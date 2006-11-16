@@ -35,9 +35,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -80,48 +77,6 @@ public class ClassConstExpr extends Expr {
   public Value eval(Env env, QuercusClass ownerClass)
   {
     return ownerClass.getConstant(env, _name);
-  }
-
-  //
-  // java code generation
-  //
-  
-  /**
-   * Analyzes the function.
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.getClass(\"");
-    out.printJavaString(_className);
-    out.print("\").getConstant(env, \"");
-    out.printJavaString(_name);
-    out.print("\")");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new ClassConstExpr(");
-    out.print("\"");
-    out.printJavaString(_className);
-    out.print("\", \"");
-    out.printJavaString(_name);
-    out.print("\")");
   }
   
   public String toString()

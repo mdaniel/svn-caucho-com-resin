@@ -35,9 +35,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 /**
@@ -87,81 +84,6 @@ public class OrExpr extends BinaryExpr {
   public boolean evalBoolean(Env env)
   {
     return _left.evalBoolean(env) || _right.evalBoolean(env);
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    // quercus/3a0z
-    _left.analyze(info);
-
-    AnalyzeInfo copy = info.copy();
-
-    _right.analyze(copy);
-
-    info.merge(copy);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.toValue(");
-    generateBoolean(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression as a long.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateBoolean(PhpWriter out)
-    throws IOException
-  {
-    out.print("(");
-    _left.generateBoolean(out);
-    out.print(" || ");
-    _right.generateBoolean(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new com.caucho.quercus.expr.OrExpr(");
-    _left.generateExpr(out);
-    out.print(", ");
-    _right.generateExpr(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateStatement(PhpWriter out)
-    throws IOException
-  {
-    out.print("if (");
-    generateBoolean(out);
-    out.println(") {}");
   }
 
   public String toString()

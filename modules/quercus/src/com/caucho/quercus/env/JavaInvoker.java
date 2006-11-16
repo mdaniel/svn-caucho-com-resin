@@ -42,6 +42,7 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.module.*;
+import com.caucho.quercus.function.*;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
@@ -69,9 +70,9 @@ abstract public class JavaInvoker
   private boolean _hasEnv;
   private boolean _hasThis;
   private Expr [] _defaultExprs;
-  private Marshall [] _marshallArgs;
+  private Marshal [] _marshalArgs;
   private boolean _hasRestArgs;
-  private Marshall _unmarshallReturn;
+  private Marshal _unmarshalReturn;
 
   private boolean _isRestReference;
 
@@ -102,6 +103,8 @@ abstract public class JavaInvoker
   {
     if (_isInit)
       return;
+
+    MarshalFactory marshalFactory = _moduleContext.getMarshalFactory();
 
     try {
       boolean callUsesVariableArgs = false;
@@ -160,7 +163,7 @@ abstract public class JavaInvoker
 
       _defaultExprs = new Expr[argLength - envOffset];
 
-      _marshallArgs = new Marshall[argLength - envOffset];
+      _marshalArgs = new Marshal[argLength - envOffset];
 
       for (int i = 0; i < argLength - envOffset; i++) {
 	boolean isReference = false;
@@ -186,7 +189,7 @@ abstract public class JavaInvoker
 	Class argType = _param[i + envOffset];
 
 	if (isReference) {
-	  _marshallArgs[i] = Marshall.MARSHALL_REFERENCE;
+	  _marshalArgs[i] = marshalFactory.createReference();
 
 	  if (! Value.class.equals(argType)
 	      && ! Var.class.equals(argType)) {
@@ -195,13 +198,12 @@ abstract public class JavaInvoker
 	  }
 	}
 	else
-	  _marshallArgs[i] = Marshall.create(_moduleContext,
-					     argType,
-					     isNotNull);
+	  _marshalArgs[i] = marshalFactory.create(argType, isNotNull);
       }
 
-      _unmarshallReturn = Marshall.create(_moduleContext, _retType, false,
-					  returnNullAsFalse);
+      _unmarshalReturn = marshalFactory.create(_retType,
+					       false,
+					       returnNullAsFalse);
     } finally {
       _isInit = true;
     }
@@ -243,12 +245,12 @@ abstract public class JavaInvoker
   /**
    * Returns the unmarshaller for the return
    */
-  public Marshall getUnmarshallReturn()
+  public Marshal getUnmarshalReturn()
   {
     if (! _isInit)
       init();
     
-    return _unmarshallReturn;
+    return _unmarshalReturn;
   }
 
   /**
@@ -283,7 +285,7 @@ abstract public class JavaInvoker
     if (! _isInit)
       init();
     
-    return _unmarshallReturn.isBoolean();
+    return _unmarshalReturn.isBoolean();
   }
 
   /**
@@ -294,7 +296,7 @@ abstract public class JavaInvoker
     if (! _isInit)
       init();
     
-    return _unmarshallReturn.isString();
+    return _unmarshalReturn.isString();
   }
 
   /**
@@ -305,7 +307,7 @@ abstract public class JavaInvoker
     if (! _isInit)
       init();
     
-    return _unmarshallReturn.isLong();
+    return _unmarshalReturn.isLong();
   }
 
   /**
@@ -316,18 +318,18 @@ abstract public class JavaInvoker
     if (! _isInit)
       init();
     
-    return _unmarshallReturn.isDouble();
+    return _unmarshalReturn.isDouble();
   }
 
   /**
-   * Returns the marshall arguments.
+   * Returns the marshal arguments.
    */
-  protected Marshall []getMarshallArgs()
+  protected Marshal []getMarshalArgs()
   {
     if (! _isInit)
       init();
     
-    return _marshallArgs;
+    return _marshalArgs;
   }
 
   /**
@@ -364,10 +366,10 @@ abstract public class JavaInvoker
     Value []values = new Value[args.length];
 
     for (int i = 0; i < args.length; i++) {
-      Marshall arg = null;
+      Marshal arg = null;
 
-      if (i < _marshallArgs.length)
-        arg = _marshallArgs[i];
+      if (i < _marshalArgs.length)
+        arg = _marshalArgs[i];
       else if (_isRestReference) {
         values[i] = args[i].evalRef(env);
 	continue;
@@ -430,7 +432,7 @@ abstract public class JavaInvoker
       obj = null;
     }
 
-    for (int i = 0; i < _marshallArgs.length; i++) {
+    for (int i = 0; i < _marshalArgs.length; i++) {
       Expr expr;
 
       if (i < exprs.length && exprs[i] != null)
@@ -442,7 +444,7 @@ abstract public class JavaInvoker
           expr = new RequiredExpr(getLocation());
       }
 
-      values[k] = _marshallArgs[i].marshall(env, expr, _param[k]);
+      values[k] = _marshalArgs[i].marshal(env, expr, _param[k]);
 
       k++;
     }
@@ -450,18 +452,18 @@ abstract public class JavaInvoker
     if (_hasRestArgs) {
       Value []rest;
 
-      int restLen = exprs.length - _marshallArgs.length;
+      int restLen = exprs.length - _marshalArgs.length;
 
       if (restLen <= 0)
         rest = NULL_VALUES;
       else {
         rest = new Value[restLen];
 
-        for (int i = _marshallArgs.length; i < exprs.length; i++) {
+        for (int i = _marshalArgs.length; i < exprs.length; i++) {
           if (_isRestReference)
-            rest[i - _marshallArgs.length] = exprs[i].evalRef(env);
+            rest[i - _marshalArgs.length] = exprs[i].evalRef(env);
           else
-            rest[i - _marshallArgs.length] = exprs[i].eval(env);
+            rest[i - _marshalArgs.length] = exprs[i].eval(env);
         }
       }
 
@@ -470,7 +472,7 @@ abstract public class JavaInvoker
 
     Object result = invoke(obj, values);
     
-    return _unmarshallReturn.unmarshall(env, result);
+    return _unmarshalReturn.unmarshal(env, result);
   }
 
   public Value call(Env env, Object obj, Value []args)
@@ -491,22 +493,22 @@ abstract public class JavaInvoker
       obj = null;
     }
 
-    for (int i = 0; i < _marshallArgs.length; i++) {
+    for (int i = 0; i < _marshalArgs.length; i++) {
       Value value;
 
       if (i < args.length && args[i] != null)
-        javaArgs[k] = _marshallArgs[i].marshall(env, args[i], _param[k]);
+        javaArgs[k] = _marshalArgs[i].marshal(env, args[i], _param[k]);
       else if (_defaultExprs[i] != null) {
-        javaArgs[k] = _marshallArgs[i].marshall(env,
+        javaArgs[k] = _marshalArgs[i].marshal(env,
                                               _defaultExprs[i],
                                               _param[k]);
       } else {
 	env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
-			_name, _marshallArgs.length, args.length));
+			_name, _marshalArgs.length, args.length));
 	
-        javaArgs[k] = _marshallArgs[i].marshall(env,
-						NullValue.NULL,
-						_param[k]);
+        javaArgs[k] = _marshalArgs[i].marshal(env,
+					      NullValue.NULL,
+					      _param[k]);
       }
 
       k++;
@@ -515,18 +517,18 @@ abstract public class JavaInvoker
     if (_hasRestArgs) {
       Value []rest;
 
-      int restLen = args.length - _marshallArgs.length;
+      int restLen = args.length - _marshalArgs.length;
 
       if (restLen <= 0)
         rest = NULL_VALUES;
       else {
         rest = new Value[restLen];
 
-        for (int i = _marshallArgs.length; i < args.length; i++) {
+        for (int i = _marshalArgs.length; i < args.length; i++) {
           if (_isRestReference)
-            rest[i - _marshallArgs.length] = args[i];
+            rest[i - _marshalArgs.length] = args[i];
           else
-            rest[i - _marshallArgs.length] = args[i].toValue();
+            rest[i - _marshalArgs.length] = args[i].toValue();
         }
       }
 
@@ -535,7 +537,7 @@ abstract public class JavaInvoker
 
     Object result = invoke(obj, javaArgs);
 
-    return _unmarshallReturn.unmarshall(env, result);
+    return _unmarshalReturn.unmarshal(env, result);
   }
 
   public Value call(Env env, Object obj)

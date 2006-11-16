@@ -32,9 +32,7 @@ package com.caucho.quercus.expr;
 import java.io.IOException;
 
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 /**
@@ -121,137 +119,6 @@ public class ListEachExpr extends Expr {
     array.next();
 
     return true;
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    // XXX: should be unique (?)
-    info.getFunction().addTempVar("_quercus_list");
-
-    _value.analyze(info);
-
-    AnalyzeInfo trueBlockInfo = info.copy();
-    
-    if (_keyVar != null)
-      _keyVar.analyzeAssign(trueBlockInfo);
-
-    if (_valueVar != null)
-      _valueVar.analyzeAssign(trueBlockInfo);
-    
-    info.merge(trueBlockInfo);
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    String var = "_quercus_list";
-
-    out.print("((" + var + " = ");
-    _value.generate(out);
-    out.print(").hasCurrent() ? ");
-
-    out.print("env.first(BooleanValue.TRUE");
-
-    if (_keyVar != null) {
-      out.print(", ");
-      _keyVar.generateAssign(out, new EachKeyExpr(getLocation(), var), false);
-    }
-
-    if (_valueVar != null) {
-      out.print(", ");
-      _valueVar.generateAssign(out, new EachValueExpr(getLocation(), var), false);
-    }
-
-    out.print(", " + var + ".next()");
-
-    out.print(") : BooleanValue.FALSE)");
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateStatement(PhpWriter out)
-    throws IOException
-  {
-    String var = "_quercus_list";
-
-    /*
-    out.print("if ((" + var + " = ");
-    _value.generate(out);
-    out.println(").hasCurrent()) {");
-    out.pushDepth();
-    */
-    out.print(var + " = ");
-    _value.generate(out);
-    out.println(";");
-
-    if (_keyVar != null) {
-      _keyVar.generateAssign(out, new EachKeyExpr(getLocation(), var), true);
-      out.println(";");
-    }
-
-    if (_valueVar != null) {
-      _valueVar.generateAssign(out, new EachValueExpr(getLocation(), var), true);
-      out.println(";");
-    }
-
-    out.println(var + ".next();");
-  }
-
-  static class EachKeyExpr extends Expr {
-    private String _var;
-
-    EachKeyExpr(Location location, String var)
-    {
-      super(location);
-      _var = var;
-    }
-
-    public Value eval(Env env)
-    {
-      throw new UnsupportedOperationException();
-    }
-
-    public void generate(PhpWriter out)
-      throws IOException
-    {
-      out.print(_var + ".key()");
-    }
-  }
-
-  static class EachValueExpr extends Expr {
-    private String _var;
-
-    EachValueExpr(Location location, String var)
-    {
-      super(location);
-      _var = var;
-    }
-
-    public Value eval(Env env)
-    {
-      throw new UnsupportedOperationException();
-    }
-
-    public void generate(PhpWriter out)
-      throws IOException
-    {
-      out.print(_var + ".current()");
-    }
   }
 }
 

@@ -42,7 +42,6 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 import com.caucho.quercus.expr.VarState;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -74,45 +73,5 @@ public class GlobalStatement extends Statement {
 
     return null;
   }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    _var.analyzeAssign(info);
-
-    return true;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    out.print(_var.getJavaVar());
-    out.print(" = env.getGlobalVar(\"");
-    out.printJavaString(_var.getName());
-    out.println("\");");
-
-    FunctionInfo funInfo = _var.getVarInfo().getFunction();
-    if ((funInfo.isVariableVar() || funInfo.isUsesSymbolTable())) {
-      // php/3a84, php/3235, php/3b29
-      out.print("if (! env.isGlobalEnv()) ");
-      out.print("env.setVar(\"");
-      out.printJavaString(_var.getName());
-      out.print("\", (Var) ");
-      out.print(_var.getJavaVar());
-      out.println(");");
-    }
-  }
-
 }
 

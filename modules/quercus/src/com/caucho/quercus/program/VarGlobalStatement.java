@@ -42,7 +42,6 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarVarExpr;
 import com.caucho.quercus.expr.VarState;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -70,36 +69,6 @@ public class VarGlobalStatement extends Statement {
     env.setValue(name, env.getGlobalVar(name));
 
     return null;
-  }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    _varExpr.analyze(info);
-
-    return true;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.setVar(");
-    _varExpr.generateString(out);
-    out.print(", ");
-    out.print("env.getGlobalVar(");
-    _varExpr.generateString(out);
-    out.println("));");
   }
 }
 

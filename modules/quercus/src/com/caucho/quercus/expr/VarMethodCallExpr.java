@@ -37,9 +37,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.AnalyzeInfo;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -106,58 +104,6 @@ public class VarMethodCallExpr extends Expr {
     }
     
     return _objExpr.eval(env).callMethod(env, _name.evalString(env), values);
-  }
-
-  //
-  // java code generation
-  //
-  
-  /**
-   * Analyzes the function.
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _objExpr.analyze(info);
-    _name.analyze(info);
-    
-    for (int i = 0; i < _args.length; i++) {
-      _args[i].analyze(info);
-    }
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    _objExpr.generate(out);
-    out.print(".callMethod(env, ");
-    _name.generateString(out);
-
-    if (_args.length <= 5) {
-      for (int i = 0; i < _args.length; i++) {
-	out.print(", ");
-      
-	_args[i].generateArg(out);
-      }
-    }
-    else {
-      out.print(", new Value[] {");
-
-      for (int i = 0; i < _args.length; i++) {
-	if (i != 0)
-	  out.print(", ");
-      
-	_args[i].generateArg(out);
-      }
-      
-      out.print("}");
-    }
-      
-    out.print(")");
   }
   
   public String toString()

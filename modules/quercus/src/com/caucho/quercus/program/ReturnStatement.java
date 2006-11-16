@@ -38,7 +38,6 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -78,22 +77,6 @@ public class ReturnStatement extends Statement {
       return NullValue.NULL;
   }
 
-  //
-  // java code generation
-  //
-  
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    _expr.analyze(info);
-
-    // _expr.analyzeSetReference(info); // php/3783, php/3a5d
-
-    return false;
-  }
-
   /**
    * Returns true if control can go past the statement.
    */
@@ -101,37 +84,5 @@ public class ReturnStatement extends Statement {
   {
     return RETURN;
   }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    // the "if" test handles Java's issue with trailing statements
-    
-    if (_expr != null) {
-      out.print("return ");
-
-      // php/3a5h
-      _expr.generateValue(out);
-      
-      /**
-      Expr copy = _expr.createCopy();
-
-      if (_expr instanceof VarExpr)
-	copy.generateReturn(out);
-      else
-	copy.generate(out);
-      */
-      
-      out.println(";");
-    }
-    else
-      out.print("return NullValue.NULL;");
-  }
-  
 }
 

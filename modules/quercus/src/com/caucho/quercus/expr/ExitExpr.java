@@ -37,10 +37,6 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.program.AnalyzeInfo;
-
 /**
  * Represents the exit expression
  */
@@ -89,37 +85,6 @@ public class ExitExpr extends Expr {
     } catch (IOException e) {
     }
     throw new QuercusExitException();
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    if (_value != null)
-      _value.analyze(info);
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    if (_value != null) {
-      out.print("env.exit(");
-      _value.generateString(out);
-      out.print(")");
-    }
-    else {
-      out.print("env.exit()");
-    }
   }
 }
 

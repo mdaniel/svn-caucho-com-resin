@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.function.*;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.JavaImplClassDef;
@@ -84,6 +85,8 @@ public class ModuleContext {
   private HashMap<String, StringValue> _iniMap
     = new HashMap<String, StringValue>();
 
+  protected MarshalFactory _marshalFactory;
+
   /**
    * Constructor.
    */
@@ -98,6 +101,8 @@ public class ModuleContext {
   public ModuleContext(ClassLoader loader)
   {
     _loader = loader;
+    
+    _marshalFactory = new MarshalFactory(this);
   }
 
   public static ModuleContext getLocalContext(ClassLoader loader)
@@ -287,6 +292,18 @@ public class ModuleContext {
       return def;
 
     return _lowerJavaClassWrappers.get(name.toLowerCase());
+  }
+
+  public MarshalFactory getMarshalFactory()
+  {
+    return _marshalFactory;
+  }
+  
+  public Marshal createMarshal(Class type,
+			       boolean isNotNull,
+			       boolean isNullAsFalse)
+  {
+    return _marshalFactory.create(type, isNotNull, isNullAsFalse);
   }
 
   /**

@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 /**
@@ -55,39 +54,6 @@ abstract public class UnaryExpr extends Expr {
   public final Expr getExpr()
   {
     return _expr;
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _expr.analyze(info);
-  }
-
-  /**
-   * Returns the variables state.
-   *
-   * @param var the variables to test
-   * @param owner the owning expression
-   */
-  public VarState getVarState(VarExpr var, VarExpr owner)
-  {
-    return _expr.getVarState(var, owner);
-  }
-
-  /**
-   * Returns true if the variable is ever assigned.
-   *
-   * @param var the variable to test
-   */
-  public boolean isVarAssigned(VarExpr var)
-  {
-    return _expr.isVarAssigned(var);
   }
 }
 

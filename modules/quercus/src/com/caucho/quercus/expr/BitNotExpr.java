@@ -34,7 +34,6 @@ import java.io.IOException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -71,49 +70,6 @@ public class BitNotExpr extends UnaryExpr {
     long lValue = _expr.evalLong(env);
 
     return new LongValue(~ lValue);
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("new com.caucho.quercus.env.LongValue(");
-    generateLong(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression as a long.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateLong(PhpWriter out)
-    throws IOException
-  {
-    out.print("(~ ");
-    _expr.generateLong(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new com.caucho.quercus.expr.BitNotExpr(");
-    _expr.generateExpr(out);
-    out.print(")");
   }
 
   public String toString()

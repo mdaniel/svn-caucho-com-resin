@@ -34,9 +34,6 @@ import java.io.IOException;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.*;
 
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.Path;
@@ -93,34 +90,6 @@ public class IncludeExpr extends UnaryExpr {
     } finally {
       env.popCall();
     }
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    super.analyze(info);
-
-    info.getFunction().setUsesSymbolTable(true);
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.include(");
-    out.print("_quercus_selfPath.getParent(), ");
-    _expr.generateString(out);
-    out.print(", " + _isRequire + ", false)");
   }
   
   public String toString()

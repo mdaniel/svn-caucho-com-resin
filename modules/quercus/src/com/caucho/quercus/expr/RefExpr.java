@@ -36,9 +36,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.env.RefVar;
 
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 /**
@@ -100,42 +97,6 @@ public class RefExpr extends UnaryExpr {
     else
       return value;
     */
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyzeAssign(AnalyzeInfo info)
-  {
-    _expr.analyzeAssign(info);
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    _expr.generateRef(out);
-    out.print(".toRef()");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateRef(PhpWriter out)
-    throws IOException
-  {
-    // php/3c1q
-    _expr.generateRef(out);
   }
 
   public String toString()

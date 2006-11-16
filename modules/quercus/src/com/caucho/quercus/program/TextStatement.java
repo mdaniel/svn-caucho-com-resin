@@ -36,7 +36,6 @@ import com.caucho.java.JavaWriter;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -76,35 +75,5 @@ public class TextStatement extends Statement {
 
     return null;
   }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   *
-   * @return true if the following statement can be executed
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    info.getFunction().setOutUsed();
-    
-    return true;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.print(\"");
-    out.printJavaString(_value);
-    out.println("\");");
-  }
-  
 }
 

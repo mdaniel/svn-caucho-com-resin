@@ -33,7 +33,6 @@ import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -79,80 +78,6 @@ public class ModExpr extends BinaryExpr {
     Value rValue = _right.eval(env);
 
     return lValue.mod(rValue);
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("LongValue.create(");
-    generateLong(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression directly.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateLong(PhpWriter out)
-    throws IOException
-  {
-    out.print("(long) ");
-    out.print("(");
-    _left.generateDouble(out);
-    out.print(" % ");
-    _right.generateDouble(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression directly.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateDouble(PhpWriter out)
-    throws IOException
-  {
-    generateLong(out);
-  }
-
-  /**
-   * Generates code to evaluate the expression directly.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generatePrint(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.print((long) (");
-    _left.generateDouble(out);
-    out.print(" % ");
-    _right.generateDouble(out);
-    out.print("))");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new com.caucho.quercus.expr.ModExpr(");
-    _left.generateExpr(out);
-    out.print(", ");
-    _right.generateExpr(out);
-    out.print(")");
   }
 
   public String toString()

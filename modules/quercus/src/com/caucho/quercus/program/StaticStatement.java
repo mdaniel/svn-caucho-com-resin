@@ -43,7 +43,6 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 import com.caucho.quercus.expr.VarState;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -87,41 +86,5 @@ public class StaticStatement extends Statement {
 
     return null;
   }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    _var.analyzeAssign(info);
-
-    return true;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    String varName = out.createStaticVar();
-
-    out.print(_var.getJavaVar());
-    out.println(" = env.getStaticVar(" + varName + ");");
-
-    if (_initValue != null) {
-      out.println("if (! " + _var.getJavaVar() + ".isset())");
-      out.print("  " + _var.getJavaVar() + ".set(");
-      _initValue.generate(out);
-      out.println(");");
-    }
-  }
-
 }
 

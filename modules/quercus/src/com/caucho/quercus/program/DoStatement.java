@@ -38,7 +38,6 @@ import com.caucho.quercus.env.BreakValue;
 
 import com.caucho.quercus.expr.Expr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -81,71 +80,5 @@ public class DoStatement extends Statement {
 
     return null;
   }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    AnalyzeInfo contInfo = info.copy();
-
-    info.clear();
-    AnalyzeInfo breakInfo = info;
-
-    AnalyzeInfo loopInfo = contInfo.createLoop(contInfo, breakInfo);
-
-    _block.analyze(loopInfo);
-
-    loopInfo.merge(contInfo);
-
-    if (_test != null)
-      _test.analyze(loopInfo);
-
-    info.merge(loopInfo);
-
-    // handle loop values
-
-    _block.analyze(loopInfo);
-
-    loopInfo.merge(contInfo);
-
-    if (_test != null)
-      _test.analyze(loopInfo);
-
-    info.merge(loopInfo);
-
-    return true;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    out.println("do {");
-    out.pushDepth();
-    out.println("env.checkTimeout();");
-
-    _block.generate(out);
-    out.popDepth();
-    out.print("} while (");
-
-    if (_test.isTrue())
-      out.print("BooleanValue.TRUE.toBoolean()");
-    else if (_test.isFalse())
-      out.print("BooleanValue.FALSE.toBoolean()");
-    else
-      _test.generateBoolean(out);
-
-    out.println(");");
-  }
-
 }
 

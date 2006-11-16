@@ -38,9 +38,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -108,55 +105,6 @@ public class NewExpr extends Expr {
     } finally {
       env.popCall();
     }
-  }
-
-  //
-  // java generation code
-  //
-  
-  /**
-   * Analyzes the function.
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    for (int i = 0; i < _args.length; i++) {
-      _args[i].analyze(info);
-    }
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    /*
-    if (out.getProgram().findClass(_name) != null) {
-      out.print("__quercus_class_" + _name + ".callNew(env, new Value[] {");
-
-      for (int i = 0; i < _args.length; i++) {
-	if (i != 0)
-	  out.print(", ");
-      
-	_args[i].generate(out);
-      }
-      out.print("})");
-    }
-    else {
-    */
-    out.print("env.findAbstractClass(\"");
-    out.printJavaString(_name);
-    out.print("\").callNew(env, new Value[] {");
-
-    for (int i = 0; i < _args.length; i++) {
-      if (i != 0)
-	out.print(", ");
-      
-      _args[i].generate(out);
-    }
-    out.print("})");
   }
   
   public String toString()

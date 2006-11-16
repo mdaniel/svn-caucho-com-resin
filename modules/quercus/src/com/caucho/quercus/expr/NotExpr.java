@@ -35,7 +35,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -74,48 +73,6 @@ public class NotExpr extends UnaryExpr {
   public boolean evalBoolean(Env env)
   {
     return ! _expr.evalBoolean(env);
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.toValue(");
-    generateBoolean(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateBoolean(PhpWriter out)
-    throws IOException
-  {
-    out.print("! ");
-    _expr.generateBoolean(out);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new com.caucho.quercus.expr.NotExpr(");
-    _expr.generateExpr(out);
-    out.print(")");
   }
 
   public String toString()

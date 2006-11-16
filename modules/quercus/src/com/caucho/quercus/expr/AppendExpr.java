@@ -33,9 +33,6 @@ import java.io.IOException;
 
 import com.caucho.quercus.env.*;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -106,99 +103,6 @@ public class AppendExpr extends Expr
     }
 
     return sb.toString();
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _value.analyze(info);
-
-    if (_next != null)
-      _next.analyze(info);
-  }
-
-  /**
-   * Generates code to evaluate the expression as a string.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    _value.generate(out);
-    out.print(".toStringBuilder()");
-
-    for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
-      out.print(".append(");
-      ptr._value.generateAppend(out);
-      out.print(")");
-    }
-  }
-
-  /**
-   * Generates code to evaluate the expression as a string.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAppend(PhpWriter out)
-    throws IOException
-  {
-    for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
-      out.print(".append(");
-      ptr._value.generateAppend(out);
-      out.print(")");
-    }
-  }
-
-  /**
-   * Generates code to evaluate the expression as a string.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateString(PhpWriter out)
-    throws IOException
-  {
-    _value.generate(out);
-    out.print(".toStringBuilder()");
-
-    for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
-      out.print(".append(");
-      ptr._value.generateAppend(out);
-      out.print(")");
-    }
-
-    out.print(".toString()");
-    /*
-    out.print("(");
-
-    _value.generateString(out);
-    
-    for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
-      out.print(" + ");
-      ptr._value.generateString(out);
-    }
-    
-    out.print(")");
-    */
-  }
-
-  /**
-   * Generates code to print the expression to the output
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generatePrint(PhpWriter out)
-    throws IOException
-  {
-    for (AppendExpr ptr = this; ptr != null; ptr = ptr._next) {
-      ptr._value.generatePrint(out);
-    }
   }
 
   public String toString()

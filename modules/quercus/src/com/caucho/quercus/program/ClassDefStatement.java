@@ -72,47 +72,5 @@ public class ClassDefStatement extends Statement {
 
     return null;
   }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    return true;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    out.print("if (env.findClass(\"");
-    out.printJavaString(_cl.getName());
-    out.println("\") == null)");
-    out.print("  env.addClass(\"");
-    out.printJavaString(_cl.getName());
-    out.print("\", new QuercusClass(env.findClassDef(\"");
-    out.printJavaString(_cl.getName());
-    out.print("\", ");
-
-    if (_cl.getParentName() != null) {
-      out.print("env.getClass(\"");
-      out.printJavaString(_cl.getParentName());
-      out.print("\")");
-    }
-    else
-      out.print("null");
-    
-    out.println("));");
-    // XXX:
-  }
-  
 }
 

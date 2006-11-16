@@ -37,9 +37,6 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 /**
@@ -192,113 +189,6 @@ public class VarVarExpr extends AbstractVarExpr {
 
       return array;
     }
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    info.getFunction().setVariableVar(true);
-
-    _var.analyze(info);
-  }
-  /**
-   * Analyze the expression
-   */
-  public void analyzeAssign(AnalyzeInfo info)
-  {
-    info.getFunction().setVariableVar(true);
-
-    _var.analyzeAssign(info);
-
-    // php/3253
-    info.clear();
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.getValue(");
-    _var.generateString(out);
-    out.print(".intern())");
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateRef(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.getVar(");
-    _var.generateString(out);
-    out.print(".intern())");
-  }
-
-  /**
-   * Generates code to evaluate the expression, copying the result
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateCopy(PhpWriter out)
-    throws IOException
-  {
-    generate(out);
-    out.print(".copy()");  // php/3a5t
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssign(PhpWriter out, Expr value, boolean isTop)
-    throws IOException
-  {
-    out.print("env.getVar(");
-    _var.generateString(out);
-    out.print(".intern()).set(");
-    value.generateCopy(out); // php/3a84
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
-    throws IOException
-  {
-    out.print("env.setVar(");
-    _var.generateString(out);
-    out.print(".intern(), ");
-    value.generateRef(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateUnset(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.unsetVar(");
-    _var.generateString(out);
-    out.print(".intern())");
   }
 
   public String toString()

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.module;
+package com.caucho.quercus.function;
 
 import java.util.*;
 import java.io.IOException;
@@ -40,8 +40,6 @@ import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.NullValue;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 import com.caucho.quercus.program.JavaClassDef;
 
 import com.caucho.util.L10N;
@@ -49,36 +47,36 @@ import com.caucho.util.L10N;
 /**
  * Code for marshalling arguments.
  */
-public class JavaMapMarshall extends Marshall {
-  private static final L10N L = new L10N(JavaMarshall.class);
+public class JavaMapMarshal extends Marshal {
+  private static final L10N L = new L10N(JavaMarshal.class);
 
-  private final JavaClassDef _def;
-  private final boolean _isNotNull;
-  private final boolean _isUnmarshallNullAsFalse;
+  protected final JavaClassDef _def;
+  protected final boolean _isNotNull;
+  protected final boolean _isUnmarshalNullAsFalse;
 
-  public JavaMapMarshall(JavaClassDef def,
+  public JavaMapMarshal(JavaClassDef def,
                       boolean isNotNull)
   {
     this(def, isNotNull, false);
   }
 
-  public JavaMapMarshall(JavaClassDef def,
+  public JavaMapMarshal(JavaClassDef def,
                       boolean isNotNull,
-                      boolean isUnmarshallNullAsFalse)
+                      boolean isUnmarshalNullAsFalse)
   {
     _def = def;
     _isNotNull = isNotNull;
-    _isUnmarshallNullAsFalse = isUnmarshallNullAsFalse;
+    _isUnmarshalNullAsFalse = isUnmarshalNullAsFalse;
   }
 
-  public Object marshall(Env env, Expr expr, Class argClass)
+  public Object marshal(Env env, Expr expr, Class argClass)
   {
     Value value = expr.eval(env);
 
-    return marshall(env, value, argClass);
+    return marshal(env, value, argClass);
   }
 
-  public Object marshall(Env env, Value value, Class argClass)
+  public Object marshal(Env env, Value value, Class argClass)
   {
     if (! value.isset()) {
       if (_isNotNull) {
@@ -108,32 +106,9 @@ public class JavaMapMarshall extends Marshall {
     return obj;
   }
 
-  public void generate(PhpWriter out, Expr expr, Class argClass)
-    throws IOException
+  public Value unmarshal(Env env, Object value)
   {
-    out.print("(" + argClass.getName() + ") ");
-    expr.generate(out);
-    out.print(".toJavaMap(env, " + argClass.getName() + ".class)");
-  }
-
-  public Value unmarshall(Env env, Object value)
-  {
-    return env.wrapJava(value, _def, _isUnmarshallNullAsFalse);
-  }
-
-  public void generateResultStart(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.wrapJava(");
-  }
-
-  public void generateResultEnd(PhpWriter out)
-    throws IOException
-  {
-    if (_isUnmarshallNullAsFalse)
-      out.print(", true");
-
-    out.print(")");
+    return env.wrapJava(value, _def, _isUnmarshalNullAsFalse);
   }
 
   private static String shortName(Class cl)

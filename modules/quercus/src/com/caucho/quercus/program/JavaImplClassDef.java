@@ -35,10 +35,11 @@ import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.function.JavaMarshal;
+import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.module.Construct;
-import com.caucho.quercus.module.JavaMarshall;
-import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.function.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
@@ -283,6 +284,8 @@ public class JavaImplClassDef extends ClassDef {
    */
   private void introspectFields(ModuleContext moduleContext, Class type)
   {
+    MarshalFactory marshalFactory = moduleContext.getMarshalFactory();
+    
     // Introspect public non-static fields
     Field[] fields = type.getFields();
 
@@ -290,9 +293,9 @@ public class JavaImplClassDef extends ClassDef {
       if (Modifier.isStatic(field.getModifiers()))
         continue;
 
-      Marshall marshall = Marshall.create(moduleContext,
-					  field.getType(), false);
-      //_fieldMap.put(field.getName(), new FieldMarshallPair(field, marshall));
+      Marshal marshal = marshalFactory.create(field.getType(), false);
+      
+      //_fieldMap.put(field.getName(), new FieldMarshalPair(field, marshal));
     }
 
 
@@ -376,15 +379,15 @@ public class JavaImplClassDef extends ClassDef {
     introspectMethods(moduleContext, type.getSuperclass());
   }
 
-  private class FieldMarshallPair {
-    public Field _field;
-    public Marshall _marshall;
+  private class FieldMarshalPair {
+    public final Field _field;
+    public final Marshal _marshal;
 
-    public FieldMarshallPair(Field field,
-                             Marshall marshall)
+    public FieldMarshalPair(Field field,
+			    Marshal marshal)
     {
       _field = field;
-      _marshall = marshall;
+      _marshal = marshal;
     }
   }
 }

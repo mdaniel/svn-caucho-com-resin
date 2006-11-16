@@ -38,9 +38,7 @@ import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.AnalyzeInfo;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -114,86 +112,6 @@ public class ClassMethodExpr extends Expr {
       values[i] = _args[i].eval(env);
     
     return fun.callMethod(env, env.getThis(), values);
-  }
-
-  //
-  // java code generation
-  //
-  
-  /**
-   * Analyzes the function.
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _isMethod = info.getFunction().isMethod();
-    
-    for (int i = 0; i < _args.length; i++) {
-      _args[i].analyze(info);
-    }
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.getClass(\"");
-    out.printJavaString(_className);
-    out.print("\").getFunction(\"");
-    out.printJavaString(_name);
-    out.print("\").callMethod(env, ");
-
-    if (_isMethod)
-      out.print("q_this");
-    else
-      out.print("NullValue.NULL");
-      
-    if (_args.length <= 5) {
-      for (int i = 0; i < _args.length; i++) {
-	out.print(", ");
-      
-	_args[i].generate(out);
-      }
-    }
-    else {
-      out.print(", new Value[] {");
-
-      for (int i = 0; i < _args.length; i++) {
-	if (i != 0)
-	  out.print(", ");
-      
-	_args[i].generate(out);
-      }
-	
-      out.print("}");
-    }
-
-    out.print(")");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new ParentMethodExpr(");
-    out.print("\"");
-    out.printJavaString(_name);
-    out.print("\", new Expr[] {");
-
-    for (int i = 0; i < _args.length; i++) {
-      if (i != 0)
-	out.print(", ");
-      
-      _args[i].generateExpr(out);
-    }
-    out.print("})");
   }
   
   public String toString()

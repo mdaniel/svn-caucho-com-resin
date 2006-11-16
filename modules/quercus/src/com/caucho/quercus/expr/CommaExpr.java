@@ -34,7 +34,6 @@ import java.io.IOException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -77,52 +76,6 @@ public class CommaExpr extends BinaryExpr {
     _left.eval(env);
 
     return _right.evalBoolean(env);
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.comma(");
-    _left.generate(out);
-    out.print(", ");
-    _right.generate(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateStatement(PhpWriter out)
-    throws IOException
-  {
-    _left.generateTop(out);
-    _right.generateTop(out);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new com.caucho.quercus.expr.CommaExpr(");
-    _left.generateExpr(out);
-    out.print(", ");
-    _right.generateExpr(out);
-    out.print(")");
   }
 
   public String toString()

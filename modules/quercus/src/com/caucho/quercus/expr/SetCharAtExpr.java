@@ -34,7 +34,6 @@ import java.io.IOException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -74,22 +73,6 @@ public class SetCharAtExpr extends Expr {
   public Value eval(Env env)
   {
     throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    _objExpr.generate(out);
-    out.print(".setCharValueAt(");
-    _indexExpr.generateLong(out);
-    out.print(",");
-    _valueExpr.generateString(out);
-    out.print(")");
   }
   
   public String toString()

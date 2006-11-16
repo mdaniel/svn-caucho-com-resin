@@ -39,9 +39,6 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.ConstArrayValue;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -123,127 +120,6 @@ public class ArrayFunExpr extends Expr {
     }
 
     return array;
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    for (int i = 0; i < _values.length; i++) {
-      if (_keys[i] != null)
-        _keys[i].analyze(info);
-
-      _values[i].analyze(info);
-    }
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    if (isConstant() && _keys.length > 3) {
-      ConstArrayValue array = new ConstArrayValue();
-
-      try {
-        for (int i = 0; i < _keys.length; i++) {
-          if (_keys[i] != null)
-            array.put(_keys[i].eval(null), _values[i].eval(null));
-          else
-            array.put(_values[i].eval(null));
-        }
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Throwable e) {
-        throw new RuntimeException(e);
-      }
-
-      out.print(array);
-      out.print(".copy()");
-    }
-
-    else if (_keys.length < 16) {
-      out.print("new ArrayValueImpl()");
-
-      for (int i = 0; i < _keys.length; i++) {
-        out.print(".");
-        out.print("append(");
-        if (_keys[i] != null) {
-          _keys[i].generateCopy(out);
-          out.print(", ");
-        }
-        _values[i].generateCopy(out);
-        out.print(")");
-      }
-    }
-    else {
-      out.print("new ArrayValueImpl(");
-      out.print("new Value[] {");
-
-      for (int i = 0; i < _keys.length; i++) {
-        if (i != 0)
-          out.print(", ");
-
-        if (_keys[i] != null)
-          _keys[i].generateCopy(out);
-        else
-          out.print("null");
-      }
-
-      out.print("}, new Value[] {");
-
-      for (int i = 0; i < _values.length; i++) {
-        if (i != 0)
-          out.print(", ");
-
-        _values[i].generateCopy(out);
-      }
-
-      out.print("})");
-    }
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    // quercus/3724
-    out.print("new ArrayFunExpr(");
-
-    out.print("new Expr[] {");
-
-    for (int i = 0; i < _keys.length; i++) {
-      if (i != 0)
-        out.print(", ");
-
-      if (_keys[i] != null)
-        _keys[i].generateExpr(out);
-      else
-        out.print("null");
-    }
-
-    out.print("}, new Expr[] {");
-
-    for (int i = 0; i < _values.length; i++) {
-      if (i != 0)
-        out.print(", ");
-
-      _values[i].generateExpr(out);
-    }
-
-    out.print("})");
   }
 
   public String toString()

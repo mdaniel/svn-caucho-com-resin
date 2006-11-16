@@ -42,7 +42,6 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 import com.caucho.quercus.expr.VarState;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -76,62 +75,6 @@ public class ExprStatement extends Statement {
     _expr.eval(env);
 
     return null;
-  }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    _expr.analyze(info);
-
-    return true;
-  }
-
-  /**
-   * Returns the variables state.
-   *
-   * @param var the variables to test
-   */
-  public VarState getVarState(VarExpr var,
-			      Statement stmtOwner,
-			      VarExpr exprOwner)
-  {
-    return _expr.getVarState(var, exprOwner);
-  }
-
-  /**
-   * Returns true if the variable is ever assigned.
-   *
-   * @param var the variable to test
-   */
-  public boolean isVarAssigned(VarExpr var)
-  {
-    return _expr.isVarAssigned(var);
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    _expr.generateStatement(out);
-  }
-
-  /**
-   * Disassembly.
-   */
-  public void debug(JavaWriter out)
-    throws IOException
-  {
-    out.println(_expr + ";");
   }
 }
 

@@ -34,7 +34,6 @@ import java.io.IOException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -61,22 +60,6 @@ public class ToObjectExpr extends UnaryExpr {
   public Value eval(Env env)
   {
     return _expr.eval(env).toObject(env);
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    _expr.generate(out);
-    out.print(".toObject(env)");
   }
 
   public String toString()

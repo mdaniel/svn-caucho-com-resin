@@ -36,9 +36,7 @@ import java.util.ArrayList;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 /**
@@ -93,69 +91,6 @@ public class ListHeadExpr extends Expr {
       if (_varList[i] != null)
         _varList[i].evalAssign(env, value.get(_keyList[i]).copy());
     }
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _varName = "q_list_" + info.getFunction().getTempIndex();
-
-    info.getFunction().addTempVar(_varName);
-
-    for (int i = 0; i < _varList.length; i++) {
-      if (_varList[i] != null)
-        _varList[i].analyzeAssign(info);
-    }
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssign(PhpWriter out, Expr value)
-    throws IOException
-  {
-    String var = _varName;
-
-    out.print("env.first(" + var + " = ");
-    value.generate(out);
-
-    VarInfo varInfo = new VarInfo(var, null);
-    VarExpr varExpr = new PhpVarExpr(getLocation(), varInfo);
-
-    varExpr.setVarState(VarState.VALID);
-
-    int count = 1;
-
-    for (int i = 0; i < _varList.length; i++) {
-      if (_varList[i] == null)
-        continue;
-
-      out.print(", ");
-
-      if (i > 0 && i % 4 == 0) {
-        out.print("env.first(");
-        count++;
-      }
-
-      AbstractVarExpr refExpr = new ArrayGetExpr(getLocation(), varExpr,
-						 new LongLiteralExpr(i));
-
-      if (_varList[i] instanceof AbstractVarExpr)
-        ((AbstractVarExpr) _varList[i]).generateAssign(out, refExpr, false);
-      else
-        ((ListHeadExpr) _varList[i]).generateAssign(out, refExpr);
-    }
-
-    for (; count > 0; count--)
-      out.print(")");
   }
 }
 

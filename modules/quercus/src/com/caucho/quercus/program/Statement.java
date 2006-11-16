@@ -41,7 +41,6 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.expr.VarExpr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusExecutionException;
 
@@ -73,6 +72,14 @@ abstract public class Statement {
   }
 
   abstract public Value execute(Env env);
+
+  /**
+   * Returns true if the statement can fallthrough.
+   */
+  public int fallThrough()
+  {
+    return FALL_THROUGH;
+  }
 
   final protected void rethrow(Throwable t)
     throws Throwable
@@ -203,108 +210,6 @@ abstract public class Statement {
     rootCause.setStackTrace(elements);
 
     throw typedT;
-  }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   *
-   * @return true if the following statement can be executed
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    System.out.println("ANALYZE: " + getClass().getName());
-
-    return true;
-  }
-
-  /**
-   * Returns true if the statement can fallthrough.
-   */
-  public int fallThrough()
-  {
-    return FALL_THROUGH;
-  }
-
-  /**
-   * Returns true if the variable is ever assigned.
-   *
-   * @param var the variable to test
-   */
-  public boolean isVarAssigned(VarExpr var)
-  {
-    return false;
-  }
-
-  /**
-   * Returns true if the output is used in the statement.
-   */
-  public boolean isOutUsed()
-  {
-    return false;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  public final void generate(PhpWriter out)
-    throws IOException
-  {
-    if (_location != null) {
-      out.setLocation(_location.getFileName(), _location.getLineNumber());
-
-      if (log.isLoggable(Level.FINE)) {
-        out.print("// ");
-        out.print(_location.getFileName());
-        out.print(":");
-        out.print(_location.getLineNumber());
-
-        if (log.isLoggable(Level.FINER)) {
-          out.print(" ");
-          out.print(toString());
-        }
-
-        out.println();
-      }
-    }
-
-    generateImpl(out);
-  }
-
-  /**
-   * Implementation of the generation.
-   */
-  abstract protected void generateImpl(PhpWriter out)
-    throws IOException;
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  public void generateGetOut(PhpWriter out)
-    throws IOException
-  {
-    // quercus/1l07
-    // out.print("_quercus_out");
-
-    //out.print("env.getOut()");
-    out.print("env");
-  }
-
-  /**
-   * Generates static/initialization code code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  public void generateCoda(PhpWriter out)
-    throws IOException
-  {
   }
 
   /**

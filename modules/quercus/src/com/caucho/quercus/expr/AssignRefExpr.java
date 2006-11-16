@@ -33,9 +33,7 @@ import java.io.IOException;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 /**
@@ -88,56 +86,6 @@ public class AssignRefExpr extends Expr {
     _var.evalAssign(env, value);
 
     return value.copy();
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _var.analyzeAssign(info);
-    _var.analyzeSetReference(info);
-
-    _value.analyze(info);
-    _value.analyzeSetReference(info);
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    _var.generateAssignRef(out, _value, false);
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateTop(PhpWriter out)
-    throws IOException
-  {
-    _var.generateAssignRef(out, _value, true);
-  }
-
-  /**
-   * Generates code to evaluate the expression, copying the result
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateCopy(PhpWriter out)
-    throws IOException
-  {
-    generate(out);
-    out.print(".copy()");  // php/3a5r
   }
 
   public String toString()

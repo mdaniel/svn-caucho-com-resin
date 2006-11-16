@@ -34,9 +34,6 @@ import java.io.IOException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -128,76 +125,6 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
   public void evalUnset(Env env)
   {
     // env.removeGlobal(_envName);
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.getGlobalValue(\"" + _envName + "\")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateRef(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.getGlobalVar(\"" + _envName + "\")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssign(PhpWriter out, Expr value, boolean isTop)
-    throws IOException
-  {
-    out.print("env.setGlobalValue(\"" + _envName + "\", ");
-    value.generateCopy(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
-    throws IOException
-  {
-    out.print("env.setGlobalValue(\"" + _envName + "\", ");
-    value.generateRef(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateUnset(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.removeGlobalVar(\"" + _envName + "\")");
   }
   
   public String toString()

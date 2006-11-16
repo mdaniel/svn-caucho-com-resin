@@ -36,15 +36,14 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.UnsetValue;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP array is set expression.
  */
 public class ArrayIsSetExpr extends Expr {
-  private final Expr _expr;
-  private final Expr _index;
+  protected final Expr _expr;
+  protected final Expr _index;
 
   public ArrayIsSetExpr(Location location, Expr expr, Expr index)
   {
@@ -89,36 +88,6 @@ public class ArrayIsSetExpr extends Expr {
     Value index = _index.eval(env);
 
     return array.get(index) != UnsetValue.UNSET;
-  }
-
-  //
-  // java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  /*
-  public void analyze(AnalyzeInfo info)
-  {
-    _expr.analyze(info);
-    _index.analyze(info);
-  }
-  */
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateBoolean(PhpWriter out)
-    throws IOException
-  {
-    out.print("(");
-    _expr.generate(out);
-    out.print(".get(");
-    _index.generate(out);
-    out.print(") != UnsetValue.UNSET)");
   }
 
   public String toString()

@@ -38,7 +38,6 @@ import com.caucho.quercus.env.ContinueValue;
 
 import com.caucho.quercus.expr.Expr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -88,88 +87,6 @@ public class ForStatement extends Statement {
     }
 
     return null;
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    if (_init != null)
-      _init.analyze(info);
-
-    if (_test != null)
-      _test.analyze(info);
-
-    AnalyzeInfo contInfo = info.copy();
-    AnalyzeInfo breakInfo = info;
-
-    AnalyzeInfo loopInfo = info.createLoop(contInfo, breakInfo);
-
-    _block.analyze(loopInfo);
-
-    if (_incr != null)
-      _incr.analyze(loopInfo);
-
-    if (_test != null)
-      _test.analyze(loopInfo);
-
-    loopInfo.merge(contInfo);
-
-    // handle loop values
-
-    _block.analyze(loopInfo);
-
-    loopInfo.merge(contInfo);
-
-    if (_incr != null)
-      _incr.analyze(loopInfo);
-
-    if (_test != null)
-      _test.analyze(loopInfo);
-
-    info.merge(loopInfo);
-
-    return true;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    out.print("for (");
-    if (_init != null)
-      _init.generateTop(out);
-
-    out.println(";");
-    out.print("     ");
-
-    if (_test != null)
-      _test.generateBoolean(out);
-    else
-      out.print("true");
-
-    out.println(";");
-    out.print("     ");
-
-    if (_incr != null)
-      _incr.generateTop(out);
-
-    out.println(") {");
-    out.pushDepth();
-    out.println("env.checkTimeout();");
-
-    _block.generate(out);
-    out.popDepth();
-    out.println("}");
   }
 }
 

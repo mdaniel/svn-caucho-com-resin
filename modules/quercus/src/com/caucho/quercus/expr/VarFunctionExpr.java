@@ -41,7 +41,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.*;
 
 import com.caucho.quercus.parser.*;
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -122,94 +121,6 @@ public class VarFunctionExpr extends Expr {
   public Value evalRef(Env env)
   {
     return env.getFunction(_name.eval(env)).callRef(env, _args);
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _name.analyze(info);
-
-    for (int i = 0; i < _args.length; i++)
-      _args[i].analyze(info);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    generateImpl(out, false);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateRef(PhpWriter out)
-    throws IOException
-  {
-    generateImpl(out, true);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateCopy(PhpWriter out)
-    throws IOException
-  {
-    generateImpl(out, true);
-    out.print(".copyReturn()");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  private void generateImpl(PhpWriter out, boolean isRef)
-    throws IOException
-  {
-    out.print("env.getFunction(");
-    _name.generate(out);
-    out.print(")");
-
-    if (isRef)
-      out.print(".callRef(env");
-    else
-      out.print(".call(env");
-    
-    if (_args.length <= 5) {
-      for (int i = 0; i < _args.length; i++) {
-	out.print(", ");
-
-	_args[i].generateArg(out);
-      }
-
-      out.print(")");
-    }
-    else {
-      out.print(", new Value[] {");
-
-      for (int i = 0; i < _args.length; i++) {
-	if (i != 0)
-	  out.print(", ");
-
-	_args[i].generateArg(out);
-      }
-      out.print("})");
-    }
   }
   
   public String toString()

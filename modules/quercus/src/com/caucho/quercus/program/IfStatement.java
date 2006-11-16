@@ -39,7 +39,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -88,75 +87,5 @@ public class IfStatement extends Statement {
     else
       return null;
   }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    _test.analyze(info);
-
-    AnalyzeInfo trueBlockInfo = info.copy();
-    AnalyzeInfo falseBlockInfo = info.copy();
-
-    boolean isComplete = false;
-
-    if (_trueBlock.analyze(trueBlockInfo)) {
-      info.merge(trueBlockInfo);
-      isComplete = true;
-    }
-
-    if (_falseBlock != null) {
-      if (_falseBlock.analyze(falseBlockInfo)) {
-        info.merge(falseBlockInfo);
-        isComplete = true;
-      }
-    }
-    else
-      isComplete = true;
-
-    return isComplete;
-  }
-
-  /**
-   * Returns true if the statement can fallthrough.
-   */
-  public int fallThrough()
-  {
-    if (_falseBlock == null)
-      return FALL_THROUGH;
-    else
-      return (_trueBlock.fallThrough() & _falseBlock.fallThrough());
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    out.print("if (");
-    _test.generateBoolean(out);
-    out.println(") {");
-    out.pushDepth();
-    _trueBlock.generate(out);
-    out.popDepth();
-    out.println("}");
-
-    if (_falseBlock != null) {
-      out.println("else {");
-      out.pushDepth();
-      _falseBlock.generate(out);
-      out.popDepth();
-      out.println("}");
-    }
-  }
-
 }
 

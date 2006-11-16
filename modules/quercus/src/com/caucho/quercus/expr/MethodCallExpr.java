@@ -38,9 +38,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.AnalyzeInfo;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -56,7 +54,10 @@ public class MethodCallExpr extends Expr {
   protected final String _name;
   protected final Expr []_args;
 
-  public MethodCallExpr(Location location, Expr objExpr, String name, ArrayList<Expr> args)
+  public MethodCallExpr(Location location,
+			Expr objExpr,
+			String name,
+			ArrayList<Expr> args)
   {
     super(location);
     _objExpr = objExpr;
@@ -140,95 +141,6 @@ public class MethodCallExpr extends Expr {
     } finally {
       env.popCall();
     }
-  }
-
-  //
-  // java code generation
-  //
-  
-  /**
-   * Analyzes the function.
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _objExpr.analyze(info);
-    
-    for (int i = 0; i < _args.length; i++) {
-      _args[i].analyze(info);
-      
-      _args[i].analyzeSetReference(info);
-      _args[i].analyzeSetModified(info);
-    }
-  }
-
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    generateImpl(out, false);
-  }
-
-  public void generateRef(PhpWriter out)
-    throws IOException
-  {
-    generateImpl(out, true);
-  }
-
-  public void generateCopy(PhpWriter out)
-    throws IOException
-  {
-    generateImpl(out, false);
-    out.print(".copyReturn()"); // php/3a5x
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateValue(PhpWriter out)
-    throws IOException
-  {
-    generateImpl(out, false);
-    out.print(".toValue()");  // php/3a5z
-  }
-  
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  private void generateImpl(PhpWriter out, boolean isRef)
-    throws IOException
-  {
-    String ref = isRef ? "Ref" : "";
-    
-    _objExpr.generate(out);
-    out.print(".callMethod" + ref + "(env, \"");
-    out.printJavaString(_name);
-    out.print("\"");
-
-    if (_args.length <= 5) {
-      for (int i = 0; i < _args.length; i++) {
-	out.print(", ");
-      
-	_args[i].generateArg(out);
-      }
-    }
-    else {
-      out.print(", new Value[] {");
-
-      for (int i = 0; i < _args.length; i++) {
-	if (i != 0)
-	  out.print(", ");
-      
-	_args[i].generateArg(out);
-      }
-      
-      out.print("}");
-    }
-      
-    out.print(")");
-
   }
   
   public String toString()

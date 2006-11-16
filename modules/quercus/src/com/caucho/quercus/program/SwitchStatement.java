@@ -40,7 +40,6 @@ import com.caucho.quercus.env.BreakValue;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -117,57 +116,6 @@ public class SwitchStatement extends Statement {
     return null;
   }
 
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    _value.analyze(info);
-
-    AnalyzeInfo breakInfo = info;
-
-    AnalyzeInfo switchInfo = info.createLoop(null, breakInfo);
-
-    info.clear();
-
-    boolean isFallThrough = false;
-
-    for (int i = 0; i < _cases.length; i++) {
-      Expr []cases = _cases[i];
-
-      if (cases.length > 0)
-        cases[0].analyze(switchInfo);
-
-      AnalyzeInfo topCase = switchInfo.copy();
-
-      for (int j = 1; j < cases.length; j++) {
-        cases[j].analyze(switchInfo);
-
-        topCase.merge(switchInfo);
-      }
-
-      // XXX: need to handle internal breaks like the loops
-
-      if (_blocks[i].analyze(topCase))
-        isFallThrough = true;
-
-      info.merge(topCase);
-    }
-
-    if (_defaultBlock == null)
-      isFallThrough = true;
-    else if (_defaultBlock.analyze(switchInfo))
-      isFallThrough = true;
-
-    info.merge(switchInfo);
-
-    return isFallThrough;
-  }
-
   /**
    * Returns true if control can go past the statement.
    */
@@ -190,88 +138,5 @@ public class SwitchStatement extends Statement {
       return fallThrough;
     */
   }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    String breakVar = "switch_" + out.generateId();
-    String oldBreakVar = out.setBreakVar(breakVar);
-
-    boolean oldSwitch = out.setSwitch(true);
-
-    String testVar = "quercus_test_" + out.generateId();
-
-    out.print("Value " + testVar + " = ");
-    _value.generate(out);
-    // XXX: should be a createValue like createCopy
-    out.println(".toValue();");
-
-    out.println(breakVar + ": {");
-    out.pushDepth();
-
-    boolean hasTest = false;
-
-    for (int i = 0; i < _cases.length; i++) {
-      Expr []values = _cases[i];
-
-      if (values.length == 0)
-        continue;
-
-      if (hasTest)
-        out.print("else ");
-      hasTest = true;
-
-      out.print("if (");
-
-      for (int j = 0; j < values.length; j++) {
-        if (j != 0)
-          out.print(" || ");
-
-        out.print(testVar + ".eq(");
-        values[j].generate(out);
-        out.print(")");
-      }
-
-      out.println(") {");
-      out.pushDepth();
-
-      Statement []stmts = _blocks[i].getStatements();
-
-      for (int j = 0; j < stmts.length; j++) {
-        stmts[j].generate(out);
-
-        if (stmts[j].fallThrough() != FALL_THROUGH)
-          break;
-      }
-
-      out.popDepth();
-      out.println("}");
-    }
-
-    if (_defaultBlock != null) {
-      if (hasTest)
-	out.print("else if (true) ");
-      
-      out.println("{");
-      out.pushDepth();
-
-      _defaultBlock.generate(out);
-
-      out.popDepth();
-      out.println("}");
-    }
-
-    out.popDepth();
-    out.println("}");
-
-    out.setSwitch(oldSwitch);
-    out.setBreakVar(oldBreakVar);
-  }
-
 }
 

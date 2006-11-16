@@ -38,7 +38,7 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.session.SessionModule;
 import com.caucho.quercus.lib.string.StringModule;
-import com.caucho.quercus.module.Marshall;
+import com.caucho.quercus.function.*;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.page.QuercusPage;
@@ -2717,19 +2717,13 @@ public final class Env {
 
       Class componentClass = def.getType().getComponentType();
 
-      Marshall componentClassMarshall = Marshall.create(_quercus.getModuleContext(),
-							componentClass);
+      MarshalFactory factory = _quercus.getModuleContext().getMarshalFactory();
+      Marshal componentClassMarshal = factory.create(componentClass);
 
       Object[] objAsArray = (Object[]) obj;
 
-      try {
-        for (int i = 0; i < objAsArray.length; i++)
-          arrayValueImpl.put(componentClassMarshall.unmarshall(this, objAsArray[i]));
-      }
-      catch (Throwable e) {
-        // XXX: why does unmarshall throw Throwable?
-        throw new RuntimeException(e);
-      }
+      for (int i = 0; i < objAsArray.length; i++)
+	arrayValueImpl.put(componentClassMarshal.unmarshal(this, objAsArray[i]));
 
       return arrayValueImpl;
     }
@@ -2817,13 +2811,8 @@ public final class Env {
         _autoload = findFunction("__autoload");
 
       if (_autoload != null) {
-        try {
-          _autoload.call(this, new StringValueImpl(name));
-          return createClassImpl(name, false);
-        }
-        catch (Throwable e) {
-          throw new RuntimeException(e);
-        }
+	_autoload.call(this, new StringValueImpl(name));
+	return createClassImpl(name, false);
       }
     }
 

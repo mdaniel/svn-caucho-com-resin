@@ -30,7 +30,8 @@
 package com.caucho.quercus.env;
 
 import com.caucho.vfs.WriteStream;
-import com.caucho.quercus.module.Marshall;
+
+import com.caucho.quercus.function.*;
 
 import java.util.*;
 import java.util.logging.*;
@@ -1092,7 +1093,7 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
-   * Takes the values of this array, unmarshalls them to objects of type
+   * Takes the values of this array, unmarshals them to objects of type
    * <i>elementType</i>, and puts them in a java array.
    */
   public <T> T[] valuesToArray(Env env, Class<T> elementType)
@@ -1101,19 +1102,13 @@ abstract public class ArrayValue extends Value {
 
     T[] array = (T[]) Array.newInstance(elementType, size);
 
-    Marshall elementMarshall = Marshall.create(env.getModuleContext(),
-					       elementType);
+    MarshalFactory factory = env.getModuleContext().getMarshalFactory();
+    Marshal elementMarshal = factory.create(elementType);
 
     int i = 0;
 
-    try {
-      for (Entry ptr = getHead(); ptr != null; ptr = ptr.getNext()) {
-        array[i++] = (T) elementMarshall.marshall(env, ptr.getValue(), elementType);
-      }
-    }
-    catch (Throwable e) {
-      // XXX: why does marshall throw Throwable?
-      throw new RuntimeException(e);
+    for (Entry ptr = getHead(); ptr != null; ptr = ptr.getNext()) {
+      array[i++] = (T) elementMarshal.marshal(env, ptr.getValue(), elementType);
     }
 
     return array;

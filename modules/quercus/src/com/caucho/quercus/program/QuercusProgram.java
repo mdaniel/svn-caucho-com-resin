@@ -112,8 +112,8 @@ public class QuercusProgram extends GenClass {
     addImport("com.caucho.quercus.program.*");
     addImport("com.caucho.quercus.lib.*");
     
-    QuercusMain main = new QuercusMain(this, functionInfo, statement);
-    addComponent(main);
+    //QuercusMain main = new QuercusMain(this, functionInfo, statement);
+    //addComponent(main);
     
     addDependencyComponent().addDependency(new VersionDependency());
   }

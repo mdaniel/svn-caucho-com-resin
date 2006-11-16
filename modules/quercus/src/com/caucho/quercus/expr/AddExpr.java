@@ -34,7 +34,6 @@ import java.io.IOException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -81,97 +80,6 @@ public class AddExpr extends BinaryExpr {
   public boolean isNumber()
   {
     return true;
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Generates code to evaluate the expression as a long.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    if (_left.isDouble() || _right.isDouble()) {
-      out.print("new com.caucho.quercus.env.DoubleValue(");
-      _left.generateDouble(out);
-      out.print(" + ");
-      _right.generateDouble(out);
-      out.print(")");
-    }
-    else if (_left.isLong() && _right.isLong()) {
-      out.print("new com.caucho.quercus.env.LongValue(");
-      _left.generateLong(out);
-      out.print(" + ");
-      _right.generateLong(out);
-      out.print(")");
-    }
-    else if (_left.isLong()) {
-      _right.generate(out);
-      out.print(".add(");
-      _left.generateLong(out);
-      out.print(")");
-    }
-    else if (_right.isLong()) {
-      _left.generate(out);
-      out.print(".add(");
-      _right.generateLong(out);
-      out.print(")");
-    }
-    else {
-      _left.generate(out);
-      out.print(".add(");
-      _right.generate(out);
-      out.print(")");
-    }
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateLong(PhpWriter out)
-    throws IOException
-  {
-    out.print("(");
-    _left.generateLong(out);
-    out.print(" + ");
-    _right.generateLong(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateDouble(PhpWriter out)
-    throws IOException
-  {
-    out.print("(");
-    _left.generateDouble(out);
-    out.print(" + ");
-    _right.generateDouble(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new com.caucho.quercus.expr.AddExpr(");
-    _left.generateExpr(out);
-    out.print(", ");
-    _right.generateExpr(out);
-    out.print(")");
   }
 
   public String toString()

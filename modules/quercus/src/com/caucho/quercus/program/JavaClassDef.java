@@ -34,9 +34,8 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
+import com.caucho.quercus.function.*;
 import com.caucho.quercus.module.Construct;
-import com.caucho.quercus.module.JavaMarshall;
-import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
@@ -86,8 +85,8 @@ public class JavaClassDef extends ClassDef {
 
   // _fieldMap stores all public non-static fields
   // used by getField and setField
-  private final HashMap<String, FieldMarshallPair> _fieldMap
-    = new HashMap<String, FieldMarshallPair> ();
+  private final HashMap<String, FieldMarshalPair> _fieldMap
+    = new HashMap<String, FieldMarshalPair> ();
 
   private JavaMethod __get = null;
 
@@ -106,7 +105,7 @@ public class JavaClassDef extends ClassDef {
 
   private Method _iterator;
 
-  private Marshall _marshall;
+  private Marshal _marshal;
 
   protected JavaClassDef(ModuleContext moduleContext, String name, Class type)
   {
@@ -252,11 +251,11 @@ public class JavaClassDef extends ClassDef {
         return NullValue.NULL;
       }
     } else {
-      FieldMarshallPair fieldPair = _fieldMap.get(name);
+      FieldMarshalPair fieldPair = _fieldMap.get(name);
       if (fieldPair != null) {
         try {
           result = fieldPair._field.get(obj);
-          return fieldPair._marshall.unmarshall(env, result);
+          return fieldPair._marshal.unmarshal(env, result);
         } catch (Throwable e) {
           log.log(Level.FINE,  L.l(e.getMessage()), e);
           return NullValue.NULL;
@@ -316,12 +315,12 @@ public class JavaClassDef extends ClassDef {
         return NullValue.NULL;
       }
     } else {
-      FieldMarshallPair fieldPair = _fieldMap.get(name);
+      FieldMarshalPair fieldPair = _fieldMap.get(name);
       if (fieldPair != null) {
         try {
           Class type = fieldPair._field.getType();
-          Object marshalledValue = fieldPair._marshall.marshall(env, value, type);
-          fieldPair._field.set(obj, marshalledValue);
+          Object marshaledValue = fieldPair._marshal.marshal(env, value, type);
+          fieldPair._field.set(obj, marshaledValue);
 
           return value;
 
@@ -345,11 +344,11 @@ public class JavaClassDef extends ClassDef {
   }
 
   /**
-   * Returns the marshall instance.
+   * Returns the marshal instance.
    */
-  public Marshall getMarshall()
+  public Marshal getMarshal()
   {
-    return _marshall;
+    return _marshal;
   }
 
   /**
@@ -666,7 +665,7 @@ public class JavaClassDef extends ClassDef {
       introspectMethods(_moduleContext, _type);
       introspectFields(_moduleContext, _type);
 
-      _marshall = new JavaMarshall(this, false);
+      _marshal = new JavaMarshal(this, false);
 
       Method consMethod = getConsMethod(_type);
 
@@ -785,9 +784,9 @@ public class JavaClassDef extends ClassDef {
       if (Modifier.isStatic(field.getModifiers()))
         continue;
 
-      Marshall marshall = Marshall.create(moduleContext,
-					  field.getType(), false);
-      _fieldMap.put(field.getName(), new FieldMarshallPair(field, marshall));
+      MarshalFactory factory = moduleContext.getMarshalFactory();
+      Marshal marshal = factory.create(field.getType(), false);
+      _fieldMap.put(field.getName(), new FieldMarshalPair(field, marshal));
     }
 
 
@@ -973,27 +972,27 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  private class MethodMarshallPair {
+  private class MethodMarshalPair {
     public Method _method;
-    public Marshall _marshall;
+    public Marshal _marshal;
 
-    public MethodMarshallPair(Method method,
-                              Marshall marshall)
+    public MethodMarshalPair(Method method,
+                              Marshal marshal)
     {
       _method = method;
-      _marshall = marshall;
+      _marshal = marshal;
     }
   }
 
-  private class FieldMarshallPair {
+  private class FieldMarshalPair {
     public Field _field;
-    public Marshall _marshall;
+    public Marshal _marshal;
 
-    public FieldMarshallPair(Field field,
-                             Marshall marshall)
+    public FieldMarshalPair(Field field,
+                             Marshal marshal)
     {
       _field = field;
-      _marshall = marshall;
+      _marshal = marshal;
     }
   }
   

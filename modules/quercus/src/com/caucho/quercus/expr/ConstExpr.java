@@ -35,9 +35,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -80,43 +77,6 @@ public class ConstExpr extends Expr {
       value = new StringValueImpl(_var);
 
     return value;
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.getConstant(\"");
-    out.printJavaString(_var);
-    out.print("\")");
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new ConstExpr(\"");
-    out.printJavaString(_var);
-    out.print("\")");
   }
 
   public String toString()

@@ -38,7 +38,6 @@ import com.caucho.quercus.env.BreakValue;
 
 import com.caucho.quercus.expr.Expr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -80,64 +79,5 @@ public class WhileStatement extends Statement {
 
     return null;
   }
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    if (_test != null)
-      _test.analyze(info);
-
-    AnalyzeInfo contInfo = info.copy();
-    AnalyzeInfo breakInfo = info;
-
-    AnalyzeInfo loopInfo = info.createLoop(contInfo, breakInfo);
-
-    _block.analyze(loopInfo);
-
-    if (_test != null)
-      _test.analyze(loopInfo);
-
-    loopInfo.merge(contInfo);
-
-    // handle loop values
-
-    _block.analyze(loopInfo);
-
-    loopInfo.merge(contInfo);
-
-    if (_test != null)
-      _test.analyze(loopInfo);
-
-    info.merge(loopInfo);
-
-    return true;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    out.print("while (");
-    if (_test.isTrue())
-      out.print("BooleanValue.TRUE.toBoolean()");
-    else if (_test.isFalse())
-      out.print("BooleanValue.FALSE.toBoolean()");
-    else
-      _test.generateBoolean(out);
-    out.println(") {");
-    out.pushDepth();
-    out.println("env.checkTimeout();");
-
-    _block.generate(out);
-    out.popDepth();
-    out.println("}");
-  }
-
 }
 

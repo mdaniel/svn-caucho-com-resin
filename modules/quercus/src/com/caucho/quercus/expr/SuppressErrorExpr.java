@@ -36,7 +36,6 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.parser.QuercusParser;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -149,51 +148,6 @@ public class SuppressErrorExpr extends UnaryExpr {
     } finally {
       env.setErrorMask(oldErrorMask);
     }
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.suppress(env.setErrorMask(0), ");
-    _expr.generate(out);
-    out.println(")");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateValue(PhpWriter out)
-    throws IOException
-  {
-    // php/33i2
-    out.print("env.suppress(env.setErrorMask(0), ");
-    _expr.generate(out);
-    out.println(").toValue()");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateCopy(PhpWriter out)
-    throws IOException
-  {
-    // php/3a5s
-    out.print("env.suppress(env.setErrorMask(0), ");
-    _expr.generateCopy(out);
-    out.println(")");
   }
 
   public String toString()

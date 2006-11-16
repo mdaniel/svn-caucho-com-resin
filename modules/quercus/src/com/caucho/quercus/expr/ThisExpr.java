@@ -34,10 +34,8 @@ import java.io.IOException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.program.InterpretedClassDef;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -128,61 +126,6 @@ public class ThisExpr extends AbstractVarExpr {
   public void evalUnset(Env env)
   {
     env.error("can't unset $this");
-  }
-
-  //
-  // Java code generation
-  //
-  
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("q_this");
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssign(PhpWriter out, Expr value, boolean isTop)
-    throws IOException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
-    throws IOException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateUnset(PhpWriter out)
-    throws IOException
-  {
-    throw new UnsupportedOperationException();
   }
   
   public String toString()

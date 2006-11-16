@@ -36,10 +36,7 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.parser.QuercusParser;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 import com.caucho.quercus.program.Statement;
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.program.ExprStatement;
 import com.caucho.quercus.Location;
 
@@ -155,51 +152,5 @@ abstract public class AbstractVarExpr extends Expr {
    * @return the expression value.
    */
   abstract public void evalAssign(Env env, Value value);
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze a variable assignment
-   */
-  public void analyzeAssign(AnalyzeInfo info)
-  {
-    analyze(info);
-  }
-
-  /**
-   * Analyze the unset assignment
-   */
-  public void analyzeUnset(AnalyzeInfo info)
-  {
-    analyze(info);
-  }
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  abstract public void generateAssign(PhpWriter out, Expr value, boolean isTop)
-    throws IOException;
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  abstract public void generateAssignRef(PhpWriter out,
-                                         Expr value,
-                                         boolean isTop)
-    throws IOException;
-
-  /**
-   * Generates code to evaluate the unset expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  abstract public void generateUnset(PhpWriter out)
-    throws IOException;
 }
 

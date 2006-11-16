@@ -35,7 +35,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -79,37 +78,6 @@ public class InstanceOfVarExpr extends BinaryExpr {
     Value rValue = _right.eval(env);
 
     return lValue.isA(rValue.toString());
-  }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.toValue(");
-    generateBoolean(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateBoolean(PhpWriter out)
-    throws IOException
-  {
-    _left.generate(out);
-    out.print(".isA(");
-    _right.generateString(out);
-    out.print(")");
   }
 
   public String toString()

@@ -35,16 +35,14 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP null expression.
  */
 public class NullLiteralExpr extends Expr {
-  public static final NullLiteralExpr NULL = new NullLiteralExpr(Location.UNKNOWN);
+  public static final NullLiteralExpr NULL
+    = new NullLiteralExpr(Location.UNKNOWN);
 
   private NullLiteralExpr(Location location)
   {
@@ -88,40 +86,6 @@ public class NullLiteralExpr extends Expr {
   //
   // Java code generation
   //
-
-  /**
-   * Analyze the statement
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("NullValue.NULL");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("NullLiteralExpr.NULL");
-  }
-
-  public void generateStatement(PhpWriter out)
-    throws IOException
-  {
-  }
 
   public String toString()
   {

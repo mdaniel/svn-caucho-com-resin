@@ -37,9 +37,6 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.NullValue;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -178,117 +175,6 @@ public class ArrayTailExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   public void evalUnset(Env env)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Analyze the statement
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _expr.analyze(info);
-    _expr.analyzeSetReference(info);
-    _expr.analyzeSetModified(info);
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    throw new UnsupportedOperationException(toString() + " cannot be read");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateArg(PhpWriter out)
-    throws IOException
-  {
-    _expr.generateArray(out);
-    out.print(".putRef()");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateRef(PhpWriter out)
-    throws IOException
-  {
-    _expr.generateArray(out);
-    out.print(".putRef()");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateArray(PhpWriter out)
-    throws IOException
-  {
-    // quercus/3d1i
-    _expr.generateArray(out);
-    out.print(".putArray()");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateObject(PhpWriter out)
-    throws IOException
-  {
-    _expr.generateArray(out);
-    out.print(".putObject(env)");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssign(PhpWriter out, Expr value, boolean isTop)
-    throws IOException
-  {
-    // php/3a55
-    _expr.generateArray(out);
-    out.print(".put(");
-    value.generateCopy(out); // php/3a80
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
-    throws IOException
-  {
-    // php/3a56
-    _expr.generateArray(out);
-    out.print(".put(");
-    value.generateRef(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateUnset(PhpWriter out)
-    throws IOException
   {
     throw new UnsupportedOperationException();
   }

@@ -36,9 +36,6 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.InternStringValue;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -97,121 +94,6 @@ public class StringLiteralExpr extends Expr {
   public Value eval(Env env)
   {
     return _value;
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    if (_value.toString().equals(""))
-      out.print("StringValue.EMPTY");
-    else {
-      String var = out.addValue(_value);
-
-      out.print(var);
-    }
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateTop(PhpWriter out)
-    throws IOException
-  {
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateStatement(PhpWriter out)
-    throws IOException
-  {
-  }
-
-  /**
-   * Generates code to evaluate the expression directly.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generatePrint(PhpWriter out)
-    throws IOException
-  {
-    if (_value.toString().equals(""))
-      return;
-
-    generateGetOut(out);
-
-    out.print(".print(\"");
-    out.printJavaString(_value.toString());
-    out.print("\")");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateString(PhpWriter out)
-    throws IOException
-  {
-    out.print("\"");
-    out.printJavaString(_value.toString());
-    out.print("\"");
-  }
-
-  /**
-   * Generates code to append to a string builder.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAppend(PhpWriter out)
-    throws IOException
-  {
-    if (_value.length() == 1) {
-      char ch = _value.charAt(0);
-
-      if (ch ==  '\'')
-	out.print("'\\''");
-      else {
-	out.print('\'');
-	out.printJavaString(_value.toString());
-	out.print('\'');
-      }
-    }
-    else
-      generateString(out);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new StringLiteralExpr(\"");
-    out.printJavaString(_value.toString());
-    out.print("\")");
   }
 
   public String toString()

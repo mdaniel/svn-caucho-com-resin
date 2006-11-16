@@ -34,9 +34,7 @@ import java.io.IOException;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.gen.PhpWriter;
 
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.Path;
@@ -45,8 +43,8 @@ import com.caucho.vfs.Path;
  * Represents a PHP include statement
  */
 public class IncludeOnceExpr extends UnaryExpr {
-  private Path _dir;
-  private boolean _isRequire;
+  protected Path _dir;
+  protected boolean _isRequire;
   
   public IncludeOnceExpr(Location location, Path sourceFile, Expr expr)
   {
@@ -92,34 +90,6 @@ public class IncludeOnceExpr extends UnaryExpr {
       return env.require_once(name);
     else
       return env.include_once(name);
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    super.analyze(info);
-
-    info.getFunction().setUsesSymbolTable(true);
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.include(");
-    out.print("_quercus_selfPath.getParent(), ");
-    _expr.generateString(out);
-    out.print(", " + _isRequire + ", true)");
   }
   
   public String toString()

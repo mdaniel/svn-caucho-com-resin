@@ -35,9 +35,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
-
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 /**
@@ -85,48 +82,6 @@ public class LongLiteralExpr extends Expr {
   public Value eval(Env env)
   {
     return _objValue;
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    String var = out.addValue(_objValue);
-
-    out.print(var);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new com.caucho.quercus.expr.LongLiteralExpr(");
-    out.print(_value);
-    out.print("L)");
-  }
-
-  public void generateStatement(PhpWriter out)
-    throws IOException
-  {
   }
 
   public String toString()

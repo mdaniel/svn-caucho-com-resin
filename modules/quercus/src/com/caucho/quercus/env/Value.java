@@ -31,7 +31,6 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.program.AbstractFunction;

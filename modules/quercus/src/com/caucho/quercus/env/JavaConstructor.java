@@ -51,7 +51,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AbstractFunction;
 
 import com.caucho.quercus.module.ModuleContext;
-import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.Optional;
 

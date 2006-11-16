@@ -38,7 +38,6 @@ import com.caucho.java.JavaWriter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -80,6 +79,23 @@ public class BlockStatement extends Statement {
     return _statements;
   }
 
+  /**
+   * Returns true if the statement can fallthrough.
+   */
+  public int fallThrough()
+  {
+    for (int i = 0; i < getStatements().length; i++) {
+      Statement stmt = getStatements()[i];
+	  
+      int fallThrough = stmt.fallThrough();
+
+      if (fallThrough != FALL_THROUGH)
+	return fallThrough;
+    }
+
+    return FALL_THROUGH;
+  }
+
   public Value execute(Env env)
   {
     for (int i = 0; i < _statements.length; i++) {
@@ -93,71 +109,6 @@ public class BlockStatement extends Statement {
     }
 
     return null;
-  }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    for (int i = 0; i < _statements.length; i++) {
-      if (! _statements[i].analyze(info))
-        return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Returns true if the statement can fallthrough.
-   */
-  public int fallThrough()
-  {
-    for (int i = 0; i < _statements.length; i++) {
-      int fallThrough = _statements[i].fallThrough();
-
-      if (fallThrough != FALL_THROUGH)
-        return fallThrough;
-    }
-
-    return FALL_THROUGH;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    for (int i = 0; i < _statements.length; i++) {
-      _statements[i].generate(out);
-
-      if (_statements[i].fallThrough() != FALL_THROUGH)
-        return;
-    }
-  }
-
-  /**
-   * Generates the Java footer code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  public void generateCoda(PhpWriter out)
-    throws IOException
-  {
-    try {
-      for (int i = 0; i < _statements.length; i++)
-        _statements[i].generateCoda(out);
-    }
-    catch (Throwable t) {
-      rethrow(t, IOException.class);
-    }
   }
 
   /**

@@ -36,9 +36,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.LongValue;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -133,117 +130,6 @@ public class LiteralExpr extends Expr {
   public Value eval(Env env)
   {
     return _value;
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    String var = out.addValue(_value);
-
-    out.print(var);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateTop(PhpWriter out)
-    throws IOException
-  {
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateStatement(PhpWriter out)
-    throws IOException
-  {
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateString(PhpWriter out)
-    throws IOException
-  {
-    try {
-      out.print("\"");
-      out.printJavaString(_value.toString());
-      out.print("\"");
-    } catch (IOException e) {
-      throw e;
-    } catch (Throwable e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateDouble(PhpWriter out)
-    throws IOException
-  {
-    out.print(_value.toDouble());
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateLong(PhpWriter out)
-    throws IOException
-  {
-    out.print(_value.toLong() + "L");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateBoolean(PhpWriter out)
-    throws IOException
-  {
-    out.print(_value.toBoolean());
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new com.caucho.quercus.expr.LiteralExpr(");
-
-    _value.generate(out);
-
-    out.print(")");
   }
 
   public String toString()

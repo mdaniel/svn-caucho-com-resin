@@ -41,7 +41,6 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.expr.*;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -73,53 +72,6 @@ public class EchoStatement extends Statement {
     return null;
   }
 
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    info.getFunction().setOutUsed();
-      
-    _expr.analyze(info);
-
-    return true;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    _expr.generatePrint(out);
-    out.println(";");
-  }
-
-  /**
-   * Generates static/initialization code code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  /*
-public void generateCoda(PhpWriter out)
-  throws IOException
-{
-  try {
-    out.print("static com.caucho.quercus.expr.Expr " + _genId + " = ");
-    _expr.generateExpr(out);
-    out.println(";");
-  }
-  catch (Throwable t) {
-    rethrow(t, IOException.class);
-  }
-  }
-  */
 
   /**
    * Disassembly.

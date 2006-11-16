@@ -37,7 +37,6 @@ import com.caucho.quercus.env.ContinueValue;
 
 import com.caucho.quercus.expr.Expr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -61,34 +60,6 @@ public class ContinueStatement extends Statement {
   public Value execute(Env env)
   {
     return ContinueValue.CONTINUE;
-  }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   *
-   * @return true if the following statement can be executed
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    info.mergeLoopContinueInfo();
-
-    return false;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    // the "if" test handles trailing values
-    out.println("if (true) continue;");
   }
 }
 

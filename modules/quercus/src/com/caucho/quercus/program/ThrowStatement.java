@@ -38,7 +38,6 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -69,44 +68,11 @@ public class ThrowStatement extends Statement {
 				      getLocation().getLineNumber());
   }
 
-  //
-  // java code generation
-  //
-  
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    _expr.analyze(info);
-
-    return false;
-  }
-
   /**
    * Returns true if control can go past the statement.
    */
   public int fallThrough()
   {
     return RETURN;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    // php/3g00
-    // out.print("if (true) throw ");
-    
-    out.print("throw ");
-
-    // php/3a5h
-    _expr.generate(out);
-
-    out.println(".toException(env, \"" + getLocation().getFileName() + "\", " + getLocation().getLineNumber() + ");");
   }
 }

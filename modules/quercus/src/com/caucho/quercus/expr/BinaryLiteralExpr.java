@@ -36,9 +36,6 @@ import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -64,47 +61,6 @@ public class BinaryLiteralExpr extends StringLiteralExpr
   public BinaryLiteralExpr(BinaryValue value)
   {
     this(Location.UNKNOWN, value);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    if (_value.toString().equals(""))
-      out.print("StringValue.EMPTY");
-    else {
-      String var = out.addValue(_value);
-
-      out.print(var);
-    }
-  }
-
-  /**
-   * Generates code to append to a string builder.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAppend(PhpWriter out)
-    throws IOException
-  {
-    generate(out);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("new BinaryLiteralExpr(\"");
-    out.printJavaString(_value.toString());
-    out.print("\")");
   }
 }
 

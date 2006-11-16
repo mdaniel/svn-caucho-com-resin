@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 /**
@@ -66,41 +65,6 @@ abstract public class BinaryExpr extends Expr {
   public final Expr getRight()
   {
     return _right;
-  }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _left.analyze(info);
-    _right.analyze(info);
-  }
-
-  /**
-   * Returns the variables state.
-   *
-   * @param var the variables to test
-   * @param owner the owning expression
-   */
-  public VarState getVarState(VarExpr var, VarExpr owner)
-  {
-    return combineBinaryVarState(_left.getVarState(var, owner),
-                                 _right.getVarState(var, owner));
-  }
-
-  /**
-   * Returns true if the variable is ever assigned.
-   *
-   * @param var the variable to test
-   */
-  public boolean isVarAssigned(VarExpr var)
-  {
-    return _left.isVarAssigned(var) || _right.isVarAssigned(var);
   }
 }
 

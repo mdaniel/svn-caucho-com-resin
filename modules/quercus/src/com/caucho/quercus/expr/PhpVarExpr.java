@@ -40,10 +40,7 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.ArrayValue;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 import com.caucho.quercus.program.Statement;
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.program.ExprStatement;
 import com.caucho.quercus.Location;
 

@@ -38,9 +38,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.QuercusClass;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -102,43 +99,6 @@ public class VarNewExpr extends Expr {
     _fullArgs = _args;
 
     return cl.callNew(env, _args);
-  }
-
-  //
-  // java generation code
-  //
-  
-  /**
-   * Analyzes the function.
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _name.analyze(info);
-    
-    for (int i = 0; i < _args.length; i++) {
-      _args[i].analyze(info);
-    }
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("env.findClass(");
-    _name.generateString(out);
-    out.print(".intern()).callNew(env, new Value[] {");
-
-    for (int i = 0; i < _args.length; i++) {
-      if (i != 0)
-	out.print(", ");
-      
-      _args[i].generate(out);
-    }
-    out.print("})");
   }
   
   public String toString()

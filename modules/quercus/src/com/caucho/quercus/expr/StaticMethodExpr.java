@@ -42,7 +42,6 @@ import com.caucho.quercus.env.QuercusClass;
 
 import com.caucho.quercus.parser.*;
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.AnalyzeInfo;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -152,108 +151,6 @@ public class StaticMethodExpr extends Expr {
     Value thisValue = env.getThis();
 
     return cl.callMethodRef(env, thisValue, _name, _args);
-  }
-
-  //
-  // Java code generation
-  //
-  
-  /**
-   * Analyzes the function.
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    _isMethod = info.getFunction().isMethod();
-    
-    for (int i = 0; i < _args.length; i++) {
-      _args[i].analyze(info);
-    }
-  }
-
-  private boolean isMethod()
-  {
-    return _isMethod;
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    generate(out, false);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateRef(PhpWriter out)
-    throws IOException
-  {
-    generate(out, true);
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  private void generate(PhpWriter out, boolean isRef)
-    throws IOException
-  {
-    Expr []args = _args;
-
-    out.print("env.getClass(\"");
-    out.printJavaString(_className);
-    if (isRef)
-      out.print("\").callMethodRef(env, ");
-    else
-      out.print("\").callMethod(env, ");
-
-    // XXX: needed for mediawiki
-    if (isMethod())
-      out.print("q_this");
-    else
-      out.print("NullThisValue.NULL");
-
-    out.print(", \"");
-    out.printJavaString(_name);
-    out.print("\"");
-
-    if (args.length <= 5) {
-      // XXX: check variable args
-      
-      for (int i = 0; i < args.length; i++) {
-	out.print(", ");
-      
-	args[i].generateArg(out);
-      }
-
-      out.print(")");
-    }
-    else {
-      out.print(", new Value[] {");
-
-      for (int i = 0; i < args.length; i++) {
-	if (i != 0)
-	  out.print(", ");
-      
-	args[i].generateArg(out);
-      }
-      
-      out.print("})");
-    }
-  }
-
-  public void generateCopy(PhpWriter out)
-    throws IOException
-  {
-    generate(out);
-    out.print(".copyReturn()"); // php/3a5y
   }
   
   public String toString()

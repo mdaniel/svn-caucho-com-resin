@@ -41,7 +41,6 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.expr.VarExpr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -73,35 +72,5 @@ public class FunctionDefStatement extends Statement {
 
     return null;
   }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    return true;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    out.print("if (env.findFunction(\"");
-    out.printJavaString(_fun.getName().toLowerCase());
-    out.println("\") == null)");
-    out.print("  env.addFunction(\"");
-    out.printJavaString(_fun.getName().toLowerCase());
-    out.println("\", fun_" + _fun.getName() + ");");
-    // XXX:
-  }
-  
 }
 

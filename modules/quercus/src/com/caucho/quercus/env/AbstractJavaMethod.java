@@ -42,7 +42,6 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.module.ModuleContext;
-import com.caucho.quercus.module.Marshall;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.This;

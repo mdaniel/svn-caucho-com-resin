@@ -39,7 +39,6 @@ import com.caucho.quercus.env.NullValue;
 
 import com.caucho.quercus.expr.Expr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -80,45 +79,12 @@ public class ReturnRefStatement extends Statement {
     return null;
   }
 
-  //
-  // java code generation
-  //
-  
-  /**
-   * Analyze the statement
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    _expr.analyze(info);
-
-    return false;
-  }
-
   /**
    * Returns true if control can go past the statement.
    */
   public int fallThrough()
   {
     return RETURN;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    // the "if" test handles Java's issue with trailing statements
-    
-    if (_expr != null) {
-      out.print("return ");
-      _expr.generateRef(out);
-      out.println(";");
-    }
-    else
-      out.print("return NullValue.NULL;");
   }
 
   /**

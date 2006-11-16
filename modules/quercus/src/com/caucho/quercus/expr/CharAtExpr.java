@@ -34,9 +34,6 @@ import java.io.IOException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.program.AnalyzeInfo;
-
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;
@@ -129,84 +126,6 @@ public class CharAtExpr extends AbstractVarExpr {
     return eval(env);
   }
 
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the statement
-   */
-  public void analyze(AnalyzeInfo info)
-  {
-    // quercus/3a0w
-    
-    _objExpr.analyze(info);
-    _indexExpr.analyze(info);
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    _objExpr.generate(out);
-    out.print(".charValueAt(");
-    _indexExpr.generateLong(out);
-    out.print(")");
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssign(PhpWriter out, Expr valueExpr, boolean isTop)
-    throws IOException
-  {
-    if (_objExpr instanceof AbstractVarExpr) {
-      AbstractVarExpr varExpr = (AbstractVarExpr) _objExpr;
-
-      varExpr.generateAssign(out, new SetCharAtExpr(getLocation(),
-                                                    _objExpr,
-						    _indexExpr,
-						    valueExpr),
-			     isTop);
-    }
-    else {
-      _objExpr.generate(out);
-      out.print(".setCharValueAt(");
-      _indexExpr.generateLong(out);
-      out.print(", ");
-      valueExpr.generateString(out);
-      out.print(")");
-    }
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateAssignRef(PhpWriter out, Expr valueExpr, boolean isTop)
-    throws IOException
-  {
-    generateAssign(out, valueExpr, isTop);
-  }
-
-  /**
-   * Generates code to evaluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateUnset(PhpWriter out)
-    throws IOException
-  {
-    throw new UnsupportedOperationException();
-  }
-  
   public String toString()
   {
     return _objExpr + "{" + _indexExpr + "}";

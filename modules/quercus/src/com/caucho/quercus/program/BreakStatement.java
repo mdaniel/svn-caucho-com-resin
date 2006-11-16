@@ -37,7 +37,6 @@ import com.caucho.quercus.env.BreakValue;
 
 import com.caucho.quercus.expr.Expr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -62,47 +61,5 @@ public class BreakStatement extends Statement {
   {
     return BreakValue.BREAK;
   }
-
-  //
-  // java generation code
-  //
-
-  /**
-   * Analyze the statement
-   *
-   * @return true if the following statement can be executed
-   */
-  public boolean analyze(AnalyzeInfo info)
-  {
-    info.mergeLoopBreakInfo();
-
-    // quercus/067i
-    return true;
-  }
-
-  /**
-   * Returns true if the statement can fallthrough.
-   */
-  public int fallThrough()
-  {
-    return BREAK_FALL_THROUGH;
-  }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-    String breakVar = out.getBreakVar();
-
-    if (breakVar != null)
-      out.println("if (true) break " + breakVar + ";");
-    else
-      out.println("if (true) break;");
-  }
-  
 }
 
