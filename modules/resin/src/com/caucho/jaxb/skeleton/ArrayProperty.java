@@ -102,6 +102,11 @@ public class ArrayProperty extends IterableProperty {
   {
     return false;
   }
+
+  protected boolean isXmlPrimitiveType()
+  {
+    return false;
+  }
 }
 
 

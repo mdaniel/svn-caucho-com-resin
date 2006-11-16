@@ -75,6 +75,11 @@ public class ListProperty extends IterableProperty {
     return false;
   }
 
+  protected boolean isXmlPrimitiveType()
+  {
+    return false;
+  }
+
   protected String getMaxOccurs()
   {
     return "unbounded";

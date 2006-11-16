@@ -28,15 +28,16 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
+
+import java.io.*;
+import java.lang.reflect.*;
+import java.util.*;
+
 import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
-import java.util.*;
 
-import java.lang.reflect.*;
-import java.io.*;
-
+import com.caucho.jaxb.*;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -65,18 +66,17 @@ public class SkeletonProperty extends Property {
     skeleton.write(m, out, obj, _accessor.getQName());
   }
 
-  public void generateSchema(XMLStreamWriter out)
-    throws JAXBException, XMLStreamException
-  {
-    _skeleton.generateSchema(out);
-  }
-
   protected String getSchemaType()
   {
-    throw new UnsupportedOperationException();
+    return JAXBUtil.qNameToString(_skeleton.getTypeName());
   }
 
   protected boolean isPrimitiveType()
+  {
+    return false;
+  }
+
+  protected boolean isXmlPrimitiveType()
   {
     return false;
   }

@@ -51,8 +51,7 @@ import com.caucho.server.util.*;
 public class JAXBContextImpl extends JAXBContext {
   private static final L10N L = new L10N(JAXBContextImpl.class);
 
-  private Class[]     _classes;
-  private String[]    _packages;
+  private String[] _packages;
   private ClassLoader _classLoader;
   private JAXBIntrospector _jaxbIntrospector;
 
@@ -76,9 +75,8 @@ public class JAXBContextImpl extends JAXBContext {
                          Map<String,?> properties)
     throws JAXBException
   {
-    this._jaxbIntrospector = new JAXBIntrospectorImpl(this);
-    this._classes = new Class[0];
-    this._classLoader = classLoader;
+    _jaxbIntrospector = new JAXBIntrospectorImpl(this);
+    _classLoader = classLoader;
 
     StringTokenizer st = new StringTokenizer(contextPath, ":");
 
@@ -111,8 +109,18 @@ public class JAXBContextImpl extends JAXBContext {
     }
 
     try {
-      String resourceName = "/" + packageName.replace('.', '/') + "/jaxb.index";
-      InputStream is = this.getClass().getResourceAsStream(resourceName);
+      String resourceName = packageName.replace('.', '/') + "/jaxb.index";
+
+      // For some reason, this approach works when running resin...
+      InputStream is = this.getClass().getResourceAsStream('/' + resourceName);
+
+      // ...and this approach works in QA
+      if (is == null) {
+        ClassLoader classLoader = 
+          Thread.currentThread().getContextClassLoader();
+
+        is = classLoader.getResourceAsStream(resourceName);
+      }
 
       InputStreamReader isr = new InputStreamReader(is, "utf-8");
       LineNumberReader in = new LineNumberReader(isr);
@@ -125,7 +133,7 @@ public class JAXBContextImpl extends JAXBContext {
 
         if (! "".equals(className)) {
           Class cl = CauchoSystem.loadClass(packageName + "." + className);
-          getSkeleton(cl);
+          createSkeleton(cl);
         }
       }
 
@@ -142,20 +150,16 @@ public class JAXBContextImpl extends JAXBContext {
   public JAXBContextImpl(Class[] classes, Map<String,?> properties)
     throws JAXBException
   {
-    this._jaxbIntrospector = new JAXBIntrospectorImpl(this);
-    this._packages = new String[0];
-    this._classLoader = null;
-    this._classes = new Class[classes.length];
+    _jaxbIntrospector = new JAXBIntrospectorImpl(this);
+    _packages = new String[0];
+    _classLoader = null;
 
-    System.arraycopy(classes, 0, _classes, 0, classes.length);
-    Arrays.sort(_classes, new ClassDepthComparator());
-
-    for(Class c : _classes) {
+    for(Class c : classes) {
       if (! c.isPrimitive() && 
           ! c.equals(String.class) &&
           ! c.equals(Class.class) &&
           ! c.equals(Object.class))
-        getSkeleton(c);
+        createSkeleton(c);
     }
 
     if (properties != null) {
@@ -188,12 +192,10 @@ public class JAXBContextImpl extends JAXBContext {
     StringBuilder sb = new StringBuilder();
     sb.append("JAXBContext[");
 
-    for(int i = 0; i < _classes.length; i++) {
-      Class c = _classes[i];
-      sb.append(c.getName() + (i < _classes.length - 1 ? ":" : ""));
-    }
+    for (Class c : _classSkeletons.keySet())
+      sb.append(c.getName() + ":");
 
-    for(int i = 0; i < _packages.length; i++) {
+    for (int i = 0; i < _packages.length; i++) {
       String p = _packages[i];
       sb.append(p + (i < _packages.length - 1 ? ":" : ""));
     }
@@ -233,7 +235,7 @@ public class JAXBContextImpl extends JAXBContext {
 
       out.writeStartDocument();
 
-      generateSchemaWithoutHeader(out, null);
+      generateSchemaWithoutHeader(out);
     }
     catch (Exception e) {
       IOException ioException = new IOException();
@@ -244,24 +246,11 @@ public class JAXBContextImpl extends JAXBContext {
     }
   }
 
-  public void generateSchemaWithoutHeader(XMLStreamWriter out,
-                                          Map<String,String> elements)
+  public void generateSchemaWithoutHeader(XMLStreamWriter out)
     throws JAXBException, XMLStreamException
   {
     out.writeStartElement("xsd", "schema", "http://www.w3.org/2001/XMLSchema");
-
-    if (elements != null) {
-      for (Map.Entry<String,String> element : elements.entrySet()) {
-        String name = element.getKey();
-        String type = element.getValue();
-
-        out.writeEmptyElement("xsd", "element", 
-                              "http://www.w3.org/2001/XMLSchema");
-
-        out.writeAttribute("name", name);
-        out.writeAttribute("type", "xsd:" + type);
-      }
-    }
+    out.writeAttribute("version", "1.0");
 
     for (Skeleton skeleton : _classSkeletons.values())
       skeleton.generateSchema(out);
@@ -272,30 +261,37 @@ public class JAXBContextImpl extends JAXBContext {
     out.writeEndElement(); // schema
   }
 
+  public void createSkeleton(Class c)
+    throws JAXBException
+  {
+    if (_classSkeletons.containsKey(c))
+      return;
+
+    // Breadcrumb to prevent problems with recursion
+    _classSkeletons.put(c, null); 
+
+    ClassSkeleton skeleton = new ClassSkeleton(this, c);
+    _classSkeletons.put(c, skeleton);
+  }
+
   public Skeleton getSkeleton(Class c)
     throws JAXBException
   {
-    ClassSkeleton skeleton = _classSkeletons.get(c);
+    createSkeleton(c);
 
-    if (skeleton == null) {
-      skeleton = new ClassSkeleton(this, c);
-      _classSkeletons.put(c, skeleton);
-    }
-
-    return skeleton;
+    return _classSkeletons.get(c);
   }
 
   public ClassSkeleton findSkeletonForObject(Object obj)
     throws JAXBException
   {
     Class cl = obj.getClass();
-    
-    if (_classSkeletons.containsKey(cl))
-      return _classSkeletons.get(cl);
 
-    for (Class jaxbCl : _classes) {
-      if (jaxbCl.isAssignableFrom(cl))
-        return _classSkeletons.get(jaxbCl);
+    while (! cl.equals(Object.class)) {
+      if (_classSkeletons.containsKey(cl))
+        return _classSkeletons.get(cl);
+
+      cl = cl.getSuperclass();
     }
 
     throw new JAXBException(L.l("Class {0} unknown to this JAXBContext", cl));
@@ -339,6 +335,9 @@ public class JAXBContextImpl extends JAXBContext {
     if (BigDecimal.class.equals(type))
       return new BigDecimalProperty(a);
 
+    if (BigInteger.class.equals(type))
+      return new BigIntegerProperty(a);
+
     if (List.class.equals(type))
       return new ListProperty(a);
 
@@ -376,51 +375,17 @@ public class JAXBContextImpl extends JAXBContext {
    * its schema without generating a new class.
    *
    **/
-  public void addWrapperType(QName typeName, 
+  public void addWrapperType(QName elementName, 
+                             QName typeName,
                              List<QName> names, 
                              List<Class> wrapped)
     throws JAXBException
   {
     WrapperSkeleton wrapper = 
-      new WrapperSkeleton(this, typeName, names, wrapped);
+      new WrapperSkeleton(this, elementName, typeName, names, wrapped);
 
     addRootElement(wrapper);
     _wrappers.add(wrapper);
-  }
-
-  /**
-   * Sorts classes in reverse depth order.  When searching for the correct
-   * class for an instance, we need the most specific known type.
-   */
-  private static class ClassDepthComparator implements Comparator<Class> {
-    public int compare(Class o1, Class o2) 
-    {
-      int d1 = classDepth(o1);
-      int d2 = classDepth(o2);
-
-      if (d1 < d2)
-        return 1;
-      else if (d1 > d2)
-        return -1;
-      else
-        return 0;
-    }
-
-    public boolean equals(Object obj)
-    {
-      return obj instanceof ClassDepthComparator;
-    }
-
-    // XXX Memoize?
-    private static int classDepth(Class cl)
-    {
-      Class superClass = cl.getSuperclass();
-
-      if (superClass == null)
-        return 0;
-
-      return 1 + classDepth(superClass);
-    }
   }
 }
 

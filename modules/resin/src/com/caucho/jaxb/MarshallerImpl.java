@@ -64,7 +64,6 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
   {
     ClassSkeleton skeleton = _context.findSkeletonForObject(jaxbElement);
     Class c = skeleton.getType();
-    System.out.println("marshalling type "  + c);
 
     if (! _context.createJAXBIntrospector().isElement(jaxbElement) &&
         ! c.isAnnotationPresent(XmlRootElement.class))

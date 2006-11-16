@@ -29,6 +29,8 @@
 
 package com.caucho.jaxb.skeleton;
 
+import java.beans.*;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -140,14 +142,19 @@ public class ClassSkeleton<C> extends Skeleton {
       if (c.isAnnotationPresent(XmlRootElement.class)) {
         XmlRootElement xre = c.getAnnotation(XmlRootElement.class);
 
-        if (!"##default".equals(xre.name())) {
-          if ("##default".equals(xre.namespace()))
-            _elementName = new QName(xre.name());
-          else
-            _elementName = new QName(xre.namespace(), xre.name());
+        String localName = null;
+        
+        if ("##default".equals(xre.name()))
+          localName = JAXBUtil.decapitalizeClassName(_class);
+        else
+          localName = xre.name();
 
-          _context.addRootElement(this);
-        }
+        if ("##default".equals(xre.namespace()))
+          _elementName = new QName(localName);
+        else
+          _elementName = new QName(xre.namespace(), localName);
+
+        _context.addRootElement(this);
       }
 
       _typeName = new QName(JAXBUtil.getXmlSchemaDatatype(_class));
@@ -157,16 +164,46 @@ public class ClassSkeleton<C> extends Skeleton {
                                   XmlAccessType.PUBLIC_MEMBER :
                                   accessorType.value());
 
+      if (accessType != XmlAccessType.FIELD) {
+        // getter/setter
+        BeanInfo beanInfo = Introspector.getBeanInfo(c);
+
+        for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
+          // JAXB specifies that a "class" property must be specified as "clazz"
+          // because of Object.getClass()
+          if ("class".equals(property.getName()))
+            continue;
+
+          Method get = property.getReadMethod();
+          Method set = property.getWriteMethod();
+
+          if (get != null && get.isAnnotationPresent(XmlTransient.class))
+            continue;
+          if (set != null && set.isAnnotationPresent(XmlTransient.class))
+            continue;
+
+          Accessor a = new Accessor.GetterSetterAccessor(property, _context);
+          Property p = _context.createProperty(a);
+
+          if ((get != null && get.isAnnotationPresent(XmlAttribute.class)) ||
+              (set != null && set.isAnnotationPresent(XmlAttribute.class)))
+            _attributeProperties.put(p.getName(), p);
+          else
+            _elementProperties.put(p.getName(), p);
+
+          if (! p.isXmlPrimitiveType())
+            _context.createSkeleton(property.getPropertyType());
+        }
+      } 
+
       if (accessType != XmlAccessType.PROPERTY) {
         Field[] fields = c.getDeclaredFields();
         AccessibleObject.setAccessible(fields, true);
 
         for (Field f : fields) {
-
           if (Modifier.isStatic(f.getModifiers())) continue;
           if (Modifier.isTransient(f.getModifiers())) continue;
-          if (f.isAnnotationPresent(XmlTransient.class))
-            continue;
+          if (f.isAnnotationPresent(XmlTransient.class)) continue;
 
           if (accessType == XmlAccessType.PUBLIC_MEMBER &&
               ! Modifier.isPublic(f.getModifiers()))
@@ -181,10 +218,13 @@ public class ClassSkeleton<C> extends Skeleton {
             _attributeProperties.put(p.getName(), p);
           else
             _elementProperties.put(p.getName(), p);
+
+          // Make sure the field's type is in the context so that the
+          // schema generates correctly
+          if (! p.isXmlPrimitiveType())
+            _context.getSkeleton(f.getType());
         }
       }
-      
-      // XXX: getter/setter methods
     }
     catch (Exception e) {
       throw new JAXBException(e);
@@ -207,7 +247,7 @@ public class ClassSkeleton<C> extends Skeleton {
           Method m = factoryClass.getMethod(xmlType.factoryMethod(),
                                             new Class[] { });
           // XXX: make sure m is static
-          return (C)m.invoke(null);
+          return (C) m.invoke(null);
         }
       }
       
@@ -218,17 +258,6 @@ public class ClassSkeleton<C> extends Skeleton {
       throw new JAXBException(e);
     }
   }
-
-  /*
-    private Iterable<String> propNames()
-    {
-    XmlType xmlType = getXmlType();
-    if (xmlType != null) {
-    if (xmlType.propOrder() == 
-    }
-    return null;
-    }
-  */
 
   public XmlType getXmlType()
   {
@@ -305,7 +334,7 @@ public class ClassSkeleton<C> extends Skeleton {
         out.writeStartElement(tagName.getNamespaceURI(),
                               tagName.getLocalPart());
 
-      for(Property p : _elementProperties.values())
+      for (Property p : _elementProperties.values())
         p.write(m, out, p.get(obj));
       
       out.writeEndElement();

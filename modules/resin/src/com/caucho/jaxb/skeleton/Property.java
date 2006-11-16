@@ -185,17 +185,19 @@ public abstract class Property {
       XmlElement element =
         (XmlElement) _accessor.getAnnotation(XmlElement.class);
 
-      if (element != null) {
-        if (element.required())
-          out.writeAttribute("minOccurs", "1");
+      if (! isPrimitiveType()) {
+        if (element != null) {
+          if (element.required())
+            out.writeAttribute("minOccurs", "1");
+          else
+            out.writeAttribute("minOccurs", "0");
+
+          if (element.nillable())
+            out.writeAttribute("nillable", "true");
+        }
         else
           out.writeAttribute("minOccurs", "0");
-
-        if (element.nillable())
-          out.writeAttribute("nillable", "true");
       }
-      else
-        out.writeAttribute("minOccurs", "0");
 
       if (getMaxOccurs() != null)
         out.writeAttribute("maxOccurs", getMaxOccurs());
@@ -206,7 +208,16 @@ public abstract class Property {
   }
 
   protected abstract String getSchemaType();
-  protected abstract boolean isPrimitiveType();
+
+  protected boolean isPrimitiveType()
+  {
+    return true;
+  }
+
+  protected boolean isXmlPrimitiveType()
+  {
+    return true;
+  }
 
   public Accessor getAccessor()
   {

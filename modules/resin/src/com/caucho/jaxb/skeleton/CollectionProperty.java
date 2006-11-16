@@ -77,6 +77,11 @@ public class CollectionProperty extends IterableProperty {
   {
     return false;
   }
+  
+  protected boolean isXmlPrimitiveType()
+  {
+    return false;
+  }
 }
 
 

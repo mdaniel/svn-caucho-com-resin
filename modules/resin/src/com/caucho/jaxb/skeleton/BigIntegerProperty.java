@@ -18,7 +18,7 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * aboolean with Resin Open Source; if not, write to the
+ * along with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
@@ -33,6 +33,7 @@ import javax.xml.bind.*;
 import javax.xml.namespace.*;
 import javax.xml.stream.*;
 import java.util.*;
+import java.math.*;
 
 import java.lang.reflect.*;
 import java.io.*;
@@ -40,33 +41,39 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * a Character Property
+ * a BigInteger Property
  */
-public class CharacterProperty extends CDataProperty {
+public class BigIntegerProperty extends CDataProperty {
 
-  public CharacterProperty(Accessor a) {
+  public BigIntegerProperty(Accessor a) {
     super(a);
   }
 
   protected String write(Object in)
-    throws IOException, XMLStreamException
+      throws IOException, XMLStreamException
   {
-    char ch = ((Character)in).charValue();
-
-    return DatatypeConverter.printUnsignedShort(Character.getNumericValue(ch));
+    return DatatypeConverter.printInteger((BigInteger) in);
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    int i = DatatypeConverter.parseUnsignedShort(in);
-
-    return new Character((char) i);
+    return DatatypeConverter.parseInteger(in);
   }
 
   protected String getSchemaType()
   {
-    return "xsd:unsignedShort";
+    return "xsd:integer";
+  }
+
+  protected boolean isPrimitiveType()
+  {
+    return false;
+  }
+
+  protected boolean isXmlPrimitiveType()
+  {
+    return true;
   }
 }
 

@@ -34,6 +34,7 @@ import java.util.*;
 
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 
 /**
  * JAXB utilities.
@@ -113,11 +114,8 @@ public class JAXBUtil {
     return cl.getName().substring(i + 1);
   }
 
-  public static String getXmlSchemaDatatype(Class cl)
+  public static String decapitalizeClassName(Class cl)
   {
-    if (_datatypeMap.containsKey(cl))
-      return _datatypeMap.get(cl);
-
     // XXX The JAXB standard seems to say that we should use the following: 
     //
     // String name = java.beans.Introspector.decapitalize(classBasename(cl));
@@ -125,17 +123,33 @@ public class JAXBUtil {
     // but the RI does simple decapitalization:
 
     String basename = classBasename(cl);
-    String name = Character.toLowerCase(basename.charAt(0)) +
-                  (basename.length() > 1 ? basename.substring(1) : "");
+    return Character.toLowerCase(basename.charAt(0)) +
+           (basename.length() > 1 ? basename.substring(1) : "");
+  }
+
+  public static String getXmlSchemaDatatype(Class cl)
+  {
+    if (_datatypeMap.containsKey(cl))
+      return _datatypeMap.get(cl);
 
     if (cl.isAnnotationPresent(XmlType.class)) {
       XmlType xmlType = (XmlType) cl.getAnnotation(XmlType.class);
 
-      return xmlType.name(); // XXX ""
+      if (! "##default".equals(xmlType.name()))
+        return xmlType.name();
     }
 
-    return name;
+    return decapitalizeClassName(cl);
   }
+
+  public static String qNameToString(QName qName)
+  {
+    if (qName.getPrefix() == null || "".equals(qName.getPrefix()))
+      return qName.getLocalPart();
+    else
+      return qName.getPrefix() + ':' + qName.getLocalPart();
+  }
+
 
   static {
     _datatypeMap.put(String.class, "xsd:string");

@@ -87,6 +87,11 @@ public class MapProperty extends Property {
   {
     return false;
   }
+
+  protected boolean isXmlPrimitiveType()
+  {
+    return false;
+  }
 }
 
 

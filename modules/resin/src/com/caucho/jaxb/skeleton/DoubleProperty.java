@@ -64,9 +64,4 @@ public class DoubleProperty extends CDataProperty {
   {
     return "xsd:double";
   }
-
-  protected boolean isPrimitiveType()
-  {
-    return true;
-  }
 }

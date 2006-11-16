@@ -70,6 +70,11 @@ public class BigDecimalProperty extends CDataProperty {
   {
     return false;
   }
+
+  protected boolean isXmlPrimitiveType()
+  {
+    return true;
+  }
 }
 
 

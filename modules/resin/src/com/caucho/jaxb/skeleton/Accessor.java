@@ -29,17 +29,21 @@
 
 package com.caucho.jaxb.skeleton;
 
-import com.caucho.util.*;
-import com.caucho.jaxb.*;
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.bind.annotation.*;
+import java.beans.*;
+import java.io.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
-import org.w3c.dom.*;
 import java.util.*;
-import java.io.*;
+
+import javax.xml.bind.*;
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.*;
+import javax.xml.stream.*;
+
+import org.w3c.dom.*;
+
+import com.caucho.util.*;
+import com.caucho.jaxb.*;
 
 /** an Accessor is either a getter/setter pair or a field */
 public abstract class Accessor {
@@ -96,7 +100,7 @@ public abstract class Accessor {
       _genericType = _field.getGenericType();
     }
 
-    public Object     get(Object o)
+    public Object get(Object o)
       throws JAXBException
     {
       try {
@@ -107,7 +111,7 @@ public abstract class Accessor {
       }
     }
 
-    public void       set(Object o, Object value)
+    public void set(Object o, Object value)
       throws JAXBException
     {
       try {
@@ -146,39 +150,31 @@ public abstract class Accessor {
     private Type _genericType;
     private String _name;
 
-    public GetterSetterAccessor(Class c, String name, JAXBContextImpl context)
+    private PropertyDescriptor _property;
+
+    public GetterSetterAccessor(PropertyDescriptor property, 
+                                JAXBContextImpl context)
       throws JAXBException
     {
       super(context);
-      try {
-        String getName =
-          "get" +
-          name.substring(0, 1).toUpperCase() +
-          name.substring(1);
-        
-        String setName =
-          "set" +
-          name.substring(0, 1).toUpperCase() +
-          name.substring(1);
-        
-        _get = c.getMethod(getName, new Class[] { });
-        
-        _type = _get.getReturnType();
-        _genericType = _get.getGenericReturnType();
-        
-        _set = c.getMethod(setName, new Class[] { _type });
-        
-        _name = name;
-      }
-      catch (Exception e) {
-        throw new JAXBException(e);
-      }
+
+      _property = property;
+
+      _get = _property.getReadMethod();
+      _set = _property.getWriteMethod();
+      _name = _property.getName();
+
+      if ("clazz".equals(_name))
+        _name = "class";
     }
 
     public Object get(Object o)
       throws JAXBException
     {
       try {
+        if (_get == null)
+          return null;
+
         return _get.invoke(o);
       }
       catch (Exception e) {
@@ -190,6 +186,9 @@ public abstract class Accessor {
       throws JAXBException
     {
       try {
+        if (_set == null)
+          return;
+
         _set.invoke(o, value);
       }
       catch (Exception e) {
@@ -199,23 +198,24 @@ public abstract class Accessor {
 
     public Annotation getAnnotation(Class c)
     {
-      Annotation a = _get.getAnnotation(c);
+      Annotation a = null;
 
-      if (a != null)
-        return a;
+      if (_get != null)
+        a = _get.getAnnotation(c);
+      else if (_set != null)
+        a = _set.getAnnotation(c);
 
-      a = _set.getAnnotation(c);
       return a;
     }
 
     public Class getType()
     {
-      return _type;
+      return _property.getPropertyType();
     }
 
     public Type getGenericType()
     {
-      return _genericType;
+      return getType();
     }
 
     public String getName()

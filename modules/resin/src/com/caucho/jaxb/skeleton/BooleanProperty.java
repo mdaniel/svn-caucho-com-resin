@@ -64,9 +64,4 @@ public class BooleanProperty extends CDataProperty {
   {
     return "xsd:boolean";
   }
-
-  protected boolean isPrimitiveType()
-  {
-    return true;
-  }
 }

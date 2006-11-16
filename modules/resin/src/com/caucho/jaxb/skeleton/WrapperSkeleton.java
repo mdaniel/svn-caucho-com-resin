@@ -67,7 +67,10 @@ public class WrapperSkeleton extends Skeleton {
   private static final Logger log 
     = Logger.getLogger(WrapperSkeleton.class.getName());
 
+  private final QName _elementName;
+
   public WrapperSkeleton(JAXBContextImpl context, 
+                         QName elementName, 
                          QName typeName, 
                          List<QName> names,
                          List<Class> wrapped)
@@ -76,6 +79,7 @@ public class WrapperSkeleton extends Skeleton {
     super(context);
 
     try {
+      _elementName = elementName;
       _typeName = typeName;
 
       for (int i = 0; i < wrapped.size(); i++) {
@@ -137,8 +141,14 @@ public class WrapperSkeleton extends Skeleton {
   public void generateSchema(XMLStreamWriter out)
     throws JAXBException, XMLStreamException
   {
+    /// XXX elementName and typeName namespaces
+    
+    out.writeStartElement(XML_SCHEMA_PREFIX, "element", XML_SCHEMA_NS);
+    out.writeAttribute("type",  _typeName.getLocalPart());
+    out.writeAttribute("name",  _elementName.getLocalPart());
+
     out.writeStartElement(XML_SCHEMA_PREFIX, "complexType", XML_SCHEMA_NS);
-    out.writeAttribute("name", _typeName.toString());
+    out.writeAttribute("name", _typeName.getLocalPart());
 
     out.writeStartElement(XML_SCHEMA_PREFIX, "sequence", XML_SCHEMA_NS);
 
