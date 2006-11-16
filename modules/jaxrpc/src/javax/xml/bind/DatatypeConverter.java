@@ -229,11 +229,12 @@ public final class DatatypeConverter {
   public static void setDatatypeConverter(DatatypeConverterInterface converter)
     throws IllegalArgumentException
   {
-    if (_converter != null)
-      _converter = converter;
-
     if (converter == null)
       throw new IllegalArgumentException("Datatype converter cannot be null");
+
+    // Can only be set once
+    if (_converter == null)
+      _converter = converter;
   }
 
 }
