@@ -28,21 +28,14 @@
 
 package com.caucho.ejb.protocol;
 
-import java.lang.reflect.Field;
-
-import java.util.logging.Logger;
-
-import com.caucho.util.L10N;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.log.Log;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
-import com.caucho.log.Log;
-
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.EJBExceptionWrapper;
-
-import com.caucho.ejb.entity.EntityServer;
+import java.util.logging.Logger;
 
 /**
  * Encodes and decodes handles.
@@ -50,9 +43,9 @@ import com.caucho.ejb.entity.EntityServer;
 public class HandleEncoder {
   private static final L10N L = new L10N(HandleEncoder.class);
   private static final Logger log = Log.open(HandleEncoder.class);
-  
+
+  private final String _serverId;
   private AbstractServer _server;
-  private String _serverId;
 
   public HandleEncoder(String serverId)
   {
@@ -66,6 +59,11 @@ public class HandleEncoder {
     setServer(server);
   }
 
+  public String getServerId()
+  {
+    return _serverId;
+  }
+
   protected void setServer(AbstractServer server)
   {
     _server = server;
@@ -74,16 +72,6 @@ public class HandleEncoder {
   protected AbstractServer getServer()
   {
     return _server;
-  }
-
-  public String getServerId()
-  {
-    return _serverId;
-  }
-
-  public void setServerId(String id)
-  {
-    _serverId = id;
   }
 
   /**

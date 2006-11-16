@@ -43,7 +43,6 @@ import com.caucho.util.L10N;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.RemoteExceptionWrapper;
 import com.caucho.ejb.NoSuchObjectExceptionWrapper;
 
@@ -162,7 +161,7 @@ public abstract class JVMObject extends AbstractEJBObject
   private AbstractServer getServer()
   {
     if (_server.isDead()) {
-      String serverId = _server.getServerId();
+      String serverId = _server.getHandleServerId();
       _object = null;
       _server = EjbProtocolManager.getJVMServer(serverId);
     }

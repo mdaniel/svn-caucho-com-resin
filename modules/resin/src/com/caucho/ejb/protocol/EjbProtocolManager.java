@@ -29,31 +29,21 @@
 
 package com.caucho.ejb.protocol;
 
-import java.lang.ref.WeakReference;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.HashMap;
-import java.util.Hashtable;
-
-import java.util.logging.Logger;
-
-import javax.naming.InitialContext;
-import javax.naming.Context;
-import javax.naming.NamingException;
-
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.EnvServerManager;
+import com.caucho.log.Log;
+import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.log.Log;
-
-import com.caucho.naming.AbstractModel;
-import com.caucho.naming.MemoryModel;
-import com.caucho.naming.Jndi;
-
-import com.caucho.ejb.EnvServerManager;
-import com.caucho.ejb.AbstractServer;
+import javax.naming.NamingException;
+import java.lang.ref.WeakReference;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 
 /**
@@ -71,14 +61,12 @@ public class EjbProtocolManager {
   private static Hashtable<String,WeakReference<AbstractServer>> _staticServerMap
     = new Hashtable<String,WeakReference<AbstractServer>>();
 
-  private EnvServerManager _ejbServer;
-  
-  private AbstractModel _localRoot;
-  private AbstractModel _remoteRoot;
-  
+  private final EnvServerManager _ejbServer;
+  private final ClassLoader _loader;
+
   private String _localJndiName = "java:comp/env/cmp";
   private String _remoteJndiName = "java:comp/env/ejb";
-  
+
   private HashMap<String,AbstractServer> _serverMap
     = new HashMap<String,AbstractServer>();
 
@@ -94,47 +82,40 @@ public class EjbProtocolManager {
     throws ConfigException
   {
     _ejbServer = ejbServer;
+    _loader = _ejbServer.getClassLoader();
 
-    _localRoot = new MemoryModel();
-    _remoteRoot = new MemoryModel();
+     ProtocolContainer iiop = IiopProtocolContainer.createProtocolContainer();
 
-    ProtocolContainer iiop = IiopProtocolContainer.createProtocolContainer();
+     if (iiop != null)
+       _protocolMap.put("iiop", iiop);
+   }
 
-    if (iiop != null)
-      _protocolMap.put("iiop", iiop);
-  }
+   public void setLocalJndiName(String name)
+   {
+     _localJndiName = name;
+   }
 
-  public void setLocalJndiName(String name)
-  {
-    _localJndiName = name;
-  }
+   public String getLocalJndiName()
+   {
+     return _localJndiName;
+   }
 
-  public String getLocalJndiName()
-  {
-    return _localJndiName;
-  }
+   public void setRemoteJndiName(String name)
+   {
+     _remoteJndiName = name;
+   }
 
-  public void setRemoteJndiName(String name)
-  {
-    _remoteJndiName = name;
-  }
+   public String getRemoteJndiName()
+   {
+     return _remoteJndiName;
+   }
 
-  public String getRemoteJndiName()
-  {
-    return _remoteJndiName;
-  }
-
-  /**
-   * Returns the EJB server.
-   */
+   /**
+    * Returns the EJB server.
+    */
   public EnvServerManager getServerManager()
   {
     return _ejbServer;
-  }
-
-  public AbstractModel getLocalNamingModel()
-  {
-    return _localRoot;
   }
 
   /**
@@ -143,12 +124,6 @@ public class EjbProtocolManager {
   public void init()
     throws NamingException
   {
-    Jndi.rebindDeep(_localJndiName, new NamingProxy(_localRoot));
-
-    if (_localJndiName.equals(_remoteJndiName))
-      _remoteRoot = _localRoot;
-    else
-      Jndi.rebindDeep(_remoteJndiName, new NamingProxy(_remoteRoot));
   }
 
   /**
@@ -167,7 +142,7 @@ public class EjbProtocolManager {
     String oldProtocol = _protocolLocal.get();
 
     _protocolLocal.set(protocol);
-    
+
     return oldProtocol;
   }
 
@@ -190,7 +165,7 @@ public class EjbProtocolManager {
 
     addProtocolContainer(protocol.getName(), protocol);
   }
-  
+
   public void addProtocolContainer(String name, ProtocolContainer protocol)
   {
     synchronized (_protocolMap) {
@@ -207,7 +182,7 @@ public class EjbProtocolManager {
       return _protocolMap.get(name);
     }
   }
-  
+
   private void addProtocolServers(ProtocolContainer protocol)
   {
     for (AbstractServer server : _serverMap.values()) {
@@ -232,9 +207,38 @@ public class EjbProtocolManager {
     throws NamingException
   {
     _serverMap.put(server.getEJBName(), server);
-    
-    addLocalServer(server);
-    addRemoteServer(server);
+
+    for (ProtocolContainer protocol : _protocolMap.values()) {
+      protocol.addServer(server);
+    }
+
+    Object home;
+
+    home = server.getEJBLocalHome();
+
+    if (home == null)
+      home = server.getClientObject();
+
+    try {
+    if (home == null)
+      home = server.getEJBHome();
+    }
+    catch (RemoteException ex) {
+      throw new RuntimeException(ex);
+    }
+
+    if (home != null) {
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+
+      try {
+        Thread.currentThread().setContextClassLoader(_loader);
+        Jndi.bindDeepShort(server.getJndiName(), home);
+      }
+      finally {
+        Thread.currentThread().setContextClassLoader(loader);
+      }
+    }
   }
 
   /**
@@ -243,70 +247,11 @@ public class EjbProtocolManager {
   public void removeServer(AbstractServer server)
     throws NamingException
   {
-    //addLocalServer(server);
-    removeRemoteServer(server);
-  }
-	   
-  /**
-   * Adds a server.
-   */
-  public void addLocalServer(AbstractServer server)
-    throws NamingException
-  {
     String ejbName = server.getEJBName();
 
-    if (server.getEJBLocalHome() != null)
-      addServer(_localRoot, ejbName, server.getEJBLocalHome());
-    else if (server.getClientObject() != null)
-      addServer(_localRoot, ejbName, server.getClientObject());
-  }
-
-  /**
-   * Adds a remote server.
-   */
-  public void addRemoteServer(AbstractServer server)
-    throws NamingException
-  {
-    for (ProtocolContainer protocol : _protocolMap.values()) {
-      protocol.addServer(server);
-    }
-    
-    try {
-      String ejbName = server.getEJBName();
-      String jndiName = server.getJndiName();
-
-      if (server.getEJBHome() == null) {
-      }
-      else {
-	if (jndiName != null)
-	  addServer(_remoteRoot, jndiName, server.getEJBHome());
-
-	if (ejbName != null) {
-	  Jndi.bindDeepShort("ejb/" + ejbName, server.getEJBHome());
-	}
-	// XXX:
-	// addServer(_remoteRoot, ejbName, server.getEJBHome());
-      }
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (NamingException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Removes a remote server.
-   */
-  public void removeRemoteServer(AbstractServer server)
-    throws NamingException
-  {
-    String ejbName = server.getEJBName();
-    
     while (ejbName.startsWith("/"))
       ejbName = ejbName.substring(1);
-    
+
     while (ejbName.endsWith("/"))
       ejbName = ejbName.substring(ejbName.length() - 1);
 
@@ -316,62 +261,16 @@ public class EjbProtocolManager {
   }
 
   /**
-   * DeployGenerator locally
-   */
-  public void deployEJB(String ejbName, AbstractServer server)
-  {
-    
-  }
-
-  /**
-   * DeployGenerator locally
-   */
-  public void deployJNDI(String jndiName, AbstractServer server)
-    throws Exception
-  {
-    /*
-    Context ic = new InitialContext();
-    ic.rebind(jndiName, this);
-    */
-  }
-	   
-  /**
-   * Adds a server.
-   */
-  private void addServer(AbstractModel model,
-			 String ejbName,
-			 Object home)
-    throws NamingException
-  {
-    while (ejbName.startsWith("/"))
-      ejbName = ejbName.substring(1);
-    
-    while (ejbName.endsWith("/"))
-      ejbName = ejbName.substring(ejbName.length() - 1);
-    
-    String []split = ejbName.split("/+");
-
-    for (int i = 0; i < split.length - 1; i++) {
-      if (model.lookup(split[i]) != null)
-	model = (AbstractModel) model.lookup(split[i]);
-      else
-	model = model.createSubcontext(split[i]);
-    }
-
-    model.bind(split[split.length - 1], home);
-  }
-  
-  /**
    * Returns the server specified by the serverId.
    */
   public AbstractServer getServerByEJBName(String ejbName)
   {
     if (! ejbName.startsWith("/"))
       ejbName = "/" + ejbName;
-    
+
     return _serverMap.get(ejbName);
   }
-  
+
   /**
    * Returns the server specified by the serverId.
    */
@@ -379,7 +278,7 @@ public class EjbProtocolManager {
   {
     for (AbstractServer server : _serverMap.values()) {
       if (jndiName.equals(server.getJndiName()))
-	return server;
+        return server;
     }
 
     return null;
@@ -399,12 +298,12 @@ public class EjbProtocolManager {
   {
     if (! ejbName.startsWith("/"))
       ejbName = "/" + ejbName;
-    
+
     if (! ejbName.endsWith("/"))
       ejbName = ejbName + "/";
 
     ArrayList<String> children = new ArrayList<String>();
-    
+
     Iterator<String> iter = _serverMap.keySet().iterator();
     while (iter.hasNext()) {
       String name = iter.next();
@@ -440,12 +339,12 @@ public class EjbProtocolManager {
   {
     if (! ejbName.startsWith("/"))
       ejbName = "/" + ejbName;
-    
+
     if (! ejbName.endsWith("/"))
       ejbName = ejbName + "/";
 
     ArrayList<String> children = new ArrayList<String>();
-    
+
     Iterator<String> iter = _serverMap.keySet().iterator();
     while (iter.hasNext()) {
       String name = iter.next();
@@ -476,8 +375,8 @@ public class EjbProtocolManager {
   }
 
   public HandleEncoder createHandleEncoder(AbstractServer server,
-					   Class primaryKeyClass,
-					   String protocolName)
+                                           Class primaryKeyClass,
+                                           String protocolName)
     throws ConfigException
   {
     ProtocolContainer protocol = null;
@@ -485,7 +384,7 @@ public class EjbProtocolManager {
     synchronized (_protocolMap) {
       protocol = _protocolMap.get(protocolName);
     }
-    
+
     if (protocol != null)
       return protocol.createHandleEncoder(server, primaryKeyClass);
     else if (_protocolContainer != null)

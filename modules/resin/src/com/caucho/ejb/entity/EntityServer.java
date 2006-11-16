@@ -649,9 +649,6 @@ public class EntityServer extends AbstractServer {
 	  } catch (AmberException e) {
 	    String name = getEJBName();
 
-	    if (name.startsWith("/"))
-	      name = name.substring(1);
-	    
 	    FinderException exn = new ObjectNotFoundException(L.l("'{0}' is an unknown entity.",
 							  name + "[" + key + "]"));
 	    exn.initCause(e);
@@ -844,11 +841,6 @@ public class EntityServer extends AbstractServer {
     super.destroy();
   }
   
-  public String toString()
-  {
-    return "EntityServer[" + _ejbName + "]";
-  }
-
   static class RemoveListener {
     QEntityContext _listener;
     Class _listenClass;

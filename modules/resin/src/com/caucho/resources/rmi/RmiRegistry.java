@@ -31,21 +31,16 @@ package com.caucho.resources.rmi;
 import com.caucho.config.ConfigException;
 import com.caucho.jca.AbstractResourceAdapter;
 import com.caucho.log.Log;
-import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+import javax.resource.spi.BootstrapContext;
+import javax.resource.spi.ResourceAdapterInternalException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.resource.spi.BootstrapContext;
-import javax.resource.spi.ResourceAdapterInternalException;
 
 /** 
  * An RMI registry and its services.  This resource is used to register
@@ -120,8 +115,6 @@ public class RmiRegistry extends AbstractResourceAdapter
   public void start(BootstrapContext ctx)
     throws ResourceAdapterInternalException
   {
-    System.out.println("START:");
-    
     if (_server.equals("localhost"))
         startRegistry();
     else {

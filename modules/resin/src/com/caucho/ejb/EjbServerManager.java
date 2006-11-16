@@ -55,10 +55,12 @@ import com.caucho.util.CharBuffer;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.TempBuffer;
+import com.caucho.naming.Jndi;
 
 import javax.jms.ConnectionFactory;
 import javax.sql.DataSource;
 import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -639,7 +641,7 @@ public class EjbServerManager
     throws Exception
   {
     _envServerManager.init();
-    
+
     build();
   }
   
@@ -838,7 +840,7 @@ public class EjbServerManager
   static class ServerCmp implements Comparator<AbstractServer> {
     public int compare(AbstractServer a, AbstractServer b)
     {
-      return a.getEJBName().compareTo(b.getEJBName());
+      return a.getJndiName().compareTo(b.getJndiName());
     }
   }
 }

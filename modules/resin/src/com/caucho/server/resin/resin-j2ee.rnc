@@ -43,6 +43,8 @@ r_ejb-local-ref = element ejb-local-ref {
 
   r_ejb-ref-name,
 
+  r_jndi-name?,
+
   r_ejb-ref-type,
 
   r_local-home,
@@ -58,6 +60,8 @@ r_ejb-ref = element ejb-ref {
   r_description*
 
   & r_ejb-ref-name
+
+  & r_jndi-name?
 
   & r_ejb-ref-type?
 

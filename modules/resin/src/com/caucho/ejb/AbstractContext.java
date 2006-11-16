@@ -28,25 +28,20 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.rmi.*;
-import java.security.*;
-
-import javax.ejb.*;
-import javax.transaction.*;
-
+import com.caucho.ejb.xa.TransactionContext;
+import com.caucho.security.SecurityContext;
+import com.caucho.security.SecurityContextException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.security.SecurityContext;
-import com.caucho.security.SecurityContextException;
-
-import com.caucho.ejb.xa.TransactionContext;
-
-import com.caucho.ejb.protocol.AbstractHandle;
+import javax.ejb.*;
+import javax.transaction.UserTransaction;
+import java.rmi.RemoteException;
+import java.security.Identity;
+import java.security.Principal;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base class for an abstract context
@@ -131,7 +126,7 @@ abstract public class AbstractContext implements EJBContext {
     throws IllegalStateException
   {
     throw new IllegalStateException(L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
-                                        getServer().getEJBName()));
+                                        getServer()));
   }
   
   /**
@@ -152,7 +147,7 @@ abstract public class AbstractContext implements EJBContext {
   public EJBObject getRemoteView()
   {
     throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
-                                        getServer().getEJBName()));
+                                        getServer()));
   }
 
   /**

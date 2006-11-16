@@ -113,9 +113,9 @@ r_ejb-bean = element ejb-bean {
 
   r_icon?,
 
-  r_jndi-name?,
-
   r_ejb-name,
+
+  r_jndi-name?,
 
   r_ejb_env,
 
@@ -273,9 +273,9 @@ r_entity = element entity {
 
   r_icon?,
 
-  r_jndi-name?,
-
   r_ejb-name,
+
+  r_jndi-name?,
 
   ((r_home, r_remote?)?,
 
@@ -559,9 +559,9 @@ r_session = element session {
 
   r_icon?,
 
-  r_jndi-name?,
-
   r_ejb-name,
+
+  r_jndi-name?,
 
   (r_home, r_remote)?,
 

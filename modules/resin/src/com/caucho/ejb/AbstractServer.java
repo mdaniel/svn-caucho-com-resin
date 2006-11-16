@@ -281,7 +281,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     return _ejbName;
   }
 
-  public String getServerId()
+  public String getHandleServerId()
   {
     if (_serverId == null)
       _serverId = getHandleEncoder().getServerId();
@@ -610,7 +610,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void init()
     throws Exception
   {
-    _loader.setId("EnvironmentLoader[ejb:" + getEJBName() + "]");
+    _loader.setId("EnvironmentLoader[ejb:" + getJndiName() + "]");
   }
 
   public void start()
@@ -642,9 +642,6 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   public String toString()
   {
-    String name = getClass().getName();
-    int p = name.lastIndexOf('.');
-    
-    return name.substring(p + 1) + "[" + _ejbName + "]";
+    return getClass().getSimpleName() + "[" + getEJBName() + "," + getJndiName() + "]";
   }
 }

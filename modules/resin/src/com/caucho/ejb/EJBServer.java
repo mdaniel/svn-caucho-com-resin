@@ -45,13 +45,12 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.log.Log;
-import com.caucho.naming.AbstractModel;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.MergePath;
-import com.caucho.vfs.Vfs;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJBHome;
@@ -131,14 +130,6 @@ public class EJBServer
     throws ConfigException
   {
     _ejbManager = new EjbServerManager();
-    AbstractModel localNamingModel = _ejbManager.getProtocolManager().getLocalNamingModel();
-
-    // XXX: somewhat incorrect for multiple servers
-    try {
-      localNamingModel.bind("resin-ejb-server", _ejbManager);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
 
     _urlPrefix = _localURL.get();
 
@@ -632,6 +623,18 @@ public class EJBServer
     if (_localServer.getLevel() == null
         || "java:comp/env/cmp".equals(_localJndiName)) {
       _localServer.set(this);
+    }
+
+    try {
+      Jndi.bindDeepShort(_localJndiName + "/resin-ejb-server", _ejbManager);
+    } catch (NamingException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    try {
+      Jndi.bindDeepShort(_localJndiName + "/caucho-ejb-admin", _ejbManager);
+    } catch (NamingException e) {
+      log.log(Level.WARNING, e.toString(), e);
     }
 
     try {

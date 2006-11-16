@@ -29,7 +29,6 @@
 package com.caucho.naming;
 
 import com.caucho.log.Log;
-import com.caucho.management.j2ee.JNDIResource;
 import com.caucho.util.L10N;
 
 import javax.naming.Context;
@@ -61,20 +60,29 @@ public class Jndi {
   public static void bindDeepShort(String name, Object obj)
     throws NamingException
   {
-    if (name.startsWith("java:comp"))
-      bindDeep(name, obj);
-    else
-      bindDeep("java:comp/env/" + name, obj);
+    bindImpl(new InitialContext(), getFullName(name), obj, name);
+  }
+
+  public static void bindDeepShort(Context context, String name, Object obj)
+    throws NamingException
+  {
+    bindImpl(context, getFullName(name), obj, name);
   }
 
   public static void bindDeep(String name, Object obj)
     throws NamingException
   {
-    bindDeep(new InitialContext(), name, obj, name);
+    bindImpl(new InitialContext(), name, obj, name);
   }
-  
-  private static void bindDeep(Context context, String name,
-			      Object obj, String fullName)
+
+  public static void bindDeep(Context context, String name, Object obj)
+    throws NamingException
+  {
+    bindImpl(context, name, obj, name);
+  }
+
+  private static void bindImpl(Context context, String name,
+                               Object obj, String fullName)
     throws NamingException
   {
     NameParser parser = context.getNameParser("");
@@ -109,8 +117,7 @@ public class Jndi {
       sub = context.createSubcontext(parsedName.get(0));
       
     if (sub instanceof Context)
-      bindDeep((Context) sub, parsedName.getSuffix(1).toString(), obj,
-               fullName);
+      bindImpl((Context) sub, parsedName.getSuffix(1).toString(), obj, fullName);
 
     else
       throw new NamingException(L.l("`{0}' is an invalid JNDI name because `{1} is not a Context.  One of the subcontexts is not a Context as expected.",
@@ -125,10 +132,18 @@ public class Jndi {
   public static void rebindDeepShort(String name, Object obj)
     throws NamingException
   {
-    if (name.startsWith("java:comp"))
-      rebindDeep(name, obj);
-    else
-      rebindDeep("java:comp/env/" + name, obj);
+    rebindImpl(new InitialContext(), getFullName(name), obj, name);
+  }
+
+  /**
+   * Binds the object into JNDI without warnings if an old
+   * object exists.  The name may be a full name or the short
+   * form.
+   */
+  public static void rebindDeepShort(Context context, String name, Object obj)
+    throws NamingException
+  {
+    rebindImpl(context, getFullName(name), obj, name);
   }
 
   /**
@@ -138,17 +153,25 @@ public class Jndi {
   public static void rebindDeep(String name, Object obj)
     throws NamingException
   {
-    JNDIResource jndiResource = new JNDIResource(name);
+    rebindImpl(new InitialContext(), name, obj, name);
+  }
 
-    rebindDeep(new InitialContext(), name, obj, name);
+  /**
+   * Binds the object into JNDI without warnings if an old
+   * object exists, using the full JNDI name.
+   */
+  public static void rebindDeep(Context context, String name, Object obj)
+    throws NamingException
+  {
+    rebindImpl(context, name, obj, name);
   }
 
   /**
    * Binds the object into JNDI without warnings if an old
    * object exists.
    */
-  private static void rebindDeep(Context context, String name,
-				Object obj, String fullName)
+  private static void rebindImpl(Context context, String name,
+                                 Object obj, String fullName)
     throws NamingException
   {
     NameParser parser = context.getNameParser("");
@@ -165,8 +188,8 @@ public class Jndi {
       sub = context.createSubcontext(parsedName.get(0));
       
     if (sub instanceof Context)
-      rebindDeep((Context) sub, parsedName.getSuffix(1).toString(), obj,
-               fullName);
+      rebindImpl((Context) sub, parsedName.getSuffix(1).toString(), obj,
+                 fullName);
 
     else
       throw new NamingException(L.l("`{0}' is an invalid JNDI name because `{1} is not a Context.  One of the subcontexts is not a Context as expected.",

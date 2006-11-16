@@ -125,7 +125,7 @@ public abstract class JVMHome extends AbstractEJBObject implements EJBHome {
   private AbstractServer getServer()
   {
     if (_server.isDead()) {
-      String serverId = _server.getServerId();
+      String serverId = _server.getHandleServerId();
       
       _object = null;
       _server = EjbProtocolManager.getJVMServer(serverId);

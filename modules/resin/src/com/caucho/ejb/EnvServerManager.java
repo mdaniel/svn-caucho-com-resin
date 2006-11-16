@@ -29,64 +29,37 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.*;
-
-import java.rmi.*;
-
-import java.sql.*;
-
-import javax.ejb.*;
-import javax.sql.*;
-import javax.naming.*;
-import javax.transaction.*;
-
-import javax.jms.ConnectionFactory;
-
+import com.caucho.amber.entity.AmberEntityHome;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.JClassLoader;
-
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.admin.EJBAdmin;
+import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.ejb.entity.EntityKey;
+import com.caucho.ejb.entity.EntityServer;
+import com.caucho.ejb.entity.QEntityContext;
+import com.caucho.ejb.protocol.EjbProtocolManager;
+import com.caucho.ejb.protocol.ProtocolContainer;
+import com.caucho.ejb.xa.EjbTransactionManager;
+import com.caucho.java.WorkDir;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.SimpleLoader;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
+import com.caucho.vfs.Path;
 
-import com.caucho.vfs.*;
-
-import com.caucho.java.WorkDir;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.SimpleLoader;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentListener;
-
-import com.caucho.loader.enhancer.EnhancingClassLoader;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.amber.entity.AmberEntityHome;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.ejb.protocol.EjbProtocolManager;
-import com.caucho.ejb.protocol.ProtocolContainer;
-
-import com.caucho.ejb.xa.EjbTransactionManager;
-
-import com.caucho.ejb.admin.EJBAdmin;
-
-import com.caucho.ejb.cfg.EjbConfig;
-
-import com.caucho.ejb.entity.EntityServer;
-import com.caucho.ejb.entity.QEntityContext;
-import com.caucho.ejb.entity.EntityKey;
-
-import com.caucho.ejb.enhancer.EjbEnhancer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manages the beans in an environment.
@@ -511,7 +484,6 @@ public class EnvServerManager implements EnvironmentListener {
    */
   public void environmentStop(EnvironmentClassLoader loader)
   {
-    // XXX: this was missing for some reason
   }
 
   /**
@@ -569,7 +541,7 @@ public class EnvServerManager implements EnvironmentListener {
   static class ServerCmp implements Comparator<AbstractServer> {
     public int compare(AbstractServer a, AbstractServer b)
     {
-      return a.getEJBName().compareTo(b.getEJBName());
+      return a.getJndiName().compareTo(b.getJndiName());
     }
   }
 }
