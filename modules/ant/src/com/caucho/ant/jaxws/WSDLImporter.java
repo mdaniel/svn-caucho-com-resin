@@ -31,8 +31,7 @@ package com.caucho.ant.jaxws;
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.server.util.CauchoSystem;
 
-import java.io.File;
-import java.io.OutputStream;
+import java.io.*;
 
 /**
  * Command-line tool and ant task to generate Java from WSDLs.

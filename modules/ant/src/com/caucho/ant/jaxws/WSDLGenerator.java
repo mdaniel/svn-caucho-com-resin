@@ -28,11 +28,11 @@
 
 package com.caucho.ant.jaxws;
 
+import java.io.*;
+import java.util.*;
+
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.server.util.CauchoSystem;
-
-import java.io.File;
-import java.io.OutputStream;
 
 /**
  * Command-line tool and ant task to generate WSDLs from WebService 
@@ -48,14 +48,22 @@ public class WSDLGenerator extends org.apache.tools.ant.Task {
   private boolean _verbose;
   private boolean _genWsdl;
   private boolean _extension;
-  private boolean _debug; // not documented in TCK, but is used (!)
+  private boolean _debug; // undocumented in TCK
+  private boolean _fork;// undocumented in TCK
   private String _protocol;
   private String _serviceName;
   private String _portName;
 
   private static void error(String msg)
   {
-    System.err.println(msg);
+    System.err.print(msg);
+    System.exit(1);
+  }
+
+  private static void error(String msg, Exception e)
+  {
+    System.err.print(msg + ":" );
+    e.printStackTrace();
     System.exit(1);
   }
 
@@ -114,6 +122,11 @@ public class WSDLGenerator extends org.apache.tools.ant.Task {
     _debug = debug;
   }
 
+  public void setFork(boolean fork)
+  {
+    _fork = fork;
+  }
+
   public void setProtocol(String protocol)
   {
     _protocol = protocol;
@@ -152,8 +165,10 @@ public class WSDLGenerator extends org.apache.tools.ant.Task {
     WebServiceIntrospector introspector = new WebServiceIntrospector();
     
     try {
-      // XXX
-      introspector.introspect(seiClass, "").dumpWSDL(System.out);
+      if (_resourceDestDir != null && ! "".equals(_resourceDestDir))
+        introspector.introspect(seiClass, "").dumpWSDL(_resourceDestDir);
+      else
+        introspector.introspect(seiClass, "").dumpWSDL(System.out);
     }
     catch (Exception e) {
       throw new org.apache.tools.ant.BuildException(e);
@@ -173,11 +188,12 @@ public class WSDLGenerator extends org.apache.tools.ant.Task {
       generator.execute();
     }
     catch (org.apache.tools.ant.BuildException e) {
-      error("Unable to load SEI (" + args[0] + "): " + e);
+      error("Unable to load SEI (" + args[0] + ")", e);
     }
   }
 
   public static class ClassPath {
+    private List<PathElement> _pathElements = new ArrayList<PathElement>();
     private String _path;
 
     public String getPath()
@@ -188,6 +204,30 @@ public class WSDLGenerator extends org.apache.tools.ant.Task {
     public void setPath(String path)
     {
       _path = path;
+    }
+
+    public List<PathElement> getPathElements()
+    {
+      return _pathElements;
+    }
+
+    public void addPathelement(PathElement pathElement)
+    {
+      _pathElements.add(pathElement);
+    }
+
+    public static class PathElement {
+      private String _path;
+
+      public String getPath()
+      {
+        return _path;
+      }
+
+      public void setPath(String path)
+      {
+        _path = path;
+      }
     }
   }
 }
