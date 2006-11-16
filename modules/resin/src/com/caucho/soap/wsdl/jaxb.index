@@ -21,7 +21,5 @@ WSDLOperationOutput
 WSDLPart
 WSDLPort
 WSDLPortType
-WSDLRequestResponseOrOneWay
 WSDLService
-WSDLSolicitResponseOrNotificationOperation
 WSDLTypes

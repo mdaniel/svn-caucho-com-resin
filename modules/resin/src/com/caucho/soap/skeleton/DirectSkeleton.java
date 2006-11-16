@@ -289,8 +289,9 @@ public class DirectSkeleton extends Skeleton {
 
       try {
         _marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        /*
         _marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
-                                new WSDLPrefixMapper());
+                                new WSDLPrefixMapper());*/
       } 
       catch(PropertyException e) {
         // Non fatal
@@ -316,14 +317,17 @@ public class DirectSkeleton extends Skeleton {
 
     Node definitionsNode = wsdlNode.getFirstChild();
 
+    // XXX switch from getNodeName to getLocalName when QName is fixed
     if (definitionsNode == null ||
-        ! "definitions".equals(definitionsNode.getLocalName()))
+        ! "definitions".equals(definitionsNode.getNodeName()))
       throw new JAXBException(L.l("Unable to attach types node"));
 
     Node typesNode = definitionsNode.getFirstChild();
 
-    if (typesNode == null || ! "types".equals(typesNode.getLocalName()))
+    if (typesNode == null || ! "types".equals(typesNode.getNodeName())) {
+      System.out.println("typeNode = " + typesNode);
       throw new JAXBException(L.l("Unable to attach types node"));
+    }
 
     return typesNode;
   }
@@ -336,8 +340,20 @@ public class DirectSkeleton extends Skeleton {
     printer.printPrettyXml(getWSDLNode());
   }
 
+  /**
+   * Dumps a WSDL into the specified directory using the service name
+   * annotation if present.  (Mainly for TCK, wsgen)
+   */
+  public void dumpWSDL(String dir)
+    throws IOException, JAXBException
+  {
+    File child = new File(dir, _serviceName + ".wsdl");
+    dumpWSDL(new FileOutputStream(child));
+  }
+
   // XXX Remove after switching to Caucho JAXB
-  private class WSDLPrefixMapper 
+  /*
+  private class WSDLPrefixMapper
     extends com.sun.xml.bind.marshaller.NamespacePrefixMapper
   {
     public String getPreferredPrefix(String namespaceUri, 
@@ -367,5 +383,5 @@ public class DirectSkeleton extends Skeleton {
         _namespace
       };
     }
-  }
+  }*/
 }

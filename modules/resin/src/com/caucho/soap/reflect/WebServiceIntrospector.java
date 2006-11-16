@@ -120,6 +120,7 @@ public class WebServiceIntrospector {
       skel.addAction(name, methodSkel);
     }
 
+    /*
     Node typesNode = skel.getTypesNode();
     DOMResult result = new DOMResult(typesNode);
 
@@ -129,7 +130,7 @@ public class WebServiceIntrospector {
     }
     catch (XMLStreamException e) {
       throw new JAXBException(e);
-    }
+    }*/
 
     return skel;
   }
