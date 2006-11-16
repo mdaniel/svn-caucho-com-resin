@@ -50,7 +50,7 @@ import com.caucho.vfs.WriteStream;
  * Represents a global statement in a PHP program.
  */
 public class VarGlobalStatement extends Statement {
-  private Expr _varExpr;
+  protected Expr _varExpr;
   
   /**
    * Creates the echo statement.

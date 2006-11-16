@@ -51,9 +51,9 @@ import com.caucho.util.L10N;
 public class JavaMarshal extends Marshal {
   private static final L10N L = new L10N(JavaMarshal.class);
 
-  private final JavaClassDef _def;
-  private final boolean _isNotNull;
-  private final boolean _isUnmarshalNullAsFalse;
+  protected final JavaClassDef _def;
+  protected final boolean _isNotNull;
+  protected final boolean _isUnmarshalNullAsFalse;
 
   public JavaMarshal(JavaClassDef def,
                       boolean isNotNull)

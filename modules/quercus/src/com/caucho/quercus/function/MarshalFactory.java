@@ -48,7 +48,7 @@ import java.io.InputStream;
 public class MarshalFactory {
   private static final L10N L = new L10N(MarshalFactory.class);
 
-  private ModuleContext _moduleContext;
+  protected ModuleContext _moduleContext;
 
   public MarshalFactory(ModuleContext moduleContext)
   {

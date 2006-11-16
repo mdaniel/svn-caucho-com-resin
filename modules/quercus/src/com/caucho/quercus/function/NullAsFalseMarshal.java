@@ -43,7 +43,7 @@ import java.io.InputStream;
 
 public class NullAsFalseMarshal extends Marshal
 {
-  private Marshal _marshal;
+  protected Marshal _marshal;
 
   public NullAsFalseMarshal(Marshal marshal)
   {
