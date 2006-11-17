@@ -203,7 +203,7 @@ public class SchemaGenerator extends org.apache.tools.ant.Task {
       DOMResult result = new DOMResult();
       XMLStreamWriter out = factory.createXMLStreamWriter(result);
 
-      out.writeStartDocument();
+      out.writeStartDocument("UTF-8", "1.0");
       context.generateSchemaWithoutHeader(out);
       out.close();
 
@@ -211,6 +211,8 @@ public class SchemaGenerator extends org.apache.tools.ant.Task {
 
       XmlPrinter xmlPrinter = new XmlPrinter(fileWriter);
       xmlPrinter.setPrintDeclaration(true);
+      xmlPrinter.setEncoding("UTF-8");
+      xmlPrinter.setStandalone("yes");
       xmlPrinter.printPrettyXml(result.getNode());
     }
     catch (Exception e) {

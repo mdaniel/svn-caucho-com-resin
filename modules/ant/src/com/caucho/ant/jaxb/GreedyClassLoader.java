@@ -31,8 +31,7 @@ package com.caucho.ant.jaxb;
 
 import java.io.*;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.*;
 
 import java.net.URL;
 
@@ -53,6 +52,7 @@ public class GreedyClassLoader extends java.net.URLClassLoader
   private ClassLoader _parent;
   private Hashtable<String,Class> _classes = new Hashtable<String,Class>();
   private ByteBuffer _buffer = new ByteBuffer();
+  private HashMap<File,String> _problemFiles = new HashMap<File,String>();
 
   public GreedyClassLoader(ClassLoader parent)
   {
@@ -103,6 +103,29 @@ public class GreedyClassLoader extends java.net.URLClassLoader
     throws IOException
   {
     loadClassFiles(root, null);
+
+    int startSize;
+
+    // XXX
+    // Very crude method to deal with dependencies
+    do {
+      startSize = _problemFiles.size();
+
+      Iterator<Map.Entry<File,String>> i = _problemFiles.entrySet().iterator();
+
+      while (i.hasNext()) {
+        try {
+          Map.Entry<File,String> problem = i.next();
+
+          loadClassFile(problem.getKey(), problem.getValue());
+
+          i.remove();
+        }
+        catch (NoClassDefFoundError e) {
+        }
+      }
+    }
+    while (_problemFiles.size() < startSize);
   }
 
   public void loadClassFiles(File root, String packagePrefix)
@@ -126,8 +149,14 @@ public class GreedyClassLoader extends java.net.URLClassLoader
       }
     }
     else {
-      if (root.getPath().endsWith(".class"))
-        loadClassFile(root, packagePrefix);
+      if (root.getPath().endsWith(".class")) {
+        try {
+          loadClassFile(root, packagePrefix);
+        }
+        catch (NoClassDefFoundError e) {
+          _problemFiles.put(root, packagePrefix);
+        }
+      }
     }
   }
 
