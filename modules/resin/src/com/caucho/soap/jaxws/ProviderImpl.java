@@ -27,65 +27,55 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.soap.jaxws;
 
-import java.io.IOException;
+import java.util.logging.Logger;
 
-import java.util.HashSet;
-import java.util.ArrayList;
+import java.net.URL;
 
-import com.caucho.java.JavaWriter;
+import javax.xml.namespace.QName;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
+import javax.xml.ws.Endpoint;
+import javax.xml.ws.spi.*;
 
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.VarExpr;
-import com.caucho.quercus.expr.VarState;
-
-import com.caucho.quercus.gen.PhpWriter;
-import com.caucho.quercus.Location;
-
-import com.caucho.vfs.WriteStream;
+import com.caucho.util.*;
 
 /**
- * A dummy statement representing the function arguments
+ * Provider
  */
-public class FunctionHeaderStatement extends Statement {
-  private ArrayList<Arg> _args;
+public class ProviderImpl extends Provider {
+  private final static Logger log
+    = Logger.getLogger(ProviderImpl.class.getName());
+  private final static L10N L = new L10N(ProviderImpl.class);
 
-  public FunctionHeaderStatement(Location location, ArrayList<Arg> args)
-  {
-    super(location);
+  private ClassLoader _loader = Thread.currentThread().getContextClassLoader();
 
-    _args = args;
-  }
-  
-  public Value execute(Env env)
+  public Endpoint createAndPublishEndpoint(String address,
+					   Object implementor)
   {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
-  //
-  // java generation code
-  //
+  public Endpoint createEndpoint(String bindingId,
+				 Object implementor)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public ServiceDelegate createServiceDelegate(URL wsdl,
+					       QName serviceName,
+					       Class serviceClass)
+  {
+    return new ServiceDelegateImpl(wsdl, serviceName, serviceClass);
+  }
 
   /**
-   * Returns the variables used in the statement.
+   * Returns the id.
    */
-  public void getVariables(HashSet<VarExpr> vars)
+  public String toString()
   {
+    return "ProviderImpl[]";
   }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-  }
-
 }
+
 

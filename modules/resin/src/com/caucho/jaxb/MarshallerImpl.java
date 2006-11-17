@@ -50,6 +50,8 @@ import javax.xml.bind.MarshalException;
 public class MarshallerImpl extends AbstractMarshallerImpl {
 
   private JAXBContextImpl _context;
+  private Listener _listener;
+  
 
   MarshallerImpl(JAXBContextImpl context)
   {
@@ -65,9 +67,11 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
     ClassSkeleton skeleton = _context.findSkeletonForObject(jaxbElement);
     Class c = skeleton.getType();
 
+    /* tck/JAXBMarshall
     if (! _context.createJAXBIntrospector().isElement(jaxbElement) &&
         ! c.isAnnotationPresent(XmlRootElement.class))
       throw new MarshalException("JAXBIntrospector.isElement()==false");
+    */
 
     String name = null;
 
@@ -105,6 +109,16 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
     catch (Exception e) {
       throw new JAXBException(e);
     }
+  }
+
+  public Listener getListener()
+  {
+    return _listener;
+  }
+
+  public void setListener(Marshaller.Listener listener)
+  {
+    _listener = listener;
   }
 
   public void marshal(Object obj, XMLEventWriter writer) throws JAXBException

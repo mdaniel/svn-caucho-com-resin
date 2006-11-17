@@ -34,7 +34,6 @@ import java.io.IOException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;
@@ -45,7 +44,7 @@ import com.caucho.vfs.WriteStream;
 public class NullStatement extends Statement {
   public static final NullStatement NULL = new NullStatement();
 
-  private NullStatement()
+  protected NullStatement()
   {
     super(Location.UNKNOWN);
   }
@@ -57,16 +56,5 @@ public class NullStatement extends Statement {
   {
     return null;
   }
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  protected void generateImpl(PhpWriter out)
-    throws IOException
-  {
-  }
-  
 }
 

@@ -39,12 +39,6 @@ import java.util.*;
 
 /** XXX */
 public abstract class ServiceDelegate {
-  protected ServiceDelegate()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-
   /** XXX */
   public abstract void addPort(QName portName, String bindingId, String endpointAddress);
 

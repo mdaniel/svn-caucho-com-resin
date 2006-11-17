@@ -27,30 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.soap.skeleton;
 
-import java.io.IOException;
+import java.io.*;
+import javax.xml.ws.*;
+import javax.xml.stream.*;
+import javax.xml.namespace.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.caucho.soap.marshall.*;
 
-import java.util.logging.Logger;
+public class InParameterMarshal extends ParameterMarshal {
+  public InParameterMarshal(int arg,
+			    Marshall marshal,
+			    QName name)
+  {
+    super(arg, marshal, name);
+  }
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
+  //
+  // client
+  //
 
-import com.caucho.quercus.expr.Expr;
+  public void serializeCall(XMLStreamWriter out, Object []args)
+    throws IOException, XMLStreamException
+  {
+    _marshal.serialize(out, args[_arg], _name);
+  }
 
-import com.caucho.util.L10N;
+  //
+  // server
+  //
 
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.env.Var;
-import com.caucho.quercus.env.NullValue;
-
-/**
- * Represents a compiled function with 1 arg
- */
-abstract public class CompiledMethodRef extends CompiledFunctionRef {
+  public void deserializeCall(XMLStreamReader in, Object []args)
+    throws IOException, XMLStreamException
+  {
+    args[_arg] = _marshal.deserialize(in);
+  }
 }
-

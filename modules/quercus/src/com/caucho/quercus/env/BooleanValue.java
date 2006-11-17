@@ -29,12 +29,10 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.IdentityHashMap;
 
 import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP boolean value.
@@ -228,7 +226,7 @@ public class BooleanValue extends Value {
    *
    * @param out the writer to the Java source code.
    */
-  public void generate(PhpWriter out)
+  public void generate(PrintWriter out)
     throws IOException
   {
     if (_value)
@@ -242,7 +240,7 @@ public class BooleanValue extends Value {
    *
    * @param out the writer to the Java source code.
    */
-  public void generateBoolean(PhpWriter out)
+  public void generateBoolean(PrintWriter out)
     throws IOException
   {
     if (_value)

@@ -37,7 +37,6 @@ import java.lang.reflect.Method;
 import com.caucho.quercus.expr.*;
 import com.caucho.quercus.module.*;
 import com.caucho.quercus.program.*;
-import com.caucho.quercus.gen.*;
 
 /**
  * Represents the introspected static function information.
@@ -93,11 +92,6 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
       return _methods[args.length].call(env, obj, args);
     else
       return _methods[_methods.length - 1].call(env, obj, args);
-  }
-
-  public void generate(PhpWriter out, Expr funExpr, Expr []expr)
-  {
-    throw new UnsupportedOperationException();
   }
 
   public String toString()

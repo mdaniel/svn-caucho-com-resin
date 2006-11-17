@@ -149,9 +149,13 @@ public class WebServiceClient implements ObjectProxy, java.io.Serializable {
   {
     try {
       int p = _url.indexOf(':');
+
+      String urlName = _url.substring(p + 1);
       
-      URL url = new URL(_url.substring(p + 1));
-      QName name = new QName("foo", "bar");
+      URL url = new URL(urlName);
+      String action = "dummy-action";
+      
+      QName name = new QName(urlName, "dummy-action");
 
       return ctor.newInstance(url, name);
     } catch (RuntimeException e) {

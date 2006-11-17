@@ -37,8 +37,6 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempStream;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 /**
  * Represents a PHP output buffer
  */

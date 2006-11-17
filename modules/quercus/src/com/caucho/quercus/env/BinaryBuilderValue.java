@@ -29,13 +29,9 @@
 
 package com.caucho.quercus.env;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
+import java.io.*;
 
 import com.caucho.quercus.Quercus;
-
-import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a 8-bit binary builder
@@ -834,11 +830,11 @@ public class BinaryBuilderValue extends BinaryValue {
    *
    * @param out the writer to the Java source code.
    */
-  public void generate(PhpWriter out)
+  public void generate(PrintWriter out)
     throws IOException
   {
     out.print("new BinaryBuilderValue(\"");
-    out.printJavaString(toString());
+    printJavaString(out, toString());
     out.print("\")");
   }
 

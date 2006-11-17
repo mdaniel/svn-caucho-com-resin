@@ -33,8 +33,6 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 

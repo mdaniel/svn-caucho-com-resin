@@ -31,6 +31,8 @@ package javax.xml.ws;
 import javax.xml.namespace.*;
 import javax.xml.ws.handler.*;
 import javax.xml.ws.Service.*;
+import javax.xml.ws.spi.Provider;
+import javax.xml.ws.spi.ServiceDelegate;
 import javax.xml.bind.*;
 import java.net.*;
 import java.util.concurrent.*;
@@ -39,123 +41,93 @@ import java.lang.reflect.*;
 
 /** XXX */
 public class Service {
+  private final transient ServiceDelegate _delegate;
 
-  protected Service(URL wsdlDocumentLocation, QName serviceName)
+  protected Service(URL wsdl, QName serviceName)
   {
+    Provider provider = Provider.provider();
+
+    _delegate = provider.createServiceDelegate(wsdl, serviceName, getClass());
   }
 
-
-  /** XXX */
   public void addPort(QName portName, String bindingId, String endpointAddress)
   {
-    throw new UnsupportedOperationException();
+    _delegate.addPort(portName, bindingId, endpointAddress);
   }
 
 
-  /** XXX */
   public static Service create(QName serviceName)
   {
-    try {
-      Class c = Class.forName("com.caucho.soap.service.ServiceImpl");
-      Constructor con = c.getConstructor(new Class[] { QName.class });
-      return (Service)con.newInstance(new Object[] { serviceName });
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return new Service(null, serviceName);
   }
 
-
-  /** XXX */
   public static Service create(URL wsdlDocumentLocation, QName serviceName)
   {
-    throw new UnsupportedOperationException();
+    return new Service(wsdlDocumentLocation, serviceName);
   }
 
 
-  /** XXX */
   public <T> Dispatch<T> createDispatch(QName portName, Class<T> type,
                                         Mode mode)
   {
-    throw new UnsupportedOperationException();
+    return _delegate.createDispatch(portName, type, mode);
   }
 
 
-  /** XXX */
-    /*
   public Dispatch<Object> createDispatch(QName portName,
                                          JAXBContext context, Mode mode)
   {
-    throw new UnsupportedOperationException();
+    return _delegate.createDispatch(portName, context, mode);
   }
 
-  /** XXX */
   public Executor getExecutor()
   {
-    throw new UnsupportedOperationException();
+    return _delegate.getExecutor();
   }
 
-
-  /** XXX */
   public HandlerResolver getHandlerResolver()
   {
-    throw new UnsupportedOperationException();
+    return _delegate.getHandlerResolver();
   }
 
-
-  /** XXX */
   public <T> T getPort(Class<T> serviceEndpointName)
   {
-    throw new UnsupportedOperationException();
+    return _delegate.getPort(serviceEndpointName);
   }
 
-
-  /** XXX */
   public <T> T getPort(QName portName, Class<T> serviceEndpointName)
   {
-    throw new UnsupportedOperationException();
+    return _delegate.getPort(portName, serviceEndpointName);
   }
 
-
-  /** XXX */
   public Iterator<QName> getPorts()
   {
-    throw new UnsupportedOperationException();
+    return _delegate.getPorts();
   }
 
 
-  /** XXX */
   public QName getServiceName()
   {
-    throw new UnsupportedOperationException();
+    return _delegate.getServiceName();
   }
 
-
-  /** XXX */
   public URL getWSDLDocumentLocation()
   {
-    throw new UnsupportedOperationException();
+    return _delegate.getWSDLDocumentLocation();
   }
 
-
-  /** XXX */
   public void setExecutor(Executor executor)
   {
-    throw new UnsupportedOperationException();
+    _delegate.setExecutor(executor);
   }
 
-
-  /** XXX */
   public void setHandlerResolver(HandlerResolver handlerResolver)
   {
-    throw new UnsupportedOperationException();
+    _delegate.setHandlerResolver(handlerResolver);
   }
 
-
-  /** XXX */
   public static enum Mode {
-
       MESSAGE, PAYLOAD;
-
   }
 }
 

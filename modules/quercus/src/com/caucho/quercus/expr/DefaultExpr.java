@@ -35,7 +35,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -62,39 +61,6 @@ public class DefaultExpr extends Expr {
   public Value eval(Env env)
   {
     return DefaultValue.DEFAULT;
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    out.print("DefaultValue.DEFAULT");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateLong(PhpWriter out)
-    throws IOException
-  {
-    out.print("0");
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateString(PhpWriter out)
-    throws IOException
-  {
-    out.print("\"\"");
   }
 
   public String toString()

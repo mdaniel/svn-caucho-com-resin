@@ -35,7 +35,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -66,17 +65,6 @@ public class RequiredExpr extends Expr {
     env.warning("required argument missing");
 
     return NullValue.NULL;
-  }
-
-  /**
-   * Generates code to recreate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generateExpr(PhpWriter out)
-    throws IOException
-  {
-    out.print("RequiredExpr.REQUIRED");
   }
 
   public String toString()

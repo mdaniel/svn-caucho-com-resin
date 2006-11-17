@@ -54,6 +54,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
+import com.caucho.soa.client.WebServiceClient;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
@@ -141,6 +142,14 @@ public class AppClient implements EnvironmentBean
 
   public void setIcon(com.caucho.config.types.Icon icon)
   {
+  }
+
+  /**
+   * Adds a web service client.
+   */
+  public WebServiceClient createWebServiceClient()
+  {
+    return new WebServiceClient();
   }
 
   private void addConfig(Path path)
@@ -247,7 +256,7 @@ public class AppClient implements EnvironmentBean
         = InjectIntrospector.introspectStatic(mainClass);
 
       for (BuilderProgram program : programList) {
-        if (log.isLoggable(Level.FINEST))
+        if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, "configure: " + program);
 
         program.configure((Object) null);

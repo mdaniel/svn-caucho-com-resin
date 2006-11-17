@@ -187,6 +187,10 @@ public class ClassSkeleton<C> extends Skeleton {
           Method get = property.getReadMethod();
           Method set = property.getWriteMethod();
 
+	  if (property.getPropertyType() == null) {
+	    continue;
+	  }
+
           if (get != null && get.isAnnotationPresent(XmlTransient.class))
             continue;
           if (set != null && set.isAnnotationPresent(XmlTransient.class))
@@ -220,12 +224,15 @@ public class ClassSkeleton<C> extends Skeleton {
         AccessibleObject.setAccessible(fields, true);
 
         for (Field f : fields) {
-          if (Modifier.isStatic(f.getModifiers())) continue;
-          if (Modifier.isTransient(f.getModifiers())) continue;
-          if (f.isAnnotationPresent(XmlTransient.class)) continue;
+          if (Modifier.isStatic(f.getModifiers()))
+	    continue;
+          if (Modifier.isTransient(f.getModifiers()))
+	    continue;
+          if (f.isAnnotationPresent(XmlTransient.class))
+	    continue;
 
-          if (accessType == XmlAccessType.PUBLIC_MEMBER &&
-              ! Modifier.isPublic(f.getModifiers()))
+          if (accessType == XmlAccessType.PUBLIC_MEMBER
+	      && ! Modifier.isPublic(f.getModifiers()))
             continue;
 
           // XXX : XmlAccessType.NONE

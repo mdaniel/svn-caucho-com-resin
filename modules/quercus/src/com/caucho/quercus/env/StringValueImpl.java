@@ -33,8 +33,6 @@ import java.io.IOException;
 
 import com.caucho.quercus.Quercus;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 /**
  * Represents a unicode string value.
  */

@@ -65,14 +65,28 @@ public class WebServiceIntrospector {
   /**
    * Introspects the class
    */
+  public DirectSkeleton introspect(Class type)
+    //throws ConfigException
+    throws JAXBException
+  {
+    return introspect(type, null);
+  }
+	   
+  /**
+   * Introspects the class
+   */
   public DirectSkeleton introspect(Class type, String wsdlLocation)
     //throws ConfigException
     throws JAXBException
   {
-    // server/4221
+    // server/4221 vs soap/0301
+    /*
     if (! type.isAnnotationPresent(WebService.class))
       throw new RuntimeException(L.l("{0}: needs a @WebService annotation.",
                                      type.getName()));
+    */
+    
+    boolean isInterface = type.isInterface();
 
     MarshallFactory marshallFactory = new MarshallFactory();
 
@@ -97,7 +111,7 @@ public class WebServiceIntrospector {
 
       WebMethod webMethod = methods[i].getAnnotation(WebMethod.class);
 
-      if (webService == null && webMethod == null)
+      if (webService == null && webMethod == null && ! isInterface)
         continue;
 
       if (webMethod == null && methods[i].getDeclaringClass() != type)

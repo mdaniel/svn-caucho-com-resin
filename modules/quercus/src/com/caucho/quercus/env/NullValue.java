@@ -29,12 +29,10 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP null value.
@@ -298,7 +296,7 @@ public class NullValue extends Value {
    *
    * @param out the writer to the Java source code.
    */
-  public void generate(PhpWriter out)
+  public void generate(PrintWriter out)
     throws IOException
   {
     out.print("NullValue.NULL");

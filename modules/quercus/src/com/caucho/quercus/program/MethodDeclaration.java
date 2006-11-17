@@ -49,7 +49,6 @@ import com.caucho.util.L10N;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.env.NullValue;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 /**
@@ -101,17 +100,6 @@ public class MethodDeclaration extends Function {
   public Value call(Env env, Value []args)
   {
     throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Generates code to calluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out, Expr funExpr, Expr []args)
-    throws IOException
-  {
-    throw new IllegalStateException();
   }
 
   public String toString()

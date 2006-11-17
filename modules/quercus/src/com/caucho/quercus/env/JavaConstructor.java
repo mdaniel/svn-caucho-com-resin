@@ -54,8 +54,6 @@ import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.Optional;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 import com.caucho.util.L10N;
 
 /**

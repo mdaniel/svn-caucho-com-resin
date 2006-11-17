@@ -58,7 +58,10 @@ public class LongMarshall extends CDataMarshall {
   protected String serialize(Object in)
       throws IOException, XMLStreamException
   {
-    return ((Long)in).longValue()+"";
+    if (in == null)
+      return "0";
+    else
+      return ((Long)in).longValue()+"";
   }
 
   protected Object deserialize(String in)

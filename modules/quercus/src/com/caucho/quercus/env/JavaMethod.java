@@ -54,8 +54,6 @@ import com.caucho.quercus.module.Reference;
 import com.caucho.quercus.module.Optional;
 import com.caucho.quercus.module.ModuleContext;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 import com.caucho.util.L10N;
 
 /**
@@ -100,11 +98,6 @@ public class JavaMethod extends JavaInvoker {
     } catch (Exception e) {
       throw new QuercusException(_method.getName() + ": " + e.getMessage(), e);
     }
-  }
-
-  public void generate(PhpWriter out, Expr funExpr, Expr []expr)
-  {
-    throw new UnsupportedOperationException();
   }
 
   public String toString()

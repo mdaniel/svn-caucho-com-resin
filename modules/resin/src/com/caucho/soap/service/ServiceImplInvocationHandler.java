@@ -46,8 +46,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class ServiceImplInvocationHandler implements InvocationHandler {
-
+public class ServiceImplInvocationHandler implements InvocationHandler
+{
   private Class _api;
   private DirectSkeleton _skeleton;
   private String _url;

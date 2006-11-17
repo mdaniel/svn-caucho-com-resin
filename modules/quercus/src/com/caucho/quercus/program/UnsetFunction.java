@@ -55,11 +55,5 @@ public class UnsetFunction extends AbstractFunction {
   {
     throw new UnsupportedOperationException();
   }
-  
-  public void generate(PhpWriter out, Expr funExpr, Expr []args)
-    throws IOException
-  {
-    throw new UnsupportedOperationException();
-  }
 }
 

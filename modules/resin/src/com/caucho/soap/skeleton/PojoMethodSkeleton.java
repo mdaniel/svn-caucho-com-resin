@@ -77,6 +77,8 @@ public class PojoMethodSkeleton {
   protected final LinkedHashMap<String,ParameterMarshall> _headerArguments
     = new LinkedHashMap<String,ParameterMarshall>();
 
+  protected ParameterMarshall _retMarshal;
+
   protected int _headerOutputs;
   protected int _bodyOutputs;
 
@@ -184,11 +186,11 @@ public class PojoMethodSkeleton {
 
     // Document wrapped is the default for methods w/o a @SOAPBinding
     if (soapBinding == null) {
-      return new DocumentWrappedPojoMethodSkeleton(method, 
-                                                   factory, 
-                                                   jaxbContext, 
-                                                   targetNamespace,
-                                                   elements);
+      return new DocumentWrappedAction(method, 
+				       factory, 
+				       jaxbContext, 
+				       targetNamespace,
+				       elements);
     }
 
     if (soapBinding.use() == javax.jws.soap.SOAPBinding.Use.ENCODED)
@@ -252,48 +254,7 @@ public class PojoMethodSkeleton {
       XMLStreamWriter out =
         outputFactory.createXMLStreamWriter(httpConnection.getOutputStream());
 
-      out.writeStartDocument();
-      out.writeStartElement("env", "Envelope", Skeleton.SOAP_ENVELOPE);
-      out.writeNamespace("env", Skeleton.SOAP_ENVELOPE);
-
-      out.writeStartElement("env", "Header", Skeleton.SOAP_ENVELOPE);
-
-      for (ParameterMarshall marshall : _headerArguments.values()) {
-        Object arg = args[marshall._arg];
-
-        if (marshall._mode == WebParam.Mode.IN) {
-          marshall.serialize(arg, out);
-        }
-        else if (marshall._mode == WebParam.Mode.INOUT) {
-          Holder holder = (Holder) arg;
-
-          marshall.serialize(holder.value, out);
-        }
-      }
-
-      out.writeEndElement(); // Header
-
-      out.writeStartElement("env", "Body", Skeleton.SOAP_ENVELOPE);
-
-      out.writeStartElement("m", name, namespace);
-      out.writeNamespace("m", namespace);
-
-      for (ParameterMarshall marshall : _bodyArguments.values()) {
-        Object arg = args[marshall._arg];
-
-        if (marshall._mode == WebParam.Mode.IN) {
-          marshall.serialize(arg, out);
-        }
-        else if (marshall._mode == WebParam.Mode.INOUT) {
-          Holder holder = (Holder) arg;
-
-          marshall.serialize(holder.value, out);
-        }
-      }
-
-      out.writeEndElement(); // name
-      out.writeEndElement(); // Body
-      out.writeEndElement(); // Envelope
+      writeRequest(out, args, name, namespace);
       out.flush();
 
       //
@@ -303,85 +264,11 @@ public class PojoMethodSkeleton {
       if (httpConnection.getResponseCode() != 200)
         return null; // XXX more meaningful error
 
-      Object ret = null;
-
       XMLInputFactory inputFactory = XMLInputFactory.newInstance();
       XMLStreamReader in = 
         inputFactory.createXMLStreamReader(httpConnection.getInputStream());
 
-      in.nextTag();
-
-      if (! "Envelope".equals(in.getName().getLocalPart()))
-        throw new IOException("expected Envelope at " + in.getName());
-
-      // Header
-      if (_headerOutputs > 0) {
-        in.nextTag();
-
-        if (! "Header".equals(in.getName().getLocalPart()))
-          throw new IOException("expected <Header>");
-
-        for (int i = 0; i < _headerOutputs; i++) {
-          String tagName = in.getLocalName();
-
-          ParameterMarshall marshall = _headerArguments.get(tagName);
-
-          if (marshall == null)
-            throw new IOException(L.l("Unknown output in header <{0}>", tagName));
-
-          if (marshall._mode == WebParam.Mode.IN)
-            throw new IOException(L.l("Received value for input parameter <{0}>", tagName));
-
-          Object value = marshall._marshall.deserialize(in);
-
-          if (marshall._arg < 0)
-            ret = value;
-          else
-            ((Holder) args[marshall._arg]).value = value;
-
-          if (i + 1 < _headerOutputs)
-            in.nextTag();
-        }
-
-        if (in.nextTag() != in.END_ELEMENT)
-          throw new IOException("expected </Header>");
-      }
-
-      // Body is manditory
-      in.nextTag();
-      if (! "Body".equals(in.getName().getLocalPart()))
-        throw new IOException("expected Body");
-
-      // Body
-      if (_bodyOutputs > 0) {
-        for (int i = 0; i < _headerOutputs; i++) {
-          String tagName = in.getLocalName();
-
-          ParameterMarshall marshall = _headerArguments.get(tagName);
-
-          if (marshall == null)
-            throw new IOException(L.l("Unknown output in header <{0}>", tagName));
-
-          if (marshall._mode == WebParam.Mode.IN)
-            throw new IOException(L.l("Received value for input parameter <{0}>", tagName));
-
-          Object value = marshall._marshall.deserialize(in);
-
-          if (marshall._arg < 0)
-            ret = value;
-          else
-            ((Holder) args[marshall._arg]).value = value;
-
-          if (i + 1 < _headerOutputs)
-            in.nextTag();
-        }
-      }
-
-      if (in.nextTag() != in.END_ELEMENT)
-        throw new IOException("expected </Body>");
-
-      if (in.nextTag() != in.END_ELEMENT)
-        throw new IOException("expected </Envelope>");
+      Object ret = readResponse(in, args);
 
       return ret;
     } 
@@ -389,6 +276,139 @@ public class PojoMethodSkeleton {
       if (httpConnection != null)
         httpConnection.disconnect();
     }
+  }
+
+  protected void writeRequest(XMLStreamWriter out, Object []args,
+			      String name, String namespace)
+    throws IOException, XMLStreamException
+  {
+    out.writeStartDocument();
+    out.writeStartElement("env", "Envelope", Skeleton.SOAP_ENVELOPE);
+    out.writeNamespace("env", Skeleton.SOAP_ENVELOPE);
+
+    out.writeStartElement("env", "Header", Skeleton.SOAP_ENVELOPE);
+
+    for (ParameterMarshall marshall : _headerArguments.values()) {
+      Object arg = args[marshall._arg];
+
+      if (marshall._mode == WebParam.Mode.IN) {
+	marshall.serialize(arg, out);
+      }
+      else if (marshall._mode == WebParam.Mode.INOUT) {
+	Holder holder = (Holder) arg;
+
+	marshall.serialize(holder.value, out);
+      }
+    }
+
+    out.writeEndElement(); // Header
+
+    out.writeStartElement("env", "Body", Skeleton.SOAP_ENVELOPE);
+
+    out.writeStartElement("m", name, namespace);
+    out.writeNamespace("m", namespace);
+
+    for (ParameterMarshall marshall : _bodyArguments.values()) {
+      Object arg = args[marshall._arg];
+
+      if (marshall._mode == WebParam.Mode.IN) {
+	marshall.serialize(arg, out);
+      }
+      else if (marshall._mode == WebParam.Mode.INOUT) {
+	Holder holder = (Holder) arg;
+
+	marshall.serialize(holder.value, out);
+      }
+    }
+
+    out.writeEndElement(); // name
+    out.writeEndElement(); // Body
+    out.writeEndElement(); // Envelope
+  }
+
+  protected Object readResponse(XMLStreamReader in, Object []args)
+    throws IOException, XMLStreamException
+  {
+    Object ret = null;
+    
+    in.nextTag();
+
+    if (! "Envelope".equals(in.getName().getLocalPart()))
+      throw new IOException("expected Envelope at " + in.getName());
+
+    // Header
+    if (_headerOutputs > 0) {
+      in.nextTag();
+
+      if (! "Header".equals(in.getName().getLocalPart()))
+	throw new IOException("expected <Header>");
+
+      for (int i = 0; i < _headerOutputs; i++) {
+	String tagName = in.getLocalName();
+
+	ParameterMarshall marshall = _headerArguments.get(tagName);
+
+	if (marshall == null)
+	  throw new IOException(L.l("Unknown output in header <{0}>", tagName));
+
+	if (marshall._mode == WebParam.Mode.IN)
+	  throw new IOException(L.l("Received value for input parameter <{0}>", tagName));
+
+	Object value = marshall._marshall.deserialize(in);
+
+	if (marshall._arg < 0)
+	  ret = value;
+	else
+	  ((Holder) args[marshall._arg]).value = value;
+
+	if (i + 1 < _headerOutputs)
+	  in.nextTag();
+      }
+
+      if (in.nextTag() != in.END_ELEMENT)
+	throw new IOException("expected </Header>");
+    }
+
+    // Body is manditory
+    in.nextTag();
+    if (! "Body".equals(in.getName().getLocalPart()))
+      throw new IOException("expected Body");
+
+    // Body
+    if (_bodyOutputs > 0) {
+      for (int i = 0; i < _headerOutputs; i++) {
+	String tagName = in.getLocalName();
+
+	ParameterMarshall marshall = _headerArguments.get(tagName);
+
+	if (marshall == null)
+	  throw new IOException(L.l("Unknown output in header <{0}>", tagName));
+
+	if (marshall._mode == WebParam.Mode.IN)
+	  throw new IOException(L.l("Received value for input parameter <{0}>", tagName));
+
+	Object value = marshall._marshall.deserialize(in);
+
+	if (marshall._arg < 0)
+	  ret = value;
+	else
+	  ((Holder) args[marshall._arg]).value = value;
+
+	if (i + 1 < _headerOutputs)
+	  in.nextTag();
+      }
+    }
+
+    if (in.nextTag() != in.END_ELEMENT)
+      throw new IOException(L.l("expected </Body> at <{0}>",
+				in.getName().getLocalPart()));
+				  
+
+    if (in.nextTag() != in.END_ELEMENT)
+      throw new IOException(L.l("expected </Envelope> at {0}",
+				in.getName().getLocalPart()));
+
+    return ret;
   }
 
   /**
@@ -529,13 +549,15 @@ public class PojoMethodSkeleton {
     public QName _name;
     public WebParam.Mode _mode = WebParam.Mode.IN;
 
-    public ParameterMarshall(int arg, Marshall marshall, QName name,
+    public ParameterMarshall(int arg,
+			     Marshall marshall,
+			     QName name,
                              WebParam.Mode mode) 
     {
       _arg = arg;
       _marshall = marshall;
       _name = name;
-      _mode =mode;
+      _mode = mode;
     }
 
     public void serialize(Object o, XMLStreamWriter out)

@@ -42,7 +42,6 @@ import com.caucho.quercus.env.QuercusClass;
 
 import com.caucho.quercus.expr.VarExpr;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.vfs.WriteStream;

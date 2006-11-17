@@ -27,30 +27,49 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.soap.skeleton;
 
-import java.io.IOException;
+import java.io.*;
+import javax.xml.ws.*;
+import javax.xml.stream.*;
+import javax.xml.namespace.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.caucho.soap.marshall.*;
 
-import java.util.logging.Logger;
+public class OutParameterMarshal extends ParameterMarshal {
+  public OutParameterMarshal(int arg,
+			     Marshall marshal,
+			     QName name)
+  {
+    super(arg, marshal, name);
+  }
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
+  //
+  // client
+  //
 
-import com.caucho.quercus.expr.Expr;
+  public void deserializeReply(XMLStreamReader in, Object []args)
+    throws IOException, XMLStreamException
+  {
+    args[_arg] = _marshal.deserialize(in);
+  }
 
-import com.caucho.util.L10N;
+  //
+  // server
+  //
 
-import com.caucho.vfs.WriteStream;
+  public void deserializeCallDefault(Object []args)
+  {
+    if (args[_arg] == null)
+      args[_arg] = new Holder();
+  }
 
-import com.caucho.quercus.env.Var;
-import com.caucho.quercus.env.NullValue;
-
-/**
- * Represents a compiled function with 1 arg
- */
-abstract public class CompiledMethodRef extends CompiledFunctionRef {
+  public void serializeReply(XMLStreamWriter out, Object []args)
+    throws IOException, XMLStreamException
+  {
+    if (args[_arg] instanceof Holder)
+      _marshal.serialize(out, ((Holder) args[_arg]).value, _name);
+    else
+      _marshal.serialize(out, null, _name);
+  }
 }
-

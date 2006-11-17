@@ -203,10 +203,12 @@ public class DirectSkeleton extends Skeleton {
   {
     PojoMethodSkeleton action = _actionMap.get(name);
 
+    System.out.println("ACTION: " + name + " " + action);
+    
     if (action != null)
       return action.invoke(name, url, args, _namespace);
     else if ("toString".equals(name))
-      return "SoapStub[" + _api.getName() + "]";
+      return "SoapStub[" + (_api != null ? _api.getName() : "") + "]";
     else
       throw new RuntimeException("no such method: " + name);
   }
@@ -222,14 +224,29 @@ public class DirectSkeleton extends Skeleton {
     in.nextTag();
 
     if (! "Envelope".equals(in.getName().getLocalPart()))
-      throw new IOException("expected Envelope at " + in.getName());
+      throw new IOException(L.l("expected Envelope at {0}", in.getName()));
 
     in.nextTag();
 
-    // XXX: Header
+    if ("Header".equals(in.getName().getLocalPart())) {
+      int depth = 1;
+
+      while (depth > 0) {
+	switch (in.nextTag()) {
+	case XMLStreamReader.START_ELEMENT:
+	  depth++;
+	  break;
+	case XMLStreamReader.END_ELEMENT:
+	  depth--;
+	  break;
+	}
+      }
+
+      in.nextTag();
+    }
 
     if (! "Body".equals(in.getName().getLocalPart()))
-      throw new IOException("expected Body");
+      throw new IOException(L.l("expected Body at {0}", in.getName()));
 
     in.nextTag();
 
@@ -246,16 +263,19 @@ public class DirectSkeleton extends Skeleton {
     PojoMethodSkeleton method = _actionMap.get(action);
 
     // XXX: exceptions<->faults
-    if (method != null)
-      method.invoke(service, in, out);    
-    /*
-    else
+    if (method != null) {
+      System.out.println("INVOKE: " + method);
+      
+      method.invoke(service, in, out);
+    }
+    else {
       // XXX: fault
-      out.println("no such action:" + action);*/
+      System.out.println("no such action:" + action);
+    }
 
     if (in.getEventType() != in.END_ELEMENT)
       throw new IOException("expected </" + action + ">, " + 
-                            "not </" + in.getName().getLocalPart() + ">");
+                            "not <" + in.getName().getLocalPart() + ">");
     else if (! action.equals(in.getName().getLocalPart()))
       throw new IOException("expected </" + action + ">, " +
                             "not </" + in.getName().getLocalPart() + ">");

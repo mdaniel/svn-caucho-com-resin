@@ -43,7 +43,6 @@ import com.caucho.quercus.program.*;
 
 import com.caucho.quercus.parser.QuercusParser;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.Location;
 
 import com.caucho.util.L10N;

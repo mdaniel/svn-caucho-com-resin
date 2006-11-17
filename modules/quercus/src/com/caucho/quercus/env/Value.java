@@ -32,13 +32,11 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -1407,13 +1405,40 @@ abstract public class Value {
    *
    * @param out the writer to the Java source code.
    */
-  public void generate(PhpWriter out)
+  public void generate(PrintWriter out)
     throws IOException
   {
-    // XXX: remove when done
-    System.out.println("Generate: " + getClass().getName());
+  }
 
-    out.print("com.caucho.quercus.env.NullValue.NULL");
+  protected void printJavaString(PrintWriter out, String s)
+  {
+    if (s == null) {
+      out.print("");
+      return;
+    }
+
+    int len = s.length();
+    for (int i = 0; i < len; i++) {
+      char ch = s.charAt(i);
+
+      switch (ch) {
+      case '\r':
+	out.print("\\r");
+	break;
+      case '\n':
+	out.print("\\n");
+	break;
+      case '\"':
+	out.print("\\\"");
+	break;
+      case '\'':
+	out.print("\\\'");
+	break;
+      default:
+	out.print(ch);
+	break;
+      }
+    }
   }
 
   public String toInternString()

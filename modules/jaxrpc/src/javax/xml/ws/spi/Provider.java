@@ -28,41 +28,101 @@
 */
 
 package javax.xml.ws.spi;
-import javax.xml.namespace.*;
+
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
 import java.net.*;
+import javax.xml.namespace.*;
 import javax.xml.ws.*;
 
-/** XXX */
 public abstract class Provider {
+  private static final Logger log
+    = Logger.getLogger(Provider.class.getName());
+  
+  public static final String JAXWSPROVIDER_PROPERTY
+    = "javax.xml.ws.spi.Provider";
 
-  /** XXX */
-  public static final String JAXWSPROVIDER_PROPERTY="javax.xml.ws.spi.Provider";
+  private static final WeakHashMap<ClassLoader,String> _providerMap
+    = new WeakHashMap<ClassLoader,String>();
 
-
-  /** XXX */
   protected Provider()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /** XXX */
-  public abstract Endpoint createAndPublishEndpoint(String address, Object implementor);
-
-
-  /** XXX */
-  public abstract Endpoint createEndpoint(String bindingId, Object implementor);
+  public abstract Endpoint createAndPublishEndpoint(String address,
+						    Object implementor);
 
 
-  /** XXX */
-  public abstract ServiceDelegate createServiceDelegate(URL wsdlDocumentLocation, QName serviceName, Class serviceClass);
+  public abstract Endpoint createEndpoint(String bindingId,
+					  Object implementor);
+
+  public abstract ServiceDelegate
+    createServiceDelegate(URL wsdlDocumentLocation,
+			  QName serviceName,
+			  Class serviceClass);
 
 
   /** XXX */
   public static Provider provider()
   {
-    throw new UnsupportedOperationException();
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      synchronized (_providerMap) {
+	String className = _providerMap.get(loader);
+
+	if (className == null) {
+	  className = findServiceName(loader);
+
+	  if (log.isLoggable(Level.FINER) && className != null)
+	    log.finer("jaxws.Provider implementation " + className);
+
+	  _providerMap.put(loader, className);
+	}
+	
+	Class cl = Class.forName(className, false, loader);
+
+	return (Provider) cl.newInstance();
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
+  private static String findServiceName(ClassLoader loader)
+  {
+    InputStream is = null;
+    try {
+      is = loader.getResourceAsStream("META-INF/services/javax.xml.ws.spi.Provider");
+
+      if (is != null) {
+	StringBuilder sb = new StringBuilder();
+	int ch;
+
+	while (Character.isWhitespace((ch = is.read()))) {
+	}
+
+	for (; ch >= 0 && ! Character.isWhitespace(ch); ch = is.read()) {
+	  sb.append((char) ch);
+	}
+
+	return sb.toString();
+      }
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      if (is != null)
+	try { is.close(); } catch (IOException e) {}
+    }
+
+    String name = System.getProperty("javax.xml.ws.spi.Provider");
+
+    if (name != null)
+      return name;
+    else
+      return "com.caucho.soap.jaxws.ProviderImpl";
+  }
 }
 

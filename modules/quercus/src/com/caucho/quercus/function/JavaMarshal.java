@@ -39,8 +39,6 @@ import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.NullValue;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 import com.caucho.quercus.program.JavaClassDef;
 
 import com.caucho.util.L10N;

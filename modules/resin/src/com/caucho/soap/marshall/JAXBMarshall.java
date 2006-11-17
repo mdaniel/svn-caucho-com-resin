@@ -85,6 +85,10 @@ public class JAXBMarshall extends Marshall {
   public void serialize(XMLStreamWriter out, Object obj, QName fieldName)
     throws IOException, XMLStreamException
   {
+    // XXX: null handling?
+    if (obj == null)
+      return;
+    
     out.writeStartElement(fieldName.toString());
 
     try {

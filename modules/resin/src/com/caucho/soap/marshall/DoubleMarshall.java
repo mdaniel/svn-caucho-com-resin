@@ -58,7 +58,10 @@ public class DoubleMarshall extends CDataMarshall {
   protected String serialize(Object in)
       throws IOException, XMLStreamException
   {
-    return ((Number)in).doubleValue()+"";
+    if (in == null)
+      return "0";
+    else
+      return ((Number)in).doubleValue()+"";
   }
 
   protected Object deserialize(String in)

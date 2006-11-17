@@ -29,11 +29,9 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
+import java.io.*;
 
 import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP default value.
@@ -108,7 +106,7 @@ public class DefaultValue extends NullValue {
    *
    * @param out the writer to the Java source code.
    */
-  public void generate(PhpWriter out)
+  public void generate(PrintWriter out)
     throws IOException
   {
     out.print("DefaultValue.DEFAULT");
@@ -119,7 +117,7 @@ public class DefaultValue extends NullValue {
    *
    * @param out the writer to the Java source code.
    */
-  public void generateLong(PhpWriter out)
+  public void generateLong(PrintWriter out)
     throws IOException
   {
     out.print("0");
@@ -130,7 +128,7 @@ public class DefaultValue extends NullValue {
    *
    * @param out the writer to the Java source code.
    */
-  public void generateString(PhpWriter out)
+  public void generateString(PrintWriter out)
     throws IOException
   {
     out.print("\"\"");

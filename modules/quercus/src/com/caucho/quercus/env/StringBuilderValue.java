@@ -29,11 +29,9 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
+import java.io.*;
 
 import com.caucho.quercus.Quercus;
-
-import com.caucho.quercus.gen.PhpWriter;
 
 /**
  * Represents a PHP string value.
@@ -858,11 +856,11 @@ public class StringBuilderValue extends UnicodeValue {
    *
    * @param out the writer to the Java source code.
    */
-  public void generate(PhpWriter out)
+  public void generate(PrintWriter out)
     throws IOException
   {
     out.print("new InternStringValue(\"");
-    out.printJavaString(toString());
+    printJavaString(out, toString());
     out.print("\")");
   }
 

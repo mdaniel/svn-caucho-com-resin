@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
+import java.io.*;
 
 import java.util.Collection;
 import java.util.IdentityHashMap;
@@ -41,8 +41,6 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.quercus.QuercusRuntimeException;
 
 import com.caucho.quercus.program.AbstractFunction;
-
-import com.caucho.quercus.gen.PhpWriter;
 
 import com.caucho.quercus.expr.Expr;
 

@@ -40,7 +40,6 @@ import com.caucho.quercus.expr.DefaultExpr;
 import com.caucho.quercus.expr.RequiredExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.NullLiteralExpr;
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.module.*;
 import com.caucho.quercus.function.*;
 import com.caucho.quercus.parser.QuercusParser;
@@ -570,12 +569,6 @@ abstract public class JavaInvoker
                     Value a1, Value a2, Value a3, Value a4, Value a5)
   {
     return call(env, obj, new Value[]{a1, a2, a3, a4, a5});
-  }
-
-  public void generate(PhpWriter out, Expr funExpr, Expr []expr)
-    throws IOException
-  {
-    throw new UnsupportedOperationException();
   }
 
   abstract public Object invoke(Object obj, Object []args);

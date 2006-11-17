@@ -288,8 +288,10 @@ public class JAXBContextImpl extends JAXBContext {
     Class cl = obj.getClass();
 
     while (! cl.equals(Object.class)) {
-      if (_classSkeletons.containsKey(cl))
-        return _classSkeletons.get(cl);
+      ClassSkeleton skeleton = _classSkeletons.get(cl);
+
+      if (skeleton != null)
+	return skeleton;
 
       cl = cl.getSuperclass();
     }
@@ -308,19 +310,19 @@ public class JAXBContextImpl extends JAXBContext {
     if (Map.class.equals(type))
       return new MapProperty(a);
 
-    if (Double.class.equals(type) || Double.TYPE.equals(type))
+    if (double.class.equals(type) || Double.class.equals(type))
       return new DoubleProperty(a, type.isPrimitive());
 
-    if (Float.class.equals(type) || Float.TYPE.equals(type))
+    if (float.class.equals(type) || Float.class.equals(type))
       return new FloatProperty(a, type.isPrimitive());
 
-    if (Integer.class.equals(type) || Integer.TYPE.equals(type))
+    if (int.class.equals(type) || Integer.class.equals(type))
       return new IntProperty(a, type.isPrimitive());
 
     if (Long.class.equals(type) || Long.TYPE.equals(type))
       return new LongProperty(a, type.isPrimitive());
 
-    if (Boolean.class.equals(type) || Boolean.TYPE.equals(type))
+    if (boolean.class.equals(type) || Boolean.class.equals(type))
       return new BooleanProperty(a, type.isPrimitive());
 
     if (Character.class.equals(type) || Character.TYPE.equals(type))

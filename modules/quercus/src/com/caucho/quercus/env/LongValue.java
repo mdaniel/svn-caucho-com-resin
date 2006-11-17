@@ -29,10 +29,9 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.IdentityHashMap;
 
 /**
@@ -278,7 +277,7 @@ public class LongValue extends NumberValue {
    *
    * @param out the writer to the Java source code.
    */
-  public void generate(PhpWriter out)
+  public void generate(PrintWriter out)
     throws IOException
   {
     if (_value == 0)

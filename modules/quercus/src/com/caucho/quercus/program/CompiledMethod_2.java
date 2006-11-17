@@ -48,8 +48,6 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.env.NullValue;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 /**
  * Represents a compiled method with 2 args
  */

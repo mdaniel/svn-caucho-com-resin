@@ -48,8 +48,6 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.env.NullValue;
 
-import com.caucho.quercus.gen.PhpWriter;
-
 /**
  * Represents a compiled function with 1 arg
  */
@@ -128,17 +126,6 @@ abstract public class CompiledFunctionRef extends AbstractFunction {
 			  Value a3, Value a4, Value a5)
   {
     return callMethodRef(env, obj, a1, a2, a3, a4, a5).copyReturn();
-  }
-
-  /**
-   * Generates code to calluate the expression.
-   *
-   * @param out the writer to the Java source code.
-   */
-  public void generate(PhpWriter out, Expr funExpr, Expr []args)
-    throws IOException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 }
 

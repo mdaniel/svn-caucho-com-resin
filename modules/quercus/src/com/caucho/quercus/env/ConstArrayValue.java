@@ -29,9 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import com.caucho.quercus.gen.PhpWriter;
+import java.io.*;
 
 /**
  * Represents a PHP array value.
@@ -71,7 +69,7 @@ public class ConstArrayValue extends ArrayValueImpl {
    *
    * @param out the writer to the Java source code.
    */
-  public void generate(PhpWriter out)
+  public void generate(PrintWriter out)
     throws IOException
   {
     out.print("new ConstArrayValue(");

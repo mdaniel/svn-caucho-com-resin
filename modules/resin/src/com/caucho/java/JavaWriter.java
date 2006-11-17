@@ -40,7 +40,7 @@ import com.caucho.vfs.*;
 /**
  * Writing class for generated Java code.
  */
-public class JavaWriter {
+public class JavaWriter extends Writer {
   // Write stream for generating the code
   private WriteStream _os;
   
@@ -218,6 +218,12 @@ public class JavaWriter {
       
       _os.print((char) ch);
     }
+  }
+
+  public void write(char []buffer, int offset, int length)
+    throws IOException
+  {
+    print(new String(buffer, offset, length));
   }
 
   /**
@@ -492,5 +498,13 @@ public class JavaWriter {
       return _srcFilename + ':' + _srcLine + ": " + message;
     */
     return message;
+  }
+
+  public void flush()
+  {
+  }
+
+  public void close()
+  {
   }
 }

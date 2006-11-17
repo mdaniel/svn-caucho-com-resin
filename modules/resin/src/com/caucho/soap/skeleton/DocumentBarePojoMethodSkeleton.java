@@ -241,8 +241,8 @@ public class DocumentBarePojoMethodSkeleton extends PojoMethodSkeleton {
 
         outputPart.setName(localName);
 
-        ParameterMarshall paramMarshall = 
-          new ParameterMarshall(-1, marshall, name, WebParam.Mode.OUT);
+        ParameterMarshall paramMarshall
+	  = new ParameterMarshall(-1, marshall, name, WebParam.Mode.OUT);
 
         _bodyArguments.put(localName, paramMarshall);
       }
