@@ -53,13 +53,10 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.EJBHome;
 import javax.jms.ConnectionFactory;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.io.FileNotFoundException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -738,17 +735,6 @@ public class EJBServer
     }
   }
 
-  public EJBHome findRemoteEJB(String name)
-    throws RemoteException
-  {
-    AbstractServer server = _ejbManager.getServerByEJBName(name);
-
-    if (server != null)
-      return server.getEJBHome();
-    else
-      return null;
-  }
-
   /**
    * Initialize all EJBs for any *.ejb or ejb-jar.xml in the WEB-INF or
    * in a META-INF in the classpath.
@@ -793,12 +779,12 @@ public class EJBServer
   }
 
   /**
-   * Return the canonical name for an ejb.
+   * Return the jndi name for an ejb.
    *
    * @param path the archive-path or expand-path of a module
    */
   public String getJndiName(Path path, String ejbName)
-    throws FileNotFoundException, NameNotFoundException
+    throws NameNotFoundException
   {
     return _ejbManager.getJndiName(path, ejbName);
   }

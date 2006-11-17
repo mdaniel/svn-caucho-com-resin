@@ -78,17 +78,17 @@ public class EnvServerManager implements EnvironmentListener {
   private Path _workPath;
 
   private int _entityCacheSize = 32 * 1024;
-  
+
   private long _entityCacheTimeout = 5000L;
-  
+
   private ConfigException _initException;
-  
+
   private EJBAdmin _ejbAdmin;
 
   private AmberPersistenceUnit _amberPersistenceUnit;
-  
+
   private EjbTransactionManager _ejbTransactionManager;
-  
+
   private EjbProtocolManager _protocolManager;
 
   private ArrayList<EjbConfig> _ejbConfigList = new ArrayList<EjbConfig>();
@@ -102,7 +102,7 @@ public class EnvServerManager implements EnvironmentListener {
     = new HashMap<String,ProtocolContainer>();
 
   private LruCache<EntityKey,QEntityContext> _entityCache;
-  
+
   private EntityKey _entityKey = new EntityKey();
 
   private final Lifecycle _lifecycle = new Lifecycle(log, "ejb-manager");
@@ -116,7 +116,7 @@ public class EnvServerManager implements EnvironmentListener {
       _amberPersistenceUnit = amberPersistenceUnit;
       _amberPersistenceUnit.initLoaders();
       _amberPersistenceUnit.setTableCacheTimeout(_entityCacheTimeout);
-      
+
       _classLoader = (EnvironmentClassLoader) Thread.currentThread().getContextClassLoader();
       _workPath = WorkDir.getLocalWorkDir(_classLoader).lookup("ejb");
       _classLoader.addLoader(new SimpleLoader(_workPath));
@@ -125,10 +125,10 @@ public class EnvServerManager implements EnvironmentListener {
 	_ejbTransactionManager = new EjbTransactionManager(this);
       } catch (Throwable e) {
 	log.info("transactions are not available to EJB server");
-	
+
 	log.log(Level.FINE, e.toString(), e);
       }
-    
+
       _ejbAdmin = new EJBAdmin(this);
 
       _protocolManager = new EjbProtocolManager(this);
@@ -315,7 +315,7 @@ public class EnvServerManager implements EnvironmentListener {
 
     Environment.addEnvironmentListener(this);
   }
-  
+
   /**
    * Initialize the manager after all the configuration files have been read.
    */
@@ -346,13 +346,13 @@ public class EnvServerManager implements EnvironmentListener {
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
     for (AbstractServer server : _serverMap.values()) {
       try {
 	thread.setContextClassLoader(server.getClassLoader());
 
 	log.fine(server + " starting");
-	
+
 	server.start();
       } finally {
 	thread.setContextClassLoader(oldLoader);
@@ -396,36 +396,27 @@ public class EnvServerManager implements EnvironmentListener {
     }
   }
 
-  /**
-   * Returns the server specified by the serverId.
-   */
-  public AbstractServer getServer(String serverId)
-  {
-    if (serverId.startsWith("/"))
-      return _serverMap.get(serverId);
-    else
-      return _serverMap.get("/" + serverId);
-  }
-  
-  /**
-   * Returns the server specified by the serverId.
-   */
-  public AbstractServer getServerByEJBName(String ejbName)
-  {
-    if (! ejbName.startsWith("/"))
-      ejbName = "/" + ejbName;
-    
-    return _serverMap.get(ejbName);
-  }
 
   /**
-   * Adds a new entity.
+   * Returns the server specified by the serverId.
    */
+  public AbstractServer getServer(Path path, String ejbName)
+  {
+    // XXX: incorrect, need to use path
+
+    AbstractServer server =  _serverMap.get(ejbName);
+
+    return server;
+   }
+
+   /**
+    * Adds a new entity.
+    */
   public QEntityContext getEntity(EntityServer server, Object key)
   {
     synchronized (_entityKey) {
       _entityKey.init(server, key);
-      
+
       return _entityCache.get(_entityKey);
     }
   }
@@ -478,7 +469,7 @@ public class EnvServerManager implements EnvironmentListener {
   {
     start();
   }
-  
+
   /**
    * Handles the case where the environment is stopping
    */
@@ -503,7 +494,7 @@ public class EnvServerManager implements EnvironmentListener {
 	for (int i = 0; i < _serverNames.size(); i++)
 	_staticServerMap.remove(_serverNames.get(i));
       */
-    
+
       // only purpose of the sort is to make the qa order consistent
       Collections.sort(servers, new ServerCmp());
 

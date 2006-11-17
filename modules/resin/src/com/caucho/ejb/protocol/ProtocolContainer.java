@@ -29,23 +29,11 @@
 
 package com.caucho.ejb.protocol;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-
-import java.sql.*;
-
-import javax.ejb.*;
-import javax.sql.*;
-import javax.naming.*;
-import javax.transaction.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.ejb.*;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.EjbServerManager;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 /**
  * Server containing all the EJBs for a given configuration.
@@ -115,15 +103,15 @@ public class ProtocolContainer {
   public void removeServer(AbstractServer server)
   {
   }
-  
+
   protected HandleEncoder createHandleEncoder(AbstractServer server,
                                               Class primaryKeyClass)
     throws ConfigException
   {
     if (_urlPrefix != null)
-      return new HandleEncoder(server, _urlPrefix + server.getEJBName());
+      return new HandleEncoder(server, _urlPrefix + server.getServerId());
     else
-      return new HandleEncoder(server, server.getEJBName());
+      return new HandleEncoder(server, server.getServerId());
   }
 
   /**

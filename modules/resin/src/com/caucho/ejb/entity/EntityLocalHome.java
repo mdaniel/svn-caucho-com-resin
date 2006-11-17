@@ -28,11 +28,10 @@
 
 package com.caucho.ejb.entity;
 
-import java.io.ObjectStreamException;
+import com.caucho.ejb.protocol.HomeSkeletonWrapper;
 
 import javax.ejb.EJBLocalHome;
-
-import com.caucho.ejb.protocol.HomeSkeletonWrapper;
+import java.io.ObjectStreamException;
 
 /**
  * Abstract base class for an EntityHome.
@@ -44,7 +43,7 @@ abstract public class EntityLocalHome extends EntityHome
   {
     super(server);
   }
-  
+
   /**
    * Serialize the HomeSkeletonWrapper in place of this object.
    *
@@ -52,7 +51,7 @@ abstract public class EntityLocalHome extends EntityHome
    */
   public Object writeReplace() throws ObjectStreamException
   {
-    return new HomeSkeletonWrapper(getServer().getEJBName());
+    return new HomeSkeletonWrapper(getServer().getServerId());
   }
 }
 

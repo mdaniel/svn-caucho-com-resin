@@ -29,26 +29,13 @@
 
 package com.caucho.ejb.protocol;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-
-import java.sql.*;
-
-import javax.ejb.*;
-import javax.sql.*;
-import javax.naming.*;
-import javax.transaction.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.ejb.*;
-
+import com.caucho.ejb.AbstractServer;
 import com.caucho.iiop.IiopContext;
 import com.caucho.iiop.IiopRemoteService;
+import com.caucho.util.L10N;
+
+import javax.ejb.EJBHome;
 
 /**
  * Server containing all the EJBs for a given configuration.
@@ -64,7 +51,7 @@ public class IiopProtocolContainer extends ProtocolContainer {
   {
     _context = context;
   }
-  
+
   /**
    * Creates the IIOP protocol server if IIOP is available.
    */
@@ -77,7 +64,7 @@ public class IiopProtocolContainer extends ProtocolContainer {
     else
       return null;
   }
-  
+
   /**
    * Creates the IIOP protocol server if IIOP is available.
    */
@@ -90,7 +77,7 @@ public class IiopProtocolContainer extends ProtocolContainer {
 
     if (! ejbName.startsWith("/"))
       ejbName = "/" + ejbName;
-    
+
     IiopRemoteService service = context.getService(ejbName);
 
     if (service != null)
@@ -114,11 +101,7 @@ public class IiopProtocolContainer extends ProtocolContainer {
 
     EjbIiopRemoteService service = new EjbIiopRemoteService(server);
 
-    // XXX: check logic with getJNDIName
-    _context.setService(server.getEJBName(), service);
-
-    if (server.getJndiName() != null)
-      _context.setService(server.getJndiName(), service);
+    _context.setService(server.getServerId(), service);
   }
 
   /**
@@ -129,20 +112,17 @@ public class IiopProtocolContainer extends ProtocolContainer {
     if (server.getHomeObject() == null)
       return;
 
-    _context.removeService(server.getEJBName());
-    
-    if (server.getJndiName() != null)
-      _context.removeService(server.getJndiName());
+    _context.removeService(server.getServerId());
   }
-  
+
   protected HandleEncoder createHandleEncoder(AbstractServer server,
                                               Class primaryKeyClass)
     throws ConfigException
   {
     if (_urlPrefix != null)
-      return new HandleEncoder(server, _urlPrefix + server.getEJBName());
+      return new HandleEncoder(server, _urlPrefix + server.getServerId());
     else
-      return new HandleEncoder(server, server.getEJBName());
+      return new HandleEncoder(server, server.getServerId());
   }
 
   /**

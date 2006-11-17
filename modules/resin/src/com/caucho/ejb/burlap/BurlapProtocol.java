@@ -28,29 +28,21 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.ejb.*;
-import javax.naming.*;
-
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.message.MessageServer;
+import com.caucho.ejb.protocol.HandleEncoder;
+import com.caucho.ejb.protocol.ProtocolContainer;
+import com.caucho.ejb.protocol.Skeleton;
+import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.hessian.io.HessianRemoteResolver;
-
-import com.caucho.ejb.AbstractServer;
-
-import com.caucho.ejb.protocol.ProtocolContainer;
-import com.caucho.ejb.protocol.HandleEncoder;
-import com.caucho.ejb.protocol.Skeleton;
-
-import com.caucho.ejb.message.MessageServer;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 /**
  * Server containing all the EJBs for a given configuration.
  *
@@ -60,12 +52,12 @@ public class BurlapProtocol extends ProtocolContainer {
   private static final L10N L = new L10N(BurlapProtocol.class);
   private static final Logger log = Log.open(BurlapProtocol.class);
 
-  private Class _objectSkelClass; 
+  private Class _objectSkelClass;
   private Class _homeSkelClass;
 
   private HashMap<AbstractServer,Class> _homeSkeletonMap =
     new HashMap<AbstractServer,Class>();
-  
+
   private HashMap<AbstractServer,Class> _objectSkeletonMap =
     new HashMap<AbstractServer,Class>();
 
@@ -73,7 +65,7 @@ public class BurlapProtocol extends ProtocolContainer {
     new HashMap<String,AbstractServer>();
 
   private HessianRemoteResolver _resolver;
-  
+
   /**
    * Create a server with the given prefix name.
    */
@@ -93,8 +85,8 @@ public class BurlapProtocol extends ProtocolContainer {
   public void addServer(AbstractServer server)
   {
     log.finer("Burlap[" + server + "] added");
-    
-    _serverMap.put(server.getEJBName(), server);
+
+    _serverMap.put(server.getServerId(), server);
   }
 
   /**
@@ -102,7 +94,7 @@ public class BurlapProtocol extends ProtocolContainer {
    */
   public void removeServer(AbstractServer server)
   {
-    _serverMap.remove(server.getEJBName());
+    _serverMap.remove(server.getServerId());
   }
 
   protected HandleEncoder createHandleEncoder(AbstractServer server,
@@ -110,7 +102,7 @@ public class BurlapProtocol extends ProtocolContainer {
     throws ConfigException
   {
     return new BurlapHandleEncoder(server,
-                                   getURLPrefix() + server.getEJBName(),
+                                   getURLPrefix() + server.getServerId(),
                                    primaryKeyClass);
   }
 

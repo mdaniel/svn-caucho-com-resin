@@ -29,24 +29,21 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.rmi.*;
-
-import javax.ejb.*;
-import javax.naming.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.hessian.io.HessianRemoteResolver;
-
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.*;
+import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.message.MessageServer;
+import com.caucho.ejb.protocol.HandleEncoder;
+import com.caucho.ejb.protocol.ProtocolContainer;
+import com.caucho.ejb.protocol.Skeleton;
+import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.util.L10N;
+
+import javax.ejb.EJBHome;
+import javax.ejb.EJBObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Server containing all the EJBs for a given configuration.
@@ -58,13 +55,10 @@ public class HessianProtocol extends ProtocolContainer
   private static final L10N L = new L10N(HessianProtocol.class);
   private static final Logger log
     = Logger.getLogger(HessianProtocol.class.getName());
-  
-  private Class _objectSkelClass; 
-  private Class _homeSkelClass;
 
   private HashMap<AbstractServer,Class> _homeSkeletonMap
     = new HashMap<AbstractServer,Class>();
-  
+
   private HashMap<AbstractServer,Class> _objectSkeletonMap
     = new HashMap<AbstractServer,Class>();
 
@@ -84,14 +78,14 @@ public class HessianProtocol extends ProtocolContainer
   }
 
   /**
-   * Returns the handle encoder for burlap.
+   * Returns the handle encoder for hessian.
    */
   protected HandleEncoder createHandleEncoder(AbstractServer server,
                                               Class primaryKeyClass)
     throws ConfigException
   {
     return new HessianHandleEncoder(server,
-                                    getURLPrefix() + server.getEJBName(),
+                                    getURLPrefix() + server.getServerId(),
                                     primaryKeyClass);
   }
 
@@ -122,10 +116,14 @@ public class HessianProtocol extends ProtocolContainer
       int p = queryString.indexOf('=');
 
       if (p >= 0)
-	objectId = queryString.substring(p + 1);
+        objectId = queryString.substring(p + 1);
       else
-	objectId = queryString;
+        objectId = queryString;
+
     }
+
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, "uri=" + uri + ", queryString=" + queryString + ", serverId=" + serverId + ", objectId=" + objectId);
 
     if (serverId.equals("/_ejb_xa_resource"))
       return new XAResourceSkeleton(getProtocolManager().getServerManager().getTransactionManager());
@@ -147,7 +145,7 @@ public class HessianProtocol extends ProtocolContainer
     }
     else if (objectId != null) {
       Object key = server.getHandleEncoder("hessian").objectIdToKey(objectId);
-        
+
       EJBObject obj = server.getContext(key, false).getRemoteView();
 
       Class objectSkelClass = getObjectSkelClass(server);
@@ -165,24 +163,24 @@ public class HessianProtocol extends ProtocolContainer
       Object remote = server.getRemoteObject();
 
       if (remote instanceof EJBHome) {
-	Class homeSkelClass = getHomeSkelClass(server);
+        Class homeSkelClass = getHomeSkelClass(server);
 
-	HessianSkeleton skel = (HessianSkeleton) homeSkelClass.newInstance();
-	skel._setServer(server);
-	skel._setResolver(_resolver);
-	skel._setObject(remote);
+        HessianSkeleton skel = (HessianSkeleton) homeSkelClass.newInstance();
+        skel._setServer(server);
+        skel._setResolver(_resolver);
+        skel._setObject(remote);
 
-	return skel;
+        return skel;
       }
       else if (remote instanceof EJBObject) {
-	Class skelClass = getObjectSkelClass(server);
+        Class skelClass = getObjectSkelClass(server);
 
-	HessianSkeleton skel = (HessianSkeleton) skelClass.newInstance();
-	skel._setServer(server);
-	skel._setResolver(_resolver);
-	skel._setObject(remote);
+        HessianSkeleton skel = (HessianSkeleton) skelClass.newInstance();
+        skel._setServer(server);
+        skel._setResolver(_resolver);
+        skel._setObject(remote);
 
-	return skel;
+        return skel;
       }
 
       return null;
@@ -196,10 +194,10 @@ public class HessianProtocol extends ProtocolContainer
     throws Exception
   {
     Class homeSkelClass = _homeSkeletonMap.get(server);
-    
+
     if (homeSkelClass != null)
       return homeSkelClass;
-    
+
     Class remoteHomeClass = server.getRemoteHomeClass();
 
     homeSkelClass = HessianSkeletonGenerator.generate(remoteHomeClass,
@@ -217,10 +215,10 @@ public class HessianProtocol extends ProtocolContainer
     throws Exception
   {
     Class objectSkelClass = _objectSkeletonMap.get(server);
-    
+
     if (objectSkelClass != null)
       return objectSkelClass;
-    
+
     Class remoteObjectClass = server.getRemoteObjectClass();
 
     objectSkelClass = HessianSkeletonGenerator.generate(remoteObjectClass,

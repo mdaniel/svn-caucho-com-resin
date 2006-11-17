@@ -28,18 +28,9 @@
 
 package com.caucho.ejb.entity;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import java.security.*;
-
-import javax.ejb.*;
-import javax.transaction.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-
 import com.caucho.ejb.protocol.LocalSkeletonWrapper;
+
+import java.io.ObjectStreamException;
 
 /**
  * Abstract base class for an EntityObject.
@@ -53,7 +44,7 @@ abstract public class EntityLocal extends EntityObject
    */
   public Object writeReplace() throws ObjectStreamException
   {
-    String serverId = _caucho_getEntityServer().getEJBName();
+    String serverId = _caucho_getEntityServer().getServerId();
     Object key = getPrimaryKey();
     return new LocalSkeletonWrapper(serverId, key);
   }

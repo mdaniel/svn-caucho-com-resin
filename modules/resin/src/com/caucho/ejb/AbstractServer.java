@@ -64,6 +64,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected String _ejbName;
   protected String _jndiName;
   protected String _serverId;
+  protected String _handleServerId;
 
   protected EjbServerManager _ejbManager;
   private BuilderProgram _serverProgram;
@@ -114,13 +115,15 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public void setEJBName(String ejbName)
   {
-    if (! ejbName.startsWith("/"))
-      ejbName = "/" + ejbName;
-    
-    while (ejbName.endsWith("/"))
-      ejbName = ejbName.substring(0, ejbName.length() - 1);
-    
     _ejbName = ejbName;
+  }
+
+  /**
+   * Returns the ejb's name
+   */
+  public String getEJBName()
+  {
+    return _ejbName;
   }
 
   /**
@@ -139,18 +142,39 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     while (jndiName.endsWith("/"))
       jndiName = jndiName.substring(0, jndiName.length() - 1);
-    
+
     _jndiName = jndiName;
   }
 
   /**
-   * Gets the canonical jndi name.  The canonical jndi name
-   * does not include the java:comp/env prefix, and does not start
-   * or end with a '/'.
+   * Returns the jndi name.  The jndi name does not include the java:comp/env
+   * prefix, and does not start or end with a '/'.
    */
   public String getJndiName()
   {
     return _jndiName;
+  }
+
+  /**
+   * Returns the server id, used by implementations of
+   * {@link com.caucho.ejb.protocol.ProtocolContainer} as the identity of the
+   * home.  Always starts with a "/" but does not end with a "/".
+   */
+  public String getServerId()
+  {
+    if (_serverId == null) {
+      String serverId = getJndiName();
+
+      if (! serverId.startsWith("/"))
+        serverId = "/" + serverId;
+
+      while (serverId.endsWith("/"))
+        serverId = serverId.substring(0, serverId.length() - 1);
+
+      _serverId = serverId;
+    }
+
+    return _serverId;
   }
 
   /**
@@ -196,7 +220,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   public HandleEncoder getHandleEncoder(String protocol)
   {
     HandleEncoder encoder;
-    
+
     if (_protocolEncoderMap != null) {
       encoder = _protocolEncoderMap.get(protocol);
 
@@ -206,7 +230,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     try {
       Class keyClass = getPrimaryKeyClass();
-      
+
       encoder = _ejbManager.getProtocolManager().createHandleEncoder(this, keyClass, protocol);
     } catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
@@ -216,7 +240,7 @@ abstract public class AbstractServer implements EnvironmentBean {
       _protocolEncoderMap = new HashMap<String,HandleEncoder>(8);
 
     _protocolEncoderMap.put(protocol, encoder);
-    
+
     return encoder;
   }
 
@@ -231,7 +255,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   public HandleEncoder addHandleEncoder(String protocol, String serverId)
   {
     HandleEncoder encoder;
-    
+
     if (_protocolEncoderMap != null) {
       encoder = _protocolEncoderMap.get(protocol);
 
@@ -241,7 +265,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     try {
       Class keyClass = getPrimaryKeyClass();
-      
+
       encoder = new HandleEncoder(this, serverId + _ejbName);
     } catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
@@ -251,7 +275,7 @@ abstract public class AbstractServer implements EnvironmentBean {
       _protocolEncoderMap = new HashMap<String,HandleEncoder>(8);
 
     _protocolEncoderMap.put(protocol, encoder);
-    
+
     return encoder;
   }
 
@@ -259,7 +283,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     return getHandleEncoder(EjbProtocolManager.getThreadProtocol());
   }
-  
+
   public void setHandleEncoder(HandleEncoder encoder)
   {
     if (_homeHandle != null)
@@ -268,25 +292,17 @@ abstract public class AbstractServer implements EnvironmentBean {
     _handleEncoder = encoder;
   }
 
+  public String getHandleServerId()
+  {
+    if (_handleServerId == null)
+      _handleServerId = getHandleEncoder().getServerId();
+
+    return _handleServerId;
+  }
+
   public UserTransaction getUserTransaction()
   {
     return _ejbManager.getTransactionManager().getUserTransaction();
-  }
-
-  /**
-   * Returns the ejb's name
-   */
-  public String getEJBName()
-  {
-    return _ejbName;
-  }
-
-  public String getHandleServerId()
-  {
-    if (_serverId == null)
-      _serverId = getHandleEncoder().getServerId();
-
-    return _serverId;
   }
 
   /**

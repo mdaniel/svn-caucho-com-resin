@@ -29,25 +29,22 @@
 
 package com.caucho.iiop;
 
-import java.util.logging.Logger;
-
-import java.lang.reflect.*;
-import java.io.*;
+import com.caucho.ejb.AbstractEJBObject;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
 
 import javax.rmi.CORBA.Util;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.AbstractHandle;
-import com.caucho.log.Log;
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 public class MarshallObject {
   private static final Logger log = Log.open(MarshallObject.class);
-  
+
   public final static int VOID = -1;
-  
+
   public final static int BOOLEAN = 0;
   public final static int BYTE = 1;
   public final static int SHORT = 2;
@@ -56,9 +53,9 @@ public class MarshallObject {
   public final static int LONG = 5;
   public final static int FLOAT = 6;
   public final static int DOUBLE = 7;
-  
+
   public final static int STRING = 8;
-  
+
   public final static int BOOLEAN_ARRAY = 9;
   public final static int BYTE_ARRAY = 10;
   public final static int SHORT_ARRAY = 11;
@@ -70,16 +67,16 @@ public class MarshallObject {
   public final static int STRING_ARRAY = 17;
 
   public final static int OBJECT = 20;
-  
+
   public final static int CORBA_OBJECT = 21;
   public final static int REMOTE = 22;
   public final static int EJB_HOME = 23;
   public final static int EJB_OBJECT = 24;
-  
+
   public final static int OBJECT_ARRAY = 25;
-  
+
   public final static int OBJECT_HELPER = 26;
-  
+
   private int _code;
   private Class objClass;
   private MarshallObject subObj;
@@ -160,7 +157,7 @@ public class MarshallObject {
         readHelper = helperClass.getMethod("read", new Class[] {
           org.omg.CORBA.portable.InputStream.class
         });
-        
+
         writeHelper = helperClass.getMethod("write", new Class[] {
           org.omg.CORBA.portable.OutputStream.class, cl
         });
@@ -252,17 +249,17 @@ public class MarshallObject {
         array[i] = reader.read_wstring();
 	System.out.println(array[i]);
       }
-      
+
       return array;
     }
     */
-    
+
     case REMOTE:
       return reader.readObject(objClass);
-    
+
     case CORBA_OBJECT:
       return reader.read_Object();
-    
+
     case OBJECT_ARRAY:
     {
       int len = reader.read_sequence_length();
@@ -270,19 +267,19 @@ public class MarshallObject {
 
       for (int i = 0; i < len; i++)
         obj[i] = subObj.unmarshall(reader);
-      
+
       return obj;
     }
-    
+
     case OBJECT_HELPER:
     {
       return readHelper.invoke(null, new Object[] { reader });
     }
-      
+
     default:
       try {
 	log.info("Class: " + objClass);
-	
+
         return reader.read_value(objClass);
       } catch (Exception e) {
         e.printStackTrace();
@@ -331,7 +328,7 @@ public class MarshallObject {
         AbstractServer server = absObj.__caucho_getServer();
 	String local = absObj.__caucho_getId();
 
-	String url = server.getEJBName() + "?" + local;
+	String url = server.getServerId() + "?" + local;
 	String typeName = "RMI:" + objClass.getName() + ":0";
 
 	IOR ior = new IOR(typeName, writer.getHost(), writer.getPort(), url);

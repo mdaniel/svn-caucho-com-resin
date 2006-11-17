@@ -206,7 +206,7 @@ public class EjbProtocolManager {
   public void addServer(AbstractServer server)
     throws NamingException
   {
-    _serverMap.put(server.getEJBName(), server);
+    _serverMap.put(server.getServerId(), server);
 
     for (ProtocolContainer protocol : _protocolMap.values()) {
       protocol.addServer(server);
@@ -247,14 +247,6 @@ public class EjbProtocolManager {
   public void removeServer(AbstractServer server)
     throws NamingException
   {
-    String ejbName = server.getEJBName();
-
-    while (ejbName.startsWith("/"))
-      ejbName = ejbName.substring(1);
-
-    while (ejbName.endsWith("/"))
-      ejbName = ejbName.substring(ejbName.length() - 1);
-
     for (ProtocolContainer protocol : _protocolMap.values()) {
       protocol.removeServer(server);
     }
@@ -390,7 +382,7 @@ public class EjbProtocolManager {
     else if (_protocolContainer != null)
       return _protocolContainer.createHandleEncoder(server, primaryKeyClass);
     else
-      return new HandleEncoder(server, server.getEJBName());
+      return new HandleEncoder(server, server.getServerId());
   }
 
   protected HandleEncoder createHandleEncoder(AbstractServer server,
@@ -400,7 +392,7 @@ public class EjbProtocolManager {
     if (_protocolContainer != null)
       return _protocolContainer.createHandleEncoder(server, primaryKeyClass);
     else
-      return new HandleEncoder(server, server.getEJBName());
+      return new HandleEncoder(server, server.getServerId());
   }
 
   /**

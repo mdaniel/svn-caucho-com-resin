@@ -50,21 +50,18 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.j2ee.EJBModule;
 import com.caucho.management.j2ee.J2EEManagedObject;
-import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Path;
+import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
-import com.caucho.naming.Jndi;
 
 import javax.jms.ConnectionFactory;
-import javax.sql.DataSource;
 import javax.naming.NameNotFoundException;
-import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -671,16 +668,14 @@ public class EjbServerManager
   }
 
   /**
-   * Return the canonical name for an ejb.
+   * Return the jndi name for an ejb.
    *
    * @param path the archive-path or expand-path of a module
    */
   public String getJndiName(Path path, String ejbName)
-    throws FileNotFoundException, NameNotFoundException
+    throws NameNotFoundException
   {
-    // XXX: incorrect, need to use path, throw FileNotFoundException if invalid
-
-    AbstractServer server = _envServerManager.getServerByEJBName(ejbName);
+    AbstractServer server = _envServerManager.getServer(path, ejbName);
 
     if (server == null)
       throw new NameNotFoundException(ejbName);
@@ -716,22 +711,6 @@ public class EjbServerManager
   public void addServer(AbstractServer server)
   {
     _envServerManager.addServer(server);
-  }
-
-  /**
-   * Returns the server specified by the serverId.
-   */
-  public AbstractServer getServer(String serverId)
-  {
-    return _envServerManager.getServer(serverId);
-  }
-  
-  /**
-   * Returns the server specified by the serverId.
-   */
-  public AbstractServer getServerByEJBName(String ejbName)
-  {
-    return _envServerManager.getServerByEJBName(ejbName);
   }
 
   /**
