@@ -91,6 +91,7 @@ public abstract class Accessor {
     private Field _field;
     private Class _type;
     private Type _genericType;
+    private String _name;
 
     public FieldAccessor(Field f, JAXBContextImpl context)
     {
@@ -98,6 +99,20 @@ public abstract class Accessor {
       _field = f;
       _type = _field.getType();
       _genericType = _field.getGenericType();
+      _name = _field.getName();
+
+      if (_field.isAnnotationPresent(XmlElement.class)) {
+        XmlElement element = _field.getAnnotation(XmlElement.class);
+
+        if (! "##default".equals(element.name()))
+          _name = element.name();
+      }
+      else if (_field.isAnnotationPresent(XmlAttribute.class)) {
+        XmlAttribute attribute = _field.getAnnotation(XmlAttribute.class);
+
+        if (! "##default".equals(attribute.name()))
+          _name = attribute.name();
+      }
     }
 
     public Object get(Object o)
@@ -139,7 +154,7 @@ public abstract class Accessor {
 
     public String getName()
     {
-      return _field.getName();
+      return _name;
     }
   }
 

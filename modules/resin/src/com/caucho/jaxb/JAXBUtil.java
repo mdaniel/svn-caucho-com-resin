@@ -28,6 +28,8 @@
 
 package com.caucho.jaxb;
 
+import static java.lang.Character.*;
+
 import java.lang.reflect.*;
 import java.math.*;
 import java.util.*;
@@ -40,7 +42,7 @@ import javax.xml.namespace.QName;
  * JAXB utilities.
  */
 public class JAXBUtil {
-  private static final Map<Class,String> _datatypeMap 
+  private static final Map<Class,String> _datatypeMap
     = new HashMap<Class,String>();
 
   public static void introspectClass(Class cl, 
@@ -114,32 +116,131 @@ public class JAXBUtil {
     return cl.getName().substring(i + 1);
   }
 
-  public static String decapitalizeClassName(Class cl)
+  /**
+   * Tests for punctuation according to JAXB page 334.
+   */
+  private static boolean isPunctuation(char ch)
   {
-    // XXX The JAXB standard seems to say that we should use the following: 
-    //
-    // String name = java.beans.Introspector.decapitalize(classBasename(cl));
-    //
-    // but the RI does simple decapitalization:
+    return "-.:\u00B7\u0387\u06DD\u06dd\u06de_".indexOf((int) ch) >= 0;
+  }
 
-    String basename = classBasename(cl);
-    return Character.toLowerCase(basename.charAt(0)) +
-           (basename.length() > 1 ? basename.substring(1) : "");
+  /**
+   * Tests for "uncased" characters.
+   */
+  private static boolean isUncased(char ch)
+  {
+    return (! isLowerCase(ch)) && (! isUpperCase(ch));
+  }
+
+  /**
+   * Splits a string into XML "words" as defined by the JAXB standard.
+   * (see page 162 and appendix D)
+   *
+   */
+  private static List<StringBuilder> splitIdentifier(String identifier)
+  {
+    List<StringBuilder> words = new ArrayList<StringBuilder>();
+    StringBuilder word = new StringBuilder();
+    char lastCh = 0;
+
+    for (int i = 0; i < identifier.length(); i++) {
+      char ch = identifier.charAt(i);
+
+      // punctuation shouldn't be common for the java -> xml direction
+      if (word.length() > 0 && isPunctuation(ch)) {
+        words.add(word);
+        word = new StringBuilder();
+      } 
+      else if (isDigit(ch)) {
+        if (word.length() > 0 && ! isDigit(lastCh)) {
+          words.add(word);
+          word = new StringBuilder();
+        }
+
+        word.append(ch);
+      }
+      else if (i > 0) { // all of the following need lastCh
+        if (isLowerCase(lastCh) && isUpperCase(ch)) {
+          words.add(word);
+          word = new StringBuilder();
+          word.append(ch);
+        }
+        else if (isUpperCase(lastCh) && isLowerCase(ch)) {
+          // need to steal the last character from the current word 
+          // for the next word (e.g. FOOBar -> { "FOO", "Bar" })
+
+          if (word.length() > 1) {
+            word.deleteCharAt(word.length() - 1);
+            words.add(word);
+          }
+
+          word = new StringBuilder();
+          word.append(lastCh);
+          word.append(ch);
+        }
+        else if (isLetter(lastCh) != isLetter(ch)) {
+          words.add(word);
+          word = new StringBuilder();
+          word.append(ch);
+        }
+        else if (isUncased(lastCh) != isUncased(ch)) {
+          words.add(word);
+          word = new StringBuilder();
+          word.append(ch);
+        }
+        else
+          word.append(ch);
+      }
+      else
+        word.append(ch);
+
+      lastCh = ch;
+    }
+
+    if (word.length() > 0)
+      words.add(word);
+
+    return words;
+  }
+
+  public static String identifierToXmlName(Class cl)
+  {
+    List<StringBuilder> words = splitIdentifier(classBasename(cl));
+    StringBuilder xmlName = new StringBuilder();
+
+    xmlName.append(toLowerCase(words.get(0).charAt(0)));
+    xmlName.append(words.get(0).substring(1));
+
+    for (int i = 1; i < words.size(); i++) {
+      xmlName.append(toUpperCase(words.get(i).charAt(0)));
+      xmlName.append(words.get(i).substring(1));
+    }
+
+    return xmlName.toString();
   }
 
   public static String getXmlSchemaDatatype(Class cl)
   {
+    // XXX namespaces
+    
     if (_datatypeMap.containsKey(cl))
       return _datatypeMap.get(cl);
+
+    String name = null;
 
     if (cl.isAnnotationPresent(XmlType.class)) {
       XmlType xmlType = (XmlType) cl.getAnnotation(XmlType.class);
 
       if (! "##default".equals(xmlType.name()))
-        return xmlType.name();
+        name = xmlType.name();
     }
 
-    return decapitalizeClassName(cl);
+    if (name == null)
+      name = identifierToXmlName(cl);
+
+    _datatypeMap.put(cl, name);
+
+    return name;
   }
 
   public static String qNameToString(QName qName)

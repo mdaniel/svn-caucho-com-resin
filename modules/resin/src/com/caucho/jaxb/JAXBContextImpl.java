@@ -233,7 +233,7 @@ public class JAXBContextImpl extends JAXBContext {
       XMLOutputFactory factory = XMLOutputFactory.newInstance();
       XMLStreamWriter out = factory.createXMLStreamWriter(result);
 
-      out.writeStartDocument();
+      out.writeStartDocument("UTF-8", "1.0");
 
       generateSchemaWithoutHeader(out);
     }
@@ -309,28 +309,28 @@ public class JAXBContextImpl extends JAXBContext {
       return new MapProperty(a);
 
     if (Double.class.equals(type) || Double.TYPE.equals(type))
-      return new DoubleProperty(a);
+      return new DoubleProperty(a, type.isPrimitive());
 
     if (Float.class.equals(type) || Float.TYPE.equals(type))
-      return new FloatProperty(a);
+      return new FloatProperty(a, type.isPrimitive());
 
     if (Integer.class.equals(type) || Integer.TYPE.equals(type))
-      return new IntProperty(a);
+      return new IntProperty(a, type.isPrimitive());
 
     if (Long.class.equals(type) || Long.TYPE.equals(type))
-      return new LongProperty(a);
+      return new LongProperty(a, type.isPrimitive());
 
     if (Boolean.class.equals(type) || Boolean.TYPE.equals(type))
-      return new BooleanProperty(a);
+      return new BooleanProperty(a, type.isPrimitive());
 
     if (Character.class.equals(type) || Character.TYPE.equals(type))
-      return new CharacterProperty(a);
+      return new CharacterProperty(a, type.isPrimitive());
 
     if (Short.class.equals(type) || Short.TYPE.equals(type))
-      return new ShortProperty(a);
+      return new ShortProperty(a, type.isPrimitive());
 
     if (Byte.class.equals(type) || Byte.TYPE.equals(type))
-      return new ByteProperty(a);
+      return new ByteProperty(a, type.isPrimitive());
 
     if (BigDecimal.class.equals(type))
       return new BigDecimalProperty(a);

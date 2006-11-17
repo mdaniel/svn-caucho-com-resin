@@ -43,9 +43,12 @@ import com.caucho.vfs.WriteStream;
  * a Boolean Property
  */
 public class BooleanProperty extends CDataProperty {
+  private boolean _isPrimitiveType;
 
-  public BooleanProperty(Accessor a) {
+  public BooleanProperty(Accessor a, boolean isPrimitiveType) {
     super(a);
+
+    _isPrimitiveType = isPrimitiveType;
   }
 
   protected String write(Object in)
@@ -63,5 +66,10 @@ public class BooleanProperty extends CDataProperty {
   protected String getSchemaType()
   {
     return "xsd:boolean";
+  }
+
+  protected boolean isPrimitiveType()
+  {
+    return _isPrimitiveType;
   }
 }

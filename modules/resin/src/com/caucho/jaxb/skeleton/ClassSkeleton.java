@@ -58,6 +58,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 import javax.xml.namespace.QName;
 
@@ -68,10 +69,13 @@ import javax.xml.stream.XMLStreamException;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 
+import com.caucho.util.L10N;
+
 public class ClassSkeleton<C> extends Skeleton {
   public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
   public static final String XML_SCHEMA_PREFIX = "xsd";
 
+  private static final L10N L = new L10N(ClassSkeleton.class);
   private static final Logger log = Logger.getLogger(Skeleton.class.getName());
 
   private Class<C> _class;
@@ -82,6 +86,12 @@ public class ClassSkeleton<C> extends Skeleton {
   private Method _afterMarshal;
 
   private QName _elementName;
+
+  /**
+   * The value @XmlValue.
+   * 
+   **/
+  private Property _value;
 
   public Class<C> getType()
   {
@@ -145,7 +155,7 @@ public class ClassSkeleton<C> extends Skeleton {
         String localName = null;
         
         if ("##default".equals(xre.name()))
-          localName = JAXBUtil.decapitalizeClassName(_class);
+          localName = JAXBUtil.identifierToXmlName(_class);
         else
           localName = xre.name();
 
@@ -185,11 +195,20 @@ public class ClassSkeleton<C> extends Skeleton {
           Accessor a = new Accessor.GetterSetterAccessor(property, _context);
           Property p = _context.createProperty(a);
 
-          if ((get != null && get.isAnnotationPresent(XmlAttribute.class)) ||
-              (set != null && set.isAnnotationPresent(XmlAttribute.class)))
+          if (a.getAnnotation(XmlValue.class) != null) {
+            if (_value != null)
+              throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
+
+            _value = p;
+          }
+          else if (a.getAnnotation(XmlAttribute.class) != null)
             _attributeProperties.put(p.getName(), p);
-          else
+          else {
+            if (_value != null)
+              throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
+
             _elementProperties.put(p.getName(), p);
+          }
 
           if (! p.isXmlPrimitiveType())
             _context.createSkeleton(property.getPropertyType());
@@ -214,10 +233,20 @@ public class ClassSkeleton<C> extends Skeleton {
           Accessor a = new Accessor.FieldAccessor(f, _context);
           Property p = _context.createProperty(a);
 
-          if (f.isAnnotationPresent(XmlAttribute.class))
+          if (a.getAnnotation(XmlValue.class) != null) {
+            if (_value != null)
+              throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
+
+            _value = p;
+          }
+          else if (a.getAnnotation(XmlAttribute.class) != null)
             _attributeProperties.put(p.getName(), p);
-          else
+          else {
+            if (_value != null)
+              throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
+
             _elementProperties.put(p.getName(), p);
+          }
 
           // Make sure the field's type is in the context so that the
           // schema generates correctly
@@ -391,13 +420,30 @@ public class ClassSkeleton<C> extends Skeleton {
     throws JAXBException, XMLStreamException
   {
     if (_elementName != null) {
-      out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", XML_SCHEMA_NS);
-      out.writeAttribute("type", _typeName.getLocalPart());
+
+      if ("".equals(_typeName.getLocalPart()))
+        out.writeStartElement(XML_SCHEMA_PREFIX, "element", XML_SCHEMA_NS);
+      else {
+        out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", XML_SCHEMA_NS);
+        out.writeAttribute("type", _typeName.getLocalPart());
+      }
+
       out.writeAttribute("name", _elementName.getLocalPart());
     }
 
+    generateSchemaType(out);
+
+    if (_elementName != null && "".equals(_typeName.getLocalPart()))
+      out.writeEndElement(); // element
+  }
+
+  public void generateSchemaType(XMLStreamWriter out)
+    throws JAXBException, XMLStreamException
+  {
     out.writeStartElement(XML_SCHEMA_PREFIX, "complexType", XML_SCHEMA_NS);
-    out.writeAttribute("name", _typeName.getLocalPart());
+
+    if (! "".equals(_typeName.getLocalPart()))
+      out.writeAttribute("name", _typeName.getLocalPart());
 
     out.writeStartElement(XML_SCHEMA_PREFIX, "sequence", XML_SCHEMA_NS);
 

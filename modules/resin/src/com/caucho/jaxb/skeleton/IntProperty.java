@@ -43,9 +43,12 @@ import com.caucho.vfs.WriteStream;
  * a Int Property
  */
 public class IntProperty extends CDataProperty {
+  private boolean _isPrimitiveType;
 
-  public IntProperty(Accessor a) {
+  public IntProperty(Accessor a, boolean isPrimitiveType) {
     super(a);
+
+    _isPrimitiveType = isPrimitiveType;
   }
 
   protected String write(Object in)
@@ -63,6 +66,11 @@ public class IntProperty extends CDataProperty {
   protected String getSchemaType()
   {
     return "xsd:int";
+  }
+
+  protected boolean isPrimitiveType()
+  {
+    return _isPrimitiveType;
   }
 }
 

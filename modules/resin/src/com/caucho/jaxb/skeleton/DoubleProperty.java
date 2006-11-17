@@ -43,9 +43,12 @@ import com.caucho.vfs.WriteStream;
  * a Double Property
  */
 public class DoubleProperty extends CDataProperty {
+  private boolean _isPrimitiveType;
 
-  public DoubleProperty(Accessor a) {
+  public DoubleProperty(Accessor a, boolean isPrimitiveType) {
     super(a);
+
+    _isPrimitiveType = isPrimitiveType;
   }
 
   protected String write(Object in)
@@ -63,5 +66,10 @@ public class DoubleProperty extends CDataProperty {
   protected String getSchemaType()
   {
     return "xsd:double";
+  }
+
+  protected boolean isPrimitiveType()
+  {
+    return _isPrimitiveType;
   }
 }

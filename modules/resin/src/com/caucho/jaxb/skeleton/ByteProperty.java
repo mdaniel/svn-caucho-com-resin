@@ -43,9 +43,12 @@ import com.caucho.vfs.WriteStream;
  * a Byte Property
  */
 public class ByteProperty extends CDataProperty {
+  private boolean _isPrimitiveType;
 
-  public ByteProperty(Accessor a) {
+  public ByteProperty(Accessor a, boolean isPrimitiveType) {
     super(a);
+
+    _isPrimitiveType = isPrimitiveType;
   }
 
   protected String write(Object in)
@@ -63,5 +66,10 @@ public class ByteProperty extends CDataProperty {
   protected String getSchemaType()
   {
     return "xsd:byte";
+  }
+
+  protected boolean isPrimitiveType()
+  {
+    return _isPrimitiveType;
   }
 }

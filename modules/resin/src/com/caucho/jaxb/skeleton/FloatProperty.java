@@ -43,9 +43,12 @@ import com.caucho.vfs.WriteStream;
  * a Float Property
  */
 public class FloatProperty extends CDataProperty {
+  private boolean _isPrimitiveType;
 
-  public FloatProperty(Accessor a) {
+  public FloatProperty(Accessor a, boolean isPrimitiveType) {
     super(a);
+
+    _isPrimitiveType = isPrimitiveType;
   }
 
   protected String write(Object in)
@@ -63,5 +66,10 @@ public class FloatProperty extends CDataProperty {
   protected String getSchemaType()
   {
     return "xsd:float";
+  }
+
+  protected boolean isPrimitiveType()
+  {
+    return _isPrimitiveType;
   }
 }

@@ -44,9 +44,12 @@ import com.caucho.vfs.WriteStream;
  * a Long Property
  */
 public class LongProperty extends CDataProperty {
+  private boolean _isPrimitiveType;
 
-  public LongProperty(Accessor a) {
+  public LongProperty(Accessor a, boolean isPrimitiveType) {
     super(a);
+
+    _isPrimitiveType = isPrimitiveType;
   }
 
   protected String write(Object in)
@@ -64,6 +67,11 @@ public class LongProperty extends CDataProperty {
   protected String getSchemaType()
   {
     return "xsd:long";
+  }
+
+  protected boolean isPrimitiveType()
+  {
+    return _isPrimitiveType;
   }
 }
 

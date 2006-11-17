@@ -44,9 +44,12 @@ import com.caucho.vfs.WriteStream;
  * a short property
  */
 public class ShortProperty extends CDataProperty {
+  private boolean _isPrimitiveType;
 
-  public ShortProperty(Accessor accessor) {
+  public ShortProperty(Accessor accessor, boolean isPrimitiveType) {
     super(accessor);
+
+    _isPrimitiveType = isPrimitiveType;
   }
   
   protected String write(Object in)
@@ -64,5 +67,10 @@ public class ShortProperty extends CDataProperty {
   protected String getSchemaType()
   {
     return "xsd:short";
+  }
+
+  protected boolean isPrimitiveType()
+  {
+    return _isPrimitiveType;
   }
 }
