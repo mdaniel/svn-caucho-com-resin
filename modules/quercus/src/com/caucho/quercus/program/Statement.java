@@ -34,8 +34,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.IdentityHashMap;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -210,15 +208,6 @@ abstract public class Statement {
     rootCause.setStackTrace(elements);
 
     throw typedT;
-  }
-
-  /**
-   * Disassembly.
-   */
-  public void debug(JavaWriter out)
-    throws IOException
-  {
-    out.println("# unknown " + getClass().getName());
   }
 
   public String toString()

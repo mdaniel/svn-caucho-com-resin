@@ -30,7 +30,7 @@
 package com.caucho.quercus.module;
 
 import com.caucho.config.ConfigException;
-import com.caucho.loader.EnvironmentLocal;
+
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.function.*;

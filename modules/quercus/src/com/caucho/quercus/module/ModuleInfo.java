@@ -47,8 +47,6 @@ import java.util.logging.*;
 
 import com.caucho.config.ConfigException;
 
-import com.caucho.loader.EnvironmentLocal;
-
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 

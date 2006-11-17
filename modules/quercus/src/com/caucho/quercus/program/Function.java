@@ -37,8 +37,6 @@ import java.util.IdentityHashMap;
 
 import java.util.logging.Logger;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -346,16 +344,6 @@ public class Function extends AbstractFunction {
     // return _info.isVariableVar();
     // php/3254
     return _info.isUsesSymbolTable() || _info.isVariableVar();
-  }
-
-  /**
-   * Disassembly.
-   */
-  public void debug(JavaWriter out)
-    throws IOException
-  {
-    out.println("function " + _name + "()");
-    _statement.debug(out);
   }
 
   public String toString()

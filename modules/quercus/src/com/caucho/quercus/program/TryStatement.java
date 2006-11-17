@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.java.JavaWriter;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
@@ -83,15 +82,6 @@ public class TryStatement extends Statement {
 
       throw e;
     }
-  }
-
-  /**
-   * Disassembly.
-   */
-  public void debug(JavaWriter out)
-    throws IOException
-  {
-    _block.debug(out);
   }
 
   public static class Catch {

@@ -122,7 +122,7 @@ public class ServiceDelegateImpl extends ServiceDelegate {
       
       Skeleton skeleton = new WebServiceIntrospector().introspect(api, url);
 
-      System.out.println("PROXY: PORT:" + portName + " SERV:" + _serviceName + " " + _wsdl);
+      //System.out.println("PROXY: PORT:" + portName + " SERV:" + _serviceName + " " + _wsdl);
 
       PortProxyHandler handler = new PortProxyHandler(skeleton, url);
 

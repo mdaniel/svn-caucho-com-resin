@@ -29,10 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.java.LineMap;
-import com.caucho.java.ScriptStackTrace;
-import com.caucho.java.WorkDir;
-import com.caucho.loader.SimpleLoader;
 import com.caucho.quercus.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.lib.VariableModule;
@@ -47,13 +43,10 @@ import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.quercus.resources.StreamContextResource;
+
 import com.caucho.sql.DatabaseManager;
-import com.caucho.util.Alarm;
-import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-import com.caucho.util.LruCache;
-import com.caucho.util.URLUtil;
+
+import com.caucho.util.*;
 
 import com.caucho.vfs.*;
 
@@ -82,9 +75,10 @@ import java.util.logging.Logger;
 /**
  * Represents the Quercus environment.
  */
-public final class Env {
+public class Env {
   private static final L10N L = new L10N(Env.class);
-  private static final Logger log = Log.open(Env.class);
+  private static final Logger log
+    = Logger.getLogger(Env.class.getName());
 
   public static final int B_ERROR = 0;
   public static final int B_WARNING = 1;
@@ -149,7 +143,7 @@ public final class Env {
 
   private static ThreadLocal<Env> _env = new ThreadLocal<Env>();
 
-  private Quercus _quercus;
+  protected Quercus _quercus;
   private QuercusPage _page;
 
   private Value _this = NullThisValue.NULL;
@@ -3779,57 +3773,12 @@ public final class Env {
 
     if (call != null)
       return call.getLocation();
-    else {
-      Exception e = new Exception();
-      e.fillInStackTrace();
-
-      StackTraceElement []trace = e.getStackTrace();
-
-      ClassLoader loader = SimpleLoader.create(WorkDir.getLocalWorkDir());
-
-      for (int i = 0; i < trace.length; i++) {
-        String className = trace[i].getClassName();
-
-        if (className.startsWith("_quercus")) {
-          LineMap lineMap = ScriptStackTrace.getScriptLineMap(className,
-                                                              loader);
-
-          LineMap.Line line = null;
-
-          if (lineMap != null)
-            line = lineMap.getLine(trace[i].getLineNumber());
-
-          if (line != null) {
-            int sourceLine = line.getSourceLine(trace[i].getLineNumber());
-
-            // XXX: need className and functionName info
-            return new Location(line.getSourceFilename(), sourceLine, null, null);
-          }
-        }
-      }
-    }
 
     return Location.UNKNOWN;
   }
 
   public int getSourceLine(String className, int javaLine)
   {
-    if (className.startsWith("_quercus")) {
-      ClassLoader loader = SimpleLoader.create(WorkDir.getLocalWorkDir());
-      
-      LineMap lineMap = ScriptStackTrace.getScriptLineMap(className,
-							  loader);
-
-      LineMap.Line line = null;
-
-      if (lineMap != null)
-	line = lineMap.getLine(javaLine);
-
-      if (line != null) {
-	return line.getSourceLine(javaLine);
-      }
-    }
-
     return javaLine;
   }
 

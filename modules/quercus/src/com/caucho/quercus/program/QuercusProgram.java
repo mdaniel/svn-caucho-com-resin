@@ -39,17 +39,12 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.page.QuercusPage;
 
 import com.caucho.quercus.Quercus;
-
-import com.caucho.make.*;
-
-import com.caucho.java.gen.GenClass;
-
 import com.caucho.vfs.*;
 
 /**
  * Represents a compiled Quercus program.
  */
-public class QuercusProgram extends GenClass {
+public class QuercusProgram {
   private Quercus _quercus;
 
   private QuercusPage _compiledPage;
@@ -67,8 +62,9 @@ public class QuercusProgram extends GenClass {
 
   private ArrayList<PersistentDependency> _dependList
     = new ArrayList<PersistentDependency>();
-  private DependencyContainer _depend
-    = new DependencyContainer();
+
+  private BasicDependencyContainer _depend
+    = new BasicDependencyContainer();
 
   /**
    * Creates a new quercus program
@@ -83,8 +79,6 @@ public class QuercusProgram extends GenClass {
 			FunctionInfo functionInfo,
 			Statement statement)
   {
-    super(quercus.getClassName(sourceFile));
-    
     _quercus = quercus;
 
     _sourceFile = sourceFile;
@@ -102,20 +96,6 @@ public class QuercusProgram extends GenClass {
 
     _functionInfo = functionInfo;
     _statement = statement;
-
-    // Java generation code
-    setSuperClassName("com.caucho.quercus.page.QuercusPage");
-
-    addImport("com.caucho.quercus.Quercus");
-    addImport("com.caucho.quercus.env.*");
-    addImport("com.caucho.quercus.expr.*");
-    addImport("com.caucho.quercus.program.*");
-    addImport("com.caucho.quercus.lib.*");
-    
-    //QuercusMain main = new QuercusMain(this, functionInfo, statement);
-    //addComponent(main);
-    
-    addDependencyComponent().addDependency(new VersionDependency());
   }
 
   /**
@@ -152,7 +132,6 @@ public class QuercusProgram extends GenClass {
     Depend depend = new Depend(path);
     
     _dependList.add(depend);
-    addDependencyComponent().addDependency(depend);
     _depend.add(depend);
   }
 

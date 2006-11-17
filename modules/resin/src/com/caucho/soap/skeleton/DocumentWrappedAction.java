@@ -84,6 +84,8 @@ public class DocumentWrappedAction extends PojoMethodSkeleton {
   {
     super(method, factory, jaxbContext, targetNamespace);
 
+    _isWrapped = true;
+    
     Class []params = method.getParameterTypes();
     Annotation [][]paramAnn = method.getParameterAnnotations();
 
@@ -309,7 +311,6 @@ public class DocumentWrappedAction extends PojoMethodSkeleton {
 
     while (in.nextTag() == XMLStreamReader.START_ELEMENT) {
       String tagName = in.getLocalName();
-
       ParameterMarshal marshal = _bodyMap.get(tagName);
 
       if (marshal != null) {

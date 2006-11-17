@@ -34,8 +34,6 @@ import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.java.gen.GenClass;
-
 import com.caucho.quercus.Quercus;
 
 import com.caucho.quercus.env.Env;

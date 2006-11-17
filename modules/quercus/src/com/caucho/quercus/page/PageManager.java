@@ -42,12 +42,8 @@ import com.caucho.vfs.*;
 
 import com.caucho.util.ThreadPool;
 
-import com.caucho.java.JavaCompiler;
-
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
-
-import com.caucho.quercus.gen.PhpGenerator;
 
 import com.caucho.quercus.parser.QuercusParser;
 
@@ -151,6 +147,7 @@ public class PageManager
   /**
    * Returns the relative path.
    */
+  /*
   public String getClassName(Path path)
   {
     if (path == null)
@@ -168,6 +165,7 @@ public class PageManager
 
     return "_quercus." + JavaCompiler.mangleName(relPath);
   }
+  */
   
   /**
    * Returns a parsed or compiled quercus program.

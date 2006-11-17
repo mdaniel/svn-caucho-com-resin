@@ -89,8 +89,8 @@ public class UnmarshallerImpl extends AbstractUnmarshallerImpl
     throws JAXBException
   {
     try {
-      while (reader.getEventType() != XMLStreamReader.START_ELEMENT)
-        reader.next();
+      if (reader.nextTag() != XMLStreamReader.START_ELEMENT)
+	throw new JAXBException(L.l("Expected root element"));
 
       Skeleton skel =  _context.getRootElement(reader.getName());
 

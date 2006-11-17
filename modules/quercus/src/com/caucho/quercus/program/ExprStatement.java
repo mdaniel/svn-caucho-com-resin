@@ -33,8 +33,6 @@ import java.io.IOException;
 
 import java.util.HashSet;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 

@@ -203,8 +203,6 @@ public class DirectSkeleton extends Skeleton {
   {
     PojoMethodSkeleton action = _actionMap.get(name);
 
-    System.out.println("ACTION: " + name + " " + action);
-    
     if (action != null)
       return action.invoke(name, url, args, _namespace);
     else if ("toString".equals(name))
@@ -264,13 +262,10 @@ public class DirectSkeleton extends Skeleton {
 
     // XXX: exceptions<->faults
     if (method != null) {
-      System.out.println("INVOKE: " + method);
-      
       method.invoke(service, in, out);
     }
     else {
       // XXX: fault
-      System.out.println("no such action:" + action);
     }
 
     if (in.getEventType() != in.END_ELEMENT)

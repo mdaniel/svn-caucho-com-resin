@@ -37,8 +37,6 @@ import java.util.IdentityHashMap;
 
 import java.util.logging.Logger;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 

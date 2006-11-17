@@ -33,8 +33,6 @@ import java.io.IOException;
 
 import java.util.HashSet;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -70,16 +68,6 @@ public class EchoStatement extends Statement {
     value.print(env);
 
     return null;
-  }
-
-
-  /**
-   * Disassembly.
-   */
-  public void debug(JavaWriter out)
-    throws IOException
-  {
-    out.println("echo " + _expr + ";");
   }
 }
 

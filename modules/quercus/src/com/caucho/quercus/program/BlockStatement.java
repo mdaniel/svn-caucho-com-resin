@@ -33,8 +33,6 @@ import java.util.ArrayList;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -110,20 +108,5 @@ public class BlockStatement extends Statement {
 
     return null;
   }
-
-  /**
-   * Disassembly.
-   */
-  public void debug(JavaWriter out)
-    throws IOException
-  {
-    out.println("{");
-    out.pushDepth();
-    for (int i = 0; i < _statements.length; i++)
-      _statements[i].debug(out);
-    out.popDepth();
-    out.println("}");
-  }
-
 }
 

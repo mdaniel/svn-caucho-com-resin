@@ -31,8 +31,6 @@ package com.caucho.quercus.program;
 
 import java.io.IOException;
 
-import com.caucho.java.JavaWriter;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
@@ -86,15 +84,5 @@ public class ReturnRefStatement extends Statement {
   {
     return RETURN;
   }
-
-  /**
-   * Disassembly.
-   */
-  public void debug(JavaWriter out)
-    throws IOException
-  {
-    out.println("return-ref " + _expr + ";");
-  }
-  
 }
 

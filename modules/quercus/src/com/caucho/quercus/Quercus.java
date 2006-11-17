@@ -506,10 +506,12 @@ public class Quercus {
   /**
    * Returns the relative path.
    */
+  /*
   public String getClassName(Path path)
   {
     return _pageManager.getClassName(path);
   }
+  */
 
   /**
    * Returns an include path.

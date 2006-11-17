@@ -33,7 +33,6 @@ import java.io.*;
 
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.*;
-import com.caucho.quercus.gen.*;
 
 /**
  * Represents an unset function
