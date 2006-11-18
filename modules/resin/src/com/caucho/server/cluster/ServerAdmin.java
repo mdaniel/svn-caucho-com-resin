@@ -35,6 +35,7 @@ import com.caucho.management.server.*;
 import com.caucho.server.port.*;
 import com.caucho.server.resin.*;
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 
 public class ServerAdmin extends AbstractManagedObject
   implements ServerMXBean
@@ -295,6 +296,18 @@ public class ServerAdmin extends AbstractManagedObject
   public long getRuntimeMemoryFree()
   {
     return Runtime.getRuntime().freeMemory();
+  }
+
+  /**
+   * Returns the CPU load average.
+   */
+  public double getCpuLoadAvg()
+  {
+    try {
+      return CauchoSystem.getLoadAvg();
+    } catch (Exception e) {
+      return 0;
+    }
   }
 
   //

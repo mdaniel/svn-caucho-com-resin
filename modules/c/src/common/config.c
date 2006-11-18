@@ -959,6 +959,7 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
     int code;
     int len;
     int is_change;
+    time_t prev_update;
 
     prev_update = host->last_update;
     host->last_update = now;

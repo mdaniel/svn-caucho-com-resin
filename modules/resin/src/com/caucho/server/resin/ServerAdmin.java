@@ -46,7 +46,7 @@ import com.caucho.vfs.Path;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class ServerAdmin implements ServerMXBean
+public class ServerAdmin
 {
   private static final L10N L = new L10N(ServerAdmin.class);
 

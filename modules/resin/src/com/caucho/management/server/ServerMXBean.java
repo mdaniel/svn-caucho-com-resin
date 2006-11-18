@@ -227,6 +227,12 @@ public interface ServerMXBean {
   @Units("bytes")
   public long getRuntimeMemoryFree();
 
+  /**
+   * Returns the current CPU load average.
+   */
+  @Description("The current CPU load average")
+  public double getCpuLoadAvg();
+
   //
   // Operations
   //

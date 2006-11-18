@@ -35,6 +35,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import com.caucho.util.*;
+import com.caucho.server.util.*;
 import com.caucho.vfs.*;
 
 import com.caucho.server.connection.AbstractHttpRequest;
@@ -92,6 +93,10 @@ public class HmuxResponse extends AbstractHttpResponse {
     }
     else if (isPrivateCache())
       _req.writeHeader("Cache-Control", "private");
+
+    int load = (int) (1000 * CauchoSystem.getLoadAvg());
+    _req.writeString(HmuxRequest.HMUX_META_HEADER, "cpu-load");
+    _req.writeString(HmuxRequest.HMUX_STRING, String.valueOf(load));
 
     for (int i = 0; i < _headerKeys.size(); i++) {
       String key = (String) _headerKeys.get(i);

@@ -63,7 +63,7 @@ public class JniCauchoSystem {
 	  Class cl = Class.forName("com.caucho.server.util.JniCauchoSystemImpl");
 
 	  _system = (JniCauchoSystem) cl.newInstance();
-	} catch (Exception e) {
+	} catch (Throwable e) {
 	  log.log(Level.FINEST, e.toString(), e);
 	}
 

@@ -98,6 +98,8 @@ public final class ClusterClient {
   private volatile long _failCountTotal;
   private volatile long _busyCountTotal;
 
+  private volatile double _cpuLoadAvg;
+
   ClusterClient(ServerConnector server)
   {
     _server = server;
@@ -193,6 +195,22 @@ public final class ClusterClient {
   public Date getLastBusyTime()
   {
     return new Date(_lastBusyTime);
+  }
+
+  /**
+   * Sets the CPU load avg (from backend).
+   */
+  public void setCpuLoadAvg(double load)
+  {
+    _cpuLoadAvg = load;
+  }
+
+  /**
+   * Gets the CPU load avg
+   */
+  public double getCpuLoadAvg()
+  {
+    return _cpuLoadAvg;
   }
 
   /**

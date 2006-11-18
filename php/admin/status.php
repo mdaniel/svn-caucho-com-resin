@@ -106,6 +106,11 @@ if (! empty($server->Id))
     <td><?= format_memory($server->RuntimeMemoryFree) ?></td>
   </tr>
 
+  <tr title="The current CPU load average.">
+    <th>CPU Load:</th>
+    <td><?= sprintf("%.2f", $server->CpuLoadAvg) ?></td>
+  </tr>
+
 <?php
 
 $block_cache = $mbeanServer->lookup("resin:type=BlockManager");

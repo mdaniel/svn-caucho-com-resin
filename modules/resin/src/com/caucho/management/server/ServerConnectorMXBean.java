@@ -195,6 +195,12 @@ public interface ServerConnectorMXBean extends ManagedObjectMXBean {
   public Date getLastBusyTime();
 
   /**
+   * Returns the server's load average.
+   */
+  @Description("The load average of the backend server")
+  public double getServerCpuLoadAvg();
+
+  /**
    * Enables connections to the target server.
    */
   @Description("Enables connections to the target server")

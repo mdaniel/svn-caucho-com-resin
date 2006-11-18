@@ -198,6 +198,11 @@ public class ServerConnectorAdmin extends AbstractManagedObject
     return _client.getServer().getClient().getKeepaliveCountTotal();
   }
 
+  public double getServerCpuLoadAvg()
+  {
+    return _client.getServer().getClient().getCpuLoadAvg();
+  }
+
   public void start()
   {
     _client.start();

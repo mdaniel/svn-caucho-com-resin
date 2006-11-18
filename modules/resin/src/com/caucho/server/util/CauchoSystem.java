@@ -68,6 +68,7 @@ public class CauchoSystem {
   private static String newline;
   private static long _version;
 
+  private static JniCauchoSystem _jniCauchoSystem;
   private static boolean _isDetailedStatistics;
   private static String _user;
   private static String _group;
@@ -441,6 +442,14 @@ public class CauchoSystem {
     _classPath = cb.toString();
 
     return _classPath;
+  }
+
+  public static double getLoadAvg()
+  {
+    if (_jniCauchoSystem == null)
+      _jniCauchoSystem = JniCauchoSystem.create();
+
+    return _jniCauchoSystem.getLoadAvg();
   }
 
   /**
