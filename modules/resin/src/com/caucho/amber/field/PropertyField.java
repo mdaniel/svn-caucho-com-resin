@@ -53,8 +53,9 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 
 import com.caucho.amber.expr.AmberExpr;
-import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.expr.ColumnExpr;
+import com.caucho.amber.expr.EmbeddedExpr;
+import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
 
 /**
@@ -429,6 +430,14 @@ public class PropertyField extends AbstractField {
    */
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
-    return new ColumnExpr(parent, getColumn());
+    Column column;
+
+    if (parent instanceof EmbeddedExpr) {
+      column = ((EmbeddedExpr) parent).getColumnByFieldName(getName());
+    }
+    else
+      column = getColumn();
+
+    return new ColumnExpr(parent, column);
   }
 }

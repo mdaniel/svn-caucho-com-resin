@@ -88,7 +88,9 @@ public class SubstringFunExpr extends FunExpr {
     // if (n != 3)
     //   throw new QueryParseException(L.l("expected 3 arguments for SUBSTRING"));
 
-    cb.append("substring(");
+    // XXX: MySQL requires 'substring' but Derby requires 'substr' and
+    // Postgres accepts both.
+    cb.append("substr(");
 
     if (select)
       args.get(0).generateWhere(cb);

@@ -23,7 +23,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
 package com.caucho.amber.expr;
@@ -33,24 +33,26 @@ import com.caucho.amber.query.*;
 
 import com.caucho.util.L10N;
 
+import com.caucho.amber.field.AmberField;
 import com.caucho.amber.type.EntityType;
 
-import com.caucho.amber.field.AmberField;
-
 /**
- * Represents from-item table.
+ * Represents an association from a from-item table.
  */
-public class FromIdSchemaExpr extends SchemaExpr {
-  private static final L10N L = new L10N(FromIdSchemaExpr.class);
+public class OneToOneSchemaExpr extends SchemaExpr {
+  private static final L10N L = new L10N(OneToOneSchemaExpr.class);
 
-  private IdExpr _id;
+  private DependentEntityOneToOneExpr _expr;
+  private String _name;
 
   /**
-   * Creates the table id expr.
+   * Creates the association schema.
    */
-  public FromIdSchemaExpr(IdExpr id)
+  public OneToOneSchemaExpr(DependentEntityOneToOneExpr expr,
+                            String name)
   {
-    _id = id;
+    _expr = expr;
+    _name = name;
   }
 
   /**
@@ -58,7 +60,7 @@ public class FromIdSchemaExpr extends SchemaExpr {
    */
   public String getTailName()
   {
-    return _id.getId();
+    return _name;
   }
 
   /**
@@ -67,7 +69,7 @@ public class FromIdSchemaExpr extends SchemaExpr {
   public SchemaExpr createField(QueryParser parser, String name)
     throws QueryParseException
   {
-    EntityType type = _id.getTargetType();
+    EntityType type = _expr.getTargetType();
 
     AmberField field = type.getField(name);
 
@@ -76,24 +78,14 @@ public class FromIdSchemaExpr extends SchemaExpr {
                              type.getBeanClass().getName(),
                              name));
 
-    AmberExpr fieldExpr = _id.createField(parser, name);
+    AmberExpr fieldExpr = _expr.createField(parser, name);
 
     if (fieldExpr instanceof ManyToOneExpr)
       return new ManyToOneSchemaExpr((ManyToOneExpr) fieldExpr, name);
 
-    /*
-      if (fieldExpr instanceof ManyToManyExpr)
-      return new ManyToManySchemaExpr((ManyToManyExpr) fieldExpr);
-    */
-
-    if (fieldExpr instanceof OneToManyExpr)
-      return new OneToManySchemaExpr((OneToManyExpr) fieldExpr);
-
     if (fieldExpr instanceof DependentEntityOneToOneExpr)
-      return new OneToOneSchemaExpr((DependentEntityOneToOneExpr) fieldExpr, name);
-
-    if (fieldExpr instanceof EmbeddedExpr)
-      return new EmbeddedSchemaExpr((EmbeddedExpr) fieldExpr, name);
+      return new OneToOneSchemaExpr((DependentEntityOneToOneExpr) fieldExpr,
+                                    name);
 
     throw parser.error(L.l("{0}: '{1}' must be a collection or one-to-one relationship.",
                            type.getBeanClass().getName(),
@@ -106,6 +98,10 @@ public class FromIdSchemaExpr extends SchemaExpr {
   public FromItem addFromItem(QueryParser parser, String id)
     throws QueryParseException
   {
-    return parser.addFromItem(_id.getTargetType().getTable(), id);
+    _expr = (DependentEntityOneToOneExpr) _expr.bindSelect(parser, id);
+
+    FromItem fromItem = _expr.bindSubPath(parser);
+
+    return fromItem;
   }
 }

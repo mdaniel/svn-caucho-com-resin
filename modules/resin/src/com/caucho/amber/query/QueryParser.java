@@ -31,6 +31,7 @@ package com.caucho.amber.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import java.util.logging.Logger;
 
@@ -128,7 +129,11 @@ public class QueryParser {
   public final static int MOD = SQRT + 1;
   public final static int SIZE = MOD + 1;
 
-  public final static int CONCAT = SIZE + 1;
+  public final static int MAX = SIZE + 1;
+  public final static int MIN = MAX + 1;
+  public final static int SUM = MIN + 1;
+
+  public final static int CONCAT = SUM + 1;
   public final static int LOWER = CONCAT + 1;
   public final static int UPPER = LOWER + 1;
   public final static int SUBSTRING = UPPER + 1;
@@ -317,7 +322,7 @@ public class QueryParser {
     }
 
     // "SELECT CURRENT_DATE" does NOT have a FROM clause.
-    boolean hasFrom = (token == FROM) ? true : false;
+    boolean hasFrom = (token == FROM);
 
     _token = token;
 
@@ -556,7 +561,8 @@ public class QueryParser {
       ArrayList<AmberExpr> groupList = new ArrayList<AmberExpr>();
 
       while (true) {
-        groupList.add(parseExpr());
+        // jpa/0w23
+        groupList.add(parseExpr().bindSelect(this));
 
         if (peekToken() == ',')
           scanToken();
@@ -802,7 +808,21 @@ public class QueryParser {
       schema));
     */
 
-    return schema.addFromItem(this, id);
+    FromItem item = schema.addFromItem(this, id);
+
+    if (schema instanceof EmbeddedSchemaExpr) {
+
+      // jpa/0w22
+
+      EmbeddedSchemaExpr embeddedSchema = (EmbeddedSchemaExpr) schema;
+
+      _query.addEmbeddedAlias(id, embeddedSchema.getExpr()); // pathString);
+    }
+
+    // jpa/114h
+    item.setJoinSemantics(_joinSemantics);
+
+    return item;
   }
 
   /**
@@ -1343,6 +1363,9 @@ public class QueryParser {
     case IDENTIFIER:
     case LOCATE:
     case LENGTH:
+    case MAX:
+    case MIN:
+    case SUM:
     case ABS:
     case SQRT:
     case MOD:
@@ -1356,7 +1379,13 @@ public class QueryParser {
         String name = _lexeme.toString();
 
         if (peekToken() != '(') {
-          IdExpr tableExpr = getIdentifier(name);
+          // Either IdExpr or EmbeddedExpr
+          AbstractPathExpr tableExpr = getIdentifier(name);
+
+          if (tableExpr == null) {
+            // jpa/0w22
+            tableExpr = getEmbeddedAlias(name);
+          }
 
           if (tableExpr != null) {
             AmberExpr amberExpr = parsePath(tableExpr);
@@ -1678,6 +1707,18 @@ public class QueryParser {
       funExpr = LengthFunExpr.create(args);
       break;
 
+    case MAX:
+      funExpr = MaxFunExpr.create(id, args, distinct);
+      break;
+
+    case MIN:
+      funExpr = MinFunExpr.create(id, args, distinct);
+      break;
+
+    case SUM:
+      funExpr = SumFunExpr.create(id, args, distinct);
+      break;
+
     case ABS:
       funExpr = AbsFunExpr.create(args);
       break;
@@ -1740,7 +1781,7 @@ public class QueryParser {
       for (int i = 0; i < fromList.size(); i++) {
         FromItem from = fromList.get(i);
 
-        if (from.getName().equals(name))
+        if (from.getName().equalsIgnoreCase(name))
           return from.getIdExpr();
       }
     }
@@ -1748,6 +1789,31 @@ public class QueryParser {
     return null;
 
     // throw error(L.l("`{0}' is an unknown table", name));
+  }
+
+  /**
+   * Returns the matching embedded alias.
+   */
+  private EmbeddedExpr getEmbeddedAlias(String name)
+    throws QueryParseException
+  {
+    // jpa/0w22
+
+    AbstractQuery query = _query;
+
+    for (; query != null; query = query.getParentQuery()) {
+      HashMap<String, EmbeddedExpr> embeddedAliases =
+        query.getEmbeddedAliases();
+
+      for (Map.Entry<String, EmbeddedExpr> entry :
+             embeddedAliases.entrySet()) {
+
+        if (entry.getKey().equalsIgnoreCase(name))
+          return entry.getValue();
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -2144,6 +2210,10 @@ public class QueryParser {
     _reserved.put("sqrt", SQRT);
     _reserved.put("mod", MOD);
     _reserved.put("size", SIZE);
+
+    _reserved.put("max", MAX);
+    _reserved.put("min", MIN);
+    _reserved.put("sum", SUM);
 
     _reserved.put("concat", CONCAT);
     _reserved.put("lower", LOWER);

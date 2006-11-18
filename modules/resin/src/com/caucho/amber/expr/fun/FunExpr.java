@@ -54,7 +54,7 @@ public class FunExpr extends AbstractAmberExpr {
   private boolean _distinct;
 
   /**
-   * Creates a new cmp expression
+   * Creates a new function expression
    */
   protected FunExpr(String id,
                     ArrayList<AmberExpr> args,
@@ -141,11 +141,13 @@ public class FunExpr extends AbstractAmberExpr {
   public Object getObject(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
-    // XXX: needs to be factored into a CountFunExpr
     if (_id.equalsIgnoreCase("count"))
       return rs.getLong(index);
-    else
-      return super.getObject(aConn, rs, index);
+
+    if (_id.equalsIgnoreCase("avg"))
+      return rs.getDouble(index);
+
+    return super.getObject(aConn, rs, index);
   }
 
   public String toString()

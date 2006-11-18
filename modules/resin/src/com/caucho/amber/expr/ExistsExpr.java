@@ -74,7 +74,7 @@ public class ExistsExpr extends AbstractAmberExpr {
   public void generateWhere(CharBuffer cb)
   {
     cb.append("EXISTS(");
-    cb.append(_query.generateLoadSQL());
+    cb.append(_query.generateLoadSQL(false));
     cb.append(')');
   }
 

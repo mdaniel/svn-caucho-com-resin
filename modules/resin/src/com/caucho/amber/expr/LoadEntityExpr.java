@@ -180,9 +180,21 @@ public class LoadEntityExpr extends AbstractAmberExpr {
    */
   public void generateSelect(CharBuffer cb)
   {
+    generateSelect(cb, true);
+  }
+
+  /**
+   * Generates the where expression.
+   */
+  public void generateSelect(CharBuffer cb,
+                             boolean fullSelect)
+  {
     EntityType type = getEntityType();
 
     cb.append(type.getId().generateSelect(getTable()));
+
+    if (! fullSelect)
+      return;
 
     String valueSelect = type.generateLoadSelect(_fromItem.getTable(),
                                                  _fromItem.getName());

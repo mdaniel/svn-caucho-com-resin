@@ -30,6 +30,7 @@
 package com.caucho.amber.query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import java.sql.SQLException;
 
@@ -47,6 +48,13 @@ abstract public class AbstractQuery {
   private String _sql;
 
   protected ArrayList<FromItem> _fromList = new ArrayList<FromItem>();
+
+  // jpa/0w22
+  // SELECT p.startMonth FROM TestBean o JOIN o.period p
+  // p is an alias to o.period (o.period is @Embedded)
+  // "p" -> "o.period"
+  protected HashMap<String, EmbeddedExpr> _embeddedAliases
+    = new HashMap<String, EmbeddedExpr>();
 
   private ArgExpr []_argList;
 
@@ -69,6 +77,23 @@ abstract public class AbstractQuery {
   public String getQueryString()
   {
     return _sql;
+  }
+
+  /**
+   * Adds an embedded alias.
+   */
+  public void addEmbeddedAlias(String alias,
+                               EmbeddedExpr expr)
+  {
+    _embeddedAliases.put(alias, expr);
+  }
+
+  /**
+   * Gets the embedded aliases.
+   */
+  public HashMap<String, EmbeddedExpr> getEmbeddedAliases()
+  {
+    return _embeddedAliases;
   }
 
   /**

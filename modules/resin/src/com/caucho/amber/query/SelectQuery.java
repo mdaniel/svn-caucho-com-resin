@@ -311,6 +311,7 @@ public class SelectQuery extends AbstractQuery {
       else if (joinParent.getJoinExpr() == null &&
                joinParent == joinTarget &&
                ! usesFromData(joinParent)) {
+
         _fromList.remove(joinParent);
 
         replaceJoin(join);
@@ -328,6 +329,11 @@ public class SelectQuery extends AbstractQuery {
       else if (! isJoinParent(item) &&
                item == joinTarget &&
                ! usesFromData(item)) {
+
+        // jpa/114g
+        if (! item.isOuterJoin())
+          continue;
+
         _fromList.remove(item);
 
         replaceJoin(join);
@@ -350,7 +356,9 @@ public class SelectQuery extends AbstractQuery {
       if (item.getJoinExpr() == null)
         continue;
 
-      item.setOuterJoin(! isFromInnerJoin(item));
+      boolean isFromInner = isFromInnerJoin(item);
+
+      item.setOuterJoin(! isFromInner);
     }
 
     _cacheTimeout = Long.MAX_VALUE / 2;
@@ -455,6 +463,31 @@ public class SelectQuery extends AbstractQuery {
 
   public String generateLoadSQL()
   {
+    return generateLoadSQL(true);
+  }
+
+  /**
+   * Generates the load SQL.
+   *
+   * @param fullSelect true if the load entity expressions
+   *                   should be fully loaded for all entity
+   *                   fields. Otherwise, only the entity id
+   *                   will be loaded: select o.id from ...
+   *                   It is implemented to optimize the SQL
+   *                   and allow for databases that only
+   *                   support single columns in subqueries.
+   *                   Derby is an example. An additional
+   *                   condition to generate only the o.id
+   *                   is the absence of group by. If there
+   *                   is a group by the full select will
+   *                   always be generated.
+   *
+   *                   See also com.caucho.amber.expr.ExistsExpr
+   *
+   * @return the load SQL.
+   */
+  public String generateLoadSQL(boolean fullSelect)
+  {
     CharBuffer cb = CharBuffer.allocate();
 
     cb.append("select ");
@@ -468,7 +501,10 @@ public class SelectQuery extends AbstractQuery {
 
       AmberExpr expr = _resultList.get(i);
 
-      expr.generateSelect(cb);
+      if ((_groupList == null) && (expr instanceof LoadEntityExpr))
+        ((LoadEntityExpr) expr).generateSelect(cb, fullSelect);
+      else
+        expr.generateSelect(cb);
     }
 
     if (_hasFrom)

@@ -54,8 +54,10 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 
 import com.caucho.amber.expr.AmberExpr;
-import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.expr.ColumnExpr;
+import com.caucho.amber.expr.EmbeddedExpr;
+import com.caucho.amber.expr.PathExpr;
+
 import com.caucho.amber.query.QueryParser;
 
 /**
@@ -67,7 +69,7 @@ public class EntityEmbeddedField extends AbstractField {
 
   private HashMap<String, Column> _columns;
   private HashMap<String, String> _fieldNameByColumn;
-  private Type _type;
+  private EntityType _type;
 
   private boolean _isInsert = true;
   private boolean _isUpdate = true;
@@ -88,7 +90,7 @@ public class EntityEmbeddedField extends AbstractField {
   /**
    * Sets the result type.
    */
-  public void setType(Type type)
+  public void setType(EntityType type)
   {
     _type = type;
   }
@@ -496,7 +498,6 @@ public class EntityEmbeddedField extends AbstractField {
    */
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
   {
-    return null;
-    // XXX: handle multiple columns return new ColumnExpr(parent, getColumns());
+    return new EmbeddedExpr(parent, _type, _columns, _fieldNameByColumn);
   }
 }
