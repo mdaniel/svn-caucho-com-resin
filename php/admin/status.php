@@ -256,6 +256,7 @@ echo "<h2>Server Connectors: $cluster->Name</h2>";
     <th>Active</th>
     <th>Idle</th>
     <th>Connection</th>
+    <th>Load</th>
     <th>Fail Total</th>
     <th>Busy Total</th>
   </tr>
@@ -273,6 +274,7 @@ foreach ($cluster->Servers as $client) {
     <td><?= $client->ConnectionIdleCount ?></td>
     <td><?= format_hit_ratio($client->ConnectionKeepaliveCountTotal,
                              $client->ConnectionNewCountTotal) ?></td>
+    <td><?= $client->ServerCpuLoadAvg ?></td>
 <!-- XXX:
     <td><?= $client->LastFailTime ?></td>
     <td><?= $client->LastBusyTime ?></td>
