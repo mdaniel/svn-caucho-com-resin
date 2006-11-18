@@ -57,7 +57,7 @@ public class FilePath extends FilesystemPath {
 
   public FilePath(String path)
   {
-    this(PWD != null ? PWD._root : null,
+    this(null,  //PWD != null ? PWD._root : null,
 	 path, normalizePath("/", initialPath(path),
                              0, getFileSeparatorChar()));
 

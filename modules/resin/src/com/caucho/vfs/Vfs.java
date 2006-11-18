@@ -326,7 +326,7 @@ public final class Vfs {
       if (localMap != null)
 	localMap.put("file", jniFilePath);
       
-       localMap = _localSchemeMap.get(ClassLoader.getSystemClassLoader());
+      localMap = _localSchemeMap.get(ClassLoader.getSystemClassLoader());
       if (localMap != null)
 	localMap.put("file", jniFilePath);
       
@@ -340,7 +340,15 @@ public final class Vfs {
 
     Path.setDefaultSchemeMap(DEFAULT_SCHEME_MAP);
 
-    DEFAULT_SCHEME_MAP.put("file", new FilePath(null));
+    FilePath pwd = new FilePath(null);
+    PWD = pwd;
+    setPwd(pwd);
+    ENV_PWD.setGlobal(pwd);
+    ENV_PWD.set(pwd);
+    
+    _localSchemeMap.setGlobal(DEFAULT_SCHEME_MAP);
+    
+    DEFAULT_SCHEME_MAP.put("file", pwd);
     
     DEFAULT_SCHEME_MAP.put("memory", new MemoryScheme());
     
@@ -366,6 +374,5 @@ public final class Vfs {
     DEFAULT_SCHEME_MAP.put("config", new ConfigPath());
     DEFAULT_SCHEME_MAP.put("spy", new SpyScheme()); 
 
-    _localSchemeMap.setGlobal(DEFAULT_SCHEME_MAP);
   }
 }

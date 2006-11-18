@@ -90,8 +90,10 @@ public class SchemeMap {
 
     if (path != null)
       return path;
-    else
+    else {
+
       return new NotFoundPath(scheme + ":");
+    }
   }
 
   /**

@@ -32,6 +32,7 @@ package com.caucho.boot;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.el.EL;
+import com.caucho.loader.*;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -77,6 +78,8 @@ public class ResinBoot {
   ResinBoot(String []argv)
     throws Exception
   {
+    Environment.init();
+    
     _argv = argv;
 
     calculateResinHome();

@@ -73,9 +73,9 @@ public abstract class Path {
   
   private static final PathKey _key = new PathKey();
 
-  private static final SchemeMap DEFAULT_SCHEME_MAP;
+  private static final SchemeMap DEFAULT_SCHEME_MAP = new SchemeMap();
   
-  private static SchemeMap _defaultSchemeMap = SchemeMap.NULL_SCHEME_MAP;
+  private static SchemeMap _defaultSchemeMap;
 
   protected SchemeMap _schemeMap = _defaultSchemeMap;
 
@@ -86,10 +86,12 @@ public abstract class Path {
    */
   protected Path(Path root)
   {
-    if (root != null) {
+    if (root != null)
       _schemeMap = root._schemeMap;
-      return;
-    }
+    else if (_defaultSchemeMap != null)
+      _schemeMap = _defaultSchemeMap;
+    else
+      _schemeMap = DEFAULT_SCHEME_MAP;
   }
 
   /**
@@ -1318,6 +1320,7 @@ public abstract class Path {
   public static final void setDefaultSchemeMap(SchemeMap schemeMap)
   {
     _defaultSchemeMap = schemeMap;
+    _pathLookupCache.clear();
   }
 
   public static final boolean isWindows()
@@ -1408,10 +1411,6 @@ public abstract class Path {
   }
 
   static {
-    DEFAULT_SCHEME_MAP = new SchemeMap();
-
-    Path.setDefaultSchemeMap(DEFAULT_SCHEME_MAP);
-
     DEFAULT_SCHEME_MAP.put("file", new FilePath(null));
     
     //DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null)); 
