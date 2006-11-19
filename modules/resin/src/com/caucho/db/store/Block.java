@@ -75,7 +75,7 @@ abstract public class Block implements SyncCacheListener {
     _store = store;
     _blockId = blockId;
     
-    _lock = new Lock(_blockId);
+    _lock = new Lock("block:" + store.getName() + ":" + _blockId);
     
     _isFlushDirtyOnCommit = _store.isFlushDirtyBlocksOnCommit();
 
@@ -253,6 +253,9 @@ abstract public class Block implements SyncCacheListener {
    */
   public void setDirty(int min, int max)
   {
+    if (Store.BLOCK_SIZE < max)
+      Thread.dumpStack();
+    
     _isValid = true;
 
     if (min < _dirtyMin)

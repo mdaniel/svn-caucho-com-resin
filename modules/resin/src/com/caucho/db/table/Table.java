@@ -96,7 +96,10 @@ public class Table extends Store {
   
   public final static int INLINE_BLOB_SIZE = 120;
   
-  public final static long ROW_CLOCK_MIN = 1024;
+  public final static long ROW_CLOCK_MIN = 256;
+
+  public final static byte ROW_VALID = 0x1;
+  public final static byte ROW_ALLOC = 0x2;
 
   private final static String DB_VERSION = "Resin-DB 3.0.18";
   private final static String MIN_VERSION = "Resin-DB 3.0.18";
@@ -113,13 +116,15 @@ public class Table extends Store {
 
   private long _entries;
 
+  private final Object _rowClockLock = new Object();
   private long _rowClockAddr;
   private long _rowClockTotal;
   private long _rowClockUsed;
 
   private long _autoIncrementValue = -1;
 
-  private Lock _lock;
+  private Lock _allocLock;
+  private Lock _insertLock;
 
   Table(Database database, String name, Row row, Constraint constraints[])
   {
@@ -144,7 +149,8 @@ public class Table extends Store {
     }
     _autoIncrementColumn = autoIncrementColumn;
 
-    _lock = new Lock(getId());
+    _insertLock = new Lock("table-insert:" + name);
+    _allocLock = new Lock("table-alloc:" + name);
   }
 
   Row getRow()
@@ -621,150 +627,171 @@ public class Table extends Store {
   {
     if (log.isLoggable(Level.FINE))
       log.fine("db table " + getName() + " insert row xa:" + xa);
-
-    xa.lockWrite(_lock);
-
+    
+    Block block = null;
+    
     try {
-      TableIterator iter = createTableIterator();
-      TableIterator []iterSet = new TableIterator[] { iter };
-      // QueryContext context = QueryContext.allocate();
-      queryContext.init(xa, iterSet, true);
-      iter.init(queryContext);
-
+      long addr;
+      int rowOffset = 0;
+      
       boolean isLoop = false;
+      boolean hasRow = false;
 
-      while (true) {
-	Block block = null;
+      long rowClockAddr = 0;
+      long rowClockUsed = 0;
+      long rowClockTotal = 0;
+      
+      do {
+	long blockId = 0;
 
-	try {
-	  long addr = _rowClockAddr;
-	
-	  long blockId = firstRow(addr);
+	synchronized (_rowClockLock) {
+	  blockId = firstRow(_rowClockAddr);
 
-	  int rowOffset;
-
-	  if (blockId < 0) {
+	  if (blockId >= 0) {
+	    block = xa.readBlock(this, blockId);
+	  }
+	  else if (! isLoop
+		   && ROW_CLOCK_MIN < _rowClockTotal
+		   && 4 * _rowClockUsed < 3 * _rowClockTotal) {
 	    // go around loop if there are sufficient entries, i.e. over
 	    // ROW_CLOCK_MIN and at least 1/4 free entries.
-	    if (! isLoop &&
-		ROW_CLOCK_MIN < _rowClockTotal &&
-		4 * _rowClockUsed < 3 * _rowClockTotal) {
-	      isLoop = true;
-	      _rowClockAddr = 0;
-	      _rowClockUsed = 0;
-	      _rowClockTotal = 0;
-	      continue;
-	    }
-	    else {
-	      // if no free row is available, allocate a new one
-	      block = xa.allocateRow(this);
-	      //System.out.println("ALLOC: " + block);
-
-	      blockId = block.getBlockId();
-
-	      addr = blockIdToAddress(blockId);
-
-	      _rowClockAddr = 0;
-	      _rowClockUsed = 0;
-	      _rowClockTotal = 0;
-	    
-	      rowOffset = 0;
-	    }
-	  }
-	  else if (blockId == addressToBlockId(addr)) {
-	    rowOffset = (int) (addr & BLOCK_INDEX_MASK);
-	  }
-	  else {
-	    rowOffset = 0;
-	    _rowClockAddr = blockIdToAddress(blockId);
-	    addr = _rowClockAddr;
-	  }
-
-	  int nextRowOffset = rowOffset + _rowLength;
-      
-	  if (_rowEnd <= nextRowOffset)
-	    nextRowOffset = BLOCK_SIZE;
-
-	  _rowClockAddr = (_rowClockAddr & ~BLOCK_INDEX_MASK) + nextRowOffset;
-	  _rowClockTotal++;
-	
-	  if (block == null)
-	    block = xa.readBlock(this, blockId);
-
-	  if ((block.getBuffer()[rowOffset] & 0x01) == 1) {
-	    _rowClockUsed++;
+	    isLoop = true;
+	    _rowClockAddr = 0;
+	    _rowClockUsed = 0;
+	    _rowClockTotal = 0;
 	    continue;
 	  }
+	  else {
+	    // if no free row is available, allocate a new one
+	    block = xa.allocateRow(this);
+	    //System.out.println("ALLOC: " + block);
+
+	    blockId = block.getBlockId();
+	  }
+	    
+	  rowClockAddr = blockIdToAddress(blockId);
+	  rowClockUsed = _rowClockUsed;
+	  rowClockTotal = _rowClockTotal;
+
+	  // the next insert will try the following block
+	  _rowClockAddr = rowClockAddr + BLOCK_SIZE;
+	  _rowClockUsed = rowClockUsed + 1;
+	  _rowClockTotal = rowClockTotal + 1;
+	}
+	
+	xa.lockWrite(block.getLock());
+	try {
+	  rowOffset = 0;
 
 	  byte []buffer = block.getBuffer();
-
-	  long rowAddr = blockIdToAddress(block.getBlockId(), rowOffset);
-	  //System.out.println("ADDR:" + rowAddr + " " + rowOffset + " " + block);
-
-	  boolean isOkay = false;
-	  try {
-	    iter.setRow(block, rowOffset);
-
-	    queryContext.lock();
-
-	    for (int i = rowOffset + _rowLength - 1; rowOffset <= i; i--)
-	      buffer[i] = 0;
-
-	    for (int i = 0; i < columns.size(); i++) {
-	      Column column = columns.get(i);
-	      Expr value = values.get(i);
-
-	      column.setExpr(xa, buffer, rowOffset, value, queryContext);
-	    }
-
-	    block.setDirty(rowOffset, nextRowOffset);
-    
-	    buffer[rowOffset] |= 1;
-
-	    try {
-	      validate(block, rowOffset, queryContext, xa);
-	    } catch (SQLException e) {
-	      delete(xa, buffer, rowOffset);
 	    
-	      throw e;
+	  for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
+	    if (buffer[rowOffset] == 0) {
+	      block.setDirty(rowOffset, rowOffset + 1);
+			     
+	      hasRow = true;
+	      buffer[rowOffset] = ROW_ALLOC;
+	      break;
 	    }
-
-	    for (int i = 0; i < columns.size(); i++) {
-	      Column column = columns.get(i);
-	      Expr value = values.get(i);
-
-	      column.setIndex(xa, buffer, rowOffset, rowAddr, queryContext);
-	    }
-
-	    xa.addUpdateBlock(block);
-
-	    if (_autoIncrementColumn != null) {
-	      long value = _autoIncrementColumn.getLong(buffer, rowOffset);
-
-	      synchronized (this) {
-		if (_autoIncrementValue < value)
-		  _autoIncrementValue = value;
-	      }
-	    }
-
-	    isOkay = true;
-	  } finally {
-	    if (! isOkay)
-	      buffer[rowOffset] &= ~1;
-
-	    queryContext.unlock();
 	  }
-    
-	  _entries++;
-
-	  return addr;
 	} finally {
-	  if (block != null)
-	    block.free();
+	  xa.unlockWrite(block.getLock());
+	}
+      } while (! hasRow);
+
+      if (rowOffset + _rowLength >= Store.BLOCK_SIZE)
+	System.out.println("OFF: " + rowOffset + " " + hasRow);
+      
+      insertRow(queryContext, xa, columns, values,
+		block, rowOffset);
+
+      synchronized (_rowClockLock) {
+	if (rowClockAddr < _rowClockAddr) {
+	  // the next insert will retry this block
+	  
+	  _rowClockAddr = rowClockAddr;
+	  _rowClockUsed = rowClockUsed;
+	  _rowClockTotal = rowClockTotal;
 	}
       }
+
+      return blockIdToAddress(block.getBlockId(), rowOffset);
     } finally {
-      xa.unlockWrite(_lock);
+      if (block != null)
+	block.free();
+    }
+  }
+
+  public void insertRow(QueryContext queryContext, Transaction xa,
+			ArrayList<Column> columns,
+			ArrayList<Expr> values,
+			Block block, int rowOffset)
+    throws SQLException
+  {
+    byte []buffer = block.getBuffer();
+
+    long rowAddr = blockIdToAddress(block.getBlockId(), rowOffset);
+    //System.out.println("ADDR:" + rowAddr + " " + rowOffset + " " + block);
+
+    TableIterator iter = createTableIterator();
+    TableIterator []iterSet = new TableIterator[] { iter };
+    // QueryContext context = QueryContext.allocate();
+    queryContext.init(xa, iterSet, true);
+    iter.init(queryContext);
+
+    boolean isOkay = false;
+    queryContext.lock();
+    try {
+      iter.setRow(block, rowOffset);
+
+      block.setDirty(rowOffset, rowOffset + _rowLength);
+	  
+      for (int i = rowOffset + _rowLength - 1; rowOffset <= i; i--)
+	buffer[i] = 0;
+
+      for (int i = 0; i < columns.size(); i++) {
+	Column column = columns.get(i);
+	Expr value = values.get(i);
+
+	column.setExpr(xa, buffer, rowOffset, value, queryContext);
+      }
+
+      // lock for insert, i.e. entries, indices, and validation
+      xa.lockWrite(_insertLock);
+      try {
+	validate(block, rowOffset, queryContext, xa);
+      
+	buffer[rowOffset] = 1;
+
+	for (int i = 0; i < columns.size(); i++) {
+	  Column column = columns.get(i);
+	  Expr value = values.get(i);
+
+	  column.setIndex(xa, buffer, rowOffset, rowAddr, queryContext);
+	}
+
+	xa.addUpdateBlock(block);
+
+	if (_autoIncrementColumn != null) {
+	  long value = _autoIncrementColumn.getLong(buffer, rowOffset);
+
+	  synchronized (this) {
+	    if (_autoIncrementValue < value)
+	      _autoIncrementValue = value;
+	  }
+	}
+	  
+	_entries++;
+      
+	isOkay = true;
+      } finally {
+	xa.unlockWrite(_insertLock);
+	  
+	if (! isOkay)
+	  delete(xa, buffer, rowOffset);
+      }
+    } finally {
+      queryContext.unlock();
     }
   }
 
@@ -788,12 +815,12 @@ public class Table extends Store {
   void delete(Transaction xa, byte []block, int rowOffset)
     throws SQLException
   {
+    block[rowOffset] = 0;
+    
     Column []columns = _row.getColumns();
     
     for (int i = 0; i < columns.length; i++)
       columns[i].delete(xa, block, rowOffset);
-    
-    block[rowOffset] = 0;
   }
 
   private void writeLong(WriteStream os, long value)

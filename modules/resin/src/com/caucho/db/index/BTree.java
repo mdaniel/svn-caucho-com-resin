@@ -119,7 +119,7 @@ public final class BTree {
     _store = store;
     _blockManager = _store.getBlockManager();
     _rootBlockId = rootBlockId;
-    _lock = new Lock(_rootBlockId);
+    _lock = new Lock("index:" + store.getName());
     
     if (BLOCK_SIZE < keySize + HEADER_SIZE)
       throw new IOException(L.l("BTree key size `{0}' is too large.",

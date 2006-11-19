@@ -68,7 +68,7 @@ public class Database {
 
   private LruCache<String,Query> _cachedQueries = new LruCache<String,Query>(128);
 
-  private Lock _databaseLock = new Lock(0);
+  private Lock _databaseLock = new Lock("db");
 
   private boolean _removeOnError;
 

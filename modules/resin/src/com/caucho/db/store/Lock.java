@@ -47,21 +47,23 @@ import com.caucho.sql.SQLExceptionWrapper;
 /**
  * Locking for tables/etc.
  */
-public final class Lock implements ClockCacheItem {
+public final class Lock {
   private final static L10N L = new L10N(Lock.class);
   private final static Logger log = Log.open(Lock.class);
 
-  private final long _id;
-  
-  private volatile int _readCount;
-  private volatile int _upgradeCount;
-  private volatile int _writeCount;
+  private final String _id;
 
-  private boolean _isUsed;
-
-  private final ArrayList<Transaction> _queue = new ArrayList<Transaction>();
+  // count of threads trying to get a write lock
+  private int _tryWriteCount;
   
-  public Lock(long id)
+  // count of threads with a read currently running
+  private int _readCount;
+  // true if a thread has a write lock
+  private boolean _isWrite;
+
+  private Thread _owner;
+  
+  public Lock(String id)
   {
     _id = id;
   }
@@ -69,7 +71,7 @@ public final class Lock implements ClockCacheItem {
   /**
    * Returns the lock identifier.
    */
-  public long getId()
+  public String getId()
   {
     return _id;
   }
@@ -80,23 +82,39 @@ public final class Lock implements ClockCacheItem {
    * @param timeout how long to wait for a timeout
    */
   void lockRead(Transaction xa, long timeout)
-    throws SQLException
+    throws LockTimeoutException
   {
     if (log.isLoggable(Level.FINEST)) {
-      log.finest("LockRead$" + System.identityHashCode(this) + "[" + _id + "] read:" + _readCount +
-		 " upgrade:" + _upgradeCount);
+      log.finest(this + " lockRead (read:" + _readCount
+		 + " write:" + _isWrite
+		 + " try-write:" + _tryWriteCount + ")");
     }
 
     long expire = Alarm.getCurrentTime() + timeout;
 
-    synchronized (_queue) {
-      queue(xa, expire);
+    synchronized (this) {
+      long now;
 
-      _readCount++;
+      do {
+	if (! _isWrite && _tryWriteCount == 0) {
+	  _readCount++;
+	  return;
+	}
 
-      dequeue(xa);
+	if (Alarm.isTest())
+	  break;
 
-      wake();
+	try {
+	  wait(expire - Alarm.getCurrentTime());
+	} catch (InterruptedException e) {
+	  throw new LockTimeoutException(e);
+	}
+      } while (Alarm.getCurrentTime() <= expire);
+
+      Thread.dumpStack();
+      throw new LockTimeoutException(L.l("Lock {0} timed out ({1}ms) try-writers:{2}",
+					 this, timeout,
+					 _tryWriteCount));
     }
   }
 
@@ -106,169 +124,20 @@ public final class Lock implements ClockCacheItem {
   void unlockRead()
     throws SQLException
   {
-    synchronized (_queue) {
+    synchronized (this) {
       _readCount--;
     
       if (_readCount < 0)
 	Thread.dumpStack();
 
-      if (log.isLoggable(Level.FINEST))
-	log.finest("UnlockRead[" + _id + "] read:" + _readCount +
-		   " write:" + _writeCount);
-
-      wake();
-    }
-  }
-
-  /**
-   * Tries to get a write lock.
-   *
-   * @param timeout how long to wait for a timeout
-   */
-  void lockUpgrade(Transaction xa, long timeout)
-    throws SQLException
-  {
-    if (log.isLoggable(Level.FINEST))
-      log.finest("LockUpgrade[" + _id + "] read:" + _readCount +
-		" upgrade:" + _upgradeCount);
-
-    boolean isOkay = false;
-
-    synchronized (_queue) {
-      _upgradeCount++;
-
-      try {
-	long expire = Alarm.getCurrentTime() + timeout;
-      
-	queue(xa, expire);
-
-	isOkay = waitForRead(xa, expire, 1);
-      } finally {
-	if (isOkay) {
-	  _readCount--;
-	}
-	else {
-	  _upgradeCount--;
-
-	  wake();
-	}
+      if (log.isLoggable(Level.FINEST)) {
+	log.finest(this + " unlockRead (read:" + _readCount
+		   + " write:" + _isWrite
+		   + " try-write:" + _tryWriteCount + ")");
       }
+
+      notifyAll();
     }
-
-    if (! isOkay)
-      throw new IllegalStateException("Expected valid upgrade lock");
-  }
-
-  /**
-   * Tries to get a upgrade lock.
-   *
-   * @param timeout how long to wait for a timeout
-   */
-  void lockReadAndUpgrade(Transaction xa, long timeout)
-    throws SQLException
-  {
-    if (log.isLoggable(Level.FINEST))
-      log.finest("LockUpgrade[" + _id + "] read:" + _readCount +
-		" upgrade:" + _upgradeCount);
-
-    long expire = Alarm.getCurrentTime() + timeout;
-    boolean isOkay = false;
-
-    synchronized (_queue) {
-      _upgradeCount++;
-
-      try {
-	queue(xa, expire);
-
-	isOkay = waitForRead(xa, expire, 0);
-      } finally {
-	if (! isOkay) {
-	  _upgradeCount--;
-
-	  wake();
-	}
-      }
-    }
-
-    if (! isOkay)
-      throw new IllegalStateException("Expected valid upgrade lock");
-  }
-
-  /**
-   * Clears a read lock.
-   */
-  void unlockUpgrade()
-    throws SQLException
-  {
-    synchronized (_queue) {
-      unlockUpgradeInt();
-    }
-  }
-
-  /**
-   * Clears a write lock.
-   */
-  private void unlockUpgradeInt()
-    throws SQLException
-  {
-    _upgradeCount--;
-
-    if (_upgradeCount < 0) {
-      RuntimeException e = new IllegalStateException("Illegal upgrade count: " + _upgradeCount);
-      e.fillInStackTrace();
-      log.log(Level.WARNING, e.toString(), e);
-      
-      _upgradeCount = 0;
-    }
-
-    if (log.isLoggable(Level.FINEST))
-      log.finest("UnlockUpgradeInt[" + _id + "] read:" + _readCount +
-		" upgrade:" + _upgradeCount);
-    
-    wake();
-  }
-
-  /**
-   * Tries to get a write lock.
-   *
-   * @param timeout how long to wait for a timeout
-   */
-  void lockWrite(Transaction xa, long timeout)
-    throws SQLException
-  {
-    if (log.isLoggable(Level.FINEST))
-      log.finest("LockWrite[" + _id + "] read:" + _readCount +
-		" write:" + _writeCount);
-
-    boolean isOkay = false;
-    long expire = Alarm.getCurrentTime() + timeout;
-
-    synchronized (_queue) {
-      if (_writeCount > 0)
-	throw new IllegalStateException(L.l("multiple write locks"));
-      else if (_upgradeCount == 0)
-	throw new IllegalStateException(L.l("no upgrade obtained for write"));
-
-      _writeCount++;
-
-      try {
-	queue(xa, expire);
-
-	isOkay = waitForRead(xa, expire, 1);
-      } finally {
-	if (isOkay) {
-	  _readCount--;
-	}
-	else {
-	  _writeCount--;
-
-	  wake();
-	}
-      }
-    }
-
-    if (! isOkay)
-      throw new IllegalStateException("Expected valid write lock");
   }
 
   /**
@@ -279,34 +148,99 @@ public final class Lock implements ClockCacheItem {
   void lockReadAndWrite(Transaction xa, long timeout)
     throws SQLException
   {
-    if (log.isLoggable(Level.FINEST))
-      log.finest("LockWrite[" + _id + "] read:" + _readCount +
-		" upgrade:" + _upgradeCount);
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " lockReadAndWrite (read:" + _readCount
+		 + " write:" + _isWrite
+		 + " try-write:" + _tryWriteCount + ")");
+    }
+
+    long start = Alarm.getCurrentTime();
+    long expire = start + timeout;
+    boolean isOkay = false;
+
+    synchronized (this) {
+      _tryWriteCount++;
+
+      try {
+	do {
+	  if (! _isWrite && _readCount == 0) {
+	    _readCount++;
+	    _isWrite = true;
+	    _owner = Thread.currentThread();
+	    return;
+	  }
+
+	  if (Alarm.isTest())
+	    break;
+
+	  try {
+	    wait(expire - Alarm.getCurrentTime());
+	  } catch (InterruptedException e) {
+	    throw new LockTimeoutException(e);
+	  }
+	} while (Alarm.getCurrentTime() < expire);
+
+	Thread.dumpStack();
+	throw new LockTimeoutException(L.l("{0} lockReadAndWrite timed out ({1}ms) try-writers:{2}",
+					   this,
+					   (Alarm.getCurrentTime() - start),
+					   _tryWriteCount));
+      } finally {
+	_tryWriteCount--;
+
+	notifyAll();
+      }
+    }
+  }
+
+  /**
+   * Tries to get a write lock when already have a read lock.
+   *
+   * @param timeout how long to wait for a timeout
+   */
+  void lockWrite(Transaction xa, long timeout)
+    throws SQLException
+  {
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " lockWrite (read:" + _readCount
+		 + " write:" + _isWrite
+		 + " try-write:" + _tryWriteCount + ")");
+    }
 
     long expire = Alarm.getCurrentTime() + timeout;
     boolean isOkay = false;
 
-    synchronized (_queue) {
-      _upgradeCount++;
+    synchronized (this) {
+      _tryWriteCount++;
 
       try {
-	queue(xa, expire);
+	do {
+	  if (! _isWrite && _readCount == 1) {
+	    _isWrite = true;
+	    return;
+	  }
 
-	isOkay = waitForRead(xa, expire, 0);
+	  if (Alarm.isTest())
+	    break;
+
+	  try {
+	    wait(expire - Alarm.getCurrentTime());
+	  } catch (InterruptedException e) {
+	    throw new LockTimeoutException(e);
+	  }
+	} while (Alarm.getCurrentTime() < expire);
+
+	Thread.dumpStack();
+	throw new LockTimeoutException(L.l("{0} lockWrite timed out ({1}ms) try-writers:{2}",
+					   this,
+					   timeout,
+					   _tryWriteCount));
       } finally {
-	if (isOkay) {
-	  _writeCount = 1;
-	}
-	else {
-	  _upgradeCount--;
+	_tryWriteCount--;
 
-	  wake();
-	}
+	notifyAll();
       }
     }
-
-    if (! isOkay)
-      throw new IllegalStateException("Expected valid upgrade lock");
   }
 
   /**
@@ -315,188 +249,23 @@ public final class Lock implements ClockCacheItem {
   void unlockWrite()
     throws SQLException
   {
-    synchronized (_queue) {
-      unlockWriteInt();
+    synchronized (this) {
+      _readCount--;
+      _isWrite = false;
+      _owner = null;
+
+      notifyAll();
     }
     
-    if (log.isLoggable(Level.FINEST))
-      log.finest("UnlockWrite[" + _id + "] read:" + _readCount +
-		" write:" + _writeCount);
-    
-  }
-
-  /**
-   * Clears a write lock, including its upgrade and read locks.
-   */
-  private void unlockWriteInt()
-    throws SQLException
-  {
-    _writeCount--;
-    _upgradeCount--;
-    _readCount--;
-
-    if (_writeCount < 0) {
-      _writeCount = 0;
-      Thread.dumpStack();
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " unlockWrite (read:" + _readCount
+		 + " write:" + _isWrite
+		 + " try-write:" + _tryWriteCount + ")");
     }
-
-    if (_upgradeCount < 0) {
-      _upgradeCount = 0;
-      Thread.dumpStack();
-    }
-
-    if (_readCount < 0) {
-      _readCount = 0;
-      Thread.dumpStack();
-    }
-
-    wake();
-  }
-
-  /**
-   * Queues the transaction for the lock.
-   */
-  private boolean queue(Transaction xa, long expireTime)
-    throws SQLException
-  {
-    long startTime = Alarm.getCurrentTime();
-    boolean isOkay = false;
-
-    _queue.add(xa);
-
-    if (_queue.size() == 1)
-      return true;
-
-    try {
-      do {
-	long delta = expireTime - Alarm.getCurrentTime();
-
-	if (delta > 0) {
-	  _queue.wait(delta);
-	}
-
-	if (_queue.get(0) == xa) {
-	  isOkay = true;
-	  return true;
-	}
-      } while (Alarm.getCurrentTime() < expireTime && ! Alarm.isTest()); 
-
-      _queue.notifyAll();
-      
-      log.fine(L.l("{0}: transaction timed out waiting for lock", this));
-
-      LockTimeoutException e;
-      e = new LockTimeoutException(L.l("transaction timed out ({0}ms) waiting for lock {1}, read:{2} upgrade:{3}, write:{4}",
-					 Alarm.getCurrentTime() - startTime,
-					 this,
-					 _readCount,
-					 _upgradeCount,
-					 _writeCount));
-
-      e.fillInStackTrace();
-      e.printStackTrace();
-
-      throw e;
-    } catch (SQLException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new SQLExceptionWrapper(e);
-    } finally {
-      if (! isOkay)
-	_queue.remove(xa);
-    }
-  }
-
-  /**
-   * Waits for the reads to be a certain level.
-   */
-  private boolean waitForRead(Transaction xa, long expireTime, int readCount)
-    throws SQLException
-  {
-    boolean isOkay = false;
-
-    if (_queue.size() < 1 || _queue.get(0) != xa)
-      throw new IllegalStateException(L.l("illegal lock state"));
-
-    try {
-      while (readCount < _readCount &&
-	     Alarm.getCurrentTime() < expireTime && ! Alarm.isTest()) {
-	long delta = expireTime - Alarm.getCurrentTime();
-
-	if (delta > 0) {
-	  _queue.wait(delta);
-	}
-      }
-
-      if (_readCount <= readCount) {
-	_readCount++;
-	
-	return true;
-      }
-
-      log.fine(L.l("transaction timed out waiting for read lock"));
-      
-      throw new LockTimeoutException(L.l("transaction timed out waiting for write lock, read:{0} upgrade:{1}, write:{2}",
-					 _readCount,
-					 _upgradeCount,
-					 _writeCount));
-    } catch (SQLException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new SQLExceptionWrapper(e);
-    } finally {
-      _queue.remove(xa);
-    }
-  }
-
-  /**
-   * Wakes any transaction for the lock.
-   */
-  private void dequeue(Transaction xa)
-  {
-    _queue.remove(xa);
-  }
-
-  /**
-   * Wakes any transaction for the lock.
-   */
-  private boolean wake()
-  {
-    try {
-      _queue.notifyAll();
-
-      return true;
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-      return true;
-    }
-  }
-
-  // clock cache events
-
-  public void clearUsed()
-  {
-    _isUsed = false;
-  }
-
-  public void setUsed()
-  {
-    _isUsed = true;
-  }
-
-  public boolean isUsed()
-  {
-    synchronized (_queue) {
-      return _isUsed || _readCount > 0 || _upgradeCount > 0;
-    }
-  }
-
-  public void removeEvent()
-  {
   }
   
   public String toString()
   {
-    return "Lock$" + System.identityHashCode(this) + "[" + _id + "]";
+    return "Lock[" + _id + "]";
   }
 }

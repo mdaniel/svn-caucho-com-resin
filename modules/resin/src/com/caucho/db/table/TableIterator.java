@@ -240,7 +240,7 @@ public class TableIterator {
 
     rowOffset += rowLength;
     for (; rowOffset < rowEnd; rowOffset += rowLength) {
-      if ((buffer[rowOffset] & 0x01) != 0) {
+      if ((buffer[rowOffset] & Table.ROW_VALID) != 0) {
 	_rowOffset = rowOffset;
 	return true;
       }
@@ -435,9 +435,8 @@ public class TableIterator {
   public void delete()
     throws SQLException
   {
-    _table.delete(_transaction, _buffer, _rowOffset);
-    
     setDirty();
+    _table.delete(_transaction, _buffer, _rowOffset);
   }
   
   public void setDirty()

@@ -191,7 +191,7 @@ public class Store {
     _id = _blockManager.allocateStoreId();
 
     if (rowLock == null)
-      rowLock = new Lock(_id);
+      rowLock = new Lock("row-lock:" + _name + ":" + _id);
 
     _rowLock = rowLock;
   }
@@ -931,8 +931,9 @@ public class Store {
       if (j >= 8)
 	System.out.println("BAD J: " + fragMask);
 
-      if ((fragMask & (1 << j)) == 0)
+      if ((fragMask & (1 << j)) == 0) {
 	System.out.println("BAD J-MASK: " + fragMask + " " + j);
+      }
 
       _allocationTable[i + 1] = (byte) (fragMask & ~(1 << j));
 
