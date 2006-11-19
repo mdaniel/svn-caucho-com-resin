@@ -122,7 +122,20 @@ public class StatementImpl implements java.sql.Statement {
   private java.sql.ResultSet executeQuery(Query query)
     throws SQLException
   {
-    query.execute(_queryContext, _conn.getTransaction());
+    Transaction xa = _conn.getTransaction();
+    
+    boolean isOkay = false;
+    try {
+      query.execute(_queryContext, xa);
+      isOkay = true;
+    } finally {
+      if (! xa.isAutoCommit()) {
+      }
+      else if (isOkay)
+	xa.commit();
+      else
+	xa.rollback();
+    }
     
     _rs = new ResultSetImpl(this, _queryContext.getResult());
 

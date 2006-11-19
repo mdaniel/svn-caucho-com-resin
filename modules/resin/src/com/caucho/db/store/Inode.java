@@ -512,6 +512,7 @@ public class Inode {
 	if (length <= INLINE_BLOB_SIZE || bytes == null)
 	  return;
 
+	long initLength = length;
 	for (; length > 0; length -= INODE_BLOCK_SIZE) {
 	  long fragAddr = readFragmentAddr(bytes, 0, _store, length - 1);
 

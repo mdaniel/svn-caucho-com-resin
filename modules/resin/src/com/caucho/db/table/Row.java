@@ -31,6 +31,9 @@ package com.caucho.db.table;
 import com.caucho.util.CharBuffer;
 
 class Row {
+  // bit of the first null mask, i.e. skipping the allocation bits
+  private static final int NULL_OFFSET = 2;
+  
   private Column []_columns = new Column[0];
   private int _rowLength = 1;
   private int _nullOffset = 0;
@@ -56,7 +59,7 @@ class Row {
    */
   byte getNullMask()
   {
-    return (byte) (1 << ((_columns.length + 1) % 8));
+    return (byte) (1 << ((_columns.length + NULL_OFFSET) % 8));
   }
 
   /**
@@ -84,7 +87,7 @@ class Row {
    */
   void allocateColumn()
   {
-    if ((_columns.length + 1) % 8 == 0) {
+    if ((_columns.length + NULL_OFFSET) % 8 == 0) {
       _nullOffset = _rowLength;
       _rowLength++;
     }

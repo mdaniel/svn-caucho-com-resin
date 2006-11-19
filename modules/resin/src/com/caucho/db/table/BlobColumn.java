@@ -156,8 +156,9 @@ class BlobColumn extends Column {
    * @param rowOffset the offset into the row
    * @param str the string value
    */
-  void setStream(Transaction xa, byte []block, int rowOffset,
-		 InputStream value)
+  private void setStream(Transaction xa,
+			 byte []block, int rowOffset,
+			 InputStream value)
   {
     if (value == null) {
       setNull(block, rowOffset);
@@ -200,6 +201,7 @@ class BlobColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
+  @Override
   void delete(Transaction xa, byte []block, int rowOffset)
     throws SQLException
   {
@@ -214,7 +216,8 @@ class BlobColumn extends Column {
       xa.addDeleteInode(inode);
     }
   }
-  
+
+  @Override
   public String getString(byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
@@ -225,7 +228,7 @@ class BlobColumn extends Column {
       is = new BlobInputStream(getTable(), block, rowOffset + _columnOffset);
 
       int ch;
-      CharBuffer cb = CharBuffer.allocate();
+      StringBuilder cb = new StringBuilder();
 
       while ((ch = is.read()) >= 0) {
 	if (ch < 0x80)
@@ -248,7 +251,7 @@ class BlobColumn extends Column {
 
       is.close();
 
-      return cb.close();
+      return cb.toString();
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -345,6 +348,7 @@ class BlobColumn extends Column {
   /**
    * Evaluates the column to a stream.
    */
+  @Override
   public void evalToResult(byte []block, int rowOffset, SelectResult result)
   {
     if (isNull(block, rowOffset)) {

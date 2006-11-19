@@ -556,6 +556,20 @@ public class Store {
     long blockIndex;
     boolean isFileExtended = false;
 
+    /*
+    switch (code) {
+    case ALLOC_ROW:
+      System.out.println("ALLOC_ROW:");
+      break;
+    case ALLOC_INDEX:
+      System.out.println("ALLOC_INDEX:");
+      break;
+    case ALLOC_FRAGMENT:
+      System.out.println("ALLOC_FRAG:");
+      break;
+    }
+    */
+
     synchronized (_allocationLock) {
       long end = _blockCount;
 

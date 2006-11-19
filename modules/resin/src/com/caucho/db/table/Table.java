@@ -96,7 +96,7 @@ public class Table extends Store {
   
   public final static int INLINE_BLOB_SIZE = 120;
   
-  public final static long ROW_CLOCK_MIN = 256;
+  public final static long ROW_CLOCK_MIN = 1024;
 
   public final static byte ROW_VALID = 0x1;
   public final static byte ROW_ALLOC = 0x2;
@@ -120,6 +120,8 @@ public class Table extends Store {
   private long _rowClockAddr;
   private long _rowClockTotal;
   private long _rowClockUsed;
+  private int _rowClockCount;
+  private int _rowAllocCount;
 
   private long _autoIncrementValue = -1;
 
@@ -637,6 +639,7 @@ public class Table extends Store {
       boolean isLoop = false;
       boolean hasRow = false;
 
+      int rowClockCount = 0;
       long rowClockAddr = 0;
       long rowClockUsed = 0;
       long rowClockTotal = 0;
@@ -651,32 +654,42 @@ public class Table extends Store {
 	    block = xa.readBlock(this, blockId);
 	  }
 	  else if (! isLoop
-		   && ROW_CLOCK_MIN < _rowClockTotal
-		   && 4 * _rowClockUsed < 3 * _rowClockTotal) {
+		   && (ROW_CLOCK_MIN < _rowClockTotal
+		       && 4 * _rowClockUsed < 3 * _rowClockTotal
+		       || _rowAllocCount > 8)) {
+	    System.out.println("LOOP: used:" + _rowClockUsed + " total:" + _rowClockTotal + " frac:" + (double) _rowClockUsed / (double) (_rowClockTotal + 0.01));
 	    // go around loop if there are sufficient entries, i.e. over
 	    // ROW_CLOCK_MIN and at least 1/4 free entries.
 	    isLoop = true;
+	    _rowClockCount = 0;
 	    _rowClockAddr = 0;
 	    _rowClockUsed = 0;
 	    _rowClockTotal = 0;
+	    _rowAllocCount = 0;
 	    continue;
 	  }
 	  else {
+	    System.out.println("ROW: used:" + _rowClockUsed + " total:" + _rowClockTotal + " frac:" + (double) _rowClockUsed / (double) (_rowClockTotal + 0.01));
+
+	    _rowAllocCount++;
+	    
 	    // if no free row is available, allocate a new one
 	    block = xa.allocateRow(this);
 	    //System.out.println("ALLOC: " + block);
 
 	    blockId = block.getBlockId();
 	  }
-	    
+
+	  rowClockCount = _rowClockCount;
 	  rowClockAddr = blockIdToAddress(blockId);
 	  rowClockUsed = _rowClockUsed;
 	  rowClockTotal = _rowClockTotal;
 
 	  // the next insert will try the following block
+	  _rowClockCount++;
 	  _rowClockAddr = rowClockAddr + BLOCK_SIZE;
-	  _rowClockUsed = rowClockUsed + 1;
-	  _rowClockTotal = rowClockTotal + 1;
+	  _rowClockUsed = rowClockUsed + _rowsPerBlock;
+	  _rowClockTotal = rowClockTotal + _rowsPerBlock;
 	}
 	
 	xa.lockWrite(block.getLock());
@@ -699,19 +712,18 @@ public class Table extends Store {
 	}
       } while (! hasRow);
 
-      if (rowOffset + _rowLength >= Store.BLOCK_SIZE)
-	System.out.println("OFF: " + rowOffset + " " + hasRow);
-      
       insertRow(queryContext, xa, columns, values,
 		block, rowOffset);
 
       synchronized (_rowClockLock) {
-	if (rowClockAddr < _rowClockAddr) {
+	if (rowClockCount < _rowClockCount) {
 	  // the next insert will retry this block
-	  
+	  int blocks = _rowClockCount - rowClockCount;
+
+	  _rowClockCount = rowClockCount;
 	  _rowClockAddr = rowClockAddr;
-	  _rowClockUsed = rowClockUsed;
-	  _rowClockTotal = rowClockTotal;
+	  _rowClockUsed -= blocks * _rowsPerBlock;
+	  _rowClockTotal -= blocks * _rowsPerBlock;
 	}
       }
 
@@ -746,7 +758,7 @@ public class Table extends Store {
 
       block.setDirty(rowOffset, rowOffset + _rowLength);
 	  
-      for (int i = rowOffset + _rowLength - 1; rowOffset <= i; i--)
+      for (int i = rowOffset + _rowLength - 1; rowOffset < i; i--)
 	buffer[i] = 0;
 
       for (int i = 0; i < columns.size(); i++) {
@@ -757,11 +769,12 @@ public class Table extends Store {
       }
 
       // lock for insert, i.e. entries, indices, and validation
-      xa.lockWrite(_insertLock);
+      // XXX: the set index needs to handle the validation
+      //xa.lockWrite(_insertLock);
       try {
 	validate(block, rowOffset, queryContext, xa);
       
-	buffer[rowOffset] = 1;
+	buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~0x3) | ROW_VALID);
 
 	for (int i = 0; i < columns.size(); i++) {
 	  Column column = columns.get(i);
@@ -785,10 +798,10 @@ public class Table extends Store {
       
 	isOkay = true;
       } finally {
-	xa.unlockWrite(_insertLock);
+	// xa.unlockWrite(_insertLock);
 	  
 	if (! isOkay)
-	  delete(xa, buffer, rowOffset);
+	  delete(xa, block, buffer, rowOffset);
       }
     } finally {
       queryContext.unlock();
@@ -812,15 +825,26 @@ public class Table extends Store {
     }
   }
   
-  void delete(Transaction xa, byte []block, int rowOffset)
+  void delete(Transaction xa, Block block, byte []buffer, int rowOffset)
     throws SQLException
   {
-    block[rowOffset] = 0;
+    buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~0x3) | ROW_ALLOC);
     
     Column []columns = _row.getColumns();
     
-    for (int i = 0; i < columns.length; i++)
-      columns[i].delete(xa, block, rowOffset);
+    for (int i = 0; i < columns.length; i++) {
+      columns[i].delete(xa, buffer, rowOffset);
+    }
+
+    buffer[rowOffset] = 0;
+    
+    synchronized (_rowClockLock) {
+      long addr = blockIdToAddress(block.getBlockId());
+      
+      if (addr <= _rowClockAddr) {
+	_rowClockUsed--;
+      }
+    }
   }
 
   private void writeLong(WriteStream os, long value)
