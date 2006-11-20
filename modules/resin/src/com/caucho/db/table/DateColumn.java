@@ -329,7 +329,7 @@ class DateColumn extends Column {
     if (index == null)
       return;
 
-    index.insert(block, rowOffset + _columnOffset, 8, rowAddr, xa);
+    index.insert(block, rowOffset + _columnOffset, 8, rowAddr, xa, false);
   }
 
   /**

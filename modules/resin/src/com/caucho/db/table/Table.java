@@ -100,6 +100,7 @@ public class Table extends Store {
 
   public final static byte ROW_VALID = 0x1;
   public final static byte ROW_ALLOC = 0x2;
+  public final static byte ROW_MASK = 0x3;
 
   private final static String DB_VERSION = "Resin-DB 3.0.18";
   private final static String MIN_VERSION = "Resin-DB 3.0.18";
@@ -774,7 +775,7 @@ public class Table extends Store {
       try {
 	validate(block, rowOffset, queryContext, xa);
       
-	buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~0x3) | ROW_VALID);
+	buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~ROW_MASK) | ROW_VALID);
 
 	for (int i = 0; i < columns.size(); i++) {
 	  Column column = columns.get(i);
@@ -828,7 +829,12 @@ public class Table extends Store {
   void delete(Transaction xa, Block block, byte []buffer, int rowOffset)
     throws SQLException
   {
-    buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~0x3) | ROW_ALLOC);
+    byte rowState = buffer[rowOffset];
+
+    if ((rowState & ROW_MASK) != ROW_VALID)
+      return;
+    
+    buffer[rowOffset] = (byte) ((rowState & ~ROW_MASK) | ROW_ALLOC);
     
     Column []columns = _row.getColumns();
     

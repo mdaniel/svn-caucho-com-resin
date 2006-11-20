@@ -288,7 +288,7 @@ class IntColumn extends Column {
     if (index == null)
       return;
 
-    index.insert(block, rowOffset + _columnOffset, 4, rowAddr, xa);
+    index.insert(block, rowOffset + _columnOffset, 4, rowAddr, xa, false);
   }
 
   /**

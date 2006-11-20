@@ -31,6 +31,8 @@ package com.caucho.db.table;
 
 import java.io.IOException;
 
+import java.util.logging.*;
+
 import java.sql.SQLException;
 
 import com.caucho.vfs.WriteStream;
@@ -47,7 +49,13 @@ import com.caucho.db.index.KeyCompare;
 import com.caucho.db.index.StringKeyCompare;
 import com.caucho.db.index.BTree;
 
+import com.caucho.util.*;
+
 class StringColumn extends Column {
+  private static final Logger log
+    = Logger.getLogger(StringColumn.class.getName());
+  private static final L10N L = new L10N(StringColumn.class);
+  
   private final int _maxLength;
 
   /**
@@ -322,8 +330,22 @@ class StringColumn extends Column {
   {
     BTree index = getIndex();
 
-    if (index != null)
-      index.insert(block, rowOffset + _columnOffset, getLength(), rowAddr, xa);
+    if (index != null) {
+      try {
+	index.insert(block,
+		     rowOffset + _columnOffset, getLength(),
+		     rowAddr,
+		     xa,
+		     false);
+      } catch (SQLException e) {
+	log.log(Level.FINER, e.toString(), e);
+	
+	throw new SQLException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}",
+				   getTable().getName(),
+				   getName(),
+				   getString(block, rowOffset)));
+      }
+    }
   }
   
   /**

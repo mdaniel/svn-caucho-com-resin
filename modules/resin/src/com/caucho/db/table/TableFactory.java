@@ -171,7 +171,7 @@ public class TableFactory {
     column.setUnique();
     column.setNotNull();
 
-    addConstraint(new PrimaryKeySingleColumnConstraint(column));
+    //addConstraint(new PrimaryKeySingleColumnConstraint(column));
   }
 
   /**

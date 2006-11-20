@@ -204,7 +204,8 @@ public final class BTree {
 		     int keyOffset,
 		     int keyLength,
 		     long value,
-		     Transaction xa)
+		     Transaction xa,
+		     boolean isOverride)
     throws SQLException
   {
     xa.lockWrite(_lock);
@@ -248,7 +249,8 @@ public final class BTree {
 	    
 	    insertLeafBlock(blockId, buffer,
 			    keyBuffer, keyOffset, keyLength,
-			    value);
+			    value,
+			    isOverride);
 
 	    return;
 	  }
@@ -277,8 +279,9 @@ public final class BTree {
                                byte []keyBuffer,
                                int keyOffset,
                                int keyLength,
-                               long value)
-    throws IOException
+                               long value,
+			       boolean isOverride)
+    throws IOException, SQLException
   {
     int offset = HEADER_SIZE;
     int tupleSize = _tupleSize;
@@ -294,6 +297,13 @@ public final class BTree {
         continue;
       }
       else if (cmp == 0) {
+	if (! isOverride) {
+	  long oldValue = getPointer(buffer, offset);
+
+	  if (value != oldValue)
+	    throw new SQLException(L.l("BTree insert of mismatched value"));
+	}
+	
         setPointer(buffer, offset, value);
         //writeBlock(blockIndex, block);
         
@@ -354,7 +364,7 @@ public final class BTree {
   private void split(long parentId,
 		     Block block,
 		     Transaction xa)
-    throws IOException
+    throws IOException, SQLException
   {
     long blockId = block.getBlockId();
     
@@ -409,7 +419,8 @@ public final class BTree {
 
       insertLeafBlock(parentId, parentBuffer,
 		      leftBuffer, pivotEnd - _tupleSize + PTR_SIZE, _keySize,
-		      leftBlockId);
+		      leftBlockId,
+		      true);
     } finally {
       if (parentBlock != null)
 	parentBlock.free();
