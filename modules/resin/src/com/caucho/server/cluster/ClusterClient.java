@@ -650,12 +650,14 @@ public final class ClusterClient {
 
       synchronized (this) {
 	if (_idleHead != _idleTail) {
-	  oldStream = _idle[_idleTail + 1];
+	  int nextTail = (_idleTail + 1) % _idle.length;
+	  
+	  oldStream = _idle[nextTail];
 
 	  if (oldStream != null
 	      && oldStream.getFreeTime() + maxIdleTime < now) {
-	    _idle[_idleTail + 1] = null;
-	    _idleTail = (_idleTail + 1) % _idle.length;
+	    _idle[nextTail] = null;
+	    _idleTail = nextTail;
 	  }
 	  else
 	    oldStream = null;
