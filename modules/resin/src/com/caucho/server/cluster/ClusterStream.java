@@ -105,6 +105,15 @@ public class ClusterStream {
   }
 
   /**
+   * Returns true if nearing end of free time.
+   */
+  public boolean isLongIdle()
+  {
+    return (_srun.getServer().getLoadBalanceIdleTime() <
+	    Alarm.getCurrentTime() - _freeTime + 2000L);
+  }
+
+  /**
    * Returns the debug id.
    */
   public String getDebugId()

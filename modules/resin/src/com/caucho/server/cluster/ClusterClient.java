@@ -545,7 +545,7 @@ public final class ClusterClient {
         if (now < freeTime + _server.getLoadBalanceIdleTime()) {
           _activeCount++;
 	  _keepaliveCountTotal++;
-	  
+
           return stream;
         }
       }
@@ -650,11 +650,11 @@ public final class ClusterClient {
 
       synchronized (this) {
 	if (_idleHead != _idleTail) {
-	  oldStream = _idle[_idleTail];
+	  oldStream = _idle[_idleTail + 1];
 
-	  if (oldStream != null &&
-	      oldStream.getFreeTime() + maxIdleTime < now) {
-	    _idle[_idleTail] = null;
+	  if (oldStream != null
+	      && oldStream.getFreeTime() + maxIdleTime < now) {
+	    _idle[_idleTail + 1] = null;
 	    _idleTail = (_idleTail + 1) % _idle.length;
 	  }
 	  else
