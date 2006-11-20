@@ -337,17 +337,33 @@ public final class BlockManager
 	  Block block = null;
 	  
 	  synchronized (_writeQueue) {
-	    while (_writeQueue.size() == 0) {
-	      _writeQueue.wait();
-	    }
+	    loop:
+	    while (true) {
+	      for (int i = 0; i < _writeQueue.size(); i++) {
+		block = _writeQueue.get(i);
 
-	    block = _writeQueue.get(0);
+		if (block.isFree())
+		  break loop;
+		else
+		  block = null;
+	      }
+
+	      if (_writeQueue.size() == 0)
+		_writeQueue.wait();
+	      else
+		_writeQueue.wait(10000);
+	    }
 	  }
 
 	  block.close();
 
 	  synchronized (_writeQueue) {
-	    _writeQueue.remove(0);
+	    for (int i = 0; i < _writeQueue.size(); i++) {
+	      if (block == _writeQueue.get(i)) {
+		_writeQueue.remove(i);
+		break;
+	      }
+	    }
 
 	    _writeQueue.notifyAll();
 	  }

@@ -213,12 +213,13 @@ public class TableFactory {
     Column column = _row.getColumn(name);
 
     if (column == null)
-      throw new SQLException(L.l("`{0}' is not a valid column for NOT NULL",
+      throw new SQLException(L.l("'{0}' is not a valid column for NOT NULL",
 				 name));
 
     column.setUnique();
 
-    addConstraint(new UniqueSingleColumnConstraint(column));
+    // already checked by unique
+    //addConstraint(new UniqueSingleColumnConstraint(column));
   }
   
   /**
@@ -230,7 +231,7 @@ public class TableFactory {
     Column column = _row.getColumn(name);
 
     if (column == null)
-      throw new SQLException(L.l("`{0}' is not a valid column for auto_increment",
+      throw new SQLException(L.l("'{0}' is not a valid column for auto_increment",
 				 name));
 
     column.setAutoIncrement(min);
@@ -263,8 +264,11 @@ public class TableFactory {
     Column []columnArray = new Column[columns.size()];
     columns.toArray(columnArray);
 
-    if (columnArray.length == 1)
-      addConstraint(new UniqueSingleColumnConstraint(columnArray[0]));
+    if (columnArray.length == 1) {
+      columnArray[0].setUnique();
+      
+      //addConstraint(new UniqueSingleColumnConstraint(columnArray[0]));
+    }
     else
       addConstraint(new UniqueConstraint(columnArray));
   }
@@ -295,8 +299,10 @@ public class TableFactory {
     Column []columnArray = new Column[columns.size()];
     columns.toArray(columnArray);
     
-    if (columnArray.length == 1)
-      addConstraint(new PrimaryKeySingleColumnConstraint(columnArray[0]));
+    if (columnArray.length == 1) {
+      columnArray[0].setPrimaryKey(true);
+      //addConstraint(new PrimaryKeySingleColumnConstraint(columnArray[0]));
+    }
     else
       addConstraint(new PrimaryKeyConstraint(columnArray));
   }
