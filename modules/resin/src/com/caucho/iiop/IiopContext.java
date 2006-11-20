@@ -46,8 +46,8 @@ public class IiopContext {
   private static final EnvironmentLocal<IiopContext> _localIiop =
     new EnvironmentLocal<IiopContext>();
 
-  private HashMap<String,IiopRemoteService> _serviceMap =
-    new HashMap<String,IiopRemoteService>();
+  private HashMap<String,IiopRemoteService> _serviceMap
+    = new HashMap<String,IiopRemoteService>();
 
   /**
    * Returns the local context.

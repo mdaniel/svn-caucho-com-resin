@@ -340,7 +340,7 @@ public class InjectIntrospector {
   {
     PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
 
-    String jndiPrefix = "java:comp/env/persistence/PersistenceUnit";
+    String jndiPrefix = "java:comp/env/persistence/_amber_PersistenceUnit";
 
     String jndiName = null;
     String unitName = pUnit.unitName();

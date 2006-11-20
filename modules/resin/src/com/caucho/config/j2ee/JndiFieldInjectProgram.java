@@ -65,7 +65,8 @@ public class JndiFieldInjectProgram extends BuilderProgram {
       if (value == null)
 	return;
 
-      if (! _field.getType().isAssignableFrom(value.getClass())) {
+      if (! _field.getType().isAssignableFrom(value.getClass())
+	  && ! _field.getType().isPrimitive()) {
 	throw new ConfigException(L.l("Resource at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
 				      _jndiName,
 				      value.getClass().getName(),

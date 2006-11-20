@@ -28,9 +28,8 @@
 
 package com.caucho.amber.query;
 
-import java.util.Calendar;
-import java.util.Map;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.logging.*;
 
 import java.io.Reader;
 import java.io.InputStream;
@@ -64,6 +63,8 @@ import com.caucho.amber.manager.AmberConnection;
  * The JDBC statement implementation.
  */
 public class ResultSetImpl implements ResultSet {
+  private static final Logger log
+    = Logger.getLogger(ResultSetImpl.class.getName());
   private static final L10N L = new L10N(ResultSetImpl.class);
 
   public static final int CACHE_CHUNK_SIZE = 64;
@@ -1729,12 +1730,16 @@ public class ResultSetImpl implements ResultSet {
   }
 
   public void close()
-    throws SQLException
   {
     ResultSet rs = _rs;
     _rs = null;
 
-    if (rs != null)
-      rs.close();
+    if (rs != null) {
+      try {
+	rs.close();
+      } catch (SQLException e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
+    }
   }
 }

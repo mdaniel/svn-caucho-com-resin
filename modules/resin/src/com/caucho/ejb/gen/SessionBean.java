@@ -66,6 +66,7 @@ public class SessionBean extends ClassComponent {
     generateContext(out);
 
     generateNewInstance(out);
+    generateNewRemoteInstance(out);
     
     generateBean(out);
   }
@@ -178,6 +179,38 @@ public class SessionBean extends ClassComponent {
 				_prefix));
     */
     out.println("return cxt.getEJBLocalObject();");
+    
+    out.popDepth();
+    out.println("}");
+  }
+
+  protected void generateNewRemoteInstance(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("protected Object _caucho_newRemoteInstance()");
+    out.println("{");
+    out.pushDepth();
+    
+    out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
+
+    out.println("Bean bean = new Bean(cxt);");
+    
+    out.println("cxt._ejb_free(bean);");
+    
+    out.println();
+
+    /*
+    Class retType = getReturnType();
+    if ("RemoteHome".equals(_prefix))
+      out.println("return (" + retType.getName() + ") cxt.getRemoteView();");
+    else if ("LocalHome".equals(_prefix))
+      out.println("return (" + retType.getName() + ") cxt.getLocalView();");
+    else
+      throw new IOException(L.l("trying to create unknown type {0}",
+				_prefix));
+    */
+    out.println("return cxt.getEJBObject();");
     
     out.popDepth();
     out.println("}");

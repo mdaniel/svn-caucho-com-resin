@@ -59,7 +59,7 @@ import com.caucho.soa.client.WebServiceClient;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
-import javax.naming.Context;
+import javax.naming.*;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
@@ -67,7 +67,7 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -91,6 +91,9 @@ public class AppClient implements EnvironmentBean
   private Lifecycle _lifecycle = new Lifecycle(log);
   private Method _mainMethod;
   private String[] _mainArgs = new String[] {};
+
+  private Hashtable _ejbEnv = new Hashtable();
+  private Context _ejbContext;
 
   private AppClient()
   {
@@ -202,6 +205,11 @@ public class AppClient implements EnvironmentBean
     System.setProperty(Context.SECURITY_CREDENTIALS, callback.getPassword());
   }
 
+  public ClientEjbRef createEjbRef()
+  {
+    return new ClientEjbRef(_ejbContext);
+  }
+
   public void init()
     throws Exception
   {
@@ -209,8 +217,13 @@ public class AppClient implements EnvironmentBean
       return;
 
     if (_clientJar == null)
-      throw new ConfigException(L.l("'{0}' is required", "client-jar"));
+      throw new ConfigException(L.l("'client-jar' is required"));
 
+    // corba needs for RMI(?)
+
+    //EnvironmentClassLoader.initializeEnvironment();
+    //System.setSecurityManager(new SecurityManager());
+    
     if (_rootDirectory == null) {
       String name = _clientJar.getTail();
 
@@ -241,6 +254,8 @@ public class AppClient implements EnvironmentBean
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("work-directory is {0}", WorkDir.getLocalWorkDir()));
+
+      _ejbContext = new InitialContext(_ejbEnv);
 
       JarPath jarPath = JarPath.create(_clientJar);
 

@@ -57,12 +57,12 @@ import com.caucho.hessian.io.*;
  */
 
 public class HessianStubFactory implements HessianRemoteResolver {
-  private HessianRemoteResolver resolver;
-  private Path workPath;
+  private HessianRemoteResolver _resolver;
+  private Path _workPath;
   
   public HessianStubFactory()
   {
-    resolver = this;
+    _resolver = this;
   }
 
   /**
@@ -70,17 +70,17 @@ public class HessianStubFactory implements HessianRemoteResolver {
    */
   public HessianRemoteResolver getRemoteResolver()
   {
-    return resolver;
+    return _resolver;
   }
 
   public void setWorkPath(Path path)
   {
-    this.workPath = path;
+    _workPath = path;
   }
 
   public Path getWorkPath()
   {
-    return workPath;
+    return _workPath;
   }
 
   /**
@@ -101,7 +101,7 @@ public class HessianStubFactory implements HessianRemoteResolver {
     throws Exception
   {
     StubGenerator gen = new StubGenerator();
-    gen.setClassDir(getWorkPath());
+    gen.setClassDir(getWorkPath().lookup("ejb"));
       
     Class cl = gen.createStub(api);
 
@@ -116,7 +116,7 @@ public class HessianStubFactory implements HessianRemoteResolver {
   public AbstractHessianInput getHessianInput(InputStream is)
   {
     AbstractHessianInput in = new HessianSerializerInput(is);
-    in.setRemoteResolver(resolver);
+    in.setRemoteResolver(_resolver);
 
     return in;
   }

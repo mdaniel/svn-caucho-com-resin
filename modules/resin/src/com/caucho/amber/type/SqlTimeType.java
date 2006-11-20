@@ -32,6 +32,7 @@ import java.io.IOException;
 
 import com.caucho.util.L10N;
 
+import com.caucho.bytecode.*;
 import com.caucho.java.JavaWriter;
 
 import java.sql.ResultSet;
@@ -66,6 +67,15 @@ public class SqlTimeType extends Type {
   public String getName()
   {
     return "java.sql.Time";
+  }
+
+  /**
+   * Returns true if the value is assignable to the Java type.
+   */
+  @Override
+  public boolean isAssignableTo(JClass javaType)
+  {
+    return javaType.isAssignableFrom(java.sql.Time.class);
   }
 
   /**

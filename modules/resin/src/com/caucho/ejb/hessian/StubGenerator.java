@@ -36,6 +36,7 @@ import java.lang.reflect.*;
 import com.caucho.vfs.*;
 import com.caucho.util.*;
 import com.caucho.make.*;
+import com.caucho.java.*;
 
 import com.caucho.config.ConfigException;
 
@@ -49,6 +50,7 @@ class StubGenerator extends MarshalGenerator {
   
   StubGenerator()
   {
+    setClassDir(WorkDir.getLocalWorkDir().lookup("ejb"));
   }
   
   Class createHomeStub(Class cl)
@@ -144,6 +146,7 @@ class StubGenerator extends MarshalGenerator {
       if (declaringClass.getName().startsWith("javax.ejb."))
         prefix = "_ejb_";
 
+      /*
       Class []exns = method.getExceptionTypes();
       for (int j = 0; j < exns.length; j++) {
         if (exns[j].isAssignableFrom(java.rmi.RemoteException.class)) {
@@ -151,6 +154,8 @@ class StubGenerator extends MarshalGenerator {
           break;
         }
       }
+      */
+      printMethod(prefix + method.getName(), method);
     }
     
     printDependList(_dependList);
@@ -271,7 +276,7 @@ class StubGenerator extends MarshalGenerator {
     
     if (! hasThrowable) {
       println("} catch (Throwable e) {");
-      println("  throw new RemoteException(\"stub exception\", e);");
+      println("  throw new javax.ejb.EJBException(\"stub exception\", e);");
     }
     
     println("} finally {");

@@ -61,7 +61,10 @@ public class EjbIiopRemoteService extends IiopRemoteService {
    */
   public Class getHomeAPI()
   {
-    return _server.getRemoteHomeClass();
+    if (_server.getRemoteHomeClass() != null)
+      return _server.getRemoteHomeClass();
+    else
+      return _server.getRemoteObjectClass();
   }
 
   /**
@@ -77,7 +80,12 @@ public class EjbIiopRemoteService extends IiopRemoteService {
    */
   public Object getHome()
   {
-    return _server.getHomeObject();
+    Object obj = _server.getHomeObject();
+
+    if (obj != null)
+      return obj;
+    else
+      return _server.getRemoteObject();
   }
 
   /**

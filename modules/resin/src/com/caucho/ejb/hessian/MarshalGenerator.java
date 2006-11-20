@@ -95,7 +95,7 @@ abstract class MarshalGenerator extends AbstractGenerator {
       dcl.make();
     }
 
-    Path workPath = CauchoSystem.getWorkPath();
+    Path workPath = getClassDir();
 
     _cl = beanClass;
 

@@ -46,6 +46,7 @@ import javax.ejb.EJBHome;
 import javax.ejb.SessionBean;
 import javax.ejb.FinderException;
 
+import com.caucho.naming.*;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 
@@ -82,15 +83,22 @@ public class SessionServer extends AbstractServer {
   public void init()
     throws Exception
   {
-    super.init();
-    
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
     try {
+      thread.setContextClassLoader(_loader);
+    
+      super.init();
+    
+      Jndi.rebindDeep("java:comp/env/ejb/sessionContext", getSessionContext());
+      
       _localHome = getSessionContext().createLocalHome();
       _remoteHomeView = getSessionContext().createRemoteHomeView();
       
       log.config("initialized session bean: " + this);
-    } catch (Exception e) {
-      throw e;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 
@@ -125,6 +133,17 @@ public class SessionServer extends AbstractServer {
   public Object getHomeObject()
   {
     return _remoteHomeView;
+  }
+
+  /**
+   * Returns the EJBRemote stub for the container
+   */
+  public Object getRemoteObject()
+  {
+    if (_remoteHomeView != null)
+      return _remoteHomeView;
+    else
+      return _homeContext._caucho_newRemoteInstance();
   }
 
   /**

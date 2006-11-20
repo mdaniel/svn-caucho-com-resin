@@ -752,13 +752,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       
       createViews();
 
+      /*
       if (_jndiName == null) {
         if (getRemoteHomeClass() != null)
           _jndiName = getConfig().getRemoteJndiName() + "/" + _ejbName;
         else
           _jndiName = getConfig().getLocalJndiName() + "/" + _ejbName;
       }
-
+      */
     } catch (LineConfigException e) {
       throw e;
     } catch (ConfigException e) {

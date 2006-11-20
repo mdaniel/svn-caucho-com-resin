@@ -131,7 +131,8 @@ public class IiopProtocol extends Protocol {
     if (service == null)
       return null;
     else if (local == null) {
-      return new IiopSkeleton(service.getHome(), service.getHomeAPI(),
+      return new IiopSkeleton(service.getHome(),
+			      service.getHomeAPI(),
                               service.getClassLoader(),
                               host, port, url);
     }

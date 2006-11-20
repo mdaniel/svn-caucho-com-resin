@@ -104,6 +104,8 @@ public class PolicyImpl extends Policy {
       return true;
 
     // XXX: temporary to restore default security-manager
+    if (true)
+      return true;
     if (true && _parent != null)
       return _parent.implies(domain, permission);
     else if (true)

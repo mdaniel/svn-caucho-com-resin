@@ -119,21 +119,28 @@ public class HessianProtocol extends ProtocolContainer
         objectId = queryString.substring(p + 1);
       else
         objectId = queryString;
-
     }
-
+    
     if (log.isLoggable(Level.FINEST))
       log.log(Level.FINEST, "uri=" + uri + ", queryString=" + queryString + ", serverId=" + serverId + ", objectId=" + objectId);
 
-    if (serverId.equals("/_ejb_xa_resource"))
+    if ("/_ejb_xa_resource".equals(serverId))
       return new XAResourceSkeleton(getProtocolManager().getServerManager().getTransactionManager());
 
     AbstractServer server;
 
-    server = getProtocolManager().getServerByJndiName(serverId);
+    // XXX: should avoid this work for runtime
+    String name = serverId;
+    if (name == null)
+      name = "";
+    
+    while (name.startsWith("/"))
+      name = name.substring(1);
+
+    server = getProtocolManager().getServerByJndiName(name);
 
     if (server == null)
-      server = getProtocolManager().getServerByEJBName(serverId);
+      server = getProtocolManager().getServerByEJBName(name);
 
     if (server == null) {
       ArrayList children = getProtocolManager().getRemoteChildren(serverId);

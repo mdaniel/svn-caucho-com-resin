@@ -32,6 +32,7 @@ import java.io.IOException;
 
 import com.caucho.util.L10N;
 
+import com.caucho.bytecode.*;
 import com.caucho.java.JavaWriter;
 
 import java.sql.PreparedStatement;
@@ -68,6 +69,15 @@ public class SqlDateType extends Type {
   public String getName()
   {
     return "java.sql.Date";
+  }
+
+  /**
+   * Returns true if the value is assignable to the Java type.
+   */
+  @Override
+  public boolean isAssignableTo(JClass javaType)
+  {
+    return javaType.isAssignableFrom(java.sql.Date.class);
   }
 
   /**

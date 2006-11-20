@@ -112,12 +112,13 @@ public class AmberSelectMethod extends AbstractQueryMethod {
     out.print("com.caucho.ejb.xa.TransactionContext trans");
     out.println(" = _ejb_context.getTransactionManager().beginSupports();");
 
+    out.println("com.caucho.amber.query.ResultSetImpl rs = null;");
     out.println("try {");
     out.pushDepth();
 
     generatePrepareQuery(out, args);
 
-    out.println("com.caucho.amber.query.ResultSetImpl rs = (com.caucho.amber.query.ResultSetImpl) query.executeQuery();");
+    out.println("rs = (com.caucho.amber.query.ResultSetImpl) query.executeQuery();");
 
     out.println("if (rs.next()) {");
     out.pushDepth();
@@ -134,16 +135,12 @@ public class AmberSelectMethod extends AbstractQueryMethod {
       out.println(";");
     }
 
-    out.println("rs.close();");
     out.println();
     out.println("return v;");
     
     out.popDepth();
     out.println("}");
     out.println();
-
-    // XXX: s/b FinderException? possibly
-    out.println("rs.close();");
 
     if (getReturnType().isPrimitive())
       out.println("return 0;");
@@ -154,6 +151,9 @@ public class AmberSelectMethod extends AbstractQueryMethod {
     out.println("} catch (java.sql.SQLException e) {");
     out.println("  throw new com.caucho.ejb.FinderExceptionWrapper(e);");
     out.println("} finally {");
+    out.println("if (rs != null)");
+    out.println("  rs.close();");
+
     out.println("  trans.commit();");
     out.println("}");
   }

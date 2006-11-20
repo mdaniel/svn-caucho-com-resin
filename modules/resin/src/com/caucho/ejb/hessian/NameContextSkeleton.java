@@ -104,6 +104,9 @@ public class NameContextSkeleton extends Skeleton {
     String name = in.readString();
     in.completeCall();
 
+    while (name.startsWith("/"))
+      name = name.substring(1);
+    
     EjbProtocolManager container = _protocol.getProtocolManager();
     
     AbstractServer server;

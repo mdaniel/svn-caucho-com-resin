@@ -47,6 +47,8 @@ public class JndiInjectProgram extends BuilderProgram {
   {
     _jndiName = jndiName;
     _method = method;
+
+    method.setAccessible(true);
   }
 
   @Override

@@ -165,7 +165,6 @@ public class Resin implements EnvironmentBean, SchemaBean
     else
       setResinHome(Vfs.getPwd());
 
-
     String resinRoot = System.getProperty("resin.root");
 
     if (resinRoot != null)

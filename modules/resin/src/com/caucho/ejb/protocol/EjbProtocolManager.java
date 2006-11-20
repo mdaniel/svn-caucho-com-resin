@@ -64,8 +64,8 @@ public class EjbProtocolManager {
   private final EnvServerManager _ejbServer;
   private final ClassLoader _loader;
 
-  private String _localJndiName = "java:comp/env/cmp";
-  private String _remoteJndiName = "java:comp/env/ejb";
+  private String _localJndiName; // = "java:comp/env/cmp";
+  private String _remoteJndiName; // = "java:comp/env/ejb";
 
   private HashMap<String,AbstractServer> _serverMap
     = new HashMap<String,AbstractServer>();
@@ -211,33 +211,47 @@ public class EjbProtocolManager {
     for (ProtocolContainer protocol : _protocolMap.values()) {
       protocol.addServer(server);
     }
-
-    Object home;
-
-    home = server.getEJBLocalHome();
-
-    if (home == null)
-      home = server.getClientObject();
+    
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
 
     try {
-    if (home == null)
-      home = server.getEJBHome();
-    }
-    catch (RemoteException ex) {
-      throw new RuntimeException(ex);
-    }
+      Thread.currentThread().setContextClassLoader(_loader);
+      String jndiName = server.getJndiName();
 
-    if (home != null) {
-      Thread thread = Thread.currentThread();
-      ClassLoader loader = thread.getContextClassLoader();
+      if (jndiName == null)
+	jndiName = server.getEJBName();
+
+      Object home;
+
+      home = server.getEJBLocalHome();
+
+      if (home == null)
+	home = server.getClientObject();
+
+      if (home != null) {
+	if (jndiName.startsWith("java:comp"))
+	  Jndi.bindDeepShort(jndiName, home);
+	else if (_localJndiName != null)
+	  Jndi.bindDeepShort(_localJndiName + "/" + jndiName, home);
+      }
 
       try {
-        Thread.currentThread().setContextClassLoader(_loader);
-        Jndi.bindDeepShort(server.getJndiName(), home);
+	home = server.getEJBHome();
+	
+	if (home != null) {
+	  if (jndiName.startsWith("java:comp")) {
+	  }
+	  else if (_remoteJndiName != null)
+	    Jndi.bindDeepShort(_remoteJndiName + "/" + jndiName, home);
+	}
       }
-      finally {
-        Thread.currentThread().setContextClassLoader(loader);
+      catch (RemoteException ex) {
+	throw new RuntimeException(ex);
       }
+    }
+    finally {
+      Thread.currentThread().setContextClassLoader(loader);
     }
   }
 
@@ -331,9 +345,6 @@ public class EjbProtocolManager {
   {
     if (! ejbName.startsWith("/"))
       ejbName = "/" + ejbName;
-
-    if (! ejbName.endsWith("/"))
-      ejbName = ejbName + "/";
 
     ArrayList<String> children = new ArrayList<String>();
 

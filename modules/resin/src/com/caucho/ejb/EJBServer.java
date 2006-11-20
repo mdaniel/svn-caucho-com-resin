@@ -76,11 +76,14 @@ public class EJBServer
   private static EnvironmentLocal<EJBServer> _localServer
     = new EnvironmentLocal<EJBServer>("caucho.ejb-server");
 
+  private static EnvironmentLocal<EjbServerManager> _localManager
+    = new EnvironmentLocal<EjbServerManager>();
+
   protected static EnvironmentLocal<String> _localURL =
     new EnvironmentLocal<String>("caucho.url");
 
-  private String _localJndiName = "java:comp/env/cmp";
-  private String _remoteJndiName = "java:comp/env/ejb";
+  private String _localJndiName; // = "java:comp/env/cmp";
+  private String _remoteJndiName; // = "java:comp/env/ejb";
 
   private String _entityManagerJndiName = "java:comp/EntityManager";
 
@@ -229,13 +232,13 @@ public class EJBServer
    */
   public void setJndiName(String name)
   {
-    setLocalJndiName(name);
+    setJndiLocalPrefix(name);
   }
 
   /**
    * Gets the JNDI name.
    */
-  public void setLocalJndiName(String name)
+  public void setJndiLocalPrefix(String name)
   {
     _localJndiName = name;
   }
@@ -251,7 +254,7 @@ public class EJBServer
   /**
    * Gets the remote JNDI name.
    */
-  public void setRemoteJndiName(String name)
+  public void setJndiRemotePrefix(String name)
   {
     _remoteJndiName = name;
   }
@@ -601,6 +604,11 @@ public class EJBServer
     return _localServer.get();
   }
 
+  public static EjbServerManager getLocalManager()
+  {
+    return _localManager.get();
+  }
+
   /**
    * Initialize the container.
    */
@@ -620,16 +628,19 @@ public class EJBServer
     if (_localServer.getLevel() == null
         || "java:comp/env/cmp".equals(_localJndiName)) {
       _localServer.set(this);
+      _localManager.set(_ejbManager);
     }
 
     try {
-      Jndi.bindDeepShort(_localJndiName + "/resin-ejb-server", _ejbManager);
+      if (_localJndiName != null)
+	Jndi.bindDeepShort(_localJndiName + "/resin-ejb-server", _ejbManager);
     } catch (NamingException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
     try {
-      Jndi.bindDeepShort(_localJndiName + "/caucho-ejb-admin", _ejbManager);
+      if (_localJndiName != null)
+	Jndi.bindDeepShort(_localJndiName + "/caucho-ejb-admin", _ejbManager);
     } catch (NamingException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -656,7 +667,8 @@ public class EJBServer
     throws Exception
   {
     try {
-      log.fine("Initializing ejb-server : " + _localJndiName);
+      log.fine("Initializing ejb-server : local-jndi=" + _localJndiName
+	       + " remote-jndi=" + _remoteJndiName);
 
       ProtocolContainer protocol = new ProtocolContainer();
       if (_urlPrefix != null)

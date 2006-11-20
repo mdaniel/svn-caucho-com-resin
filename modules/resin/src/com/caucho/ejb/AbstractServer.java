@@ -152,7 +152,10 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public String getJndiName()
   {
-    return _jndiName;
+    if (_jndiName != null)
+      return _jndiName;
+    else
+      return _ejbName;
   }
 
   /**
@@ -164,6 +167,11 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     if (_serverId == null) {
       String serverId = getJndiName();
+
+      if (serverId == null) {
+	// XXX: should include jar, too
+	serverId = getEJBName();
+      }
 
       if (! serverId.startsWith("/"))
         serverId = "/" + serverId;
@@ -619,8 +627,18 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void initInstance(Object instance)
     throws Throwable
   {
-    if (_initProgram != null)
-      _initProgram.configure(instance);
+    if (_initProgram != null) {
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      try {
+	thread.setContextClassLoader(_loader);
+      
+	_initProgram.configure(instance);
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
+    }
   }
 
   public void init()

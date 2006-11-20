@@ -36,6 +36,7 @@ import com.caucho.iiop.IiopRemoteService;
 import com.caucho.util.L10N;
 
 import javax.ejb.EJBHome;
+import java.util.logging.*;
 
 /**
  * Server containing all the EJBs for a given configuration.
@@ -43,6 +44,8 @@ import javax.ejb.EJBHome;
  * <p>Each protocol will extend the container to override Handle creation.
  */
 public class IiopProtocolContainer extends ProtocolContainer {
+  private static final Logger log
+    = Logger.getLogger(IiopProtocolContainer.class.getName());
   private static final L10N L = new L10N(IiopProtocolContainer.class);
 
   private IiopContext _context;
@@ -94,14 +97,31 @@ public class IiopProtocolContainer extends ProtocolContainer {
   /**
    * Exports a server to iiop.
    */
+  @Override
   public void addServer(AbstractServer server)
   {
-    if (server.getHomeObject() == null)
+    if (server.getRemoteObject() == null)
       return;
+
+    String name = getName(server);
+
+    log.fine("iiop: add server " + name);
 
     EjbIiopRemoteService service = new EjbIiopRemoteService(server);
 
-    _context.setService(server.getServerId(), service);
+    _context.setService(name, service);
+  }
+
+  private String getName(AbstractServer server)
+  {
+    String name = server.getJndiName();
+    if (name == null)
+      name = server.getEJBName();
+
+    if (! name.startsWith("/"))
+      name = "/" + name;
+
+    return name;
   }
 
   /**
@@ -109,20 +129,24 @@ public class IiopProtocolContainer extends ProtocolContainer {
    */
   public void removeServer(AbstractServer server)
   {
-    if (server.getHomeObject() == null)
+    if (server.getRemoteObject() == null)
       return;
 
-    _context.removeService(server.getServerId());
+    String name = getName(server);
+    
+    _context.removeService(name);
   }
 
   protected HandleEncoder createHandleEncoder(AbstractServer server,
                                               Class primaryKeyClass)
     throws ConfigException
   {
+    String name = getName(server);
+    
     if (_urlPrefix != null)
-      return new HandleEncoder(server, _urlPrefix + server.getServerId());
+      return new HandleEncoder(server, _urlPrefix + name);
     else
-      return new HandleEncoder(server, server.getServerId());
+      return new HandleEncoder(server, name);
   }
 
   /**

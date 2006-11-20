@@ -36,6 +36,7 @@ import java.rmi.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import javax.ejb.*;
 import javax.transaction.xa.Xid;
 
 import com.caucho.vfs.*;
@@ -94,7 +95,7 @@ public abstract class HessianStub implements HessianRemoteObject {
   }
 
   protected HessianWriter _hessian_openWriter()
-    throws RemoteException
+    throws EJBException
   {
     try {
       ReadWritePair pair = _urlPath.openReadWrite();
@@ -113,7 +114,7 @@ public abstract class HessianStub implements HessianRemoteObject {
 
       return out;
     } catch (IOException e) {
-      throw new RemoteException(String.valueOf(e));
+      throw new EJBException(e);
     }
   }
 

@@ -41,4 +41,12 @@ abstract public class StatefulContext extends AbstractSessionContext {
    * Returns the new instance.
    */
   abstract protected Object _caucho_newInstance();
+
+  /**
+   * Returns the new remote instance.
+   */
+  protected Object _caucho_newRemoteInstance()
+  {
+    return null;
+  }
 }

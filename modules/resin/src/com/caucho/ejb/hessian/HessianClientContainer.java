@@ -413,7 +413,6 @@ class HessianClientContainer implements HessianRemoteResolver {
     throws Exception
   {
     StubGenerator gen = new StubGenerator();
-    gen.setClassDir(CauchoSystem.getWorkPath());
       
     Class cl = gen.createStub(api);
 

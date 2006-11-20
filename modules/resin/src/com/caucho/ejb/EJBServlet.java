@@ -113,7 +113,7 @@ public class EJBServlet extends GenericServlet {
   public void init()
     throws ServletException
   {
-    _ejbManager = (EjbServerManager) Jndi.lookup(_ejbServerJndiName + "/resin-ejb-server");
+    _ejbManager = EJBServer.getLocalManager();
 
     if (_ejbManager == null) {
       throw new ServletException(L.l("No <ejb-server> detected.  '{0}' requires a configured <ejb-server>",
@@ -204,8 +204,13 @@ public class EJBServlet extends GenericServlet {
           throw _exception;
 
 	try {
+	  if (pathInfo == null)
+	    pathInfo = "";
+	  
 	  skeleton = _protocolContainer.getSkeleton(pathInfo, queryString);
-	} catch (Throwable e) {
+	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	  
 	  skeleton = _protocolContainer.getExceptionSkeleton();
 
 	  if (skeleton != null) {

@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import com.caucho.util.L10N;
 
+import com.caucho.bytecode.*;
 import com.caucho.java.JavaWriter;
 
 import java.sql.PreparedStatement;
@@ -69,6 +70,15 @@ public class SqlTimestampType extends Type {
   public String getName()
   {
     return "java.sql.Timestamp";
+  }
+
+  /**
+   * Returns true if the value is assignable to the Java type.
+   */
+  @Override
+  public boolean isAssignableTo(JClass javaType)
+  {
+    return javaType.isAssignableFrom(java.sql.Timestamp.class);
   }
 
   /**

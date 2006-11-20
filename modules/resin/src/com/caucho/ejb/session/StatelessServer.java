@@ -39,6 +39,7 @@ import javax.ejb.EJBObject;
 import javax.ejb.EJBLocalObject;
 import javax.ejb.FinderException;
 
+import com.caucho.naming.*;
 import com.caucho.util.Log;
 
 import com.caucho.ejb.EjbServerManager;
@@ -79,9 +80,17 @@ public class StatelessServer extends AbstractServer {
   public void init()
     throws Exception
   {
-    super.init();
-    
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
     try {
+      thread.setContextClassLoader(_loader);
+      
+      super.init();
+    
+      Jndi.rebindDeep("java:comp/env/ejb/sessionContext",
+		      getStatelessContext());
+      
       _localHome = getStatelessContext().createLocalHome();
       _remoteHomeView = getStatelessContext().createRemoteHomeView();
 
@@ -95,22 +104,22 @@ public class StatelessServer extends AbstractServer {
       } catch (Throwable e) {
       }
       /*
-      if (_config.getLocalHomeClass() != null)
-        _localHome = _homeContext.createLocalHome();
+	if (_config.getLocalHomeClass() != null)
+	_localHome = _homeContext.createLocalHome();
 
-      if (_homeStubClass != null) {
-        _remoteHomeView = _homeContext.createRemoteHomeView();
+	if (_homeStubClass != null) {
+	_remoteHomeView = _homeContext.createRemoteHomeView();
 
 	if (_config.getJndiName() != null) {
-	  Context ic = new InitialContext();
-	  ic.rebind(_config.getJndiName(), this);
+	Context ic = new InitialContext();
+	ic.rebind(_config.getJndiName(), this);
 	}
-      }
+	}
       */
       
       log.config("initialized session bean: " + this);
-    } catch (Exception e) {
-      throw e;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 

@@ -12,6 +12,8 @@
 
 <s2 title="3.1snap - Oct 6, 2006">
 <ul>
+<li>EJB/CMP: ejbSelect needs to close result set in finally block (#1303)
+<li>EJB: change hessian stub generation location to work/ejb (#1301 rep by Steve Baugus)
 <li>mod_caucho: avoid premature error validation on non-blocking connect() failure for Solaris (#1415, rep by L Kaminsky)</li>
 <li>Changed Jar.create synchronization so the remoteEvent will occur outside the sync (#1428, rep by mabbott)</li>
 <li>JMX: getter/setter swapped for Introspector when no getter (#1390, rep by maltem)</li>

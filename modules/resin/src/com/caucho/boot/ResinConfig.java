@@ -122,6 +122,13 @@ public class ResinConfig implements EnvironmentBean {
   public void setMinFreeMemory(BuilderProgram program)
   {
   }
+    
+    /**
+     * Ignore items we can't understand.
+     */
+    public void setSecurityManager(BuilderProgram program)
+    {
+    }
 
   /**
    * Finds a server.

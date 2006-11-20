@@ -37,7 +37,7 @@ import javax.naming.Name;
 import javax.naming.NameNotFoundException;
 import javax.naming.NameParser;
 import javax.naming.NamingException;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Static utility functions.
@@ -182,7 +182,13 @@ public class Jndi {
       return;
     }
 
-    Object sub = context.lookup(parsedName.get(0));
+    Object sub = null;
+
+    try {
+      sub = context.lookup(parsedName.get(0));
+    } catch (NameNotFoundException e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
 
     if (sub == null)
       sub = context.createSubcontext(parsedName.get(0));

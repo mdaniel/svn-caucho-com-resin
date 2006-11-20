@@ -141,8 +141,12 @@ abstract public class JMethod extends JAccessibleObject {
       return false;
 
     for (int i = 0; i < aParam.length; i++) {
-      if (! aParam[i].equals(bParam[i]))
-  return false;
+      if (aParam[i] == bParam[i])
+	continue;
+      else if (aParam[i] == null || bParam[i] == null)
+	return false;
+      else if (! aParam[i].equals(bParam[i]))
+	return false;
     }
 
     return true;
