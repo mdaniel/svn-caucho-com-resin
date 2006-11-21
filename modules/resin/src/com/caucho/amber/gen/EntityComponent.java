@@ -151,7 +151,11 @@ public class EntityComponent extends ClassComponent {
     try {
       generateHeader(out);
 
-      if (!_entityType.isEmbeddable()) {
+      boolean isEntity;
+
+      isEntity = ! _entityType.isEmbeddable();
+
+      if (isEntity) {
         generateInit(out);
 
         HashSet<Object> completedSet = new HashSet<Object>();
@@ -164,14 +168,14 @@ public class EntityComponent extends ClassComponent {
       if (_entityType.getParentType() == null)
         generateGetEntityState(out);
 
-      if (!_entityType.isEmbeddable())
+      if (isEntity)
         generateMatch(out);
 
       generateFields(out);
 
       generateMethods(out);
 
-      if (!_entityType.isEmbeddable()) {
+      if (isEntity) {
         generateDetach(out);
 
         generateLoad(out);
@@ -184,8 +188,7 @@ public class EntityComponent extends ClassComponent {
         for (int i = min; i <= max; i++)
           generateLoadGroup(out, i);
 
-        if (!_entityType.isEmbeddable())
-          generateResultSetLoad(out);
+        generateResultSetLoad(out);
 
         generateSetQuery(out);
 
@@ -198,6 +201,8 @@ public class EntityComponent extends ClassComponent {
         generateMakePersistent(out);
 
         generateCascadePersist(out);
+
+        generateCascadeRemove(out);
 
         generateCreate(out);
 
@@ -1442,6 +1447,57 @@ public class EntityComponent extends ClassComponent {
         out.println();
 
         cascadable.generatePostCascade(out, "aConn", CascadeType.PERSIST);
+      }
+    }
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates the cascade remove
+   */
+  private void generateCascadeRemove(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public void __caucho_cascadePreRemove(com.caucho.amber.manager.AmberConnection aConn)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
+
+    ArrayList<AmberField> fields = _entityType.getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field.isCascadable()) {
+        CascadableField cascadable = (CascadableField) field;
+
+        out.println();
+
+        cascadable.generatePreCascade(out, "aConn", CascadeType.REMOVE);
+      }
+    }
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public void __caucho_cascadePostRemove(com.caucho.amber.manager.AmberConnection aConn)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field.isCascadable()) {
+        CascadableField cascadable = (CascadableField) field;
+
+        out.println();
+
+        cascadable.generatePostCascade(out, "aConn", CascadeType.REMOVE);
       }
     }
 

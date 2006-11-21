@@ -294,7 +294,7 @@ public class AmberConnection
         // only the cascade is performed.
       }
 
-      // jpa/
+      // jpa/0h27
       // Post-persist child entities.
       instance.__caucho_cascadePostPersist(this);
 
@@ -361,10 +361,27 @@ public class AmberConnection
   public void remove(Object entity)
   {
     try {
+      if (entity == null)
+        return;
+
       if (! (entity instanceof Entity))
         throw new IllegalArgumentException("remove() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
 
-      delete((Entity) entity);
+      Entity instance = (Entity) entity;
+
+      int state = instance.__caucho_getEntityState();
+
+      if (state >= com.caucho.amber.entity.Entity.P_DELETING)
+        return;
+
+      // Pre-remove child entities.
+      instance.__caucho_cascadePreRemove(this);
+
+      delete(instance);
+
+      // jpa/0o30
+      // Post-remove child entities.
+      instance.__caucho_cascadePostRemove(this);
 
     } catch (RuntimeException e) {
       throw e;
@@ -992,6 +1009,9 @@ public class AmberConnection
    */
   public boolean contains(Object obj)
   {
+    if (obj == null)
+      return false;
+
     if (! (obj instanceof Entity))
       throw new IllegalArgumentException("contains() operation can only be applied to an entity instance.");
 

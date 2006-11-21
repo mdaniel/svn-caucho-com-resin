@@ -549,6 +549,31 @@ public class AmberPersistenceUnit {
   }
 
   /**
+   * Adds an enumerated type.
+   */
+  public EnumType createEnum(String name,
+                             JClass beanClass)
+  {
+    EnumType enumType = (EnumType) _typeManager.get(name);
+
+    if (enumType != null)
+      return enumType;
+
+    enumType = new EnumType();
+
+    _typeManager.put(name, enumType);
+
+    // XXX: some confusion about the double entry
+    if (_typeManager.get(beanClass.getName()) == null)
+      _typeManager.put(beanClass.getName(), enumType);
+
+    enumType.setName(name);
+    enumType.setBeanClass(beanClass);
+
+    return enumType;
+  }
+
+  /**
    * Adds an entity listener.
    */
   public ListenerType addDefaultListener(JClass beanClass)
@@ -667,11 +692,12 @@ public class AmberPersistenceUnit {
 
         type = entityType;
 
-        if (! entityType.isEmbeddable()) {
-          entityType.init();
+        if (entityType.isEmbeddable())
+          continue;
 
-          getGenerator().generate(entityType);
-        }
+        entityType.init();
+
+        getGenerator().generate(entityType);
       }
 
       for (ListenerType listenerType : _defaultListeners) {

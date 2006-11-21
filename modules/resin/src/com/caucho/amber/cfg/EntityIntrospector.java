@@ -997,38 +997,46 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     KeyPropertyField idField;
     idField = new KeyPropertyField(entityType, fieldName, keyColumn);
 
-    JdbcMetaData metaData = persistenceUnit.getMetaData();
-
     if (gen == null) {
     }
-    else if (GenerationType.IDENTITY.equals(gen.get("strategy"))) {
-      if (! metaData.supportsIdentity())
-        throw new ConfigException(L.l("'{0}' does not support identity.",
-                                      metaData.getDatabaseName()));
+    else {
+      JdbcMetaData metaData = null;
 
-      keyColumn.setGeneratorType("identity");
-      idField.setGenerator("identity");
-    }
-    else if (GenerationType.SEQUENCE.equals(gen.get("strategy"))) {
-      if (! metaData.supportsSequences())
-        throw new ConfigException(L.l("'{0}' does not support sequence.",
-                                      metaData.getDatabaseName()));
+      try {
+        metaData = persistenceUnit.getMetaData();
+      } catch (Exception e) {
+        throw new ConfigException(L.l("Unable to get meta data for database. Meta data is needed for generated values."));
+      }
 
-      addSequenceIdGenerator(persistenceUnit, idField, gen);
-    }
-    else if (GenerationType.TABLE.equals(gen.get("strategy"))) {
-      addTableIdGenerator(persistenceUnit, idField, id);
-    }
-    else if (GenerationType.AUTO.equals(gen.get("strategy"))) {
-      if (metaData.supportsIdentity()) {
+      if (GenerationType.IDENTITY.equals(gen.get("strategy"))) {
+        if (! metaData.supportsIdentity())
+          throw new ConfigException(L.l("'{0}' does not support identity.",
+                                        metaData.getDatabaseName()));
+
         keyColumn.setGeneratorType("identity");
         idField.setGenerator("identity");
       }
-      else if (metaData.supportsSequences()) {
+      else if (GenerationType.SEQUENCE.equals(gen.get("strategy"))) {
+        if (! metaData.supportsSequences())
+          throw new ConfigException(L.l("'{0}' does not support sequence.",
+                                        metaData.getDatabaseName()));
+
         addSequenceIdGenerator(persistenceUnit, idField, gen);
       }
-      else
+      else if (GenerationType.TABLE.equals(gen.get("strategy"))) {
         addTableIdGenerator(persistenceUnit, idField, id);
+      }
+      else if (GenerationType.AUTO.equals(gen.get("strategy"))) {
+        if (metaData.supportsIdentity()) {
+          keyColumn.setGeneratorType("identity");
+          idField.setGenerator("identity");
+        }
+        else if (metaData.supportsSequences()) {
+          addSequenceIdGenerator(persistenceUnit, idField, gen);
+        }
+        else
+          addTableIdGenerator(persistenceUnit, idField, id);
+      }
     }
 
     return idField;
@@ -1573,6 +1581,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
     JAnnotation basicAnn = field.getAnnotation(Basic.class);
     JAnnotation columnAnn = field.getAnnotation(javax.persistence.Column.class);
+    JAnnotation enumeratedAnn = field.getAnnotation(Enumerated.class);
 
     ColumnConfig columnConfig = null;
 
@@ -1587,7 +1596,21 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       throw error(field, L.l("{0} is an invalid @Basic type for {1}.",
                              fieldType.getName(), field.getName()));
 
-    Type amberType = persistenceUnit.createType(fieldType);
+    Type amberType;
+
+    if (enumeratedAnn == null)
+      amberType = persistenceUnit.createType(fieldType);
+    else {
+      com.caucho.amber.type.EnumType enumType;
+
+      enumType = persistenceUnit.createEnum(fieldType.getName(),
+                                            fieldType);
+
+      enumType.setOrdinal(enumeratedAnn.get("value") ==
+                          javax.persistence.EnumType.ORDINAL);
+
+      amberType = enumType;
+    }
 
     Column fieldColumn = createColumn(sourceType, field, fieldName,
                                       columnAnn, amberType, columnConfig);
@@ -2954,7 +2977,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                                         _field.getName()));
       }
 
-      // jpa/0o03, jpa/0o06, jpa/0o07, jpa/10ca
+      // jpa/0o00, jpa/0o03, jpa/0o06, jpa/0o07, jpa/10ca
 
       // jpa/0o06
       boolean isManyToOne = (mappedBy == null) || "".equals(mappedBy);
@@ -2996,9 +3019,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
             = getSourceCompletion(targetType, mappedBy);
 
           if (otherSide != null) {
-            _depCompletions.remove(otherSide);
-
-            otherSide.complete();
+            // jpa/0o00
+            if (_depCompletions.remove(otherSide))
+              otherSide.complete();
           }
         }
 
@@ -3232,6 +3255,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     _idAnnotations.add("javax.persistence.Id");
     _idAnnotations.add("javax.persistence.SequenceGenerator");
     _idAnnotations.add("javax.persistence.TableGenerator");
+    _idAnnotations.add("javax.persistence.Temporal");
 
     // allowed with a @Id annotation
     _idTypes.add("boolean");

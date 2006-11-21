@@ -69,6 +69,14 @@ abstract public class Type {
   }
 
   /**
+   * Returns true for a numeric type.
+   */
+  public boolean isNumeric()
+  {
+    return false;
+  }
+
+  /**
    * Returns the java type.
    */
   public String getJavaTypeName()

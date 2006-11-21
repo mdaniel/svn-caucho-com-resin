@@ -69,6 +69,14 @@ public class PrimitiveShortType extends PrimitiveType {
   }
 
   /**
+   * Returns true for a numeric type.
+   */
+  public boolean isNumeric()
+  {
+    return true;
+  }
+
+  /**
    * Returns the type as a foreign key.
    */
   public Type getForeignType()

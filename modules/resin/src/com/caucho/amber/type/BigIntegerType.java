@@ -71,6 +71,14 @@ public class BigIntegerType extends Type {
   }
 
   /**
+   * Returns true for a numeric type.
+   */
+  public boolean isNumeric()
+  {
+    return true;
+  }
+
+  /**
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,

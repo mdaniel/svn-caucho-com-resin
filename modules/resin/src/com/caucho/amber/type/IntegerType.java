@@ -70,6 +70,14 @@ public class IntegerType extends Type {
   }
 
   /**
+   * Returns true for a numeric type.
+   */
+  public boolean isNumeric()
+  {
+    return true;
+  }
+
+  /**
    * Generates the type for the table.
    */
   public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)

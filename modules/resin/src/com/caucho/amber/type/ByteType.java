@@ -69,9 +69,20 @@ public class ByteType extends Type {
   }
 
   /**
+   * Returns true for a numeric type.
+   */
+  public boolean isNumeric()
+  {
+    return true;
+  }
+
+  /**
    * Generates the type for the table.
    */
-  public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
+  public String generateCreateColumnSQL(AmberPersistenceUnit manager,
+                                        int length,
+                                        int precision,
+                                        int scale)
   {
     return manager.getCreateColumnSQL(Types.TINYINT, length, precision, scale);
   }
@@ -80,12 +91,12 @@ public class ByteType extends Type {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print("com.caucho.amber.type.ByteType.toByte(" +
-	      rs + ".getByte(" + indexVar + " + " + index + "), " +
-	      rs + ".wasNull())");
+              rs + ".getByte(" + indexVar + " + " + index + "), " +
+              rs + ".wasNull())");
 
     return index + 1;
   }
@@ -94,21 +105,21 @@ public class ByteType extends Type {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.TINYINT);");
     out.println("else");
     out.println("  " + pstmt + ".setByte(" + index + "++, " +
-		value + ".byteValue());");
+                value + ".byteValue());");
   }
 
   /**
    * Generates a string to set the property.
    */
   public void generateSetNull(JavaWriter out, String pstmt,
-			      String index)
+                              String index)
     throws IOException
   {
     out.println(pstmt + ".setNull(" + index + "++, java.sql.Types.TINYINT);");
@@ -132,7 +143,7 @@ public class ByteType extends Type {
     throws SQLException
   {
     int value = rs.getByte(index);
-    
+
     return rs.wasNull() ? null : new Byte((byte) value);
   }
 }

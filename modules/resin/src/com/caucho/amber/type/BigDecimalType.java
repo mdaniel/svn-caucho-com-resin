@@ -72,10 +72,18 @@ public class BigDecimalType extends Type {
   }
 
   /**
+   * Returns true for a numeric type.
+   */
+  public boolean isNumeric()
+  {
+    return true;
+  }
+
+  /**
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print(rs + ".getBigDecimal(" + indexVar + " + " + index + ")");
@@ -87,7 +95,7 @@ public class BigDecimalType extends Type {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");

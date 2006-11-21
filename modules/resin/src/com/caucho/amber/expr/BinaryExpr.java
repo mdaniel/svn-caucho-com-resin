@@ -30,9 +30,12 @@ package com.caucho.amber.expr;
 
 import com.caucho.amber.query.*;
 
+import com.caucho.amber.type.EnumType;
+import com.caucho.amber.type.Type;
 
 import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
+
 
 /**
  * Bound identifier expression.
@@ -97,6 +100,9 @@ public class BinaryExpr extends AbstractAmberExpr {
   {
     _left = _left.bindSelect(parser);
     _right = _right.bindSelect(parser);
+
+    bindTypes(_left, _right);
+    bindTypes(_right, _left);
 
     return this;
   }
@@ -189,6 +195,25 @@ public class BinaryExpr extends AbstractAmberExpr {
 
   //
   // private
+
+  private static void bindTypes(AmberExpr left,
+                                AmberExpr right)
+  {
+    // jpa/141d
+
+    Type leftType = left.getType();
+    Type rightType = right.getType();
+
+    if (left instanceof EnumExpr) {
+      EnumExpr enumExpr = (EnumExpr) left;
+      enumExpr.setOrdinal(rightType.isNumeric());
+    }
+    else if (left instanceof ArgExpr) {
+      if (rightType instanceof EnumType) {
+        ((ArgExpr) left).setType(rightType);
+      }
+    }
+  }
 
   private void generateInternalWhere(CharBuffer cb,
                                      boolean select)

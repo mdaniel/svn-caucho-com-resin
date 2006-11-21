@@ -67,6 +67,14 @@ public class PrimitiveDoubleType extends PrimitiveType {
   }
 
   /**
+   * Returns true for a numeric type.
+   */
+  public boolean isNumeric()
+  {
+    return true;
+  }
+
+  /**
    * Returns the type as a foreign key.
    */
   public Type getForeignType()
@@ -86,7 +94,7 @@ public class PrimitiveDoubleType extends PrimitiveType {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print(rs + ".getDouble(" + indexVar + " + " + index + ")");
@@ -98,7 +106,7 @@ public class PrimitiveDoubleType extends PrimitiveType {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println(pstmt + ".setDouble(" + index + "++, " + value + ");");
@@ -120,7 +128,7 @@ public class PrimitiveDoubleType extends PrimitiveType {
   {
     return "new Double(" + value + ")";
   }
-  
+
   /**
    * Converts the value.
    */

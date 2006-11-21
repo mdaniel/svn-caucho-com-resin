@@ -130,7 +130,16 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println("    return;");
       out.println("  }");
       out.println("  else if (__caucho_state < com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
+      out.println("    int state = __caucho_state;");
+
       out.println("    __caucho_state = com.caucho.amber.entity.Entity.P_TRANSACTIONAL;");
+
+      out.println("    aConn.makeTransactional(this);");
+
+      out.println();
+      out.println("    if ((state > 0) && ((__caucho_loadMask_" + group + " & " + mask + "L) != 0))");
+      out.println("      return;");
+      out.println();
 
       int loadCount = _entityType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
@@ -141,7 +150,6 @@ public class LoadGroupGenerator extends ClassComponent {
         out.println("    __caucho_dirtyMask_" + i + " = 0;");
       }
 
-      out.println("    aConn.makeTransactional(this);");
       out.println("  }");
       out.println("  else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
       out.println("    return;");

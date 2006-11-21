@@ -68,6 +68,14 @@ public class PrimitiveByteType extends PrimitiveType {
   }
 
   /**
+   * Returns true for a numeric type.
+   */
+  public boolean isNumeric()
+  {
+    return true;
+  }
+
+  /**
    * Returns the foreign key type.
    */
   public Type getForeignType()
@@ -78,7 +86,10 @@ public class PrimitiveByteType extends PrimitiveType {
   /**
    * Generates the type for the table.
    */
-  public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
+  public String generateCreateColumnSQL(AmberPersistenceUnit manager,
+                                        int length,
+                                        int precision,
+                                        int scale)
   {
     return manager.getCreateColumnSQL(Types.TINYINT, length, precision, scale);
   }
@@ -87,7 +98,7 @@ public class PrimitiveByteType extends PrimitiveType {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print(rs + ".getByte(" + indexVar + " + " + index + ")");
@@ -99,7 +110,7 @@ public class PrimitiveByteType extends PrimitiveType {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println(pstmt + ".setByte(" + index + "++, " + value + ");");
@@ -121,7 +132,7 @@ public class PrimitiveByteType extends PrimitiveType {
   {
     return "new Byte(" + value + ")";
   }
-  
+
   /**
    * Converts the value.
    */

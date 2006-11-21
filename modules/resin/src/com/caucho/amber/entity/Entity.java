@@ -71,9 +71,21 @@ public interface Entity {
     throws SQLException;
 
   /**
+   * Pre-cascades the remove operation to child entities.
+   */
+  public void __caucho_cascadePreRemove(AmberConnection aConn)
+    throws SQLException;
+
+  /**
    * Post-cascades the persist operation to child entities.
    */
   public void __caucho_cascadePostPersist(AmberConnection aConn)
+    throws SQLException;
+
+  /**
+   * Post-cascades the remove operation to child entities.
+   */
+  public void __caucho_cascadePostRemove(AmberConnection aConn)
     throws SQLException;
 
   /**

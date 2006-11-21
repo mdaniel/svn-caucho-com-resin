@@ -29,6 +29,8 @@
 
 package com.caucho.amber.query;
 
+import java.lang.reflect.Field;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -1387,6 +1389,14 @@ public class QueryParser {
             tableExpr = getEmbeddedAlias(name);
           }
 
+          if (tableExpr == null) {
+            // jpa/11z6
+            AmberExpr amberExpr = parseEnum(name);
+
+            if (amberExpr != null)
+              return amberExpr;
+          }
+
           if (tableExpr != null) {
             AmberExpr amberExpr = parsePath(tableExpr);
 
@@ -1568,6 +1578,57 @@ public class QueryParser {
     }
 
     return path;
+  }
+
+  /**
+   * Parses a enum value
+   *
+   * <pre>
+   * enum ::= (IDENTIFIER '.')+ IDENTIFIER
+   * </pre>
+   */
+  private EnumExpr parseEnum(String head)
+    throws QueryParseException
+  {
+    CharBuffer cb = CharBuffer.allocate();
+
+    int token;
+
+    while ((token = scanToken()) == '.') {
+
+      if (cb.length() > 0)
+        cb.append('.');
+
+      cb.append(head);
+
+      token = scanToken();
+
+      if (token != IDENTIFIER)
+        throw error(L.l("expected identifier for enumerated type {0} at {1}",
+                        cb.toString(),
+                        tokenName(token)));
+
+      head = _lexeme.toString();
+    }
+
+    int value = -1;
+    Class cl = null;
+
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      cl = Class.forName(cb.toString(), false, loader);
+
+      Enum enumValue = Enum.valueOf(cl, head);
+
+      value = enumValue.ordinal();
+    } catch (ClassNotFoundException e) {
+      // Not an error; only this is not a enum.
+      // Continue - see parseSimpleTerm().
+      return null;
+    }
+
+    return new EnumExpr(cl, head, value);
   }
 
   /**

@@ -70,6 +70,14 @@ public class FloatType extends Type {
   }
 
   /**
+   * Returns true for a numeric type.
+   */
+  public boolean isNumeric()
+  {
+    return true;
+  }
+
+  /**
    * Generates the type for the table.
    */
   public String generateCreateColumnSQL(AmberPersistenceUnit manager, int length, int precision, int scale)
@@ -81,12 +89,12 @@ public class FloatType extends Type {
    * Generates a string to load the property.
    */
   public int generateLoad(JavaWriter out, String rs,
-			  String indexVar, int index)
+                          String indexVar, int index)
     throws IOException
   {
     out.print("com.caucho.amber.type.FloatType.toFloat(" +
-	      rs + ".getFloat(" + indexVar + " + " + index + "), " +
-	      rs + ".wasNull())");
+              rs + ".getFloat(" + indexVar + " + " + index + "), " +
+              rs + ".wasNull())");
 
     return index + 1;
   }
@@ -95,21 +103,21 @@ public class FloatType extends Type {
    * Generates a string to set the property.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.REAL);");
     out.println("else");
     out.println("  " + pstmt + ".setFloat(" + index + "++, " +
-		value + ".floatValue());");
+                value + ".floatValue());");
   }
 
   /**
    * Generates a string to set the property.
    */
   public void generateSetNull(JavaWriter out, String pstmt,
-			      String index)
+                              String index)
     throws IOException
   {
     out.println(pstmt + ".setNull(" + index + "++, java.sql.Types.REAL);");
@@ -133,7 +141,7 @@ public class FloatType extends Type {
     throws SQLException
   {
     float value = rs.getFloat(index);
-    
+
     return rs.wasNull() ? null : new Float(value);
   }
 }

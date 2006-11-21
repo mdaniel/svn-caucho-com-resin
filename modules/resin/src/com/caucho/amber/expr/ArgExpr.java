@@ -51,6 +51,7 @@ public class ArgExpr extends AbstractAmberExpr {
 
   private String _name;
 
+  private Type _type;
 
   /**
    * Creates a new argument expression.
@@ -88,6 +89,22 @@ public class ArgExpr extends AbstractAmberExpr {
   int getIndex()
   {
     return _index;
+  }
+
+  /**
+   * Returns the expr type.
+   */
+  public Type getType()
+  {
+    return _type;
+  }
+
+  /**
+   * Sets the expr type.
+   */
+  public void setType(Type type)
+  {
+    _type = type;
   }
 
   /**
@@ -142,6 +159,10 @@ public class ArgExpr extends AbstractAmberExpr {
   {
     if (_name == null) {
 
+      // jpa/141d (enum type)
+      if (getType() != null)
+        argTypes[_index - 1] = getType();
+
       if (argTypes[_index - 1] != null)
         argTypes[_index - 1].setParameter(pstmt, _sqlIndex + 1,
                                           argValues[_index - 1]);
@@ -149,6 +170,10 @@ public class ArgExpr extends AbstractAmberExpr {
         pstmt.setString(_sqlIndex + 1, null);
     }
     else {
+
+      // jpa/141d (enum type)
+      if (getType() != null)
+        argTypes[i - 1] = getType();
 
       if (argTypes[i - 1] != null)
         argTypes[i - 1].setParameter(pstmt, i, argValues[i - 1]);
