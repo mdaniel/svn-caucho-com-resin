@@ -112,6 +112,7 @@ public final class Lock {
       } while (Alarm.getCurrentTime() <= expire);
 
       Thread.dumpStack();
+	printOwnerStack();
       throw new LockTimeoutException(L.l("Lock {0} timed out ({1}ms) try-writers:{2} is-write:{3}",
 					 this, timeout,
 					 _tryWriteCount,
@@ -182,6 +183,7 @@ public final class Lock {
 	} while (Alarm.getCurrentTime() < expire);
 
 	Thread.dumpStack();
+	printOwnerStack();
 	throw new LockTimeoutException(L.l("{0} lockReadAndWrite timed out ({1}ms) try-writers:{2}",
 					   this,
 					   (Alarm.getCurrentTime() - start),
@@ -208,7 +210,8 @@ public final class Lock {
 		 + " try-write:" + _tryWriteCount + ")");
     }
 
-    long expire = Alarm.getCurrentTime() + timeout;
+    long start = Alarm.getCurrentTime();
+    long expire = start + timeout;
     boolean isOkay = false;
 
     synchronized (this) {
@@ -231,10 +234,17 @@ public final class Lock {
 	  }
 	} while (Alarm.getCurrentTime() < expire);
 
+	printOwnerStack();
 	Thread.dumpStack();
+	System.out.println(L.l("{0} lockWrite timed out ({1}ms) try-writers:{2}",
+			       this,
+			       timeout,
+			       _tryWriteCount));
+	
+	printOwnerStack();
 	throw new LockTimeoutException(L.l("{0} lockWrite timed out ({1}ms) try-writers:{2}",
 					   this,
-					   timeout,
+					   Alarm.getCurrentTime() - start,
 					   _tryWriteCount));
       } finally {
 	_tryWriteCount--;
@@ -263,6 +273,19 @@ public final class Lock {
 		 + " write:" + _isWrite
 		 + " try-write:" + _tryWriteCount + ")");
     }
+  }
+
+  private void printOwnerStack()
+  {
+    Thread thread = _owner;
+
+    if (thread == null)
+      return;
+
+    System.out.println("Owner-stack");
+    StackTraceElement []stack = thread.getStackTrace();
+    for (int i = 0; i < stack.length; i++)
+      System.out.println(stack[i]);
   }
   
   public String toString()

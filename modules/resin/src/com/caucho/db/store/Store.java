@@ -946,7 +946,7 @@ public class Store {
 	System.out.println("BAD J: " + fragMask);
 
       if ((fragMask & (1 << j)) == 0) {
-	System.out.println("BAD J-MASK: " + fragMask + " " + j);
+	log.fine("BAD J-MASK: " + fragMask + " " + j);
       }
 
       _allocationTable[i + 1] = (byte) (fragMask & ~(1 << j));

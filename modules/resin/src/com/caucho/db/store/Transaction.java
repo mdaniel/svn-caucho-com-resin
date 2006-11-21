@@ -82,6 +82,7 @@ public class Transaction extends StoreTransaction {
   private ArrayList<Block> _deallocateBlocks;
 
   private boolean _isRollbackOnly;
+  private SQLException _rollbackExn;
 
   private long _timeout = AUTO_COMMIT_TIMEOUT;
 
@@ -109,6 +110,8 @@ public class Transaction extends StoreTransaction {
   {
     _conn = conn;
     _timeout = AUTO_COMMIT_TIMEOUT;
+    _isRollbackOnly = false;
+    _rollbackExn = null;
   }
 
   /**
@@ -159,8 +162,12 @@ public class Transaction extends StoreTransaction {
   public void lockRead(Lock lock)
     throws SQLException
   {
-    if (_isRollbackOnly)
-      throw new SQLException(L.l("can't get lock with rollback transaction"));
+    if (_isRollbackOnly) {
+      if (_rollbackExn != null)
+	throw _rollbackExn;
+      else
+	throw new SQLException(L.l("can't get lock with rollback transaction"));
+    }
 
     try {
       if (_readLocks == null)
@@ -171,7 +178,7 @@ public class Transaction extends StoreTransaction {
 	_readLocks.add(lock);
       }
     } catch (SQLException e) {
-      setRollbackOnly();
+      setRollbackOnly(e);
       
       throw e;
     }
@@ -184,8 +191,12 @@ public class Transaction extends StoreTransaction {
   public void lockWrite(Lock lock)
     throws SQLException
   {
-    if (_isRollbackOnly)
-      throw new SQLException(L.l("can't get lock with rollback transaction"));
+    if (_isRollbackOnly) {
+      if (_rollbackExn != null)
+	throw _rollbackExn;
+      else
+	throw new SQLException(L.l("can't get lock with rollback transaction"));
+    }
 
     try {
       if (_readLocks == null)
@@ -206,7 +217,7 @@ public class Transaction extends StoreTransaction {
 	_writeLocks.add(lock);
       }
     } catch (SQLException e) {
-      setRollbackOnly();
+      setRollbackOnly(e);
       
       throw e;
     }
@@ -445,8 +456,11 @@ public class Transaction extends StoreTransaction {
     }
   }
 
-  public void setRollbackOnly()
+  public void setRollbackOnly(SQLException e)
   {
+    if (_rollbackExn == null)
+      _rollbackExn = e;
+    
     _isRollbackOnly = true;
 
     releaseLocks();
@@ -455,9 +469,9 @@ public class Transaction extends StoreTransaction {
     _writeBlocks = null;
   }
 
-  public void setRollbackOnly(SQLException e)
+  public void setRollbackOnly()
   {
-    setRollbackOnly();
+    setRollbackOnly(null);
   }
 
   public void commit()
@@ -589,5 +603,8 @@ public class Transaction extends StoreTransaction {
       
       // writeBlocks.clear();
     }
+
+    _isRollbackOnly = false;
+    _rollbackExn = null;
   }
 }
