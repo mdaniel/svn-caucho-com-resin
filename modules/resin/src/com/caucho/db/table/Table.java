@@ -648,11 +648,15 @@ public class Table extends Store {
       do {
 	long blockId = 0;
 
+	if (block != null) {
+	  block.free();
+	  block = null;
+	}
+
 	synchronized (_rowClockLock) {
 	  blockId = firstRow(_rowClockAddr);
 
 	  if (blockId >= 0) {
-	    block = xa.readBlock(this, blockId);
 	  }
 	  else if (! isLoop
 		   && (ROW_CLOCK_MIN < _rowClockTotal
@@ -692,6 +696,9 @@ public class Table extends Store {
 	  _rowClockUsed = rowClockUsed + _rowsPerBlock;
 	  _rowClockTotal = rowClockTotal + _rowsPerBlock;
 	}
+
+	if (block == null)
+	  block = xa.readBlock(this, blockId);
 	
 	xa.lockWrite(block.getLock());
 	try {

@@ -112,9 +112,10 @@ public final class Lock {
       } while (Alarm.getCurrentTime() <= expire);
 
       Thread.dumpStack();
-      throw new LockTimeoutException(L.l("Lock {0} timed out ({1}ms) try-writers:{2}",
+      throw new LockTimeoutException(L.l("Lock {0} timed out ({1}ms) try-writers:{2} is-write:{3}",
 					 this, timeout,
-					 _tryWriteCount));
+					 _tryWriteCount,
+					 _isWrite));
     }
   }
 
