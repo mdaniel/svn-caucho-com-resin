@@ -531,12 +531,12 @@ public final class BTree {
       Block block = _store.readBlock(blockId);
 
       try {
-	xa.lockWrite(block.getLock());
+	xa.lockReadAndWrite(block.getLock());
 	
 	try {
 	  split(parent, block, xa);
 	} finally {
-	  xa.unlockWrite(block.getLock());
+	  xa.unlockReadAndWrite(block.getLock());
 	}
       } finally {
 	block.free();
@@ -624,12 +624,12 @@ public final class BTree {
     Block rootBlock = _store.readBlock(rootBlockId);
 
     try {
-      xa.lockWrite(rootBlock.getLock());
+      xa.lockReadAndWrite(rootBlock.getLock());
       
       try {
 	splitRoot(rootBlock, xa);
       } finally {
-	xa.unlockWrite(rootBlock.getLock());
+	xa.unlockReadAndWrite(rootBlock.getLock());
       }
     } finally {
       rootBlock.free();
@@ -848,19 +848,22 @@ public final class BTree {
 
       Block childBlock = _store.readBlock(childId);
       try {
+	boolean isJoin = false;
+	
 	xa.lockRead(childBlock.getLock());
 
 	try {
-	  if (! remove(childBlock,
-		       keyBuffer, keyOffset, keyLength,
-		       xa)) {
-	    if (joinBlocks(block, childBlock, xa)) {
-	      // XXX: deallocate at end?
-	      xa.deallocateBlock(childBlock);
-	    }
-	  }
+	  isJoin = ! remove(childBlock,
+			    keyBuffer, keyOffset, keyLength,
+			    xa);
 	} finally {
 	  xa.unlockRead(childBlock.getLock());
+	}
+
+	if (isJoin) {
+	  if (joinBlocks(block, childBlock, xa)) {
+	    xa.deallocateBlock(childBlock);
+	  }
 	}
       } finally {
 	childBlock.free();
@@ -904,10 +907,10 @@ public final class BTree {
 	  int leftLength = getLength(leftBuffer);
 
 	  if (_minN < leftLength && isLeaf(buffer) == isLeaf(leftBuffer)) {
-	    xa.lockWrite(leftBlock.getLock());
+	    xa.lockReadAndWrite(leftBlock.getLock());
 	  
 	    try {
-	      xa.lockWrite(block.getLock());
+	      xa.lockReadAndWrite(block.getLock());
 	    
 	      try {
 		parent.setFlushDirtyOnCommit(false);
@@ -921,10 +924,10 @@ public final class BTree {
 
 		return false;
 	      } finally {
-		xa.unlockWrite(block.getLock());
+		xa.unlockReadAndWrite(block.getLock());
 	      }
 	    } finally {
-	      xa.unlockWrite(leftBlock.getLock());
+	      xa.unlockReadAndWrite(leftBlock.getLock());
 	    }
 	  }
 	} finally {
@@ -941,10 +944,10 @@ public final class BTree {
 	  int rightLength = getLength(rightBuffer);
 	  
 	  if (_minN < rightLength & isLeaf(buffer) == isLeaf(rightBuffer)) {
-	    xa.lockWrite(block.getLock());
+	    xa.lockReadAndWrite(block.getLock());
 
 	    try {
-	      xa.lockWrite(rightBlock.getLock());
+	      xa.lockReadAndWrite(rightBlock.getLock());
 
 	      try {
 		parent.setFlushDirtyOnCommit(false);
@@ -959,10 +962,10 @@ public final class BTree {
 
 		return false;
 	      } finally {
-		xa.unlockWrite(rightBlock.getLock());
+		xa.unlockReadAndWrite(rightBlock.getLock());
 	      }
 	    } finally {
-		xa.unlockWrite(block.getLock());
+	      xa.unlockReadAndWrite(block.getLock());
 	    }
 	  }
 	} finally {
@@ -980,10 +983,10 @@ public final class BTree {
 	  byte []leftBuffer = leftBlock.getBuffer();
 	  
 	  if (isLeaf(leftBuffer) == isLeaf(buffer)) {
-	    xa.lockWrite(leftBlock.getLock());
+	    xa.lockReadAndWrite(leftBlock.getLock());
 
 	    try {
-	      xa.lockWrite(block.getLock());
+	      xa.lockReadAndWrite(block.getLock());
 
 	      try {
 		parent.setFlushDirtyOnCommit(false);
@@ -998,10 +1001,10 @@ public final class BTree {
 
 		return true;
 	      } finally {
-		xa.unlockWrite(block.getLock());
+		xa.unlockReadAndWrite(block.getLock());
 	      }
 	    } finally {
-	      xa.unlockWrite(leftBlock.getLock());
+	      xa.unlockReadAndWrite(leftBlock.getLock());
 	    }
 	  }
 	} finally {
@@ -1016,10 +1019,10 @@ public final class BTree {
 	  byte []rightBuffer = rightBlock.getBuffer();
 
 	  if (isLeaf(buffer) == isLeaf(rightBuffer)) {
-	    xa.lockWrite(block.getLock());
+	    xa.lockReadAndWrite(block.getLock());
 
 	    try {
-	      xa.lockWrite(rightBlock.getLock());
+	      xa.lockReadAndWrite(rightBlock.getLock());
 
 	      try {
 		rightBlock.setFlushDirtyOnCommit(false);
@@ -1034,10 +1037,10 @@ public final class BTree {
 	
 		return true;
 	      } finally {
-		xa.unlockWrite(rightBlock.getLock());
+		xa.unlockReadAndWrite(rightBlock.getLock());
 	      }
 	    } finally {
-	      xa.unlockWrite(block.getLock());
+	      xa.unlockReadAndWrite(block.getLock());
 	    }
 	  }
 	} finally {

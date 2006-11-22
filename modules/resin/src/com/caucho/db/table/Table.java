@@ -716,7 +716,7 @@ public class Table extends Store {
 	    }
 	  }
 	} finally {
-	  xa.unlockWrite(block.getLock());
+	  xa.unlockReadAndWrite(block.getLock());
 	}
       } while (! hasRow);
 

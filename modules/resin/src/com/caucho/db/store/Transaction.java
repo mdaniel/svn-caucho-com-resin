@@ -188,6 +188,15 @@ public class Transaction extends StoreTransaction {
   /**
    * Acquires a new write lock.
    */
+  public void lockReadAndWrite(Lock lock)
+    throws SQLException
+  {
+    lockWrite(lock);
+  }
+  
+  /**
+   * Acquires a new write lock.
+   */
   public void lockWrite(Lock lock)
     throws SQLException
   {
@@ -272,11 +281,19 @@ public class Transaction extends StoreTransaction {
     }
   }
   
-  public void unlockWrite(Lock lock)
+  public void unlockReadAndWrite(Lock lock)
     throws SQLException
   {
     _readLocks.remove(lock);
-
+    
+    if (_writeLocks.remove(lock)) {
+      lock.unlockReadAndWrite();
+    }
+  }
+  
+  public void unlockWrite(Lock lock)
+    throws SQLException
+  {
     if (_writeLocks.remove(lock)) {
       lock.unlockWrite();
     }
@@ -563,7 +580,7 @@ public class Transaction extends StoreTransaction {
 	  _readLocks.remove(lock);
 
 	try {
-	  lock.unlockWrite();
+	  lock.unlockReadAndWrite();
 	} catch (Throwable e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}

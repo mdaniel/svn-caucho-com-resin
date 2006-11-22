@@ -117,9 +117,8 @@ class UpdateQuery extends Query {
 
 	  TableIterator iter = rows[0];
 
-	  column.set(xa, iter, expr, context);
-
 	  iter.setDirty();
+	  column.set(xa, iter, expr, context);
 	}
 
 	context.setRowUpdateCount(++count);

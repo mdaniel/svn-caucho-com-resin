@@ -510,7 +510,7 @@ public class QueryContext {
 	if (block == null) {
 	}
 	else if (_isWrite) {
-	  _xa.unlockWrite(block.getLock());
+	  _xa.unlockReadAndWrite(block.getLock());
 
 	  try {
 	    block.commit();

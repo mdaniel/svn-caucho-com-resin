@@ -53,6 +53,8 @@ public final class Lock {
 
   private final String _id;
 
+  // count of threads trying to upgrade from a read lock
+  private int _tryUpgradeCount;
   // count of threads trying to get a write lock
   private int _tryWriteCount;
   
@@ -90,31 +92,35 @@ public final class Lock {
 		 + " try-write:" + _tryWriteCount + ")");
     }
 
-    long expire = Alarm.getCurrentTime() + timeout;
+    long start = Alarm.getCurrentTime();
+    long expire = start + timeout;
 
     synchronized (this) {
       long now;
 
-      do {
+      while (true) {
 	if (! _isWrite && _tryWriteCount == 0) {
 	  _readCount++;
 	  return;
 	}
 
-	if (Alarm.isTest())
+	long delta = expire - Alarm.getCurrentTime();
+
+	if (delta < 0 || Alarm.isTest())
 	  break;
 
 	try {
-	  wait(expire - Alarm.getCurrentTime());
+	  wait(delta);
 	} catch (InterruptedException e) {
 	  throw new LockTimeoutException(e);
 	}
-      } while (Alarm.getCurrentTime() <= expire);
+      }
 
+      printOwnerStack();
       Thread.dumpStack();
-	printOwnerStack();
       throw new LockTimeoutException(L.l("Lock {0} timed out ({1}ms) try-writers:{2} is-write:{3}",
-					 this, timeout,
+					 this,
+					 Alarm.getCurrentTime() - start,
 					 _tryWriteCount,
 					 _isWrite));
     }
@@ -163,31 +169,39 @@ public final class Lock {
     synchronized (this) {
       _tryWriteCount++;
 
+      // XXX: temp debug only
+      if (_owner == null)
+	_owner = Thread.currentThread();
+
       try {
-	do {
-	  if (! _isWrite && _readCount == 0) {
+	while (true) {
+	  if (! _isWrite && _readCount == _tryUpgradeCount) {
 	    _readCount++;
 	    _isWrite = true;
 	    _owner = Thread.currentThread();
 	    return;
 	  }
 
-	  if (Alarm.isTest())
+	  long delta = expire - Alarm.getCurrentTime();
+
+	  if (delta < 0 || Alarm.isTest())
 	    break;
 
 	  try {
-	    wait(expire - Alarm.getCurrentTime());
+	    wait(delta);
 	  } catch (InterruptedException e) {
 	    throw new LockTimeoutException(e);
 	  }
-	} while (Alarm.getCurrentTime() < expire);
+	}
 
-	Thread.dumpStack();
 	printOwnerStack();
-	throw new LockTimeoutException(L.l("{0} lockReadAndWrite timed out ({1}ms) try-writers:{2}",
+	Thread.dumpStack();
+	throw new LockTimeoutException(L.l("{0} lockReadAndWrite timed out ({1}ms) is-write:{2} try-writers:{3} try-upgrade:{4}",
 					   this,
 					   (Alarm.getCurrentTime() - start),
-					   _tryWriteCount));
+					   _isWrite,
+					   _tryWriteCount,
+					   _tryUpgradeCount));
       } finally {
 	_tryWriteCount--;
 
@@ -216,23 +230,31 @@ public final class Lock {
 
     synchronized (this) {
       _tryWriteCount++;
+      _tryUpgradeCount++;
+
+      // XXX: temp debug only
+      if (_owner == null)
+	_owner = Thread.currentThread();
 
       try {
-	do {
-	  if (! _isWrite && _readCount == 1) {
+	while (true) {
+	  if (! _isWrite && _readCount == _tryUpgradeCount) {
 	    _isWrite = true;
+	    _owner = Thread.currentThread();
 	    return;
 	  }
 
-	  if (Alarm.isTest())
+	  long delta = expire - Alarm.getCurrentTime();
+
+	  if (delta < 0 || Alarm.isTest())
 	    break;
 
 	  try {
-	    wait(expire - Alarm.getCurrentTime());
+	    wait(delta);
 	  } catch (InterruptedException e) {
 	    throw new LockTimeoutException(e);
 	  }
-	} while (Alarm.getCurrentTime() < expire);
+	}
 
 	printOwnerStack();
 	Thread.dumpStack();
@@ -241,16 +263,37 @@ public final class Lock {
 			       timeout,
 			       _tryWriteCount));
 	
-	printOwnerStack();
 	throw new LockTimeoutException(L.l("{0} lockWrite timed out ({1}ms) try-writers:{2}",
 					   this,
 					   Alarm.getCurrentTime() - start,
 					   _tryWriteCount));
       } finally {
 	_tryWriteCount--;
+	_tryUpgradeCount--;
 
 	notifyAll();
       }
+    }
+  }
+
+  /**
+   * Clears a write lock.
+   */
+  void unlockReadAndWrite()
+    throws SQLException
+  {
+    synchronized (this) {
+      _readCount--;
+      _isWrite = false;
+      _owner = null;
+
+      notifyAll();
+    }
+    
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " unlockReadAndWrite (read:" + _readCount
+		 + " write:" + _isWrite
+		 + " try-write:" + _tryWriteCount + ")");
     }
   }
 
@@ -261,7 +304,6 @@ public final class Lock {
     throws SQLException
   {
     synchronized (this) {
-      _readCount--;
       _isWrite = false;
       _owner = null;
 
