@@ -164,9 +164,10 @@ public class AmberConnection
   }
 
   /**
-   * @PrePersist callback for default listeners.
+   * @PrePersist callback for default listeners and
+   * entity listeners.
    */
-  public void prePersist(Object entity)
+  public void prePersist(Entity entity)
   {
     try {
       _persistenceUnit.prePersist(entity);
@@ -178,9 +179,10 @@ public class AmberConnection
   }
 
   /**
-   * @PostPersist callback for default listeners.
+   * @PostPersist callback for default listeners and
+   * entity listeners.
    */
-  public void postPersist(Object entity)
+  public void postPersist(Entity entity)
   {
     try {
       _persistenceUnit.postPersist(entity);
@@ -192,9 +194,10 @@ public class AmberConnection
   }
 
   /**
-   * @PreRemove callback for default listeners.
+   * @PreRemove callback for default listeners and
+   * entity listeners.
    */
-  public void preRemove(Object entity)
+  public void preRemove(Entity entity)
   {
     try {
       _persistenceUnit.preRemove(entity);
@@ -206,9 +209,10 @@ public class AmberConnection
   }
 
   /**
-   * @PostRemove callback for default listeners.
+   * @PostRemove callback for default listeners and
+   * entity listeners.
    */
-  public void postRemove(Object entity)
+  public void postRemove(Entity entity)
   {
     try {
       _persistenceUnit.postRemove(entity);
@@ -220,9 +224,10 @@ public class AmberConnection
   }
 
   /**
-   * @PreUpdate callback for default listeners.
+   * @PreUpdate callback for default listeners and
+   * entity listeners.
    */
-  public void preUpdate(Object entity)
+  public void preUpdate(Entity entity)
   {
     try {
       _persistenceUnit.preUpdate(entity);
@@ -234,9 +239,10 @@ public class AmberConnection
   }
 
   /**
-   * @PostUpdate callback for default listeners.
+   * @PostUpdate callback for default listeners and
+   * entity listeners.
    */
-  public void postUpdate(Object entity)
+  public void postUpdate(Entity entity)
   {
     try {
       _persistenceUnit.postUpdate(entity);
@@ -248,9 +254,10 @@ public class AmberConnection
   }
 
   /**
-   * @PostLoad callback for default listeners.
+   * @PostLoad callback for default listeners and
+   * entity listeners.
    */
-  public void postLoad(Object entity)
+  public void postLoad(Entity entity)
   {
     try {
       _persistenceUnit.postLoad(entity);
@@ -300,6 +307,8 @@ public class AmberConnection
 
     } catch (RuntimeException e) {
       throw e;
+    } catch (SQLException e) {
+      throw new IllegalStateException(e);
     } catch (Exception e) {
       throw new EJBExceptionWrapper(e);
     }
@@ -514,7 +523,27 @@ public class AmberConnection
    */
   public void refresh(Object entity)
   {
-    throw new UnsupportedOperationException();
+    try {
+      if (entity == null)
+        return;
+
+      if (! (entity instanceof Entity))
+        throw new IllegalArgumentException("refresh() operation can only be applied to an entity instance.");
+
+      Entity instance = (Entity) entity;
+
+      int state = instance.__caucho_getEntityState();
+
+      if (state <= Entity.TRANSIENT || state >= Entity.P_DELETING)
+        throw new IllegalArgumentException("refresh() operation can only be applied to a managed entity instance.");
+
+      // Reset and refresh state.
+      instance.__caucho_expire();
+      instance.__caucho_makePersistent(this, (EntityType) null);
+      instance.__caucho_retrieve(this);
+    } catch (SQLException e) {
+      throw new AmberRuntimeException(e);
+    }
   }
 
   /**

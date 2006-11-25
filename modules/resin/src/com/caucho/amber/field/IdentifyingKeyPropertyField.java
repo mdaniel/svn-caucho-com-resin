@@ -34,7 +34,7 @@ import com.caucho.util.L10N;
 
 import com.caucho.log.Log;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 import com.caucho.amber.table.ForeignColumn;
 
@@ -45,8 +45,8 @@ public class IdentifyingKeyPropertyField extends KeyPropertyField {
   private static final L10N L = new L10N(IdentifyingKeyPropertyField.class);
   protected static final Logger log = Log.open(IdentifyingKeyPropertyField.class);
 
-  public IdentifyingKeyPropertyField(EntityType entityType,
-				     ForeignColumn column)
+  public IdentifyingKeyPropertyField(RelatedType entityType,
+                                     ForeignColumn column)
   {
     super(entityType);
 

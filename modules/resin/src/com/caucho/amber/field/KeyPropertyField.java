@@ -48,7 +48,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 import com.caucho.amber.table.Column;
 
@@ -68,21 +68,21 @@ public class KeyPropertyField extends PropertyField implements IdField {
   private boolean _isKeyField;
   private String _generator;
 
-  public KeyPropertyField(EntityType tableType)
+  public KeyPropertyField(RelatedType tableType)
   {
     super(tableType);
   }
 
-  public KeyPropertyField(EntityType tableType,
-			  String name)
+  public KeyPropertyField(RelatedType tableType,
+                          String name)
     throws ConfigException
   {
     super(tableType, name);
   }
 
-  public KeyPropertyField(EntityType entityType,
-			  String name,
-			  Column column)
+  public KeyPropertyField(RelatedType entityType,
+                          String name,
+                          Column column)
     throws ConfigException
   {
     super(entityType, name);
@@ -151,7 +151,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
     ArrayList<Column> columns = new ArrayList<Column>();
 
     columns.add(_column);
-    
+
     return columns;
   }
 
@@ -186,16 +186,16 @@ public class KeyPropertyField extends PropertyField implements IdField {
     throws IOException
   {
     super.generatePrologue(out, completedSet);
-    
+
     if (isAbstract()) {
       out.println();
-      
+
       out.println();
       out.println("public " + getJavaTypeName() + " " + getGetterName() + "()");
       out.println("{");
       out.println("  return " + getFieldName() + ";");
       out.println("}");
-      
+
       out.println();
       out.println("public void " + getSetterName() + "(" + getJavaTypeName() + " v)");
       out.println("{");
@@ -209,7 +209,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
    */
   public String generateSuperGetter()
   {
-    if (isAbstract() ||	getGetterMethod() == null)
+    if (isAbstract() || getGetterMethod() == null)
       return getFieldName();
     else
       return getGetterMethod().getName() + "()";
@@ -220,7 +220,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
    */
   public String generateSuperSetter(String value)
   {
-    if (isAbstract() ||	getGetterMethod() == null || getSetterMethod() == null)
+    if (isAbstract() || getGetterMethod() == null || getSetterMethod() == null)
       return(getFieldName() + " = " + value + ";");
     else
       return getSetterMethod().getName() + "(" + value + ")";
@@ -232,6 +232,19 @@ public class KeyPropertyField extends PropertyField implements IdField {
   public String generateSelect(String id)
   {
     return _column.generateSelect(id);
+  }
+
+  /**
+   * Returns the JPA QL select code
+   */
+  public String generateJavaSelect(String id)
+  {
+    String select = getName();
+
+    if (id != null)
+      select = id + "." + select;
+
+    return select;
   }
 
   /**
@@ -254,11 +267,11 @@ public class KeyPropertyField extends PropertyField implements IdField {
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-				 String indexVar, int index)
+                                 String indexVar, int index)
     throws IOException
   {
     return generateLoadForeign(out, rs, indexVar, index,
-			       getForeignTypeName().replace('.', '_'));
+                               getForeignTypeName().replace('.', '_'));
   }
 
   /**
@@ -291,8 +304,8 @@ public class KeyPropertyField extends PropertyField implements IdField {
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-				 String indexVar, int index,
-				 String name)
+                                 String indexVar, int index,
+                                 String name)
     throws IOException
   {
     // XXX: 0 == null
@@ -303,14 +316,14 @@ public class KeyPropertyField extends PropertyField implements IdField {
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String index, String value)
+                          String index, String value)
     throws IOException
   {
     if (value == null)
       _column.getType().generateSetNull(out, pstmt, index);
     else
       _column.getType().generateSet(out, pstmt, index,
-				    generateGet(value));
+                                    generateGet(value));
   }
 
   /**
@@ -364,16 +377,16 @@ public class KeyPropertyField extends PropertyField implements IdField {
     throws IOException
   {
     /*
-    out.println("insertSql.append(\"" + getName() + "\");");
-    out.println("insertValues.append(\"?\");");
+      out.println("insertSql.append(\"" + getName() + "\");");
+      out.println("insertValues.append(\"?\");");
     */
-    
+
     if ("identity".equals(_generator))
       return;
     else if (_generator != null) {
-      if (getSourceType().getGenerator(getName()) == null)
-	throw new IllegalStateException("no sequence generator for " + getName());
-      
+      if (getEntitySourceType().getGenerator(getName()) == null)
+        throw new IllegalStateException("no sequence generator for " + getName());
+
       out.println("if (" + getType().generateIsNull(generateSuperGetter()) + ") {");
       out.pushDepth();
 
@@ -382,25 +395,25 @@ public class KeyPropertyField extends PropertyField implements IdField {
       String javaType = getType().getJavaTypeName();
 
       if ("long".equals(javaType))
-	id = "(" + javaType + ") " + id;
+        id = "(" + javaType + ") " + id;
       else if ("int".equals(javaType))
-	id = "(" + javaType + ") " + id;
+        id = "(" + javaType + ") " + id;
       else if ("short".equals(javaType))
-	id = "(" + javaType + ") " + id;
+        id = "(" + javaType + ") " + id;
       else if ("java.lang.Long".equals(javaType))
-	id = "new Long(" + id + ")";
+        id = "new Long(" + id + ")";
       else if ("java.lang.Integer".equals(javaType))
-	id = "new Integer((int) " + id + ")";
+        id = "new Integer((int) " + id + ")";
       else if ("java.lang.Short".equals(javaType))
-	id = "new Short((short) " + id + ")";
+        id = "new Short((short) " + id + ")";
       else if ("java.lang.Byte".equals(javaType))
-	id = "new Byte((byte) " + id + ")";
+        id = "new Byte((byte) " + id + ")";
       else
-	throw new UnsupportedOperationException(L.l("{0} is an unsupported generated key type.",
-						  javaType));
+        throw new UnsupportedOperationException(L.l("{0} is an unsupported generated key type.",
+                                                    javaType));
 
       out.println(generateSuperSetter(id) + ";");
-      
+
       out.popDepth();
       out.println("}");
 
@@ -428,7 +441,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
     out.pushDepth();
 
     String var = "__caucho_rs_" + out.generateId();
-    
+
     out.println("java.sql.ResultSet " + var + " = " + pstmt + ".getGeneratedKeys();");
     out.println("if (" + var + ".next()) {");
     out.pushDepth();
@@ -436,16 +449,16 @@ public class KeyPropertyField extends PropertyField implements IdField {
     out.print(getType().getName() + " v1 = ");
     getType().generateLoad(out, var, "", 1);
     out.println(";");
-    
+
     out.println(generateSuperSetter("v1") + ";");
 
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINER))");
     out.println("  __caucho_log.finer(\"create with new primaryKey \" + " + generateSuperGetter() + ");");
-    
+
     out.popDepth();
     out.println("}");
     out.println("else throw new java.sql.SQLException();");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -481,18 +494,18 @@ public class KeyPropertyField extends PropertyField implements IdField {
   public String generateGetProxyProperty(String value)
   {
     // XXX: better solution
-    Class proxyClass = ((JClassWrapper) getSourceType().getProxyClass()).getWrappedClass();
+    Class proxyClass = ((JClassWrapper) getEntitySourceType().getProxyClass()).getWrappedClass();
 
     try {
       Method method = proxyClass.getMethod(getGetterName(), new Class[0]);
 
       if (method != null)
-	return generateGet(value);
+        return generateGet(value);
     } catch (Throwable e) {
     }
 
-    Id id = getSourceType().getId();
-    
+    Id id = getEntitySourceType().getId();
+
     return generateGetKeyProperty("((" + id.getForeignTypeName() + ") " + value + ".getPrimaryKey())");
   }
 

@@ -54,7 +54,8 @@ import com.caucho.amber.query.QueryParser;
 
 import com.caucho.amber.table.Table;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.AbstractStatefulType;
 
 import com.caucho.config.ConfigException;
 
@@ -72,7 +73,7 @@ abstract public class AbstractField implements AmberField {
   private static final L10N L = new L10N(AbstractField.class);
   protected static final Logger log = Log.open(AbstractField.class);
 
-  private EntityType _sourceType;
+  private AbstractStatefulType _sourceType;
 
   private String _name;
 
@@ -86,12 +87,12 @@ abstract public class AbstractField implements AmberField {
   private int _updateIndex;
   private int _loadGroupIndex = -1;
 
-  AbstractField(EntityType sourceType)
+  AbstractField(AbstractStatefulType sourceType)
   {
     _sourceType = sourceType;
   }
 
-  AbstractField(EntityType sourceType, String name)
+  AbstractField(AbstractStatefulType sourceType, String name)
     throws ConfigException
   {
     this(sourceType);
@@ -115,11 +116,11 @@ abstract public class AbstractField implements AmberField {
       String getter = "get" + name;
       String setter = "set" + name;
 
-      _getterMethod = EntityType.getGetter(getBeanClass(), getter);
+      _getterMethod = AbstractStatefulType.getGetter(getBeanClass(), getter);
 
       if (_getterMethod == null) {
         getter = "is" + name;
-        _getterMethod = EntityType.getGetter(getBeanClass(), getter);
+        _getterMethod = AbstractStatefulType.getGetter(getBeanClass(), getter);
       }
 
       if (_getterMethod == null)
@@ -128,10 +129,10 @@ abstract public class AbstractField implements AmberField {
 
       _javaType = _getterMethod.getGenericReturnType();
 
-      _setterMethod = EntityType.getSetter(getBeanClass(), setter);
+      _setterMethod = AbstractStatefulType.getSetter(getBeanClass(), setter);
     }
     else {
-      JField field = EntityType.getField(getBeanClass(), name);
+      JField field = AbstractStatefulType.getField(getBeanClass(), name);
 
       if (field == null)
         throw new ConfigException(L.l("{0}: {1} has no matching field.",
@@ -174,7 +175,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Returns the owning entity class.
    */
-  public EntityType getSourceType()
+  public AbstractStatefulType getSourceType()
   {
     return _sourceType;
   }
@@ -196,11 +197,20 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
+   * Returns the source type as
+   * entity or mapped-superclass.
+   */
+  public RelatedType getEntitySourceType()
+  {
+    return (RelatedType) getSourceType();
+  }
+
+  /**
    * Returns the table containing the field's columns.
    */
   public Table getTable()
   {
-    return getSourceType().getTable();
+    return getEntitySourceType().getTable();
   }
 
   /**
@@ -368,9 +378,9 @@ abstract public class AbstractField implements AmberField {
   {
     if (_loadGroupIndex < 0) {
       if (_isLazy)
-        _loadGroupIndex = getSourceType().nextLoadGroupIndex();
+        _loadGroupIndex = getEntitySourceType().nextLoadGroupIndex();
       else
-        _loadGroupIndex = getSourceType().getDefaultLoadGroupIndex();
+        _loadGroupIndex = getEntitySourceType().getDefaultLoadGroupIndex();
     }
   }
 
@@ -412,6 +422,14 @@ abstract public class AbstractField implements AmberField {
    * Generates the select clause.
    */
   public String generateSelect(String id)
+  {
+    return null;
+  }
+
+  /**
+   * Generates the JPA QL select clause.
+   */
+  public String generateJavaSelect(String id)
   {
     return null;
   }

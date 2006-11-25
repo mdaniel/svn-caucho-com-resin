@@ -142,7 +142,7 @@ public class FromItem {
    */
   public EntityType getTableType()
   {
-    return _table.getType();
+    return (EntityType) _table.getType();
   }
 
   /**

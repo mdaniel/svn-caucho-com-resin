@@ -54,7 +54,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.LinkColumns;
@@ -79,7 +79,7 @@ public class EntityOneToManyField extends CollectionField {
 
   private EntityManyToOneField _sourceField;
 
-  public EntityOneToManyField(EntityType entityType,
+  public EntityOneToManyField(RelatedType entityType,
                               String name,
                               CascadeType[] cascadeTypes)
     throws ConfigException
@@ -87,14 +87,14 @@ public class EntityOneToManyField extends CollectionField {
     super(entityType, name, cascadeTypes);
   }
 
-  public EntityOneToManyField(EntityType entityType,
+  public EntityOneToManyField(RelatedType entityType,
                               String name)
     throws ConfigException
   {
     this(entityType, name, null);
   }
 
-  public EntityOneToManyField(EntityType entityType)
+  public EntityOneToManyField(RelatedType entityType)
   {
     super(entityType);
   }
@@ -110,11 +110,21 @@ public class EntityOneToManyField extends CollectionField {
   }
 
   /**
-   * Returns the target type as entity.
+   * Returns the source type as
+   * entity or mapped-superclass.
    */
-  public EntityType getEntityTargetType()
+  public RelatedType getEntitySourceType()
   {
-    return (EntityType) getTargetType();
+    return (RelatedType) getSourceType();
+  }
+
+  /**
+   * Returns the target type as
+   * entity or mapped-superclass.
+   */
+  public RelatedType getEntityTargetType()
+  {
+    return (RelatedType) getTargetType();
   }
 
   /**
@@ -192,6 +202,10 @@ public class EntityOneToManyField extends CollectionField {
                                  CascadeType cascadeType)
     throws IOException
   {
+    if (cascadeType == CascadeType.PERSIST)
+      return;
+
+    generateInternalCascade(out, aConn, cascadeType);
   }
 
   /**
@@ -205,10 +219,27 @@ public class EntityOneToManyField extends CollectionField {
                                   CascadeType cascadeType)
     throws IOException
   {
+    if (cascadeType != CascadeType.PERSIST)
+      return;
+
+    generateInternalCascade(out, aConn, cascadeType);
+  }
+
+  private void generateInternalCascade(JavaWriter out,
+                                       String aConn,
+                                       CascadeType cascadeType)
+    throws IOException
+  {
     if (isCascade(cascadeType)) {
 
       String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
 
+      out.println("if (" + getter + " == null)");
+      out.pushDepth();
+      out.println(getSetterName() + "(" +  generateSuperGetter() + ");");
+      out.popDepth();
+
+      out.println();
       out.println("if (" + getter + " != null) {");
       out.pushDepth();
 
@@ -369,10 +400,10 @@ public class EntityOneToManyField extends CollectionField {
     out.print("String sql=\"");
 
     out.print("SELECT c");
-    out.print(" FROM " + getSourceType().getName() + " o,");
+    out.print(" FROM " + getEntitySourceType().getName() + " o,");
     out.print("      o." + getName() + " c");
     out.print(" WHERE ");
-    out.print(getSourceType().getId().generateRawWhere("o"));
+    out.print(getEntitySourceType().getId().generateRawWhere("o"));
 
     if (_orderByFields != null) {
       out.print(" ORDER BY ");
@@ -392,7 +423,7 @@ public class EntityOneToManyField extends CollectionField {
     out.println("query = __caucho_session.prepareQuery(sql);");
 
     out.println("int index = 1;");
-    getSourceType().getId().generateSet(out, "query", "index", "this");
+    getEntitySourceType().getId().generateSet(out, "query", "index", "this");
 
     // Ex: _caucho_getChildren = new com.caucho.amber.collection.CollectionImpl
     out.print(var);
@@ -468,14 +499,14 @@ public class EntityOneToManyField extends CollectionField {
     out.print("String sql=\"");
 
     out.print("SELECT count(*) FROM ");
-    out.print(getSourceType().getName());
+    out.print(getEntitySourceType().getName());
     out.print(" AS o ");
 
     out.print(" WHERE ");
 
     // getKeyColumn().generateRawMatchArgWhere("o");
 
-    ArrayList<IdField> keys = getSourceType().getId().getKeys();
+    ArrayList<IdField> keys = getEntitySourceType().getId().getKeys();
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
         out.print(" AND ");
@@ -491,7 +522,7 @@ public class EntityOneToManyField extends CollectionField {
     out.println("int index = 1;");
 
     // ejb/06h0
-    getSourceType().getId().generateSet(out, "query", "index", getSourceType().getInstanceClassName() + ".this"); // "__ResinExt.this");
+    getEntitySourceType().getId().generateSet(out, "query", "index", getEntitySourceType().getInstanceClassName() + ".this"); // "__ResinExt.this");
 
     out.println("java.sql.ResultSet rs = query.executeQuery();");
 
@@ -525,11 +556,11 @@ public class EntityOneToManyField extends CollectionField {
 
     JType type;
 
-    if (! getSourceType().isFieldAccess()) {
+    if (! getEntitySourceType().isFieldAccess()) {
       type = getGetterMethod().getGenericReturnType();
     }
     else {
-      JField field = EntityType.getField(getBeanClass(), getName());
+      JField field = RelatedType.getField(getBeanClass(), getName());
       type = field.getGenericType();
     }
 
@@ -542,9 +573,9 @@ public class EntityOneToManyField extends CollectionField {
     out.println("{");
     out.pushDepth();
 
-    out.println("if (" + generateSuperGetter() + " == value)");
-    out.println("  return;");
-    out.println();
+    // out.println("if (" + generateSuperGetter() + " == value)");
+    // out.println("  return;");
+    // out.println();
 
     //
     // jpa/0j57 needs to generate the following snippet:

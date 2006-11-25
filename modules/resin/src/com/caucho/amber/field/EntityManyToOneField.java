@@ -49,7 +49,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.amber.AmberRuntimeException;
 
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.ForeignColumn;
@@ -70,7 +70,7 @@ public class EntityManyToOneField extends CascadableField {
 
   private LinkColumns _linkColumns;
 
-  private EntityType _targetType;
+  private RelatedType _targetType;
 
   private int _targetLoadIndex;
 
@@ -83,24 +83,24 @@ public class EntityManyToOneField extends CascadableField {
   private boolean _isSourceCascadeDelete;
   private boolean _isTargetCascadeDelete;
 
-  public EntityManyToOneField(EntityType entityType,
+  public EntityManyToOneField(RelatedType relatedType,
                               String name,
                               CascadeType[] cascadeType)
     throws ConfigException
   {
-    super(entityType, name, cascadeType);
+    super(relatedType, name, cascadeType);
   }
 
-  public EntityManyToOneField(EntityType entityType,
+  public EntityManyToOneField(RelatedType relatedType,
                               String name)
     throws ConfigException
   {
-    this(entityType, name, null);
+    this(relatedType, name, null);
   }
 
-  public EntityManyToOneField(EntityType entityType)
+  public EntityManyToOneField(RelatedType relatedType)
   {
-    super(entityType);
+    super(relatedType);
   }
 
   /**
@@ -108,17 +108,27 @@ public class EntityManyToOneField extends CascadableField {
    */
   public void setType(Type targetType)
   {
-    if (! (targetType instanceof EntityType))
+    if (! (targetType instanceof RelatedType))
       throw new AmberRuntimeException(L.l("many-to-one requires an entity target at '{0}'",
                                           targetType));
 
-    _targetType = (EntityType) targetType;
+    _targetType = (RelatedType) targetType;
   }
 
   /**
-   * Returns the target type.
+   * Returns the source type as
+   * entity or mapped-superclass.
    */
-  public EntityType getEntityType()
+  public RelatedType getEntitySourceType()
+  {
+    return (RelatedType) getSourceType();
+  }
+
+  /**
+   * Returns the target type as
+   * entity or mapped-superclass.
+   */
+  public RelatedType getEntityTargetType()
   {
     return _targetType;
   }
@@ -129,7 +139,7 @@ public class EntityManyToOneField extends CascadableField {
   public String getForeignTypeName()
   {
     //return ((KeyColumn) getColumn()).getType().getForeignTypeName();
-    return getEntityType().getForeignTypeName();
+    return getEntityTargetType().getForeignTypeName();
   }
 
   /**
@@ -204,7 +214,7 @@ public class EntityManyToOneField extends CascadableField {
   {
     super.init();
 
-    Id id = getEntityType().getId();
+    Id id = getEntityTargetType().getId();
     ArrayList<Column> keys = id.getColumns();
 
     if (_linkColumns == null) {
@@ -220,17 +230,17 @@ public class EntityManyToOneField extends CascadableField {
         else
           name = getName() + "_" + key.getName();
 
-        columns.add(getSourceType().getTable().createForeignColumn(name, key));
+        columns.add(getEntitySourceType().getTable().createForeignColumn(name, key));
       }
 
-      _linkColumns = new LinkColumns(getSourceType().getTable(),
+      _linkColumns = new LinkColumns(getEntitySourceType().getTable(),
                                      _targetType.getTable(),
                                      columns);
     }
 
-    if (getSourceType().getId() != null) {
+    if (getEntitySourceType().getId() != null) {
       // resolve any alias
-      for (AmberField field : getSourceType().getId().getKeys()) {
+      for (AmberField field : getEntitySourceType().getId().getKeys()) {
         if (field instanceof PropertyField) {
           PropertyField prop = (PropertyField) field;
 
@@ -242,7 +252,7 @@ public class EntityManyToOneField extends CascadableField {
       }
     }
 
-    _targetLoadIndex = getSourceType().getLoadGroupIndex(); // nextLoadGroupIndex();
+    _targetLoadIndex = getEntitySourceType().getLoadGroupIndex(); // nextLoadGroupIndex();
 
     _linkColumns.setTargetCascadeDelete(isTargetCascadeDelete());
     _linkColumns.setSourceCascadeDelete(isSourceCascadeDelete());
@@ -321,7 +331,7 @@ public class EntityManyToOneField extends CascadableField {
 
     out.println();
 
-    Id id = getEntityType().getId();
+    Id id = getEntityTargetType().getId();
 
     out.println("protected transient " + id.getForeignTypeName() + " __caucho_field_" + getName() + ";");
 
@@ -352,17 +362,17 @@ public class EntityManyToOneField extends CascadableField {
 
     out.print("__caucho_field_" + getName() + " = ");
 
-    index = getEntityType().getId().generateLoadForeign(out, rs,
-                                                        indexVar, index,
-                                                        getName());
+    index = getEntityTargetType().getId().generateLoadForeign(out, rs,
+                                                              indexVar, index,
+                                                              getName());
 
     out.println(";");
 
     /*
     // ejb/0a06
-    String proxy = "aConn.loadProxy(\"" + getEntityType().getName() + "\", __caucho_field_" + getName() + ")";
+    String proxy = "aConn.loadProxy(\"" + getEntityTargetType().getName() + "\", __caucho_field_" + getName() + ")";
 
-    proxy = "(" + getEntityType().getProxyClass().getName() + ") " + proxy;
+    proxy = "(" + getEntityTargetType().getProxyClass().getName() + ") " + proxy;
 
     out.println(generateSuperSetter(proxy) + ";");
     */
@@ -465,7 +475,7 @@ public class EntityManyToOneField extends CascadableField {
     out.pushDepth();
 
     // ejb/06h0
-    String extClassName = getSourceType().getInstanceClassName(); // getSourceType().getName() + "__ResinExt";
+    String extClassName = getEntitySourceType().getInstanceClassName(); // getEntitySourceType().getName() + "__ResinExt";
     out.println(extClassName + " item = (" + extClassName + ") __caucho_item.getEntity();");
 
     out.println("item.__caucho_item_" + getGetterName() + "(__caucho_session);");
@@ -517,9 +527,9 @@ public class EntityManyToOneField extends CascadableField {
 
     // ejb/06h0
     if (isAbstract()) {
-      String proxy = "aConn.loadProxy(\"" + getEntityType().getName() + "\", __caucho_field_" + getName() + ")";
+      String proxy = "aConn.loadProxy(\"" + getEntityTargetType().getName() + "\", __caucho_field_" + getName() + ")";
 
-      proxy = getEntityType().getProxyClass().getName() + " v" + index + " = (" + getEntityType().getProxyClass().getName() + ") " + proxy + ";";
+      proxy = getEntityTargetType().getProxyClass().getName() + " v" + index + " = (" + getEntityTargetType().getProxyClass().getName() + ") " + proxy + ";";
 
       out.println(proxy);
       out.println(generateSuperSetter("v" + index) + ";");
@@ -581,7 +591,7 @@ public class EntityManyToOneField extends CascadableField {
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
     // jpa/0o05
     if (! dst.equals("super")) { // || isLazy())) {
-      out.println("((" + getSourceType().getInstanceClassName() + ") " + dst + ")." +
+      out.println("((" + getEntitySourceType().getInstanceClassName() + ") " + dst + ")." +
                   generateSuperSetter(generateSuperGetter()) + ";");
     }
 
@@ -610,7 +620,7 @@ public class EntityManyToOneField extends CascadableField {
     if (src.equals("super"))
       return var;
     else
-      return "((" + getSourceType().getInstanceClassName() + ") " + src + ")." + var;
+      return "((" + getEntitySourceType().getInstanceClassName() + ") " + src + ")." + var;
   }
 
   /**
@@ -621,10 +631,10 @@ public class EntityManyToOneField extends CascadableField {
   {
     // ejb/06gc - updates with EJB 2.0
 
-    Id id = getEntityType().getId();
+    Id id = getEntityTargetType().getId();
     String var = "__caucho_field_" + getName();
 
-    String keyType = getEntityType().getId().getForeignTypeName();
+    String keyType = getEntityTargetType().getId().getForeignTypeName();
 
     out.println();
     out.println("public void " + getSetterName() + "(" + getJavaTypeName() + " v)");
@@ -653,14 +663,14 @@ public class EntityManyToOneField extends CascadableField {
       out.pushDepth();
       out.print(keyType + " key = ");
 
-      EntityType targetType = getEntityType();
+      RelatedType targetType = getEntityTargetType();
 
       if (targetType.isEJBProxy(getJavaTypeName())) {
         // To handle EJB local objects.
         out.print(id.generateGetProxyKey("v"));
       }
       else {
-        String v = "((" + getEntityType().getInstanceClassName()+ ") v)";
+        String v = "((" + getEntityTargetType().getInstanceClassName()+ ") v)";
 
         out.print(id.toObject(id.generateGetProperty(v)));
       }
@@ -730,7 +740,7 @@ public class EntityManyToOneField extends CascadableField {
     out.println("if (" + var + " != null) {");
     out.pushDepth();
 
-    Id id = getEntityType().getId();
+    Id id = getEntityTargetType().getId();
     ArrayList<IdField> keys = id.getKeys();
 
     if (keys.size() == 1) {

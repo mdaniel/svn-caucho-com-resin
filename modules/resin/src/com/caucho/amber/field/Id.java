@@ -54,7 +54,7 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 
 import com.caucho.amber.table.Column;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 /**
  * Configuration for a bean's field
@@ -63,14 +63,14 @@ public class Id {
   private static final L10N L = new L10N(Id.class);
   protected static final Logger log = Log.open(Id.class);
 
-  private EntityType _ownerType;
+  private RelatedType _ownerType;
 
   private ArrayList<IdField> _keys = new ArrayList<IdField>();
   private ArrayList<Column> _columns = new ArrayList<Column>();
 
   private EmbeddedIdField _embeddedIdField;
 
-  public Id(EntityType ownerType, ArrayList<IdField> keys)
+  public Id(RelatedType ownerType, ArrayList<IdField> keys)
   {
     _ownerType = ownerType;
 
@@ -79,7 +79,7 @@ public class Id {
     }
   }
 
-  public Id(EntityType ownerType, IdField key)
+  public Id(RelatedType ownerType, IdField key)
   {
     _ownerType = ownerType;
 
@@ -119,7 +119,7 @@ public class Id {
   /**
    * Returns the owner type.
    */
-  public EntityType getOwnerType()
+  public RelatedType getOwnerType()
   {
     return _ownerType;
   }
@@ -223,6 +223,14 @@ public class Id {
   public String generateSelect(String id)
   {
     return getKey().generateSelect(id);
+  }
+
+  /**
+   * Generates the JPA QL select clause.
+   */
+  public String generateJavaSelect(String id)
+  {
+    return getKey().generateJavaSelect(id);
   }
 
   /**

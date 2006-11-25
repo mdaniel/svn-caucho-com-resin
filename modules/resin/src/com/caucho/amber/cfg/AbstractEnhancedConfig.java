@@ -24,47 +24,33 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
-package com.caucho.amber.type;
+package com.caucho.amber.cfg;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.table.Table;
 
 /**
- * Represents an application persistent bean type
+ * Base for <embeddable>, <entity> or
+ * <mapped-superclass> tags in orm.xml
  */
-public class EntityType extends RelatedType {
-  private static final Logger log = Logger.getLogger(EntityType.class.getName());
-  private static final L10N L = new L10N(EntityType.class);
+abstract public class AbstractEnhancedConfig {
+  // attributes
+  private String _access;
 
-  public EntityType(AmberPersistenceUnit amberPersistenceUnit)
+  /**
+   * Returns the access type.
+   */
+  public String getAccess()
   {
-    super(amberPersistenceUnit);
+    return _access;
   }
 
   /**
-   * Sets the table.
+   * Sets the access type.
    */
-  public void setTable(Table table)
+  public void setAccess(String access)
   {
-    super.setTable(table);
-
-    table.setType(this);
-  }
-
-  /**
-   * Printable version of the entity.
-   */
-  public String toString()
-  {
-    return "EntityType[" + _beanClass.getName() + "]";
+    _access = access;
   }
 }

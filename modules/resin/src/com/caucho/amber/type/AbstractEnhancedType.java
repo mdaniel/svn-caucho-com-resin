@@ -55,9 +55,9 @@ public abstract class AbstractEnhancedType extends Type {
   private static final Logger log = Logger.getLogger(AbstractEnhancedType.class.getName());
   private static final L10N L = new L10N(AbstractEnhancedType.class);
 
-  protected AmberPersistenceUnit _amberPersistenceUnit;
+  AmberPersistenceUnit _amberPersistenceUnit;
 
-  protected JClass _beanClass;
+  JClass _beanClass;
 
   private String _name;
 

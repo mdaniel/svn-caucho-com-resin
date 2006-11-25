@@ -33,7 +33,7 @@ import javax.persistence.CascadeType;
 import com.caucho.util.L10N;
 import com.caucho.log.Log;
 import com.caucho.config.ConfigException;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.table.LinkColumns;
 
 
@@ -50,17 +50,17 @@ public class AssociationField extends CollectionField {
 
   private boolean _hasInverseJoinColumns;
 
-  public AssociationField(EntityType entityType,
+  public AssociationField(RelatedType relatedType,
                           String name,
                           CascadeType[] cascadeTypes)
     throws ConfigException
   {
-    super(entityType, name, cascadeTypes);
+    super(relatedType, name, cascadeTypes);
   }
 
-  public AssociationField(EntityType entityType)
+  public AssociationField(RelatedType relatedType)
   {
-    super(entityType);
+    super(relatedType);
   }
 
   /**

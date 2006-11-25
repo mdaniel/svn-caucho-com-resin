@@ -46,7 +46,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.ForeignColumn;
@@ -60,7 +60,7 @@ import com.caucho.amber.query.QueryParser;
 /**
  * Represents a many-to-one link pointing to an entity.
  */
-public class DependentEntityOneToOneField extends AbstractField {
+public class DependentEntityOneToOneField extends CascadableField {
   private static final L10N L = new L10N(DependentEntityOneToOneField.class);
   protected static final Logger log = Log.open(DependentEntityOneToOneField.class);
 
@@ -68,11 +68,11 @@ public class DependentEntityOneToOneField extends AbstractField {
   private long _targetLoadIndex;
   private boolean _isCascadeDelete;
 
-  public DependentEntityOneToOneField(EntityType entityType,
+  public DependentEntityOneToOneField(RelatedType relatedType,
                                       String name)
     throws ConfigException
   {
-    super(entityType, name);
+    super(relatedType, name, null);
   }
 
   /**
@@ -92,11 +92,21 @@ public class DependentEntityOneToOneField extends AbstractField {
   }
 
   /**
-   * Returns the target type.
+   * Returns the source type as
+   * entity or mapped-superclass.
    */
-  public EntityType getEntityType()
+  public RelatedType getEntitySourceType()
   {
-    return _targetField.getSourceType();
+    return (RelatedType) getSourceType();
+  }
+
+  /**
+   * Returns the target type as
+   * entity or mapped-superclass.
+   */
+  public RelatedType getEntityTargetType()
+  {
+    return (RelatedType) _targetField.getSourceType();
   }
 
   /**
@@ -104,7 +114,7 @@ public class DependentEntityOneToOneField extends AbstractField {
    */
   public Type getType()
   {
-    return getEntityType();
+    return getEntityTargetType();
   }
 
   /**
@@ -113,7 +123,7 @@ public class DependentEntityOneToOneField extends AbstractField {
   public String getForeignTypeName()
   {
     //return ((KeyColumn) getColumn()).getType().getForeignTypeName();
-    return getEntityType().getForeignTypeName();
+    return getEntityTargetType().getForeignTypeName();
   }
 
   /**
@@ -145,7 +155,7 @@ public class DependentEntityOneToOneField extends AbstractField {
   {
     super.init();
 
-    _targetLoadIndex = getSourceType().nextLoadGroupIndex();
+    _targetLoadIndex = getEntitySourceType().nextLoadGroupIndex();
   }
 
   /**
@@ -167,7 +177,7 @@ public class DependentEntityOneToOneField extends AbstractField {
 
       ArrayList<ForeignColumn> columns = entityColumn.getColumns();
 
-      Id id = getEntityType().getId();
+      Id id = getEntityTargetType().getId();
       ArrayList<IdField> keys = id.getKeys();
 
       for (int i = 0; i < keys.size(); i++ ){
@@ -180,6 +190,32 @@ public class DependentEntityOneToOneField extends AbstractField {
   }
 
   /**
+   * Generates the flush check for this child.
+   */
+  public boolean generateFlushCheck(JavaWriter out)
+    throws IOException
+  {
+    String getter = generateSuperGetter();
+
+    out.println("if (" + getter + " != null) {");
+    out.pushDepth();
+    out.println("int state = ((com.caucho.amber.entity.Entity) " + getter + ").__caucho_getEntityState();");
+    out.println("if (state <= com.caucho.amber.entity.Entity.P_NEW || ");
+    out.println("    state >= com.caucho.amber.entity.Entity.P_DELETED)");
+
+    String errorString = ("(\"amber flush: unable to flush " +
+                          getEntitySourceType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
+                          "with non-managed dependent relationship one-to-one to "+
+                          getEntityTargetType().getName() + "\")");
+
+    out.println("  throw new IllegalStateException" + errorString + ";");
+    out.popDepth();
+    out.println("}");
+
+    return true;
+  }
+
+  /**
    * Generates any prologue.
    */
   public void generatePrologue(JavaWriter out, HashSet<Object> completedSet)
@@ -189,7 +225,7 @@ public class DependentEntityOneToOneField extends AbstractField {
 
     out.println();
 
-    Id id = getEntityType().getId();
+    Id id = getEntityTargetType().getId();
 
     id.generatePrologue(out, completedSet, getName());
   }
@@ -287,7 +323,7 @@ public class DependentEntityOneToOneField extends AbstractField {
     generateLoadProperty(out, index, "__caucho_session");
 
     /*
-      out.print(javaType + " v = (" + javaType + ") __caucho_session.loadProxy(\"" + getEntityType().getName() + "\", ");
+      out.print(javaType + " v = (" + javaType + ") __caucho_session.loadProxy(\"" + getEntityTargetType().getName() + "\", ");
       out.println("__caucho_field_" + getName() + ", true);");
     */
 
@@ -319,10 +355,10 @@ public class DependentEntityOneToOneField extends AbstractField {
 
     out.print("String sql"+index+" = \"");
     out.print("SELECT o." + getName() +
-              " FROM " + getSourceType().getName() + " o" +
+              " FROM " + getEntitySourceType().getName() + " o" +
               " WHERE ");
 
-    ArrayList<IdField> sourceKeys = getSourceType().getId().getKeys();
+    ArrayList<IdField> sourceKeys = getEntitySourceType().getId().getKeys();
     for (int i = 0; i < sourceKeys.size(); i++) {
       if (i != 0)
         out.print(" and ");
@@ -337,7 +373,7 @@ public class DependentEntityOneToOneField extends AbstractField {
 
     out.println("int index"+index+" = 1;");
 
-    getSourceType().getId().generateSet(out, "query"+index, "index"+index, "super");
+    getEntitySourceType().getId().generateSet(out, "query"+index, "index"+index, "super");
 
     out.println("v"+index+" = (" + javaType + ") query"+index+".getSingleResult();");
 
@@ -383,9 +419,9 @@ public class DependentEntityOneToOneField extends AbstractField {
   public void generateSetProperty(JavaWriter out)
     throws IOException
   {
-    Id id = getEntityType().getId();
+    Id id = getEntityTargetType().getId();
 
-    String keyType = getEntityType().getId().getForeignTypeName();
+    String keyType = getEntityTargetType().getId().getForeignTypeName();
 
     out.println();
     out.println("public void " + getSetterName() + "(" + getJavaTypeName() + " v)");
@@ -430,7 +466,7 @@ public class DependentEntityOneToOneField extends AbstractField {
   public void generateInvalidateForeign(JavaWriter out)
     throws IOException
   {
-    out.println("if (\"" + getEntityType().getTable().getName() + "\".equals(table)) {");
+    out.println("if (\"" + getEntityTargetType().getTable().getName() + "\".equals(table)) {");
     out.pushDepth();
     String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
     out.println(loadVar + " = 0;");

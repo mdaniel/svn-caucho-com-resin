@@ -33,11 +33,10 @@ package com.caucho.amber.cfg;
 /**
  * <mapped-superclass> tag in the orm.xml
  */
-public class MappedSuperclassConfig {
+public class MappedSuperclassConfig extends AbstractEnhancedConfig {
 
   // attributes
   private String _className;
-  private AccessType _access;
   private boolean _isMetadataComplete;
 
   // elements
@@ -54,14 +53,6 @@ public class MappedSuperclassConfig {
   private PostUpdateConfig _postUpdate;
   private PostLoadConfig _postLoad;
   private AttributesConfig _attributes;
-
-  /**
-   * Returns the access type.
-   */
-  public AccessType getAccess()
-  {
-    return _access;
-  }
 
   /**
    * Returns the attributes.
@@ -85,14 +76,6 @@ public class MappedSuperclassConfig {
   public boolean isMetaDataComplete()
   {
     return _isMetadataComplete;
-  }
-
-  /**
-   * Sets the access type.
-   */
-  public void setAccess(String access)
-  {
-    _access = AccessType.valueOf(access);
   }
 
   /**

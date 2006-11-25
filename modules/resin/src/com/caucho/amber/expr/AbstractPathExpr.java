@@ -37,7 +37,8 @@ import com.caucho.amber.AmberRuntimeException;
 
 import com.caucho.amber.field.AmberField;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.AbstractStatefulType;
+import com.caucho.amber.type.RelatedType;
 
 /**
  * Represents an amber mapping query expression
@@ -53,11 +54,13 @@ abstract public class AbstractPathExpr extends AbstractAmberExpr
   {
     AmberField field = null;
 
-    EntityType type = getTargetType();
+    AbstractStatefulType type = getTargetType();
 
     do {
       field = type.getField(fieldName);
-      type = type.getParentType();
+
+      if (type instanceof RelatedType)
+        type = ((RelatedType) type).getParentType();
     }
     while ((type != null) && (field == null));
 

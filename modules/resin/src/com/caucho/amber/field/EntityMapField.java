@@ -63,7 +63,7 @@ public class EntityMapField extends AbstractField {
 
   private IdField _id;
   private IdField _index;
-  
+
   public EntityMapField(EntityType entityType)
   {
     super(entityType);
@@ -80,7 +80,7 @@ public class EntityMapField extends AbstractField {
     } catch (ConfigException e) {
       log.log(Level.FINEST, e.toString(), e);
     }
-    
+
     setJavaType(java.util.Map.class);
   }
 
@@ -144,7 +144,7 @@ public class EntityMapField extends AbstractField {
    * Generates loading cache
    */
   public void generateUpdate(JavaWriter out, String mask, String pstmt,
-			     String index)
+                             String index)
     throws IOException
   {
   }
@@ -164,7 +164,7 @@ public class EntityMapField extends AbstractField {
     throws IOException
   {
   }
-  
+
   /**
    * Generates the select clause.
    */
@@ -177,8 +177,8 @@ public class EntityMapField extends AbstractField {
    * Updates the cached copy.
    */
   public void generateCopyUpdateObject(JavaWriter out,
-				       String dst, String src,
-				       int updateIndex)
+                                       String dst, String src,
+                                       int updateIndex)
     throws IOException
   {
   }
@@ -187,8 +187,8 @@ public class EntityMapField extends AbstractField {
    * Updates the cached copy.
    */
   public void generateCopyLoadObject(JavaWriter out,
-				       String dst, String src,
-				       int loadIndex)
+                                     String dst, String src,
+                                     int loadIndex)
     throws IOException
   {
   }
@@ -222,11 +222,11 @@ public class EntityMapField extends AbstractField {
       out.pushDepth();
 
       out.println("return null;");
-    
+
       out.popDepth();
       out.println("}");
     }
-    
+
     if (_mapMethod != null) {
       out.println();
       out.print("public ");
@@ -244,43 +244,43 @@ public class EntityMapField extends AbstractField {
 
       out.println("try {");
       out.pushDepth();
-      
+
       out.println("com.caucho.amber.AmberQuery query;");
 
       EntityType targetType = _targetType;
-      
+
       String table = targetType.getName();
 
       out.print("String sql = \"SELECT o");
       out.print(" FROM " + table + " o");
       out.print(" WHERE ");
 
-      EntityType sourceType = getSourceType();
+      EntityType sourceType = (EntityType) getSourceType();
       ArrayList<IdField> keys = sourceType.getId().getKeys();
 
       out.print("o." + _index.getName() + "=?1");
 
       for (int i = 0; i < keys.size(); i++) {
-	IdField key = keys.get(i);
-	
-	out.print(" and ");
+        IdField key = keys.get(i);
 
-	out.print("o." + _id.getName() + "." + key.getName() + "=?" + (i + 2));
+        out.print(" and ");
+
+        out.print("o." + _id.getName() + "." + key.getName() + "=?" + (i + 2));
       }
 
       out.println("\";");
-      
+
       out.println("query = __caucho_session.prepareQuery(sql);");
 
       out.println("int index = 1;");
       _index.getType().generateSet(out, "query", "index", "a0");
-      
-      for (int i = 0; i < keys.size(); i++) {
-	IdField key = keys.get(i);
 
-	key.generateSet(out, "query", "index", "this");
+      for (int i = 0; i < keys.size(); i++) {
+        IdField key = keys.get(i);
+
+        key.generateSet(out, "query", "index", "this");
       }
-      
+
       out.print("return (");
       out.print(_mapMethod.getReturnType().getPrintName());
       out.println(") query.getSingleResult();");
@@ -289,7 +289,7 @@ public class EntityMapField extends AbstractField {
       out.println("} catch (Exception e) {");
       out.println("  throw com.caucho.amber.AmberRuntimeException.create(e);");
       out.println("}");
-    
+
       out.popDepth();
       out.println("}");
     }

@@ -47,8 +47,8 @@ import com.caucho.config.LineConfigException;
 
 import com.caucho.amber.AmberRuntimeException;
 
+import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.AmberCompletion;
@@ -71,7 +71,7 @@ public class Table {
   private AmberPersistenceUnit _manager;
 
   // The entity type is used to generate primary keys for cascade deletes
-  private EntityType _type;
+  private RelatedType _type;
 
   private ArrayList<Column> _columns = new ArrayList<Column>();
 
@@ -130,7 +130,7 @@ public class Table {
   /**
    * Sets the entity type.
    */
-  public void setType(EntityType type)
+  public void setType(RelatedType type)
   {
     if (_type == null)
       _type = type;
@@ -139,7 +139,7 @@ public class Table {
   /**
    * Gets the entity type.
    */
-  public EntityType getType()
+  public RelatedType getType()
   {
     return _type;
   }

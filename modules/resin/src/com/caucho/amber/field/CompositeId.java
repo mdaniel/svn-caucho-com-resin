@@ -47,7 +47,8 @@ import com.caucho.java.JavaWriter;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.EmbeddableType;
+import com.caucho.amber.type.RelatedType;
 
 
 /**
@@ -59,12 +60,14 @@ public class CompositeId extends Id {
 
   private JClass _keyClass;
 
-  public CompositeId(EntityType ownerType, ArrayList<IdField> keys)
+  public CompositeId(RelatedType ownerType,
+                     ArrayList<IdField> keys)
   {
     super(ownerType, keys);
   }
 
-  public CompositeId(EntityType ownerType, EmbeddedIdField embeddedId)
+  public CompositeId(RelatedType ownerType,
+                     EmbeddedIdField embeddedId)
   {
     super(ownerType, embeddedId);
   }
@@ -154,7 +157,7 @@ public class CompositeId extends Id {
       }
     }
     else {
-      EntityType embeddable = (EntityType) getEmbeddedIdField().getType();
+      EmbeddableType embeddable = (EmbeddableType) getEmbeddedIdField().getType();
 
       ArrayList<AmberField> fields = embeddable.getFields();
       for (int i = 0; i < fields.size(); i++) {
@@ -181,7 +184,7 @@ public class CompositeId extends Id {
       }
     }
     else {
-      EntityType embeddable = (EntityType) getEmbeddedIdField().getType();
+      EmbeddableType embeddable = (EmbeddableType) getEmbeddedIdField().getType();
 
       ArrayList<AmberField> fields = embeddable.getFields();
       for (int i = 0; i < fields.size(); i++) {
@@ -289,6 +292,25 @@ public class CompositeId extends Id {
         cb.append(", ");
 
       cb.append(keys.get(i).generateSelect(id));
+    }
+
+    return cb.close();
+  }
+
+  /**
+   * Generates the JPA QL select clause.
+   */
+  public String generateJavaSelect(String id)
+  {
+    ArrayList<IdField> keys = getKeys();
+
+    CharBuffer cb = CharBuffer.allocate();
+
+    for (int i = 0; i < keys.size(); i++) {
+      if (i != 0)
+        cb.append(", ");
+
+      cb.append(keys.get(i).generateJavaSelect(id));
     }
 
     return cb.close();

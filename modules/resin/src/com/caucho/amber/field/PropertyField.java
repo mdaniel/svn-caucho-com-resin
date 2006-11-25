@@ -44,8 +44,9 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.java.JavaWriter;
 
+import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.AbstractStatefulType;
 import com.caucho.amber.type.ArrayType;
-import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 
 import com.caucho.amber.table.Table;
@@ -73,15 +74,16 @@ public class PropertyField extends AbstractField {
   private boolean _isInsert = true;
   private boolean _isUpdate = true;
 
-  public PropertyField(EntityType entityType, String name)
+  public PropertyField(AbstractStatefulType statefulType,
+                       String name)
     throws ConfigException
   {
-    super(entityType, name);
+    super(statefulType, name);
   }
 
-  public PropertyField(EntityType entityType)
+  public PropertyField(AbstractStatefulType statefulType)
   {
-    super(entityType);
+    super(statefulType);
   }
 
   /**
@@ -98,6 +100,15 @@ public class PropertyField extends AbstractField {
   public Type getType()
   {
     return _type;
+  }
+
+  /**
+   * Returns the source type as
+   * entity or mapped-superclass.
+   */
+  public RelatedType getEntitySourceType()
+  {
+    return (RelatedType) getSourceType();
   }
 
   /**
@@ -151,9 +162,14 @@ public class PropertyField extends AbstractField {
     if (getColumn() == null)
       throw new IllegalStateException(L.l("column must be set before init"));
 
-    if (getSourceType().getId() != null) {
+    // Embedded types have no id.
+    // Only entity or mapped-superclass types have id.
+    if (! (getSourceType() instanceof RelatedType))
+      return;
+
+    if (getEntitySourceType().getId() != null) {
       // resolve any alias
-      for (AmberField field : getSourceType().getId().getKeys()) {
+      for (AmberField field : getEntitySourceType().getId().getKeys()) {
         if (field instanceof KeyManyToOneField) {
           KeyManyToOneField key = (KeyManyToOneField) field;
 

@@ -29,7 +29,7 @@
 
 package com.caucho.amber.field;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.CharBuffer;
@@ -49,12 +49,12 @@ abstract public class CascadableField extends AbstractField {
 
   private CascadeType[] _cascadeTypes;
 
-  CascadableField(EntityType sourceType)
+  CascadableField(RelatedType sourceType)
   {
     super(sourceType);
   }
 
-  CascadableField(EntityType sourceType,
+  CascadableField(RelatedType sourceType,
                   String name,
                   CascadeType[] cascadeTypes)
     throws ConfigException
@@ -186,10 +186,10 @@ abstract public class CascadableField extends AbstractField {
   }
 
   /**
-   * Generates the flush of this child.
-   * See EntityManyToManyField.
+   * Generates the flush check for this child.
+   * See DependentEntityOneToOneField.
    */
-  public boolean generateFlush(CharBuffer cb)
+  public boolean generateFlushCheck(JavaWriter out)
     throws IOException
   {
     return false;

@@ -113,20 +113,20 @@ public interface IdField extends AmberField {
    */
   public void generateSetInsert(JavaWriter out, String pstmt, String index)
     throws IOException;
-  
+
   /**
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-				 String indexVar, int index)
+                                 String indexVar, int index)
     throws IOException;
-  
+
   /**
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-				 String indexVar, int index,
-				 String name)
+                                 String indexVar, int index,
+                                 String name)
     throws IOException;
 
   /**

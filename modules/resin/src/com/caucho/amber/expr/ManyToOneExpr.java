@@ -34,7 +34,7 @@ import com.caucho.amber.query.*;
 import com.caucho.util.CharBuffer;
 
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.LinkColumns;
@@ -62,7 +62,7 @@ public class ManyToOneExpr extends AbstractPathExpr {
   /**
    * Returns the entity class.
    */
-  public EntityType getTargetType()
+  public RelatedType getTargetType()
   {
     return _linkColumns.getTargetTable().getType();
   }

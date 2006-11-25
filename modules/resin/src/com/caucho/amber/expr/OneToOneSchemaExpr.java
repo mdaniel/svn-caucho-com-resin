@@ -34,7 +34,7 @@ import com.caucho.amber.query.*;
 import com.caucho.util.L10N;
 
 import com.caucho.amber.field.AmberField;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 /**
  * Represents an association from a from-item table.
@@ -69,7 +69,7 @@ public class OneToOneSchemaExpr extends SchemaExpr {
   public SchemaExpr createField(QueryParser parser, String name)
     throws QueryParseException
   {
-    EntityType type = _expr.getTargetType();
+    RelatedType type = _expr.getTargetType();
 
     AmberField field = type.getField(name);
 

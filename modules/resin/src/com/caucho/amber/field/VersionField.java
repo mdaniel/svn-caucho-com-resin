@@ -44,8 +44,8 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.java.JavaWriter;
 
+import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
@@ -63,7 +63,7 @@ public class VersionField extends PropertyField {
   private static final L10N L = new L10N(VersionField.class);
   protected static final Logger log = Log.open(VersionField.class);
 
-  public VersionField(EntityType entityType, String name)
+  public VersionField(RelatedType entityType, String name)
     throws ConfigException
   {
     super(entityType, name);
@@ -71,7 +71,7 @@ public class VersionField extends PropertyField {
     setLazy(false);
   }
 
-  public VersionField(EntityType entityType)
+  public VersionField(RelatedType entityType)
   {
     super(entityType);
 

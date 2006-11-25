@@ -34,7 +34,7 @@ import com.caucho.amber.query.*;
 import com.caucho.util.L10N;
 
 import com.caucho.amber.field.AmberField;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.EmbeddableType;
 
 /**
  * Represents an embedded from a from-item table.
@@ -77,7 +77,7 @@ public class EmbeddedSchemaExpr extends SchemaExpr {
   public SchemaExpr createField(QueryParser parser, String name)
     throws QueryParseException
   {
-    EntityType type = _expr.getTargetType();
+    EmbeddableType type = _expr.getTargetType();
 
     AmberField field = type.getField(name);
 

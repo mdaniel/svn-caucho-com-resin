@@ -33,32 +33,15 @@ package com.caucho.amber.cfg;
 /**
  * <embeddable> tag in the orm.xml
  */
-public class EmbeddableConfig {
+public class EmbeddableConfig extends AbstractEnhancedConfig {
 
   // attributes
   private String _className;
-  private String _access; // AccessType;
   private boolean _isMetadataComplete;
 
   // elements
   private String _description;
   private EmbeddableAttributesConfig _attributes;
-
-  /**
-   * Returns the access type.
-   */
-  public String getAccess()
-  {
-    return _access;
-  }
-
-  /**
-   * Sets the access type.
-   */
-  public void setAccess(String access)
-  {
-    _access = access;
-  }
 
   public String getDescription()
   {

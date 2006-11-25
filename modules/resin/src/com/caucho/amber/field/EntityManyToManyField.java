@@ -49,7 +49,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.LinkColumns;
@@ -73,7 +73,7 @@ public class EntityManyToManyField extends AssociationField {
 
   private String _mapKey;
 
-  private EntityType _targetType;
+  private RelatedType _targetType;
 
   private Table _associationTable;
 
@@ -83,35 +83,35 @@ public class EntityManyToManyField extends AssociationField {
   private ArrayList<String> _orderByFields;
   private ArrayList<Boolean> _orderByAscending;
 
-  public EntityManyToManyField(EntityType entityType,
+  public EntityManyToManyField(RelatedType relatedType,
                                String name,
                                CascadeType[] cascadeTypes)
     throws ConfigException
   {
-    super(entityType, name, cascadeTypes);
+    super(relatedType, name, cascadeTypes);
   }
 
-  public EntityManyToManyField(EntityType entityType,
+  public EntityManyToManyField(RelatedType relatedType,
                                String name)
     throws ConfigException
   {
-    this(entityType, name, null);
+    this(relatedType, name, null);
   }
 
-  public EntityManyToManyField(EntityType entityType)
+  public EntityManyToManyField(RelatedType relatedType)
   {
-    super(entityType);
+    super(relatedType);
   }
 
-  public EntityManyToManyField(EntityType entityType,
+  public EntityManyToManyField(RelatedType relatedType,
                                String name,
                                EntityManyToManyField source,
                                CascadeType[] cascadeTypes)
     throws ConfigException
   {
-    super(entityType, name, cascadeTypes);
+    super(relatedType, name, cascadeTypes);
 
-    _targetType = source.getSourceType();
+    _targetType = source.getEntitySourceType();
     _associationTable = source._associationTable;
     _sourceLink = source._targetLink;
     _targetLink = source._sourceLink;
@@ -138,15 +138,24 @@ public class EntityManyToManyField extends AssociationField {
    */
   public void setType(Type targetType)
   {
-    _targetType = (EntityType) targetType;
+    _targetType = (RelatedType) targetType;
 
     super.setType(targetType);
   }
 
   /**
+   * Returns the source type as
+   * entity or mapped-superclass.
+   */
+  public RelatedType getEntitySourceType()
+  {
+    return (RelatedType) getSourceType();
+  }
+
+  /**
    * Returns the target type.
    */
-  public EntityType getTargetType()
+  public RelatedType getTargetType()
   {
     return _targetType;
   }
@@ -357,7 +366,7 @@ public class EntityManyToManyField extends AssociationField {
     out.print(" FROM " + getSourceType().getName() + " o,");
     out.print("  IN(o." + getName() + ") c");
     out.print(" WHERE ");
-    out.print(getSourceType().getId().generateRawWhere("o"));
+    out.print(getEntitySourceType().getId().generateRawWhere("o"));
 
     if (_orderByFields != null) {
       out.print(" ORDER BY ");
@@ -377,7 +386,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("query = __caucho_session.prepareQuery(sql);");
 
     out.println("int index = 1;");
-    getSourceType().getId().generateSet(out, "query", "index", "this");
+    getEntitySourceType().getId().generateSet(out, "query", "index", "this");
 
     // Ex: _caucho_getChildren = new com.caucho.amber.collection.CollectionImpl
     out.print(var);
@@ -451,7 +460,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("{");
     out.pushDepth();
 
-    String ownerType = getSourceType().getInstanceClassName();
+    String ownerType = getEntitySourceType().getInstanceClassName();
 
     out.println("if (! (o instanceof " + ownerType + "))");
     out.println("  throw new java.lang.IllegalArgumentException((o == null ? \"null\" : o.getClass().getName()) + \" must be a " + ownerType + "\");");
@@ -573,7 +582,7 @@ public class EntityManyToManyField extends AssociationField {
     String ownerType = getSourceType().getInstanceClassName();
 
     out.println("int index = 1;");
-    getSourceType().getId().generateSet(out, "query", "index", ownerType + ".this");
+    getEntitySourceType().getId().generateSet(out, "query", "index", ownerType + ".this");
 
     out.println("query.executeUpdate();");
 
@@ -637,7 +646,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("int index = 1;");
 
     // ejb/06h0
-    getSourceType().getId().generateSet(out, "query", getSourceType().getInstanceClassName() + ".this", "index"); // "__ResinExt.this", "index");
+    getEntitySourceType().getId().generateSet(out, "query", getSourceType().getInstanceClassName() + ".this", "index"); // "__ResinExt.this", "index");
 
     out.println("java.sql.ResultSet rs = query.executeQuery();");
 
@@ -746,7 +755,7 @@ public class EntityManyToManyField extends AssociationField {
 
     out.print(") VALUES (");
 
-    int count = (getSourceType().getId().getKeyCount() +
+    int count = (getEntitySourceType().getId().getKeyCount() +
                  getTargetType().getId().getKeyCount());
 
     for (int i = 0; i < count; i++) {
@@ -764,7 +773,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareInsertStatement(sql);");
 
     out.println("int index = 1;");
-    getSourceType().getId().generateSet(out, "pstmt", "index", "this");
+    getEntitySourceType().getId().generateSet(out, "pstmt", "index", "this");
     getTargetType().getId().generateSet(out, "pstmt", "index", "v");
 
     out.println("if (pstmt.executeUpdate() == 1) {");
@@ -829,7 +838,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareStatement(sql);");
 
     out.println("int index = 1;");
-    getSourceType().getId().generateSet(out, "pstmt", "index", "this");
+    getEntitySourceType().getId().generateSet(out, "pstmt", "index", "this");
     getTargetType().getId().generateSet(out, "pstmt", "index", "v");
 
     out.println("if (pstmt.executeUpdate() == 1) {");
@@ -925,7 +934,7 @@ public class EntityManyToManyField extends AssociationField {
       type = getGetterMethod().getGenericReturnType();
     }
     else {
-      JField field = EntityType.getField(getBeanClass(), getName());
+      JField field = RelatedType.getField(getBeanClass(), getName());
       type = field.getGenericType();
     }
 

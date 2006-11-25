@@ -36,7 +36,9 @@ import com.caucho.util.L10N;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
 /**
- * Represents a default listener type.
+ * Represents a listener type: either a default listener
+ * declared in orm.xml meta-data or an entity listener
+ * specified in @EntityListeners entity annotation.
  */
 public class ListenerType extends AbstractEnhancedType {
   private static final Logger log = Logger.getLogger(ListenerType.class.getName());

@@ -55,7 +55,7 @@ import com.caucho.amber.query.QueryParser;
 
 import com.caucho.amber.table.Table;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.AbstractStatefulType;
 
 /**
  * Configuration for a bean's property
@@ -64,7 +64,7 @@ public interface AmberField {
   /**
    * Returns the owning entity class.
    */
-  public EntityType getSourceType();
+  public AbstractStatefulType getSourceType();
 
   /**
    * Returns true if and only if this is a LAZY field.
@@ -177,6 +177,11 @@ public interface AmberField {
    * Generates the select clause.
    */
   public String generateSelect(String id);
+
+  /**
+   * Generates the JPA QL select clause.
+   */
+  public String generateJavaSelect(String id);
 
   /**
    * Generates the where clause.

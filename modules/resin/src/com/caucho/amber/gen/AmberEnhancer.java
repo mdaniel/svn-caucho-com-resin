@@ -497,10 +497,14 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       }
     }
 
-    // Property-based fixup.
-    EntityType type = _amberContainer.getEntity(entityClass.getName());
+    // Property-based fixup (EntityType or ListenerType).
+    AbstractEnhancedType type;
 
-    if (type.isFieldAccess())
+    type = _amberContainer.getEntity(entityClass.getName());
+
+    if (type == null)
+      type = _amberContainer.getListener(entityClass.getName());
+    else if (((EntityType) type).isFieldAccess())
       return;
 
     // jpa/0h28: implied by tck.

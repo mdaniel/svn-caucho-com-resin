@@ -46,8 +46,9 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.java.JavaWriter;
 
+import com.caucho.amber.type.EmbeddableType;
+import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
 
 import com.caucho.amber.table.Table;
 import com.caucho.amber.table.Column;
@@ -69,28 +70,29 @@ public class EntityEmbeddedField extends AbstractField {
 
   private HashMap<String, Column> _columns;
   private HashMap<String, String> _fieldNameByColumn;
-  private EntityType _type;
+  private EmbeddableType _type;
 
   private boolean _isInsert = true;
   private boolean _isUpdate = true;
 
   private boolean _isEmbeddedId = false;
 
-  public EntityEmbeddedField(EntityType entityType, String name)
+  public EntityEmbeddedField(RelatedType relatedType,
+                             String name)
     throws ConfigException
   {
-    super(entityType, name);
+    super(relatedType, name);
   }
 
-  public EntityEmbeddedField(EntityType entityType)
+  public EntityEmbeddedField(RelatedType relatedType)
   {
-    super(entityType);
+    super(relatedType);
   }
 
   /**
    * Sets the result type.
    */
-  public void setType(EntityType type)
+  public void setType(EmbeddableType type)
   {
     _type = type;
   }
@@ -400,9 +402,9 @@ public class EntityEmbeddedField extends AbstractField {
 
       String getter = _fieldNameByColumn.get(column.getName());
 
-      EntityType entityType = (EntityType) getType();
+      RelatedType relatedType = (RelatedType) getType();
 
-      if (! entityType.isFieldAccess())
+      if (! relatedType.isFieldAccess())
         getter = "get" + Character.toUpperCase(getter.charAt(0)) +
           getter.substring(1) + "()";
 
@@ -429,9 +431,9 @@ public class EntityEmbeddedField extends AbstractField {
 
     String thisGetter = generateGet("this");
 
-    EntityType entityType = (EntityType) getType();
+    RelatedType relatedType = (RelatedType) getType();
 
-    ArrayList<AmberField> fields = entityType.getFields();
+    ArrayList<AmberField> fields = relatedType.getFields();
     for (int i = 0; i < fields.size(); i++) {
       if (i != 0)
         cb.append(", ");
@@ -440,7 +442,7 @@ public class EntityEmbeddedField extends AbstractField {
 
       String getter = field.getName();
 
-      if (! entityType.isFieldAccess()) {
+      if (! relatedType.isFieldAccess()) {
         getter = "get" + Character.toUpperCase(getter.charAt(0)) +
           getter.substring(1) + "()";
       }
@@ -475,9 +477,9 @@ public class EntityEmbeddedField extends AbstractField {
 
       String setter = _fieldNameByColumn.get(column.getName());
 
-      EntityType entityType = (EntityType) getType();
+      RelatedType relatedType = (RelatedType) getType();
 
-      if (entityType.isFieldAccess()) {
+      if (relatedType.isFieldAccess()) {
         out.println(var + "." + setter + " = amber_ld" + (index-1) + ";");
       }
       else {

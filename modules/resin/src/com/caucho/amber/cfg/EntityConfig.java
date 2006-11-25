@@ -33,11 +33,10 @@ package com.caucho.amber.cfg;
 /**
  * <entity> tag in the orm.xml
  */
-public class EntityConfig {
+public class EntityConfig extends AbstractEnhancedConfig {
   // attributes
   private String _name;
   private String _className;
-  private String _access;
   private boolean _isMetadataComplete;
 
   // elements
@@ -69,14 +68,6 @@ public class EntityConfig {
   private AttributesConfig _attributes;
 
   /**
-   * Returns the access type.
-   */
-  public String getAccess()
-  {
-    return _access;
-  }
-
-  /**
    * Returns the attributes.
    */
   public AttributesConfig getAttributes()
@@ -106,14 +97,6 @@ public class EntityConfig {
   public boolean isMetaDataComplete()
   {
     return _isMetadataComplete;
-  }
-
-  /**
-   * Sets the access type.
-   */
-  public void setAccess(String access)
-  {
-    _access = access;
   }
 
   /**

@@ -84,7 +84,8 @@ public class CollectionImpl<E> extends AbstractList<E>
   {
     _aConn = aConn;
 
-    _aConn.register(this);
+    if (_aConn != null)
+      _aConn.register(this);
   }
 
   /**

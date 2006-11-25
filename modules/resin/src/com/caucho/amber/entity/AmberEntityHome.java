@@ -116,7 +116,7 @@ public class AmberEntityHome {
    */
   public EntityType getRootType()
   {
-    return _entityType.getRootType();
+    return (EntityType) _entityType.getRootType();
   }
 
   /**
@@ -434,7 +434,8 @@ public class AmberEntityHome {
     EntityItem item = _manager.getEntity(getRootType(), key);
 
     if (item == null) {
-      EntityType subEntity = _entityType.getSubClass(discriminator);
+      EntityType subEntity
+        = (EntityType) _entityType.getSubClass(discriminator);
 
       Entity cacheEntity = subEntity.createBean();
 

@@ -34,7 +34,7 @@ import com.caucho.amber.query.*;
 import com.caucho.util.L10N;
 
 import com.caucho.amber.field.AmberField;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 /**
  * Represents a collection from a from-item table.
@@ -68,28 +68,28 @@ public class ManyToOneSchemaExpr extends SchemaExpr {
   public SchemaExpr createField(QueryParser parser, String name)
     throws QueryParseException
   {
-    EntityType type = _expr.getTargetType();
+    RelatedType type = _expr.getTargetType();
 
     AmberField field = type.getField(name);
 
     if (field == null)
       throw parser.error(L.l("{0}: '{1}' is an unknown field.",
-			     type.getBeanClass().getName(),
-			     name));
+                             type.getBeanClass().getName(),
+                             name));
 
     AmberExpr fieldExpr = _expr.createField(parser, name);
 
     if (fieldExpr instanceof ManyToOneExpr)
       return new ManyToOneSchemaExpr((ManyToOneExpr) fieldExpr, name);
-      /*
-    else if (fieldExpr instanceof ManyToManyExpr)
+    /*
+      else if (fieldExpr instanceof ManyToManyExpr)
       return new ManyToManySchemaExpr((ManyToManyExpr) fieldExpr);
-      */
+    */
     else if (fieldExpr instanceof OneToManyExpr)
       return new OneToManySchemaExpr((OneToManyExpr) fieldExpr);
     throw parser.error(L.l("{0}: '{1}' must be a collection.",
-			   type.getBeanClass().getName(),
-			   name));
+                           type.getBeanClass().getName(),
+                           name));
   }
 
   /**

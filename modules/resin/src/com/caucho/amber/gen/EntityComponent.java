@@ -44,6 +44,7 @@ import com.caucho.java.gen.ClassComponent;
 import com.caucho.loader.Environment;
 
 import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
 
@@ -717,6 +718,21 @@ public class EntityComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    ArrayList<AmberField> fields = _entityType.getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field.isCascadable()) {
+        CascadableField cascadable = (CascadableField) field;
+
+        cascadable.generateFlushCheck(out);
+
+        out.println();
+      }
+    }
+
+    out.println();
     out.println("if (__caucho_state == com.caucho.amber.entity.Entity.P_DELETED) {");
     out.println("  __caucho_delete_int();");
     out.println("  return true;");
@@ -761,8 +777,6 @@ public class EntityComponent extends ClassComponent {
     out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareStatement(cb.toString());");
 
     out.println("int index = 1;");
-
-    ArrayList<AmberField> fields = _entityType.getFields();
 
     for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
@@ -1089,7 +1103,7 @@ public class EntityComponent extends ClassComponent {
     out.println();
     _entityType.getId().generateSetGeneratedKeys(out, "pstmt");
 
-    EntityType parentType = _entityType;
+    RelatedType parentType = _entityType;
 
     do {
       for (Table subTable : parentType.getSecondaryTables()) {
@@ -1178,8 +1192,16 @@ public class EntityComponent extends ClassComponent {
 
     out.println("if (__caucho_state >= com.caucho.amber.entity.Entity.P_DELETING)");
     out.println("  return;");
+    out.println();
+
+    out.println("if (__caucho_session != null)");
+    out.println("  __caucho_session.preRemove(this);");
+    out.println();
+
+    generateCallbacks(out, "this", _entityType.getPreRemoveCallbacks());
 
     _entityType.generatePreDelete(out);
+
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_DELETING;");
 
     out.println("if (__caucho_session != null) {");
@@ -1203,10 +1225,6 @@ public class EntityComponent extends ClassComponent {
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
-
-    out.println("__caucho_session.preRemove(this);");
-
-    generateCallbacks(out, "this", _entityType.getPreRemoveCallbacks());
 
     out.print("__caucho_home.delete(__caucho_session, ");
     out.print(id.toObject(id.generateGetProperty("this")));

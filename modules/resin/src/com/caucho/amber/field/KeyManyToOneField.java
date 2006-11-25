@@ -44,8 +44,9 @@ import com.caucho.config.ConfigException;
 
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.type.Type;
 import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.Type;
 
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
@@ -70,13 +71,13 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   // use field accessors to get key values.
   private boolean _isKeyField;
 
-  public KeyManyToOneField(EntityType entityType, String name)
+  public KeyManyToOneField(RelatedType entityType, String name)
     throws ConfigException
   {
     super(entityType, name);
   }
 
-  public KeyManyToOneField(EntityType entityType,
+  public KeyManyToOneField(RelatedType entityType,
                            String name,
                            LinkColumns columns)
     throws ConfigException
@@ -96,9 +97,18 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
     return null;
   }
 
+  /**
+   * Returns the target type as entity (ejb 2.1)
+   * See com.caucho.ejb.ql.Expr
+   */
+  public EntityType getEntityType()
+  {
+    return (EntityType) getEntityTargetType();
+  }
+
   public Type getType()
   {
-    return getEntityType();
+    return getEntityTargetType();
   }
 
   public Column getColumn()
@@ -146,7 +156,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   {
     super.init();
 
-    ArrayList<IdField> keys = getEntityType().getId().getKeys();
+    ArrayList<IdField> keys = getEntityTargetType().getId().getKeys();
 
     ArrayList<ForeignColumn> columns = getLinkColumns().getColumns();
 
@@ -155,7 +165,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
       ForeignColumn column = columns.get(i);
 
       KeyPropertyField field;
-      field = new IdentifyingKeyPropertyField(getSourceType(), column);
+      field = new IdentifyingKeyPropertyField(getEntitySourceType(), column);
 
       _idFields.add(field);
     }
@@ -166,7 +176,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
    */
   public int getComponentCount()
   {
-    return getEntityType().getId().getKeyCount();
+    return getEntityTargetType().getId().getKeyCount();
   }
 
   /**
@@ -186,7 +196,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
    */
   public KeyPropertyField getIdField(IdField field)
   {
-    ArrayList<IdField> keys = getEntityType().getId().getKeys();
+    ArrayList<IdField> keys = getEntityTargetType().getId().getKeys();
 
     if (_idFields.size() != keys.size()) {
       try {
@@ -229,7 +239,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
 
     String prefix = id + "." + getName();
 
-    ArrayList<IdField> keys = getEntityType().getId().getKeys();
+    ArrayList<IdField> keys = getEntityTargetType().getId().getKeys();
 
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
@@ -310,9 +320,9 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   {
     out.print("(" + getForeignTypeName() + ") ");
 
-    out.print("aConn.loadProxy(\"" + getEntityType().getName() + "\", ");
-    index = getEntityType().getId().generateLoadForeign(out, rs, indexVar, index,
-                                                        getName());
+    out.print("aConn.loadProxy(\"" + getEntityTargetType().getName() + "\", ");
+    index = getEntityTargetType().getId().generateLoadForeign(out, rs, indexVar, index,
+                                                              getName());
 
     out.println(");");
 
@@ -353,7 +363,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   {
     ArrayList<ForeignColumn> columns = getLinkColumns().getColumns();
 
-    Id id = getEntityType().getId();
+    Id id = getEntityTargetType().getId();
     ArrayList<IdField> keys = id.getKeys();
 
     String prop = value != null ? generateGet(value) : null;
@@ -373,7 +383,7 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   {
     String var = getFieldName();
 
-    Id id = getEntityType().getId();
+    Id id = getEntityTargetType().getId();
     ArrayList<IdField> keys = id.getKeys();
 
     for (int i = 0; i < keys.size(); i++) {
@@ -391,10 +401,10 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   {
     String value = generateSuperGetter();
 
-    out.println("if (" + getEntityType().generateIsNull(value) + ") {");
+    out.println("if (" + getEntityTargetType().generateIsNull(value) + ") {");
     out.pushDepth();
 
-    getEntityType().generateSetNull(out, pstmt, index);
+    getEntityTargetType().generateSetNull(out, pstmt, index);
 
     out.popDepth();
     out.println("} else {");

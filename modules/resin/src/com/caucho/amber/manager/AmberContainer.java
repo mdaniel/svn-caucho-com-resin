@@ -35,6 +35,7 @@ import java.net.URL;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -48,6 +49,7 @@ import com.caucho.amber.cfg.EntityMappingsConfig;
 import com.caucho.amber.cfg.PersistenceConfig;
 import com.caucho.amber.cfg.PersistenceUnitConfig;
 
+import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.ListenerType;
 
@@ -95,13 +97,22 @@ public class AmberContainer {
   private HashMap<String,AmberPersistenceUnit> _unitMap
     = new HashMap<String,AmberPersistenceUnit>();
 
+  private HashMap<String,EmbeddableType> _embeddableMap
+    = new HashMap<String,EmbeddableType>();
+
   private HashMap<String,EntityType> _entityMap
     = new HashMap<String,EntityType>();
 
-  private HashMap<String,ListenerType> _listenerMap
+  private HashMap<String,ListenerType> _defaultListenerMap
     = new HashMap<String,ListenerType>();
 
+  private HashMap<String, HashMap<String, ListenerType>>
+    _entityListenerMap = new HashMap<String, HashMap<String, ListenerType>>();
+
   private Throwable _exception;
+
+  private HashMap<String,Throwable> _embeddableExceptionMap
+    = new HashMap<String,Throwable>();
 
   private HashMap<String,Throwable> _entityExceptionMap
     = new HashMap<String,Throwable>();
@@ -260,6 +271,22 @@ public class AmberContainer {
   }
 
   /**
+   * Returns the EmbeddableType for an introspected class.
+   */
+  public EmbeddableType getEmbeddable(String className)
+  {
+    Throwable e = _embeddableExceptionMap.get(className);
+
+    if (e != null)
+      throw new AmberRuntimeException(e);
+    else if (_exception != null) {
+      throw new AmberRuntimeException(_exception);
+    }
+
+    return _embeddableMap.get(className);
+  }
+
+  /**
    * Returns the EntityType for an introspected class.
    */
   public EntityType getEntity(String className)
@@ -276,9 +303,9 @@ public class AmberContainer {
   }
 
   /**
-   * Returns the ListenerType for an introspected class.
+   * Returns the default ListenerType for an introspected class.
    */
-  public ListenerType getListener(String className)
+  public ListenerType getDefaultListener(String className)
   {
     Throwable e = _listenerExceptionMap.get(className);
 
@@ -288,7 +315,50 @@ public class AmberContainer {
       throw new AmberRuntimeException(_exception);
     }
 
-    return _listenerMap.get(className);
+    return _defaultListenerMap.get(className);
+  }
+
+  /**
+   * Returns the entity ListenerType for an introspected class.
+   */
+  public ListenerType getEntityListener(String className)
+  {
+    Throwable e = _listenerExceptionMap.get(className);
+
+    if (e != null)
+      throw new AmberRuntimeException(e);
+    else if (_exception != null) {
+      throw new AmberRuntimeException(_exception);
+    }
+
+    HashMap<String, ListenerType> listenerMap;
+
+    for (Map.Entry<String, HashMap<String, ListenerType>>
+           entry : _entityListenerMap.entrySet()) {
+
+      listenerMap = entry.getValue();
+
+      if (listenerMap == null)
+        continue;
+
+      ListenerType listener = listenerMap.get(className);
+
+      if (listener == null)
+        continue;
+
+      return listener;
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the entity listeners for an entity.
+   */
+  public HashMap<String, ListenerType>
+  getEntityListeners(String entityClassName)
+  {
+    return _entityListenerMap.get(entityClassName);
   }
 
   /**
@@ -317,6 +387,14 @@ public class AmberContainer {
   }
 
   /**
+   * Adds an embeddable for an introspected class.
+   */
+  public void addEmbeddable(String className, EmbeddableType type)
+  {
+    _embeddableMap.put(className, type);
+  }
+
+  /**
    * Adds an entity for an introspected class.
    */
   public void addEntity(String className, EntityType type)
@@ -325,11 +403,30 @@ public class AmberContainer {
   }
 
   /**
-   * Adds a listener for an introspected class.
+   * Adds a default listener.
    */
-  public void addListener(String className, ListenerType type)
+  public void addDefaultListener(String className,
+                                 ListenerType type)
   {
-    _listenerMap.put(className, type);
+    _defaultListenerMap.put(className, type);
+  }
+
+  /**
+   * Adds an entity listener.
+   */
+  public void addEntityListener(String entityClassName,
+                                String listenerClassName,
+                                ListenerType listenerType)
+  {
+    HashMap<String, ListenerType> listenerMap
+      = _entityListenerMap.get(entityClassName);
+
+    if (listenerMap == null) {
+      listenerMap = new HashMap<String, ListenerType>();
+      _entityListenerMap.put(entityClassName, listenerMap);
+    }
+
+    listenerMap.put(listenerClassName, listenerType);
   }
 
   /**

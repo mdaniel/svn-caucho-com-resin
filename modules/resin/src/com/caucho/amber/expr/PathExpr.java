@@ -30,8 +30,7 @@ package com.caucho.amber.expr;
 
 import com.caucho.amber.query.*;
 
-
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.AbstractStatefulType;
 
 /**
  * Represents an amber mapping query expression
@@ -40,28 +39,28 @@ public interface PathExpr extends AmberExpr {
   /**
    * Returns the target type.
    */
-  public EntityType getTargetType();
+  public AbstractStatefulType getTargetType();
 
   /**
    * Creates the expr from the path.
    */
   public AmberExpr createField(QueryParser parser, String field);
-  
+
   /**
    * Creates an array reference.
    */
   public AmberExpr createArray(AmberExpr field);
-  
+
   /**
    * Binds the expression as a select item.
    */
   public PathExpr bindSelect(QueryParser parser, String tableName);
-  
+
   /**
    * Binds the expression as a select item.
    */
   public FromItem bindSubPath(QueryParser parser);
-  
+
   /**
    * Returns the from item
    */

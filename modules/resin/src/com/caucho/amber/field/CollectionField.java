@@ -46,7 +46,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
@@ -69,17 +69,17 @@ public class CollectionField extends CascadableField {
 
   private String _table;
 
-  public CollectionField(EntityType entityType,
+  public CollectionField(RelatedType relatedType,
                          String name,
                          CascadeType[] cascadeTypes)
     throws ConfigException
   {
-    super(entityType, name, cascadeTypes);
+    super(relatedType, name, cascadeTypes);
   }
 
-  public CollectionField(EntityType entityType)
+  public CollectionField(RelatedType relatedType)
   {
-    super(entityType);
+    super(relatedType);
   }
 
   /**

@@ -45,7 +45,7 @@ import com.caucho.java.JavaWriter;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.RelatedType;
 
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.LinkColumns;
@@ -60,7 +60,7 @@ public class SubId extends Id {
   private Id _parentId;
   private LinkColumns _link;
 
-  public SubId(EntityType ownerType, EntityType rootType)
+  public SubId(RelatedType ownerType, RelatedType rootType)
   {
     super(ownerType, new ArrayList<IdField>());
 
@@ -74,7 +74,7 @@ public class SubId extends Id {
   {
     return _parentId.getKeys();
   }
-  
+
   /**
    * Returns the keys.
    */
@@ -82,7 +82,7 @@ public class SubId extends Id {
   {
     return _parentId.getKeys();
   }
-  
+
   /**
    * Returns the foreign type.
    */
@@ -98,12 +98,12 @@ public class SubId extends Id {
     throws IOException
   {
   }
-  
+
   /**
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
- 				 String indexVar, int index)
+                                 String indexVar, int index)
     throws IOException
   {
     return _parentId.generateLoadForeign(out, rs, indexVar, index);
@@ -113,8 +113,8 @@ public class SubId extends Id {
    * Returns the foreign type.
    */
   public int generateLoadForeign(JavaWriter out, String rs,
-				 String indexVar, int index,
-				 String name)
+                                 String indexVar, int index,
+                                 String name)
     throws IOException
   {
     return _parentId.generateLoadForeign(out, rs, indexVar, index, name);
@@ -128,10 +128,10 @@ public class SubId extends Id {
     ArrayList<IdField> keys = getParentKeys();
 
     CharBuffer cb = CharBuffer.allocate();
-    
+
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(", ");
+        cb.append(", ");
 
       cb.append(keys.get(i).generateSelect(id));
     }
@@ -193,7 +193,7 @@ public class SubId extends Id {
 
     for (int i = 0; i < keys.size(); i++) {
       if (i != 0)
-	cb.append(" and ");
+        cb.append(" and ");
 
       generateMatchArgWhere(cb, keys.get(i), id);
     }
@@ -208,14 +208,14 @@ public class SubId extends Id {
   private void generateMatchArgWhere(CharBuffer cb, IdField parentId, String id)
   {
     LinkColumns link = getOwnerType().getTable().getDependentIdLink();
-    
+
     ArrayList<Column> columns = parentId.getColumns();
 
     for (int i = 0; i < columns.size(); i++) {
       Column column = columns.get(i);
 
       if (i != 0)
-	cb.append(" and ");
+        cb.append(" and ");
 
       cb.append(id);
       cb.append('.');
@@ -223,7 +223,7 @@ public class SubId extends Id {
       cb.append("=?");
     }
   }
-    
+
   /**
    * Generates the where clause.
    */
@@ -236,7 +236,7 @@ public class SubId extends Id {
    * Generates the set clause.
    */
   public void generateSetKey(JavaWriter out, String pstmt,
-			     String obj, String index)
+                             String obj, String index)
     throws IOException
   {
     _parentId.generateSetKey(out, pstmt, obj, index);
@@ -246,7 +246,7 @@ public class SubId extends Id {
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
-			  String obj, String index)
+                          String obj, String index)
     throws IOException
   {
     _parentId.generateSet(out, pstmt, obj, index);
@@ -277,7 +277,7 @@ public class SubId extends Id {
   {
     return value;
   }
-  
+
   /**
    * Generates code for a match.
    */
@@ -294,7 +294,7 @@ public class SubId extends Id {
   {
     return leftBase + ".equals(" + value + ")";
   }
-  
+
   /**
    * Generates the set clause.
    */

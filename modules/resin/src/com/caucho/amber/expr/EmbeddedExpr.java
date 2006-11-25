@@ -33,7 +33,7 @@ import com.caucho.amber.query.*;
 import com.caucho.util.CharBuffer;
 
 import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.EmbeddableType;
 
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
@@ -47,7 +47,7 @@ import java.util.Map;
 public class EmbeddedExpr extends AbstractPathExpr {
   private PathExpr _parent;
 
-  private EntityType _embeddableType;
+  private EmbeddableType _embeddableType;
 
   private HashMap<String, Column> _columns;
 
@@ -60,7 +60,7 @@ public class EmbeddedExpr extends AbstractPathExpr {
    * Creates a new expression.
    */
   public EmbeddedExpr(PathExpr parent,
-                      EntityType embeddableType,
+                      EmbeddableType embeddableType,
                       HashMap<String, Column> columns,
                       HashMap<String, String> fieldNameByColumn)
   {
@@ -73,7 +73,7 @@ public class EmbeddedExpr extends AbstractPathExpr {
   /**
    * Returns the target type.
    */
-  public EntityType getTargetType()
+  public EmbeddableType getTargetType()
   {
     return _embeddableType;
   }

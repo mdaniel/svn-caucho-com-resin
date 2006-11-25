@@ -42,12 +42,13 @@ import com.caucho.amber.table.Column;
 public class SubEntityType extends EntityType {
   private static final L10N L = new L10N(SubEntityType.class);
 
-  private EntityType _root;
-  private EntityType _parent;
+  private RelatedType _root;
+  private RelatedType _parent;
 
   private Id _id;
 
-  public SubEntityType(AmberPersistenceUnit amberPersistenceUnit, EntityType parent)
+  public SubEntityType(AmberPersistenceUnit amberPersistenceUnit,
+                       RelatedType parent)
   {
     super(amberPersistenceUnit);
 
@@ -81,7 +82,7 @@ public class SubEntityType extends EntityType {
   /**
    * Returns the root type.
    */
-  public EntityType getRootType()
+  public RelatedType getRootType()
   {
     return _root;
   }
@@ -89,7 +90,7 @@ public class SubEntityType extends EntityType {
   /**
    * Returns the parent class.
    */
-  public EntityType getParentType()
+  public RelatedType getParentType()
   {
     return _parent;
   }
