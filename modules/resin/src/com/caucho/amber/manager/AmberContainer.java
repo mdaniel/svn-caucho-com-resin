@@ -353,6 +353,19 @@ public class AmberContainer {
   }
 
   /**
+   * Returns the listener for an introspected class.
+   */
+  public ListenerType getListener(String className)
+  {
+    ListenerType listener = getDefaultListener(className);
+
+    if (listener == null)
+      listener = getEntityListener(className);
+
+    return listener;
+  }
+
+  /**
    * Returns the entity listeners for an entity.
    */
   public HashMap<String, ListenerType>
