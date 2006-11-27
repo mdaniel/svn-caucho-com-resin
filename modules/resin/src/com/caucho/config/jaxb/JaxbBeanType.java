@@ -175,14 +175,16 @@ public class JaxbBeanType extends TypeStrategy {
    * @return the strategy
    * @throws ConfigException
    */
+  @Override
   public AttributeStrategy getAttributeStrategy(QName attrName)
-    throws Exception
   {
-    AttributeStrategy strategy = _attributeMap.get(attrName.getLocalName());
+    AttributeStrategy strategy = _attributeMap.get(attrName.getName());
 
     if (strategy != null)
       return strategy;
 
+    strategy = _attributeMap.get(attrName.getLocalName());
+    
     return strategy;
   }
 
@@ -827,7 +829,7 @@ public class JaxbBeanType extends TypeStrategy {
 
   public String toString()
   {
-    return "JaxbBeanType[" + _type + "]";
+    return "JaxbBeanType[" + _type.getName() + "]";
   }
 
   static class Adapter {

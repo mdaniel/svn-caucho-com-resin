@@ -133,7 +133,7 @@ public class ParseTagManager {
       String tagLocation = taglib.getTagFilePath(tail);
       Path path = taglib.getPath();
 
-      if (path != null) {
+      if (path != null && tagLocation != null) {
 	path = path.lookup(tagLocation);
 
 	tag = _tagFileManager.getTag(path, qname.getPrefix(), tagLocation);

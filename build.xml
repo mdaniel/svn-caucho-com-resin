@@ -66,7 +66,7 @@
   </target>
 
   <target name="compile" 
-          depends="init, ejb, jpa, j2ee-deploy, j2ee-management, jaxrpc, jca, jms, jsdk, jstl, jta, portlet, script, resin-util, resin, quercus, ecmascript, webutil, deploy, conf, ext">
+          depends="init, ejb, jpa, j2ee-deploy, j2ee-management, jaxrpc, jca, jms, jsdk, jstl, jta, portlet, script, resin-util, resin, quercus, ecmascript, webutil, deploy, conf, ext, jsf">
   </target>
 
   <target name="ant" depends="init">
@@ -140,6 +140,20 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jsdk"/>
       <param name="module.jar" value="jsdk-15.jar"/>
+    </antcall>
+  </target>
+
+  <target name="jsf" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="jsf"/>
+      <param name="module.jar" value="jsf-12.jar"/>
+    </antcall>
+  </target>
+
+  <target name="resin-jsf" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="resin-jsf"/>
+      <param name="module.jar" value="resin-jsf.jar"/>
     </antcall>
   </target>
 

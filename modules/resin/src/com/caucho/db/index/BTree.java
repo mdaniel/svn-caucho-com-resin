@@ -790,24 +790,28 @@ public final class BTree {
   }
   */
   
-  private void remove(byte []keyBuffer,
+  public void remove(byte []keyBuffer,
 		      int keyOffset,
 		      int keyLength,
 		      Transaction xa)
-    throws IOException, SQLException
+    throws SQLException
   {
-    Block rootBlock = _store.readBlock(_rootBlockId);
-
     try {
-      xa.lockRead(rootBlock.getLock());
+      Block rootBlock = _store.readBlock(_rootBlockId);
 
       try {
-	remove(rootBlock, keyBuffer, keyOffset, keyLength, xa);
+	xa.lockRead(rootBlock.getLock());
+
+	try {
+	  remove(rootBlock, keyBuffer, keyOffset, keyLength, xa);
+	} finally {
+	  xa.unlockRead(rootBlock.getLock());
+	}
       } finally {
-	xa.unlockRead(rootBlock.getLock());
+	rootBlock.free();
       }
-    } finally {
-      rootBlock.free();
+    } catch (IOException e) {
+      throw new SQLExceptionWrapper(e);
     }
   }
   

@@ -68,7 +68,7 @@ possible because 1) PHP code is interpreted/compiled into Java and
 2) Quercus and its libraries are written entirely in Java.
 This lets PHP applications and Java libraries to talk directly with one
 another at the program level.  To
-faciliate this new Java/PHP architecture, Quercus provides an API and interface
+facilitate this new Java/PHP architecture, Quercus provides an API and interface
 to expose Java libraries to PHP.</p>
 
 </s3>

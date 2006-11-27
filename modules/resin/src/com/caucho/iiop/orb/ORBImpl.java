@@ -31,9 +31,11 @@ package com.caucho.iiop.orb;
 
 import java.applet.Applet;
 import java.io.*;
-import java.net.*;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.*;
+import javax.rmi.*;
+import javax.rmi.CORBA.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -44,6 +46,16 @@ public class ORBImpl extends org.omg.CORBA.ORB
 {
   public static final Logger log
     = Logger.getLogger(ORBImpl.class.getName());
+  
+  private String _host;
+  private int _port;
+
+  private final StubDelegateImpl _stubDelegate;
+
+  public ORBImpl()
+  {
+    _stubDelegate = new StubDelegateImpl(this);
+  }
 
   public TypeCode create_alias_tc(String id, String name, TypeCode original)
   {
@@ -182,8 +194,21 @@ public class ORBImpl extends org.omg.CORBA.ORB
 
   public org.omg.CORBA.Object resolve_initial_references(String object_name)
   {
-    System.out.println("RESOLVE: " + object_name);
-    throw new UnsupportedOperationException();
+    try {
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+      
+      IiopProxyHandler handler = new IiopProxyHandler(this);
+
+      Init init = (Init) Proxy.newProxyInstance(loader,
+						new Class[] { Init.class },
+						handler);
+      System.out.println("INIT: " + init);
+      
+      return null;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void send_multiple_requests_deferred(Request []req)
@@ -204,16 +229,31 @@ public class ORBImpl extends org.omg.CORBA.ORB
   public void set_parameters(String []args, Properties props)
   {
     if (props != null) {
-      java.lang.Object portName = props.get("org.omg.CORBA.ORBInitialPort");
+      java.lang.Object port = props.get("org.omg.CORBA.ORBInitialPort");
       java.lang.Object host = props.get("org.omg.CORBA.ORBInitialHost");
-      int port = 0;
-	
-      System.out.println("PROPS: " + props);
+
+      if (host != null)
+	_host = String.valueOf(host);
+
+      if (port == null) {
+      }
+      else if (port instanceof Number)
+	_port = ((Number) port).intValue();
+      else
+	_port = Integer.parseInt(String.valueOf(port));
     }
   }
 
   public org.omg.CORBA.Object string_to_object(String str)
   {
     throw new UnsupportedOperationException();
+  }
+
+  public String toString()
+  {
+    if (_host != null)
+      return "ORBImpl[" + _host + ", " + _port + "]";
+    else
+      return "ORBImpl[]";
   }
 }

@@ -39,7 +39,7 @@ import com.caucho.el.*;
 /**
  * Represents an EL expression factory
  */
-public class JspExpressionFactoryImpl extends  ExpressionFactory {
+public class JspExpressionFactoryImpl extends ExpressionFactory {
   private static final HashMap<Class,CoerceType> _coerceMap
     = new HashMap<Class,CoerceType>();
   

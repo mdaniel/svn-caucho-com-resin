@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
-*
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -27,19 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho;
+package com.caucho.iiop.orb;
 
-final public class Version {
-  public static final String COPYRIGHT =
-    "Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.";
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.logging.*;
 
-  public static String FULL_VERSION = "Resin-3.1.s061126 (built Sun, 26 Nov 2006 05:41:08 PST)";
-  public static String VERSION = "3.1.s061126";
-  public static String VERSION_DATE = "20061126T054108";
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
-  public static void main(String []argv)
-  {
-    System.out.println(FULL_VERSION);
-    System.out.println(COPYRIGHT);
-  }
+import org.omg.CORBA.*;
+
+public interface Init
+{
+  public org.omg.CORBA.Object get(String name);
 }
