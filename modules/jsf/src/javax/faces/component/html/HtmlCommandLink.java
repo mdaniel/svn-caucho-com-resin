@@ -35,9 +35,9 @@ import javax.el.*;
 import javax.faces.component.*;
 import javax.faces.context.*;
 
-public class HtmlOutputLink extends UIOutput
+public class HtmlCommandLink extends UICommand
 {
-  public static final String COMPONENT_TYPE = "javax.faces.HtmlOutputLink";
+  public static final String COMPONENT_TYPE = "javax.faces.HtmlCommandLink";
 
   private static final HashMap<String,PropEnum> _propMap
     = new HashMap<String,PropEnum>();
@@ -126,7 +126,7 @@ public class HtmlOutputLink extends UIOutput
   private String _type;
   private ValueExpression _typeExpr;
 
-  public HtmlOutputLink()
+  public HtmlCommandLink()
   {
     setRendererType("javax.faces.Link");
   }

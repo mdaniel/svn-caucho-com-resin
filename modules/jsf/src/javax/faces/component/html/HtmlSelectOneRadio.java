@@ -35,9 +35,10 @@ import javax.el.*;
 import javax.faces.component.*;
 import javax.faces.context.*;
 
-public class HtmlOutputLink extends UIOutput
+public class HtmlSelectOneRadio extends UISelectMany
 {
-  public static final String COMPONENT_TYPE = "javax.faces.HtmlOutputLink";
+  public static final String COMPONENT_TYPE
+    = "javax.faces.HtmlSelectOneRadio";
 
   private static final HashMap<String,PropEnum> _propMap
     = new HashMap<String,PropEnum>();
@@ -45,11 +46,8 @@ public class HtmlOutputLink extends UIOutput
   private String _accesskey;
   private ValueExpression _accesskeyExpr;
   
-  private String _charset;
-  private ValueExpression _charsetExpr;
-  
-  private String _coords;
-  private ValueExpression _coordsExpr;
+  private Integer _border;
+  private ValueExpression _borderExpr;
   
   private String _dir;
   private ValueExpression _dirExpr;
@@ -57,14 +55,26 @@ public class HtmlOutputLink extends UIOutput
   private Boolean _disabled;
   private ValueExpression _disabledExpr;
   
-  private String _hreflang;
-  private ValueExpression _hreflangExpr;
+  private String _disabledClass;
+  private ValueExpression _disabledClassExpr;
+  
+  private String _enabledClass;
+  private ValueExpression _enabledClassExpr;
+  
+  private String _label;
+  private ValueExpression _labelExpr;
   
   private String _lang;
   private ValueExpression _langExpr;
   
+  private String _layout;
+  private ValueExpression _layoutExpr;
+  
   private String _onblur;
   private ValueExpression _onblurExpr;
+  
+  private String _onchange;
+  private ValueExpression _onchangeExpr;
   
   private String _onclick;
   private ValueExpression _onclickExpr;
@@ -99,14 +109,11 @@ public class HtmlOutputLink extends UIOutput
   private String _onmouseup;
   private ValueExpression _onmouseupExpr;
 
-  private String _rel;
-  private ValueExpression _relExpr;
+  private String _onselect;
+  private ValueExpression _onselectExpr;
 
-  private String _rev;
-  private ValueExpression _revExpr;
-
-  private String _shape;
-  private ValueExpression _shapeExpr;
+  private Boolean _readonly;
+  private ValueExpression _readonlyExpr;
 
   private String _style;
   private ValueExpression _styleExpr;
@@ -117,18 +124,12 @@ public class HtmlOutputLink extends UIOutput
   private String _tabindex;
   private ValueExpression _tabindexExpr;
 
-  private String _target;
-  private ValueExpression _targetExpr;
-
   private String _title;
   private ValueExpression _titleExpr;
 
-  private String _type;
-  private ValueExpression _typeExpr;
-
-  public HtmlOutputLink()
+  public HtmlSelectOneRadio()
   {
-    setRendererType("javax.faces.Link");
+    setRendererType("javax.faces.Radio");
   }
 
   //
@@ -150,19 +151,19 @@ public class HtmlOutputLink extends UIOutput
     _accesskey = value;
   }
   
-  public String getCharset()
+  public int getBorder()
   {
-    if (_charset != null)
-      return _charset;
-    else if (_charsetExpr != null)
-      return Util.evalString(_charsetExpr);
+    if (_border != null)
+      return _border;
+    else if (_borderExpr != null)
+      return Util.evalInt(_borderExpr);
     else
-      return null;
+      return 0;
   }
 
-  public void setCharset(String value)
+  public void setBorder(int value)
   {
-    _charset = value;
+    _border = value;
   }
   
   public String getDir()
@@ -180,6 +181,36 @@ public class HtmlOutputLink extends UIOutput
     _dir = value;
   }
   
+  public String getDisabledClass()
+  {
+    if (_disabledClass != null)
+      return _disabledClass;
+    else if (_disabledClassExpr != null)
+      return Util.evalString(_disabledClassExpr);
+    else
+      return null;
+  }
+
+  public void setDisabledClass(String value)
+  {
+    _disabledClass = value;
+  }
+  
+  public String getEnabledClass()
+  {
+    if (_enabledClass != null)
+      return _enabledClass;
+    else if (_enabledClassExpr != null)
+      return Util.evalString(_enabledClassExpr);
+    else
+      return null;
+  }
+
+  public void setEnabledClass(String value)
+  {
+    _enabledClass = value;
+  }
+  
   public boolean isDisabled()
   {
     if (_disabled != null)
@@ -195,34 +226,19 @@ public class HtmlOutputLink extends UIOutput
     _disabled = value;
   }
   
-  public String getCoords()
+  public String getLabel()
   {
-    if (_coords != null)
-      return _coords;
-    else if (_coordsExpr != null)
-      return Util.evalString(_coordsExpr);
+    if (_label != null)
+      return _label;
+    else if (_labelExpr != null)
+      return Util.evalString(_labelExpr);
     else
       return null;
   }
 
-  public void setCoords(String value)
+  public void setLabel(String value)
   {
-    _coords = value;
-  }
-  
-  public String getHreflang()
-  {
-    if (_hreflang != null)
-      return _hreflang;
-    else if (_hreflangExpr != null)
-      return Util.evalString(_hreflangExpr);
-    else
-      return null;
-  }
-
-  public void setHreflang(String value)
-  {
-    _hreflang = value;
+    _label = value;
   }
   
   public String getLang()
@@ -240,6 +256,21 @@ public class HtmlOutputLink extends UIOutput
     _lang = value;
   }
   
+  public String getLayout()
+  {
+    if (_layout != null)
+      return _layout;
+    else if (_layoutExpr != null)
+      return Util.evalString(_layoutExpr);
+    else
+      return null;
+  }
+
+  public void setLayout(String value)
+  {
+    _layout = value;
+  }
+  
   public String getOnblur()
   {
     if (_onblur != null)
@@ -253,6 +284,21 @@ public class HtmlOutputLink extends UIOutput
   public void setOnblur(String value)
   {
     _onblur = value;
+  }
+  
+  public String getOnchange()
+  {
+    if (_onchange != null)
+      return _onchange;
+    else if (_onchangeExpr != null)
+      return Util.evalString(_onchangeExpr);
+    else
+      return null;
+  }
+
+  public void setOnchange(String value)
+  {
+    _onchange = value;
   }
   
   public String getOnclick()
@@ -420,49 +466,34 @@ public class HtmlOutputLink extends UIOutput
     _onmouseup = value;
   }
   
-  public String getRel()
+  public String getOnselect()
   {
-    if (_rel != null)
-      return _rel;
-    else if (_relExpr != null)
-      return Util.evalString(_relExpr);
+    if (_onselect != null)
+      return _onselect;
+    else if (_onselectExpr != null)
+      return Util.evalString(_onselectExpr);
     else
       return null;
   }
 
-  public void setRel(String value)
+  public void setOnselect(String value)
   {
-    _rel = value;
+    _onselect = value;
   }
   
-  public String getRev()
+  public boolean isReadonly()
   {
-    if (_rev != null)
-      return _rev;
-    else if (_revExpr != null)
-      return Util.evalString(_revExpr);
+    if (_readonly != null)
+      return _readonly;
+    else if (_readonlyExpr != null)
+      return Util.evalBoolean(_readonlyExpr);
     else
-      return null;
+      return false;
   }
 
-  public void setRev(String value)
+  public void setReadonly(boolean value)
   {
-    _rev = value;
-  }
-  
-  public String getShape()
-  {
-    if (_shape != null)
-      return _shape;
-    else if (_shapeExpr != null)
-      return Util.evalString(_shapeExpr);
-    else
-      return null;
-  }
-
-  public void setShape(String value)
-  {
-    _shape = value;
+    _readonly = value;
   }
   
   public String getStyle()
@@ -510,21 +541,6 @@ public class HtmlOutputLink extends UIOutput
     _tabindex = value;
   }
   
-  public String getTarget()
-  {
-    if (_target != null)
-      return _target;
-    else if (_targetExpr != null)
-      return Util.evalString(_targetExpr);
-    else
-      return null;
-  }
-
-  public void setTarget(String value)
-  {
-    _target = value;
-  }
-  
   public String getTitle()
   {
     if (_title != null)
@@ -538,21 +554,6 @@ public class HtmlOutputLink extends UIOutput
   public void setTitle(String value)
   {
     _title = value;
-  }
-  
-  public String getType()
-  {
-    if (_type != null)
-      return _type;
-    else if (_typeExpr != null)
-      return Util.evalString(_typeExpr);
-    else
-      return null;
-  }
-
-  public void setType(String value)
-  {
-    _type = value;
   }
 
   //
@@ -571,20 +572,26 @@ public class HtmlOutputLink extends UIOutput
       switch (prop) {
       case ACCESSKEY:
 	return _accesskeyExpr;
-      case CHARSET:
-	return _charsetExpr;
-      case COORDS:
-	return _coordsExpr;
+      case BORDER:
+	return _borderExpr;
       case DIR:
 	return _dirExpr;
       case DISABLED:
 	return _disabledExpr;
-      case HREFLANG:
-	return _hreflangExpr;
+      case DISABLED_CLASS:
+	return _disabledClassExpr;
+      case ENABLED_CLASS:
+	return _enabledClassExpr;
+      case LABEL:
+	return _labelExpr;
       case LANG:
 	return _langExpr;
+      case LAYOUT:
+	return _layoutExpr;
       case ONBLUR:
 	return _onblurExpr;
+      case ONCHANGE:
+	return _onchangeExpr;
       case ONCLICK:
 	return _onclickExpr;
       case ONDBLCLICK:
@@ -607,24 +614,18 @@ public class HtmlOutputLink extends UIOutput
 	return _onmouseoverExpr;
       case ONMOUSEUP:
 	return _onmouseupExpr;
-      case REL:
-	return _relExpr;
-      case REV:
-	return _revExpr;
-      case SHAPE:
-	return _shapeExpr;
+      case ONSELECT:
+	return _onselectExpr;
+      case READONLY:
+	return _readonlyExpr;
       case STYLE:
 	return _styleExpr;
       case STYLE_CLASS:
 	return _styleClassExpr;
       case TABINDEX:
 	return _tabindexExpr;
-      case TARGET:
-	return _targetExpr;
       case TITLE:
 	return _titleExpr;
-      case TYPE:
-	return _typeExpr;
       }
     }
     
@@ -647,19 +648,12 @@ public class HtmlOutputLink extends UIOutput
 	else
 	  _accesskeyExpr = expr;
 	return;
-	
-      case CHARSET:
+
+      case BORDER:
 	if (expr != null && expr.isLiteralText())
-	  _charset = Util.evalString(expr);
+	  _border = Util.evalInt(expr);
 	else
-	  _charsetExpr = expr;
-	return;
-	
-      case COORDS:
-	if (expr != null && expr.isLiteralText())
-	  _coords = Util.evalString(expr);
-	else
-	  _coordsExpr = expr;
+	  _borderExpr = expr;
 	return;
 
       case DIR:
@@ -676,11 +670,25 @@ public class HtmlOutputLink extends UIOutput
 	  _disabledExpr = expr;
 	return;
 
-      case HREFLANG:
+      case DISABLED_CLASS:
 	if (expr != null && expr.isLiteralText())
-	  _hreflang = Util.evalString(expr);
+	  _disabledClass = Util.evalString(expr);
 	else
-	  _hreflangExpr = expr;
+	  _disabledClassExpr = expr;
+	return;
+
+      case ENABLED_CLASS:
+	if (expr != null && expr.isLiteralText())
+	  _enabledClass = Util.evalString(expr);
+	else
+	  _enabledClassExpr = expr;
+	return;
+
+      case LABEL:
+	if (expr != null && expr.isLiteralText())
+	  _label = Util.evalString(expr);
+	else
+	  _labelExpr = expr;
 	return;
 	
       case LANG:
@@ -690,11 +698,25 @@ public class HtmlOutputLink extends UIOutput
 	  _langExpr = expr;
 	return;
 	
+      case LAYOUT:
+	if (expr != null && expr.isLiteralText())
+	  _layout = Util.evalString(expr);
+	else
+	  _layoutExpr = expr;
+	return;
+	
       case ONBLUR:
 	if (expr != null && expr.isLiteralText())
 	  _onblur = Util.evalString(expr);
 	else
 	  _onblurExpr = expr;
+	return;
+	
+      case ONCHANGE:
+	if (expr != null && expr.isLiteralText())
+	  _onchange = Util.evalString(expr);
+	else
+	  _onchangeExpr = expr;
 	return;
 	
       case ONCLICK:
@@ -774,25 +796,18 @@ public class HtmlOutputLink extends UIOutput
 	  _onmouseupExpr = expr;
 	return;
 
-      case REL:
+      case ONSELECT:
 	if (expr != null && expr.isLiteralText())
-	  _rel = Util.evalString(expr);
+	  _onselect = Util.evalString(expr);
 	else
-	  _relExpr = expr;
+	  _onselectExpr = expr;
 	return;
 
-      case REV:
+      case READONLY:
 	if (expr != null && expr.isLiteralText())
-	  _rev = Util.evalString(expr);
+	  _readonly = Util.evalBoolean(expr);
 	else
-	  _revExpr = expr;
-	return;
-
-      case SHAPE:
-	if (expr != null && expr.isLiteralText())
-	  _shape = Util.evalString(expr);
-	else
-	  _shapeExpr = expr;
+	  _readonlyExpr = expr;
 	return;
 
       case STYLE:
@@ -816,25 +831,11 @@ public class HtmlOutputLink extends UIOutput
 	  _tabindexExpr = expr;
 	return;
 
-      case TARGET:
-	if (expr != null && expr.isLiteralText())
-	  _target = Util.evalString(expr);
-	else
-	  _targetExpr = expr;
-	return;
-
       case TITLE:
 	if (expr != null && expr.isLiteralText())
 	  _title = Util.evalString(expr);
 	else
 	  _titleExpr = expr;
-	return;
-
-      case TYPE:
-	if (expr != null && expr.isLiteralText())
-	  _type = Util.evalString(expr);
-	else
-	  _typeExpr = expr;
 	return;
       }
     }
@@ -848,13 +849,16 @@ public class HtmlOutputLink extends UIOutput
 
   private enum PropEnum {
     ACCESSKEY,
-    CHARSET,
-    COORDS,
+    BORDER,
     DIR,
     DISABLED,
-    HREFLANG,
+    DISABLED_CLASS,
+    ENABLED_CLASS,
+    LABEL,
     LANG,
+    LAYOUT,
     ONBLUR,
+    ONCHANGE,
     ONCLICK,
     ONDBLCLICK,
     ONFOCUS,
@@ -866,26 +870,26 @@ public class HtmlOutputLink extends UIOutput
     ONMOUSEOUT,
     ONMOUSEOVER,
     ONMOUSEUP,
-    REL,
-    REV,
-    SHAPE,
+    ONSELECT,
+    READONLY,
     STYLE,
     STYLE_CLASS,
     TABINDEX,
-    TARGET,
     TITLE,
-    TYPE,
   }
 
   static {
     _propMap.put("accesskey", PropEnum.ACCESSKEY);
-    _propMap.put("charset", PropEnum.CHARSET);
-    _propMap.put("coords", PropEnum.COORDS);
+    _propMap.put("border", PropEnum.BORDER);
     _propMap.put("dir", PropEnum.DIR);
     _propMap.put("disabled", PropEnum.DISABLED);
-    _propMap.put("hreflang", PropEnum.HREFLANG);
+    _propMap.put("disabledClass", PropEnum.DISABLED_CLASS);
+    _propMap.put("enabledClass", PropEnum.ENABLED_CLASS);
+    _propMap.put("label", PropEnum.LABEL);
     _propMap.put("lang", PropEnum.LANG);
+    _propMap.put("layout", PropEnum.LAYOUT);
     _propMap.put("onblur", PropEnum.ONBLUR);
+    _propMap.put("onchange", PropEnum.ONCHANGE);
     _propMap.put("onclick", PropEnum.ONCLICK);
     _propMap.put("ondblclick", PropEnum.ONDBLCLICK);
     _propMap.put("onfocus", PropEnum.ONFOCUS);
@@ -897,14 +901,11 @@ public class HtmlOutputLink extends UIOutput
     _propMap.put("onmouseover", PropEnum.ONMOUSEOVER);
     _propMap.put("onmouseout", PropEnum.ONMOUSEOUT);
     _propMap.put("onmouseup", PropEnum.ONMOUSEUP);
-    _propMap.put("rel", PropEnum.REL);
-    _propMap.put("rev", PropEnum.REV);
-    _propMap.put("shape", PropEnum.SHAPE);
+    _propMap.put("onselect", PropEnum.ONSELECT);
+    _propMap.put("readonly", PropEnum.READONLY);
     _propMap.put("style", PropEnum.STYLE);
     _propMap.put("styleClass", PropEnum.STYLE_CLASS);
     _propMap.put("tabindex", PropEnum.TABINDEX);
-    _propMap.put("target", PropEnum.TARGET);
     _propMap.put("title", PropEnum.TITLE);
-    _propMap.put("type", PropEnum.TYPE);
   }
 }
