@@ -1430,7 +1430,9 @@ public class RegexpModule
             if (tail > 0) {
               StringValue hex = regexp.substring(i + 2, tail);
 
-              if (hex.length() == 2)
+              if (hex.length() == 1)
+                sb.append("x0" + hex);
+              else if (hex.length() == 2)
                 sb.append("x" + hex);
               else if (hex.length() == 4)
                 sb.append("u" + hex);
