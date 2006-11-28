@@ -29,16 +29,12 @@
 
 package javax.script;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.logging.Logger;
+
+import java.util.*;
+import java.util.logging.*;
 
 /**
  * A manager for script engines.
@@ -51,7 +47,7 @@ public class ScriptEngineManager {
 
   protected HashSet engineSpis = new HashSet();
   protected HashMap extensionAssociations = new HashMap();
-  protected Namespace globalScope = new SimpleNamespace();
+  protected Bindings globalScope = new SimpleBindings();
   protected HashMap mimeTypeAssociations = new HashMap();
   protected HashMap nameAssociations = new HashMap();
 
@@ -60,21 +56,29 @@ public class ScriptEngineManager {
    */
   public ScriptEngineManager()
   {
-    initEngines();
+    this(Thread.currentThread().getContextClassLoader());
   }
 
   /**
-   * Sets the global scope namespace.
+   * The constructor checks for implementations of the factory.
    */
-  public void setNamespace(Namespace globalScope)
+  public ScriptEngineManager(ClassLoader loader)
+  {
+    initEngines(loader);
+  }
+
+  /**
+   * Sets the global scope bindings.
+   */
+  private void setBindings(Bindings globalScope)
   {
     this.globalScope = globalScope;
   }
 
   /**
-   * Gets the global scope namespace.
+   * Gets the global scope bindings.
    */
-  public Namespace getNamespace()
+  private Bindings getBindings()
   {
     return this.globalScope;
   }
@@ -84,7 +88,7 @@ public class ScriptEngineManager {
    */
   public void put(String key, Object value)
   {
-    getNamespace().put(key, value);
+    getBindings().put(key, value);
   }
 
   /**
@@ -92,7 +96,7 @@ public class ScriptEngineManager {
    */
   public Object get(String key)
   {
-    return getNamespace().get(key);
+    return getBindings().get(key);
   }
 
   /**
@@ -137,14 +141,9 @@ public class ScriptEngineManager {
   /**
    * Returns the known factories.
    */
-  public ScriptEngineFactory []getEngineFactories()
+  public List<ScriptEngineFactory> getEngineFactories()
   {
-    ScriptEngineFactory []factories;
-    factories = new ScriptEngineFactory[_engineFactories.size()];
-
-    _engineFactories.toArray(factories);
-
-    return factories;
+    return new ArrayList<ScriptEngineFactory>(_engineFactories);
   }
 
   /**
@@ -174,10 +173,8 @@ public class ScriptEngineManager {
   /**
    * Initialize the script engine.
    */
-  private void initEngines()
+  private void initEngines(ClassLoader loader)
   {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
     try {
       Enumeration resources = loader.getResources("META-INF/services/javax.script.ScriptEngineFactory");
 
@@ -239,24 +236,18 @@ public class ScriptEngineManager {
 
       this.engineSpis.add(cl);
 
-      String []names = factory.getNames();
-
-      for (int i = 0; i < names.length; i++) {
-	registerEngineName(names[i], cl);
+      for (String name : factory.getNames()) {
+	registerEngineName(name, cl);
       }
 
-      String []mimeTypes = factory.getMimeTypes();
-
-      for (int i = 0; i < mimeTypes.length; i++) {
-	registerEngineMimeType(mimeTypes[i], cl);
+      for (String mimeType : factory.getMimeTypes()) {
+	registerEngineMimeType(mimeType, cl);
       }
 
-      String []extensions = factory.getExtensions();
-
-      for (int i = 0; i < extensions.length; i++) {
-	registerEngineExtension(extensions[i], cl);
+      for (String ext : factory.getExtensions()) {
+	registerEngineExtension(ext, cl);
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -272,7 +263,7 @@ public class ScriptEngineManager {
       ScriptEngine engine = factory.getScriptEngine();
       
       ScriptContext cxt = engine.getContext();
-      cxt.setNamespace(this.globalScope, ScriptContext.GLOBAL_SCOPE);
+      cxt.setBindings(this.globalScope, ScriptContext.GLOBAL_SCOPE);
       
       return engine;
     }

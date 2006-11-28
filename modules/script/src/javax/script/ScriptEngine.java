@@ -67,18 +67,18 @@ public interface ScriptEngine {
    * Evaluates the script with the given context, returning any value.
    *
    * @param string the script
-   * @param namespace the single namespace
+   * @param bindings the single bindings
    */
-  public Object eval(String script, Namespace namespace)
+  public Object eval(String script, Bindings bindings)
     throws ScriptException;
 
   /**
    * Evaluates the script with the given context, returning any value.
    *
    * @param reader reader to the script
-   * @param namespace the single namespace
+   * @param bindings the single bindings
    */
-  public Object eval(Reader reader, Namespace namespace)
+  public Object eval(Reader reader, Bindings bindings)
     throws ScriptException;
 
   /**
@@ -108,19 +108,19 @@ public interface ScriptEngine {
   public Object get(String key);
 
   /**
+   * Creates a new bindings.
+   */
+  public Bindings createBindings();
+
+  /**
    * Returns a scope of named values.
    */
-  public Namespace getNamespace(int scope);
+  public Bindings getBindings(int scope);
 
   /**
    * Sets a scope of named values.
    */
-  public void setNamespace(Namespace namespace, int scope);
-
-  /**
-   * Creates a new namespace.
-   */
-  public Namespace createNamespace();
+  public void setBindings(Bindings bindings, int scope);
 
   /**
    * Returns the default script context.

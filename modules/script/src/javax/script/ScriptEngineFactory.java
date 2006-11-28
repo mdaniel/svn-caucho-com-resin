@@ -29,10 +29,80 @@
 
 package javax.script;
 
+import java.util.*;
+
 /**
  * A factory for creating scripts.
  */
-public interface ScriptEngineFactory extends ScriptEngineInfo {
+public interface ScriptEngineFactory {
+  /**
+   * Returns the full name of the ScriptEngine.
+   */
+  public String getEngineName();
+
+  /**
+   * Returns the version of the ScriptEngine, e.g.
+   * Rhino Mozilla Javascript Engine.
+   */
+  public String getEngineVersion();
+
+  /**
+   * Returns an array of filename extensions normally used by this
+   * language.
+   */
+  public List<String> getExtensions();
+
+  /**
+   * Returns the name of the supported language.
+   */
+  public String getLanguageName();
+
+  /**
+   * Returns the version of the scripting language.
+   */
+  public String getLanguageVersion();
+
+  /**
+   * Returns engine-specific properties.
+   *
+   * Predefined keys include:
+   * <ul>
+   * <li>ENGINE
+   * <li>ENGINE_VERSION
+   * <li>NAME
+   * <li>LANGUAGE
+   * <li>LANGUAGE_VERSION
+   * <li>THREADING
+   * </ul>
+   */
+  public Object getParameter(String key);
+
+  /**
+   * Returns a string which could invoke a method of a Java object.
+   */
+  public String getMethodCallSyntax(String obj, String m, String ... args);
+
+  /**
+   * Returns the mime-types for scripts for the engine.
+   */
+  public List<String> getMimeTypes();
+
+  /**
+   * Returns the short names for the scripts for the engine,
+   * e.g. {"javascript", "rhino"}
+   */
+  public List<String> getNames();
+
+  /**
+   * Returns a string which generates an output statement.
+   */
+  public String getOutputStatement(String toDisplay);
+
+  /**
+   * Returns a string which generates a valid program.
+   */
+  public String getProgram(String ... statements);
+  
   /**
    * Returns a ScriptEngine instance.
    */

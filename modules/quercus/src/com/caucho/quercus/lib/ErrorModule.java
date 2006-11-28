@@ -423,6 +423,30 @@ public class ErrorModule extends AbstractQuercusModule {
   }
 
   /**
+   * Sets an exception handler
+   *
+   * @param env the quercus environment
+   * @param fun the exception handler
+   */
+  public static Value set_exception_handler(Env env,
+					    Callback fun)
+  {
+    return env.setExceptionHandler(fun);
+  }
+
+  /**
+   * Restore an exception handler
+   *
+   * @param env the quercus environment
+   */
+  public static Value restore_exception_handler(Env env)
+  {
+    env.restoreExceptionHandler();
+
+    return BooleanValue.TRUE;
+  }
+
+  /**
    * Triggers an error.
    *
    * @param env the quercus environment

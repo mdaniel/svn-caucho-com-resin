@@ -45,20 +45,20 @@ abstract public class CompiledScript {
   }
   
   /**
-   * Evaluates the script with the given namespace.
+   * Evaluates the script with the given bindings.
    */
-  public Object eval(Namespace namespace)
+  public Object eval(Bindings bindings)
     throws ScriptException
   {
     ScriptContext engineCxt = getEngine().getContext();
-    ScriptContext cxt = new GenericScriptContext();
+    ScriptContext cxt = new SimpleScriptContext();
 
     cxt.setReader(engineCxt.getReader());
     cxt.setWriter(engineCxt.getWriter());
     cxt.setErrorWriter(engineCxt.getErrorWriter());
-    cxt.setNamespace(engineCxt.getNamespace(ScriptContext.GLOBAL_SCOPE),
+    cxt.setBindings(engineCxt.getBindings(ScriptContext.GLOBAL_SCOPE),
 		     ScriptContext.GLOBAL_SCOPE);
-    cxt.setNamespace(namespace, ScriptContext.ENGINE_SCOPE);
+    cxt.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
 
     return eval(cxt);
   }

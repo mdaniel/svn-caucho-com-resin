@@ -35,12 +35,12 @@ import java.io.Writer;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
-import javax.script.GenericScriptEngine;
-import javax.script.Namespace;
+import javax.script.AbstractScriptEngine;
+import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
-import javax.script.SimpleNamespace;
+import javax.script.SimpleBindings;
 import javax.script.ScriptException;
 
 import com.caucho.quercus.Quercus;
@@ -60,7 +60,7 @@ import com.caucho.vfs.*;
  * Script engine
  */
 public class QuercusScriptEngine
-  extends GenericScriptEngine
+  extends AbstractScriptEngine
   implements Compilable {
   private QuercusScriptEngineFactory _factory;
   private final Quercus _quercus;
@@ -169,11 +169,11 @@ public class QuercusScriptEngine
   }
 
   /**
-   * Creates a namespace.
+   * Creates a bindings.
    */
-  public Namespace createNamespace()
+  public Bindings createBindings()
   {
-    return new SimpleNamespace();
+    return new SimpleBindings();
   }
 
   public String toString()

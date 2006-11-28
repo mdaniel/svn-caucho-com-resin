@@ -65,6 +65,10 @@ public class FilterConfigImpl implements FilterConfig {
   public FilterConfigImpl()
   {
   }
+  
+  public void setId(String id)
+  {
+  }
 
   /**
    * Sets the filter name.

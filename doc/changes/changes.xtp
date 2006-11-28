@@ -12,6 +12,10 @@
 
 <s2 title="3.1snap - Oct 6, 2006">
 <ul>
+<li>Quercus: rework for final javax.script API (#1473, rep by George Moschovitis)
+<li>Quercus: set_exception_handler (#1400, rep by awatt)
+<li>isapi_srun must turn off chunking for non-200 responses (#1460, ve6eei)
+<li>filter needs to allow id field (#1468, rep by mogsie)
 <li>EJB/CMP: ejbSelect needs to close result set in finally block (#1303)
 <li>EJB: change hessian stub generation location to work/ejb (#1301 rep by Steve Baugus)
 <li>mod_caucho: avoid premature error validation on non-blocking connect() failure for Solaris (#1415, rep by L Kaminsky)</li>

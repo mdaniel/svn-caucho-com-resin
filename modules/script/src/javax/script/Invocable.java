@@ -40,9 +40,9 @@ public interface Invocable {
    * @param thisObject the class object
    * @param args the arguments
    */
-  public Object call(String name,
-		     Object thisObject,
-		     Object []args)
+  public Object invokeMethod(Object thisObject,
+			     String name,
+			     Object... args)
     throws ScriptException, NoSuchMethodException;
   
   /**
@@ -51,8 +51,8 @@ public interface Invocable {
    * @param name the name of the function
    * @param args the arguments
    */
-  public Object call(String name,
-		     Object []args)
+  public Object invokeFunction(String name,
+			       Object... args)
     throws ScriptException, NoSuchMethodException;
   
   /**
@@ -60,6 +60,14 @@ public interface Invocable {
    *
    * @param proxyClass the name of the function
    */
-  public Object getInterface(Class apiClass);
+  public <T> T getInterface(Class<T> apiClass);
+  
+  /**
+   * Returns an implementation of an interface.
+   *
+   * @param proxyClass the name of the function
+   */
+  public <T> T getInterface(Object thisObj,
+			    Class<T> apiClass);
 }
 

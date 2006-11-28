@@ -29,16 +29,18 @@
 
 package com.caucho.quercus.script;
 
-import javax.script.Namespace;
+import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
-import javax.script.SimpleNamespace;
+import javax.script.SimpleBindings;
+
+import java.util.*;
 
 /**
  * Script engine factory
  */
 public class QuercusScriptEngineFactory implements ScriptEngineFactory {
-  private Namespace _globalNamespace = new SimpleNamespace();
+  private Bindings _globalBindings = new SimpleBindings();
   
   /**
    * Returns the full name of the ScriptEngine.
@@ -60,26 +62,31 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory {
    * Returns an array of filename extensions normally used by this
    * language.
    */
-  public String []getExtensions()
+  public List<String> getExtensions()
   {
-    return new String[] { "php" };
+    ArrayList<String> ext = new ArrayList<String>();
+    ext.add("php");
+    return ext;
   }
 
   /**
    * Returns the mime-types for scripts for the engine.
    */
-  public String []getMimeTypes()
+  public List<String> getMimeTypes()
   {
-    return new String[] {};
+    return new ArrayList<String>();
   }
 
   /**
    * Returns the short names for the scripts for the engine,
    * e.g. {"javascript", "rhino"}
    */
-  public String []getNames()
+  public List<String> getNames()
   {
-    return new String[] {"quercus", "php"};
+    ArrayList<String> names = new ArrayList<String>();
+    names.add("quercus");
+    names.add("php");
+    return names;
   }
 
   /**

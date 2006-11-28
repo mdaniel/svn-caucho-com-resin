@@ -34,26 +34,26 @@ import java.io.Reader;
 /**
  * A standard imlementation of the ScriptEngine.
  */
-abstract public class GenericScriptEngine implements ScriptEngine {
+abstract public class AbstractScriptEngine implements ScriptEngine {
   protected ScriptContext context;
 
   /**
    * Creates a default script engine.
    */
-  public GenericScriptEngine()
+  public AbstractScriptEngine()
   {
-    this.context = new GenericScriptContext();
-    this.context.setNamespace(createNamespace(),
-			      GenericScriptContext.ENGINE_SCOPE);
+    this.context = new SimpleScriptContext();
+    this.context.setBindings(createBindings(),
+			      SimpleScriptContext.ENGINE_SCOPE);
   }
 
   /**
    * Creates a default script engine.
    */
-  public GenericScriptEngine(Namespace n)
+  public AbstractScriptEngine(Bindings n)
   {
-    this.context = new GenericScriptContext();
-    this.context.setNamespace(n, GenericScriptContext.ENGINE_SCOPE);
+    this.context = new SimpleScriptContext();
+    this.context.setBindings(n, SimpleScriptContext.ENGINE_SCOPE);
   }
   
   /**
@@ -78,20 +78,20 @@ abstract public class GenericScriptEngine implements ScriptEngine {
    * Evaluates the script with the given context, returning any value.
    *
    * @param reader reader to the script
-   * @param namespace the single namespace
+   * @param bindings the single bindings
    */
-  public Object eval(Reader reader, Namespace namespace)
+  public Object eval(Reader reader, Bindings bindings)
     throws ScriptException
   {
     ScriptContext engineCxt = getContext();
-    ScriptContext cxt = new GenericScriptContext();
+    ScriptContext cxt = new SimpleScriptContext();
 
     cxt.setReader(engineCxt.getReader());
     cxt.setWriter(engineCxt.getWriter());
     cxt.setErrorWriter(engineCxt.getErrorWriter());
-    cxt.setNamespace(engineCxt.getNamespace(ScriptContext.GLOBAL_SCOPE),
+    cxt.setBindings(engineCxt.getBindings(ScriptContext.GLOBAL_SCOPE),
 		     ScriptContext.GLOBAL_SCOPE);
-    cxt.setNamespace(namespace, ScriptContext.ENGINE_SCOPE);
+    cxt.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
 
     return eval(reader, cxt);
   }
@@ -100,20 +100,20 @@ abstract public class GenericScriptEngine implements ScriptEngine {
    * Evaluates the script with the given context, returning any value.
    *
    * @param script the script
-   * @param namespace the single namespace
+   * @param bindings the single bindings
    */
-  public Object eval(String script, Namespace namespace)
+  public Object eval(String script, Bindings bindings)
     throws ScriptException
   {
     ScriptContext engineCxt = getContext();
-    ScriptContext cxt = new GenericScriptContext();
+    ScriptContext cxt = new SimpleScriptContext();
 
     cxt.setReader(engineCxt.getReader());
     cxt.setWriter(engineCxt.getWriter());
     cxt.setErrorWriter(engineCxt.getErrorWriter());
-    cxt.setNamespace(engineCxt.getNamespace(ScriptContext.GLOBAL_SCOPE),
+    cxt.setBindings(engineCxt.getBindings(ScriptContext.GLOBAL_SCOPE),
 		     ScriptContext.GLOBAL_SCOPE);
-    cxt.setNamespace(namespace, ScriptContext.ENGINE_SCOPE);
+    cxt.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
 
     return eval(script, cxt);
   }
@@ -145,7 +145,7 @@ abstract public class GenericScriptEngine implements ScriptEngine {
    */
   public void put(String key, Object value)
   {
-    getNamespace(ScriptContext.ENGINE_SCOPE).put(key, value);
+    getBindings(ScriptContext.ENGINE_SCOPE).put(key, value);
   }
 
   /**
@@ -153,23 +153,23 @@ abstract public class GenericScriptEngine implements ScriptEngine {
    */
   public Object get(String key)
   {
-    return getNamespace(ScriptContext.ENGINE_SCOPE).get(key);
+    return getBindings(ScriptContext.ENGINE_SCOPE).get(key);
   }
 
   /**
    * Returns a scope of named values.
    */
-  public Namespace getNamespace(int scope)
+  public Bindings getBindings(int scope)
   {
-    return getContext().getNamespace(scope);
+    return getContext().getBindings(scope);
   }
 
   /**
    * Sets a scope of named values.
    */
-  public void setNamespace(Namespace namespace, int scope)
+  public void setBindings(Bindings bindings, int scope)
   {
-    getContext().setNamespace(namespace, scope);
+    getContext().setBindings(bindings, scope);
   }
 
   /**

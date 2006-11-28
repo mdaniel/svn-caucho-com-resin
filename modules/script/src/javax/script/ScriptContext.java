@@ -29,28 +29,29 @@
 
 package javax.script;
 
-import java.io.Writer;
-import java.io.Reader;
+import java.io.*;
+
+import java.util.*;
 
 /**
- * Context information from an engine to the namespace.
+ * Context information from an engine to the bindings.
  */
 public interface ScriptContext {
   public static int ENGINE_SCOPE = 100;
   public static int GLOBAL_SCOPE = 200;
 
   /**
-   * Associates a namespace with a scope.
+   * Associates a bindings with a scope.
    *
-   * @param namespace the namespace to assign
+   * @param bindings the bindings to assign
    * @param scope the scope code
    */
-  public void setNamespace(Namespace namespace, int scope);
+  public void setBindings(Bindings bindings, int scope);
 
   /**
-   * Returns the namespace associated with a scope.
+   * Returns the bindings associated with a scope.
    */
-  public Namespace getNamespace(int scope);
+  public Bindings getBindings(int scope);
 
   /**
    * Sets an attribute in a scope.
@@ -106,5 +107,10 @@ public interface ScriptContext {
    * Returns the script's error writer.
    */
   public void setErrorWriter(Writer writer);
+
+  /**
+   * Returns the available scopes.
+   */
+  public List<Integer> getScopes();
 }
 

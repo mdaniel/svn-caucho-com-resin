@@ -249,6 +249,9 @@ public class Env {
   private Callback [] _prevErrorHandlers = new Callback[B_STRICT + 1];
   private Callback [] _errorHandlers = new Callback[B_STRICT + 1];
 
+  private Callback _prevExceptionHandler;
+  private Callback _exceptionHandler;
+
   private SessionCallback _sessionCallback;
 
   private StreamContextResource _defaultStreamContext;
@@ -3560,6 +3563,37 @@ public class Env {
   {
     for (int i = 0; i < _errorHandlers.length; i++)
       _errorHandlers[i] = _prevErrorHandlers[i];
+  }
+  
+  /**
+   * Gets the exception handler
+   */
+  public Callback getExceptionHandler()
+  {
+    return _exceptionHandler;
+  }
+  
+  /**
+   * Sets an exception handler
+   */
+  public Value setExceptionHandler(Callback fun)
+  {
+    _prevExceptionHandler = _exceptionHandler;
+    
+    _exceptionHandler = fun;
+
+    if (_prevExceptionHandler != null)
+      return _prevExceptionHandler.toStringValue();
+    else
+      return NullValue.NULL;
+  }
+  
+  /**
+   * Restore an exception handler
+   */
+  public void restoreExceptionHandler()
+  {
+    _exceptionHandler = _prevExceptionHandler;
   }
 
   /**

@@ -78,6 +78,9 @@ public class JspDirectiveTag extends JspNode {
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
+    if (! _gen.isTag())
+      throw error(L.l("@tag directive is only allowed in tag files"));
+    
     JavaTagGenerator gen = (JavaTagGenerator) _gen;
 
     if (IS_EL_IGNORED.equals(name)) {

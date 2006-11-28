@@ -29,31 +29,31 @@
 
 package javax.script;
 
-import java.io.Writer;
-import java.io.Reader;
+import java.io.*;
+import java.util.*;
 
 /**
  * Basic implementation of a script context.
  */
-public class GenericScriptContext implements ScriptContext {
-  protected Namespace engineScope = new SimpleNamespace();
-  protected Namespace globalScope = new SimpleNamespace();
+public class SimpleScriptContext implements ScriptContext {
+  protected Bindings engineScope = new SimpleBindings();
+  protected Bindings globalScope = new SimpleBindings();
   
   protected Reader reader;
   protected Writer writer;
   protected Writer errorWriter;
 
   /**
-   * Sets the namespace with the given scope.
+   * Sets the bindings with the given scope.
    */
-  public void setNamespace(Namespace namespace, int scope)
+  public void setBindings(Bindings bindings, int scope)
   {
     switch (scope) {
     case ENGINE_SCOPE:
-      this.engineScope = namespace;
+      this.engineScope = bindings;
       break;
     case GLOBAL_SCOPE:
-      this.globalScope = namespace;
+      this.globalScope = bindings;
       break;
     default:
       throw new IllegalArgumentException("scope '" + scope + " must either be ENGINE_SCOPE or GLOBAL_SCOPE.");
@@ -61,9 +61,9 @@ public class GenericScriptContext implements ScriptContext {
   }
 
   /**
-   * Gets the namespace with the given scope.
+   * Gets the bindings with the given scope.
    */
-  public Namespace getNamespace(int scope)
+  public Bindings getBindings(int scope)
   {
     switch (scope) {
     case ENGINE_SCOPE:
@@ -117,7 +117,7 @@ public class GenericScriptContext implements ScriptContext {
    */
   public Object getAttribute(String name, int scope)
   {
-    return getNamespace(scope).get(name);
+    return getBindings(scope).get(name);
   }
 
   /**
@@ -125,7 +125,7 @@ public class GenericScriptContext implements ScriptContext {
    */
   public Object removeAttribute(String name, int scope)
   {
-    return getNamespace(scope).remove(name);
+    return getBindings(scope).remove(name);
   }
 
   /**
@@ -133,7 +133,7 @@ public class GenericScriptContext implements ScriptContext {
    */
   public void setAttribute(String name, Object value, int scope)
   {
-    getNamespace(scope).put(name, value);
+    getBindings(scope).put(name, value);
   }
 
   /**
@@ -182,6 +182,16 @@ public class GenericScriptContext implements ScriptContext {
   public void setErrorWriter(Writer writer)
   {
     this.errorWriter = writer;
+  }
+
+  public List<Integer> getScopes()
+  {
+    ArrayList<Integer> scopes = new ArrayList<Integer>();
+
+    scopes.add(ENGINE_SCOPE);
+    scopes.add(GLOBAL_SCOPE);
+
+    return scopes;
   }
 }
 

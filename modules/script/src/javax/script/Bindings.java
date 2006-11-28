@@ -34,6 +34,14 @@ import java.util.Map;
 /**
  * Modifies the script's global variables.
  */
-public interface Namespace extends Map {
+public interface Bindings extends Map<String,Object>
+{
+  public void putAll(Map<? extends String,? extends Object> toMerge);
+
+  public boolean containsKey(Object key);
+
+  public Object get(Object key);
+
+  public Object remove(Object key);
 }
 

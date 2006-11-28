@@ -76,7 +76,8 @@ public class Mysqli extends JdbcConnectionResource {
    * is ready to be used by the next call to
    * mysqli_store_result or mysqli_use_result.
    */
-  private ArrayList<JdbcResultResource> _resultValues = new ArrayList<JdbcResultResource>();
+  private ArrayList<JdbcResultResource> _resultValues
+    = new ArrayList<JdbcResultResource>();
   private int _nextResultValue = 0;
   private boolean _hasBeenUsed = true;
 

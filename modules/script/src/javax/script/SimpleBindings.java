@@ -37,20 +37,20 @@ import java.util.Collection;
 /**
  * Implements the namespace
  */
-public class SimpleNamespace implements Namespace {
+public class SimpleBindings implements Bindings {
   private HashMap _map = new HashMap();
 
   /**
    * Creates the simple namespace.
    */
-  public SimpleNamespace()
+  public SimpleBindings()
   {
   }
 
   /**
    * Creates the simple namespace.
    */
-  public SimpleNamespace(Map map)
+  public SimpleBindings(Map map)
   {
     _map.putAll(map);
   }
@@ -93,7 +93,7 @@ public class SimpleNamespace implements Namespace {
     return _map.keySet();
   }
 
-  public Object put(Object name, Object value)
+  public Object put(String name, Object value)
   {
     return _map.put(name, value);
   }

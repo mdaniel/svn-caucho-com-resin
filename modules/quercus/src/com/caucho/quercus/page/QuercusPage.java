@@ -37,9 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.quercus.Quercus;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
@@ -118,6 +116,11 @@ abstract public class QuercusPage {
     env.setPwd(pwd);
     try {
       return execute(env);
+    } catch (QuercusLanguageException e) {
+      if (env.getExceptionHandler() != null)
+	env.getExceptionHandler().call(env, e.getValue());
+
+      return NullValue.NULL;
     } finally {
       env.setPwd(oldPwd);
     }
