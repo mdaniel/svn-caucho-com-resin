@@ -109,9 +109,9 @@ public class ProtocolContainer {
     throws ConfigException
   {
     if (_urlPrefix != null)
-      return new HandleEncoder(server, _urlPrefix + server.getServerId());
+      return new HandleEncoder(server, _urlPrefix + server.getProtocolId());
     else
-      return new HandleEncoder(server, server.getServerId());
+      return new HandleEncoder(server, server.getProtocolId());
   }
 
   /**

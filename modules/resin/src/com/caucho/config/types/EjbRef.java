@@ -30,17 +30,17 @@
 package com.caucho.config.types;
 
 import com.caucho.config.ConfigException;
+import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBServer;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
-import com.caucho.vfs.Vfs;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.naming.InitialContext;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,6 +62,8 @@ public class EjbRef implements ObjectProxy {
   private Class _remote;
   private String _jndiName;
   private String _ejbLink;
+
+  private Object _target;
 
   public EjbRef()
   {
@@ -157,13 +159,24 @@ public class EjbRef implements ObjectProxy {
   public void init()
     throws Exception
   {
+    boolean bind = false;
+
     if (_ejbRefName == null)
       throw new ConfigException(L.l("{0} is required", "<ejb-ref-name>"));
 
-    _ejbRefName = Jndi.getFullName(_ejbRefName);
-
     if (_ejbLink != null &&  _jndiName != null)
         throw new ConfigException(L.l("either {0} or {1} can be used, but not both", "<ejb-link>", "<jndi-name>"));
+
+    if (_ejbLink == null && _jndiName == null) {
+      EJBServer server = EJBServer.getLocal();
+
+      if (server != null)
+        _ejbLink = _ejbRefName;
+      else
+        _jndiName = _ejbRefName;
+    }
+
+    _ejbRefName = Jndi.getFullName(_ejbRefName);
 
     if (_ejbLink != null) {
       EJBServer server = EJBServer.getLocal();
@@ -171,15 +184,26 @@ public class EjbRef implements ObjectProxy {
       if (server == null)
         throw new ConfigException(L.l("{0} requires a local {1}", "<ejb-link>", "<ejb-server>"));
 
-      Jndi.bindDeep(_ejbRefName, this);
+      bind = true;
     }
     else {
       if (_jndiName != null) {
         _jndiName = Jndi.getFullName(_jndiName);
 
         if (! _jndiName.equals(_ejbRefName))
-          Jndi.bindDeep(_ejbRefName, this);
+          bind = true;
       }
+    }
+
+    if (bind) {
+      try {
+        (new InitialContext()).unbind(_ejbRefName);
+      }
+      catch (Exception ex) {
+        log.log(Level.FINEST, ex.toString(), ex);
+      }
+
+      Jndi.bindDeep(_ejbRefName, this);
     }
 
     if (log.isLoggable(Level.FINER))
@@ -194,7 +218,25 @@ public class EjbRef implements ObjectProxy {
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    if (_jndiName == null) {
+    if (_target == null)
+      resolve();
+
+    return _target;
+  }
+
+  private void resolve()
+    throws NamingException
+  {
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, L.l("{0} resolving", this));
+
+    if (_jndiName != null) {
+      _target = Jndi.lookup(_jndiName);
+
+      if (_target == null && log.isLoggable(Level.FINE))
+        log.log(Level.FINE, L.l("no ejb bean with jndi-name '{0}' could be found", _jndiName));
+    }
+    else {
       String archiveName;
       String ejbName;
 
@@ -212,26 +254,39 @@ public class EjbRef implements ObjectProxy {
       try {
         Path path = archiveName == null ? Vfs.getPwd() : Vfs.lookup(archiveName);
 
-        _jndiName = Jndi.getFullName(EJBServer.getLocal().getJndiName(path, ejbName));
+        AbstractServer server = EJBServer.getLocal().getServer(path, ejbName);
+
+        if (server == null) {
+          if (log.isLoggable(Level.FINE))
+            log.log(Level.FINE, L.l("no ejb bean with path '{0}' and name '{1}' could be found", path, ejbName));
+        }
+        else {
+          Object localHome = server.getEJBLocalHome();
+
+          if (localHome != null)
+            _target = localHome;
+
+          if (_target == null) {
+            Object remoteHome = server.getEJBHome();
+
+            if (remoteHome != null)
+              _target = remoteHome;
+          }
+
+          if (log.isLoggable(Level.FINE))
+            log.log(Level.FINE, L.l("no home interface is available for '{0}'", server));
+        }
       }
       catch (Exception e) {
         throw new NamingException(L.l("invalid {0} '{1}': {2}", "<ejb-link>", _ejbLink, e));
       }
 
-      if (_jndiName == null)
-        throw new NamingException(L.l("invalid {0} '{1}'", "<ejb-link>", _ejbLink));
-
-      // XXX: might be valid in some circumstances
-      if (_ejbRefName.equals(_jndiName))
-        throw new NamingException(L.l("invalid {0} '{1}': resolves to self", "<ejb-link>", _ejbLink));
+      if (_target == null)
+        throw new NamingException(L.l("{0} '{1}' cannot be resolved", "<ejb-ref>", _ejbRefName));
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("{0} resolved", this));
     }
-
-    Context ic = new InitialContext(env);
-
-    return ic.lookup(_jndiName);
   }
 
   public String toString()

@@ -532,7 +532,7 @@ public class EnvServerManager implements EnvironmentListener {
   static class ServerCmp implements Comparator<AbstractServer> {
     public int compare(AbstractServer a, AbstractServer b)
     {
-      return a.getJndiName().compareTo(b.getJndiName());
+      return a.getEJBName().compareTo(b.getEJBName());
     }
   }
 }

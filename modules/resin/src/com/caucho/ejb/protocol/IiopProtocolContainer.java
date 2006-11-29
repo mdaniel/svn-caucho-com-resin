@@ -114,7 +114,7 @@ public class IiopProtocolContainer extends ProtocolContainer {
 
   private String getName(AbstractServer server)
   {
-    String name = server.getJndiName();
+    String name = server.getProtocolId();
     if (name == null)
       name = server.getEJBName();
 

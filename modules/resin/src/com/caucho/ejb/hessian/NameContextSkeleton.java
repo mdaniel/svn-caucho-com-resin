@@ -35,12 +35,9 @@ import java.util.logging.Level;
 
 import javax.ejb.*;
 
-import com.caucho.vfs.*;
-import com.caucho.java.*;
 import com.caucho.ejb.*;
 import com.caucho.ejb.protocol.*;
 import com.caucho.log.Log;
-import com.caucho.util.*;
 
 import com.caucho.hessian.io.*;
 import com.caucho.services.name.NameServerRemote;
@@ -111,7 +108,7 @@ public class NameContextSkeleton extends Skeleton {
     
     AbstractServer server;
 
-    server = container.getServerByJndiName(name);
+    server = container.getServerByServerId(name);
 
     if (server == null)
       server = container.getServerByEJBName(name);

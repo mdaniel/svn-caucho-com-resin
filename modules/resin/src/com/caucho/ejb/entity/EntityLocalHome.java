@@ -51,7 +51,7 @@ abstract public class EntityLocalHome extends EntityHome
    */
   public Object writeReplace() throws ObjectStreamException
   {
-    return new HomeSkeletonWrapper(getServer().getServerId());
+    return new HomeSkeletonWrapper(getServer().getProtocolId());
   }
 }
 

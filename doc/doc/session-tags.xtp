@@ -153,8 +153,8 @@ when serializing the session.</p>
 </tr>
 <tr>
   <td>invalidate-after-listener</td>
-  <td>. (resin 3.0)</td>
-  <td></td>
+  <td>Invalidate the session after notifying session listeners.</td>
+  <td>false</td>
 </tr>
 <tr>
   <td>reuse-session-id</td>
@@ -165,6 +165,12 @@ when serializing the session.</p>
   <td>save-only-on-shutdown</td>
   <td>Only save session when the application shuts down. (resin 1.2.3)</td>
   <td>false</td>
+</tr>
+<tr>
+  <td>ssl-cookie-name</td>
+  <td>Set a different cookie name to use for SSL connections, and add the
+      "secure" flag when setting the cookie in the browser.</td>
+  <td></td>
 </tr>
 <tr>
   <td>session-max</td>

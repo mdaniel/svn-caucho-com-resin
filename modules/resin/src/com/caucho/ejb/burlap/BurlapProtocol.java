@@ -86,7 +86,7 @@ public class BurlapProtocol extends ProtocolContainer {
   {
     log.finer("Burlap[" + server + "] added");
 
-    _serverMap.put(server.getServerId(), server);
+    _serverMap.put(server.getProtocolId(), server);
   }
 
   /**
@@ -94,7 +94,7 @@ public class BurlapProtocol extends ProtocolContainer {
    */
   public void removeServer(AbstractServer server)
   {
-    _serverMap.remove(server.getServerId());
+    _serverMap.remove(server.getProtocolId());
   }
 
   protected HandleEncoder createHandleEncoder(AbstractServer server,
@@ -102,7 +102,7 @@ public class BurlapProtocol extends ProtocolContainer {
     throws ConfigException
   {
     return new BurlapHandleEncoder(server,
-                                   getURLPrefix() + server.getServerId(),
+                                   getURLPrefix() + server.getProtocolId(),
                                    primaryKeyClass);
   }
 

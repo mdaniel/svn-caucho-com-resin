@@ -791,14 +791,14 @@ public class EJBServer
   }
 
   /**
-   * Return the jndi name for an ejb.
+   * Return the server for a given path and ejbName
    *
    * @param path the archive-path or expand-path of a module
    */
-  public String getJndiName(Path path, String ejbName)
+  public AbstractServer getServer(Path path, String ejbName)
     throws NameNotFoundException
   {
-    return _ejbManager.getJndiName(path, ejbName);
+    return _ejbManager.getServer(path, ejbName);
   }
 
   /**

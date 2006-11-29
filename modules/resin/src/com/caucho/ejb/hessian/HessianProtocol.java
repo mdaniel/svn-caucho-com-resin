@@ -85,7 +85,7 @@ public class HessianProtocol extends ProtocolContainer
     throws ConfigException
   {
     return new HessianHandleEncoder(server,
-                                    getURLPrefix() + server.getServerId(),
+                                    getURLPrefix() + server.getProtocolId(),
                                     primaryKeyClass);
   }
 
@@ -99,7 +99,7 @@ public class HessianProtocol extends ProtocolContainer
    */
   public void addServer(AbstractServer server)
   {
-    log.fine("Hessian: add server " + server.getJndiName());
+    log.fine("Hessian: add server " + server.getProtocolId());
   }
 
   /**
@@ -137,7 +137,7 @@ public class HessianProtocol extends ProtocolContainer
     while (name.startsWith("/"))
       name = name.substring(1);
 
-    server = getProtocolManager().getServerByJndiName(name);
+    server = getProtocolManager().getServerByServerId(name);
 
     if (server == null)
       server = getProtocolManager().getServerByEJBName(name);

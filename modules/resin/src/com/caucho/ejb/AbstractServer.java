@@ -71,13 +71,13 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected HashMap<String,HandleEncoder> _protocolEncoderMap;
   protected HandleEncoder _handleEncoder;
-  
+
   protected DataSource _dataSource;
-  
+
   protected DynamicClassLoader _loader;
 
   protected SameJVMClientContainer _jvmClient;
-  
+
   // The class for the extended bean
   protected Class _contextImplClass;
 
@@ -106,10 +106,16 @@ abstract public class AbstractServer implements EnvironmentBean {
   public AbstractServer(EjbServerManager manager)
   {
     _ejbManager = manager;
-    
+
     _loader = new EnvironmentClassLoader(manager.getClassLoader());
   }
 
+  public String getId()
+  {
+    // XXX: s/b  module-path#ejb-name
+    return getEJBName();
+  }
+  
   /**
    * Sets the ejb name.
    */
@@ -134,14 +140,12 @@ abstract public class AbstractServer implements EnvironmentBean {
     if (jndiName == null)
       return;
 
-    if (jndiName.startsWith("java:comp/env"))
-      jndiName = jndiName.substring(13);
-
     while (jndiName.startsWith("/"))
       jndiName = jndiName.substring(1);
 
     while (jndiName.endsWith("/"))
       jndiName = jndiName.substring(0, jndiName.length() - 1);
+
 
     _jndiName = jndiName;
   }
@@ -152,26 +156,24 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public String getJndiName()
   {
-    if (_jndiName != null)
-      return _jndiName;
-    else
-      return _ejbName;
+    return _jndiName;
   }
 
   /**
-   * Returns the server id, used by implementations of
+   * Returns the protocol id, used by implementations of
    * {@link com.caucho.ejb.protocol.ProtocolContainer} as the identity of the
    * home.  Always starts with a "/" but does not end with a "/".
    */
-  public String getServerId()
+  public String getProtocolId()
   {
     if (_serverId == null) {
       String serverId = getJndiName();
 
-      if (serverId == null) {
-	// XXX: should include jar, too
+      if (serverId == null)
 	serverId = getEJBName();
-      }
+
+      if (serverId.startsWith("java:comp/env"))
+        serverId = serverId.substring(13);
 
       if (! serverId.startsWith("/"))
         serverId = "/" + serverId;
@@ -441,7 +443,7 @@ abstract public class AbstractServer implements EnvironmentBean {
         _metaData.setSession(true);
       }
     }
-    
+
     return _metaData;
   }
 
@@ -452,7 +454,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     if (_homeHandle == null)
       _homeHandle = getHandleEncoder().createHomeHandle();
-    
+
     return _homeHandle;
   }
 
@@ -552,7 +554,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     return getContext(new Long(key));
   }
-  
+
   /**
    * Returns the context with the given key
    */
@@ -568,7 +570,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     return _ejbManager.getUserTransaction();
   }
   */
-  
+
   /**
    * Returns the currrent transaction context.
    *
@@ -578,7 +580,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   {
     return _ejbManager.getTransactionManager();
   }
-  
+
   /**
    * Returns the currrent transaction context.
    *
@@ -633,7 +635,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 
       try {
 	thread.setContextClassLoader(_loader);
-      
+
 	_initProgram.configure(instance);
       } finally {
 	thread.setContextClassLoader(oldLoader);
@@ -644,7 +646,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void init()
     throws Exception
   {
-    _loader.setId("EnvironmentLoader[ejb:" + getJndiName() + "]");
+    _loader.setId("EnvironmentLoader[ejb:" + getId() + "]");
   }
 
   public void start()

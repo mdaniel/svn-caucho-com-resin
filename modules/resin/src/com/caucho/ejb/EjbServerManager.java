@@ -57,7 +57,6 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 
 import javax.jms.ConnectionFactory;
-import javax.naming.NameNotFoundException;
 import javax.sql.DataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -672,15 +671,9 @@ public class EjbServerManager
    *
    * @param path the archive-path or expand-path of a module
    */
-  public String getJndiName(Path path, String ejbName)
-    throws NameNotFoundException
+  public AbstractServer getServer(Path path, String ejbName)
   {
-    AbstractServer server = _envServerManager.getServer(path, ejbName);
-
-    if (server == null)
-      throw new NameNotFoundException(ejbName);
-
-    return server.getJndiName();
+    return _envServerManager.getServer(path, ejbName);
   }
 
   public AmberEntityHome getAmberEntityHome(String name)
@@ -819,7 +812,7 @@ public class EjbServerManager
   static class ServerCmp implements Comparator<AbstractServer> {
     public int compare(AbstractServer a, AbstractServer b)
     {
-      return a.getJndiName().compareTo(b.getJndiName());
+      return a.getEJBName().compareTo(b.getEJBName());
     }
   }
 }

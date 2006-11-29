@@ -44,7 +44,7 @@ abstract public class EntityLocal extends EntityObject
    */
   public Object writeReplace() throws ObjectStreamException
   {
-    String serverId = _caucho_getEntityServer().getServerId();
+    String serverId = _caucho_getEntityServer().getProtocolId();
     Object key = getPrimaryKey();
     return new LocalSkeletonWrapper(serverId, key);
   }

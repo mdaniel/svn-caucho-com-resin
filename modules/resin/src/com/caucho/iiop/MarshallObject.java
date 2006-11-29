@@ -328,7 +328,7 @@ public class MarshallObject {
         AbstractServer server = absObj.__caucho_getServer();
 	String local = absObj.__caucho_getId();
 
-	String url = server.getServerId() + "?" + local;
+	String url = server.getProtocolId() + "?" + local;
 	String typeName = "RMI:" + objClass.getName() + ":0";
 
 	IOR ior = new IOR(typeName, writer.getHost(), writer.getPort(), url);

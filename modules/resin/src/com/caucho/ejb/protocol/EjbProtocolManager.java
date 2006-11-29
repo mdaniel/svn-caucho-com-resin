@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 
 /**
@@ -206,48 +207,76 @@ public class EjbProtocolManager {
   public void addServer(AbstractServer server)
     throws NamingException
   {
-    _serverMap.put(server.getServerId(), server);
+    _serverMap.put(server.getProtocolId(), server);
 
     for (ProtocolContainer protocol : _protocolMap.values()) {
       protocol.addServer(server);
     }
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
 
     try {
       Thread.currentThread().setContextClassLoader(_loader);
+      String ejbName = server.getEJBName();
       String jndiName = server.getJndiName();
 
-      if (jndiName == null)
-	jndiName = server.getEJBName();
+      Object localHome = server.getEJBLocalHome();
+      String localJndiName = null;
 
-      Object home;
 
-      home = server.getEJBLocalHome();
+      // XXX: ejb/0g01
+      // if (localHome == null)
+      //   localHome = server.getClientObject();
 
-      if (home == null)
-	home = server.getClientObject();
+      if (localHome != null) {
 
-      if (home != null) {
-	if (jndiName.startsWith("java:comp"))
-	  Jndi.bindDeepShort(jndiName, home);
-	else if (_localJndiName != null)
-	  Jndi.bindDeepShort(_localJndiName + "/" + jndiName, home);
+        if (jndiName != null) {
+          if (jndiName.startsWith("java:comp"))
+            localJndiName = Jndi.getFullName(jndiName);
+          else if (_localJndiName != null)
+            localJndiName = Jndi.getFullName(_localJndiName + "/" + jndiName);
+          else
+            localJndiName = Jndi.getFullName(jndiName);
+        }
+        else if (_localJndiName != null)
+          localJndiName = Jndi.getFullName(_localJndiName + "/" + ejbName);
+
+        if (localJndiName != null) {
+          if (log.isLoggable(Level.FINER))
+            log.finer(L.l("binding local ejb home {0} to {1}", localHome, localJndiName));
+
+          Jndi.bindDeep(localJndiName, localHome);
+        }
       }
 
       try {
-	home = server.getEJBHome();
-	
-	if (home != null) {
-	  if (jndiName.startsWith("java:comp")) {
-	  }
-	  else if (_remoteJndiName != null)
-	    Jndi.bindDeepShort(_remoteJndiName + "/" + jndiName, home);
-	}
+        Object remoteHome = server.getEJBHome();
+        String remoteJndiName = null;
+
+        if (remoteHome != null) {
+
+          if (jndiName != null) {
+            if (jndiName.startsWith("java:comp"))
+              remoteJndiName = Jndi.getFullName(jndiName);
+            else if (_remoteJndiName != null)
+              remoteJndiName = Jndi.getFullName(_remoteJndiName + "/" + jndiName);
+            else
+              remoteJndiName = Jndi.getFullName(jndiName);
+          }
+          else if (_remoteJndiName != null)
+            remoteJndiName = Jndi.getFullName(_remoteJndiName + "/" + ejbName);
+
+          if (remoteJndiName != null && !remoteJndiName.equals(localJndiName)) {
+            if (log.isLoggable(Level.FINER))
+              log.finer(L.l("binding remote ejb home {0} to {1}", remoteHome, remoteJndiName));
+
+            Jndi.bindDeep(remoteJndiName, remoteHome);
+          }
+        }
       }
       catch (RemoteException ex) {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
     }
     finally {
@@ -280,10 +309,10 @@ public class EjbProtocolManager {
   /**
    * Returns the server specified by the serverId.
    */
-  public AbstractServer getServerByJndiName(String jndiName)
+  public AbstractServer getServerByServerId(String protocolId)
   {
     for (AbstractServer server : _serverMap.values()) {
-      if (jndiName.equals(server.getJndiName()))
+      if (protocolId.equals(server.getProtocolId()))
         return server;
     }
 
@@ -393,7 +422,7 @@ public class EjbProtocolManager {
     else if (_protocolContainer != null)
       return _protocolContainer.createHandleEncoder(server, primaryKeyClass);
     else
-      return new HandleEncoder(server, server.getServerId());
+      return new HandleEncoder(server, server.getProtocolId());
   }
 
   protected HandleEncoder createHandleEncoder(AbstractServer server,
@@ -403,7 +432,7 @@ public class EjbProtocolManager {
     if (_protocolContainer != null)
       return _protocolContainer.createHandleEncoder(server, primaryKeyClass);
     else
-      return new HandleEncoder(server, server.getServerId());
+      return new HandleEncoder(server, server.getProtocolId());
   }
 
   /**
