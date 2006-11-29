@@ -31,18 +31,17 @@ package com.caucho.quercus.lib.i18n;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 
@@ -51,15 +50,13 @@ import com.caucho.quercus.lib.RegexpModule;
 import com.caucho.quercus.lib.string.StringModule;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.VariableArguments;
+import com.caucho.quercus.annotation.Reference;
+import com.caucho.quercus.annotation.VariableArguments;
 
 import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
 
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
 

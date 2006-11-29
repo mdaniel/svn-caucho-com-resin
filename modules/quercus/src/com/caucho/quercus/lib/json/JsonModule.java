@@ -30,7 +30,6 @@
 package com.caucho.quercus.lib.json;
 
 import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
@@ -42,13 +41,10 @@ import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.ReturnNullAsFalse;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
 

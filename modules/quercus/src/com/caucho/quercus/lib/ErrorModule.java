@@ -54,7 +54,7 @@ import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.expr.*;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.vfs.*;
 

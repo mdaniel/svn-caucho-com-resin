@@ -30,29 +30,19 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.function.JavaMarshal;
 import com.caucho.quercus.function.Marshal;
-import com.caucho.quercus.module.Construct;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.function.*;
 import com.caucho.util.L10N;
-import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

@@ -31,7 +31,6 @@ package com.caucho.quercus.lib.db;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.Map;
 import java.util.HashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -45,8 +44,8 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.env.*;
 
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.ReturnNullAsFalse;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 
 import com.caucho.quercus.UnimplementedException;
 
@@ -161,10 +160,10 @@ public class PDO implements java.io.Closeable {
       DataSource ds = getDataSource(env, dsn);
 
       if (ds == null) {
-	env.warning(L.l("'{0}' is an unknown PDO data source.", dsn));
+        env.warning(L.l("'{0}' is an unknown PDO data source.", dsn));
       }
       else
-	_conn = ds.getConnection(_user, _password);
+        _conn = ds.getConnection(_user, _password);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -254,7 +253,7 @@ public class PDO implements java.io.Closeable {
         conn.close();
       }
       catch (SQLException e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -474,7 +473,7 @@ public class PDO implements java.io.Closeable {
    */
   @ReturnNullAsFalse
   public PDOStatement prepare(String statement,
-			      @Optional ArrayValue driverOptions)
+                              @Optional ArrayValue driverOptions)
   {
     if (_conn == null)
       return null;
@@ -484,7 +483,7 @@ public class PDO implements java.io.Closeable {
 
       PDOStatement pdoStatement = new PDOStatement(_env, _conn, statement, true, driverOptions);
       _lastPDOStatement = pdoStatement;
-      
+
       return pdoStatement;
     } catch (SQLException e) {
       _error.error(e);
@@ -762,7 +761,7 @@ public class PDO implements java.io.Closeable {
       return getResinDataSource(env, dsn);
     else {
       env.error(L.l("'{0}' is an unknown PDO data source.",
-		    dsn));
+                    dsn));
 
       return null;
     }
@@ -775,7 +774,7 @@ public class PDO implements java.io.Closeable {
     throws Exception
   {
     HashMap<String,String> attr = parseAttr(dsn, dsn.indexOf(':'));
-    
+
     String host = attr.get("host");
     String port = attr.get("port");
     String dbname = attr.get("dbname");
@@ -829,7 +828,7 @@ public class PDO implements java.io.Closeable {
   private DataSource getJndiDataSource(Env env, String dsn)
   {
     DataSource ds = null;
-    
+
     try {
       Context ic = new InitialContext();
 
@@ -840,7 +839,7 @@ public class PDO implements java.io.Closeable {
 
     if (ds == null)
       env.error(L.l("'{0}' is an unknown PDO JNDI data source.",
-		    dsn));
+                    dsn));
 
     return ds;
   }
@@ -848,28 +847,28 @@ public class PDO implements java.io.Closeable {
   private HashMap<String,String> parseAttr(String dsn, int i)
   {
     HashMap<String,String> attr = new HashMap<String,String>();
-    
+
     int length = dsn.length();
 
     for (; i < length; i++) {
       char ch = dsn.charAt(i);
-      
+
       if (! Character.isJavaIdentifierStart(ch))
-	continue;
+        continue;
 
       StringBuilder name = new StringBuilder();
       for (;
-	   i < length && Character.isJavaIdentifierPart((ch = dsn.charAt(i)));
-	   i++) {
-	name.append(ch);
+           i < length && Character.isJavaIdentifierPart((ch = dsn.charAt(i)));
+           i++) {
+        name.append(ch);
       }
-      
+
       for (; i < length && ((ch = dsn.charAt(i)) == ' ' || ch == '='); i++) {
       }
 
       StringBuilder value = new StringBuilder();
       for (; i < length && (ch = dsn.charAt(i)) != ' ' && ch != ';'; i++) {
-	value.append(ch);
+        value.append(ch);
       }
 
       attr.put(name.toString(), value.toString());

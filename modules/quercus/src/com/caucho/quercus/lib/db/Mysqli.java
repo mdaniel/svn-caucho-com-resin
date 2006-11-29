@@ -45,13 +45,12 @@ import com.caucho.util.L10N;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.ReturnNullAsFalse;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 
 /**
  * mysqli object oriented API facade

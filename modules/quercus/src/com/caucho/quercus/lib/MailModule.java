@@ -35,8 +35,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.activation.DataHandler;
-
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.Session;
@@ -49,12 +47,12 @@ import javax.mail.internet.MimeMessage;
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Env;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
 
 /**
  * PHP functions implemented from the mail module
@@ -69,11 +67,11 @@ public class MailModule extends AbstractQuercusModule {
    * Send mail using JavaMail.
    */
   public static boolean mail(Env env,
-			     String to,
-			     String subject,
-			     StringValue message,
-			     @Optional String additionalHeaders,
-			     @Optional String additionalParameters)
+                             String to,
+                             String subject,
+                             StringValue message,
+                             @Optional String additionalHeaders,
+                             @Optional String additionalParameters)
   {
     Transport smtp = null;
 
@@ -82,15 +80,15 @@ public class MailModule extends AbstractQuercusModule {
 
       StringValue host = env.getIni("SMTP");
       if (host != null && ! host.toString().equals(""))
-	props.put("mail.smtp.host", host.toString());
+        props.put("mail.smtp.host", host.toString());
 
       StringValue port = env.getIni("smtp_port");
       if (port != null && ! port.toString().equals(""))
-	props.put("mail.smtp.port", port.toString());
+        props.put("mail.smtp.port", port.toString());
 
       StringValue user = env.getIni("sendmail_from");
       if (user != null && ! user.toString().equals(""))
-	props.put("mail.from", user.toString());
+        props.put("mail.from", user.toString());
 
       Session mailSession = Session.getInstance(props, null);
       smtp = mailSession.getTransport("smtp");
@@ -104,24 +102,24 @@ public class MailModule extends AbstractQuercusModule {
       addrList = addRecipients(msg, Message.RecipientType.TO, to);
 
       if (additionalHeaders != null)
-	addHeaders(msg, additionalHeaders);
+        addHeaders(msg, additionalHeaders);
 
       msg.saveChanges();
 
       if (addrList.size() == 0)
-	throw new QuercusModuleException(L.l("mail has no recipients"));
+        throw new QuercusModuleException(L.l("mail has no recipients"));
 
       String username = env.getIniString("smtp_username");
       String password = env.getIniString("smtp_password");
 
       if (password != null && ! "".equals(password))
-	smtp.connect(username, password);
+        smtp.connect(username, password);
       else
-	smtp.connect();
+        smtp.connect();
 
       Address[] addr = new Address[addrList.size()];
       addrList.toArray(addr);
-      
+
       smtp.sendMessage(msg, addr);
 
       log.fine("quercus-mail: sent mail to " + to);
@@ -145,17 +143,17 @@ public class MailModule extends AbstractQuercusModule {
       return false;
     } finally {
       try {
-	if (smtp != null)
-	  smtp.close();
+        if (smtp != null)
+          smtp.close();
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
   }
 
   private static ArrayList<Address> addRecipients(MimeMessage msg,
-						  Message.RecipientType type,
-						  String to)
+                                                  Message.RecipientType type,
+                                                  String to)
     throws MessagingException
   {
     String []split = to.split("[ \t,<>]");
@@ -164,10 +162,10 @@ public class MailModule extends AbstractQuercusModule {
 
     for (int i = 0; i < split.length; i++) {
       if (split[i].indexOf('@') > 0) {
-	Address addr = new InternetAddress(split[i]);
-	
-	addresses.add(addr);
-	msg.addRecipient(type, addr);
+        Address addr = new InternetAddress(split[i]);
+
+        addresses.add(addr);
+        msg.addRecipient(type, addr);
       }
     }
 
@@ -184,35 +182,35 @@ public class MailModule extends AbstractQuercusModule {
       char ch;
 
       for (;
-	   i < len && Character.isWhitespace(headers.charAt(i));
-	   i++) {
+           i < len && Character.isWhitespace(headers.charAt(i));
+           i++) {
       }
 
       if (len <= i)
-	return;
+        return;
 
       StringBuilder name = new StringBuilder();
 
       for (;
-	   i < len && (! Character.isWhitespace(ch = headers.charAt(i)) &&
-		       ch != ':');
-	   i++) {
-	name.append((char) ch);
+           i < len && (! Character.isWhitespace(ch = headers.charAt(i)) &&
+                       ch != ':');
+           i++) {
+        name.append((char) ch);
       }
 
       for (;
-	   i < len && (Character.isWhitespace(ch = headers.charAt(i)) ||
-		       ch == ':');
-	   i++) {
+           i < len && (Character.isWhitespace(ch = headers.charAt(i)) ||
+                       ch == ':');
+           i++) {
       }
 
       StringBuilder value = new StringBuilder();
 
       for (;
-	   i < len && ((ch = headers.charAt(i)) != '\r' &&
-		       ch != '\n');
-	   i++) {
-	value.append((char) ch);
+           i < len && ((ch = headers.charAt(i)) != '\r' &&
+                       ch != '\n');
+           i++) {
+        value.append((char) ch);
       }
 
       msg.addHeader(name.toString(), value.toString());

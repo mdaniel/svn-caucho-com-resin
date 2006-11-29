@@ -29,9 +29,6 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,13 +37,11 @@ import java.io.Closeable;
 import java.sql.*;
 
 import com.caucho.quercus.*;
+import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.sql.UserConnection;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
-
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.ReturnNullAsFalse;
 
 /**
  * Represents a JDBC Connection value.
@@ -484,7 +479,7 @@ public abstract class JdbcConnectionResource implements Closeable {
   {
     if (! _connected) {
       throw _env.errorException(L.l("Connection is not properly initialized {0}\nDriver {1}",
-				    _url, _driver));
+                                    _url, _driver));
     }
 
     return this;
@@ -503,9 +498,9 @@ public abstract class JdbcConnectionResource implements Closeable {
 
     try {
       stmt = getConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                   ResultSet.CONCUR_READ_ONLY);
+                                             ResultSet.CONCUR_READ_ONLY);
       stmt.setEscapeProcessing(false); // php/1406
-      
+
       if (stmt.execute(sql)) {
         ResultSet rs = stmt.getResultSet();
         _rs = createResult(stmt, rs);

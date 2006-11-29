@@ -29,10 +29,12 @@
 package com.caucho.quercus.lib.zip;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
@@ -41,18 +43,11 @@ import com.caucho.quercus.lib.file.BinaryStream;
 import com.caucho.quercus.lib.file.FileModule;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.ReturnNullAsFalse;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
-import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * PHP Zip
@@ -73,7 +68,7 @@ public class ZipModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public ZipDirectory zip_open(Env env,
-                                String filename)
+                               String filename)
   {
     if (filename == null || filename == "")
       return null;
@@ -92,7 +87,7 @@ public class ZipModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public QuercusZipEntry zip_read(Env env,
-                        @NotNull ZipDirectory directory)
+                                  @NotNull ZipDirectory directory)
   {
     try {
       if (directory == null)
@@ -116,7 +111,7 @@ public class ZipModule extends AbstractQuercusModule {
    * @return false if zipEntry is null
    */
   public Value zip_entry_name(Env env,
-                                @NotNull QuercusZipEntry entry)
+                              @NotNull QuercusZipEntry entry)
   {
     if (entry == null)
       return BooleanValue.FALSE;
@@ -174,7 +169,7 @@ public class ZipModule extends AbstractQuercusModule {
    * @return true if successful, else false;
    */
   public boolean zip_entry_close(Env env,
-                              @NotNull QuercusZipEntry entry)
+                                 @NotNull QuercusZipEntry entry)
   {
     try {
       if (entry == null)

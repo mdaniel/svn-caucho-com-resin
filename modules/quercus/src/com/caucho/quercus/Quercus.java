@@ -50,7 +50,7 @@ import com.caucho.quercus.module.StaticFunction;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleInfo;
 import com.caucho.quercus.module.ModuleStartupListener;
-import com.caucho.quercus.module.ClassImplementation;
+import com.caucho.quercus.annotation.ClassImplementation;
 
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;

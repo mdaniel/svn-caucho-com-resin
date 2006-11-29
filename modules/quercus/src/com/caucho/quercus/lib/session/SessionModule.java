@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.lib.session;
 
-import java.io.IOException;
-
 import java.util.Map;
 import java.util.HashMap;
 
@@ -40,16 +38,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
-import com.caucho.util.Alarm;
 
 import com.caucho.java.WorkDir;
 
-import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.StaticFunction;
 import com.caucho.quercus.module.ModuleStartupListener;
 
 import com.caucho.quercus.env.Value;
@@ -64,7 +58,6 @@ import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.SessionArrayValue;
 import com.caucho.quercus.env.SessionCallback;
 
-import com.caucho.quercus.lib.UnserializeReader;
 import com.caucho.quercus.lib.OutputModule;
 
 /**

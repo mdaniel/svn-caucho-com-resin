@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.lib.gettext;
 
-import com.caucho.quercus.UnimplementedException;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BinaryValue;
@@ -44,9 +42,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.lib.string.StringModule;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.ReturnNullAsFalse;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -55,7 +51,6 @@ import com.caucho.vfs.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 

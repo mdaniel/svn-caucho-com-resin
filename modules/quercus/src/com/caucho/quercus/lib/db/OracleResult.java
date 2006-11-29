@@ -29,13 +29,6 @@
 
 package com.caucho.quercus.lib.db;
 
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.ReturnNullAsFalse;
-
 import com.caucho.util.L10N;
 
 import java.sql.ResultSet;

@@ -31,12 +31,12 @@ package com.caucho.quercus.lib.curl;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Callback;
-import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
@@ -45,21 +45,15 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.BinaryOutput;
-import com.caucho.quercus.lib.file.FileModule;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.ReturnNullAsFalse;
-import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.annotation.Reference;
 
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import java.io.IOException;
 import java.util.logging.Level;

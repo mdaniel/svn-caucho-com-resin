@@ -29,35 +29,23 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.StringWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.QuercusModuleException;
-
-import com.caucho.quercus.program.AbstractFunction;
-
 import com.caucho.quercus.lib.HttpModule;
-import com.caucho.quercus.lib.session.SessionModule;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.ModuleStartupListener;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;
@@ -69,9 +57,7 @@ import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Callback;
-import com.caucho.quercus.env.CallbackFunction;
 import com.caucho.quercus.env.OutputBuffer;
-import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.TempBufferStringValue;
 
 import com.caucho.vfs.TempStream;

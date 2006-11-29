@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.module;
+package com.caucho.quercus.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,9 +35,10 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The @NotNull annotation.
+ * The @This annotation marks a parameter as the Quercus "this" value.
+ * The @This must be the first value after the optional Env.
  */
 @Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface NotNull {
+public @interface This {
 }

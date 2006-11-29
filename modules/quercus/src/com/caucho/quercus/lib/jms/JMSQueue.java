@@ -38,8 +38,6 @@ import java.util.logging.Logger;
 import javax.jms.*;
 import javax.naming.*;
 
-import com.caucho.util.L10N;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.JavaValue;
@@ -49,17 +47,13 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.ResourceValue;
 
 import com.caucho.quercus.program.JavaClassDef;
 
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.Optional;
 
 /**
  * JMS functions
@@ -99,7 +93,7 @@ public class JMSQueue {
   {
     JMSQueue queue = JMSModule.message_get_queue(env, queueName, null);
 
-    return new JavaValue(env, queue, 
+    return new JavaValue(env, queue,
                          env.getJavaClassDefinition(JMSQueue.class.getName()));
   }
 
@@ -122,7 +116,7 @@ public class JMSQueue {
           ((MapMessage) message).setBytes(entry.getKey().toString(), bytes);
         } else {
           // every primitive except for bytes can be translated from a string
-          ((MapMessage) message).setString(entry.getKey().toString(), 
+          ((MapMessage) message).setString(entry.getKey().toString(),
                                            entry.getValue().toString());
         }
       }
@@ -182,7 +176,7 @@ public class JMSQueue {
     } else if (message instanceof BytesMessage) {
       BytesMessage bytesMessage = (BytesMessage) message;
 
-      BinaryBuilderValue bb = 
+      BinaryBuilderValue bb =
         new BinaryBuilderValue((int) bytesMessage.getBodyLength());
 
       bytesMessage.readBytes(bb.getBuffer());
@@ -219,7 +213,7 @@ public class JMSQueue {
 
   private static Value objectToValue(Object object, Env env)
   {
-    JavaClassDef def = 
+    JavaClassDef def =
       env.getQuercus().getJavaClassDefinition(object.getClass().getName());
 
     if (object instanceof Long) {

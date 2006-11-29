@@ -29,28 +29,8 @@
 
 package com.caucho.quercus.lib;
 
-import java.sql.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-
-import com.caucho.quercus.lib.db.JdbcConnectionResource;
-import com.caucho.quercus.lib.db.JdbcResultResource;
-
-import com.caucho.quercus.QuercusRuntimeException;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.JavaValue;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.module.Optional;
 
 /**
  * Java object facade.
@@ -60,15 +40,15 @@ public class Java {
    * Create a new Java API object.
    */
   public static Object __construct(Env env,
-				   String className, Object []args)
+                                   String className, Object []args)
   {
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
+
       Class cl = Class.forName(className, false, loader);
 
       try {
-	return cl.newInstance();
+        return cl.newInstance();
       } catch (Throwable e) {
       }
 

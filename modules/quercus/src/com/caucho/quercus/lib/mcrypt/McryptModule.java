@@ -37,7 +37,7 @@ import com.caucho.util.RandomUtil;
 import com.caucho.vfs.Path;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.BooleanValue;

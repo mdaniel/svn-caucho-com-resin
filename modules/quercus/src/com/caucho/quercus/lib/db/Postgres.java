@@ -49,7 +49,7 @@ import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.Optional;
 
 /**
  * postgres connection class (postgres has NO object oriented API)

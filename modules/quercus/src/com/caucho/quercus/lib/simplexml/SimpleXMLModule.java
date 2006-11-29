@@ -30,8 +30,8 @@ package com.caucho.quercus.lib.simplexml;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.lib.simplexml.SimpleXMLElement;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;

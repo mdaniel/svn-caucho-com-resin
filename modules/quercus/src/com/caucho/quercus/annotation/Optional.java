@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.module;
+package com.caucho.quercus.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,15 +35,10 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * The @ClassImplementation annotation annotates a class as
- * implementing methods for a Quercus object.
- *
- * The object will be an ObjectValue, not a JavaValue.
- *
- * Most of the methods will have a @This annotation on the first argument
- * to handle the Quercus object.
+ * The @Optional annotation.
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ClassImplementation {
+public @interface Optional {
+  public String value() default "";
 }

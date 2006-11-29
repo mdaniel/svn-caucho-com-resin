@@ -47,11 +47,11 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.ReturnNullAsFalse;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 
 import com.caucho.quercus.env.*;
 

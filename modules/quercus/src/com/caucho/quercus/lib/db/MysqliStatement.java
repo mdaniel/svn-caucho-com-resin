@@ -37,9 +37,9 @@ import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.annotation.Reference;
 
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.ReturnNullAsFalse;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 
 import com.caucho.util.L10N;
 

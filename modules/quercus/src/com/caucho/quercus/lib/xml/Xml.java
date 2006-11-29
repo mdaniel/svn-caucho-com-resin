@@ -30,8 +30,8 @@
 package com.caucho.quercus.lib.xml;
 
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.Reference;
 import com.caucho.util.L10N;
 
 import org.xml.sax.Attributes;

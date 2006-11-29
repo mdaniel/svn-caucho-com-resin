@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.lib.i18n;
 
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +37,6 @@ import java.util.logging.Logger;
 import java.util.Enumeration;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.HeaderTokenizer;
 import javax.mail.Header;
 import javax.mail.internet.InternetHeaders;
 
@@ -47,22 +44,16 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.UnicodeValue;
-import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.annotation.Optional;
 
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
 
 import com.caucho.util.L10N;

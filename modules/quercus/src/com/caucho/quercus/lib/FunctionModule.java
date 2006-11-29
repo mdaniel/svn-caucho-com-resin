@@ -37,9 +37,9 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.annotation.VariableArguments;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.VariableArguments;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;

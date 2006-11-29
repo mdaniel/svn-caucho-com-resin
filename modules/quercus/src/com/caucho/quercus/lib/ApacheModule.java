@@ -29,13 +29,10 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.IOException;
-
 import java.util.Enumeration;
 
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import com.caucho.util.L10N;
@@ -45,7 +42,7 @@ import com.caucho.server.connection.CauchoResponse;
 import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Env;

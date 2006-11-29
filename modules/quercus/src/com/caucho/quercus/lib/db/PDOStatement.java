@@ -47,9 +47,9 @@ import com.caucho.util.IntMap;
 
 import com.caucho.quercus.env.*;
 
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.ReadOnly;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.Reference;
+import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.lib.db.PDO;
 import com.caucho.quercus.lib.db.PDOError;
 import com.caucho.quercus.UnimplementedException;

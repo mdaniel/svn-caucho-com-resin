@@ -34,11 +34,6 @@ import java.io.*;
 import java.util.*;
 
 import javax.transaction.UserTransaction;
-import javax.transaction.SystemException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.RollbackException;
 
 import javax.management.*;
 
@@ -51,6 +46,7 @@ import com.caucho.Version;
 import com.caucho.naming.Jndi;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.NotNull;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
@@ -62,9 +58,8 @@ import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BooleanValue;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.ReadOnly;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReadOnly;
 
 import com.caucho.util.L10N;
 

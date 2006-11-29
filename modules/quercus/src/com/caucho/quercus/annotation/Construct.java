@@ -27,7 +27,7 @@
  * @author Charles Reich
  */
 
-package com.caucho.quercus.module;
+package com.caucho.quercus.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -31,13 +31,13 @@ package com.caucho.quercus.lib.zlib;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.NotNull;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
@@ -51,17 +51,13 @@ import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import com.caucho.quercus.lib.file.FileValue;
-import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.string.StringModule;
 
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.ReturnNullAsFalse;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 
-import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 
 /**

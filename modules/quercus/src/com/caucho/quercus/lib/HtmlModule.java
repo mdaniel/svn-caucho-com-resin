@@ -36,7 +36,7 @@ import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.Optional;
 import com.caucho.util.L10N;
 
 import java.util.HashMap;

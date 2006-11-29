@@ -30,7 +30,7 @@
 package com.caucho.quercus.lib.dom;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.Optional;
 
 import org.w3c.dom.ProcessingInstruction;
 

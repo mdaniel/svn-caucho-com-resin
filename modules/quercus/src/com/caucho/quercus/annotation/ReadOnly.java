@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2005 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,30 +19,25 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
+package com.caucho.quercus.annotation;
 
-package com.caucho.quercus.module;
-
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
 
 /**
- * Mark a method such that if execution of the method returns null,
- * the value returned to the Quercus caller is instead
- * {@link com.caucho.quercus.env.BooleanValue.FALSE}.
- *
- * Note that the return value is not modified if
- * the method returns {@link com.caucho.quercus.env.NullValue.NULL}.
+ * The @ReadOnly annotation marks the argument as unmodified..
  */
-@Target({ElementType.METHOD})
+@Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ReturnNullAsFalse {
+public @interface ReadOnly {
 }

@@ -30,14 +30,13 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReadOnly;
+import com.caucho.quercus.annotation.Reference;
 
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.ReadOnly;
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.UsesSymbolTable;
-import com.caucho.quercus.lib.file.*;
+import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.WriteStream;

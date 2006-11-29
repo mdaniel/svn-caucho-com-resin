@@ -36,14 +36,13 @@ import java.util.Map;
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.ReadOnly;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.ReadOnly;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.quercus.env.*;
 
 import com.caucho.quercus.expr.Expr;
 
-import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.AbstractFunction;
 
 /**
@@ -58,8 +57,8 @@ public class ClassesModule extends AbstractQuercusModule {
    * Returns true if the class exists.
    */
   public boolean class_exists(Env env,
-			      String className,
-			      @Optional("true") boolean useAutoload)
+                              String className,
+                              @Optional("true") boolean useAutoload)
   {
     return env.findClass(className, useAutoload) != null;
   }
@@ -191,7 +190,7 @@ public class ClassesModule extends AbstractQuercusModule {
       String parent = obj.getParentName();
 
       if (parent != null)
-	return new StringValueImpl(parent);
+        return new StringValueImpl(parent);
     }
     else if (value instanceof StringValue) {
       String className = value.toString();
@@ -199,10 +198,10 @@ public class ClassesModule extends AbstractQuercusModule {
       QuercusClass cl = env.findClass(className);
 
       if (cl != null) {
-	String parent = cl.getParentName();
+        String parent = cl.getParentName();
 
-	if (parent != null)
-	  return new StringValueImpl(parent);
+        if (parent != null)
+          return new StringValueImpl(parent);
       }
     }
 
@@ -229,8 +228,8 @@ public class ClassesModule extends AbstractQuercusModule {
    * Returns true if the object implements the given class.
    */
   public static boolean is_subclass_of(Env env,
-				       @ReadOnly Value value,
-				       String name)
+                                       @ReadOnly Value value,
+                                       String name)
   {
     QuercusClass cl;
 

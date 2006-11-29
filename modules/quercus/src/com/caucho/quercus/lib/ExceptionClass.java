@@ -30,8 +30,10 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.annotation.ClassImplementation;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.module.*;
 
 /**
  * Exception object facade.
@@ -42,9 +44,9 @@ public class ExceptionClass {
    * Create a new exception API object.
    */
   public static Value __construct(Env env,
-			          @This ObjectValue value,
-				  @Optional StringValue message,
-				  @Optional("0") int code)
+                                  @This ObjectValue value,
+                                  @Optional StringValue message,
+                                  @Optional("0") int code)
   {
     value.putField(env, "message", message);
     value.putField(env, "code", LongValue.create(code));
@@ -52,15 +54,15 @@ public class ExceptionClass {
     Location location = env.getLocation();
     if (location != null) {
       if (location.getFileName() != null)
-	value.putField(env, "file", new StringValueImpl(location.getFileName()));
+        value.putField(env, "file", new StringValueImpl(location.getFileName()));
       else
-	value.putField(env, "file", new StringValueImpl("unknown"));
-      
+        value.putField(env, "file", new StringValueImpl("unknown"));
+
       value.putField(env, "line", new LongValue(location.getLineNumber()));
     }
 
     value.putField(env, "trace", ErrorModule.debug_backtrace(env));
-    
+
     return value;
   }
 

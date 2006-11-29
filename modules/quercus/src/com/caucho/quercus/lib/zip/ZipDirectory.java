@@ -28,24 +28,13 @@
 
 package com.caucho.quercus.lib.zip;
 
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.TempBufferStringValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
 
-import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
 import java.io.InputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
 /**

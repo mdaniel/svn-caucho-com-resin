@@ -29,23 +29,16 @@
 
 package com.caucho.quercus.lib;
 
-import java.sql.*;
-
 import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.IdentityHashMap;
 
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.module.Optional;
-import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.annotation.Optional;
 
 /**
  * memcache object oriented API facade

@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.Reader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,22 +41,17 @@ import java.net.Socket;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
 import java.util.LinkedHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.URLUtil;
 
-import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.Optional;
 
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.file.BinaryInput;
@@ -65,11 +59,9 @@ import com.caucho.quercus.lib.file.BinaryStream;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.ObjectValue;
@@ -80,7 +72,7 @@ import com.caucho.quercus.env.BooleanValue;
  */
 public class UrlModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(UrlModule.class);
-  private static final Logger log 
+  private static final Logger log
     = Logger.getLogger(UrlModule.class.getName());
 
   /**
@@ -98,16 +90,16 @@ public class UrlModule extends AbstractQuercusModule {
 
     try {
       while ((len = is.read(buffer, offset, buffer.length)) >= 0) {
-	int tail = len % 3;
-	
-	Base64.encode(cb, buffer, 0, len - tail);
+        int tail = len % 3;
 
-	System.arraycopy(buffer, len - tail, buffer, 0, tail);
-	offset = tail;
+        Base64.encode(cb, buffer, 0, len - tail);
+
+        System.arraycopy(buffer, len - tail, buffer, 0, tail);
+        offset = tail;
       }
 
       if (offset > 0)
-	Base64.encode(cb, buffer, 0, offset);
+        Base64.encode(cb, buffer, 0, offset);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -129,7 +121,7 @@ public class UrlModule extends AbstractQuercusModule {
    * Creates a http string.
    */
   public String http_build_query(Value value,
-				 @Optional String prefix)
+                                 @Optional String prefix)
   {
     StringBuilder sb = new StringBuilder();
 
@@ -138,26 +130,26 @@ public class UrlModule extends AbstractQuercusModule {
       ArrayValue array = (ArrayValue) value;
 
       for (Map.Entry<Value,Value> entry : array.entrySet()) {
-	Value keyValue = entry.getKey();
-	Value v = entry.getValue();
+        Value keyValue = entry.getKey();
+        Value v = entry.getValue();
 
-	String key;
+        String key;
 
-	if (keyValue.isLongConvertible())
-	  key = prefix + keyValue;
-	else
-	  key = keyValue.toString();
+        if (keyValue.isLongConvertible())
+          key = prefix + keyValue;
+        else
+          key = keyValue.toString();
 
-	if (v instanceof ArrayValue)
-	  http_build_query(sb, key, (ArrayValue) v);
-	else {
-	  if (sb.length() > 0)
-	    sb.append('&');
+        if (v instanceof ArrayValue)
+          http_build_query(sb, key, (ArrayValue) v);
+        else {
+          if (sb.length() > 0)
+            sb.append('&');
 
-	  sb.append(key);
-	  sb.append('=');
-	  urlencode(sb, v.toString());
-	}
+          sb.append(key);
+          sb.append('=');
+          urlencode(sb, v.toString());
+        }
       }
     }
 
@@ -168,8 +160,8 @@ public class UrlModule extends AbstractQuercusModule {
    * Creates a http string.
    */
   private void http_build_query(StringBuilder sb,
-				String prefix,
-				ArrayValue array)
+                                String prefix,
+                                ArrayValue array)
   {
     for (Map.Entry<Value,Value> entry : array.entrySet()) {
       Value keyValue = entry.getKey();
@@ -178,14 +170,14 @@ public class UrlModule extends AbstractQuercusModule {
       String key = prefix + '[' + keyValue + ']';
 
       if (v instanceof ArrayValue)
-	http_build_query(sb, key, (ArrayValue) v);
+        http_build_query(sb, key, (ArrayValue) v);
       else {
-	if (sb.length() > 0)
-	  sb.append('&');
+        if (sb.length() > 0)
+          sb.append('&');
 
-	sb.append(key);
-	sb.append('=');
-	urlencode(sb, v.toString());
+        sb.append(key);
+        sb.append('=');
+        urlencode(sb, v.toString());
       }
     }
   }
@@ -213,19 +205,19 @@ public class UrlModule extends AbstractQuercusModule {
       char ch = str.charAt(i);
 
       if ('a' <= ch && ch <= 'z')
-	sb.append(ch);
+        sb.append(ch);
       else if ('A' <= ch && ch <= 'Z')
-	sb.append(ch);
+        sb.append(ch);
       else if ('0' <= ch && ch <= '9')
-	sb.append(ch);
+        sb.append(ch);
       else if (ch == '-' || ch == '_' || ch == '.')
-	sb.append(ch);
+        sb.append(ch);
       else if (ch == ' ')
-	sb.append('+');
+        sb.append('+');
       else {
-	sb.append('%');
-	sb.append(toHexDigit(ch / 16));
-	sb.append(toHexDigit(ch));
+        sb.append('%');
+        sb.append(toHexDigit(ch / 16));
+        sb.append(toHexDigit(ch));
       }
     }
   }
@@ -273,7 +265,7 @@ public class UrlModule extends AbstractQuercusModule {
         sb.append((char) v);
       }
       else if (ch == '+')
-	sb.append(' ');
+        sb.append(' ');
       else
         sb.append(ch);
     }
@@ -381,166 +373,166 @@ public class UrlModule extends AbstractQuercusModule {
 
       switch (ch) {
       case ':':
-	if (state == ParseUrlState.INIT) {
-	  value.put("scheme", sb.toString());
-	  sb.clear();
+        if (state == ParseUrlState.INIT) {
+          value.put("scheme", sb.toString());
+          sb.clear();
 
-	  if (length <= i + 1 || str.charAt(i + 1) != '/') {
-	    state = ParseUrlState.PATH;
-	  }
-	  else if (length <= i + 2 || str.charAt(i + 2) != '/') {
-	    state = ParseUrlState.PATH;
-	  }
-	  else if (length <= i + 3 || str.charAt(i + 3) != '/') {
-	    i += 2;
-	    state = ParseUrlState.USER;
-	  }
-	  else {
-	    // file:///foo
+          if (length <= i + 1 || str.charAt(i + 1) != '/') {
+            state = ParseUrlState.PATH;
+          }
+          else if (length <= i + 2 || str.charAt(i + 2) != '/') {
+            state = ParseUrlState.PATH;
+          }
+          else if (length <= i + 3 || str.charAt(i + 3) != '/') {
+            i += 2;
+            state = ParseUrlState.USER;
+          }
+          else {
+            // file:///foo
 
-	    i += 2;
-	    state = ParseUrlState.PATH;
-	  }
-	}
-	else if (state == ParseUrlState.USER) {
-	  user = sb.toString();
-	  sb.clear();
-	  state = ParseUrlState.PASS;
-	}
-	else if (state == ParseUrlState.HOST) {
-	  value.put("host", sb.toString());
-	  sb.clear();
-	  state = ParseUrlState.PORT;
-	}
-	else
-	  sb.append(ch);
-	break;
+            i += 2;
+            state = ParseUrlState.PATH;
+          }
+        }
+        else if (state == ParseUrlState.USER) {
+          user = sb.toString();
+          sb.clear();
+          state = ParseUrlState.PASS;
+        }
+        else if (state == ParseUrlState.HOST) {
+          value.put("host", sb.toString());
+          sb.clear();
+          state = ParseUrlState.PORT;
+        }
+        else
+          sb.append(ch);
+        break;
 
       case '@':
-	if (state == ParseUrlState.USER) {
-	  value.put("user", sb.toString());
-	  sb.clear();
-	  state = ParseUrlState.HOST;
-	}
-	else if (state == ParseUrlState.PASS) {
-	  value.put("user", user);
-	  value.put("pass", sb.toString());
-	  sb.clear();
-	  state = ParseUrlState.HOST;
-	}
-	else
-	  sb.append(ch);
-	break;
+        if (state == ParseUrlState.USER) {
+          value.put("user", sb.toString());
+          sb.clear();
+          state = ParseUrlState.HOST;
+        }
+        else if (state == ParseUrlState.PASS) {
+          value.put("user", user);
+          value.put("pass", sb.toString());
+          sb.clear();
+          state = ParseUrlState.HOST;
+        }
+        else
+          sb.append(ch);
+        break;
 
       case '/':
-	if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
-	  value.put("host", sb.toString());
-	  sb.clear();
-	  state = ParseUrlState.PATH;
-	  sb.append(ch);
-	}
-	else if (state == ParseUrlState.PASS) {
-	  value.put("host", user);
-	  value.put(new StringValueImpl("port"),
-		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
-	  sb.clear();
-	  state = ParseUrlState.PATH;
-	  sb.append(ch);
-	}
-	else if (state == ParseUrlState.PORT) {
-	  value.put(new StringValueImpl("port"),
-		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
-	  sb.clear();
-	  state = ParseUrlState.PATH;
-	  sb.append(ch);
-	}
-	else
-	  sb.append(ch);
-	break;
+        if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
+          value.put("host", sb.toString());
+          sb.clear();
+          state = ParseUrlState.PATH;
+          sb.append(ch);
+        }
+        else if (state == ParseUrlState.PASS) {
+          value.put("host", user);
+          value.put(new StringValueImpl("port"),
+                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          sb.clear();
+          state = ParseUrlState.PATH;
+          sb.append(ch);
+        }
+        else if (state == ParseUrlState.PORT) {
+          value.put(new StringValueImpl("port"),
+                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          sb.clear();
+          state = ParseUrlState.PATH;
+          sb.append(ch);
+        }
+        else
+          sb.append(ch);
+        break;
 
       case '?':
-	if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
-	  value.put("host", sb.toString());
-	  sb.clear();
-	  state = ParseUrlState.QUERY;
-	}
-	else if (state == ParseUrlState.PASS) {
-	  value.put("host", user);
-	  value.put(new StringValueImpl("port"),
-		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
-	  sb.clear();
-	  state = ParseUrlState.QUERY;
-	}
-	else if (state == ParseUrlState.PORT) {
-	  value.put(new StringValueImpl("port"),
-		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
-	  sb.clear();
-	  state = ParseUrlState.QUERY;
-	}
-	else if (state == ParseUrlState.PATH) {
-	  if (sb.length() > 0)
-	    value.put("path", sb.toString());
-	  sb.clear();
-	  state = ParseUrlState.QUERY;
-	}
-	else
-	  sb.append(ch);
-	break;
+        if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
+          value.put("host", sb.toString());
+          sb.clear();
+          state = ParseUrlState.QUERY;
+        }
+        else if (state == ParseUrlState.PASS) {
+          value.put("host", user);
+          value.put(new StringValueImpl("port"),
+                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          sb.clear();
+          state = ParseUrlState.QUERY;
+        }
+        else if (state == ParseUrlState.PORT) {
+          value.put(new StringValueImpl("port"),
+                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          sb.clear();
+          state = ParseUrlState.QUERY;
+        }
+        else if (state == ParseUrlState.PATH) {
+          if (sb.length() > 0)
+            value.put("path", sb.toString());
+          sb.clear();
+          state = ParseUrlState.QUERY;
+        }
+        else
+          sb.append(ch);
+        break;
 
       case '#':
-	if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
-	  value.put("host", sb.toString());
-	  sb.clear();
-	  state = ParseUrlState.FRAGMENT;
-	}
-	else if (state == ParseUrlState.PASS) {
-	  value.put("host", user);
-	  value.put(new StringValueImpl("port"),
-		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
-	  sb.clear();
-	  state = ParseUrlState.FRAGMENT;
-	}
-	else if (state == ParseUrlState.PORT) {
-	  value.put(new StringValueImpl("port"),
-		    new LongValue(new StringValueImpl(sb.toString()).toLong()));
-	  sb.clear();
-	  state = ParseUrlState.FRAGMENT;
-	}
-	else if (state == ParseUrlState.PATH) {
-	  if (sb.length() > 0)
-	    value.put("path", sb.toString());
-	  sb.clear();
-	  state = ParseUrlState.FRAGMENT;
-	}
-	else if (state == ParseUrlState.QUERY) {
-	  if (sb.length() > 0)
-	    value.put("query", sb.toString());
-	  sb.clear();
-	  state = ParseUrlState.FRAGMENT;
-	}
-	else
-	  sb.append(ch);
-	break;
+        if (state == ParseUrlState.USER || state == ParseUrlState.HOST) {
+          value.put("host", sb.toString());
+          sb.clear();
+          state = ParseUrlState.FRAGMENT;
+        }
+        else if (state == ParseUrlState.PASS) {
+          value.put("host", user);
+          value.put(new StringValueImpl("port"),
+                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          sb.clear();
+          state = ParseUrlState.FRAGMENT;
+        }
+        else if (state == ParseUrlState.PORT) {
+          value.put(new StringValueImpl("port"),
+                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          sb.clear();
+          state = ParseUrlState.FRAGMENT;
+        }
+        else if (state == ParseUrlState.PATH) {
+          if (sb.length() > 0)
+            value.put("path", sb.toString());
+          sb.clear();
+          state = ParseUrlState.FRAGMENT;
+        }
+        else if (state == ParseUrlState.QUERY) {
+          if (sb.length() > 0)
+            value.put("query", sb.toString());
+          sb.clear();
+          state = ParseUrlState.FRAGMENT;
+        }
+        else
+          sb.append(ch);
+        break;
 
       default:
-	sb.append((char) ch);
-	break;
+        sb.append((char) ch);
+        break;
       }
     }
 
     if (sb.length() == 0) {
     }
     else if (state == ParseUrlState.USER ||
-	     state == ParseUrlState.HOST)
+             state == ParseUrlState.HOST)
       value.put("host", sb.toString());
     else if (state == ParseUrlState.PASS) {
       value.put("host", user);
       value.put(new StringValueImpl("port"),
-		new LongValue(new StringValueImpl(sb.toString()).toLong()));
+                new LongValue(new StringValueImpl(sb.toString()).toLong()));
     }
     else if (state == ParseUrlState.PORT) {
       value.put(new StringValueImpl("port"),
-		new LongValue(new StringValueImpl(sb.toString()).toLong()));
+                new LongValue(new StringValueImpl(sb.toString()).toLong()));
     }
     else if (state == ParseUrlState.QUERY)
       value.put("query", sb.toString());
@@ -552,21 +544,21 @@ public class UrlModule extends AbstractQuercusModule {
     return value;
   }
 
-  public static Value http_build_query(Env env, Value formdata, 
+  public static Value http_build_query(Env env, Value formdata,
                                        @Optional String numeric_prefix)
   {
-    String result = 
+    String result =
       httpBuildQueryImpl(env, "", formdata, numeric_prefix).toString();
 
     return new StringValueImpl(result);
   }
 
-  public static StringBuilder httpBuildQueryImpl(Env env, String path, 
-                                                 Value formdata, 
+  public static StringBuilder httpBuildQueryImpl(Env env, String path,
+                                                 Value formdata,
                                                  String numeric_prefix)
   {
     StringBuilder result = new StringBuilder();
-    
+
     Set<Map.Entry<Value,Value>> entrySet;
 
     if (formdata.isArray())
@@ -584,7 +576,7 @@ public class UrlModule extends AbstractQuercusModule {
     } else {
       env.warning(L.l("formdata must be an array or object"));
 
-      return result; 
+      return result;
     }
 
     for (Map.Entry<Value,Value> entry : entrySet) {
@@ -602,13 +594,13 @@ public class UrlModule extends AbstractQuercusModule {
     }
 
     // trim any trailing &'s
-    if (result.length() > 0) 
+    if (result.length() > 0)
       result.deleteCharAt(result.length() - 1);
 
     return result;
   }
 
-  private static String makeNewPath(String oldPath, Value key, 
+  private static String makeNewPath(String oldPath, Value key,
                                     String numeric_prefix)
   {
     if (oldPath.length() == 0) {
@@ -624,15 +616,15 @@ public class UrlModule extends AbstractQuercusModule {
    * Connects to the given URL using a HEAD request to retreive
    * the headers sent in the response.
    */
-  public static Value get_headers(Env env, String urlString, 
+  public static Value get_headers(Env env, String urlString,
                                   @Optional Value format)
   {
     Socket socket = null;
-    
+
     try {
       URL url = new URL(urlString);
 
-      if (! url.getProtocol().equals("http") && 
+      if (! url.getProtocol().equals("http") &&
           ! url.getProtocol().equals("https")) {
         env.warning(L.l("Not an HTTP URL"));
         return null;
@@ -650,7 +642,7 @@ public class UrlModule extends AbstractQuercusModule {
       }
 
       socket = new Socket(url.getHost(), port);
-      
+
       OutputStream out = socket.getOutputStream();
       InputStream in = socket.getInputStream();
 
@@ -661,7 +653,7 @@ public class UrlModule extends AbstractQuercusModule {
       if (url.getPath() != null)
         request.append(url.getPath());
 
-      if (url.getQuery() != null) 
+      if (url.getQuery() != null)
         request.append("?" + url.getQuery());
 
       if (url.getRef() != null)
@@ -683,11 +675,11 @@ public class UrlModule extends AbstractQuercusModule {
       ArrayValue result = new ArrayValueImpl();
 
       if (format.toBoolean()) {
-        for (String line = reader.readLine(); 
-             line != null; 
+        for (String line = reader.readLine();
+             line != null;
              line = reader.readLine()) {
           line = line.trim();
-          
+
           if (line.length() == 0)
             continue;
 
@@ -698,7 +690,7 @@ public class UrlModule extends AbstractQuercusModule {
           if (colon < 0)
             result.put(new StringValueImpl(line.trim()));
           else {
-            StringValueImpl key = 
+            StringValueImpl key =
               new StringValueImpl(line.substring(0, colon).trim());
 
             StringValueImpl value;
@@ -729,13 +721,13 @@ public class UrlModule extends AbstractQuercusModule {
             result.put(key, ((ArrayValue)value).get(LongValue.ZERO));
         }
       } else {
-        for (String line = reader.readLine(); 
-            line != null; 
-            line = reader.readLine()) {
+        for (String line = reader.readLine();
+             line != null;
+             line = reader.readLine()) {
           line = line.trim();
 
           if (line.length() == 0)
-            continue; 
+            continue;
 
           result.put(new StringValueImpl(line.trim()));
         }
@@ -759,7 +751,7 @@ public class UrlModule extends AbstractQuercusModule {
   /**
    * Extracts the meta tags from a file and returns them as an array.
    */
-  public static Value get_meta_tags(Env env, String filename, 
+  public static Value get_meta_tags(Env env, String filename,
                                     @Optional("false") boolean use_include_path)
   {
     InputStream in = null;
@@ -767,7 +759,7 @@ public class UrlModule extends AbstractQuercusModule {
     ArrayValue result = new ArrayValueImpl();
 
     try {
-      BinaryStream stream = 
+      BinaryStream stream =
         FileModule.fopen(env, filename, "r", use_include_path, null);
 
       if (stream == null || ! (stream instanceof BinaryInput))
@@ -794,7 +786,7 @@ public class UrlModule extends AbstractQuercusModule {
             }
 
             if (name != null && content != null) {
-              result.put(new StringValueImpl(name), 
+              result.put(new StringValueImpl(name),
                          new StringValueImpl(content));
               break;
             }
@@ -866,7 +858,7 @@ public class UrlModule extends AbstractQuercusModule {
 
     if (input.isEOF())
       return new String[] { attribute.toString() };
-    
+
     ch = input.read();
     if (ch != '=') {
       input.unread();
@@ -888,14 +880,14 @@ public class UrlModule extends AbstractQuercusModule {
     if (ch == '"' || ch == '\'') {
       quoted = true;
       quote = ch;
-    } else 
+    } else
       input.unread();
 
     StringBuilder value = new StringBuilder();
 
     while (! input.isEOF()) {
       ch = input.read();
-  
+
       // mimics PHP behavior
       if ((quoted && ch == quote) ||
           (! quoted && Character.isWhitespace(ch)) || ch == '>')
@@ -920,8 +912,8 @@ public class UrlModule extends AbstractQuercusModule {
 
   private static boolean isValidAttributeCharacter(int ch)
   {
-    return Character.isLetterOrDigit(ch) || 
-      (ch == '-') || (ch == '.') || (ch == '_') || (ch == ':');
+    return Character.isLetterOrDigit(ch) ||
+           (ch == '-') || (ch == '.') || (ch == '_') || (ch == ':');
   }
 
   private static char toHexDigit(int d)

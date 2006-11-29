@@ -39,25 +39,13 @@ import javax.naming.*;
 
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
 import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.JavaValue;
-import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.BooleanValue;
 
-import com.caucho.quercus.program.JavaClassDef;
-
-import com.caucho.quercus.module.NotNull;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.ReturnNullAsFalse;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.ModuleStartupListener;
-import com.caucho.quercus.module.ClassImplementation;
+import com.caucho.quercus.annotation.ClassImplementation;
 
 /**
  * JMS functions

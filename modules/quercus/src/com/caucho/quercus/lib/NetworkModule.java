@@ -32,7 +32,6 @@ package com.caucho.quercus.lib;
 import java.io.IOException;
 
 import java.util.Map;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
@@ -51,8 +50,7 @@ import com.caucho.util.L10N;
 import com.caucho.quercus.QuercusModuleException;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
+import com.caucho.quercus.annotation.*;
 
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
@@ -66,11 +64,7 @@ import com.caucho.quercus.env.Env;
 
 import com.caucho.quercus.lib.file.SocketReadWrite;
 
-import com.caucho.quercus.resources.StreamReadWrite;
-
 import com.caucho.util.*;
-
-import com.caucho.vfs.*;
 
 /**
  * Information about PHP network
@@ -142,19 +136,19 @@ public class NetworkModule extends AbstractQuercusModule {
    */
   public static SocketReadWrite
     fsockopen(Env env,
-	      String host,
-	      @Optional("80") int port,
-	      @Optional @Reference Value errno,
-	      @Optional @Reference Value errstr,
-	      @Optional double timeout)
+              String host,
+              @Optional("80") int port,
+              @Optional @com.caucho.quercus.annotation.Reference Value errno,
+              @Optional @com.caucho.quercus.annotation.Reference Value errstr,
+              @Optional double timeout)
   {
     try {
       Socket s = new Socket(host, port);
 
       if (timeout > 0)
-	s.setSoTimeout((int) (timeout * 1000));
+        s.setSoTimeout((int) (timeout * 1000));
       else
-	s.setSoTimeout(120000);
+        s.setSoTimeout(120000);
 
       SocketReadWrite stream;
       stream = new SocketReadWrite(env, s, SocketReadWrite.Domain.AF_INET);
@@ -164,10 +158,10 @@ public class NetworkModule extends AbstractQuercusModule {
       return stream;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
-      
+
       if (errstr != null)
-	errstr.set(new StringValueImpl(e.toString()));
-      
+        errstr.set(new StringValueImpl(e.toString()));
+
       return null;
     }
   }
@@ -213,20 +207,20 @@ public class NetworkModule extends AbstractQuercusModule {
    */
   public static Value gethostbyname(String hostname)
   {
-  	// php/1m01
+          // php/1m01
 
-  	InetAddress ip = null;
+          InetAddress ip = null;
 
-  	try {
-	  ip = InetAddress.getByName(hostname);
-  	}
-  	catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
+          try {
+          ip = InetAddress.getByName(hostname);
+          }
+          catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
 
-	  return StringValue.create(hostname);
-  	}
+          return StringValue.create(hostname);
+          }
 
-  	return StringValue.create(ip.getHostAddress());
+          return StringValue.create(ip.getHostAddress());
   }
 
   /**
@@ -280,9 +274,9 @@ public class NetworkModule extends AbstractQuercusModule {
     // php/1m03
 
     String formIPv4 = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+                      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+                      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+                      "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
 
     CharSequence ipToCS = ip.subSequence(0, ip.length());
 
@@ -357,7 +351,7 @@ public class NetworkModule extends AbstractQuercusModule {
 
     for (Map.Entry<String, LongValue> entry: _protoToNum.entrySet())
       if (entry.getValue().toLong() == protoNumber)
-	return StringValue.create(entry.getKey());
+        return StringValue.create(entry.getKey());
 
     return BooleanValue.FALSE;
   }
@@ -404,17 +398,17 @@ public class NetworkModule extends AbstractQuercusModule {
       ServiceNode node = entry.getValue();
 
       if (node.getPort().toLong() == port &&
-      		node.protocolCheck(protocol))
-      	return StringValue.create(entry.getKey());
+          node.protocolCheck(protocol))
+              return StringValue.create(entry.getKey());
     }
 
     return BooleanValue.FALSE;
   }
-  
+
   public static boolean getmxrr(Env env,
-				   String hostname,
-				   @Reference Value mxhosts,
-				   @Optional @Reference Value weight)
+                                String hostname,
+                                @com.caucho.quercus.annotation.Reference Value mxhosts,
+                                @Optional @com.caucho.quercus.annotation.Reference Value weight)
   {
     return dns_get_mx(env, hostname, mxhosts, weight);
   }
@@ -431,9 +425,9 @@ public class NetworkModule extends AbstractQuercusModule {
    * @return true if records are found, false otherwise
    */
   public static boolean dns_get_mx(Env env,
-				   String hostname,
-				   @Reference Value mxhosts,
-				   @Optional @Reference Value weight)
+                                   String hostname,
+                                   @com.caucho.quercus.annotation.Reference Value mxhosts,
+                                   @Optional @com.caucho.quercus.annotation.Reference Value weight)
   {
     try {
       // php/1m08
@@ -446,39 +440,39 @@ public class NetworkModule extends AbstractQuercusModule {
       ArrayValue weights = new ArrayValueImpl();
 
       try {
-	NamingEnumeration list = atrs.getAll();
+        NamingEnumeration list = atrs.getAll();
 
-	if (! (list.hasMore()))
-	  return false;
+        if (! (list.hasMore()))
+          return false;
 
-	String[] tokens = list.next().toString().split("\\s");
+        String[] tokens = list.next().toString().split("\\s");
 
-	for (int k = 1; k < tokens.length; k++) {
-	  int weightToInt = Integer.valueOf(tokens[k]).intValue();
+        for (int k = 1; k < tokens.length; k++) {
+          int weightToInt = Integer.valueOf(tokens[k]).intValue();
 
-	  weights.append(LongValue.create(weightToInt));
+          weights.append(LongValue.create(weightToInt));
 
-	  k++;
+          k++;
 
-	  String uncleanHost = tokens[k];
+          String uncleanHost = tokens[k];
 
-	  int numOfCharacters = 0;
+          int numOfCharacters = 0;
 
-	  if (k < tokens.length - 1)
-	    numOfCharacters = uncleanHost.length() - 2;
-	  else
-	    numOfCharacters = uncleanHost.length() -1;
+          if (k < tokens.length - 1)
+            numOfCharacters = uncleanHost.length() - 2;
+          else
+            numOfCharacters = uncleanHost.length() -1;
 
-	  String cleanHost = uncleanHost.substring(0, numOfCharacters);
+          String cleanHost = uncleanHost.substring(0, numOfCharacters);
 
-	  hosts.append(StringValue.create(cleanHost));
-	}
+          hosts.append(StringValue.create(cleanHost));
+        }
       }
       catch (Exception e) {
-    	log.log(Level.WARNING, e.toString(), e);
-	env.warning("An error occurred while processing the records");
+            log.log(Level.WARNING, e.toString(), e);
+        env.warning("An error occurred while processing the records");
 
-	return false;
+        return false;
       }
 
       mxhosts.set(hosts);
@@ -490,8 +484,8 @@ public class NetworkModule extends AbstractQuercusModule {
   }
 
   public static boolean checkdnsrr(Env env,
-				   String hostname,
-				   @Optional("MX") String type)
+                                   String hostname,
+                                   @Optional("MX") String type)
   {
     return dns_check_record(env, hostname, _dnsTypeMap.get(type), null, null);
   }
@@ -508,10 +502,10 @@ public class NetworkModule extends AbstractQuercusModule {
    * @return true if records are found, false otherwise
    */
   public static boolean dns_check_record(Env env,
-					 String hostname,
-					 @Optional("DNS_ALL") int type,
-					 @Optional ArrayValue mxhosts,
-					 @Optional ArrayValue weight)
+                                         String hostname,
+                                         @Optional("DNS_ALL") int type,
+                                         @Optional ArrayValue mxhosts,
+                                         @Optional ArrayValue weight)
   {
     // php/1m09
 
@@ -524,47 +518,47 @@ public class NetworkModule extends AbstractQuercusModule {
       ArrayValue weights = new ArrayValueImpl();
 
       try {
-	NamingEnumeration<? extends Attribute> e = atrs.getAll();
-	
-	while (e.hasMoreElements()) {
-	  Attribute attr = e.nextElement();
-	  
-	  String id = attr.getID();
-	  
-	  String[] tokens = attr.toString().split("\\s");
+        NamingEnumeration<? extends Attribute> e = atrs.getAll();
 
-	  for (int k = 1; k < tokens.length; k++) {
-	    int weightToInt = Integer.valueOf(tokens[k]).intValue();
+        while (e.hasMoreElements()) {
+          Attribute attr = e.nextElement();
 
-	    weights.append(LongValue.create(weightToInt));
+          String id = attr.getID();
 
-	    k++;
+          String[] tokens = attr.toString().split("\\s");
 
-	    String uncleanHost = tokens[k];
+          for (int k = 1; k < tokens.length; k++) {
+            int weightToInt = Integer.valueOf(tokens[k]).intValue();
 
-	    int numOfCharacters = 0;
+            weights.append(LongValue.create(weightToInt));
 
-	    if (k < tokens.length - 1)
-	      numOfCharacters = uncleanHost.length() - 2;
-	    else
-	      numOfCharacters = uncleanHost.length() -1;
+            k++;
 
-	    String cleanHost = uncleanHost.substring(0, numOfCharacters);
+            String uncleanHost = tokens[k];
 
-	    hosts.append(StringValue.create(cleanHost));
-	  }
-	}
+            int numOfCharacters = 0;
+
+            if (k < tokens.length - 1)
+              numOfCharacters = uncleanHost.length() - 2;
+            else
+              numOfCharacters = uncleanHost.length() -1;
+
+            String cleanHost = uncleanHost.substring(0, numOfCharacters);
+
+            hosts.append(StringValue.create(cleanHost));
+          }
+        }
       } catch (Exception e) {
-    	log.log(Level.WARNING, e.toString(), e);
-	env.warning(L.l("An error occurred while processing the records\n{0}",
-			e));
+            log.log(Level.WARNING, e.toString(), e);
+        env.warning(L.l("An error occurred while processing the records\n{0}",
+                        e));
 
-	return false;
+        return false;
       }
 
       mxhosts.set(hosts);
       weight.set(weights);
-      
+
       return true;
     } catch (NamingException e) {
       throw new QuercusModuleException(e);
@@ -578,7 +572,7 @@ public class NetworkModule extends AbstractQuercusModule {
   {
     return NullValue.NULL;
   }
-  
+
   /**
    * Opens syslog.
    *
@@ -596,14 +590,14 @@ public class NetworkModule extends AbstractQuercusModule {
   {
     return true;
   }
-  
+
   /**
    * syslog
    */
   public static boolean syslog(Env env, int priority, String message)
   {
     Level level = Level.OFF;
-    
+
     switch (priority) {
     case LOG_EMERG:
     case LOG_ALERT:
@@ -651,11 +645,11 @@ public class NetworkModule extends AbstractQuercusModule {
     public boolean protocolCheck(String protocol)
     {
       if (protocol.equals("tcp"))
-      	return _isTCP;
+              return _isTCP;
       else if (protocol.equals("udp"))
-      	return _isUDP;
+              return _isUDP;
       else
-      	return false;
+              return false;
     }
 
     public boolean isTCP()

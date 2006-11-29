@@ -37,7 +37,7 @@ import com.caucho.util.L10N;
 
 import com.caucho.quercus.env.*;
 
-import com.caucho.quercus.module.Optional;
+import com.caucho.quercus.annotation.Optional;
 
 /**
  * oracle connection class (oracle has NO object oriented API)

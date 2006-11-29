@@ -29,13 +29,10 @@
 
 package com.caucho.quercus.lib;
 
-import java.sql.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -50,9 +47,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.Optional;
-
-import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.annotation.Optional;
 
 /**
  * APC object oriented API facade
@@ -60,7 +55,7 @@ import com.caucho.vfs.WriteStream;
 public class ApcModule extends AbstractQuercusModule {
   private static final Logger log = Logger.getLogger(ApcModule.class.getName());
   private static final L10N L = new L10N(ApcModule.class);
-  
+
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
 
@@ -92,14 +87,14 @@ public class ApcModule extends AbstractQuercusModule {
 
     return value;
   }
-  
+
   /**
    * Clears the cache
    */
   public boolean apc_clear_cache(Env env, @Optional String type)
   {
     _cache.clear();
-    
+
     return true;
   }
 
@@ -107,9 +102,9 @@ public class ApcModule extends AbstractQuercusModule {
    * Defines constants
    */
   public boolean apc_define_constants(Env env,
-				      String key,
-				      ArrayValue values,
-				      @Optional("true") boolean caseSensitive)
+                                      String key,
+                                      ArrayValue values,
+                                      @Optional("true") boolean caseSensitive)
   {
     _constMap.put(key, values.copy(env));
 
@@ -135,7 +130,7 @@ public class ApcModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
 
     Value value = entry.getValue();
-    
+
     if (entry.isValid() && value != null)
       return value.copy(env);
     else
@@ -146,8 +141,8 @@ public class ApcModule extends AbstractQuercusModule {
    * Defines constants
    */
   public boolean apc_load_constants(Env env,
-				    String key,
-				    @Optional("true") boolean caseSensitive)
+                                    String key,
+                                    @Optional("true") boolean caseSensitive)
   {
     ArrayValue array = (ArrayValue) _constMap.get(key);
 
@@ -156,8 +151,8 @@ public class ApcModule extends AbstractQuercusModule {
 
     for (Map.Entry<Value,Value> entry : array.entrySet()) {
       env.addConstant(entry.getKey().toString(),
-		      entry.getValue().copy(env),
-		      ! caseSensitive);
+                      entry.getValue().copy(env),
+                      ! caseSensitive);
     }
 
     return true;
@@ -182,7 +177,7 @@ public class ApcModule extends AbstractQuercusModule {
    * Returns a value.
    */
   public Value apc_store(Env env, String key, Value value,
-			 @Optional("0") int ttl)
+                         @Optional("0") int ttl)
   {
     _cache.put(key, new Entry(value.copy(env), ttl));
 
@@ -198,18 +193,18 @@ public class ApcModule extends AbstractQuercusModule {
       _value = value;
 
       if (ttl <= 0)
-	_expire = Long.MAX_VALUE;
+        _expire = Long.MAX_VALUE;
       else
-	_expire = Alarm.getCurrentTime() + ttl * 1000L;
+        _expire = Alarm.getCurrentTime() + ttl * 1000L;
     }
 
     public boolean isValid()
     {
       if (Alarm.getCurrentTime() <= _expire)
-	return true;
+        return true;
       else {
-	_value = null;
-	return false;
+        _value = null;
+        return false;
       }
     }
 

@@ -29,25 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.expr.DefaultExpr;
-import com.caucho.quercus.expr.RequiredExpr;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.NullLiteralExpr;
-import com.caucho.quercus.module.ModuleContext;
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.Reference;
-import com.caucho.quercus.module.This;
-import com.caucho.quercus.module.UsesSymbolTable;
-import com.caucho.quercus.module.VariableArguments;
-import com.caucho.quercus.module.ReturnNullAsFalse;
-import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 

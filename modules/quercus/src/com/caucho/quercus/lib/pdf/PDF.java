@@ -47,8 +47,8 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.TempBufferStringValue;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.module.Optional;
-import com.caucho.quercus.module.NotNull;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.NotNull;
 
 /**
  * pdf object oriented API facade
@@ -90,7 +90,7 @@ public class PDF {
   }
 
   public boolean begin_document(@Optional String fileName,
-				@Optional String optList)
+                                @Optional String optList)
     throws IOException
   {
     _tempStream = new TempStream();
@@ -200,9 +200,9 @@ public class PDF {
       PDFFont font = _stream.getFont();
 
       if (font != null)
-	return font.getFontName();
+        return font.getFontName();
       else
-	return null;
+        return null;
     }
     else
       return null;
@@ -217,25 +217,25 @@ public class PDF {
       PDFFont font = _stream.getFont();
 
       if (font != null)
-	return font.getAscender();
+        return font.getAscender();
       else
-	return 0;
+        return 0;
     }
     else if ("capheight".equals(name)) {
       PDFFont font = _stream.getFont();
 
       if (font != null)
-	return font.getCapHeight();
+        return font.getCapHeight();
       else
-	return 0;
+        return 0;
     }
     else if ("descender".equals(name)) {
       PDFFont font = _stream.getFont();
 
       if (font != null)
-	return font.getDescender();
+        return font.getDescender();
       else
-	return 0;
+        return 0;
     }
     else if ("fontsize".equals(name)) {
       return _stream.getFontSize();
@@ -247,7 +247,7 @@ public class PDF {
   public boolean initgraphics(Env env)
   {
     env.stub("initgraphics");
-    
+
     return false;
   }
 
@@ -286,9 +286,9 @@ public class PDF {
       Font face = _faceMap.get(name);
 
       if (face == null) {
-	face = new AfmParser().parse(name);
+        face = new AfmParser().parse(name);
 
-	_faceMap.put(name, face);
+        _faceMap.put(name, face);
       }
 
       return face;
@@ -332,10 +332,10 @@ public class PDF {
    * Sets the linecap style
    */
   public boolean setlinecap(Env env,
-			    int cap)
+                            int cap)
   {
     env.stub("setlinecap");
-    
+
     return false;
   }
 
@@ -343,10 +343,10 @@ public class PDF {
    * Sets the linejoin style
    */
   public boolean setlinejoin(Env env,
-			     int linejoin)
+                             int linejoin)
   {
     env.stub("setlinejoin");
-    
+
     return false;
   }
 
@@ -374,15 +374,15 @@ public class PDF {
    * Sets the matrix style
    */
   public boolean setmatrix(Env env,
-			   double a,
-			   double b,
-			   double c,
-			   double d,
-			   double e,
-			   double f)
+                           double a,
+                           double b,
+                           double c,
+                           double d,
+                           double e,
+                           double f)
   {
     env.stub("setmatrix");
-    
+
     return false;
   }
 
@@ -392,7 +392,7 @@ public class PDF {
   public boolean setmiterlimit(Env env, double v)
   {
     env.stub("setmiterlimit");
-    
+
     return false;
   }
 
@@ -400,11 +400,11 @@ public class PDF {
    * Sets the shading pattern
    */
   public boolean shading_pattern(Env env,
-				 int shading,
-				 @Optional String optlist)
+                                 int shading,
+                                 @Optional String optlist)
   {
     env.stub("shading_pattern");
-    
+
     return false;
   }
 
@@ -412,19 +412,19 @@ public class PDF {
    * Define a blend
    */
   public int shading(Env env,
-		     String type,
-		     double x1,
-		     double y1,
-		     double x2,
-		     double y2,
-		     double c1,
-		     double c2,
-		     double c3,
-		     double c4,
-		     @Optional String optlist)
+                     String type,
+                     double x1,
+                     double y1,
+                     double x2,
+                     double y2,
+                     double c1,
+                     double c2,
+                     double c3,
+                     double c4,
+                     @Optional String optlist)
   {
     env.stub("shading");
-    
+
     return 0;
   }
 
@@ -432,10 +432,10 @@ public class PDF {
    * Fill with a shading object.
    */
   public boolean shfill(Env env,
-			int shading)
+                        int shading)
   {
     env.stub("shfill");
-    
+
     return false;
   }
 
@@ -535,8 +535,8 @@ public class PDF {
    * Draws a bezier curve
    */
   public boolean curveto(double x1, double y1,
-			 double x2, double y2,
-			 double x3, double y3)
+                         double x2, double y2,
+                         double x3, double y3)
   {
     _stream.curveTo(x1, y1, x2, y2, x3, y3);
 
@@ -547,7 +547,7 @@ public class PDF {
    * Draws a bezier curve
    */
   public boolean curveto_b(double x1, double y1,
-			   double x2, double y2)
+                           double x2, double y2)
   {
     _stream.curveTo(x1, y1, x1, y1, x2, y2);
 
@@ -558,7 +558,7 @@ public class PDF {
    * Draws a bezier curve
    */
   public boolean curveto_e(double x1, double y1,
-			   double x2, double y2)
+                           double x2, double y2)
   {
     _stream.curveTo(x1, y1, x2, y2, x2, y2);
 
@@ -591,7 +591,7 @@ public class PDF {
       clockwiseArc(x1, y1, r, a, (aQuarter + 1) * 90);
 
       for (int q = aQuarter + 1; q < bQuarter; q++)
-	clockwiseArc(x1, y1, r, q * 90, (q + 1) * 90);
+        clockwiseArc(x1, y1, r, q * 90, (q + 1) * 90);
 
       clockwiseArc(x1, y1, r, bQuarter * 90, b);
     }
@@ -625,7 +625,7 @@ public class PDF {
       counterClockwiseArc(x1, y1, r, a, aQuarter * 90);
 
       for (int q = aQuarter - 1; bQuarter < q; q--)
-	counterClockwiseArc(x1, y1, r, (q + 1) * 90, q * 90);
+        counterClockwiseArc(x1, y1, r, (q + 1) * 90, q * 90);
 
       counterClockwiseArc(x1, y1, r, (bQuarter + 1) * 90, b);
     }
@@ -637,7 +637,7 @@ public class PDF {
    * Creates an arc from 0 to pi/2
    */
   private boolean clockwiseArc(double x, double y, double r,
-			       double aDeg, double bDeg)
+                               double aDeg, double bDeg)
   {
     double a = aDeg * Math.PI / 180.0;
     double b = bDeg * Math.PI / 180.0;
@@ -658,8 +658,8 @@ public class PDF {
 
     lineto(x1, y1);
     curveto(x1 - l * sin_a, y1 + l * cos_a,
-	    x2 + l * sin_b, y2 - l * cos_b,
-	    x2, y2);
+            x2 + l * sin_b, y2 - l * cos_b,
+            x2, y2);
 
     return true;
   }
@@ -668,7 +668,7 @@ public class PDF {
    * Creates an arc from 0 to pi/2
    */
   private boolean counterClockwiseArc(double x, double y, double r,
-				      double aDeg, double bDeg)
+                                      double aDeg, double bDeg)
   {
     double a = aDeg * Math.PI / 180.0;
     double b = bDeg * Math.PI / 180.0;
@@ -689,8 +689,8 @@ public class PDF {
 
     lineto(x1, y1);
     curveto(x1 + l * sin_a, y1 - l * cos_a,
-	    x2 - l * sin_b, y2 + l * cos_b,
-	    x2, y2);
+            x2 - l * sin_b, y2 + l * cos_b,
+            x2, y2);
 
     return true;
   }
@@ -797,10 +797,10 @@ public class PDF {
    * Sets the color
    */
   public boolean setcolor(String fstype, String colorspace,
-			  double c1,
-			  @Optional double c2,
-			  @Optional double c3,
-			  @Optional double c4)
+                          double c1,
+                          @Optional double c2,
+                          @Optional double c3,
+                          @Optional double c4)
   {
     return _stream.setcolor(fstype, colorspace, c1, c2, c3, c4);
   }
@@ -817,7 +817,7 @@ public class PDF {
    * Concatenates the matrix
    */
   public boolean concat(double a, double b, double c,
-			double d, double e, double f)
+                        double d, double e, double f)
   {
     return _stream.concat(a, b, c, d, e, f);
   }
@@ -826,8 +826,8 @@ public class PDF {
    * open image
    */
   public PDFImage open_image_file(String type, Path file,
-				  @Optional String stringParam,
-				  @Optional int intParam)
+                                  @Optional String stringParam,
+                                  @Optional int intParam)
     throws IOException
   {
     PDFImage img = new PDFImage(file);
@@ -843,8 +843,8 @@ public class PDF {
    * open image
    */
   public PDFImage load_image(String type,
-			     Path file,
-			     @Optional String optlist)
+                             Path file,
+                             @Optional String optlist)
     throws IOException
   {
     PDFImage img = new PDFImage(file);
@@ -857,7 +857,7 @@ public class PDF {
   }
 
   public boolean fit_image(PDFImage img, double x, double y,
-			   @Optional String opt)
+                           @Optional String opt)
   {
     _page.addResource(img.getResource());
 
@@ -918,8 +918,8 @@ public class PDF {
     double p = pDeg * Math.PI / 180;
 
     return _stream.concat(Math.cos(p), Math.sin(p),
-			  -Math.sin(p), Math.cos(p),
-			  0, 0);
+                          -Math.sin(p), Math.cos(p),
+                          0, 0);
   }
 
   /**
@@ -952,8 +952,8 @@ public class PDF {
    * Displays text
    */
   public boolean show_boxed(String text, double x, double y,
-			    double width, double height,
-			    String mode, @Optional String feature)
+                            double width, double height,
+                            String mode, @Optional String feature)
   {
     set_text_pos(x, y);
     _stream.show(text);
@@ -1019,7 +1019,7 @@ public class PDF {
       _pageGroup.clear();
 
       if (_pagesGroupList.size() > 0)
-	_pagesGroupList.add(_pageParentId);
+        _pagesGroupList.add(_pageParentId);
     }
 
     _out.writeCatalog(_catalogId, _pageParentId, _pagesGroupList, _pageCount);
