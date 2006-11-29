@@ -28,8 +28,8 @@
 */
 
 package javax.xml.bind;
-import java.io.*;
-import javax.xml.namespace.*;
+import javax.xml.namespace.QName;
+import java.io.Serializable;
 
 public class JAXBElement<T> implements Serializable {
 

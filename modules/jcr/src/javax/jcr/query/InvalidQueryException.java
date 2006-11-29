@@ -29,7 +29,7 @@
 
 package javax.jcr.query;
 
-import javax.jcr.*;
+import javax.jcr.RepositoryException;
 
 public class InvalidQueryException extends RepositoryException {
   public InvalidQueryException()

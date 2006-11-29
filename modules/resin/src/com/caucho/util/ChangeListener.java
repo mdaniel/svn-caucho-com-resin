@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.EventListener;
 
 public interface ChangeListener extends EventListener {
   void handleChange(Object object);

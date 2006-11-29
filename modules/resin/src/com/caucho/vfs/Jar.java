@@ -29,30 +29,29 @@
 
 package com.caucho.vfs;
 
-import java.security.cert.Certificate;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Enumeration;
-
-import java.util.logging.*;
-
-import java.util.zip.*;
-
-import java.util.jar.*;
-
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-
-import java.lang.ref.SoftReference;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.loader.EnvironmentLocal;
-
 import com.caucho.make.CachedDependency;
+import com.caucho.util.Alarm;
+import com.caucho.util.CacheListener;
+import com.caucho.util.Log;
+import com.caucho.util.LruCache;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.SoftReference;
+import java.security.cert.Certificate;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * Jar is a cache around a jar file to avoid scanning through the whole

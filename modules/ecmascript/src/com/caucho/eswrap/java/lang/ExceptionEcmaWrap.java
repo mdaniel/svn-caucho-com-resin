@@ -30,11 +30,12 @@
 
 package com.caucho.eswrap.java.lang;
 
-import java.io.*;
+import com.caucho.es.ESException;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.util.*;
-import com.caucho.es.*;
-import com.caucho.vfs.*;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 public class ExceptionEcmaWrap {
   public static void printStackTrace(Exception e, Object o)

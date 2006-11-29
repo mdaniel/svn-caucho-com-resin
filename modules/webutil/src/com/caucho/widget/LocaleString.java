@@ -31,12 +31,10 @@ package com.caucho.widget;
 
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.util.Locale;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * A locale String maps locales to String

@@ -28,11 +28,10 @@
 
 package com.caucho.xpath.pattern;
 
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
+import com.caucho.xpath.ExprEnvironment;
 
-import com.caucho.util.*;
-import com.caucho.xpath.*;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Iterates through matching nodes.

@@ -48,10 +48,10 @@
 
 package com.caucho.services.server;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 
 /**
  * Interface for a service, including lifecycle.

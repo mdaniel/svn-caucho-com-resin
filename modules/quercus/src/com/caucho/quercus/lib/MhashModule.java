@@ -29,21 +29,22 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.HashMap;
+import com.caucho.config.ConfigException;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-
-import com.caucho.util.L10N;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.env.*;
-import com.caucho.config.ConfigException;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Mhash functions.

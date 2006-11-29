@@ -30,9 +30,8 @@
 
 package javax.servlet.jsp.tagext;
 
-import java.util.*;
-
-import javax.servlet.jsp.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * Tag instance attributes and values.  This information is used by

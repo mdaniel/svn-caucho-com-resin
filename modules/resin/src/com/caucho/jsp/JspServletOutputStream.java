@@ -29,11 +29,9 @@
 
 package com.caucho.jsp;
 
-import java.io.OutputStream;
-import java.io.IOException;
-
-import javax.servlet.ServletResponse;
 import javax.servlet.ServletOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 class JspServletOutputStream extends ServletOutputStream {
   private PageContextImpl _pageContext;

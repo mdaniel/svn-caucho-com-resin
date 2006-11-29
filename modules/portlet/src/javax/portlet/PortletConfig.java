@@ -29,8 +29,9 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public interface PortletConfig
 {

@@ -28,11 +28,9 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.IntMap;
 
-import com.caucho.util.*;
+import java.util.Iterator;
 
 class PropertyEnumeration implements Iterator {
   IntMap completed = new IntMap();

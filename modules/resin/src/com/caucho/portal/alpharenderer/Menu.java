@@ -31,11 +31,9 @@ package com.caucho.portal.alpharenderer;
 
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 abstract public class Menu
 {

@@ -29,42 +29,63 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.lang.ref.SoftReference;
-
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-import javax.servlet.*;
-
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
-
-import org.w3c.dom.*;
-
+import com.caucho.java.JavaCompiler;
+import com.caucho.java.LineMap;
 import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.util.Semaphore;
-import com.caucho.util.TimeUnit;
-import com.caucho.vfs.*;
-import com.caucho.xsl.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
-import com.caucho.xpath.*;
-
-import com.caucho.server.webapp.WebApp;
-
-import com.caucho.server.dispatch.ServletConfigImpl;
-
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.RequestAdapter;
 import com.caucho.server.connection.ResponseAdapter;
+import com.caucho.server.dispatch.ServletConfigImpl;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.RegistryException;
+import com.caucho.util.Semaphore;
+import com.caucho.util.TimeUnit;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.CauchoDocument;
+import com.caucho.xml.Html;
+import com.caucho.xml.Xml;
+import com.caucho.xml.XmlParser;
+import com.caucho.xml.XmlUtil;
+import com.caucho.xpath.XPath;
+import com.caucho.xpath.XPathException;
+import com.caucho.xsl.CauchoStylesheet;
+import com.caucho.xsl.StylesheetImpl;
+import com.caucho.xsl.TransformerImpl;
+import com.caucho.xsl.XslParseException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.ProcessingInstruction;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspFactory;
+import javax.servlet.jsp.PageContext;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Templates;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**

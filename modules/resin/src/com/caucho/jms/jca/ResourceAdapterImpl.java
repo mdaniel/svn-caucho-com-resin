@@ -28,32 +28,23 @@
 
 package com.caucho.jms.jca;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import javax.resource.ResourceException;
-import javax.resource.NotSupportedException;
-
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.BootstrapContext;
-import javax.resource.spi.ActivationSpec;
-import javax.resource.spi.ResourceAdapterInternalException;
-
-import javax.resource.spi.endpoint.MessageEndpointFactory;
-
-import javax.resource.spi.work.WorkManager;
-
-import javax.transaction.xa.XAResource;
+import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
+import javax.resource.spi.ActivationSpec;
+import javax.resource.spi.BootstrapContext;
+import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.ResourceAdapterInternalException;
+import javax.resource.spi.endpoint.MessageEndpointFactory;
+import javax.resource.spi.work.WorkManager;
+import javax.transaction.xa.XAResource;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * The JCA resource adapter.

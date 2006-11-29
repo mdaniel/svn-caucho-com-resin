@@ -29,16 +29,13 @@
 
 package com.caucho.vfs.i18n;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.OutputStreamWriter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import java.nio.charset.Charset;
-
 import com.caucho.vfs.OutputStreamWithBuffer;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.logging.Level;
 
 /**
  * Factory for JDK-based encoding writers.

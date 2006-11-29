@@ -29,13 +29,11 @@
 
 package com.caucho.iiop;
 
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Log;
 
-import com.caucho.loader.EnvironmentLocal;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * IIOP EJB binding for the local context.

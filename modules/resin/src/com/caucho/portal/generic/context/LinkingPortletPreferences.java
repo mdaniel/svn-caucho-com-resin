@@ -48,12 +48,13 @@
 
 package com.caucho.portal.generic.context;
 
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.portlet.*;
+import javax.portlet.PortletPreferences;
+import javax.portlet.PreferencesValidator;
+import javax.portlet.ReadOnlyException;
+import javax.portlet.ValidatorException;
 import java.io.IOException;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * An implementation of PortletPreferences that stores values temporarily,

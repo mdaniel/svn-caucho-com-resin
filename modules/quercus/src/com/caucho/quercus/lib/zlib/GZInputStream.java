@@ -29,10 +29,9 @@
 
 package com.caucho.quercus.lib.zlib;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
-import java.io.IOException;
-
 import java.util.zip.CRC32;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;

@@ -48,8 +48,9 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 
 /**
  * Abstract base class for Hessian requests.  Hessian users should only

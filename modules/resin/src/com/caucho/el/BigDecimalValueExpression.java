@@ -29,12 +29,13 @@
 
 package com.caucho.el;
 
-import java.util.logging.*;
-import java.math.*;
+import com.caucho.util.L10N;
 
-import javax.el.*;
-
-import com.caucho.util.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.PropertyNotFoundException;
+import java.math.BigDecimal;
+import java.util.logging.Logger;
 
 /**
  * Abstract implementation class for an expression.

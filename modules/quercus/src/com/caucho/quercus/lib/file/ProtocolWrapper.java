@@ -29,15 +29,13 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.program.AbstractFunction;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.program.AbstractFunction;
 
 public class ProtocolWrapper {
   private QuercusClass _qClass;

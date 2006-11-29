@@ -29,7 +29,8 @@
 
 package javax.xml.stream;
 
-import javax.xml.namespace.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
 
 public interface XMLStreamReader extends XMLStreamConstants {
 

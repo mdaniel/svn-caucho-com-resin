@@ -28,19 +28,16 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.jsp.*;
+import com.caucho.vfs.WriteStream;
 
-import javax.xml.transform.*;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class StreamTransformerImpl extends TransformerImpl {
   StreamTransformerImpl(StylesheetImpl stylesheet)

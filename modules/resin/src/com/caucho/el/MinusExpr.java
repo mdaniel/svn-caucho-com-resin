@@ -28,14 +28,13 @@
 
 package com.caucho.el;
 
-import java.io.*;
-import java.math.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.vfs.WriteStream;
 
-import javax.el.*;
-
-import com.caucho.vfs.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * Represents a unary minus expression.

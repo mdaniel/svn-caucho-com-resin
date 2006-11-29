@@ -28,14 +28,9 @@
 
 package com.caucho.server.connection;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.servlet.ServletInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ServletInputStreamImpl extends ServletInputStream  {
   private InputStream _is;

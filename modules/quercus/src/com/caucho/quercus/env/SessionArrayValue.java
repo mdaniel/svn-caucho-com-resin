@@ -29,35 +29,19 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.log.Log;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.lib.UnserializeReader;
+import com.caucho.server.cluster.ClusterObject;
+import com.caucho.util.CacheListener;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
 import java.util.IdentityHashMap;
-
-import java.util.logging.*;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.Alarm;
-import com.caucho.util.CacheListener;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.server.cluster.ClusterObject;
-
-import com.caucho.quercus.lib.UnserializeReader;
-
-import com.caucho.quercus.QuercusModuleException;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents the $_SESSION

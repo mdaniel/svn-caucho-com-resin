@@ -28,14 +28,13 @@
 
 package com.caucho.ejb.metadata;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-
-import javax.naming.InitialContext;
-
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import com.caucho.config.*;
+import javax.naming.InitialContext;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class JndiInjectProgram extends BuilderProgram {
   static final L10N L = new L10N(BuilderProgram.class);

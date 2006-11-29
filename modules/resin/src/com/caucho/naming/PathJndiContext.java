@@ -28,15 +28,12 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import javax.naming.*;
-
-import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.Hashtable;
 
 public class PathJndiContext implements Context {
   private static L10N L = new L10N(PathJndiContext.class);

@@ -28,27 +28,10 @@
 
 package com.caucho.xsl.java;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
+import com.caucho.java.JavaWriter;
+import com.caucho.xml.QName;
 
 import org.w3c.dom.Node;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CompileException;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.LineCompileException;
-
-import com.caucho.log.Log;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.xml.QName;
-import com.caucho.xml.QAbstractNode;
-import com.caucho.xml.XmlChar;
-
-import com.caucho.xsl.XslParseException;
-import com.caucho.xsl.JavaGenerator;
 
 /**
  * Represents any XSL node from the stylesheet.

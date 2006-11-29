@@ -29,44 +29,38 @@
 
 package com.caucho.config;
 
-import java.io.InputStream;
-import java.io.IOException;
-
-import java.util.Map;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Constructor;
-
-import java.lang.ref.SoftReference;
-
-import javax.el.*;
-
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
-
-import org.w3c.dom.Node;
-
-import com.caucho.el.*;
-
-import com.caucho.relaxng.*;
-
+import com.caucho.el.EL;
+import com.caucho.el.EnvironmentContext;
+import com.caucho.relaxng.CompactVerifierFactoryImpl;
+import com.caucho.relaxng.Schema;
+import com.caucho.relaxng.Verifier;
+import com.caucho.relaxng.VerifierFilter;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
-
-import com.caucho.vfs.*;
-
-import com.caucho.xml.QName;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 import com.caucho.xml.DOMBuilder;
 import com.caucho.xml.QDocument;
+import com.caucho.xml.QName;
 import com.caucho.xml.Xml;
 
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ELResolver;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.SoftReference;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Facade for Resin's configuration builder.

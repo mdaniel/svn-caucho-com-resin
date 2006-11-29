@@ -28,26 +28,16 @@
 
 package com.caucho.ejb.session;
 
-import java.util.logging.Logger;
-
-import java.io.Serializable;
-import java.io.ObjectStreamException;
-
-import javax.ejb.EJBHome;
-import javax.ejb.EJBObject;
-import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBMetaData;
-import javax.ejb.HomeHandle;
-import javax.ejb.Handle;
-import javax.ejb.RemoveException;
-
+import com.caucho.ejb.AbstractContext;
+import com.caucho.ejb.AbstractEJBHome;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.protocol.HomeSkeletonWrapper;
 import com.caucho.util.Log;
 
-import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.AbstractEJBHome;
-
-import com.caucho.ejb.protocol.HomeSkeletonWrapper;
+import javax.ejb.*;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.logging.Logger;
 
 /**
  * Abstract base class for a SessionHome.

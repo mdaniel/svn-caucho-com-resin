@@ -29,19 +29,13 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.expr.*;
-
-import com.caucho.quercus.parser.*;
-import com.caucho.quercus.Location;
-
+import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 
 /**
  * Represents a PHP function expression.

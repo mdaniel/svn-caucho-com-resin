@@ -28,18 +28,10 @@
 
 package com.caucho.server.resin;
 
-import java.io.*;
-import java.net.*;
-
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolConfig;
-
-import com.caucho.server.hmux.HmuxProtocol;
+import com.caucho.util.L10N;
 
 /**
  * Represents a protocol connection.

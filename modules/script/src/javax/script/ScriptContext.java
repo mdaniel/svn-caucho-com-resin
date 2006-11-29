@@ -29,9 +29,9 @@
 
 package javax.script;
 
-import java.io.*;
-
-import java.util.*;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.List;
 
 /**
  * Context information from an engine to the bindings.

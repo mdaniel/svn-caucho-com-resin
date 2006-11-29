@@ -29,12 +29,13 @@
 
 package javax.xml.bind;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
+import org.w3c.dom.Node;
 
-import org.w3c.dom.*;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public abstract class JAXBContext {
   private static final Logger log =

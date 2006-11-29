@@ -28,7 +28,7 @@
 */
 
 package javax.xml.ws.handler;
-import java.util.*;
+import java.util.List;
 
 /** XXX */
 public interface HandlerResolver {

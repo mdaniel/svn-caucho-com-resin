@@ -29,29 +29,18 @@
 
 package com.caucho.db.sql;
 
-import java.io.InputStream;
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.Types;
-import java.sql.SQLException;
-
+import com.caucho.db.table.Column;
+import com.caucho.db.table.Table;
+import com.caucho.log.Log;
+import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.log.Log;
-
-import com.caucho.sql.SQLExceptionWrapper;
-
-import com.caucho.db.table.Table;
-import com.caucho.db.table.TableIterator;
-import com.caucho.db.table.Column;
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 abstract public class Expr {
   protected static final L10N L = new L10N(Expr.class);

@@ -28,15 +28,12 @@
 
 package com.caucho.xsl.java;
 
-import java.util.ArrayList;
-
-import java.util.regex.Pattern;
-
 import com.caucho.java.JavaWriter;
-
 import com.caucho.xml.QName;
-
 import com.caucho.xsl.XslParseException;
+
+import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * Represents the top-level xsl:stylesheet node.

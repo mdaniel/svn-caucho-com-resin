@@ -28,8 +28,8 @@
 */
 
 package javax.xml.ws.soap;
-import javax.xml.soap.*;
-import javax.xml.ws.*;
+import javax.xml.soap.SOAPFault;
+import javax.xml.ws.ProtocolException;
 
 /** XXX */
 public class SOAPFaultException extends ProtocolException {

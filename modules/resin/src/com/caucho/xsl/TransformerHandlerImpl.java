@@ -28,26 +28,20 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.io.*;
-
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.sax.*;
-import javax.xml.transform.stream.*;
-
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.xml.sax.ext.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
-import com.caucho.xpath.*;
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.xml.DOMBuilder;
+import com.caucho.xml.QDocument;
+
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+import javax.xml.transform.Result;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.TransformerHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TransformerHandlerImpl extends DOMBuilder
   implements TransformerHandler {

@@ -29,47 +29,40 @@
 
 package com.caucho.loader;
 
-import java.io.*;
-
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.Enumeration;
-import java.util.Hashtable;
-
-import java.util.jar.Manifest;
-import java.util.jar.Attributes;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.Pattern;
-
-import java.net.URL;
-
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.security.CodeSource;
-
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.ByteBuffer;
-import com.caucho.util.TimedCache;
-
-import com.caucho.vfs.*;
-
 import com.caucho.config.ConfigException;
-
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.enhancer.ByteCodeEnhancer;
+import com.caucho.loader.enhancer.EnhancerRuntimeException;
+import com.caucho.make.AlwaysModified;
 import com.caucho.make.DependencyContainer;
 import com.caucho.make.Make;
 import com.caucho.make.MakeContainer;
-import com.caucho.make.AlwaysModified;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.TimedCache;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.loader.enhancer.ByteCodeEnhancer;
-import com.caucho.loader.enhancer.EnhancerRuntimeException;
+import javax.annotation.PostConstruct;
+import java.io.FilePermission;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * Class loader which checks for changes in class files and automatically

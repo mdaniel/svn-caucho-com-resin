@@ -48,10 +48,12 @@
 
 package com.caucho.portal.generic;
 
-import java.util.*;
-import java.io.IOException;
-
 import javax.portlet.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A Window represents the use of a portlet on a page.

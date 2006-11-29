@@ -28,37 +28,22 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.lang.reflect.*;
-import java.beans.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.xml.QName;
-import com.caucho.xml.XmlChar;
-
-import com.caucho.config.types.*;
-import com.caucho.server.http.*;
-import com.caucho.java.*;
-import com.caucho.jsp.*;
-import com.caucho.jsp.el.*;
-
-import com.caucho.xpath.*;
-import com.caucho.el.*;
-
-import com.caucho.jsp.cfg.TldFunction;
-import com.caucho.jsp.cfg.TldTag;
+import com.caucho.config.types.Signature;
+import com.caucho.jsp.JspParseException;
+import com.caucho.jsp.ParseTagManager;
 import com.caucho.jsp.cfg.TldAttribute;
+import com.caucho.jsp.cfg.TldTag;
 import com.caucho.jsp.cfg.TldVariable;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Generates JSP code.  JavaGenerator, JavaScriptGenerator, and

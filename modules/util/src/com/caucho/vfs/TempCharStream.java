@@ -28,12 +28,7 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 public class TempCharStream extends StreamImpl {
   private TempCharBuffer _head;

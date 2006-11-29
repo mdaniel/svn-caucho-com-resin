@@ -29,39 +29,21 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.logging.Logger;
-
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.GZIPOutputStream;
-
-import com.caucho.util.L10N;
-
-import com.caucho.quercus.lib.HttpModule;
-
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.ModuleStartupListener;
-import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.Callback;
-import com.caucho.quercus.env.OutputBuffer;
-import com.caucho.quercus.env.TempBufferStringValue;
-
-import com.caucho.vfs.TempStream;
+import com.caucho.util.L10N;
 import com.caucho.vfs.StreamImplOutputStream;
+import com.caucho.vfs.TempStream;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * PHP output routines.

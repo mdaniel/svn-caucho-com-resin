@@ -29,9 +29,9 @@
 
 package com.caucho.jcr.base;
 
-import javax.jcr.*;
-import javax.jcr.nodetype.*;
-import javax.jcr.version.*;
+import javax.jcr.nodetype.ItemDefinition;
+import javax.jcr.nodetype.NodeType;
+import javax.jcr.version.OnParentVersionAction;
 
 /**
  * Definition for types of items.

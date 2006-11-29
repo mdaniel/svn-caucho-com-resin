@@ -28,35 +28,22 @@
 
 package com.caucho.jms.jca;
 
-import java.util.logging.Logger;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
-import java.io.PrintWriter;
-
-import javax.security.auth.Subject;
-
-import javax.resource.ResourceException;
+import javax.jms.*;
 import javax.resource.NotSupportedException;
-
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.ManagedConnectionMetaData;
-import javax.resource.spi.LocalTransaction;
+import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionEvent;
 import javax.resource.spi.ConnectionEventListener;
 import javax.resource.spi.ConnectionRequestInfo;
-
+import javax.resource.spi.LocalTransaction;
+import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.ManagedConnectionMetaData;
+import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
-
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.Message;
-import javax.jms.Connection;
-import javax.jms.Session;
-import javax.jms.MessageProducer;
-import javax.jms.JMSException;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.L10N;
+import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 /**
  * The managed session

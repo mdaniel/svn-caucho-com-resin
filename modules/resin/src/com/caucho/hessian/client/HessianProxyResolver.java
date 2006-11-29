@@ -48,10 +48,9 @@
 
 package com.caucho.hessian.client;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.hessian.io.HessianRemoteResolver;
 
-import com.caucho.hessian.io.*;
+import java.io.IOException;
 
 /**
  * Looks up remote objects in the proxy.

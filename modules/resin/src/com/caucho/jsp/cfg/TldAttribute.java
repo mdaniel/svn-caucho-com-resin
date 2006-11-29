@@ -28,11 +28,9 @@
 
 package com.caucho.jsp.cfg;
 
-import java.util.ArrayList;
-
-import javax.servlet.jsp.tagext.*;
-
 import com.caucho.config.types.Signature;
+
+import javax.servlet.jsp.tagext.JspFragment;
 
 /**
  * Configuration for the taglib attribute in the .tld

@@ -29,23 +29,15 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.tagext.*;
-
+import com.caucho.el.Expr;
 import com.caucho.log.Log;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.server.http.*;
-
-import com.caucho.el.Expr;
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.JspFragment;
+import java.io.Writer;
+import java.util.logging.Logger;
 
 /**
  * Abstract implementation for the fragment support.

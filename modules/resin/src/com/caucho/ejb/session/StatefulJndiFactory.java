@@ -28,11 +28,10 @@
 
 package com.caucho.ejb.session;
 
-import java.util.Hashtable;
+import com.caucho.naming.ObjectProxy;
 
 import javax.naming.NamingException;
-
-import com.caucho.naming.ObjectProxy;
+import java.util.Hashtable;
 
 /**
  * Creates stateful JNDI objects for each instance.

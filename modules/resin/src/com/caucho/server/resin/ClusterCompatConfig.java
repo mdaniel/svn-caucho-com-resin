@@ -29,14 +29,14 @@
 
 package com.caucho.server.resin;
 
-import java.net.*;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.ClusterPort;
+import com.caucho.server.cluster.ClusterServer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.JsseSSLFactory;
 
-import javax.annotation.*;
-
-import com.caucho.util.*;
-
-import com.caucho.server.cluster.*;
-import com.caucho.vfs.*;
+import javax.annotation.PostConstruct;
+import java.net.UnknownHostException;
 
 /**
  * Compatiblity configuration for Resin 3.0-style configuration.

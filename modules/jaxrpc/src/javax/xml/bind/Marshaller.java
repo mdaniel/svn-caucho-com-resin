@@ -28,15 +28,17 @@
 */
 
 package javax.xml.bind;
-import javax.xml.stream.*;
-import javax.xml.transform.*;
-import java.io.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import javax.xml.bind.attachment.*;
-import javax.xml.validation.*;
-import javax.xml.bind.annotation.adapters.*;
-import javax.xml.bind.Marshaller.*;
+import org.w3c.dom.Node;
+import org.xml.sax.ContentHandler;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.attachment.AttachmentMarshaller;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Result;
+import javax.xml.validation.Schema;
+import java.io.OutputStream;
+import java.io.Writer;
 
 public interface Marshaller {
 

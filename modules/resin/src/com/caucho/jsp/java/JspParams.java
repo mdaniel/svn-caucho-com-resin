@@ -28,11 +28,11 @@
 
 package com.caucho.jsp.java;
 
-import java.util.*;
-import java.io.*;
-
-import com.caucho.jsp.*;
+import com.caucho.jsp.JspParseException;
 import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Represents a Java scriptlet.

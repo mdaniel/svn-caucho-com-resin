@@ -28,12 +28,11 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.java.LineMap;
+import com.caucho.util.Exit;
+import com.caucho.vfs.Path;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
+import java.util.HashMap;
 
 /**
  * The Script object represents a compiled JavaScript.  Executing it

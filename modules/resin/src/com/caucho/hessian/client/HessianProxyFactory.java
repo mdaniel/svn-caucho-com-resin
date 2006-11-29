@@ -48,22 +48,26 @@
 
 package com.caucho.hessian.client;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import java.net.URL;
-import java.net.HttpURLConnection;
-import java.net.URLConnection;
-import java.net.MalformedURLException;
-
-import java.lang.reflect.*;
-import javax.naming.*;
-import javax.naming.spi.*;
-
 import com.caucho.hessian.io.*;
-
 import com.caucho.services.client.ServiceProxyFactory;
+
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.NamingException;
+import javax.naming.RefAddr;
+import javax.naming.Reference;
+import javax.naming.spi.ObjectFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Hashtable;
+import java.util.logging.Logger;
 
 /**
  * Factory for creating Hessian client stubs.  The returned stub will

@@ -28,16 +28,12 @@
 
 package com.caucho.relaxng.program;
 
-import java.util.*;
-
+import com.caucho.relaxng.RelaxException;
 import com.caucho.util.L10N;
-
 import com.caucho.xml.QName;
 
-import com.caucho.config.BeanConfigException;
-
-import com.caucho.relaxng.ParseState;
-import com.caucho.relaxng.RelaxException;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * Represents a match inside an element with a continuation.

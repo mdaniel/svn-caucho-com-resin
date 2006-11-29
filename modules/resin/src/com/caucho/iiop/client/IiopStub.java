@@ -28,18 +28,12 @@
 
 package com.caucho.iiop.client;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.rmi.*;
-
-import javax.ejb.*;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBMetaData;
+import javax.ejb.EJBObject;
+import javax.ejb.Handle;
+import javax.ejb.HomeHandle;
 import javax.rmi.CORBA.Stub;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.iiop.*;
 
 abstract public class IiopStub extends Stub {
   public EJBHome getEJBHome()

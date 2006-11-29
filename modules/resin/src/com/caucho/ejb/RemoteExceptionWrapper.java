@@ -30,10 +30,10 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.ExceptionWrapper;
 
-import com.caucho.util.*;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 /**
  * Wraps the actual exception with an Remote exception

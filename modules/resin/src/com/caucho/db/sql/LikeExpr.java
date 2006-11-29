@@ -29,19 +29,13 @@
 
 package com.caucho.db.sql;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import java.sql.SQLException;
-
 import com.caucho.log.Log;
 
-import com.caucho.db.table.TableIterator;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 class LikeExpr extends Expr {
   private static final Logger log = Log.open(LikeExpr.class);

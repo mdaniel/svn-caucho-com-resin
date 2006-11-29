@@ -28,8 +28,6 @@
 
 package com.caucho.jsp.cfg;
 
-import java.util.ArrayList;
-
 /**
  * Configuration for the taglib variable in the .tld
  */

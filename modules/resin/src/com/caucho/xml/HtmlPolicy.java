@@ -28,12 +28,15 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CharCursor;
+import com.caucho.util.CharScanner;
+import com.caucho.util.IntMap;
+import com.caucho.util.StringCharCursor;
 
-import com.caucho.util.*;
+import org.w3c.dom.Element;
+
+import java.io.IOException;
 
 /**
  * Policy for parsing an HTML file.

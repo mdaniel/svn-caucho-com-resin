@@ -29,10 +29,11 @@
 
 package com.caucho.server.connection;
 
-import java.io.*;
-import java.net.*;
+import com.caucho.vfs.VfsStream;
 
-import com.caucho.vfs.*;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
 
 /**
  * A Connection based on streams.  Stream connection is primarily used

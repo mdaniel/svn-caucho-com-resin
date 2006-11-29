@@ -29,28 +29,16 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.gen.*;
+import com.caucho.java.gen.BaseMethod;
+import com.caucho.java.gen.CallChain;
+import com.caucho.util.L10N;
+
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
-
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JClass;
-
-import com.caucho.util.L10N;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.gen.BaseMethod;
-import com.caucho.java.gen.CallChain;
-
-import com.caucho.ejb.gen.BeanAssembler;
-import com.caucho.ejb.gen.ViewClass;
-import com.caucho.ejb.gen.AmberFindMethod;
-import com.caucho.ejb.gen.CMP10FindMethod;
-import com.caucho.ejb.gen.EntityFindMethod;
-import com.caucho.ejb.gen.EntityFindCollectionMethod;
-import com.caucho.ejb.gen.EntityHomeSync;
-import com.caucho.ejb.gen.EntityHomePoolChain;
 
 /**
  * Configuration for a method of a view.

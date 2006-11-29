@@ -28,11 +28,12 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.util.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /*
  * A stream for reading multipart/mime files.

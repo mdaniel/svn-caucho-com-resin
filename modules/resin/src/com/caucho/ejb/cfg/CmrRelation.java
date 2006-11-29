@@ -29,27 +29,19 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.Collection;
-import java.util.Map;
-
-import java.io.IOException;
-
-import javax.ejb.EJBLocalObject;
-
-import com.caucho.bytecode.JMethod;
+import com.caucho.amber.field.AmberField;
+import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JClass;
-
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.gen.EntityBean;
+import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.amber.type.EntityType;
-
-import com.caucho.amber.field.AmberField;
-
-import com.caucho.ejb.gen.EntityBean;
+import javax.ejb.EJBLocalObject;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Abstract relation.

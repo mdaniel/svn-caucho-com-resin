@@ -29,13 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-
 /**
  * Represents a 16-bit unicode string value.
  */
@@ -56,9 +49,9 @@ abstract public class UnicodeValue extends StringValue {
   public StringValue toStringBuilder()
   {
     StringBuilderValue sb = new StringBuilderValue();
-    
+
     sb.append(this);
-    
+
     return sb;
   }
 

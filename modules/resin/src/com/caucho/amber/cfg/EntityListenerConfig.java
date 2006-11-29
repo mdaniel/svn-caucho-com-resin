@@ -29,8 +29,6 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.HashMap;
-
 /**
  * <entity-listener> tag in the orm.xml
  */

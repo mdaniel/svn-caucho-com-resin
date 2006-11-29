@@ -28,12 +28,10 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.regex.*;
+import com.caucho.util.IntMap;
 
-import com.caucho.util.*;
+import java.util.Iterator;
+import java.util.regex.Pattern;
 
 public class ESRegexp extends ESObject {
   static ESId GLOBAL = ESId.intern("global");

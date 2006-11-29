@@ -28,12 +28,12 @@
 
 package com.caucho.xsl;
 
-import java.io.*;
+import com.caucho.java.LineMap;
+import com.caucho.util.ExceptionWrapper;
 
-import javax.xml.transform.*;
-
-import com.caucho.util.*;
-import com.caucho.java.*;
+import javax.xml.transform.TransformerException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 /**
  * Exception rewriting.

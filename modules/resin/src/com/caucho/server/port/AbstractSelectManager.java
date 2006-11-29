@@ -28,22 +28,10 @@
 
 package com.caucho.server.port;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import java.nio.channels.Selector;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SelectableChannel;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.vfs.*;
-
-import com.caucho.config.ConfigException;
+import java.util.logging.Logger;
 
 /**
  * A select manager handles keepalive connections.

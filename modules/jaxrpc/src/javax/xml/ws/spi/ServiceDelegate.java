@@ -28,14 +28,14 @@
 */
 
 package javax.xml.ws.spi;
-import javax.xml.namespace.*;
-import javax.xml.ws.*;
-import javax.xml.ws.handler.*;
-import javax.xml.ws.Service.*;
-import javax.xml.bind.*;
-import java.net.*;
-import java.util.concurrent.*;
-import java.util.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.Service.Mode;
+import javax.xml.ws.handler.HandlerResolver;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.concurrent.Executor;
 
 /** XXX */
 public abstract class ServiceDelegate {

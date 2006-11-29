@@ -28,12 +28,12 @@
 */
 
 package javax.xml.bind.annotation;
-import javax.xml.transform.*;
-import org.w3c.dom.*;
-import javax.xml.transform.dom.*;
-import javax.xml.parsers.*;
-import javax.xml.bind.*;
 import org.w3c.dom.Element;
+
+import javax.xml.bind.ValidationEventHandler;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMResult;
 
 public class W3CDomHandler implements DomHandler<org.w3c.dom.Element, DOMResult> {
 

@@ -28,15 +28,8 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.io.*;
-
-import java.lang.reflect.*;
-import java.io.*;
-
-import com.caucho.vfs.WriteStream;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 
 /**
  * a string property

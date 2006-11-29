@@ -28,25 +28,17 @@
 
 package com.caucho.loader;
 
-import java.io.InputStream;
-
-import java.util.Vector;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.net.URL;
-
-import java.security.CodeSource;
-
-import java.security.cert.Certificate;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.log.Log;
+import com.caucho.vfs.Path;
+
+import java.io.InputStream;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.cert.Certificate;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**

@@ -29,17 +29,11 @@
 
 package com.caucho.jaxb;
 
-import java.io.*;
-import java.math.*;
-import java.util.*;
+import com.caucho.jaxb.skeleton.Skeleton;
 
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.jaxb.skeleton.*;
+import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 /**
  * Generates various parts of schema.

@@ -28,17 +28,11 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.vfs.ReadStream;
 
-import javax.xml.transform.*;
+import org.w3c.dom.Document;
 
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
+import javax.xml.transform.TransformerConfigurationException;
 
 /**
  * Public facade for creating StyleScript stylesheets.

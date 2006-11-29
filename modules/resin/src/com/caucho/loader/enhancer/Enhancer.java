@@ -29,30 +29,12 @@
 
 package com.caucho.loader.enhancer;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.bytecode.JavaClass;
+import com.caucho.java.gen.GenClass;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.SimpleLoader;
-import com.caucho.loader.Loader;
-import com.caucho.loader.ClassEntry;
-
-import com.caucho.bytecode.JavaClass;
-
-import com.caucho.java.CompileClassNotFound;
-
-import com.caucho.java.gen.GenClass;
+import java.util.logging.Logger;
 
 /**
  * Class loader which enhances classes.

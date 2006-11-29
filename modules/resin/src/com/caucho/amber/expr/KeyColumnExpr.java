@@ -28,9 +28,7 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
-
+import com.caucho.amber.query.FromItem;
 import com.caucho.amber.table.Column;
 
 /**

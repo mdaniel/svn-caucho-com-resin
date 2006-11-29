@@ -28,19 +28,14 @@
 
 package com.caucho.db.sql;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
+import com.caucho.db.table.Column;
+import com.caucho.db.table.Table;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.db.table.Table;
-import com.caucho.db.table.Column;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 class UnboundIdentifierExpr extends Expr {
   private static final L10N L = new L10N(UnboundIdentifierExpr.class);

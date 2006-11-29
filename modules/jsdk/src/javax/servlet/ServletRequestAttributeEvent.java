@@ -30,9 +30,6 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
-
 /**
  * The event class for changes to servlet request attributes.
  *
@@ -52,7 +49,7 @@ public class ServletRequestAttributeEvent extends ServletRequestEvent {
    * @param value the value of the attribute that changed
    */
   public ServletRequestAttributeEvent(ServletContext application,
-				      ServletRequest request,
+                                      ServletRequest request,
                                       String name,
                                       Object value)
   {
@@ -61,7 +58,7 @@ public class ServletRequestAttributeEvent extends ServletRequestEvent {
     _name = name;
     _value = value;
   }
-  
+
   /**
    * Returns the name of the attribute that changed.
    */

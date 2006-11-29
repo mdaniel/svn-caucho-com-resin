@@ -28,17 +28,15 @@
 
 package com.caucho.java.gen;
 
-import java.util.ArrayList;
+import com.caucho.java.JavaWriter;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
 
 import java.io.IOException;
-
-import com.caucho.server.util.*;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-
-import com.caucho.vfs.*;
-
-import com.caucho.java.JavaWriter;
+import java.util.ArrayList;
 
 /**
  * Basic method generation.

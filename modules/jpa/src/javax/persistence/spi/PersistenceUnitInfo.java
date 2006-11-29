@@ -29,11 +29,10 @@
 
 package javax.persistence.spi;
 
+import javax.sql.DataSource;
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
-
-import javax.sql.DataSource;
 
 /**
  * Container interface when creating an EntityManagerFactory.

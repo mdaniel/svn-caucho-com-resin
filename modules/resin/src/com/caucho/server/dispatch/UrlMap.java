@@ -29,17 +29,14 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
-import java.util.regex.*;
-import java.io.*;
-import java.net.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
+import javax.servlet.ServletException;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Maps uris to objects, using the syntax in the servlet2.2 deployment

@@ -29,10 +29,7 @@
 
 package javax.servlet.jsp;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
+import javax.servlet.Servlet;
 
 /**
  * JspPage is the base interface for any JSP page.

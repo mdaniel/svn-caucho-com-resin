@@ -30,11 +30,10 @@ package com.caucho.quercus.lib.zip;
 
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
-
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.ZipEntry;
 
 /**

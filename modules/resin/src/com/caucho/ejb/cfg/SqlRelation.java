@@ -28,7 +28,7 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.util.*;
+import com.caucho.util.L10N;
 
 /**
  * Represents a single relation to SQL mapping.

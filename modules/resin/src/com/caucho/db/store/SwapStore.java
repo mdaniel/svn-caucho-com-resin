@@ -29,12 +29,9 @@
 
 package com.caucho.db.store;
 
-import java.io.IOException;
-
 import com.caucho.java.WorkDir;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.vfs.Path;
 
 /**
  * The swap store is a singleton Store to manage buffered data that might

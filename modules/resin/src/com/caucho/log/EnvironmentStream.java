@@ -29,14 +29,18 @@
 
 package com.caucho.log;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.util.Alarm;
+import com.caucho.util.QDate;
+import com.caucho.vfs.StderrStream;
+import com.caucho.vfs.StdoutStream;
+import com.caucho.vfs.StreamImpl;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 /**
  * A stream that varies depending on the environment class loader.

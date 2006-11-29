@@ -29,7 +29,6 @@
 
 package com.caucho.util;
 
-import java.util.*;
 import java.io.*;
 
 /**

@@ -28,14 +28,9 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.util.CharBuffer;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import org.xml.sax.Attributes;
 
 class QAttributes implements Attributes {
   QName []names = new QName[32];

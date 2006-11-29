@@ -28,11 +28,10 @@
 
 package com.caucho.db.sql;
 
-import java.util.logging.Logger;
-
+import com.caucho.log.Log;
 import com.caucho.util.FreeList;
 
-import com.caucho.log.Log;
+import java.util.logging.Logger;
 
 /**
  * Represents a row of a group item.

@@ -31,10 +31,10 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.*;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.function.Marshal;
+import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.lib.VariableModule;
-import com.caucho.quercus.lib.session.SessionModule;
 import com.caucho.quercus.lib.string.StringModule;
-import com.caucho.quercus.function.*;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.page.QuercusPage;
@@ -43,15 +43,18 @@ import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.quercus.resources.StreamContextResource;
-
-import com.caucho.sql.DatabaseManager;
-
-import com.caucho.util.*;
-
-import com.caucho.vfs.*;
-
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
+import com.caucho.sql.DatabaseManager;
+import com.caucho.util.Alarm;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.ByteToChar;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 import javax.script.ScriptContext;
 import javax.servlet.http.Cookie;

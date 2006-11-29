@@ -29,13 +29,12 @@
 
 package com.caucho.xml.stream;
 
-import java.io.*;
-import java.util.logging.*;
-
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-
-import com.caucho.util.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
+import javax.xml.stream.StreamFilter;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 class FilteredStreamReader implements XMLStreamReader {
 

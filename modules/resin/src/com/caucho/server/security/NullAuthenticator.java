@@ -28,17 +28,13 @@
 
 package com.caucho.server.security;
 
-import java.io.*;
-import java.util.*;
-import java.security.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.security.BasicPrincipal;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.security.Principal;
 
 /**
  * The null authenticator creates a dummy user.

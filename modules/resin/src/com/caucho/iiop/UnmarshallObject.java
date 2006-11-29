@@ -28,10 +28,7 @@
 
 package com.caucho.iiop;
 
-import java.io.*;
-import javax.naming.*;
-
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 public class UnmarshallObject {
   public final static int BOOLEAN = 0;

@@ -28,8 +28,6 @@
 
 package com.caucho.soap.wsdl;
 
-import javax.xml.bind.annotation.*;
-
 /**
  * WSDL operation message definition
  */

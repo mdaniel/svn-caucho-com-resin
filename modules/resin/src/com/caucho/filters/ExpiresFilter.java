@@ -28,14 +28,17 @@
 
 package com.caucho.filters;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
 import com.caucho.config.types.Period;
+import com.caucho.util.Alarm;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Caches the servlet output.  ExpiresFilter sets the Expires header

@@ -28,13 +28,14 @@
 
 package com.caucho.log;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
+import com.caucho.util.QDate;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.StreamImpl;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 /**
  * Automatically-rotating streams.  Normally, clients will call

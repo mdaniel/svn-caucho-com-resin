@@ -28,20 +28,18 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import javax.el.*;
-
-import com.caucho.util.*;
-
-import com.caucho.config.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.ConfigELContext;
 import com.caucho.config.types.RawString;
-
 import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
+import com.caucho.util.L10N;
+
+import javax.el.ELContext;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Configuration for a servlet regexp.

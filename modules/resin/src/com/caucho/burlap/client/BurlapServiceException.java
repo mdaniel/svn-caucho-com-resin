@@ -48,9 +48,6 @@
 
 package com.caucho.burlap.client;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * Exception for faults when the fault doesn't return a java exception.
  * This exception is required for MicroBurlapInput.
@@ -65,7 +62,7 @@ public class BurlapServiceException extends Exception {
   public BurlapServiceException()
   {
   }
-  
+
   /**
    * Create the exception.
    */
@@ -83,7 +80,7 @@ public class BurlapServiceException extends Exception {
   {
     return code;
   }
-  
+
   /**
    * Returns the detail.
    */

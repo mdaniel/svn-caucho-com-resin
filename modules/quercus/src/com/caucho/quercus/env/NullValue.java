@@ -29,10 +29,12 @@
 
 package com.caucho.quercus.env;
 
-import java.io.*;
-import java.util.*;
-
 import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 /**
  * Represents a PHP null value.

@@ -28,7 +28,8 @@
 
 package javax.servlet.jsp.jstl.fmt;
 
-import java.util.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class LocalizationContext {
   private ResourceBundle bundle;

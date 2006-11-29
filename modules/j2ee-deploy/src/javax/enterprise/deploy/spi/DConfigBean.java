@@ -28,13 +28,11 @@
 
 package javax.enterprise.deploy.spi;
 
-import java.beans.PropertyChangeListener;
-
 import javax.enterprise.deploy.model.DDBean;
 import javax.enterprise.deploy.model.XpathEvent;
-
-import javax.enterprise.deploy.spi.exceptions.ConfigurationException;
 import javax.enterprise.deploy.spi.exceptions.BeanNotFoundException;
+import javax.enterprise.deploy.spi.exceptions.ConfigurationException;
+import java.beans.PropertyChangeListener;
 
 /**
  * Interface for a configuration bean.

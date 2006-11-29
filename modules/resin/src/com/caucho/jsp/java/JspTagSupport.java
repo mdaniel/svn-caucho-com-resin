@@ -28,23 +28,15 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.config.ConfigException;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
 
 import javax.servlet.ServletException;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.xml.QName;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.vfs.*;
-
-import com.caucho.java.LineMap;
-
-import com.caucho.jsp.*;
+import javax.servlet.jsp.tagext.SimpleTagSupport;
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
+import java.util.ArrayList;
 
 /**
  * Represents the body for a SimpleTag

@@ -28,9 +28,11 @@
 */
 
 package javax.xml.stream.events;
-import java.io.*;
-import javax.xml.stream.*;
-import javax.xml.namespace.*;
+import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import java.io.Writer;
 
 public interface XMLEvent extends XMLStreamConstants {
 

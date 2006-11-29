@@ -29,41 +29,31 @@
 
 package com.caucho.server.http;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import java.security.cert.*;
-
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CharSegment;
-
-import com.caucho.vfs.QSocket;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.ClientDisconnectException;
-
-//import com.caucho.jsp.*;
-
 import com.caucho.log.Log;
-
+import com.caucho.server.cluster.Server;
+import com.caucho.server.connection.AbstractHttpRequest;
+import com.caucho.server.connection.Connection;
+import com.caucho.server.dispatch.BadRequestException;
+import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
-import com.caucho.server.dispatch.DispatchServer;
-import com.caucho.server.dispatch.BadRequestException;
-
-import com.caucho.server.webapp.ErrorPageManager;
-
-import com.caucho.server.cluster.Server;
-
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
-
-import com.caucho.server.port.TcpConnection;
 import com.caucho.server.port.ServerRequest;
+import com.caucho.server.port.TcpConnection;
+import com.caucho.server.webapp.ErrorPageManager;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CharSegment;
+import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.QSocket;
+import com.caucho.vfs.ReadStream;
+
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles a new request from an HTTP connection.

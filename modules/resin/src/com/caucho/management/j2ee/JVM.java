@@ -32,9 +32,9 @@ package com.caucho.management.j2ee;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.util.CauchoSystem;
 
-import javax.management.j2ee.statistics.JVMStats;
 import javax.management.j2ee.statistics.BoundedRangeStatistic;
 import javax.management.j2ee.statistics.CountStatistic;
+import javax.management.j2ee.statistics.JVMStats;
 
 /**
  * Management interface for the JVM.

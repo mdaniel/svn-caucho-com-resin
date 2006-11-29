@@ -29,36 +29,22 @@
 
 package com.caucho.quercus.lib.zlib;
 
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.file.FileValue;
+import com.caucho.quercus.lib.string.StringModule;
+import com.caucho.util.L10N;
+import com.caucho.vfs.TempBuffer;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
-
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.annotation.NotNull;
-
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.BinaryValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.lib.file.FileValue;
-import com.caucho.quercus.lib.string.StringModule;
-
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.ReturnNullAsFalse;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.TempBuffer;
 
 /**
  * Zlib object oriented API facade

@@ -28,15 +28,12 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
+import com.caucho.amber.query.QueryParser;
+import com.caucho.amber.type.Type;
+import com.caucho.util.CharBuffer;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.amber.type.Type;
 
 /**
  * Parameter argument expression.

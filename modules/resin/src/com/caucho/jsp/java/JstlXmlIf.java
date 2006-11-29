@@ -28,15 +28,11 @@
 
 package com.caucho.jsp.java;
 
-import java.io.IOException;
-
-import javax.servlet.jsp.*;
-
+import com.caucho.jsp.JspParseException;
 import com.caucho.vfs.WriteStream;
-
 import com.caucho.xml.QName;
 
-import com.caucho.jsp.JspParseException;
+import java.io.IOException;
 
 public class JstlXmlIf extends JstlNode {
   private static final QName SELECT = new QName("select");

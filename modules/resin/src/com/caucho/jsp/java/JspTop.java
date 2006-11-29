@@ -29,18 +29,14 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
+import com.caucho.jsp.JspParseException;
+import com.caucho.util.L10N;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.XmlChar;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.jsp.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.xml.QName;
-import com.caucho.xml.XmlChar;
 
 /**
  * Represents the root node.

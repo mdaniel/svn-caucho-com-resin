@@ -28,12 +28,6 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-
 class NativeWrapper extends ESObject {
   static ESId CONSTRUCTOR = ESId.intern("constructor");
   static ESId LENGTH = ESId.intern("length");
@@ -58,7 +52,7 @@ class NativeWrapper extends ESObject {
     proto.put(CONSTRUCTOR, new ESThunk(thunk), DONT_ENUM);
 
     put(PROTOTYPE, new ESThunk(thunk - 1), DONT_ENUM|DONT_DELETE|READ_ONLY);
-    
+
     put(LENGTH, ESNumber.create(fun.length), DONT_ENUM|DONT_DELETE|READ_ONLY);
   }
 
@@ -100,7 +94,7 @@ class NativeWrapper extends ESObject {
   {
     return fun.call(eval, length);
   }
-  
+
   public ESBase construct(Call eval, int length) throws Throwable
   {
     if (constructor != null)

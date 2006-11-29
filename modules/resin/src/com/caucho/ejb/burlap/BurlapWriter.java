@@ -28,19 +28,13 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-
-import com.caucho.hessian.io.HessianRemoteResolver;
-
 import com.caucho.burlap.io.BurlapInput;
 import com.caucho.burlap.io.BurlapOutput;
+import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.ReadStream;
+
+import java.io.OutputStream;
 
 public class BurlapWriter extends BurlapOutput {
   private ReadStream _is;

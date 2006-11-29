@@ -29,29 +29,24 @@
 
 package com.caucho.java.gen;
 
-import java.lang.reflect.Method;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaWriter;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.SimpleLoader;
+import com.caucho.loader.enhancer.EnhancingClassLoader;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.*;
-
-import com.caucho.java.JavaWriter;
-import com.caucho.java.JavaCompiler;
-
-import com.caucho.loader.SimpleLoader;
-import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.loader.enhancer.EnhancingClassLoader;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Factory for generating Java classes.

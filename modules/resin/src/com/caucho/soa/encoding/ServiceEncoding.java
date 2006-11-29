@@ -32,8 +32,6 @@ package com.caucho.soa.encoding;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.caucho.config.ConfigException;
-
 /**
  * An encoding for a (web) service.
  */

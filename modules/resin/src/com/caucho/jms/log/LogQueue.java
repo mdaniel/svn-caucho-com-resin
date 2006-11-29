@@ -28,36 +28,27 @@
 
 package com.caucho.jms.log;
 
-import java.io.OutputStream;
-import java.io.ObjectOutputStream;
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Enumeration;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.jms.Message;
-import javax.jms.Queue;
-import javax.jms.JMSException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.TempBuffer;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.jms.AbstractDestination;
 import com.caucho.jms.JMSExceptionWrapper;
-
 import com.caucho.jms.selector.Selector;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Queue;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A log queue.

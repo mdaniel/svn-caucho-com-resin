@@ -29,35 +29,27 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.Version;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-
 import com.caucho.config.j2ee.InjectIntrospector;
-
-import com.caucho.log.Log;
-
-import com.caucho.server.webapp.WebApp;
-
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.Environment;
-
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.RequestAdapter;
-
+import com.caucho.java.JavaCompiler;
 import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.loader.Environment;
+import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Alarm;
+import com.caucho.util.CacheListener;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.MemoryPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Parent template manager for both JspManager and XtpManager.  PageManager

@@ -29,11 +29,14 @@
 
 package javax.servlet.jsp.el;
 
+import javax.el.ELContext;
+import javax.el.ELResolver;
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.PageContext;
 import java.beans.FeatureDescriptor;
-import java.util.*;
-
-import javax.el.*;
-import javax.servlet.jsp.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  * Variable resolution for JSP variables

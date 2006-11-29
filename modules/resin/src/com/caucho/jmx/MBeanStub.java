@@ -28,16 +28,12 @@
 
 package com.caucho.jmx;
 
-import java.util.logging.Logger;
-
-import java.io.Serializable;
-import java.io.ObjectStreamException;
-
-import javax.management.MalformedObjectNameException;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.logging.Logger;
 
 /**
  * Encapsulates the managed object.

@@ -28,17 +28,11 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
-
-import java.lang.reflect.*;
-import java.io.*;
-import java.util.*;
-
-import com.caucho.vfs.WriteStream;
+import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * a Collection Property

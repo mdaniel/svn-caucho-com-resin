@@ -29,21 +29,16 @@
 
 package com.caucho.make;
 
+import com.caucho.util.Crc64;
+import com.caucho.vfs.PersistentDependency;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
 import java.util.Arrays;
 import java.util.Comparator;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Base64;
-import com.caucho.util.Crc64;
-
-import com.caucho.vfs.*;
+import java.util.logging.Logger;
 
 /**
  * Representing a class that might change.

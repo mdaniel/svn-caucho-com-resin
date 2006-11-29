@@ -49,13 +49,11 @@
 
 package com.caucho.portal.generic.taglib;
 
-import java.io.IOException;
-
 import javax.portlet.RenderResponse;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
+import java.io.IOException;
 
 public class NamespaceTag extends TagSupport {
   public int doStartTag() 

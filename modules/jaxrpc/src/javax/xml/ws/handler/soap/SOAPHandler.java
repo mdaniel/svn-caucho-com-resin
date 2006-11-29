@@ -28,9 +28,9 @@
 */
 
 package javax.xml.ws.handler.soap;
-import javax.xml.namespace.*;
-import javax.xml.ws.handler.*;
-import java.util.*;
+import javax.xml.namespace.QName;
+import javax.xml.ws.handler.Handler;
+import java.util.Set;
 
 /** XXX */
 public interface SOAPHandler<T extends SOAPMessageContext>

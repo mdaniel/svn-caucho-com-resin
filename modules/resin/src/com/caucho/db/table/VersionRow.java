@@ -28,12 +28,10 @@
 
 package com.caucho.db.table;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import java.util.logging.Logger;
 
 /**
  * Represents a versioned row

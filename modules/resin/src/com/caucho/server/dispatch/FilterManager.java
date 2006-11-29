@@ -28,24 +28,20 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.NodeBuilderProgram;
+import com.caucho.config.types.InitProgram;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.Filter;
+import javax.servlet.ServletException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.annotation.*;
-
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.*;
-import com.caucho.config.types.InitProgram;
-
-import com.caucho.config.j2ee.InjectIntrospector;
 
 /**
  * Manages the servlets.

@@ -29,18 +29,10 @@
 package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.expr.AmberExpr;
-
-import java.util.ArrayList;
-
+import com.caucho.amber.type.*;
 import com.caucho.util.L10N;
 
-import com.caucho.amber.type.DoubleType;
-import com.caucho.amber.type.FloatType;
-import com.caucho.amber.type.IntegerType;
-import com.caucho.amber.type.LongType;
-import com.caucho.amber.type.PrimitiveFloatType;
-import com.caucho.amber.type.PrimitiveIntType;
-import com.caucho.amber.type.Type;
+import java.util.ArrayList;
 
 
 /**

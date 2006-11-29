@@ -28,16 +28,13 @@
 
 package com.caucho.amber.entity;
 
-import java.util.logging.Logger;
-
-import java.util.Map;
-
-import java.sql.SQLException;
-
+import com.caucho.amber.manager.AmberConnection;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.amber.manager.AmberConnection;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Manages the set of persistent beans.

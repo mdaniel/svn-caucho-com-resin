@@ -29,18 +29,13 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
+import com.caucho.quercus.Location;
+import com.caucho.quercus.env.BreakValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BreakValue;
-
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.VarExpr;
 
-import com.caucho.quercus.Location;
+import java.util.ArrayList;
 
 /**
  * Represents a switch statement.

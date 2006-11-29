@@ -28,9 +28,8 @@
 
 package javax.xml.rpc.handler;
 
-import java.util.List;
-
 import javax.xml.namespace.QName;
+import java.util.List;
 
 /**
  * Represents a mapping registry.

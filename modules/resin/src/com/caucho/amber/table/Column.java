@@ -28,26 +28,20 @@
 
 package com.caucho.amber.table;
 
-import java.io.IOException;
-
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.type.Type;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
-
 import com.caucho.java.JavaWriter;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.type.Type;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Column configuration.

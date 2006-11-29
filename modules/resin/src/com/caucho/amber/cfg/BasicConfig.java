@@ -29,8 +29,6 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.ArrayList;
-
 import javax.persistence.EnumType;
 import javax.persistence.FetchType;
 import javax.persistence.TemporalType;

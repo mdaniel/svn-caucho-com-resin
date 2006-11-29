@@ -28,7 +28,7 @@
 */
 
 package javax.xml.ws.http;
-import javax.xml.ws.*;
+import javax.xml.ws.Binding;
 
 /** XXX */
 public interface HTTPBinding extends Binding {

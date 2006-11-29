@@ -28,14 +28,12 @@
 
 package com.caucho.config;
 
-import java.lang.reflect.*;
+import com.caucho.util.L10N;
 
-import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
-import com.caucho.util.*;
-
-import com.caucho.config.BeanBuilderException;
+import java.lang.reflect.Method;
 
 /**
  * TypeBuilder for nodes.

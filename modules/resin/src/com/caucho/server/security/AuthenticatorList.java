@@ -28,17 +28,14 @@
 
 package com.caucho.server.security;
 
-import java.security.Principal;
-
-import java.util.ArrayList;
-
-import javax.annotation.*;
-
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.security.Principal;
+import java.util.ArrayList;
 
 /**
  * The AuthenticatorList is used to configure more than one authenticators in a

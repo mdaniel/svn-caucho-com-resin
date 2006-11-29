@@ -48,11 +48,11 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
 import com.caucho.hessian.util.IdentityIntMap;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
 
 /**
  * Output stream for Hessian 2 requests.

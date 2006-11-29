@@ -29,22 +29,17 @@
 
 package com.caucho.server.connection;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.OutputStream;
-import java.io.IOException;
+import com.caucho.log.Log;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.ServletContext;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ClientDisconnectException;
-
-import com.caucho.log.Log;
-
-import com.caucho.server.webapp.WebApp;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class ResponseStream extends ToByteResponseStream {
   static final Logger log = Log.open(ResponseStream.class);

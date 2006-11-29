@@ -29,24 +29,24 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.log.Log;
-
-import com.caucho.ejb.*;
+import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.Skeleton;
-
 import com.caucho.ejb.xa.TransactionContext;
+import com.caucho.hessian.io.HessianDebugInputStream;
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.HessianProtocolException;
+import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.hessian.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base class for any bean skeleton capable of handling a Hessian request.

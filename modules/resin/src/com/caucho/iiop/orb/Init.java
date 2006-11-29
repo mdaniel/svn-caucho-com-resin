@@ -29,16 +29,6 @@
 
 package com.caucho.iiop.orb;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import org.omg.CORBA.*;
-
 public interface Init
 {
   public org.omg.CORBA.Object get(String name);

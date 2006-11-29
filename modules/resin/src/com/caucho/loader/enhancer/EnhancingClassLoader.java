@@ -29,48 +29,10 @@
 
 package com.caucho.loader.enhancer;
 
-import java.io.InputStream;
-
-import java.net.URL;
-
-import java.security.Permission;
-
-import java.util.ArrayList;
-import java.util.Enumeration;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.bytecode.ByteCodeParser;
-import com.caucho.bytecode.JavaClass;
-import com.caucho.bytecode.JavaField;
-import com.caucho.bytecode.JavaMethod;
-import com.caucho.bytecode.ConstantPool;
-import com.caucho.bytecode.ConstantPoolEntry;
-import com.caucho.bytecode.FieldRefConstant;
-import com.caucho.bytecode.MethodRefConstant;
-import com.caucho.bytecode.Utf8Constant;
-import com.caucho.bytecode.CodeVisitor;
-import com.caucho.bytecode.CodeEnhancer;
-import com.caucho.bytecode.Analyzer;
-import com.caucho.bytecode.CodeAttribute;
-
 import com.caucho.java.WorkDir;
-import com.caucho.java.CompileClassNotFound;
-
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.java.gen.GenClass;
-
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.SimpleLoader;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.ClassEntry;
-import com.caucho.loader.Loader;
-
 import com.caucho.util.L10N;
-
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
 
 /**
  * Class loader which checks for changes in class files and automatically

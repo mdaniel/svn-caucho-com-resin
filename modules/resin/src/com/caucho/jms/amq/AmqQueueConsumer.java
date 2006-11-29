@@ -29,30 +29,15 @@
 
 package com.caucho.jms.amq;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Enumeration;
+import com.caucho.jms.message.MessageImpl;
+import com.caucho.jms.session.SessionImpl;
+import com.caucho.util.L10N;
 
-import java.util.logging.Logger;
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.QueueReceiver;
 import java.util.logging.Level;
-
-import java.io.IOException;
-
-import javax.jms.*;
-
-import com.caucho.util.*;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.vfs.*;
-
-import com.caucho.jms.*;
-
-import com.caucho.jms.selector.*;
-
-import com.caucho.jms.message.*;
-
-import com.caucho.jms.session.*;
+import java.util.logging.Logger;
 
 /**
  * Represents a JDBC queue consumer.

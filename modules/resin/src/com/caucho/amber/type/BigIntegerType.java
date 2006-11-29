@@ -28,17 +28,13 @@
 
 package com.caucho.amber.type;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
-import java.io.IOException;
-
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import com.caucho.java.JavaWriter;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

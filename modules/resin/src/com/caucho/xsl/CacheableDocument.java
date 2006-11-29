@@ -28,15 +28,11 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.jsp.*;
+import com.caucho.vfs.Path;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
+import java.util.ArrayList;
 
 /**
  * A document wrapper allowing caching of XSL-generated content.

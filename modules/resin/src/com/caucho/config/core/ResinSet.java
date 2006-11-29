@@ -29,14 +29,11 @@
 
 package com.caucho.config.core;
 
-import javax.annotation.*;
-
+import com.caucho.config.Config;
+import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Config;
-
-import com.caucho.naming.Jndi;
+import javax.annotation.PostConstruct;
 
 /**
  * Sets an EL value.

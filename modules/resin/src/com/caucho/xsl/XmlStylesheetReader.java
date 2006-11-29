@@ -28,17 +28,12 @@
 
 package com.caucho.xsl;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.xml.XmlUtil;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-import com.caucho.xml.*;
+import org.xml.sax.helpers.DefaultHandler;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
    * Handler for xml-stylesheet the resin.conf file.

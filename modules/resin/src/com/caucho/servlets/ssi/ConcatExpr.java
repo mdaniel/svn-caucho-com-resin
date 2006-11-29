@@ -29,21 +29,8 @@
 
 package com.caucho.servlets.ssi;
 
-import java.io.IOException;
-
-import java.util.HashMap;
-
-import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.util.IntMap;
-import com.caucho.util.Alarm;
-import com.caucho.util.QDate;
-
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.Path;
 
 /**
  * Represents a SSI string concat expression

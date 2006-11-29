@@ -33,15 +33,12 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
-import java.util.AbstractSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.Collection;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
-import java.io.IOException;
 
 /**
  * Represents a compiled object value.

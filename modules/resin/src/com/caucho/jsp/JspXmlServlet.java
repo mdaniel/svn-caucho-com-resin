@@ -29,17 +29,6 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.server.webapp.WebApp;
-
 /**
  * Handles JSP pages.  Most of the work is done in the JspManager and QServlet.
  *

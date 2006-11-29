@@ -28,10 +28,10 @@
 
 package com.caucho.server.webapp;
 
-import java.util.*;
-
-import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 
 /**
  * Configuration for welcome-file-list.

@@ -29,34 +29,58 @@
 
 package com.caucho.xsl;
 
-import java.lang.ref.SoftReference;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.*;
-
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
-import javax.xml.transform.sax.*;
-
-import org.xml.sax.*;
-import org.w3c.dom.*;
-
-import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xpath.*;
-import com.caucho.java.*;
-import com.caucho.xml.*;
+import com.caucho.java.JavaCompiler;
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.SimpleLoader;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.SimpleLoader;
+import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.Crc64Stream;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.*;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.XPath;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
+import org.w3c.dom.Node;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLFilter;
+import org.xml.sax.XMLReader;
+
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.Source;
+import javax.xml.transform.Templates;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TemplatesHandler;
+import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.lang.ref.SoftReference;
+import java.util.Iterator;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract factory for creating stylesheets.

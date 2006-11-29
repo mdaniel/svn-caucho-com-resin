@@ -28,7 +28,7 @@
 */
 
 package javax.xml.bind;
-import javax.xml.namespace.*;
+import javax.xml.namespace.QName;
 
 public abstract class JAXBIntrospector {
 

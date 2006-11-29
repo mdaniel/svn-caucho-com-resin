@@ -28,15 +28,11 @@
 
 package com.caucho.xpath.expr;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.XPathException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
-import com.caucho.xpath.pattern.*;
+import org.w3c.dom.Node;
 
 abstract public class AbstractNumberExpr extends Expr {
   public boolean isNumber()

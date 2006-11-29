@@ -28,18 +28,26 @@
 */
 
 package javax.xml.bind.helpers;
-import javax.xml.stream.*;
-import org.w3c.dom.*;
-import java.io.*;
-import org.xml.sax.*;
-import java.util.*;
-import javax.xml.bind.attachment.*;
-import javax.xml.validation.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.sax.*;
-import javax.xml.bind.annotation.adapters.*;
-import javax.xml.bind.*;
-import javax.xml.bind.Marshaller.*;
+import org.w3c.dom.Node;
+import org.xml.sax.ContentHandler;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.PropertyException;
+import javax.xml.bind.ValidationEventHandler;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.attachment.AttachmentMarshaller;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.sax.SAXResult;
+import javax.xml.validation.Schema;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.HashMap;
 
 public abstract class AbstractMarshallerImpl implements Marshaller {
 

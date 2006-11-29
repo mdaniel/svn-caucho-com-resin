@@ -28,14 +28,9 @@
 
 package com.caucho.es.parser;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.es.*;
+import com.caucho.es.ESException;
+import com.caucho.es.ESId;
+import com.caucho.server.util.CauchoSystem;
 
 /**
  * Expression for a java type.

@@ -29,19 +29,15 @@
 
 package com.caucho.amber.field;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.JavaWriter;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * The stub method is needed in particular to support EJB/CMP and ejbSelect

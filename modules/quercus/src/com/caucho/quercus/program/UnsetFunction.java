@@ -29,10 +29,8 @@
 
 package com.caucho.quercus.program;
 
-import java.io.*;
-
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.expr.*;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
 /**
  * Represents an unset function

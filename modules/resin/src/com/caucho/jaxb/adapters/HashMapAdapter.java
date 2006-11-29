@@ -28,11 +28,7 @@
 */
 
 package com.caucho.jaxb.adapters;
-import com.caucho.jaxb.*;
-import javax.xml.bind.*;
-import javax.xml.bind.util.*;
-import javax.xml.bind.annotation.adapters.*;
-import java.util.*;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class HashMapAdapter<ValueType,BoundType>
   extends XmlAdapter<ValueType,BoundType> {

@@ -28,7 +28,8 @@
 */
 
 package javax.xml.bind.helpers;
-import javax.xml.bind.*;
+import javax.xml.bind.ValidationEvent;
+import javax.xml.bind.ValidationEventLocator;
 
 public class ValidationEventImpl implements ValidationEvent {
 

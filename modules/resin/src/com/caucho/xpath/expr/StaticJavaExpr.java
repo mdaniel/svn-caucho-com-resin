@@ -28,16 +28,15 @@
 
 package com.caucho.xpath.expr;
 
-import java.util.*;
-import java.io.*;
-import java.lang.reflect.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.XPathException;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Node;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
  * Implements the static java extension functions.

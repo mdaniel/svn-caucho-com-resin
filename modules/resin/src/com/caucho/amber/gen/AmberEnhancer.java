@@ -29,57 +29,31 @@
 
 package com.caucho.amber.gen;
 
-import java.lang.reflect.Method;
-
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.bytecode.CodeAttribute;
-import com.caucho.bytecode.JavaClass;
-import com.caucho.bytecode.JMethod;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-
-import com.caucho.loader.enhancer.ClassEnhancer;
-import com.caucho.loader.enhancer.EnhancerPrepare;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.JavaCompiler;
-import com.caucho.java.WorkDir;
-
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.java.gen.DependencyComponent;
-import com.caucho.java.gen.GenClass;
-
-import com.caucho.amber.AmberRuntimeException;
-
+import com.caucho.amber.field.AmberField;
+import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.type.AbstractEnhancedType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.ListenerType;
 import com.caucho.amber.type.SubEntityType;
+import com.caucho.bytecode.*;
+import com.caucho.config.ConfigException;
+import com.caucho.java.JavaCompiler;
+import com.caucho.java.WorkDir;
+import com.caucho.java.gen.DependencyComponent;
+import com.caucho.java.gen.GenClass;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.loader.enhancer.ClassEnhancer;
+import com.caucho.loader.enhancer.EnhancerPrepare;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.amber.field.AmberField;
-
-import com.caucho.amber.manager.AmberContainer;
-
-import com.caucho.bytecode.ConstantPool;
-import com.caucho.bytecode.FieldRefConstant;
-import com.caucho.bytecode.MethodRefConstant;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JavaMethod;
-import com.caucho.bytecode.CodeVisitor;
-import com.caucho.bytecode.Analyzer;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Enhancing the java objects for Amber mapping.

@@ -28,8 +28,7 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import com.caucho.util.*;
+import java.io.IOException;
 
 public class IOExceptionWrapper extends IOException {
   private Throwable _rootCause;

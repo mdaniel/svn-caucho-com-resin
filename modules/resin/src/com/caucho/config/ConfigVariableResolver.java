@@ -29,15 +29,13 @@
 
 package com.caucho.config;
 
-import java.util.HashMap;
-
-import javax.el.*;
-
+import com.caucho.el.AbstractVariableResolver;
+import com.caucho.el.EL;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 
-import com.caucho.el.EL;
-import com.caucho.el.AbstractVariableResolver;
+import javax.el.ELContext;
+import java.util.HashMap;
 
 /**
  * Creates a variable resolver based on the classloader.

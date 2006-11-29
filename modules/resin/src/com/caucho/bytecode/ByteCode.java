@@ -28,16 +28,12 @@
 
 package com.caucho.bytecode;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Logger;
 
 /**
  * Interface to the bytecode compiler.

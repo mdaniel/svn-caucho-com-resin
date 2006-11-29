@@ -29,12 +29,11 @@
 
 package javax.portlet;
 
-import java.io.*;
-
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Set;
 
 public interface PortletContext
 {

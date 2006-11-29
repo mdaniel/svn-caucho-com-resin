@@ -28,13 +28,12 @@
 
 package com.caucho.vfs;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.io.IOException;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A print writer which allows for a changing writer.

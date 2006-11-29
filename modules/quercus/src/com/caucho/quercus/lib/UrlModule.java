@@ -29,43 +29,29 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.LineNumberReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-
-import java.net.URL;
-import java.net.Socket;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.LinkedHashMap;
-import java.util.logging.Logger;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Base64;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.vfs.TempBuffer;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.BinaryStream;
+import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.TempBuffer;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.UnsetValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.BooleanValue;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.net.URL;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * PHP URL

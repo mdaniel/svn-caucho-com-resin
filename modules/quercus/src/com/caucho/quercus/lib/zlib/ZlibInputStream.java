@@ -29,16 +29,13 @@
 
 package com.caucho.quercus.lib.zlib;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.zip.CRC32;
-
 import com.caucho.quercus.QuercusModuleException;
-
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 /**
  * Input from a compressed stream.

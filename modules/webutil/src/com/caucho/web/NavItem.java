@@ -30,8 +30,10 @@
 
 package com.caucho.web;
 
-import java.util.*;
-import com.caucho.util.*;
+import com.caucho.util.Tree;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class NavItem {
   Tree tree;

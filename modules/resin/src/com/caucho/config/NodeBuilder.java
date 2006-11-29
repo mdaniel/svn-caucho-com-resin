@@ -26,52 +26,33 @@
 
 package com.caucho.config;
 
-import java.lang.ref.SoftReference;
-
-import java.lang.reflect.*;
-
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.el.*;
-
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import org.w3c.dom.Attr;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.DocumentType;
-import org.w3c.dom.Comment;
-import org.w3c.dom.ProcessingInstruction;
-
-import com.caucho.el.*;
-
-import com.caucho.util.*;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentBean;
-
-import com.caucho.vfs.*;
-
-import com.caucho.xml.QDocument;
-import com.caucho.xml.QElement;
-import com.caucho.xml.QAbstractNode;
-import com.caucho.xml.QName;
-import com.caucho.xml.QNode;
-import com.caucho.xml.Xml;
-import com.caucho.xml.XmlUtil;
-import com.caucho.xml.DOMBuilder;
-
 import com.caucho.config.types.ResinType;
 import com.caucho.config.types.Validator;
-
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
-import com.caucho.el.EL;
+import com.caucho.util.CompileException;
+import com.caucho.util.L10N;
+import com.caucho.util.LineCompileException;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.xml.QAbstractNode;
+import com.caucho.xml.QDocument;
+import com.caucho.xml.QElement;
+import com.caucho.xml.QName;
+import com.caucho.xml.QNode;
+import com.caucho.xml.XmlUtil;
+
+import org.w3c.dom.*;
+
+import javax.el.ELException;
+import javax.el.ELResolver;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * DOM builder is the interface for the

@@ -29,10 +29,13 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.L10N;
 
-import com.caucho.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Wraps a path object.

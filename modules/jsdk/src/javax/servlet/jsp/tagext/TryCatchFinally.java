@@ -30,8 +30,6 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-
 /**
  * Mixin interface to handle exceptions thrown in a tag.
  */

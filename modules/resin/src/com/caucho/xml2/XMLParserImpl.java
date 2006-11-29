@@ -28,20 +28,12 @@
 
 package com.caucho.xml2;
 
-import java.io.IOException;
-
-import java.util.Locale;
-
-import org.xml.sax.Parser;
-import org.xml.sax.XMLReader;
-import org.xml.sax.InputSource;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.DocumentHandler;
-import org.xml.sax.DTDHandler;
-import org.xml.sax.SAXException;
-
 import com.caucho.xml.QName;
+
+import org.xml.sax.*;
+
+import java.io.IOException;
+import java.util.Locale;
 
 /**
  * A fast XML parser.

@@ -28,15 +28,9 @@
 
 package com.caucho.xpath.expr;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
-import com.caucho.xpath.pattern.*;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.XPathException;
+import com.caucho.xpath.pattern.NodeIterator;
 
 /**
  * A variable containing a Java object.

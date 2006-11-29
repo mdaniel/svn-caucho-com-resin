@@ -29,7 +29,8 @@
 
 package javax.jcr.lock;
 
-import javax.jcr.*;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 
 public interface Lock {
   public String getLockOwner();

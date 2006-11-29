@@ -53,11 +53,11 @@ import com.caucho.portal.generic.Action;
 import com.caucho.portal.generic.Portal;
 import com.caucho.portal.generic.Window;
 
-import java.io.*;
-
-import java.util.*;
-
-import javax.portlet.*;
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
+import javax.portlet.Portlet;
+import javax.portlet.PortletException;
+import java.io.IOException;
 
 
 class ActionImpl

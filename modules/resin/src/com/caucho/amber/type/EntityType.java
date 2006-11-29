@@ -29,14 +29,11 @@
 
 package com.caucho.amber.type;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.Table;
 import com.caucho.util.L10N;
 
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.table.Table;
+import java.util.logging.Logger;
 
 /**
  * Represents an application persistent bean type

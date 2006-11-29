@@ -28,20 +28,12 @@
 
 package com.caucho.server.session;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 import com.caucho.log.Log;
-import com.caucho.server.http.*;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletException;
+import java.util.logging.Logger;
 
 /**
  * A factory for creating sessions.

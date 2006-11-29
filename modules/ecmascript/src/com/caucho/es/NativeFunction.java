@@ -28,13 +28,12 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.es.parser.Parser;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.es.parser.*;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * JavaScript object

@@ -27,32 +27,12 @@
 
 package com.caucho.config;
 
-import java.lang.ref.SoftReference;
-
-import java.lang.reflect.*;
-
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CompileException;
-import com.caucho.util.LineCompileException;
-
 import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentBean;
-
-import com.caucho.vfs.*;
-
+import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-import com.caucho.config.types.ResinType;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * MapBuilder populates the bean based on a map.

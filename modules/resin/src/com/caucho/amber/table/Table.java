@@ -29,34 +29,27 @@
 
 package com.caucho.amber.table;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.config.ConfigException;
-import com.caucho.config.LineConfigException;
-
 import com.caucho.amber.AmberRuntimeException;
-
-import com.caucho.amber.type.RelatedType;
-import com.caucho.amber.type.Type;
-
-import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.AmberCompletion;
-import com.caucho.amber.entity.TableInvalidateCompletion;
+import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityListener;
-
+import com.caucho.amber.entity.TableInvalidateCompletion;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.Type;
+import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Representation of a database table.

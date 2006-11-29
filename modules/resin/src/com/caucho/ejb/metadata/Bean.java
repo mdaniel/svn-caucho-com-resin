@@ -29,9 +29,6 @@
 
 package com.caucho.ejb.metadata;
 
-import javax.annotation.*;
-
-import com.caucho.amber.cfg.EntityIntrospector;
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
@@ -46,6 +43,7 @@ import com.caucho.ejb.cfg.MethodSignature;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.*;
 import javax.persistence.Entity;
 import java.util.ArrayList;

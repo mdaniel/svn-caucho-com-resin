@@ -28,19 +28,30 @@
 
 package com.caucho.xsl.fun;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import org.w3c.dom.*;
-import javax.xml.transform.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
 import com.caucho.log.Log;
-import com.caucho.xsl.*;
-import com.caucho.xpath.*;
-import com.caucho.xpath.pattern.*;
+import com.caucho.vfs.Path;
+import com.caucho.xml.CauchoNode;
+import com.caucho.xml.LooseHtml;
+import com.caucho.xml.QDocument;
+import com.caucho.xml.Xml;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.XPathException;
+import com.caucho.xpath.XPathFun;
+import com.caucho.xpath.pattern.AbstractPattern;
+import com.caucho.xsl.TransformerImpl;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
+import org.w3c.dom.Node;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The document(...) function.

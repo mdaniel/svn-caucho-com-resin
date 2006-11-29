@@ -28,29 +28,24 @@
 
 package com.caucho.jms.message;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.Enumeration;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.lang.ref.SoftReference;
-
-import javax.jms.Message;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageFormatException;
-import javax.jms.MessageNotReadableException;
-import javax.jms.MessageNotWriteableException;
-
+import com.caucho.jms.session.SessionImpl;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.NullEnumeration;
 
-import com.caucho.log.Log;
-
-import com.caucho.jms.session.SessionImpl;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageFormatException;
+import javax.jms.MessageNotReadableException;
+import javax.jms.MessageNotWriteableException;
+import java.lang.ref.SoftReference;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A basic message.

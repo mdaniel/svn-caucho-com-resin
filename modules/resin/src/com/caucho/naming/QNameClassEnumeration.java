@@ -28,16 +28,18 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
 import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.naming.NameClassPair;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class QNameClassEnumeration implements NamingEnumeration {
   private static final Logger log = Log.open(QNameClassEnumeration.class);

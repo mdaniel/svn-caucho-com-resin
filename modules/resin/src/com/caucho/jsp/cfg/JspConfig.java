@@ -28,9 +28,9 @@
 
 package com.caucho.jsp.cfg;
 
-import java.util.ArrayList;
+import com.caucho.server.webapp.WebApp;
 
-import com.caucho.server.webapp.*;
+import java.util.ArrayList;
 
 /**
  * Configuration from the web.xml.

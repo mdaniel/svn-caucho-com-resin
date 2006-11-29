@@ -28,19 +28,15 @@
 
 package com.caucho.transaction.cfg;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.config.ConfigException;
+import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.transaction.xalog.AbstractXALogManager;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.transaction.TransactionManagerImpl;
-
-import com.caucho.transaction.xalog.AbstractXALogManager;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Configures the transaction manager.

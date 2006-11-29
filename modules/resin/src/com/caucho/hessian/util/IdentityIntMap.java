@@ -48,7 +48,6 @@
 
 package com.caucho.hessian.util;
 
-import java.util.*;
 /**
  * The IntMap provides a simple hashmap from keys to integers.  The API is
  * an abbreviation of the HashMap collection API.
@@ -62,12 +61,12 @@ public class IdentityIntMap {
    * it's impossible to distinguish between the two.
    */
   public final static int NULL = 0xdeadbeef; // Integer.MIN_VALUE + 1;
-  
+
   private static final Object DELETED = new Object();
-  
+
   private Object []_keys;
   private int []_values;
-  
+
   private int _size;
   private int _mask;
 
@@ -90,19 +89,19 @@ public class IdentityIntMap {
   {
     Object []keys = _keys;
     int []values = _values;
-    
+
     for (int i = keys.length - 1; i >= 0; i--) {
       keys[i] = null;
       values[i] = 0;
     }
-    
+
     _size = 0;
   }
   /**
    * Returns the current number of entries in the map.
    */
-  public int size() 
-  { 
+  public int size()
+  {
     return _size;
   }
 
@@ -120,9 +119,9 @@ public class IdentityIntMap {
       Object mapKey = keys[hash];
 
       if (mapKey == null)
-	return NULL;
+        return NULL;
       else if (mapKey == key)
-	return _values[hash];
+        return _values[hash];
 
       hash = (hash + 1) % mask;
     }
@@ -140,23 +139,23 @@ public class IdentityIntMap {
 
     Object []keys = _keys;
     int values[] = _values;
-    
+
     for (int i = keys.length - 1; i >= 0; i--) {
       Object key = keys[i];
-      
+
       if (key == null || key == DELETED)
-	continue;
+        continue;
 
       int hash = System.identityHashCode(key) % mask & mask;
 
       while (true) {
-	if (newKeys[hash] == null) {
-	  newKeys[hash] = key;
-	  newValues[hash] = values[i];
-	  break;
-	}
-	
-	hash = (hash + 1) % mask;
+        if (newKeys[hash] == null) {
+          newKeys[hash] = key;
+          newValues[hash] = values[i];
+          break;
+        }
+
+        hash = (hash + 1) % mask;
       }
     }
 
@@ -178,27 +177,27 @@ public class IdentityIntMap {
       Object testKey = keys[hash];
 
       if (testKey == null || testKey == DELETED) {
-	keys[hash] = key;
-	_values[hash] = value;
+        keys[hash] = key;
+        _values[hash] = value;
 
-	_size++;
+        _size++;
 
-	if (keys.length <= 4 * _size)
-	  resize(4 * keys.length);
+        if (keys.length <= 4 * _size)
+          resize(4 * keys.length);
 
-	return NULL;
+        return NULL;
       }
       else if (key != testKey) {
-	hash = (hash + 1) % mask;
-	
-	continue;
+        hash = (hash + 1) % mask;
+
+        continue;
       }
       else {
-	int old = _values[hash];
+        int old = _values[hash];
 
-	_values[hash] = value;
+        _values[hash] = value;
 
-	return old;
+        return old;
       }
     }
   }
@@ -215,13 +214,13 @@ public class IdentityIntMap {
       Object mapKey = _keys[hash];
 
       if (mapKey == null)
-	return NULL;
+        return NULL;
       else if (mapKey == key) {
-	_keys[hash] = DELETED;
+        _keys[hash] = DELETED;
 
-	_size--;
+        _size--;
 
-	return _values[hash];
+        return _values[hash];
       }
 
       hash = (hash + 1) % mask;
@@ -234,20 +233,20 @@ public class IdentityIntMap {
 
     sbuf.append("IntMap[");
     boolean isFirst = true;
-    
+
     for (int i = 0; i <= _mask; i++) {
       if (_keys[i] != null && _keys[i] != DELETED) {
-	if (! isFirst)
-	  sbuf.append(", ");
-	
-	isFirst = false;
-	sbuf.append(_keys[i]);
-	sbuf.append(":");
-	sbuf.append(_values[i]);
+        if (! isFirst)
+          sbuf.append(", ");
+
+        isFirst = false;
+        sbuf.append(_keys[i]);
+        sbuf.append(":");
+        sbuf.append(_values[i]);
       }
     }
     sbuf.append("]");
-    
+
     return sbuf.toString();
   }
 }

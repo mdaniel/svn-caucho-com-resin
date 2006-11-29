@@ -29,25 +29,21 @@
 
 package com.caucho.log;
 
-import java.lang.ref.SoftReference;
-
-import java.io.OutputStream;
-import java.io.IOException;
-
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.zip.ZipOutputStream;
-import java.util.zip.GZIPOutputStream;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.config.types.Period;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.QDate;
+import com.caucho.util.WeakAlarm;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.StreamImpl;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Automatically-rotating streams.  Normally, clients will call

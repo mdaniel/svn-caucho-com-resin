@@ -28,11 +28,9 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 
 class Utf16RevReader extends Reader {
   private InputStream is;

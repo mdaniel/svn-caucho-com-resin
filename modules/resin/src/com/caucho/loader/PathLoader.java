@@ -29,25 +29,14 @@
 
 package com.caucho.loader;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.*;
-
-import java.util.jar.Manifest;
-import java.util.jar.Attributes;
+import com.caucho.log.Log;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Path;
 
 import java.net.URL;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
+import java.util.HashMap;
+import java.util.Vector;
+import java.util.logging.Logger;
 
 /**
  * Class loader which loads specific paths.

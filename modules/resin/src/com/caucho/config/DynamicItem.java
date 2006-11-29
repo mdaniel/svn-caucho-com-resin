@@ -29,12 +29,10 @@
 
 package com.caucho.config;
 
-import java.util.*;
-import java.util.logging.*;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import java.util.logging.Logger;
 
 /**
  * A dynamic item represents a tag value which is determined at runtime.

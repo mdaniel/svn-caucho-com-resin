@@ -28,11 +28,15 @@
 
 package com.caucho.eswrap.java.io;
 
-import java.io.*;
+import com.caucho.es.Call;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.ReadWritePair;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.util.*;
-import com.caucho.es.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class OutputStreamEcmaWrap {
   public static void writeByte(OutputStream os, int ch)

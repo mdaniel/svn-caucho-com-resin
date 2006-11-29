@@ -29,42 +29,31 @@
 
 package com.caucho.amber.field;
 
-import java.io.IOException;
-import java.io.Serializable;
-
-import java.sql.SQLException;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import java.util.logging.Logger;
-
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JType;
-import com.caucho.bytecode.JClassWrapper;
-import com.caucho.bytecode.JField;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.manager.AmberConnection;
-
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.PathExpr;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryParser;
-
 import com.caucho.amber.table.Table;
-
-import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.AbstractStatefulType;
-
+import com.caucho.amber.type.RelatedType;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JClassWrapper;
+import com.caucho.bytecode.JField;
+import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.JType;
 import com.caucho.config.ConfigException;
-
 import com.caucho.java.JavaWriter;
-
 import com.caucho.log.Log;
-
-import com.caucho.util.L10N;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.logging.Logger;
 
 /**
  * Configuration for a bean's property

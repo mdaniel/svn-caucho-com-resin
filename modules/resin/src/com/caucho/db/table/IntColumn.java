@@ -28,23 +28,15 @@
 
 package com.caucho.db.table;
 
-import java.io.IOException;
-
-import java.sql.SQLException;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.db.store.Transaction;
-
 import com.caucho.db.index.BTree;
-import com.caucho.db.index.KeyCompare;
 import com.caucho.db.index.IntKeyCompare;
-
+import com.caucho.db.index.KeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
+import com.caucho.db.store.Transaction;
+
+import java.sql.SQLException;
 
 /**
  * Represents a 32-bit integer column.

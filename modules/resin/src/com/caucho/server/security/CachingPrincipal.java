@@ -28,9 +28,9 @@
 
 package com.caucho.server.security;
 
-import java.util.ArrayList;
-
 import com.caucho.security.BasicPrincipal;
+
+import java.util.ArrayList;
 
 /**
  * Principal which caches the roles.

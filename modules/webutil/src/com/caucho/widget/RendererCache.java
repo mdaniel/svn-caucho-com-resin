@@ -31,17 +31,14 @@ package com.caucho.widget;
 
 import com.caucho.util.L10N;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
-
-import java.io.IOException;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 
 class RendererCache
 {

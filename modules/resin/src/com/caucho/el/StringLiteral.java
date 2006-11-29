@@ -29,11 +29,12 @@
 
 package com.caucho.el;
 
-import java.io.*;
+import com.caucho.vfs.WriteStream;
 
-import javax.el.*;
-
-import com.caucho.vfs.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.MethodInfo;
+import java.io.IOException;
 
 /**
  * Represents a string literal expression

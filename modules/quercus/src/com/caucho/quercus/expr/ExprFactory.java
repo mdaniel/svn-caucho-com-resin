@@ -29,24 +29,16 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
+import com.caucho.quercus.Location;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.parser.QuercusParser;
+import com.caucho.quercus.program.*;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
-import java.util.*;
-
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.program.*;
-
-import com.caucho.quercus.parser.QuercusParser;
-
-import com.caucho.quercus.Location;
-
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
 
 /**
  * Factory for creating PHP expressions and statements

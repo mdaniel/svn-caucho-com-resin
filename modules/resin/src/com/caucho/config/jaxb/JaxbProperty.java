@@ -29,19 +29,13 @@
 
 package com.caucho.config.jaxb;
 
-import java.util.*;
-import java.lang.reflect.*;
+import com.caucho.config.AttributeStrategy;
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
+import com.caucho.el.Expr;
+import com.caucho.xml.QName;
 
-import javax.el.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-
-import com.caucho.el.*;
-
-import com.caucho.config.*;
-import com.caucho.xml.*;
+import org.w3c.dom.Node;
 
 public class JaxbProperty extends AttributeStrategy {
   /**

@@ -29,51 +29,27 @@
 
 package com.caucho.loader.enhancer;
 
-import java.lang.reflect.Method;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.bytecode.ByteCodeParser;
-import com.caucho.bytecode.ByteCodeClassScanner;
 import com.caucho.bytecode.ByteCodeClassMatcher;
+import com.caucho.bytecode.ByteCodeClassScanner;
+import com.caucho.bytecode.ByteCodeParser;
 import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JavaClass;
 import com.caucho.bytecode.JavaClassLoader;
-import com.caucho.bytecode.JavaMethod;
-import com.caucho.bytecode.JavaAnnotation;
-
-import com.caucho.config.ConfigException;
-
 import com.caucho.java.WorkDir;
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.java.gen.GenClass;
-import com.caucho.java.gen.CallChain;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.loader.enhancer.Enhancer;
-import com.caucho.loader.enhancer.ByteCodeEnhancer;
-
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.util.CharBuffer;
-
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manages the enhancement

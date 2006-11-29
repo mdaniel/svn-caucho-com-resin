@@ -48,8 +48,7 @@
 
 package com.caucho.burlap.io;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
 
 /**
  * Looks up remote objects.  The default just returns a BurlapRemote object.

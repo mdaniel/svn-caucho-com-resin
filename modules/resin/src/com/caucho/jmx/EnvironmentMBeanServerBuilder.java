@@ -28,18 +28,13 @@
 
 package com.caucho.jmx;
 
-import java.lang.reflect.Method;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerDelegate;
-import javax.management.MBeanServerBuilder;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentLocal;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resin implementation for an MBeanServer factory.

@@ -29,12 +29,9 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Logs usage of the path.

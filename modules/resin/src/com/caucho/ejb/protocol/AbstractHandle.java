@@ -28,13 +28,12 @@
 
 package com.caucho.ejb.protocol;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.ejb.Handle;
-import javax.ejb.EJBObject;
-
 import com.caucho.log.Log;
+
+import javax.ejb.EJBObject;
+import javax.ejb.Handle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handle implementation for EJB Objects.

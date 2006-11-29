@@ -29,12 +29,14 @@
 
 package com.caucho.jsp.el;
 
-import javax.el.*;
-import javax.servlet.jsp.*;
+import com.caucho.jsp.TaglibManager;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
 
-import com.caucho.jsp.*;
-import com.caucho.server.webapp.*;
-import com.caucho.util.*;
+import javax.el.ELContextListener;
+import javax.el.ELResolver;
+import javax.el.ExpressionFactory;
+import javax.servlet.jsp.JspApplicationContext;
 
 public class JspApplicationContextImpl implements JspApplicationContext
 {

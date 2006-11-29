@@ -28,12 +28,10 @@
 
 package com.caucho.jsp;
 
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 class JspServletConfig implements ServletConfig  {
   private Hashtable init;

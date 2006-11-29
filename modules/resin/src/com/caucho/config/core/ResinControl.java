@@ -30,10 +30,6 @@ package com.caucho.config.core;
 
 import com.caucho.util.L10N;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.ConfigException;
-
 /**
  * Handled control classes.
  */

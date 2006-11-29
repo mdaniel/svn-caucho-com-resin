@@ -28,30 +28,26 @@
 
 package com.caucho.transaction;
 
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.lang.ref.WeakReference;
-
-import javax.transaction.*;
-import javax.transaction.xa.*;
-
-import com.caucho.util.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.Environment;
-
 import com.caucho.config.types.Period;
-
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
+import com.caucho.log.Log;
 import com.caucho.transaction.xalog.AbstractXALogManager;
 import com.caucho.transaction.xalog.AbstractXALogStream;
+import com.caucho.util.Crc64;
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
+
+import javax.transaction.*;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+import java.io.Serializable;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the transaction manager.

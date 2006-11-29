@@ -28,11 +28,7 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
-
-import org.xml.sax.*;
-import org.w3c.dom.*;
+import java.util.ArrayList;
 
 /**
  * Encapsulates the xsl:output attributes.

@@ -29,36 +29,26 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.jsp.java.JavaJspGenerator;
-import com.caucho.jsp.cfg.JspConfig;
-import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.jsp.cfg.Jsp;
-import com.caucho.jsp.cfg.JspTaglib;
-
 import com.caucho.java.LineMap;
-
-import com.caucho.loader.SimpleLoader;
 import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.server.webapp.WebApp;
-
+import com.caucho.loader.SimpleLoader;
+import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.RequestAdapter;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
+
+import javax.servlet.SingleThreadModel;
+import javax.servlet.jsp.HttpJspPage;
+import javax.servlet.jsp.JspFactory;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manages JSP templates.

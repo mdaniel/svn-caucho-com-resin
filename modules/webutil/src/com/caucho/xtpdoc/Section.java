@@ -29,13 +29,8 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
 import java.io.IOException;
-
-import java.util.ArrayList;
-
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
+import java.io.PrintWriter;
 
 public abstract class Section extends ContainerNode {
   protected FormattedTextWithAnchors _description;

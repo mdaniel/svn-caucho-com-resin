@@ -28,9 +28,9 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
+import com.caucho.util.ExceptionWrapper;
 
-import com.caucho.util.*;
+import java.io.IOException;
 
 /**
  * Exception thrown when a client unexpectedly closes a connection.

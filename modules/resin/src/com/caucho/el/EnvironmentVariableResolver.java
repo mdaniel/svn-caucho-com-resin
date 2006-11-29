@@ -29,9 +29,10 @@
 
 package com.caucho.el;
 
-import javax.el.*;
-
 import com.caucho.loader.EnvironmentMap;
+
+import javax.el.ELContext;
+import javax.el.ELResolver;
 
 /**
  * Creates a variable resolver based on the classloader.

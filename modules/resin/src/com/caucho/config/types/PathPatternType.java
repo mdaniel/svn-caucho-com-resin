@@ -28,20 +28,15 @@
 
 package com.caucho.config.types;
 
-import java.util.logging.Logger;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.regex.PatternSyntaxException;
-
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Abstract type building a path pattern.  The pattern follows ant.

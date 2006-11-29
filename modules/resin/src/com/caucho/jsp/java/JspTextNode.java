@@ -28,14 +28,11 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-
 import com.caucho.vfs.WriteStream;
-
-import com.caucho.jsp.*;
-
 import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;
+
+import java.io.IOException;
 
 /**
  * Represents static text.

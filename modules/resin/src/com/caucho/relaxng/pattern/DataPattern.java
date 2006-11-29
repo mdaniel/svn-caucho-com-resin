@@ -28,13 +28,9 @@
 
 package com.caucho.relaxng.pattern;
 
-import com.caucho.xml.QName;
-
-
 import com.caucho.relaxng.RelaxException;
-
-import com.caucho.relaxng.program.Item;
 import com.caucho.relaxng.program.DataItem;
+import com.caucho.relaxng.program.Item;
 
 /**
  * Relax empty pattern

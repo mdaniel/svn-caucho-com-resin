@@ -29,14 +29,10 @@
 
 package com.caucho.xml.stream;
 
-import java.io.*;
-import java.util.logging.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.WriteStream;
 
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 public class Escapifier {
 

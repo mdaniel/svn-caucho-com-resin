@@ -29,16 +29,19 @@
 
 package com.caucho.config.types;
 
-import javax.el.*;
-
 import com.caucho.config.Config;
 import com.caucho.config.NodeBuilder;
 import com.caucho.config.TypeStrategy;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
 import org.w3c.dom.Node;
+
+import javax.el.ELContext;
+import javax.el.ELException;
 
 public class PathTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(PathTypeStrategy.class);

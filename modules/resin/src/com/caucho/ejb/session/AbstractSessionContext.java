@@ -28,15 +28,12 @@
 
 package com.caucho.ejb.session;
 
-import javax.ejb.EJBObject;
-import javax.ejb.EJBMetaData;
-import javax.ejb.Handle;
-import javax.ejb.SessionContext;
-
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 
-import com.caucho.ejb.protocol.AbstractHandle;
+import javax.ejb.EJBObject;
+import javax.ejb.Handle;
+import javax.ejb.SessionContext;
 
 /**
  * Abstract base class for an session context

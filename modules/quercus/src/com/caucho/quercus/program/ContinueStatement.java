@@ -29,17 +29,10 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
+import com.caucho.quercus.Location;
+import com.caucho.quercus.env.ContinueValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ContinueValue;
-
-import com.caucho.quercus.expr.Expr;
-
-import com.caucho.quercus.Location;
-
-import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a continue expression statement in a PHP program.

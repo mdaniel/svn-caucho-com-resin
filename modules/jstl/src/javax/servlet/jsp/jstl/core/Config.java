@@ -28,11 +28,10 @@
 
 package javax.servlet.jsp.jstl.core;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
-import javax.servlet.jsp.*;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.PageContext;
 
 public class Config {
   /**

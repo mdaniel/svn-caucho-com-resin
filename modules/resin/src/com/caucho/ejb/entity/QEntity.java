@@ -29,8 +29,6 @@
 
 package com.caucho.ejb.entity;
 
-import com.caucho.util.L10N;
-
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.xa.TransactionObject;
 /**

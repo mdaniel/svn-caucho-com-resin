@@ -29,23 +29,15 @@
 
 package com.caucho.db.jdbc;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.*;
-import javax.sql.*;
-
+import com.caucho.db.Database;
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.Path;
-
-import com.caucho.log.Log;
-
-import com.caucho.db.Database;
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import javax.sql.PooledConnection;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * The JDBC connection implementation.

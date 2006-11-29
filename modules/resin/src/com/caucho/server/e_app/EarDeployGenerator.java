@@ -29,11 +29,11 @@
 
 package com.caucho.server.e_app;
 
+import com.caucho.config.ConfigException;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.ExpandDeployGenerator;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.vfs.Path;
-import com.caucho.config.ConfigException;
 
 import java.util.ArrayList;
 

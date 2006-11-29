@@ -29,30 +29,22 @@
 
 package com.caucho.resources;
 
-import java.util.concurrent.*;
-
-import java.util.logging.*;
-
-import javax.annotation.*;
-
-import javax.resource.spi.BootstrapContext;
-
-import javax.resource.spi.work.WorkManager;
-import javax.resource.spi.work.Work;
-import javax.resource.spi.work.WorkException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.ThreadPool;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.CronType;
-
 import com.caucho.jca.AbstractResourceAdapter;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.resource.spi.BootstrapContext;
+import javax.resource.spi.work.Work;
+import javax.resource.spi.work.WorkManager;
+import java.util.concurrent.Executor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The cron resources starts application Work tasks at cron-specified

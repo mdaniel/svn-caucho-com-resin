@@ -28,16 +28,16 @@
 
 package com.caucho.util;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.lang.reflect.*;
-import java.beans.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import javax.servlet.jsp.el.VariableResolver;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.beans.BeanInfo;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Bean utilities.

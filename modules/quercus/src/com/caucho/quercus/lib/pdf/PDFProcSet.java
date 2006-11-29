@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.lib.pdf;
 
-import java.io.IOException;
-
 /**
  * pdf object oriented API facade
  */

@@ -29,8 +29,6 @@
 
 package com.caucho.jmx;
 
-import java.lang.reflect.Method;
-
 /**
  * Unmarshalls results.
  */

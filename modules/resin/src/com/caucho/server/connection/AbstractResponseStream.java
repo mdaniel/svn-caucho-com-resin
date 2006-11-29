@@ -28,22 +28,17 @@
 
 package com.caucho.server.connection;
 
-import java.io.OutputStream;
-import java.io.Writer;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import java.util.Locale;
-
-import java.util.logging.Logger;
-
 import com.caucho.log.Log;
-
 import com.caucho.util.L10N;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.OutputStreamWithBuffer;
+import com.caucho.vfs.Path;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.Locale;
+import java.util.logging.Logger;
 
 /**
  * API for handling the PrintWriter/ServletOutputStream

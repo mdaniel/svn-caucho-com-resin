@@ -28,15 +28,7 @@
 
 package com.caucho.security;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.security.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.security.Principal;
 
 public class BasicPrincipal implements Principal, java.io.Serializable {
   String _name;

@@ -29,8 +29,8 @@
 
 package com.caucho.server.e_app;
 
-import com.caucho.server.deploy.ExpandDeployGeneratorAdmin;
 import com.caucho.management.server.EarDeployMXBean;
+import com.caucho.server.deploy.ExpandDeployGeneratorAdmin;
 
 public class EarDeployGeneratorAdmin
   extends ExpandDeployGeneratorAdmin<EarDeployGenerator>

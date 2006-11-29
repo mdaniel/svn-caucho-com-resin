@@ -28,23 +28,38 @@
 
 package com.caucho.servlets.webdav;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-import javax.naming.*;
-
-import org.xml.sax.*;
-
 import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-
 import com.caucho.server.webapp.Application;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.HTTPUtil;
+import com.caucho.util.QDate;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.XmlParser;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Serves the WebDAV protocol.  The underlying AbstractPath controls

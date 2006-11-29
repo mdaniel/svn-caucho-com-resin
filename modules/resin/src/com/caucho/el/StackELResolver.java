@@ -29,10 +29,11 @@
 
 package com.caucho.el;
 
+import javax.el.ELContext;
+import javax.el.ELResolver;
 import java.beans.FeatureDescriptor;
-import java.util.*;
-
-import javax.el.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Stack-based composite resolver,

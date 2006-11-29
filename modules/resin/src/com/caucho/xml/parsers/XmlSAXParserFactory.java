@@ -29,16 +29,15 @@
 
 package com.caucho.xml.parsers;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.xml.Xml;
+import com.caucho.xml.XmlParser;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import org.xml.sax.Parser;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.XMLReader;
 
-import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
-
-import com.caucho.xml.*;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * JAXP SAX parser factory for strict XML parsing.

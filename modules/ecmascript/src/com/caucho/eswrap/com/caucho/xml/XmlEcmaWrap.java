@@ -28,16 +28,17 @@
 
 package com.caucho.eswrap.com.caucho.xml;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StringStream;
+import com.caucho.xml.Xml;
 
-import org.xml.sax.*;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.es.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class XmlEcmaWrap {
   public static Document parse(InputStream is)

@@ -28,10 +28,10 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.Node;
+import org.w3c.dom.Notation;
+
+import java.io.IOException;
 
 class QNotation extends QNode implements Notation {
   String _name;

@@ -48,9 +48,7 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.IOException;
 
 /**
  * Serializing an object for known object types.

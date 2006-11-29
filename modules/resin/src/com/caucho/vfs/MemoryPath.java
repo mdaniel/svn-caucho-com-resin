@@ -29,12 +29,14 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.Alarm;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.L10N;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.config.types.Bytes;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class MemoryPath extends FilesystemPath {
   private static L10N L = new L10N(MemoryPath.class);

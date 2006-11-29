@@ -28,7 +28,7 @@
 */
 
 package javax.xml.stream;
-import javax.xml.stream.events.*;
+import javax.xml.stream.events.XMLEvent;
 
 public interface EventFilter {
 

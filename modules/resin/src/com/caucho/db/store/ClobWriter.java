@@ -29,16 +29,10 @@
 
 package com.caucho.db.store;
 
-import java.io.IOException;
-import java.io.Writer;
-
-import java.sql.SQLException;
-
 import com.caucho.vfs.TempBuffer;
 
-import com.caucho.util.CharBuffer;
-
-import com.caucho.db.sql.Expr;
+import java.io.IOException;
+import java.io.Writer;
 
 class ClobWriter extends Writer {
   private Store _store;

@@ -29,10 +29,6 @@
 
 package javax.servlet.jsp;
 
-import java.io.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
-
 /**
  * Information about an error for error pages.
  */
@@ -41,14 +37,14 @@ public class ErrorData {
   private int _statusCode;
   private String _uri;
   private String _servletName;
-  
+
   /**
    * Create a new errorData object.
    */
   public ErrorData(Throwable throwable,
-		   int statusCode,
+                   int statusCode,
                    String uri,
-		   String servletName)
+                   String servletName)
   {
     _throwable = throwable;
     _statusCode = statusCode;

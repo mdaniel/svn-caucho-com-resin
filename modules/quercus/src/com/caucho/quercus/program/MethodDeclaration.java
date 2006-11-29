@@ -29,25 +29,15 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-
-import java.util.logging.Logger;
-
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.expr.*;
-
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.env.Var;
-import com.caucho.quercus.env.NullValue;
-
-import com.caucho.quercus.Location;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Declaration for an abstract function or interface.

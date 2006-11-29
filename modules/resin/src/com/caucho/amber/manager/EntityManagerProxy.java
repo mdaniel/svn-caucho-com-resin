@@ -29,20 +29,14 @@
 
 package com.caucho.amber.manager;
 
-import java.sql.Connection;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.util.L10N;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Query;
-import javax.persistence.LockModeType;
 import javax.persistence.FlushModeType;
-
-import com.caucho.util.L10N;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
+import javax.persistence.LockModeType;
+import javax.persistence.Query;
+import java.util.logging.Logger;
 
 /**
  * The Entity manager

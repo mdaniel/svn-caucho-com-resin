@@ -28,15 +28,6 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 /**
  * Symbols for HTML using Latin-1 (ISO-8859-1)
  */

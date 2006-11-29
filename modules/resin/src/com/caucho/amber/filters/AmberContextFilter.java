@@ -28,23 +28,19 @@
 
 package com.caucho.amber.filters;
 
-import java.io.IOException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletException;
-
-import javax.naming.NamingException;
-
-import com.caucho.util.L10N;
-
 import com.caucho.amber.AmberContext;
 import com.caucho.amber.AmberFactory;
-
 import com.caucho.config.types.JndiBuilder;
+import com.caucho.util.L10N;
+
+import javax.naming.NamingException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
 
 /**
  * Context for the amber filter.

@@ -29,11 +29,11 @@
 
 package com.caucho.jsp.java;
 
-import javax.el.*;
-
-import java.beans.FeatureDescriptor;
-import java.lang.reflect.*;
-import java.util.*;
+import javax.el.ELContext;
+import javax.el.ELResolver;
+import javax.el.FunctionMapper;
+import javax.el.VariableMapper;
+import java.lang.reflect.Method;
 
 /**
  * ELContext a context for EL parsing.

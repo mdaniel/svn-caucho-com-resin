@@ -28,8 +28,10 @@
 
 package com.caucho.es;
 
-import java.util.*;
-import com.caucho.util.*;
+import com.caucho.util.IntMap;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Implementation class for the base of the JavaScript object hierarchy.

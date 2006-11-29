@@ -32,7 +32,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.ejb.EJBClientInterface;
 import com.caucho.ejb.cfg.EjbBean;
 import com.caucho.ejb.cfg.EjbConfig;
-import com.caucho.vfs.*;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
 
 public class IiopClient implements EJBClientInterface {
   private EjbConfig _ejbConfig = new EjbConfig(null);

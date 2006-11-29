@@ -28,25 +28,15 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.Method;
-import java.beans.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.config.types.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-
-import com.caucho.jsp.*;
+import com.caucho.config.types.Signature;
+import com.caucho.jsp.JspParseException;
 import com.caucho.jsp.cfg.TldAttribute;
-
+import com.caucho.util.L10N;
+import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
-import com.caucho.xml.XmlChar;
+
+import javax.servlet.jsp.tagext.JspFragment;
+import java.io.IOException;
 
 public class JspDirectiveAttribute extends JspNode {
   static L10N L = new L10N(JspDirectiveAttribute.class);

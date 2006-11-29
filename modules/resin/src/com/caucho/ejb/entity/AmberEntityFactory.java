@@ -29,19 +29,15 @@
 
 package com.caucho.ejb.entity;
 
-import java.util.logging.Logger;
-
-import java.util.Map;
-
-import javax.ejb.FinderException;
-
+import com.caucho.amber.entity.EntityFactory;
+import com.caucho.amber.entity.EntityItem;
+import com.caucho.amber.manager.AmberConnection;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.amber.entity.EntityFactory;
-import com.caucho.amber.entity.EntityItem;
-
-import com.caucho.amber.manager.AmberConnection;
+import javax.ejb.FinderException;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Manages the set of persistent beans.

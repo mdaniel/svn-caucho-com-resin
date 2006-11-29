@@ -29,38 +29,26 @@
 
 package com.caucho.server.cluster;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import javax.naming.*;
-
-import javax.sql.DataSource;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.db.jdbc.DataSourceImpl;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-
+import com.caucho.util.Alarm;
+import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.util.Alarm;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.FreeList;
-
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.TempStream;
+
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**

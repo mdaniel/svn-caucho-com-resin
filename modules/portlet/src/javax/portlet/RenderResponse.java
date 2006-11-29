@@ -29,8 +29,10 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.Locale;
 
 public interface RenderResponse extends PortletResponse
 {

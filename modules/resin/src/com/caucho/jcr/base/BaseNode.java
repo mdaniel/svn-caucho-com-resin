@@ -29,16 +29,20 @@
 
 package com.caucho.jcr.base;
 
-import java.io.InputStream;
-
-import java.util.Calendar;
+import com.caucho.util.L10N;
 
 import javax.jcr.*;
-import javax.jcr.lock.*;
-import javax.jcr.nodetype.*;
-import javax.jcr.version.*;
-
-import com.caucho.util.L10N;
+import javax.jcr.lock.Lock;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.nodetype.NodeDefinition;
+import javax.jcr.nodetype.NodeType;
+import javax.jcr.version.Version;
+import javax.jcr.version.VersionException;
+import javax.jcr.version.VersionHistory;
+import java.io.InputStream;
+import java.util.Calendar;
 
 /**
  * Represents a directory node in the repository.

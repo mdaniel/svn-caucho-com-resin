@@ -28,8 +28,8 @@
 */
 
 package javax.xml.ws;
-import javax.xml.ws.handler.*;
-import java.security.*;
+import javax.xml.ws.handler.MessageContext;
+import java.security.Principal;
 
 /** XXX */
 public interface WebServiceContext {

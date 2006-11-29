@@ -29,12 +29,14 @@
 
 package com.caucho.xml.stream.events;
 
-import java.io.*;
-import java.util.*;
-
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
+import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+import java.io.Writer;
 
 public abstract class XMLEventImpl implements XMLEvent {
 

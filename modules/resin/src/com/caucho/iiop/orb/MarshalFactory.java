@@ -29,12 +29,7 @@
 
 package com.caucho.iiop.orb;
 
-import java.io.*;
-import java.util.*;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
+import java.util.HashMap;
 
 /**
  * Proxy implementation for ORB clients.

@@ -28,14 +28,18 @@
 
 package com.caucho.es.wrapper;
 
-import java.util.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.lang.ref.*;
-import java.beans.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.WeakLruCache;
 
-import com.caucho.util.*;
-import com.caucho.server.util.*;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.beans.PropertyDescriptor;
+import java.lang.ref.SoftReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
     
 /**
  * Analyzes the class from a JavaScript perspective.

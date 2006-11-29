@@ -28,29 +28,20 @@
 
 package com.caucho.soap.jaxrpc;
 
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-
-import java.net.URL;
-
-import javax.xml.namespace.QName;
-
-import javax.xml.rpc.Service;
-import javax.xml.rpc.Call;
-import javax.xml.rpc.ServiceException;
-
-import javax.xml.rpc.handler.HandlerRegistry;
-
-import javax.xml.rpc.encoding.TypeMappingRegistry;
-
+import com.caucho.log.Log;
+import com.caucho.soap.wsdl.WSDLPort;
+import com.caucho.soap.wsdl.WSDLService;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.soap.wsdl.WSDLService;
-import com.caucho.soap.wsdl.WSDLPort;
-import com.caucho.soap.wsdl.WSDLOperation;
+import javax.xml.namespace.QName;
+import javax.xml.rpc.Call;
+import javax.xml.rpc.Service;
+import javax.xml.rpc.ServiceException;
+import javax.xml.rpc.encoding.TypeMappingRegistry;
+import javax.xml.rpc.handler.HandlerRegistry;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * Service

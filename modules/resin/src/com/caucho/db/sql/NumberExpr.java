@@ -28,9 +28,8 @@
 
 package com.caucho.db.sql;
 
-import java.util.ArrayList;
-
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 class NumberExpr extends Expr {
   static Expr create(String lexeme)

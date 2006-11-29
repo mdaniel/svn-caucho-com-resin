@@ -28,12 +28,10 @@
 
 package javax.resource.spi;
 
-import javax.transaction.xa.XAResource;
-
-import javax.resource.ResourceException;
 import javax.resource.NotSupportedException;
-
+import javax.resource.ResourceException;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
+import javax.transaction.xa.XAResource;
 
 /**
  * The main interface for a resource.

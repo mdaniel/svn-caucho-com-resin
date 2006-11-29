@@ -28,13 +28,10 @@
 
 package javax.servlet.jsp.tagext;
 
-import java.io.Writer;
-import java.io.IOException;
-
-import java.util.Map;
-
 import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.JspException;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * An implementation of a JspFragment

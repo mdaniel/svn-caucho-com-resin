@@ -28,11 +28,8 @@
 
 package com.caucho.java;
 
-import java.util.*;
-import java.io.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.LineCompileException;
+import com.caucho.vfs.IOExceptionWrapper;
 
 public class JavaCompileException extends IOExceptionWrapper
   implements LineCompileException {

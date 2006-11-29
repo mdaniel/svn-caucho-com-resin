@@ -28,11 +28,10 @@
 
 package com.caucho.xml2;
 
-import org.xml.sax.Attributes;
-
 import com.caucho.util.CharBuffer;
-
 import com.caucho.xml.QName;
+
+import org.xml.sax.Attributes;
 
 /**
  * Implements the SAX Attributes class.

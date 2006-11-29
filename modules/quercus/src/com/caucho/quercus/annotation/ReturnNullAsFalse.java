@@ -29,10 +29,10 @@
 
 package com.caucho.quercus.annotation;
 
-import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Mark a method such that if execution of the method returns null,

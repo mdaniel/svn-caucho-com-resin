@@ -29,15 +29,14 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import java.util.*;
-
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.expr.Expr;
-
-import com.caucho.quercus.program.AbstractFunction;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 /**
  * Represents a PHP variable value.

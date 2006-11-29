@@ -28,10 +28,13 @@
 
 package com.caucho.es;
 
-import java.io.*;
+import com.caucho.java.LineMap;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.util.*;
-import com.caucho.java.*;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 /**
  * JavaScript exception, filtered to get the line numbers right.

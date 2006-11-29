@@ -28,20 +28,12 @@
 
 package com.caucho.jca.cfg;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import javax.resource.spi.ManagedConnectionFactory;
-
+import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-import com.caucho.config.Config;
-
-import com.caucho.jca.ResourceManagerImpl;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Configuration for a connector.

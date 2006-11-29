@@ -48,10 +48,9 @@
 
 package com.caucho.services.server;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.*;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import java.util.HashMap;
 
 /**
  * Context for a service, to handle request-specific information.

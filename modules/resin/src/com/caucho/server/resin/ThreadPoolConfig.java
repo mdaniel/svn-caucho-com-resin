@@ -28,10 +28,10 @@
 
 package com.caucho.server.resin;
 
-import javax.annotation.*;
-
-import com.caucho.util.ThreadPool;
 import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
+
+import javax.annotation.PostConstruct;
 
 public class ThreadPoolConfig {
   private static final L10N L = new L10N(ThreadPoolConfig.class);

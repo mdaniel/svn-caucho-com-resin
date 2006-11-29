@@ -30,15 +30,18 @@
 
 package com.caucho.eswrap.com.caucho.sql;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
+import com.caucho.es.ESException;
+import com.caucho.sql.DBPool;
+import com.caucho.util.Exit;
+import com.caucho.util.ExitListener;
 
-import com.caucho.util.*;
-import com.caucho.es.*;
-import com.caucho.sql.*;
-import javax.naming.*;
-import com.caucho.eswrap.java.sql.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 
 public class DBPoolEcmaWrap {
   public static DBPool call(String name)

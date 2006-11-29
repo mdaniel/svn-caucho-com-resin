@@ -29,14 +29,8 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.parser.QuercusParser;
-
-import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP list assignment expression.

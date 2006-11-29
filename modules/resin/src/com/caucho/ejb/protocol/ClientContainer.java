@@ -28,22 +28,15 @@
 
 package com.caucho.ejb.protocol;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.rmi.*;
-
-import javax.ejb.*;
-import javax.servlet.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import com.caucho.ejb.AbstractServer;
 import com.caucho.log.Log;
-import com.caucho.java.*;
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.*;
-import com.caucho.server.http.*;
-import com.caucho.ejb.*;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+
+import javax.ejb.EJBHome;
+import javax.ejb.EJBLocalHome;
+import javax.ejb.EJBObject;
+import java.util.logging.Logger;
 
 /**
  * Container for EJB stubs.

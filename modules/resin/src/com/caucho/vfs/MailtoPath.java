@@ -28,12 +28,13 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.StringCharCursor;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The mailto: scheme sends mail using the SMTP protocol.

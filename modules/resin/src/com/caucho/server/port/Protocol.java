@@ -29,9 +29,8 @@
 
 package com.caucho.server.port;
 
-import com.caucho.server.dispatch.DispatchServer;
-
 import com.caucho.server.connection.Connection;
+import com.caucho.server.dispatch.DispatchServer;
 
 /**
  * Represents a protocol connection.

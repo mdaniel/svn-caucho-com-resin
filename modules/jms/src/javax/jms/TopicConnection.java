@@ -28,28 +28,26 @@
 
 package javax.jms;
 
-import java.util.Enumeration;
-
 /**
  * The main destination.
  */
 public interface TopicConnection extends Connection {
   public TopicSession createTopicSession(boolean transacted,
-					 int acknowledgeMode)
+                                         int acknowledgeMode)
     throws JMSException;
 
   public ConnectionConsumer
     createConnectionConsumer(Topic topic,
-			     String messageSelector,
-			     ServerSessionPool sessionPool,
-			     int maxMessages)
+                             String messageSelector,
+                             ServerSessionPool sessionPool,
+                             int maxMessages)
     throws JMSException;
 
   public ConnectionConsumer
     createDurableConnectionConsumer(Topic topic,
-				    String subscriptionName,
-				    String messageSelector,
-				    ServerSessionPool sessionPool,
-				    int maxMessages)
+                                    String subscriptionName,
+                                    String messageSelector,
+                                    ServerSessionPool sessionPool,
+                                    int maxMessages)
     throws JMSException;
 }

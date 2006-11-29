@@ -28,11 +28,10 @@
 
 package com.caucho.server.security;
 
-import javax.servlet.*;
-
+import com.caucho.server.dispatch.ServletConfigException;
 import com.caucho.util.L10N;
 
-import com.caucho.server.dispatch.ServletConfigException;
+import javax.servlet.ServletException;
 
 /**
  * Configuration for the user-data-constraint.

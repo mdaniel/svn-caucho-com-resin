@@ -28,7 +28,8 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  * Makes an Enumeration appear as an Iterator.

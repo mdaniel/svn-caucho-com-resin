@@ -29,6 +29,8 @@
 
 package com.caucho.jsp;
 
+import com.caucho.vfs.PersistentDependency;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -38,8 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.HttpJspPage;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import com.caucho.vfs.*;
 
 public abstract class JavaPage extends Page implements HttpJspPage
 {

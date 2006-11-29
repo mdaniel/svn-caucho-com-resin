@@ -28,11 +28,9 @@
 
 package com.caucho.config.core;
 
-import com.caucho.util.L10N;
-
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 /**
  * Executes code when an expression is valid.

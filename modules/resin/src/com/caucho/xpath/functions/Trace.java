@@ -28,23 +28,18 @@
 
 package com.caucho.xpath.functions;
 
-import java.io.IOException;
-
-import org.w3c.dom.Node;
-
 import com.caucho.util.L10N;
-
-import com.caucho.xml.QAbstractNode;
 import com.caucho.xml.XmlPrinter;
-
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.ExprEnvironment;
 import com.caucho.xpath.XPathException;
 import com.caucho.xpath.XPathParseException;
-
 import com.caucho.xpath.expr.AbstractStringExpr;
-
 import com.caucho.xpath.pattern.NodeIterator;
+
+import org.w3c.dom.Node;
+
+import java.io.IOException;
 
 /**
  * Traces an object.

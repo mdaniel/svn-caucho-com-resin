@@ -28,18 +28,21 @@
 
 package com.caucho.iiop;
 
-import java.io.Serializable;
-import java.io.IOException;
+import com.caucho.util.Alarm;
+import com.caucho.util.IdentityIntMap;
 
-import javax.rmi.CORBA.*;
-
-import org.omg.CORBA.*;
-import org.omg.CORBA.Object;
-
+import org.omg.CORBA.Any;
+import org.omg.CORBA.ORB;
+import org.omg.CORBA.SystemException;
+import org.omg.CORBA.TCKind;
+import org.omg.CORBA.TypeCode;
 import org.omg.SendingContext.RunTime;
 
-import com.caucho.util.IdentityIntMap;
-import com.caucho.util.Alarm;
+import javax.rmi.CORBA.ClassDesc;
+import javax.rmi.CORBA.Util;
+import javax.rmi.CORBA.ValueHandler;
+import java.io.IOException;
+import java.io.Serializable;
 
 abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream {
   static protected final int VALUE_TAG = 0x7fffff00;

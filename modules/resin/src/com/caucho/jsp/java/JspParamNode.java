@@ -28,19 +28,7 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
-
-import java.lang.reflect.*;
-import java.beans.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.xml.QName;
-import com.caucho.xml.XmlChar;
-
-import com.caucho.jsp.*;
+import com.caucho.jsp.JspParseException;
 
 /**
  * Represents a custom tag.

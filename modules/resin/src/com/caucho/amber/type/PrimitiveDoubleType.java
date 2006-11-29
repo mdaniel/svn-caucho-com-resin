@@ -28,15 +28,12 @@
 
 package com.caucho.amber.type;
 
-import java.io.IOException;
-
-import java.sql.Types;
-
 import com.caucho.amber.manager.AmberPersistenceUnit;
-
 import com.caucho.java.JavaWriter;
-
 import com.caucho.util.L10N;
+
+import java.io.IOException;
+import java.sql.Types;
 
 /**
  * The primitive double type.

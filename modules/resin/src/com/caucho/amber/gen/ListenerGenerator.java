@@ -29,16 +29,11 @@
 
 package com.caucho.amber.gen;
 
-import java.io.*;
-import java.util.*;
-
+import com.caucho.amber.type.ListenerType;
+import com.caucho.java.AbstractGenerator;
 import com.caucho.util.L10N;
 
-import com.caucho.java.AbstractGenerator;
-
-import com.caucho.loader.Environment;
-
-import com.caucho.amber.type.ListenerType;
+import java.io.IOException;
 
 //import com.caucho.amber.field.Field;
 //import com.caucho.amber.field.FieldType;

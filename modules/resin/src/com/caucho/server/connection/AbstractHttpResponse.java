@@ -29,39 +29,43 @@
 
 package com.caucho.server.connection;
 
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
+import com.caucho.log.Log;
+import com.caucho.server.cache.AbstractCacheEntry;
+import com.caucho.server.cache.AbstractCacheFilterChain;
+import com.caucho.server.dispatch.BadRequestException;
+import com.caucho.server.dispatch.InvocationDecoder;
+import com.caucho.server.session.CookieImpl;
+import com.caucho.server.session.SessionImpl;
+import com.caucho.server.session.SessionManager;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.ErrorPageManager;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Alarm;
 import com.caucho.util.CaseInsensitiveIntMap;
-
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.FlushBuffer;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.HTTPUtil;
+import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 import com.caucho.vfs.ClientDisconnectException;
-
+import com.caucho.vfs.FlushBuffer;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.WriteStream;
 import com.caucho.xml.XmlChar;
 
-import com.caucho.log.Log;
-
-import com.caucho.server.cache.AbstractCacheFilterChain;
-import com.caucho.server.cache.AbstractCacheEntry;
-
-import com.caucho.server.dispatch.*;
-
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.webapp.ErrorPageManager;
-
-import com.caucho.server.session.CookieImpl;
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.session.SessionImpl;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Encapsulates the servlet response, controlling response headers and the

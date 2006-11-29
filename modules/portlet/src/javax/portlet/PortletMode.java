@@ -28,9 +28,6 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
-
 public class PortletMode
 {
   public final static PortletMode VIEW = new PortletMode("view");
@@ -39,7 +36,7 @@ public class PortletMode
 
   private String _name;
 
-  public PortletMode(String name) 
+  public PortletMode(String name)
   {
     if (name==null) {
       throw new IllegalArgumentException("PortletMode name can not be NULL");
@@ -47,17 +44,17 @@ public class PortletMode
     _name = name.toLowerCase();
   }
 
-  public String toString() 
+  public String toString()
   {
     return _name;
   }
 
-  public int hashCode() 
+  public int hashCode()
   {
     return _name.hashCode();
   }
 
-  public boolean equals(Object o) 
+  public boolean equals(Object o)
   {
     if ( o instanceof PortletMode )
       return _name.equals(((PortletMode) o)._name);

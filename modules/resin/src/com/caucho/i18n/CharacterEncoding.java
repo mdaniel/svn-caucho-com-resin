@@ -29,15 +29,12 @@
 
 package com.caucho.i18n;
 
-import javax.annotation.*;
-
+import com.caucho.config.ConfigException;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
-
 import com.caucho.vfs.Encoding;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.loader.EnvironmentLocal;
+import javax.annotation.PostConstruct;
 
 /**
  * Configuration for the character-encoding pattern.

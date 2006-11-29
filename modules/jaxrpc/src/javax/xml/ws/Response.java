@@ -28,8 +28,8 @@
 */
 
 package javax.xml.ws;
-import java.util.concurrent.*;
-import java.util.*;
+import java.util.Map;
+import java.util.concurrent.Future;
 
 /** XXX */
 public interface Response<T> extends Future<T> {

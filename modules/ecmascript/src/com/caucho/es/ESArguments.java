@@ -28,11 +28,9 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.IntMap;
 
-import com.caucho.util.*;
+import java.util.HashMap;
 
 class ESArguments extends ESObject {
   static ESId CALLEE = ESId.intern("callee");

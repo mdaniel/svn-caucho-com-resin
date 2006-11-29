@@ -28,7 +28,7 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
+import javax.servlet.jsp.PageContext;
 
 /**
  * Adapts an object to the tag hierarchy.

@@ -28,9 +28,9 @@
 
 package com.caucho.iiop;
 
-import java.io.IOException;
-
 import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
 
 public class StreamMessageWriter extends MessageWriter {
   private WriteStream _out;

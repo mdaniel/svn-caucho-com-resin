@@ -28,9 +28,12 @@
 */
 
 package javax.xml.bind.util;
-import javax.xml.transform.sax.*;
-import javax.xml.bind.*;
-import org.xml.sax.*;
+import org.xml.sax.ContentHandler;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.sax.SAXResult;
 
 /** Turn a SAX source into a JAXB value */
 public class JAXBResult extends SAXResult {

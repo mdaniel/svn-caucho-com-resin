@@ -29,15 +29,12 @@
 
 package com.caucho.bytecode;
 
-import java.lang.reflect.Method;
-
-import java.io.InputStream;
 import java.io.IOException;
-
+import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.HashMap;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a java annotation.

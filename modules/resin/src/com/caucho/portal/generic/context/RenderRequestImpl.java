@@ -49,10 +49,9 @@
 
 package com.caucho.portal.generic.context;
 
-import java.util.Map;
+import javax.portlet.RenderRequest;
 import java.util.Enumeration;
-
-import javax.portlet.*;
+import java.util.Map;
 
 
 class RenderRequestImpl

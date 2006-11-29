@@ -28,7 +28,7 @@
 
 package com.caucho.loader;
 
-import javax.annotation.*;
+import javax.annotation.PostConstruct;
 
 /**
  * Configuration class for the servlet classloader

@@ -49,22 +49,15 @@
 
 package com.caucho.portal.generic;
 
+import javax.portlet.PortletContext;
+import javax.portlet.PortletRequestDispatcher;
+import javax.servlet.ServletContext;
 import java.io.InputStream;
-
 import java.net.URL;
-
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
-import javax.portlet.*;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 
 /** 
  * HttpPortletContext provides the connection to a web application

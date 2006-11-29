@@ -49,12 +49,11 @@
 
 package com.caucho.portal.generic;
 
-import java.io.IOException;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-
-import javax.portlet.*;
+import javax.portlet.Portlet;
+import javax.portlet.PortletException;
+import java.io.IOException;
 
 /**
  */

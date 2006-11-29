@@ -29,24 +29,16 @@
 
 package com.caucho.db.table;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
-
-import java.sql.SQLException;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.log.Log;
-
-import com.caucho.db.store.Transaction;
-
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
-
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
+import com.caucho.db.store.Transaction;
+import com.caucho.log.Log;
+
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 abstract public class Column {
   protected final static Logger log = Log.open(Column.class);

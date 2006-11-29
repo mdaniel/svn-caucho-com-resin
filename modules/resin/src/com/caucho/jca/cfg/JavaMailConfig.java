@@ -28,17 +28,13 @@
 
 package com.caucho.jca.cfg;
 
-import java.lang.reflect.Method;
-
-import java.util.Properties;
-
-import java.util.logging.Logger;
-
+import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
+import java.lang.reflect.Method;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Configuration for a javamail.

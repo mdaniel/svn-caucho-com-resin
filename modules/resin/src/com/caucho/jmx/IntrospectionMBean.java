@@ -29,18 +29,23 @@
 
 package com.caucho.jmx;
 
+import javax.management.*;
+import javax.management.openmbean.ArrayType;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
 import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.management.*;
-import javax.management.modelmbean.*;
-import javax.management.openmbean.*;
 
 /**
  * Resin implementation of StandardMBean.

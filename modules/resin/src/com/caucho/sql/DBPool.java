@@ -43,7 +43,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
 
-import javax.annotation.*;
+import javax.annotation.PostConstruct;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;

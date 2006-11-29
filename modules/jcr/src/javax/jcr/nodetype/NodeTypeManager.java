@@ -29,7 +29,7 @@
 
 package javax.jcr.nodetype;
 
-import javax.jcr.*;
+import javax.jcr.RepositoryException;
 
 public interface NodeTypeManager {
   public NodeType getNodeType(String nodeTypeName)

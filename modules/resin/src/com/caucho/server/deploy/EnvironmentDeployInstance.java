@@ -29,8 +29,6 @@
 
 package com.caucho.server.deploy;
 
-import java.util.Map;
-
 import com.caucho.vfs.Path;
 
 /**

@@ -28,11 +28,9 @@
 
 package com.caucho.jms.selector;
 
-import javax.jms.Message;
-import javax.jms.JMSException;
 import javax.jms.InvalidSelectorException;
-
-import com.caucho.jms.message.ObjectConverter;
+import javax.jms.JMSException;
+import javax.jms.Message;
 
 /**
  * The base selector.

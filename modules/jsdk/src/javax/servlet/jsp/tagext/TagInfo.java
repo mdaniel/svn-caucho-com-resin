@@ -28,8 +28,6 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-
 /**
  * Represents the tag information from the tld.  TagExtraInfo classes
  * can use this to help in validation or in variable creation.
@@ -64,7 +62,7 @@ public class TagInfo {
    * Constant for "tag-dependent" unprocessed verbatim body content
    */
   public static final String BODY_CONTENT_TAG_DEPENDENT = "tagdependent";
-  
+
   private String bodyContent;
   private String infoString;
   private String tagClassName;
@@ -91,12 +89,12 @@ public class TagInfo {
    * @param tagAttributeInfo information about the tags attribute from the tld.
    */
   public TagInfo(String tagName,
-		 String tagClassName,
-		 String bodyContent,
-		 String infoString,
-		 TagLibraryInfo taglib,
-		 TagExtraInfo tagExtraInfo,
-		 TagAttributeInfo []attributeInfo)
+                 String tagClassName,
+                 String bodyContent,
+                 String infoString,
+                 TagLibraryInfo taglib,
+                 TagExtraInfo tagExtraInfo,
+                 TagAttributeInfo []attributeInfo)
   {
     this.tagName = tagName;
     this.tagClassName = tagClassName;
@@ -127,12 +125,12 @@ public class TagInfo {
    * @param tvi variable info in the tld
    */
   public TagInfo(String tagName,
-		 String tagClassName,
-		 String bodyContent,
-		 String infoString,
-		 TagLibraryInfo taglib,
-		 TagExtraInfo tagExtraInfo,
-		 TagAttributeInfo []attributeInfo,
+                 String tagClassName,
+                 String bodyContent,
+                 String infoString,
+                 TagLibraryInfo taglib,
+                 TagExtraInfo tagExtraInfo,
+                 TagAttributeInfo []attributeInfo,
                  String displayName,
                  String smallIcon,
                  String largeIcon,
@@ -164,12 +162,12 @@ public class TagInfo {
    * @param tvi variable info in the tld
    */
   public TagInfo(String tagName,
-		 String tagClassName,
-		 String bodyContent,
-		 String infoString,
-		 TagLibraryInfo taglib,
-		 TagExtraInfo tagExtraInfo,
-		 TagAttributeInfo []attributeInfo,
+                 String tagClassName,
+                 String bodyContent,
+                 String infoString,
+                 TagLibraryInfo taglib,
+                 TagExtraInfo tagExtraInfo,
+                 TagAttributeInfo []attributeInfo,
                  String displayName,
                  String smallIcon,
                  String largeIcon,

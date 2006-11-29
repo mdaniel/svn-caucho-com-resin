@@ -28,13 +28,11 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-import java.util.*;
-import javax.ejb.*;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBMetaData;
+import java.io.Serializable;
 
 public class EJBMetaDataImpl implements EJBMetaData, Serializable {
   // ejb/0230

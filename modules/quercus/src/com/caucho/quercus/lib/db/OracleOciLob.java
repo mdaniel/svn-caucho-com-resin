@@ -29,17 +29,14 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringBuilderValue;
-
-import com.caucho.quercus.annotation.NotNull;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.ReturnNullAsFalse;
-
 import com.caucho.util.L10N;
-
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -48,13 +45,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-
 import java.lang.reflect.Method;
-
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

@@ -29,27 +29,15 @@
 
 package com.caucho.soap.skeleton;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
+import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.soap.marshall.MarshallFactory;
+import com.caucho.util.L10N;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.ws.*;
-
-import javax.jws.*;
-import javax.jws.soap.*;
-
-import com.caucho.jaxb.*;
-import com.caucho.soap.marshall.*;
-import com.caucho.soap.wsdl.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.xml.bind.JAXBException;
+import javax.xml.ws.WebServiceException;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Invokes a SOAP request on a Java POJO method

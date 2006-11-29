@@ -28,11 +28,11 @@
 
 package com.caucho.jms.util;
 
-import java.io.*;
-
-import java.util.logging.*;
-
-import javax.jms.*;
+import javax.jms.BytesMessage;
+import javax.jms.JMSException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.logging.Logger;
 
 /**
  * An output stream that writes to a BytesMessage.

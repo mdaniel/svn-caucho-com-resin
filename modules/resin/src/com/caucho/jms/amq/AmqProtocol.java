@@ -29,12 +29,7 @@
 
 package com.caucho.jms.amq;
 
-import java.util.logging.*;
-
-import com.caucho.util.*;
-
 import com.caucho.server.connection.Connection;
-
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
 

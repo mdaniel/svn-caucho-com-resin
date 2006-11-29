@@ -28,7 +28,7 @@
 */
 
 package javax.xml.ws;
-import java.util.concurrent.*;
+import java.util.concurrent.Future;
 
 /** XXX */
 public interface Dispatch<T> extends BindingProvider {

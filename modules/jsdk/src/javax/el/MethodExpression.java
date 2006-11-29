@@ -29,20 +29,18 @@
 
 package javax.el;
 
-import java.util.*;
-
 /**
  * Represents an EL expression
  */
 public abstract class MethodExpression extends Expression {
   public abstract MethodInfo getMethodInfo(ELContext context)
     throws PropertyNotFoundException,
-	   MethodNotFoundException,
-	   ELException;
+           MethodNotFoundException,
+           ELException;
 
   public abstract Object invoke(ELContext context,
-				Object []params)
+                                Object []params)
     throws PropertyNotFoundException,
-	   MethodNotFoundException,
-	   ELException;
+           MethodNotFoundException,
+           ELException;
 }

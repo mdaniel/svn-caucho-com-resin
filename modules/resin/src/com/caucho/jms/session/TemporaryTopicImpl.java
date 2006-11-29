@@ -28,9 +28,9 @@
 
 package com.caucho.jms.session;
 
-import javax.jms.TemporaryTopic;
-
 import com.caucho.jms.memory.MemoryTopic;
+
+import javax.jms.TemporaryTopic;
 
 /**
  * A basic topic.

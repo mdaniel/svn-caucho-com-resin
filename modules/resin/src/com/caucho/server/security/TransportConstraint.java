@@ -28,17 +28,14 @@
 
 package com.caucho.server.security;
 
-import java.io.*;
-import java.util.*;
-import java.security.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.server.webapp.Application;
 import com.caucho.server.host.Host;
+import com.caucho.server.webapp.Application;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class TransportConstraint extends AbstractConstraint {
   private String _transport;

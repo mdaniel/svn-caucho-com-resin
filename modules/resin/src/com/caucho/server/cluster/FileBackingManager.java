@@ -28,12 +28,7 @@
 
 package com.caucho.server.cluster;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
 
 /**
  * Manages the object backing for a context.

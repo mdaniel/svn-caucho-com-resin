@@ -28,27 +28,21 @@
  */
 package com.caucho.db.jdbc;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.*;
-import javax.sql.*;
-
+import com.caucho.db.Database;
+import com.caucho.db.sql.Query;
+import com.caucho.db.store.Transaction;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.Path;
-
-import com.caucho.log.Log;
-
-import com.caucho.db.Database;
-
-import com.caucho.db.store.Transaction;
-
-import com.caucho.db.sql.Query;
+import java.sql.CallableStatement;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Savepoint;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The JDBC connection implementation.

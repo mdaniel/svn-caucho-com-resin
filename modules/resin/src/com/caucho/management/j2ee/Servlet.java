@@ -29,9 +29,9 @@
 
 package com.caucho.management.j2ee;
 
-import javax.servlet.ServletConfig;
 import javax.management.j2ee.statistics.ServletStats;
 import javax.management.j2ee.statistics.TimeStatistic;
+import javax.servlet.ServletConfig;
 
 public class Servlet
   extends J2EEManagedObject

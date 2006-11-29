@@ -49,10 +49,6 @@
 package com.caucho.portal.generic;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.portlet.*;
 
 public class ResourceBundleFactory
 {

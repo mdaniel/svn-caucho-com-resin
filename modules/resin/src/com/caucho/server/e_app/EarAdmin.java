@@ -29,7 +29,7 @@
 
 package com.caucho.server.e_app;
 
-import com.caucho.management.server.*;
+import com.caucho.management.server.EAppMXBean;
 import com.caucho.server.deploy.DeployControllerAdmin;
 
 public class EarAdmin

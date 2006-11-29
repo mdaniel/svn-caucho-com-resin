@@ -28,13 +28,11 @@
 
 package com.caucho.util;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.vfs.*;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Localization

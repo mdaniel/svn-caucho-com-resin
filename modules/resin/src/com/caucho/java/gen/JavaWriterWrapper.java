@@ -29,14 +29,12 @@
 
 package com.caucho.java.gen;
 
-import java.io.IOException;
-
 import com.caucho.bytecode.JClass;
-
 import com.caucho.java.JavaWriter;
 import com.caucho.java.LineMap;
-
 import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
 
 /**
  * Wrapper

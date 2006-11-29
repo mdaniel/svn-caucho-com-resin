@@ -49,12 +49,13 @@
 
 package com.caucho.portal.generic.context;
 
-import com.caucho.portal.generic.*;
+import com.caucho.portal.generic.Constraint;
+import com.caucho.portal.generic.Invocation;
+import com.caucho.portal.generic.Window;
 
-
-import java.util.*;
-
-import javax.portlet.*;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 
 /** 

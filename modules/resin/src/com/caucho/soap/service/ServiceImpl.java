@@ -29,17 +29,10 @@
 
 package com.caucho.soap.service;
 
-import com.caucho.soap.reflect.*;
-import java.lang.reflect.*;
-import javax.jws.*;
-import com.caucho.soap.marshall.*;
-import com.caucho.soap.skeleton.*;
-import com.caucho.util.*;
-import java.io.*;
-import javax.xml.namespace.*;
-import javax.xml.ws.*;
-import javax.xml.stream.*;
-import com.caucho.vfs.*;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 
 public class ServiceImpl extends Service {
 

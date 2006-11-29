@@ -29,8 +29,7 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
 
 public interface Portlet
 {

@@ -49,11 +49,15 @@
 
 package com.caucho.portal.generic;
 
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.portlet.*;
+import javax.portlet.PortletMode;
+import javax.portlet.PortletModeException;
+import javax.portlet.PortletSecurityException;
+import javax.portlet.WindowState;
+import javax.portlet.WindowStateException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 
 abstract public class InvocationURL
 {

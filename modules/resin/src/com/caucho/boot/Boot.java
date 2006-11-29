@@ -29,7 +29,8 @@
 
 package com.caucho.boot;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public interface Boot {
   public Process exec(ArrayList<String> args,

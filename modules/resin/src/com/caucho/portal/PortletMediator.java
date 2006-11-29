@@ -31,10 +31,11 @@ package com.caucho.portal;
 
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 import java.util.logging.Logger;
-
-import javax.portlet.*;
 
 public class PortletMediator
 {

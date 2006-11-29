@@ -50,14 +50,16 @@
 package com.caucho.portal.generic.context;
 
 import com.caucho.portal.generic.BufferFactory;
-import com.caucho.portal.generic.PortletCharBuffer;
 import com.caucho.portal.generic.PortletByteBuffer;
+import com.caucho.portal.generic.PortletCharBuffer;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.Level;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class BufferedResponseHandler extends AbstractResponseHandler

@@ -28,23 +28,26 @@
 
 package com.caucho.xpath;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import java.lang.reflect.*;
-
-import org.w3c.dom.*;
-
 import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+import com.caucho.xml.XmlChar;
 import com.caucho.xpath.expr.*;
-import com.caucho.xpath.expr.Functions;
+import com.caucho.xpath.functions.BaseURI;
+import com.caucho.xpath.functions.ResolveURI;
+import com.caucho.xpath.functions.Trace;
 import com.caucho.xpath.pattern.*;
 
-import com.caucho.xpath.functions.*;
+import org.w3c.dom.Node;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 
 /**

@@ -29,8 +29,10 @@
 
 package javax.script;
 
-import java.io.*;
-import java.util.*;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Basic implementation of a script context.

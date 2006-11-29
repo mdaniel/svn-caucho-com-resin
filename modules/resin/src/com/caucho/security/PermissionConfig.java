@@ -28,20 +28,13 @@
 
 package com.caucho.security;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.security.Permission;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InstantiationConfig;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import java.security.Permission;
+import java.util.logging.Logger;
 
 /**
  * Permission configuration.

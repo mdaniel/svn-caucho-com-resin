@@ -28,15 +28,17 @@
 
 package com.caucho.xpath.expr;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.XPathException;
+import com.caucho.xpath.pattern.NodeIterator;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
-import com.caucho.xpath.pattern.*;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class BooleanExpr extends Expr {
   private int _code;

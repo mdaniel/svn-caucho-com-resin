@@ -28,15 +28,12 @@
 
 package com.caucho.config.types;
 
-import javax.sql.*;
-import javax.naming.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.config.BeanBuilderException;
-import com.caucho.config.TypeStrategy;
 import com.caucho.config.NodeBuilder;
+import com.caucho.config.TypeStrategy;
+
 import org.w3c.dom.Node;
+
+import javax.naming.InitialContext;
 
 /**
  * JNDI lookup.

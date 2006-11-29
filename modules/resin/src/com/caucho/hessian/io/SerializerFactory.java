@@ -48,15 +48,15 @@
 
 package com.caucho.hessian.io;
 
-import java.util.*;
-import java.util.logging.*;
-
-import java.io.*;
-import java.io.File;
-
-import java.math.BigDecimal;
-
 import com.caucho.burlap.io.BurlapRemoteObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Factory for returning serialization methods.

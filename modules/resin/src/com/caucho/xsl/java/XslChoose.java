@@ -28,15 +28,10 @@
 
 package com.caucho.xsl.java;
 
-import java.util.ArrayList;
-
 import com.caucho.java.JavaWriter;
-
-import com.caucho.xml.QName;
-
-import com.caucho.xpath.pattern.AbstractPattern;
-
 import com.caucho.xsl.XslParseException;
+
+import java.util.ArrayList;
 
 /**
  * Represents the xsl:choose element.

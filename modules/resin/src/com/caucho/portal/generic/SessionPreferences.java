@@ -48,24 +48,13 @@
 
 package com.caucho.portal.generic;
 
-import java.lang.ref.WeakReference;
-
-import java.io.IOException;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.LinkedHashMap;
-
-import javax.portlet.*;
-
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionEvent;
+import java.lang.ref.WeakReference;
+import java.util.LinkedHashMap;
 
 public class SessionPreferences
   extends LinkedHashMap<String, String[]>

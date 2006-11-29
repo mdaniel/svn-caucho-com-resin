@@ -29,21 +29,14 @@
 
 package com.caucho.sql;
 
-import java.lang.ref.SoftReference;
-
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.sql.*;
-import javax.transaction.*;
-import javax.transaction.xa.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
 import com.caucho.log.Log;
-import com.caucho.transaction.*;
+import com.caucho.util.L10N;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Adapts the JDBC 2.0 connection pooling and XA support for database drivers

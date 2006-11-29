@@ -29,20 +29,15 @@
 
 package com.caucho.servlets.ssi;
 
-import java.io.IOException;
-
-import java.util.HashMap;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.util.IntMap;
-
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.Path;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Represents a SSI include statement

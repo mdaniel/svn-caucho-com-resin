@@ -28,43 +28,30 @@
 
 package com.caucho.server.security;
 
-import java.io.IOException;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.InitParam;
 
-import java.lang.reflect.Method;
-
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.security.Principal;
-
-import javax.annotation.*;
-
+import javax.annotation.PostConstruct;
 import javax.security.auth.Subject;
-
-import javax.security.auth.spi.LoginModule;
-
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
-
 import javax.security.auth.login.LoginException;
-
+import javax.security.auth.spi.LoginModule;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.InitParam;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.logging.Level;
 
 /**
  * The JAAS authenticator uses an underlying JAAS.

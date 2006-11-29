@@ -48,11 +48,13 @@
 
 package com.caucho.portal.generic;
 
-import java.util.*;
-import java.io.IOException;
-
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * A Map that wraps another map and uses different keys in the wrapped

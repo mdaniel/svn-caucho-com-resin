@@ -30,10 +30,9 @@
 
 package com.caucho.eswrap.org.w3c.dom;
 
-import java.util.*;
-import org.w3c.dom.*;
-import com.caucho.util.*;
-import com.caucho.es.*;
+import org.w3c.dom.NamedNodeMap;
+
+import java.util.Iterator;
 
 public class NamedNodeMapEcmaWrap {
   static class NamedNodeMapIterator implements Iterator {

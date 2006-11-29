@@ -29,11 +29,8 @@
 
 package com.caucho.amber.gen;
 
-import com.caucho.java.gen.JavaClassGenerator;
-
-import com.caucho.amber.EnvAmberManager;
-
 import com.caucho.amber.type.AbstractEnhancedType;
+import com.caucho.java.gen.JavaClassGenerator;
 
 /**
  * Enhancing the java objects for Amber mapping.

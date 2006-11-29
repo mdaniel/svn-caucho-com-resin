@@ -28,12 +28,9 @@
 
 package com.caucho.es;
 
-import java.util.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.beans.*;
+import com.caucho.util.IntMap;
 
-import com.caucho.util.*;
+import java.util.Iterator;
 
 /**
  * JavaScript object

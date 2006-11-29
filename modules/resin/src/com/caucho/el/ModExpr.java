@@ -29,15 +29,13 @@
 
 package com.caucho.el;
 
-import java.io.*;
-import java.util.logging.*;
+import com.caucho.vfs.WriteStream;
 
+import javax.el.ELContext;
+import javax.el.ELException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
-import javax.el.*;
-
-import com.caucho.vfs.*;
 
 /**
  * Represents a binary mod numeric operation

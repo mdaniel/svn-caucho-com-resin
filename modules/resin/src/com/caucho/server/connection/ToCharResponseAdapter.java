@@ -29,25 +29,12 @@
 
 package com.caucho.server.connection;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletOutputStream;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-
+import com.caucho.log.Log;
 import com.caucho.util.FreeList;
 
-import com.caucho.log.Log;
-
-import com.caucho.vfs.FlushBuffer;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 public class ToCharResponseAdapter extends ResponseAdapter {
   private static final Logger log = Log.open(ToCharResponseAdapter.class);

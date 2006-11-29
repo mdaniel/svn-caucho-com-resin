@@ -28,19 +28,20 @@
 
 package com.caucho.server.connection;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.HashMapImpl;
+import com.caucho.util.L10N;
+import com.caucho.vfs.MultipartStream;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Multipart form handling.

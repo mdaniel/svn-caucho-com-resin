@@ -29,36 +29,15 @@
 
 package com.caucho.quercus.lib;
 
-import java.lang.reflect.Method;
-
-import java.io.StringWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-
-import java.util.HashMap;
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import com.caucho.quercus.env.*;
+import com.caucho.server.session.SessionManager;
 import com.caucho.util.URLUtil;
 
-import com.caucho.server.session.SessionManager;
-
-import com.caucho.quercus.lib.session.SessionModule;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaMethod;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.OutputBuffer;
-import com.caucho.quercus.env.Callback;
-import com.caucho.quercus.env.CallbackFunction;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Implements the built-in URL rewriter for passing session ids and other

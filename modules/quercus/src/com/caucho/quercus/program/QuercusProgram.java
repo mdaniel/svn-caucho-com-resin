@@ -29,17 +29,20 @@
 
 package com.caucho.quercus.program;
 
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.page.QuercusPage;
+import com.caucho.vfs.BasicDependencyContainer;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Collection;
-
-import com.caucho.quercus.env.*;
-
-import com.caucho.quercus.page.QuercusPage;
-
-import com.caucho.quercus.Quercus;
-import com.caucho.vfs.*;
 
 /**
  * Represents a compiled Quercus program.

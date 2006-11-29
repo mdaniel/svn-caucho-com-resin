@@ -28,14 +28,11 @@
 
 package com.caucho.xpath;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.xpath.pattern.AbstractPattern;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.pattern.*;
+import org.w3c.dom.Node;
+
+import java.util.ArrayList;
 
 /**
  * Base class for XPath functions.  The custom functions can use the

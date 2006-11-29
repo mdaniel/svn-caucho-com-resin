@@ -28,8 +28,9 @@
 */
 
 package javax.xml.bind;
-import org.w3c.dom.*;
-import java.net.*;
+import org.w3c.dom.Node;
+
+import java.net.URL;
 
 public interface ValidationEventLocator {
 

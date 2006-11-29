@@ -28,14 +28,16 @@
 
 package com.caucho.jslib;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
+import com.caucho.util.Exit;
+import com.caucho.util.ExitListener;
 
-import javax.sql.*;
-import javax.naming.*;
-
-import com.caucho.util.*;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Encapsulates a database connection for JavaScript.

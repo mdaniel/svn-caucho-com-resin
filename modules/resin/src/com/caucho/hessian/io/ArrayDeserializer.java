@@ -48,9 +48,9 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 /**
  * Deserializing a Java array

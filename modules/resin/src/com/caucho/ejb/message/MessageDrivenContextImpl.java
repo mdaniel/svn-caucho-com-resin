@@ -29,18 +29,12 @@
 
 package com.caucho.ejb.message;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.rmi.*;
-import java.lang.reflect.*;
+import com.caucho.ejb.AbstractContext;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.util.Log;
 
-import javax.ejb.*;
-import javax.jms.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.ejb.*;
+import javax.ejb.MessageDrivenContext;
+import java.util.logging.Logger;
 
 /**
  * Server container for a message bean.

@@ -28,9 +28,6 @@
 
 package com.caucho.es;
 
-import java.util.*;
-import com.caucho.util.*;
-
 abstract public class ESClass extends ESObject implements ESCallable {
   protected ESClass()
   {

@@ -40,7 +40,7 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.util.L10N;
 
-import javax.annotation.*;
+import javax.annotation.PostConstruct;
 import javax.ejb.MessageDrivenBean;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;

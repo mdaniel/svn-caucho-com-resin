@@ -28,19 +28,10 @@
 
 package com.caucho.relaxng;
 
-import java.util.*;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
+import com.caucho.relaxng.program.Item;
 import com.caucho.util.L10N;
 
-import com.caucho.xml.QName;
-
-import com.caucho.config.BeanConfigException;
-
-import com.caucho.relaxng.program.Item;
+import java.util.ArrayList;
 
 /**
  * Parse state.

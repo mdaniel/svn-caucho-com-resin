@@ -30,7 +30,6 @@
 package com.caucho.management.server;
 
 import com.caucho.jmx.Description;
-import com.caucho.jmx.Name;
 
 /**
  * Management interface for the block manager used by the proxy cache

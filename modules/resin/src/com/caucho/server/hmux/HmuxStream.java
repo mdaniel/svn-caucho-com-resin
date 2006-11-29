@@ -29,21 +29,20 @@
 
 package com.caucho.server.hmux;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import java.security.NoSuchAlgorithmException;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
 import com.caucho.log.Log;
-import com.caucho.server.hmux.*;
+import com.caucho.util.Alarm;
+import com.caucho.vfs.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.Socket;
+import java.net.SocketException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Underlying stream handling HTTP requests.

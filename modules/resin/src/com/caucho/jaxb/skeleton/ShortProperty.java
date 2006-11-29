@@ -29,16 +29,9 @@
 
 package com.caucho.jaxb.skeleton;
 
-import java.util.*;
-import java.lang.reflect.*;
-import java.io.*;
-
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-
-import com.caucho.jaxb.*;
-import com.caucho.vfs.WriteStream;
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 
 /**
  * a short property

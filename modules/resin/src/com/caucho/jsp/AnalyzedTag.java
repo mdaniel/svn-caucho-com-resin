@@ -28,11 +28,10 @@
 
 package com.caucho.jsp;
 
-import java.util.logging.Logger;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import java.util.logging.Logger;
 
 /**
  * Stores analyzed information about a tag.

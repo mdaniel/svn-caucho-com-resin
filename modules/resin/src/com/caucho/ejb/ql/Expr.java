@@ -28,27 +28,21 @@
 
 package com.caucho.ejb.ql;
 
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.Collections;
-
-import java.util.logging.Logger;
-
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.ejb.cfg.EjbEntityBean;
-
-import com.caucho.amber.type.EntityType;
-
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.KeyManyToOneField;
+import com.caucho.amber.type.EntityType;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JClassLoader;
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.logging.Logger;
 
 /**
  * Parsed expression for EJB-QL.

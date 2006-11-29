@@ -29,13 +29,12 @@
 
 package com.caucho.jsp.cfg;
 
-import java.util.ArrayList;
-
-import com.caucho.vfs.*;
-
 import com.caucho.config.DependencyBean;
-
 import com.caucho.server.webapp.Application;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
+
+import java.util.ArrayList;
 
 /**
  * Configuration for the taglib in the .tld

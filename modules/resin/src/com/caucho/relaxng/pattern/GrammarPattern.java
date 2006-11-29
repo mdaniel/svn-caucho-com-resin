@@ -28,13 +28,11 @@
 
 package com.caucho.relaxng.pattern;
 
-import java.util.*;
-
+import com.caucho.relaxng.RelaxException;
 import com.caucho.util.L10N;
 
-import com.caucho.relaxng.RelaxException;
-
-import com.caucho.relaxng.program.Item;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Relax grammar pattern

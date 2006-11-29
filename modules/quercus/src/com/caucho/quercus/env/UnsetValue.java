@@ -29,10 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import com.caucho.vfs.WriteStream;
-
 /**
  * Represents a PHP null value.
  */

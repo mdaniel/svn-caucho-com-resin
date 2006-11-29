@@ -29,63 +29,43 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Enumeration;
-
-import java.io.IOException;
-
-import javax.annotation.*;
-import javax.sql.DataSource;
-
-import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBHome;
-import javax.ejb.EJBObject;
-import javax.ejb.EntityBean;
-import javax.ejb.EntityContext;
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.type.EntityType;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JClassLoader;
+import com.caucho.bytecode.JClassWrapper;
 import com.caucho.bytecode.JField;
 import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassWrapper;
-import com.caucho.bytecode.JClassLoader;
-
-import com.caucho.util.L10N;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.types.Period;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.MethodCallChain;
-import com.caucho.java.gen.BaseClass;
-import com.caucho.java.gen.CallChain;
-import com.caucho.java.gen.BaseMethod;
-import com.caucho.java.gen.JavaClassGenerator;
-
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.AbstractServer;
-
+import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.amber.AmberConfig;
 import com.caucho.ejb.entity.EntityServer;
-
+import com.caucho.ejb.gen.AmberAssembler;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.EntityAssembler;
-import com.caucho.ejb.gen.AmberAssembler;
+import com.caucho.ejb.gen.EntityCreateMethod;
 import com.caucho.ejb.gen.EntityFindMethod;
 import com.caucho.ejb.gen.EntityHomePoolChain;
-import com.caucho.ejb.gen.EntityCreateMethod;
-
-import com.caucho.ejb.amber.AmberConfig;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.type.EntityType;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseClass;
+import com.caucho.java.gen.BaseMethod;
+import com.caucho.java.gen.CallChain;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.java.gen.MethodCallChain;
 import com.caucho.management.j2ee.J2EEManagedObject;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.*;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Map;
 
 /**
  * Configuration for an ejb entity bean.

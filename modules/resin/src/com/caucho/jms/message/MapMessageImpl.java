@@ -28,13 +28,12 @@
 
 package com.caucho.jms.message;
 
-import java.util.HashMap;
-import java.util.Collections;
-import java.util.Enumeration;
-
+import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.MessageFormatException;
-import javax.jms.JMSException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 
 /**
  * A stream message.

@@ -29,13 +29,11 @@
 
 package com.caucho.server.thread;
 
-import java.util.*;
+import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
 
-import java.util.concurrent.*;
-import java.util.logging.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.util.concurrent.Executor;
+import java.util.logging.Logger;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.

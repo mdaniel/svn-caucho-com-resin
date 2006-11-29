@@ -29,7 +29,7 @@
 
 package javax.script;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * A factory for creating scripts.

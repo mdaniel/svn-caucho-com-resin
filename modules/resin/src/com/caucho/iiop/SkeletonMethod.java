@@ -29,15 +29,11 @@
 
 package com.caucho.iiop;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
 import com.caucho.log.Log;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 public class SkeletonMethod {
   private static final Logger log = Log.open(SkeletonMethod.class);

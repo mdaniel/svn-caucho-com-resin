@@ -28,19 +28,16 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.java.LineMap;
+import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.xml.DOMBuilder;
+import com.caucho.xml.Xml;
 
-import javax.servlet.jsp.*;
-import javax.xml.transform.*;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class NodeTransformerImpl extends TransformerImpl {
   protected LineMap _lineMap;

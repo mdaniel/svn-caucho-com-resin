@@ -28,14 +28,9 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.util.FreeList;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.DOMImplementation;
 
 /**
  * XML parser interface.  The parser can parse directly into the DOM or it

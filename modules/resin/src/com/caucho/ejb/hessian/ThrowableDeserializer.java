@@ -28,11 +28,9 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
 import com.caucho.hessian.io.JavaDeserializer;
+
+import java.lang.reflect.Constructor;
 
 /**
  * Serializing an object for known object types.

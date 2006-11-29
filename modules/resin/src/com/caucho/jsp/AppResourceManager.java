@@ -29,10 +29,8 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-
-import com.caucho.vfs.*;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.vfs.Path;
 
 /**
  * Resolves resources and looks up *.tld

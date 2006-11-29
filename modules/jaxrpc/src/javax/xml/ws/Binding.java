@@ -28,8 +28,8 @@
 */
 
 package javax.xml.ws;
-import javax.xml.ws.handler.*;
-import java.util.*;
+import javax.xml.ws.handler.Handler;
+import java.util.List;
 
 /** XXX */
 public interface Binding {

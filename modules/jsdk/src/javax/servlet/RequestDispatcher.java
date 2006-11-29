@@ -23,8 +23,7 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
 
 /**
  * The RequestDispatcher gives servlets the capabilities of SSI includes.

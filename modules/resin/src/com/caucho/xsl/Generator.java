@@ -28,28 +28,50 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import java.text.*;
-
-import org.w3c.dom.*;
-import javax.xml.transform.*;
-
+import com.caucho.java.JavaWriter;
+import com.caucho.java.LineMap;
 import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
-import com.caucho.xpath.pattern.*;
-import com.caucho.jsp.*;
-import com.caucho.xsl.fun.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CharScanner;
+import com.caucho.util.IntArray;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+import com.caucho.util.StringCharCursor;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.xml.CauchoDocument;
+import com.caucho.xml.QAbstractNode;
+import com.caucho.xml.QElement;
+import com.caucho.xml.QName;
+import com.caucho.xml.Xml;
+import com.caucho.xml.XmlChar;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.NamespaceContext;
+import com.caucho.xpath.XPath;
+import com.caucho.xpath.pattern.AbstractPattern;
+import com.caucho.xpath.pattern.UnionPattern;
+import com.caucho.xsl.fun.FormatNumberFun;
+import com.caucho.xsl.fun.KeyFun;
 import com.caucho.xsl.java.XslAttributeSet;
 import com.caucho.xsl.java.XslNode;
-import com.caucho.xsl.java.XslTemplate;
 import com.caucho.xsl.java.XslStylesheet;
+import com.caucho.xsl.java.XslTemplate;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base class for generating code from an XSL tree.  JavaGenerator and

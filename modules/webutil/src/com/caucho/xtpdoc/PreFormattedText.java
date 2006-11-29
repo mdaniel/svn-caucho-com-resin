@@ -29,15 +29,12 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.Writer;
-import java.io.PrintWriter;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.FilterWriter;
 import java.io.IOException;
-
-import java.util.ArrayList;
-
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 public class PreFormattedText extends FormattedText {
   public PreFormattedText(Document document)

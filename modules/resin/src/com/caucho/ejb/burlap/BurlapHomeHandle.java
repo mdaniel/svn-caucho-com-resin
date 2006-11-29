@@ -28,16 +28,11 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import javax.ejb.*;
+import com.caucho.ejb.RemoteExceptionWrapper;
+import com.caucho.ejb.protocol.AbstractHomeHandle;
 
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.*;
+import javax.ejb.EJBHome;
+import java.rmi.RemoteException;
 
 /**
  * Implementation for a home handle.

@@ -29,11 +29,7 @@
 
 package com.caucho.relaxng.pattern;
 
-import com.caucho.xml.QName;
-
 import com.caucho.relaxng.RelaxException;
-
-import com.caucho.relaxng.program.Item;
 import com.caucho.relaxng.program.AnyNameItem;
 import com.caucho.relaxng.program.NameClassItem;
 

@@ -29,16 +29,17 @@
 
 package com.caucho.jcr.svn;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.vfs.*;
-
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.ReadWritePair;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Subversion Client class.

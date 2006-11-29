@@ -29,8 +29,6 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.ArrayList;
-
 import javax.persistence.TemporalType;
 
 

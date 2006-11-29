@@ -29,27 +29,28 @@
 
 package com.caucho.soap.skeleton;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
+import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.soap.marshall.Marshall;
+import com.caucho.soap.marshall.MarshallFactory;
+import com.caucho.soap.wsdl.SOAPBody;
+import com.caucho.soap.wsdl.SOAPHeader;
+import com.caucho.soap.wsdl.SOAPUseChoice;
+import com.caucho.soap.wsdl.WSDLOperationInput;
+import com.caucho.soap.wsdl.WSDLOperationOutput;
+import com.caucho.soap.wsdl.WSDLPart;
+import com.caucho.util.L10N;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.ws.*;
-
-import javax.jws.*;
-import javax.jws.soap.*;
-
-import com.caucho.jaxb.*;
-import com.caucho.soap.marshall.*;
-import com.caucho.soap.wsdl.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.jws.WebParam;
+import javax.jws.WebResult;
+import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Holder;
+import javax.xml.ws.WebServiceException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Invokes a SOAP request on a Java POJO method.

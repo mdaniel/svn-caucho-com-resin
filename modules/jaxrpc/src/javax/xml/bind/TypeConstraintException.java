@@ -28,7 +28,7 @@
 */
 
 package javax.xml.bind;
-import java.io.*;
+import java.io.PrintStream;
 
 public class TypeConstraintException extends RuntimeException {
 

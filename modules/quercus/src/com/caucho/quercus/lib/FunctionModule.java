@@ -29,25 +29,16 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.VariableArguments;
-
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
 
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.Callback;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * PHP function routines.

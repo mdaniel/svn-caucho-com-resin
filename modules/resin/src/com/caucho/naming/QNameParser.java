@@ -28,13 +28,9 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
-
-import javax.naming.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.naming.Name;
+import javax.naming.NameParser;
+import javax.naming.NamingException;
 
 public class QNameParser implements NameParser {
   private ContextImpl context;

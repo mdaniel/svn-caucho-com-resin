@@ -49,11 +49,10 @@
 
 package com.caucho.portal.generic;
 
-import java.util.Set;
-import java.util.Map;
-
 import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
+import java.util.Map;
+import java.util.Set;
 
 
 /**

@@ -29,28 +29,21 @@
 
 package com.caucho.amber.gen;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.java.JavaCompiler;
-
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.java.gen.GenClass;
-import com.caucho.java.gen.DependencyComponent;
-
+import com.caucho.amber.entity.Entity;
+import com.caucho.amber.entity.Listener;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.AbstractEnhancedType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.ListenerType;
+import com.caucho.java.JavaCompiler;
+import com.caucho.java.gen.DependencyComponent;
+import com.caucho.java.gen.GenClass;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
-import com.caucho.amber.entity.Entity;
-import com.caucho.amber.entity.Listener;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Enhancing the java objects for Amber mapping.

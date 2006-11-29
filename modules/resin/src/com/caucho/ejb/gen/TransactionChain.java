@@ -28,18 +28,13 @@
 
 package com.caucho.ejb.gen;
 
-import java.lang.reflect.Method;
-
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-
+import com.caucho.ejb.cfg.EjbMethod;
 import com.caucho.java.JavaWriter;
-
 import com.caucho.java.gen.CallChain;
 import com.caucho.java.gen.FilterCallChain;
+import com.caucho.util.L10N;
 
-import com.caucho.ejb.cfg.EjbMethod;
+import java.io.IOException;
 
 /**
  * Generates the skeleton for a method call.

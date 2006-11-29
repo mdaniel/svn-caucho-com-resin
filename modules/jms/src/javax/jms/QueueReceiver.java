@@ -28,8 +28,6 @@
 
 package javax.jms;
 
-import java.util.Enumeration;
-
 /**
  * The main destination.
  */

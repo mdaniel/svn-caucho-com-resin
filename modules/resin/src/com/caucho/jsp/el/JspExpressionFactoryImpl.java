@@ -29,12 +29,16 @@
 
 package com.caucho.jsp.el;
 
-import java.math.*;
-import java.util.*;
-
-import javax.el.*;
-
 import com.caucho.el.*;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ExpressionFactory;
+import javax.el.MethodExpression;
+import javax.el.ValueExpression;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
 
 /**
  * Represents an EL expression factory

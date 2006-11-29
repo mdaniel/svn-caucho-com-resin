@@ -28,19 +28,10 @@
 
 package com.caucho.ejb.ql;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.config.ConfigException;
-
 import com.caucho.amber.type.EntityType;
-
-import com.caucho.amber.field.IdField;
-import com.caucho.amber.field.KeyManyToOneField;
-
+import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.util.CharBuffer;
 
 /**
  * Identifier expression for EJB-QL.

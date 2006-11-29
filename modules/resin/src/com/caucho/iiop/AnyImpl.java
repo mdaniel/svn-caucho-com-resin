@@ -28,27 +28,23 @@
 
 package com.caucho.iiop;
 
-import java.util.logging.Logger;
-
-import java.io.Serializable;
-import java.io.IOException;
-
-import java.math.BigDecimal;
-
-import org.omg.CORBA.TypeCode;
-import org.omg.CORBA.Any;
-import org.omg.CORBA.Principal;
-import org.omg.CORBA.MARSHAL;
-import org.omg.CORBA.BAD_OPERATION;
-import org.omg.CORBA.BAD_INV_ORDER;
-
-import org.omg.CORBA.portable.Streamable;
-import org.omg.CORBA.portable.InputStream;
-import org.omg.CORBA.portable.OutputStream;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import org.omg.CORBA.Any;
+import org.omg.CORBA.BAD_INV_ORDER;
+import org.omg.CORBA.BAD_OPERATION;
+import org.omg.CORBA.MARSHAL;
+import org.omg.CORBA.Principal;
+import org.omg.CORBA.TypeCode;
+import org.omg.CORBA.portable.InputStream;
+import org.omg.CORBA.portable.OutputStream;
+import org.omg.CORBA.portable.Streamable;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.logging.Logger;
 
 public class AnyImpl extends Any {
   protected static final L10N L = new L10N(AnyImpl.class);

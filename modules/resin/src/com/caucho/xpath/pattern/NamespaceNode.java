@@ -28,13 +28,20 @@
 
 package com.caucho.xpath.pattern;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.CauchoElement;
+import com.caucho.xml.CauchoNode;
+import com.caucho.xml.QAbstractNode;
+import com.caucho.xml.QAttr;
 
-import org.w3c.dom.*;
-import com.caucho.xml.*;
-import com.caucho.vfs.*;
-import com.caucho.xpath.*;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * A pseudo-node for handling the namespace:: axis.

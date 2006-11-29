@@ -28,11 +28,10 @@
  */
 
 package javax.xml.stream;
-import javax.xml.namespace.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
 import javax.xml.stream.events.*;
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
+import java.util.Iterator;
 
 public abstract class XMLEventFactory {
 

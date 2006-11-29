@@ -29,72 +29,33 @@
 
 package com.caucho.amber;
 
-import java.io.IOException;
-
-import java.lang.ref.SoftReference;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import javax.naming.InitialContext;
-
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
-
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.loader.enhancer.EnhancerManager;
-
-import com.caucho.jdbc.JdbcMetaData;
-
-import com.caucho.amber.manager.AmberConnection;
-import com.caucho.amber.manager.CacheConnection;
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.entity.AmberEntityHome;
-import com.caucho.amber.entity.EntityKey;
-import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.entity.AmberCompletion;
-
-import com.caucho.amber.gen.AmberGenerator;
-import com.caucho.amber.gen.AmberGeneratorImpl;
+import com.caucho.amber.entity.AmberEntityHome;
+import com.caucho.amber.entity.EntityItem;
+import com.caucho.amber.entity.EntityKey;
 import com.caucho.amber.gen.AmberEnhancer;
-
+import com.caucho.amber.gen.AmberGenerator;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryCacheKey;
 import com.caucho.amber.query.ResultSetCacheChunk;
-
-import com.caucho.amber.table.Table;
-
-import com.caucho.amber.type.Type;
 import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.GeneratorTableType;
-import com.caucho.amber.type.SubEntityType;
-import com.caucho.amber.type.TypeManager;
-
-import com.caucho.amber.idgen.IdGenerator;
-import com.caucho.amber.idgen.SequenceIdGenerator;
-
+import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.ConfigException;
-
-import com.caucho.java.gen.JavaClassGenerator;
-
-import com.caucho.loader.enhancer.EnhancingClassLoader;
-
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.enhancer.EnhancerManager;
 import com.caucho.log.Log;
-
-import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Main interface between Resin and the connector.  It's the

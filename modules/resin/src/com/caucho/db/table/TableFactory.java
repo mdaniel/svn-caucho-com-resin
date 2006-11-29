@@ -28,20 +28,13 @@
 
 package com.caucho.db.table;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.sql.SQLException;
-
-import com.caucho.util.CharBuffer;
+import com.caucho.db.Database;
+import com.caucho.db.sql.Expr;
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.Path;
-
-import com.caucho.db.Database;
-
-import com.caucho.db.sql.Expr;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class TableFactory {
   private static final L10N L = new L10N(TableFactory.class);

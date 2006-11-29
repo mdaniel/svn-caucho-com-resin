@@ -28,13 +28,10 @@
 
 package com.caucho.vfs;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-
-import javax.annotation.*;
-
 import com.caucho.loader.EnvironmentLocal;
+
+import javax.annotation.PostConstruct;
+import java.io.File;
 
 /**
  * Configuration for CaseInsensitive environments.

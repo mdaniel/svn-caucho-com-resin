@@ -29,27 +29,29 @@
 
 package com.caucho.soap.skeleton;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
+import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.soap.marshall.Marshall;
+import com.caucho.soap.marshall.MarshallException;
+import com.caucho.soap.marshall.MarshallFactory;
+import com.caucho.util.L10N;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.ws.*;
-
-import javax.jws.*;
-import javax.jws.soap.*;
-
-import com.caucho.jaxb.*;
-import com.caucho.soap.marshall.*;
-import com.caucho.soap.wsdl.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.jws.WebParam;
+import javax.jws.WebResult;
+import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.ws.Holder;
+import javax.xml.ws.WebServiceException;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Document wrapped action

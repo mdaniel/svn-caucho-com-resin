@@ -28,9 +28,9 @@
 
 package com.caucho.config;
 
-import java.util.ArrayList;
-
 import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 
 public class BuilderProgramContainer extends BuilderProgram {
   static final L10N L = new L10N(BuilderProgramContainer.class);

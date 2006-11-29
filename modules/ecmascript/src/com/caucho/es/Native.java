@@ -28,12 +28,6 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-
 /**
  * JavaScript function.  The global object is represented as one so
  * the top level script can be called.
@@ -95,10 +89,10 @@ class Native extends ESBase {
     sbuf.append("(");
     for (int i = 0; formals != null && i < formals.length; i++) {
       if (i != 0)
-	sbuf.append(", ");
+        sbuf.append(", ");
       sbuf.append(formals[i]);
     }
-      
+
     sbuf.append(") ");
 
     sbuf.append("{ ");

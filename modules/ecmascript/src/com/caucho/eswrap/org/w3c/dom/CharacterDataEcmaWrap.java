@@ -30,10 +30,8 @@
 
 package com.caucho.eswrap.org.w3c.dom;
 
-import java.io.*;
-import java.util.*;
-
-import org.w3c.dom.*;
+import org.w3c.dom.CharacterData;
+import org.w3c.dom.DOMException;
 
 public class CharacterDataEcmaWrap {
   public static String substringData(CharacterData node, int index)

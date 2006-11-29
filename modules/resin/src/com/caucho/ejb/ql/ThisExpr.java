@@ -28,11 +28,9 @@
 
 package com.caucho.ejb.ql;
 
-import com.caucho.util.CharBuffer;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.util.CharBuffer;
 
 /**
  * Identifier expression for EJB-QL.

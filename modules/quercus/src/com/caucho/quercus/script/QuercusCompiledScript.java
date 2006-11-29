@@ -29,27 +29,18 @@
 
 package com.caucho.quercus.script;
 
-import java.io.StringReader;
-import java.io.Reader;
-import java.io.Writer;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.page.InterpretedPage;
+import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 import javax.script.CompiledScript;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-
-import com.caucho.quercus.Quercus;
-
-import com.caucho.quercus.env.Env;
-
-import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.page.InterpretedPage;
-
-import com.caucho.quercus.parser.QuercusParser;
-
-import com.caucho.quercus.program.QuercusProgram;
-
-import com.caucho.vfs.*;
+import java.io.Writer;
 
 /**
  * Script engine

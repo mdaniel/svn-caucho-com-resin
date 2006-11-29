@@ -28,12 +28,9 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.Crc64;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 public class Crc64Stream extends StreamImpl {
   private StreamImpl _next;

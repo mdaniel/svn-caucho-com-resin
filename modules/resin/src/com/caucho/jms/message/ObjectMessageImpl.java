@@ -28,20 +28,17 @@
 
 package com.caucho.jms.message;
 
-import java.io.Serializable;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.IOException;
-
-import javax.jms.ObjectMessage;
-import javax.jms.JMSException;
-
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ContextLoaderObjectInputStream;
-
 import com.caucho.jms.JMSExceptionWrapper;
+import com.caucho.vfs.ContextLoaderObjectInputStream;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
+
+import javax.jms.JMSException;
+import javax.jms.ObjectMessage;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 /**
  * An object message.

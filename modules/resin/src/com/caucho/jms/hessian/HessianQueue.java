@@ -28,24 +28,28 @@
 
 package com.caucho.jms.hessian;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import java.net.*;
-
-import javax.jms.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jms.*;
-import com.caucho.jms.session.MessageAvailableListener;
-import com.caucho.jms.selector.*;
-import com.caucho.hessian.*;
 import com.caucho.ejb.hessian.HessianWriter;
-import com.caucho.hessian.io.*;
-
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.jms.session.MessageAvailableListener;
 import com.caucho.services.message.MessageSender;
 import com.caucho.services.message.MessageServiceException;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.ReadWritePair;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.ObjectMessage;
+import javax.jms.TextMessage;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * The Hessian queue is a write-only queue.

@@ -29,13 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.ejb.*;
-
-import com.caucho.config.ConfigException;
-
 /**
  * Security identity
  */
@@ -45,7 +38,7 @@ public class SecurityIdentity {
   public SecurityIdentity()
   {
   }
-  
+
   public void setDescription(String description)
   {
   }
@@ -53,7 +46,7 @@ public class SecurityIdentity {
   public void setUseCallerIdentity(boolean value)
   {
   }
-  
+
   public void setRunAs(RunAs runAs)
   {
     _runAs = runAs.getRoleName();
@@ -62,7 +55,7 @@ public class SecurityIdentity {
 
   public static class RunAs {
     String _roleName;
-    
+
     public void setDescription(String description)
     {
     }

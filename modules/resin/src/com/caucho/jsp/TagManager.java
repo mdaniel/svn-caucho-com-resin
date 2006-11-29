@@ -28,16 +28,12 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Stores the information for the .tags

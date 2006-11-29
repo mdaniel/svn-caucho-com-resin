@@ -28,8 +28,8 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * The <code>ActionResponse</code> is the request interface available to the

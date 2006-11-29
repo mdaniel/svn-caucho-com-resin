@@ -30,8 +30,7 @@
 
 package javax.servlet.http;
 
-import java.util.*;
-import java.io.*;
+import java.util.EventListener;
 
 /**
  * This listener lets session values know when a session is created or

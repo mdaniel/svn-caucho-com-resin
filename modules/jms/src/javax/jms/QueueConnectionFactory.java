@@ -28,16 +28,14 @@
 
 package javax.jms;
 
-import java.util.Enumeration;
-
 /**
  * The main destination.
  */
 public interface QueueConnectionFactory extends ConnectionFactory {
   public QueueConnection createQueueConnection()
     throws JMSException;
-  
+
   public QueueConnection createQueueConnection(String userName,
-					       String password)
+                                               String password)
     throws JMSException;
 }

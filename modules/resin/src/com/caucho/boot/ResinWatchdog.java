@@ -32,13 +32,16 @@ package com.caucho.boot;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.log.RotateStream;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ResinWatchdogMXBean;
 import com.caucho.server.admin.HessianHmuxProxy;
 import com.caucho.server.port.Port;
 import com.caucho.util.Alarm;
-import com.caucho.log.*;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.QServerSocket;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 import java.io.File;
 import java.io.IOException;

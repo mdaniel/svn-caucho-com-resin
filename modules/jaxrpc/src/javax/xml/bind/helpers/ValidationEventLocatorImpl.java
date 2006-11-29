@@ -28,10 +28,12 @@
 */
 
 package javax.xml.bind.helpers;
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import javax.xml.bind.*;
-import java.net.*;
+import org.w3c.dom.Node;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXParseException;
+
+import javax.xml.bind.ValidationEventLocator;
+import java.net.URL;
 
 public class ValidationEventLocatorImpl implements ValidationEventLocator {
 

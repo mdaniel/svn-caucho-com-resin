@@ -29,8 +29,6 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-
 /**
  * Information about tag attributes.  This information comes from the
  * Tag Library Descriptor (TLD).  Generally, a TagExtraInfo class will
@@ -53,16 +51,16 @@ public class TagAttributeInfo {
    * ID is "id"
    */
   public static final String ID = "id";
-  
+
   private String _name;
   private boolean _reqTime;
   private boolean _required;
   private String _type;
-  
+
   private boolean _fragment;
 
   private String _description;
-  
+
   private boolean _isDeferredValue;
   private boolean _isDeferredMethod;
 
@@ -79,9 +77,9 @@ public class TagAttributeInfo {
    * @param type the Java type of the attribute
    */
   public TagAttributeInfo(String name,
-			  boolean required,
+                          boolean required,
                           String type,
-			  boolean reqTime)
+                          boolean reqTime)
   {
     _name = name;
     _required = required;
@@ -99,9 +97,9 @@ public class TagAttributeInfo {
    * @param type the Java type of the attribute
    */
   public TagAttributeInfo(String name,
-			  boolean required,
+                          boolean required,
                           String type,
-			  boolean reqTime,
+                          boolean reqTime,
                           boolean fragment)
   {
     this(name, required, type, reqTime);
@@ -119,15 +117,15 @@ public class TagAttributeInfo {
    * @param type the Java type of the attribute
    */
   public TagAttributeInfo(String name,
-			  boolean required,
+                          boolean required,
                           String type,
-			  boolean reqTime,
+                          boolean reqTime,
                           boolean fragment,
-			  String description,
-			  boolean deferredValue,
-			  boolean deferredMethod,
-			  String expectedTypeName,
-			  String methodSignature)
+                          String description,
+                          boolean deferredValue,
+                          boolean deferredMethod,
+                          String expectedTypeName,
+                          String methodSignature)
   {
     this(name, required, type, reqTime, fragment);
 
@@ -236,7 +234,7 @@ public class TagAttributeInfo {
   {
     for (int i = 0; i < a.length; i++)
       if (a[i].getName().equals(ID))
-	return a[i];
+        return a[i];
 
     return null;
   }

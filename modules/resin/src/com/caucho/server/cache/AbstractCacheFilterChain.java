@@ -28,34 +28,14 @@
 
 package com.caucho.server.cache;
 
-import java.io.OutputStream;
-import java.io.Writer;
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.connection.CauchoRequest;
 
 import javax.servlet.FilterChain;
-
-import com.caucho.util.L10N;
-import com.caucho.util.QDate;
-import com.caucho.util.Alarm;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.vfs.*;
-
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
-
-import com.caucho.server.webapp.Application;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.util.ArrayList;
 
 /**
  * Represents the final servlet in a filter chain.

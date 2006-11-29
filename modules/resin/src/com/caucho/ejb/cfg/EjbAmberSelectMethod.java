@@ -29,34 +29,23 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.Collection;
-
-import javax.ejb.EJBLocalObject;
-
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassWrapper;
-
-import com.caucho.util.L10N;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.gen.BaseMethod;
-import com.caucho.java.gen.CallChain;
-
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.Type;
-
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
 import com.caucho.ejb.EjbServerManager;
-
-import com.caucho.ejb.gen.BeanAssembler;
-import com.caucho.ejb.gen.ViewClass;
 import com.caucho.ejb.gen.AbstractQueryMethod;
-import com.caucho.ejb.gen.AmberSelectMethod;
 import com.caucho.ejb.gen.AmberSelectCollectionMethod;
-
-import com.caucho.ejb.ql.QLParser;
+import com.caucho.ejb.gen.AmberSelectMethod;
+import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.ql.EjbSelectQuery;
+import com.caucho.ejb.ql.QLParser;
+import com.caucho.java.gen.BaseMethod;
+import com.caucho.util.L10N;
+
+import javax.ejb.EJBLocalObject;
+import java.util.Collection;
 
 /**
  * Configuration for find method.

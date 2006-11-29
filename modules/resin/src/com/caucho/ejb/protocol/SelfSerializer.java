@@ -28,18 +28,14 @@
 
 package com.caucho.ejb.protocol;
 
-import java.io.*;
-
-import java.rmi.RemoteException;
-
-import javax.ejb.RemoveException;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.RemoteExceptionWrapper;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
+
+import java.io.*;
+import java.rmi.RemoteException;
 /**
  * Serializer for transfers inside a single JVM.
  */

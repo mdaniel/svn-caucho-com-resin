@@ -29,14 +29,8 @@
 
 package com.caucho.util;
 
-import java.util.*;
-
-import java.util.concurrent.*;
-import java.util.logging.*;
-
-import com.caucho.config.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.util.concurrent.Executor;
+import java.util.logging.Logger;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.

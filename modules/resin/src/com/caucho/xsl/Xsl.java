@@ -30,16 +30,18 @@
 package com.caucho.xsl;
 
 import com.caucho.log.Log;
-
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.ExceptionWrapper;
-
-import com.caucho.vfs.*;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 import com.caucho.xml.Html;
 import com.caucho.xml.Xml;
 import com.caucho.xml.XmlParser;
+
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerConfigurationException;

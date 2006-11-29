@@ -28,18 +28,17 @@
 
 package com.caucho.eswrap.javax.xml.parsers;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.es.Call;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 
-import javax.xml.parsers.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-import org.w3c.dom.*;
+import org.xml.sax.HandlerBase;
+import org.xml.sax.InputSource;
+import org.xml.sax.helpers.DefaultHandler;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.es.*;
+import javax.xml.parsers.SAXParser;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class SAXParserEcmaWrap {
   public static void parse(SAXParser parser, Call call, int length)

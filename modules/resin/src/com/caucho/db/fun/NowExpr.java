@@ -28,22 +28,17 @@
 
 package com.caucho.db.fun;
 
-import java.util.Date;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.QDate;
-
-import com.caucho.log.Log;
-
-import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.FunExpr;
+import com.caucho.db.sql.QueryContext;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.QDate;
+
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.logging.Logger;
 
 public class NowExpr extends FunExpr {
   protected static final L10N L = new L10N(NowExpr.class);

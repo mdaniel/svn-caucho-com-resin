@@ -29,9 +29,8 @@
 
 package com.caucho.soa.client;
 
-import java.net.MalformedURLException;
-
 import javax.xml.bind.JAXBException;
+import java.net.MalformedURLException;
 
 public interface EncodingProxyFactory {
   public Object getProxy(Class serviceInterface, String url) 

@@ -28,7 +28,9 @@
 
 package com.caucho.server.cluster;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
  * Base class for the distributed objects

@@ -28,17 +28,13 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
+import com.caucho.ejb.EJBExceptionWrapper;
+import com.caucho.ejb.RemoteExceptionWrapper;
+import com.caucho.ejb.protocol.AbstractHandle;
+import com.caucho.ejb.protocol.HandleEncoder;
 
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.*;
+import javax.ejb.EJBObject;
+import java.rmi.RemoteException;
 
 /**
  * Handle implementation for Hessian Objects.

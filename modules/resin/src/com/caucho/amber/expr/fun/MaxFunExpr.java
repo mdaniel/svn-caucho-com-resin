@@ -29,13 +29,10 @@
 package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.expr.AmberExpr;
-
-import java.util.ArrayList;
-
+import com.caucho.amber.type.Type;
 import com.caucho.util.L10N;
 
-import com.caucho.amber.type.Type;
-import com.caucho.amber.type.StringType;
+import java.util.ArrayList;
 
 
 /**

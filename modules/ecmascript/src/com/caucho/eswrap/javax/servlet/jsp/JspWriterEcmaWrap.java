@@ -30,13 +30,9 @@
 
 package com.caucho.eswrap.javax.servlet.jsp;
 
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.jsp.*;
+import com.caucho.es.Call;
 
-import com.caucho.util.*;
-import com.caucho.es.*;
-import com.caucho.vfs.*;
+import javax.servlet.jsp.JspWriter;
 
 public class JspWriterEcmaWrap {
   public static void write(JspWriter os, Call call, int length)

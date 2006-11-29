@@ -28,16 +28,14 @@
 
 package com.caucho.jms.session;
 
+import com.caucho.jms.ConnectionFactoryImpl;
+
+import javax.jms.ConnectionConsumer;
+import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
-import javax.jms.ServerSessionPool;
-import javax.jms.ConnectionConsumer;
 import javax.jms.QueueSession;
-import javax.jms.JMSException;
-import javax.jms.IllegalStateException;
-
-import com.caucho.jms.AbstractDestination;
-import com.caucho.jms.ConnectionFactoryImpl;
+import javax.jms.ServerSessionPool;
 
 /**
  * A sample queue connection factory.

@@ -29,75 +29,47 @@
 
 package com.caucho.amber.manager;
 
-import java.io.IOException;
-
-import java.lang.ref.SoftReference;
-
-import java.lang.reflect.Method;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.persistence.EntityManager;
-
-import javax.sql.DataSource;
-
 import com.caucho.amber.AmberException;
 import com.caucho.amber.AmberRuntimeException;
-
 import com.caucho.amber.cfg.BaseConfigIntrospector;
 import com.caucho.amber.cfg.EmbeddableIntrospector;
 import com.caucho.amber.cfg.EntityIntrospector;
-import com.caucho.amber.cfg.MappedSuperIntrospector;
 import com.caucho.amber.cfg.EntityMappingsConfig;
-
+import com.caucho.amber.cfg.MappedSuperIntrospector;
 import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.entity.EntityKey;
 import com.caucho.amber.entity.Listener;
-
-import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.gen.AmberGeneratorImpl;
-
 import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.idgen.SequenceIdGenerator;
-
 import com.caucho.amber.query.QueryCacheKey;
 import com.caucho.amber.query.ResultSetCacheChunk;
-
 import com.caucho.amber.table.Table;
-
 import com.caucho.amber.type.*;
-
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
 import com.caucho.bytecode.JMethod;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.java.gen.JavaClassGenerator;
-
 import com.caucho.jdbc.JdbcMetaData;
-
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.enhancer.EnhancingClassLoader;
-
 import com.caucho.naming.Jndi;
-
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+
+import javax.persistence.EntityManager;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.sql.ResultSetMetaData;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Main interface between Resin and the connector.  It's the

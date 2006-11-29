@@ -28,33 +28,31 @@
 
 package com.caucho.jms;
 
-import java.lang.ref.SoftReference;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Enumeration;
-
-import java.util.logging.Logger;
-
-import java.io.Serializable;
-
-import javax.jms.*;
-
-import com.caucho.util.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-
+import com.caucho.jms.message.ObjectMessageImpl;
+import com.caucho.jms.message.TextMessageImpl;
 import com.caucho.jms.selector.Selector;
-
-import com.caucho.jms.message.*;
-
-import com.caucho.jms.session.*;
-
+import com.caucho.jms.session.MessageAvailableListener;
+import com.caucho.jms.session.MessageProducerImpl;
+import com.caucho.jms.session.QueueSenderImpl;
+import com.caucho.jms.session.SessionImpl;
+import com.caucho.jms.session.TopicPublisherImpl;
+import com.caucho.loader.Environment;
 import com.caucho.services.message.MessageSender;
 import com.caucho.services.message.MessageServiceException;
+import com.caucho.util.Alarm;
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.NullEnumeration;
+import com.caucho.util.RandomUtil;
+
+import javax.jms.*;
+import java.io.Serializable;
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * An abstract destination, including the needed send/receive.

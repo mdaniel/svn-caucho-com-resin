@@ -28,25 +28,19 @@
 
 package com.caucho.filters;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
 
-import java.io.IOException;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
-import com.caucho.util.IntMap;
-
-import com.caucho.log.Log;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Throttles the filter to only a limited number of requests.

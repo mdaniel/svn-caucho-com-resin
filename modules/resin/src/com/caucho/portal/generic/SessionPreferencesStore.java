@@ -48,12 +48,8 @@
 
 package com.caucho.portal.generic;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.portlet.*;
-
-import java.util.LinkedHashMap;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletSession;
 import java.util.Map;
 
 /**

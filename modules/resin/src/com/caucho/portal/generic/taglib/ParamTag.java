@@ -49,9 +49,6 @@
 
 package com.caucho.portal.generic.taglib;
 
-import javax.portlet.*;
-
-import javax.servlet.ServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 

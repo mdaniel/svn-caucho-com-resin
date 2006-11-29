@@ -28,8 +28,6 @@
 
 package com.caucho.xpath;
 
-import java.io.*;
-
 /**
  * Exception thrown when detecting an error during parsing.
  */
@@ -37,12 +35,12 @@ public class XPathParseException extends XPathException {
   public XPathParseException()
   {
   }
-  
+
   public XPathParseException(String msg)
   {
     super(msg);
   }
-  
+
   public XPathParseException(Throwable e)
   {
     super(e);

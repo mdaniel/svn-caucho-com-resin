@@ -28,10 +28,6 @@
 
 package javax.xml.rpc.handler;
 
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 /**
  * Represents a handler.
  */
@@ -50,21 +46,21 @@ public interface HandlerChain extends java.util.List {
    * Returns the roles handled by the chain.
    */
   public void setRoles(String []roles);
-    
+
   /**
    * Handles the request.
    *
    * @return true to continue handling.
    */
   public boolean handleRequest(MessageContext context);
-    
+
   /**
    * Handles the response.
    *
    * @return true to continue handling.
    */
   public boolean handleResponse(MessageContext context);
-    
+
   /**
    * Handles the fault.
    *

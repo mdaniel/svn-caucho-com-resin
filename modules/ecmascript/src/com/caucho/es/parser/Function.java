@@ -28,13 +28,14 @@
 
 package com.caucho.es.parser;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.es.ESId;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.es.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Function is an intermediate form representing an expression.

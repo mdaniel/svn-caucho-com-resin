@@ -28,11 +28,11 @@
 
 package com.caucho.jms;
 
+import com.caucho.jms.session.TopicConnectionImpl;
+
+import javax.jms.JMSException;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
-import javax.jms.JMSException;
-
-import com.caucho.jms.session.TopicConnectionImpl;
 
 /**
  * A sample queue connection factory.

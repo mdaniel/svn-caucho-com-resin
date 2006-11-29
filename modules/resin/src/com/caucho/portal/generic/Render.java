@@ -49,9 +49,11 @@
 
 package com.caucho.portal.generic;
 
+import javax.portlet.Portlet;
+import javax.portlet.PortletException;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 import java.io.IOException;
-
-import javax.portlet.*;
 
 
 /**

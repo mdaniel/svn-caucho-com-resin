@@ -28,35 +28,30 @@
 
 package com.caucho.jca;
 
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.jca.cfg.AdminObjectConfig;
+import com.caucho.jca.cfg.ConnectionDefinition;
+import com.caucho.jca.cfg.ConnectorConfig;
+import com.caucho.jca.cfg.MessageListenerConfig;
+import com.caucho.jca.cfg.ResourceAdapterConfig;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Jar;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.jca.cfg.ConnectorConfig;
-import com.caucho.jca.cfg.ConnectionDefinition;
-import com.caucho.jca.cfg.ResourceAdapterConfig;
-import com.caucho.jca.cfg.AdminObjectConfig;
-import com.caucho.jca.cfg.MessageListenerConfig;
 
 /**
  * A resource archive (rar)

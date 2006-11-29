@@ -36,9 +36,9 @@ import com.caucho.jms.memory.MemoryQueue;
 import com.caucho.jms.memory.MemoryTopic;
 import com.caucho.jms.session.ConnectionImpl;
 import com.caucho.log.Log;
-import com.caucho.util.L10N;
-import com.caucho.management.j2ee.JMSResource;
 import com.caucho.management.j2ee.J2EEManagedObject;
+import com.caucho.management.j2ee.JMSResource;
+import com.caucho.util.L10N;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;

@@ -28,12 +28,11 @@
 
 package com.caucho.vfs.i18n;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.CharConversionException;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 
 /**
  * Implements an encoding reader for UTF8.

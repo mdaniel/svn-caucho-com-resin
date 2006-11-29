@@ -48,9 +48,6 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * Interface for any hessian remote object.
  */

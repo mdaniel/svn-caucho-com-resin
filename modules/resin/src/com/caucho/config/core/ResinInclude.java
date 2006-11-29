@@ -29,24 +29,19 @@
 
 package com.caucho.config.core;
 
-import java.util.logging.Logger;
-
-import javax.annotation.*;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.SchemaBean;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.xml.LooseXml;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.*;
-
-import com.caucho.config.Config;
-import com.caucho.config.SchemaBean;
-import com.caucho.config.ConfigException;
-
-import com.caucho.xml.LooseXml;
+import javax.annotation.PostConstruct;
+import java.util.logging.Logger;
 
 /**
  * Imports values from a separate file.

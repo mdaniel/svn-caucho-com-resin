@@ -29,17 +29,17 @@
 
 package com.caucho.amber.query;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.caucho.amber.expr.ArgExpr;
+import com.caucho.amber.expr.EmbeddedExpr;
+import com.caucho.amber.expr.JoinExpr;
+import com.caucho.amber.expr.ManyToOneJoinExpr;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.table.LinkColumns;
+import com.caucho.amber.table.Table;
 
 import java.sql.SQLException;
-
-import com.caucho.amber.expr.*;
-
-import com.caucho.amber.manager.AmberConnection;
-
-import com.caucho.amber.table.Table;
-import com.caucho.amber.table.LinkColumns;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Represents an amber query

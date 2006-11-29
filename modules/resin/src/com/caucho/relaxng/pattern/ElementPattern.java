@@ -28,14 +28,9 @@
 
 package com.caucho.relaxng.pattern;
 
-import com.caucho.xml.QName;
-
-import com.caucho.config.BeanConfigException;
-
 import com.caucho.relaxng.RelaxException;
-
-import com.caucho.relaxng.program.Item;
 import com.caucho.relaxng.program.ElementItem;
+import com.caucho.relaxng.program.Item;
 
 /**
  * Relax element pattern

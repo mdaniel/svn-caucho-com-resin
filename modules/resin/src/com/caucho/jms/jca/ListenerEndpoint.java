@@ -28,17 +28,13 @@
 
 package com.caucho.jms.jca;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.transaction.xa.XAResource;
-
-import javax.resource.spi.endpoint.MessageEndpoint;
+import com.caucho.log.Log;
 
 import javax.jms.Message;
 import javax.jms.MessageListener;
-
-import com.caucho.log.Log;
+import javax.resource.spi.endpoint.MessageEndpoint;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The JMS MessageListener endpoint

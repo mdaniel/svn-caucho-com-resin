@@ -28,11 +28,9 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
+import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.type.PrimitiveIntType;
 import com.caucho.amber.type.Type;
-
 import com.caucho.util.CharBuffer;
 
 

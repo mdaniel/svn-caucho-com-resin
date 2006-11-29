@@ -29,11 +29,12 @@
 
 package com.caucho.config.jaxb;
 
-import org.w3c.dom.Node;
-
-import com.caucho.config.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
+import com.caucho.config.TypeStrategy;
 import com.caucho.util.L10N;
-import com.caucho.xml.QName;
+
+import org.w3c.dom.Node;
 
 /**
  * Strategy for configuring types.

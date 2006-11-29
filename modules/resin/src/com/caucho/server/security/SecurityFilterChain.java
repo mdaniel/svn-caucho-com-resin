@@ -28,20 +28,17 @@
 
 package com.caucho.server.security;
 
-import java.io.*;
-import java.util.*;
-import java.security.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
 import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SecurityFilterChain implements FilterChain {
   private FilterChain _next;

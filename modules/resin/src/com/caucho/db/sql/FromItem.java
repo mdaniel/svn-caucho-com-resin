@@ -28,14 +28,11 @@
 
 package com.caucho.db.sql;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.db.table.Table;
 import com.caucho.log.Log;
 
-import com.caucho.db.table.Table;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Represents a table binding for a from.

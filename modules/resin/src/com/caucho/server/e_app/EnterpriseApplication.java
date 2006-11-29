@@ -29,72 +29,27 @@
 
 package com.caucho.server.e_app;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Hashtable;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-
-import javax.annotation.*;
-
-import javax.naming.Context;
-
-import javax.servlet.jsp.el.VariableResolver;
-
-import org.xml.sax.SAXException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-
-import com.caucho.vfs.*;
-
-import com.caucho.java.WorkDir;
-
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.Environment;
-
-import com.caucho.loader.enhancer.EnhancingClassLoader;
-
-import com.caucho.log.Log;
-
-import com.caucho.naming.Jndi;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
-import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.types.PathBuilder;
-
-import com.caucho.jmx.Jmx;
-
-import com.caucho.el.EL;
-import com.caucho.el.MapVariableResolver;
-
+import com.caucho.ejb.EJBServer;
+import com.caucho.java.WorkDir;
 import com.caucho.lifecycle.Lifecycle;
-
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.log.Log;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
-
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.ejb.EJBServer;
-import com.caucho.ejb.EJBServerInterface;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An enterprise application (ear)

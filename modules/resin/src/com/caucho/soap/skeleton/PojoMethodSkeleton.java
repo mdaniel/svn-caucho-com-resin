@@ -29,27 +29,40 @@
 
 package com.caucho.soap.skeleton;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
+import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.soap.marshall.Marshall;
+import com.caucho.soap.marshall.MarshallFactory;
+import com.caucho.soap.wsdl.SOAPOperation;
+import com.caucho.soap.wsdl.WSDLBindingOperation;
+import com.caucho.soap.wsdl.WSDLBindingOperationMessage;
+import com.caucho.soap.wsdl.WSDLMessage;
+import com.caucho.soap.wsdl.WSDLOperation;
+import com.caucho.soap.wsdl.WSDLOperationFault;
+import com.caucho.util.L10N;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.ws.*;
-
-import javax.jws.*;
-import javax.jws.soap.*;
-
-import com.caucho.jaxb.*;
-import com.caucho.soap.marshall.*;
-import com.caucho.soap.wsdl.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.ws.Holder;
+import javax.xml.ws.WebServiceException;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Invokes a SOAP request on a Java POJO method

@@ -28,12 +28,12 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.CharConversionException;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 public class StringWriter extends StreamImpl {
   private WriteStream ws;

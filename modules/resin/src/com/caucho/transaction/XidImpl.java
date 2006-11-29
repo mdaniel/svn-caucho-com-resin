@@ -28,13 +28,11 @@
 
 package com.caucho.transaction;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
-import javax.transaction.*;
-import javax.transaction.xa.*;
-
-import com.caucho.util.*;
+import javax.transaction.xa.Xid;
 
 /**
  * Transaction identifier implementation.

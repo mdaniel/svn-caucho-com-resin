@@ -28,16 +28,19 @@
 
 package com.caucho.jms.memory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Logger;
-
-import javax.jms.*;
-
 import com.caucho.jms.AbstractDestination;
 import com.caucho.jms.session.SessionImpl;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.Topic;
+import javax.jms.TopicSubscriber;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * A basic topic.

@@ -29,30 +29,24 @@
 
 package com.caucho.soap.reflect;
 
-import java.io.*;
+import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.jaxb.JAXBUtil;
+import com.caucho.soap.marshall.MarshallFactory;
+import com.caucho.soap.skeleton.DirectSkeleton;
+import com.caucho.soap.skeleton.PojoMethodSkeleton;
+import com.caucho.util.L10N;
 
-import java.lang.reflect.*;
-
-import java.util.*;
-
-import javax.jws.*;
-import javax.xml.bind.*;
-import javax.xml.bind.util.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.transform.Result;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Node;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.soap.marshall.*;
-import com.caucho.soap.skeleton.*;
-
-import com.caucho.jaxb.*;
-import com.caucho.util.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 //import com.caucho.xml.*;
 
 /**

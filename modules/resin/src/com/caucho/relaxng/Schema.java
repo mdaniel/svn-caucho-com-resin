@@ -28,20 +28,7 @@
 
 package com.caucho.relaxng;
 
-import java.util.*;
-import java.io.*;
-
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.util.LruCache;
-import com.caucho.vfs.*;
-
-import com.caucho.config.BeanConfigException;
-
-import com.caucho.relaxng.pattern.GrammarPattern;
-
-import com.caucho.relaxng.program.Item;
+import org.xml.sax.SAXException;
 
 /**
  * JARV Schema implementation

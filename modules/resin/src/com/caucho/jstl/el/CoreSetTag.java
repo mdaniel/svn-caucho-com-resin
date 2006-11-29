@@ -29,17 +29,14 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.el.Expr;
+import com.caucho.util.L10N;
 
-import javax.el.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.el.*;
+import javax.el.ELContext;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.BodyContent;
+import javax.servlet.jsp.tagext.BodyTagSupport;
 
 public class CoreSetTag extends BodyTagSupport {
   private static L10N L = new L10N(CoreSetTag.class);

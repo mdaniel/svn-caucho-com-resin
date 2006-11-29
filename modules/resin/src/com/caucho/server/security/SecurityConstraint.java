@@ -29,20 +29,17 @@
 
 package com.caucho.server.security;
 
-import java.util.*;
-import java.util.regex.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-
-import javax.servlet.*;
-
 import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-
 import com.caucho.server.dispatch.UrlMap;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Configuration for the security-constraint.

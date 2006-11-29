@@ -29,15 +29,12 @@
 
 package com.caucho.jcr.file;
 
-import java.io.InputStream;
-import java.io.IOException;
-
-import javax.jcr.*;
-import javax.jcr.nodetype.*;
-
-import com.caucho.jcr.base.*;
-
+import com.caucho.jcr.base.BinaryValue;
 import com.caucho.vfs.Path;
+
+import javax.jcr.RepositoryException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Represents a file's contents in the filesystem

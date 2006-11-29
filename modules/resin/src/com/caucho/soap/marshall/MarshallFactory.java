@@ -29,9 +29,13 @@
 
 package com.caucho.soap.marshall;
 
-import java.util.*;
-import java.math.*;
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Factory for creating marshall instances

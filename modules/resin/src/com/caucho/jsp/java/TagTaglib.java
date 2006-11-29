@@ -28,19 +28,7 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.beans.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.log.Log;
-import com.caucho.server.http.*;
-import com.caucho.jsp.cfg.*;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
 
 /**
  * Stores the entire information for a tag library.

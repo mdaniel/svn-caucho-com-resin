@@ -48,9 +48,11 @@
 
 package com.caucho.portal.generic;
 
-import java.util.*;
-import java.io.IOException;
 import javax.portlet.PortletRequest;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Abstract base class for implementations that load and save preferences.

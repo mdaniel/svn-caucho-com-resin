@@ -28,12 +28,6 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-
 /**
  * Implementation class for JavaScript booleans.
  */
@@ -113,7 +107,7 @@ public class ESBoolean extends ESBase {
   private ESBoolean(boolean value)
   {
     super(null);
-    
+
     this.value = value;
   }
 }

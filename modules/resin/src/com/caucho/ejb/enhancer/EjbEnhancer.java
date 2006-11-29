@@ -28,14 +28,12 @@
 
 package com.caucho.ejb.enhancer;
 
-import java.util.logging.Logger;
-
+import com.caucho.ejb.EjbServerManager;
+import com.caucho.loader.enhancer.Enhancer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.loader.enhancer.Enhancer;
-
-import com.caucho.ejb.EjbServerManager;
+import java.util.logging.Logger;
 
 /**
  * Enhancing the java objects for Amber mapping.

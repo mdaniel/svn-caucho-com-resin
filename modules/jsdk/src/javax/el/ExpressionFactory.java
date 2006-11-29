@@ -29,31 +29,29 @@
 
 package javax.el;
 
-import java.util.*;
-
 /**
  * Represents an EL expression factory
  */
 public abstract class ExpressionFactory {
   public abstract Object coerceToType(Object obj,
-				      Class<?> targetType)
+                                      Class<?> targetType)
     throws ELException;
 
   public abstract MethodExpression
     createMethodExpression(ELContext context,
-			   String expression,
-			   Class<?> expectedReturnType,
-			   Class<?>[] expectedParamTypes)
+                           String expression,
+                           Class<?> expectedReturnType,
+                           Class<?>[] expectedParamTypes)
     throws ELException;
 
   public abstract ValueExpression
     createValueExpression(ELContext context,
-			  String expression,
-			  Class<?> expectedType)
+                          String expression,
+                          Class<?> expectedType)
     throws ELException;
 
   public abstract ValueExpression
     createValueExpression(Object instance,
-			  Class<?> expectedType)
+                          Class<?> expectedType)
     throws ELException;
 }

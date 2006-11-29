@@ -29,23 +29,20 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-
-import javax.el.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.jstl.core.*;
-import javax.servlet.jsp.jstl.fmt.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-
+import com.caucho.el.Expr;
 import com.caucho.jsp.PageContextImpl;
+import com.caucho.util.L10N;
 
-import com.caucho.el.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.BodyTagSupport;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
 
 /**
  * Looks up an i18n message from a bundle and prints it.

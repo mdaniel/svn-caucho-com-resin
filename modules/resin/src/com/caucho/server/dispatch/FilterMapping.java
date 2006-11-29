@@ -29,18 +29,16 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
-import java.util.regex.*;
-import java.io.*;
-
-import javax.annotation.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-
 import com.caucho.config.ConfigException;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.regex.Pattern;
 
 /**
  * Configuration for a filter.

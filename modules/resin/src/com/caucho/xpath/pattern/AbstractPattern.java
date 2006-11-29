@@ -28,16 +28,14 @@
 
 package com.caucho.xpath.pattern;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
 import com.caucho.log.Log;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.XPathException;
+
+import org.w3c.dom.Node;
+
+import java.util.logging.Logger;
 
 /**
  * A node selection pattern.  AbstractPatterns represent compiled XPath node selectors.

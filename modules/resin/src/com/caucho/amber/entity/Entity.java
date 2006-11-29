@@ -29,15 +29,13 @@
 
 package com.caucho.amber.entity;
 
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.type.EntityType;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import java.util.Map;
-
-import com.caucho.amber.manager.AmberConnection;
-
-import com.caucho.amber.type.EntityType;
 
 /**
  * An entity instance

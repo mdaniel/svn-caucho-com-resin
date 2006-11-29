@@ -28,15 +28,10 @@
 
 package com.caucho.xsl.java;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 import com.caucho.java.JavaWriter;
 
-import com.caucho.xml.QName;
-
-import com.caucho.xsl.XslParseException;
-import com.caucho.xsl.JavaGenerator;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Represents any XSL node from the stylesheet.

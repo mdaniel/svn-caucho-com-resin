@@ -28,18 +28,17 @@
 
 package com.caucho.xpath;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.log.Log;
-import com.caucho.xpath.expr.*;
-import com.caucho.xpath.pattern.*;
+import com.caucho.util.LruCache;
+import com.caucho.xpath.pattern.AbstractPattern;
+import com.caucho.xpath.pattern.FromContext;
+
+import org.w3c.dom.Node;
+
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Public facade for selecting nodes and creating match patterns.

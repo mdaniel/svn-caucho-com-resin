@@ -28,10 +28,8 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.L10N;
-
 import com.caucho.config.ConfigException;
-import com.caucho.vfs.*;
+import com.caucho.util.L10N;
 
 /**
  * Configures a vfs scheme.

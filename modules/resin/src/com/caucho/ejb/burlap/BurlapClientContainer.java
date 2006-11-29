@@ -28,21 +28,22 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-
-import javax.ejb.*;
-import javax.rmi.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.*;
-import com.caucho.burlap.io.*;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.burlap.io.BurlapRemoteResolver;
 import com.caucho.config.ConfigException;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.EJBExceptionWrapper;
+import com.caucho.ejb.protocol.EjbProtocolManager;
+import com.caucho.ejb.protocol.HandleEncoder;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.ejb.EJBHome;
+import javax.ejb.EJBObject;
+import java.io.IOException;
+import java.util.Hashtable;
 
 /**
  * Container for Burlap clients in the same JVM, but not the same

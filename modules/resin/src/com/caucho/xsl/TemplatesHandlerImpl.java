@@ -28,23 +28,16 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.util.L10N;
+import com.caucho.xml.DOMBuilder;
+import com.caucho.xml.QDocument;
 
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.sax.*;
-import javax.xml.transform.stream.*;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.xml.sax.ext.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
-import com.caucho.xpath.*;
+import javax.xml.transform.Templates;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.sax.TemplatesHandler;
 
 public class TemplatesHandlerImpl extends DOMBuilder
   implements TemplatesHandler {

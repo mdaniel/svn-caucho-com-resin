@@ -48,9 +48,8 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
-import java.lang.reflect.*;
 
 /**
  * Deserializing a JDK 1.2 Collection.

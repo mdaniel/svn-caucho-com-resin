@@ -28,14 +28,12 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
-
-import java.util.ArrayList;
-
+import com.caucho.amber.query.FromItem;
+import com.caucho.amber.query.QueryParser;
+import com.caucho.amber.table.Column;
 import com.caucho.util.CharBuffer;
 
-import com.caucho.amber.table.Column;
+import java.util.ArrayList;
 
 /**
  * Links two tables by their key fields.

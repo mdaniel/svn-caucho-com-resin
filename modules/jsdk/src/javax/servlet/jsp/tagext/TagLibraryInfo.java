@@ -28,8 +28,6 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-
 /**
  * Information about the entire tag library.
  *
@@ -96,7 +94,7 @@ abstract public class TagLibraryInfo {
    * <code><pre>
    *  &lt;%@ taglib prefix='foo' uri='WEB-INF/tags.tld' %>
    * </pre></code>
-   */ 
+   */
   public String getPrefixString()
   {
     return this.prefix;
@@ -108,7 +106,7 @@ abstract public class TagLibraryInfo {
    * <code><pre>
    *  &lt;%@ taglib prefix='foo' uri='WEB-INF/tags.tld' %>
    * </pre></code>
-   */ 
+   */
   public String getURI()
   {
     return this.uri;
@@ -159,10 +157,10 @@ abstract public class TagLibraryInfo {
   {
     if (this.tags == null)
       return null;
-    
+
     for (int i = 0; i < this.tags.length; i++) {
       if (this.tags[i].getTagName().equals(name))
-	return this.tags[i];
+        return this.tags[i];
     }
 
     return null;
@@ -177,7 +175,7 @@ abstract public class TagLibraryInfo {
   {
     if (this.functions == null)
       return null;
-    
+
     for (int i = 0; i < this.functions.length; i++)
       if (this.functions[i].getName().equals(name))
         return this.functions[i];
@@ -197,7 +195,7 @@ abstract public class TagLibraryInfo {
 
   /**
    * Returns the tag from the tag file.
-   */ 
+   */
   public TagFileInfo []getTagFiles()
   {
     return this.tagFiles;
@@ -205,12 +203,12 @@ abstract public class TagLibraryInfo {
 
   /**
    * Returns the information from the tag file.
-   */ 
+   */
   public abstract TagLibraryInfo []getTagLibraryInfos();
 
   /**
    * Returns the tag from the tag file.
-   */ 
+   */
   public TagFileInfo getTagFile(String shortname)
   {
     if (this.tagFiles == null)

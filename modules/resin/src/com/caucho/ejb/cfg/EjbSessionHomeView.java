@@ -29,26 +29,14 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.ejb.CreateException;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.gen.BaseClass;
-
-import com.caucho.ejb.gen.BeanAssembler;
+import javax.ejb.CreateException;
+import java.util.logging.Logger;
 
 /**
  * Configuration for a particular view.

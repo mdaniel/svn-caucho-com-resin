@@ -28,7 +28,7 @@
 
 package com.caucho.xpath;
 
-import com.caucho.util.*;
+import com.caucho.util.ExceptionWrapper;
 
 /**
  * Exception thrown while evaluating an xpath expression.

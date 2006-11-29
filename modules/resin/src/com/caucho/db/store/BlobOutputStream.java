@@ -29,19 +29,11 @@
 
 package com.caucho.db.store;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
-import java.sql.SQLException;
-
-import com.caucho.vfs.TempBuffer;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.db.sql.Expr;
+import java.util.logging.Logger;
 
 public class BlobOutputStream extends OutputStream {
   private static final Logger log

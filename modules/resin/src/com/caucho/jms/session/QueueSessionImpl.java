@@ -28,11 +28,11 @@
 
 package com.caucho.jms.session;
 
+import javax.jms.JMSException;
 import javax.jms.Queue;
-import javax.jms.QueueSession;
 import javax.jms.QueueReceiver;
 import javax.jms.QueueSender;
-import javax.jms.JMSException;
+import javax.jms.QueueSession;
 
 /**
  * A sample queue session.  Lets the client create queues, browsers, etc.

@@ -30,37 +30,27 @@
 package com.caucho.quercus.lib.curl;
 
 import com.caucho.quercus.QuercusModuleException;
-
 import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BinaryValue;
-import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
-
 import com.caucho.util.L10N;
 
 import java.io.Closeable;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
-import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.net.URL;
-import java.net.URLConnection;
-
+import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.Map;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import java.util.zip.InflaterInputStream;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 
 /**
  * Represents a generic Http request.

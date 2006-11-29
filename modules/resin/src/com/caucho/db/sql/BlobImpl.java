@@ -28,22 +28,14 @@
  */
 package com.caucho.db.sql;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.Blob;
-import java.sql.SQLException;
-
+import com.caucho.db.store.BlobInputStream;
+import com.caucho.db.store.Store;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.db.store.Store;
-import com.caucho.db.store.BlobInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.sql.Blob;
+import java.sql.SQLException;
 
 /**
  * The JDBC blob implementation.

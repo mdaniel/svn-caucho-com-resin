@@ -28,46 +28,27 @@
 
 package com.caucho.jca;
 
-import java.lang.reflect.Method;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.annotation.*;
-
-import javax.naming.*;
-
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.ResourceAdapterAssociation;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ActivationSpec;
-
-import javax.resource.spi.endpoint.MessageEndpointFactory;
-
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.InitProgram;
+import com.caucho.jca.cfg.ObjectConfig;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.log.Log;
+import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.CloseListener;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.naming.Jndi;
-
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Config;
-import com.caucho.config.types.InitProgram;
-import com.caucho.config.types.InitParam;
-
-import com.caucho.jca.cfg.ObjectConfig;
+import javax.annotation.PostConstruct;
+import javax.resource.spi.ActivationSpec;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.ResourceAdapterAssociation;
+import javax.resource.spi.endpoint.MessageEndpointFactory;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Configuration for the <connector> pattern.

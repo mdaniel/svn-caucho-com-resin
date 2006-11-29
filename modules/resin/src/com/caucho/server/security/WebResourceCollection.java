@@ -28,13 +28,12 @@
 
 package com.caucho.server.security;
 
-import com.caucho.server.dispatch.UrlMap;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
 import com.caucho.config.ConfigException;
+import com.caucho.server.dispatch.UrlMap;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 

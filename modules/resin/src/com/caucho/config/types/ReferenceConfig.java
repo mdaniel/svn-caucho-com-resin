@@ -28,22 +28,17 @@
 
 package com.caucho.config.types;
 
-import java.util.*;
-
-import javax.annotation.*;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
+import com.caucho.config.ConfigException;
+import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
-import com.caucho.loader.Environment;
-import com.caucho.loader.ClassLoaderListener;
-
-import com.caucho.naming.Jndi;
-
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
+import javax.annotation.PostConstruct;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
+import javax.naming.spi.ObjectFactory;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 /**
  * Configuration for the init-param pattern.

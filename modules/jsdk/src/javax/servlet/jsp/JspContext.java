@@ -29,16 +29,11 @@
 
 package javax.servlet.jsp;
 
-import java.io.*;
-import java.util.*;
-
-import javax.el.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
+import javax.el.ELContext;
 import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.el.VariableResolver;
+import java.io.Writer;
+import java.util.Enumeration;
 
 public abstract class JspContext {
   /**

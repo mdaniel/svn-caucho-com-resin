@@ -28,7 +28,7 @@
 */
 
 package javax.xml.ws.http;
-import javax.xml.ws.*;
+import javax.xml.ws.ProtocolException;
 
 /** XXX */
 public class HTTPException extends ProtocolException {

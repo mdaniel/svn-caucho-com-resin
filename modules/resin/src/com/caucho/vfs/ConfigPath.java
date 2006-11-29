@@ -28,10 +28,9 @@
 
 package com.caucho.vfs;
 
-import java.util.Map;
-
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.vfs.*;
+
+import java.util.Map;
 
 /**
  * ConfigPath implements remote configuration scheme.

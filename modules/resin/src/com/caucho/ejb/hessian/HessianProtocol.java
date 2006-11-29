@@ -42,8 +42,8 @@ import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Server containing all the EJBs for a given configuration.

@@ -28,11 +28,9 @@
 
 package com.caucho.security;
 
-import java.io.*;
-import java.util.*;
-import java.security.*;
-
 import com.caucho.loader.EnvironmentLocal;
+
+import java.security.Permission;
 
 /**
  * Manages the permission for a context.

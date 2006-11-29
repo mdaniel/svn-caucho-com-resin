@@ -28,41 +28,22 @@
 
 package com.caucho.server.security;
 
-import java.io.IOException;
+import com.caucho.config.types.InitParam;
+import com.caucho.security.BasicPrincipal;
 
-import java.lang.reflect.Method;
-
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Set;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.annotation.*;
-
-import javax.naming.*;
-import javax.naming.directory.*;
-
-import java.security.Principal;
-
-import javax.security.auth.Subject;
-
-import javax.security.auth.spi.LoginModule;
-
+import javax.annotation.PostConstruct;
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.InitialDirContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.InitParam;
-
-import com.caucho.security.BasicPrincipal;
+import java.security.Principal;
+import java.util.Hashtable;
+import java.util.logging.Level;
 
 /**
  * The LDAP authenticator uses the underlying LDAP.

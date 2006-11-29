@@ -29,35 +29,24 @@
 
 package com.caucho.jsp;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.annotation.*;
-
-import javax.servlet.jsp.JspFactory;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CompileException;
-
-import com.caucho.vfs.*;
-
-import com.caucho.java.LineMap;
-import com.caucho.java.JavaCompiler;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
-
-import com.caucho.loader.Environment;
-
+import com.caucho.java.JavaCompiler;
+import com.caucho.java.LineMap;
 import com.caucho.lifecycle.Lifecycle;
-
+import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.CompileException;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.jsp.JspFactory;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resource for precompiling all the *.jsp files on startup.

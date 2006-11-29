@@ -28,13 +28,15 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.NamespaceContext;
+import com.caucho.xpath.Pattern;
+import com.caucho.xpath.XPathException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xpath.*;
+import org.w3c.dom.Node;
+
+import java.util.HashMap;
 
 /**
  * Implementation class for JavaScript stylesheets.  It is made public only

@@ -29,18 +29,18 @@
 
 package com.caucho.bytecode;
 
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
-
-import java.io.*;
-
 import java.net.URL;
-
-import java.util.*;
-
-import java.util.logging.Logger;
+import java.util.ArrayList;
 import java.util.logging.Level;
-
-import com.caucho.vfs.*;
+import java.util.logging.Logger;
 
 /**
  * Represents a java class.

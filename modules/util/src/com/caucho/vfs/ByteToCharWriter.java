@@ -28,12 +28,8 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Utility class for converting a byte stream to a character stream.

@@ -28,12 +28,11 @@
 
 package com.caucho.config.core;
 
-import java.util.logging.Logger;
-
-import javax.annotation.*;
-
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import java.util.logging.Logger;
 
 /**
  * Logs an EL value.

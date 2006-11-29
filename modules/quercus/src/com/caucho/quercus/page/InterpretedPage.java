@@ -29,24 +29,15 @@
 
 package com.caucho.quercus.page;
 
-import java.util.HashMap;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.quercus.Quercus;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
-
 import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
-
+import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
+
+import java.util.HashMap;
 
 /**
  * Represents an interpreted Quercus program.

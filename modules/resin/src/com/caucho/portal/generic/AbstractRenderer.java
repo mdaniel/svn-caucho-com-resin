@@ -49,21 +49,17 @@
 
 package com.caucho.portal.generic;
 
+import javax.portlet.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
-
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.LinkedHashSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.portlet.*;
 
 /**
  * <h3>Template</h3> 

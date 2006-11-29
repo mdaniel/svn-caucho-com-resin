@@ -32,8 +32,8 @@ package com.caucho.server.resin;
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.naming.Jndi;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
 import com.caucho.vfs.Path;
 
 import java.net.InetAddress;

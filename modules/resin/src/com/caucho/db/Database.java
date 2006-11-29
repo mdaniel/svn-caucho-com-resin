@@ -29,22 +29,13 @@
 
 package com.caucho.db;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.annotation.*;
-
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.Query;
-import com.caucho.db.store.Store;
 import com.caucho.db.store.BlockManager;
 import com.caucho.db.store.Lock;
+import com.caucho.db.store.Store;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableFactory;
-
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
@@ -53,6 +44,13 @@ import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manager for a basic Java-based database.

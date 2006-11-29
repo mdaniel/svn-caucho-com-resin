@@ -29,13 +29,11 @@
 
 package com.caucho.server.e_app;
 
-import java.util.ArrayList;
-
-import com.caucho.util.L10N;
-
 import com.caucho.config.ConfigException;
-
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+
+import java.util.ArrayList;
 
 /**
  * Configuration for the application.xml file.

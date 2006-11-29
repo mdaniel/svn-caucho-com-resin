@@ -28,10 +28,11 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import com.caucho.util.L10N;
+
+import org.w3c.dom.DOMException;
+
+import java.io.Serializable;
 
 public class QName implements Comparable, Serializable {
   protected static L10N L = new L10N(QName.class);

@@ -29,11 +29,10 @@
 
 package com.caucho.jca;
 
-import java.util.logging.Logger;
-
 import com.caucho.server.deploy.DeployConfig;
-
 import com.caucho.util.L10N;
+
+import java.util.logging.Logger;
 
 /**
  * The configuration for a resource-default.

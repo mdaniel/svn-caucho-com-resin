@@ -29,11 +29,13 @@
 
 package com.caucho.jms.amq;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.ThreadPool;
 
-import com.caucho.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * AMQ channel.

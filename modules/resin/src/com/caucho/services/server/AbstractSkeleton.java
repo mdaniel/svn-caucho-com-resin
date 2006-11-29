@@ -49,11 +49,8 @@
 package com.caucho.services.server;
 
 import java.io.InputStream;
-
-import java.util.HashMap;
-
 import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 
 /**
  * Proxy class for Hessian services.

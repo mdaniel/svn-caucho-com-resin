@@ -28,18 +28,10 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.IOException;
+import java.net.SocketException;
+import java.util.Iterator;
 import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import java.security.NoSuchAlgorithmException;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 
 /**
  * Facade to HttpStream to properly handle the close.

@@ -29,8 +29,8 @@
 
 package com.caucho.vfs;
 
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * An OutputStream with an accessible buffer.

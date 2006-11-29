@@ -28,17 +28,16 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.NameParser;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import java.util.Hashtable;
+import java.util.logging.Logger;
 
 /**
  * Error context always throwing NamingExceptions.

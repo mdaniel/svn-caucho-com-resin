@@ -29,14 +29,20 @@
 
 package com.caucho.xml.stream;
 
-import java.io.*;
-import java.util.logging.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.logging.Logger;
 
 /**
  * XML pull-parser interface.

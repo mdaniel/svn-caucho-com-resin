@@ -28,9 +28,6 @@
 
 package javax.servlet;
 
-import java.io.*;
-import java.util.*;
-
 public class UnavailableException extends ServletException {
   private int sec;
   private Servlet servlet;

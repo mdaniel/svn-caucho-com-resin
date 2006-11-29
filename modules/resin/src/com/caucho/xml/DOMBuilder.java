@@ -28,20 +28,22 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.*;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
 import org.w3c.dom.*;
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.log.Log;
-import com.caucho.java.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * XMLWriter to create a DOM document.

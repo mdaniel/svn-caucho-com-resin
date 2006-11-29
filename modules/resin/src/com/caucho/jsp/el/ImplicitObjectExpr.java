@@ -28,20 +28,18 @@
 
 package com.caucho.jsp.el;
 
-import java.io.*;
-import java.util.*;
-
-import javax.el.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-
-import com.caucho.vfs.*;
-
+import com.caucho.el.Expr;
 import com.caucho.jsp.PageContextImpl;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.el.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.PageContext;
+import java.io.IOException;
+import java.util.*;
 
 public class ImplicitObjectExpr extends Expr {
   final static int PAGE_CONTEXT = 1;

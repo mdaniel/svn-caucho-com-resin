@@ -28,9 +28,9 @@
 
 package com.caucho.amber.field;
 
-import java.util.ArrayList;
-
 import com.caucho.amber.table.Column;
+
+import java.util.ArrayList;
 
 /**
  * Configuration for a bean's field

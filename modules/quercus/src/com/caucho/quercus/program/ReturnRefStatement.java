@@ -29,17 +29,11 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.NullValue;
-
-import com.caucho.quercus.expr.Expr;
-
 import com.caucho.quercus.Location;
-
-import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.expr.Expr;
 
 /**
  * Represents a return expression statement in a PHP program.

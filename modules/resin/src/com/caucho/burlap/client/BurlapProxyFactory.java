@@ -48,27 +48,28 @@
 
 package com.caucho.burlap.client;
 
-import java.io.*;
-import java.util.*;
-
-import java.net.URL;
-import java.net.HttpURLConnection;
-import java.net.URLConnection;
-import java.net.MalformedURLException;
-
-import java.lang.reflect.Proxy;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
-import com.caucho.burlap.io.BurlapRemoteResolver;
+import com.caucho.burlap.io.AbstractBurlapInput;
 import com.caucho.burlap.io.BurlapInput;
 import com.caucho.burlap.io.BurlapOutput;
-import com.caucho.burlap.io.AbstractBurlapInput;
-import com.caucho.burlap.io.AbstractBurlapOutput;
 import com.caucho.burlap.io.BurlapRemoteObject;
-
+import com.caucho.burlap.io.BurlapRemoteResolver;
 import com.caucho.services.client.ServiceProxyFactory;
+
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.NamingException;
+import javax.naming.RefAddr;
+import javax.naming.Reference;
+import javax.naming.spi.ObjectFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Proxy;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Hashtable;
 
 /**
  * Factory for creating Burlap client stubs.  The returned stub will

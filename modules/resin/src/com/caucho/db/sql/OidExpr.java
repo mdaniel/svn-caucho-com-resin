@@ -28,20 +28,12 @@
 
 package com.caucho.db.sql;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.vfs.WriteStream;
-
+import com.caucho.db.table.Table;
+import com.caucho.db.table.TableIterator;
 import com.caucho.log.Log;
 
-import com.caucho.db.table.Table;
-import com.caucho.db.table.Column;
-import com.caucho.db.table.TableIterator;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 class OidExpr extends Expr {
   private static final Logger log = Log.open(OidExpr.class);

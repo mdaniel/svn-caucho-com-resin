@@ -28,7 +28,8 @@
 
 package com.caucho.el;
 
-import javax.el.*;
+import javax.el.ELContext;
+import javax.el.ELResolver;
 
 /**
  * Variable resolver using the system properties (@link System#getProperty()}

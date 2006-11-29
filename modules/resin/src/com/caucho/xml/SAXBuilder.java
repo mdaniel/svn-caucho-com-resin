@@ -28,15 +28,14 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.util.CharBuffer;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.java.*;
+import java.io.IOException;
 
 /**
  * XMLWriter to create a SAX events.

@@ -29,9 +29,10 @@
 
 package com.caucho.vfs;
 
-import java.util.logging.*;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.logging.Logger;
 
 /**
  * Reads from a file in a random-access fashion.

@@ -28,25 +28,21 @@
 
 package com.caucho.ejb.entity;
 
-import java.util.logging.Logger;
-
-import java.io.Serializable;
-import java.io.ObjectStreamException;
+import com.caucho.ejb.AbstractContext;
+import com.caucho.ejb.AbstractEJBHome;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.protocol.HomeSkeletonWrapper;
+import com.caucho.log.Log;
 
 import javax.ejb.EJBHome;
 import javax.ejb.EJBMetaData;
+import javax.ejb.FinderException;
 import javax.ejb.Handle;
 import javax.ejb.HomeHandle;
 import javax.ejb.RemoveException;
-import javax.ejb.FinderException;
-
-import com.caucho.log.Log;
-
-import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.AbstractEJBHome;
-
-import com.caucho.ejb.protocol.HomeSkeletonWrapper;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.util.logging.Logger;
 
 /**
  * Abstract base class for an EntityHome.

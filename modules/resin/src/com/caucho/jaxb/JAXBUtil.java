@@ -28,15 +28,19 @@
 
 package com.caucho.jaxb;
 
-import static java.lang.Character.*;
-
-import java.lang.reflect.*;
-import java.math.*;
-import java.util.*;
-
-import javax.xml.bind.*;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
+import static java.lang.Character.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * JAXB utilities.

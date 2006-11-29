@@ -29,23 +29,18 @@
 
 package com.caucho.quercus.lib.pdf;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
-
-import com.caucho.vfs.Path;
-
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
-
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
-
 import com.caucho.quercus.module.AbstractQuercusModule;
-
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * PHP PDF routines.

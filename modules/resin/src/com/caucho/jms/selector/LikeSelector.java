@@ -28,16 +28,11 @@
 
 package com.caucho.jms.selector;
 
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import javax.jms.Message;
-import javax.jms.JMSException;
-import javax.jms.InvalidSelectorException;
-
 import com.caucho.util.CharBuffer;
 
-import com.caucho.jms.message.ObjectConverter;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import java.util.regex.Pattern;
 
 /**
  * The like selector.

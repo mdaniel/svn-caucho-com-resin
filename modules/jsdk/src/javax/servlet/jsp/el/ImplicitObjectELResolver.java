@@ -29,13 +29,22 @@
 
 package javax.servlet.jsp.el;
 
+import javax.el.ELContext;
+import javax.el.ELResolver;
+import javax.el.PropertyNotWritableException;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.PageContext;
 import java.beans.FeatureDescriptor;
-import java.util.*;
-
-import javax.el.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Variable resolution for JSP variables

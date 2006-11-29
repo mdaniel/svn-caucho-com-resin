@@ -28,10 +28,9 @@
 
 package javax.servlet.http;
 
-import java.util.*;
-import java.security.*;
-import java.io.*;
-import javax.servlet.*;
+import javax.servlet.ServletResponse;
+import javax.servlet.ServletResponseWrapper;
+import java.io.IOException;
 
 /**
  * Wraps a servlet request in another request.  Filters may

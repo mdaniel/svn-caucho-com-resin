@@ -28,20 +28,16 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-import java.beans.*;
-import java.lang.reflect.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.xml.*;
-import com.caucho.ejb.*;
+import com.caucho.java.AbstractGenerator;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
+import com.caucho.vfs.Path;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
  * Base class for generating code to marshal and unmarshal sml-rpc calls.

@@ -28,10 +28,8 @@
 
 package com.caucho.soap.wsdl;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.namespace.QName;
-
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.*;
 
 /**
  * WSDL message part.

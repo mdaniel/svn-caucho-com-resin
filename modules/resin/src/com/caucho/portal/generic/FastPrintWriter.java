@@ -49,9 +49,10 @@
 
 package com.caucho.portal.generic;
 
-import java.io.*;
-
-import java.util.logging.Level;
+import java.io.IOException;
+import java.io.PipedWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.logging.Logger;
 
 

@@ -29,28 +29,20 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
 import com.caucho.log.Log;
-
 import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
 import com.caucho.util.FreeList;
-
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.TempCharStream;
+import com.caucho.util.L10N;
 import com.caucho.vfs.TempCharBuffer;
 import com.caucho.vfs.TempCharReader;
+import com.caucho.vfs.TempCharStream;
+
+import javax.servlet.jsp.JspWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the JSP BodyContent interface.

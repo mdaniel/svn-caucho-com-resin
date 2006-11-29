@@ -48,33 +48,18 @@
 
 package com.caucho.hessian.client;
 
-import java.io.IOException;
+import com.caucho.hessian.io.AbstractHessianOutput;
+import com.caucho.jms.util.BytesMessageOutputStream;
 
-import java.util.logging.Logger;
-
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.HttpURLConnection;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-
-import javax.jms.BytesMessage;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-
+import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
-import com.caucho.hessian.io.AbstractHessianOutput;
-
-import com.caucho.jms.util.BytesMessageOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.logging.Logger;
 
 /**
  * Proxy implementation for Hessian clients using JMS.  Applications will 

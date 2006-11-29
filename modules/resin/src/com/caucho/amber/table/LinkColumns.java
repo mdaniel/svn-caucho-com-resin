@@ -28,24 +28,19 @@
 
 package com.caucho.amber.table;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
+import com.caucho.amber.entity.AmberCompletion;
+import com.caucho.amber.entity.Entity;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.type.EntityType;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.amber.entity.Entity;
-import com.caucho.amber.entity.AmberCompletion;
-
-import com.caucho.amber.manager.AmberConnection;
-
-import com.caucho.amber.type.EntityType;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Represents a many-to-one link from one table to another.

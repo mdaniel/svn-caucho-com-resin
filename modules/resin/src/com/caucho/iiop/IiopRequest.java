@@ -29,15 +29,15 @@
 
 package com.caucho.iiop;
 
-import java.io.*;
-import java.net.*;
-import java.util.logging.*;
-import javax.rmi.CORBA.*;
-
-import com.caucho.vfs.*;
-
-import com.caucho.server.port.ServerRequest;
 import com.caucho.server.connection.Connection;
+import com.caucho.server.port.ServerRequest;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Protocol specific information for each request.  ServerRequest

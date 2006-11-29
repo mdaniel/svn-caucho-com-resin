@@ -29,22 +29,13 @@
 
 package com.caucho.db.sql;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.util.CharBuffer;
+import com.caucho.db.Database;
+import com.caucho.db.store.Transaction;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.sql.SQLExceptionWrapper;
-
-import com.caucho.db.Database;
-import com.caucho.db.ResultSetImpl;
-
-import com.caucho.db.store.Transaction;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 class DropQuery extends Query {
   private static final L10N L = new L10N(DropQuery.class);

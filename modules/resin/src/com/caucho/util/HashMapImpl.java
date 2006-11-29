@@ -28,7 +28,12 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * HashMap which doesn't allocate a new DeployController per item.

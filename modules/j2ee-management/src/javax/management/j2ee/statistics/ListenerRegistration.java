@@ -29,15 +29,13 @@
 
 package javax.management.j2ee.statistics;
 
-import javax.ejb.EJBHome;
-import javax.ejb.CreateException;
-import javax.management.ObjectName;
-import javax.management.NotificationListener;
-import javax.management.NotificationFilter;
 import javax.management.InstanceNotFoundException;
 import javax.management.ListenerNotFoundException;
-import java.rmi.RemoteException;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
 import java.io.Serializable;
+import java.rmi.RemoteException;
 
 public interface ListenerRegistration
   extends Serializable

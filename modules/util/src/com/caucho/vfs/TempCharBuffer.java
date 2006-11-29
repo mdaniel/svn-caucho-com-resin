@@ -29,12 +29,7 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.FreeList;
 
 public class TempCharBuffer {
   private static FreeList<TempCharBuffer> _freeList =

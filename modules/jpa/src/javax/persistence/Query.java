@@ -32,7 +32,6 @@ package javax.persistence;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The main application interface to the persistence context.

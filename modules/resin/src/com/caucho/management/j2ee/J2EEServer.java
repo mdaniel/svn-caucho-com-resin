@@ -31,7 +31,6 @@ package com.caucho.management.j2ee;
 
 import com.caucho.Version;
 import com.caucho.loader.EnvironmentLocal;
-
 import com.caucho.server.cluster.Server;
 
 /**

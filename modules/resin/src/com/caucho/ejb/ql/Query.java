@@ -29,12 +29,9 @@
 package com.caucho.ejb.ql;
 
 import com.caucho.bytecode.JMethod;
-
-import com.caucho.util.IntArray;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.util.IntArray;
 
 /**
  * A select/find query

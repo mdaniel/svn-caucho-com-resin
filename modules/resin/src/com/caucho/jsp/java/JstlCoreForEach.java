@@ -29,16 +29,13 @@
 
 package com.caucho.jsp.java;
 
-import java.util.ArrayList;
-import java.io.*;
-
-import javax.servlet.jsp.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.jsp.el.*;
+import com.caucho.jsp.JspParseException;
+import com.caucho.jsp.TagInstance;
+import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Special generator for a JSTL c:forEach tag.

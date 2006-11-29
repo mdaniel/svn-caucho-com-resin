@@ -29,15 +29,14 @@
 
 package com.caucho.amber.type;
 
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.java.JavaWriter;
+import com.caucho.util.L10N;
+
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
 
 /**
  * The type of a property.

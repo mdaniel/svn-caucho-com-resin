@@ -29,53 +29,20 @@
 
 package com.caucho.jmx;
 
-import java.lang.reflect.Method;
-
-import java.lang.ref.WeakReference;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.Set;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.management.ObjectName;
-import javax.management.MBeanRegistration;
-import javax.management.DynamicMBean;
-import javax.management.ObjectInstance;
-import javax.management.QueryExp;
-import javax.management.StandardMBean;
-import javax.management.MBeanServerDelegate;
-import javax.management.NotificationBroadcaster;
-import javax.management.NotificationFilter;
-import javax.management.NotificationListener;
-import javax.management.MBeanServerNotification;
-import javax.management.MalformedObjectNameException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.IntrospectionException;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.BadStringOperationException;
-import javax.management.BadBinaryOpValueExpException;
-import javax.management.BadAttributeValueExpException;
-import javax.management.InvalidApplicationException;
-
-import javax.management.loading.ClassLoaderRepository;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.Environment;
 import com.caucho.loader.WeakCloseListener;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.management.*;
+import javax.management.loading.ClassLoaderRepository;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The context containing mbeans registered at a particular level.

@@ -28,8 +28,10 @@
 */
 
 package com.caucho.jaxb;
-import javax.xml.namespace.*;
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.JAXBIntrospector;
+import javax.xml.namespace.QName;
 
 class JAXBIntrospectorImpl extends JAXBIntrospector {
 

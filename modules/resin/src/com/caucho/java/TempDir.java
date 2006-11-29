@@ -28,11 +28,10 @@
 
 package com.caucho.java;
 
-import javax.annotation.*;
-
 import com.caucho.loader.Environment;
-
 import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
 
 public class TempDir {
   private Path _path;

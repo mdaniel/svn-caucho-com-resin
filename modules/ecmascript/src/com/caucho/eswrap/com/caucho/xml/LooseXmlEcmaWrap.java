@@ -28,16 +28,14 @@
 
 package com.caucho.eswrap.com.caucho.xml;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.vfs.Path;
+import com.caucho.xml.LooseXml;
 
-import org.xml.sax.*;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.es.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class LooseXmlEcmaWrap {
   public static Document parse(InputStream is)

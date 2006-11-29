@@ -30,8 +30,6 @@ package com.caucho.db;
 
 import java.sql.SQLException;
 
-import com.caucho.db.sql.Query;
-
 abstract public class ResultSetImpl {
   abstract public boolean next()
     throws SQLException;

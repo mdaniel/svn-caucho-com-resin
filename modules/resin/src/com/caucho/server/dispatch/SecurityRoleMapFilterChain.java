@@ -28,29 +28,17 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import javax.transaction.Status;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestWrapper;
-import javax.servlet.ServletException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.caucho.log.Log;
-
 import com.caucho.server.connection.CauchoRequest;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestWrapper;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will

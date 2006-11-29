@@ -28,18 +28,17 @@
 
 package com.caucho.sql.spy;
 
-import java.io.*;
-import java.sql.*;
-import java.util.logging.*;
-import java.net.URL;
-
-import java.util.Calendar;
-import java.math.BigDecimal;
-
-import com.caucho.util.L10N;
 import com.caucho.log.Log;
-
 import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.L10N;
+
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.*;
+import java.util.Calendar;
+import java.util.logging.Logger;
 
 /**
  * Spying on a statement;

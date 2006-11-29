@@ -28,29 +28,22 @@
 
 package com.caucho.ejb.session;
 
-import java.io.Serializable;
-import java.io.ObjectStreamException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.rmi.RemoteException;
+import com.caucho.ejb.AbstractEJBObject;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
+import com.caucho.util.Log;
 
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBObject;
 import javax.ejb.EJBLocalObject;
+import javax.ejb.EJBObject;
 import javax.ejb.Handle;
 import javax.ejb.SessionBean;
-import javax.ejb.RemoveException;
-
-import com.caucho.util.Log;
-
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.AbstractEJBObject;
-
-import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
-import com.caucho.ejb.protocol.AbstractHandle;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract base class for a session object

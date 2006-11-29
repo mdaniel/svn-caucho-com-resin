@@ -28,9 +28,9 @@
 
 package com.caucho.loader;
 
-import javax.annotation.*;
-
 import com.caucho.config.types.Period;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Class for update interval checking.

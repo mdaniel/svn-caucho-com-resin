@@ -29,34 +29,31 @@
 
 package com.caucho.config;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.ref.SoftReference;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import javax.annotation.*;
-import javax.el.*;
+import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.config.types.Validator;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.WeakDestroyListener;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.NotImplementedException;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.PersistentDependency;
+import com.caucho.xml.CauchoNode;
+import com.caucho.xml.QAbstractNode;
+import com.caucho.xml.QName;
 
 import org.w3c.dom.Node;
 
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.NotImplementedException;
-
-import com.caucho.config.types.Validator;
-import com.caucho.config.j2ee.*;
-
-import com.caucho.loader.*;
-
-import com.caucho.vfs.*;
-
-import com.caucho.xml.QName;
-import com.caucho.xml.QNode;
-import com.caucho.xml.CauchoNode;
-import com.caucho.xml.QAbstractNode;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.el.ELContext;
+import java.lang.ref.SoftReference;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class BeanTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(BeanTypeStrategy.class);

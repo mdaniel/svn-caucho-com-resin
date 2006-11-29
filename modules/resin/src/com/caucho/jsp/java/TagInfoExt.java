@@ -29,11 +29,14 @@
 
 package com.caucho.jsp.java;
 
+import com.caucho.vfs.PersistentDependency;
+
+import javax.servlet.jsp.tagext.TagAttributeInfo;
+import javax.servlet.jsp.tagext.TagExtraInfo;
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
+import javax.servlet.jsp.tagext.TagVariableInfo;
 import java.util.ArrayList;
-
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.vfs.*;
 
 /**
  * Information for a tag file.

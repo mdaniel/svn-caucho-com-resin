@@ -28,10 +28,9 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
+import com.caucho.util.ExceptionWrapper;
 
 import javax.servlet.jsp.JspException;
-import com.caucho.util.ExceptionWrapper;
 
 /**
  * A JSP exception which includes the proper error page.

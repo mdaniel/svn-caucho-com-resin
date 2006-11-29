@@ -32,7 +32,9 @@ import com.caucho.config.Config;
 import com.caucho.log.Log;
 import com.caucho.server.deploy.ExpandDeployController;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import java.util.ArrayList;
 import java.util.Iterator;

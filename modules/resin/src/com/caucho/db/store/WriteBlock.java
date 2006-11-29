@@ -29,17 +29,11 @@
 
 package com.caucho.db.store;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
 import java.io.IOException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.ClockCacheItem;
-
-import com.caucho.vfs.TempBuffer;
-
-import com.caucho.log.Log;
+import java.util.logging.Logger;
 
 /**
  * Represents a write (dirty) block.

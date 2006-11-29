@@ -29,14 +29,14 @@
 
 package com.caucho.server.deploy;
 
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Dependency;
+
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.caucho.log.Log;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
 
 /**
  * A list of deploy objects.

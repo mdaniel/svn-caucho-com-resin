@@ -29,16 +29,14 @@
 
 package com.caucho.soap.jaxws;
 
-import java.util.logging.Logger;
-
-import java.net.URL;
+import com.caucho.util.L10N;
 
 import javax.xml.namespace.QName;
-
 import javax.xml.ws.Endpoint;
-import javax.xml.ws.spi.*;
-
-import com.caucho.util.*;
+import javax.xml.ws.spi.Provider;
+import javax.xml.ws.spi.ServiceDelegate;
+import java.net.URL;
+import java.util.logging.Logger;
 
 /**
  * Provider

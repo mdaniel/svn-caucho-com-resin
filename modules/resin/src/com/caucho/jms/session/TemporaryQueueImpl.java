@@ -28,9 +28,9 @@
 
 package com.caucho.jms.session;
 
-import javax.jms.TemporaryQueue;
-
 import com.caucho.jms.memory.MemoryQueue;
+
+import javax.jms.TemporaryQueue;
 
 /**
  * A temporary queue

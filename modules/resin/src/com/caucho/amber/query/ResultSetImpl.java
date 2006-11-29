@@ -28,36 +28,24 @@
 
 package com.caucho.amber.query;
 
-import java.util.*;
-import java.util.logging.*;
-
-import java.io.Reader;
-import java.io.InputStream;
-
-import java.net.URL;
-
-import java.math.BigDecimal;
-
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Timestamp;
-import java.sql.Time;
-import java.sql.Ref;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Array;
-import java.sql.SQLWarning;
-import java.sql.SQLException;
-
+import com.caucho.amber.entity.AmberEntityHome;
+import com.caucho.amber.entity.Entity;
+import com.caucho.amber.entity.EntityItem;
+import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.expr.LoadEntityExpr;
+import com.caucho.amber.manager.AmberConnection;
 import com.caucho.util.L10N;
 
-import com.caucho.amber.entity.AmberEntityHome;
-import com.caucho.amber.entity.EntityItem;
-import com.caucho.amber.entity.Entity;
-
-import com.caucho.amber.expr.*;
-
-import com.caucho.amber.manager.AmberConnection;
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The JDBC statement implementation.

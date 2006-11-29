@@ -28,13 +28,13 @@
 
 package com.caucho.es.parser;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.es.ESBase;
+import com.caucho.es.ESBoolean;
+import com.caucho.es.ESException;
+import com.caucho.es.ESId;
+import com.caucho.es.ESNumber;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.es.*;
+import java.io.IOException;
 
 /**
  * Expr is an intermediate form representing an expression.

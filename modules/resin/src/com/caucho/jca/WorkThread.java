@@ -28,22 +28,14 @@
 
 package com.caucho.jca;
 
-import java.util.ArrayList;
-  
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.resource.spi.work.WorkManager;
-import javax.resource.spi.work.Work;
-import javax.resource.spi.work.WorkEvent;
-import javax.resource.spi.work.WorkListener;
-import javax.resource.spi.work.ExecutionContext;
-import javax.resource.spi.work.WorkException;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadTask;
 
-import com.caucho.log.Log;
+import javax.resource.spi.work.Work;
+import javax.resource.spi.work.WorkEvent;
+import javax.resource.spi.work.WorkListener;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the work manager.

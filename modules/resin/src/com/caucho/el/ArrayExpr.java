@@ -28,16 +28,16 @@
 
 package com.caucho.el;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.beans.*;
-import java.lang.reflect.*;
+import com.caucho.util.BeanUtil;
+import com.caucho.vfs.WriteStream;
 
-import javax.el.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an array reference:

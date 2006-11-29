@@ -29,25 +29,29 @@
 
 package com.caucho.server.webapp;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import javax.annotation.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-
-import com.caucho.server.dispatch.*;
-
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
+import com.caucho.config.ObjectAttributeProgram;
+import com.caucho.config.types.InitProgram;
+import com.caucho.server.dispatch.ErrorFilterChain;
+import com.caucho.server.dispatch.ForwardFilterChain;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.MovedFilterChain;
+import com.caucho.server.dispatch.RedirectFilterChain;
+import com.caucho.server.dispatch.ServletConfigImpl;
 import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Configuration for a rewrite-url

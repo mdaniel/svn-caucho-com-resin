@@ -30,15 +30,20 @@
 
 package com.caucho.web;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.Tree;
+import com.caucho.vfs.Path;
+import com.caucho.xml.LooseXml;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.XPath;
+import com.caucho.xpath.XPathFun;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
-import com.caucho.xpath.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Navigation {
   private Element root;

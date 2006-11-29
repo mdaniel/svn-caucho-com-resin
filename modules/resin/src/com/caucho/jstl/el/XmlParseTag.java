@@ -29,20 +29,20 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.PageContextImpl;
+import com.caucho.el.Expr;
 import com.caucho.jsp.BodyContentImpl;
-import com.caucho.el.*;
-import com.caucho.xml.*;
+import com.caucho.jsp.PageContextImpl;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
+import com.caucho.xml.Xml;
+import com.caucho.xml.XmlParser;
+
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.BodyTagSupport;
+import java.io.Reader;
 
 public class XmlParseTag extends BodyTagSupport {
   private static L10N L = new L10N(XmlParseTag.class);

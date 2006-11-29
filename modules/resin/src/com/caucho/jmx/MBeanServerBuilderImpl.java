@@ -28,15 +28,12 @@
 
 package com.caucho.jmx;
 
-import java.util.*;
-
-import java.util.logging.Logger;
-
-import javax.management.*;
-
 import com.caucho.log.Log;
 
-import com.caucho.loader.EnvironmentLocal;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerBuilder;
+import javax.management.MBeanServerDelegate;
+import java.util.logging.Logger;
 
 /**
  * Resin implementation for an MBeanServer factory.

@@ -28,20 +28,17 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import com.caucho.util.*;
-
 public class IOTimeoutException extends IOExceptionWrapper {
   public IOTimeoutException(String message)
   {
     super(message);
   }
-  
+
   public IOTimeoutException(String message, Throwable e)
   {
     super(message, e);
   }
-  
+
   public IOTimeoutException(Throwable e)
   {
     super(e);

@@ -29,17 +29,15 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
 import javax.naming.*;
-import javax.naming.spi.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.naming.spi.NamingManager;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resin's implementation of the JNDI <code>Context</code>.  The actual storage

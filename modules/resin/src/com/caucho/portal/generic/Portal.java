@@ -48,8 +48,10 @@
 
 package com.caucho.portal.generic;
 
-import javax.portlet.*;
-
+import javax.portlet.PortalContext;
+import javax.portlet.PortletMode;
+import javax.portlet.PortletRequest;
+import javax.portlet.WindowState;
 import java.util.Set;
 
 public interface Portal 

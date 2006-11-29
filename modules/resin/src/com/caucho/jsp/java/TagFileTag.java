@@ -28,20 +28,13 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
-
-import java.lang.reflect.*;
-import java.beans.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
 import com.caucho.xml.QName;
 
-import com.caucho.jsp.*;
+import javax.servlet.jsp.tagext.JspFragment;
+import javax.servlet.jsp.tagext.TagAttributeInfo;
+import javax.servlet.jsp.tagext.VariableInfo;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Represents a custom tag.

@@ -31,17 +31,17 @@ package com.caucho.server.deploy;
 
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.Environment;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Dependency;
 
 import javax.annotation.PostConstruct;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The generator for the deploy

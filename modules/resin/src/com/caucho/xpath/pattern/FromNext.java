@@ -28,14 +28,12 @@
 
 package com.caucho.xpath.pattern;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.xml.XmlUtil;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.XPathException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
+import org.w3c.dom.Node;
 
 /**
  * Matches nodes following the current node in the current document.

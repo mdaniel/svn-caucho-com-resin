@@ -28,28 +28,22 @@
 
 package com.caucho.ejb.protocol;
 
-import java.util.Hashtable;
-
-import java.rmi.NoSuchObjectException;
-import java.rmi.RemoteException;
-
-import javax.ejb.Handle;
-import javax.ejb.EJBHome;
-import javax.ejb.EJBObject;
-import javax.ejb.EJBException;
-
-import com.caucho.util.L10N;
-import com.caucho.server.util.*;
-
-import com.caucho.loader.EnvironmentLocal;
-
 import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.RemoteExceptionWrapper;
-
 import com.caucho.ejb.gen.JVMHomeStubGenerator;
 import com.caucho.ejb.gen.JVMObjectStubGenerator;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
+
+import javax.ejb.EJBException;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBObject;
+import javax.ejb.Handle;
+import java.rmi.NoSuchObjectException;
+import java.rmi.RemoteException;
+import java.util.Hashtable;
 
 /**
  * Container for EJB clients in the same JVM, but not the same class loader.

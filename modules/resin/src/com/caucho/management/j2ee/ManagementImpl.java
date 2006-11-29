@@ -30,8 +30,8 @@
 package com.caucho.management.j2ee;
 
 import com.caucho.ejb.AbstractSessionBean;
-import com.caucho.jmx.Jmx;
 import com.caucho.jmx.AbstractMBeanServer;
+import com.caucho.jmx.Jmx;
 
 import javax.ejb.CreateException;
 import javax.management.*;

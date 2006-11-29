@@ -29,9 +29,8 @@
 
 package javax.persistence.spi;
 
-import java.util.Map;
-
 import javax.persistence.EntityManagerFactory;
+import java.util.Map;
 
 /**
  * Bootstrap class to obtain an EntityManagerFactory.

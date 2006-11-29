@@ -29,19 +29,20 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.InitProgram;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Configuration for a filter.

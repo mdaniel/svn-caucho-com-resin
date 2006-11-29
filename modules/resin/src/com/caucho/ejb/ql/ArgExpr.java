@@ -29,17 +29,13 @@
 
 package com.caucho.ejb.ql;
 
+import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JField;
 import com.caucho.bytecode.JMethod;
-
-import com.caucho.util.CharBuffer;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.ejb.cfg.EjbEntityBean;
-
-import com.caucho.amber.type.EntityType;
+import com.caucho.util.CharBuffer;
 
 /**
  * Expression representing a select method argument.

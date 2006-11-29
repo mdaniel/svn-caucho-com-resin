@@ -29,9 +29,9 @@
 package com.caucho.ejb.session;
 
 
-import javax.ejb.RemoveException;
-
 import com.caucho.ejb.AbstractServer;
+
+import javax.ejb.RemoveException;
 
 /**
  * Abstract base class for a session object

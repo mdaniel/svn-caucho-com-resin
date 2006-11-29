@@ -28,33 +28,23 @@
 
 package com.caucho.ejb.xa;
 
-import java.util.Hashtable;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
-import javax.transaction.Transaction;
-import javax.transaction.UserTransaction;
-import javax.transaction.TransactionManager;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.EJBExceptionWrapper;
+import com.caucho.ejb.EnvServerManager;
+import com.caucho.log.Log;
+import com.caucho.util.FreeList;
+import com.caucho.util.L10N;
 
 import javax.ejb.EJBException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.FreeList;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.log.Log;
-
-import com.caucho.transaction.TransactionManagerImpl;
-
-import com.caucho.amber.manager.AmberConnection;
-
-import com.caucho.ejb.EnvServerManager;
-import com.caucho.ejb.EJBExceptionWrapper;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Server containing all the EJBs for a given configuration.

@@ -28,27 +28,21 @@
 
 package com.caucho.ejb.session;
 
-import java.lang.reflect.Constructor;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.ejb.SessionBean;
-import javax.ejb.EJBHome;
-import javax.ejb.EJBObject;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.FinderException;
-
-import com.caucho.naming.*;
-import com.caucho.util.Log;
-
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
-
-import com.caucho.ejb.protocol.JVMObject;
+import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.protocol.AbstractHandle;
+import com.caucho.naming.Jndi;
+import com.caucho.util.Log;
+
+import javax.ejb.EJBHome;
+import javax.ejb.EJBLocalObject;
+import javax.ejb.EJBObject;
+import javax.ejb.FinderException;
+import java.lang.reflect.Constructor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Server home container for a stateless session bean

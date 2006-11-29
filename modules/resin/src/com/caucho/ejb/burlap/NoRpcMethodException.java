@@ -28,12 +28,6 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.vfs.*;
-
 public class NoRpcMethodException extends RpcException {
   public NoRpcMethodException() {}
   public NoRpcMethodException(String s) { super(s); }

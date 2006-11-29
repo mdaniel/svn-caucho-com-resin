@@ -28,9 +28,8 @@
 
 package com.caucho.amber.query;
 
-import com.caucho.util.CompileException;
-
 import com.caucho.amber.AmberException;
+import com.caucho.util.CompileException;
 
 /**
  * Exception.

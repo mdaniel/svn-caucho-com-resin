@@ -28,7 +28,8 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 
 /**
  * Tags are Java classes implementing JSP Tag extensions.  The class must

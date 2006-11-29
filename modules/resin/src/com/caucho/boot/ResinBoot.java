@@ -32,10 +32,11 @@ package com.caucho.boot;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.el.EL;
-import com.caucho.loader.*;
+import com.caucho.loader.Environment;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import java.io.File;
 import java.io.IOException;

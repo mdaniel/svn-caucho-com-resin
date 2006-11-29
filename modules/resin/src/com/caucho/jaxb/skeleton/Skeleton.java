@@ -29,38 +29,18 @@
 
 package com.caucho.jaxb.skeleton;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
-import java.io.IOException;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-
-import java.util.logging.Logger;
+import com.caucho.jaxb.JAXBContextImpl;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-
 import javax.xml.namespace.QName;
-
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
-
-import com.caucho.jaxb.JAXBContextImpl;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.logging.Logger;
 
 public abstract class Skeleton {
   public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";

@@ -29,19 +29,13 @@
 
 package com.caucho.server.connection;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.Writer;
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.AbstractPrintWriter;
-import com.caucho.vfs.TempCharBuffer;
-import com.caucho.vfs.WriteStream;
-
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.AbstractPrintWriter;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ResponseWriter extends AbstractPrintWriter {
   static final Logger log = Log.open(ResponseWriter.class);

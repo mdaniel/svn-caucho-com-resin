@@ -28,15 +28,11 @@
 
 package com.caucho.jms;
 
-import java.util.logging.Logger;
-
-import javax.jms.Topic;
-import javax.jms.JMSException;
-
 import com.caucho.log.Log;
 
-import com.caucho.services.message.MessageSender;
-import com.caucho.services.message.MessageServiceException;
+import javax.jms.JMSException;
+import javax.jms.Topic;
+import java.util.logging.Logger;
 
 /**
  * An abstract topic, including the needed publish/receive.

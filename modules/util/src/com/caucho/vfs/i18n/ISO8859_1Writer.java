@@ -28,9 +28,9 @@
 
 package com.caucho.vfs.i18n;
 
-import java.io.IOException;
-
 import com.caucho.vfs.OutputStreamWithBuffer;
+
+import java.io.IOException;
 
 /**
  * Implements the ISO-8859-1 EncodingWriter factory.

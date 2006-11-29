@@ -28,22 +28,11 @@
 
 package com.caucho.server.hmux;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import java.security.cert.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-
 import com.caucho.server.cluster.Cluster;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
 
 /**
  * Handles cluster requests from a remote dispatcher.

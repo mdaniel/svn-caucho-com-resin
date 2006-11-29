@@ -28,17 +28,14 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.vfs.Path;
 
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.server.http.*;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.jsp.HttpJspPage;
+import java.io.IOException;
 
 /**
  * Wraps Java JSP files using 'extends' in a page.  Since a JSP file which

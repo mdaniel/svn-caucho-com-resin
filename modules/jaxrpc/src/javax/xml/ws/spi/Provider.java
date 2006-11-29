@@ -29,12 +29,14 @@
 
 package javax.xml.ws.spi;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.net.*;
-import javax.xml.namespace.*;
-import javax.xml.ws.*;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Endpoint;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class Provider {
   private static final Logger log

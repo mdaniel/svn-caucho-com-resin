@@ -29,20 +29,8 @@
 
 package com.caucho.relaxng;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.xml.QName;
-
-import com.caucho.relaxng.program.Item;
-import com.caucho.relaxng.program.EmptyItem;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
 
 /**
  * JARV verifier implementation

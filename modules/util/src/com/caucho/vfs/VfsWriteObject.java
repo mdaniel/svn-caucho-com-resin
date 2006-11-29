@@ -28,7 +28,7 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
+import java.io.IOException;
 
 public interface VfsWriteObject {
   void print(WriteStream os) throws IOException;

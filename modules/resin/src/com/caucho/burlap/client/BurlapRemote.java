@@ -48,9 +48,6 @@
 
 package com.caucho.burlap.client;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * Encapsulates a remote address when no stub is available, e.g. for
  * Java MicroEdition.
@@ -58,7 +55,7 @@ import java.util.*;
 public class BurlapRemote {
   private String type;
   private String url;
-  
+
   /**
    * Creates a new Burlap remote object.
    *

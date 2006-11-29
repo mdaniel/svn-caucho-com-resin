@@ -29,12 +29,12 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
-
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.vfs.*;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * A merging of several Paths used like a CLASSPATH.  When the MergePath

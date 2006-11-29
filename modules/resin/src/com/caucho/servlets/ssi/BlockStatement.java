@@ -29,16 +29,13 @@
 
 package com.caucho.servlets.ssi;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.vfs.WriteStream;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Represents a SSI statement

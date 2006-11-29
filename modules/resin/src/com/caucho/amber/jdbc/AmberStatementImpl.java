@@ -28,7 +28,9 @@
 
 package com.caucho.amber.jdbc;
 
-import java.sql.*;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 
 /**
  * Amber wrapper of a statement.

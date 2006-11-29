@@ -28,9 +28,9 @@
 
 package com.caucho.server.security;
 
-import java.util.*;
-
 import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 
 /**
  * Configuration for the auth-constraint

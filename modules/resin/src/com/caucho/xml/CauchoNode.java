@@ -28,11 +28,11 @@
 
 package com.caucho.xml;
 
-import java.io.*;
+import com.caucho.vfs.WriteStream;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Node;
 
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 /**
  * CauchoNode extends the DOM, providing namespace support and input file

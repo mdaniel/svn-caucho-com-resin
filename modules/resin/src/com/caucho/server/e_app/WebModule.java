@@ -29,9 +29,7 @@
 
 package com.caucho.server.e_app;
 
-import java.util.ArrayList;
-
-import com.caucho.server.webapp.*;
+import com.caucho.server.webapp.WebAppConfig;
 
 /**
  * Configuration for the application web module

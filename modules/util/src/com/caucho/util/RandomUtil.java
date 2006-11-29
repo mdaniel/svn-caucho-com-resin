@@ -29,9 +29,8 @@
 
 package com.caucho.util;
 
-import java.util.Random;
-
 import java.security.SecureRandom;
+import java.util.Random;
 
 /**
  * System-wide random number generator.

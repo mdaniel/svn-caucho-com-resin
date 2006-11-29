@@ -29,30 +29,24 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.Properties;
-import java.util.ArrayList;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
 
 import javax.mail.Address;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.MessagingException;
-
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-
-import com.caucho.util.L10N;
-
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Env;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * PHP functions implemented from the mail module

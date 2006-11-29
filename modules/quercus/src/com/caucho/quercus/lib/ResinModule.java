@@ -29,41 +29,29 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.*;
+import com.caucho.Version;
+import com.caucho.naming.Jndi;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReadOnly;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
-import java.util.*;
-
-import javax.transaction.UserTransaction;
-
-import javax.management.*;
-
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
-import com.caucho.Version;
-
-import com.caucho.naming.Jndi;
-
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.annotation.NotNull;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BooleanValue;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.ReadOnly;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.*;
+import javax.transaction.UserTransaction;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Hashtable;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 
 public class ResinModule

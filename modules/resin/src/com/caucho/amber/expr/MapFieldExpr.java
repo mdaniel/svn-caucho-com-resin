@@ -28,15 +28,12 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
-
 import com.caucho.amber.field.MapElementField;
+import com.caucho.amber.query.FromItem;
+import com.caucho.amber.query.QueryParser;
+import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.Type;
+import com.caucho.util.CharBuffer;
 
 /**
  * Bound identifier expression.

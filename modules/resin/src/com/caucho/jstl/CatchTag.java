@@ -28,16 +28,11 @@
 
 package com.caucho.jstl;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.L10N;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.jsp.el.*;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.tagext.TryCatchFinally;
 
 public class CatchTag extends TagSupport implements TryCatchFinally {
   private static L10N L = new L10N(CatchTag.class);

@@ -28,10 +28,8 @@
 
 package com.caucho.server.thread;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.util.*;
+import com.caucho.util.Alarm;
+import com.caucho.util.CacheListener;
 
 /**
  * A single item timed cache.  The item will remain valid until it expires.

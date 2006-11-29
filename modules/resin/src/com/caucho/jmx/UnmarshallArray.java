@@ -29,10 +29,7 @@
 
 package com.caucho.jmx;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Array;
-
-import javax.management.ObjectName;
 
 /**
  * Unmarshalls an mbean with a getObjectName()

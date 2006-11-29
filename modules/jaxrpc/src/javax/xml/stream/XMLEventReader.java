@@ -28,8 +28,8 @@
 */
 
 package javax.xml.stream;
-import javax.xml.stream.events.*;
-import java.util.*;
+import javax.xml.stream.events.XMLEvent;
+import java.util.Iterator;
 
 public interface XMLEventReader extends Iterator {
 

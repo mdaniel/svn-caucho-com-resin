@@ -29,35 +29,19 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-
-import com.caucho.util.L10N;
-
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.lib.file.ProtocolWrapper;
-
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.QuercusClass;
-
 import com.caucho.quercus.resources.StreamContextResource;
-
+import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Handling the PHP Stream API

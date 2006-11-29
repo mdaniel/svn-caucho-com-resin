@@ -29,8 +29,8 @@
 
 package javax.el;
 
-import java.beans.FeatureDescriptor;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * ELContext a context for EL resolution.

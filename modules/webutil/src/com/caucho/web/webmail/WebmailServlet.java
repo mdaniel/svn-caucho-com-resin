@@ -30,8 +30,10 @@ package com.caucho.web.webmail;
 
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
-
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;

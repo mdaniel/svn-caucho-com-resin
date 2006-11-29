@@ -28,22 +28,19 @@
 
 package com.caucho.server.security;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.security.*;
-
-import javax.annotation.*;
-
-import javax.naming.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
 import com.caucho.log.Log;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import javax.annotation.PostConstruct;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Used to authenticate users in a servlet request.  AbstractLogin handles

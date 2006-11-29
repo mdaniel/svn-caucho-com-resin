@@ -28,19 +28,7 @@
 
 package com.caucho.config.types;
 
-import java.util.*;
-
-import javax.naming.*;
-
 import com.caucho.util.L10N;
-
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.ClassLoaderListener;
-
-import com.caucho.config.BuilderProgram;
-
-import com.caucho.naming.Jndi;
 
 /**
  * Configuration for the init-param pattern.

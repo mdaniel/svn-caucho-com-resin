@@ -29,14 +29,11 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.*;
-
 import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JClass;
-
-import com.caucho.util.*;
-import com.caucho.ejb.*;
 import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 
 /**
  * <pre>

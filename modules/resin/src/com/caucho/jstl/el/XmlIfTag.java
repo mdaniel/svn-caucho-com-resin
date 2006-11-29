@@ -28,22 +28,16 @@
 
 package com.caucho.jstl.el;
 
-import java.io.IOException;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import org.w3c.dom.Node;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.WriteStream;
-
 import com.caucho.jsp.PageContextImpl;
-
+import com.caucho.util.L10N;
 import com.caucho.xpath.Env;
 import com.caucho.xpath.XPath;
 import com.caucho.xpath.XPathException;
+
+import org.w3c.dom.Node;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
 
 /**
  * Tag representing an "if" condition.

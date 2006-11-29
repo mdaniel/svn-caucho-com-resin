@@ -29,7 +29,6 @@
 package javax.enterprise.deploy.spi.factories;
 
 import javax.enterprise.deploy.spi.DeploymentManager;
-
 import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException;
 
 /**

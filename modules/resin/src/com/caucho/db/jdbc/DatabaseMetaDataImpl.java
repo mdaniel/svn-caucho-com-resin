@@ -28,13 +28,10 @@
 
 package com.caucho.db.jdbc;
 
-import java.io.*;
-import java.net.*;
-import java.sql.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
 
 class DatabaseMetaDataImpl implements DatabaseMetaData {
   private Connection _conn;

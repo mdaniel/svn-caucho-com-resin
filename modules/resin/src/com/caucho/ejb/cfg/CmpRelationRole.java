@@ -28,15 +28,12 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.Collection;
-
-import javax.annotation.*;
-
-import com.caucho.util.*;
-
-import com.caucho.config.ConfigException;
-
 import com.caucho.amber.field.AbstractField;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import java.util.Collection;
 
 /**
  * Configuration for a cmp-relation.

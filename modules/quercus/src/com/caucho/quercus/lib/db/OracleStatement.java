@@ -30,14 +30,11 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.env.Value;
-
 import com.caucho.util.L10N;
 
 import java.sql.CallableStatement;
-
-import java.util.logging.Logger;
-
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 
 /**

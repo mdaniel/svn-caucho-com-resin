@@ -29,16 +29,22 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.hessian.io.*;
-
-import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.HessianProtocolException;
+import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.hessian.io.HessianSerializerOutput;
 import com.caucho.transaction.TransactionImpl;
+import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.ReadStream;
+
+import javax.ejb.EJBHome;
+import javax.ejb.EJBObject;
+import javax.ejb.Handle;
+import javax.ejb.HomeHandle;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class HessianWriter extends HessianSerializerOutput {
   private InputStream _is;

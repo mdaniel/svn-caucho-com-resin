@@ -29,16 +29,14 @@
 
 package com.caucho.xml.stream;
 
-import java.io.*;
-
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.events.*;
-import javax.xml.stream.util.*;
-import javax.xml.transform.*;
-
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
 
 public class XMLEventWriterImpl implements XMLEventWriter, XMLStreamConstants {
   private XMLStreamWriter _out;

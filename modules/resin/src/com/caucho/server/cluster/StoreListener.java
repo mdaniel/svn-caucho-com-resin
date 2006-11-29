@@ -28,13 +28,6 @@
 
 package com.caucho.server.cluster;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 /**
  * Interface for a listener for storage events.
  */
@@ -43,7 +36,7 @@ public interface StoreListener {
    * Called when the object has been updated.
    */
   public void updateEvent(String id);
-  
+
   /**
    * Called when the object has been remove.
    */

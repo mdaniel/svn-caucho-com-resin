@@ -28,19 +28,17 @@
 
 package com.caucho.amber.expr.fun;
 
+import com.caucho.amber.expr.AbstractAmberExpr;
+import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.manager.AmberConnection;
-
-import com.caucho.amber.expr.*;
-
-import com.caucho.amber.query.*;
+import com.caucho.amber.query.FromItem;
+import com.caucho.amber.query.QueryParser;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import java.util.ArrayList;
-
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
 
 
 /**

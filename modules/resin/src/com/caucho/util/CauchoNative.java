@@ -28,12 +28,6 @@
 
 package com.caucho.util;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-
-import com.caucho.vfs.*;
-
 /**
  * A wrapper for Caucho system variables, allowing tests to override
  * the default variables.
@@ -45,12 +39,12 @@ class CauchoNative {
   private CauchoNative()
   {
   }
-  
+
   static CauchoNative create()
   {
     if (jni != null)
       return jni;
-    
+
     if (! isInit) {
       isInit = true;
       //System.loadLibrary("caucho");
@@ -59,17 +53,17 @@ class CauchoNative {
 
     return jni;
   }
-  
+
   native void calculateUsage();
 
   native int getPid();
-  
+
   native double getUserTime();
   native double getSystemTime();
   native int getMaxResidentSetSize();
   native int getResidentSetSize();
   native int getSwaps();
   native int getContextSwitches();
-  
+
   native boolean setUser(String user, String group);
 }

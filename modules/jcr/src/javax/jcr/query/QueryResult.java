@@ -28,7 +28,8 @@
  */
 package javax.jcr.query;
 
-import javax.jcr.*;
+import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
 
 public interface QueryResult {
   public String[] getColumnNames()

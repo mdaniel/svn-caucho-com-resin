@@ -28,14 +28,12 @@
 
 package javax.enterprise.deploy.spi;
 
+import javax.enterprise.deploy.model.DDBeanRoot;
+import javax.enterprise.deploy.model.DeployableObject;
+import javax.enterprise.deploy.spi.exceptions.BeanNotFoundException;
+import javax.enterprise.deploy.spi.exceptions.ConfigurationException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import javax.enterprise.deploy.model.DeployableObject;
-import javax.enterprise.deploy.model.DDBeanRoot;
-
-import javax.enterprise.deploy.spi.exceptions.ConfigurationException;
-import javax.enterprise.deploy.spi.exceptions.BeanNotFoundException;
 
 /**
  * Top-level configuration.

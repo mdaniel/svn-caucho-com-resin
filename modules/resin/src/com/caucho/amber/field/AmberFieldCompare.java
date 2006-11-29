@@ -28,9 +28,9 @@
 
 package com.caucho.amber.field;
 
-import java.util.Comparator;
-
 import com.caucho.util.L10N;
+
+import java.util.Comparator;
 
 /**
  * Sorts ID fields.

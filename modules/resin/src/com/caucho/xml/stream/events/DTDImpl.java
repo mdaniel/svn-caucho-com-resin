@@ -29,12 +29,10 @@
 
 package com.caucho.xml.stream.events;
 
-import java.io.*;
-import java.util.*;
-
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.DTD;
+import java.io.Writer;
+import java.util.List;
 
 public class DTDImpl extends XMLEventImpl implements DTD {
   private final String _dtdTypeDecl;

@@ -29,11 +29,19 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.i18n.EncodingReader;
+import com.caucho.vfs.i18n.EncodingWriter;
+import com.caucho.vfs.i18n.ISO8859_1Writer;
+import com.caucho.vfs.i18n.JDKReader;
+import com.caucho.vfs.i18n.JDKWriter;
 
-import com.caucho.util.*;
-import com.caucho.vfs.i18n.*;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Locale;
 
 /**
  * Converts between the mime encoding names and Java encoding names.

@@ -28,9 +28,8 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.util.L10N;
-
 import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for an ejb bean.

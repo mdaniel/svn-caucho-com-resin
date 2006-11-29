@@ -29,18 +29,12 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-
-import java.util.ArrayList;
-
+import com.caucho.jsp.JspParseException;
 import com.caucho.util.CharBuffer;
-
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.jsp.*;
-
-import com.caucho.xml.QName;
-import com.caucho.xml.XmlChar;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Represents static text.

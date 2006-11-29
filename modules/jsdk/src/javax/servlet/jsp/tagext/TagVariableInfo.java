@@ -28,8 +28,6 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-
 /**
  * TagVariableInfo objects create runtime variables available to the tags.
  *

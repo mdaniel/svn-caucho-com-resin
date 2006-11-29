@@ -29,25 +29,17 @@
 
 package com.caucho.transaction.enhancer;
 
-import java.lang.reflect.Method;
-
-import java.io.IOException;
-
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JAnnotation;
-
+import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
-
-import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
-
+import com.caucho.java.gen.GenClass;
 import com.caucho.loader.enhancer.MethodEnhancer;
-
 import com.caucho.util.L10N;
+
+import javax.ejb.TransactionAttributeType;
+import java.lang.reflect.Method;
 
 /**
  * Enhancing a method objects.

@@ -28,9 +28,10 @@
 */
 
 package javax.xml.ws;
-import javax.xml.transform.*;
-import java.util.*;
-import java.util.concurrent.*;
+import javax.xml.transform.Source;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 /** XXX */
 public abstract class Endpoint {

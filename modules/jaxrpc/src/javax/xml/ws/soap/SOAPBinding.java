@@ -28,9 +28,10 @@
 */
 
 package javax.xml.ws.soap;
-import javax.xml.soap.*;
-import javax.xml.ws.*;
-import java.util.*;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.ws.Binding;
+import java.util.Set;
 
 /** XXX */
 public interface SOAPBinding extends Binding {

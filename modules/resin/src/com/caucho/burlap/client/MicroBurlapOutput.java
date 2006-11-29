@@ -48,8 +48,14 @@
 
 package com.caucho.burlap.client;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.TimeZone;
+import java.util.Vector;
 
 /**
  * Output stream for Burlap requests, compatible with microedition

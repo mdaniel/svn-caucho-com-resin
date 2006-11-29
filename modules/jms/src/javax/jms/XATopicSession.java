@@ -28,10 +28,6 @@
 
 package javax.jms;
 
-import java.io.Serializable;
-
-import javax.transaction.xa.XAResource;
-
 /**
  * The main destination.
  */

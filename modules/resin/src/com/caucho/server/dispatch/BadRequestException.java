@@ -28,9 +28,9 @@
 
 package com.caucho.server.dispatch;
 
-import java.io.IOException;
-
 import com.caucho.util.CompileException;
+
+import java.io.IOException;
 
 public class BadRequestException extends IOException implements CompileException {
   public BadRequestException(String msg)

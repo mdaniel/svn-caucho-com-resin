@@ -48,22 +48,19 @@
 
 package com.caucho.burlap.client;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * Wrapper for protocol exceptions thrown in the proxy.
  */
 public class BurlapRuntimeException extends RuntimeException {
   private Throwable rootCause;
-  
+
   /**
    * Zero-arg constructor.
    */
   public BurlapRuntimeException()
   {
   }
-  
+
   /**
    * Create the exception.
    */
@@ -71,7 +68,7 @@ public class BurlapRuntimeException extends RuntimeException {
   {
     super(message);
   }
-  
+
   /**
    * Create the exception.
    */
@@ -81,7 +78,7 @@ public class BurlapRuntimeException extends RuntimeException {
 
     this.rootCause = rootCause;
   }
-  
+
   /**
    * Create the exception.
    */

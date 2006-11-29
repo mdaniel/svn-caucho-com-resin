@@ -29,19 +29,22 @@
 
 package com.caucho.quercus.lib;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.math.MathContext;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.env.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * PHP math routines.

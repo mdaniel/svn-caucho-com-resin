@@ -28,10 +28,10 @@
 
 package com.caucho.jms.session;
 
-import javax.jms.Queue;
-import javax.jms.Message;
-import javax.jms.QueueSender;
 import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Queue;
+import javax.jms.QueueSender;
 
 /**
  * A basic queue.

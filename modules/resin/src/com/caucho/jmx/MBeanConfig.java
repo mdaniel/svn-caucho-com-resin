@@ -28,24 +28,18 @@
 
 package com.caucho.jmx;
 
-import java.util.ArrayList;
-
-import java.lang.reflect.Constructor;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.ObjectInstance;
-import javax.management.StandardMBean;
-import javax.management.MBeanInfo;
-import javax.management.MBeanAttributeInfo;
-import javax.management.Attribute;
-import javax.management.NotificationFilter;
-import javax.management.MalformedObjectNameException;
-
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.BuilderProgram;
+import javax.management.Attribute;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
+import javax.management.NotificationFilter;
+import javax.management.ObjectName;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 
 /**
  * Configuration for the mbean pattern.

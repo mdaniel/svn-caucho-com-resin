@@ -29,15 +29,9 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import com.caucho.quercus.env.Env;
 
 import java.util.LinkedList;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BinaryValue;
 
 /**
  * Bucket for stream filters.

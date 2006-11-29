@@ -28,12 +28,6 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-
 /**
  * Implementation class representing a JavaScript function.
  */
@@ -73,7 +67,7 @@ public class ESClosure extends ESObject {
     this.n = n;
     this.formals = formals;
     this.nFormals = formals.length;
-    
+
     if (global instanceof ESGlobal)
       this.global = (ESGlobal) global;
 
@@ -83,8 +77,8 @@ public class ESClosure extends ESObject {
       this.scope[0] = global;
     }
   }
-    
-  protected ESClosure(ESBase []scope, int scopeLength)  
+
+  protected ESClosure(ESBase []scope, int scopeLength)
   {
     super("Function", null);
 
@@ -126,9 +120,9 @@ public class ESClosure extends ESObject {
   {
     if (id.equals(PROTOTYPE)) {
       if (proto == null) {
-	ESObject obj = Global.getGlobalProto().createObject();
-	proto = obj;
-	obj.put(CONSTRUCTOR, this, DONT_ENUM);
+        ESObject obj = Global.getGlobalProto().createObject();
+        proto = obj;
+        obj.put(CONSTRUCTOR, this, DONT_ENUM);
       }
 
       return proto;
@@ -136,7 +130,7 @@ public class ESClosure extends ESObject {
       return ESNumber.create(nFormals);
     } else if (hasFields) {
       return super.hasProperty(id);
-    } else if (prototype != null) 
+    } else if (prototype != null)
       return prototype.hasProperty(id);
     else
       return ESBase.esEmpty;
@@ -147,9 +141,9 @@ public class ESClosure extends ESObject {
   {
     if (id.equals(PROTOTYPE)) {
       if (proto == null) {
-	ESObject obj = Global.getGlobalProto().createObject();
-	proto = obj;
-	obj.put(CONSTRUCTOR, this, DONT_ENUM);
+        ESObject obj = Global.getGlobalProto().createObject();
+        proto = obj;
+        obj.put(CONSTRUCTOR, this, DONT_ENUM);
       }
 
       return proto;
@@ -228,14 +222,14 @@ public class ESClosure extends ESObject {
 
     sbuf.append("function ");
     if (name != null && ! name.toString().startsWith("$lambda"))
-	sbuf.append(name);
+        sbuf.append(name);
     sbuf.append("(");
     for (int i = 0; formals != null && i < nFormals; i++) {
       if (i != 0)
-	sbuf.append(", ");
+        sbuf.append(", ");
       sbuf.append(formals[i]);
     }
-      
+
     sbuf.append(") ");
 
     sbuf.append("{ ");
@@ -254,7 +248,7 @@ public class ESClosure extends ESObject {
   {
     if (global != null)
       call.global = global;
-      
+
     if (esClass != null)
       return esClass.call(n, call, length);
     else
@@ -305,7 +299,7 @@ public class ESClosure extends ESObject {
 
     for (int i = 0; i < scopeLength; i++) {
       if (scope[i] != null) {
-	closure.scope[i] = (ESBase) scope[i];
+        closure.scope[i] = (ESBase) scope[i];
       }
     }
 

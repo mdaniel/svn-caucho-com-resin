@@ -28,9 +28,8 @@
 
 package javax.resource.spi.work;
 
-import javax.transaction.xa.Xid;
-
 import javax.resource.NotSupportedException;
+import javax.transaction.xa.Xid;
 
 /**
  * The context for a work creation.

@@ -29,19 +29,16 @@
 
 package com.caucho.server.dispatch;
 
-import java.io.*;
-
-import java.util.HashMap;
-
-import java.util.logging.*;
-
-import javax.servlet.*;
-
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.security.*;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * A repository for request information gleaned from the uri.

@@ -29,11 +29,9 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.util.*;
+import java.util.Map;
 
 /**
  * Abstract FilesystemPath, the parent of hierarchical Paths like

@@ -30,13 +30,8 @@
 package com.caucho.bytecode;
 
 import java.lang.ref.SoftReference;
-
 import java.util.HashMap;
-
 import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.loader.Environment;
 
 /**
  * Manages an introspected java classes.

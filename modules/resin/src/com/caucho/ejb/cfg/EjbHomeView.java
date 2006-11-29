@@ -29,19 +29,14 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import com.caucho.bytecode.JClass;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.ViewClass;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import java.util.logging.Logger;
 
 /**
  * Configuration for a particular view.

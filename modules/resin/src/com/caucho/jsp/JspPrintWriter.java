@@ -29,19 +29,16 @@
 
 package com.caucho.jsp;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
+import com.caucho.vfs.FlushBuffer;
 
 import javax.servlet.jsp.JspWriter;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.FlushBuffer;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A buffered JSP writer encapsulating a Writer.

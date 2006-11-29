@@ -28,8 +28,6 @@
 
 package com.caucho.db.sql;
 
-import java.sql.SQLException;
-
 import com.caucho.db.table.Column;
 
 public class Data {

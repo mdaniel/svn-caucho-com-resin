@@ -29,26 +29,16 @@
 
 package com.caucho.quercus.program;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.Iterator;
-import java.util.Set;
-
-import java.io.IOException;
-
-import com.caucho.quercus.QuercusRuntimeException;
-
-import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.quercus.program.InstanceInitializer;
-import com.caucho.quercus.program.Function;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
-
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents an interpreted PHP class definition.

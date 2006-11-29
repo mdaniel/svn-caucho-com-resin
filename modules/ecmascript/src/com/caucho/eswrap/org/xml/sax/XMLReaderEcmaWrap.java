@@ -28,17 +28,13 @@
 
 package com.caucho.eswrap.org.xml.sax;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.es.Call;
 
-import javax.xml.parsers.*;
-import org.xml.sax.*;
-import org.w3c.dom.*;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.es.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class XMLReaderEcmaWrap {
   public static void parse(XMLReader parser, Call call, int length)

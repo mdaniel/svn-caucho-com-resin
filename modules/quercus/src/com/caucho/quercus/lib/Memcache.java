@@ -29,16 +29,14 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.logging.Logger;
-
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.annotation.Optional;
+import java.util.logging.Logger;
 
 /**
  * memcache object oriented API facade

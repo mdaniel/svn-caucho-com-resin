@@ -28,11 +28,8 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.vfs.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
 
 /**
  * CauchoElement extends the DOM, providing for ordered Attributes.

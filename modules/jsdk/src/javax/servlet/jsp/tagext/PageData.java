@@ -28,8 +28,6 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-
 /**
  * Translation-time information for a JSP page.  A validator might use this
  * to perform its own evaluation of the page.

@@ -28,9 +28,6 @@
 
 package com.caucho.es;
 
-import java.util.*;
-import com.caucho.util.*;
-
 /**
  * Factory for creating the base objects, allowing sophisticated script
  * users to override the implementations.
@@ -40,7 +37,7 @@ public class ESFactory {
   {
     return new ESUndefined();
   }
-      
+
   public ESBase createNull()
   {
     return new ESNull();

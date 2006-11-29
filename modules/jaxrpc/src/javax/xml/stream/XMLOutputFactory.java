@@ -28,8 +28,9 @@
 */
 
 package javax.xml.stream;
-import javax.xml.transform.*;
-import java.io.*;
+import javax.xml.transform.Result;
+import java.io.OutputStream;
+import java.io.Writer;
 
 public abstract class XMLOutputFactory {
 

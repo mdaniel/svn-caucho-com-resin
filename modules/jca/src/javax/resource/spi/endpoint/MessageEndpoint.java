@@ -28,9 +28,8 @@
 
 package javax.resource.spi.endpoint;
 
-import java.lang.reflect.Method;
-
 import javax.resource.ResourceException;
+import java.lang.reflect.Method;
 
 /**
  * Implemented by the application server, called by the resource adapter.

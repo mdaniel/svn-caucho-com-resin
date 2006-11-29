@@ -29,25 +29,18 @@
 
 package com.caucho.server.webapp;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import javax.annotation.*;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.config.types.PathBuilder;
-
 import com.caucho.server.dispatch.UrlMap;
-
 import com.caucho.util.L10N;
-
 import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Configuration for a rewrite-real-path

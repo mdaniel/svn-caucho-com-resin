@@ -28,9 +28,9 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.Node;
+
+import java.io.IOException;
 
 class QUnescapedText extends QText {
   QUnescapedText(String data)

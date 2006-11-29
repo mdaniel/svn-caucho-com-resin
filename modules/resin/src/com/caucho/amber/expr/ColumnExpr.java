@@ -29,15 +29,13 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
-
-import com.caucho.util.CharBuffer;
-
+import com.caucho.amber.query.FromItem;
+import com.caucho.amber.query.QueryParseException;
+import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.LinkColumns;
-
 import com.caucho.amber.type.Type;
+import com.caucho.util.CharBuffer;
 
 
 /**

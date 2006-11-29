@@ -29,13 +29,8 @@
 
 package com.caucho.xml.stream.events;
 
-import java.io.*;
-import java.util.*;
-
-import javax.xml.namespace.*;
-
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
+import javax.xml.namespace.QName;
+import javax.xml.stream.events.Namespace;
 
 public class NamespaceImpl extends AttributeImpl implements Namespace {
   private final String _namespaceURI;

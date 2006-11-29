@@ -29,42 +29,28 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.IOException;
-
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.regex.Pattern;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.net.InetAddress;
-import java.net.Socket;
-
-import javax.naming.*;
-
-import javax.naming.directory.*;
-
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.file.SocketReadWrite;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.QuercusModuleException;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.annotation.*;
-
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.Env;
-
-import com.caucho.quercus.lib.file.SocketReadWrite;
-
-import com.caucho.util.*;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * Information about PHP network

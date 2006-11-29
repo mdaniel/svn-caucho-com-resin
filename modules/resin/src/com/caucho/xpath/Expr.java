@@ -28,16 +28,23 @@
 
 package com.caucho.xpath;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.xml.XmlChar;
+import com.caucho.xml.XmlUtil;
+import com.caucho.xpath.expr.ObjectVar;
+import com.caucho.xpath.expr.Var;
+import com.caucho.xpath.pattern.AbstractPattern;
+import com.caucho.xpath.pattern.FromExpr;
+import com.caucho.xpath.pattern.NodeArrayListIterator;
+import com.caucho.xpath.pattern.NodeIterator;
+import com.caucho.xpath.pattern.NodeListIterator;
+import com.caucho.xpath.pattern.SingleNodeIterator;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.pattern.*;
-import com.caucho.xpath.expr.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Compute values from nodes.  Because the expressions themselves are

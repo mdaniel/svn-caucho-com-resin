@@ -29,19 +29,14 @@
 
 package com.caucho.loader;
 
-import java.util.ArrayList;
-
-import javax.annotation.*;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.make.MakeLoader;
-
 import com.caucho.loader.enhancer.EnhancerManager;
-
+import com.caucho.make.MakeLoader;
 import com.caucho.util.L10N;
-
 import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 
 /**
  * Class for configuration.

@@ -28,14 +28,16 @@
 
 package com.caucho.relaxng;
 
-import java.util.*;
-import java.io.*;
-
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.xml.Xml;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+
+import java.io.IOException;
 
 /**
  * JARV Verifier factory.

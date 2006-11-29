@@ -28,10 +28,7 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import java.util.ArrayList;
 
 class QAttributeDef {
   String _name;

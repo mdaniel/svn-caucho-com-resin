@@ -28,8 +28,6 @@
 
 package com.caucho.loader;
 
-import java.util.EventListener;
-
 /**
  * Interface for receiving environment events.
  */
@@ -39,7 +37,7 @@ public interface EnvironmentListener {
    */
   public void environmentStart(EnvironmentClassLoader loader)
     throws Throwable;
-  
+
   /**
    * Handles the case where the environment is stopping
    */

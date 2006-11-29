@@ -29,21 +29,18 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
-
 public class UnavailableException extends PortletException
 {
   private int         _seconds;
 
-  public UnavailableException(String msg) 
+  public UnavailableException(String msg)
   {
     super(msg);
 
     _seconds = Integer.MAX_VALUE;
   }
 
-  public UnavailableException(String msg, int seconds) 
+  public UnavailableException(String msg, int seconds)
   {
     super(msg);
 
@@ -53,12 +50,12 @@ public class UnavailableException extends PortletException
       _seconds = seconds;
   }
 
-  public boolean isPermanent() 
+  public boolean isPermanent()
   {
     return _seconds == Integer.MAX_VALUE;
   }
 
-  public int getUnavailableSeconds() 
+  public int getUnavailableSeconds()
   {
     return _seconds == Integer.MAX_VALUE ? -1 : _seconds;
   }

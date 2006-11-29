@@ -28,20 +28,14 @@
 
 package com.caucho.el;
 
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ELResolver;
+import javax.el.PropertyNotFoundException;
+import javax.el.PropertyNotWritableException;
 import java.beans.FeatureDescriptor;
-
-import java.util.AbstractMap;
 import java.util.Iterator;
-import java.util.Set;
-
 import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.el.*;
-
-import com.caucho.util.NullIterator;
-
-import com.caucho.log.Log;
 
 /**
  * Abstract variable resolver.  Supports chaining and the "Var"

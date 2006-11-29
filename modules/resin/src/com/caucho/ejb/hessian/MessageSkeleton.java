@@ -28,27 +28,28 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.ejb.*;
-import javax.jms.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
-import com.caucho.log.Log;
-
-import com.caucho.hessian.io.*;
-
-import com.caucho.services.message.MessageSender;
-
+import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.message.MessageServer;
-
 import com.caucho.ejb.protocol.Skeleton;
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.HessianSerializerInput;
+import com.caucho.log.Log;
+import com.caucho.services.message.MessageSender;
+import com.caucho.util.CharBuffer;
+
+import javax.jms.Connection;
+import javax.jms.Destination;
+import javax.jms.Message;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base class for any bean skeleton capable of handling an HESSIAN-RPC request.

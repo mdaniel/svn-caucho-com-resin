@@ -28,12 +28,11 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.ExceptionWrapper;
 
-import javax.naming.*;
-
-import com.caucho.util.*;
+import javax.naming.NamingException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 /**
  * Wraps the actual exception with a Naming exception

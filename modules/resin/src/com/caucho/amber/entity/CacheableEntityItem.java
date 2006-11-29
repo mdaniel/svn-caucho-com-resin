@@ -29,13 +29,11 @@
 
 package com.caucho.amber.entity;
 
-import java.sql.SQLException;
-
-import java.util.Map;
-
+import com.caucho.amber.manager.AmberConnection;
 import com.caucho.util.Alarm;
 
-import com.caucho.amber.manager.AmberConnection;
+import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * An entity item handles the living entities.

@@ -29,16 +29,14 @@
 
 package com.caucho.jms.amq;
 
-import java.io.*;
-
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.server.port.ServerRequest;
 import com.caucho.server.connection.Connection;
+import com.caucho.server.port.ServerRequest;
+import com.caucho.util.ByteBuffer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Protocol specific information for each request.  ServerRequest

@@ -49,11 +49,7 @@
 
 package com.caucho.portal.generic.context;
 
-import java.io.*;
-
-import java.util.*;
-
-import javax.portlet.*;
+import javax.portlet.PortletResponse;
 
 
 class PortletResponseImpl

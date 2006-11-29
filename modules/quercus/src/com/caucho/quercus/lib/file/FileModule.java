@@ -29,42 +29,31 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.InputStream;
-import java.io.IOException;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Arrays;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.regex.PatternSyntaxException;
-
-import com.caucho.util.L10N;
-
 import com.caucho.quercus.QuercusModuleException;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.env.*;
 import com.caucho.quercus.annotation.NotNull;
-
-import com.caucho.quercus.lib.file.DirectoryValue;
-import com.caucho.quercus.lib.string.StringModule;
-import com.caucho.quercus.lib.UrlModule;
-
+import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.UrlModule;
+import com.caucho.quercus.lib.string.StringModule;
+import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.Alarm;
-
-import com.caucho.vfs.WriteStream;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Information and actions for about files

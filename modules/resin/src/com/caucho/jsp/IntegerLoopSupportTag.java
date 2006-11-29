@@ -28,14 +28,13 @@
 
 package com.caucho.jsp;
 
-import javax.servlet.jsp.tagext.TagSupport;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.SimpleTag;
-import javax.servlet.jsp.tagext.JspTag;
-import javax.servlet.jsp.tagext.TagAdapter;
-
 import javax.servlet.jsp.jstl.core.LoopTag;
 import javax.servlet.jsp.jstl.core.LoopTagStatus;
+import javax.servlet.jsp.tagext.JspTag;
+import javax.servlet.jsp.tagext.SimpleTag;
+import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.TagAdapter;
+import javax.servlet.jsp.tagext.TagSupport;
 
 public class IntegerLoopSupportTag extends TagSupport
   implements LoopTag, LoopTagStatus {

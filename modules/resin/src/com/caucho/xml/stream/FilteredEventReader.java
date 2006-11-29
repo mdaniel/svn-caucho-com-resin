@@ -29,14 +29,10 @@
 
 package com.caucho.xml.stream;
 
-import java.io.*;
-import java.util.logging.*;
-
-import javax.xml.stream.events.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-
-import com.caucho.util.*;
+import javax.xml.stream.EventFilter;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.XMLEvent;
 
 class FilteredEventReader implements XMLEventReader {
 

@@ -29,27 +29,32 @@
 
 package com.caucho.soap.skeleton;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.jws.*;
-import javax.xml.bind.*;
-import javax.xml.bind.annotation.adapters.*;
-import javax.xml.namespace.QName;
-import javax.xml.stream.*;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.ws.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.jaxb.*;
+import com.caucho.jaxb.JAXBUtil;
 import com.caucho.soap.wsdl.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
+import com.caucho.util.L10N;
+import com.caucho.xml.XmlPrinter;
+
+import org.w3c.dom.Node;
+
+import javax.jws.WebService;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.PropertyException;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.ws.WebServiceException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 /**
  * Invokes a SOAP request on a Java POJO

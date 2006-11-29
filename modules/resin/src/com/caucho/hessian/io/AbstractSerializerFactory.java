@@ -48,15 +48,6 @@
 
 package com.caucho.hessian.io;
 
-import java.util.*;
-
-import java.io.*;
-import java.io.File;
-
-import java.math.BigDecimal;
-
-import com.caucho.burlap.io.BurlapRemoteObject;
-
 /**
  * Factory for returning serialization methods.
  */
@@ -70,7 +61,7 @@ abstract public class AbstractSerializerFactory {
    */
   abstract public Serializer getSerializer(Class cl)
     throws HessianProtocolException;
-  
+
   /**
    * Returns the deserializer for a class.
    *

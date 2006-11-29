@@ -29,30 +29,35 @@
 
 package com.caucho.sql;
 
-import java.io.PrintWriter;
-import java.lang.IllegalStateException;
-import java.sql.*;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.log.Log;
+import com.caucho.sql.spy.SpyConnection;
+import com.caucho.sql.spy.SpyXAResource;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
-import javax.resource.spi.*;
+import javax.resource.spi.ConnectionEvent;
+import javax.resource.spi.ConnectionEventListener;
+import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.LocalTransaction;
+import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.ManagedConnectionMetaData;
 import javax.security.auth.Subject;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
-
-import com.caucho.log.Log;
-
-import com.caucho.sql.spy.SpyConnection;
-import com.caucho.sql.spy.SpyXAResource;
-
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a single pooled connection.  For the most part, it just

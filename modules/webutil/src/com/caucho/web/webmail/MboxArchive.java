@@ -28,10 +28,14 @@
 
 package com.caucho.web.webmail;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MboxArchive {
   private Path path;

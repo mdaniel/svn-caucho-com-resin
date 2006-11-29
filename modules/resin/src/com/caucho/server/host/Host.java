@@ -29,36 +29,29 @@
 
 package com.caucho.server.host;
 
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.config.SchemaBean;
 import com.caucho.config.ConfigException;
-
-import com.caucho.management.server.HostMXBean;
-
+import com.caucho.config.SchemaBean;
 import com.caucho.lifecycle.Lifecycle;
-
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.make.AlwaysModified;
+import com.caucho.management.server.HostMXBean;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
-
-import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ExceptionFilterChain;
-
-import com.caucho.server.cluster.*;
-
-import com.caucho.server.port.*;
-
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.port.Port;
 import com.caucho.server.webapp.WebAppContainer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Path;
 
-import com.caucho.make.*;
-import com.caucho.vfs.*;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resin's virtual host implementation.

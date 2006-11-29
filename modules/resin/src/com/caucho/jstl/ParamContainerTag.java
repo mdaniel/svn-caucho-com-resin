@@ -28,18 +28,6 @@
 
 package com.caucho.jstl;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.jstl.core.*;
-import javax.servlet.jsp.jstl.fmt.*;
-
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-import com.caucho.jsp.el.*;
-
 /**
  * Looks up an i18n message from a bundle and prints it.
  */

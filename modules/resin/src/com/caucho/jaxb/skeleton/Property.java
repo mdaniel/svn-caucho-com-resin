@@ -28,16 +28,17 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
-import javax.xml.bind.*;
-import javax.xml.bind.annotation.*;
-
-import java.io.*;
-
-import javax.xml.stream.*;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
 
 /**
  * represents a property in a skeleton; requires an Accessor to access it

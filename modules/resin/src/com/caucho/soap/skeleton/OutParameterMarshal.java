@@ -29,12 +29,14 @@
 
 package com.caucho.soap.skeleton;
 
-import java.io.*;
-import javax.xml.ws.*;
-import javax.xml.stream.*;
-import javax.xml.namespace.*;
+import com.caucho.soap.marshall.Marshall;
 
-import com.caucho.soap.marshall.*;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.ws.Holder;
+import java.io.IOException;
 
 public class OutParameterMarshal extends ParameterMarshal {
   public OutParameterMarshal(int arg,

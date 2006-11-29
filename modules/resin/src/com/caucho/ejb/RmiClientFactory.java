@@ -28,7 +28,7 @@
 
 package com.caucho.ejb;
 
-import java.rmi.*;
+import java.rmi.Naming;
 
 /**
  * Create a remote object

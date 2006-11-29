@@ -29,9 +29,10 @@
 
 package com.caucho.quercus.env;
 
-import java.io.*;
-
-import com.caucho.quercus.Quercus;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 /**
  * Represents a 8-bit binary builder

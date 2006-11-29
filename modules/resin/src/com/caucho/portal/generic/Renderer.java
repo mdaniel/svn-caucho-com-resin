@@ -49,17 +49,13 @@
 
 package com.caucho.portal.generic;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.io.PrintWriter;
-import java.io.OutputStream;
-
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
-import javax.portlet.WindowState;
 import javax.portlet.PortletMode;
+import javax.portlet.PortletRequest;
+import javax.portlet.RenderRequest;
+import javax.portlet.WindowState;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 /**
  * Classes can implement {@link AbstractRenderer} to protect from API changes. 

@@ -29,7 +29,7 @@
 
 package com.caucho.management.server;
 
-import com.caucho.jmx.*;
+import com.caucho.jmx.Description;
 
 /**
  * Management interface for the host.

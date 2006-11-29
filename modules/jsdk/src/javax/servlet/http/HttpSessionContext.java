@@ -23,9 +23,7 @@
 
 package javax.servlet.http;
 
-import java.util.*;
-import java.security.*;
-import javax.servlet.*;
+import java.util.Enumeration;
 
 /**
  * @deprecated

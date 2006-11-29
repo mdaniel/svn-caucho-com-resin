@@ -28,9 +28,9 @@
 */
 
 package javax.xml.stream;
-import javax.xml.stream.util.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.events.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.util.XMLEventConsumer;
 
 public interface XMLEventWriter extends XMLEventConsumer {
 

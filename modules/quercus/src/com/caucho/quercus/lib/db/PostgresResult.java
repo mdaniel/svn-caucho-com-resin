@@ -29,13 +29,12 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.util.L10N;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-
 import java.util.logging.Logger;
-
-import com.caucho.util.L10N;
 
 /**
  * postgres result set class (postgres has NO object oriented API)

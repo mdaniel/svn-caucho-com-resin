@@ -29,31 +29,27 @@
 
 package com.caucho.log;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.Bytes;
+import com.caucho.config.types.Period;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.QDate;
+import com.caucho.util.ThreadPool;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-
-import java.util.zip.ZipOutputStream;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
-
-import java.io.OutputStream;
-import java.io.IOException;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.CloseListener;
-
-import com.caucho.config.types.Period;
-import com.caucho.config.types.Bytes;
-import com.caucho.config.types.InitProgram;
-import com.caucho.config.ConfigException;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Abstract class for a log that rolls over based on size or period.

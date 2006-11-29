@@ -29,15 +29,17 @@
 
 package javax.jcr;
 
-import java.io.*;
+import org.xml.sax.ContentHandler;
 
-import org.xml.sax.*;
-
-import javax.jcr.lock.*;
-import javax.jcr.nodetype.*;
-import javax.jcr.observation.*;
-import javax.jcr.query.*;
-import javax.jcr.version.*;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NodeTypeManager;
+import javax.jcr.observation.ObservationManager;
+import javax.jcr.query.QueryManager;
+import javax.jcr.version.Version;
+import javax.jcr.version.VersionException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Represents a open workspace to a repository.

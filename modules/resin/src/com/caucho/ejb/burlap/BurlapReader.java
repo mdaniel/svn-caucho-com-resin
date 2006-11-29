@@ -28,16 +28,9 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-
 import com.caucho.burlap.io.BurlapInput;
+
+import java.io.InputStream;
 
 public class BurlapReader extends BurlapInput {
   /**

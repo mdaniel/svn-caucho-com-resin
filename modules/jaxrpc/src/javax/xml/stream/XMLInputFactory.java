@@ -28,9 +28,10 @@
 */
 
 package javax.xml.stream;
-import javax.xml.transform.*;
-import java.io.*;
-import javax.xml.stream.util.*;
+import javax.xml.stream.util.XMLEventAllocator;
+import javax.xml.transform.Source;
+import java.io.InputStream;
+import java.io.Reader;
 
 public abstract class XMLInputFactory {
 

@@ -28,13 +28,11 @@
 
 package com.caucho.ejb.ql;
 
-import java.util.ArrayList;
-
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.cfg.FunctionSignature;
 import com.caucho.util.CharBuffer;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.ejb.cfg.FunctionSignature;
+import java.util.ArrayList;
 
 /**
  * A builtin SQL function expression

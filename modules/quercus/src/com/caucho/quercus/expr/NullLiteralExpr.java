@@ -29,13 +29,10 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.Location;
 
 /**
  * Represents a PHP null expression.

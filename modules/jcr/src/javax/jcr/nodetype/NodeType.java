@@ -29,7 +29,7 @@
 
 package javax.jcr.nodetype;
 
-import javax.jcr.*;
+import javax.jcr.Value;
 
 /**
  * Represents the type of a node.

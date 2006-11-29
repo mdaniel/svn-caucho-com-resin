@@ -49,16 +49,14 @@
 
 package com.caucho.portal.generic.context;
 
-import com.caucho.portal.generic.FastPrintWriter;
 import com.caucho.portal.generic.Renderer;
-
-import java.io.*;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 public class RendererResponseHandler
   extends AbstractResponseHandler

@@ -29,17 +29,12 @@
 
 package com.caucho.bytecode;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
 import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Scans for matching classes.

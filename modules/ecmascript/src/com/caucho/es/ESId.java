@@ -28,11 +28,7 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
+import java.util.Hashtable;
 
 final public class ESId extends ESString {
   static Integer LOCK = new Integer(0);

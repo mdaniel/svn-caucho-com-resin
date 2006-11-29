@@ -28,11 +28,7 @@
 
 package com.caucho.web.webmail;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.util.ArrayList;
 
 /*
  * Represents a single mbox message.

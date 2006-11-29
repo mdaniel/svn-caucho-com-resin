@@ -28,11 +28,18 @@
  */
 
 package javax.xml.bind;
-import javax.xml.namespace.*;
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class FactoryLoader {
   private static Logger log =

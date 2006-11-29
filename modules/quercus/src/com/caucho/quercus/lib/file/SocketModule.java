@@ -29,23 +29,28 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempCharBuffer;
 
-import java.io.*;
-
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.*;
+import java.util.logging.Logger;
 
 /**
  * Information and actions for about sockets

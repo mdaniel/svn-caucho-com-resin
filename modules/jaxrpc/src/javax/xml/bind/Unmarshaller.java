@@ -28,16 +28,19 @@
 */
 
 package javax.xml.bind;
-import javax.xml.stream.*;
-import javax.xml.transform.*;
-import org.w3c.dom.*;
-import java.io.*;
-import org.xml.sax.*;
-import javax.xml.bind.attachment.*;
-import javax.xml.bind.Unmarshaller.*;
-import javax.xml.validation.*;
-import javax.xml.bind.annotation.adapters.*;
-import java.net.*;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.attachment.AttachmentUnmarshaller;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
+import javax.xml.validation.Schema;
+import java.io.File;
+import java.io.InputStream;
+import java.io.Reader;
+import java.net.URL;
 
 public interface Unmarshaller {
 

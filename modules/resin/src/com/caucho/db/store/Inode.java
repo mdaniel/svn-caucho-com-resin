@@ -29,20 +29,18 @@
 
 package com.caucho.db.store;
 
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+import com.caucho.vfs.OutputStreamWithBuffer;
+import com.caucho.vfs.TempCharBuffer;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.io.IOException;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import com.caucho.util.Log;
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.OutputStreamWithBuffer;
-import com.caucho.vfs.TempCharBuffer;
+import java.util.logging.Logger;
 
 /**
  * Represents the indexes for a BLOB or CLOB.

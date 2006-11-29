@@ -29,16 +29,14 @@
 
 package com.caucho.quercus.env;
 
-import java.io.ByteArrayInputStream;
+import com.caucho.vfs.WriteStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-
 import java.util.IdentityHashMap;
-
-import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a 8-bit binary string value.

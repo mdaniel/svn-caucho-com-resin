@@ -29,14 +29,13 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.module.ModuleContext;
 
-import java.util.*;
 import java.lang.reflect.Method;
-
-import com.caucho.quercus.expr.*;
-import com.caucho.quercus.module.*;
-import com.caucho.quercus.program.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Represents the introspected static function information.

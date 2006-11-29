@@ -28,15 +28,12 @@
 
 package com.caucho.ejb.entity;
 
-import java.util.AbstractMap;
-import java.util.Set;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.HashMap;
+import com.caucho.amber.AmberQuery;
 
 import java.sql.ResultSet;
-
-import com.caucho.amber.AmberQuery;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Set;
   
 /**
  * Represents a lazy collection.

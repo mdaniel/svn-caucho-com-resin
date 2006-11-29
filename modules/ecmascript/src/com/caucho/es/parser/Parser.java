@@ -28,18 +28,28 @@
 
 package com.caucho.es.parser;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.es.*;
+import com.caucho.es.ESBase;
+import com.caucho.es.ESException;
+import com.caucho.es.ESId;
+import com.caucho.es.ESParseException;
+import com.caucho.es.Script;
+import com.caucho.java.JavaCompiler;
+import com.caucho.java.LineMap;
 import com.caucho.loader.SimpleLoader;
 import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntArray;
+import com.caucho.util.L10N;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Parser is a factory for generating compiled Script objects.

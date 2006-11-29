@@ -28,7 +28,7 @@
 */
 
 package javax.xml.stream;
-import javax.xml.namespace.*;
+import javax.xml.namespace.NamespaceContext;
 
 public interface XMLStreamWriter {
 

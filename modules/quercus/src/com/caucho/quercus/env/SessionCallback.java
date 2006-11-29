@@ -29,12 +29,10 @@
 
 package com.caucho.quercus.env;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.IdentityHashMap;
-
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.vfs.WriteStream;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a PHP session callback.

@@ -28,15 +28,10 @@
 
 package com.caucho.ejb.gen;
 
-import java.io.*;
-import java.util.*;
-import java.beans.*;
-import java.lang.reflect.*;
+import com.caucho.java.AbstractGenerator;
 
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
+import java.io.IOException;
+import java.lang.reflect.Method;
 
 /**
  * Generator for stubs.

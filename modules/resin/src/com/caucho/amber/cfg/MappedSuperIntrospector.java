@@ -29,41 +29,15 @@
 
 package com.caucho.amber.cfg;
 
-import java.sql.SQLException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.persistence.*;
-
-import com.caucho.amber.AmberTableCache;
-
-import com.caucho.amber.field.*;
-
-import com.caucho.amber.idgen.IdGenerator;
-
-import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.table.Column;
-import com.caucho.amber.table.ForeignColumn;
-import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Table;
-
-import com.caucho.amber.type.*;
-
-import com.caucho.bytecode.*;
+import com.caucho.amber.type.AbstractEnhancedType;
+import com.caucho.bytecode.JAnnotation;
+import com.caucho.bytecode.JClass;
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
-import com.caucho.ejb.EjbServerManager;
-import com.caucho.jdbc.JdbcMetaData;
-import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * Configuration for a mapped superclass type

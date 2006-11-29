@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.net.*;
+import java.net.InetAddress;
 
 /**
  * Represents an internet network mask.

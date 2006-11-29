@@ -29,7 +29,7 @@
 
 package javax.jcr.observation;
 
-import javax.jcr.*;
+import javax.jcr.RangeIterator;
 
 public interface EventListenerIterator extends RangeIterator {
   public EventListener nextEventListener();

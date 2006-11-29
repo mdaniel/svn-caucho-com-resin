@@ -29,24 +29,20 @@
 
 package com.caucho.db.sql;
 
-import java.io.IOException;
+import com.caucho.db.jdbc.GeneratedKeysResultSet;
+import com.caucho.db.store.Block;
+import com.caucho.db.store.Transaction;
+import com.caucho.db.table.TableIterator;
+import com.caucho.log.Log;
+import com.caucho.util.FreeList;
+import com.caucho.util.L10N;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.util.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.db.store.*;
-import com.caucho.db.table.*;
-
-import com.caucho.db.jdbc.GeneratedKeysResultSet;
+import java.util.logging.Logger;
 
 /**
  * Represents the state of the query at any particular time.

@@ -28,15 +28,8 @@
 
 package com.caucho.xpath;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.expr.*;
-import com.caucho.xpath.pattern.*;
+import com.caucho.xpath.expr.ObjectVar;
+import com.caucho.xpath.expr.Var;
 
 public class VarEnv {
   public Var getVar(String name)

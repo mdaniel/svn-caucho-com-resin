@@ -29,19 +29,22 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.Value;
+import com.caucho.sql.UserConnection;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 
 import java.io.Closeable;
-
 import java.sql.*;
-
-import com.caucho.quercus.*;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.*;
-import com.caucho.sql.UserConnection;
-import com.caucho.util.LruCache;
-import com.caucho.util.L10N;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a JDBC Connection value.

@@ -28,13 +28,11 @@
 
 package com.caucho.server.cache;
 
-import javax.servlet.FilterChain;
-
+import com.caucho.config.types.Bytes;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.Path;
 
-import com.caucho.config.types.Bytes;
-
-import com.caucho.server.webapp.WebApp;
+import javax.servlet.FilterChain;
 
 /**
  * Cached response.

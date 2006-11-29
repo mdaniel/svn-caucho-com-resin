@@ -28,13 +28,6 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 public interface ESCallable {
   public abstract ESBase call(int n, Call call, int length)
     throws Throwable;

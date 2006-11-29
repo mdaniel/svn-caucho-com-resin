@@ -28,24 +28,16 @@
  */
 package com.caucho.db.sql;
 
+import com.caucho.db.store.BlobInputStream;
+import com.caucho.db.store.Store;
+import com.caucho.util.L10N;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import java.sql.Clob;
 import java.sql.SQLException;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.db.store.Store;
-import com.caucho.db.store.BlobInputStream;
 
 /**
  * The JDBC clob implementation.

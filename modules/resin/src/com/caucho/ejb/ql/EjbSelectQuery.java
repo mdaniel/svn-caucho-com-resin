@@ -28,17 +28,12 @@
 
 package com.caucho.ejb.ql;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.util.CharBuffer;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.ejb.cfg.EjbEntityBean;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Parsed expression for EJB-QL.

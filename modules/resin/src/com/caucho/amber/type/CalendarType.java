@@ -28,22 +28,17 @@
 
 package com.caucho.amber.type;
 
-import java.util.Calendar;
-
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.sql.SQLException;
-
-import javax.persistence.TemporalType;
-
-
-import java.io.IOException;
-
+import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import com.caucho.java.JavaWriter;
+import javax.persistence.TemporalType;
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.Calendar;
 
 /**
  * The type of a property.

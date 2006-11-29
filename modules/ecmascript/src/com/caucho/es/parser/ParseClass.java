@@ -28,14 +28,17 @@
 
 package com.caucho.es.parser;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 import com.caucho.es.*;
-import com.caucho.java.*;
+import com.caucho.java.LineMap;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 class ParseClass {
   private String srcFilename;

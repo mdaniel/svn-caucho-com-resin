@@ -28,10 +28,8 @@
 
 package javax.enterprise.deploy.spi.status;
 
-import java.util.EventListener;
-import java.util.EventObject;
-
 import javax.enterprise.deploy.spi.TargetModuleID;
+import java.util.EventObject;
 
 /**
  * Listener for progress events.

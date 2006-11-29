@@ -29,21 +29,19 @@
 
 package com.caucho.quercus.lib;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
-
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.module.*;
-
-import com.caucho.quercus.lib.file.*;
-
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Quercus tokenizer 

@@ -28,8 +28,6 @@
 
 package com.caucho.util;
 
-import java.util.*;
-
 /**
  * Crc64 hash
  */
@@ -60,10 +58,10 @@ public class Crc64 {
 
     for (int i = 0; i < len; i++) {
       char ch = value.charAt(i);
-      
+
       if (ch > 0xff)
-	crc = next(crc, (ch >> 8));
-      
+        crc = next(crc, (ch >> 8));
+
       crc = next(crc, ch);
     }
 
@@ -79,8 +77,8 @@ public class Crc64 {
       char ch = buffer[offset + i];
 
       if (ch > 0xff)
-	crc = next(crc, (ch >> 8));
-      
+        crc = next(crc, (ch >> 8));
+
       crc = next(crc, ch);
     }
 
@@ -102,7 +100,7 @@ public class Crc64 {
   {
     return (crc >>> 8) ^ CRC_TABLE[((int) crc ^ ch) & 0xff];
   }
-  
+
   static {
     CRC_TABLE = new long[256];
 
@@ -110,17 +108,17 @@ public class Crc64 {
       long v = i;
 
       for (int j = 0; j < 8; j++) {
-	boolean flag = (v & 1) != 0;
+        boolean flag = (v & 1) != 0;
 
-	long newV = v >>> 1;
+        long newV = v >>> 1;
 
-	if ((v & 0x100000000L) != 0)
-	  newV |= 0x100000000L;
-	
-	if ((v & 1) != 0)
-	  newV ^= POLY64REV;
+        if ((v & 0x100000000L) != 0)
+          newV |= 0x100000000L;
 
-	v = newV;
+        if ((v & 1) != 0)
+          newV ^= POLY64REV;
+
+        v = newV;
       }
 
       CRC_TABLE[i] = v;

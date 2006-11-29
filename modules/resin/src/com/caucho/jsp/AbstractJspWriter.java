@@ -28,21 +28,15 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
-
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
 import com.caucho.log.Log;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.vfs.*;
+import com.caucho.vfs.FlushBuffer;
+
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.BodyContent;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.logging.Logger;
 
 /**
  * A buffered JSP writer encapsulating a Writer.

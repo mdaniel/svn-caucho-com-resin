@@ -28,10 +28,10 @@
 
 package javax.annotation;
 
+import static java.lang.annotation.ElementType.METHOD;
 import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
 import java.lang.annotation.RetentionPolicy;
-import static java.lang.annotation.ElementType.*;
+import java.lang.annotation.Target;
 
 /**
  * Marks a method to be called after construction.

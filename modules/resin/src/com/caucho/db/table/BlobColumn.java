@@ -29,26 +29,18 @@
 
 package com.caucho.db.table;
 
-import java.io.InputStream;
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.db.store.Transaction;
-import com.caucho.db.store.BlobOutputStream;
-import com.caucho.db.store.BlobInputStream;
-import com.caucho.db.store.Inode;
-
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
+import com.caucho.db.store.BlobInputStream;
+import com.caucho.db.store.BlobOutputStream;
+import com.caucho.db.store.Inode;
+import com.caucho.db.store.Transaction;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.util.logging.Level;
 
 class BlobColumn extends Column {
   /**

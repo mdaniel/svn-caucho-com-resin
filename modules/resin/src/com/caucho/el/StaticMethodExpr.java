@@ -29,17 +29,14 @@
 
 package com.caucho.el;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.beans.*;
-import java.lang.reflect.*;
-
-import javax.el.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
 import com.caucho.config.types.Signature;
+import com.caucho.vfs.WriteStream;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
 
 /**
  * Represents a method call.  The expr will evaluate to a method.

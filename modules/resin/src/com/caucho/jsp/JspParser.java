@@ -29,23 +29,22 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.util.*;
+import com.caucho.java.LineMap;
+import com.caucho.jsp.java.JspNode;
 import com.caucho.log.Log;
-import com.caucho.vfs.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.LineCompileException;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;
-import com.caucho.java.LineMap;
-import com.caucho.server.http.*;
 
-import com.caucho.jsp.java.JspNode;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Parses the JSP page.  Both the XML and JSP tags are understood.  However,

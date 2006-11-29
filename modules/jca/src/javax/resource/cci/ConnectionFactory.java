@@ -28,10 +28,9 @@
 
 package javax.resource.cci;
 
-import java.io.Serializable;
-
-import javax.resource.ResourceException;
 import javax.resource.Referenceable;
+import javax.resource.ResourceException;
+import java.io.Serializable;
 
 /**
  * Creates application connection objects.  Generally the ConnectionFactory

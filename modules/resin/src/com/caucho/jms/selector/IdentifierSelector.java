@@ -28,15 +28,11 @@
 
 package com.caucho.jms.selector;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
 
-import javax.jms.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jms.*;
+import javax.jms.JMSException;
+import javax.jms.Message;
 
 /**
  * The selector to grab a property.

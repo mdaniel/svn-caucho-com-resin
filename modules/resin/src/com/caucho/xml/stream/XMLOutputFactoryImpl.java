@@ -28,15 +28,20 @@
 */
 
 package com.caucho.xml.stream;
-import java.io.*;
-import javax.xml.stream.*;
-import javax.xml.stream.util.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.sax.*;
-import javax.xml.transform.stream.*;
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
+
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Result;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 public class XMLOutputFactoryImpl extends XMLOutputFactory {
   private static final L10N L = new L10N(XMLOutputFactoryImpl.class);

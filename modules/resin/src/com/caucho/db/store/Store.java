@@ -29,36 +29,19 @@
 
 package com.caucho.db.store;
 
-import java.lang.ref.SoftReference;
+import com.caucho.db.Database;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.log.Log;
+import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.RandomAccessStream;
 
 import java.io.IOException;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import java.lang.ref.SoftReference;
 import java.sql.SQLException;
-
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.RandomAccessStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.TempStream;
-
-import com.caucho.sql.SQLExceptionWrapper;
-
-import com.caucho.log.Log;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.db.Database;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The store manages the block-based persistent store file.  Each table

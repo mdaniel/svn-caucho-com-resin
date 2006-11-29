@@ -29,21 +29,16 @@
 
 package com.caucho.server.connection;
 
-import java.util.Locale;
-
-import java.util.logging.Logger;
-
-import java.io.UnsupportedEncodingException;
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-
 import com.caucho.log.Log;
-
-import com.caucho.vfs.TempBuffer;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
-
+import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.i18n.EncodingWriter;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Locale;
+import java.util.logging.Logger;
 
 /**
  * Handles the dual char/byte buffering for the response stream.

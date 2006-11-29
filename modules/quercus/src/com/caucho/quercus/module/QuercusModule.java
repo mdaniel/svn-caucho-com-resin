@@ -29,11 +29,10 @@
 
 package com.caucho.quercus.module;
 
-import java.util.Map;
-
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.VarMap;
+import com.caucho.quercus.env.Value;
+
+import java.util.Map;
 
 /**
  * Represents a quercus module.

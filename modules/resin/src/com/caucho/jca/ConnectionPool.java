@@ -28,42 +28,33 @@
  */
 
 package com.caucho.jca;
-  
-import java.util.ArrayList;
-import java.util.Set;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.transaction.xa.XAResource;
-  
-import javax.resource.ResourceException;
-import javax.resource.NotSupportedException;
-
-import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ValidatingManagedConnectionFactory;
-import javax.resource.spi.ConnectionRequestInfo;
-
-import javax.transaction.xa.Xid;
-
-import javax.security.auth.Subject;
-
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.log.Log;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.ConnectionPoolMXBean;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.LifoSet;
 import com.caucho.util.WeakAlarm;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
-
-import com.caucho.log.Log;
-
-import com.caucho.lifecycle.Lifecycle;
-
-import com.caucho.management.server.*;
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionManager;
+import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.resource.spi.ValidatingManagedConnectionFactory;
+import javax.security.auth.Subject;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the connection manager.

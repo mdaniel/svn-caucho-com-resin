@@ -29,24 +29,23 @@
 
 package com.caucho.transaction;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.transaction.*;
-import javax.transaction.xa.*;
-
-import com.caucho.util.L10N;
+import com.caucho.jca.UserTransactionImpl;
+import com.caucho.jca.UserTransactionSuspendState;
+import com.caucho.log.Log;
+import com.caucho.transaction.xalog.AbstractXALogStream;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.transaction.xalog.AbstractXALogStream;
-
-import com.caucho.jca.UserTransactionImpl;
-import com.caucho.jca.UserTransactionSuspendState;
+import javax.transaction.*;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the transaction.  Transactions are normally

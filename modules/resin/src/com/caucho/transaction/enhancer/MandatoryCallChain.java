@@ -29,16 +29,12 @@
 
 package com.caucho.transaction.enhancer;
 
-import java.io.IOException;
-
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.CallChain;
+import com.caucho.java.gen.FilterCallChain;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.FilterCallChain;
-import com.caucho.java.gen.CallChain;
+import java.io.IOException;
 
 /**
  * Enhancing a method objects.

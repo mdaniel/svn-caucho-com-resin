@@ -28,8 +28,9 @@
 */
 
 package javax.xml.bind.util;
-import javax.xml.bind.*;
-import java.util.*;
+import javax.xml.bind.ValidationEvent;
+import javax.xml.bind.ValidationEventHandler;
+import java.util.ArrayList;
 
 /** ValidationEventHandler implementation that collects all events */
 public class ValidationEventCollector implements ValidationEventHandler {

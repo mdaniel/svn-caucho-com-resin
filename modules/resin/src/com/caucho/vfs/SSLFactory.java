@@ -28,13 +28,11 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.security.GeneralSecurityException;
-
 import com.caucho.config.ConfigException;
-import com.caucho.vfs.*;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.security.GeneralSecurityException;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.

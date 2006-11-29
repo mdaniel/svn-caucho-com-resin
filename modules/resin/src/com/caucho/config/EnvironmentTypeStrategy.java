@@ -29,22 +29,15 @@
 
 package com.caucho.config;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.ref.SoftReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import javax.servlet.jsp.el.VariableResolver;
+import com.caucho.el.EnvironmentLevelELResolver;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.vfs.Dependency;
+import com.caucho.xml.QName;
 
 import org.w3c.dom.Node;
 
-import com.caucho.el.*;
-import com.caucho.util.*;
-import com.caucho.xml.QName;
-import com.caucho.loader.*;
-import com.caucho.vfs.*;
+import java.util.ArrayList;
 
 public class EnvironmentTypeStrategy extends BeanTypeStrategy {
   EnvironmentTypeStrategy(Class type)

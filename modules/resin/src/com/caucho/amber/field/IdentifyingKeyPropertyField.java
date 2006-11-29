@@ -28,15 +28,12 @@
 
 package com.caucho.amber.field;
 
-import java.util.logging.Logger;
-
+import com.caucho.amber.table.ForeignColumn;
+import com.caucho.amber.type.RelatedType;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.amber.type.RelatedType;
-
-import com.caucho.amber.table.ForeignColumn;
+import java.util.logging.Logger;
 
 /**
  * Configuration for a bean's field

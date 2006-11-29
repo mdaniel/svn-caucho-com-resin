@@ -29,25 +29,21 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.vfs.ReadStream;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
-import com.caucho.quercus.QuercusModuleException;
-
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.BinaryValue;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a Quercus file open for reading

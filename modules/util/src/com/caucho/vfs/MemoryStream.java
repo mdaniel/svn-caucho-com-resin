@@ -28,12 +28,8 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class MemoryStream extends StreamImpl {
   private TempBuffer _head;

@@ -28,9 +28,6 @@
 
 package com.caucho.es;
 
-import java.util.*;
-import com.caucho.util.*;
-
 public class ESUndefined extends ESBase {
   ESUndefined()
   {
@@ -49,12 +46,12 @@ public class ESUndefined extends ESBase {
   }
 
   public ESBase getProperty(ESString key) throws ESException
-  { 
+  {
     throw new ESNullException(className + " has no properties");
   }
 
   public void setProperty(ESString key, ESBase value) throws ESException
-  { 
+  {
     throw new ESNullException(className + " has no properties");
   }
 

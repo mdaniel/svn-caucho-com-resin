@@ -28,9 +28,9 @@
 
 package javax.servlet.jsp.tagext;
 
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.JspException;
 import java.io.IOException;
-
-import javax.servlet.jsp.*;
 
 /**
  * Support for SimpleTag.

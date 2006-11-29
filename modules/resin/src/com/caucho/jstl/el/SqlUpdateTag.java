@@ -28,28 +28,24 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.sql.*;
-import javax.naming.*;
-
-import javax.el.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.jstl.core.*;
-import javax.servlet.jsp.jstl.sql.Result;
-import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
-
-import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jstl.ResultImpl;
+import com.caucho.el.Expr;
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.el.*;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.el.ELContext;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
+import javax.servlet.jsp.tagext.BodyTagSupport;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SqlUpdateTag extends BodyTagSupport implements SQLExecutionTag {
   private static final Logger log = Log.open(SqlUpdateTag.class);

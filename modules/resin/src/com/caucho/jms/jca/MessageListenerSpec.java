@@ -29,25 +29,18 @@
 
 package com.caucho.jms.jca;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.resource.ResourceException;
-
-import javax.resource.spi.ActivationSpec;
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.InvalidPropertyException;
-
-import javax.resource.spi.endpoint.MessageEndpointFactory;
-import javax.resource.spi.endpoint.MessageEndpoint;
-
-import javax.jms.JMSException;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import javax.jms.JMSException;
+import javax.resource.ResourceException;
+import javax.resource.spi.ActivationSpec;
+import javax.resource.spi.InvalidPropertyException;
+import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.endpoint.MessageEndpointFactory;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The JMS MessageListener configuration specification.

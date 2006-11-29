@@ -28,7 +28,7 @@
 */
 
 package javax.xml.ws;
-import java.util.*;
+import java.util.Map;
 
 /** XXX */
 public interface BindingProvider {

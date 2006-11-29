@@ -28,25 +28,11 @@
 
 package com.caucho.db.sql;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
 import java.sql.SQLException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.QDate;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.log.Log;
-
-import com.caucho.sql.SQLExceptionWrapper;
-
-import com.caucho.db.table.Table;
-import com.caucho.db.table.TableIterator;
-import com.caucho.db.table.Column;
+import java.util.logging.Logger;
 
 /**
  * Represents a GROUP BY expression.

@@ -28,9 +28,9 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
-
+import com.caucho.amber.query.FromItem;
+import com.caucho.amber.query.QueryParseException;
+import com.caucho.amber.query.QueryParser;
 import com.caucho.util.L10N;
 
 /**

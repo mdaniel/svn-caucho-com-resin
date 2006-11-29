@@ -29,12 +29,14 @@
 
 package com.caucho.soap.skeleton;
 
-import java.io.*;
-import javax.jws.*;
-import javax.xml.stream.*;
-import javax.xml.namespace.*;
+import com.caucho.soap.marshall.Marshall;
 
-import com.caucho.soap.marshall.*;
+import javax.jws.WebParam;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
 
 abstract public class ParameterMarshal {
   protected final int _arg;

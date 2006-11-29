@@ -28,18 +28,12 @@
 
 package com.caucho.log;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Syslog;
 
-import com.caucho.util.L10N;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 /**
  * Logs to the syslog stream

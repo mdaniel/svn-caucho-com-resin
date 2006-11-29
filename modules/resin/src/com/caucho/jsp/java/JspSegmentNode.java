@@ -28,16 +28,6 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-
-import javax.servlet.jsp.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.xml.QName;
-import com.caucho.xml.XmlChar;
-
 /**
  * Represents a node which encapsulates a generated Java body.
  */

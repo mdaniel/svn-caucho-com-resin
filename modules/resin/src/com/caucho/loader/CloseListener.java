@@ -28,17 +28,12 @@
 
 package com.caucho.loader;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.lang.reflect.Method;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Waits for the close event and calls a destroy() method.

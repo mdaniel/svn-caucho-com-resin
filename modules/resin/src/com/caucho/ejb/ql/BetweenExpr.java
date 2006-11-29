@@ -28,11 +28,8 @@
 
 package com.caucho.ejb.ql;
 
-import java.util.*;
-
-import com.caucho.util.*;
-
 import com.caucho.config.ConfigException;
+import com.caucho.util.CharBuffer;
 
 /**
  * A between expression

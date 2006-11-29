@@ -28,11 +28,12 @@
 */
 
 package javax.xml.ws.handler.soap;
-import javax.xml.soap.*;
-import javax.xml.namespace.*;
-import javax.xml.ws.handler.*;
-import javax.xml.bind.*;
-import java.util.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.ws.handler.MessageContext;
+import java.util.List;
+import java.util.Map;
 
 /** XXX */
 public interface SOAPMessageContext

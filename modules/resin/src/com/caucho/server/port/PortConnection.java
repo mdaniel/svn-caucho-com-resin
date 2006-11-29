@@ -28,15 +28,10 @@
 
 package com.caucho.server.port;
 
-import java.io.*;
-import java.net.*;
-
-import java.nio.channels.SelectableChannel;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-
 import com.caucho.server.connection.Connection;
+
+import java.net.InetAddress;
+import java.nio.channels.SelectableChannel;
 
 /**
  * Represents a protocol-independent connection.  Prococol servers and

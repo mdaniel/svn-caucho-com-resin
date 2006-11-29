@@ -28,20 +28,18 @@
 
 package javax.jms;
 
-import java.util.Enumeration;
-
 /**
  * The main destination.
  */
 public interface QueueConnection extends Connection {
   public QueueSession createQueueSession(boolean transacted,
-					 int acknowledgeMode)
+                                         int acknowledgeMode)
     throws JMSException;
 
   public ConnectionConsumer
     createConnectionConsumer(Queue queue,
-			     String messageSelector,
-			     ServerSessionPool sessionPool,
-			     int maxMessages)
+                             String messageSelector,
+                             ServerSessionPool sessionPool,
+                             int maxMessages)
     throws JMSException;
 }

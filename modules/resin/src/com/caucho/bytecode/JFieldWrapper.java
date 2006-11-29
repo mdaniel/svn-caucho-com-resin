@@ -30,9 +30,9 @@
 package com.caucho.bytecode;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 /**
  * Wrapper around the Java field for a JField.

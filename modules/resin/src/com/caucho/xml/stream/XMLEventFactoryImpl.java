@@ -28,13 +28,12 @@
 */
 
 package com.caucho.xml.stream;
-import java.io.*;
-import java.util.*;
-import javax.xml.stream.*;
-import javax.xml.stream.util.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.events.*;
-import javax.xml.transform.*;
-import javax.xml.namespace.*;
+import java.util.Iterator;
 
 public class XMLEventFactoryImpl extends XMLEventFactory {
 

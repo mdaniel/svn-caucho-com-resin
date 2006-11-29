@@ -29,17 +29,18 @@
 
 package com.caucho.log;
 
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
-
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
  * Proxy logger that understands the environment.

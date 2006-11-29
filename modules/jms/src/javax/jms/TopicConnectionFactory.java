@@ -28,16 +28,14 @@
 
 package javax.jms;
 
-import java.util.Enumeration;
-
 /**
  * The main destination.
  */
 public interface TopicConnectionFactory extends ConnectionFactory {
   public TopicConnection createTopicConnection()
     throws JMSException;
-  
+
   public TopicConnection createTopicConnection(String userName,
-					       String password)
+                                               String password)
     throws JMSException;
 }

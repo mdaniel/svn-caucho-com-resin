@@ -26,16 +26,15 @@
 
 package com.caucho.ejb.protocol;
 
-import java.rmi.RemoteException;
+import com.caucho.ejb.AbstractEJBObject;
+import com.caucho.ejb.AbstractServer;
 
 import javax.ejb.EJBHome;
 import javax.ejb.EJBMetaData;
 import javax.ejb.Handle;
 import javax.ejb.HomeHandle;
 import javax.ejb.RemoveException;
-
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.AbstractEJBObject;
+import java.rmi.RemoteException;
 
 /**
  * Interface for stubs inside the same JVM.

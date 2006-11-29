@@ -28,33 +28,25 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
+import com.caucho.amber.entity.Entity;
+import com.caucho.amber.entity.EntityItem;
+import com.caucho.amber.field.AmberField;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.query.FromItem;
+import com.caucho.amber.query.QueryParser;
+import com.caucho.amber.table.LinkColumns;
+import com.caucho.amber.table.Table;
+import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.Type;
+import com.caucho.util.CharBuffer;
 
 import java.lang.reflect.Method;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-
-import com.caucho.amber.entity.Entity;
-import com.caucho.amber.entity.EntityItem;
-
-import com.caucho.amber.field.AmberField;
-
-import com.caucho.amber.manager.AmberConnection;
-
-import com.caucho.amber.table.Table;
-import com.caucho.amber.table.LinkColumns;
-
-import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
-
-import com.caucho.util.CharBuffer;
 
 /**
  * An entity expression which should be loaded.

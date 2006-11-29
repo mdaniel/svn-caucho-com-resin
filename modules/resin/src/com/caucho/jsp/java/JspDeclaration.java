@@ -29,13 +29,10 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-
-import com.caucho.jsp.*;
-
+import com.caucho.jsp.JspParseException;
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.xml.QName;
+import java.io.IOException;
 
 /**
  * Represents a Java declaration.

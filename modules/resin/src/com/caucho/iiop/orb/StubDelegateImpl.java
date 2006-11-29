@@ -29,18 +29,9 @@
 
 package com.caucho.iiop.orb;
 
-import java.applet.Applet;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.rmi.*;
-import javax.rmi.CORBA.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import org.omg.CORBA.*;
+
+import java.util.logging.Logger;
 
 public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
 {

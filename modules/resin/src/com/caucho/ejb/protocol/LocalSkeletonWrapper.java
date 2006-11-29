@@ -28,19 +28,13 @@
 
 package com.caucho.ejb.protocol;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import java.security.*;
+import com.caucho.util.L10N;
 
-import javax.ejb.*;
-import javax.transaction.*;
-import javax.naming.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-
-import com.caucho.ejb.AbstractServer;
+import javax.ejb.EJBLocalHome;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 
 /**
  * Special class for dealing with serialization.

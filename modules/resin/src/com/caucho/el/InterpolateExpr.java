@@ -29,12 +29,12 @@
 
 package com.caucho.el;
 
-import java.io.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.WriteStream;
 
-import javax.el.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import java.io.IOException;
 
 /**
  * Representing a string interpolation expression.

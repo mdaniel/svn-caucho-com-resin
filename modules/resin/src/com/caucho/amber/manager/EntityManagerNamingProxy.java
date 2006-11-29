@@ -29,9 +29,9 @@
 
 package com.caucho.amber.manager;
 
-import java.util.Hashtable;
-
 import com.caucho.naming.ObjectProxy;
+
+import java.util.Hashtable;
 
 /**
  * JNDI proxy for EntityManager

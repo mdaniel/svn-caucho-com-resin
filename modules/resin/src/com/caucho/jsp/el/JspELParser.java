@@ -28,15 +28,10 @@
 
 package com.caucho.jsp.el;
 
-import java.io.*;
+import com.caucho.el.ELParser;
+import com.caucho.el.Expr;
 
-import java.util.*;
-
-import javax.el.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.el.*;
+import javax.el.ELContext;
 
 /**
  * Parses the expression.

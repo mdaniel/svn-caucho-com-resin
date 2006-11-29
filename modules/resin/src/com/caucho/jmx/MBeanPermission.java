@@ -28,19 +28,10 @@
 
 package com.caucho.jmx;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-
-import java.security.*;
-import javax.management.*;
-
 import com.caucho.log.Log;
 
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.vfs.WriteStream;
+import java.security.BasicPermission;
+import java.util.logging.Logger;
 
 /**
  * Static convenience methods.

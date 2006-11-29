@@ -28,15 +28,14 @@
 
 package com.caucho.jstl.rt;
 
-import java.io.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.vfs.*;
-import com.caucho.jsp.PageContextImpl;
-import com.caucho.jsp.BodyContentImpl;
 import com.caucho.el.Expr;
+import com.caucho.jsp.BodyContentImpl;
+import com.caucho.jsp.PageContextImpl;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.BodyTagSupport;
+import java.io.IOException;
 
 public class OutTag extends BodyTagSupport {
   private Object _value;

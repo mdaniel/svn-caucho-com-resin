@@ -28,18 +28,20 @@
 
 package com.caucho.server.security;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.security.*;
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CharCursor;
+import com.caucho.util.RandomUtil;
+import com.caucho.util.StringCharCursor;
+import com.caucho.xml.XmlChar;
 
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.server.webapp.Application;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.logging.Level;
 
 /**
  * Implements the "digest" auth-method.  Basic uses the

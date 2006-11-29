@@ -48,12 +48,15 @@
 
 package com.caucho.burlap.io;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
-import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.io.Serializer;
+import com.caucho.hessian.io.SerializerFactory;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.IdentityHashMap;
+import java.util.TimeZone;
 
 /**
  * Output stream for Burlap requests, compatible with microedition

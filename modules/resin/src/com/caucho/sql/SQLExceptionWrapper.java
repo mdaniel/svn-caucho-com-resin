@@ -28,10 +28,9 @@
 
 package com.caucho.sql;
 
-import java.io.*;
-import java.sql.*;
+import com.caucho.util.ExceptionWrapper;
 
-import com.caucho.util.*;
+import java.sql.SQLException;
 
 /**
  * Wraps an exception in a SQLException wrapper.

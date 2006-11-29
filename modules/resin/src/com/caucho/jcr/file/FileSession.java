@@ -29,15 +29,16 @@
 
 package com.caucho.jcr.file;
 
-import javax.jcr.*;
-
-import com.caucho.jcr.base.*;
-
-import com.caucho.config.ConfigException;
-
+import com.caucho.jcr.base.BaseNode;
+import com.caucho.jcr.base.BaseSession;
+import com.caucho.jcr.base.BaseWorkspace;
 import com.caucho.util.L10N;
-
 import com.caucho.vfs.Path;
+
+import javax.jcr.Node;
+import javax.jcr.Repository;
+import javax.jcr.RepositoryException;
+import javax.jcr.Workspace;
 
 /**
  * Represents a open session for a file repository.

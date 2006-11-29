@@ -28,27 +28,13 @@
 
 package com.caucho.filters;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.OutputStream;
-import java.io.IOException;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletOutputStream;
-
-import javax.servlet.http.HttpServletResponse;
-
+import com.caucho.log.Log;
+import com.caucho.server.connection.ToByteResponseStream;
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ClientDisconnectException;
-
-import com.caucho.log.Log;
-
-import com.caucho.server.connection.ToByteResponseStream;
-import com.caucho.server.webapp.Application;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.logging.Logger;
 
 public class FilterWrapperResponseStream extends ToByteResponseStream {
   static final Logger log = Log.open(FilterWrapperResponseStream.class);

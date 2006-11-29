@@ -29,11 +29,9 @@
 package com.caucho.xsl.java;
 
 import com.caucho.java.JavaWriter;
-
 import com.caucho.xml.QName;
-
-import com.caucho.xsl.XslParseException;
 import com.caucho.xsl.JavaGenerator;
+import com.caucho.xsl.XslParseException;
 
 /**
  * Represents any XSL node from the stylesheet.

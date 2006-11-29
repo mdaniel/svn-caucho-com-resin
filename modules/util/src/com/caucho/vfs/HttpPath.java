@@ -29,13 +29,18 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.util.QDate;
 
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
-import com.caucho.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * The HTTP scheme.  Currently it supports GET and POST.

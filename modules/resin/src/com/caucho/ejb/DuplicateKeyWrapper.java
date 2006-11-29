@@ -30,10 +30,7 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.util.*;
+import com.caucho.util.ExceptionWrapper;
 
 /**
  * Wraps the actual exception with an EJB exception

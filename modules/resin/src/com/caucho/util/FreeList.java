@@ -28,8 +28,6 @@
 
 package com.caucho.util;
 
-import java.util.*;
-
 /**
  * FreeList provides a simple class to manage free objects.  This is useful
  * for large data structures that otherwise would gobble up huge GC time.
@@ -60,7 +58,7 @@ public final class FreeList<T> {
   {
     synchronized (_freeStack) {
       if (_top > 0)
-	return _freeStack[--_top];
+        return _freeStack[--_top];
       else
         return null;
     }
@@ -75,19 +73,19 @@ public final class FreeList<T> {
   {
     synchronized (_freeStack) {
       if (_top < _freeStack.length) {
-	_freeStack[_top++] = obj;
-	return true;
+        _freeStack[_top++] = obj;
+        return true;
       }
       else
-	return false;
+        return false;
     }
   }
-  
+
   public boolean allowFree(T obj)
   {
     return _top < _freeStack.length;
   }
-  
+
   /**
    * Frees the object.  If the free list is full, the object will be garbage
    * collected.
@@ -111,8 +109,8 @@ public final class FreeList<T> {
       int top = _top;
 
       for (int i = _top - 1; i >= 0; i--) {
-	if (_freeStack[i] == obj)
-	  return true;
+        if (_freeStack[i] == obj)
+          return true;
       }
     }
 

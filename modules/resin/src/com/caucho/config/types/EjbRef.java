@@ -39,8 +39,8 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
-import javax.naming.NamingException;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;

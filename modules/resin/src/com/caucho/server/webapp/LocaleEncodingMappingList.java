@@ -28,13 +28,11 @@
 
 package com.caucho.server.webapp;
 
-import java.util.logging.Logger;
-
-import javax.annotation.*;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import javax.annotation.PostConstruct;
+import java.util.logging.Logger;
 
 /**
  * Configuration for the locale.

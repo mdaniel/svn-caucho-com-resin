@@ -29,33 +29,21 @@
 
 package com.caucho.jmx;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.TimerTask;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
 import javax.management.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Alarm;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.vfs.WriteStream;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Static convenience methods.

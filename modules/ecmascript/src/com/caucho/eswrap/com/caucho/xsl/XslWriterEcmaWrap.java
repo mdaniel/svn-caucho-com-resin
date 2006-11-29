@@ -28,12 +28,8 @@
 
 package com.caucho.eswrap.com.caucho.xsl;
 
-import java.io.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.xsl.*;
-import com.caucho.es.*;
+import com.caucho.es.Call;
+import com.caucho.xsl.XslWriter;
 
 public class XslWriterEcmaWrap {
   public static void write(XslWriter s, Call call, int length)

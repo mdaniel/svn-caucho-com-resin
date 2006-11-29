@@ -29,30 +29,28 @@
 
 package com.caucho.servlets;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.ReadWritePair;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
-import javax.servlet.*;
-import javax.naming.*;
-import javax.servlet.http.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.loader.Environment;
-
-import com.caucho.server.cluster.*;
-
-import com.caucho.server.webapp.Application;
-
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-
-import com.caucho.server.hmux.HmuxRequest;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * HTTP proxy

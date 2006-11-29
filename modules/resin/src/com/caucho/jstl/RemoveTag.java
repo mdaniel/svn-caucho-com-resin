@@ -28,15 +28,10 @@
 
 package com.caucho.jstl;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.L10N;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
 
 public class RemoveTag extends TagSupport {
   private static L10N L = new L10N(RemoveTag.class);

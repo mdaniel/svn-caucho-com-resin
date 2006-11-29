@@ -29,14 +29,12 @@
 
 package com.caucho.soa.client;
 
-import java.lang.reflect.Proxy;
-
-import java.net.MalformedURLException;
+import com.caucho.soap.service.ServiceImplInvocationHandler;
+import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
-
-import com.caucho.soap.service.*;
-import com.caucho.util.*;
+import java.lang.reflect.Proxy;
+import java.net.MalformedURLException;
 
 public class SoapEncodingProxyFactory implements EncodingProxyFactory {
   private static final L10N L = new L10N(SoapEncodingProxyFactory.class);

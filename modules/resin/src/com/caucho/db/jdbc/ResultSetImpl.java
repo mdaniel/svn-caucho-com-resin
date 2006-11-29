@@ -27,27 +27,14 @@
  */
 package com.caucho.db.jdbc;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.db.sql.SelectResult;
 
 import java.math.BigDecimal;
-
-import java.sql.*;
-import javax.sql.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.log.Log;
-
-import com.caucho.db.Database;
-
-import com.caucho.db.sql.SelectResult;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 
 /**
  * The JDBC statement implementation.

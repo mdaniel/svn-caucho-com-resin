@@ -29,14 +29,14 @@
 
 package com.caucho.soa.servlet;
 
+import com.caucho.soa.encoding.ServiceEncoding;
+
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
-import java.io.*;
-
 import java.util.logging.Logger;
-
-import javax.servlet.*;
-
-import com.caucho.soa.encoding.*;
 
 /**
  * Generic servlet handling a SOA RPC call.

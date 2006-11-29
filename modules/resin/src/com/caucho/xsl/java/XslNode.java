@@ -28,40 +28,25 @@
 
 package com.caucho.xsl.java;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CompileException;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.LineCompileException;
-
-import com.caucho.log.Log;
-
 import com.caucho.java.JavaWriter;
-
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CompileException;
+import com.caucho.util.L10N;
+import com.caucho.util.LineCompileException;
 import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;
-
-import com.caucho.xpath.pattern.AbstractPattern;
-import com.caucho.xpath.pattern.FilterPattern;
-import com.caucho.xpath.pattern.FromChildren;
-import com.caucho.xpath.pattern.FromNextSibling;
-import com.caucho.xpath.pattern.NodeTypePattern;
-import com.caucho.xpath.pattern.NodePattern;
-import com.caucho.xpath.pattern.FromRoot;
-import com.caucho.xpath.pattern.FromContext;
 import com.caucho.xpath.Expr;
+import com.caucho.xpath.NamespaceContext;
 import com.caucho.xpath.XPath;
 import com.caucho.xpath.expr.NumericExpr;
-import com.caucho.xpath.NamespaceContext;
-
-import com.caucho.xsl.XslParseException;
+import com.caucho.xpath.pattern.*;
 import com.caucho.xsl.JavaGenerator;
+import com.caucho.xsl.XslParseException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Represents any XSL node from the stylesheet.

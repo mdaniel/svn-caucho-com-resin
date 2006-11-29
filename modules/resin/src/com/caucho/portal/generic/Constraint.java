@@ -49,9 +49,8 @@
 
 package com.caucho.portal.generic;
 
-import java.io.*;
-
-import javax.portlet.*;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 
 
 abstract public class Constraint

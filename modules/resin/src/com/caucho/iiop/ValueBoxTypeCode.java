@@ -28,20 +28,10 @@
 
 package com.caucho.iiop;
 
-import java.util.logging.Logger;
+import org.omg.CORBA.TCKind;
+import org.omg.CORBA.TypeCode;
 
 import java.io.IOException;
-
-import org.omg.CORBA.TypeCode;
-import org.omg.CORBA.TCKind;
-import org.omg.CORBA.Any;
-
-import org.omg.CORBA.TypeCodePackage.BadKind;
-import org.omg.CORBA.TypeCodePackage.Bounds;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
 
 public class ValueBoxTypeCode extends TypeCodeImpl {
   private TypeCode _subTypeCode;

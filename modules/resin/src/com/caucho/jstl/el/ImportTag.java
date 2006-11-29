@@ -28,27 +28,34 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-import java.net.*;
-
-import javax.el.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-
-import com.caucho.jsp.ResinJspWriter;
+import com.caucho.el.Expr;
 import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.PageContextImpl;
-
-import com.caucho.server.connection.*;
-
 import com.caucho.jstl.NameValueTag;
-import com.caucho.el.*;
+import com.caucho.server.connection.CauchoResponse;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.FlushBuffer;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.BodyTagSupport;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 
 public class ImportTag extends BodyTagSupport implements NameValueTag {
   private static L10N L = new L10N(ImportTag.class);

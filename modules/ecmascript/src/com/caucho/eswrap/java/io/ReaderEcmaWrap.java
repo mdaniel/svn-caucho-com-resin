@@ -28,10 +28,10 @@
 
 package com.caucho.eswrap.java.io;
 
-import java.io.*;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.util.*;
-import com.caucho.es.*;
+import java.io.IOException;
+import java.io.Reader;
 
 public class ReaderEcmaWrap {
   public static int readByte(Reader is)

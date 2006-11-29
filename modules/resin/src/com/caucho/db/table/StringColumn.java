@@ -29,27 +29,18 @@
 
 package com.caucho.db.table;
 
-import java.io.IOException;
-
-import java.util.logging.*;
-
-import java.sql.SQLException;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.util.CharBuffer;
-
+import com.caucho.db.index.BTree;
+import com.caucho.db.index.KeyCompare;
+import com.caucho.db.index.StringKeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-
 import com.caucho.db.store.Transaction;
+import com.caucho.util.L10N;
 
-import com.caucho.db.index.KeyCompare;
-import com.caucho.db.index.StringKeyCompare;
-import com.caucho.db.index.BTree;
-
-import com.caucho.util.*;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class StringColumn extends Column {
   private static final Logger log

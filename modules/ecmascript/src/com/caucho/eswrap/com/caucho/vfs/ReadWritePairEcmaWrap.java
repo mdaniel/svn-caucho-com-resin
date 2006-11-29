@@ -28,12 +28,15 @@
 
 package com.caucho.eswrap.com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.es.Call;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.ReadWritePair;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.es.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
 
 public class ReadWritePairEcmaWrap {
   public static void writeByte(ReadWritePair s, int ch)

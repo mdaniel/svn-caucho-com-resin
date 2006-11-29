@@ -29,13 +29,10 @@
 
 package com.caucho.amber.manager;
 
-import java.util.logging.Logger;
-
-import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContextType;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Amber's EntityManagerFactory container.

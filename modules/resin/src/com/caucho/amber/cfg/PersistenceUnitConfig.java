@@ -29,19 +29,14 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
-import com.caucho.bytecode.JClass;
-
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.config.ConfigException;
-
+import com.caucho.bytecode.JClass;
 import com.caucho.vfs.Path;
+
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <persistence-unit> tag in the persistence.xml

@@ -29,35 +29,30 @@
 
 package com.caucho.quercus.parser;
 
-import java.io.*;
-
-import java.lang.reflect.Modifier;
-
-import java.util.ArrayList;
-
-import com.caucho.quercus.QuercusRuntimeException;
-
-import com.caucho.quercus.expr.*;
-
-import com.caucho.quercus.program.*;
-
-import com.caucho.quercus.Quercus;
 import com.caucho.quercus.Location;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.DoubleValue;
 import com.caucho.quercus.env.CallbackFunction;
-
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.expr.*;
+import com.caucho.quercus.program.*;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
 import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StringPath;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
+import java.io.CharConversionException;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
 
 /**
  * Parses a PHP program.

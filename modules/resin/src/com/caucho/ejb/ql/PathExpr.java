@@ -28,20 +28,16 @@
 
 package com.caucho.ejb.ql;
 
-import java.util.Collections;
-import java.util.ArrayList;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.config.ConfigException;
-
 import com.caucho.amber.field.IdField;
-
 import com.caucho.amber.type.EntityType;
-
-import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg.CmpField;
 import com.caucho.ejb.cfg.CmrRelation;
+import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.util.CharBuffer;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Generated expression a relation path.

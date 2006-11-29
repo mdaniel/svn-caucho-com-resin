@@ -28,23 +28,20 @@
 
 package com.caucho.loader;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.util.jar.Manifest;
-import java.util.jar.Attributes;
-
-import java.net.URL;
-
-import javax.annotation.*;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
 import com.caucho.make.DependencyContainer;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class loader which checks for changes in class files and automatically

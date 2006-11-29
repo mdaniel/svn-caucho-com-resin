@@ -28,12 +28,12 @@
 
 package com.caucho.ejb.cfg;
 
-import javax.annotation.*;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Signature;
 import com.caucho.j2ee.cfg.J2eeSecurityRole;
 import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Configuration for an ejb bean.

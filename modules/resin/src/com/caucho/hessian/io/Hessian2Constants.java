@@ -48,10 +48,6 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
 public interface Hessian2Constants
 {
   public static final int INT_DIRECT_MIN = -0x10;
@@ -66,11 +62,11 @@ public interface Hessian2Constants
   public static final int INT_SHORT_MIN = -0x40000;
   public static final int INT_SHORT_MAX = 0x3ffff;
   public static final int INT_SHORT_ZERO = 0xd4;
-  
+
   public static final long LONG_DIRECT_MIN = -0x08;
   public static final long LONG_DIRECT_MAX =  0x0f;
   public static final int LONG_ZERO = 0xe0;
-  
+
   public static final long LONG_BYTE_MIN = -0x800;
   public static final long LONG_BYTE_MAX =  0x7ff;
   public static final int LONG_BYTE_ZERO = 0xf8;
@@ -78,17 +74,17 @@ public interface Hessian2Constants
   public static final int LONG_SHORT_MIN = -0x40000;
   public static final int LONG_SHORT_MAX = 0x3ffff;
   public static final int LONG_SHORT_ZERO = 0x3c;
-  
+
   public static final int STRING_DIRECT_MAX = 0x0f;
   public static final int STRING_DIRECT = 0x00;
   // 0x10-0x1f is reserved
-  
+
   public static final int BYTES_DIRECT_MAX = 0x0f;
   public static final int BYTES_DIRECT = 0x20;
   // 0x30-0x3f is reserved
-  
+
   public static final int LONG_INT = 'a';
-  
+
   public static final int DOUBLE_ZERO = 'h';
   public static final int DOUBLE_ONE = 'i';
   public static final int DOUBLE_BYTE = 'j';
@@ -100,7 +96,7 @@ public interface Hessian2Constants
   public static final int DOUBLE_FLOAT = 'q';
   public static final int LENGTH_BYTE = 'u';
   public static final int LIST_FIXED = 'v';
-  
+
   public static final int REF_BYTE = 'e';
   public static final int REF_SHORT = 'f';
 

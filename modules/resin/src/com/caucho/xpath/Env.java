@@ -28,15 +28,20 @@
 
 package com.caucho.xpath;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.util.FreeList;
+import com.caucho.xml.XmlUtil;
+import com.caucho.xpath.expr.ObjectVar;
+import com.caucho.xpath.expr.Var;
+import com.caucho.xpath.pattern.AbstractPattern;
+import com.caucho.xpath.pattern.NodeIterator;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.expr.*;
-import com.caucho.xpath.pattern.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Global and local variable environment.  The April XSLT draft introduces

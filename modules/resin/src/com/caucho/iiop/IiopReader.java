@@ -29,30 +29,29 @@
 
 package com.caucho.iiop;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntArray;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempBuffer;
 
-import java.util.logging.Logger;
-
-import javax.rmi.CORBA.ValueHandler;
-import javax.rmi.CORBA.Util;
-
-import org.omg.CORBA.Any;
-import org.omg.CORBA.Context;
-import org.omg.CORBA.ContextList;
 import org.omg.CORBA.Principal;
-import org.omg.CORBA.TypeCode;
 import org.omg.CORBA.TCKind;
-
+import org.omg.CORBA.TypeCode;
 import org.omg.CORBA.portable.IndirectionException;
-
 import org.omg.SendingContext.RunTime;
 
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.log.Log;
+import javax.rmi.CORBA.Util;
+import javax.rmi.CORBA.ValueHandler;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   protected static final L10N L = new L10N(IiopReader.class);

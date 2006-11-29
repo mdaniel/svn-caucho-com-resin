@@ -29,29 +29,36 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.el.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import javax.xml.transform.*;
-import javax.xml.transform.stream.*;
-import javax.xml.transform.dom.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.el.Expr;
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.el.*;
-import com.caucho.xsl.*;
 import com.caucho.jstl.NameValueTag;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.BodyContent;
+import javax.servlet.jsp.tagext.BodyTagSupport;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
   private static final Logger log = Log.open(XmlTransformTag.class);

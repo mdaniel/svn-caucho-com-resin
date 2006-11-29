@@ -30,8 +30,6 @@ package javax.xml.rpc.handler;
 
 import java.util.Iterator;
 
-import javax.xml.namespace.QName;
-
 /**
  * Represents the message context.
  */

@@ -29,13 +29,14 @@
 
 package com.caucho.soa.servlet;
 
-import java.io.*;
+import com.caucho.soa.encoding.SoapEncoding;
 
-import java.util.logging.*;
-
-import javax.servlet.*;
-
-import com.caucho.soa.encoding.*;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Invokes a service based on a Soap-encoded request.

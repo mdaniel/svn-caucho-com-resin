@@ -28,11 +28,13 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.Node;
+
+import java.io.IOException;
 
 public class QDocumentFragment extends QNode implements DocumentFragment {
   protected Document _masterDoc;

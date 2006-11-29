@@ -29,21 +29,25 @@
 
 package com.caucho.jaxb;
 
-import java.io.*;
-import java.math.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.jaxb.skeleton.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
+
+import org.w3c.dom.Node;
 
 import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.transform.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.jaxb.skeleton.*;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Result;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Entry point to API

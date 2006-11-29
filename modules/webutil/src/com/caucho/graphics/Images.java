@@ -30,14 +30,10 @@
 
 package com.caucho.graphics;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
 import java.awt.*;
-import java.awt.image.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.awt.image.ColorModel;
+import java.awt.image.ImageConsumer;
+import java.util.Hashtable;
 
 public class Images implements ImageConsumer {
   private static Toolkit toolkit;

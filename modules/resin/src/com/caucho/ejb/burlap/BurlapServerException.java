@@ -28,11 +28,7 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.vfs.*;
+import com.caucho.util.CompileException;
 
 /**
  * An exception for server messages, e.g. 500 codes.

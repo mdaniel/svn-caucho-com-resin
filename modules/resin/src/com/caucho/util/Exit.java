@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * The exit class is used to automatically clean state.  For example,

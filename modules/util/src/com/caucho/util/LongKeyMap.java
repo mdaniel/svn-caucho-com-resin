@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.Iterator;
 /**
  * The LongKeyMap provides a simple hashmap from longs to values.  The API is
  * an abbreviation of the HashMap collection API.

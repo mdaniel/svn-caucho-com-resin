@@ -28,14 +28,12 @@
 
 package com.caucho.amber.entity;
 
-import java.util.logging.Logger;
-
+import com.caucho.amber.query.ResultSetCacheChunk;
+import com.caucho.amber.type.EntityType;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.amber.type.EntityType;
-
-import com.caucho.amber.query.ResultSetCacheChunk;
+import java.util.logging.Logger;
 
 /**
  * Code to update the cache value on the completion of a transaction.

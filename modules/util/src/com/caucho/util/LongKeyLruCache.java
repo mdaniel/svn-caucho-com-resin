@@ -31,7 +31,6 @@ package com.caucho.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import java.util.logging.Logger;
 
 /**

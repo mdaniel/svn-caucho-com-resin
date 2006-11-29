@@ -29,8 +29,6 @@
 
 package javax.script;
 
-import java.io.Reader;
-
 /**
  * Represents a compiled script.
  */
@@ -43,7 +41,7 @@ abstract public class CompiledScript {
   {
     return eval(getEngine().getContext());
   }
-  
+
   /**
    * Evaluates the script with the given bindings.
    */
@@ -57,18 +55,18 @@ abstract public class CompiledScript {
     cxt.setWriter(engineCxt.getWriter());
     cxt.setErrorWriter(engineCxt.getErrorWriter());
     cxt.setBindings(engineCxt.getBindings(ScriptContext.GLOBAL_SCOPE),
-		     ScriptContext.GLOBAL_SCOPE);
+                    ScriptContext.GLOBAL_SCOPE);
     cxt.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
 
     return eval(cxt);
   }
-  
+
   /**
    * Evaluates the script with the given context.
    */
   abstract public Object eval(ScriptContext context)
     throws ScriptException;
-  
+
   /**
    * Returns the owning engine.
    */

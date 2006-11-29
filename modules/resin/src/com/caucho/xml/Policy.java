@@ -28,12 +28,11 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.util.HashMap;
 
 /**
  * The Policy class defines the parsing policy.  It configures the parser

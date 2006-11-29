@@ -29,22 +29,18 @@
 
 package com.caucho.jdbc;
 
-import java.util.HashMap;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import javax.naming.InitialContext;
-import javax.naming.Context;
-import javax.naming.NamingException;
-
-import com.caucho.util.Log;
-import com.caucho.util.L10N;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract way of grabbing data from the JDBC connection.

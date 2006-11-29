@@ -28,24 +28,24 @@
 
 package com.caucho.server.security;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.security.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
 import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
+import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.webapp.Application;
 import com.caucho.server.webapp.RequestDispatcherImpl;
+import com.caucho.util.L10N;
 
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
+import javax.servlet.GenericServlet;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FormLoginServlet extends GenericServlet {
   private final Logger log = Log.open(FormLoginServlet.class);

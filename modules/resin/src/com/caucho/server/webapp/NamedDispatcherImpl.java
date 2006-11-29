@@ -28,21 +28,20 @@
 
 package com.caucho.server.webapp;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.RequestAdapter;
-import com.caucho.server.connection.ResponseAdapter;
 import com.caucho.server.connection.AbstractHttpResponse;
-import com.caucho.server.connection.IncludeResponseStream;
+import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.connection.RequestAdapter;
+
+import javax.servlet.FilterChain;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 class NamedDispatcherImpl implements RequestDispatcher {
   private WebApp _webApp;

@@ -48,12 +48,16 @@
 
 package com.caucho.portal.generic;
 
-import javax.portlet.*;
-
-import java.util.*;
-
+import javax.portlet.PortalContext;
+import javax.portlet.PortletMode;
+import javax.portlet.PortletRequest;
+import javax.portlet.WindowState;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * A Portal implementation with default values.

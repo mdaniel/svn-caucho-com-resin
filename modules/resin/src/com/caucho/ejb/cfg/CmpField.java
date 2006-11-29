@@ -29,30 +29,22 @@
 
 package com.caucho.ejb.cfg;
 
-import javax.annotation.*;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBObject;
-
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.jdbc.JdbcMetaData;
-
-import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
-
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.KeyPropertyField;
-
 import com.caucho.amber.manager.AmberPersistenceUnit;
-
 import com.caucho.amber.table.Column;
+import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.Type;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.jdbc.JdbcMetaData;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJBLocalObject;
+import javax.ejb.EJBObject;
 
 /**
  * Configuraton for a cmp-field.

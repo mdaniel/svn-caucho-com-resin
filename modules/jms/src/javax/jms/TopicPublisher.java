@@ -28,8 +28,6 @@
 
 package javax.jms;
 
-import java.util.Enumeration;
-
 /**
  * The main destination.
  */
@@ -41,19 +39,19 @@ public interface TopicPublisher extends MessageProducer {
     throws JMSException;
 
   public void publish(Message message,
-		   int deliveryMode,
-		   int priority,
-		   long timeToLive)
+                      int deliveryMode,
+                      int priority,
+                      long timeToLive)
     throws JMSException;
 
   public void publish(Topic topic,
-		   Message message)
+                      Message message)
     throws JMSException;
 
   public void publish(Topic topic,
-		   Message message,
-		   int deliveryMode,
-		   int priority,
-		   long timeToLive)
+                      Message message,
+                      int deliveryMode,
+                      int priority,
+                      long timeToLive)
     throws JMSException;
 }

@@ -29,44 +29,38 @@
 
 package com.caucho.server.dispatch;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-
-import java.util.Hashtable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Collections;
-import java.util.Enumeration;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.annotation.*;
-import javax.naming.*;
-
-import javax.servlet.*;
-import javax.jws.*;
-
-import com.caucho.config.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.Config;
+import com.caucho.config.NodeBuilderProgram;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.InitProgram;
-
-import com.caucho.config.j2ee.InjectIntrospector;
-
 import com.caucho.jmx.Jmx;
-
-import com.caucho.naming.*;
-
-import com.caucho.jsp.QServlet;
 import com.caucho.jsp.Page;
-
+import com.caucho.jsp.QServlet;
+import com.caucho.naming.Jndi;
 import com.caucho.server.connection.StubServletRequest;
 import com.caucho.server.connection.StubServletResponse;
+import com.caucho.soa.servlet.ProtocolServlet;
+import com.caucho.soa.servlet.SoapProtocolServlet;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.CompileException;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
-import com.caucho.soa.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.management.j2ee.J2EEManagedObject;
+import javax.annotation.PostConstruct;
+import javax.jws.WebService;
+import javax.naming.NamingException;
+import javax.servlet.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Configuration for a servlet.

@@ -28,11 +28,6 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
 /**
  * JavaScript object
  */
@@ -100,13 +95,13 @@ class NativeRegexp extends Native {
 
     case TO_STRING:
       try {
-	ESRegexp regexp = (ESRegexp) eval.getThis();
-	String s = regexp.pattern.toString();
-	String f = regexp.flags.toString();
+        ESRegexp regexp = (ESRegexp) eval.getThis();
+        String s = regexp.pattern.toString();
+        String f = regexp.flags.toString();
 
-	return ESString.create("/" + s + "/" + f);
+        return ESString.create("/" + s + "/" + f);
       } catch (ClassCastException e) {
-	throw new ESException("toString expected regexp object");
+        throw new ESException("toString expected regexp object");
       }
 
     case EXEC:
@@ -186,15 +181,15 @@ class NativeRegexp extends Native {
       regexp = new ESRegexp(reg.toStr(), ESString.NULL);
     if (regexp.prototype == null)
       throw new RuntimeException();
-    
+
     ESString string;
-    
+
     Global global = Global.getGlobalProto();
     if (length == 0)
       string = global.getRegexp().getProperty(global.getRegexp().INPUT).toStr();
     else
       string = eval.getArg(0).toStr();
-    
+
     global.getRegexp().setRegexp(regexp);
     if (! regexp.exec(string))
       return esNull;
@@ -236,7 +231,7 @@ class NativeRegexp extends Native {
       throw new RuntimeException();
 
     ESString string;
-    ESRegexpWrapper globalRegexp = Global.getGlobalProto().getRegexp(); 
+    ESRegexpWrapper globalRegexp = Global.getGlobalProto().getRegexp();
     if (length == 0)
       string = globalRegexp.getProperty(globalRegexp.INPUT).toStr();
     else

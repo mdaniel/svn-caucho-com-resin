@@ -29,13 +29,11 @@
 
 package com.caucho.quercus.lib.pdf;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
 import com.caucho.util.L10N;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * pdf object oriented API facade

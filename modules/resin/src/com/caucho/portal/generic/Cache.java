@@ -49,13 +49,13 @@
 
 package com.caucho.portal.generic;
 
-import java.io.*;
-
-import java.util.*;
-import java.util.logging.Level;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.portlet.*;
 
 
 abstract public class Cache

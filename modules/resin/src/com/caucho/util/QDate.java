@@ -29,16 +29,15 @@
 
 package com.caucho.util;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.vfs.WriteStream;
 
-import java.util.logging.Logger;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.logging.Level;
-
-import java.text.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.util.logging.Logger;
 
 /**
  * Resin Date object

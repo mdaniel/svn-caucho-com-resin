@@ -29,15 +29,8 @@
 
 package com.caucho.relaxng.pattern;
 
-import com.caucho.util.L10N;
-
-import com.caucho.xml.QName;
-
-import com.caucho.config.BeanConfigException;
-
 import com.caucho.relaxng.RelaxException;
-
-import com.caucho.relaxng.program.Item;
+import com.caucho.util.L10N;
 
 /**
  * Relax pattern

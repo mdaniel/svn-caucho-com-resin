@@ -29,17 +29,18 @@
 
 package com.caucho.jsp.el;
 
-import java.io.*;
+import com.caucho.el.Expr;
+import com.caucho.vfs.WriteStream;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.PageContext;
+import java.io.IOException;
 import java.util.*;
-
-import javax.el.*;
-
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-import com.caucho.el.*;
 
 public class ImplicitFieldExpr extends Expr {
   private int _index;

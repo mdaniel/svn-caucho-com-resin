@@ -29,17 +29,12 @@
 
 package com.caucho.jsp;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-import java.io.PrintWriter;
+import com.caucho.server.connection.AbstractResponseStream;
+import com.caucho.util.L10N;
 
 import javax.servlet.jsp.JspWriter;
-
-import com.caucho.server.connection.AbstractResponseStream;
-
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * A buffered JSP writer encapsulating a Writer.

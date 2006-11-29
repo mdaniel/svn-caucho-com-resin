@@ -29,50 +29,38 @@
 
 package com.caucho.jca;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Constructor;
-
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ConnectionManager;
-
-import javax.management.ObjectName;
-import javax.management.MBeanServer;
-import javax.management.Attribute;
-import javax.management.NotificationFilter;
-import javax.management.MBeanInfo;
-import javax.management.MBeanAttributeInfo;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.CloseListener;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.StartListener;
-
-import com.caucho.naming.Jndi;
-
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-
 import com.caucho.config.types.InitProgram;
-import com.caucho.config.types.InitParam;
-
-import com.caucho.jmx.Jmx;
-import com.caucho.jmx.IntrospectionMBean;
-
 import com.caucho.jca.cfg.JavaMailConfig;
+import com.caucho.jmx.IntrospectionMBean;
+import com.caucho.jmx.Jmx;
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.CloseListener;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.StartListener;
+import com.caucho.naming.Jndi;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.management.Attribute;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
+import javax.management.NotificationFilter;
+import javax.management.ObjectName;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.resource.spi.ResourceAdapter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Configuration for the init-param pattern.

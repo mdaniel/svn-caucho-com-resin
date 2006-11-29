@@ -28,19 +28,12 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 /**
  * Implementation class representing the global object.
  */
 abstract public class ESGlobal extends ESObject implements ESCallable {
   private Global resin;
-  
+
   /**
    * Null constructor
    */
@@ -96,7 +89,7 @@ abstract public class ESGlobal extends ESObject implements ESCallable {
     throws Throwable
   {
     Global resin = (Global) prototype;
-    
+
     try {
       Call call = resin.getCall();
       call.caller = call;
@@ -110,9 +103,9 @@ abstract public class ESGlobal extends ESObject implements ESCallable {
       ESBase value = null;
 
       try {
-	value = call(0, call, 0);
+        value = call(0, call, 0);
       } finally {
-	resin.freeCall(call);
+        resin.freeCall(call);
       }
 
       return value;
@@ -123,11 +116,11 @@ abstract public class ESGlobal extends ESObject implements ESCallable {
     }
   }
 
-  
+
   public void export(ESObject dest)
     throws Throwable
   {
-    
+
   }
 
   /**
@@ -138,7 +131,7 @@ abstract public class ESGlobal extends ESObject implements ESCallable {
   {
     return resin.wrap(obj);
   }
-  
+
   public abstract ESBase call(int n, Call call, int length)
     throws Throwable;
 }

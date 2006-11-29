@@ -28,8 +28,6 @@
 
 package com.caucho.util;
 
-import java.util.*;
-
 /**
  * Item fitting in a clock cache.
  */

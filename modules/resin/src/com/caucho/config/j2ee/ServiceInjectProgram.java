@@ -29,18 +29,20 @@
 
 package com.caucho.config.j2ee;
 
-import java.lang.reflect.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
+import com.caucho.soa.client.WebServiceClient;
+import com.caucho.util.L10N;
 
-import java.net.*;
-import java.util.logging.*;
-
-import javax.naming.*;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
-
-import com.caucho.config.*;
-import com.caucho.util.*;
-import com.caucho.soa.client.*;
+import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class ServiceInjectProgram extends BuilderProgram {

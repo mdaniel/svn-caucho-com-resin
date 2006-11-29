@@ -30,7 +30,7 @@
 package javax.el;
 
 import java.beans.FeatureDescriptor;
-import java.util.*;
+import java.util.Iterator;
 
 /**
  * Resolves EL variables

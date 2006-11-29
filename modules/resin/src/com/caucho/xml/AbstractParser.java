@@ -28,19 +28,24 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.VfsStream;
 
-import javax.xml.parsers.*;
-
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
 import org.xml.sax.*;
-import org.xml.sax.ext.*;
+import org.xml.sax.ext.LexicalHandler;
 
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.logging.Logger;
 
 abstract public class AbstractParser implements XMLReader, Parser
 {

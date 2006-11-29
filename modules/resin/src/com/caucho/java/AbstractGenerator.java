@@ -29,18 +29,19 @@
 
 package com.caucho.java;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.loader.SimpleLoader;
-
-import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.DependencyComponent;
+import com.caucho.java.gen.GenClass;
+import com.caucho.loader.SimpleLoader;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
  * Generates the Java code for the wrapped object.

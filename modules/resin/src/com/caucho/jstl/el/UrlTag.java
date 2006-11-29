@@ -29,20 +29,19 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-import java.net.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.el.ELException;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.el.*;
+import com.caucho.el.Expr;
+import com.caucho.jsp.PageContextImpl;
 import com.caucho.jstl.NameValueTag;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.TagSupport;
+import java.io.IOException;
 
 public class UrlTag extends TagSupport implements NameValueTag {
   private static final L10N L = new L10N(ImportTag.class);

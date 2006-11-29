@@ -28,13 +28,14 @@
 
 package com.caucho.amber.field;
 
-import java.util.logging.Logger;
-import javax.persistence.CascadeType;
-import com.caucho.util.L10N;
-import com.caucho.log.Log;
-import com.caucho.config.ConfigException;
-import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.table.LinkColumns;
+import com.caucho.amber.type.RelatedType;
+import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.persistence.CascadeType;
+import java.util.logging.Logger;
 
 
 /**

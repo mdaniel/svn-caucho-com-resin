@@ -29,17 +29,7 @@
 
 package com.caucho.quercus.resources;
 
-import java.io.IOException;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.quercus.env.ResourceValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.*;
 
 /**
  * Represents a PHP stream context.

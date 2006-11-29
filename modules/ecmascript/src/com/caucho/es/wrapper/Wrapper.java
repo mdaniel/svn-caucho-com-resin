@@ -28,20 +28,34 @@
 
 package com.caucho.es.wrapper;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.beans.*;
-import java.net.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.es.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.log.Log;
+import com.caucho.es.ESArrayWrapper;
+import com.caucho.es.ESBase;
+import com.caucho.es.ESBeanWrapper;
+import com.caucho.es.Global;
+import com.caucho.java.JavaCompiler;
 import com.caucho.loader.SimpleLoader;
+import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class Wrapper {
   private static final Integer LOCK = new Integer(0);

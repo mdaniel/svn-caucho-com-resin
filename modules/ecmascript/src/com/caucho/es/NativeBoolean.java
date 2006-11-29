@@ -28,12 +28,6 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-
 /**
  * JavaScript object
  */
@@ -51,17 +45,17 @@ class NativeBoolean extends Native {
 
     this.n = n;
   }
-  
+
   /**
    * Creates the initial native Boolean object
    */
   static ESObject create(Global resin)
   {
     Native nativeBool = new NativeBoolean("Boolean", NEW, 1);
-    ESWrapper boolProto = new ESWrapper("Boolean", resin.objProto, 
-					ESBoolean.FALSE);
+    ESWrapper boolProto = new ESWrapper("Boolean", resin.objProto,
+                                        ESBoolean.FALSE);
     NativeWrapper bool = new NativeWrapper(resin, nativeBool,
-					   boolProto, ESThunk.BOOL_THUNK);
+                                           boolProto, ESThunk.BOOL_THUNK);
     resin.boolProto = boolProto;
 
     put(boolProto, "toString", TO_STRING, 0, DONT_ENUM);
@@ -72,9 +66,9 @@ class NativeBoolean extends Native {
 
     return bool;
   }
-  
-  private static void put(ESObject obj, String name, int n, int len, 
-			  int flags)
+
+  private static void put(ESObject obj, String name, int n, int len,
+                          int flags)
   {
     obj.put(name, new NativeBoolean(name, n, len), flags);
   }
@@ -84,32 +78,32 @@ class NativeBoolean extends Native {
     switch (n) {
     case NEW:
       if (length == 0)
-	return ESBoolean.FALSE;
+        return ESBoolean.FALSE;
       else
-	return ESBoolean.create(eval.getArg(0).toBoolean());
+        return ESBoolean.create(eval.getArg(0).toBoolean());
 
     case TO_STRING:
       try {
-	return ((ESBase) ((ESWrapper) eval.getArg(-1)).value).toStr();
+        return ((ESBase) ((ESWrapper) eval.getArg(-1)).value).toStr();
       } catch (ClassCastException e) {
-	if (eval.getArg(-1) instanceof ESBoolean)
-	  return eval.getArg(-1);
-	if (eval.getArg(-1) instanceof ESThunk)
-	  return ((ESBase) ((ESWrapper) ((ESThunk) eval.getArg(-1)).getObject()).value).toStr();
+        if (eval.getArg(-1) instanceof ESBoolean)
+          return eval.getArg(-1);
+        if (eval.getArg(-1) instanceof ESThunk)
+          return ((ESBase) ((ESWrapper) ((ESThunk) eval.getArg(-1)).getObject()).value).toStr();
 
-	throw new ESException("toString expected boolean object");
+        throw new ESException("toString expected boolean object");
       }
 
     case VALUE_OF:
       try {
-	return (ESBase) ((ESWrapper) eval.getArg(-1)).value;
+        return (ESBase) ((ESWrapper) eval.getArg(-1)).value;
       } catch (ClassCastException e) {
-	if (eval.getArg(-1) instanceof ESBoolean)
-	  return eval.getArg(-1);
-	if (eval.getArg(-1) instanceof ESThunk)
-	  return (ESBase) ((ESWrapper) ((ESThunk) eval.getArg(-1)).getObject()).value;
+        if (eval.getArg(-1) instanceof ESBoolean)
+          return eval.getArg(-1);
+        if (eval.getArg(-1) instanceof ESThunk)
+          return (ESBase) ((ESWrapper) ((ESThunk) eval.getArg(-1)).getObject()).value;
 
-	throw new ESException("valueOf expected boolean object");
+        throw new ESException("valueOf expected boolean object");
       }
 
     default:
@@ -121,7 +115,7 @@ class NativeBoolean extends Native {
   {
     if (n != NEW)
       return super.construct(eval, length);
-    
+
     ESBase value;
 
     if (length == 0)

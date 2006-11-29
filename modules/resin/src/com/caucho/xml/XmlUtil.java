@@ -28,14 +28,19 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.util.CharBuffer;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import org.w3c.dom.Comment;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.ProcessingInstruction;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * XML utilities for manipulating names and the DOM.

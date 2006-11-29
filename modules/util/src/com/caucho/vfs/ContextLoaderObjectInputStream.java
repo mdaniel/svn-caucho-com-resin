@@ -28,11 +28,10 @@
 
 package com.caucho.vfs;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
-import java.io.InputStream;
-import java.io.IOException;
-
 import java.lang.reflect.Proxy;
 
 /**

@@ -28,9 +28,6 @@
 
 package javax.servlet.jsp.tagext;
 
-import java.util.*;
-import javax.servlet.jsp.*;
-
 /**
  * Abstract class for a JSP page validator.  The validator works on the
  * XML version of the page.

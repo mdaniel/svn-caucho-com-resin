@@ -28,18 +28,16 @@
 
 package com.caucho.jms.session;
 
-import javax.jms.Destination;
-import javax.jms.MessageProducer;
-import javax.jms.Message;
-import javax.jms.DeliveryMode;
-import javax.jms.JMSException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-
 import com.caucho.jms.AbstractDestination;
-
 import com.caucho.jms.message.MessageImpl;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+
+import javax.jms.DeliveryMode;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageProducer;
 
 /**
  * A basic message producer.

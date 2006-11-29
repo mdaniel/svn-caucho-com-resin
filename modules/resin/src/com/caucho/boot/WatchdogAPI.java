@@ -29,8 +29,7 @@
 
 package com.caucho.boot;
 
-import java.io.*;
-import javax.servlet.*;
+import java.io.IOException;
 
 /**
  * Process responsible for watching a backend server.

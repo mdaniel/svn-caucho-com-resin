@@ -48,22 +48,19 @@
 
 package com.caucho.hessian.client;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * Wrapper for protocol exceptions thrown in the proxy.
  */
 public class HessianRuntimeException extends RuntimeException {
   private Throwable rootCause;
-  
+
   /**
    * Zero-arg constructor.
    */
   public HessianRuntimeException()
   {
   }
-  
+
   /**
    * Create the exception.
    */
@@ -71,7 +68,7 @@ public class HessianRuntimeException extends RuntimeException {
   {
     super(message);
   }
-  
+
   /**
    * Create the exception.
    */
@@ -81,7 +78,7 @@ public class HessianRuntimeException extends RuntimeException {
 
     this.rootCause = rootCause;
   }
-  
+
   /**
    * Create the exception.
    */

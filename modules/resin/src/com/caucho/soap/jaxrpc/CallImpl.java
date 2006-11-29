@@ -29,12 +29,11 @@
 package com.caucho.soap.jaxrpc;
 
 import com.caucho.log.Log;
-import com.caucho.soap.wsdl.WSDLMessage;
 import com.caucho.soap.wsdl.WSDLOperation;
 import com.caucho.soap.wsdl.WSDLPort;
 import com.caucho.util.L10N;
 import com.caucho.xml.XMLWriter;
-import com.caucho.xml.XmlPrinter;
+
 import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
@@ -42,8 +41,6 @@ import javax.xml.rpc.Call;
 import javax.xml.rpc.JAXRPCException;
 import javax.xml.rpc.ParameterMode;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;

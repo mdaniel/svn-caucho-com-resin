@@ -29,13 +29,11 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.java.JavaWriter;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
 
 /**
  * Writing class for generated Java code.

@@ -29,27 +29,23 @@
 
 package com.caucho.config.types;
 
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.annotation.*;
-
-import javax.naming.*;
-
-import com.caucho.util.L10N;
-
 import com.caucho.config.BuilderProgram;
-import com.caucho.config.LineConfigException;
-import com.caucho.config.ConfigException;
 import com.caucho.config.Config;
-
+import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
+import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.ClassLoaderListener;
-
 import com.caucho.naming.Jndi;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Configuration for the init-param pattern.

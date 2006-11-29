@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.io.*;
+import java.io.InputStream;
 
 /**
  * CharBuffer is an unsynchronized version of StringBuffer.

@@ -29,23 +29,15 @@
 
 package com.caucho.db.table;
 
-import java.io.IOException;
-
-import java.sql.SQLException;
-
-import com.caucho.db.store.Block;
-import com.caucho.db.store.Store;
-import com.caucho.db.store.WriteBlock;
-import com.caucho.db.store.Transaction;
-
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-
-import com.caucho.sql.SQLExceptionWrapper;
-
+import com.caucho.db.store.Block;
+import com.caucho.db.store.Store;
+import com.caucho.db.store.Transaction;
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.WriteStream;
+import java.io.IOException;
+import java.sql.SQLException;
 
 
 /**

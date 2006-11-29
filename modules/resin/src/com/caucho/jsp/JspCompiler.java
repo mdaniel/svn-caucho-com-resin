@@ -31,17 +31,22 @@ package com.caucho.jsp;
 
 import com.caucho.config.Config;
 import com.caucho.java.JavaCompiler;
-import com.caucho.java.LineMap;
-import com.caucho.jsp.cfg.*;
-import com.caucho.loader.*;
+import com.caucho.jsp.cfg.JspConfig;
+import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.jsp.cfg.JspTaglib;
+import com.caucho.loader.CompilingLoader;
+import com.caucho.loader.DirectoryLoader;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.SimpleLoader;
 import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppController;
-
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
-
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import javax.servlet.SingleThreadModel;
 import javax.servlet.jsp.HttpJspPage;

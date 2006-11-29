@@ -28,7 +28,7 @@
 */
 
 package javax.xml.bind;
-import javax.xml.validation.*;
+import javax.xml.validation.Schema;
 
 public abstract class Binder<XmlNode> {
 

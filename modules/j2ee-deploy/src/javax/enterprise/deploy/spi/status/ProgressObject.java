@@ -29,7 +29,6 @@
 package javax.enterprise.deploy.spi.status;
 
 import javax.enterprise.deploy.spi.TargetModuleID;
-
 import javax.enterprise.deploy.spi.exceptions.OperationUnsupportedException;
 /**
  * Status of the progress.

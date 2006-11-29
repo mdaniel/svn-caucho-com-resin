@@ -28,23 +28,16 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.util.L10N;
+import com.caucho.xml.DOMBuilder;
+import com.caucho.xml.QDocument;
 
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.sax.*;
-import javax.xml.transform.stream.*;
-
-import org.w3c.dom.*;
+import org.w3c.dom.Node;
 import org.xml.sax.*;
-import org.xml.sax.ext.*;
+import org.xml.sax.ext.LexicalHandler;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
-import com.caucho.xpath.*;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
 
 public class SAXFilterImpl implements XMLFilter {
   protected static L10N L = new L10N(SAXFilterImpl.class);

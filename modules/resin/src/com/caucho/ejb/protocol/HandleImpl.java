@@ -28,12 +28,11 @@
 
 package com.caucho.ejb.protocol;
 
-import java.rmi.RemoteException;
-
-import javax.ejb.EJBObject;
-
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.RemoteExceptionWrapper;
+
+import javax.ejb.EJBObject;
+import java.rmi.RemoteException;
   
 /**
  * Handle implementation for EJB Objects.

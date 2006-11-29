@@ -28,12 +28,6 @@
 
 package com.caucho.db.table;
 
-import java.sql.SQLException;
-
-import java.util.ArrayList;
-
-import com.caucho.db.sql.Expr;
-
 /**
  * Validity constraints.
  */

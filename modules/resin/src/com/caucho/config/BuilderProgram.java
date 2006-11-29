@@ -29,8 +29,6 @@
 
 package com.caucho.config;
 
-import javax.servlet.jsp.el.VariableResolver;
-
 /**
  * A saved program for configuring an object.
  */
@@ -43,7 +41,7 @@ public abstract class BuilderProgram {
   {
     this(NodeBuilder.getCurrentBuilder());
   }
-  
+
   protected BuilderProgram(NodeBuilder builder)
   {
     // server/13co
@@ -56,7 +54,7 @@ public abstract class BuilderProgram {
 
     _loader = Thread.currentThread().getContextClassLoader();
   }
-  
+
   /**
    * Configures the object.
    */
@@ -78,7 +76,7 @@ public abstract class BuilderProgram {
     else
       return configureImpl(NodeBuilder.createForProgram(), type);
   }
-  
+
   /**
    * Configures the object.
    */
@@ -96,7 +94,7 @@ public abstract class BuilderProgram {
   {
     try {
       Object bean = type.newInstance();
-    
+
       configureImpl(builder, bean);
 
       return bean;

@@ -28,20 +28,13 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
-
+import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.ejb.hessian.QSerializerFactory;
-
-import com.caucho.hessian.io.Serializer;
 import com.caucho.hessian.io.HessianProtocolException;
+import com.caucho.hessian.io.Serializer;
+
+import javax.ejb.EJBHome;
+import javax.ejb.EJBObject;
 
 public class BurlapSerializerFactory extends QSerializerFactory {
   public Serializer getSerializer(Class cl)

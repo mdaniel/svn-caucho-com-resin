@@ -28,10 +28,6 @@
 
 package javax.resource.cci;
 
-import java.io.Serializable;
-
-import java.util.List;
-
 /**
  * Specification for an interaction.
  */

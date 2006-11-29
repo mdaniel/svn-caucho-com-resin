@@ -48,12 +48,11 @@
 
 package com.caucho.hessian.jmx;
 
-import java.io.IOException;
-
-import javax.management.MBeanAttributeInfo;
-
 import com.caucho.hessian.io.AbstractDeserializer;
 import com.caucho.hessian.io.AbstractHessianInput;
+
+import javax.management.MBeanAttributeInfo;
+import java.io.IOException;
 
 /**
  * Deserializing an MBeanAttributeInfo valued object

@@ -28,18 +28,12 @@
 
 package com.caucho.jstl.rt;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.jstl.core.*;
-import javax.servlet.jsp.jstl.fmt.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
 import com.caucho.jsp.PageContextImpl;
-import com.caucho.jsp.el.*;
+import com.caucho.util.L10N;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.jstl.fmt.LocalizationContext;
+import javax.servlet.jsp.tagext.TagSupport;
 
 /**
  * Sets the i18n localization bundle for the current page.

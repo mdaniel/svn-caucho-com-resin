@@ -49,11 +49,13 @@
 
 package com.caucho.portal.generic.context;
 
-import java.io.*;
-
-import java.util.*;
-
-import javax.portlet.*;
+import javax.portlet.ActionResponse;
+import javax.portlet.PortletMode;
+import javax.portlet.PortletModeException;
+import javax.portlet.WindowState;
+import javax.portlet.WindowStateException;
+import java.io.IOException;
+import java.util.Map;
 
 
 class ActionResponseImpl

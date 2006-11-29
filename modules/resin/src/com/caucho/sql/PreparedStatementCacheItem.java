@@ -28,17 +28,13 @@
 
 package com.caucho.sql;
 
-import java.lang.ref.SoftReference;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.PreparedStatement;
-
-import com.caucho.util.L10N;
+import com.caucho.log.Log;
 import com.caucho.util.CacheListener;
 
-import com.caucho.log.Log;
+import java.lang.ref.SoftReference;
+import java.sql.PreparedStatement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represtents a prepared statement.

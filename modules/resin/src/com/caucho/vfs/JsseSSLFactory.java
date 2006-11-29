@@ -28,26 +28,22 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.GeneralSecurityException;
-
-import java.security.cert.Certificate;
-
-import javax.annotation.*;
+import javax.annotation.PostConstruct;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.KeyManagerFactory;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.*;
-
-import com.caucho.config.ConfigException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.

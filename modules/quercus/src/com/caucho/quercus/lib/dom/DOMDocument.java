@@ -46,8 +46,8 @@ import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.xml.XmlPrinter;
 
-import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.util.logging.Level;

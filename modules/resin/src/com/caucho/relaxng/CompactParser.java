@@ -29,46 +29,24 @@
 
 package com.caucho.relaxng;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-
-import org.xml.sax.*;
-
-import com.caucho.util.L10N;
+import com.caucho.relaxng.pattern.*;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
-
-import com.caucho.vfs.*;
-
-import com.caucho.xml.XmlChar;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.xml.QName;
+import com.caucho.xml.XmlChar;
 
-import com.caucho.relaxng.RelaxException;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import com.caucho.relaxng.pattern.GrammarPattern;
-
-import com.caucho.relaxng.pattern.Pattern;
-
-import com.caucho.relaxng.pattern.NameClassPattern;
-import com.caucho.relaxng.pattern.NamePattern;
-import com.caucho.relaxng.pattern.NsNamePattern;
-import com.caucho.relaxng.pattern.AnyNamePattern;
-import com.caucho.relaxng.pattern.ChoiceNamePattern;
-
-import com.caucho.relaxng.pattern.ElementPattern;
-import com.caucho.relaxng.pattern.AttributePattern;
-
-import com.caucho.relaxng.pattern.TextPattern;
-import com.caucho.relaxng.pattern.DataPattern;
-
-import com.caucho.relaxng.pattern.EmptyPattern;
-import com.caucho.relaxng.pattern.GroupPattern;
-import com.caucho.relaxng.pattern.InterleavePattern;
-import com.caucho.relaxng.pattern.ChoicePattern;
-import com.caucho.relaxng.pattern.ZeroOrMorePattern;
-
-import com.caucho.relaxng.pattern.RefPattern;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Builder for the relax.

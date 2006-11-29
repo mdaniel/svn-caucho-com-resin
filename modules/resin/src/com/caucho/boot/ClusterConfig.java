@@ -29,11 +29,12 @@
 
 package com.caucho.boot;
 
-import java.util.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.InitProgram;
+import com.caucho.util.L10N;
 
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.util.*;
+import java.util.ArrayList;
 
 public class ClusterConfig {
   private static final L10N L = new L10N(ClusterConfig.class);

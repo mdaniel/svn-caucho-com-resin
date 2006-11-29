@@ -29,8 +29,8 @@
 
 package com.caucho.jmx;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Wrapper around a method to produce open-model types.

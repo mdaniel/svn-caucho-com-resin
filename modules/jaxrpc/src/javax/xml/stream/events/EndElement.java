@@ -28,8 +28,8 @@
 */
 
 package javax.xml.stream.events;
-import javax.xml.namespace.*;
-import java.util.*;
+import javax.xml.namespace.QName;
+import java.util.Iterator;
 
 public interface EndElement extends XMLEvent {
 

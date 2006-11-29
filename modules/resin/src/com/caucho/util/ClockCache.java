@@ -28,7 +28,8 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Cache with a clock replacement policy.

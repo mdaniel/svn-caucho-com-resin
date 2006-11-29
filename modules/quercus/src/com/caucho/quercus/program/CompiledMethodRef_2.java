@@ -29,24 +29,13 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
-
 import com.caucho.quercus.expr.Expr;
-
 import com.caucho.util.L10N;
 
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.env.Var;
-import com.caucho.quercus.env.NullValue;
+import java.util.logging.Logger;
 
 /**
  * Represents a compiled method with 2 args

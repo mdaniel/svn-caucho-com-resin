@@ -28,12 +28,7 @@
 
 package com.caucho.log;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
+import java.util.logging.Logger;
 
 /**
  * Static facade.

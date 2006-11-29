@@ -28,34 +28,17 @@
  */
 
 package com.caucho.jca;
-  
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.resource.ResourceException;
-import javax.resource.NotSupportedException;
-
-import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.ConnectionEventListener;
-import javax.resource.spi.ConnectionEvent;
-import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.LocalTransaction;
-
-import javax.transaction.SystemException;
-import javax.transaction.RollbackException;
-
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
-import javax.transaction.xa.XAException;
-
-import javax.security.auth.Subject;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
 
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionEvent;
+import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.security.auth.Subject;
+import javax.transaction.RollbackException;
+import java.util.logging.Logger;
 
 /**
  * Pool item representing the user connection.

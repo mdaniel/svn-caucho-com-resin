@@ -28,26 +28,20 @@
 
 package com.caucho.amber.type;
 
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.bytecode.JClass;
+import com.caucho.java.JavaWriter;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+
 import java.io.IOException;
-
 import java.lang.reflect.Method;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Log;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.bytecode.JClass;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
 
 /**
  * The enum type.

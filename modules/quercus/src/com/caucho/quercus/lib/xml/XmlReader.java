@@ -28,21 +28,24 @@
 
 package com.caucho.quercus.lib.xml;
 
-import com.caucho.util.L10N;
-import com.caucho.xml.stream.XMLStreamReaderImpl;
 import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.xml.stream.XMLStreamReaderImpl;
 
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import java.io.IOException;
-
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamConstants;
 
 public class XmlReader {
   private static final Logger log = Logger.getLogger(XmlReader.class.getName());

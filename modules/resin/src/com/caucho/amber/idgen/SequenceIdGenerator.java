@@ -28,27 +28,21 @@
 
 package com.caucho.amber.idgen;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.config.ConfigException;
+import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.jdbc.JdbcMetaData;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.manager.AmberConnection;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Generator table.

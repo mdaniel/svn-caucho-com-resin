@@ -28,11 +28,7 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
+import com.caucho.util.IntMap;
 
 public class ConstIntMap extends IntMap {
   int value;

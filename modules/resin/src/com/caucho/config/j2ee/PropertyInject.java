@@ -29,12 +29,11 @@
 
 package com.caucho.config.j2ee;
 
-import java.lang.reflect.*;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
-import java.util.logging.*;
-
-import com.caucho.config.*;
-import com.caucho.util.*;
+import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 
 public class PropertyInject extends AccessibleInject {

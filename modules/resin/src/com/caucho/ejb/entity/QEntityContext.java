@@ -28,27 +28,19 @@
 
 package com.caucho.ejb.entity;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.transaction.UserTransaction;
-
-import javax.ejb.EntityContext;
-import javax.ejb.EJBObject;
-import javax.ejb.Handle;
-import javax.ejb.HomeHandle;
-import javax.ejb.EJBMetaData;
-import javax.ejb.RemoveException;
-import javax.ejb.FinderException;
-
 import com.caucho.amber.entity.EntityItem;
-
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
-
-import com.caucho.ejb.protocol.AbstractHandle;
-
 import com.caucho.ejb.xa.EjbTransactionManager;
+
+import javax.ejb.EJBObject;
+import javax.ejb.EntityContext;
+import javax.ejb.FinderException;
+import javax.ejb.Handle;
+import javax.ejb.HomeHandle;
+import javax.ejb.RemoveException;
+import javax.transaction.UserTransaction;
+import java.util.logging.Level;
 
 /**
  * Abstract base class for an EntityHome.

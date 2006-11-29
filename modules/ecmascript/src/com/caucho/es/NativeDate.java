@@ -28,11 +28,8 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-
-import com.caucho.util.*;
+import com.caucho.util.Alarm;
+import com.caucho.util.QDate;
 
 /**
  * JavaScript Date object

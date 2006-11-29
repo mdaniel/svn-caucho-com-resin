@@ -28,16 +28,30 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.ReaderWriterStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.readers.MacroReader;
+import com.caucho.xml.readers.Utf16Reader;
+import com.caucho.xml.readers.Utf8Reader;
+import com.caucho.xml.readers.XmlReader;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.readers.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.logging.Level;
 
 /**
  * A configurable XML parser.  Loose versions of XML and HTML are supported

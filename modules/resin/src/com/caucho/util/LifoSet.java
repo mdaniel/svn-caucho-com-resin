@@ -28,7 +28,10 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Stack (lifo) ordered set, used by the JCA code so recent

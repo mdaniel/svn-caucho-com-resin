@@ -32,8 +32,8 @@ package com.caucho.quercus.lib.dom;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public interface DOMFactory {
   Attr createAttr(String name);

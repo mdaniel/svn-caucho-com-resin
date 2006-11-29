@@ -29,21 +29,14 @@
 
 package com.caucho.quercus.env;
 
-import java.util.AbstractSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.io.IOException;
-
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.StringLiteralExpr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Represents a PHP object value.

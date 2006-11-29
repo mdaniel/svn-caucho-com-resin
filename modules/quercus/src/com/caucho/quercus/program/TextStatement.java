@@ -29,14 +29,12 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
+import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.Location;
 
-import com.caucho.vfs.WriteStream;
+import java.io.IOException;
 
 /**
  * Represents static text in a PHP program.

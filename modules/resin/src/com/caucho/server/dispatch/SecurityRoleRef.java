@@ -28,13 +28,7 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for a servlet.

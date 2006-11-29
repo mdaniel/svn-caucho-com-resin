@@ -28,12 +28,11 @@
 
 package com.caucho.ejb.protocol;
 
+import com.caucho.log.Log;
+
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.logging.Logger;
-
-import com.caucho.log.Log;
 
 /**
  * Base class for any bean skeleton capable of handling an BURLAP-RPC request.

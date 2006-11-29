@@ -28,10 +28,9 @@
 
 package com.caucho.server.hmux;
 
+import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
-
-import com.caucho.server.connection.Connection;
 
 /**
  * Dispatches the HMUX protocol.

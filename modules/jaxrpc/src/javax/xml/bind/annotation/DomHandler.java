@@ -28,8 +28,9 @@
 */
 
 package javax.xml.bind.annotation;
-import javax.xml.transform.*;
-import javax.xml.bind.*;
+import javax.xml.bind.ValidationEventHandler;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 
 /** XXX */
 public interface DomHandler<ElementT,ResultT extends Result> {

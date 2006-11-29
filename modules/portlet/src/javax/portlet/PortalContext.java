@@ -29,8 +29,7 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
+import java.util.Enumeration;
 
 public interface PortalContext
 {

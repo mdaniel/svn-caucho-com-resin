@@ -28,8 +28,6 @@
 
 package javax.jms;
 
-import java.io.Serializable;
-
 /**
  * The main destination.
  */

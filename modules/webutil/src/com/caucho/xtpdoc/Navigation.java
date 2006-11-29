@@ -29,17 +29,15 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
-import java.io.IOException;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-
 import com.caucho.vfs.Path;
 
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class Navigation {
   private static final Logger log 

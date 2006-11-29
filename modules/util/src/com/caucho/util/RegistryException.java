@@ -28,7 +28,8 @@
 
 package com.caucho.util;
 
-import java.io.*;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 /**
  * Base class for configuration exceptions.  Thrown by RegistryNode

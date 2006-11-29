@@ -29,15 +29,11 @@
 
 package com.caucho.security;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.security.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import java.security.Principal;
+import java.util.logging.Logger;
 
 /**
  * Defines a proxy for the current security context.

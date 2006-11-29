@@ -29,14 +29,9 @@
 
 package com.caucho.config;
 
-import java.util.*;
-import java.lang.reflect.*;
-
 import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.NotImplementedException;
-
 import com.caucho.xml.QName;
+
 import org.w3c.dom.Node;
 
 public class EnvironmentAttributeStrategy extends AttributeStrategy {

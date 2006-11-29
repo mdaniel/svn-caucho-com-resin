@@ -29,17 +29,14 @@
 
 package com.caucho.el;
 
-import java.beans.*;
-import java.util.*;
-
-import javax.el.*;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
 
-import com.caucho.el.EL;
-import com.caucho.el.AbstractVariableResolver;
+import javax.el.ELContext;
+import javax.el.ELResolver;
+import java.beans.FeatureDescriptor;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Creates a variable resolver based on the classloader.

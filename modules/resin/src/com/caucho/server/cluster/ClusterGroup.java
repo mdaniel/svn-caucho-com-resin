@@ -28,19 +28,12 @@
 
 package com.caucho.server.cluster;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.config.ConfigException;
-
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Defines a group of clusters.  Normally, the group is the entire

@@ -28,11 +28,9 @@
 
 package javax.resource.spi.endpoint;
 
-import java.lang.reflect.Method;
-
-import javax.transaction.xa.XAResource;
-
 import javax.resource.spi.UnavailableException;
+import javax.transaction.xa.XAResource;
+import java.lang.reflect.Method;
 
 /**
  * A factory for creating message endpoints.

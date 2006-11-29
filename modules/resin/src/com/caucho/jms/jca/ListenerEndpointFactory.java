@@ -28,22 +28,17 @@
 
 package com.caucho.jms.jca;
 
-import java.lang.reflect.Method;
-
-import java.util.logging.Logger;
-
-import javax.transaction.xa.XAResource;
-
-import javax.resource.spi.endpoint.MessageEndpoint;
-import javax.resource.spi.endpoint.MessageEndpointFactory;
-import javax.resource.spi.UnavailableException;
-
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-import com.caucho.config.BuilderProgram;
+import javax.resource.spi.UnavailableException;
+import javax.resource.spi.endpoint.MessageEndpoint;
+import javax.resource.spi.endpoint.MessageEndpointFactory;
+import javax.transaction.xa.XAResource;
+import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 /**
  * The JMS MessageListener endpoing factory

@@ -45,7 +45,8 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import java.util.ArrayList;
 import java.util.Collection;

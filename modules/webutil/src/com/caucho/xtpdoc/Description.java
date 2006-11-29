@@ -29,14 +29,6 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
-
 public class Description extends ContainerNode {
   public Description(Document document)
   {

@@ -28,13 +28,12 @@
 
 package com.caucho.ejb.cfg;
 
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.config.ConfigException;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Proxy for an cmp-field configuration.  This proxy is needed to handle

@@ -28,9 +28,7 @@
 
 package com.caucho.relaxng;
 
-import java.io.*;
-
-import com.caucho.util.*;
+import com.caucho.util.CompileException;
 
 /**
  * A relax exception.

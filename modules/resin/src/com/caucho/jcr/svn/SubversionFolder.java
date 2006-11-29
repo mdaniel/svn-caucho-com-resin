@@ -29,17 +29,9 @@
 
 package com.caucho.jcr.svn;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Date;
+import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.vfs.*;
-
-import com.caucho.util.L10N;
 
 /**
  * Subversion folder class.

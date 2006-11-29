@@ -28,9 +28,6 @@
 
 package javax.servlet.http;
 
-import java.util.*;
-import java.io.*;
-
 /**
  * Encapsulates HTTP cookies.
  *
@@ -92,7 +89,7 @@ public class Cookie implements Cloneable {
       else if (ch == '$' && i == 0)
         throw new IllegalArgumentException("cookie can't start with '$'");
     }
-    
+
     this.name = name;
     this.value = value;
   }

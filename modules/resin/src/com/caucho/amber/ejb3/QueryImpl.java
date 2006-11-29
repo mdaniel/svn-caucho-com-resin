@@ -28,28 +28,21 @@
  */
 package com.caucho.amber.ejb3;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Calendar;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-import javax.persistence.FlushModeType;
-
 import com.caucho.amber.manager.AmberConnection;
-
 import com.caucho.amber.query.AbstractQuery;
 import com.caucho.amber.query.UserQuery;
-
+import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.util.L10N;
 
-import com.caucho.ejb.EJBExceptionWrapper;
+import javax.persistence.FlushModeType;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * The EJB query

@@ -28,17 +28,13 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.beans.*;
-import java.lang.reflect.*;
-import java.rmi.*;
+import com.caucho.ejb.RemoteExceptionWrapper;
 
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBObject;
+import javax.ejb.Handle;
+import javax.ejb.RemoveException;
+import java.rmi.RemoteException;
 
 /**
  * Base class for generated object stubs.

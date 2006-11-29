@@ -28,24 +28,17 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.ejb.*;
-import javax.transaction.xa.XAResource;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.*;
+import com.caucho.ejb.protocol.Skeleton;
 import com.caucho.ejb.xa.EjbTransactionManager;
-import com.caucho.log.Log;
-import com.caucho.util.*;
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.HessianProtocolException;
 
-import com.caucho.hessian.io.*;
-import com.caucho.services.name.NameServerRemote;
+import javax.transaction.xa.XAResource;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Skeleton for XA Resource.

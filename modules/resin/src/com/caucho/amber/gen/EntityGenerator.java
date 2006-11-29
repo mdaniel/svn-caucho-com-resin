@@ -29,21 +29,14 @@
 
 package com.caucho.amber.gen;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.java.AbstractGenerator;
-
-import com.caucho.loader.Environment;
-
 import com.caucho.amber.type.EntityType;
+import com.caucho.java.AbstractGenerator;
+import com.caucho.loader.Environment;
+import com.caucho.util.L10N;
+import com.caucho.vfs.PersistentDependency;
 
-//import com.caucho.amber.field.Field;
-//import com.caucho.amber.field.FieldType;
-
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Generates the Java code for the wrapped object.

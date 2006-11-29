@@ -29,14 +29,13 @@
 
 package com.caucho.make;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.util.Alarm;
+import com.caucho.util.Log;
+import com.caucho.vfs.Dependency;
+
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Contains a set of dependencies.

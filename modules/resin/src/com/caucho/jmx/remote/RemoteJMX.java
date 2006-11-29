@@ -29,12 +29,9 @@
 
 package com.caucho.jmx.remote;
 
-import java.io.IOException;
-
-import javax.management.MBeanInfo;
 import javax.management.JMException;
-
-import com.caucho.services.server.GenericService;
+import javax.management.MBeanInfo;
+import java.io.IOException;
 
 /**
  * JMX service.

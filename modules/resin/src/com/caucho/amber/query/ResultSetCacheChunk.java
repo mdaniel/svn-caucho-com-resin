@@ -28,15 +28,12 @@
 
 package com.caucho.amber.query;
 
-import java.util.ArrayList;
+import com.caucho.amber.expr.AmberExpr;
+import com.caucho.util.Alarm;
 
 import java.lang.ref.SoftReference;
-
 import java.sql.SQLException;
-
-import com.caucho.amber.expr.*;
-
-import com.caucho.util.Alarm;
+import java.util.ArrayList;
 
 /**
  * The JDBC statement implementation.

@@ -32,6 +32,7 @@ package com.caucho.config.types;
 import com.caucho.config.NodeBuilder;
 import com.caucho.config.TypeStrategy;
 import com.caucho.util.L10N;
+
 import org.w3c.dom.Node;
 
 import java.util.HashMap;

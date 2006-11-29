@@ -28,10 +28,6 @@
 
 package javax.xml.rpc.handler;
 
-import java.util.List;
-
-import javax.xml.namespace.QName;
-
 /**
  * Represents a handler.
  */
@@ -39,7 +35,7 @@ public abstract class GenericHandler implements Handler {
   protected GenericHandler()
   {
   }
-    
+
   /**
    * Handles the request.
    *
@@ -49,7 +45,7 @@ public abstract class GenericHandler implements Handler {
   {
     return true;
   }
-    
+
   /**
    * Handles the response.
    *
@@ -59,7 +55,7 @@ public abstract class GenericHandler implements Handler {
   {
     return true;
   }
-    
+
   /**
    * Handles the fault.
    *

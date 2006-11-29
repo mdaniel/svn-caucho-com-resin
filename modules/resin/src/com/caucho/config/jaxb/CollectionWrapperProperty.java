@@ -29,19 +29,15 @@
 
 package com.caucho.config.jaxb;
 
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.el.*;
+import com.caucho.config.AttributeStrategy;
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
+import com.caucho.xml.QName;
 
 import org.w3c.dom.Node;
 
-import com.caucho.util.*;
-
-import com.caucho.el.*;
-
-import com.caucho.config.*;
-import com.caucho.xml.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 
 public class CollectionWrapperProperty extends JaxbProperty {
   private CollectionWrapperType _wrapperType

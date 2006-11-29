@@ -29,12 +29,12 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.StringValue;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Interface for a Quercus binary input stream

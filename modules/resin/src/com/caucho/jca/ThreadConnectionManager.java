@@ -28,15 +28,12 @@
 
 package com.caucho.jca;
 
-import java.lang.ref.SoftReference;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 
 /**

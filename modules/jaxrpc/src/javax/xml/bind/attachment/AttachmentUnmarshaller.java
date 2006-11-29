@@ -28,7 +28,7 @@
 */
 
 package javax.xml.bind.attachment;
-import javax.activation.*;
+import javax.activation.DataHandler;
 
 public abstract class AttachmentUnmarshaller {
 

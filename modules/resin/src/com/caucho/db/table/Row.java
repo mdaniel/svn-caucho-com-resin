@@ -28,12 +28,10 @@
 
 package com.caucho.db.table;
 
-import com.caucho.util.CharBuffer;
-
 class Row {
   // bit of the first null mask, i.e. skipping the allocation bits
   private static final int NULL_OFFSET = 2;
-  
+
   private Column []_columns = new Column[0];
   private int _rowLength = 1;
   private int _nullOffset = 0;
@@ -77,7 +75,7 @@ class Row {
   {
     for (int i = 0; i < _columns.length; i++)
       if (name.equals(_columns[i].getName()))
-	return _columns[i];
+        return _columns[i];
 
     return null;
   }

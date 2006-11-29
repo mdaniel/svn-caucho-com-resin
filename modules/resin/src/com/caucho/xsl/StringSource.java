@@ -28,9 +28,8 @@
 
 package com.caucho.xsl;
 
-import java.io.*;
-
-import javax.xml.transform.*;
+import javax.xml.transform.Source;
+import java.io.File;
 
 /**
  * Source for an input string.

@@ -48,14 +48,20 @@
 
 package com.caucho.burlap.io;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
-import com.caucho.hessian.io.SerializerFactory;
-import com.caucho.hessian.io.Serializer;
 import com.caucho.hessian.io.Deserializer;
 import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.hessian.io.SerializerFactory;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.TimeZone;
 
 /**
  * Input stream for Burlap requests.

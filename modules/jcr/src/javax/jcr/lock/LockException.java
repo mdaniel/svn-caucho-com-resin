@@ -29,7 +29,7 @@
 
 package javax.jcr.lock;
 
-import javax.jcr.*;
+import javax.jcr.RepositoryException;
 
 public class LockException extends RepositoryException {
   public LockException()

@@ -28,15 +28,17 @@
 
 package com.caucho.server.connection;
 
-import java.util.*;
-
-import java.io.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
+import com.caucho.util.NullEnumeration;
 import com.caucho.vfs.ReadStream;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletInputStream;
+import java.io.BufferedReader;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Used when there isn't any actual request object, e.g. for calling

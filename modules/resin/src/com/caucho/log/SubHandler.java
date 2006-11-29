@@ -29,23 +29,10 @@
 
 package com.caucho.log;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-
-import com.caucho.vfs.WriteStream;
-
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.CloseListener;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 /**
  * Proxy for an underlying handler, e.g. to handle different

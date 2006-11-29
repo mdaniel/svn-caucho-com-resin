@@ -29,15 +29,12 @@
 
 package com.caucho.widget;
 
+import com.caucho.portal.generic.FastPrintWriter;
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.io.Writer;
 import java.io.IOException;
-
-import com.caucho.portal.generic.FastPrintWriter;
+import java.io.Writer;
+import java.util.logging.Logger;
 
 public class WidgetWriter
   extends FastPrintWriter

@@ -29,18 +29,10 @@
 
 package com.caucho.quercus.function;
 
-import java.io.IOException;
-
-import com.caucho.quercus.expr.Expr;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.JavaValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.NullValue;
-
+import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.JavaClassDef;
-
 import com.caucho.util.L10N;
 
 /**

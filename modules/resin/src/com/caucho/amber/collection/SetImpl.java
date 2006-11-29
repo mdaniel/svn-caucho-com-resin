@@ -29,20 +29,16 @@
 
 package com.caucho.amber.collection;
 
-import java.util.AbstractSet;
-import java.util.Iterator;
-import java.util.ArrayList;
-
-import java.sql.SQLException;
-
-import com.caucho.util.Alarm;
-
 import com.caucho.amber.AmberQuery;
 import com.caucho.amber.AmberRuntimeException;
-
 import com.caucho.amber.manager.AmberConnection;
-
 import com.caucho.amber.query.UserQuery;
+import com.caucho.util.Alarm;
+
+import java.sql.SQLException;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Represents a lazy collection.

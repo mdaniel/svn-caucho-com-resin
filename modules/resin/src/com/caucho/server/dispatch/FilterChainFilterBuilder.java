@@ -28,13 +28,10 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import com.caucho.util.L10N;
 
-import com.caucho.jsp.*;
-import com.caucho.util.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
 
 /**
  * A filter chain factory which adds a filter.

@@ -29,18 +29,14 @@
 
 package com.caucho.iiop;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
 
 import org.omg.CORBA.NO_IMPLEMENT;
 
-import com.caucho.log.Log;
-
-import com.caucho.vfs.*;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class IiopSkeleton extends DummyObjectImpl {
   private static final Logger log = Log.open(IiopSkeleton.class);

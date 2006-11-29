@@ -29,10 +29,15 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Map;
 
 /**
  * FilePath implements the native filesystem.

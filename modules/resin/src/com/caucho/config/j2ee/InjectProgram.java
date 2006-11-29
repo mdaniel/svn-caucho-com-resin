@@ -29,37 +29,12 @@
 
 package com.caucho.config.j2ee;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-import java.util.ArrayList;
-
-import java.util.concurrent.*;
-
-import java.util.logging.*;
-
-import javax.sql.DataSource;
-
-import javax.naming.*;
-
-import javax.transaction.UserTransaction;
-
-import javax.annotation.Resource;
-
-import javax.ejb.EJB;
-import javax.ejb.EJBHome;
-
-import javax.persistence.PersistenceUnit;
-import javax.persistence.PersistenceContext;
-
-import javax.xml.ws.*;
-
+import com.caucho.config.BuilderProgram;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.ConfigException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Analyzes a bean for @Inject tags.

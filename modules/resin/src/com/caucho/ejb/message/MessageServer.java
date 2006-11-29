@@ -29,33 +29,20 @@
 
 package com.caucho.ejb.message;
 
-import java.lang.reflect.Method;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.jms.ConnectionFactory;
-import javax.jms.Connection;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
-import javax.jms.Destination;
-import javax.jms.Topic;
-import javax.jms.MessageListener;
-import javax.jms.JMSException;
-
-import javax.ejb.MessageDrivenBean;
-import javax.ejb.MessageDrivenContext;
-
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.AbstractContext;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.EjbServerManager;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.ejb.EjbServerManager;
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.AbstractContext;
+import javax.ejb.MessageDrivenBean;
+import javax.ejb.MessageDrivenContext;
+import javax.jms.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Server container for a message bean.

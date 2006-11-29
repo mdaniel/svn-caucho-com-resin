@@ -29,14 +29,6 @@
 
 package com.caucho.jmx.remote;
 
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.ObjectInstance;
-import javax.management.JMException;
-
-import com.caucho.services.server.GenericService;
-
 /**
  * JMX service.
  */

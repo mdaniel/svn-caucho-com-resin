@@ -28,7 +28,7 @@
 */
 
 package javax.xml.ws.handler;
-import javax.xml.namespace.*;
+import javax.xml.namespace.QName;
 
 /** XXX */
 public interface PortInfo {

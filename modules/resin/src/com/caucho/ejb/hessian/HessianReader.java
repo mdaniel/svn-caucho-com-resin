@@ -28,15 +28,9 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import com.caucho.hessian.io.HessianSerializerInput;
 
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.hessian.io.*;
+import java.io.InputStream;
 
 public class HessianReader extends HessianSerializerInput {
   /**

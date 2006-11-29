@@ -28,8 +28,6 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-
 /**
  * TagExtraInfo classes generate VariableInfo objects to create
  * runtime variables available to the tags.
@@ -83,7 +81,7 @@ public class VariableInfo {
    * </pre></code>
    */
   public static int AT_END = 2;
-  
+
   private String varName;
   private String className;
   private boolean declare;
@@ -99,7 +97,7 @@ public class VariableInfo {
    * @param scope the scope of the variable
    */
   public VariableInfo(String varName, String className,
-		      boolean declare, int scope)
+                      boolean declare, int scope)
   {
     this.varName = varName;
     this.className = className;

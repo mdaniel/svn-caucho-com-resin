@@ -30,8 +30,7 @@
 
 package javax.servlet.http;
 
-import java.util.*;
-import java.io.*;
+import java.util.EventObject;
 
 /**
  * The event object for session changes.

@@ -29,7 +29,10 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.sql.*;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * Represents a JDBC column metadata

@@ -29,13 +29,16 @@
 
 package com.caucho.jcr.base;
 
-import java.io.InputStream;
-
-import java.util.Calendar;
-
-import javax.jcr.*;
-
 import com.caucho.util.L10N;
+
+import javax.jcr.Node;
+import javax.jcr.PropertyType;
+import javax.jcr.RepositoryException;
+import javax.jcr.Value;
+import javax.jcr.ValueFactory;
+import javax.jcr.ValueFormatException;
+import java.io.InputStream;
+import java.util.Calendar;
 
 /**
  * Creates a value.

@@ -40,7 +40,10 @@ import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import java.util.ArrayList;
 import java.util.HashMap;

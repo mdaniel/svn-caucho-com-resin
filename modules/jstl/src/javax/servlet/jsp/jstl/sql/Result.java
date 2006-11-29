@@ -30,9 +30,6 @@ package javax.servlet.jsp.jstl.sql;
 
 import java.util.SortedMap;
 
-import java.sql.*;
-import javax.sql.*;
-
 public interface Result {
   public SortedMap[] getRows();
   public Object[][] getRowsByIndex();

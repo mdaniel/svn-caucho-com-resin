@@ -29,17 +29,12 @@
 
 package com.caucho.quercus.function;
 
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.Callback;
+import com.caucho.quercus.env.CallbackFunction;
+import com.caucho.quercus.env.DefaultValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-
-import javax.management.ObjectName;
-import java.util.*;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class CallbackMarshal extends Marshal
 {

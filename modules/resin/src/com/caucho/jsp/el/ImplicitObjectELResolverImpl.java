@@ -29,11 +29,10 @@
 
 package com.caucho.jsp.el;
 
+import javax.el.ELContext;
+import javax.servlet.jsp.el.ImplicitObjectELResolver;
 import java.beans.FeatureDescriptor;
-import java.util.*;
-
-import javax.servlet.jsp.el.*;
-import javax.el.*;
+import java.util.Iterator;
 
 /**
  * Variable resolution for JSP variables

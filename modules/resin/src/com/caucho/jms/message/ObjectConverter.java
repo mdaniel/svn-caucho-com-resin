@@ -28,14 +28,12 @@
 
 package com.caucho.jms.message;
 
-import java.util.logging.Logger;
-
-import javax.jms.MessageFormatException;
-import javax.jms.JMSException;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import javax.jms.JMSException;
+import javax.jms.MessageFormatException;
+import java.util.logging.Logger;
 
 /**
  * A basic message.

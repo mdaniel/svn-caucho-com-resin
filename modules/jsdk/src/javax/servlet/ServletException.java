@@ -28,9 +28,6 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
-
 /**
  * A servlet exception.  ServletException can wrap another exception,
  * so the servlet can rethrow an exception to the servlet engine.
@@ -45,7 +42,7 @@ import java.io.*;
  */
 public class ServletException extends Exception {
   private Throwable _rootCause;
-  
+
   /**
    * Basic exception constructor.
    */
@@ -78,7 +75,7 @@ public class ServletException extends Exception {
   public ServletException(Throwable cause)
   {
     super(String.valueOf(cause));
-    
+
     _rootCause = cause;
   }
 
@@ -93,7 +90,7 @@ public class ServletException extends Exception {
 
     return cause;
   }
-  
+
   /**
    * Returns any wrapped exception.
    */

@@ -28,51 +28,26 @@
 
 package com.caucho.jms.jdbc;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Enumeration;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.Connection;
-import java.sql.Blob;
-import java.sql.SQLException;
-
-import javax.jms.Message;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
-import javax.jms.JMSException;
-
-import javax.sql.DataSource;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ByteToChar;
-
-import com.caucho.jms.AbstractDestination;
 import com.caucho.jms.JMSExceptionWrapper;
-
-import com.caucho.jms.selector.Selector;
-
 import com.caucho.jms.message.MessageImpl;
-
 import com.caucho.jms.session.MessageConsumerImpl;
 import com.caucho.jms.session.SessionImpl;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+
+import javax.jms.JMSException;
+import javax.jms.Topic;
+import javax.jms.TopicSubscriber;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a JDBC topic consumer.

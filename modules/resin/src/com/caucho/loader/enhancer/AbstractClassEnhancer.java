@@ -29,13 +29,7 @@
 
 package com.caucho.loader.enhancer;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JavaClass;
-
-import com.caucho.java.gen.GenClass;
 
 /**
  * Interface for a class enhancer.

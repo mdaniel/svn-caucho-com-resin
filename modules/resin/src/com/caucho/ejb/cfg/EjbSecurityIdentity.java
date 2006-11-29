@@ -28,23 +28,12 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.ejb.*;
-
-import com.caucho.util.*;
-import com.caucho.ejb.*;
-
-import com.caucho.config.ConfigException;
-
-
 /**
  * Configuration for an ejb entity bean.
  */
 public class EjbSecurityIdentity {
   private String _runAs;
-  
+
   /**
    * Creates a new session bean configuration.
    */
@@ -59,7 +48,7 @@ public class EjbSecurityIdentity {
   public void setUseCallerIdentity(boolean useIdentity)
   {
   }
-  
+
   public void setRunAs(RunAs runAs)
   {
     _runAs = runAs.getRoleName();
@@ -68,11 +57,11 @@ public class EjbSecurityIdentity {
 
   public static class RunAs {
     String _roleName;
-    
+
     public void setId(String id)
     {
     }
-    
+
     public void setDescription(String description)
     {
     }

@@ -28,12 +28,10 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.text.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
 
-import com.caucho.util.*;
+import java.text.CharacterIterator;
 
 /**
  * Implementation class for JavaScript strings.

@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * Cache with a clock replacement policy.

@@ -29,26 +29,16 @@
 
 package com.caucho.server.webapp;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.log.Log;
+import com.caucho.util.FreeList;
 
-import com.caucho.server.connection.RequestAdapter;
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.ServletInputStreamImpl;
-import com.caucho.server.connection.Form;
-
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.session.SessionImpl;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.logging.Logger;
 /**
  * sub-request for a include() page
  */

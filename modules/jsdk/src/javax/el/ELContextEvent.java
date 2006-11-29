@@ -29,7 +29,7 @@
 
 package javax.el;
 
-import java.util.*;
+import java.util.EventObject;
 
 /**
  * An event indicating that an ELContext is created.

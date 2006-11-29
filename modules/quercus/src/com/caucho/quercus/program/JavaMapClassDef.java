@@ -29,20 +29,12 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.LiteralExpr;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.module.*;
-import com.caucho.util.L10N;
-import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaMapValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.ModuleContext;
 
-import java.io.IOException;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
+import java.util.Map;
 
 /**
  * Represents an introspected Java class.

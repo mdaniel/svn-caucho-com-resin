@@ -29,9 +29,9 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.ArrayList;
-
 import com.caucho.vfs.Path;
+
+import java.util.ArrayList;
 
 /**
  * Top <persistence> tag for the persistence.xml

@@ -28,11 +28,10 @@
 
 package com.caucho.config;
 
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-
 import com.caucho.util.L10N;
-import com.caucho.xml.*;
+import com.caucho.xml.QElement;
+
+import org.w3c.dom.Node;
 
 /**
  * Stored configuration program for an attribute.

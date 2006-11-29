@@ -29,8 +29,6 @@
 
 package javax.el;
 
-import java.util.*;
-
 /**
  * Represents an EL expression
  */
@@ -39,18 +37,18 @@ public abstract class ValueExpression extends Expression {
 
   public abstract Class<?> getType(ELContext context)
     throws PropertyNotFoundException,
-	   ELException;
+           ELException;
 
   public abstract Object getValue(ELContext context)
     throws PropertyNotFoundException,
-	   ELException;
+           ELException;
 
   public abstract boolean isReadOnly(ELContext context)
     throws PropertyNotFoundException,
-	   ELException;
+           ELException;
 
   public abstract void setValue(ELContext context, Object value)
     throws PropertyNotFoundException,
-	   PropertyNotWritableException,
-	   ELException;
+           PropertyNotWritableException,
+           ELException;
 }

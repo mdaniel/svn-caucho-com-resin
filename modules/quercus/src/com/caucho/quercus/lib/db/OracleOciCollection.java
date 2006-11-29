@@ -29,23 +29,18 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.annotation.ReturnNullAsFalse;
-
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-
 import java.sql.Array;
 import java.sql.Connection;
-
 import java.util.ArrayList;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

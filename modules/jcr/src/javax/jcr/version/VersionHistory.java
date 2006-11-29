@@ -28,7 +28,11 @@
  */
 package javax.jcr.version;
 
-import javax.jcr.*;
+import javax.jcr.AccessDeniedException;
+import javax.jcr.Node;
+import javax.jcr.ReferentialIntegrityException;
+import javax.jcr.RepositoryException;
+import javax.jcr.UnsupportedRepositoryOperationException;
 
 public interface VersionHistory extends Node {
   public String getVersionableUUID()

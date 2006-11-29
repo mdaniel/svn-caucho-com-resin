@@ -36,7 +36,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
-import com.caucho.server.admin.*;
+import com.caucho.server.admin.RemoteMBeanConnectionFactory;
 
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;

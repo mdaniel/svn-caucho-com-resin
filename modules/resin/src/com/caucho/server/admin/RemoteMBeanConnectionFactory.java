@@ -29,11 +29,7 @@
 
 package com.caucho.server.admin;
 
-import java.io.*;
-import java.util.*;
-
-import java.lang.reflect.*;
-import javax.management.*;
+import javax.management.MBeanServerConnection;
 
 /**
  * Proxy implementation for Hessian clients.  Applications will generally

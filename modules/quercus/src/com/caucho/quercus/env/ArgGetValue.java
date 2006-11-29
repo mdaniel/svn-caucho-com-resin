@@ -29,10 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.vfs.WriteStream;
-
-import java.util.IdentityHashMap;
-
 /**
  * Represents an array-get argument which might be a call to a reference.
  *

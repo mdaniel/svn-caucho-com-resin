@@ -29,9 +29,6 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
-
 public class PortletSessionUtil
 {
   private static final String PORTLET_SCOPE_NAMESPACE = "javax.portlet.p.";

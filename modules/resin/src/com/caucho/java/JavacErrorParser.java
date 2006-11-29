@@ -28,11 +28,14 @@
 
 package com.caucho.java;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CharCursor;
+import com.caucho.util.StringCharCursor;
+import com.caucho.vfs.ByteToChar;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Reads javac error messages and parses them into a usable format.

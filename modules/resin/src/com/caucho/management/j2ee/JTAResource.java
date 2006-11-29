@@ -31,8 +31,8 @@ package com.caucho.management.j2ee;
 
 import com.caucho.transaction.TransactionManagerImpl;
 
-import javax.management.j2ee.statistics.JTAStats;
 import javax.management.j2ee.statistics.CountStatistic;
+import javax.management.j2ee.statistics.JTAStats;
 
 /**
  * Management interface for a JTA resource.

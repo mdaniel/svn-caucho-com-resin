@@ -29,15 +29,16 @@
 
 package com.caucho.jcr.file;
 
-import javax.jcr.*;
-
-import com.caucho.jcr.base.*;
-
 import com.caucho.config.ConfigException;
-
+import com.caucho.jcr.base.BaseRepository;
 import com.caucho.util.L10N;
-
 import com.caucho.vfs.Path;
+
+import javax.jcr.Credentials;
+import javax.jcr.LoginException;
+import javax.jcr.NoSuchWorkspaceException;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 
 /**
  * Represents a repository based on a filesystem.

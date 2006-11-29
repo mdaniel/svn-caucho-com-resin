@@ -28,18 +28,10 @@
 
 package com.caucho.jdbc;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.Connection;
-import java.sql.Types;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.caucho.util.Log;
 
 import javax.sql.DataSource;
-
-import com.caucho.util.Log;
+import java.util.logging.Logger;
 
 /**
  * Metadata for the Resin database.

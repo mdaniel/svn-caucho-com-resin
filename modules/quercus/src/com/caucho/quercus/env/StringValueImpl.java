@@ -29,10 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import com.caucho.quercus.Quercus;
-
 /**
  * Represents a unicode string value.
  */

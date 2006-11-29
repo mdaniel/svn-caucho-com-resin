@@ -28,7 +28,7 @@
 */
 
 package javax.xml.ws;
-import java.security.*;
+import java.security.BasicPermission;
 
 /** XXX */
 public final class WebServicePermission extends BasicPermission {

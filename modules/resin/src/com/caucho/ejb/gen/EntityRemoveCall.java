@@ -28,23 +28,12 @@
 
 package com.caucho.ejb.gen;
 
-import java.lang.reflect.Method;
-
-import java.io.IOException;
-
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBObject;
-
+import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.CallChain;
 import com.caucho.util.L10N;
 
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.CallChain;
-import com.caucho.java.gen.MethodCallChain;
-
-import com.caucho.ejb.cfg.EjbEntityBean;
-import com.caucho.ejb.cfg.CmrRelation;
-import com.caucho.ejb.cfg.CmrManyToOne;
+import java.io.IOException;
 
 /**
  * Generates the skeleton for the remove method.

@@ -31,12 +31,6 @@ package com.caucho.db.store;
 
 import java.io.IOException;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 /**
  * Represents a raw-single transaction.
  */

@@ -29,13 +29,11 @@
 
 package com.caucho.soa.client;
 
-import java.lang.reflect.Proxy;
-
-import java.net.MalformedURLException;
+import com.caucho.soa.rest.RestProxy;
 
 import javax.xml.bind.JAXBException;
-
-import com.caucho.soa.rest.RestProxy;
+import java.lang.reflect.Proxy;
+import java.net.MalformedURLException;
 
 public class RestEncodingProxyFactory implements EncodingProxyFactory {
   public Object getProxy(Class serviceInterface, String url) 

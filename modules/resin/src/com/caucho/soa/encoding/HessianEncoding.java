@@ -29,28 +29,23 @@
 
 package com.caucho.soa.encoding;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
-import javax.annotation.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.jws.*;
-
 import com.caucho.hessian.io.AbstractHessianOutput;
-import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.hessian.server.HessianSkeleton;
-
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.services.server.GenericService;
-
-import com.caucho.server.util.*;
 import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.jws.WebService;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Invokes a service based on a Hessian-encoded request.

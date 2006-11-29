@@ -29,13 +29,16 @@
 
 package com.caucho.xml.stream.events;
 
-import java.io.*;
-import java.util.*;
-
-import javax.xml.namespace.*;
-
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.Namespace;
+import javax.xml.stream.events.StartElement;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class StartElementImpl extends XMLEventImpl implements StartElement {
   private final QName _name;

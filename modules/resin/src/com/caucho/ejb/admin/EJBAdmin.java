@@ -29,12 +29,11 @@
 
 package com.caucho.ejb.admin;
 
-import java.util.logging.Logger;
-
+import com.caucho.ejb.EnvServerManager;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.ejb.EnvServerManager;
+import java.util.logging.Logger;
 
 /**
  * Administration for EJB.  EJBAdmin is available in the ServletContext

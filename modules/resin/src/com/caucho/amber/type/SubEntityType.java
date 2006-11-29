@@ -28,13 +28,10 @@
 
 package com.caucho.amber.type;
 
-import com.caucho.util.L10N;
-
 import com.caucho.amber.field.Id;
-
 import com.caucho.amber.manager.AmberPersistenceUnit;
-
 import com.caucho.amber.table.Column;
+import com.caucho.util.L10N;
 
 /**
  * Represents an application persistent bean type

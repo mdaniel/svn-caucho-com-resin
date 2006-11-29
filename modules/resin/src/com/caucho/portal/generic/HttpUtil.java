@@ -49,16 +49,13 @@
 
 package com.caucho.portal.generic;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import java.io.Writer;
-import java.io.IOException;
 
 /**
  * HTTP utilities. 

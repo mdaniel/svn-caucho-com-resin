@@ -28,12 +28,10 @@
 
 package com.caucho.jms.message;
 
-import java.util.ArrayList;
-
-import javax.jms.StreamMessage;
-import javax.jms.MessageEOFException;
-import javax.jms.MessageNotReadableException;
 import javax.jms.JMSException;
+import javax.jms.MessageEOFException;
+import javax.jms.StreamMessage;
+import java.util.ArrayList;
 
 /**
  * A stream message.

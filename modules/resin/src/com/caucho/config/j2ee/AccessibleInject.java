@@ -29,13 +29,7 @@
 
 package com.caucho.config.j2ee;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-
-import java.util.logging.*;
-
-import com.caucho.config.*;
-import com.caucho.util.*;
+import com.caucho.config.ConfigException;
 
 
 abstract public class AccessibleInject {

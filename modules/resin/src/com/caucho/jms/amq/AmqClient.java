@@ -29,12 +29,19 @@
 
 package com.caucho.jms.amq;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.ThreadPool;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.ReadWritePair;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * AMQ client.

@@ -28,12 +28,14 @@
 
 package com.caucho.web.webmail;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StreamImpl;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /*
  * A stream for reading mbox files.

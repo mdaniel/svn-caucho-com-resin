@@ -28,15 +28,9 @@
 
 package com.caucho.jms.selector;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-
-import javax.jms.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jms.*;
+import javax.jms.InvalidSelectorException;
+import javax.jms.JMSException;
+import javax.jms.Message;
 
 /**
  * The base selector.

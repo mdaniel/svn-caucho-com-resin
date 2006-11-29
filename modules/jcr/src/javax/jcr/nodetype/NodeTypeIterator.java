@@ -29,7 +29,7 @@
 
 package javax.jcr.nodetype;
 
-import javax.jcr.*;
+import javax.jcr.RangeIterator;
 
 public interface NodeTypeIterator extends RangeIterator {
   public NodeType nextNodeType();

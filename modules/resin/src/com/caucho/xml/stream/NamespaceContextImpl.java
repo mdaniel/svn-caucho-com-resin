@@ -29,15 +29,15 @@
 
 package com.caucho.xml.stream;
 
-import java.io.*;
-import java.util.logging.*;
-import java.util.*;
+import com.caucho.vfs.WriteStream;
 
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  *  Maintains a stack of namespace contexts

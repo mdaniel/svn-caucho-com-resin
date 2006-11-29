@@ -29,9 +29,9 @@
 
 package javax.servlet.jsp.jstl.fmt;
 
-import javax.servlet.jsp.*;
-
 import com.caucho.jstl.JstlPageContext;
+
+import javax.servlet.jsp.PageContext;
 
 public class LocaleSupport {
   public static String getLocalizedMessage(PageContext pageContext,

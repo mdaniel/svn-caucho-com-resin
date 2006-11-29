@@ -29,22 +29,14 @@
 
 package com.caucho.db.table;
 
-import java.util.ArrayList;
-
-import java.io.IOException;
-
-import java.sql.SQLException;
-
+import com.caucho.db.index.BTree;
+import com.caucho.db.sql.QueryContext;
+import com.caucho.db.store.Transaction;
+import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 
-import com.caucho.sql.SQLExceptionWrapper;
-
-import com.caucho.db.index.BTree;
-
-import com.caucho.db.store.Transaction;
-
-import com.caucho.db.sql.Expr;
-import com.caucho.db.sql.QueryContext;
+import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * Validity constraints.

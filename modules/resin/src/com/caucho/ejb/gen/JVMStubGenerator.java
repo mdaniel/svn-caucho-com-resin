@@ -28,15 +28,18 @@
 
 package com.caucho.ejb.gen;
 
-import java.io.*;
-import java.util.*;
-import java.beans.*;
-import java.lang.reflect.*;
-import javax.ejb.*;
+import com.caucho.java.AbstractGenerator;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+import com.caucho.vfs.IOExceptionWrapper;
 
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBLocalHome;
+import javax.ejb.EJBLocalObject;
+import javax.ejb.EJBObject;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
  * Generator for stubs.

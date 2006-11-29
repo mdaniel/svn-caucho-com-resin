@@ -28,21 +28,19 @@
 
 package com.caucho.server.security;
 
-import java.io.*;
-import java.util.*;
-import java.security.*;
-
-import javax.annotation.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 import com.caucho.config.Config;
-import com.caucho.server.http.*;
-
 import com.caucho.security.BasicPrincipal;
+import com.caucho.util.Alarm;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.security.Principal;
+import java.util.Hashtable;
 
 /**
  * The XML authenticator reads a static file for authentication.

@@ -29,11 +29,9 @@
 
 package com.caucho.xml.stream.events;
 
-import java.io.*;
-
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.EndDocument;
+import java.io.Writer;
 
 public class EndDocumentImpl extends XMLEventImpl implements EndDocument {
   public int getEventType()

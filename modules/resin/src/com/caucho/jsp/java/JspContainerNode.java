@@ -28,20 +28,16 @@
 
 package com.caucho.jsp.java;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
+import com.caucho.jsp.JspParseException;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.LineCompileException;
-import com.caucho.util.CharBuffer;
-
 import com.caucho.vfs.WriteStream;
-
 import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;
 
-import com.caucho.jsp.JspParseException;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * A node which can contain other nodes.

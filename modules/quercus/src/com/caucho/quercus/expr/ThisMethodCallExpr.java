@@ -29,10 +29,10 @@
 
 package com.caucho.quercus.expr;
 
-import java.util.ArrayList;
-
-import com.caucho.util.L10N;
 import com.caucho.quercus.Location;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 
 /**
  * Represents a PHP method call expression from $this.

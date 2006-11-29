@@ -30,7 +30,7 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
+import javax.servlet.jsp.JspException;
 
 /**
  * BodyTag lets tags access the generated tag contents and it allows

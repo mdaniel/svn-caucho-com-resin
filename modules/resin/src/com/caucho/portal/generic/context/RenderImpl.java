@@ -49,13 +49,15 @@
 
 package com.caucho.portal.generic.context;
 
-import com.caucho.portal.generic.Render;
 import com.caucho.portal.generic.Portal;
+import com.caucho.portal.generic.Render;
 import com.caucho.portal.generic.Window;
 
+import javax.portlet.Portlet;
+import javax.portlet.PortletException;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 import java.io.IOException;
-
-import javax.portlet.*;
 
 
 class RenderImpl

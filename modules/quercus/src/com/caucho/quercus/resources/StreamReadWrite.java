@@ -29,17 +29,14 @@
 
 package com.caucho.quercus.resources;
 
-import java.io.IOException;
-
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-
 import com.caucho.quercus.QuercusException;
-
-import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
 
 /**
  * Represents read/write stream

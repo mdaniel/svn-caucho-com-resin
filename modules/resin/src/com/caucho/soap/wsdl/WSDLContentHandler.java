@@ -28,19 +28,16 @@
 
 package com.caucho.soap.wsdl;
 
-import java.util.logging.Logger;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-
-import org.xml.sax.helpers.DefaultHandler;
-
-import javax.xml.namespace.QName;
-
+import com.caucho.log.Log;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.namespace.QName;
+import java.util.logging.Logger;
 
 /**
  * WSDL Content handler

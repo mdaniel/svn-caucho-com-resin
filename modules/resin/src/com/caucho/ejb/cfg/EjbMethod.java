@@ -29,21 +29,16 @@
 
 package com.caucho.ejb.cfg;
 
-import java.io.IOException;
-
 import com.caucho.bytecode.JMethod;
-
-import com.caucho.util.L10N;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.java.JavaWriter;
-import com.caucho.java.gen.BaseClass;
-import com.caucho.java.gen.BaseMethod;
-import com.caucho.java.gen.CallChain;
-
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.ViewClass;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseMethod;
+import com.caucho.java.gen.CallChain;
+import com.caucho.util.L10N;
+
+import java.io.IOException;
 
 /**
  * Configuration for a method of a view.

@@ -30,11 +30,6 @@
 
 package javax.servlet.jsp;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
-
 public abstract class JspEngineInfo {
   public abstract String getSpecificationVersion();
 }

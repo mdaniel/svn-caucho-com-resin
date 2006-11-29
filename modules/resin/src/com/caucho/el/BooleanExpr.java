@@ -29,12 +29,12 @@
 
 package com.caucho.el;
 
-import java.io.*;
-import java.util.logging.*;
+import com.caucho.vfs.WriteStream;
 
-import javax.el.*;
-
-import com.caucho.vfs.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * Represents a binary boolean expression.

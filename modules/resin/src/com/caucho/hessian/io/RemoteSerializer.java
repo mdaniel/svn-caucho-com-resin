@@ -48,11 +48,9 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
 import com.caucho.burlap.io.BurlapRemoteObject;
+
+import java.io.IOException;
 
 /**
  * Serializing a remote object.

@@ -29,14 +29,14 @@
 
 package com.caucho.boot;
 
-import java.util.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.types.InitProgram;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.vfs.Path;
 
-import javax.annotation.*;
-
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.loader.*;
-import com.caucho.vfs.*;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 
 public class ResinConfig implements EnvironmentBean {
   private ArrayList<InitProgram> _clusterDefaultList

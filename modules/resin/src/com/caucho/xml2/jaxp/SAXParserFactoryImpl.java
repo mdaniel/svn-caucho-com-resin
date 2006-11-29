@@ -28,15 +28,14 @@
 
 package com.caucho.xml2.jaxp;
 
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.SAXParser;
+import com.caucho.xml2.XMLReaderImpl;
 
 import org.xml.sax.Parser;
-import org.xml.sax.XMLReader;
 import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.XMLReader;
 
-import com.caucho.xml2.XMLParserImpl;
-import com.caucho.xml2.XMLReaderImpl;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * JAXP SAX parser factory for strict XML parsing.

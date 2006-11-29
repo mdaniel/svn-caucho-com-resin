@@ -29,16 +29,18 @@
 
 package com.caucho.xml.stream;
 
-import java.io.*;
-import java.util.*;
-
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.L10N;
 import com.caucho.xml.stream.events.*;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.Namespace;
+import javax.xml.stream.events.XMLEvent;
+import java.util.HashMap;
 
 public class XMLEventReaderImpl implements XMLEventReader, XMLStreamConstants {
   public static final L10N L = new L10N(XMLEventReaderImpl.class);

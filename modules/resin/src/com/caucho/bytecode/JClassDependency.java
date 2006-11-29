@@ -29,16 +29,15 @@
 
 package com.caucho.bytecode;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Log;
+import com.caucho.vfs.PersistentDependency;
 
 import java.security.MessageDigest;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Representing a class that might change.

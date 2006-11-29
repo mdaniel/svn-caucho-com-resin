@@ -28,24 +28,17 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import javax.el.*;
-
-import com.caucho.vfs.*;
-
+import com.caucho.el.Expr;
+import com.caucho.jsp.BodyContentImpl;
+import com.caucho.jsp.PageContextImpl;
 import com.caucho.log.Log;
 
-import com.caucho.jsp.PageContextImpl;
-import com.caucho.jsp.BodyContentImpl;
-
-import com.caucho.el.*;
+import javax.el.ELContext;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.BodyTagSupport;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CoreOutTag extends BodyTagSupport {
   private static final Logger log = Log.open(CoreOutTag.class);

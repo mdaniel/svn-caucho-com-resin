@@ -29,7 +29,7 @@
 
 package com.caucho.xtpdoc;
 
-import com.caucho.config.types.*;
+import com.caucho.config.types.RawString;
 
 public class VerboseFormattedText extends FormattedText {
   public VerboseFormattedText(Document document)

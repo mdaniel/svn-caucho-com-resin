@@ -29,25 +29,21 @@
 
 package com.caucho.server.port;
 
-import java.io.*;
-import java.net.*;
-import java.util.logging.*;
-
+import com.caucho.loader.Environment;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.TcpConnectionMXBean;
+import com.caucho.server.connection.BroadcastTask;
+import com.caucho.util.Alarm;
 import com.caucho.util.ThreadPool;
 import com.caucho.util.ThreadTask;
-import com.caucho.util.Alarm;
+import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.QSocket;
+import com.caucho.vfs.ReadStream;
 
-import com.caucho.vfs.*;
-
-import com.caucho.jmx.Jmx;
-
-import com.caucho.loader.Environment;
-
-import com.caucho.management.server.*;
-
-import com.caucho.server.connection.BroadcastTask;
-
-import com.caucho.log.Log;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A protocol-independent TcpConnection.  TcpConnection controls the

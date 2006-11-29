@@ -29,20 +29,14 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.beans.*;
-import java.lang.reflect.*;
-import java.rmi.*;
-import java.util.logging.Logger;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
 import java.util.logging.Level;
-
-import javax.ejb.*;
-import javax.transaction.xa.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.hessian.io.*;
+import java.util.logging.Logger;
 
 /**
  * Resource

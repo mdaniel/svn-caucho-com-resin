@@ -29,21 +29,22 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Level;
-
-import java.lang.reflect.*;
-import java.beans.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import com.caucho.jsp.JspParseException;
+import com.caucho.jsp.TagInstance;
+import com.caucho.util.BeanUtil;
+import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
 
-import com.caucho.jsp.*;
+import javax.servlet.jsp.tagext.*;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.logging.Level;
 
 /**
  * Represents a custom tag.

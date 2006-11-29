@@ -30,9 +30,8 @@
 
 package com.caucho.server.cluster;
 
-import javax.management.ObjectName;
-
-import com.caucho.management.server.*;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.PersistentStoreMXBean;
 
 public class StoreAdmin extends AbstractManagedObject
   implements PersistentStoreMXBean

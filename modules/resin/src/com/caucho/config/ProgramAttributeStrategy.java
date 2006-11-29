@@ -29,15 +29,13 @@
 
 package com.caucho.config;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+import com.caucho.util.L10N;
+import com.caucho.xml.QName;
 
 import org.w3c.dom.Node;
 
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.NotImplementedException;
-import com.caucho.xml.QName;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class ProgramAttributeStrategy extends AttributeStrategy {
   static final L10N L = new L10N(ProgramAttributeStrategy.class);

@@ -28,12 +28,9 @@
 
 package com.caucho.vfs.i18n;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.vfs.OutputStreamWithBuffer;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 /**
  * Implements an encoding char-to-byte writer for UTF16 and the associated

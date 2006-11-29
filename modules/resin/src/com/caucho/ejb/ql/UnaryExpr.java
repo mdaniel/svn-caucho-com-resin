@@ -28,9 +28,8 @@
 
 package com.caucho.ejb.ql;
 
-import com.caucho.util.CharBuffer;
-
 import com.caucho.config.ConfigException;
+import com.caucho.util.CharBuffer;
 
 /**
  * A unary expression

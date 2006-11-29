@@ -49,13 +49,9 @@
 
 package com.caucho.portal.generic;
 
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.portlet.PortletMode;
-import javax.portlet.PortletURL;
 import javax.portlet.WindowState;
+import java.util.Map;
 
 
 /**

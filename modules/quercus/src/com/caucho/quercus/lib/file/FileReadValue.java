@@ -29,17 +29,15 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-import java.io.OutputStream;
-
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a Quercus open file

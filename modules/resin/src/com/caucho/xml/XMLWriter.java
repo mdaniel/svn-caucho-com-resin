@@ -28,11 +28,10 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import java.io.IOException;
 
 /**
  * Interface for printing XML documents.

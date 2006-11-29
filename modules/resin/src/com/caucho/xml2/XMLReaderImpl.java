@@ -28,28 +28,19 @@
 
 package com.caucho.xml2;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.IOException;
-
-import org.xml.sax.Parser;
-import org.xml.sax.XMLReader;
-import org.xml.sax.InputSource;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.DTDHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
-
 import com.caucho.util.L10N;
-
-import com.caucho.vfs.*;
-
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempCharBuffer;
+import com.caucho.vfs.Vfs;
+import com.caucho.xml.ExtendedLocator;
 import com.caucho.xml.QName;
 import com.caucho.xml.XmlChar;
-import com.caucho.xml.ExtendedLocator;
+
+import org.xml.sax.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 
 /**
  * A fast XML parser.

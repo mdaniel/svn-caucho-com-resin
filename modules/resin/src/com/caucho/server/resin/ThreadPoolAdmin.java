@@ -29,12 +29,12 @@
 
 package com.caucho.server.resin;
 
-import java.util.logging.Logger;
-
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
 
-import com.caucho.management.server.*;
+import java.util.logging.Logger;
 
 public class ThreadPoolAdmin extends AbstractManagedObject
   implements ThreadPoolMXBean

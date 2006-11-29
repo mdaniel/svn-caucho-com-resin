@@ -28,18 +28,11 @@
 
 package com.caucho.ejb.cfg;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.lang.reflect.*;
-
-import java.sql.*;
-import javax.sql.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.config.ConfigException;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 
 /**
  * A builtin SQL function expression

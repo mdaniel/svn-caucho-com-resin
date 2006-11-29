@@ -28,18 +28,11 @@
 
 package com.caucho.jstl.rt;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import com.caucho.util.L10N;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.jstl.core.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.jsp.el.*;
+import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.jstl.core.LoopTagSupport;
+import java.util.Iterator;
 
 public class CoreForEachTag extends LoopTagSupport {
   private static L10N L = new L10N(CoreForEachTag.class);

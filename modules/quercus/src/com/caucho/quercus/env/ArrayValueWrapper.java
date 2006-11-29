@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
 import java.util.IdentityHashMap;
 
 /**

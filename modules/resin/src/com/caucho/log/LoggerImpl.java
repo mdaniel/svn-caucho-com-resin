@@ -28,7 +28,7 @@
 
 package com.caucho.log;
 
-import java.util.logging.*;
+import java.util.logging.Logger;
 
 /**
  * A trivial implementation that allows Resin to instantiate its own

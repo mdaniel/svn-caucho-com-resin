@@ -29,30 +29,33 @@
 
 package com.caucho.config.jaxb;
 
-import java.beans.Introspector;
-
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-
-import java.lang.ref.SoftReference;
-
-import java.util.*;
-
-import javax.annotation.*;
-import javax.el.*;
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.*;
+import com.caucho.config.*;
+import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.WeakDestroyListener;
+import com.caucho.util.L10N;
+import com.caucho.xml.QName;
+import com.caucho.xml.QNode;
 
 import org.w3c.dom.Node;
 
-import com.caucho.util.*;
-
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-
-import com.caucho.loader.*;
-
-import com.caucho.xml.*;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.beans.Introspector;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JaxbBeanType extends TypeStrategy {
   protected static final L10N L = new L10N(BeanTypeStrategy.class);

@@ -28,13 +28,6 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 class XmlPolicy extends Policy {
   /**
    * Initialize the policy.
@@ -59,20 +52,20 @@ class XmlPolicy extends Policy {
     throws XmlParseException
   {
     String qname = name.getName();
-    
+
     if (qname == "#document" && tagEnd.equals(""))
       return POP;
     else if (qname.equals(tagEnd))
       return POP;
     else {
       if (qname.equals("#document"))
-	qname = L.l("end of document");
+        qname = L.l("end of document");
       else
-	qname = "`</" + qname + ">'";
+        qname = "`</" + qname + ">'";
       if (tagEnd.equals(""))
-	tagEnd = L.l("end of file");
+        tagEnd = L.l("end of file");
       else
-	tagEnd = "`</" + tagEnd + ">'";
+        tagEnd = "`</" + tagEnd + ">'";
 
       throw parser.error(L.l("expected {0} at {1} (open at {2})",
                              qname, tagEnd,

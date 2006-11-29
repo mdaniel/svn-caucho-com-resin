@@ -28,11 +28,10 @@
 
 package com.caucho.ejb.ql;
 
-import java.util.ArrayList;
-
+import com.caucho.config.ConfigException;
 import com.caucho.util.CharBuffer;
 
-import com.caucho.config.ConfigException;
+import java.util.ArrayList;
 
 /**
  * An 'in' expression

@@ -28,19 +28,12 @@
 
 package com.caucho.server.host;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-
-import com.caucho.util.L10N;
-
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Dependency;
 
-import com.caucho.vfs.*;
-
-import com.caucho.config.ConfigException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Returns a list of the current host entries

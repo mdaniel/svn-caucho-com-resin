@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.EventListener;
 
 public interface ExitListener extends EventListener {
   void handleExit(Object object);

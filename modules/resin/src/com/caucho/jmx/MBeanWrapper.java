@@ -29,40 +29,11 @@
 
 package com.caucho.jmx;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-
-import java.lang.ref.WeakReference;
-
-import javax.management.ObjectName;
-import javax.management.ObjectInstance;
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.MBeanInfo;
-import javax.management.ReflectionException;
-import javax.management.MBeanException;
-import javax.management.DynamicMBean;
-import javax.management.StandardMBean;
-import javax.management.NotificationEmitter;
-import javax.management.NotificationBroadcaster;
-import javax.management.NotificationListener;
-import javax.management.NotificationFilter;
-import javax.management.InvalidAttributeValueException;
-import javax.management.AttributeNotFoundException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.InstanceNotFoundException;
-import javax.management.ListenerNotFoundException;
-import javax.management.RuntimeOperationsException;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import javax.management.*;
+import java.util.logging.Logger;
 
 /**
  * Wrapper around the dynamic mbean to handle classloader lifecycle.

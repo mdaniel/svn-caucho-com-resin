@@ -34,15 +34,14 @@ import com.caucho.util.InetNetwork;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.logging.Logger;
-
-import javax.annotation.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 /**
  * Allow or deny requests based on the ip address of the client.

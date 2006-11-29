@@ -29,17 +29,16 @@
 
 package com.caucho.el;
 
-import java.io.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
-import java.util.*;
-import java.util.logging.*;
-import java.lang.reflect.*;
-
-import javax.el.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.log.Log;
+import javax.el.ELContext;
+import javax.el.FunctionMapper;
+import javax.el.ValueExpression;
+import javax.el.VariableMapper;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Parses the expression.

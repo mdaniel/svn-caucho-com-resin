@@ -28,11 +28,10 @@
 
 package com.caucho.amber.field;
 
-import java.sql.SQLException;
-
 import com.caucho.amber.entity.Entity;
-
 import com.caucho.amber.manager.AmberConnection;
+
+import java.sql.SQLException;
 
 /**
  * Field which responds to a deletion.

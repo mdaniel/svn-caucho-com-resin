@@ -31,7 +31,8 @@ package com.caucho.quercus.env;
 
 import com.caucho.vfs.WriteStream;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.IdentityHashMap;
 
 /**

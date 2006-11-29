@@ -29,34 +29,26 @@
 
 package com.caucho.ejb.session;
 
-import java.lang.reflect.Constructor;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.rmi.RemoteException;
-
-import javax.naming.*;
-
-import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBHome;
-import javax.ejb.SessionBean;
-import javax.ejb.FinderException;
-
-import com.caucho.naming.*;
-import com.caucho.util.Log;
-import com.caucho.util.LruCache;
-
-import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
-
+import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.JVMObject;
+import com.caucho.naming.Jndi;
+import com.caucho.util.Log;
+import com.caucho.util.LruCache;
+
+import javax.ejb.EJBHome;
+import javax.ejb.EJBLocalHome;
+import javax.ejb.FinderException;
+import javax.ejb.SessionBean;
+import java.lang.reflect.Constructor;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Server container for a session bean.

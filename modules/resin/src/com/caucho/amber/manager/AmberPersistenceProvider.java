@@ -29,14 +29,13 @@
 
 package com.caucho.amber.manager;
 
-import java.util.logging.Logger;
-
-import java.util.Map;
-
-import javax.persistence.*;
-import javax.persistence.spi.*;
-
 import com.caucho.util.L10N;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceUnitInfo;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * The persistence provider implementation.

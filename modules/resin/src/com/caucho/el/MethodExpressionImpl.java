@@ -29,11 +29,15 @@
 
 package com.caucho.el;
 
-import java.util.logging.*;
+import com.caucho.util.L10N;
 
-import javax.el.*;
-
-import com.caucho.util.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.MethodExpression;
+import javax.el.MethodInfo;
+import javax.el.MethodNotFoundException;
+import javax.el.PropertyNotFoundException;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the method expression.

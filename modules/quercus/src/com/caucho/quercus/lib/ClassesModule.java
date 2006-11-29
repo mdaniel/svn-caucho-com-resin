@@ -29,21 +29,17 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.Map;
-
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReadOnly;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.annotation.ReadOnly;
-import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.env.*;
-
-import com.caucho.quercus.expr.Expr;
-
-import com.caucho.quercus.program.AbstractFunction;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Quercus class information

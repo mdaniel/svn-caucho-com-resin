@@ -28,27 +28,18 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.beans.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-import javax.servlet.jsp.tagext.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.server.http.*;
-import com.caucho.java.*;
-import com.caucho.xpath.*;
-
 import com.caucho.jsp.java.JspTagFileSupport;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.xml.QName;
+
+import javax.servlet.jsp.tagext.SimpleTag;
+import javax.servlet.jsp.tagext.TagAttributeInfo;
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.VariableInfo;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * Describes a single tag instance.

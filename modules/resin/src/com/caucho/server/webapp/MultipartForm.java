@@ -28,12 +28,8 @@
 
 package com.caucho.server.webapp;
 
-import java.util.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
 import com.caucho.config.types.Bytes;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for the multipart form.

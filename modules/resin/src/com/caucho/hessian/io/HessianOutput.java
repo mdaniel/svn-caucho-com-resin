@@ -48,9 +48,9 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.IdentityHashMap;
 
 /**
  * Output stream for Hessian requests, compatible with microedition

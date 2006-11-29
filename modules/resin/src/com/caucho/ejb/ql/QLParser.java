@@ -29,30 +29,24 @@
 
 package com.caucho.ejb.ql;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
+import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.cfg.FunctionSignature;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
-import java.util.logging.Logger;
-
+import javax.ejb.EJBLocalObject;
 import javax.ejb.EntityBean;
 import javax.ejb.FinderException;
-import javax.ejb.EJBLocalObject;
-
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JClass;
-
-import com.caucho.util.Log;
-import com.caucho.util.L10N;
-import com.caucho.util.IntMap;
-import com.caucho.util.IntArray;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.config.LineConfigException;
-import com.caucho.config.ConfigException;
-
-import com.caucho.ejb.cfg.EjbEntityBean;
-import com.caucho.ejb.cfg.EjbConfig;
-import com.caucho.ejb.cfg.FunctionSignature;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Contains the parser for EJB-QL queries and stores the parsed expressions.

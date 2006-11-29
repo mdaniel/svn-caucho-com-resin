@@ -29,21 +29,22 @@
 
 package com.caucho.jaxb.skeleton;
 
-import java.beans.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
+import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.util.L10N;
 
-import javax.xml.bind.*;
-import javax.xml.bind.annotation.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.jaxb.*;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
+import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Map;
 
 /** an Accessor is either a getter/setter pair or a field */
 public abstract class Accessor {

@@ -28,20 +28,12 @@
 
 package com.caucho.jsp.el;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.el.AbstractVariableResolver;
 
-import javax.el.*;
-
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ELResolver;
 import javax.servlet.jsp.el.VariableResolver;
-
-import com.caucho.el.*;
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-
-import com.caucho.el.Expr;
 
 /**
  * Implementation of the expression evaluator.

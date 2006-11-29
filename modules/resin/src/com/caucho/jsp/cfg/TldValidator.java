@@ -28,13 +28,12 @@
 
 package com.caucho.jsp.cfg;
 
-import java.util.HashMap;
-
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.util.*;
-
 import com.caucho.config.types.InitParam;
+import com.caucho.util.BeanUtil;
+import com.caucho.util.RegistryException;
+
+import javax.servlet.jsp.tagext.TagLibraryValidator;
+import java.util.HashMap;
 
 /**
  * Configuration for the taglib validator in the .tld

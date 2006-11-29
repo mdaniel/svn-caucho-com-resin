@@ -30,9 +30,10 @@
 package javax.el;
 
 import java.beans.FeatureDescriptor;
-import java.lang.reflect.Array;
-import java.util.*;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Resolves properties based on maps.

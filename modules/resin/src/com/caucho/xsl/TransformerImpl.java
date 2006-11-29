@@ -29,23 +29,44 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
-
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.sax.*;
-import javax.xml.transform.stream.*;
-
-import org.w3c.dom.*;
-import org.xml.sax.*;
-import org.xml.sax.ext.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.java.LineMap;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 import com.caucho.xml.*;
-import com.caucho.java.*;
-import com.caucho.xpath.*;
+import com.caucho.xpath.XPathFun;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.ext.LexicalHandler;
+
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Properties;
 
 public class TransformerImpl extends javax.xml.transform.Transformer {
   protected static L10N L = new L10N(TransformerImpl.class);

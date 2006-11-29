@@ -29,11 +29,10 @@
 
 package com.caucho.amber.type;
 
-import java.util.logging.Logger;
-
+import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.util.L10N;
 
-import com.caucho.amber.manager.AmberPersistenceUnit;
+import java.util.logging.Logger;
 
 /**
  * Represents a listener type: either a default listener

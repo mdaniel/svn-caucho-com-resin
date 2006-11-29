@@ -28,16 +28,6 @@
 
 package com.caucho.vfs;
 
-import java.io.IOException;
-
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-
-import com.caucho.util.QDate;
-
 /**
  * Stream which writes to syslog.
  */
@@ -62,7 +52,7 @@ public class Syslog {
   public static final int LOG_LOCAL5 = 21;
   public static final int LOG_LOCAL6 = 22;
   public static final int LOG_LOCAL7 = 23;
-    
+
   public static final int LOG_EMERG = 0;
   public static final int LOG_ALERT = 1;
   public static final int LOG_CRIT = 2;
@@ -71,7 +61,7 @@ public class Syslog {
   public static final int LOG_NOTICE = 5;
   public static final int LOG_INFO = 6;
   public static final int LOG_DEBUG = 7;
-  
+
   private static boolean _hasSyslog;
   private static boolean _isOpen;
 
@@ -88,7 +78,7 @@ public class Syslog {
       _isOpen = true;
       nativeOpenSyslog();
     }
-    
+
     int priority = facility * 8 + severity;
 
     nativeSyslog(priority, text);

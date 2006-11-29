@@ -28,14 +28,10 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
+import com.caucho.jsp.JspParseException;
+import com.caucho.vfs.WriteStream;
 
-import javax.servlet.jsp.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.jsp.el.*;
+import java.io.IOException;
 
 public class JstlCoreChoose extends JstlNode {
   /**

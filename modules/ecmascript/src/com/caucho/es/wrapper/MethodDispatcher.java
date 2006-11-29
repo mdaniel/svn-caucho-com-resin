@@ -28,16 +28,9 @@
 
 package com.caucho.es.wrapper;
 
-import java.util.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.beans.*;
-import java.net.*;
-
-import com.caucho.util.*;
-import com.caucho.es.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
+import com.caucho.es.Call;
+import com.caucho.es.ESBase;
+import com.caucho.es.ESNull;
 
 /**
  * Dynamic selection of overloaded methods.  This is really a last

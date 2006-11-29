@@ -28,8 +28,7 @@
 */
 
 package javax.xml.ws.handler;
-import javax.xml.ws.handler.MessageContext.*;
-import java.util.*;
+import java.util.Map;
 
 /** XXX */
 public interface MessageContext extends Map<String,Object> {

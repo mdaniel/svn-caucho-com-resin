@@ -29,8 +29,9 @@
 
 package com.caucho.soap.marshall;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Collection;
-import javax.xml.bind.annotation.*;
 
 /**
  * Wraps a JAXB object to make Collections work.

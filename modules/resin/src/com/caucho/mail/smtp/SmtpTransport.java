@@ -29,32 +29,25 @@
 
 package com.caucho.mail.smtp;
 
-import java.net.InetAddress;
-import java.net.Socket;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.SocketStream;
+import com.caucho.vfs.WriteStream;
 
 import javax.mail.Address;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.URLName;
-import javax.mail.MessagingException;
-
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-
-import com.caucho.util.L10N;
-import com.caucho.server.util.CauchoSystem;
-
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.SocketStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Resin's SMTP transport implementation.

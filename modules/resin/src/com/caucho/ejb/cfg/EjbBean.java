@@ -29,54 +29,52 @@
 
 package com.caucho.ejb.cfg;
 
-import java.lang.ref.SoftReference;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.annotation.*;
-import javax.ejb.*;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassWrapper;
+import com.caucho.bytecode.JClassDependency;
 import com.caucho.bytecode.JClassLoader;
 import com.caucho.bytecode.JClassLoaderWrapper;
-import com.caucho.bytecode.JClassDependency;
-
-import com.caucho.util.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.*;
-
-import com.caucho.config.types.*;
-
-import com.caucho.vfs.*;
-
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentBean;
-
-import com.caucho.make.*;
-
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.java.gen.BaseClass;
-import com.caucho.java.gen.BaseMethod;
-import com.caucho.java.gen.MethodCallChain;
-import com.caucho.java.gen.CallChain;
-import com.caucho.java.gen.GenClass;
-
-import com.caucho.ejb.EjbServerManager;
+import com.caucho.bytecode.JClassWrapper;
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.ConfigException;
+import com.caucho.config.DependencyBean;
+import com.caucho.config.LineConfigException;
+import com.caucho.config.types.Period;
 import com.caucho.ejb.AbstractServer;
-
+import com.caucho.ejb.EjbServerManager;
+import com.caucho.ejb.amber.AmberConfig;
 import com.caucho.ejb.gen.BeanAssembler;
-import com.caucho.ejb.gen.ViewClass;
 import com.caucho.ejb.gen.TransactionChain;
 import com.caucho.ejb.gen.UserInRoleChain;
+import com.caucho.ejb.gen.ViewClass;
+import com.caucho.java.gen.BaseClass;
+import com.caucho.java.gen.BaseMethod;
+import com.caucho.java.gen.CallChain;
+import com.caucho.java.gen.GenClass;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.java.gen.MethodCallChain;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.log.Log;
+import com.caucho.make.ClassDependency;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
 
-import com.caucho.ejb.amber.AmberConfig;
+import javax.annotation.PostConstruct;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBLocalHome;
+import javax.ejb.EJBLocalObject;
+import javax.ejb.EJBObject;
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Configuration for an ejb bean.

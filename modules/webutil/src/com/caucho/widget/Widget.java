@@ -33,7 +33,11 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

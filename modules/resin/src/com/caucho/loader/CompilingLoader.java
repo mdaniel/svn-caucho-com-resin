@@ -28,37 +28,27 @@
 
 package com.caucho.loader;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import javax.annotation.*;
-
-import java.net.URL;
-
-import java.security.CodeSource;
-
-import java.security.cert.Certificate;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Depend;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.make.Make;
-import com.caucho.make.AlwaysModified;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.java.CompileClassNotFound;
 import com.caucho.java.JavaCompiler;
+import com.caucho.log.Log;
+import com.caucho.make.AlwaysModified;
+import com.caucho.make.Make;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.cert.Certificate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A class loader that automatically compiles Java.

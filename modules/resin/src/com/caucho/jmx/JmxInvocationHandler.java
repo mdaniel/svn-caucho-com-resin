@@ -29,9 +29,16 @@
 
 package com.caucho.jmx;
 
-import java.lang.reflect.*;
-
-import javax.management.*;
+import javax.management.Attribute;
+import javax.management.MBeanServer;
+import javax.management.NotificationEmitter;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * Proxy hander for mbeans.

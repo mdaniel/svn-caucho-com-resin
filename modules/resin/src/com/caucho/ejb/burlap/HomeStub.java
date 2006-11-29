@@ -28,17 +28,14 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.beans.*;
-import java.lang.reflect.*;
+import com.caucho.ejb.EJBMetaDataImpl;
 
-import java.rmi.*;
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBMetaData;
+import javax.ejb.Handle;
+import javax.ejb.HomeHandle;
+import javax.ejb.RemoveException;
+import java.rmi.RemoteException;
 
 /**
  * Base class for home stubs.

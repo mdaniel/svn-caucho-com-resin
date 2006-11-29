@@ -29,21 +29,16 @@
 
 package com.caucho.naming.burlap;
 
-import java.util.Hashtable;
-
-import java.util.logging.Logger;
-
-import javax.naming.Name;
-import javax.naming.Context;
-import javax.naming.NamingException;
-
-import javax.naming.spi.ObjectFactory;
-
+import com.caucho.burlap.client.BurlapProxyFactory;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.burlap.client.BurlapProxyFactory;
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.NamingException;
+import javax.naming.spi.ObjectFactory;
+import java.util.Hashtable;
+import java.util.logging.Logger;
 
 /**
  * Create a remote object

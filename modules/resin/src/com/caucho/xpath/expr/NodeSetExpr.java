@@ -28,13 +28,14 @@
 
 package com.caucho.xpath.expr;
 
-import org.w3c.dom.*;
-
 import com.caucho.xml.NodeListImpl;
 import com.caucho.xml.XmlUtil;
-
-import com.caucho.xpath.*;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.XPathException;
 import com.caucho.xpath.pattern.*;
+
+import org.w3c.dom.Node;
 
 public class NodeSetExpr extends Expr {
   private AbstractPattern _pattern;

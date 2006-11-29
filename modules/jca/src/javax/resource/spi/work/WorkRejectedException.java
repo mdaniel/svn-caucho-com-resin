@@ -28,8 +28,6 @@
 
 package javax.resource.spi.work;
 
-import javax.resource.ResourceException;
-
 /**
  * An exception for an unavailable service.
  */

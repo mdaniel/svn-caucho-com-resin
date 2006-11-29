@@ -28,13 +28,13 @@
 
 package com.caucho.jstl;
 
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.ArrayList;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
 
 /**
  * Tag representing the functions.

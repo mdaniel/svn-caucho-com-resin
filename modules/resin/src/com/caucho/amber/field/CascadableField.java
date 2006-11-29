@@ -32,12 +32,12 @@ package com.caucho.amber.field;
 import com.caucho.amber.type.RelatedType;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.persistence.CascadeType;
 import java.io.IOException;
 import java.util.logging.Logger;
-import javax.persistence.CascadeType;
 
 /**
  * A child field that is cascadable from parent to child

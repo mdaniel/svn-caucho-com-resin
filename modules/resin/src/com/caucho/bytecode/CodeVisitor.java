@@ -29,15 +29,12 @@
 
 package com.caucho.bytecode;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-import com.caucho.util.IntArray;
-
 import com.caucho.log.Log;
+import com.caucho.util.IntArray;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Visitor for travelling the code.

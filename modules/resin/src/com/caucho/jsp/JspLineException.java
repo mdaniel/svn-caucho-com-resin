@@ -28,12 +28,12 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import javax.servlet.*;
+import com.caucho.java.LineMap;
+import com.caucho.java.LineMapException;
+import com.caucho.util.ExceptionWrapper;
 
-import com.caucho.util.*;
-import com.caucho.java.*;
-import com.caucho.vfs.*;
+import javax.servlet.ServletException;
+import java.io.Serializable;
 
 /**
  * Mapping from the generated code exception line numbers back to the JSP

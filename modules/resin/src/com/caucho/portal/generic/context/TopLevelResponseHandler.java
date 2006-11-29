@@ -51,8 +51,10 @@ package com.caucho.portal.generic.context;
 
 import com.caucho.portal.generic.PortletConnection;
 
-import java.io.*;
-
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 
 /**

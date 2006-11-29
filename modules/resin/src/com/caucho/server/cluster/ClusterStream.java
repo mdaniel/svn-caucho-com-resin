@@ -29,15 +29,13 @@
 
 package com.caucho.server.cluster;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.Alarm;
-
 import com.caucho.log.Log;
-
+import com.caucho.util.Alarm;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Defines a connection to the client.

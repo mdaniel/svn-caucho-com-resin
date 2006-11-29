@@ -29,19 +29,9 @@
 
 package com.caucho.quercus.program;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import java.io.IOException;
-
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.expr.VarExpr;
-
-import com.caucho.quercus.Location;
-
-import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a function definition

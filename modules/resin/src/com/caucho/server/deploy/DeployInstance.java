@@ -29,14 +29,7 @@
 
 package com.caucho.server.deploy;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.vfs.*;
-
-import com.caucho.util.*;
+import com.caucho.vfs.Dependency;
 
 /**
  * Abstract deployment entry.

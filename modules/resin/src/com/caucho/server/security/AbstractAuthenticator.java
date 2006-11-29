@@ -28,29 +28,28 @@
 
 package com.caucho.server.security;
 
-import java.lang.ref.SoftReference;
-
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.security.*;
-
-import javax.annotation.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.log.Log;
-
 import com.caucho.security.BasicPrincipal;
-
-import com.caucho.server.webapp.Application;
-
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
+import com.caucho.server.webapp.Application;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.lang.ref.SoftReference;
+import java.security.MessageDigest;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * All applications should extend AbstractAuthenticator to implement

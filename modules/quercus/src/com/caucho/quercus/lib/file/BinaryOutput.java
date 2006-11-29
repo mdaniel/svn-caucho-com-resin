@@ -29,14 +29,9 @@
 
 package com.caucho.quercus.lib.file;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-
-import com.caucho.quercus.env.ResourceValue;
-import com.caucho.quercus.env.Env;
-
-import com.caucho.quercus.QuercusModuleException;
 
 /**
  * Represents a Quercus output stream

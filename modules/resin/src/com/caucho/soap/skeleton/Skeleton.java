@@ -29,11 +29,11 @@
 
 package com.caucho.soap.skeleton;
 
-import java.io.*;
-import java.net.*;
-import javax.xml.stream.*;
-
-import com.caucho.vfs.WriteStream;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 /**
  * Invokes a request on a Java POJO

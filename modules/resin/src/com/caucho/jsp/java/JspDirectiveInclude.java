@@ -28,21 +28,19 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import org.xml.sax.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
+import com.caucho.jsp.JspContentHandler;
+import com.caucho.jsp.JspParseException;
+import com.caucho.jsp.Namespace;
+import com.caucho.jsp.ParseState;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
-import com.caucho.xml.XmlChar;
 import com.caucho.xml.Xml;
+
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
 
 public class JspDirectiveInclude extends JspNode {
   static L10N L = new L10N(JspDirectiveInclude.class);

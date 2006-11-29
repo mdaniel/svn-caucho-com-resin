@@ -33,16 +33,13 @@ package com.caucho.server.webapp;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.TcpConnection;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.webapp.WebAppAdmin;
-import com.caucho.server.host.HostAdmin;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.ClientDisconnectException;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.ServletException;
 import java.io.IOException;
 
 public class StatisticsFilterChain

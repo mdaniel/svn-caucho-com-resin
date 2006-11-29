@@ -29,23 +29,14 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.File;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
-import java.nio.channels.FileLock;
-import java.nio.channels.FileChannel;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.FilePath;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.VfsStream;
-
 import com.caucho.quercus.env.Env;
+import com.caucho.vfs.VfsStream;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents an output stream for a popen'ed process.

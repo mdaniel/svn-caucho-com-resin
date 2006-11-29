@@ -28,13 +28,18 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.L10N;
+import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Node;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.OutputStream;
 
 /**
  * QAbstractNode is an abstract implementation for any DOM node.

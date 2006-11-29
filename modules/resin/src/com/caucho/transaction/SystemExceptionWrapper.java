@@ -28,8 +28,7 @@
 
 package com.caucho.transaction;
 
-import java.io.*;
-import javax.transaction.*;
+import javax.transaction.SystemException;
 
 public class SystemExceptionWrapper extends SystemException {
   private Throwable _rootCause;

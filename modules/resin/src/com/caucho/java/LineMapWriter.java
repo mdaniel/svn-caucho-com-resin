@@ -29,11 +29,11 @@
 
 package com.caucho.java;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.IntMap;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * LineMapWriter writes the *.map files.

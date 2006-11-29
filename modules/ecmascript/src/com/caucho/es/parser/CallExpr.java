@@ -28,15 +28,12 @@
 
 package com.caucho.es.parser;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.lang.reflect.*;
+import com.caucho.es.ESException;
+import com.caucho.es.ESId;
+import com.caucho.es.wrapper.ESMethodDescriptor;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.es.*;
-import com.caucho.es.wrapper.*;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Represents a method call.  Both Java calls and JavaScript calls are

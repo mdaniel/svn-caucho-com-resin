@@ -30,8 +30,7 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.util.Enumeration;
 
 /**
  * Configuration for a filter.  The container will fill the

@@ -30,12 +30,8 @@
 
 package com.caucho.eswrap.javax.servlet.http;
 
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.es.*;
+import javax.servlet.http.HttpSession;
+import java.util.Iterator;
 
 public class HttpSessionEcmaWrap {
   static class KeyIterator implements Iterator {

@@ -29,21 +29,14 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.vfs.TempBuffer;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
-
-import com.caucho.quercus.QuercusModuleException;
 
 /**
  * Represents a PHP open file

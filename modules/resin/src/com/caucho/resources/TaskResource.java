@@ -28,17 +28,14 @@
 
 package com.caucho.resources;
 
-import java.util.concurrent.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.ThreadPool;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.util.concurrent.Executor;
+import java.util.logging.Logger;
 
 /**
  * The task resource starts a backgroun task on initialization.

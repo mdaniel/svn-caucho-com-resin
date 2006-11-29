@@ -28,17 +28,14 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.beans.*;
-import java.lang.reflect.*;
-import java.rmi.*;
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.ReadWritePair;
+import com.caucho.vfs.WriteStream;
 
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.hessian.io.*;
+import java.io.IOException;
 
 /**
  * Utility class to call methods easily.

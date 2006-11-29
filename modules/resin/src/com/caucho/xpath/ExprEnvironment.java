@@ -28,14 +28,10 @@
 
 package com.caucho.xpath;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.xpath.expr.Var;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.expr.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * Adds variable environment.

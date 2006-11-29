@@ -29,8 +29,6 @@
 
 package com.caucho.server.deploy;
 
-import java.io.*;
-
 /**
  * Thrown during deployment
  */

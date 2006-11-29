@@ -32,14 +32,6 @@ package com.caucho.db.store;
 import java.io.IOException;
 import java.io.InputStream;
 
-import java.sql.SQLException;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.db.sql.Expr;
-
 public class BlobInputStream extends InputStream {
   private static final int INODE_DIRECT_BLOCKS = 14;
     

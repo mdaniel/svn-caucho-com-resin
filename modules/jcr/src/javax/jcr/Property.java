@@ -28,13 +28,12 @@
  */
 package javax.jcr;
 
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.PropertyDefinition;
+import javax.jcr.version.VersionException;
 import java.io.InputStream;
-
 import java.util.Calendar;
-
-import javax.jcr.lock.*;
-import javax.jcr.nodetype.*;
-import javax.jcr.version.*;
 
 /**
  * Represents a node's property.

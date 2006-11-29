@@ -29,21 +29,22 @@
 
 package com.caucho.config.types;
 
-import java.util.*;
-
-import javax.el.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.vfs.*;
-
-import com.caucho.el.MapVariableResolver;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigELContext;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
-import com.caucho.el.EL;
+import com.caucho.el.MapVariableResolver;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.config.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ELResolver;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Special builder for path variables.

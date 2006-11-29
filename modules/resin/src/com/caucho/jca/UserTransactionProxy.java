@@ -29,20 +29,19 @@
 
 package com.caucho.jca;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.transaction.UserTransaction;
-import javax.transaction.*;
-import javax.transaction.xa.*;
-
+import com.caucho.log.Log;
+import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.transaction.TransactionManagerImpl;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the UserTransactionImpl for a thread instance.

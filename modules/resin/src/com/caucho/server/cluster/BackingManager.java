@@ -28,12 +28,9 @@
 
 package com.caucho.server.cluster;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.LruCache;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.util.Hashtable;
 
 /**
  * Manages the object backing for a context.

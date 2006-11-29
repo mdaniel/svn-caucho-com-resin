@@ -28,7 +28,12 @@
 
 package com.caucho.jmx;
 
-import javax.management.*;
+import javax.management.MBeanNotificationInfo;
+import javax.management.MBeanServerDelegate;
+import javax.management.MBeanServerNotification;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
 
 /**
  * The main interface for retrieving and managing JMX objects.

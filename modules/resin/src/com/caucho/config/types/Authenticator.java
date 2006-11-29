@@ -28,20 +28,8 @@
 
 package com.caucho.config.types;
 
-import java.util.HashMap;
-
-import javax.naming.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.ClassLoaderListener;
-
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BeanBuilderException;
-
 import com.caucho.jca.Resource;
+import com.caucho.util.L10N;
 
 /**
  * The authenticator is the same as resource, but has a default.

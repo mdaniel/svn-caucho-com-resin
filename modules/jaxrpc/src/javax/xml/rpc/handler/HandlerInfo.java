@@ -28,10 +28,9 @@
 
 package javax.xml.rpc.handler;
 
+import javax.xml.namespace.QName;
 import java.util.Map;
 import java.util.Vector;
-
-import javax.xml.namespace.QName;
 
 /**
  * Represents a handler configuration info.

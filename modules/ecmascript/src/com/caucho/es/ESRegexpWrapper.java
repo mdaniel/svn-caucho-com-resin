@@ -28,11 +28,8 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
 
 class ESRegexpWrapper extends NativeWrapper {
   static ESId INPUT = ESId.intern("input");

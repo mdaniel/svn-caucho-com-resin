@@ -28,22 +28,24 @@
 
 package com.caucho.jsp.java;
 
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.servlet.jsp.tagext.TagInfo;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.SimpleTag;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-
+import com.caucho.jsp.JspBuilder;
+import com.caucho.jsp.JspGenerator;
+import com.caucho.jsp.JspLineParseException;
+import com.caucho.jsp.JspParseException;
 import com.caucho.log.Log;
-
+import com.caucho.util.CompileException;
+import com.caucho.util.L10N;
+import com.caucho.util.LineCompileException;
+import com.caucho.vfs.PersistentDependency;
 import com.caucho.xml.QName;
+
+import javax.servlet.jsp.tagext.SimpleTag;
+import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.TagInfo;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Generates the nodes for JSP code.

@@ -29,17 +29,18 @@
 
 package com.caucho.jaxb;
 
-import java.math.*;
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import java.io.*;
-import java.text.*;
-import java.util.*;
+import com.caucho.util.Base64;
+import com.caucho.util.L10N;
 
-import org.w3c.dom.*;
-
-import com.caucho.jaxb.skeleton.*;
-import com.caucho.util.*;
+import javax.xml.bind.DatatypeConverterInterface;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  */

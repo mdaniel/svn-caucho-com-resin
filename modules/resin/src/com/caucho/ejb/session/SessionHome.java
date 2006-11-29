@@ -28,21 +28,13 @@
 
 package com.caucho.ejb.session;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.rmi.*;
-import java.security.*;
-
-import javax.ejb.*;
-import javax.transaction.*;
-
-import com.caucho.util.Log;
-
 import com.caucho.ejb.AbstractEJBHome;
 import com.caucho.ejb.AbstractServer;
-
 import com.caucho.ejb.protocol.HomeSkeletonWrapper;
+
+import javax.ejb.*;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 
 /**
  * Abstract base class for a SessionHome.

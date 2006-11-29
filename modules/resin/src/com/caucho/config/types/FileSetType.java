@@ -29,22 +29,17 @@
 
 package com.caucho.config.types;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract type building a path pattern.  The pattern follows ant.

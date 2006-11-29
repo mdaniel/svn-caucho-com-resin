@@ -32,14 +32,12 @@ import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
+import javax.resource.spi.ResourceAdapterInternalException;
 import java.rmi.Naming;
 import java.rmi.Remote;
 import java.rmi.server.UnicastRemoteObject;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.resource.spi.ResourceAdapterInternalException;
 
 /**
  *

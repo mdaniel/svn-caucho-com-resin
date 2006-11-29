@@ -28,16 +28,17 @@
 
 package com.caucho.filters;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import javax.naming.*;
-import javax.transaction.*;
-
-import com.caucho.util.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.transaction.UserTransaction;
+import java.io.IOException;
 
 /**
  * Wraps the request in a transaction.  All database calls for

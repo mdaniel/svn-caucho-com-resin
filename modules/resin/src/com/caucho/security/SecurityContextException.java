@@ -28,10 +28,9 @@
 
 package com.caucho.security;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.ExceptionWrapper;
 
-import com.caucho.util.*;
+import java.io.Serializable;
 
 /**
  * Security exception for finding the current security context.

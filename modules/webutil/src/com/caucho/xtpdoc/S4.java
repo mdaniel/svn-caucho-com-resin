@@ -29,10 +29,8 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
 import java.io.IOException;
-
-import java.util.ArrayList;
+import java.io.PrintWriter;
 
 public class S4 extends Section {
   public S4(Document document, String parentHref)

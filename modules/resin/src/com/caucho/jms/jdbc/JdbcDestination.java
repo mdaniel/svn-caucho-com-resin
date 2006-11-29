@@ -29,26 +29,20 @@
 
 package com.caucho.jms.jdbc;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.Connection;
-import java.sql.SQLException;
+import com.caucho.config.ConfigException;
+import com.caucho.jdbc.JdbcMetaData;
+import com.caucho.jms.AbstractDestination;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
 import javax.sql.DataSource;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.jdbc.JdbcMetaData;
-
-import com.caucho.jms.AbstractDestination;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.Log;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a JDBC destination.

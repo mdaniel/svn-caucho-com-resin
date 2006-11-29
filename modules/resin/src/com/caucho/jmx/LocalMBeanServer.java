@@ -28,13 +28,10 @@
 
 package com.caucho.jmx;
 
-import java.util.logging.Logger;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentLocal;
+import java.util.logging.Logger;
 
 /**
  * JNDI object for the Resin mbean server.

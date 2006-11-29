@@ -28,10 +28,7 @@
 
 package com.caucho.java;
 
-import java.util.*;
-import java.io.*;
-
-import com.caucho.util.*;
+import com.caucho.util.CompileException;
 
 /**
  * Wrapper for a compile error.

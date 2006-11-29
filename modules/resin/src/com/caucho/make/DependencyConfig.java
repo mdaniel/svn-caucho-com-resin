@@ -28,10 +28,9 @@
 
 package com.caucho.make;
 
+import com.caucho.loader.Environment;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
-
-import com.caucho.loader.Environment;
 
 /**
  * Checking dependency.

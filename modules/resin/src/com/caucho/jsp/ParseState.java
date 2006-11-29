@@ -29,26 +29,20 @@
 
 package com.caucho.jsp;
 
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.L10N;
+import com.caucho.java.LineMap;
+import com.caucho.jsp.cfg.JspPropertyGroup;
+import com.caucho.log.Log;
+import com.caucho.server.webapp.Application;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.StringCharCursor;
 import com.caucho.util.CharScanner;
-
+import com.caucho.util.L10N;
+import com.caucho.util.StringCharCursor;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
-
-import com.caucho.log.Log;
-
-import com.caucho.server.webapp.Application;
-
-import com.caucho.java.LineMap;
-
 import com.caucho.xml.QName;
 
-import com.caucho.jsp.cfg.JspPropertyGroup;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Represents the current state of the parser.

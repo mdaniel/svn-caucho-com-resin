@@ -28,18 +28,14 @@
 
 package com.caucho.j2ee.deploytool;
 
-import java.util.Enumeration;
-
-import java.io.InputStream;
-import java.io.FileNotFoundException;
-
-import javax.enterprise.deploy.model.DeployableObject;
-import javax.enterprise.deploy.model.DDBeanRoot;
 import javax.enterprise.deploy.model.DDBean;
-
+import javax.enterprise.deploy.model.DDBeanRoot;
+import javax.enterprise.deploy.model.DeployableObject;
 import javax.enterprise.deploy.model.exceptions.DDBeanCreateException;
-
 import javax.enterprise.deploy.shared.ModuleType;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.Enumeration;
 
 /**
  * Represents a deployable object

@@ -29,7 +29,8 @@
 
 package com.caucho.quercus.env;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * Represents a PHP array value.

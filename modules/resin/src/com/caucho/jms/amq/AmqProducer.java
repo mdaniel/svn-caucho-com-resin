@@ -29,14 +29,19 @@
 
 package com.caucho.jms.amq;
 
-import java.io.*;
-import javax.jms.*;
+import com.caucho.jms.JMSExceptionWrapper;
+import com.caucho.jms.session.MessageProducerImpl;
+import com.caucho.jms.session.SessionImpl;
+import com.caucho.util.L10N;
 
-import com.caucho.util.*;
-
-import com.caucho.jms.*;
-import com.caucho.jms.message.*;
-import com.caucho.jms.session.*;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageProducer;
+import javax.jms.TextMessage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * A basic message producer.

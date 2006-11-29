@@ -29,23 +29,16 @@
 
 package com.caucho.server.host;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import java.util.regex.Pattern;
-
-import javax.annotation.*;
-
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.RawString;
+import com.caucho.log.Log;
+import com.caucho.server.deploy.DeployConfig;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.RawString;
-
-import com.caucho.server.deploy.DeployConfig;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * The configuration for a host in the resin.conf

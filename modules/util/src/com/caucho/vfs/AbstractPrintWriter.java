@@ -28,10 +28,9 @@
 
 package com.caucho.vfs;
 
-import java.io.Writer;
-import java.io.StringWriter;
 import java.io.PrintWriter;
-import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 
 /**
  * An abstract print writer.

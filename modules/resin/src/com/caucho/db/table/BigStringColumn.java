@@ -28,23 +28,6 @@
 
 package com.caucho.db.table;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.db.store.Transaction;
-
-import com.caucho.db.sql.Expr;
-import com.caucho.db.sql.QueryContext;
-import com.caucho.db.sql.SelectResult;
-
 class BigStringColumn extends BlobColumn {
   private int _size;
   /**

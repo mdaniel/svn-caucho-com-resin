@@ -29,18 +29,14 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.*;
-
-import java.net.*;
-
-import com.caucho.vfs.*;
-
-import com.caucho.quercus.QuercusException;
-
-import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.SocketStream;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.resources.StreamReadWrite;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.SocketAddress;
 
 /**
  * Represents read/write stream

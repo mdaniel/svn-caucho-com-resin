@@ -30,9 +30,6 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
-
 /**
  * The event class for changes to servlet context attributes.
  *
@@ -59,7 +56,7 @@ public class ServletContextAttributeEvent extends ServletContextEvent {
     this.name = name;
     this.value = value;
   }
-  
+
   /**
    * Returns the name of the attribute that changed.
    */

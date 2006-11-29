@@ -29,35 +29,37 @@
 
 package com.caucho.quercus.lib;
 
-import java.awt.*;
-import java.awt.color.*;
-import java.awt.image.*;
-import java.awt.geom.*;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.LinkedList;
-
-import javax.imageio.*;
-
-import com.caucho.util.L10N;
-
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-
 import com.caucho.quercus.env.*;
-
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.color.ColorSpace;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.FlatteningPathIterator;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ColorConvertOp;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
+import java.awt.image.RescaleOp;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * PHP image

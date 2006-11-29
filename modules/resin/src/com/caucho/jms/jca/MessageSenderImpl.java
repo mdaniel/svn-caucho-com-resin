@@ -28,22 +28,16 @@
 
 package com.caucho.jms.jca;
 
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-
-import javax.resource.spi.ConnectionManager;
-
-import javax.jms.Session;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-
 import com.caucho.log.Log;
-
-import com.caucho.util.L10N;
-
 import com.caucho.services.message.MessageSender;
 import com.caucho.services.message.MessageServiceException;
+import com.caucho.util.L10N;
+
+import javax.jms.Message;
+import javax.jms.ObjectMessage;
+import javax.resource.spi.ConnectionManager;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * The managed factory implementation.

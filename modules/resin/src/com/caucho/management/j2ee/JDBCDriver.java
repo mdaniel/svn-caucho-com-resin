@@ -31,8 +31,8 @@ package com.caucho.management.j2ee;
 
 import com.caucho.sql.DriverConfig;
 
-import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 import java.util.Hashtable;
 
 /**

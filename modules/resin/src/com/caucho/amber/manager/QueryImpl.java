@@ -29,41 +29,28 @@
 
 package com.caucho.amber.manager;
 
-import java.lang.reflect.Constructor;
+import com.caucho.amber.AmberException;
+import com.caucho.amber.entity.Entity;
+import com.caucho.amber.query.AbstractQuery;
+import com.caucho.amber.query.SelectQuery;
+import com.caucho.amber.query.UserQuery;
+import com.caucho.amber.type.CalendarType;
+import com.caucho.amber.type.UtilDateType;
+import com.caucho.ejb.EJBExceptionWrapper;
+import com.caucho.util.L10N;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import javax.persistence.FlushModeType;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
+import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Calendar;
-
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-import javax.persistence.FlushModeType;
-
-import com.caucho.amber.AmberException;
-
-import com.caucho.amber.entity.Entity;
-
-import com.caucho.amber.manager.AmberConnection;
-
-import com.caucho.amber.query.AbstractQuery;
-import com.caucho.amber.query.ResultSetImpl;
-import com.caucho.amber.query.SelectQuery;
-import com.caucho.amber.query.UserQuery;
-
-import com.caucho.amber.type.CalendarType;
-import com.caucho.amber.type.UtilDateType;
-
-import com.caucho.util.L10N;
-
-import com.caucho.ejb.EJBExceptionWrapper;
+import java.util.Date;
+import java.util.List;
 
 /**
  * The EJB query

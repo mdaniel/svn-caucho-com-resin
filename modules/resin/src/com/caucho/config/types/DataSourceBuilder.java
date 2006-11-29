@@ -28,12 +28,11 @@
 
 package com.caucho.config.types;
 
-import javax.sql.*;
-import javax.naming.*;
-
 import com.caucho.util.L10N;
 
-import com.caucho.config.BeanBuilderException;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 /**
  * path building

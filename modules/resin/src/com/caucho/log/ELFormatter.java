@@ -28,21 +28,20 @@
 
 package com.caucho.log;
 
-import com.caucho.config.*;
+import com.caucho.config.ConfigELContext;
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
-import com.caucho.el.*;
-import com.caucho.util.CharBuffer;
+import com.caucho.el.AbstractVariableResolver;
+import com.caucho.el.ELParser;
+import com.caucho.el.Expr;
 import com.caucho.util.L10N;
 
+import javax.annotation.PostConstruct;
+import javax.el.ELContext;
+import javax.el.ELException;
 import java.util.ResourceBundle;
-import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-
-import javax.annotation.*;
-
-import javax.el.*;
 
 /**
  * A Formatter that accepts an EL format string, and.

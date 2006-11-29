@@ -29,19 +29,11 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.jsp.JspParseException;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.QName;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.jsp.el.*;
-import com.caucho.xml.*;
+import java.io.IOException;
 
 public class JstlFmtParam extends JstlNode {
   private static final QName VALUE = new QName("value");

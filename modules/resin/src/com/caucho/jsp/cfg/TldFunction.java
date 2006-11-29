@@ -28,18 +28,14 @@
 
 package com.caucho.jsp.cfg;
 
-import java.util.ArrayList;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
-import javax.annotation.*;
-
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.util.*;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Signature;
-import com.caucho.jsp.JspParseException;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.jsp.tagext.FunctionInfo;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * Configuration for the taglib tag in the .tld

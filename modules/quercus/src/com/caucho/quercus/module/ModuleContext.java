@@ -30,20 +30,22 @@
 package com.caucho.quercus.module;
 
 import com.caucho.config.ConfigException;
-
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.function.*;
+import com.caucho.quercus.function.Marshal;
+import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.JavaImplClassDef;
 import com.caucho.util.L10N;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.reflect.*;
 
 /**
  * Class-loader specific context for loaded PHP.

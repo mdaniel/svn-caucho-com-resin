@@ -29,13 +29,12 @@
 
 package com.caucho.java;
 
-import java.io.*;
-import java.util.*;
-
 import com.caucho.bytecode.JClass;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Writing class for generated Java code.

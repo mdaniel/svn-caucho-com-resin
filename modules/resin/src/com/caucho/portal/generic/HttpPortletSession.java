@@ -49,15 +49,12 @@
 
 package com.caucho.portal.generic;
 
+import javax.portlet.PortletContext;
+import javax.portlet.PortletSession;
+import javax.servlet.http.HttpSession;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.portlet.*;
-
-import javax.servlet.http.*;
-import javax.servlet.http.HttpSession;
 
 /**
  * An adapter to a {@link javax.servlet.HttpSession}.

@@ -48,12 +48,8 @@
 
 package com.caucho.services.server;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 
 /**
  * Interface for a service lifecycle.

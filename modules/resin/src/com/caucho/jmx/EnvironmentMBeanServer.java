@@ -29,18 +29,15 @@
 
 package com.caucho.jmx;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.management.*;
-
-import javax.management.loading.ClassLoaderRepository;
-
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.*;
+import javax.management.MBeanServerDelegate;
+import javax.management.MBeanServerDelegateMBean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * JNDI object for the Resin mbean server.

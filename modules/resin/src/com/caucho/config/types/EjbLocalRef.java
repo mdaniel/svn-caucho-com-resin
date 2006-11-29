@@ -28,14 +28,11 @@
 
 package com.caucho.config.types;
 
-import java.util.*;
-
-import javax.annotation.*;
-
-import javax.naming.*;
-
+import com.caucho.naming.Jndi;
+import com.caucho.naming.LinkProxy;
 import com.caucho.util.L10N;
-import com.caucho.naming.*;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Configuration for the ejb-ref

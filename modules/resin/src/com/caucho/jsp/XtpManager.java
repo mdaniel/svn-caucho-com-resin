@@ -28,24 +28,14 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.*;
-import javax.servlet.http.*;
-
-import org.w3c.dom.*;
-
 import com.caucho.log.Log;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
-import com.caucho.xsl.*;
-import com.caucho.server.webapp.*;
+import javax.servlet.jsp.JspFactory;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Manages XTP templates.  The XtpManager allows for a template style of

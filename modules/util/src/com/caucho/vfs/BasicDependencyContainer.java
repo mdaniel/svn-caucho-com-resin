@@ -29,11 +29,10 @@
 
 package com.caucho.vfs;
 
+import com.caucho.util.Alarm;
+
 import java.util.ArrayList;
-
 import java.util.logging.Logger;
-
-import com.caucho.util.*;
 
 /**
  * Contains a set of dependencies.

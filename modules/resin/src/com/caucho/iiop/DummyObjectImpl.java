@@ -28,15 +28,6 @@
 
 package com.caucho.iiop;
 
-import java.lang.reflect.*;
-import java.io.*;
-import javax.naming.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-
-import javax.rmi.CORBA.Util;
-
 public class DummyObjectImpl extends org.omg.CORBA.portable.ObjectImpl {
   IOR _ior;
 

@@ -30,12 +30,8 @@
 
 package com.caucho.eswrap.javax.servlet;
 
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.es.*;
+import javax.servlet.ServletRequest;
+import java.util.Enumeration;
 
 public class ServletRequestEcmaWrap {
   public static Enumeration getFormKeys(ServletRequest request)

@@ -29,13 +29,12 @@
 
 package com.caucho.quercus.program;
 
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.expr.VarInfo;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.ArrayList;
-
-import com.caucho.quercus.Quercus;
-
-import com.caucho.quercus.expr.VarInfo;
 
 /**
  * Information about a function.

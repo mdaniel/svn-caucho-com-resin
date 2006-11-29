@@ -29,22 +29,14 @@
 
 package com.caucho.server.cluster;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-import javax.naming.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
-
+import com.caucho.log.Log;
 import com.caucho.naming.Jndi;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Configuration distributed stores.

@@ -28,18 +28,19 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.jsp.*;
+import com.caucho.java.LineMap;
+import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.CauchoNode;
+import com.caucho.xml.XmlPrinter;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
 import javax.xml.transform.OutputKeys;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * Transforms a document to a result string.

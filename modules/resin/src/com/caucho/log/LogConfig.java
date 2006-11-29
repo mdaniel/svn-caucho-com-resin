@@ -29,26 +29,20 @@
 
 package com.caucho.log;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Formatter;
-
-import javax.annotation.*;
-
-import com.caucho.vfs.WriteStream;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
-
 import com.caucho.jmx.Jmx;
-
-import com.caucho.loader.Environment;
 import com.caucho.loader.CloseListener;
-
+import com.caucho.loader.Environment;
 import com.caucho.util.L10N;
+import com.caucho.vfs.WriteStream;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Environment-specific configuration.

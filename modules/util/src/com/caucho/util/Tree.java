@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.Iterator;
 
 public class Tree {
   private Tree parent;

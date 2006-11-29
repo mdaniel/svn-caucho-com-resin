@@ -28,15 +28,13 @@
 
 package com.caucho.ejb.protocol;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.ejb.HomeHandle;
-import javax.ejb.EJBHome;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import javax.ejb.EJBHome;
+import javax.ejb.HomeHandle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation for a home handle.

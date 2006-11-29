@@ -49,13 +49,13 @@
 
 package com.caucho.portal.generic.context;
 
-import java.io.*;
-
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.portlet.*;
+import javax.portlet.ActionRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
+import java.util.Map;
 
 
 class ActionRequestImpl 

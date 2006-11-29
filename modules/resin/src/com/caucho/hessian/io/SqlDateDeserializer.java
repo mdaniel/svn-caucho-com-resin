@@ -48,9 +48,8 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
 
 /**
  * Deserializing a string valued object

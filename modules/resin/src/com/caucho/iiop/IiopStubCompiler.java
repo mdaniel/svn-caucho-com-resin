@@ -28,17 +28,15 @@
 
 package com.caucho.iiop;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.lang.reflect.*;
+import com.caucho.java.AbstractGenerator;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
 
-import javax.ejb.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBObject;
+import java.io.IOException;
+import java.lang.reflect.Method;
 
 public class IiopStubCompiler extends AbstractGenerator {
   private Class _cl;

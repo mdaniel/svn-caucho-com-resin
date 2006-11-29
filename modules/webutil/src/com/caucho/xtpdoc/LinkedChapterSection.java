@@ -29,16 +29,13 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
 import com.caucho.config.Config;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 public class LinkedChapterSection extends ChapterSection {
   private static final Logger log = Logger.getLogger(Anchor.class.getName());

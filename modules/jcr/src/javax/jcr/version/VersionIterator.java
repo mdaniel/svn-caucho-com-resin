@@ -28,7 +28,7 @@
  */
 package javax.jcr.version;
 
-import javax.jcr.*;
+import javax.jcr.RangeIterator;
 
 public interface VersionIterator extends RangeIterator {
   public Version nextVersion();

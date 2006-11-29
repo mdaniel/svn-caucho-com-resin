@@ -29,9 +29,8 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.HashSet;
-
 import javax.persistence.CascadeType;
+import java.util.HashSet;
 
 
 /**

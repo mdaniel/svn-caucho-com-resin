@@ -32,16 +32,12 @@ package com.caucho.j2ee.appclient;
 import com.caucho.config.ConfigException;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
-import com.caucho.vfs.Vfs;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 
 import javax.annotation.PostConstruct;
 import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.Hashtable;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

@@ -29,14 +29,12 @@
 
 package com.caucho.quercus.program;
 
-import java.util.logging.Logger;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-
 import com.caucho.quercus.expr.Expr;
-
 import com.caucho.util.L10N;
+
+import java.util.logging.Logger;
 
 /**
  * Represents a compiled function with 5 args

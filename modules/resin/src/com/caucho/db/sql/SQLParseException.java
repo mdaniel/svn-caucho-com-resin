@@ -28,7 +28,7 @@
 
 package com.caucho.db.sql;
 
-import java.sql.*;
+import java.sql.SQLException;
 
 public class SQLParseException extends SQLException {
   public SQLParseException(String msg)

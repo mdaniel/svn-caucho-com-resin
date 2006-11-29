@@ -29,9 +29,9 @@
 
 package com.caucho.management.j2ee;
 
-import javax.management.j2ee.statistics.JCAStats;
-import javax.management.j2ee.statistics.JCAConnectionStats;
 import javax.management.j2ee.statistics.JCAConnectionPoolStats;
+import javax.management.j2ee.statistics.JCAConnectionStats;
+import javax.management.j2ee.statistics.JCAStats;
 
 /**
  * Management interface for a JCA resource.

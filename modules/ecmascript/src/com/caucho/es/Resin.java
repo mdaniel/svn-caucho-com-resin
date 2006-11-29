@@ -28,15 +28,18 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.Version;
+import com.caucho.es.parser.Parser;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.VfsStream;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.*;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.es.parser.*;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Resin is the primary public entry to the JavaScript compiler.

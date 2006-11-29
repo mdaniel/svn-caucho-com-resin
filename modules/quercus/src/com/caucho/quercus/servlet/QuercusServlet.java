@@ -39,12 +39,12 @@ import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.server.connection.CauchoResponse;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-
 import com.caucho.server.session.SessionManager;
-
 import com.caucho.server.webapp.Application;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

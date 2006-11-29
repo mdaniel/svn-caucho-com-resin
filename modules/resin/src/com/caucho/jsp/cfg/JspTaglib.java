@@ -29,8 +29,6 @@
 
 package com.caucho.jsp.cfg;
 
-import java.util.ArrayList;
-
 /**
  * Configuration for the taglib in the web.xml
  */

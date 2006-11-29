@@ -29,15 +29,11 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.Location;
+import java.util.ArrayList;
 
 /**
  * Represents a list assignment expression.

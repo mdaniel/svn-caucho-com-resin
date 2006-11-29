@@ -28,15 +28,20 @@
 
 package com.caucho.xml.parsers;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.xml.QDOMImplementation;
+import com.caucho.xml.Xml;
+import com.caucho.xml.XmlParser;
 
-import javax.xml.parsers.*;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.xml.*;
+import javax.xml.parsers.DocumentBuilder;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * JAXP document builder factory for strict XML parsing.

@@ -29,25 +29,23 @@
 
 package com.caucho.quercus.env;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.IdentityHashMap;
-import java.util.logging.Logger;
-
 import com.caucho.quercus.QuercusRuntimeException;
-
 import com.caucho.quercus.expr.ClassConstExpr;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InstanceInitializer;
-
-import com.caucho.util.L10N;
 import com.caucho.util.IdentityIntMap;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Represents a Quercus runtime class.

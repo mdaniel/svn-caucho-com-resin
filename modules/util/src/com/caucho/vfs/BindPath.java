@@ -28,10 +28,8 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.util.*;
+import java.io.IOException;
+import java.util.Map;
 
 class BindPath extends FilesystemPath {
   private Node _node;

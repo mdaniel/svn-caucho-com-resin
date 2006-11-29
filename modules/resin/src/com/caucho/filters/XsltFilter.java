@@ -28,43 +28,48 @@
 
 package com.caucho.filters;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.log.Log;
+import com.caucho.server.connection.CauchoRequest;
+import com.caucho.server.connection.RequestAdapter;
+import com.caucho.util.CompileException;
+import com.caucho.util.L10N;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.Xml;
+import com.caucho.xml.XmlUtil;
+import com.caucho.xpath.XPath;
+import com.caucho.xpath.XPathException;
+import com.caucho.xsl.AbstractStylesheetFactory;
+import com.caucho.xsl.CauchoStylesheet;
+import com.caucho.xsl.StyleScript;
+import com.caucho.xsl.TransformerImpl;
 
-import java.net.URL;
+import org.w3c.dom.Document;
+import org.w3c.dom.ProcessingInstruction;
 
 import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.xml.transform.*;
-import javax.xml.transform.stream.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
-
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.log.Log;
-
-import com.caucho.xpath.XPathException;
-import com.caucho.xpath.XPath;
-
-import com.caucho.xml.XmlUtil;
-import com.caucho.xml.Xml;
-
-import com.caucho.xsl.CauchoStylesheet;
-import com.caucho.xsl.TransformerImpl;
-import com.caucho.xsl.StyleScript;
-import com.caucho.xsl.Xsl;
-import com.caucho.xsl.AbstractStylesheetFactory;
-
-import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.RequestAdapter;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Sends the results of the servlet through XSLT.

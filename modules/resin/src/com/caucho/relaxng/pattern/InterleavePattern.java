@@ -28,18 +28,12 @@
 
 package com.caucho.relaxng.pattern;
 
-import java.util.*;
-
+import com.caucho.relaxng.RelaxException;
+import com.caucho.relaxng.program.InterleaveItem;
+import com.caucho.relaxng.program.Item;
 import com.caucho.util.CharBuffer;
 
-import com.caucho.xml.QName;
-
-import com.caucho.config.BeanConfigException;
-
-import com.caucho.relaxng.RelaxException;
-
-import com.caucho.relaxng.program.Item;
-import com.caucho.relaxng.program.InterleaveItem;
+import java.util.ArrayList;
 
 /**
  * Relax element pattern

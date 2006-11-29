@@ -28,30 +28,16 @@
 
 package com.caucho.server.webapp;
 
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.io.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.Version;
-
 import com.caucho.log.Log;
 
-import com.caucho.util.ExceptionWrapper;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CompileException;
-
-import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.Encoding;
-
-import com.caucho.java.LineMap;
-import com.caucho.java.LineMapException;
-
-import com.caucho.server.connection.AbstractHttpResponse;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Represents the final servlet in a filter chain.

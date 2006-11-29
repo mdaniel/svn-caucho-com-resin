@@ -28,13 +28,15 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.naming.*;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
-import com.caucho.util.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import java.io.IOException;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Adapts the JNDI to the Path API.  The name separator is always '/'.

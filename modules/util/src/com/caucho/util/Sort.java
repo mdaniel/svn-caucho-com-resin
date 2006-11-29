@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.ArrayList;
 
 abstract public class Sort {
   abstract public boolean lessThan(Object a, Object b);

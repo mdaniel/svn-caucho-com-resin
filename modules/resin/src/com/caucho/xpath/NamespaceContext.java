@@ -28,13 +28,6 @@
 
 package com.caucho.xpath;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.xml.*;
-
 public class NamespaceContext {
   private NamespaceContext prev;
   private String prefix;
@@ -66,9 +59,9 @@ public class NamespaceContext {
   {
     for (; ns != null; ns = ns.prev) {
       if (ns.prefix.equals(prefix))
-	return ns.url;
+        return ns.url;
     }
-    
+
     return null;
   }
 }

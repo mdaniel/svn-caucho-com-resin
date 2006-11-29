@@ -30,8 +30,10 @@
 
 package javax.servlet.jsp.tagext;
 
-import java.io.*;
-import javax.servlet.jsp.*;
+import javax.servlet.jsp.JspWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 
 /**
  * BodyContent subclasses JspWriter to accumulate the contents of a

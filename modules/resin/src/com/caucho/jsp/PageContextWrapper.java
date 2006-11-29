@@ -28,35 +28,27 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.text.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.jstl.core.*;
-import javax.servlet.jsp.jstl.fmt.*;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.el.*;
-
 import com.caucho.log.Log;
-
-import com.caucho.xpath.VarEnv;
-
-import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.ResponseAdapter;
-import com.caucho.server.connection.RequestAdapter;
-
-import com.caucho.server.webapp.RequestDispatcherImpl;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.FreeList;
+import com.caucho.util.L10N;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.ErrorData;
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.el.ExpressionEvaluator;
+import javax.servlet.jsp.tagext.BodyContent;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.util.logging.Logger;
 
 public class PageContextWrapper extends PageContextImpl {
   private static final Logger log = Log.open(PageContextWrapper.class);

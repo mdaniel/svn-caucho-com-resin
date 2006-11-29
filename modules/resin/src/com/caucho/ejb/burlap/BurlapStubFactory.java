@@ -28,24 +28,17 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.beans.*;
-import java.lang.reflect.*;
-
-import java.rmi.*;
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.ejb.*;
-
 import com.caucho.burlap.io.BurlapInput;
-
 import com.caucho.hessian.io.AbstractHessianInput;
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Factory for creating Burlap client stubs.  The returned stub will

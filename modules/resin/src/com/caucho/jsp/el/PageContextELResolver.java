@@ -29,14 +29,17 @@
 
 package com.caucho.jsp.el;
 
-import java.beans.FeatureDescriptor;
-import java.util.*;
+import com.caucho.el.AbstractVariableResolver;
+import com.caucho.jsp.PageContextImpl;
 
-import javax.servlet.jsp.el.*;
 import javax.el.*;
-
-import com.caucho.el.*;
-import com.caucho.jsp.*;
+import javax.servlet.jsp.el.ImplicitObjectELResolver;
+import javax.servlet.jsp.el.ScopedAttributeELResolver;
+import java.beans.FeatureDescriptor;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Variable resolution for JSP variables

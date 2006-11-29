@@ -28,14 +28,11 @@
 
 package com.caucho.xsl.java;
 
-import java.util.ArrayList;
-
 import com.caucho.java.JavaWriter;
-
 import com.caucho.xml.QName;
-
 import com.caucho.xsl.XslParseException;
-import com.caucho.xsl.JavaGenerator;
+
+import java.util.ArrayList;
 
 /**
  * Represents an attribute set.

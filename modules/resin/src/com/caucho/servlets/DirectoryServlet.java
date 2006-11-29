@@ -29,21 +29,20 @@
 
 package com.caucho.servlets;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.i18n.CharacterEncoding;
-
-import com.caucho.server.webapp.Application;
-
 import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.webapp.Application;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.URLUtil;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Iterator;
 
 public class DirectoryServlet extends HttpServlet {
   Application _app;

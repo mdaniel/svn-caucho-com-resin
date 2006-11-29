@@ -28,10 +28,7 @@
 
 package com.caucho.jmx;
 
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.management.*;
+import javax.management.JMRuntimeException;
 
 /**
  * Resin implementation for an MBean

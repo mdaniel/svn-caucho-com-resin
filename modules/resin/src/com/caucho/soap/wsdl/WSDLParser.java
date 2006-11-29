@@ -28,27 +28,15 @@
 
 package com.caucho.soap.wsdl;
 
-import java.util.logging.Logger;
-
-import java.io.InputStream;
-import java.io.IOException;
-
-import javax.xml.bind.*;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
-import org.w3c.dom.Document;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.config.NodeBuilder;
-import com.caucho.config.Config;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Logger;
 
 /**
  * WSDL Parser

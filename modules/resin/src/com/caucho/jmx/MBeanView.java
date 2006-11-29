@@ -32,7 +32,12 @@ import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.management.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**

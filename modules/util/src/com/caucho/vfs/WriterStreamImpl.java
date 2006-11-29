@@ -28,11 +28,11 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles a stream which outputs to a writer.

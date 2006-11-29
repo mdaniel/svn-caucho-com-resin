@@ -29,10 +29,6 @@
 
 package javax.servlet.jsp.el;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
-
 /**
  * Allows evaluation of JSP EL.
  */

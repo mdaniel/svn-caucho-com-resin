@@ -28,23 +28,18 @@
 
 package com.caucho.amber.collection;
 
-import java.lang.reflect.Method;
+import com.caucho.amber.AmberQuery;
+import com.caucho.amber.AmberRuntimeException;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.query.UserQuery;
+import com.caucho.util.Alarm;
 
+import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import java.sql.SQLException;
-
-import com.caucho.util.Alarm;
-
-import com.caucho.amber.AmberQuery;
-import com.caucho.amber.AmberRuntimeException;
-
-import com.caucho.amber.manager.AmberConnection;
-
-import com.caucho.amber.query.UserQuery;
 
 /**
  * Represents a lazy collection.

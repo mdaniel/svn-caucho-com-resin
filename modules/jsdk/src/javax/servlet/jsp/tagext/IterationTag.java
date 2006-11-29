@@ -28,7 +28,7 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
+import javax.servlet.jsp.JspException;
 
 /**
  * IterationTag lets tags loop over the body.

@@ -48,8 +48,8 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Abstract output stream for Hessian requests.

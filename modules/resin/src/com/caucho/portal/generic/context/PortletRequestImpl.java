@@ -49,9 +49,16 @@
 
 package com.caucho.portal.generic.context;
 
-import javax.portlet.*;
-
-import java.util.*;
+import javax.portlet.PortalContext;
+import javax.portlet.PortletMode;
+import javax.portlet.PortletPreferences;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletSession;
+import javax.portlet.WindowState;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.Map;
 
 class PortletRequestImpl 
   extends PortalRequestImpl

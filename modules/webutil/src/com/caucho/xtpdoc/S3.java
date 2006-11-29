@@ -29,12 +29,10 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
-
-import java.util.ArrayList;
-
-import javax.xml.stream.*;
+import java.io.PrintWriter;
 
 public class S3 extends Section {
   public S3(Document document, String parentHref)

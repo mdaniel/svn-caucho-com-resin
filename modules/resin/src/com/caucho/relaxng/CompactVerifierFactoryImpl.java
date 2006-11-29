@@ -28,22 +28,16 @@
 
 package com.caucho.relaxng;
 
-import java.lang.ref.SoftReference;
-
-import java.util.HashMap;
-
-import java.io.IOException;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.xml.Xml;
-
-import com.caucho.config.BeanConfigException;
+import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.HashMap;
 
 /**
  * JARV Verifier factory.

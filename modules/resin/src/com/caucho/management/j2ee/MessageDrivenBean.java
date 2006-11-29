@@ -31,8 +31,8 @@ package com.caucho.management.j2ee;
 
 import com.caucho.ejb.cfg.EjbMessageBean;
 
-import javax.management.j2ee.statistics.MessageDrivenBeanStats;
 import javax.management.j2ee.statistics.CountStatistic;
+import javax.management.j2ee.statistics.MessageDrivenBeanStats;
 
 /**
  * Management interface for a message driven bean.

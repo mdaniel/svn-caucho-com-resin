@@ -29,13 +29,12 @@
 
 package com.caucho.loader;
 
-import java.util.Properties;
-import java.util.Hashtable;
-import java.util.ArrayList;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Path;
 
 import java.security.Permission;
-
-import com.caucho.vfs.*;
+import java.util.ArrayList;
 
 /**
  * Static utility classes.

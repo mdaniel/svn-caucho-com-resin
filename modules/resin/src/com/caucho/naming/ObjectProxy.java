@@ -28,14 +28,8 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.naming.NamingException;
+import java.util.Hashtable;
 
 /**
  * An object proxy for a foreign JNDI factory.

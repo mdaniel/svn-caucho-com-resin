@@ -29,9 +29,8 @@
 
 package javax.servlet.jsp;
 
-import java.io.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
+import java.io.IOException;
+import java.io.Writer;
 
 abstract public class JspWriter extends Writer {
   public static final int DEFAULT_BUFFER = -1;

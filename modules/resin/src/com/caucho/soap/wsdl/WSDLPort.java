@@ -28,9 +28,10 @@
 
 package com.caucho.soap.wsdl;
 
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.*;
-
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 
 /**

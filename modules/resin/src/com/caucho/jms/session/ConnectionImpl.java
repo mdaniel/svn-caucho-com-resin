@@ -28,33 +28,16 @@
 
 package com.caucho.jms.session;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.jms.Connection;
-import javax.jms.ExceptionListener;
-import javax.jms.ServerSessionPool;
-import javax.jms.Destination;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
-import javax.jms.ConnectionMetaData;
-import javax.jms.ConnectionConsumer;
-import javax.jms.Session;
-import javax.jms.JMSException;
-import javax.jms.InvalidClientIDException;
-import javax.jms.IllegalStateException;
-
+import com.caucho.jms.ConnectionFactoryImpl;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.log.Log;
-
-import com.caucho.jms.ConnectionFactoryImpl;
-import com.caucho.jms.AbstractDestination;
+import javax.jms.*;
+import javax.jms.IllegalStateException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A connection.

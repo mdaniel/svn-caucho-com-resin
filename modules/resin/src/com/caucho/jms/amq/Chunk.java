@@ -29,17 +29,6 @@
 
 package com.caucho.jms.amq;
 
-import java.io.*;
-
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.server.port.ServerRequest;
-import com.caucho.server.connection.Connection;
-
 /**
  * Chunk of data.
  */
@@ -47,7 +36,7 @@ public class Chunk
 {
   private byte []_data;
   private int _offset;
-  
+
   Chunk(int length)
   {
     _data = new byte[length];

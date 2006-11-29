@@ -29,16 +29,7 @@
 
 package com.caucho.server.http;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-import com.caucho.server.*;
+import com.caucho.util.CharBuffer;
 
 /**
  * The invocation key is a <host, port, url> triple

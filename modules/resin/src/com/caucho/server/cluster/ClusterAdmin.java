@@ -30,9 +30,12 @@
 
 package com.caucho.server.cluster;
 
-import javax.management.ObjectName;
-
-import com.caucho.management.server.*;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.ClusterMXBean;
+import com.caucho.management.server.HostMXBean;
+import com.caucho.management.server.PersistentStoreMXBean;
+import com.caucho.management.server.PortMXBean;
+import com.caucho.management.server.ServerConnectorMXBean;
 
 public class ClusterAdmin extends AbstractManagedObject
   implements ClusterMXBean

@@ -33,7 +33,8 @@ import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.util.L10N;
 
-import javax.el.*;
+import javax.el.ELContext;
+import javax.el.ELException;
 
 /**
  * Class-loading TypeBuilder

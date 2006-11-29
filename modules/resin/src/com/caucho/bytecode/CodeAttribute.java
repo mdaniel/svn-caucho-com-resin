@@ -29,18 +29,14 @@
 
 package com.caucho.bytecode;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.TempBuffer;
-
 import com.caucho.log.Log;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Represents a generic attribute

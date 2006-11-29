@@ -29,16 +29,12 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.lib.file.FileReadValue;
-import com.caucho.quercus.lib.file.FileValue;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a PHP open file

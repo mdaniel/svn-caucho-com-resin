@@ -28,23 +28,18 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.config.ConfigException;
+import com.caucho.i18n.CharacterEncoding;
+import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ByteToChar;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.server.util.CauchoSystem;
-
-import com.caucho.i18n.CharacterEncoding;
-
-import com.caucho.vfs.ByteToChar;
-
-import com.caucho.config.ConfigException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Decodes invocation URI.

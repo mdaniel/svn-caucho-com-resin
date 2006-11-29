@@ -28,26 +28,9 @@
 
 package com.caucho.transaction.xalog;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import java.util.logging.Logger;
+import com.caucho.transaction.XidImpl;
 
 import java.io.IOException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.LongMap;
-import com.caucho.util.ThreadPool;
-import com.caucho.util.ThreadTask;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.config.types.Bytes;
-
-import com.caucho.transaction.XidImpl;
 
 /**
  * Implements a single log stream.  Each log stream has two associated

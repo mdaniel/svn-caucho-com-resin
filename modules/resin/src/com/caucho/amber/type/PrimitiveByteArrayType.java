@@ -28,12 +28,10 @@
 
 package com.caucho.amber.type;
 
-import java.io.IOException;
-
+import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import com.caucho.java.JavaWriter;
-
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

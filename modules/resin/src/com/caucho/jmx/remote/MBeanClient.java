@@ -29,19 +29,11 @@
 
 package com.caucho.jmx.remote;
 
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.ObjectInstance;
-import javax.management.MBeanInfo;
-import javax.management.JMException;
-import javax.management.RuntimeMBeanException;
-
+import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.jmx.JMXSerializerFactory;
 
-import com.caucho.hessian.client.HessianProxyFactory;
-
-import com.caucho.services.server.GenericService;
+import javax.management.MBeanInfo;
+import javax.management.ObjectName;
 
 /**
  * Client for mbeans.

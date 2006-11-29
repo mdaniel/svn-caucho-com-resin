@@ -28,33 +28,27 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.lang.ref.SoftReference;
-
-import javax.servlet.*;
-import javax.servlet.jsp.*;
-import javax.servlet.http.*;
-
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xsl.*;
-
 import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.server.webapp.WebApp;
-
+import com.caucho.log.Log;
 import com.caucho.server.connection.CauchoRequest;
-import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.xsl.AbstractStylesheetFactory;
+import com.caucho.xsl.CauchoStylesheet;
+import com.caucho.xsl.StyleScript;
+import com.caucho.xsl.StylesheetImpl;
+import com.caucho.xsl.Xsl;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.xml.transform.Templates;
+import java.lang.ref.SoftReference;
+import java.util.logging.Logger;
 
 class XslManager {
   private static final Logger log = Log.open(XslManager.class);

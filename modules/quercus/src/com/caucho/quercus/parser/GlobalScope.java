@@ -29,17 +29,13 @@
 
 package com.caucho.quercus.parser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import com.caucho.quercus.expr.ExprFactory;
+import com.caucho.quercus.program.Function;
+import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.expr.ExprFactory;
-
-import com.caucho.quercus.program.Function;
-
-import com.caucho.quercus.program.ClassDef;
-import com.caucho.quercus.program.InterpretedClassDef;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Parse scope.

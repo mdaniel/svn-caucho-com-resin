@@ -28,17 +28,12 @@
 
 package javax.xml.rpc;
 
-import java.util.Iterator;
-
-import java.net.URL;
-
-import java.rmi.Remote;
-
 import javax.xml.namespace.QName;
-
 import javax.xml.rpc.encoding.TypeMappingRegistry;
-
 import javax.xml.rpc.handler.HandlerRegistry;
+import java.net.URL;
+import java.rmi.Remote;
+import java.util.Iterator;
 
 /**
  * Abstract implementation of a XML-RPC service.

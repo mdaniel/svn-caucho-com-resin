@@ -29,11 +29,8 @@
 
 package com.caucho.bytecode;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 /**
  * Wrapper around the Java Constructor for a JMethod.

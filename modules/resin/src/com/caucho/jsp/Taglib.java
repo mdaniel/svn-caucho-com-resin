@@ -28,20 +28,24 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.beans.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
+import com.caucho.jsp.cfg.TldFunction;
+import com.caucho.jsp.cfg.TldTag;
+import com.caucho.jsp.cfg.TldTagFile;
+import com.caucho.jsp.cfg.TldTaglib;
+import com.caucho.jsp.cfg.TldValidator;
 import com.caucho.log.Log;
-import com.caucho.server.http.*;
-import com.caucho.jsp.cfg.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
+import javax.servlet.jsp.tagext.FunctionInfo;
+import javax.servlet.jsp.tagext.TagExtraInfo;
+import javax.servlet.jsp.tagext.TagFileInfo;
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.jsp.tagext.TagLibraryInfo;
+import javax.servlet.jsp.tagext.TagLibraryValidator;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Stores the entire information for a tag library.

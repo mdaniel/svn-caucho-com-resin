@@ -29,20 +29,16 @@
 
 package com.caucho.config.jaxb;
 
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.el.*;
-import javax.xml.bind.annotation.adapters.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
+import com.caucho.config.TypeStrategy;
+import com.caucho.xml.QName;
 
 import org.w3c.dom.Node;
 
-import com.caucho.util.*;
-
-import com.caucho.el.*;
-
-import com.caucho.config.*;
-import com.caucho.xml.*;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 
 public class AdapterField extends JaxbProperty {
   private final TypeStrategy _typeMarshal;

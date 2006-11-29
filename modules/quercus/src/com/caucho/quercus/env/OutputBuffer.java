@@ -29,13 +29,12 @@
 
 package com.caucho.quercus.env;
 
-import java.util.logging.Logger;
-
-import java.io.IOException;
-
-import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Represents a PHP output buffer

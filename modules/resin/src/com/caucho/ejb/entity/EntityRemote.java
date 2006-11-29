@@ -28,9 +28,9 @@
 
 package com.caucho.ejb.entity;
 
-import java.io.ObjectStreamException;
-
 import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
+
+import java.io.ObjectStreamException;
 /**
  * Abstract base class for an EntityObject.
  */

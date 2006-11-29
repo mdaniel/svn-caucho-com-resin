@@ -28,14 +28,11 @@
 
 package javax.enterprise.deploy.model;
 
-import java.util.Enumeration;
-
-import java.io.InputStream;
-import java.io.FileNotFoundException;
-
 import javax.enterprise.deploy.model.exceptions.DDBeanCreateException;
-
 import javax.enterprise.deploy.shared.ModuleType;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.Enumeration;
 
 /**
  * Representds a J2EE deployable module (JAR, WAR, etc)

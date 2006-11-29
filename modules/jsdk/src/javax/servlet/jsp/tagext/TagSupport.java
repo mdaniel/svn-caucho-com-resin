@@ -28,10 +28,11 @@
 
 package javax.servlet.jsp.tagext;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.jsp.*;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * Convenient support class for creating tags which don't analyze their

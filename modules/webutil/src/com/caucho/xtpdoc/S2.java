@@ -29,12 +29,10 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
-
-import java.util.ArrayList;
-
-import javax.xml.stream.*;
+import java.io.PrintWriter;
 
 public class S2 extends Section {
   public S2(Document document, String parentHref)

@@ -28,11 +28,10 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.ArrayList;
-
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
+import java.util.ArrayList;
 
 /**
  * Configuration for a method.

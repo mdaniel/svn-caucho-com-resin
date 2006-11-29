@@ -29,9 +29,7 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.util.HashMap;
 
 /**
  * The top-level filesystem schemes are collected into a single map.

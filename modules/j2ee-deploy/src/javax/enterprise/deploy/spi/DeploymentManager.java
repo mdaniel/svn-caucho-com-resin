@@ -28,21 +28,16 @@
 
 package javax.enterprise.deploy.spi;
 
-import java.util.Locale;
-
-import java.io.File;
-import java.io.InputStream;
-
 import javax.enterprise.deploy.model.DeployableObject;
-
 import javax.enterprise.deploy.shared.DConfigBeanVersionType;
 import javax.enterprise.deploy.shared.ModuleType;
-
-import javax.enterprise.deploy.spi.status.ProgressObject;
-
-import javax.enterprise.deploy.spi.exceptions.TargetException;
-import javax.enterprise.deploy.spi.exceptions.InvalidModuleException;
 import javax.enterprise.deploy.spi.exceptions.DConfigBeanVersionUnsupportedException;
+import javax.enterprise.deploy.spi.exceptions.InvalidModuleException;
+import javax.enterprise.deploy.spi.exceptions.TargetException;
+import javax.enterprise.deploy.spi.status.ProgressObject;
+import java.io.File;
+import java.io.InputStream;
+import java.util.Locale;
 
 /**
  * Manager for the deployments.

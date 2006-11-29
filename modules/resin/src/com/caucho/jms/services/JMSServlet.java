@@ -29,29 +29,18 @@
 
 package com.caucho.jms.services;
 
-import java.io.InputStream;
-import java.io.IOException;
+import com.caucho.jms.util.BytesMessageOutputStream;
+import com.caucho.vfs.VfsStream;
+import com.caucho.vfs.WriteStream;
 
-import java.util.logging.Logger;
-
-import javax.jms.BytesMessage;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-
+import javax.jms.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.jms.util.BytesMessageOutputStream;
-
-import com.caucho.vfs.VfsStream;
-import com.caucho.vfs.WriteStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Logger;
 
 public class JMSServlet extends HttpServlet {
   private static final Logger log =

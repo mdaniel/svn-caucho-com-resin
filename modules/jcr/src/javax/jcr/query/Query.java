@@ -28,10 +28,15 @@
  */
 package javax.jcr.query;
 
-import javax.jcr.*;
-import javax.jcr.lock.*;
-import javax.jcr.nodetype.*;
-import javax.jcr.version.*;
+import javax.jcr.ItemExistsException;
+import javax.jcr.ItemNotFoundException;
+import javax.jcr.Node;
+import javax.jcr.PathNotFoundException;
+import javax.jcr.RepositoryException;
+import javax.jcr.UnsupportedRepositoryOperationException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.version.VersionException;
 
 public interface Query {
   public static final String XPATH = "xpath";

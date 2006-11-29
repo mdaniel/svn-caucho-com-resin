@@ -28,17 +28,13 @@
 
 package com.caucho.jsp;
 
-import org.xml.sax.Locator;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
+import com.caucho.vfs.Vfs;
 import com.caucho.xml.QName;
 
-import com.caucho.jsp.java.JspNode;
-
-import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.vfs.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Generates the nodes for JSP code.

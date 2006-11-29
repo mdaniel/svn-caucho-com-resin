@@ -29,13 +29,10 @@
 
 package com.caucho.jsp;
 
-import javax.servlet.ServletException;
-
+import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.Path;
 
-import com.caucho.java.LineMap;
-
-import com.caucho.server.webapp.WebApp;
+import javax.servlet.ServletException;
 
 public interface CauchoPage {
   public void init(Path path)

@@ -28,12 +28,7 @@
 
 package com.caucho.es.wrapper;
 
-import java.io.*;
-import java.util.*;
-import java.beans.*;
-import java.lang.reflect.*;
-
-import com.caucho.util.*;
+import java.beans.IntrospectionException;
 
 class ESIndexedPropertyDescriptor extends ESPropertyDescriptor {
   ESMethodDescriptor getter;

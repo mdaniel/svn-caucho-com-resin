@@ -28,16 +28,20 @@
 
 package com.caucho.eswrap.java.sql;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.math.*;
-import java.sql.*;
-
-import com.caucho.es.*;
-import com.caucho.vfs.*;
+import com.caucho.es.Call;
+import com.caucho.es.ESBase;
+import com.caucho.es.Global;
 import com.caucho.log.Log;
-import com.caucho.util.*;
+import com.caucho.util.NullIterator;
+
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 public class ResultSetEcmaWrap {
   private static final Logger log = Log.open(ResultSet.class);

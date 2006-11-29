@@ -28,25 +28,21 @@
 
 package com.caucho.make;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.Loader;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.EnvironmentLocal;
-
 import com.caucho.config.DynamicBean;
 import com.caucho.config.DynamicItem;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.Loader;
+import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class loader which checks for changes in class files and automatically

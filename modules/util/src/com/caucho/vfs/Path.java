@@ -29,13 +29,19 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Crc64;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.util.RandomUtil;
 
-import java.io.*;
-
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.security.cert.Certificate;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * A virtual filesystem path, essentially represented by a URL.

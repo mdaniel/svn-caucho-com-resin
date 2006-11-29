@@ -31,9 +31,9 @@ package com.caucho.management.j2ee;
 
 import com.caucho.ejb.cfg.EjbSessionBean;
 
-import javax.management.j2ee.statistics.StatelessSessionBeanStats;
-import javax.management.j2ee.statistics.RangeStatistic;
 import javax.management.j2ee.statistics.CountStatistic;
+import javax.management.j2ee.statistics.RangeStatistic;
+import javax.management.j2ee.statistics.StatelessSessionBeanStats;
 
 /**
  * Management interface for a stateless session bean.

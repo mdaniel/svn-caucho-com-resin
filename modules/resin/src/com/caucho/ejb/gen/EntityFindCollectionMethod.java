@@ -28,24 +28,17 @@
 
 package com.caucho.ejb.gen;
 
-import java.io.IOException;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Enumeration;
-
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBObject;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-
-import com.caucho.util.L10N;
-
+import com.caucho.bytecode.JMethod;
 import com.caucho.java.JavaWriter;
-
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.MethodCallChain;
+import com.caucho.util.L10N;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  * Generates the skeleton for the find method.

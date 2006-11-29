@@ -29,33 +29,24 @@
 
 package com.caucho.amber.field;
 
-import java.io.IOException;
-import java.io.Serializable;
-
-import java.util.HashSet;
-import java.util.ArrayList;
-
-import java.sql.SQLException;
-
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JType;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.amber.manager.AmberConnection;
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.PathExpr;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryParser;
-
 import com.caucho.amber.table.Table;
-
 import com.caucho.amber.type.AbstractStatefulType;
+import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.JType;
+import com.caucho.config.ConfigException;
+import com.caucho.java.JavaWriter;
+import com.caucho.util.CharBuffer;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Configuration for a bean's property

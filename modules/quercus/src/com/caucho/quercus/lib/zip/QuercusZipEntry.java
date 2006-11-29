@@ -28,18 +28,17 @@
 
 package com.caucho.quercus.lib.zip;
 
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.annotation.Optional;
 import com.caucho.util.L10N;
-
 import com.caucho.vfs.TempBuffer;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;

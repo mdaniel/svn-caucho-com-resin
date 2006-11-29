@@ -28,9 +28,6 @@
 
 package com.caucho.es;
 
-import java.util.*;
-import com.caucho.util.*;
-
 public class ESNull extends ESBase {
   ESNull()
   {

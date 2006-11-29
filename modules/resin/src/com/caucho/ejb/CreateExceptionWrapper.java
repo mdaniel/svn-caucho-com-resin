@@ -28,11 +28,6 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.util.*;
-
 /**
  * Wraps the actual exception with an EJB exception
  */

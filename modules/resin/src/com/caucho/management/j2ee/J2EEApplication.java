@@ -29,8 +29,8 @@
 
 package com.caucho.management.j2ee;
 
-import com.caucho.server.e_app.EarDeployController;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.server.e_app.EarDeployController;
 
 /**
  * Management interface for a J2EE Application (EAR).

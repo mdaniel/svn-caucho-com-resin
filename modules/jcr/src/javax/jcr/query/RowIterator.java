@@ -29,7 +29,7 @@
 
 package javax.jcr.query;
 
-import javax.jcr.*;
+import javax.jcr.RangeIterator;
 
 public interface RowIterator extends RangeIterator {
   public Row nextRow();

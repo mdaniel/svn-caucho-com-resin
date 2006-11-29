@@ -28,15 +28,7 @@
 
 package com.caucho.amber.query;
 
-import com.caucho.amber.type.Type;
-import com.caucho.amber.type.StringType;
-import com.caucho.amber.type.ByteType;
-import com.caucho.amber.type.ShortType;
-import com.caucho.amber.type.IntegerType;
-import com.caucho.amber.type.LongType;
-import com.caucho.amber.type.DoubleType;
-import com.caucho.amber.type.SqlTimestampType;
-import com.caucho.amber.type.SqlDateType;
+import com.caucho.amber.type.*;
 
 /**
  * Represents the arguments to a query.

@@ -29,7 +29,7 @@
 
 package com.caucho.soa.servlet;
 
-import javax.servlet.*;
+import javax.servlet.Servlet;
 
 /**
  * A SOA protocol.

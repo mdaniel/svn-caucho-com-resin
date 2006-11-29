@@ -28,10 +28,10 @@
  */
 package com.caucho.db.jdbc;
 
-import java.sql.ResultSetMetaData;
-
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.SelectResult;
+
+import java.sql.ResultSetMetaData;
 
 /**
  * Metadata for the result

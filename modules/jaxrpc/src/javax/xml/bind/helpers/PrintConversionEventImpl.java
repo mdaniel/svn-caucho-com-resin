@@ -28,7 +28,8 @@
 */
 
 package javax.xml.bind.helpers;
-import javax.xml.bind.*;
+import javax.xml.bind.PrintConversionEvent;
+import javax.xml.bind.ValidationEventLocator;
 
 public class PrintConversionEventImpl
   extends ValidationEventImpl

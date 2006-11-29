@@ -30,13 +30,11 @@
 
 package com.caucho.server.cluster;
 
-import java.io.Serializable;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.ClusterMXBean;
+import com.caucho.management.server.ServerConnectorMXBean;
 
 import java.util.Date;
-
-import javax.management.ObjectName;
-
-import com.caucho.management.server.*;
 
 /**
  * Implementation of the ClusterClient's administration mbean.

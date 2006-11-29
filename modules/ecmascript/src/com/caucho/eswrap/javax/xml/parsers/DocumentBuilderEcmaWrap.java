@@ -28,17 +28,15 @@
 
 package com.caucho.eswrap.javax.xml.parsers;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.es.Call;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 
-import javax.xml.parsers.*;
-import org.xml.sax.*;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.es.*;
+import javax.xml.parsers.DocumentBuilder;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class DocumentBuilderEcmaWrap {
   public static Document parse(DocumentBuilder parser, Call call, int length)

@@ -31,8 +31,8 @@ package com.caucho.management.j2ee;
 
 import com.caucho.jms.ConnectionFactoryImpl;
 
-import javax.management.j2ee.statistics.JMSStats;
 import javax.management.j2ee.statistics.JMSConnectionStats;
+import javax.management.j2ee.statistics.JMSStats;
 
 /**
  * Management interface for a JMS resource.

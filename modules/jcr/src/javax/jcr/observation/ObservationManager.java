@@ -29,7 +29,7 @@
 
 package javax.jcr.observation;
 
-import javax.jcr.*;
+import javax.jcr.RepositoryException;
 
 public interface ObservationManager {
   public void addEventListener(EventListener listener,

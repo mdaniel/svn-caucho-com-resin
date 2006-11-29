@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.IOException;
-
 import com.caucho.quercus.env.Value;
 
 /**

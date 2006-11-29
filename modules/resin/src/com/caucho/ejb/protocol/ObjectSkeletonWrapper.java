@@ -28,10 +28,9 @@
 
 package com.caucho.ejb.protocol;
 
-import java.io.Serializable;
-import java.io.ObjectStreamException;
-
 import javax.ejb.Handle;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 
 /**
  * Special class for dealing with serialization.

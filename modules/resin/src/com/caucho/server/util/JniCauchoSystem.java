@@ -29,17 +29,8 @@
 
 package com.caucho.server.util;
 
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import java.util.regex.Pattern;
-import java.io.*;
-import java.net.*;
-
-import com.caucho.util.*;
-import com.caucho.loader.*;
-import com.caucho.vfs.*;
-import com.caucho.java.WorkDir;
+import java.util.logging.Logger;
 
 /**
  * A wrapper for Caucho system variables, allowing tests to override

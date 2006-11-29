@@ -29,14 +29,15 @@
 
 package com.caucho.jcr.file;
 
-import java.io.IOException;
-
-import javax.jcr.*;
-import javax.jcr.nodetype.*;
-
-import com.caucho.jcr.base.*;
-
+import com.caucho.jcr.base.BaseNode;
+import com.caucho.jcr.base.BaseNodeType;
 import com.caucho.vfs.Path;
+
+import javax.jcr.PathNotFoundException;
+import javax.jcr.Property;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.nodetype.NodeType;
 
 /**
  * Represents a file's contents in the filesystem

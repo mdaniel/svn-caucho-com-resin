@@ -28,9 +28,7 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
-
+import com.caucho.amber.query.QueryParser;
 import com.caucho.util.CharBuffer;
 
 /**

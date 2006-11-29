@@ -28,15 +28,11 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.util.LineCompileException;
 
-import javax.xml.transform.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.xml.transform.TransformerConfigurationException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 public class XslParseException extends TransformerConfigurationException
   implements LineCompileException {

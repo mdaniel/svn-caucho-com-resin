@@ -29,14 +29,6 @@
 
 package com.caucho.config.types;
 
-import java.util.ArrayList;
-import java.lang.reflect.Method;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.config.BeanBuilderException;
-
 /**
  * A string without EL expr.
  */

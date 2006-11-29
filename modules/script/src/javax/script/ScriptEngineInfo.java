@@ -29,8 +29,6 @@
 
 package javax.script;
 
-import java.util.Map;
-
 /**
  * Metadata about the script engine.
  */

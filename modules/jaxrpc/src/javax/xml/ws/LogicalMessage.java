@@ -28,8 +28,8 @@
 */
 
 package javax.xml.ws;
-import javax.xml.transform.*;
-import javax.xml.bind.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.transform.Source;
 
 /** XXX */
 public interface LogicalMessage {

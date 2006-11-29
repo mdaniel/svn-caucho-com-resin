@@ -29,19 +29,6 @@
 
 package com.caucho.server.deploy;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import com.caucho.util.*;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.lifecycle.Lifecycle;
-
 /**
  * DeployController controls the lifecycle of the DeployInstance.
  *
@@ -80,7 +67,7 @@ public interface DeployControllerStrategy
    * @param controller the owning controller
    */
   public<I extends DeployInstance>
-    void startOnInit(DeployController<I> controller);
+  void startOnInit(DeployController<I> controller);
 
   /**
    * Starts the instance from an admin command.
@@ -88,7 +75,7 @@ public interface DeployControllerStrategy
    * @param controller the owning controller
    */
   public<I extends DeployInstance>
-    void start(DeployController<I> controller);
+  void start(DeployController<I> controller);
 
   /**
    * Stops the instance from an admin command.
@@ -96,7 +83,7 @@ public interface DeployControllerStrategy
    * @param controller the owning controller
    */
   public<I extends DeployInstance>
-    void stop(DeployController<I> controller);
+  void stop(DeployController<I> controller);
 
   /**
    * Checks for updates from an admin command.  The target state will be the
@@ -105,7 +92,7 @@ public interface DeployControllerStrategy
    * @param controller the owning controller
    */
   public<I extends DeployInstance>
-    void update(DeployController<I> controller);
+  void update(DeployController<I> controller);
 
   /**
    * On a top-level request, returns the deploy instance, starting if necessary.
@@ -115,7 +102,7 @@ public interface DeployControllerStrategy
    */
   /* XXX: should request always return an instance? */
   public<I extends DeployInstance>
-    I request(DeployController<I> controller);
+  I request(DeployController<I> controller);
 
   /**
    * On a sub-request, returns the deploy instance, starting if necessary.
@@ -125,7 +112,7 @@ public interface DeployControllerStrategy
    */
   /* XXX: should request always return an instance? */
   public<I extends DeployInstance>
-    I subrequest(DeployController<I> controller);
+  I subrequest(DeployController<I> controller);
 
 
   /**
@@ -134,6 +121,6 @@ public interface DeployControllerStrategy
    * @param controller the owning controller
    */
   public<I extends DeployInstance>
-    void alarm(DeployController<I> controller);
+  void alarm(DeployController<I> controller);
 
 }

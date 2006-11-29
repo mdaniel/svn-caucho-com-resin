@@ -29,7 +29,7 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.*;
+import com.caucho.config.BuilderProgram;
 
 public class ServerConfig {
   private ClusterConfig _cluster;

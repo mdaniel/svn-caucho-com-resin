@@ -29,24 +29,19 @@
 
 package com.caucho.soa.encoding;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
-import java.util.logging.Logger;
-
-import javax.annotation.*;
-
-import javax.xml.bind.JAXBException;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
-
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.soap.skeleton.DirectSkeleton;
+
+import javax.annotation.PostConstruct;
+import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.logging.Logger;
 
 /**
  * Invokes a service based on a Hessian-encoded request.

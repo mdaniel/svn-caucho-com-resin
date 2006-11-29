@@ -29,41 +29,16 @@
 
 package com.caucho.server.log;
 
-import java.util.ArrayList;
+import com.caucho.log.AbstractRolloverLog;
+import com.caucho.util.Alarm;
+import com.caucho.util.FreeList;
+import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.zip.ZipOutputStream;
-import java.util.zip.GZIPOutputStream;
-
-import java.io.OutputStream;
 import java.io.IOException;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.util.*;
-
-import com.caucho.vfs.*;
-import com.caucho.log.*;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.CloseListener;
-
-import com.caucho.config.types.Period;
-import com.caucho.config.types.Bytes;
-import com.caucho.config.types.InitProgram;
-import com.caucho.config.ConfigException;
-
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
-
-import com.caucho.server.dispatch.ServletConfigException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents an log of every top-level request to the server.

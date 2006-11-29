@@ -29,19 +29,18 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
-import java.io.IOException;
+import com.caucho.config.Config;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-
-import javax.xml.stream.XMLStreamWriter;
+import javax.servlet.ServletContext;
 import javax.xml.stream.XMLStreamException;
-
-import com.caucho.config.*;
-import com.caucho.vfs.*;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Document {
   private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());

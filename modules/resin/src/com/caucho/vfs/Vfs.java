@@ -29,14 +29,16 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
-
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.server.hmux.*;
+import com.caucho.server.hmux.HmuxPath;
+import com.caucho.util.CharBuffer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Map;
 
 /**
  * Facade to create useful Path and Stream objects.

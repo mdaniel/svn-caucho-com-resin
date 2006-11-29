@@ -28,11 +28,10 @@
 
 package com.caucho.server.connection;
 
-import java.io.*;
-import java.net.*;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
+import java.net.InetAddress;
 
 /**
  * Represents a protocol-independent connection.  Prococol servers and

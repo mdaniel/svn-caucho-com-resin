@@ -30,9 +30,7 @@
 
 package com.caucho.eswrap.java.util;
 
-import java.util.*;
-import com.caucho.util.*;
-import com.caucho.es.*;
+import java.util.Enumeration;
 
 public class EnumerationEcmaWrap {
   public static Enumeration keys(Enumeration e)

@@ -29,23 +29,22 @@
 
 package com.caucho.loader;
 
-import java.lang.ref.WeakReference;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
+import com.caucho.make.DependencyContainer;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.QDate;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.ReadStream;
 
 import java.io.IOException;
-
+import java.lang.ref.WeakReference;
 import java.security.CodeSource;
-
-import com.caucho.util.QDate;
-import com.caucho.util.ByteBuffer;
-
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.make.DependencyContainer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Describes a cached loaded class entry.

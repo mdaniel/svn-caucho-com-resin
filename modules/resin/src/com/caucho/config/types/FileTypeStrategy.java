@@ -29,18 +29,14 @@
 
 package com.caucho.config.types;
 
-import java.io.File;
-
-import javax.servlet.jsp.el.VariableResolver;
-import javax.servlet.jsp.el.ELException;
-
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
 import com.caucho.config.NodeBuilder;
 import com.caucho.config.TypeStrategy;
-import com.caucho.el.Expr;
-import com.caucho.el.ELParser;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
 import org.w3c.dom.Node;
+
+import java.io.File;
 
 public class FileTypeStrategy extends TypeStrategy {
   protected static final L10N L = new L10N(FileTypeStrategy.class);

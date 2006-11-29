@@ -30,8 +30,6 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-
 /**
  * Extra tag information for a custom tag.  It performs a similar function
  * to BeanInfo classes, but for tag libraries.  The TagExtraInfo class will
@@ -61,7 +59,7 @@ public abstract class TagExtraInfo {
   public TagExtraInfo()
   {
   }
-  
+
   /**
    * Returns information needed to instantiate runtime variables.
    *
@@ -124,10 +122,10 @@ public abstract class TagExtraInfo {
       ValidationMessage msg;
       String prefix = getTagInfo().getTagLibrary().getShortName();
       String name = getTagInfo().getTagName();
-      
+
       if (prefix != null)
-	name = prefix + ':' + name;
-      
+        name = prefix + ':' + name;
+
       msg = new ValidationMessage(null, "tag <" + name + "> was not valid according to validator `" + getClass().getName() + "'");
 
       return new ValidationMessage[] { msg };

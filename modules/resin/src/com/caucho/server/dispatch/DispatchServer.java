@@ -29,15 +29,14 @@
 
 package com.caucho.server.dispatch;
 
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.Dependency;
+
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-
-import javax.annotation.*;
-
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.util.LruCache;
-import com.caucho.vfs.*;
 
 /**
  * The dispatch server is responsible for building Invocations,

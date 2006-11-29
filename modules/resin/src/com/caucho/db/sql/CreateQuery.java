@@ -28,23 +28,14 @@
 
 package com.caucho.db.sql;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.util.CharBuffer;
-
+import com.caucho.db.Database;
+import com.caucho.db.store.Transaction;
+import com.caucho.db.table.TableFactory;
 import com.caucho.log.Log;
-
 import com.caucho.sql.SQLExceptionWrapper;
 
-import com.caucho.db.Database;
-import com.caucho.db.ResultSetImpl;
-
-import com.caucho.db.store.Transaction;
-
-import com.caucho.db.table.TableFactory;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 public class CreateQuery extends Query {
   private static final Logger log = Log.open(CreateQuery.class);

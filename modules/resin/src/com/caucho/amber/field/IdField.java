@@ -28,15 +28,12 @@
 
 package com.caucho.amber.field;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
+import com.caucho.amber.table.Column;
+import com.caucho.amber.type.Type;
 import com.caucho.java.JavaWriter;
 
-import com.caucho.amber.type.Type;
-
-import com.caucho.amber.table.Column;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Configuration for a bean's field

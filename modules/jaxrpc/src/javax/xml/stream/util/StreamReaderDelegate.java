@@ -28,8 +28,11 @@
 */
 
 package javax.xml.stream.util;
-import javax.xml.stream.*;
-import javax.xml.namespace.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  *  Wrapper around an XMLStreamReader

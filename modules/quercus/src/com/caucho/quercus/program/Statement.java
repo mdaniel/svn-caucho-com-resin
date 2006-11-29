@@ -29,18 +29,14 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.IdentityHashMap;
-
+import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusExecutionException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.expr.VarExpr;
-
-import com.caucho.quercus.Location;
-import com.caucho.quercus.QuercusExecutionException;
+import java.util.IdentityHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a PHP statement

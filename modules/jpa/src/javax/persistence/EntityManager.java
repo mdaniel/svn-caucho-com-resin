@@ -29,8 +29,6 @@
 
 package javax.persistence;
 
-import java.util.Map;
-
 /**
  * The main application interface to the persistence context.
  */

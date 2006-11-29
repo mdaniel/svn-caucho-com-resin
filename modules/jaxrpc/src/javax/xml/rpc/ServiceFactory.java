@@ -28,19 +28,13 @@
 
 package javax.xml.rpc;
 
-import java.util.Iterator;
-import java.util.Properties;
-
+import javax.xml.namespace.QName;
+import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.BufferedReader;
-
 import java.net.URL;
-
-import java.rmi.Remote;
-
-import javax.xml.namespace.QName;
+import java.util.Properties;
 
 /**
  * Abstract implementation of a XML-RPC service.

@@ -29,22 +29,15 @@
 
 package com.caucho.soap.service;
 
-import com.caucho.soap.reflect.*;
-import java.lang.reflect.*;
-import javax.jws.*;
-import com.caucho.soap.marshall.*;
-import com.caucho.soap.skeleton.*;
-import com.caucho.util.*;
-import java.io.*;
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-import javax.xml.ws.*;
-import javax.xml.stream.*;
-import com.caucho.vfs.*;
-import java.net.HttpURLConnection;
+import com.caucho.soap.reflect.WebServiceIntrospector;
+import com.caucho.soap.skeleton.DirectSkeleton;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class ServiceImplInvocationHandler implements InvocationHandler
 {

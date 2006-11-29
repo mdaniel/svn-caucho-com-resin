@@ -29,15 +29,15 @@
 
 package com.caucho.soa.servlet;
 
-import java.io.*;
+import com.caucho.hessian.io.SerializerFactory;
+import com.caucho.soa.encoding.HessianEncoding;
 
-import java.util.logging.*;
-
-import javax.servlet.*;
-
-import com.caucho.hessian.io.*;
-
-import com.caucho.soa.encoding.*;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Invokes a service based on a Hessian-encoded request.

@@ -28,9 +28,6 @@
 
 package com.caucho.widget;
 
-import java.io.*;
-import java.util.*;
-
 import com.caucho.util.L10N;
 
 public class WidgetMode

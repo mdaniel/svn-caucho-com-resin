@@ -29,23 +29,17 @@
 
 package com.caucho.amber.type;
 
-import java.util.ArrayList;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import com.caucho.amber.AmberRuntimeException;
-
 import com.caucho.amber.entity.Listener;
-
 import com.caucho.amber.field.StubMethod;
-
+import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassLoader;
 import com.caucho.bytecode.JMethod;
-
 import com.caucho.util.L10N;
 
-import com.caucho.amber.manager.AmberPersistenceUnit;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents an abstract enhanced type.

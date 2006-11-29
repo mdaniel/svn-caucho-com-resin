@@ -52,14 +52,14 @@ package com.caucho.portal.generic.context;
 import com.caucho.portal.generic.Cache;
 import com.caucho.portal.generic.CacheKey;
 
-import java.io.*;
-
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class CachingResponseHandler extends AbstractResponseHandler
 {

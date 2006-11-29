@@ -28,15 +28,12 @@
 
 package com.caucho.jmx;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import javax.management.loading.ClassLoaderRepository;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import javax.management.loading.ClassLoaderRepository;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Resin implementation for a class loader repository.

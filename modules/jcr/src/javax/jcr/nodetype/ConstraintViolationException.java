@@ -29,7 +29,7 @@
 
 package javax.jcr.nodetype;
 
-import javax.jcr.*;
+import javax.jcr.RepositoryException;
 
 public class ConstraintViolationException extends RepositoryException {
   public ConstraintViolationException()

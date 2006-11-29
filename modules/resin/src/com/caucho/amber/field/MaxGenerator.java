@@ -29,9 +29,9 @@
 package com.caucho.amber.field;
 
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Configuration for a bean's field

@@ -31,6 +31,7 @@ package com.caucho.config;
 
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
+
 import org.w3c.dom.Node;
 
 /**

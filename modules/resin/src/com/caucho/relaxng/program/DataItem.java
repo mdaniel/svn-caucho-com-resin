@@ -28,14 +28,10 @@
 
 package com.caucho.relaxng.program;
 
-import java.util.*;
-import java.util.logging.*;
-
 import com.caucho.util.L10N;
-
 import com.caucho.xml.QName;
 
-import com.caucho.relaxng.RelaxException;
+import java.util.HashSet;
 
 /**
  * Represents generaic text.

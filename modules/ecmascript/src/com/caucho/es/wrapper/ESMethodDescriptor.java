@@ -28,12 +28,10 @@
 
 package com.caucho.es.wrapper;
 
-import java.io.*;
-import java.util.*;
-import java.beans.*;
-import java.lang.reflect.*;
-
-import com.caucho.util.*;
+import java.beans.IntrospectionException;
+import java.beans.MethodDescriptor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * Describes a method from a JavaScript perspective.

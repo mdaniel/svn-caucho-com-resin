@@ -28,34 +28,23 @@
 
 package com.caucho.amber.entity;
 
-import java.lang.reflect.Method;
-
-import java.lang.ref.SoftReference;
-
-import java.util.ArrayList;
-import java.util.Map;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-import java.sql.ResultSet;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-
 import com.caucho.amber.AmberException;
-import com.caucho.amber.AmberObjectNotFoundException;
-
-import com.caucho.amber.type.EntityType;
-
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-
 import com.caucho.amber.query.CacheUpdate;
+import com.caucho.amber.type.EntityType;
+import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import java.lang.ref.SoftReference;
+import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manages the set of persistent beans.

@@ -29,31 +29,10 @@
 
 package com.caucho.servlets;
 
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.PathPatternType;
-
-import com.caucho.server.webapp.Application;
-
-import com.caucho.server.connection.StubServletRequest;
-import com.caucho.server.connection.StubServletResponse;
-
-import com.caucho.jsp.JspPrecompileResource;
+import java.util.logging.Logger;
 
 /**
  * Precompiles jsp files.

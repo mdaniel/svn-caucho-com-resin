@@ -29,35 +29,35 @@
 
 package com.caucho.soa.rest;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
-import java.lang.annotation.Annotation;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import java.util.logging.Logger;
+import com.caucho.jaxb.JAXBUtil;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.soa.servlet.ProtocolServlet;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.stream.XMLStreamWriterImpl;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import javax.xml.bind.*;
-
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.jaxb.JAXBUtil;
-import com.caucho.soa.servlet.*;
-import com.caucho.xml.stream.*;
-import com.caucho.vfs.*;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * A binding for REST services.

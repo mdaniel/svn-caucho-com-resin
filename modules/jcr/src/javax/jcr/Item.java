@@ -29,11 +29,10 @@
 
 package javax.jcr;
 
-import javax.jcr.lock.*;
-
-import javax.jcr.nodetype.*;
-
-import javax.jcr.version.*;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.version.VersionException;
 
 /**
  * Represents a Node or Property in the repository.

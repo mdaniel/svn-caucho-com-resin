@@ -28,15 +28,10 @@
  */
 
 package com.caucho.soap.marshall;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
-import java.math.*;
-
-import java.lang.reflect.*;
-import java.io.*;
-
-import com.caucho.vfs.WriteStream;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.math.BigDecimal;
 
 /**
  * Marshalls data for a string object

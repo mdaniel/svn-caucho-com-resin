@@ -28,8 +28,6 @@
 
 package com.caucho.jsp;
 
-import javax.servlet.jsp.tagext.TagInfo;
-
 import com.caucho.jsp.cfg.TldTag;
 import com.caucho.jsp.java.TagInfoExt;
 

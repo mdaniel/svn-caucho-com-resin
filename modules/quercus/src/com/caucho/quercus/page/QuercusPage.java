@@ -29,21 +29,17 @@
 
 package com.caucho.quercus.page;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.caucho.quercus.Quercus;
-
-import com.caucho.quercus.env.*;
-
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusLanguageException;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
-
 import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a compiled PHP program.

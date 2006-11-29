@@ -28,11 +28,10 @@
 
 package com.caucho.db.table;
 
-import java.sql.SQLException;
-
+import com.caucho.db.sql.QueryContext;
 import com.caucho.db.store.Transaction;
 
-import com.caucho.db.sql.QueryContext;
+import java.sql.SQLException;
 
 /**
  * Validity constraints.

@@ -28,16 +28,14 @@
 
 package com.caucho.naming;
 
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
-import com.caucho.util.*;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.util.L10N;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.spi.InitialContextFactory;
+import java.util.Hashtable;
+import java.util.logging.Logger;
 
 /**
  * Returns the JNDI context for the current classloader.  Since each

@@ -29,14 +29,16 @@
 
 package com.caucho.quercus.env;
 
-import java.io.InputStream;
-import java.io.IOException;
+import com.caucho.quercus.lib.string.StringModule;
+import com.caucho.vfs.MultipartStream;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.http.HttpServletRequest;
-
-import com.caucho.vfs.*;
-
-import com.caucho.quercus.lib.string.StringModule;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Handling of POST requests.

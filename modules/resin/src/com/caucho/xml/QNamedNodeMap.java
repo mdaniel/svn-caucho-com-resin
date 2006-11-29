@@ -28,10 +28,12 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
-import java.util.*;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 class QNamedNodeMap<N> implements NamedNodeMap {
   HashMap<String,Node> _map;

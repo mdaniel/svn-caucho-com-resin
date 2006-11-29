@@ -28,19 +28,16 @@
 
 package com.caucho.transaction;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.naming.InitialContext;
-
-import javax.transaction.Transaction;
-import javax.transaction.UserTransaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.Status;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import javax.naming.InitialContext;
+import javax.transaction.Status;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Transaction identifier implementation.

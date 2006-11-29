@@ -36,7 +36,10 @@ import com.caucho.server.connection.RequestAdapter;
 import com.caucho.server.connection.ResponseAdapter;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

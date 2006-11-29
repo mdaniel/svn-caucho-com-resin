@@ -28,25 +28,11 @@
 
 package com.caucho.jca;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.transaction.UserTransaction;
-import javax.transaction.*;
-import javax.transaction.xa.*;
-
-import javax.security.auth.Subject;
-
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ConnectionRequestInfo;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.transaction.TransactionImpl;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Saved state for a suspend.

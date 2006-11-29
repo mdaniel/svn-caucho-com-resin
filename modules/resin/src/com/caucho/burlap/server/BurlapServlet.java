@@ -48,26 +48,23 @@
 
 package com.caucho.burlap.server;
 
+import com.caucho.burlap.io.BurlapInput;
+import com.caucho.burlap.io.BurlapOutput;
+import com.caucho.services.server.Service;
+import com.caucho.services.server.ServiceContext;
+
+import javax.servlet.GenericServlet;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.IOException;
-
-import javax.servlet.Servlet;
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.burlap.io.BurlapInput;
-import com.caucho.burlap.io.BurlapOutput;
-
-import com.caucho.services.server.Service;
-import com.caucho.services.server.ServiceContext;
 
 /**
  * Servlet for serving Burlap services.

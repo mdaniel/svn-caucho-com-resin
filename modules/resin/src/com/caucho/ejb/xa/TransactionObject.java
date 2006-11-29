@@ -28,9 +28,8 @@
 
 package com.caucho.ejb.xa;
 
-import java.rmi.RemoteException;
-
 import javax.ejb.EJBException;
+import java.rmi.RemoteException;
 
 /**
  * Interface for transaction objects

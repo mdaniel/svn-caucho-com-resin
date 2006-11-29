@@ -28,15 +28,13 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
+import com.caucho.jsp.JspParseException;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.QName;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-
-import com.caucho.jsp.*;
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.xml.QName;
 
 /**
  * Represents a Java scriptlet.

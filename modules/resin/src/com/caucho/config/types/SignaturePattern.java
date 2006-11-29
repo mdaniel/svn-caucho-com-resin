@@ -28,12 +28,12 @@
 
 package com.caucho.config.types;
 
-import java.util.*;
-import java.lang.reflect.*;
-
-import com.caucho.util.*;
-
 import com.caucho.config.ConfigException;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 public class SignaturePattern {
   private static L10N L = new L10N(SignaturePattern.class);

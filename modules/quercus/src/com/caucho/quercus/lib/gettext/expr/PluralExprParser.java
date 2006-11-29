@@ -29,25 +29,6 @@
 
 package com.caucho.quercus.lib.gettext.expr;
 
-import com.caucho.quercus.UnimplementedException;
-
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BinaryValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-
 /**
  * Parses a gettext plural expression.
  */
@@ -139,11 +120,11 @@ class PluralExprParser
       isNplurals = true;
     }
     else if (ch == 'p' &&
-        read() == 'l' &&
-        read() == 'u' &&
-        read() == 'r' &&
-        read() == 'a' &&
-        read() == 'l') {
+             read() == 'l' &&
+             read() == 'u' &&
+             read() == 'r' &&
+             read() == 'a' &&
+             read() == 'l') {
       isNplurals = false;
     }
     else
@@ -411,7 +392,7 @@ class PluralExprParser
         default:
           return ch;
       }
-    } 
+    }
   }
 
   private int read()

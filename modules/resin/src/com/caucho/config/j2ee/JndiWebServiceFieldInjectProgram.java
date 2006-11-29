@@ -29,16 +29,17 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
+import com.caucho.soa.client.WebServiceClient;
+import com.caucho.util.L10N;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-
-import java.util.logging.*;
-
-import javax.naming.*;
-
-import com.caucho.config.*;
-import com.caucho.util.*;
-import com.caucho.soa.client.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class JndiWebServiceFieldInjectProgram extends BuilderProgram {

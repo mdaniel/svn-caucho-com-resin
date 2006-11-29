@@ -28,35 +28,14 @@
 
 package com.caucho.jms.jca;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.transaction.xa.XAResource;
-
-import javax.resource.spi.endpoint.MessageEndpoint;
-
-import javax.resource.spi.work.Work;
-
-import javax.jms.ConnectionFactory;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.Connection;
-import javax.jms.QueueConnection;
-import javax.jms.TopicConnection;
-import javax.jms.Session;
-import javax.jms.QueueSession;
-import javax.jms.TopicSession;
-import javax.jms.MessageConsumer;
-import javax.jms.QueueReceiver;
-import javax.jms.TopicSubscriber;
-import javax.jms.MessageListener;
-import javax.jms.Message;
-import javax.jms.Destination;
-import javax.jms.Queue;
-import javax.jms.Topic;
-import javax.jms.JMSException;
-
 import com.caucho.log.Log;
+
+import javax.jms.*;
+import javax.resource.spi.endpoint.MessageEndpoint;
+import javax.resource.spi.work.Work;
+import java.lang.IllegalStateException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The JMS MessageListener endpoint

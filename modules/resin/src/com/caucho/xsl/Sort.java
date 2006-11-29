@@ -28,18 +28,15 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
-import java.text.Collator;
-import javax.servlet.jsp.*;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.XPath;
+import com.caucho.xpath.XPathException;
+import com.caucho.xpath.XPathParseException;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Node;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
-import com.caucho.java.*;
+import java.util.Comparator;
 
 public class Sort {
   public final static int NO_CASE_ORDER = 0;

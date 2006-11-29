@@ -28,10 +28,7 @@
 
 package javax.resource.spi;
 
-import javax.transaction.xa.XAResource;
-
 import javax.resource.ResourceException;
-import javax.resource.NotSupportedException;
 
 /**
  * The associates and object with a resource adapter resource.

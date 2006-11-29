@@ -29,55 +29,25 @@
 
 package com.caucho.jms.session;
 
+import com.caucho.jms.AbstractDestination;
+import com.caucho.jms.message.BytesMessageImpl;
+import com.caucho.jms.message.MapMessageImpl;
+import com.caucho.jms.message.MessageImpl;
+import com.caucho.jms.message.ObjectMessageImpl;
+import com.caucho.jms.message.StreamMessageImpl;
+import com.caucho.jms.message.TextMessageImpl;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
+import com.caucho.util.ThreadTask;
+
+import javax.jms.*;
+import javax.jms.IllegalStateException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import javax.jms.Message;
-import javax.jms.TextMessage;
-import javax.jms.BytesMessage;
-import javax.jms.ObjectMessage;
-import javax.jms.MapMessage;
-import javax.jms.StreamMessage;
-import javax.jms.MessageListener;
-import javax.jms.Destination;
-import javax.jms.Topic;
-import javax.jms.TemporaryTopic;
-import javax.jms.Queue;
-import javax.jms.TemporaryQueue;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.QueueBrowser;
-import javax.jms.TopicSubscriber;
-import javax.jms.Session;
-import javax.jms.JMSException;
-import javax.jms.IllegalStateException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.ThreadTask;
-import com.caucho.util.ThreadPool;
-import com.caucho.util.Alarm;
-
-import com.caucho.log.Log;
-
-import com.caucho.jms.AbstractDestination;
-import com.caucho.jms.AbstractTopic;
-import com.caucho.jms.JMSExceptionWrapper;
-
-import com.caucho.jms.message.MessageImpl;
-import com.caucho.jms.message.TextMessageImpl;
-import com.caucho.jms.message.BytesMessageImpl;
-import com.caucho.jms.message.ObjectMessageImpl;
-import com.caucho.jms.message.MapMessageImpl;
-import com.caucho.jms.message.StreamMessageImpl;
-
-import com.caucho.jms.selector.Selector;
-
-import com.caucho.jms.memory.MemoryQueue;
-import com.caucho.jms.memory.MemoryTopic;
+import java.util.logging.Logger;
 
 /**
  * Manages the JMS session.

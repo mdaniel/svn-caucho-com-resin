@@ -29,14 +29,12 @@
 
 package com.caucho.soa.client;
 
-import java.util.HashMap;
-import java.util.logging.Logger;
-
-import java.net.MalformedURLException;
+import com.caucho.soa.encoding.UnknownServiceEncodingException;
 
 import javax.xml.bind.JAXBException;
-
-import com.caucho.soa.encoding.UnknownServiceEncodingException;
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class ProxyManager {
   private static final Logger log 

@@ -29,14 +29,14 @@
 
 package com.caucho.log;
 
-import java.lang.ref.SoftReference;
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.L10N;
-import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
+
+import java.lang.ref.SoftReference;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the log manager.

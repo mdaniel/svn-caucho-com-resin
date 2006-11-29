@@ -30,14 +30,12 @@
 
 package com.caucho.eswrap.org.w3c.dom;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.xpath.XPath;
+import com.caucho.xpath.XPathException;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Node;
 
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
+import java.util.Iterator;
 
 public class NodeEcmaWrap {
   public static Node find(Node node, String pattern)

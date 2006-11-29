@@ -28,10 +28,8 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * An expression of the DTD grammar.

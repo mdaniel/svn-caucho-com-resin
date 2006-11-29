@@ -29,10 +29,13 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.DocumentType;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class QDocumentType extends QNode implements DocumentType {
   String _name;

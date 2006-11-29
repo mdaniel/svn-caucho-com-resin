@@ -29,26 +29,17 @@
 
 package com.caucho.ejb.gen;
 
-import java.util.ArrayList;
-
-import java.io.IOException;
-
-import javax.ejb.EntityContext;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassWrapper;
 import com.caucho.bytecode.JClassLoader;
-
-import com.caucho.util.L10N;
-
+import com.caucho.ejb.cfg.EjbEntityBean;
 import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.ClassComponent;
 import com.caucho.java.gen.BaseClass;
 import com.caucho.java.gen.BaseMethod;
+import com.caucho.java.gen.ClassComponent;
+import com.caucho.util.L10N;
 
-import com.caucho.ejb.cfg.EjbEntityBean;
+import javax.ejb.EntityContext;
+import java.io.IOException;
 
 /**
  * Generates the skeleton for a session bean.

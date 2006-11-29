@@ -28,9 +28,6 @@
 
 package com.caucho.java;
 
-import java.io.*;
-import java.util.*;
-
 public class CompileError {
   String filename;
   int line;

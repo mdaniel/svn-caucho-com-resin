@@ -28,15 +28,11 @@
 
 package com.caucho.config;
 
-import java.lang.reflect.*;
-
-import com.caucho.util.*;
-
-import com.caucho.config.BeanBuilderException;
-
-import com.caucho.config.types.RawString;
 import com.caucho.xml.QName;
+
 import org.w3c.dom.Node;
+
+import java.lang.reflect.Method;
 
 /**
  * TypeBuilder for primitives, primitive wrappers, and Strings

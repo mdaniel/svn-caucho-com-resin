@@ -28,13 +28,11 @@
 
 package com.caucho.java.gen;
 
-import java.io.IOException;
-
 import com.caucho.bytecode.JClass;
-
+import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import com.caucho.java.JavaWriter;
+import java.io.IOException;
 
 /**
  * Generates code for a method call.

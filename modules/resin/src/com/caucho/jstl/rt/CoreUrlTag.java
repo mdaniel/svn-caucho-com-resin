@@ -28,19 +28,19 @@
 
 package com.caucho.jstl.rt;
 
-import java.io.*;
-import java.net.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.jsp.el.*;
 import com.caucho.jstl.NameValueTag;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.TagSupport;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 public class CoreUrlTag extends TagSupport implements NameValueTag {
   private static L10N L = new L10N(CoreUrlTag.class);

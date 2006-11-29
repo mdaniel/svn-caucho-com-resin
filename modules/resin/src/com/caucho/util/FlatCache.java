@@ -28,8 +28,6 @@
 
 package com.caucho.util;
 
-import java.util.*;
-
 /**
  * Fixed length cache with a LRU replacement policy.  If cache items
  * implement CacheListener, they will be informed when they're removed
@@ -40,13 +38,13 @@ import java.util.*;
 public class FlatCache<K,V> {
   private Object []_keys;
   private V []_values;
-  
+
   // maximum allowed entries
   private int _capacity;
   private int _mask;
-  
+
   private static Object NULL = new Object();
-  
+
   public FlatCache(int initialCapacity)
   {
     for (_capacity = 32; _capacity < 2 * initialCapacity; _capacity *= 2) {
@@ -54,7 +52,7 @@ public class FlatCache<K,V> {
 
     _keys = new Object[_capacity];
     _values = (V []) new Object[_capacity];
-    
+
     _mask = _capacity - 1;
   }
 
@@ -66,7 +64,7 @@ public class FlatCache<K,V> {
     for (int i = 0; i < _capacity; i++) {
       if (_values[i] instanceof CacheListener)
         ((CacheListener) _values[i]).removeEvent();
-      
+
       _keys[i] = null;
       _values[i] = null;
     }
@@ -83,7 +81,7 @@ public class FlatCache<K,V> {
     Object okey = key;
     if (okey == null)
       okey = NULL;
-    
+
     int hash = okey.hashCode() & _mask;
 
     Object testKey = _keys[hash];
@@ -116,7 +114,7 @@ public class FlatCache<K,V> {
     _keys[hash] = null;
     _values[hash] = value;
     _keys[hash] = okey;
-    
+
     if (old instanceof CacheListener)
       ((CacheListener) old).removeEvent();
 

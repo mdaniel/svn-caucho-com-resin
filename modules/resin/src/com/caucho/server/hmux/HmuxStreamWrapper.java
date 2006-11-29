@@ -29,19 +29,13 @@
 
 package com.caucho.server.hmux;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import java.security.NoSuchAlgorithmException;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 import com.caucho.log.Log;
+import com.caucho.vfs.StreamImpl;
+
+import java.io.IOException;
+import java.net.SocketException;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * Facade to HmuxStream to properly handle the close.

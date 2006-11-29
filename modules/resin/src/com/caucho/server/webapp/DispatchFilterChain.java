@@ -28,34 +28,16 @@
 
 package com.caucho.server.webapp;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import javax.transaction.Status;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.caucho.log.Log;
 
-import com.caucho.server.connection.AbstractHttpRequest;
-import com.caucho.server.connection.AbstractHttpResponse;
-
-import com.caucho.server.log.AccessLog;
-
-import com.caucho.loader.Environment;
-
-import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.transaction.TransactionImpl;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestEvent;
+import javax.servlet.ServletRequestListener;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Represents the next filter in a filter chain.  The final filter will

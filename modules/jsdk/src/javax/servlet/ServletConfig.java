@@ -30,8 +30,7 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.util.Enumeration;
 
 /**
  * ServletConfig encapsulates servlet configuration and gives access to

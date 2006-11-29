@@ -28,11 +28,10 @@
 
 package com.caucho.vfs.i18n;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Abstract class for a byte-to-character encoding reader and its

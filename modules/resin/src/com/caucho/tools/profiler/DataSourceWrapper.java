@@ -29,7 +29,6 @@
 
 package com.caucho.tools.profiler;
 
-import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 import javax.sql.DataSource;

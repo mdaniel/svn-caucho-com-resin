@@ -28,11 +28,9 @@
 
 package com.caucho.soap.wsdl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.*;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * SOAP binding definition

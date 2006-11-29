@@ -28,9 +28,9 @@
 
 package com.caucho.amber;
 
-import java.sql.SQLException;
-
 import com.caucho.util.L10N;
+
+import java.sql.SQLException;
 
 /**
  * Context for amber.

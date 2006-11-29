@@ -28,16 +28,13 @@
 
 package com.caucho.eswrap.com.caucho.xml;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.XmlPrinter;
 
-import org.xml.sax.*;
-import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.es.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class XmlPrinterEcmaWrap {
   public static XmlPrinter create(WriteStream os)

@@ -28,8 +28,6 @@
 
 package com.caucho.util;
 
-import java.util.*;
-
 /**
  * URL utilities.
  */
@@ -67,17 +65,17 @@ public class URLUtil {
   public static String byteToHex(int b)
   {
     CharBuffer cb = CharBuffer.allocate();
-    
+
     cb.append(encodeHex((b & 0xf0) >> 4));
     cb.append(encodeHex(b & 0xf));
-    
+
     return cb.close();
   }
 
   public static char encodeHex(int ch)
   {
     ch &= 0xf;
-    
+
     if (ch < 10)
       return (char) (ch + '0');
     else

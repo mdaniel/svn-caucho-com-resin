@@ -29,10 +29,8 @@
 
 package com.caucho.amber.jdbc;
 
-import java.util.*;
 import java.sql.*;
-
-import javax.sql.*;
+import java.util.Map;
 
 /**
  * Wrapper of the JDBC Connection.

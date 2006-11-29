@@ -28,24 +28,13 @@
 
 package com.caucho.security;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.security.Policy;
-import java.security.CodeSource;
-import java.security.AllPermission;
-import java.security.Permission;
-import java.security.Permissions;
-import java.security.PermissionCollection;
-import java.security.ProtectionDomain;
-
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentClassLoader;
+import java.security.*;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Defines the policy for the current security context.

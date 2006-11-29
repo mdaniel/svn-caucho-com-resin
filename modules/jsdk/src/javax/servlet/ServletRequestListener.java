@@ -28,8 +28,7 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.util.EventListener;
 
 /**
  * Interface for a listener receiving events when the ServletRequest

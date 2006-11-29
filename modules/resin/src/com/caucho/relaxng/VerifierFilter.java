@@ -29,15 +29,12 @@
 
 package com.caucho.relaxng;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.xml.Xml;
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import org.xml.sax.helpers.DefaultHandler;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.Xml;
+import java.io.IOException;
 
 /**
  * JARV verifier implementation

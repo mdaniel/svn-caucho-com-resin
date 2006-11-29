@@ -26,25 +26,22 @@
 
 package com.caucho.ejb.protocol;
 
-import java.io.Serializable;
-import java.io.ObjectStreamException;
+import com.caucho.ejb.AbstractContext;
+import com.caucho.ejb.AbstractEJBObject;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.NoSuchObjectExceptionWrapper;
+import com.caucho.ejb.RemoteExceptionWrapper;
+import com.caucho.util.L10N;
 
-import java.rmi.RemoteException;
-import java.rmi.NoSuchObjectException;
-
-import javax.ejb.Handle;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import javax.ejb.FinderException;
+import javax.ejb.Handle;
 import javax.ejb.RemoveException;
-
-import com.caucho.util.L10N;
-
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.AbstractEJBObject;
-import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.RemoteExceptionWrapper;
-import com.caucho.ejb.NoSuchObjectExceptionWrapper;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.rmi.NoSuchObjectException;
+import java.rmi.RemoteException;
 
 /**
  * Interface for stubs inside the same JVM.

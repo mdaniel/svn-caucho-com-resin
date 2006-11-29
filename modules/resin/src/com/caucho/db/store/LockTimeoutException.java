@@ -29,17 +29,12 @@
 
 package com.caucho.db.store;
 
-import java.io.*;
-import java.sql.*;
-
-import com.caucho.util.*;
-
 /**
  * Wraps an exception in a SQLException wrapper.
  */
 public class LockTimeoutException extends java.sql.SQLException {
   private Throwable _cause;
-  
+
   /**
    * Creates the wrapper with a message.
    */
@@ -68,7 +63,7 @@ public class LockTimeoutException extends java.sql.SQLException {
 
     _cause = e;
   }
-  
+
   /**
    * Creates the wrapper with a root cause.
    *

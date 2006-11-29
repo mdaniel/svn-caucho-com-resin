@@ -30,13 +30,9 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.log.Log;
-
-import com.caucho.vfs.Dependency;
-import com.caucho.make.DependencyContainer;
-
 import com.caucho.server.webapp.WebApp;
-
 import com.caucho.util.L10N;
+import com.caucho.vfs.Dependency;
 
 import java.util.logging.Logger;
 

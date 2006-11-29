@@ -29,11 +29,14 @@
 
 package com.caucho.el;
 
-import java.util.logging.*;
+import com.caucho.util.L10N;
 
-import javax.el.*;
-
-import com.caucho.util.*;
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.PropertyNotFoundException;
+import javax.el.PropertyNotWritableException;
+import javax.el.ValueExpression;
+import java.util.logging.Logger;
 
 /**
  * Abstract implementation class for an expression.

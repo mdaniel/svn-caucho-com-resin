@@ -30,7 +30,7 @@ package javax.servlet.jsp.jstl.sql;
 
 import com.caucho.jstl.ResultImpl;
 
-import java.sql.*;
+import java.sql.ResultSet;
 
 public class ResultSupport {
   public static Result toResult(ResultSet rs)

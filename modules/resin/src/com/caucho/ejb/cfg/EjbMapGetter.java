@@ -29,30 +29,18 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.ArrayList;
-
-import java.io.IOException;
-
+import com.caucho.amber.field.IdField;
+import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JMethod;
-
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.gen.AbstractQueryMethod;
+import com.caucho.ejb.gen.BeanAssembler;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.BaseMethod;
-import com.caucho.java.gen.ClassComponent;
-
-import com.caucho.amber.type.EntityType;
-import com.caucho.amber.field.IdField;
-
-import com.caucho.ejb.gen.BeanAssembler;
-import com.caucho.ejb.gen.ViewClass;
-import com.caucho.ejb.gen.EntityCreateMethod;
-import com.caucho.ejb.gen.AmberCreateMethod;
-import com.caucho.ejb.gen.AbstractQueryMethod;
-import com.caucho.ejb.gen.CollectionClass;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Configuration for a one-to-many CMP method.

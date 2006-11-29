@@ -28,19 +28,11 @@
 
 package com.caucho.ejb.protocol;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.naming.ObjectProxy;
 
-import javax.naming.*;
-import javax.naming.spi.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.InitParam;
-import com.caucho.naming.*;
-import com.caucho.ejb.*;
+import javax.naming.NamingException;
+import java.util.Hashtable;
 
 /**
  * An object proxy for a foreign JNDI factory.

@@ -28,16 +28,14 @@
 
 package com.caucho.jms.selector;
 
-import java.util.logging.Logger;
-
-import javax.jms.JMSException;
-import javax.jms.InvalidSelectorException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.IntMap;
-import com.caucho.util.CharBuffer;
-
 import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+
+import javax.jms.InvalidSelectorException;
+import javax.jms.JMSException;
+import java.util.logging.Logger;
 
 
 /**

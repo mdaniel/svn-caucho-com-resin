@@ -28,9 +28,8 @@
 
 package com.caucho.config.types;
 
-import com.caucho.util.L10N;
-
 import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 /**
  * Returns a number of bytes, allowing EL expressions.  Default is bytes.

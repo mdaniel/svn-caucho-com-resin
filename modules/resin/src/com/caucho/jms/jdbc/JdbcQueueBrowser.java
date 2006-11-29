@@ -28,43 +28,23 @@
 
 package com.caucho.jms.jdbc;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Enumeration;
+import com.caucho.jms.selector.Selector;
+import com.caucho.jms.selector.SelectorParser;
+import com.caucho.jms.session.SessionImpl;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.Connection;
-import java.sql.SQLException;
-
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.QueueBrowser;
-import javax.jms.JMSException;
-
-import javax.sql.DataSource;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.jms.AbstractDestination;
-import com.caucho.jms.JMSExceptionWrapper;
-
-import com.caucho.jms.selector.Selector;
-import com.caucho.jms.selector.SelectorParser;
-
-import com.caucho.jms.session.SessionImpl;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a JDBC queue browser.

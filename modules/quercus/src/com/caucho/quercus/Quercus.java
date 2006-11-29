@@ -29,52 +29,49 @@
 
 package com.caucho.quercus;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.*;
-import java.lang.reflect.*;
-import java.net.URL;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.sql.DataSource;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.quercus.lib.session.QuercusSessionManager;
-
+import com.caucho.loader.Environment;
+import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.env.*;
-
-import com.caucho.quercus.module.QuercusModule;
-import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.lib.session.QuercusSessionManager;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleInfo;
 import com.caucho.quercus.module.ModuleStartupListener;
-import com.caucho.quercus.annotation.ClassImplementation;
-
+import com.caucho.quercus.module.QuercusModule;
+import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.page.InterpretedPage;
-
 import com.caucho.quercus.parser.QuercusParser;
-
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.JavaImplClassDef;
 import com.caucho.quercus.program.QuercusProgram;
-
-import com.caucho.quercus.lib.file.FileModule;
-
-import com.caucho.loader.Environment;
-
 import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 import com.caucho.util.TimedCache;
-import com.caucho.util.L10N;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.SoftReference;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Facade for the PHP language.

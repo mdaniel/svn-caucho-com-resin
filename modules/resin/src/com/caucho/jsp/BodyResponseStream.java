@@ -28,22 +28,18 @@
 
 package com.caucho.jsp;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
+import com.caucho.server.connection.AbstractResponseStream;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.TempBuffer;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.Encoding;
-
-import com.caucho.log.Log;
-
-import com.caucho.server.connection.AbstractResponseStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BodyResponseStream extends AbstractResponseStream {
   static final Logger log = Log.open(BodyResponseStream.class);

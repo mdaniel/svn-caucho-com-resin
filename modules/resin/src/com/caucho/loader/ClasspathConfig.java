@@ -28,9 +28,9 @@
 
 package com.caucho.loader;
 
-import javax.annotation.*;
-
 import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Class for configuration.

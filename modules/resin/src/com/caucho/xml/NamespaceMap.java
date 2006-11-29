@@ -28,12 +28,6 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
 public class NamespaceMap {
   NamespaceMap next;
 
@@ -46,7 +40,7 @@ public class NamespaceMap {
     this.prefix = prefix;
     this.url = url;
   }
-  
+
   static String get(NamespaceMap map, String prefix)
   {
     for (; map != null; map = map.next) {

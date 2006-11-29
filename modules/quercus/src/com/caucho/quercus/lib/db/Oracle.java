@@ -29,15 +29,18 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.sql.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.util.L10N;
 
-import com.caucho.quercus.env.*;
-
-import com.caucho.quercus.annotation.Optional;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * oracle connection class (oracle has NO object oriented API)

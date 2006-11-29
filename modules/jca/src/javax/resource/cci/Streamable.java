@@ -28,9 +28,9 @@
 
 package javax.resource.cci;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 
 /**
  * Lets a record extract data from a record.

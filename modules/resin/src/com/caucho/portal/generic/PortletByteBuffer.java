@@ -49,8 +49,8 @@
 
 package com.caucho.portal.generic;
 
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 public interface PortletByteBuffer
 {

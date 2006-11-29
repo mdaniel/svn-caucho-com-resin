@@ -29,16 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import java.util.*;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.quercus.*;
-import com.caucho.quercus.expr.*;
-
-import com.caucho.quercus.program.*;
+import com.caucho.quercus.QuercusModuleException;
 
 /**
  * Represents a PHP variable value.

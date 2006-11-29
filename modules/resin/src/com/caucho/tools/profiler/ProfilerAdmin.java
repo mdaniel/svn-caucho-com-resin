@@ -33,7 +33,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.util.L10N;
 
 import javax.management.ObjectName;
-import javax.management.openmbean.*;
+import javax.management.openmbean.TabularData;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

@@ -28,26 +28,26 @@
 
 package com.caucho.jstl.rt;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.jstl.ResultImpl;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
-import javax.sql.*;
-import javax.naming.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.jstl.core.*;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.sql.Result;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jstl.ResultImpl;
-import com.caucho.jsp.*;
+import javax.servlet.jsp.tagext.BodyTagSupport;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
   private static final Logger log = Log.open(SqlQueryTag.class);

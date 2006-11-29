@@ -35,9 +35,7 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLanguageException;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.AbstractVarExpr;
-import com.caucho.quercus.expr.RawExpr;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**

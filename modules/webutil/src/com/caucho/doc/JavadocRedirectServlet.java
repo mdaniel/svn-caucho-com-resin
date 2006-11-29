@@ -28,27 +28,20 @@
 
 package com.caucho.doc;
 
-import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppController;
-import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.URLUtil;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.util.ArrayList;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *

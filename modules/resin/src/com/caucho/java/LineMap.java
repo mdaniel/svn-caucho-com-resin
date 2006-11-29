@@ -29,10 +29,15 @@
 
 package com.caucho.java;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.util.*;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * LineMap maps generated code lines back to the source lines.

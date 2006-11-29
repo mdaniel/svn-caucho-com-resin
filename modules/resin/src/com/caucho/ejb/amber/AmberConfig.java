@@ -29,28 +29,32 @@
 
 package com.caucho.ejb.amber;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.caucho.amber.field.AmberField;
+import com.caucho.amber.field.CompositeId;
+import com.caucho.amber.field.Id;
+import com.caucho.amber.field.IdField;
+import com.caucho.amber.field.PropertyField;
+import com.caucho.amber.field.StubMethod;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.Column;
+import com.caucho.amber.table.Table;
+import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.Type;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.cfg.CmpField;
+import com.caucho.ejb.cfg.CmpProperty;
+import com.caucho.ejb.cfg.CmrRelation;
+import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.util.L10N;
+import com.caucho.vfs.PersistentDependency;
 
 import java.io.IOException;
-
-import javax.sql.DataSource;
-
-import com.caucho.bytecode.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.gen.*;
-
-import com.caucho.amber.field.*;
-import com.caucho.amber.manager.*;
-import com.caucho.amber.table.*;
-import com.caucho.amber.type.*;
-
-import com.caucho.ejb.cfg.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Configuration manager for amber.

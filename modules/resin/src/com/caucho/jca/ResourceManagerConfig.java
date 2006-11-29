@@ -28,26 +28,19 @@
 
 package com.caucho.jca;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import java.io.InputStream;
-
-import javax.annotation.*;
-import javax.resource.spi.ResourceAdapter;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.*;
-
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-
 import com.caucho.jca.cfg.ConnectorConfig;
 import com.caucho.jca.cfg.ResourceAdapterConfig;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
+import javax.annotation.PostConstruct;
+import javax.resource.spi.ResourceAdapter;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Configuration for the resource manager.

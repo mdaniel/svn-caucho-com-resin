@@ -29,22 +29,19 @@
 
 package com.caucho.soa.client;
 
-import java.net.*;
-
-import java.lang.reflect.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-
-import javax.annotation.*;
-import javax.naming.*;
-import javax.naming.spi.*;
-import javax.xml.namespace.QName;
-
 import com.caucho.config.ConfigException;
-import com.caucho.naming.*;
-
+import com.caucho.naming.Jndi;
+import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.naming.NamingException;
+import javax.xml.namespace.QName;
+import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.logging.Logger;
 
 /**
  */

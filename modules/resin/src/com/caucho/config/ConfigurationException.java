@@ -28,9 +28,6 @@
 
 package com.caucho.config;
 
-import java.io.*;
-
-import com.caucho.util.CompileException;
 import com.caucho.util.LineCompileException;
 
 /**

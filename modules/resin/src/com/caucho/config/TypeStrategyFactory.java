@@ -28,26 +28,24 @@
 
 package com.caucho.config;
 
-import java.util.logging.Logger;
-import java.util.HashMap;
-import java.util.Enumeration;
-import java.net.URL;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.xml.bind.annotation.*;
-
-import com.caucho.util.Log;
-import com.caucho.util.L10N;
-import com.caucho.el.Expr;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.config.jaxb.*;
+import com.caucho.config.jaxb.JaxbBeanType;
+import com.caucho.config.types.ClassTypeStrategy;
 import com.caucho.config.types.InitProgram;
 import com.caucho.config.types.RawString;
-import com.caucho.config.types.ClassTypeStrategy;
+import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 import com.caucho.xml.QName;
+
 import org.w3c.dom.Node;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Factory for returning type strategies.

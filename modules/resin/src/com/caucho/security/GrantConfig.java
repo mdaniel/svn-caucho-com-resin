@@ -28,19 +28,14 @@
 
 package com.caucho.security;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.loader.Environment;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
 import java.security.Permission;
 import java.security.Policy;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.Environment;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Grants permissions.

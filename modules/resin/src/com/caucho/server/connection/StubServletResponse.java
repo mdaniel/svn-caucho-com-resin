@@ -28,13 +28,11 @@
 
 package com.caucho.server.connection;
 
-import java.util.Locale;
-
-import java.io.IOException;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.http.Cookie;
-
-import com.caucho.vfs.WriteStream;
+import java.io.IOException;
+import java.util.Locale;
 
 // Is there anything at all useful that could be put here?
 public class StubServletResponse extends AbstractHttpResponse {

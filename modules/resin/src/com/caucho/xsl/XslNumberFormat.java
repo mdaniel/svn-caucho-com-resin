@@ -28,16 +28,10 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.jsp.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntArray;
 
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
+import java.util.ArrayList;
 
 /**
  * Formatting for the xsl:number action.

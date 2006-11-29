@@ -29,23 +29,19 @@
 
 package com.caucho.quercus.lib.mcrypt;
 
-import java.util.logging.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.lib.mcrypt.Mcrypt;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
+import com.caucho.vfs.Path;
+
+import java.util.logging.Logger;
 
 /**
  * PHP encryption

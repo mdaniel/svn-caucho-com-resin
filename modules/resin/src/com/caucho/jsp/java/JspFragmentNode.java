@@ -29,19 +29,9 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
+import com.caucho.jsp.JspParseException;
+import com.caucho.jsp.TagInstance;
 import com.caucho.util.CharBuffer;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.xml.QName;
-
-import com.caucho.jsp.*;
 
 /**
  * Represents the body for a fragment (jsp:attribute or jsp:body)

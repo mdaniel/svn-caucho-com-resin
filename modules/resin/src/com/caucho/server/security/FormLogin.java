@@ -28,23 +28,21 @@
 
 package com.caucho.server.security;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.security.*;
-
-import javax.annotation.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.server.webapp.Application;
 import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.webapp.Application;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.logging.Level;
 
 /**
  * Used to authenticate users in a servlet request.  Applications will

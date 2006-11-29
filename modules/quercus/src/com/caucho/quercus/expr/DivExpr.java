@@ -29,12 +29,10 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.Location;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
 /**
  * Represents a PHP division expression.

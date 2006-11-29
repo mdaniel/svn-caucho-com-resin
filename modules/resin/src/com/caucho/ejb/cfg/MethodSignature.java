@@ -29,19 +29,16 @@
 
 package com.caucho.ejb.cfg;
 
-import java.lang.reflect.Method;
-
-import java.util.*;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.ejb.*;
-
+import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Signature;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 public class MethodSignature {
   private static L10N L = new L10N(MethodSignature.class);

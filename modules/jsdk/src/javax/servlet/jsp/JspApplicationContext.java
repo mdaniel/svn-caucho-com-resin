@@ -29,7 +29,9 @@
 
 package javax.servlet.jsp;
 
-import javax.el.*;
+import javax.el.ELContextListener;
+import javax.el.ELResolver;
+import javax.el.ExpressionFactory;
 
 /**
  * EL information for JSP containers.

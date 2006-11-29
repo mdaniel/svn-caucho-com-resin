@@ -29,9 +29,6 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
-
 public class WindowStateException extends PortletException
 {
   private transient WindowState _state = null;

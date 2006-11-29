@@ -28,8 +28,6 @@
 
 package com.caucho.util;
 
-import java.io.*;
-
 /**
  * CharSegment is a section of a character buffer
  */
@@ -41,7 +39,7 @@ public class CharSegment implements CharSequence {
   public CharSegment()
   {
   }
-  
+
   /**
    * Constructs a char segment based on a char array.
    */
@@ -106,7 +104,7 @@ public class CharSegment implements CharSequence {
 
     return _buffer[_offset + _length - 1];
   }
-  
+
   /**
    * Returns the buffer's char array.
    */
@@ -168,7 +166,7 @@ public class CharSegment implements CharSequence {
   {
     return indexOf(ch, 0);
   }
-  
+
   /**
    * Returns the index of a character in the CharSegment starting
    * from an offset.
@@ -184,7 +182,7 @@ public class CharSegment implements CharSequence {
     char []buffer = _buffer;
     for (; start < end; start++) {
       if (buffer[start] == ch)
-	return start - _offset;
+        return start - _offset;
     }
 
     return -1;
@@ -201,7 +199,7 @@ public class CharSegment implements CharSequence {
    * Returns the last index of a character in the CharSegment starting
    * from an offset.
    */
-  
+
   public final int lastIndexOf(char ch, int start)
   {
     if (_length <= start)
@@ -211,18 +209,18 @@ public class CharSegment implements CharSequence {
     int offset = _offset;
     for (; start >= 0; start--) {
       if (buffer[start + offset] == ch)
-	return start;
+        return start;
     }
 
     return -1;
   }
 
-  public int indexOf(String s) 
+  public int indexOf(String s)
   {
     return indexOf(s, 0);
   }
 
-  public int indexOf(String s, int start) 
+  public int indexOf(String s, int start)
   {
     int slen = s.length();
 
@@ -269,24 +267,24 @@ public class CharSegment implements CharSequence {
   {
     if (this == a)
       return true;
-    
+
     else if (a instanceof CharSegment) {
       CharSegment cb = (CharSegment) a;
-      
+
       int length = _length;
       if (length != cb._length)
-	return false;
+        return false;
 
       char []buffer = _buffer;
       char []aBuffer = cb._buffer;
 
       int offset = _offset;
       int aOffset = cb._offset;
-      
+
       for (int i = length - 1; i >= 0; i--)
-	if (buffer[offset + i] != aBuffer[aOffset + i])
-	  return false;
-      
+        if (buffer[offset + i] != aBuffer[aOffset + i])
+          return false;
+
       return true;
     }
     else if (a instanceof CharSequence) {
@@ -295,11 +293,11 @@ public class CharSegment implements CharSequence {
       int length = seq.length();
 
       if (_length != length)
-	return false;
+        return false;
 
       for (int i = length - 1; i >= 0; i--) {
-	if (_buffer[i] != seq.charAt(i))
-	  return false;
+        if (_buffer[i] != seq.charAt(i))
+          return false;
       }
 
       return true;
@@ -322,11 +320,11 @@ public class CharSegment implements CharSequence {
 
     int offset = _offset;
     int aOffset = cb._offset;
-      
+
     for (int i = length - 1; i >= 0; i--)
       if (buffer[offset + i] != aBuffer[aOffset + i])
         return false;
-      
+
     return true;
   }
 
@@ -340,11 +338,11 @@ public class CharSegment implements CharSequence {
 
     int offset = _offset;
     char []buffer = _buffer;
-    
+
     for (int i = _length - 1; i >= 0; i--)
       if (buffer[offset + i] != cb[i])
         return false;
-    
+
     return true;
   }
 
@@ -359,7 +357,7 @@ public class CharSegment implements CharSequence {
 
     int offset = _offset;
     char []buffer = _buffer;
-    
+
     for (int i = 0; i < len; i++) {
       char ca = buffer[offset + i];
       char cb = a.charAt(i);
@@ -368,9 +366,9 @@ public class CharSegment implements CharSequence {
       }
 
       else if (Character.toLowerCase(ca) != Character.toLowerCase(cb))
-	return false;
+        return false;
     }
-    
+
     return true;
   }
 
@@ -388,14 +386,14 @@ public class CharSegment implements CharSequence {
 
     int offset = _offset;
     int bOffset = b._offset;
-    
+
     for (int i = length - 1; i >= 0; i--) {
       char ca = buffer[offset + i];
       char cb = bBuffer[bOffset + i];
 
       if (ca != cb &&
           Character.toLowerCase(ca) != Character.toLowerCase(cb))
-	return false;
+        return false;
     }
     return true;
   }
@@ -408,32 +406,32 @@ public class CharSegment implements CharSequence {
     if (a instanceof CharSegment) {
       CharSegment cb = (CharSegment) a;
       if (_length != cb._length)
-	return false;
+        return false;
 
       int offset = _offset;
       int bOffset = cb._offset;
 
       char []buffer = _buffer;
       char []cbBuffer = cb._buffer;
-      
+
       for (int i = _length - 1; i >= 0; i--)
-	if (buffer[offset + i] != cbBuffer[bOffset + i])
-	  return false;
-      
+        if (buffer[offset + i] != cbBuffer[bOffset + i])
+          return false;
+
       return true;
     } else if (a instanceof String) {
       String sa = (String) a;
 
       if (_length != sa.length())
-	return false;
+        return false;
 
       int offset = _offset;
       char []buffer = _buffer;
-      
+
       for (int i = _length - 1; i >= 0; i--)
-	if (buffer[i + offset] != sa.charAt(i))
-	  return false;
-      
+        if (buffer[i + offset] != sa.charAt(i))
+          return false;
+
       return true;
     } else
       return false;
@@ -449,11 +447,11 @@ public class CharSegment implements CharSequence {
 
     char []buffer = _buffer;
     int offset = _offset;
-    
+
     for (int i = _length - 1; i >= 0; i--)
       if (_buffer[_offset + i] != sa.charAt(i))
         return false;
-    
+
     return true;
   }
 
@@ -470,11 +468,11 @@ public class CharSegment implements CharSequence {
     for (int i = _length - 1; i >= 0; i--) {
       char ca = buffer[offset + i];
       char cb = sa.charAt(i);
-      
+
       if (ca != cb && Character.toLowerCase(ca) != Character.toLowerCase(cb))
         return false;
     }
-    
+
     return true;
   }
 
@@ -487,7 +485,7 @@ public class CharSegment implements CharSequence {
     char []bufBuffer = buf._buffer;
     for (int i = len - 1; i >= 0; i--) {
       if (buffer[off1 + i] != bufBuffer[off2 + i])
-	return false;
+        return false;
     }
 
     return true;
@@ -501,14 +499,14 @@ public class CharSegment implements CharSequence {
     char []buffer = _buffer;
     for (int i = 0; i < len; i++) {
       if (buffer[off1 + i] != buf.charAt(off2 + i))
-	return false;
+        return false;
     }
 
     return true;
   }
 
-  public boolean regionMatchesIgnoreCase(int off1, CharSegment buf, 
-					 int off2, int len)
+  public boolean regionMatchesIgnoreCase(int off1, CharSegment buf,
+                                         int off2, int len)
   {
     if (_length < off1 + len || buf._length < off2 + len)
       return false;
@@ -516,9 +514,9 @@ public class CharSegment implements CharSequence {
     char []buffer = _buffer;
     char []bufBuffer = buf._buffer;
     for (int i = len -1; i >= 0; i--) {
-      if (Character.toLowerCase(buffer[off1 + i]) != 
-	  Character.toLowerCase(bufBuffer[off2 + i]))
-	return false;
+      if (Character.toLowerCase(buffer[off1 + i]) !=
+          Character.toLowerCase(bufBuffer[off2 + i]))
+        return false;
     }
 
     return true;
@@ -604,10 +602,10 @@ public class CharSegment implements CharSequence {
     char []buffer = _buffer;
     int len = _length;
     int offset = _offset;
- 
+
     while (--len >= 0)
       buffer[offset + len] = Character.toLowerCase(buffer[offset + len]);
- 
+
     return this;
   }
 

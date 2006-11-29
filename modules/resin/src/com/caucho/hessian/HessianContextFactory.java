@@ -28,21 +28,6 @@
 
 package com.caucho.hessian;
 
-import java.util.*;
-import java.io.*;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
-import com.caucho.util.*;
-import com.caucho.naming.*;
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-import com.caucho.server.*;
-import com.caucho.sql.*;
-import com.caucho.ejb.*;
-import com.caucho.config.ConfigException;
-
 /**
  * use com.caucho.ejb.hessian.HessianContextFactory instead
  * 

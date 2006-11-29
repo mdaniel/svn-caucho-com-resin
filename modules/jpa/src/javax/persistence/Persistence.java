@@ -29,19 +29,15 @@
 
 package javax.persistence;
 
-import java.io.InputStream;
-
-import java.net.URL;
-
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.WeakHashMap;
-import java.util.Enumeration;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import javax.persistence.spi.PersistenceProvider;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Bootstrap class to obtain an EntityManagerFactory.

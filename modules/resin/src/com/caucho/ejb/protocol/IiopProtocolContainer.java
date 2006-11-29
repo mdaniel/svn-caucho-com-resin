@@ -36,7 +36,7 @@ import com.caucho.iiop.IiopRemoteService;
 import com.caucho.util.L10N;
 
 import javax.ejb.EJBHome;
-import java.util.logging.*;
+import java.util.logging.Logger;
 
 /**
  * Server containing all the EJBs for a given configuration.

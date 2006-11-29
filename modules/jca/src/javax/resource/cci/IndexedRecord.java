@@ -29,7 +29,6 @@
 package javax.resource.cci;
 
 import java.io.Serializable;
-
 import java.util.List;
 /**
  * Represents an ordered collection of elements.

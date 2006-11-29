@@ -29,9 +29,9 @@
 
 package com.caucho.lifecycle;
 
-import javax.management.Notification;
-
 import com.caucho.util.Alarm;
+
+import javax.management.Notification;
 
 /**
  * Lifecycle JMX notification

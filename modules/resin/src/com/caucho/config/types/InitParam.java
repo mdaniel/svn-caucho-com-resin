@@ -28,12 +28,11 @@
 
 package com.caucho.config.types;
 
-import java.util.HashMap;
+import com.caucho.config.Config;
+import com.caucho.util.L10N;
 
 import javax.servlet.jsp.el.ELException;
-
-import com.caucho.util.L10N;
-import com.caucho.config.Config;
+import java.util.HashMap;
 
 /**
  * Configuration for the init-param pattern.

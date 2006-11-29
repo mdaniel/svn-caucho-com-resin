@@ -28,8 +28,13 @@
 
 package com.caucho.util;
 
-import java.io.*;
-import com.caucho.vfs.*;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.VfsStream;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * A variable-length byte buffer, similar to a character buffer.

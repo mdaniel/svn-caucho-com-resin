@@ -29,15 +29,24 @@
 
 package com.caucho.server.hmux;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.util.QDate;
+import com.caucho.vfs.FilesystemPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StreamImpl;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.XmlParser;
 
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * The HTTP scheme.  Currently it supports GET and POST.

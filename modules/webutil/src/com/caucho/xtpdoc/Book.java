@@ -29,12 +29,9 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
 import java.io.IOException;
-
+import java.io.PrintWriter;
 import java.util.ArrayList;
-
-import com.caucho.vfs.Path;
 
 public class Book {
   private String _title;

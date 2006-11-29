@@ -28,15 +28,14 @@
 
 package com.caucho.xml.parsers;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.xml.LooseHtml;
+import com.caucho.xml.XmlParser;
 
-import javax.xml.parsers.*;
+import org.xml.sax.Parser;
+import org.xml.sax.XMLReader;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.xml.*;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * JAXP SAX parser factory for loose HTML parsing.

@@ -29,26 +29,18 @@
 
 package com.caucho.ejb.gen;
 
-import java.util.ArrayList;
-import java.util.Set;
-
-import java.io.IOException;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-
+import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.CmrManyToMany;
+import com.caucho.ejb.cfg.CmrManyToOne;
+import com.caucho.ejb.cfg.CmrRelation;
+import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseClass;
 import com.caucho.util.L10N;
 
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.ClassComponent;
-import com.caucho.java.gen.BaseClass;
-
-import com.caucho.ejb.cfg.EjbEntityBean;
-import com.caucho.ejb.cfg.CmrOneToMany;
-import com.caucho.ejb.cfg.CmrRelation;
-import com.caucho.ejb.cfg.CmrManyToOne;
-import com.caucho.ejb.cfg.CmrManyToMany;
+import java.io.IOException;
+import java.util.Set;
 
 /**
  * Generates the skeleton for an Amber-based entity bean.

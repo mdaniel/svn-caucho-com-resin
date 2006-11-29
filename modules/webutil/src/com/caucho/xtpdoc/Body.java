@@ -29,18 +29,11 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
-
-import com.caucho.config.*;
-import com.caucho.vfs.Path;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 public class Body extends ContainerNode {
   private static Logger log = Logger.getLogger(Body.class.getName());

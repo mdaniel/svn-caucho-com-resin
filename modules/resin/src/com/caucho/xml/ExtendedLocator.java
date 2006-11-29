@@ -28,16 +28,7 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.readers.*;
+import org.xml.sax.Locator;
 
 public interface ExtendedLocator extends Locator {
   public String getFilename();

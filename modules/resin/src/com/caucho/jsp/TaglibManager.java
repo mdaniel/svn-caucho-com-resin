@@ -29,33 +29,21 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.logging.*;
-import java.util.zip.*;
-import java.util.jar.*;
-import java.beans.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.log.Log;
-import com.caucho.server.http.*;
-import com.caucho.jsp.cfg.*;
-import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.relaxng.CompactVerifierFactoryImpl;
-
-import com.caucho.config.NodeBuilder;
-import com.caucho.config.ConfigException;
-
 import com.caucho.config.types.FileSetType;
-
+import com.caucho.jsp.cfg.TldFunction;
+import com.caucho.jsp.cfg.TldTaglib;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Stores the entire information for a tag library.

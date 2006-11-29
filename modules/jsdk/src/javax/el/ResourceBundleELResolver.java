@@ -30,9 +30,11 @@
 package javax.el;
 
 import java.beans.FeatureDescriptor;
-import java.lang.reflect.Array;
-import java.util.*;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 /**
  * Resolves properties based on resourceBundles.

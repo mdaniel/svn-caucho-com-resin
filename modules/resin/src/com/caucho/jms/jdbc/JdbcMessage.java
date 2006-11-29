@@ -29,65 +29,40 @@
 
 package com.caucho.jms.jdbc;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Enumeration;
+import com.caucho.config.ConfigException;
+import com.caucho.jdbc.JdbcMetaData;
+import com.caucho.jdbc.OracleMetaData;
+import com.caucho.jms.JMSExceptionWrapper;
+import com.caucho.jms.message.BytesMessageImpl;
+import com.caucho.jms.message.MapMessageImpl;
+import com.caucho.jms.message.MessageImpl;
+import com.caucho.jms.message.ObjectMessageImpl;
+import com.caucho.jms.message.StreamMessageImpl;
+import com.caucho.jms.message.TextMessageImpl;
+import com.caucho.jms.selector.Selector;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ByteToChar;
+import com.caucho.vfs.ContextLoaderObjectInputStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import javax.jms.*;
+import javax.sql.DataSource;
+import java.io.EOFException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.IOException;
-import java.io.EOFException;
-
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.sql.Connection;
-import java.sql.Types;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import javax.jms.TextMessage;
-import javax.jms.BytesMessage;
-import javax.jms.StreamMessage;
-import javax.jms.ObjectMessage;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.Queue;
-import javax.jms.JMSException;
-import javax.jms.MessageEOFException;
-
-import javax.sql.DataSource;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.jdbc.JdbcMetaData;
-import com.caucho.jdbc.OracleMetaData;
-
-import com.caucho.jms.AbstractDestination;
-import com.caucho.jms.JMSExceptionWrapper;
-
-import com.caucho.jms.selector.Selector;
-
-import com.caucho.jms.message.MessageImpl;
-import com.caucho.jms.message.TextMessageImpl;
-import com.caucho.jms.message.BytesMessageImpl;
-import com.caucho.jms.message.StreamMessageImpl;
-import com.caucho.jms.message.ObjectMessageImpl;
-import com.caucho.jms.message.MapMessageImpl;
-
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ByteToChar;
-import com.caucho.vfs.ContextLoaderObjectInputStream;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a JDBC message.

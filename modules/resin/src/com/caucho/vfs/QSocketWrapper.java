@@ -28,19 +28,22 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import java.nio.channels.SelectableChannel;
-
-import java.security.cert.*;
-import javax.net.ssl.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 import com.caucho.log.Log;
+import com.caucho.util.IntMap;
+
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.nio.channels.SelectableChannel;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.

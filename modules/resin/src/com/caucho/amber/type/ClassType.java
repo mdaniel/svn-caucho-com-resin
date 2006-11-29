@@ -28,16 +28,13 @@
 
 package com.caucho.amber.type;
 
-import java.io.IOException;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
+import com.caucho.amber.AmberException;
+import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
-import com.caucho.java.JavaWriter;
-
-import com.caucho.amber.AmberException;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * A property containing a class

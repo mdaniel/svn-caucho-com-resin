@@ -28,18 +28,15 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.*;
-import com.caucho.hessian.io.AbstractSerializer;
+import com.caucho.ejb.AbstractEJBHome;
+import com.caucho.ejb.AbstractEJBObject;
+import com.caucho.ejb.AbstractServer;
 import com.caucho.hessian.io.AbstractHessianOutput;
+import com.caucho.hessian.io.AbstractSerializer;
+
+import javax.ejb.EJBHome;
+import javax.ejb.HomeHandle;
+import java.io.IOException;
 
 public class HomeSerializer extends AbstractSerializer {
   private static HomeSerializer _singleton = new HomeSerializer();

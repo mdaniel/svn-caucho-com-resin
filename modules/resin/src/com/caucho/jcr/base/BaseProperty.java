@@ -29,16 +29,20 @@
 
 package com.caucho.jcr.base;
 
-import java.io.InputStream;
-
-import java.util.Calendar;
-
-import javax.jcr.*;
-import javax.jcr.lock.*;
-import javax.jcr.nodetype.*;
-import javax.jcr.version.*;
-
 import com.caucho.util.L10N;
+
+import javax.jcr.Node;
+import javax.jcr.Property;
+import javax.jcr.RepositoryException;
+import javax.jcr.Value;
+import javax.jcr.ValueFactory;
+import javax.jcr.ValueFormatException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.PropertyDefinition;
+import javax.jcr.version.VersionException;
+import java.io.InputStream;
+import java.util.Calendar;
 
 /**
  * Represents a property item in the repository.

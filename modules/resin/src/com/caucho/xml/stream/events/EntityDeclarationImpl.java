@@ -29,13 +29,9 @@
 
 package com.caucho.xml.stream.events;
 
-import java.io.*;
-import java.util.*;
-
-import javax.xml.namespace.*;
-
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.EntityDeclaration;
+import java.io.Writer;
 
 public class EntityDeclarationImpl extends XMLEventImpl 
   implements EntityDeclaration

@@ -29,12 +29,13 @@
 
 package com.caucho.quercus.lib.pdf;
 
-import java.io.IOException;
-import java.io.FileNotFoundException;
-
-import com.caucho.vfs.*;
-
 import com.caucho.util.L10N;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * parses afm

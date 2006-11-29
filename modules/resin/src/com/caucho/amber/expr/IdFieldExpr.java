@@ -28,11 +28,7 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
-
 import com.caucho.amber.field.IdField;
-
 import com.caucho.amber.table.Column;
 
 /**

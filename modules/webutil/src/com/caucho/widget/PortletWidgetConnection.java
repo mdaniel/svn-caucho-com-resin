@@ -31,16 +31,12 @@ package com.caucho.widget;
 
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import javax.portlet.*;
 import java.io.IOException;
-
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
-
-import javax.portlet.*;
+import java.util.logging.Logger;
 
 public class PortletWidgetConnection
   extends WidgetConnection

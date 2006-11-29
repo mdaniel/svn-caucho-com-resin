@@ -28,13 +28,9 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.channels.Selector;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.

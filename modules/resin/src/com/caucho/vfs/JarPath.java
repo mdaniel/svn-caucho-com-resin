@@ -29,15 +29,12 @@
 
 package com.caucho.vfs;
 
-import java.util.Map;
-import java.util.jar.Manifest;
+import com.caucho.util.LruCache;
 
 import java.io.IOException;
-
 import java.security.cert.Certificate;
-
-import com.caucho.util.LruCache;
-import com.caucho.vfs.*;
+import java.util.Map;
+import java.util.jar.Manifest;
 
 /**
  * A filesystem for .jar files.

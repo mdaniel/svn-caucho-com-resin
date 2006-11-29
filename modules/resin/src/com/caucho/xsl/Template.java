@@ -28,14 +28,8 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xpath.*;
-import com.caucho.xpath.pattern.*;
+import com.caucho.xpath.pattern.AbstractPattern;
+import com.caucho.xpath.pattern.FromAny;
 
 public class Template {
   AbstractPattern pattern;

@@ -28,14 +28,13 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.amber.AmberObjectNotFoundException;
+import com.caucho.util.ExceptionWrapper;
 
-import javax.ejb.*;
-
-import com.caucho.util.*;
-import com.caucho.amber.*;
+import javax.ejb.FinderException;
+import javax.ejb.ObjectNotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Wraps the actual exception with an EJB exception

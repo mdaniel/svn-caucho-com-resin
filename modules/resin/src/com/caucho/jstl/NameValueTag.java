@@ -28,18 +28,6 @@
 
 package com.caucho.jstl;
 
-import java.io.*;
-import java.net.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-
 /**
  * An interface for tags that can have name-value parameters.
  */

@@ -28,13 +28,11 @@
 
 package com.caucho.server.webapp;
 
-import javax.annotation.*;
-
-import javax.servlet.*;
-
+import com.caucho.config.types.Period;
 import com.caucho.util.L10N;
 
-import com.caucho.config.types.Period;
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletException;
 
 /**
  * Configuration for a cache-mapping.

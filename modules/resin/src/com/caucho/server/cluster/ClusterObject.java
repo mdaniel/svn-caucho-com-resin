@@ -31,9 +31,18 @@ package com.caucho.server.cluster;
 
 import com.caucho.log.Log;
 import com.caucho.util.Alarm;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Crc64Stream;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.VfsStream;
+import com.caucho.vfs.WriteStream;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

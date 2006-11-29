@@ -29,12 +29,9 @@
 
 package com.caucho.util;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The alarm class provides a lightweight event scheduler.  This allows

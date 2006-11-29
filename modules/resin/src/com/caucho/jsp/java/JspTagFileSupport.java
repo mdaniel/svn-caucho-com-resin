@@ -28,18 +28,6 @@
 
 package com.caucho.jsp.java;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.xml.QName;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.jsp.PageContextWrapper;
-
 /**
  * Represents the body for a tag file with no scripting .
  */

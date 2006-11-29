@@ -28,23 +28,18 @@
 
 package com.caucho.jms.message;
 
-import java.util.logging.Level;
-
-import java.io.IOException;
+import com.caucho.jms.JMSExceptionWrapper;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.MessageEOFException;
-import javax.jms.MessageNotReadableException;
 import javax.jms.MessageFormatException;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.jms.JMSExceptionWrapper;
+import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * A byte-stream message.

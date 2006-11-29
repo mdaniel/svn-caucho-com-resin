@@ -29,38 +29,28 @@
 
 package com.caucho.ejb;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import java.sql.*;
-import java.util.logging.*;
-
-import javax.servlet.*;
-import javax.naming.*;
-import javax.servlet.http.*;
-import javax.sql.*;
-
-import javax.transaction.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-
-import com.caucho.server.webapp.*;
-
+import com.caucho.ejb.protocol.ProtocolContainer;
+import com.caucho.ejb.protocol.Skeleton;
+import com.caucho.log.Log;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.Application;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
-import com.caucho.naming.*;
-
-import com.caucho.loader.Environment;
-
-import com.caucho.log.Log;
-
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.*;
-import com.caucho.ejb.protocol.Skeleton;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Servlet for serving EJBs from the Resin web server.

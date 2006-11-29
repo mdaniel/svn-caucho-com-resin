@@ -29,19 +29,16 @@
 
 package com.caucho.db.jdbc;
 
-import java.io.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.*;
-import javax.sql.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.*;
-
 import com.caucho.db.Database;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * Driver for the internal database.

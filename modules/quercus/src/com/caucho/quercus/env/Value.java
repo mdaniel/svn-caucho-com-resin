@@ -36,8 +36,12 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 /**
  * Represents a PHP expression value.

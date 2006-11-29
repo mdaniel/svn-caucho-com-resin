@@ -29,12 +29,12 @@
 
 package com.caucho.log;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.management.server.*;
-
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.LoggerMXBean;
 import com.caucho.util.L10N;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Environment-specific java.util.logging.Logger configuration.

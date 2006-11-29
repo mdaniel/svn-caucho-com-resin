@@ -29,9 +29,6 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
-
 public class ReadOnlyException extends PortletException
 {
   private ReadOnlyException()

@@ -28,26 +28,20 @@
 
 package com.caucho.ejb.entity;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.Serializable;
-
-import java.rmi.RemoteException;
-
-import javax.ejb.EJBHome;
-import javax.ejb.EJBObject;
-import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.Handle;
-import javax.ejb.RemoveException;
-
+import com.caucho.ejb.AbstractEJBObject;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.xa.TransactionContext;
 import com.caucho.util.Log;
 
-import com.caucho.ejb.AbstractServer;
-import com.caucho.ejb.AbstractEJBObject;
-
-import com.caucho.ejb.xa.TransactionContext;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBLocalHome;
+import javax.ejb.EJBLocalObject;
+import javax.ejb.EJBObject;
+import javax.ejb.Handle;
+import java.io.Serializable;
+import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract base class for an EntityObject.

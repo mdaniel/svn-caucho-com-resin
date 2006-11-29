@@ -34,9 +34,10 @@ import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ObjectAttributeProgram;
 import com.caucho.config.types.PathBuilder;
-import com.caucho.config.types.RawString;
 import com.caucho.config.types.Period;
-import com.caucho.vfs.*;
+import com.caucho.config.types.RawString;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import java.util.Map;
 import java.util.logging.Level;

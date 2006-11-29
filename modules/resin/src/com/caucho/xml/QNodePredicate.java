@@ -28,10 +28,6 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
-
 interface QNodePredicate {
   public boolean isMatch(QAbstractNode node);
 }

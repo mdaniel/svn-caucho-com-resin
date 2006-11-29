@@ -29,20 +29,13 @@
 
 package com.caucho.db.store;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
 import java.sql.SQLException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.ClockCacheItem;
-
-import com.caucho.log.Log;
-
-import com.caucho.sql.SQLExceptionWrapper;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Locking for tables/etc.

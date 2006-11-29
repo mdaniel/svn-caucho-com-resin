@@ -28,8 +28,6 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-
 /**
  * Represents the tag information from a *.tag.
  */
@@ -37,7 +35,7 @@ public class TagFileInfo {
   private String _name;
   private String _path;
   private TagInfo _tagInfo;
-  
+
   /**
    * Create a new TagFileInfo.
    */

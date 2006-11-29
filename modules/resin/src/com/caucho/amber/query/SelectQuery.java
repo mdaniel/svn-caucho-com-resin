@@ -28,19 +28,18 @@
 
 package com.caucho.amber.query;
 
-import java.util.ArrayList;
-import java.util.Map;
-
-import java.sql.SQLException;
-
+import com.caucho.amber.entity.AmberEntityHome;
+import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.expr.AndExpr;
+import com.caucho.amber.expr.JoinExpr;
+import com.caucho.amber.expr.LoadEntityExpr;
+import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
 
-import com.caucho.amber.expr.*;
-
-import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
-
-import com.caucho.amber.entity.AmberEntityHome;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Map;
 
 
 /**

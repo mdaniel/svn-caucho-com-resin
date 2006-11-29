@@ -28,14 +28,7 @@
 
 package com.caucho.relaxng.pattern;
 
-import java.util.*;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.xml.QName;
-
 import com.caucho.relaxng.RelaxException;
-
 import com.caucho.relaxng.program.Item;
 import com.caucho.relaxng.program.ZeroOrMoreItem;
 

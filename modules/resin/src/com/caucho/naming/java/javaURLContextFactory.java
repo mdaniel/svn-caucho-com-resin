@@ -29,18 +29,20 @@
 
 package com.caucho.naming.java;
 
-import java.util.*;
-import java.util.logging.*;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
-import com.caucho.util.*;
-import com.caucho.naming.*;
-
 import com.caucho.loader.EnvironmentLocal;
-
 import com.caucho.log.Log;
+import com.caucho.naming.AbstractModel;
+import com.caucho.naming.ContextImpl;
+import com.caucho.naming.MemoryModel;
+import com.caucho.util.L10N;
+
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.NamingException;
+import javax.naming.spi.ObjectFactory;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Create a remote object

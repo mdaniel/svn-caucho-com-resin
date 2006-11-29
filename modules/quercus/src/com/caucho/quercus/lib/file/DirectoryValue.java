@@ -29,17 +29,14 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.IOException;
-
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.ResourceValue;
+import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Path;
 
-import com.caucho.quercus.env.ResourceValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.NullValue;
+import java.io.IOException;
 
 /**
  * Represents a PHP directory listing

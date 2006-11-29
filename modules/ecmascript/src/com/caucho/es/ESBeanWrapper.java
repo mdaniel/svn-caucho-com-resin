@@ -28,12 +28,9 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.lang.reflect.*;
+import com.caucho.util.IntMap;
 
-import com.caucho.util.*;
+import java.util.HashMap;
 
 /**
  * Implementation class serving as the base for wrapped Java objects.

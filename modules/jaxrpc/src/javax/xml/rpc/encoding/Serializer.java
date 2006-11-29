@@ -28,8 +28,6 @@
 
 package javax.xml.rpc.encoding;
 
-import java.util.Iterator;
-
 /**
  * Interface for a serializer.
  */

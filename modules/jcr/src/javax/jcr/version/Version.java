@@ -29,9 +29,9 @@
 
 package javax.jcr.version;
 
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 import java.util.Calendar;
-
-import javax.jcr.*;
 
 public interface Version extends Node {
   public VersionHistory getContainingHistory()

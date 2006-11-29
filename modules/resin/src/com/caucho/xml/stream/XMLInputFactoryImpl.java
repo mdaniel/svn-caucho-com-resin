@@ -28,10 +28,13 @@
 */
 
 package com.caucho.xml.stream;
-import java.io.*;
 import javax.xml.stream.*;
-import javax.xml.stream.util.*;
-import javax.xml.transform.*;
+import javax.xml.stream.util.XMLEventAllocator;
+import javax.xml.transform.Source;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 public class XMLInputFactoryImpl extends XMLInputFactory {
 

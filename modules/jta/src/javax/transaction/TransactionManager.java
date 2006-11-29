@@ -28,8 +28,6 @@
 
 package javax.transaction;
 
-import javax.transaction.xa.XAResource;
-
 /**
  * The app server transaction interface.  Transactions are normally
  * associated with a single thread.
@@ -46,31 +44,31 @@ public interface TransactionManager {
    */
   public Transaction getTransaction()
     throws SystemException;
-  
+
   /**
    * Gets the transaction's status
    */
   public int getStatus()
     throws SystemException;
-  
+
   /**
    * Start the transaction.
    */
   public void begin()
     throws NotSupportedException, SystemException;
-  
+
   /**
    * Suspends the transaction.
    */
   public Transaction suspend()
     throws SystemException;
-  
+
   /**
    * Resume a transaction.
    */
   public void resume(Transaction transaction)
     throws IllegalStateException, InvalidTransactionException, SystemException;
-  
+
   /**
    * Marks the transaction as rollback only.
    */
@@ -82,8 +80,8 @@ public interface TransactionManager {
    */
   public void commit()
     throws IllegalStateException, RollbackException, HeuristicMixedException,
-	   HeuristicRollbackException, SecurityException, SystemException;
-  
+           HeuristicRollbackException, SecurityException, SystemException;
+
   /**
    * Rolls the transaction back
    */

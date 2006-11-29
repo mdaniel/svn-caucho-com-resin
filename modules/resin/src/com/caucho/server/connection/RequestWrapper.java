@@ -28,24 +28,19 @@
 
 package com.caucho.server.connection;
 
-import java.util.Map;
-import java.util.Enumeration;
-import java.util.Locale;
-
-import java.io.InputStream;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
 import java.security.Principal;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletInputStream;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Cookie;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Wraps a servlet request in another request.  Filters may

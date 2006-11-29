@@ -29,12 +29,8 @@
 
 package com.caucho.vfs;
 
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import com.caucho.util.Base64;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Crc64;
+import java.util.logging.Logger;
 
 /**
  * Class for keeping track of modifications.

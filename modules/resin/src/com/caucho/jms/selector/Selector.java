@@ -28,16 +28,13 @@
 
 package com.caucho.jms.selector;
 
-import java.util.logging.Logger;
-
-import javax.jms.Message;
-import javax.jms.JMSException;
-
+import com.caucho.jms.message.ObjectConverter;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.jms.message.ObjectConverter;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import java.util.logging.Logger;
 
 /**
  * The base selector.

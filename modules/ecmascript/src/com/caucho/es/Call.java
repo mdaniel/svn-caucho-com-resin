@@ -28,9 +28,8 @@
 
 package com.caucho.es;
 
-import java.util.*;
-
-import com.caucho.util.*;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  * Implementation class representing a call context.

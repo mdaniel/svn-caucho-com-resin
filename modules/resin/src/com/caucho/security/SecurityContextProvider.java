@@ -28,12 +28,7 @@
 
 package com.caucho.security;
 
-import java.io.*;
-import java.util.*;
-import java.security.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.security.Principal;
 
 /**
  * Defines the interface any security provider must implement.

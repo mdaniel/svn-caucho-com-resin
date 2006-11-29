@@ -32,14 +32,6 @@ package com.caucho.db.store;
 import java.io.IOException;
 import java.io.Reader;
 
-import java.sql.SQLException;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.util.CharBuffer;
-
-import com.caucho.db.sql.Expr;
-
 public class ClobReader extends Reader {
   private static final int INODE_DIRECT_BLOCKS = 14;
     

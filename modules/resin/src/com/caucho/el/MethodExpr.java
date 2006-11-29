@@ -29,13 +29,13 @@
 
 package com.caucho.el;
 
+import com.caucho.vfs.WriteStream;
+
+import javax.el.ELContext;
+import javax.el.ELException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
-import javax.el.*;
-
-import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a named method call on an object.

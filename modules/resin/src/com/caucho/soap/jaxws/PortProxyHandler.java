@@ -29,25 +29,14 @@
 
 package com.caucho.soap.jaxws;
 
-import java.lang.reflect.*;
+import com.caucho.soap.skeleton.Skeleton;
+import com.caucho.util.L10N;
 
-import java.util.*;
-import java.util.logging.*;
-import java.util.concurrent.*;
-
-import java.net.URL;
-
-import javax.xml.namespace.QName;
-
-import javax.xml.bind.*;
-import javax.xml.ws.*;
-import javax.xml.ws.handler.*;
-import javax.xml.ws.spi.*;
-
-import com.caucho.util.*;
-
-import com.caucho.soap.skeleton.*;
-import com.caucho.soap.reflect.*;
+import javax.xml.ws.BindingProvider;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Port handler

@@ -31,16 +31,6 @@ package com.caucho.vfs;
 
 import java.lang.reflect.Method;
 
-import java.util.Map;
-
-import java.util.logging.Logger;
-
-import java.io.IOException;
-import java.io.FileNotFoundException;
-
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.vfs.*;
-
 /**
  * FilePath implements the native filesystem.
  */

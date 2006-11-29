@@ -29,18 +29,16 @@
 
 package com.caucho.jsp;
 
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.java.LineMap;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
 
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
-  
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.log.Log;
-
-import com.caucho.java.LineMap;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Generates JSP code.  JavaGenerator, JavaScriptGenerator, and

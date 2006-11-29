@@ -28,19 +28,15 @@
 
 package com.caucho.relaxng.program;
 
-import java.util.*;
-import java.util.logging.*;
-
+import com.caucho.log.Log;
+import com.caucho.relaxng.RelaxException;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
-
 import com.caucho.xml.QName;
-import com.caucho.log.Log;
 
-import com.caucho.config.BeanConfigException;
-
-import com.caucho.relaxng.ParseState;
-import com.caucho.relaxng.RelaxException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * Generates programs from patterns.

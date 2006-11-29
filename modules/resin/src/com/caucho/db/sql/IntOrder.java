@@ -28,11 +28,7 @@
 
 package com.caucho.db.sql;
 
-import java.util.logging.Logger;
-
 import java.sql.SQLException;
-
-import com.caucho.log.Log;
 
 /**
  * Ordering an int-valued field.

@@ -28,15 +28,22 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.Log;
+import com.caucho.util.NullIterator;
+import com.caucho.util.QDate;
+import com.caucho.util.StringCharCursor;
 
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the SMTP/RFC822 protocol to handle mailto:

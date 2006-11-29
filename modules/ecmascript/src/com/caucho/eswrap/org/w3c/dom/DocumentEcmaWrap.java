@@ -30,10 +30,9 @@
 
 package com.caucho.eswrap.org.w3c.dom;
 
-import java.io.*;
-import java.util.*;
-
-import org.w3c.dom.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
 
 public class DocumentEcmaWrap {
   public static Attr createAttribute(Document doc, String name, String value)

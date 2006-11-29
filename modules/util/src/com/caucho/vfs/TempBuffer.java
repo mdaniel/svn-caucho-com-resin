@@ -29,10 +29,9 @@
 
 package com.caucho.vfs;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.caucho.util.FreeList;
+
+import java.io.IOException;
 
 /**
  * Pooled temporary byte buffer.

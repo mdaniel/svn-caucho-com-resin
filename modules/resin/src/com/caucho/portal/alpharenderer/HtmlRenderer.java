@@ -29,20 +29,16 @@
 
 package com.caucho.portal.alpharenderer;
 
+import com.caucho.portal.generic.AbstractRenderer;
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.util.ResourceBundle;
-import java.util.MissingResourceException;
-import java.util.Set;
-
+import javax.portlet.*;
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import javax.portlet.*;
-import com.caucho.portal.generic.AbstractRenderer;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Preferences:

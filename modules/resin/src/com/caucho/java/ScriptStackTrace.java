@@ -29,29 +29,24 @@
 
 package com.caucho.java;
 
-import java.io.PrintWriter;
-import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import java.util.WeakHashMap;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.bytecode.Attribute;
 import com.caucho.bytecode.ByteCodeParser;
 import com.caucho.bytecode.JavaClass;
-import com.caucho.bytecode.Attribute;
 import com.caucho.bytecode.OpaqueAttribute;
-
 import com.caucho.loader.SimpleLoader;
-
-import com.caucho.util.Log;
 import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
+import com.caucho.util.Log;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Prints a stack trace using JSR-45

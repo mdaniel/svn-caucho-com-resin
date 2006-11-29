@@ -28,18 +28,15 @@
 
 package com.caucho.xpath.expr;
 
-import org.w3c.dom.Node;
-
 import com.caucho.util.L10N;
-
 import com.caucho.xml.QAbstractNode;
-
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.ExprEnvironment;
 import com.caucho.xpath.XPathException;
 import com.caucho.xpath.XPathParseException;
-
 import com.caucho.xpath.pattern.NodeIterator;
+
+import org.w3c.dom.Node;
 
 /**
  * Contains the builtin XPath functions.

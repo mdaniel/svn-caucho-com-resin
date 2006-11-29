@@ -28,8 +28,6 @@
 
 package com.caucho.jsp.cfg;
 
-import java.util.ArrayList;
-
 /**
  * Configuration for the taglib attribute in the .tld
  */
@@ -45,7 +43,7 @@ public class TldTagFile {
   {
     _id = id;
   }
-  
+
   /**
    * Sets the attribute name.
    */

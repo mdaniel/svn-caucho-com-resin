@@ -28,12 +28,17 @@
 
 package com.caucho.es.wrapper;
 
-import java.util.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.beans.*;
-
-import com.caucho.util.*;
+import java.beans.IntrospectionException;
+import java.beans.MethodDescriptor;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
     
 /**
  * Full analyzed information on the class as a JavaScript object.

@@ -28,11 +28,7 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
+import java.io.IOException;
 
 /**
  * Stream using with JNI.

@@ -28,23 +28,17 @@
 
 package com.caucho.config.types;
 
-import java.util.ArrayList;
+import com.caucho.config.ConfigException;
+import com.caucho.el.EL;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
-import java.lang.reflect.Modifier;
+import javax.annotation.PostConstruct;
+import javax.servlet.jsp.el.ELException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
-import javax.annotation.*;
-
-import javax.servlet.jsp.el.ELException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.el.EL;
-import com.caucho.el.ELParseException;
-
-import com.caucho.config.ConfigException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 
 /**
  * Constructor for a function signature.

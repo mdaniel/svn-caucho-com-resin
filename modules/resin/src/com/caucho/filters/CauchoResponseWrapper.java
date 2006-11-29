@@ -28,25 +28,23 @@
 
 package com.caucho.filters;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 import com.caucho.log.Log;
-
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.connection.ResponseWriter;
-import com.caucho.server.connection.ResponseWrapper;
 import com.caucho.server.connection.AbstractResponseStream;
+import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.connection.ResponseWrapper;
+import com.caucho.server.connection.ResponseWriter;
 import com.caucho.server.connection.ServletOutputStreamImpl;
+import com.caucho.vfs.FlushBuffer;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Locale;
+import java.util.logging.Logger;
 
 /**
  * Response wrapper that can take advantage of Resin's streams.

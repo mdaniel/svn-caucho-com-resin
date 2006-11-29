@@ -28,20 +28,18 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.naming.*;
-import javax.ejb.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.naming.*;
+import com.caucho.naming.AbstractModel;
+import com.caucho.naming.NamingExceptionWrapper;
 import com.caucho.services.name.NameServerRemote;
+import com.caucho.util.L10N;
+
+import javax.ejb.EJBHome;
+import javax.naming.NamingException;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * JNDI context for Burlap home objects.

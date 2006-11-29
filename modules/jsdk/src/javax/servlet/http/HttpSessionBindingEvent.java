@@ -30,9 +30,6 @@
 
 package javax.servlet.http;
 
-import java.util.*;
-import java.io.*;
-
 /**
  * The event object for adding or removing a session object.  See
  * HttpSessionBindingListener.

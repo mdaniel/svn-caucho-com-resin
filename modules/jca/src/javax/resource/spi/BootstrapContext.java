@@ -28,11 +28,8 @@
 
 package javax.resource.spi;
 
-import java.lang.reflect.Method;
-
-import java.util.Timer;
-
 import javax.resource.spi.work.WorkManager;
+import java.util.Timer;
 
 /**
  * Facilities made available by the application server to the resource.

@@ -28,20 +28,17 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.naming.*;
-import javax.naming.directory.*;
-import javax.naming.spi.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.naming.Name;
+import javax.naming.NamingEnumeration;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.ModificationItem;
+import javax.naming.directory.SearchControls;
+import java.util.Hashtable;
+import java.util.logging.Logger;
 
 /**
  * Resin's implementation of the JNDI <code>DirContext</code>.

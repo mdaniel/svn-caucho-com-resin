@@ -28,15 +28,10 @@
 
 package com.caucho.config.core;
 
-import java.util.ArrayList;
-
-import javax.annotation.*;
-
 import com.caucho.util.L10N;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BuilderProgramContainer;
-import com.caucho.config.ConfigException;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 
 /**
  * Executes code when an expression is valid.

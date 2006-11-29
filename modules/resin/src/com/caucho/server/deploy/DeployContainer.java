@@ -31,14 +31,18 @@ package com.caucho.server.deploy;
 
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
-import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.make.*;
-import com.caucho.vfs.*;
+import com.caucho.make.CachedDependency;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Dependency;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Logger;
 
 /**
  * A container of deploy objects.

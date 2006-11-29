@@ -30,11 +30,7 @@
 
 package com.caucho.eswrap.javax.servlet;
 
-import java.util.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-import com.caucho.es.*;
+import javax.servlet.ServletContext;
 
 public class ServletContextEcmaWrap {
   public static void log(ServletContext cxt, String msg, Throwable t)

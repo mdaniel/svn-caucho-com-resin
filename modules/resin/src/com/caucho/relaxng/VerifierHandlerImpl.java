@@ -29,11 +29,14 @@
 
 package com.caucho.relaxng;
 
-import com.caucho.log.Log;
 import com.caucho.relaxng.program.EmptyItem;
 import com.caucho.relaxng.program.Item;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.xml.QName;
 
 import org.xml.sax.Attributes;

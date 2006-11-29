@@ -28,9 +28,6 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
-
 /**
  * Servlets implementing the SingleThreadModel have only a single thread
  * executing at any time.  This may simplify coding of some servlets.

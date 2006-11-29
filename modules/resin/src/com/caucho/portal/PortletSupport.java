@@ -30,18 +30,18 @@ package com.caucho.portal;
 
 import com.caucho.util.L10N;
 
-import java.io.IOException;
-import java.io.File;
-import java.io.PrintWriter;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import javax.portlet.*;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PortletSupport extends GenericPortlet {
   private static final L10N L = new L10N(PortletSupport.class);

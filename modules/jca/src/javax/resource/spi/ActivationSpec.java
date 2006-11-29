@@ -28,8 +28,6 @@
 
 package javax.resource.spi;
 
-import javax.resource.ResourceException;
-
 /**
  * Marker for the activation configuration for an endpoint.
  */

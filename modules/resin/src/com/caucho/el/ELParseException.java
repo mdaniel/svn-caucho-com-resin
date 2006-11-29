@@ -28,11 +28,7 @@
 
 package com.caucho.el;
 
-import java.io.*;
-
-import javax.el.ELException;
-
-import com.caucho.util.*;
+import com.caucho.util.CompileException;
 
 /**
  * An expression language exception.

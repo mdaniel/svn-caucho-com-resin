@@ -29,13 +29,8 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
-
-import javax.naming.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.naming.NamingException;
+import java.util.List;
 
 /**
  * Abstract data model behind Resin's JNDI.

@@ -29,13 +29,11 @@
 
 package com.caucho.amber.type;
 
-import java.util.HashMap;
-
 import com.caucho.bytecode.JClass;
-
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
+import java.util.HashMap;
 
 /**
  * The manages the types known to the Amber instnce.

@@ -48,46 +48,19 @@
 
 package com.caucho.jms.services;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.IOException;
-
-import java.util.logging.Logger;
-
-import javax.jms.BytesMessage;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.Topic;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import com.caucho.hessian.io.AbstractHessianOutput;
-import com.caucho.hessian.io.HessianInput;
-import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.SerializerFactory;
-
 import com.caucho.hessian.server.HessianSkeleton;
-
 import com.caucho.jms.util.BytesMessageInputStream;
-import com.caucho.jms.util.BytesMessageOutputStream;
-
-import com.caucho.services.server.Service;
 import com.caucho.services.server.GenericService;
-import com.caucho.services.server.ServiceContext;
-
 import com.caucho.util.NullOutputStream;
+
+import javax.jms.*;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * MessageListener for serving Hessian services.

@@ -28,19 +28,17 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.beans.*;
-import java.lang.reflect.*;
+import com.caucho.hessian.io.AbstractHessianInput;
+import com.caucho.hessian.io.HessianOutput;
+import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.hessian.io.HessianSerializerInput;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import java.rmi.*;
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.ejb.*;
-import com.caucho.hessian.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Factory for creating Hessian client stubs.  The returned stub will

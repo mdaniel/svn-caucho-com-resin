@@ -28,16 +28,9 @@
 
 package com.caucho.license;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import com.caucho.config.ConfigException;
 
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.Path;
+import java.io.IOException;
 
 /**
  * This interface hides an implementation class that loads all of the licenses

@@ -28,12 +28,8 @@
 
 package com.caucho.util;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import java.net.*;
-
-import com.caucho.vfs.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CpuUsage {
   static Logger log = Log.open(CpuUsage.class);

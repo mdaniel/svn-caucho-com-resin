@@ -28,25 +28,18 @@
 
 package com.caucho.jms.jdbc;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.config.types.Period;
-
 import com.caucho.jdbc.JdbcMetaData;
-
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Logger;
 
 /**
  * Manages the JDBC configuration.

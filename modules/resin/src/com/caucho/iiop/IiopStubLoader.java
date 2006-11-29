@@ -28,34 +28,20 @@
 
 package com.caucho.iiop;
 
-import java.util.HashSet;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.AbstractStubLoader;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.Path;
 
 import java.net.URL;
-
 import java.security.CodeSource;
-
 import java.security.cert.Certificate;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.CharBuffer;
-import com.caucho.server.util.CauchoSystem;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.vfs.*;
-
-import com.caucho.java.WorkDir;
-
-import com.caucho.ejb.AbstractStubLoader;
-
-import com.caucho.loader.Loader;
-import com.caucho.loader.DynamicClassLoader;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class loader which checks for changes in class files and automatically

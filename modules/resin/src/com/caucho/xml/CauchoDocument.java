@@ -28,12 +28,12 @@
 
 package com.caucho.xml;
 
-import java.io.*;
-import java.util.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
-import org.w3c.dom.*;
-
-import com.caucho.vfs.*;
+import java.util.HashMap;
 
 /**
  * CauchoDocument extends the DOM, providing namespaces

@@ -29,12 +29,11 @@
 
 package com.caucho.transaction;
 
+import javax.ejb.TransactionAttributeType;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-
-import javax.ejb.TransactionAttributeType;
 
 /**
  * Marks a class as enhanced.

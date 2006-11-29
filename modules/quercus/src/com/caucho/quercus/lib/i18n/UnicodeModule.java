@@ -29,34 +29,21 @@
 
 package com.caucho.quercus.lib.i18n;
 
+import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
+
+import javax.mail.Header;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetHeaders;
 import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Enumeration;
-
-import javax.mail.MessagingException;
-import javax.mail.Header;
-import javax.mail.internet.InternetHeaders;
-
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.BinaryValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.UnicodeValue;
-import com.caucho.quercus.env.Value;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.UnimplementedException;
-
-import com.caucho.util.L10N;
 /**
  * Unicode handling.  Also includes iconv, etc.
  */

@@ -28,10 +28,8 @@
 
 package javax.servlet.http;
 
-import java.util.*;
-import java.security.*;
-import java.io.*;
-import javax.servlet.*;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
 
 /**
  * HttpServletResponse extends ServletResponse allowing servlets to

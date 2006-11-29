@@ -29,11 +29,10 @@
 
 package com.caucho.amber.table;
 
-import java.sql.SQLException;
-
 import com.caucho.amber.entity.Entity;
-
 import com.caucho.amber.manager.AmberConnection;
+
+import java.sql.SQLException;
 
 /**
  * Represents an object dependent on the creation/deletion of entities.

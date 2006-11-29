@@ -28,9 +28,8 @@
 
 package com.caucho.jws;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 public class SoapCall {
 

@@ -28,10 +28,6 @@
 
 package com.caucho.util;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-
 /**
  * JNI calls for misc system utilities.
  */

@@ -29,11 +29,9 @@
 
 package com.caucho.management.server;
 
-import java.util.Date;
+import com.caucho.jmx.Description;
 
 import javax.management.ObjectName;
-
-import com.caucho.jmx.Description;
 
 /**
  * Parent mbean of all Resin's managed objects.

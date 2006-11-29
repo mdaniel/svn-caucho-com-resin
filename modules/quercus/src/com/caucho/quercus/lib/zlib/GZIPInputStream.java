@@ -29,8 +29,8 @@
 
 package com.caucho.quercus.lib.zlib;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *

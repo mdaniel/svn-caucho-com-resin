@@ -29,20 +29,24 @@
 
 package com.caucho.xml.stream;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.util.L10N;
+import com.caucho.xml.QDocument;
 
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.dom.DOMResult;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   private static final Logger log

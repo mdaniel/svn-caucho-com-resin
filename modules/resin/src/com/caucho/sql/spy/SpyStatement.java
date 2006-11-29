@@ -28,16 +28,16 @@
 
 package com.caucho.sql.spy;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
-
+import com.caucho.log.Log;
+import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.sql.SQLExceptionWrapper;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
+import java.util.logging.Logger;
 
 /**
  * Spying on a statement;

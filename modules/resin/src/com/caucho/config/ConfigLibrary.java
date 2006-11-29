@@ -29,26 +29,21 @@
 
 package com.caucho.config;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
-import java.util.Enumeration;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.InputStream;
-import java.io.IOException;
-
-import java.net.URL;
-
 import com.caucho.loader.EnvironmentLocal;
-
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Library of static config functions.

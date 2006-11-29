@@ -29,23 +29,18 @@
 
 package com.caucho.jmx;
 
+import javax.management.MBeanServer;
+import javax.management.MBeanServerInvocationHandler;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
+import javax.naming.InitialContext;
 import java.io.InvalidObjectException;
 import java.io.NotActiveException;
 import java.io.ObjectStreamException;
-
 import java.lang.ref.SoftReference;
-
 import java.lang.reflect.Method;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import javax.management.ObjectName;
-import javax.management.ObjectInstance;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerInvocationHandler;
-
-import javax.naming.InitialContext;
+import java.util.logging.Logger;
 
 /**
  * Serialization handle for mbeans.

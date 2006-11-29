@@ -29,7 +29,7 @@
 
 package com.caucho.soap.marshall;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
  * Exception while marshalling.

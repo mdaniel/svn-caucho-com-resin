@@ -29,19 +29,9 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.*;
-
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 
 /**
  * A buffered JSP writer encapsulating a Writer.

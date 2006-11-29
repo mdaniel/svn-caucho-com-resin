@@ -28,8 +28,6 @@
 
 package javax.resource.spi;
 
-import java.util.EventObject;
-
 import javax.resource.ResourceException;
 
 /**

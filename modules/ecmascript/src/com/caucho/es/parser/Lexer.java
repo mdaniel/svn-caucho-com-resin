@@ -28,15 +28,17 @@
 
 package com.caucho.es.parser;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.regex.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 import com.caucho.es.*;
-import com.caucho.java.*;
+import com.caucho.java.LineMap;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
+
+import java.io.CharConversionException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Pattern;
 
 /**
  * JavaScript lexer.

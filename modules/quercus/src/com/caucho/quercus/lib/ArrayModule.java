@@ -29,6 +29,21 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReadOnly;
+import com.caucho.quercus.annotation.Reference;
+import com.caucho.quercus.annotation.UsesSymbolTable;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.ArrayValue.AbstractGet;
+import com.caucho.quercus.env.ArrayValue.GetKey;
+import com.caucho.quercus.env.ArrayValue.KeyComparator;
+import com.caucho.quercus.env.ArrayValue.ValueComparator;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
+
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -36,21 +51,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.ReadOnly;
-import com.caucho.quercus.annotation.Reference;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.env.ArrayValue.AbstractGet;
-import com.caucho.quercus.env.ArrayValue.GetKey;
-import com.caucho.quercus.env.ArrayValue.KeyComparator;
-import com.caucho.quercus.env.ArrayValue.ValueComparator;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.annotation.UsesSymbolTable;
-import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
 
 /**
  * PHP array routines.

@@ -29,27 +29,21 @@
 
 package com.caucho.jms.jca;
 
-import java.util.Set;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-
-import java.io.PrintWriter;
-
-import javax.security.auth.Subject;
-
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.ConnectionManager;
-import javax.resource.ResourceException;
-
+import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
-
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
+import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionManager;
+import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.resource.spi.ResourceAdapter;
+import javax.security.auth.Subject;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * The managed factory implementation.

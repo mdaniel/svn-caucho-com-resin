@@ -28,23 +28,13 @@
 
 package com.caucho.db.sql;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
+import com.caucho.db.table.TableIterator;
 import com.caucho.log.Log;
 
-import com.caucho.sql.SQLExceptionWrapper;
-
-import com.caucho.db.table.TableIterator;
-import com.caucho.db.table.Column;
-
-import com.caucho.db.index.BTree;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 class LeftOuterJoinExpr extends RowIterateExpr {
   private static final Logger log = Log.open(LeftOuterJoinExpr.class);

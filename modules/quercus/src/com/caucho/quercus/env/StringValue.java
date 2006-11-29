@@ -29,22 +29,20 @@
 
 package com.caucho.quercus.env;
 
-import java.util.IdentityHashMap;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-
+import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempCharBuffer;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusModuleException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.util.IdentityHashMap;
 
 /**
  * Represents a Quercus string value.

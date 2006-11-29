@@ -28,20 +28,6 @@
 
 package com.caucho.servlets.webdav;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-
-import com.caucho.server.http.*;
-
 /**
  * Represents an attribute name.
  */

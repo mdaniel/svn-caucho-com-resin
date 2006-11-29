@@ -28,10 +28,6 @@
 
 package javax.servlet.jsp.el;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
-
 /**
  * Allows evaluation of JSP EL.
  */
@@ -40,15 +36,15 @@ public abstract class ExpressionEvaluator {
    * Evaluates the expression.
    */
   abstract public Object evaluate(String expression, Class expectedType,
-				  VariableResolver varEnv,
-				  FunctionMapper funEnv)
+                                  VariableResolver varEnv,
+                                  FunctionMapper funEnv)
     throws ELException;
-  
+
   /**
    * Evaluates the expression.
    */
   abstract public Expression parseExpression(String expression,
-					     Class expectedType,
-					     FunctionMapper funEnv)
+                                             Class expectedType,
+                                             FunctionMapper funEnv)
     throws ELException;
 }

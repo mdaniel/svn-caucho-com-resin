@@ -28,29 +28,16 @@
 
 package com.caucho.config;
 
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+import com.caucho.xml.QName;
+
+import org.w3c.dom.Node;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
-import java.io.File;
-
-import java.util.HashMap;
-
-import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.IntMap;
-
-import com.caucho.log.Log;
-
-import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.config.BeanBuilderException;
-
-import com.caucho.config.types.RawString;
-import com.caucho.xml.QName;
-import org.w3c.dom.Node;
+import java.util.logging.Logger;
 
 /**
  * Attribute strategy for a setXXX or addXXX method.

@@ -28,17 +28,28 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-
-import org.w3c.dom.*;
-
 import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CharCursor;
+import com.caucho.util.CharScanner;
+import com.caucho.util.L10N;
+import com.caucho.util.StringCharCursor;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 import com.caucho.xml.*;
+
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.ProcessingInstruction;
+import org.w3c.dom.Text;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Parses a 'StyleScript' file.  StyleScript is compatible with XSLT, adding

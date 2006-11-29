@@ -28,16 +28,14 @@
 
 package com.caucho.config.types;
 
-import java.util.ArrayList;
-import java.lang.reflect.Method;
-
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.server.util.CauchoSystem;
-
 import com.caucho.config.ConfigException;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
  * Configuration for a function signature.

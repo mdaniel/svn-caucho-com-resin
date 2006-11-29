@@ -28,13 +28,11 @@
 
 package com.caucho.xpath.pattern;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.XPathException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xpath.*;
+import org.w3c.dom.Node;
 
 /**
  * matches if we can find a following sibling matching the parent pattern.

@@ -28,9 +28,12 @@
 
 package com.caucho.config.types;
 
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.NodeBuilder;
 import com.caucho.util.L10N;
-
-import com.caucho.config.*;
 
 /**
  * Configuration for an init program

@@ -28,29 +28,10 @@
 
 package com.caucho.ejb;
 
-import java.util.HashSet;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import java.net.URL;
-
-import java.security.CodeSource;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.CharBuffer;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.vfs.*;
-
 import com.caucho.java.WorkDir;
-
 import com.caucho.loader.Loader;
-import com.caucho.loader.DynamicClassLoader;
+import com.caucho.vfs.Path;
 
 /**
  * Class loader builds stubs.

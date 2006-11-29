@@ -29,12 +29,11 @@
 
 package com.caucho.quercus.env;
 
-import java.io.InputStream;
-
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.TempReadStream;
 import com.caucho.vfs.StreamImplInputStream;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.TempReadStream;
+
+import java.io.InputStream;
 
 /**
  * Represents a PHP string value implemented as a TempBuffer, with

@@ -29,18 +29,12 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.util.HashMap;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.sql.*;
-
-import com.caucho.util.Log;
 import com.caucho.util.Alarm;
 
-import com.caucho.quercus.lib.db.JdbcConnectionResource;
-import com.caucho.quercus.env.*;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
 
 /**
  * Represents a JDBC column metadata

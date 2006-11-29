@@ -29,8 +29,8 @@
 
 package com.caucho.quercus.lib.dom;
 
-import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.module.AbstractQuercusModule;
 
 public class QuercusDOMModule
   extends AbstractQuercusModule

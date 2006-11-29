@@ -28,18 +28,27 @@
 */
 
 package javax.xml.bind.helpers;
-import javax.xml.stream.*;
-import javax.xml.transform.*;
-import org.w3c.dom.*;
-import java.io.*;
-import javax.xml.bind.attachment.*;
-import org.xml.sax.*;
-import javax.xml.bind.Unmarshaller.*;
-import javax.xml.validation.*;
-import javax.xml.bind.annotation.adapters.*;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+
 import javax.xml.bind.*;
-import java.net.*;
-import java.util.*;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.attachment.AttachmentUnmarshaller;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
+import javax.xml.validation.Schema;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.net.URL;
+import java.util.HashMap;
 
 public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
 

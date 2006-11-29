@@ -28,11 +28,14 @@
 */
 
 package javax.xml.bind.util;
-import javax.xml.transform.sax.*;
-import javax.xml.bind.*;
-import org.xml.sax.*;
-import java.util.*;
-import java.io.*;
+import org.xml.sax.InputSource;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.transform.sax.SAXSource;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 /** Make the result of a JAXB marshalling look like a SAX source */
 public class JAXBSource extends SAXSource {

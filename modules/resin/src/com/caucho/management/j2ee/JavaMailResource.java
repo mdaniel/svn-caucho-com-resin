@@ -29,8 +29,8 @@
 
 package com.caucho.management.j2ee;
 
-import javax.management.j2ee.statistics.JavaMailStats;
 import javax.management.j2ee.statistics.CountStatistic;
+import javax.management.j2ee.statistics.JavaMailStats;
 
 /**
  * Management interface for a JavaMail resource.

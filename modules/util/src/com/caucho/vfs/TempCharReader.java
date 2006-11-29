@@ -29,7 +29,6 @@
 package com.caucho.vfs;
 
 import java.io.Reader;
-import java.io.IOException;
 
 /**
  * Char reader based on an underlying buffer.

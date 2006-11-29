@@ -28,8 +28,6 @@
 
 package javax.resource.spi;
 
-import javax.resource.ResourceException;
-
 /**
  * Indicates that the ConnectionManager implements the lazy enlistable
  * connection implementation.

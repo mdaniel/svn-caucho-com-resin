@@ -28,8 +28,6 @@
 
 package com.caucho.util;
 
-import java.io.*;
-
 /* The text cursor is purposely lightweight.  It does not update with the
  * text, nor does is allow changes.
  */

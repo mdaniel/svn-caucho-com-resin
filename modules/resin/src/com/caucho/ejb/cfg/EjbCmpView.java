@@ -29,17 +29,13 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
+import java.util.logging.Logger;
 
 /**
  * Configuration for a cmp view.

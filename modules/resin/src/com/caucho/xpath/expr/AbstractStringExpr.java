@@ -28,15 +28,13 @@
 
 package com.caucho.xpath.expr;
 
-import org.w3c.dom.Node;
-
 import com.caucho.util.CharBuffer;
-
 import com.caucho.xml.XmlChar;
-
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.ExprEnvironment;
 import com.caucho.xpath.XPathException;
+
+import org.w3c.dom.Node;
 
 /**
  * Implements the builtin XPath string expressions.

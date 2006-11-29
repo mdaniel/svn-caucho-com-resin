@@ -31,14 +31,7 @@ package com.caucho.widget;
 
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class FieldWidgetState
   extends WidgetContainerState

@@ -28,9 +28,9 @@
 
 package com.caucho.ejb;
 
+import javax.ejb.EJBException;
 import javax.ejb.EntityBean;
 import javax.ejb.EntityContext;
-import javax.ejb.EJBException;
 import javax.ejb.RemoveException;
 
 /**

@@ -29,22 +29,16 @@
 
 package com.caucho.amber.gen;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
+import com.caucho.amber.table.LinkColumns;
+import com.caucho.amber.table.Table;
+import com.caucho.amber.type.EntityType;
+import com.caucho.bytecode.JMethod;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.ClassComponent;
-
-import com.caucho.amber.type.EntityType;
-
-import com.caucho.amber.table.Table;
-import com.caucho.amber.table.LinkColumns;
-
-import com.caucho.bytecode.JMethod;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Generates the Java code for the wrapped object.

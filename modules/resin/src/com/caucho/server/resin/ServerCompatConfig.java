@@ -29,15 +29,17 @@
 
 package com.caucho.server.resin;
 
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.SchemaBean;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.ClusterServer;
+import com.caucho.server.port.Port;
+import com.caucho.util.L10N;
 
-import javax.annotation.*;
-
-import com.caucho.config.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.port.*;
-import com.caucho.util.*;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Compatiblity configuration for Resin 3.0-style configuration.

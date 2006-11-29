@@ -29,8 +29,8 @@
 
 package com.caucho.jcr.base;
 
-import javax.jcr.*;
-import javax.jcr.nodetype.*;
+import javax.jcr.nodetype.NodeDefinition;
+import javax.jcr.nodetype.NodeType;
 
 /**
  * Definition for a node type.

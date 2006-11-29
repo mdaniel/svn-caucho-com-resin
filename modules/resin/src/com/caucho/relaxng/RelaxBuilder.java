@@ -28,43 +28,18 @@
 
 package com.caucho.relaxng;
 
-import java.util.*;
-import java.io.*;
-
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
+import com.caucho.config.BeanBuilderException;
+import com.caucho.relaxng.pattern.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-import com.caucho.config.BeanBuilderException;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
-import com.caucho.relaxng.pattern.Pattern;
-
-import com.caucho.relaxng.pattern.GrammarPattern;
-
-import com.caucho.relaxng.pattern.NameClassPattern;
-import com.caucho.relaxng.pattern.NamePattern;
-import com.caucho.relaxng.pattern.NsNamePattern;
-import com.caucho.relaxng.pattern.AnyNamePattern;
-import com.caucho.relaxng.pattern.ChoiceNamePattern;
-import com.caucho.relaxng.pattern.ExcludeNamePattern;
-
-import com.caucho.relaxng.pattern.ElementPattern;
-import com.caucho.relaxng.pattern.AttributePattern;
-
-import com.caucho.relaxng.pattern.TextPattern;
-import com.caucho.relaxng.pattern.DataPattern;
-
-import com.caucho.relaxng.pattern.EmptyPattern;
-import com.caucho.relaxng.pattern.GroupPattern;
-import com.caucho.relaxng.pattern.ChoicePattern;
-import com.caucho.relaxng.pattern.InterleavePattern;
-import com.caucho.relaxng.pattern.ZeroOrMorePattern;
-
-import com.caucho.relaxng.pattern.RefPattern;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Builder for the relax.

@@ -28,19 +28,14 @@
 
 package com.caucho.jca;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.jca.cfg.ResourceAdapterConfig;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.jca.cfg.ResourceAdapterConfig;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Manages the resource archives.

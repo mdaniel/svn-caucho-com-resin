@@ -28,10 +28,7 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-import com.caucho.vfs.*;
+import org.w3c.dom.DOMException;
 
 class QDOMException extends DOMException {
   QDOMException(int code, String message)

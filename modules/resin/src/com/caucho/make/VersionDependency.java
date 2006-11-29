@@ -28,11 +28,10 @@
 
 package com.caucho.make;
 
-import java.util.logging.Logger;
-
 import com.caucho.Version;
+import com.caucho.vfs.PersistentDependency;
 
-import com.caucho.vfs.*;
+import java.util.logging.Logger;
 
 /**
  * Representing a Resin version.

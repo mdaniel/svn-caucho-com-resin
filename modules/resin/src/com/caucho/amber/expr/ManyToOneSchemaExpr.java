@@ -28,13 +28,12 @@
 
 package com.caucho.amber.expr;
 
-import com.caucho.amber.query.*;
-
-
-import com.caucho.util.L10N;
-
 import com.caucho.amber.field.AmberField;
+import com.caucho.amber.query.FromItem;
+import com.caucho.amber.query.QueryParseException;
+import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.type.RelatedType;
+import com.caucho.util.L10N;
 
 /**
  * Represents a collection from a from-item table.

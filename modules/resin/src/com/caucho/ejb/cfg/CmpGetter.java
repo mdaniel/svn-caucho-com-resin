@@ -29,17 +29,11 @@
 package com.caucho.ejb.cfg;
 
 import com.caucho.bytecode.JMethod;
-
-import com.caucho.util.L10N;
-
-import com.caucho.config.ConfigException;
-
+import com.caucho.ejb.gen.AmberGetter;
+import com.caucho.ejb.gen.ViewClass;
 import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
-
-import com.caucho.ejb.gen.BeanAssembler;
-import com.caucho.ejb.gen.ViewClass;
-import com.caucho.ejb.gen.AmberGetter;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for a method of a view.

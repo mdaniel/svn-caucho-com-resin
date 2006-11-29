@@ -48,7 +48,7 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
  * Exception wrapper for IO.

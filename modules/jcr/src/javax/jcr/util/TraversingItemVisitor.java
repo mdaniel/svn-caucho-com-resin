@@ -28,9 +28,10 @@
  */
 package javax.jcr.util;
 
-import java.util.LinkedList;
-
-import javax.jcr.*;
+import javax.jcr.ItemVisitor;
+import javax.jcr.Node;
+import javax.jcr.Property;
+import javax.jcr.RepositoryException;
 
 public abstract class TraversingItemVisitor implements ItemVisitor {
   protected final boolean breadthFirst;

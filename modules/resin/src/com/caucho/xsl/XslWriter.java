@@ -28,19 +28,28 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import javax.servlet.jsp.*;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntArray;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.xml.*;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.NamespaceContext;
+import com.caucho.xpath.XPathException;
 
 import org.w3c.dom.*;
-import org.xml.sax.*;
+import org.xml.sax.SAXException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.log.Log;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Writer stream for generating stylesheet output.

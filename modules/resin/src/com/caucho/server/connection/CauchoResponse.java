@@ -29,11 +29,10 @@
 
 package com.caucho.server.connection;
 
-import java.io.IOException;
+import com.caucho.vfs.FlushBuffer;
 
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.vfs.FlushBuffer;
+import java.io.IOException;
 
 public interface CauchoResponse extends HttpServletResponse {
   /* caucho methods */

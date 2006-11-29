@@ -29,16 +29,9 @@
 
 package com.caucho.el;
 
-import java.io.IOException;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
+import javax.el.ELContext;
+import javax.el.ELException;
 import java.util.HashMap;
-
-import javax.el.*;
-
-import com.caucho.vfs.WriteStream;
 
 /**
  * Marshalls an expression.

@@ -28,7 +28,7 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
+import java.io.IOException;
 
 public interface ByteWriteStream {
   public void write(byte []data, int offset, int length)

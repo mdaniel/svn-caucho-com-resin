@@ -29,22 +29,17 @@
 
 package com.caucho.server.webapp;
 
-import java.io.PrintWriter;
-import java.io.IOException;
+import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.connection.AbstractResponseStream;
+import com.caucho.server.connection.CauchoResponse;
+import com.caucho.server.connection.IncludeResponseStream;
+import com.caucho.util.FreeList;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletResponseWrapper;
-
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.util.FreeList;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.server.connection.AbstractHttpResponse;
-import com.caucho.server.connection.IncludeResponseStream;
-import com.caucho.server.connection.AbstractResponseStream;
-import com.caucho.server.connection.CauchoResponse;
+import java.io.IOException;
 
 /**
  * Internal response for an include() or forward()

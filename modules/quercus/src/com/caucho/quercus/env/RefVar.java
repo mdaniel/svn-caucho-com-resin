@@ -33,9 +33,9 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.IdentityHashMap;
-import java.io.IOException;
 
 /**
  * Represents a reference to a PHP variable in a function call.

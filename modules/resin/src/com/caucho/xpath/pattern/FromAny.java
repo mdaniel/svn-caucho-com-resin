@@ -28,14 +28,10 @@
 
 package com.caucho.xpath.pattern;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.xml.XmlUtil;
+import com.caucho.xpath.ExprEnvironment;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xpath.*;
-import com.caucho.xml.*;
+import org.w3c.dom.Node;
 
 /**
  * matches any node.  The 'any' axis is the root of a match pattern.

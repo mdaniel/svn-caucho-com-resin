@@ -31,7 +31,6 @@ package com.caucho.widget;
 
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 

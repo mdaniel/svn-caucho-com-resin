@@ -28,13 +28,8 @@
 
 package javax.resource.spi;
 
-import java.util.Set;
-
-import java.io.PrintWriter;
-
-import javax.security.auth.Subject;
-
 import javax.resource.ResourceException;
+import java.util.Set;
 
 /**
  * Interface for the resource adapter's connection factory.

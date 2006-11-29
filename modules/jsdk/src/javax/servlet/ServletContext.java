@@ -29,8 +29,9 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.Set;
 
 /**
  * ServletContexts encapsulate applications.  Applications are generalized

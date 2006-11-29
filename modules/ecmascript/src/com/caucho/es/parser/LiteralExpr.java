@@ -28,13 +28,12 @@
 
 package com.caucho.es.parser;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.es.ESBase;
+import com.caucho.es.ESBoolean;
+import com.caucho.es.ESNumber;
+import com.caucho.es.ESString;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.es.*;
+import java.io.IOException;
 
 /**
  * Represents a java literal.

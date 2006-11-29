@@ -29,18 +29,19 @@
 
 package com.caucho.quercus.function;
 
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.Callback;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.quercus.module.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
-import javax.management.ObjectName;
-import java.util.*;
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Code for marshaling (PHP to Java) and unmarshaling (Java to PHP) arguments.

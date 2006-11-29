@@ -48,9 +48,9 @@
 
 package com.caucho.portal.generic;
 
-import javax.portlet.*;
-import java.util.Map;
+import javax.portlet.PortletRequest;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Factory that returns a Map<String, String[]>

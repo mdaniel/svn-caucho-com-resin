@@ -28,8 +28,6 @@
 
 package com.caucho.jca.cfg;
 
-import com.caucho.config.ConfigException;
-
 /**
  * Configuration property for a connector.
  */
@@ -40,7 +38,7 @@ public class ConfigProperty {
 
   public void setDescription(String description)
   {
-    
+
   }
 
   public void setConfigPropertyName(String name)

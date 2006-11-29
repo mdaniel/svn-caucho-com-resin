@@ -29,13 +29,8 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
 import java.io.IOException;
-
-import java.util.ArrayList;
-
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
+import java.io.PrintWriter;
 
 abstract public class Node implements ContentItem {
   protected void writeHtmlText(PrintWriter out, String text)

@@ -28,37 +28,25 @@
 
 package com.caucho.jca;
 
-import java.lang.ref.SoftReference;
-
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Timer;
-  
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ResourceAdapter;
-import javax.resource.spi.BootstrapContext;
-import javax.resource.spi.XATerminator;
-
-import javax.resource.spi.work.WorkManager;
-
-import javax.naming.InitialContext;
-import javax.naming.Context;
-
-import javax.transaction.TransactionManager;
-
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
-
 import com.caucho.config.ConfigException;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.resource.spi.BootstrapContext;
+import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.XATerminator;
+import javax.resource.spi.work.WorkManager;
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of the resource manager.

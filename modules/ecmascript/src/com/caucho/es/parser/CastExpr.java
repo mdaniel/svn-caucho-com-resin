@@ -28,14 +28,9 @@
 
 package com.caucho.es.parser;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.lang.reflect.*;
+import com.caucho.es.ESException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.es.*;
+import java.io.IOException;
 
 /**
  * CastExpr represents casting.

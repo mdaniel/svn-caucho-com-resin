@@ -28,8 +28,8 @@
 */
 
 package javax.xml.ws.handler;
-import javax.xml.ws.*;
-import java.util.*;
+import javax.xml.ws.LogicalMessage;
+import java.util.Map;
 
 /** XXX */
 public interface LogicalMessageContext

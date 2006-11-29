@@ -28,7 +28,7 @@
 
 package com.caucho.iiop;
 
-import java.io.*;
+import java.io.IOException;
 
 abstract public class MessageWriter {
   /**

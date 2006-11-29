@@ -29,13 +29,12 @@
 
 package com.caucho.el;
 
-import java.io.*;
+import com.caucho.vfs.WriteStream;
 
-import javax.el.*;
-
+import javax.el.ELContext;
+import javax.el.ELException;
 import javax.servlet.jsp.JspWriter;
-
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 /**
  * Represents a double literal expression.

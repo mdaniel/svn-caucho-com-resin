@@ -29,11 +29,9 @@
 
 package com.caucho.amber.entity;
 
-import java.sql.SQLException;
-
 import com.caucho.amber.manager.AmberConnection;
 
-import com.caucho.amber.entity.Entity;
+import java.sql.SQLException;
 
 /**
  * Represents an object dependent on the creation/deletion of entities.

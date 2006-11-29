@@ -29,11 +29,13 @@
 
 package com.caucho.jcr.base;
 
+import javax.jcr.PropertyType;
+import javax.jcr.Value;
+import javax.jcr.nodetype.NodeDefinition;
+import javax.jcr.nodetype.NodeType;
+import javax.jcr.nodetype.PropertyDefinition;
+import javax.jcr.version.OnParentVersionAction;
 import java.util.ArrayList;
-
-import javax.jcr.*;
-import javax.jcr.nodetype.*;
-import javax.jcr.version.*;
 
 /**
  * Represents a node type.

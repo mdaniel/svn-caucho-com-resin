@@ -28,15 +28,14 @@
 
 package com.caucho.sql.spy;
 
-import java.io.*;
-import java.sql.*;
-import javax.sql.*;
-import java.util.*;
-import javax.transaction.xa.*;
-import java.util.logging.*;
-
-import com.caucho.util.L10N;
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.sql.ConnectionEventListener;
+import javax.sql.PooledConnection;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * Spying on a connection.

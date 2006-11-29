@@ -31,7 +31,6 @@ package com.caucho.quercus.lib.gettext;
 
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeValue;
-
 import com.caucho.quercus.lib.gettext.expr.PluralExpr;
 
 import java.io.IOException;

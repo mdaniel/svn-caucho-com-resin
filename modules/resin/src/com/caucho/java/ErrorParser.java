@@ -28,8 +28,8 @@
 
 package com.caucho.java;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 abstract class ErrorParser {
   /**

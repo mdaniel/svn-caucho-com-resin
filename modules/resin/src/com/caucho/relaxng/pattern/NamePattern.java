@@ -29,15 +29,10 @@
 
 package com.caucho.relaxng.pattern;
 
-import com.caucho.xml.QName;
-
-import com.caucho.config.BeanConfigException;
-
 import com.caucho.relaxng.RelaxException;
-
-import com.caucho.relaxng.program.Item;
-import com.caucho.relaxng.program.NameItem;
 import com.caucho.relaxng.program.NameClassItem;
+import com.caucho.relaxng.program.NameItem;
+import com.caucho.xml.QName;
 
 /**
  * Relax name pattern

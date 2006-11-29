@@ -28,14 +28,17 @@
 
 package com.caucho.xpath.pattern;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.xml.CauchoElement;
+import com.caucho.xml.CauchoNode;
+import com.caucho.xml.QAttr;
+import com.caucho.xml.QElement;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.XPathException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * matches attributes of an element.

@@ -34,9 +34,11 @@ import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+import com.caucho.util.WeakAlarm;
+import com.caucho.vfs.Dependency;
 
 import java.io.IOException;
 import java.util.logging.Level;

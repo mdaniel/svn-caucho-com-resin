@@ -28,17 +28,12 @@
 
 package com.caucho.naming.hessian;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.naming.Context;
-import javax.naming.NamingException;
-
-import javax.management.MalformedObjectNameException;
-
+import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.naming.AbstractModel;
 
-import com.caucho.hessian.client.HessianProxyFactory;
+import javax.naming.NamingException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Memory based model for JNDI.

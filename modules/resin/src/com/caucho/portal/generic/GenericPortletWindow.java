@@ -48,16 +48,12 @@
 
 package com.caucho.portal.generic;
 
+import javax.portlet.Portlet;
+import javax.portlet.PortletContext;
+import javax.portlet.PortletException;
 import java.io.IOException;
-
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Constructor;
-
-import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.portlet.*;
 
 /**
  * A Window that contains one {@link javax.portlet.Portlet}.

@@ -49,12 +49,13 @@
 
 package com.caucho.portal.generic.context;
 
+import javax.portlet.PortletMode;
+import javax.portlet.PortletURL;
+import javax.portlet.RenderResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Locale;
-
-import javax.portlet.*;
 
 class RenderResponseImpl
   extends PortletResponseImpl

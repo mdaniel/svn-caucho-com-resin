@@ -31,9 +31,9 @@ package com.caucho.management.j2ee;
 
 import com.caucho.sql.DBPool;
 
-import javax.management.j2ee.statistics.JDBCStats;
-import javax.management.j2ee.statistics.JDBCConnectionStats;
 import javax.management.j2ee.statistics.JDBCConnectionPoolStats;
+import javax.management.j2ee.statistics.JDBCConnectionStats;
+import javax.management.j2ee.statistics.JDBCStats;
 
 /**
  * Management interface for a JDBC resource.

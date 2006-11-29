@@ -29,21 +29,17 @@
 
 package com.caucho.amber.query;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.Type;
+import com.caucho.bytecode.JClass;
+import com.caucho.util.Alarm;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import com.caucho.bytecode.JClass;
-
-import com.caucho.util.Alarm;
-
-import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
-
-import com.caucho.amber.manager.AmberConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the application's view of the query.

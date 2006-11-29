@@ -29,25 +29,28 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.HashMap;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.ResultSet;
-
-import javax.sql.DataSource;
-import javax.naming.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.quercus.env.*;
-
+import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
 
-import com.caucho.quercus.UnimplementedException;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * PDO object oriented API facade.

@@ -48,9 +48,8 @@
 
 
 package com.caucho.portal.generic.taglib;
-import com.caucho.portal.generic.*;
-
-import javax.portlet.*;
+import javax.portlet.PortletURL;
+import javax.portlet.RenderResponse;
 
 public class ActionUrlTag 
   extends AbstractUrlTag 

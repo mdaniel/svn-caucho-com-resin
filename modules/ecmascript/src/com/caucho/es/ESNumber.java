@@ -28,12 +28,13 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.vfs.VfsWriteObject;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 /**
  * Implementation class for JavaScript numbers.  Essentially, these are

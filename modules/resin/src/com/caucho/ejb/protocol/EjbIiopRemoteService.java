@@ -29,14 +29,12 @@
 
 package com.caucho.ejb.protocol;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.ejb.AbstractServer;
+import com.caucho.iiop.IiopRemoteService;
 import com.caucho.util.Log;
 
-import com.caucho.iiop.IiopRemoteService;
-
-import com.caucho.ejb.AbstractServer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EjbIiopRemoteService extends IiopRemoteService {
   private static final Logger log = Log.open(EjbIiopRemoteService.class);

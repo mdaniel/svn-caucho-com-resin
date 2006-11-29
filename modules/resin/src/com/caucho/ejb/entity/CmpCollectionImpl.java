@@ -28,13 +28,12 @@
 
 package com.caucho.ejb.entity;
 
-import java.util.AbstractList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.ArrayList;
-
 import com.caucho.amber.AmberQuery;
 import com.caucho.amber.manager.AmberConnection;
+
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Iterator;
   
 /**
  * Represents a lazy collection.

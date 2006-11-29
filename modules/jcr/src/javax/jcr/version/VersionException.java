@@ -29,7 +29,7 @@
 
 package javax.jcr.version;
 
-import javax.jcr.*;
+import javax.jcr.RepositoryException;
 
 public class VersionException extends RepositoryException {
   public VersionException()

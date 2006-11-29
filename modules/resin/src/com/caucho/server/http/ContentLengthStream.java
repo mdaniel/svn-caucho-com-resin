@@ -28,14 +28,10 @@
 
 package com.caucho.server.http;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StreamImpl;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 /**
  * Filter so POST readers can only read data up to the content length

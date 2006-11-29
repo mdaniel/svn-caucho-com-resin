@@ -30,10 +30,9 @@
 package com.caucho.bytecode;
 
 import java.lang.ref.SoftReference;
-
-import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**

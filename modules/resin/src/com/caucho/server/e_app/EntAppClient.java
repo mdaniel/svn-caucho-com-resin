@@ -44,7 +44,10 @@ import com.caucho.naming.Jndi;
 import com.caucho.server.deploy.DeployInstance;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
 import javax.naming.InitialContext;

@@ -29,11 +29,13 @@
 
 package com.caucho.java;
 
-import javax.annotation.*;
-
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.vfs.MemoryPath;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
-import com.caucho.vfs.*;
+import javax.annotation.PostConstruct;
 
 public class WorkDir {
   private static final EnvironmentLocal<Path> _localWorkDir =

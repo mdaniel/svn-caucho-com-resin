@@ -29,36 +29,19 @@
 
 package com.caucho.quercus.lib.session;
 
-import java.util.Map;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
+import com.caucho.java.WorkDir;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.OutputModule;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.ModuleStartupListener;
+import com.caucho.util.L10N;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.util.L10N;
-
-import com.caucho.java.WorkDir;
-
-import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.ModuleStartupListener;
-
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.Callback;
-import com.caucho.quercus.env.SessionArrayValue;
-import com.caucho.quercus.env.SessionCallback;
-
-import com.caucho.quercus.lib.OutputModule;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Quercus session handling

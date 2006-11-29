@@ -28,19 +28,14 @@
 
 package com.caucho.config.types;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Constructor;
-
-import java.util.ArrayList;
-
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.el.EL;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 
 /**
  * Configuration for an instantiation

@@ -28,29 +28,23 @@
 
 package com.caucho.loader;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.*;
-
-import java.util.jar.Manifest;
-import java.util.jar.Attributes;
-
-import java.util.regex.Pattern;
-
-import java.net.URL;
-
-import java.security.CodeSource;
-
-import java.security.cert.Certificate;
-
-import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.*;
-
 import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+
+import java.io.IOException;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.cert.Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * JarEntry.

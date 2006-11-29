@@ -28,11 +28,7 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.Exit;
 
 /**
  * ScriptClosure lets Java programs call JavaScript functions.  It contains

@@ -29,20 +29,14 @@
 
 package com.caucho.jca;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-
-import javax.annotation.*;
-
 import com.caucho.config.BuilderProgram;
-
-import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.EnvironmentClassLoader;
-
-import com.caucho.server.deploy.DeployConfig;
-
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * The configuration for a resource-default.

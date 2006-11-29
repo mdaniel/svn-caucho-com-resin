@@ -28,17 +28,7 @@
 
 package com.caucho.sql;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-
-import javax.sql.*;
-import javax.transaction.xa.*;
-import javax.transaction.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.transaction.*;
+import java.sql.SQLException;
 
 /**
  * Represents a pooled connection, managed by the Resin pool.

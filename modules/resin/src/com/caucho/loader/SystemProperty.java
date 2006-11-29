@@ -28,8 +28,6 @@
 
 package com.caucho.loader;
 
-import java.util.*;
-
 /**
  * Sets a system property.
  */

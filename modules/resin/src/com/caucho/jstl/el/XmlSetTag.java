@@ -28,18 +28,18 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-import java.util.logging.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
+import com.caucho.jsp.PageContextImpl;
+import com.caucho.log.Log;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.XPath;
+import com.caucho.xpath.XPathException;
 
 import org.w3c.dom.Node;
 
-import com.caucho.log.Log;
-import com.caucho.vfs.*;
-import com.caucho.jsp.PageContextImpl;
-import com.caucho.xpath.*;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class XmlSetTag extends TagSupport {
   private static final Logger log = Log.open(XmlSetTag.class);

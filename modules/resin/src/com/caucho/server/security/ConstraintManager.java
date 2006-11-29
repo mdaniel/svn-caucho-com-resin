@@ -28,21 +28,18 @@
 
 package com.caucho.server.security;
 
-import java.util.*;
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.jsp.*;
-import com.caucho.util.*;
-
+import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.FilterChainBuilder;
 import com.caucho.server.dispatch.ForwardFilterChain;
-import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.FilterConfigImpl;
-
 import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
+
+import javax.servlet.FilterChain;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Manages security constraint.

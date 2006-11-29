@@ -29,20 +29,11 @@
 
 package com.caucho.server.cluster;
 
-import java.io.*;
-import java.net.*;
-
-import javax.annotation.*;
-
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.server.port.Port;
-import com.caucho.server.port.Protocol;
-
 import com.caucho.server.hmux.HmuxProtocol;
+import com.caucho.server.port.Port;
+import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Represents a protocol connection.

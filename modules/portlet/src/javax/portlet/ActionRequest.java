@@ -27,7 +27,10 @@
  */
 package javax.portlet;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * The <code>ActionRequest</code> is the request interface available to the

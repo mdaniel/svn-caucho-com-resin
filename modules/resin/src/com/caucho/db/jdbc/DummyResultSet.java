@@ -28,14 +28,12 @@
 
 package com.caucho.db.jdbc;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.regex.*;
-import java.math.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.InputStream;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 class DummyResultSet extends AbstractResultSet {
   private static Pattern _csvRegexp;

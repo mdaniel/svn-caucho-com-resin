@@ -28,17 +28,14 @@
 
 package com.caucho.jca.cfg;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-import com.caucho.config.Config;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * Configuration for an object with config values.

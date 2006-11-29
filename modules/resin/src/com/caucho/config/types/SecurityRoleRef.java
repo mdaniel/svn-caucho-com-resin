@@ -28,10 +28,6 @@
 
 package com.caucho.config.types;
 
-import java.util.*;
-
-import javax.naming.*;
-
 import com.caucho.util.L10N;
 
 /**

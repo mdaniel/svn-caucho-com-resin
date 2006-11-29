@@ -29,18 +29,17 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
-import java.lang.reflect.Method;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-
-import java.nio.channels.ServerSocketChannel;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.lang.reflect.Method;
+import java.net.BindException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.

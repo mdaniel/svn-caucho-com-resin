@@ -28,37 +28,28 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.ejb.*;
-
-import javax.jms.Destination;
-import javax.jms.Session;
-import javax.jms.Message;
-import javax.jms.MessageProducer;
-import javax.jms.Connection;
-import javax.jms.JMSException;
-
+import com.caucho.burlap.io.BurlapInput;
+import com.caucho.burlap.io.BurlapOutput;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.message.MessageServer;
+import com.caucho.ejb.protocol.Skeleton;
+import com.caucho.log.Log;
+import com.caucho.services.message.MessageSender;
 import com.caucho.util.CharBuffer;
 
-import com.caucho.ejb.*;
-
-import com.caucho.ejb.protocol.Skeleton;
-
-import com.caucho.ejb.message.MessageServer;
-
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.log.Log;
-
-import com.caucho.burlap.io.*;
-
-import com.caucho.services.message.MessageSender;
+import javax.jms.Connection;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base class for any bean skeleton capable of handling an BURLAP-RPC request.

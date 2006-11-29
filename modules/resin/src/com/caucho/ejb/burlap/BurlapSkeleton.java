@@ -28,24 +28,19 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.log.Log;
-
-import com.caucho.ejb.*;
-
-import com.caucho.ejb.protocol.Skeleton;
+import com.caucho.burlap.io.BurlapInput;
+import com.caucho.burlap.io.BurlapOutput;
+import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.EjbProtocolManager;
-
-import com.caucho.burlap.io.*;
+import com.caucho.ejb.protocol.Skeleton;
 import com.caucho.hessian.io.HessianRemoteResolver;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Base class for any bean skeleton capable of handling a Burlap request.

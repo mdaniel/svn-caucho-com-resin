@@ -28,26 +28,21 @@
 */
 
 package com.caucho.jaxb;
-import javax.xml.bind.*;
-import java.util.*;
-import javax.xml.stream.*;
-import javax.xml.transform.*;
-import java.io.*;
-import java.net.*;
-import javax.xml.bind.attachment.*;
-import javax.xml.bind.Unmarshaller.*;
-import javax.xml.validation.*;
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.*;
-import javax.xml.bind.helpers.*;
-import javax.xml.namespace.*;
+import com.caucho.jaxb.adapters.BeanAdapter;
+import com.caucho.jaxb.skeleton.Skeleton;
+import com.caucho.util.L10N;
 
-import org.xml.sax.*;
-import org.w3c.dom.*;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
-import com.caucho.jaxb.skeleton.*;
-import com.caucho.jaxb.adapters.*;
-import com.caucho.util.*;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.helpers.AbstractUnmarshallerImpl;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamReader;
 
 public class UnmarshallerImpl extends AbstractUnmarshallerImpl
 {

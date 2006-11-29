@@ -29,20 +29,14 @@
 
 package com.caucho.jms.amq;
 
-import java.util.logging.*;
-
-import java.io.*;
-
-import javax.jms.*;
-
-import com.caucho.util.*;
-
 import com.caucho.config.ConfigException;
+import com.caucho.jms.AbstractDestination;
+import com.caucho.util.L10N;
 
-import com.caucho.jms.*;
-import com.caucho.jms.selector.*;
-import com.caucho.jms.message.*;
-import com.caucho.jms.session.*;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import java.util.logging.Logger;
 
 /**
  * An AMQ destination.

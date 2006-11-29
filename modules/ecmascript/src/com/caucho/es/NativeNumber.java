@@ -28,12 +28,6 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-
 /**
  * JavaScript object
  */
@@ -59,20 +53,20 @@ class NativeNumber extends Native {
   {
     Native nativeNum = new NativeNumber("Number", NEW, 1);
     ESWrapper numProto = new ESWrapper("Number", resin.objProto,
-				       ESNumber.create(0));
+                                       ESNumber.create(0));
     NativeWrapper num = new NativeWrapper(resin, nativeNum, numProto,
-					  ESThunk.NUM_THUNK);
+                                          ESThunk.NUM_THUNK);
     resin.numProto = numProto;
 
     int flags = DONT_ENUM;
     int allflags = (DONT_ENUM|DONT_DELETE|READ_ONLY);
 
     numProto.put(ESId.intern("toString"),
-		 new NativeNumber("toString", TO_STRING, 0), 
-		 flags);
-    numProto.put(ESId.intern("valueOf"), 
-		 new NativeNumber("valueOf", VALUE_OF, 0), 
-		 flags);
+                 new NativeNumber("toString", TO_STRING, 0),
+                 flags);
+    numProto.put(ESId.intern("valueOf"),
+                 new NativeNumber("valueOf", VALUE_OF, 0),
+                 flags);
 
     num.put("length", ESNumber.create(1), allflags);
     num.put("MAX_VALUE", ESNumber.create(Double.MAX_VALUE), allflags);
@@ -94,32 +88,32 @@ class NativeNumber extends Native {
     switch (n) {
     case NEW:
       if (length == 0)
-	return ESNumber.create(0);
+        return ESNumber.create(0);
       else
-	return ESNumber.create(eval.getArg(0).toNum());
+        return ESNumber.create(eval.getArg(0).toNum());
 
     case TO_STRING:
       try {
-	return ((ESBase) ((ESWrapper) eval.getArg(-1)).value).toStr();
+        return ((ESBase) ((ESWrapper) eval.getArg(-1)).value).toStr();
       } catch (ClassCastException e) {
-	if (eval.getArg(-1) instanceof ESNumber)
-	  return eval.getArg(-1);
-	if (eval.getArg(-1) instanceof ESThunk)
-	  return ((ESBase) ((ESWrapper) ((ESThunk) eval.getArg(-1)).getObject()).value).toStr();
+        if (eval.getArg(-1) instanceof ESNumber)
+          return eval.getArg(-1);
+        if (eval.getArg(-1) instanceof ESThunk)
+          return ((ESBase) ((ESWrapper) ((ESThunk) eval.getArg(-1)).getObject()).value).toStr();
 
-	throw new ESException("toString expected number object");
+        throw new ESException("toString expected number object");
       }
 
     case VALUE_OF:
       try {
-	return (ESBase) ((ESWrapper) eval.getArg(-1)).value;
+        return (ESBase) ((ESWrapper) eval.getArg(-1)).value;
       } catch (ClassCastException e) {
-	if (eval.getArg(-1) instanceof ESNumber)
-	  return eval.getArg(-1);
-	if (eval.getArg(-1) instanceof ESThunk)
-	  return (ESBase) ((ESWrapper) ((ESThunk) eval.getArg(-1)).getObject()).value;
+        if (eval.getArg(-1) instanceof ESNumber)
+          return eval.getArg(-1);
+        if (eval.getArg(-1) instanceof ESThunk)
+          return (ESBase) ((ESWrapper) ((ESThunk) eval.getArg(-1)).getObject()).value;
 
-	throw new ESException("valueOf expected number object");
+        throw new ESException("valueOf expected number object");
       }
 
     default:
@@ -131,7 +125,7 @@ class NativeNumber extends Native {
   {
     if (n != NEW)
       return super.construct(eval, length);
-    
+
     ESBase value;
 
     if (length == 0)

@@ -29,32 +29,23 @@
 
 package com.caucho.amber.field;
 
-import java.io.IOException;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.Column;
+import com.caucho.amber.type.RelatedType;
+import com.caucho.config.ConfigException;
+import com.caucho.java.JavaWriter;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
 import java.util.logging.Logger;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.log.Log;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.table.Column;
-
-import com.caucho.amber.type.RelatedType;
 
 /**
  * Configuration for a bean's field

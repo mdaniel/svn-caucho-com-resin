@@ -29,20 +29,24 @@
 
 package com.caucho.java;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.util.regex.Pattern;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.*;
-import com.caucho.make.Make;
-import com.caucho.log.Log;
-import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.MemoryStream;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Compiles Java source, returning the loaded class.

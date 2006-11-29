@@ -29,11 +29,10 @@
 
 package com.caucho.soa.client;
 
-import java.net.MalformedURLException;
-
 import com.caucho.hessian.client.HessianProxyFactory;
-
 import com.caucho.util.L10N;
+
+import java.net.MalformedURLException;
 
 public class HessianEncodingProxyFactory implements EncodingProxyFactory {
   private static HessianProxyFactory _proxyFactory;

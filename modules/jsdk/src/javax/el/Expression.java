@@ -29,8 +29,6 @@
 
 package javax.el;
 
-import java.util.*;
-
 /**
  * Represents an EL expression
  */
@@ -38,10 +36,10 @@ public abstract class Expression implements java.io.Serializable {
   public abstract String getExpressionString();
 
   public abstract boolean isLiteralText();
-  
+
   @Override
   public abstract int hashCode();
-  
+
   @Override
   public abstract boolean equals(Object obj);
 }

@@ -28,16 +28,13 @@
 
 package com.caucho.server.connection;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.server.webapp.WebApp;
+import com.caucho.vfs.ReadStream;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 public interface CauchoRequest extends HttpServletRequest {
   public String getPageURI();

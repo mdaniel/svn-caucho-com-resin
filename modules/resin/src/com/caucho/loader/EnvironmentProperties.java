@@ -29,7 +29,10 @@
 
 package com.caucho.loader;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * Creates a ClassLoader-dependent properties table.

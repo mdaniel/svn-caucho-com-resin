@@ -28,10 +28,7 @@
 
 package com.caucho.soap.wsdl;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.*;
+import javax.xml.bind.annotation.XmlAttribute;
 
 /**
  * A WSDL element with arbitrary children.

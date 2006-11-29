@@ -48,9 +48,6 @@
 
 package com.caucho.burlap.io;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * Interface for any burlap remote object.
  */

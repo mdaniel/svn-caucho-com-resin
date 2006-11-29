@@ -28,10 +28,10 @@
 
 package com.caucho.jms.session;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.Topic;
 import javax.jms.TopicPublisher;
-import javax.jms.Message;
-import javax.jms.JMSException;
 
 /**
  * A basic topic.

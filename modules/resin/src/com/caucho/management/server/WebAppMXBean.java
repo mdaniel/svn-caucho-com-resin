@@ -29,7 +29,8 @@
 
 package com.caucho.management.server;
 
-import com.caucho.jmx.*;
+import com.caucho.jmx.Description;
+import com.caucho.jmx.Units;
 
 /**
  * MBean API for the WebApp.

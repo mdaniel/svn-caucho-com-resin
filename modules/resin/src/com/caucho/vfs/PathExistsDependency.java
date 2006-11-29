@@ -29,11 +29,8 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.vfs.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class for keeping track of modifications.

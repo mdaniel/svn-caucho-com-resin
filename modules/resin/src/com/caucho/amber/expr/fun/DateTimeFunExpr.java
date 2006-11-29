@@ -28,10 +28,7 @@
 
 package com.caucho.amber.expr.fun;
 
-import com.caucho.amber.expr.*;
-
-import com.caucho.amber.query.*;
-
+import com.caucho.amber.expr.AmberExpr;
 
 import java.util.ArrayList;
 

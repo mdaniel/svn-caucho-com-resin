@@ -28,16 +28,10 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.naming.AbstractModel;
+import com.caucho.naming.ContextImpl;
 
-import javax.naming.*;
-import javax.ejb.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.naming.*;
+import java.util.Hashtable;
 
 /**
  * JNDI context for Burlap requests.

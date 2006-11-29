@@ -29,52 +29,35 @@
 
 package com.caucho.ejb.entity;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Constructor;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Collections;
-import java.util.Comparator;
-
-import java.util.logging.Level;
-
-import java.rmi.RemoteException;
-
-import java.sql.Connection;
-
-import javax.ejb.HomeHandle;
-import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBHome;
-import javax.ejb.FinderException;
-import javax.ejb.ObjectNotFoundException;
-
-import javax.sql.DataSource;
-
-import javax.naming.InitialContext;
-import javax.naming.Context;
-
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.config.ConfigException;
-
 import com.caucho.amber.AmberException;
-
-import com.caucho.amber.manager.AmberConnection;
-
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.EntityItem;
-
-import com.caucho.ejb.EjbServerManager;
-import com.caucho.ejb.AbstractServer;
+import com.caucho.amber.manager.AmberConnection;
 import com.caucho.ejb.AbstractContext;
+import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
+import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.FinderExceptionWrapper;
-
-import com.caucho.ejb.protocol.JVMObject;
 import com.caucho.ejb.protocol.AbstractHandle;
+import com.caucho.ejb.protocol.JVMObject;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import javax.ejb.EJBHome;
+import javax.ejb.EJBLocalHome;
+import javax.ejb.FinderException;
+import javax.ejb.HomeHandle;
+import javax.ejb.ObjectNotFoundException;
+import javax.sql.DataSource;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.logging.Level;
 
 /**
  * EntityServer is a container for the instances of an entity bean.

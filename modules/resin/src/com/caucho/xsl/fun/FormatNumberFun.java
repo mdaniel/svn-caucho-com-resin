@@ -28,16 +28,18 @@
 
 package com.caucho.xsl.fun;
 
-import java.util.*;
-import java.text.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.ExprEnvironment;
+import com.caucho.xpath.XPathException;
+import com.caucho.xpath.XPathFun;
+import com.caucho.xpath.pattern.AbstractPattern;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
-import com.caucho.xpath.pattern.*;
+import org.w3c.dom.Node;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * The format-number(...) function.

@@ -29,20 +29,17 @@
 
 package com.caucho.vfs;
 
+import com.caucho.util.CharSegment;
+import com.caucho.vfs.i18n.EncodingWriter;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.Iterator;
 import java.util.Locale;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
-import java.io.PrintWriter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import com.caucho.util.*;
-
-import com.caucho.vfs.i18n.EncodingWriter;
 
 /**
  * A fast bufferered output stream supporting both character

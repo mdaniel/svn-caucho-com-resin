@@ -48,10 +48,16 @@
 
 package com.caucho.portal.generic;
 
-import javax.portlet.*;
-
-import java.util.*;
+import javax.portlet.PortletPreferences;
+import javax.portlet.PreferencesValidator;
+import javax.portlet.ReadOnlyException;
+import javax.portlet.ValidatorException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class GenericPortletPreferences implements PortletPreferences
 {

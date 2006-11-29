@@ -28,13 +28,15 @@
 
 package com.caucho.naming;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.L10N;
 
-import javax.naming.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.naming.Context;
+import javax.naming.InvalidNameException;
+import javax.naming.Name;
+import javax.naming.NamingException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 
 /**
  * Represents a parsed JNDI name.

@@ -29,25 +29,16 @@
 
 package com.caucho.amber.gen;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.ClassComponent;
-
-import com.caucho.loader.Environment;
-
 import com.caucho.amber.entity.Listener;
-
-import com.caucho.amber.field.StubMethod;
-
 import com.caucho.amber.type.ListenerType;
-
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.ClassComponent;
+import com.caucho.util.L10N;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Generates the Java code for the wrapped entity listener object.

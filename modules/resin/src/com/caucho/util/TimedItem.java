@@ -28,9 +28,6 @@
 
 package com.caucho.util;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * A single item timed cache.  The item will remain valid until it expires.
  * TimedItem can simplify database caching.
@@ -102,10 +99,10 @@ public class TimedItem {
     else {
       Object v = value;
       value = null;
-      
+
       if (v instanceof CacheListener)
         ((CacheListener) v).removeEvent();
-      
+
       return null;
     }
   }

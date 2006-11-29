@@ -28,12 +28,6 @@
 
 package com.caucho.util;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-
 public class Sprintf {
   private static final L10N L = new L10N(Sprintf.class);
 
@@ -51,9 +45,9 @@ public class Sprintf {
   private final static int XMLESCAPE = 0x200;
 
   private static char []digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-			  'a', 'b', 'c', 'd', 'e', 'f'};
+                                  'a', 'b', 'c', 'd', 'e', 'f'};
   private static char []bigDigits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-			     'A', 'B', 'C', 'D', 'E', 'F'};
+                                     'A', 'B', 'C', 'D', 'E', 'F'};
 
   /**
    * An implementation of the classic sprintf.<p>
@@ -213,111 +207,111 @@ public class Sprintf {
       int start = i;
 
       if ((ch = format.charAt(i)) != '%') {
-	result.append((char) ch);
-	continue;
+        result.append((char) ch);
+        continue;
       }
 
       int flags = 0;
     loop:
       while (++i < len) {
-	switch ((ch = format.charAt(i))) {
-	case '0': flags |= ZERO_FILL; break;
-	case '+': flags |= POS_PLUS; break;
-	case ' ': flags |= POS_SPACE; break;
-	case '#': flags |= ALT; break;
-	case '-': flags |= LALIGN; break;
-	case 'j': flags |= JAVAESCAPE; break;
-	case 'v': flags |= JAVAESCAPE; flags |= CSVESCAPE; break;
-	case 'm': flags |= XMLESCAPE; break;
+        switch ((ch = format.charAt(i))) {
+        case '0': flags |= ZERO_FILL; break;
+        case '+': flags |= POS_PLUS; break;
+        case ' ': flags |= POS_SPACE; break;
+        case '#': flags |= ALT; break;
+        case '-': flags |= LALIGN; break;
+        case 'j': flags |= JAVAESCAPE; break;
+        case 'v': flags |= JAVAESCAPE; flags |= CSVESCAPE; break;
+        case 'm': flags |= XMLESCAPE; break;
 
-	default: break loop;
-	}
+        default: break loop;
+        }
       }
 
       int width = 0;
       for (; i < len && (ch = format.charAt(i)) >= '0' && ch <= '9'; i++) {
-	width = 10 * width + ch - '0';
+        width = 10 * width + ch - '0';
       }
 
       if (i >= len) {
-	fixBits(result, format, start, i);
-	break;
+        fixBits(result, format, start, i);
+        break;
       }
 
       int prec = 0;
       if (ch == '.') {
-	while (++i < len && (ch = format.charAt(i)) >= '0' && ch <= '9') {
-	  prec = 10 * prec + ch - '0';
-	}
+        while (++i < len && (ch = format.charAt(i)) >= '0' && ch <= '9') {
+          prec = 10 * prec + ch - '0';
+        }
       } else
-	prec = -1;
+        prec = -1;
 
       if (i >= len) {
-	fixBits(result, format, start, i);
-	break;
+        fixBits(result, format, start, i);
+        break;
       }
 
       switch (ch) {
       case '%':
-	result.append((char) '%');
-	break;
+        result.append((char) '%');
+        break;
 
       case 'd':
       case 'D':
       case 'i':
       case 'u':
       case 'U':
-	if (arg >= length)
+        if (arg >= length)
           missing(arg);
-	formatInteger(result, toLong(args[arg++]), width, prec, flags, 10);
-	break;
+        formatInteger(result, toLong(args[arg++]), width, prec, flags, 10);
+        break;
 
       case 'o':
       case 'O':
-	if (arg >= length)
+        if (arg >= length)
           missing(arg);
-	formatInteger(result, toLong(args[arg++]), width, prec, flags, 8);
-	break;
+        formatInteger(result, toLong(args[arg++]), width, prec, flags, 8);
+        break;
 
       case 'X':
-	flags |= BIG;
+        flags |= BIG;
       case 'x':
-	if (arg >= length)
+        if (arg >= length)
           missing(arg);
-	formatInteger(result, toLong(args[arg++]), width, prec, flags, 16);
-	break;
+        formatInteger(result, toLong(args[arg++]), width, prec, flags, 16);
+        break;
 
       case 'E':
       case 'G':
-	flags |= BIG;
+        flags |= BIG;
       case 'f':
       case 'e':
       case 'g':
-	if (arg >= length)
+        if (arg >= length)
           missing(arg);
-	formatDouble(result, toDouble(args[arg++]), width, prec, flags, ch);
-	break;
+        formatDouble(result, toDouble(args[arg++]), width, prec, flags, ch);
+        break;
 
       case 'c':
-	if (arg >= length)
+        if (arg >= length)
           missing(arg);
-	formatChar(result, toLong(args[arg++]), width, flags);
-	break;
+        formatChar(result, toLong(args[arg++]), width, flags);
+        break;
 
       case 's':
-	if (arg >= length)
+        if (arg >= length)
           missing(arg);
-	formatString(result, toString(args[arg++],"#null"), prec, width, flags);
-	break;
+        formatString(result, toString(args[arg++],"#null"), prec, width, flags);
+        break;
 
       case 'z':
-	if (arg >= length)
+        if (arg >= length)
           missing(arg);
-	formatString(result, toString(args[arg++],""), prec, width, flags);
-	break;
+        formatString(result, toString(args[arg++],""), prec, width, flags);
+        break;
 
       case 'p':
-	if (arg >= length)
+        if (arg >= length)
           missing(arg);
 
         // like the default for toString()
@@ -327,8 +321,8 @@ public class Sprintf {
         result.append(Integer.toHexString(o.hashCode()));
 
       default:
-	fixBits(result, format, start, i + 1);
-	break;
+        fixBits(result, format, start, i + 1);
+        break;
       }
     }
 
@@ -341,7 +335,7 @@ public class Sprintf {
   }
 
   public static void formatDouble(CharBuffer cb, double value,
-				  int prec, int flags, int type)
+                                  int prec, int flags, int type)
   {
     String raw = Double.toString(value);
     int expt = 0;
@@ -353,13 +347,13 @@ public class Sprintf {
     // XXX: locale screws us?
     for (; i < raw.length(); i++) {
       if ((ch = raw.charAt(i)) == '.' || ch == 'e' || ch == 'E')
-	break;
+        break;
       else if (! seenDigit && ch == '0') {
       }
       else {
-	seenDigit = true;
-	digits.append((char) ch);
-	expt++;
+        seenDigit = true;
+        digits.append((char) ch);
+        expt++;
       }
     }
 
@@ -370,30 +364,30 @@ public class Sprintf {
       ch = raw.charAt(i);
 
       if (! seenDigit && ch == '0') {
-	expt--;
+        expt--;
       } else if (ch >= '0' && ch <= '9') {
-	digits.append((char) ch);
-	seenDigit = true;
+        digits.append((char) ch);
+        seenDigit = true;
       }
       else {
-	int sign = 1;
-	i++;
-	if ((ch = raw.charAt(i)) == '+') {
-	  i++;
-	}
-	else if (ch == '-') {
-	  i++;
-	  sign = -1;
-	}
-	  
-	int e = 0;
-	for (; i < raw.length() && (ch = raw.charAt(i)) >= '0' && ch <= '9';
-	     i++) {
-	  e = 10 * e + ch - '0';
-	}
-	
-	expt += sign * e;
-	break;
+        int sign = 1;
+        i++;
+        if ((ch = raw.charAt(i)) == '+') {
+          i++;
+        }
+        else if (ch == '-') {
+          i++;
+          sign = -1;
+        }
+
+        int e = 0;
+        for (; i < raw.length() && (ch = raw.charAt(i)) >= '0' && ch <= '9';
+             i++) {
+          e = 10 * e + ch - '0';
+        }
+
+        expt += sign * e;
+        break;
       }
     }
 
@@ -405,31 +399,31 @@ public class Sprintf {
 
     if (type == 'f') {
       if (roundDigits(digits, expt + prec)) {
-	expt++;
+        expt++;
       }
 
       formatFixed(cb, digits, expt, prec, flags);
     }
     else if (type == 'e' || type == 'E') {
       if (roundDigits(digits, prec + 1))
-	expt++;
+        expt++;
 
       formatExpt(cb, digits, expt, prec, flags);
     }
     else {
       if (roundDigits(digits, prec))
-	expt++;
+        expt++;
 
       if (expt < -3 || expt > prec)
-	formatExpt(cb, digits, expt, prec - 1, flags|NO_TRAIL_ZERO);
+        formatExpt(cb, digits, expt, prec - 1, flags|NO_TRAIL_ZERO);
       else
-	formatFixed(cb, digits, expt, prec - expt, flags|NO_TRAIL_ZERO);
+        formatFixed(cb, digits, expt, prec - expt, flags|NO_TRAIL_ZERO);
     }
   }
 
   public static void formatDouble(CharBuffer cb, double value,
-				  int width, int prec, int flags, 
-				  int type)
+                                  int width, int prec, int flags,
+                                  int type)
   {
     if (prec < 0)
       prec = 6;
@@ -437,9 +431,9 @@ public class Sprintf {
     int offset = cb.length();
 
     if ((flags & ZERO_FILL) != 0 &&
-	(value < 0 || (flags & (POS_PLUS|POS_SPACE)) != 0)) {
-	offset++;
-	width--;
+        (value < 0 || (flags & (POS_PLUS|POS_SPACE)) != 0)) {
+        offset++;
+        width--;
     }
 
     if (value < 0) {
@@ -457,9 +451,9 @@ public class Sprintf {
 
     for (int i = 0; i < width; i++) {
       if ((flags & LALIGN) != 0)
-	cb.append(' ');
+        cb.append(' ');
       else
-	cb.insert(offset, (flags & ZERO_FILL) == 0 ? ' ' : '0');
+        cb.insert(offset, (flags & ZERO_FILL) == 0 ? ' ' : '0');
     }
   }
 
@@ -476,8 +470,8 @@ public class Sprintf {
       int ch = digits.charAt(i);
 
       if (ch != '9') {
-	digits.setCharAt(i, (char) (ch + 1));
-	return false;
+        digits.setCharAt(i, (char) (ch + 1));
+        return false;
       }
       digits.setCharAt(i, '0');
     }
@@ -488,18 +482,18 @@ public class Sprintf {
   }
 
   private static void formatFixed(CharBuffer cb, CharBuffer digits,
-				 int expt, int prec, int flags)
+                                  int expt, int prec, int flags)
   {
     int i = 0;
     int origExpt = expt;
 
     for (; expt > 0; expt--) {
       if (i < digits.length())
-	cb.append((char) digits.charAt(i++));
+        cb.append((char) digits.charAt(i++));
       else
-	cb.append('0');
+        cb.append('0');
     }
-    
+
     if (origExpt <= 0) // || digits.length() == 0)
       cb.append('0');
 
@@ -521,7 +515,7 @@ public class Sprintf {
   }
 
   private static void formatExpt(CharBuffer cb, CharBuffer digits,
-				 int expt, int prec, int flags)
+                                 int expt, int prec, int flags)
   {
     if (digits.length() == 0)
       cb.append('0');
@@ -533,7 +527,7 @@ public class Sprintf {
 
     for (int i = 1; i < digits.length(); i++) {
       if (prec > 0)
-	cb.append((char) digits.charAt(i));
+        cb.append((char) digits.charAt(i));
       prec--;
     }
 
@@ -549,7 +543,7 @@ public class Sprintf {
   }
 
   public static void formatInteger(CharBuffer cb, long dvalue,
-				   int width, int prec, int flags, int radix)
+                                   int width, int prec, int flags, int radix)
   {
     boolean isBig = (flags & BIG) != 0;
     int begin = cb.length();
@@ -595,11 +589,11 @@ public class Sprintf {
     width -= cb.length() - begin;
     for (; width > 0; width--) {
       if ((flags & LALIGN) != 0)
-	cb.append(' ');
+        cb.append(' ');
       else if ((flags & ZERO_FILL) != 0 && prec < 0)
-	cb.insert(begin, '0');
+        cb.insert(begin, '0');
       else
-	cb.insert(begin, ' ');
+        cb.insert(begin, ' ');
     }
 
     if (cb.length() == begin)
@@ -607,7 +601,7 @@ public class Sprintf {
   }
 
   public static void formatInteger(CharBuffer cb, double dvalue,
-				   int width, int prec, int flags, int radix)
+                                   int width, int prec, int flags, int radix)
   {
     long value;
     if (dvalue > 0)
@@ -626,15 +620,15 @@ public class Sprintf {
 
     if ((flags & LALIGN) == 0) {
       for (int i = 0; i < width - 1; i++)
-	cb.insert(offset, (char) ' ');
+        cb.insert(offset, (char) ' ');
     } else {
       for (int i = 0; i < width - 1; i++)
-	cb.append((char) ' ');
+        cb.append((char) ' ');
     }
   }
 
   public static void formatString(CharBuffer cb, String string,
-				  int prec, int width, int flags)
+                                  int prec, int width, int flags)
   {
     int offset = cb.length();
 
@@ -656,7 +650,7 @@ public class Sprintf {
             cb.append("\\r"); offset+=1; width-=1; continue;
           case '\"':
             cb.append("\\\""); offset+=1; width-=1; continue;
-        } 
+        }
       }
       if ((flags & XMLESCAPE) != 0) {
         switch (ch) {
@@ -679,10 +673,10 @@ public class Sprintf {
 
     if ((flags & LALIGN) == 0) {
       for (int i = 0; i < width; i++)
-	cb.insert(offset, (char) ' ');
+        cb.insert(offset, (char) ' ');
     } else {
       for (int i = 0; i < width; i++)
-	cb.append((char) ' ');
+        cb.append((char) ' ');
     }
   }
 
@@ -725,7 +719,7 @@ public class Sprintf {
     }
     else {
       throw new IllegalArgumentException(L.l("can't convert {0} to double.",
-                                          value.getClass().getName()));
+                                             value.getClass().getName()));
     }
   }
 
@@ -755,7 +749,7 @@ public class Sprintf {
       int i = 0;
       for (; i < length && Character.isWhitespace(string.charAt(i)); i++) {
       }
-      
+
       if (length <= i)
         return 0;
 
@@ -783,16 +777,16 @@ public class Sprintf {
 
       for (; i < length && Character.isWhitespace(string.charAt(i)); i++) {
       }
-      
+
       if (i < length)
         throw new IllegalArgumentException(L.l("can't convert '{0}' to long.", string));
-      
+
       return sign * intValue;
-      
+
     }
     else {
       throw new IllegalArgumentException(L.l("can't convert {0} to long.",
-                                          value.getClass().getName()));
+                                             value.getClass().getName()));
     }
   }
 

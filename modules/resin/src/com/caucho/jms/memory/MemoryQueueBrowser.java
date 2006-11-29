@@ -28,28 +28,18 @@
 
 package com.caucho.jms.memory;
 
-import java.util.Iterator;
-import java.util.Enumeration;
-import java.util.Collections;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.jms.Queue;
-import javax.jms.QueueBrowser;
-import javax.jms.JMSException;
-
+import com.caucho.jms.selector.Selector;
+import com.caucho.jms.selector.SelectorParser;
+import com.caucho.jms.session.SessionImpl;
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 import com.caucho.util.NullEnumeration;
 
-import com.caucho.log.Log;
-
-import com.caucho.jms.AbstractDestination;
-
-import com.caucho.jms.selector.Selector;
-import com.caucho.jms.selector.SelectorParser;
-
-import com.caucho.jms.session.SessionImpl;
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.QueueBrowser;
+import java.util.Enumeration;
+import java.util.logging.Logger;
 
 /**
  * A basic queue.

@@ -29,13 +29,17 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.xml.LooseHtml;
+import com.caucho.xml.QElement;
+import com.caucho.xml.QName;
+import com.caucho.xml.XmlPrinter;
 
 import org.xml.sax.SAXException;
 
-import com.caucho.vfs.*;
-
-import com.caucho.xml.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class LooseToStrictHtml {
   private static void renameSections(org.w3c.dom.Node node, int level)

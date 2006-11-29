@@ -28,9 +28,8 @@
 
 package com.caucho.ejb.protocol;
 
-import java.rmi.RemoteException;
-
 import javax.ejb.EJBHome;
+import java.rmi.RemoteException;
 
 /**
  * Implementation for a home handle.

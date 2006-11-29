@@ -29,7 +29,7 @@
 
 package javax.el;
 
-import java.util.*;
+import java.util.EventListener;
 
 /**
  * A listener for ELContext events

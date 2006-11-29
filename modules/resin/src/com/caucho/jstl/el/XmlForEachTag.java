@@ -28,21 +28,21 @@
 
 package com.caucho.jstl.el;
 
-import java.util.*;
-import java.io.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
+import com.caucho.jsp.PageContextImpl;
+import com.caucho.util.L10N;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.XPath;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jsp.PageContextImpl;
-import com.caucho.xpath.Env;
-import com.caucho.xpath.Expr;
-import com.caucho.xpath.XPath;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.IterationTag;
+import javax.servlet.jsp.tagext.TagSupport;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Tag representing a "for each" condition.

@@ -33,7 +33,12 @@ import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import javax.resource.ResourceException;
-import javax.resource.spi.*;
+import javax.resource.spi.ConnectionManager;
+import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.ValidatingManagedConnectionFactory;
 import javax.security.auth.Subject;
 import java.io.PrintWriter;
 import java.sql.SQLException;

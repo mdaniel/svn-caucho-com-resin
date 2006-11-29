@@ -28,13 +28,6 @@
 
 package com.caucho.util;
 
-import java.io.*;
-import java.util.*;
-import java.sql.*;
-
-import com.caucho.util.*;
-import com.caucho.sql.*;
-
 /**
  * A timed LRU cache.  Items remain valid until they expire.
  * TimedCache can simplify database caching.
@@ -68,7 +61,7 @@ public class TimedCache<K,V> {
   public TimedCache(int capacity, long expireInterval)
   {
     _cache = new LruCache<K,Entry<V>>(capacity);
-    
+
     _expireInterval = expireInterval;
   }
 
@@ -99,7 +92,7 @@ public class TimedCache<K,V> {
       return entry.getValue();
     else {
       _cache.remove(key);
-      
+
       return null;
     }
   }
@@ -116,7 +109,7 @@ public class TimedCache<K,V> {
     {
       _expireInterval = expireInterval;
       _value = value;
-      
+
       _checkTime = Alarm.getCurrentTime();
     }
 
@@ -129,7 +122,7 @@ public class TimedCache<K,V> {
     {
       return _value;
     }
-    
+
     public void removeEvent()
     {
       if (_value instanceof CacheListener)

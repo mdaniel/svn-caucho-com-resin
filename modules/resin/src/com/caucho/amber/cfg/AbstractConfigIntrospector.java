@@ -29,30 +29,22 @@
 
 package com.caucho.amber.cfg;
 
+import com.caucho.amber.field.IdField;
+import com.caucho.amber.table.ForeignColumn;
+import com.caucho.amber.type.AbstractStatefulType;
+import com.caucho.amber.type.RelatedType;
+import com.caucho.bytecode.JAccessibleObject;
+import com.caucho.bytecode.JAnnotation;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-
 import java.util.logging.Logger;
-
-import javax.persistence.*;
-
-import com.caucho.bytecode.*;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.amber.field.IdField;
-
-import com.caucho.amber.type.AbstractStatefulType;
-import com.caucho.amber.type.ListenerType;
-import com.caucho.amber.type.RelatedType;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.table.ForeignColumn;
-
-import com.caucho.util.L10N;
 
 
 /**

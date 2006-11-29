@@ -28,9 +28,8 @@
 
 package com.caucho.ejb;
 
-import com.caucho.vfs.Path;
-
 import com.caucho.config.ConfigException;
+import com.caucho.vfs.Path;
 
 /**
  * Interface for the EJBClient.

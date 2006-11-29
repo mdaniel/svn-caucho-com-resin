@@ -28,8 +28,6 @@
 
 package com.caucho.util;
 
-import java.lang.management.ManagementFactory;
-
 /**
  * Compatibility for JDK 1.5
  */

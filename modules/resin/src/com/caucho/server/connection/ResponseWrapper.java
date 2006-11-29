@@ -28,16 +28,13 @@
 
 package com.caucho.server.connection;
 
-import java.io.PrintWriter;
-import java.io.IOException;
-
-import java.util.Locale;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Locale;
 
 /**
  * Wraps a servlet response in another response.  Filters may

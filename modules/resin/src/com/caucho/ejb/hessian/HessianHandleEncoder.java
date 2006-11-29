@@ -28,26 +28,16 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-
-import java.sql.*;
-import java.lang.reflect.*;
-
-import javax.ejb.*;
-import javax.sql.*;
-import javax.naming.*;
-import javax.transaction.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.config.ConfigException;
+import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.EJBExceptionWrapper;
+import com.caucho.ejb.protocol.AbstractHandle;
+import com.caucho.ejb.protocol.AbstractHomeHandle;
+import com.caucho.ejb.protocol.HandleEncoder;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.sql.*;
-import com.caucho.ejb.*;
-import com.caucho.ejb.protocol.*;
+import javax.ejb.EJBException;
+import java.lang.reflect.Field;
 
 /**
  * Encodes and decodes handles.

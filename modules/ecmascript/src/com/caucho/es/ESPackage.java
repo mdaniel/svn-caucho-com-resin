@@ -28,12 +28,9 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.server.util.CauchoSystem;
 
-import com.caucho.util.*;
-import com.caucho.server.util.*;
+import java.util.Hashtable;
 
 /**
  * JavaScript object representing a Java package or class.

@@ -28,35 +28,24 @@
 
 package com.caucho.ejb.xa;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.rmi.RemoteException;
-
-import javax.transaction.Status;
-import javax.transaction.UserTransaction;
-import javax.transaction.Transaction;
-import javax.transaction.Synchronization;
-
-import javax.ejb.SessionSynchronization;
-import javax.ejb.EJBException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-
-import com.caucho.log.Log;
-
-import com.caucho.transaction.TransactionImpl;
-
 import com.caucho.amber.manager.AmberConnection;
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.ejb.EJBExceptionWrapper;
-
-import com.caucho.ejb.entity.QEntity;
-import com.caucho.ejb.entity.EntityObject;
 import com.caucho.ejb.entity.EntityServer;
+import com.caucho.ejb.entity.QEntity;
+import com.caucho.log.Log;
+import com.caucho.transaction.TransactionImpl;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+
+import javax.ejb.EJBException;
+import javax.ejb.SessionSynchronization;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.Transaction;
+import javax.transaction.UserTransaction;
+import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Handles entity beans for a single transaction.

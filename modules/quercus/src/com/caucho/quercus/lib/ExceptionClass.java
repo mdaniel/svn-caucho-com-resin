@@ -33,7 +33,12 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.This;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.Value;
 
 /**
  * Exception object facade.

@@ -28,18 +28,18 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
+import com.caucho.jsp.PageContextImpl;
+import com.caucho.jstl.ChooseTag;
+import com.caucho.util.L10N;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.XPath;
 
 import org.w3c.dom.Node;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jsp.PageContextImpl;
-import com.caucho.xpath.*;
-import com.caucho.jstl.ChooseTag;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.TagSupport;
 
 /**
  * Tag representing an "when" condition.

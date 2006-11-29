@@ -28,11 +28,13 @@
 
 package com.caucho.server.dispatch;
 
-import java.util.*;
-import java.io.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Represents the final servlet in a filter chain.

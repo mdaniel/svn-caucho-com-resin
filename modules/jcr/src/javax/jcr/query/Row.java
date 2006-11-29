@@ -29,7 +29,9 @@
 
 package javax.jcr.query;
 
-import javax.jcr.*;
+import javax.jcr.ItemNotFoundException;
+import javax.jcr.RepositoryException;
+import javax.jcr.Value;
 
 public interface Row {
   public Value[] getValues()

@@ -48,8 +48,8 @@
 
 package com.caucho.hessian.mux;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Input stream to a specific channel.

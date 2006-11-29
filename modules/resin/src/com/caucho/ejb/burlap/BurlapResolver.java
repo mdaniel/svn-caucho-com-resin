@@ -48,9 +48,9 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.IOException;
-
 import com.caucho.hessian.io.HessianRemoteResolver;
+
+import java.io.IOException;
 
 /**
  * Looks up remote objects.  The default just returns a HessianRemote object.

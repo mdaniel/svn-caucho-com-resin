@@ -28,13 +28,7 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import org.xml.sax.*;
+import java.io.IOException;
 
 public class RemoteURLException extends IOException {
   RemoteURLException(String msg)

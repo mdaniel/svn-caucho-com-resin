@@ -28,11 +28,11 @@
 */
 
 package com.caucho.xml.stream;
-import java.io.*;
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
-import javax.xml.stream.util.*;
-import javax.xml.transform.*;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.util.XMLEventAllocator;
+import javax.xml.stream.util.XMLEventConsumer;
 
 public class XMLEventAllocatorImpl implements XMLEventAllocator {
 

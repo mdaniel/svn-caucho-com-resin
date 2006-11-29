@@ -27,28 +27,12 @@
  */
 package com.caucho.db.jdbc;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.math.BigDecimal;
-
-import java.sql.*;
-import javax.sql.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.log.Log;
-
-import com.caucho.db.Database;
+import com.caucho.db.sql.Data;
 import com.caucho.db.table.Column;
 
-import com.caucho.db.sql.Data;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 
 /**
  * The JDBC statement implementation.

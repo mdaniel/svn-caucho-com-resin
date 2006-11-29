@@ -28,9 +28,9 @@
 
 package com.caucho.server.dispatch;
 
-import javax.servlet.ServletException;
-
 import com.caucho.util.LineCompileException;
+
+import javax.servlet.ServletException;
 
 /**
  * Represents the final servlet in a filter chain.

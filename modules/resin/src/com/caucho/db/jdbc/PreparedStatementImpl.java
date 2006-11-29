@@ -28,28 +28,15 @@
  */
 package com.caucho.db.jdbc;
 
-import java.io.*;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.*;
-import javax.sql.*;
-
-import com.caucho.util.L10N;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.log.Log;
-
-import com.caucho.db.Database;
-
-import com.caucho.db.store.Transaction;
-
 import com.caucho.db.sql.Query;
 import com.caucho.db.sql.QueryContext;
+import com.caucho.db.store.Transaction;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.Reader;
+import java.sql.*;
+import java.util.Calendar;
 
 /**
  * The JDBC statement implementation.

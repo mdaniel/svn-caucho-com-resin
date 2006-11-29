@@ -28,13 +28,17 @@
 
 package com.caucho.sql.spy;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.L10N;
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Spying on a driver.

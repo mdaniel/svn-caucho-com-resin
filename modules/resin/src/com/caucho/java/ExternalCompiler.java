@@ -28,15 +28,17 @@
 
 package com.caucho.java;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
 import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Compiles Java source, returning the loaded class.

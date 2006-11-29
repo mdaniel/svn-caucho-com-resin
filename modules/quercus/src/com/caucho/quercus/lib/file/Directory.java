@@ -29,13 +29,11 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.IOException;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
-
 import com.caucho.vfs.Path;
+
+import java.io.IOException;
 
 public class Directory {
   public DirectoryValue handle;

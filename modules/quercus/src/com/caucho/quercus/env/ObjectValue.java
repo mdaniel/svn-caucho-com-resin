@@ -29,8 +29,8 @@
 
 package com.caucho.quercus.env;
 
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a Quercus object value.

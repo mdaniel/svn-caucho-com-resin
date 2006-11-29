@@ -29,19 +29,16 @@
 
 package com.caucho.db.debug;
 
-import java.io.IOException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
+import com.caucho.db.store.Store;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.vfs.*;
-
-import com.caucho.db.store.Store;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Manager for a basic Java-based database.

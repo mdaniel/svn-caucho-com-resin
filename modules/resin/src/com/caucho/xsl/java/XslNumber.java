@@ -29,12 +29,9 @@
 package com.caucho.xsl.java;
 
 import com.caucho.java.JavaWriter;
-
 import com.caucho.xml.QName;
-
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.pattern.AbstractPattern;
-
 import com.caucho.xsl.XslNumberFormat;
 import com.caucho.xsl.XslParseException;
 

@@ -28,12 +28,9 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.rmi.*;
-
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.vfs.*;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.rmi.RemoteException;
 
 public class SerializedExceptionWrapper extends RemoteException {
   private Throwable cause;

@@ -29,9 +29,6 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
-
 public class PortletModeException extends PortletException
 {
   private transient PortletMode _mode = null;

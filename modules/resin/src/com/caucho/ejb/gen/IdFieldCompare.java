@@ -28,11 +28,10 @@
 
 package com.caucho.ejb.gen;
 
-import java.util.Comparator;
-
+import com.caucho.amber.field.IdField;
 import com.caucho.util.L10N;
 
-import com.caucho.amber.field.IdField;
+import java.util.Comparator;
 
 /**
  * Sorts ID fields.

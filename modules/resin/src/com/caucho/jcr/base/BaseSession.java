@@ -29,14 +29,17 @@
 
 package com.caucho.jcr.base;
 
-import java.io.*;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
 
 import javax.jcr.*;
-import javax.jcr.lock.*;
-import javax.jcr.nodetype.*;
-import javax.jcr.version.*;
-
-import org.xml.sax.*;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.version.VersionException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Represents an open session to a Repository workspace.

@@ -28,74 +28,38 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-import java.text.*;
+import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaWriter;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntArray;
+import com.caucho.util.IntMap;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.QAbstractNode;
+import com.caucho.xml.QAttr;
+import com.caucho.xml.QElement;
+import com.caucho.xml.QName;
+import com.caucho.xml.XmlChar;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.NamespaceContext;
+import com.caucho.xpath.expr.NumericExpr;
+import com.caucho.xpath.pattern.*;
+import com.caucho.xsl.fun.KeyFun;
+import com.caucho.xsl.java.*;
 
 import org.w3c.dom.*;
 
-import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
-import com.caucho.xpath.pattern.*;
-import com.caucho.xpath.expr.*;
-import com.caucho.java.*;
-import com.caucho.jsp.*;
-import com.caucho.loader.DynamicClassLoader;
-
-import com.caucho.xsl.java.XslAttribute;
-import com.caucho.xsl.java.XslApplyImports;
-import com.caucho.xsl.java.XslApplyTemplates;
-import com.caucho.xsl.java.XslAttributeNode;
-import com.caucho.xsl.java.XslAttributeSet;
-import com.caucho.xsl.java.XslCallTemplate;
-import com.caucho.xsl.java.XslChoose;
-import com.caucho.xsl.java.XslComment;
-import com.caucho.xsl.java.XslCopy;
-import com.caucho.xsl.java.XslCopyOf;
-import com.caucho.xsl.java.XslDecimalFormat;
-import com.caucho.xsl.java.XslForEach;
-import com.caucho.xsl.java.XslElement;
-import com.caucho.xsl.java.XslElementNode;
-import com.caucho.xsl.java.XslIf;
-import com.caucho.xsl.java.XslImport;
-import com.caucho.xsl.java.XslInclude;
-import com.caucho.xsl.java.XslKey;
-import com.caucho.xsl.java.XslMessage;
-import com.caucho.xsl.java.XslNamespaceAlias;
-import com.caucho.xsl.java.XslNode;
-import com.caucho.xsl.java.XslNumber;
-import com.caucho.xsl.java.XslOtherwise;
-import com.caucho.xsl.java.XslOutput;
-import com.caucho.xsl.java.XslParam;
-import com.caucho.xsl.java.XslProcessingInstruction;
-import com.caucho.xsl.java.XslPreserveSpace;
-import com.caucho.xsl.java.XslResultDocument;
-import com.caucho.xsl.java.XslSort;
-import com.caucho.xsl.java.XslStylesheet;
-import com.caucho.xsl.java.XslText;
-import com.caucho.xsl.java.XslTemplate;
-import com.caucho.xsl.java.XslTransform;
-import com.caucho.xsl.java.XslStripSpace;
-import com.caucho.xsl.java.XslValueOf;
-import com.caucho.xsl.java.XslVariable;
-import com.caucho.xsl.java.XslWhen;
-import com.caucho.xsl.java.XslWithParam;
-import com.caucho.xsl.java.XslWrapperNode;
-import com.caucho.xsl.java.TextNode;
-
-import com.caucho.xsl.java.XtpExpression;
-import com.caucho.xsl.java.XtpScriptlet;
-import com.caucho.xsl.java.XtpDeclaration;
-import com.caucho.xsl.java.XtpDirectivePage;
-import com.caucho.xsl.java.XtpDirectiveCache;
-
-import com.caucho.xsl.fun.*;
+import java.io.IOException;
+import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.logging.Logger;
 
 /**
  * Generates code for a Java based stylesheet.

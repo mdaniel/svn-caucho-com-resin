@@ -28,16 +28,14 @@
 
 package com.caucho.ejb.hessian;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import com.caucho.ejb.AbstractEJBObject;
+import com.caucho.hessian.io.Deserializer;
+import com.caucho.hessian.io.HessianProtocolException;
+import com.caucho.hessian.io.Serializer;
+import com.caucho.hessian.io.SerializerFactory;
 
-import javax.ejb.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
-import com.caucho.hessian.io.*;
+import javax.ejb.EJBHome;
+import javax.ejb.EJBObject;
 
 public class QSerializerFactory extends SerializerFactory {
   public Serializer getSerializer(Class cl)

@@ -28,8 +28,8 @@
 
 package com.caucho.jms.message;
 
-import javax.jms.TextMessage;
 import javax.jms.JMSException;
+import javax.jms.TextMessage;
 
 /**
  * A text message.

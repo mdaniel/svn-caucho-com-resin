@@ -28,11 +28,10 @@
 
 package com.caucho.vfs.i18n;
 
-import java.util.logging.Logger;
+import com.caucho.vfs.OutputStreamWithBuffer;
 
 import java.io.IOException;
-
-import com.caucho.vfs.OutputStreamWithBuffer;
+import java.util.logging.Logger;
 
 /**
  * Abstract class for a character-to-byte encoding writer.

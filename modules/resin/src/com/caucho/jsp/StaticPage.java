@@ -28,17 +28,22 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempCharBuffer;
+import com.caucho.vfs.WriteStream;
 
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import com.caucho.util.*;
-
-import com.caucho.vfs.*;
-
-import com.caucho.server.connection.CauchoResponse;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * A static page is a page that's just a static file.

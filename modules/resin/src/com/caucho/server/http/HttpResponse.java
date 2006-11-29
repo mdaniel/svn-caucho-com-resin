@@ -29,22 +29,16 @@
 
 package com.caucho.server.http;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.xml.XmlChar;
-
+import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.util.Alarm;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.server.cluster.Server;
+import javax.servlet.http.Cookie;
+import java.io.IOException;
+import java.util.logging.Level;
 
 public class HttpResponse extends AbstractHttpResponse {
   static final byte []_http10ok = "HTTP/1.0 200 OK".getBytes();

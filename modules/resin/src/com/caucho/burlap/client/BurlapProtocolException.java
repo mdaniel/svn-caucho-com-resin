@@ -48,8 +48,7 @@
 
 package com.caucho.burlap.client;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
 
 /**
  * Exception for faults when the fault doesn't return a java exception.

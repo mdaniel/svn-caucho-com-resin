@@ -28,17 +28,11 @@
 
 package com.caucho.log;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-
-import com.caucho.vfs.*;
-
-import com.caucho.util.L10N;
-
 import com.caucho.config.ConfigException;
+import com.caucho.vfs.WriteStream;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
 
 /**
  * Configuration for the standard output log

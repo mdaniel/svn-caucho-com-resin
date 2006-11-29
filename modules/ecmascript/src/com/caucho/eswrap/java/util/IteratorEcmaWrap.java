@@ -30,9 +30,7 @@
 
 package com.caucho.eswrap.java.util;
 
-import java.util.*;
-import com.caucho.util.*;
-import com.caucho.es.*;
+import java.util.Iterator;
 
 public class IteratorEcmaWrap {
   public static Iterator keys(Iterator i)

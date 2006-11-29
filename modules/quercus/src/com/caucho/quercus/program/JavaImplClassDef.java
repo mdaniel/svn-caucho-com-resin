@@ -30,12 +30,17 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaMethod;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.ObjectExtValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralExpr;
-import com.caucho.quercus.env.*;
 import com.caucho.quercus.function.Marshal;
+import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.module.ModuleContext;
-import com.caucho.quercus.function.*;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Field;

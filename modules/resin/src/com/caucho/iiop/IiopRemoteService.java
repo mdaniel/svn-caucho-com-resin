@@ -29,17 +29,12 @@
 
 package com.caucho.iiop;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.util.Log;
-
 abstract public class IiopRemoteService {
   /**
    * Returns the context class loader.
    */
   abstract public ClassLoader getClassLoader();
-  
+
   /**
    * Returns the home API class.
    */
@@ -49,7 +44,7 @@ abstract public class IiopRemoteService {
    * Returns the object API class.
    */
   abstract public Class getObjectAPI();
-  
+
   /**
    * Returns the home object.
    */

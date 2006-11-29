@@ -29,39 +29,24 @@
 
 package com.caucho.amber.gen;
 
-import java.io.*;
-import java.util.*;
-
-import javax.persistence.CascadeType;
-
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.ClassComponent;
-
-import com.caucho.loader.Environment;
-
+import com.caucho.amber.field.*;
+import com.caucho.amber.table.Column;
+import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
-
-import com.caucho.amber.field.AbstractField;
-import com.caucho.amber.field.AmberField;
-import com.caucho.amber.field.CascadableField;
-//import com.caucho.amber.field.Field;
-//import com.caucho.amber.field.FieldType;
-import com.caucho.amber.field.Id;
-import com.caucho.amber.field.IdField;
-import com.caucho.amber.field.StubMethod;
-import com.caucho.amber.field.VersionField;
-
-import com.caucho.amber.table.Table;
-import com.caucho.amber.table.Column;
-
 import com.caucho.bytecode.JMethod;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.ClassComponent;
+import com.caucho.loader.Environment;
+import com.caucho.util.L10N;
+import com.caucho.vfs.PersistentDependency;
+
+import javax.persistence.CascadeType;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Generates the Java code for the wrapped object.

@@ -32,7 +32,12 @@ package com.caucho.tools.profiler;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.LruCache;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The main entry point for profiling.  This class is used to obtain instances

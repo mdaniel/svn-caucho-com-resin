@@ -28,11 +28,9 @@
 
 package com.caucho.xsl;
 
-import javax.xml.transform.*;
+import com.caucho.util.ExceptionWrapper;
 
-import java.io.*;
-
-import com.caucho.util.*;
+import javax.xml.transform.TransformerConfigurationException;
 
 /**
  * Represents a exception when creating a transformation.

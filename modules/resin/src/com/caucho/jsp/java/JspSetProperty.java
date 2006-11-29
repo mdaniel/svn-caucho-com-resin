@@ -28,17 +28,19 @@
 
 package com.caucho.jsp.java;
 
+import com.caucho.jsp.JspParseException;
+import com.caucho.util.BeanUtil;
+import com.caucho.vfs.WriteStream;
+import com.caucho.xml.QName;
+
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorManager;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
-import java.beans.*;
-import java.io.*;
-
-import com.caucho.jsp.*;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.xml.QName;
-import com.caucho.util.*;
 
 /**
  * Represents a Java scriptlet.

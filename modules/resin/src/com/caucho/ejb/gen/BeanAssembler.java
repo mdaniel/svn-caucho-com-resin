@@ -29,20 +29,14 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
-
 import com.caucho.ejb.cfg.EjbBean;
-
-import com.caucho.java.gen.GenClass;
-import com.caucho.java.gen.BaseClass;
-import com.caucho.java.gen.CallChain;
-import com.caucho.java.gen.ClassComponent;
 import com.caucho.java.gen.BaseMethod;
+import com.caucho.java.gen.ClassComponent;
 import com.caucho.java.gen.DependencyComponent;
-
+import com.caucho.java.gen.GenClass;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.PersistentDependency;
 
 /**
  * Assembles the generator structure.

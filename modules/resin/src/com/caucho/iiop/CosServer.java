@@ -28,21 +28,19 @@
 
 package com.caucho.iiop;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.*;
-import javax.naming.*;
-
-import org.omg.CosNaming.*;
-import org.omg.CosNaming.NamingContextPackage.*;
-
 import com.caucho.log.Log;
+import com.caucho.naming.AbstractModel;
+import com.caucho.naming.MemoryModel;
 
-import com.caucho.vfs.*;
-import com.caucho.server.*;
-import com.caucho.server.http.*;
-import com.caucho.naming.*;
+import org.omg.CosNaming.NameComponent;
+import org.omg.CosNaming.NamingContextPackage.CannotProceed;
+import org.omg.CosNaming.NamingContextPackage.InvalidName;
+import org.omg.CosNaming.NamingContextPackage.NotFound;
+import org.omg.CosNaming.NamingContextPackage.NotFoundReason;
+
+import javax.naming.NamingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CosServer {
   private static final Logger log = Log.open(CosServer.class);

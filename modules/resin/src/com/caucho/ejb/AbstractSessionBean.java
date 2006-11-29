@@ -28,7 +28,9 @@
 
 package com.caucho.ejb;
 
-import javax.ejb.*;
+import javax.ejb.EJBException;
+import javax.ejb.SessionBean;
+import javax.ejb.SessionContext;
 
 abstract public class AbstractSessionBean implements SessionBean {
   protected SessionContext sessionContext;

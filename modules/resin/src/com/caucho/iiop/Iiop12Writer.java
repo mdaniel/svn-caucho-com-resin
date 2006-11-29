@@ -29,12 +29,7 @@
 
 package com.caucho.iiop;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 public class Iiop12Writer extends Iiop10Writer {
   private final static int KEY_ADDR = 0;

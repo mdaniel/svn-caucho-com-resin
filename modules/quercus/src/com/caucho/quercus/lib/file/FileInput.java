@@ -29,26 +29,17 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
-import java.nio.channels.FileLock;
-import java.nio.channels.FileChannel;
-
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringBuilderValue;
-
-import com.caucho.vfs.Path;
 import com.caucho.vfs.FilePath;
-import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Path;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.util.logging.Logger;
 
 /**
  * Represents a Quercus file open for reading

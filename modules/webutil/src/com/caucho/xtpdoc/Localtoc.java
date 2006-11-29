@@ -29,16 +29,10 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
-
-import java.util.logging.Logger;
-
-import javax.xml.stream.*;
-
-import com.caucho.vfs.Path;
-
-import com.caucho.config.Config;
+import java.io.PrintWriter;
 
 public class Localtoc implements ContentItem {
   Document _document;

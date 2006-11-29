@@ -29,35 +29,22 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.File;
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.Closeable;
-import java.io.Reader;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.io.RandomAccessFile;
-
-import java.nio.channels.FileLock;
-import java.nio.channels.FileChannel;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.FilePath;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.RandomAccessStream;
-import com.caucho.vfs.Encoding;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.FilePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.RandomAccessStream;
+
+import java.io.*;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents a PHP open file

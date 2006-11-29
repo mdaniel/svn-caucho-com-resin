@@ -28,8 +28,9 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.ResourceBundle;
 
 public abstract class GenericPortlet implements Portlet, PortletConfig
 {

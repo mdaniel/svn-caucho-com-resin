@@ -29,38 +29,21 @@
 
 package com.caucho.amber.query;
 
+import com.caucho.amber.AmberQuery;
+import com.caucho.amber.expr.ArgExpr;
+import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.type.*;
+import com.caucho.jdbc.JdbcMetaData;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Types;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.caucho.jdbc.JdbcMetaData;
-
-import com.caucho.amber.AmberQuery;
-
-import com.caucho.amber.expr.*;
-
-import com.caucho.amber.type.Type;
-import com.caucho.amber.type.StringType;
-import com.caucho.amber.type.ObjectType;
-import com.caucho.amber.type.ByteType;
-import com.caucho.amber.type.ShortType;
-import com.caucho.amber.type.IntegerType;
-import com.caucho.amber.type.LongType;
-import com.caucho.amber.type.FloatType;
-import com.caucho.amber.type.DoubleType;
-import com.caucho.amber.type.SqlTimestampType;
-import com.caucho.amber.type.SqlDateType;
-
-import com.caucho.amber.manager.AmberConnection;
 
 /**
  * Represents the application's view of the query.

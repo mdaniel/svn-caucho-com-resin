@@ -28,25 +28,6 @@
 
 package com.caucho.transaction.xalog;
 
-import java.util.HashSet;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-import java.io.EOFException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.LongMap;
-import com.caucho.util.Alarm;
-
-import com.caucho.log.Log;
-
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ReadStream;
-
 import com.caucho.transaction.XidImpl;
 
 /**

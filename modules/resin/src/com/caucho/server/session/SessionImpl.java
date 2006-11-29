@@ -41,7 +41,11 @@ import com.caucho.vfs.IOExceptionWrapper;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.security.Principal;
 import java.util.*;
 import java.util.logging.Level;

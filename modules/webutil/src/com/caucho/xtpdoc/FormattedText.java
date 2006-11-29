@@ -29,15 +29,7 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
-
-import com.caucho.config.types.*;
+import com.caucho.config.types.RawString;
 
 public class FormattedText extends ContainerNode {
   public FormattedText(Document document)

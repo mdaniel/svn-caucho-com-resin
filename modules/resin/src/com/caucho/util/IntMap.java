@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.Iterator;
 /**
  * The IntMap provides a simple hashmap from keys to integers.  The API is
  * an abbreviation of the HashMap collection API.

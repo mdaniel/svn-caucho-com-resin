@@ -29,9 +29,6 @@
 
 package javax.portlet;
 
-import java.io.*;
-import java.util.*;
-
 public interface PreferencesValidator
 {
   public void validate(PortletPreferences preferences)

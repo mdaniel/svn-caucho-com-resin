@@ -28,25 +28,18 @@
 
 package com.caucho.jstl.rt;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.sql.*;
-import javax.naming.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.jstl.core.*;
-import javax.servlet.jsp.jstl.sql.Result;
-import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
-
 import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jstl.ResultImpl;
-import com.caucho.jsp.*;
+import com.caucho.util.L10N;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.tagext.TryCatchFinally;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SqlTransactionTag extends TagSupport implements TryCatchFinally  {
   private static final Logger log = Log.open(SqlTransactionTag.class);

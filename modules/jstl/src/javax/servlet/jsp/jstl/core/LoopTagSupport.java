@@ -28,12 +28,11 @@
 
 package javax.servlet.jsp.jstl.core;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.tagext.IterationTag;
+import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.tagext.TryCatchFinally;
 
 abstract public class LoopTagSupport extends TagSupport
   implements IterationTag, TryCatchFinally, LoopTag {

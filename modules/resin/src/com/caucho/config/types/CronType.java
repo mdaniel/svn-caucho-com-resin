@@ -28,14 +28,11 @@
 
 package com.caucho.config.types;
 
-import java.util.regex.Pattern;
-
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
-import com.caucho.vfs.*;
-
-import com.caucho.config.ConfigException;
+import java.util.regex.Pattern;
 
 /**
  * Class-loading TypeBuilder

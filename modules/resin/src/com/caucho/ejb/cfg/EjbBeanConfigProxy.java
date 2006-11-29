@@ -28,12 +28,15 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.*;
-import com.caucho.vfs.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.ConfigException;
+import com.caucho.config.DependencyBean;
 import com.caucho.util.L10N;
+import com.caucho.vfs.PersistentDependency;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import javax.annotation.*;
 
 /**
  * Proxy for an ejb bean configuration.  This proxy is needed to handle

@@ -29,15 +29,7 @@
 
 package com.caucho.iiop.orb;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import org.omg.CORBA.*;
+import java.util.logging.Logger;
 
 public class InitStub extends javax.rmi.CORBA.Stub
 {

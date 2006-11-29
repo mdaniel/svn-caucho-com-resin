@@ -28,15 +28,12 @@
 
 package com.caucho.config;
 
-import java.util.*;
-import java.lang.reflect.*;
-
 import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.NotImplementedException;
-
 import com.caucho.xml.QName;
+
 import org.w3c.dom.Node;
+
+import java.lang.reflect.Method;
 
 public class CreateAttributeStrategy extends AttributeStrategy {
   static final L10N L = new L10N(CreateAttributeStrategy.class);

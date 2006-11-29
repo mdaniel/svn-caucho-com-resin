@@ -28,15 +28,6 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 /**
  * Latin1 encodings (ISO-8859-1) doesn't need to escape the printable Latin1
  * characters.
@@ -49,12 +40,12 @@ class Latin1Entities extends HtmlEntities {
   {
     if (version == 0 || version >= 4.0) {
       if (_html40 == null)
-	_html40 = new Latin1Entities(4.0);
+        _html40 = new Latin1Entities(4.0);
       return _html40;
     }
     else {
       if (_html32 == null)
-	_html32 = new Latin1Entities(3.2);
+        _html32 = new Latin1Entities(3.2);
       return _html32;
     }
   }

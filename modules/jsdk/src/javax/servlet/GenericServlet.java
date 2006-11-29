@@ -28,9 +28,8 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
+import java.util.Enumeration;
+import java.util.logging.Logger;
 
 /**
  * GenericServlet is a convenient abstract class for defining Servlets.

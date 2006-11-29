@@ -29,48 +29,34 @@
 
 package com.caucho.amber.manager;
 
-import java.io.InputStream;
-
-import java.net.URL;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.sql.DataSource;
-
 import com.caucho.amber.AmberRuntimeException;
-
 import com.caucho.amber.cfg.EntityConfig;
 import com.caucho.amber.cfg.EntityMappingsConfig;
 import com.caucho.amber.cfg.PersistenceConfig;
 import com.caucho.amber.cfg.PersistenceUnitConfig;
-
+import com.caucho.amber.gen.AmberEnhancer;
+import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.ListenerType;
-
-import com.caucho.amber.gen.AmberEnhancer;
-import com.caucho.amber.gen.AmberGenerator;
-
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
-
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.enhancer.EnhancerManager;
-
-import com.caucho.naming.Jndi;
-
 import com.caucho.vfs.Path;
+
+import javax.sql.DataSource;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Environment-based container.

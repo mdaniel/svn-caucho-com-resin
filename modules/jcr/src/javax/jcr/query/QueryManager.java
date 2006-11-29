@@ -29,7 +29,8 @@
 
 package javax.jcr.query;
 
-import javax.jcr.*;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
 
 public interface QueryManager {
   public Query createQuery(String statement, String language)

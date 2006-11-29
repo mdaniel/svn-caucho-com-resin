@@ -29,12 +29,17 @@
 
 package com.caucho.server.dispatch;
 
-import javax.annotation.*;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.soa.rest.RestProtocolServlet;
+import com.caucho.soa.servlet.HessianProtocolServlet;
+import com.caucho.soa.servlet.ProtocolServlet;
+import com.caucho.soa.servlet.SoapProtocolServlet;
+import com.caucho.util.L10N;
 
-import com.caucho.config.*;
-import com.caucho.soa.servlet.*;
-import com.caucho.soa.rest.*;
-import com.caucho.util.*;
+import javax.annotation.PostConstruct;
 /**
  * Configuration for a servlet web-service protocol.
  */

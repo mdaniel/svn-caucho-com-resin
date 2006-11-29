@@ -29,56 +29,36 @@
 
 package com.caucho.amber.type;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.io.IOException;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassDependency;
-import com.caucho.bytecode.JField;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.config.ConfigException;
-
-import com.caucho.make.ClassDependency;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.lifecycle.Lifecycle;
-
 import com.caucho.amber.AmberRuntimeException;
-
+import com.caucho.amber.entity.AmberCompletion;
+import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityItem;
-import com.caucho.amber.entity.AmberEntityHome;
-import com.caucho.amber.entity.AmberCompletion;
-
 import com.caucho.amber.field.AmberField;
-import com.caucho.amber.field.AmberFieldCompare;
 import com.caucho.amber.field.EntityManyToOneField;
 import com.caucho.amber.field.Id;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.VersionField;
-
 import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.idgen.SequenceIdGenerator;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.manager.AmberConnection;
-
-import com.caucho.amber.table.Table;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
+import com.caucho.amber.table.Table;
+import com.caucho.bytecode.JClass;
+import com.caucho.config.ConfigException;
+import com.caucho.java.JavaWriter;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.logging.Logger;
 
 /**
  * Base for entity or mapped-superclass types.

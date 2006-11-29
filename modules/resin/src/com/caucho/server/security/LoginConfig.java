@@ -28,19 +28,14 @@
 
 package com.caucho.server.security;
 
-import java.util.logging.*;
-
-
-import javax.servlet.*;
-import javax.naming.*;
-
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.InitProgram;
 import com.caucho.log.Log;
-
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Config;
-import com.caucho.config.types.InitProgram;
+import javax.servlet.ServletException;
+import java.util.logging.Logger;
 
 /**
  * Configuration for the login-config.

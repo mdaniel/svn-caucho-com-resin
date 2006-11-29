@@ -28,11 +28,11 @@
 
 package com.caucho.jms.session;
 
-import javax.jms.Topic;
-import javax.jms.TopicSession;
-import javax.jms.TopicPublisher;
-import javax.jms.TopicSubscriber;
 import javax.jms.JMSException;
+import javax.jms.Topic;
+import javax.jms.TopicPublisher;
+import javax.jms.TopicSession;
+import javax.jms.TopicSubscriber;
 
 /**
  * A sample topic session.  Lets the client create topics, browsers, etc.

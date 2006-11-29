@@ -28,8 +28,6 @@
 
 package javax.transaction;
 
-import javax.transaction.xa.XAResource;
-
 /**
  * The user transaction interface.  Transactions are normally
  * associated with a single thread.
@@ -40,32 +38,32 @@ public interface UserTransaction {
    */
   public void setTransactionTimeout(int seconds)
     throws SystemException;
-  
+
   /**
    * Gets the transaction's status
    */
   public int getStatus()
     throws SystemException;
-  
+
   /**
    * Start the transaction.
    */
   public void begin()
     throws NotSupportedException, SystemException;
-  
+
   /**
    * Marks the transaction as rollback only.
    */
   public void setRollbackOnly()
     throws IllegalStateException, SystemException;
-  
+
   /**
    * Commits the transaction
    */
   public void commit()
     throws IllegalStateException, RollbackException, HeuristicMixedException,
-	   HeuristicRollbackException, SecurityException, SystemException;
-  
+           HeuristicRollbackException, SecurityException, SystemException;
+
   /**
    * Rolls the transaction back
    */

@@ -28,17 +28,7 @@
 
 package com.caucho.server.http;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.server.connection.Connection;
-
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
 

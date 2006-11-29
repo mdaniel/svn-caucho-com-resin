@@ -29,24 +29,46 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-
-import javax.servlet.jsp.*;
-import javax.xml.transform.*;
-
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
+import com.caucho.java.LineMap;
 import com.caucho.log.Log;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.*;
-import com.caucho.xpath.pattern.*;
-import com.caucho.xsl.fun.*;
-import com.caucho.java.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntArray;
+import com.caucho.vfs.Path;
+import com.caucho.xml.CauchoNode;
+import com.caucho.xml.QAbstractNode;
+import com.caucho.xml.QElement;
+import com.caucho.xml.XMLWriter;
+import com.caucho.xml.XmlChar;
+import com.caucho.xml.XmlUtil;
+import com.caucho.xpath.Env;
+import com.caucho.xpath.Expr;
+import com.caucho.xpath.StylesheetEnv;
+import com.caucho.xpath.XPath;
+import com.caucho.xpath.XPathException;
+import com.caucho.xpath.XPathFun;
+import com.caucho.xpath.pattern.AbstractPattern;
+import com.caucho.xpath.pattern.NodeIterator;
+import com.caucho.xsl.fun.DocumentFun;
+import com.caucho.xsl.fun.ExtensionElementFun;
+import com.caucho.xsl.fun.ExtensionFunctionFun;
+import com.caucho.xsl.fun.SystemPropertyFun;
+import com.caucho.xsl.fun.UnparsedEntityFun;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
+
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.logging.Logger;
 
 /**
  * Implementation base class for stylesheets.  It is made public only

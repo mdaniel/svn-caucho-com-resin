@@ -29,14 +29,8 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.LinkedHashMap;
-
-import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP chained map

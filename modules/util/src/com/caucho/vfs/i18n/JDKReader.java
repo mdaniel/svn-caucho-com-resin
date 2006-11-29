@@ -28,13 +28,12 @@
 
 package com.caucho.vfs.i18n;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.net.*;
-import java.util.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 
 /**
  * Reader to handle any encoding by passing it to the JDK.

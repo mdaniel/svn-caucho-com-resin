@@ -28,10 +28,10 @@
 
 package com.caucho.server.port;
 
-import java.util.*;
-
-import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentBean;
+import com.caucho.loader.EnvironmentClassLoader;
+
+import java.util.ArrayList;
 
 abstract public class AbstractServer implements EnvironmentBean {
   // The environment class loader

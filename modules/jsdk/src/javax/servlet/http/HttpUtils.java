@@ -30,10 +30,9 @@
 
 package javax.servlet.http;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.*;
+import javax.servlet.ServletInputStream;
+import java.io.IOException;
+import java.util.Hashtable;
 
 /**
  * @deprecated

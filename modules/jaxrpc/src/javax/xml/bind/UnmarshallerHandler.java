@@ -28,7 +28,7 @@
 */
 
 package javax.xml.bind;
-import org.xml.sax.*;
+import org.xml.sax.ContentHandler;
 
 public interface UnmarshallerHandler extends ContentHandler {
 

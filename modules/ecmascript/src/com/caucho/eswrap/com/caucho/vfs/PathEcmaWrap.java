@@ -28,12 +28,20 @@
 
 package com.caucho.eswrap.com.caucho.vfs;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.es.Call;
+import com.caucho.es.ESBase;
+import com.caucho.es.ESException;
+import com.caucho.util.Exit;
+import com.caucho.util.ExitListener;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.ReadWritePair;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.es.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Iterator;
 
 public class PathEcmaWrap {
   public static ReadStream openRead(Path p)

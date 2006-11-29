@@ -48,19 +48,13 @@
 
 package com.caucho.burlap.server;
 
-import java.io.InputStream;
-import java.io.IOException;
-
-import java.util.HashMap;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-
+import com.caucho.burlap.io.BurlapInput;
+import com.caucho.burlap.io.BurlapOutput;
 import com.caucho.services.server.AbstractSkeleton;
 import com.caucho.services.server.ServiceContext;
 
-import com.caucho.burlap.io.BurlapInput;
-import com.caucho.burlap.io.BurlapOutput;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Proxy class for Burlap services.

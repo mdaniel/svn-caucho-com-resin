@@ -29,11 +29,9 @@
 
 package com.caucho.amber.cfg;
 
-import java.util.HashMap;
-
-import com.caucho.config.ConfigException;
-
 import com.caucho.vfs.Path;
+
+import java.util.HashMap;
 
 /**
  * Top <entity-mappings> tag in the orm.xml

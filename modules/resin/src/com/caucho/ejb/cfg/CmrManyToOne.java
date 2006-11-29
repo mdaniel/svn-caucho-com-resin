@@ -29,34 +29,25 @@
 
 package com.caucho.ejb.cfg;
 
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.caucho.bytecode.JMethod;
+import com.caucho.amber.field.AmberField;
+import com.caucho.amber.field.DependentEntityOneToOneField;
+import com.caucho.amber.field.EntityManyToOneField;
+import com.caucho.amber.field.Id;
+import com.caucho.amber.field.IdField;
+import com.caucho.amber.field.KeyManyToOneField;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.Column;
+import com.caucho.amber.table.ForeignColumn;
+import com.caucho.amber.table.LinkColumns;
+import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JClass;
-
+import com.caucho.bytecode.JMethod;
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.amber.type.Type;
-import com.caucho.amber.type.EntityType;
-
-import com.caucho.amber.field.Id;
-import com.caucho.amber.field.IdField;
-import com.caucho.amber.field.AmberField;
-import com.caucho.amber.field.EntityManyToOneField;
-import com.caucho.amber.field.DependentEntityOneToOneField;
-import com.caucho.amber.field.KeyManyToOneField;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.table.ForeignColumn;
-import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.table.Column;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * many-to-one relation

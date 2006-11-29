@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.cfg;
 
-import javax.annotation.*;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
 import com.caucho.config.BuilderProgram;
@@ -50,6 +49,7 @@ import com.caucho.management.j2ee.StatefulSessionBean;
 import com.caucho.management.j2ee.StatelessSessionBean;
 import com.caucho.util.L10N;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;

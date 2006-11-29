@@ -29,9 +29,9 @@
 
 package com.caucho.log;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 /**
  * Wrapper for a level-based handler.

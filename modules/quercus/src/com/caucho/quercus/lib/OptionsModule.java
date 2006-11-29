@@ -29,25 +29,20 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.io.IOException;
-
-import com.caucho.util.L10N;
-
+import com.caucho.Version;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
-
-import com.caucho.quercus.program.QuercusProgram;
-
-import com.caucho.quercus.lib.file.FileModule;
-
 import com.caucho.quercus.env.*;
-import com.caucho.Version;
+import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.util.L10N;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * PHP options

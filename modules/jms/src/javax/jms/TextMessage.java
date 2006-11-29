@@ -28,15 +28,13 @@
 
 package javax.jms;
 
-import java.io.Serializable;
-
 /**
  * The main message.
  */
 public interface TextMessage extends Message {
   public void setText(String text)
     throws JMSException;
-  
+
   public String getText()
     throws JMSException;
 }

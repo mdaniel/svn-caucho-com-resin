@@ -48,9 +48,6 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * Exception for faults when the fault doesn't return a java exception.
  * This exception is required for MicroHessianInput.
@@ -65,7 +62,7 @@ public class HessianServiceException extends Exception {
   public HessianServiceException()
   {
   }
-  
+
   /**
    * Create the exception.
    */
@@ -83,7 +80,7 @@ public class HessianServiceException extends Exception {
   {
     return code;
   }
-  
+
   /**
    * Returns the detail.
    */

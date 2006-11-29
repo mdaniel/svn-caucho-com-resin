@@ -29,35 +29,25 @@
 
 package com.caucho.soa.rest;
 
-import java.io.OutputStream;
-
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import java.lang.annotation.Annotation;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import java.util.logging.Logger;
+import com.caucho.jaxb.JAXBUtil;
+import com.caucho.util.URLUtil;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-
-import com.caucho.jaxb.JAXBUtil;
-
-import com.caucho.util.URLUtil;
+import java.io.OutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class RestProxy implements InvocationHandler {
   private static final Logger log = Logger.getLogger(RestProxy.class.getName());

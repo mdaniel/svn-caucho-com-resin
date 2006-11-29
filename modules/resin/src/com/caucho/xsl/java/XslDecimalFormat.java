@@ -28,13 +28,11 @@
 
 package com.caucho.xsl.java;
 
-import java.text.DecimalFormatSymbols;
-
 import com.caucho.java.JavaWriter;
-
 import com.caucho.xml.QName;
-
 import com.caucho.xsl.XslParseException;
+
+import java.text.DecimalFormatSymbols;
 
 /**
  * xsl:decimal-format

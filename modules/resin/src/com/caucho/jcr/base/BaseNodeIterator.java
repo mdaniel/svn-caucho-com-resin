@@ -29,7 +29,8 @@
 
 package com.caucho.jcr.base;
 
-import javax.jcr.*;
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
 
 /**
  * Iterates over an array array of base nodes.

@@ -30,8 +30,7 @@
 
 package javax.servlet;
 
-import java.util.*;
-import java.io.*;
+import java.util.EventObject;
 
 /**
  * The event class for changes to the servlet context.

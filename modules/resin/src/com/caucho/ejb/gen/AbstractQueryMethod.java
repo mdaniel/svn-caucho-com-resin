@@ -29,38 +29,23 @@
 
 package com.caucho.ejb.gen;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
-import java.io.IOException;
-
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBObject;
-
+import com.caucho.amber.field.IdField;
+import com.caucho.amber.type.EntityType;
+import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JField;
 import com.caucho.bytecode.JMethod;
-import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JType;
-
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.ejb.ql.EjbSelectQuery;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.BaseMethod;
-
-import com.caucho.ejb.cfg.EjbEntityBean;
-import com.caucho.ejb.cfg.EjbConfig;
-
-import com.caucho.ejb.ql.EjbSelectQuery;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
-
-import com.caucho.amber.field.IdField;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Generates the code for a query

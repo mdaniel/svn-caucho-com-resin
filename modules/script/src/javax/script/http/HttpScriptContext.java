@@ -29,17 +29,13 @@
 
 package javax.script.http;
 
-import java.io.Writer;
-import java.io.Reader;
-import java.io.IOException;
-
 import javax.script.ScriptContext;
-
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.Reader;
 
 /**
  * Context information from an engine to the namespace.

@@ -29,27 +29,13 @@
 
 package com.caucho.quercus.module;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
+import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.env.JavaInvoker;
+import com.caucho.util.L10N;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.logging.Logger;
-
-import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.JavaInvoker;
-import com.caucho.quercus.expr.DefaultExpr;
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.NullLiteralExpr;
-import com.caucho.quercus.expr.RequiredExpr;
-import com.caucho.quercus.parser.QuercusParser;
-import com.caucho.quercus.program.AbstractFunction;
-import com.caucho.util.L10N;
 
 /**
  * Represents the introspected static function information.

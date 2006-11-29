@@ -28,14 +28,12 @@
 
 package com.caucho.jms.session;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import com.caucho.util.L10N;
 
-import javax.jms.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import javax.jms.ConnectionMetaData;
+import javax.jms.JMSException;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Metadata

@@ -28,13 +28,11 @@
 
 package com.caucho.ejb.ql;
 
-import java.lang.reflect.Method;
-
+import com.caucho.config.ConfigException;
+import com.caucho.ejb.cfg.EjbEntityBean;
 import com.caucho.util.CharBuffer;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.ejb.cfg.EjbEntityBean;
+import java.lang.reflect.Method;
 
 /**
  * An 'is' expression

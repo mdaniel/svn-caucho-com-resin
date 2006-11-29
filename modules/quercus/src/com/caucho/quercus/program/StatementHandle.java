@@ -29,20 +29,16 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.expr.VarState;
-import com.caucho.quercus.expr.VarExpr;
-import com.caucho.quercus.expr.Expr;
-
 /**
  * A handle to a statement
  */
 public class StatementHandle {
   public static final StatementHandle NULL
     = new StatementHandle(NullStatement.NULL);
-  
+
   private final StatementHandle _parent;
   private final StatementHandle _previous;
-  
+
   private Statement _statement;
 
   public StatementHandle(StatementHandle parent, StatementHandle previous)

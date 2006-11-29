@@ -29,15 +29,12 @@
 
 package com.caucho.sql;
 
-import java.util.HashMap;
-
-import java.util.logging.Logger;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.util.L10N;
 
 import javax.sql.DataSource;
-
-import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.util.L10N;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Manages databases in a local environment, e.g. for PHP dynamic

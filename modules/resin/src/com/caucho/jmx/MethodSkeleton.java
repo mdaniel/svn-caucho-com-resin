@@ -28,13 +28,10 @@
 
 package com.caucho.jmx;
 
-import java.lang.reflect.Method;
-
-import java.util.logging.Logger;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
+import java.util.logging.Logger;
 
 /**
  * Encapsulates the managed object.

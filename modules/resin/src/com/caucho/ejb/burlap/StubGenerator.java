@@ -28,19 +28,14 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-import java.beans.*;
-import java.lang.reflect.*;
-
-import com.caucho.vfs.*;
-import com.caucho.java.*;
-import com.caucho.util.*;
-import com.caucho.ejb.*;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.make.ClassDependency;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.PersistentDependency;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
  * Generator for stubs.

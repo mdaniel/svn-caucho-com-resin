@@ -28,13 +28,10 @@
 
 package com.caucho.jca.cfg;
 
-import java.util.logging.Logger;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.jca.ResourceManagerConfig;
+import java.util.logging.Logger;
 
 /**
  * Configuration for a connector.

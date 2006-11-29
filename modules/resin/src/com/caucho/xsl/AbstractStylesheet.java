@@ -28,18 +28,17 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.Vfs;
+import com.caucho.xml.XMLWriter;
 
-import javax.servlet.jsp.*;
-import javax.xml.transform.*;
+import org.w3c.dom.Node;
 
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
+import javax.xml.transform.Templates;
+import javax.xml.transform.URIResolver;
+import java.util.ArrayList;
+import java.util.Properties;
 
 /**
  * A compiled XSL stylesheet.  Stylesheets use 'transform' to transform

@@ -28,15 +28,11 @@
  */
 
 package com.caucho.soap.marshall;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
-
-import java.io.*;
-
-import javax.xml.stream.*;
-
-import com.caucho.vfs.WriteStream;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
 
 /**
  * Marshalls data to and from soap.

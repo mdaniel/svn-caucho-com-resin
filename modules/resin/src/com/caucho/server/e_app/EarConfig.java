@@ -28,10 +28,6 @@
 
 package com.caucho.server.e_app;
 
-import java.util.ArrayList;
-
-import com.caucho.util.L10N;
-
 import com.caucho.server.deploy.DeployConfig;
 
 /**

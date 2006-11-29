@@ -29,20 +29,29 @@
 
 package com.caucho.jsp;
 
+import com.caucho.bytecode.ByteCodeParser;
+import com.caucho.bytecode.CodeAttribute;
+import com.caucho.bytecode.CodeVisitor;
+import com.caucho.bytecode.JavaClass;
+import com.caucho.bytecode.JavaMethod;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.annotation.Resource;
+import javax.ejb.EJB;
+import javax.servlet.jsp.tagext.BodyTag;
+import javax.servlet.jsp.tagext.BodyTagSupport;
+import javax.servlet.jsp.tagext.IterationTag;
+import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.tagext.TryCatchFinally;
+import javax.xml.ws.WebServiceRef;
 import java.io.InputStream;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.annotation.*;
-import javax.ejb.*;
-import javax.xml.ws.*;
-import javax.servlet.jsp.tagext.*;
-
-import com.caucho.bytecode.*;
-import com.caucho.log.Log;
-import com.caucho.util.L10N;
 
 /**
  * Analyzes the class for tag.

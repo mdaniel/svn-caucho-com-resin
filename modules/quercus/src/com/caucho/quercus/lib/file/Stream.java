@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.lib.file;
 
-import java.io.IOException;
-
 /**
  * Interface for a Quercus stream
  */

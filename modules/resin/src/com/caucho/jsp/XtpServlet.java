@@ -28,16 +28,11 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.*;
-import javax.servlet.jsp.*;
-import javax.servlet.http.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
 import com.caucho.server.webapp.WebApp;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.jsp.JspFactory;
 
 /**
  * Handles XTP pages.  Most of the work is done in the JspManager and QServlet.

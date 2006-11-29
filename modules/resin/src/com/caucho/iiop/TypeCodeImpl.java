@@ -28,21 +28,18 @@
 
 package com.caucho.iiop;
 
-import java.util.*;
-import java.util.logging.Logger;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
-import java.io.IOException;
-
-import org.omg.CORBA.TypeCode;
-import org.omg.CORBA.TCKind;
 import org.omg.CORBA.Any;
-
+import org.omg.CORBA.TCKind;
+import org.omg.CORBA.TypeCode;
 import org.omg.CORBA.TypeCodePackage.BadKind;
 import org.omg.CORBA.TypeCodePackage.Bounds;
 
-import com.caucho.util.L10N;
-
-import com.caucho.log.Log;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 public class TypeCodeImpl extends TypeCode {
   protected static final L10N L = new L10N(TypeCodeImpl.class);

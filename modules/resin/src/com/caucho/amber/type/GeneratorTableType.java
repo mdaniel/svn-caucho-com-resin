@@ -28,20 +28,15 @@
 
 package com.caucho.amber.type;
 
-import java.util.HashMap;
-
-import java.sql.SQLException;
-
+import com.caucho.amber.idgen.AmberTableGenerator;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.Column;
+import com.caucho.amber.table.Table;
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.table.Table;
-import com.caucho.amber.table.Column;
-
-import com.caucho.amber.idgen.AmberTableGenerator;
+import java.sql.SQLException;
+import java.util.HashMap;
 
 /**
  * A type which represents a table or a portion.

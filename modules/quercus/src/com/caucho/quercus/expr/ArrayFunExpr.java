@@ -29,17 +29,13 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.ConstArrayValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
-import com.caucho.quercus.Location;
+import java.util.ArrayList;
 
 /**
  * Represents the array function

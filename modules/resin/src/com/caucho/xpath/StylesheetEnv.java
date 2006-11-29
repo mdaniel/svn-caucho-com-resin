@@ -28,15 +28,7 @@
 
 package com.caucho.xpath;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.expr.*;
-import com.caucho.xpath.pattern.*;
+import com.caucho.vfs.Path;
 
 public class StylesheetEnv {
   private Path _path;

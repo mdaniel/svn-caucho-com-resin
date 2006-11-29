@@ -28,15 +28,13 @@
 
 package com.caucho.xml.readers;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.ReadStream;
+import com.caucho.xml.XmlParser;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
+import java.io.CharConversionException;
+import java.io.EOFException;
+import java.io.IOException;
 
 /**
  * A fast reader to convert bytes to characters for parsing XML.

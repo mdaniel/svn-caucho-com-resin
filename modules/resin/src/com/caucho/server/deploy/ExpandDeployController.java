@@ -29,31 +29,24 @@
 
 package com.caucho.server.deploy;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import java.util.jar.Manifest;
-import java.util.jar.Attributes;
-
-import java.util.regex.Pattern;
-
 import com.caucho.config.types.FileSetType;
-
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.util.*;
-
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * A deployment entry that expands from an archive (Jar/Zip) file.

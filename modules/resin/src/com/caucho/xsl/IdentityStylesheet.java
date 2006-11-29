@@ -28,19 +28,14 @@
 
 package com.caucho.xsl;
 
-import java.util.*;
-import java.io.*;
+import com.caucho.xml.QElement;
+import com.caucho.xml.XMLWriter;
 
-import javax.servlet.jsp.*;
-import javax.xml.transform.*;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
-import org.w3c.dom.*;
-import org.xml.sax.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.java.*;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
 
 /**
  * A compiled XSL stylesheet.  Stylesheets use 'transform' to transform

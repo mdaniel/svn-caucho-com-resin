@@ -28,9 +28,9 @@
 
 package com.caucho.java;
 
-import javax.annotation.*;
-
 import com.caucho.loader.EnvironmentLocal;
+
+import javax.annotation.PostConstruct;
 
 public class JavacConfig {
   private static final EnvironmentLocal<JavacConfig> _localJavac =

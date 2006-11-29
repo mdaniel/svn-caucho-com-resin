@@ -28,22 +28,25 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.el.*;
-
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.jstl.core.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-
+import com.caucho.el.Expr;
 import com.caucho.jsp.PageContextImpl;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.EnumIterator;
+import com.caucho.util.L10N;
+import com.caucho.util.NullIterator;
 
-import com.caucho.el.*;
+import javax.el.ELContext;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspTagException;
+import javax.servlet.jsp.jstl.core.LoopTag;
+import javax.servlet.jsp.jstl.core.LoopTagStatus;
+import javax.servlet.jsp.tagext.IterationTag;
+import javax.servlet.jsp.tagext.TagSupport;
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 
 public class ForEachTag extends TagSupport
   implements IterationTag, LoopTag, LoopTagStatus {

@@ -29,22 +29,15 @@
 
 package com.caucho.config;
 
-import java.util.*;
-import java.lang.reflect.*;
-
-import javax.el.*;
+import com.caucho.el.ELParser;
+import com.caucho.el.Expr;
+import com.caucho.util.L10N;
+import com.caucho.xml.QName;
 
 import org.w3c.dom.Node;
 
-import com.caucho.util.L10N;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.NotImplementedException;
-
-import com.caucho.el.ELParser;
-import com.caucho.el.Expr;
-import com.caucho.el.EL;
-
-import com.caucho.xml.QName;
+import javax.el.ELContext;
+import javax.el.ELException;
 
 public abstract class AttributeStrategy {
   static final L10N L = new L10N(AttributeStrategy.class);

@@ -32,25 +32,19 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.ResourceValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
-
-import com.caucho.sql.UserConnection;
-
-import com.caucho.util.Log;
 import com.caucho.util.L10N;
+import com.caucho.util.Log;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

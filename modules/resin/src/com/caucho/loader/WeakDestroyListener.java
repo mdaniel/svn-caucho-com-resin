@@ -28,19 +28,13 @@
 
 package com.caucho.loader;
 
-import java.lang.reflect.Method;
-
-import java.lang.ref.WeakReference;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
+import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.DynamicClassLoader;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Waits for the stop event and calls a @PreDestroy

@@ -28,12 +28,9 @@
 
 package com.caucho.es;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
 
 /**
  * JavaScript object

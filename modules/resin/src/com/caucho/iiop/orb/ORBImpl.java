@@ -29,18 +29,12 @@
 
 package com.caucho.iiop.orb;
 
-import java.applet.Applet;
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.rmi.*;
-import javax.rmi.CORBA.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import org.omg.CORBA.*;
+
+import java.applet.Applet;
+import java.lang.reflect.Proxy;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 public class ORBImpl extends org.omg.CORBA.ORB
 {

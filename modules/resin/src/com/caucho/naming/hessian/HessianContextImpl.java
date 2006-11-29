@@ -28,18 +28,14 @@
 
 package com.caucho.naming.hessian;
 
-import java.util.Hashtable;
-
-import java.util.logging.Logger;
-
-import javax.naming.NamingException;
-
+import com.caucho.log.Log;
+import com.caucho.naming.AbstractModel;
+import com.caucho.naming.ContextImpl;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.naming.ContextImpl;
-import com.caucho.naming.AbstractModel;
+import javax.naming.NamingException;
+import java.util.Hashtable;
+import java.util.logging.Logger;
 
 /**
  * Hessian implementation of the JNDI <code>Context</code>.

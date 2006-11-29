@@ -29,10 +29,9 @@
 
 package com.caucho.jsp.cfg;
 
-import java.util.ArrayList;
-
-import com.caucho.config.*;
-import com.caucho.server.webapp.*;
+import com.caucho.config.ConfigException;
+import com.caucho.server.webapp.Listener;
+import com.caucho.server.webapp.WebApp;
 
 /**
  * Configuration for the taglib listener in the .tld

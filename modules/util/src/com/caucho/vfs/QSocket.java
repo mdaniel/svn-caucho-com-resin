@@ -28,16 +28,10 @@
 
 package com.caucho.vfs;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
+import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.channels.SelectableChannel;
-
-import java.security.cert.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.security.cert.X509Certificate;
 
 /**
  * Abstract socket to handle both normal sockets and JNI sockets.

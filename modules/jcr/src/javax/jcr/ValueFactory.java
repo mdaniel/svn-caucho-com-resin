@@ -30,7 +30,6 @@
 package javax.jcr;
 
 import java.io.InputStream;
-
 import java.util.Calendar;
 
 public interface ValueFactory {

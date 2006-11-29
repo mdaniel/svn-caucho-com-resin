@@ -29,22 +29,14 @@
 
 package com.caucho.jstl.el;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.el.Expr;
+import com.caucho.util.L10N;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import javax.servlet.jsp.jstl.core.*;
-import javax.servlet.jsp.jstl.fmt.*;
+import javax.el.ELContext;
+import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
-
-import javax.el.*;
-
-import com.caucho.vfs.*;
-import com.caucho.util.*;
-import com.caucho.jsp.*;
-import com.caucho.el.*;
-import com.caucho.jstl.ParamContainerTag;
+import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.TagSupport;
 
 /**
  * Looks up an i18n message from a bundle and prints it.

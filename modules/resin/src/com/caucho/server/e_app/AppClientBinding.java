@@ -28,17 +28,9 @@
 
 package com.caucho.server.e_app;
 
-import java.util.ArrayList;
-
-import javax.annotation.*;
-
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
-
-import com.caucho.config.types.EjbRef;
-
-import com.caucho.vfs.Path;
+import javax.annotation.PostConstruct;
 
 /**
  * Configuration for the application.xml file.

@@ -29,9 +29,6 @@
 
 package com.caucho.widget;
 
-import java.io.*;
-import java.util.*;
-
 public class WidgetException extends Exception
 {
   public WidgetException()

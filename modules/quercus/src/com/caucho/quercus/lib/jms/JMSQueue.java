@@ -29,31 +29,18 @@
 
 package com.caucho.quercus.lib.jms;
 
-import java.io.Serializable;
-
-import java.util.*;
-
-import java.util.logging.Logger;
-
-import javax.jms.*;
-import javax.naming.*;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.JavaValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.BinaryValue;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.BooleanValue;
-
-import com.caucho.quercus.program.JavaClassDef;
-
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.program.JavaClassDef;
+
+import javax.jms.*;
+import javax.naming.Context;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * JMS functions

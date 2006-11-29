@@ -29,19 +29,13 @@
 
 package com.caucho.el;
 
-import java.util.HashMap;
-
-import java.util.logging.*;
-
-import javax.el.*;
-
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
 
-import com.caucho.log.Log;
-
-import com.caucho.vfs.WriteStream;
-
-import com.caucho.loader.EnvironmentLocal;
+import javax.el.ELContext;
+import javax.el.ELException;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Abstract implementation class for an expression.

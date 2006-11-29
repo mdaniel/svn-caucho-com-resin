@@ -28,8 +28,9 @@
 
 package com.caucho.util;
 
-import java.util.*;
-import java.lang.ref.*;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Fixed length cache with a LRU replacement policy.  If cache items

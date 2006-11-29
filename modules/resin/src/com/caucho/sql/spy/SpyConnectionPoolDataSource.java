@@ -28,20 +28,14 @@
 
 package com.caucho.sql.spy;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.sql.*;
-
-import javax.transaction.*;
-import javax.transaction.xa.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.log.Log;
+import com.caucho.util.L10N;
+
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * Spying on a driver.

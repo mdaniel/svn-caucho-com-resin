@@ -28,19 +28,17 @@
 
 package com.caucho.java;
 
-import java.lang.reflect.Method;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
+import com.caucho.log.Log;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
-
-import com.caucho.log.Log;
-
-import com.caucho.util.*;
-import com.caucho.server.util.*;
-import com.caucho.vfs.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Compiles Groovy source, returning the loaded class.

@@ -29,7 +29,7 @@
 
 package com.caucho.server.port;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
  * Protocol specific information for each request.  ServerRequest

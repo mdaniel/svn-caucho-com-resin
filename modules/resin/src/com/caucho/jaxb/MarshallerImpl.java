@@ -28,24 +28,21 @@
 */
 
 package com.caucho.jaxb;
-import javax.xml.bind.*;
-import java.util.*;
-import javax.xml.stream.*;
-import javax.xml.transform.*;
-import javax.xml.namespace.*;
-import org.w3c.dom.*;
-import java.io.*;
-import java.math.*;
-import org.xml.sax.*;
-import javax.xml.bind.attachment.*;
-import javax.xml.bind.helpers.*;
-import javax.xml.validation.*;
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.*;
-import java.net.*;
-import com.caucho.jaxb.skeleton.*;
-import com.caucho.jaxb.adapters.*;
-import javax.xml.bind.MarshalException;
+import com.caucho.jaxb.adapters.BeanAdapter;
+import com.caucho.jaxb.skeleton.ClassSkeleton;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.helpers.AbstractMarshallerImpl;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Result;
 
 public class MarshallerImpl extends AbstractMarshallerImpl {
 

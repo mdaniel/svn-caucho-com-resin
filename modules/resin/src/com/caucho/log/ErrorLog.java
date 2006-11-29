@@ -28,21 +28,9 @@
 
 package com.caucho.log;
 
-import java.util.logging.*;
-
-import javax.naming.*;
-
-import com.caucho.util.L10N;
-import com.caucho.util.QDate;
-import com.caucho.util.Alarm;
-
-import com.caucho.vfs.*;
-
-import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.config.BeanBuilderException;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.vfs.Path;
 
 /**
  * Configuration for the error-log pattern (backwards compat).

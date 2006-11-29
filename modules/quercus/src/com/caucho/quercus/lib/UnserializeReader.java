@@ -29,16 +29,12 @@
 
 package com.caucho.quercus.lib;
 
-import java.util.logging.*;
+import com.caucho.quercus.env.*;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 
 import java.io.IOException;
-
-import com.caucho.util.L10N;
-
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.lib.VariableModule;
-
-import com.caucho.util.LruCache;
+import java.util.logging.Logger;
 
 public final class UnserializeReader {
   private static final L10N L = new L10N(UnserializeReader.class);

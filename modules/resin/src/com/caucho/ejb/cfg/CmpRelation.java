@@ -28,11 +28,10 @@
 
 package com.caucho.ejb.cfg;
 
-import javax.annotation.*;
-
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import com.caucho.config.ConfigException;
+import javax.annotation.PostConstruct;
 
 /**
  * Configuraton for a cmp-relation.

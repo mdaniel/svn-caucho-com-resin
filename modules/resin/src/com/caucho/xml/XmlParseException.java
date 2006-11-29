@@ -28,13 +28,9 @@
 
 package com.caucho.xml;
 
-import java.util.*;
-import java.io.*;
-import org.w3c.dom.*;
+import com.caucho.util.LineCompileException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import org.xml.sax.*;
+import org.xml.sax.SAXException;
 
 public class XmlParseException extends SAXException
   implements LineCompileException

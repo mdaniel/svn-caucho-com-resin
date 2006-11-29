@@ -28,9 +28,10 @@
 
 package com.caucho.es;
 
-import java.io.*;
+import com.caucho.util.ExceptionWrapper;
 
-import com.caucho.util.*;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 /**
  * JavaScript exception

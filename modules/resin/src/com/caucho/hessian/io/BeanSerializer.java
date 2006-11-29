@@ -48,12 +48,10 @@
 
 package com.caucho.hessian.io;
 
-import java.io.*;
-import java.util.*;
-
-import java.lang.reflect.Modifier;
+import java.io.IOException;
 import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 
 /**
  * Serializing an object for known object types.

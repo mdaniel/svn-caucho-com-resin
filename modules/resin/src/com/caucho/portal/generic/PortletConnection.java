@@ -51,14 +51,22 @@ package com.caucho.portal.generic;
 
 import com.caucho.portal.generic.context.ConnectionContext;
 
-import java.io.*;
-
-import java.util.*;
+import javax.portlet.PortletException;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletSecurityException;
+import javax.portlet.PortletSession;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.portlet.*;
 
 
 /**

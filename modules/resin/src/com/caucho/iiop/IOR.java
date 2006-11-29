@@ -28,12 +28,11 @@
 
 package com.caucho.iiop;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.CharBuffer;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 public class IOR {
   private static final String RMI_VERSION = ":0000000000000000";

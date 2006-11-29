@@ -30,9 +30,8 @@
 package com.caucho.make;
 
 import com.caucho.loader.Environment;
-
 import com.caucho.util.Alarm;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Dependency;
 
 /**
  * A cached dependency only checks the dependency at an interval.

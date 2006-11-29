@@ -28,14 +28,8 @@
 
 package com.caucho.jsp;
 
-import java.io.*;
-
-import javax.servlet.ServletException;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.java.LineMap;
 import com.caucho.java.LineMapException;
+import com.caucho.util.LineCompileException;
 
 public class JspLineParseException extends JspParseException
   implements LineCompileException, LineMapException {

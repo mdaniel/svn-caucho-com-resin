@@ -29,11 +29,10 @@
 
 package com.caucho.soa.client;
 
-import java.net.MalformedURLException;
-
 import com.caucho.naming.Jndi;
-
 import com.caucho.util.L10N;
+
+import java.net.MalformedURLException;
 
 public class VMEncodingProxyFactory implements EncodingProxyFactory {
   private static final L10N L = new L10N(VMEncodingProxyFactory.class);

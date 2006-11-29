@@ -29,12 +29,11 @@
 
 package com.caucho.xml.stream.events;
 
-import java.io.*;
-
-import javax.xml.namespace.*;
-
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
+import java.io.IOException;
+import java.io.Writer;
 
 public class AttributeImpl extends XMLEventImpl implements Attribute {
   private final QName _name;

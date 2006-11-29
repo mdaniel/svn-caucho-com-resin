@@ -29,37 +29,24 @@
 
 package com.caucho.amber.query;
 
-import java.lang.reflect.Field;
+import com.caucho.amber.AmberException;
+import com.caucho.amber.entity.AmberEntityHome;
+import com.caucho.amber.expr.*;
+import com.caucho.amber.expr.fun.*;
+import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.LinkColumns;
+import com.caucho.amber.table.Table;
+import com.caucho.amber.type.EntityType;
+import com.caucho.log.Log;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import java.util.logging.Logger;
-
-import java.sql.SQLException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.IntMap;
-import com.caucho.util.CharBuffer;
-
-import com.caucho.log.Log;
-
-import com.caucho.amber.AmberException;
-
-import com.caucho.amber.entity.AmberEntityHome;
-
-import com.caucho.amber.expr.*;
-import com.caucho.amber.expr.fun.*;
-
-import com.caucho.amber.manager.AmberPersistenceUnit;
-
-import com.caucho.amber.table.Table;
-import com.caucho.amber.table.LinkColumns;
-
-import com.caucho.amber.type.EntityType;
-
-import com.caucho.amber.field.AmberField;
 
 /**
  * Contains the parser for EJB 3.0 style queries and stores

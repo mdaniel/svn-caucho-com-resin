@@ -49,7 +49,6 @@
 
 package com.caucho.portal.generic.taglib;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.jsp.tagext.TagData;
 import javax.servlet.jsp.tagext.TagExtraInfo;
 import javax.servlet.jsp.tagext.VariableInfo;

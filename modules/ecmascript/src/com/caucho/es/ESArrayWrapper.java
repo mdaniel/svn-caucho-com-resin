@@ -28,13 +28,6 @@
 
 package com.caucho.es;
 
-import java.util.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.beans.*;
-
-import com.caucho.util.*;
-
 /**
  * JavaScript object
  */
@@ -66,7 +59,7 @@ public class ESArrayWrapper {
 
   static class ObjArray extends ESArrayWrap {
     protected ObjArray() {}
-    protected ESObject dup() 
+    protected ESObject dup()
     {
       ObjArray dup = new ObjArray();
       dup.value = value;
@@ -77,31 +70,31 @@ public class ESArrayWrapper {
 
     public ESBase getProperty(int i)
       throws Throwable
-    { 
+    {
       Object []array = (Object []) value;
 
       if (i >= 0 && i < array.length)
-	return Global.getGlobalProto().wrap(array[i]);
+        return Global.getGlobalProto().wrap(array[i]);
       else
-	return esEmpty;
+        return esEmpty;
     }
 
     public void setProperty(int i, ESBase value) throws ESException
-    { 
+    {
       Object []array = (Object []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = value.toJavaObject();
+        array[i] = value.toJavaObject();
       }
     }
 
     public ESBase delete(int i) throws ESException
-    { 
+    {
       Object []array = (Object []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = null;
-	return ESBoolean.TRUE;
+        array[i] = null;
+        return ESBoolean.TRUE;
       }
 
       return ESBoolean.FALSE;
@@ -115,7 +108,7 @@ public class ESArrayWrapper {
 
   static class BooleanArray extends ESArrayWrap {
     protected BooleanArray() {}
-    protected ESObject dup() 
+    protected ESObject dup()
     {
       BooleanArray dup = new BooleanArray();
       dup.value = value;
@@ -124,32 +117,32 @@ public class ESArrayWrapper {
 
     protected int length() { return ((boolean []) value).length; }
 
-    public ESBase getProperty(int i) 
-    { 
+    public ESBase getProperty(int i)
+    {
       boolean []array = (boolean []) value;
 
       if (i >= 0 && i < array.length)
-	return ESBoolean.create(array[i]);
+        return ESBoolean.create(array[i]);
       else
-	return esEmpty;
+        return esEmpty;
     }
 
     public void setProperty(int i, ESBase value) throws ESException
-    { 
+    {
       boolean []array = (boolean []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = value.toBoolean();
+        array[i] = value.toBoolean();
       }
     }
 
     public ESBase delete(int i) throws ESException
-    { 
+    {
       boolean []array = (boolean []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = false;
-	return ESBoolean.TRUE;
+        array[i] = false;
+        return ESBoolean.TRUE;
       }
 
       return ESBoolean.FALSE;
@@ -163,7 +156,7 @@ public class ESArrayWrapper {
 
   static class ByteArray extends ESArrayWrap {
     protected ByteArray() {}
-    protected ESObject dup() 
+    protected ESObject dup()
     {
       ByteArray dup = new ByteArray();
       dup.value = value;
@@ -172,32 +165,32 @@ public class ESArrayWrapper {
 
     protected int length() { return ((byte []) value).length; }
 
-    public ESBase getProperty(int i) 
-    { 
+    public ESBase getProperty(int i)
+    {
       byte []array = (byte []) value;
 
       if (i >= 0 && i < array.length)
-	return ESNumber.create(array[i]);
+        return ESNumber.create(array[i]);
       else
-	return esEmpty;
+        return esEmpty;
     }
 
     public void setProperty(int i, ESBase value) throws Throwable
-    { 
+    {
       byte []array = (byte []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = (byte) value.toInt32();
+        array[i] = (byte) value.toInt32();
       }
     }
 
     public ESBase delete(int i) throws ESException
-    { 
+    {
       byte []array = (byte []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = 0;
-	return ESBoolean.TRUE;
+        array[i] = 0;
+        return ESBoolean.TRUE;
       }
 
       return ESBoolean.FALSE;
@@ -211,7 +204,7 @@ public class ESArrayWrapper {
 
   static class ShortArray extends ESArrayWrap {
     protected ShortArray() {}
-    protected ESObject dup() 
+    protected ESObject dup()
     {
       ShortArray dup = new ShortArray();
       dup.value = value;
@@ -220,32 +213,32 @@ public class ESArrayWrapper {
 
     protected int length() { return ((short []) value).length; }
 
-    public ESBase getProperty(int i) 
-    { 
+    public ESBase getProperty(int i)
+    {
       short []array = (short []) value;
 
       if (i >= 0 && i < array.length)
-	return ESNumber.create(array[i]);
+        return ESNumber.create(array[i]);
       else
-	return esEmpty;
+        return esEmpty;
     }
 
     public void setProperty(int i, ESBase value) throws Throwable
-    { 
+    {
       short []array = (short []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = (short) value.toInt32();
+        array[i] = (short) value.toInt32();
       }
     }
 
     public ESBase delete(int i) throws ESException
-    { 
+    {
       short []array = (short []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = 0;
-	return ESBoolean.TRUE;
+        array[i] = 0;
+        return ESBoolean.TRUE;
       }
 
       return ESBoolean.FALSE;
@@ -259,7 +252,7 @@ public class ESArrayWrapper {
 
   static class CharArray extends ESArrayWrap {
     protected CharArray() {}
-    protected ESObject dup() 
+    protected ESObject dup()
     {
       CharArray dup = new CharArray();
       dup.value = value;
@@ -268,34 +261,34 @@ public class ESArrayWrapper {
 
     protected int length() { return ((char []) value).length; }
 
-    public ESBase getProperty(int i) 
-    { 
+    public ESBase getProperty(int i)
+    {
       char []array = (char []) value;
 
       if (i >= 0 && i < array.length)
-	return ESString.create("" + array[i]);
+        return ESString.create("" + array[i]);
       else
-	return esEmpty;
+        return esEmpty;
     }
 
     public void setProperty(int i, ESBase value) throws Throwable
-    { 
+    {
       char []array = (char []) this.value;
 
       if (i >= 0 && i < array.length) {
-	ESString str = value.toStr();
+        ESString str = value.toStr();
 
-	array[i] = str.length() > 0 ? str.charAt(0) : 0;
+        array[i] = str.length() > 0 ? str.charAt(0) : 0;
       }
     }
 
     public ESBase delete(int i) throws ESException
-    { 
+    {
       char []array = (char []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = 0;
-	return ESBoolean.TRUE;
+        array[i] = 0;
+        return ESBoolean.TRUE;
       }
 
       return ESBoolean.FALSE;
@@ -309,7 +302,7 @@ public class ESArrayWrapper {
 
   static class IntArray extends ESArrayWrap {
     protected IntArray() {}
-    protected ESObject dup() 
+    protected ESObject dup()
     {
       IntArray dup = new IntArray();
       dup.value = value;
@@ -318,32 +311,32 @@ public class ESArrayWrapper {
 
     protected int length() { return ((int []) value).length; }
 
-    public ESBase getProperty(int i) 
-    { 
+    public ESBase getProperty(int i)
+    {
       int []array = (int []) value;
 
       if (i >= 0 && i < array.length)
-	return ESNumber.create(array[i]);
+        return ESNumber.create(array[i]);
       else
-	return esEmpty;
+        return esEmpty;
     }
 
     public void setProperty(int i, ESBase value) throws Throwable
-    { 
+    {
       int []array = (int []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = (int) value.toInt32();
+        array[i] = (int) value.toInt32();
       }
     }
 
     public ESBase delete(int i) throws ESException
-    { 
+    {
       int []array = (int []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = 0;
-	return ESBoolean.TRUE;
+        array[i] = 0;
+        return ESBoolean.TRUE;
       }
 
       return ESBoolean.FALSE;
@@ -357,7 +350,7 @@ public class ESArrayWrapper {
 
   static class LongArray extends ESArrayWrap {
     protected LongArray() {}
-    protected ESObject dup() 
+    protected ESObject dup()
     {
       LongArray dup = new LongArray();
       dup.value = value;
@@ -366,32 +359,32 @@ public class ESArrayWrapper {
 
     protected int length() { return ((long []) value).length; }
 
-    public ESBase getProperty(int i) 
-    { 
+    public ESBase getProperty(int i)
+    {
       long []array = (long []) value;
 
       if (i >= 0 && i < array.length)
-	return ESNumber.create(array[i]);
+        return ESNumber.create(array[i]);
       else
-	return esEmpty;
+        return esEmpty;
     }
 
     public void setProperty(int i, ESBase value) throws Throwable
-    { 
+    {
       long []array = (long []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = (long) value.toNum();
+        array[i] = (long) value.toNum();
       }
     }
 
     public ESBase delete(int i) throws ESException
-    { 
+    {
       long []array = (long []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = 0;
-	return ESBoolean.TRUE;
+        array[i] = 0;
+        return ESBoolean.TRUE;
       }
 
       return ESBoolean.FALSE;
@@ -405,7 +398,7 @@ public class ESArrayWrapper {
 
   static class FloatArray extends ESArrayWrap {
     protected FloatArray() {}
-    protected ESObject dup() 
+    protected ESObject dup()
     {
       FloatArray dup = new FloatArray();
       dup.value = value;
@@ -414,32 +407,32 @@ public class ESArrayWrapper {
 
     protected int length() { return ((float []) value).length; }
 
-    public ESBase getProperty(int i) 
-    { 
+    public ESBase getProperty(int i)
+    {
       float []array = (float []) value;
 
       if (i >= 0 && i < array.length)
-	return ESNumber.create(array[i]);
+        return ESNumber.create(array[i]);
       else
-	return esEmpty;
+        return esEmpty;
     }
 
     public void setProperty(int i, ESBase value) throws Throwable
-    { 
+    {
       float []array = (float []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = (float) value.toNum();
+        array[i] = (float) value.toNum();
       }
     }
 
     public ESBase delete(int i) throws ESException
-    { 
+    {
       float []array = (float []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = 0;
-	return ESBoolean.TRUE;
+        array[i] = 0;
+        return ESBoolean.TRUE;
       }
 
       return ESBoolean.FALSE;
@@ -453,7 +446,7 @@ public class ESArrayWrapper {
 
   static class DoubleArray extends ESArrayWrap {
     protected DoubleArray() {}
-    protected ESObject dup() 
+    protected ESObject dup()
     {
       DoubleArray dup = new DoubleArray();
       dup.value = value;
@@ -462,32 +455,32 @@ public class ESArrayWrapper {
 
     protected int length() { return ((double []) value).length; }
 
-    public ESBase getProperty(int i) 
-    { 
+    public ESBase getProperty(int i)
+    {
       double []array = (double []) value;
 
       if (i >= 0 && i < array.length)
-	return ESNumber.create(array[i]);
+        return ESNumber.create(array[i]);
       else
-	return esEmpty;
+        return esEmpty;
     }
 
     public void setProperty(int i, ESBase value) throws Throwable
-    { 
+    {
       double []array = (double []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = (double) value.toNum();
+        array[i] = (double) value.toNum();
       }
     }
 
     public ESBase delete(int i) throws ESException
-    { 
+    {
       double []array = (double []) this.value;
 
       if (i >= 0 && i < array.length) {
-	array[i] = 0;
-	return ESBoolean.TRUE;
+        array[i] = 0;
+        return ESBoolean.TRUE;
       }
 
       return ESBoolean.FALSE;

@@ -28,8 +28,6 @@
 */
 
 package javax.xml.bind;
-import java.io.*;
-
 public class JAXBException extends Exception {
 
   private String _errorCode;

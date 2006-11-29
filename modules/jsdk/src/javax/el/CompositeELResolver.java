@@ -30,8 +30,8 @@
 package javax.el;
 
 import java.beans.FeatureDescriptor;
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Resolves properties based on arrays.

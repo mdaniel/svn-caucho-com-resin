@@ -28,24 +28,17 @@
 
 package com.caucho.config.types;
 
-import java.util.*;
-
-import javax.annotation.*;
-
-import javax.naming.*;
-import javax.naming.spi.*;
-
+import com.caucho.config.BeanBuilderException;
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.naming.Jndi;
+import com.caucho.naming.LinkProxy;
 import com.caucho.util.L10N;
 
-import com.caucho.naming.LinkProxy;
-import com.caucho.naming.Jndi;
-
-import com.caucho.loader.Environment;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.EnvironmentListener;
-
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.BeanBuilderException;
+import javax.annotation.PostConstruct;
+import javax.naming.spi.InitialContextFactory;
+import java.util.Hashtable;
 
 /**
  * Configuration for the init-param pattern.

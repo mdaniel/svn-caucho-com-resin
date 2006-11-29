@@ -29,13 +29,10 @@
 
 package com.caucho.quercus.parser;
 
-import java.util.ArrayList;
-
 import com.caucho.quercus.program.Function;
-
-import com.caucho.quercus.env.QuercusClass;
-
 import com.caucho.quercus.program.InterpretedClassDef;
+
+import java.util.ArrayList;
 
 /**
  * Parse scope.

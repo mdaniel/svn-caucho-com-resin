@@ -29,10 +29,9 @@
 
 package javax.ejb;
 
-import java.util.Date;
-import java.util.Collection;
-
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * The timer interface

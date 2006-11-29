@@ -28,27 +28,20 @@
 
 package com.caucho.jms.session;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.Destination;
-import javax.jms.MessageListener;
-import javax.jms.Session;
-import javax.jms.JMSException;
-
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-
-import com.caucho.log.Log;
-
 import com.caucho.jms.AbstractDestination;
-
 import com.caucho.jms.message.MessageImpl;
-
 import com.caucho.jms.selector.Selector;
 import com.caucho.jms.selector.SelectorParser;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.Session;
+import java.util.logging.Logger;
 
 /**
  * A basic message consumer.

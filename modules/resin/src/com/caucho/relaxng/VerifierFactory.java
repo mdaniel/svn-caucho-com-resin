@@ -28,21 +28,10 @@
 
 package com.caucho.relaxng;
 
-import java.lang.ref.SoftReference;
-
-import java.util.HashMap;
-
-import java.io.IOException;
-
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import com.caucho.xml.Xml;
-
-import com.caucho.config.BeanConfigException;
+import java.io.IOException;
 
 /**
  * JARV Verifier factory.

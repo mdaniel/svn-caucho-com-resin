@@ -48,8 +48,12 @@
 
 package com.caucho.hessian.micro;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Output stream for Hessian requests, compatible with microedition

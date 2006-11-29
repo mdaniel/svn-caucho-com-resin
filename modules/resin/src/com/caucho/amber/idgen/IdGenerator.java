@@ -28,14 +28,12 @@
 
 package com.caucho.amber.idgen;
 
-import java.util.logging.Logger;
-
-import java.sql.SQLException;
-
+import com.caucho.amber.manager.AmberConnection;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import com.caucho.amber.manager.AmberConnection;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * Generator table.

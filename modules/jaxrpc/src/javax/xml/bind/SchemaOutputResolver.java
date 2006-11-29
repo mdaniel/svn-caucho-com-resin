@@ -28,8 +28,8 @@
 */
 
 package javax.xml.bind;
-import java.io.*;
-import javax.xml.transform.*;
+import javax.xml.transform.Result;
+import java.io.IOException;
 
 public abstract class SchemaOutputResolver {
 

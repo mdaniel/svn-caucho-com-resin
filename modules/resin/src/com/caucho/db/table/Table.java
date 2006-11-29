@@ -29,47 +29,31 @@
 
 package com.caucho.db.table;
 
-import java.io.IOException;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.RandomAccessFile;
-
-import java.util.ArrayList;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import java.sql.SQLException;
-
-import com.caucho.util.CharBuffer;
+import com.caucho.db.Database;
+import com.caucho.db.index.BTree;
+import com.caucho.db.index.KeyCompare;
+import com.caucho.db.sql.CreateQuery;
+import com.caucho.db.sql.Expr;
+import com.caucho.db.sql.Parser;
+import com.caucho.db.sql.QueryContext;
+import com.caucho.db.store.Block;
+import com.caucho.db.store.Lock;
+import com.caucho.db.store.Store;
+import com.caucho.db.store.Transaction;
+import com.caucho.log.Log;
+import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
-
 import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.sql.SQLExceptionWrapper;
-
-import com.caucho.log.Log;
-
-import com.caucho.db.Database;
-
-import com.caucho.db.store.Store;
-import com.caucho.db.store.Block;
-import com.caucho.db.store.WriteBlock;
-import com.caucho.db.store.BlockManager;
-import com.caucho.db.store.Transaction;
-import com.caucho.db.store.Lock;
-
-import com.caucho.db.index.BTree;
-import com.caucho.db.index.KeyCompare;
-
-import com.caucho.db.sql.Expr;
-import com.caucho.db.sql.Parser;
-import com.caucho.db.sql.CreateQuery;
-import com.caucho.db.sql.QueryContext;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Table format:

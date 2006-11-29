@@ -28,21 +28,10 @@
 
 package com.caucho.server.cluster;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
 import com.caucho.log.Log;
 
-import com.caucho.loader.EnvironmentLocal;
-
-import com.caucho.server.resin.SrunPort;
+import javax.annotation.PostConstruct;
+import java.util.logging.Logger;
 
 /**
  * Defines a set of clustered servers.

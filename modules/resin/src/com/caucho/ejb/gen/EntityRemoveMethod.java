@@ -29,25 +29,16 @@
 
 package com.caucho.ejb.gen;
 
-import java.io.IOException;
-
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBObject;
-import javax.ejb.RemoveException;
-
-import com.caucho.bytecode.JMethod;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
-
+import com.caucho.bytecode.JMethod;
+import com.caucho.ejb.cfg.EjbEntityBean;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseMethod;
 import com.caucho.util.L10N;
 
-import com.caucho.java.JavaWriter;
-
-import com.caucho.java.gen.BaseMethod;
-import com.caucho.java.gen.CallChain;
-import com.caucho.java.gen.MethodCallChain;
-
-import com.caucho.ejb.cfg.EjbEntityBean;
+import javax.ejb.RemoveException;
+import java.io.IOException;
 
 /**
  * Generates the skeleton for the create method.

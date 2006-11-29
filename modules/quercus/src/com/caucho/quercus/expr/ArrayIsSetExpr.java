@@ -29,14 +29,11 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.UnsetValue;
-
 import com.caucho.quercus.Location;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.UnsetValue;
+import com.caucho.quercus.env.Value;
 
 /**
  * Represents a PHP array is set expression.

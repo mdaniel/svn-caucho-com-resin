@@ -29,12 +29,8 @@
 
 package com.caucho.xtpdoc;
 
-import java.io.PrintWriter;
 import java.io.IOException;
-
-import java.util.ArrayList;
-
-import com.caucho.vfs.Path;
+import java.io.PrintWriter;
 
 public abstract class ChapterSection {
   public abstract void writeLaTeX(PrintWriter out)

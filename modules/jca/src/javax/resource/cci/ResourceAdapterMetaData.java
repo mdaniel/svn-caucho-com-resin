@@ -28,8 +28,6 @@
 
 package javax.resource.cci;
 
-import javax.resource.ResourceException;
-
 /**
  * Returns meta-data for a resource adapter.
  */

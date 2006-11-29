@@ -28,10 +28,12 @@
 
 package com.caucho.el;
 
-import java.beans.*;
-import java.util.*;
-
-import javax.el.*;
+import javax.el.ELContext;
+import javax.el.ELResolver;
+import java.beans.FeatureDescriptor;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Variable resolver using an underlying Map.

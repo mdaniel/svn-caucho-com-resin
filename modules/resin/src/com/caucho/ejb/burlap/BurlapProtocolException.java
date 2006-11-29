@@ -28,11 +28,11 @@
 
 package com.caucho.ejb.burlap;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
+import com.caucho.util.ExceptionWrapper;
 
-import com.caucho.util.*;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.rmi.RemoteException;
 
 /**
  * Wraps the actual exception with a burlap protocol exception

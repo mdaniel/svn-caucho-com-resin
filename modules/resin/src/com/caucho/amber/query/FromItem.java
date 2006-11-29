@@ -29,12 +29,12 @@
 package com.caucho.amber.query;
 
 import com.caucho.amber.entity.AmberEntityHome;
-
-import com.caucho.amber.expr.*;
-
-import com.caucho.amber.type.EntityType;
-
+import com.caucho.amber.expr.CollectionIdExpr;
+import com.caucho.amber.expr.IdExpr;
+import com.caucho.amber.expr.JoinExpr;
+import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.table.Table;
+import com.caucho.amber.type.EntityType;
 
 public class FromItem {
   private String _name;

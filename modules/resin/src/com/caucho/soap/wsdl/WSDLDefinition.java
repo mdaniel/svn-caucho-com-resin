@@ -28,9 +28,6 @@
 
 package com.caucho.soap.wsdl;
 
-import java.util.*;
-import javax.xml.bind.annotation.*;
-
 /**
  * Represents a top level definition.
  **/

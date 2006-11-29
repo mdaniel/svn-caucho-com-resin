@@ -28,8 +28,6 @@
 
 package javax.transaction;
 
-import javax.transaction.xa.XAResource;
-
 /**
  * Status constants.
  * associated with a single thread.

@@ -29,14 +29,12 @@
 
 package com.caucho.log;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import javax.annotation.*;
-
 import com.caucho.config.ConfigException;
-
 import com.caucho.util.L10N;
+
+import javax.annotation.PostConstruct;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Environment-specific java.util.logging.Logger configuration.

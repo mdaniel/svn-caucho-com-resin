@@ -29,20 +29,11 @@
 
 package com.caucho.quercus.program;
 
-import java.io.IOException;
-
-import java.util.HashSet;
-
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarVarExpr;
-import com.caucho.quercus.expr.VarState;
-
-import com.caucho.quercus.Location;
-
-import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a global statement in a PHP program.

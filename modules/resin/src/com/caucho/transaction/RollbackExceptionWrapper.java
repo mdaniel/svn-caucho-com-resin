@@ -28,8 +28,7 @@
 
 package com.caucho.transaction;
 
-import java.io.*;
-import javax.transaction.*;
+import javax.transaction.RollbackException;
 
 public class RollbackExceptionWrapper extends RollbackException {
   private Throwable _rootCause;

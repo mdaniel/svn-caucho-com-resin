@@ -29,38 +29,30 @@
 
 package com.caucho.quercus.lib.zlib;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import java.util.logging.*;
-
-import java.util.zip.*;
-
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
-
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.ArrayValueImpl;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.BinaryValue;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.TempBufferStringValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.ServerArrayValue;
-
-import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-
-import com.caucho.quercus.lib.file.*;
-
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.file.BinaryInput;
+import com.caucho.quercus.lib.file.BinaryOutput;
+import com.caucho.quercus.lib.file.BinaryStream;
+import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
+import com.caucho.vfs.StreamImplOutputStream;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
 
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.Adler32;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 /**
  * PHP Zlib

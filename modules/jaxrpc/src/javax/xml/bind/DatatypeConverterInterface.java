@@ -28,9 +28,11 @@
 */
 
 package javax.xml.bind;
-import javax.xml.namespace.*;
-import java.math.*;
-import java.util.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Calendar;
 
 public interface DatatypeConverterInterface {
 

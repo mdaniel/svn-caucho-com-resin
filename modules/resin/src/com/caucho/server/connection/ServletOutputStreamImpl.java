@@ -29,10 +29,9 @@
 
 package com.caucho.server.connection;
 
-import java.io.OutputStream;
-import java.io.IOException;
-
 import javax.servlet.ServletOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Implementation of the ServletOutputStream.

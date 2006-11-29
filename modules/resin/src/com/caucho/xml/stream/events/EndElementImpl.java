@@ -29,13 +29,12 @@
 
 package com.caucho.xml.stream.events;
 
-import java.io.*;
-import java.util.*;
-
-import javax.xml.namespace.*;
-
-import javax.xml.stream.*;
-import javax.xml.stream.events.*;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.EndElement;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Iterator;
 
 public class EndElementImpl extends XMLEventImpl implements EndElement {
   private final QName _name;

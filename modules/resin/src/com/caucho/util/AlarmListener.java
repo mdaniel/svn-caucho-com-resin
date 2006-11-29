@@ -28,7 +28,7 @@
 
 package com.caucho.util;
 
-import java.util.*;
+import java.util.EventListener;
 
 /**
  * Interface for receiving alarm events.

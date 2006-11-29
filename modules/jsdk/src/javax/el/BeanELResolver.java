@@ -29,10 +29,21 @@
 
 package javax.el;
 
-import java.beans.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
+import java.beans.BeanInfo;
+import java.beans.FeatureDescriptor;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.logging.Logger;
 
 /**
  * Resolves properties based on beans.

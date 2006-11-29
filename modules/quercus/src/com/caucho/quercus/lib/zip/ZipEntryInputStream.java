@@ -29,21 +29,13 @@
 
 package com.caucho.quercus.lib.zip;
 
-import java.io.InputStream;
+import com.caucho.quercus.lib.file.BinaryInput;
+import com.caucho.quercus.lib.file.ReadStreamInput;
+import com.caucho.vfs.Vfs;
+
 import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import com.caucho.quercus.env.BinaryValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-
-import com.caucho.quercus.QuercusModuleException;
-
-import com.caucho.quercus.lib.file.BinaryInput;
-import com.caucho.quercus.lib.file.ReadStreamInput;
-
-import com.caucho.vfs.*;
 
 /**
  * Input from a compressed stream.

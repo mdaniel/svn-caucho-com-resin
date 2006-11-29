@@ -28,22 +28,16 @@
 
 package com.caucho.servlets.webdav;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
-import org.xml.sax.*;
-
 import com.caucho.log.Log;
+import com.caucho.util.NullIterator;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-
-import com.caucho.server.http.*;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * Represents a virtual filesystem.

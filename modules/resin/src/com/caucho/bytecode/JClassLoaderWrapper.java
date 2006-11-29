@@ -29,10 +29,9 @@
 
 package com.caucho.bytecode;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import com.caucho.loader.EnvironmentLocal;
+
+import java.util.logging.Level;
 
 /**
  * Managed introspected java classes.

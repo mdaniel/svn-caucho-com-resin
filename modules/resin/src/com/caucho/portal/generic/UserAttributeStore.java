@@ -49,9 +49,9 @@
 package com.caucho.portal.generic;
 
 import javax.portlet.PortletRequest;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
-import java.io.IOException;
 
 /**
  * Factory that returns a Map of user attribute values
