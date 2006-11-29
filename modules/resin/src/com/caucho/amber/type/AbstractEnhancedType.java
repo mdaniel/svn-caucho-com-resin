@@ -429,6 +429,62 @@ public abstract class AbstractEnhancedType extends Type {
     return _postRemoveCallbacks;
   }
 
+  /**
+   * Gets the callbacks.
+   */
+  public ArrayList<JMethod> getCallbacks(int callbackIndex)
+  {
+    switch (callbackIndex) {
+    case Listener.PRE_PERSIST:
+      return _prePersistCallbacks;
+    case Listener.POST_PERSIST:
+      return _postPersistCallbacks;
+    case Listener.PRE_REMOVE:
+      return _preRemoveCallbacks;
+    case Listener.POST_REMOVE:
+      return _postRemoveCallbacks;
+    case Listener.PRE_UPDATE:
+      return _preUpdateCallbacks;
+    case Listener.POST_UPDATE:
+      return _postUpdateCallbacks;
+    case Listener.POST_LOAD:
+      return _postLoadCallbacks;
+    }
+
+    return null;
+  }
+
+  /**
+   * Adds a callback.
+   */
+  public void addCallback(int callbackIndex,
+                          JMethod callback)
+  {
+    switch (callbackIndex) {
+    case Listener.PRE_PERSIST:
+      _prePersistCallbacks.add(callback);
+      break;
+    case Listener.POST_PERSIST:
+      _postPersistCallbacks.add(callback);
+      break;
+    case Listener.PRE_REMOVE:
+      _preRemoveCallbacks.add(callback);
+      break;
+    case Listener.POST_REMOVE:
+      _postRemoveCallbacks.add(callback);
+      break;
+    case Listener.PRE_UPDATE:
+      _preUpdateCallbacks.add(callback);
+      break;
+    case Listener.POST_UPDATE:
+      _postUpdateCallbacks.add(callback);
+      break;
+    case Listener.POST_LOAD:
+      _postLoadCallbacks.add(callback);
+      break;
+    }
+  }
+
   public boolean isEmbeddable()
   {
     return false;

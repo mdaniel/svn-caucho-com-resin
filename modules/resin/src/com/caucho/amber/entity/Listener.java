@@ -32,14 +32,15 @@ package com.caucho.amber.entity;
 /**
  * An entity listener instance.
  */
-public interface Listener {
-  public static final int PRE_PERSIST  = 0x01;
-  public static final int POST_PERSIST = 0x02;
-  public static final int PRE_REMOVE   = 0x04;
-  public static final int POST_REMOVE  = 0x08;
-  public static final int PRE_UPDATE   = 0x10;
-  public static final int POST_UPDATE  = 0x20;
-  public static final int POST_LOAD    = 0x40;
+public interface Listener
+{
+  public static final int PRE_PERSIST  = 1;
+  public static final int POST_PERSIST = 2;
+  public static final int PRE_REMOVE   = 3;
+  public static final int POST_REMOVE  = 4;
+  public static final int PRE_UPDATE   = 5;
+  public static final int POST_UPDATE  = 6;
+  public static final int POST_LOAD    = 7;
 
   /**
    * Called before EntityManager.persist().
@@ -76,4 +77,9 @@ public interface Listener {
    * the current persistence context.
    */
   public void __caucho_postLoad(Object entity);
+
+  /**
+   * Generic callback.
+   */
+  public void __caucho_callback(int callbackIndex, Object entity);
 }

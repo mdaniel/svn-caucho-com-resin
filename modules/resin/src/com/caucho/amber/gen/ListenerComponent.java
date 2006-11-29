@@ -112,6 +112,8 @@ public class ListenerComponent extends ClassComponent {
     try {
       generateHeader(out);
 
+      generateMainCallback(out, _listenerType);
+
       generateCallbacks(out, Listener.PRE_PERSIST, _listenerType);
       generateCallbacks(out, Listener.POST_PERSIST, _listenerType);
       generateCallbacks(out, Listener.PRE_REMOVE, _listenerType);
@@ -143,12 +145,48 @@ public class ListenerComponent extends ClassComponent {
     out.println();
   }
 
+  private void generateMainCallback(JavaWriter out,
+                                    ListenerType listenerType)
+    throws IOException
+  {
+    out.println("public void __caucho_callback(int callbackIndex, Object entity)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("switch (callbackIndex) {");
+    out.println("case com.caucho.amber.entity.Listener.PRE_PERSIST:");
+    out.println("  __caucho_prePersist(entity);");
+    out.println("  break;");
+    out.println("case com.caucho.amber.entity.Listener.POST_PERSIST:");
+    out.println("  __caucho_postPersist(entity);");
+    out.println("  break;");
+    out.println("case com.caucho.amber.entity.Listener.PRE_REMOVE:");
+    out.println("  __caucho_preRemove(entity);");
+    out.println("  break;");
+    out.println("case com.caucho.amber.entity.Listener.POST_REMOVE:");
+    out.println("  __caucho_postRemove(entity);");
+    out.println("  break;");
+    out.println("case com.caucho.amber.entity.Listener.PRE_UPDATE:");
+    out.println("  __caucho_preUpdate(entity);");
+    out.println("  break;");
+    out.println("case com.caucho.amber.entity.Listener.POST_UPDATE:");
+    out.println("  __caucho_postUpdate(entity);");
+    out.println("  break;");
+    out.println("case com.caucho.amber.entity.Listener.POST_LOAD:");
+    out.println("  __caucho_postLoad(entity);");
+    out.println("  break;");
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+  }
+
   private void generateCallbacks(JavaWriter out,
-                                 int callbackMask,
+                                 int callbackIndex,
                                  ListenerType listenerType)
     throws IOException
   {
-    String name = toCallbackName(callbackMask);
+    String name = toCallbackName(callbackIndex);
 
     out.println("public void __caucho_" + name + "(Object entity)");
     out.println("{");
@@ -160,7 +198,7 @@ public class ListenerComponent extends ClassComponent {
     parentType = listenerType;
 
     do {
-      switch (callbackMask) {
+      switch (callbackIndex) {
       case Listener.PRE_PERSIST:
         callbacks = parentType.getPrePersistCallbacks();
         break;
@@ -209,9 +247,9 @@ public class ListenerComponent extends ClassComponent {
     out.println("}");
   }
 
-  private static String toCallbackName(int callbackMask)
+  private static String toCallbackName(int callbackIndex)
   {
-    switch (callbackMask) {
+    switch (callbackIndex) {
     case Listener.PRE_PERSIST:
       return "prePersist";
     case Listener.POST_PERSIST:

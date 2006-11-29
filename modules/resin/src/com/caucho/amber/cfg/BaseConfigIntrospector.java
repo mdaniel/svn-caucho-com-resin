@@ -29,6 +29,8 @@
 
 package com.caucho.amber.cfg;
 
+import com.caucho.amber.entity.Listener;
+
 import com.caucho.amber.field.*;
 import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.manager.AmberPersistenceUnit;
@@ -263,7 +265,30 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   /**
    * Introspects the callbacks.
    */
-  public void introspectCallbacks(AbstractEnhancedType type, JMethod method)
+  public void introspectCallbacks(JClass type,
+                                  EntityType entityType)
+    throws ConfigException
+  {
+    getInternalExcludeDefaultListenersConfig(type);
+
+    if (! _annotationCfg.isNull())
+      entityType.setExcludeDefaultListeners(true);
+
+    getInternalExcludeSuperclassListenersConfig(type);
+
+    if (! _annotationCfg.isNull())
+      entityType.setExcludeSuperclassListeners(true);
+
+    for (JMethod method : type.getMethods()) {
+      introspectCallbacks(entityType, method);
+    }
+  }
+
+  /**
+   * Introspects the callbacks.
+   */
+  public void introspectCallbacks(AbstractEnhancedType type,
+                                  JMethod method)
     throws ConfigException
   {
     JClass []param = method.getParameterTypes();
@@ -273,60 +298,17 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     boolean isListener = type instanceof ListenerType;
 
-    getInternalPostLoadConfig(jClass, method, methodName);
+    int n = ListenerType.CALLBACK_CLASS.length;
 
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PostLoad", method, isListener);
+    for (int i=1; i < n; i++) {
+      getInternalCallbackConfig(i, jClass, method, methodName);
 
-      type.addPostLoadCallback(method);
-    }
+      if (! _annotationCfg.isNull()) {
+        validateCallback(ListenerType.CALLBACK_CLASS[i].getName(),
+                         method, isListener);
 
-    getInternalPrePersistConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PrePersist", method, isListener);
-
-      type.addPrePersistCallback(method);
-    }
-
-    getInternalPostPersistConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PostPersist", method, isListener);
-
-      type.addPostPersistCallback(method);
-    }
-
-    getInternalPreUpdateConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PreUpdate", method, isListener);
-
-      type.addPreUpdateCallback(method);
-    }
-
-    getInternalPostUpdateConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PostUpdate", method, isListener);
-
-      type.addPostUpdateCallback(method);
-    }
-
-    getInternalPreRemoveConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PreRemove", method, isListener);
-
-      type.addPreRemoveCallback(method);
-    }
-
-    getInternalPostRemoveConfig(jClass, method, methodName);
-
-    if (! _annotationCfg.isNull()) {
-      validateCallback("PostRemove", method, isListener);
-
-      type.addPostRemoveCallback(method);
+        type.addCallback(i, method);
+      }
     }
   }
 
@@ -2913,10 +2895,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, EntityListeners.class);
 
-    EntityConfig entityConfig = null;
-
     if (_entityConfigMap == null)
       return;
+
+    EntityConfig entityConfig;
 
     entityConfig = _entityConfigMap.get(type.getName());
 
@@ -2924,6 +2906,40 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       return;
 
     _annotationCfg.setConfig(entityConfig.getEntityListeners());
+  }
+
+  void getInternalExcludeDefaultListenersConfig(JClass type)
+  {
+    _annotationCfg.reset(type, ExcludeDefaultListeners.class);
+
+    if (_entityConfigMap == null)
+      return;
+
+    EntityConfig entityConfig;
+
+    entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig == null)
+      return;
+
+    _annotationCfg.setConfig(entityConfig.getExcludeDefaultListeners());
+  }
+
+  void getInternalExcludeSuperclassListenersConfig(JClass type)
+  {
+    _annotationCfg.reset(type, ExcludeSuperclassListeners.class);
+
+    if (_entityConfigMap == null)
+      return;
+
+    EntityConfig entityConfig;
+
+    entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig == null)
+      return;
+
+    _annotationCfg.setConfig(entityConfig.getExcludeSuperclassListeners());
   }
 
   void getInternalMappedSuperclassConfig(JClass type)
@@ -3151,53 +3167,56 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
   }
 
-  void getInternalPostLoadConfig(JClass type,
+  void getInternalCallbackConfig(int callback,
+                                 JClass type,
                                  JAccessibleObject method,
                                  String fieldName)
   {
-    _annotationCfg.reset(method, PostLoad.class);
-  }
+    _annotationCfg.reset(method, ListenerType.CALLBACK_CLASS[callback]);
 
-  void getInternalPrePersistConfig(JClass type,
-                                   JAccessibleObject method,
-                                   String fieldName)
-  {
-    _annotationCfg.reset(method, PrePersist.class);
-  }
+    if (_entityConfigMap == null)
+      return;
 
-  void getInternalPostPersistConfig(JClass type,
-                                    JAccessibleObject method,
-                                    String fieldName)
-  {
-    _annotationCfg.reset(method, PostPersist.class);
-  }
+    EntityConfig entityConfig;
 
-  void getInternalPreUpdateConfig(JClass type,
-                                  JAccessibleObject method,
-                                  String fieldName)
-  {
-    _annotationCfg.reset(method, PreUpdate.class);
-  }
+    entityConfig = _entityConfigMap.get(type.getName());
 
-  void getInternalPostUpdateConfig(JClass type,
-                                   JAccessibleObject method,
-                                   String fieldName)
-  {
-    _annotationCfg.reset(method, PostUpdate.class);
-  }
+    if (entityConfig == null)
+      return;
 
-  void getInternalPreRemoveConfig(JClass type,
-                                  JAccessibleObject method,
-                                  String fieldName)
-  {
-    _annotationCfg.reset(method, PreRemove.class);
-  }
+    AbstractListenerConfig callbackConfig;
 
-  void getInternalPostRemoveConfig(JClass type,
-                                   JAccessibleObject method,
-                                   String fieldName)
-  {
-    _annotationCfg.reset(method, PostRemove.class);
+    switch (callback) {
+    case Listener.PRE_PERSIST:
+      callbackConfig = entityConfig.getPrePersist();
+      break;
+    case Listener.POST_PERSIST:
+      callbackConfig = entityConfig.getPostPersist();
+      break;
+    case Listener.PRE_REMOVE:
+      callbackConfig = entityConfig.getPreRemove();
+      break;
+    case Listener.POST_REMOVE:
+      callbackConfig = entityConfig.getPostRemove();
+      break;
+    case Listener.PRE_UPDATE:
+      callbackConfig = entityConfig.getPreUpdate();
+      break;
+    case Listener.POST_UPDATE:
+      callbackConfig = entityConfig.getPostUpdate();
+      break;
+    case Listener.POST_LOAD:
+      callbackConfig = entityConfig.getPostLoad();
+      break;
+    default:
+      return;
+    }
+
+    if (callbackConfig == null)
+      return;
+
+    if (callbackConfig.getMethodName().equals(method.getName()))
+      _annotationCfg.setConfig(callbackConfig);
   }
 
   void getInternalEmbeddedIdConfig(JClass type,

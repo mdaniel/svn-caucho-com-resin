@@ -30,6 +30,8 @@
 package com.caucho.amber.type;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
+import javax.persistence.*;
+
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
@@ -42,6 +44,18 @@ import java.util.logging.Logger;
 public class ListenerType extends AbstractEnhancedType {
   private static final Logger log = Logger.getLogger(ListenerType.class.getName());
   private static final L10N L = new L10N(ListenerType.class);
+
+  // See com.caucho.amber.entity.Listener
+  public static final Class[] CALLBACK_CLASS = new Class[] {
+    null,
+    PrePersist.class,
+    PostPersist.class,
+    PreRemove.class,
+    PostRemove.class,
+    PreUpdate.class,
+    PostUpdate.class,
+    PostLoad.class
+  };
 
   public ListenerType(AmberPersistenceUnit amberPersistenceUnit)
   {

@@ -145,7 +145,7 @@ public class AmberConnection
   public void prePersist(Entity entity)
   {
     try {
-      _persistenceUnit.prePersist(entity);
+      _persistenceUnit.callListeners(Listener.PRE_PERSIST, entity);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -160,7 +160,7 @@ public class AmberConnection
   public void postPersist(Entity entity)
   {
     try {
-      _persistenceUnit.postPersist(entity);
+      _persistenceUnit.callListeners(Listener.POST_PERSIST, entity);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -175,7 +175,7 @@ public class AmberConnection
   public void preRemove(Entity entity)
   {
     try {
-      _persistenceUnit.preRemove(entity);
+      _persistenceUnit.callListeners(Listener.PRE_REMOVE, entity);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -190,7 +190,7 @@ public class AmberConnection
   public void postRemove(Entity entity)
   {
     try {
-      _persistenceUnit.postRemove(entity);
+      _persistenceUnit.callListeners(Listener.POST_REMOVE, entity);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -205,7 +205,7 @@ public class AmberConnection
   public void preUpdate(Entity entity)
   {
     try {
-      _persistenceUnit.preUpdate(entity);
+      _persistenceUnit.callListeners(Listener.PRE_UPDATE, entity);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -220,7 +220,7 @@ public class AmberConnection
   public void postUpdate(Entity entity)
   {
     try {
-      _persistenceUnit.postUpdate(entity);
+      _persistenceUnit.callListeners(Listener.POST_UPDATE, entity);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -235,7 +235,7 @@ public class AmberConnection
   public void postLoad(Entity entity)
   {
     try {
-      _persistenceUnit.postLoad(entity);
+      _persistenceUnit.callListeners(Listener.POST_LOAD, entity);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

@@ -374,9 +374,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         introspectMethods(_persistenceUnit, entityType, parentType, type, entityConfig);
 
       if (isEntity) {
-        for (JMethod method : type.getMethods()) {
-          introspectCallbacks(entityType, method);
-        }
+        introspectCallbacks(type, entityType);
 
         if (secondaryTableAnn != null) {
           Object []join = (Object []) secondaryTableAnn.get("pkJoinColumns");

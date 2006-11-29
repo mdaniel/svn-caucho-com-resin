@@ -98,6 +98,9 @@ abstract public class RelatedType extends AbstractStatefulType {
   protected int _minDirtyIndex;
   protected int _dirtyIndex;
 
+  private boolean _excludeDefaultListeners;
+  private boolean _excludeSuperclassListeners;
+
   protected boolean _hasLoadCallback;
 
   private HashMap<String,IdGenerator> _idGenMap
@@ -416,6 +419,38 @@ abstract public class RelatedType extends AbstractStatefulType {
   public ArrayList<Column> getColumns()
   {
     return getTable().getColumns();
+  }
+
+  /**
+   * Gets the exclude default listeners flag.
+   */
+  public boolean getExcludeDefaultListeners()
+  {
+    return _excludeDefaultListeners;
+  }
+
+  /**
+   * Sets the exclude default listeners flag.
+   */
+  public void setExcludeDefaultListeners(boolean b)
+  {
+    _excludeDefaultListeners = b;
+  }
+
+  /**
+   * Gets the exclude superclass listeners flag.
+   */
+  public boolean getExcludeSuperclassListeners()
+  {
+    return _excludeSuperclassListeners;
+  }
+
+  /**
+   * Sets the exclude superclass listeners flag.
+   */
+  public void setExcludeSuperclassListeners(boolean b)
+  {
+    _excludeSuperclassListeners = b;
   }
 
   /**

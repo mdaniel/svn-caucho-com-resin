@@ -1176,21 +1176,26 @@ public class AmberPersistenceUnit {
   }
 
   /**
-   * Applies persistence unit default entity listeners
-   * for @PrePersist callbacks.
+   * Applies persistence unit default and entity listeners
+   * for @PreXxx, @PostXxx callbacks.
    */
-  protected void prePersist(Entity entity)
+  protected void callListeners(int callbackIndex,
+                               Entity entity)
   {
-    for (ListenerType listenerType : _defaultListeners) {
-      for (JMethod m : listenerType.getPrePersistCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_prePersist(entity);
+    String className = entity.getClass().getName();
+
+    EntityType entityType = (EntityType) _typeManager.get(className);
+
+    if (! entityType.getExcludeDefaultListeners()) {
+      for (ListenerType listenerType : _defaultListeners) {
+        for (JMethod m : listenerType.getCallbacks(callbackIndex)) {
+          Listener listener = (Listener) listenerType.getInstance();
+          listener.__caucho_callback(callbackIndex, entity);
+        }
       }
     }
 
     ArrayList<ListenerType> listeners;
-
-    String className = entity.getClass().getName();
 
     listeners = _amberContainer.getEntityListeners(className);
 
@@ -1199,217 +1204,13 @@ public class AmberPersistenceUnit {
 
     for (ListenerType listenerType : listeners) {
 
-      if (_defaultListeners.contains(listenerType))
+      if ((! entityType.getExcludeDefaultListeners()) &&
+          _defaultListeners.contains(listenerType))
         continue;
 
-      for (JMethod m : listenerType.getPrePersistCallbacks()) {
+      for (JMethod m : listenerType.getCallbacks(callbackIndex)) {
         Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_prePersist(entity);
-      }
-    }
-  }
-
-  /**
-   * Applies persistence unit default entity listeners
-   * for @PostPersist callbacks.
-   */
-  protected void postPersist(Entity entity)
-  {
-    for (ListenerType listenerType : _defaultListeners) {
-      for (JMethod m : listenerType.getPostPersistCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_postPersist(entity);
-      }
-    }
-
-    ArrayList<ListenerType> listeners;
-
-    String className = entity.getClass().getName();
-
-    listeners = _amberContainer.getEntityListeners(className);
-
-    if (listeners == null)
-      return;
-
-    for (ListenerType listenerType : listeners) {
-
-      if (_defaultListeners.contains(listenerType))
-        continue;
-
-      for (JMethod m : listenerType.getPostPersistCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_postPersist(entity);
-      }
-    }
-  }
-
-  /**
-   * Applies persistence unit default entity listeners
-   * for @PreRemove callbacks.
-   */
-  protected void preRemove(Entity entity)
-  {
-    for (ListenerType listenerType : _defaultListeners) {
-      for (JMethod m : listenerType.getPreRemoveCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_preRemove(entity);
-      }
-    }
-
-    ArrayList<ListenerType> listeners;
-
-    String className = entity.getClass().getName();
-
-    listeners = _amberContainer.getEntityListeners(className);
-
-    if (listeners == null)
-      return;
-
-    for (ListenerType listenerType : listeners) {
-
-      if (_defaultListeners.contains(listenerType))
-        continue;
-
-      for (JMethod m : listenerType.getPreRemoveCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_preRemove(entity);
-      }
-    }
-  }
-
-  /**
-   * Applies persistence unit default entity listeners
-   * for @PostRemove callbacks.
-   */
-  protected void postRemove(Entity entity)
-  {
-    for (ListenerType listenerType : _defaultListeners) {
-      for (JMethod m : listenerType.getPostRemoveCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_postRemove(entity);
-      }
-    }
-
-    ArrayList<ListenerType> listeners;
-
-    String className = entity.getClass().getName();
-
-    listeners = _amberContainer.getEntityListeners(className);
-
-    if (listeners == null)
-      return;
-
-    for (ListenerType listenerType : listeners) {
-
-      if (_defaultListeners.contains(listenerType))
-        continue;
-
-      for (JMethod m : listenerType.getPostRemoveCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_postRemove(entity);
-      }
-    }
-  }
-
-  /**
-   * Applies persistence unit default entity listeners
-   * for @PreUpdate callbacks.
-   */
-  protected void preUpdate(Entity entity)
-  {
-    for (ListenerType listenerType : _defaultListeners) {
-      for (JMethod m : listenerType.getPreUpdateCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_preUpdate(entity);
-      }
-    }
-
-    ArrayList<ListenerType> listeners;
-
-    String className = entity.getClass().getName();
-
-    listeners = _amberContainer.getEntityListeners(className);
-
-    if (listeners == null)
-      return;
-
-    for (ListenerType listenerType : listeners) {
-
-      if (_defaultListeners.contains(listenerType))
-        continue;
-
-      for (JMethod m : listenerType.getPreUpdateCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_preUpdate(entity);
-      }
-    }
-  }
-
-  /**
-   * Applies persistence unit default entity listeners
-   * for @PostUpdate callbacks.
-   */
-  protected void postUpdate(Entity entity)
-  {
-    for (ListenerType listenerType : _defaultListeners) {
-      for (JMethod m : listenerType.getPostUpdateCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_postUpdate(entity);
-      }
-    }
-
-    ArrayList<ListenerType> listeners;
-
-    String className = entity.getClass().getName();
-
-    listeners = _amberContainer.getEntityListeners(className);
-
-    if (listeners == null)
-      return;
-
-    for (ListenerType listenerType : listeners) {
-
-      if (_defaultListeners.contains(listenerType))
-        continue;
-
-      for (JMethod m : listenerType.getPostUpdateCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_postUpdate(entity);
-      }
-    }
-  }
-
-  /**
-   * Applies persistence unit default entity listeners
-   * for @PostLoad callbacks.
-   */
-  protected void postLoad(Entity entity)
-  {
-    for (ListenerType listenerType : _defaultListeners) {
-      for (JMethod m : listenerType.getPostLoadCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-        listener.__caucho_postLoad(entity);
-      }
-    }
-
-    ArrayList<ListenerType> listeners;
-
-    String className = entity.getClass().getName();
-
-    listeners = _amberContainer.getEntityListeners(className);
-
-    if (listeners == null)
-      return;
-
-    for (ListenerType listenerType : listeners) {
-
-      if (_defaultListeners.contains(listenerType))
-        continue;
-
-      for (JMethod m : listenerType.getPostLoadCallbacks()) {
-        Listener listener = (Listener) listenerType.getInstance();
-
-        listener.__caucho_postLoad(entity);
+        listener.__caucho_callback(callbackIndex, entity);
       }
     }
   }
