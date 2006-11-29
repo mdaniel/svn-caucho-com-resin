@@ -1371,9 +1371,11 @@ public class EntityComponent extends ClassComponent {
     out.println("o.__caucho_state = __caucho_state;"); // com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
     out.println("o.__caucho_loadMask_0 = __caucho_loadMask_0;"); // & 1L;");
 
-    out.println("aConn.postLoad(this);");
-
-    generateCallbacks(out, "o", _entityType.getPostLoadCallbacks());
+    // See LoadGroupGenerator __caucho_load.
+    //
+    // out.println("aConn.postLoad(this);");
+    //
+    // generateCallbacks(out, "o", _entityType.getPostLoadCallbacks());
 
     out.println();
     out.println("return o;");
@@ -1669,7 +1671,8 @@ public class EntityComponent extends ClassComponent {
     out.println("java.sql.ResultSet rs" + varSuffix + " = pstmt" + varSuffix + ".executeQuery();");
     out.println("if (! rs" + varSuffix + ".next()) {");
     out.println("  rs" + varSuffix + ".close();");
-    out.println("  throw new com.caucho.amber.AmberException(key + \" has no matching object\");");
+    out.println("  return null;");
+    // out.println("  throw new com.caucho.amber.AmberException(key + \" has no matching object\");");
     out.println("}");
   }
 

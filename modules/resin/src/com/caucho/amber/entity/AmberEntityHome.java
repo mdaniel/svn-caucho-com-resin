@@ -329,7 +329,9 @@ public class AmberEntityHome {
     EntityItem item = findEntityItem(aConn, key, isLoad, preloadedProperties);
 
     if (item == null)
-      throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
+      return null;
+
+    // throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
 
     return item.copy(aConn);
   }
@@ -379,6 +381,10 @@ public class AmberEntityHome {
 
         Entity cacheEntity;
         cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
+
+        // Object does not exist.
+        if (cacheEntity == null)
+          return null;
 
         if (isLoad) {
           cacheEntity.__caucho_retrieve(aConn, preloadedProperties);
@@ -467,13 +473,9 @@ public class AmberEntityHome {
    * Saves based on the object.
    */
   public void save(AmberConnection aConn, Entity entity)
-    throws AmberException
+    throws Exception
   {
-    try {
-      entity.__caucho_create(aConn, _entityType);
-    } catch (Exception e) {
-      throw AmberException.create(e);
-    }
+    entity.__caucho_create(aConn, _entityType);
   }
 
   /**

@@ -169,20 +169,50 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
   public void introspectEntityListeners(JClass type,
                                         RelatedType relatedType,
-                                        String relatedTypeName,
                                         AmberPersistenceUnit persistenceUnit)
     throws ConfigException
   {
-    JAnnotation entityListenersAnn = type.getAnnotation(EntityListeners.class);
+    getInternalEntityListenersConfig(type);
+    JAnnotation entityListenersAnn = _annotationCfg.getAnnotation();
+    EntityListenersConfig entityListenersCfg
+      = _annotationCfg.getEntityListenersConfig();
 
-    if (entityListenersAnn == null)
+    Object listeners[] = null;
+
+    // XML mapping takes higher priority than annotations.
+    if (entityListenersCfg != null)
+      listeners = entityListenersCfg.getEntityListeners().toArray();
+    else if (entityListenersAnn != null)
+      listeners = (Object []) entityListenersAnn.get("value");
+    else
       return;
 
-    Object listenerClasses[] = (Object []) entityListenersAnn.get("value");
+    String relatedTypeName = relatedType.getBeanClass().getName();
 
-    for (int i=0; i < listenerClasses.length; i++) {
+    for (int i=0; i < listeners.length; i++) {
 
-      JClass cl = (JClass) listenerClasses[i];
+      JClass cl;
+
+      // Introspects annotation or xml.
+      if (listeners[i] instanceof JClass)
+        cl = (JClass) listeners[i];
+      else {
+        JClassLoader loader = persistenceUnit.getJClassLoader();
+
+        EntityListenerConfig listenerConfig
+          = (EntityListenerConfig) listeners[i];
+
+        String className = listenerConfig.getClassName();
+
+        cl = loader.forName(className);
+
+        if (cl == null)
+          throw new ConfigException(L.l("'{0}' is an unknown type for <entity-listener> in orm.xml",
+                                        className));
+      }
+
+      if (persistenceUnit.getDefaultListener(cl.getName()) != null)
+        continue;
 
       introspectEntityListener(cl,
                                persistenceUnit,
@@ -203,10 +233,34 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                     sourceClassName));
     }
 
-    ListenerType listenerType
-      = persistenceUnit.addEntityListener(sourceType.getName(), type);
+    JClass parentClass = type.getSuperClass();
 
-    introspectListener(type, listenerType);
+    if (parentClass == null) {
+      // java.lang.Object
+      return;
+    }
+    else {
+      // XXX: entity listener super-classes in a hierarchy might
+      // not be annotated as entity listeners but they might have
+      // @PreXxx or @PostXxx annotated methods. On the other hand,
+      // needs to filter regular classes out.
+
+      introspectEntityListener(parentClass, persistenceUnit,
+                               sourceType, sourceClassName);
+    }
+
+    // jpa/0r42
+
+    ListenerType listenerType
+      = persistenceUnit.getEntityListener(type.getName());
+
+    ListenerType newListenerType
+      = persistenceUnit.addEntityListener(sourceClassName, type);
+
+    if (listenerType == null) {
+      listenerType = newListenerType;
+      introspectListener(type, listenerType);
+    }
 
     sourceType.addListener(listenerType);
   }
@@ -2869,6 +2923,23 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       entityConfig = _entityConfigMap.get(type.getName());
 
     _annotationCfg.setConfig(entityConfig);
+  }
+
+  void getInternalEntityListenersConfig(JClass type)
+  {
+    _annotationCfg.reset(type, EntityListeners.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap == null)
+      return;
+
+    entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig == null)
+      return;
+
+    _annotationCfg.setConfig(entityConfig.getEntityListeners());
   }
 
   void getInternalMappedSuperclassConfig(JClass type)

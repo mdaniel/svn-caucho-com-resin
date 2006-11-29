@@ -1448,7 +1448,7 @@ public class AmberConnection
    * @param obj the object to create
    */
   public void create(Object obj)
-    throws SQLException
+    throws Exception
   {
     AmberEntityHome home = null;
 
@@ -1471,7 +1471,7 @@ public class AmberConnection
    * @param obj the object to create
    */
   public void create(String homeName, Object obj)
-    throws SQLException
+    throws Exception
   {
     AmberEntityHome home = _persistenceUnit.getEntityHome(homeName);
 
@@ -1488,7 +1488,7 @@ public class AmberConnection
    * @param obj the object to create
    */
   public void create(AmberEntityHome home, Object obj)
-    throws SQLException
+    throws Exception
   {
     // XXX: flushing things like delete might be useful?
     // XXX: the issue is a flush can break FK constraints and

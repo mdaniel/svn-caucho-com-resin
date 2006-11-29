@@ -480,6 +480,11 @@ abstract public class AbstractConfigIntrospector {
       return (EntityConfig) _config;
     }
 
+    public EntityListenersConfig getEntityListenersConfig()
+    {
+      return (EntityListenersConfig) _config;
+    }
+
     public MappedSuperclassConfig getMappedSuperclassConfig()
     {
       return (MappedSuperclassConfig) _config;

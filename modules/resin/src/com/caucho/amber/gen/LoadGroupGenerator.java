@@ -109,6 +109,11 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
     out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this);");
 
+    out.println();
+    out.println("aConn.postLoad(this);");
+
+    generateCallbacks(out, _entityType.getPostLoadCallbacks());
+
     out.popDepth();
     out.println("}");
 

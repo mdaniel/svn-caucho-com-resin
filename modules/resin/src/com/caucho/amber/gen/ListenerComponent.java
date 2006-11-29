@@ -40,6 +40,8 @@ import com.caucho.java.gen.ClassComponent;
 
 import com.caucho.loader.Environment;
 
+import com.caucho.amber.entity.Listener;
+
 import com.caucho.amber.field.StubMethod;
 
 import com.caucho.amber.type.ListenerType;
@@ -119,15 +121,13 @@ public class ListenerComponent extends ClassComponent {
     try {
       generateHeader(out);
 
-      // generateMethods(out);
-
-      generateCallbacks(out, "prePersist", _listenerType.getPrePersistCallbacks());
-      generateCallbacks(out, "postPersist", _listenerType.getPostPersistCallbacks());
-      generateCallbacks(out, "preRemove", _listenerType.getPreRemoveCallbacks());
-      generateCallbacks(out, "postRemove", _listenerType.getPostRemoveCallbacks());
-      generateCallbacks(out, "preUpdate", _listenerType.getPreUpdateCallbacks());
-      generateCallbacks(out, "postUpdate", _listenerType.getPostUpdateCallbacks());
-      generateCallbacks(out, "postLoad", _listenerType.getPostLoadCallbacks());
+      generateCallbacks(out, Listener.PRE_PERSIST, _listenerType);
+      generateCallbacks(out, Listener.POST_PERSIST, _listenerType);
+      generateCallbacks(out, Listener.PRE_REMOVE, _listenerType);
+      generateCallbacks(out, Listener.POST_REMOVE, _listenerType);
+      generateCallbacks(out, Listener.PRE_UPDATE, _listenerType);
+      generateCallbacks(out, Listener.POST_UPDATE, _listenerType);
+      generateCallbacks(out, Listener.POST_LOAD, _listenerType);
 
     } catch (IOException e) {
       throw e;
@@ -152,35 +152,91 @@ public class ListenerComponent extends ClassComponent {
     out.println();
   }
 
-  /**
-   * Generates the stub methods (needed for EJB)
-   */
-  private void generateMethods(JavaWriter out)
-    throws IOException
-  {
-    for (StubMethod method : _listenerType.getMethods()) {
-      method.generate(out);
-    }
-  }
-
   private void generateCallbacks(JavaWriter out,
-                                 String name,
-                                 ArrayList<JMethod> callbacks)
+                                 int callbackMask,
+                                 ListenerType listenerType)
     throws IOException
   {
+    String name = toCallbackName(callbackMask);
+
     out.println("public void __caucho_" + name + "(Object entity)");
     out.println("{");
     out.pushDepth();
 
-    if (callbacks.size() == 0)
-      return;
+    ArrayList<JMethod> callbacks = null;
+    ListenerType parentType;
 
-    for (JMethod method : callbacks) {
-      JClass params[] = method.getParameterTypes();
-      out.println("this." + method.getName() + "((" + params[0].getName() + ") entity);");
+    parentType = listenerType;
+
+    do {
+      switch (callbackMask) {
+      case Listener.PRE_PERSIST:
+        callbacks = parentType.getPrePersistCallbacks();
+        break;
+      case Listener.POST_PERSIST:
+        callbacks = parentType.getPostPersistCallbacks();
+        break;
+      case Listener.PRE_REMOVE:
+        callbacks = parentType.getPreRemoveCallbacks();
+        break;
+      case Listener.POST_REMOVE:
+        callbacks = parentType.getPostRemoveCallbacks();
+        break;
+      case Listener.PRE_UPDATE:
+        callbacks = parentType.getPreUpdateCallbacks();
+        break;
+      case Listener.POST_UPDATE:
+        callbacks = parentType.getPostUpdateCallbacks();
+        break;
+      case Listener.POST_LOAD:
+        callbacks = parentType.getPostLoadCallbacks();
+        break;
+      }
+
+      if (callbacks.size() > 0)
+        break;
+
+      parentType = parentType.getParentType();
+    }
+    while (parentType != null);
+
+    if (callbacks.size() > 0) {
+      for (JMethod method : callbacks) {
+        JClass params[] = method.getParameterTypes();
+
+        if (listenerType.getParentType() == null)
+          out.print("this.");
+        else
+          out.print("super.");
+
+        out.print(method.getName());
+        out.println("((" + params[0].getName() + ") entity);");
+      }
     }
 
     out.popDepth();
     out.println("}");
+  }
+
+  private static String toCallbackName(int callbackMask)
+  {
+    switch (callbackMask) {
+    case Listener.PRE_PERSIST:
+      return "prePersist";
+    case Listener.POST_PERSIST:
+      return "postPersist";
+    case Listener.PRE_REMOVE:
+      return "preRemove";
+    case Listener.POST_REMOVE:
+      return "postRemove";
+    case Listener.PRE_UPDATE:
+      return "preUpdate";
+    case Listener.POST_UPDATE:
+      return "postUpdate";
+    case Listener.POST_LOAD:
+      return "postLoad";
+    }
+
+    return null;
   }
 }

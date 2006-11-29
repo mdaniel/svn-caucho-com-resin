@@ -36,17 +36,23 @@ import com.caucho.util.L10N;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 
 /**
- * Represents a listener type: either a default listener
- * declared in orm.xml meta-data or an entity listener
- * specified in @EntityListeners entity annotation.
+ * Represents a listener type with a parent listener:
+ * either a default listener declared in orm.xml meta-data or
+ * an entity listener specified in @EntityListeners entity
+ * annotation.
  */
-public class ListenerType extends AbstractEnhancedType {
-  private static final Logger log = Logger.getLogger(ListenerType.class.getName());
-  private static final L10N L = new L10N(ListenerType.class);
+public class SubListenerType extends ListenerType {
+  private static final Logger log = Logger.getLogger(SubListenerType.class.getName());
+  private static final L10N L = new L10N(SubListenerType.class);
 
-  public ListenerType(AmberPersistenceUnit amberPersistenceUnit)
+  private ListenerType _parent;
+
+  public SubListenerType(AmberPersistenceUnit amberPersistenceUnit,
+                         ListenerType parent)
   {
     super(amberPersistenceUnit);
+
+    _parent = parent;
   }
 
   /**
@@ -54,7 +60,7 @@ public class ListenerType extends AbstractEnhancedType {
    */
   public ListenerType getParentType()
   {
-    return null;
+    return _parent;
   }
 
   /**
@@ -63,8 +69,8 @@ public class ListenerType extends AbstractEnhancedType {
   public String toString()
   {
     if (getBeanClass() == null)
-      return "ListenerType[]";
+      return "SubListenerType[]";
     else
-      return "ListenerType[" + getBeanClass().getName() + "]";
+      return "SubListenerType[" + getBeanClass().getName() + "]";
   }
 }

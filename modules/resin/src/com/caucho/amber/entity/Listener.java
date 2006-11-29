@@ -40,9 +40,16 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.type.EntityType;
 
 /**
- * An entity listener instance
+ * An entity listener instance.
  */
 public interface Listener {
+  public static final int PRE_PERSIST  = 0x01;
+  public static final int POST_PERSIST = 0x02;
+  public static final int PRE_REMOVE   = 0x04;
+  public static final int POST_REMOVE  = 0x08;
+  public static final int PRE_UPDATE   = 0x10;
+  public static final int POST_UPDATE  = 0x20;
+  public static final int POST_LOAD    = 0x40;
 
   /**
    * Called before EntityManager.persist().

@@ -33,6 +33,7 @@ import java.io.InputStream;
 
 import java.net.URL;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -106,8 +107,8 @@ public class AmberContainer {
   private HashMap<String,ListenerType> _defaultListenerMap
     = new HashMap<String,ListenerType>();
 
-  private HashMap<String, HashMap<String, ListenerType>>
-    _entityListenerMap = new HashMap<String, HashMap<String, ListenerType>>();
+  private HashMap<String, ArrayList<ListenerType>>
+    _entityListenerMap = new HashMap<String, ArrayList<ListenerType>>();
 
   private Throwable _exception;
 
@@ -331,22 +332,20 @@ public class AmberContainer {
       throw new AmberRuntimeException(_exception);
     }
 
-    HashMap<String, ListenerType> listenerMap;
+    ArrayList<ListenerType> listenerList;
 
-    for (Map.Entry<String, HashMap<String, ListenerType>>
+    for (Map.Entry<String, ArrayList<ListenerType>>
            entry : _entityListenerMap.entrySet()) {
 
-      listenerMap = entry.getValue();
+      listenerList = entry.getValue();
 
-      if (listenerMap == null)
+      if (listenerList == null)
         continue;
 
-      ListenerType listener = listenerMap.get(className);
-
-      if (listener == null)
-        continue;
-
-      return listener;
+      for (ListenerType listener : listenerList) {
+        if (className.equals(listener.getBeanClass().getName()))
+          return listener;
+      }
     }
 
     return null;
@@ -368,7 +367,7 @@ public class AmberContainer {
   /**
    * Returns the entity listeners for an entity.
    */
-  public HashMap<String, ListenerType>
+  public ArrayList<ListenerType>
   getEntityListeners(String entityClassName)
   {
     return _entityListenerMap.get(entityClassName);
@@ -428,18 +427,17 @@ public class AmberContainer {
    * Adds an entity listener.
    */
   public void addEntityListener(String entityClassName,
-                                String listenerClassName,
                                 ListenerType listenerType)
   {
-    HashMap<String, ListenerType> listenerMap
+    ArrayList<ListenerType> listenerList
       = _entityListenerMap.get(entityClassName);
 
-    if (listenerMap == null) {
-      listenerMap = new HashMap<String, ListenerType>();
-      _entityListenerMap.put(entityClassName, listenerMap);
+    if (listenerList == null) {
+      listenerList = new ArrayList<ListenerType>();
+      _entityListenerMap.put(entityClassName, listenerList);
     }
 
-    listenerMap.put(listenerClassName, listenerType);
+    listenerList.add(listenerType);
   }
 
   /**

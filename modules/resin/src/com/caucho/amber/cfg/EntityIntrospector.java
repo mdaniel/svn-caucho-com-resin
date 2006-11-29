@@ -226,7 +226,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       _entityMap.put(entityName, entityType);
 
       // Adds entity listeners, if any.
-      introspectEntityListeners(type, entityType, entityName, _persistenceUnit);
+      introspectEntityListeners(type, entityType, _persistenceUnit);
 
       boolean isField = isField(type, entityConfig, false);
 
