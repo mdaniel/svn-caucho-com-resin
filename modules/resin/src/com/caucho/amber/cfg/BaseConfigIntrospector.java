@@ -2922,7 +2922,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     if (entityConfig == null)
       return;
 
-    _annotationCfg.setConfig(entityConfig.getExcludeDefaultListeners());
+    if (entityConfig.getExcludeDefaultListeners())
+      _annotationCfg.setConfig(entityConfig.getExcludeDefaultListeners());
   }
 
   void getInternalExcludeSuperclassListenersConfig(JClass type)
@@ -2939,7 +2940,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     if (entityConfig == null)
       return;
 
-    _annotationCfg.setConfig(entityConfig.getExcludeSuperclassListeners());
+    if (entityConfig.getExcludeSuperclassListeners())
+      _annotationCfg.setConfig(entityConfig.getExcludeSuperclassListeners());
   }
 
   void getInternalMappedSuperclassConfig(JClass type)
