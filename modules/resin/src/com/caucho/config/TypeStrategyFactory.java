@@ -109,8 +109,10 @@ public class TypeStrategyFactory {
     if (strategy != null)
       return strategy;
 
-    if (name.getLocalName() != null && ! name.getLocalName().equals(""))
-      return _envMap.get(new QName(name.getLocalName(), null));
+    if (name.getLocalName() != null && ! name.getLocalName().equals("")) {
+      strategy = _envMap.get(new QName(name.getLocalName(), null));
+      return strategy;
+    }
     else
       return null;
   }

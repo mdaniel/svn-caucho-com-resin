@@ -60,6 +60,8 @@
 
     <persistent-store>com.caucho.server.cluster.PersistentStoreConfig</persistent-store>
 
+    <persistence-manager>com.caucho.amber.cfg.PersistenceManager</persistence-manager>
+
     <reference>com.caucho.config.types.ReferenceConfig</reference>
 
     <resource>com.caucho.jca.Resource</resource>
@@ -90,7 +92,7 @@
     <temporary-directory>com.caucho.java.TempDir</temporary-directory>
 
     <work-dir>com.caucho.java.WorkDir</work-dir>
-    <work-directory>com.caucho.java.TempDir</work-directory>
+    <work-directory>com.caucho.java.WorkDir</work-directory>
   </environment-attribute>
 
   <flow-attribute>

@@ -52,8 +52,8 @@ public class ConfigLibrary {
   private static final L10N L = new L10N(ConfigLibrary.class);
   private static final Logger log = Log.open(ConfigLibrary.class);
 
-  private static EnvironmentLocal<ConfigLibrary> _localLibrary =
-    new EnvironmentLocal<ConfigLibrary>();
+  private static EnvironmentLocal<ConfigLibrary> _localLibrary
+    = new EnvironmentLocal<ConfigLibrary>();
 
   private HashMap<String,Method> _methodMap = new HashMap<String,Method>();
 

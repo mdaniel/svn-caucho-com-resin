@@ -8335,7 +8335,7 @@ if test "${apache_dir}" = "yes"; then
   apache_dir=/usr/local/apache
 fi
 
-if test ! -d "${apache_dir}; then
+if test ! -d "${apache_dir}"; then
   { { echo "$as_me:$LINENO: error: --with-apache=${apache_dir} is not a valid Apache directory" >&5
 echo "$as_me: error: --with-apache=${apache_dir} is not a valid Apache directory" >&2;}
    { (exit 1); exit 1; }; }
@@ -8714,8 +8714,12 @@ echo -n "checking if Java is 64-bit... "
 tmpname="/tmp/java$$.out"
 
 $JAVA_HOME/bin/java -version 2> $tmpname
-grep "(64-Bit|amd64-64)" $tmpname 1> /dev/null
+grep "64-Bit" $tmpname 1> /dev/null
+if test "$?" = "0"; then
+   b64_jni=true
+fi
 
+grep "amd64-64" $tmpname 1> /dev/null
 if test "$?" = "0"; then
    b64_jni=true
 fi

@@ -27,35 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.amber.cfg;
 
-import com.caucho.util.L10N;
-import com.caucho.xml.QName;
+import com.caucho.amber.manager.*;
+import com.caucho.config.*;
+import com.caucho.loader.*;
+import com.caucho.util.*;
 
-import org.w3c.dom.Node;
+import java.util.logging.*;
+import javax.sql.*;
+import javax.annotation.*;
 
-public class EnvironmentAttributeStrategy extends AttributeStrategy {
-  static final L10N L = new L10N(EnvironmentAttributeStrategy.class);
+/**
+ * Configures the persistence for a level.
+ */
+public class PersistenceManager
+{
+  private static final L10N L = new L10N(PersistenceManager.class);
+  protected static final Logger log
+    = Logger.getLogger(PersistenceManager.class.getName());
 
-  private final TypeStrategy _typeStrategy;
-
-  public EnvironmentAttributeStrategy(TypeStrategy typeStrategy)
+  private AmberContainer _amberManager;
+  
+  /**
+   * Create a persistence manager
+   */
+  public PersistenceManager()
+    throws ConfigException
   {
-    _typeStrategy = typeStrategy;
+    _amberManager = AmberContainer.getLocalContainer();
   }
 
-  public void configure(NodeBuilder builder, Object bean,
-			QName name, Node node)
-          throws Exception
+  public void setDataSource(DataSource dataSource)
   {
-    // builder.configureChildImpl(_typeStrategy, node, bean);
-    bean = _typeStrategy.create();
-    
-    builder.configureImpl(_typeStrategy, bean, node);
+    _amberManager.setDataSource(dataSource);
   }
 
-  public String toString()
+  @PostConstruct
+  public void init()
   {
-    return "EnvironmentAttributeStrategy[" + _typeStrategy + "]";
+    Environment.addChildEnvironmentListener(new PersistenceEnvironmentListener());
   }
 }
+

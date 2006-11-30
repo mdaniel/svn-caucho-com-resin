@@ -38,10 +38,15 @@ import com.caucho.vfs.Vfs;
 import javax.annotation.PostConstruct;
 
 public class WorkDir {
-  private static final EnvironmentLocal<Path> _localWorkDir =
-    new EnvironmentLocal<Path>("caucho.work-dir");
+  private static final EnvironmentLocal<Path> _localWorkDir
+    = new EnvironmentLocal<Path>("caucho.work-dir");
+  
   private Path _path;
 
+  public WorkDir()
+  {
+  }
+  
   /**
    * Returns the local work directory.
    */

@@ -73,7 +73,8 @@ public class EnvAmberManager {
 
   private ClassLoader _parentLoader;
 
-  private ArrayList<AmberPersistenceUnit> _managerList = new ArrayList<AmberPersistenceUnit>();
+  private ArrayList<AmberPersistenceUnit> _managerList
+    = new ArrayList<AmberPersistenceUnit>();
 
   private AmberEnhancer _enhancer;
 

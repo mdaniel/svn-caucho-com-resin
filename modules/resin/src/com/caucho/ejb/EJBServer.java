@@ -680,8 +680,8 @@ public class EJBServer
       _ejbManager.setLocalJndiName(_localJndiName);
       _ejbManager.setRemoteJndiName(_remoteJndiName);
 
-      _ejbManager.setDataSource(_dataSource);
-      _ejbManager.setCreateDatabaseSchema(_createDatabaseSchema);
+      //_ejbManager.setDataSource(_dataSource);
+      //_ejbManager.setCreateDatabaseSchema(_createDatabaseSchema);
       _ejbManager.setValidateDatabaseSchema(_validateDatabaseSchema);
       _ejbManager.setJMSConnectionFactory(_jmsConnectionFactory);
       _ejbManager.setCacheSize(_entityCacheSize);

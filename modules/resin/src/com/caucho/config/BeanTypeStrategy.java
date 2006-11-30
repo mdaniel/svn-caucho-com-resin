@@ -740,4 +740,9 @@ public class BeanTypeStrategy extends TypeStrategy {
   {
     return new NotImplementedException(L.l("Not implemented."));
   }
+
+  public String toString()
+  {
+    return "BeanTypeStrategy[" + _type.getName() + "]";
+  }
 }

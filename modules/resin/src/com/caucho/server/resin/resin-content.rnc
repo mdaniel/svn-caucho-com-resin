@@ -434,6 +434,8 @@ r_protocol =
   }
 
 r_resin = element resin {
+  r_root-directory?,
+
   r_resin-Content
 }
 
