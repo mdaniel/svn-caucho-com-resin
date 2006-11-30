@@ -208,7 +208,7 @@ public class MysqliModule extends AbstractQuercusModule {
     throws IllegalStateException
   {
     Mysqli mysqli = new Mysqli(env, host, userName, password, dbname, port,
-          socket, 0, null, null);
+			       socket, 0, null, null);
 
     if (! mysqli.isConnected())
       return null;

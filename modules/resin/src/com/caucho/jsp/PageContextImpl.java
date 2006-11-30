@@ -992,12 +992,15 @@ public class PageContextImpl extends PageContext
 	_out.flush();
     }
 
-    _out.clear();
-
     RequestDispatcher rd = null;
 
     HttpServletRequest req = (HttpServletRequest) getCauchoRequest();
     HttpServletResponse res = (HttpServletResponse) getResponse();
+
+    if (res.isCommitted())
+      throw new IOException(L.l("can't forward after writing HTTP headers"));
+    
+    _out.clear();
 
     if (relativeUrl != null && ! relativeUrl.startsWith("/")) {
       String servletPath = RequestAdapter.getPageServletPath(req);

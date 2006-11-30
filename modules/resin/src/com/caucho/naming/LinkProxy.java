@@ -233,7 +233,9 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
 	&& Jndi.getFullName(_name).equals(Jndi.getFullName(_foreignName)))
       return;
 
-    Jndi.bindDeepShort(_name, this);
+    // server/155a - not a short link since it needs to be able to bind
+    // the jndi root
+    Jndi.bindDeep(_name, this);
   }
 
   public String toString()

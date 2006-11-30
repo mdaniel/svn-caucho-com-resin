@@ -109,8 +109,11 @@ public final class Lock {
 	}
       }
 
-      printOwnerStack();
-      Thread.dumpStack();
+      if (! Alarm.isTest()) {
+	printOwnerStack();
+	Thread.dumpStack();
+      }
+
       throw new LockTimeoutException(L.l("Lock {0} timed out ({1}ms) try-writers:{2} is-write:{3}",
 					 this,
 					 Alarm.getCurrentTime() - start,
@@ -187,8 +190,11 @@ public final class Lock {
 	  }
 	}
 
-	printOwnerStack();
-	Thread.dumpStack();
+	if (! Alarm.isTest()) {
+	  printOwnerStack();
+	  Thread.dumpStack();
+	}
+	
 	throw new LockTimeoutException(L.l("{0} lockReadAndWrite timed out ({1}ms) is-write:{2} try-writers:{3} try-upgrade:{4}",
 					   this,
 					   (Alarm.getCurrentTime() - start),
@@ -249,12 +255,10 @@ public final class Lock {
 	  }
 	}
 
-	printOwnerStack();
-	Thread.dumpStack();
-	System.out.println(L.l("{0} lockWrite timed out ({1}ms) try-writers:{2}",
-			       this,
-			       timeout,
-			       _tryWriteCount));
+	if (! Alarm.isTest()) {
+	  printOwnerStack();
+	  Thread.dumpStack();
+	}
 	
 	throw new LockTimeoutException(L.l("{0} lockWrite timed out ({1}ms) try-writers:{2}",
 					   this,

@@ -37,9 +37,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppController;
-import com.caucho.util.Base64;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.Crc64;
+import com.caucho.util.*;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -251,7 +249,8 @@ public class HmuxDispatchRequest {
     
     long crc64 = 0;
 
-    crc64 = Crc64.generate(crc64, com.caucho.Version.FULL_VERSION);
+    if (! Alarm.isTest())
+      crc64 = Crc64.generate(crc64, com.caucho.Version.FULL_VERSION);
     
     queryServer(os);
     

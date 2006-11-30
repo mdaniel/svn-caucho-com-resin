@@ -54,6 +54,11 @@ abstract public class AbstractCache {
   abstract public void setDiskSize(Bytes size);
 
   /**
+   * Sets the max entry size of the cache
+   */
+  abstract public int getMaxEntrySize();
+
+  /**
    * Set true if enabled.
    */
   abstract public void setEnable(boolean isEnabled);

@@ -979,8 +979,10 @@ public final class BTree {
       
 	try {
 	  byte []leftBuffer = leftBlock.getBuffer();
+	  int leftLength = getLength(leftBuffer);
 	  
-	  if (isLeaf(leftBuffer) == isLeaf(buffer)) {
+	  if (isLeaf(leftBuffer) == isLeaf(buffer)
+	      && length + leftLength <= _n) {
 	    xa.lockReadAndWrite(leftBlock.getLock());
 
 	    try {
@@ -1015,8 +1017,10 @@ public final class BTree {
 
 	try {
 	  byte []rightBuffer = rightBlock.getBuffer();
+	  int rightLength = getLength(rightBuffer);
 
-	  if (isLeaf(buffer) == isLeaf(rightBuffer)) {
+	  if (isLeaf(rightBuffer) == isLeaf(buffer)
+	      && length + rightLength <= _n) {
 	    xa.lockReadAndWrite(block.getLock());
 
 	    try {
@@ -1032,7 +1036,7 @@ public final class BTree {
 		//System.out.println("MERGE_RIGHT: " + debugId(blockId) + " from " + debugId(rightBlockId));
 	    
 		mergeRight(parentBuffer, buffer, rightBuffer, blockId);
-	
+
 		return true;
 	      } finally {
 		xa.unlockReadAndWrite(rightBlock.getLock());
@@ -1166,15 +1170,14 @@ public final class BTree {
 			 byte []buffer,
 			 long blockId)
   {
+    int leftLength = getLength(leftBuffer);
+    int length = getLength(buffer);
+
     int parentLength = getLength(parentBuffer);
 
     int tupleSize = _tupleSize;
     int parentOffset = HEADER_SIZE;
     int parentEnd = parentOffset + parentLength * tupleSize;
-
-    int leftLength = getLength(leftBuffer);
-
-    int length = getLength(buffer);
 
     for (parentOffset += tupleSize;
 	 parentOffset < parentEnd;

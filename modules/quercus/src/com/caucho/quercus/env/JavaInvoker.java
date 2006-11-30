@@ -436,7 +436,7 @@ abstract public class JavaInvoker
         expr = _defaultExprs[i];
 
         if (expr == null)
-          expr = new RequiredExpr(getLocation());
+          expr = _moduleContext.getExprFactory().createRequired();
       }
 
       values[k] = _marshalArgs[i].marshal(env, expr, _param[k]);

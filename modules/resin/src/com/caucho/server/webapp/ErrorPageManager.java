@@ -30,7 +30,7 @@
 package com.caucho.server.webapp;
 
 import com.caucho.Version;
-import com.caucho.config.LineConfigRuntimeException;
+import com.caucho.config.*;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.java.LineMap;
 import com.caucho.java.LineMapException;
@@ -214,7 +214,7 @@ public class ErrorPageManager {
 	else if (compileException == null) // ! isLineCompileException)
           compileException = rootExn;
       }
-      else if (rootExn instanceof LineConfigRuntimeException) {
+      else if (rootExn instanceof LineException) {
 	if (lineMessage == null)
 	  lineMessage = rootExn.getMessage();
       }

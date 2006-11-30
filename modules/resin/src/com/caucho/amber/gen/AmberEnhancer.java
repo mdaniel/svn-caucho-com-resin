@@ -513,7 +513,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     CodeVisitor visitor = new CodeVisitor(baseClass, codeAttr);
 
-    for (int i=0; i < code.length; i++) {
+    for (int i = 0; i < code.length; i++) {
       byte op = code[i];
 
       if ((op & 0xff) == CodeVisitor.INVOKEVIRTUAL) {

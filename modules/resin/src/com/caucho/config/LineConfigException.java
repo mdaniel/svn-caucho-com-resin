@@ -34,7 +34,7 @@ import com.caucho.util.LineCompileException;
  * Thrown by the various Builders
  */
 public class LineConfigException extends ConfigException
-  implements LineCompileException
+  implements LineCompileException, LineException
 {
   private String _filename;
   private int _line = -1;

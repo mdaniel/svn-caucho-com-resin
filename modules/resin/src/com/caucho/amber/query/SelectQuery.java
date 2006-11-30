@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -307,9 +308,9 @@ public class SelectQuery extends AbstractQuery {
 
       if (joinParent == null) {
       }
-      else if (joinParent.getJoinExpr() == null &&
-               joinParent == joinTarget &&
-               ! usesFromData(joinParent)) {
+      else if (joinParent.getJoinExpr() == null
+	       && joinParent == joinTarget
+	       && ! usesFromData(joinParent)) {
 
         _fromList.remove(joinParent);
 
@@ -325,9 +326,9 @@ public class SelectQuery extends AbstractQuery {
         if (joinWhere != null)
           _where = AndExpr.create(_where, joinWhere);
       }
-      else if (! isJoinParent(item) &&
-               item == joinTarget &&
-               ! usesFromData(item)) {
+      else if (! isJoinParent(item)
+	       && item == joinTarget
+	       && ! usesFromData(item)) {
 
         // jpa/114g
         if (! item.isOuterJoin())

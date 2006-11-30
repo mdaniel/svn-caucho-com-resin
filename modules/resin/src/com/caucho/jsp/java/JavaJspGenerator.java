@@ -934,7 +934,10 @@ public class JavaJspGenerator extends JspGenerator {
     }
     out.println("\");");
 
-    if (contentType == null || contentType.indexOf("charset") < 0) {
+    if (encoding == null) {
+      // server/1204
+    }
+    else if (contentType == null || contentType.indexOf("charset") < 0) {
       out.print("response.setCharacterEncoding(\"");
       if (encoding != null)
 	out.printJavaString(encoding);

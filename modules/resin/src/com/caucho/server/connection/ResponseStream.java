@@ -55,6 +55,7 @@ class ResponseStream extends ToByteResponseStream {
   private WriteStream _next;
   
   private OutputStream _cacheStream;
+  private long _cacheMaxLength;
   // used for the direct copy and caching
   private int _bufferStartOffset;
   
@@ -123,6 +124,10 @@ class ResponseStream extends ToByteResponseStream {
   public void setByteCacheStream(OutputStream cacheStream)
   {
     _cacheStream = cacheStream;
+    
+    CauchoRequest req = _response.getRequest();
+    WebApp app = req.getWebApp();
+    _cacheMaxLength = app.getCacheMaxLength();
   }
 
   /**
@@ -767,10 +772,7 @@ class ResponseStream extends ToByteResponseStream {
     if (length == 0)
       return;
     
-    CauchoRequest req = _response.getRequest();
-    WebApp app = req.getWebApp();
-    if (app != null &&
-	app.getCacheMaxLength() < _contentLength) {
+    if (_cacheMaxLength < _contentLength) {
       _cacheStream = null;
       _response.killCache();
     }

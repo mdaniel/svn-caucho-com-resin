@@ -1566,7 +1566,7 @@ public class QuercusParser {
       }
       
       String argName = parseIdentifier();
-      Expr defaultExpr = RequiredExpr.REQUIRED;
+      Expr defaultExpr = _factory.createRequired();
 
       token = parseToken();
       if (token == '=') {

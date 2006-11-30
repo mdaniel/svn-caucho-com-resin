@@ -840,6 +840,8 @@ public class NodeBuilder {
       return (LineConfigException) e;
     else if (e instanceof LineConfigRuntimeException)
       throw (LineConfigRuntimeException) e;
+    else if (e instanceof LineRuntimeException)
+      throw (LineRuntimeException) e;
     else if (e instanceof ConfigException &&
              e.getMessage() != null &&
              filename != null) {
@@ -861,10 +863,12 @@ public class NodeBuilder {
       String msg = filename + ":" + line + ": " + e;
 
       if (e instanceof RuntimeException) {
-	throw new LineConfigRuntimeException(msg, e);
+	throw new LineRuntimeException(msg, e);
       }
       else if (e instanceof Error) {
-	throw (Error) e;
+	// server/1711
+	throw new LineRuntimeException(msg, e);
+	// throw (Error) e;
       }
       else
 	return new LineConfigException(msg, e);

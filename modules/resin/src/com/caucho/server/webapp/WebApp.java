@@ -2389,7 +2389,7 @@ public class WebApp extends ServletContextImpl
    */
   public long getCacheMaxLength()
   {
-    return 1000000L;
+    return _cache.getMaxEntrySize();
   }
 
   /**

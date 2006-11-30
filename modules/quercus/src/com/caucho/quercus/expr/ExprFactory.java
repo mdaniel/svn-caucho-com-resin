@@ -48,7 +48,7 @@ public class ExprFactory {
   private static final Logger log
     = Logger.getLogger(ExprFactory.class.getName());
 
-  protected ExprFactory()
+  public ExprFactory()
   {
   }
 
@@ -351,6 +351,14 @@ public class ExprFactory {
   public Expr createExit(Expr expr)
   {
     return new ExitExpr(expr);
+  }
+
+  /**
+   * Creates a required
+   */
+  public Expr createRequired()
+  {
+    return new RequiredExpr();
   }
 
   /**

@@ -32,8 +32,8 @@ package com.caucho.quercus.module;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.function.Marshal;
-import com.caucho.quercus.function.MarshalFactory;
+import com.caucho.quercus.expr.*;
+import com.caucho.quercus.function.*;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.JavaImplClassDef;
@@ -44,13 +44,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Class-loader specific context for loaded PHP.
  */
-public class ModuleContext {
+public class ModuleContext
+{
   private static L10N L = new L10N(ModuleContext.class);
   private static final Logger log
     = Logger.getLogger(ModuleContext.class.getName());
@@ -88,6 +88,7 @@ public class ModuleContext {
     = new HashMap<String, StringValue>();
 
   protected MarshalFactory _marshalFactory;
+  protected ExprFactory _exprFactory;
 
   /**
    * Constructor.
@@ -105,6 +106,7 @@ public class ModuleContext {
     _loader = loader;
     
     _marshalFactory = new MarshalFactory(this);
+    _exprFactory = new ExprFactory();
   }
 
   public static ModuleContext getLocalContext(ClassLoader loader)
@@ -300,12 +302,17 @@ public class ModuleContext {
   {
     return _marshalFactory;
   }
+
+  public ExprFactory getExprFactory()
+  {
+    return _exprFactory;
+  }
   
   public Marshal createMarshal(Class type,
 			       boolean isNotNull,
 			       boolean isNullAsFalse)
   {
-    return _marshalFactory.create(type, isNotNull, isNullAsFalse);
+    return getMarshalFactory().create(type, isNotNull, isNullAsFalse);
   }
 
   /**

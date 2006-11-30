@@ -57,8 +57,8 @@ public class CauchoSystem {
   static EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
 
-  static char separatorChar = File.separatorChar;
-  static char pathSeparatorChar = File.pathSeparatorChar;
+  static char _separatorChar = File.separatorChar;
+  static char _pathSeparatorChar = File.pathSeparatorChar;
   static String _localHost;
   static String _userDir;
   static String _userName;
@@ -69,8 +69,8 @@ public class CauchoSystem {
 
   static boolean _hasJni;
 
-  private static int isUnix = -1;
-  private static String newline;
+  private static int _isUnix = -1;
+  private static String _newline;
   private static long _version;
 
   private static JniCauchoSystem _jniCauchoSystem;
@@ -79,8 +79,8 @@ public class CauchoSystem {
   private static String _group;
   private static String _classPath;
 
-  static CpuUsage cpuUsage;
-
+  static CpuUsage _cpuUsage;
+  
   private CauchoSystem()
   {
   }
@@ -269,28 +269,41 @@ public class CauchoSystem {
 
   public static char getFileSeparatorChar()
   {
-    return separatorChar;
+    return _separatorChar;
   }
 
   public static char getPathSeparatorChar()
   {
-    return pathSeparatorChar;
+    return _pathSeparatorChar;
   }
 
   public static String getNewlineString()
   {
-    if (newline == null) {
-      newline = System.getProperty("line.separator");
-      if (newline == null)
-        newline = "\n";
+    if (_newline == null) {
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      try {
+	thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+	
+	_newline = System.getProperty("line.separator");
+	if (_newline != null) {
+	}
+	else if (isWindows())
+	  _newline = "\r\n";
+	else
+	  _newline = "\n";
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
     }
 
-    return newline;
+    return _newline;
   }
 
   public static boolean isWindows()
   {
-    return separatorChar == '\\' || _isTestWindows;
+    return _separatorChar == '\\' || _isTestWindows;
   }
 
   public static boolean isTest()
@@ -305,15 +318,15 @@ public class CauchoSystem {
 
   public static boolean isUnix()
   {
-    if (isUnix >= 0)
-      return isUnix == 1;
+    if (_isUnix >= 0)
+      return _isUnix == 1;
 
-    isUnix = 0;
+    _isUnix = 0;
 
-    if (separatorChar == '/' && Vfs.lookup("/bin/sh").canRead())
-      isUnix = 1;
+    if (_separatorChar == '/' && Vfs.lookup("/bin/sh").canRead())
+      _isUnix = 1;
 
-    return isUnix == 1;
+    return _isUnix == 1;
   }
 
   public static void setWindowsTest(boolean windows)
