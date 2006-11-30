@@ -90,7 +90,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="c:\program files\java\jdk1.5.0_08\include,c:\program files\java\jdk1.5.0_08\include\win32,..\common,c:\local\ssl\include"
+				AdditionalIncludeDirectories="e:\program files\java\jdk1.5.0_09\include,e:\program files\java\jdk1.5.0_09\include\win32,..\common,c:\local\ssl\include"
 				PreprocessorDefinitions="WIN32;HAS_JVMTI;NDEBUG;_WINDOWS;_USRDLL"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"

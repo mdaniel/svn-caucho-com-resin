@@ -23,7 +23,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="c:\Program Files\Apache Group\Apache2\include,..\common"
+				AdditionalIncludeDirectories="e:\Program Files\Apache Group\Apache2\include,..\common"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;APACHE_EXPORTS"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -44,7 +44,7 @@
 				OutputFile="Release/mod_caucho.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="c:\Program Files\Apache Group\Apache2\lib"
+				AdditionalLibraryDirectories="e:\Program Files\Apache Group\Apache2\lib"
 				ProgramDatabaseFile=".\Release/mod_caucho.pdb"
 				ImportLibrary=".\Release/mod_caucho.lib"
 				TargetMachine="1"/>

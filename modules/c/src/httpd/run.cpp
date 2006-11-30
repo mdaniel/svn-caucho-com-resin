@@ -285,15 +285,23 @@ set_jdk_args(char *exe, char *cp,
         buf[k++] = '\"';
         buf[k++] = 0;
 	args[i++] = strdup(buf);
+	
 	args[i++] = strdup(rsprintf(buf, "-Dresin.home=\"%s\"", resin_home));
+	args[i++] = strdup(rsprintf(buf, "-Dresin.root=\"%s\"", server_root));
 	args[i++] = strdup(rsprintf(buf, "-Dserver.root=\"%s\"", server_root));
+	
 	if (! jit) {
 		//args[i++] = "-nojit";
 		args[i++] = strdup(rsprintf(buf, "-Djava.compiler=NONE"));
 	}
         args[i++] = "-Djava.util.logging.manager=com.caucho.log.LogManagerImpl";
         args[i++] = "-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl";
+		args[i++] = "-Djava.system.class.loader=com.caucho.loader.SystemClassLoader";
 	args[i++] = main;
+	args[i++] = "-resin-home";
+	args[i++] = resin_home;
+	args[i++] = "-resin-root";
+	args[i++] = server_root;
 
 	while (argc > 0) {
 		args[i++] = strdup(rsprintf(buf, "\"%s\"", argv[0]));

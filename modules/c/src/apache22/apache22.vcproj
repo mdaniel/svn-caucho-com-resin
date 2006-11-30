@@ -23,7 +23,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="c:\Program Files\Apache Software Foundation\Apache2.2\include,..\common"
+				AdditionalIncludeDirectories="e:\Program Files\Apache Software Foundation\Apache2.2\include,..\common"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;APACHE_EXPORTS"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -44,7 +44,7 @@
 				OutputFile="Release/mod_caucho.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="c:\Program Files\Apache Software Foundation\Apache2.2\lib"
+				AdditionalLibraryDirectories="e:\Program Files\Apache Software Foundation\Apache2.2\lib"
 				ProgramDatabaseFile=".\Release/mod_caucho.pdb"
 				ImportLibrary=".\Release/mod_caucho.lib"
 				TargetMachine="1"/>
@@ -148,9 +148,6 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
-			<File
-				RelativePath=".\apache22.rc">
-			</File>
 			<File
 				RelativePath="..\common\config.c">
 			</File>
