@@ -115,6 +115,16 @@ public class ArgExpr extends AbstractAmberExpr {
   }
 
   /**
+   * Returns true if the expression must exist
+   */
+  @Override
+  public boolean exists()
+  {
+    // ejb/0h1k
+    return true;
+  }
+
+  /**
    * Generates the literal.
    */
   public void generateWhere(CharBuffer cb)

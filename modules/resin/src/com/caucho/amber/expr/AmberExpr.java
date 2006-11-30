@@ -72,6 +72,21 @@ public interface AmberExpr {
   boolean usesFrom(FromItem from, int type, boolean isNot);
 
   /**
+   * Returns true if the item is required to exist by the expression, e.g.
+   * foo.id='1' forces foo to exist.
+   */
+  boolean exists(FromItem from);
+
+  /**
+   * Returns true if the expression item is required to exist, e.g.
+   * constants and arguments.
+   *
+   * (Can also apply to arguments required to exist after a particular
+   * from item, i.e. from items already proved to exist.)
+   */
+  boolean exists();
+
+  /**
    * Returns true if the expression uses the from item.
    */
   AmberExpr replaceJoin(JoinExpr join);

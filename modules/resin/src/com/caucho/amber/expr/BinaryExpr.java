@@ -117,6 +117,29 @@ public class BinaryExpr extends AbstractAmberExpr {
   /**
    * Returns true if the expression uses the from item.
    */
+  @Override
+  public boolean exists(FromItem from)
+  {
+    if (_token == QueryParser.EQ) {
+      if (_left instanceof KeyColumnExpr
+	  && _left.usesFrom(from, AmberExpr.IS_INNER_JOIN, false)
+	  && _right.exists())
+	return true;
+      else if (_right instanceof KeyColumnExpr
+	       && _right.usesFrom(from, AmberExpr.IS_INNER_JOIN, false)
+	       && _right.exists(from)
+	       && _left.exists())
+	return true;
+      else
+	return false;
+    }
+    else
+      return false;
+  }
+
+  /**
+   * Returns true if the expression uses the from item.
+   */
   public AmberExpr replaceJoin(JoinExpr join)
   {
     _left = _left.replaceJoin(join);

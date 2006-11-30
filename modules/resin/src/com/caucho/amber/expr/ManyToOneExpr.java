@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -160,9 +161,20 @@ public class ManyToOneExpr extends AbstractPathExpr {
    */
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
-    return (_childFromItem == from && type == IS_INNER_JOIN ||
-            _fromItem == from ||
-            _parent.usesFrom(from, type));
+    return (_childFromItem == from && type == IS_INNER_JOIN
+	    || _fromItem == from
+	    || _parent.usesFrom(from, type));
+  }
+
+  /**
+   * Returns true if the item is forced to exist by the parent
+   */
+  @Override
+  public boolean exists(FromItem from)
+  {
+    System.out.println("P: " + _parent);
+    return (_fromItem == from
+	    && _parent.exists());
   }
 
   /**

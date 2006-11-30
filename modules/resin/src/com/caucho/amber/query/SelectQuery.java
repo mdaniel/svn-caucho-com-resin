@@ -306,12 +306,11 @@ public class SelectQuery extends AbstractQuery {
 
       boolean isTarget = item == joinTarget;
 
-      if (joinParent == null) {
+      if (joinParent == null || joinParent.getJoinExpr() != null) {
       }
       else if (joinParent.getJoinExpr() == null
 	       && joinParent == joinTarget
 	       && ! usesFromData(joinParent)) {
-
         _fromList.remove(joinParent);
 
         replaceJoin(join);
@@ -328,11 +327,12 @@ public class SelectQuery extends AbstractQuery {
       }
       else if (! isJoinParent(item)
 	       && item == joinTarget
-	       && ! usesFromData(item)) {
-
-        // jpa/114g
-        if (! item.isOuterJoin())
-          continue;
+	       && ! usesFromData(item)
+	       && exists(joinTarget)) {
+	// Optimization for common children query:
+	// SELECT o FROM TestBean o WHERE o.parent.id=?
+	// jpa/0h1k
+	// jpa/114g as negative exists test
 
         _fromList.remove(item);
 
@@ -406,6 +406,15 @@ public class SelectQuery extends AbstractQuery {
   boolean usesFromData(FromItem item)
   {
     return usesFrom(item, AmberExpr.USES_DATA);
+  }
+
+  /**
+   * Returns true if the item must have at least one entry in the database.
+   */
+  public boolean exists(FromItem item)
+  {
+    // jpa/0h1b vs jpa/114g
+    return _where != null && _where.exists(item);
   }
 
   /**

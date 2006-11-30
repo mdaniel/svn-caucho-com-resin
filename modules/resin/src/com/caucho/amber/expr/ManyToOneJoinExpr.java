@@ -130,6 +130,15 @@ public class ManyToOneJoinExpr extends JoinExpr {
   }
 
   /**
+   * Returns true if the expression uses the from item.
+   */
+  @Override
+  public boolean exists(FromItem from)
+  {
+    return false;
+  }
+
+  /**
    * Returns the id expr with the joined expression.
    */
   public AmberExpr replace(KeyColumnExpr id)

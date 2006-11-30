@@ -99,6 +99,22 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   }
 
   /**
+   * Returns true if the expression must exist
+   */
+  public boolean exists(FromItem from)
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the expression must exist
+   */
+  public boolean exists()
+  {
+    return false;
+  }
+
+  /**
    * Returns true if the expression uses the from item.
    */
   public AmberExpr replaceJoin(JoinExpr join)
