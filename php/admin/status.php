@@ -69,7 +69,7 @@ if (! empty($server->Id))
 
   <tr title="The server root directory used when starting this instance of Resin. This is the root directory of the web server files.">
     <th>Server root:</th>
-    <td><?= $resin->ServerRoot ?></td>
+    <td><?= $resin->RootDirectory ?></td>
   </tr>
 
   <tr title="The ip address of the machine that is running this instance of Resin.">

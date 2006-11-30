@@ -331,7 +331,7 @@ abstract public class StoreManager
   /**
    * Returns the owning index.
    */
-  public int getOwnerIndex(String id)
+  public int getPrimaryIndex(String id, int offset)
   {
     return 0;
   }
@@ -339,7 +339,7 @@ abstract public class StoreManager
   /**
    * Returns the backup index.
    */
-  public int getBackupIndex(String id)
+  public int getSecondaryIndex(String id, int offset)
   {
     return 0;
   }

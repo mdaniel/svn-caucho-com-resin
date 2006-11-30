@@ -126,7 +126,7 @@ public class ClusterObject {
     if (selfServer == null)
       return true;
     else
-      return _storeManager.getOwnerIndex(id) == selfServer.getIndex();
+      return _storeManager.getPrimaryIndex(id, 0) == selfServer.getIndex();
   }
 
   /**

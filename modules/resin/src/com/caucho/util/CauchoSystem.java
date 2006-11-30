@@ -266,8 +266,12 @@ public class CauchoSystem {
   {
     if (newline == null) {
       newline = System.getProperty("line.separator");
-      if (newline == null)
-        newline = "\n";
+      if (newline != null) {
+      }
+      else if (isWindows())
+        newline = "\r\n";
+      else
+        newline = "\r\n";
     }
 
     return newline;

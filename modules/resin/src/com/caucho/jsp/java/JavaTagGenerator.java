@@ -298,11 +298,15 @@ public class JavaTagGenerator extends JavaJspGenerator {
       String isSetName = "_jsp_" + name + "_isSet";
 
       out.println();
-      out.println("private " + type + " " + fieldName + ";");
+      out.print("private ");
+      out.printClass(cl);
+      out.println(" " + fieldName + ";");
       out.println("private boolean " + isSetName + ";");
       
       out.println();
-      out.println("public void set" + upperName + "(" + type + " value)");
+      out.print("public void set" + upperName + "(");
+      out.printClass(cl);
+      out.println(" value)");
       out.println("{");
       out.pushDepth();
       out.println("this." + isSetName + " = true;");
@@ -633,8 +637,11 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("attr.setName(\"" + attr.getName() + "\");");
 
       Class type = attr.getType();
-      if (type != null)
-        out.println("attr.setType(" + type.getName() + ".class);");
+      if (type != null) {
+        out.print("attr.setType(");
+	out.printClass(type);
+	out.println(".class);");
+      }
       out.println("attr.setRtexprvalue(" + attr.getRtexprvalue() + ");");
       out.println("attr.setRequired(" + attr.getRequired() + ");");
 

@@ -2,6 +2,14 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
+<s2 title="3.0snap - Oct 6, 2006">
+<ul>
+<li>jdbc/cluster store detection of primary server was selecting 'a' always (#1470, rep by Serge Knystautas, Shane Cruz)</li>
+<li>access log: getNewline() adds check for windows is line.separator is null isntead of defaulting to \n (#1449, rep by Chris Head)</li>
+<li>JSP: .tag attribute with inner classes were not working (#1479, rep by stevejf7)</li>
+</ul>
+</s2>
+
 <s2 title='3.0.22 - Nov 10, 2006'>
 <ul>
 <li>(2006-11-10) mod_caucho: ./configure fixes for Solaris 10</li>
