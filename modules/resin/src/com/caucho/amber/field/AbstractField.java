@@ -728,12 +728,11 @@ abstract public class AbstractField implements AmberField {
     throws IOException
   {
     // commented out: jpa/0l03
-    // if (getIndex() == updateIndex) {
-
-    String value = generateGet(src);
-    out.println(generateSet(dst, value) + ";");
-
-    // }
+    
+    if (getIndex() == updateIndex) {
+      String value = generateGet(src);
+      out.println(generateSet(dst, value) + ";");
+    }
   }
 
   /**
@@ -745,12 +744,12 @@ abstract public class AbstractField implements AmberField {
     throws IOException
   {
     // commented out: jpa/0l02
-    // if (getLoadGroupIndex() == loadIndex) {
 
-    String value = generateGet(src);
-    out.println(generateSet(dst, value) + ";");
-
-    // }
+    // jpa/0g0l
+    if (getLoadGroupIndex() == loadIndex) {
+      String value = generateGet(src);
+      out.println(generateSet(dst, value) + ";");
+    }
   }
 
   /**

@@ -974,21 +974,21 @@ public class EntityComponent extends ClassComponent {
       _entityType.generateCopyLoadObject(out, "item", "super", 0);
     }
 
-    for (int i = 1; i < _entityType.getLoadGroupIndex(); i++) {
+    for (int i = 1; i <= _entityType.getLoadGroupIndex(); i++) {
       String loadVar = "__caucho_loadMask_" + (i / 64);
       long mask = (1L << (i % 64));
 
-      if (_entityType.isLoadGroupOwnedByType(i)) {
-        out.println("if ((" + loadVar + " & " + mask + "L) != 0) {");
-        out.pushDepth();
+      // jpa/0l02: if (_entityType.isLoadGroupOwnedByType(i)) {
+      out.println("if ((" + loadVar + " & " + mask + "L) != 0) {");
+      out.pushDepth();
 
-        _entityType.generateCopyLoadObject(out, "item", "super", i);
+      _entityType.generateCopyLoadObject(out, "item", "super", i);
 
-        out.println("item." + loadVar + " |= " + mask + "L;");
+      out.println("item." + loadVar + " |= " + mask + "L;");
 
-        out.popDepth();
-        out.println("}");
-      }
+      out.popDepth();
+      out.println("}");
+      //}
     }
 
     if (_entityType.getParentType() != null) {
@@ -1397,11 +1397,19 @@ public class EntityComponent extends ClassComponent {
       out.println(key.generateSet("o", key.generateGet("super")) + ";");
     }
 
-    _entityType.generateCopyLoadObject(out, "o", "super", 0);
+    for (int i = 0; i <= _entityType.getLoadGroupIndex(); i++) {
+      // jpa/0l02
+      _entityType.generateCopyLoadObject(out, "o", "super", i);
+    }
 
     out.println("o.__caucho_session = aConn;");
     out.println("o.__caucho_state = __caucho_state;"); // com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
-    out.println("o.__caucho_loadMask_0 = __caucho_loadMask_0;"); // & 1L;");
+
+    for (int i = 0; i <= _entityType.getLoadGroupIndex() / 64; i++) {
+      String mask = "__caucho_loadMask_" + i;
+      
+      out.println("o." + mask + " = " + mask + ";");
+    }
 
     // See LoadGroupGenerator __caucho_load.
     //
