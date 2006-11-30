@@ -306,7 +306,7 @@ public class SelectQuery extends AbstractQuery {
 
       boolean isTarget = item == joinTarget;
 
-      if (joinParent == null || joinParent.getJoinExpr() != null) {
+      if (joinParent == null) {
       }
       else if (joinParent.getJoinExpr() == null
 	       && joinParent == joinTarget
@@ -325,10 +325,10 @@ public class SelectQuery extends AbstractQuery {
         if (joinWhere != null)
           _where = AndExpr.create(_where, joinWhere);
       }
-      else if (! isJoinParent(item)
-	       && item == joinTarget
+      else if (item == joinTarget
+	       && ! isJoinParent(item)
 	       && ! usesFromData(item)
-	       && exists(joinTarget)) {
+	       && (item.isOuterJoin() || exists(joinTarget))) {
 	// Optimization for common children query:
 	// SELECT o FROM TestBean o WHERE o.parent.id=?
 	// jpa/0h1k
