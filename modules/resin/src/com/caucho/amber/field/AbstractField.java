@@ -379,10 +379,6 @@ abstract public class AbstractField implements AmberField {
   public void generatePostConstructor(JavaWriter out)
     throws IOException
   {
-    if (isFieldAccess())
-      return;
-
-    out.println(getSetterName() + "(" + generateSuperGetter() + ");");
   }
 
   /**

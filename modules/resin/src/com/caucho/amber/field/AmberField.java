@@ -160,6 +160,12 @@ public interface AmberField {
     throws IOException;
 
   /**
+   * Generates the post constructor fixup
+   */
+  public void generatePostConstructor(JavaWriter out)
+    throws IOException;
+
+  /**
    * Generates the select clause for an entity load.
    */
   public String generateLoadSelect(Table table, String id);

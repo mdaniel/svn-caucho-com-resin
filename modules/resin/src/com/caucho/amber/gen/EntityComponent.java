@@ -36,7 +36,7 @@ import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
-import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.loader.Environment;
@@ -261,6 +261,7 @@ public class EntityComponent extends ClassComponent {
     // XXX: needs to handle this with subclasses
     // but there is an issue in the enhancer fixup
     // removing the "super." call.
+    /*
     out.println();
     out.println("public void __caucho_postConstructor()");
     out.println("{");
@@ -279,6 +280,52 @@ public class EntityComponent extends ClassComponent {
 
     out.popDepth();
     out.println("}");
+    */
+    
+    String className = getClassName();
+    int p = className.lastIndexOf('.');
+    if (p > 0)
+      className = className.substring(p + 1);
+
+    ArrayList<AmberField> fields = _entityType.getFields();
+
+    for (JMethod ctor : _entityType.getBeanClass().getConstructors()) {
+      out.println();
+      // XXX: s/b actual access type?
+      out.print("public ");
+
+      out.print(className);
+      out.print("(");
+
+      JClass []args = ctor.getParameterTypes();
+      for (int i = 0; i < args.length; i++) {
+	if (i != 0)
+	  out.print(", ");
+
+	out.print(args[i].getPrintName());
+	out.print(" a" + i);
+      }
+      out.println(")");
+      out.println("{");
+      out.pushDepth();
+
+      out.print("super(");
+      for (int i = 0; i < args.length; i++) {
+	if (i != 0)
+	  out.print(", ");
+
+	out.print("a" + i);
+      }
+      out.println(");");
+      
+      for (AmberField field : fields) {
+	field.generatePostConstructor(out);
+      }
+      
+      out.popDepth();
+      out.println("}");
+    }
+    
 
     out.println();
     out.println("public void __caucho_setPrimaryKey(Object key)");

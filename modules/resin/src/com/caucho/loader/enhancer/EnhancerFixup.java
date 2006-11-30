@@ -344,10 +344,12 @@ public class EnhancerFixup {
           methodName = "__init__super";
           // methodRef.setNameAndType(methodName, type);
         }
+	/* jpa/0h28, shouldn't automatically change this
         else {
           methodName = methodName + "__super";
           methodRef.setNameAndType(methodName, type);
         }
+	*/
       }
     }
   }
@@ -368,6 +370,8 @@ public class EnhancerFixup {
     ArrayList<JavaMethod> extMethods = extClass.getMethodList();
     for (int i = 0; i < extMethods.size(); i++) {
       JavaMethod extMethod = extMethods.get(i);
+
+      fixupExtMethod(baseClass, extClass, extMethod);
 
       String baseName = extMethod.getName();
 
@@ -451,8 +455,9 @@ public class EnhancerFixup {
 
       extEnhancer.add(0, code, 0, code.length);
 
-      ExtInitAnalyzer extInitAnalyzer = new ExtInitAnalyzer(offset);
-      extEnhancer.analyze(extInitAnalyzer);
+      ExtMethodAnalyzer extMethodAnalyzer
+	= new ExtMethodAnalyzer(baseClass, extMethod, offset);
+      extEnhancer.analyze(extMethodAnalyzer);
       extEnhancer.update();
 
       CodeAttribute baseCode = baseMethod.getCode();
@@ -470,6 +475,31 @@ public class EnhancerFixup {
       /*
         baseMethod.concatenate(extMethod);
       */
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Merges the init methods
+   */
+  private void fixupExtMethod(JavaClass baseClass,
+			      JavaClass extClass,
+			      JavaMethod extMethod)
+  {
+    try {
+      if (extMethod.getName().endsWith("__super"))
+	return;
+      
+      CodeEnhancer extEnhancer
+	= new CodeEnhancer(extClass, extMethod.getCode());
+
+      ExtMethodAnalyzer extMethodAnalyzer
+	= new ExtMethodAnalyzer(baseClass, extMethod, 0);
+      extEnhancer.analyze(extMethodAnalyzer);
+      extEnhancer.update();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -552,7 +582,9 @@ public class EnhancerFixup {
   /**
    * Finds a matching method.
    */
-  private JavaMethod findMethod(JavaClass cl, String name, String descriptor)
+  private static JavaMethod findMethod(JavaClass cl,
+				       String name,
+				       String descriptor)
   {
     ArrayList<JavaMethod> methods = cl.getMethodList();
 
@@ -880,9 +912,9 @@ public class EnhancerFixup {
 
         // ejb/0l00
         // handler "super()" and "this()"
-        if (ref.getName().equals("<init>") &&
-            (ref.getClassName().equals(javaClass.getThisClass()) ||
-             ref.getClassName().equals(javaClass.getSuperClassName()))) {
+        if (ref.getName().equals("<init>")
+	    && (ref.getClassName().equals(javaClass.getThisClass())
+		|| ref.getClassName().equals(javaClass.getSuperClassName()))) {
           _offset = visitor.getOffset() + 3;
         }
         break;
@@ -890,12 +922,19 @@ public class EnhancerFixup {
     }
   }
 
-  private static class ExtInitAnalyzer extends Analyzer {
+  //
+  // convert super.foo() calls to foo__super() where appropriate
+  //
+  private static class ExtMethodAnalyzer extends Analyzer {
+    JClass _baseClass;
+    JMethod _method;
     int _startOffset;
     boolean _isEnhanced;
 
-    ExtInitAnalyzer(int length)
+    ExtMethodAnalyzer(JClass baseClass, JMethod method, int length)
     {
+      _baseClass = baseClass;
+      _method = method;
       _startOffset = length;
     }
 
@@ -915,16 +954,39 @@ public class EnhancerFixup {
       case CodeVisitor.INVOKESPECIAL:
         int index = visitor.getShortArg();
 
-        ConstantPool cp = visitor.getJavaClass().getConstantPool();
+	JavaClass jClass = visitor.getJavaClass();
+        ConstantPool cp = jClass.getConstantPool();
         MethodRefConstant ref;
         ref = cp.getMethodRef(index);
 
-        if (! ref.getName().equals("<init>"))
-          return;
+	if (ref.getName().endsWith("__super")) {
+	  return;
+	}
+	else if (ref.getName().equals("<init>")
+		 && (! ref.getClassName().equals(jClass.getSuperClassName())
+		     || ! _method.getName().equals("<init>"))) {
+	  return;
+	}
+	else if (! ref.getName().equals("<init>")) {
+	  // private methods are called with invokespecial, but shouldn't
+	  // be modified
+	  JMethod method = findMethod(jClass,
+				      ref.getName(),
+				      ref.getType());
+
+	  if (method != null && method.isPrivate())
+	    return;
+	}
+
+	String superName;
+        if (ref.getName().equals("<init>"))
+	  superName = "__init__super";
+	else
+	  superName = ref.getName() + "__super";
 
         MethodRefConstant newRef;
         newRef = cp.addMethodRef(ref.getClassName(),
-                                 "__init__super",
+                                 superName,
                                  ref.getType());
 
         visitor.setShortArg(1, newRef.getIndex());

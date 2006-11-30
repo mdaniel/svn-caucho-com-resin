@@ -249,6 +249,15 @@ public class EntityManyToOneField extends CascadableField {
   }
 
   /**
+   * Generates the post constructor initialization.
+   */
+  public void generatePostConstructor(JavaWriter out)
+    throws IOException
+  {
+    out.println(getSetterName() + "(" + generateSuperGetter() + ");");
+  }
+
+  /**
    * Creates the expression for the field.
    */
   public AmberExpr createExpr(QueryParser parser, PathExpr parent)
