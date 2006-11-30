@@ -156,6 +156,20 @@ public class AndExpr extends AbstractAmberExpr {
   }
 
   /**
+   * Returns true if the from item is used in the expression
+   */
+  @Override
+  public boolean exists(FromItem from)
+  {
+    for (int i = 0; i < _components.size(); i++) {
+      if (_components.get(i).exists(from))
+	return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Returns true if the expression uses the from item.
    */
   public AmberExpr replaceJoin(JoinExpr join)
