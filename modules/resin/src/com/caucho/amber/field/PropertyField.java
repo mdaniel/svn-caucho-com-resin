@@ -237,16 +237,18 @@ public class PropertyField extends AbstractField {
     out.println("{");
     out.pushDepth();
 
-    // jpa/0g06
-    out.println("if (__caucho_session != null && __caucho_session.isInTransaction())");
-    out.println("  __caucho_session.makeTransactional(this);");
-    out.println();
-
+    // jpa/0gh0
     if (getSourceType() instanceof EmbeddableType) {
       out.println(generateSuperSetter("v") + ";");
       out.popDepth();
       out.println("}");
       return;
+    }
+    else {
+      // jpa/0g06
+      out.println("if (__caucho_session != null && __caucho_session.isInTransaction())");
+      out.println("  __caucho_session.makeTransactional(this);");
+      out.println();
     }
 
     if (! _isUpdate) {

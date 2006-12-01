@@ -169,28 +169,6 @@ public class EmbeddedIdField extends EntityEmbeddedField implements IdField {
   }
 
   /**
-   * Returns the actual data.
-   */
-  public String generateSuperGetter()
-  {
-    if (isAbstract() || getGetterMethod() == null)
-      return getFieldName();
-    else
-      return getGetterMethod().getName() + "()";
-  }
-
-  /**
-   * Sets the actual data.
-   */
-  public String generateSuperSetter(String value)
-  {
-    if (isAbstract() || getGetterMethod() == null || getSetterMethod() == null)
-      return(getFieldName() + " = " + value + ";");
-    else
-      return getSetterMethod().getName() + "(" + value + ")";
-  }
-
-  /**
    * Returns the where code
    */
   public String generateMatchArgWhere(String id)

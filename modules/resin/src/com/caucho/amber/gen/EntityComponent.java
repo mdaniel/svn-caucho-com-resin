@@ -740,6 +740,9 @@ public class EntityComponent extends ClassComponent {
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
+    out.println("if (__caucho_session == null)");
+    out.println("  return false;");
+    out.println();
 
     ArrayList<AmberField> fields = _entityType.getFields();
 
