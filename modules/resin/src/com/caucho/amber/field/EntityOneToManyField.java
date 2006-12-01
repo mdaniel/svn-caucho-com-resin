@@ -632,6 +632,8 @@ public class EntityOneToManyField extends CollectionField {
 
     if (isMap)
       out.println("putAll(value);");
+    else if (isSet)
+      out.println("addAll(value);");
     else
       out.println("addAll(0, value);");
 

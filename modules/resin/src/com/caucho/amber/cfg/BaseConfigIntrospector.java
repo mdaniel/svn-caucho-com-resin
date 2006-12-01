@@ -1926,7 +1926,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       manyToManyField.setType(targetType);
       sourceType.addField(manyToManyField);
 
-      // jpa/0i50
+      // jpa/0i5-
       // Update column names for bidirectional many-to-many
 
       if (! sourceField.hasJoinColumns()) {

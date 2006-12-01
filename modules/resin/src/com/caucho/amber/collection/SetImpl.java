@@ -38,6 +38,7 @@ import com.caucho.util.Alarm;
 import java.sql.SQLException;
 import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -125,6 +126,16 @@ public class SetImpl<E> extends AbstractSet<E>
     fill();
 
     return _values.get(index);
+  }
+
+  /**
+   * Adds all items to this collection.
+   */
+  public boolean addAll(Collection<? extends E> collection)
+  {
+    fill();
+
+    return _values.addAll(collection);
   }
 
   /**

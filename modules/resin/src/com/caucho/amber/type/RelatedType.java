@@ -1106,11 +1106,30 @@ abstract public class RelatedType extends AbstractStatefulType {
       }
 
       if (field != null) {
+
+        // jpa/0x00
+        if (field instanceof VersionField)
+          continue;
+
         if (! isFirst)
           sql.append(", ");
         isFirst = false;
 
         field.generateUpdate(sql);
+      }
+    }
+
+    // jpa/0x00
+    for (int j = 0; j < fields.size(); j++) {
+      AmberField field = fields.get(j);
+
+      if (field instanceof VersionField) {
+        if (! isFirst)
+          sql.append(", ");
+        isFirst = false;
+
+        field.generateUpdate(sql);
+        break;
       }
     }
 

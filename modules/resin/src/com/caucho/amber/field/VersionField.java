@@ -74,6 +74,9 @@ public class VersionField extends PropertyField {
     long dirtyMask = 1L << (getIndex() % 64);
 
     out.println();
+    out.println(generateSuperSetter(generateSuperGetter() + " + 1") + ";");
+
+    out.println();
     out.println("long oldMask = " + dirtyVar + ";");
     out.println(dirtyVar + " |= " + dirtyMask + "L;");
     out.println();
