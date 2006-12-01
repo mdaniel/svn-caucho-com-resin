@@ -1982,14 +1982,16 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       HashMap<String, JoinColumnConfig> joinColumnsConfig = null;
       HashMap<String, JoinColumnConfig> inverseJoinColumnsConfig = null;
 
-      manyToManyField.setJoinColumns(true);
-
       String joinTableName;
 
       if (joinTableAnn != null) {
         joinTableName = joinTableAnn.getString("name");
         joinColumns = (Object []) joinTableAnn.get("joinColumns");
         inverseJoinColumns = (Object []) joinTableAnn.get("inverseJoinColumns");
+
+        if ((joinColumns != null) &&
+            (joinColumns.length > 0))
+          manyToManyField.setJoinColumns(true);
 
         if ((inverseJoinColumns != null) &&
             (inverseJoinColumns.length > 0))
@@ -1999,6 +2001,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         joinTableName = joinTableConfig.getName();
         joinColumnsConfig = joinTableConfig.getJoinColumnMap();
         inverseJoinColumnsConfig = joinTableConfig.getInverseJoinColumnMap();
+
+        if ((joinColumnsConfig != null) &&
+            (joinColumnsConfig.size() > 0))
+          manyToManyField.setJoinColumns(true);
 
         if ((inverseJoinColumnsConfig != null) &&
             (inverseJoinColumnsConfig.size() > 0))
