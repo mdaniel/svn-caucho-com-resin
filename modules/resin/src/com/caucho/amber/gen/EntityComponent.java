@@ -843,6 +843,7 @@ public class EntityComponent extends ClassComponent {
     out.println();
     out.println("__caucho_inc_version = false;");
     out.println();
+
     out.println("return false;");
     out.popDepth();
     out.println("}");
@@ -1400,6 +1401,15 @@ public class EntityComponent extends ClassComponent {
       String mask = "__caucho_loadMask_" + i;
 
       out.println("o." + mask + " = " + mask + ";");
+    }
+
+    int dirtyCount = _entityType.getDirtyIndex();
+
+    // jpa/0g06
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      String mask = "__caucho_dirtyMask_" + i;
+
+      out.println("o." + mask + " = 0L;");
     }
 
     // See LoadGroupGenerator __caucho_load.

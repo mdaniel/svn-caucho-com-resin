@@ -983,16 +983,22 @@ public class AmberConnection
    */
   public boolean addEntity(Entity entity)
   {
+    boolean added = false;
+
     if (! _entities.contains(entity)) {
       _entities.add(entity);
-
-      if (_isInTransaction)
-        _txEntities.add(entity);
-
-      return true;
+      added = true;
     }
-    else
-      return false;
+
+    // jpa/0g06
+    if (_isInTransaction) {
+      if (! _txEntities.contains(entity)) {
+        _txEntities.add(entity);
+        added = true;
+      }
+    }
+
+    return added;
   }
 
   /**
@@ -1362,6 +1368,9 @@ public class AmberConnection
    */
   public void makeTransactional(Entity entity)
   {
+    // jpa/0g06
+    addEntity(entity);
+
     /*
       if (! isInTransaction())
       throw new AmberRuntimeException(L.l("makePersistent must be called from within a transaction."));

@@ -237,6 +237,11 @@ public class PropertyField extends AbstractField {
     out.println("{");
     out.pushDepth();
 
+    // jpa/0g06
+    out.println("if (__caucho_session != null && __caucho_session.isInTransaction())");
+    out.println("  __caucho_session.makeTransactional(this);");
+    out.println();
+
     if (getSourceType() instanceof EmbeddableType) {
       out.println(generateSuperSetter("v") + ";");
       out.popDepth();
@@ -295,6 +300,7 @@ public class PropertyField extends AbstractField {
       out.println();
       out.println("long oldMask = " + dirtyVar + ";");
       out.println(dirtyVar + " |= " + dirtyMask + "L;");
+
       out.println();
       out.println("if (__caucho_session != null && oldMask == 0)");
       out.println("  __caucho_session.update(this);");
