@@ -12,9 +12,16 @@
 
 <s2 title="3.1snap - Oct 6, 2006">
 <ul>
+<li>Quercus: marshaling of null for Java objects: Byte, Integer, etc (#1444, rep by KnisterPeter)</li>
+<li>OpenSSL: nullpointer when loading ssl fails (#1442, rep by Anoop Achuthan)</li>
+<li>expand-directory in web-app-deploy generated confusing error message (#1452, rep by gjvc)</li>
+<li>Make transaction manager visible for Spring (#1425, rep by buzzterrier)</li>
+<li>Quercus: count("asdf") should return 1. (#1483, rep by Salz)</li>
+<li>Quercus: null checking on file_exists (#1430, rep by Anoop Achuthan)</li>
+<li>Amber: inheritance fixes (#1454, rep by KnisterPeter)</li>
 <li>work-dir wasn't configuring properly (#1409, rep by ckchris)</li>
-<li>JPA/EJB: ejb-server was overriding persistent-manager's data-source (#1456, rep by spoty)</li>
-<li>JPA: 99 fields were overflowing the generated code (#1440, rep by spoty)</li>
+<li>Amber/EJB: ejb-server was overriding persistent-manager's data-source (#1456, rep by spoty)</li>
+<li>Amber: 99 fields were overflowing the generated code (#1440, rep by spoty)</li>
 <li>Quercus: mysqli_connection should return false with a connection error (#1401, rep by dberry)</li>
 <li>access log: getNewline() adds check for windows is line.separator is null isntead of defaulting to \n (#1449, rep by Chris Head)</li>
 <li>Cache: max-entry-size was being ignored (#1474, rep by Kalev Sullakatko)

@@ -847,9 +847,11 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value filetype(Env env, Path path)
+  public static Value filetype(Env env, @NotNull Path path)
   {
-    if (! path.exists()) {
+    if (path == null)
+      return BooleanValue.FALSE;
+    else if (! path.exists()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
     }
@@ -874,7 +876,7 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean file_exists(Env env, @NotNull Path path)
+  public static boolean file_exists(@NotNull Path path)
   {
     if (path != null)
       return path.exists();

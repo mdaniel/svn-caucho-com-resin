@@ -50,7 +50,7 @@ public class LongObjectMarshal extends Marshal
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return new Long(value.toLong());
+    return value.toJavaLong();
   }
 
   public Value unmarshal(Env env, Object value)

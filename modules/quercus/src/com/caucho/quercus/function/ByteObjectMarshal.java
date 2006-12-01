@@ -48,9 +48,10 @@ public class ByteObjectMarshal extends Marshal
     return true;
   }
 
+  @Override
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return new Byte((byte) value.toLong());
+    return value.toJavaByte();
   }
 
   public Value unmarshal(Env env, Object value)

@@ -746,8 +746,9 @@ r_web-app-deploy = element web-app-deploy {
    | element url-prefix { string })?
 
   & (r_path
-     | attribute expand-directory { r_path-Type }
-     | element expand-directory { r_path-Type })
+
+     & (attribute expand-directory { r_path-Type }
+        | element expand-directory { r_path-Type })?)
 
   & (attribute archive-directory { r_path-Type }
      | element archive-directory { r_path-Type })?

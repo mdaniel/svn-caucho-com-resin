@@ -48,9 +48,10 @@ public class ShortObjectMarshal extends Marshal
     return new Short((short) expr.evalLong(env));
   }
 
+  @Override
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return new Short((short) value.toLong());
+    return value.toJavaShort();
   }
 
   public Value unmarshal(Env env, Object value)

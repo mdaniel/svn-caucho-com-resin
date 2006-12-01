@@ -140,6 +140,87 @@ public class NullValue extends Value {
   }
 
   /**
+   * Converts to a java boolean object.
+   */
+  @Override
+  public Boolean toJavaBoolean()
+  {
+    return null;
+  }
+
+  /**
+   * Converts to a java Byte object.
+   */
+  @Override
+  public Byte toJavaByte()
+  {
+    return null;
+  }
+
+  /**
+   * Converts to a java Short object.
+   */
+  @Override
+  public Short toJavaShort()
+  {
+    return null;
+  }
+
+  /**
+   * Converts to a java Integer object.
+   */
+  @Override
+  public Integer toJavaInteger()
+  {
+    return null;
+  }
+
+  /**
+   * Converts to a java Long object.
+   */
+  @Override
+  public Long toJavaLong()
+  {
+    return null;
+  }
+
+  /**
+   * Converts to a java Float object.
+   */
+  @Override
+  public Float toJavaFloat()
+  {
+    return null;
+  }
+
+  /**
+   * Converts to a java Double object.
+   */
+  @Override
+  public Double toJavaDouble()
+  {
+    return null;
+  }
+
+  /**
+   * Converts to a java Character object.
+   */
+  @Override
+  public Character toJavaCharacter()
+  {
+    return null;
+  }
+
+  /**
+   * Converts to a java String object.
+   */
+  @Override
+  public String toJavaString()
+  {
+    return null;
+  }
+
+  /**
    * Converts to a java object.
    */
   public Map toJavaMap(Env env, Class type)
@@ -178,6 +259,14 @@ public class NullValue extends Value {
   public ArrayValue toArrayValue(Env env)
   {
     return null;
+  }
+
+  /**
+   * Returns the array size.
+   */
+  public int getSize()
+  {
+    return 0;
   }
 
   /**

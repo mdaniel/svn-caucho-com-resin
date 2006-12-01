@@ -51,7 +51,7 @@ public class CharacterObjectMarshal extends Marshal
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return new Character(value.toChar());
+    return value.toJavaCharacter();
   }
 
   public Value unmarshal(Env env, Object value)

@@ -50,7 +50,7 @@ public class DoubleObjectMarshal extends Marshal
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return new Double(value.toDouble());
+    return value.toJavaDouble();
   }
 
   public Value unmarshal(Env env, Object value)

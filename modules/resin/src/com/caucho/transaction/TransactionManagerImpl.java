@@ -77,7 +77,7 @@ public class TransactionManagerImpl
 
   private long _timeout = -1;
 
-  private TransactionManagerImpl()
+  public TransactionManagerImpl()
   {
   }
 

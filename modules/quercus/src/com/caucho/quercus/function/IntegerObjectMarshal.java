@@ -50,7 +50,7 @@ public class IntegerObjectMarshal extends Marshal
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return new Integer((int) value.toLong());
+    return value.toJavaInteger();
   }
 
   public Value unmarshal(Env env, Object value)

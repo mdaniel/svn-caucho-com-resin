@@ -48,9 +48,10 @@ public class FloatObjectMarshal extends Marshal
     return new Float((float) expr.evalDouble(env));
   }
 
+  @Override
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return new Float((float) value.toDouble());
+    return value.toJavaFloat();
   }
 
   public Value unmarshal(Env env, Object value)

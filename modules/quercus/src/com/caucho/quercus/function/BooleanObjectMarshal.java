@@ -49,9 +49,13 @@ public class BooleanObjectMarshal extends Marshal
     return expr.evalBoolean(env) ? Boolean.TRUE : Boolean.FALSE;
   }
 
+  @Override
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return value.toBoolean() ? Boolean.TRUE : Boolean.FALSE;
+    if (value.isNull())
+      return null;
+    else
+      return value.toBoolean() ? Boolean.TRUE : Boolean.FALSE;
   }
 
   public Value unmarshal(Env env, Object value)

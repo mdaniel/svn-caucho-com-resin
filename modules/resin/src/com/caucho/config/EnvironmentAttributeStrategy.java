@@ -49,9 +49,18 @@ public class EnvironmentAttributeStrategy extends AttributeStrategy {
           throws Exception
   {
     // builder.configureChildImpl(_typeStrategy, node, bean);
-    bean = _typeStrategy.create();
-    
-    builder.configureImpl(_typeStrategy, bean, node);
+    Object child = builder.createResinType(node);
+
+    if (child == null)
+      child = _typeStrategy.create();
+
+    if (child != null) {
+      _typeStrategy.setParent(child, bean);
+      
+      builder.configureImpl(_typeStrategy, child, node);
+    }
+    else
+      builder.configureChildImpl(_typeStrategy, node, bean);
   }
 
   public String toString()

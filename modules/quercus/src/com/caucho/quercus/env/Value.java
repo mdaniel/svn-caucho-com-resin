@@ -436,6 +436,78 @@ abstract public class Value {
   }
 
   /**
+   * Converts to a java boolean object.
+   */
+  public Boolean toJavaBoolean()
+  {
+    return toBoolean() ? Boolean.FALSE : Boolean.TRUE;
+  }
+
+  /**
+   * Converts to a java byte object.
+   */
+  public Byte toJavaByte()
+  {
+    return new Byte((byte) toLong());
+  }
+
+  /**
+   * Converts to a java short object.
+   */
+  public Short toJavaShort()
+  {
+    return new Short((short) toLong());
+  }
+
+  /**
+   * Converts to a java Integer object.
+   */
+  public Integer toJavaInteger()
+  {
+    return new Integer((int) toLong());
+  }
+
+  /**
+   * Converts to a java Long object.
+   */
+  public Long toJavaLong()
+  {
+    return new Long((int) toLong());
+  }
+
+  /**
+   * Converts to a java Float object.
+   */
+  public Float toJavaFloat()
+  {
+    return new Float((float) toDouble());
+  }
+
+  /**
+   * Converts to a java Double object.
+   */
+  public Double toJavaDouble()
+  {
+    return new Double(toDouble());
+  }
+
+  /**
+   * Converts to a java Character object.
+   */
+  public Character toJavaCharacter()
+  {
+    return new Character(toChar());
+  }
+
+  /**
+   * Converts to a java String object.
+   */
+  public String toJavaString()
+  {
+    return toString();
+  }
+
+  /**
    * Converts to a java object.
    */
   public Map toJavaMap(Env env, Class type)
@@ -1097,7 +1169,7 @@ abstract public class Value {
    */
   public int getSize()
   {
-    return 0;
+    return 1;
   }
 
   /**
