@@ -24,53 +24,28 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
-package com.caucho.amber.type;
+package com.caucho.amber.entity;
 
-import com.caucho.amber.entity.Entity;
-import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Table;
-import com.caucho.util.L10N;
+import com.caucho.amber.manager.AmberConnection;
 
-import java.util.logging.Logger;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
- * Represents an application persistent bean type
+ * An embeddable object.
  */
-public class EntityType extends RelatedType {
-  private static final Logger log = Logger.getLogger(EntityType.class.getName());
-  private static final L10N L = new L10N(EntityType.class);
-
-  public EntityType(AmberPersistenceUnit amberPersistenceUnit)
-  {
-    super(amberPersistenceUnit);
-  }
+public interface Embeddable {
 
   /**
-   * Gets the instance class.
+   * Loads the embeddable object from the
+   * database and returns the number of columns
+   * consumed from the result set.
    */
-  public Class getInstanceClass()
-  {
-    return getInstanceClass(Entity.class);
-  }
-
-  /**
-   * Sets the table.
-   */
-  public void setTable(Table table)
-  {
-    super.setTable(table);
-
-    table.setType(this);
-  }
-
-  /**
-   * Printable version of the entity.
-   */
-  public String toString()
-  {
-    return "EntityType[" + _beanClass.getName() + "]";
-  }
+  public int __caucho_load(AmberConnection aConn,
+                           ResultSet rs,
+                           int index)
+    throws SQLException;
 }

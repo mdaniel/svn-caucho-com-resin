@@ -29,9 +29,15 @@
 
 package com.caucho.amber.type;
 
+import com.caucho.amber.AmberRuntimeException;
+import com.caucho.amber.entity.Embeddable;
+import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.Table;
 import com.caucho.util.L10N;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 /**
@@ -44,6 +50,35 @@ public class EmbeddableType extends AbstractStatefulType {
   public EmbeddableType(AmberPersistenceUnit amberPersistenceUnit)
   {
     super(amberPersistenceUnit);
+  }
+
+  /**
+   * Gets the instance class.
+   */
+  public Class getInstanceClass()
+  {
+    return getInstanceClass(Embeddable.class);
+  }
+
+  /**
+   * Generates the select clause for a load.
+   */
+  public String generateLoadSelect(Table table, String id)
+  {
+    return generateLoadSelect(table, id, -1);
+  }
+
+  /**
+   * Creates an embeddable object of this type.
+   */
+  public Embeddable createObject()
+    throws SQLException
+  {
+    try {
+      return (Embeddable) getInstanceClass().newInstance();
+    } catch (Exception e) {
+      throw new AmberRuntimeException(e);
+    }
   }
 
   /**

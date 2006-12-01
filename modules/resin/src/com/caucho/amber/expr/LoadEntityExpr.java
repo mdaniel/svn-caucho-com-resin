@@ -51,24 +51,11 @@ import java.util.Map;
 /**
  * An entity expression which should be loaded.
  */
-public class LoadEntityExpr extends AbstractAmberExpr {
-  private PathExpr _expr;
-  private FromItem _fromItem;
-  private int _index;
+public class LoadEntityExpr extends LoadExpr {
 
-  private ArrayList<FromItem> _subItems = new ArrayList<FromItem>();
-
-  public LoadEntityExpr(PathExpr expr)
+  LoadEntityExpr(PathExpr expr)
   {
-    _expr = expr;
-  }
-
-  /**
-   * Returns the type.
-   */
-  public Type getType()
-  {
-    return getEntityType();
+    super(expr);
   }
 
   /**
@@ -76,32 +63,7 @@ public class LoadEntityExpr extends AbstractAmberExpr {
    */
   public EntityType getEntityType()
   {
-    return (EntityType) _expr.getTargetType();
-  }
-
-  /**
-   * Returns the underlying expression
-   */
-  public PathExpr getExpr()
-  {
-    return _expr;
-  }
-
-  /**
-   * Returns the number of columns consumed from
-   * a result set after loading the entity.
-   */
-  public int getIndex()
-  {
-    return _index;
-  }
-
-  /**
-   * Returns the table.
-   */
-  public String getTable()
-  {
-    return _fromItem.getName();
+    return (EntityType) getType();
   }
 
   /**
@@ -131,105 +93,6 @@ public class LoadEntityExpr extends AbstractAmberExpr {
     }
 
     return this;
-  }
-
-  /**
-   * Binds the expression as a select item.
-   */
-  public FromItem bindSubPath(QueryParser parser)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Returns true if the expression uses the from item.
-   */
-  public boolean usesFrom(FromItem from, int type, boolean isNot)
-  {
-    if (_fromItem == from)
-      return true;
-
-    for (int i = 0; i < _subItems.size(); i++) {
-      FromItem subItem = _subItems.get(i);
-
-      if (from == subItem)
-        return true;
-    }
-
-    return _expr.usesFrom(from, type, isNot);
-  }
-
-  /**
-   * Returns the from item
-   */
-  public FromItem getChildFromItem()
-  {
-    return _expr.getChildFromItem();
-  }
-
-  /**
-   * Generates the where expression.
-   */
-  public void generateSelect(CharBuffer cb)
-  {
-    generateSelect(cb, true);
-  }
-
-  /**
-   * Generates the where expression.
-   */
-  public void generateSelect(CharBuffer cb,
-                             boolean fullSelect)
-  {
-    EntityType type = getEntityType();
-
-    cb.append(type.getId().generateSelect(getTable()));
-
-    if (! fullSelect)
-      return;
-
-    String valueSelect = type.generateLoadSelect(_fromItem.getTable(),
-                                                 _fromItem.getName());
-
-    if (valueSelect != null && ! "".equals(valueSelect)) {
-      cb.append(", ");
-      cb.append(valueSelect);
-    }
-
-    for (int i = 0; i < _subItems.size(); i++) {
-      FromItem item = _subItems.get(i);
-
-      valueSelect = type.generateLoadSelect(item.getTable(), item.getName());
-
-      if (! valueSelect.equals("")) {
-        cb.append(", ");
-        cb.append(valueSelect);
-      }
-    }
-  }
-
-  /**
-   * Generates the where expression.
-   */
-  public void generateWhere(CharBuffer cb, String fieldName)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Generates the (update) where expression.
-   */
-  public void generateUpdateWhere(CharBuffer cb, String fieldName)
-  {
-    generateWhere(cb, fieldName);
-  }
-
-  /**
-   * Generates the having expression.
-   */
-  public void generateHaving(CharBuffer cb, String fieldName)
-  {
-    generateWhere(cb, fieldName);
   }
 
   /**

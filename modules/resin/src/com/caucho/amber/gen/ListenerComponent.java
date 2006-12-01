@@ -141,8 +141,6 @@ public class ListenerComponent extends ClassComponent {
     out.println("java.util.logging.Logger.getLogger(\"" + getBeanClassName() + "\");");
     //    if (_listenerType.getParentType() == null) {
     out.println();
-    out.println("protected transient com.caucho.amber.manager.AmberConnection __caucho_session;");
-    out.println();
   }
 
   private void generateMainCallback(JavaWriter out,

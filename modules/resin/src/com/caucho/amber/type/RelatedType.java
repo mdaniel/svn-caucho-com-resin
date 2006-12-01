@@ -924,24 +924,10 @@ abstract public class RelatedType extends AbstractStatefulType {
       hasSelect = true;
     }
 
-    ArrayList<AmberField> fields = getFields();
-    for (int i = 0; i < fields.size(); i++) {
-      AmberField field = fields.get(i);
-
-      if (field.getLoadGroupIndex() != loadGroup)
-        continue;
-
-      String propSelect = field.generateLoadSelect(table, id);
-
-      if (propSelect == null)
-        continue;
-
-      if (hasSelect)
-        cb.append(", ");
-      hasSelect = true;
-
-      cb.append(propSelect);
-    }
+    cb.append(super.generateLoadSelect(table,
+                                       id,
+                                       loadGroup,
+                                       hasSelect));
 
     if (cb.length() == 0)
       return null;

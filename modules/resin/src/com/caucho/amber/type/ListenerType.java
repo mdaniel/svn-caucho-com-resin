@@ -29,6 +29,7 @@
 
 package com.caucho.amber.type;
 
+import com.caucho.amber.entity.Listener;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import javax.persistence.*;
 
@@ -60,6 +61,14 @@ public class ListenerType extends AbstractEnhancedType {
   public ListenerType(AmberPersistenceUnit amberPersistenceUnit)
   {
     super(amberPersistenceUnit);
+  }
+
+  /**
+   * Gets the instance class.
+   */
+  public Class getInstanceClass()
+  {
+    return getInstanceClass(Listener.class);
   }
 
   /**

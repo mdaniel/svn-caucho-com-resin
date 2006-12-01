@@ -78,6 +78,11 @@ public class EntityEmbeddedField extends AbstractField {
     super(relatedType);
   }
 
+  public EmbeddableType getEmbeddableType()
+  {
+    return (EmbeddableType) _type;
+  }
+
   /**
    * Sets the result type.
    */
@@ -391,9 +396,9 @@ public class EntityEmbeddedField extends AbstractField {
 
       String getter = _fieldNameByColumn.get(column.getName());
 
-      RelatedType relatedType = (RelatedType) getType();
+      EmbeddableType embeddableType = getEmbeddableType();
 
-      if (! relatedType.isFieldAccess())
+      if (! embeddableType.isFieldAccess())
         getter = "get" + Character.toUpperCase(getter.charAt(0)) +
           getter.substring(1) + "()";
 
@@ -420,9 +425,9 @@ public class EntityEmbeddedField extends AbstractField {
 
     String thisGetter = generateGet("this");
 
-    RelatedType relatedType = (RelatedType) getType();
+    EmbeddableType embeddableType = getEmbeddableType();
 
-    ArrayList<AmberField> fields = relatedType.getFields();
+    ArrayList<AmberField> fields = embeddableType.getFields();
     for (int i = 0; i < fields.size(); i++) {
       if (i != 0)
         cb.append(", ");
@@ -431,7 +436,7 @@ public class EntityEmbeddedField extends AbstractField {
 
       String getter = field.getName();
 
-      if (! relatedType.isFieldAccess()) {
+      if (! embeddableType.isFieldAccess()) {
         getter = "get" + Character.toUpperCase(getter.charAt(0)) +
           getter.substring(1) + "()";
       }
@@ -466,9 +471,9 @@ public class EntityEmbeddedField extends AbstractField {
 
       String setter = _fieldNameByColumn.get(column.getName());
 
-      RelatedType relatedType = (RelatedType) getType();
+      EmbeddableType embeddableType = getEmbeddableType();
 
-      if (relatedType.isFieldAccess()) {
+      if (embeddableType.isFieldAccess()) {
         out.println(var + "." + setter + " = amber_ld" + (index-1) + ";");
       }
       else {

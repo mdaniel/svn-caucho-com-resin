@@ -144,6 +144,9 @@ public class AmberPersistenceUnit {
 
   private EntityMappingsConfig _entityMappings;
 
+  private ArrayList<EmbeddableType> _embeddableTypes
+    = new ArrayList<EmbeddableType>();
+
   private ArrayList<ListenerType> _defaultListeners =
     new ArrayList<ListenerType>();
 
@@ -548,6 +551,8 @@ public class AmberPersistenceUnit {
     embeddableType.setName(name);
     embeddableType.setBeanClass(beanClass);
 
+    _embeddableTypes.add(embeddableType);
+
     return embeddableType;
   }
 
@@ -757,9 +762,7 @@ public class AmberPersistenceUnit {
       while (_lazyGenerate.size() > 0) {
         EntityType entityType = _lazyGenerate.remove(0);
 
-        if (entityType.isEmbeddable())
-          continue;
-
+        // Entity
         initType(type = entityType);
 
         ArrayList<ListenerType> listeners;
@@ -771,10 +774,16 @@ public class AmberPersistenceUnit {
         if (listeners == null)
           continue;
 
+        // Entity Listeners
         for (ListenerType listenerType : listeners)
           initType(type = listenerType);
       }
 
+      // Embeddable
+      for (EmbeddableType embeddableType : _embeddableTypes)
+        initType(type = embeddableType);
+
+      // Default Listeners
       for (ListenerType listenerType : _defaultListeners)
         initType(type = listenerType);
 
@@ -831,6 +840,25 @@ public class AmberPersistenceUnit {
       }
 
       configure();
+    }
+
+    for (EmbeddableType embeddableType : _embeddableTypes) {
+
+      embeddableType.init();
+
+      if (! embeddableType.isGenerated()) {
+        if (embeddableType.getInstanceClassName() == null)
+          throw new ConfigException(L.l("'{0}' does not have a configured instance class.",
+                                        embeddableType));
+
+        embeddableType.setGenerated(true);
+
+        try {
+          getGenerator().generateJava(javaGen, embeddableType);
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
+      }
     }
 
     for (SequenceIdGenerator gen : _sequenceGenMap.values())
@@ -916,6 +944,19 @@ public class AmberPersistenceUnit {
     }
 
     return _entityHomeMap.get(name);
+  }
+
+  /**
+   * Returns a matching embeddable type.
+   */
+  public EmbeddableType getEmbeddable(String className)
+  {
+    Type type = _typeManager.get(className);
+
+    if (type instanceof EmbeddableType)
+      return (EmbeddableType) type;
+    else
+      return null;
   }
 
   /**

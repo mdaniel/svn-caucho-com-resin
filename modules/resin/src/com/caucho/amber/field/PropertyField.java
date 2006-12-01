@@ -39,6 +39,7 @@ import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.AbstractStatefulType;
 import com.caucho.amber.type.ArrayType;
+import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.Type;
 import com.caucho.config.ConfigException;
@@ -208,9 +209,12 @@ public class PropertyField extends AbstractField {
     out.println("{");
     out.pushDepth();
 
-    out.println("if (__caucho_session != null)");
-    out.println("  __caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
-    out.println();
+    if (! (getSourceType() instanceof EmbeddableType)) {
+      out.println("if (__caucho_session != null)");
+      out.println("  __caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
+      out.println();
+    }
+
     out.println("return " + generateSuperGetter() + ";");
 
     out.popDepth();
@@ -231,6 +235,13 @@ public class PropertyField extends AbstractField {
     out.println("public void " + getSetterName() + "(" + getJavaTypeName() + " v)");
     out.println("{");
     out.pushDepth();
+
+    if (getSourceType() instanceof EmbeddableType) {
+      out.println(generateSuperSetter("v") + ";");
+      out.popDepth();
+      out.println("}");
+      return;
+    }
 
     if (! _isUpdate) {
       out.println("if (__caucho_session == null)");
@@ -402,13 +413,26 @@ public class PropertyField extends AbstractField {
 
     String var = "amber_ld" + index;
 
-    Type columnType = getColumn().getType();
+    Type columnType;
+
+    // jpa/0w24
+    if (getColumn() == null)
+      columnType = getType();
+    else
+      columnType = getColumn().getType();
+
     if (columnType instanceof ArrayType)
       out.print(((ArrayType) columnType).getPrimitiveArrayTypeName());
     else
       out.print(getJavaTypeName());
     out.print(" " + var + " = ");
-    index = getColumn().generateLoad(out, rs, indexVar, index);
+
+    // jpa/0w24
+    if (getColumn() == null)
+      index = getType().generateLoad(out, rs, indexVar, index);
+    else
+      index = getColumn().generateLoad(out, rs, indexVar, index);
+
     out.println(";");
 
     // jpa/0t17

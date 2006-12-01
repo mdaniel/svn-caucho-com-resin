@@ -1135,7 +1135,12 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     // jpa/0r37: fields declared in non-entity superclasses
     // must not be considered.
 
-    EntityType declaringType = _persistenceUnit.getEntity(jClass.getName());
+    AbstractStatefulType declaringType;
+
+    declaringType = _persistenceUnit.getEntity(jClass.getName());
+
+    if (declaringType == null)
+      declaringType = _persistenceUnit.getEmbeddable(jClass.getName());
 
     if (declaringType == null)
       return;
@@ -1416,6 +1421,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     PropertyField property = new PropertyField(sourceType, fieldName);
     property.setColumn(fieldColumn);
+
+    // jpa/0w24
+    property.setType(amberType);
 
     if (basicAnn != null)
       property.setLazy(basicAnn.get("fetch") == FetchType.LAZY);

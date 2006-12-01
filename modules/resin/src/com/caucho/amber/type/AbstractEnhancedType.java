@@ -198,10 +198,7 @@ public abstract class AbstractEnhancedType extends Type {
   /**
    * Gets the instance class.
    */
-  public Class getInstanceClass()
-  {
-    return getInstanceClass(Listener.class);
-  }
+  abstract public Class getInstanceClass();
 
   /**
    * Gets the instance class.
@@ -483,11 +480,6 @@ public abstract class AbstractEnhancedType extends Type {
       _postLoadCallbacks.add(callback);
       break;
     }
-  }
-
-  public boolean isEmbeddable()
-  {
-    return false;
   }
 
   /**

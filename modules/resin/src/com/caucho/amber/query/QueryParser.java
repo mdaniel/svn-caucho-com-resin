@@ -433,7 +433,7 @@ public class QueryParser {
           else if (expr instanceof PathExpr) {
             PathExpr pathExpr = (PathExpr) expr;
 
-            expr = new LoadEntityExpr(pathExpr);
+            expr = LoadExpr.create(pathExpr);
 
             expr = expr.bindSelect(this);
           }
@@ -487,7 +487,7 @@ public class QueryParser {
         else if (expr instanceof PathExpr) {
           PathExpr pathExpr = (PathExpr) expr;
 
-          expr = new LoadEntityExpr(pathExpr);
+          expr = LoadExpr.create(pathExpr);
           expr = expr.bindSelect(this);
         }
 
@@ -1716,7 +1716,7 @@ public class QueryParser {
           if (arg instanceof PathExpr) {
             PathExpr pathExpr = (PathExpr) arg;
 
-            arg = new LoadEntityExpr(pathExpr);
+            arg = LoadExpr.create(pathExpr);
 
             arg = arg.bindSelect(this);
 

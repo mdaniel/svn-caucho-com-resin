@@ -33,6 +33,7 @@ import com.caucho.amber.field.AmberField;
 import com.caucho.amber.field.AmberFieldCompare;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
+import com.caucho.amber.table.Table;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassDependency;
 import com.caucho.bytecode.JField;
@@ -40,6 +41,7 @@ import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.make.ClassDependency;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.PersistentDependency;
 
@@ -265,6 +267,57 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
     }
 
     return index;
+  }
+
+  /**
+   * Generates the select clause for a load.
+   */
+  abstract public String generateLoadSelect(Table table, String id);
+
+  /**
+   * Generates the select clause for a load.
+   */
+  public String generateLoadSelect(Table table,
+                                   String id,
+                                   int loadGroup)
+  {
+    return generateLoadSelect(table, id, loadGroup, false);
+  }
+
+  /**
+   * Generates the select clause for a load.
+   */
+  public String generateLoadSelect(Table table,
+                                   String id,
+                                   int loadGroup,
+                                   boolean hasSelect)
+  {
+    CharBuffer cb = CharBuffer.allocate();
+
+    ArrayList<AmberField> fields = getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field.getLoadGroupIndex() != loadGroup)
+        continue;
+
+      String propSelect = field.generateLoadSelect(table, id);
+
+      if (propSelect == null)
+        continue;
+
+      if (hasSelect)
+        cb.append(", ");
+      hasSelect = true;
+
+      cb.append(propSelect);
+    }
+
+    if (cb.length() == 0)
+      return null;
+    else
+      return cb.close();
   }
 
   /**

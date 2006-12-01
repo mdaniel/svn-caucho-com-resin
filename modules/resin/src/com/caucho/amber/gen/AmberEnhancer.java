@@ -32,6 +32,8 @@ package com.caucho.amber.gen;
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.type.AbstractEnhancedType;
+import com.caucho.amber.type.AbstractStatefulType;
+import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.ListenerType;
 import com.caucho.amber.type.SubEntityType;
@@ -160,6 +162,11 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     if (entityType != null && entityType.isEnhanced())
       return true;
 
+    EmbeddableType embeddableType = _amberContainer.getEmbeddable(className);
+
+    if (embeddableType != null && embeddableType.isEnhanced())
+      return true;
+
     ListenerType listenerType = _amberContainer.getListener(className);
 
     if (listenerType != null && listenerType.isEnhanced())
@@ -252,7 +259,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     EntityType entityType = _amberContainer.getEntity(className);
 
     // Type can be null for subclasses and inner classes that need fixups
-    if ((entityType != null) && (! entityType.isEmbeddable())) {
+    if (entityType != null) {
 
       log.info("Amber enhancing class " + className);
 
@@ -301,6 +308,25 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
       genClass.addComponent(listener);
     }
+
+    EmbeddableType embeddableType = _amberContainer.getEmbeddable(className);
+
+    // Type can be null for subclasses and inner classes that need fixups
+    if (embeddableType != null) {
+      log.info("Amber enhancing class " + className);
+
+      embeddableType.init();
+
+      genClass.addInterfaceName("com.caucho.amber.entity.Embeddable");
+
+      EmbeddableComponent embeddable = new EmbeddableComponent();
+
+      embeddable.setEmbeddableType(embeddableType);
+      embeddable.setBaseClassName(baseClass.getName());
+      embeddable.setExtClassName(extClassName);
+
+      genClass.addComponent(embeddable);
+    }
   }
 
   /**
@@ -309,9 +335,6 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public void generate(AbstractEnhancedType type)
     throws Exception
   {
-    if (type.isEmbeddable())
-      return;
-
     JavaClassGenerator javaGen = new JavaClassGenerator();
 
     javaGen.setWorkDir(getWorkDir());
@@ -332,7 +355,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
                            AbstractEnhancedType type)
     throws Exception
   {
-    if (type.isGenerated() || type.isEmbeddable())
+    if (type.isGenerated())
       return;
 
     type.setGenerated(true);
@@ -361,7 +384,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
       javaClass.addComponent(entity);
     }
-    else {
+    else if (type instanceof ListenerType) {
       javaClass.addInterfaceName("com.caucho.amber.entity.Listener");
 
       type.setEnhanced(true);
@@ -374,6 +397,20 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       listener.setExtClassName(type.getInstanceClassName());
 
       javaClass.addComponent(listener);
+    }
+    else {
+      javaClass.addInterfaceName("com.caucho.amber.entity.Embeddable");
+
+      type.setEnhanced(true);
+
+      EmbeddableComponent embeddable = new EmbeddableComponent();
+
+      embeddable.setEmbeddableType((EmbeddableType) type);
+      embeddable.setBaseClassName(type.getBeanClass().getName());
+
+      embeddable.setExtClassName(type.getInstanceClassName());
+
+      javaClass.addComponent(embeddable);
     }
 
     javaGen.generate(javaClass);
@@ -443,16 +480,22 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     // Field-based fixup.
     do {
-      EntityType type = _amberContainer.getEntity(thisClass.getName());
+      AbstractStatefulType type;
+
+      type = _amberContainer.getEntity(thisClass.getName());
+
+      if (type == null)
+        type = _amberContainer.getEmbeddable(thisClass.getName());
 
       if (type == null || ! type.isFieldAccess())
         continue;
 
-      if (type.isEmbeddable())
-        return;
+      if (type instanceof EntityType) {
+        EntityType entityType = (EntityType) type;
 
-      for (AmberField field : type.getId().getKeys()) {
-        fieldMaps.add(new FieldMap(baseClass, field.getName()));
+        for (AmberField field : entityType.getId().getKeys()) {
+          fieldMaps.add(new FieldMap(baseClass, field.getName()));
+        }
       }
 
       for (AmberField field : type.getFields()) {

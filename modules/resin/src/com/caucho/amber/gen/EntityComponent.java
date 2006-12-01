@@ -137,73 +137,64 @@ public class EntityComponent extends ClassComponent {
     try {
       generateHeader(out);
 
-      boolean isEntity;
+      generateInit(out);
 
-      isEntity = ! _entityType.isEmbeddable();
+      HashSet<Object> completedSet = new HashSet<Object>();
 
-      if (isEntity) {
-        generateInit(out);
-
-        HashSet<Object> completedSet = new HashSet<Object>();
-
-        generatePrologue(out, completedSet);
-      }
+      generatePrologue(out, completedSet);
 
       generateGetEntityType(out);
 
       if (_entityType.getParentType() == null)
         generateGetEntityState(out);
 
-      if (isEntity)
-        generateMatch(out);
+      generateMatch(out);
 
       generateFields(out);
 
       generateMethods(out);
 
-      if (isEntity) {
-        generateDetach(out);
+      generateDetach(out);
 
-        generateLoad(out);
+      generateLoad(out);
 
-        int min = 0;
-        if (_entityType.getParentType() != null)
-          min = _entityType.getParentType().getLoadGroupIndex() + 1;
-        int max = _entityType.getLoadGroupIndex();
+      int min = 0;
+      if (_entityType.getParentType() != null)
+        min = _entityType.getParentType().getLoadGroupIndex() + 1;
+      int max = _entityType.getLoadGroupIndex();
 
-        for (int i = min; i <= max; i++)
-          generateLoadGroup(out, i);
+      for (int i = min; i <= max; i++)
+        generateLoadGroup(out, i);
 
-        generateResultSetLoad(out);
+      generateResultSetLoad(out);
 
-        generateSetQuery(out);
+      generateSetQuery(out);
 
-        // generateLoadFromObject();
+      // generateLoadFromObject();
 
-        // generateCopy();
+      // generateCopy();
 
-        generateCopy(out);
+      generateCopy(out);
 
-        generateMakePersistent(out);
+      generateMakePersistent(out);
 
-        generateCascadePersist(out);
+      generateCascadePersist(out);
 
-        generateCascadeRemove(out);
+      generateCascadeRemove(out);
 
-        generateCreate(out);
+      generateCreate(out);
 
-        generateDelete(out);
+      generateDelete(out);
 
-        generateDeleteForeign(out);
+      generateDeleteForeign(out);
 
-        generateFlush(out);
+      generateFlush(out);
 
-        generateAfterCommit(out);
+      generateAfterCommit(out);
 
-        generateAfterRollback(out);
+      generateAfterRollback(out);
 
-        generateHome(out);
-      }
+      generateHome(out);
 
       generateInternals(out);
 
@@ -281,7 +272,7 @@ public class EntityComponent extends ClassComponent {
     out.popDepth();
     out.println("}");
     */
-    
+
     String className = getClassName();
     int p = className.lastIndexOf('.');
     if (p > 0)
@@ -299,11 +290,11 @@ public class EntityComponent extends ClassComponent {
 
       JClass []args = ctor.getParameterTypes();
       for (int i = 0; i < args.length; i++) {
-	if (i != 0)
-	  out.print(", ");
+  if (i != 0)
+    out.print(", ");
 
-	out.print(args[i].getPrintName());
-	out.print(" a" + i);
+  out.print(args[i].getPrintName());
+  out.print(" a" + i);
       }
       out.println(")");
       out.println("{");
@@ -311,21 +302,21 @@ public class EntityComponent extends ClassComponent {
 
       out.print("super(");
       for (int i = 0; i < args.length; i++) {
-	if (i != 0)
-	  out.print(", ");
+  if (i != 0)
+    out.print(", ");
 
-	out.print("a" + i);
+  out.print("a" + i);
       }
       out.println(");");
-      
+
       for (AmberField field : fields) {
-	field.generatePostConstructor(out);
+  field.generatePostConstructor(out);
       }
-      
+
       out.popDepth();
       out.println("}");
     }
-    
+
 
     out.println();
     out.println("public void __caucho_setPrimaryKey(Object key)");
@@ -463,10 +454,10 @@ public class EntityComponent extends ClassComponent {
     if (id != null)
       id.generatePrologue(out, completedSet);
 
-    ArrayList<AmberField> _fields = _entityType.getFields();
+    ArrayList<AmberField> fields = _entityType.getFields();
 
-    for (int i = 0; i < _fields.size(); i++) {
-      AmberField prop = _fields.get(i);
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField prop = fields.get(i);
 
       prop.generatePrologue(out, completedSet);
     }
@@ -512,10 +503,10 @@ public class EntityComponent extends ClassComponent {
   private void generateFields(JavaWriter out)
     throws IOException
   {
-    ArrayList<AmberField> _fields = _entityType.getFields();
+    ArrayList<AmberField> fields = _entityType.getFields();
 
-    for (int i = 0; i < _fields.size(); i++) {
-      AmberField prop = _fields.get(i);
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField prop = fields.get(i);
 
       prop.generateSuperGetter(out);
       prop.generateGetProperty(out);
@@ -1407,7 +1398,7 @@ public class EntityComponent extends ClassComponent {
 
     for (int i = 0; i <= _entityType.getLoadGroupIndex() / 64; i++) {
       String mask = "__caucho_loadMask_" + i;
-      
+
       out.println("o." + mask + " = " + mask + ";");
     }
 
