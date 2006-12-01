@@ -410,7 +410,7 @@ abstract public class AbstractConfigIntrospector {
     return columns;
   }
 
-  static String toSqlName(String name)
+  public static String toSqlName(String name)
   {
     return name.toUpperCase();
   }

@@ -150,6 +150,8 @@ public class EmbeddableComponent extends ClassComponent {
     for (int i = 0; i < fields.size(); i++) {
       AmberField prop = fields.get(i);
 
+      prop.generatePrologue(out, null);
+
       prop.generateSuperGetter(out);
       prop.generateGetProperty(out);
 

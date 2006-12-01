@@ -29,6 +29,7 @@
 
 package com.caucho.amber.field;
 
+import com.caucho.amber.cfg.AbstractConfigIntrospector;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.ColumnExpr;
 import com.caucho.amber.expr.EmbeddedExpr;
@@ -188,9 +189,9 @@ public class PropertyField extends AbstractField {
    */
   protected String getFieldName()
   {
-    // jpa/0w10
+    // jpa/0w01, jpa/0w10
     if (getColumn() == null)
-      return getName();
+      return "__amber_" + AbstractConfigIntrospector.toSqlName(getName());
 
     return getColumn().getFieldName();
   }
