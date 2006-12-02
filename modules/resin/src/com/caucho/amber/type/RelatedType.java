@@ -919,15 +919,19 @@ abstract public class RelatedType extends AbstractStatefulType {
 
       if (id != null) {
         cb.append(id + ".");
-        }
+      }
+
       cb.append(getDiscriminator().getName());
       hasSelect = true;
     }
 
-    cb.append(super.generateLoadSelect(table,
-                                       id,
-                                       loadGroup,
-                                       hasSelect));
+    String propSelect = super.generateLoadSelect(table,
+                                                 id,
+                                                 loadGroup,
+                                                 hasSelect);
+    // jpa/0s26
+    if (propSelect != null)
+      cb.append(propSelect);
 
     if (cb.length() == 0)
       return null;

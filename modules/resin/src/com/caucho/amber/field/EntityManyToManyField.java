@@ -665,6 +665,9 @@ public class EntityManyToManyField extends AssociationField {
                                   CascadeType cascadeType)
     throws IOException
   {
+    if (cascadeType != CascadeType.PERSIST)
+      return;
+
     if (isCascade(cascadeType)) {
       out.println("if (__caucho_state <= P_TRANSACTIONAL) {");
       out.pushDepth();
@@ -684,27 +687,6 @@ public class EntityManyToManyField extends AssociationField {
       out.println("}");
     }
   }
-
-  /* XXX: to be removed
-   * Generates the flush of this child.
-   *
-  public boolean generateFlush(CharBuffer cb)
-    throws IOException
-  {
-    String amberAdd = "__amber_" + getGetterName() + "_add";
-
-    String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
-
-    cb.append("if (" + getter + " != null) {\n");
-
-    cb.append("  for (Object o : " + getter + ")\n");
-    cb.append("    " + amberAdd + "(o);\n");
-
-    cb.append("}\n");
-
-    return true;
-  }
-  */
 
   /**
    * Generates the set property.

@@ -74,7 +74,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   HashMap<String, EntityConfig> _entityConfigMap
     = new HashMap<String, EntityConfig>();
 
-  HashMap<String, MappedSuperclassConfig> _mappedSuperConfigMap
+  HashMap<String, MappedSuperclassConfig> _mappedSuperclassConfigMap
     = new HashMap<String, MappedSuperclassConfig>();
 
   /**
@@ -98,6 +98,15 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   public void setEntityConfigMap(HashMap<String, EntityConfig> entityConfigMap)
   {
     _entityConfigMap = entityConfigMap;
+  }
+
+  /**
+   * Sets the mapped superclass config map.
+   */
+  public void setMappedSuperclassConfigMap(HashMap<String, MappedSuperclassConfig>
+                                           mappedSuperclassConfigMap)
+  {
+    _mappedSuperclassConfigMap = mappedSuperclassConfigMap;
   }
 
   /**
@@ -2631,7 +2640,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                         _field.getName()));
       }
 
-      // jpa/0o00, jpa/0o03, jpa/0o06, jpa/0o07, jpa/10ca
+      // jpa/0o00, jpa/0o03, jpa/0o06, jpa/0o07, jpa/10ca, jpa/0s2d
 
       // jpa/0o06
       boolean isManyToOne = (mappedBy == null) || "".equals(mappedBy);
@@ -2652,8 +2661,14 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
           OneToOneCompletion otherSide
             = getSourceCompletion(targetType, mappedBy);
 
-          if (otherSide != null)
-            isManyToOne = false;
+          if (otherSide != null) {
+            getInternalJoinColumnConfig(targetType.getBeanClass(),
+                                        otherSide._field,
+                                        otherSide._fieldName);
+            // jpa/0o07, jpa/0s2d
+            if (! _annotationCfg.isNull())
+              isManyToOne = false;
+          }
         }
       }
 
@@ -2674,11 +2689,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
           if (otherSide != null) {
             // jpa/0o00
-            if (_depCompletions.remove(otherSide))
+            if (_depCompletions.remove(otherSide)) {
               otherSide.complete();
+            }
           }
         }
 
+        // Owner
         EntityManyToOneField sourceField
           = getSourceField(targetType, mappedBy, _relatedType);
 
@@ -2905,6 +2922,20 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     _annotationCfg.setConfig(entityConfig);
   }
 
+  void getInternalMappedSuperclassConfig(JClass type)
+  {
+    _annotationCfg.reset(type, MappedSuperclass.class);
+
+    if (_mappedSuperclassConfigMap == null)
+      return;
+
+    MappedSuperclassConfig mappedSuperConfig = null;
+
+    mappedSuperConfig = _mappedSuperclassConfigMap.get(type.getName());
+
+    _annotationCfg.setConfig(mappedSuperConfig);
+  }
+
   void getInternalEntityListenersConfig(JClass type)
   {
     _annotationCfg.reset(type, EntityListeners.class);
@@ -2956,18 +2987,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     if (entityConfig.getExcludeSuperclassListeners())
       _annotationCfg.setConfig(entityConfig.getExcludeSuperclassListeners());
-  }
-
-  void getInternalMappedSuperclassConfig(JClass type)
-  {
-    _annotationCfg.reset(type, MappedSuperclass.class);
-
-    MappedSuperclassConfig mappedSuperConfig = null;
-
-    if (_mappedSuperConfigMap != null)
-      mappedSuperConfig = _mappedSuperConfigMap.get(type.getName());
-
-    _annotationCfg.setConfig(mappedSuperConfig);
   }
 
   void getInternalInheritanceConfig(JClass type)

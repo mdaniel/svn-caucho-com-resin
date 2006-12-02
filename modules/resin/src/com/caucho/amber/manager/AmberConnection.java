@@ -1368,8 +1368,12 @@ public class AmberConnection
    */
   public void makeTransactional(Entity entity)
   {
-    // jpa/0g06
-    addEntity(entity);
+    int state = entity.__caucho_getEntityState();
+
+    if (state > Entity.TRANSIENT && state < Entity.P_DELETING) {
+      // jpa/0g06
+      addEntity(entity);
+    }
 
     /*
       if (! isInTransaction())

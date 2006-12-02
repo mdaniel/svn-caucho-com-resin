@@ -83,126 +83,144 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   public EntityType introspect(JClass type)
     throws ConfigException, SQLException
   {
-    getInternalEntityConfig(type);
-    JAnnotation entityAnn = _annotationCfg.getAnnotation();
-    EntityConfig entityConfig = _annotationCfg.getEntityConfig();
+    EntityType entityType = null;
 
-    JAnnotation mappedSuperclassAnn = type.getAnnotation(MappedSuperclass.class);
+    try {
+      getInternalEntityConfig(type);
+      JAnnotation entityAnn = _annotationCfg.getAnnotation();
+      EntityConfig entityConfig = _annotationCfg.getEntityConfig();
 
-    boolean isEntity = (entityAnn != null) || (entityConfig != null);
-    boolean isMappedSuperclass = mappedSuperclassAnn != null;
-    if (! (isEntity || isMappedSuperclass)) {
-      throw new ConfigException(L.l("'{0}' is not an @Entity or @MappedSuperclass.",
-                                    type));
-    }
+      boolean isEntity = ! _annotationCfg.isNull();
 
-    String typeName = isEntity ? entityAnn.getString("name") :
-      mappedSuperclassAnn.getString("name");
+      String typeName;
 
-    // Adds named queries, if any.
-    introspectNamedQueries(type, typeName);
+      if (isEntity) {
+        if (entityConfig != null)
+          typeName = entityConfig.getClassName();
+        else
+          typeName = entityAnn.getString("name");
+      }
+      else {
+        getInternalMappedSuperclassConfig(type);
+        JAnnotation mappedSuperAnn = _annotationCfg.getAnnotation();
+        MappedSuperclassConfig mappedSuperConfig = _annotationCfg.getMappedSuperclassConfig();
 
-    // Validates the type
-    String entityName;
-    EntityType parentType = null;
-    JAnnotation inheritanceAnn = null;
-    InheritanceConfig inheritanceConfig = null;
-    JClass rootClass = type;
-    JAnnotation rootEntityAnn = null;
-    EntityConfig rootEntityConfig = null;
+        boolean isMappedSuperclass = ! _annotationCfg.isNull();
 
-    if (isEntity) {
-      validateType(type);
-
-      // Inheritance annotation/configuration is specified
-      // on the entity class that is the root of the entity
-      // class hierarachy.
-
-      getInternalInheritanceConfig(type);
-      inheritanceAnn = _annotationCfg.getAnnotation();
-      inheritanceConfig = _annotationCfg.getInheritanceConfig();
-
-      boolean hasInheritance = ! _annotationCfg.isNull();
-
-      for (JClass parentClass = type.getSuperClass();
-           parentClass != null;
-           parentClass = parentClass.getSuperClass()) {
-
-        getInternalEntityConfig(parentClass);
-
-        if (_annotationCfg.isNull())
-          break;
-
-        rootEntityAnn = _annotationCfg.getAnnotation();
-        rootEntityConfig = _annotationCfg.getEntityConfig();
-
-        rootClass = parentClass;
-
-        if (hasInheritance)
-          throw new ConfigException(L.l("'{0}' cannot have @Inheritance. It must be specified on the entity class that is the root of the entity class hierarchy.",
+        if (isMappedSuperclass) {
+          if (mappedSuperConfig != null)
+            typeName = mappedSuperConfig.getClassName();
+          else
+            typeName = mappedSuperAnn.getString("name");
+        }
+        else
+          throw new ConfigException(L.l("'{0}' is not an @Entity or @MappedSuperclass.",
                                         type));
+      }
 
-        getInternalInheritanceConfig(rootClass);
+      // Adds named queries, if any.
+      introspectNamedQueries(type, typeName);
+
+      // Validates the type
+      String entityName;
+      EntityType parentType = null;
+      JAnnotation inheritanceAnn = null;
+      InheritanceConfig inheritanceConfig = null;
+      JClass rootClass = type;
+      JAnnotation rootEntityAnn = null;
+      EntityConfig rootEntityConfig = null;
+
+      if (isEntity) {
+        validateType(type);
+
+        // Inheritance annotation/configuration is specified
+        // on the entity class that is the root of the entity
+        // class hierarachy.
+
+        getInternalInheritanceConfig(type);
         inheritanceAnn = _annotationCfg.getAnnotation();
         inheritanceConfig = _annotationCfg.getInheritanceConfig();
 
-        hasInheritance = ! _annotationCfg.isNull();
-      }
-
-      if (hasInheritance) {
+        boolean hasInheritance = ! _annotationCfg.isNull();
 
         for (JClass parentClass = type.getSuperClass();
              parentClass != null;
              parentClass = parentClass.getSuperClass()) {
 
           getInternalEntityConfig(parentClass);
-          JAnnotation parentEntity = _annotationCfg.getAnnotation();
-          EntityConfig superEntityConfig = _annotationCfg.getEntityConfig();
 
-          if (! _annotationCfg.isNull()) {
-            parentType = introspect(parentClass);
+          if (_annotationCfg.isNull())
             break;
-          }
 
-          // getInternalMappedSuperclassConfig(parentClass);
-          // JAnnotation superclassAnn = _annotationCfg.getAnnotation();
-          // EntityConfig superclassConfig = _annotationCfg.getMappedSuperclassConfig();
-          //
-          // if (! _annotationCfg.isNull()) {
-          //   parentType = introspect(parentClass);
-          //   break;
-          // }
+          rootEntityAnn = _annotationCfg.getAnnotation();
+          rootEntityConfig = _annotationCfg.getEntityConfig();
+
+          rootClass = parentClass;
+
+          if (hasInheritance)
+            throw new ConfigException(L.l("'{0}' cannot have @Inheritance. It must be specified on the entity class that is the root of the entity class hierarchy.",
+                                          type));
+
+          getInternalInheritanceConfig(rootClass);
+          inheritanceAnn = _annotationCfg.getAnnotation();
+          inheritanceConfig = _annotationCfg.getInheritanceConfig();
+
+          hasInheritance = ! _annotationCfg.isNull();
+        }
+
+        if (hasInheritance) {
+
+          for (JClass parentClass = type.getSuperClass();
+               parentClass != null;
+               parentClass = parentClass.getSuperClass()) {
+
+            getInternalEntityConfig(parentClass);
+            JAnnotation parentEntity = _annotationCfg.getAnnotation();
+            EntityConfig superEntityConfig = _annotationCfg.getEntityConfig();
+
+            if (! _annotationCfg.isNull()) {
+              parentType = introspect(parentClass);
+              break;
+            }
+
+            // getInternalMappedSuperclassConfig(parentClass);
+            // JAnnotation superclassAnn = _annotationCfg.getAnnotation();
+            // EntityConfig superclassConfig = _annotationCfg.getMappedSuperclassConfig();
+            //
+            // if (! _annotationCfg.isNull()) {
+            //   parentType = introspect(parentClass);
+            //   break;
+            // }
+          }
+        }
+
+        if (entityAnn != null)
+          entityName = entityAnn.getString("name");
+        else {
+          entityName = entityConfig.getClassName();
+
+          int p = entityName.lastIndexOf('.');
+
+          if (p > 0)
+            entityName = entityName.substring(p + 1);
         }
       }
-
-      if (entityAnn != null)
-        entityName = entityAnn.getString("name");
       else {
-        entityName = entityConfig.getClassName();
+        entityName = type.getName();
+      }
 
+      if (entityName.equals("")) {
+        entityName = type.getName();
         int p = entityName.lastIndexOf('.');
-
         if (p > 0)
           entityName = entityName.substring(p + 1);
       }
-    }
-    else {
-      entityName = type.getName();
-    }
 
-    if (entityName.equals("")) {
-      entityName = type.getName();
-      int p = entityName.lastIndexOf('.');
-      if (p > 0)
-        entityName = entityName.substring(p + 1);
-    }
+      entityType = _entityMap.get(entityName);
 
-    EntityType entityType = _entityMap.get(entityName);
+      if (entityType != null)
+        return entityType;
 
-    if (entityType != null)
-      return entityType;
-
-    try {
       entityType = _persistenceUnit.createEntity(entityName, type);
       _entityMap.put(entityName, entityType);
 
@@ -392,15 +410,18 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         }
       }
     } catch (ConfigException e) {
-      entityType.setConfigException(e);
+      if (entityType != null)
+        entityType.setConfigException(e);
 
       throw e;
     } catch (SQLException e) {
-      entityType.setConfigException(e);
+      if (entityType != null)
+        entityType.setConfigException(e);
 
       throw e;
     } catch (RuntimeException e) {
-      entityType.setConfigException(e);
+      if (entityType != null)
+        entityType.setConfigException(e);
 
       throw e;
     }

@@ -1046,8 +1046,10 @@ public class AmberPersistenceUnit {
   {
     _entityMappings = entityMappings;
 
-    if (_entityMappings != null)
+    if (_entityMappings != null) {
       _entityIntrospector.setEntityConfigMap(_entityMappings.getEntityMap());
+      _entityIntrospector.setMappedSuperclassConfigMap(_entityMappings.getMappedSuperclassMap());
+    }
   }
 
   /**
