@@ -29,37 +29,58 @@
 
 package com.caucho.iiop.orb;
 
-import java.util.HashMap;
+import com.caucho.iiop.*;
 
-/**
- * Proxy implementation for ORB clients.
- */
-public class MarshalFactory {
-  private static MarshalFactory _factory = new MarshalFactory();
+import org.omg.CORBA.*;
 
-  private static HashMap<Class,Marshal> _classMap
-    = new HashMap<Class,Marshal>();
+import java.util.logging.Logger;
 
-  public static MarshalFactory create()
+public class StubImpl extends javax.rmi.CORBA.Stub
+{
+  public static final Logger log
+    = Logger.getLogger(StubImpl.class.getName());
+  
+  private ORBImpl _orb;
+  private IOR _ior;
+
+  StubImpl(ORBImpl orb)
   {
-    return _factory;
+    _orb = orb;
+
+    _set_delegate(orb.getStubDelegate());
   }
 
-  public Marshal create(Class cl)
+  public StubImpl(ORBImpl orb, IOR ior)
   {
-    Marshal marshal = _classMap.get(cl);
+    _orb = orb;
+    _ior = ior;
 
-    if (marshal != null)
-      return marshal;
-
-    if (java.io.Serializable.class.isAssignableFrom(cl))
-      return SerializableMarshal.MARSHAL;
-
-    throw new UnsupportedOperationException(cl.getName());
+    _set_delegate(orb.getStubDelegate());
   }
 
-  static {
-    _classMap.put(String.class, StringMarshal.MARSHAL);
-    _classMap.put(org.omg.CORBA.Object.class, CorbaObjectMarshal.MARSHAL);
+  public String []_ids()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public IOR getIOR()
+  {
+    return _ior;
+  }
+
+  public byte []getOid()
+  {
+    if (_ior != null)
+      return _ior.getOid();
+    else
+      return "INIT".getBytes();
+  }
+
+  public String toString()
+  {
+    if (_ior != null)
+      return "StubImpl[" + _ior + "]";
+    else
+      return "StubImpl[]";
   }
 }

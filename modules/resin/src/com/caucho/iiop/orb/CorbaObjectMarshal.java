@@ -29,37 +29,22 @@
 
 package com.caucho.iiop.orb;
 
-import java.util.HashMap;
-
 /**
- * Proxy implementation for ORB clients.
+ * CORBA object marshaller
  */
-public class MarshalFactory {
-  private static MarshalFactory _factory = new MarshalFactory();
+public class CorbaObjectMarshal extends Marshal {
+  public static final Marshal MARSHAL = new CorbaObjectMarshal();
 
-  private static HashMap<Class,Marshal> _classMap
-    = new HashMap<Class,Marshal>();
-
-  public static MarshalFactory create()
+  @Override
+  public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
+                      Object value)
   {
-    return _factory;
+    os.write_value((java.io.Serializable) value);
   }
 
-  public Marshal create(Class cl)
+  @Override
+  public Object unmarshal(org.omg.CORBA_2_3.portable.InputStream is)
   {
-    Marshal marshal = _classMap.get(cl);
-
-    if (marshal != null)
-      return marshal;
-
-    if (java.io.Serializable.class.isAssignableFrom(cl))
-      return SerializableMarshal.MARSHAL;
-
-    throw new UnsupportedOperationException(cl.getName());
-  }
-
-  static {
-    _classMap.put(String.class, StringMarshal.MARSHAL);
-    _classMap.put(org.omg.CORBA.Object.class, CorbaObjectMarshal.MARSHAL);
+    return is.read_value();
   }
 }

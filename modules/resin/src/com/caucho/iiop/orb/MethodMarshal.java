@@ -55,25 +55,19 @@ public class MethodMarshal {
     _ret = factory.create(method.getReturnType());
   }
 
-  public Object invoke(org.omg.CORBA.Object obj,
+  public Object invoke(org.omg.CORBA.portable.ObjectImpl obj,
 		       Object []args)
     throws Throwable
   {
-    org.omg.CORBA_2_3.portable.OutputStream os = null;
-    /*
-      = ((org.omg.CORBA_2_3.portable.OutputStream) obj._create_output_stream(_name));
-    */
+    org.omg.CORBA_2_3.portable.OutputStream os
+      = ((org.omg.CORBA_2_3.portable.OutputStream) obj._request(_name, true));
     
     for (int i = 0; i < _args.length; i++) {
       _args[i].marshal(os, args[i]);
     }
 
-    org.omg.CORBA_2_3.portable.InputStream is = null;
-    /*
     org.omg.CORBA_2_3.portable.InputStream is
-      = ((org.omg.CORBA_2_3.portable.InputStream)
-	 obj._invoke(os));
-    */
+      = ((org.omg.CORBA_2_3.portable.InputStream) obj._invoke(os));
 
     return _ret.unmarshal(is);
   }

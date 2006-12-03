@@ -29,12 +29,17 @@
 
 package com.caucho.iiop.orb;
 
+import com.caucho.vfs.*;
+import com.caucho.iiop.*;
+
 import org.omg.CORBA.*;
 
 import java.applet.Applet;
 import java.lang.reflect.Proxy;
 import java.util.Properties;
 import java.util.logging.Logger;
+import javax.rmi.PortableRemoteObject;
+import java.io.IOException;
 
 public class ORBImpl extends org.omg.CORBA.ORB
 {
@@ -44,11 +49,38 @@ public class ORBImpl extends org.omg.CORBA.ORB
   private String _host;
   private int _port;
 
+  private Path _path;
+
   private final StubDelegateImpl _stubDelegate;
 
   public ORBImpl()
   {
     _stubDelegate = new StubDelegateImpl(this);
+  }
+
+  StubDelegateImpl getStubDelegate()
+  {
+    return _stubDelegate;
+  }
+
+  WriteStream openWriter()
+  {
+    try {
+      ReadWritePair pair = _path.openReadWrite();
+
+      return pair.getWriteStream();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  ReadWritePair openReadWrite()
+  {
+    try {
+      return _path.openReadWrite();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public TypeCode create_alias_tc(String id, String name, TypeCode original)
@@ -191,15 +223,32 @@ public class ORBImpl extends org.omg.CORBA.ORB
     try {
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
-      
-      IiopProxyHandler handler = new IiopProxyHandler(this);
 
-      Init init = (Init) Proxy.newProxyInstance(loader,
-						new Class[] { Init.class },
-						handler);
-      System.out.println("INIT: " + init);
+      Iiop10Writer writer = new Iiop10Writer();
+
+      ReadWritePair pair = openReadWrite();
+
+      MessageWriter out = new StreamMessageWriter(pair.getWriteStream());
+
+      IiopReader in = new IiopReader(pair.getReadStream());
+      in.setOrb(this);
+    
+      writer.init(out, new IiopReader(pair.getReadStream()));
+
+      byte []oid = new byte[] { 'I', 'N', 'I', 'T' };
+
+      writer.startRequest(oid, 0, oid.length, "get", 1);
+
+      writer.writeString(object_name);
+
+      in = writer._call();
+      in.setOrb(this);
+
+      org.omg.CORBA.Object value = in.read_Object();
+
+      in.close();
       
-      return null;
+      return value;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -235,6 +284,8 @@ public class ORBImpl extends org.omg.CORBA.ORB
 	_port = ((Number) port).intValue();
       else
 	_port = Integer.parseInt(String.valueOf(port));
+
+      _path = Vfs.lookup("tcp://" + _host + ":" + port);
     }
   }
 

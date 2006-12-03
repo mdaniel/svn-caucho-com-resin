@@ -30,6 +30,7 @@
 package com.caucho.iiop;
 
 import com.caucho.log.Log;
+import com.caucho.iiop.orb.*;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.CharBuffer;
@@ -122,6 +123,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   private ValueHandler _valueHandler = Util.createValueHandler();
   private RunTime runTime = _valueHandler.getRunTimeCodeBase();
 
+  private ORBImpl _orb;
+
   public IiopReader()
   {
   }
@@ -129,6 +132,11 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   public IiopReader(ReadStream rs)
   {
     init(rs);
+  }
+
+  public void setOrb(ORBImpl orb)
+  {
+    _orb = orb;
   }
 
   /**
@@ -1117,7 +1125,13 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   public org.omg.CORBA.Object read_Object()
   {
     try {
-      return new DummyObjectImpl(readIOR());
+      IOR ior = readIOR();
+      
+      System.out.println("RO: " + _orb + " " + ior);
+      if (_orb != null)
+	return new StubImpl(_orb, ior);
+      else
+	return new DummyObjectImpl(ior);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

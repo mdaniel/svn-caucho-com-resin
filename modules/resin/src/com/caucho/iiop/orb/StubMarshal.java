@@ -29,37 +29,37 @@
 
 package com.caucho.iiop.orb;
 
-import java.util.HashMap;
+import java.util.*;
+import java.lang.reflect.*;
 
 /**
- * Proxy implementation for ORB clients.
+ * Marshal for a client stub.
  */
-public class MarshalFactory {
-  private static MarshalFactory _factory = new MarshalFactory();
+public class StubMarshal {
+  private final HashMap<Method,MethodMarshal> _methodMap
+    = new HashMap<Method,MethodMarshal>();
 
-  private static HashMap<Class,Marshal> _classMap
-    = new HashMap<Class,Marshal>();
-
-  public static MarshalFactory create()
+  StubMarshal(Class cl)
   {
-    return _factory;
+    introspect(cl);
   }
 
-  public Marshal create(Class cl)
+  private void introspect(Class cl)
   {
-    Marshal marshal = _classMap.get(cl);
+    for (Method method : cl.getMethods()) {
+      if (Modifier.isStatic(method.getModifiers()))
+	continue;
+      if (method.getDeclaringClass().equals(Object.class))
+	continue;
 
-    if (marshal != null)
-      return marshal;
+      _methodMap.put(method, new MethodMarshal(method));
 
-    if (java.io.Serializable.class.isAssignableFrom(cl))
-      return SerializableMarshal.MARSHAL;
-
-    throw new UnsupportedOperationException(cl.getName());
+      System.out.println("M: " + method);
+    }
   }
 
-  static {
-    _classMap.put(String.class, StringMarshal.MARSHAL);
-    _classMap.put(org.omg.CORBA.Object.class, CorbaObjectMarshal.MARSHAL);
+  MethodMarshal get(Method method)
+  {
+    return _methodMap.get(method);
   }
 }

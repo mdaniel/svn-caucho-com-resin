@@ -29,18 +29,27 @@
 
 package com.caucho.iiop.orb;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
  * Proxy implementation for ORB clients.
  */
 public class IiopProxyHandler implements InvocationHandler {
+  private final HashMap<String,MethodMarshal> _methodMap
+    = new HashMap<String,MethodMarshal>();
+
   private ORBImpl _orb;
+  private org.omg.CORBA.portable.ObjectImpl _stub;
+  private StubMarshal _stubMarshal;
   
-  IiopProxyHandler(ORBImpl orb)
+  IiopProxyHandler(ORBImpl orb,
+		   org.omg.CORBA.portable.ObjectImpl stub,
+		   StubMarshal stubMarshal)
   {
     _orb = orb;
+    _stub = stub;
+    _stubMarshal = stubMarshal;
   }
 
   /**
@@ -54,6 +63,13 @@ public class IiopProxyHandler implements InvocationHandler {
     throws Throwable
   {
     String methodName = method.getName();
+
+    MethodMarshal marshal = _stubMarshal.get(method);
+
+    if (marshal != null) {
+      return marshal.invoke(_stub, args);
+    }
+    
     Class []params = method.getParameterTypes();
 
     if (methodName.equals("toString") && params.length == 0)

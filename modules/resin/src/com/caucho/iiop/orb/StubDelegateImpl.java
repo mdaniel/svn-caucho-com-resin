@@ -32,6 +32,10 @@ package com.caucho.iiop.orb;
 import org.omg.CORBA.*;
 
 import java.util.logging.Logger;
+import java.io.*;
+
+import com.caucho.iiop.*;
+import com.caucho.vfs.*;
 
 public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
 {
@@ -43,6 +47,47 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
   StubDelegateImpl(ORBImpl orb)
   {
     _orb = orb;
+  }
+
+  @Override
+  public org.omg.CORBA.portable.OutputStream
+    request(org.omg.CORBA.Object self,
+	    String op,
+	    boolean isResponseExpected)
+  {
+    try {
+      Iiop10Writer writer = new Iiop10Writer();
+
+      ReadWritePair pair = _orb.openReadWrite();
+
+      MessageWriter out = new StreamMessageWriter(pair.getWriteStream());
+    
+      writer.init(out, new IiopReader(pair.getReadStream()));
+
+      byte []oid = ((StubImpl) self).getOid();
+
+      writer.startRequest(oid, 0, oid.length, op, 1);
+
+      return writer;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public org.omg.CORBA.portable.InputStream
+    invoke(org.omg.CORBA.Object self,
+	   org.omg.CORBA.portable.OutputStream os)
+  {
+    try {
+      IiopWriter writer = (IiopWriter) os;
+
+      IiopReader reader = writer._call();
+
+      return reader;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
