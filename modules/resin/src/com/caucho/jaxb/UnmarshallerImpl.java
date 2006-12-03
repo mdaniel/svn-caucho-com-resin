@@ -28,46 +28,78 @@
 */
 
 package com.caucho.jaxb;
+
 import com.caucho.jaxb.adapters.BeanAdapter;
 import com.caucho.jaxb.skeleton.Skeleton;
 import com.caucho.util.L10N;
+import com.caucho.vfs.*;
+import com.caucho.xml.stream.*;
 
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
+import org.w3c.dom.*;
+import org.xml.sax.*;
+import org.xml.sax.*;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.bind.helpers.AbstractUnmarshallerImpl;
+import javax.xml.bind.*;
+import javax.xml.bind.annotation.adapters.*;
+import javax.xml.bind.attachment.*;
+import javax.xml.bind.helpers.*;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.*;
+import javax.xml.transform.*;
+import javax.xml.validation.*;
 
-public class UnmarshallerImpl extends AbstractUnmarshallerImpl
+import java.net.*;
+import java.io.*;
+import java.util.*;
+
+public class UnmarshallerImpl implements Unmarshaller
 {
   private static final L10N L = new L10N(UnmarshallerImpl.class);
 
   private JAXBContextImpl _context;
+  
+  protected boolean validating;
+
+  private AttachmentUnmarshaller _attachmentUnmarshaller = null;
+  private ValidationEventHandler _validationEventHandler = null;
+  private Listener _listener = null;
+  private HashMap<String,Object> _properties = new HashMap<String,Object>();
+  private Schema _schema = null;
+  private XMLReader _xmlreader = null;
+  private XmlAdapter _adapter = null;
+  private UnmarshallerHandler _unmarshallerHandler = null;
+  private HashMap<Class,XmlAdapter> _adapters
+    = new HashMap<Class,XmlAdapter>();
 
   UnmarshallerImpl(JAXBContextImpl context)
   {
     this._context = context;
   }
 
+  //
+  // unmarshallers.
+  //
+
+  /**
+   * Unmarshall from a DOM node.
+   */
   public Object unmarshal(Node node) throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
 
-  ////////////////////////////////////////////////////////////////////////
-
+  /**
+   * Unmarshall from an input source.
+   */
   protected Object unmarshal(XMLReader reader, InputSource source)
     throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
 
+  /**
+   * Unmarshall from an event reader.
+   */
   public Object unmarshal(XMLEventReader reader) throws JAXBException
   {
     throw new UnsupportedOperationException();
@@ -101,13 +133,42 @@ public class UnmarshallerImpl extends AbstractUnmarshallerImpl
     }
   }
 
+  /**
+   * Parses the XML based on an InputStream
+   */
+  public Object unmarshal(InputStream is)
+    throws JAXBException
+  {
+    try {
+      XMLStreamReader reader = new XMLStreamReaderImpl(is);
+
+      try {
+	if (reader.nextTag() != XMLStreamReader.START_ELEMENT)
+	  throw new JAXBException(L.l("Expected root element"));
+
+	Skeleton skel =  _context.getRootElement(reader.getName());
+
+	if (skel == null)
+	  throw new JAXBException(L.l("'{0}' is an unknown root element",
+				      reader.getName()));
+
+	return skel.read(this, reader);
+      } finally {
+	reader.close();
+      }
+    } catch (JAXBException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public <T> JAXBElement<T> unmarshal(XMLStreamReader reader,
                                       Class<T> declaredType)
       throws JAXBException
   {
     try {
-
-      while(reader.getEventType() != XMLStreamReader.START_ELEMENT)
+      while (reader.getEventType() != XMLStreamReader.START_ELEMENT)
         reader.next();
 
       QName name = reader.getName();
@@ -119,13 +180,191 @@ public class UnmarshallerImpl extends AbstractUnmarshallerImpl
     }
   }
 
+  //
+  // From AbstractUnmarshallerImpl
+  //
+
+  public UnmarshallerHandler getUnmarshallerHandler()
+  {
+    return _unmarshallerHandler;
+  }
+
+  public void setUnmarshallerHandler(UnmarshallerHandler u)
+  {
+    _unmarshallerHandler = u;
+  }
+
+  protected UnmarshalException createUnmarshalException(SAXException e)
+  {
+    return new UnmarshalException(e);
+  }
+
   public <A extends XmlAdapter> A getAdapter(Class<A> type)
   {
-    A a = super.getAdapter(type);
+    A a = (A)_adapters.get(type);
 
     if (a == null)
       return (A)new BeanAdapter();
 
     return a;
+  }
+
+  public AttachmentUnmarshaller getAttachmentUnmarshaller()
+  {
+    return _attachmentUnmarshaller;
+  }
+
+  public ValidationEventHandler getEventHandler() throws JAXBException
+  {
+    return _validationEventHandler;
+  }
+
+  public Listener getListener()
+  {
+    return _listener;
+  }
+
+  public Object getProperty(String name) throws PropertyException
+  {
+    return _properties.get(name);
+  }
+
+  public Schema getSchema()
+  {
+    return _schema;
+  }
+
+  protected XMLReader getXMLReader() throws JAXBException
+  {
+    return _xmlreader;
+  }
+
+  public boolean isValidating() throws JAXBException
+  {
+    return validating;
+  }
+
+  public <A extends XmlAdapter> void setAdapter(Class<A> type, A adapter)
+  {
+    _adapters.put(type, adapter);
+  }
+
+  public void setAdapter(XmlAdapter adapter)
+  {
+    setAdapter((Class)adapter.getClass(), adapter);
+  }
+
+  public void setAttachmentUnmarshaller(AttachmentUnmarshaller au)
+  {
+    _attachmentUnmarshaller = au;
+  }
+
+  public void setEventHandler(ValidationEventHandler handler)
+    throws JAXBException
+  {
+    _validationEventHandler = handler;
+  }
+
+  public void setListener(Listener listener)
+  {
+    _listener = listener;
+  }
+
+  public void setProperty(String name, Object value) throws PropertyException
+  {
+    _properties.put(name, value);
+  }
+
+  public void setSchema(Schema schema)
+  {
+    _schema = schema;
+  }
+
+  public void setValidating(boolean validating) throws JAXBException
+  {
+    this.validating = validating;
+  }
+
+  public Object unmarshal(File f) throws JAXBException
+  {
+    FileInputStream fis = null;
+    try {
+      fis = new FileInputStream(f);
+      return unmarshal(fis);
+    }
+    catch (IOException e) {
+      throw new JAXBException(e);
+    }
+    finally {
+      try {
+        if (fis != null)
+          fis.close();
+      }
+      catch (IOException e) {
+        throw new JAXBException(e);
+      }
+    }
+  }
+
+  public Object unmarshal(InputSource source) throws JAXBException
+  {
+    throw new UnsupportedOperationException("subclasses must override this");
+  }
+
+  public Object unmarshal(Reader reader) throws JAXBException
+  {
+    try {
+      XMLInputFactory factory = _context.getXMLInputFactory();
+      
+      return unmarshal(factory.createXMLStreamReader(reader));
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
+  }
+
+  public Object unmarshal(Source source) throws JAXBException
+  {
+    try {
+      XMLInputFactory factory = _context.getXMLInputFactory();
+      
+      return unmarshal(factory.createXMLStreamReader(source));
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
+  }
+
+  public <T> JAXBElement<T> unmarshal(Node node, Class<T> declaredType)
+      throws JAXBException
+  {
+    throw new UnsupportedOperationException("subclasses must override this");
+  }
+
+  public <T> JAXBElement<T> unmarshal(Source node, Class<T> declaredType)
+      throws JAXBException
+  {
+    try {
+      XMLInputFactory factory = XMLInputFactory.newInstance();
+      return unmarshal(factory.createXMLStreamReader(node), declaredType);
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
+  }
+
+  public Object unmarshal(URL url) throws JAXBException
+  {
+    try {
+      InputStream is = url.openStream();
+
+      try {
+	return unmarshal(is);
+      } finally {
+	is.close();
+      }
+    } catch (IOException e) {
+      throw new JAXBException(e);
+    }
   }
 }

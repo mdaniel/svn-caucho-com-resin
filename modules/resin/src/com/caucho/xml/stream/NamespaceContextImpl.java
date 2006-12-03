@@ -31,6 +31,7 @@ package com.caucho.xml.stream;
 
 import com.caucho.vfs.WriteStream;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import java.io.IOException;
@@ -42,47 +43,87 @@ import java.util.Map;
 /**
  *  Maintains a stack of namespace contexts
  */
-public class NamespaceContextImpl implements NamespaceContext {
+public class NamespaceContextImpl implements NamespaceContext
+{
+  // The current namespace bindings
+  private final HashMap<String,NamespaceBinding> _bindings
+    = new HashMap<String,NamespaceBinding>();
+
+  // The stack of element bindings
+  protected final ArrayList<ElementBinding> _stack
+    = new ArrayList<ElementBinding>();
 
   private Context _context = new Context();
-  private int _uniquifier = 0;
 
-  /** creates a new subcontext and enters it */
-  public void push(QName tagName)
-  {    
-    _context = _context.push(tagName);
+  private NamespaceBinding _nullEltBinding;
+  private NamespaceBinding _nullAttrBinding;
+
+  private int _uniqueId = 0;
+  private int _version = 0;
+
+  NamespaceContextImpl()
+  {
+    _nullEltBinding = new NamespaceBinding(null, null, 0);
+    _nullAttrBinding = new NamespaceBinding(null, null, 0);
+    
+    _stack.add(null);
   }
 
-  /** deletes the current context and enters its parent */
+  /**
+   * Creates a new subcontext and enters it
+   */
+  public void push()
+  {
+    _stack.add(null);
+  }
+
+  /**
+   * deletes the current context and enters its parent
+   */
   public void pop()
-  {    
-    _context = _context.pop();
-  }
-
-  public QName getTagName()
   {
-    return _context.getTagName();
+    ElementBinding eltBinding = _stack.remove(_stack.size() - 1);
+
+    if (eltBinding != null) {
+      ArrayList<Decl> oldBinding = eltBinding.getOldBindingList();
+
+      for (int i = 0; i < oldBinding.size(); i++) {
+	Decl decl = oldBinding.get(i);
+	NamespaceBinding binding = decl.getBinding();
+
+	_version++;
+	
+	binding.setUri(decl.getOldUri());
+	binding.setVersion(_version);
+      }
+    }
   }
 
-  public QName resolve(String localName)
+  public int getDepth()
   {
-    return resolve(null, localName);
+    return _stack.size() - 1;
   }
 
-  public QName resolve(String prefix, String localName)
-  {
-    String uri = getUri(prefix);
-
-    if (uri == null)
-      return new QName(localName);
-
-    return new QName(uri, localName, prefix);
-  }
-
-  /** declares a new namespace prefix in the current context */
+  /**
+   * declares a new namespace prefix in the current context
+   */
   public void declare(String prefix, String uri)
   {
-    _context.declare(prefix, uri);
+    NamespaceBinding binding = getElementNamespace(prefix);
+
+    ElementBinding eltBinding = _stack.get(_stack.size() - 1);
+
+    if (eltBinding == null) {
+      eltBinding = new ElementBinding();
+      
+      _stack.set(_stack.size() - 1, eltBinding);
+    }
+
+    eltBinding.addOldBinding(binding, prefix, binding.getUri(), uri);
+
+    _version++;
+    binding.setUri(uri);
+    binding.setVersion(_version);
   }
 
   /**
@@ -91,16 +132,29 @@ public class NamespaceContextImpl implements NamespaceContext {
    */
   public String declare(String uri)
   {
-    return _context.declare(uri);
+    String prefix = "ns"+ _uniqueId++;
+    
+    declare(prefix, uri);
+    
+    return prefix;
   }
 
-  /** looks up the prefix, returns the uri it corresponds to */
+  /**
+   * looks up the prefix, returns the uri it corresponds to
+   */
   public String getUri(String prefix)
   {
-    return _context.getUri(prefix);
+    NamespaceBinding binding = _bindings.get(prefix);
+
+    if (binding != null)
+      return binding.getUri();
+    else
+      return null;
   }
 
-  /** looks up the uri, returns the prefix it corresponds to */
+  /**
+   * looks up the uri, returns the prefix it corresponds to
+   */
   public String getPrefix(String uri)
   {
     return _context.getPrefix(uri);
@@ -114,32 +168,101 @@ public class NamespaceContextImpl implements NamespaceContext {
 
   public String getNamespaceURI(String prefix)
   {
-    return getUri(prefix);
+    NamespaceBinding binding = _bindings.get(prefix);
+
+    if (binding != null)
+      return binding.getUri();
+
+    String uri = null;
+    
+    if (XMLConstants.XML_NS_PREFIX.equals(prefix))
+      uri = XMLConstants.XML_NS_URI;
+    else if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix))
+      uri = XMLConstants.XMLNS_ATTRIBUTE_NS_URI;
+
+    return uri;
   }
 
   public Iterator getPrefixes(String uri)
   {
-    return _context.getPrefixes(uri);
+    return null;
   }
 
   public String getUri(int i)
   {
-    return _context.getUri(i);
+    ElementBinding eltBinding = _stack.get(_stack.size() - 1);
+
+    if (eltBinding != null) {
+      return eltBinding.getOldBindingList().get(i).getNewUri();
+    }
+    else
+      return null;
   }
   
   public String getPrefix(int i)
   {
-    return _context.getPrefix(i);
+    ElementBinding eltBinding = _stack.get(_stack.size() - 1);
+
+    if (eltBinding != null) {
+      return eltBinding.getOldBindingList().get(i).getPrefix();
+    }
+
+    return null;
   }
   
   public int getNumDecls()
   {
-    return _context.getNumDecls();
+    ElementBinding eltBinding = _stack.get(_stack.size() - 1);
+
+    if (eltBinding != null)
+      return eltBinding.getOldBindingList().size();
+    else
+      return 0;
   }
 
   public void setTagName(QName tagName)
   {
     _context.setTagName(tagName);
+  }
+
+  NamespaceBinding getElementNamespace(String prefix)
+  {
+    NamespaceBinding binding;
+
+    if (prefix == null)
+      binding = _nullEltBinding;
+    else
+      binding = _bindings.get(prefix);
+
+    if (binding != null)
+      return binding;
+    else {
+      binding = new NamespaceBinding(prefix, null, _version);
+
+      _bindings.put(prefix, binding);
+
+      return binding;
+    }
+  }
+
+  NamespaceBinding getAttributeNamespace(String prefix)
+  {
+    NamespaceBinding binding;
+
+    if (prefix == null)
+      binding = _nullAttrBinding;
+    else
+      binding = _bindings.get(prefix);
+
+    if (binding != null)
+      return binding;
+    else {
+      binding = new NamespaceBinding(prefix, null, _version);
+
+      _bindings.put(prefix, binding);
+
+      return binding;
+    }
   }
 
   // XXX: can be vastly more efficient
@@ -153,6 +276,9 @@ public class NamespaceContextImpl implements NamespaceContext {
 
     private HashMap<String,String> _uris
       = new HashMap<String,String>();
+
+    private HashMap<String,NamespaceBinding> _bindings
+      = new HashMap<String,NamespaceBinding>();
 
     private ArrayList<String> _decls
       = new ArrayList<String>();
@@ -176,45 +302,6 @@ public class NamespaceContextImpl implements NamespaceContext {
     public Context pop()
     {
       return _parent;
-    }
-
-    public Iterator getPrefixes(final String uri)
-    {
-      return new Iterator() {
-        private int i = 0;
-        private Object waiting = null;
-
-        public void remove()
-        {
-          throw new RuntimeException("not supported");
-        }
-
-        public boolean hasNext()
-        {
-          if (waiting != null) return true;
-          waiting = next();
-          return waiting != null;
-        }
-
-        public Object next()
-        {
-          if (waiting != null) {
-            Object ret = waiting;
-            waiting = null;
-            return ret;
-          }
-          while (i < _decls.size())
-            {
-              if (uri.equals(getUri(i))) {
-                i++;
-                return getPrefix(i);
-              } else {
-                i++;
-              }
-            }
-          return null;
-        }
-      };
     }
 
     public Context push(QName tagName)
@@ -242,7 +329,9 @@ public class NamespaceContextImpl implements NamespaceContext {
       return _decls.size();
     }
 
-    /** declares a new namespace prefix in the current context */
+    /**
+     * declares a new namespace prefix in the current context
+     **/
     public void declare(String prefix, String uri)
     {
       String oldUri = getUri(prefix);
@@ -264,7 +353,7 @@ public class NamespaceContextImpl implements NamespaceContext {
       if (prefix != null)
         return prefix;
 
-      prefix = "ns"+(_uniquifier++);
+      prefix = "ns"+(_uniqueId++);
       declare(prefix, uri);
       return prefix;
     }
@@ -307,6 +396,110 @@ public class NamespaceContextImpl implements NamespaceContext {
         ws.print(Escapifier.escape(e.getValue()));
         ws.print("'");
       }
+    }
+  }
+  
+  static class ElementBinding
+  {
+    private QName _name;
+    private ArrayList<Decl> _declList = new ArrayList<Decl>();
+
+    public void setName(QName name)
+    {
+      _name = name;
+    }
+
+    public QName getName()
+    {
+      return _name;
+    }
+    
+    public void addOldBinding(NamespaceBinding binding, String prefix,
+			      String oldUri, String newUri)
+    {
+      _declList.add(new Decl(binding, prefix, oldUri, newUri));
+    }
+
+    public ArrayList<Decl> getOldBindingList()
+    {
+      return _declList;
+    }
+  }
+
+  static class Decl {
+    private final NamespaceBinding _binding;
+    private final String _prefix;
+    private final String _oldUri;
+    private final String _newUri;
+
+    Decl(NamespaceBinding binding, String prefix,
+	 String oldUri, String newUri)
+    {
+      _binding = binding;
+      _prefix = prefix;
+      _oldUri = oldUri;
+      _newUri = newUri;
+    }
+
+    NamespaceBinding getBinding()
+    {
+      return _binding;
+    }
+
+    String getPrefix()
+    {
+      return _prefix;
+    }
+
+    String getOldUri()
+    {
+      return _oldUri;
+    }
+
+    String getNewUri()
+    {
+      return _newUri;
+    }
+  }
+
+  static class PrefixIterator
+  {
+    private NamespaceContextImpl _context;
+    private ElementBinding _eltBinding;
+    private int _index = 0;
+      
+    PrefixIterator(NamespaceContextImpl context,
+		   ElementBinding eltBinding)
+    {
+      _context = context;
+      _eltBinding = eltBinding;
+    }
+
+    public void remove()
+    {
+      throw new RuntimeException("not supported");
+    }
+
+    public boolean hasNext()
+    {
+      if (_eltBinding == null)
+	return false;
+
+      return _index < _eltBinding.getOldBindingList().size();
+    }
+
+    public Object next()
+    {
+      if (_eltBinding == null)
+	return null;
+
+      ArrayList<Decl> oldBindingList = _eltBinding.getOldBindingList();
+
+      if (_index < oldBindingList.size()) {
+	return oldBindingList.get(_index++).getPrefix();
+      }
+	
+      return null;
     }
   }
 }

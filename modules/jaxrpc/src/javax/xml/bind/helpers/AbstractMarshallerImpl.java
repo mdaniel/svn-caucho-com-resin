@@ -49,8 +49,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.HashMap;
 
-public abstract class AbstractMarshallerImpl implements Marshaller {
-
+public abstract class AbstractMarshallerImpl implements Marshaller
+{
   private XMLOutputFactory _factory;
   private AttachmentMarshaller _attachmentMarshaller;
   private String _encoding;

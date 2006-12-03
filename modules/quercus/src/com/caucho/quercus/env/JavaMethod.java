@@ -33,7 +33,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.util.L10N;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 
 /**
  * Represents the introspected static function information.
@@ -74,6 +74,10 @@ public class JavaMethod extends JavaInvoker {
   {
     try {
       return _method.invoke(obj, args);
+    } catch (InvocationTargetException e) {
+      Throwable e1 = e.getCause();
+      
+      throw new QuercusException(_method.getName() + ": " + e1.getMessage(), e1);
     } catch (Exception e) {
       throw new QuercusException(_method.getName() + ": " + e.getMessage(), e);
     }

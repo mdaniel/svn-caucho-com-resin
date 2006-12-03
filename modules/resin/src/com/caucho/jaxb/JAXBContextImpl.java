@@ -37,8 +37,10 @@ import org.w3c.dom.Node;
 
 import javax.xml.bind.*;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import java.io.IOException;
@@ -58,6 +60,9 @@ public class JAXBContextImpl extends JAXBContext {
   private String[] _packages;
   private ClassLoader _classLoader;
   private JAXBIntrospector _jaxbIntrospector;
+
+  private XMLInputFactory _staxInputFactory;
+  private XMLOutputFactory _staxOutputFactory;
 
   private ArrayList<ObjectFactorySkeleton> _objectFactories 
     = new ArrayList<ObjectFactorySkeleton>();
@@ -97,58 +102,11 @@ public class JAXBContextImpl extends JAXBContext {
     DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
   }
 
-  private void loadPackage(String packageName) 
+  public static JAXBContext createContext(Class []classes,
+					  Map<String,?> properties)
     throws JAXBException
   {
-    boolean success = false;
-
-    try {
-      Class cl = CauchoSystem.loadClass(packageName + ".ObjectFactory");
-      _objectFactories.add(new ObjectFactorySkeleton(cl));
-
-      success = true;
-    }
-    catch (ClassNotFoundException e) {
-      // we can still try for jaxb.index
-    }
-
-    try {
-      String resourceName = packageName.replace('.', '/') + "/jaxb.index";
-
-      // For some reason, this approach works when running resin...
-      InputStream is = this.getClass().getResourceAsStream('/' + resourceName);
-
-      // ...and this approach works in QA
-      if (is == null) {
-        ClassLoader classLoader = 
-          Thread.currentThread().getContextClassLoader();
-
-        is = classLoader.getResourceAsStream(resourceName);
-      }
-
-      InputStreamReader isr = new InputStreamReader(is, "utf-8");
-      LineNumberReader in = new LineNumberReader(isr);
-
-      for (String line = in.readLine();
-           line != null;
-           line = in.readLine()) {
-        String[] parts = line.split("#", 2);
-        String className = parts[0].trim();
-
-        if (! "".equals(className)) {
-          Class cl = CauchoSystem.loadClass(packageName + "." + className);
-          createSkeleton(cl);
-        }
-      }
-
-      success = true;
-    }
-    catch (Throwable t) {
-      if (! success) {
-        throw new JAXBException(L.l("Unable to open jaxb.index for package {0}",
-                                    packageName), t);
-      }
-    }
+    return new JAXBContextImpl(classes, properties);
   }
 
   public JAXBContextImpl(Class[] classes, Map<String,?> properties)
@@ -190,6 +148,31 @@ public class JAXBContextImpl extends JAXBContext {
     throws JAXBException
   {
     throw new UnsupportedOperationException();
+  }
+
+  XMLStreamReader getXMLStreamReader(InputStream is)
+    throws XMLStreamException
+  {
+    if (_staxInputFactory == null)
+      _staxInputFactory = XMLInputFactory.newInstance();
+
+    return _staxInputFactory.createXMLStreamReader(is);
+  }
+
+  XMLInputFactory getXMLInputFactory()
+  {
+    if (_staxInputFactory == null)
+      _staxInputFactory = XMLInputFactory.newInstance();
+
+    return _staxInputFactory;
+  }
+
+  XMLOutputFactory getXMLOutputFactory()
+  {
+    if (_staxOutputFactory == null)
+      _staxOutputFactory = XMLOutputFactory.newInstance();
+
+    return _staxOutputFactory;
   }
 
   public String toString() {
@@ -234,7 +217,7 @@ public class JAXBContextImpl extends JAXBContext {
     Result result = outputResolver.createOutput("", "schema1.xsd");
 
     try {
-      XMLOutputFactory factory = XMLOutputFactory.newInstance();
+      XMLOutputFactory factory = getXMLOutputFactory();
       XMLStreamWriter out = factory.createXMLStreamWriter(result);
 
       out.writeStartDocument("UTF-8", "1.0");
@@ -392,6 +375,60 @@ public class JAXBContextImpl extends JAXBContext {
 
     addRootElement(wrapper);
     _wrappers.add(wrapper);
+  }
+
+  private void loadPackage(String packageName) 
+    throws JAXBException
+  {
+    boolean success = false;
+
+    try {
+      Class cl = CauchoSystem.loadClass(packageName + ".ObjectFactory");
+      _objectFactories.add(new ObjectFactorySkeleton(cl));
+
+      success = true;
+    }
+    catch (ClassNotFoundException e) {
+      // we can still try for jaxb.index
+    }
+
+    try {
+      String resourceName = packageName.replace('.', '/') + "/jaxb.index";
+
+      // For some reason, this approach works when running resin...
+      InputStream is = this.getClass().getResourceAsStream('/' + resourceName);
+
+      // ...and this approach works in QA
+      if (is == null) {
+        ClassLoader classLoader = 
+          Thread.currentThread().getContextClassLoader();
+
+        is = classLoader.getResourceAsStream(resourceName);
+      }
+
+      InputStreamReader isr = new InputStreamReader(is, "utf-8");
+      LineNumberReader in = new LineNumberReader(isr);
+
+      for (String line = in.readLine();
+           line != null;
+           line = in.readLine()) {
+        String[] parts = line.split("#", 2);
+        String className = parts[0].trim();
+
+        if (! "".equals(className)) {
+          Class cl = CauchoSystem.loadClass(packageName + "." + className);
+          createSkeleton(cl);
+        }
+      }
+
+      success = true;
+    }
+    catch (Throwable t) {
+      if (! success) {
+        throw new JAXBException(L.l("Unable to open jaxb.index for package {0}",
+                                    packageName), t);
+      }
+    }
   }
 }
 

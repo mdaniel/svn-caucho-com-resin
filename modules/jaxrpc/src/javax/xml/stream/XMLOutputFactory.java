@@ -29,13 +29,17 @@
 
 package javax.xml.stream;
 import javax.xml.transform.Result;
+import java.util.WeakHashMap;
 import java.io.OutputStream;
 import java.io.Writer;
 
-public abstract class XMLOutputFactory {
-
+public abstract class XMLOutputFactory
+{
   public static final String IS_REPAIRING_NAMESPACES =
     "javax.xml.stream.isRepairingNamespaces";
+
+  private static final WeakHashMap<ClassLoader,Class> _factoryMap
+    = new WeakHashMap<ClassLoader,Class>();
 
   protected XMLOutputFactory()
   {
@@ -82,8 +86,24 @@ public abstract class XMLOutputFactory {
                                              ClassLoader classLoader)
     throws FactoryConfigurationError
   {
-    return (XMLOutputFactory)FactoryLoader
-      .getFactoryLoader(factoryId).newInstance(classLoader);
+    Class cl = _factoryMap.get(classLoader);
+
+    if (cl == null) {
+      cl = FactoryLoader.getFactoryLoader(factoryId).newClass(classLoader);
+
+      if (cl != null)
+	_factoryMap.put(classLoader, cl);
+    }
+
+    try {
+      return (XMLOutputFactory) cl.newInstance();
+    } catch (FactoryConfigurationError e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new FactoryConfigurationError(e);
+    }
   }
 
   public abstract void setProperty(String name, Object value)

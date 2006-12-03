@@ -41,6 +41,7 @@ import org.xml.sax.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.HashMap;
 
 /**
  * A fast XML parser.
@@ -58,6 +59,8 @@ public class XMLReaderImpl implements XMLReader {
   static final QName JSP_ATTRIBUTE_NAME = new QName("xtp", "jsp-attribute", null);
   static final String LEXICAL_HANDLER = "http://xml.org/sax/properties/lexical-handler";
 
+  private static final boolean []XML_NAME_CHAR;
+
   private ContentHandler _contentHandler;
   private EntityResolver _entityResolver;
   private DTDHandler _dtdHandler;
@@ -67,6 +70,13 @@ public class XMLReaderImpl implements XMLReader {
 
   private final AttributesImpl _attributes = new AttributesImpl();
   private final ExtendedLocator _locator = new LocatorImpl();
+
+  private final Intern _intern = new Intern();
+
+  private final HashMap<NameKey,QName> _nameMap
+    = new HashMap<NameKey,QName>();
+
+  private final NameKey _nameKey = new NameKey();
 
   private char []_valueBuf;
   private char []_inputBuf;
@@ -288,6 +298,7 @@ public class XMLReaderImpl implements XMLReader {
   private void parseContent()
     throws IOException, SAXException
   {
+    char []inputBuf = _inputBuf;
     char []valueBuffer = _valueBuf;
     int valueLength = valueBuffer.length;
     int valueOffset = 0;
@@ -301,7 +312,7 @@ public class XMLReaderImpl implements XMLReader {
 	return;
       }
 
-      char ch = _inputBuf[_inputOffset++];
+      char ch = inputBuf[_inputOffset++];
 
       switch (ch) {
       case ' ': case '\t':
@@ -343,7 +354,7 @@ public class XMLReaderImpl implements XMLReader {
 	if (_inputLength == _inputOffset && ! fillBuffer())
 	  error("XXX: unexpected eof");
 
-	ch = _inputBuf[_inputOffset];
+	ch = inputBuf[_inputOffset];
 	switch (ch) {
 	case '!':
 	  break;
@@ -387,7 +398,8 @@ public class XMLReaderImpl implements XMLReader {
   private void parseElement()
     throws IOException, SAXException
   {
-    String name = parseName();
+    InternQName qName = parseName();
+    String name = qName.getName();
 
     _attributes.clear();
 
@@ -423,7 +435,8 @@ public class XMLReaderImpl implements XMLReader {
 
 	parseContent();
 
-	String tailName = parseName();
+	InternQName tailQName = parseName();
+	String tailName = tailQName.getName();
 
 	if ((ch = read()) != '>')
 	  throw error("XXX: expected '>'");
@@ -439,7 +452,7 @@ public class XMLReaderImpl implements XMLReader {
 	if (XmlChar.isNameStart(ch)) {
 	  unread();
 	  
-	  String attrName = parseName();
+	  InternQName attrName = parseName();
 	  ch = skipWhitespace(read());
 
 	  if (ch != '=')
@@ -448,7 +461,7 @@ public class XMLReaderImpl implements XMLReader {
 
 	  String attrValue = parseValue();
 
-	  _attributes.add(new QName(attrName, null), attrValue);
+	  _attributes.add(attrName, attrValue);
 	}
 	else
 	  throw error(L.l("{0} is an unexpected character in element.",
@@ -460,24 +473,99 @@ public class XMLReaderImpl implements XMLReader {
   /**
    * Parses a name.
    */
-  private String parseName()
+  private QName parseAttrName()
     throws IOException
   {
     int valueOffset = 0;
 
+    char []inputBuf = _inputBuf;
+    char []valueBuf = _valueBuf;
+
+    int inputLength = _inputLength;
+    int inputOffset = _inputOffset;
+
     while (true) {
-      if (_inputLength == _inputOffset && ! fillBuffer()) {
-	return new String(_valueBuf, 0, valueOffset);
+      if (inputOffset < inputLength) {
+      }
+      else if (fillBuffer()) {
+	inputLength = _inputLength;
+	inputOffset = 0;
+      }
+      else {
+	_nameKey.init(valueBuf, 0, valueOffset);
+
+	QName name = _nameMap.get(_nameKey);
+
+	if (name == null) {
+	  name = new QName(new String(valueBuf, 0, valueOffset), null);
+	  _nameMap.put(new NameKey(valueBuf, 0, valueOffset), name);
+	}
+
+	return name;
       }
 
-      char ch = _inputBuf[_inputOffset++];
+      char ch = inputBuf[inputOffset++];
 
-      if (XmlChar.isNameChar(ch))
-	_valueBuf[valueOffset++] = ch;
+      if (XML_NAME_CHAR[ch])
+	valueBuf[valueOffset++] = ch;
+      else if (ch == ':') {
+	valueBuf[valueOffset++] = ch;
+      }
       else {
-	_inputOffset--;
+	_inputOffset = inputOffset - 1;
 
-	return new String(_valueBuf, 0, valueOffset);
+	QName name = _nameMap.get(_nameKey);
+
+	if (name == null) {
+	  name = new QName(new String(valueBuf, 0, valueOffset), null);
+	  _nameMap.put(new NameKey(valueBuf, 0, valueOffset), name);
+	}
+
+	return name;
+      }
+    }
+  }
+
+  /**
+   * Parses a name.
+   */
+  private InternQName parseName()
+    throws IOException
+  {
+    int valueOffset = 0;
+
+    char []inputBuf = _inputBuf;
+    char []valueBuf = _valueBuf;
+
+    int inputLength = _inputLength;
+    int inputOffset = _inputOffset;
+    int colon = 0;
+
+    while (true) {
+      if (inputOffset < inputLength) {
+	char ch = inputBuf[inputOffset++];
+
+	if (XML_NAME_CHAR[ch]) {
+	  valueBuf[valueOffset++] = ch;
+	}
+	else if (ch == ':') {
+	  if (colon <= 0)
+	    colon = valueOffset;
+	  
+	  valueBuf[valueOffset++] = ch;
+	}
+	else {
+	  _inputOffset = inputOffset - 1;
+
+	  return _intern.add(valueBuf, 0, valueOffset, colon);
+	}
+      }
+      else if (fillBuffer()) {
+	inputLength = _inputLength;
+	inputOffset = 0;
+      }
+      else {
+	return _intern.add(valueBuf, 0, valueOffset, colon);
       }
     }
   }
@@ -514,13 +602,14 @@ public class XMLReaderImpl implements XMLReader {
       throw error(L.l("expected quote at '{0}'", badChar(end)));
 
     int index = 0;
+    char []inputBuf = _inputBuf;
     char []valueBuf = _valueBuf;
     
     while (true) {
       if (_inputLength == _inputOffset && ! fillBuffer())
 	throw error(L.l("Unexpected end of file in attribute value."));
 
-      char ch = _inputBuf[_inputOffset++];
+      char ch = inputBuf[_inputOffset++];
       
       switch (ch) {
       case '&':
@@ -703,6 +792,74 @@ public class XMLReaderImpl implements XMLReader {
     public int getColumnNumber()
     {
       return -1;
+    }
+  }
+
+  static class NameKey {
+    char []_buf;
+    int _offset;
+    int _length;
+
+    NameKey()
+    {
+    }
+
+    NameKey(char []buf, int offset, int length)
+    {
+      _buf = new char[length];
+      System.arraycopy(buf, offset, _buf, 0, length);
+      _offset = 0;
+      _length = 0;
+    }
+
+    void init(char []buf, int offset, int length)
+    {
+      _buf = buf;
+      _offset = offset;
+      _length = length;
+    }
+
+    @Override
+    public int hashCode()
+    {
+      int hash = 37;
+
+      char buf[] = _buf;
+      for (int i = _length - 1; i >= 0; i--)
+	hash = 65537 * hash + buf[i];
+
+      return hash;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+      NameKey key = (NameKey) o;
+
+      int length = _length;
+      if (length != key._length)
+	return false;
+
+      char []aBuf = _buf;
+      char []bBuf = key._buf;
+
+      int aOffset = _offset;
+      int bOffset = key._offset;
+
+      for (int i = 0; i < length; i++) {
+	if (aBuf[aOffset + i] != bBuf[bOffset + i])
+	  return false;
+      }
+
+      return true;
+    }
+  }
+
+  static {
+    XML_NAME_CHAR = new boolean[65536];
+
+    for (int i = 0; i < 65536; i++) {
+      XML_NAME_CHAR[i] = XmlChar.isNameChar(i) && i != ':';
     }
   }
 }

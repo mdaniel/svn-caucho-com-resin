@@ -133,6 +133,8 @@ public class ClassSkeleton<C> extends Skeleton {
       // XXX: @XmlJavaTypeAdapter
       
       // XXX: look for @XmlValue annotation
+
+      _typeName = new QName(JAXBUtil.getXmlSchemaDatatype(_class));
       
       if (c.isAnnotationPresent(XmlRootElement.class)) {
         XmlRootElement xre = c.getAnnotation(XmlRootElement.class);
@@ -149,10 +151,10 @@ public class ClassSkeleton<C> extends Skeleton {
         else
           _elementName = new QName(xre.namespace(), localName);
 
+	_typeName = _elementName;
+
         _context.addRootElement(this);
       }
-
-      _typeName = new QName(JAXBUtil.getXmlSchemaDatatype(_class));
 
       XmlAccessorType accessorType = c.getAnnotation(XmlAccessorType.class);
       XmlAccessType accessType = (accessorType == null ? 

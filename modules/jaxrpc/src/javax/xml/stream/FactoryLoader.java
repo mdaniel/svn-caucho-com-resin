@@ -42,15 +42,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class FactoryLoader {
-
   private static Logger log =
     Logger.getLogger("javax.xml.stream.FactoryLoader");
 
   private static HashMap<String,FactoryLoader>
     _factoryLoaders = new HashMap<String,FactoryLoader>();
 
-  public static FactoryLoader getFactoryLoader(String factoryId) {
+  private String _factoryId;
 
+  private WeakHashMap<ClassLoader,Class[]>
+    _providerMap = new WeakHashMap<ClassLoader,Class[]>();
+
+  public static FactoryLoader getFactoryLoader(String factoryId)
+  {
     FactoryLoader ret = _factoryLoaders.get(factoryId);
 
     if (ret == null) {
@@ -61,15 +65,6 @@ class FactoryLoader {
     return ret;
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-
-  private String _factoryId;
-
-  private WeakHashMap<ClassLoader,Object[]>
-    _providerMap = new WeakHashMap<ClassLoader,Object[]>();
-
-  //////////////////////////////////////////////////////////////////////////////
-
   private FactoryLoader(String factoryId)
   {
     this._factoryId = factoryId;
@@ -78,18 +73,34 @@ class FactoryLoader {
   public Object newInstance(ClassLoader classLoader)
     throws FactoryConfigurationError
   {
+    Class cl = newClass(classLoader);
+
+    if (cl != null) {
+      try {
+        return cl.newInstance();
+      }
+      catch (Exception e) {
+        throw new FactoryConfigurationError(e);
+      }
+    }
+
+    return null;
+  }
+
+  public Class newClass(ClassLoader classLoader)
+    throws FactoryConfigurationError
+  {
     String className = null;
 
     className = System.getProperty(_factoryId);
 
     if (className == null) {
       
-      String fileName =
-        System.getProperty("java.home") +
-        File.separatorChar +
-        "lib" +
-        File.separatorChar +
-        "stax.properties";
+      String fileName = (System.getProperty("java.home")
+			 + File.separatorChar
+			 + "lib"
+			 + File.separatorChar
+			 + "stax.properties");
 
       FileInputStream is = null;
       try {
@@ -99,11 +110,8 @@ class FactoryLoader {
         props.load(is);
 
         className = props.getProperty(_factoryId);
-
-      }
-      catch (IOException e) {
-        log.log(Level.FINER, "ignoring exception", e);
-
+      } catch (IOException e) {
+        log.log(Level.FINEST, "ignoring exception", e);
       }
       finally {
         if (is != null)
@@ -116,16 +124,15 @@ class FactoryLoader {
     }
 
     if (className == null) {
-      Object factory = createFactory("META-INF/services/"+_factoryId,
+      Class cl = createFactoryClass("META-INF/services/"+_factoryId,
                                      classLoader);
-      if (factory != null)
-        return factory;
+      if (cl != null)
+        return cl;
     }
 
     if (className != null) {
-        
       try {
-        return classLoader.loadClass(className).newInstance();
+        return classLoader.loadClass(className);
       }
       catch (Exception e) {
         throw new FactoryConfigurationError(e);
@@ -135,12 +142,12 @@ class FactoryLoader {
     return null;
   }
 
-  public Object createFactory(String name, ClassLoader loader)
+  public Class createFactoryClass(String name, ClassLoader loader)
   {
-    Object[] providers = getProviderList(name, loader);
+    Class[] providers = getProviderList(name, loader);
 
     for (int i = 0; i < providers.length; i++) {
-      Object factory;
+      Class factory;
 
       factory = providers[i];
 
@@ -151,15 +158,14 @@ class FactoryLoader {
     return null;
   }
   
-  private Object []getProviderList(String service, ClassLoader loader)
+  private Class []getProviderList(String service, ClassLoader loader)
   {
-
-    Object []providers = _providerMap.get(loader);
+    Class []providers = _providerMap.get(loader);
 
     if (providers != null)
       return providers;
     
-    ArrayList<Object> list = new ArrayList<Object>();
+    ArrayList<Class> list = new ArrayList<Class>();
 
     try {
       Enumeration e = loader.getResources(service);
@@ -167,7 +173,7 @@ class FactoryLoader {
       while (e.hasMoreElements()) {
         URL url = (URL) e.nextElement();
 
-        Object provider = loadProvider(url, loader);
+        Class provider = loadProvider(url, loader);
 
         if (provider != null)
           list.add(provider);
@@ -176,7 +182,7 @@ class FactoryLoader {
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    providers = new Object[list.size()];
+    providers = new Class[list.size()];
     list.toArray(providers);
 
     _providerMap.put(loader, providers);
@@ -184,7 +190,7 @@ class FactoryLoader {
     return providers;
   }
 
-  private Object loadProvider(URL url, ClassLoader loader)
+  private Class loadProvider(URL url, ClassLoader loader)
   {
     InputStream is = null;
     try {
@@ -211,16 +217,16 @@ class FactoryLoader {
 
           Class cl = Class.forName(className, false, loader);
 
-          return (Object) cl.newInstance();
+          return cl;
         }
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       try {
         if (is != null)
           is.close();
-      } catch (Throwable e) {
+      } catch (IOException e) {
       }
     }
 

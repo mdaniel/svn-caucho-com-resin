@@ -37,7 +37,7 @@ import org.xml.sax.Attributes;
  * Implements the SAX Attributes class.
  */
 class AttributesImpl implements Attributes {
-  private QName []_names = new QName[32];
+  private InternQName []_names = new InternQName[32];
   private String []_values = new String[32];
   private int _size;
 
@@ -52,10 +52,10 @@ class AttributesImpl implements Attributes {
   /**
    * Adds a new attribute name and value.
    */
-  void add(QName name, String value)
+  void add(InternQName name, String value)
   {
     if (_size == _names.length) {
-      QName []newNames = new QName[2 * _names.length];
+      InternQName []newNames = new InternQName[2 * _names.length];
       String []newValues = new String[2 * _names.length];
       System.arraycopy(_names, 0, newNames, 0, _names.length);
       System.arraycopy(_values, 0, newValues, 0, _names.length);
@@ -79,10 +79,12 @@ class AttributesImpl implements Attributes {
   /**
    * Returns the indexed name.
    */
+  /*
   public QName getName(int i)
   {
     return _names[i];
-  }    
+  }
+  */
 
   /**
    * Returns the name.
@@ -97,12 +99,8 @@ class AttributesImpl implements Attributes {
    */
   public String getURI(int i)
   {
-    String uri = _names[i].getNamespaceURI();
-
-    if (uri != null)
-      return uri;
-    else
-      return ""; 
+    throw new UnsupportedOperationException();
+    //return _names[i].getNamespaceURI();
   }    
 
   /**
@@ -110,12 +108,7 @@ class AttributesImpl implements Attributes {
    */
   public String getLocalName(int i)
   {
-    String localName = _names[i].getLocalName();
-
-    if (localName != null)
-      return localName;
-    else
-      return "";
+    return _names[i].getLocalName();
   }    
 
   /**

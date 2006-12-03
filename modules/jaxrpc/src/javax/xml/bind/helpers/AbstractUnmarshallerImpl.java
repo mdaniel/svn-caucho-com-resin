@@ -50,8 +50,9 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.HashMap;
 
-public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
-
+public abstract class AbstractUnmarshallerImpl implements Unmarshaller
+{
+  private XMLInputFactory _factory;
   protected boolean validating;
 
   private AttachmentUnmarshaller _attachmentUnmarshaller = null;
@@ -165,6 +166,14 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
     this.validating = validating;
   }
 
+  private XMLInputFactory getXMLInputFactory()
+  {
+    if (_factory == null)
+      _factory = XMLInputFactory.newInstance();
+
+    return _factory;
+  }
+
   public final Object unmarshal(File f) throws JAXBException
   {
     FileInputStream fis = null;
@@ -205,7 +214,8 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
   public final Object unmarshal(Reader reader) throws JAXBException
   {
     try {
-      XMLInputFactory factory = XMLInputFactory.newInstance();
+      XMLInputFactory factory = getXMLInputFactory();
+      
       return unmarshal(factory.createXMLStreamReader(reader));
     }
     catch (XMLStreamException e) {
@@ -216,7 +226,8 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller {
   public Object unmarshal(Source source) throws JAXBException
   {
     try {
-      XMLInputFactory factory = XMLInputFactory.newInstance();
+      XMLInputFactory factory = getXMLInputFactory();
+      
       return unmarshal(factory.createXMLStreamReader(source));
     }
     catch (XMLStreamException e) {

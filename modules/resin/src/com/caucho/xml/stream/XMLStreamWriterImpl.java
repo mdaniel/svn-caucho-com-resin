@@ -44,7 +44,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     = Logger.getLogger(XMLStreamReaderImpl.class.getName());
 
   private WriteStream _ws;
-  private NamespaceContextImpl _tracker = new NamespaceContextImpl();
+  private NamespaceWriterContext _tracker = new NamespaceWriterContext();
 
   private QName _pendingTagName = null;
   private boolean _shortTag = false;
@@ -388,7 +388,8 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     throws IOException
   {
     flushContext();
-    _tracker.push(elementName);
+    _tracker.push();
+    _tracker.setElementName(elementName);
     _flushed = false;
   }
 
@@ -396,7 +397,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     throws IOException
   {
     flushContext();
-    QName name = _tracker.getTagName();
+    QName name = _tracker.getElementName();
     _tracker.pop();
     return name;
   }
