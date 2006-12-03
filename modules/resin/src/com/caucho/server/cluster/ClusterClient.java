@@ -100,6 +100,7 @@ public final class ClusterClient {
   private volatile long _busyCountTotal;
 
   private volatile double _cpuLoadAvg;
+  private volatile long _cpuSetTime;
 
   ClusterClient(ServerConnector server)
   {
@@ -203,6 +204,7 @@ public final class ClusterClient {
    */
   public void setCpuLoadAvg(double load)
   {
+    _cpuSetTime = Alarm.getCurrentTime();
     _cpuLoadAvg = load;
   }
 
@@ -211,7 +213,15 @@ public final class ClusterClient {
    */
   public double getCpuLoadAvg()
   {
-    return _cpuLoadAvg;
+    double avg = _cpuLoadAvg;
+    long time = _cpuSetTime;
+
+    long now = Alarm.getCurrentTime();
+
+    if (now - time < 10000L)
+      return avg;
+    else
+      return avg * 10000L / (now - time);
   }
 
   /**

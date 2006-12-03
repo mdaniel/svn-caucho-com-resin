@@ -451,6 +451,15 @@ r_rewrite-dispatch = element rewrite-dispatch {
 
        & (attribute cluster { string }
           | element cluster { string })
+
+       & (attribute connection-load-weight { r_int-Type }
+          | element connection-load-weight { r_int-Type })?
+
+       & (attribute cpu-load-weight { r_int-Type }
+          | element cpu-load-weight { r_int-Type })?
+
+       & (attribute sticky-sessions { r_boolean-Type }
+          | element sticky-sessions { r_boolean-Type })?
      }*
 
    & element moved-permanently {

@@ -29,7 +29,7 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.*;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ObjectAttributeProgram;
 import com.caucho.config.types.InitProgram;
@@ -390,10 +390,11 @@ public class RewriteInvocation {
 
   public static class LoadBalance extends Program {
     private final WebApp _webApp;
-    private String _cluster;
     
     private Pattern _regexp;
     private ServletConfigImpl _servlet;
+
+    private BuilderProgramContainer _program = new BuilderProgramContainer();
 
     LoadBalance(WebApp webApp)
     {
@@ -408,14 +409,9 @@ public class RewriteInvocation {
       _regexp = Pattern.compile(regexp);
     }
 
-    public void setCluster(String cluster)
+    public void addBuilderProgram(BuilderProgram program)
     {
-      _cluster = cluster;
-    }
-
-    public String getCluster()
-    {
-      return _cluster;
+      _program.addProgram(program);
     }
 
     public FilterChain dispatch(String uri)
@@ -436,20 +432,15 @@ public class RewriteInvocation {
     {
       if (_regexp == null)
 	throw new ConfigException(L.l("load-balance needs 'regexp' attribute."));
-      if (_cluster == null)
-	throw new ConfigException(L.l("load-balance needs 'cluster' attribute."));
 
       try {
 	_servlet = new ServletConfigImpl();
 
-	_servlet.setServletName("resin-dispatch-lb-" + _cluster);
+	_servlet.setServletName("resin-dispatch-lb");
 	Class cl = Class.forName("com.caucho.servlets.LoadBalanceServlet");
 	_servlet.setServletClass("com.caucho.servlets.LoadBalanceServlet");
 
-	BuilderProgram program
-	  = new ObjectAttributeProgram("cluster", _cluster);
-
-	_servlet.setInit(new InitProgram(program));
+	_servlet.setInit(new InitProgram(_program));
 
 	_webApp.addServlet(_servlet);
       } catch (ClassNotFoundException e) {

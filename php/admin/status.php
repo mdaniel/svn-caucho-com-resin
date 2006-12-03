@@ -272,9 +272,9 @@ foreach ($cluster->Servers as $client) {
     <td><?= $client->State ?></td>
     <td><?= $client->ConnectionActiveCount ?></td>
     <td><?= $client->ConnectionIdleCount ?></td>
-    <td><?= format_hit_ratio($client->ConnectionKeepaliveCountTotal,
-                             $client->ConnectionNewCountTotal) ?></td>
-    <td><?= $client->ServerCpuLoadAvg ?></td>
+    <td><?= format_miss_ratio($client->ConnectionKeepaliveCountTotal,
+                              $client->ConnectionNewCountTotal) ?></td>
+    <td><?= sprintf("%.2f", $client->ServerCpuLoadAvg) ?></td>
 <!-- XXX:
     <td><?= $client->LastFailTime ?></td>
     <td><?= $client->LastBusyTime ?></td>
