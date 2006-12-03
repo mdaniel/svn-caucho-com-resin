@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,27 +19,41 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
-*
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho;
+package com.caucho.xml2;
 
-final public class Version {
-  public static final String COPYRIGHT =
-    "Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.";
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
-  public static String FULL_VERSION = "Resin-3.1.s061203 (built Sun, 03 Dec 2006 11:37:55 PST)";
-  public static String VERSION = "3.1.s061203";
-  public static String VERSION_DATE = "20061203T113755";
+import java.util.HashMap;
 
-  public static void main(String []argv)
-  {
-    System.out.println(FULL_VERSION);
-    System.out.println(COPYRIGHT);
-  }
+/**
+ * CauchoDocument extends the DOM, providing namespaces
+ */
+public interface CauchoDocument extends Document, CauchoNode {
+  public final static String DEPENDS = "caucho.depends";
+  
+  /**
+   * Creates a namespace-aware element
+   */
+  public Element createElement(String prefix, String local, String url);
+  /**
+   * Creates a namespace-aware attribute
+   */
+  public Attr createAttribute(String prefix, String local, String url);
+
+  public Text createUnescapedTextNode(String text);
+
+  public HashMap getNamespaces();
+
+  public Object getProperty(String name);
+  public void setProperty(String name, Object value);
 }

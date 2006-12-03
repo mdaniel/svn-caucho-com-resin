@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,17 +19,29 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
  */
 
-#ifndef CSE_VERSION_H
-#define CSE_VERSION_H
+package com.caucho.xml2;
 
-#define VERSION "Resin/3.1.s061203"
-#define FULL_VERSION "Resin-3.1.s061203 (built Sun, 03 Dec 2006 11:37:55 PST)"
+import com.caucho.util.LineCompileException;
 
-#endif /* CSE_VERSION_H */
+import org.xml.sax.SAXException;
 
+public class XmlParseException extends SAXException
+  implements LineCompileException
+{
+  XmlParseException(String msg)
+  {
+    super(msg);
+  }
+
+  XmlParseException()
+  {
+    super("generic");
+  }
+}

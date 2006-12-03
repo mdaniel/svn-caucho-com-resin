@@ -30,8 +30,6 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.*;
-import com.caucho.config.ConfigException;
-import com.caucho.config.ObjectAttributeProgram;
 import com.caucho.config.types.InitProgram;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ForwardFilterChain;

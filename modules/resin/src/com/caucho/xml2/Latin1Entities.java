@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,17 +19,44 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
  */
 
-#ifndef CSE_VERSION_H
-#define CSE_VERSION_H
+package com.caucho.xml2;
 
-#define VERSION "Resin/3.1.s061203"
-#define FULL_VERSION "Resin-3.1.s061203 (built Sun, 03 Dec 2006 11:37:55 PST)"
+/**
+ * Latin1 encodings (ISO-8859-1) doesn't need to escape the printable Latin1
+ * characters.
+ */
+class Latin1Entities extends HtmlEntities {
+  private static HtmlEntities _html40;
+  private static HtmlEntities _html32;
 
-#endif /* CSE_VERSION_H */
+  static Entities create(double version)
+  {
+    if (version == 0 || version >= 4.0) {
+      if (_html40 == null)
+        _html40 = new Latin1Entities(4.0);
+      return _html40;
+    }
+    else {
+      if (_html32 == null)
+        _html32 = new Latin1Entities(3.2);
+      return _html32;
+    }
+  }
 
+  protected Latin1Entities(double version)
+  {
+    super(version);
+
+    for (int i = 161; i < 256; i++) {
+      _latin1[i] = String.valueOf((char) i).toCharArray();
+      _attrLatin1[i] = _latin1[i];
+    }
+  }
+}

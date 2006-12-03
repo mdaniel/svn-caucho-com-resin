@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,17 +19,44 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
  */
 
-#ifndef CSE_VERSION_H
-#define CSE_VERSION_H
+package com.caucho.xml2;
 
-#define VERSION "Resin/3.1.s061203"
-#define FULL_VERSION "Resin-3.1.s061203 (built Sun, 03 Dec 2006 11:37:55 PST)"
+import org.w3c.dom.Node;
 
-#endif /* CSE_VERSION_H */
+import java.io.IOException;
 
+class QUnescapedText extends QText {
+  QUnescapedText(String data)
+  {
+    super(data);
+  }
+
+  Node importNode(QDocument owner, boolean deep)
+  {
+    QUnescapedText text = new QUnescapedText(_data);
+    text._filename = _filename;
+    text._line = _line;
+    text._owner = owner;
+    return text;
+  }
+
+  public void print(XmlPrinter os) throws IOException
+  {
+    boolean oldEscaping = os.getEscaping();
+    os.setEscaping(false);
+    os.text(getData());
+    os.setEscaping(oldEscaping);
+  }
+
+  private Object writeReplace()
+  {
+    return new SerializedXml(this);
+  }
+}

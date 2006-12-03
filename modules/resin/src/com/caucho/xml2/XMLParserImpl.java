@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.xml2;
+package com.caucho.xml22;
 
 import com.caucho.xml.QName;
 
