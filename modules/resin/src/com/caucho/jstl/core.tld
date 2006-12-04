@@ -2,7 +2,7 @@
   <tlib-version>1.0</tlib-version>
   <short-name>c</short-name>
 
-  <uri>http://java.sun.com/jstl/core</uri>
+  <uri>http://java.sun.com/jsp/jstl/core</uri>
 
   <tag>
     <name>out</name>

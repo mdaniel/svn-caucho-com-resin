@@ -65,8 +65,13 @@ public class JavaJspBuilder extends JspBuilder {
   public static final String JSTL_EL_XML_URI = "http://java.sun.com/jstl/xml";
   public static final String JSTL_RT_XML_URI = "http://java.sun.com/jstl/xml_rt";
   
+  public static final String JSTL_SQL_URI = "http://java.sun.com/jsp/jstl/sql";
+  
+  public static final String JSTL_EL_SQL_URI = "http://java.sun.com/jstl/sql";
+  public static final String JSTL_RT_SQL_URI = "http://java.sun.com/jstl/sql_rt";
+  
   private static L10N L = new L10N(JavaJspBuilder.class);
-  private static Logger log = Log.open(JavaJspBuilder.class);
+  private static Logger log = Logger.getLogger(JavaJspBuilder.class.getName());
   
   static final int IGNORE = 0;
   static final int DIRECTIVE_PAGE = IGNORE + 1;

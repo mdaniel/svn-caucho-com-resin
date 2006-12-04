@@ -1,7 +1,7 @@
 <taglib xmlns="http://java.sun.com/xml/ns/j2ee" version="2.0">
   <tlib-version>1.0</tlib-version>
   <short-name>sql</short-name>
-  <uri>http://java.sun.com/jstl/sql</uri>
+  <uri>http://java.sun.com/jsp/jstl/sql</uri>
 
   <tag>
     <name>query</name>

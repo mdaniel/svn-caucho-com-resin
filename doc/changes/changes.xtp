@@ -12,6 +12,7 @@
 
 <s2 title="3.1snap - Dec 3, 2006">
 <ul>
+<li>./configure changes for 64bit detection (#1465, rep by K Paulson)</li>
 <li>(2006-12-03) Quercus: marshaling of null for Java objects: Byte, Integer, etc (#1444, rep by KnisterPeter)</li>
 <li>OpenSSL: nullpointer when loading ssl fails (#1442, rep by Anoop Achuthan)</li>
 <li>expand-directory in web-app-deploy generated confusing error message (#1452, rep by gjvc)</li>
