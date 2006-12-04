@@ -168,6 +168,8 @@ public class PersistenceUnitConfig {
     AmberPersistenceUnit unit
       = new AmberPersistenceUnit(container, _name);
 
+    unit.setJPA(true);
+
     unit.setEntityMappingsConfig(entityMappings);
 
     unit.init();

@@ -85,6 +85,8 @@ public class AmberPersistenceUnit {
 
   private String _name;
 
+  private boolean _isJPA;
+
   private AmberContainer _amberContainer;
 
   // Actual class is EntityManagerProxy, but EntityManager is JDK 1.5 dependent
@@ -809,6 +811,22 @@ public class AmberPersistenceUnit {
   }
 
   /**
+   * Gets the JPA flag.
+   */
+  public boolean isJPA()
+  {
+    return _isJPA;
+  }
+
+  /**
+   * Sets the JPA flag.
+   */
+  public void setJPA(boolean isJPA)
+  {
+    _isJPA = isJPA;
+  }
+
+  /**
    * Configure lazy.
    */
   public void generate(JavaClassGenerator javaGen)
@@ -1225,13 +1243,13 @@ public class AmberPersistenceUnit {
   protected void callListeners(int callbackIndex,
                                Entity entity)
   {
+    // ejb/0g22
+    if (! isJPA())
+      return;
+
     String className = entity.getClass().getName();
 
     EntityType entityType = (EntityType) _typeManager.get(className);
-
-    // Temp. hack for cmp. ejb/0g22
-    if (entityType == null)
-      return;
 
     if (! entityType.getExcludeDefaultListeners()) {
       for (ListenerType listenerType : _defaultListeners) {
