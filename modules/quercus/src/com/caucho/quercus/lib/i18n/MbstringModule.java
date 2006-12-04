@@ -858,7 +858,7 @@ public class MbstringModule
     encoding = getEncoding(env, encoding);
 
     str = str.toUnicodeValue(env, encoding);
-    str = new StringValueImpl(StringModule.strtolower(str.toString()));
+    str = StringModule.strtolower(str);
 
     return str.toBinaryValue(env, encoding);
   }
@@ -873,7 +873,7 @@ public class MbstringModule
     encoding = getEncoding(env, encoding);
 
     str = str.toUnicodeValue(env, encoding);
-    str = new StringValueImpl(StringModule.strtoupper(str.toString()));
+    str = StringModule.strtoupper(str);
 
     return str.toBinaryValue(env, encoding);
   }

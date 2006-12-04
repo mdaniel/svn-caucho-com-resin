@@ -985,6 +985,34 @@ abstract public class StringValue extends Value implements CharSequence {
 
     return string;
   }
+  
+  /**
+   * Convert to lower case.
+   */
+  public StringValue toUpperCase()
+  {
+    int length = length();
+    
+    StringBuilderValue string = new StringBuilderValue(length);
+
+    char []buffer = string.toCharArray();
+    getChars(0, buffer, 0, length);
+
+    for (int i = 0; i < length; i++) {
+      char ch = buffer[i];
+      
+      if ('a' <= ch && ch <= 'z')
+        buffer[i] = (char) (ch + 'A' - 'a');
+      else if (ch < 0x80) {
+      }
+      else if (Character.isLowerCase(ch))
+        buffer[i] = Character.toUpperCase(ch);
+    }
+
+    string.setLength(length);
+
+    return string;
+  }
 
   /**
    * Returns a byteArrayInputStream for the value.

@@ -101,6 +101,9 @@ public class StringModule extends AbstractQuercusModule {
    */
   public static StringValue addcslashes(StringValue source, String characters)
   {
+    if (characters == null)
+      characters = "";
+    
     boolean []bitmap = parseCharsetBitmap(characters);
 
     int length = source.length();
@@ -305,6 +308,12 @@ v   *
                                    @Optional("76") int chunkLen,
                                    @Optional("\"\\r\\n\"") String end)
   {
+    if (body == null)
+      body = "";
+    
+    if (end == null)
+      end = "";
+    
     if (chunkLen < 1) // XXX: real exn
       throw new IllegalArgumentException(L.l("bad value {0}", chunkLen));
 
@@ -540,6 +549,9 @@ v   *
 
   public static String crypt(String string, @Optional String salt)
   {
+    if (string == null)
+      string = "";
+    
     if (salt == null || salt.equals("")) {
       salt = ("" + Crypt.resultToChar(RandomUtil.nextInt(0x40)) +
               Crypt.resultToChar(RandomUtil.nextInt(0x40)));
@@ -783,6 +795,9 @@ v   *
    */
   public static String metaphone(String string)
   {
+    if (string == null)
+      string = "";
+    
     int length = string.length();
     int index = 0;
     char ch = 0;
@@ -1222,7 +1237,7 @@ v   *
    *
    * @return the integer value
    */
-  public static long ord(String string)
+  public static long ord(StringValue string)
   {
     if (string.length() == 0)
       return 0;
@@ -1241,6 +1256,9 @@ v   *
   public static Value parse_str(Env env, String str,
                                 @Optional @Reference Value ref)
   {
+    if (str == null)
+      str = "";
+    
     try {
       ByteToChar byteToChar = env.getByteToChar();
       int len = str.length();
@@ -1333,6 +1351,9 @@ v   *
                                   int i, int ch)
     throws IOException
   {
+    if (str == null)
+      str = "";
+    
     switch (ch) {
     case '+':
       byteToChar.addChar(' ');
@@ -1362,6 +1383,12 @@ v   *
   public static void addQueryValue(Env env, ArrayValue array,
                                    String key, String valueStr)
   {
+    if (key == null)
+      key = "";
+    
+    if (valueStr == null)
+      valueStr = "";
+    
     int p;
 
     Value value = new StringValueImpl(valueStr);
@@ -1420,9 +1447,9 @@ v   *
    *
    * @return the quoted
    */
-  public static Value quotemeta(String string)
+  public static Value quotemeta(StringValue string)
   {
-    StringBuilder sb = new StringBuilder();
+    StringBuilderValue sb = new StringBuilderValue();
 
     int len = string.length();
     for (int i = 0; i < len; i++) {
@@ -1440,7 +1467,7 @@ v   *
       }
     }
 
-    return new StringValueImpl(sb.toString());
+    return sb;
   }
 
   /**
@@ -1449,6 +1476,9 @@ v   *
   // XXX: i18n
   public static String quoted_printable_decode(String str)
   {
+    if (str == null)
+      str = "";
+    
     StringBuilder sb = new StringBuilder();
 
     int length = str.length();
@@ -1501,10 +1531,13 @@ v   *
    * @param characters optional set of characters to trim
    * @return the trimmed string
    */
-  public static String ltrim(Env env,
-                             String string,
+  public static StringValue ltrim(Env env,
+                             StringValue string,
                              @Optional String characters)
   {
+    if (characters == null)
+      characters = "";
+
     boolean []trim;
 
     if (characters.equals(""))
@@ -1523,7 +1556,7 @@ v   *
       }
     }
 
-    return "";
+    return StringValue.EMPTY;
   }
 
   /**
@@ -1538,6 +1571,9 @@ v   *
 				  StringValue string,
 				  @Optional String characters)
   {
+    if (characters == null)
+      characters = "";
+    
     boolean []trim;
 
     if (characters.equals(""))
@@ -1600,7 +1636,7 @@ v   *
   private static Locale setLocale(LocaleInfo localeInfo,
                                   int category,
                                   String localeName)
-  {
+  { 
     String language;
     String country;
     String variant;
@@ -1706,6 +1742,9 @@ v   *
   public static String sha1(String source,
                             @Optional boolean rawOutput)
   {
+    if (source == null)
+      source = "";
+    
     try {
       MessageDigest md = MessageDigest.getInstance("SHA1");
       
@@ -1911,6 +1950,9 @@ v   *
 
   public static Value soundex(String string)
   {
+    if (string == null)
+      string = "";
+    
     int length = string.length();
 
     if (length == 0)
@@ -1958,6 +2000,9 @@ v   *
    */
   public static Value sprintf(String format, Value []args)
   {
+    if (format == null)
+      format = "";
+    
     ArrayList<PrintfSegment> segments = parsePrintfFormat(format);
 
     StringBuilderValue sb = new StringBuilderValue();
@@ -1969,7 +2014,7 @@ v   *
   }
 
   private static ArrayList<PrintfSegment> parsePrintfFormat(String format)
-  {
+  { 
     ArrayList<PrintfSegment> segments = new ArrayList<PrintfSegment>();
 
     StringBuilder sb = new StringBuilder();
@@ -2157,7 +2202,7 @@ v   *
     if (padLen <= 0)
       return string;
 
-    if (pad.length() == 0)
+    if (pad == null || pad.length() == 0)
       pad = " ";
 
     int leftPad = 0;
@@ -2198,14 +2243,14 @@ v   *
    * @param string string to repeat
    * @param count number of times to repeat
    */
-  public static Value str_repeat(String string, int count)
+  public static Value str_repeat(StringValue string, int count)
   {
-    StringBuilder sb = new StringBuilder();
+    StringBuilderValue sb = new StringBuilderValue();
 
     for (int i = 0; i < count; i++)
       sb.append(string);
 
-    return new StringValueImpl(sb.toString());
+    return sb;
   }
 
   /**
@@ -2447,6 +2492,9 @@ v   *
    */
   public static Value str_rot13(String string)
   {
+    if (string == null)
+      string = "";
+    
     StringBuilder sb = new StringBuilder();
 
     int len = string.length();
@@ -2476,6 +2524,9 @@ v   *
    */
   public static String str_shuffle(String string)
   {
+    if (string == null)
+      string = "";
+    
     char []chars = string.toCharArray();
 
     int length = chars.length;
@@ -2500,6 +2551,9 @@ v   *
   public static Value str_split(String string,
                                 @Optional("1") int chunk)
   {
+    if (string == null)
+      string = "";
+    
     ArrayValue array = new ArrayValueImpl();
 
     int strLen = string.length();
@@ -2523,6 +2577,9 @@ v   *
                                      @Optional int format,
                                      @Optional String additionalWordCharacters)
   {
+    if (string == null)
+      string = "";
+    
     if (format < 0 || format > 2)
       return NullValue.NULL;
 
@@ -2591,7 +2648,7 @@ v   *
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strcasecmp(String a, String b)
+  public static int strcasecmp(StringValue a, StringValue b)
   {
     int aLen = a.length();
     int bLen = b.length();
@@ -2634,6 +2691,12 @@ v   *
    */
   public static int strcmp(String a, String b)
   {
+    if (a == null)
+      a = "";
+    
+    if (b == null)
+      b = "";
+    
     int cmp = a.compareTo(b);
 
     if (cmp == 0)
@@ -2650,7 +2713,7 @@ v   *
    * @param env the calling environment
    */
   public static Value strchr(Env env, String haystack, Value needle)
-  {
+  { 
     return strstr(env, haystack, needle);
   }
 
@@ -2664,6 +2727,12 @@ v   *
    */
   public static Value strcoll(String a, String b)
   {
+    if (a == null)
+      a = "";
+    
+    if (b == null)
+      b = "";
+    
     int cmp = a.compareTo(b);
 
     if (cmp == 0)
@@ -2745,7 +2814,7 @@ v   *
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strnatcasecmp(String a, String b)
+  public static int strnatcasecmp(StringValue a, StringValue b)
   {
     return strcasecmp(a, b);
   }
@@ -2801,6 +2870,12 @@ v   *
    */
   public static int strncmp(String a, String b, int length)
   {
+    if (a == null)
+      a = "";
+    
+    if (b == null)
+      b = "";
+    
     if (length < a.length())
       a = a.substring(0, length);
 
@@ -2880,6 +2955,9 @@ v   *
    */
   public static String stripcslashes(String source)
   {
+    if (source == null)
+      source = "";
+    
     StringBuilder result = new StringBuilder(source.length());
 
     int length = source.length();
@@ -2987,9 +3065,9 @@ v   *
    *
    * @param string the string to clean
    */
-  public static String stripslashes(String string)
-  {
-    StringBuilder sb = new StringBuilder();
+  public static StringValue stripslashes(StringValue string)
+  { 
+    StringBuilderValue sb = new StringBuilderValue();
     int len = string.length();
 
     for (int i = 0; i < len; i++) {
@@ -3003,7 +3081,7 @@ v   *
         sb.append(ch);
     }
 
-    return sb.toString();
+    return sb;
   }
 
   /**
@@ -3016,6 +3094,9 @@ v   *
   public static Value stristr(String haystack,
                               Value needleV)
   {
+    if (haystack == null)
+      haystack = "";
+    
     String needle;
 
     if (needleV instanceof StringValue) {
@@ -3046,6 +3127,9 @@ v   *
   public static Value strrchr(String haystack,
                               Value needleV)
   {
+    if (haystack == null)
+      haystack = "";
+    
     String needle;
 
     if (needleV instanceof StringValue) {
@@ -3067,15 +3151,15 @@ v   *
    * Reverses a string.
    *
    */
-  public static Value strrev(String string)
-  {
-    StringBuilder sb = new StringBuilder();
+  public static Value strrev(StringValue string)
+  { 
+    StringBuilderValue sb = new StringBuilderValue();
 
     for (int i = string.length() - 1; i >= 0; i--) {
       sb.append(string.charAt(i));
     }
 
-    return new StringValueImpl(sb.toString());
+    return sb;
   }
 
   /**
@@ -3121,6 +3205,9 @@ v   *
                                Value needleV,
                                @Optional Value offsetV)
   {
+    if (haystack == null)
+      haystack = "";
+    
     String needle;
 
     if (needleV instanceof StringValue)
@@ -3228,6 +3315,9 @@ v   *
                              String haystack,
                              Value needleV)
   {
+    if (haystack == null)
+      haystack = "";
+    
     String needle;
 
     if (needleV instanceof StringValue) {
@@ -3292,6 +3382,9 @@ v   *
    */
   public static Value strtok(Env env, String string1, @Optional Value string2)
   {
+    if (string1 == null)
+      string1 = "";
+    
     String string;
     String characters;
     int offset;
@@ -3352,7 +3445,7 @@ v   *
    *
    * @param string the input string
    */
-  public static String strtolower(String string)
+  public static StringValue strtolower(StringValue string)
   {
     return string.toLowerCase();
   }
@@ -3362,7 +3455,7 @@ v   *
    *
    * @param string the input string
    */
-  public static String strtoupper(String string)
+  public static StringValue strtoupper(StringValue string)
   {
     return string.toUpperCase();
   }
@@ -3377,7 +3470,7 @@ v   *
   public static StringValue strtr(Env env,
                              StringValue string,
                              Value fromV,
-                             @Optional String to)
+                             @Optional StringValue to)
   {
     if (fromV instanceof ArrayValue)
       return strtrArray(string, (ArrayValue) fromV);
@@ -3503,11 +3596,15 @@ v   *
   }
 
   public static Value substr_count(Env env,
-                                   String haystack,
-                                   String needle,
+                                   StringValue haystackV,
+                                   StringValue needleV,
                                    @Optional("0") int offset,
                                    @Optional("-1") int length)
   {
+    String haystack = haystackV.toString();
+    
+    String needle = needleV.toString();
+    
     if (needle.length() == 0) {
       env.warning(L.l("empty substr"));
       return BooleanValue.FALSE;
@@ -3554,10 +3651,10 @@ v   *
    * @param lengthV the optional length
    */
   public static Value substr_replace(Value subjectV,
-                                     String replacement,
+                                     StringValue replacement,
                                      Value startV,
                                      @Optional Value lengthV)
-  {
+  { 
     int start = 0;
     int length = Integer.MAX_VALUE / 2;
 
@@ -3590,7 +3687,7 @@ v   *
         if (startIterator != null && startIterator.hasNext())
           start = startIterator.next().toInt();
 
-        Value result = substrReplaceImpl(value.toString(), replacement, start, length);
+        Value result = substrReplaceImpl(value.toStringValue(), replacement, start, length);
 
         resultArray.append(result);
       }
@@ -3604,11 +3701,14 @@ v   *
       if (startIterator != null && startIterator.hasNext())
         start = startIterator.next().toInt();
 
-      return substrReplaceImpl(subjectV.toString(), replacement, start, length);
+      return substrReplaceImpl(subjectV.toStringValue(), replacement, start, length);
     }
   }
 
-  private static Value substrReplaceImpl(String string, String replacement, int start, int len)
+  private static Value substrReplaceImpl(StringValue string,
+                                         StringValue replacement,
+                                         int start,
+                                         int len)
   {
     int strLen = string.length();
 
@@ -3624,11 +3724,13 @@ v   *
     else
       end = Math.min(start + len, strLen);
 
-    String result;
+    StringBuilderValue result = new StringBuilderValue();
 
-    result = string.substring(0, start) + replacement +  string.substring(end);
-
-    return new StringValueImpl(result);
+    result.append(string.substring(0, start));
+    result.append(replacement);
+    result.append(string.substring(end));
+    
+    return result;
   }
 
   /**
@@ -3681,6 +3783,9 @@ v   *
    */
   public static String ucfirst(String string)
   {
+    if (string == null)
+      string = "";
+    
     if (string.length() == 0)
       return string;
 
@@ -3694,6 +3799,9 @@ v   *
    */
   public static String ucwords(String string)
   {
+    if (string == null)
+      string = "";
+    
     int strLen = string.length();
 
     boolean isStart = true;
@@ -3780,6 +3888,12 @@ v   *
                                 @Optional("'\n'") String breakString,
                                 @Optional boolean cut)
   {
+    if (string == null)
+      string = "";
+    
+    if (breakString == null)
+      breakString = "";
+
     int len = string.length();
     int head = 0;
 
