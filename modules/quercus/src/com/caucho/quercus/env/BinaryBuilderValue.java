@@ -70,6 +70,18 @@ public class BinaryBuilderValue extends BinaryValue {
   {
     this(buffer, 0, buffer.length);
   }
+  
+  public BinaryBuilderValue(Byte []buffer)
+  {
+    int length = buffer.length;
+    
+    _buffer =  new byte[length];
+    _length = length;
+    
+    for (int i = 0; i < length; i++) {
+      _buffer[i] = buffer[i].byteValue();
+    }
+  }
 
   public BinaryBuilderValue(String value)
   {

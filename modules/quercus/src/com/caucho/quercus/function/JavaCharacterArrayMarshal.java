@@ -27,30 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.function;
 
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaMapAdapter;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.ModuleContext;
 
-import java.util.Map;
+public class JavaCharacterArrayMarshal extends JavaArrayMarshal
+{
+  public static final Marshal MARSHAL = new JavaCharacterArrayMarshal();
 
-/**
- * Represents an introspected Java class.
- */
-public class JavaMapClassDef extends JavaClassDef {
-  JavaMapClassDef(ModuleContext moduleContext, String name, Class type)
+  @Override
+  public Value unmarshal(Env env, Object value)
   {
-    super(moduleContext, name, type);
-  }
-
-  public Value wrap(Env env, Object obj)
-  {
-    if (! _isInit)
-      init();
-    
-    return new JavaMapAdapter(env, (Map) obj, this);
+    return new StringBuilderValue((char[]) value);
   }
 }
-

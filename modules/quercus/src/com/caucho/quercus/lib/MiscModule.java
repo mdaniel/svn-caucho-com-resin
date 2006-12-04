@@ -461,7 +461,8 @@ public class MiscModule extends AbstractQuercusModule {
                        @Optional() String user_agent,
                        @Optional() boolean return_array)
   {
-    if (user_agent.length() == 0) 
+    if (user_agent == null ||
+        user_agent.length() == 0) 
       user_agent = env.getRequest().getHeader("User-Agent");
 
     if (user_agent == null) {

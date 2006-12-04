@@ -229,6 +229,15 @@ public class NullValue extends Value {
   }
 
   /**
+   * Takes the values of this array, unmarshalls them to objects of type
+   * <i>elementType</i>, and puts them in a java array.
+   */
+  public Object valuesToArray(Env env, Class elementType)
+  {
+    return null;
+  }
+  
+  /**
    * Converts to an object.
    */
   public Value toObject(Env env)

@@ -31,19 +31,14 @@ package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 
 /**
  * Code for marshalling arguments.
  */
-public class JavaMapMarshal extends Marshal {
+public class JavaMapMarshal extends JavaMarshal {
   private static final L10N L = new L10N(JavaMarshal.class);
-
-  protected final JavaClassDef _def;
-  protected final boolean _isNotNull;
-  protected final boolean _isUnmarshalNullAsFalse;
 
   public JavaMapMarshal(JavaClassDef def,
                       boolean isNotNull)
@@ -55,16 +50,7 @@ public class JavaMapMarshal extends Marshal {
                       boolean isNotNull,
                       boolean isUnmarshalNullAsFalse)
   {
-    _def = def;
-    _isNotNull = isNotNull;
-    _isUnmarshalNullAsFalse = isUnmarshalNullAsFalse;
-  }
-
-  public Object marshal(Env env, Expr expr, Class argClass)
-  {
-    Value value = expr.eval(env);
-
-    return marshal(env, value, argClass);
+    super(def, isNotNull, isUnmarshalNullAsFalse);
   }
 
   public Object marshal(Env env, Value value, Class argClass)
@@ -89,29 +75,11 @@ public class JavaMapMarshal extends Marshal {
       return null;
     }
     else if (! argClass.isAssignableFrom(obj.getClass())) {
-      //env.error(L.l("Can't assign {0} to {1}", obj, argClass));
       env.warning(L.l("'{0}' of type '{1}' is an unexpected argument, expected {2}", value, shortName(value.getClass()), shortName(argClass)));
       return null;
     }
 
     return obj;
-  }
-
-  public Value unmarshal(Env env, Object value)
-  {
-    return env.wrapJava(value, _def, _isUnmarshalNullAsFalse);
-  }
-
-  private static String shortName(Class cl)
-  {
-    String name = cl.getName();
-
-    int p = name.lastIndexOf('.');
-
-    if (p > 0)
-      return name.substring(p + 1);
-    else
-      return name;
   }
 }
 

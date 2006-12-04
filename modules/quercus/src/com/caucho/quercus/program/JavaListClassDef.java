@@ -30,17 +30,17 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaMapAdapter;
+import com.caucho.quercus.env.JavaListAdapter;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.ModuleContext;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * Represents an introspected Java class.
  */
-public class JavaMapClassDef extends JavaClassDef {
-  JavaMapClassDef(ModuleContext moduleContext, String name, Class type)
+public class JavaListClassDef extends JavaClassDef {
+  JavaListClassDef(ModuleContext moduleContext, String name, Class type)
   {
     super(moduleContext, name, type);
   }
@@ -50,7 +50,7 @@ public class JavaMapClassDef extends JavaClassDef {
     if (! _isInit)
       init();
     
-    return new JavaMapAdapter(env, (Map) obj, this);
+    return new JavaListAdapter(env, (List)obj, this);
   }
 }
 

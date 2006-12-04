@@ -132,9 +132,9 @@ public class VariableModule extends AbstractQuercusModule {
    * @param env the quercus calling environment
    * @param name the constant name
    */
-  public static boolean defined(Env env, String name)
+  public static boolean defined(Env env, StringValue name)
   {
-    return env.isDefined(name);
+    return env.isDefined(name.toString());
   }
 
   /**

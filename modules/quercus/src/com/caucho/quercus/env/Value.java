@@ -39,8 +39,13 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -508,14 +513,70 @@ abstract public class Value {
   }
 
   /**
-   * Converts to a java object.
+   * Converts to a java Collection object.
+   */
+  public Collection toJavaCollection(Env env, Class type)
+  {
+    env.warning(L.l("Can't convert {0} to Java {1}",
+            getClass().getName(), type.getName()));
+    
+    return null;
+  }
+  
+  /**
+   * Converts to a java List object.
+   */
+  public List toJavaList(Env env, Class type)
+  {
+    env.warning(L.l("Can't convert {0} to Java {1}",
+            getClass().getName(), type.getName()));
+    
+    return null;
+  }
+  
+  /**
+   * Converts to a java Map object.
    */
   public Map toJavaMap(Env env, Class type)
   {
     env.warning(L.l("Can't convert {0} to Java {1}",
-		    getClass().getName(), type.getName()));
+            getClass().getName(), type.getName()));
     
     return null;
+  }
+
+  /**
+   * Converts to a Java Calendar.
+   */
+  public Calendar toJavaCalendar()
+  {
+    Calendar cal = Calendar.getInstance();
+    
+    cal.setTimeInMillis(toLong());
+    
+    return cal;
+  }
+  
+  /**
+   * Converts to a Java Date.
+   */
+  public Date toJavaDate()
+  {
+    return new Date(toLong());
+  }
+  
+  /**
+   * Converts to a Java URL.
+   */
+  public URL toJavaURL(Env env)
+  {
+    try {
+      return new URL(toString());
+    }
+    catch (MalformedURLException e) {
+      env.warning(L.l(e.getMessage()));
+      return null;
+    }
   }
 
   /**
@@ -1422,12 +1483,14 @@ abstract public class Value {
   {
     return UnsetValue.UNSET;
   }
+  
   /**
    * Takes the values of this array, unmarshalls them to objects of type
    * <i>elementType</i>, and puts them in a java array.
    */
-  public <T> T[] valuesToArray(Env env, Class<T> elementType)
+  public Object valuesToArray(Env env, Class elementType)
   {
+    env.error(L.l("Can't assign {0} with type {1} to {2}[]", this, this.getClass(), elementType));
     return null;
   }
 

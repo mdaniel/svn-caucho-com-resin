@@ -24,76 +24,58 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.program.AbstractFunction;
+import java.io.IOException;
+import java.net.URL;
+
+import java.util.*;
+
 import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
-import java.util.Map;
-import java.net.URL;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.IdentityHashMap;
-import java.util.List;
+import com.caucho.quercus.expr.Expr;
+
+import com.caucho.quercus.program.AbstractFunction;
 
 /**
  * Represents a PHP variable value.
  */
-public class Var extends Value {
-  Value _value;
-  private int _refCount;
+public class JavaAdapterVar extends Var {
+  
+  private JavaAdapter _adapter;
+  private Value _key;
 
-  public Var()
+  public JavaAdapterVar(JavaAdapter adapter, Value key)
   {
-    _value = NullValue.NULL;
+    _adapter = adapter;
+    _key = key;
   }
 
-  public Var(Value value)
+  public Value getValue()
   {
-    _value = value;
+    return _adapter.get(_key);
   }
-
-  /**
-   * Adds a reference.
-   */
-  public void setReference()
+  
+  public void setValue(Value value)
   {
-    _refCount = 1;
+    _adapter.putImpl(_key, value);
   }
-
-  /**
-   * Sets as a global variable
-   */
-  public void setGlobal()
-  {
-    _refCount = 1;
-  }
-
+  
   /**
    * Sets the value.
    */
   public Value set(Value value)
   {
-    _value = value.toValue();
-
-    return _value;
-  }
-
-  /**
-   * Sets the value.
-   */
-  protected Value setRaw(Value value)
-  {
-    // quercus/0431
-    _value = value;
-
-    return _value;
+    setRaw(getValue());
+    
+    value = super.set(value);
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -101,7 +83,7 @@ public class Var extends Value {
    */
   public String getType()
   {
-    return _value.getType();
+    return getValue().getType();
   }
 
   /**
@@ -109,7 +91,7 @@ public class Var extends Value {
    */
   public boolean isset()
   {
-    return _value.isset();
+    return getValue().isset();
   }
 
   /**
@@ -117,7 +99,7 @@ public class Var extends Value {
    */
   public boolean isA(String name)
   {
-    return _value.isA(name);
+    return getValue().isA(name);
   }
 
   /**
@@ -125,7 +107,7 @@ public class Var extends Value {
    */
   public boolean isNull()
   {
-    return _value.isNull();
+    return getValue().isNull();
   }
 
   /**
@@ -133,7 +115,7 @@ public class Var extends Value {
    */
   public boolean isLongConvertible()
   {
-    return _value.isLongConvertible();
+    return getValue().isLongConvertible();
   }
 
   /**
@@ -141,7 +123,7 @@ public class Var extends Value {
    */
   public boolean isDoubleConvertible()
   {
-    return _value.isDoubleConvertible();
+    return getValue().isDoubleConvertible();
   }
 
   /**
@@ -149,7 +131,7 @@ public class Var extends Value {
    */
   public boolean isNumberConvertible()
   {
-    return _value.isNumberConvertible();
+    return getValue().isNumberConvertible();
   }
 
   /**
@@ -158,7 +140,7 @@ public class Var extends Value {
   @Override
   public boolean isNumeric()
   {
-    return _value.isNumeric();
+    return getValue().isNumeric();
   }
 
   /**
@@ -167,7 +149,7 @@ public class Var extends Value {
   /*
   public boolean isScalar()
   {
-    return _value.isScalar();
+    return getValue().isScalar();
   }
   */
 
@@ -176,7 +158,7 @@ public class Var extends Value {
    */
   public boolean isString()
   {
-    return _value.isString();
+    return getValue().isString();
   }
 
   /**
@@ -184,7 +166,7 @@ public class Var extends Value {
    */
   public boolean isBinary()
   {
-    return _value.isBinary();
+    return getValue().isBinary();
   }
 
   /**
@@ -192,7 +174,7 @@ public class Var extends Value {
    */
   public boolean isUnicode()
   {
-    return _value.isUnicode();
+    return getValue().isUnicode();
   }
 
   //
@@ -201,7 +183,7 @@ public class Var extends Value {
 
   public String toString()
   {
-    return _value.toString();
+    return getValue().toString();
   }
 
   /**
@@ -209,7 +191,7 @@ public class Var extends Value {
    */
   public boolean toBoolean()
   {
-    return _value.toBoolean();
+    return getValue().toBoolean();
   }
 
   /**
@@ -217,7 +199,7 @@ public class Var extends Value {
    */
   public long toLong()
   {
-    return _value.toLong();
+    return getValue().toLong();
   }
 
   /**
@@ -225,7 +207,7 @@ public class Var extends Value {
    */
   public double toDouble()
   {
-    return _value.toDouble();
+    return getValue().toDouble();
   }
 
   /**
@@ -234,7 +216,7 @@ public class Var extends Value {
    */
   public StringValue toString(Env env)
   {
-    return _value.toString(env);
+    return getValue().toString(env);
   }
 
   /**
@@ -242,7 +224,7 @@ public class Var extends Value {
    */
   public Object toJavaObject()
   {
-    return _value.toJavaObject();
+    return getValue().toJavaObject();
   }
 
   /**
@@ -251,7 +233,7 @@ public class Var extends Value {
   @Override
   public Object toJavaObject(Env env, Class type)
   {
-    return _value.toJavaObject(env, type);
+    return getValue().toJavaObject(env, type);
   }
 
   /**
@@ -260,7 +242,7 @@ public class Var extends Value {
   @Override
   public Object toJavaObjectNotNull(Env env, Class type)
   {
-    return _value.toJavaObjectNotNull(env, type);
+    return getValue().toJavaObjectNotNull(env, type);
   }
 
   /**
@@ -268,7 +250,7 @@ public class Var extends Value {
    */
   public Collection toJavaCollection(Env env, Class type)
   {
-    return _value.toJavaCollection(env, type);
+    return getValue().toJavaCollection(env, type);
   }
   
   /**
@@ -276,50 +258,24 @@ public class Var extends Value {
    */
   public List toJavaList(Env env, Class type)
   {
-    return _value.toJavaList(env, type);
+    return getValue().toJavaList(env, type);
   }
-
+  
   /**
-   * Converts to a java map.
+   * Converts to a java Map object.
    */
   public Map toJavaMap(Env env, Class type)
   {
-    return _value.toJavaMap(env, type);
+    return getValue().toJavaMap(env, type);
   }
 
-  /**
-   * Converts to a Java Calendar.
-   */
-  @Override
-  public Calendar toJavaCalendar()
-  {
-    return _value.toJavaCalendar();
-  }
-  
-  /**
-   * Converts to a Java Date.
-   */
-  @Override
-  public Date toJavaDate()
-  {
-    return _value.toJavaDate();
-  }
-  
-  /**
-   * Converts to a Java URL.
-   */
-  @Override
-  public URL toJavaURL(Env env)
-  {
-    return _value.toJavaURL(env);
-  }
 
   /**
    * Converts to an array
    */
   public Value toArray()
   {
-    return _value.toArray();
+    return getValue().toArray();
   }
 
   /**
@@ -328,7 +284,7 @@ public class Var extends Value {
   @Override
   public ArrayValue toArrayValue(Env env)
   {
-    return _value.toArrayValue(env);
+    return getValue().toArrayValue(env);
   }
 
   /**
@@ -336,9 +292,13 @@ public class Var extends Value {
    */
   public Value toAutoArray()
   {
-    _value = _value.toAutoArray();
+    setRaw(getValue());
     
-    return _value;
+    Value value = super.toAutoArray();
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -346,15 +306,42 @@ public class Var extends Value {
    */
   public Value toObject(Env env)
   {
-    return _value.toObject(env);
+    return getValue().toObject(env);
   }
 
+  /**
+   * Converts to a Java Calendar.
+   */
+  @Override
+  public Calendar toJavaCalendar()
+  {
+    return getValue().toJavaCalendar();
+  }
+  
+  /**
+   * Converts to a Java Date.
+   */
+  @Override
+  public Date toJavaDate()
+  {
+    return getValue().toJavaDate();
+  }
+  
+  /**
+   * Converts to a Java URL.
+   */
+  @Override
+  public URL toJavaURL(Env env)
+  {
+    return getValue().toJavaURL(env);
+  }
+  
   /**
    * Append to a string builder.
    */
   public void appendTo(StringBuilderValue sb)
   {
-    _value.appendTo(sb);
+    getValue().appendTo(sb);
   }
 
   /**
@@ -362,15 +349,7 @@ public class Var extends Value {
    */
   public void appendTo(BinaryBuilderValue sb)
   {
-    _value.appendTo(sb);
-  }
-
-  /**
-   * Returns to the value value.
-   */
-  public final Value getRawValue()
-  {
-    return _value;
+    getValue().appendTo(sb);
   }
 
   /**
@@ -378,7 +357,7 @@ public class Var extends Value {
    */
   public Value toValue()
   {
-    return _value;
+    return getValue();
   }
 
   /**
@@ -387,7 +366,7 @@ public class Var extends Value {
   @Override
   public Value toArgValueReadOnly()
   {
-    return _value;
+    return getValue();
   }
 
   /**
@@ -396,7 +375,7 @@ public class Var extends Value {
   @Override
   public Value toArgValue()
   {
-    return _value.toArgValue();
+    return getValue().toArgValue();
   }
 
   /**
@@ -406,8 +385,13 @@ public class Var extends Value {
   @Override
   public Value toRefValue()
   {
-    // php/344r
-    return _value.toRefValue();
+    setRaw(getValue());
+    
+    Value value = super.toRefValue();
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -416,18 +400,13 @@ public class Var extends Value {
   @Override
   public Var toVar()
   {
-    // php/3d04
-    return new Var(_value.toArgValue());
-  }
-
-  /**
-   * Converts to a reference variable
-   */
-  public Var toRefVar()
-  {
-    _refCount = 2;
-
-    return this;
+    setRaw(getValue());
+    
+    Var value = super.toVar();
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -435,31 +414,31 @@ public class Var extends Value {
    */
   public Value toKey()
   {
-    return _value.toKey();
+    return getValue().toKey();
   }
 
   @Override
   public StringValue toStringValue()
   {
-    return _value.toStringValue();
+    return getValue().toStringValue();
   }
 
   @Override
   public BinaryValue toBinaryValue(Env env)
   {
-    return _value.toBinaryValue(env);
+    return getValue().toBinaryValue(env);
   }
 
   @Override
   public UnicodeValue toUnicodeValue(Env env)
   {
-    return _value.toUnicodeValue(env);
+    return getValue().toUnicodeValue(env);
   }
 
   @Override
   public StringValue toStringBuilder()
   {
-    return _value.toStringBuilder();
+    return getValue().toStringBuilder();
   }
 
   //
@@ -471,19 +450,13 @@ public class Var extends Value {
    */
   public Value copy()
   {
-    // php/041d
-    return _value.copy();
-  }
-
-  /**
-   * Copy the value as an array item.
-   */
-  public Value copyArrayItem()
-  {
-    _refCount = 2;
-
-    // php/041d
-    return this;
+    setRaw(getValue());
+    
+    Value value = super.copy();
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -491,10 +464,13 @@ public class Var extends Value {
    */
   public Value copyReturn()
   {
-    if (_refCount < 1)
-      return _value;
-    else
-      return _value.copy();
+    setRaw(getValue());
+    
+    Value value = super.copyReturn();
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -502,9 +478,13 @@ public class Var extends Value {
    */
   public Value toRef()
   {
-    _refCount = 2;
-
-    return new RefVar(this);
+    setRaw(getValue());
+    
+    Value value = super.toRef();
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -512,7 +492,7 @@ public class Var extends Value {
    */
   public boolean isArray()
   {
-    return _value.isArray();
+    return getValue().isArray();
   }
 
   /**
@@ -520,7 +500,7 @@ public class Var extends Value {
    */
   public Value neg()
   {
-    return _value.neg();
+    return getValue().neg();
   }
 
   /**
@@ -528,7 +508,7 @@ public class Var extends Value {
    */
   public Value add(Value rValue)
   {
-    return _value.add(rValue);
+    return getValue().add(rValue);
   }
 
   /**
@@ -537,7 +517,7 @@ public class Var extends Value {
   @Override
   public Value add(long rValue)
   {
-    return _value.add(rValue);
+    return getValue().add(rValue);
   }
 
   /**
@@ -545,9 +525,13 @@ public class Var extends Value {
    */
   public Value preincr(int incr)
   {
-    _value = _value.preincr(incr);
-
-    return _value;
+    setRaw(getValue());
+    
+    Value value = super.preincr(incr);
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -555,10 +539,12 @@ public class Var extends Value {
    */
   public Value postincr(int incr)
   {
-    Value value = _value;
-
-    _value = value.postincr(incr);
-
+    setRaw(getValue());
+    
+    Value value = super.postincr(incr);
+    
+    setValue(getRawValue());
+    
     return value;
   }
 
@@ -567,7 +553,7 @@ public class Var extends Value {
    */
   public Value sub(Value rValue)
   {
-    return _value.sub(rValue);
+    return getValue().sub(rValue);
   }
 
   /**
@@ -575,7 +561,7 @@ public class Var extends Value {
    */
   public Value mul(Value rValue)
   {
-    return _value.mul(rValue);
+    return getValue().mul(rValue);
   }
 
   /**
@@ -583,7 +569,7 @@ public class Var extends Value {
    */
   public Value mul(long lValue)
   {
-    return _value.mul(lValue);
+    return getValue().mul(lValue);
   }
 
   /**
@@ -591,7 +577,7 @@ public class Var extends Value {
    */
   public Value div(Value rValue)
   {
-    return _value.div(rValue);
+    return getValue().div(rValue);
   }
 
   /**
@@ -599,7 +585,7 @@ public class Var extends Value {
    */
   public Value lshift(Value rValue)
   {
-    return _value.lshift(rValue);
+    return getValue().lshift(rValue);
   }
 
   /**
@@ -607,7 +593,7 @@ public class Var extends Value {
    */
   public Value rshift(Value rValue)
   {
-    return _value.rshift(rValue);
+    return getValue().rshift(rValue);
   }
 
   /**
@@ -615,7 +601,7 @@ public class Var extends Value {
    */
   public boolean eq(Value rValue)
   {
-    return _value.eq(rValue);
+    return getValue().eq(rValue);
   }
 
   /**
@@ -623,7 +609,7 @@ public class Var extends Value {
    */
   public boolean eql(Value rValue)
   {
-    return _value.eql(rValue);
+    return getValue().eql(rValue);
   }
 
   /**
@@ -631,7 +617,7 @@ public class Var extends Value {
    */
   public int cmp(Value rValue)
   {
-    return _value.cmp(rValue);
+    return getValue().cmp(rValue);
   }
 
   /**
@@ -639,7 +625,7 @@ public class Var extends Value {
    */
   public int getSize()
   {
-    return _value.getSize();
+    return getValue().getSize();
   }
 
   /**
@@ -647,7 +633,7 @@ public class Var extends Value {
    */
   public Collection<Value> getIndices()
   {
-    return _value.getIndices();
+    return getValue().getIndices();
   }
 
   /**
@@ -655,7 +641,7 @@ public class Var extends Value {
    */
   public Value []getKeyArray()
   {
-    return _value.getKeyArray();
+    return getValue().getKeyArray();
   }
 
   /**
@@ -663,7 +649,7 @@ public class Var extends Value {
    */
   public Value []getValueArray(Env env)
   {
-    return _value.getValueArray(env);
+    return getValue().getValueArray(env);
   }
 
   /**
@@ -671,10 +657,13 @@ public class Var extends Value {
    */
   public Value getArray()
   {
-    if (! _value.isset())
-      _value = new ArrayValueImpl();
-
-    return _value;
+    setRaw(getValue());
+    
+    Value value = super.getArray();
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -682,10 +671,13 @@ public class Var extends Value {
    */
   public Value getObject(Env env)
   {
-    if (! _value.isset())
-      _value = env.createObject();
-
-    return _value;
+    setRaw(getValue());
+    
+    Value value = super.getObject(env);
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -693,7 +685,7 @@ public class Var extends Value {
    */
   public Value get(Value index)
   {
-    return _value.get(index);
+    return getValue().get(index);
   }
 
   /**
@@ -701,11 +693,13 @@ public class Var extends Value {
    */
   public Value getRef(Value index)
   {
-    // php/3d1a
-    if (! _value.isset())
-      _value = new ArrayValueImpl();
-
-    return _value.getRef(index);
+    setRaw(getValue());
+    
+    Value value = super.getRef(index);
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -713,10 +707,13 @@ public class Var extends Value {
    */
   public Value getArg(Value index)
   {
-    if (_value.isset())
-      return _value.getArg(index);
-    else
-      return new ArgGetValue(this, index); // php/3d2p
+    setRaw(getValue());
+    
+    Value value = super.getArg(index);
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -724,10 +721,13 @@ public class Var extends Value {
    */
   public Value getArgRef(Value index)
   {
-    if (_value.isset())
-      return _value.getArgRef(index);
-    else
-      return new ArgGetValue(this, index);
+    setRaw(getValue());
+    
+    Value value = super.getArgRef(index);
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -735,10 +735,13 @@ public class Var extends Value {
    */
   public Value getArray(Value index)
   {
-    // php/3d11
-    _value = _value.toAutoArray();
-
-    return _value.getArray(index);
+    setRaw(getValue());
+    
+    Value value = super.getArray(index);
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -746,7 +749,7 @@ public class Var extends Value {
    */
   public Value getDirty(Value index)
   {
-    return _value.getDirty(index);
+    return getValue().getDirty(index);
   }
 
   /**
@@ -754,10 +757,13 @@ public class Var extends Value {
    */
   public Value getObject(Env env, Value index)
   {
-    // php/3d2p
-    _value = _value.toAutoArray();
-
-    return _value.getObject(env, index);
+    setRaw(getValue());
+    
+    Value value = super.getObject(env, index);
+    
+    setValue(getRawValue());
+    
+    return value;
   }
 
   /**
@@ -765,9 +771,13 @@ public class Var extends Value {
    */
   public Value put(Value index, Value value)
   {
-    _value = _value.toAutoArray();
+    setRaw(getValue());
     
-    return _value.put(index, value);
+    Value retValue = super.put(index, value);
+    
+    setValue(getRawValue());
+    
+    return retValue;
   }
 
   /**
@@ -775,9 +785,13 @@ public class Var extends Value {
    */
   public Value put(Value value)
   {
-    _value = _value.toAutoArray();
+    setRaw(getValue());
     
-    return _value.put(value);
+    Value retValue = super.put(value);
+    
+    setValue(getRawValue());
+    
+    return retValue;
   }
 
   /**
@@ -785,9 +799,13 @@ public class Var extends Value {
    */
   public Value putRef()
   {
-    _value = _value.toAutoArray();
+    setRaw(getValue());
     
-    return _value.putRef();
+    Value retValue = super.putRef();
+    
+    setValue(getRawValue());
+    
+    return retValue;
   }
 
   /**
@@ -795,7 +813,7 @@ public class Var extends Value {
    */
   public Value remove(Value index)
   {
-    return _value.remove(index);
+    return getValue().remove(index);
   }
 
   /**
@@ -804,7 +822,7 @@ public class Var extends Value {
   @Override
   public Value getField(Env env, String index)
   {
-    return _value.getField(env, index);
+    return getValue().getField(env, index);
   }
 
   /**
@@ -812,10 +830,13 @@ public class Var extends Value {
    */
   public Value getFieldRef(Env env, String index)
   {
-    // php/3a0r
-    _value = _value.toAutoObject(env);
+    setRaw(getValue());
     
-    return _value.getFieldRef(env, index);
+    Value retValue = super.getFieldRef(env, index);
+    
+    setValue(getRawValue());
+    
+    return retValue;
   }
 
   /**
@@ -823,10 +844,13 @@ public class Var extends Value {
    */
   public Value getFieldArg(Env env, String index)
   {
-    if (_value.isset())
-      return _value.getFieldArg(env, index);
-    else
-      return new ArgGetFieldValue(env, this, index);
+    setRaw(getValue());
+    
+    Value retValue = super.getFieldArg(env, index);
+    
+    setValue(getRawValue());
+    
+    return retValue;
   }
 
   /**
@@ -834,10 +858,13 @@ public class Var extends Value {
    */
   public Value getFieldArray(Env env, String index)
   {
-    // php/3d1q
-    _value = _value.toAutoObject(env);
+    setRaw(getValue());
     
-    return _value.getFieldArray(env, index);
+    Value retValue = super.getFieldArray(env, index);
+    
+    setValue(getRawValue());
+    
+    return retValue;
   }
 
   /**
@@ -845,9 +872,13 @@ public class Var extends Value {
    */
   public Value getFieldObject(Env env, String index)
   {
-    _value = _value.toAutoObject(env);
+    setRaw(getValue());
     
-    return _value.getFieldObject(env, index);
+    Value retValue = super.getFieldObject(env, index);
+    
+    setValue(getRawValue());
+    
+    return retValue;
   }
 
   /**
@@ -855,10 +886,13 @@ public class Var extends Value {
    */
   public Value putField(Env env, String index, Value value)
   {
-    // php/3a0s
-    _value = _value.toAutoObject(env);
-
-    return _value.putField(env, index, value);
+    setRaw(getValue());
+    
+    Value retValue = super.putField(env, index, value);
+    
+    setValue(getRawValue());
+    
+    return retValue;
   }
 
   /**
@@ -866,16 +900,25 @@ public class Var extends Value {
    */
   public void removeField(String index)
   {
-    _value.removeField(index);
+    getValue().removeField(index);
   }
 
+  /**
+   * Takes the values of this array, unmarshalls them to objects of type
+   * <i>elementType</i>, and puts them in a java array.
+   */
+  public Object valuesToArray(Env env, Class elementType)
+  {
+    return getValue().valuesToArray(env, elementType);
+  }
+  
   /**
    * Returns the character at an index
    */
   @Override
   public Value charValueAt(long index)
   {
-    return _value.charValueAt(index);
+    return getValue().charValueAt(index);
   }
 
   /**
@@ -884,7 +927,7 @@ public class Var extends Value {
   @Override
   public Value setCharValueAt(long index, String value)
   {
-    return _value.setCharValueAt(index, value);
+    return getValue().setCharValueAt(index, value);
   }
 
   /**
@@ -892,7 +935,7 @@ public class Var extends Value {
    */
   public boolean hasCurrent()
   {
-    return _value.hasCurrent();
+    return getValue().hasCurrent();
   }
 
   /**
@@ -900,7 +943,7 @@ public class Var extends Value {
    */
   public Value key()
   {
-    return _value.key();
+    return getValue().key();
   }
 
   /**
@@ -908,7 +951,7 @@ public class Var extends Value {
    */
   public Value current()
   {
-    return _value.current();
+    return getValue().current();
   }
 
   /**
@@ -916,7 +959,7 @@ public class Var extends Value {
    */
   public Value next()
   {
-    return _value.next();
+    return getValue().next();
   }
 
   /**
@@ -924,7 +967,7 @@ public class Var extends Value {
    */
   public Value callMethod(Env env, String methodName, Expr []args)
   {
-    return _value.callMethod(env, methodName, args);
+    return getValue().callMethod(env, methodName, args);
   }
 
   /**
@@ -932,7 +975,7 @@ public class Var extends Value {
    */
   public Value callMethod(Env env, String methodName, Value []args)
   {
-    return _value.callMethod(env, methodName, args);
+    return getValue().callMethod(env, methodName, args);
   }
 
   /**
@@ -940,7 +983,7 @@ public class Var extends Value {
    */
   public Value callMethod(Env env, String methodName)
   {
-    return _value.callMethod(env, methodName);
+    return getValue().callMethod(env, methodName);
   }
 
   /**
@@ -948,7 +991,7 @@ public class Var extends Value {
    */
   public Value callMethod(Env env, String methodName, Value a0)
   {
-    return _value.callMethod(env, methodName, a0);
+    return getValue().callMethod(env, methodName, a0);
   }
 
   /**
@@ -956,7 +999,7 @@ public class Var extends Value {
    */
   public Value callMethod(Env env, String methodName, Value a0, Value a1)
   {
-    return _value.callMethod(env, methodName, a0, a1);
+    return getValue().callMethod(env, methodName, a0, a1);
   }
 
   /**
@@ -965,7 +1008,7 @@ public class Var extends Value {
   public Value callMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
   {
-    return _value.callMethod(env, methodName, a0, a1, a2);
+    return getValue().callMethod(env, methodName, a0, a1, a2);
   }
 
   /**
@@ -974,7 +1017,7 @@ public class Var extends Value {
   public Value callMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
   {
-    return _value.callMethod(env, methodName, a0, a1, a2, a3);
+    return getValue().callMethod(env, methodName, a0, a1, a2, a3);
   }
 
   /**
@@ -983,7 +1026,7 @@ public class Var extends Value {
   public Value callMethod(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return _value.callMethod(env, methodName, a0, a1, a2, a3, a4);
+    return getValue().callMethod(env, methodName, a0, a1, a2, a3, a4);
   }
 
   /**
@@ -991,7 +1034,7 @@ public class Var extends Value {
    */
   public Value callMethodRef(Env env, String methodName, Expr []args)
   {
-    return _value.callMethodRef(env, methodName, args);
+    return getValue().callMethodRef(env, methodName, args);
   }
 
   /**
@@ -999,7 +1042,7 @@ public class Var extends Value {
    */
   public Value callMethodRef(Env env, String methodName, Value []args)
   {
-    return _value.callMethodRef(env, methodName, args);
+    return getValue().callMethodRef(env, methodName, args);
   }
 
   /**
@@ -1007,7 +1050,7 @@ public class Var extends Value {
    */
   public Value callMethodRef(Env env, String methodName)
   {
-    return _value.callMethodRef(env, methodName);
+    return getValue().callMethodRef(env, methodName);
   }
 
   /**
@@ -1015,7 +1058,7 @@ public class Var extends Value {
    */
   public Value callMethodRef(Env env, String methodName, Value a0)
   {
-    return _value.callMethodRef(env, methodName, a0);
+    return getValue().callMethodRef(env, methodName, a0);
   }
 
   /**
@@ -1023,7 +1066,7 @@ public class Var extends Value {
    */
   public Value callMethodRef(Env env, String methodName, Value a0, Value a1)
   {
-    return _value.callMethodRef(env, methodName, a0, a1);
+    return getValue().callMethodRef(env, methodName, a0, a1);
   }
 
   /**
@@ -1032,7 +1075,7 @@ public class Var extends Value {
   public Value callMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2)
   {
-    return _value.callMethodRef(env, methodName, a0, a1, a2);
+    return getValue().callMethodRef(env, methodName, a0, a1, a2);
   }
 
   /**
@@ -1041,7 +1084,7 @@ public class Var extends Value {
   public Value callMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3)
   {
-    return _value.callMethodRef(env, methodName, a0, a1, a2, a3);
+    return getValue().callMethodRef(env, methodName, a0, a1, a2, a3);
   }
 
   /**
@@ -1050,7 +1093,7 @@ public class Var extends Value {
   public Value callMethodRef(Env env, String methodName,
 			  Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return _value.callMethodRef(env, methodName, a0, a1, a2, a3, a4);
+    return getValue().callMethodRef(env, methodName, a0, a1, a2, a3, a4);
   }
 
   /**
@@ -1058,7 +1101,7 @@ public class Var extends Value {
    */
   public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
-    return _value.callClassMethod(env, fun, args);
+    return getValue().callClassMethod(env, fun, args);
   }
 
   /**
@@ -1067,7 +1110,7 @@ public class Var extends Value {
    */
   public void print(Env env)
   {
-    _value.print(env);
+    getValue().print(env);
   }
 
   /**
@@ -1075,7 +1118,7 @@ public class Var extends Value {
    */
   public void serialize(StringBuilder sb)
   {
-    _value.serialize(sb);
+    getValue().serialize(sb);
   }
 
   public void varDumpImpl(Env env,
@@ -1085,7 +1128,7 @@ public class Var extends Value {
     throws IOException
   {
     out.print("&");
-    _value.varDump(env, out, depth, valueSet);
+    getValue().varDump(env, out, depth, valueSet);
   }
 }
 

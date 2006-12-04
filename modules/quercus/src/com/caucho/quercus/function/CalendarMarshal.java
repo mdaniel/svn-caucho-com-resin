@@ -27,30 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaMapAdapter;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.expr.Expr;
 
-import java.util.Map;
+import java.util.Calendar;
 
-/**
- * Represents an introspected Java class.
- */
-public class JavaMapClassDef extends JavaClassDef {
-  JavaMapClassDef(ModuleContext moduleContext, String name, Class type)
+public class CalendarMarshal extends Marshal
+{
+  public static final Marshal MARSHAL = new CalendarMarshal();
+
+  public Object marshal(Env env, Expr expr, Class expectedClass)
   {
-    super(moduleContext, name, type);
+    return marshal(env, expr.eval(env), expectedClass);
   }
 
-  public Value wrap(Env env, Object obj)
+  public Object marshal(Env env, Value value, Class expectedClass)
   {
-    if (! _isInit)
-      init();
-    
-    return new JavaMapAdapter(env, (Map) obj, this);
+    return value.toJavaCalendar();
+  }
+
+  public Value unmarshal(Env env, Object value)
+  {
+    return env.wrapJava((Calendar)value);
   }
 }
-

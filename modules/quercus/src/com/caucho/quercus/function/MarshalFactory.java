@@ -41,6 +41,11 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.io.InputStream;
+import java.net.URL;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -156,12 +161,50 @@ public class MarshalFactory {
     else if (void.class.equals(argType)) {
       marshal = VoidMarshal.MARSHAL;
     }
+    else if (Calendar.class.equals(argType)){
+      marshal = CalendarMarshal.MARSHAL;
+    }
+    else if (Date.class.equals(argType)) {
+      marshal = DateMarshal.MARSHAL;
+    }
+    else if (URL.class.equals(argType)) {
+      marshal = URLMarshal.MARSHAL;
+    }
+    else if (byte[].class.equals(argType)) {
+      marshal = JavaByteArrayMarshal.MARSHAL;
+    }
+    else if (Byte[].class.equals(argType)) {
+      marshal = JavaByteObjectArrayMarshal.MARSHAL;
+    }
+    else if (char[].class.equals(argType)) {
+      marshal = JavaCharacterArrayMarshal.MARSHAL;
+    }
+    else if (Character[].class.equals(argType)) {
+      marshal = JavaCharacterObjectArrayMarshal.MARSHAL;
+    }
+    else if (argType.isArray()) {
+      marshal = JavaArrayMarshal.MARSHAL;
+    }
     else if (Map.class.isAssignableFrom(argType)) {
       String typeName = argType.getName();
 
       JavaClassDef javaDef = _moduleContext.getJavaClassDefinition(typeName);
 
       marshal = new JavaMapMarshal(javaDef, isNotNull, isNullAsFalse);
+    }
+    else if (List.class.isAssignableFrom(argType)) {
+      String typeName = argType.getName();
+
+      JavaClassDef javaDef = _moduleContext.getJavaClassDefinition(typeName);
+
+      marshal = new JavaListMarshal(javaDef, isNotNull, isNullAsFalse);
+    }
+    else if (Collection.class.isAssignableFrom(argType)) {
+      String typeName = argType.getName();
+
+      JavaClassDef javaDef = _moduleContext.getJavaClassDefinition(typeName);
+
+      marshal = new JavaCollectionMarshal(javaDef, isNotNull, isNullAsFalse);
     }
     else {
       String typeName = argType.getName();

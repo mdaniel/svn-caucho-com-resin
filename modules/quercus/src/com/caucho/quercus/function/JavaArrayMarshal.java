@@ -27,30 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaMapAdapter;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.expr.Expr;
 
-import java.util.Map;
+public class JavaArrayMarshal extends Marshal
+{
+  public static final Marshal MARSHAL = new JavaArrayMarshal();
 
-/**
- * Represents an introspected Java class.
- */
-public class JavaMapClassDef extends JavaClassDef {
-  JavaMapClassDef(ModuleContext moduleContext, String name, Class type)
+  public Object marshal(Env env, Expr expr, Class expectedClass)
   {
-    super(moduleContext, name, type);
+    return marshal(env, expr.eval(env), expectedClass);
   }
 
-  public Value wrap(Env env, Object obj)
+  public Object marshal(Env env, Value value, Class expectedClass)
   {
-    if (! _isInit)
-      init();
+    /*
+    if (! value.isset()) {
+      if (_isNotNull) {
+        env.warning(L.l("null is an unexpected argument, expected {0}", shortName(expectedClass)));
+      }
+
+      return null;
+    }
+    */
+
+    Class componentType = expectedClass.getComponentType();
+    Object array = value.valuesToArray(env, componentType);
     
-    return new JavaMapAdapter(env, (Map) obj, this);
+    /*
+    if (array == null && _isNotNull) {
+      env.warning(L.l("null is an unexpected argument, expected {0}", shortName(expectedClass)));
+    }
+    */
+    
+    return array;
+  }
+
+  public Value unmarshal(Env env, Object value)
+  {
+    return env.wrapJava(value);
   }
 }
-

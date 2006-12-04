@@ -454,6 +454,51 @@ abstract public class StringValue extends Value implements CharSequence {
   }
 
   /**
+   * Takes the values of this array, unmarshalls them to objects of type
+   * <i>elementType</i>, and puts them in a java array.
+   */
+  @Override
+  public Object valuesToArray(Env env, Class elementType)
+  {
+    if (char.class.equals(elementType)) {
+      return toUnicodeValue(env).toCharArray();
+    }
+    else if (Character.class.equals(elementType)) {
+      char[] chars = toUnicodeValue(env).toCharArray();
+      
+      int length = chars.length;
+      
+      Character[] charObjects = new Character[length];
+      
+      for (int i = 0; i <length; i++) {
+        charObjects[i] = Character.valueOf(chars[i]);
+      }
+      
+      return charObjects;
+    }
+    else if (byte.class.equals(elementType)) {
+      return toBinaryValue(env).toBytes();
+    }
+    else if (Byte.class.equals(elementType)) {
+      byte[] bytes = toBinaryValue(env).toBytes();
+      
+      int length = bytes.length;
+      
+      Byte[] byteObjects = new Byte[length];
+      
+      for (int i = 0; i <length; i++) {
+        byteObjects[i] = Byte.valueOf(bytes[i]);
+      }
+      
+      return byteObjects;
+    }
+    else {
+      env.error(L.l("Can't assign {0} with type {1} to {2}", this, this.getClass(), elementType));
+      return null;
+    }
+  }
+  
+  /**
    * Converts to an array if null.
    */
   public Value toAutoArray()

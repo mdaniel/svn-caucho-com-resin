@@ -95,6 +95,15 @@ abstract public class ArrayValue extends Value {
     return null;
   }
 
+  /**
+   * Converts to a java object.
+   */
+  @Override
+  public Object toJavaObject()
+  {
+    return this;
+  }
+
   //
   // Conversions
   //
@@ -136,6 +145,73 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Converts to a java List object.
+   */
+  public Collection toJavaCollection(Env env, Class type)
+  {
+    Collection coll = null;
+    
+    if (type.isAssignableFrom(HashSet.class)) {
+      coll = new HashSet();
+    }
+    else if (type.isAssignableFrom(TreeSet.class)) {
+      coll = new TreeSet();
+    }
+    else {
+      try {
+        coll = (Collection) type.newInstance();
+      }
+      catch (Throwable e) {
+        log.log(Level.FINE, e.toString(), e);
+        env.warning(L.l("Can't assign array to {0}", type.getName()));
+
+        return null;
+      }
+    }
+    
+    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      coll.add(entry.getValue().toJavaObject());
+    }
+
+    return coll;
+  }
+  
+  /**
+   * Converts to a java List object.
+   */
+  public List toJavaList(Env env, Class type)
+  {
+    List list = null;
+    
+    if (type.isAssignableFrom(ArrayList.class)) {
+      list = new ArrayList();
+    }
+    else if (type.isAssignableFrom(LinkedList.class)) {
+      list = new LinkedList();
+    }
+    else if (type.isAssignableFrom(Vector.class)) {
+      list = new Vector();
+    }
+    else {
+      try {
+        list = (List) type.newInstance();
+      }
+      catch (Throwable e) {
+        log.log(Level.FINE, e.toString(), e);
+        env.warning(L.l("Can't assign array to {0}", type.getName()));
+
+        return null;
+      }
+    }
+
+    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      list.add(entry.getValue().toJavaObject());
+    }
+
+    return list;
+  }
+  
+  /**
    * Converts to a java object.
    */
   @Override
@@ -151,12 +227,13 @@ abstract public class ArrayValue extends Value {
     }
     else {
       try {
-	map = (Map) type.newInstance();
-      } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        map = (Map) type.newInstance();
+      }
+      catch (Throwable e) {
+        log.log(Level.FINE, e.toString(), e);
 	
-	env.warning(L.l("Can't assign array to {0}",
-			type.getName()));
+        env.warning(L.l("Can't assign array to {0}",
+			            type.getName()));
 
 	return null;
       }
@@ -164,7 +241,7 @@ abstract public class ArrayValue extends Value {
 
     for (Entry entry = getHead(); entry != null; entry = entry._next) {
       map.put(entry.getKey().toJavaObject(),
-	      entry.getValue().toJavaObject());
+	          entry.getValue().toJavaObject());
     }
 
     return map;
@@ -1096,11 +1173,11 @@ abstract public class ArrayValue extends Value {
    * Takes the values of this array, unmarshals them to objects of type
    * <i>elementType</i>, and puts them in a java array.
    */
-  public <T> T[] valuesToArray(Env env, Class<T> elementType)
+  public Object valuesToArray(Env env, Class elementType)
   {
     int size = getSize();
 
-    T[] array = (T[]) Array.newInstance(elementType, size);
+    Object array = Array.newInstance(elementType, size);
 
     MarshalFactory factory = env.getModuleContext().getMarshalFactory();
     Marshal elementMarshal = factory.create(elementType);
@@ -1108,7 +1185,9 @@ abstract public class ArrayValue extends Value {
     int i = 0;
 
     for (Entry ptr = getHead(); ptr != null; ptr = ptr.getNext()) {
-      array[i++] = (T) elementMarshal.marshal(env, ptr.getValue(), elementType);
+      Array.set(array, i++, elementMarshal.marshal(env,
+                                                   ptr.getValue(),
+                                                   elementType));
     }
 
     return array;

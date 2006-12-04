@@ -66,6 +66,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -2720,10 +2721,11 @@ public class Env {
       MarshalFactory factory = _quercus.getModuleContext().getMarshalFactory();
       Marshal componentClassMarshal = factory.create(componentClass);
 
-      Object[] objAsArray = (Object[]) obj;
-
-      for (int i = 0; i < objAsArray.length; i++)
-	arrayValueImpl.put(componentClassMarshal.unmarshal(this, objAsArray[i]));
+      int length = Array.getLength(obj);
+      
+      for (int i = 0; i < length; i++) {
+        arrayValueImpl.put(componentClassMarshal.unmarshal(this, Array.get(obj, i)));
+      }
 
       return arrayValueImpl;
     }

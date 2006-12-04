@@ -119,6 +119,18 @@ public class StringBuilderValue extends UnicodeValue {
     System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
+  public StringBuilderValue(Character []buffer)
+  {
+    int length = buffer.length;
+    
+    _buffer =  new char[length];
+    _length = length;
+    
+    for (int i = 0; i < length; i++) {
+      _buffer[i] = buffer[i].charValue();
+    }
+  }
+  
   /**
    * Returns the value.
    */
@@ -622,7 +634,11 @@ public class StringBuilderValue extends UnicodeValue {
   @Override
   public char []toCharArray()
   {
-    return _buffer;
+    char[] dest = new char[_length];
+    
+    System.arraycopy(_buffer, 0, dest, 0, _length);
+    
+    return dest;
   }
 
   /**

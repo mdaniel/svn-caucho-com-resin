@@ -27,30 +27,57 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaMapAdapter;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.vfs.WriteStream;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
- * Represents an introspected Java class.
+ * Represents a Quercus java URL value.
  */
-public class JavaMapClassDef extends JavaClassDef {
-  JavaMapClassDef(ModuleContext moduleContext, String name, Class type)
+public class JavaURLValue extends JavaValue {
+  private static final Logger log
+    = Logger.getLogger(JavaURLValue.class.getName());
+
+  private final URL _url;
+
+  public JavaURLValue(Env env, URL url, JavaClassDef def)
   {
-    super(moduleContext, name, type);
+    super(env, url, def);
+    _url = url;
   }
 
-  public Value wrap(Env env, Object obj)
+  /**
+   * Converts to a Java URL.
+   */
+  @Override
+  public URL toJavaURL(Env env)
   {
-    if (! _isInit)
-      init();
-    
-    return new JavaMapAdapter(env, (Map) obj, this);
+    return _url;
+  }
+
+  /**
+   * Converts to a Java InputStream.
+   */
+  @Override
+  public InputStream toInputStream()
+  {
+    try {
+      return _url.openStream();
+    }
+    catch (IOException e) {
+      throw new QuercusRuntimeException(e);
+    }
   }
 }
 

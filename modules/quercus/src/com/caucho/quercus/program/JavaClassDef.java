@@ -47,10 +47,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -135,8 +140,18 @@ public class JavaClassDef extends ClassDef {
       return new StringClassDef(moduleContext);
     else if (Boolean.class.isAssignableFrom(type))
       return new BooleanClassDef(moduleContext);
+    else if (Calendar.class.isAssignableFrom(type))
+      return new CalendarClassDef(moduleContext);
+    else if (Date.class.isAssignableFrom(type))
+      return new DateClassDef(moduleContext);
+    else if (URL.class.isAssignableFrom(type))
+      return new URLClassDef(moduleContext);
     else if (Map.class.isAssignableFrom(type))
       return new JavaMapClassDef(moduleContext, name, type);
+    else if (List.class.isAssignableFrom(type))
+      return new JavaListClassDef(moduleContext, name, type);
+    else if (Collection.class.isAssignableFrom(type))
+      return new JavaCollectionClassDef(moduleContext, name, type);
     else
       return new JavaClassDef(moduleContext, name, type);
   }
@@ -1046,6 +1061,42 @@ public class JavaClassDef extends ClassDef {
 	return BooleanValue.TRUE;
       else
 	return BooleanValue.FALSE;
+    }
+  }
+  
+  private static class CalendarClassDef extends JavaClassDef {
+    CalendarClassDef(ModuleContext module)
+    {
+      super(module, "Calendar", Calendar.class);
+    }
+    
+    public Value wrap(Env env, Object obj)
+    {
+      return new JavaCalendarValue(env, (Calendar)obj, this);
+    }
+  }
+  
+  private static class DateClassDef extends JavaClassDef {
+    DateClassDef(ModuleContext module)
+    {
+      super(module, "Date", Date.class);
+    }
+    
+    public Value wrap(Env env, Object obj)
+    {
+      return new JavaDateValue(env, (Date)obj, this);
+    }
+  }
+  
+  private static class URLClassDef extends JavaClassDef {
+    URLClassDef(ModuleContext module)
+    {
+      super(module, "URL", URL.class);
+    }
+    
+    public Value wrap(Env env, Object obj)
+    {
+      return new JavaURLValue(env, (URL)obj, this);
     }
   }
 }

@@ -27,30 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaMapAdapter;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.program.JavaClassDef;
 
-import java.util.Map;
+import java.util.Date;
+import java.util.logging.Logger;
 
 /**
- * Represents an introspected Java class.
+ * Represents a Quercus java Date value.
  */
-public class JavaMapClassDef extends JavaClassDef {
-  JavaMapClassDef(ModuleContext moduleContext, String name, Class type)
+public class JavaDateValue extends JavaValue {
+  private static final Logger log
+    = Logger.getLogger(JavaDateValue.class.getName());
+  
+  private final Date _date;
+  
+  public JavaDateValue(Env env, Date date, JavaClassDef def)
   {
-    super(moduleContext, name, type);
+    super(env, date, def);
+    _date = date;
   }
 
-  public Value wrap(Env env, Object obj)
+  /**
+   * Converts to a long.
+   */
+  @Override
+  public long toLong()
   {
-    if (! _isInit)
-      init();
-    
-    return new JavaMapAdapter(env, (Map) obj, this);
+    return _date.getTime();
   }
+  
+  /**
+   * Converts to a Java Date.
+   */
+  @Override
+  public Date toJavaDate()
+  {
+    return _date;
+  }
+
 }
-

@@ -175,7 +175,7 @@ public class MathModule extends AbstractQuercusModule {
    * @return the decimal equivalent of the binary number
    * @throws ArithmeticException if the binary number cannot fit in a long
    */
-  public static long bindec(String bin)
+  public static long bindec(StringValue bin)
   {
     // This implementation deliberately differs from the php implementation,
     // which returns an int or a float.  Quercus uses long's to represent
@@ -316,7 +316,7 @@ public class MathModule extends AbstractQuercusModule {
     return Math.IEEEremainder(xV, yV);
   }
 
-  public static long hexdec(String s)
+  public static long hexdec(StringValue s)
   {
     long v = 0;
     int len = s.length();
@@ -503,7 +503,7 @@ public class MathModule extends AbstractQuercusModule {
    * @return the decimal equivalent of the octal number
    * @throws ArithmeticException if the octal number cannot fit in a long
    */
-  public static long octdec(String oct)
+  public static long octdec(StringValue oct)
   {
     // This implementation deliberately differs from the php implementation,
     // which returns an int or a float.  Quercus uses long's to represent

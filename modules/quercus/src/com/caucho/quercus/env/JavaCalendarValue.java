@@ -27,30 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.program;
+package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaMapAdapter;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.program.JavaClassDef;
 
-import java.util.Map;
+import java.util.Calendar;
+import java.util.logging.Logger;
 
 /**
- * Represents an introspected Java class.
+ * Represents a Quercus java Calendar value.
  */
-public class JavaMapClassDef extends JavaClassDef {
-  JavaMapClassDef(ModuleContext moduleContext, String name, Class type)
+public class JavaCalendarValue extends JavaValue {
+  private static final Logger log
+    = Logger.getLogger(JavaCalendarValue.class.getName());
+  
+  private final Calendar _calendar;
+  
+  public JavaCalendarValue(Env env, Calendar calendar, JavaClassDef def)
   {
-    super(moduleContext, name, type);
+    super(env, calendar, def);
+    _calendar = calendar;
   }
 
-  public Value wrap(Env env, Object obj)
+  /**
+   * Converts to a long.
+   */
+  @Override
+  public long toLong()
   {
-    if (! _isInit)
-      init();
-    
-    return new JavaMapAdapter(env, (Map) obj, this);
+    return _calendar.getTimeInMillis();
+  }
+  
+  /**
+   * Converts to a Java Calendar.
+   */
+  @Override
+  public Calendar toJavaCalendar()
+  {
+    return _calendar;
+  }
+  
+  public String toString()
+  {
+    return _calendar.getTime().toString();
   }
 }
-
