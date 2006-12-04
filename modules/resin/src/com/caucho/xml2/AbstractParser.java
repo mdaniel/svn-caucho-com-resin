@@ -67,7 +67,6 @@ abstract public class AbstractParser implements XMLReader, Parser
   boolean _strictCharacters;
   boolean _strictXml;
   boolean _singleTopElement;
-  boolean _normalizeWhitespace = false;
 
   boolean _isNamespaceAware = true;
   boolean _isNamespacePrefixes = true;
@@ -142,7 +141,6 @@ abstract public class AbstractParser implements XMLReader, Parser
     _strictCharacters = false;
     _strictXml = false;
     _singleTopElement = false;
-    _normalizeWhitespace = false;
 
     _defaultEncoding = "UTF-8";
     _isStaticEncoding = false;

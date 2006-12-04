@@ -30,6 +30,7 @@ package com.caucho.xml2;
 
 import org.w3c.dom.Node;
 
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.ArrayList;
 

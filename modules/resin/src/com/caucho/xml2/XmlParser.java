@@ -30,11 +30,7 @@
 package com.caucho.xml2;
 
 import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.ReaderWriterStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 import com.caucho.xml2.readers.MacroReader;
 import com.caucho.xml2.readers.Utf16Reader;
 import com.caucho.xml2.readers.Utf8Reader;
@@ -47,6 +43,7 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import javax.xml.namespace.QName;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,17 +62,15 @@ public class XmlParser extends AbstractParser {
   public static final String XMLNS = "http://www.w3.org/2000/xmlns/";
   public static final String XML = "http://www.w3.org/XML/1998/namespace";
 
-  static final QName DOC_NAME = new QName(null, "#document", null);
-  static final QName TEXT_NAME = new QName(null, "#text", null);
-  static final QName JSP_NAME = new QName(null, "#jsp", null);
-  static final QName WHITESPACE_NAME = new QName(null, "#whitespace", null);
-  static final QName JSP_ATTRIBUTE_NAME = new QName("xtp", "jsp-attribute", null);
+  static final QName DOC_NAME = new QName("#document");
+  static final QName TEXT_NAME = new QName("#text");
+  static final QName WHITESPACE_NAME = new QName("#whitespace");
+  
+  private static final boolean []XML_NAME_CHAR;
 
   QAttributes _attributes;
   QAttributes _nullAttributes;
 
-  boolean _inDtd;
-  
   CharBuffer _text;
   CharBuffer _eltName;
   CharBuffer _cb;
@@ -83,11 +78,17 @@ public class XmlParser extends AbstractParser {
   String _textFilename;
   int _textLine;
 
+  TempCharBuffer _tempInputBuffer;
+  char []_inputBuffer;
+  int _inputOffset;
+  int _inputLength;
+
   char []_textBuffer = new char[1024];
   int _textLength;
   int _textCapacity = _textBuffer.length;
   boolean _isIgnorableWhitespace;
-  boolean _isJspText;
+  
+  char []_valueBuffer = _textBuffer;
   
   CharBuffer _name = new CharBuffer();
   CharBuffer _nameBuffer = new CharBuffer();
@@ -97,14 +98,10 @@ public class XmlParser extends AbstractParser {
   int _macroLength = 0;
   char []_macroBuffer;
 
-  QName []_elementNames = new QName[64];
-  NamespaceMap []_namespaces = new NamespaceMap[64];
   int []_elementLines = new int[64];
   int _elementTop;
 
-  NamespaceMap _namespaceMap;
-
-  ArrayList<String> _attrNames = new ArrayList<String>();
+  ArrayList<SaxIntern.Entry> _attrNames = new ArrayList<SaxIntern.Entry>();
   ArrayList<String> _attrValues = new ArrayList<String>();
 
   ReadStream _is;
@@ -112,6 +109,9 @@ public class XmlParser extends AbstractParser {
   
   String _extPublicId;
   String _extSystemId;
+
+  NamespaceContextImpl _namespace = new NamespaceContextImpl();
+  SaxIntern _intern = new SaxIntern(_namespace);;
   
   QName _activeNode;
   QName _topNamespaceNode;
@@ -148,9 +148,6 @@ public class XmlParser extends AbstractParser {
     _eltName = new CharBuffer();
     _text = new CharBuffer();
 
-    // jsp/193b
-    // _namespaceMap = null;
-    
     _textLength = 0;
     _isIgnorableWhitespace = true;
     _elementTop = 0;
@@ -159,7 +156,6 @@ public class XmlParser extends AbstractParser {
     _line = 1;
 
     _dtd = null;
-    _inDtd = false;
     _isTagStart = false;
     _stopOnIncludeEnd = false;
 
@@ -191,6 +187,10 @@ public class XmlParser extends AbstractParser {
   Document parseInt(ReadStream is)
     throws IOException, SAXException
   {
+    _tempInputBuffer = TempCharBuffer.allocate();
+    _inputBuffer = _tempInputBuffer.getBuffer();
+    _inputLength = _inputOffset = 0;
+    
     _is = is;
 
     if (_filename == null && _systemId != null)
@@ -204,11 +204,6 @@ public class XmlParser extends AbstractParser {
 	_systemId = "stream";
     }
 
-    /* xsl/0401
-    if (_isNamespaceAware)
-      _namespaceMap = new NamespaceMap(null, "", "");
-    */
-    
     if (_filename == null)
       _filename = _systemId;
 
@@ -239,10 +234,9 @@ public class XmlParser extends AbstractParser {
     
     _contentHandler.startDocument();
     
-    int ch = parseXMLDeclaration(null);
+    parseXMLDeclaration(null);
     
-    ch = skipWhitespace(ch);
-    parseNode(ch, false);
+    parseNode();
 
     /*
     if (dbg.canWrite()) {
@@ -251,11 +245,10 @@ public class XmlParser extends AbstractParser {
     }
     */
 
-    if (_strictXml && ! _hasTopElement)
+    if (! _hasTopElement)
       throw error(L.l("XML file has no top-element.  All well-formed XML files have a single top-level element."));
 
-    if (_contentHandler != null)
-      _contentHandler.endDocument();
+    _contentHandler.endDocument();
 
     QDocument owner = _owner;
     _owner = null;
@@ -268,133 +261,124 @@ public class XmlParser extends AbstractParser {
    *
    * @param node the current node
    * @param ch the next character
-   * @param special true for the short form, &lt;foo/bar/>
    */
-  private void parseNode(int ch, boolean special)
+  private void parseNode()
     throws IOException, SAXException
   {
-    //boolean isTop = node instanceof QDocument;
-
-    _text.clear();
+    char []valueBuffer = _valueBuffer;
+    int valueLength = valueBuffer.length;
+    int valueOffset = 0;
+    boolean isWhitespace = true;
+    
+    char []inputBuffer = _inputBuffer;
+    int inputLength = _inputLength;
+    int inputOffset = _inputOffset;
 
   loop:
     while (true) {
-      if (_textLength == 0) {
-        _textFilename = getFilename();
-        _textLine = getLine();
+      int ch;
+
+      if (inputOffset < inputLength)
+	ch = inputBuffer[inputOffset++];
+      else if (fillBuffer()) {
+	inputBuffer = _inputBuffer;
+	inputOffset = _inputOffset;
+	inputLength = _inputLength;
+	
+	ch = inputBuffer[inputOffset++];
+      }
+      else {
+	if (valueOffset > 0)
+	  addText(valueBuffer, 0, valueOffset, isWhitespace);
+	
+	_inputOffset = inputOffset;
+	_inputLength = inputLength;
+
+	close();
+	return;
       }
 
       switch (ch) {
-      case -1:
-	if (_textLength != 0)
-	  appendText();
-        if (! _stopOnIncludeEnd && _reader.getNext() != null) {
-          popInclude();
-          if (_reader != null)
-            parseNode(_reader.read(), special);
-          return;
-        }
-	closeTag("");
-	return;
-
-      case ' ': case '\t': case '\n': case '\r':
-	if (! _normalizeWhitespace)
-	  addText((char) ch);
-	else if (_textLength == 0) {
-	  if (! _isTagStart)
-	    addText(' ');
-	}
-	else if (_textBuffer[_textLength - 1] != ' ') {
-	  addText(' ');
-	}
-	ch = _reader.read();
+      case '\n':
+	_line++;
+	valueBuffer[valueOffset++] = (char) ch;
+	break;
+	
+      case ' ': case '\t': case '\r':
+	valueBuffer[valueOffset++] = (char) ch;
 	break;
 
       case 0xffff:
-	// marker for end of text for serialization
+	// marker for end of text for serialization (?)
+	if (valueOffset > 0)
+	  addText(valueBuffer, 0, valueOffset, isWhitespace);
+	
+	_inputOffset = inputOffset;
+	_inputLength = inputLength;
 	return;
 
-      default:
-	addText((char) ch);
-	ch = _reader.read();
-	break;
-
-      case '/':
-	if (! special) {
-	  addText((char) ch);
-	  ch = _reader.read();
-	  continue;
-	}
-	ch = _reader.read();
-	if (ch == '>' || ch == -1) {
-          appendText();
-          popNode();
-	  return;
-	}
-	addText('/');
-	break;
-
       case '&':
-        ch = parseEntityReference();
+	if (valueOffset > 0)
+	  addText(valueBuffer, 0, valueOffset, isWhitespace);
+	
+	_inputOffset = inputOffset;
+	_inputLength = inputLength;
+	
+        parseEntityReference();
+	
+	inputOffset = _inputOffset;
+	inputLength = _inputOffset;
 	break;
 
       case '<':
-	boolean endTag = false;
-	ch = _reader.read();
+	if (valueOffset > 0)
+	  addText(valueBuffer, 0, valueOffset, isWhitespace);
+	
+	_inputOffset = inputOffset;
+	_inputLength = inputLength;
 
-	if (ch == '/' && ! special) {
-	  if (_normalizeWhitespace &&
-	      _textLength > 0 && _textBuffer[_textLength - 1] == ' ') {
-	    _textLength--;
-	  }
-	  appendText();
+	ch = read();
 
-	  ch = _reader.parseName(_name, _reader.read());
+	if (ch == '/') {
+	  SaxIntern.Entry entry = parseName(0, false);
+
+	  ch = read();
 
           if (ch != '>') {
-            // XXX: Hack for Java PetStore
-            while (XmlChar.isWhitespace(ch))
-              ch = _reader.read();
-
-            if (ch != '>')
-              throw error(L.l("'</{0}>' expected '>' at {1}.  Closing tags must close immediately after the tag name.", _name, badChar(ch)));
+	    throw error(L.l("'</{0}>' expected '>' at {1}.  Closing tags must close immediately after the tag name.",
+			    entry.getName(), badChar(ch)));
           }
 
-	  // closeTag(_policy.getName(_name).getName());
-	  popNode();
-
-	  ch = _reader.read();
+	  _namespace.pop(entry);
 	} 
 	// element: <tag attr=value ... attr=value> ...
 	else if (XmlChar.isNameStart(ch)) {
-	  appendText();
-	  
 	  parseElement(ch);
-	  ch = _reader.read();
+	  ch = read();
 	}
 	// <! ...
 	else if (ch == '!') {
 	  // <![CDATA[ ... ]]>
-	  if ((ch = _reader.read()) == '[') {
+	  if ((ch = read()) == '[') {
 	    parseCdata();
-	    ch = _reader.read();
+	    ch = read();
 	  }
 	  // <!-- ... -->
           else if (ch == '-') {
 	    parseComment();
 
-	    ch = _reader.read();
+	    ch = read();
 	  } 
 	  else if (XmlChar.isNameStart(ch)) {
-	    appendText();
-	    ch = _reader.parseName(_name, ch);
-	    String declName = _name.toString();
+	    unread(ch);
+	    
+	    SaxIntern.Entry entry = parseName(0, false);
+
+	    String declName = entry.getName();
 	    if (declName.equals("DOCTYPE")) {
-	      parseDoctype(ch);
+	      parseDoctype();
               if (_contentHandler instanceof DOMBuilder)
                 ((DOMBuilder) _contentHandler).dtd(_dtd);
-
-	      ch = _reader.read();
 	    }
 	    else
 	      throw error(L.l("expected '<!DOCTYPE' declaration at {0}", declName));
@@ -404,11 +388,26 @@ public class XmlParser extends AbstractParser {
 	} 
 	// PI: <?tag attr=value ... attr=value?>
 	else if (ch == '?') {
-	  ch = parsePI();
+	  parsePI();
 	} 
 	else {
 	  throw error(L.l("expected tag name after '<' at {0}.  Open tag names must immediately follow the open brace like '<foo ...>'", badChar(ch)));
         }
+	
+	inputOffset = _inputOffset;
+	inputLength = _inputLength;
+	break;
+	
+      default:
+	isWhitespace = false;
+	valueBuffer[valueOffset++] = (char) ch;
+	break;
+      }
+
+      if (valueOffset == valueLength) {
+	addText(valueBuffer, 0, valueOffset, isWhitespace);
+
+	valueOffset = 0;
       }
     }
   }
@@ -416,15 +415,13 @@ public class XmlParser extends AbstractParser {
   /**
    * Parses the &lt;!DOCTYPE> declaration.
    */
-  private void parseDoctype(int ch)
+  private void parseDoctype()
     throws IOException, SAXException
   {
     if (_activeNode != DOC_NAME)
       throw error(L.l("<!DOCTYPE immediately follow the <?xml ...?> declaration."));
     
-    _inDtd = true;
-
-    ch = skipWhitespace(ch);
+    int ch = skipWhitespace(read());
     ch = _reader.parseName(_nameBuffer, ch);
     String name = _nameBuffer.toString();
     ch = skipWhitespace(ch);
@@ -463,7 +460,8 @@ public class XmlParser extends AbstractParser {
       if (hasInclude) {
         _stopOnIncludeEnd = true;
 	try {
-	  ch = parseDoctypeDecl(_dtd);
+	  DtdParser dtdParser = new DtdParser(this, _dtd);
+	  ch = dtdParser.parseDoctypeDecl(_dtd);
 	} catch (XmlParseException e) {
 	  if (_extSystemId != null &&
 	      _extSystemId.startsWith("http")) {
@@ -482,98 +480,16 @@ public class XmlParser extends AbstractParser {
         ch = skipWhitespace(read());
     }
     
-    if (ch == '[')
-      ch = parseDoctypeDecl(_dtd);
+    if (ch == '[') {
+      DtdParser dtdParser = new DtdParser(this, _dtd);
+      ch = dtdParser.parseDoctypeDecl(_dtd);
+    }
 
     ch = skipWhitespace(ch);
-
-    _inDtd = false;
 
     if (ch != '>')
       throw error(L.l("expected '>' in <!DOCTYPE at {0}",
                       badChar(ch)));
-  }
-
-  /**
-   * Parses the DTD.
-   *
-   * <pre>
-   * dtd-item ::= &lt!ELEMENT ...  |
-   *              &lt!ATTLIST ...  |
-   *              &lt!NOTATION ... |
-   *              &lt!ENTITY ...   |
-   *              &lt!-- comment   |
-   *              &lt? pi          |
-   *              %pe-ref;
-   * </pre>
-   *
-   * @return the next character.
-   */
-  private int parseDoctypeDecl(QDocumentType doctype)
-    throws IOException, SAXException
-  {
-    _hasDoctype = true;
-    int ch = 0;
-
-    for (ch = skipWhitespace(read()); 
-	 ch >= 0 && ch != ']'; 
-	 ch = skipWhitespace(read())) {
-      if (ch == '<') {
-	if ((ch = read()) == '!') {
-	  if (XmlChar.isNameStart(ch = read())) {
-	    ch = _reader.parseName(_text, ch);
-	    String name = _text.toString();
-
-	    if (name.equals("ELEMENT"))
-	      parseElementDecl(doctype);
-	    else if (name.equals("ATTLIST"))
-	      parseAttlistDecl(doctype);
-	    else if (name.equals("NOTATION"))
-	      parseNotationDecl(doctype);
-	    else if (name.equals("ENTITY"))
-	      parseEntityDecl(doctype);
-	    else
-	      throw error("unknown declaration '" + name + "'");
-	  }
-	  else if (ch == '-')
-	    parseComment();
-	  else if (ch == '[') {
-	    ch = _reader.parseName(_text, read());
-	    String name = _text.toString();
-
-	    if (name.equals("IGNORE")) {
-	      parseIgnore();
-	    }
-	    else if (name.equals("INCLUDE")) {
-	      parseIgnore();
-	    }
-	    else
-	      throw error("unknown declaration '" + name + "'");
-	  }
-	}
-	else if (ch == '?') {
-	  parsePI();
-	}
-	else 
-	  throw error(L.l("expected markup at {0}", badChar(ch)));
-      }
-      else if (ch == '%') {
-	ch = _reader.parseName(_buf, read());
-
-	if (ch != ';')
-	  throw error(L.l("'%{0};' expects ';' at {1}.  Parameter entities have a '%name;' syntax.", _buf, badChar(ch)));
-
-	addPEReference(_text, _buf.toString());
-      }
-      else {
-	throw error(L.l("expected '<' at {0}", badChar(ch)));
-      }
-
-      _text.clear();
-    }
-    _text.clear();
-
-    return read();
   }
 
   /**
@@ -584,39 +500,55 @@ public class XmlParser extends AbstractParser {
   private void parseElement(int ch)
     throws IOException, SAXException
   {
-    ch = _reader.parseName(_eltName, ch);
+    unread(ch);
 
-    NamespaceMap oldNamespace = _namespaceMap;
+    SaxIntern.Entry entry = parseName(0, false);
     
-    if (ch != '>' && ch != '/')
+    _namespace.push(entry);
+
+    ch = read();
+    
+    if (ch != '>' && ch != '/') {
       ch = parseAttributes(ch, true);
+    }
     else
       _attributes.clear();
 
-    QName qname = new QName(_eltName.toString());
+    QName qName = entry.getQName();
 
     if (_isValidating && _dtd != null) {
-      QElementDef elementDef = _dtd.getElement(qname.getName());
+      QElementDef elementDef = _dtd.getElement(qName.getLocalPart());
       
       if (elementDef != null)
         elementDef.fillDefaults(_attributes);
     }
+    
+    _contentHandler.startElement(entry.getUri(),
+				 entry.getLocalName(),
+				 entry.getName(),
+				 _attributes);
+
+    _hasTopElement = true;
 
     if (ch == '/') {
       // empty tag: <foo/>
-      if ((ch = _reader.read()) == '>') {
-	addElement(qname, true, _attributes, oldNamespace);
+      if ((ch = read()) == '>') {
+	_contentHandler.endElement(entry.getUri(),
+				   entry.getLocalName(),
+				   entry.getName());
+
+	_namespace.pop(entry);
       }
       // short tag: </foo/some text here/>
       else {
-	addElement(qname, false, _attributes, oldNamespace);
-	parseNode(ch, true);
+	throw error(L.l("unexpected character {0} after '/', expected '/>'",
+                      badChar(ch), entry.getName()));
       }
-    } else if (ch == '>') {
-      addElement(qname, false, _attributes, oldNamespace);
-    } else
+    }
+    else if (ch != '>') {
       throw error(L.l("unexpected character {0} while parsing '{1}' attributes.  Expected an attribute name or '>' or '/>'.  XML element syntax is:\n  <name attr-1=\"value-1\" ... attr-n=\"value-n\">",
-                      badChar(ch), qname.getName()));
+                      badChar(ch), entry.getName()));
+    }
   }
 
   /**
@@ -629,15 +561,20 @@ public class XmlParser extends AbstractParser {
   private int parseAttributes(int ch, boolean isElement)
     throws IOException, SAXException
   {
-    ch = skipWhitespace(ch);
     _attributes.clear();
 
     _attrNames.clear();
     _attrValues.clear();
 
-    boolean hasWhitespace = true;
-
     while (ch != -1) {
+      boolean hasWhitespace = false;
+	
+      while (ch <= 0x20
+	     && (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')) {
+	hasWhitespace = true;
+	ch = read();
+      }
+	
       if (! XmlChar.isNameStart(ch)) {
 	break;
       }
@@ -646,321 +583,73 @@ public class XmlParser extends AbstractParser {
 	throw error(L.l("attributes must be separated by whitespace"));
 
       hasWhitespace = false;
-      
-      ch = _reader.parseName(_text, ch);
 
-      if (! _text.startsWith("xmlns")) {
+      unread(ch);
+
+      SaxIntern.Entry entry = parseName(0, true);
+
+      ch = read();
+
+
+      while (ch <= 0x20
+	     && (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')) {
+	ch = read();
       }
-      else {
-        QName name;
 
-	if (_isNamespaceAware && _contentHandler instanceof DOMBuilder)
-	  name = new QName(_text.toString());
-	else
-	  name = new QName(_text.toString(), null);
+      String value = null;
 
+      if (ch != '=') {
+	throw error(L.l("attribute '{0}' expects value at {1}.  XML requires attributes to have explicit values.",
+                        entry.getName(), badChar(ch)));
+      }
+
+      ch = read();
+      
+      while (ch <= 0x20
+	     && (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')) {
+	ch = read();
+      }
+
+      value = parseValue(ch);
+
+      ch = read();
+
+      if (entry.isXmlns()) {
 	String prefix;
-
-	if (_text.length() > 5) {
-	  prefix = _text.substring(6);
-
-	  if (prefix.equals(""))
-	    throw error(L.l("'{0}' is an illegal namespace declaration.",
-			    _text));
-	}
-	else {
+	
+	if (entry.getPrefix() != null)
+	  prefix = entry.getLocalName();
+	else
 	  prefix = "";
-	}
+	  
+	String uri = value;
 	
-	_text.clear();
-	ch = skipWhitespace(ch);
-	if (ch != '=')
-	  throw error(L.l("xmlns: needs value at {0}", badChar(ch)));
-	ch = skipWhitespace(_reader.read());
-	ch = parseValue(_text, ch, true);
-	
-	hasWhitespace = isWhitespace(ch);
-	
-	ch = skipWhitespace(ch);
-
-	// topNamespaceNode = element;
-        String uri = _text.toString();
-
         if (_isXmlnsPrefix) {
-          _namespaceMap = new NamespaceMap(_namespaceMap, prefix, uri);
-
           _contentHandler.startPrefixMapping(prefix, uri);
 	}
 
 	// needed for xml/032e
 	if (isElement && _isXmlnsAttribute) {
-          _attributes.add(name, uri);
+          _attributes.add(entry.getQName(), uri);
 	}
-
-	continue;
-      }
-
-      String attrName = _text.toString();
-      _attrNames.add(attrName);
-
-      _text.clear();
-      ch = skipWhitespace(ch);
-
-      String value = null;
-
-      if (ch == '=') {
-	ch = skipWhitespace(_reader.read());
-	ch = parseValue(_text, ch, true);
-
-	hasWhitespace = isWhitespace(ch);
-	
-	ch = skipWhitespace(ch);
-
-	value = _text.toString();
-      }
-      else if (_strictAttributes) {
-	throw error(L.l("attribute '{0}' expects value at {1}.  XML requires attributes to have explicit values.",
-                        attrName, badChar(ch)));
       }
       else {
-	value = attrName; // xxx: conflict xsl/0432
-	hasWhitespace = true;
+	_attrNames.add(entry);
+	_attrValues.add(value);
       }
-
-      _attrValues.add(value);
     }
 
     int len = _attrNames.size();
     for (int i = 0; i < len; i++) {
-      String attrName = _attrNames.get(i);
+      SaxIntern.Entry attrEntry = _attrNames.get(i);
       String value = _attrValues.get(i);
 
-      _text.clear();
-      _text.append(attrName);
-      QName name;
-
-      if (_contentHandler instanceof DOMBuilder)
-	name = getAttributeName(_eltName, _text, true);
-      else
-	name = getAttributeName(_eltName, _text);
+      QName name = attrEntry.getQName();
 
       _attributes.add(name, value);
     }
     
     return ch;
-  }
-
-  private QName getAttributeName(CharBuffer eltName,
-				 CharBuffer text,
-				 boolean dom)
-  {
-    return new QName(text.toString());
-  }
-
-  private QName getAttributeName(CharBuffer eltName,
-				 CharBuffer text)
-  {
-    return new QName(text.toString());
-  }
-
-  /**
-   * Special parser to handle the use of &lt;%= as an attribute in JSP
-   * files.  Covers cases like the following:
-   *
-   * <pre>
-   * &lt;options>
-   * &lt;option name="foo" &lt;%= test.isSelected("foo") %>/>
-   * &lt;/options>
-   * </pre>
-   *
-   * @param element the parent element
-   *
-   * @return the next character to read.
-   */
-  private int parseJspAttribute(boolean isElement)
-    throws IOException, XmlParseException
-  {
-    int ch = _reader.read();
-
-    if (ch != '%')
-      throw error(L.l("unexpected char '{0}' in element", "%"));
-
-    ch = _reader.read();
-    if (ch != '=')
-      throw error(L.l("unexpected char '{0}' in element", "="));
-
-    _text.clear();
-    ch = _reader.read();
-    while (ch >= 0) {
-      if (ch == '%') {
-        ch = _reader.read();
-        if (ch == '>') {
-          ch = _reader.read();
-          break;
-        }
-        _text.append((char) ch);
-      }
-      else {
-        _text.append((char) ch);
-        ch = _reader.read();
-      }
-    }
-
-    String value = _text.toString();
-
-    if (isElement)
-      _attributes.add(JSP_ATTRIBUTE_NAME, value);
-
-    return ch;
-  }
-
-  /**
-   * Handle processing at a close tag.  For strict XML, this will normally
-   * just change the current node to its parent, but HTML has a more
-   * complicated policy.
-   */
-  private void closeTag(String endTagName)
-    throws IOException, SAXException
-  {
-    popNode();
-
-    if (endTagName != null && ! endTagName.equals(""))
-      throw error(L.l("Unexpected end tag '</{0}>' at top-level.  All open tags have already been closed.",
-                    endTagName));
-  }
-
-  /**
-   * Handles processing of the resin:include tag.
-   */
-  private void handleResinInclude()
-    throws IOException, SAXException
-  {
-    String filename = _attributes.getValue("path");
-    
-    if (filename == null || filename.equals(""))
-      filename = _attributes.getValue("href");
-
-    if (filename.equals(""))
-      throw error(L.l("<resin:include> expects a 'path' attribute."));
-
-    pushInclude(filename);
-  }
-
-  /**
-   * Handles processing of the resin:include tag.
-   */
-  private void handleResinIncludeDirectory()
-    throws IOException, SAXException
-  {
-    String filename = _attributes.getValue("path");
-
-    if (filename == null || filename.equals(""))
-      filename = _attributes.getValue("href");
-	
-    String extension = _attributes.getValue("extension");
-
-    if (filename.equals(""))
-      throw error(L.l("<resin:include> expects a 'path' attribute."));
-
-    Path pwd;
-    if (_searchPath != null)
-      pwd = _searchPath;
-    else
-      pwd = Vfs.lookup(_systemId).getParent();
-
-    Path dir = pwd.lookup(filename);
-    if (! dir.isDirectory())
-      throw error(L.l("'{0}' is not a directory for resin:include-directory.  The href for resin:include-directory must refer to a directory.",
-                      dir.getNativePath()));
-
-    String []list = dir.list();
-    Arrays.sort(list);
-    for (int i = list.length - 1; i >= 0; i--) {
-      if (list[i].startsWith(".") ||
-          extension != null && ! list[i].endsWith(extension))
-        continue;
-
-      pushInclude(dir.lookup(list[i]).getPath());
-    }
-  }
-
-  private int parseNameToken(CharBuffer name, int ch)
-    throws IOException, SAXException
-  {
-    name.clear();
-
-    if (! XmlChar.isNameChar(ch))
-      throw error(L.l("expected name at {0}", badChar(ch)));
-
-    for (; XmlChar.isNameChar(ch); ch = _reader.read())
-      name.append((char) ch);
-
-    return ch;
-  }
-
-  /**
-   * Pop the top-level node
-   */
-  private void popNode()
-    throws SAXException
-  {
-    QName node = _activeNode;
-
-    if (_activeNode != DOC_NAME) {
-      String uri = _activeNode.getNamespaceURI();
-      String localName = _activeNode.getLocalName();
-      
-      if (uri == null) {
-	uri = "";
-
-	if (_isNamespaceAware)
-	  localName = _activeNode.getName();
-	else
-	  localName = "";
-      }
-
-      _contentHandler.endElement(uri,
-				 localName,
-				 _activeNode.getName());
-    }
-
-    if (_elementTop > 0) {
-      _elementTop--;
-      NamespaceMap oldMap = _namespaces[_elementTop];
-
-      popNamespaces(oldMap);
-      
-      _activeNode = _elementNames[_elementTop];
-    }
-    
-    if (_elementTop == 0)
-      _activeNode = DOC_NAME;
-  }
-
-  public void pushNamespace(String prefix, String uri)
-  {
-    _namespaceMap = new NamespaceMap(_namespaceMap, prefix, uri);
-  }
-
-  private void popNamespaces(NamespaceMap oldMap)
-    throws SAXException
-  {
-    for (;
-         _namespaceMap != null && _namespaceMap != oldMap;
-         _namespaceMap = _namespaceMap.next) {
-      _contentHandler.endPrefixMapping(_namespaceMap.prefix);
-    }
-    _namespaceMap = oldMap;
-  }
-
-  private void appendText(String s)
-  {
-    if (_text.length() == 0) {
-      _textFilename = getFilename();
-      _textLine = getLine();
-    }
-
-    _text.append(s);
   }
 
   /**
@@ -976,13 +665,13 @@ public class XmlParser extends AbstractParser {
   {
     int ch;
 
-    ch = _reader.read();
+    ch = read();
 
     // character reference
     if (ch == '#') {
       addText((char) parseCharacterReference());
 
-      return _reader.read();
+      return read();
     } 
     // entity reference
     else if (XmlChar.isNameStart(ch)) {
@@ -998,7 +687,7 @@ public class XmlParser extends AbstractParser {
 
       addEntityReference(_buf.toString());
 
-      ch = _reader.read();
+      ch = read();
 
       return ch;
     } else if (_strictXml) {
@@ -1012,16 +701,16 @@ public class XmlParser extends AbstractParser {
   private int parseCharacterReference()
     throws IOException, SAXException
   {
-    int ch = _reader.read();
+    int ch = read();
 
     int radix = 10;
     if (ch == 'x') {
       radix = 16;
-      ch = _reader.read();
+      ch = read();
     }
 
     int value = 0;
-    for (; ch != ';'; ch = _reader.read()) {
+    for (; ch != ';'; ch = read()) {
       if (ch >= '0' && ch <= '9')
 	value = radix * value + ch - '0';
       else if (radix == 16 && ch >= 'a' && ch <= 'f')
@@ -1071,19 +760,10 @@ public class XmlParser extends AbstractParser {
 
     if (entity == null && (_dtd == null || _dtd.getName() == null ||
                            ! _dtd.isExternal())) {
-      if (_strictXml)
-	throw error(L.l("'&{0};' is an unknown entity.  XML predefines only '&lt;', '&amp;', '&gt;', '&apos;' and  '&quot;'. All other entities must be defined in an &lt;!ENTITY> definition in the DTD.", name));
-      else {
-        if (expand && _contentHandler instanceof DOMBuilder) {
-          appendText();
-          ((DOMBuilder) _contentHandler).entityReference(name);
-        }
-        else
-          addText("&" + name + ";");
-      }
+      throw error(L.l("'&{0};' is an unknown entity.  XML predefines only '&lt;', '&amp;', '&gt;', '&apos;' and  '&quot;'. All other entities must be defined in an &lt;!ENTITY> definition in the DTD.", name));
     }
     else if (entity != null) {
-      if (expand && entity._isSpecial && entity._value != null)
+      if (entity._isSpecial && entity._value != null)
 	addText(entity._value);
       else if (entity.getSystemId() != null) {
         if (pushSystemEntity(entity)) {
@@ -1094,7 +774,6 @@ public class XmlParser extends AbstractParser {
         }
         */
         else if (_contentHandler instanceof DOMBuilder) {
-          appendText();
           ((DOMBuilder) _contentHandler).entityReference(name);
         }
         else
@@ -1106,8 +785,7 @@ public class XmlParser extends AbstractParser {
         addText("&" + name + ";");
     }
     else {
-      if (expand && _contentHandler instanceof DOMBuilder) {
-        appendText();
+      if (_contentHandler instanceof DOMBuilder) {
         ((DOMBuilder) _contentHandler).entityReference(name);
       }
       else // XXX: error?
@@ -1169,143 +847,9 @@ public class XmlParser extends AbstractParser {
     XmlReader oldReader = _reader;
     _reader = null;
 
-    int ch = parseXMLDeclaration(oldReader);
-    unread(ch);
+    parseXMLDeclaration(oldReader);
 
     return true;
-  }
-
-  /**
-   * Parses an attribute value.
-   *
-   * <pre>
-   * value ::= '[^']*'
-   *       ::= "[^"]*"
-   *       ::= [^ />]*
-   * </pre>
-   *
-   * @param value the CharBuffer which will contain the value.
-   * @param ch the next character from the input stream.
-   * @param isGeneral true if general entities are allowed.
-   *
-   * @return the following character from the input stream
-   */
-  private int parseValue(CharBuffer value, int ch, boolean isGeneral)
-    throws IOException, SAXException
-  {
-    int end = ch;
-
-    value.clear();
-
-    if (end == '\'' || end == '"')
-      ch = _reader.read();
-    else {
-      value.append((char) end);
-      for (ch = _reader.read();
-           ch >= 0 && XmlChar.isNameChar(ch);
-           ch = _reader.read())
-        value.append((char) ch);
-      
-      throw error(L.l("XML attribute value must be quoted at '{0}'.  XML attribute syntax is either attr=\"value\" or attr='value'.",
-                      value));
-    }
-
-    while (ch != -1 && (end != 0 && ch != end
-			|| end == 0 && isAttributeChar(ch))) {
-      if (end == 0 && ch == '/') {
-	ch = _reader.read();
-	if (! isWhitespace(ch) && ch != '>') {
-	  value.append('/');
-	  value.append((char) ch);
-	}
-	else {
-          unread(ch);
-	  return '/';
-	}
-      }
-      else if (ch == '&' && ! _entitiesAsText) {
-	if ((ch = _reader.read()) == '#')
-	  value.append((char) parseCharacterReference());
-	else if (! isGeneral) {
-	  value.append('&');
-	  value.append((char) ch);
-	}
-        else if (XmlChar.isNameStart(ch)) {
-	  ch = _reader.parseName(_buf, ch);
-	  String name = _buf.toString();
-
-	  if (ch != ';' && _strictXml)
-	    throw error(L.l("expected '{0}' at {1}", ";", badChar(ch)));
-	  else if (ch != ';') {
-	    value.append('&');
-	    value.append(name);
-	    continue;
-	  } else {
-            int lookup = _entities.getEntity(name);
-
-            if (lookup >= 0 && lookup <= 0xffff) {
-              ch = _reader.read();
-              value.append((char) lookup);
-              continue;
-            }
-            
-	    QEntity entity = _dtd == null ? null : _dtd.getEntity(name);
-	    if (entity != null && entity._value != null)
-              setMacroAttr(entity._value);
-	    else if (_strictXml)
-	      throw error(L.l("expected local reference at '&{0};'", name));
-	    else {
-	      value.append('&');
-	      value.append(name);
-	      value.append(';');
-	    }
-	  }
-	}
-      }
-      else if (ch == '%' && ! isGeneral) {
-        ch = _reader.read();
-
-        if (! XmlChar.isNameStart(ch)) {
-          value.append('%');
-          continue;
-        }
-        else {
-          ch = _reader.parseName(_buf, ch);
-
-          if (ch != ';')
-            throw error(L.l("expected '{0}' at {1}", ";", badChar(ch)));
-          else
-            addPEReference(value, _buf.toString());
-        }
-      } 
-      else if (isGeneral) {
-        if (ch == '\r') {
-          ch = _reader.read();
-          if (ch != '\n') {
-            value.append('\n');
-            continue;
-          }
-        }
-        value.append((char) ch);
-      }
-      else if (ch == '\r') {
-	value.append(' ');
-        
-        if ((ch = _reader.read()) != '\n')
-          continue;
-      }
-      else if (ch == '\n')
-	value.append(' ');
-      else
-	value.append((char) ch);
-
-      ch = _reader.read();
-    }
-
-    if (end != 0)
-      ch = _reader.read();
-
-    return ch;
   }
 
   private boolean isAttributeChar(int ch)
@@ -1320,231 +864,12 @@ public class XmlParser extends AbstractParser {
     }
   }
 
-  private void parsePcdata(QNode node) throws IOException, SAXException
-  {
-    int ch;
-    String tail = "</" + node.getNodeName() + ">";
-
-    _text.clear();
-    ch = _reader.read();
-    if (ch == '\n')
-      ch = _reader.read();
-
-    for (; ch != -1; ch = _reader.read()) {
-      addText((char) ch);
-
-      if (_text.endsWith(tail)) {
-	_text.setLength(_text.length() - tail.length());
-	if (_text.length() > 1 && _text.charAt(_text.length() - 1) == '\n')
-	  _text.setLength(_text.length() - 1);
-	appendText();
-	return;
-      }
-    }
-    
-    throw error("bad pcdata");
-  }
-
-  private int parseXMLDeclaration(XmlReader oldReader)
-    throws IOException, SAXException
-  {
-    int startOffset = _is.getOffset();
-    boolean isEBCDIC = false;
-    int ch = _is.read();
-
-    XmlReader reader = null;
-    
-    // utf-16 starts with \xfe \xff
-    if (ch == 0xfe) {
-      ch = _is.read();
-      if (ch == 0xff) {
-	_owner.setAttribute("encoding", "UTF-16");
-	_is.setEncoding("utf-16");
-
-        reader = new Utf16Reader(this, _is);
-        
-        ch = reader.read();
-      }
-    }
-    // utf-16 rev starts with \xff \xfe
-    else if (ch == 0xff) {
-      ch = _is.read();
-      if (ch == 0xfe) {
-	_owner.setAttribute("encoding", "UTF-16");
-	_is.setEncoding("utf-16");
-
-        reader = new Utf16Reader(this, _is);
-        ((Utf16Reader) reader).setReverse(true);
-        
-        ch = reader.read();
-      }
-    }
-    // utf-16 can also start with \x00 <
-    else if (ch == 0x00) {
-      ch = _is.read();
-      _owner.setAttribute("encoding", "UTF-16");
-      _is.setEncoding("utf-16");
-      
-      reader = new Utf16Reader(this, _is);
-    }
-    // utf-8 BOM is \xef \xbb \xbf
-    else if (ch == 0xef) {
-      ch = _is.read();
-      if (ch == 0xbb) {
-        ch = _is.read();
-
-        if (ch == 0xbf) {
-          ch = _is.read();
-
-          _owner.setAttribute("encoding", "UTF-8");
-          _is.setEncoding("utf-8");
-      
-          reader = new Utf8Reader(this, _is);
-        }
-      }
-    }
-    else if (ch == 0x4c) {
-      // ebcdic
-      // xml/00l1
-      _is.unread();
-      // _is.setEncoding("cp037");
-      _is.setEncoding("cp500");
-
-      isEBCDIC = true;
-
-      reader = new XmlReader(this, _is);
-
-      ch = reader.read();
-    }
-    else {
-      int ch2 = _is.read();
-
-      if (ch2 == 0x00) {
-	_owner.setAttribute("encoding", "UTF-16LE");
-	_is.setEncoding("utf-16le");
-
-        reader = new Utf16Reader(this, _is);
-        ((Utf16Reader) reader).setReverse(true);
-      }
-      else if (ch2 > 0)
-	_is.unread();
-    }
-
-    if (reader != null && reader != oldReader) {
-    }
-    else if (_is.getSource() instanceof ReaderWriterStream) {
-      reader = new XmlReader(this, _is);
-    }
-    else {
-      reader = new Utf8Reader(this, _is);
-    }
-
-    if (ch == '\n')
-      reader.setLine(2);
-
-    reader.setSystemId(_systemId);
-    if (_systemId == null)
-      reader.setSystemId(_filename);
-    reader.setFilename(_filename);
-    reader.setPublicId(_publicId);
-
-    reader.setNext(oldReader);
-
-    _reader = reader;
-
-    /* XXX: this might be too strict. */
-    /*
-    if (! strictXml) {
-      for (; XmlChar.isWhitespace(ch); ch = reader.read()) {
-      }
-    }
-    */
-
-    if (ch != '<')
-      return ch;
-
-    if (parseXMLDecl(_reader) && isEBCDIC) {
-      // EBCDIC requires a re-read
-      _is.setOffset(startOffset);
-
-      ch = _reader.read();
-      if (ch != '<')
-	throw new IllegalStateException();
-      
-      parseXMLDecl(_reader);
-    }
-
-    return _reader.read();    
-  }
-
-  private boolean parseXMLDecl(XmlReader reader)
-    throws IOException, SAXException
-  {
-    int ch = reader.read();
-    if (ch != '?') {
-      unread((char) ch);
-      unread('<');
-      return false;
-    }
-
-    ch = _reader.read();
-    if (! XmlChar.isNameStart(ch))
-      throw error(L.l("expected name after '<?' at {0}.  Processing instructions expect a name like <?foo ... ?>", badChar(ch)));
-    ch = _reader.parseName(_text, ch);
-
-    String piName = _text.toString();
-    if (! piName.equals("xml")) {
-      ch = parsePITail(piName, ch);
-      unread(ch);
-      return false;
-    }
-          
-    ch = parseAttributes(ch, false);
-      
-    if (ch != '?')
-      throw error(L.l("expected '?' at {0}.  Processing instructions end with '?>' like <?foo ... ?>", badChar(ch)));
-    if ((ch = _reader.read()) != '>')
-      throw error(L.l("expected '>' at {0}.  Processing instructions end with '?>' like <?foo ... ?>", ">", badChar(ch)));
-
-    for (int i = 0; i < _attributes.getLength(); i++) {
-      QName name = _attributes.getName(i);
-      String value = _attributes.getValue(i);
-
-      if (_owner != null)
-        _owner.setAttribute(name.getName(), value);
-
-      if (name.getName().equals("encoding")) { // xml/00hb // && ! _inDtd) {
-        String encoding = value;
-
-        if (! _isStaticEncoding &&
-            ! encoding.equalsIgnoreCase("UTF-8") &&
-            ! encoding.equalsIgnoreCase("UTF-16") &&
-            ! (_is.getSource() instanceof ReaderWriterStream)) {
-	  _is.setEncoding(encoding);
-
-	  XmlReader oldReader = _reader;
-	  
-	  _reader = new XmlReader(this, _is);
-	  // _reader.setNext(oldReader);
-	  
-	  _reader.setLine(oldReader.getLine());
-
-          _reader.setSystemId(_filename);
-          _reader.setPublicId(null);
-        }
-      }
-    }
-
-    return true;
-  }
-
   private int parsePI()
     throws IOException, SAXException
   {
     int ch;
 
-    appendText();
-    ch = _reader.read();
+    ch = read();
     if (! XmlChar.isNameStart(ch))
       throw error(L.l("expected name after '<?' at {0}.  Processing instructions expect a name like <?foo ... ?>", badChar(ch)));
     ch = _reader.parseName(_text, ch);
@@ -1566,26 +891,19 @@ public class XmlParser extends AbstractParser {
     _text.clear();
     while (ch != -1) {
       if (ch == '?') {
-        if ((ch = _reader.read()) == '>')
+        if ((ch = read()) == '>')
           break;
         else
           _text.append('?');
       } else {
         _text.append((char) ch);
-        ch = _reader.read();
+        ch = read();
       }
     }
 
-    if (_inDtd) {
-      QProcessingInstruction pi;
-      pi = new QProcessingInstruction(piName, _text.toString());
-      pi._owner = _dtd._owner;
-      _dtd.appendChild(pi);
-    }
-    else
-      _contentHandler.processingInstruction(piName, _text.toString());
+    _contentHandler.processingInstruction(piName, _text.toString());
 
-    return _reader.read();
+    return read();
   }
 
   /**
@@ -1594,15 +912,12 @@ public class XmlParser extends AbstractParser {
   private void parseComment()
     throws IOException, SAXException
   {
-    if (! _skipComments)
-      appendText();
-
-    int ch = _reader.read();
+    int ch = read();
 
     if (ch != '-')
       throw error(L.l("expected comment at {0}", badChar(ch)));
 
-    ch = _reader.read();
+    ch = read();
 
     if (! _skipComments)
       _buf.clear();
@@ -1610,10 +925,10 @@ public class XmlParser extends AbstractParser {
   comment:
     while (ch != -1) {
       if (ch == '-') {
-	ch = _reader.read();
+	ch = read();
 
 	while (ch == '-') {
-	  if ((ch = _reader.read()) == '>')
+	  if ((ch = read()) == '>')
 	    break comment;
 	  else if (_strictComments)
 	    throw error(L.l("XML forbids '--' in comments"));
@@ -1633,16 +948,11 @@ public class XmlParser extends AbstractParser {
         throw error(L.l("bad character {0}", hex(ch)));
       } else {
 	_buf.append((char) ch);
-	ch = _reader.read();
+	ch = read();
       }
     }
 
-    if (_inDtd) {
-      QComment comment = new QComment(_buf.toString());
-      comment._owner = _dtd._owner;
-      _dtd.appendChild(comment);
-    }
-    else if (_skipComments) {
+    if (_skipComments) {
     }
     else if (_contentHandler instanceof XMLWriter && ! _skipComments) {
       ((XMLWriter) _contentHandler).comment(_buf.toString());
@@ -1666,31 +976,28 @@ public class XmlParser extends AbstractParser {
   {
     int ch;
 
-    if ((ch = _reader.read()) != 'C' ||
-	(ch = _reader.read()) != 'D' ||
-	(ch = _reader.read()) != 'A' ||
-	(ch = _reader.read()) != 'T' ||
-	(ch = _reader.read()) != 'A' ||
-	(ch = _reader.read()) != '[') {
+    if ((ch = read()) != 'C' ||
+	(ch = read()) != 'D' ||
+	(ch = read()) != 'A' ||
+	(ch = read()) != 'T' ||
+	(ch = read()) != 'A' ||
+	(ch = read()) != '[') {
       throw error(L.l("expected '<![CDATA[' at {0}", badChar(ch)));
     }
 
-    ch = _reader.read();
+    ch = read();
 
     if (_lexicalHandler != null) {
       _lexicalHandler.startCDATA();
-      appendText();
     }
-    else if (! _isCoalescing)
-      appendText();
 
   cdata:
     while (ch != -1) {
       if (ch == ']') {
-	ch = _reader.read();
+	ch = read();
 
 	while (ch == ']') {
-	  if ((ch = _reader.read()) == '>')
+	  if ((ch = read()) == '>')
 	    break cdata;
 	  else if (ch == ']')
 	    addText(']');
@@ -1705,191 +1012,13 @@ public class XmlParser extends AbstractParser {
 	throw error(L.l("expected character in cdata at {0}", badChar(ch)));
       } else {
 	addText((char) ch);
-	ch = _reader.read();
+	ch = read();
       }
     }
     
     if (_lexicalHandler != null) {
-      appendText();
       _lexicalHandler.endCDATA();
     }
-    else if (! _isCoalescing)
-      appendText();
-  }
-
-  /**
-   * Ignores content to the ']]>'
-   */
-  private void parseIgnore()
-    throws IOException, SAXException
-  {
-    int ch = read();
-
-    while (ch >= 0) {
-      if (ch != ']') {
-	ch = read();
-      }
-      else if ((ch = read()) != ']') {
-      }
-      else if ((ch = read()) == '>')
-	return;
-    }
-  }
-
-  private int parseContentSpec(QElementDef def, int ch)
-    throws IOException, SAXException
-  {
-    ch = expandPE(ch);
-    
-    if (XmlChar.isNameStart(ch)) {
-      ch = _reader.parseName(_text, ch);
-      String name = _text.toString();
-
-      if (name.equals("EMPTY")) {
-	def._content = "EMPTY";
-	return ch;
-      }
-      else if (name.equals("ANY")) {
-	def._content = "ANY";
-	return ch;
-      }
-      else
-	throw error(L.l("expected EMPTY or ANY at '{0}'", name));
-    }
-    else if (ch != '(') {
-      throw error(L.l("expected grammar definition starting with '(' at {0}.  <!ELEMENT> definitions have the syntax <!ELEMENT name - - (grammar)>", badChar(ch)));
-    }
-    else {
-      QContentParticle cp = new QContentParticle();
-      def._content = cp;
-
-      return parseContentParticle(cp, true);
-    }
-  }
-
-  /**
-   * Parses a content-particle, i.e. a grammer particle in the DTD
-   * regexp.
-   */
-  private int parseContentParticle(QContentParticle cp, boolean isTop)
-    throws IOException, SAXException
-  {
-    boolean hasCdata = false;
-    cp._separator = 0;
-    cp._repeat = 0;
-    int ch;
-
-    ch = expandPE(_reader.read());
-    
-    for (; ch != -1; ch = expandPE(ch)) {
-      if (ch == '(') {
-	QContentParticle child = new QContentParticle();
-	cp.addChild(child);
-	
-	ch = parseContentParticle(child, false);
-      }
-      else if (XmlChar.isNameStart(ch)) {
-	ch = _reader.parseName(_text, ch);
-	cp.addChild(_text.toString());
-      }
-      else if (ch == '#') {
-	ch = _reader.parseName(_text, _reader.read());
-	String name = _text.toString();
-
-	if (_strictXml && cp._children.size() != 0)
-	  throw error(L.l("'#{0}' must occur first", name));
-	if (_strictXml && ! isTop)
-	  throw error(L.l("'#{0}' may only occur at top level", name));
-
-	if (name.equals("PCDATA"))
-	  cp.addChild("#PCDATA");
-	else
-	  throw error(L.l("illegal content particle at '#{0}'", name));
-
-	hasCdata = true;
-      }
-      else
-	throw error(L.l("expected content particle at {0}", badChar(ch)));
-
-      ch = expandPE(ch);
-
-      if (ch == '?' || ch == '*' || ch == '+') {
-        Object child = cp.getChild(cp.getChildSize() - 1);
-        if (child instanceof QContentParticle) {
-          QContentParticle cpChild = (QContentParticle) child;
-          cpChild._repeat = ch;
-        }
-        else {
-          QContentParticle cpChild = new QContentParticle();
-          cpChild.addChild(child);
-          cpChild._repeat = ch;
-          cp.setChild(cp.getChildSize() - 1, cpChild);
-        }
-
-        ch = expandPE(_reader.read());
-      }
-
-      if (ch == ')')
-	break;
-      else if (cp._separator == 0) {
-	if (ch == '|') 
-	  cp._separator = ch;
-	else if (hasCdata && _strictXml)
-	  throw error(L.l("#PCDATA must be separated by '|' at {0}",
-                          badChar(ch)));
-	else if (ch == ',')
-	  cp._separator = ch;
-	else if (! _strictXml && ch =='&')
-	  cp._separator = ch;
-	else
-	  throw error(L.l("expected separator at {0}", badChar(ch)));
-
-	ch = _reader.read();
-      } else if (ch != cp._separator)
-	throw error(L.l("expected '{0}' at {1}",
-                        "" + (char) cp._separator, badChar(ch)));
-      else
-	ch = _reader.read();
-    }
-
-    ch = expandPE(_reader.read());
-
-    if (_strictXml && hasCdata && (ch == '+' || ch == '?'))
-      throw error(L.l("pcdata clause can not have {0}", badChar(ch)));
-    else if (ch == '*' || ch == '+' || ch == '?') {
-      cp._repeat = ch;
-      return _reader.read();
-    }
-    else
-      return ch;
-  }
-
-  private int expandPE(int ch)
-    throws IOException, SAXException
-  {
-    ch = skipWhitespace(ch);
-    
-    while (ch == '%') {
-      parsePEReference();
-      ch = skipWhitespace(_reader.read());
-    }
-
-    return ch;
-  }
-
-  /**
-   * Parses a PE reference %foo; and inserts the macro text to the input
-   * stream.
-   */
-  private void parsePEReference()
-    throws IOException, SAXException
-  {
-    int ch = _reader.parseName(_buf, _reader.read());
-
-    if (ch != ';')
-      throw error(L.l("'%{0};' expects ';' at {1}.  Parameter entities have a '%name;' syntax.", _buf, badChar(ch)));
-
-    addPEReference(_text, _buf.toString());
   }
 
   /**
@@ -1915,46 +1044,6 @@ public class XmlParser extends AbstractParser {
     }
   }
 
-  /**
-   * <!ELEMENT name contentspec>
-   */
-  private void parseElementDecl(QDocumentType doctype)
-    throws IOException, SAXException
-  {
-    int ch = skipWhitespace(_reader.read());
-
-    ch = _reader.parseName(_text, ch);
-    String name = _text.toString();
-
-    ch = skipWhitespace(ch);
-
-    QElementDef def = _dtd.addElement(name);
-    def.setLocation(getSystemId(), getFilename(), getLine(), getColumn());
-
-    boolean needsStartTag = true;
-    boolean needsEndTag = true;
-
-    if (_optionalTags && (ch == 'O' || ch == '-')) {
-      needsStartTag = ch == '-';
-
-      ch = skipWhitespace(ch);
-
-      if (ch == '0')
-	needsEndTag = false;
-      else if (ch == '-')
-	needsEndTag = true;
-      else
-	throw error(L.l("unknown short tag"));
-    }
-
-    ch = parseContentSpec(def, ch);
-
-    ch = skipWhitespace(ch);
-
-    if (ch != '>')
-      throw error(L.l("'<!ELEMENT' must close with '>' at {0}", badChar(ch)));
-  }
-
   private static String toAttrDefault(CharBuffer text)
   {
     for (int i = 0; i < text.length(); i++) {
@@ -1975,160 +1064,6 @@ public class XmlParser extends AbstractParser {
   }
 
   /**
-   * <!ATTLIST name (attr type def)*>
-   */
-  private void parseAttlistDecl(QDocumentType doctype)
-    throws IOException, SAXException
-  {
-    int ch = skipWhitespace(_reader.read());
-
-    ch = _reader.parseName(_text, ch);
-    String name = _text.toString();
-
-    ch = skipWhitespace(ch);
-
-    QElementDef def = _dtd.addElement(name);
-
-    while (XmlChar.isNameStart((ch = expandPE(ch)))) {
-      ch = _reader.parseName(_text, ch);
-      String attrName = _text.toString();
-
-      String attrType = null;
-      ArrayList<String> enumeration = null;
-      ch = expandPE(ch);
-      if (ch == '(') {
-	attrType = "#ENUM";
-	enumeration = new ArrayList<String>();
-	do {
-	  ch = expandPE(_reader.read());
-
-	  ch = parseNameToken(_text, ch);
-	  enumeration.add(_text.toString());
-
-	  ch = expandPE(ch);
-	} while (ch == '|');
-
-	if (ch != ')')
-	  throw error(L.l("expected '{0}' at {1}.  <!ATTRLIST> enumerations definitions are enclosed in '(' ... ')'.", ")", badChar(ch)));
-	ch = _reader.read();
-      }
-      else {
-	ch = _reader.parseName(_text, ch);
-	attrType = _text.toString();
-
-	if (attrType.equals("NOTATION")) {
-	  enumeration = new ArrayList<String>();
-	  ch = expandPE(ch);
-	  if (ch != '(')
-            throw error(L.l("expected '{0}' at {1}", "(", badChar(ch)));
-
-	  do {
-	    ch = expandPE(_reader.read());
-
-	    ch = _reader.parseName(_text, ch);
-	    enumeration.add(_text.toString());
-
-	    ch = expandPE(ch);
-	  } while (ch == '|');
-
-	  if (ch != ')')
-	    throw error(L.l("expected '{0}' at {1}", ")", badChar(ch)));
-	  ch = _reader.read();
-	}
-	else if (_attrTypes.get(attrType) != null) {
-	}
-        else
-	  throw error(L.l("expected attribute type at '{0}'", attrType));
-      }
-
-      ch = skipWhitespace(ch);
-      String qualifier = null;
-      String attrDefault = null;
-      if (ch == '#') {
-	ch = _reader.parseName(_text, _reader.read());
-	qualifier = "#" + _text.toString();
-
-	if (qualifier.equals("#IMPLIED")) {
-	}
-	else if (qualifier.equals("#REQUIRED")) {
-	}
-	else if (qualifier.equals("#FIXED")) {
-	  ch = skipWhitespace(ch);
-	  ch = parseValue(_text, ch, false);
-	  attrDefault = _text.toString();
-	} else
-	  throw error(L.l("expected attribute default at '{0}'",
-                      qualifier));
-      }
-      else if (ch != '>') {
-	ch = parseValue(_text, ch, false);
-	attrDefault = _text.toString();
-      }
-
-      def.addAttribute(attrName, attrType, enumeration, 
-                       qualifier, attrDefault);
-      if (attrType != null && attrType.equals("ID"))
-	doctype.setElementId(name, attrName);
-
-      ch = skipWhitespace(ch);
-    }
-
-    if (ch != '>')
-      throw error(L.l("expected '{0}' at {1}", ">", badChar(ch)));
-  }
-
-  /**
-   * <!NOTATION name systemId publicId>
-   */
-  private void parseNotationDecl(QDocumentType doctype)
-    throws IOException, SAXException
-  {
-    int ch = skipWhitespace(_reader.read());
-
-    ch = _reader.parseName(_text, ch);
-    String name = _text.toString();
-
-    ch = skipWhitespace(ch);
-    ch = _reader.parseName(_text, ch);
-    String key = _text.toString();
-
-    ch = skipWhitespace(ch);
-    ch = parseValue(_text, ch, false);
-    String id = _text.toString();
-
-    ch = skipWhitespace(ch);
-
-    QNotation notation;
-
-    if (key.equals("PUBLIC")) {
-      String systemId = null;
-
-      if (ch == '"' || ch == '\'') {
-	ch = parseValue(_text, ch, false);
-	ch = skipWhitespace(ch);
-	systemId = _text.toString();
-      }
-
-      notation = new QNotation(name, id, systemId);
-      notation._owner = doctype._owner;
-      notation.setLocation(getSystemId(), getFilename(), getLine(), getColumn());
-    }
-    else if (key.equals("SYSTEM")) {
-      notation = new QNotation(name, null, id);
-      notation._owner = doctype._owner;
-      notation.setLocation(getSystemId(), getFilename(), getLine(), getColumn());
-    }
-    else
-      throw error(L.l("expected PUBLIC or SYSTEM at '{0}'", key));
-    
-    doctype.addNotation(notation);
-    doctype.appendChild(notation);
-
-    if (ch != '>')
-      throw error(L.l("expected '{0}' at {1}", ">", badChar(ch)));
-  }
-
-  /**
    * externalID ::= PUBLIC publicId systemId
    *            ::= SYSTEM systemId
    */
@@ -2142,21 +1077,19 @@ public class XmlParser extends AbstractParser {
     _extSystemId = null;
     _extPublicId = null;
     if (key.equals("PUBLIC")) {
-      ch = parseValue(_text, ch, false);
-      _extPublicId = _text.toString();
-      ch = skipWhitespace(ch);
+      _extPublicId = parseValue(ch);
+      ch = skipWhitespace(read());
 
       if (_extPublicId.indexOf('&') > 0)
 	throw error(L.l("Illegal character '&' in PUBLIC identifier '{0}'",
 			_extPublicId));
 
-      ch = parseValue(_text, ch, false);
-      ch = skipWhitespace(ch);
-      _extSystemId = _text.toString();
+      _extSystemId = parseValue(ch);
+      ch = skipWhitespace(read());
     }
     else if (key.equals("SYSTEM")) {
-      ch = parseValue(_text, ch, false);
-      _extSystemId = _text.toString();
+      _extSystemId = parseValue(ch);
+      ch = read();
     }
     else
       throw error(L.l("expected PUBLIC or SYSTEM at '{0}'", key));
@@ -2165,67 +1098,88 @@ public class XmlParser extends AbstractParser {
   }
 
   /**
-   * <!ENTITY name systemId publicId>
+   * Parses an attribute value.
+   *
+   * <pre>
+   * value ::= '[^']*'
+   *       ::= "[^"]*"
+   *       ::= [^ />]*
+   * </pre>
+   *
+   * @param value the CharBuffer which will contain the value.
+   * @param ch the next character from the input stream.
+   * @param isGeneral true if general entities are allowed.
+   *
+   * @return the following character from the input stream
    */
-  private void parseEntityDecl(QDocumentType doctype)
+  private String parseValue(int ch)
     throws IOException, SAXException
   {
-    int ch = skipWhitespace(_reader.read());
+    int end = ch;
 
-    boolean isPe = ch == '%';
+    char []valueBuffer = _valueBuffer;
+    int valueLength = 0;
 
-    if (isPe)
-      ch = skipWhitespace(_reader.read());
-
-    ch = _reader.parseName(_text, ch);
-    String name = _text.toString();
-
-    ch = skipWhitespace(ch);
-
-    QEntity entity;
-    if (ch == '"' || ch == '\'') {
-      ch = parseValue(_text, ch, false);
-      
-      entity = new QEntity(name, _text.toString(), null, null);
-      entity._owner = doctype._owner;
-      entity.setLocation(getSystemId(), getFilename(), getLine(), getColumn());
-    }
-    else {
-      ch = parseExternalID(ch);
-
-      entity = new QEntity(name, null, _extPublicId, _extSystemId);
-      entity._owner = doctype._owner;
-      entity.setLocation(getSystemId(), getFilename(), getLine(), getColumn());
-
-      ch = skipWhitespace(ch);
-      if (! isPe && XmlChar.isNameStart(ch)) {
-	ch = _reader.parseName(_text, ch);
-	String key = _text.toString();
-	if (key.equals("NDATA")) {
-	  ch = skipWhitespace(ch);
-	  ch = _reader.parseName(_text, ch);
-
-	  String ndata = _text.toString();
-
-	  entity._ndata = ndata;
-	} else
-	  throw error(L.l("expected 'NDATA' at '{0}'", key));
+    if (end != '\'' && end != '"') {
+      valueBuffer[valueLength++] = (char) end;
+      for (ch = read();
+           ch >= 0 && XmlChar.isNameChar(ch);
+           ch = read()) {
+        valueBuffer[valueLength++] = (char) ch;
       }
-    }
       
-    entity._isPe = isPe;
+      String value = new String(valueBuffer, 0, valueLength);
+      
+      throw error(L.l("XML attribute value must be quoted at '{0}'.  XML attribute syntax is either attr=\"value\" or attr='value'.",
+                      value));
+    }
+    
+    ch = read();
 
-    if (isPe)
-      doctype.addParameterEntity(entity);
-    else
-      doctype.addEntity(entity);
+    while (ch >= 0 && ch != end) {
+      if (ch == '&') {
+	if ((ch = read()) == '#') {
+	  valueBuffer[valueLength++] = (char) parseCharacterReference();
+	}
+        else if (XmlChar.isNameStart(ch)) {
+	  ch = _reader.parseName(_buf, ch);
+	  String name = _buf.toString();
 
-    doctype.appendChild(entity);
+	  if (ch != ';')
+	    throw error(L.l("expected '{0}' at {1}", ";", badChar(ch)));
+	  else {
+            int lookup = _entities.getEntity(name);
 
-    ch = skipWhitespace(ch);
+            if (lookup >= 0 && lookup <= 0xffff) {
+              ch = read();
+              valueBuffer[valueLength++] = (char) lookup;
+              continue;
+            }
+            
+	    QEntity entity = _dtd == null ? null : _dtd.getEntity(name);
+	    if (entity != null && entity._value != null)
+              setMacroAttr(entity._value);
+	    else
+	      throw error(L.l("expected local reference at '&{0};'", name));
+	  }
+	}
+      }
+      else {
+        if (ch == '\r') {
+          ch = read();
+          if (ch != '\n') {
+            valueBuffer[valueLength++] = '\n';
+            continue;
+          }
+        }
+	
+        valueBuffer[valueLength++] = (char) ch;
+      }
 
-    if (ch != '>')
-      throw error(L.l("expected '>' at {0}", badChar(ch)));
+      ch = read();
+    }
+
+    return new String(valueBuffer, 0, valueLength);
   }
 
   private boolean isWhitespace(int ch)
@@ -2345,10 +1299,6 @@ public class XmlParser extends AbstractParser {
   private void addText(char ch)
     throws IOException, SAXException
   {
-    if (_textLength >= _textCapacity) {
-      appendText();
-    }
-
     if (_textLength > 0 && _textBuffer[_textLength - 1] == '\r') {
       _textBuffer[_textLength - 1] = '\n';
       if (ch == '\n')
@@ -2364,107 +1314,69 @@ public class XmlParser extends AbstractParser {
   /**
    * Flushes the text buffer to the SAX callback.
    */
-  private void appendText()
+  private void addText(char []buffer, int offset, int length,
+		       boolean isWhitespace)
     throws IOException, SAXException
   {
-    if (_textLength > 0) {
-      if (_activeNode == DOC_NAME) {
-        if (_isIgnorableWhitespace) {
-        }
-        else if (_strictXml)
-          throw error(L.l("expected top element at '{0}'",
-                          new String(_textBuffer, 0, _textLength)));
-      }
-      else if (_isIgnorableWhitespace) {
-	_contentHandler.ignorableWhitespace(_textBuffer, 0, _textLength);
-      }
-      else if (! _isIgnorableWhitespace && _activeNode == DOC_NAME) {
+    if (length <= 0)
+      return;
+    
+    if (_namespace.getDepth() == 1) {
+      if (! isWhitespace) {
+	throw error(L.l("expected top element at '{0}'",
+			new String(buffer, offset, length)));
       }
       else {
-        _contentHandler.characters(_textBuffer, 0, _textLength);
+	_contentHandler.ignorableWhitespace(buffer, offset, length);
       }
-        
-      _textLength = 0;
-      _isIgnorableWhitespace = true;
     }
+    else
+      _contentHandler.characters(buffer, offset, length);
   }
 
-  private void addElement(String child, boolean isEmpty,
-                          QAttributes attributes,
-                          NamespaceMap oldNamespace)
-    throws IOException, SAXException
-  {
-    _text.clear();
-    _text.append(child);
-    
-    addElement(new QName(_text.toString()), isEmpty, attributes, oldNamespace);
-  }
-  
   /**
-   * Adds an element as a child of the current tree.  Some
-   * DTDs, like HTML, will push additional nodes to make
-   * the tree work, e.g. the body tag.
-   *
-   * @param child the new child to be added.
-   * @param isEmpty true if the tag is already closed.
+   * Parses a name.
    */
-  private void addElement(QName child, boolean isEmpty,
-                          QAttributes attributes, NamespaceMap oldNamespace)
-    throws IOException, SAXException
+  private SaxIntern.Entry parseName(int offset, boolean isAttribute)
+    throws IOException
   {
-    if (_activeNode == DOC_NAME && _hasTopElement && _strictXml)
-      throw error(L.l("expected a single top-level element at '{0}'",
-                      child.getName()));
-
-    _hasTopElement = true;
+    char []inputBuf = _inputBuffer;
+    int inputLength = _inputLength;
+    int inputOffset = _inputOffset;
     
-    String childURI = child.getNamespaceURI();
-    String childLocal = child.getLocalName();
+    char []valueBuf = _valueBuffer;
+    int valueLength = offset;
 
-    if (childURI == null) {
-      childURI = "";
+    int colon = 0;
 
-      if (_isNamespaceAware)
-	childLocal = child.getName();
-      else
-	childLocal = "";
-    }
+    while (true) {
+      if (inputOffset < inputLength) {
+	char ch = inputBuf[inputOffset++];
 
-    if (_contentHandler instanceof DOMBuilder)
-      ((DOMBuilder) _contentHandler).startElement(child, attributes);
-    else {
-      _contentHandler.startElement(childURI,
-				   childLocal,
-				   child.getName(),
-				   attributes);
-    }
-        
-    if (isEmpty) {
-      _contentHandler.endElement(childURI,
-				 childLocal,
-				 child.getName());
+	if (XML_NAME_CHAR[ch]) {
+	  valueBuf[valueLength++] = ch;
+	}
+	else if (ch == ':') {
+	  if (colon <= 0)
+	    colon = valueLength;
+	  
+	  valueBuf[valueLength++] = ch;
+	}
+	else {
+	  _inputOffset = inputOffset - 1;
 
-      popNamespaces(oldNamespace);
-    }
-    else {
-      if (_elementTop == _elementNames.length) {
-	int len = _elementNames.length;
-	QName []names = new QName[2 * len];
-	NamespaceMap []newNamespaces = new NamespaceMap[2 * len];
-	int []lines = new int[2 * len];
-	System.arraycopy(_elementNames, 0, names, 0, len);
-	System.arraycopy(_elementLines, 0, lines, 0, len);
-	System.arraycopy(_namespaces, 0, newNamespaces, 0, len);
-	_elementNames = names;
-	_elementLines = lines;
-	_namespaces = newNamespaces;
+	  return _intern.add(valueBuf, offset, valueLength - offset,
+			     colon, isAttribute);
+	}
       }
-      _namespaces[_elementTop] = oldNamespace;
-      _elementLines[_elementTop] = getLine();
-      _elementNames[_elementTop] = _activeNode;
-      _elementTop++;
-      _activeNode = child;
-      _isTagStart = true;
+      else if (fillBuffer()) {
+	inputLength = _inputLength;
+	inputOffset = 0;
+      }
+      else {
+	return _intern.add(valueBuf, offset, valueLength - offset,
+			   colon, isAttribute);
+      }
     }
   }
   
@@ -2552,8 +1464,8 @@ public class XmlParser extends AbstractParser {
     _reader = null;
     
     _line = 1;
-
-    int ch = parseXMLDeclaration(oldReader);
+    parseXMLDeclaration(oldReader);
+    int ch = read();
 
     XmlReader reader = _reader;
 
@@ -2599,40 +1511,254 @@ public class XmlParser extends AbstractParser {
     _macro.add(text);
   }
 
-  protected int read()
+  protected final int read()
     throws IOException, SAXException
   {
-    int ch = _reader.read();
-    while (ch < 0 && _reader.getNext() != null) {
-      if (_stopOnIncludeEnd)
-	return -1;
-      
-      popInclude();
-      ch = _reader.read();
-    }
+    int inputOffset = _inputOffset;
     
-    return ch;
+    if (inputOffset < _inputLength) {
+      char ch = _inputBuffer[inputOffset];
+
+      _inputOffset = inputOffset + 1;
+      
+      return ch;
+    }
+    else if (fillBuffer()) {
+      return _inputBuffer[_inputOffset++];
+    }
+    else
+      return -1;
+  }
+
+  public final void unread(int ch)
+  {
+    if (ch < 0 || _inputOffset <= 0)
+      return;
+
+    _inputOffset--;
   }
     
-
-  public void unread(int ch)
+  protected boolean fillBuffer()
+    throws IOException
   {
-    if (ch < 0) {
-      return;
-    }
-    else if (_reader == _macro) {
-    }
-    else if (_macro.getNext() == null) {
-      _macro.init(this, _reader);
-      _reader = _macro;
+    int len = _is.read(_inputBuffer, 0, _inputBuffer.length);
+
+    if (len >= 0) {
+      _inputLength = len;
+      _inputOffset = 0;
+      
+      return true;
     }
     else {
-      _macro = new MacroReader();
-      _macro.init(this, _reader);
-      _reader = _macro;
+      _inputLength = 0;
+      _inputOffset = 0;
+
+      return false;
     }
+  }
+
+  private void parseXMLDeclaration(XmlReader oldReader)
+    throws IOException, SAXException
+  {
+    int startOffset = _is.getOffset();
+    boolean isEBCDIC = false;
+    int ch = _is.read();
+
+    XmlReader reader = null;
     
-    _macro.prepend((char) ch);
+    // utf-16 starts with \xfe \xff
+    if (ch == 0xfe) {
+      ch = _is.read();
+      if (ch == 0xff) {
+	_owner.setAttribute("encoding", "UTF-16");
+	_is.setEncoding("utf-16");
+
+        reader = new Utf16Reader(this, _is);
+        
+        ch = reader.read();
+      }
+    }
+    // utf-16 rev starts with \xff \xfe
+    else if (ch == 0xff) {
+      ch = _is.read();
+      if (ch == 0xfe) {
+	_owner.setAttribute("encoding", "UTF-16");
+	_is.setEncoding("utf-16");
+
+        reader = new Utf16Reader(this, _is);
+        ((Utf16Reader) reader).setReverse(true);
+        
+        ch = reader.read();
+      }
+    }
+    // utf-16 can also start with \x00 <
+    else if (ch == 0x00) {
+      ch = _is.read();
+      _owner.setAttribute("encoding", "UTF-16");
+      _is.setEncoding("utf-16");
+      
+      reader = new Utf16Reader(this, _is);
+    }
+    // utf-8 BOM is \xef \xbb \xbf
+    else if (ch == 0xef) {
+      ch = _is.read();
+      if (ch == 0xbb) {
+        ch = _is.read();
+
+        if (ch == 0xbf) {
+          ch = _is.read();
+
+          _owner.setAttribute("encoding", "UTF-8");
+          _is.setEncoding("utf-8");
+      
+          reader = new Utf8Reader(this, _is);
+        }
+      }
+    }
+    else if (ch == 0x4c) {
+      // ebcdic
+      // xml/00l1
+      _is.unread();
+      // _is.setEncoding("cp037");
+      _is.setEncoding("cp500");
+
+      isEBCDIC = true;
+
+      reader = new XmlReader(this, _is);
+
+      ch = reader.read();
+    }
+    else {
+      int ch2 = _is.read();
+
+      if (ch2 == 0x00) {
+	_owner.setAttribute("encoding", "UTF-16LE");
+	_is.setEncoding("utf-16le");
+
+        reader = new Utf16Reader(this, _is);
+        ((Utf16Reader) reader).setReverse(true);
+      }
+      else if (ch2 > 0)
+	_is.unread();
+    }
+
+    if (reader != null && reader != oldReader) {
+    }
+    else if (_is.getSource() instanceof ReaderWriterStream) {
+      reader = new XmlReader(this, _is);
+    }
+    else {
+      reader = new Utf8Reader(this, _is);
+    }
+
+    if (ch == '\n')
+      reader.setLine(2);
+
+    reader.setSystemId(_systemId);
+    if (_systemId == null)
+      reader.setSystemId(_filename);
+    reader.setFilename(_filename);
+    reader.setPublicId(_publicId);
+
+    reader.setNext(oldReader);
+
+    _reader = reader;
+
+    /* XXX: this might be too strict. */
+    /*
+    if (! strictXml) {
+      for (; XmlChar.isWhitespace(ch); ch = reader.read()) {
+      }
+    }
+    */
+
+    if (ch != '<') {
+      unreadByte(ch);
+      return;
+    }
+
+    if (parseXMLDecl(_reader) && isEBCDIC) {
+      // EBCDIC requires a re-read
+      _is.setOffset(startOffset);
+
+      ch = read();
+      if (ch != '<')
+	throw new IllegalStateException();
+      
+      parseXMLDecl(_reader);
+    }
+  }
+
+  private boolean parseXMLDecl(XmlReader reader)
+    throws IOException, SAXException
+  {
+    int ch = readByte();
+    if (ch != '?') {
+      unreadByte((char) ch);
+      unreadByte('<');
+      return false;
+    }
+
+    ch = read();
+    if (! XmlChar.isNameStart(ch))
+      throw error(L.l("expected name after '<?' at {0}.  Processing instructions expect a name like <?foo ... ?>", badChar(ch)));
+    ch = _reader.parseName(_text, ch);
+
+    String piName = _text.toString();
+    if (! piName.equals("xml")) {
+      ch = parsePITail(piName, ch);
+      unreadByte(ch);
+      return false;
+    }
+          
+    ch = parseAttributes(ch, false);
+      
+    if (ch != '?')
+      throw error(L.l("expected '?' at {0}.  Processing instructions end with '?>' like <?foo ... ?>", badChar(ch)));
+    if ((ch = read()) != '>')
+      throw error(L.l("expected '>' at {0}.  Processing instructions end with '?>' like <?foo ... ?>", ">", badChar(ch)));
+
+    for (int i = 0; i < _attributes.getLength(); i++) {
+      QName name = _attributes.getName(i);
+      String value = _attributes.getValue(i);
+
+      if (_owner != null)
+        _owner.setAttribute(name.getLocalPart(), value);
+
+      if (name.getLocalPart().equals("encoding")) { // xml/00hb // && ! _inDtd) {
+        String encoding = value;
+
+        if (! _isStaticEncoding &&
+            ! encoding.equalsIgnoreCase("UTF-8") &&
+            ! encoding.equalsIgnoreCase("UTF-16") &&
+            ! (_is.getSource() instanceof ReaderWriterStream)) {
+	  _is.setEncoding(encoding);
+
+	  XmlReader oldReader = _reader;
+	  
+	  _reader = new XmlReader(this, _is);
+	  // _reader.setNext(oldReader);
+	  
+	  _reader.setLine(oldReader.getLine());
+
+          _reader.setSystemId(_filename);
+          _reader.setPublicId(null);
+        }
+      }
+    }
+
+    return true;
+  }
+
+  protected int readByte()
+    throws IOException
+  {
+    return _is.read();
+  }
+
+  protected void unreadByte(int ch)
+  {
+    _is.unread();
   }
 
   /**
@@ -2703,6 +1829,17 @@ public class XmlParser extends AbstractParser {
       s.println("<" + node.getNodeName() + "/>");
   }
 
+  public void close()
+  {
+    TempCharBuffer tempInputBuffer = _tempInputBuffer;
+    _tempInputBuffer = null;
+
+    _inputBuffer = null;
+
+    if (tempInputBuffer != null)
+      TempCharBuffer.free(tempInputBuffer);
+  }
+
   public static class LocatorImpl implements ExtendedLocator {
     XmlParser _parser;
 
@@ -2758,6 +1895,14 @@ public class XmlParser extends AbstractParser {
     public int getColumnNumber()
     {
       return _parser.getColumnNumber();
+    }
+  }
+
+  static {
+    XML_NAME_CHAR = new boolean[65536];
+
+    for (int i = 0; i < 65536; i++) {
+      XML_NAME_CHAR[i] = XmlChar.isNameChar(i) && i != ':';
     }
   }
 }

@@ -34,6 +34,7 @@ import org.w3c.dom.*;
 
 import java.io.IOException;
 import java.util.HashMap;
+import javax.xml.namespace.QName;
 
 /**
  * Resin's implementation of the DOM element.
@@ -119,7 +120,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
    */
   public String getNodeName()
   {
-    return _name.getName();
+    return _name.getLocalPart();
   }
 
   /**
@@ -127,7 +128,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
    */
   public String getTagName()
   {
-    return _name.getName();
+    return _name.getLocalPart();
   }
 
   /**
@@ -135,7 +136,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
    */
   public String getLocalName()
   {
-    return _name.getLocalName();
+    return _name.getLocalPart();
   }
 
   /**
@@ -151,7 +152,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
    */
   public String getCanonicalName()
   {
-    return _name.getCanonicalName();
+    return _name.toString();
   }
 
   /**
@@ -159,7 +160,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
    */
   public String getNamespaceURI()
   {
-    return _name.getNamespace();
+    return _name.getNamespaceURI();
   }
 
   /**
@@ -246,7 +247,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
       QElement elt = (QElement) child;
       QName name = elt._name;
 
-      if (name.getNamespace() != "") {
+      if (name.getNamespaceURI() != "") {
         addNamespace(name);
       }
 
@@ -255,7 +256,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
 	   attr = (QAttr) attr.getNextSibling()) {
 	name = attr._name;
 
-	if (name.getNamespace() != "") {
+	if (name.getNamespaceURI() != "") {
 	  addNamespace(name);
 	}
       }
@@ -269,7 +270,7 @@ public class QElement extends QAttributedNode implements CauchoElement {
    */
   void addNamespace(QName name)
   {
-    _owner.addNamespace(name.getPrefix(), name.getNamespace());
+    _owner.addNamespace(name.getPrefix(), name.getNamespaceURI());
   }
 
   /**

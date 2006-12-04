@@ -31,6 +31,8 @@ package com.caucho.xml2;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 
+import javax.xml.namespace.QName;
+
 /**
  * CauchoElement extends the DOM, providing for ordered Attributes.
  */

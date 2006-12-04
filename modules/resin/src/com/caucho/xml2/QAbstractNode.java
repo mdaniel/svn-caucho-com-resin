@@ -39,6 +39,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.UserDataHandler;
 
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.ArrayList;
 

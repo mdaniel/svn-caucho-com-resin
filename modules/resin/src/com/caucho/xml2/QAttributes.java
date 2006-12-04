@@ -31,6 +31,7 @@ package com.caucho.xml2;
 import com.caucho.util.CharBuffer;
 
 import org.xml.sax.Attributes;
+import javax.xml.namespace.QName;
 
 class QAttributes implements Attributes {
   QName []names = new QName[32];
@@ -70,7 +71,12 @@ class QAttributes implements Attributes {
 
   public String getQName(int i)
   {
-    return names[i].getName();
+    String prefix = names[i].getPrefix();
+
+    if (prefix != null && prefix.length() > 0)
+      return prefix + ":" + names[i].getLocalPart();
+    else
+      return names[i].getLocalPart();
   }    
 
   public String getURI(int i)
@@ -85,7 +91,7 @@ class QAttributes implements Attributes {
 
   public String getLocalName(int i)
   {
-    String name = names[i].getLocalName();
+    String name = names[i].getLocalPart();
 
     if (name != null)
       return name;
@@ -101,7 +107,7 @@ class QAttributes implements Attributes {
   public String getValue(String qName)
   {
     for (int i = 0; i < size; i++) {
-      if (qName.equals(names[i].getName()))
+      if (qName.equals(names[i].getLocalPart()))
         return values[i];
     }
 
@@ -116,7 +122,7 @@ class QAttributes implements Attributes {
       if (testURI == null)
 	testURI = "";
       
-      if (uri.equals(testURI) && localName.equals(names[i].getLocalName()))
+      if (uri.equals(testURI) && localName.equals(names[i].getLocalPart()))
         return values[i];
     }
 
@@ -126,7 +132,7 @@ class QAttributes implements Attributes {
   public int getIndex(String qName)
   {
     for (int i = 0; i < size; i++) {
-      if (qName.equals(names[i].getName()))
+      if (qName.equals(names[i].getLocalPart()))
         return i;
     }
 
@@ -137,7 +143,7 @@ class QAttributes implements Attributes {
   {
     for (int i = 0; i < size; i++) {
       if (uri.equals(names[i].getNamespaceURI()) &&
-          localName.equals(names[i].getLocalName()))
+          localName.equals(names[i].getLocalPart()))
         return i;
     }
 
@@ -161,8 +167,8 @@ class QAttributes implements Attributes {
 
   public String toString()
   {
-    CharBuffer cb = CharBuffer.allocate();
-    cb.append("[QAttributes");
+    StringBuilder cb = new StringBuilder();
+    cb.append("QAttributes[");
     for (int i = 0; i < size; i++) {
       cb.append(" ");
       cb.append(names[i]);
@@ -171,6 +177,7 @@ class QAttributes implements Attributes {
       cb.append("\"");
     }
     cb.append("]");
-    return cb.close();
+    
+    return cb.toString();
   }
 }

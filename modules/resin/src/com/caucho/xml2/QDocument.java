@@ -33,6 +33,7 @@ import com.caucho.vfs.Path;
 
 import org.w3c.dom.*;
 
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -616,7 +617,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
   public Attr createAttribute(QName name, String value)
     throws DOMException
   {
-    String url = name.getNamespace();
+    String url = name.getNamespaceURI();
 
     if (url != null && url != "") {
       addNamespace(name.getPrefix(), url);

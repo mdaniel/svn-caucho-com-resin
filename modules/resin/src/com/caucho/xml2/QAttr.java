@@ -33,6 +33,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.TypeInfo;
 
+import javax.xml.namespace.QName;
 import java.io.IOException;
 
 public class QAttr extends QNode implements Attr {
@@ -83,7 +84,7 @@ public class QAttr extends QNode implements Attr {
 
   public String getNodeName()
   {
-    return _name.getName();
+    return _name.getLocalPart();
   }
 
   public boolean isId()
@@ -93,7 +94,7 @@ public class QAttr extends QNode implements Attr {
 
   public String getName()
   {
-    return _name.getName();
+    return _name.getLocalPart(); // XXX:
   }
 
   public String getPrefix()
@@ -103,17 +104,18 @@ public class QAttr extends QNode implements Attr {
 
   public String getLocalName()
   {
-    return _name.getLocalName();
+    return _name.getLocalPart();
   }
 
   public String getCanonicalName()
   {
-    return _name.getCanonicalName();
+    //return _name.getCanonicalName();
+    return _name.toString(); // XXX:
   }
 
   public String getNamespaceURI()
   {
-    return _name.getNamespace();
+    return _name.getNamespaceURI();
   }
 
   public String getNodeValue()

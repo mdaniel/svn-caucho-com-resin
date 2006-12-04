@@ -33,6 +33,8 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import javax.xml.namespace.QName;
+
 public abstract class QAttributedNode extends QNode {
   QAttr _firstAttribute;
 

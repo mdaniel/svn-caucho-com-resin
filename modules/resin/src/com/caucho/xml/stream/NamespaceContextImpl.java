@@ -65,7 +65,7 @@ public class NamespaceContextImpl implements NamespaceContext
   {
     _nullEltBinding = new NamespaceBinding(null, null, 0);
     _nullAttrBinding = new NamespaceBinding(null, null, 0);
-    
+
     _stack.add(null);
   }
 
@@ -87,7 +87,7 @@ public class NamespaceContextImpl implements NamespaceContext
     if (eltBinding != null) {
       ArrayList<Decl> oldBinding = eltBinding.getOldBindingList();
 
-      for (int i = 0; i < oldBinding.size(); i++) {
+      for (int i = 0; oldBinding != null && i < oldBinding.size(); i++) {
 	Decl decl = oldBinding.get(i);
 	NamespaceBinding binding = decl.getBinding();
 
@@ -96,6 +96,8 @@ public class NamespaceContextImpl implements NamespaceContext
 	binding.setUri(decl.getOldUri());
 	binding.setVersion(_version);
       }
+
+      eltBinding.clear();
     }
   }
 
@@ -214,8 +216,14 @@ public class NamespaceContextImpl implements NamespaceContext
   {
     ElementBinding eltBinding = _stack.get(_stack.size() - 1);
 
-    if (eltBinding != null)
-      return eltBinding.getOldBindingList().size();
+    if (eltBinding != null) {
+      ArrayList<Decl> oldBindingList = eltBinding.getOldBindingList();
+
+      if (oldBindingList != null)
+	return oldBindingList.size();
+      else
+	return 0;
+    }
     else
       return 0;
   }
@@ -402,11 +410,16 @@ public class NamespaceContextImpl implements NamespaceContext
   static class ElementBinding
   {
     private QName _name;
-    private ArrayList<Decl> _declList = new ArrayList<Decl>();
+    private ArrayList<Decl> _declList;
 
     public void setName(QName name)
     {
       _name = name;
+    }
+
+    public void clear()
+    {
+      _declList = null;
     }
 
     public QName getName()
@@ -417,6 +430,9 @@ public class NamespaceContextImpl implements NamespaceContext
     public void addOldBinding(NamespaceBinding binding, String prefix,
 			      String oldUri, String newUri)
     {
+      if (_declList == null)
+	_declList = new ArrayList<Decl>();
+      
       _declList.add(new Decl(binding, prefix, oldUri, newUri));
     }
 
