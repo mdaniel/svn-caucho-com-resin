@@ -10,9 +10,9 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1snap - Oct 6, 2006">
+<s2 title="3.1snap - Dec 3, 2006">
 <ul>
-<li>Quercus: marshaling of null for Java objects: Byte, Integer, etc (#1444, rep by KnisterPeter)</li>
+<li>(2006-12-03) Quercus: marshaling of null for Java objects: Byte, Integer, etc (#1444, rep by KnisterPeter)</li>
 <li>OpenSSL: nullpointer when loading ssl fails (#1442, rep by Anoop Achuthan)</li>
 <li>expand-directory in web-app-deploy generated confusing error message (#1452, rep by gjvc)</li>
 <li>Make transaction manager visible for Spring (#1425, rep by buzzterrier)</li>
@@ -24,7 +24,7 @@
 <li>Amber: 99 fields were overflowing the generated code (#1440, rep by spoty)</li>
 <li>Quercus: mysqli_connection should return false with a connection error (#1401, rep by dberry)</li>
 <li>access log: getNewline() adds check for windows is line.separator is null isntead of defaulting to \n (#1449, rep by Chris Head)</li>
-<li>Cache: max-entry-size was being ignored (#1474, rep by Kalev Sullakatko)
+<li>Cache: max-entry-size was being ignored (#1474, rep by Kalev Sullakatko)</li>
 <li>Quercus: marshal String[] properly (#1463, rep by KnisterPeter)</li>
 <li>JSP: .tag attribute with inner classes were not working (#1479, rep by stevejf7)</li>
 <li>Quercus: rework for final javax.script API (#1473, rep by George Moschovitis)</li>
