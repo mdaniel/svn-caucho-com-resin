@@ -433,8 +433,10 @@ public class AbstractRolloverLog {
       }
     } finally {
       synchronized (this) {
-	if (isRollingOver)
+	if (isRollingOver) {
 	  _isRollingOver = false;
+	  flushTempStream();
+	}
       }
     }
   }
@@ -763,6 +765,29 @@ public class AbstractRolloverLog {
     }
   }
 
+  void flushTempStream()
+  {
+    TempStream ts = _tempStream;
+    _tempStream = null;
+    
+    if (ts != null) {
+      if (_os == null)
+	openLog();
+
+      try {
+	ReadStream is = ts.openRead(true);
+
+	try {
+	  is.writeToStream(_os);
+	} finally {
+	  is.close();
+	}
+      } catch (IOException e) {
+	e.printStackTrace();
+      }
+    }
+  }
+
   class ArchiveTask implements Runnable {
     public void run()
     {
@@ -771,26 +796,9 @@ public class AbstractRolloverLog {
       } finally {
 	// Write any new data from the temp stream to the log.
 	synchronized (this) {
-	  if (_os == null)
-	    openLog();
-	
 	  _isRollingOver = false;
-	  TempStream ts = _tempStream;
-	  _tempStream = null;
 
-	  if (ts != null) {
-	    try {
-	      ReadStream is = ts.openRead();
-
-	      try {
-		is.writeToStream(_os);
-	      } finally {
-		is.close();
-	      }
-	    } catch (IOException e) {
-	      e.printStackTrace();
-	    }
-	  }
+	  flushTempStream();
 	}
       }
     }
