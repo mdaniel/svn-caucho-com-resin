@@ -264,12 +264,12 @@ public class AmberConnection
       int state = instance.__caucho_getEntityState();
 
       if (state == Entity.TRANSIENT) {
-        create(instance);
+        createInternal(instance);
       }
       else if (state >= Entity.P_DELETING) {
         // removed entity instance, reset state and persist.
         instance.__caucho_makePersistent(null, (EntityType) null);
-        create(instance);
+        createInternal(instance);
       }
       else {
         // managed entity instance: ignored, i.e.
@@ -1456,21 +1456,18 @@ public class AmberConnection
    * @param obj the object to create
    */
   public void create(Object obj)
-    throws Exception
+    throws SQLException
   {
-    AmberEntityHome home = null;
+    // ejb/0g22 exception handling
+    try {
 
-    Class cl = obj.getClass();
+      createInternal(obj);
 
-    for (; home == null && cl != null; cl = cl.getSuperclass()) {
-      home = _persistenceUnit.getHome(cl);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
     }
-
-    if (home == null)
-      throw new AmberException(L.l("`{0}' is not a known entity class.",
-                                   obj.getClass().getName()));
-
-    create(home, obj);
   }
 
   /**
@@ -1479,15 +1476,18 @@ public class AmberConnection
    * @param obj the object to create
    */
   public void create(String homeName, Object obj)
-    throws Exception
+    throws SQLException
   {
-    AmberEntityHome home = _persistenceUnit.getEntityHome(homeName);
+    // ejb/0g22 exception handling
+    try {
 
-    if (home == null)
-      throw new AmberException(L.l("`{0}' is not a known entity class.",
-                                   obj.getClass().getName()));
+      createInternal(homeName, obj);
 
-    create(home, obj);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
   }
 
   /**
@@ -1496,25 +1496,18 @@ public class AmberConnection
    * @param obj the object to create
    */
   public void create(AmberEntityHome home, Object obj)
-    throws Exception
+    throws SQLException
   {
-    // XXX: flushing things like delete might be useful?
-    // XXX: the issue is a flush can break FK constraints and
-    //      fail prematurely (jpa/0h26).
-    // commented out: flush();
+    // ejb/0g22 exception handling
+    try {
 
-    if (contains(obj)) {
-      return;
+      createInternal(home, obj);
+
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
     }
-
-    Entity entity = (Entity) obj;
-
-    home.save(this, entity);
-
-    addEntity(entity);
-
-    Table table = home.getEntityType().getTable();
-    addCompletion(new TableInvalidateCompletion(table.getName()));
   }
 
   /**
@@ -1826,5 +1819,80 @@ public class AmberConnection
   public void finalize()
   {
     cleanup();
+  }
+
+  //
+  // private
+  //
+  // throws Exception (for jpa)
+  //
+  // ejb/0g22 (cmp) expects exception handling in
+  // the public methods. See public void create(Object) above.
+
+  /**
+   * Saves the object.
+   *
+   * @param obj the object to create
+   */
+  private void createInternal(Object obj)
+    throws Exception
+  {
+    AmberEntityHome home = null;
+
+    Class cl = obj.getClass();
+
+    for (; home == null && cl != null; cl = cl.getSuperclass()) {
+      home = _persistenceUnit.getHome(cl);
+    }
+
+    if (home == null)
+      throw new AmberException(L.l("`{0}' is not a known entity class.",
+                                   obj.getClass().getName()));
+
+    create(home, obj);
+  }
+
+  /**
+   * Saves the object.
+   *
+   * @param obj the object to create
+   */
+  private void createInternal(String homeName, Object obj)
+    throws Exception
+  {
+    AmberEntityHome home = _persistenceUnit.getEntityHome(homeName);
+
+    if (home == null)
+      throw new AmberException(L.l("`{0}' is not a known entity class.",
+                                   obj.getClass().getName()));
+
+    create(home, obj);
+  }
+
+  /**
+   * Saves the object.
+   *
+   * @param obj the object to create
+   */
+  private void createInternal(AmberEntityHome home, Object obj)
+    throws Exception
+  {
+    // XXX: flushing things like delete might be useful?
+    // XXX: the issue is a flush can break FK constraints and
+    //      fail prematurely (jpa/0h26).
+    // commented out: flush();
+
+    if (contains(obj)) {
+      return;
+    }
+
+    Entity entity = (Entity) obj;
+
+    home.save(this, entity);
+
+    addEntity(entity);
+
+    Table table = home.getEntityType().getTable();
+    addCompletion(new TableInvalidateCompletion(table.getName()));
   }
 }
