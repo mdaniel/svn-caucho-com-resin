@@ -23,66 +23,30 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
 package com.caucho.config.types;
 
-import com.caucho.naming.Jndi;
-import com.caucho.naming.LinkProxy;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
-
 /**
- * Configuration for the ejb-ref
+ * Configuration for the ejb-local-ref
  */
-public class EjbLocalRef {
-  private static L10N L = new L10N(EjbLocalRef.class);
-
-  private String _name;
-  private String _type;
-  private String _home;
-  private String _remote;
-  private String _link;
-
-  public void setEjbRefName(String name)
+public class EjbLocalRef
+  extends EjbRef
+{
+  protected String getTagName()
   {
-    _name = name;
+    return "<ejb-local-ref>";
   }
 
-  public void setEjbRefType(String type)
+  public void setLocalHome(Class home)
   {
-    _type = type;
+    // XXX: should distinguish
+    setHome(home);
   }
 
-  public void setLocalHome(String home)
+  public void setLocal(Class local)
   {
-    _home = home;
-  }
-
-  public void setLocal(String remote)
-  {
-    _remote = remote;
-  }
-
-  public void setEjbLink(String link)
-  {
-    _link = link;
-  }
-
-  @PostConstruct
-  public void init()
-    throws Exception
-  {
-    if (_link != null) {
-      LinkProxy proxy = new LinkProxy(_link);
-      Jndi.bindDeepShort(_name, proxy);
-    }
-  }
-
-  public String toString()
-  {
-    return "EjbLocalRef[" + _name + "]";
+    setRemote(local);
   }
 }

@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
 package com.caucho.config.types;
@@ -67,6 +67,11 @@ public class EjbRef implements ObjectProxy {
 
   public EjbRef()
   {
+  }
+
+  protected String getTagName()
+  {
+    return "<ejb-ref>";
   }
 
   public void setId(String id)
@@ -129,6 +134,7 @@ public class EjbRef implements ObjectProxy {
    */
   public Class getRemote()
   {
+    // XXX: should distinguish
     return _remote;
   }
 
@@ -176,7 +182,7 @@ public class EjbRef implements ObjectProxy {
         _jndiName = _ejbRefName;
     }
 
-    _ejbRefName = Jndi.getFullName(_ejbRefName);
+    String fullEjbRefName = Jndi.getFullName(_ejbRefName);
 
     if (_ejbLink != null) {
       EJBServer server = EJBServer.getLocal();
@@ -190,20 +196,20 @@ public class EjbRef implements ObjectProxy {
       if (_jndiName != null) {
         _jndiName = Jndi.getFullName(_jndiName);
 
-        if (! _jndiName.equals(_ejbRefName))
+        if (! _jndiName.equals(fullEjbRefName))
           bind = true;
       }
     }
 
     if (bind) {
       try {
-        (new InitialContext()).unbind(_ejbRefName);
+        (new InitialContext()).unbind(fullEjbRefName);
       }
       catch (Exception ex) {
         log.log(Level.FINEST, ex.toString(), ex);
       }
 
-      Jndi.bindDeep(_ejbRefName, this);
+      Jndi.bindDeep(fullEjbRefName, this);
     }
 
     if (log.isLoggable(Level.FINER))
@@ -233,8 +239,13 @@ public class EjbRef implements ObjectProxy {
     if (_jndiName != null) {
       _target = Jndi.lookup(_jndiName);
 
-      if (_target == null && log.isLoggable(Level.FINE))
-        log.log(Level.FINE, L.l("no ejb bean with jndi-name '{0}' could be found", _jndiName));
+      if (_target == null)
+        if (_jndiName.equals(_ejbRefName))
+          throw new NamingException(L.l("{0} '{1}' cannot be resolved",
+                                        getTagName(), _ejbRefName));
+        else
+          throw new NamingException(L.l("{0} '{1}' jndi-name '{2}' not found",
+                                        getTagName(), _ejbRefName, _jndiName));
     }
     else {
       String archiveName;
@@ -257,8 +268,12 @@ public class EjbRef implements ObjectProxy {
         AbstractServer server = EJBServer.getLocal().getServer(path, ejbName);
 
         if (server == null) {
-          if (log.isLoggable(Level.FINE))
-            log.log(Level.FINE, L.l("no ejb bean with path '{0}' and name '{1}' could be found", path, ejbName));
+          if (_ejbLink.equals(_ejbRefName))
+            throw new NamingException(L.l("{0} '{1}' cannot be resolved",
+                                          getTagName(), _ejbRefName));
+          else
+            throw new NamingException(L.l("{0} '{1}' ejb-link '{2}' not found",
+                                          getTagName(), _ejbRefName, _ejbLink));
         }
         else {
           Object localHome = server.getEJBLocalHome();
@@ -273,24 +288,30 @@ public class EjbRef implements ObjectProxy {
               _target = remoteHome;
           }
 
-          if (log.isLoggable(Level.FINE))
+          if (_target == null)  {
             log.log(Level.FINE, L.l("no home interface is available for '{0}'", server));
+
+            throw new NamingException(L.l("{0} '{1}' ejb bean found with ejb-link '{2}' has no home interface",
+                                          getTagName(), _ejbRefName, _ejbLink));
+          }
         }
       }
+      catch (NamingException e) {
+        throw e;
+      }
       catch (Exception e) {
-        throw new NamingException(L.l("invalid {0} '{1}': {2}", "<ejb-link>", _ejbLink, e));
+        throw new NamingException(L.l("{0} '{1}'  ejb-link '{2}' invalid ",
+                                      getTagName(), _ejbRefName, _ejbLink));
       }
 
-      if (_target == null)
-        throw new NamingException(L.l("{0} '{1}' cannot be resolved", "<ejb-ref>", _ejbRefName));
-
-      if (log.isLoggable(Level.FINER))
-        log.log(Level.FINER, L.l("{0} resolved", this));
+      if (log.isLoggable(Level.CONFIG))
+        log.log(Level.CONFIG, L.l("{0} resolved", this));
     }
   }
 
   public String toString()
   {
-    return "EjbRef[" + _ejbRefName + ", " + _ejbLink + ", " +  _jndiName + "]";
+    return getClass().getSimpleName()
+           +  "[" + _ejbRefName + ", " + _ejbLink + ", " +  _jndiName + "]";
   }
 }

@@ -212,6 +212,8 @@ public class Jndi {
       if (value != null)
         return value;
     } catch (NamingException e) {
+      if (log.isLoggable(Level.FINEST))
+        log.log(Level.FINEST, e.toString(), e);
     }
 
     if (! name.startsWith("java:comp/env")) {
@@ -221,6 +223,8 @@ public class Jndi {
         if (value != null)
           return value;
       } catch (NamingException e) {
+        if (log.isLoggable(Level.FINEST))
+          log.log(Level.FINEST, e.toString(), e);
       }
     }
 
