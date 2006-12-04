@@ -1243,14 +1243,11 @@ public class AmberConnection
         if (state < Entity.P_DELETING) {
           entity.__caucho_cascadePrePersist(this);
           // entity.__caucho_cascadePostPersist(this);
-          state = entity.__caucho_getEntityState();
         }
       }
 
       for (int i = _txEntities.size() - 1; i >= 0; i--) {
         Entity entity = _txEntities.get(i);
-
-        int state = entity.__caucho_getEntityState();
 
         entity.__caucho_flush();
       }
