@@ -1229,6 +1229,10 @@ public class AmberPersistenceUnit {
 
     EntityType entityType = (EntityType) _typeManager.get(className);
 
+    // Temp. hack for cmp. ejb/0g22
+    if (entityType == null)
+      return;
+
     if (! entityType.getExcludeDefaultListeners()) {
       for (ListenerType listenerType : _defaultListeners) {
         for (JMethod m : listenerType.getCallbacks(callbackIndex)) {
