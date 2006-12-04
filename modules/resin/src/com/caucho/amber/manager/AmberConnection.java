@@ -978,6 +978,19 @@ public class AmberConnection
     return null;
   }
 
+  private Entity getTransactionEntity(String className, Object key)
+  {
+    for (int i = _txEntities.size() - 1; i >= 0; i--) {
+      Entity entity = _txEntities.get(i);
+
+      if (entity.__caucho_match(className, key)) {
+        return entity;
+      }
+    }
+
+    return null;
+  }
+
   /**
    * Adds an entity.
    */
@@ -985,14 +998,22 @@ public class AmberConnection
   {
     boolean added = false;
 
-    if (! _entities.contains(entity)) {
+    Entity oldEntity = getEntity(entity.getClass().getName(),
+                                 entity.__caucho_getPrimaryKey());
+
+    // jpa/0s2d: if (! _entities.contains(entity)) {
+    if (oldEntity == null) {
       _entities.add(entity);
       added = true;
     }
 
     // jpa/0g06
     if (_isInTransaction) {
-      if (! _txEntities.contains(entity)) {
+      oldEntity = getTransactionEntity(entity.getClass().getName(),
+                                       entity.__caucho_getPrimaryKey());
+
+      // jpa/0s2d: if (! _txEntities.contains(entity)) {
+      if (oldEntity == null) {
         _txEntities.add(entity);
         added = true;
       }
@@ -1228,6 +1249,8 @@ public class AmberConnection
 
       for (int i = _txEntities.size() - 1; i >= 0; i--) {
         Entity entity = _txEntities.get(i);
+
+        int state = entity.__caucho_getEntityState();
 
         entity.__caucho_flush();
       }

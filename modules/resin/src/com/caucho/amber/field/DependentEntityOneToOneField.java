@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
+
 /**
  * Represents a many-to-one link pointing to an entity.
  */
@@ -192,8 +194,11 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.println("if (" + getter + " != null) {");
     out.pushDepth();
     out.println("int state = ((com.caucho.amber.entity.Entity) " + getter + ").__caucho_getEntityState();");
-    out.println("if (state <= com.caucho.amber.entity.Entity.P_NEW || ");
-    out.println("    state >= com.caucho.amber.entity.Entity.P_DELETED)");
+
+    // jpa/0s2d
+    out.println("if (this.__caucho_state < com.caucho.amber.entity.Entity.P_DELETING");
+    out.println("    && (state <= com.caucho.amber.entity.Entity.P_NEW || ");
+    out.println("        state >= com.caucho.amber.entity.Entity.P_DELETED))");
 
     String errorString = ("(\"amber flush: unable to flush " +
                           getEntitySourceType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+

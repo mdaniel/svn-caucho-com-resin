@@ -665,21 +665,27 @@ public class EntityManyToManyField extends AssociationField {
                                   CascadeType cascadeType)
     throws IOException
   {
-    if (cascadeType != CascadeType.PERSIST)
+    if (cascadeType != CascadeType.PERSIST
+        && cascadeType != CascadeType.REMOVE)
       return;
 
     if (isCascade(cascadeType)) {
       out.println("if (__caucho_state <= P_TRANSACTIONAL) {");
       out.pushDepth();
 
-      String amberAdd = "__amber_" + getGetterName() + "_add";
+      String amberCascade = "__amber_" + getGetterName();
+
+      if (cascadeType == CascadeType.PERSIST)
+        amberCascade += "_add";
+      else
+        amberCascade += "_remove";
 
       String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
 
       out.println("if (" + getter + " != null) {");
 
       out.println("  for (Object o : " + getter + ")");
-      out.println("    " + amberAdd + "(o);");
+      out.println("    " + amberCascade + "(o);");
 
       out.println("}");
 
