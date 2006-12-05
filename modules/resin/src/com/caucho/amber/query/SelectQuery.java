@@ -311,8 +311,8 @@ public class SelectQuery extends AbstractQuery {
       if (joinParent == null) {
       }
       else if (joinParent.getJoinExpr() == null
-         && joinParent == joinTarget
-         && ! usesFromData(joinParent)) {
+               && joinParent == joinTarget
+               && ! usesFromData(joinParent)) {
         _fromList.remove(joinParent);
 
         replaceJoin(join);
@@ -341,26 +341,26 @@ public class SelectQuery extends AbstractQuery {
         }
 
         if (item.isOuterJoin() || exists(joinTarget) || isManyToMany) {
-           // Optimization for common children query:
-           // SELECT o FROM TestBean o WHERE o.parent.id=?
-           // jpa/0h1k
-           // jpa/114g as negative exists test
+          // Optimization for common children query:
+          // SELECT o FROM TestBean o WHERE o.parent.id=?
+          // jpa/0h1k
+          // jpa/114g as negative exists test
 
-           _fromList.remove(item);
+          _fromList.remove(item);
 
-           replaceJoin(join);
+          replaceJoin(join);
 
-           i = -1;
+          i = -1;
 
-           AmberExpr joinWhere = join.getWhere();
+          AmberExpr joinWhere = join.getWhere();
 
-           if (joinWhere != null)
-             _where = AndExpr.create(_where, joinWhere);
+          if (joinWhere != null)
+            _where = AndExpr.create(_where, joinWhere);
         }
         /*
-         else if ((i == _fromList.size() - 1)
-                  && (exists()) {
-         }
+          else if ((i == _fromList.size() - 1)
+          && (exists()) {
+          }
         */
       }
     }
