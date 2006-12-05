@@ -69,10 +69,10 @@ public class TransactionContext implements Synchronization {
   Transaction _oldTrans;
 
   private long _startTime;
-  
+
   private TransactionObject []_objects = new TransactionObject[16];
   private int _objectTop;
-  
+
   private SessionSynchronization []_sessions = new SessionSynchronization[16];
   private int _sessionTop;
 
@@ -87,11 +87,11 @@ public class TransactionContext implements Synchronization {
   TransactionContext(EjbTransactionManager container)
   {
     _container = container;
-    
+
     if (container != null)
       _userTransaction = container.getUserTransaction();
   }
-  
+
   void init(boolean pushDepth)
   {
     if (_isAlive) {
@@ -99,7 +99,7 @@ public class TransactionContext implements Synchronization {
 
       throw new IllegalStateException(L.l("nested transaction start"));
     }
-    
+
     _transaction = null;
     _old = null;
     _oldTrans = null;
@@ -140,7 +140,7 @@ public class TransactionContext implements Synchronization {
   {
     return _transaction == null;
   }
-  
+
   /**
    * Returns true for a row-locking transaction.
    */
@@ -148,7 +148,7 @@ public class TransactionContext implements Synchronization {
   {
     return _transaction != null && _isRowLocking;
   }
-  
+
   /**
    * Set true for a row-locking transaction.
    */
@@ -176,7 +176,7 @@ public class TransactionContext implements Synchronization {
   {
     if (old == _transaction && old != null)
       throw new IllegalStateException();
-    
+
     _oldTrans = old;
   }
 
@@ -185,7 +185,7 @@ public class TransactionContext implements Synchronization {
     if (_depth == 0) {
       _isAlive = true;
     }
-    
+
     _depth++;
   }
 
@@ -193,7 +193,7 @@ public class TransactionContext implements Synchronization {
   {
     if (_depth == 0)
       _isAlive = true;
-    
+
     _isUserTransaction = isUserTransaction;
   }
 
@@ -238,13 +238,13 @@ public class TransactionContext implements Synchronization {
         else
           _transaction.setRollbackOnly();
       } catch (Exception e) {
-	return EJBExceptionWrapper.createRuntime(exn);
+        return EJBExceptionWrapper.createRuntime(exn);
       }
     }
 
     return EJBExceptionWrapper.createRuntime(exn);
   }
-  
+
   /**
    * Add a new persistent object to the transaction context.
    *
@@ -262,7 +262,7 @@ public class TransactionContext implements Synchronization {
 
     _objects[_objectTop++] = object;
   }
-  
+
   /**
    * Remove a transaction object from the transaction context.
    *
@@ -289,11 +289,11 @@ public class TransactionContext implements Synchronization {
       TransactionObject obj = _objects[i];
 
       if (obj instanceof QEntity) {
-	QEntity entity = (QEntity) obj;
+        QEntity entity = (QEntity) obj;
 
-	if (entity._caucho_isMatch(server, primaryKey)) {
-	  return entity;
-	}
+        if (entity._caucho_isMatch(server, primaryKey)) {
+          return entity;
+        }
       }
     }
 
@@ -308,7 +308,7 @@ public class TransactionContext implements Synchronization {
     if (_amberConn == null) {
       _amberConn = _container.getEJBManager().getAmberManager().getThreadConnection();
     }
-    
+
     try {
       _amberConn.setXA(_transaction != null);
     } catch (Exception e) {
@@ -317,7 +317,7 @@ public class TransactionContext implements Synchronization {
 
     return _amberConn;
   }
-  
+
   /**
    * Add a session to the transaction context.
    *
@@ -329,11 +329,11 @@ public class TransactionContext implements Synchronization {
     for (int i = _sessionTop - 1; i >= 0; i--)
       if (_sessions[i] == session)
         return;
-    
+
     if (_sessionTop + 1 >= _sessions.length) {
       SessionSynchronization []newSessions;
       newSessions = new SessionSynchronization[_sessions.length * 2];
-      
+
       for (int i = 0; i < _sessionTop; i++)
         newSessions[i] = _sessions[i];
       _sessions = newSessions;
@@ -391,12 +391,12 @@ public class TransactionContext implements Synchronization {
     boolean hasCompletion = false;
     try {
       _isCommitting = true;
-      
+
       if (! _isAlive) {
-	log.warning(L.l("Transaction has died"));
+        log.warning(L.l("Transaction has died"));
       }
       else if (_transaction == null) {
-	hasCompletion = true;
+        hasCompletion = true;
         try {
           beforeCompletion();
         } finally {
@@ -407,11 +407,11 @@ public class TransactionContext implements Synchronization {
       }
       else if (_rollbackOnly ||
                _transaction.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
-	hasCompletion = true;
+        hasCompletion = true;
         _userTransaction.rollback();
       }
       else if (_transaction.getStatus() != Status.STATUS_NO_TRANSACTION) {
-	hasCompletion = true;
+        hasCompletion = true;
         _userTransaction.commit();
       }
     } catch (Exception e) {
@@ -432,10 +432,10 @@ public class TransactionContext implements Synchronization {
   {
     if (_isCommitting || --_depth > 0)
       return;
-      
+
     try {
       _isCommitting = true;
-      
+
       if (! _rollbackOnly)
         setRollbackOnly();
 
@@ -454,7 +454,7 @@ public class TransactionContext implements Synchronization {
       throw new EJBExceptionWrapper(e);
     } finally {
       _isCommitting = false;
-      
+
       if (_depth <= 0 && _transaction != null)
         afterCompletion(Status.STATUS_ROLLEDBACK);
     }
@@ -477,8 +477,12 @@ public class TransactionContext implements Synchronization {
         _objects[i]._caucho_beforeCompletion(! _rollbackOnly);
       }
 
-      if (_amberConn != null)
-	_amberConn.beforeCommit();
+      // ejb/0600: com.caucho.transaction.TransactionImpl
+      // will call _amberConn.beforeCompletion() which
+      // already calls beforeCommit().
+      //
+      // if (_amberConn != null)
+      // _amberConn.beforeCommit();
     } catch (Throwable e) {
       throw setRollbackOnly(e);
     }
@@ -495,9 +499,9 @@ public class TransactionContext implements Synchronization {
   public void afterCompletion(int status)
   {
     /*
-    if (! _isUserTransaction && _depth > 0) {
+      if (! _isUserTransaction && _depth > 0) {
       return;
-    }
+      }
     */
 
     if (! _isAlive) {
@@ -512,7 +516,7 @@ public class TransactionContext implements Synchronization {
     TransactionContext old = _old;
     Transaction transaction = _transaction;
     Transaction oldTrans = _oldTrans;
-    
+
     _sessionTop = 0;
     _objectTop = 0;
     _old = null;
@@ -520,15 +524,15 @@ public class TransactionContext implements Synchronization {
       oldTrans = null;
     _oldTrans = null;
     _rollbackOnly = false;
-    
+
     Throwable exn = null;
 
     try {
       AmberConnection amberConn = _amberConn;
       _amberConn = null;
       if (amberConn != null) {
-	amberConn.afterCommit(wasCommitted);
-	amberConn.freeConnection();
+        amberConn.afterCommit(wasCommitted);
+        amberConn.freeConnection();
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -553,7 +557,7 @@ public class TransactionContext implements Synchronization {
         log.log(Level.WARNING, e.toString(), e);
       }
     }
-    
+
     _transaction = null;
     _isAlive = false;
 
