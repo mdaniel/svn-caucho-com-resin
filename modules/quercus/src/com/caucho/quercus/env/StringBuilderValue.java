@@ -633,12 +633,20 @@ public class StringBuilderValue extends UnicodeValue {
    */
   @Override
   public char []toCharArray()
-  {
+  { 
     char[] dest = new char[_length];
     
     System.arraycopy(_buffer, 0, dest, 0, _length);
     
     return dest;
+  }
+  
+  /**
+   * Returns the buffer backing this StringBuilderValue.
+   */
+  public char []getBuffer()
+  {
+    return _buffer;
   }
 
   /**

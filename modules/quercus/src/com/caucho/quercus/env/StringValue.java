@@ -1011,8 +1011,8 @@ abstract public class StringValue extends Value implements CharSequence {
     int length = length();
     
     StringBuilderValue string = new StringBuilderValue(length);
-
-    char []buffer = string.toCharArray();
+    
+    char []buffer = string.getBuffer();
     getChars(0, buffer, 0, length);
 
     for (int i = 0; i < length; i++) {
@@ -1040,7 +1040,7 @@ abstract public class StringValue extends Value implements CharSequence {
     
     StringBuilderValue string = new StringBuilderValue(length);
 
-    char []buffer = string.toCharArray();
+    char []buffer = string.getBuffer();
     getChars(0, buffer, 0, length);
 
     for (int i = 0; i < length; i++) {

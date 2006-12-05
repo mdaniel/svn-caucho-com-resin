@@ -33,7 +33,10 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.util.IdentityHashMap;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -228,6 +231,33 @@ public class NullValue extends Value {
     return null;
   }
 
+  /**
+   * Converts to a Java Calendar.
+   */
+  @Override
+  public Calendar toJavaCalendar()
+  {
+    return null;
+  }
+  
+  /**
+   * Converts to a Java Date.
+   */
+  @Override
+  public Date toJavaDate()
+  {
+    return null;
+  }
+  
+  /**
+   * Converts to a Java URL.
+   */
+  @Override
+  public URL toJavaURL(Env env)
+  {
+    return null;
+  }
+  
   /**
    * Takes the values of this array, unmarshalls them to objects of type
    * <i>elementType</i>, and puts them in a java array.
