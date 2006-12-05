@@ -112,12 +112,6 @@ abstract public class AbstractServer implements EnvironmentBean {
     _ejbManager = manager;
 
     _loader = new EnvironmentClassLoader(manager.getClassLoader());
-
-    try {
-      _jndiEnv = (Context) new InitialContext().lookup("java:comp/env");
-    } catch (Exception e) {
-      throw new ConfigException(e);
-    }
   }
 
   public String getId()
@@ -326,6 +320,9 @@ abstract public class AbstractServer implements EnvironmentBean {
   public Object lookup(String jndiName)
   {
     try {
+      if (_jndiEnv == null)
+	_jndiEnv = (Context) new InitialContext().lookup("java:comp/env");
+      
       // XXX: not tested
       return _jndiEnv.lookup(jndiName);
     } catch (NamingException e) {
