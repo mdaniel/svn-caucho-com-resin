@@ -230,7 +230,6 @@ public class EjbProtocolManager {
       //   localHome = server.getClientObject();
 
       if (localHome != null) {
-
         if (jndiName != null) {
           if (jndiName.startsWith("java:comp"))
             localJndiName = Jndi.getFullName(jndiName);
@@ -241,7 +240,7 @@ public class EjbProtocolManager {
         }
         else if (_localJndiName != null)
           localJndiName = Jndi.getFullName(_localJndiName + "/" + ejbName);
-
+	
         if (localJndiName != null) {
           if (log.isLoggable(Level.FINER))
             log.finer(L.l("binding local ejb home {0} to {1}", localHome, localJndiName));
