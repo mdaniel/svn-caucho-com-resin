@@ -128,6 +128,14 @@ abstract public class AbstractContext implements EJBContext {
     throw new IllegalStateException(L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
                                         getServer()));
   }
+
+  /**
+   * Looks up an object in the current JNDI context.
+   */
+  public Object lookup(String name)
+  {
+    return getServer().lookup(name);
+  }
   
   /**
    * Returns the EJBObject stub for the container.
@@ -257,6 +265,14 @@ abstract public class AbstractContext implements EJBContext {
     throws IllegalStateException
   {
     return getServer().getUserTransaction();
+  }
+
+  /**
+   * Looks up an object in the current JNDI context.
+   */
+  public TimerService getTimerService()
+  {
+    throw new UnsupportedOperationException();
   }
 
   /**

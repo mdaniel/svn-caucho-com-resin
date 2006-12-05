@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -39,10 +39,6 @@ import java.util.Properties;
 public interface EJBContext {
   public EJBHome getEJBHome();
 
-  public EJBLocalHome getEJBLocalHome();
-
-  public Properties getEnvironment();
-
   public Identity getCallerIdentity();
 
   public Principal getCallerPrincipal();
@@ -51,12 +47,21 @@ public interface EJBContext {
 
   public boolean isCallerInRole(String roleName);
 
-  public UserTransaction getUserTransaction()
-    throws IllegalStateException;
+  public EJBLocalHome getEJBLocalHome();
+
+  public Properties getEnvironment();
+
+  public Object lookup(String name);
 
   public void setRollbackOnly()
     throws IllegalStateException;
 
   public boolean getRollbackOnly()
+    throws IllegalStateException;
+
+  public TimerService getTimerService()
+    throws IllegalStateException;
+
+  public UserTransaction getUserTransaction()
     throws IllegalStateException;
 }

@@ -35,6 +35,8 @@ import javax.ejb.EJBObject;
 import javax.ejb.Handle;
 import javax.ejb.SessionContext;
 
+import javax.xml.rpc.handler.MessageContext;
+
 /**
  * Abstract base class for an session context
  */
@@ -91,5 +93,20 @@ abstract public class AbstractSessionContext extends AbstractContext
       _primaryKey = getSessionServer().createSessionKey(this);
 
     return _primaryKey;
+  }
+  
+  public <T> T getBusinessObject(Class<T> businessInterface)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  public Class getInvokedBusinessInterface()
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  public MessageContext getMessageContext()
+  {
+    throw new UnsupportedOperationException();
   }
 }

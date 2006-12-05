@@ -462,7 +462,7 @@ public class AmberEntityHome {
    * Saves based on the object.
    */
   public void save(AmberConnection aConn, Entity entity)
-    throws Exception
+    throws SQLException
   {
     entity.__caucho_create(aConn, _entityType);
   }

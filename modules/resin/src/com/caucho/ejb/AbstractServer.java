@@ -29,7 +29,7 @@
 
 package com.caucho.ejb;
 
-import com.caucho.config.BuilderProgram;
+import com.caucho.config.*;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
@@ -45,8 +45,10 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import javax.ejb.*;
+import javax.naming.*;
 import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
+import java.lang.reflect.*;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -65,6 +67,8 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected String _jndiName;
   protected String _serverId;
   protected String _handleServerId;
+
+  private Context _jndiEnv;
 
   protected EjbServerManager _ejbManager;
   private BuilderProgram _serverProgram;
@@ -108,6 +112,12 @@ abstract public class AbstractServer implements EnvironmentBean {
     _ejbManager = manager;
 
     _loader = new EnvironmentClassLoader(manager.getClassLoader());
+
+    try {
+      _jndiEnv = (Context) new InitialContext().lookup("java:comp/env");
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   public String getId()
@@ -309,6 +319,20 @@ abstract public class AbstractServer implements EnvironmentBean {
 
     return _handleServerId;
   }
+
+  /**
+   * Looks up the JNDI object.
+   */
+  public Object lookup(String jndiName)
+  {
+    try {
+      // XXX: not tested
+      return _jndiEnv.lookup(jndiName);
+    } catch (NamingException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+  
 
   public UserTransaction getUserTransaction()
   {
