@@ -1388,6 +1388,10 @@ public class AmberConnection
    */
   public void makeTransactional(Entity entity)
   {
+    // ejb/0600
+    if (! _persistenceUnit.isJPA())
+      return;
+
     int state = entity.__caucho_getEntityState();
 
     if (state > Entity.TRANSIENT && state < Entity.P_DELETING) {
