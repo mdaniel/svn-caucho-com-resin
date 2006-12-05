@@ -28,6 +28,7 @@
 
 package com.caucho.amber.expr;
 
+import com.caucho.amber.field.EntityEmbeddedField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
@@ -228,25 +229,10 @@ public class EmbeddedExpr extends AbstractPathExpr {
    */
   public void generateSelect(CharBuffer cb)
   {
-    String tableName;
-
-    if (_fromItem != null)
-      tableName = _fromItem.getName();
-    else
-      tableName = _parent.getChildFromItem().getName();
-
-    boolean isFirst = true;
-
-    for (Map.Entry<String, Column> entry : _columns.entrySet()) {
-      Column column = entry.getValue();
-
-      if (! isFirst)
-        cb.append(", ");
-      else
-        isFirst = false;
-
-      cb.append(column.getName());
-    }
+    cb.append(EntityEmbeddedField.generateSelect(null,
+                                                 _embeddableType,
+                                                 _fieldNameByColumn,
+                                                 _columns));
   }
 
   /**

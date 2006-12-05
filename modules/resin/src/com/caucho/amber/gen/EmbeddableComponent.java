@@ -174,7 +174,7 @@ public class EmbeddableComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    _embeddableType.generateLoad(out, "rs", "", 1, -1);
+    _embeddableType.generateLoad(out, "rs", "index", 0, -1);
 
     out.println("return index;");
 

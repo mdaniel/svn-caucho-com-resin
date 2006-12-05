@@ -183,7 +183,16 @@ public class CompositeId extends Id {
       for (int i = 0; i < fields.size(); i++) {
         AmberField field = fields.get(i);
 
-        out.println(field.generateSet("key", "a" + i) + ";");
+        if (getOwnerType().isFieldAccess())
+          out.println(field.generateSet("key", "a" + i) + ";");
+        else {
+          String setter = field.getName();
+
+          setter = "set" + Character.toUpperCase(setter.charAt(0)) +
+            (setter.length() == 1 ? "" : setter.substring(1));
+
+          out.println("key." + setter + "(a" + i + ");");
+        }
       }
     }
 
