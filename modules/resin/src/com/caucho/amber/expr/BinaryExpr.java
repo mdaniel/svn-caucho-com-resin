@@ -122,16 +122,16 @@ public class BinaryExpr extends AbstractAmberExpr {
   {
     if (_token == QueryParser.EQ) {
       if (_left instanceof KeyColumnExpr
-	  && _left.usesFrom(from, AmberExpr.IS_INNER_JOIN, false)
-	  && _right.exists())
-	return true;
+          && _left.usesFrom(from, AmberExpr.IS_INNER_JOIN, false)
+          && _right.exists())
+        return true;
       else if (_right instanceof KeyColumnExpr
-	       && _right.usesFrom(from, AmberExpr.IS_INNER_JOIN, false)
-	       && _right.exists(from)
-	       && _left.exists())
-	return true;
+               && _right.usesFrom(from, AmberExpr.IS_INNER_JOIN, false)
+               && _right.exists(from)
+               && _left.exists())
+        return true;
       else
-	return false;
+        return false;
     }
     else
       return false;

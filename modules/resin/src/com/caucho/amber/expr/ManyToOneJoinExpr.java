@@ -77,6 +77,17 @@ public class ManyToOneJoinExpr extends JoinExpr {
   }
 
   /**
+   * Returns true for a many-to-many expression.
+   */
+  public boolean isManyToMany()
+  {
+    if (_sourceFromItem == null)
+      return false;
+
+    return _sourceFromItem.getJoinExpr() instanceof OneToManyJoinExpr;
+  }
+
+  /**
    * Binds the expression as a select item.
    */
   public AmberExpr bindSelect(QueryParser parser)

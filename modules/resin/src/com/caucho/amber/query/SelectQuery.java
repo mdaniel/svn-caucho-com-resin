@@ -33,7 +33,9 @@ import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.AndExpr;
 import com.caucho.amber.expr.JoinExpr;
+import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.expr.LoadEntityExpr;
+import com.caucho.amber.expr.ManyToOneJoinExpr;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
@@ -309,8 +311,8 @@ public class SelectQuery extends AbstractQuery {
       if (joinParent == null) {
       }
       else if (joinParent.getJoinExpr() == null
-	       && joinParent == joinTarget
-	       && ! usesFromData(joinParent)) {
+         && joinParent == joinTarget
+         && ! usesFromData(joinParent)) {
         _fromList.remove(joinParent);
 
         replaceJoin(join);
@@ -326,24 +328,40 @@ public class SelectQuery extends AbstractQuery {
           _where = AndExpr.create(_where, joinWhere);
       }
       else if (item == joinTarget
-	       && ! isJoinParent(item)
-	       && ! usesFromData(item)
-	       && (item.isOuterJoin() || exists(joinTarget))) {
-	// Optimization for common children query:
-	// SELECT o FROM TestBean o WHERE o.parent.id=?
-	// jpa/0h1k
-	// jpa/114g as negative exists test
+               && ! isJoinParent(item)
+               && ! usesFromData(item)) {
 
-        _fromList.remove(item);
+        boolean isManyToMany = false;
 
-        replaceJoin(join);
+        // jpa/1144
+        if (join instanceof ManyToOneJoinExpr) {
+          ManyToOneJoinExpr manyToOneJoinExpr;
+          manyToOneJoinExpr = (ManyToOneJoinExpr) join;
+          isManyToMany = manyToOneJoinExpr.isManyToMany();
+        }
 
-        i = -1;
+        if (item.isOuterJoin() || exists(joinTarget) || isManyToMany) {
+           // Optimization for common children query:
+           // SELECT o FROM TestBean o WHERE o.parent.id=?
+           // jpa/0h1k
+           // jpa/114g as negative exists test
 
-        AmberExpr joinWhere = join.getWhere();
+           _fromList.remove(item);
 
-        if (joinWhere != null)
-          _where = AndExpr.create(_where, joinWhere);
+           replaceJoin(join);
+
+           i = -1;
+
+           AmberExpr joinWhere = join.getWhere();
+
+           if (joinWhere != null)
+             _where = AndExpr.create(_where, joinWhere);
+        }
+        /*
+         else if ((i == _fromList.size() - 1)
+                  && (exists()) {
+         }
+        */
       }
     }
 
@@ -414,7 +432,30 @@ public class SelectQuery extends AbstractQuery {
   public boolean exists(FromItem item)
   {
     // jpa/0h1b vs jpa/114g
-    return _where != null && _where.exists(item);
+    if (_where != null && _where.exists(item))
+      return true;
+
+    if (_orderList != null) {
+      for (AmberExpr orderBy : _orderList) {
+        // jpa/1110
+        if (orderBy instanceof KeyColumnExpr
+            && orderBy.usesFrom(item, AmberExpr.IS_INNER_JOIN, false))
+          return true;
+      }
+    }
+
+    if (_groupList != null) {
+      for (AmberExpr groupBy : _groupList) {
+        if (groupBy instanceof KeyColumnExpr
+            && groupBy.usesFrom(item, AmberExpr.IS_INNER_JOIN, false))
+          return true;
+      }
+    }
+
+    if (_having != null && _having.exists(item))
+      return true;
+
+    return false;
   }
 
   /**
