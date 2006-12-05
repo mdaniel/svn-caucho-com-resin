@@ -35,6 +35,8 @@ import javax.ejb.EJBObject;
 import javax.ejb.Handle;
 import javax.ejb.SessionContext;
 
+import javax.xml.rpc.handler.MessageContext;
+
 /**
  * Abstract base class for an session context
  */
@@ -92,5 +94,20 @@ abstract public class AbstractStatelessContext extends AbstractContext
   public Object getPrimaryKey()
   {
     return "::ejb:stateless";
+  }
+  
+  public <T> T getBusinessObject(Class<T> businessInterface)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  public Class getInvokedBusinessInterface()
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  public MessageContext getMessageContext()
+  {
+    throw new UnsupportedOperationException();
   }
 }
