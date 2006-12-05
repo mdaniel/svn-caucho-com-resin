@@ -1047,15 +1047,12 @@ public abstract class JspNode {
       else if (rtexpr && hasELAttribute(value)) { // jsp/0138 vs jsp/18s0
 	return generateELValue(type, value);
       }
-      /*
       else if (! rtexpr && hasELAttribute(value)) {
-	  // jsp/184v vs jsp/18cr
-	  throw error(L.l("EL expression '{0}' is only allowed for a runtime expression value.",
-			  value));
-	  return value;
-	}
+	// JSP.2.3.6 says this is an error
+	// jsp/184v vs jsp/18cr
+	throw error(L.l("EL expression '{0}' is only allowed for attributes with rtexprvalue='true'.",
+			value));
       }
-      */
       else if (! rtexpr
 	       && hasDeferredAttribute(value)
 	       && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()) {
@@ -1397,14 +1394,6 @@ public abstract class JspNode {
   public boolean hasDeferredAttribute(String value)
   {
     return ! _parseState.isELIgnored() && value.indexOf("#{") >= 0;
-  }
-  
-  /**
-   * Returns true if the value is a runtime attribute.
-   */
-  public boolean containsELAttribute(String value)
-  {
-    return value.indexOf("${") >= 0;
   }
 
   /**
