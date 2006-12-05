@@ -469,8 +469,10 @@ public class EnhancerFixup {
       // XXX: needs tests badly
       extCode.removeAttribute("LocalVariableTable");
       extCode.removeAttribute("LineNumberTable");
+      extCode.removeAttribute("StackMapTable");
       baseCode.removeAttribute("LocalVariableTable");
       baseCode.removeAttribute("LineNumberTable");
+      baseCode.removeAttribute("StackMapTable");
 
       /*
         baseMethod.concatenate(extMethod);
