@@ -94,7 +94,7 @@ public class TransactionEnhancer implements MethodEnhancer {
     case REQUIRED:
       call = new RequiredCallChain(call);
       break;
-    case REQUIRESNEW:
+    case REQUIRES_NEW:
       call = new RequiresNewCallChain(call);
       break;
     case NEVER:
@@ -103,7 +103,7 @@ public class TransactionEnhancer implements MethodEnhancer {
     case SUPPORTS:
       call = new SupportsCallChain(call);
       break;
-    case NOTSUPPORTED:
+    case NOT_SUPPORTED:
       call = new SuspendCallChain(call);
       break;
     default:
