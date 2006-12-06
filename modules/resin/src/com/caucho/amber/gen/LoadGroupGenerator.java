@@ -135,9 +135,9 @@ public class LoadGroupGenerator extends ClassComponent {
 
       out.println("    aConn.makeTransactional(this);");
 
-      out.println();
-      out.println("    if ((state > 0) && ((__caucho_loadMask_" + group + " & " + mask + "L) != 0))");
-      out.println("      return;");
+      // XXX: ejb/0d01
+      // out.println("    if ((state > 0) && ((__caucho_loadMask_" + group + " & " + mask + "L) != 0))");
+      // out.println("      return;");
       out.println();
 
       int loadCount = _entityType.getLoadGroupIndex();
@@ -150,8 +150,9 @@ public class LoadGroupGenerator extends ClassComponent {
       }
 
       out.println("  }");
-      out.println("  else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
-      out.println("    return;");
+      // XXX: ejb/0d01
+      // out.println("  else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
+      // out.println("    return;");
       out.println("}");
       out.print("else ");
     }

@@ -357,7 +357,11 @@ public class AmberEntityHome {
       return null; // ejb/0a06 throw new NullPointerException("primaryKey");
 
     try {
-      EntityItem item = _manager.getEntity(getRootType(), key);
+      EntityItem item = null;
+
+      // XXX: ejb/0d01
+      if (aConn.shouldRetrieveFromCache())
+        item = _manager.getEntity(getRootType(), key);
 
       if (item == null) {
         if (_homeBean == null && _configException != null)
@@ -426,7 +430,11 @@ public class AmberEntityHome {
                                                 String discriminator)
     throws SQLException
   {
-    EntityItem item = _manager.getEntity(getRootType(), key);
+    EntityItem item = null;
+
+    // XXX: ejb/0d01
+    if (aConn.shouldRetrieveFromCache())
+      item = _manager.getEntity(getRootType(), key);
 
     if (item == null) {
       EntityType subEntity

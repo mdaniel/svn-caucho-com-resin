@@ -669,7 +669,11 @@ public class AmberConnection
                      Map preloadedProperties)
     throws AmberException
   {
-    Entity entity = getEntity(cl.getName(), key);
+    Entity entity = null;
+
+    // XXX: ejb/0d01
+    if (shouldRetrieveFromCache())
+      entity = getEntity(cl.getName(), key);
 
     if (entity != null)
       return entity;
@@ -704,7 +708,11 @@ public class AmberConnection
     if (entityHome == null)
       return null;
 
-    Entity entity = getEntity(entityName, key);
+    Entity entity = null;
+
+    // XXX: ejb/0d01
+    if (shouldRetrieveFromCache())
+      entity = getEntity(entityName, key);
 
     if (entity != null)
       return entity;
@@ -796,7 +804,11 @@ public class AmberConnection
     if (key == null)
       return null;
 
-    Entity entity = getEntity(className, key);
+    Entity entity = null;
+
+    // XXX: ejb/0d01
+    if (shouldRetrieveFromCache())
+      entity = getEntity(className, key);
 
     try {
       AmberEntityHome home = _persistenceUnit.getEntityHome(name);
@@ -1823,6 +1835,15 @@ public class AmberConnection
   public void finalize()
   {
     cleanup();
+  }
+
+  /**
+   * Returns true when cache items can be used.
+   */
+  public boolean shouldRetrieveFromCache()
+  {
+    // ejb/0d01
+    return (! isInTransaction());
   }
 
   //
