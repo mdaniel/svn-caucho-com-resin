@@ -226,8 +226,10 @@ public class EjbProtocolManager {
 
 
       // XXX: ejb/0g01
-      // if (localHome == null)
-      //   localHome = server.getClientObject();
+      // vs ejb/0f00.  EJB 3.0 does not require home interfaces, e.g
+      // for stateless session beans
+      if (localHome == null)
+	localHome = server.getClientObject();
 
       if (localHome != null) {
         if (jndiName != null) {

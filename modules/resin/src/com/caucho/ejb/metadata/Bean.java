@@ -326,7 +326,7 @@ public class Bean {
       pattern.setTransaction(EjbMethod.TRANS_REQUIRED);
       break;
 	  
-    case REQUIRESNEW:
+    case REQUIRES_NEW:
       pattern.setTransaction(EjbMethod.TRANS_REQUIRES_NEW);
       break;
 	  
@@ -338,7 +338,7 @@ public class Bean {
       pattern.setTransaction(EjbMethod.TRANS_SUPPORTS);
       break;
 	  
-    case NOTSUPPORTED:
+    case NOT_SUPPORTED:
       pattern.setTransaction(EjbMethod.TRANS_NOT_SUPPORTED);
       break;
 	  
