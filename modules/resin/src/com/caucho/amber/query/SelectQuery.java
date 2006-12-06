@@ -357,11 +357,6 @@ public class SelectQuery extends AbstractQuery {
           if (joinWhere != null)
             _where = AndExpr.create(_where, joinWhere);
         }
-        /*
-          else if ((i == _fromList.size() - 1)
-          && (exists()) {
-          }
-        */
       }
     }
 
