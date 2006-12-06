@@ -723,6 +723,8 @@ public class EnhancerFixup {
     for (int i = 0; i < _enhancerList.size(); i++) {
       _enhancerList.get(i).postEnhance(baseClass);
     }
+
+    fixupJdk16Methods(baseClass);
   }
 
   /**
@@ -754,8 +756,6 @@ public class EnhancerFixup {
     copyExtAnnotations(baseClass);
 
     addExtClasses(baseClass, extClass);
-
-    fixupJdk16Methods(extClass);
   }
 
   /**
@@ -849,12 +849,12 @@ public class EnhancerFixup {
   /**
    * Remove the StackMapTable
    */
-  private void fixupJdk16Methods(JavaClass extClass)
+  private void fixupJdk16Methods(JavaClass baseClass)
   {
-    for (JavaMethod method : extClass.getMethodList()) {
-      CodeAttribute extCode = method.getCode();
+    for (JavaMethod method : baseClass.getMethodList()) {
+      CodeAttribute code = method.getCode();
 
-      extCode.removeAttribute("StackMapTable");
+      code.removeAttribute("StackMapTable");
     }
   }
 
