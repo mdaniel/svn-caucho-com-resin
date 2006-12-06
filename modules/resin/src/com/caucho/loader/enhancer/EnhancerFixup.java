@@ -469,10 +469,8 @@ public class EnhancerFixup {
       // XXX: needs tests badly
       extCode.removeAttribute("LocalVariableTable");
       extCode.removeAttribute("LineNumberTable");
-      extCode.removeAttribute("StackMapTable");
       baseCode.removeAttribute("LocalVariableTable");
       baseCode.removeAttribute("LineNumberTable");
-      baseCode.removeAttribute("StackMapTable");
 
       /*
         baseMethod.concatenate(extMethod);
@@ -756,6 +754,8 @@ public class EnhancerFixup {
     copyExtAnnotations(baseClass);
 
     addExtClasses(baseClass, extClass);
+
+    fixupJdk16Methods(extClass);
   }
 
   /**
@@ -843,6 +843,18 @@ public class EnhancerFixup {
 
       if (! fields.contains(field))
         fields.add(field);
+    }
+  }
+
+  /**
+   * Remove the StackMapTable
+   */
+  private void fixupJdk16Methods(JavaClass extClass)
+  {
+    for (JavaMethod method : extClass.getMethodList()) {
+      CodeAttribute extCode = method.getCode();
+
+      extCode.removeAttribute("StackMapTable");
     }
   }
 
