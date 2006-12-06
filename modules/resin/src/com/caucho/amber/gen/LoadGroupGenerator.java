@@ -125,9 +125,13 @@ public class LoadGroupGenerator extends ClassComponent {
     // non-read-only entities must be reread in a transaction
     if (! _entityType.isReadOnly()) {
       out.println("if (aConn.isInTransaction()) {");
+      
+      // deleted objects are not reloaded
       out.println("  if (com.caucho.amber.entity.Entity.P_DELETING <= __caucho_state) {");
       out.println("    return;");
       out.println("  }");
+
+      // from non-transactional to transactional
       out.println("  else if (__caucho_state < com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
       out.println("    int state = __caucho_state;");
 
@@ -135,7 +139,7 @@ public class LoadGroupGenerator extends ClassComponent {
 
       out.println("    aConn.makeTransactional(this);");
 
-      // XXX: ejb/0d01
+      // XXX: ejb/0d01 (create issue?)
       // out.println("    if ((state > 0) && ((__caucho_loadMask_" + group + " & " + mask + "L) != 0))");
       // out.println("      return;");
       out.println();
@@ -150,9 +154,9 @@ public class LoadGroupGenerator extends ClassComponent {
       }
 
       out.println("  }");
-      // XXX: ejb/0d01
-      // out.println("  else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
-      // out.println("    return;");
+      // ejb/0d01 - already loaded in the transaction
+      out.println("  else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
+      out.println("    return;");
       out.println("}");
       out.print("else ");
     }
