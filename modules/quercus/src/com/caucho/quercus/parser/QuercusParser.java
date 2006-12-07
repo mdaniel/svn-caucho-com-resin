@@ -2767,15 +2767,53 @@ public class QuercusParser {
       {
         Expr expr = parseTerm();
 
-        return _factory.createMinus(expr);
+        token = parseToken();
+
+        if (token == '=') {
+          token = parseToken();
+
+          if (token == '&') {
+            return _factory.createMinus(expr.createAssignRef(this, parseBitOrExpr()));
+          }
+          else {
+            _peekToken = token;
+
+            return _factory.createMinus(expr.createAssign(this, parseConditionalExpr()));
+          }
+
+        }
+        else {
+          _peekToken = token;
+
+          return _factory.createMinus(expr);
+        }
       }
 
     case '+':
-      {
-        Expr expr = parseTerm();
+    { 
+      Expr expr = parseTerm();
+
+      token = parseToken();
+
+      if (token == '=') {
+        token = parseToken();
+
+        if (token == '&') {
+          return _factory.createPlus(expr.createAssignRef(this, parseBitOrExpr()));
+        }
+        else {
+          _peekToken = token;
+
+          return _factory.createPlus(expr.createAssign(this, parseConditionalExpr()));
+        }
+
+      }
+      else {
+        _peekToken = token;
 
         return _factory.createPlus(expr);
       }
+    }
 
     case '!':
       {

@@ -2893,6 +2893,30 @@ v   *
   }
 
   /**
+   * Returns a substring of <i>haystack</i> starting from the earliest
+   * occurence of any char in <i>charList</i>
+   * 
+   * @param haystack the string to search in
+   * @param charList list of chars that would trigger match
+   * @return substring, else FALSE
+   */
+  public static Value strpbrk(StringValue haystack,
+                              StringValue charList)
+  {
+    int len = haystack.length();
+    int sublen = charList.length();
+    
+    for (int i = 0; i < len; i++) {
+      for (int j = 0; j < sublen; j++) {
+        if (haystack.charAt(i) == charList.charAt(j))
+          return haystack.substring(i);
+      }
+    }
+
+    return BooleanValue.FALSE;
+  }
+
+  /**
    * Returns the position of a substring.
    *
    * @param haystack the string to search in
