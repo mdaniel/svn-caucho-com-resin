@@ -126,7 +126,7 @@
 
   <tag>
     <name>when</name>
-    <tag-class>com.caucho.jstl.rt.WhenTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.CoreWhenTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -186,7 +186,7 @@
 
   <tag>
     <name>forTokens</name>
-    <tag-class>com.caucho.jstl.rt.ForTokensTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.CoreForTokensTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -240,7 +240,7 @@
 
   <tag>
     <name>import</name>
-    <tag-class>com.caucho.jstl.rt.ImportTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.CoreImportTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -282,7 +282,7 @@
 
   <tag>
     <name>url</name>
-    <tag-class>com.caucho.jstl.rt.UrlTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.CoreUrlTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -312,7 +312,7 @@
 
   <tag>
     <name>redirect</name>
-    <tag-class>com.caucho.jstl.rt.RedirectTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.CoreRedirectTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>

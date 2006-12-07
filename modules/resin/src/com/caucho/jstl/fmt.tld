@@ -191,7 +191,7 @@
 
   <tag>
     <name>parseNumber</name>
-    <tag-class>com.caucho.jstl.rt.ParseNumberTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.FmtParseNumberTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -329,7 +329,7 @@
 
   <tag>
     <name>parseDate</name>
-    <tag-class>com.caucho.jstl.rt.ParseDateTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.FmtParseDateTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -389,7 +389,7 @@
 
   <tag>
     <name>requestEncoding</name>
-    <tag-class>com.caucho.jstl.rt.RequestEncodingTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.FmtRequestEncodingTag</tag-class>
     <body-content>empty</body-content>
 
     <attribute>
