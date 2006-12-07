@@ -43,10 +43,11 @@ import java.util.logging.Logger;
  * sub-request for a include() page
  */
 class IncludeDispatchRequest extends DispatchRequest {
-  protected static final Logger log = Log.open(IncludeDispatchRequest.class);
+  protected static final Logger log
+    = Logger.getLogger(IncludeDispatchRequest.class.getName());
 
-  private static final FreeList<IncludeDispatchRequest> _freeList =
-    new FreeList<IncludeDispatchRequest>(32);
+  private static final FreeList<IncludeDispatchRequest> _freeList
+    = new FreeList<IncludeDispatchRequest>(32);
   
   private Hashtable<String,String> _headers;
   

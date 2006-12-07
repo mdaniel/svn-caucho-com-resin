@@ -28,6 +28,7 @@
 
 package com.caucho.ejb.hessian;
 
+import com.caucho.java.WorkDir;
 import com.caucho.hessian.io.AbstractHessianInput;
 import com.caucho.hessian.io.HessianOutput;
 import com.caucho.hessian.io.HessianRemoteResolver;
@@ -78,7 +79,10 @@ public class HessianStubFactory implements HessianRemoteResolver {
 
   public Path getWorkPath()
   {
-    return _workPath;
+    if (_workPath != null)
+      return _workPath;
+    else
+      return WorkDir.getLocalWorkDir();
   }
 
   /**

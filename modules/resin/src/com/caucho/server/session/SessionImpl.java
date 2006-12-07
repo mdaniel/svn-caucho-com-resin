@@ -534,7 +534,6 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public void invalidate(boolean isLRU)
   {
-
     if (log.isLoggable(Level.FINE)) {
 
       if (log.isLoggable(Level.FINEST))
@@ -732,6 +731,10 @@ public class SessionImpl implements HttpSession, CacheListener {
   public boolean load()
   {
     boolean isValid;
+
+    // server/01k0
+    if (_useCount > 1)
+      return true;
 
     ClusterObject clusterObject = _clusterObject;
     if (clusterObject != null)

@@ -423,6 +423,7 @@ class DispatchRequest extends RequestAdapter {
    *
    * @return the current session
    */
+  @Override
   public HttpSession getSession(boolean create)
   {
     SessionManager manager = _webApp.getSessionManager();

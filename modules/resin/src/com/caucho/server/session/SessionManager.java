@@ -1080,6 +1080,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
 	_sessionStore.setAlwaysLoad(true);
       else if (_alwaysLoadSession == SET_FALSE)
 	_sessionStore.setAlwaysLoad(false);
+      
+      _sessionStore.setAlwaysSave(_alwaysSaveSession);
     }
 
     _alarm.queue(60000);
@@ -1564,6 +1566,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
 	  if (_storeManager == null) {
 	    // if no persistent store then invalidate
+	    // XXX: server/12cg - single signon shouldn't logout
 	    session.invalidate();
 	  }
 	  else if (session.getSrunIndex() != _srunIndex && _srunIndex >= 0) {

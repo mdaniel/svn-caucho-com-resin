@@ -391,7 +391,7 @@ public class ClusterObject {
       _isValid = false;
     }
 
-    if (! _isChanged && ! _storeManager.isAlwaysSave())
+    if (! _isChanged && ! _store.isAlwaysSave())
       return;
 
     _isChanged = false;

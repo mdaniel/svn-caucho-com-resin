@@ -47,6 +47,7 @@ public class Store {
   private long _maxIdleTime;
 
   private boolean _isAlwaysLoad;
+  private boolean _isAlwaysSave;
 
   /**
    * Creates the new application view of the store.
@@ -63,6 +64,7 @@ public class Store {
     _maxIdleTime = storeManager.getMaxIdleTime();
 
     _isAlwaysLoad = _storeManager.isAlwaysLoad();
+    _isAlwaysSave = _storeManager.isAlwaysSave();
   }
 
   /**
@@ -119,6 +121,22 @@ public class Store {
   public void setAlwaysLoad(boolean isAlwaysLoad)
   {
     _isAlwaysLoad = isAlwaysLoad;
+  }
+
+  /**
+   * Set true if the object should always be saved.
+   */
+  public void setAlwaysSave(boolean isAlwaysSave)
+  {
+    _isAlwaysSave = isAlwaysSave;
+  }
+
+  /**
+   * Returns true if the object should always be saved.
+   */
+  public boolean isAlwaysSave()
+  {
+    return _isAlwaysSave;
   }
 
   /**
