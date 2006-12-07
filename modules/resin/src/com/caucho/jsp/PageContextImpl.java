@@ -124,7 +124,7 @@ public class PageContextImpl extends PageContext
   
   private JspPrintWriter _jspPrintWriter;
 
-  private int _bufferSize;
+  private int _bufferSize = 8192;
   private boolean autoFlush;
   private BodyContentImpl _bodyOut;
 

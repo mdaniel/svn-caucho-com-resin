@@ -6,37 +6,37 @@
 
   <tag>
     <name>out</name>
-    <tag-class>com.caucho.jstl.el.CoreOutTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.OutTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
       <name>value</name>
       <required>true</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>escapeXml</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>default</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
   </tag>
 
   <tag>
     <name>set</name>
-    <tag-class>com.caucho.jstl.el.CoreSetTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.CoreSetTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
       <name>value</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
@@ -54,13 +54,13 @@
     <attribute>
       <name>target</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>property</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
   </tag>
 
@@ -96,13 +96,13 @@
 
   <tag>
     <name>if</name>
-    <tag-class>com.caucho.jstl.el.IfTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.IfTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
       <name>test</name>
       <required>true</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
@@ -126,13 +126,13 @@
 
   <tag>
     <name>when</name>
-    <tag-class>com.caucho.jstl.el.WhenTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.WhenTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
       <name>test</name>
       <required>true</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
   </tag>
 
@@ -144,13 +144,13 @@
 
   <tag>
     <name>forEach</name>
-    <tag-class>com.caucho.jstl.el.ForEachTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.ForEachTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
       <name>items</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
@@ -168,37 +168,37 @@
     <attribute>
       <name>begin</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>end</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>step</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
   </tag>
 
   <tag>
     <name>forTokens</name>
-    <tag-class>com.caucho.jstl.el.ForTokensTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.ForTokensTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
       <name>items</name>
       <required>true</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>delims</name>
       <required>true</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
@@ -222,43 +222,43 @@
     <attribute>
       <name>begin</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>end</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>step</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
   </tag>
 
   <tag>
     <name>import</name>
-    <tag-class>com.caucho.jstl.el.ImportTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.ImportTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
       <name>url</name>
       <required>true</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>context</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>charEncoding</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
@@ -282,19 +282,19 @@
 
   <tag>
     <name>url</name>
-    <tag-class>com.caucho.jstl.el.UrlTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.UrlTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
       <name>value</name>
       <required>true</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>context</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
@@ -312,37 +312,37 @@
 
   <tag>
     <name>redirect</name>
-    <tag-class>com.caucho.jstl.el.RedirectTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.RedirectTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
       <name>url</name>
       <required>true</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>context</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
   </tag>
 
   <tag>
     <name>param</name>
-    <tag-class>com.caucho.jstl.el.CoreParamTag</tag-class>
+    <tag-class>com.caucho.jstl.rt.CoreParamTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
       <name>name</name>
       <required>true</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
 
     <attribute>
       <name>value</name>
       <required>false</required>
-      <rtexprvalue>false</rtexprvalue>
+      <rtexprvalue>true</rtexprvalue>
     </attribute>
   </tag>
 </taglib>

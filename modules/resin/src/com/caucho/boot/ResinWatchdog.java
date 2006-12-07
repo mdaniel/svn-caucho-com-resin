@@ -37,7 +37,7 @@ import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ResinWatchdogMXBean;
 import com.caucho.server.admin.HessianHmuxProxy;
 import com.caucho.server.port.Port;
-import com.caucho.util.Alarm;
+import com.caucho.util.*;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.Vfs;
@@ -64,6 +64,8 @@ import java.util.logging.Logger;
 public class ResinWatchdog extends AbstractManagedObject
   implements Runnable, ResinWatchdogMXBean
 {
+  private static final L10N L
+    = new L10N(ResinWatchdog.class);
   private static final Logger log
     = Logger.getLogger(ResinWatchdog.class.getName());
 
@@ -613,6 +615,11 @@ public class ResinWatchdog extends AbstractManagedObject
 	}
       } catch (Exception e) {
 	log.log(Level.INFO, e.toString(), e);
+
+	try {
+	  Thread.sleep(5000);
+	} catch (Exception e1) {
+	}
       } finally {
 	if (watchdogIs != null) {
 	  try {
@@ -746,6 +753,12 @@ public class ResinWatchdog extends AbstractManagedObject
 	}
       }
     }
+
+    if (_userName != null)
+      throw new ConfigException(L.l("<user-name> requires Resin Professional and compiled JNI."));
+
+    if (_groupName != null)
+      throw new ConfigException(L.l("<group-name> requires Resin Professional and compiled JNI."));
 
     ProcessBuilder builder = new ProcessBuilder();
 

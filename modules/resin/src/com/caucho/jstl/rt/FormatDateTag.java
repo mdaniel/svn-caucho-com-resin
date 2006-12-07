@@ -65,9 +65,12 @@ public class FormatDateTag extends BodyTagSupport {
    *
    * @param value the date value.
    */
-  public void setValue(Date value)
+  public void setValue(Object value)
   {
-    _value = value;
+    if (value instanceof Number)
+      _value = new Date(((Number) value).longValue());
+    else
+      _value = (Date) value;
   }
 
   /**
