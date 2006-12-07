@@ -1160,7 +1160,13 @@ public class AmberPersistenceUnit {
   public CacheConnection getCacheConnection()
   {
     // cache connection cannot be reused (#998)
-    return new CacheConnection(this);
+
+    CacheConnection cacheConnection = new CacheConnection(this);
+
+    // ejb/0a0b - avoid dangling connections.
+    cacheConnection.register();
+
+    return cacheConnection;
   }
 
   /**
