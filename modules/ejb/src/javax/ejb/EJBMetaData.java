@@ -36,9 +36,9 @@ public interface EJBMetaData {
   
   public Class getHomeInterfaceClass();
   
-  public Class getRemoteInterfaceClass();
-  
   public Class getPrimaryKeyClass();
+  
+  public Class getRemoteInterfaceClass();
   
   public boolean isSession();
   

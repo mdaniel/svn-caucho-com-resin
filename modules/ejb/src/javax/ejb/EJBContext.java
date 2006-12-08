@@ -37,24 +37,15 @@ import java.util.Properties;
  * The main ejb context.
  */
 public interface EJBContext {
-  public EJBHome getEJBHome();
-
   public Identity getCallerIdentity();
 
   public Principal getCallerPrincipal();
-
-  public boolean isCallerInRole(Identity role);
-
-  public boolean isCallerInRole(String roleName);
+  
+  public EJBHome getEJBHome();
 
   public EJBLocalHome getEJBLocalHome();
 
   public Properties getEnvironment();
-
-  public Object lookup(String name);
-
-  public void setRollbackOnly()
-    throws IllegalStateException;
 
   public boolean getRollbackOnly()
     throws IllegalStateException;
@@ -63,5 +54,14 @@ public interface EJBContext {
     throws IllegalStateException;
 
   public UserTransaction getUserTransaction()
+    throws IllegalStateException;
+
+  public boolean isCallerInRole(Identity role);
+
+  public boolean isCallerInRole(String roleName);
+
+  public Object lookup(String name);
+
+  public void setRollbackOnly()
     throws IllegalStateException;
 }

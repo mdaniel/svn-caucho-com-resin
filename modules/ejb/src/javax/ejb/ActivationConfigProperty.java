@@ -28,25 +28,19 @@
 
 package javax.ejb;
 
-import java.io.Serializable;
-import java.util.Date;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The timer interface
+ * The EJB annotation.
  */
-public interface Timer {
-  public void cancel()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public TimerHandle getHandle()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public Serializable getInfo()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public Date getNextTimeout()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public long getTimeRemaining()
-    throws NoSuchObjectLocalException, EJBException;
+@Target({})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ActivationConfigProperty {
+  String propertyName();
+  String propertyValue();
 }

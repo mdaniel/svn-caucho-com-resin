@@ -32,9 +32,9 @@ package javax.ejb;
  * The main ejb context.
  */
 public interface MessageDrivenBean extends EnterpriseBean {
-  public void setMessageDrivenContext(MessageDrivenContext ctx)
+  public void ejbRemove()
     throws EJBException;
   
-  public void ejbRemove()
+  public void setMessageDrivenContext(MessageDrivenContext ctx)
     throws EJBException;
 }

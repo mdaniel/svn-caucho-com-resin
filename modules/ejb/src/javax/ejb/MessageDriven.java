@@ -19,6 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
+ *
  *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -28,25 +29,20 @@
 
 package javax.ejb;
 
-import java.io.Serializable;
-import java.util.Date;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The timer interface
+ * The RemoteHome annotation for remote interfaces.
  */
-public interface Timer {
-  public void cancel()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public TimerHandle getHandle()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public Serializable getInfo()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public Date getNextTimeout()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public long getTimeRemaining()
-    throws NoSuchObjectLocalException, EJBException;
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MessageDriven {
+  String name() default "";
+  Class messageListenerInterface() default Object.class;
+  ActivationConfigProperty []activationConfig() default {};
+  String mappedName() default "";
+  String description() default "";
 }

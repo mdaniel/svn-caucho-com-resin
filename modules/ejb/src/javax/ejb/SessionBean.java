@@ -34,9 +34,6 @@ import java.rmi.RemoteException;
  * The main ejb context.
  */
 public interface SessionBean extends EnterpriseBean {
-  public void setSessionContext(SessionContext ctx)
-    throws EJBException, RemoteException;
-  
   public void ejbActivate()
     throws EJBException, RemoteException;
 
@@ -44,5 +41,8 @@ public interface SessionBean extends EnterpriseBean {
     throws EJBException, RemoteException;
 
   public void ejbRemove()
+    throws EJBException, RemoteException;
+  
+  public void setSessionContext(SessionContext ctx)
     throws EJBException, RemoteException;
 }

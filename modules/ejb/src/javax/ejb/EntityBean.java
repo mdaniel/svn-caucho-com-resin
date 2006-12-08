@@ -34,24 +34,25 @@ import java.rmi.RemoteException;
  * The main ejb context.
  */
 public interface EntityBean extends EnterpriseBean {
+  public void ejbActivate()
+    throws EJBException, RemoteException;
+  
+  public void ejbLoad()
+    throws EJBException, RemoteException;
+
+  public void ejbPassivate()
+    throws EJBException, RemoteException;
+  
+  public void ejbRemove()
+    throws RemoveException, EJBException, RemoteException;
+
+  public void ejbStore()
+    throws EJBException, RemoteException;
+  
   public void setEntityContext(EntityContext ctx)
     throws EJBException, RemoteException;
 
   public void unsetEntityContext()
     throws EJBException, RemoteException;
 
-  public void ejbRemove()
-    throws RemoveException, EJBException, RemoteException;
-
-  public void ejbActivate()
-    throws EJBException, RemoteException;
-
-  public void ejbPassivate()
-    throws EJBException, RemoteException;
-
-  public void ejbLoad()
-    throws EJBException, RemoteException;
-
-  public void ejbStore()
-    throws EJBException, RemoteException;
 }

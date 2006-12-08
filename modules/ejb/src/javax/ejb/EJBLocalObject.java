@@ -38,9 +38,9 @@ public interface EJBLocalObject {
   public Object getPrimaryKey()
     throws EJBException;
   
-  public void remove()
-    throws RemoveException, EJBException;
-  
   public boolean isIdentical(EJBLocalObject obj)
     throws EJBException;
+  
+  public void remove()
+    throws RemoveException, EJBException;
 }

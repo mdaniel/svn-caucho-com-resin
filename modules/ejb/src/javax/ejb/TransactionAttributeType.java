@@ -33,9 +33,9 @@ package javax.ejb;
  */
 public enum TransactionAttributeType {
   MANDATORY,
+  NEVER,
+  NOT_SUPPORTED,
   REQUIRED,
   REQUIRES_NEW,
-  SUPPORTS,
-  NOT_SUPPORTED,
-  NEVER
+  SUPPORTS
 }

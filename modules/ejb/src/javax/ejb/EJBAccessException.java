@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,25 +28,16 @@
 
 package javax.ejb;
 
-import java.io.Serializable;
-import java.util.Date;
-
 /**
- * The timer interface
+ * The main ejb context.
  */
-public interface Timer {
-  public void cancel()
-    throws NoSuchObjectLocalException, EJBException;
+public class EJBAccessException extends EJBException {
+  public EJBAccessException()
+  {
+  }
   
-  public TimerHandle getHandle()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public Serializable getInfo()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public Date getNextTimeout()
-    throws NoSuchObjectLocalException, EJBException;
-  
-  public long getTimeRemaining()
-    throws NoSuchObjectLocalException, EJBException;
+  public EJBAccessException(String msg)
+  {
+    super(msg);
+  }
 }

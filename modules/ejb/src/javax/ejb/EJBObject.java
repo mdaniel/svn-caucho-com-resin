@@ -38,15 +38,15 @@ public interface EJBObject extends Remote {
   public EJBHome getEJBHome()
     throws RemoteException;
   
-  public Object getPrimaryKey()
+  public Handle getHandle()
     throws RemoteException;
   
-  public void remove()
-    throws RemoteException, RemoveException;
-  
-  public Handle getHandle()
+  public Object getPrimaryKey()
     throws RemoteException;
   
   public boolean isIdentical(EJBObject obj)
     throws RemoteException;
+  
+  public void remove()
+    throws RemoteException, RemoveException;
 }
