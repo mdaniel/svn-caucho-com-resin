@@ -864,6 +864,14 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a null literal expression.
+   */
+  public Statement createNullStatement()
+  {
+    return NullStatement.NULL;
+  }
+
+  /**
    * Creates an echo statement
    */
   public Statement createEcho(Location loc, Expr expr)

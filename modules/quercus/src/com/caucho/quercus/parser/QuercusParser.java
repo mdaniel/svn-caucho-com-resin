@@ -684,7 +684,7 @@ public class QuercusParser {
 
     switch (token) {
     case ';':
-      return NullStatement.NULL;
+      return _factory.createNullStatement();
 
     case '{':
       location = getLocation();

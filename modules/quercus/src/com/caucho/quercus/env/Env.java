@@ -2811,7 +2811,7 @@ public class Env {
     if (useAutoload) {
       if (_autoload == null)
         _autoload = findFunction("__autoload");
-
+      
       if (_autoload != null) {
 	_autoload.call(this, new StringValueImpl(name));
 	return createClassImpl(name, false);
