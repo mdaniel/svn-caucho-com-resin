@@ -542,7 +542,6 @@ public class ObjectExtValue extends ObjectValue {
   {
     AbstractFunction fun = _cl.findFunction(methodName);
 
-    try {
     if (fun != null)
       return fun.callMethod(env, this, args);
     else if (_cl.getCall() != null) {
