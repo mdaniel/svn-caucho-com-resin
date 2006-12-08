@@ -542,6 +542,7 @@ public class ObjectExtValue extends ObjectValue {
   {
     AbstractFunction fun = _cl.findFunction(methodName);
 
+    try {
     if (fun != null)
       return fun.callMethod(env, this, args);
     else if (_cl.getCall() != null) {
@@ -732,7 +733,19 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value callMethodRef(Env env, String methodName)
   {
-    return _cl.getFunction(methodName).callMethodRef(env, this);
+    AbstractFunction fun = _cl.findFunction(methodName);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this);
+    else if (_cl.getCall() != null) {
+      return _cl.getCall().callMethodRef(env,
+					 this,
+					 new StringValueImpl(methodName),
+					 new ArrayValueImpl());
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           _cl.getName(), methodName));
   }
 
   /**
@@ -740,7 +753,20 @@ public class ObjectExtValue extends ObjectValue {
    */
   public Value callMethodRef(Env env, String methodName, Value a0)
   {
-    return _cl.getFunction(methodName).callMethodRef(env, this, a0);
+    AbstractFunction fun = _cl.findFunction(methodName);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, a0);
+    else if (_cl.getCall() != null) {
+      return _cl.getCall().callMethodRef(env,
+					 this,
+					 new StringValueImpl(methodName),
+					 new ArrayValueImpl()
+					 .append(a0));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           _cl.getName(), methodName));
   }
 
   /**
@@ -749,7 +775,21 @@ public class ObjectExtValue extends ObjectValue {
   public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1)
   {
-    return _cl.getFunction(methodName).callMethodRef(env, this, a0, a1);
+    AbstractFunction fun = _cl.findFunction(methodName);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, a0, a1);
+    else if (_cl.getCall() != null) {
+      return _cl.getCall().callMethodRef(env,
+					 this,
+					 new StringValueImpl(methodName),
+					 new ArrayValueImpl()
+					 .append(a0)
+					 .append(a1));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           _cl.getName(), methodName));
   }
 
   /**
@@ -758,8 +798,22 @@ public class ObjectExtValue extends ObjectValue {
   public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2)
   {
-    return _cl.getFunction(methodName).callMethodRef(env, this,
-                                                     a0, a1, a2);
+    AbstractFunction fun = _cl.findFunction(methodName);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, a0, a1, a2);
+    else if (_cl.getCall() != null) {
+      return _cl.getCall().callMethodRef(env,
+					 this,
+					 new StringValueImpl(methodName),
+					 new ArrayValueImpl()
+					 .append(a0)
+					 .append(a1)
+					 .append(a2));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           _cl.getName(), methodName));
   }
 
   /**
@@ -768,8 +822,23 @@ public class ObjectExtValue extends ObjectValue {
   public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3)
   {
-    return _cl.getFunction(methodName).callMethodRef(env, this,
-                                                     a0, a1, a2, a3);
+    AbstractFunction fun = _cl.findFunction(methodName);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, a0, a1, a2, a3);
+    else if (_cl.getCall() != null) {
+      return _cl.getCall().callMethodRef(env,
+					 this,
+					 new StringValueImpl(methodName),
+					 new ArrayValueImpl()
+					 .append(a0)
+					 .append(a1)
+					 .append(a2)
+					 .append(a3));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           _cl.getName(), methodName));
   }
 
   /**
@@ -778,8 +847,24 @@ public class ObjectExtValue extends ObjectValue {
   public Value callMethodRef(Env env, String methodName,
                              Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return _cl.getFunction(methodName).callMethodRef(env, this,
-                                                     a0, a1, a2, a3, a4);
+    AbstractFunction fun = _cl.findFunction(methodName);
+
+    if (fun != null)
+      return fun.callMethodRef(env, this, a0, a1, a2, a3, a4);
+    else if (_cl.getCall() != null) {
+      return _cl.getCall().callMethodRef(env,
+					 this,
+					 new StringValueImpl(methodName),
+					 new ArrayValueImpl()
+					 .append(a0)
+					 .append(a1)
+					 .append(a2)
+					 .append(a3)
+					 .append(a4));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           _cl.getName(), methodName));
   }
 
   /**

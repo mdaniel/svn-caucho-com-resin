@@ -362,6 +362,14 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a default
+   */
+  public Expr createDefault()
+  {
+    return new DefaultExpr();
+  }
+
+  /**
    * Creates an addition expression.
    */
   public Expr createAdd(Expr left, Expr right)
@@ -504,7 +512,7 @@ public class ExprFactory {
 
     tail = append(left.getNext(), tail);
 
-    if (false
+    if (true
 	&& left.getValue() instanceof StringLiteralExpr
 	&& tail.getValue() instanceof StringLiteralExpr) {
       StringLiteralExpr leftString = (StringLiteralExpr) left.getValue();

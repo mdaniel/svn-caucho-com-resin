@@ -739,6 +739,22 @@ abstract public class Value {
     return new StringBuilderValue(toString(), 32);
   }
 
+  /**
+   * Converts to a long vaule
+   */
+  public Value toLongValue()
+  {
+    return new LongValue(toLong());
+  }
+
+  /**
+   * Converts to a double vaule
+   */
+  public Value toDoubleValue()
+  {
+    return new DoubleValue(toDouble());
+  }
+
   //
   // Operations
   //
@@ -1572,6 +1588,9 @@ abstract public class Value {
 	break;
       case '\'':
 	out.print("\\\'");
+	break;
+      case '\\':
+	out.print("\\\\");
 	break;
       default:
 	out.print(ch);

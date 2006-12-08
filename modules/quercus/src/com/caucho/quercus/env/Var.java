@@ -229,6 +229,22 @@ public class Var extends Value {
   }
 
   /**
+   * Converts to a long.
+   */
+  public Value toLongValue()
+  {
+    return _value.toLongValue();
+  }
+
+  /**
+   * Converts to a double.
+   */
+  public Value toDoubleValue()
+  {
+    return _value.toDoubleValue();
+  }
+
+  /**
    * Converts to a string.
    * @param env
    */

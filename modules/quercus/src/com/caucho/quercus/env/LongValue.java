@@ -137,6 +137,14 @@ public class LongValue extends NumberValue {
   }
 
   /**
+   * Converts to a long value
+   */
+  public Value toLongValue()
+  {
+    return this;
+  }
+
+  /**
    * Converts to a key.
    */
   public Value toKey()

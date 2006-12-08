@@ -42,7 +42,8 @@ import java.util.HashMap;
 /**
  * Represents an interpreted Quercus program.
  */
-public class InterpretedPage extends QuercusPage {
+public class InterpretedPage extends QuercusPage
+{
   private final QuercusProgram _program;
 
   public InterpretedPage(QuercusProgram program)

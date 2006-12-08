@@ -55,11 +55,8 @@ public class PageManager
   private boolean _isLazyCompile;
   private boolean _isCompile;
 
-  private LruCache<Path,QuercusProgram> _programCache
+  protected LruCache<Path,QuercusProgram> _programCache
     = new LruCache<Path,QuercusProgram>(1024);
-
-  private ArrayList<Path> _pendingPages = new ArrayList<Path>();
-  private boolean _isCompilerActive;
 
   private boolean _isClosed;
   
@@ -198,8 +195,9 @@ public class PageManager
 	_programCache.put(path, program);
       }
 
-      if (program.getCompiledPage() != null)
+      if (program.getCompiledPage() != null) {
 	return program.getCompiledPage();
+      }
 
       return compilePage(program, path);
     } catch (IOException e) {

@@ -119,6 +119,14 @@ public class DoubleValue extends NumberValue {
   }
 
   /**
+   * Converts to a double.
+   */
+  public Value toDoubleValue()
+  {
+    return this;
+  }
+
+  /**
    * Converts to a key.
    */
   public Value toKey()

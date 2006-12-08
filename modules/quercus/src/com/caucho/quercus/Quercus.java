@@ -172,24 +172,21 @@ public class Quercus {
     initStaticClasses();
     initStaticClassServices();
 
-    PageManager pageManager = null;
-
-    try {
-      Class cl = Class.forName("com.caucho.quercus.page.ProPageManager");
-      Constructor ctor = cl.getConstructor(new Class[] { Quercus.class });
-      
-      pageManager = (PageManager) ctor.newInstance(this);
-    } catch (Exception e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-
-    if (pageManager == null)
-      pageManager = new PageManager(this);
+    _pageManager = createPageManager();
     
-    _pageManager = pageManager;
-    _sessionManager = new QuercusSessionManager();
+    _sessionManager = createSessionManager();
   }
 
+  protected PageManager createPageManager()
+  {
+    return new PageManager(this);
+  }
+
+  protected QuercusSessionManager createSessionManager()
+  {
+    return new QuercusSessionManager();
+  }
+  
   /**
    * Returns the context for this class loader.
    */

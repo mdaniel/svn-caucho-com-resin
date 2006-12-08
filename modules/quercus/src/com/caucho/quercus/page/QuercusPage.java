@@ -44,7 +44,8 @@ import java.util.Map;
 /**
  * Represents a compiled PHP program.
  */
-abstract public class QuercusPage {
+abstract public class QuercusPage
+{
   private HashMap<String,AbstractFunction> _funMap
     = new HashMap<String,AbstractFunction>();
   

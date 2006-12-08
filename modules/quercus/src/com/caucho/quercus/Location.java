@@ -90,4 +90,9 @@ public class Location {
     else
       return _fileName + ":" + _lineNumber + ": ";
   }
+
+  public String toString()
+  {
+    return "Location[" + _fileName + ":" + _lineNumber + "]";
+  }
 }

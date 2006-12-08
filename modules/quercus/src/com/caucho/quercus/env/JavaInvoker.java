@@ -31,9 +31,7 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.*;
-import com.caucho.quercus.expr.DefaultExpr;
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.RequiredExpr;
+import com.caucho.quercus.expr.*;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.module.ModuleContext;
@@ -100,6 +98,7 @@ abstract public class JavaInvoker
       return;
 
     MarshalFactory marshalFactory = _moduleContext.getMarshalFactory();
+    ExprFactory exprFactory = _moduleContext.getExprFactory();
 
     try {
       boolean callUsesVariableArgs = false;
@@ -173,7 +172,7 @@ abstract public class JavaInvoker
 
 	      _defaultExprs[i] = expr;
 	    } else
-	      _defaultExprs[i] = new DefaultExpr(getLocation());
+	      _defaultExprs[i] = exprFactory.createDefault();
 	  } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
 	    isReference = true;
 	  } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
