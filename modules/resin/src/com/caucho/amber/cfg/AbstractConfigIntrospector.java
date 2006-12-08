@@ -309,6 +309,11 @@ abstract public class AbstractConfigIntrospector {
 
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 
+    // #1448 not reproduced.
+    if (type.getId() == null)
+      throw error(field, L.l("Entity {0} has no primary key defined.",
+                             type.getName()));
+
     ArrayList<IdField> idFields = type.getId().getKeys();
 
     int len;

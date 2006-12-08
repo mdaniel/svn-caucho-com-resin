@@ -1928,6 +1928,12 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       EntityManyToManyField manyToManyField;
 
+      if (sourceField == null)
+        throw error(field,
+                    L.l("Unable to find the associated field in '{0}' for a @ManyToMany relationship from '{1}'",
+                        targetName,
+                        field.getName()));
+
       manyToManyField = new EntityManyToManyField(sourceType,
                                                   fieldName,
                                                   sourceField,
