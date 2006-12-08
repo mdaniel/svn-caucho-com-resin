@@ -30,8 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.expr.ClassConstExpr;
-import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.*;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.Function;
@@ -490,9 +489,25 @@ public class QuercusClass {
   /**
    * calls the function.
    */
-  public Value callMethod(Env env, Value thisValue, String name, Expr []args)
+  public Value callMethod(Env env,
+			  Value thisValue,
+			  String methodName,
+			  Expr []args)
   {
-    return getFunction(name).callMethod(env, thisValue, args);
+    AbstractFunction fun = findFunction(methodName);
+    
+    if (fun != null)
+      return fun.callMethod(env, thisValue, args);
+    else if (getCall() != null) {
+      Expr []newArgs = new Expr[args.length + 1];
+      newArgs[0] = new StringLiteralExpr(methodName);
+      System.arraycopy(args, 0, newArgs, 1, args.length);
+      
+      return getCall().callMethod(env, thisValue, newArgs);
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}",
+                           getName(), methodName));
   }  
 
   /**
@@ -514,10 +529,25 @@ public class QuercusClass {
   /**
    * calls the function.
    */
-  public Value callMethod(Env env, Value thisValue, String name,
+  public Value callMethod(Env env,
+			  Value thisValue,
+			  String methodName,
 			  Value a1)
   {
-    return getFunction(name).callMethod(env, thisValue, a1);
+    AbstractFunction fun = findFunction(methodName);
+
+    if (fun != null)
+      return fun.callMethod(env, thisValue, a1);
+    else if (getCall() != null) {
+      return getCall().callMethod(env,
+				  thisValue,
+				  new StringValueImpl(methodName),
+				  new ArrayValueImpl()
+				  .append(a1));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           getName(), methodName));
   }  
 
   /**

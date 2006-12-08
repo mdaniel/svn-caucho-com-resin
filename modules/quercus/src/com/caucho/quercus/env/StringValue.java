@@ -522,6 +522,15 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Returns the character at an index
    */
+  public Value getArg(Value key)
+  {
+    // php/03ma
+    return charValueAt(key.toLong());
+  }
+
+  /**
+   * Returns the character at an index
+   */
   public Value getRef(Value key)
   {
     return charValueAt(key.toLong());

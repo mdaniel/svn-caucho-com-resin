@@ -3611,7 +3611,7 @@ public class Env {
     Location location = getLocation();
 
     String locationMessagePrefix = loc;
-    Thread.dumpStack();
+
     if (loc.equals(""))
       locationMessagePrefix = location.getMessagePrefix();
 
