@@ -671,9 +671,9 @@ public class AmberConnection
   {
     Entity entity = null;
 
-    // XXX: ejb/0d01
-    if (shouldRetrieveFromCache())
-      entity = getEntity(cl.getName(), key);
+    // XXX: ejb/0d01 (should not check this)
+    // jpa/0g0h if (shouldRetrieveFromCache())
+    entity = getEntity(cl.getName(), key);
 
     if (entity != null)
       return entity;
@@ -1527,10 +1527,17 @@ public class AmberConnection
   }
 
   /**
-   * Loads the object with the given class.
+   * Updates the object.
    */
   public void update(Entity entity)
   {
+    if (entity == null)
+      return;
+
+    // jpa/0g0i
+    if (entity.__caucho_getEntityType() == null)
+      return;
+
     Table table = entity.__caucho_getEntityType().getTable();
 
     Object key = entity.__caucho_getPrimaryKey();
@@ -1874,7 +1881,7 @@ public class AmberConnection
       throw new AmberException(L.l("`{0}' is not a known entity class.",
                                    obj.getClass().getName()));
 
-    create(home, obj);
+    createInternal(home, obj);
   }
 
   /**
@@ -1891,7 +1898,7 @@ public class AmberConnection
       throw new AmberException(L.l("`{0}' is not a known entity class.",
                                    obj.getClass().getName()));
 
-    create(home, obj);
+    createInternal(home, obj);
   }
 
   /**
@@ -1907,13 +1914,16 @@ public class AmberConnection
     //      fail prematurely (jpa/0h26).
     // commented out: flush();
 
-    if (contains(obj)) {
+    if (contains(obj))
       return;
-    }
 
     Entity entity = (Entity) obj;
 
-    home.save(this, entity);
+    // jpa/0g0k: cannot call home.save because of jpa exception handling.
+    if (_persistenceUnit.isJPA())
+      entity.__caucho_create(this, home.getEntityType());
+    else
+      home.save(this, entity);
 
     addEntity(entity);
 

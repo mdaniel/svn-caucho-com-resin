@@ -98,6 +98,14 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println("__caucho_load_select_" + i + "(aConn, preloadedProperties);");
     }
 
+    if (min <= max) {
+      // jpa/0g0k: only makes transactional if exists.
+      out.println();
+      out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
+      out.println("  aConn.makeTransactional(this);");
+      out.println("}");
+    }
+
     // needs to be after load to prevent loop if toString() expects data
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
@@ -125,7 +133,7 @@ public class LoadGroupGenerator extends ClassComponent {
     // non-read-only entities must be reread in a transaction
     if (! _entityType.isReadOnly()) {
       out.println("if (aConn.isInTransaction()) {");
-      
+
       // deleted objects are not reloaded
       out.println("  if (com.caucho.amber.entity.Entity.P_DELETING <= __caucho_state) {");
       out.println("    return;");
@@ -137,9 +145,9 @@ public class LoadGroupGenerator extends ClassComponent {
 
       out.println("    __caucho_state = com.caucho.amber.entity.Entity.P_TRANSACTIONAL;");
 
-      out.println("    aConn.makeTransactional(this);");
-
       // XXX: ejb/0d01 (create issue?)
+      // jpa/0g0k: see __caucho_load_select
+      // out.println("    aConn.makeTransactional(this);");
       // out.println("    if ((state > 0) && ((__caucho_loadMask_" + group + " & " + mask + "L) != 0))");
       // out.println("      return;");
       out.println();
