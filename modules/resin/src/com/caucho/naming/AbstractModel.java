@@ -84,7 +84,7 @@ abstract public class AbstractModel {
   public void bind(String name, Object obj)
     throws NamingException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -93,7 +93,7 @@ abstract public class AbstractModel {
   public void unbind(String name)
     throws NamingException
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

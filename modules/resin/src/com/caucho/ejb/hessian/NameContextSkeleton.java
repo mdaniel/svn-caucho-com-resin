@@ -130,12 +130,24 @@ public class NameContextSkeleton extends Skeleton {
     else if (container.getRemoteChildren(name) != null) {
       out.startReply();
 
-      String serverId = _prefix + name;
+      String serverId;
+
+      if (_prefix.endsWith("/") || name.startsWith("/"))
+	serverId = _prefix + name;
+      else
+	serverId = _prefix + '/' + name;
+	
       if (serverId.startsWith("/"))
         serverId = serverId.substring(1);
-      
-      out.writeRemote(NameServerRemote.class.getName(),
-                      _protocol.getURLPrefix() + serverId);
+
+      String url;
+      String prefix = _protocol.getURLPrefix();
+      if (prefix.endsWith("/"))
+	url = prefix + serverId;
+      else
+	url = prefix + '/' + serverId;
+
+      out.writeRemote(NameServerRemote.class.getName(), url);
       
       out.completeReply();
     }

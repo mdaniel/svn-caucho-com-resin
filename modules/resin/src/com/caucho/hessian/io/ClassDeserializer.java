@@ -66,6 +66,8 @@ public class ClassDeserializer extends AbstractDeserializer {
   public Object readMap(AbstractHessianInput in)
     throws IOException
   {
+    int ref = in.addRef(null);
+    
     String name = null;
     
     while (! in.isEnd()) {
@@ -76,6 +78,8 @@ public class ClassDeserializer extends AbstractDeserializer {
       else
 	in.readObject();
     }
+      
+    in.readMapEnd();
 
     return create(name);
   }

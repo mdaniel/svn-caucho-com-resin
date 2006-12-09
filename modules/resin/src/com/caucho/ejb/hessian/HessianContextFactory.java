@@ -58,11 +58,11 @@ public class HessianContextFactory implements InitialContextFactory  {
     String user = (String) environment.get(Context.SECURITY_PRINCIPAL);
     String pw = (String) environment.get(Context.SECURITY_CREDENTIALS);
 
+    if (! prefix.endsWith("/"))
+      prefix = prefix + '/';
+
     if (user != null) {
       String auth = Base64.encode(user + ':' + pw);
-
-      if (! prefix.endsWith("/"))
-	prefix = prefix + '/';
       
       HessianModel model = new HessianModel(prefix);
       HessianClientContainer client;

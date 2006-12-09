@@ -82,8 +82,15 @@ public class SessionServer extends AbstractServer {
       thread.setContextClassLoader(_loader);
     
       super.init();
-    
-      Jndi.rebindDeep("java:comp/env/ejb/sessionContext", getSessionContext());
+
+      // XXX: from TCK, s/b local or remote?
+      String prefix = getServerManager().getLocalJndiName();
+      if (prefix != null)
+	Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
+      
+      prefix = getServerManager().getRemoteJndiName();
+      if (prefix != null)
+	Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
       
       _localHome = getSessionContext().createLocalHome();
       _remoteHomeView = getSessionContext().createRemoteHomeView();

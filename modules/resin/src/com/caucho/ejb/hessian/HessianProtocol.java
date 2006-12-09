@@ -84,14 +84,28 @@ public class HessianProtocol extends ProtocolContainer
                                               Class primaryKeyClass)
     throws ConfigException
   {
-    return new HessianHandleEncoder(server,
-                                    getURLPrefix() + server.getProtocolId(),
-                                    primaryKeyClass);
+    String prefix = getURLPrefix();
+    String id = server.getProtocolId();
+
+    String url;
+    if (prefix.endsWith("/") || id.startsWith("/"))
+      url = prefix + id;
+    else
+      url = prefix + '/' + id;
+    
+      
+    return new HessianHandleEncoder(server, url, primaryKeyClass);
   }
 
   String calculateURL(String ejbName)
   {
-    return getURLPrefix() + ejbName;
+    String prefix = getURLPrefix();
+
+    String url;
+    if (prefix.endsWith("/") || ejbName.startsWith("/"))
+      return prefix + ejbName;
+    else
+      return prefix + '/' + ejbName;
   }
 
   /**
