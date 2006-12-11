@@ -30,10 +30,11 @@
 package com.caucho.soap.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
-import com.caucho.soap.marshall.MarshallFactory;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.ws.WebServiceException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -42,21 +43,20 @@ import java.util.logging.Logger;
 /**
  * Invokes a SOAP request on a Java POJO method
  */
-public class RpcPojoMethodSkeleton extends PojoMethodSkeleton {
-  private final static Logger log = 
-    Logger.getLogger(PojoMethodSkeleton.class.getName());
-  public static final L10N L = new L10N(PojoMethodSkeleton.class);
+public class RpcAction extends AbstractAction {
+  private final static Logger log = Logger.getLogger(RpcAction.class.getName());
+  public static final L10N L = new L10N(RpcAction.class);
 
   private static final String TARGET_NAMESPACE_PREFIX = "tns";
 
-  public RpcPojoMethodSkeleton(Method method, 
-                               MarshallFactory factory,
-                               JAXBContextImpl jaxbContext, 
-                               String targetNamespace,
-                               Map<String,String> elements)
+  public RpcAction(Method method, 
+                   JAXBContextImpl jaxbContext, 
+                   String targetNamespace,
+                   Marshaller marshaller,
+                   Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
-    super(method, factory, jaxbContext, targetNamespace);
+    super(method, jaxbContext, targetNamespace);
 
     /*
 

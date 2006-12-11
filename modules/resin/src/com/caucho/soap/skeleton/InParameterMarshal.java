@@ -29,8 +29,12 @@
 
 package com.caucho.soap.skeleton;
 
-import com.caucho.soap.marshall.Marshall;
+import com.caucho.jaxb.skeleton.Property;
+import com.caucho.util.L10N;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -38,11 +42,12 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 
 public class InParameterMarshal extends ParameterMarshal {
-  public InParameterMarshal(int arg,
-			    Marshall marshal,
-			    QName name)
+  public static final L10N L = new L10N(InParameterMarshal.class);
+
+  public InParameterMarshal(int arg, Property property, QName name,
+                            Marshaller marshaller, Unmarshaller unmarshaller)
   {
-    super(arg, marshal, name);
+    super(arg, property, name, marshaller, unmarshaller);
   }
 
   //
@@ -50,9 +55,12 @@ public class InParameterMarshal extends ParameterMarshal {
   //
 
   public void serializeCall(XMLStreamWriter out, Object []args)
-    throws IOException, XMLStreamException
+    throws IOException, XMLStreamException, JAXBException
   {
-    _marshal.serialize(out, args[_arg], _name);
+    //_property.serialize(out, args[_arg], _name);
+    
+    //XXX: QName
+    _property.write(_marshaller, out, args[_arg]);
   }
 
   //
@@ -60,8 +68,34 @@ public class InParameterMarshal extends ParameterMarshal {
   //
 
   public void deserializeCall(XMLStreamReader in, Object []args)
-    throws IOException, XMLStreamException
+    throws IOException, XMLStreamException, JAXBException
   {
-    args[_arg] = _marshal.deserialize(in);
+    //args[_arg] = _property.deserialize(in);
+
+    if (_name != null) {
+      in.nextTag();
+
+      if (in.getEventType() != in.START_ELEMENT)
+        throw new IOException(L.l("Expected <{0}>", _name.getLocalPart()));
+
+      if (! in.getName().equals(_name))
+        throw new IOException(L.l("Expected <{0}> not <{1}>",
+                                  _name.getLocalPart(),
+                                  in.getName().getLocalPart()));
+    }
+
+    args[_arg] = _property.read(_unmarshaller, in);
+
+    if (_name != null) {
+      if (in.getEventType() != in.END_ELEMENT)
+        throw new IOException(L.l("Expected </{0}>", _name.getLocalPart()));
+
+      if (! in.getName().equals(_name))
+        throw new IOException(L.l("Expected </{0}> not </{1}>",
+                                  _name.getLocalPart(),
+                                  in.getName().getLocalPart()));
+
+      in.nextTag();
+    }
   }
 }

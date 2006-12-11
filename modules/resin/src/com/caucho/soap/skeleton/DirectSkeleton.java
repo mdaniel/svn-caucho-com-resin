@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.StringTokenizer;
@@ -68,8 +69,8 @@ public class DirectSkeleton extends Skeleton {
   private Marshaller _marshaller;
   private Node _wsdlNode;
 
-  private HashMap<String,PojoMethodSkeleton> _actionMap
-    = new HashMap<String,PojoMethodSkeleton>();
+  private HashMap<String,AbstractAction> _actionMap
+    = new HashMap<String,AbstractAction>();
 
   private Class _api;
   
@@ -89,23 +90,23 @@ public class DirectSkeleton extends Skeleton {
 
   public DirectSkeleton(Class type, String wsdlAddress)
   {
-    WebService webService = (WebService)type.getAnnotation(WebService.class);
+    WebService webService = (WebService) type.getAnnotation(WebService.class);
     setNamespace(type);
 
     _name = getWebServiceName(type);
     _typeName = _name + "PortType";
 
-    _serviceName = webService!=null && !webService.serviceName().equals("")
+    _serviceName = webService != null && ! webService.serviceName().equals("")
       ? webService.serviceName()
       : _name + "HttpBinding";
 
     _portName =
-      webService!=null && !webService.portName().equals("")
+      webService != null && ! webService.portName().equals("")
       ? webService.portName()
       : _name + "HttpPort";
 
     _wsdlLocation =
-      webService!=null && !webService.wsdlLocation().equals("")
+      webService != null && ! webService.wsdlLocation().equals("")
       ? webService.wsdlLocation()
       : null;
 
@@ -117,7 +118,7 @@ public class DirectSkeleton extends Skeleton {
     _wsdl.addDefinition(_wsdlPortType);
 
     javax.jws.soap.SOAPBinding sbAnnotation = 
-      (javax.jws.soap.SOAPBinding) 
+      (javax.jws.soap.SOAPBinding)
       type.getAnnotation(javax.jws.soap.SOAPBinding.class);
 
     com.caucho.soap.wsdl.SOAPBinding soapBinding = 
@@ -159,12 +160,12 @@ public class DirectSkeleton extends Skeleton {
     return _namespace;
   }
 
-  private void setNamespace(Class type) {
-    WebService webService = (WebService)type.getAnnotation(WebService.class);
+  private void setNamespace(Class type) 
+  {
+    WebService webService = (WebService) type.getAnnotation(WebService.class);
 
-    if (webService != null && !webService.targetNamespace().equals("")) {
+    if (webService != null && ! webService.targetNamespace().equals(""))
       _namespace = webService.targetNamespace();
-    }
     else {
       _namespace = null;
       String packageName = type.getPackage().getName();
@@ -175,13 +176,12 @@ public class DirectSkeleton extends Skeleton {
       }
 
       _namespace = "http://"+_namespace+"/";
-
     }
   }
 
   static String getWebServiceName(Class type) 
   {
-    WebService webService = (WebService)type.getAnnotation(WebService.class);
+    WebService webService = (WebService) type.getAnnotation(WebService.class);
 
     if (webService != null && !webService.name().equals(""))
       return webService.name();
@@ -189,7 +189,7 @@ public class DirectSkeleton extends Skeleton {
       return JAXBUtil.classBasename(type);
   }
 
-  public void addAction(String name, PojoMethodSkeleton action)
+  public void addAction(String name, AbstractAction action)
   {
     _actionMap.put(name, action);
 
@@ -204,9 +204,9 @@ public class DirectSkeleton extends Skeleton {
    * Invokes the request on a remote object using an outbound XML stream.
    */
   public Object invoke(String name, String url, Object[] args)
-    throws IOException, XMLStreamException, MalformedURLException
+    throws IOException, XMLStreamException, MalformedURLException, JAXBException
   {
-    PojoMethodSkeleton action = _actionMap.get(name);
+    AbstractAction action = _actionMap.get(name);
 
     if (action != null)
       return action.invoke(name, url, args, _namespace);
@@ -219,10 +219,8 @@ public class DirectSkeleton extends Skeleton {
   /**
    * Invokes the request on a local object using an inbound XML stream.
    */
-  public void invoke(Object service,
-                     XMLStreamReader in,
-                     XMLStreamWriter out)
-    throws IOException, XMLStreamException
+  public void invoke(Object service, XMLStreamReader in, XMLStreamWriter out)
+    throws IOException, XMLStreamException, Throwable
   {
     in.nextTag();
 
@@ -235,14 +233,14 @@ public class DirectSkeleton extends Skeleton {
       int depth = 1;
 
       while (depth > 0) {
-	switch (in.nextTag()) {
-	case XMLStreamReader.START_ELEMENT:
-	  depth++;
-	  break;
-	case XMLStreamReader.END_ELEMENT:
-	  depth--;
-	  break;
-	}
+        switch (in.nextTag()) {
+          case XMLStreamReader.START_ELEMENT:
+            depth++;
+            break;
+          case XMLStreamReader.END_ELEMENT:
+            depth--;
+            break;
+        }
       }
 
       in.nextTag();
@@ -253,37 +251,39 @@ public class DirectSkeleton extends Skeleton {
 
     in.nextTag();
 
-    String action = in.getName().getLocalPart();
+    String actionName = in.getName().getLocalPart();
 
     out.writeStartDocument();
-    out.writeStartElement("env:Envelope");
-    out.writeNamespace("env", SOAP_ENVELOPE);
-    out.writeNamespace("xsi", XMLNS_XSI);
+    out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Envelope", SOAP_ENVELOPE);
+    out.writeNamespace(SOAP_ENVELOPE_PREFIX, SOAP_ENVELOPE);
+    //out.writeNamespace("xsi", XMLNS_XSI);
     out.writeNamespace("xsd", XMLNS_XSD);
 
-    out.writeStartElement("env:Body");
+    out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Body", SOAP_ENVELOPE);
 
-    PojoMethodSkeleton method = _actionMap.get(action);
+    AbstractAction action = _actionMap.get(actionName);
 
     // XXX: exceptions<->faults
-    if (method != null) {
-      method.invoke(service, in, out);
-    }
+    if (action != null)
+      action.invoke(service, in, out);
     else {
       // XXX: fault
     }
 
+    if (action.getArity() == 0)
+      in.nextTag();
+
     if (in.getEventType() != in.END_ELEMENT)
-      throw new IOException("expected </" + action + ">, " + 
-                            "not <" + in.getName().getLocalPart() + ">");
-    else if (! action.equals(in.getName().getLocalPart()))
-      throw new IOException("expected </" + action + ">, " +
+      throw new IOException("expected </" + actionName + ">, " + 
+                            "not <" + in.getName().getLocalPart() + "> ");
+    else if (! actionName.equals(in.getName().getLocalPart()))
+      throw new IOException("expected </" + actionName + ">, " +
                             "not </" + in.getName().getLocalPart() + ">");
 
     if (in.nextTag() != in.END_ELEMENT)
-      throw new IOException("expected </Body>");
+      throw new IOException("expected </Body>, got: " + in.getName());
     else if (! "Body".equals(in.getName().getLocalPart()))
-      throw new IOException("expected </Body>");
+      throw new IOException("expected </Body>, got: " + in.getName());
     /*
     if (in.nextTag() != in.END_ELEMENT)
       throw new IOException("expected </Envelope>");
@@ -309,9 +309,6 @@ public class DirectSkeleton extends Skeleton {
 
       try {
         _marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        /*
-        _marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper",
-                                new WSDLPrefixMapper());*/
       } 
       catch(PropertyException e) {
         // Non fatal
@@ -360,6 +357,14 @@ public class DirectSkeleton extends Skeleton {
     printer.printPrettyXml(getWSDLNode());
   }
 
+  public void dumpWSDL(Writer w)
+    throws IOException, JAXBException
+  {
+    XmlPrinter printer = new XmlPrinter(w);
+    printer.setPrintDeclaration(true);
+    printer.printPrettyXml(getWSDLNode());
+  }
+
   /**
    * Dumps a WSDL into the specified directory using the service name
    * annotation if present.  (Mainly for TCK, wsgen)
@@ -370,38 +375,4 @@ public class DirectSkeleton extends Skeleton {
     File child = new File(dir, _serviceName + ".wsdl");
     dumpWSDL(new FileOutputStream(child));
   }
-
-  // XXX Remove after switching to Caucho JAXB
-  /*
-  private class WSDLPrefixMapper
-    extends com.sun.xml.bind.marshaller.NamespacePrefixMapper
-  {
-    public String getPreferredPrefix(String namespaceUri, 
-                                     String suggestion, 
-                                     boolean requirePrefix) 
-    {
-      if ("http://schemas.xmlsoap.org/wsdl/".equals(namespaceUri))
-        return requirePrefix ? "wsdl" : "";
-
-      if ("http://schemas.xmlsoap.org/wsdl/soap/".equals(namespaceUri))
-        return "soap";
-
-      if ("http://www.w3.org/2001/XMLSchema".equals(namespaceUri)) 
-        return "xsd";
-
-      if (_namespace.equals(namespaceUri)) 
-        return "tns";
-
-      return suggestion;
-    }
-
-    public String[] getPreDeclaredNamespaceUris() {
-      return new String[] {
-        "http://schemas.xmlsoap.org/wsdl/",
-        "http://schemas.xmlsoap.org/wsdl/soap/",
-        "http://www.w3.org/2001/XMLSchema",
-        _namespace
-      };
-    }
-  }*/
 }

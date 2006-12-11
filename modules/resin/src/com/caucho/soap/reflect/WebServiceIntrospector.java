@@ -31,14 +31,17 @@ package com.caucho.soap.reflect;
 
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
-import com.caucho.soap.marshall.MarshallFactory;
 import com.caucho.soap.skeleton.DirectSkeleton;
-import com.caucho.soap.skeleton.PojoMethodSkeleton;
+import com.caucho.soap.skeleton.AbstractAction;
 import com.caucho.util.L10N;
+
+import org.w3c.dom.Node;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -47,7 +50,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-//import com.caucho.xml.*;
 
 /**
  * Introspects a web service
@@ -63,7 +65,8 @@ public class WebServiceIntrospector {
     //throws ConfigException
     throws JAXBException
   {
-    return introspect(type, null);
+    // matches RI stub for the WSDL location
+    return introspect(type, "REPLACE_WITH_ACTUAL_URL");
   }
 	   
   /**
@@ -82,21 +85,21 @@ public class WebServiceIntrospector {
     
     boolean isInterface = type.isInterface();
 
-    MarshallFactory marshallFactory = new MarshallFactory();
-
     WebService webService = (WebService) type.getAnnotation(WebService.class);
 
     // Get all the classes that JAXB needs, then generate schema for them
     HashSet<Class> jaxbClasses = new HashSet<Class>();
     JAXBUtil.introspectClass(type, jaxbClasses);
+    Class[] jaxbClassArray = new Class[jaxbClasses.size()];
+    jaxbClasses.toArray(jaxbClassArray);
 
-    JAXBContextImpl jaxbContext = 
-      new JAXBContextImpl(jaxbClasses.toArray(new Class[0]), null);
+    JAXBContextImpl jaxbContext = new JAXBContextImpl(jaxbClassArray, null);
+    Marshaller marshaller = jaxbContext.createMarshaller();
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
     DirectSkeleton skel = new DirectSkeleton(type, wsdlLocation);
     String namespace = skel.getNamespace();
 
-    LinkedHashMap<String,String> elements = new LinkedHashMap<String,String>();
     Method[] methods = type.getMethods();
 
     for (int i = 0; i < methods.length; i++) {
@@ -111,34 +114,33 @@ public class WebServiceIntrospector {
       if (webMethod == null && methods[i].getDeclaringClass() != type)
         continue;
 
-      // XXX: needs test
       if (webMethod != null && webMethod.exclude())
         continue;
 
-      PojoMethodSkeleton methodSkel = 
-        PojoMethodSkeleton.createMethodSkeleton(methods[i], marshallFactory, 
-                                                jaxbContext, namespace,
-                                                elements);
+      AbstractAction action = 
+        AbstractAction.createAction(methods[i], jaxbContext, namespace,
+                                    marshaller, unmarshaller);
 
       String name = webMethod == null ? "" : webMethod.operationName();
 
       if (name.equals(""))
           name = methods[i].getName();
 
-      skel.addAction(name, methodSkel);
+      skel.addAction(name, action);
     }
 
-    /*
+    /* XXX
     Node typesNode = skel.getTypesNode();
     DOMResult result = new DOMResult(typesNode);
 
     try {
       XMLStreamWriter out = getStreamWriter(result);
-      jaxbContext.generateSchemaWithoutHeader(out, elements);
+      jaxbContext.generateSchemaWithoutHeader(out);
     }
     catch (XMLStreamException e) {
       throw new JAXBException(e);
-    }*/
+    }
+    */
 
     return skel;
   }

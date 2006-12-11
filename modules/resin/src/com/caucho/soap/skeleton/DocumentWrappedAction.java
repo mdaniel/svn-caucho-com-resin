@@ -30,14 +30,15 @@
 package com.caucho.soap.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
-import com.caucho.soap.marshall.Marshall;
-import com.caucho.soap.marshall.MarshallException;
-import com.caucho.soap.marshall.MarshallFactory;
+import com.caucho.jaxb.skeleton.Property;
+
 import com.caucho.util.L10N;
 
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -56,50 +57,43 @@ import java.util.logging.Logger;
 /**
  * Document wrapped action
  */
-public class DocumentWrappedAction extends PojoMethodSkeleton {
+public class DocumentWrappedAction extends AbstractAction {
   private final static Logger log = 
     Logger.getLogger(DocumentWrappedAction.class.getName());
   public static final L10N L = new L10N(DocumentWrappedAction.class);
 
-  private static final String TARGET_NAMESPACE_PREFIX = "tns";
+  private static final String TARGET_NAMESPACE_PREFIX = "m";
+
+  /*
+   * Document wrapped arguments are in an xsd:sequence -- in other words, 
+   * there is a prescribed order in which the arguments are expected to be
+   * given.  (Any arguments from the header are excepted; headers are 
+   * key/value pairs.)  
+   *
+   */
 
   private HashMap<String,ParameterMarshal> _headerMap
     = new HashMap<String,ParameterMarshal>();
 
   private ParameterMarshal []_headerArgs;
-  
-  private HashMap<String,ParameterMarshal> _bodyMap
-    = new HashMap<String,ParameterMarshal>();
-
   private ParameterMarshal []_bodyArgs;
 
-  private Marshall _retMarshal;
-
-  private boolean _isWrapped;
+  private ParameterMarshal _returnMarshal;
 
   public DocumentWrappedAction(Method method, 
-			       MarshallFactory factory,
-			       JAXBContextImpl jaxbContext, 
-			       String targetNamespace,
-			       Map<String,String> elements)
+                               JAXBContextImpl jaxbContext, 
+                               String targetNamespace,
+                               Marshaller marshaller,
+                               Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
-    super(method, factory, jaxbContext, targetNamespace);
+    super(method, jaxbContext, targetNamespace);
 
-    _isWrapped = true;
-    
-    Class []params = method.getParameterTypes();
-    Annotation [][]paramAnn = method.getParameterAnnotations();
+    Class[] params = method.getParameterTypes();
+    Annotation[][] paramAnn = method.getParameterAnnotations();
 
-    //
-    // Create wrappers for input and output parameters
-    //
-
-    ArrayList<ParameterMarshal> headerList
-      = new ArrayList<ParameterMarshal>();
-
-    ArrayList<ParameterMarshal> bodyList
-      = new ArrayList<ParameterMarshal>();
+    ArrayList<ParameterMarshal> headerList = new ArrayList<ParameterMarshal>();
+    ArrayList<ParameterMarshal> bodyList = new ArrayList<ParameterMarshal>();
     
     for (int i = 0; i < params.length; i++) {
       boolean isInput = true;
@@ -107,7 +101,7 @@ public class DocumentWrappedAction extends PojoMethodSkeleton {
 
       String localName = "arg" + i; // As per JAX-WS spec
 
-      QName name = new QName(localName);
+      QName name = null;
       WebParam.Mode mode = WebParam.Mode.IN;
 
       for (Annotation ann : paramAnn[i]) {
@@ -131,39 +125,44 @@ public class DocumentWrappedAction extends PojoMethodSkeleton {
         }
       }
 
-      Marshall marshal = factory.createDeserializer(params[i],
-						    _jaxbContext);
+      if (name == null) 
+        name = new QName(localName);
+
+      Property property = _jaxbContext.createProperty(params[i]);
 
       ParameterMarshal pMarshal
-	= ParameterMarshal.create(i, marshal, name, mode);
+        = ParameterMarshal.create(i, property, name, mode,
+                                  marshaller, unmarshaller);
 
       if (isHeader) {
-	headerList.add(pMarshal);
-	_headerMap.put(localName, pMarshal);
+        headerList.add(pMarshal);
+        _headerMap.put(localName, pMarshal);
       }
-      else {
-	bodyList.add(pMarshal);
-	_bodyMap.put(localName, pMarshal);
-      }
+      else
+        bodyList.add(pMarshal);
     }
 
     _headerArgs = new ParameterMarshal[headerList.size()];
     headerList.toArray(_headerArgs);
-    
+
     _bodyArgs = new ParameterMarshal[bodyList.size()];
     bodyList.toArray(_bodyArgs);
-    
-    // XXX Can input/output messages have no parts?
 
-    _retMarshal = factory.createSerializer(method.getReturnType(),
-					   _jaxbContext);
+    if (! Void.class.equals(method.getReturnType()) &&
+        ! Void.TYPE.equals(method.getReturnType())) {
+      Property property = _jaxbContext.createProperty(method.getReturnType());
 
-    if (method.isAnnotationPresent(WebResult.class))
-      _resultName =
-        new QName(method.getAnnotation(WebResult.class).targetNamespace(),
-                  method.getAnnotation(WebResult.class).name());
-    else
-      _resultName = new QName("return");
+      if (method.isAnnotationPresent(WebResult.class))
+        _resultName =
+          new QName(method.getAnnotation(WebResult.class).targetNamespace(),
+              method.getAnnotation(WebResult.class).name());
+      else
+        _resultName = new QName("return");
+
+      _returnMarshal = 
+        ParameterMarshal.create(0, property, _resultName, WebParam.Mode.OUT,
+                                marshaller, unmarshaller);
+    }
 
     //
     // Exceptions -> Faults
@@ -181,62 +180,61 @@ public class DocumentWrappedAction extends PojoMethodSkeleton {
    * Invokes the request for a call.
    */
   public void invoke(Object service, XMLStreamReader in, XMLStreamWriter out)
-    throws IOException, XMLStreamException
+    throws IOException, XMLStreamException, Throwable
   {
     // We're starting out at the point in the input stream where the 
     // arguments are listed and the point in the output stream where
     // the results are to be written.
     
-    Object []args = new Object[_arity];
+    Object[] args = new Object[_arity];
 
-    while (in.nextTag() == in.START_ELEMENT) {
-      String tagName = in.getLocalName();
-
-      ParameterMarshal marshal = _bodyMap.get(tagName);
-
-      if (marshal == null)
-        throw new IOException("Unknown parameter <" + tagName + "/>"); // ???
-
-      marshal.deserializeCall(in, args);
-    }
-
+    // document wrapped => everything must be in order
     for (int i = 0; i < _bodyArgs.length; i++) {
-      _bodyArgs[i].deserializeCallDefault(args);
+      if (_bodyArgs[i] instanceof InParameterMarshal)
+        _bodyArgs[i].deserializeCall(in, args);
+      else
+        _bodyArgs[i].deserializeCallDefault(args);
     }
 
     Object value = null;
 
     try {
       value = _method.invoke(service, args);
-    } catch (IllegalAccessException e) {
-      throw new MarshallException(e);
-    } catch (InvocationTargetException e) {
-      throw new MarshallException(e.getCause());
+    } 
+    catch (IllegalAccessException e) {
+      throw new Throwable(e);
+    } 
+    catch (InvocationTargetException e) {
+      throw new Throwable(e.getCause());
     }
 
-    if (_isWrapped)
-      out.writeStartElement(_responseName);
+    out.writeStartElement(TARGET_NAMESPACE_PREFIX, 
+                          _responseName, 
+                          _targetNamespace);
+    out.writeNamespace(TARGET_NAMESPACE_PREFIX, _targetNamespace);
 
-    if (_retMarshal != null)
-      _retMarshal.serialize(out, value, _resultName);
+    if (_returnMarshal != null)
+      _returnMarshal.serializeReply(out, value);
 
-    for (int i = 0; i < _bodyArgs.length; i++) {
+    for (int i = 0; i < _bodyArgs.length; i++)
       _bodyArgs[i].serializeReply(out, args);
-    }
 
-    if (_isWrapped)
-      out.writeEndElement(); // response name
+    out.writeEndElement(); // response name
   }
 
-  protected void writeRequest(XMLStreamWriter out, Object []args,
-			      String name, String namespace)
-    throws IOException, XMLStreamException
+  protected void writeRequest(XMLStreamWriter out, Object[] args,
+                              String name, String namespace)
+    throws IOException, XMLStreamException, JAXBException
   {
     out.writeStartDocument();
-    out.writeStartElement("env", "Envelope", Skeleton.SOAP_ENVELOPE);
-    out.writeNamespace("env", Skeleton.SOAP_ENVELOPE);
+    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
+                          "Envelope", 
+                          Skeleton.SOAP_ENVELOPE);
+    out.writeNamespace(Skeleton.SOAP_ENVELOPE_PREFIX, Skeleton.SOAP_ENVELOPE);
 
-    out.writeStartElement("env", "Header", Skeleton.SOAP_ENVELOPE);
+    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
+                          "Header", 
+                          Skeleton.SOAP_ENVELOPE);
 
     for (int i = 0; i < _headerArgs.length; i++) {
       ParameterMarshal marshal = _headerArgs[i];
@@ -246,16 +244,15 @@ public class DocumentWrappedAction extends PojoMethodSkeleton {
 
     out.writeEndElement(); // Header
 
-    out.writeStartElement("env", "Body", Skeleton.SOAP_ENVELOPE);
+    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
+                          "Body", 
+                          Skeleton.SOAP_ENVELOPE);
 
     out.writeStartElement("m", name, namespace);
     out.writeNamespace("m", namespace);
 
-    for (int i = 0; i < _bodyArgs.length; i++) {
-      ParameterMarshal marshal = _bodyArgs[i];
-
-      marshal.serializeCall(out, args);
-    }
+    for (int i = 0; i < _bodyArgs.length; i++)
+      _bodyArgs[i].serializeCall(out, args);
 
     out.writeEndElement(); // name
     out.writeEndElement(); // Body
@@ -263,12 +260,12 @@ public class DocumentWrappedAction extends PojoMethodSkeleton {
   }
 
   protected Object readResponse(XMLStreamReader in, Object []args)
-    throws IOException, XMLStreamException
+    throws IOException, XMLStreamException, JAXBException
   {
     Object ret = null;
-    
+
     if (in.nextTag() != XMLStreamReader.START_ELEMENT
-	|| ! "Envelope".equals(in.getLocalName()))
+        || ! "Envelope".equals(in.getLocalName()))
       throw expectStart("Envelope", in);
 
     if (in.nextTag() != XMLStreamReader.START_ELEMENT)
@@ -276,56 +273,56 @@ public class DocumentWrappedAction extends PojoMethodSkeleton {
 
     if ("Header".equals(in.getLocalName())) {
       while (in.nextTag() == XMLStreamReader.START_ELEMENT) {
-	String tagName = in.getLocalName();
+        String tagName = in.getLocalName();
 
-	ParameterMarshal marshal = _headerMap.get(tagName);
+        ParameterMarshal marshal = _headerMap.get(tagName);
 
-	if (marshal != null) {
-	  marshal.deserializeReply(in, args);
-	}
-	else {
-	  int depth = 1;
+        if (marshal != null)
+          marshal.deserializeReply(in, args);
+        else {
+          int depth = 1;
 
-	  while (depth > 0) {
-	    switch (in.nextTag()) {
-	    case XMLStreamReader.START_ELEMENT:
-	      depth++;
-	      break;
-	    case XMLStreamReader.END_ELEMENT:
-	      depth--;
-	      break;
-	    default:
-	      throw new IOException("expected </Header>");
-	    }
-	  }
-	}
+          while (depth > 0) {
+            switch (in.nextTag()) {
+              case XMLStreamReader.START_ELEMENT:
+                depth++;
+                break;
+              case XMLStreamReader.END_ELEMENT:
+                depth--;
+                break;
+              default:
+                throw new IOException("expected </Header>");
+            }
+          }
+        }
       }
 
       if (! "Header".equals(in.getLocalName()))
-	throw expectEnd("Header", in);
+        throw expectEnd("Header", in);
 
       if (in.nextTag() != XMLStreamReader.START_ELEMENT)
-	throw expectStart("Body", in);
+        throw expectStart("Body", in);
     }
-    
+
     if (! "Body".equals(in.getLocalName()))
       throw expectStart("Body", in);
 
+    /* XXX make ordered
     while (in.nextTag() == XMLStreamReader.START_ELEMENT) {
       String tagName = in.getLocalName();
       ParameterMarshal marshal = _bodyMap.get(tagName);
 
       if (marshal != null) {
-	marshal.deserializeReply(in, args);
+        marshal.deserializeReply(in, args);
       }
       else {
-	ret = _retMarshal.deserialize(in);
+        ret = _returnMarshal.deserialize(in);
       }
-    }
+    }*/
 
     if (! "Body".equals(in.getLocalName()))
       throw expectEnd("Body", in);
-    
+
     if (in.nextTag() != in.END_ELEMENT)
       throw expectEnd("Envelope", in);
 

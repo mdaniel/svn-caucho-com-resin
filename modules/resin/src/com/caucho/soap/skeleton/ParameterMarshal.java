@@ -29,9 +29,12 @@
 
 package com.caucho.soap.skeleton;
 
-import com.caucho.soap.marshall.Marshall;
+import com.caucho.jaxb.skeleton.Property;
 
 import javax.jws.WebParam;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -40,31 +43,43 @@ import java.io.IOException;
 
 abstract public class ParameterMarshal {
   protected final int _arg;
-  protected final Marshall _marshal;
+  protected final Property _property;
   protected final QName _name;
+  protected final Marshaller _marshaller;
+  protected final Unmarshaller _unmarshaller;
 
-  protected ParameterMarshal(int arg,
-			     Marshall marshal,
-			     QName name)
+  protected ParameterMarshal(int arg, Property property, QName name, 
+                             Marshaller marshaller, Unmarshaller unmarshaller)
   {
     _arg = arg;
-    _marshal = marshal;
+    _property = property;
     _name = name;
+    _marshaller = marshaller;
+    _unmarshaller = unmarshaller;
   }
 
-  static ParameterMarshal create(int arg,
-				  Marshall marshal,
-				  QName name,
-				  WebParam.Mode mode)
+  static ParameterMarshal create(int arg, 
+                                 Property property, 
+                                 QName name,
+                                 WebParam.Mode mode, 
+                                 Marshaller marshaller, 
+                                 Unmarshaller unmarshaller)
   {
     switch (mode) {
     case IN:
-      return new InParameterMarshal(arg, marshal, name);
+      return new InParameterMarshal(arg, property, name, 
+                                    marshaller, unmarshaller);
     case OUT:
-      return new OutParameterMarshal(arg, marshal, name);
+      return new OutParameterMarshal(arg, property, name, 
+                                     marshaller, unmarshaller);
     default:
       throw new UnsupportedOperationException();
     }
+  }
+
+  public int getArg()
+  {
+    return _arg;
   }
 
   //
@@ -72,12 +87,18 @@ abstract public class ParameterMarshal {
   //
 
   public void serializeCall(XMLStreamWriter out, Object []args)
-    throws IOException, XMLStreamException
+    throws IOException, XMLStreamException, JAXBException
   {
   }
 
-  public void deserializeReply(XMLStreamReader in, Object []args)
-    throws IOException, XMLStreamException
+  public Object deserializeReply(XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    return null;
+  }
+  
+  public void deserializeReply(XMLStreamReader in, Object[] args)
+    throws IOException, XMLStreamException, JAXBException
   {
   }
 
@@ -86,7 +107,7 @@ abstract public class ParameterMarshal {
   //
 
   public void deserializeCall(XMLStreamReader in, Object []args)
-    throws IOException, XMLStreamException
+    throws IOException, XMLStreamException, JAXBException
   {
   }
 
@@ -94,8 +115,13 @@ abstract public class ParameterMarshal {
   {
   }
 
+  public void serializeReply(XMLStreamWriter out, Object ret)
+    throws IOException, XMLStreamException, JAXBException
+  {
+  }
+
   public void serializeReply(XMLStreamWriter out, Object []args)
-    throws IOException, XMLStreamException
+    throws IOException, XMLStreamException, JAXBException
   {
   }
 }

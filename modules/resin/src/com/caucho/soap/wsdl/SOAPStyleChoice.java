@@ -39,5 +39,5 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum(String.class)
 public enum SOAPStyleChoice {
   @XmlEnumValue("document") DOCUMENT,
-  @XmlEnumValue("rpc") RPC
+  @XmlEnumValue("rpc") RPC;
 }

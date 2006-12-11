@@ -29,8 +29,11 @@
 
 package com.caucho.soap.skeleton;
 
-import com.caucho.soap.marshall.Marshall;
+import com.caucho.jaxb.skeleton.Property;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -39,21 +42,26 @@ import javax.xml.ws.Holder;
 import java.io.IOException;
 
 public class OutParameterMarshal extends ParameterMarshal {
-  public OutParameterMarshal(int arg,
-			     Marshall marshal,
-			     QName name)
+  public OutParameterMarshal(int arg, Property property, QName name, 
+                             Marshaller marshaller, Unmarshaller unmarshaller)
   {
-    super(arg, marshal, name);
+    super(arg, property, name, marshaller, unmarshaller);
   }
 
   //
   // client
   //
 
-  public void deserializeReply(XMLStreamReader in, Object []args)
-    throws IOException, XMLStreamException
+  public Object deserializeReply(XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException
   {
-    args[_arg] = _marshal.deserialize(in);
+    return _property.read(_unmarshaller, in);
+  }
+
+  public void deserializeReply(XMLStreamReader in, Object[] args)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    ((Holder) args[_arg]).value = _property.read(_unmarshaller, in);
   }
 
   //
@@ -67,11 +75,45 @@ public class OutParameterMarshal extends ParameterMarshal {
   }
 
   public void serializeReply(XMLStreamWriter out, Object []args)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (_name != null)
+      writeName(out);
+
+    if (args[_arg] instanceof Holder)
+      _property.write(_marshaller, out, ((Holder) args[_arg]).value);
+    else
+      _property.write(_marshaller, out, null);
+
+    if (_name != null)
+      out.writeEndElement();
+  }
+
+  public void serializeReply(XMLStreamWriter out, Object ret)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (_name != null)
+      writeName(out);
+
+    _property.write(_marshaller, out, ret);
+
+    if (_name != null)
+      out.writeEndElement();
+  }
+
+  private void writeName(XMLStreamWriter out)
     throws IOException, XMLStreamException
   {
-    if (args[_arg] instanceof Holder)
-      _marshal.serialize(out, ((Holder) args[_arg]).value, _name);
+    if (_name.getPrefix() != null) {
+      out.writeStartElement(_name.getPrefix(), 
+                            _name.getLocalPart(), 
+                            _name.getNamespaceURI());
+    }
+    else if (_name.getNamespaceURI() != null) {
+      out.writeStartElement(_name.getNamespaceURI(),
+                            _name.getLocalPart());
+    }
     else
-      _marshal.serialize(out, null, _name);
+      out.writeStartElement(_name.getLocalPart());
   }
 }

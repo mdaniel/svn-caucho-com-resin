@@ -30,8 +30,6 @@
 package com.caucho.soap.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
-import com.caucho.soap.marshall.Marshall;
-import com.caucho.soap.marshall.MarshallFactory;
 import com.caucho.soap.wsdl.SOAPBody;
 import com.caucho.soap.wsdl.SOAPHeader;
 import com.caucho.soap.wsdl.SOAPUseChoice;
@@ -42,6 +40,8 @@ import com.caucho.util.L10N;
 
 import javax.jws.WebParam;
 import javax.jws.WebResult;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
@@ -60,21 +60,22 @@ import java.util.logging.Logger;
  * argument.  Non-void return values count as an output argument and
  * INOUT arguments count as both one input and one output.
  */
-public class DocumentBarePojoMethodSkeleton extends PojoMethodSkeleton {
+public class DocumentBareAction extends AbstractAction {
   private final static Logger log = 
-    Logger.getLogger(DocumentBarePojoMethodSkeleton.class.getName());
-  private static final L10N L = new L10N(DocumentBarePojoMethodSkeleton.class);
+    Logger.getLogger(DocumentBareAction.class.getName());
+  private static final L10N L = new L10N(DocumentBareAction.class);
 
   private static final String TARGET_NAMESPACE_PREFIX = "tns";
 
-  public DocumentBarePojoMethodSkeleton(Method method, 
-                                        MarshallFactory factory,
-                                        JAXBContextImpl jaxbContext, 
-                                        String targetNamespace,
-                                        Map<String,String> elements)
+  public DocumentBareAction(Method method, 
+                            JAXBContextImpl jaxbContext, 
+                            String targetNamespace,
+                            Marshaller marshaller,
+                            Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
-    super(method, factory, jaxbContext, targetNamespace);
+    super(method, jaxbContext, targetNamespace);
+    /*
 
     //
     // Create marshallers and message/parts for the arguments/return values
@@ -320,9 +321,6 @@ public class DocumentBarePojoMethodSkeleton extends PojoMethodSkeleton {
 
       if (marshall == null)
         marshall = _headerArguments.get(inputPart.getName());
-
-      elements.put(inputPart.getName(),
-                   marshall._marshall.getXmlSchemaDatatype().getLocalPart());
     }
 
     if (outputPart != null) {
@@ -332,9 +330,6 @@ public class DocumentBarePojoMethodSkeleton extends PojoMethodSkeleton {
 
       if (marshall == null)
         marshall = _headerArguments.get(outputPart.getName());
-
-      elements.put(outputPart.getName(),
-                   marshall._marshall.getXmlSchemaDatatype().getLocalPart());
     }
 
 
@@ -347,6 +342,6 @@ public class DocumentBarePojoMethodSkeleton extends PojoMethodSkeleton {
     // XXX multiple exceptions -> multiple faults?
     //
     for (Class exception : exceptions) {
-    }
+    }*/
   }
 }

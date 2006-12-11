@@ -29,6 +29,7 @@
 
 package com.caucho.soap.skeleton;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -36,13 +37,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 /**
+ * XXX Necessary?
  * Invokes a request on a Java POJO
  */
 abstract public class Skeleton {
   public final static String XMLNS =
     "http://www.w3.org/2000/xmlns/";
   public final static String SOAP_ENVELOPE =
-    "http://www.w3.org/2003/05/soap-envelope";
+    "http://schemas.xmlsoap.org/soap/envelope/";
+  // Older namespace URI: "http://www.w3.org/2003/05/soap-envelope";
   public final static String SOAP_ENCODING =
     "http://schemas.xmlsoap.org/soap/encoding/";
   public final static String SOAP_RESULT =
@@ -52,16 +55,19 @@ abstract public class Skeleton {
   public final static String XMLNS_XSI =
     "http://www.w3.org/2001/XMLSchema-instance";
 
+  public final static String SOAP_ENVELOPE_PREFIX = "soapenv";
+
   /**
    * Invokes the request.
    */
   abstract public void invoke(Object service,
                               XMLStreamReader in,
                               XMLStreamWriter out)
-    throws IOException, XMLStreamException;
+    throws IOException, XMLStreamException, Throwable;
 
   abstract public Object invoke(String name, String url, Object[] args)
-    throws IOException, XMLStreamException, MalformedURLException;
+    throws IOException, XMLStreamException, MalformedURLException, 
+           JAXBException;
 }
 
 
