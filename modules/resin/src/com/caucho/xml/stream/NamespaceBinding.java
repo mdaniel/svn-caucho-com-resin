@@ -28,6 +28,9 @@
 
 package com.caucho.xml.stream;
 
+import java.io.IOException;
+import com.caucho.vfs.WriteStream;
+
 /**
  * Binding to a namespace URL.
  */
@@ -38,6 +41,10 @@ final class NamespaceBinding
   private String _uri;
   
   private int _version;
+
+  // namespaces are only emitted (written) when writeNamespace() or
+  // writeDefaultNamespace() is called explicitly.
+  private boolean _emit = false;
 
   NamespaceBinding(String prefix, String uri, int version)
   {
@@ -64,5 +71,34 @@ final class NamespaceBinding
   int getVersion()
   {
     return _version;
+  }
+
+  String getPrefix()
+  {
+    return _prefix;
+  }
+
+  void emit(WriteStream ws)
+    throws IOException
+  {
+    if (_emit) {
+      if (_prefix == null)
+        ws.print(" xmlns");
+      else {
+        ws.print(" xmlns:");
+        ws.print(Escapifier.escape(_prefix));
+      }
+
+      ws.print("=\"");
+      ws.print(Escapifier.escape(_uri));
+      ws.print('"');
+
+      _emit = false;
+    }
+  }
+
+  void setEmit(boolean emit)
+  {
+    _emit = emit;
   }
 }

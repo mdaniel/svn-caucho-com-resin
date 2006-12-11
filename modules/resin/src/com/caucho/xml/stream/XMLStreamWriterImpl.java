@@ -97,7 +97,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void setDefaultNamespace(String uri)
     throws XMLStreamException
   {
-    _tracker.declare("", uri);
+    _tracker.declare(null, uri);
   }
 
   public void setNamespaceContext(NamespaceContext context)
@@ -194,7 +194,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void writeDefaultNamespace(String namespaceURI)
     throws XMLStreamException
   {
-    _tracker.declare("", namespaceURI);
+    _tracker.declare("", namespaceURI, true);
   }
 
   public void writeDTD(String dtd)
@@ -287,7 +287,10 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void writeNamespace(String prefix, String namespaceURI)
     throws XMLStreamException
   {
-    _tracker.declare(prefix, namespaceURI);
+    if (prefix == null || "".equals(prefix) || "xmlns".equals(prefix))
+      writeDefaultNamespace(namespaceURI);
+    else
+      _tracker.declare(prefix, namespaceURI, true);
   }
 
   public void writeProcessingInstruction(String target)
@@ -336,7 +339,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     throws XMLStreamException
   {
     try {
-      _ws.print("<?xml version='"+version+"' encoding='"+encoding+"'?>");
+      _ws.print("<?xml version=\""+version+"\" encoding=\""+encoding+"\"?>");
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -422,9 +425,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
       for(int i=0; i<_pendingAttributeNames.size(); i++) {
         _ws.print(" ");
         _ws.print(printQName(_pendingAttributeNames.get(i)));
-        _ws.print("='");
+        _ws.print("=\"");
         Escapifier.escape(_pendingAttributeValues.get(i), _ws);
-        _ws.print("'");
+        _ws.print('"');
       }
       flushContext();
 

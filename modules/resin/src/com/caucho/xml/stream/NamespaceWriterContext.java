@@ -45,12 +45,44 @@ import java.util.Map;
  */
 public class NamespaceWriterContext extends NamespaceContextImpl
 {
-  NamespaceWriterContext()
+  // map from URIs -> NamespaceBinding
+  private final HashMap<String,NamespaceBinding> _bindings
+    = new HashMap<String,NamespaceBinding>();
+
+  private int _uniqueId = 0;
+  private NamespaceBinding _nullBinding = new NamespaceBinding(null, null, 0);
+
+  public void declare(String prefix, String uri)
   {
+    declare(prefix, uri, false);
   }
 
-  public void setElementName(QName name)
+  /**
+   * declares a new namespace prefix in the current context
+   */
+  public void declare(String prefix, String uri, boolean emit)
   {
+    NamespaceBinding binding;
+
+    if (uri == null)
+      binding = _nullBinding;
+    else {
+      binding = _bindings.get(uri);
+
+      if (binding != null && binding.getPrefix().equals(prefix)) {
+        // for writing, ignore matching prefixes
+        binding.setEmit(emit);
+        return;
+      }
+      else if (binding == null) {
+        // set the URI to null so that addOldBinding registers that there
+        // was no previous binding
+        binding = new NamespaceBinding(prefix, null, _version);
+
+        _bindings.put(uri, binding);
+      }
+    }
+
     ElementBinding eltBinding = _stack.get(_stack.size() - 1);
 
     if (eltBinding == null) {
@@ -59,16 +91,45 @@ public class NamespaceWriterContext extends NamespaceContextImpl
       _stack.set(_stack.size() - 1, eltBinding);
     }
 
-    eltBinding.setName(name);
+    eltBinding.addOldBinding(binding, prefix, binding.getUri(), uri);
+
+    _version++;
+    binding.setUri(uri);
+    binding.setVersion(_version);
+    binding.setEmit(emit);
   }
 
-  public QName getElementName()
+  /**
+   *  declares a new namespace prefix in the current context; the
+   *  auto-allocated prefix is returned
+   */
+  public String declare(String uri)
   {
-    ElementBinding eltBinding = _stack.get(_stack.size() - 1);
+    NamespaceBinding binding = _bindings.get(uri);
 
-    if (eltBinding != null)
-      return eltBinding.getName();
-    else
-      return null;
+    // without an explicit prefix, don't add a new prefix
+    if (binding != null)
+      return binding.getPrefix();
+
+    String prefix = "ns"+ _uniqueId++;
+    
+    declare(prefix, uri);
+    
+    return prefix;
+  }
+
+  /**
+   * looks up the uri, returns the prefix it corresponds to
+   */
+  public String getPrefix(String uri)
+  {
+    return _bindings.get(uri).getPrefix();
+  }
+
+  public void emitDeclarations(WriteStream ws)
+    throws IOException
+  {
+    for (NamespaceBinding binding : _bindings.values())
+      binding.emit(ws);
   }
 }

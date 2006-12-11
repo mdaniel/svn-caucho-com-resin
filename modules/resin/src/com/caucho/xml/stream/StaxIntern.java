@@ -38,15 +38,15 @@ public class StaxIntern {
   
   private final Entry []_entries = new Entry[SIZE];
 
-  private final NamespaceContextImpl _namespaceContext;
+  private final NamespaceReaderContext _namespaceContext;
 
-  StaxIntern(NamespaceContextImpl namespaceContext)
+  StaxIntern(NamespaceReaderContext namespaceContext)
   {
     _namespaceContext = namespaceContext;
   }
 
-  Entry add(char []buffer, int offset, int length, int colon,
-	    boolean isAttribute)
+  Entry add(char []buffer, int offset, int length, int colon, 
+            boolean isAttribute)
   {
     int hash = 0;
 
@@ -57,18 +57,18 @@ public class StaxIntern {
     int bucket = (hash & 0x7fffffff) % SIZE;
 
     Entry entry;
-    
+
     for (entry = _entries[bucket];
-	 entry != null;
-	 entry = entry._next) {
+         entry != null;
+         entry = entry._next) {
       if (entry.match(buffer, offset, length, isAttribute))
-	return entry;
+        return entry;
     }
 
     entry = new Entry(_entries[bucket],
-		      buffer, offset, length,
-		      colon,
-		      isAttribute);
+                      buffer, offset, length,
+                      colon,
+                      isAttribute);
     _entries[bucket] = entry;
 
     return entry;
@@ -88,45 +88,45 @@ public class StaxIntern {
     QName _qName;
 
     Entry(Entry next,
-	  char []buf, int offset, int length,
-	  int colon,
-	  boolean isAttribute)
+          char []buf, int offset, int length,
+          int colon,
+          boolean isAttribute)
     {
       _next = next;
-      
+
       _buf = new char[length];
       System.arraycopy(buf, offset, _buf, 0, length);
 
       _isAttribute = isAttribute;
 
       if (colon > 0) {
-	_prefix = new String(buf, 0, colon);
-	_localName = new String(buf, colon + 1, length - colon - 1);
+        _prefix = new String(buf, 0, colon);
+        _localName = new String(buf, colon + 1, length - colon - 1);
       }
       else {
-	_prefix = null;
-	_localName = new String(buf, 0, length);
+        _prefix = null;
+        _localName = new String(buf, 0, length);
       }
 
       if (_isAttribute)
-	_namespace = _namespaceContext.getAttributeNamespace(_prefix);
+        _namespace = _namespaceContext.getAttributeNamespace(_prefix);
       else
-	_namespace = _namespaceContext.getElementNamespace(_prefix);
+        _namespace = _namespaceContext.getElementNamespace(_prefix);
 
       fillQName();
     }
 
     public final boolean match(char []buf, int offset, int length,
-			       boolean isAttribute)
+                               boolean isAttribute)
     {
       if (length != _buf.length || _isAttribute != isAttribute)
-	return false;
+        return false;
 
       char []entryBuf = _buf;
-      
+
       for (length--; length >= 0; length--) {
-	if (entryBuf[length] != buf[offset + length])
-	  return false;
+        if (entryBuf[length] != buf[offset + length])
+          return false;
       }
 
       return true;
@@ -145,8 +145,8 @@ public class StaxIntern {
     QName getQName()
     {
       if (_version != _namespace.getVersion())
-	fillQName();
-      
+        fillQName();
+
       return _qName;
     }
 
@@ -157,7 +157,7 @@ public class StaxIntern {
       String prefix = _prefix;
 
       if (prefix == null)
-	prefix = "";
+        prefix = "";
 
       _qName = new QName(_namespace.getUri(), _localName, prefix);
     }

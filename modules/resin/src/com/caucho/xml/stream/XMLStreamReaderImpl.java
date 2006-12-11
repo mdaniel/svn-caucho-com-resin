@@ -61,7 +61,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   private int _row = 1;
   private int _ofs = 1;
 
-  private NamespaceContextImpl _namespaceTracker;
+  private NamespaceReaderContext _namespaceTracker;
 
   private String _version;
   private String _encoding = "UTF-8";
@@ -134,7 +134,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   public void init(ReadStream is)
     throws XMLStreamException
   {
-    _namespaceTracker = new NamespaceContextImpl();
+    _namespaceTracker = new NamespaceReaderContext();
     _intern = new StaxIntern(_namespaceTracker);
     
     _is = is;
@@ -622,15 +622,14 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
       ch = skipWhitespace();
 
       if (ch == '\'' || ch == '"') {
-	if ("xmlns".equals(rawName.getPrefix())) {
-          _namespaceTracker.declare(rawName.getLocalName(),
-                                    readValue(ch));
-	}
-	else if ("xmlns".equals(rawName.getLocalName())) {
+        if ("xmlns".equals(rawName.getPrefix())) {
+          _namespaceTracker.declare(rawName.getLocalName(), readValue(ch));
+        }
+        else if ("xmlns".equals(rawName.getLocalName())) {
           _namespaceTracker.declare(null, readValue(ch));
         }
-	else {
-	  _attrRawNames[attrCount] = rawName;
+        else {
+          _attrRawNames[attrCount] = rawName;
           _attrValues[attrCount++] = readValue(ch);
         }
       }
@@ -876,29 +875,29 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
     while (true) {
       if (inputOffset < inputLength) {
-	char ch = inputBuf[inputOffset++];
+        char ch = inputBuf[inputOffset++];
 
-	if (IS_XML_NAME[ch]) {
-	  valueBuf[valueOffset++] = ch;
-	}
-	else if (ch == ':') {
-	  if (colon <= 0)
-	    colon = valueOffset;
-	  
-	  valueBuf[valueOffset++] = ch;
-	}
-	else {
-	  _inputOffset = inputOffset - 1;
+        if (IS_XML_NAME[ch]) {
+          valueBuf[valueOffset++] = ch;
+        }
+        else if (ch == ':') {
+          if (colon <= 0)
+            colon = valueOffset;
 
-	  return _intern.add(valueBuf, 0, valueOffset, colon, isAttribute);
-	}
+          valueBuf[valueOffset++] = ch;
+        }
+        else {
+          _inputOffset = inputOffset - 1;
+
+          return _intern.add(valueBuf, 0, valueOffset, colon, isAttribute);
+        }
       }
       else if (fillBuffer()) {
-	inputLength = _inputLength;
-	inputOffset = _inputOffset;
+        inputLength = _inputLength;
+        inputOffset = _inputOffset;
       }
       else {
-	return _intern.add(valueBuf, 0, valueOffset, colon, isAttribute);
+        return _intern.add(valueBuf, 0, valueOffset, colon, isAttribute);
       }
     }
   }
@@ -1200,7 +1199,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   static {
     for (int i = 0; i < IS_XML_NAME.length; i++) {
       if (isXmlName(i) && i != ':')
-	IS_XML_NAME[i] = isXmlName(i);
+        IS_XML_NAME[i] = isXmlName(i);
     }
   }
 
