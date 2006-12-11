@@ -36,13 +36,7 @@ import java.io.IOException;
  * a Float Property
  */
 public class FloatProperty extends CDataProperty {
-  private boolean _isPrimitiveType;
-
-  public FloatProperty(Accessor a, boolean isPrimitiveType) {
-    super(a);
-
-    _isPrimitiveType = isPrimitiveType;
-  }
+  public static final FloatProperty PROPERTY = new FloatProperty();
 
   protected String write(Object in)
       throws IOException, XMLStreamException
@@ -56,13 +50,8 @@ public class FloatProperty extends CDataProperty {
     return DatatypeConverter.parseFloat(in);
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:float";
-  }
-
-  protected boolean isPrimitiveType()
-  {
-    return _isPrimitiveType;
   }
 }

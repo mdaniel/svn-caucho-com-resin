@@ -36,20 +36,15 @@ import java.io.IOException;
  * a Character Property
  */
 public class CharacterProperty extends CDataProperty {
-  private boolean _isPrimitiveType;
-
-  public CharacterProperty(Accessor a, boolean isPrimitiveType) {
-    super(a);
-
-    _isPrimitiveType = isPrimitiveType;
-  }
+  public static final CharacterProperty PROPERTY = new CharacterProperty();
 
   protected String write(Object in)
     throws IOException, XMLStreamException
   {
     char ch = ((Character)in).charValue();
 
-    return DatatypeConverter.printUnsignedShort(Character.getNumericValue(ch));
+    // NOTE: this is _not_ Character.getNumericValue(ch));
+    return DatatypeConverter.printUnsignedShort((int) ch);
   }
 
   protected Object read(String in)
@@ -60,15 +55,8 @@ public class CharacterProperty extends CDataProperty {
     return new Character((char) i);
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:unsignedShort";
   }
-
-  protected boolean isPrimitiveType()
-  {
-    return _isPrimitiveType;
-  }
 }
-
-

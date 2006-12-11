@@ -28,205 +28,43 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import java.io.IOException;
+
+import javax.xml.XMLConstants;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+
 import javax.xml.namespace.QName;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.IOException;
 
 /**
  * represents a property in a skeleton; requires an Accessor to access it
  */
 public abstract class Property {
-  public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
-  public static final String XML_SCHEMA_PREFIX = "xsd";
-
-  protected Accessor _accessor;
-
-  public Property(Accessor accessor) {
-    this._accessor = accessor;
+  public boolean isXmlPrimitiveType()
+  {
+    return true;
   }
+
+  public String getMaxOccurs()
+  {
+    return null;
+  }
+
+  public abstract String getSchemaType();
 
   public abstract Object read(Unmarshaller u, XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException;
   
   public abstract void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException;
-
-  public void writeStartElement(XMLStreamWriter out, Object obj)
-    throws IOException, XMLStreamException, JAXBException
-  {
-
-    XmlElementWrapper wrapper =
-      (XmlElementWrapper)_accessor.getAnnotation(XmlElementWrapper.class);
-    XmlElement element =
-      (XmlElement)_accessor.getAnnotation(XmlElement.class);
-
-    if (wrapper != null) {
-      if (obj == null && !wrapper.nillable())
-        return;
-      if (wrapper.name().equals("##default"))
-        out.writeStartElement(getName());
-      else if (wrapper.namespace().equals("##default"))
-        out.writeStartElement(wrapper.name());
-      else
-        out.writeStartElement(wrapper.namespace(), wrapper.name());
-      if (obj == null)
-        out.writeAttribute("xsi", "http://www.w3.org/2001/XMLSchema-instance",
-                           "nil", "true");
-    }
-    else if (element != null) {
-      if (obj == null && !element.nillable())
-        return;
-      if (element.name().equals("##default"))
-        out.writeStartElement(getName());
-      else if (element.namespace().equals("##default"))
-        out.writeStartElement(element.name());
-      else
-        out.writeStartElement(element.namespace(), element.name());
-      if (obj == null)
-        out.writeAttribute("xsi", "http://www.w3.org/2001/XMLSchema-instance",
-                           "nil", "true");
-    }
-    else {
-      if (obj == null) return;
-      out.writeStartElement(getQName().getLocalPart());
-    }
-  }
-
-  public void writeEndElement(XMLStreamWriter out, Object obj)
-    throws IOException, XMLStreamException, JAXBException
-  {
-
-    XmlElementWrapper wrapper =
-      (XmlElementWrapper)_accessor.getAnnotation(XmlElementWrapper.class);
-    XmlElement element =
-      (XmlElement)_accessor.getAnnotation(XmlElement.class);
-
-    if (wrapper != null) {
-      if (obj == null && !wrapper.nillable())
-        return;
-    } else if (element != null) {
-      if (obj == null && !element.nillable())
-        return;
-    } else {
-      if (obj == null) return;
-    }
-    out.writeEndElement();
-  }
-
-  public QName getQName()
-  {
-    XmlElementWrapper wrapper =
-      (XmlElementWrapper)_accessor.getAnnotation(XmlElementWrapper.class);
-    XmlElement element =
-      (XmlElement)_accessor.getAnnotation(XmlElement.class);
-
-    if (wrapper != null) {
-      if (wrapper.name().equals("##default"))
-        return _accessor.getQName();
-      else if (wrapper.namespace().equals("##default"))
-        return new QName(wrapper.name());
-      else
-        return new QName(wrapper.namespace(), wrapper.name());
-    }
-    else if (element != null) {
-      if (element.name().equals("##default"))
-        return _accessor.getQName();
-      else if (element.namespace().equals("##default"))
-        return new QName(element.name());
-      else
-        return new QName(element.namespace(), element.name());
-    }
-
-    return _accessor.getQName();
-  }
-
-  public Object get(Object target)
-    throws JAXBException
-  {
-    return _accessor.get(target);
-  }
-
-  public void set(Object target, Object value)
-    throws JAXBException
-  {
-    _accessor.set(target, value);
-  }
-
-  public String getName()
-  {
-    return _accessor.getName();
-  }
-
-  public void generateSchema(XMLStreamWriter out)
-    throws JAXBException, XMLStreamException
-  {
-    XmlAttribute attribute =
-      (XmlAttribute) _accessor.getAnnotation(XmlAttribute.class);
-
-    if (attribute != null) {
-      out.writeEmptyElement(XML_SCHEMA_PREFIX, "attribute", XML_SCHEMA_NS);
-
-      // See http://forums.java.net/jive/thread.jspa?messageID=167171
-      // Primitives are always required
-
-      if (attribute.required() || isPrimitiveType())
-        out.writeAttribute("use", "required");
-    }
-    else {
-      out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", XML_SCHEMA_NS);
-
-      XmlElement element =
-        (XmlElement) _accessor.getAnnotation(XmlElement.class);
-
-      if (! isPrimitiveType()) {
-        if (element != null) {
-          if (element.required())
-            out.writeAttribute("minOccurs", "1");
-          else
-            out.writeAttribute("minOccurs", "0");
-
-          if (element.nillable())
-            out.writeAttribute("nillable", "true");
-        }
-        else
-          out.writeAttribute("minOccurs", "0");
-      }
-
-      if (getMaxOccurs() != null)
-        out.writeAttribute("maxOccurs", getMaxOccurs());
-    }
-
-    out.writeAttribute("type", getSchemaType());
-    out.writeAttribute("name", _accessor.getName());
-  }
-
-  protected abstract String getSchemaType();
-
-  protected boolean isPrimitiveType()
-  {
-    return true;
-  }
-
-  protected boolean isXmlPrimitiveType()
-  {
-    return true;
-  }
-
-  public Accessor getAccessor()
-  {
-    return _accessor;
-  }
-
-  protected String getMaxOccurs()
-  {
-    return null;
-  }
 }

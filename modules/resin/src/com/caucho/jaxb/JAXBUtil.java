@@ -216,8 +216,10 @@ public class JAXBUtil {
     xmlName.append(words.get(0).substring(1));
 
     for (int i = 1; i < words.size(); i++) {
-      xmlName.append(toUpperCase(words.get(i).charAt(0)));
-      xmlName.append(words.get(i).substring(1));
+      if (words.get(i).length() > 0) {
+        xmlName.append(toUpperCase(words.get(i).charAt(0)));
+        xmlName.append(words.get(i).substring(1));
+      }
     }
 
     return xmlName.toString();

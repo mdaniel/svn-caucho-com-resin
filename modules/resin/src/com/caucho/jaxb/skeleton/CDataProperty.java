@@ -40,11 +40,6 @@ import java.io.IOException;
  * helper class for properties that are represented as a "flat" CDATA block
  */
 public abstract class CDataProperty extends Property {
-
-  public CDataProperty(Accessor a) {
-    super(a);
-  }
-
   protected abstract Object read(String in)
     throws IOException, XMLStreamException;
 
@@ -72,9 +67,7 @@ public abstract class CDataProperty extends Property {
   public void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    writeStartElement(out, obj);
     out.writeCharacters(write(obj));
-    writeEndElement(out, obj);
   }
 
 }

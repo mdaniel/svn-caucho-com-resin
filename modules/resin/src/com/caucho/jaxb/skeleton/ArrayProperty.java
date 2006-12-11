@@ -41,18 +41,8 @@ import java.util.Iterator;
  * a property for serializing/deserializing arrays
  */
 public class ArrayProperty extends IterableProperty {
-
-  private Accessor.ArrayComponentAccessor _componentAccessor;
   private Property _componentProperty;
-  private XmlElementWrapper _wrap;
 
-  public ArrayProperty(Accessor a)
-    throws JAXBException
-  {
-    super(a, a.getContext()
-          .createProperty(new Accessor.ArrayComponentAccessor(a)));
-  }
-  
   public Object read(Unmarshaller u, XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -90,7 +80,7 @@ public class ArrayProperty extends IterableProperty {
 
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     throw new UnsupportedOperationException();
   }
@@ -100,7 +90,7 @@ public class ArrayProperty extends IterableProperty {
     return false;
   }
 
-  protected boolean isXmlPrimitiveType()
+  public boolean isXmlPrimitiveType()
   {
     return false;
   }

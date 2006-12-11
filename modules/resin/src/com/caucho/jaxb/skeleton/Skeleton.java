@@ -51,11 +51,11 @@ public abstract class Skeleton {
   protected JAXBContextImpl _context;
   protected QName _typeName;
 
-  protected LinkedHashMap<String,Property> _attributeProperties
-    = new LinkedHashMap<String,Property>();
+  protected LinkedHashMap<String,Accessor> _attributeAccessors
+    = new LinkedHashMap<String,Accessor>();
 
-  protected LinkedHashMap<String,Property> _elementProperties 
-    = new LinkedHashMap<String,Property>();
+  protected LinkedHashMap<String,Accessor> _elementAccessors 
+    = new LinkedHashMap<String,Accessor>();
 
   protected Skeleton(JAXBContextImpl context)
   {
@@ -74,10 +74,9 @@ public abstract class Skeleton {
                              Object obj, QName fieldName)
     throws IOException, XMLStreamException, JAXBException;
 
-  protected Property getProperty(QName q)
+  protected Accessor getAccessor(QName q)
   {
-    // XXX
-    return _elementProperties.get(q.getLocalPart());
+    return _elementAccessors.get(q.getLocalPart());
   }
 
   public abstract void generateSchema(XMLStreamWriter out)

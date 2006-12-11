@@ -28,38 +28,40 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.stream.XMLStreamException;
+
 import java.io.IOException;
-import java.math.BigInteger;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 /**
- * a BigInteger Property
+ * a qname property
  */
-public class BigIntegerProperty extends CDataProperty {
-  public static final BigIntegerProperty PROPERTY = new BigIntegerProperty();
+public class QNameProperty extends CDataProperty {
+  public static final QNameProperty PROPERTY = new QNameProperty();
 
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return DatatypeConverter.printInteger((BigInteger) in);
+    if (in == null)
+      return null;
+
+    QName qname = (QName) in;
+
+    if (qname.getPrefix() == null)
+      return qname.getLocalPart();
+    else
+      return qname.getPrefix() + ":" + qname.getLocalPart();
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return DatatypeConverter.parseInteger(in);
+    return in;
   }
 
   public String getSchemaType()
   {
-    return "xsd:integer";
-  }
-
-  public boolean isXmlPrimitiveType()
-  {
-    return true;
+    return "xsd:QName";
   }
 }
-
-

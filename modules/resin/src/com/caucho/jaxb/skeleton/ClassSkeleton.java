@@ -37,20 +37,27 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
+
 import javax.xml.namespace.QName;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+
 import java.io.IOException;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +70,9 @@ public class ClassSkeleton<C> extends Skeleton {
   private static final L10N L = new L10N(ClassSkeleton.class);
   private static final Logger log = Logger.getLogger(Skeleton.class.getName());
 
+  private static final Class[] NO_PARAMS = new Class[0];
+  private static final Object[] NO_ARGS = new Object[0];
+
   private Class<C> _class;
 
   private Method _beforeUnmarshal;
@@ -72,11 +82,13 @@ public class ClassSkeleton<C> extends Skeleton {
 
   private QName _elementName;
 
+  private Constructor _constructor;
+
   /**
    * The value @XmlValue.
    * 
    **/
-  private Property _value;
+  private Accessor _value;
 
   public Class<C> getType()
   {
@@ -132,7 +144,20 @@ public class ClassSkeleton<C> extends Skeleton {
       
       // XXX: @XmlJavaTypeAdapter
       
-      // XXX: look for @XmlValue annotation
+      // Find the zero-parameter constructor
+      try {
+        _constructor = c.getConstructor(NO_PARAMS);
+        _constructor.setAccessible(true);
+      }
+      catch (Exception e1) {
+        try {
+          _constructor = c.getDeclaredConstructor(NO_PARAMS);
+          _constructor.setAccessible(true);
+        }
+        catch (Exception e2) {
+          throw new JAXBException(L.l("Zero-arg constructor not found for class {0}", c.getName()), e2);
+        }
+      }
 
       _typeName = new QName(JAXBUtil.getXmlSchemaDatatype(_class));
       
@@ -151,7 +176,7 @@ public class ClassSkeleton<C> extends Skeleton {
         else
           _elementName = new QName(xre.namespace(), localName);
 
-	_typeName = _elementName;
+        _typeName = _elementName;
 
         _context.addRootElement(this);
       }
@@ -174,35 +199,16 @@ public class ClassSkeleton<C> extends Skeleton {
           Method get = property.getReadMethod();
           Method set = property.getWriteMethod();
 
-	  if (property.getPropertyType() == null) {
-	    continue;
-	  }
+          if (property.getPropertyType() == null) {
+            continue;
+          }
 
           if (get != null && get.isAnnotationPresent(XmlTransient.class))
             continue;
           if (set != null && set.isAnnotationPresent(XmlTransient.class))
             continue;
 
-          Accessor a = new Accessor.GetterSetterAccessor(property, _context);
-          Property p = _context.createProperty(a);
-
-          if (a.getAnnotation(XmlValue.class) != null) {
-            if (_value != null)
-              throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
-
-            _value = p;
-          }
-          else if (a.getAnnotation(XmlAttribute.class) != null)
-            _attributeProperties.put(p.getName(), p);
-          else {
-            if (_value != null)
-              throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
-
-            _elementProperties.put(p.getName(), p);
-          }
-
-          if (! p.isXmlPrimitiveType())
-            _context.createSkeleton(property.getPropertyType());
+          addAccessor(new GetterSetterAccessor(property, _context));
         }
       } 
 
@@ -212,45 +218,59 @@ public class ClassSkeleton<C> extends Skeleton {
 
         for (Field f : fields) {
           if (Modifier.isStatic(f.getModifiers()))
-	    continue;
-          if (Modifier.isTransient(f.getModifiers()))
-	    continue;
+            continue;
           if (f.isAnnotationPresent(XmlTransient.class))
-	    continue;
+            continue;
+          // jaxb/0176: transient modifier ignored
 
           if (accessType == XmlAccessType.PUBLIC_MEMBER
-	      && ! Modifier.isPublic(f.getModifiers()))
+              && ! Modifier.isPublic(f.getModifiers()))
             continue;
 
           // XXX : XmlAccessType.NONE
 
-          Accessor a = new Accessor.FieldAccessor(f, _context);
-          Property p = _context.createProperty(a);
-
-          if (a.getAnnotation(XmlValue.class) != null) {
-            if (_value != null)
-              throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
-
-            _value = p;
-          }
-          else if (a.getAnnotation(XmlAttribute.class) != null)
-            _attributeProperties.put(p.getName(), p);
-          else {
-            if (_value != null)
-              throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
-
-            _elementProperties.put(p.getName(), p);
-          }
-
-          // Make sure the field's type is in the context so that the
-          // schema generates correctly
-          if (! p.isXmlPrimitiveType())
-            _context.getSkeleton(f.getType());
+          addAccessor(new FieldAccessor(f, _context));
         }
       }
     }
     catch (Exception e) {
       throw new JAXBException(e);
+    }
+  }
+
+  private void addAccessor(Accessor a)
+    throws JAXBException
+  {
+    if (a.getAnnotation(XmlValue.class) != null) {
+      if (_value != null)
+        throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
+
+      if (! a.isXmlPrimitiveType() && 
+          ! Collection.class.isAssignableFrom(a.getType()))
+        throw new JAXBException(L.l("XmlValue must be either a collection or a simple type"));
+
+      _value = a;
+    }
+    else if (a.getAnnotation(XmlAttribute.class) != null)
+      _attributeAccessors.put(a.getName(), a);
+    else {
+      if (_value != null)
+        throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
+
+      _elementAccessors.put(a.getName(), a);
+    }
+
+    // Make sure the field's type is in the context so that the
+    // schema generates correctly
+    /*
+    if ((a instanceof IterableProperty) && 
+        ! ((IterableProperty) p).getComponentProperty().isXmlPrimitiveType()) {
+      Property compProp = ((IterableProperty) p).getComponentProperty();
+      _context.createSkeleton(compProp.getAccessor().getType());
+    }
+    else */
+    if (! a.isXmlPrimitiveType()) {
+      _context.createSkeleton(a.getType());
     }
   }
 
@@ -266,16 +286,19 @@ public class ClassSkeleton<C> extends Skeleton {
         if (xmlType.factoryClass() == XmlType.DEFAULT.class)
           factoryClass = _class;
         
-        if (!"".equals(xmlType.factoryMethod())) {
-          Method m = factoryClass.getMethod(xmlType.factoryMethod(),
-                                            new Class[] { });
-          // XXX: make sure m is static
+        if (! "".equals(xmlType.factoryMethod())) {
+          Method m = factoryClass.getMethod(xmlType.factoryMethod(), NO_PARAMS);
+
+          if (! Modifier.isStatic(m.getModifiers()))
+            throw new JAXBException(L.l("Factory method not static"));
+
           return (C) m.invoke(null);
         }
       }
       
-      Constructor con = _class.getConstructor(new Class[] { });
-      return (C)con.newInstance(new Object[] { });
+      Constructor con = _class.getConstructor(NO_PARAMS);
+
+      return (C)con.newInstance(NO_ARGS);
     }
     catch (Exception e) {
       throw new JAXBException(e);
@@ -291,8 +314,7 @@ public class ClassSkeleton<C> extends Skeleton {
     throws IOException, XMLStreamException, JAXBException
   {
     try {
-      Constructor constructor = _class.getConstructor(new Class[] { });
-      C ret = (C) constructor.newInstance();
+      C ret = (C) _constructor.newInstance();
       in.next();
 
       if (_beforeUnmarshal != null)
@@ -302,9 +324,9 @@ public class ClassSkeleton<C> extends Skeleton {
       
       while (in.getEventType() != -1) {
         if (in.getEventType() == in.START_ELEMENT) {
-          Property prop = getProperty(in.getName());
-          Object val = prop.read(u, in);
-          prop.set(ret, val);
+          Accessor a = getAccessor(in.getName());
+          Object val = a.read(u, in);
+          a.set(ret, val);
         } 
         else if (in.getEventType() == in.END_ELEMENT) {
           in.next();
@@ -319,9 +341,6 @@ public class ClassSkeleton<C> extends Skeleton {
         u.getListener().afterUnmarshal(ret, null);
       
       return ret;
-    }
-    catch (NoSuchMethodException e) {
-      throw new JAXBException(e);
     }
     catch (InstantiationException e) {
       throw new JAXBException(e);
@@ -357,8 +376,8 @@ public class ClassSkeleton<C> extends Skeleton {
         out.writeStartElement(tagName.getNamespaceURI(),
                               tagName.getLocalPart());
 
-      for (Property p : _elementProperties.values())
-        p.write(m, out, p.get(obj));
+      for (Accessor a : _elementAccessors.values())
+        a.write(m, out, a.get(obj));
       
       out.writeEndElement();
       
@@ -434,21 +453,37 @@ public class ClassSkeleton<C> extends Skeleton {
   public void generateSchemaType(XMLStreamWriter out)
     throws JAXBException, XMLStreamException
   {
-    out.writeStartElement(XML_SCHEMA_PREFIX, "complexType", XML_SCHEMA_NS);
+    if (_value != null) {
+      out.writeStartElement(XML_SCHEMA_PREFIX, "simpleType", XML_SCHEMA_NS);
 
-    if (! "".equals(_typeName.getLocalPart()))
-      out.writeAttribute("name", _typeName.getLocalPart());
+      if (! "".equals(_typeName.getLocalPart()))
+        out.writeAttribute("name", _typeName.getLocalPart());
 
-    out.writeStartElement(XML_SCHEMA_PREFIX, "sequence", XML_SCHEMA_NS);
+      out.writeEmptyElement(XML_SCHEMA_PREFIX, "restriction", XML_SCHEMA_NS);
+      out.writeAttribute("base", _value.getSchemaType());
 
-    for (Property property : _elementProperties.values())
-      property.generateSchema(out);
+      for (Accessor accessor : _attributeAccessors.values())
+        accessor.generateSchema(out);
 
-    out.writeEndElement(); // sequence
+      out.writeEndElement(); // simpleType
+    }
+    else {
+      out.writeStartElement(XML_SCHEMA_PREFIX, "complexType", XML_SCHEMA_NS);
 
-    for (Property property : _attributeProperties.values())
-      property.generateSchema(out);
+      if (! "".equals(_typeName.getLocalPart()))
+        out.writeAttribute("name", _typeName.getLocalPart());
 
-    out.writeEndElement(); // complexType
+      out.writeStartElement(XML_SCHEMA_PREFIX, "sequence", XML_SCHEMA_NS);
+
+      for (Accessor accessor : _elementAccessors.values())
+        accessor.generateSchema(out);
+
+      out.writeEndElement(); // sequence
+
+      for (Accessor accessor : _attributeAccessors.values())
+        accessor.generateSchema(out);
+
+      out.writeEndElement(); // complexType
+    }
   }
 }

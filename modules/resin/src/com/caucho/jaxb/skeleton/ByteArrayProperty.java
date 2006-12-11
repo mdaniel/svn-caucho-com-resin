@@ -37,10 +37,7 @@ import java.io.IOException;
  * a ByteArray Property
  */
 public class ByteArrayProperty extends CDataProperty {
-
-  public ByteArrayProperty(Accessor a) {
-    super(a);
-  }
+  public static final ByteArrayProperty PROPERTY = new ByteArrayProperty();
 
   protected String write(Object in)
       throws IOException, XMLStreamException
@@ -54,13 +51,8 @@ public class ByteArrayProperty extends CDataProperty {
     return DatatypeConverter.parseBase64Binary(in);
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:base64Binary";
-  }
-
-  protected boolean isPrimitiveType()
-  {
-    return false;
   }
 }

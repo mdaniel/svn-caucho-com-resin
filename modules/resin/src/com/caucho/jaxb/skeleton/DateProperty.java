@@ -37,10 +37,7 @@ import java.util.Calendar;
  * a Date Property
  */
 public class DateProperty extends CDataProperty {
-
-  public DateProperty(Accessor a) {
-    super(a);
-  }
+  public static final DateProperty PROPERTY = new DateProperty();
 
   protected String write(Object in)
     throws IOException, XMLStreamException
@@ -54,15 +51,8 @@ public class DateProperty extends CDataProperty {
     return DatatypeConverter.parseDate(in);
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:date";
   }
-
-  protected boolean isPrimitiveType()
-  {
-    return false;
-  }
 }
-
-

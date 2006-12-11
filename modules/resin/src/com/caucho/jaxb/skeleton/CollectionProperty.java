@@ -38,14 +38,6 @@ import java.util.Iterator;
  * a Collection Property
  */
 public class CollectionProperty extends IterableProperty {
-
-  public CollectionProperty(Accessor a)
-    throws JAXBException
-  {
-    super(a, a.getContext()
-          .createProperty(new Accessor.CollectionComponentAccessor(a)));
-  }
-
   public int size(Object o)
   {
     return ((Collection)o).size();
@@ -62,17 +54,12 @@ public class CollectionProperty extends IterableProperty {
     throw new UnsupportedOperationException();
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     throw new UnsupportedOperationException();
   }
-
-  protected boolean isPrimitiveType()
-  {
-    return false;
-  }
   
-  protected boolean isXmlPrimitiveType()
+  public boolean isXmlPrimitiveType()
   {
     return false;
   }

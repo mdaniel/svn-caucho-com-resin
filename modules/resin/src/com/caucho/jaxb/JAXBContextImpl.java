@@ -73,9 +73,6 @@ public class JAXBContextImpl extends JAXBContext {
   private LinkedHashMap<Class,ClassSkeleton> _classSkeletons 
     = new LinkedHashMap<Class,ClassSkeleton>();
 
-  private LinkedHashSet<WrapperSkeleton> _wrappers 
-    = new LinkedHashSet<WrapperSkeleton>();
-
   private HashMap<QName,Skeleton> _roots 
     = new HashMap<QName,Skeleton>();
 
@@ -242,9 +239,6 @@ public class JAXBContextImpl extends JAXBContext {
     for (Skeleton skeleton : _classSkeletons.values())
       skeleton.generateSchema(out);
 
-    for (Skeleton skeleton : _wrappers)
-      skeleton.generateSchema(out);
-
     out.writeEndElement(); // schema
   }
 
@@ -252,6 +246,10 @@ public class JAXBContextImpl extends JAXBContext {
     throws JAXBException
   {
     if (_classSkeletons.containsKey(c))
+      return;
+
+    // XXX
+    if (c.isEnum() || c.isInterface())
       return;
 
     // Breadcrumb to prevent problems with recursion
@@ -278,7 +276,7 @@ public class JAXBContextImpl extends JAXBContext {
       ClassSkeleton skeleton = _classSkeletons.get(cl);
 
       if (skeleton != null)
-	return skeleton;
+        return skeleton;
 
       cl = cl.getSuperclass();
     }
@@ -286,63 +284,70 @@ public class JAXBContextImpl extends JAXBContext {
     throw new JAXBException(L.l("Class {0} unknown to this JAXBContext", cl));
   }
 
-  public Property createProperty(Accessor a)
+  public Property createProperty(Class type)
     throws JAXBException
   {
-    Class type = a.getType();
-
     if (String.class.equals(type))
-      return new StringProperty(a);
+      return StringProperty.PROPERTY;
 
     if (Map.class.equals(type))
-      return new MapProperty(a);
+      return new MapProperty();
 
     if (double.class.equals(type) || Double.class.equals(type))
-      return new DoubleProperty(a, type.isPrimitive());
+      return DoubleProperty.PROPERTY;
 
     if (float.class.equals(type) || Float.class.equals(type))
-      return new FloatProperty(a, type.isPrimitive());
+      return FloatProperty.PROPERTY;
 
     if (int.class.equals(type) || Integer.class.equals(type))
-      return new IntProperty(a, type.isPrimitive());
+      return IntProperty.PROPERTY;
 
     if (Long.class.equals(type) || Long.TYPE.equals(type))
-      return new LongProperty(a, type.isPrimitive());
+      return LongProperty.PROPERTY;
 
     if (boolean.class.equals(type) || Boolean.class.equals(type))
-      return new BooleanProperty(a, type.isPrimitive());
+      return BooleanProperty.PROPERTY;
 
     if (Character.class.equals(type) || Character.TYPE.equals(type))
-      return new CharacterProperty(a, type.isPrimitive());
+      return CharacterProperty.PROPERTY;
 
     if (Short.class.equals(type) || Short.TYPE.equals(type))
-      return new ShortProperty(a, type.isPrimitive());
+      return ShortProperty.PROPERTY;
 
     if (Byte.class.equals(type) || Byte.TYPE.equals(type))
-      return new ByteProperty(a, type.isPrimitive());
+      return ByteProperty.PROPERTY;
 
     if (BigDecimal.class.equals(type))
-      return new BigDecimalProperty(a);
+      return BigDecimalProperty.PROPERTY;
 
     if (BigInteger.class.equals(type))
-      return new BigIntegerProperty(a);
+      return BigIntegerProperty.PROPERTY;
+
+    if (QName.class.equals(type))
+      return QNameProperty.PROPERTY;
 
     if (List.class.equals(type))
-      return new ListProperty(a);
+      return new ListProperty();
 
     if (Date.class.equals(type))
-      return new DateProperty(a);
+      return DateTimeProperty.PROPERTY;
+
+    if (Calendar.class.equals(type))
+      return DateTimeProperty.PROPERTY;
 
     if (byte[].class.equals(type))
-      return new ByteArrayProperty(a);
+      return ByteArrayProperty.PROPERTY;
 
     if (Collection.class.isAssignableFrom(type))
-      return new CollectionProperty(a);
+      return new CollectionProperty();
 
     if (type.isArray())
-      return new ArrayProperty(a);
+      return new ArrayProperty();
 
-    return new SkeletonProperty(getSkeleton(type), a);
+    if (type.isEnum())
+      return new EnumProperty();
+
+    return new SkeletonProperty(getSkeleton(type));
   }
 
   public void addRootElement(Skeleton s) 
@@ -353,28 +358,6 @@ public class JAXBContextImpl extends JAXBContext {
   public Skeleton getRootElement(QName q)
   {
     return _roots.get(q);
-  }
-
-  /**
-   *
-   * A Resin-specific method that allows adding a skeleton to the context
-   * which doesn't actually represent a java class.  This is specifically
-   * for JAX-WS functionality which wraps arguments and return values for
-   * communication.  Adding a wrapper as a skeleton also allows writing
-   * its schema without generating a new class.
-   *
-   **/
-  public void addWrapperType(QName elementName, 
-                             QName typeName,
-                             List<QName> names, 
-                             List<Class> wrapped)
-    throws JAXBException
-  {
-    WrapperSkeleton wrapper = 
-      new WrapperSkeleton(this, elementName, typeName, names, wrapped);
-
-    addRootElement(wrapper);
-    _wrappers.add(wrapper);
   }
 
   private void loadPackage(String packageName) 
@@ -417,6 +400,7 @@ public class JAXBContextImpl extends JAXBContext {
 
         if (! "".equals(className)) {
           Class cl = CauchoSystem.loadClass(packageName + "." + className);
+
           createSkeleton(cl);
         }
       }

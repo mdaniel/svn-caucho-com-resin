@@ -37,14 +37,8 @@ import java.io.IOException;
  * a short property
  */
 public class ShortProperty extends CDataProperty {
-  private boolean _isPrimitiveType;
+  public static final ShortProperty PROPERTY = new ShortProperty();
 
-  public ShortProperty(Accessor accessor, boolean isPrimitiveType) {
-    super(accessor);
-
-    _isPrimitiveType = isPrimitiveType;
-  }
-  
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
@@ -57,13 +51,8 @@ public class ShortProperty extends CDataProperty {
     return Short.valueOf(DatatypeConverter.parseShort(in));
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:short";
-  }
-
-  protected boolean isPrimitiveType()
-  {
-    return _isPrimitiveType;
   }
 }

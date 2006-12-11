@@ -37,13 +37,7 @@ import java.io.IOException;
  * a Long Property
  */
 public class LongProperty extends CDataProperty {
-  private boolean _isPrimitiveType;
-
-  public LongProperty(Accessor a, boolean isPrimitiveType) {
-    super(a);
-
-    _isPrimitiveType = isPrimitiveType;
-  }
+  public static final LongProperty PROPERTY = new LongProperty();
 
   protected String write(Object in)
     throws IOException, XMLStreamException
@@ -57,14 +51,9 @@ public class LongProperty extends CDataProperty {
     return Long.valueOf(DatatypeConverter.parseLong(in));
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:long";
-  }
-
-  protected boolean isPrimitiveType()
-  {
-    return _isPrimitiveType;
   }
 }
 

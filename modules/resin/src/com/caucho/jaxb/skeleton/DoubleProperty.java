@@ -36,13 +36,7 @@ import java.io.IOException;
  * a Double Property
  */
 public class DoubleProperty extends CDataProperty {
-  private boolean _isPrimitiveType;
-
-  public DoubleProperty(Accessor a, boolean isPrimitiveType) {
-    super(a);
-
-    _isPrimitiveType = isPrimitiveType;
-  }
+  public static final DoubleProperty PROPERTY = new DoubleProperty();
 
   protected String write(Object in)
       throws IOException, XMLStreamException
@@ -56,13 +50,8 @@ public class DoubleProperty extends CDataProperty {
     return DatatypeConverter.parseDouble(in);
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:double";
-  }
-
-  protected boolean isPrimitiveType()
-  {
-    return _isPrimitiveType;
   }
 }

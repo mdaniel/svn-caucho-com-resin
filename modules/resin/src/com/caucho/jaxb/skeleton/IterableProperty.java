@@ -43,19 +43,10 @@ import java.util.Iterator;
  */
 public abstract class IterableProperty extends Property {
 
-  private Property _componentProperty;
-  private XmlElementWrapper _wrap;
+  private Property _componentProperty = null;
 
   protected abstract int size(Object o);
   protected abstract Iterator getIterator(Object o);
-
-  public IterableProperty(Accessor a, Property cp)
-    throws JAXBException
-  {
-    super(a);
-    _componentProperty = cp;
-    _wrap = (XmlElementWrapper)a.getAnnotation(XmlElementWrapper.class);
-  }
   
   public Object read(Unmarshaller u, XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
@@ -66,6 +57,7 @@ public abstract class IterableProperty extends Property {
   public void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
+    /* XXX
     if (obj == null) {
       if (_wrap == null || !_wrap.nillable()) return;
     }
@@ -81,7 +73,7 @@ public abstract class IterableProperty extends Property {
     }
 
     if (_wrap != null)
-      writeEndElement(out, obj);
+      writeEndElement(out, obj);*/
   }
 
   protected Property getComponentProperty()

@@ -40,12 +40,6 @@ import java.io.IOException;
  * a Map property
  */
 public class MapProperty extends Property {
-
-  public MapProperty(Accessor a)
-  {
-    super(a);
-  }
-  
   public Object read(Unmarshaller u, XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -75,17 +69,12 @@ public class MapProperty extends Property {
     throw new UnsupportedOperationException();
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     throw new UnsupportedOperationException();
   }
 
-  protected boolean isPrimitiveType()
-  {
-    return false;
-  }
-
-  protected boolean isXmlPrimitiveType()
+  public boolean isXmlPrimitiveType()
   {
     return false;
   }

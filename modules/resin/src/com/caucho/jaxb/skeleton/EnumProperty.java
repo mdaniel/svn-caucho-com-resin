@@ -28,38 +28,29 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import javax.xml.bind.DatatypeConverter;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.math.BigInteger;
 
 /**
- * a BigInteger Property
+ * a string property
  */
-public class BigIntegerProperty extends CDataProperty {
-  public static final BigIntegerProperty PROPERTY = new BigIntegerProperty();
-
+public class EnumProperty extends CDataProperty {
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
-    return DatatypeConverter.printInteger((BigInteger) in);
+    return in == null ? null : in.toString();
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return DatatypeConverter.parseInteger(in);
+    return in;
   }
 
   public String getSchemaType()
   {
-    return "xsd:integer";
+    return "xsd:string";
   }
 
-  public boolean isXmlPrimitiveType()
-  {
-    return true;
-  }
+  // XXX: schema generation
 }
-
-

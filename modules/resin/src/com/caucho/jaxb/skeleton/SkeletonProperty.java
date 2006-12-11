@@ -46,9 +46,9 @@ public class SkeletonProperty extends Property {
 
   private Skeleton _skeleton;
 
-  public SkeletonProperty(Skeleton skeleton, Accessor a) {
-    super(a);
-    this._skeleton = skeleton;
+  public SkeletonProperty(Skeleton skeleton)
+  {
+    _skeleton = skeleton;
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in)
@@ -61,21 +61,16 @@ public class SkeletonProperty extends Property {
     throws IOException, XMLStreamException, JAXBException
   {
     // XXX
-    Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
-    skeleton.write(m, out, obj, _accessor.getQName());
+    //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
+    //skeleton.write(m, out, obj, _accessor.getQName());
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return JAXBUtil.qNameToString(_skeleton.getTypeName());
   }
 
-  protected boolean isPrimitiveType()
-  {
-    return false;
-  }
-
-  protected boolean isXmlPrimitiveType()
+  public boolean isXmlPrimitiveType()
   {
     return false;
   }

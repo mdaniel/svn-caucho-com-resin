@@ -18,47 +18,49 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Resin Open Source; if not, write to the
+ * adate with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong
+ * @author Adam Megacz
  */
 
 package com.caucho.jaxb.skeleton;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
-import java.math.BigInteger;
+import com.caucho.jaxb.*;
+import javax.xml.bind.*;
+import javax.xml.namespace.*;
+import javax.xml.stream.*;
+import java.util.*;
+import java.text.*;
+
+import java.lang.reflect.*;
+import java.io.*;
+
+import com.caucho.vfs.WriteStream;
 
 /**
- * a BigInteger Property
+ * a Date Property
  */
-public class BigIntegerProperty extends CDataProperty {
-  public static final BigIntegerProperty PROPERTY = new BigIntegerProperty();
+public class DateTimeProperty extends CDataProperty {
+  public static final DateTimeProperty PROPERTY = new DateTimeProperty();
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
+    throws IOException, XMLStreamException
   {
-    return DatatypeConverter.printInteger((BigInteger) in);
+    return DatatypeConverter.printDate((Calendar) in);
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return DatatypeConverter.parseInteger(in);
+    return DatatypeConverter.parseDate(in);
   }
 
   public String getSchemaType()
   {
-    return "xsd:integer";
-  }
-
-  public boolean isXmlPrimitiveType()
-  {
-    return true;
+    return "xsd:dateTime";
   }
 }
 

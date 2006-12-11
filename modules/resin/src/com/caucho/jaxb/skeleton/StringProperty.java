@@ -35,11 +35,8 @@ import java.io.IOException;
  * a string property
  */
 public class StringProperty extends CDataProperty {
+  public static final StringProperty PROPERTY = new StringProperty();
 
-  public StringProperty(Accessor a) {
-    super(a);
-  }
-  
   protected String write(Object in)
       throws IOException, XMLStreamException
   {
@@ -52,13 +49,8 @@ public class StringProperty extends CDataProperty {
     return in;
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:string";
-  }
-
-  protected boolean isPrimitiveType()
-  {
-    return false;
   }
 }

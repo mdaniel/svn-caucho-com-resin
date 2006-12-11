@@ -36,16 +36,10 @@ import java.io.IOException;
  * a Boolean Property
  */
 public class BooleanProperty extends CDataProperty {
-  private boolean _isPrimitiveType;
-
-  public BooleanProperty(Accessor a, boolean isPrimitiveType) {
-    super(a);
-
-    _isPrimitiveType = isPrimitiveType;
-  }
+  public static final BooleanProperty PROPERTY = new BooleanProperty();
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
+    throws IOException, XMLStreamException
   {
     return DatatypeConverter.printBoolean(((Boolean)in).booleanValue());
   }
@@ -56,13 +50,8 @@ public class BooleanProperty extends CDataProperty {
     return Boolean.valueOf(DatatypeConverter.parseBoolean(in));
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:boolean";
-  }
-
-  protected boolean isPrimitiveType()
-  {
-    return _isPrimitiveType;
   }
 }

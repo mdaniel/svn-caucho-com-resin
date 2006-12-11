@@ -37,10 +37,7 @@ import java.math.BigDecimal;
  * a BigDecimal Property
  */
 public class BigDecimalProperty extends CDataProperty {
-
-  public BigDecimalProperty(Accessor a) {
-    super(a);
-  }
+  public static final BigDecimalProperty PROPERTY = new BigDecimalProperty();
 
   protected String write(Object in)
       throws IOException, XMLStreamException
@@ -54,17 +51,12 @@ public class BigDecimalProperty extends CDataProperty {
     return DatatypeConverter.parseDecimal(in);
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:decimal";
   }
 
-  protected boolean isPrimitiveType()
-  {
-    return false;
-  }
-
-  protected boolean isXmlPrimitiveType()
+  public boolean isXmlPrimitiveType()
   {
     return true;
   }

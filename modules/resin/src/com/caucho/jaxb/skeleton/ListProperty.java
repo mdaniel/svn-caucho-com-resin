@@ -39,14 +39,6 @@ import java.util.List;
  * a List Property
  */
 public class ListProperty extends IterableProperty {
-
-  public ListProperty(Accessor a)
-    throws JAXBException
-  {
-    super(a, a.getContext()
-          .createProperty(new Accessor.CollectionComponentAccessor(a)));
-  }
-
   public int size(Object o)
   {
     return ((List) o).size();
@@ -57,25 +49,22 @@ public class ListProperty extends IterableProperty {
     return ((List) o).iterator();
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
+    /*
     Property p = getComponentProperty();
     Accessor a = p.getAccessor();
 
-    return JAXBUtil.getXmlSchemaDatatype(a.getType());
+    return JAXBUtil.getXmlSchemaDatatype(a.getType());*/
+    return "xsd:string"; // XXX
   }
 
-  protected boolean isPrimitiveType()
+  public boolean isXmlPrimitiveType()
   {
-    return false;
+    return getComponentProperty().isXmlPrimitiveType();
   }
 
-  protected boolean isXmlPrimitiveType()
-  {
-    return false;
-  }
-
-  protected String getMaxOccurs()
+  public String getMaxOccurs()
   {
     return "unbounded";
   }

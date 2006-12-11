@@ -36,13 +36,7 @@ import java.io.IOException;
  * a Int Property
  */
 public class IntProperty extends CDataProperty {
-  private boolean _isPrimitiveType;
-
-  public IntProperty(Accessor a, boolean isPrimitiveType) {
-    super(a);
-
-    _isPrimitiveType = isPrimitiveType;
-  }
+  public static final IntProperty PROPERTY = new IntProperty();
 
   protected String write(Object in)
     throws IOException, XMLStreamException
@@ -56,14 +50,9 @@ public class IntProperty extends CDataProperty {
     return DatatypeConverter.parseInt(in);
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:int";
-  }
-
-  protected boolean isPrimitiveType()
-  {
-    return _isPrimitiveType;
   }
 }
 

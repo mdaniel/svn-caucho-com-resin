@@ -36,13 +36,7 @@ import java.io.IOException;
  * a Byte Property
  */
 public class ByteProperty extends CDataProperty {
-  private boolean _isPrimitiveType;
-
-  public ByteProperty(Accessor a, boolean isPrimitiveType) {
-    super(a);
-
-    _isPrimitiveType = isPrimitiveType;
-  }
+  public static final ByteProperty PROPERTY = new ByteProperty();
 
   protected String write(Object in)
       throws IOException, XMLStreamException
@@ -56,13 +50,8 @@ public class ByteProperty extends CDataProperty {
     return DatatypeConverter.parseByte(in);
   }
 
-  protected String getSchemaType()
+  public String getSchemaType()
   {
     return "xsd:byte";
-  }
-
-  protected boolean isPrimitiveType()
-  {
-    return _isPrimitiveType;
   }
 }
