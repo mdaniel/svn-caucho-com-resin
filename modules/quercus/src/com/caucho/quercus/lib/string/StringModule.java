@@ -3135,7 +3135,7 @@ v   *
 
     int i = haystackLower.indexOf(needleLower);
 
-    if (i > 0)
+    if (i >= 0)
       return new StringValueImpl(haystack.substring(i));
     else
       return BooleanValue.FALSE;
