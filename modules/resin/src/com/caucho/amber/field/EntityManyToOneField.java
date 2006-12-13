@@ -760,22 +760,30 @@ public class EntityManyToOneField extends CascadableField {
       throw new NullPointerException();
     }
 
-    // The "one" end in the many-to-one relationship.
-    String amberVar = "__amber_" + getName();
-
     String var = "__caucho_field_" + getName();
 
     if (! source.equals("this") && ! source.equals("super"))
       var = source + "." + var;
 
-    // jpa/0j58: avoid breaking FK constraints.
-    out.println("int " + amberVar + "_state = (" + var + " == null) ? ");
-    out.println("com.caucho.amber.entity.Entity.TRANSIENT : ");
-    out.println("((com.caucho.amber.entity.Entity) " + amberVar + ").");
-    out.println("__caucho_getEntityState();");
+    if (! isAbstract()) {
+      // jpa/1004
+      out.println("if (" + var + " != null) {");
+    }
+    else {
+      // jpa/0j58: avoids breaking FK constraints.
 
-    out.println("if (" + amberVar + "_state >= com.caucho.amber.entity.Entity.P_NEW &&");
-    out.println("    " + amberVar + "_state <= com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
+      // The "one" end in the many-to-one relationship.
+      String amberVar = getFieldName();
+
+      out.println("int " + amberVar + "_state = (" + var + " == null) ? ");
+      out.println("com.caucho.amber.entity.Entity.TRANSIENT : ");
+      out.println("((com.caucho.amber.entity.Entity) " + amberVar + ").");
+      out.println("__caucho_getEntityState();");
+
+      out.println("if (" + amberVar + "_state >= com.caucho.amber.entity.Entity.P_NEW &&");
+      out.println("    " + amberVar + "_state <= com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
+    }
+
     out.pushDepth();
 
     Id id = getEntityTargetType().getId();

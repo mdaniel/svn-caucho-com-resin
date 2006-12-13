@@ -395,7 +395,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         throw new ConfigException(L.l("{0} does not have any primary keys.  Entities must have at least one @Id or exactly one @EmbeddedId field.",
                                       entityType.getName()));
 
-      // Introspect overridden attributes.
+      // Introspect overridden attributes. (jpa/0ge2)
       introspectAttributeOverrides(type, entityType);
 
       if (isField)
