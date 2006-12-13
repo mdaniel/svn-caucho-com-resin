@@ -2890,6 +2890,21 @@ v   *
           }
         }
       }
+      else if ('0' < aChar && aChar <= '9' &&
+               '0' < bChar && bChar <= '9')
+      {
+        int aInteger = aIn.readInt(aChar);
+        int bInteger = bIn.readInt(bChar);
+        
+        if (aInteger > bInteger)
+          return 1;
+        else if (aInteger < bInteger)
+          return -1;
+        else {
+          aChar = aIn.read();
+          bChar = bIn.read();
+        }
+      }
 
       if (ignoreCase) {
         aChar = Character.toUpperCase(aChar);
@@ -4356,6 +4371,25 @@ v   *
       else
         return -1;
         
+    }
+
+    int readInt(int currChar)
+    {
+      int number = currChar - '0';
+      
+      while (true) {
+        currChar = peek();
+        
+        if ('0' <= currChar && currChar <= '9') {
+          number = number * 10 + currChar - '0';
+          _index++;
+        }
+        else {
+          break;
+        }
+      }
+      
+      return number;
     }
   }
 
