@@ -255,6 +255,14 @@ public class Table {
   }
 
   /**
+   * Remove a given column.
+   */
+  public boolean removeColumn(Column column)
+  {
+    return _columns.remove(column);
+  }
+
+  /**
    * Adds an incoming link.
    */
   void addIncomingLink(LinkColumns link)

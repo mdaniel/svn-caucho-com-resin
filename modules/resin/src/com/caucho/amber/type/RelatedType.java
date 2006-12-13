@@ -39,6 +39,7 @@ import com.caucho.amber.field.EntityManyToOneField;
 import com.caucho.amber.field.Id;
 import com.caucho.amber.field.IdField;
 import com.caucho.amber.field.VersionField;
+import com.caucho.amber.idgen.AmberTableGenerator;
 import com.caucho.amber.idgen.IdGenerator;
 import com.caucho.amber.idgen.SequenceIdGenerator;
 import com.caucho.amber.manager.AmberConnection;
@@ -779,8 +780,13 @@ abstract public class RelatedType extends AbstractStatefulType {
   {
     IdGenerator idGen = _idGenMap.get(name);
 
-    if (idGen instanceof SequenceIdGenerator)
+    if (idGen instanceof SequenceIdGenerator) {
       ((SequenceIdGenerator) idGen).init(_amberPersistenceUnit);
+    }
+    else if (idGen instanceof AmberTableGenerator) {
+      // jpa/0g60
+      ((AmberTableGenerator) idGen).init(_amberPersistenceUnit);
+    }
 
     return idGen.allocate(aConn);
   }

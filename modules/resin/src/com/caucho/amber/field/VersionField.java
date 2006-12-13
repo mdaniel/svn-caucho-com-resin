@@ -63,6 +63,17 @@ public class VersionField extends PropertyField {
   }
 
   /**
+   * Generates the is null test.
+   */
+  public String generateIsNull()
+  {
+    String getter = generateSuperGetter();
+    Type type = getColumn().getType();
+
+    return type.generateIsNull(getter);
+  }
+
+  /**
    * Generates the increment version.
    */
   public void generateIncrementVersion(JavaWriter out)
@@ -73,8 +84,15 @@ public class VersionField extends PropertyField {
 
     long dirtyMask = 1L << (getIndex() % 64);
 
+    String getter = generateSuperGetter();
+    Type type = getColumn().getType();
+
+    // jpa/0x02
     out.println();
-    out.println(generateSuperSetter(generateSuperGetter() + " + 1") + ";");
+    out.println("if (" + generateIsNull() + ")");
+    out.println("  " + generateSuperSetter("new Integer(1)") + ";");
+    out.println("else");
+    out.println("  " + generateSuperSetter(type.generateIncrementVersion(getter)) + ";");
 
     out.println();
     out.println("long oldMask = " + dirtyVar + ";");
@@ -93,6 +111,22 @@ public class VersionField extends PropertyField {
   }
 
   /**
+   * Generates the post constructor initialization.
+   */
+  public void generatePostConstructor(JavaWriter out)
+    throws IOException
+  {
+    // jpa/0x02
+
+    String setter = getSetterName();
+    String typeName = getJavaTypeName();
+    Object initialValue = getColumn().getType().toObject(1);
+
+    out.println("if (" + generateIsNull() + ");");
+    out.println("  __caucho_increment_version();");
+  }
+
+  /**
    * Generates the set version clause.
    */
   public void generateSetVersion(JavaWriter out,
@@ -102,7 +136,8 @@ public class VersionField extends PropertyField {
   {
     String value = generateGet("super");
     Type type = getColumn().getType();
-    getColumn().generateSet(out, pstmt, index, type.generateIncrementVersion(value));
+    // jpa/0x02
+    getColumn().generateSetVersion(out, pstmt, index, value); // type.generateIncrementVersion(value));
   }
 
   /**
@@ -122,15 +157,17 @@ public class VersionField extends PropertyField {
                              String index)
     throws IOException
   {
-    int group = getIndex() / 64;
-
-    out.println();
-    out.println("if (" + maskVar + "_" + group + " != 0L) {");
-    out.pushDepth();
+    // jpa/0x02
+    //
+    // int group = getIndex() / 64;
+    //
+    // out.println();
+    // out.println("if (" + maskVar + "_" + group + " != 0L) {");
+    // out.pushDepth();
 
     generateSetVersion(out, pstmt, index);
 
-    out.popDepth();
-    out.println("}");
+    // out.popDepth();
+    // out.println("}");
   }
 }

@@ -39,5 +39,7 @@ public class CacheConnection extends AmberConnection {
   CacheConnection(AmberPersistenceUnit persistenceUnit)
   {
     super(persistenceUnit);
+
+    try { throw new Exception("CacheConnection.<constructor>"); } catch (Exception e) {e.printStackTrace(); }
   }
 }

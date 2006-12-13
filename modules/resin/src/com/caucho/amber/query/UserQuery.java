@@ -297,7 +297,7 @@ public class UserQuery implements AmberQuery {
   public ResultSet executeQuery()
     throws SQLException
   {
-    _aConn.flush();
+    _aConn.flushNoChecks();
 
     if (_rs == null)
       _rs = new ResultSetImpl();
@@ -372,6 +372,7 @@ public class UserQuery implements AmberQuery {
     if (maxResults > 0) {
       JdbcMetaData metaData = _aConn.getAmberManager().getMetaData();
 
+      // XXX: should limit meta-data as well?
       sql = metaData.limit(sql, maxResults);
     }
 
@@ -399,7 +400,7 @@ public class UserQuery implements AmberQuery {
   public int executeUpdate()
     throws SQLException
   {
-    _aConn.flush();
+    _aConn.flushNoChecks();
     // XXX: sync
 
     String sql = _query.getSQL();

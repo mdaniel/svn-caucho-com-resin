@@ -534,7 +534,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("try {");
     out.pushDepth();
 
-    out.println("__caucho_session.flush();");
+    out.println("__caucho_session.flushNoChecks();");
 
     out.print("String sql=\"");
 
@@ -607,7 +607,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("try {");
     out.pushDepth();
 
-    out.println("__caucho_session.flush();");
+    out.println("__caucho_session.flushNoChecks();");
 
     out.print("String sql=\"");
 

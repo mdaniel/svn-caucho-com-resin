@@ -237,6 +237,11 @@ public class PropertyField extends AbstractField {
     out.println("{");
     out.pushDepth();
 
+    int maskGroup = getLoadGroupIndex() / 64;
+    String loadVar = "__caucho_loadMask_" + maskGroup;
+
+    long mask = 1L << (getLoadGroupIndex() % 64);
+
     // jpa/0gh0
     if (getSourceType() instanceof EmbeddableType) {
       out.println(generateSuperSetter("v") + ";");
@@ -245,9 +250,11 @@ public class PropertyField extends AbstractField {
       return;
     }
     else {
-      // jpa/0g06
-      out.println("if (__caucho_session != null && __caucho_session.isInTransaction())");
+      // jpa/0g06, jpa/0g0k
+      out.println("if (__caucho_session != null && __caucho_session.isInTransaction()) {");
+      out.println("  __caucho_load_" + maskGroup + "(__caucho_session);");
       out.println("  __caucho_session.makeTransactional(this);");
+      out.println("}");
       out.println();
     }
 
@@ -257,11 +264,6 @@ public class PropertyField extends AbstractField {
     }
     else {
       out.println(getJavaTypeName() + " oldValue = " + generateSuperGetter() + ";");
-
-      int maskGroup = getLoadGroupIndex() / 64;
-      String loadVar = "__caucho_loadMask_" + maskGroup;
-
-      long mask = 1L << (getLoadGroupIndex() % 64);
 
       if (getJavaTypeName().equals("java.lang.String")) {
         out.println("if ((oldValue == v || v != null && v.equals(oldValue)) && (" + loadVar + " & " + mask + "L) != 0L)");

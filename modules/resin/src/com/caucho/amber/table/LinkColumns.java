@@ -405,7 +405,7 @@ public class LinkColumns {
     throws SQLException
   {
     // commented out: jpa/0h25
-    // aConn.flush();
+    // aConn.flushNoChecks();
 
     String sourceTable = _sourceTable.getName();
 

@@ -109,7 +109,7 @@ public class DeleteQuery extends AbstractQuery {
   public void prepare(UserQuery userQuery, AmberConnection aConn)
     throws SQLException
   {
-    aConn.flush();
+    aConn.flushNoChecks();
   }
 
   /**

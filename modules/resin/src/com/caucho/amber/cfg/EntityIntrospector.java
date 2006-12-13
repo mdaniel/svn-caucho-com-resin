@@ -30,9 +30,16 @@
 package com.caucho.amber.cfg;
 
 import com.caucho.amber.AmberTableCache;
+import com.caucho.amber.field.AmberField;
+import com.caucho.amber.field.Id;
+import com.caucho.amber.field.IdField;
+import com.caucho.amber.field.KeyPropertyField;
+import com.caucho.amber.field.PropertyField;
 import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.Type;
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
@@ -40,9 +47,11 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.util.L10N;
 
+import javax.persistence.AttributeOverrides;
 import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -386,6 +395,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         throw new ConfigException(L.l("{0} does not have any primary keys.  Entities must have at least one @Id or exactly one @EmbeddedId field.",
                                       entityType.getName()));
 
+      // Introspect overridden attributes.
+      introspectAttributeOverrides(type, entityType);
+
       if (isField)
         introspectFields(_persistenceUnit, entityType, parentType, type, entityConfig, false);
       else
@@ -427,5 +439,127 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     }
 
     return entityType;
+  }
+
+  private void introspectAttributeOverrides(JClass type,
+                                            EntityType entityType)
+  {
+    getInternalAttributeOverrideConfig(type);
+    JAnnotation attributeOverrideAnn = _annotationCfg.getAnnotation();
+    AttributeOverrideConfig attributeOverrideConfig
+      = _annotationCfg.getAttributeOverrideConfig();
+
+    boolean hasAttributeOverride = ! _annotationCfg.isNull();
+
+    JAnnotation attributeOverridesAnn = type.getAnnotation(AttributeOverrides.class);
+
+    boolean hasAttributeOverrides = (attributeOverridesAnn != null);
+
+    if (hasAttributeOverride && hasAttributeOverrides)
+      throw new ConfigException(L.l("{0} may not have both @AttributeOverride and @AttributeOverrides",
+                                    type));
+
+    Object attOverridesAnn[] = null;
+
+    if (attributeOverrideAnn != null) {
+      attOverridesAnn = new Object[] { attributeOverrideAnn };
+    }
+    else if (attributeOverridesAnn != null) {
+      attOverridesAnn = (Object []) attributeOverridesAnn.get("value");
+    }
+    else
+      return;
+
+    Table sourceTable = entityType.getTable();
+
+    for (int j=0; j < attOverridesAnn.length; j++) {
+
+      JAnnotation attOverrideAnn = (JAnnotation) attOverridesAnn[j];
+
+      String entityFieldName;
+      String columnName;
+      boolean notNull = false;
+      boolean unique = false;
+
+      Type amberType = null;
+
+      ArrayList<AmberField> fields = entityType.getFields();
+
+      for (int i=0; i < fields.size(); i++) {
+
+        AmberField field = fields.get(i);
+
+        // XXX: needs to handle @AttributeOverrides with
+        //      fields other than PropertyField's.
+        if (! (field instanceof PropertyField))
+          continue;
+
+        entityFieldName = field.getName();
+
+        columnName = toSqlName(entityFieldName);
+
+        if (entityFieldName.equals(attOverrideAnn.getString("name"))) {
+
+          JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
+
+          if (columnAnn != null) {
+            columnName = columnAnn.getString("name");
+            notNull = ! columnAnn.getBoolean("nullable");
+            unique = columnAnn.getBoolean("unique");
+            amberType = _persistenceUnit.createType(field.getJavaType().getName());
+
+            Column column = sourceTable.createColumn(columnName, amberType);
+
+            column.setNotNull(notNull);
+            column.setUnique(unique);
+
+            ((PropertyField) field).setColumn(column);
+          }
+        }
+      }
+
+      if (entityType.getId() != null) {
+        ArrayList<IdField> keys = entityType.getId().getKeys();
+
+        for (int i=0; i < keys.size(); i++) {
+
+          IdField field = keys.get(i);
+
+          entityFieldName = field.getName();
+
+          columnName = toSqlName(entityFieldName);
+
+          if (entityFieldName.equals(attOverrideAnn.getString("name"))) {
+
+            JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
+
+            if (columnAnn != null) {
+              columnName = columnAnn.getString("name");
+              notNull = ! columnAnn.getBoolean("nullable");
+              unique = columnAnn.getBoolean("unique");
+              amberType = _persistenceUnit.createType(field.getJavaType().getName());
+
+              Column column = sourceTable.createColumn(columnName, amberType);
+
+              column.setNotNull(notNull);
+              column.setUnique(unique);
+
+              ArrayList<Column> columns = field.getColumns();
+
+              if (field instanceof KeyPropertyField) {
+                if (columns.size() > 0) {
+                  sourceTable.removeColumn(columns.get(0));
+                  columns.remove(0);
+                }
+
+                columns.add(column);
+
+                ((KeyPropertyField) field).setColumn(column);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

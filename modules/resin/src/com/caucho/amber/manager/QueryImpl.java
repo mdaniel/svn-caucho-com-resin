@@ -40,6 +40,8 @@ import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.util.L10N;
 
 import javax.persistence.FlushModeType;
+import javax.persistence.NonUniqueResultException;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import java.lang.reflect.Constructor;
@@ -63,7 +65,6 @@ public class QueryImpl implements Query {
 
   private AmberConnection _aConn;
   private int _firstResult;
-  private int _maxResults = Integer.MAX_VALUE / 2;
 
   private int _currIndex;
 
@@ -256,12 +257,21 @@ public class QueryImpl implements Query {
   public Object getSingleResult()
   {
     try {
+      if (! (_query instanceof SelectQuery))
+        throw new IllegalStateException(L.l("javax.persistence.Query.getSingleResult() can only be applied to a SELECT statement"));
+
       ResultSet rs = executeQuery();
 
       Object value = null;
 
       if (rs.next())
         value = rs.getObject(1);
+      else // jpa/1004
+        throw new NoResultException("Query returned no results for getSingleResult()");
+
+      // jpa/1005
+      if (rs.next())
+        throw new NonUniqueResultException("Query returned more than one result for getSingleResult()");
 
       rs.close();
 
@@ -277,6 +287,10 @@ public class QueryImpl implements Query {
   public int executeUpdate()
   {
     try {
+      // jpa/1006
+      if (_query instanceof SelectQuery)
+        throw new IllegalStateException(L.l("javax.persistence.Query.executeUpdate() cannot be applied to a SELECT statement"));
+
       return _userQuery.executeUpdate();
     } catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
@@ -295,8 +309,13 @@ public class QueryImpl implements Query {
   /**
    * Sets the maximum result returned.
    */
-  public Query setMaxResults(int maxResult)
+  public Query setMaxResults(int maxResults)
   {
+    if (maxResults < 0)
+      throw new IllegalArgumentException(L.l("setMaxResults() needs a non-negative argument, '{0}' is not allowed", maxResults));
+
+    _userQuery.setMaxResults(maxResults);
+
     return this;
   }
 
@@ -307,6 +326,8 @@ public class QueryImpl implements Query {
   {
     if (startPosition < 0)
       throw new IllegalArgumentException("setFirstResult() requires a non-negative argument");
+
+    _userQuery.setFirstResult(startPosition);
 
     return this;
   }
@@ -328,11 +349,17 @@ public class QueryImpl implements Query {
 
     int n = mapping.size();
 
+    boolean found = false;
+
     for (int i=0; i < n; i++) {
       if (mapping.get(i).equals(name)) {
         setParameter(i+1, value);
+        found = true;
       }
     }
+
+    if (! found)
+      throw new IllegalArgumentException(L.l("Parameter name '{0}' is invalid", name));
 
     return this;
   }
@@ -346,11 +373,16 @@ public class QueryImpl implements Query {
 
     int n = mapping.size();
 
+    boolean found = false;
+
     for (int i=0; i < n; i++) {
       if (mapping.get(i).equals(name)) {
         setParameter(i+1, value, type);
       }
     }
+
+    if (! found)
+      throw new IllegalArgumentException(L.l("Parameter name '{0}' is invalid", name));
 
     return this;
   }
@@ -364,11 +396,16 @@ public class QueryImpl implements Query {
 
     int n = mapping.size();
 
+    boolean found = false;
+
     for (int i=0; i < n; i++) {
       if (mapping.get(i).equals(name)) {
         setParameter(i+1, value, type);
       }
     }
+
+    if (! found)
+      throw new IllegalArgumentException(L.l("Parameter name '{0}' is invalid", name));
 
     return this;
   }
@@ -378,24 +415,28 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(int index, Object value)
   {
-    if (value == null)
-      _userQuery.setNull(index, java.sql.Types.JAVA_OBJECT);
-    else if (value instanceof Double)
-      _userQuery.setString(index, value.toString()); // commented out (jpa/141a): ((Double) value).doubleValue());
-    else if (value instanceof Character)
-      _userQuery.setString(index, value.toString());
-    else if (value instanceof Entity) {
-      // XXX: needs to handle Compound PK
+    try {
+      if (value == null)
+        _userQuery.setNull(index, java.sql.Types.JAVA_OBJECT);
+      else if (value instanceof Double)
+        _userQuery.setString(index, value.toString()); // commented out (jpa/141a): ((Double) value).doubleValue());
+      else if (value instanceof Character)
+        _userQuery.setString(index, value.toString());
+      else if (value instanceof Entity) {
+        // XXX: needs to handle Compound PK
 
-      Object pk = ((Entity) value).__caucho_getPrimaryKey();
+        Object pk = ((Entity) value).__caucho_getPrimaryKey();
 
-      _userQuery.setObject(index, pk);
+        _userQuery.setObject(index, pk);
+      }
+      else {
+        _userQuery.setObject(index, value);
+      }
+
+      return this;
+    } catch (IndexOutOfBoundsException e) {
+      throw new IllegalArgumentException(L.l("Parameter index '{0}' is not valid for setParameter()", index));
     }
-    else {
-      _userQuery.setObject(index, value);
-    }
-
-    return this;
   }
 
   /**
@@ -403,24 +444,28 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(int index, Date value, TemporalType type)
   {
-    if (value == null)
-      _userQuery.setNull(index, Types.JAVA_OBJECT);
-    else {
-      switch (type) {
-      case TIME:
-        _userQuery.setObject(index, value, UtilDateType.TEMPORAL_TIME_TYPE);
-        break;
+    try {
+      if (value == null)
+        _userQuery.setNull(index, Types.JAVA_OBJECT);
+      else {
+        switch (type) {
+        case TIME:
+          _userQuery.setObject(index, value, UtilDateType.TEMPORAL_TIME_TYPE);
+          break;
 
-      case DATE:
-        _userQuery.setObject(index, value, UtilDateType.TEMPORAL_DATE_TYPE);
-        break;
+        case DATE:
+          _userQuery.setObject(index, value, UtilDateType.TEMPORAL_DATE_TYPE);
+          break;
 
-      default:
-        _userQuery.setObject(index, value, UtilDateType.TEMPORAL_TIMESTAMP_TYPE);
+        default:
+          _userQuery.setObject(index, value, UtilDateType.TEMPORAL_TIMESTAMP_TYPE);
+        }
       }
-    }
 
-    return this;
+      return this;
+    } catch (IndexOutOfBoundsException e) {
+      throw new IllegalArgumentException(L.l("Parameter index '{0}' is not valid for setParameter()", index));
+    }
   }
 
   /**
@@ -428,24 +473,28 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(int index, Calendar value, TemporalType type)
   {
-    if (value == null)
-      _userQuery.setNull(index, Types.JAVA_OBJECT);
-    else {
-      switch (type) {
-      case TIME:
-        _userQuery.setObject(index, value, CalendarType.TEMPORAL_TIME_TYPE);
-        break;
+    try {
+      if (value == null)
+        _userQuery.setNull(index, Types.JAVA_OBJECT);
+      else {
+        switch (type) {
+        case TIME:
+          _userQuery.setObject(index, value, CalendarType.TEMPORAL_TIME_TYPE);
+          break;
 
-      case DATE:
-        _userQuery.setObject(index, value, CalendarType.TEMPORAL_DATE_TYPE);
-        break;
+        case DATE:
+          _userQuery.setObject(index, value, CalendarType.TEMPORAL_DATE_TYPE);
+          break;
 
-      default:
-        _userQuery.setObject(index, value, CalendarType.TEMPORAL_TIMESTAMP_TYPE);
+        default:
+          _userQuery.setObject(index, value, CalendarType.TEMPORAL_TIMESTAMP_TYPE);
+        }
       }
-    }
 
-    return this;
+      return this;
+    } catch (IndexOutOfBoundsException e) {
+      throw new IllegalArgumentException(L.l("Parameter index '{0}' is not valid for setParameter()", index));
+    }
   }
 
   /**

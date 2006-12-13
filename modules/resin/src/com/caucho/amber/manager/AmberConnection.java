@@ -50,10 +50,13 @@ import com.caucho.jca.UserTransactionProxy;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
+import javax.persistence.TransactionRequiredException;
 import javax.sql.DataSource;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -255,6 +258,8 @@ public class AmberConnection
       if (! (entity instanceof Entity))
         throw new IllegalArgumentException("persist() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
 
+      checkTransactionRequired("persist");
+
       Entity instance = (Entity) entity;
 
       // jpa/0h24
@@ -271,10 +276,8 @@ public class AmberConnection
         instance.__caucho_makePersistent(null, (EntityType) null);
         createInternal(instance);
       }
-      else {
-        // managed entity instance: ignored, i.e.
-        // only the cascade is performed.
-      }
+      else // jpa/0ga5
+        throw new EntityExistsException(L.l("Trying to persist an entity that is detached or already exists."));
 
       // jpa/0h27
       // Post-persist child entities.
@@ -299,7 +302,7 @@ public class AmberConnection
       if (! (entityT instanceof Entity))
         throw new IllegalArgumentException("merge() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
 
-      flush();
+      flushInternal();
 
       Entity entity = (Entity) entityT;
 
@@ -351,12 +354,21 @@ public class AmberConnection
       if (! (entity instanceof Entity))
         throw new IllegalArgumentException("remove() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
 
+      checkTransactionRequired("remove");
+
       Entity instance = (Entity) entity;
 
       int state = instance.__caucho_getEntityState();
 
       if (state >= com.caucho.amber.entity.Entity.P_DELETING)
         return;
+
+      Object oldEntity = getEntity(instance.getClass().getName(),
+                                   instance.__caucho_getPrimaryKey());
+
+      // jpa/0ga4
+      if (oldEntity == null)
+        throw new IllegalArgumentException("remove() operation can only be applied to a managed entity instance.");
 
       // Pre-remove child entities.
       instance.__caucho_cascadePreRemove(this);
@@ -431,8 +443,30 @@ public class AmberConnection
    * Find by the primary key.
    */
   public <T> T getReference(Class<T> entityClass, Object primaryKey)
+    throws EntityNotFoundException, IllegalArgumentException
   {
-    throw new UnsupportedOperationException();
+    T reference = null;
+
+    try {
+      // XXX: only needs to get a reference.
+
+      reference = find(entityClass, primaryKey);
+
+      if (reference == null)
+        throw new EntityNotFoundException(L.l("entity with primary key {0} not found in getReference()", primaryKey));
+
+      if (! (entityClass.isAssignableFrom(Entity.class)))
+        throw new IllegalArgumentException(L.l("getReference() operation can only be applied to an entity class"));
+
+      return reference;
+
+    } catch (EntityNotFoundException e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw new IllegalArgumentException(e);
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
   }
 
   /**
@@ -440,7 +474,8 @@ public class AmberConnection
    */
   public void clear()
   {
-    throw new UnsupportedOperationException();
+    _entities.clear();
+    _txEntities.clear();
   }
 
   /**
@@ -505,11 +540,21 @@ public class AmberConnection
       if (! (entity instanceof Entity))
         throw new IllegalArgumentException("refresh() operation can only be applied to an entity instance.");
 
+      checkTransactionRequired("refresh");
+
       Entity instance = (Entity) entity;
 
-      int state = instance.__caucho_getEntityState();
+      Object oldEntity = getEntity(instance.getClass().getName(),
+                                   instance.__caucho_getPrimaryKey());
 
-      if (state <= Entity.TRANSIENT || state >= Entity.P_DELETING)
+      if (oldEntity != null) {
+        int state = instance.__caucho_getEntityState();
+
+        if (state <= Entity.TRANSIENT || state >= Entity.P_DELETING)
+          oldEntity = null;
+      }
+
+      if (oldEntity == null)
         throw new IllegalArgumentException("refresh() operation can only be applied to a managed entity instance.");
 
       // Reset and refresh state.
@@ -1119,13 +1164,23 @@ public class AmberConnection
     throws SQLException
   {
     try {
-      flush();
+      flushInternal();
 
       _xid = 0;
       if (_conn != null) {
         _conn.commit();
       }
-    } finally {
+    }
+    catch (RuntimeException e) {
+      throw e;
+    }
+    catch (SQLException e) {
+      throw new IllegalStateException(e);
+    }
+    catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+    finally {
       if (! _isXA)
         _isInTransaction = false;
 
@@ -1204,6 +1259,18 @@ public class AmberConnection
     }
 
     _txEntities.clear();
+
+    if (! isCommit) {
+      // jpa/0j5c
+      _entities.clear();
+
+      try {
+        if (_conn != null)
+          _conn.rollback();
+      } catch (SQLException e) {
+        throw new IllegalStateException(e);
+      }
+    }
   }
 
   /**
@@ -1213,13 +1280,23 @@ public class AmberConnection
     throws SQLException
   {
     try {
-      flush();
+      flushInternal();
 
       _xid = 0;
       if (_conn != null) {
         _conn.rollback();
       }
-    } finally {
+    }
+    catch (RuntimeException e) {
+      throw e;
+    }
+    catch (SQLException e) {
+      throw new IllegalStateException(e);
+    }
+    catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+    finally {
       if (! _isXA)
         _isInTransaction = false;
 
@@ -1236,50 +1313,38 @@ public class AmberConnection
   }
 
   /**
-   * Commits a transaction.
+   * Flushes managed entities.
    */
   public void flush()
   {
     try {
-      for (int i = _txEntities.size() - 1; i >= 0; i--) {
-        Entity entity = _txEntities.get(i);
+      checkTransactionRequired("flush");
 
-        int state = entity.__caucho_getEntityState();
+      flushInternal();
 
-        // jpa/0h27: for all entities Y referenced by a *managed*
-        // entity X, where the relationship has been annotated
-        // with cascade=PERSIST/ALL, the persist operation is
-        // applied to Y. It is a lazy cascade as the relationship
-        // is not always initialized at the time persist(X) was
-        // called but must be at flush time.
-        if (state < Entity.P_DELETING) {
-          entity.__caucho_cascadePrePersist(this);
-          // entity.__caucho_cascadePostPersist(this);
-        }
-      }
-
-      for (int i = _txEntities.size() - 1; i >= 0; i--) {
-        Entity entity = _txEntities.get(i);
-
-        entity.__caucho_flush();
-      }
-
-      if (! isInTransaction()) {
-        if (_completionList.size() > 0) {
-          _persistenceUnit.complete(_completionList);
-        }
-        _completionList.clear();
-
-        for (int i = 0; i < _txEntities.size(); i++) {
-          Entity entity = _txEntities.get(i);
-
-          entity.__caucho_afterCommit();
-        }
-
-        _txEntities.clear();
-      }
+    } catch (RuntimeException e) {
+      throw e;
     } catch (SQLException e) {
-      throw new AmberRuntimeException(e);
+      throw new IllegalStateException(e);
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  /**
+   * Flushes managed entities.
+   */
+  public void flushNoChecks()
+  {
+    try {
+      flushInternal();
+
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (SQLException e) {
+      throw new IllegalStateException(e);
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
     }
   }
 
@@ -1754,8 +1819,18 @@ public class AmberConnection
   public void cleanup()
   {
     try {
-      flush();
-    } finally {
+      flushInternal();
+    }
+    catch (RuntimeException e) {
+      throw e;
+    }
+    catch (SQLException e) {
+      throw new IllegalStateException(e);
+    }
+    catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+    finally {
       _depth = 0;
 
       for (int i = _entities.size() - 1; i >= 0; i--) {
@@ -1912,7 +1987,7 @@ public class AmberConnection
     // XXX: flushing things like delete might be useful?
     // XXX: the issue is a flush can break FK constraints and
     //      fail prematurely (jpa/0h26).
-    // commented out: flush();
+    // commented out: flushInternal();
 
     if (contains(obj))
       return;
@@ -1929,5 +2004,59 @@ public class AmberConnection
 
     Table table = home.getEntityType().getTable();
     addCompletion(new TableInvalidateCompletion(table.getName()));
+  }
+
+  private void checkTransactionRequired(String operation)
+    throws TransactionRequiredException
+  {
+    // XXX: also needs to check PersistenceContextType.TRANSACTION/EXTENDED.
+
+    if (! (_isXA || _isInTransaction))
+      throw new TransactionRequiredException(L.l("{0}() operation can only be executed in the scope of a transaction.", operation));
+  }
+
+  /**
+   * Flush managed entities.
+   */
+  private void flushInternal()
+    throws Exception
+  {
+    for (int i = _txEntities.size() - 1; i >= 0; i--) {
+      Entity entity = _txEntities.get(i);
+
+      int state = entity.__caucho_getEntityState();
+
+      // jpa/0h27: for all entities Y referenced by a *managed*
+      // entity X, where the relationship has been annotated
+      // with cascade=PERSIST/ALL, the persist operation is
+      // applied to Y. It is a lazy cascade as the relationship
+      // is not always initialized at the time persist(X) was
+      // called but must be at flush time.
+      if (state < Entity.P_DELETING) {
+        entity.__caucho_cascadePrePersist(this);
+        // entity.__caucho_cascadePostPersist(this);
+      }
+    }
+
+    for (int i = _txEntities.size() - 1; i >= 0; i--) {
+      Entity entity = _txEntities.get(i);
+
+      entity.__caucho_flush();
+    }
+
+    if (! isInTransaction()) {
+      if (_completionList.size() > 0) {
+        _persistenceUnit.complete(_completionList);
+      }
+      _completionList.clear();
+
+      for (int i = 0; i < _txEntities.size(); i++) {
+        Entity entity = _txEntities.get(i);
+
+        entity.__caucho_afterCommit();
+      }
+
+      _txEntities.clear();
+    }
   }
 }

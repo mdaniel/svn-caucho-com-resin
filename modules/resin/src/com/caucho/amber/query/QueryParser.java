@@ -201,6 +201,8 @@ public class QueryParser {
   // SELECT .._depth=0.. TRIM(.._depth=1.. 'a' FROM o.d1) .._depth=0 FROM ...
   private int _depth = 0;
 
+  private boolean _parsingFrom;
+
   /**
    * Creates the query parser.
    */
@@ -250,6 +252,7 @@ public class QueryParser {
     _unique = 0;
     _token = -1;
     _depth = 0;
+    _parsingFrom = false;
     _joinFetchMap = new HashMap<AmberExpr, String>();
   }
 
@@ -317,6 +320,8 @@ public class QueryParser {
 
     if (hasFrom) {
 
+      _parsingFrom = true;
+
       do {
 
         scanToken();
@@ -369,6 +374,8 @@ public class QueryParser {
 
       } while ((token == ',') ||
                (token == JOIN));
+
+      _parsingFrom = false;
     }
 
     int fromParseIndex = _parseIndex;
@@ -751,7 +758,8 @@ public class QueryParser {
 
       scanToken();
 
-      expr = parseSimpleTerm();
+      // jpa/1222 expr = parseSimpleTerm();
+      expr = parseConcatExpr();
 
       expr = expr.bindSelect(this);
 
@@ -1874,7 +1882,8 @@ public class QueryParser {
 
     String identifier = _lexeme;
 
-    // Resolves ambiguous 'order': "SELECT o FROM Order o"
+    // Resolves ambiguous identifiers:
+    // 1. 'order': "SELECT o FROM Order o"
     if (token == ORDER) {
       int parseIndex = _parseIndex;
 
@@ -1883,11 +1892,14 @@ public class QueryParser {
       if (peekToken() != BY) {
         token = IDENTIFIER;
 
-        // Restores parse index right after ORDER.
+        // Restores parse index right after ORDER BY.
         _parseIndex = parseIndex;
         _lexeme = identifier;
         _token = -1;
       }
+    } // 2. 'member': "SELECT m FROM Member m" (jpa/0x02)
+    else if (_parsingFrom && token == MEMBER) {
+      token = IDENTIFIER;
     }
 
     if (token != IDENTIFIER) {

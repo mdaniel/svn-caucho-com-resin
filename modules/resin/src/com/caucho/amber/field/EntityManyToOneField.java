@@ -718,6 +718,35 @@ public class EntityManyToOneField extends CascadableField {
   }
 
   /**
+   * Generates the flush check for this child.
+   */
+  public boolean generateFlushCheck(JavaWriter out)
+    throws IOException
+  {
+    String getter = generateSuperGetter();
+
+    out.println("if (" + getter + " != null) {");
+    out.pushDepth();
+    out.println("int state = ((com.caucho.amber.entity.Entity) " + getter + ").__caucho_getEntityState();");
+
+    // jpa/0j5c
+    out.println("if (this.__caucho_state < com.caucho.amber.entity.Entity.P_DELETING");
+    out.println("    && (state <= com.caucho.amber.entity.Entity.P_NEW || ");
+    out.println("        state >= com.caucho.amber.entity.Entity.P_DELETED))");
+
+    String errorString = ("(\"amber flush: unable to flush " +
+                          getEntitySourceType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
+                          "with non-managed dependent relationship many-to-one to "+
+                          getEntityTargetType().getName() + "\")");
+
+    out.println("  throw new IllegalStateException" + errorString + ";");
+    out.popDepth();
+    out.println("}");
+
+    return true;
+  }
+
+  /**
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,
@@ -731,12 +760,22 @@ public class EntityManyToOneField extends CascadableField {
       throw new NullPointerException();
     }
 
+    // The "one" end in the many-to-one relationship.
+    String amberVar = "__amber_" + getName();
+
     String var = "__caucho_field_" + getName();
 
     if (! source.equals("this") && ! source.equals("super"))
       var = source + "." + var;
 
-    out.println("if (" + var + " != null) {");
+    // jpa/0j58: avoid breaking FK constraints.
+    out.println("int " + amberVar + "_state = (" + var + " == null) ? ");
+    out.println("com.caucho.amber.entity.Entity.TRANSIENT : ");
+    out.println("((com.caucho.amber.entity.Entity) " + amberVar + ").");
+    out.println("__caucho_getEntityState();");
+
+    out.println("if (" + amberVar + "_state >= com.caucho.amber.entity.Entity.P_NEW &&");
+    out.println("    " + amberVar + "_state <= com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
     out.pushDepth();
 
     Id id = getEntityTargetType().getId();

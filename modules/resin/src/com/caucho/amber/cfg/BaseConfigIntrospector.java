@@ -810,8 +810,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         else if (metaData.supportsSequences()) {
           addSequenceIdGenerator(persistenceUnit, idField, gen);
         }
-        else
+        else {
           addTableIdGenerator(persistenceUnit, idField, id);
+        }
       }
     }
 
@@ -2812,11 +2813,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       JAnnotation attributeOverridesAnn = _field.getAnnotation(AttributeOverrides.class);
 
-      // getInternalAttributeOverridesConfig(_relatedType.getBeanClass(), _field, _fieldName);
-      // JAnnotation attributeOverridesAnn = _annotationCfg.getAnnotation();
-      // AttributeOverridesConfig attributeOverridesConfig = _annotationCfg.getAttributeOverridesConfig();
-
-      boolean hasAttributeOverrides = ! _annotationCfg.isNull();
+      boolean hasAttributeOverrides = (attributeOverridesAnn != null);
 
       if (hasAttributeOverride && hasAttributeOverrides) {
         throw error(_field, L.l("{0} may not have both @AttributeOverride and @AttributeOverrides",
@@ -3300,5 +3297,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                           String fieldName)
   {
     _annotationCfg.reset(field, AttributeOverride.class);
+  }
+
+  void getInternalAttributeOverrideConfig(JClass type)
+  {
+    _annotationCfg.reset(type, AttributeOverride.class);
   }
 }

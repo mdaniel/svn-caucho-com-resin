@@ -253,24 +253,24 @@ public class EntityComponent extends ClassComponent {
     // but there is an issue in the enhancer fixup
     // removing the "super." call.
     /*
-    out.println();
-    out.println("public void __caucho_postConstructor()");
-    out.println("{");
-    out.pushDepth();
+      out.println();
+      out.println("public void __caucho_postConstructor()");
+      out.println("{");
+      out.pushDepth();
 
-    ArrayList<AmberField> fields = _entityType.getFields();
+      ArrayList<AmberField> fields = _entityType.getFields();
 
-    for (int i = 0; i < fields.size(); i++) {
+      for (int i = 0; i < fields.size(); i++) {
       AmberField field = fields.get(i);
 
       if (field instanceof AbstractField) {
-        AbstractField f = (AbstractField) field;
-        f.generatePostConstructor(out);
+      AbstractField f = (AbstractField) field;
+      f.generatePostConstructor(out);
       }
-    }
+      }
 
-    out.popDepth();
-    out.println("}");
+      out.popDepth();
+      out.println("}");
     */
 
     String className = getClassName();
@@ -290,11 +290,11 @@ public class EntityComponent extends ClassComponent {
 
       JClass []args = ctor.getParameterTypes();
       for (int i = 0; i < args.length; i++) {
-  if (i != 0)
-    out.print(", ");
+        if (i != 0)
+          out.print(", ");
 
-  out.print(args[i].getPrintName());
-  out.print(" a" + i);
+        out.print(args[i].getPrintName());
+        out.print(" a" + i);
       }
       out.println(")");
       out.println("{");
@@ -302,15 +302,15 @@ public class EntityComponent extends ClassComponent {
 
       out.print("super(");
       for (int i = 0; i < args.length; i++) {
-  if (i != 0)
-    out.print(", ");
+        if (i != 0)
+          out.print(", ");
 
-  out.print("a" + i);
+        out.print("a" + i);
       }
       out.println(");");
 
       for (AmberField field : fields) {
-  field.generatePostConstructor(out);
+        field.generatePostConstructor(out);
       }
 
       out.popDepth();
@@ -787,7 +787,12 @@ public class EntityComponent extends ClassComponent {
 
     out.println();
 
+    // if (version == null)
     out.println("if (! isDirty)");
+    // else {
+    // jpa/0x02
+    //  out.println("if (! (isDirty || " + version.generateIsNull() + "))");
+    // }
     out.println("  return true;");
 
     out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
@@ -795,8 +800,13 @@ public class EntityComponent extends ClassComponent {
     out.println("boolean isFirst = true;");
 
     for (int i = 0; i <= dirtyCount / 64; i++) {
-      out.println("if (mask_" + i + " != 0L)");
-      out.println("  isFirst = __caucho_home.generateUpdateSQLComponent(cb, " + i + ", mask_" + i + ", isFirst);");
+      // jpa/0x02 is a negative test.
+      if (i != 0 || version == null) {
+        out.println("if (mask_" + i + " != 0L)");
+        out.print("  ");
+      }
+
+      out.println("isFirst = __caucho_home.generateUpdateSQLComponent(cb, " + i + ", mask_" + i + ", isFirst);");
     }
     out.println("__caucho_home.generateUpdateSQLSuffix(cb);");
 
@@ -1025,6 +1035,7 @@ public class EntityComponent extends ClassComponent {
     out.pushDepth();
 
     out.println("__caucho_state = com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
+
     int loadCount = _entityType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("__caucho_loadMask_" + i + " = 0L;");
