@@ -221,7 +221,7 @@ public class AbstractBinaryInputOutput
 	
 	int ch2 = _is.read();
 
-	if (ch == '\n')
+	if (ch2 == '\n')
 	  sb.append('\n');
 	else
 	  _is.unread();

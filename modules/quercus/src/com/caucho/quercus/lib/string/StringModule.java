@@ -2814,11 +2814,11 @@ v   *
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strnatcasecmp(StringValue a, StringValue b)
+  public static int strnatcasecmp(UnicodeValue a, UnicodeValue b)
   {
-    return strcasecmp(a, b);
+    return naturalOrderCompare(a, b, true);
   }
-
+  
   /**
    * Case-sensitive comparison
    *
@@ -2826,9 +2826,91 @@ v   *
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strnatcmp(String a, String b)
+  public static int strnatcmp(UnicodeValue a, UnicodeValue b)
   {
-    return strcmp(a, b);
+    return naturalOrderCompare(a, b, false);
+  }
+
+  /**
+   * http://sourcefrog.net/projects/natsort/
+   */
+  private static int naturalOrderCompare(UnicodeValue a,
+                                         UnicodeValue b,
+                                         boolean ignoreCase)
+  {
+    SimpleStringReader aIn = new SimpleStringReader(a);
+    SimpleStringReader bIn = new SimpleStringReader(b);
+    
+    int aChar = aIn.read();
+    int bChar = bIn.read();
+    
+    if (aChar == -1 && bChar >= 0)
+      return -1;
+    else if (aChar >= 0 && bChar == -1)
+      return 1;
+
+    while (true) {
+      while (Character.isWhitespace(aChar)) {
+        aChar = aIn.read();
+      }
+
+      while (Character.isWhitespace(bChar)) {
+        bChar = bIn.read();
+      }
+
+      if (aChar == -1 && bChar == -1) {
+        return 0;
+      }
+
+      // leading zeros
+      // '01' < '2'
+      // '0a' > 'a'
+      if (aChar == '0' && bChar == '0') {
+        while (true) {
+          aChar = aIn.read();
+          bChar = bIn.read();
+            
+          if (aChar == '0' && bChar == '0') {
+            continue;
+          }
+          else if (aChar == '0') {
+            if ('1' <= bChar && bChar <= '9')
+              return -1;
+            else
+              return 1;
+          }
+          else if (bChar == 0) {
+            if ('1' <= aChar && aChar <= '9')
+              return 1;
+            else
+              return -1;
+          }
+          else {
+            break;
+          }
+        }
+      }
+
+      if (ignoreCase) {
+        aChar = Character.toUpperCase(aChar);
+        bChar = Character.toUpperCase(bChar);
+      }
+
+      if (aChar > bChar)
+        return 1;
+      else if (aChar < bChar)
+        return -1;
+
+      aChar = aIn.read();
+      bChar = bIn.read();
+
+      // trailing spaces
+      // "abc " > "abc"
+      if (aChar >= 0 && bChar == -1)
+        return 1;
+      else if (aChar == -1 && bChar >= 0)
+        return -1;
+    }
   }
 
   /**
@@ -4243,6 +4325,37 @@ v   *
         return String.valueOf((char) v.toLong());
       else
         return v.charValueAt(0).toString();
+    }
+  }
+
+  static class SimpleStringReader {
+    UnicodeValue _str;
+
+    int _length;
+    int _index;
+    
+    SimpleStringReader(UnicodeValue str)
+    {
+      _str = str;
+      _length = str.length();
+      _index = 0;
+    }
+    
+    int read()
+    {
+      if (_index < _length)
+        return _str.charAt(_index++);
+      else
+        return -1;
+    }
+    
+    int peek()
+    {
+      if (_index < _length)
+        return _str.charAt(_index);
+      else
+        return -1;
+        
     }
   }
 

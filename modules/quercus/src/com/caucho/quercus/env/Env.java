@@ -296,8 +296,12 @@ public class Env {
 
     setPwd(Vfs.lookup());
 
-    if (_page != null)
+    if (_page != null) {
       _selfPath = _page.getSelfPath(null);
+
+      // php/0b32
+      _includeSet.add(_selfPath);
+    }
 
     if (_request != null && _request.getMethod().equals("POST")) {
       _post = new ArrayValueImpl();
