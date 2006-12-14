@@ -29,6 +29,7 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.ArrayList;
 
 /**
  * The <entity-result> tag in orm.xml
@@ -40,7 +41,8 @@ public class EntityResultConfig {
   private String _discriminatorColumn;
 
   // elements
-  private FieldResultConfig _fieldResult;
+  private ArrayList<FieldResultConfig> _fieldResults
+    = new ArrayList<FieldResultConfig>();
 
   public String getEntityClass()
   {
@@ -62,13 +64,19 @@ public class EntityResultConfig {
     _discriminatorColumn = discriminatorColumn;
   }
 
-  public FieldResultConfig getFieldResult()
+  /**
+   * Adds a new <field-result>.
+   */
+  public void addFieldResult(FieldResultConfig fieldResult)
   {
-    return _fieldResult;
+    _fieldResults.add(fieldResult);
   }
 
-  public void setFieldResult(FieldResultConfig fieldResult)
+  /**
+   * Returns all <field-result> elements.
+   */
+  public ArrayList<FieldResultConfig> getFieldResults()
   {
-    _fieldResult = fieldResult;
+    return _fieldResults;
   }
 }

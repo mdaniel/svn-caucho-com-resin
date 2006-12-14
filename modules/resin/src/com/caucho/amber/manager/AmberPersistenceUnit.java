@@ -36,6 +36,8 @@ import com.caucho.amber.cfg.EmbeddableIntrospector;
 import com.caucho.amber.cfg.EntityIntrospector;
 import com.caucho.amber.cfg.EntityMappingsConfig;
 import com.caucho.amber.cfg.MappedSuperIntrospector;
+import com.caucho.amber.cfg.NamedNativeQueryConfig;
+import com.caucho.amber.cfg.SqlResultSetMappingConfig;
 import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.Entity;
@@ -143,6 +145,12 @@ public class AmberPersistenceUnit {
 
   private HashMap<String,String> _namedQueryMap =
     new HashMap<String,String>();
+
+  private HashMap<String, SqlResultSetMappingConfig> _sqlResultSetMap =
+    new HashMap<String, SqlResultSetMappingConfig>();
+
+  private HashMap<String, NamedNativeQueryConfig> _namedNativeQueryMap =
+    new HashMap<String, NamedNativeQueryConfig>();
 
   private EntityMappingsConfig _entityMappings;
 
@@ -442,6 +450,29 @@ public class AmberPersistenceUnit {
   }
 
   /**
+   * Adds a sql result set mapping.
+   */
+  public void addSqlResultSetMapping(String resultSetName,
+                                     SqlResultSetMappingConfig resultSet)
+    throws ConfigException
+  {
+    if (_sqlResultSetMap.containsKey(resultSetName)) {
+      throw new ConfigException(L.l("SqlResultSetMapping '{0}' is already defined.",
+                                    resultSetName));
+    }
+
+    _sqlResultSetMap.put(resultSetName, resultSet);
+  }
+
+  /**
+   * Returns the sql result set mapping.
+   */
+  public SqlResultSetMappingConfig getSqlResultSetMapping(String resultSetName)
+  {
+    return _sqlResultSetMap.get(resultSetName);
+  }
+
+  /**
    * Adds a named query.
    */
   public void addNamedQuery(String name,
@@ -462,6 +493,29 @@ public class AmberPersistenceUnit {
   public String getNamedQuery(String name)
   {
     return (String) _namedQueryMap.get(name);
+  }
+
+  /**
+   * Adds a named native query.
+   */
+  public void addNamedNativeQuery(String name,
+                                  NamedNativeQueryConfig queryConfig)
+    throws ConfigException
+  {
+    if (_namedNativeQueryMap.containsKey(name)) {
+      throw new ConfigException(L.l("NamedNativeQuery '{0}' is already defined.",
+                                    name));
+    }
+
+    _namedNativeQueryMap.put(name, queryConfig);
+  }
+
+  /**
+   * Returns the named native query.
+   */
+  public NamedNativeQueryConfig getNamedNativeQuery(String name)
+  {
+    return _namedNativeQueryMap.get(name);
   }
 
   /**

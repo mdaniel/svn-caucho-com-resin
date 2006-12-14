@@ -535,6 +535,14 @@ abstract public class AbstractConfigIntrospector {
       return (NamedQueryConfig) _config;
     }
 
+    public NamedNativeQueryConfig getNamedNativeQueryConfig() {
+      return (NamedNativeQueryConfig) _config;
+    }
+
+    public SqlResultSetMappingConfig getSqlResultSetMappingConfig() {
+      return (SqlResultSetMappingConfig) _config;
+    }
+
     public PrimaryKeyJoinColumnConfig getPrimaryKeyJoinColumnConfig() {
       return (PrimaryKeyJoinColumnConfig) _config;
     }

@@ -29,6 +29,7 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.ArrayList;
 
 /**
  * The <sql-result-set-mapping> tag in orm.xml
@@ -39,36 +40,51 @@ public class SqlResultSetMappingConfig {
   private String _name;
 
   // elements
-  private EntityResultConfig _entityResult;
-  private ColumnResultConfig _columnResult;
+  private ArrayList<EntityResultConfig> _entityResults
+    = new ArrayList<EntityResultConfig>();
+
+  private ArrayList<ColumnResultConfig> _columnResults
+    = new ArrayList<ColumnResultConfig>();
 
   public String getName()
   {
     return _name;
   }
 
-  public EntityResultConfig getEntityResult()
+  /**
+   * Adds a new <entity-result>.
+   */
+  public void addEntityResult(EntityResultConfig entityResult)
   {
-    return _entityResult;
+    _entityResults.add(entityResult);
   }
 
-  public ColumnResultConfig getColumnResult()
+  /**
+   * Returns all <entity-result> elements.
+   */
+  public ArrayList<EntityResultConfig> getEntityResults()
   {
-    return _columnResult;
+    return _entityResults;
+  }
+
+  /**
+   * Adds a new <column-result>.
+   */
+  public void addColumnResult(ColumnResultConfig columnResult)
+  {
+    _columnResults.add(columnResult);
+  }
+
+  /**
+   * Returns all <column-result> elements.
+   */
+  public ArrayList<ColumnResultConfig> getColumnResults()
+  {
+    return _columnResults;
   }
 
   public void setName(String name)
   {
     _name = name;
-  }
-
-  public void setEntityResult(EntityResultConfig entityResult)
-  {
-    _entityResult = entityResult;
-  }
-
-  public void setColumnResult(ColumnResultConfig columnResult)
-  {
-    _columnResult = columnResult;
   }
 }

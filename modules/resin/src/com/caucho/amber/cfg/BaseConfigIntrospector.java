@@ -321,7 +321,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
   }
 
-  void introspectNamedQueries(JClass type, String typeName) {
+  /**
+   * Introspects named queries.
+   */
+  void introspectNamedQueries(JClass type, String typeName)
+  {
+    // jpa/0y0-
+
     getInternalNamedQueryConfig(type);
     JAnnotation namedQueryAnn = _annotationCfg.getAnnotation();
     NamedQueryConfig namedQueryConfig = _annotationCfg.getNamedQueryConfig();
@@ -330,27 +336,210 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     JAnnotation namedQueriesAnn = type.getAnnotation(NamedQueries.class);
     // NamedQueriesConfig namedQueriesConfig = _annotationCfg.getNamedQueriesConfig();
 
-    if (! ((namedQueryAnn == null) && (namedQueriesAnn == null))) {
+    if ((namedQueryAnn == null) && (namedQueriesAnn == null))
+      return;
 
-      Object namedQueryArray[];
+    Object namedQueryArray[];
 
-      if ((namedQueryAnn != null) && (namedQueriesAnn != null)) {
-        throw new ConfigException(L.l("{0} may not have both @NamedQuery and @NamedQueries",
-                                      typeName));
-      }
-      else if (namedQueriesAnn != null) {
-        namedQueryArray = (Object []) namedQueriesAnn.get("value");
-      }
-      else {
-        namedQueryArray = new Object[] { namedQueryAnn };
-      }
-
-      for (int i=0; i < namedQueryArray.length; i++) {
-        namedQueryAnn = (JAnnotation) namedQueryArray[i];
-        _persistenceUnit.addNamedQuery(namedQueryAnn.getString("name"),
-                                       namedQueryAnn.getString("query"));
-      }
+    if ((namedQueryAnn != null) && (namedQueriesAnn != null)) {
+      throw new ConfigException(L.l("{0} may not have both @NamedQuery and @NamedQueries",
+                                    typeName));
     }
+    else if (namedQueriesAnn != null) {
+      namedQueryArray = (Object []) namedQueriesAnn.get("value");
+    }
+    else {
+      namedQueryArray = new Object[] { namedQueryAnn };
+    }
+
+    for (int i=0; i < namedQueryArray.length; i++) {
+      namedQueryAnn = (JAnnotation) namedQueryArray[i];
+      _persistenceUnit.addNamedQuery(namedQueryAnn.getString("name"),
+                                     namedQueryAnn.getString("query"));
+    }
+  }
+
+  /**
+   * Introspects named native queries.
+   */
+  void introspectNamedNativeQueries(JClass type, String typeName)
+  {
+    // jpa/0y2-
+
+    getInternalNamedNativeQueryConfig(type);
+    JAnnotation namedNativeQueryAnn = _annotationCfg.getAnnotation();
+    NamedNativeQueryConfig namedNativeQueryConfig = _annotationCfg.getNamedNativeQueryConfig();
+
+    JAnnotation namedNativeQueriesAnn = type.getAnnotation(NamedNativeQueries.class);
+
+    if ((namedNativeQueryAnn == null) && (namedNativeQueriesAnn == null))
+      return;
+
+    Object namedNativeQueryArray[];
+
+    if ((namedNativeQueryAnn != null) && (namedNativeQueriesAnn != null)) {
+      throw new ConfigException(L.l("{0} may not have both @NamedNativeQuery and @NamedNativeQueries",
+                                    typeName));
+    }
+    else if (namedNativeQueriesAnn != null) {
+      namedNativeQueryArray = (Object []) namedNativeQueriesAnn.get("value");
+    }
+    else {
+      namedNativeQueryArray = new Object[] { namedNativeQueryAnn };
+    }
+
+    for (int i=0; i < namedNativeQueryArray.length; i++) {
+      namedNativeQueryAnn = (JAnnotation) namedNativeQueryArray[i];
+
+      NamedNativeQueryConfig nativeQueryConfig = new NamedNativeQueryConfig();
+
+      nativeQueryConfig.setQuery(namedNativeQueryAnn.getString("query"));
+      nativeQueryConfig.setResultClass(namedNativeQueryAnn.getClass("resultClass").getName());
+      nativeQueryConfig.setResultSetMapping(namedNativeQueryAnn.getString("resultSetMapping"));
+
+      _persistenceUnit.addNamedNativeQuery(namedNativeQueryAnn.getString("name"),
+                                           nativeQueryConfig);
+    }
+  }
+
+  /**
+   * Introspects sql result set mappings.
+   */
+  void introspectSqlResultSetMappings(JClass type,
+                                      RelatedType relatedType,
+                                      String typeName)
+  {
+    // jpa/0y1-
+
+    getInternalSqlResultSetMappingConfig(type);
+    JAnnotation sqlResultSetMappingAnn = _annotationCfg.getAnnotation();
+    SqlResultSetMappingConfig sqlResultSetMappingConfig
+      = _annotationCfg.getSqlResultSetMappingConfig();
+
+    JAnnotation sqlResultSetMappingsAnn = type.getAnnotation(SqlResultSetMappings.class);
+
+    if ((sqlResultSetMappingAnn == null) && (sqlResultSetMappingsAnn == null))
+      return;
+
+    Object sqlResultSetMappingArray[];
+
+    if ((sqlResultSetMappingAnn != null) && (sqlResultSetMappingsAnn != null)) {
+      throw new ConfigException(L.l("{0} may not have both @SqlResultSetMapping and @SqlResultSetMappings",
+                                    typeName));
+    }
+    else if (sqlResultSetMappingsAnn != null) {
+      sqlResultSetMappingArray = (Object []) sqlResultSetMappingsAnn.get("value");
+    }
+    else {
+      sqlResultSetMappingArray = new Object[] { sqlResultSetMappingAnn };
+    }
+
+    if (sqlResultSetMappingConfig != null) {
+      _persistenceUnit.addSqlResultSetMapping(sqlResultSetMappingConfig.getName(),
+                                              sqlResultSetMappingConfig);
+      return;
+    }
+
+    for (int i=0; i < sqlResultSetMappingArray.length; i++) {
+      sqlResultSetMappingAnn = (JAnnotation) sqlResultSetMappingArray[i];
+
+      String name = sqlResultSetMappingAnn.getString("name");
+      Object entities[] = (Object []) sqlResultSetMappingAnn.get("entities");
+      Object columns[] = (Object []) sqlResultSetMappingAnn.get("columns");
+
+      SqlResultSetMappingCompletion completion
+        = new SqlResultSetMappingCompletion(relatedType, name,
+                                            entities, columns);
+
+      _depCompletions.add(completion);
+    }
+  }
+
+  /**
+   * Completion callback for sql result set mappings.
+   */
+  void addSqlResultSetMapping(String resultSetName,
+                              Object entities[],
+                              Object columns[])
+    throws ConfigException
+  {
+    // jpa/0y1-
+
+    SqlResultSetMappingConfig sqlResultSetMapping
+      = new SqlResultSetMappingConfig();
+
+    // Adds @EntityResult.
+    for (int i=0; i < entities.length; i++) {
+      JAnnotation entityResult = (JAnnotation) entities[i];
+
+      String className = entityResult.getClass("entityClass").getName();
+
+      EntityType resultType = _persistenceUnit.getEntity(className);
+
+      if (resultType == null)
+        throw new ConfigException(L.l("entityClass '{0}' is not an @Entity bean for @SqlResultSetMapping '{1}'. The entityClass of an @EntityResult must be an @Entity bean.",
+                                      className,
+                                      resultSetName));
+
+      EntityResultConfig entityResultConfig = new EntityResultConfig();
+
+      entityResultConfig.setEntityClass(className);
+
+      // @FieldResult annotations.
+      Object fields[] = (Object []) entityResult.get("fields");
+
+      for (int j=0; j < fields.length; j++) {
+        JAnnotation fieldResult = (JAnnotation) fields[j];
+
+        String fieldName = fieldResult.getString("name");
+
+        AmberField field = resultType.getField(fieldName);
+
+        if (field == null)
+          throw new ConfigException(L.l("@FieldResult with field name '{0}' is not a field for @EntityResult bean '{1}' in @SqlResultSetMapping '{2}'",
+                                        fieldName,
+                                        className,
+                                        resultSetName));
+
+        String columnName = fieldResult.getString("column");
+
+        if (columnName == null || columnName.length() == 0)
+          throw new ConfigException(L.l("@FieldResult must have a column name defined and it must not be empty for '{0}' in @EntityResult '{1}' @SqlResultSetMapping '{2}'",
+                                        fieldName,
+                                        className,
+                                        resultSetName));
+
+        FieldResultConfig fieldResultConfig = new FieldResultConfig();
+
+        fieldResultConfig.setName(fieldName);
+        fieldResultConfig.setColumn(columnName);
+
+        entityResultConfig.addFieldResult(fieldResultConfig);
+      }
+
+      sqlResultSetMapping.addEntityResult(entityResultConfig);
+    }
+
+    // Adds @ColumnResult.
+    for (int i=0; i < columns.length; i++) {
+      JAnnotation columnResult = (JAnnotation) columns[i];
+
+      String columnName = columnResult.getString("name");
+
+      if (columnName == null || columnName.length() == 0)
+        throw new ConfigException(L.l("@ColumnResult must have a column name defined and it must not be empty in @SqlResultSetMapping '{0}'",
+                                      resultSetName));
+
+      ColumnResultConfig columnResultConfig = new ColumnResultConfig();
+
+      columnResultConfig.setName(columnName);
+
+      sqlResultSetMapping.addColumnResult(columnResultConfig);
+    }
+
+    // Adds a global sql result set mapping to the persistence unit.
+    _persistenceUnit.addSqlResultSetMapping(resultSetName,
+                                            sqlResultSetMapping);
   }
 
   /**
@@ -2154,6 +2343,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       _relatedType.addCompletionField(fieldName);
     }
 
+    protected Completion(RelatedType relatedType)
+    {
+      _relatedType = relatedType;
+    }
+
     RelatedType getRelatedType()
     {
       return _relatedType;
@@ -2901,6 +3095,35 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     }
   }
 
+  /**
+   * completes for dependent
+   */
+  class SqlResultSetMappingCompletion extends Completion {
+    private String _name;
+    private Object _entities[];
+    private Object _columns[];
+
+    SqlResultSetMappingCompletion(RelatedType type,
+                                  String name,
+                                  Object entities[],
+                                  Object columns[])
+    {
+      super(type);
+
+      _name = name;
+      _entities = entities;
+      _columns = columns;
+    }
+
+    void complete()
+      throws ConfigException
+    {
+      addSqlResultSetMapping(_name,
+                             _entities,
+                             _columns);
+    }
+  }
+
   void getInternalEmbeddableConfig(JClass type)
   {
     _annotationCfg.reset(type, Embeddable.class);
@@ -3017,6 +3240,34 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     if (entityConfig != null) {
       _annotationCfg.setConfig(entityConfig.getNamedQuery());
+    }
+  }
+
+  void getInternalNamedNativeQueryConfig(JClass type)
+  {
+    _annotationCfg.reset(type, NamedNativeQuery.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+      _annotationCfg.setConfig(entityConfig.getNamedNativeQuery());
+    }
+  }
+
+  void getInternalSqlResultSetMappingConfig(JClass type)
+  {
+    _annotationCfg.reset(type, SqlResultSetMapping.class);
+
+    EntityConfig entityConfig = null;
+
+    if (_entityConfigMap != null)
+      entityConfig = _entityConfigMap.get(type.getName());
+
+    if (entityConfig != null) {
+      _annotationCfg.setConfig(entityConfig.getSqlResultSetMapping());
     }
   }
 

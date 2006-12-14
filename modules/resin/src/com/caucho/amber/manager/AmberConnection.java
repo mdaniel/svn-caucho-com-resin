@@ -33,6 +33,9 @@ import com.caucho.amber.AmberException;
 import com.caucho.amber.AmberObjectNotFoundException;
 import com.caucho.amber.AmberQuery;
 import com.caucho.amber.AmberRuntimeException;
+import com.caucho.amber.cfg.EntityResultConfig;
+import com.caucho.amber.cfg.NamedNativeQueryConfig;
+import com.caucho.amber.cfg.SqlResultSetMappingConfig;
 import com.caucho.amber.collection.AmberCollection;
 import com.caucho.amber.entity.*;
 import com.caucho.amber.query.AbstractQuery;
@@ -256,7 +259,7 @@ public class AmberConnection
         return;
 
       if (! (entity instanceof Entity))
-        throw new IllegalArgumentException("persist() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
+        throw new IllegalArgumentException(L.l("persist() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit."));
 
       checkTransactionRequired("persist");
 
@@ -300,7 +303,7 @@ public class AmberConnection
     try {
 
       if (! (entityT instanceof Entity))
-        throw new IllegalArgumentException("merge() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
+        throw new IllegalArgumentException(L.l("merge() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit."));
 
       flushInternal();
 
@@ -311,7 +314,7 @@ public class AmberConnection
       if (state == com.caucho.amber.entity.Entity.TRANSIENT) {
         if (contains(entity)) {
           // detached entity instance
-          throw new UnsupportedOperationException("Merge operation for detached instances is not supported");
+          throw new UnsupportedOperationException(L.l("Merge operation for detached instances is not supported"));
         }
         else {
           // new entity instance
@@ -320,7 +323,7 @@ public class AmberConnection
       }
       else if (state >= com.caucho.amber.entity.Entity.P_DELETING) {
         // removed entity instance
-        throw new IllegalArgumentException("Merge operation cannot be applied to a removed entity instance");
+        throw new IllegalArgumentException(L.l("Merge operation cannot be applied to a removed entity instance"));
       }
       else {
         // managed entity instance: ignored.
@@ -352,7 +355,7 @@ public class AmberConnection
         return;
 
       if (! (entity instanceof Entity))
-        throw new IllegalArgumentException("remove() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.");
+        throw new IllegalArgumentException(L.l("remove() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit."));
 
       checkTransactionRequired("remove");
 
@@ -368,7 +371,7 @@ public class AmberConnection
 
       // jpa/0ga4
       if (oldEntity == null)
-        throw new IllegalArgumentException("remove() operation can only be applied to a managed entity instance.");
+        throw new IllegalArgumentException(L.l("remove() operation can only be applied to a managed entity instance."));
 
       // Pre-remove child entities.
       instance.__caucho_cascadePreRemove(this);
@@ -423,7 +426,7 @@ public class AmberConnection
         = _persistenceUnit.getEntityHome(entityClass.getName());
 
       if (entityHome == null) {
-        throw new IllegalArgumentException("find() operation can only be applied if the entity class is specified in the scope of a persistence unit.");
+        throw new IllegalArgumentException(L.l("find() operation can only be applied if the entity class is specified in the scope of a persistence unit."));
       }
 
       return (T) load(entityClass, primaryKey, preloadedProperties);
@@ -501,7 +504,26 @@ public class AmberConnection
   {
     String sql = _persistenceUnit.getNamedQuery(name);
 
-    return createQuery(sql);
+    if (sql != null)
+      return createQuery(sql);
+
+    NamedNativeQueryConfig nativeQuery
+      = _persistenceUnit.getNamedNativeQuery(name);
+
+    sql = nativeQuery.getQuery();
+
+    String resultSetMapping = nativeQuery.getResultSetMapping();
+
+    if (resultSetMapping != null)
+      return createNativeQuery(sql, resultSetMapping);
+
+    String resultClass = nativeQuery.getResultClass();
+
+    try {
+      return createNativeQuery(sql, Class.forName(resultClass));
+    } catch (Exception e) {
+      throw new IllegalArgumentException(e);
+    }
   }
 
   /**
@@ -509,7 +531,17 @@ public class AmberConnection
    */
   public Query createNativeQuery(String sql)
   {
-    throw new UnsupportedOperationException();
+    try {
+      QueryImpl query = new QueryImpl(this);
+
+      query.setNativeSql(sql);
+
+      return query;
+    } catch (RuntimeException e) {
+      throw new IllegalArgumentException(e);
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
   }
 
   /**
@@ -517,15 +549,34 @@ public class AmberConnection
    */
   public Query createNativeQuery(String sql, String map)
   {
-    throw new UnsupportedOperationException();
+    // jpa/0y1-
+
+    SqlResultSetMappingConfig resultSet;
+
+    resultSet = _persistenceUnit.getSqlResultSetMapping(map);
+
+    if (resultSet == null)
+      throw new IllegalArgumentException(L.l("createNativeQuery() cannot create a native query for a result set named '{0}'", map));
+
+    return createInternalNativeQuery(sql, resultSet);
   }
 
   /**
-   * Creates an instance of the named query
+   * Creates an instance of the native query
    */
   public Query createNativeQuery(String sql, Class type)
   {
-    throw new UnsupportedOperationException();
+    SqlResultSetMappingConfig resultSet
+      = new SqlResultSetMappingConfig();
+
+    EntityResultConfig entityResult
+      = new EntityResultConfig();
+
+    entityResult.setEntityClass(type.getName());
+
+    resultSet.addEntityResult(entityResult);
+
+    return createInternalNativeQuery(sql, resultSet);
   }
 
   /**
@@ -538,7 +589,7 @@ public class AmberConnection
         return;
 
       if (! (entity instanceof Entity))
-        throw new IllegalArgumentException("refresh() operation can only be applied to an entity instance.");
+        throw new IllegalArgumentException(L.l("refresh() operation can only be applied to an entity instance."));
 
       checkTransactionRequired("refresh");
 
@@ -555,7 +606,7 @@ public class AmberConnection
       }
 
       if (oldEntity == null)
-        throw new IllegalArgumentException("refresh() operation can only be applied to a managed entity instance.");
+        throw new IllegalArgumentException(L.l("refresh() operation can only be applied to a managed entity instance."));
 
       // Reset and refresh state.
       instance.__caucho_expire();
@@ -716,8 +767,8 @@ public class AmberConnection
   {
     Entity entity = null;
 
-    // XXX: ejb/0d01 (should not check this)
-    // jpa/0g0h if (shouldRetrieveFromCache())
+    // ejb/0d01, jpa/0gh0, jpa/0g0k
+    // if (shouldRetrieveFromCache())
     entity = getEntity(cl.getName(), key);
 
     if (entity != null)
@@ -756,8 +807,8 @@ public class AmberConnection
     Entity entity = null;
 
     // XXX: ejb/0d01
-    if (shouldRetrieveFromCache())
-      entity = getEntity(entityName, key);
+    // jpa/0y14 if (shouldRetrieveFromCache())
+    entity = getEntity(entityName, key);
 
     if (entity != null)
       return entity;
@@ -852,8 +903,8 @@ public class AmberConnection
     Entity entity = null;
 
     // XXX: ejb/0d01
-    if (shouldRetrieveFromCache())
-      entity = getEntity(className, key);
+    // jpa/0y14 if (shouldRetrieveFromCache())
+    entity = getEntity(className, key);
 
     try {
       AmberEntityHome home = _persistenceUnit.getEntityHome(name);
@@ -1101,7 +1152,7 @@ public class AmberConnection
       return false;
 
     if (! (obj instanceof Entity))
-      throw new IllegalArgumentException("contains() operation can only be applied to an entity instance.");
+      throw new IllegalArgumentException(L.l("contains() operation can only be applied to an entity instance."));
 
     Entity entity = (Entity) obj;
 
@@ -2058,5 +2109,20 @@ public class AmberConnection
 
       _txEntities.clear();
     }
+  }
+
+  /**
+   * Creates an instance of the native query.
+   */
+  private Query createInternalNativeQuery(String sql,
+                                          SqlResultSetMappingConfig map)
+  {
+    Query query = createNativeQuery(sql);
+
+    QueryImpl queryImpl = (QueryImpl) query;
+
+    queryImpl.setSqlResultSetMapping(map);
+
+    return query;
   }
 }

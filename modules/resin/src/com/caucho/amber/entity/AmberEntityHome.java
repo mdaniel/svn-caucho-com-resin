@@ -359,9 +359,9 @@ public class AmberEntityHome {
     try {
       EntityItem item = null;
 
-      // XXX: ejb/0d01
-      if (aConn.shouldRetrieveFromCache())
-        item = _manager.getEntity(getRootType(), key);
+      // XXX: ejb/0d01 should not check this.
+      // jpa/0y14 if (aConn.shouldRetrieveFromCache())
+      item = _manager.getEntity(getRootType(), key);
 
       if (item == null) {
         if (_homeBean == null && _configException != null)

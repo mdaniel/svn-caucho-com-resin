@@ -30,11 +30,17 @@
 package com.caucho.amber.manager;
 
 import com.caucho.amber.AmberException;
+import com.caucho.amber.cfg.ColumnResultConfig;
+import com.caucho.amber.cfg.EntityResultConfig;
+import com.caucho.amber.cfg.FieldResultConfig;
+import com.caucho.amber.cfg.SqlResultSetMappingConfig;
 import com.caucho.amber.entity.Entity;
+import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.query.AbstractQuery;
 import com.caucho.amber.query.SelectQuery;
 import com.caucho.amber.query.UserQuery;
 import com.caucho.amber.type.CalendarType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.UtilDateType;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.util.L10N;
@@ -45,6 +51,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import java.lang.reflect.Constructor;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -68,6 +75,12 @@ public class QueryImpl implements Query {
 
   private int _currIndex;
 
+  // Native queries.
+  private String _nativeSql;
+  private SqlResultSetMappingConfig _sqlResultSetMapping;
+  private int _currEntityResult;
+  private int _currColumnResult;
+
   /**
    * Creates a manager instance.
    */
@@ -81,6 +94,14 @@ public class QueryImpl implements Query {
   }
 
   /**
+   * Creates a manager instance.
+   */
+  QueryImpl(AmberConnection aConn)
+  {
+    _aConn = aConn;
+  }
+
+  /**
    * Execute the query and return as a List.
    */
   public List getResultList()
@@ -89,11 +110,11 @@ public class QueryImpl implements Query {
 
       Class constructorClass = null;
 
-      SelectQuery selectQuery;
-
-      if (_query instanceof SelectQuery) {
-        selectQuery = (SelectQuery) _query;
-        constructorClass = selectQuery.getConstructorClass();
+      if (isSelectQuery()) {
+        if (! isNativeQuery()) {
+          SelectQuery selectQuery = (SelectQuery) _query;
+          constructorClass = selectQuery.getConstructorClass();
+        }
       }
       else
         throw new IllegalStateException(L.l("javax.persistence.Query.getResultList() can only be applied to a SELECT statement"));
@@ -147,7 +168,24 @@ public class QueryImpl implements Query {
 
             try {
 
-              object = getInternalObject(rs, columnType);
+              if (isNativeQuery()) {
+                ArrayList<EntityResultConfig> entityResults
+                  = _sqlResultSetMapping.getEntityResults();
+
+                if (_currEntityResult == entityResults.size()) {
+
+                  ArrayList<ColumnResultConfig> columnResults
+                    = _sqlResultSetMapping.getColumnResults();
+
+                  if (_currColumnResult == columnResults.size())
+                    break;
+                }
+
+                object = getInternalNative(rs);
+              }
+              else {
+                object = getInternalObject(rs, columnType);
+              }
 
               columns.add(object);
 
@@ -203,7 +241,10 @@ public class QueryImpl implements Query {
             } catch (Exception ex) {
             }
 
-            row[i] = getInternalObject(rs, columnType);
+            if (isNativeQuery())
+              row[i] = getInternalNative(rs);
+            else
+              row[i] = getInternalObject(rs, columnType);
           }
         }
 
@@ -257,7 +298,7 @@ public class QueryImpl implements Query {
   public Object getSingleResult()
   {
     try {
-      if (! (_query instanceof SelectQuery))
+      if (! isSelectQuery())
         throw new IllegalStateException(L.l("javax.persistence.Query.getSingleResult() can only be applied to a SELECT statement"));
 
       ResultSet rs = executeQuery();
@@ -288,7 +329,7 @@ public class QueryImpl implements Query {
   {
     try {
       // jpa/1006
-      if (_query instanceof SelectQuery)
+      if (isSelectQuery())
         throw new IllegalStateException(L.l("javax.persistence.Query.executeUpdate() cannot be applied to a SELECT statement"));
 
       return _userQuery.executeUpdate();
@@ -303,7 +344,21 @@ public class QueryImpl implements Query {
   protected ResultSet executeQuery()
     throws SQLException
   {
-    return _userQuery.executeQuery();
+    ResultSet rs;
+
+    if (_nativeSql == null) {
+      // JPA query.
+      rs = _userQuery.executeQuery();
+    }
+    else {
+      // Native query.
+
+      PreparedStatement pstmt = _aConn.prepareStatement(_nativeSql);
+
+      rs = pstmt.executeQuery();
+    }
+
+    return rs;
   }
 
   /**
@@ -519,6 +574,48 @@ public class QueryImpl implements Query {
   }
 
   /**
+   * Sets the sql for native queries.
+   */
+  protected void setNativeSql(String sql)
+  {
+    _nativeSql = sql;
+  }
+
+  /**
+   * Sets the sql result set mapping for native queries.
+   */
+  protected void setSqlResultSetMapping(SqlResultSetMappingConfig map)
+  {
+    _sqlResultSetMapping = map;
+  }
+
+  /**
+   * Returns true for SELECT queries.
+   */
+  private boolean isSelectQuery()
+  {
+    if (_query instanceof SelectQuery)
+      return true;
+
+    if (isNativeQuery()) {
+      String sql = _nativeSql.trim().toUpperCase();
+
+      if (sql.startsWith("SELECT"))
+        return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns true for native queries.
+   */
+  private boolean isNativeQuery()
+  {
+    return _nativeSql != null;
+  }
+
+  /**
    * Creates an error.
    */
   private AmberException error(String msg)
@@ -526,6 +623,83 @@ public class QueryImpl implements Query {
     msg += "\nin \"" + _query.getQueryString() + "\"";
 
     return new AmberException(msg);
+  }
+
+  /**
+   * Native queries. Returns the object using the
+   * result set mapping.
+   */
+  private Object getInternalNative(ResultSet rs)
+    throws Exception
+  {
+    int oldEntityResult = _currEntityResult;
+
+    ArrayList<EntityResultConfig> entityResults
+      = _sqlResultSetMapping.getEntityResults();
+
+    if (oldEntityResult == entityResults.size()) {
+
+      ArrayList<ColumnResultConfig> columnResults
+        = _sqlResultSetMapping.getColumnResults();
+
+      if (_currColumnResult == columnResults.size()) {
+        _currColumnResult = 0;
+      }
+      else {
+        _currColumnResult++;
+
+        if (columnResults.size() > 0) {
+          Object object = rs.getObject(_currIndex++);
+
+          return object;
+        }
+      }
+
+      oldEntityResult = 0;
+      _currEntityResult = 0;
+    }
+
+    _currEntityResult++;
+
+    EntityResultConfig entityResult = entityResults.get(oldEntityResult);
+
+    String className = entityResult.getEntityClass();
+
+    EntityType entityType = _aConn.getPersistenceUnit().getEntity(className);
+
+    if (entityType == null)
+      throw new IllegalStateException(L.l("Unable to locate entity '{0}' for native query.", className));
+
+    int oldIndex = _currIndex;
+
+    _currIndex++;
+
+    /* jpa/0y14
+    EntityItem item = entityType.getHome().findItem(_aConn, rs, oldIndex);
+
+    if (item == null)
+      return null;
+
+    Entity entity = item.getEntity();
+    */
+
+    int keyLength = entityType.getId().getKeyCount();
+
+    ArrayList<FieldResultConfig> fieldResults
+      = entityResult.getFieldResults();
+
+    Entity entity = null;
+
+    // jpa/0y14
+    entity = (Entity) _aConn.load(className, rs.getObject(oldIndex));
+
+    int consumed = entity.__caucho_load(_aConn, rs, oldIndex + keyLength);
+
+    // item.setNumberOfLoadingColumns(consumed);
+
+    _currIndex += consumed;
+
+    return entity;
   }
 
   /**

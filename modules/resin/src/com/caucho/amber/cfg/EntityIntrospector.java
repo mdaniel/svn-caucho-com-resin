@@ -129,6 +129,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
       // Adds named queries, if any.
       introspectNamedQueries(type, typeName);
+      introspectNamedNativeQueries(type, typeName);
 
       // Validates the type
       String entityName;
@@ -235,6 +236,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
       // Adds entity listeners, if any.
       introspectEntityListeners(type, entityType, _persistenceUnit);
+
+      // Adds sql result set mappings, if any.
+      introspectSqlResultSetMappings(type, entityType, typeName);
 
       boolean isField = isField(type, entityConfig, false);
 
