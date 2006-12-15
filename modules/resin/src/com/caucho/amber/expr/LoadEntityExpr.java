@@ -39,6 +39,7 @@ import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
@@ -47,11 +48,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An entity expression which should be loaded.
  */
 public class LoadEntityExpr extends LoadExpr {
+  private static final L10N L = new L10N(LoadEntityExpr.class);
+  private static final Logger log
+    = Logger.getLogger(LoadEntityExpr.class.getName());
 
   LoadEntityExpr(PathExpr expr)
   {
@@ -226,14 +232,12 @@ public class LoadEntityExpr extends LoadExpr {
         }
         while (property != null);
 
-      } catch (NoSuchMethodException e1) {
-        // XXX: this exception must never happen if the
-        // query parser does a proper validation.
-      } catch (IllegalAccessException e2) {
-        // XXX: this exception must never happen if the
-        // query parser does a proper validation.
-      } catch (java.lang.reflect.InvocationTargetException e3) {
-        // XXX: this needs to be handled
+      } catch (NoSuchMethodException e) {
+        log.log(Level.FINER, e.toString(), e);
+      } catch (IllegalAccessException e) {
+        log.log(Level.FINER, e.toString(), e);
+      } catch (java.lang.reflect.InvocationTargetException e) {
+        log.log(Level.FINER, e.toString(), e);
       }
     }
 

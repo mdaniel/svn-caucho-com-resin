@@ -42,10 +42,15 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -203,6 +208,8 @@ public class QueryParser {
 
   private boolean _parsingFrom;
 
+  private boolean _isDerbyDBMS;
+
   /**
    * Creates the query parser.
    */
@@ -212,11 +219,52 @@ public class QueryParser {
   }
 
   /**
+   * Returns true for Derby-like DBMS.
+   */
+  public boolean isDerbyDBMS()
+  {
+    return _isDerbyDBMS;
+  }
+
+  /**
    * Sets the entity home manager.
    */
   public void setAmberManager(AmberPersistenceUnit amberPersistenceUnit)
   {
     _amberPersistenceUnit = amberPersistenceUnit;
+
+    _isDerbyDBMS = false;
+
+    if (amberPersistenceUnit == null)
+      return;
+
+    try {
+      Connection conn = null;
+
+      try {
+        DataSource ds = amberPersistenceUnit.getDataSource();
+        conn = ds.getConnection();
+
+        Statement stmt = conn.createStatement();
+
+        try {
+          String sql = "select position('a' in 'abc')";
+
+          ResultSet rs = stmt.executeQuery(sql);
+          rs.close();
+        } catch (SQLException e) {
+          _isDerbyDBMS = true;
+          log.log(Level.WARNING, e.toString(), e);
+        }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      } finally {
+        if (conn != null)
+          conn.close();
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
 
   /**
@@ -1642,13 +1690,13 @@ public class QueryParser {
     switch (functionToken) {
 
     case CURRENT_DATE:
-      return CurrentDateFunExpr.create();
+      return CurrentDateFunExpr.create(this);
 
     case CURRENT_TIME:
-      return CurrentTimeFunExpr.create();
+      return CurrentTimeFunExpr.create(this);
 
     case CURRENT_TIMESTAMP:
-      return CurrentTimestampFunExpr.create();
+      return CurrentTimestampFunExpr.create(this);
     }
 
     // Function with arguments.
@@ -1756,60 +1804,60 @@ public class QueryParser {
     switch (functionToken) {
 
     case LOCATE:
-      funExpr = LocateFunExpr.create(args);
+      funExpr = LocateFunExpr.create(this, args);
       break;
 
     case LENGTH:
-      funExpr = LengthFunExpr.create(args);
+      funExpr = LengthFunExpr.create(this, args);
       break;
 
     case MAX:
-      funExpr = MaxFunExpr.create(id, args, distinct);
+      funExpr = MaxFunExpr.create(this, id, args, distinct);
       break;
 
     case MIN:
-      funExpr = MinFunExpr.create(id, args, distinct);
+      funExpr = MinFunExpr.create(this, id, args, distinct);
       break;
 
     case SUM:
-      funExpr = SumFunExpr.create(id, args, distinct);
+      funExpr = SumFunExpr.create(this, id, args, distinct);
       break;
 
     case ABS:
-      funExpr = AbsFunExpr.create(args);
+      funExpr = AbsFunExpr.create(this, args);
       break;
 
     case SQRT:
-      funExpr = SqrtFunExpr.create(args);
+      funExpr = SqrtFunExpr.create(this, args);
       break;
 
     case MOD:
-      funExpr = ModFunExpr.create(args);
+      funExpr = ModFunExpr.create(this, args);
       break;
 
     case SIZE:
-      funExpr = SizeFunExpr.create(args);
+      funExpr = SizeFunExpr.create(this, args);
       break;
 
     case CONCAT:
-      funExpr = ConcatFunExpr.create(args);
+      funExpr = ConcatFunExpr.create(this, args);
       break;
 
     case LOWER:
-      funExpr = LowerFunExpr.create(args);
+      funExpr = LowerFunExpr.create(this, args);
       break;
 
     case UPPER:
-      funExpr = UpperFunExpr.create(args);
+      funExpr = UpperFunExpr.create(this, args);
       break;
 
     case SUBSTRING:
-      funExpr = SubstringFunExpr.create(args);
+      funExpr = SubstringFunExpr.create(this, args);
       break;
 
     case TRIM:
       {
-        TrimFunExpr trimFunExpr = TrimFunExpr.create(args);
+        TrimFunExpr trimFunExpr = TrimFunExpr.create(this, args);
         trimFunExpr.setTrimChar(trimChar);
         trimFunExpr.setTrimSemantics(trimSemantics);
         funExpr = trimFunExpr;
@@ -1817,7 +1865,7 @@ public class QueryParser {
       }
 
     default:
-      funExpr = FunExpr.create(id, args, distinct);
+      funExpr = FunExpr.create(this, id, args, distinct);
     }
 
     return funExpr;

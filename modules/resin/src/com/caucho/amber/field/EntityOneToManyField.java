@@ -222,9 +222,9 @@ public class EntityOneToManyField extends CollectionField {
 
       String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
 
-      out.println("if (" + getter + " == null)");
+      out.println("if (" + getter + " == null && " + generateSuperGetter() + " != null)");
       out.pushDepth();
-      out.println(getSetterName() + "(" +  generateSuperGetter() + ");");
+      out.println(getSetterName() + "(" + generateSuperGetter() + ");");
       out.popDepth();
 
       out.println();
@@ -244,7 +244,7 @@ public class EntityOneToManyField extends CollectionField {
 
       switch (cascadeType) {
       case PERSIST:
-        out.print("persist");
+        out.print("persistNoChecks");
         break;
 
       case MERGE:
@@ -482,7 +482,7 @@ public class EntityOneToManyField extends CollectionField {
     out.println("try {");
     out.pushDepth();
 
-    out.println("__caucho_session.flush();");
+    out.println("__caucho_session.flushNoChecks();");
 
     out.print("String sql=\"");
 

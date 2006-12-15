@@ -29,6 +29,7 @@
 package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.query.QueryParser;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -44,14 +45,16 @@ public class SizeFunExpr extends FunExpr {
   /**
    * Creates a new expression
    */
-  protected SizeFunExpr(ArrayList<AmberExpr> args)
+  protected SizeFunExpr(QueryParser parser,
+                        ArrayList<AmberExpr> args)
   {
-    super("size", args, false);
+    super(parser, "size", args, false);
   }
 
-  public static FunExpr create(ArrayList<AmberExpr> args)
+  public static FunExpr create(QueryParser parser,
+                               ArrayList<AmberExpr> args)
   {
-    return new SizeFunExpr(args);
+    return new SizeFunExpr(parser, args);
   }
 
   /**

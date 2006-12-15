@@ -29,6 +29,7 @@
 package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.query.QueryParser;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -44,14 +45,16 @@ public class ConcatFunExpr extends FunExpr {
   /**
    * Creates a new expression
    */
-  protected ConcatFunExpr(ArrayList<AmberExpr> args)
+  protected ConcatFunExpr(QueryParser parser,
+                          ArrayList<AmberExpr> args)
   {
-    super("concat", args, false);
+    super(parser, "concat", args, false);
   }
 
-  public static FunExpr create(ArrayList<AmberExpr> args)
+  public static FunExpr create(QueryParser parser,
+                               ArrayList<AmberExpr> args)
   {
-    return new ConcatFunExpr(args);
+    return new ConcatFunExpr(parser, args);
   }
 
   /**

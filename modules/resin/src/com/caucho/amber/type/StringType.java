@@ -109,8 +109,11 @@ public class StringType extends Type {
   public void setParameter(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
-    if (value == null)
-      pstmt.setNull(index, java.sql.Types.OTHER);
+    if (value == null) {
+      // XXX: issue with derby.
+      // pstmt.setNull(index, java.sql.Types.OTHER);
+      pstmt.setString(index, null);
+    }
     else
       pstmt.setString(index, (String) value);
   }

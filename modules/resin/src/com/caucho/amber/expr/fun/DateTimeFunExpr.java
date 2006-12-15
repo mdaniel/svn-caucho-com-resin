@@ -29,6 +29,7 @@
 package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.query.QueryParser;
 
 import java.util.ArrayList;
 
@@ -40,10 +41,11 @@ abstract public class DateTimeFunExpr extends FunExpr {
   /**
    * Creates a new expression
    */
-  protected DateTimeFunExpr(String id,
+  protected DateTimeFunExpr(QueryParser parser,
+                            String id,
                             ArrayList<AmberExpr> args,
                             boolean distinct)
   {
-    super(id, args, distinct);
+    super(parser, id, args, distinct);
   }
 }

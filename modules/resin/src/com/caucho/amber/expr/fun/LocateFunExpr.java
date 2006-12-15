@@ -29,6 +29,7 @@
 package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.query.QueryParser;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -44,14 +45,16 @@ public class LocateFunExpr extends FunExpr {
   /**
    * Creates a new expression
    */
-  protected LocateFunExpr(ArrayList<AmberExpr> args)
+  protected LocateFunExpr(QueryParser parser,
+                          ArrayList<AmberExpr> args)
   {
-    super("locate", args, false);
+    super(parser, "locate", args, false);
   }
 
-  public static FunExpr create(ArrayList<AmberExpr> args)
+  public static FunExpr create(QueryParser parser,
+                               ArrayList<AmberExpr> args)
   {
-    return new LocateFunExpr(args);
+    return new LocateFunExpr(parser, args);
   }
 
   /**
@@ -82,12 +85,51 @@ public class LocateFunExpr extends FunExpr {
 
     int n = args.size();
 
-    // XXX: this validation should be moved to QueryParser
+    // XXX:
     // if (n < 2)
-    //   throw new QueryParseException(L.l("expected at least 2 string arguments for LOCATE"));
+    //   throw _parser.error(L.l("expected at least 2 string arguments for LOCATE"));
     //
     // if (n > 3)
-    //   throw new QueryParseException(L.l("expected at most 3 arguments for LOCATE"));
+    //   throw _parser.error(L.l("expected at most 3 arguments for LOCATE"));
+
+    if (_parser.isDerbyDBMS()) {
+
+      // Derby.
+
+      cb.append("locate(");
+
+      if (select)
+        args.get(0).generateWhere(cb);
+      else
+        args.get(0).generateUpdateWhere(cb);
+
+      cb.append(',');
+
+      if (select)
+        args.get(1).generateWhere(cb);
+      else
+        args.get(1).generateUpdateWhere(cb);
+
+      cb.append(',');
+
+      if (n == 2) {
+        cb.append('1');
+      }
+      else {
+        AmberExpr expr = args.get(2);
+
+         if (select)
+          expr.generateWhere(cb);
+        else
+          expr.generateUpdateWhere(cb);
+      }
+
+      cb.append(')');
+
+      return;
+    }
+
+    // Postgres, MySql.
 
     CharBuffer charBuffer = new CharBuffer();
 
@@ -105,7 +147,7 @@ public class LocateFunExpr extends FunExpr {
     else
       args.get(1).generateUpdateWhere(charBuffer);
 
-    charBuffer.append(",");
+    charBuffer.append(',');
 
     int fromIndex = 1;
 

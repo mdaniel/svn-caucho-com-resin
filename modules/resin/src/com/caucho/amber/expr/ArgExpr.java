@@ -50,6 +50,9 @@ public class ArgExpr extends AbstractAmberExpr {
 
   private Type _type;
 
+  // For "a = null" verification, see jpa/141e, jpa/141f
+  private boolean _isDuplicated;
+
   /**
    * Creates a new argument expression.
    *
@@ -80,6 +83,22 @@ public class ArgExpr extends AbstractAmberExpr {
     _sqlIndex = -1;
   }
 
+  /*
+   * Returns a new ArgExpr with the same state,
+   * except its _sqlIndex will be the next one
+   * when generated.
+   *
+  public ArgExpr getNextClone()
+  {
+    // jpa/114e
+    ArgExpr arg = new ArgExpr(_parser, _name, _index);
+
+    arg.setType(_type);
+
+    return arg;
+  }
+  */
+
   /**
    * Returns the index value
    */
@@ -102,6 +121,15 @@ public class ArgExpr extends AbstractAmberExpr {
   public void setType(Type type)
   {
     _type = type;
+  }
+
+  /**
+   * Sets true if the parameter is duplicated
+   * for null verification in the where clause.
+   */
+  public void setDuplicated(boolean isDuplicated)
+  {
+    _isDuplicated = isDuplicated;
   }
 
   /**
@@ -170,22 +198,34 @@ public class ArgExpr extends AbstractAmberExpr {
       if (getType() != null)
         argTypes[_index - 1] = getType();
 
-      if (argTypes[_index - 1] != null)
+      if (argTypes[_index - 1] != null) {
+
         argTypes[_index - 1].setParameter(pstmt, _sqlIndex + 1,
                                           argValues[_index - 1]);
+
+        if (_isDuplicated) {
+          // jpa/141e
+          argTypes[_index - 1].setParameter(pstmt, _sqlIndex + 2,
+                                            argValues[_index - 1]);
+        }
+      }
       else
         pstmt.setString(_sqlIndex + 1, null);
     }
     else {
-
       // jpa/141d (enum type)
       if (getType() != null)
         argTypes[i - 1] = getType();
 
-      if (argTypes[i - 1] != null)
-        argTypes[i - 1].setParameter(pstmt, i, argValues[i - 1]);
+      if (argTypes[i - 1] != null) {
+        // jpa/141g argTypes[i - 1].setParameter(pstmt, i - 1, argValues[i - 1]);
+        argTypes[i - 1].setParameter(pstmt, _sqlIndex + 1, argValues[i - 1]);
+
+        if (_isDuplicated)
+          argTypes[i - 1].setParameter(pstmt, _sqlIndex + 2, argValues[i - 1]);
+      }
       else
-        pstmt.setString(i, null);
+        pstmt.setString(_sqlIndex + 1, null);
     }
 
   }
@@ -206,6 +246,9 @@ public class ArgExpr extends AbstractAmberExpr {
   {
     if (_sqlIndex < 0)
       _sqlIndex = _parser.generateSQLArg();
+
+    if (_isDuplicated)
+      _parser.generateSQLArg();
 
     cb.append("?");
   }

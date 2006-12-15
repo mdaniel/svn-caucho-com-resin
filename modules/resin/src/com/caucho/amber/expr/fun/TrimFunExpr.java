@@ -29,6 +29,7 @@
 package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.query.QueryParser;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -50,14 +51,16 @@ public class TrimFunExpr extends FunExpr {
   /**
    * Creates a new expression
    */
-  protected TrimFunExpr(ArrayList<AmberExpr> args)
+  protected TrimFunExpr(QueryParser parser,
+                        ArrayList<AmberExpr> args)
   {
-    super("trim", args, false);
+    super(parser, "trim", args, false);
   }
 
-  public static TrimFunExpr create(ArrayList<AmberExpr> args)
+  public static TrimFunExpr create(QueryParser parser,
+                                   ArrayList<AmberExpr> args)
   {
-    return new TrimFunExpr(args);
+    return new TrimFunExpr(parser, args);
   }
 
   /**
@@ -105,6 +108,46 @@ public class TrimFunExpr extends FunExpr {
     // XXX: this validation should be moved to QueryParser
     // if (n != 1)
     //   throw new QueryParseException(L.l("expected 1 string argument for TRIM"));
+
+    if (_parser.isDerbyDBMS()) {
+
+      // Derby.
+
+      switch (_trimSemantics) {
+
+      case LEADING:
+        cb.append("ltrim(");
+        break;
+
+      case TRAILING:
+        cb.append("rtrim(");
+        break;
+
+      default:
+        cb.append("ltrim(rtrim(");
+      }
+
+      if (_trimChar != null) {
+        if (select)
+          _trimChar.generateWhere(cb);
+        else
+          _trimChar.generateUpdateWhere(cb);
+
+        cb.append(" from ");
+      }
+
+      if (select)
+        args.get(0).generateWhere(cb);
+      else
+        args.get(0).generateUpdateWhere(cb);
+
+      cb.append(')');
+
+      if (_trimSemantics == TrimSemantics.BOTH)
+        cb.append(')');
+
+      return;
+    }
 
     cb.append("trim(");
 

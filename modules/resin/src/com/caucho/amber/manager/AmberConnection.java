@@ -263,29 +263,33 @@ public class AmberConnection
 
       checkTransactionRequired("persist");
 
-      Entity instance = (Entity) entity;
+      persistInternal(entity);
 
-      // jpa/0h24
-      // Pre-persist child entities.
-      instance.__caucho_cascadePrePersist(this);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (SQLException e) {
+      throw new IllegalStateException(e);
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
 
-      int state = instance.__caucho_getEntityState();
+  /**
+   * Makes the instance managed called
+   * from cascading operations.
+   */
+  public void persistNoChecks(Object entity)
+  {
+    try {
+      if (entity == null)
+        return;
 
-      if (state == Entity.TRANSIENT) {
-        createInternal(instance);
-      }
-      else if (state >= Entity.P_DELETING) {
-        // removed entity instance, reset state and persist.
-        instance.__caucho_makePersistent(null, (EntityType) null);
-        createInternal(instance);
-      }
-      else // jpa/0ga5
-        throw new EntityExistsException(L.l("Trying to persist an entity that is detached or already exists."));
+      persistInternal(entity);
 
-      // jpa/0h27
-      // Post-persist child entities.
-      instance.__caucho_cascadePostPersist(this);
-
+    } catch (EntityExistsException e) {
+      // This is not an issue. It is the cascading
+      // operation trying to persist the source
+      // entity from the destination end.
     } catch (RuntimeException e) {
       throw e;
     } catch (SQLException e) {
@@ -431,8 +435,8 @@ public class AmberConnection
 
       return (T) load(entityClass, primaryKey, preloadedProperties);
     } catch (AmberObjectNotFoundException e) {
-      // XXX: shouldn't be throwing at all?
-      log.log(Level.FINER, e.toString(), e);
+      // JPA: should not throw at all, returns null only.
+      // log.log(Level.FINER, e.toString(), e);
 
       return null;
     } catch (RuntimeException e) {
@@ -514,13 +518,18 @@ public class AmberConnection
 
     String resultSetMapping = nativeQuery.getResultSetMapping();
 
-    if (resultSetMapping != null)
+    if (! ((resultSetMapping == null) || "".equals(resultSetMapping)))
       return createNativeQuery(sql, resultSetMapping);
 
     String resultClass = nativeQuery.getResultClass();
 
+    AmberEntityHome entityHome
+      = _persistenceUnit.getEntityHome(resultClass);
+
+    EntityType entityType = entityHome.getEntityType();
+
     try {
-      return createNativeQuery(sql, Class.forName(resultClass));
+      return createNativeQuery(sql, entityType.getInstanceClass());
     } catch (Exception e) {
       throw new IllegalArgumentException(e);
     }
@@ -767,6 +776,9 @@ public class AmberConnection
   {
     Entity entity = null;
 
+    if (key == null)
+      return null;
+
     // ejb/0d01, jpa/0gh0, jpa/0g0k
     // if (shouldRetrieveFromCache())
     entity = getEntity(cl.getName(), key);
@@ -786,6 +798,10 @@ public class AmberConnection
       }
 
       entity = entityHome.load(this, key, preloadedProperties);
+
+      if (entity == null)
+        return null;
+
       addEntity(entity);
 
       return entity;
@@ -2109,6 +2125,36 @@ public class AmberConnection
 
       _txEntities.clear();
     }
+  }
+
+  /**
+   * Persists the entity.
+   */
+  public void persistInternal(Object entity)
+    throws Exception
+  {
+    Entity instance = (Entity) entity;
+
+    // jpa/0h24
+    // Pre-persist child entities.
+    instance.__caucho_cascadePrePersist(this);
+
+    int state = instance.__caucho_getEntityState();
+
+    if (state == Entity.TRANSIENT) {
+      createInternal(instance);
+    }
+    else if (state >= Entity.P_DELETING) {
+      // removed entity instance, reset state and persist.
+      instance.__caucho_makePersistent(null, (EntityType) null);
+      createInternal(instance);
+    }
+    else // jpa/0ga5
+      throw new EntityExistsException(L.l("Trying to persist an entity that is detached or already exists. Entity state '{0}'", state));
+
+    // jpa/0h27
+    // Post-persist child entities.
+    instance.__caucho_cascadePostPersist(this);
   }
 
   /**

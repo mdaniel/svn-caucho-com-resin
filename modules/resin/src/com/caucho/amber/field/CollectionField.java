@@ -145,7 +145,7 @@ public class CollectionField extends CascadableField {
 
       switch (cascadeType) {
       case PERSIST:
-        out.print("persist");
+        out.print("persistNoChecks");
         break;
 
       case MERGE:

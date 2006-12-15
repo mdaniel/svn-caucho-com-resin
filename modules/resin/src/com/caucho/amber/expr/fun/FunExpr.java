@@ -47,6 +47,8 @@ import java.util.ArrayList;
 public class FunExpr extends AbstractAmberExpr {
   private static final L10N L = new L10N(FunExpr.class);
 
+  QueryParser _parser;
+
   private String _id;
   private ArrayList<AmberExpr> _args;
   private boolean _distinct;
@@ -54,20 +56,23 @@ public class FunExpr extends AbstractAmberExpr {
   /**
    * Creates a new function expression
    */
-  protected FunExpr(String id,
+  protected FunExpr(QueryParser parser,
+                    String id,
                     ArrayList<AmberExpr> args,
                     boolean distinct)
   {
+    _parser = parser;
     _id = id;
     _args = args;
     _distinct = distinct;
   }
 
-  public static FunExpr create(String id,
+  public static FunExpr create(QueryParser parser,
+                               String id,
                                ArrayList<AmberExpr> args,
                                boolean distinct)
   {
-    return new FunExpr(id, args, distinct);
+    return new FunExpr(parser, id, args, distinct);
   }
 
   /**

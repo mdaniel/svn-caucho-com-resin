@@ -28,6 +28,7 @@
 
 package com.caucho.amber.expr.fun;
 
+import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.type.SqlDateType;
 import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
@@ -43,14 +44,14 @@ public class CurrentDateFunExpr extends DateTimeFunExpr {
   /**
    * Creates a new expression
    */
-  protected CurrentDateFunExpr()
+  protected CurrentDateFunExpr(QueryParser parser)
   {
-    super("current_date", null, false);
+    super(parser, "current_date", null, false);
   }
 
-  public static FunExpr create()
+  public static FunExpr create(QueryParser parser)
   {
-    return new CurrentDateFunExpr();
+    return new CurrentDateFunExpr(parser);
   }
 
   /**

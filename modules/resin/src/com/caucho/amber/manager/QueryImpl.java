@@ -75,6 +75,11 @@ public class QueryImpl implements Query {
 
   private int _currIndex;
 
+  private FlushModeType _flushMode;
+
+  // Constructor queries.
+  private Class _primitiveColumns[];
+
   // Native queries.
   private String _nativeSql;
   private SqlResultSetMappingConfig _sqlResultSetMapping;
@@ -202,29 +207,70 @@ public class QueryImpl implements Query {
 
           if (constructorClass != null) {
 
-            StringBuilder argTypes = new StringBuilder();
+            _primitiveColumns = new Class[row.length];
+
+            StringBuilder argValues = new StringBuilder();
 
             try {
-
-              Class paramTypes[] = new Class[n];
+              // jpa/11a4, jpa/11a5
 
               boolean isFirst = true;
 
               for (int i=0; i < n; i++) {
-                paramTypes[i] = row[i].getClass();
-
                 if (isFirst)
                   isFirst = false;
                 else
-                  argTypes.append(", ");
+                  argValues.append(", ");
 
-                argTypes.append(paramTypes[i].getName());
+                argValues.append(row[i]);
               }
 
-              constructor = constructorClass.getDeclaredConstructor(paramTypes);
+              Constructor ctors[] = constructorClass.getDeclaredConstructors();
+
+              ArrayList<Constructor> validConstructors
+                = new ArrayList<Constructor>();
+
+              for (int j=0; j < ctors.length; j++) {
+
+                Class paramTypes[] = ctors[j].getParameterTypes();
+
+                if (paramTypes.length != row.length)
+                  continue;
+
+                boolean isValid = true;
+
+                for (int k=0; k < paramTypes.length; k++) {
+                  Class columnClass = row[k].getClass();
+
+                  if (! paramTypes[k].isAssignableFrom(columnClass)) {
+
+                    if (! paramTypes[k].isPrimitive()) {
+                      isValid = false;
+                      break;
+                    }
+
+                    Class primitiveType
+                      = (Class) columnClass.getDeclaredField("TYPE").get(null);
+
+                    if (paramTypes[k].isAssignableFrom(primitiveType)) {
+                      // jpa/11a5
+                      _primitiveColumns[k] = primitiveType;
+                    }
+                    else {
+                      isValid = false;
+                      break;
+                    }
+                  }
+                }
+
+                if (isValid)
+                  validConstructors.add(ctors[j]);
+              }
+
+              constructor = validConstructors.get(0);
 
             } catch (Exception ex) {
-              throw error(L.l("Unable to find constructor {0}. Make sure there is a public constructor for the given argument types ({1})", constructorClass.getName(), argTypes));
+              throw error(L.l("Unable to find constructor {0}. Make sure there is a public constructor for the given argument values ({1})", constructorClass.getName(), argValues));
             }
           }
         }
@@ -257,6 +303,31 @@ public class QueryImpl implements Query {
         else {
 
           try {
+            for (int i=0; i < row.length; i++) {
+              Class primitiveType = _primitiveColumns[i];
+
+              if (primitiveType == null)
+                continue;
+
+              // jpa/11a5
+              if (primitiveType == Boolean.TYPE)
+                row[i] = ((Boolean) row[i]).booleanValue();
+              else if (primitiveType == Byte.TYPE)
+                row[i] = ((Byte) row[i]).byteValue();
+              else if (primitiveType == Character.TYPE)
+                row[i] = ((Character) row[i]).charValue();
+              else if (primitiveType == Double.TYPE)
+                row[i] = ((Double) row[i]).doubleValue();
+              else if (primitiveType == Float.TYPE)
+                row[i] = ((Float) row[i]).floatValue();
+              else if (primitiveType == Integer.TYPE)
+                row[i] = ((Integer) row[i]).intValue();
+              else if (primitiveType == Long.TYPE)
+                row[i] = ((Long) row[i]).longValue();
+              else if (primitiveType == Short.TYPE)
+                row[i] = ((Short) row[i]).shortValue();
+            }
+
             object = constructor.newInstance(row);
           } catch (Exception ex) {
 
@@ -264,7 +335,7 @@ public class QueryImpl implements Query {
 
             boolean isFirst = true;
 
-            for (int i=0; i<row.length; i++) {
+            for (int i=0; i < row.length; i++) {
 
               if (isFirst)
                 isFirst = false;
@@ -332,6 +403,9 @@ public class QueryImpl implements Query {
       if (isSelectQuery())
         throw new IllegalStateException(L.l("javax.persistence.Query.executeUpdate() cannot be applied to a SELECT statement"));
 
+      if (_flushMode == FlushModeType.AUTO)
+        _aConn.flushNoChecks();
+
       return _userQuery.executeUpdate();
     } catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
@@ -345,6 +419,9 @@ public class QueryImpl implements Query {
     throws SQLException
   {
     ResultSet rs;
+
+    if (_flushMode == FlushModeType.AUTO)
+      _aConn.flushNoChecks();
 
     if (_nativeSql == null) {
       // JPA query.
@@ -433,6 +510,7 @@ public class QueryImpl implements Query {
     for (int i=0; i < n; i++) {
       if (mapping.get(i).equals(name)) {
         setParameter(i+1, value, type);
+        found = true;
       }
     }
 
@@ -456,6 +534,7 @@ public class QueryImpl implements Query {
     for (int i=0; i < n; i++) {
       if (mapping.get(i).equals(name)) {
         setParameter(i+1, value, type);
+        found = true;
       }
     }
 
@@ -557,6 +636,8 @@ public class QueryImpl implements Query {
    */
   public Query setFlushMode(FlushModeType mode)
   {
+    _flushMode = mode;
+
     return this;
   }
 

@@ -29,6 +29,7 @@
 package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.type.Type;
 import com.caucho.util.L10N;
 
@@ -46,21 +47,23 @@ public class MaxFunExpr extends FunExpr {
   /**
    * Creates a new function expression
    */
-  protected MaxFunExpr(String id,
+  protected MaxFunExpr(QueryParser parser,
+                       String id,
                        ArrayList<AmberExpr> args,
                        boolean distinct)
   {
-    super(id, args, distinct);
+    super(parser, id, args, distinct);
 
     // XXX: needs to throw IllegalArgument for empty args
     _arg = args.get(0);
   }
 
-  public static MaxFunExpr create(String id,
+  public static MaxFunExpr create(QueryParser parser,
+                                  String id,
                                   ArrayList<AmberExpr> args,
                                   boolean distinct)
   {
-    return new MaxFunExpr(id, args, distinct);
+    return new MaxFunExpr(parser, id, args, distinct);
   }
 
   /**
