@@ -550,10 +550,23 @@ public class QueryImpl implements Query {
   public Query setParameter(int index, Object value)
   {
     try {
-      if (value == null)
+      if (value == null) {
         _userQuery.setNull(index, java.sql.Types.JAVA_OBJECT);
-      else if (value instanceof Double)
-        _userQuery.setString(index, value.toString()); // commented out (jpa/141a): ((Double) value).doubleValue());
+        return this;
+      }
+
+      if (value instanceof Byte)
+        _userQuery.setByte(index, ((Byte) value).byteValue());
+      if (value instanceof Short)
+        _userQuery.setShort(index, ((Short) value).shortValue());
+      if (value instanceof Integer)
+        _userQuery.setInt(index, ((Integer) value).intValue());
+      if (value instanceof Long)
+        _userQuery.setLong(index, ((Long) value).longValue());
+      if (value instanceof Float)
+        _userQuery.setFloat(index, ((Float) value).floatValue());
+      if (value instanceof Double) // jpa/141a
+        _userQuery.setDouble(index, ((Double) value).doubleValue());
       else if (value instanceof Character)
         _userQuery.setString(index, value.toString());
       else if (value instanceof Entity) {

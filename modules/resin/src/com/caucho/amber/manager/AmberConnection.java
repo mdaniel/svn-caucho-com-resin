@@ -334,6 +334,8 @@ public class AmberConnection
 
         // cascade children
         entity.__caucho_cascadePrePersist(this);
+
+        // jpa/0i5g
         entity.__caucho_cascadePostPersist(this);
       }
 

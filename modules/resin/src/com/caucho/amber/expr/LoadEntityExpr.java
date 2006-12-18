@@ -179,9 +179,12 @@ public class LoadEntityExpr extends LoadExpr {
     if (eagerFieldNames != null)
       eagerFieldsIterator = eagerFieldNames.iterator();
 
-    if (property == null)
-      if ((eagerFieldsIterator != null) && (eagerFieldsIterator.hasNext()))
-        property = (String) eagerFieldsIterator.next();
+    // XXX: needs to handle field-based access
+    if (! entityType.isFieldAccess()) {
+      if (property == null)
+        if ((eagerFieldsIterator != null) && eagerFieldsIterator.hasNext())
+          property = (String) eagerFieldsIterator.next();
+    }
 
     if (property != null) {
 

@@ -209,6 +209,7 @@ public class QueryParser {
   private boolean _parsingFrom;
 
   private boolean _isDerbyDBMS;
+  private boolean _isPostgresDBMS;
 
   /**
    * Creates the query parser.
@@ -227,6 +228,14 @@ public class QueryParser {
   }
 
   /**
+   * Returns true for Postgres-like DBMS.
+   */
+  public boolean isPostgresDBMS()
+  {
+    return _isPostgresDBMS;
+  }
+
+  /**
    * Sets the entity home manager.
    */
   public void setAmberManager(AmberPersistenceUnit amberPersistenceUnit)
@@ -234,6 +243,7 @@ public class QueryParser {
     _amberPersistenceUnit = amberPersistenceUnit;
 
     _isDerbyDBMS = false;
+    _isPostgresDBMS = false;
 
     if (amberPersistenceUnit == null)
       return;
@@ -252,9 +262,22 @@ public class QueryParser {
 
           ResultSet rs = stmt.executeQuery(sql);
           rs.close();
+
         } catch (SQLException e) {
           _isDerbyDBMS = true;
-          log.log(Level.WARNING, e.toString(), e);
+          log.log(Level.FINER, e.toString(), e);
+        }
+
+        try {
+          String sql = "select false";
+
+          ResultSet rs = stmt.executeQuery(sql);
+          rs.close();
+
+          _isPostgresDBMS = true;
+
+        } catch (SQLException e) {
+          log.log(Level.FINER, e.toString(), e);
         }
       } catch (Exception e) {
         log.log(Level.WARNING, e.toString(), e);
@@ -592,6 +615,7 @@ public class QueryParser {
     }
 
     boolean hasGroupBy = false;
+    ArrayList<AmberExpr> groupList = null;
 
     token = peekToken();
     if (token == GROUP) {
@@ -602,7 +626,7 @@ public class QueryParser {
         hasGroupBy = true;
       }
 
-      ArrayList<AmberExpr> groupList = new ArrayList<AmberExpr>();
+      groupList = new ArrayList<AmberExpr>();
 
       while (true) {
         // jpa/0w23
@@ -625,7 +649,9 @@ public class QueryParser {
 
       scanToken();
 
-      query.setHaving(parseExpr().createBoolean().bindSelect(this));
+      AmberExpr havingExpr = parseExpr();
+
+      query.setHaving(havingExpr.createBoolean().bindSelect(this));
     }
 
     token = peekToken();
@@ -1307,7 +1333,13 @@ public class QueryParser {
       switch (token) {
       case CONCAT_OP:
         scanToken();
-        expr = new ConcatExpr(expr, parseAddExpr());
+
+        ArrayList<AmberExpr> args = new ArrayList<AmberExpr>();
+
+        args.add(expr);
+        args.add(parseAddExpr());
+
+        expr = ConcatFunExpr.create(this, args);
         break;
       default:
         return expr;
@@ -1507,25 +1539,25 @@ public class QueryParser {
       }
 
     case FALSE:
-      return new LiteralExpr(_lexeme, boolean.class);
+      return new LiteralExpr(this, _lexeme, boolean.class);
 
     case TRUE:
-      return new LiteralExpr(_lexeme, boolean.class);
+      return new LiteralExpr(this, _lexeme, boolean.class);
 
     case NULL:
       return new NullExpr();
 
     case INTEGER:
-      return new LiteralExpr(_lexeme, int.class);
+      return new LiteralExpr(this, _lexeme, int.class);
 
     case LONG:
-      return new LiteralExpr(_lexeme, long.class);
+      return new LiteralExpr(this, _lexeme, long.class);
 
     case DOUBLE:
-      return new LiteralExpr(_lexeme, double.class);
+      return new LiteralExpr(this, _lexeme, double.class);
 
     case STRING:
-      return new LiteralExpr(_lexeme, String.class);
+      return new LiteralExpr(this, _lexeme, String.class);
 
     case ARG:
       {

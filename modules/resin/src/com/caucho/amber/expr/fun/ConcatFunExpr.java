@@ -79,8 +79,6 @@ public class ConcatFunExpr extends FunExpr {
   private void generateInternalWhere(CharBuffer cb,
                                      boolean select)
   {
-    // Translate to => arg1 || arg2 (XXX: Mysql CONCAT??)
-
     ArrayList<AmberExpr> args = getArgs();
 
     int n = args.size();
@@ -89,20 +87,83 @@ public class ConcatFunExpr extends FunExpr {
     // if (n != 2)
     //   throw new QueryParseException(L.l("expected 2 string arguments for CONCAT"));
 
-    cb.append("(");
+    if (_parser.isDerbyDBMS()) {
 
-    if (select)
-      args.get(0).generateWhere(cb);
-    else
-      args.get(0).generateUpdateWhere(cb);
+      // Derby does not accept two params in (? || ?).
+      // Translates to ((? || '') || ('' || ?)).
 
-    cb.append(" || ");
+      // XXX: there seems to be an issue with VARCHAR(32672)
+      // and a Derby driver patch should be released soon.
 
-    if (select)
-      args.get(1).generateWhere(cb);
-    else
-      args.get(1).generateUpdateWhere(cb);
+      cb.append("VARCHAR(CAST(");
 
-    cb.append(")");
+      if (select)
+        args.get(0).generateWhere(cb);
+      else
+        args.get(0).generateUpdateWhere(cb);
+
+      cb.append("AS VARCHAR(2000)) || CAST(");
+
+      if (select)
+        args.get(1).generateWhere(cb);
+      else
+        args.get(1).generateUpdateWhere(cb);
+
+      cb.append(" AS VARCHAR(2000)))");
+
+      return;
+    }
+
+    cb.append("concat");
+
+    generateInternalConcat(cb, true, true, null, select);
+  }
+
+  private void generateInternalConcat(CharBuffer cb,
+                                      boolean arg0,
+                                      boolean arg1,
+                                      String str,
+                                      boolean select)
+  {
+    ArrayList<AmberExpr> args = getArgs();
+
+    cb.append('(');
+
+    if (arg0) {
+      if (select)
+        args.get(0).generateWhere(cb);
+      else
+        args.get(0).generateUpdateWhere(cb);
+
+      if (_parser.isDerbyDBMS())
+        cb.append(" || ");
+      else
+        cb.append(',');
+    }
+
+    if (arg1) {
+      if (select)
+        args.get(1).generateWhere(cb);
+      else
+        args.get(1).generateUpdateWhere(cb);
+
+      if (arg0) {
+        cb.append(')');
+        return;
+      }
+
+      if (_parser.isDerbyDBMS())
+        cb.append(" || ");
+      else
+        cb.append(',');
+    }
+
+    cb.append('\'');
+
+    cb.append(str);
+
+    cb.append('\'');
+
+    cb.append(')');
   }
 }

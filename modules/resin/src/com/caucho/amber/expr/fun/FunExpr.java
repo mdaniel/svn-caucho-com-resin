@@ -30,6 +30,8 @@ package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.expr.AbstractAmberExpr;
 import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.expr.IdExpr;
+import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
@@ -98,6 +100,22 @@ public class FunExpr extends AbstractAmberExpr {
   {
     for (int i = 0; i < _args.size(); i++) {
       AmberExpr arg = _args.get(i);
+
+      if (arg instanceof IdExpr) {
+        IdExpr id = (IdExpr) arg;
+
+        // jpa/0i18
+        if (id.getFromItem() == from)
+          return true;
+      }
+
+      if (arg instanceof KeyColumnExpr) {
+        KeyColumnExpr key = (KeyColumnExpr) arg;
+
+        // jpa/1123
+        if (key.usesFrom(from, IS_INNER_JOIN, false))
+          return true;
+      }
 
       if (arg.usesFrom(from, type))
         return true;

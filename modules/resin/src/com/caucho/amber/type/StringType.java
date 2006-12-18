@@ -114,8 +114,10 @@ public class StringType extends Type {
       // pstmt.setNull(index, java.sql.Types.OTHER);
       pstmt.setString(index, null);
     }
-    else
+    else if (value instanceof String)
       pstmt.setString(index, (String) value);
+    else
+      throw new IllegalArgumentException("Invalid argument for setParameter.");
   }
 
   /**

@@ -242,6 +242,20 @@ public class BinaryExpr extends AbstractAmberExpr {
   {
     cb.append('(');
 
+    ArgExpr arg;
+
+    if ((_left instanceof ArgExpr) &&
+        (_right instanceof AbstractAmberExpr)) {
+      arg = (ArgExpr) _left;
+      arg.setType(((AbstractAmberExpr) _right).getType());
+    }
+
+    if ((_right instanceof ArgExpr) &&
+        (_left instanceof AbstractAmberExpr)) {
+      arg = (ArgExpr) _right;
+      arg.setType(((AbstractAmberExpr) _left).getType());
+    }
+
     if (select)
       _left.generateWhere(cb);
     else
@@ -298,7 +312,7 @@ public class BinaryExpr extends AbstractAmberExpr {
       if ((_token == QueryParser.EQ) ||
           (_token == QueryParser.NE)) {
 
-        ArgExpr arg = (ArgExpr) _right;
+        arg = (ArgExpr) _right;
 
         arg.setDuplicated(true);
 
