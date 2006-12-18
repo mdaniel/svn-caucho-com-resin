@@ -29,10 +29,8 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.log.Log;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.lib.UnserializeReader;
-import com.caucho.server.cluster.ClusterObject;
 import com.caucho.util.CacheListener;
 
 import java.io.IOException;
@@ -48,15 +46,14 @@ import java.util.logging.Logger;
  */
 public class SessionArrayValue extends ArrayValueWrapper 
   implements CacheListener {
-  static protected final Logger log = Log.open(SessionArrayValue.class);
+  static protected final Logger log
+    = Logger.getLogger(SessionArrayValue.class.getName());
 
   private String _id;
 
-  private ClusterObject _clusterObject;
-  
   private int _useCount;
 
-  private long _accessTime;
+  protected long _accessTime;
   private long _maxInactiveInterval;
 
   private boolean _isValid;
@@ -100,13 +97,11 @@ public class SessionArrayValue extends ArrayValueWrapper
   {
     long accessTime = _accessTime;
 
-    SessionArrayValue theCopy = 
+    SessionArrayValue copy = 
       new SessionArrayValue(_id, accessTime, _maxInactiveInterval,
                             (ArrayValue) getArray().copy(env, map));
 
-    theCopy.setClusterObject(_clusterObject);
-
-    return theCopy;
+    return copy;
   }
 
   /**
@@ -175,10 +170,7 @@ public class SessionArrayValue extends ArrayValueWrapper
 
   public boolean load()
   {
-    if (_clusterObject != null)
-      return _clusterObject.load(this);
-    else
-      return true;
+    return true;
   }
 
   /**
@@ -223,19 +215,7 @@ public class SessionArrayValue extends ArrayValueWrapper
     if (count < 0)
       throw new IllegalStateException();
 
-    try {
-      ClusterObject clusterObject = _clusterObject;
-
-      if (clusterObject != null) {
-        // make sure the object always saves - PHP references can make changes
-        // without directly calling on the session object
-        clusterObject.change(); 
-
-        clusterObject.store(this);
-      }
-    } catch (Throwable e) {
-      log.log(Level.WARNING, "Can't serialize session", e);
-    }
+    store();
   }
 
   /**
@@ -243,16 +223,11 @@ public class SessionArrayValue extends ArrayValueWrapper
    */
   public void storeOnShutdown()
   {
-    try {
-      ClusterObject clusterObject = _clusterObject;
+    store();
+  }
 
-      if (clusterObject != null) {
-        clusterObject.change();
-        clusterObject.store(this);
-      }
-    } catch (Throwable e) {
-      log.log(Level.WARNING, "Can't serialize session", e);
-    }
+  protected void store()
+  {
   }
 
   public long getMaxInactiveInterval()
@@ -260,10 +235,12 @@ public class SessionArrayValue extends ArrayValueWrapper
     return _maxInactiveInterval;
   }
 
+  /*
   public void setClusterObject(ClusterObject clusterObject)
   {
     _clusterObject = clusterObject;
   }
+  */
 
   public void reset(long now)
   {
@@ -301,18 +278,16 @@ public class SessionArrayValue extends ArrayValueWrapper
       throw new IllegalStateException(L.l("Can't call invalidate() when session is no longer valid."));
 
     try {
-      ClusterObject clusterObject = _clusterObject;
-      _clusterObject = null;
-
-      if (clusterObject != null)
-        clusterObject.remove();
+      remove();
 
       clear();
- 
-      _isValid = false;
     } finally {
       _isValid = false;
     }
+  }
+
+  protected void remove()
+  {
   }
   
   public boolean isEmpty()

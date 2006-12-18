@@ -30,7 +30,6 @@
 package com.caucho.quercus;
 
 import com.caucho.config.ConfigException;
-import com.caucho.loader.Environment;
 import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.FileModule;
@@ -54,10 +53,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 import com.caucho.util.TimedCache;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -65,6 +61,7 @@ import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.*;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -159,6 +156,9 @@ public class Quercus {
 
   private long _staticId;
 
+  private Path _pwd;
+  private Path _workDir;
+
   /**
    * Constructor.
    */
@@ -175,6 +175,55 @@ public class Quercus {
     _pageManager = createPageManager();
     
     _sessionManager = createSessionManager();
+
+    _workDir = getWorkDir();
+  }
+  
+  /**
+   * Returns the working directory.
+   */
+  public Path getPwd()
+  {
+    if (_pwd == null)
+      _pwd = new FilePath(System.getProperty("user.dir"));
+    
+    return _pwd;
+  }
+
+  /**
+   * Sets the working directory.
+   */
+  public void setPwd(Path path)
+  {
+    _pwd = path;
+  }
+
+  public Path getWorkDir()
+  {
+    if (_workDir == null)
+      _workDir = getPwd().lookup("WEB-INF/work");
+
+    return _workDir;
+  }
+
+  public void setWorkDir(Path workDir)
+  {
+    _workDir = workDir;
+  }
+
+  public String getCookieName()
+  {
+    return "JSESSIONID";
+  }
+
+  public String getVersion()
+  {
+    return "Resin/3.1.0";
+  }
+
+  public String getVersionDate()
+  {
+    return "20061220T1222";
   }
 
   protected PageManager createPageManager()
@@ -224,22 +273,6 @@ public class Quercus {
   }
 
   /**
-   * Returns the working directory.
-   */
-  public Path getPwd()
-  {
-    return _pageManager.getPwd();
-  }
-
-  /**
-   * Sets the working directory.
-   */
-  public void setPwd(Path path)
-  {
-    _pageManager.setPwd(path);
-  }
-
-  /**
    * Set true if pages should be compiled.
    */
   public void setCompile(boolean isCompile)
@@ -279,6 +312,35 @@ public class Quercus {
   public DataSource getDatabase()
   {
     return _database;
+  }
+
+  /**
+   * Gets the default data source.
+   */
+  public DataSource findDatabase(String driver, String url)
+  {
+    if (_database != null)
+      return _database;
+    else {
+      throw new QuercusModuleException(L.l("Can't find database for driver '{0}' and url '{1}'",
+					   driver, url));
+    }
+  }
+
+  /**
+   * Unwrap connection if necessary.
+   */
+  public Connection getConnection(Connection conn)
+  {
+    return conn;
+  }
+
+  /**
+   * Unwrap statement if necessary.
+   */
+  public Statement getStatement(Statement stmt)
+  {
+    return stmt;
   }
 
   /**
@@ -394,7 +456,8 @@ public class Quercus {
    */
   public void setIniFile(Path path)
   {
-    Environment.addDependency(new Depend(path));
+    // XXX: Not sure why this dependency would be useful
+    // Environment.addDependency(new Depend(path));
 
     if (path.canRead()) {
       Env env = new Env(this);
@@ -926,7 +989,8 @@ public class Quercus {
         ReadStream rs = null;
         try {
           is = url.openStream();
-          rs = Vfs.openRead(is);
+	  
+	  rs = new ReadStream(new VfsStream(is, null));
 
           parseServicesModule(rs);
         } catch (Throwable e) {
@@ -1063,8 +1127,9 @@ public class Quercus {
         ReadStream rs = null;
         try {
           is = url.openStream();
-          rs = Vfs.openRead(is);
-
+	  
+	  rs = new ReadStream(new VfsStream(is, null));
+	  
           parseClassServicesModule(rs);
         } catch (Throwable e) {
           log.log(Level.WARNING, e.toString(), e);

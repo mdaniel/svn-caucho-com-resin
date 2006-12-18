@@ -43,11 +43,7 @@ import com.caucho.quercus.program.*;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
-import com.caucho.vfs.IOExceptionWrapper;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.StringPath;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 
 import java.io.CharConversionException;
 import java.io.IOException;
@@ -351,7 +347,7 @@ public class QuercusParser {
   public static Expr parse(Quercus quercus, String str)
     throws IOException
   {
-    Path path = Vfs.lookup("string:");
+      Path path = new StringPath(str);
     
     return new QuercusParser(quercus, path, new java.io.StringReader(str)).parseExpr();
   }
@@ -359,7 +355,7 @@ public class QuercusParser {
   public static Expr parseDefault(String str)
   {
     try {
-      Path path = Vfs.lookup("string:");
+      Path path = new StringPath(str);
     
       return new QuercusParser(null, path, new java.io.StringReader(str)).parseExpr();
     } catch (IOException e) {

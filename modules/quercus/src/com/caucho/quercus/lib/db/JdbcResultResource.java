@@ -30,7 +30,6 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.env.*;
-import com.caucho.sql.UserStatement;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -1071,7 +1070,7 @@ public class JdbcResultResource {
    */
   protected Statement getJavaStatement()
   {
-    return ((UserStatement) getStatement()).getStatement();
+    return _conn.getEnv().getQuercus().getStatement(getStatement());
   }
 
   /**

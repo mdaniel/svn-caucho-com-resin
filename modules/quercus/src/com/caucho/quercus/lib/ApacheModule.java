@@ -37,10 +37,9 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.server.connection.CauchoResponse;
 import com.caucho.util.L10N;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.*;
 import java.util.Enumeration;
 import java.util.logging.Logger;
 
@@ -135,7 +134,7 @@ public class ApacheModule extends AbstractQuercusModule {
   {
     try {
       HttpServletRequest req = env.getRequest();
-      CauchoResponse res = (CauchoResponse) env.getResponse();
+      HttpServletResponse res = env.getResponse();
 
       // XXX: need to put the output, so the included stream gets the
       // buffer, too

@@ -66,6 +66,21 @@ public class Base64 {
     cb.append(Base64.encode(data));
   }
 
+  public static void encode(StringBuilder cb, long data)
+  {
+    cb.append(Base64.encode(data >> 60));
+    cb.append(Base64.encode(data >> 54));
+    cb.append(Base64.encode(data >> 48));
+    cb.append(Base64.encode(data >> 42));
+    cb.append(Base64.encode(data >> 36));
+    cb.append(Base64.encode(data >> 30));
+    cb.append(Base64.encode(data >> 24));
+    cb.append(Base64.encode(data >> 18));
+    cb.append(Base64.encode(data >> 12));
+    cb.append(Base64.encode(data >> 6));
+    cb.append(Base64.encode(data));
+  }
+
   public static void encode24(CharBuffer cb, int data)
   {
     cb.append(Base64.encode(data >> 18));

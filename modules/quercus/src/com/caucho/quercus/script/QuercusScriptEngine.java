@@ -35,8 +35,7 @@ import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.QuercusProgram;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
 import javax.script.*;
 import java.io.Reader;
@@ -79,10 +78,19 @@ public class QuercusScriptEngine
       
       WriteStream out;
 
-      if (writer != null)
-	out = Vfs.openWrite(writer);
+      if (writer != null) {
+	ReaderWriterStream s = new ReaderWriterStream(null, writer);
+	WriteStream os = new WriteStream(s);
+    
+	try {
+	  os.setEncoding("utf-8");
+	} catch (Exception e) {
+	}
+
+	out = os;
+      }
       else
-	out = Vfs.lookup("null:").openWrite();
+	out = new NullWriteStream();
 
       QuercusPage page = new InterpretedPage(program);
 

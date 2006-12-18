@@ -43,9 +43,6 @@ import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.quercus.resources.StreamContextResource;
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.ClusterServer;
-import com.caucho.sql.DatabaseManager;
 import com.caucho.util.Alarm;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
@@ -53,7 +50,6 @@ import com.caucho.util.LruCache;
 import com.caucho.vfs.ByteToChar;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import javax.script.ScriptContext;
@@ -294,7 +290,7 @@ public class Env {
       importPage(_page);
     }
 
-    setPwd(Vfs.lookup());
+    setPwd(_quercus.getPwd());
 
     if (_page != null) {
       _selfPath = _page.getSelfPath(null);
@@ -313,6 +309,7 @@ public class Env {
                     getIniBoolean("magic_quotes_gpc"));
     }
 
+    /*
     Cluster cluster = Cluster.getLocal();
 
     if (cluster != null) {
@@ -321,6 +318,7 @@ public class Env {
       if (selfServer != null)
         setIni("caucho.server_id", selfServer.getId());
     }
+    */
 
     _startTime = Alarm.getCurrentTime();
   }
@@ -529,7 +527,7 @@ public class Env {
       return entry.getConnection();
     }
 
-    database = DatabaseManager.findDatabase(driver, url);
+    database = _quercus.findDatabase(driver, url);
     
     ConnectionEntry entry = new ConnectionEntry();
     entry.init(database, userName, password);
@@ -560,7 +558,7 @@ public class Env {
     if (database != null)
       return database;
     else
-      return DatabaseManager.findDatabase(driver, url);
+      return _quercus.findDatabase(driver, url);
   }
 
   /**
@@ -812,6 +810,14 @@ public class Env {
   public Path getPwd()
   {
     return _pwd;
+  }
+
+  /**
+   * Returns the current directory.
+   */
+  public Path getWorkDir()
+  {
+    return _quercus.getWorkDir();
   }
 
   /**

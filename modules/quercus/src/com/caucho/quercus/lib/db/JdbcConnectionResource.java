@@ -37,7 +37,6 @@ import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
-import com.caucho.sql.UserConnection;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
@@ -368,7 +367,7 @@ public abstract class JdbcConnectionResource implements Closeable {
   protected Connection getJavaConnection()
     throws SQLException
   {
-    return ((UserConnection) _conn).getConnection();
+    return _env.getQuercus().getConnection(_conn);
   }
 
   /**
@@ -376,7 +375,8 @@ public abstract class JdbcConnectionResource implements Closeable {
    */
   public String getURL()
   {
-    return ((UserConnection) _conn).getURL();
+    // return getJavaConnection().getURL();
+    return _url;
   }
 
   /**

@@ -96,7 +96,7 @@ public class FilePath extends FilesystemPath {
   /**
    * Gets the system's user dir (pwd) and convert it to the Resin format.
    */
-  private static String getPwd()
+  public static String getPwd()
   {
     String path = getUserDir();
 

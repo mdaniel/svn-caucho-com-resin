@@ -35,6 +35,7 @@ import javax.script.ScriptEngineFactory;
 import javax.script.SimpleBindings;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.reflect.*;
 
 /**
  * Script engine factory
@@ -55,7 +56,17 @@ public class QuercusScriptEngineFactory implements ScriptEngineFactory {
    */
   public String getEngineVersion()
   {
-    return com.caucho.Version.VERSION;
+    try {
+      //return com.caucho.Version.VERSION;
+
+      Class cl = Class.forName("com.caucho.Version");
+      Field version = cl.getField("VERSION");
+
+      return (String) version.get(null);
+    } catch (Exception e) {
+    }
+
+    return "Resin/3.1.0";
   }
 
   /**

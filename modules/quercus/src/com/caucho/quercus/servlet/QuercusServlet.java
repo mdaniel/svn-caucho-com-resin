@@ -38,18 +38,12 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.page.QuercusPage;
-import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.webapp.Application;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.*;
+import javax.servlet.http.*;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -67,9 +61,34 @@ public class QuercusServlet
     = Logger.getLogger(QuercusServlet.class.getName());
 
   private Quercus _quercus;
+  private QuercusServletImpl _impl;
 
   private boolean _isCompileSet;
 
+  public QuercusServlet()
+  {
+    if (_impl == null) {
+      try {
+	Class cl = Class.forName("com.caucho.quercus.ProQuercusServlet");
+	_impl = (QuercusServletImpl) cl.newInstance();
+      } catch (Exception e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+    
+    if (_impl == null) {
+      try {
+	Class cl = Class.forName("com.caucho.quercus.ResinQuercusServlet");
+	_impl = (QuercusServletImpl) cl.newInstance();
+      } catch (Exception e) {
+	log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+    
+    if (_impl == null)
+      _impl = new QuercusServletImpl();
+  }
+  
   /**
    * Set true if quercus should be compiled into Java.
    */
@@ -182,14 +201,16 @@ public class QuercusServlet
   /**
    * Gets the script manager.
    */
-  public void init()
+  public void init(ServletConfig config)
     throws ServletException
   {
-    initImpl();
+    super.init(config);
+    
+    initImpl(config);
   }
 
-  private void initImpl()
-   // throws ServletException
+  private void initImpl(ServletConfig config)
+    throws ServletException
   {
     getQuercus();
 
@@ -199,6 +220,8 @@ public class QuercusServlet
       // XXX: for validating QA
       // throw new ServletException("compile must be set.");
     }
+
+    _impl.init(config);
   }
 
   /**
@@ -208,113 +231,7 @@ public class QuercusServlet
                       HttpServletResponse response)
     throws ServletException, IOException
   {
-    try {
-      Path path = getPath(request);
-
-      QuercusPage page = getQuercus().parse(path);
-
-      WriteStream ws;
-      
-      // XXX: check if correct.  PHP doesn't expect the lower levels
-      // to deal with the encoding, so this may be okay
-      if (response instanceof CauchoResponse) {
-	ws = Vfs.openWrite(((CauchoResponse) response).getResponseStream());
-      } else {
-	OutputStream out = response.getOutputStream();
-
-	ws = Vfs.openWrite(out);
-      }
-
-      Env env = new Env(getQuercus(), page, ws, request, response);
-      try {
-        env.setGlobalValue("request", env.wrapJava(request));
-        env.setGlobalValue("response", env.wrapJava(request));
-
-        env.start();
-
-	String prepend = env.getIniString("auto_prepend_file");
-	if (prepend != null) {
-	  QuercusPage prependPage = getQuercus().parse(env.lookup(prepend));
-	  prependPage.executeTop(env);
-	}
-
-        page.executeTop(env);
-
-	String append = env.getIniString("auto_append_file");
-	if (append != null) {
-	  QuercusPage appendPage = getQuercus().parse(env.lookup(append));
-	  appendPage.executeTop(env);
-	}
-     //   return;
-      }
-      catch (QuercusExitException e) {
-        throw e;
-      }
-      catch (QuercusLineRuntimeException e) {
-        log.log(Level.FINE, e.toString(), e);
-
-      //  return;
-      }
-      catch (QuercusValueException e) {
-        log.log(Level.FINE, e.toString(), e);
-	
-	ws.println(e.toString());
-
-      //  return;
-      }
-      catch (Throwable e) {
-        if (response.isCommitted())
-          e.printStackTrace(ws.getPrintWriter());
-
-        ws = null;
-
-        throw e;
-      }
-      finally {
-        env.close();
-
-        // don't want a flush for an exception
-        if (ws != null)
-          ws.close();
-      }
-    }
-    catch (QuercusDieException e) {
-      log.log(Level.FINE, e.toString(), e);
-      // normal exit
-    }
-    catch (QuercusExitException e) {
-      log.log(Level.FINER, e.toString(), e);
-      // normal exit
-    }
-    catch (RuntimeException e) {
-      throw e;
-    }
-    catch (Throwable e) {
-      throw new ServletException(e);
-    }
-  }
-
-  Path getPath(HttpServletRequest req)
-  {
-    String scriptPath = req.getServletPath();
-    String pathInfo = req.getPathInfo();
-
-    Path pwd = Vfs.lookup();
-
-    Path path = pwd.lookup(req.getRealPath(scriptPath));
-
-    if (path.isFile())
-      return path;
-
-    // XXX: include
-
-    String fullPath;
-    if (pathInfo != null)
-      fullPath = scriptPath + pathInfo;
-    else
-      fullPath = scriptPath;
-
-    return Vfs.lookup().lookup(req.getRealPath(fullPath));
+    _impl.service(request, response);
   }
 
   /**
@@ -323,27 +240,8 @@ public class QuercusServlet
   private Quercus getQuercus()
   {
     synchronized (this) {
-      if (_quercus == null) {
-	try {
-	  Class cl = Class.forName("com.caucho.quercus.ProQuercus");
-	  _quercus = (Quercus) cl.newInstance();
-	} catch (Exception e) {
-	  log.log(Level.FINEST, e.toString(), e);
-	}
-
-	if (_quercus == null)
-	  _quercus = new Quercus();
-      }
-    }
-
-    if (_quercus.getQuercusSessionManager().getSessionManager() == null) {
-      Application app = (Application) getServletContext();
-
-      if (app != null) {
-        SessionManager sm = app.getSessionManager();
-
-        _quercus.getQuercusSessionManager().setSessionManager(sm, app);
-      }
+      if (_quercus == null)
+	_quercus = _impl.getQuercus();
     }
 
     return _quercus;
@@ -355,6 +253,7 @@ public class QuercusServlet
   public void destroy()
   {
     _quercus.close();
+    _impl.destroy();
   }
 
   public static class PhpIni {

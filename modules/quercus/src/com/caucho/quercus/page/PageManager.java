@@ -35,7 +35,6 @@ import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.IOExceptionWrapper;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,16 +65,6 @@ public class PageManager
   public PageManager(Quercus quercus)
   {
     _quercus = quercus;
-    
-    _pwd = Vfs.getPwd();
-  }
-
-  /**
-   * Sets the owning directory.
-   */
-  public void setPwd(Path pwd)
-  {
-    _pwd = pwd;
   }
 
   public Quercus getQuercus()
@@ -88,7 +77,7 @@ public class PageManager
    */
   public Path getPwd()
   {
-    return _pwd;
+    return _quercus.getPwd();
   }
 
   /**

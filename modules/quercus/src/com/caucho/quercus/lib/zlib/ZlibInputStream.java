@@ -32,8 +32,7 @@ package com.caucho.quercus.lib.zlib;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 
 import java.io.IOException;
 
@@ -58,7 +57,7 @@ public class ZlibInputStream extends ReadStreamInput
     _in = in;
 
     _gzIn = new GZInputStream(in.getInputStream());
-    ReadStream rs = Vfs.openRead(_gzIn);
+    ReadStream rs = new ReadStream(new VfsStream(_gzIn, null));
 
     init(rs);
   }

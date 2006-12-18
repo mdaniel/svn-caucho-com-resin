@@ -39,7 +39,6 @@ import com.caucho.quercus.expr.IncludeExpr;
 import com.caucho.quercus.expr.MethodCallExpr;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Vfs;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -126,7 +125,7 @@ public class ErrorModule extends AbstractQuercusModule {
       else if (className.startsWith("_quercus._")
 	  && name.equals("call")) {
 	String path = unmangleFile(className);
-	String fileName = Vfs.lookup("./" + path).getNativePath();
+	String fileName = env.getPwd().lookup("./" + path).getNativePath();
 	
 	ArrayValue call = new ArrayValueImpl();
 	result.put(call);
@@ -141,7 +140,7 @@ public class ErrorModule extends AbstractQuercusModule {
       else if (className.startsWith("_quercus._")
 	       && name.equals("callMethod")) {
 	String path = unmangleFile(className);
-	String fileName = Vfs.lookup("./" + path).getNativePath();
+	String fileName = env.getPwd().lookup("./" + path).getNativePath();
 	
 	ArrayValue call = new ArrayValueImpl();
 	result.put(call);
@@ -160,7 +159,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	if (stack[i - 1].getMethodName().equals("include") &&
 	    stack[i - 1].getClassName().equals("com.caucho.quercus.env.Env")) {
 	  String path = unmangleFile(className);
-	  String fileName = Vfs.lookup("./" + path).getNativePath();
+	  String fileName = env.getPwd().lookup("./" + path).getNativePath();
 	
 	  ArrayValue call = new ArrayValueImpl();
 	  result.put(call);

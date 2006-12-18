@@ -37,18 +37,17 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.xml.stream.XMLStreamReaderImpl;
 
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class XmlReader {
-  private static final Logger log = Logger.getLogger(XmlReader.class.getName());
+public class XmlReader
+{
+  private static final Logger log
+    = Logger.getLogger(XmlReader.class.getName());
   private static final L10N L = new L10N(XmlReader.class);
 
   private int _depth;
@@ -61,8 +60,8 @@ public class XmlReader {
 
   private XMLStreamReader  _streamReader;
 
-  private static final HashMap<Integer, Integer> _constConvertMap =
-          new HashMap<Integer, Integer>();
+  private static final HashMap<Integer, Integer> _constConvertMap
+    = new HashMap<Integer, Integer>();
 
   private  HashMap<String, Integer> _startElements;
 
@@ -545,7 +544,9 @@ public class XmlReader {
    */
   public BooleanValue open(Env env, Path path) {
     try {
-      _streamReader = new XMLStreamReaderImpl(path.openRead());
+      XMLInputFactory factory = XMLInputFactory.newInstance();
+	
+      _streamReader = factory.createXMLStreamReader(path.openRead());
     }
     catch (XMLStreamException ex) {
       log.log(Level.WARNING, ex.toString(), ex);

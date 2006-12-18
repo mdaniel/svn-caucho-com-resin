@@ -41,7 +41,7 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -223,13 +223,13 @@ public class MiscModule extends AbstractQuercusModule {
   /**
    * Dumps the stack.
    */
-  public static Value dump_stack()
+  public static Value dump_stack(Env env)
   {
     try {
       Exception e = new Exception("Stack trace");
       e.fillInStackTrace();
 
-      com.caucho.vfs.WriteStream out = com.caucho.vfs.Vfs.openWrite("stderr:");
+      WriteStream out = env.getPwd().lookup("stderr:").openWrite();
       try {
 	e.printStackTrace(out.getPrintWriter());
 	//ScriptStackTrace.printStackTrace(e, out.getPrintWriter());

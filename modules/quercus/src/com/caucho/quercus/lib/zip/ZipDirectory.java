@@ -30,7 +30,7 @@ package com.caucho.quercus.lib.zip;
 
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,7 +52,9 @@ public class ZipDirectory
   public ZipDirectory(BinaryInput in)
   {
     _oldIn = in;
-    _in = new ReadStreamInput(Vfs.openRead(in.getInputStream()));
+    
+    VfsStream s = new VfsStream(in.getInputStream(), null);
+    _in = new ReadStreamInput(new ReadStream(s));
     _tmpBuf = new byte[32];
     _eof = false;
   }

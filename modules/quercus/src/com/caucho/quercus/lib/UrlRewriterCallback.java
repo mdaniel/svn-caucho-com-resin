@@ -30,7 +30,6 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.*;
-import com.caucho.server.session.SessionManager;
 import com.caucho.util.URLUtil;
 
 import java.lang.reflect.Method;
@@ -152,10 +151,8 @@ public class UrlRewriterCallback extends CallbackFunction {
         _sessionName = _env.getIni("session.name").toString();
         _sessionId = _env.getSession().getId();
 
-        SessionManager sessionManager = 
-          _env.getQuercus().getQuercusSessionManager().getSessionManager();
+	_javaSessionName = _env.getQuercus().getCookieName();
 
-        _javaSessionName = sessionManager.getCookieName();
         _javaSessionId = _env.getJavaSession().getId();
       }
 

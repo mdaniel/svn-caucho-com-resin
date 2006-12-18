@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.lib.session;
 
-import com.caucho.java.WorkDir;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.OutputModule;
@@ -392,7 +391,7 @@ public class SessionModule extends AbstractQuercusModule
     boolean create = false;
 
     if (callback != null)
-      callback.open(env, WorkDir.getLocalWorkDir().getPath(), cookieName);
+      callback.open(env, env.getWorkDir().getPath(), cookieName);
 
     //
     // Use cookies to transmit session id
