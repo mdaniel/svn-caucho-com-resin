@@ -63,7 +63,7 @@ public class CauchoSystem {
   static String _userDir;
   static String _userName;
   static Path _resinHome;
-  static Path _resinRoot;
+  static Path _rootDirectory;
   static boolean _isTesting;
   static boolean _isTestWindows;
 
@@ -171,39 +171,34 @@ public class CauchoSystem {
   }
 
   /**
-   * Gets the Path used as Resin Root
+   * Gets the Path used as root directory
    */
-  public static Path getResinRoot()
+  /**
+  public static Path getRootDirectory()
   {
-    if (_resinRoot != null)
-      return _resinRoot;
+    if (_rootDirectory != null)
+      return _rootDirectory;
 
-    String path = System.getProperty("resin.root");
+    String path = System.getProperty("server.root");
+
     if (path != null) {
-      _resinRoot = Vfs.lookupNative(path);
-      return _resinRoot;
+      _rootDirectory = Vfs.lookupNative(path);
+      return _rootDirectory;
     }
 
     path = System.getProperty("resin.home");
-    if (path != null) {
-      _resinRoot = Vfs.lookupNative(path);
 
-      return _resinRoot;
+    if (path != null) {
+      _rootDirectory = Vfs.lookupNative(path);
+
+      return _rootDirectory;
     }
 
-    _resinRoot = getResinHome();
+    _rootDirectory = getResinHome();
 
-    return _resinRoot;
+    return _rootDirectory;
   }
-
-  /**
-   * @deprecated Use {@link #getResinRoot()}
-   * @return
    */
-  public static Path getServerRoot()
-  {
-    return getResinRoot();
-  }
 
   public static long getVersionId()
   {

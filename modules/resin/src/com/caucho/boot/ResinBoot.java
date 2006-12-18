@@ -66,7 +66,7 @@ public class ResinBoot {
   private String []_argv;
 
   private Path _resinHome;
-  private Path _resinRoot;
+  private Path _rootDirectory;
   private Path _resinConf;
   private String _serverId = "";
   private boolean _isVerbose;
@@ -80,16 +80,19 @@ public class ResinBoot {
     throws Exception
   {
     Environment.init();
-    
+
     _argv = argv;
 
     calculateResinHome();
-    calculateResinRoot();
+    calculateRootDirectory();
 
     parseCommandLine(argv);
 
+    // required for license check
+    System.setProperty("resin.home", _resinHome.getNativePath());
+
     if (_resinConf == null) {
-      _resinConf = _resinRoot.lookup("conf/resin.conf");
+      _resinConf = _rootDirectory.lookup("conf/resin.conf");
 
       if (!_resinConf.exists()) {
         Path resinHomeConf = _resinHome.lookup("conf/resin.conf");
@@ -99,7 +102,8 @@ public class ResinBoot {
       }
     }
 
-    Vfs.setPwd(_resinRoot);
+    // watchdog/0210
+    // Vfs.setPwd(_rootDirectory);
 
     if (! _resinConf.canRead())
       throw new ConfigException(L().l("Can't open resin.conf file '{0}'",
@@ -109,7 +113,7 @@ public class ResinBoot {
 
     Config config = new Config();
 
-    ResinConfig conf = new ResinConfig(_resinHome, _resinRoot);
+    ResinConfig conf = new ResinConfig(_resinHome, _rootDirectory);
 
     ResinELContext elContext = new ResinBootELContext();
 
@@ -178,26 +182,19 @@ public class ResinBoot {
 
     path = path.substring(p + 1, q);
 
-    Path pwd = Vfs.lookup(path).getParent().getParent();
-
-    _resinHome = pwd;
+    _resinHome = Vfs.lookup(path).getParent().getParent();
   }
 
-  private void calculateResinRoot()
+  private void calculateRootDirectory()
   {
-    String resinRoot;
+    String rootDirectory = System.getProperty("server.root");
 
-    resinRoot = System.getProperty("resin.root");
-
-    if (resinRoot == null)
-      resinRoot = System.getProperty("server.root");
-
-    if (resinRoot != null) {
-      _resinRoot = Vfs.lookup(resinRoot);
+    if (rootDirectory != null) {
+      _rootDirectory = Vfs.lookup(rootDirectory);
       return;
     }
 
-    _resinRoot = _resinHome;
+    _rootDirectory = _resinHome;
   }
 
   private void parseCommandLine(String []argv)
@@ -217,14 +214,14 @@ public class ResinBoot {
 	_resinHome = Vfs.lookup(argv[i + 1]);
 	i++;
       }
-      else if ("-resin-root".equals(arg)
-               || "--resin-root".equals(arg)) {
-        _resinRoot = Vfs.lookup(argv[i + 1]);
+      else if ("-root-directory".equals(arg)
+               || "--root-directory".equals(arg)) {
+        _rootDirectory = Vfs.lookup(argv[i + 1]);
         i++;
       }
       else if ("-server-root".equals(arg)
 	       || "--server-root".equals(arg)) {
-	_resinRoot = Vfs.lookup(argv[i + 1]);
+	_rootDirectory = Vfs.lookup(argv[i + 1]);
 	i++;
       }
       else if ("-server".equals(arg)
@@ -253,8 +250,8 @@ public class ResinBoot {
     if (resinConf != null) {
       _resinConf = Vfs.getPwd().lookup(resinConf);
 
-      if (! _resinConf.exists() && _resinRoot != null)
-        _resinConf = _resinRoot.lookup(resinConf);
+      if (! _resinConf.exists() && _rootDirectory != null)
+        _resinConf = _rootDirectory.lookup(resinConf);
 
       if (! _resinConf.exists() && _resinHome != null)
         _resinConf = _resinHome.lookup(resinConf);
@@ -305,7 +302,7 @@ public class ResinBoot {
       return false;
     }
     else {
-      return _server.startSingle(_argv, _resinRoot) != 0;
+      return _server.startSingle(_argv, _rootDirectory) != 0;
     }
   }
 
@@ -371,7 +368,7 @@ public class ResinBoot {
 
     public Path getRootDirectory()
     {
-      return _resinRoot;
+      return _rootDirectory;
     }
 
     public Path getResinConf()

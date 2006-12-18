@@ -87,7 +87,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
     _args = new Args(argv);
 
-    Vfs.setPwd(_args.getResinRoot());
+    Vfs.setPwd(_args.getRootDirectory());
 
     _resin = readConfig(_args);
 
@@ -186,7 +186,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
     String serverId = args.getServerId();
 
-    Vfs.setPwd(_args.getResinRoot());
+    Vfs.setPwd(_args.getRootDirectory());
 
     ResinConfig resin = null;
 
@@ -214,7 +214,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
       _activeServerMap.put(serverId, server);
     }
     
-    server.start(argv, args.getResinRoot());
+    server.start(argv, args.getRootDirectory());
 
     return true;
   }
@@ -243,9 +243,9 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
   {
     Config config = new Config();
 
-    Vfs.setPwd(args.getResinRoot());
+    Vfs.setPwd(args.getRootDirectory());
     ResinConfig resin = new ResinConfig(args.getResinHome(),
-					args.getResinRoot());
+					args.getRootDirectory());
 
     config.configure(resin,
 		     args.getResinConf(),
@@ -336,10 +336,10 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
   static Path calculateResinRoot(Path resinHome)
   {
-    String resinRoot = System.getProperty("resin.root");
+    String serverRoot = System.getProperty("server.root");
 
-    if (resinRoot != null)
-      return Vfs.lookup(resinRoot);
+    if (serverRoot != null)
+      return Vfs.lookup(serverRoot);
 
     return resinHome;
   }
@@ -407,7 +407,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
   static class Args {
     private Path _resinHome;
-    private Path _resinRoot;
+    private Path _rootDirectory;
     private String []_argv;
 
     private Path _resinConf;
@@ -419,7 +419,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     Args(String []argv)
     {
       _resinHome = calculateResinHome();
-      _resinRoot = calculateResinRoot(_resinHome);
+      _rootDirectory = calculateResinRoot(_resinHome);
       
       _argv = argv;
 
@@ -433,9 +433,9 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
       return _resinHome;
     }
 
-    Path getResinRoot()
+    Path getRootDirectory()
     {
-      return _resinRoot;
+      return _rootDirectory;
     }
 
     Path getResinConf()
@@ -473,14 +473,14 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 	  _resinHome = Vfs.lookup(argv[i + 1]);
 	  i++;
 	}
-        else if ("-resin-root".equals(arg)
-                 || "--resin-root".equals(arg)) {
-          _resinRoot = Vfs.lookup(argv[i + 1]);
+        else if ("-root-directory".equals(arg)
+                 || "--root-directory".equals(arg)) {
+          _rootDirectory = Vfs.lookup(argv[i + 1]);
           i++;
         }
 	else if ("-server-root".equals(arg)
 		 || "--server-root".equals(arg)) {
-	  _resinRoot = Vfs.lookup(argv[i + 1]);
+	  _rootDirectory = Vfs.lookup(argv[i + 1]);
 	  i++;
 	}
 	else if ("-server".equals(arg)

@@ -112,7 +112,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   private boolean _isGlobal;
 
   private String _serverId = "";
-  private String _configFile = "conf/resin.conf";
 
   private Path _resinHome;
   private Path _rootDirectory;
@@ -142,10 +141,10 @@ public class Resin implements EnvironmentBean, SchemaBean
   private J2EEDomain _j2eeDomainManagedObject;
   private JVM _jvmManagedObject;
 
-  private String _resinConf = "conf/resin.conf";
+  private String _configFile;
   private String _configServer;
 
-  private Path _resinRoot;
+  private Path _resinConf;
 
   private ClassLoader _systemClassLoader;
   private Thread _mainThread;
@@ -195,18 +194,15 @@ public class Resin implements EnvironmentBean, SchemaBean
     else
       setResinHome(Vfs.getPwd());
 
-    String resinRoot = System.getProperty("resin.root");
+    // server.root backwards compat
+    String serverRoot = System.getProperty("server.root");
 
-    if (resinRoot != null)
-      setRootDirectory(Vfs.lookup(resinRoot));
-    else {
-      String serverRoot = System.getProperty("server.root");
+    if (serverRoot != null)
+      setRootDirectory(Vfs.lookup(serverRoot));
 
-      if (serverRoot != null)
-        setRootDirectory(Vfs.lookup(serverRoot));
-      else
-        setRootDirectory(Vfs.getPwd());
-    }
+    // watchdog/0212
+    // else
+    //  setRootDirectory(Vfs.getPwd());
 
     _variableMap.put("resin", new Var());
     _variableMap.put("server", new Var());
@@ -298,14 +294,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
-   * Gets the config file.
-   */
-  public String getConfigFile()
-  {
-    return _configFile;
-  }
-
-  /**
    * Sets resin.home
    */
   public void setResinHome(Path home)
@@ -341,6 +329,14 @@ public class Resin implements EnvironmentBean, SchemaBean
   public Path getRootDirectory()
   {
     return _rootDirectory;
+  }
+
+  /**
+   * The configuration file used to start the server.
+   */
+  public Path getResinConf()
+  {
+    return _resinConf;
   }
 
   /**
@@ -799,7 +795,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       else if (i + 1 < len &&
                (argv[i].equals("-conf") ||
                 argv[i].equals("--conf"))) {
-        _resinConf = argv[i + 1];
+        _configFile = argv[i + 1];
 	i += 2;
       }
       else if (i + 1 < len &&
@@ -823,15 +819,15 @@ public class Resin implements EnvironmentBean, SchemaBean
 
 	i += 2;
       }
-      else if (argv[i].equals("-resin-root")
-               || argv[i].equals("--resin-root")) {
-        _resinRoot = _resinHome.lookup(argv[i + 1]);
+      else if (argv[i].equals("-root-directory")
+               || argv[i].equals("--root-directory")) {
+        _rootDirectory = _resinHome.lookup(argv[i + 1]);
 
         i += 2;
       }
-      else if (argv[i].equals("-server-root")
+      else if (argv[i].equals("-server-root") // backwards compat
 	       || argv[i].equals("--server-root")) {
-	_resinRoot = _resinHome.lookup(argv[i + 1]);
+	_rootDirectory = _resinHome.lookup(argv[i + 1]);
 
 	i += 2;
       }
@@ -1005,9 +1001,45 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
     */
 
-    Path resinConf = _resinHome.lookup(_resinConf);
+    Path pwd = Vfs.getPwd();
 
-    Vfs.setPwd(_resinRoot);
+    if (_rootDirectory == null)
+      _rootDirectory = _resinHome;
+
+    Vfs.setPwd(_rootDirectory);
+
+    Path resinConf = null;
+
+    if (_configFile != null) {
+      if (log().isLoggable(Level.FINER))
+        log().log(Level.FINER, "looking for conf in " +  pwd.lookup(_configFile));
+
+      resinConf = pwd.lookup(_configFile);
+    }
+
+    if (_configFile == null)
+      _configFile = "conf/resin.conf";
+
+    if (resinConf == null || !resinConf.exists()) {
+      if (log().isLoggable(Level.FINER))
+        log().log(Level.FINER, "looking for conf in " +  _rootDirectory.lookup(_configFile));
+
+      resinConf = _rootDirectory.lookup(_configFile);
+    }
+
+    if (!resinConf.exists() && ! _resinHome.equals(_rootDirectory)) {
+      if (log().isLoggable(Level.FINER))
+        log().log(Level.FINER, "looking for conf in " +  _resinHome.lookup(_configFile));
+
+      resinConf = _resinHome.lookup(_configFile);
+    }
+
+    // for error messages, show path relative to rootDirectory
+    if (!resinConf.exists())
+      resinConf = _rootDirectory.lookup(_configFile);
+
+    _resinConf = resinConf;
+
     // server.setServerRoot(_serverRoot);
 
     setResinProfessional(isResinProfessional);
@@ -1018,7 +1050,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     // server/10hc
     // config.setResinInclude(true);
 
-    config.configure(this, Vfs.lookup(_resinConf), getSchema());
+    config.configure(this, resinConf, getSchema());
 
     ClusterServer clusterServer = findClusterServer(_serverId);
     for (int i = 0; i < _boundPortList.size(); i++) {
@@ -1423,7 +1455,7 @@ public class Resin implements EnvironmentBean, SchemaBean
      */
     public Path getConf()
     {
-      return getHome().lookup(Resin.this.getConfigFile());
+      return getResinConf();
     }
 
     /**

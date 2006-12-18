@@ -82,7 +82,8 @@ public class ResinWatchdog extends AbstractManagedObject
   private boolean _hasXss;
   private boolean _hasXmx;
 
-  private Path _resinRoot;
+  private Path _pwd;
+  private Path _rootDirectory;
 
   private Boot _jniBoot;
   private String _userName;
@@ -107,9 +108,11 @@ public class ResinWatchdog extends AbstractManagedObject
   private Date _initialStartTime;
   private Date _lastStartTime;
   private int _startCount;
-  
+
   ResinWatchdog(ClusterConfig cluster)
   {
+    _pwd = Vfs.getPwd();
+
     _cluster = cluster;
 
     try {
@@ -117,10 +120,10 @@ public class ResinWatchdog extends AbstractManagedObject
     } catch (Exception e) {
       throw new ConfigException(e);
     }
-    
+
     try {
       Class cl = Class.forName("com.caucho.boot.JniBoot");
-      
+
       _jniBoot = (Boot) cl.newInstance();
     } catch (ClassNotFoundException e) {
       log.finer(e.toString());
@@ -387,13 +390,13 @@ public class ResinWatchdog extends AbstractManagedObject
     _thread.start();
   }
 
-  public int startSingle(String []argv, Path resinRoot)
+  public int startSingle(String []argv, Path rootDirectory)
   {
     if (! _lifecycle.toActive())
       return -1;
 
     _argv = argv;
-    _resinRoot = resinRoot;
+    _rootDirectory = rootDirectory;
     _isSingle = true;
 
     _thread = new Thread(this, "watchdog-" + _id);
@@ -412,7 +415,7 @@ public class ResinWatchdog extends AbstractManagedObject
     return 1;
   }
 
-  public boolean start(String []argv, Path resinRoot)
+  public boolean start(String []argv, Path rootDirectory)
   {
     if (! _lifecycle.toActive())
       return false;
@@ -420,7 +423,7 @@ public class ResinWatchdog extends AbstractManagedObject
     registerSelf();
 
     _argv = argv;
-    _resinRoot = resinRoot;
+    _rootDirectory = rootDirectory;
 
     _thread = new Thread(this, "watchdog-" + _id);
 
@@ -466,7 +469,7 @@ public class ResinWatchdog extends AbstractManagedObject
 	int port = ss.getLocalPort();
 
 	Path resinHome = _cluster.getResin().getResinHome();
-	Path resinRoot = _cluster.getResin().getRootDirectory();
+	Path rootDirectory = _cluster.getResin().getRootDirectory();
 
 	if (! _isSingle) {
 	  String name;
@@ -476,7 +479,7 @@ public class ResinWatchdog extends AbstractManagedObject
 	  else
 	    name = "jvm-" + _id + ".log";
 
-	  Path jvmPath = resinRoot.lookup("log/" + name);
+	  Path jvmPath = rootDirectory.lookup("log/" + name);
 
 	  try {
 	    jvmPath.getParent().mkdirs();
@@ -496,9 +499,13 @@ public class ResinWatchdog extends AbstractManagedObject
 
 	if (! _isSingle)
 	  log.info("starting Resin " + this);
-	
-	Process process = createProcess(resinHome, resinRoot, port,
-					jvmOut);
+
+        // watchdog/0210
+        // Path pwd = rootDirectory;
+        Path pwd = _pwd;
+
+        Process process = createProcess(pwd, resinHome, rootDirectory,
+                                        port, jvmOut);
 
 	ss.setSoTimeout(60000);
 
@@ -638,7 +645,8 @@ public class ResinWatchdog extends AbstractManagedObject
     }
   }
 
-  private Process createProcess(Path resinHome,
+  private Process createProcess(Path processPwd,
+                                Path resinHome,
 				Path resinRoot,
 				int socketPort,
 				WriteStream out)
@@ -670,8 +678,6 @@ public class ResinWatchdog extends AbstractManagedObject
     list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
-    list.add("-Dresin.root=" + _resinRoot.getPath());
-    list.add("-Dserver.root=" + _resinRoot.getPath()); // backwards compatability
 
     if (! _hasXss)
       list.add("-Xss1m");
@@ -737,7 +743,7 @@ public class ResinWatchdog extends AbstractManagedObject
 	}
 
 	Process process = _jniBoot.exec(list, env,
-					resinHome.getNativePath(),
+					processPwd.getNativePath(),
 					_userName, _groupName);
 
 	if (process != null)
@@ -762,7 +768,7 @@ public class ResinWatchdog extends AbstractManagedObject
 
     ProcessBuilder builder = new ProcessBuilder();
 
-    builder.directory(new File(resinRoot.getNativePath()));
+    builder.directory(new File(processPwd.getNativePath()));
 
     builder.environment().putAll(env);
     

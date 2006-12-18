@@ -79,7 +79,7 @@ public class ResinAdmin extends AbstractManagedObject
 
   public String getConfigFile()
   {
-    return _resin.getConfigFile();
+    return _resin.getResinConf().getNativePath();
   }
 
   public String getResinHome()

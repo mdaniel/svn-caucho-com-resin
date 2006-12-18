@@ -1023,11 +1023,11 @@ public class Server extends ProtocolDispatchServer
 
         if (resin != null) {
           log.info("resin.home = " + resin.getResinHome().getNativePath());
-          log.info("resin.root = " + resin.getRootDirectory().getNativePath());
+          log.info("root.directory = " + resin.getRootDirectory().getNativePath());
+          log.info("resin.conf = " + resin.getResinConf());
         }
         else {
           log.info("resin.home = " + System.getProperty("resin.home"));
-          log.info("resin.root = " + System.getProperty("resin.root"));
         }
 
         log.info("");

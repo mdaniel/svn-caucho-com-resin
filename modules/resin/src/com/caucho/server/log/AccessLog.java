@@ -282,9 +282,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
   /**
    * Logs a request using the current format.
-   *
-   * @param request the servlet request.
-   * @param response the servlet response.
    */
   public void log(HttpServletRequest req,
 		  HttpServletResponse res,
