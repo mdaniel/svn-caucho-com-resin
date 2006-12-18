@@ -69,7 +69,7 @@ public class QuercusServlet
   {
     if (_impl == null) {
       try {
-	Class cl = Class.forName("com.caucho.quercus.ProQuercusServlet");
+	Class cl = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
 	_impl = (QuercusServletImpl) cl.newInstance();
       } catch (Exception e) {
 	log.log(Level.FINEST, e.toString(), e);
@@ -78,7 +78,7 @@ public class QuercusServlet
     
     if (_impl == null) {
       try {
-	Class cl = Class.forName("com.caucho.quercus.ResinQuercusServlet");
+	Class cl = Class.forName("com.caucho.quercus.servlet.ResinQuercusServlet");
 	_impl = (QuercusServletImpl) cl.newInstance();
       } catch (Exception e) {
 	log.log(Level.FINEST, e.toString(), e);
