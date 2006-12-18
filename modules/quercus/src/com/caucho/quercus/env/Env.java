@@ -1496,10 +1496,15 @@ public class Env {
 
       _globalMap.put(name, var);
 
-      if (_request == null)
-	return null;
-
       ArrayValue post = new ArrayValueImpl();
+
+      var.set(post);
+
+      if (_request == null)
+        return null;
+
+      if (! "POST".equals(_request.getMethod()))
+        return var;
 
       if (_post != null) {
         for (Map.Entry<Value, Value> entry : _post.entrySet()) {
@@ -1507,8 +1512,8 @@ public class Env {
         }
       }
 
-      var.set(post);
-
+      // commented out: don't add non-POST parameters to $_POST
+      /*
       try {
 	_request.setCharacterEncoding(getHttpInputEncoding().toString());
       } catch (Exception e) {
@@ -1526,6 +1531,7 @@ public class Env {
 
         Post.addFormValue(post, key, value, getIniBoolean("magic_quotes_gpc"));
       }
+      */
     }
     break;
 

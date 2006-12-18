@@ -333,6 +333,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
   /**
    * Returns the client version
+   * @deprecated
    */
   public String getClientInfo()
   {

@@ -232,8 +232,10 @@ public class UrlRewriterCallback extends CallbackFunction {
     {
       int tagStart = _input.indexOf('<', _index);
 
-      if (tagStart < 0)
+      if (tagStart < 0) {
+        _output.append(_input.substring(_index));
         return null;
+      }
 
       // consume everything upto the tag opening
       _output.append(_input.substring(_index, tagStart + 1));

@@ -37,6 +37,8 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
+import java.sql.Driver;
+import java.sql.DriverManager;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -594,12 +596,17 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns the MySQL client version.
    */
-  public String mysql_get_client_info(Env env, @Optional Mysqli conn)
-  {
-    if (conn == null)
-      conn = getConnection(env);
-
-    return conn.get_client_info();
+  public static String mysql_get_client_info(Env env)
+  { 
+    try {
+      Driver driver = DriverManager.getDriver("jdbc:mysql://localhost/");
+      
+      return driver.getMajorVersion() + '.' +
+             driver.getMinorVersion() + ".00";
+    }
+    catch (SQLException e) {
+      return "0.00.00";
+    }
   }
 
   /**

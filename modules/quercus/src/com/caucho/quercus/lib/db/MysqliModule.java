@@ -584,10 +584,7 @@ public class MysqliModule extends AbstractQuercusModule {
    */
   public static String mysqli_get_client_info(Env env)
   {
-    Mysqli mysqli = new Mysqli(env, "localhost", null, null, null, 3306,
-             null, 0, null, null);
-
-    return mysqli.get_client_info();
+    return MysqlModule.mysql_get_client_info(env);
   }
 
   /**

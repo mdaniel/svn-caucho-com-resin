@@ -58,6 +58,14 @@ public class MbstringModule
   public static final int MB_CASE_TITLE = 2;
 
   /**
+   * Returns the extensions implemented by the module.
+   */
+  public String []getLoadedExtensions()
+  {
+    return new String[] { "mbstring" };
+  }
+
+  /**
    * Upper-cases, lower-cases, or capitalizes first letter of words.
    */
   public static StringValue mb_convert_case(Env env,

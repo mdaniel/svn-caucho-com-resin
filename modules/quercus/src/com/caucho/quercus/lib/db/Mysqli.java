@@ -251,6 +251,8 @@ public class Mysqli extends JdbcConnectionResource {
 
   /**
    * Returns the host information.
+   *
+   * @deprecated
    */
   public String get_client_info()
   {

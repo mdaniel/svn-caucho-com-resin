@@ -57,9 +57,28 @@ public class Post {
 
       String contentType = request.getHeader("Content-Type");
 
-      if (contentType == null ||
-          ! contentType.startsWith("multipart/form-data"))
+      if (contentType == null)
         return;
+      else if (contentType.startsWith("application/x-www-form-urlencoded")) {
+        is = request.getInputStream();
+        
+        if (is == null)
+          return;
+        
+        StringBuilder value = new StringBuilder();
+        int ch;
+
+        while ((ch = is.read()) >= 0) {
+          value.append((char) ch);
+        }
+        
+        StringModule.parse_str(env, value.toString(), post);
+        
+        return;
+      }
+      else if (! contentType.startsWith("multipart/form-data")) {
+        return;
+      }
 
       String boundary = getBoundary(contentType);
 

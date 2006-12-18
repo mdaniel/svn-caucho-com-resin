@@ -50,8 +50,9 @@ import java.util.Map;
 public class OptionsModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(OptionsModule.class);
 
-  // XXX: get real value
-  public static final String PHP_OS = "Linux";
+  // php/1a0q (phpMyAdmin)
+  public static final String PHP_OS
+    = System.getProperty("os.name").toUpperCase();
 
   public static final int ASSERT_ACTIVE = 1;
   public static final int ASSERT_CALLBACK = 2;

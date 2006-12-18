@@ -394,41 +394,10 @@ public class SessionModule extends AbstractQuercusModule
     if (callback != null)
       callback.open(env, WorkDir.getLocalWorkDir().getPath(), cookieName);
 
-    if (env.getIni("session.use_trans_sid").toBoolean()) {
-      //
-      // Use URL rewriting to transmit session id
-      // 
-      if (sessionIdValue != null)
-        sessionId = sessionIdValue.toString();
-
-      if (sessionId == null || "".equals(sessionId)) {
-        String queryString = env.getRequest().getQueryString();
-        if (queryString != null) {
-          String [] queryElements = queryString.split("&");
-
-          for (String queryElement : queryElements) {
-            String [] nameValue = queryElement.split("=");
-
-            if (nameValue.length == 2 && nameValue[0].equals(cookieName))
-              sessionId = nameValue[1];
-          }
-        }
-      }
-
-      if (sessionId == null || "".equals(sessionId)) {
-        sessionId = env.generateSessionId();
-        create = true;
-      }
-
-      env.addConstant("SID", new StringValueImpl(cookieName + '=' + sessionId),
-                      false);
-
-      OutputModule.pushUrlRewriter(env);
-    } else {
-      //
-      // Use cookies to transmit session id
-      // 
-
+    //
+    // Use cookies to transmit session id
+    // 
+    if (env.getIni("session.use_cookies").toBoolean()) {
       if (sessionIdValue != null)
         sessionId = sessionIdValue.toString();
 
@@ -450,6 +419,44 @@ public class SessionModule extends AbstractQuercusModule
         sessionId = env.generateSessionId();
         create = true;
       }
+    }
+    
+    //
+    // Use URL rewriting to transmit session id
+    // 
+    if (env.getIni("session.use_trans_sid").toBoolean() &&
+        ! env.getIni("session.use_only_cookies").toBoolean()) {
+      
+      if (sessionId != null) {
+      }
+      else {
+        if (sessionIdValue != null)
+          sessionId = sessionIdValue.toString();
+
+        if (sessionId == null || "".equals(sessionId)) {
+          String queryString = env.getRequest().getQueryString();
+          if (queryString != null) {
+            String [] queryElements = queryString.split("&");
+
+            for (String queryElement : queryElements) {
+              String [] nameValue = queryElement.split("=");
+
+              if (nameValue.length == 2 && nameValue[0].equals(cookieName))
+                sessionId = nameValue[1];
+            }
+          }
+        }
+
+        if (sessionId == null || "".equals(sessionId)) {
+          sessionId = env.generateSessionId();
+          create = true;
+        }
+      }
+
+      env.addConstant("SID", new StringValueImpl(cookieName + '=' + sessionId),
+                      false);
+      
+      OutputModule.pushUrlRewriter(env);
     }
 
     if (response.isCommitted())
