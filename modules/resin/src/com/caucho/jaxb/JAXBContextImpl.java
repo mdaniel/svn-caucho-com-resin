@@ -57,6 +57,27 @@ import java.util.*;
 public class JAXBContextImpl extends JAXBContext {
   private static final L10N L = new L10N(JAXBContextImpl.class);
 
+  private static final HashSet<Class> _specialClasses = new HashSet<Class>();
+
+  static {
+    _specialClasses.add(Object.class);
+    _specialClasses.add(Class.class);
+    _specialClasses.add(String.class);
+    _specialClasses.add(Double.class);
+    _specialClasses.add(Float.class);
+    _specialClasses.add(Integer.class);
+    _specialClasses.add(Long.class);
+    _specialClasses.add(Boolean.class);
+    _specialClasses.add(Character.class);
+    _specialClasses.add(Short.class);
+    _specialClasses.add(Byte.class);
+    _specialClasses.add(BigDecimal.class);
+    _specialClasses.add(BigInteger.class);
+    _specialClasses.add(QName.class);
+    _specialClasses.add(Date.class);
+    _specialClasses.add(Calendar.class);
+  }
+
   private String[] _packages;
   private ClassLoader _classLoader;
   private JAXBIntrospector _jaxbIntrospector;
@@ -99,8 +120,8 @@ public class JAXBContextImpl extends JAXBContext {
     DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
   }
 
-  public static JAXBContext createContext(Class []classes,
-					  Map<String,?> properties)
+  public static JAXBContext createContext(Class []classes, 
+                                          Map<String,?> properties)
     throws JAXBException
   {
     return new JAXBContextImpl(classes, properties);
@@ -114,10 +135,10 @@ public class JAXBContextImpl extends JAXBContext {
     _classLoader = null;
 
     for(Class c : classes) {
-      if (! c.isPrimitive() && 
-          ! c.equals(String.class) &&
-          ! c.equals(Class.class) &&
-          ! c.equals(Object.class))
+      // XXX pull out to JAX-WS?
+      if (! c.isPrimitive() &&
+          ! c.isArray() && 
+          ! _specialClasses.contains(c))
         createSkeleton(c);
     }
 
@@ -293,19 +314,19 @@ public class JAXBContextImpl extends JAXBContext {
     if (Map.class.equals(type))
       return new MapProperty();
 
-    if (double.class.equals(type) || Double.class.equals(type))
+    if (Double.class.equals(type) || Double.TYPE.equals(type))
       return DoubleProperty.PROPERTY;
 
-    if (float.class.equals(type) || Float.class.equals(type))
+    if (Float.class.equals(type) || Float.TYPE.equals(type))
       return FloatProperty.PROPERTY;
 
-    if (int.class.equals(type) || Integer.class.equals(type))
+    if (Integer.class.equals(type) || Integer.TYPE.equals(type))
       return IntProperty.PROPERTY;
 
     if (Long.class.equals(type) || Long.TYPE.equals(type))
       return LongProperty.PROPERTY;
 
-    if (boolean.class.equals(type) || Boolean.class.equals(type))
+    if (Boolean.class.equals(type) || Boolean.TYPE.equals(type))
       return BooleanProperty.PROPERTY;
 
     if (Character.class.equals(type) || Character.TYPE.equals(type))
@@ -333,7 +354,7 @@ public class JAXBContextImpl extends JAXBContext {
       return DateTimeProperty.PROPERTY;
 
     if (Calendar.class.equals(type))
-      return DateTimeProperty.PROPERTY;
+      return CalendarProperty.PROPERTY;
 
     if (byte[].class.equals(type))
       return ByteArrayProperty.PROPERTY;
@@ -341,8 +362,11 @@ public class JAXBContextImpl extends JAXBContext {
     if (Collection.class.isAssignableFrom(type))
       return new CollectionProperty();
 
-    if (type.isArray())
-      return new ArrayProperty();
+    if (type.isArray()) {
+      Property componentProperty = createProperty(type.getComponentType());
+      return ArrayProperty.createArrayProperty(componentProperty,
+                                               type.getComponentType());
+    }
 
     if (type.isEnum())
       return new EnumProperty();

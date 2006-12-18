@@ -53,7 +53,7 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
   private final SimpleDateFormat timeFormat 
     = new SimpleDateFormat("HH:mm:ss");
   private final SimpleDateFormat dateTimeFormat 
-    = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
   private final char[] hexDigits = { '0', '1', '2', '3', '4',
                                      '5', '6', '7', '8', '9',

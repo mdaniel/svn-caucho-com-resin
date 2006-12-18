@@ -62,9 +62,38 @@ public abstract class Property {
 
   public abstract String getSchemaType();
 
-  public abstract Object read(Unmarshaller u, XMLStreamReader in)
+  public abstract Object read(Unmarshaller u, XMLStreamReader in, QName name)
     throws IOException, XMLStreamException, JAXBException;
   
-  public abstract void write(Marshaller m, XMLStreamWriter out, Object obj)
+  public abstract void write(Marshaller m, XMLStreamWriter out, 
+                             Object obj, QName name)
     throws IOException, XMLStreamException, JAXBException;
+
+  protected void writeQNameStartElement(XMLStreamWriter out, QName name)
+    throws IOException, XMLStreamException
+  {
+    if (name == null)
+      return;
+
+    if (name.getPrefix() != null && ! "".equals(name.getPrefix())) {
+      out.writeStartElement(name.getPrefix(), 
+                            name.getLocalPart(), 
+                            name.getNamespaceURI());
+    }
+    else if (name.getNamespaceURI() != null && 
+             ! "".equals(name.getNamespaceURI())) {
+      out.writeStartElement(name.getNamespaceURI(), name.getLocalPart());
+    }
+    else
+      out.writeStartElement(name.getLocalPart());
+  }
+
+  protected void writeQNameEndElement(XMLStreamWriter out, QName name)
+    throws IOException, XMLStreamException
+  {
+    if (name == null)
+      return;
+
+    out.writeEndElement();
+  }
 }

@@ -34,6 +34,7 @@ import com.caucho.jaxb.JAXBUtil;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -51,13 +52,14 @@ public class SkeletonProperty extends Property {
     _skeleton = skeleton;
   }
 
-  public Object read(Unmarshaller u, XMLStreamReader in)
+  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
+    // XXX: QName
     return _skeleton.read(u, in);
   }
   
-  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
     // XXX

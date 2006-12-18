@@ -28,35 +28,50 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
+
+import com.caucho.util.L10N;
 
 /**
  * helper class for properties that are represented as a "flat" CDATA block
  */
 public abstract class CDataProperty extends Property {
+  private static final L10N L = new L10N(CDataProperty.class);
+
   protected abstract Object read(String in)
     throws IOException, XMLStreamException;
 
-  public Object read(Unmarshaller u, XMLStreamReader in)
+  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    while(in.getEventType() != in.END_ELEMENT &&
-          in.getEventType() != in.CHARACTERS)
-      in.next();
-    
+    if (in.getEventType() != in.START_ELEMENT || ! in.getName().equals(qname))
+      throw new IOException(L.l("Expected <{0}>, not <{1}>", 
+                                qname.toString(), in.getName().toString()));
+
+    in.next();
+
     Object ret = null;
 
     if (in.getEventType() == in.CHARACTERS)
       ret = read(in.getText());
 
-    while(in.getEventType() != in.END_ELEMENT)
-      in.next();
+    while (in.getEventType() != in.END_ELEMENT)
+      in.nextTag();
+
+    if (! in.getName().equals(qname))
+      throw new IOException(L.l("Expected </{0}>, not </{1}>", 
+                                qname.getLocalPart(), in.getLocalName()));
+
+    in.nextTag();
 
     return ret;
   }
@@ -64,12 +79,11 @@ public abstract class CDataProperty extends Property {
   protected abstract String write(Object in)
     throws IOException, XMLStreamException;
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
+    writeQNameStartElement(out, qname);
     out.writeCharacters(write(obj));
+    writeQNameEndElement(out, qname);
   }
-
 }
-
-

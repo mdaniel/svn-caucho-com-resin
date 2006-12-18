@@ -29,7 +29,11 @@
 
 package com.caucho.jaxb.skeleton;
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 
 /**
@@ -53,6 +57,14 @@ public class IntProperty extends CDataProperty {
   public String getSchemaType()
   {
     return "xsd:int";
+  }
+
+  public void write(Marshaller m, XMLStreamWriter out, int i, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    writeQNameStartElement(out, qname);
+    out.writeCharacters(DatatypeConverter.printInt(i));
+    writeQNameEndElement(out, qname);
   }
 }
 

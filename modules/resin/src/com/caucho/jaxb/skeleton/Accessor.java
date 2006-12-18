@@ -94,14 +94,14 @@ public abstract class Accessor {
     throws IOException, XMLStreamException, JAXBException
   {
     writeStartElement(out, obj);
-    _property.write(m, out, obj);
+    _property.write(m, out, obj, getQName());
     writeEndElement(out, obj);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
   {
-    return _property.read(u, in); // XXX
+    return _property.read(u, in, getQName());
   }
 
   protected void writeStartElement(XMLStreamWriter out, Object obj)

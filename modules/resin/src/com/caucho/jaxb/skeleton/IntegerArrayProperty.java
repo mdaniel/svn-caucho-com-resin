@@ -18,13 +18,13 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Resin Open Source; if not, write to the
+ * aint with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong
  */
 
 package com.caucho.jaxb.skeleton;
@@ -37,48 +37,55 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Iterator;
 
-/**
- * common superclass for arrays and collections
- */
-public abstract class IterableProperty extends Property {
-  private Property _componentProperty = null;
+import com.caucho.util.L10N;
 
-  /*
-  protected abstract int size(Object o);
-  protected abstract Iterator getIterator(Object o);*/
-  
-  public Object read(Unmarshaller u, XMLStreamReader in, QName name)
+/**
+ * a property for serializing/deserializing arrays
+ */
+public class IntegerArrayProperty extends ArrayProperty {
+  private static final L10N L = new L10N(IntegerArrayProperty.class);
+
+  public static final IntegerArrayProperty PROPERTY 
+    = new IntegerArrayProperty();
+
+  private IntegerArrayProperty()
+  {
+    super(IntProperty.PROPERTY);
+  }
+
+  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
+      return new int[0]; // avoid ArrayList instantiation
+
+    ArrayList<Integer> ret = new ArrayList<Integer>();
+
+    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName()))
+      ret.add((Integer) _componentProperty.read(u, in, qname));
+
+    int[] array = new int[ret.size()];
+
+    for (int i = 0; i < ret.size(); i++)
+      array[i] = ret.get(i).intValue();
+
+    return array;
   }
 
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    /* XXX
-    if (obj == null) {
-      if (_wrap == null || !_wrap.nillable()) return;
-    }
-
-    if (_wrap != null)
-      writeStartElement(out, obj);
-
+    //XXX wrapper
+    
     if (obj != null) {
-      Iterator it = getIterator(obj);
+      int[] array = (int[]) obj;
 
-      while (it.hasNext())
-        _componentProperty.write(m, out, it.next());
+      for (int i = 0; i < array.length; i++) 
+        IntProperty.PROPERTY.write(m, out, array[i], qname);
     }
-
-    if (_wrap != null)
-      writeEndElement(out, obj);*/
-  }
-
-  protected Property getComponentProperty()
-  {
-    return _componentProperty;
   }
 }

@@ -18,56 +18,49 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Resin Open Source; if not, write to the
+ * adate with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong
  */
 
 package com.caucho.jaxb.skeleton;
+import com.caucho.jaxb.*;
+import javax.xml.bind.*;
+import javax.xml.namespace.*;
+import javax.xml.stream.*;
+import java.util.*;
+import java.text.*;
 
-import com.caucho.jaxb.JAXBUtil;
+import java.lang.reflect.*;
+import java.io.*;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.namespace.QName;
-import java.util.Iterator;
-import java.util.List;
+import com.caucho.vfs.WriteStream;
 
 /**
- * a List Property
+ * a Date Property
  */
-public class ListProperty extends IterableProperty {
-  public int size(Object o)
+public class CalendarProperty extends CDataProperty {
+  public static final CalendarProperty PROPERTY = new CalendarProperty();
+
+  protected String write(Object in)
+    throws IOException, XMLStreamException
   {
-    return ((List) o).size();
+    return DatatypeConverter.printDateTime((Calendar) in);
   }
 
-  public Iterator getIterator(Object o)
+  protected Object read(String in)
+    throws IOException, XMLStreamException
   {
-    return ((List) o).iterator();
+    return DatatypeConverter.parseDateTime(in);
   }
 
   public String getSchemaType()
   {
-    /*
-    Property p = getComponentProperty();
-    Accessor a = p.getAccessor();
-
-    return JAXBUtil.getXmlSchemaDatatype(a.getType());*/
-    return "xsd:string"; // XXX
-  }
-
-  public boolean isXmlPrimitiveType()
-  {
-    return getComponentProperty().isXmlPrimitiveType();
-  }
-
-  public String getMaxOccurs()
-  {
-    return "unbounded";
+    return "xsd:dateTime";
   }
 }
 

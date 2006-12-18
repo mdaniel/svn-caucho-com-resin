@@ -24,12 +24,15 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong
  */
 
 package com.caucho.jaxb.skeleton;
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 
 /**

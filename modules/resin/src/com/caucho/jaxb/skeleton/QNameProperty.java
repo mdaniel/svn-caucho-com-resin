@@ -31,33 +31,100 @@ package com.caucho.jaxb.skeleton;
 
 import java.io.IOException;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
+
+import com.caucho.util.L10N;
 
 /**
  * a qname property
  */
-public class QNameProperty extends CDataProperty {
+public class QNameProperty extends Property {
+  private static final L10N L = new L10N(QNameProperty.class);
+
   public static final QNameProperty PROPERTY = new QNameProperty();
 
-  protected String write(Object in)
-      throws IOException, XMLStreamException
+  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+    throws IOException, XMLStreamException, JAXBException
   {
-    if (in == null)
-      return null;
+    writeQNameStartElement(out, qname);
 
-    QName qname = (QName) in;
+    if (obj != null) {
+      QName name = (QName) obj;
 
-    if (qname.getPrefix() == null)
-      return qname.getLocalPart();
-    else
-      return qname.getPrefix() + ":" + qname.getLocalPart();
+      String namespace = name.getNamespaceURI();
+      String prefix = name.getPrefix();
+
+      // check if we need to declare this namespace prefix
+      if (namespace != null && ! "".equals(namespace) &&
+          prefix != null && ! "".equals(prefix)) {
+
+        String declaredPrefix = out.getPrefix(namespace);
+        
+        if (prefix != null && ! prefix.equals(name.getPrefix()))
+          out.writeNamespace(name.getPrefix(), name.getNamespaceURI());
+      }
+
+      if (name.getPrefix() == null || "".equals(name.getPrefix()))
+        out.writeCharacters(name.getLocalPart());
+      else
+        out.writeCharacters(name.getPrefix() + ":" + name.getLocalPart());
+    }
+
+    writeQNameEndElement(out, qname);
   }
 
-  protected Object read(String in)
-    throws IOException, XMLStreamException
+  // Can't use CDataProperty because we need access to the namespace map
+  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+    throws IOException, XMLStreamException, JAXBException
   {
-    return in;
+    if (in.getEventType() != in.START_ELEMENT || ! in.getName().equals(qname))
+      throw new IOException(L.l("Expected <{0}>, not <{1}>", 
+                                qname.getLocalPart(), in.getLocalName()));
+
+    in.next();
+ 
+    Object ret = null;
+
+    if (in.getEventType() == in.CHARACTERS) {
+      String text = in.getText();
+      int colon = text.indexOf(':');
+
+      if (colon < 0)
+        ret = new QName(text);
+      else {
+        String prefix = text.substring(0, colon);
+
+        String namespace = in.getNamespaceURI(prefix);
+
+        if (namespace == null)
+          throw new IOException(L.l("No known namespace for prefix {0}", 
+                                    prefix));
+
+        String localName = text.substring(colon + 1);
+
+        if ("".equals(localName))
+          throw new IOException(L.l("Malformed QName: empty localName"));
+
+        ret = new QName(namespace, localName, prefix);
+      }
+    }
+
+    while(in.getEventType() != in.END_ELEMENT)
+      in.next();
+
+    if (! in.getName().equals(qname))
+      throw new IOException(L.l("Expected </{0}>, not </{1}>", 
+                                qname.getLocalPart(), in.getLocalName()));
+
+    in.next();
+
+    return ret;
   }
 
   public String getSchemaType()

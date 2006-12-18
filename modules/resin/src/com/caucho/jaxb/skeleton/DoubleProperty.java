@@ -29,7 +29,11 @@
 
 package com.caucho.jaxb.skeleton;
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 
 /**
@@ -53,5 +57,13 @@ public class DoubleProperty extends CDataProperty {
   public String getSchemaType()
   {
     return "xsd:double";
+  }
+
+  public void write(Marshaller m, XMLStreamWriter out, double d, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    writeQNameStartElement(out, qname);
+    out.writeCharacters(DatatypeConverter.printDouble(d));
+    writeQNameEndElement(out, qname);
   }
 }

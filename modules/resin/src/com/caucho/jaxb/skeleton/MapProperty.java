@@ -31,6 +31,7 @@ package com.caucho.jaxb.skeleton;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -40,13 +41,13 @@ import java.io.IOException;
  * a Map property
  */
 public class MapProperty extends Property {
-  public Object read(Unmarshaller u, XMLStreamReader in)
+  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj)
+  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
     /*

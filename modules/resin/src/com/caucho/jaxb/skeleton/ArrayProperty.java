@@ -31,53 +31,63 @@ package com.caucho.jaxb.skeleton;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Iterator;
+
+import com.caucho.util.L10N;
 
 /**
  * a property for serializing/deserializing arrays
  */
-public class ArrayProperty extends IterableProperty {
-  private Property _componentProperty;
+public abstract class ArrayProperty extends IterableProperty {
+  private static final L10N L = new L10N(CDataProperty.class);
 
-  public Object read(Unmarshaller u, XMLStreamReader in)
-    throws IOException, XMLStreamException, JAXBException
+  protected Property _componentProperty;
+
+  protected ArrayProperty(Property componentProperty)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _componentProperty = componentProperty;
   }
 
-  public int size(Object o)
+  public static ArrayProperty createArrayProperty(Property componentProperty,
+                                                  Class type)
+    throws JAXBException
   {
-    return Array.getLength(o);
-  }
+    if (! type.isPrimitive())
+      return new ObjectArrayProperty(componentProperty, type);
 
-  public Iterator getIterator(Object o)
-  {
-    return new ArrayIterator(o);
-  }
+    if (Double.TYPE.equals(type))
+      return DoubleArrayProperty.PROPERTY;
 
-  private static class ArrayIterator implements Iterator {
-    private int i = 0;
-    private Object _array;
+    if (Float.TYPE.equals(type))
+      return FloatArrayProperty.PROPERTY;
 
-    public ArrayIterator(Object o) {
-      _array = o;
-    }
+    if (Integer.TYPE.equals(type))
+      return IntegerArrayProperty.PROPERTY;
 
-    public Object next() {
-      return Array.get(_array, i++);
-    }
-    
-    public boolean hasNext() {
-      return i < Array.getLength(_array);
-    }
+    if (Long.TYPE.equals(type))
+      return LongArrayProperty.PROPERTY;
 
-    public void remove() {
-    }
+    if (Boolean.TYPE.equals(type))
+      return BooleanArrayProperty.PROPERTY;
 
+    if (Character.TYPE.equals(type))
+      return CharacterArrayProperty.PROPERTY;
+
+    if (Short.TYPE.equals(type))
+      return ShortArrayProperty.PROPERTY;
+
+    /* XXX
+    if (Byte.TYPE.equals(type))
+      return ByteArrayProperty.PROPERTY; */
+
+    throw new JAXBException(L.l("{0} is neither primitive, nor non-primitive!",
+                                type));
   }
 
   public String getSchemaType()

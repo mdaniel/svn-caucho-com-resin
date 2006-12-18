@@ -49,13 +49,16 @@ public class DateTimeProperty extends CDataProperty {
   protected String write(Object in)
     throws IOException, XMLStreamException
   {
-    return DatatypeConverter.printDate((Calendar) in);
+    Date date = (Date) in;
+    Calendar calendar = new GregorianCalendar();
+    calendar.setTime(date);
+    return DatatypeConverter.printDateTime(calendar);
   }
 
   protected Object read(String in)
     throws IOException, XMLStreamException
   {
-    return DatatypeConverter.parseDate(in);
+    return DatatypeConverter.parseDate(in).getTime();
   }
 
   public String getSchemaType()

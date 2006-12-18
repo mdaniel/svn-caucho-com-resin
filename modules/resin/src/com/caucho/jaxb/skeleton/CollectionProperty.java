@@ -29,6 +29,7 @@
 
 package com.caucho.jaxb.skeleton;
 import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.Collection;
