@@ -52,6 +52,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.StringTokenizer;
@@ -171,8 +172,11 @@ public class DirectSkeleton extends Skeleton {
       String packageName = type.getPackage().getName();
       StringTokenizer st = new StringTokenizer(packageName, ".");
 
-      while (st.hasMoreTokens()) { _namespace = st.nextToken() +
-          (_namespace == null ? "" : ("."+_namespace));
+      while (st.hasMoreTokens()) { 
+        if (_namespace == null) 
+          _namespace = st.nextToken();
+        else
+          _namespace = st.nextToken() + "." + _namespace;
       }
 
       _namespace = "http://"+_namespace+"/";
@@ -203,17 +207,18 @@ public class DirectSkeleton extends Skeleton {
   /**
    * Invokes the request on a remote object using an outbound XML stream.
    */
-  public Object invoke(String name, String url, Object[] args)
+  public Object invoke(Method method, String url, Object[] args)
     throws IOException, XMLStreamException, MalformedURLException, JAXBException
   {
-    AbstractAction action = _actionMap.get(name);
+    String actionName = AbstractAction.getWebMethodName(method);
+    AbstractAction action = _actionMap.get(actionName);
 
     if (action != null)
-      return action.invoke(name, url, args, _namespace);
-    else if ("toString".equals(name))
+      return action.invoke(url, args);
+    else if ("toString".equals(actionName))
       return "SoapStub[" + (_api != null ? _api.getName() : "") + "]";
     else
-      throw new RuntimeException("no such method: " + name);
+      throw new RuntimeException("no such method: " + actionName);
   }
   
   /**
@@ -252,6 +257,7 @@ public class DirectSkeleton extends Skeleton {
     in.nextTag();
 
     String actionName = in.getName().getLocalPart();
+    in.nextTag();
 
     out.writeStartDocument();
     out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Envelope", SOAP_ENVELOPE);
@@ -270,19 +276,16 @@ public class DirectSkeleton extends Skeleton {
       // XXX: fault
     }
 
-    if (action.getArity() == 0)
-      in.nextTag();
-
     if (in.getEventType() != in.END_ELEMENT)
       throw new IOException("expected </" + actionName + ">, " + 
-                            "not <" + in.getName().getLocalPart() + "> ");
-    else if (! actionName.equals(in.getName().getLocalPart()))
+                            "not event of type " + in.getEventType());
+    else if (! actionName.equals(in.getLocalName()))
       throw new IOException("expected </" + actionName + ">, " +
-                            "not </" + in.getName().getLocalPart() + ">");
+                            "not </" + in.getLocalName() + ">");
 
     if (in.nextTag() != in.END_ELEMENT)
       throw new IOException("expected </Body>, got: " + in.getName());
-    else if (! "Body".equals(in.getName().getLocalPart()))
+    else if (! "Body".equals(in.getLocalName()))
       throw new IOException("expected </Body>, got: " + in.getName());
     /*
     if (in.nextTag() != in.END_ELEMENT)

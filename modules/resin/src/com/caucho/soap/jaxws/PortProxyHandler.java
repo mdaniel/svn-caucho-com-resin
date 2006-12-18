@@ -71,22 +71,22 @@ public class PortProxyHandler implements InvocationHandler {
 
     if (specialMethod != null) {
       switch (specialMethod) {
-      case TO_STRING:
-	return "PortProxyHandler[]";
-      case EQUALS:
-	return false;
-      case HASH_CODE:
-	return System.identityHashCode(this);
-	
-      case GET_REQUEST_CONTEXT:
-	return _requestContext;
-	
-      case GET_RESPONSE_CONTEXT:
-	return _responseContext;
+        case TO_STRING:
+          return "PortProxyHandler[]";
+        case EQUALS:
+          return false;
+        case HASH_CODE:
+          return System.identityHashCode(this);
+
+        case GET_REQUEST_CONTEXT:
+          return _requestContext;
+
+        case GET_RESPONSE_CONTEXT:
+          return _responseContext;
       }
     }
     
-    Object ret = _skeleton.invoke(method.getName(), _url, args);
+    Object ret = _skeleton.invoke(method, _url, args);
 
     return ret;
   }
@@ -94,25 +94,26 @@ public class PortProxyHandler implements InvocationHandler {
   static {
     try {
       _specialMethods.put(Object.class.getMethod("toString",
-						 new Class[0]),
-			  SpecialMethod.TO_STRING);
+                                                 new Class[0]),
+                          SpecialMethod.TO_STRING);
     
       _specialMethods.put(Object.class.getMethod("equals",
-						 new Class[] { Object.class }),
-			  SpecialMethod.EQUALS);
+                                                 new Class[] { Object.class }),
+                          SpecialMethod.EQUALS);
     
       _specialMethods.put(Object.class.getMethod("hashCode",
-						 new Class[0]),
-			  SpecialMethod.HASH_CODE);
+                                                 new Class[0]),
+                          SpecialMethod.HASH_CODE);
       
       _specialMethods.put(BindingProvider.class.getMethod("getRequestContext",
-						 new Class[0]),
-			  SpecialMethod.GET_REQUEST_CONTEXT);
+                                                          new Class[0]),
+                          SpecialMethod.GET_REQUEST_CONTEXT);
       
       _specialMethods.put(BindingProvider.class.getMethod("getResponseContext",
-						 new Class[0]),
-			  SpecialMethod.GET_RESPONSE_CONTEXT);
-    } catch (Exception e) {
+                                                          new Class[0]),
+                          SpecialMethod.GET_RESPONSE_CONTEXT);
+    }
+    catch (Exception e) {
       e.printStackTrace();
     }
   }

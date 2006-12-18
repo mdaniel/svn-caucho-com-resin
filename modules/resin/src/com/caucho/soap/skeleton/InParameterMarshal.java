@@ -57,10 +57,7 @@ public class InParameterMarshal extends ParameterMarshal {
   public void serializeCall(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    //_property.serialize(out, args[_arg], _name);
-    
-    //XXX: QName
-    _property.write(_marshaller, out, args[_arg]);
+    _property.write(_marshaller, out, args[_arg], _name);
   }
 
   //
@@ -70,32 +67,6 @@ public class InParameterMarshal extends ParameterMarshal {
   public void deserializeCall(XMLStreamReader in, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    //args[_arg] = _property.deserialize(in);
-
-    if (_name != null) {
-      in.nextTag();
-
-      if (in.getEventType() != in.START_ELEMENT)
-        throw new IOException(L.l("Expected <{0}>", _name.getLocalPart()));
-
-      if (! in.getName().equals(_name))
-        throw new IOException(L.l("Expected <{0}> not <{1}>",
-                                  _name.getLocalPart(),
-                                  in.getName().getLocalPart()));
-    }
-
-    args[_arg] = _property.read(_unmarshaller, in);
-
-    if (_name != null) {
-      if (in.getEventType() != in.END_ELEMENT)
-        throw new IOException(L.l("Expected </{0}>", _name.getLocalPart()));
-
-      if (! in.getName().equals(_name))
-        throw new IOException(L.l("Expected </{0}> not </{1}>",
-                                  _name.getLocalPart(),
-                                  in.getName().getLocalPart()));
-
-      in.nextTag();
-    }
+    args[_arg] = _property.read(_unmarshaller, in, _name);
   }
 }

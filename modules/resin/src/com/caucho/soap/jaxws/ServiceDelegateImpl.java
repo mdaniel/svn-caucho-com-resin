@@ -115,7 +115,7 @@ public class ServiceDelegateImpl extends ServiceDelegate {
 	url = portName.getNamespaceURI();
 
       if (url == null)
-	url = _serviceName.getNamespaceURI();
+        url = _serviceName.getNamespaceURI();
       
       Skeleton skeleton = new WebServiceIntrospector().introspect(api, url);
 

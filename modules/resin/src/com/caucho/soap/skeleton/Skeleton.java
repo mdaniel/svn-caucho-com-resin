@@ -34,6 +34,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 
 /**
@@ -65,7 +66,7 @@ abstract public class Skeleton {
                               XMLStreamWriter out)
     throws IOException, XMLStreamException, Throwable;
 
-  abstract public Object invoke(String name, String url, Object[] args)
+  abstract public Object invoke(Method method, String url, Object[] args)
     throws IOException, XMLStreamException, MalformedURLException, 
            JAXBException;
 }

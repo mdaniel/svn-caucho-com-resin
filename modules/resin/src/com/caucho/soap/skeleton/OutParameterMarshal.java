@@ -55,13 +55,13 @@ public class OutParameterMarshal extends ParameterMarshal {
   public Object deserializeReply(XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
   {
-    return _property.read(_unmarshaller, in);
+    return _property.read(_unmarshaller, in, _name);
   }
 
   public void deserializeReply(XMLStreamReader in, Object[] args)
     throws IOException, XMLStreamException, JAXBException
   {
-    ((Holder) args[_arg]).value = _property.read(_unmarshaller, in);
+    ((Holder) args[_arg]).value = _property.read(_unmarshaller, in, _name);
   }
 
   //
@@ -77,28 +77,16 @@ public class OutParameterMarshal extends ParameterMarshal {
   public void serializeReply(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (_name != null)
-      writeName(out);
-
     if (args[_arg] instanceof Holder)
-      _property.write(_marshaller, out, ((Holder) args[_arg]).value);
+      _property.write(_marshaller, out, ((Holder) args[_arg]).value, _name);
     else
-      _property.write(_marshaller, out, null);
-
-    if (_name != null)
-      out.writeEndElement();
+      _property.write(_marshaller, out, null, _name);
   }
 
   public void serializeReply(XMLStreamWriter out, Object ret)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (_name != null)
-      writeName(out);
-
-    _property.write(_marshaller, out, ret);
-
-    if (_name != null)
-      out.writeEndElement();
+    _property.write(_marshaller, out, ret, _name);
   }
 
   private void writeName(XMLStreamWriter out)

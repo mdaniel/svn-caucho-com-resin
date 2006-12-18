@@ -76,7 +76,6 @@ public class DocumentWrappedAction extends AbstractAction {
     = new HashMap<String,ParameterMarshal>();
 
   private ParameterMarshal []_headerArgs;
-  private ParameterMarshal []_bodyArgs;
 
   private ParameterMarshal _returnMarshal;
 
@@ -222,43 +221,6 @@ public class DocumentWrappedAction extends AbstractAction {
     out.writeEndElement(); // response name
   }
 
-  protected void writeRequest(XMLStreamWriter out, Object[] args,
-                              String name, String namespace)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    out.writeStartDocument();
-    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
-                          "Envelope", 
-                          Skeleton.SOAP_ENVELOPE);
-    out.writeNamespace(Skeleton.SOAP_ENVELOPE_PREFIX, Skeleton.SOAP_ENVELOPE);
-
-    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
-                          "Header", 
-                          Skeleton.SOAP_ENVELOPE);
-
-    for (int i = 0; i < _headerArgs.length; i++) {
-      ParameterMarshal marshal = _headerArgs[i];
-
-      marshal.serializeCall(out, args);
-    }
-
-    out.writeEndElement(); // Header
-
-    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
-                          "Body", 
-                          Skeleton.SOAP_ENVELOPE);
-
-    out.writeStartElement("m", name, namespace);
-    out.writeNamespace("m", namespace);
-
-    for (int i = 0; i < _bodyArgs.length; i++)
-      _bodyArgs[i].serializeCall(out, args);
-
-    out.writeEndElement(); // name
-    out.writeEndElement(); // Body
-    out.writeEndElement(); // Envelope
-  }
-
   protected Object readResponse(XMLStreamReader in, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -307,20 +269,27 @@ public class DocumentWrappedAction extends AbstractAction {
     if (! "Body".equals(in.getLocalName()))
       throw expectStart("Body", in);
 
-    /* XXX make ordered
-    while (in.nextTag() == XMLStreamReader.START_ELEMENT) {
-      String tagName = in.getLocalName();
-      ParameterMarshal marshal = _bodyMap.get(tagName);
+    if (in.nextTag() != XMLStreamReader.START_ELEMENT &&
+        ! _responseName.equals(in.getLocalName()))
+      throw expectStart(_responseName, in);
 
-      if (marshal != null) {
-        marshal.deserializeReply(in, args);
-      }
-      else {
-        ret = _returnMarshal.deserialize(in);
-      }
-    }*/
+    in.nextTag();
 
-    if (! "Body".equals(in.getLocalName()))
+    if (_returnMarshal != null)
+      ret = _returnMarshal.deserializeReply(in);
+
+    // document wrapped => everything must be in order
+    for (int i = 0; i < _bodyArgs.length; i++) {
+      if (_bodyArgs[i] instanceof OutParameterMarshal)
+        _bodyArgs[i].deserializeReply(in, args);
+    }
+
+    if (in.getEventType() != XMLStreamReader.END_ELEMENT &&
+        ! _responseName.equals(in.getLocalName()))
+      throw expectEnd(_responseName, in);
+
+    if (in.nextTag() != XMLStreamReader.END_ELEMENT &&
+        ! "Body".equals(in.getLocalName()))
       throw expectEnd("Body", in);
 
     if (in.nextTag() != in.END_ELEMENT)

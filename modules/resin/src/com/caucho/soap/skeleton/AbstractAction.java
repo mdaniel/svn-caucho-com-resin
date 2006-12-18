@@ -54,6 +54,8 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -78,6 +80,11 @@ public abstract class AbstractAction {
   protected static final String SOAP_ENCODING_STYLE 
     = "http://schemas.xmlsoap.org/soap/encoding/";
 
+  protected final XMLOutputFactory _xmlOutputFactory 
+    = XMLOutputFactory.newInstance();
+  protected final XMLInputFactory _xmlInputFactory
+    = XMLInputFactory.newInstance();
+
   protected final Method _method;
   protected final int _arity;
 
@@ -89,6 +96,7 @@ public abstract class AbstractAction {
   // XXX: add array for efficiency
   protected final LinkedHashMap<String,ParameterMarshal> _bodyArguments
     = new LinkedHashMap<String,ParameterMarshal>();
+  protected ParameterMarshal[] _bodyArgs;
 
   protected final LinkedHashMap<String,ParameterMarshal> _headerArguments
     = new LinkedHashMap<String,ParameterMarshal>();
@@ -124,21 +132,14 @@ public abstract class AbstractAction {
     _method = method;
     _arity = _method.getParameterTypes().length;
     _jaxbContext = jaxbContext;
-    _targetNamespace = targetNamespace;
+    _targetNamespace = targetNamespace;  // XXX introspect this from the method
 
     // set the names for the input/output messages, portType/operation, and
     // binding/operation.
-    _operationName = method.getName();
+    _operationName = getWebMethodName(method);
     _responseName = _operationName + "Response";
 
-    if (method.isAnnotationPresent(WebMethod.class)) {
-      WebMethod webMethod = (WebMethod) method.getAnnotation(WebMethod.class);
-
-      if (! "".equals(webMethod.operationName()))
-        _operationName = webMethod.operationName();
-    }
-
-    _inputMessage.setName(_operationName);
+      _inputMessage.setName(_operationName);
     _outputMessage.setName(_responseName);
 
     _wsdlOperation.setName(_operationName);
@@ -232,7 +233,7 @@ public abstract class AbstractAction {
   /**
    * Client-side invocation.
    */
-  public Object invoke(String name, String url, Object[] args, String namespace)
+  public Object invoke(String url, Object[] args)
     throws IOException, XMLStreamException, MalformedURLException, JAXBException
   {
     URL urlObject = new URL(url);
@@ -253,11 +254,10 @@ public abstract class AbstractAction {
       httpConnection.setDoInput(true);
       httpConnection.setDoOutput(true);
 
-      XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-      XMLStreamWriter out =
-        outputFactory.createXMLStreamWriter(httpConnection.getOutputStream());
+      OutputStream httpOut = httpConnection.getOutputStream();
+      XMLStreamWriter out = _xmlOutputFactory.createXMLStreamWriter(httpOut);
 
-      writeRequest(out, args, name, namespace);
+      writeRequest(out, args);
       out.flush();
 
       //
@@ -267,9 +267,8 @@ public abstract class AbstractAction {
       if (httpConnection.getResponseCode() != 200)
         return null; // XXX more meaningful error
 
-      XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-      XMLStreamReader in = 
-        inputFactory.createXMLStreamReader(httpConnection.getInputStream());
+      InputStream httpIn = httpConnection.getInputStream();
+      XMLStreamReader in = _xmlInputFactory.createXMLStreamReader(httpIn);
 
       Object ret = readResponse(in, args);
 
@@ -281,30 +280,39 @@ public abstract class AbstractAction {
     }
   }
 
-  protected void writeRequest(XMLStreamWriter out, Object []args,
-                              String name, String namespace)
+  protected void writeRequest(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
     out.writeStartDocument();
-    out.writeStartElement("env", "Envelope", Skeleton.SOAP_ENVELOPE);
-    out.writeNamespace("env", Skeleton.SOAP_ENVELOPE);
+    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
+                          "Envelope", 
+                          Skeleton.SOAP_ENVELOPE);
+    out.writeNamespace(Skeleton.SOAP_ENVELOPE_PREFIX, Skeleton.SOAP_ENVELOPE);
 
-    out.writeStartElement("env", "Header", Skeleton.SOAP_ENVELOPE);
+    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
+                          "Header", 
+                          Skeleton.SOAP_ENVELOPE);
 
     for (ParameterMarshal marshal : _headerArguments.values())
       marshal.serializeCall(out, args);
 
     out.writeEndElement(); // Header
 
-    out.writeStartElement("env", "Body", Skeleton.SOAP_ENVELOPE);
+    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
+                          "Body", 
+                          Skeleton.SOAP_ENVELOPE);
 
-    out.writeStartElement("m", name, namespace);
-    out.writeNamespace("m", namespace);
+    out.writeStartElement(TARGET_NAMESPACE_PREFIX, 
+                          _operationName, 
+                          _targetNamespace);
+    out.writeNamespace(TARGET_NAMESPACE_PREFIX, 
+                       _targetNamespace);
 
-    for (ParameterMarshal marshal : _bodyArguments.values())
-      marshal.serializeCall(out, args);
+    for (int i = 0; i < _bodyArgs.length; i++)
+      _bodyArgs[i].serializeCall(out, args);
 
     out.writeEndElement(); // name
+
     out.writeEndElement(); // Body
     out.writeEndElement(); // Envelope
   }
@@ -437,5 +445,17 @@ public abstract class AbstractAction {
     // XXX Generics and arrays
     Type holderParams[] = ((ParameterizedType) holder).getActualTypeArguments();
     return (Class) holderParams[0];
+  }
+
+  public static String getWebMethodName(Method method)
+  {
+    String name = method.getName();
+
+    WebMethod webMethod = (WebMethod) method.getAnnotation(WebMethod.class);
+
+    if (webMethod != null && ! "".equals(webMethod.operationName()))
+      name = webMethod.operationName();
+    
+    return name;
   }
 }
