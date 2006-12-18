@@ -144,7 +144,6 @@ public class DoubleType extends Type {
       pstmt.setDouble(index, ((Double) value).doubleValue());
   }
 
-
   /**
    * Gets the value.
    */

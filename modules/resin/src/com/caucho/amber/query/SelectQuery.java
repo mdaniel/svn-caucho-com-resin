@@ -303,6 +303,10 @@ public class SelectQuery extends AbstractQuery {
       if (join == null)
         continue;
 
+      // jpa/1178
+      if (getParentQuery() != null)
+        break;
+
       FromItem joinParent = join.getJoinParent();
       FromItem joinTarget = join.getJoinTarget();
 
@@ -469,9 +473,6 @@ public class SelectQuery extends AbstractQuery {
     if (_where != null && _where.usesFrom(item, type))
       return true;
 
-    if (_having != null && _having.usesFrom(item, type))
-      return true;
-
     if (_orderList != null) {
       for (int j = 0; j < _orderList.size(); j++) {
         AmberExpr order = _orderList.get(j);
@@ -480,6 +481,21 @@ public class SelectQuery extends AbstractQuery {
           return true;
         }
       }
+    }
+
+    // jpa/1123
+    if (_groupList != null) {
+      for (int j = 0; j < _groupList.size(); j++) {
+        AmberExpr group = _groupList.get(j);
+
+        // jpa/1123 if (group.usesFrom(item, type)) {
+        if (group.usesFrom(item, AmberExpr.IS_INNER_JOIN)) {
+          return true;
+        }
+      }
+
+      if (_having != null && _having.usesFrom(item, type))
+        return true;
     }
 
     return false;
@@ -649,6 +665,7 @@ public class SelectQuery extends AbstractQuery {
 
       cb.append(" having ");
 
+      /*
       for (int i = 0; i < _fromList.size(); i++) {
         FromItem item = _fromList.get(i);
         AmberExpr expr = item.getJoinExpr();
@@ -661,6 +678,7 @@ public class SelectQuery extends AbstractQuery {
           expr.generateJoin(cb);
         }
       }
+      */
 
       if (_having != null) {
         if (hasExpr)

@@ -130,8 +130,14 @@ public class EmptyExpr extends AbstractAmberExpr {
 
     LinkColumns join = oneToMany.getLinkColumns();
 
-    cb.append("EXISTS(SELECT *");
     Table table = join.getSourceTable();
+    cb.append("EXISTS(SELECT ");
+
+    if (table.getIdColumns().size() > 0)
+      cb.append(table.getIdColumns().get(0).getName());
+    else
+      cb.append('*');
+
     cb.append(" FROM " + table.getName() + " " + _tableName);
     cb.append(" WHERE ");
 

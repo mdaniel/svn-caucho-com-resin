@@ -112,13 +112,26 @@ abstract public class AbstractField implements AmberField {
         _getterMethod = AbstractStatefulType.getGetter(getBeanClass(), getter);
       }
 
+      /* jpa/0u21
       if (_getterMethod == null)
         throw new ConfigException(L.l("{0}: {1} has no matching getter.",
                                       getBeanClass().getName(), name));
+      */
 
-      _javaType = _getterMethod.getGenericReturnType();
+      if (_getterMethod == null) {
+        JField field = AbstractStatefulType.getField(getBeanClass(), _name);
 
-      _setterMethod = AbstractStatefulType.getSetter(getBeanClass(), setter);
+        if (field == null)
+          throw new ConfigException(L.l("{0}: {1} has no matching field.",
+                                        getBeanClass().getName(), _name));
+
+        _javaType = field.getGenericType();
+      }
+      else {
+        _javaType = _getterMethod.getGenericReturnType();
+
+        _setterMethod = AbstractStatefulType.getSetter(getBeanClass(), setter);
+      }
     }
     else {
       JField field = AbstractStatefulType.getField(getBeanClass(), name);
@@ -335,7 +348,9 @@ abstract public class AbstractField implements AmberField {
    */
   public boolean isAbstract()
   {
-    if (getSourceType().isFieldAccess())
+    // jpa/0u21
+
+    if (getSourceType().isFieldAccess() || getSourceType().isIdClass())
       return true;
     else if (_getterMethod == null)
       return false;

@@ -30,9 +30,14 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.Column;
+import com.caucho.amber.type.AbstractStatefulType;
 import com.caucho.amber.type.EmbeddableType;
+import com.caucho.amber.type.PrimitiveType;
 import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.Type;
 import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
@@ -166,15 +171,45 @@ public class CompositeId extends Id {
     out.println(")");
     out.println("{");
     out.pushDepth();
+
+    out.println();
     out.println(getForeignTypeName() + " key = new " + getForeignTypeName() + "();");
 
     if (! isEmbeddedId()) {
+      String args = "";
+
       ArrayList<IdField> keys = getKeys();
       for (int i = 0; i < keys.size(); i++) {
-        IdField key = keys.get(i);
+        KeyPropertyField key = (KeyPropertyField) keys.get(i);
 
-        out.println(key.generateSetKeyProperty("key", "a" + i) + ";");
+        String name = key.getName();
+
+        char ch = Character.toUpperCase(name.charAt(0));
+        if (name.length() == 1)
+          name = "get" + ch;
+        else
+          name = "get" + ch + key.getName().substring(1);
+
+        JMethod method = AbstractStatefulType.getGetter(_keyClass, name);
+
+        if (key.isKeyField() || (method != null)) {
+          out.println(key.generateSetKeyProperty("key", "a" + i) + ";");
+        }
+        else {
+          // Arg. constructor jpa/0u21
+          if (i != 0)
+            args += ", ";
+
+          args += " a" + i;
+
+          out.println("if (a" + i + " == null)");
+          out.println("  return new " + getForeignTypeName() + "();");
+
+          if (i + 1 == keys.size())
+            out.print("key = new " + getForeignTypeName() + "(" + args + ");");
+        }
       }
+
     }
     else {
       EmbeddableType embeddable = (EmbeddableType) getEmbeddedIdField().getType();
@@ -239,10 +274,46 @@ public class CompositeId extends Id {
       out.println("  return null;");
     }
 
-    out.println(getForeignTypeName() + " key = new " + getForeignTypeName() + "();");
+    out.print(getForeignTypeName() + " key = new " + getForeignTypeName() + "(");
 
-    for (int i = 0; i < keys.size(); i++) {
-      out.println(keys.get(i).generateSetKeyProperty("key", "a" + i) + ";");
+    if (isEmbeddedId()) {
+      out.println(");");
+
+      for (int i = 0; i < keys.size(); i++) {
+        out.println(keys.get(i).generateSetKeyProperty("key", "a" + i) + ";");
+      }
+    }
+    else {
+      for (int i = 0; i < keys.size(); i++) {
+        KeyPropertyField key = (KeyPropertyField) keys.get(i);
+
+        String name = key.getName();
+
+        char ch = Character.toUpperCase(name.charAt(0));
+        if (name.length() == 1)
+          name = "get" + ch;
+        else
+          name = "get" + ch + key.getName().substring(1);
+
+        JMethod method = AbstractStatefulType.getGetter(_keyClass, name);
+
+        if (key.isKeyField() || (method != null)) {
+          if (i == 0)
+            out.println(");");
+
+          out.println(key.generateSetKeyProperty("key", "a" + i) + ";");
+        }
+        else {
+          // Arg. constructor jpa/0u21
+          if (i != 0)
+            out.print(", ");
+
+          out.print(" a" + i);
+
+          if (i + 1 == keys.size())
+            out.println(");");
+        }
+      }
     }
 
     out.println("return key;");
@@ -401,18 +472,70 @@ public class CompositeId extends Id {
     out.println("if (" + obj + " != null) {");
     out.pushDepth();
 
-    out.println(getForeignTypeName() + " " + obj + "_key = (" + getForeignTypeName() + ") " + obj + ";");
-
     if (! isEmbeddedId()) {
-      ArrayList<IdField> keys = getKeys();
 
+      // jpa/0u21
+
+      AmberPersistenceUnit persistenceUnit
+        = getOwnerType().getPersistenceUnit();
+
+      EmbeddableType embeddable
+        = persistenceUnit.getEmbeddable(_keyClass.getName());
+
+      // jpa/0u21 ArrayList<IdField> keys = getKeys();
+      ArrayList<AmberField> keys = embeddable.getFields();
+
+      for (int i = 0; i < keys.size(); i++) {
+        PropertyField key = (PropertyField) keys.get(i);
+
+        String getter = "__caucho_get_field(" + i + ")";
+
+        String value
+          = "((com.caucho.amber.entity.Embeddable) key)." + getter;
+
+        out.println("Object field" + i + " = " + value + ";");
+
+        out.println("if (field" + i + " == null)");
+        out.println("  return;");
+
+        KeyPropertyField prop = null;
+
+        Column column = key.getColumn();
+
+        if (column == null) {
+          ArrayList<IdField> fields = getKeys();
+          for (int j = 0; j < fields.size(); j++) {
+            IdField id = fields.get(j);
+            if (id.getName().equals(key.getName()))
+              if (id instanceof KeyPropertyField)
+                prop = (KeyPropertyField) id;
+          }
+        }
+
+        if (prop != null)
+          key = prop;
+
+        Type columnType = key.getColumn().getType();
+
+        value = columnType.generateCastFromObject("field" + i);
+
+        key.generateSet(out, value);
+      }
+
+      // jpa/0u21
+      out.println("__caucho_compound_key  = (" + getForeignTypeName() + ") " + obj + ";");
+
+      /*
       for (int i = 0; i < keys.size(); i++) {
         IdField key = keys.get(i);
 
         key.generateSet(out, key.generateGetKeyProperty(obj + "_key"));
       }
+      */
     }
     else {
+      out.println(getForeignTypeName() + " " + obj + "_key = (" + getForeignTypeName() + ") " + obj + ";");
+
       getEmbeddedIdField().generateSet(out, obj+"_key");
     }
 
@@ -478,10 +601,62 @@ public class CompositeId extends Id {
     throws IOException
   {
     if (! isEmbeddedId()) {
-      ArrayList<IdField> keys = getKeys();
+
+      // XXX: jpa/0u21
+
+      ArrayList keys = getKeys();
 
       for (int i = 0; i < keys.size(); i++) {
-        keys.get(i).generateSet(out, pstmt, obj, index);
+        PropertyField key = (PropertyField) keys.get(i);
+
+        String name = key.getName();
+
+        char ch = Character.toUpperCase(name.charAt(0));
+        if (name.length() == 1)
+          name = "get" + ch;
+        else
+          name = "get" + ch + key.getName().substring(1);
+
+        JMethod method = AbstractStatefulType.getGetter(_keyClass, name);
+
+        if ((key instanceof KeyPropertyField) &&
+            (((KeyPropertyField) key).isKeyField() || (method != null))) {
+          key.generateSet(out, pstmt, obj, index);
+        }
+        else {
+          // XXX: jpa/0u21
+
+          String getter = null;
+
+          AmberPersistenceUnit persistenceUnit
+            = getOwnerType().getPersistenceUnit();
+
+          EmbeddableType embeddable
+            = persistenceUnit.getEmbeddable(_keyClass.getName());
+
+          if (embeddable.isIdClass()) {
+            ArrayList<AmberField> fields = embeddable.getFields();
+            for (int j = 0; j < fields.size(); j++) {
+              AmberField id = fields.get(j);
+              if (id.getName().equals(key.getName()))
+                if (id instanceof PropertyField)
+                  getter = "__caucho_get_field(" + j + ")";
+            }
+          }
+          else
+            getter = key.getGetterMethod().getName() + "()";
+
+          Column column = key.getColumn();
+
+          Type columnType = column.getType();
+
+          String value
+            = "((com.caucho.amber.entity.Embeddable) __caucho_compound_key)." + getter;
+
+          value = columnType.generateCastFromObject(value);
+
+          columnType.generateSet(out, pstmt, obj, value);
+        }
       }
     }
     else {

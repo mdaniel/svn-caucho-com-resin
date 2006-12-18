@@ -226,6 +226,11 @@ public class AmberPersistenceUnit {
     return null;
   }
 
+  public AmberContainer getAmberContainer()
+  {
+    return _amberContainer;
+  }
+
   public ClassLoader getEnhancedLoader()
   {
     return _amberContainer.getEnhancedLoader();
@@ -955,6 +960,14 @@ public class AmberPersistenceUnit {
         }
       }
     }
+  }
+
+  /**
+   * Returns the @Embeddable introspector.
+   */
+  public EmbeddableIntrospector getEmbeddableIntrospector()
+  {
+    return _embeddableIntrospector;
   }
 
   /**

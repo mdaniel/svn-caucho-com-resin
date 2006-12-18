@@ -317,16 +317,19 @@ public class EntityComponent extends ClassComponent {
       out.println("}");
     }
 
+    Id id = _entityType.getId();
 
+    if (id == null)
+      throw new IllegalStateException(L.l("`{0}' is missing a key.",
+                                          _entityType.getName()));
+
+    // jpa/0u21
+    out.println();
+    out.println("private " + id.getForeignTypeName() + " __caucho_compound_key = new " + id.getForeignTypeName() + "();");
     out.println();
     out.println("public void __caucho_setPrimaryKey(Object key)");
     out.println("{");
     out.pushDepth();
-
-    Id id = _entityType.getId();
-    if (id == null)
-      throw new IllegalStateException(L.l("`{0}' is missing a key.",
-                                          _entityType.getName()));
 
     id.generateSet(out, id.generateCastFromObject("key"));
 

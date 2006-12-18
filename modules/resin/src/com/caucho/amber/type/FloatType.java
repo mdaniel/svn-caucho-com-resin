@@ -34,6 +34,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -106,8 +107,11 @@ public class FloatType extends Type {
     out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.REAL);");
     out.println("else");
-    out.println("  " + pstmt + ".setFloat(" + index + "++, " +
-                value + ".floatValue());");
+    // out.println("  " + pstmt + ".setFloat(" + index + "++, " +
+    //             value + ".floatValue());");
+    // jpa/0u21
+    out.println("  " + pstmt + ".setString(" + index + "++, " +
+                value + ".toString());");
   }
 
   /**
@@ -140,5 +144,17 @@ public class FloatType extends Type {
     float value = rs.getFloat(index);
 
     return rs.wasNull() ? null : new Float(value);
+  }
+
+  /**
+   * Sets the value.
+   */
+  public void setParameter(PreparedStatement pstmt, int index, Object value)
+    throws SQLException
+  {
+    if (value == null)
+      pstmt.setNull(index, Types.FLOAT);
+    else
+      pstmt.setFloat(index, ((Float) value).floatValue());
   }
 }

@@ -116,6 +116,11 @@ public class EmbeddableComponent extends ClassComponent {
     try {
       generateHeader(out);
 
+      generateInit(out);
+
+      // jpa/0u21
+      generateGetField(out);
+
       generateFields(out);
 
       generateLoad(out);
@@ -140,11 +145,65 @@ public class EmbeddableComponent extends ClassComponent {
   }
 
   /**
+   * Generates the initialization.
+   */
+  private void generateInit(JavaWriter out)
+    throws IOException
+  {
+    String className = getClassName();
+    int p = className.lastIndexOf('.');
+    if (p > 0)
+      className = className.substring(p + 1);
+
+    ArrayList<AmberField> fields = _embeddableType.getFields();
+
+    for (JMethod ctor : _embeddableType.getBeanClass().getConstructors()) {
+      out.println();
+      // XXX: s/b actual access type?
+      out.print("public ");
+
+      out.print(className);
+      out.print("(");
+
+      JClass []args = ctor.getParameterTypes();
+      for (int i = 0; i < args.length; i++) {
+        if (i != 0)
+          out.print(", ");
+
+        out.print(args[i].getPrintName());
+        out.print(" a" + i);
+      }
+      out.println(")");
+      out.println("{");
+      out.pushDepth();
+
+      out.print("super(");
+      for (int i = 0; i < args.length; i++) {
+        if (i != 0)
+          out.print(", ");
+
+        out.print("a" + i);
+      }
+      out.println(");");
+
+      for (AmberField field : fields) {
+        field.generatePostConstructor(out);
+      }
+
+      out.popDepth();
+      out.println("}");
+    }
+  }
+
+  /**
    * Generates the fields.
    */
   private void generateFields(JavaWriter out)
     throws IOException
   {
+    if (_embeddableType.isIdClass())
+      return;
+
     ArrayList<AmberField> fields = _embeddableType.getFields();
 
     for (int i = 0; i < fields.size(); i++) {
@@ -161,6 +220,43 @@ public class EmbeddableComponent extends ClassComponent {
   }
 
   /**
+   * Generates the get field method.
+   */
+  private void generateGetField(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public Object __caucho_get_field(int index)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("switch (index) {");
+    out.pushDepth();
+
+    ArrayList<AmberField> fields = _embeddableType.getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField prop = fields.get(i);
+
+      if (! (prop instanceof PropertyField))
+        break;
+
+      out.println("case " + i + ":");
+      out.println("  return " + prop.getName() + ";");
+      out.println();
+    }
+
+    out.println("default:");
+    out.println("  return null;");
+
+    out.popDepth();
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+   }
+
+  /**
    * Generates the load.
    */
   private void generateLoad(JavaWriter out)
@@ -174,9 +270,14 @@ public class EmbeddableComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    _embeddableType.generateLoad(out, "rs", "index", 0, -1);
+    if (_embeddableType.isIdClass()) {
+      out.println("return 0;");
+    }
+    else {
+      _embeddableType.generateLoad(out, "rs", "index", 0, -1);
 
-    out.println("return index;");
+      out.println("return index;");
+    }
 
     out.popDepth();
     out.println("}");

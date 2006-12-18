@@ -48,4 +48,9 @@ public interface Embeddable {
                            ResultSet rs,
                            int index)
     throws SQLException;
+
+  /**
+   * Returns the ith field.
+   */
+  public Object __caucho_get_field(int index);
 }

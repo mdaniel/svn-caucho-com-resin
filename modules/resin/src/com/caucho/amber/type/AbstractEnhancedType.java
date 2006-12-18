@@ -60,6 +60,9 @@ public abstract class AbstractEnhancedType extends Type {
   private ClassLoader _instanceLoader;
   private Class _instanceClass;
 
+  // XXX: jpa/0u21
+  private boolean _isIdClass;
+
   private boolean _isEnhanced;
 
   private volatile boolean _isGenerated;
@@ -278,6 +281,25 @@ public abstract class AbstractEnhancedType extends Type {
   public boolean isEnhanced()
   {
     return _isEnhanced;
+  }
+
+  /**
+   * Sets true if the class is a key class, i.e.,
+   * some entity is annotated with @IdClass(this.class)
+   */
+  public void setIdClass(boolean isIdClass)
+  {
+    // jpa/0u21
+
+    _isIdClass = isIdClass;
+  }
+
+  /**
+   * Returns true if the class is a key class.
+   */
+  public boolean isIdClass()
+  {
+    return _isIdClass;
   }
 
   /**

@@ -35,6 +35,8 @@ import com.caucho.util.CharBuffer;
  * Literal expression for Amber.
  */
 public class LiteralExpr extends AbstractAmberExpr {
+  private QueryParser _parser;
+
   // literal value
   private String _value;
 
@@ -46,8 +48,11 @@ public class LiteralExpr extends AbstractAmberExpr {
    * @param value the string value of the literal
    * @param type the java type of the literal
    */
-  public LiteralExpr(String value, Class javaType)
+  public LiteralExpr(QueryParser parser,
+                     String value,
+                     Class javaType)
   {
+    _parser = parser;
     _value = value;
     _javaType = javaType;
   }
@@ -90,15 +95,19 @@ public class LiteralExpr extends AbstractAmberExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    // XXX: Derby requires 0 or 1 for tck
-    // ejb30/persistence/query/language/queryTest14
-    // if ((_javaType != null) && _javaType.equals(boolean.class)) {
-    //   if (_value.equalsIgnoreCase("false"))
-    //     cb.append("0");
-    //   else
-    //     cb.append("1");
-    // }
-    // else
+    if ((_javaType != null) && _javaType.equals(boolean.class)) {
+      if (! _parser.isPostgresDBMS()) {
+
+        // Derby and MySql.
+
+        if (_value.equalsIgnoreCase("false"))
+          cb.append("0");
+        else
+          cb.append("1");
+
+        return;
+      }
+    }
 
     cb.append(_value);
   }

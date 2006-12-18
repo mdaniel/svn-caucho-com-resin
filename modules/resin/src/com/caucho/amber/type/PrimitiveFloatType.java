@@ -33,6 +33,8 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Types;
 
 /**
@@ -132,5 +134,17 @@ public class PrimitiveFloatType extends PrimitiveType {
   public String generateCastFromObject(String value)
   {
     return "((Number) " + value + ").floatValue()";
+  }
+
+  /**
+   * Sets the value.
+   */
+  public void setParameter(PreparedStatement pstmt, int index, Object value)
+    throws SQLException
+  {
+    if (value instanceof Number) // jpa/141a
+      pstmt.setString(index, value.toString());
+    else
+      throw new IllegalArgumentException("Invalid argument for setParameter.");
   }
 }

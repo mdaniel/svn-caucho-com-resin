@@ -369,6 +369,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
           String s = idClassConfig.getClassName();
           idClass = _persistenceUnit.getJClassLoader().forName(s);
         }
+
+        // XXX: temp. introspects idClass as an embeddable type.
+        _persistenceUnit.getEmbeddableIntrospector().introspect(idClass);
       }
 
       if (entityType.getId() != null) {

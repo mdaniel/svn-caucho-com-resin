@@ -277,6 +277,7 @@ public class LoadGroupGenerator extends ClassComponent {
 
     out.println("if (rs.next()) {");
     out.pushDepth();
+
     _entityType.generateLoad(out, "rs", "", 1, _index);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
 

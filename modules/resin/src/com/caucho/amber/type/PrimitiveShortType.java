@@ -33,6 +33,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -165,5 +166,17 @@ public class PrimitiveShortType extends PrimitiveType {
   public Object toObject(long value)
   {
     return new Short((short) value);
+  }
+
+  /**
+   * Sets the value.
+   */
+  public void setParameter(PreparedStatement pstmt, int index, Object value)
+    throws SQLException
+  {
+    if (value instanceof Number)
+      pstmt.setString(index, value.toString());
+    else
+      throw new IllegalArgumentException("Invalid argument for setParameter.");
   }
 }

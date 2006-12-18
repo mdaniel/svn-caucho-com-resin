@@ -301,7 +301,7 @@ public class EntityManyToManyField extends AssociationField {
     JType param = paramArgs.length > 0 ? paramArgs[0] : null;
     JType param2 = paramArgs.length > 1 ? paramArgs[1] : null;
 
-    out.print("private ");
+    String s = "private ";
 
     String collectionImpl;
 
@@ -312,21 +312,25 @@ public class EntityManyToManyField extends AssociationField {
     else
       collectionImpl = "com.caucho.amber.collection.CollectionImpl";
 
-    out.print(collectionImpl);
+    s = s + collectionImpl;
 
     if (param != null) {
-      out.print("<");
-      out.print(param.getPrintName());
+      s = s + '<' + param.getPrintName();
       if (isMap) {
         if (param2 != null) {
-          out.print(", ");
-          out.print(param2.getPrintName());
+          s = s + ", " + param2.getPrintName();
         }
       }
-      out.print(">");
+      s = s + '>';
     }
 
-    out.println(" " + var + ";");
+    s = s + " " + var;
+
+    // jpa/0i5g
+    out.println("java.util.HashSet<" + getTargetType().getBeanClass().getName() + "> " + var + "_added;");
+
+    out.println();
+    out.println(s + ';');
 
     out.println();
     out.println("public " + getJavaTypeName() + " " + getGetterName() + "()");
@@ -417,6 +421,17 @@ public class EntityManyToManyField extends AssociationField {
       out.popDepth();
       out.println("};");
     */
+
+    out.println();
+
+    // jpa/0i5g
+    out.print(var + "_added = ");
+    out.println("new java.util.HashSet<" + getTargetType().getBeanClass().getName() + ">();");
+
+    if (isMap)
+      out.print(var + "_added.addAll(" + var + ".values());");
+    else
+      out.println(var + "_added.addAll(" + var + ");");
 
     out.println();
     out.println("return " + var + ";");
@@ -716,6 +731,17 @@ public class EntityManyToManyField extends AssociationField {
 
     out.println();
     out.println(targetType + " v = (" + targetType + ") o;");
+
+    // jpa/0i5g
+    String varAdded = "_caucho_field_" + getGetterName() + "_added";
+    out.println();
+    out.println("if (" + varAdded + " == null)");
+    out.println("  " + varAdded + " = new java.util.HashSet<" + getTargetType().getBeanClass().getName() + ">();");
+    out.println("else if (" + varAdded + ".contains(v))");
+    out.println("  return false;");
+    out.println();
+    out.println(varAdded + ".add(v);");
+
     out.println();
     out.println("if (__caucho_session == null)");
     out.println("  return false;");
@@ -919,7 +945,7 @@ public class EntityManyToManyField extends AssociationField {
     // commented out: jpa/0s2i
     // out.print("public void " + setter.getName() + "(");
     out.print("public void " + getSetterName() + "(");
-    out.print(type.getPrintName() + " value)");
+    out.println(type.getPrintName() + " value)");
     out.println("{");
     out.pushDepth();
 
@@ -993,10 +1019,12 @@ public class EntityManyToManyField extends AssociationField {
 
     out.print(var + ".");
 
-    if (isMap)
+    if (isMap) {
       out.println("putAll(value);");
-    else
+    }
+    else {
       out.println("addAll(0, value);");
+    }
 
     out.popDepth();
     out.println("} catch(Exception e) {");

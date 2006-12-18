@@ -33,6 +33,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -148,5 +149,17 @@ public class PrimitiveCharType extends PrimitiveType {
       return 0;
     else
       return value.charAt(0);
+  }
+
+  /**
+   * Sets the value.
+   */
+  public void setParameter(PreparedStatement pstmt, int index, Object value)
+    throws SQLException
+  {
+    if ((value instanceof Character) || (value instanceof String))
+      pstmt.setString(index, value.toString());
+    else
+      throw new IllegalArgumentException("Invalid argument for setParameter.");
   }
 }

@@ -62,7 +62,7 @@ public class IdExpr extends AbstractPathExpr {
   /**
    * Returns the from item
    */
-  FromItem getFromItem()
+  public FromItem getFromItem()
   {
     return _fromItem;
   }

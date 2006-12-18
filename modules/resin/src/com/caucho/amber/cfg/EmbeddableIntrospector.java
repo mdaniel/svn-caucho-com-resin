@@ -97,6 +97,16 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
       if (isField)
         embeddableType.setFieldAccess(true);
 
+      // XXX: jpa/0u21
+      JAnnotation ann = type.getAnnotation(javax.persistence.Embeddable.class);
+
+      if (ann == null) {
+        isField = true;
+        embeddableType.setIdClass(true);
+        _persistenceUnit.getAmberContainer().addEmbeddable(typeName,
+                                                             embeddableType);
+      }
+
       embeddableType.setInstanceClassName(type.getName() +
                                           "__ResinExt");
       embeddableType.setEnhanced(true);
