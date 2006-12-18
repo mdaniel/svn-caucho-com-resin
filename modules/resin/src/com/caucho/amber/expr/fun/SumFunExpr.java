@@ -28,6 +28,7 @@
 
 package com.caucho.amber.expr.fun;
 
+import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.type.*;
 import com.caucho.util.L10N;
@@ -46,21 +47,23 @@ public class SumFunExpr extends FunExpr {
   /**
    * Creates a new function expression
    */
-  protected SumFunExpr(String id,
+  protected SumFunExpr(QueryParser parser,
+                       String id,
                        ArrayList<AmberExpr> args,
                        boolean distinct)
   {
-    super(id, args, distinct);
+    super(parser, id, args, distinct);
 
     // XXX: needs to throw IllegalArgument for empty args
     _arg = args.get(0);
   }
 
-  public static SumFunExpr create(String id,
+  public static SumFunExpr create(QueryParser parser,
+                                  String id,
                                   ArrayList<AmberExpr> args,
                                   boolean distinct)
   {
-    return new SumFunExpr(id, args, distinct);
+    return new SumFunExpr(parser, id, args, distinct);
   }
 
   /**
