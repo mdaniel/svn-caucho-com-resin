@@ -37,6 +37,7 @@ import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.Version;
 
 import java.io.File;
 import java.io.IOException;
@@ -105,9 +106,10 @@ public class ResinBoot {
     // watchdog/0210
     // Vfs.setPwd(_rootDirectory);
 
-    if (! _resinConf.canRead())
-      throw new ConfigException(L().l("Can't open resin.conf file '{0}'",
-                                      _resinConf.getNativePath()));
+    if (! _resinConf.canRead()) {
+      throw new ConfigException(L().l("Resin/{0} can't open configuration file '{1}'",
+                                      Version.VERSION, _resinConf.getNativePath()));
+    }
 
     // XXX: set _isResinProfessional
 
@@ -132,8 +134,8 @@ public class ResinBoot {
     _server = conf.findServer(_serverId);
 
     if (_server == null)
-      throw new ConfigException(L().l("-server '{0}' does not match any defined <server id> in {1}.",
-                                      _serverId, _resinConf));
+      throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
+                                      Version.VERSION, _serverId, _resinConf));
 
     if (_isVerbose)
       _server.setVerbose(_isVerbose);
@@ -175,7 +177,8 @@ public class ResinBoot {
     String path = url.toString();
 
     if (! path.startsWith("jar:"))
-      throw new RuntimeException(L().l("Can't find jar in {0}", path));
+      throw new RuntimeException(L().l("Resin/{0}: can't find jar for ResinBoot.class in {1}",
+				       Version.VERSION, path));
 
     int p = path.indexOf(':');
     int q = path.indexOf('!');
@@ -232,6 +235,12 @@ public class ResinBoot {
       else if ("-verbose".equals(arg)
 	       || "--verbose".equals(arg)) {
 	_isVerbose = true;
+	Logger.getLogger("").setLevel(Level.FINE);
+      }
+      else if ("-finer".equals(arg)
+	       || "--finer".equals(arg)) {
+	_isVerbose = true;
+	Logger.getLogger("").setLevel(Level.FINER);
       }
       else if ("start".equals(arg)) {
 	_startMode = StartMode.START;
@@ -257,47 +266,81 @@ public class ResinBoot {
         _resinConf = _resinHome.lookup(resinConf);
 
       if (! _resinConf.exists())
-        throw new ConfigException(L().l("Can't find resin.conf file '{0}'", resinConf));
+        throw new ConfigException(L().l("Resin/{0} can't find configuration file '{1}'", Version.VERSION, _resinConf.getNativePath()));
     }
   }
 
   boolean start()
-    throws IOException, InterruptedException
+    throws Exception
   {
     if (_startMode == StartMode.START) {
-      if (_server.startWatchdog(_argv)) {
-	System.out.println(L().l("Started server '{0}'", _server.getId()));
+      try {
+	_server.startWatchdog(_argv);
+	
+	System.out.println(L().l("Resin/{0} started -server '{1}'.",
+				 Version.VERSION, _server.getId()));
+      } catch (Exception e) {
+	System.out.println(L().l("Resin/{0} can't start -server '{1}'.\n{2}",
+				 Version.VERSION, _server.getId(),
+				 e.toString()));
+
+	log().log(Level.FINE, e.toString(), e);
+
+	System.exit(1);
       }
-      else
-	System.out.println(L().l("Can't start server '{0}'", _server.getId()));
-      
-      return false;
-    }
-    else if (_startMode == StartMode.RESTART) {
-      if (_server.restartWatchdog(_argv)) {
-	System.out.println(L().l("Restarted server '{0}'", _server.getId()));
-      }
-      else
-	System.out.println(L().l("Can't restart server '{0}'", _server.getId()));
       
       return false;
     }
     else if (_startMode == StartMode.STOP) {
-      if (_server.stopWatchdog())
-	System.out.println("Stopped server '" + _server.getId() + "'");
-      else
-	System.out.println("Can't stop server " + _server.getId());
+      try {
+	_server.stopWatchdog();
+	
+	System.out.println(L().l("Resin/{0} stopped -server '{1}'.",
+				 Version.VERSION, _server.getId()));
+      } catch (Exception e) {
+	System.out.println(L().l("Resin/{0} can't stop -server '{1}'.\n{2}",
+				 Version.VERSION, _server.getId(),
+				 e.toString()));
+
+	log().log(Level.FINE, e.toString(), e);
+
+	System.exit(1);
+      }
+      
+      return false;
+    }
+    else if (_startMode == StartMode.RESTART) {
+      try {
+	_server.restartWatchdog(_argv);
+	
+	System.out.println(L().l("Resin/{0} restarted -server '{1}'.",
+				 Version.VERSION, _server.getId()));
+      } catch (Exception e) {
+	System.out.println(L().l("Resin/{0} can't restart -server '{1}'.\n{2}",
+				 Version.VERSION, _server.getId(),
+				 e.toString()));
+
+	log().log(Level.FINE, e.toString(), e);
+
+	System.exit(1);
+      }
       
       return false;
     }
     else if (_startMode == StartMode.SHUTDOWN) {
       try {
 	_server.shutdown();
-      } catch (Exception e) {
-	log().log(Level.FINE, e.toString(), e);
-      }
 
-      System.out.println("Shutdown watchdog");
+	System.out.println(L().l("Resin/{0} shutdown ResinWatchdogManager",
+				 Version.VERSION));
+      } catch (Exception e) {
+	System.out.println(L().l("Resin/{0} can't shutdown ResinWatchdogManager.\n{1}",
+				 Version.VERSION, e.toString()));
+
+	log().log(Level.FINE, e.toString(), e);
+
+	System.exit(1);
+      }
 
       return false;
     }
@@ -329,8 +372,12 @@ public class ResinBoot {
       }
     } catch (ConfigException e) {
       System.out.println(e.getMessage());
+
+      System.exit(1);
     } catch (Exception e) {
       e.printStackTrace();
+      
+      System.exit(1);
     }
   }
 

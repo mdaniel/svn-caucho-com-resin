@@ -29,20 +29,26 @@
 
 package com.caucho.boot;
 
-import java.io.IOException;
+import java.io.*;
+
+import com.caucho.config.ConfigException;
 
 /**
  * Process responsible for watching a backend server.
  */
 public interface WatchdogAPI {
-  public boolean start(String []argv)
-    throws IOException;
+  /**
+   * Starts the server with the given arguments.  If the
+   * start fails, a ConfigException is thrown.
+   */
+  public void start(String []argv)
+    throws ConfigException, IllegalStateException, IOException;
   
-  public boolean restart(String serverId, String []argv)
-    throws IOException;
+  public void restart(String serverId, String []argv)
+    throws ConfigException, IllegalStateException, IOException;
   
-  public boolean stop(String serverId)
-    throws IOException;
+  public void stop(String serverId)
+    throws ConfigException, IllegalStateException, IOException;
   
   public boolean shutdown()
     throws IOException;

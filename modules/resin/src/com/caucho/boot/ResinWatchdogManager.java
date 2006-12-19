@@ -46,6 +46,7 @@ import com.caucho.server.port.ProtocolDispatchServer;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.L10N;
+import com.caucho.Version;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
@@ -180,7 +181,8 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
   }
   */
 
-  boolean startServer(String []argv)
+  void startServer(String []argv)
+    throws ConfigException
   {
     Args args = new Args(argv);
 
@@ -201,41 +203,45 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     ResinWatchdog server = resin.findServer(serverId);
 
     if (server == null)
-      throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
-				      serverId));
+      throw new ConfigException(L().l("No matching <server> found for -server '{0}' in '{1}'",
+				      serverId, _args.getResinConf()));
 
     if (args.isVerbose())
       server.setVerbose(args.isVerbose());
 
     synchronized (_activeServerMap) {
-      if (_activeServerMap.get(serverId) != null)
-	return false;
+      if (_activeServerMap.get(serverId) != null) {
+	throw new IllegalStateException(L().l("-server '{0}' is already running.",
+				      serverId));
+      }
 
       _activeServerMap.put(serverId, server);
     }
     
     server.start(argv, args.getRootDirectory());
-
-    return true;
   }
 
-  boolean stopServer(String serverId)
+  void stopServer(String serverId)
   {
     ResinWatchdog server = null;
+    
+    server = _resin.findServer(serverId);
+
+    if (server == null)
+      throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
+				      serverId, _args.getResinConf()));
     
     synchronized (_activeServerMap) {
       server = _activeServerMap.remove(serverId);
     }
 
-    log().info("STOP: '" + serverId + " " + server);
+    log().info(server + " stopping");
 
     if (server == null)
-      throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
-				      serverId));
+      throw new IllegalStateException(L().l("-server '{0}' is already stopped.",
+					  serverId));
 
     server.stop();
-
-    return true;
   }
 
   private ResinConfig readConfig(Args args)
@@ -322,7 +328,8 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     String path = url.toString();
 
     if (! path.startsWith("jar:"))
-      throw new RuntimeException(L().l("Can't find jar in {0}", path));
+      throw new RuntimeException(L().l("Resin/{0}: can't find jar for ResinBoot in {1}",
+				       Version.VERSION, path));
 
     int p = path.indexOf(':');
     int q = path.indexOf('!');

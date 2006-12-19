@@ -667,6 +667,12 @@ public class EnhancerFixup {
         is.close();
     }
 
+    // jpa/0j26
+    // XXX: later, need to see if it's possible to keep some of this
+    // information for debugging
+    fixupLocalVariableTable(extClass);
+    fixupLocalVariableTable(baseClass);
+    
     // The base class will have the modified class
     mergeClasses(className, baseClass, extClass);
 
@@ -855,6 +861,19 @@ public class EnhancerFixup {
       CodeAttribute code = method.getCode();
 
       code.removeAttribute("StackMapTable");
+    }
+  }
+
+  /**
+   * Remove the LocalVariableTable
+   */
+  private void fixupLocalVariableTable(JavaClass extClass)
+  {
+    for (JavaMethod method : extClass.getMethodList()) {
+      CodeAttribute code = method.getCode();
+
+      code.removeAttribute("LocalVariableTable");
+      code.removeAttribute("LocalVariableTypeTable");
     }
   }
 

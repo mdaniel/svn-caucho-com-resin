@@ -77,7 +77,7 @@ public class SqrtFunExpr extends FunExpr {
   // private
 
   private void generateInternalWhere(CharBuffer cb,
-                                     boolean select)
+				     boolean select)
   {
     ArrayList<AmberExpr> args = getArgs();
 

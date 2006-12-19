@@ -29,6 +29,7 @@
 
 package com.caucho.boot;
 
+import com.caucho.config.ConfigException;
 import com.caucho.hessian.server.HessianServlet;
 
 import java.util.logging.Logger;
@@ -47,22 +48,23 @@ public class ResinWatchdogServlet extends HessianServlet implements WatchdogAPI 
     _watchdogManager = ResinWatchdogManager.getWatchdog();
   }
     
-  public boolean start(String []argv)
+  public void start(String []argv)
+    throws ConfigException, IllegalStateException
   {
-    return _watchdogManager.startServer(argv);
+    _watchdogManager.startServer(argv);
   }
   
-  public boolean restart(String serverId, String []argv)
+  public void restart(String serverId, String []argv)
   {
     stop(serverId);
-    return start(argv);
+    start(argv);
   }
-  
-  public boolean stop(String serverId)
+
+  public void stop(String serverId)
   {
     log.info("Watchdog stop: " + serverId);
     
-    return _watchdogManager.stopServer(serverId);
+    _watchdogManager.stopServer(serverId);
   }
   
   public boolean shutdown()

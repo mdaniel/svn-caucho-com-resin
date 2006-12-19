@@ -38,6 +38,7 @@ import com.caucho.management.server.ResinWatchdogMXBean;
 import com.caucho.server.admin.HessianHmuxProxy;
 import com.caucho.server.port.Port;
 import com.caucho.util.*;
+import com.caucho.Version;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.Vfs;
@@ -47,10 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -229,25 +227,25 @@ public class ResinWatchdog extends AbstractManagedObject
   {
   }
 
-  public boolean startWatchdog(String []argv)
-    throws IOException
+  public void startWatchdog(String []argv)
+    throws ConfigException, IOException
   {
     WatchdogAPI watchdog = getProxy();
 
     try {
-      return watchdog.start(argv);
+      watchdog.start(argv);
     } catch (ConfigException e) {
+      throw e;
+    } catch (IllegalStateException e) {
       throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
 
     launchManager(argv);
-
-    return true;
   }
 
-  public boolean restartWatchdog(String []argv)
+  public void restartWatchdog(String []argv)
     throws IOException
   {
     WatchdogAPI watchdog = getProxy();
@@ -259,7 +257,9 @@ public class ResinWatchdog extends AbstractManagedObject
     }
 
     try {
-      return watchdog.start(argv);
+      watchdog.start(argv);
+
+      return;
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
@@ -267,25 +267,25 @@ public class ResinWatchdog extends AbstractManagedObject
     }
 
     launchManager(argv);
-
-    return true;
   }
 
-  public boolean stopWatchdog()
+  public void stopWatchdog()
     throws IOException
   {
     WatchdogAPI watchdog = getProxy();
 
     try {
-      return watchdog.stop(getId());
+      watchdog.stop(getId());
     } catch (ConfigException e) {
       throw e;
+    } catch (IllegalStateException e) {
+      throw e;
+    } catch (IOException e) {
+      throw new IllegalStateException(L.l("Can't connect to ResinWatchdogManager.\n{1}",
+					  Version.VERSION, e.toString()),
+				      e);
     } catch (Exception e) {
-	e.printStackTrace();
-	
       log.log(Level.FINE, e.toString(), e);
-
-      return false;
     }
   }
 
@@ -320,6 +320,8 @@ public class ResinWatchdog extends AbstractManagedObject
   public void launchManager(String []argv)
     throws IOException
   {
+    log.fine(this + " starting ResinWatchdogManager");
+    
     Path resinHome = _cluster.getResin().getResinHome();
     Path resinRoot = _cluster.getResin().getRootDirectory();
     
