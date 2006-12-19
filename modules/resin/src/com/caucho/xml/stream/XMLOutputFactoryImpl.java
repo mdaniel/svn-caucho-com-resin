@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -46,6 +46,8 @@ import java.io.Writer;
 public class XMLOutputFactoryImpl extends XMLOutputFactory {
   private static final L10N L = new L10N(XMLOutputFactoryImpl.class);
 
+  private boolean _repair = false;
+
   public XMLOutputFactoryImpl()
   {
   }
@@ -90,7 +92,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLStreamWriter createXMLStreamWriter(OutputStream stream)
     throws XMLStreamException
   {
-    return new XMLStreamWriterImpl(Vfs.openWrite(stream));
+    return new XMLStreamWriterImpl(Vfs.openWrite(stream), _repair);
   }
 
   public XMLStreamWriter createXMLStreamWriter(OutputStream stream,
@@ -99,7 +101,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   {
     try {
       OutputStreamWriter osw = new OutputStreamWriter(stream, encoding);
-      return new XMLStreamWriterImpl(Vfs.openWrite(osw));
+      return new XMLStreamWriterImpl(Vfs.openWrite(osw), _repair);
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -126,7 +128,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLStreamWriter createXMLStreamWriter(Writer stream)
     throws XMLStreamException
   {
-    return new XMLStreamWriterImpl(Vfs.openWrite(stream));
+    return new XMLStreamWriterImpl(Vfs.openWrite(stream), _repair);
   }
 
   public Object getProperty(String name)
@@ -143,9 +145,13 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public void setProperty(String name, Object value)
     throws IllegalArgumentException
   {
-    throw new IllegalArgumentException("property \""+name+"\" not supported");
+    if ("javax.xml.stream.isRepairingNamespaces".equals(name)) {
+      if (value instanceof Boolean)
+        _repair = ((Boolean) value).booleanValue();
+      else 
+        throw new IllegalArgumentException("value of " + name + " must be Boolean, not " + value);
+    }
+    else
+      throw new IllegalArgumentException("property \""+name+"\" not supported");
   }
-
-
 }
-

@@ -47,7 +47,7 @@ public class Escapifier {
     for(int i=0; i<len; i++) {
       char c = s.charAt(i);
 
-      if (c >= 32 && c <= 127 && c!='&' && c!='<' &&  c!='\"' // && c!='\'' 
+      if (c >= 32 && c <= 127 && c!='&' && c!='<' && c!='>' && c!='\"'
           || Character.isWhitespace(c)) {
         if (cb != null) cb.append(c);
         continue;
@@ -59,6 +59,7 @@ public class Escapifier {
       switch(c) {
       case '&': cb.append("&amp;"); break;
       case '<': cb.append("&lt;"); break;
+      case '>': cb.append("&gt;"); break;
       // case '\'': cb.append("&apos;"); break; // TCK compliance
       case '\"': cb.append("&quot;"); break;
       default: cb.append("&#"+((int)(c & 0xffff))+";"); break;

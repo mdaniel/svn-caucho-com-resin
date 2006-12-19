@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -44,16 +44,24 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     = Logger.getLogger(XMLStreamReaderImpl.class.getName());
 
   private WriteStream _ws;
-  private NamespaceWriterContext _tracker = new NamespaceWriterContext();
+  private NamespaceWriterContext _tracker;
 
   private QName _pendingTagName = null;
   private boolean _shortTag = false;
+  private boolean _repair = false;
   private ArrayList<QName> _pendingAttributeNames = new ArrayList<QName>();
   private ArrayList<String> _pendingAttributeValues = new ArrayList<String>();
 
   public XMLStreamWriterImpl(WriteStream ws)
   {
+    this(ws, false);
+  }
+
+  public XMLStreamWriterImpl(WriteStream ws, boolean repair)
+  {
     _ws = ws;
+    _repair = repair;
+    _tracker = new NamespaceWriterContext(repair);
   }
 
   public void close() throws XMLStreamException
@@ -97,7 +105,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void setDefaultNamespace(String uri)
     throws XMLStreamException
   {
-    _tracker.declare(null, uri);
+    _tracker.declare(null, uri, _repair);
   }
 
   public void setNamespaceContext(NamespaceContext context)
@@ -124,17 +132,29 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
                              String value)
     throws XMLStreamException
   {
-    writeAttribute(_tracker.declare(namespaceURI),
-                   namespaceURI,
-                   localName,
-                   value);
+    if (_repair) {
+      String prefix = _tracker.declare(namespaceURI);
+
+      if (prefix == null)
+        _pendingAttributeNames.add(new QName(namespaceURI, localName));
+      else
+        _pendingAttributeNames.add(new QName(namespaceURI, localName, prefix));
+    }
+    else
+      _pendingAttributeNames.add(new QName(namespaceURI, localName));
+
+    _pendingAttributeValues.add(value);
   }
 
   public void writeAttribute(String prefix, String namespaceURI,
                              String localName, String value)
     throws XMLStreamException
   {
-    _tracker.declare(prefix, namespaceURI);
+    if (_repair && _tracker.getPrefix(namespaceURI) == null)
+      _tracker.declare(prefix, namespaceURI, true);
+    else
+      _tracker.declare(prefix, namespaceURI);
+
     _pendingAttributeNames.add(new QName(namespaceURI, localName, prefix));
     _pendingAttributeValues.add(value);
   }
@@ -221,9 +241,29 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void writeEmptyElement(String namespaceURI, String localName)
     throws XMLStreamException
   {
-    writeEmptyElement(_tracker.declare(namespaceURI),
-                      localName,
-                      namespaceURI);
+    flushPending();
+
+    try {
+      QName qname = null;
+
+      if (_repair) {
+        String prefix = _tracker.declare(namespaceURI);
+
+        if (prefix == null)
+          qname = new QName(namespaceURI, localName);
+        else
+          qname = new QName(namespaceURI, localName, prefix);
+      }
+      else
+        qname = new QName(namespaceURI, localName);
+
+      pushContext(qname);
+      _pendingTagName = qname;
+      _shortTag = true;
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeEmptyElement(String prefix, String localName,
@@ -232,6 +272,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
+      if (_repair && _tracker.getPrefix(namespaceURI) == null)
+        _tracker.declare(prefix, namespaceURI, true);
+
       QName qname = new QName(namespaceURI, localName, prefix);
       pushContext(qname);
       _pendingTagName = qname;
@@ -287,6 +330,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void writeNamespace(String prefix, String namespaceURI)
     throws XMLStreamException
   {
+    if (_pendingTagName == null)
+      throw new XMLStreamException("Namespace written before element");
+
     if (prefix == null || "".equals(prefix) || "xmlns".equals(prefix))
       writeDefaultNamespace(namespaceURI);
     else
@@ -298,9 +344,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      _ws.print("<? ");
+      _ws.print("<?");
       _ws.print(target);
-      _ws.print(" ?>");
+      _ws.print("?>");
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -312,11 +358,11 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      _ws.print("<? ");
+      _ws.print("<?");
       _ws.print(target);
       _ws.print(" ");
       _ws.print(data);
-      _ws.print(" ?>");
+      _ws.print("?>");
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -332,10 +378,10 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void writeStartDocument(String version)
     throws XMLStreamException
   {
-    writeStartDocument(version, "utf-8");
+    writeStartDocument("utf-8", version);
   }
 
-  public void writeStartDocument(String version, String encoding)
+  public void writeStartDocument(String encoding, String version)
     throws XMLStreamException
   {
     try {
@@ -363,9 +409,27 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void writeStartElement(String namespaceURI, String localName)
     throws XMLStreamException
   {
-    writeStartElement(_tracker.declare(namespaceURI),
-                      localName,
-                      namespaceURI);
+    flushPending();
+    try {
+      QName qname = null;
+
+      if (_repair) {
+        String prefix = _tracker.declare(namespaceURI);
+
+        if (prefix == null)
+          qname = new QName(namespaceURI, localName);
+        else
+          qname = new QName(namespaceURI, localName, prefix);
+      }
+      else
+        qname = new QName(namespaceURI, localName);
+
+      pushContext(qname);
+      _pendingTagName = qname;
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeStartElement(String prefix, String localName,
@@ -374,6 +438,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
+      if (_repair && _tracker.getPrefix(namespaceURI) == null)
+        _tracker.declare(prefix, namespaceURI, true);
+
       QName qname = new QName(namespaceURI, localName, prefix);
       pushContext(qname);
       _pendingTagName = qname;

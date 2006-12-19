@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -52,6 +52,20 @@ public class NamespaceWriterContext extends NamespaceContextImpl
   private int _uniqueId = 0;
   private NamespaceBinding _nullBinding = new NamespaceBinding(null, null, 0);
 
+  private boolean _repair = false;
+
+  public NamespaceWriterContext()
+  {
+    this(false);
+  }
+
+  public NamespaceWriterContext(boolean repair)
+  {
+    super();
+
+    _repair = repair;
+  }
+
   public void declare(String prefix, String uri)
   {
     declare(prefix, uri, false);
@@ -69,7 +83,9 @@ public class NamespaceWriterContext extends NamespaceContextImpl
     else {
       binding = _bindings.get(uri);
 
-      if (binding != null && binding.getPrefix().equals(prefix)) {
+      if (binding != null && 
+          binding.getPrefix() != null &&
+          binding.getPrefix().equals(prefix)) {
         // for writing, ignore matching prefixes
         binding.setEmit(emit);
         return;
@@ -94,6 +110,7 @@ public class NamespaceWriterContext extends NamespaceContextImpl
     eltBinding.addOldBinding(binding, prefix, binding.getUri(), uri);
 
     _version++;
+    binding.setPrefix(prefix);
     binding.setUri(uri);
     binding.setVersion(_version);
     binding.setEmit(emit);
@@ -111,9 +128,9 @@ public class NamespaceWriterContext extends NamespaceContextImpl
     if (binding != null)
       return binding.getPrefix();
 
-    String prefix = "ns"+ _uniqueId++;
-    
-    declare(prefix, uri);
+    String prefix = "ns" + _uniqueId++;
+
+    declare(prefix, uri, _repair);
     
     return prefix;
   }
@@ -123,7 +140,12 @@ public class NamespaceWriterContext extends NamespaceContextImpl
    */
   public String getPrefix(String uri)
   {
-    return _bindings.get(uri).getPrefix();
+    NamespaceBinding binding = _bindings.get(uri);
+
+    if (binding == null)
+      return null;
+    
+    return binding.getPrefix();
   }
 
   public void emitDeclarations(WriteStream ws)

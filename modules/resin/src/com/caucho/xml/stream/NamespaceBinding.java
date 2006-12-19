@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -36,7 +36,7 @@ import com.caucho.vfs.WriteStream;
  */
 final class NamespaceBinding
 {
-  private final String _prefix;
+  private String _prefix;
   
   private String _uri;
   
@@ -78,6 +78,11 @@ final class NamespaceBinding
     return _prefix;
   }
 
+  void setPrefix(String prefix)
+  {
+    _prefix = prefix;
+  }
+
   void emit(WriteStream ws)
     throws IOException
   {
@@ -100,5 +105,12 @@ final class NamespaceBinding
   void setEmit(boolean emit)
   {
     _emit = emit;
+  }
+
+  public String toString()
+  {
+    return "NamespaceBinding[prefix=" + _prefix + 
+                           ",uri=" + _uri + 
+                           ",version=" + _version + "]";
   }
 }
