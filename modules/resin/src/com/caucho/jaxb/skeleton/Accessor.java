@@ -93,9 +93,11 @@ public abstract class Accessor {
   public void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    writeStartElement(out, obj);
+    //writeStartElement(out, obj);
+
     _property.write(m, out, obj, getQName());
-    writeEndElement(out, obj);
+
+    //writeEndElement(out, obj);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in)
@@ -107,6 +109,7 @@ public abstract class Accessor {
   protected void writeStartElement(XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
+    // XXX
     XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
     XmlElement element = getAnnotation(XmlElement.class);
 
@@ -165,10 +168,12 @@ public abstract class Accessor {
     if (wrapper != null) {
       if (obj == null && !wrapper.nillable())
         return;
-    } else if (element != null) {
+    } 
+    else if (element != null) {
       if (obj == null && !element.nillable())
         return;
-    } else {
+    } 
+    else {
       if (obj == null) return;
     }
 

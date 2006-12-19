@@ -53,7 +53,9 @@ public abstract class CDataProperty extends Property {
   public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT || ! in.getName().equals(qname))
+    if (in.getEventType() != in.START_ELEMENT)
+      throw new IOException(L.l("Expected <{0}>", qname.toString()));
+    else if (! in.getName().equals(qname))
       throw new IOException(L.l("Expected <{0}>, not <{1}>", 
                                 qname.toString(), in.getName().toString()));
 
@@ -82,8 +84,10 @@ public abstract class CDataProperty extends Property {
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    writeQNameStartElement(out, qname);
-    out.writeCharacters(write(obj));
-    writeQNameEndElement(out, qname);
+    if (obj != null) {
+      writeQNameStartElement(out, qname);
+      out.writeCharacters(write(obj));
+      writeQNameEndElement(out, qname);
+    }
   }
 }

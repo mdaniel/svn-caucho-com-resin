@@ -71,17 +71,21 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
     */
 
     String name = null;
+    String namespace = null;
+
+    /// XXX: put into skeleton?
+    XmlType xmlTypeAnnotation = (XmlType) c.getAnnotation(XmlType.class);
+
+    if (name == null) {
+      name = 
+        (xmlTypeAnnotation == null ? c.getName() : xmlTypeAnnotation.name());
+    }
 
     XmlRootElement xre = (XmlRootElement) c.getAnnotation(XmlRootElement.class);
 
-    if (xre != null)
+    if (xre != null) {
       name = xre.name();
-
-    XmlType xmlTypeAnnotation = (XmlType) c.getAnnotation(XmlType.class);
-    if (name == null)
-      name = xmlTypeAnnotation == null
-        ? c.getName()
-        : xmlTypeAnnotation.name();
+    }
 
     String encoding = getEncoding();
     if (encoding == null)
@@ -89,7 +93,7 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
 
     try {
       if (!isFragment())
-        writer.writeStartDocument("1.0", encoding);
+        writer.writeStartDocument(encoding, "1.0");
 
       // XXX this needs to happen after the startElement is written
       // jaxb/5003
@@ -101,7 +105,8 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
                               getNoNSSchemaLocation());
       */
 
-      skeleton.write(this, writer, jaxbElement, new QName(name));
+
+      skeleton.write(this, writer, jaxbElement, null);
     }
     catch (Exception e) {
       throw new JAXBException(e);

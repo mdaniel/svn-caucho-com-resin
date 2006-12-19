@@ -49,6 +49,8 @@ public class QNameProperty extends Property {
 
   public static final QNameProperty PROPERTY = new QNameProperty();
 
+  private int _nsCounter = 0;
+
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -61,19 +63,52 @@ public class QNameProperty extends Property {
       String prefix = name.getPrefix();
 
       // check if we need to declare this namespace prefix
-      if (namespace != null && ! "".equals(namespace) &&
-          prefix != null && ! "".equals(prefix)) {
-
+      if (namespace != null && ! "".equals(namespace)) {
         String declaredPrefix = out.getPrefix(namespace);
         
-        if (prefix != null && ! prefix.equals(name.getPrefix()))
-          out.writeNamespace(name.getPrefix(), name.getNamespaceURI());
+        // 6 cases: the given prefix can be "" or not "" 
+        // and the declared prefix can be null, default (""), or not ""
+
+        if (declaredPrefix == null) {
+          if ("".equals(prefix)) {
+            // use a dummy prefix... can use "n" all the time since we enter
+            // and leave the element without any children... unless the name
+            // of the element itself has a namespace with prefix "n"
+            if ("n".equals(qname.getPrefix()))
+              prefix = "d";
+            else
+              prefix = "n";
+
+            out.writeNamespace(prefix, namespace);
+          }
+          else {
+            // just write the given prefix
+            out.writeNamespace(prefix, namespace);
+          }
+        }
+        else if ("".equals(declaredPrefix)) {
+          if (! "".equals(prefix)) {
+            // need to declare this prefix
+            out.writeNamespace(prefix, namespace);
+          }
+          // else if prefix == "" or prefix == null, do nothing
+        }
+        else {
+          if ("".equals(prefix)) {
+            // take on existing prefix
+            prefix = declaredPrefix;
+          }
+          else if (! prefix.equals(declaredPrefix)) {
+            // the given prefix doesn't match the existing one, so declare it
+            out.writeNamespace(prefix, namespace);
+          }
+        }
       }
 
-      if (name.getPrefix() == null || "".equals(name.getPrefix()))
+      if (prefix == null || "".equals(prefix))
         out.writeCharacters(name.getLocalPart());
       else
-        out.writeCharacters(name.getPrefix() + ":" + name.getLocalPart());
+        out.writeCharacters(prefix + ":" + name.getLocalPart());
     }
 
     writeQNameEndElement(out, qname);

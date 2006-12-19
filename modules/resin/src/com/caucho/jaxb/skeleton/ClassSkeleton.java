@@ -313,6 +313,7 @@ public class ClassSkeleton<C> extends Skeleton {
   public Object read(Unmarshaller u, XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
   {
+    // XXX: sequences/choice/etc
     try {
       C ret = (C) _constructor.newInstance();
       in.next();
@@ -364,7 +365,7 @@ public class ClassSkeleton<C> extends Skeleton {
       if (m.getListener() != null)
         m.getListener().beforeMarshal(obj);
       
-      QName tagName = getElementName((C) obj);
+      QName tagName = _elementName; //getElementName((C) obj);
       
       if (tagName == null)
         tagName = fieldName;
@@ -394,11 +395,12 @@ public class ClassSkeleton<C> extends Skeleton {
     }
   }
 
-  public QName getElementName(Object object)
+  public QName getElementName()
   {
+    return _elementName;
+    /*
     QName tagName = null;
 
-    /*
     if (tagName==null && _class.isAnnotationPresent(XmlRootElement.class)) {
       XmlRootElement annotation = _class.getAnnotation(XmlRootElement.class);
       String localname = annotation.name();
@@ -411,7 +413,6 @@ public class ClassSkeleton<C> extends Skeleton {
       else
         tagName = new QName(namespace, localname);
     }
-    */
 
     if (tagName == null && _class.isAnnotationPresent(XmlElement.class)) {
       XmlElement annotation = _class.getAnnotation(XmlElement.class);
@@ -427,6 +428,7 @@ public class ClassSkeleton<C> extends Skeleton {
     }
 
     return tagName;
+    */
   }
 
   public void generateSchema(XMLStreamWriter out)
