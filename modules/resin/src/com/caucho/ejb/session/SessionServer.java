@@ -104,6 +104,7 @@ public class SessionServer extends AbstractServer {
   /**
    * Returns the object key from a handle.
    */
+  @Override
   public Class getPrimaryKeyClass()
   {
     return null;
@@ -112,6 +113,7 @@ public class SessionServer extends AbstractServer {
   /**
    * Returns the EJBLocalHome stub for the container
    */
+  @Override
   public EJBLocalHome getEJBLocalHome()
   {
     return _localHome;
@@ -120,6 +122,7 @@ public class SessionServer extends AbstractServer {
   /**
    * Returns the EJBHome stub for the container
    */
+  @Override
   public EJBHome getEJBHome()
     throws RemoteException
   {
@@ -129,6 +132,7 @@ public class SessionServer extends AbstractServer {
   /**
    * Returns the home object for jndi.
    */
+  @Override
   public Object getHomeObject()
   {
     return _remoteHomeView;
@@ -137,6 +141,7 @@ public class SessionServer extends AbstractServer {
   /**
    * Returns the EJBRemote stub for the container
    */
+  @Override
   public Object getRemoteObject()
   {
     if (_remoteHomeView != null)
@@ -148,6 +153,7 @@ public class SessionServer extends AbstractServer {
   /**
    * Returns the EJBHome stub for the container
    */
+  @Override
   public Object getClientObject()
   {
     return new StatefulJndiFactory(this);
@@ -226,6 +232,7 @@ public class SessionServer extends AbstractServer {
    *
    * @return the remote interface of the entity.
    */
+  @Override
   public AbstractContext getContext(Object key, boolean forceLoad)
     throws FinderException
   {
@@ -265,6 +272,7 @@ public class SessionServer extends AbstractServer {
   /**
    * Remove an object by its handle.
    */
+  @Override
   public void remove(AbstractHandle handle)
   {
     _sessions.remove(handle.getObjectId());
@@ -274,6 +282,7 @@ public class SessionServer extends AbstractServer {
   /**
    * Cleans up the entity server nicely.
    */
+  @Override
   public void destroy()
   {
     synchronized (this) {

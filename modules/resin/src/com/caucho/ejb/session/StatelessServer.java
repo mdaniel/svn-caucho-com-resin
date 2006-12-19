@@ -117,9 +117,22 @@ public class StatelessServer extends AbstractServer {
     }
   }
 
+  @Override
+  public boolean isLocal()
+  {
+    return super.isLocal() || _localObject != null;
+  }
+
+  @Override
+  public boolean isRemote()
+  {
+    return super.isRemote() || _remoteObject != null;
+  }
+
   /**
    * Returns the ejb home.
    */
+  @Override
   public EJBHome getEJBHome()
   {
     return _remoteHomeView;
@@ -128,6 +141,7 @@ public class StatelessServer extends AbstractServer {
   /**
    * Returns the EJBHome stub for the container
    */
+  @Override
   public Object getRemoteObject()
   {
     Object home = getEJBHome();
@@ -144,6 +158,7 @@ public class StatelessServer extends AbstractServer {
   /**
    * Returns the EJBHome stub for the container
    */
+  @Override
   public Object getClientObject()
   {
     Object home = getClientLocalHome();
@@ -164,6 +179,7 @@ public class StatelessServer extends AbstractServer {
    *
    * @return the remote interface of the entity.
    */
+  @Override
   public EJBObject getEJBObject(Object key)
     throws FinderException
   {
@@ -175,6 +191,7 @@ public class StatelessServer extends AbstractServer {
     return getStatelessContext();
   }
 
+  @Override
   public AbstractContext getContext(Object key, boolean forceLoad)
   {
     return getStatelessContext();
@@ -236,6 +253,7 @@ public class StatelessServer extends AbstractServer {
   /**
    * Cleans up the entity server nicely.
    */
+  @Override
   public void destroy()
   {
     if (_homeContext != null) {

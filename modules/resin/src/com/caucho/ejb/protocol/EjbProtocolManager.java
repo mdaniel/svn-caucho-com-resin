@@ -221,67 +221,77 @@ public class EjbProtocolManager {
       String ejbName = server.getEJBName();
       String jndiName = server.getJndiName();
 
-      Object localHome = server.getEJBLocalHome();
       String localJndiName = null;
+      String remoteJndiName = null;
 
+      if (server.isLocal()) {
+        Object localObj = server.getEJBLocalHome();
 
-      // XXX: ejb/0g01 ejb/0g11
-      // vs ejb/0f00.  EJB 3.0 does not require home interfaces, e.g
-      // for stateless session beans
-      if (localHome == null)
-        localHome = server.getClientObject();
+        // ejb/0f00
+        // EJB 3.0 does not require home interfaces, e.g
+        // for stateless session beans
+        if (localObj == null)
+          localObj = server.getClientObject();
 
-      if (localHome != null) {
-        if (jndiName != null) {
-          if (jndiName.startsWith("java:comp"))
-            localJndiName = Jndi.getFullName(jndiName);
-          else if (_localJndiPrefix != null)
-            localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + jndiName);
-        }
-        else if (_localJndiPrefix != null)
-          localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
-
-        if (localJndiName != null) {
-          if (log.isLoggable(Level.CONFIG))
-            log.config(L.l("local ejb {0} has JNDI binding {1}", localHome, localJndiName));
-
-          bindServer(localJndiName, localHome);
-        }
-        else {
-          if (log.isLoggable(Level.FINE))
-            log.fine(L.l("local ejb {0} has no JNDI binding", localHome));
-        }
-      }
-
-      try {
-        Object remoteHome = server.getEJBHome();
-        String remoteJndiName = null;
-
-        if (remoteHome != null) {
-
+        if (localObj != null) {
           if (jndiName != null) {
             if (jndiName.startsWith("java:comp"))
-              remoteJndiName = Jndi.getFullName(jndiName);
-            else if (_remoteJndiPrefix != null)
-              remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + jndiName);
+              localJndiName = Jndi.getFullName(jndiName);
+            else if (_localJndiPrefix != null)
+              localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + jndiName);
+            else
+              throw new NamingException(L.l("<jndi-name> `{0}' requires a fully qualified name or a configured <jndi-local-prefix>",
+                                            jndiName));
           }
-          else if (_remoteJndiPrefix != null)
-            remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + ejbName);
+          else if (_localJndiPrefix != null)
+            localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
 
-          if (remoteJndiName != null && !remoteJndiName.equals(localJndiName)) {
+          if (localJndiName != null) {
             if (log.isLoggable(Level.CONFIG))
-              log.config(L.l("remote ejb {0} has JNDI binding {1}", remoteHome, remoteJndiName));
+              log.config(L.l("local ejb {0} has JNDI binding {1}", localObj, localJndiName));
 
-            bindServer(remoteJndiName, remoteHome);
+            bindServer(localJndiName, localObj);
           }
           else {
             if (log.isLoggable(Level.FINE))
-              log.fine(L.l("remote ejb {0} has no JNDI binding", remoteHome));
+              log.fine(L.l("local ejb {0} has no JNDI binding", localObj));
           }
         }
       }
-      catch (RemoteException ex) {
-        throw new RuntimeException(ex);
+
+      if (server.isRemote()) {
+        try {
+          Object remoteObj = server.getEJBHome();
+
+          if (remoteObj != null) {
+
+            if (jndiName != null) {
+              if (jndiName.startsWith("java:comp"))
+                remoteJndiName = Jndi.getFullName(jndiName);
+              else if (_remoteJndiPrefix != null)
+                remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + jndiName);
+              else
+                throw new NamingException(L.l("<jndi-name> `{0}' requires a fully qualified name or a configured <jndi-remote-prefix>",
+                                              jndiName));
+            }
+            else if (_remoteJndiPrefix != null)
+              remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + ejbName);
+
+            if (remoteJndiName != null && !remoteJndiName.equals(localJndiName)) {
+              if (log.isLoggable(Level.CONFIG))
+                log.config(L.l("remote ejb {0} has JNDI binding {1}", remoteObj, remoteJndiName));
+
+              bindServer(remoteJndiName, remoteObj);
+            }
+            else {
+              if (log.isLoggable(Level.FINE))
+                log.fine(L.l("remote ejb {0} has no JNDI binding", remoteObj));
+            }
+          }
+        }
+        catch (RemoteException ex) {
+          throw new RuntimeException(ex);
+        }
       }
     }
     finally {

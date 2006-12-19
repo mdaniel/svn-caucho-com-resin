@@ -156,8 +156,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
-   * Returns the jndi name.  The jndi name does not include the java:comp/env
-   * prefix, and does not start or end with a '/'.
+   * Returns the jndi name.
    */
   public String getJndiName()
   {
@@ -675,6 +674,22 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void start()
     throws Exception
   {
+  }
+
+  /**
+   * Returns true is there is a local home or local client object for the bean.
+   */
+  public boolean isLocal()
+  {
+    return _localHome != null;
+  }
+
+  /**
+   * Returns true is there is a remote home or remote client object for the bean.
+   */
+  public boolean isRemote()
+  {
+    return _remoteHome != null || _remoteHomeView != null;
   }
 
   /**
