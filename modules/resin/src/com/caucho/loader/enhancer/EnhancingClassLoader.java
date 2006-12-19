@@ -105,8 +105,8 @@ public class EnhancingClassLoader extends EnvironmentClassLoader {
   {
     super.init();
 
-    if (getByteCodeEnhancerList() == null &&
-	EnhancerManager.getLocalEnhancer(this) != null) {
+    if (getTransformerList() == null
+	&& EnhancerManager.getLocalEnhancer(this) != null) {
       EnhancerManager.create(this);
     }
   }

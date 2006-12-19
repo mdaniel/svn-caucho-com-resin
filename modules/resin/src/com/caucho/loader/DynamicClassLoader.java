@@ -51,9 +51,8 @@ import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.security.CodeSource;
-import java.security.Permission;
-import java.security.PermissionCollection;
+import java.security.*;
+import java.lang.instrument.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -73,7 +72,8 @@ import java.util.regex.Pattern;
  * the class loader chain searches like a classpath.
  */
 public class DynamicClassLoader extends java.net.URLClassLoader
-  implements Dependency, Make {
+  implements Dependency, Make
+{
   private static L10N _L;
   private static Logger _log;
 
@@ -133,7 +133,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private CodeSource _codeSource;
 
   // Any enhancer
-  private ArrayList<ByteCodeEnhancer> _byteCodeEnhancerList;
+  private ArrayList<ClassFileTransformer> _classFileTransformerList;
 
   private URL []_urls = NULL_URL_ARRAY;
 
@@ -730,17 +730,17 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Sets any enhancer.
    */
-  public void addByteCodeEnhancer(ByteCodeEnhancer enhancer)
+  public void addTransformer(ClassFileTransformer transformer)
   {
-    if (_byteCodeEnhancerList == null)
-      _byteCodeEnhancerList = new ArrayList<ByteCodeEnhancer>();
+    if (_classFileTransformerList == null)
+      _classFileTransformerList = new ArrayList<ClassFileTransformer>();
     
-    _byteCodeEnhancerList.add(enhancer);
+    _classFileTransformerList.add(transformer);
   }
 
-  protected ArrayList<ByteCodeEnhancer> getByteCodeEnhancerList()
+  protected ArrayList<ClassFileTransformer> getTransformerList()
   {
-    return _byteCodeEnhancerList;
+    return _classFileTransformerList;
   }
 
   /**
@@ -1224,20 +1224,34 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       byte []bBuf = buffer.getBuffer();
       int bLen = buffer.length();
 
-      if (_byteCodeEnhancerList != null) {
-	for (int i = 0; i < _byteCodeEnhancerList.size(); i++) {
-	  ByteCodeEnhancer byteCodeEnhancer = _byteCodeEnhancerList.get(i);
+      if (_classFileTransformerList != null) {
+	Class redefineClass = null;
+	String className = name.replace('.', '/');
+
+	if (bBuf.length != bLen) {
+	  byte []tempBuf = new byte[bLen];
+	  System.arraycopy(bBuf, 0, tempBuf, 0, bLen);
+	  bBuf = tempBuf;
+	}
+
+	ProtectionDomain protectionDomain = null;
+	
+	for (int i = 0; i < _classFileTransformerList.size(); i++) {
+	  ClassFileTransformer transformer = _classFileTransformerList.get(i);
 	  
 	  try {
-	    byte []enhancedBuffer = byteCodeEnhancer.enhance(name,
-							     bBuf, 0, bLen);
+	    byte []enhancedBuffer = transformer.transform(this,
+							  className,
+							  redefineClass,
+							  protectionDomain,
+							  bBuf);
 
 	    if (enhancedBuffer != null) {
 	      bBuf = enhancedBuffer;
 	      bLen = enhancedBuffer.length;
 
 	      if (_isVerbose || true)
-		verbose(name, String.valueOf(byteCodeEnhancer));
+		verbose(name, String.valueOf(transformer));
 	    }
 	    /* RSN-109
 	       } catch (RuntimeException e) {
@@ -1589,7 +1603,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       _permissions = null;
       _securityManager = null;
       _codeSource = null;
-      _byteCodeEnhancerList = null;
+      _classFileTransformerList = null;
 
       _lifecycle.toDestroy();
     }
@@ -1613,7 +1627,12 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
   }
 
-  public ClassLoader getNewTempClassLoader()
+  public ClassLoader getInstrumentableClassLoader()
+  {
+    return this;
+  }
+  
+  public ClassLoader getThrowawayClassLoader()
   {
     DynamicClassLoader dynLoader = new DynamicClassLoader(getParent());
 

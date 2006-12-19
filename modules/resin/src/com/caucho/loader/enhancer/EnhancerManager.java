@@ -47,14 +47,18 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 
 import java.io.ByteArrayInputStream;
+import java.lang.instrument.*;
 import java.util.ArrayList;
+import java.security.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Manages the enhancement
  */
-public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
+public class EnhancerManager
+  implements ClassFileTransformer, ByteCodeClassMatcher
+{
   private static final L10N L = new L10N(EnhancerManager.class);
   private static final Logger log = Log.open(EnhancerManager.class);
 
@@ -104,7 +108,7 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
 
       for (; loader != null; loader = loader.getParent()) {
 	if (loader instanceof DynamicClassLoader) {
-	  ((DynamicClassLoader) loader).addByteCodeEnhancer(enhancer);
+	  ((DynamicClassLoader) loader).addTransformer(enhancer);
 	  break;
 	}
       }
@@ -182,13 +186,18 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
   /**
    * Returns the enhanced .class or null if no enhancement.
    */
-  public byte[] enhance(String className,
-			byte []buffer, int offset, int length)
+  public byte[] transform(ClassLoader loader,
+			  String className,
+			  Class oldClass,
+			  ProtectionDomain domain,
+			  byte []buffer)
   {
+    int length = buffer.length;
+    
     ByteCodeClassScanner scanner;
 
     // XXX: temp
-    scanner = new ByteCodeClassScanner(className, buffer, offset, length, this);
+    scanner = new ByteCodeClassScanner(className, buffer, 0, length, this);
 
     if (scanner.scan()) {
       try {
@@ -196,7 +205,7 @@ public class EnhancerManager implements ByteCodeEnhancer, ByteCodeClassMatcher {
 	parser.setClassLoader(_jClassLoader);
 	
 	ByteArrayInputStream is;
-	is = new ByteArrayInputStream(buffer, offset, length);
+	is = new ByteArrayInputStream(buffer, 0, length);
       
 	JavaClass jClass = parser.parse(is);
 

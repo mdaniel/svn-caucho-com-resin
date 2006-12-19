@@ -136,7 +136,7 @@ public class JdbcMessage
       sql = ("CREATE TABLE " + _messageTable + " (" +
 	     "  m_id " + longType + " PRIMARY KEY" + identity + "," +
 	     "  queue INTEGER NOT NULL," +
-	     "  connection VARCHAR(255)," +
+	     "  conn VARCHAR(255)," +
 	     "  consumer " + longType + "," +
 	     "  delivered INTEGER NOT NULL," +
 	     "  msg_type INTEGER NOT NULL," +

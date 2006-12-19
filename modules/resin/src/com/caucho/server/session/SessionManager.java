@@ -167,7 +167,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   private boolean _isWebAppStore; // i.e. for old-style compatibility
   private Store _sessionStore;
   private int _alwaysLoadSession;
-  private boolean _alwaysSaveSession;
+  private int _alwaysSaveSession;
 
   private boolean _distributedRing;
   private Path _persistentPath;
@@ -349,22 +349,6 @@ public final class SessionManager implements ObjectManager, AlarmListener
       throw new ConfigException(L.l("{0} is an unknown persistent store.",
 				    store.getJndiName()));
   }
-  
-  /**
-   * True if sessions should always be saved.
-   */
-  boolean getAlwaysSaveSession()
-  {
-    return _alwaysSaveSession;
-  }
-
-  /**
-   * True if sessions should always be saved.
-   */
-  public void setAlwaysSaveSession(boolean save)
-  {
-    _alwaysSaveSession = save;
-  }
 
   /**
    * True if sessions should always be loadd.
@@ -380,6 +364,22 @@ public final class SessionManager implements ObjectManager, AlarmListener
   public void setAlwaysLoadSession(boolean load)
   {
     _alwaysLoadSession = load ? SET_TRUE : SET_FALSE;
+  }
+
+  /**
+   * True if sessions should always be saved.
+   */
+  boolean getAlwaysSaveSession()
+  {
+    return _alwaysSaveSession == SET_TRUE;
+  }
+
+  /**
+   * True if sessions should always be saved.
+   */
+  public void setAlwaysSaveSession(boolean save)
+  {
+    _alwaysSaveSession = save ? SET_TRUE : SET_FALSE;
   }
 
   /**
@@ -1045,7 +1045,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
   public void init()
   {
     if (_sessionSaveMode == SAVE_ON_SHUTDOWN
-	&& (_alwaysSaveSession || _alwaysLoadSession == SET_TRUE))
+	&& (_alwaysSaveSession == SET_TRUE
+	    || _alwaysLoadSession == SET_TRUE))
       throw new ConfigException(L.l("save-mode='on-shutdown' cannot be used with <always-save-session/> or <always-load-session/>"));
   }
 
@@ -1066,7 +1067,11 @@ public final class SessionManager implements ObjectManager, AlarmListener
       else if (_alwaysLoadSession == SET_FALSE)
 	_storeManager.setAlwaysLoad(false);
       
-      _storeManager.setAlwaysSave(_alwaysSaveSession);
+      if (_alwaysSaveSession == SET_TRUE)
+	_sessionStore.setAlwaysSave(true);
+      else if (_alwaysSaveSession == SET_FALSE)
+	_sessionStore.setAlwaysSave(false);
+
       _storeManager.init();
 
       _storeManager.updateIdleCheckInterval(_sessionTimeout);
@@ -1081,7 +1086,10 @@ public final class SessionManager implements ObjectManager, AlarmListener
       else if (_alwaysLoadSession == SET_FALSE)
 	_sessionStore.setAlwaysLoad(false);
       
-      _sessionStore.setAlwaysSave(_alwaysSaveSession);
+      if (_alwaysSaveSession == SET_TRUE)
+	_sessionStore.setAlwaysSave(true);
+      else if (_alwaysSaveSession == SET_FALSE)
+	_sessionStore.setAlwaysSave(false);
     }
 
     _alarm.queue(60000);
