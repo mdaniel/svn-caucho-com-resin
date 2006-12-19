@@ -73,7 +73,8 @@ import java.util.logging.Logger;
 /**
  * Facade for the PHP language.
  */
-public class Quercus {
+public class Quercus
+{
   private static L10N L = new L10N(Quercus.class);
   private static final Logger log = Log.open(Quercus.class);
 

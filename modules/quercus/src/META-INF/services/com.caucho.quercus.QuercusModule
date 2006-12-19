@@ -28,10 +28,8 @@ com.caucho.quercus.lib.NetworkModule
 com.caucho.quercus.lib.db.OracleModule
 com.caucho.quercus.lib.OptionsModule
 com.caucho.quercus.lib.OutputModule
-com.caucho.quercus.lib.pdf.PDFModule
 com.caucho.quercus.lib.db.PostgresModule
 com.caucho.quercus.lib.RegexpModule
-com.caucho.quercus.lib.ResinModule
 com.caucho.quercus.lib.session.SessionModule
 com.caucho.quercus.lib.simplexml.SimpleXMLModule
 com.caucho.quercus.lib.file.SocketModule

@@ -97,9 +97,6 @@ public class QuercusServlet
   {
     _isCompileSet = true;
 
-    if ("false".equals(isCompile) && _quercus == null)
-      _quercus = new Quercus();
-
     Quercus quercus = getQuercus();
 
     if ("true".equals(isCompile) || "".equals(isCompile)) {

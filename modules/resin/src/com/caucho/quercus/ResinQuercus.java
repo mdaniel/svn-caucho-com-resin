@@ -30,6 +30,7 @@
 package com.caucho.quercus;
 
 import com.caucho.config.ConfigException;
+import com.caucho.loader.*;
 import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.FileModule;
@@ -81,6 +82,9 @@ public class ResinQuercus extends Quercus
 {
   private static L10N L = new L10N(ResinQuercus.class);
   private static final Logger log = Log.open(ResinQuercus.class);
+  
+  private static EnvironmentLocal<ModuleContext> _localModuleContext
+    = new EnvironmentLocal<ModuleContext>();
 
   private WebApp _webApp;
   
@@ -103,6 +107,21 @@ public class ResinQuercus extends Quercus
   public WebApp getWebApp()
   {
     return _webApp;
+  }
+
+  @Override
+  public ModuleContext getLocalContext(ClassLoader loader)
+  {
+    synchronized (_localModuleContext) {
+      ModuleContext context = _localModuleContext.getLevel(loader);
+
+      if (context == null) {
+	context = createModuleContext(loader);
+	_localModuleContext.set(context, loader);
+      }
+
+      return context;
+    }
   }
 
   public String getCookieName()
