@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface ResponseWrapper {
     String className() default "";
-    String targetName() default "";
-    String localNamespace() default "";
+    String localName() default "";
+    String targetNamespace() default "";
 }
 
