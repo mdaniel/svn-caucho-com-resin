@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -117,18 +118,6 @@ public class ResinWatchdog extends AbstractManagedObject
       _address = InetAddress.getByName("127.0.0.1");
     } catch (Exception e) {
       throw new ConfigException(e);
-    }
-
-    try {
-      Class cl = Class.forName("com.caucho.boot.JniBoot");
-
-      _jniBoot = (Boot) cl.newInstance();
-    } catch (ClassNotFoundException e) {
-      log.finer(e.toString());
-    } catch (IllegalStateException e) {
-      log.finer(e.toString());
-    } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
     }
 
     _is64bit = "64".equals(System.getProperty("sun.arch.data.model"));
@@ -230,6 +219,14 @@ public class ResinWatchdog extends AbstractManagedObject
   public void startWatchdog(String []argv)
     throws ConfigException, IOException
   {
+    if (_userName != null && ! hasBoot()) {
+	throw new ConfigException(L.l("<user-name> requires Resin Professional and compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin.so and check for a valid license in $RESIN_HOME/licenses."));
+    }
+
+    if (_groupName != null && ! hasBoot()) {
+      throw new ConfigException(L.l("<group-name> requires Resin Professional and compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin.so and check for a valid license in $RESIN_HOME/licenses."));
+    }
+    
     WatchdogAPI watchdog = getProxy();
 
     try {
@@ -237,30 +234,6 @@ public class ResinWatchdog extends AbstractManagedObject
     } catch (ConfigException e) {
       throw e;
     } catch (IllegalStateException e) {
-      throw e;
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    launchManager(argv);
-  }
-
-  public void restartWatchdog(String []argv)
-    throws IOException
-  {
-    WatchdogAPI watchdog = getProxy();
-
-    try {
-      watchdog.stop(getId());
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    try {
-      watchdog.start(argv);
-
-      return;
-    } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -287,6 +260,18 @@ public class ResinWatchdog extends AbstractManagedObject
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
+  }
+
+  public void restartWatchdog(String []argv)
+    throws IOException
+  {
+    try {
+      stopWatchdog();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    startWatchdog(argv);
   }
 
   public boolean shutdown()
@@ -417,6 +402,9 @@ public class ResinWatchdog extends AbstractManagedObject
     return 1;
   }
 
+  /**
+   * Starts the watchdog instance.
+   */
   public boolean start(String []argv, Path rootDirectory)
   {
     if (! _lifecycle.toActive())
@@ -723,7 +711,7 @@ public class ResinWatchdog extends AbstractManagedObject
         out.println("" + envEntry.getKey() + ": " + envEntry.getValue());
     }
 
-    if (_jniBoot != null) {
+    if (getJniBoot() != null) {
       ArrayList<QServerSocket> boundSockets = new ArrayList<QServerSocket>();
 
       try {
@@ -744,9 +732,9 @@ public class ResinWatchdog extends AbstractManagedObject
 	  }
 	}
 
-	Process process = _jniBoot.exec(list, env,
-					processPwd.getNativePath(),
-					_userName, _groupName);
+	Process process = getJniBoot().exec(list, env,
+					    processPwd.getNativePath(),
+					    _userName, _groupName);
 
 	if (process != null)
 	  return process;
@@ -844,6 +832,51 @@ public class ResinWatchdog extends AbstractManagedObject
   public String toString()
   {
     return "Watchdog[" + getId() + "]";
+  }
+
+  private Boot getJniBoot()
+  {
+    if (_jniBoot != null)
+      return _jniBoot;
+    
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      Class cl = Class.forName("com.caucho.boot.JniBoot", false, loader);
+
+      Constructor ctor = cl.getConstructor(new Class[] { Path.class });
+
+      _jniBoot = (Boot) ctor.newInstance(_cluster.getResin().getResinHome());
+    } catch (ClassNotFoundException e) {
+      log.fine(e.toString());
+    } catch (IllegalStateException e) {
+      log.fine(e.toString());
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return _jniBoot;
+  }
+
+  private boolean hasBoot()
+  {
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      Class cl = Class.forName("com.caucho.boot.JniBoot", false, loader);
+
+      Method method = cl.getMethod("isValid", new Class[] { Path.class });
+
+      return (Boolean) method.invoke(null, _cluster.getResin().getResinHome());
+    } catch (ClassNotFoundException e) {
+      log.finer(e.toString());
+    } catch (IllegalStateException e) {
+      log.fine(e.toString());
+    } catch (Throwable e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return false;
   }
 
   //

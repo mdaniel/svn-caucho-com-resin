@@ -809,10 +809,6 @@ public class Resin implements EnvironmentBean, SchemaBean
 	System.out.println(com.caucho.Version.FULL_VERSION);
 	System.exit(66);
       }
-      else if (argv[i].equals("-verbose")
-	       || argv[i].equals("--verbose")) {
-	i += 1;
-      }
       else if (argv[i].equals("-resin-home")
 	       || argv[i].equals("--resin-home")) {
 	_resinHome = Vfs.lookup(argv[i + 1]);
@@ -887,8 +883,20 @@ public class Resin implements EnvironmentBean, SchemaBean
 	       || "restart".equals(argv[i])) {
 	i++;
       }
+      else if (argv[i].equals("-verbose")
+	       || argv[i].equals("--verbose")) {
+	i += 1;
+      }
+      else if (argv[i].equals("-fine")
+	       || argv[i].equals("--fine")) {
+	i += 1;
+      }
+      else if (argv[i].equals("-finer")
+	       || argv[i].equals("--finer")) {
+	i += 1;
+      }
       else {
-        System.out.println(L().l("unknown argument `{0}'", argv[i]));
+        System.out.println(L().l("unknown argument '{0}'", argv[i]));
         System.out.println();
 	usage();
 	System.exit(66);

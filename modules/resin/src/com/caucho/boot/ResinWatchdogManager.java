@@ -215,10 +215,10 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 				      serverId));
       }
 
+      server.start(argv, args.getRootDirectory());
+      
       _activeServerMap.put(serverId, server);
     }
-    
-    server.start(argv, args.getRootDirectory());
   }
 
   void stopServer(String serverId)
@@ -264,7 +264,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     throws Throwable
   {
     try {
-      Path logPath = Vfs.lookup("log/watchdog_manager.out");
+      Path logPath = Vfs.lookup("log/watchdog-manager.log");
 
       RotateStream stream = RotateStream.create(logPath);
       stream.init();

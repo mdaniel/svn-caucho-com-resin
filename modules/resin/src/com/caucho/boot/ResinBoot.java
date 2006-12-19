@@ -235,12 +235,21 @@ public class ResinBoot {
       else if ("-verbose".equals(arg)
 	       || "--verbose".equals(arg)) {
 	_isVerbose = true;
-	Logger.getLogger("").setLevel(Level.FINE);
+	Logger.getLogger("").setLevel(Level.CONFIG);
       }
       else if ("-finer".equals(arg)
 	       || "--finer".equals(arg)) {
 	_isVerbose = true;
 	Logger.getLogger("").setLevel(Level.FINER);
+      }
+      else if ("-fine".equals(arg)
+	       || "--fine".equals(arg)) {
+	_isVerbose = true;
+	Logger.getLogger("").setLevel(Level.FINE);
+      }
+      else if (arg.startsWith("-J")
+	       || arg.startsWith("-D")
+	       || arg.startsWith("-X")) {
       }
       else if ("start".equals(arg)) {
 	_startMode = StartMode.START;
@@ -253,6 +262,12 @@ public class ResinBoot {
       }
       else if ("shutdown".equals(arg)) {
 	_startMode = StartMode.SHUTDOWN;
+      }
+      else {
+        System.out.println(L().l("unknown argument '{0}'", argv[i]));
+        System.out.println();
+	usage();
+	System.exit(66);
       }
     }
 
@@ -268,6 +283,18 @@ public class ResinBoot {
       if (! _resinConf.exists())
         throw new ConfigException(L().l("Resin/{0} can't find configuration file '{1}'", Version.VERSION, _resinConf.getNativePath()));
     }
+  }
+
+  private static void usage()
+  {
+    System.err.println(L().l("usage: java -jar resin.jar [-options] [start | stop | restart]"));
+    System.err.println(L().l(""));
+    System.err.println(L().l("where options include:"));
+    System.err.println(L().l("   -conf <file>       select a configuration file"));
+    System.err.println(L().l("   -resin-home <dir>  select a resin home directory"));
+    System.err.println(L().l("   -root-directory <dir>  select a root directory"));
+    System.err.println(L().l("   -server <id>   select a <server> to run"));
+    System.err.println(L().l("   -verbose       print verbose starting information"));
   }
 
   boolean start()
