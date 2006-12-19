@@ -34,6 +34,7 @@ import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.expr.*;
 import com.caucho.amber.expr.fun.*;
 import com.caucho.amber.manager.AmberPersistenceUnit;
+import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EntityType;
@@ -195,6 +196,8 @@ public class QueryParser {
 
   private HashMap<AmberExpr, String> _joinFetchMap;
 
+  ArrayList<AmberExpr> _groupList = null;
+
   private int _sqlArgCount;
 
   private FromItem.JoinSemantics _joinSemantics
@@ -207,6 +210,11 @@ public class QueryParser {
   private int _depth = 0;
 
   private boolean _parsingFrom;
+  private boolean _parsingHaving;
+
+  // jpa/119l: WHERE SIZE(xxx) > 0 => GROUP BY ... HAVING COUNT(xxx) > 0
+  private boolean _isSizeFunExpr;
+  private AmberExpr _havingExpr;
 
   private boolean _isDerbyDBMS;
   private boolean _isPostgresDBMS;
@@ -324,6 +332,9 @@ public class QueryParser {
     _token = -1;
     _depth = 0;
     _parsingFrom = false;
+    _parsingHaving = false;
+    _havingExpr = null;
+    _groupList = null;
     _joinFetchMap = new HashMap<AmberExpr, String>();
   }
 
@@ -371,9 +382,12 @@ public class QueryParser {
     boolean oldIsJoinFetch = _isJoinFetch;
     AbstractQuery oldQuery = _query;
     int oldDepth = _depth;
+    AmberExpr oldHavingExpr = _havingExpr;
 
     // Reset depth: subselect
     _depth = 0;
+
+    _havingExpr = null;
 
     SelectQuery query = new SelectQuery(_sql);
     query.setParentQuery(_query);
@@ -609,13 +623,17 @@ public class QueryParser {
 
       AmberExpr expr = parseExpr();
 
-      expr = expr.createBoolean();
+      // jpa/119l: WHERE SIZE() is moved to HAVING COUNT()
+      if (expr != null) {
+        expr = expr.createBoolean();
 
-      query.setWhere(expr.bindSelect(this));
+        query.setWhere(expr.bindSelect(this));
+      }
     }
 
     boolean hasGroupBy = false;
-    ArrayList<AmberExpr> groupList = null;
+
+    ArrayList<AmberExpr> groupList = _groupList;
 
     token = peekToken();
     if (token == GROUP) {
@@ -626,7 +644,8 @@ public class QueryParser {
         hasGroupBy = true;
       }
 
-      groupList = new ArrayList<AmberExpr>();
+      if (groupList == null)
+        groupList = new ArrayList<AmberExpr>();
 
       while (true) {
         // jpa/0w23
@@ -639,6 +658,9 @@ public class QueryParser {
       }
 
       query.setGroupList(groupList);
+
+      // Reset temp group list after parsing subselect.
+      _groupList = null;
     }
 
     token = peekToken();
@@ -647,12 +669,22 @@ public class QueryParser {
       if (! hasGroupBy)
         throw error(L.l("Use of HAVING without GROUP BY is not currently supported"));
 
+      _parsingHaving = true;
+
       scanToken();
 
       AmberExpr havingExpr = parseExpr();
 
+      // jpa/119l: SIZE()
+      if (_havingExpr != null)
+        havingExpr = AndExpr.create(havingExpr, _havingExpr);
+
       query.setHaving(havingExpr.createBoolean().bindSelect(this));
+
+      _parsingHaving = false;
     }
+    else if (_havingExpr != null) // jpa/119l
+      query.setHaving(_havingExpr.createBoolean().bindSelect(this));
 
     token = peekToken();
     if (token == ORDER) {
@@ -714,6 +746,7 @@ public class QueryParser {
     _isJoinFetch = oldIsJoinFetch;
     _query = oldQuery;
     _depth = oldDepth;
+    _havingExpr = oldHavingExpr;
 
     return query;
   }
@@ -1099,7 +1132,12 @@ public class QueryParser {
         orExpr.add(expr);
       }
 
-      orExpr.add(parseAndExpr());
+      AmberExpr andExpr = parseAndExpr();
+
+      if (andExpr == null)
+        continue;
+
+      orExpr.add(andExpr);
     }
 
     return orExpr == null ? expr : orExpr;
@@ -1122,7 +1160,12 @@ public class QueryParser {
         andExpr.add(expr);
       }
 
-      andExpr.add(parseNotExpr());
+      AmberExpr notExpr = parseNotExpr();
+
+      if (notExpr == null)
+        continue;
+
+      andExpr.add(notExpr);
     }
 
     return andExpr == null ? expr : andExpr;
@@ -1135,14 +1178,32 @@ public class QueryParser {
   private AmberExpr parseNotExpr()
     throws QueryParseException
   {
+    AmberExpr expr;
+
     if (peekToken() == NOT) {
       scanToken();
 
-      return new UnaryExpr(NOT, parseCmpExpr());
+      expr = new UnaryExpr(NOT, parseCmpExpr());
     }
     else
-      return parseCmpExpr();
+      expr = parseCmpExpr();
 
+    // jpa/119l
+
+    if (_parsingHaving)
+      return expr;
+
+    if (! _isSizeFunExpr)
+      return expr;
+
+    _isSizeFunExpr = false;
+
+    if (_havingExpr == null)
+      _havingExpr = expr;
+    else
+      _havingExpr = AndExpr.create(_havingExpr, expr);
+
+    return null;
   }
 
   /**
@@ -1868,7 +1929,36 @@ public class QueryParser {
       break;
 
     case SIZE:
+      if (! (_query instanceof SelectQuery))
+        throw error(L.l("The SIZE() function is only supported for SELECT or subselect queries"));
+
+      // jpa/119l
+
+      AmberExpr arg = args.get(0);
+      if (arg instanceof ManyToOneExpr) {
+        // @ManyToMany
+        arg = ((ManyToOneExpr) arg).getParent();
+      }
+
+      if (! (arg instanceof OneToManyExpr))
+        throw error(L.l("The SIZE() function is only supported for @ManyToMany or @OneToMany relationships"));
+
+      OneToManyExpr oneToMany = (OneToManyExpr) arg;
+
+      _groupList = new ArrayList<AmberExpr>();
+
+      LinkColumns linkColumns = oneToMany.getLinkColumns();
+      ForeignColumn fkColumn = linkColumns.getColumns().get(0);
+
+      _groupList.add(new ColumnExpr(oneToMany.getParent(),
+                                    fkColumn.getTargetColumn()));
+
+      ((SelectQuery) _query).setGroupList(_groupList);
+
       funExpr = SizeFunExpr.create(this, args);
+
+      _isSizeFunExpr = true;
+
       break;
 
     case CONCAT:

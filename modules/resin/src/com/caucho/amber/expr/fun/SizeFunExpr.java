@@ -28,8 +28,9 @@
 
 package com.caucho.amber.expr.fun;
 
-import com.caucho.amber.expr.AmberExpr;
-import com.caucho.amber.query.QueryParser;
+import com.caucho.amber.expr.*;
+import com.caucho.amber.query.*;
+import com.caucho.amber.table.*;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -62,7 +63,7 @@ public class SizeFunExpr extends FunExpr {
    */
   public void generateWhere(CharBuffer cb)
   {
-    throw new UnsupportedOperationException();
+    generateInternalWhere(cb, true);
   }
 
   /**
@@ -70,6 +71,42 @@ public class SizeFunExpr extends FunExpr {
    */
   public void generateUpdateWhere(CharBuffer cb)
   {
-    generateWhere(cb);
+    generateInternalWhere(cb, false);
+  }
+
+  /**
+   * Generates the where clause.
+   */
+  void generateInternalWhere(CharBuffer cb,
+                             boolean select)
+  {
+    cb.append("count(");
+
+    AmberExpr arg = _args.get(0);
+
+    if (arg instanceof OneToManyExpr) {
+
+      // jpa/119m
+
+      OneToManyExpr oneToMany = (OneToManyExpr) arg;
+
+      FromItem fromItem = oneToMany.getChildFromItem();
+
+      cb.append(fromItem.getName());
+      cb.append('.');
+
+      LinkColumns linkColumns = oneToMany.getLinkColumns();
+      ForeignColumn fkColumn = linkColumns.getColumns().get(0);
+
+      cb.append(fkColumn.getName());
+    }
+    else {
+      if (select)
+        arg.generateWhere(cb);
+      else
+        arg.generateUpdateWhere(cb);
+    }
+
+    cb.append(')');
   }
 }

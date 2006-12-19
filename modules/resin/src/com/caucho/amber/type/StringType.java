@@ -116,8 +116,8 @@ public class StringType extends Type {
     }
     else if (value instanceof String)
       pstmt.setString(index, (String) value);
-    else
-      throw new IllegalArgumentException("Invalid argument for setParameter.");
+    else // ejb/0623
+      pstmt.setObject(index, value);
   }
 
   /**

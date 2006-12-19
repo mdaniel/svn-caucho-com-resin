@@ -51,9 +51,9 @@ public class FunExpr extends AbstractAmberExpr {
 
   QueryParser _parser;
 
-  private String _id;
-  private ArrayList<AmberExpr> _args;
-  private boolean _distinct;
+  String _id;
+  ArrayList<AmberExpr> _args;
+  boolean _distinct;
 
   /**
    * Creates a new function expression
@@ -149,14 +149,6 @@ public class FunExpr extends AbstractAmberExpr {
   }
 
   /**
-   * Returns the args.
-   */
-  protected ArrayList<AmberExpr> getArgs()
-  {
-    return _args;
-  }
-
-  /**
    * Returns the object for the expr.
    */
   public Object getObject(AmberConnection aConn, ResultSet rs, int index)
@@ -188,10 +180,21 @@ public class FunExpr extends AbstractAmberExpr {
     return str + ")";
   }
 
-  // private
+  // protected
 
-  private void generateInternalWhere(CharBuffer cb,
-                                     boolean select)
+  /**
+   * Returns the args.
+   */
+  ArrayList<AmberExpr> getArgs()
+  {
+    return _args;
+  }
+
+  /**
+   * Generates the where clause.
+   */
+  void generateInternalWhere(CharBuffer cb,
+                             boolean select)
   {
     cb.append(_id);
     cb.append('(');

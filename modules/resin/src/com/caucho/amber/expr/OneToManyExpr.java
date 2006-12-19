@@ -99,7 +99,7 @@ public class OneToManyExpr extends AbstractPathExpr {
   /**
    * Returns the parent.
    */
-  PathExpr getParent()
+  public PathExpr getParent()
   {
     return _parent;
   }
