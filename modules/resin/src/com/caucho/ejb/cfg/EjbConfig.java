@@ -91,12 +91,12 @@ public class EjbConfig {
 
   public String getRemoteJndiName()
   {
-    return _ejbManager.getRemoteJndiName();
+    return _ejbManager.getRemoteJndiPrefix();
   }
 
   public String getLocalJndiName()
   {
-    return _ejbManager.getLocalJndiName();
+    return _ejbManager.getLocalJndiPrefix();
   }
 
   /**

@@ -171,24 +171,24 @@ public class EjbServerManager
     return _amberContainer;
   }
 
-  public void setLocalJndiName(String localJndiName)
+  public void setLocalJndiPrefix(String localJndiPrefix)
   {
-    getProtocolManager().setLocalJndiName(localJndiName);
+    getProtocolManager().setLocalJndiPrefix(localJndiPrefix);
   }
 
-  public String getLocalJndiName()
+  public String getLocalJndiPrefix()
   {
-    return getProtocolManager().getLocalJndiName();
+    return getProtocolManager().getLocalJndiPrefix();
   }
 
-  public void setRemoteJndiName(String remoteJndiName)
+  public void setRemoteJndiPrefix(String remoteJndiPrefix)
   {
-    getProtocolManager().setRemoteJndiName(remoteJndiName);
+    getProtocolManager().setRemoteJndiPrefix(remoteJndiPrefix);
   }
 
-  public String getRemoteJndiName()
+  public String getRemoteJndiPrefix()
   {
-    return getProtocolManager().getRemoteJndiName();
+    return getProtocolManager().getRemoteJndiPrefix();
   }
 
   /**

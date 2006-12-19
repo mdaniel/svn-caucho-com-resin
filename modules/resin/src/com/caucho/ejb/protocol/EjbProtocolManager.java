@@ -65,8 +65,8 @@ public class EjbProtocolManager {
   private final EnvServerManager _ejbServer;
   private final ClassLoader _loader;
 
-  private String _localJndiName; // = "java:comp/env/cmp";
-  private String _remoteJndiName; // = "java:comp/env/ejb";
+  private String _localJndiPrefix; // = "java:comp/env/cmp";
+  private String _remoteJndiPrefix; // = "java:comp/env/ejb";
 
   private HashMap<String,AbstractServer> _serverMap
     = new HashMap<String,AbstractServer>();
@@ -91,24 +91,24 @@ public class EjbProtocolManager {
        _protocolMap.put("iiop", iiop);
    }
 
-   public void setLocalJndiName(String name)
+   public void setLocalJndiPrefix(String name)
    {
-     _localJndiName = name;
+     _localJndiPrefix = name;
    }
 
-   public String getLocalJndiName()
+   public String getLocalJndiPrefix()
    {
-     return _localJndiName;
+     return _localJndiPrefix;
    }
 
-   public void setRemoteJndiName(String name)
+   public void setRemoteJndiPrefix(String name)
    {
-     _remoteJndiName = name;
+     _remoteJndiPrefix = name;
    }
 
-   public String getRemoteJndiName()
+   public String getRemoteJndiPrefix()
    {
-     return _remoteJndiName;
+     return _remoteJndiPrefix;
    }
 
    /**
@@ -225,29 +225,31 @@ public class EjbProtocolManager {
       String localJndiName = null;
 
 
-      // XXX: ejb/0g01
+      // XXX: ejb/0g01 ejb/0g11
       // vs ejb/0f00.  EJB 3.0 does not require home interfaces, e.g
       // for stateless session beans
       if (localHome == null)
-	localHome = server.getClientObject();
+        localHome = server.getClientObject();
 
       if (localHome != null) {
         if (jndiName != null) {
           if (jndiName.startsWith("java:comp"))
             localJndiName = Jndi.getFullName(jndiName);
-          else if (_localJndiName != null)
-            localJndiName = Jndi.getFullName(_localJndiName + "/" + jndiName);
-          else
-            localJndiName = Jndi.getFullName(jndiName);
+          else if (_localJndiPrefix != null)
+            localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + jndiName);
         }
-        else if (_localJndiName != null)
-          localJndiName = Jndi.getFullName(_localJndiName + "/" + ejbName);
-	
-        if (localJndiName != null) {
-          if (log.isLoggable(Level.FINER))
-            log.finer(L.l("binding local ejb home {0} to {1}", localHome, localJndiName));
+        else if (_localJndiPrefix != null)
+          localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
 
-          Jndi.bindDeep(localJndiName, localHome);
+        if (localJndiName != null) {
+          if (log.isLoggable(Level.CONFIG))
+            log.config(L.l("local ejb {0} has JNDI binding {1}", localHome, localJndiName));
+
+          bindServer(localJndiName, localHome);
+        }
+        else {
+          if (log.isLoggable(Level.FINE))
+            log.fine(L.l("local ejb {0} has no JNDI binding", localHome));
         }
       }
 
@@ -260,24 +262,48 @@ public class EjbProtocolManager {
           if (jndiName != null) {
             if (jndiName.startsWith("java:comp"))
               remoteJndiName = Jndi.getFullName(jndiName);
-            else if (_remoteJndiName != null)
-              remoteJndiName = Jndi.getFullName(_remoteJndiName + "/" + jndiName);
-            else
-              remoteJndiName = Jndi.getFullName(jndiName);
+            else if (_remoteJndiPrefix != null)
+              remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + jndiName);
           }
-          else if (_remoteJndiName != null)
-            remoteJndiName = Jndi.getFullName(_remoteJndiName + "/" + ejbName);
+          else if (_remoteJndiPrefix != null)
+            remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + ejbName);
 
           if (remoteJndiName != null && !remoteJndiName.equals(localJndiName)) {
-            if (log.isLoggable(Level.FINER))
-              log.finer(L.l("binding remote ejb home {0} to {1}", remoteHome, remoteJndiName));
+            if (log.isLoggable(Level.CONFIG))
+              log.config(L.l("remote ejb {0} has JNDI binding {1}", remoteHome, remoteJndiName));
 
-            Jndi.bindDeep(remoteJndiName, remoteHome);
+            bindServer(remoteJndiName, remoteHome);
+          }
+          else {
+            if (log.isLoggable(Level.FINE))
+              log.fine(L.l("remote ejb {0} has no JNDI binding", remoteHome));
           }
         }
       }
       catch (RemoteException ex) {
         throw new RuntimeException(ex);
+      }
+    }
+    finally {
+      Thread.currentThread().setContextClassLoader(loader);
+    }
+  }
+
+  private void bindServer(String jndiName, Object obj)
+    throws NamingException
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+
+    try {
+      Thread.currentThread().setContextClassLoader(_loader);
+
+      Jndi.bindDeep(jndiName, obj);
+
+      for (AbstractServer server : _serverMap.values()) {
+        Thread.currentThread().setContextClassLoader(server.getClassLoader());
+
+        Jndi.bindDeep(jndiName, obj);
       }
     }
     finally {

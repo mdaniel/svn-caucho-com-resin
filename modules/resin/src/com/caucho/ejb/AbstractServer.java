@@ -29,7 +29,7 @@
 
 package com.caucho.ejb;
 
-import com.caucho.config.*;
+import com.caucho.config.BuilderProgram;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
@@ -45,10 +45,11 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import javax.ejb.*;
-import javax.naming.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
-import java.lang.reflect.*;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -658,6 +659,7 @@ abstract public class AbstractServer implements EnvironmentBean {
 	thread.setContextClassLoader(_loader);
 
 	_initProgram.configure(instance);
+
       } finally {
 	thread.setContextClassLoader(oldLoader);
       }

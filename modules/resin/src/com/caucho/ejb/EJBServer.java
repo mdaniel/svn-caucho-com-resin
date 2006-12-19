@@ -82,8 +82,8 @@ public class EJBServer
   protected static EnvironmentLocal<String> _localURL =
     new EnvironmentLocal<String>("caucho.url");
 
-  private String _localJndiName; // = "java:comp/env/cmp";
-  private String _remoteJndiName; // = "java:comp/env/ejb";
+  private String _localJndiPrefix; // = "java:comp/env/cmp";
+  private String _remoteJndiPrefix; // = "java:comp/env/ejb";
 
   private String _entityManagerJndiName = "java:comp/EntityManager";
 
@@ -240,15 +240,15 @@ public class EJBServer
    */
   public void setJndiLocalPrefix(String name)
   {
-    _localJndiName = name;
+    _localJndiPrefix = name;
   }
 
   /**
    * Gets the JNDI name.
    */
-  public String getLocalJndiName()
+  public String getLocalJndiPrefix()
   {
-    return _localJndiName;
+    return _localJndiPrefix;
   }
 
   /**
@@ -256,15 +256,15 @@ public class EJBServer
    */
   public void setJndiRemotePrefix(String name)
   {
-    _remoteJndiName = name;
+    _remoteJndiPrefix = name;
   }
 
   /**
    * Gets the JNDI name.
    */
-  public String getRemoteJndiName()
+  public String getRemoteJndiPrefix()
   {
-    return _remoteJndiName;
+    return _remoteJndiPrefix;
   }
 
   /**
@@ -626,21 +626,21 @@ public class EJBServer
     */
 
     if (_localServer.getLevel() == null
-        || "java:comp/env/cmp".equals(_localJndiName)) {
+        || "java:comp/env/cmp".equals(_localJndiPrefix)) {
       _localServer.set(this);
       _localManager.set(_ejbManager);
     }
 
     try {
-      if (_localJndiName != null)
-	Jndi.bindDeepShort(_localJndiName + "/resin-ejb-server", _ejbManager);
+      if (_localJndiPrefix != null)
+	Jndi.bindDeepShort(_localJndiPrefix + "/resin-ejb-server", _ejbManager);
     } catch (NamingException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
     try {
-      if (_localJndiName != null)
-	Jndi.bindDeepShort(_localJndiName + "/caucho-ejb-admin", _ejbManager);
+      if (_localJndiPrefix != null)
+	Jndi.bindDeepShort(_localJndiPrefix + "/caucho-ejb-admin", _ejbManager);
     } catch (NamingException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -667,8 +667,8 @@ public class EJBServer
     throws Exception
   {
     try {
-      log.fine("Initializing ejb-server : local-jndi=" + _localJndiName
-	       + " remote-jndi=" + _remoteJndiName);
+      log.fine("Initializing ejb-server : local-jndi=" + _localJndiPrefix
+	       + " remote-jndi=" + _remoteJndiPrefix);
 
       ProtocolContainer protocol = new ProtocolContainer();
       if (_urlPrefix != null)
@@ -677,8 +677,8 @@ public class EJBServer
       protocol.setServerManager(_ejbManager); // .getEnvServerManager());
 
       _ejbManager.getProtocolManager().setProtocolContainer(protocol);
-      _ejbManager.setLocalJndiName(_localJndiName);
-      _ejbManager.setRemoteJndiName(_remoteJndiName);
+      _ejbManager.setLocalJndiPrefix(_localJndiPrefix);
+      _ejbManager.setRemoteJndiPrefix(_remoteJndiPrefix);
 
       //_ejbManager.setDataSource(_dataSource);
       //_ejbManager.setCreateDatabaseSchema(_createDatabaseSchema);

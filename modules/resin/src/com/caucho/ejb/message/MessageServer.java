@@ -93,6 +93,7 @@ public class MessageServer extends AbstractServer {
   public void init()
     throws Exception
   {
+    super.init();
   }
 
   /**
@@ -101,6 +102,8 @@ public class MessageServer extends AbstractServer {
   public void start()
     throws Exception
   {
+    super.start();
+
     ConnectionFactory factory = null;//_config.getConnectionFactory();
     if (factory == null)
       factory = _ejbManager.getConnectionFactory();
@@ -129,6 +132,7 @@ public class MessageServer extends AbstractServer {
     }
     
     _connection.start();
+
   }
   
   void generate()

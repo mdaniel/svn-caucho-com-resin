@@ -84,11 +84,11 @@ public class SessionServer extends AbstractServer {
       super.init();
 
       // XXX: from TCK, s/b local or remote?
-      String prefix = getServerManager().getLocalJndiName();
+      String prefix = getServerManager().getLocalJndiPrefix();
       if (prefix != null)
 	Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
       
-      prefix = getServerManager().getRemoteJndiName();
+      prefix = getServerManager().getRemoteJndiPrefix();
       if (prefix != null)
 	Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
       
