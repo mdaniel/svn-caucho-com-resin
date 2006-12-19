@@ -344,10 +344,8 @@ public class DirectSkeleton extends Skeleton {
 
     Node typesNode = definitionsNode.getFirstChild();
 
-    if (typesNode == null || ! "types".equals(typesNode.getNodeName())) {
-      System.out.println("typeNode = " + typesNode);
+    if (typesNode == null || ! "types".equals(typesNode.getNodeName()))
       throw new JAXBException(L.l("Unable to attach types node"));
-    }
 
     return typesNode;
   }

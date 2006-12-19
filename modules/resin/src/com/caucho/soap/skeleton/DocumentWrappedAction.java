@@ -151,16 +151,22 @@ public class DocumentWrappedAction extends AbstractAction {
         ! Void.TYPE.equals(method.getReturnType())) {
       Property property = _jaxbContext.createProperty(method.getReturnType());
 
-      if (method.isAnnotationPresent(WebResult.class))
-        _resultName =
-          new QName(method.getAnnotation(WebResult.class).targetNamespace(),
-              method.getAnnotation(WebResult.class).name());
+      if (method.isAnnotationPresent(WebResult.class)) {
+        WebResult webResult = (WebResult) method.getAnnotation(WebResult.class);
+
+        String localName = webResult.name();
+
+        if ("".equals(localName))
+          localName = "return";
+
+        _resultName = new QName(webResult.targetNamespace(), localName);
+      }
       else
         _resultName = new QName("return");
 
-      _returnMarshal = 
-        ParameterMarshal.create(0, property, _resultName, WebParam.Mode.OUT,
-                                marshaller, unmarshaller);
+      _returnMarshal = ParameterMarshal.create(0, property, _resultName, 
+                                               WebParam.Mode.OUT,
+                                               marshaller, unmarshaller);
     }
 
     //
