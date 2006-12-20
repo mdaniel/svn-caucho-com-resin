@@ -74,10 +74,10 @@ public class AbsFunExpr extends FunExpr {
   }
 
   //
-  // private
+  // private/protected
 
-  private void generateInternalWhere(CharBuffer cb,
-                                     boolean select)
+  void generateInternalWhere(CharBuffer cb,
+                             boolean select)
   {
     ArrayList<AmberExpr> args = getArgs();
 

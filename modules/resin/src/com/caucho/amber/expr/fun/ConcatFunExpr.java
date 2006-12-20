@@ -74,10 +74,10 @@ public class ConcatFunExpr extends FunExpr {
   }
 
   //
-  // private
+  // private/protected
 
-  private void generateInternalWhere(CharBuffer cb,
-                                     boolean select)
+  void generateInternalWhere(CharBuffer cb,
+                             boolean select)
   {
     ArrayList<AmberExpr> args = getArgs();
 
@@ -113,6 +113,11 @@ public class ConcatFunExpr extends FunExpr {
 
       return;
     }
+    else if (_parser.isPostgresDBMS()) {
+      // jpa/1230
+      generateInternalConcat(cb, true, true, null, select);
+      return;
+    }
 
     cb.append("concat");
 
@@ -127,6 +132,9 @@ public class ConcatFunExpr extends FunExpr {
   {
     ArrayList<AmberExpr> args = getArgs();
 
+    boolean usesConcatOperator
+      = _parser.isDerbyDBMS() || _parser.isPostgresDBMS();
+
     cb.append('(');
 
     if (arg0) {
@@ -135,7 +143,7 @@ public class ConcatFunExpr extends FunExpr {
       else
         args.get(0).generateUpdateWhere(cb);
 
-      if (_parser.isDerbyDBMS())
+      if (usesConcatOperator)
         cb.append(" || ");
       else
         cb.append(',');
@@ -152,7 +160,7 @@ public class ConcatFunExpr extends FunExpr {
         return;
       }
 
-      if (_parser.isDerbyDBMS())
+      if (usesConcatOperator)
         cb.append(" || ");
       else
         cb.append(',');

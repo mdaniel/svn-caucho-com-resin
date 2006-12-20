@@ -74,10 +74,10 @@ public class LocateFunExpr extends FunExpr {
   }
 
   //
-  // private
+  // private/protected
 
-  private void generateInternalWhere(CharBuffer cb,
-                                     boolean select)
+  void generateInternalWhere(CharBuffer cb,
+                             boolean select)
   {
     // Translate to => POSITION('word' in SUBSTRING(data,i,LENGTH(data)))+(i-1)
 
