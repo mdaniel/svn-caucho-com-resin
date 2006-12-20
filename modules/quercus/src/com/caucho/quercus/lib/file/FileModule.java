@@ -1868,6 +1868,9 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean is_writable(Path path)
   {
+    if (path == null)
+      return false;
+
     return path.canWrite();
   }
 
