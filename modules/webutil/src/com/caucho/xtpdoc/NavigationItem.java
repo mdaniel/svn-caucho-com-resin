@@ -155,6 +155,8 @@ public class NavigationItem {
     if (_uri != null) {
       Path linkPath = _document.getRealPath(_uri);
 
+      System.out.println("LINK: " + linkPath);
+      
       if (linkPath.exists()) {
         Config config = new Config();
 
@@ -268,7 +270,8 @@ public class NavigationItem {
 			int depth, int styleDepth, int maxDepth)
     throws XMLStreamException
   {
-    initSummary();
+    if (depth + styleDepth <= 1)
+      initSummary();
 
     for (NavigationItem item : _items)
       item.writeHtmlImpl(out, path, depth, styleDepth, maxDepth);
@@ -282,7 +285,8 @@ public class NavigationItem {
     if (maxDepth <= depth)
       return;
 
-    initSummary();
+    if (depth + styleDepth <= 1)
+      initSummary();
 
     if (_child != null && depth + 1 < maxDepth)
       _child.initSummary();

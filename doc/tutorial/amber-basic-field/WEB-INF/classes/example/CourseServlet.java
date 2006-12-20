@@ -5,18 +5,24 @@ import java.io.IOException;
 
 import java.util.List;
 
+import javax.annotation.*;
+
 import javax.servlet.ServletException;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.transaction.*;
 import javax.persistence.*;
 
 /**
  * The CourseServlet queries the active courses and displays them.
  */
 public class CourseServlet extends HttpServlet {
+  @Resource
+  private UserTransaction _uTrans;
+  
   @PersistenceContext(name="example")
   private EntityManager _manager;
 
@@ -35,8 +41,13 @@ public class CourseServlet extends HttpServlet {
     } catch (Exception e) {
     }
 
-    _manager.persist(new Course("Potions", "Severus Snape"));
-    _manager.persist(new Course("Transfiguration", "Minerva McGonagall"));
+    _manager.getTransaction().begin();
+    try {
+      _manager.persist(new Course("Potions", "Severus Snape"));
+      _manager.persist(new Course("Transfiguration", "Minerva McGonagall"));
+    } finally {
+      _manager.getTransaction().commit();
+    }
   }
 
   /**

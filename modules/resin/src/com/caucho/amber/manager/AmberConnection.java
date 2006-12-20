@@ -53,12 +53,13 @@ import com.caucho.jca.UserTransactionProxy;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
+import javax.persistence.PersistenceException;
+import javax.persistence.EntityExistsException;
 import javax.persistence.TransactionRequiredException;
 import javax.sql.DataSource;
 import javax.transaction.Status;
@@ -80,7 +81,8 @@ import java.util.logging.Logger;
  * The entity manager from a entity manager proxy.
  */
 public class AmberConnection
-  implements BeginResource, CloseResource, Synchronization {
+  implements BeginResource, CloseResource, Synchronization
+{
   private static final L10N L = new L10N(AmberConnection.class);
   private static final Logger log
     = Logger.getLogger(AmberConnection.class.getName());
@@ -100,6 +102,8 @@ public class AmberConnection
   private ArrayList<AmberCollection> _queries
     = new ArrayList<AmberCollection>();
 
+  private EntityTransaction _trans;
+  
   private long _xid;
   private boolean _isInTransaction;
   private boolean _isXA;
@@ -657,7 +661,10 @@ public class AmberConnection
    */
   public EntityTransaction getTransaction()
   {
-    return null;
+    if (_trans == null)
+      _trans = new EntityTransactionImpl();
+
+    return _trans;
   }
 
   /**
@@ -2172,5 +2179,66 @@ public class AmberConnection
     queryImpl.setSqlResultSetMapping(map);
 
     return query;
+  }
+
+  private class EntityTransactionImpl implements EntityTransaction {
+    /**
+     * Starts a resource transaction.
+     */
+    public void begin()
+    {
+      try {
+	AmberConnection.this.beginTransaction();
+      } catch (SQLException e) {
+	throw new PersistenceException(e);
+      }
+    }
+
+    /**
+     * Commits a resource transaction.
+     */
+    public void commit()
+    {
+      try {
+	AmberConnection.this.commit();
+      } catch (SQLException e) {
+	throw new PersistenceException(e);
+      }
+    }
+
+    /**
+     * Rolls the current transaction back.
+     */
+    public void rollback()
+    {
+      try {
+	AmberConnection.this.rollback();
+      } catch (SQLException e) {
+	throw new PersistenceException(e);
+      }
+    }
+
+    /**
+     * Marks the current transaction for rollback only.
+     */
+    public void setRollbackOnly()
+    {
+    }
+
+    /**
+     * Returns true if the transaction is for rollback only.
+     */
+    public boolean getRollbackOnly()
+    {
+      return false;
+    }
+
+    /**
+     * Test if a transaction is in progress.
+     */
+    public boolean isActive()
+    {
+      return _isInTransaction;
+    }
   }
 }

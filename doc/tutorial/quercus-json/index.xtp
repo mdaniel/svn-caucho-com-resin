@@ -152,7 +152,7 @@ calls <code>eval()</code> on the JSON data to recover a JavaScript object.
   function handle_json(http_request) {
    if (http_request.readyState == 4) {
     document.firstForm.json.value = http_request.responseText;
-    <b>var decoded = eval("(" + http_request.responseText + ")");</b>
+    var decoded = eval("(" + http_request.responseText + ")");
     document.firstForm.decoded.value = decoded.a + "'s " +
         decoded.b + " with " + decoded.c + " at work.";
    }
