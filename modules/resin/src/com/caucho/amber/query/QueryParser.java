@@ -649,7 +649,21 @@ public class QueryParser {
 
       while (true) {
         // jpa/0w23
-        groupList.add(parseExpr().bindSelect(this));
+        AmberExpr groupExpr = parseExpr();
+
+        groupExpr = groupExpr.bindSelect(this);
+
+        if (groupExpr instanceof PathExpr) {
+          // jpa/119n
+
+          PathExpr pathExpr = (PathExpr) groupExpr;
+
+          groupExpr = LoadExpr.create(pathExpr);
+
+          groupExpr = groupExpr.bindSelect(this);
+        }
+
+        groupList.add(groupExpr);
 
         if (peekToken() == ',')
           scanToken();
@@ -1577,6 +1591,12 @@ public class QueryParser {
 
             scanToken();
 
+            ArrayList<FromItem> parentFromList;
+            parentFromList = select.getParentQuery().getFromList();
+
+            // jpa/1178
+            select.getFromList().addAll(0, parentFromList);
+
             if (name.equals("exists"))
               return new ExistsExpr(select);
             else if (name.equals("all"))
@@ -1950,8 +1970,22 @@ public class QueryParser {
       LinkColumns linkColumns = oneToMany.getLinkColumns();
       ForeignColumn fkColumn = linkColumns.getColumns().get(0);
 
-      _groupList.add(new ColumnExpr(oneToMany.getParent(),
-                                    fkColumn.getTargetColumn()));
+      AmberExpr groupExpr = oneToMany.getParent();
+
+      if (groupExpr instanceof PathExpr) {
+        // jpa/119n
+
+        PathExpr pathExpr = (PathExpr) groupExpr;
+
+        groupExpr = LoadExpr.create(pathExpr);
+
+        groupExpr = groupExpr.bindSelect(this);
+      }
+
+      // groupExpr = new ColumnExpr(oneToMany.getParent(),
+      //                            fkColumn.getTargetColumn());
+
+      _groupList.add(groupExpr);
 
       ((SelectQuery) _query).setGroupList(_groupList);
 

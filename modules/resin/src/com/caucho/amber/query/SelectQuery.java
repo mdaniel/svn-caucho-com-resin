@@ -598,10 +598,25 @@ public class SelectQuery extends AbstractQuery {
     }
 
     boolean hasJoinExpr = false;
+    boolean isFirst = true;
     for (int i = 0; i < _fromList.size(); i++) {
       FromItem item = _fromList.get(i);
 
-      if (i != 0) {
+      // jpa/1178
+      if (getParentQuery() != null) {
+        ArrayList<FromItem> fromList = getParentQuery().getFromList();
+        if (fromList != null) {
+          if (fromList.contains(item)) {
+            hasJoinExpr = true;
+            continue;
+          }
+        }
+      }
+
+      if (isFirst) {
+        isFirst = false;
+      }
+      else {
         if (item.isOuterJoin())
           cb.append(" left outer join ");
         else {
@@ -656,7 +671,7 @@ public class SelectQuery extends AbstractQuery {
         if (i != 0)
           cb.append(", ");
 
-        _groupList.get(i).generateWhere(cb);
+        _groupList.get(i).generateSelect(cb);
       }
     }
 
