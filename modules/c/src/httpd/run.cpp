@@ -298,9 +298,9 @@ set_jdk_args(char *exe, char *cp,
         args[i++] = "-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl";
 		args[i++] = "-Djava.system.class.loader=com.caucho.loader.SystemClassLoader";
 	args[i++] = main;
-	args[i++] = "-resin-home";
+	args[i++] = "--resin-home";
 	args[i++] = resin_home;
-	args[i++] = "-resin-root";
+	args[i++] = "--root-directory";
 	args[i++] = server_root;
 
 	while (argc > 0) {
@@ -443,12 +443,14 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 			argc -= 1;
 			argv += 1;
 		} else if (! strcmp(argv[1], "-resin_home") ||
-			       ! strcmp(argv[1], "-resin-home")) {
+			       ! strcmp(argv[1], "-resin-home") ||
+				   ! strcmp(argv[1], "--resin-home")) {
 			resin_home = strdup(argv[2]);
 			argc -= 2;
 			argv += 2;
 		} else if (! strcmp(argv[1], "-server_root") ||
-			   ! strcmp(argv[1], "-server-root")) {
+			   ! strcmp(argv[1], "-server-root") ||
+			   ! strcmp(argv[1], "--root-directory")) {
 			server_root = strdup(argv[2]);
 			argc -= 2;
 			argv += 2;
@@ -504,6 +506,17 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 				argc -= 1;
 				argv += 1;
 			}
+		} else if (! strcmp(argv[1], "start")
+				   || ! strcmp(argv[1], "stop")
+				   || ! strcmp(argv[1], "restart")
+				   || ! strcmp(argv[1], "shutdown")) {
+		   resin_argv[resin_argc++] = argv[1];
+		   argc -= 1;
+		   argv += 1;
+		   main = "com.caucho.boot.ResinBoot";
+
+		   g_is_standalone = 1;
+		   g_console = 0;
 		} else {
 			resin_argv[resin_argc++] = argv[1];
 			argc -= 1;
@@ -531,7 +544,7 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 		AllocConsole();
 	}
 
-	if (! g_console && (g_is_service || stderr_file)) {
+	if (! g_console && stderr_file) {
 		CreateDirectory(rsprintf(buf, "%s/log", server_root), NULL);
 		SECURITY_ATTRIBUTES security;
 		memset(&security, 0, sizeof(security));
@@ -560,11 +573,14 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 	int fdErr = _open_osfhandle((long) GetStdHandle(STD_ERROR_HANDLE), _O_TEXT);
 	out = fdopen(fdOut, "w");
 	err = fdopen(fdErr, "w");
-	*stdout = *out;
-	*stderr = *err;
+
+	if (out && err) {
+  	  *stdout = *out;
+	  *stderr = *err;
 	
-	setvbuf(out, NULL, _IONBF, 0);
-	setvbuf(err, NULL, _IONBF, 0);
+	  setvbuf(out, NULL, _IONBF, 0);
+	  setvbuf(err, NULL, _IONBF, 0);
+	}
 
 	if (msjava)
 		java_home = 0;
@@ -595,7 +611,7 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 		return 0;
 	}
 
-	if (verbose || g_is_service) {
+	if (verbose) {
 		fprintf(stdout, "java:        %s\n", java_exe);
 		fprintf(stdout, "JAVA_HOME:   %s\n", java_home);
 		fprintf(stdout, "RESIN_HOME:  %s\n", resin_home);
