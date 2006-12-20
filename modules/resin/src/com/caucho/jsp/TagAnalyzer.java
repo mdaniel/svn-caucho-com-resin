@@ -39,12 +39,7 @@ import com.caucho.util.L10N;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.BodyTagSupport;
-import javax.servlet.jsp.tagext.IterationTag;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagSupport;
-import javax.servlet.jsp.tagext.TryCatchFinally;
+import javax.servlet.jsp.tagext.*;
 import javax.xml.ws.WebServiceRef;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -82,15 +77,18 @@ public class TagAnalyzer {
   {
     if (tagClass == null)
       return null;
+    
     AnalyzedTag analyzedTag = _analyzedTags.get(tagClass);
     if (analyzedTag != null)
       return analyzedTag;
 
-    if (! Tag.class.isAssignableFrom(tagClass))
+    if (! JspTag.class.isAssignableFrom(tagClass)) {
       return null;
+    }
 
-    if (tagClass.isInterface())
+    if (tagClass.isInterface()) {
       return null;
+    }
 
     AnalyzedTag parent = analyze(tagClass.getSuperclass());
     

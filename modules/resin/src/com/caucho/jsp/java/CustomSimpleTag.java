@@ -39,7 +39,8 @@ import java.util.ArrayList;
 /**
  * Represents a custom tag.
  */
-public class CustomSimpleTag extends GenericTag {
+public class CustomSimpleTag extends GenericTag
+{
   JspBody _body;
   private boolean _oldScriptingInvalid;
 
@@ -209,7 +210,7 @@ public class CustomSimpleTag extends GenericTag {
     if (parentNode != null) {
       out.println(var + ".setParent(" + parentNode.getCustomTagName() + ");");
     }
-    
+
     if (_tag.getAnalyzedTag() != null
 	&& _tag.getAnalyzedTag().getHasInjection()) {
       out.println("_jsp_inject_" + _tag.getId() + ".configure(" + var + ");");

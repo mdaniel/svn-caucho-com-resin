@@ -49,7 +49,8 @@ import java.util.logging.Level;
 /**
  * Represents a custom tag.
  */
-abstract public class GenericTag extends JspContainerNode {
+abstract public class GenericTag extends JspContainerNode
+{
   private static final String DEFAULT_VAR_TYPE = "java.lang.String";
 
   private static final HashSet<String> _primTypes

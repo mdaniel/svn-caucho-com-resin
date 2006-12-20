@@ -132,7 +132,9 @@ public class TaglibManager {
    */
   AnalyzedTag analyzeTag(Class cl)
   {
-    return _tagAnalyzer.analyze(cl);
+    AnalyzedTag tag = _tagAnalyzer.analyze(cl);
+
+    return tag;
   }
 
   /**

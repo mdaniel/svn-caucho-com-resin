@@ -12,6 +12,7 @@
 
 <s2 title="3.1snap - Dec 3, 2006">
 <ul>
+<li>JPA: bytecode enhancement needs to handle LocalVariableTable (#1512, rep by jarnbjo)</li>
 <li>JMS: resin_jms_message should not use 'connection' as column name for MySQL 5 (#1511, rep by jarnbjo)</li>
 <li>continuous errors with dangling connections in amber when using cmp relations (#1495, rep by plehov)</li>
 <li>./configure changes for 64bit detection (#1465, rep by K Paulson)</li>

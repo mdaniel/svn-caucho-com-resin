@@ -1101,8 +1101,14 @@ public abstract class JspNode {
         return ("new java.lang.Float((float) " + Float.valueOf(value) + ")");
       else if (type.equals(double.class))
         return String.valueOf(Double.valueOf(value));
-      else if (type.equals(Double.class))
-        return ("new java.lang.Double(" + Double.valueOf(value) + ")");
+      else if (type.equals(Double.class)) {
+	double v = Double.valueOf(value);
+
+	if (Double.isNaN(v))
+	  return ("new java.lang.Double(Double.NaN)");
+	else
+	  return ("new java.lang.Double(" + v + ")");
+      }
       else if (! type.equals(String.class)
 	       && ! type.equals(Object.class)) {
         return null;
@@ -1197,10 +1203,22 @@ public abstract class JspNode {
 	  return "(float) " + expr.evalDouble(null);
 	else if (Float.class.equals(type))
 	  return "new java.lang.Float((float) " + expr.evalDouble(null) + ")";
-	else if (double.class.equals(type))
-	  return "" + expr.evalDouble(null);
-	else if (Double.class.equals(type))
-	  return "new java.lang.Double(" + expr.evalDouble(null) + ")";
+	else if (double.class.equals(type)) {
+	  double v = expr.evalDouble(null);
+
+	  if (Double.isNaN(v))
+	    return "Double.NaN";
+	  else
+	    return "" + v;
+	}
+	else if (Double.class.equals(type)) {
+	  double v = expr.evalDouble(null);
+
+	  if (Double.isNaN(v))
+	    return "new Double(Double.NaN)";
+	  else
+	    return "new java.lang.Double(" + v + ")";
+	}
 	else if (char.class.equals(type))
 	  return "((char) " + (int) expr.evalCharacter(null) + ")";
 	else if (Character.class.equals(type)) {
@@ -1461,8 +1479,14 @@ public abstract class JspNode {
       return "new java.lang.Long(" + obj + "L)";
     else if (obj instanceof Integer)
       return "new java.lang.Integer((int) " + obj + "L)";
-    else if (obj instanceof Double)
-      return "new java.lang.Double(" + obj + ")";
+    else if (obj instanceof Double) {
+      double v = (Double) obj;
+
+      if (Double.isNaN(v))
+	return "new java.lang.Double(Double.NaN)";
+      else
+	return "new java.lang.Double(" + v + ")";
+    }
     else if (obj instanceof Boolean)
       return ((Boolean) obj).booleanValue() ? "java.lang.Boolean.TRUE" : "java.lang.Boolean.FALSE";
     else
