@@ -304,33 +304,6 @@ public class BinaryExpr extends AbstractAmberExpr {
     else
       _right.generateUpdateWhere(cb);
 
-    // Translate 'A = ?' to support 'A is null'
-    if (_right instanceof ArgExpr) {
-      // A = ? is translated to:
-      // A = ? OR (? is null AND A is null)
-
-      if ((_token == QueryParser.EQ) ||
-          (_token == QueryParser.NE)) {
-
-        arg = (ArgExpr) _right;
-
-        arg.setDuplicated(true);
-
-        cb.append(" OR (? is null AND ");
-
-        if (select)
-          _left.generateWhere(cb);
-        else
-          _left.generateUpdateWhere(cb);
-
-        if (_token == QueryParser.EQ)
-          cb.append(" is null)");
-        else
-          cb.append(" is not null)");
-
-      }
-    }
-
     cb.append(')');
   }
 }
