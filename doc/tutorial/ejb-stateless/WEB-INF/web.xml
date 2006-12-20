@@ -6,7 +6,7 @@
              env-entry-type="java.lang.String"
              env-entry-value="Hello, World."/>
 
-  <ejb-server jndi-name="java:comp/env/ejb">
+  <ejb-server jndi-local-prefix="java:comp/env/ejb">
     <bean type="example.HelloBean"/>
   </ejb-server>
 

@@ -35,9 +35,15 @@ public class QueryServlet extends HttpServlet {
     } catch (Exception e) {
     }
 
-    _manager.persist(new Student("Harry Potter"));
-    _manager.persist(new Prefect("Ron Weasley"));
-    _manager.persist(new Prefect("Hermione Granger"));
+    _manager.getTransaction().begin();
+
+    try {
+      _manager.persist(new Student("Harry Potter"));
+      _manager.persist(new Prefect("Ron Weasley"));
+      _manager.persist(new Prefect("Hermione Granger"));
+    } finally {
+      _manager.getTransaction().commit();
+    }
   }
 
   /**

@@ -30,14 +30,20 @@ public class CreateServlet extends HttpServlet {
     }
 
     if (course == null) {
-      course = new Course("Potions", "Severus Snape");
-      _entityManager.persist(course);
+      _entityManager.getTransaction().begin();
+
+      try {
+	course = new Course("Potions", "Severus Snape");
+	_entityManager.persist(course);
 	
-      course = new Course("Transfiguration", "Minerva McGonagall");
-      _entityManager.persist(course);
+	course = new Course("Transfiguration", "Minerva McGonagall");
+	_entityManager.persist(course);
 	
-      course = new Course("Defense Against the Dark Arts", "Remus Lupin");
-      _entityManager.persist(course);
+	course = new Course("Defense Against the Dark Arts", "Remus Lupin");
+	_entityManager.persist(course);
+      } finally {
+	_entityManager.getTransaction().commit();
+      }
     }
   }
 
@@ -57,6 +63,8 @@ public class CreateServlet extends HttpServlet {
     Course divination = null;
     Course creatures = null;
 
+    _entityManager.getTransaction().begin();
+    
     try {
       divination = new Course("Divination", "Sybil Trelawney");
 
@@ -87,6 +95,8 @@ public class CreateServlet extends HttpServlet {
 
       if (creatures != null)
 	_entityManager.remove(creatures);
+      
+      _entityManager.getTransaction().commit();
     }
 
     out.println("<h3>Removing the new classes</h3>");

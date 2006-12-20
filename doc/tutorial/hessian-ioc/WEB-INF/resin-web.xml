@@ -17,7 +17,7 @@
 
   <reference jndi-name="client/greeting"
              factory="com.caucho.hessian.client.HessianProxyFactory">
-    <init-param url="${app.getURL()}/hessian/greeting"/>
+    <init-param url="${webApp.url}/hessian/greeting"/>
     <init-param type="example.GreetingAPI"/>
   </reference>
 

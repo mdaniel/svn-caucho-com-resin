@@ -71,9 +71,8 @@ public class House {
   /**
    * returns a <code>Collection</code> of all Students living in this House.
    */
-  @OneToMany(targetEntity=Student.class,
-	     mappedBy="house")
-  public Collection getStudentList()
+  @OneToMany(mappedBy="house")
+  public Collection<Student> getStudentList()
   {
     return _studentList;
   }
@@ -81,8 +80,7 @@ public class House {
   /**
    * returns a <code>Collection</code> of all Students living in this House.
    */
-  public Collection setStudentList()
+  public void setStudentList(Collection<Student> list)
   {
-    return _studentList;
   }
 }

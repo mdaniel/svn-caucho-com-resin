@@ -14,7 +14,6 @@ import javax.persistence.*;
  * </pre></code>
  */
 @Entity
-@Inheritance
 @DiscriminatorValue("prefect")
 public class Prefect extends Student {
   public Prefect()

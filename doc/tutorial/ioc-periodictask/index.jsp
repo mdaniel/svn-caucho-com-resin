@@ -1,5 +1,5 @@
 <%@ page session="false" %>
-<%@ taglib uri="http://java.sun.com/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%
   // stop browser from caching the page
   response.setHeader("Cache-Control","no-cache,post-check=0,pre-check=0,no-store");

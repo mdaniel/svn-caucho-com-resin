@@ -29,14 +29,16 @@
 
 package com.caucho.xtpdoc;
 
+import com.caucho.config.types.RawString;
+
 public class VerboseFormattedTextWithAnchors extends FormattedTextWithAnchors {
   public VerboseFormattedTextWithAnchors(Document document)
   {
     super(document);
   }
 
-  public void setText(String text)
+  public void setText(RawString text)
   {
-    addItem(new VerboseText(text, getDocument()));
+    addItem(new VerboseText(text.getValue(), getDocument()));
   }
 }

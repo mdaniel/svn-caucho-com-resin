@@ -18,7 +18,7 @@ public class HelloServlet extends HttpServlet {
   /**
    * Dependency injector for the Hello interface.
    */
-  @EJB(name="HelloBean")
+  @EJB(name="ejb/HelloBean")
   public void setHello(Hello hello)
   {
     _hello = hello;

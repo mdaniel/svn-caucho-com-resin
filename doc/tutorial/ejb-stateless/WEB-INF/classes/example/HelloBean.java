@@ -1,7 +1,8 @@
 package example;
 
+import javax.annotation.Resource;
+
 import javax.ejb.Stateless;
-import javax.ejb.Inject;
 import javax.ejb.TransactionAttribute;
 import static javax.ejb.TransactionAttributeType.SUPPORTS;
 
@@ -15,7 +16,7 @@ public class HelloBean implements Hello {
   /**
    * Injector to set the greeting.
    */
-  @Inject
+  @Resource
   public void setGreeting(String greeting)
   {
     _greeting = greeting;

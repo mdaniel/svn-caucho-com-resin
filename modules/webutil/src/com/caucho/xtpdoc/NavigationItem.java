@@ -155,7 +155,7 @@ public class NavigationItem {
     if (_uri != null) {
       Path linkPath = _document.getRealPath(_uri);
 
-      System.out.println("LINK: " + linkPath);
+      // System.out.println("LINK: " + linkPath);
       
       if (linkPath.exists()) {
         Config config = new Config();

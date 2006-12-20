@@ -44,14 +44,15 @@ public class Escapifier {
     CharBuffer cb = null;
     int len = s.length();
 
-    for(int i=0; i<len; i++) {
+    for (int i = 0; i < len; i++) {
       char c = s.charAt(i);
 
-      if (c >= 32 && c <= 127 && c!='&' && c!='<' && c!='>' && c!='\"'
+      if (c >= 32 && c <= 127 && c != '&' && c!='<' && c!='>' && c!='\"'
           || Character.isWhitespace(c)) {
         if (cb != null) cb.append(c);
         continue;
       }
+      
       if (cb == null) {
         cb = new CharBuffer();
         cb.append(s.substring(0, i));
@@ -78,10 +79,39 @@ public class Escapifier {
     ws.print(escape(s));
   }
 
-  public static void escape(char[] c, int start, int len, WriteStream ws)
+  public static void escape(char []buffer, int offset, int len,
+			    WriteStream out)
     throws IOException
   {
-    ws.print(escape(new String(c, start, len)));
-  }
+    for (int i = 0; i < len; i++) {
+      char ch = buffer[offset + i];
+      
+      switch (ch) {
+      case '&':
+	out.print("&amp;");
+	break;
+      case '<':
+	out.print("&lt;");
+	break;
+      case '>':
+	out.print("&gt;");
+	break;
+      // case '\'': out.print("&apos;"); break; // TCK compliance
+      case '\"':
+	out.print("&quot;");
+	break;
 
+      case ' ': case '\t': case '\r': case '\n':
+	out.print(ch);
+	break;
+	
+      default:
+	if (32 <= ch && ch <= 127)
+	  out.print(ch);
+	else
+	  out.print("&#" + ((int) ch) + ";");
+	break;
+      }
+    }
+  }
 }

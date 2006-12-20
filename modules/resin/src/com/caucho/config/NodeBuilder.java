@@ -478,8 +478,8 @@ public class NodeBuilder {
     Object resinTypeValue = createResinType(child);
 
     if (resinTypeValue != null) {
-      TypeStrategy typeStrategy =
-              TypeStrategyFactory.getTypeStrategy(resinTypeValue.getClass());
+      TypeStrategy typeStrategy
+	= TypeStrategyFactory.getTypeStrategy(resinTypeValue.getClass());
 
       return String.valueOf(configureImpl(typeStrategy, resinTypeValue, child));
     }
@@ -498,8 +498,8 @@ public class NodeBuilder {
     Object resinTypeValue = createResinType(child);
 
     if (resinTypeValue != null) {
-      TypeStrategy typeStrategy =
-              TypeStrategyFactory.getTypeStrategy(resinTypeValue.getClass());
+      TypeStrategy typeStrategy
+	= TypeStrategyFactory.getTypeStrategy(resinTypeValue.getClass());
 
       return String.valueOf(configureImpl(typeStrategy, resinTypeValue, child));
     }
@@ -667,14 +667,8 @@ public class NodeBuilder {
     else {
       String value = XmlUtil.textValue(node);
 
-      if (value == null || value.equals(""))
+      if (value == null)
 	return "";
-      else if (node instanceof Element) {
-	String space = ((Element) node).getAttribute("xml:space");
-
-	if (! space.equals(""))
-	  return value;
-      }
 
       return value;
     }

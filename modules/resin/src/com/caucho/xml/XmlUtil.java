@@ -261,7 +261,7 @@ public class XmlUtil {
         
         if (child instanceof Element || child instanceof Document) {
           if (cb == null)
-            cb = CharBuffer.allocate();
+            cb = new CharBuffer();
           if (s != null)
             cb.append(s);
           s = null;
@@ -276,7 +276,7 @@ public class XmlUtil {
           s = value;
         }
         else {
-          cb = CharBuffer.allocate();
+          cb = new CharBuffer();
 
           cb.append(s);
           cb.append(value);
@@ -287,7 +287,7 @@ public class XmlUtil {
       if (s != null)
         return s;
       else if (cb != null)
-        return cb.close();
+        return cb.toString();
       else
         return "";
     }

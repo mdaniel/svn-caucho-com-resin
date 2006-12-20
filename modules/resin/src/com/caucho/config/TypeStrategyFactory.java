@@ -605,7 +605,7 @@ public class TypeStrategyFactory {
     public Object configure(NodeBuilder builder, Node node, Object parent)
       throws Exception
     {
-      return new RawString(builder.configureRawString(node));
+      return new RawString(builder.configureRawStringNoTrim(node));
     }
   }
 

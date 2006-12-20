@@ -1,4 +1,4 @@
-<%@ taglib prefix='c' uri='http://java.sun.com/jstl/core' %>
+<%@ taglib prefix='c' uri='http://java.sun.com/jsp/jstl/core' %>
 
 <c:url var="readUrl" value="test">
   <c:param name="inputFile" value="testFile.txt"/>

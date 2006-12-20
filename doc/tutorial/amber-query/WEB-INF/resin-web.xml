@@ -1,9 +1,8 @@
 <web-app xmlns="http://caucho.com/ns/resin">
   <!--
-     - configuration for the JNDI server.
+     - configuration for the Persistence manager
     -->
-  <ejb-server data-source="jdbc/resin" create-database-schema="true">
-  </ejb-server>
+  <ejb-server data-source="jdbc/resin" create-database-schema="true"/>
 
   <!--
      - configuration for the client.

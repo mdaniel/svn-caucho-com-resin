@@ -34,17 +34,22 @@ public class CourseServlet extends HttpServlet {
     } catch (Exception e) {
     }
 
-    CourseBean potions = new CourseBean();
-    potions.setCourse("Potions");
-    potions.setTeacher("Severus Snape");
+    _manager.getTransaction().begin();
+    try {
+      CourseBean potions = new CourseBean();
+      potions.setCourse("Potions");
+      potions.setTeacher("Severus Snape");
 
-    _manager.persist(potions);
+      _manager.persist(potions);
 
-    CourseBean xfig = new CourseBean();
-    xfig.setCourse("Transfiguration");
-    xfig.setTeacher("Minerva McGonagall");
+      CourseBean xfig = new CourseBean();
+      xfig.setCourse("Transfiguration");
+      xfig.setTeacher("Minerva McGonagall");
 
-    _manager.persist(xfig);
+      _manager.persist(xfig);
+    } finally {
+      _manager.getTransaction().commit();
+    }
   }
 
   /**

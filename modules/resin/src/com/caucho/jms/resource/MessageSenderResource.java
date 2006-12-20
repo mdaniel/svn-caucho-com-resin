@@ -37,6 +37,7 @@ import com.caucho.services.message.MessageServiceException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
+import javax.annotation.*;
 import javax.jms.*;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -78,6 +79,7 @@ public class MessageSenderResource implements MessageSender {
    * @throws JMSException
    * @throws ConfigException
    */
+  @PostConstruct
   public void init() throws JMSException, ConfigException
   {
     if (_destination == null)

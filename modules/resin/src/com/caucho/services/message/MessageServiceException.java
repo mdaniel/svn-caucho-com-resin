@@ -97,6 +97,14 @@ public class MessageServiceException extends IOException {
    */
   public Throwable getRootCause()
   {
+    return getCause();
+  }
+
+  /**
+   * Returns the underlying cause.
+   */
+  public Throwable getCause()
+  {
     return _rootCause;
   }
 }
