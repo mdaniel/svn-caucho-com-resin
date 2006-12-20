@@ -36,7 +36,8 @@ import java.lang.annotation.Target;
 /**
  * The Local annotation for local interfaces.
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Local {
   Class []value() default {};
 }

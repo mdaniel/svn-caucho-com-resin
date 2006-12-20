@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,21 +23,28 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package javax.ejb;
+package javax.ejb.spi;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.ejb.EJBObject;
+import javax.ejb.EJBHome;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 
-/**
- * The Stateless annotation.
- */
-@Target({ElementType.TYPE,ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface SecurityRoles {
-  String [] roleNames();
+public interface HandleDelegate {
+  public void writeEJBObject(EJBObject ejbObject, ObjectOutputStream oos)
+    throws IOException;
+
+  public EJBObject readEJBObject(ObjectInputStream ois)
+    throws IOException,
+           ClassNotFoundException;
+
+  public void writeEJBHome(EJBHome ejbHome, ObjectOutputStream oos)
+    throws IOException;
+
+  public EJBHome readEJBHome(ObjectInputStream ois)
+    throws IOException, ClassNotFoundException;
 }

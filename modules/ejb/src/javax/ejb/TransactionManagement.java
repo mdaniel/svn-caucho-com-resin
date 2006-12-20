@@ -36,7 +36,8 @@ import java.lang.annotation.Target;
 /**
  * The TransactionManagement type for local interfaces.
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface TransactionManagement {
   TransactionManagementType value()
     default TransactionManagementType.CONTAINER;

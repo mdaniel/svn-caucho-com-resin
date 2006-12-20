@@ -262,16 +262,6 @@ public class Bean {
 	setPatternTransaction(pattern, xa);
       }
 
-      JAnnotation perms = type.getAnnotation(MethodPermissions.class);
-      if (perms != null) {
-	MethodSignature sig = new MethodSignature();
-	sig.setMethodName("*");
-
-	EjbMethodPattern pattern = bean.createMethod(sig);
-
-	// XXX: pattern.setRoles(perms.value());
-      }
-    
       configureMethods(bean, type);
 
       for (int i = 0; i < _initList.size(); i++)
@@ -303,13 +293,6 @@ public class Bean {
 	EjbMethodPattern pattern = bean.createMethod(getSignature(method));
 
 	setPatternTransaction(pattern, xa);
-      }
-      
-      JAnnotation perms = method.getAnnotation(MethodPermissions.class);
-      if (perms != null) {
-	EjbMethodPattern pattern = bean.createMethod(getSignature(method));
-
-	// XXX: pattern.setRoles(perms.value());
       }
     }
   }

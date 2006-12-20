@@ -33,6 +33,5 @@ package javax.ejb;
  */
 public enum TransactionManagementType {
   CONTAINER,
-
   BEAN
 }

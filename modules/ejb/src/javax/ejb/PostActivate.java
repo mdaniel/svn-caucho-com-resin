@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
 /**
  * The @PostActivate annotation.
  */
-@Target({ElementType.TYPE,ElementType.METHOD})
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PostActivate {
 }

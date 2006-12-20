@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
 /**
  * The Remove annotation.
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Remove {
   boolean retainIfException() default false;

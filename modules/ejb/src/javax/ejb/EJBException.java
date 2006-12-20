@@ -51,11 +51,6 @@ public class EJBException extends RuntimeException {
     super(message, e);
   }
 
-  public EJBException(String message, Throwable e)
-  {
-    super(message, e);
-  }
-
   public Exception getCausedByException()
   {
     return (Exception) getCause();

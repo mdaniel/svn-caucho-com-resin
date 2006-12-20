@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
 /**
  * The Init annotation.
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Init {
   String value() default "";

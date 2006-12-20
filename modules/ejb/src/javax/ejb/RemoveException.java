@@ -28,9 +28,6 @@
 
 package javax.ejb;
 
-/**
- * The main ejb context.
- */
 public class RemoveException extends Exception {
   public RemoveException()
   {
