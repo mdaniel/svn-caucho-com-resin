@@ -29,7 +29,7 @@
 package com.caucho.amber.expr;
 
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.*;
 import com.caucho.util.CharBuffer;
 
 import java.sql.PreparedStatement;
@@ -195,8 +195,12 @@ public class ArgExpr extends AbstractAmberExpr {
     if (_name == null) {
 
       // jpa/141d (enum type)
-      if (getType() != null)
-        argTypes[_index - 1] = getType();
+      if (getType() != null) {
+        if (! ((getType() instanceof UtilDateType) ||
+               (getType() instanceof CalendarType))) {
+          argTypes[_index - 1] = getType();
+        }
+      }
 
       if (argTypes[_index - 1] != null) {
 
@@ -214,8 +218,13 @@ public class ArgExpr extends AbstractAmberExpr {
     }
     else {
       // jpa/141d (enum type)
-      if (getType() != null)
-        argTypes[i - 1] = getType();
+      if (getType() != null) {
+        // jpa/1410, jpa/1413
+        if (! ((getType() instanceof UtilDateType) ||
+               (getType() instanceof CalendarType))) {
+          argTypes[i - 1] = getType();
+        }
+      }
 
       if (argTypes[i - 1] != null) {
         // jpa/141g argTypes[i - 1].setParameter(pstmt, i - 1, argValues[i - 1]);

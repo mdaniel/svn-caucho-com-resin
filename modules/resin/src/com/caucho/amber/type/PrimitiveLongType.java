@@ -192,7 +192,11 @@ public class PrimitiveLongType extends PrimitiveType {
   public void setParameter(PreparedStatement pstmt, int index, Object value)
     throws SQLException
   {
-    if (value instanceof Number)
+    if (value == null) {
+      // jpa/141e
+      pstmt.setString(index, null);
+    }
+    else if (value instanceof Number)
       pstmt.setString(index, value.toString());
     else
       throw new IllegalArgumentException("Invalid argument for setParameter.");
