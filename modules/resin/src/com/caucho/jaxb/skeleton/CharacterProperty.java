@@ -40,7 +40,15 @@ import java.io.IOException;
  * a Character Property
  */
 public class CharacterProperty extends CDataProperty {
-  public static final CharacterProperty PROPERTY = new CharacterProperty();
+  public static final CharacterProperty OBJECT_PROPERTY 
+    = new CharacterProperty(true);
+  public static final CharacterProperty PRIMITIVE_PROPERTY 
+    = new CharacterProperty(false);
+
+  protected CharacterProperty(boolean isNillable)
+  {
+    _isNillable = isNillable;
+  }
 
   protected String write(Object in)
     throws IOException, XMLStreamException

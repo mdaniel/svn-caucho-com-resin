@@ -53,7 +53,7 @@ public class FloatArrayProperty extends ArrayProperty {
 
   public FloatArrayProperty()
   {
-    super(FloatProperty.PROPERTY);
+    super(FloatProperty.PRIMITIVE_PROPERTY);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
@@ -84,7 +84,7 @@ public class FloatArrayProperty extends ArrayProperty {
       float[] array = (float[]) obj;
 
       for (int i = 0; i < array.length; i++) 
-        FloatProperty.PROPERTY.write(m, out, array[i], qname);
+        FloatProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
     }
   }
 }

@@ -28,8 +28,9 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
 import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * a string property
@@ -38,9 +39,9 @@ public class StringProperty extends CDataProperty {
   public static final StringProperty PROPERTY = new StringProperty();
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
+    throws IOException, XMLStreamException
   {
-    return in==null ? null : in.toString();
+    return in == null ? null : in.toString();
   }
 
   protected Object read(String in)

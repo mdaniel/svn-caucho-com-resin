@@ -53,7 +53,7 @@ public class ShortArrayProperty extends ArrayProperty {
 
   public ShortArrayProperty()
   {
-    super(ShortProperty.PROPERTY);
+    super(ShortProperty.PRIMITIVE_PROPERTY);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
@@ -84,7 +84,7 @@ public class ShortArrayProperty extends ArrayProperty {
       short[] array = (short[]) obj;
 
       for (int i = 0; i < array.length; i++) 
-        ShortProperty.PROPERTY.write(m, out, array[i], qname);
+        ShortProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
     }
   }
 }

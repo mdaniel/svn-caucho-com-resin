@@ -54,7 +54,7 @@ public class CharacterArrayProperty extends ArrayProperty {
 
   public CharacterArrayProperty()
   {
-    super(CharacterProperty.PROPERTY);
+    super(CharacterProperty.PRIMITIVE_PROPERTY);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
@@ -85,7 +85,7 @@ public class CharacterArrayProperty extends ArrayProperty {
       char[] array = (char[]) obj;
 
       for (int i = 0; i < array.length; i++) 
-        CharacterProperty.PROPERTY.write(m, out, array[i], qname);
+        CharacterProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
     }
   }
 }

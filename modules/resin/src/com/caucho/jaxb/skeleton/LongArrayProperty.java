@@ -53,7 +53,7 @@ public class LongArrayProperty extends ArrayProperty {
 
   public LongArrayProperty()
   {
-    super(LongProperty.PROPERTY);
+    super(LongProperty.PRIMITIVE_PROPERTY);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
@@ -84,7 +84,7 @@ public class LongArrayProperty extends ArrayProperty {
       long[] array = (long[]) obj;
 
       for (int i = 0; i < array.length; i++) 
-        LongProperty.PROPERTY.write(m, out, array[i], qname);
+        LongProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
     }
   }
 }

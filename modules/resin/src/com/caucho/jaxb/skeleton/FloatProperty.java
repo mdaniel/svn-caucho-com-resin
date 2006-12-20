@@ -40,7 +40,15 @@ import java.io.IOException;
  * a Float Property
  */
 public class FloatProperty extends CDataProperty {
-  public static final FloatProperty PROPERTY = new FloatProperty();
+  public static final FloatProperty OBJECT_PROPERTY 
+    = new FloatProperty(true);
+  public static final FloatProperty PRIMITIVE_PROPERTY 
+    = new FloatProperty(false);
+
+  protected FloatProperty(boolean isNillable)
+  {
+    _isNillable = isNillable;
+  }
 
   protected String write(Object in)
       throws IOException, XMLStreamException

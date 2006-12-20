@@ -39,7 +39,13 @@ import java.io.IOException;
  * a Byte Property
  */
 public class ByteProperty extends CDataProperty {
-  public static final ByteProperty PROPERTY = new ByteProperty();
+  public static final ByteProperty OBJECT_PROPERTY = new ByteProperty(true);
+  public static final ByteProperty PRIMITIVE_PROPERTY = new ByteProperty(false);
+
+  protected ByteProperty(boolean isNillable)
+  {
+    _isNillable = isNillable;
+  }
 
   protected String write(Object in)
       throws IOException, XMLStreamException

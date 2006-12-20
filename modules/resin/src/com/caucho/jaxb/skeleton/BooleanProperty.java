@@ -40,7 +40,15 @@ import java.io.IOException;
  * a Boolean Property
  */
 public class BooleanProperty extends CDataProperty {
-  public static final BooleanProperty PROPERTY = new BooleanProperty();
+  public static final BooleanProperty OBJECT_PROPERTY 
+    = new BooleanProperty(true);
+  public static final BooleanProperty PRIMITIVE_PROPERTY 
+    = new BooleanProperty(true);
+
+  protected BooleanProperty(boolean isNillable)
+  {
+    _isNillable = isNillable;
+  }
 
   protected String write(Object in)
     throws IOException, XMLStreamException

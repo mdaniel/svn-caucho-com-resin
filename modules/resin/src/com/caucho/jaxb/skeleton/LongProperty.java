@@ -41,7 +41,13 @@ import java.io.IOException;
  * a Long Property
  */
 public class LongProperty extends CDataProperty {
-  public static final LongProperty PROPERTY = new LongProperty();
+  public static final LongProperty OBJECT_PROPERTY = new LongProperty(true);
+  public static final LongProperty PRIMITIVE_PROPERTY = new LongProperty(false);
+
+  protected LongProperty(boolean isNillable)
+  {
+    _isNillable = isNillable;
+  }
 
   protected String write(Object in)
     throws IOException, XMLStreamException

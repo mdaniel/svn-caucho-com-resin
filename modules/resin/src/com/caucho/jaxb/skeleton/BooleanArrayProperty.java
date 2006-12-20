@@ -54,7 +54,7 @@ public class BooleanArrayProperty extends ArrayProperty {
 
   private BooleanArrayProperty()
   {
-    super(BooleanProperty.PROPERTY);
+    super(BooleanProperty.PRIMITIVE_PROPERTY);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
@@ -85,7 +85,7 @@ public class BooleanArrayProperty extends ArrayProperty {
       boolean[] array = (boolean[]) obj;
 
       for (int i = 0; i < array.length; i++) 
-        BooleanProperty.PROPERTY.write(m, out, array[i], qname);
+        BooleanProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
     }
   }
 }

@@ -47,17 +47,27 @@ import com.caucho.util.L10N;
 public abstract class CDataProperty extends Property {
   private static final L10N L = new L10N(CDataProperty.class);
 
+  protected boolean _isNillable = true;
+
   protected abstract Object read(String in)
-    throws IOException, XMLStreamException;
+    throws IOException, XMLStreamException, JAXBException;
 
   public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT)
-      throw new IOException(L.l("Expected <{0}>", qname.toString()));
-    else if (! in.getName().equals(qname))
-      throw new IOException(L.l("Expected <{0}>, not <{1}>", 
-                                qname.toString(), in.getName().toString()));
+    if (in.getEventType() != in.START_ELEMENT) {
+      if (_isNillable)
+        return null;
+      else
+        throw new IOException(L.l("Expected <{0}>", qname.toString()));
+    }
+    else if (! in.getName().equals(qname)) {
+      if (_isNillable)
+        return null;
+      else
+        throw new IOException(L.l("Expected <{0}>, not <{1}>", 
+                                  qname.toString(), in.getName().toString()));
+    }
 
     in.next();
 
@@ -65,6 +75,8 @@ public abstract class CDataProperty extends Property {
 
     if (in.getEventType() == in.CHARACTERS)
       ret = read(in.getText());
+    else
+      ret = read(""); // Hack when we have something like <tag></tag>
 
     while (in.getEventType() != in.END_ELEMENT)
       in.nextTag();

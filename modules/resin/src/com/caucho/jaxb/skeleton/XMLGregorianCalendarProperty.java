@@ -18,59 +18,68 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Resin Open Source; if not, write to the
+ * adate with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong
  */
 
 package com.caucho.jaxb.skeleton;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.IOException;
+import com.caucho.jaxb.*;
+import javax.xml.bind.*;
+import javax.xml.datatype.*;
+import javax.xml.namespace.*;
+import javax.xml.stream.*;
+import java.util.*;
+import java.text.*;
+
+import java.lang.reflect.*;
+import java.io.*;
+
+import com.caucho.vfs.WriteStream;
 
 /**
- * a Int Property
+ * a Date Property
  */
-public class IntProperty extends CDataProperty {
-  public static final IntProperty OBJECT_PROPERTY = new IntProperty(true);
-  public static final IntProperty PRIMITIVE_PROPERTY = new IntProperty(false);
+public class XMLGregorianCalendarProperty extends CDataProperty {
+  private DatatypeFactory _datatypeFactory;
 
-  protected IntProperty(boolean isNillable)
-  {
-    _isNillable = isNillable;
-  }
+  public static final XMLGregorianCalendarProperty PROPERTY 
+    = new XMLGregorianCalendarProperty();
 
   protected String write(Object in)
     throws IOException, XMLStreamException
   {
-    return DatatypeConverter.printInt(((Integer) in).intValue());
+    return ((XMLGregorianCalendar) in).toXMLFormat();
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
+    throws IOException, XMLStreamException, JAXBException
   {
-    return DatatypeConverter.parseInt(in);
+    return getDatatypeFactory().newXMLGregorianCalendar(in);
   }
 
   public String getSchemaType()
   {
-    return "xsd:int";
+    return "xsd:dateTime";
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, int i, QName qname)
-    throws IOException, XMLStreamException, JAXBException
+  private DatatypeFactory getDatatypeFactory()
+    throws JAXBException
   {
-    writeQNameStartElement(out, qname);
-    out.writeCharacters(DatatypeConverter.printInt(i));
-    writeQNameEndElement(out, qname);
+    if (_datatypeFactory == null) {
+      try {
+        _datatypeFactory = DatatypeFactory.newInstance();
+      }
+      catch (DatatypeConfigurationException e) {
+        throw new JAXBException(e);
+      }
+    }
+
+    return _datatypeFactory;
   }
 }
 

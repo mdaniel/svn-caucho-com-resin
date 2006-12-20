@@ -41,7 +41,15 @@ import java.io.IOException;
  * a short property
  */
 public class ShortProperty extends CDataProperty {
-  public static final ShortProperty PROPERTY = new ShortProperty();
+  public static final ShortProperty OBJECT_PROPERTY 
+    = new ShortProperty(true);
+  public static final ShortProperty PRIMITIVE_PROPERTY 
+    = new ShortProperty(false);
+
+  protected ShortProperty(boolean isNillable)
+  {
+    _isNillable = isNillable;
+  }
 
   protected String write(Object in)
       throws IOException, XMLStreamException

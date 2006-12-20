@@ -54,7 +54,7 @@ public class IntegerArrayProperty extends ArrayProperty {
 
   private IntegerArrayProperty()
   {
-    super(IntProperty.PROPERTY);
+    super(IntProperty.PRIMITIVE_PROPERTY);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
@@ -85,7 +85,7 @@ public class IntegerArrayProperty extends ArrayProperty {
       int[] array = (int[]) obj;
 
       for (int i = 0; i < array.length; i++) 
-        IntProperty.PROPERTY.write(m, out, array[i], qname);
+        IntProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
     }
   }
 }

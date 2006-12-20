@@ -40,7 +40,15 @@ import java.io.IOException;
  * a Double Property
  */
 public class DoubleProperty extends CDataProperty {
-  public static final DoubleProperty PROPERTY = new DoubleProperty();
+  public static final DoubleProperty OBJECT_PROPERTY 
+    = new DoubleProperty(true);
+  public static final DoubleProperty PRIMITIVE_PROPERTY 
+    = new DoubleProperty(false);
+
+  protected DoubleProperty(boolean isNillable)
+  {
+    _isNillable = isNillable;
+  }
 
   protected String write(Object in)
       throws IOException, XMLStreamException
