@@ -43,7 +43,8 @@ import com.caucho.quercus.program.AbstractFunction;
 /**
  * Represents a PHP variable value.
  */
-public class JavaAdapterVar extends Var {
+public class JavaAdapterVar extends Var
+{
   
   private JavaAdapter _adapter;
   private Value _key;
@@ -1129,6 +1130,15 @@ public class JavaAdapterVar extends Var {
   {
     out.print("&");
     getValue().varDump(env, out, depth, valueSet);
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  public Object writeReplace()
+  {
+    return getValue();
   }
 }
 

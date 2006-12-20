@@ -34,6 +34,9 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
@@ -43,13 +46,15 @@ import java.util.Set;
 /**
  * Represents a compiled object value.
  */
-public class CompiledObjectValue extends ObjectValue {
+public class CompiledObjectValue extends ObjectValue
+  implements Serializable
+{
   private static final StringValue TO_STRING = new StringValueImpl("__toString");
   private static final Value []NULL_FIELDS = new Value[0];
 
-  private final QuercusClass _cl;
+  private QuercusClass _cl;
 
-  public final Value []_fields;
+  public Value []_fields;
 
   private ObjectExtValue _object;
 
@@ -799,6 +804,44 @@ public class CompiledObjectValue extends ObjectValue {
 
     printDepth(out, 4 * depth);
     out.println(")");
+  }
+  
+  //
+  // Java Serialization
+  //
+
+  private void writeObject(ObjectOutputStream out)
+    throws IOException
+  { 
+    System.err.println("CompiledObjectArray->writeObject()");
+    
+    out.writeObject(_fields);
+    out.writeObject(_object);
+    out.writeObject(_cl.getName());
+  }
+  
+  private void readObject(ObjectInputStream in)
+    throws ClassNotFoundException, IOException
+  { 
+    System.err.println("CompiledObjectArray->readObject()");
+    
+    _fields = (Value []) in.readObject();
+    _object = (ObjectExtValue) in.readObject();
+    
+    Env env = Env.getInstance();
+    String name = (String) in.readObject();
+
+    _cl = env.findClass(name);
+
+    if (_cl != null) {
+    }
+    else {
+      _cl = env.getQuercus().getStdClass();
+
+      putField(env,
+               "__Quercus_Class_Definition_Not_Found",
+               new StringValueImpl(name));
+    }
   }
 }
 

@@ -33,12 +33,15 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.IdentityHashMap;
 
 /**
  * Represents a PHP boolean value.
  */
-public class BooleanValue extends Value {
+public class BooleanValue extends Value
+  implements Serializable
+{
   public static final BooleanValue TRUE = new BooleanValue(true);
   public static final BooleanValue FALSE = new BooleanValue(false);
 
@@ -302,6 +305,18 @@ public class BooleanValue extends Value {
       out.print("bool(true)");
     else
       out.print("bool(false)");
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  private Object readResolve()
+  {
+    if (_value == true)
+      return TRUE;
+    else
+      return FALSE;
   }
 }
 

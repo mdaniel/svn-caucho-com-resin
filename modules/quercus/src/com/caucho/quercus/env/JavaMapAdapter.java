@@ -29,7 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.JavaCollectionAdapter.CollectionSet;
 import com.caucho.quercus.program.JavaClassDef;
 
 import com.caucho.quercus.QuercusRuntimeException;

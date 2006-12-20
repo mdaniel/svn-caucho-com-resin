@@ -31,13 +31,18 @@ package com.caucho.quercus.env;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 
 /**
  * Represents a 8-bit binary builder
  */
-public class BinaryBuilderValue extends BinaryValue {
+public class BinaryBuilderValue extends BinaryValue
+  implements Serializable
+{
   private byte []_buffer;
   private int _length;
 
@@ -849,6 +854,26 @@ public class BinaryBuilderValue extends BinaryValue {
     out.print("new BinaryBuilderValue(\"");
     printJavaString(out, toString());
     out.print("\")");
+  }
+  
+  //
+  // Java serialization code
+  //
+  
+  private void writeObject(ObjectOutputStream out)
+    throws IOException
+  {
+    out.writeInt(_length);
+    out.write(_buffer, 0, _length);
+  }
+  
+  private void readObject(ObjectInputStream in)
+    throws ClassNotFoundException, IOException
+  {
+    _length = in.readInt();
+    _buffer = new byte[_length];
+    
+    in.read(_buffer, 0, _length);
   }
 
   class BinaryInputStream extends InputStream {

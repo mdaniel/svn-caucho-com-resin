@@ -33,12 +33,15 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.IdentityHashMap;
 
 /**
  * Represents a PHP long value.
  */
-public class LongValue extends NumberValue {
+public class LongValue extends NumberValue
+  implements Serializable
+{
   public static final LongValue MINUS_ONE = new LongValue(-1);
   public static final LongValue ZERO = new LongValue(0);
   public static final LongValue ONE = new LongValue(1);
@@ -333,6 +336,18 @@ public class LongValue extends NumberValue {
     throws IOException
   {
     out.print("int(" + toLong() + ")");
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  private Object readResolve()
+  {
+    if (STATIC_MIN <= _value && _value <= STATIC_MAX)
+      return STATIC_VALUES[(int) (_value - STATIC_MIN)];
+    else
+      return this;
   }
 
   static {

@@ -33,12 +33,15 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.IdentityHashMap;
 
 /**
  * Represents a PHP double value.
  */
-public class DoubleValue extends NumberValue {
+public class DoubleValue extends NumberValue
+  implements Serializable
+{
   public static final DoubleValue ZERO = new DoubleValue(0);
 
   private final double _value;
@@ -336,6 +339,18 @@ public class DoubleValue extends NumberValue {
     throws IOException
   {
     out.print("float(" + toDouble() + ")");
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  private Object readResolve()
+  { 
+    if (_value == 0)
+      return ZERO;
+    else
+      return this;
   }
 
 }

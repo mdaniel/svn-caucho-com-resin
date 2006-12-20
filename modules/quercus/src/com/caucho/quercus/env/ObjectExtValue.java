@@ -36,17 +36,22 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Represents a PHP object value.
  */
-public class ObjectExtValue extends ObjectValue {
+public class ObjectExtValue extends ObjectValue
+  implements Serializable
+{
   private static final StringValue TO_STRING = new StringValueImpl("__toString");
 
   private static final int DEFAULT_SIZE = 16;
 
-  private final QuercusClass _cl;
+  private QuercusClass _cl;
 
   private Entry []_entries;
   private int _hashMask;
@@ -56,7 +61,12 @@ public class ObjectExtValue extends ObjectValue {
   public ObjectExtValue(QuercusClass cl)
   {
     _cl = cl;
-
+    
+    init();
+  }
+  
+  private void init()
+  {
     _entries = new Entry[DEFAULT_SIZE];
     _hashMask = _entries.length - 1;
   }
@@ -1062,6 +1072,50 @@ public class ObjectExtValue extends ObjectValue {
     out.println(")");
   }
 
+  //
+  // Java Serialization
+  //
+  
+  private void writeObject(ObjectOutputStream out)
+    throws IOException
+  {
+    out.writeObject(_cl.getName());
+
+    out.writeInt(_size);
+    
+    for (Map.Entry<String,Value> entry : entrySet()) {      
+      out.writeObject(entry.getKey());
+      out.writeObject(entry.getValue());
+    }
+  }
+  
+  private void readObject(ObjectInputStream in)
+    throws ClassNotFoundException, IOException
+  { 
+    Env env = Env.getInstance();
+    String name = (String) in.readObject();
+
+    _cl = env.findClass(name);
+
+    init();
+
+    if (_cl != null) {
+    }
+    else {
+      _cl = env.getQuercus().getStdClass();
+
+      putField(env,
+               "__Quercus_Class_Definition_Not_Found",
+               new StringValueImpl(name));
+    }
+
+    int size = in.readInt();
+    
+    for (int i = 0; i < size; i++) {
+      putField(env, (String) in.readObject(), (Value) in.readObject());
+    }
+  }
+  
   public class EntrySet extends AbstractSet<Map.Entry<String,Value>> {
     EntrySet()
     {

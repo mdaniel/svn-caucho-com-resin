@@ -34,12 +34,15 @@ import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempReadStream;
 
 import java.io.InputStream;
+import java.io.Serializable;
 
 /**
  * Represents a PHP string value implemented as a TempBuffer, with
  * encoding iso-8859-1..
  */
-public class TempBufferStringValue extends BinaryValue {
+public class TempBufferStringValue extends BinaryValue
+  implements Serializable
+{
   private TempBuffer _head;
 
   private String _string;
@@ -206,6 +209,15 @@ public class TempBufferStringValue extends BinaryValue {
     }
 
     return buffer;
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  public Object writeReplace()
+  {
+    return new BinaryBuilderValue(toBytes());
   }
 }
 

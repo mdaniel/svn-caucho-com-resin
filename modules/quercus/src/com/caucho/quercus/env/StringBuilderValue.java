@@ -32,12 +32,17 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.Quercus;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 
 /**
  * Represents a PHP string value.
  */
-public class StringBuilderValue extends UnicodeValue {
+public class StringBuilderValue extends UnicodeValue
+  implements Serializable
+{
   private char []_buffer;
   private int _length;
 
@@ -912,6 +917,32 @@ public class StringBuilderValue extends UnicodeValue {
     System.arraycopy(_buffer, 0, buffer, 0, _length);
 
     _buffer = buffer;
+  }
+  
+  //
+  // Java serialization code
+  //
+  
+  private void writeObject(ObjectOutputStream out)
+    throws IOException
+  {
+    out.writeInt(_length);
+    
+    for (int i = 0; i < _length; i++) {
+      out.writeChar(_buffer[i]);
+    }
+  }
+  
+  private void readObject(ObjectInputStream in)
+    throws ClassNotFoundException, IOException
+  {
+    _length = in.readInt();
+    
+    _buffer = new char[_length];
+    
+    for (int i = 0; i < _length; i++) {
+      _buffer[i] = in.readChar();
+    }
   }
 }
 

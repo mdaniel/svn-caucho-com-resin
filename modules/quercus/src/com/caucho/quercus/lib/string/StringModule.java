@@ -2638,7 +2638,10 @@ v   *
       }
     }
 
-    return resultArray == null ? new LongValue(wordCount) : resultArray;
+    if (resultArray == null)
+      return LongValue.create(wordCount);
+    else
+      return resultArray;
   }
 
   /**

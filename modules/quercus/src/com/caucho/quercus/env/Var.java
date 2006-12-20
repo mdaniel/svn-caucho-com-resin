@@ -34,6 +34,7 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Map;
 import java.net.URL;
 import java.util.Calendar;
@@ -45,7 +46,9 @@ import java.util.List;
 /**
  * Represents a PHP variable value.
  */
-public class Var extends Value {
+public class Var extends Value
+  implements Serializable
+{
   Value _value;
   private int _refCount;
 
@@ -1102,6 +1105,15 @@ public class Var extends Value {
   {
     out.print("&");
     _value.varDump(env, out, depth, valueSet);
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  public Object writeReplace()
+  {
+    return _value;
   }
 }
 

@@ -29,14 +29,28 @@
 
 package com.caucho.quercus.env;
 
+import java.io.Serializable;
+
 /**
  * Represents a PHP null value.
  */
-public class UnsetValue extends NullValue {
+public class UnsetValue extends NullValue
+  implements Serializable
+{
   public static final UnsetValue UNSET = new UnsetValue();
 
   private UnsetValue()
   {
   }
+
+  //
+  // Java Serialization
+  //
+  
+  private Object readResolve()
+  {
+    return UNSET;
+  }
+
 }
 

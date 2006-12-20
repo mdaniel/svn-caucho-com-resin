@@ -34,13 +34,16 @@ import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 
 /**
  * Represents a reference to a PHP variable in a function call.
  */
-public class RefVar extends Value {
+public class RefVar extends Value
+  implements Serializable
+{
   private Var _var;
 
   public RefVar(Var var)
@@ -538,6 +541,15 @@ public class RefVar extends Value {
     throws IOException
   {
     toValue().printRImpl(env, out, depth, valueSet);
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  public Object writeReplace()
+  {
+    return _var;
   }
 }
 

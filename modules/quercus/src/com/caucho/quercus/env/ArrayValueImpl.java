@@ -31,13 +31,20 @@ package com.caucho.quercus.env;
 
 import com.caucho.util.RandomUtil;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
  * Represents a PHP array value.
  */
-public class ArrayValueImpl extends ArrayValue {
+public class ArrayValueImpl extends ArrayValue
+  implements Serializable
+{
   private static final Logger log
     = Logger.getLogger(ArrayValueImpl.class.getName());
 
@@ -890,5 +897,40 @@ public class ArrayValueImpl extends ArrayValue {
 
     _current = _head;
   }
+
+  //
+  // Java serialization code
+  //
+  
+  private void writeObject(ObjectOutputStream out)
+    throws IOException
+  {
+    out.writeInt(_size);
+    
+    for (Map.Entry<Value,Value> entry : entrySet()) {
+      out.writeObject(entry.getKey());
+      out.writeObject(entry.getValue());
+    }
+  }
+  
+  private void readObject(ObjectInputStream in)
+    throws ClassNotFoundException, IOException
+  {
+    int size = in.readInt();
+    
+    int capacity = DEFAULT_SIZE;
+
+    while (capacity < 4 * size) {
+      capacity *= 2;
+    }
+
+    _entries = new Entry[capacity];
+    _hashMask = _entries.length - 1;
+
+    for (int i = 0; i < size; i++) {
+      put((Value) in.readObject(), (Value) in.readObject());
+    }
+  }
+
 }
 

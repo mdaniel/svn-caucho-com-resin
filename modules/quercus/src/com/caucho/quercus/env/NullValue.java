@@ -33,6 +33,7 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.IdentityHashMap;
 import java.util.Calendar;
@@ -42,7 +43,9 @@ import java.util.Map;
 /**
  * Represents a PHP null value.
  */
-public class NullValue extends Value {
+public class NullValue extends Value
+  implements Serializable
+{
   public static final NullValue NULL = new NullValue();
 
   protected NullValue()
@@ -452,6 +455,15 @@ public class NullValue extends Value {
     throws IOException
   {
     out.print("NULL");
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  private Object readResolve()
+  {
+    return NULL;
   }
 }
 

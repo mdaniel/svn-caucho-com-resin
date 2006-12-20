@@ -29,12 +29,16 @@
 
 package com.caucho.quercus.env;
 
+import java.io.Serializable;
+
 import com.caucho.quercus.QuercusException;
 
 /**
  * Represents a PHP null value.
  */
-public class NullThisValue extends NullValue {
+public class NullThisValue extends NullValue
+  implements Serializable
+{
   public static final NullThisValue NULL = new NullThisValue();
 
   protected NullThisValue()
@@ -55,6 +59,15 @@ public class NullThisValue extends NullValue {
   public Value callMethod(Env env, String methodName, Value []args)
   {
     throw new QuercusException(L.l("$this value of NULL cannot dispatch to method '{0}'.", methodName));
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  private Object readResolve()
+  {
+    return NULL;
   }
 }
 

@@ -34,6 +34,7 @@ import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.logging.Level;
@@ -973,7 +974,9 @@ abstract public class ArrayValue extends Value {
     out.println(")");
   }
 
-  public final static class Entry implements Map.Entry<Value,Value> {
+  public final static class Entry
+    implements Map.Entry<Value,Value>, Serializable  
+  {
     final Value _key;
     Value _value;
 

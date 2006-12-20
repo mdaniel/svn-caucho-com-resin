@@ -29,12 +29,16 @@
 
 package com.caucho.quercus.env;
 
+import java.io.Serializable;
+
 /**
  * Represents an array-get argument which might be a call to a reference.
  *
  * foo($a[0]), where is not known if foo is defined as foo($a) or foo(&amp;$a)
  */
-public class ArgGetValue extends Value {
+public class ArgGetValue extends Value
+  implements Serializable
+{
   private final Value _obj;
   private final Value _index;
 
@@ -141,6 +145,15 @@ public class ArgGetValue extends Value {
   {
     // php/3d2p
     return _obj.getObject(env, _index).getFieldRef(env, index);
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  public Object writeReplace()
+  {
+    return toValue();
   }
 }
 

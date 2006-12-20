@@ -40,8 +40,7 @@ import java.util.logging.*;
 /**
  * Represents a marshalled Collection argument.
  */
-public class JavaCollectionAdapter
-  extends JavaAdapter
+public class JavaCollectionAdapter extends JavaAdapter
 {
   private static final Logger log
     = Logger.getLogger(JavaCollectionAdapter.class.getName());

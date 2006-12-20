@@ -30,6 +30,11 @@
 package com.caucho.quercus.env;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
@@ -302,6 +307,18 @@ public class ServerArrayValue extends ArrayValueImpl {
     }
 
     return new StringValueImpl(sb.toString());
+  }
+  
+  //
+  // Java serialization code
+  //
+  
+  private Object writeReplace()
+  {
+    if (! _isFilled)
+      fillMap();
+    
+    return new ArrayValueImpl(this);
   }
 }
 

@@ -132,5 +132,14 @@ public class DefaultValue extends NullValue {
   {
     out.print("\"\"");
   }
+  
+  //
+  // Java Serialization
+  //
+  
+  private Object readResolve()
+  {
+    return DEFAULT;
+  }
 }
 

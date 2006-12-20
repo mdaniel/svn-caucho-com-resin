@@ -43,24 +43,26 @@ import java.util.logging.*;
 
 import java.lang.reflect.Array;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 /**
  * Interface for marshalled Java data structures.
  */
-abstract public class JavaAdapter
-  extends ArrayValue
+abstract public class JavaAdapter extends ArrayValue
+  implements Serializable
 {
   private static final Logger log
     = Logger.getLogger(JavaAdapter.class.getName());
   
-  private final Object _object;
+  private Object _object;
   
-  private final JavaClassDef _classDef;
-  private final Env _env;
+  private JavaClassDef _classDef;
+  private Env _env;
   
   // Vars to update when matching array item is modified
-  private HashMap<Value,Value> _refs
-    = new HashMap<Value,Value>();
+  private HashMap<Value,Value> _refs;
   
   protected JavaAdapter(Env env, Object object, JavaClassDef def)
   {
@@ -283,6 +285,9 @@ abstract public class JavaAdapter
   { 
     Value retValue = putImpl(key, value);
     
+    if (_refs == null)
+      _refs = new HashMap<Value,Value>();
+    
     if (value instanceof Var) {
       Var var = (Var) value;
       
@@ -421,6 +426,9 @@ abstract public class JavaAdapter
   {
     Var var = new JavaAdapterVar(this, index);
     
+    if (_refs == null)
+      _refs = new HashMap<Value,Value>();
+
     _refs.put(index, var);
     
     return var;
@@ -917,8 +925,8 @@ abstract public class JavaAdapter
       out.println("]=>");
 
       printDepth(out, nestedDepth * 2);
-
-      if (_refs.get(key) != null)
+      
+      if (_refs != null && _refs.get(key) != null)
         out.print('&');
       
       mapEntry.getValue().varDump(env, out, nestedDepth, valueSet);
@@ -958,6 +966,26 @@ abstract public class JavaAdapter
 
     printDepth(out, 8 * depth);
     out.println(")");
+  }
+  
+  //
+  // Java Serialization
+  //
+  
+  private void writeObject(ObjectOutputStream out)
+    throws IOException
+  {
+    out.writeObject(_object);
+    out.writeObject(_classDef.getName());
+  }
+  
+  private void readObject(ObjectInputStream in)
+    throws ClassNotFoundException, IOException
+  {
+    _env = Env.getInstance();
+    
+    _object = in.readObject();
+    _classDef = _env.getJavaClassDefinition((String) in.readObject());
   }
   
   /**

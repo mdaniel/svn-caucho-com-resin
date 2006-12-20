@@ -2715,8 +2715,12 @@ public class Env {
    */
   public Value wrapJava(Object obj, JavaClassDef def, boolean isNullAsFalse)
   {
-    if (obj == null)
-      return isNullAsFalse ? BooleanValue.FALSE : NullValue.NULL;
+    if (obj == null) {
+      if (isNullAsFalse)
+        return BooleanValue.FALSE;
+      else
+        return NullValue.NULL;
+    }
 
     if (obj instanceof Value)
       return (Value) obj;

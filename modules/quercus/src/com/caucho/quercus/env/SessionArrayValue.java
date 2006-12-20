@@ -36,6 +36,7 @@ import com.caucho.util.CacheListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -44,8 +45,9 @@ import java.util.logging.Logger;
 /**
  * Represents the $_SESSION
  */
-public class SessionArrayValue extends ArrayValueWrapper 
-  implements CacheListener {
+public class SessionArrayValue extends ArrayValueWrapper
+  implements CacheListener, Serializable
+{
   static protected final Logger log
     = Logger.getLogger(SessionArrayValue.class.getName());
 
@@ -323,5 +325,14 @@ public class SessionArrayValue extends ArrayValueWrapper
       }
     }
     */
+  }
+  
+  //
+  // Java serialization code
+  //
+  
+  private Object writeReplace()
+  {
+    return new ArrayValueImpl(this);
   }
 }

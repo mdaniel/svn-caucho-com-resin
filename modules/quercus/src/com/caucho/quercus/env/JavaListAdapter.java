@@ -48,7 +48,7 @@ public class JavaListAdapter
   //XXX: parameterized type
   private List _list;
   
-  private ListIterator _iterator;
+  private int _next = 0;
 
   public JavaListAdapter(Env env, List list)
   {
@@ -146,10 +146,8 @@ public class JavaListAdapter
    */
   public Value current()
   {
-    ensureIterator();
-    
-    if (_iterator.hasNext())
-      return wrapJava(_list.get(_iterator.nextIndex()));
+    if (_next < _list.size())
+      return wrapJava(_list.get(_next));
     else
       return BooleanValue.FALSE;
   }
@@ -158,11 +156,9 @@ public class JavaListAdapter
    * Returns the current key
    */
   public Value key()
-  {
-    ensureIterator();
-    
-    if (_iterator.hasNext())
-      return LongValue.create(_iterator.nextIndex());
+  {    
+    if (_next < _list.size())
+      return LongValue.create(_next);
     else
       return NullValue.NULL;
   }
@@ -172,9 +168,7 @@ public class JavaListAdapter
    */
   public boolean hasCurrent()
   {
-    ensureIterator();
-    
-    return _iterator.hasNext();
+    return _next < _list.size();
   }
 
   /**
@@ -182,14 +176,10 @@ public class JavaListAdapter
    */
   public Value next()
   {
-    ensureIterator();
-    
-    if (_iterator.hasNext())
-      _iterator.next();
+    if (_next < _list.size())
+      return wrapJava(_list.get(_next++));
     else
       return BooleanValue.FALSE;
-    
-    return current();
   }
 
   /**
@@ -197,14 +187,10 @@ public class JavaListAdapter
    */
   public Value prev()
   {
-    ensureIterator();
-    
-    if (_iterator.hasPrevious())
-      _iterator.previous();
+    if (_next > 0)
+      return wrapJava(_list.get(_next--));
     else
       return BooleanValue.FALSE;
-    
-    return current();
   }
 
   /**
@@ -212,22 +198,22 @@ public class JavaListAdapter
    */
   public Value each()
   {
-    ensureIterator();
-    
-    if (! _iterator.hasNext())
+    if (_next < _list.size())
+    {
+      ArrayValue result = new ArrayValueImpl();
+
+      result.put(LongValue.ZERO, key());
+      result.put(KEY, key());
+
+      result.put(LongValue.ONE, current());
+      result.put(VALUE, current());
+
+      _next++;
+
+      return result;
+    }
+    else
       return NullValue.NULL;
-
-    ArrayValue result = new ArrayValueImpl();
-
-    result.put(LongValue.ZERO, key());
-    result.put(KEY, key());
-
-    result.put(LongValue.ONE, current());
-    result.put(VALUE, current());
-
-    _iterator.next();
-
-    return result;
   }
 
   /**
@@ -235,7 +221,7 @@ public class JavaListAdapter
    */
   public Value reset()
   {
-    _iterator = null;
+    _next = 0;
 
     return current();
   }
@@ -245,22 +231,9 @@ public class JavaListAdapter
    */
   public Value end()
   {
-    ensureIterator();
-    
-    while (_iterator.hasNext()) {
-      _iterator.next();
-    }
-    
-    if (_iterator.hasPrevious())
-      _iterator.previous();
+    _next = _list.size();
     
     return current();
-  }
-
-  private void ensureIterator()
-  {
-    if (_iterator == null)
-      _iterator = _list.listIterator();
   }
   
   /**

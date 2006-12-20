@@ -32,10 +32,14 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.vfs.ContextLoaderObjectInputStream;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -43,15 +47,17 @@ import java.util.logging.Logger;
 /**
  * Represents a Quercus java value.
  */
-public class JavaValue extends ResourceValue {
+public class JavaValue extends ResourceValue
+  implements Serializable
+{
   private static final Logger log
     = Logger.getLogger(JavaValue.class.getName());
   
-  private final JavaClassDef _classDef;
+  private JavaClassDef _classDef;
 
-  private final Object _object;
+  private Object _object;
 
-  protected final Env _env;
+  protected Env _env;
 
   public JavaValue(Env env, Object object, JavaClassDef def)
   {
@@ -403,6 +409,28 @@ public class JavaValue extends ResourceValue {
       return (InputStream) _object;
     else
       return super.toInputStream();
+  }
+
+  //
+  // Java Serialization
+  //
+
+  private void writeObject(ObjectOutputStream out)
+    throws IOException
+  {
+    out.writeObject(_classDef.getType().getCanonicalName());
+    
+    out.writeObject(_object);
+  }
+
+  private void readObject(ObjectInputStream in)
+    throws ClassNotFoundException, IOException
+  {
+    _env = Env.getInstance();
+    
+    _classDef = _env.getJavaClassDefinition((String) in.readObject());
+    
+    _object = in.readObject();
   }
 }
 
