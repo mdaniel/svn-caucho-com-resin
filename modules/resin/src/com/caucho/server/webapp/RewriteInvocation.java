@@ -111,6 +111,14 @@ public class RewriteInvocation {
   /**
    * Adds a forward.
    */
+  public Forward createForward()
+  {
+    return new Forward();
+  }
+
+  /**
+   * Adds a forward.
+   */
   public void addForward(Forward forward)
   {
     _programList.add(forward);
@@ -449,7 +457,7 @@ public class RewriteInvocation {
     }
   }
 
-  public static class Forward extends Program {
+  public class Forward extends Program {
     private String _target;
     private Pattern _regexp;
 
@@ -472,9 +480,12 @@ public class RewriteInvocation {
 
       if (matcher.find()) {
 	matcher.reset();
-	uri = matcher.replaceAll(_target);
+	
+	String targetUri = matcher.replaceAll(_target);
 
-	return new ForwardFilterChain(uri);
+	FilterChain chain = new ForwardFilterChain(targetUri);
+
+	return chain;
       }
       else
 	return null;

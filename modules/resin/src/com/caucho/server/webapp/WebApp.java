@@ -1857,13 +1857,13 @@ public class WebApp extends ServletContextImpl
 					   invocation);
 	  }
 
-	  if (chain == null) {
+	  if (chain == null)
 	    chain = _servletMapper.mapServlet(invocation);
 
-	    _filterMapper.buildDispatchChain(invocation, chain);
+	  // server/13s[o-r]
+	  _filterMapper.buildDispatchChain(invocation, chain);
 
-	    chain = invocation.getFilterChain();
-	  }
+	  chain = invocation.getFilterChain();
 
 	  entry = new FilterChainEntry(chain, invocation);
 	  chain = entry.getFilterChain();

@@ -12,6 +12,7 @@
 
 <s2 title="3.1snap - Dec 3, 2006">
 <ul>
+<li>rewrite-dispatch was not properly applying top-level filters (#1392, rep by M Marich)</li>
 <li>&lt;database> &lt;driver> needs to validate &lt;init-param> with driver type (#1520, rep by Shane Cruz)</li>
 <li>JPA: bytecode enhancement needs to handle LocalVariableTable (#1512, rep by jarnbjo)</li>
 <li>JMS: resin_jms_message should not use 'connection' as column name for MySQL 5 (#1511, rep by jarnbjo)</li>
