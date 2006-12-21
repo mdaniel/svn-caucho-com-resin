@@ -360,6 +360,15 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
     if (javaHome.lookup("lib/tools.jar").canRead())
       classPath.add(javaHome.lookup("lib/tools.jar").getNativePath());
+    else if (javaHome.getTail().startsWith("jre")) {
+      String tail = javaHome.getTail();
+      tail = "jdk" + tail.substring(3);
+      Path jdkHome = javaHome.getParent().lookup(tail);
+
+      if (jdkHome.lookup("lib/tools.jar").canRead())
+	classPath.add(jdkHome.lookup("lib/tools.jar").getNativePath());
+    }
+    
     if (javaHome.lookup("../lib/tools.jar").canRead())
       classPath.add(javaHome.lookup("../lib/tools.jar").getNativePath());
 
