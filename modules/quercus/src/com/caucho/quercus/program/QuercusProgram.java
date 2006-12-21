@@ -138,6 +138,11 @@ public class QuercusProgram {
     _depend.add(depend);
   }
 
+  public ArrayList<PersistentDependency> getDependencyList()
+  {
+    return _dependList;
+  }
+
   /**
    * Returns true if the function is modified.
    */

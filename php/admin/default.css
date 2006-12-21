@@ -8,7 +8,6 @@ body {
 
 table {
   font-size: 100%;
-/*  background: #eeccff; */
   background: #ccddff;
   color: black;
   border-collapse: collapse;
@@ -50,4 +49,17 @@ pre {
   color : black;
   font-family : monospace;
   font-size : .9em;
+}
+
+.fail {
+  background : #f99;
+}
+
+.warmup {
+  background : #fe9;
+}
+
+.stopped-lazy {
+  background : #bbb;
+  font-style : italic;
 }

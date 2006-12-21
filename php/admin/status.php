@@ -76,9 +76,9 @@ if (! empty($server->Id))
     <td><?= $resin->ResinHome ?></td>
   </tr>
 
-  <tr title="The server root directory used when starting this instance of Resin. This is the root directory of the web server files.">
-    <th>Server root:</th>
-    <td><?= $resin->ServerRoot ?></td>
+  <tr title="The resin root directory used when starting this instance of Resin. This is the root directory of the web server files.">
+    <th>Resin root:</th>
+    <td><?= $resin->RootDirectory ?></td>
   </tr>
 
   <tr title="The ip address of the machine that is running this instance of Resin.">
@@ -88,7 +88,7 @@ if (! empty($server->Id))
 
   <tr title="The current lifecycle state">
     <th>State:</th>
-    <td><?= $server->State ?></td>
+    <td class="<?= $server->State ?>"><?= $server->State ?></td>
   </tr>
 
   <tr title="The time that this instance was last started or restarted.">
@@ -214,7 +214,7 @@ if ($ports) {
 
   <tr>
     <td><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
-    <td><?= $port->State ?></td>
+    <td class="<?= $port->State ?>"><?= $port->State ?></td>
     <td><?= $port->ThreadActiveCount ?></td>
     <td><?= $port->ThreadIdleCount ?></td>
     <td><?= $port->ThreadCount ?></td>
@@ -269,7 +269,7 @@ foreach ($cluster->Servers as $client) {
   <tr>
     <td><?= $client->Name ?></td>
     <td><?= $client->Address ?>:<?= $client->Port ?></td>
-    <td><?= $client->State ?></td>
+    <td class="<?= $client->State ?>"><?= $client->State ?></td>
     <td><?= $client->ConnectionActiveCount ?></td>
     <td><?= $client->ConnectionIdleCount ?></td>
     <td><?= format_miss_ratio($client->ConnectionKeepaliveCountTotal,
