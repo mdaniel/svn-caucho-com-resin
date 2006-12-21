@@ -482,6 +482,7 @@ abstract public class JavaInvoker
 
     if (_hasEnv)
       javaArgs[k++] = env;
+
     if (_hasThis) {
       javaArgs[k++] = (ObjectValue) obj;
       obj = null;
@@ -541,7 +542,7 @@ abstract public class JavaInvoker
 
   public Value call(Env env, Object obj, Value a1)
   {
-    return call(env, obj, new Value[]{a1});
+    return call(env, obj, new Value[] {a1});
   }
 
   public Value call(Env env, Object obj, Value a1, Value a2)

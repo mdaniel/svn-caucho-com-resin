@@ -8,6 +8,16 @@
 
 <localtoc/>
 
+<s1 title="Resin 3.1.x">
+
+<p>Resin 3.1.x is a development branch.  New capabilities will be added
+along with bug fixes for future versions of the Resin 3.1.x branch.</p>
+
+<p>Deployments which need a Resin version with only bug fixes should
+use the Resin 3.0.x branch.</p>
+
+</s1>
+
 <s1 title="Servlet 2.5">
 
 <p>Resin 3.1 adds Servlet 2.5 support.  The Servlet 2.5 specification

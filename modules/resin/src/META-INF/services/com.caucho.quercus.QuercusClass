@@ -1,0 +1,3 @@
+com.caucho.quercus.lib.pdf.PDF
+com.caucho.quercus.lib.resin.MBeanServer
+com.caucho.quercus.lib.xml.XmlReader

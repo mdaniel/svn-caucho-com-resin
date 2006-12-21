@@ -33,6 +33,7 @@ import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.util.*;
 
 import javax.jms.*;
 import javax.naming.Context;
@@ -45,7 +46,9 @@ import java.util.logging.Logger;
 /**
  * JMS functions
  */
-public class JMSQueue {
+public class JMSQueue
+{
+  private static final L10N L = new L10N(JMSQueue.class);
   private static final Logger log = Logger.getLogger(JMSQueue.class.getName());
 
   private Connection _connection;
@@ -57,18 +60,18 @@ public class JMSQueue {
   /**
    * Connects to a named queue.
    */
-  public JMSQueue(Context context, ConnectionFactory connectionFactory,
-                  String queueName)
+  public JMSQueue(ConnectionFactory connectionFactory,
+		  Destination queue)
     throws Exception
   {
     _connection = connectionFactory.createConnection();
 
     _session = _connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-    if (queueName == null || queueName.length() == 0)
+    if (queue == null)
       _destination = _session.createTemporaryQueue();
     else
-      _destination = (Destination) context.lookup(queueName);
+      _destination = queue;
 
     _consumer = _session.createConsumer(_destination);
     _producer = _session.createProducer(_destination);
@@ -79,6 +82,11 @@ public class JMSQueue {
   public static Value __construct(Env env, @Optional String queueName)
   {
     JMSQueue queue = JMSModule.message_get_queue(env, queueName, null);
+
+    if (queue == null) {
+      env.warning(L.l("'{0}' is an unknown JMSQueue", queueName));
+      return NullValue.NULL;
+    }
 
     return new JavaValue(env, queue,
                          env.getJavaClassDefinition(JMSQueue.class.getName()));

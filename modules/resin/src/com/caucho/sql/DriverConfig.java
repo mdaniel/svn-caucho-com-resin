@@ -270,6 +270,8 @@ public class DriverConfig {
    */
   public void setInitParam(InitParam initParam)
   {
+    validateInitParam();
+    
     HashMap<String,String> paramMap = initParam.getParameters();
 
     Iterator<String> iter = paramMap.keySet().iterator();
@@ -474,7 +476,24 @@ public class DriverConfig {
         _driver = new DriverWrapper(_profilerPoint, _driver);
     }
 
+    if (_info.size() != 0) {
+      validateInitParam();
+    }
+
     J2EEManagedObject.register(new JDBCDriver(this));
+  }
+
+  private void validateInitParam()
+  {
+    if (_jcaDataSource != null) {
+      throw new ConfigException(L.l("<init-param> cannot be used with a JCA data source.  Use the init-param key as a tag, like <key>value</key>"));
+    }
+    else if (_poolDataSource != null) {
+      throw new ConfigException(L.l("<init-param> cannot be used with a ConnectionPoolDataSource.  Use the init-param key as a tag, like <key>value</key>"));
+    }
+    else if (_xaDataSource != null) {
+      throw new ConfigException(L.l("<init-param> cannot be used with an XADataSource.  Use the init-param key as a tag, like <key>value</key>"));
+    }
   }
 
   /**

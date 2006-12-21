@@ -36,7 +36,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
-import javax.jms.ConnectionFactory;
+import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.util.HashMap;
@@ -54,11 +54,10 @@ public class JMSModule extends AbstractQuercusModule
 
   private static final L10N L = new L10N(JMSModule.class);
 
-  private static Context _context;
-  private static ConnectionFactory _connectionFactory = null;
-
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
+
+  private ConnectionFactory _connectionFactory = null;
 
   /**
    * Returns the default quercus.ini values.
@@ -80,7 +79,12 @@ public class JMSModule extends AbstractQuercusModule
     }
 
     try {
-      return new JMSQueue(_context, connectionFactory, queueName);
+      Destination queue = null;
+
+      if (queueName != null && ! queueName.equals(""))
+	queue = (Destination) new InitialContext().lookup("java:comp/env/" + queueName);
+      
+      return new JMSQueue(connectionFactory, queue);
     } catch (Exception e) {
       env.warning(e);
 
@@ -98,18 +102,18 @@ public class JMSModule extends AbstractQuercusModule
     try {
       Context context = (Context) new InitialContext().lookup("java:comp/env");
 
-      _connectionFactory = 
+      ConnectionFactory connectionFactory = 
         (ConnectionFactory) context.lookup(factoryName.toString());
 
-      if (_connectionFactory == null)
+      if (connectionFactory == null)
         log.warning("Couldn't find factory " + factoryName.toString());
+
+      return connectionFactory;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new QuercusModuleException(e);
     }
-
-    return _connectionFactory;
   }
 
   static {

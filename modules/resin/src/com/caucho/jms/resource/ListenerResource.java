@@ -37,6 +37,7 @@ import com.caucho.jms.ConnectionFactoryImpl;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
+import javax.annotation.*;
 import javax.jms.*;
 import java.util.logging.Logger;
 
@@ -83,6 +84,7 @@ public class ListenerResource {
     _listenerConfig = config;
   }
 
+  @PostConstruct
   public void init() throws ConfigException, JMSException
   {
     if (_destination == null)

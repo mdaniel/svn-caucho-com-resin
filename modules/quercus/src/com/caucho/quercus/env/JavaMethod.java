@@ -70,6 +70,7 @@ public class JavaMethod extends JavaInvoker {
     return _method;
   }
 
+  @Override
   public Object invoke(Object obj, Object []args)
   {
     try {
