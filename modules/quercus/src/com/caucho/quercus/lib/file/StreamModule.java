@@ -318,6 +318,25 @@ public class StreamModule extends AbstractQuercusModule {
   }
 
   /**
+   * Returns the metadata of this stream.
+   * 
+   * XXX: TODO
+   */
+  public static Value stream_get_meta_data(Env env,
+                                           BinaryStream stream )
+  {
+    if (stream == null)
+      return BooleanValue.FALSE;
+    
+    env.stub("stream_get_meta_data");
+    
+    ArrayValue array = new ArrayValueImpl();    
+    array.put(new StringValueImpl("timed_out"), BooleanValue.FALSE);
+    
+    return array;
+  }
+
+  /**
    * Returns the available transports.
    */
   public static Value stream_get_transports(Env env)

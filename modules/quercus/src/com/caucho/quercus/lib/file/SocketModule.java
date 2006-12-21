@@ -297,6 +297,11 @@ public class SocketModule extends AbstractQuercusModule {
     }
   }
 
+  public static Value socket_get_status(Env env, BinaryStream stream)
+  {
+    return StreamModule.stream_get_meta_data(env, stream);
+  }
+
   public static Value socket_read(Env env, @NotNull SocketReadWrite socket,
                                   int length, @Optional int type)
   {
