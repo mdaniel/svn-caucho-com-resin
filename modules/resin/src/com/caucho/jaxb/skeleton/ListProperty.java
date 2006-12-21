@@ -32,7 +32,15 @@ package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.JAXBUtil;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,24 +48,45 @@ import java.util.List;
  * a List Property
  */
 public class ListProperty extends IterableProperty {
-  public int size(Object o)
+  public ListProperty(Property componentProperty)
   {
-    return ((List) o).size();
+    _componentProperty = componentProperty;
   }
 
-  public Iterator getIterator(Object o)
+  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+    throws IOException, XMLStreamException, JAXBException
   {
-    return ((List) o).iterator();
+    ArrayList<Object> list = new ArrayList<Object>();
+
+    if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
+      return list; // XXX qa for null vs empty?
+
+    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName()))
+      list.add(_componentProperty.read(u, in, qname));
+
+    return list;
+  }
+
+  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    //XXX wrapper
+    
+    if (obj != null) {
+      if (obj instanceof List) {
+        List list = (List) obj;
+
+        for (Object o : list)
+          _componentProperty.write(m, out, o, qname);
+      }
+      else
+        throw new ClassCastException("Argument not a List");
+    }
   }
 
   public String getSchemaType()
   {
-    /*
-    Property p = getComponentProperty();
-    Accessor a = p.getAccessor();
-
-    return JAXBUtil.getXmlSchemaDatatype(a.getType());*/
-    return "xsd:string"; // XXX
+    return _componentProperty.getSchemaType();
   }
 
   public boolean isXmlPrimitiveType()
@@ -70,5 +99,3 @@ public class ListProperty extends IterableProperty {
     return "unbounded";
   }
 }
-
-

@@ -48,6 +48,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -77,6 +79,7 @@ public class JAXBContextImpl extends JAXBContext {
     _specialClasses.add(QName.class);
     _specialClasses.add(Date.class);
     _specialClasses.add(Calendar.class);
+    _specialClasses.add(XMLGregorianCalendar.class);
   }
 
   private String[] _packages;
@@ -306,100 +309,121 @@ public class JAXBContextImpl extends JAXBContext {
     throw new JAXBException(L.l("Class {0} unknown to this JAXBContext", cl));
   }
 
-  public Property createProperty(Class type)
+  public Property createProperty(Type type)
     throws JAXBException
   {
-    if (String.class.equals(type))
-      return StringProperty.PROPERTY;
+    if (type instanceof Class) {
+      if (String.class.equals(type))
+        return StringProperty.PROPERTY;
 
-    if (Map.class.equals(type))
-      return new MapProperty();
+      if (Double.class.equals(type))
+        return DoubleProperty.OBJECT_PROPERTY;
 
-    if (Double.class.equals(type))
-      return DoubleProperty.OBJECT_PROPERTY;
+      if (Double.TYPE.equals(type))
+        return DoubleProperty.PRIMITIVE_PROPERTY;
 
-    if (Double.TYPE.equals(type))
-      return DoubleProperty.PRIMITIVE_PROPERTY;
+      if (Float.class.equals(type))
+        return FloatProperty.OBJECT_PROPERTY;
 
-    if (Float.class.equals(type))
-      return FloatProperty.OBJECT_PROPERTY;
+      if (Float.TYPE.equals(type))
+        return FloatProperty.PRIMITIVE_PROPERTY;
 
-    if (Float.TYPE.equals(type))
-      return FloatProperty.PRIMITIVE_PROPERTY;
+      if (Integer.class.equals(type))
+        return IntProperty.OBJECT_PROPERTY;
 
-    if (Integer.class.equals(type))
-      return IntProperty.OBJECT_PROPERTY;
+      if (Integer.TYPE.equals(type))
+        return IntProperty.PRIMITIVE_PROPERTY;
 
-    if (Integer.TYPE.equals(type))
-      return IntProperty.PRIMITIVE_PROPERTY;
+      if (Long.class.equals(type))
+        return LongProperty.OBJECT_PROPERTY;
 
-    if (Long.class.equals(type))
-      return LongProperty.OBJECT_PROPERTY;
+      if (Long.TYPE.equals(type))
+        return LongProperty.PRIMITIVE_PROPERTY;
 
-    if (Long.TYPE.equals(type))
-      return LongProperty.PRIMITIVE_PROPERTY;
+      if (Boolean.class.equals(type))
+        return BooleanProperty.OBJECT_PROPERTY;
 
-    if (Boolean.class.equals(type))
-      return BooleanProperty.OBJECT_PROPERTY;
+      if (Boolean.TYPE.equals(type))
+        return BooleanProperty.PRIMITIVE_PROPERTY;
 
-    if (Boolean.TYPE.equals(type))
-      return BooleanProperty.PRIMITIVE_PROPERTY;
+      if (Character.class.equals(type))
+        return CharacterProperty.OBJECT_PROPERTY;
 
-    if (Character.class.equals(type))
-      return CharacterProperty.OBJECT_PROPERTY;
+      if (Character.TYPE.equals(type))
+        return CharacterProperty.PRIMITIVE_PROPERTY;
 
-    if (Character.TYPE.equals(type))
-      return CharacterProperty.PRIMITIVE_PROPERTY;
+      if (Short.class.equals(type))
+        return ShortProperty.OBJECT_PROPERTY;
 
-    if (Short.class.equals(type))
-      return ShortProperty.OBJECT_PROPERTY;
+      if (Short.TYPE.equals(type))
+        return ShortProperty.PRIMITIVE_PROPERTY;
 
-    if (Short.TYPE.equals(type))
-      return ShortProperty.PRIMITIVE_PROPERTY;
+      if (Byte.class.equals(type))
+        return ByteProperty.OBJECT_PROPERTY;
 
-    if (Byte.class.equals(type))
-      return ByteProperty.OBJECT_PROPERTY;
+      if (Byte.TYPE.equals(type))
+        return ByteProperty.PRIMITIVE_PROPERTY;
 
-    if (Byte.TYPE.equals(type))
-      return ByteProperty.PRIMITIVE_PROPERTY;
+      if (BigDecimal.class.equals(type))
+        return BigDecimalProperty.PROPERTY;
 
-    if (BigDecimal.class.equals(type))
-      return BigDecimalProperty.PROPERTY;
+      if (BigInteger.class.equals(type))
+        return BigIntegerProperty.PROPERTY;
 
-    if (BigInteger.class.equals(type))
-      return BigIntegerProperty.PROPERTY;
+      if (QName.class.equals(type))
+        return QNameProperty.PROPERTY;
 
-    if (QName.class.equals(type))
-      return QNameProperty.PROPERTY;
+      if (Date.class.equals(type))
+        return DateTimeProperty.PROPERTY;
 
-    if (List.class.equals(type))
-      return new ListProperty();
+      if (Calendar.class.equals(type))
+        return CalendarProperty.PROPERTY;
 
-    if (Date.class.equals(type))
-      return DateTimeProperty.PROPERTY;
+      if (XMLGregorianCalendar.class.equals(type))
+        return XMLGregorianCalendarProperty.PROPERTY;
 
-    if (Calendar.class.equals(type))
-      return CalendarProperty.PROPERTY;
+      if (byte[].class.equals(type))
+        return ByteArrayProperty.PROPERTY;
 
-    if (XMLGregorianCalendar.class.equals(type))
-      return XMLGregorianCalendarProperty.PROPERTY;
+      Class cl = (Class) type;
 
-    if (byte[].class.equals(type))
-      return ByteArrayProperty.PROPERTY;
+      if (cl.isArray()) {
+        Property componentProperty = createProperty(cl.getComponentType());
+        return ArrayProperty.createArrayProperty(componentProperty,
+                                                 cl.getComponentType());
+      }
 
-    if (Collection.class.isAssignableFrom(type))
-      return new CollectionProperty();
+      if (cl.isEnum())
+        return new EnumProperty();
 
-    if (type.isArray()) {
-      Property componentProperty = createProperty(type.getComponentType());
-      return ArrayProperty.createArrayProperty(componentProperty,
-                                               type.getComponentType());
+      return new SkeletonProperty(getSkeleton(cl));
+    }
+    else if (type instanceof ParameterizedType) {
+      ParameterizedType ptype = (ParameterizedType) type;
+      Type rawType = ptype.getRawType();
+
+      if (rawType instanceof Class) {
+        Class rawClass = (Class) rawType;
+
+        if (Map.class.equals(rawClass))
+          return new MapProperty();
+
+        if (List.class.equals(rawClass)) {
+          Type[] args = ptype.getActualTypeArguments();
+
+          if (args.length != 1)
+            throw new JAXBException(L.l("unexpected number of generic arguments for List<>: {0}", args.length));
+
+          Property componentProperty = createProperty(args[0]);
+          return new ListProperty(componentProperty);
+        }
+
+        if (Collection.class.isAssignableFrom(rawClass))
+          return new CollectionProperty();
+      }
     }
 
-    if (type.isEnum())
-      return new EnumProperty();
-
-    return new SkeletonProperty(getSkeleton(type));
+    throw new JAXBException(L.l("Unrecognized type: {0}", type.toString()));
   }
 
   public void addRootElement(Skeleton s) 

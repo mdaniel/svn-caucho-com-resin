@@ -88,7 +88,7 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
   {
     try {
       Date date = dateFormat.parse(lexicalXSDDate);
-      Calendar calendar = dateFormat.getCalendar();
+      Calendar calendar = (Calendar) dateFormat.getCalendar().clone();
       calendar.setTime(date);
 
       return calendar;
@@ -103,7 +103,7 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
   {
     try {
       Date date = dateTimeFormat.parse(lexicalXSDDateTime);
-      Calendar calendar = dateFormat.getCalendar();
+      Calendar calendar = (Calendar) dateFormat.getCalendar().clone();
       calendar.setTime(date);
 
       return calendar;
@@ -191,7 +191,7 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
   {
     try {
       Date date = timeFormat.parse(lexicalXSDTime);
-      Calendar calendar = dateFormat.getCalendar();
+      Calendar calendar = (Calendar) dateFormat.getCalendar().clone();
       calendar.setTime(date);
 
       return calendar;

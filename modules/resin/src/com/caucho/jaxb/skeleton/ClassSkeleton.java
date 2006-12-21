@@ -94,6 +94,11 @@ public class ClassSkeleton<C> extends Skeleton {
   {
     return _class;
   }
+
+  public String toString()
+  {
+    return "ClassSkeleton[" + _class + "]";
+  }
   
   public ClassSkeleton(JAXBContextImpl context, Class<C> c)
     throws JAXBException
@@ -269,6 +274,8 @@ public class ClassSkeleton<C> extends Skeleton {
       _context.createSkeleton(compProp.getAccessor().getType());
     }
     else */
+
+
     if (! a.isXmlPrimitiveType()) {
       _context.createSkeleton(a.getType());
     }
@@ -322,18 +329,11 @@ public class ClassSkeleton<C> extends Skeleton {
         _beforeUnmarshal.invoke(ret, /*FIXME*/ null, null);
       if (u.getListener() != null)
         u.getListener().beforeUnmarshal(ret, null);
-      
-      while (in.getEventType() != -1) {
-        if (in.getEventType() == in.START_ELEMENT) {
-          Accessor a = getAccessor(in.getName());
-          Object val = a.read(u, in);
-          a.set(ret, val);
-        } 
-        else if (in.getEventType() == in.END_ELEMENT) {
-          in.next();
-          break;
-        }
-        in.next();
+
+      while (in.getEventType() == in.START_ELEMENT) {
+        Accessor a = getAccessor(in.getName());
+        Object val = a.read(u, in);
+        a.set(ret, val);
       }
 
       if (_afterUnmarshal != null)

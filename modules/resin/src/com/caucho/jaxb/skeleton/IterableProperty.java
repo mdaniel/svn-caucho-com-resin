@@ -43,7 +43,7 @@ import java.util.Iterator;
  * common superclass for arrays and collections
  */
 public abstract class IterableProperty extends Property {
-  private Property _componentProperty = null;
+  protected Property _componentProperty = null;
 
   /*
   protected abstract int size(Object o);

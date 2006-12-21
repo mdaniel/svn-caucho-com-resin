@@ -47,8 +47,6 @@ import com.caucho.util.L10N;
 public abstract class ArrayProperty extends IterableProperty {
   private static final L10N L = new L10N(CDataProperty.class);
 
-  protected Property _componentProperty;
-
   protected ArrayProperty(Property componentProperty)
   {
     _componentProperty = componentProperty;
@@ -102,7 +100,7 @@ public abstract class ArrayProperty extends IterableProperty {
 
   public boolean isXmlPrimitiveType()
   {
-    return false;
+    return _componentProperty.isXmlPrimitiveType();
   }
 }
 

@@ -30,6 +30,7 @@
 package com.caucho.jaxb.skeleton;
 
 import com.caucho.jaxb.JAXBUtil;
+import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -44,6 +45,7 @@ import java.io.IOException;
  * a property referencing some other Skeleton
  */
 public class SkeletonProperty extends Property {
+  private static final L10N L = new L10N(SkeletonProperty.class);
 
   private Skeleton _skeleton;
 
@@ -55,16 +57,29 @@ public class SkeletonProperty extends Property {
   public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    // XXX: QName
-    return _skeleton.read(u, in);
+    if (in.getEventType() != in.START_ELEMENT || ! in.getName().equals(qname))
+      return null;
+
+    Object ret = _skeleton.read(u, in);
+
+    while (in.getEventType() != in.END_ELEMENT)
+      in.nextTag();
+
+    if (! in.getName().equals(qname))
+      throw new IOException(L.l("Expected </{0}>, not </{1}>", 
+                                qname.getLocalPart(), in.getLocalName()));
+
+    in.nextTag();
+
+    return ret;
   }
   
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    // XXX
+    // XXX Subclassing/anyType
     //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
-    //skeleton.write(m, out, obj, _accessor.getQName());
+    _skeleton.write(m, out, obj, qname);
   }
 
   public String getSchemaType()
@@ -75,6 +90,11 @@ public class SkeletonProperty extends Property {
   public boolean isXmlPrimitiveType()
   {
     return false;
+  }
+
+  public String toString()
+  {
+    return "SkeletonProperty[" + _skeleton + "]";
   }
 }
 

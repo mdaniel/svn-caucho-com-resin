@@ -61,14 +61,15 @@ public class ObjectArrayProperty<T> extends ArrayProperty {
     throws IOException, XMLStreamException, JAXBException
   {
     if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
-      return (T[]) new Object[0]; // avoid ArrayList instantiation
+      // avoid ArrayList instantiation
+      return (T[]) Array.newInstance(_type, 0);
 
     ArrayList<T> ret = new ArrayList<T>();
 
-    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName()))
+    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName())) 
       ret.add((T) _componentProperty.read(u, in, qname));
 
-    T[] array = (T[]) new Object[ret.size()];
+    T[] array = (T[]) Array.newInstance(_type, ret.size());
     ret.toArray(array);
 
     return array;
@@ -82,7 +83,7 @@ public class ObjectArrayProperty<T> extends ArrayProperty {
     if (obj != null) {
       T[] array = (T[]) obj;
 
-      for (int i = 0; i < array.length; i++) 
+      for (int i = 0; i < array.length; i++)
         _componentProperty.write(m, out, array[i], qname);
     }
   }

@@ -66,7 +66,8 @@ public class GetterSetterAccessor extends Accessor {
     _get = _propertyDescriptor.getReadMethod();
     _set = _propertyDescriptor.getWriteMethod();
     _name = _propertyDescriptor.getName();
-    _property = _context.createProperty(_propertyDescriptor.getPropertyType());
+    _genericType = _get.getGenericReturnType();
+    _property = _context.createProperty(_genericType);
 
     if ("clazz".equals(_name))
       _name = "class";

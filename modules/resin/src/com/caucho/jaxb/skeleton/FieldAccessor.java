@@ -61,7 +61,7 @@ public class FieldAccessor extends Accessor {
     _type = _field.getType();
     _genericType = _field.getGenericType();
     _name = _field.getName();
-    _property = _context.createProperty(_type);
+    _property = _context.createProperty(_genericType);
 
     if (_field.isAnnotationPresent(XmlElement.class)) {
       XmlElement element = _field.getAnnotation(XmlElement.class);
