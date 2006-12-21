@@ -243,7 +243,7 @@ public class DoubleValue extends NumberValue
    */
   public Object toObject()
   {
-    return String.valueOf(_value);
+    return toString();
   }
 
   /**
@@ -252,7 +252,7 @@ public class DoubleValue extends NumberValue
    */
   public void print(Env env)
   {
-    env.print(_value);
+    env.print(toString());
   }
 
   /**
@@ -261,7 +261,7 @@ public class DoubleValue extends NumberValue
   @Override
   public void appendTo(StringBuilderValue sb)
   {
-    sb.append(_value);
+    sb.append(toString());
   }
 
   /**
@@ -270,7 +270,7 @@ public class DoubleValue extends NumberValue
   @Override
   public void appendTo(BinaryBuilderValue sb)
   {
-    sb.append(_value);
+    sb.append(toString());
   }
 
   /**
@@ -288,7 +288,7 @@ public class DoubleValue extends NumberValue
    */
   public void varExport(StringBuilder sb)
   {
-    sb.append(_value);
+    sb.append(toString());
   }
 
   //
@@ -338,7 +338,7 @@ public class DoubleValue extends NumberValue
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    out.print("float(" + toDouble() + ")");
+    out.print("float(" + toString() + ")");
   }
   
   //

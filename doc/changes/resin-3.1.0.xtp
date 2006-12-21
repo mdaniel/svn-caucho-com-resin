@@ -266,31 +266,31 @@ Configuration tutorial</a></p>
 gettext, iconv, and multi-byte strings.  In addition, Quercus has PHP6 Unicode
 support in anticipation of the upcoming release of PHP6.</p>
 
-<s2 title="Certified Applications">
+<p>Added Java serialization support for Quercus/PHP types.  Hessian/Burlap will
+be able to serialize/deserialize Quercus objects with no problem.</p>
+
+<p>Revamped PHP-Java type marshaling.</p>
+
+<s2 title="Applications Running on Quercus">
 
 <ol>
-<li>Drupal</li>
+
+<li>DokuWiki 2006-11-06</li>
+<li>Dragonfly CMS 9.0.6.1.7</li>
+<li>Drupal 4.7.4</li>
 <li>Gallery2</li>
+<li>Joomla 1.0.11</li>
+<li>Mambo</li>
 <li>Mantis</li>
 <li>MediaWiki</li>
-<li>phpBB</li>
-<li>phpMyAdmin</li>
-<li>Wordpress 2.0.5</li>
-</ol>
-
-<s3 title="Newly Certified">
-
-<ol>
-<li>DokuWiki</li>
-<li>Dragonfly CMS</li>
-<li>Joomla</li>
-<li>Mambo</li>
+<li>Phorum 5.1.16a</li>
+<li>phpBB 2.0.21</li>
+<li>phpMyAdmin 2.9.1.1</li>
+<li>PHProjekt 5.2</li>
 <li>PHP-Nuke</li>
-<li>Phorum</li>
-<li>XOOPS</li>
+<li>Wordpress 2.0.5</li>
+<li>Xoops 2.0.16</li>
 </ol>
-
-</s3>
 
 </s2>
 

@@ -344,6 +344,17 @@ public class StreamModule extends AbstractQuercusModule {
     return stream_wrapper_register(env, protocol, className);
   }
 
+  public static boolean stream_set_blocking(Env env,
+                                            @NotNull Value stream,
+                                            int mode)
+  {
+    if (stream == null)
+      return false;
+    
+    env.stub("stream_set_blocking");
+    return false;
+  }
+
   public static boolean stream_set_timeout(Env env,
                                            @NotNull Value stream,
                                            int seconds,

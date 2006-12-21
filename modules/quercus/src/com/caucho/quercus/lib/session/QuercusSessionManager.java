@@ -337,7 +337,7 @@ public class QuercusSessionManager {
     String id;
 
     do {
-      StringBuilder sb = new StringBuilder();
+      CharBuffer sb = new CharBuffer();
 
       Base64.encode(sb, RandomUtil.getRandomLong());
       Base64.encode(sb, Alarm.getCurrentTime());

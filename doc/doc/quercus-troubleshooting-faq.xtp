@@ -1,0 +1,44 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Troubleshooting FAQ</title>
+    <date>December 20, 2006</date>
+    
+    <description>
+      <p>How to get apps to run in Quercus</p>
+
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+    <localtoc/>
+
+
+<s1 title="How come I get a utf-8 encoding exception?">
+
+<p>Quercus runs scripts in utf-8 by default.  Some PHP scripts are in another encoding and you will need to tell Quercus what encoding to use (usually ISO-8859-1) in the webapp's web.xml file.</p>
+
+<p>Your web.xml should look something like this:</p>
+
+<example title="web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin">
+  &lt;servlet-mapping url-pattern="*.php"
+                   servlet-class="com.caucho.quercus.servlet.QuercusServlet">
+    &lt;init>
+      <b>&lt;script-encoding>iso-8859-1&lt;/script-encoding></b>
+    &lt;/init>
+  &lt;/servlet-mapping>
+&lt;/web-app>
+</example>
+
+<p>The web.xml file belongs in the webapp's WEB-INF directory.</p>
+
+
+</s1>
+
+
+
+  </body>
+</document>

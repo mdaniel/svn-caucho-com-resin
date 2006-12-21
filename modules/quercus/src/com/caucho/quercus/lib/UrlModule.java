@@ -100,6 +100,9 @@ public class UrlModule extends AbstractQuercusModule {
    */
   public static String base64_decode(String str)
   {
+    if (str == null)
+      return "";
+
     return Base64.decode(str);
   }
 
@@ -264,6 +267,9 @@ public class UrlModule extends AbstractQuercusModule {
    */
   public static String rawurldecode(String s)
   {
+    if (s == null)
+      return "";
+
     int len = s.length();
     StringBuilder sb = new StringBuilder();
 
@@ -343,12 +349,16 @@ public class UrlModule extends AbstractQuercusModule {
    */
   public static Value parse_url(Env env, String str)
   {
+    if (str == null)
+      str = "";
+
     int i = 0;
     int length = str.length();
 
     CharBuffer sb = new CharBuffer();
 
     ArrayValueImpl value = new ArrayValueImpl();
+    value.put("path", "");
 
     ParseUrlState state = ParseUrlState.INIT;
 

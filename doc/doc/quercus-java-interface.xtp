@@ -1,0 +1,194 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Java Interface</title>
+    <date>December 20, 2006</date>
+    
+    <description>
+<p>Quercus types, Java-Quercus type mappings, working with Java Classes in
+PHP</p>
+
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+    <localtoc/>
+
+<s1 title="Introduction">
+<p><b>Working with Quercus</b></p>
+
+
+</s1>
+
+<s1 title="Quercus Types">
+
+<p>For every PHP type, there is a Quercus type that is used
+internally to represent the corresponding PHP value. All Quercus types extend
+<code>Value</code>.</p>
+
+<deftable>
+<tr><th width="50%">PHP Type</th><th width="50%">Quercus Type
+</th></tr><tr><td>string (binary)</td><td>BinaryValue
+</td></tr><tr><td>string (unicode)</td><td>UnicodeValue
+</td></tr><tr><td>bool</td><td>BooleanValue
+</td></tr><tr><td>int</td><td>LongValue
+</td></tr><tr><td>float</td><td>DoubleValue
+</td></tr><tr><td>array</td><td>ArrayValue
+</td></tr><tr><td>object</td><td>ObjectValue
+</td></tr><tr><td>NULL</td><td>NullValue
+</td></tr></deftable>
+
+<p>Quercus natively supports Unicode and is compatible with the new PHP 6
+syntax.</p>
+
+</s1>
+
+<s1 title="Java Method Arguments">
+
+<p>In Quercus, Java methods can be called from within PHP.  Java arguments for
+Java methods need to be marshaled to the correct type from the PHP parameters
+that were passed in.</p>
+
+<deftable>
+<tr><th width="50%">Java Argument Type</th><th>Allowable PHP Values
+</th></tr><tr><td>String</td><td>any
+</td></tr><tr><td>boolean</td><td>any
+</td></tr><tr><td>byte</td><td>any
+</td></tr><tr><td>short</td><td>any
+</td></tr><tr><td>int</td><td>any
+</td></tr><tr><td>long</td><td>any
+</td></tr><tr><td>float</td><td>any
+</td></tr><tr><td>double</td><td>any
+</td></tr><tr><td>char</td><td>any
+</td></tr><tr><td>Boolean</td><td>any
+</td></tr><tr><td>Byte</td><td>any
+</td></tr><tr><td>Short</td><td>any
+</td></tr><tr><td>Integer</td><td>any
+</td></tr><tr><td>Long</td><td>any
+</td></tr><tr><td>Float</td><td>any
+</td></tr><tr><td>Double</td><td>any
+</td></tr><tr><td>Character</td><td>any
+</td></tr><tr><td>byte[]</td><td>array, string
+</td></tr><tr><td>char[]</td><td>array, string
+</td></tr><tr><td>T[] (any other array)</td><td>array
+</td></tr><tr><td>Calendar</td><td>int
+</td></tr><tr><td>Date</td><td>int
+</td></tr><tr><td>URL</td><td>string
+</td></tr><tr><td>Collection</td><td>array
+</td></tr><tr><td>List</td><td>array
+</td></tr><tr><td>Map</td><td>array
+</td></tr></deftable>
+
+<p>When the Java argument type is declared to be Object, the value will
+be marshaled to a Java object.  For example, a PHP int (LongValue) will be
+marshaled to an Integer.  The only exceptions are PHP arrays and objects: they
+are passed in as-is without marshaling.</p>
+
+<p>When the Java argument type is declared to be a Quercus Value, the PHP value
+is passed in directly without marshaling.</p>
+
+<p>If the Java argument is an object, passing in a PHP NULL will set the Java
+argument to null.</p>
+
+</s1>
+
+<s1 title="Java Method Returns">
+
+<p>When a Java method is called from PHP code, the return value of that Java
+method needs to be marshaled into a valid Quercus value.</p>
+
+<deftable>
+<tr><th width="50%">Java Return Type</th><th>resultant PHP Type</th><th>Quercus Type
+</th></tr><tr><td>String</td><td>string (unicode)</td><td>UnicodeValue
+</td></tr><tr><td>boolean</td><td>bool</td><td>BooleanValue
+</td></tr><tr><td>byte</td><td>int</td><td>LongValue
+</td></tr><tr><td>short</td><td>int</td><td>LongValue
+</td></tr><tr><td>int</td><td>int</td><td>LongValue
+</td></tr><tr><td>long</td><td>int</td><td>LongValue
+</td></tr><tr><td>float</td><td>float</td><td>DoubleValue
+</td></tr><tr><td>double</td><td>float</td><td>DoubleValue
+</td></tr><tr><td>char</td><td>string (unicode)</td><td>UnicodeValue
+</td></tr><tr><td>Boolean</td><td>bool</td><td>BooleanValue
+</td></tr><tr><td>Byte</td><td>int</td><td>LongValue
+</td></tr><tr><td>Short</td><td>int</td><td>LongValue
+</td></tr><tr><td>Integer</td><td>int</td><td>LongValue
+</td></tr><tr><td>Long</td><td>int</td><td>LongValue
+</td></tr><tr><td>Float</td><td>float</td><td>DoubleValue
+</td></tr><tr><td>Double</td><td>float</td><td>DoubleValue
+</td></tr><tr><td>Character</td><td>string (unicode)</td><td>UnicodeValue
+</td></tr><tr><td>null</td><td>NULL</td><td>NullValue
+</td></tr><tr><td>byte[]</td><td>string (binary)</td><td>BinaryValue
+</td></tr><tr><td>char[]</td><td>string (unicode)</td><td>UnicodeValue
+</td></tr><tr><td>T[] (any other array)</td><td>array</td><td>ArrayValue
+</td></tr><tr><td>Calendar</td><td>effectively int (getTimeInMillis())</td><td>JavaValue
+</td></tr><tr><td>Date</td><td>effectively int (getTime())</td><td>JavaValue
+</td></tr><tr><td>URL</td><td>effectively string (toString())</td><td>JavaValue
+</td></tr><tr><td>Collection</td><td>effectively array</td><td>JavaValue
+</td></tr><tr><td>List</td><td>effectively array</td><td>JavaValue
+</td></tr><tr><td>Map</td><td>effectively array</td><td>JavaValue
+</td></tr><tr><td>other Java Objects</td><td>unspecified</td><td>JavaValue
+</td></tr><tr><td>Value</td><td>n/a</td><td>Value
+</td></tr></deftable>
+
+<p>Java objects like Calendar and Map are placed inside JavaValues and then
+returned to the PHP environment.  A JavaValue is just a wrapper that exposes
+the object's Java methods to PHP.  For example, if <code>$url</code> is holding
+a Java URL object, then we can use <code>$url->getHost()</code> to call the
+URL's <code>getHost()</code> method.</p>
+
+<p>Some Java objects may have an effective PHP value.  Take for instance, Date.
+A Date object is, for practical purposes, a PHP int with it's value pegged to
+Date.getTime().</p>
+
+<p>Collection, List, and Map behave just like PHP arrays.  Suppose
+<code>$map</code> holds a Java HashMap, then it's certainly valid to do
+<code>$map["foo"] = "bar"</code>.  However, there are some limitations that
+are dependant on the underlying Java type.  For example,
+<code>$list[-1] = 5</code> will not be possible for a Java List because List
+indexes start at 0.</p>
+
+</s1>
+
+<s1 title="Working with Java Classes in PHP">
+
+<s2 title="Getting Static Classes">
+<p>Java classes can be accessed by PHP by using the <code>java()</code>
+function.</p>
+
+<example>
+&lt;?php
+
+  $a = java("java.lang.System");
+
+  echo $a->nanoTime();
+
+?>
+</example>
+
+</s2>
+
+
+<s2 title="Instantiating Objects">
+<p>To get new instances of Java ojects, use <code>new java()</code> by passing
+in the class name and any constructor arguments.</p>
+
+<example>
+&lt;?php
+
+  $a = new java("java.util.Date", 123);
+
+  echo $a->nanoTime();
+
+?>
+</example>
+
+</s2>
+
+<note><code>java()</code> and <code>new java()</code> have the same behavior
+and may be used interchangeably.</note>
+
+</s1>
+
+  </body>
+</document>

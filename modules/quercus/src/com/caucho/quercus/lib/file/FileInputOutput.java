@@ -273,7 +273,7 @@ public class FileInputOutput extends AbstractBinaryOutput
 
         int ch2 = read();
 
-        if (ch == '\n')
+        if (ch2 == '\n')
           sb.append('\n');
         else
           unread();
