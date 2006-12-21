@@ -209,12 +209,15 @@ public class QueryParser {
   // SELECT .._depth=0.. TRIM(.._depth=1.. 'a' FROM o.d1) .._depth=0 FROM ...
   private int _depth = 0;
 
+  private boolean _parsingResult;
   private boolean _parsingFrom;
   private boolean _parsingHaving;
 
   // jpa/119l: WHERE SIZE(xxx) > 0 => GROUP BY ... HAVING COUNT(xxx) > 0
   private boolean _isSizeFunExpr;
   private AmberExpr _havingExpr;
+  // jpa/1199
+  ArrayList<AmberExpr> _appendResultList = null;
 
   private boolean _isDerbyDBMS;
   private boolean _isPostgresDBMS;
@@ -331,9 +334,11 @@ public class QueryParser {
     _unique = 0;
     _token = -1;
     _depth = 0;
+    _parsingResult = false;
     _parsingFrom = false;
     _parsingHaving = false;
     _havingExpr = null;
+    _appendResultList = null;
     _groupList = null;
     _joinFetchMap = new HashMap<AmberExpr, String>();
   }
@@ -383,11 +388,13 @@ public class QueryParser {
     AbstractQuery oldQuery = _query;
     int oldDepth = _depth;
     AmberExpr oldHavingExpr = _havingExpr;
+    ArrayList oldAppendResultList = _appendResultList;
 
     // Reset depth: subselect
     _depth = 0;
 
     _havingExpr = null;
+    _appendResultList = null;
 
     SelectQuery query = new SelectQuery(_sql);
     query.setParentQuery(_query);
@@ -518,6 +525,10 @@ public class QueryParser {
         }
         else {
 
+          // jpa/1199
+          if (expr == null)
+            continue;
+
           expr = expr.bindSelect(this);
 
           if (_isLazyResult) {
@@ -561,6 +572,8 @@ public class QueryParser {
 
     if (hasFrom && (peekToken() != FROM))
       throw error(L.l("expected FROM at {0}", tokenName(token)));
+
+    _parsingResult = true;
 
     if (resultList.size() == 0) {
 
@@ -611,7 +624,13 @@ public class QueryParser {
 
     }
 
+    // jpa/1199
+    if (_appendResultList != null)
+      resultList.addAll(_appendResultList);
+
     query.setResultList(resultList);
+
+    _parsingResult = false;
 
     _parseIndex = fromParseIndex;
     _token = fromToken;
@@ -761,6 +780,7 @@ public class QueryParser {
     _query = oldQuery;
     _depth = oldDepth;
     _havingExpr = oldHavingExpr;
+    _appendResultList = oldAppendResultList;
 
     return query;
   }
@@ -1202,9 +1222,9 @@ public class QueryParser {
     else
       expr = parseCmpExpr();
 
-    // jpa/119l
+    // jpa/1199, jpa/119l
 
-    if (_parsingHaving)
+    if (_parsingResult || _parsingHaving)
       return expr;
 
     if (! _isSizeFunExpr)
@@ -1990,6 +2010,12 @@ public class QueryParser {
       ((SelectQuery) _query).setGroupList(_groupList);
 
       funExpr = SizeFunExpr.create(this, args);
+
+      if (_appendResultList == null)
+        _appendResultList = new ArrayList<AmberExpr>();
+
+      // jpa/1199
+      _appendResultList.add(funExpr.bindSelect(this));
 
       _isSizeFunExpr = true;
 

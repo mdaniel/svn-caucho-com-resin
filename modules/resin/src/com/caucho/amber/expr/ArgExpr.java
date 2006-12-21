@@ -210,8 +210,10 @@ public class ArgExpr extends AbstractAmberExpr {
       }
 
       if (argTypes[i - 1] != null) {
-        // jpa/141g argTypes[i - 1].setParameter(pstmt, i - 1, argValues[i - 1]);
-        argTypes[i - 1].setParameter(pstmt, _sqlIndex + 1, argValues[i - 1]);
+        // jpa/141g
+
+        // jpa/1217 argTypes[i - 1].setParameter(pstmt, _sqlIndex + 1, argValues[i - 1]);
+        argTypes[i - 1].setParameter(pstmt, i, argValues[i - 1]);
       }
       else
         pstmt.setString(_sqlIndex + 1, null);

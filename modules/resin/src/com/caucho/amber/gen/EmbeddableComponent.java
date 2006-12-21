@@ -242,7 +242,12 @@ public class EmbeddableComponent extends ClassComponent {
         break;
 
       out.println("case " + i + ":");
-      out.println("  return " + prop.getName() + ";");
+
+      if (_embeddableType.isIdClass() || _embeddableType.isFieldAccess())
+        out.println("  return " + prop.getName() + ";");
+      else // jpa/0w00
+        out.println("  return " + prop.generateSuperGetter() + ";");
+
       out.println();
     }
 

@@ -620,7 +620,9 @@ public class EntityComponent extends ClassComponent {
     out.pushDepth();
 
     out.println("__caucho_session = null;");
-    out.println("__caucho_home = null;");
+
+    // jpa/0x00
+    // out.println("__caucho_home = null;");
 
     out.println("__caucho_state = com.caucho.amber.entity.Entity.TRANSIENT;");
 
@@ -747,6 +749,7 @@ public class EntityComponent extends ClassComponent {
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
+
     out.println("if (__caucho_session == null)");
     out.println("  return false;");
     out.println();
@@ -803,7 +806,9 @@ public class EntityComponent extends ClassComponent {
     out.println("  return true;");
 
     out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
+
     out.println("__caucho_home.generateUpdateSQLPrefix(cb);");
+
     out.println("boolean isFirst = true;");
 
     for (int i = 0; i <= dirtyCount / 64; i++) {
