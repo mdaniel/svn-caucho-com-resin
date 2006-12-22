@@ -53,6 +53,7 @@ import com.caucho.make.DependencyContainer;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
@@ -417,6 +418,17 @@ public class WebApp extends ServletContextImpl
   {
     if (_parent != null)
       return _parent.getDispatchServer();
+    else
+      return null;
+  }
+
+  /**
+   * Gets the dispatch server.
+   */
+  public Server getServer()
+  {
+    if (_parent != null && _parent.getDispatchServer() instanceof Server)
+      return (Server) _parent.getDispatchServer();
     else
       return null;
   }

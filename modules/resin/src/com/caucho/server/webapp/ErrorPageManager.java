@@ -408,11 +408,22 @@ public class ErrorPageManager {
 
     out.println("</pre></code>");
 
-    if (! CauchoSystem.isTesting()) {
-      out.println("<hr /><small>");
-      out.println(Version.FULL_VERSION);
+    if (CauchoSystem.isTesting() || _app == null) {
+    }
+    else {
+      out.println("<p /><hr />");
+      out.println("<small>");
+	
+      if (_app.getServer() != null
+	  && _app.getServer().getServerHeader() != null) {
+	out.println(_app.getServer().getServerHeader());
+      }
+      else
+	out.println(com.caucho.Version.FULL_VERSION);
+	  
       out.println("</small>");
     }
+      
     out.println("</body></html>");
 
     String userAgent = request.getHeader("User-Agent");

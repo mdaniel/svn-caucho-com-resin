@@ -34,7 +34,8 @@ import javax.ejb.EJBException;
 /**
  * Wraps the actual exception with an EJB exception
  */
-public class EJBExceptionWrapper extends EJBException {
+public class EJBExceptionWrapper extends EJBException
+{
   private Throwable _rootCause;
   
   /**
@@ -61,6 +62,20 @@ public class EJBExceptionWrapper extends EJBException {
   public EJBExceptionWrapper(Throwable rootCause)
   {
     super(rootCause.toString());
+
+    _rootCause = rootCause;
+    
+    initCause(rootCause);
+  }
+
+  /**
+   * Create a EJBExceptionWrapper wrapping a root exception.
+   *
+   * @param rootCause the underlying wrapped exception.
+   */
+  public EJBExceptionWrapper(String msg, Throwable rootCause)
+  {
+    super(msg);
 
     _rootCause = rootCause;
     

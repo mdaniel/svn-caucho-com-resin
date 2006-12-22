@@ -272,7 +272,7 @@ class StubGenerator extends MarshalGenerator {
     
     if (! hasThrowable) {
       println("} catch (Throwable e) {");
-      println("  throw new javax.ejb.EJBException(\"stub exception\", e);");
+      println("  throw new com.caucho.ejb.EJBExceptionWrapper(\"stub exception\", e);");
     }
     
     println("} finally {");
