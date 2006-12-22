@@ -86,8 +86,8 @@ public class Table extends Store {
   public final static byte ROW_ALLOC = 0x2;
   public final static byte ROW_MASK = 0x3;
 
-  private final static String DB_VERSION = "Resin-DB 3.0.18";
-  private final static String MIN_VERSION = "Resin-DB 3.0.18";
+  private final static String DB_VERSION = "Resin-DB 3.1.0";
+  private final static String MIN_VERSION = "Resin-DB 3.1.0";
   
   private final Row _row;
 
