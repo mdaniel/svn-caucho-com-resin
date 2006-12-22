@@ -124,6 +124,11 @@ public interface Entity {
   public void __caucho_setConnection(AmberConnection aConn);
 
   /**
+   * Returns the connection.
+   */
+  public AmberConnection __caucho_getConnection();
+
+  /**
    * Returns true if the entity matches.
    */
   public boolean __caucho_match(String className, Object key);

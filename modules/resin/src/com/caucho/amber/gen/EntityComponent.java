@@ -384,6 +384,16 @@ public class EntityComponent extends ClassComponent {
     out.popDepth();
     out.println("}");
 
+    out.println();
+    out.println("public com.caucho.amber.manager.AmberConnection __caucho_getConnection()");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("return __caucho_session;");
+
+    out.popDepth();
+    out.println("}");
+
     generateExpire(out);
   }
 

@@ -103,7 +103,7 @@ public class AmberConnection
     = new ArrayList<AmberCollection>();
 
   private EntityTransaction _trans;
-  
+
   private long _xid;
   private boolean _isInTransaction;
   private boolean _isXA;
@@ -370,6 +370,10 @@ public class AmberConnection
       checkTransactionRequired("remove");
 
       Entity instance = (Entity) entity;
+
+      // jpa/0k12
+      if (instance.__caucho_getConnection() == null)
+        throw new IllegalArgumentException(L.l("remove() operation can only be applied to a managed entity. This entity instance is detached which means it was probably removed or needs to be merged."));
 
       int state = instance.__caucho_getEntityState();
 
@@ -1701,11 +1705,12 @@ public class AmberConnection
                                  entity.__caucho_getPrimaryKey());
 
     if (oldEntity == null) {
+
       EntityType entityType = entity.__caucho_getEntityType();
 
       if (entityType == null)
         return;
-        // throw new AmberException(L.l("entity has no entityType"));
+      // throw new AmberException(L.l("entity has no entityType"));
 
       AmberEntityHome entityHome = entityType.getHome();
       //entityHome = _persistenceUnit.getEntityHome(entity.getClass().getName());
@@ -1717,8 +1722,12 @@ public class AmberConnection
 
       addEntity(entity);
     }
-    else
+    else {
+      // XXX: jpa/0k12
+      oldEntity.__caucho_setConnection(this);
+
       entity = oldEntity;
+    }
 
     entity.__caucho_delete();
   }
@@ -2188,9 +2197,9 @@ public class AmberConnection
     public void begin()
     {
       try {
-	AmberConnection.this.beginTransaction();
+        AmberConnection.this.beginTransaction();
       } catch (SQLException e) {
-	throw new PersistenceException(e);
+        throw new PersistenceException(e);
       }
     }
 
@@ -2200,9 +2209,9 @@ public class AmberConnection
     public void commit()
     {
       try {
-	AmberConnection.this.commit();
+        AmberConnection.this.commit();
       } catch (SQLException e) {
-	throw new PersistenceException(e);
+        throw new PersistenceException(e);
       }
     }
 
@@ -2212,9 +2221,9 @@ public class AmberConnection
     public void rollback()
     {
       try {
-	AmberConnection.this.rollback();
+        AmberConnection.this.rollback();
       } catch (SQLException e) {
-	throw new PersistenceException(e);
+        throw new PersistenceException(e);
       }
     }
 
