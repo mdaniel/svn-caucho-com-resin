@@ -43,7 +43,7 @@ public class IiopProxyHandler implements InvocationHandler {
   private org.omg.CORBA.portable.ObjectImpl _stub;
   private StubMarshal _stubMarshal;
   
-  IiopProxyHandler(ORBImpl orb,
+  public IiopProxyHandler(ORBImpl orb,
 		   org.omg.CORBA.portable.ObjectImpl stub,
 		   StubMarshal stubMarshal)
   {
@@ -73,8 +73,13 @@ public class IiopProxyHandler implements InvocationHandler {
     Class []params = method.getParameterTypes();
 
     if (methodName.equals("toString") && params.length == 0)
-      return "IiopProxy[" + _orb + "]";
+      return "IiopProxy[" + _orb + "," + _stub + "]";
 
     throw new RuntimeException("method not found: " + methodName);
+  }
+
+  public String toString()
+  {
+    return "IiopProxyHandler[" + _orb + ", " + _stub + "]";
   }
 }

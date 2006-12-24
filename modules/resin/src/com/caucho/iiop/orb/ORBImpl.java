@@ -56,6 +56,29 @@ public class ORBImpl extends org.omg.CORBA.ORB
   public ORBImpl()
   {
     _stubDelegate = new StubDelegateImpl(this);
+
+    System.setProperty("javax.rmi.CORBA.PortableRemoteObjectClass",
+		       "com.caucho.iiop.orb.PortableRemoteObjectDelegateImpl");
+  }
+
+  public String getHost()
+  {
+    return _host;
+  }
+
+  public void setHost(String host)
+  {
+    _host = host;
+  }
+
+  public int getPort()
+  {
+    return _port;
+  }
+
+  public void setPort(int port)
+  {
+    _port = port;
   }
 
   StubDelegateImpl getStubDelegate()

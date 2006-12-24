@@ -55,7 +55,7 @@ public class StubImpl extends javax.rmi.CORBA.Stub
     _orb = orb;
     _ior = ior;
 
-    _set_delegate(orb.getStubDelegate());
+    _set_delegate(new StubDelegateImpl(orb, ior.getOid()));
   }
 
   public String []_ids()
@@ -74,6 +74,11 @@ public class StubImpl extends javax.rmi.CORBA.Stub
       return _ior.getOid();
     else
       return "INIT".getBytes();
+  }
+
+  public ORBImpl getORBImpl()
+  {
+    return _orb;
   }
 
   public String toString()

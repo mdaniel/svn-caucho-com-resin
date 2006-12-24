@@ -29,6 +29,8 @@
 
 package com.caucho.iiop.orb;
 
+import com.caucho.iiop.marshal.Marshal;
+
 /**
  * CORBA object marshaller
  */
@@ -39,12 +41,12 @@ public class CorbaObjectMarshal extends Marshal {
   public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
                       Object value)
   {
-    os.write_value((java.io.Serializable) value);
+    os.write_Object((org.omg.CORBA.Object) value);
   }
 
   @Override
   public Object unmarshal(org.omg.CORBA_2_3.portable.InputStream is)
   {
-    return is.read_value();
+    return is.read_Object();
   }
 }

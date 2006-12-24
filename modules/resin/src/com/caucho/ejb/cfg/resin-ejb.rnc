@@ -107,19 +107,14 @@ r_display-name =
 
 ## generic ejb bean, i.e. refers to either entity or session
 r_ejb-bean = element ejb-bean {
-  r_description?,
-
-  r_display-name?,
-
-  r_icon?,
-
-  r_jndi-name?,
-
-  r_ejb-name,
-
-  r_ejb_env,
-
-  r_security-identity?
+  r_description?
+  & r_display-name?
+  & r_icon?
+  & r_ejb-name
+  & r_ejb_env
+  & r_jndi-name?
+  & r_remote-name?
+  & r_security-identity?
 }
 
 r_ejb-class =
@@ -136,16 +131,16 @@ r_ejb-ref-Link = element ejb-ref {
     & r_jndi-name
   }
 r_ejb_env =
-  r_env-entry*,
-
-  r_ejb-ref*,
-  r_ejb-local-ref*,
-  r_service-ref*,
-  r_security-identity*,
-  r_security-role-ref*,
-  r_resource-ref*,
-  r_resource-env-ref*,
-  r_message-destination-ref*
+  r_env-entry*
+  & r_ejb-ref*
+  & r_ejb-local-ref*
+  & r_jndi-link*
+  & r_service-ref*
+  & r_security-identity*
+  & r_security-role-ref*
+  & r_resource-ref*
+  & r_resource-env-ref*
+  & r_message-destination-ref*
 
 r_ejb-jar = element ejb-jar {
   attribute l:version { "2.1" }?,
@@ -530,6 +525,10 @@ r_relationships = element relationships {
 r_remote = element remote {
   j2ee_class
 }
+
+r_remote-name =
+  attribute remote-name { string }
+  | element remote-name { string }
 
 r_resource-env-ref = element resource-env-ref { string }
 r_resource-ref = element resource-ref { string }

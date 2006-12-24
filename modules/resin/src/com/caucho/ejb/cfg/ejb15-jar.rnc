@@ -81,6 +81,8 @@ ejb15_ejb-jar = element ejb-jar {
 
   attribute xsi:schemaLocation { string }?,
 
+  attribute metadata-complete { string }?,
+
   ejb15_description*,
 
   ejb15_display-name*,
@@ -387,7 +389,7 @@ ejb15_session = element session {
 
   element session-type { "Stateful" | "Stateless" }?,
 
-  ejb15_transaction-type,
+  ejb15_transaction-type?,
 
   ejb15_ejb_env,
 

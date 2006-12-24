@@ -29,12 +29,24 @@
 
 package com.caucho.iiop.orb;
 
+import com.caucho.iiop.marshal.Marshal;
+
 /**
  * Proxy implementation for ORB clients.
  */
-abstract public class Marshal {
-  abstract public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
-                               Object value);
+public class VoidMarshal extends Marshal {
+  public static final Marshal MARSHAL = new VoidMarshal();
 
-  abstract public Object unmarshal(org.omg.CORBA_2_3.portable.InputStream is);
+  @Override
+  public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
+                      Object value)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Object unmarshal(org.omg.CORBA_2_3.portable.InputStream is)
+  {
+    return null;
+  }
 }

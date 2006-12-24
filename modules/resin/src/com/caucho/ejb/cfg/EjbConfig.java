@@ -480,19 +480,9 @@ public class EjbConfig {
 	
 	thread.setContextClassLoader(server.getClassLoader());
 
-	/* XXX: handled by bean.deployServer
-	if (bean.getServerProgram() != null)
-	  bean.getServerProgram().configure(server);
-	*/
-
 	server.init();
 
 	_ejbManager.addServer(server);
-	/*
-	if (bean.getJndiName() != null)
-	  _ejbManager.getProtocolManager().deployJNDI(bean.getJndiName(),
-						     server);
-	*/
       }
     } finally {
       thread.setContextClassLoader(oldLoader);

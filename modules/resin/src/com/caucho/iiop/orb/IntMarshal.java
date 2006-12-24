@@ -34,17 +34,19 @@ import com.caucho.iiop.marshal.Marshal;
 /**
  * Proxy implementation for ORB clients.
  */
-public class SerializableMarshal extends Marshal {
-  public static final Marshal MARSHAL = new SerializableMarshal();
+public class IntMarshal extends Marshal {
+  public static final Marshal MARSHAL = new IntMarshal();
 
+  @Override
   public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
                       Object value)
   {
-    os.write_value((java.io.Serializable) value);
+    os.write_long(((Number) value).intValue());
   }
 
+  @Override
   public Object unmarshal(org.omg.CORBA_2_3.portable.InputStream is)
   {
-    return is.read_value();
+    return new Integer(is.read_long());
   }
 }

@@ -31,7 +31,7 @@ package com.caucho.iiop;
 public class DummyObjectImpl extends org.omg.CORBA.portable.ObjectImpl {
   IOR _ior;
 
-  DummyObjectImpl(IOR ior)
+  public DummyObjectImpl(IOR ior)
   {
     _ior = ior;
   }

@@ -29,45 +29,49 @@
 
 package com.caucho.iiop;
 
-import com.caucho.log.Log;
+import com.caucho.iiop.marshal.Marshal;
+import com.caucho.iiop.orb.MarshalFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
 public class SkeletonMethod {
-  private static final Logger log = Log.open(SkeletonMethod.class);
+  private static final Logger log
+    = Logger.getLogger(SkeletonMethod.class.getName());
   
   private IiopSkeleton _skeleton;
   private Method _method;
   
-  private MarshallObject []_marshallArgs;
-  private MarshallObject _marshallReturn;
+  private Marshal []_marshalArgs;
+  private Marshal _marshalReturn;
 
   SkeletonMethod(IiopSkeleton skeleton, Method method, boolean isJava)
   {
     _skeleton = skeleton;
     _method = method;
 
+    MarshalFactory factory = MarshalFactory.create();
+
     // System.out.println("M: " + method);
     
     Class []paramTypes = method.getParameterTypes();
 
-    _marshallArgs = new MarshallObject[paramTypes.length];
+    _marshalArgs = new Marshal[paramTypes.length];
 
-    for (int i = 0; i < _marshallArgs.length; i++)
-      _marshallArgs[i] = MarshallObject.create(paramTypes[i], isJava);
+    for (int i = 0; i < _marshalArgs.length; i++)
+      _marshalArgs[i] = factory.create(paramTypes[i], ! isJava);
 
-    _marshallReturn = MarshallObject.create(method.getReturnType(), isJava);
+    _marshalReturn = factory.create(method.getReturnType(), ! isJava);
   }
 
   void service(Object object, IiopReader reader, IiopWriter writer)
     throws Throwable
   {
-    Object []args = new Object[_marshallArgs.length];
+    Object []args = new Object[_marshalArgs.length];
 
     for (int i = 0; i < args.length; i++) {
-      args[i] = _marshallArgs[i].unmarshall(reader);
+      args[i] = _marshalArgs[i].unmarshal(reader);
     }
 
     try {
@@ -75,7 +79,7 @@ public class SkeletonMethod {
 
       writer.startReplyOk(reader.getRequestId());
 
-      _marshallReturn.marshall(result, writer);
+      _marshalReturn.marshal(writer, result);
     } catch (InvocationTargetException e) {
       throw e.getCause();
     }

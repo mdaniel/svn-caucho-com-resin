@@ -31,6 +31,8 @@ package com.caucho.iiop.orb;
 
 import java.lang.reflect.Method;
 
+import com.caucho.iiop.marshal.Marshal;
+
 /**
  * Proxy implementation for ORB clients.
  */
@@ -39,20 +41,20 @@ public class MethodMarshal {
   private Marshal []_args;
   private Marshal _ret;
   
-  MethodMarshal(Method method)
+  MethodMarshal(MarshalFactory factory, Method method)
   {
-    MarshalFactory factory = MarshalFactory.create();
-
     _name = method.getName();
     
     Class []params = method.getParameterTypes();
 
+    boolean isIdl = false;
+
     _args = new Marshal[params.length];
 
     for (int i = 0; i < params.length; i++)
-      _args[i] = factory.create(params[i]);
+      _args[i] = factory.create(params[i], isIdl);
 
-    _ret = factory.create(method.getReturnType());
+    _ret = factory.create(method.getReturnType(), isIdl);
   }
 
   public Object invoke(org.omg.CORBA.portable.ObjectImpl obj,

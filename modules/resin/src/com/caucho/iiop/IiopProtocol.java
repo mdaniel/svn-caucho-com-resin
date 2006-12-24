@@ -35,8 +35,10 @@ import com.caucho.management.j2ee.RMI_IIOPResource;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
+import com.caucho.iiop.orb.*;
 
 import java.util.logging.Logger;
+import javax.annotation.*;
 
 /**
  * The main class for the HTTP server.
@@ -47,12 +49,15 @@ import java.util.logging.Logger;
  * @see com.caucho.server.TcpServer
  */
 public class IiopProtocol extends Protocol {
-  private static final Logger log = Log.open(IiopProtocol.class);
+  private static final Logger log
+    = Logger.getLogger(IiopProtocol.class.getName());
 
   static final String COPYRIGHT =
     "Copyright (c) 1998-2006 Caucho Technology.  All rights reserved.";
 
   private String _protocolName = "iiop";
+
+  private ORBImpl _orb;
   private CosServer _cos;
 
   private IiopContext _iiopContext;
@@ -85,10 +90,10 @@ public class IiopProtocol extends Protocol {
     _protocolName = name;
   }
 
+  @PostConstruct
   public void init()
   {
     J2EEManagedObject.register(new RMI_IIOPResource(this));
-
   }
 
   public CosServer getCos()
@@ -101,6 +106,17 @@ public class IiopProtocol extends Protocol {
     return lookupService(host, port, oid);
   }
 
+  ORBImpl getOrb(String host, int port)
+  {
+    if (_orb == null) {
+      _orb = new ORBImpl();
+      _orb.setHost(host);
+      _orb.setPort(port);
+    }
+
+    return _orb;
+  }
+  
   /**
    * Returns the service with the given URL.
    */

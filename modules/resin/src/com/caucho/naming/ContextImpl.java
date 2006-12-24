@@ -1180,6 +1180,6 @@ public class ContextImpl implements Context {
    */
   public String toString()
   {
-    return "[ContextImpl " + _name + "]";
+    return "ContextImpl[" + _name + "]";
   }
 }

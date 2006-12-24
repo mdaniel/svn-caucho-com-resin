@@ -94,6 +94,12 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   protected JClassLoader _jClassLoader;
 
   private String _ejbName;
+
+  // The published remote name as used by IIOP, Hessian, and 
+  // jndi-remote-prefix/jndi-local-prefix
+  private String _remoteName;
+  
+  // Overridden remote-name for jndi-remote-prefix
   private String _jndiName;
 
   private String _location = "";
@@ -126,8 +132,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
   ArrayList<EjbMethodPattern> _methodList = new ArrayList<EjbMethodPattern>();
 
-  private HashMap<String,EjbBaseMethod> _methodMap =
-    new HashMap<String,EjbBaseMethod>();
+  private HashMap<String,EjbBaseMethod> _methodMap
+    = new HashMap<String,EjbBaseMethod>();
 
   private BuilderProgramContainer _initProgram;
   private BuilderProgramContainer _serverProgram;
@@ -246,7 +252,25 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   }
     
   /**
-   * Sets the jndiName
+   * The remote-name is the remote published name
+   * used by IIOP, Hessian, and jndi-remote-prefix, jndi-local-prefix.
+   */
+  public void setRemoteName(String remoteName)
+  {
+    _remoteName = remoteName;
+  }
+    
+  /**
+   * The remote-name is the remote published name
+   * used by IIOP, Hessian, and jndi-remote-prefix, jndi-local-prefix.
+   */
+  public String getRemoteName()
+  {
+    return _remoteName;
+  }
+    
+  /**
+   * Sets the jndiName (overrides remote-name for the JNDI prefixes)
    */
   public void setJndiName(String jndiName)
   {
@@ -254,7 +278,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   }
 
   /**
-   * Gets the jndiName
+   * Sets the jndiName (overrides remote-name for the JNDI prefixes)
    */
   public String getJndiName()
   {

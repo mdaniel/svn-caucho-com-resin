@@ -84,6 +84,11 @@ public class SessionServer extends AbstractServer {
       super.init();
 
       // XXX: from TCK, s/b local or remote?
+      // Should be a resin-specific name, like
+      // java:comp/env/resin-ejb/sessionContext, since storing it in
+      // JNDI is a resin-specific implementation
+      // This needs to match InjectIntrospector
+      /*
       String prefix = getServerManager().getLocalJndiPrefix();
       if (prefix != null)
 	Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
@@ -91,6 +96,9 @@ public class SessionServer extends AbstractServer {
       prefix = getServerManager().getRemoteJndiPrefix();
       if (prefix != null)
 	Jndi.rebindDeep(prefix + "/sessionContext", getSessionContext());
+      */
+      Jndi.rebindDeep("java:comp/env/ejbContext", getSessionContext());
+      Jndi.rebindDeep("java:comp/env/sessionContext", getSessionContext());
       
       _localHome = getSessionContext().createLocalHome();
       _remoteHomeView = getSessionContext().createRemoteHomeView();

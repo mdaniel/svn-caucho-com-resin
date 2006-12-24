@@ -31,9 +31,7 @@ package com.caucho.naming.java;
 
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.log.Log;
-import com.caucho.naming.AbstractModel;
-import com.caucho.naming.ContextImpl;
-import com.caucho.naming.MemoryModel;
+import com.caucho.naming.*;
 import com.caucho.util.L10N;
 
 import javax.naming.Context;
@@ -48,63 +46,17 @@ import java.util.logging.Logger;
  * Create a remote object
  */
 public class javaURLContextFactory implements ObjectFactory {
-  private static L10N L = new L10N(javaURLContextFactory.class);
-  private static Logger dbg = Log.open(javaURLContextFactory.class);
+  private static final L10N L = new L10N(javaURLContextFactory.class);
+  private static final Logger log
+    = Logger.getLogger(javaURLContextFactory.class.getName());
 
-  private static EnvironmentLocal<AbstractModel> _javaModel =
-  new EnvironmentLocal<AbstractModel>("caucho.naming.model.java");
-
-  /**
-   * Sets the model for the current class loader.
-   */
-  public static AbstractModel getContextModel()
-  {
-    return _javaModel.get();
-  }
-
-  /**
-   * Sets the model for the current class loader.
-   */
-  public static void setContextModel(AbstractModel model)
-  {
-    _javaModel.set(model);
-  }
-  
   public Object getObjectInstance(Object obj,
                                   Name name,
                                   Context parentContext,
                                   Hashtable<?,?> env)
     throws NamingException
   {
-    AbstractModel model = _javaModel.getLevel();
-
-    if (model == null) {
-      if (dbg.isLoggable(Level.FINER)) {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-        dbg.finer(L.l("creating JNDI java: model for {0} parent:{1}",
-		      loader,
-		      (loader != null ? loader.getParent() : null)));
-      }
-        
-      model = _javaModel.get();
-
-      if (model != null)
-        model = model.copy();
-      else
-        model = new MemoryModel();
-
-      if (model.lookup("java:comp") == null)
-        model.createSubcontext("java:comp");
-
-      if (model.lookup("java:") == null)
-        model.createSubcontext("java:");
-
-      // XXX: java: is not a context itself.  So you can't do a lookup on
-      // java: and then get a list.
-
-      _javaModel.set(model);
-    }
+    AbstractModel model = InitialContextFactoryImpl.createRoot();
 
     Context context = new ContextImpl(model, env);
 

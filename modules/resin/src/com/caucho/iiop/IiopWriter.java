@@ -60,6 +60,8 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
 
   protected String _host;
   protected int _port;
+  
+  private org.omg.CORBA.ORB _orb;
 
   private IdentityIntMap _refMap = new IdentityIntMap();
   
@@ -238,10 +240,12 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   /* CORBA */
   public org.omg.CORBA.ORB orb()
   {
-    //
-    ORB orb = ORB.init();
+    return _orb;
+  }
 
-    return orb;
+  public void setOrb(org.omg.CORBA.ORB orb)
+  {
+    _orb = orb;
   }
   
   public org.omg.CORBA.portable.InputStream create_input_stream()

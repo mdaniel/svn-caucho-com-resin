@@ -315,7 +315,7 @@ public class AppClient implements EnvironmentBean
     throws Exception
   {
     init();
-
+    
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 

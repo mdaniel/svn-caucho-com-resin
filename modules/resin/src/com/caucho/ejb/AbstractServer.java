@@ -65,9 +65,13 @@ abstract public class AbstractServer implements EnvironmentBean {
   private static final L10N L = new L10N(AbstractServer.class);
 
   protected String _ejbName;
-  protected String _jndiName;
   protected String _serverId;
   protected String _handleServerId;
+
+  // remote published name for IIOP, Hessian, JNDI
+  protected String _remoteName;
+  // override of remote-name (obsolete?)
+  protected String _jndiName;
 
   private Context _jndiEnv;
 
@@ -138,7 +142,33 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
-   * Sets the jndi name.
+   * Sets the remote name.  Canonical form has leading and trailing
+   * slashes trimmed.
+   */
+  public void setRemoteName(String remoteName)
+  {
+    if (remoteName == null)
+      return;
+
+    while (remoteName.startsWith("/"))
+      remoteName = remoteName.substring(1);
+
+    while (remoteName.endsWith("/"))
+      remoteName = remoteName.substring(0, remoteName.length() - 1);
+
+    _remoteName = remoteName;
+  }
+
+  /**
+   * Returns the remote name.
+   */
+  public String getRemoteName()
+  {
+    return _remoteName;
+  }
+
+  /**
+   * Sets the jndi name (overrides remote name for jndi, obsolete?).
    */
   public void setJndiName(String jndiName)
   {
@@ -171,7 +201,10 @@ abstract public class AbstractServer implements EnvironmentBean {
   public String getProtocolId()
   {
     if (_serverId == null) {
-      String serverId = getJndiName();
+      String serverId = getRemoteName();
+
+      if (serverId == null)
+	serverId = getJndiName();
 
       if (serverId == null)
 	serverId = getEJBName();
@@ -716,6 +749,9 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getEJBName() + "," + getJndiName() + "]";
+    if (getRemoteName() != null)
+      return getClass().getSimpleName() + "[" + getEJBName() + "," + getRemoteName() + "]";
+    else
+      return getClass().getSimpleName() + "[" + getEJBName() + "]";
   }
 }

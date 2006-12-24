@@ -1038,6 +1038,9 @@ public class EjbEntityBean extends EjbBean {
     EntityServer server = new EntityServer(ejbManager);
 
     server.setEJBName(getEJBName());
+    server.setRemoteName(getRemoteName());
+
+    // XXX: obsolete?
     server.setJndiName(getJndiName());
 
     server.setRemoteHomeClass(getRemoteHomeClass());

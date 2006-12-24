@@ -33,6 +33,7 @@ import com.caucho.server.connection.Connection;
 import com.caucho.server.port.ServerRequest;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
+import com.caucho.iiop.orb.*;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -51,6 +52,7 @@ public class IiopRequest implements ServerRequest {
 
   Connection _conn;
   IiopProtocol _server;
+  ORBImpl _orb;
   IiopReader _reader;
 
   ClassLoader _loader;
@@ -73,6 +75,8 @@ public class IiopRequest implements ServerRequest {
   {
     _server = server;
     _conn = conn;
+
+    InetAddress local = _conn.getLocalAddress();
 
     _reader = new IiopReader();
 
@@ -122,6 +126,16 @@ public class IiopRequest implements ServerRequest {
     
       _readStream = _conn.getReadStream();
       _writeStream = _conn.getWriteStream();
+
+      if (_orb == null) {
+	InetAddress local = _conn.getLocalAddress();
+	_orb = _server.getOrb(local.getHostName(), _conn.getLocalPort());
+
+	_reader.setOrb(_orb);
+	_writer10.setOrb(_orb);
+	_writer11.setOrb(_orb);
+	_writer12.setOrb(_orb);
+      }
 
       if (_cosSkel != null) {
       }

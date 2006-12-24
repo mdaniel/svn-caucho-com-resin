@@ -56,7 +56,9 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
   // Properties for the object
   protected Hashtable<String,String> _props;
   // The jndi-link path
-  protected String _name;
+  protected String _jndiName;
+  // The jndi-link path
+  protected String _jndiLocalName;
   // The foreign name
   protected String _foreignName;
 
@@ -104,7 +106,15 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
    */
   public void setJndiName(String name)
   {
-    _name = name;
+    _jndiName = name;
+  }
+
+  /**
+   * Sets the jndi name.
+   */
+  public void setJndiLocalName(String name)
+  {
+    _jndiLocalName = name;
   }
 
   /**
@@ -212,7 +222,7 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
   public void init()
     throws Exception
   {
-    if (_name == null)
+    if (_jndiName == null && _jndiLocalName == null)
       throw new ConfigException(L.l("<jndi-link> configuration needs a <jndi-name>.  The <jndi-name> is the JNDI name where the context will be linked."));
     
     Class factoryClass = _factoryClass;
@@ -222,27 +232,30 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
 
     if (log.isLoggable(Level.CONFIG)) {
       if (_foreignName != null)
-	log.config("jndi-link[jndi-name=" + _name
+	log.config("jndi-link[jndi-name=" + _jndiName
 		   + ", foreign-name=" + _foreignName + "] configured");
       else if (_factoryClass != null)
-	log.config("jndi-link[jndi-name=" + _name
+	log.config("jndi-link[jndi-name=" + _jndiName
 		   + ", factory=" + _factoryClass.getName() + "] configured");
     }
 
     if (_foreignName != null
-	&& Jndi.getFullName(_name).equals(Jndi.getFullName(_foreignName)))
+	&& Jndi.getFullName(_jndiName).equals(Jndi.getFullName(_foreignName)))
       return;
 
     // server/155a - not a short link since it needs to be able to bind
     // the jndi root
-    Jndi.bindDeep(_name, this);
+    if (_jndiLocalName != null)
+      Jndi.rebindDeep(_jndiLocalName, this);
+    else
+      Jndi.rebindDeepShort(_jndiName, this);
   }
 
   public String toString()
   {
     if (_factoryClass != null)
-      return "LinkProxy[name=" + _name + ",factory=" + _factoryClass.getName() + "]";
+      return "LinkProxy[name=" + _jndiName + ",factory=" + _factoryClass.getName() + "]";
     else
-      return "LinkProxy[name=" + _name + ",foreign=" + _foreignName + "]";
+      return "LinkProxy[name=" + _jndiName + ",foreign=" + _foreignName + "]";
   }
 }

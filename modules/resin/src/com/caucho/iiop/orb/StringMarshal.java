@@ -29,6 +29,8 @@
 
 package com.caucho.iiop.orb;
 
+import com.caucho.iiop.marshal.Marshal;
+
 /**
  * Proxy implementation for ORB clients.
  */

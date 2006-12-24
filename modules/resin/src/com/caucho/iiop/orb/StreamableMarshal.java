@@ -29,22 +29,40 @@
 
 package com.caucho.iiop.orb;
 
+import org.omg.CORBA.portable.Streamable;
+
 import com.caucho.iiop.marshal.Marshal;
 
 /**
  * Proxy implementation for ORB clients.
  */
-public class SerializableMarshal extends Marshal {
-  public static final Marshal MARSHAL = new SerializableMarshal();
+public class StreamableMarshal extends Marshal
+{
+  private final Class _cl;
+
+  StreamableMarshal(Class cl)
+  {
+    _cl = cl;
+  }
 
   public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
                       Object value)
   {
-    os.write_value((java.io.Serializable) value);
+    Streamable streamable = (Streamable) value;
+
+    streamable._write(os);
   }
 
   public Object unmarshal(org.omg.CORBA_2_3.portable.InputStream is)
   {
-    return is.read_value();
+    try {
+      Streamable streamable = (Streamable) _cl.newInstance();
+
+      streamable._read(is);
+      
+      return streamable;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

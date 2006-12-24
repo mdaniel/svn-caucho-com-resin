@@ -224,6 +224,8 @@ public class Bean {
 
       JClass []ifs = type.getInterfaces();
 
+      ArrayList<JClass> interfaceList = new ArrayList<JClass>();
+
       for (int i = 0; i < ifs.length; i++) {
 	local = ifs[i].getAnnotation(Local.class);
 
@@ -238,18 +240,26 @@ public class Bean {
 	  bean.setRemoteWrapper(ifs[i]);
 	  continue;
 	}
+
+	if (ifs[i].getName().equals("java.io.Serializable"))
+	  continue;
+	
+	if (ifs[i].getName().equals("java.rmi.Remote"))
+	  continue;
+
+	interfaceList.add(ifs[i]);
       }
 
       if (bean.getLocal() != null || bean.getRemote() != null) {
       }
-      else if (ifs.length == 0)
+      else if (interfaceList.size() == 0)
 	throw new ConfigException(L.l("'{0}' has no interfaces.  Can't currently generate.",
 				      type.getName()));
-      else if (ifs.length != 1)
+      else if (interfaceList.size() != 1)
 	throw new ConfigException(L.l("'{0}' has multiple interfaces, but none are marked as @Local or @Remote.",
 				      type.getName()));
       else {
-	bean.setLocalWrapper(ifs[0]);
+	bean.setLocalWrapper(interfaceList.get(0));
       }
 
       JAnnotation xa = type.getAnnotation(TransactionAttribute.class);

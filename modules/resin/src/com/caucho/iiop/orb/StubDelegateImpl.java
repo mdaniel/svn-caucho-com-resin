@@ -43,10 +43,17 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
     = Logger.getLogger(StubDelegateImpl.class.getName());
   
   private ORBImpl _orb;
+  private byte []_oid;
 
   StubDelegateImpl(ORBImpl orb)
   {
     _orb = orb;
+  }
+
+  StubDelegateImpl(ORBImpl orb, byte []oid)
+  {
+    _orb = orb;
+    _oid = oid;
   }
 
   @Override
@@ -61,10 +68,20 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
       ReadWritePair pair = _orb.openReadWrite();
 
       MessageWriter out = new StreamMessageWriter(pair.getWriteStream());
-    
-      writer.init(out, new IiopReader(pair.getReadStream()));
 
-      byte []oid = ((StubImpl) self).getOid();
+      IiopReader is = new IiopReader(pair.getReadStream());
+
+      is.setOrb(_orb);
+    
+      writer.init(out, is);
+
+      byte []oid;
+
+      if (self instanceof StubImpl)
+	oid = ((StubImpl) self).getOid();
+      else {
+	oid = _oid;
+      }
 
       writer.startRequest(oid, 0, oid.length, op, 1);
 
@@ -133,10 +150,16 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
   @Override
   public boolean is_a(org.omg.CORBA.Object obj, String repId)
   {
-    System.out.println("IS-A: " + obj + " " + repId);
-    Thread.dumpStack();
+    if (obj instanceof StubImpl) {
+      String typeId = ((StubImpl) obj).getIOR().getTypeId();
 
-    return true;
+      if (typeId.equals(repId))
+	return true;
+    }
+    
+    System.out.println("IS-A: " + obj + " " + repId);
+
+    return false;
   }
 
   @Override
@@ -161,7 +184,12 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
   @Override
   public void release(org.omg.CORBA.Object obj)
   {
-    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void releaseReply(org.omg.CORBA.Object self,
+			   org.omg.CORBA.portable.InputStream is)
+  {
   }
 
   @Override

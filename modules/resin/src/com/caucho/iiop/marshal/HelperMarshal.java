@@ -27,24 +27,57 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.iiop.orb;
+package com.caucho.iiop.marshal;
 
-import com.caucho.iiop.marshal.Marshal;
+import java.lang.reflect.Method;
 
 /**
  * Proxy implementation for ORB clients.
  */
-public class SerializableMarshal extends Marshal {
-  public static final Marshal MARSHAL = new SerializableMarshal();
+public class HelperMarshal extends Marshal
+{
+  private final Class _cl;
+  private final Method _readHelper;
+  private final Method _writeHelper;
 
+  public HelperMarshal(Class cl)
+  {
+    _cl = cl;
+    
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      Class helperClass = Class.forName(cl.getName() + "Helper", false, loader);
+
+      _readHelper = helperClass.getMethod("read", new Class[] {
+	org.omg.CORBA.portable.InputStream.class
+      });
+
+      _writeHelper = helperClass.getMethod("write", new Class[] {
+	org.omg.CORBA.portable.OutputStream.class, cl
+      });
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
   public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
                       Object value)
   {
-    os.write_value((java.io.Serializable) value);
+    try {
+      _writeHelper.invoke(null, os, value);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
+  @Override
   public Object unmarshal(org.omg.CORBA_2_3.portable.InputStream is)
   {
-    return is.read_value();
+    try {
+      return _readHelper.invoke(null, is);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

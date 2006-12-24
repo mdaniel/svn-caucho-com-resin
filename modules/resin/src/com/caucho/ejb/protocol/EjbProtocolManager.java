@@ -219,7 +219,11 @@ public class EjbProtocolManager {
     try {
       Thread.currentThread().setContextClassLoader(_loader);
       String ejbName = server.getEJBName();
-      String jndiName = server.getJndiName();
+      String jndiName = server.getRemoteName();
+
+      // XXX: obsolete?
+      if (server.getJndiName() != null)
+	jndiName = server.getJndiName();
 
       String localJndiName = null;
       String remoteJndiName = null;
@@ -264,15 +268,16 @@ public class EjbProtocolManager {
           Object remoteObj = server.getEJBHome();
 
           if (remoteObj != null) {
-
             if (jndiName != null) {
               if (jndiName.startsWith("java:comp"))
                 remoteJndiName = Jndi.getFullName(jndiName);
               else if (_remoteJndiPrefix != null)
                 remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + jndiName);
+	      /*
               else
-                throw new NamingException(L.l("<jndi-name> `{0}' requires a fully qualified name or a configured <jndi-remote-prefix>",
+                throw new NamingException(L.l("<jndi-name> '{0}' requires a fully qualified name or a configured <jndi-remote-prefix>",
                                               jndiName));
+	      */
             }
             else if (_remoteJndiPrefix != null)
               remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + ejbName);

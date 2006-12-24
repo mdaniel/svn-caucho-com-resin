@@ -82,7 +82,9 @@ public class StatelessServer extends AbstractServer {
       
       super.init();
     
-      Jndi.rebindDeep("java:comp/env/ejb/sessionContext",
+      Jndi.rebindDeep("java:comp/env/ejbContext",
+		      getStatelessContext());
+      Jndi.rebindDeep("java:comp/env/sessionContext",
 		      getStatelessContext());
       
       _localHome = getStatelessContext().createLocalHome();

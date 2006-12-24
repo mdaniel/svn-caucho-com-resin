@@ -39,22 +39,26 @@ public class StubMarshal {
   private final HashMap<Method,MethodMarshal> _methodMap
     = new HashMap<Method,MethodMarshal>();
 
-  StubMarshal(Class cl)
+  public StubMarshal(Class cl)
   {
     introspect(cl);
   }
 
   private void introspect(Class cl)
   {
+    MarshalFactory factory = MarshalFactory.create();
+    
     for (Method method : cl.getMethods()) {
       if (Modifier.isStatic(method.getModifiers()))
 	continue;
+      
       if (method.getDeclaringClass().equals(Object.class))
 	continue;
+      
+      if (method.getDeclaringClass().equals(org.omg.CORBA.Object.class))
+	continue;
 
-      _methodMap.put(method, new MethodMarshal(method));
-
-      System.out.println("M: " + method);
+      _methodMap.put(method, new MethodMarshal(factory, method));
     }
   }
 

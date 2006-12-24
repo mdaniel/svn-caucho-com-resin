@@ -248,6 +248,9 @@ public class EjbSessionBean extends EjbBean {
       server = new SessionServer(ejbManager);
 
     server.setEJBName(getEJBName());
+    server.setRemoteName(getRemoteName());
+
+    // XXX: obsolete?
     server.setJndiName(getJndiName());
 
     JClass remoteHome = getRemoteHome();

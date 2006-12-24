@@ -29,7 +29,25 @@
 
 package com.caucho.iiop.orb;
 
+import com.caucho.iiop.marshal.ArrayMarshal;
+import com.caucho.iiop.marshal.HelperMarshal;
+import com.caucho.iiop.marshal.BooleanMarshal;
+import com.caucho.iiop.marshal.CharMarshal;
+import com.caucho.iiop.marshal.ByteMarshal;
+import com.caucho.iiop.marshal.ShortMarshal;
+import com.caucho.iiop.marshal.IntMarshal;
+import com.caucho.iiop.marshal.LongMarshal;
+import com.caucho.iiop.marshal.FloatMarshal;
+import com.caucho.iiop.marshal.DoubleMarshal;
+import com.caucho.iiop.marshal.PrincipalMarshal;
+import com.caucho.iiop.marshal.RemoteMarshal;
+import com.caucho.iiop.marshal.AnyMarshal;
+import com.caucho.iiop.marshal.VoidMarshal;
+import com.caucho.iiop.marshal.Marshal;
+
 import java.util.HashMap;
+import org.omg.CORBA.portable.IDLEntity;
+
 
 /**
  * Proxy implementation for ORB clients.
@@ -45,21 +63,56 @@ public class MarshalFactory {
     return _factory;
   }
 
-  public Marshal create(Class cl)
+  /**
+   * Creates the marshal object for an object.
+   *
+   * @param cl the class to marshal
+   * @param isIdl if true, handle arrays as IDL sequences
+   */
+  public Marshal create(Class cl, boolean isIdl)
   {
     Marshal marshal = _classMap.get(cl);
 
     if (marshal != null)
       return marshal;
+    
+    if (cl.isArray() && isIdl) {
+      Class compType = cl.getComponentType();
+      
+      Marshal subMarshal = create(compType, isIdl);
+
+      return new ArrayMarshal(compType, subMarshal);
+    }
+
+    if (IDLEntity.class.isAssignableFrom(cl))
+      return new HelperMarshal(cl);
+
+    if (org.omg.CORBA.portable.Streamable.class.isAssignableFrom(cl))
+      return new StreamableMarshal(cl);
+
+    if (java.rmi.Remote.class.isAssignableFrom(cl))
+      return new RemoteMarshal(cl);
 
     if (java.io.Serializable.class.isAssignableFrom(cl))
       return SerializableMarshal.MARSHAL;
 
-    throw new UnsupportedOperationException(cl.getName());
+    return AnyMarshal.MARSHAL;
   }
 
   static {
+    _classMap.put(void.class, VoidMarshal.MARSHAL);
+    
+    _classMap.put(boolean.class, BooleanMarshal.MARSHAL);
+    _classMap.put(char.class, CharMarshal.MARSHAL);
+    _classMap.put(byte.class, ByteMarshal.MARSHAL);
+    _classMap.put(short.class, ShortMarshal.MARSHAL);
+    _classMap.put(int.class, IntMarshal.MARSHAL);
+    _classMap.put(long.class, LongMarshal.MARSHAL);
+    _classMap.put(float.class, FloatMarshal.MARSHAL);
+    _classMap.put(double.class, DoubleMarshal.MARSHAL);
+    
     _classMap.put(String.class, StringMarshal.MARSHAL);
+    
     _classMap.put(org.omg.CORBA.Object.class, CorbaObjectMarshal.MARSHAL);
   }
 }

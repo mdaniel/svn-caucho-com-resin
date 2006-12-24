@@ -33,20 +33,31 @@ import javax.naming.NamingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import com.caucho.util.*;
 
 /**
- * Memory based model for JNDI.
+ * Environment based model for JNDI.
  */
-public class MemoryModel extends AbstractModel
+public class EnvironmentModel extends AbstractModel
 {
+  private static final L10N L = new L10N(EnvironmentModel.class);
+  
+  private final EnvironmentModelRoot _root;
+  private final String _name;
+  
   private HashMap<String,Object> _children
     = new HashMap<String,Object>(8);
 
   /**
-   * Creates a new instance of the memory model.
+   * Creates a new instance of the environment model.
    */
-  public MemoryModel()
+  EnvironmentModel(EnvironmentModelRoot root, String name)
   {
+    _root = root;
+    _name = name;
+
+    if ("ejb".equals(name))
+      Thread.dumpStack();
   }
 
   /**
@@ -54,7 +65,7 @@ public class MemoryModel extends AbstractModel
    */
   protected AbstractModel create()
   {
-    return new MemoryModel();
+    return new EnvironmentModel(_root, _name);
   }
 
   /**
@@ -67,7 +78,32 @@ public class MemoryModel extends AbstractModel
   public Object lookup(String name)
     throws NamingException
   {
-    return _children.get(name);
+    Object value = _children.get(name);
+
+    if (value != null)
+      return value;
+
+    ClassLoader loader = _root.getClassLoader();
+
+    if (loader == null)
+      return null;
+    
+    EnvironmentModelRoot parentRoot
+      = EnvironmentModelRoot.getLocal(loader.getParent());
+
+    if (parentRoot != null) {
+      EnvironmentModel parentModel = parentRoot.get(_name);
+
+      if (parentModel != null) {
+	value = parentModel.lookup(name);
+
+	if (value instanceof EnvironmentModel) {
+	  value = createSubcontext(name);
+	}
+      }
+    }
+      
+    return value;
   }
 
   /**
@@ -85,7 +121,10 @@ public class MemoryModel extends AbstractModel
   public void unbind(String name)
     throws NamingException
   {
-    _children.remove(name);
+    Object oldValue = _children.remove(name);
+
+    if (oldValue instanceof EnvironmentModel)
+      _root.remove(_name + "/" + name);
   }
 
   /**
@@ -94,12 +133,23 @@ public class MemoryModel extends AbstractModel
   public AbstractModel createSubcontext(String name)
     throws NamingException
   {
-    if (_children.get(name) != null)
-      throw new NamingException("can't create subcontext: " + name + " " + _children.get(name));
+    if (_children.get(name) != null) {
+      throw new NamingException(L.l("can't create subcontext: {0} {1}",
+				    name, _children.get(name)));
+    }
 
-    MemoryModel model = new MemoryModel();
+    String childName;
+
+    if (_name.equals(""))
+      childName = name;
+    else
+      childName = _name + "/" + name;
+    
+    EnvironmentModel model = new EnvironmentModel(_root, childName);
     
     _children.put(name, model);
+
+    _root.put(childName, model);
 
     return model;
   }
@@ -109,6 +159,31 @@ public class MemoryModel extends AbstractModel
    */
   public List list()
   {
-    return new ArrayList(_children.keySet());
+    ArrayList values = new ArrayList();
+
+    fillList(values);
+
+    return values;
+  }
+
+  protected void fillList(ArrayList values)
+  {
+    values.addAll(_children.keySet());
+
+    ClassLoader loader = _root.getClassLoader();
+
+    if (loader == null)
+      return;
+    
+    EnvironmentModelRoot parentRoot
+      = EnvironmentModelRoot.getLocal(loader.getParent());
+
+    if (parentRoot != null) {
+      EnvironmentModel parentModel = parentRoot.get(_name);
+
+      if (parentModel != null) {
+	parentModel.fillList(values);
+      }
+    }
   }
 }

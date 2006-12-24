@@ -27,24 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.iiop.orb;
-
-import com.caucho.iiop.marshal.Marshal;
+package com.caucho.iiop.marshal;
 
 /**
  * Proxy implementation for ORB clients.
  */
-public class SerializableMarshal extends Marshal {
-  public static final Marshal MARSHAL = new SerializableMarshal();
+public class BooleanMarshal extends Marshal {
+  public static final Marshal MARSHAL = new BooleanMarshal();
 
+  @Override
   public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
                       Object value)
   {
-    os.write_value((java.io.Serializable) value);
+    os.write_boolean(Boolean.TRUE.equals(value));
   }
 
+  @Override
   public Object unmarshal(org.omg.CORBA_2_3.portable.InputStream is)
   {
-    return is.read_value();
+    return is.read_boolean() ? Boolean.TRUE : Boolean.FALSE;
   }
 }

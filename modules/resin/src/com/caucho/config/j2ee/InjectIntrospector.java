@@ -284,10 +284,38 @@ public class InjectIntrospector {
   {
     EJB ejb = (EJB) field.getAnnotation(javax.ejb.EJB.class);
 
-    initList.add(configureResource(field, fieldName, fieldType,
-                                   ejb.beanName(),
-                                   "javax.ejb.EJBLocalObject",
-                                   ejb.name()));
+    String name = ejb.name();
+    String beanName = ejb.beanName();
+
+    String jndiName = beanName;
+    String publishJndiName = null;
+
+    if (! "".equals(beanName)
+	&& ! "".equals(name)
+	&& ! name.equals(beanName))
+      publishJndiName = name;
+
+    if ("".equals(jndiName))
+      jndiName = name;
+
+    if ("".equals(jndiName))
+      jndiName = fieldName;
+
+    jndiName = toFullName(jndiName);
+
+    AccessibleInject inject;
+
+    if (field instanceof Field)
+      inject = new FieldInject((Field) field);
+    else
+      inject = new PropertyInject((Method) field);
+
+    BuilderProgram program;
+
+    program = new EjbInjectProgram(jndiName, publishJndiName,
+				   fieldType, inject);
+
+    initList.add(program);
   }
 
   private static void
@@ -456,7 +484,10 @@ public class InjectIntrospector {
     if (resourceType.equals("") || resourceType.equals("java.lang.Object"))
       resourceType = fieldType.getName();
 
-    if (resourceType.equals("javax.sql.DataSource"))
+    if (true) {
+      // TCK indicates this logic is incorrect
+    }
+    else if (resourceType.equals("javax.sql.DataSource"))
       prefix = "jdbc/";
     else if (resourceType.startsWith("javax.jms."))
       prefix = "jms/";

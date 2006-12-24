@@ -44,6 +44,8 @@ public class EjbJar {
   private final EjbConfig _config;
   private final String _ejbModuleName;
 
+  private boolean _isMetadataComplete;
+
   public EjbJar(EjbConfig config, String ejbModuleName)
   {
     _config = config;
@@ -56,6 +58,11 @@ public class EjbJar {
 
   public void setSchemaLocation(String value)
   {
+  }
+
+  public void setMetadataComplete(boolean isMetadataComplete)
+  {
+    _isMetadataComplete = isMetadataComplete;
   }
 
   public void setDescription(String value)

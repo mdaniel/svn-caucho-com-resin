@@ -49,7 +49,7 @@ public class InitialContextFactoryImpl implements InitialContextFactory
   private static L10N L = new L10N(InitialContextFactoryImpl.class);
 
   private static EnvironmentLocal<AbstractModel> _rootModel
-    = new EnvironmentLocal<AbstractModel>("caucho.naming.model.root");
+    = new EnvironmentLocal<AbstractModel>();
 
   /**
    * Constructor with an initial root.
@@ -73,6 +73,30 @@ public class InitialContextFactoryImpl implements InitialContextFactory
   {
     _rootModel.set(model);
   }
+
+  public static AbstractModel createRoot()
+  {
+    synchronized (_rootModel) {
+      AbstractModel model = _rootModel.getLevel();
+
+      if (model == null) {
+	EnvironmentModelRoot root = EnvironmentModelRoot.create();
+
+	model = root.get("");
+
+	_rootModel.set(model);
+
+	try {
+	  model.createSubcontext("java:comp");
+	  model.createSubcontext("java:");
+	} catch (NamingException e) {
+	  throw new RuntimeException(e);
+	}
+      }
+
+      return model;
+    }
+  }
   
   /**
    * Returns the initial context for the current thread.
@@ -80,18 +104,7 @@ public class InitialContextFactoryImpl implements InitialContextFactory
   public Context getInitialContext(Hashtable<?,?> env)
     throws NamingException
   {
-    AbstractModel model = _rootModel.getLevel();
-
-    if (model == null) {
-      model = _rootModel.get();
-
-      if (model != null)
-        model = model.copy();
-      else
-        model = new MemoryModel();
-
-      _rootModel.set(model);
-    }
+    AbstractModel model = createRoot();
 
     return new ContextImpl(model, env);
   }

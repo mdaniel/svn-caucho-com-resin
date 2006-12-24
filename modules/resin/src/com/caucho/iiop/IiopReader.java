@@ -50,6 +50,7 @@ import javax.rmi.CORBA.ValueHandler;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -1119,17 +1120,25 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       return read_value();
   }
 
+  @Override
+  public org.omg.CORBA.Object read_Object(Class cl)
+  {
+    return read_Object();
+  }
+
   /**
    * Reads a CORBA object from the input stream.
    */
+  @Override
   public org.omg.CORBA.Object read_Object()
   {
     try {
       IOR ior = readIOR();
       
       System.out.println("RO: " + _orb + " " + ior);
-      if (_orb != null)
+      if (_orb != null) {
 	return new StubImpl(_orb, ior);
+      }
       else
 	return new DummyObjectImpl(ior);
     } catch (IOException e) {

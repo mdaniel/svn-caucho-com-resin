@@ -33,12 +33,14 @@ import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.iiop.marshal.Marshal;
 
 import javax.rmi.CORBA.Util;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
+import org.omg.CORBA.portable.Streamable;
 
 public class MarshallObject {
   private static final Logger log = Log.open(MarshallObject.class);
@@ -76,12 +78,13 @@ public class MarshallObject {
   public final static int OBJECT_ARRAY = 25;
 
   public final static int OBJECT_HELPER = 26;
+  public final static int STREAMABLE = 27;
 
   private int _code;
-  private Class objClass;
-  private MarshallObject subObj;
-  private Method readHelper;
-  private Method writeHelper;
+  private Class _objClass;
+  private MarshallObject _subObj;
+  private Method _readHelper;
+  private Method _writeHelper;
 
   private MarshallObject()
   {
@@ -95,37 +98,37 @@ public class MarshallObject {
   private MarshallObject(int code, Class cl)
   {
     _code = code;
-    this.objClass = cl;
+    _objClass = cl;
   }
 
   private MarshallObject(int code, Class cl,
                          Method readHelper, Method writeHelper)
   {
     _code = code;
-    this.objClass = cl;
-    this.readHelper = readHelper;
-    this.writeHelper = writeHelper;
+    _objClass = cl;
+    _readHelper = readHelper;
+    _writeHelper = writeHelper;
   }
 
   static MarshallObject create(Class cl, boolean isJava)
   {
     if (void.class.equals(cl))
       return new MarshallObject(VOID);
-    else if (boolean.class.equals(cl) || Boolean.class.equals(cl))
+    else if (boolean.class.equals(cl))
       return new MarshallObject(BOOLEAN);
-    else if (byte.class.equals(cl) || Byte.class.equals(cl))
+    else if (byte.class.equals(cl))
       return new MarshallObject(BYTE);
-    else if (short.class.equals(cl) || Short.class.equals(cl))
+    else if (short.class.equals(cl))
       return MARSHALL_SHORT;
-    else if (char.class.equals(cl) || Character.class.equals(cl))
+    else if (char.class.equals(cl))
       return MARSHALL_CHAR;
-    else if (int.class.equals(cl) || Integer.class.equals(cl))
+    else if (int.class.equals(cl))
       return new MarshallObject(INT);
-    else if (long.class.equals(cl) || Long.class.equals(cl))
+    else if (long.class.equals(cl))
       return MARSHALL_LONG;
-    else if (float.class.equals(cl) || Float.class.equals(cl))
+    else if (float.class.equals(cl))
       return new MarshallObject(FLOAT);
-    else if (double.class.equals(cl) || Double.class.equals(cl))
+    else if (double.class.equals(cl))
       return new MarshallObject(DOUBLE);
     else if (String.class.equals(cl))
       return new MarshallObject(STRING);
@@ -143,9 +146,12 @@ public class MarshallObject {
       Class compType = cl.getComponentType();
       MarshallObject subObj = MarshallObject.create(compType, isJava);
       MarshallObject obj = new MarshallObject(OBJECT_ARRAY, compType);
-      obj.subObj = subObj;
+      obj._subObj = subObj;
 
       return obj;
+    }
+    else if (Streamable.class.isAssignableFrom(cl)) {
+      return new MarshallObject(STREAMABLE, cl);
     }
     else {
       Class helperClass = null;
@@ -255,7 +261,7 @@ public class MarshallObject {
     */
 
     case REMOTE:
-      return reader.readObject(objClass);
+      return reader.readObject(_objClass);
 
     case CORBA_OBJECT:
       return reader.read_Object();
@@ -263,24 +269,24 @@ public class MarshallObject {
     case OBJECT_ARRAY:
     {
       int len = reader.read_sequence_length();
-      Object []obj = (Object []) Array.newInstance(objClass, len);
+      Object []obj = (Object []) Array.newInstance(_objClass, len);
 
       for (int i = 0; i < len; i++)
-        obj[i] = subObj.unmarshall(reader);
+        obj[i] = _subObj.unmarshall(reader);
 
       return obj;
     }
 
     case OBJECT_HELPER:
     {
-      return readHelper.invoke(null, new Object[] { reader });
+      return _readHelper.invoke(null, new Object[] { reader });
     }
 
     default:
       try {
-	log.info("Class: " + objClass);
+	log.info("Class: " + _objClass);
 
-        return reader.read_value(objClass);
+        return reader.read_value(_objClass);
       } catch (Exception e) {
         e.printStackTrace();
         return null;
@@ -329,7 +335,7 @@ public class MarshallObject {
 	String local = absObj.__caucho_getId();
 
 	String url = server.getProtocolId() + "?" + local;
-	String typeName = "RMI:" + objClass.getName() + ":0";
+	String typeName = "RMI:" + _objClass.getName() + ":0";
 
 	IOR ior = new IOR(typeName, writer.getHost(), writer.getPort(), url);
 	//writer.write_boolean(true);
@@ -369,7 +375,7 @@ public class MarshallObject {
       break;
     case OBJECT_HELPER:
     {
-      writeHelper.invoke(null, new Object[] { writer, obj });
+      _writeHelper.invoke(null, new Object[] { writer, obj });
       break;
     }
     default:

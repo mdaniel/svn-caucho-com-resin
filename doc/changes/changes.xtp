@@ -10,7 +10,7 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1snap - Dec 3, 2006">
+<s2 title="3.1.0 - Dec 21, 2006">
 <ul>
 <li>server-header should be used for error messages when specified (#1491, rep by Larry Gelberg)</li>
 <li>rewrite-dispatch was not properly applying top-level filters (#1392, rep by M Marich)</li>
