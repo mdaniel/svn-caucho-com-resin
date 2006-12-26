@@ -62,7 +62,7 @@ public class MarshalFactory {
   {
     return _factory;
   }
-
+  
   /**
    * Creates the marshal object for an object.
    *
@@ -75,20 +75,20 @@ public class MarshalFactory {
 
     if (marshal != null)
       return marshal;
-    
-    if (cl.isArray() && isIdl) {
+
+    if (org.omg.CORBA.portable.Streamable.class.isAssignableFrom(cl))
+      return new StreamableMarshal(cl);
+
+    if (IDLEntity.class.isAssignableFrom(cl))
+      return new HelperMarshal(cl);
+
+    if (cl.isArray() && isIDLEntity(cl.getComponentType())) {
       Class compType = cl.getComponentType();
       
       Marshal subMarshal = create(compType, isIdl);
 
       return new ArrayMarshal(compType, subMarshal);
     }
-
-    if (IDLEntity.class.isAssignableFrom(cl))
-      return new HelperMarshal(cl);
-
-    if (org.omg.CORBA.portable.Streamable.class.isAssignableFrom(cl))
-      return new StreamableMarshal(cl);
 
     if (java.rmi.Remote.class.isAssignableFrom(cl))
       return new RemoteMarshal(cl);
@@ -97,6 +97,16 @@ public class MarshalFactory {
       return SerializableMarshal.MARSHAL;
 
     return AnyMarshal.MARSHAL;
+  }
+
+  private boolean isIDLEntity(Class cl)
+  {
+    if (IDLEntity.class.isAssignableFrom(cl))
+      return true;
+    else if (cl.isArray())
+      return isIDLEntity(cl.getComponentType());
+    else
+      return false;
   }
 
   static {

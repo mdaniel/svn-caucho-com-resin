@@ -82,7 +82,7 @@ public class PortableRemoteObjectDelegateImpl
 			     stubMarshal);
 
       return Proxy.newProxyInstance(narrowTo.getClassLoader(),
-				    new Class[] { narrowTo },
+				    new Class[] { narrowTo, IiopProxy.class },
 				    handler);
     }
     

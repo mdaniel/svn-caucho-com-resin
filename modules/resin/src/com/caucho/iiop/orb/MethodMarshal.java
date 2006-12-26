@@ -29,9 +29,11 @@
 
 package com.caucho.iiop.orb;
 
+import java.util.ArrayList;
 import java.lang.reflect.Method;
 
 import com.caucho.iiop.marshal.Marshal;
+import com.caucho.iiop.RemoteUserException;
 
 /**
  * Proxy implementation for ORB clients.
@@ -40,6 +42,8 @@ public class MethodMarshal {
   private String _name;
   private Marshal []_args;
   private Marshal _ret;
+
+  private Class []_exceptionTypes;
   
   MethodMarshal(MarshalFactory factory, Method method)
   {
@@ -55,22 +59,56 @@ public class MethodMarshal {
       _args[i] = factory.create(params[i], isIdl);
 
     _ret = factory.create(method.getReturnType(), isIdl);
+
+    ArrayList<Class> exnList = new ArrayList<Class>();
+    
+    for (Class exn : method.getExceptionTypes()) {
+      if (RuntimeException.class.isAssignableFrom(exn))
+	continue;
+      if (Error.class.isAssignableFrom(exn))
+	continue;
+
+      exnList.add(exn);
+    }
+
+    _exceptionTypes = new Class[exnList.size()];
+    exnList.toArray(_exceptionTypes);
   }
 
   public Object invoke(org.omg.CORBA.portable.ObjectImpl obj,
 		       Object []args)
     throws Throwable
   {
-    org.omg.CORBA_2_3.portable.OutputStream os
-      = ((org.omg.CORBA_2_3.portable.OutputStream) obj._request(_name, true));
+    org.omg.CORBA_2_3.portable.InputStream is = null;
     
-    for (int i = 0; i < _args.length; i++) {
-      _args[i].marshal(os, args[i]);
+    try {
+      org.omg.CORBA_2_3.portable.OutputStream os
+	= ((org.omg.CORBA_2_3.portable.OutputStream) obj._request(_name, true));
+    
+      for (int i = 0; i < _args.length; i++) {
+	_args[i].marshal(os, args[i]);
+      }
+
+      is = ((org.omg.CORBA_2_3.portable.InputStream) obj._invoke(os));
+
+      return _ret.unmarshal(is);
+    } catch (RemoteUserException e) {
+      // unwrap remote exceptions
+      
+      Throwable cause = e.getCause();
+
+      if (cause instanceof RuntimeException)
+	throw cause;
+
+      for (int i = 0; i < _exceptionTypes.length; i++) {
+	if (_exceptionTypes[i].isAssignableFrom(cause.getClass()))
+	  throw cause;
+      }
+
+      throw e;
+    } finally {
+      if (is != null)
+	is.close();
     }
-
-    org.omg.CORBA_2_3.portable.InputStream is
-      = ((org.omg.CORBA_2_3.portable.InputStream) obj._invoke(os));
-
-    return _ret.unmarshal(is);
   }
 }

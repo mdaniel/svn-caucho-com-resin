@@ -154,7 +154,15 @@ public class Bean {
     bean.setAllowPOJO(true);
 
     bean.setSessionType("Stateless");
-    bean.setTransactionType("Container");
+    
+    JAnnotation transaction = type.getAnnotation(TransactionManagement.class);
+    if (transaction == null)
+      bean.setTransactionType("Container");
+    else if (TransactionManagementType.BEAN.equals(transaction.get("value")))
+      bean.setTransactionType("Bean");
+    else {
+      bean.setTransactionType("Container");
+    }
 
     configureBean(bean, type, stateless.getString("name"));
   }

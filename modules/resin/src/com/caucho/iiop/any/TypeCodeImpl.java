@@ -26,10 +26,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.iiop;
+package com.caucho.iiop.any;
 
-import com.caucho.log.Log;
 import com.caucho.util.L10N;
+import com.caucho.iiop.IiopReader;
 
 import org.omg.CORBA.Any;
 import org.omg.CORBA.TCKind;
@@ -41,9 +41,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-public class TypeCodeImpl extends TypeCode {
+public class TypeCodeImpl extends AbstractTypeCode
+{
   protected static final L10N L = new L10N(TypeCodeImpl.class);
-  protected static final Logger log = Log.open(TypeCodeImpl.class);
+  protected static final Logger log
+    = Logger.getLogger(TypeCodeImpl.class.getName());
 
   public static final TypeCode TK_NULL = new TypeCodeImpl(TCKind.tk_null);
   
@@ -94,7 +96,7 @@ public class TypeCodeImpl extends TypeCode {
   private TypeCode _contentType;
   private int _length;
 
-  TypeCodeImpl(TCKind kind)
+  public TypeCodeImpl(TCKind kind)
   {
     if (kind == null)
       throw new NullPointerException();
@@ -115,22 +117,17 @@ public class TypeCodeImpl extends TypeCode {
     _id = repId;
   }
 
-  static TypeCodeImpl createValue(String repId, String name, short modifier)
+  public static TypeCodeImpl createValue(String repId, String name, short modifier)
   {
     return new TypeCodeImpl(TCKind.tk_value, repId, modifier);
   }
 
-  static TypeCodeImpl createValueBox(String repId, String name)
-  {
-    return new TypeCodeImpl(TCKind.tk_value_box, repId);
-  }
-
-  static TypeCodeImpl createAbstractInterface(String repId, String name)
+  public static TypeCodeImpl createAbstractInterface(String repId, String name)
   {
     return new TypeCodeImpl(TCKind.tk_abstract_interface, repId);
   }
 
-  static TypeCodeImpl createSequence()
+  public static TypeCodeImpl createSequence()
   {
     return new TypeCodeImpl(TCKind.tk_sequence);
   }
@@ -197,8 +194,9 @@ public class TypeCodeImpl extends TypeCode {
   /**
    * Set the type code of the concrete base
    */
-  void setConcreteBaseType(TypeCode baseType)
+  public void setConcreteBaseType(TypeCode baseType)
   {
+    // XXX:
     _concreteBaseType = baseType;
   }
   
@@ -210,7 +208,6 @@ public class TypeCodeImpl extends TypeCode {
   {
     return _concreteBaseType;
   }
-
   
   /**
    * Returns the number of fields in the type code
@@ -221,8 +218,9 @@ public class TypeCodeImpl extends TypeCode {
     return _members.size();
   }
 
-  void addMember(String name, TypeCode type, short visibility)
+  public void addMember(String name, TypeCode type, short visibility)
   {
+    // XXX:
     _members.add(new Member(name, type, visibility));
   }
 
@@ -280,8 +278,9 @@ public class TypeCodeImpl extends TypeCode {
     throw new UnsupportedOperationException();
   }
 
-  void setLength(int length)
+  public void setLength(int length)
   {
+    // XXX:
     _length = length;
   }
   
@@ -297,8 +296,9 @@ public class TypeCodeImpl extends TypeCode {
   /**
    * Returns the typecode for the content type.
    */
-  void setContentType(TypeCode type)
+  public void setContentType(TypeCode type)
   {
+    // XXX:
     _contentType = type;
   }
 
@@ -332,7 +332,7 @@ public class TypeCodeImpl extends TypeCode {
   /**
    * Reads the type code.
    */
-  public static TypeCodeImpl read(IiopReader reader)
+  public static AbstractTypeCode read(IiopReader reader)
     throws IOException
   {
     int tcKind = reader.readInt();
@@ -341,14 +341,7 @@ public class TypeCodeImpl extends TypeCode {
     switch (tcKind) {
     case TK_VALUE_BOX:
       {
-	int len = reader.read_sequence_length();
-	int endian = reader.read_octet();
-
-	String repId = reader.readString();
-	String name = reader.readString();
-	TypeCode typeCode = reader.read_TypeCode();
-
-	return new ValueBoxTypeCode(TCKind.from_int(tcKind), typeCode);
+	return ValueBoxTypeCode.readTypeCode(reader);
       }
       
     case TK_ABSTRACT_INTERFACE:
@@ -392,7 +385,6 @@ public class TypeCodeImpl extends TypeCode {
    * Reads the value from the .
    */
   public Object readValue(IiopReader reader)
-    throws IOException
   {
     log.fine("READ: " + this);
     

@@ -31,10 +31,23 @@ package com.caucho.iiop;
 
 import java.io.IOException;
 
-public class Iiop12Writer extends Iiop10Writer {
+import com.caucho.vfs.*;
+
+public class Iiop12Writer extends Iiop10Writer
+{
   private final static int KEY_ADDR = 0;
   private final static int PROFILE_ADDR = 1;
   private final static int REFERENCE_ADDR = 2;
+
+  public Iiop12Writer()
+  {
+  }
+
+  public Iiop12Writer(Iiop12Writer parent, MessageWriter out)
+  {
+    super(parent, out);
+  }
+  
   /**
    * Writes the header for a request
    *
@@ -75,16 +88,39 @@ public class Iiop12Writer extends Iiop10Writer {
   /**
    * Writes the header for a request
    */
+  @Override
   public void startReplySystemException(int requestId,
                                         String exceptionId,
                                         int minorStatus,
-                                        int completionStatus)
+                                        int completionStatus,
+					Throwable cause)
     throws IOException
   {
     _out.start12Message(IiopReader.MSG_REPLY, requestId);
     
     write_long(IiopReader.STATUS_SYSTEM_EXCEPTION);
-    write_long(0);         // service control list
+
+    System.out.println("CAUSE2:" + cause);
+
+    if (cause == null) {
+      write_long(0);         // service control list
+    } else {
+      write_long(1);
+      write_long(IiopReader.SERVICE_UNKNOWN_EXCEPTION_INFO);
+
+      EncapsulationMessageWriter out = new EncapsulationMessageWriter();
+      Iiop12Writer writer = new Iiop12Writer(this, out);
+      writer.init(out);
+      writer.write(0); // endian
+      writer.write_value(cause);
+      //writer.close();
+      out.close();
+
+      int len = out.getOffset();
+      write_long(len);
+
+      out.writeToWriter(this);
+    }
 
     writeString(exceptionId);
     write_long(minorStatus);

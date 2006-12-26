@@ -30,7 +30,17 @@ package com.caucho.iiop;
 
 import java.io.IOException;
 
-public class Iiop10Writer extends IiopWriter {
+public class Iiop10Writer extends IiopWriter
+{
+  public Iiop10Writer()
+  {
+  }
+
+  public Iiop10Writer(IiopWriter parent, MessageWriter out)
+  {
+    super(parent, out);
+  }
+  
   /**
    * Writes the header for a request
    *
@@ -68,15 +78,38 @@ public class Iiop10Writer extends IiopWriter {
   /**
    * Writes the header for a request
    */
+  @Override
   public void startReplySystemException(int requestId,
                                         String exceptionId,
                                         int minorStatus,
-                                        int completionStatus)
+                                        int completionStatus,
+					Throwable cause)
     throws IOException
   {
     startMessage(IiopReader.MSG_REPLY);
     
-    write_long(0);         // service control list
+    System.out.println("CAUSE-10:" + cause);
+    
+    if (cause == null) {
+      write_long(0);         // service control list
+    } else {
+      write_long(1);
+      write_long(IiopReader.SERVICE_UNKNOWN_EXCEPTION_INFO);
+
+      EncapsulationMessageWriter out = new EncapsulationMessageWriter();
+      Iiop10Writer writer = new Iiop10Writer(this, out);
+      writer.init(out);
+      writer.write(0); // endian
+      writer.write_value(cause);
+      //writer.close();
+      out.close();
+
+      int len = out.getOffset();
+      write_long(len);
+
+      out.writeToWriter(this);
+    }
+    
     write_long(requestId); // request id
     write_long(IiopReader.STATUS_SYSTEM_EXCEPTION);
 

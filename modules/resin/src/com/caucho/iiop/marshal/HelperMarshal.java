@@ -45,7 +45,7 @@ public class HelperMarshal extends Marshal
     _cl = cl;
     
     try {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      ClassLoader loader = cl.getClassLoader();
       Class helperClass = Class.forName(cl.getName() + "Helper", false, loader);
 
       _readHelper = helperClass.getMethod("read", new Class[] {

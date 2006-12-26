@@ -64,6 +64,11 @@ public class TcpPath extends Path {
 
       if (timeout instanceof Number)
 	_timeout = ((Number) timeout).longValue();
+      
+      timeout = newAttributes.get("timeout");
+
+      if (timeout instanceof Number)
+	_timeout = ((Number) timeout).longValue();
     }
   }
 
@@ -143,19 +148,6 @@ public class TcpPath extends Path {
 
     return _address;
   }
-
-  /*
-  public void setAttribute(String attr, Object value)
-    throws IOException
-  {
-    if (attr.equals("timeout")) {
-      Long timeout = (Long) value;
-      _timeout = timeout.longValue();
-    }
-    else
-      super.setAttribute(attr, value);
-  }
-  */
 
   public StreamImpl openReadImpl() throws IOException
   {

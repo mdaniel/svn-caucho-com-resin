@@ -19,53 +19,56 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.iiop;
+package com.caucho.iiop.any;
+
+import com.caucho.util.L10N;
+import com.caucho.iiop.IiopReader;
+import com.caucho.iiop.IiopWriter;
 
 import org.omg.CORBA.TCKind;
 import org.omg.CORBA.TypeCode;
 
-import java.io.IOException;
+public class TypeCodeTypeCode extends AbstractTypeCode
+{
+  public static final AbstractTypeCode TYPE_CODE = new TypeCodeTypeCode();
 
-public class ValueBoxTypeCode extends TypeCodeImpl {
-  private TypeCode _subTypeCode;
-  
-  ValueBoxTypeCode(TCKind kind, TypeCode subTypeCode)
+  /**
+   * Returns the kind of the type code.
+   */
+  @Override
+  public TCKind kind()
   {
-    super(kind);
-
-    _subTypeCode = subTypeCode;
+    return TCKind.tk_TypeCode;
   }
 
   /**
-   * Reads the value from the .
+   * Reads the value from the reader.
    */
-  public Object readValue(IiopReader reader)
-    throws IOException
+  @Override
+  public Object readValue(IiopReader is)
   {
-    // Object v = ((TypeCodeImpl) _subTypeCode).readValue(reader);
-    
-    Object v = reader.read_value();
-    
-    System.out.println("BOX-V: " + v);
-
-    /*
-    for (int i = 0; i < 32; i++)
-      System.out.println(reader.read_octet());
-    Thread.dumpStack();
-    */
-    
-    return v;
+    return is.read_TypeCode();
+  }
+  
+  /**
+   * Writes the value to the writer
+   */
+  @Override
+  public void writeValue(IiopWriter os, Object value)
+  {
+    os.write_TypeCode((TypeCode) value);
   }
 
   public String toString()
   {
-    return "ValueBoxTypeCode[" + _subTypeCode + "]";
+    return "TypeCodeTypeCode[]";
   }
 }

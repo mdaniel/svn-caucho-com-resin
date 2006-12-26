@@ -84,7 +84,7 @@ public class BeanTypeStrategy extends TypeStrategy {
 
     Method setParent = null;
 
-    _injectList = InjectIntrospector.introspect(type);
+    _injectList = InjectIntrospector.introspectNoInit(type);
 
     setParent = findMethod("setParent", new Class[] { null });
 

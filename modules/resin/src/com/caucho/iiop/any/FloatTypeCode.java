@@ -19,39 +19,56 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.iiop;
+package com.caucho.iiop.any;
+
+import com.caucho.util.L10N;
+import com.caucho.iiop.IiopReader;
+import com.caucho.iiop.IiopWriter;
 
 import org.omg.CORBA.TCKind;
+import org.omg.CORBA.TypeCode;
 
-import java.io.IOException;
+public class FloatTypeCode extends AbstractTypeCode
+{
+  public static final AbstractTypeCode TYPE_CODE = new FloatTypeCode();
 
-public class AbstractBaseTypeCode extends TypeCodeImpl {
-
-  AbstractBaseTypeCode(TCKind kind)
+  /**
+   * Returns the kind of the type code.
+   */
+  @Override
+  public TCKind kind()
   {
-    super(kind);
+    return TCKind.tk_float;
   }
 
   /**
-   * Reads the value from the .
+   * Reads the value from the reader.
    */
-  public Object readValue(IiopReader reader)
-    throws IOException
+  @Override
+  public Object readValue(IiopReader is)
   {
-    boolean discriminator = reader.read_boolean();
+    return is.read_float();
+  }
+  
+  /**
+   * Writes the value to the writer
+   */
+  @Override
+  public void writeValue(IiopWriter os, Object value)
+  {
+    os.write_float((Float) value);
+  }
 
-    if (discriminator) {
-      // object ref
-      throw new UnsupportedOperationException();
-    }
-    else
-      return reader.read_value();
+  public String toString()
+  {
+    return "FloatTypeCode[]";
   }
 }

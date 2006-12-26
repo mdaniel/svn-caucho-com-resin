@@ -65,11 +65,15 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
     try {
       Iiop10Writer writer = new Iiop10Writer();
 
-      ReadWritePair pair = _orb.openReadWrite();
+      writer.setOrb(_orb);
+
+      IiopSocketPool pool = _orb.getSocketPool();
+      
+      ReadWritePair pair = pool.open();
 
       MessageWriter out = new StreamMessageWriter(pair.getWriteStream());
 
-      IiopReader is = new IiopReader(pair.getReadStream());
+      IiopReader is = new IiopReader(pool, pair);
 
       is.setOrb(_orb);
     
@@ -103,6 +107,7 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
 
       return reader;
     } catch (IOException e) {
+      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }

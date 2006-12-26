@@ -32,7 +32,8 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 
-public class StreamMessageWriter extends MessageWriter {
+public class StreamMessageWriter extends MessageWriter
+{
   private WriteStream _out;
 
   private byte []_buffer;
@@ -67,6 +68,17 @@ public class StreamMessageWriter extends MessageWriter {
     _buffer[1] = 'I';
     _buffer[2] = 'O';
     _buffer[3] = 'P';
+  }
+  
+  /**
+   * initialize the writer.
+   */
+  public void initRaw(WriteStream out)
+  {
+    _out = out;
+    _buffer = _out.getBuffer();
+    _bufferLength = _buffer.length;
+    _align = 0;
   }
 
   /**

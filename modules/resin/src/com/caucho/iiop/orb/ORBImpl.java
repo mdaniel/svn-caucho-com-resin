@@ -31,6 +31,7 @@ package com.caucho.iiop.orb;
 
 import com.caucho.vfs.*;
 import com.caucho.iiop.*;
+import com.caucho.iiop.any.*;
 
 import org.omg.CORBA.*;
 
@@ -51,6 +52,9 @@ public class ORBImpl extends org.omg.CORBA.ORB
 
   private Path _path;
 
+  private IiopSocketPool _socketPool;
+
+  private TypeCodeFactory _typeCodeFactory = new TypeCodeFactory();
   private final StubDelegateImpl _stubDelegate;
 
   public ORBImpl()
@@ -100,10 +104,23 @@ public class ORBImpl extends org.omg.CORBA.ORB
   ReadWritePair openReadWrite()
   {
     try {
-      return _path.openReadWrite();
+      if (_socketPool == null && _host != null) {
+	_socketPool = new IiopSocketPool(_host, _port);
+      }
+	
+      return _socketPool.open();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  IiopSocketPool getSocketPool()
+  {
+    if (_socketPool == null && _host != null) {
+      _socketPool = new IiopSocketPool(_host, _port);
+    }
+      
+    return _socketPool;
   }
 
   public TypeCode create_alias_tc(String id, String name, TypeCode original)
@@ -113,12 +130,23 @@ public class ORBImpl extends org.omg.CORBA.ORB
 
   public Any create_any()
   {
-    throw new UnsupportedOperationException();
+    return new AnyImpl(_typeCodeFactory);
+  }
+
+  public AbstractTypeCode createTypeCode(Class type)
+  {
+    return _typeCodeFactory.createTypeCode(type);
   }
 
   public TypeCode create_array_tc(int length, TypeCode element_type)
   {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public TypeCode create_abstract_interface_tc(String id, String name)
+  {
+    return new AbstractInterfaceTypeCode(id, name);
   }
 
   public ContextList create_context_list()

@@ -34,8 +34,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import javax.annotation.Resource;
-import javax.annotation.Resources;
+import javax.annotation.*;
 import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NameClassPair;
@@ -101,6 +100,25 @@ public class InjectIntrospector {
 
     try {
       introspectImpl(initList, type);
+
+      introspectConstruct(initList, type);
+    } catch (ClassNotFoundException e) {
+    } catch (Error e) {
+    }
+
+    return initList;
+  }
+
+  /**
+   * Analyzes a bean for @Inject tags, building an init program for them.
+   */
+  public static ArrayList<BuilderProgram> introspectNoInit(Class type)
+    throws ConfigException
+  {
+    ArrayList<BuilderProgram> initList = new ArrayList<BuilderProgram>();
+
+    try {
+      introspectImpl(initList, type);
     } catch (ClassNotFoundException e) {
     } catch (Error e) {
     }
@@ -142,6 +160,26 @@ public class InjectIntrospector {
     }
   }
 
+  private static void
+    introspectConstruct(ArrayList<BuilderProgram> initList, Class type)
+    throws ConfigException, ClassNotFoundException
+  {
+    if (type == null || type.equals(Object.class))
+      return;
+
+    introspectConstruct(initList, type.getSuperclass());
+    
+    for (Method method : type.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(PostConstruct.class)) {
+	if (method.getParameterTypes().length != 0)
+	  throw new ConfigException(L.l("{0}: @PostConstruct is requires zero arguments",
+					method.getName()));
+
+	initList.add(new PostConstructProgram(method));
+      }
+    }
+  }
+
   public static void
     configureClassResources(ArrayList<BuilderProgram> initList,
                             Class type)
@@ -157,6 +195,17 @@ public class InjectIntrospector {
     Resource resource = (Resource) type.getAnnotation(Resource.class);
     if (resource != null) {
       introspectClassResource(initList, type, resource);
+    }
+
+    PersistenceContext pc
+      = (PersistenceContext) type.getAnnotation(PersistenceContext.class);
+    if (pc != null) {
+      String foreignName = findPersistenceContextName(pc.name(),
+						      pc.unitName());
+
+      if (! foreignName.equals(pc.name()) && ! "".equals(pc.name()))
+	initList.add(new JndiBindProgram(pc.name(), foreignName,
+					 javax.persistence.EntityManager.class));
     }
 
     for (Field field : type.getDeclaredFields()) {
@@ -462,8 +511,55 @@ public class InjectIntrospector {
                                      unitName,
                                      "javax.persistence.EntityManager",
                                      jndiName));
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  private static String findPersistenceContextName(String jndiName,
+						   String unitName)
+    throws ConfigException
+  {
+    String jndiPrefix = "java:comp/env/persistence";
+
+    try {
+      if (! unitName.equals(""))
+        return jndiPrefix + '/' + unitName;
+      else {
+        InitialContext ic = new InitialContext();
+
+        NamingEnumeration<NameClassPair> iter = ic.list(jndiPrefix);
+
+        if (iter == null) {
+          throw new ConfigException(L.l("Can't find configured PersistenceContext"));
+        }
+
+        String ejbJndiName = null;
+        while (iter.hasMore()) {
+          NameClassPair pair = iter.next();
+
+          // Skip reserved prefixes.
+          // See com.caucho.amber.manager.AmberContainer
+          if (pair.getName().startsWith("_amber"))
+            continue;
+
+          if (pair.getName().equals("resin-ejb"))
+            ejbJndiName = jndiPrefix + '/' + pair.getName();
+          else {
+            jndiName = jndiPrefix + '/' + pair.getName();
+            break;
+          }
+        }
+
+        if (jndiName == null)
+          jndiName = ejbJndiName;
+
+	return jndiName;
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
     }
   }
 

@@ -35,6 +35,7 @@ import com.caucho.iiop.orb.MarshalFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
+import java.rmi.RemoteException;
 
 public class SkeletonMethod {
   private static final Logger log
@@ -45,6 +46,8 @@ public class SkeletonMethod {
   
   private Marshal []_marshalArgs;
   private Marshal _marshalReturn;
+
+  private Class []_exnTypes;
 
   SkeletonMethod(IiopSkeleton skeleton, Method method, boolean isJava)
   {
@@ -63,6 +66,8 @@ public class SkeletonMethod {
       _marshalArgs[i] = factory.create(paramTypes[i], ! isJava);
 
     _marshalReturn = factory.create(method.getReturnType(), ! isJava);
+
+    _exnTypes = method.getExceptionTypes();
   }
 
   void service(Object object, IiopReader reader, IiopWriter writer)
@@ -81,7 +86,18 @@ public class SkeletonMethod {
 
       _marshalReturn.marshal(writer, result);
     } catch (InvocationTargetException e) {
-      throw e.getCause();
+      Throwable cause = e.getCause();
+
+      if (cause instanceof RemoteException)
+	throw cause;
+
+      for (int i = 0; i < _exnTypes.length; i++) {
+	if (_exnTypes[i].isAssignableFrom(cause.getClass()))
+	  throw cause;
+	
+      }
+      
+      throw new RemoteException(cause.toString(), cause);
     }
   }
 }

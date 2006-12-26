@@ -30,6 +30,7 @@ package com.caucho.iiop;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.IdentityIntMap;
+import com.caucho.iiop.any.*;
 
 import org.omg.CORBA.Any;
 import org.omg.CORBA.ORB;
@@ -63,11 +64,20 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   
   private org.omg.CORBA.ORB _orb;
 
-  private IdentityIntMap _refMap = new IdentityIntMap();
-  
-  private ValueHandler valueHandler = Util.createValueHandler();
-  private RunTime runTime = valueHandler.getRunTimeCodeBase();
+  private IiopWriter _parent;
+  private WriterContext _context;
 
+  public IiopWriter()
+  {
+  }
+
+  public IiopWriter(IiopWriter parent, MessageWriter out)
+  {
+    _parent = parent;
+    _out = out;
+    _context = parent.getContext();
+  }
+  
   /**
    * Initialize the writer with a new underlying stream.
    *
@@ -77,9 +87,14 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   {
     _out = out;
 
-    _refMap.clear();
+    _context = new WriterContext();
   }
 
+  public void init()
+  {
+    _context = new WriterContext();
+  }
+  
   /**
    * Initialize the writer with a new underlying stream and a reader.
    *
@@ -91,6 +106,11 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     init(out);
     
     _reader = reader;
+  }
+
+  protected WriterContext getContext()
+  {
+    return _context;
   }
 
   /**
@@ -187,7 +207,8 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   abstract public void startReplySystemException(int requestId,
 						 String exceptionId,
 						 int minorStatus,
-						 int completionStatus)
+						 int completionStatus,
+						 Throwable cause)
     throws IOException;
 
   /**
@@ -385,12 +406,28 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
       write_long(0);
       return;
     }
-    
-    int length = a.length();
-    write_long(length + 1);
-    for (int i = 0; i < length; i++)
-      _out.write((int) a.charAt(i));
-    _out.write(0);
+
+    _out.align(4);
+
+
+    int oldOffset = _context.getString(a);
+
+    if (oldOffset >= 0) {
+      write_long(-1);
+      int offset = getOffset();
+      write_long(oldOffset - offset);
+    }
+    else {
+      int length = a.length();
+      
+      write_long(length + 1);
+      int offset = getOffset();
+      _context.putString(a, offset);
+      
+      for (int i = 0; i < length; i++)
+	_out.write((int) a.charAt(i));
+      _out.write(0);
+    }
   }
 
   /**
@@ -430,7 +467,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    */
   public void write_TypeCode(TypeCode tc)
   {
-    //System.out.println("WRITE: " + tc);
     if (tc == null) {
       write_long(TCKind._tk_null);
       return;
@@ -464,38 +500,19 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
 	break;
 	  
       case TCKind._tk_sequence:
-	write_long(tc.kind().value());
-	write_TypeCode(tc.content_type());
-	write_long(tc.length());
+	SequenceTypeCode.writeTypeCode(this, tc);
 	break;
 	  
       case TCKind._tk_value:
-	// XXX: need to mark for recursive
-	write_long(tc.kind().value());
-	write_string(tc.id());
-	write_string(tc.name());
-	write_short(tc.type_modifier());
-	write_TypeCode(tc.concrete_base_type());
-	write_ulong(tc.member_count());
-	for (int i = 0; i < tc.member_count(); i++) {
-	  write_string(tc.member_name(i));
-	  write_TypeCode(tc.member_type(i));
-	  write_short(tc.member_visibility(i));
-	}
+	ValueTypeCode.writeTypeCode(this, tc);
 	break;
 	  
       case TCKind._tk_value_box:
-	write_long(tc.kind().value());
-	write_string(tc.id());
-	write_string(tc.name());
-	write_TypeCode(tc.content_type());
+	ValueBoxTypeCode.writeTypeCode(this, tc);
 	break;
 	  
       case TCKind._tk_abstract_interface:
-	// XXX: need to mark for recursive
-	write_long(tc.kind().value());
-	write_string(tc.id());
-	write_string(tc.name());
+	AbstractInterfaceTypeCode.writeTypeCode(this, tc);
 	break;
       
       default:
@@ -536,6 +553,8 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
 
   public void write_value(Serializable obj)
   {
+    ValueHandler valueHandler = _context.getValueHandler();
+    
     if (obj == null) {
       write_long(0);
       return;
@@ -552,12 +571,12 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
       write_value(valueHandler.getRMIRepositoryID((Class) obj));
     }
     else {
-      int oldValue = _refMap.get(obj);
+      int oldValue = _context.getRef(obj);
 
-      if (oldValue == _refMap.NULL) {
+      if (oldValue < 0) {
 	_out.align(4);
-	
-	_refMap.put(obj, _out.getOffset());
+
+	_context.putRef(obj, getOffset());
 
 	write_long(VALUE_TAG | VALUE_ONE_REP_ID);
 	write_string(valueHandler.getRMIRepositoryID(obj.getClass()));
@@ -567,7 +586,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
 	_out.align(4);
 
 	write_long(0xffffffff);
-	int delta = oldValue - _out.getOffset();
+	int delta = oldValue - getOffset();
 	
 	write_long(delta);
       }
@@ -739,5 +758,13 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     _reader.readRequest();
 
     return _reader;
+  }
+
+  public final int getOffset()
+  {
+    if (_parent != null)
+      return _parent.getOffset() + 4 + _out.getOffset();
+    else
+      return _out.getOffset();
   }
 }

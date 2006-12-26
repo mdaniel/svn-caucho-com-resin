@@ -182,6 +182,7 @@ public class IiopRequest implements ServerRequest {
 	break;
       }
 
+      writer.init();
       writer.setHost(_hostName);
       writer.setPort(_port);
 
@@ -227,14 +228,21 @@ public class IiopRequest implements ServerRequest {
 	  log.fine("IIOP[" + _conn.getId() + "] complete request");
 	}
       } catch (org.omg.CORBA.SystemException e) {
-	e.printStackTrace();
-	
 	log.log(Level.WARNING, e.toString(), e);
       
 	writer.startReplySystemException(_reader.getRequestId(),
 					 e.toString(),
 					 e.minor,
-					 e.completed.value());
+					 e.completed.value(),
+					 null);
+      } catch (java.rmi.RemoteException e) {
+	log.log(Level.WARNING, e.toString(), e);
+
+	writer.startReplySystemException(_reader.getRequestId(),
+					 e.toString(),
+					 0,
+					 0,
+					 e);
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
 
@@ -247,6 +255,8 @@ public class IiopRequest implements ServerRequest {
 	if (exName.length() > 20)
 	  exName = exName.substring(0, 20);
 	writer.write_string("IDL:" + exName + ":1.0");
+
+	//writer.write_string("RMI:" + exName + ":0");
 	writer.write_value(e);
       }
       

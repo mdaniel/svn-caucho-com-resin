@@ -44,12 +44,17 @@ public class IiopProxyHandler implements InvocationHandler {
   private StubMarshal _stubMarshal;
   
   public IiopProxyHandler(ORBImpl orb,
-		   org.omg.CORBA.portable.ObjectImpl stub,
-		   StubMarshal stubMarshal)
+			  org.omg.CORBA.portable.ObjectImpl stub,
+			  StubMarshal stubMarshal)
   {
     _orb = orb;
     _stub = stub;
     _stubMarshal = stubMarshal;
+  }
+
+  public StubImpl getStub()
+  {
+    return (StubImpl) _stub;
   }
 
   /**

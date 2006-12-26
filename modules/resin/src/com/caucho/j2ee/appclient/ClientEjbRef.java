@@ -30,13 +30,12 @@
 package com.caucho.j2ee.appclient;
 
 import com.caucho.config.ConfigException;
-import com.caucho.naming.Jndi;
-import com.caucho.naming.ObjectProxy;
+import com.caucho.naming.*;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
-import javax.naming.Context;
-import javax.naming.NamingException;
+import javax.naming.*;
+import javax.rmi.PortableRemoteObject;
 import java.util.Hashtable;
 import java.util.logging.Logger;
 
@@ -159,17 +158,33 @@ public class ClientEjbRef implements ObjectProxy {
       throw new ConfigException(L.l("{0} is required", "<ejb-ref-name>"));
 
     _ejbRefName = Jndi.getFullName(_ejbRefName);
+
+    if (_ejbLink != null) {
+      // TCK: ejb30.persistence.annotations.entity
+      Jndi.bindDeepShort(_ejbRefName, this);
+    }
   }
 
   /**
    * Creates the object from the proxy.
+   *
+   * @param env the calling environment
    *
    * @return the object named by the proxy.
    */
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    return null;
+    Context context = new InitialContext();
+
+    Object value = context.lookup(Jndi.getFullName(_ejbLink));
+
+    if (_home != null)
+      return PortableRemoteObject.narrow(value, _home);
+    else if (_remote != null)
+      return PortableRemoteObject.narrow(value, _remote);
+    else
+      return value;
   }
 
   public String toString()
