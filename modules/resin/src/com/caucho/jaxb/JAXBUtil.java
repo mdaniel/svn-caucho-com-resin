@@ -28,8 +28,11 @@
 
 package com.caucho.jaxb;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
+import javax.xml.ws.Holder;
+
 import static java.lang.Character.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -49,8 +52,33 @@ public class JAXBUtil {
   private static final Map<Class,String> _datatypeMap
     = new HashMap<Class,String>();
 
+  /**
+   * Gets the type of a parameter.  If the type is something like Holder<T>,
+   * it return T, otherwise, it returns the passed type.
+   *
+   **/
+  public static Type getActualParameterType(Type type)
+    throws JAXBException
+  {
+    if (type instanceof ParameterizedType) {
+      ParameterizedType ptype = (ParameterizedType) type;
+
+      if (ptype.getRawType().equals(Holder.class)) {
+        Type[] arguments = ptype.getActualTypeArguments();
+
+        if (arguments.length != 1)
+          throw new JAXBException("Holder has incorrect number of arguments");
+
+        return arguments[0];
+      }
+    }
+
+    return type;
+  }
+
   public static void introspectClass(Class cl, 
                                      Collection<Class> jaxbClasses)
+    throws JAXBException
   {
     Method[] methods = cl.getMethods();
 
@@ -65,13 +93,18 @@ public class JAXBUtil {
    */
   public static void introspectMethod(Method method, 
                                       Collection<Class> jaxbClasses)
+    throws JAXBException
   {
     introspectType(method.getReturnType(), jaxbClasses);
 
     Type[] params = method.getGenericParameterTypes();
 
-    for (Type param : params)
-      introspectType(param, jaxbClasses);
+    for (Type param : params) {
+      if (param.equals(Holder.class))
+        continue;
+
+      introspectType(getActualParameterType(param), jaxbClasses);
+    }
 
     /* XXX: create wrappers
     Type[] exceptions = method.getGenericExceptionTypes();

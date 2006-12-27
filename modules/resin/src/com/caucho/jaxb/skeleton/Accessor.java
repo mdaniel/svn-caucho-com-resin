@@ -74,6 +74,8 @@ public abstract class Accessor {
 
   protected JAXBContextImpl _context;
   protected Property _property;
+  protected QName _qname = null;
+  protected QName _typeQName = null;
 
   public static void setGenerateRICompatibleSchema(boolean compatible)
   {
@@ -182,40 +184,60 @@ public abstract class Accessor {
 
   private QName getTypeQName()
   {
-    XmlType xmlType = getAnnotation(XmlType.class);
+    if (_typeQName == null) {
+      XmlType xmlType = getAnnotation(XmlType.class);
 
-    if (xmlType == null || xmlType.name().equals("#default"))
-      return new QName(getName());
+      String name = getName();
+      String namespace = null; // XXX package namespace
 
-    if (xmlType.namespace().equals("#default"))
-      return new QName(xmlType.name());
+      if (xmlType != null) {
+        if (! xmlType.name().equals("#default"))
+          name = xmlType.name();
+        if (! xmlType.namespace().equals("#default"))
+          namespace = xmlType.namespace();
+      }
 
-    return new QName(xmlType.namespace(), xmlType.name());
+      if (namespace == null)
+        _typeQName = new QName(name);
+      else
+        _typeQName = new QName(namespace, name);
+    }
+
+    return _typeQName;
   }
 
   private QName getQName()
   {
-    XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
-    XmlElement element = getAnnotation(XmlElement.class);
+    if (_qname == null) {
+      XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
+      XmlElement element = getAnnotation(XmlElement.class);
 
-    if (wrapper != null) {
-      if (wrapper.name().equals("##default"))
-        return getTypeQName();
-      else if (wrapper.namespace().equals("##default"))
-        return new QName(wrapper.name());
+      String name = getName();
+      // XXX Namespace inheritance (@XmlSchema.elementFormDefault)
+      String namespace = null;
+
+      if (wrapper != null) {
+        if (! wrapper.name().equals("##default"))
+          name = wrapper.name();
+
+        if (! wrapper.namespace().equals("##default"))
+          namespace = wrapper.namespace();
+      }
+      else if (element != null) {
+        if (! element.name().equals("##default"))
+          name = element.name();
+
+        if (! element.namespace().equals("##default"))
+          namespace = element.namespace();
+      }
+
+      if (namespace == null)
+        _qname = new QName(name);
       else
-        return new QName(wrapper.namespace(), wrapper.name());
-    }
-    else if (element != null) {
-      if (element.name().equals("##default"))
-        return getTypeQName();
-      else if (element.namespace().equals("##default"))
-        return new QName(element.name());
-      else
-        return new QName(element.namespace(), element.name());
+        _qname = new QName(namespace, name);
     }
 
-    return getTypeQName();
+    return _qname;
   }
 
   public void generateSchema(XMLStreamWriter out)
