@@ -36,9 +36,7 @@ import com.caucho.amber.cfg.PersistenceConfig;
 import com.caucho.amber.cfg.PersistenceUnitConfig;
 import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
-import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.ListenerType;
+import com.caucho.amber.type.*;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.Config;
@@ -89,6 +87,9 @@ public class AmberContainer {
 
   private HashMap<String,EntityType> _entityMap
     = new HashMap<String,EntityType>();
+
+  private HashMap<String,MappedSuperclassType> _mappedSuperclassMap
+    = new HashMap<String,MappedSuperclassType>();
 
   private HashMap<String,ListenerType> _defaultListenerMap
     = new HashMap<String,ListenerType>();
@@ -290,6 +291,22 @@ public class AmberContainer {
   }
 
   /**
+   * Returns the MappedSuperclassType for an introspected class.
+   */
+  public MappedSuperclassType getMappedSuperclass(String className)
+  {
+    Throwable e = _entityExceptionMap.get(className);
+
+    if (e != null)
+      throw new AmberRuntimeException(e);
+    else if (_exception != null) {
+      throw new AmberRuntimeException(_exception);
+    }
+
+    return _mappedSuperclassMap.get(className);
+  }
+
+  /**
    * Returns the default ListenerType for an introspected class.
    */
   public ListenerType getDefaultListener(String className)
@@ -398,6 +415,15 @@ public class AmberContainer {
   public void addEntity(String className, EntityType type)
   {
     _entityMap.put(className, type);
+  }
+
+  /**
+   * Adds a mapped superclass for an introspected class.
+   */
+  public void addMappedSuperclass(String className,
+                                  MappedSuperclassType type)
+  {
+    _mappedSuperclassMap.put(className, type);
   }
 
   /**

@@ -68,7 +68,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   private static final Logger log = Logger.getLogger(RelatedType.class.getName());
   private static final L10N L = new L10N(RelatedType.class);
 
-  private Table _table;
+  Table _table;
 
   private String _rootTableName;
 
@@ -647,6 +647,16 @@ abstract public class RelatedType extends AbstractStatefulType {
 
       field.init();
     }
+
+    if (getOverriddenFields() == null)
+      return;
+
+    for (AmberField field : getOverriddenFields()) {
+      if (field.isUpdateable())
+        field.setIndex(nextDirtyIndex());
+
+      field.init();
+    }
   }
 
   /**
@@ -916,9 +926,12 @@ abstract public class RelatedType extends AbstractStatefulType {
       String parentSelect =
         getParentType().generateLoadSelect(table, id, loadGroup);
 
-      cb.append(parentSelect);
-      if (! parentSelect.equals(""))
-        hasSelect = true;
+      // jpa/0ge2
+      if (parentSelect != null) {
+        cb.append(parentSelect);
+        if (! parentSelect.equals(""))
+          hasSelect = true;
+      }
     }
     else if ((getTable() == table) && // jpa/0l11
              (loadGroup == 0 && getDiscriminator() != null)) {

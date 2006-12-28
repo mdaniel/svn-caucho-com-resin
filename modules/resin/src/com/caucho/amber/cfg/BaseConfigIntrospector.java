@@ -275,7 +275,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects the callbacks.
    */
   public void introspectCallbacks(JClass type,
-                                  EntityType entityType)
+                                  RelatedType entityType)
     throws ConfigException
   {
     getInternalExcludeDefaultListenersConfig(type);
@@ -780,8 +780,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         entityType.setId(id);
       }
     }
-    else if (keys.size() == 1)
+    else if (keys.size() == 1) {
       entityType.setId(new com.caucho.amber.field.Id(entityType, keys));
+    }
     else if (idClass == null) {
       throw new ConfigException(L.l("{0} has multiple @Id methods, but no @IdClass.  Compound primary keys require either an @IdClass or exactly one @EmbeddedId field or property.",
                                     entityType.getName()));
@@ -952,15 +953,24 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     Type amberType = persistenceUnit.createType(fieldType);
 
-    Column keyColumn = createColumn(entityType,
-                                    field,
-                                    fieldName,
-                                    column,
-                                    amberType,
-                                    columnConfig);
-
     KeyPropertyField idField;
-    idField = new KeyPropertyField(entityType, fieldName, keyColumn);
+
+    Column keyColumn = null;
+
+    if (entityType.getTable() != null) {
+      keyColumn = createColumn(entityType,
+                               field,
+                               fieldName,
+                               column,
+                               amberType,
+                               columnConfig);
+
+      idField = new KeyPropertyField(entityType, fieldName, keyColumn);
+    }
+    else {
+      idField = new KeyPropertyField(entityType, fieldName);
+      return idField;
+    }
 
     if (gen == null) {
     }
@@ -1342,6 +1352,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       declaringType = _persistenceUnit.getEmbeddable(jClass.getName());
 
     if (declaringType == null)
+      declaringType = _persistenceUnit.getMappedSuperclass(jClass.getName());
+
+    if (declaringType == null)
       return;
 
     AttributesConfig attributesConfig = null;
@@ -1703,6 +1716,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       column = table.createColumn(name, amberType);
     }
+    else if (entityType.getTable() == null) // jpa/0ge2: MappedSuperclassType
+      column = new Column(null, name, amberType);
     else
       column = entityType.getTable().createColumn(name, amberType);
 

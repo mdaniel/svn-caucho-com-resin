@@ -33,10 +33,7 @@ import com.caucho.amber.entity.Embeddable;
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.Listener;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.type.AbstractEnhancedType;
-import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.ListenerType;
+import com.caucho.amber.type.*;
 import com.caucho.java.JavaCompiler;
 import com.caucho.java.gen.DependencyComponent;
 import com.caucho.java.gen.GenClass;
@@ -98,19 +95,21 @@ public class AmberGeneratorImpl implements AmberGenerator {
 
     genClass.setSuperClassName(type.getBeanClass().getName());
 
-    if (type instanceof EntityType) {
-      genClass.addInterfaceName("com.caucho.amber.entity.Entity");
+    AmberMappedComponent componentGenerator = type.getComponentGenerator();
 
-      EntityComponent entity = new EntityComponent();
+    if (componentGenerator != null) {
+      // type is EntityType or MappedSuperclassType
 
-      entity.setEntityType((EntityType) type);
-      entity.setBaseClassName(type.getBeanClass().getName());
-      entity.setExtClassName(type.getInstanceClassName());
+      genClass.addInterfaceName(type.getComponentInterfaceName());
 
-      genClass.addComponent(entity);
+      componentGenerator.setRelatedType((RelatedType) type);
+      componentGenerator.setBaseClassName(type.getBeanClass().getName());
+      componentGenerator.setExtClassName(type.getInstanceClassName());
+
+      genClass.addComponent(componentGenerator);
 
       DependencyComponent depend = genClass.addDependencyComponent();
-      depend.addDependencyList(entity.getDependencies());
+      depend.addDependencyList(componentGenerator.getDependencies());
     }
     else if (type instanceof EmbeddableType) {
       genClass.addInterfaceName("com.caucho.amber.entity.Embeddable");

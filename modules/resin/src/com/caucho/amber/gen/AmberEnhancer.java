@@ -31,12 +31,7 @@ package com.caucho.amber.gen;
 
 import com.caucho.amber.field.AmberField;
 import com.caucho.amber.manager.AmberContainer;
-import com.caucho.amber.type.AbstractEnhancedType;
-import com.caucho.amber.type.AbstractStatefulType;
-import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.ListenerType;
-import com.caucho.amber.type.SubEntityType;
+import com.caucho.amber.type.*;
 import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaCompiler;
@@ -157,19 +152,26 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     if (p > 0)
       className = className.substring(0, p);
 
-    EntityType entityType = _amberContainer.getEntity(className);
+    AbstractEnhancedType type;
 
-    if (entityType != null && entityType.isEnhanced())
+    type = _amberContainer.getEntity(className);
+
+    if (type != null && type.isEnhanced())
       return true;
 
-    EmbeddableType embeddableType = _amberContainer.getEmbeddable(className);
+    type = _amberContainer.getMappedSuperclass(className);
 
-    if (embeddableType != null && embeddableType.isEnhanced())
+    if (type != null && type.isEnhanced())
       return true;
 
-    ListenerType listenerType = _amberContainer.getListener(className);
+    type = _amberContainer.getEmbeddable(className);
 
-    if (listenerType != null && listenerType.isEnhanced())
+    if (type != null && type.isEnhanced())
+      return true;
+
+    type = _amberContainer.getListener(className);
+
+    if (type != null && type.isEnhanced())
       return true;
 
     return false;
@@ -256,29 +258,33 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   {
     String className = baseClass.getName();
 
-    EntityType entityType = _amberContainer.getEntity(className);
+    RelatedType type = _amberContainer.getEntity(className);
+
+    if (type == null)
+      type = _amberContainer.getMappedSuperclass(className);
 
     // Type can be null for subclasses and inner classes that need fixups
-    if (entityType != null) {
+    if (type != null) {
+      // type is EntityType or MappedSuperclassType
 
       log.info("Amber enhancing class " + className);
 
       // XXX: _amberContainerenceUnitenceUnit.configure();
 
-      entityType.init();
+      type.init();
 
-      genClass.addInterfaceName("com.caucho.amber.entity.Entity");
+      genClass.addInterfaceName(type.getComponentInterfaceName());
 
-      EntityComponent entity = new EntityComponent();
+      AmberMappedComponent componentGenerator = type.getComponentGenerator();
 
-      entity.setEntityType(entityType);
-      entity.setBaseClassName(baseClass.getName());
-      entity.setExtClassName(extClassName);
+      componentGenerator.setRelatedType((RelatedType) type);
+      componentGenerator.setBaseClassName(baseClass.getName());
+      componentGenerator.setExtClassName(extClassName);
 
-      genClass.addComponent(entity);
+      genClass.addComponent(componentGenerator);
 
       DependencyComponent dependency = genClass.addDependencyComponent();
-      dependency.addDependencyList(entityType.getDependencies());
+      dependency.addDependencyList(type.getDependencies());
 
       return;
 
@@ -367,22 +373,25 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     javaClass.setSuperClassName(type.getBeanClass().getName());
 
-    if (type instanceof EntityType) {
-      javaClass.addInterfaceName("com.caucho.amber.entity.Entity");
+    AmberMappedComponent componentGenerator
+      = type.getComponentGenerator();
+
+    if (componentGenerator != null) {
+      // type is EntityType or MappedSuperclassType
+
+      javaClass.addInterfaceName(type.getComponentInterfaceName());
 
       type.setEnhanced(true);
 
-      EntityComponent entity = new EntityComponent();
-
-      entity.setEntityType((EntityType) type);
-      entity.setBaseClassName(type.getBeanClass().getName());
+      componentGenerator.setRelatedType((RelatedType) type);
+      componentGenerator.setBaseClassName(type.getBeanClass().getName());
 
       //String extClassName = gen.getBaseClassName() + "__ResinExt";
       // type.setInstanceClassName(extClassName);
 
-      entity.setExtClassName(type.getInstanceClassName());
+      componentGenerator.setExtClassName(type.getInstanceClassName());
 
-      javaClass.addComponent(entity);
+      javaClass.addComponent(componentGenerator);
     }
     else if (type instanceof ListenerType) {
       javaClass.addInterfaceName("com.caucho.amber.entity.Listener");
@@ -483,6 +492,9 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
       AbstractStatefulType type;
 
       type = _amberContainer.getEntity(thisClass.getName());
+
+      if (type == null)
+        type = _amberContainer.getMappedSuperclass(thisClass.getName());
 
       if (type == null)
         type = _amberContainer.getEmbeddable(thisClass.getName());

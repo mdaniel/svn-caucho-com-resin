@@ -32,6 +32,7 @@ package com.caucho.amber.type;
 import com.caucho.amber.AmberRuntimeException;
 import com.caucho.amber.entity.Listener;
 import com.caucho.amber.field.StubMethod;
+import com.caucho.amber.gen.AmberMappedComponent;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
@@ -143,6 +144,22 @@ public abstract class AbstractEnhancedType extends Type {
   public JClass getBeanClass()
   {
     return _beanClass;
+  }
+
+  /**
+   * Returns the component interface name.
+   */
+  public String getComponentInterfaceName()
+  {
+    return null;
+  }
+
+  /**
+   * Gets a component generator.
+   */
+  public AmberMappedComponent getComponentGenerator()
+  {
+    return null;
   }
 
   /**

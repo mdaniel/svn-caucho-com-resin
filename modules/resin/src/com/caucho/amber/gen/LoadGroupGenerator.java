@@ -31,7 +31,7 @@ package com.caucho.amber.gen;
 
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.*;
 import com.caucho.bytecode.JMethod;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
@@ -47,15 +47,15 @@ public class LoadGroupGenerator extends ClassComponent {
   private static final L10N L = new L10N(LoadGroupGenerator.class);
 
   private String _extClassName;
-  private EntityType _entityType;
+  private RelatedType _relatedType;
   private int _index;
 
   public LoadGroupGenerator(String extClassName,
-                            EntityType entityType,
+                            RelatedType relatedType,
                             int index)
   {
     _extClassName = extClassName;
-    _entityType = entityType;
+    _relatedType = relatedType;
     _index = index;
   }
 
@@ -79,47 +79,50 @@ public class LoadGroupGenerator extends ClassComponent {
     int group = _index / 64;
     long mask = (1L << (_index % 64));
 
-    generateTransactionChecks(out, group, mask);
+    // jpa/0ge2: MappedSuperclassType
+    if (_relatedType.getTable() != null) {
+      generateTransactionChecks(out, group, mask);
 
-    int min = 0;
+      int min = 0;
 
-    if (_entityType.getParentType() == null)
-      min = _index;
+      if (_relatedType.getParentType() == null)
+        min = _index;
 
-    // XXX: need to do another check for a long hierarchy and/or many-to-one
-    // if ((_entityType.getParentType() != null) &&
-    //     (_index = _entityType.getParentType().getLoadGroupIndex() + 1)) {
-    //   min = _entityType.getParentType().getLoadGroupIndex();
-    // }
+      // XXX: need to do another check for a long hierarchy and/or many-to-one
+      // if ((_relatedType.getParentType() != null) &&
+      //     (_index = _relatedType.getParentType().getLoadGroupIndex() + 1)) {
+      //   min = _relatedType.getParentType().getLoadGroupIndex();
+      // }
 
-    int max = _index;
+      int max = _index;
 
-    for (int i = min; i <= max; i++) {
-      out.println("__caucho_load_select_" + i + "(aConn, preloadedProperties);");
-    }
+      for (int i = min; i <= max; i++) {
+        out.println("__caucho_load_select_" + i + "(aConn, preloadedProperties);");
+      }
 
-    if (min <= max) {
-      // jpa/0g0k: only makes transactional if exists.
+      if (min <= max) {
+        // jpa/0g0k: only makes transactional if exists.
+        out.println();
+        out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
+        out.println("  aConn.makeTransactional(this);");
+        out.println("}");
+      }
+
+      // needs to be after load to prevent loop if toString() expects data
       out.println();
-      out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
-      out.println("  aConn.makeTransactional(this);");
-      out.println("}");
+      out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
+      out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this);");
+
+      out.println();
+      out.println("aConn.postLoad(this);");
+
+      generateCallbacks(out, _relatedType.getPostLoadCallbacks());
     }
-
-    // needs to be after load to prevent loop if toString() expects data
-    out.println();
-    out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-    out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this);");
-
-    out.println();
-    out.println("aConn.postLoad(this);");
-
-    generateCallbacks(out, _entityType.getPostLoadCallbacks());
 
     out.popDepth();
     out.println("}");
 
-    if (_index == 0 && _entityType.getHasLoadCallback()) {
+    if (_index == 0 && _relatedType.getHasLoadCallback()) {
       out.println();
       out.println("protected void __caucho_load_callback() {}");
     }
@@ -131,7 +134,7 @@ public class LoadGroupGenerator extends ClassComponent {
     throws IOException
   {
     // non-read-only entities must be reread in a transaction
-    if (! _entityType.isReadOnly()) {
+    if (! _relatedType.isReadOnly()) {
       out.println("if (aConn.isInTransaction()) {");
 
       // deleted objects are not reloaded
@@ -152,11 +155,11 @@ public class LoadGroupGenerator extends ClassComponent {
       // out.println("      return;");
       out.println();
 
-      int loadCount = _entityType.getLoadGroupIndex();
+      int loadCount = _relatedType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
         out.println("    __caucho_loadMask_" + i + " = 0;");
       }
-      int dirtyCount = _entityType.getDirtyIndex();
+      int dirtyCount = _relatedType.getDirtyIndex();
       for (int i = 0; i <= dirtyCount / 64; i++) {
         out.println("    __caucho_dirtyMask_" + i + " = 0;");
       }
@@ -179,7 +182,7 @@ public class LoadGroupGenerator extends ClassComponent {
 
     out.println("item.__caucho_load_" + _index + "(aConn);");
 
-    _entityType.generateCopyLoadObject(out, "super", "item", _index);
+    _relatedType.generateCopyLoadObject(out, "super", "item", _index);
 
     // out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
     out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
@@ -201,16 +204,23 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    if (_relatedType.getTable() == null) {
+      out.popDepth();
+      out.println("}");
+
+      return;
+    }
+
     out.println("try {");
     out.pushDepth();
 
-    Table table = _entityType.getTable();
+    Table table = _relatedType.getTable();
 
     String from = null;
     String select = null;
     String where = null;
 
-    String subSelect = _entityType.generateLoadSelect(table, "o", _index);
+    String subSelect = _relatedType.generateLoadSelect(table, "o", _index);
     Table mainTable = null;
     String tableName = null;
 
@@ -218,18 +228,18 @@ public class LoadGroupGenerator extends ClassComponent {
       select = subSelect;
 
       from = table.getName() + " o";
-      where = _entityType.getId().generateMatchArgWhere("o");
+      where = _relatedType.getId().generateMatchArgWhere("o");
 
       mainTable = table;
       tableName = "o";
     }
 
-    ArrayList<Table> subTables = _entityType.getSecondaryTables();
+    ArrayList<Table> subTables = _relatedType.getSecondaryTables();
 
     for (int i = 0; i < subTables.size(); i++) {
       Table subTable = subTables.get(i);
 
-      subSelect = _entityType.generateLoadSelect(subTable, "o" + i, _index);
+      subSelect = _relatedType.generateLoadSelect(subTable, "o" + i, _index);
 
       if (subSelect == null)
         continue;
@@ -259,7 +269,7 @@ public class LoadGroupGenerator extends ClassComponent {
     if (where == null) {
       from = table.getName() + " o";
 
-      where = _entityType.getId().generateMatchArgWhere("o");
+      where = _relatedType.getId().generateMatchArgWhere("o");
     }
 
     String sql = "select " + select + " from " + from + " where " + where;
@@ -270,7 +280,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("java.sql.PreparedStatement pstmt = aConn.prepareStatement(sql);");
 
     out.println("int index = 1;");
-    _entityType.getId().generateSet(out, "pstmt", "index", "super");
+    _relatedType.getId().generateSet(out, "pstmt", "index", "super");
 
     out.println();
     out.println("java.sql.ResultSet rs = pstmt.executeQuery();");
@@ -278,13 +288,13 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("if (rs.next()) {");
     out.pushDepth();
 
-    _entityType.generateLoad(out, "rs", "", 1, _index);
+    _relatedType.generateLoad(out, "rs", "", 1, _index);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
 
-    _entityType.generateLoadEager(out, "rs", "", 1, _index);
+    _relatedType.generateLoadEager(out, "rs", "", 1, _index);
 
     // commented out: jpa/0r01
-    // ArrayList<JMethod> postLoadCallbacks = _entityType.getPostLoadCallbacks();
+    // ArrayList<JMethod> postLoadCallbacks = _relatedType.getPostLoadCallbacks();
     // if (postLoadCallbacks.size() > 0 && _index == 0) {
     //   out.println("if (__caucho_state == com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
     //   out.pushDepth();
@@ -293,7 +303,7 @@ public class LoadGroupGenerator extends ClassComponent {
     //   out.println("}");
     // }
 
-    if (_entityType.getHasLoadCallback())
+    if (_relatedType.getHasLoadCallback())
       out.println("__caucho_load_callback();");
 
     out.popDepth();
@@ -302,7 +312,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("  rs.close();");
 
     String errorString = ("(\"amber load: no matching object " +
-                          _entityType.getName() + "[\" + __caucho_getPrimaryKey() + \"]\")");
+                          _relatedType.getName() + "[\" + __caucho_getPrimaryKey() + \"]\")");
 
     out.println("  throw new com.caucho.amber.AmberObjectNotFoundException(" + errorString + ");");
     out.println("}");

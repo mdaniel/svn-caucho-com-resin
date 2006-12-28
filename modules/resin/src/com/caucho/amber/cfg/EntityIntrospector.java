@@ -38,8 +38,7 @@ import com.caucho.amber.field.PropertyField;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.EntityType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.*;
 import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
@@ -63,8 +62,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   private static final Logger log
     = Logger.getLogger(EntityIntrospector.class.getName());
 
-  HashMap<String, EntityType> _entityMap
-    = new HashMap<String, EntityType>();
+  // EntityType or MappedSuperclassType.
+  HashMap<String, RelatedType> _relatedTypeMap
+    = new HashMap<String, RelatedType>();
 
   /**
    * Creates the introspector.
@@ -89,10 +89,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   /**
    * Introspects.
    */
-  public EntityType introspect(JClass type)
+  public RelatedType introspect(JClass type)
     throws ConfigException, SQLException
   {
-    EntityType entityType = null;
+    RelatedType entityType = null;
 
     try {
       getInternalEntityConfig(type);
@@ -100,6 +100,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       EntityConfig entityConfig = _annotationCfg.getEntityConfig();
 
       boolean isEntity = ! _annotationCfg.isNull();
+
+      boolean isMappedSuperclass = false;
+      JAnnotation mappedSuperAnn = null;
+      MappedSuperclassConfig mappedSuperConfig = null;
 
       String typeName;
 
@@ -111,10 +115,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       }
       else {
         getInternalMappedSuperclassConfig(type);
-        JAnnotation mappedSuperAnn = _annotationCfg.getAnnotation();
-        MappedSuperclassConfig mappedSuperConfig = _annotationCfg.getMappedSuperclassConfig();
+        mappedSuperAnn = _annotationCfg.getAnnotation();
+        mappedSuperConfig = _annotationCfg.getMappedSuperclassConfig();
 
-        boolean isMappedSuperclass = ! _annotationCfg.isNull();
+        isMappedSuperclass = ! _annotationCfg.isNull();
 
         if (isMappedSuperclass) {
           if (mappedSuperConfig != null)
@@ -133,14 +137,14 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
       // Validates the type
       String entityName;
-      EntityType parentType = null;
+      RelatedType parentType = null;
       JAnnotation inheritanceAnn = null;
       InheritanceConfig inheritanceConfig = null;
       JClass rootClass = type;
       JAnnotation rootEntityAnn = null;
       EntityConfig rootEntityConfig = null;
 
-      if (isEntity) {
+      if (isEntity || isMappedSuperclass) {
         validateType(type);
 
         // Inheritance annotation/configuration is specified
@@ -178,61 +182,76 @@ public class EntityIntrospector extends BaseConfigIntrospector {
           hasInheritance = ! _annotationCfg.isNull();
         }
 
-        if (hasInheritance) {
+        // jpa/0ge2
+        // if (hasInheritance) {
 
-          for (JClass parentClass = type.getSuperClass();
-               parentClass != null;
-               parentClass = parentClass.getSuperClass()) {
+        for (JClass parentClass = type.getSuperClass();
+             parentClass != null;
+             parentClass = parentClass.getSuperClass()) {
 
-            getInternalEntityConfig(parentClass);
-            JAnnotation parentEntity = _annotationCfg.getAnnotation();
-            EntityConfig superEntityConfig = _annotationCfg.getEntityConfig();
+          getInternalEntityConfig(parentClass);
 
-            if (! _annotationCfg.isNull()) {
-              parentType = introspect(parentClass);
-              break;
-            }
+          if (! _annotationCfg.isNull()) {
+            parentType = introspect(parentClass);
+            break;
+          }
 
-            // getInternalMappedSuperclassConfig(parentClass);
-            // JAnnotation superclassAnn = _annotationCfg.getAnnotation();
-            // EntityConfig superclassConfig = _annotationCfg.getMappedSuperclassConfig();
-            //
-            // if (! _annotationCfg.isNull()) {
-            //   parentType = introspect(parentClass);
-            //   break;
-            // }
+          // jpa/0ge2
+          getInternalMappedSuperclassConfig(parentClass);
+
+          if (! _annotationCfg.isNull()) {
+            parentType = introspect(parentClass);
+            break;
           }
         }
 
-        if (entityAnn != null)
-          entityName = entityAnn.getString("name");
-        else {
-          entityName = entityConfig.getClassName();
+        if (isEntity) {
+          if (entityConfig == null)
+            entityName = entityAnn.getString("name");
+          else {
+            entityName = entityConfig.getClassName();
 
-          int p = entityName.lastIndexOf('.');
+            int p = entityName.lastIndexOf('.');
 
-          if (p > 0)
-            entityName = entityName.substring(p + 1);
+            if (p > 0)
+              entityName = entityName.substring(p + 1);
+          }
+        }
+        else { // jpa/0ge2
+          if (mappedSuperConfig == null)
+            entityName = mappedSuperAnn.getString("name");
+          else {
+            entityName = mappedSuperConfig.getClassName();
+
+            int p = entityName.lastIndexOf('.');
+
+            if (p > 0)
+              entityName = entityName.substring(p + 1);
+          }
         }
       }
       else {
         entityName = type.getName();
       }
 
-      if (entityName.equals("")) {
+      if ((entityName == null) || "".equals(entityName)) {
         entityName = type.getName();
         int p = entityName.lastIndexOf('.');
         if (p > 0)
           entityName = entityName.substring(p + 1);
       }
 
-      entityType = _entityMap.get(entityName);
+      entityType = _relatedTypeMap.get(entityName);
 
       if (entityType != null)
         return entityType;
 
-      entityType = _persistenceUnit.createEntity(entityName, type);
-      _entityMap.put(entityName, entityType);
+      if (isEntity)
+        entityType = _persistenceUnit.createEntity(entityName, type);
+      else
+        entityType = _persistenceUnit.createMappedSuperclass(entityName, type);
+
+      _relatedTypeMap.put(entityName, entityType);
 
       // Adds entity listeners, if any.
       introspectEntityListeners(type, entityType, _persistenceUnit);
@@ -245,6 +264,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       if (isField)
         entityType.setFieldAccess(true);
 
+      // jpa/0ge2
       entityType.setInstanceClassName(type.getName() + "__ResinExt");
       entityType.setEnhanced(true);
 
@@ -273,8 +293,11 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         else if (inheritanceConfig != null)
           strategy = inheritanceConfig.getStrategy();
 
-        if (parentType == null)
+        if ((parentType == null) ||
+            (parentType instanceof MappedSuperclassType)) {
+
           entityType.setTable(_persistenceUnit.createTable(tableName));
+        }
         else if (strategy == InheritanceType.JOINED) {
           entityType.setTable(_persistenceUnit.createTable(tableName));
 
@@ -379,9 +402,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       else if (isField)
         introspectIdField(_persistenceUnit, entityType, parentType,
                           type, idClass, entityConfig);
-      else
+      else {
         introspectIdMethod(_persistenceUnit, entityType, parentType,
                            type, idClass, entityConfig);
+      }
 
       HashMap<String, IdConfig> idMap = null;
 
@@ -449,8 +473,16 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   }
 
   private void introspectAttributeOverrides(JClass type,
-                                            EntityType entityType)
+                                            RelatedType entityType)
   {
+    RelatedType parent = entityType.getParentType();
+
+    if (parent == null)
+      return;
+
+    if (parent instanceof EntityType)
+      return;
+
     getInternalAttributeOverrideConfig(type);
     JAnnotation attributeOverrideAnn = _annotationCfg.getAnnotation();
     AttributeOverrideConfig attributeOverrideConfig
@@ -490,14 +522,14 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
       Type amberType = null;
 
-      ArrayList<AmberField> fields = entityType.getFields();
+      ArrayList<AmberField> fields = parent.getFields();
 
       for (int i=0; i < fields.size(); i++) {
 
         AmberField field = fields.get(i);
 
         // XXX: needs to handle @AttributeOverrides with
-        //      fields other than PropertyField's.
+        //      fields other than PropertyField's ???
         if (! (field instanceof PropertyField))
           continue;
 
@@ -520,7 +552,14 @@ public class EntityIntrospector extends BaseConfigIntrospector {
             column.setNotNull(notNull);
             column.setUnique(unique);
 
-            ((PropertyField) field).setColumn(column);
+            PropertyField overriddenField
+              = new PropertyField(field.getSourceType(), field.getName());
+
+            overriddenField.setType(((PropertyField) field).getType());
+            overriddenField.setLazy(field.isLazy());
+            overriddenField.setColumn(column);
+
+            entityType.addOverriddenField(overriddenField);
           }
         }
       }
@@ -551,17 +590,20 @@ public class EntityIntrospector extends BaseConfigIntrospector {
               column.setNotNull(notNull);
               column.setUnique(unique);
 
-              ArrayList<Column> columns = field.getColumns();
-
               if (field instanceof KeyPropertyField) {
-                if (columns.size() > 0) {
-                  sourceTable.removeColumn(columns.get(0));
-                  columns.remove(0);
+                KeyPropertyField overriddenField
+                  = new KeyPropertyField((RelatedType) field.getSourceType(),
+                                         field.getName());
+
+                overriddenField.setGenerator(field.getGenerator());
+                overriddenField.setColumn(column);
+
+                // XXX: needs to handle compound pk with @AttributeOverride ???
+                if (keys.size() == 1) {
+                  keys.remove(0);
+                  keys.add(overriddenField);
+                  entityType.setId(new com.caucho.amber.field.Id(entityType, keys));
                 }
-
-                columns.add(column);
-
-                ((KeyPropertyField) field).setColumn(column);
               }
             }
           }

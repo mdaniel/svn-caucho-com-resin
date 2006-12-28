@@ -231,10 +231,14 @@ public class ListenerComponent extends ClassComponent {
       for (JMethod method : callbacks) {
         JClass params[] = method.getParameterTypes();
 
+        out.print("this.");
+
+        /* jpa/0r42
         if (listenerType.getParentType() == null)
           out.print("this.");
         else
           out.print("super.");
+        */
 
         out.print(method.getName());
         out.println("((" + params[0].getName() + ") entity);");

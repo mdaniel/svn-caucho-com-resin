@@ -31,7 +31,7 @@ package com.caucho.amber.field;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
-import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
@@ -91,6 +91,10 @@ public class Id {
     _keys.add(key);
     // ejb/0a04
     // Collections.sort(_keys, new AmberFieldCompare());
+
+    // jpa/0ge2
+    if (_ownerType instanceof MappedSuperclassType)
+      return;
 
     _columns.addAll(key.getColumns());
     // Collections.sort(_columns, new ColumnCompare());

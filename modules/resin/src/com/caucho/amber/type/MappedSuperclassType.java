@@ -24,27 +24,28 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
 package com.caucho.amber.type;
 
-import com.caucho.amber.entity.Entity;
+import com.caucho.amber.entity.MappedSuperclass;
 import com.caucho.amber.gen.*;
 import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.amber.table.Table;
+import com.caucho.amber.table.*;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
+import java.util.ArrayList;
 
 /**
- * Represents an application persistent bean type
+ * Represents a non-persistent class with abstract O/R mapping information.
  */
-public class EntityType extends RelatedType {
-  private static final Logger log = Logger.getLogger(EntityType.class.getName());
-  private static final L10N L = new L10N(EntityType.class);
+public class MappedSuperclassType extends RelatedType {
+  private static final Logger log = Logger.getLogger(MappedSuperclassType.class.getName());
+  private static final L10N L = new L10N(MappedSuperclassType.class);
 
-  public EntityType(AmberPersistenceUnit amberPersistenceUnit)
+  public MappedSuperclassType(AmberPersistenceUnit amberPersistenceUnit)
   {
     super(amberPersistenceUnit);
   }
@@ -54,7 +55,7 @@ public class EntityType extends RelatedType {
    */
   public Class getInstanceClass()
   {
-    return getInstanceClass(Entity.class);
+    return getInstanceClass(MappedSuperclass.class);
   }
 
   /**
@@ -62,7 +63,7 @@ public class EntityType extends RelatedType {
    */
   public String getComponentInterfaceName()
   {
-    return "com.caucho.amber.entity.Entity";
+    return "com.caucho.amber.entity.MappedSuperclass";
   }
 
   /**
@@ -70,7 +71,35 @@ public class EntityType extends RelatedType {
    */
   public AmberMappedComponent getComponentGenerator()
   {
-    return new EntityComponent();
+    return new MappedSuperclassComponent();
+  }
+
+  /**
+   * Returns the root type.
+   */
+  public RelatedType getRootType()
+  {
+    return null;
+  }
+
+  /**
+   * Returns the table.
+   */
+  public Table getTable()
+  {
+    return _table;
+  }
+
+  /**
+   * Returns the columns.
+   */
+  public ArrayList<Column> getColumns()
+  {
+    // jpa/0ge2
+    if (getTable() == null)
+      return null;
+
+    return getTable().getColumns();
   }
 
   /**
@@ -78,16 +107,13 @@ public class EntityType extends RelatedType {
    */
   public void setTable(Table table)
   {
-    super.setTable(table);
-
-    table.setType(this);
   }
 
   /**
-   * Printable version of the entity.
+   * Printable version of the mapped superclass.
    */
   public String toString()
   {
-    return "EntityType[" + _beanClass.getName() + "]";
+    return "MappedSuperclassType[" + _beanClass.getName() + "]";
   }
 }

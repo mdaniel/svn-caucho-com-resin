@@ -87,7 +87,7 @@ public class Column {
    * @param name the column sql name
    * @param type the column's type
    */
-  Column(Table table, String name, Type type)
+  public Column(Table table, String name, Type type)
   {
     _table = table;
     _name = name;

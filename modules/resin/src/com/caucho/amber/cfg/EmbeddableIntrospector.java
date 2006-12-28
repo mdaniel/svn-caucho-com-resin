@@ -104,7 +104,7 @@ public class EmbeddableIntrospector extends BaseConfigIntrospector {
         isField = true;
         embeddableType.setIdClass(true);
         _persistenceUnit.getAmberContainer().addEmbeddable(typeName,
-                                                             embeddableType);
+                                                           embeddableType);
       }
 
       embeddableType.setInstanceClassName(type.getName() +

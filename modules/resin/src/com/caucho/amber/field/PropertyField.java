@@ -253,7 +253,7 @@ public class PropertyField extends AbstractField {
       // jpa/0g06, jpa/0g0k
       out.println("if (__caucho_session != null && __caucho_session.isInTransaction()) {");
       out.println("  __caucho_load_" + maskGroup + "(__caucho_session);");
-      out.println("  __caucho_session.makeTransactional(this);");
+      out.println("  __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) this);");
       out.println("}");
       out.println();
     }
@@ -307,7 +307,7 @@ public class PropertyField extends AbstractField {
 
       out.println();
       out.println("if (__caucho_session != null && oldMask == 0)");
-      out.println("  __caucho_session.update(this);");
+      out.println("  __caucho_session.update((com.caucho.amber.entity.Entity) this);");
       out.println();
       out.println("__caucho_increment_version();");
     }

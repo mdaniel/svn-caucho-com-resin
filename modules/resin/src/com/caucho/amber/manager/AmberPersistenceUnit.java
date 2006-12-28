@@ -157,6 +157,9 @@ public class AmberPersistenceUnit {
   private ArrayList<EmbeddableType> _embeddableTypes
     = new ArrayList<EmbeddableType>();
 
+  private ArrayList<MappedSuperclassType> _mappedSuperclassTypes
+    = new ArrayList<MappedSuperclassType>();
+
   private ArrayList<ListenerType> _defaultListeners =
     new ArrayList<ListenerType>();
 
@@ -431,7 +434,7 @@ public class AmberPersistenceUnit {
 
     try {
       if (isEntity) {
-        EntityType entityType = _entityIntrospector.introspect(type);
+        EntityType entityType = (EntityType) _entityIntrospector.introspect(type);
 
         // EntityType entity = createEntity(type);
 
@@ -443,9 +446,11 @@ public class AmberPersistenceUnit {
         _amberContainer.addEmbeddable(className, embeddableType);
       }
       else if (isMappedSuper) {
-        // XXX: to do
-        // MappedSuperType mappedType = _mappedSuperIntrospector.introspect(type);
-        // _amberContainer.addMappedSuper(className, mappedType);
+        // XXX: needs to refactor EntityIntrospector and MappedSuperIntrospector.
+        MappedSuperclassType mappedSuperclassType
+          = (MappedSuperclassType) _entityIntrospector.introspect(type);
+
+        _amberContainer.addMappedSuperclass(className, mappedSuperclassType);
       }
     } catch (Throwable e) {
       _amberContainer.addEntityException(className, e);
@@ -546,12 +551,13 @@ public class AmberPersistenceUnit {
     // entityType = (EntityType) _typeManager.get(beanClass.getName());
 
     if (entityType == null) {
-      EntityType parentType = null;
+      // The parent type can be a @MappedSuperclass or an @EntityType.
+      RelatedType parentType = null;
 
       for (JClass parentClass = beanClass.getSuperClass();
            parentType == null && parentClass != null;
            parentClass = parentClass.getSuperClass()) {
-        parentType = (EntityType) _typeManager.get(parentClass.getName());
+        parentType = (RelatedType) _typeManager.get(parentClass.getName());
       }
 
       if (parentType != null)
@@ -586,6 +592,33 @@ public class AmberPersistenceUnit {
     addEntityHome(beanClass.getName(), entityHome);
 
     return entityType;
+  }
+
+  /**
+   * Adds an entity.
+   */
+  public MappedSuperclassType createMappedSuperclass(String name,
+                                                     JClass beanClass)
+  {
+    MappedSuperclassType mappedSuperType
+      = (MappedSuperclassType) _typeManager.get(name);
+
+    if (mappedSuperType != null)
+      return mappedSuperType;
+
+    mappedSuperType = new MappedSuperclassType(this);
+
+    _typeManager.put(name, mappedSuperType);
+    // XXX: some confusion about the double entry
+    if (_typeManager.get(beanClass.getName()) == null)
+      _typeManager.put(beanClass.getName(), mappedSuperType);
+
+    _mappedSuperclassTypes.add(mappedSuperType);
+
+    mappedSuperType.setName(name);
+    mappedSuperType.setBeanClass(beanClass);
+
+    return mappedSuperType;
   }
 
   /**
@@ -820,6 +853,9 @@ public class AmberPersistenceUnit {
     AbstractEnhancedType type = null;
 
     try {
+      for (MappedSuperclassType mappedType : _mappedSuperclassTypes)
+        initType(type = mappedType);
+
       while (_lazyGenerate.size() > 0) {
         EntityType entityType = _lazyGenerate.remove(0);
 
@@ -1055,6 +1091,19 @@ public class AmberPersistenceUnit {
       return (EntityType) type;
     else
       return null;
+  }
+
+  /**
+   * Returns a matching mapped superclass.
+   */
+  public MappedSuperclassType getMappedSuperclass(String className)
+  {
+    Type type = _typeManager.get(className);
+
+    if (type instanceof MappedSuperclassType)
+      return (MappedSuperclassType) type;
+
+    return null;
   }
 
   /**

@@ -39,27 +39,27 @@ import java.util.HashSet;
 /**
  * Generates the Java code for the wrapped object.
  */
-public class EntityComponent extends AmberMappedComponent {
-  private static final L10N L = new L10N(EntityComponent.class);
+public class MappedSuperclassComponent extends AmberMappedComponent {
+  private static final L10N L = new L10N(MappedSuperclassComponent.class);
 
-  public EntityComponent()
+  public MappedSuperclassComponent()
   {
   }
 
   /**
-   * Gets the entity type.
+   * Gets the mapped superclass type.
    */
-  public EntityType getEntityType()
+  public MappedSuperclassType getMappedSuperclassType()
   {
-    return (EntityType) _relatedType;
+    return (MappedSuperclassType) _relatedType;
   }
 
   /**
    * Sets the bean info for the generator
    */
-  public void setEntityType(EntityType entityType)
+  public void setMappedSuperclassType(MappedSuperclassType mappedSuperclassType)
   {
-    setRelatedType(entityType);
+    setRelatedType(mappedSuperclassType);
   }
 
   /**
@@ -69,14 +69,9 @@ public class EntityComponent extends AmberMappedComponent {
     throws IOException
   {
     try {
-      RelatedType parentType = getEntityType().getParentType();
+      generateHeader(out, false);
 
-      boolean isEntityParent = (parentType != null) &&
-        (parentType instanceof EntityType);
-
-      generateHeader(out, isEntityParent);
-
-      generateInit(out, isEntityParent);
+      generateInit(out, false);
 
       HashSet<Object> completedSet = new HashSet<Object>();
 
@@ -84,34 +79,27 @@ public class EntityComponent extends AmberMappedComponent {
 
       generateGetEntityType(out);
 
-      if (! isEntityParent)
-        generateGetEntityState(out);
+      generateGetEntityState(out);
 
-      generateMatch(out, isEntityParent);
+      generateMatch(out, false);
 
       generateFields(out);
 
       generateMethods(out);
 
-      generateDetach(out, isEntityParent);
+      generateDetach(out, false);
 
-      generateLoad(out, isEntityParent);
+      generateLoad(out, false);
 
       int min = 0;
-      if (isEntityParent)
-        min = getEntityType().getParentType().getLoadGroupIndex() + 1;
-      int max = getEntityType().getLoadGroupIndex();
+      int max = getMappedSuperclassType().getLoadGroupIndex();
 
       for (int i = min; i <= max; i++)
         generateLoadGroup(out, i);
 
-      generateResultSetLoad(out, isEntityParent);
+      generateResultSetLoad(out, false);
 
-      generateSetQuery(out, isEntityParent);
-
-      // generateLoadFromObject();
-
-      // generateCopy();
+      generateSetQuery(out, false);
 
       generateCopy(out);
 
@@ -129,7 +117,7 @@ public class EntityComponent extends AmberMappedComponent {
 
       generateFlush(out);
 
-      generateAfterCommit(out, isEntityParent);
+      generateAfterCommit(out, false);
 
       generateAfterRollback(out);
 
@@ -137,7 +125,6 @@ public class EntityComponent extends AmberMappedComponent {
 
       generateInternals(out);
 
-      // printDependList(out, _dependencies);
     } catch (IOException e) {
       throw e;
     }

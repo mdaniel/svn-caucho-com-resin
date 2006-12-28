@@ -63,6 +63,8 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
 
   private ArrayList<AmberField> _fields = new ArrayList<AmberField>();
 
+  private ArrayList<AmberField> _overriddenFields;
+
   private volatile boolean _isConfigured;
 
   private ArrayList<PersistentDependency> _dependencies
@@ -142,6 +144,44 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   {
     for (int i = 0; i < _fields.size(); i++) {
       AmberField field = _fields.get(i);
+
+      if (field.getName().equals(name))
+        return field;
+    }
+
+    return null;
+  }
+
+  /**
+   * Adds an overridden field.
+   */
+  public void addOverriddenField(AmberField field)
+  {
+    if (_overriddenFields == null)
+      _overriddenFields = new ArrayList<AmberField>();
+
+    _overriddenFields.add(field);
+    Collections.sort(_overriddenFields, new AmberFieldCompare());
+  }
+
+  /**
+   * Returns the overridden fields.
+   */
+  public ArrayList<AmberField> getOverriddenFields()
+  {
+    return _overriddenFields;
+  }
+
+  /**
+   * Returns the overridden field with a given name.
+   */
+  public AmberField getOverriddenField(String name)
+  {
+    if (_overriddenFields == null)
+      return null;
+
+    for (int i = 0; i < _overriddenFields.size(); i++) {
+      AmberField field = _overriddenFields.get(i);
 
       if (field.getName().equals(name))
         return field;
@@ -258,12 +298,23 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
     if (loadGroupIndex == 0 && _discriminator != null)
       index++;
 
-    ArrayList<AmberField> fields = getFields();
-    for (int i = 0; i < fields.size(); i++) {
-      AmberField field = fields.get(i);
+    // jpa/0ge2
+    ArrayList<AmberField> fields = getOverriddenFields();
 
-      if (field.getLoadGroupIndex() == loadGroupIndex)
-        index = field.generateLoad(out, rs, indexVar, index);
+    for (int i = 0; i < 2; i++) {
+      if (fields == null) {
+        fields = getFields();
+        continue;
+      }
+
+      for (int j = 0; j < fields.size(); j++) {
+        AmberField field = fields.get(j);
+
+        if (field.getLoadGroupIndex() == loadGroupIndex)
+          index = field.generateLoad(out, rs, indexVar, index);
+      }
+
+      fields = getFields();
     }
 
     return index;
@@ -294,24 +345,34 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   {
     CharBuffer cb = CharBuffer.allocate();
 
-    ArrayList<AmberField> fields = getFields();
+    // jpa/0ge2
+    ArrayList<AmberField> fields = getOverriddenFields();
 
-    for (int i = 0; i < fields.size(); i++) {
-      AmberField field = fields.get(i);
-
-      if (field.getLoadGroupIndex() != loadGroup)
+    for (int i = 0; i < 2; i++) {
+      if (fields == null) {
+        fields = getFields();
         continue;
+      }
 
-      String propSelect = field.generateLoadSelect(table, id);
+      for (int j = 0; j < fields.size(); j++) {
+        AmberField field = fields.get(j);
 
-      if (propSelect == null)
-        continue;
+        if (field.getLoadGroupIndex() != loadGroup)
+          continue;
 
-      if (hasSelect)
-        cb.append(", ");
-      hasSelect = true;
+        String propSelect = field.generateLoadSelect(table, id);
 
-      cb.append(propSelect);
+        if (propSelect == null)
+          continue;
+
+        if (hasSelect)
+          cb.append(", ");
+        hasSelect = true;
+
+        cb.append(propSelect);
+      }
+
+      fields = getFields();
     }
 
     if (cb.length() == 0)

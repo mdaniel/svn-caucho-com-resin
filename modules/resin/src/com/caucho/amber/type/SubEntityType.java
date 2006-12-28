@@ -52,6 +52,11 @@ public class SubEntityType extends EntityType {
     _parent = parent;
     _root = parent.getRootType();
 
+    if (_root == null) {
+      // jpa/0ge2: parent is MappedSuperclassType.
+      _root = this;
+    }
+
     _loadGroupIndex = -1;
     _defaultLoadGroupIndex = -1;
     _dirtyIndex = -1;
@@ -93,10 +98,24 @@ public class SubEntityType extends EntityType {
   }
 
   /**
+   * Returns true if the superclass is a MappedSuperclass.
+   */
+  public boolean isParentMappedSuperclass()
+  {
+    if (_parent instanceof MappedSuperclassType)
+      return true;
+
+    return false;
+  }
+
+  /**
    * Returns the discriminator.
    */
   public Column getDiscriminator()
   {
+    if (getRootType() == this) // jpa/0ge2
+      return super.getDiscriminator();
+
     return getRootType().getDiscriminator();
   }
 
@@ -106,7 +125,12 @@ public class SubEntityType extends EntityType {
   public int getLoadGroupIndex()
   {
     if (_loadGroupIndex < 0) {
-      _loadGroupIndex = _parent.getLoadGroupIndex() + 1;
+      _loadGroupIndex = _parent.getLoadGroupIndex();
+
+      // jpa/0ge2: MappedSuperclassType
+      if (_parent instanceof EntityType)
+        _loadGroupIndex++;
+
       _defaultLoadGroupIndex = _loadGroupIndex;
     }
 
