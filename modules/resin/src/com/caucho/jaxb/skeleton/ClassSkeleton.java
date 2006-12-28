@@ -232,7 +232,11 @@ public class ClassSkeleton<C> extends Skeleton {
               && ! Modifier.isPublic(f.getModifiers()))
             continue;
 
-          // XXX : XmlAccessType.NONE
+          // XXX : Other annotations?
+          if (accessType == XmlAccessType.NONE &&
+              ! f.isAnnotationPresent(XmlElement.class) &&
+              ! f.isAnnotationPresent(XmlAttribute.class))
+            continue;
 
           addAccessor(new FieldAccessor(f, _context));
         }

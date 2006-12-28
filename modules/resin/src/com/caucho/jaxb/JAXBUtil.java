@@ -106,11 +106,12 @@ public class JAXBUtil {
       introspectType(getActualParameterType(param), jaxbClasses);
     }
 
-    /* XXX: create wrappers
+    // XXX: Check for @WebFault annotation
+
     Type[] exceptions = method.getGenericExceptionTypes();
 
     for (Type exception : exceptions)
-      introspectType(exception, jaxbClasses);*/
+      introspectType(exception, jaxbClasses);
   }
 
   /**

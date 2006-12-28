@@ -107,7 +107,8 @@ public class GetterSetterAccessor extends Accessor {
 
     if (_get != null)
       a = _get.getAnnotation(c);
-    else if (_set != null)
+
+    if (a == null && _set != null)
       a = _set.getAnnotation(c);
 
     return a;

@@ -95,11 +95,7 @@ public abstract class Accessor {
   public void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    //writeStartElement(out, obj);
-
     _property.write(m, out, obj, getQName());
-
-    //writeEndElement(out, obj);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in)
