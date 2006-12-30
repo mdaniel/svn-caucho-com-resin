@@ -28,6 +28,12 @@
 
 package javax.faces.component;
 
+import java.util.*;
+
+import javax.faces.application.*;
+import javax.faces.context.*;
+import javax.faces.event.*;
+
 public class UIViewRoot extends UIComponentBase
 {
   public static final String COMPONENT_FAMILY = "javax.faces.ViewRoot";
@@ -38,6 +44,10 @@ public class UIViewRoot extends UIComponentBase
 
   private String _viewId;
   private int _unique;
+
+  private Locale _locale;
+
+  private ArrayList<FacesEvent> _eventList;
 
   public UIViewRoot()
   {
@@ -68,8 +78,87 @@ public class UIViewRoot extends UIComponentBase
     _viewId = value;
   }
 
+  public void setLocale(Locale locale)
+  {
+    _locale = locale;
+  }
+
+  public Locale getLocale()
+  {
+    return _locale;
+  }
+
   public String createUniqueId()
   {
     return UNIQUE_ID_PREFIX + _unique++;
+  }
+
+  /**
+   * Process the application.
+   */
+  public void processApplication(FacesContext context)
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    broadcastEvents();
+  }
+
+  /**
+   * Process the decodes.
+   */
+  public void processDecodes(FacesContext context)
+  {
+    super.processDecodes(context);
+
+    broadcastEvents();
+  }
+
+  /**
+   * Process the updates.
+   */
+  public void processUpdates(FacesContext context)
+  {
+    super.processUpdates(context);
+
+    broadcastEvents();
+  }
+
+  /**
+   * Process the validators.
+   */
+  @Override
+  public void processValidators(FacesContext context)
+  {
+    super.processValidators(context);
+
+    broadcastEvents();
+  }
+
+  @Override
+  public void queueEvent(FacesEvent event)
+  {
+    if (_eventList == null)
+      _eventList = new ArrayList<FacesEvent>();
+
+    _eventList.add(event);
+  }
+
+  private void broadcastEvents()
+  {
+    if (_eventList != null) {
+      for (int i = 0; i < _eventList.size(); i++) {
+	FacesEvent event = _eventList.get(i);
+
+	event.getComponent().broadcast(event);
+      }
+
+      _eventList = null;
+    }
+  }
+
+  public String toString()
+  {
+    return getClass().getName() + "[" + getViewId() + "]";
   }
 }

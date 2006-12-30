@@ -64,6 +64,9 @@ public class ImplicitFieldExpr extends Expr {
   {
     PageContext page = (PageContext) env.getContext(JspContext.class);
 
+    if (page == null)
+      return null;
+
     Object fieldValue = _field.evalObject(env);
 
     if (fieldValue == null)

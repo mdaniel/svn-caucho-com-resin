@@ -57,8 +57,13 @@ public class ServletFacesContextImpl extends FacesContext
   
   private UIViewRoot _uiViewRoot;
 
+  private HashMap<String,ArrayList<FacesMessage>> _messageMap
+    = new HashMap<String,ArrayList<FacesMessage>>();
+
   private ResponseWriter _responseWriter;
   private ResponseStream _responseStream;
+
+  private boolean _isClosed;
   
   ServletFacesContextImpl(FacesContextFactoryImpl factory,
 			  ServletContext webApp,
@@ -74,16 +79,17 @@ public class ServletFacesContextImpl extends FacesContext
   
   public Application getApplication()
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
     return _factory.getApplication();
-  }
-
-  public Iterator<String> getClientIdsWithMessages()
-  {
-    throw new UnsupportedOperationException();
   }
 
   public ExternalContext getExternalContext()
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
     if (_externalContext == null) {
       _externalContext
 	= new ServletExternalContext(_webApp, _request, _response);
@@ -92,23 +98,11 @@ public class ServletFacesContextImpl extends FacesContext
     return _externalContext;
   }
 
-  public FacesMessage.Severity getMaximumSeverity()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public Iterator<FacesMessage> getMessages()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public Iterator<FacesMessage> getMessages(String clientId)
-  {
-    throw new UnsupportedOperationException();
-  }
-
   public RenderKit getRenderKit()
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
     UIViewRoot viewRoot = getViewRoot();
 
     if (viewRoot == null)
@@ -127,16 +121,25 @@ public class ServletFacesContextImpl extends FacesContext
 
   public ResponseStream getResponseStream()
   {
-    throw new UnsupportedOperationException();
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
+    return _responseStream;
   }
 
   public void setResponseStream(ResponseStream responseStream)
   {
-    throw new UnsupportedOperationException();
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
+     _responseStream = responseStream;
   }
 
   public ResponseWriter getResponseWriter()
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
     if (_responseWriter == null) {
       try {
 	_responseWriter = new ResponseWriterImpl(_response,
@@ -153,6 +156,9 @@ public class ServletFacesContextImpl extends FacesContext
 
   public void setResponseWriter(ResponseWriter writer)
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
     _responseWriter = writer;
   }
 
@@ -161,6 +167,9 @@ public class ServletFacesContextImpl extends FacesContext
    */
   public UIViewRoot getViewRoot()
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
     if (_uiViewRoot == null) {
       _uiViewRoot = getApplication().getViewHandler().createView(this,
 								 null);
@@ -174,6 +183,12 @@ public class ServletFacesContextImpl extends FacesContext
    */
   public void setViewRoot(UIViewRoot root)
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
+    if (root == null)
+      throw new NullPointerException();
+    
     _uiViewRoot = root;
   }
 
@@ -183,6 +198,9 @@ public class ServletFacesContextImpl extends FacesContext
   @Override
   public boolean getRenderResponse()
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
     return _isRenderResponse;
   }
 
@@ -192,6 +210,9 @@ public class ServletFacesContextImpl extends FacesContext
   @Override
   public void renderResponse()
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
     _isRenderResponse = true;
   }
 
@@ -201,6 +222,9 @@ public class ServletFacesContextImpl extends FacesContext
   @Override
   public boolean getResponseComplete()
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
     return _isResponseComplete;
   }
 
@@ -210,27 +234,126 @@ public class ServletFacesContextImpl extends FacesContext
   @Override
   public void responseComplete()
   {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
     _isResponseComplete = true;
   }
 
   public void addMessage(String clientId,
-				  FacesMessage message)
+			 FacesMessage message)
   {
-    throw new UnsupportedOperationException();
+    if (_isClosed)
+      throw new IllegalStateException("FacesContext is closed");
+    
+    if (message == null)
+      throw new NullPointerException();
+
+    synchronized (_messageMap) {
+      ArrayList<FacesMessage> messages = _messageMap.get(clientId);
+
+      if (messages == null) {
+	messages = new ArrayList<FacesMessage>();
+	_messageMap.put(clientId, messages);
+      }
+
+      messages.add(message);
+    }
+  }
+
+  public Iterator<String> getClientIdsWithMessages()
+  {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
+    synchronized (_messageMap) {
+      ArrayList<String> list = new ArrayList<String>(_messageMap.keySet());
+
+      return list.iterator();
+    }
+  }
+
+  public FacesMessage.Severity getMaximumSeverity()
+  {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
+    synchronized (_messageMap) {
+      FacesMessage.Severity severity = null;
+      
+      for (Map.Entry<String,ArrayList<FacesMessage>> entry
+	     : _messageMap.entrySet()) {
+	for (FacesMessage msg : entry.getValue()) {
+	  if (severity == null)
+	    severity = msg.getSeverity();
+	  else if (severity.compareTo(msg.getSeverity()) < 0)
+	    severity = msg.getSeverity();
+	}
+      }
+
+      return severity;
+    }
+  }
+
+  public Iterator<FacesMessage> getMessages()
+  {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
+    synchronized (_messageMap) {
+      ArrayList<FacesMessage> messages = new ArrayList<FacesMessage>();
+      
+      for (Map.Entry<String,ArrayList<FacesMessage>> entry
+	     : _messageMap.entrySet()) {
+	messages.addAll(entry.getValue());
+      }
+
+      //_messageMap.clear();
+
+      return messages.iterator();
+    }
+  }
+
+  public Iterator<FacesMessage> getMessages(String clientId)
+  {
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
+    synchronized (_messageMap) {
+      ArrayList<FacesMessage> messages = _messageMap.get(clientId);
+
+      if (messages == null)
+	messages = new ArrayList<FacesMessage>();
+
+      return messages.iterator();
+    }
   }
 
   /**
    * @Since 1.2
    */
+  @Override
   public ELContext getELContext()
   {
-    if (_elContext == null)
-      _elContext = new FacesELContext();
+    if (_isClosed)
+      throw new IllegalStateException(getClass().getName() + " is closed");
+    
+    if (_elContext == null) {
+      _elContext = new FacesELContext(getApplication().getELResolver());
+      _elContext.putContext(FacesContext.class, this);
+    }
 
     return _elContext;
   }
 
   public void release()
   {
+    _isClosed = true;
+    FacesContext.setCurrentInstance(null);
+  }
+
+  public String toString()
+  {
+    return "ServletFacesContextImpl[]";
   }
 }

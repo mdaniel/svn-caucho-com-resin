@@ -44,6 +44,9 @@ public class ApplicationFactoryImpl extends ApplicationFactory
   
   public void setApplication(Application app)
   {
+    if (app == null)
+      throw new NullPointerException();
+    
     _application = app;
   }
 

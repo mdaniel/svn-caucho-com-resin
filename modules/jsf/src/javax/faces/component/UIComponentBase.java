@@ -46,6 +46,9 @@ public abstract class UIComponentBase extends UIComponent
 {
   private static final UIComponent []NULL_FACETS_AND_CHILDREN
     = new UIComponent[0];
+  
+  private static final FacesListener []NULL_FACES_LISTENERS
+    = new FacesListener[0];
 
   private static final WeakHashMap<Class,HashMap<String,Property>> _compMap
     = new WeakHashMap<Class,HashMap<String,Property>>();
@@ -57,7 +60,9 @@ public abstract class UIComponentBase extends UIComponent
   
   private String _rendererType;
   private boolean _isTransient;
-  private boolean _isRendered = true;
+  
+  private Boolean _isRendered;
+  private ValueExpression _isRenderedExpr;
 
   private ComponentList _children;
   private ComponentMap _facets;
@@ -66,6 +71,9 @@ public abstract class UIComponentBase extends UIComponent
 
   private AttributeMap _attributeMap;
   private HashMap<String,ValueExpression> _exprMap;
+  
+  private FacesListener []_facesListeners
+    = NULL_FACES_LISTENERS;
   
   public Map<String,Object> getAttributes()
   {
@@ -78,13 +86,40 @@ public abstract class UIComponentBase extends UIComponent
   @Deprecated
   public ValueBinding getValueBinding(String name)
   {
-    throw new UnsupportedOperationException();
+    ValueExpression expr = getValueExpression(name);
+
+    if (expr == null)
+      return null;
+    else if (expr instanceof ValueExpressionAdapter)
+      return ((ValueExpressionAdapter) expr).getBinding();
+    else // XXX:
+      throw new ClassCastException(ValueExpression.class.getName());
   }
 
   @Deprecated
   public void setValueBinding(String name, ValueBinding binding)
   {
-    throw new UnsupportedOperationException();
+    setValueExpression(name, new ValueExpressionAdapter(binding));
+  }
+
+  /**
+   * Returns the value expression for an attribute
+   *
+   * @param name the name of the attribute to get
+   */
+  @Override
+  public ValueExpression getValueExpression(String name)
+  {
+    if (name == null)
+      throw new NullPointerException();
+
+    if ("rendered".equals(name))
+      return _isRenderedExpr;
+    
+    if (_exprMap != null)
+      return _exprMap.get(name);
+    else
+      return null;
   }
 
   /**
@@ -101,6 +136,11 @@ public abstract class UIComponentBase extends UIComponent
 
     if (name.equals("id") || name.equals("parent"))
       throw new IllegalArgumentException();
+    
+    if ("rendered".equals(name)) {
+      _isRenderedExpr = expr;
+      return;
+    }
     
     try {
       if (expr != null) {
@@ -119,24 +159,6 @@ public abstract class UIComponentBase extends UIComponent
     } catch (ELException e) {
       throw new FacesException(e);
     }
-  }
-
-  /**
-   * Returns the value expression for an attribute
-   *
-   * @param name the name of the attribute to get
-   */
-  @Override
-  public ValueExpression getValueExpression(String name)
-  {
-    if (name == null)
-      throw new NullPointerException();
-
-    
-    if (_exprMap != null)
-      return _exprMap.get(name);
-    else
-      return null;
   }
 
   /**
@@ -226,7 +248,12 @@ public abstract class UIComponentBase extends UIComponent
 
   public boolean isRendered()
   {
-    return _isRendered;
+    if (_isRendered != null)
+      return _isRendered;
+    else if (_isRenderedExpr != null)
+      return Util.evalBoolean(_isRenderedExpr);
+    else
+      return true;
   }
 
   public void setRendered(boolean isRendered)
@@ -246,7 +273,12 @@ public abstract class UIComponentBase extends UIComponent
 
   public boolean getRendersChildren()
   {
-    return false;
+    Renderer renderer = getRenderer(FacesContext.getCurrentInstance());
+
+    if (renderer != null)
+      return renderer.getRendersChildren();
+    else
+      return false;
   }
 
   public List<UIComponent> getChildren()
@@ -267,6 +299,79 @@ public abstract class UIComponentBase extends UIComponent
 
   public UIComponent findComponent(String expr)
   {
+    UIComponent base = null;
+
+    String []values = expr.split(":");
+    
+    if (values[0].equals("")) {
+      for (base = this; base.getParent() != null; base = base.getParent()) {
+      }
+    }
+    else {
+      for (base = this;
+	   base.getParent() != null && ! (base instanceof NamingContainer);
+	   base = base.getParent()) {
+      }
+    }
+
+    for (int i = 0; i < values.length; i++) {
+      String v = values[i];
+
+      if ("".equals(v))
+	continue;
+
+      base = findComponent(base, v);
+
+      if (i + 1 == values.length)
+	return base;
+
+      if (! (base instanceof NamingContainer)) {
+	throw new IllegalArgumentException("'" + v + "' in expression '" + expr + "' does not match an intermediate NamingContainer.");
+      }
+    }
+    
+    return base;
+  }
+
+  private static UIComponent findComponent(UIComponent comp, String id)
+  {
+    if (id.equals(comp.getId()))
+      return comp;
+    
+    /*
+    UIComponent child = comp.getFacet(id);
+
+    if (child != null)
+      return child;
+
+    int childCount = comp.getChildCount();
+    if (childCount > 0) {
+      List<UIComponent> children = comp.getChildren();
+
+      for (int i = 0; i < children.size(); i++) {
+	child = children.get(i);
+
+	if (id.equals(child.getId()))
+	  return child;
+      }
+    }
+    */
+
+    Iterator iter = comp.getFacetsAndChildren();
+    while (iter.hasNext()) {
+      UIComponent child = (UIComponent) iter.next();
+
+      if (id.equals(child.getId()))
+	return child;
+      
+      if (! (child instanceof NamingContainer)) {
+	UIComponent desc = findComponent(child, id);
+
+	if (desc != null)
+	  return desc;
+      }
+    }
+
     return null;
   }
 
@@ -321,7 +426,10 @@ public abstract class UIComponentBase extends UIComponent
   public void broadcast(FacesEvent event)
     throws AbortProcessingException
   {
-    throw new UnsupportedOperationException();
+    for (int i = 0; i < _facesListeners.length; i++) {
+      if (event.isAppropriateListener(_facesListeners[i]))
+	event.processListener(_facesListeners[i]);
+    }
   }
   
   /**
@@ -402,19 +510,68 @@ public abstract class UIComponentBase extends UIComponent
 
   protected void addFacesListener(FacesListener listener)
   {
+    if (listener == null)
+      throw new NullPointerException();
+    
+    int length = _facesListeners.length;
+    
+    FacesListener[] newListeners = new FacesListener[length + 1];
+
+    System.arraycopy(_facesListeners, 0, newListeners, 0, length);
+
+    newListeners[length] = listener;
+
+    _facesListeners = newListeners;
   }
 
   protected FacesListener []getFacesListeners(Class cl)
   {
-    throw new UnsupportedOperationException();
+    if (FacesListener.class.equals(cl))
+      return _facesListeners;
+
+    int count = 0;
+    for (int i = _facesListeners.length - 1; i >= 0; i--) {
+      if (cl.isAssignableFrom(_facesListeners[i].getClass()))
+	count++;
+    }
+
+    FacesListener []array = (FacesListener []) Array.newInstance(cl, count);
+    count = 0;
+    for (int i = _facesListeners.length - 1; i >= 0; i--) {
+      if (cl.isAssignableFrom(_facesListeners[i].getClass())) {
+	array[count++] = _facesListeners[i];
+      }
+    }
+
+    return array;
   }
 
   protected void removeFacesListener(FacesListener listener)
   {
+    if (listener == null)
+      throw new NullPointerException();
+
+    int length = _facesListeners.length;
+    for (int i = 0; i < length; i++) {
+      if (listener.equals(_facesListeners[i])) {
+	FacesListener []newListeners = new FacesListener[length - 1];
+	System.arraycopy(_facesListeners, 0, newListeners, 0, i);
+	System.arraycopy(_facesListeners, i + 1, newListeners, i,
+			 length - i - 1);
+
+	_facesListeners = newListeners;
+
+	return;
+      }
+    }
   }
 
   public void queueEvent(FacesEvent event)
   {
+    UIComponent parent = getParent();
+
+    if (parent != null)
+      parent.queueEvent(event);
   }
 
   /**
@@ -519,6 +676,9 @@ public abstract class UIComponentBase extends UIComponent
     if (facetsAndChildren.length > 0) {
       for (int i = 0; i < facetsAndChildren.length; i++) {
 	UIComponent child = facetsAndChildren[i];
+
+	if (child.isTransient())
+	  continue;
 	
 	Object childState = child.processSaveState(context);
 
@@ -533,21 +693,75 @@ public abstract class UIComponentBase extends UIComponent
 
     Object selfSaveState = saveState(context);
 
-    return new UIComponentBaseState(childSaveState, selfSaveState);
-  }
-  
-  public Object saveState(FacesContext context)
-  {
-    return null;
+    return new Object[] { selfSaveState, childSaveState };
   }
 
   public void processRestoreState(FacesContext context,
 				  Object state)
   {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (isTransient())
+      return;
+    
+    UIComponent []facetsAndChildren = getFacetsAndChildrenArray();
+
+    Object []baseState = (Object []) state;
+
+    if (baseState == null)
+      return;
+
+    restoreState(context, baseState[0]);
+
+    Object []childSaveState = (Object []) baseState[1];
+      
+    if (facetsAndChildren.length > 0) {
+      for (int i = 0; i < facetsAndChildren.length; i++) {
+	UIComponent child = facetsAndChildren[i];
+
+	if (child.isTransient())
+	  continue;
+
+	if (childSaveState != null)
+	  child.processRestoreState(context, childSaveState[i]);
+	else
+	  child.processRestoreState(context, null);
+      }
+    }
+  }
+  
+  public Object saveState(FacesContext context)
+  {
+    return new Object[] {
+      _id,
+      _exprMap,
+      _isRendered,
+      _isRenderedExpr,
+      _rendererType,
+      (_attributeMap != null ? _attributeMap.getExtMap() : null),
+    };
   }
 
   public void restoreState(FacesContext context, Object state)
   {
+    Object []v = (Object []) state;
+
+    _id = (String) v[0];
+    _exprMap = (HashMap) v[1];
+
+    _isRendered = (Boolean) v[2];
+    _isRenderedExpr = (ValueExpression) v[3];
+
+    _rendererType = (String) v[4];
+    HashMap<String,Object> extMap = (HashMap) v[5];
+
+    if (extMap != null) {
+      if (_attributeMap == null)
+	_attributeMap = new AttributeMap(this);
+      
+      _attributeMap.setExtMap(extMap);
+    }
   }
 
   public void setTransient(boolean isTransient)
@@ -576,6 +790,7 @@ public abstract class UIComponentBase extends UIComponent
   }
 
   private static class ComponentList extends AbstractList<UIComponent>
+    implements java.io.Serializable
   {
     private ArrayList<UIComponent> _list = new ArrayList<UIComponent>();
     
@@ -627,16 +842,14 @@ public abstract class UIComponentBase extends UIComponent
     {
       UIComponent child = (UIComponent) o;
 
-      UIComponent old = _list.set(i, o);
+      UIComponent old = _list.remove(i);
 
-      if (old == o) {
-      }
-      else {
-	setParent(child);
+      if (old != null)
+	old.setParent(null);
+	
+      setParent(child);
 
-	if (old != null)
-	  old.setParent(null);
-      }
+      _list.add(i, child);
 
       return old;
     }
@@ -646,10 +859,27 @@ public abstract class UIComponentBase extends UIComponent
     {
       UIComponent old = _list.remove(i);
 
-      if (old != null)
+      if (old != null) {
+	UIComponent parent = old.getParent();
+	
 	old.setParent(null);
+      }
 
       return old;
+    }
+
+    @Override
+    public boolean remove(Object v)
+    {
+      UIComponent comp = (UIComponent) v;
+      
+      if (_list.remove(comp)) {
+	comp.setParent(null);
+
+	return true;
+      }
+      else
+	return false;
     }
 
     @Override
@@ -683,6 +913,11 @@ public abstract class UIComponentBase extends UIComponent
     {
       return _list.iterator();
     }
+  }
+
+  public String toString()
+  {
+    return getClass().getName() + "[" + getId() + "]";
   }
 
   private static class ComponentMap extends HashMap<String,UIComponent>
@@ -763,24 +998,11 @@ public abstract class UIComponentBase extends UIComponent
     }
   }
 
-  private static class UIComponentBaseState implements java.io.Serializable {
-    Object []_childSaveState;
-    Object _selfSaveState;
-
-    UIComponentBaseState()
-    {
-    }
-
-    UIComponentBaseState(Object []childSaveState, Object selfSaveState)
-    {
-      _childSaveState = childSaveState;
-      _selfSaveState = selfSaveState;
-    }
-  }
-
-  private static class AttributeMap extends HashMap<String,Object>
+  private static class AttributeMap extends AbstractMap<String,Object>
+    implements Serializable
   {
     private final transient HashMap<String,Property> _propertyMap;
+    private HashMap<String,Object> _extMap;
     private Object _obj;
 
     AttributeMap(Object obj)
@@ -801,14 +1023,26 @@ public abstract class UIComponentBase extends UIComponent
       }
     }
 
+    HashMap<String,Object> getExtMap()
+    {
+      return _extMap;
+    }
+
+    void setExtMap(HashMap<String,Object> map)
+    {
+      _extMap = map;
+    }
+
     public boolean containsKey(String name)
     {
       Property prop = _propertyMap.get(name);
 
       if (prop != null)
 	return false;
+      else if (_extMap != null)
+	return _extMap.containsKey(name);
       else
-	return super.containsKey(name);
+	return false;
     }
 
     @Override
@@ -818,8 +1052,12 @@ public abstract class UIComponentBase extends UIComponent
       
       Property prop = _propertyMap.get(name);
 
-      if (prop == null)
-	return super.get(name);
+      if (prop == null) {
+	if (_extMap != null)
+	  return _extMap.get(name);
+	else
+	  return null;
+      }
 
       Method getter = prop.getGetter();
       
@@ -841,8 +1079,12 @@ public abstract class UIComponentBase extends UIComponent
       
       Property prop = _propertyMap.get(name);
 
-      if (prop == null)
-	return super.put(name, value);
+      if (prop == null) {
+	if (_extMap == null)
+	  _extMap = new HashMap<String,Object>(8);
+
+	return _extMap.put(name, value);
+      }
 
       if (prop.getSetter()  == null)
 	throw new IllegalArgumentException(name + " is not writable");
@@ -859,10 +1101,22 @@ public abstract class UIComponentBase extends UIComponent
     {
       Property prop = _propertyMap.get(name);
 
-      if (prop == null)
-	return super.remove(name);
+      if (prop == null) {
+	if (_extMap != null)
+	  return _extMap.remove(name);
+	else
+	  return null;
+      }
 
       throw new IllegalArgumentException(name + " cannot be removed");
+    }
+
+    public Set<Map.Entry<String,Object>> entrySet()
+    {
+      if (_extMap != null)
+	return _extMap.entrySet();
+      else
+	return Collections.EMPTY_SET;
     }
 
     private static HashMap<String,Property> introspectComponent(Class cl)
@@ -904,6 +1158,76 @@ public abstract class UIComponentBase extends UIComponent
     public Method getSetter()
     {
       return _setter;
+    }
+  }
+
+  private static class ValueExpressionAdapter extends ValueExpression
+  {
+    private final ValueBinding _binding;
+
+    ValueExpressionAdapter(ValueBinding binding)
+    {
+      _binding = binding;
+    }
+
+    ValueBinding getBinding()
+    {
+      return _binding;
+    }
+
+    public Object getValue(ELContext elContext)
+    {
+      return _binding.getValue(FacesContext.getCurrentInstance());
+    }
+
+    public void setValue(ELContext elContext, Object value)
+    {
+      _binding.setValue(FacesContext.getCurrentInstance(), value);
+    }
+
+    public boolean isReadOnly(ELContext elContext)
+    {
+      return _binding.isReadOnly(FacesContext.getCurrentInstance());
+    }
+
+    public Class getType(ELContext elContext)
+    {
+      return _binding.getType(FacesContext.getCurrentInstance());
+    }
+
+    public Class getExpectedType()
+    {
+      return Object.class;
+    }
+
+    public boolean isLiteralText()
+    {
+      return false;
+    }
+
+    public int hashCode()
+    {
+      return _binding.getExpressionString().hashCode();
+    }
+
+    public boolean equals(Object o)
+    {
+      if (! (o instanceof ValueExpression))
+	return false;
+
+      ValueExpression expr = (ValueExpression) o;
+      
+      return getExpressionString().equals(expr.getExpressionString());
+    }
+
+    public String getExpressionString()
+    {
+      return _binding.getExpressionString();
+    }
+
+    public String toString()
+    {
+      return "ValueExpressionAdapter[" + getExpressionString() + "]";
     }
   }
 }

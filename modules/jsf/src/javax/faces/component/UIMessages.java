@@ -49,7 +49,7 @@ public class UIMessages extends UIComponentBase
 
   public UIMessages()
   {
-    setRendererType("javax.faces.Message");
+    setRendererType("javax.faces.Messages");
   }
 
   /**

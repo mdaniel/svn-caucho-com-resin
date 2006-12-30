@@ -64,6 +64,6 @@ public class ValueChangeEvent extends FacesEvent
 
   public void processListener(FacesListener listener)
   {
-    throw new UnsupportedOperationException();
+    ((ValueChangeListener) listener).processValueChange(this);
   }
 }

@@ -42,6 +42,9 @@ public class HtmlBasicRenderKit extends RenderKit {
 
   public HtmlBasicRenderKit()
   {
+    addRenderer("javax.faces.Input", "javax.faces.Text",
+		HtmlInputTextRenderer.RENDERER);
+    
     addRenderer("javax.faces.Output", "javax.faces.Text",
 		HtmlOutputTextRenderer.RENDERER);
     

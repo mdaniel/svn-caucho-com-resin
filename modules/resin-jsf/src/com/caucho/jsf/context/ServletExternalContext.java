@@ -47,6 +47,11 @@ public class ServletExternalContext extends ExternalContext {
   private HttpServletRequest _request;
   private HttpServletResponse _response;
 
+  private Map<String,String> _requestParameterMap;
+  private Map<String,Object> _applicationMap;
+  private Map<String,Object> _requestMap;
+  private Map<String,Object> _sessionMap;
+
   ServletExternalContext(ServletContext webApp,
 			 HttpServletRequest request,
 			 HttpServletResponse response)
@@ -68,27 +73,39 @@ public class ServletExternalContext extends ExternalContext {
 
   public String encodeActionURL(String url)
   {
-    throw new UnsupportedOperationException();
+    if (url == null)
+      throw new NullPointerException();
+    
+    return _response.encodeURL(url);
   }
 
   public String encodeNamespace(String name)
   {
-    throw new UnsupportedOperationException();
+    if (name == null)
+      throw new NullPointerException();
+    
+    return name;
   }
 
   public String encodeResourceURL(String url)
   {
-    throw new UnsupportedOperationException();
+    if (url == null)
+      throw new NullPointerException();
+    
+    return _response.encodeURL(url);
   }
 
   public Map<String,Object> getApplicationMap()
   {
-    throw new UnsupportedOperationException();
+    if (_applicationMap == null)
+      _applicationMap = new ApplicationMap();
+
+    return _applicationMap;
   }
 
   public String getAuthType()
   {
-    throw new UnsupportedOperationException();
+    return _request.getAuthType();
   }
 
   public Object getContext()
@@ -98,17 +115,29 @@ public class ServletExternalContext extends ExternalContext {
 
   public String getInitParameter(String name)
   {
-    throw new UnsupportedOperationException();
+    if (name == null)
+      throw new NullPointerException();
+    
+    return _webApp.getInitParameter(name);
   }
 
   public Map getInitParameterMap()
   {
-    throw new UnsupportedOperationException();
+    HashMap map = new HashMap();
+
+    Enumeration e = _webApp.getInitParameterNames();
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+
+      map.put(name, _webApp.getInitParameter(name));
+    }
+
+    return Collections.unmodifiableMap(map);
   }
 
   public String getRemoteUser()
   {
-    throw new UnsupportedOperationException();
+    return _request.getRemoteUser();
   }
 
   public Object getRequest()
@@ -140,47 +169,113 @@ public class ServletExternalContext extends ExternalContext {
 
   public Map<String,Object> getRequestCookieMap()
   {
-    throw new UnsupportedOperationException();
+    HashMap<String,Object> map = new HashMap<String,Object>();
+
+    Cookie []cookies = _request.getCookies();
+
+    if (cookies == null)
+      return map;
+
+    for (int i = 0; i < cookies.length; i++) {
+      map.put(cookies[i].getName(), cookies[i]);
+    }
+
+    return Collections.unmodifiableMap(map);
   }
 
   public Map<String,String> getRequestHeaderMap()
   {
-    throw new UnsupportedOperationException();
+    HashMap<String,String> map = new HashMap<String,String>();
+
+    Enumeration e = _request.getHeaderNames();
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+      
+      map.put(name, _request.getHeader(name));
+    }
+
+    return Collections.unmodifiableMap(map);
   }
 
   public Map<String,String[]> getRequestHeaderValuesMap()
   {
-    throw new UnsupportedOperationException();
+    HashMap<String,String[]> map = new HashMap<String,String[]>();
+
+    Enumeration e = _request.getHeaderNames();
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+
+      Enumeration e1 = _request.getHeaders(name);
+      ArrayList<String> values = new ArrayList<String>();
+      while (e1.hasMoreElements()) {
+	values.add((String) e1.nextElement());
+      }
+      
+      map.put(name, values.toArray(new String[values.size()]));
+    }
+
+    return Collections.unmodifiableMap(map);
   }
 
   public Locale getRequestLocale()
   {
-    throw new UnsupportedOperationException();
+    return _request.getLocale();
   }
 
   public Iterator<Locale> getRequestLocales()
   {
-    throw new UnsupportedOperationException();
+    ArrayList<Locale> locales = new ArrayList<Locale>();
+
+    Enumeration e = _request.getLocales();
+    while (e.hasMoreElements())
+      locales.add((Locale) e.nextElement());
+
+    return locales.iterator();
   }
 
   public Map<String,Object> getRequestMap()
   {
-    throw new UnsupportedOperationException();
+    if (_requestMap == null)
+      _requestMap = new RequestMap();
+
+    return _requestMap;
   }
 
   public Map<String,String> getRequestParameterMap()
   {
-    throw new UnsupportedOperationException();
+    if (_requestParameterMap == null) {
+      HashMap<String,String> map = new HashMap<String,String>();
+
+      Enumeration e = _request.getParameterNames();
+      while (e.hasMoreElements()) {
+	String name = (String) e.nextElement();
+      
+	map.put(name, _request.getParameter(name));
+      }
+
+      _requestParameterMap = Collections.unmodifiableMap(map);
+    }
+
+    return _requestParameterMap;
   }
 
   public Iterator<String> getRequestParameterNames()
   {
-    throw new UnsupportedOperationException();
+    return getRequestParameterMap().keySet().iterator();
   }
 
   public Map<String,String[]> getRequestParameterValuesMap()
   {
-    throw new UnsupportedOperationException();
+    HashMap<String,String[]> map = new HashMap<String,String[]>();
+
+    Enumeration e = _request.getParameterNames();
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+      
+      map.put(name, _request.getParameterValues(name));
+    }
+
+    return Collections.unmodifiableMap(map);
   }
 
   public String getRequestPathInfo()
@@ -212,7 +307,7 @@ public class ServletExternalContext extends ExternalContext {
    */
   public String getRequestCharacterEncoding()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _request.getCharacterEncoding();
   }
 
   /**
@@ -220,7 +315,7 @@ public class ServletExternalContext extends ExternalContext {
    */
   public String getRequestContentType()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _request.getContentType();
   }
 
   /**
@@ -228,7 +323,7 @@ public class ServletExternalContext extends ExternalContext {
    */
   public String getResponseCharacterEncoding()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _response.getCharacterEncoding();
   }
 
   /**
@@ -250,9 +345,9 @@ public class ServletExternalContext extends ExternalContext {
     return _webApp.getResourceAsStream(path);
   }
 
-  public Set<String> getResourcePath(String path)
+  public Set<String> getResourcePaths(String path)
   {
-    throw new UnsupportedOperationException();
+    return _webApp.getResourcePaths(path);
   }
 
   public Object getResponse()
@@ -265,7 +360,7 @@ public class ServletExternalContext extends ExternalContext {
    */
   public void setResponse(Object response)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _response = (HttpServletResponse) response;
   }
 
   /**
@@ -273,43 +368,133 @@ public class ServletExternalContext extends ExternalContext {
    */
   public void setResponseCharacterEncoding(String encoding)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _response.setCharacterEncoding(encoding);
   }
 
   public Object getSession(boolean create)
   {
-    throw new UnsupportedOperationException();
+    return _request.getSession(create);
   }
 
   public Map<String,Object> getSessionMap()
   {
-    throw new UnsupportedOperationException();
+    if (_sessionMap == null)
+      _sessionMap = new SessionMap(_request.getSession(true));
+
+    return _sessionMap;
   }
 
   public Principal getUserPrincipal()
   {
-    throw new UnsupportedOperationException();
+    return _request.getUserPrincipal();
   }
 
   public boolean isUserInRole(String role)
   {
-    throw new UnsupportedOperationException();
+    return _request.isUserInRole(role);
   }
 
   public void log(String message)
-    {
-    throw new UnsupportedOperationException();
+  {
+    _webApp.log(message);
   }
 
   public void log(String message, Throwable exn)
   {
-    throw new UnsupportedOperationException();
+    _webApp.log(message, exn);
   }
 
   public void redirect(String url)
     throws IOException
   {
-    throw new UnsupportedOperationException();
+    _response.sendRedirect(url);
+
+    FacesContext.getCurrentInstance().responseComplete();
+  }
+
+  class ApplicationMap extends AttributeMap {
+    public Object get(String key)
+    {
+      return _webApp.getAttribute(key);
+    }
+    
+    public Object put(String key, Object value)
+    {
+      _webApp.setAttribute(key, value);
+
+      return null;
+    }
+    
+    public Object remove(String key)
+    {
+      _webApp.removeAttribute(key);
+
+      return null;
+    }
+
+    public Enumeration getNames()
+    {
+      return _webApp.getAttributeNames();
+    }
+  }
+
+  class SessionMap extends AttributeMap {
+    private HttpSession _session;
+
+    SessionMap(HttpSession session)
+    {
+      _session = session;
+    }
+    
+    public Object get(String key)
+    {
+      return _session.getAttribute(key);
+    }
+    
+    public Object put(String key, Object value)
+    {
+      _session.setAttribute(key, value);
+
+      return null;
+    }
+    
+    public Object remove(String key)
+    {
+      _session.removeAttribute(key);
+
+      return null;
+    }
+
+    public Enumeration getNames()
+    {
+      return _session.getAttributeNames();
+    }
+  }
+
+  class RequestMap extends AttributeMap {
+    public Object get(String key)
+    {
+      return _request.getAttribute(key);
+    }
+    
+    public Object put(String key, Object value)
+    {
+      _request.setAttribute(key, value);
+
+      return null;
+    }
+    
+    public Object remove(String key)
+    {
+      _request.removeAttribute(key);
+
+      return null;
+    }
+
+    public Enumeration getNames()
+    {
+      return _request.getAttributeNames();
+    }
   }
 }
 

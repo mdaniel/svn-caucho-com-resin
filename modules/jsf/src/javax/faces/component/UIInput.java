@@ -29,18 +29,24 @@
 package javax.faces.component;
 
 import java.util.*;
+import java.util.logging.*;
 
 import javax.el.*;
 
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.convert.*;
 import javax.faces.el.*;
 import javax.faces.event.*;
+import javax.faces.render.*;
 import javax.faces.validator.*;
 
 public class UIInput extends UIOutput
   implements EditableValueHolder
 {
+  private static final Logger log
+    = Logger.getLogger(UIInput.class.getName());
+  
   public static final String COMPONENT_FAMILY = "javax.faces.Input";
   public static final String COMPONENT_TYPE = "javax.faces.Input";
   public static final String CONVERSION_MESSAGE_ID
@@ -51,9 +57,6 @@ public class UIInput extends UIOutput
     = "javax.faces.component.UIInput.UPDATE";
 
   private static final Validator []NULL_VALIDATORS = new Validator[0];
-  
-  private static final ValueChangeListener []NULL_VALUE_CHANGE_LISTENERS
-    = new ValueChangeListener[0];
   
   private static final HashMap<String,PropEnum> _propMap
     = new HashMap<String,PropEnum>();
@@ -70,6 +73,7 @@ public class UIInput extends UIOutput
   //
 
   private boolean _isValid = true;
+  private ValueExpression _valueExpr;
   private boolean _isLocalValueSet;
 
   private boolean _isRequired;
@@ -79,11 +83,6 @@ public class UIInput extends UIOutput
 
   private ArrayList<Validator> _validatorList;
   private Validator []_validators = NULL_VALIDATORS;
-
-  private ArrayList<ValueChangeListener> _valueChangeListenerList;
-  private ValueChangeListener []_valueChangeListeners
-    = NULL_VALUE_CHANGE_LISTENERS;
-  
 
   public UIInput()
   {
@@ -157,6 +156,8 @@ public class UIInput extends UIOutput
 
     if (prop != null) {
       switch (_propMap.get(name)) {
+      case VALUE:
+	return _valueExpr;
       case REQUIRED_MESSAGE:
 	return _requiredMessageExpr;
       case CONVERTER_MESSAGE:
@@ -179,6 +180,13 @@ public class UIInput extends UIOutput
 
     if (prop != null) {
       switch (_propMap.get(name)) {
+      case VALUE:
+	if (expr != null && ! expr.isLiteralText())
+	  _valueExpr = expr;
+
+	super.setValueExpression(name, expr);
+	return;
+	
       case REQUIRED_MESSAGE:
 	if (expr != null && expr.isLiteralText())
 	  _requiredMessage = (String) expr.getValue(null);
@@ -275,50 +283,58 @@ public class UIInput extends UIOutput
   }
 
   @Deprecated
-  public MethodBinding getValidator()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  @Deprecated
-  public void setValidator(MethodBinding validator)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  @Deprecated
   public MethodBinding getValueChangeListener()
   {
-    throw new UnsupportedOperationException();
+    FacesListener []listeners = getFacesListeners(FacesListener.class);
+    for (int i = 0; i < listeners.length; i++) {
+      if (listeners[i] instanceof ValueChangeListenerAdapter) {
+	ValueChangeListenerAdapter adapter
+	  = (ValueChangeListenerAdapter) listeners[i];
+
+	return adapter.getBinding();
+      }
+    }
+
+    return null;
   }
 
   @Deprecated
   public void setValueChangeListener(MethodBinding binding)
   {
-    throw new UnsupportedOperationException();
+    ValueChangeListener listener
+      = new ValueChangeListenerAdapter(binding);
+
+    FacesListener []listeners = getFacesListeners(FacesListener.class);
+    for (int i = 0; i < listeners.length; i++) {
+      if (listeners[i] instanceof ValueChangeListenerAdapter) {
+	removeFacesListener(listeners[i]);
+      }
+    }
+    
+    addValueChangeListener(listener);
   }
 
   public void addValidator(Validator validator)
   {
-    if (_validatorList == null)
-      _validatorList = new ArrayList<Validator>();
+    Validator []newValidators = new Validator[_validators.length + 1];
+    System.arraycopy(_validators, 0, newValidators, 0, _validators.length);
+    newValidators[_validators.length] = validator;
 
-    if (! _validatorList.contains(validator))
-      _validatorList.add(validator);
-
-    _validators = new Validator[_validatorList.size()];
-    _validatorList.toArray(_validators);
+    _validators = newValidators;
   }
 
   public void removeValidator(Validator validator)
   {
-    if (_validatorList == null)
-      return;
-
-    _validatorList.remove(validator);
-
-    _validators = new Validator[_validatorList.size()];
-    _validatorList.toArray(_validators);
+    int length = _validators.length;
+    for (int i = 0; i < length; i++) {
+      if (_validators[i] == validator) {
+	Validator []newValidators = new Validator[length - 1];
+	System.arraycopy(_validators, 0, newValidators, 0, i);
+	System.arraycopy(_validators, i + 1, newValidators, i, length - i - 1);
+	_validators = newValidators;
+	return;
+      }
+    }
   }
 
   public Validator []getValidators()
@@ -326,34 +342,55 @@ public class UIInput extends UIOutput
     return _validators;
   }
 
+  @Deprecated
+  public MethodBinding getValidator()
+  {
+    int length = _validators.length;
+    for (int i = 0; i < length; i++) {
+      Validator validator = _validators[i];
+
+      if (validator instanceof ValidatorAdapter) {
+	ValidatorAdapter adapter = (ValidatorAdapter) validator;
+
+	return adapter.getBinding();
+      }
+    }
+
+    return null;
+  }
+
+  @Deprecated
+  public void setValidator(MethodBinding binding)
+  {
+    ValidatorAdapter adapter = new ValidatorAdapter(binding);
+    
+    int length = _validators.length;
+    for (int i = 0; i < length; i++) {
+      Validator validator = _validators[i];
+
+      if (validator instanceof ValidatorAdapter) {
+	_validators[i] = adapter;
+	return;
+      }
+    }
+
+    addValidator(adapter);
+  }
+
   public void addValueChangeListener(ValueChangeListener listener)
   {
-    if (_valueChangeListenerList == null)
-      _valueChangeListenerList = new ArrayList<ValueChangeListener>();
-
-    if (! _valueChangeListenerList.contains(listener))
-      _valueChangeListenerList.add(listener);
-
-    int size = _valueChangeListenerList.size();
-    _valueChangeListeners = new ValueChangeListener[size];
-    _valueChangeListenerList.toArray(_valueChangeListeners);
+    addFacesListener(listener);
   }
   
   public void removeValueChangeListener(ValueChangeListener listener)
   {
-    if (_valueChangeListenerList == null)
-      return;
-
-    _valueChangeListenerList.remove(listener);
-
-    int size = _valueChangeListenerList.size();
-    _valueChangeListeners = new ValueChangeListener[size];
-    _valueChangeListenerList.toArray(_valueChangeListeners);
+    removeFacesListener(listener);
   }
   
   public ValueChangeListener []getValueChangeListeners()
   {
-    return _valueChangeListeners;
+    return
+      (ValueChangeListener []) getFacesListeners(ValueChangeListener.class);
   }
 
   //
@@ -381,17 +418,21 @@ public class UIInput extends UIOutput
     if (! isLocalValueSet())
       return;
 
-    ValueExpression expr = getValueExpression("value");
-
-    if (expr == null)
+    if (_valueExpr == null)
       return;
 
     try {
-      expr.setValue(context.getELContext(), getLocalValue());
+      _valueExpr.setValue(context.getELContext(), getLocalValue());
+
+      setValue(null);
+      _isLocalValueSet = false;
     } catch (RuntimeException e) {
-      setValid(false);
+      log.log(Level.FINE, e.toString(), e);
       
-      throw e;
+      setValid(false);
+
+      context.addMessage(getClientId(context),
+			 new FacesMessage(UPDATE_MESSAGE_ID));
     }
   }
 
@@ -403,9 +444,12 @@ public class UIInput extends UIOutput
     try {
       if (! isImmediate())
 	validate(context);
+
+      if (! isValid())
+	context.renderResponse();
     } catch (RuntimeException e) {
       context.renderResponse();
-
+      
       throw e;
     }
   }
@@ -417,12 +461,29 @@ public class UIInput extends UIOutput
     if (submittedValue == null)
       return;
 
-    Object value = getConvertedValue(context, submittedValue);
+    Object value;
 
-    validateValue(context, value);
+    try {
+      value = getConvertedValue(context, submittedValue);
 
-    if (! isValid()) {
+      validateValue(context, value);
+
+      if (! isValid()) {
+	context.renderResponse();
+	return;
+      }
+    } catch (ConverterException e) {
+      log.log(Level.FINE, e.toString(), e);
+      setValid(false);
       context.renderResponse();
+
+      FacesMessage msg = e.getFacesMessage();
+      if (msg != null)
+	context.addMessage(getClientId(context), msg);
+      else {
+	msg = new FacesMessage(CONVERSION_MESSAGE_ID);
+	context.addMessage(getClientId(context), msg);
+      }
       return;
     }
 
@@ -430,13 +491,54 @@ public class UIInput extends UIOutput
     setValue(value);
     setSubmittedValue(null);
 
-    // XXX: changes
+    if (oldValue != value
+	&& getFacesListeners(FacesListener.class).length > 0) {
+      ValueChangeEvent event = new ValueChangeEvent(this, oldValue, value);
+
+      broadcast(event);
+    }
+  }
+
+  /**
+   * Returns true
+   */
+  @Override
+  public boolean getRendersChildren()
+  {
+    return true;
   }
 
   protected Object getConvertedValue(FacesContext context,
 				     Object submittedValue)
     throws ConverterException
   {
+    Renderer renderer = getRenderer(context);
+    
+    if (renderer != null)
+      return renderer.getConvertedValue(context, this, submittedValue);
+    else if (! (submittedValue instanceof String))
+      return submittedValue;
+    else {
+      Converter converter = getConverter();
+
+      if (converter != null)
+	return converter.getAsObject(context, this, (String) submittedValue);
+
+      if (_valueExpr != null) {
+	Class type = _valueExpr.getType(context.getELContext());
+
+	if (type != null) {
+	  converter = context.getApplication().createConverter(type);
+
+	  if (converter != null) {
+	    return converter.getAsObject(context,
+					 this,
+					 (String) submittedValue);
+	  }
+	}
+      }
+    }
+
     return submittedValue;
   }
 
@@ -446,7 +548,9 @@ public class UIInput extends UIOutput
       return;
 
     if (isRequired() && (value == null || "".equals(value))) {
-      // XXX: Message
+      context.addMessage(getClientId(context),
+			 new FacesMessage(REQUIRED_MESSAGE_ID));
+
       _isValid = false;
       return;
     }
@@ -514,6 +618,7 @@ public class UIInput extends UIOutput
   //
 
   private static enum PropEnum {
+    VALUE,
     REQUIRED_MESSAGE,
     CONVERTER_MESSAGE,
     VALIDATOR_MESSAGE,
@@ -532,7 +637,66 @@ public class UIInput extends UIOutput
     private String _validatorMessageExpr;
   }
 
+  private static class ValueChangeListenerAdapter
+    implements ValueChangeListener {
+    private MethodBinding _binding;
+
+    ValueChangeListenerAdapter(MethodBinding binding)
+    {
+      _binding = binding;
+    }
+
+    MethodBinding getBinding()
+    {
+      return _binding;
+    }
+
+    public void processValueChange(ValueChangeEvent event)
+      throws AbortProcessingException
+    {
+      FacesContext facesContext = FacesContext.getCurrentInstance();
+
+      _binding.invoke(facesContext, new Object[] { event }); 
+    }
+
+    public String toString()
+    {
+      return "ValueChangeListenerAdapter[" + _binding + "]";
+    }
+  }
+
+  private static class ValidatorAdapter
+    implements Validator {
+    private MethodBinding _binding;
+
+    ValidatorAdapter(MethodBinding binding)
+    {
+      _binding = binding;
+    }
+
+    MethodBinding getBinding()
+    {
+      return _binding;
+    }
+
+    public void validate(FacesContext context,
+			 UIComponent component,
+			 Object value)
+      throws ValidatorException
+    {
+      FacesContext facesContext = FacesContext.getCurrentInstance();
+
+      _binding.invoke(facesContext, new Object[] { context, component, value }); 
+    }
+
+    public String toString()
+    {
+      return "ValueChangeListenerAdapter[" + _binding + "]";
+    }
+  }
+
   static {
+    _propMap.put("value", PropEnum.VALUE);
     _propMap.put("requiredMessage", PropEnum.REQUIRED_MESSAGE);
     _propMap.put("converterMessage", PropEnum.CONVERTER_MESSAGE);
     _propMap.put("validatorMessage", PropEnum.VALIDATOR_MESSAGE);

@@ -51,8 +51,8 @@ public class ThreadPool {
     
   private int _threadMax = 8192;
   
-  private int _threadIdleMin = 5;
-  private int _threadIdleMax = 10;
+  private int _threadIdleMin = 10;
+  private int _threadIdleMax = 15;
 
   private long _resetCount;
 
@@ -305,14 +305,18 @@ public class ThreadPool {
 
   private int getDefaultPriority()
   {
-    if (_threadIdleMin >= 10)
-      return 5;
-    else if (_threadIdleMin >= 5)
+    if (_threadIdleMin <= 2)
+      return _threadIdleMin;
+    else if (_threadIdleMin <= 3)
       return 2;
-    else if (_threadIdleMin >= 1)
-      return 1;
+    else if (_threadIdleMin <= 6)
+      return 3;
+    else if (_threadIdleMin <= 15)
+      return 5;
+    else if (_threadIdleMin <= 20)
+      return _threadIdleMin - 10;
     else
-      return 0;
+      return 10;
   }
 
   /**

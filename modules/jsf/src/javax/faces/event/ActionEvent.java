@@ -32,10 +32,20 @@ import java.util.*;
 
 import javax.faces.component.*;
 
-public abstract class ActionEvent extends FacesEvent
+public class ActionEvent extends FacesEvent
 {
   public ActionEvent(UIComponent component)
   {
     super(component);
+  }
+
+  public boolean isAppropriateListener(FacesListener listener)
+  {
+    return listener instanceof ActionListener;
+  }
+
+  public void processListener(FacesListener listener)
+  {
+    ((ActionListener) listener).processAction(this);
   }
 }

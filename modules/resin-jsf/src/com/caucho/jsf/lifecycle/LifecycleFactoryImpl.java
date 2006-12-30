@@ -29,12 +29,18 @@
 package com.caucho.jsf.lifecycle;
 
 import java.util.*;
+
 import javax.faces.lifecycle.*;
+
+import com.caucho.util.*;
 
 /**
  * Factory class for returning JSF lifecycle.
  */
-public class LifecycleFactoryImpl extends LifecycleFactory {
+public class LifecycleFactoryImpl extends LifecycleFactory
+{
+  private static final L10N L = new L10N(LifecycleFactoryImpl.class);
+  
   private HashMap<String,Lifecycle> _lifecycleMap
     = new HashMap<String,Lifecycle>();
 
@@ -48,6 +54,9 @@ public class LifecycleFactoryImpl extends LifecycleFactory {
    */
   public void addLifecycle(String name, Lifecycle lifecycle)
   {
+    if (_lifecycleMap.get(name) != null)
+      throw new IllegalArgumentException(L.l("'{0}' is a duplicate lifecycle name.",
+					  name));
     _lifecycleMap.put(name, lifecycle);
   }
 
@@ -56,7 +65,13 @@ public class LifecycleFactoryImpl extends LifecycleFactory {
    */
   public Lifecycle getLifecycle(String name)
   {
-    return _lifecycleMap.get(name);
+    Lifecycle lifecycle =  _lifecycleMap.get(name);
+
+    if (lifecycle == null)
+      throw new IllegalArgumentException(L.l("'{0}' is an unknown lifecycle name.",
+					  name));
+
+    return lifecycle;
   }
 
   /**

@@ -1,0 +1,393 @@
+/*
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.jsf.taglib;
+
+import java.io.*;
+import java.util.*;
+
+import javax.el.*;
+
+import javax.faces.component.*;
+import javax.faces.component.html.*;
+import javax.faces.context.*;
+import javax.faces.webapp.*;
+
+import javax.servlet.jsp.*;
+import javax.servlet.jsp.tagext.*;
+
+/**
+ * The base for html tags
+ */
+abstract public class HtmlStyleBaseTag extends UIComponentELTag {
+  private HashMap<String,ValueExpression> _map;
+
+  public void setAccept(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("accept", value);
+  }
+
+  public void setAcceptcharset(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("acceptcharset", value);
+  }
+
+  public void setBgcolor(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("bgcolor", value);
+  }
+
+  public void setBinding(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("binding", value);
+  }
+
+  public void setBorder(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("border", value);
+  }
+
+  public void setCaptionClass(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("captionClass", value);
+  }
+
+  public void setCaptionStyle(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("captionStyle", value);
+  }
+
+  public void setCellpadding(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("cellpadding", value);
+  }
+
+  public void setCellspacing(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("cellspacing", value);
+  }
+
+  public void setColumnClasses(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("columnClasses", value);
+  }
+
+  public void setConverter(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("converter", value);
+  }
+
+  public void setDir(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("dir", value);
+  }
+
+  public void setEnctype(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("enctype", value);
+  }
+
+  public void setEscape(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("escape", value);
+  }
+
+  public void setFooterClass(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("footerClass", value);
+  }
+
+  public void setFrame(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("frame", value);
+  }
+
+  public void setHeaderClass(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("headerClass", value);
+  }
+
+  public void setLang(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("lang", value);
+  }
+
+  public void setOnclick(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onclick", value);
+  }
+
+  public void setOndblclick(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("ondblclick", value);
+  }
+
+  public void setOnkeydown(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onkeydown", value);
+  }
+
+  public void setOnkeypress(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onkeypress", value);
+  }
+
+  public void setOnkeyup(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onkeyup", value);
+  }
+
+  public void setOnmousedown(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onmousedown", value);
+  }
+
+  public void setOnmousemove(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onmousemove", value);
+  }
+
+  public void setOnmouseout(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onmouseout", value);
+  }
+
+  public void setOnmouseover(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onmouseover", value);
+  }
+
+  public void setOnmouseup(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onmouseup", value);
+  }
+
+  public void setOnreset(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onreset", value);
+  }
+
+  public void setOnsubmit(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onsubmit", value);
+  }
+
+  public void setPrependId(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("prependId", value);
+  }
+
+  public void setRendered(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("rendered", value);
+  }
+
+  public void setRowClasses(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("rowClasses", value);
+  }
+
+  public void setRules(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("rules", value);
+  }
+
+  public void setStyle(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("style", value);
+  }
+
+  public void setStyleClass(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("styleClass", value);
+  }
+
+  public void setSummary(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("summary", value);
+  }
+
+  public void setTarget(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("target", value);
+  }
+
+  public void setTitle(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("title", value);
+  }
+
+  public void setValue(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("value", value);
+  }
+
+  public void setWidth(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("width", value);
+  }
+  
+  /**
+   * Sets the overridden properties of the tag
+   */
+  @Override
+  protected void setProperties(UIComponent component)
+  {
+    super.setProperties(component);
+
+    if (_map != null) {
+      for (Map.Entry<String,ValueExpression> entry : _map.entrySet()) {
+	component.setValueExpression(entry.getKey(), entry.getValue());
+      }
+    }
+  }
+}

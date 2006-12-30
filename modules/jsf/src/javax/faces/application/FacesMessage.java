@@ -162,4 +162,9 @@ public class FacesMessage implements java.io.Serializable
 
     VALUES_MAP = Collections.unmodifiableMap(map);
   }
+
+  public String toString()
+  {
+    return "FacesMessage[" + this.summary + "]";
+  }
 }

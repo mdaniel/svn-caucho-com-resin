@@ -121,8 +121,9 @@ public class UIGraphic extends UIComponentBase
     PropEnum prop = _propMap.get(name);
 
     if (prop != null) {
-      switch (_propMap.get(name)) {
+      switch (prop) {
       case URL:
+      case VALUE:
 	if (expr != null && expr.isLiteralText())
 	  _url = (String) expr.getValue(null);
 	else

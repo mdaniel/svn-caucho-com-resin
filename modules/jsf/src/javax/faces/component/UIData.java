@@ -150,22 +150,27 @@ public class UIData extends UIComponentBase
 
   public int getRowIndex()
   {
-    return _rowIndex;
+    return getDataModel().getRowIndex();
+  }
+
+  public Object getRowData()
+  {
+    return getDataModel().getRowData();
   }
 
   protected void setRowIndex(int value)
   {
-    _rowIndex = value;
+    getDataModel().setRowIndex(value);
   }
 
   public int getRowCount()
   {
-    throw new UnsupportedOperationException();
+    return getDataModel().getRowCount();
   }
 
   public boolean isRowAvailable()
   {
-    throw new UnsupportedOperationException();
+    return getDataModel().isRowAvailable();
   }
 
   /**

@@ -123,8 +123,7 @@ public class UISelectBoolean extends UIInput
 
     super.restoreState(context, state[0]);
 
-    if (state[3] != null)
-      _selected = (Boolean) state[1];
+    _selected = (Boolean) state[1];
     _selectedExpr = Util.restore(state[2],
 				 Boolean.class,
 				 context);

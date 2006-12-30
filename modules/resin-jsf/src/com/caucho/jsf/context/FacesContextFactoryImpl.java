@@ -36,7 +36,8 @@ import javax.faces.lifecycle.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-public class FacesContextFactoryImpl extends FacesContextFactory {
+public class FacesContextFactoryImpl extends FacesContextFactory
+{
   private ApplicationFactory _applicationFactory;
   
   public FacesContext getFacesContext(Object context,
@@ -45,10 +46,21 @@ public class FacesContextFactoryImpl extends FacesContextFactory {
 				      Lifecycle lifecycle)
     throws FacesException
   {
-    return new ServletFacesContextImpl(this,
+    if (context == null
+	|| request == null
+	|| response == null
+	|| lifecycle == null)
+      throw new NullPointerException();
+
+    FacesContext facesContext
+      = new ServletFacesContextImpl(this,
 				       (ServletContext) context,
 				       (HttpServletRequest) request,
 				       (HttpServletResponse) response);
+
+    FacesContext.setCurrentInstance(facesContext);
+
+    return facesContext;
   }
 
   Application getApplication()

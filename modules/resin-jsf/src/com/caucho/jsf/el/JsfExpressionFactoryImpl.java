@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -7,8 +7,9 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2,
- * as published by the Free Software Foundation.
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,14 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jsf.application;
-
-import java.math.*;
-import java.util.*;
-
-import javax.el.*;
+package com.caucho.jsf.el;
 
 import com.caucho.el.*;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ExpressionFactory;
+import javax.el.MethodExpression;
+import javax.el.ValueExpression;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
 
 /**
  * Represents an EL expression factory
@@ -41,8 +46,8 @@ import com.caucho.el.*;
 public class JsfExpressionFactoryImpl extends ExpressionFactory {
   private static final HashMap<Class,CoerceType> _coerceMap
     = new HashMap<Class,CoerceType>();
-  
-  JsfExpressionFactoryImpl()
+
+  public JsfExpressionFactoryImpl()
   {
   }
   
@@ -92,7 +97,7 @@ public class JsfExpressionFactoryImpl extends ExpressionFactory {
 			   Class<?>[] expectedParamTypes)
     throws ELException
   {
-    ELParser parser = new ELParser(context, expression);
+    JsfELParser parser = new JsfELParser(context, expression);
 
     Expr expr = parser.parse();
 
@@ -107,7 +112,7 @@ public class JsfExpressionFactoryImpl extends ExpressionFactory {
 			  Class<?> expectedType)
     throws ELException
   {
-    ELParser parser = new ELParser(context, expression);
+    JsfELParser parser = new JsfELParser(context, expression);
 
     Expr expr = parser.parse();
 
@@ -121,7 +126,7 @@ public class JsfExpressionFactoryImpl extends ExpressionFactory {
     CoerceType type = _coerceMap.get(expectedType);
 
     if (type == null)
-      return new ObjectValueExpression(expr, expression);
+      return new ObjectValueExpression(expr, expression, expectedType);
 
     switch (type) {
     case BOOLEAN:

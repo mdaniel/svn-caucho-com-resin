@@ -44,6 +44,15 @@ public class ViewHandlerImpl extends ViewHandler
     throw new UnsupportedOperationException();
   }
 
+  @Override
+  public String calculateCharacterEncoding(FacesContext context)
+  {
+    if (context == null)
+      throw new NullPointerException();
+    
+    return "utf-8";
+  }
+
   public String calculateRenderKitId(FacesContext context)
   {
     return RenderKitFactory.HTML_BASIC_RENDER_KIT;

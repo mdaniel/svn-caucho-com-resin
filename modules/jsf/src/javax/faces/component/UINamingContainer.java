@@ -40,7 +40,6 @@ public class UINamingContainer
 
   public UINamingContainer()
   {
-    setRendererType(COMPONENT_TYPE);
   }
 
   /**

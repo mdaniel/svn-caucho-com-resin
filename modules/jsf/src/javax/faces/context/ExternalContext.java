@@ -141,7 +141,7 @@ public abstract class ExternalContext {
 
   public abstract InputStream getResourceAsStream(String path);
 
-  public abstract Set<String> getResourcePath(String path);
+  public abstract Set<String> getResourcePaths(String path);
 
   public abstract Object getResponse();
 

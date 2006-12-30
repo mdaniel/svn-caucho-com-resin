@@ -37,10 +37,9 @@ public class FacesELContext extends ELContext
 {
   private ELResolver _elResolver;
   
-  public FacesELContext()
+  public FacesELContext(ELResolver elResolver)
   {
-    // putContext(JspContext.class, PageContextImpl.this);
-    _elResolver = new CompositeELResolver();
+    _elResolver = elResolver;
   }
     
   public ELResolver getELResolver()

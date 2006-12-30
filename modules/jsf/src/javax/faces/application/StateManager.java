@@ -53,7 +53,12 @@ public abstract class StateManager
    */
   public Object saveView(FacesContext context)
   {
-    throw new UnsupportedOperationException();
+    SerializedView view = saveSerializedView(context);
+
+    if (view == null)
+      return null;
+
+    return new Object[] { view.getStructure(), view.getState() };
   }
 
   @Deprecated
@@ -106,7 +111,10 @@ public abstract class StateManager
 
   public boolean isSavingStateInClient(FacesContext context)
   {
-    throw new UnsupportedOperationException();
+    ExternalContext extContext = context.getExternalContext();
+    String value = extContext.getInitParameter(STATE_SAVING_METHOD_PARAM_NAME);
+    
+    return STATE_SAVING_METHOD_CLIENT.equals(value);
   }
 
   @Deprecated

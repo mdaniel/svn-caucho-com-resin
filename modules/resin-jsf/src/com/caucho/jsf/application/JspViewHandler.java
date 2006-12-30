@@ -41,19 +41,39 @@ import javax.servlet.*;
 
 public class JspViewHandler extends ViewHandler
 {
+  @Override
   public Locale calculateLocale(FacesContext context)
   {
-    throw new UnsupportedOperationException();
+    if (context == null)
+      throw new NullPointerException();
+    
+    return context.getApplication().getDefaultLocale();
   }
 
+  @Override
+  public String calculateCharacterEncoding(FacesContext context)
+  {
+    if (context == null)
+      throw new NullPointerException();
+    
+    return "utf-8";
+  }
+
+  @Override
   public String calculateRenderKitId(FacesContext context)
   {
+    if (context == null)
+      throw new NullPointerException();
+    
     return RenderKitFactory.HTML_BASIC_RENDER_KIT;
   }
 
   public UIViewRoot createView(FacesContext context,
 			       String viewId)
   {
+    if (context == null)
+      throw new NullPointerException();
+    
     if (viewId == null) {
       ExternalContext extContext = context.getExternalContext();
 
@@ -93,7 +113,10 @@ public class JspViewHandler extends ViewHandler
   public String getActionURL(FacesContext context,
 			     String viewId)
   {
-    throw new UnsupportedOperationException();
+    if (context == null || viewId == null)
+      throw new NullPointerException();
+
+    return viewId;
   }
 
   public String getResourceURL(FacesContext context,

@@ -44,23 +44,57 @@ import javax.faces.validator.*;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
+import com.caucho.jsf.el.*;
+import com.caucho.jsf.el.JsfExpressionFactoryImpl;
+import com.caucho.jsf.context.*;
 
 public class ApplicationImpl extends Application
 {
   private static final L10N L = new L10N(ApplicationImpl.class);
   
   private ActionListener _actionListener;
+  private StateManager _stateManager;
   private ViewHandler _viewHandler;
   private PropertyResolver _propertyResolver;
 
   private ExpressionFactory _jsfExpressionFactory;
+  private ELResolver _elResolver;
+
+  private ArrayList<Locale> _locales;
+  private Locale _defaultLocale = Locale.getDefault();
 
   private HashMap<String,Class> _componentClassMap
     = new HashMap<String,Class>();
 
+  private HashMap<String,String> _validatorClassMap
+    = new HashMap<String,String>();
+
+  private HashMap<String,Class> _converterIdMap
+    = new HashMap<String,Class>();
+
+  private HashMap<Class,Class> _converterClassMap
+    = new HashMap<Class,Class>();
+
+  private String _messageBundle;
+
   public ApplicationImpl()
   {
     _jsfExpressionFactory = new JsfExpressionFactoryImpl();
+
+    ELResolver []customResolvers = new ELResolver[0];
+    _elResolver = new FacesContextELResolver(customResolvers);
+
+    addComponent(UIInput.COMPONENT_TYPE,
+		 "javax.faces.component.UIInput");
+
+    addComponent(UIViewRoot.COMPONENT_TYPE,
+		 "javax.faces.component.UIViewRoot");
+
+    addComponent(UIOutput.COMPONENT_TYPE,
+		 "javax.faces.component.UIOutput");
+
+    addComponent(HtmlInputText.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlInputText");
 
     addComponent(HtmlOutputText.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlOutputText");
@@ -84,12 +118,15 @@ public class ApplicationImpl extends Application
 
   public Locale getDefaultLocale()
   {
-    throw new UnsupportedOperationException();
+    return _defaultLocale;
   }
 
   public void setDefaultLocale(Locale locale)
   {
-    throw new UnsupportedOperationException();
+    if (locale == null)
+      throw new NullPointerException();
+    
+    _defaultLocale = locale;
   }
 
   public String getDefaultRenderKitIt()
@@ -104,12 +141,19 @@ public class ApplicationImpl extends Application
 
   public String getMessageBundle()
   {
-    throw new UnsupportedOperationException();
+    return _messageBundle;
   }
 
   public void setMessageBundle(String bundle)
   {
-    throw new UnsupportedOperationException();
+    _messageBundle = bundle;
+  }
+
+  @Override
+  public ResourceBundle getResourceBundle(FacesContext context,
+					  String name)
+  {
+    return null;
   }
 
   public NavigationHandler getNavigationHandler()
@@ -154,6 +198,12 @@ public class ApplicationImpl extends Application
     return _jsfExpressionFactory;
   }
 
+  @Override
+  public ELResolver getELResolver()
+  {
+    return _elResolver;
+  }
+
   public ViewHandler getViewHandler()
   {
     if (_viewHandler == null)
@@ -169,17 +219,23 @@ public class ApplicationImpl extends Application
 
   public StateManager getStateManager()
   {
-    throw new UnsupportedOperationException();
+    if (_stateManager == null)
+      _stateManager = new SessionStateManager();
+    
+    return _stateManager;
   }
 
   public void setStateManager(StateManager manager)
   {
-    throw new UnsupportedOperationException();
+    _stateManager = manager;
   }
 
   public void addComponent(String componentType,
 			   String componentClass)
   {
+    if (componentType == null)
+      throw new NullPointerException();
+    
     synchronized (_componentClassMap) {
       try {
 	ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -238,37 +294,107 @@ public class ApplicationImpl extends Application
   }
 
   public void addConverter(String converterId,
-				    String converterClass)
+			   String converterClass)
   {
-    throw new UnsupportedOperationException();
-  }
+    if (converterId == null)
+      throw new NullPointerException();
+    
+    synchronized (_converterIdMap) {
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	
+	Class cl = Class.forName(converterClass, false, loader);
 
-  public void addConverter(Class targetClass,
-				    String converterClass)
-  {
-    throw new UnsupportedOperationException();
+	Config.validate(cl, Converter.class);
+
+	_converterIdMap.put(converterId, cl);
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new FacesException(e);
+      }
+    }
   }
 
   public Converter createConverter(String converterId)
     throws FacesException
   {
-    throw new UnsupportedOperationException();
-  }
+    if (converterId == null)
+      throw new NullPointerException();
+    
+    Class cl = null;
+    
+    synchronized (_converterIdMap) {
+      cl = _converterIdMap.get(converterId);
+    }
 
-  public Converter createConverter(Class targetClass)
-    throws FacesException
-  {
-    throw new UnsupportedOperationException();
+    if (cl == null)
+      return null;
+
+    try {
+      return (Converter) cl.newInstance();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new FacesException(e);
+    }
   }
 
   public Iterator<String> getConverterIds()
   {
-    throw new UnsupportedOperationException();
+    return _converterIdMap.keySet().iterator();
+  }
+
+  public void addConverter(Class type,
+			   String converterClass)
+  {
+    if (type == null)
+      throw new NullPointerException();
+    
+    synchronized (_converterClassMap) {
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	
+	Class cl = Class.forName(converterClass, false, loader);
+
+	Config.validate(cl, Converter.class);
+
+	_converterClassMap.put(type, cl);
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new FacesException(e);
+      }
+    }
+  }
+
+  public Converter createConverter(Class type)
+    throws FacesException
+  {
+    if (type == null)
+      throw new NullPointerException();
+    
+    Class cl = null;
+    
+    synchronized (_converterClassMap) {
+      cl = _converterClassMap.get(type);
+    }
+
+    if (cl == null)
+      return null;
+
+    try {
+      return (Converter) cl.newInstance();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new FacesException(e);
+    }
   }
 
   public Iterator<Class> getConverterTypes()
   {
-    throw new UnsupportedOperationException();
+    return _converterClassMap.keySet().iterator();
   }
 
   @Deprecated
@@ -276,40 +402,70 @@ public class ApplicationImpl extends Application
 					   Class []param)
     throws ReferenceSyntaxException
   {
-    throw new UnsupportedOperationException();
+    ExpressionFactory factory = getExpressionFactory();
+
+    ELResolver elResolver = getELResolver();
+    ELContext elContext = new FacesELContext(getELResolver());
+
+    MethodExpression expr
+      = factory.createMethodExpression(elContext, ref, Object.class, param);
+
+    return new MethodBindingAdapter(expr);
   }
 
   public Iterator<Locale> getSupportedLocales()
   {
-    throw new UnsupportedOperationException();
+    if (_locales != null)
+      return _locales.iterator();
+    else
+      return new ArrayList<Locale>().iterator();
   }
 
   public void setSupportedLocales(Collection<Locale> locales)
   {
-    throw new UnsupportedOperationException();
+    _locales = new ArrayList<Locale>(locales);
   }
 
   public void addValidator(String validatorId, String validatorClass)
   {
-    throw new UnsupportedOperationException();
+    _validatorClassMap.put(validatorId, validatorClass);
   }
 
   public Validator createValidator(String validatorId)
     throws FacesException
   {
-    throw new UnsupportedOperationException();
+    try {
+      String validatorClass = _validatorClassMap.get(validatorId);
+      
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+
+      Class cl = Class.forName(validatorClass, false, loader);
+
+      return (Validator) cl.newInstance();
+    } catch (Exception e) {
+      throw new FacesException(e);
+    }
   }
 
   public Iterator<String> getValidatorIds()
   {
-    throw new UnsupportedOperationException();
+    return _validatorClassMap.keySet().iterator();
   }
 
-  @Deprecated
+  @Override    
   public ValueBinding createValueBinding(String ref)
     throws ReferenceSyntaxException
   {
-    throw new UnsupportedOperationException();
+    ExpressionFactory factory = getExpressionFactory();
+
+    ELResolver elResolver = getELResolver();
+    ELContext elContext = new FacesELContext(getELResolver());
+
+    ValueExpression expr
+      = factory.createValueExpression(elContext, ref, Object.class);
+
+    return new ValueBindingAdapter(expr);
   }
 
   public String toString()

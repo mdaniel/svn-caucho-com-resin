@@ -43,7 +43,7 @@ public class FactoryFinder
     = Logger.getLogger(FactoryFinder.class.getName());
   
   public static final String APPLICATION_FACTORY
-    = "javax.faces.application.ApplictionFactory";
+    = "javax.faces.application.ApplicationFactory";
   public static final String FACES_CONTEXT_FACTORY
     = "javax.faces.context.FacesContextFactory";
   public static final String LIFECYCLE_FACTORY
@@ -64,6 +64,9 @@ public class FactoryFinder
 
   public static Object getFactory(String factoryName)
   {
+    if (factoryName == null)
+      throw new NullPointerException();
+    
     Class factoryClass = _factoryClassMap.get(factoryName);
 
     if (factoryClass == null)

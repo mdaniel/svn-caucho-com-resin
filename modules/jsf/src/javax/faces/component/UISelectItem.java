@@ -59,7 +59,6 @@ public class UISelectItem extends UIComponentBase
 
   public UISelectItem()
   {
-    setRendererType("javax.faces.SelectItem");
   }
 
   /**

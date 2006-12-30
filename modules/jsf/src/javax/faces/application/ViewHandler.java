@@ -65,7 +65,16 @@ public abstract class ViewHandler
   public void initView(FacesContext context)
     throws FacesException
   {
-    throw new UnsupportedOperationException();
+    try {
+      String encoding = calculateCharacterEncoding(context);
+
+      if (encoding != null)
+	context.getExternalContext().setRequestCharacterEncoding(encoding);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new FacesException(e);
+    }
   }
 
   public abstract void renderView(FacesContext context,

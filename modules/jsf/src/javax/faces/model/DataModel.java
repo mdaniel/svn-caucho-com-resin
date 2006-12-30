@@ -30,6 +30,10 @@ package javax.faces.model;
 
 public abstract class DataModel
 {
+  private static final DataModelListener []NULL = new DataModelListener[0];
+  
+  private DataModelListener []_listeners = NULL;
+  
   public abstract boolean isRowAvailable();
 
   public abstract int getRowCount();
@@ -46,16 +50,41 @@ public abstract class DataModel
 
   public void addDataModelListener(DataModelListener listener)
   {
-    throw new UnsupportedOperationException();
+    if (listener == null)
+      throw new NullPointerException();
+
+    DataModelListener []newListeners
+      = new DataModelListener[_listeners.length + 1];
+
+    System.arraycopy(_listeners, 0, newListeners, 0, _listeners.length);
+    newListeners[_listeners.length] = listener;
+
+    _listeners = newListeners;
   }
 
   public void removeDataModelListener(DataModelListener listener)
   {
-    throw new UnsupportedOperationException();
+    if (listener == null)
+      throw new NullPointerException();
+
+    for (int i = _listeners.length - 1; i >= 0; i--) {
+      if (_listeners[i].equals(listener)) {
+	DataModelListener []newListeners
+	  = new DataModelListener[_listeners.length - 1];
+
+	System.arraycopy(_listeners, 0, newListeners, 0, i);
+	System.arraycopy(_listeners, i + 1, newListeners, i,
+			 _listeners.length - i - 1);
+
+	_listeners = newListeners;
+
+	return;
+      }
+    }
   }
 
   public DataModelListener []getDataModelListeners()
   {
-    throw new UnsupportedOperationException();
+    return _listeners;
   }
 }
