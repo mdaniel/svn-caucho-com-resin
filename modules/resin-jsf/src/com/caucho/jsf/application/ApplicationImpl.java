@@ -93,6 +93,9 @@ public class ApplicationImpl extends Application
     addComponent(UIOutput.COMPONENT_TYPE,
 		 "javax.faces.component.UIOutput");
 
+    addComponent(HtmlInputSecret.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlInputSecret");
+
     addComponent(HtmlInputText.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlInputText");
 

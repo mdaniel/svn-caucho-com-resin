@@ -51,8 +51,11 @@ public class ThreadPool {
     
   private int _threadMax = 8192;
   
-  private int _threadIdleMin = 10;
   private int _threadIdleMax = 15;
+  private int _threadIdleMin = 10;
+  
+  private int _threadPriority = 5;
+  private boolean _threadPrioritySet = false;
 
   private long _resetCount;
 
@@ -148,6 +151,13 @@ public class ThreadPool {
 				    max, _threadMax));
     
     _threadIdleMax = max;
+
+    if (! _threadPrioritySet) {
+      if (_threadIdleMin <= 2)
+	_threadPriority = _threadIdleMin;
+      else
+	_threadPriority = (_threadIdleMin + 1) / 2;
+    }
   }
 
   /**
@@ -156,6 +166,17 @@ public class ThreadPool {
   public int getThreadIdleMax()
   {
     return _threadIdleMax;
+  }
+
+  public void setThreadPriority(int priority)
+  {
+    _threadPriority = priority;
+    _threadPrioritySet = true;
+  }
+
+  private int getDefaultPriority()
+  {
+    return _threadPriority;
   }
 
   /**
@@ -301,22 +322,6 @@ public class ThreadPool {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     return schedule(task, loader, 0, expire, true);
-  }
-
-  private int getDefaultPriority()
-  {
-    if (_threadIdleMin <= 2)
-      return _threadIdleMin;
-    else if (_threadIdleMin <= 3)
-      return 2;
-    else if (_threadIdleMin <= 6)
-      return 3;
-    else if (_threadIdleMin <= 15)
-      return 5;
-    else if (_threadIdleMin <= 20)
-      return _threadIdleMin - 10;
-    else
-      return 10;
   }
 
   /**
