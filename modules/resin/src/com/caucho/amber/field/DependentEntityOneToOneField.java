@@ -32,12 +32,10 @@ package com.caucho.amber.field;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.DependentEntityOneToOneExpr;
 import com.caucho.amber.expr.PathExpr;
+import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.table.Column;
-import com.caucho.amber.table.ForeignColumn;
-import com.caucho.amber.table.LinkColumns;
-import com.caucho.amber.type.RelatedType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.table.*;
+import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
@@ -463,7 +461,17 @@ public class DependentEntityOneToOneField extends CascadableField {
   public void generateInvalidateForeign(JavaWriter out)
     throws IOException
   {
-    out.println("if (\"" + getEntityTargetType().getTable().getName() + "\".equals(table)) {");
+    // Table table = getEntityTargetType().getTable();
+
+    AmberPersistenceUnit persistenceUnit = getSourceType().getPersistenceUnit();
+
+    String className = getJavaType().getName();
+    EntityType entity = persistenceUnit.getEntity(className);
+
+    // jpa/0ge4
+    Table table = entity.getTable();
+
+    out.println("if (\"" + table.getName() + "\".equals(table)) {");
     out.pushDepth();
     String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
     out.println(loadVar + " = 0;");

@@ -1884,87 +1884,22 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     manyToOneField.setLazy(fetchType == FetchType.LAZY);
 
+    manyToOneField.setJoinColumns(joinColumnsAnn);
+    manyToOneField.setJoinColumnMap(joinColumnMap);
+
     sourceType.addField(manyToOneField);
 
-    Table sourceTable = sourceType.getTable();
+    // jpa/0ge3
+    if (sourceType instanceof MappedSuperclassType)
+      return;
 
     validateJoinColumns(field, joinColumnsAnn, joinColumnMap, targetType);
-
-    int n = 0;
-
-    if (joinColumnMap != null)
-      n = joinColumnMap.size();
-
-    ArrayList<ForeignColumn> foreignColumns = new ArrayList<ForeignColumn>();
-
-    RelatedType parentType = targetType;
-
-    ArrayList<Column> targetIdColumns = targetType.getId().getColumns();
-
-    while (targetIdColumns.size() == 0) {
-
-      parentType = parentType.getParentType();
-
-      if (parentType == null)
-        break;
-
-      targetIdColumns = parentType.getId().getColumns();
-    }
-
-    for (Column keyColumn : targetIdColumns) {
-
-      String columnName = fieldName.toUpperCase() + '_' + keyColumn.getName();
-      boolean nullable = true;
-      boolean unique = false;
-
-      if (n > 0) {
-
-        JoinColumnConfig joinColumn;
-
-        if (n == 1) {
-          joinColumn = (JoinColumnConfig) joinColumnMap.values().toArray()[0];
-        } else
-          joinColumn = joinColumnMap.get(keyColumn.getName());
-
-        if (joinColumn != null) {
-          columnName = joinColumn.getName();
-
-          nullable = joinColumn.getNullable();
-          unique = joinColumn.getUnique();
-        }
-      }
-      else {
-        JAnnotation joinAnn = getJoinColumn(joinColumnsAnn, keyColumn.getName());
-
-        if (joinAnn != null) {
-          columnName = joinAnn.getString("name");
-
-          nullable = joinAnn.getBoolean("nullable");
-          unique = joinAnn.getBoolean("unique");
-        }
-      }
-
-      ForeignColumn foreignColumn;
-
-      foreignColumn = sourceTable.createForeignColumn(columnName, keyColumn);
-
-      foreignColumn.setNotNull(! nullable);
-      foreignColumn.setUnique(unique);
-
-      foreignColumns.add(foreignColumn);
-    }
-
-    LinkColumns linkColumns = new LinkColumns(sourceType.getTable(),
-                                              targetType.getTable(),
-                                              foreignColumns);
-
-    manyToOneField.setLinkColumns(linkColumns);
 
     manyToOneField.init();
   }
 
-  private JAnnotation getJoinColumn(JAnnotation joinColumns,
-                                    String keyName)
+  public static JAnnotation getJoinColumn(JAnnotation joinColumns,
+                                          String keyName)
   {
     if (joinColumns == null)
       return null;
@@ -2037,7 +1972,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     return null;
   }
 
-  JAnnotation getJoinColumn(Object []columnsAnn, String keyName)
+  public static JAnnotation getJoinColumn(Object []columnsAnn,
+                                          String keyName)
   {
     if (columnsAnn == null || columnsAnn.length == 0)
       return null;
@@ -2307,17 +2243,23 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                       String mappedBy,
                                       RelatedType sourceType)
   {
-    ArrayList<AmberField> fields = targetType.getFields();
+    do {
+      ArrayList<AmberField> fields = targetType.getFields();
 
-    for (AmberField field : fields) {
-      // jpa/0o07: there is no mappedBy at all on any sides.
-      if ("".equals(mappedBy) || mappedBy == null) {
-        if (field.getJavaType().isAssignableFrom(sourceType.getBeanClass()))
+      for (AmberField field : fields) {
+        // jpa/0o07: there is no mappedBy at all on any sides.
+        if ("".equals(mappedBy) || mappedBy == null) {
+          if (field.getJavaType().isAssignableFrom(sourceType.getBeanClass()))
+            return (EntityManyToOneField) field;
+        }
+        else if (field.getName().equals(mappedBy))
           return (EntityManyToOneField) field;
       }
-      else if (field.getName().equals(mappedBy))
-        return (EntityManyToOneField) field;
+
+      // jpa/0ge4
+      targetType = targetType.getParentType();
     }
+    while (targetType != null);
 
     return null;
   }
@@ -2325,22 +2267,26 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   OneToOneCompletion getSourceCompletion(RelatedType targetType,
                                          String mappedBy)
   {
-    ArrayList<OneToOneCompletion> sourceCompletions
-      = _oneToOneCompletions.get(targetType);
+    do {
+      ArrayList<OneToOneCompletion> sourceCompletions
+        = _oneToOneCompletions.get(targetType);
 
-    if (sourceCompletions == null)
-      return null;
-
-    // jpa/0o07
-    if (sourceCompletions.size() == 1)
-      return sourceCompletions.get(0);
-
-    for (OneToOneCompletion oneToOne : sourceCompletions) {
-
-      if (oneToOne.getFieldName().equals(mappedBy)) {
-        return oneToOne;
+      if (sourceCompletions == null) {
+      } // jpa/0o07
+      else if (sourceCompletions.size() == 1)
+        return sourceCompletions.get(0);
+      else {
+        for (OneToOneCompletion oneToOne : sourceCompletions) {
+          if (oneToOne.getFieldName().equals(mappedBy)) {
+            return oneToOne;
+          }
+        }
       }
+
+      // jpa/0ge4
+      targetType = targetType.getParentType();
     }
+    while (targetType != null);
 
     return null;
   }
@@ -2863,7 +2809,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       // jpa/0o07
       if (isManyToOne) {
-
         getInternalJoinColumnConfig(_relatedType.getBeanClass(), _field, _fieldName);
         JAnnotation joinColumnAnn = _annotationCfg.getAnnotation();
         JoinColumnConfig joinColumnConfig = _annotationCfg.getJoinColumnConfig();
@@ -2881,9 +2826,27 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
             getInternalJoinColumnConfig(targetType.getBeanClass(),
                                         otherSide._field,
                                         otherSide._fieldName);
+
             // jpa/0o07, jpa/0s2d
             if (! _annotationCfg.isNull())
               isManyToOne = false;
+          }
+        }
+      }
+
+      // XXX: jpa/0ge4
+      if (targetType.getParentType() != null) {
+        if (targetType.getParentType() instanceof MappedSuperclassType) {
+          isManyToOne = false;
+
+          OneToOneCompletion otherSide
+            = getSourceCompletion(targetType.getParentType(), mappedBy);
+
+          if (otherSide != null) {
+            // jpa/0ge4
+            if (_depCompletions.remove(otherSide)) {
+              otherSide.complete();
+            }
           }
         }
       }
@@ -2915,10 +2878,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         EntityManyToOneField sourceField
           = getSourceField(targetType, mappedBy, _relatedType);
 
-        if (sourceField == null)
+        if (sourceField == null) {
           throw new ConfigException(L.l("{0}: OneToOne target '{1}' does not have a matching ManyToOne relation.",
                                         _field.getDeclaringClass().getName(),
                                         targetType.getName()));
+        }
 
         DependentEntityOneToOneField oneToOne;
 
@@ -3136,6 +3100,164 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       addSqlResultSetMapping(_name,
                              _entities,
                              _columns);
+    }
+  }
+
+  /**
+   * completes for link
+   */
+  class AttributeOverrideCompletion extends Completion {
+    private JClass _type;
+
+    AttributeOverrideCompletion(RelatedType relatedType,
+                                JClass type)
+    {
+      super(relatedType);
+
+      _type = type;
+    }
+
+    void complete()
+      throws ConfigException
+    {
+      getInternalAttributeOverrideConfig(_type);
+      JAnnotation attributeOverrideAnn = _annotationCfg.getAnnotation();
+      AttributeOverrideConfig attributeOverrideConfig
+        = _annotationCfg.getAttributeOverrideConfig();
+
+      boolean hasAttributeOverride = ! _annotationCfg.isNull();
+
+      JAnnotation attributeOverridesAnn
+        = _type.getAnnotation(AttributeOverrides.class);
+
+      boolean hasAttributeOverrides = (attributeOverridesAnn != null);
+
+      if (hasAttributeOverride && hasAttributeOverrides)
+        throw new ConfigException(L.l("{0} may not have both @AttributeOverride and @AttributeOverrides",
+                                      _type));
+
+      Object attOverridesAnn[] = null;
+
+      if (attributeOverrideAnn != null) {
+        attOverridesAnn = new Object[] { attributeOverrideAnn };
+      }
+      else if (attributeOverridesAnn != null) {
+        attOverridesAnn = (Object []) attributeOverridesAnn.get("value");
+      }
+      else
+        return;
+
+      Table sourceTable = _relatedType.getTable();
+
+      RelatedType parent = _relatedType.getParentType();
+
+      for (int i = 0; i < attOverridesAnn.length; i++) {
+
+        JAnnotation attOverrideAnn = (JAnnotation) attOverridesAnn[i];
+
+        String entityFieldName;
+        String columnName;
+        boolean notNull = false;
+        boolean unique = false;
+
+        Type amberType = null;
+
+        ArrayList<AmberField> fields = parent.getFields();
+
+        for (int j = 0; j < fields.size(); j++) {
+
+          AmberField field = fields.get(j);
+
+          if (! (field instanceof PropertyField)) {
+            // jpa/0ge3: relationship fields are fully mapped in the
+            // mapped superclass, i.e., are not included in @AttributeOverrides
+            // and can be added to the entity right away.
+
+            // Adds only once.
+            if (i == 0) {
+              _relatedType.addMappedSuperclassField(field);
+            }
+
+            continue;
+          }
+
+          entityFieldName = field.getName();
+
+          columnName = toSqlName(entityFieldName);
+
+          if (entityFieldName.equals(attOverrideAnn.getString("name"))) {
+
+            JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
+
+            if (columnAnn != null) {
+              columnName = columnAnn.getString("name");
+              notNull = ! columnAnn.getBoolean("nullable");
+              unique = columnAnn.getBoolean("unique");
+              amberType = _persistenceUnit.createType(field.getJavaType().getName());
+
+              Column column = sourceTable.createColumn(columnName, amberType);
+
+              column.setNotNull(notNull);
+              column.setUnique(unique);
+
+              PropertyField overriddenField
+                = new PropertyField(field.getSourceType(), field.getName());
+
+              overriddenField.setType(((PropertyField) field).getType());
+              overriddenField.setLazy(field.isLazy());
+              overriddenField.setColumn(column);
+
+              _relatedType.addMappedSuperclassField(overriddenField);
+            }
+          }
+        }
+
+        if (_relatedType.getId() != null) {
+          ArrayList<IdField> keys = _relatedType.getId().getKeys();
+
+          for (int j = 0; j < keys.size(); j++) {
+
+            IdField field = keys.get(j);
+
+            entityFieldName = field.getName();
+
+            columnName = toSqlName(entityFieldName);
+
+            if (entityFieldName.equals(attOverrideAnn.getString("name"))) {
+
+              JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
+
+              if (columnAnn != null) {
+                columnName = columnAnn.getString("name");
+                notNull = ! columnAnn.getBoolean("nullable");
+                unique = columnAnn.getBoolean("unique");
+                amberType = _persistenceUnit.createType(field.getJavaType().getName());
+
+                Column column = sourceTable.createColumn(columnName, amberType);
+
+                column.setNotNull(notNull);
+                column.setUnique(unique);
+
+                if (field instanceof KeyPropertyField) {
+                  KeyPropertyField overriddenField
+                    = new KeyPropertyField((RelatedType) field.getSourceType(),
+                                           field.getName());
+
+                  overriddenField.setGenerator(field.getGenerator());
+                  overriddenField.setColumn(column);
+
+                  // XXX: needs to handle compound pk with @AttributeOverride ???
+                  if (keys.size() == 1) {
+                    keys.remove(0);
+                    keys.add(overriddenField);
+                    _relatedType.setId(new com.caucho.amber.field.Id(_relatedType, keys));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 

@@ -29,8 +29,7 @@
 
 package com.caucho.amber.type;
 
-import com.caucho.amber.field.AmberField;
-import com.caucho.amber.field.AmberFieldCompare;
+import com.caucho.amber.field.*;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
@@ -63,7 +62,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
 
   private ArrayList<AmberField> _fields = new ArrayList<AmberField>();
 
-  private ArrayList<AmberField> _overriddenFields;
+  private ArrayList<AmberField> _mappedSuperclassFields;
 
   private volatile boolean _isConfigured;
 
@@ -153,35 +152,38 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   }
 
   /**
-   * Adds an overridden field.
+   * Adds a mapped superclass field.
    */
-  public void addOverriddenField(AmberField field)
+  public void addMappedSuperclassField(AmberField field)
   {
-    if (_overriddenFields == null)
-      _overriddenFields = new ArrayList<AmberField>();
+    if (_mappedSuperclassFields == null)
+      _mappedSuperclassFields = new ArrayList<AmberField>();
 
-    _overriddenFields.add(field);
-    Collections.sort(_overriddenFields, new AmberFieldCompare());
+    if (_mappedSuperclassFields.contains(field))
+      return;
+
+    _mappedSuperclassFields.add(field);
+    Collections.sort(_mappedSuperclassFields, new AmberFieldCompare());
   }
 
   /**
-   * Returns the overridden fields.
+   * Returns the mapped superclass fields.
    */
-  public ArrayList<AmberField> getOverriddenFields()
+  public ArrayList<AmberField> getMappedSuperclassFields()
   {
-    return _overriddenFields;
+    return _mappedSuperclassFields;
   }
 
   /**
-   * Returns the overridden field with a given name.
+   * Returns the mapped superclass field with a given name.
    */
-  public AmberField getOverriddenField(String name)
+  public AmberField getMappedSuperclassField(String name)
   {
-    if (_overriddenFields == null)
+    if (_mappedSuperclassFields == null)
       return null;
 
-    for (int i = 0; i < _overriddenFields.size(); i++) {
-      AmberField field = _overriddenFields.get(i);
+    for (int i = 0; i < _mappedSuperclassFields.size(); i++) {
+      AmberField field = _mappedSuperclassFields.get(i);
 
       if (field.getName().equals(name))
         return field;
@@ -298,23 +300,28 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
     if (loadGroupIndex == 0 && _discriminator != null)
       index++;
 
-    // jpa/0ge2
-    ArrayList<AmberField> fields = getOverriddenFields();
+    ArrayList<AmberField> fields = getMappedSuperclassFields();
 
-    for (int i = 0; i < 2; i++) {
-      if (fields == null) {
-        fields = getFields();
-        continue;
-      }
+    if (fields != null) {
+      for (int i = 0; i < fields.size(); i++) {
+        AmberField field = fields.get(i);
 
-      for (int j = 0; j < fields.size(); j++) {
-        AmberField field = fields.get(j);
+        if (field instanceof EntityManyToOneField) {
+          ((EntityManyToOneField) field).init((RelatedType) this);
+        }
 
         if (field.getLoadGroupIndex() == loadGroupIndex)
           index = field.generateLoad(out, rs, indexVar, index);
       }
+    }
 
-      fields = getFields();
+    fields = getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field.getLoadGroupIndex() == loadGroupIndex)
+        index = field.generateLoad(out, rs, indexVar, index);
     }
 
     return index;
@@ -346,7 +353,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
     CharBuffer cb = CharBuffer.allocate();
 
     // jpa/0ge2
-    ArrayList<AmberField> fields = getOverriddenFields();
+    ArrayList<AmberField> fields = getMappedSuperclassFields();
 
     for (int i = 0; i < 2; i++) {
       if (fields == null) {

@@ -648,10 +648,10 @@ abstract public class RelatedType extends AbstractStatefulType {
       field.init();
     }
 
-    if (getOverriddenFields() == null)
+    if (getMappedSuperclassFields() == null)
       return;
 
-    for (AmberField field : getOverriddenFields()) {
+    for (AmberField field : getMappedSuperclassFields()) {
       if (field.isUpdateable())
         field.setIndex(nextDirtyIndex());
 
@@ -716,12 +716,19 @@ abstract public class RelatedType extends AbstractStatefulType {
     if (loadGroupIndex == 0 && getDiscriminator() != null)
       index++;
 
-    ArrayList<AmberField> fields = getFields();
-    for (int i = 0; i < fields.size(); i++) {
-      AmberField field = fields.get(i);
+    ArrayList<AmberField> fields = getMappedSuperclassFields();
 
-      if (field.getLoadGroupIndex() == loadGroupIndex)
-        index = field.generateLoadEager(out, rs, indexVar, index);
+    for (int i = 0; i < 2; i++) {
+      if (fields != null) {
+        for (int j = 0; j < fields.size(); j++) {
+          AmberField field = fields.get(j);
+
+          if (field.getLoadGroupIndex() == loadGroupIndex)
+            index = field.generateLoadEager(out, rs, indexVar, index);
+        }
+      }
+
+      fields = getFields();
     }
 
     return index;
@@ -825,8 +832,8 @@ abstract public class RelatedType extends AbstractStatefulType {
                                      int loadGroup)
     throws IOException
   {
-    if (getParentType() != null)
-      getParentType().generateCopyUpdateObject(out, dst, src, loadGroup);
+    if (getParentType() != null) // jpa/0ge3
+      getParentType().generateCopyLoadObject(out, dst, src, loadGroup);
 
     ArrayList<AmberField> fields = getFields();
 
@@ -923,14 +930,17 @@ abstract public class RelatedType extends AbstractStatefulType {
     boolean hasSelect = false;
 
     if (loadGroup == 0 && getParentType() != null) {
-      String parentSelect =
-        getParentType().generateLoadSelect(table, id, loadGroup);
+      // jpa/0ge3
+      if (getParentType() instanceof EntityType) {
+        String parentSelect =
+          getParentType().generateLoadSelect(table, id, loadGroup);
 
-      // jpa/0ge2
-      if (parentSelect != null) {
-        cb.append(parentSelect);
-        if (! parentSelect.equals(""))
-          hasSelect = true;
+        // jpa/0ge2
+        if (parentSelect != null) {
+          cb.append(parentSelect);
+          if (! parentSelect.equals(""))
+            hasSelect = true;
+        }
       }
     }
     else if ((getTable() == table) && // jpa/0l11

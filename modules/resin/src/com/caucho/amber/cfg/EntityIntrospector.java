@@ -145,7 +145,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       EntityConfig rootEntityConfig = null;
 
       if (isEntity || isMappedSuperclass) {
-        validateType(type);
+        validateType(type, isEntity);
 
         // Inheritance annotation/configuration is specified
         // on the entity class that is the root of the entity
@@ -427,7 +427,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                                       entityType.getName()));
 
       // Introspect overridden attributes. (jpa/0ge2)
-      introspectAttributeOverrides(type, entityType);
+      introspectAttributeOverrides(entityType, type);
 
       if (isField)
         introspectFields(_persistenceUnit, entityType, parentType, type, entityConfig, false);
@@ -472,10 +472,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     return entityType;
   }
 
-  private void introspectAttributeOverrides(JClass type,
-                                            RelatedType entityType)
+  private void introspectAttributeOverrides(RelatedType relatedType,
+                                            JClass type)
   {
-    RelatedType parent = entityType.getParentType();
+    RelatedType parent = relatedType.getParentType();
 
     if (parent == null)
       return;
@@ -483,132 +483,6 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     if (parent instanceof EntityType)
       return;
 
-    getInternalAttributeOverrideConfig(type);
-    JAnnotation attributeOverrideAnn = _annotationCfg.getAnnotation();
-    AttributeOverrideConfig attributeOverrideConfig
-      = _annotationCfg.getAttributeOverrideConfig();
-
-    boolean hasAttributeOverride = ! _annotationCfg.isNull();
-
-    JAnnotation attributeOverridesAnn = type.getAnnotation(AttributeOverrides.class);
-
-    boolean hasAttributeOverrides = (attributeOverridesAnn != null);
-
-    if (hasAttributeOverride && hasAttributeOverrides)
-      throw new ConfigException(L.l("{0} may not have both @AttributeOverride and @AttributeOverrides",
-                                    type));
-
-    Object attOverridesAnn[] = null;
-
-    if (attributeOverrideAnn != null) {
-      attOverridesAnn = new Object[] { attributeOverrideAnn };
-    }
-    else if (attributeOverridesAnn != null) {
-      attOverridesAnn = (Object []) attributeOverridesAnn.get("value");
-    }
-    else
-      return;
-
-    Table sourceTable = entityType.getTable();
-
-    for (int j=0; j < attOverridesAnn.length; j++) {
-
-      JAnnotation attOverrideAnn = (JAnnotation) attOverridesAnn[j];
-
-      String entityFieldName;
-      String columnName;
-      boolean notNull = false;
-      boolean unique = false;
-
-      Type amberType = null;
-
-      ArrayList<AmberField> fields = parent.getFields();
-
-      for (int i=0; i < fields.size(); i++) {
-
-        AmberField field = fields.get(i);
-
-        // XXX: needs to handle @AttributeOverrides with
-        //      fields other than PropertyField's ???
-        if (! (field instanceof PropertyField))
-          continue;
-
-        entityFieldName = field.getName();
-
-        columnName = toSqlName(entityFieldName);
-
-        if (entityFieldName.equals(attOverrideAnn.getString("name"))) {
-
-          JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
-
-          if (columnAnn != null) {
-            columnName = columnAnn.getString("name");
-            notNull = ! columnAnn.getBoolean("nullable");
-            unique = columnAnn.getBoolean("unique");
-            amberType = _persistenceUnit.createType(field.getJavaType().getName());
-
-            Column column = sourceTable.createColumn(columnName, amberType);
-
-            column.setNotNull(notNull);
-            column.setUnique(unique);
-
-            PropertyField overriddenField
-              = new PropertyField(field.getSourceType(), field.getName());
-
-            overriddenField.setType(((PropertyField) field).getType());
-            overriddenField.setLazy(field.isLazy());
-            overriddenField.setColumn(column);
-
-            entityType.addOverriddenField(overriddenField);
-          }
-        }
-      }
-
-      if (entityType.getId() != null) {
-        ArrayList<IdField> keys = entityType.getId().getKeys();
-
-        for (int i=0; i < keys.size(); i++) {
-
-          IdField field = keys.get(i);
-
-          entityFieldName = field.getName();
-
-          columnName = toSqlName(entityFieldName);
-
-          if (entityFieldName.equals(attOverrideAnn.getString("name"))) {
-
-            JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
-
-            if (columnAnn != null) {
-              columnName = columnAnn.getString("name");
-              notNull = ! columnAnn.getBoolean("nullable");
-              unique = columnAnn.getBoolean("unique");
-              amberType = _persistenceUnit.createType(field.getJavaType().getName());
-
-              Column column = sourceTable.createColumn(columnName, amberType);
-
-              column.setNotNull(notNull);
-              column.setUnique(unique);
-
-              if (field instanceof KeyPropertyField) {
-                KeyPropertyField overriddenField
-                  = new KeyPropertyField((RelatedType) field.getSourceType(),
-                                         field.getName());
-
-                overriddenField.setGenerator(field.getGenerator());
-                overriddenField.setColumn(column);
-
-                // XXX: needs to handle compound pk with @AttributeOverride ???
-                if (keys.size() == 1) {
-                  keys.remove(0);
-                  keys.add(overriddenField);
-                  entityType.setId(new com.caucho.amber.field.Id(entityType, keys));
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    _depCompletions.add(new AttributeOverrideCompletion(relatedType, type));
   }
 }

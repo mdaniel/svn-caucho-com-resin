@@ -140,7 +140,7 @@ abstract public class AbstractConfigIntrospector {
   /**
    * Validates the bean
    */
-  public void validateType(JClass type)
+  public void validateType(JClass type, boolean isEntity)
     throws ConfigException
   {
     if (type.isFinal())
@@ -149,7 +149,9 @@ abstract public class AbstractConfigIntrospector {
 
     // NOTE: Both abstract and concrete classes can be entities.
 
-    validateConstructor(type);
+    // MappedSuperclass does not need constructor validation.
+    if (isEntity)
+      validateConstructor(type);
 
     for (JMethod method : type.getMethods()) {
       if (method.getDeclaringClass().getName().equals("java.lang.Object")) {

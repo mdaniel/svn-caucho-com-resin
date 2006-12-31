@@ -29,6 +29,7 @@
 package com.caucho.amber.field;
 
 import com.caucho.amber.AmberRuntimeException;
+import com.caucho.amber.cfg.*;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.ManyToOneExpr;
 import com.caucho.amber.expr.PathExpr;
@@ -37,8 +38,8 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.RelatedType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.*;
+import com.caucho.bytecode.JAnnotation;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
@@ -48,6 +49,7 @@ import com.caucho.util.L10N;
 import javax.persistence.CascadeType;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Logger;
 
@@ -72,6 +74,9 @@ public class EntityManyToOneField extends CascadableField {
 
   private boolean _isSourceCascadeDelete;
   private boolean _isTargetCascadeDelete;
+
+  private Object _joinColumnsAnn[];
+  private HashMap<String, JoinColumnConfig> _joinColumnMap = null;
 
   public EntityManyToOneField(RelatedType relatedType,
                               String name,
@@ -109,7 +114,7 @@ public class EntityManyToOneField extends CascadableField {
    * Returns the source type as
    * entity or mapped-superclass.
    */
-  public RelatedType getEntitySourceType()
+  public RelatedType getEntityRelatedType()
   {
     return (RelatedType) getSourceType();
   }
@@ -165,6 +170,38 @@ public class EntityManyToOneField extends CascadableField {
   }
 
   /**
+   * Sets the join column annotations.
+   */
+  public void setJoinColumns(Object joinColumnsAnn[])
+  {
+    _joinColumnsAnn = joinColumnsAnn;
+  }
+
+  /**
+   * Gets the join column annotations.
+   */
+  public Object[] getJoinColumns()
+  {
+    return _joinColumnsAnn;
+  }
+
+  /**
+   * Sets the join column map.
+   */
+  public void setJoinColumnMap(HashMap<String, JoinColumnConfig> joinColumnMap)
+  {
+    _joinColumnMap = joinColumnMap;
+  }
+
+  /**
+   * Gets the join column map.
+   */
+  public HashMap<String, JoinColumnConfig> getJoinColumnMap()
+  {
+    return _joinColumnMap;
+  }
+
+  /**
    * Sets the join columns.
    */
   public void setLinkColumns(LinkColumns linkColumns)
@@ -202,6 +239,96 @@ public class EntityManyToOneField extends CascadableField {
   public void init()
     throws ConfigException
   {
+    init(getEntityRelatedType());
+  }
+
+  /**
+   * Initializes the field.
+   */
+  public void init(RelatedType relatedType)
+    throws ConfigException
+  {
+    Table sourceTable = relatedType.getTable();
+
+    if (sourceTable == null) {
+      // jpa/0ge3
+      super.init();
+      _targetLoadIndex = relatedType.getLoadGroupIndex();
+      return;
+    }
+
+    int n = 0;
+
+    if (_joinColumnMap != null)
+      n = _joinColumnMap.size();
+
+    ArrayList<ForeignColumn> foreignColumns = new ArrayList<ForeignColumn>();
+
+    RelatedType parentType = _targetType;
+
+    ArrayList<Column> targetIdColumns = _targetType.getId().getColumns();
+
+    while (targetIdColumns.size() == 0) {
+
+      parentType = parentType.getParentType();
+
+      if (parentType == null)
+        break;
+
+      targetIdColumns = parentType.getId().getColumns();
+    }
+
+    for (Column keyColumn : targetIdColumns) {
+
+      String columnName = getName().toUpperCase() + '_' + keyColumn.getName();
+      boolean nullable = true;
+      boolean unique = false;
+
+      if (n > 0) {
+
+        JoinColumnConfig joinColumn;
+
+        if (n == 1) {
+          joinColumn = (JoinColumnConfig) _joinColumnMap.values().toArray()[0];
+        } else
+          joinColumn = _joinColumnMap.get(keyColumn.getName());
+
+        if (joinColumn != null) {
+          columnName = joinColumn.getName();
+
+          nullable = joinColumn.getNullable();
+          unique = joinColumn.getUnique();
+        }
+      }
+      else {
+        JAnnotation joinAnn
+          = BaseConfigIntrospector.getJoinColumn(_joinColumnsAnn,
+                                                 keyColumn.getName());
+
+        if (joinAnn != null) {
+          columnName = joinAnn.getString("name");
+
+          nullable = joinAnn.getBoolean("nullable");
+          unique = joinAnn.getBoolean("unique");
+        }
+      }
+
+      ForeignColumn foreignColumn;
+
+      foreignColumn = sourceTable.createForeignColumn(columnName, keyColumn);
+
+      foreignColumn.setNotNull(! nullable);
+      foreignColumn.setUnique(unique);
+
+      foreignColumns.add(foreignColumn);
+    }
+
+    LinkColumns linkColumns = new LinkColumns(sourceTable,
+                                              _targetType.getTable(),
+                                              foreignColumns);
+
+    setLinkColumns(linkColumns);
+
     super.init();
 
     Id id = getEntityTargetType().getId();
@@ -220,17 +347,17 @@ public class EntityManyToOneField extends CascadableField {
         else
           name = getName() + "_" + key.getName();
 
-        columns.add(getEntitySourceType().getTable().createForeignColumn(name, key));
+        columns.add(sourceTable.createForeignColumn(name, key));
       }
 
-      _linkColumns = new LinkColumns(getEntitySourceType().getTable(),
+      _linkColumns = new LinkColumns(relatedType.getTable(),
                                      _targetType.getTable(),
                                      columns);
     }
 
-    if (getEntitySourceType().getId() != null) {
+    if (relatedType.getId() != null) {
       // resolve any alias
-      for (AmberField field : getEntitySourceType().getId().getKeys()) {
+      for (AmberField field : relatedType.getId().getKeys()) {
         if (field instanceof PropertyField) {
           PropertyField prop = (PropertyField) field;
 
@@ -242,7 +369,7 @@ public class EntityManyToOneField extends CascadableField {
       }
     }
 
-    _targetLoadIndex = getEntitySourceType().getLoadGroupIndex(); // nextLoadGroupIndex();
+    _targetLoadIndex = relatedType.getLoadGroupIndex(); // nextLoadGroupIndex();
 
     _linkColumns.setTargetCascadeDelete(isTargetCascadeDelete());
     _linkColumns.setSourceCascadeDelete(isSourceCascadeDelete());
@@ -289,6 +416,11 @@ public class EntityManyToOneField extends CascadableField {
   {
     if (_aliasField != null)
       return null;
+
+    if (_linkColumns == null) {
+      // jpa/0ge3
+      return null;
+    }
 
     if (_linkColumns.getSourceTable() != table)
       return null;
@@ -474,7 +606,7 @@ public class EntityManyToOneField extends CascadableField {
     out.pushDepth();
 
     // ejb/06h0
-    String extClassName = getEntitySourceType().getInstanceClassName(); // getEntitySourceType().getName() + "__ResinExt";
+    String extClassName = getEntityRelatedType().getInstanceClassName(); // getEntityRelatedType().getName() + "__ResinExt";
     out.println(extClassName + " item = (" + extClassName + ") __caucho_item.getEntity();");
 
     out.println("item.__caucho_item_" + getGetterName() + "(__caucho_session);");
@@ -590,7 +722,7 @@ public class EntityManyToOneField extends CascadableField {
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
     // jpa/0o05
     if (! dst.equals("super")) { // || isLazy())) {
-      out.println("((" + getEntitySourceType().getInstanceClassName() + ") " + dst + ")." +
+      out.println("((" + getEntityRelatedType().getInstanceClassName() + ") " + dst + ")." +
                   generateSuperSetter(generateSuperGetter()) + ";");
     }
 
@@ -619,7 +751,7 @@ public class EntityManyToOneField extends CascadableField {
     if (src.equals("super"))
       return var;
     else
-      return "((" + getEntitySourceType().getInstanceClassName() + ") " + src + ")." + var;
+      return "((" + getEntityRelatedType().getInstanceClassName() + ") " + src + ")." + var;
   }
 
   /**
@@ -700,9 +832,9 @@ public class EntityManyToOneField extends CascadableField {
 
       out.println(dirtyVar + " |= " + dirtyMask + "L;");
       out.println(loadVar + " |= " + loadMask + "L;");
-      out.println("__caucho_session.update(this);");
+      out.println("__caucho_session.update((com.caucho.amber.entity.Entity) this);");
 
-      out.println("__caucho_session.addCompletion(__caucho_home.createManyToOneCompletion(\"" + getName() + "\", this, v));");
+      out.println("__caucho_session.addCompletion(__caucho_home.createManyToOneCompletion(\"" + getName() + "\", (com.caucho.amber.entity.Entity) this, v));");
 
       out.println();
 
@@ -735,7 +867,7 @@ public class EntityManyToOneField extends CascadableField {
     out.println("        state >= com.caucho.amber.entity.Entity.P_DELETED))");
 
     String errorString = ("(\"amber flush: unable to flush " +
-                          getEntitySourceType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
+                          getEntityRelatedType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
                           "with non-managed dependent relationship many-to-one to "+
                           getEntityTargetType().getName() + "\")");
 

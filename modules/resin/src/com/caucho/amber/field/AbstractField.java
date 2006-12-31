@@ -62,7 +62,7 @@ abstract public class AbstractField implements AmberField {
   private static final L10N L = new L10N(AbstractField.class);
   protected static final Logger log = Log.open(AbstractField.class);
 
-  private AbstractStatefulType _sourceType;
+  AbstractStatefulType _sourceType;
 
   private String _name;
 
