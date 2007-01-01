@@ -45,8 +45,20 @@ public class HtmlBasicRenderKit extends RenderKit {
     addRenderer("javax.faces.Input", "javax.faces.Secret",
 		HtmlInputSecretRenderer.RENDERER);
     
+    addRenderer("javax.faces.Input", "javax.faces.Hidden",
+		HtmlInputHiddenRenderer.RENDERER);
+    
     addRenderer("javax.faces.Input", "javax.faces.Text",
 		HtmlInputTextRenderer.RENDERER);
+    
+    addRenderer("javax.faces.Input", "javax.faces.Textarea",
+		HtmlInputTextareaRenderer.RENDERER);
+    
+    addRenderer("javax.faces.Message", "javax.faces.Message",
+		HtmlMessageRenderer.RENDERER);
+    
+    addRenderer("javax.faces.Messages", "javax.faces.Messages",
+		HtmlMessagesRenderer.RENDERER);
     
     addRenderer("javax.faces.Output", "javax.faces.Format",
 		HtmlOutputFormatRenderer.RENDERER);
@@ -62,6 +74,9 @@ public class HtmlBasicRenderKit extends RenderKit {
     
     addRenderer("javax.faces.Panel", "javax.faces.Grid",
 		HtmlPanelGridRenderer.RENDERER);
+    
+    addRenderer("javax.faces.Panel", "javax.faces.Group",
+		HtmlPanelGroupRenderer.RENDERER);
   }
   
   public void addRenderer(String family,

@@ -59,7 +59,7 @@ public class UIData extends UIComponentBase
   private ValueExpression _valueExpr;
 
   private String _var;
-  private int _rowIndex;
+  private int _rowIndex = -1;
 
   public UIData()
   {
@@ -85,11 +85,13 @@ public class UIData extends UIComponentBase
     else if (_firstExpr != null)
       return Util.evalInt(_firstExpr);
     else
-      return -1;
+      return 0;
   }
 
   public void setFirst(int first)
   {
+    if (first < 0)
+      throw new IllegalArgumentException("UIData.setFirst must have a positive value at '" + first + "'");
     _first = first;
   }
 
@@ -105,6 +107,8 @@ public class UIData extends UIComponentBase
 
   public void setRows(int rows)
   {
+    if (rows < 0)
+      throw new IllegalArgumentException("UIData.setFirst must have a positive value at '" + rows + "'");
     _rows = rows;
   }
 
@@ -150,7 +154,7 @@ public class UIData extends UIComponentBase
 
   public int getRowIndex()
   {
-    return getDataModel().getRowIndex();
+    return _rowIndex;
   }
 
   public Object getRowData()
@@ -158,19 +162,34 @@ public class UIData extends UIComponentBase
     return getDataModel().getRowData();
   }
 
-  protected void setRowIndex(int value)
+  public void setRowIndex(int value)
   {
+    if (value < -1)
+      throw new IllegalArgumentException("UIData.setRowIndex must not be less than -1 at '" + value + "'");
+    
+    _rowIndex = value;
+    
     getDataModel().setRowIndex(value);
   }
 
   public int getRowCount()
   {
-    return getDataModel().getRowCount();
+    DataModel model = getDataModel();
+
+    if (model != null)
+      return model.getRowCount();
+    else
+      return -1;
   }
 
   public boolean isRowAvailable()
   {
-    return getDataModel().isRowAvailable();
+    DataModel model = getDataModel();
+
+    if (model != null)
+      return model.isRowAvailable();
+    else
+      return false;
   }
 
   /**

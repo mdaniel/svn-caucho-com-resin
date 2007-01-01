@@ -34,7 +34,7 @@ import javax.el.*;
 
 import javax.faces.event.*;
 
-public interface ActionSource2
+public interface ActionSource2 extends ActionSource
 {
   public MethodExpression getActionExpression();
 

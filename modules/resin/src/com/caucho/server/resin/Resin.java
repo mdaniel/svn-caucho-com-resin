@@ -732,6 +732,8 @@ public class Resin implements EnvironmentBean, SchemaBean
 	_classLoader.destroy();
     } finally {
       _lifecycle.toDestroy();
+
+      System.exit(0); // XXX: check exit code
     }
   }
 

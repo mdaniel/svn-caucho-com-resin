@@ -428,7 +428,7 @@ public class AbstractRolloverLog {
       if (savedPath != null) {
 	_savedPath = savedPath;
 	isRollingOver = false;
-	ThreadPool.getThreadPool().start(_archiveTask);
+	ThreadPool.getThreadPool().startPriority(_archiveTask);
 	Thread.yield();
       }
     } finally {

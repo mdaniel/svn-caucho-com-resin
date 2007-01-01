@@ -37,7 +37,7 @@ import javax.faces.context.*;
 
 public class HtmlInputTextarea extends UIInput
 {
-  public static final String COMPONENT_TYPE = "javax.faces.HtmlInputTextare";
+  public static final String COMPONENT_TYPE = "javax.faces.HtmlInputTextarea";
 
   private static final HashMap<String,PropEnum> _propMap
     = new HashMap<String,PropEnum>();

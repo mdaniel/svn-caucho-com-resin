@@ -46,8 +46,15 @@ public class UICommand extends UIComponentBase
   private static final HashMap<String,PropEnum> _propMap
     = new HashMap<String,PropEnum>();
 
+  private static final ActionListener []NULL_ACTION_LISTENERS
+    = new ActionListener[0];
+
   private Object _value;
   private ValueExpression _valueExpr;
+  
+  private MethodExpression _actionExpr;
+
+  private ActionListener []_actionListeners = NULL_ACTION_LISTENERS;
 
   private boolean _isImmediate;
 
@@ -107,11 +114,10 @@ public class UICommand extends UIComponentBase
   @Override
   public ValueExpression getValueExpression(String name)
   {
-    switch (_propMap.get(name)) {
-    case VALUE:
+    if ("value".equals(name)) {
       return _valueExpr;
-
-    default:
+    }
+    else {
       return super.getValueExpression(name);
     }
   }
@@ -122,12 +128,10 @@ public class UICommand extends UIComponentBase
   @Override
   public void setValueExpression(String name, ValueExpression expr)
   {
-    switch (_propMap.get(name)) {
-    case VALUE:
+    if ("value".equals(name)) {
       _valueExpr = expr;
-      break;
-
-    default:
+    }
+    else {
       super.setValueExpression(name, expr);
     }
   }
@@ -135,54 +139,122 @@ public class UICommand extends UIComponentBase
   //
   // Actions
   //
+
+  @Override
+  public void broadcast(FacesEvent event)
+  {
+    super.broadcast(event);
+
+    if (_actionExpr != null && event instanceof ActionEvent) {
+      _actionExpr.invoke(FacesContext.getCurrentInstance().getELContext(),
+			 new Object[] { event });
+    }
+  }
+
+  @Override
+  public void queueEvent(FacesEvent event)
+  {
+    if (event instanceof ActionEvent) {
+      event.setPhaseId(isImmediate()
+		       ? PhaseId.APPLY_REQUEST_VALUES
+		       : PhaseId.INVOKE_APPLICATION);
+    }
+
+    super.queueEvent(event);
+  }
   
   @Deprecated
   public MethodBinding getAction()
   {
-    throw new UnsupportedOperationException();
+    if (_actionExpr == null)
+      return null;
+    else
+      return ((MethodBindingAdapter) _actionExpr).getBinding();
   }
   
   @Deprecated
   public void setAction(MethodBinding action)
   {
-    throw new UnsupportedOperationException();
+    if (action == null)
+      throw new NullPointerException();
+    
+    setActionExpression(new MethodBindingAdapter(action));
   }
 
   @Deprecated
   public MethodBinding getActionListener()
   {
-    throw new UnsupportedOperationException();
+    FacesListener []listeners = getFacesListeners(FacesListener.class);
+
+    for (int i = 0; i < listeners.length; i++) {
+      if (listeners[i] instanceof ActionListenerAdapter) {
+	return ((ActionListenerAdapter) listeners[i]).getBinding();
+      }
+    }
+
+    return null;
   }
 
   @Deprecated
   public void setActionListener(MethodBinding action)
   {
-    throw new UnsupportedOperationException();
+    if (action == null)
+      throw new NullPointerException();
+    
+    FacesListener []listeners = getFacesListeners(FacesListener.class);
+
+    for (int i = 0; i < listeners.length; i++) {
+      if (listeners[i] instanceof ActionListenerAdapter) {
+	listeners[i] = new ActionListenerAdapter(action);
+	_actionListeners = null;
+	return;
+      }
+    }
+
+    addActionListener(new ActionListenerAdapter(action));
   }
 
   public void addActionListener(ActionListener listener)
   {
-    throw new UnsupportedOperationException();
+    if (listener == null)
+      throw new NullPointerException();
+    
+    addFacesListener(listener);
+    
+    _actionListeners = null;
   }
 
   public ActionListener []getActionListeners()
   {
-    throw new UnsupportedOperationException();
+    if (_actionListeners == null) {
+      _actionListeners =
+	(ActionListener[]) getFacesListeners(ActionListener.class);
+    }
+
+    return _actionListeners;
   }
 
   public void removeActionListener(ActionListener listener)
   {
-    throw new UnsupportedOperationException();
+    if (listener == null)
+      throw new NullPointerException();
+    
+    removeFacesListener(listener);
+    
+    _actionListeners = null;
   }
 
   public MethodExpression getActionExpression()
   {
-    throw new UnsupportedOperationException();
+    return _actionExpr;
   }
 
   public void setActionExpression(MethodExpression action)
   {
-    throw new UnsupportedOperationException();
+    if (action == null)
+      throw new NullPointerException();
+    
+    _actionExpr = action;
   }
 
   //
@@ -197,6 +269,8 @@ public class UICommand extends UIComponentBase
     
     state._value = _value;
     state._valueExpr = Util.save(_valueExpr, context);
+    
+    //state._actionExpr = Util.save(_valueExpr, context);
 
     return state;
   }
@@ -224,6 +298,77 @@ public class UICommand extends UIComponentBase
     
     private Object _value;
     private String _valueExpr;
+  }
+
+  static class MethodBindingAdapter extends MethodExpression {
+    private MethodBinding _binding;
+
+    MethodBindingAdapter(MethodBinding binding)
+    {
+      _binding = binding;
+    }
+
+    MethodBinding getBinding()
+    {
+      return _binding;
+    }
+
+    public boolean isLiteralText()
+    {
+      return false;
+    }
+
+    public String getExpressionString()
+    {
+      return _binding.getExpressionString();
+    }
+    
+    public MethodInfo getMethodInfo(ELContext context)
+      throws javax.el.PropertyNotFoundException,
+	     javax.el.MethodNotFoundException,
+	     ELException
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    public Object invoke(ELContext context,
+			 Object []params)
+      throws javax.el.PropertyNotFoundException,
+	     javax.el.MethodNotFoundException,
+	     ELException
+    {
+      return _binding.invoke(FacesContext.getCurrentInstance(), params);
+    }
+
+    public int hashCode()
+    {
+      return _binding.hashCode();
+    }
+    
+    public boolean equals(Object o)
+    {
+      return (this == o);
+    }
+  }
+
+  static class ActionListenerAdapter implements ActionListener {
+    private MethodBinding _binding;
+
+    ActionListenerAdapter(MethodBinding binding)
+    {
+      _binding = binding;
+    }
+
+    MethodBinding getBinding()
+    {
+      return _binding;
+    }
+
+    public void processAction(ActionEvent event)
+    {
+      _binding.invoke(FacesContext.getCurrentInstance(),
+		      new Object[] { event });
+    }
   }
 
   static {

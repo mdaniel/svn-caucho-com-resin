@@ -159,7 +159,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
 
 	  if (! _hasThread) {
 	    _hasThread = true;
-	    ThreadPool.getThreadPool().start(this);
+	    ThreadPool.getThreadPool().startPriority(this);
 	  }
 
 	  break;
