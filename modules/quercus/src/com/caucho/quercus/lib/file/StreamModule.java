@@ -388,6 +388,19 @@ public class StreamModule extends AbstractQuercusModule {
   }
 
   /**
+   * stream_set_blocking is stubbed since Quercus should wait for
+   * any stream (unless a non-web-server Quercus is developed.)
+   */
+  public static boolean
+    stream_set_blocking(@NotNull Value stream, int mode)
+  {
+    if (stream == null)
+      return false;
+    else
+      return true;
+  }
+
+  /**
    * Sets the write buffer.
    */
   public static int stream_set_write_buffer(Env env, BinaryOutput stream,

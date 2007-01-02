@@ -408,18 +408,23 @@ public class ErrorPageManager {
 
     out.println("</pre></code>");
 
-    if (CauchoSystem.isTesting() || _app == null) {
+    String version = null;
+    if (_app == null) {
     }
-    else {
+    else if (_app.getServer() != null
+	     && _app.getServer().getServerHeader() != null) {
+      version = _app.getServer().getServerHeader();
+    }
+    else if (CauchoSystem.isTesting()) {
+    }
+    else
+      version = com.caucho.Version.FULL_VERSION;
+    
+    if (version != null) {
       out.println("<p /><hr />");
       out.println("<small>");
 	
-      if (_app.getServer() != null
-	  && _app.getServer().getServerHeader() != null) {
-	out.println(_app.getServer().getServerHeader());
-      }
-      else
-	out.println(com.caucho.Version.FULL_VERSION);
+      out.println(version);
 	  
       out.println("</small>");
     }
@@ -484,13 +489,26 @@ public class ErrorPageManager {
                         HTTPUtil.encodeString(request.getPageURI())));
       }
 
-      if (! CauchoSystem.isTesting()) {
+      String version = null;
+      if (_app == null) {
+      }
+      else if (_app.getServer() != null
+	       && _app.getServer().getServerHeader() != null) {
+	version = _app.getServer().getServerHeader();
+      }
+      else if (CauchoSystem.isTesting()) {
+      }
+      else
+	version = com.caucho.Version.FULL_VERSION;
+    
+      if (version != null) {
 	out.println("<p /><hr />");
 	out.println("<small>");
-	out.println(com.caucho.Version.FULL_VERSION);
+	
+	out.println(version);
+	  
 	out.println("</small>");
       }
-      out.println("</body></html>");
 
       String userAgent = request.getHeader("User-Agent");
       

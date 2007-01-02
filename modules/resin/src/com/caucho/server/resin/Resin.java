@@ -733,7 +733,8 @@ public class Resin implements EnvironmentBean, SchemaBean
     } finally {
       _lifecycle.toDestroy();
 
-      System.exit(0); // XXX: check exit code
+      if (_mainThread != null)
+	System.exit(0); // XXX: check exit code with config errors
     }
   }
 

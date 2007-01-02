@@ -525,18 +525,24 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         s.println(L.l("The server is temporarily unavailable due to maintenance downtime or excessive load."));
       }
 
-      if (CauchoSystem.isTesting() || app == null) {
+      String version = null;
+
+      if (app == null) {
       }
-      else {
+      else if (app.getServer() != null
+	       && app.getServer().getServerHeader() != null) {
+	version = app.getServer().getServerHeader();
+      }
+      else if (CauchoSystem.isTesting()) {
+      }
+      else
+	version = com.caucho.Version.FULL_VERSION;
+    
+      if (version != null) {
 	s.println("<p /><hr />");
 	s.println("<small>");
 	
-	if (app.getServer() != null
-	    && app.getServer().getServerHeader() != null) {
-	  s.println(app.getServer().getServerHeader());
-	}
-	else
-	  s.println(com.caucho.Version.FULL_VERSION);
+	s.println(version);
 	  
 	s.println("</small>");
       }
