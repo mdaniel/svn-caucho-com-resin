@@ -54,6 +54,9 @@ public class SystemPropertiesResolver extends AbstractVariableResolver {
    */
   public Object resolveVariable(String var)
   {
+    if (var == null || "".equals(var))
+      return null;
+    
     Object value = System.getProperty((String) var);
 
     if (value != null)

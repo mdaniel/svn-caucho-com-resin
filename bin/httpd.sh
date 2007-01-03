@@ -79,4 +79,4 @@ done
 
 bin=`dirname $script`
 
-exec $perl $bin/wrapper.pl -chdir -name "$name" -class "$class" $args $*
+exec $perl $bin/wrapper.pl -chdir -name "$name" -class "$class" $args ${1+"$@"}

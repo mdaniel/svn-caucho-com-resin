@@ -220,7 +220,7 @@ while ( $#ARGV >= 0) {
     }
     elsif ($ARGV[0] =~ "^-J") {
         $val = substr($ARGV[0], 2);
-	$JAVA_ARGS .= " " . $val;
+	$JAVA_ARGS .= " '" . $val . "'";
 
         if ($val =~ "^-Xss") {
           $DEFAULT_STACK_SIZE = "";
@@ -229,18 +229,18 @@ while ( $#ARGV >= 0) {
 	shift(@ARGV);
     }
     elsif ($ARGV[0] =~ "^-D") {
-	$JAVA_ARGS .= " " . $ARGV[0];
+	$JAVA_ARGS .= " '" . $ARGV[0] . "'";
 	shift(@ARGV);
     }
     elsif ($ARGV[0] =~ "^-javaagent"
 	   || $ARGV[0] =~ "^-agentlib"
 	   || $ARGV[0] =~ "^-agentpath") {
-	$JAVA_ARGS .= " " . $ARGV[0];
+	$JAVA_ARGS .= " '" . $ARGV[0] . "'";
 	shift(@ARGV);
     }
     elsif ($ARGV[0] =~ "^-X") {
         $val = $ARGV[0];
-	$JAVA_ARGS .= " " . $val;
+	$JAVA_ARGS .= " '" . $val . "'";
 
         if ($val =~ "^-Xss") {
           $DEFAULT_STACK_SIZE = "";

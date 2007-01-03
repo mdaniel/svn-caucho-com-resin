@@ -406,7 +406,7 @@ public abstract class AbstractHttpRequest
 	char ch = host.charAt(i);
 
 	if ('0' <= ch && ch <= '9')
-	  port = 10 * port + ch;
+	  port = 10 * port + ch - '0';
       }
 
       return port;

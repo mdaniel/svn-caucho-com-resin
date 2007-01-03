@@ -34,6 +34,8 @@ import com.caucho.util.CharBuffer;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.LinkColumns;
 
+import com.caucho.amber.type.Type;
+
 /**
  * Bound identifier expression.
  */
@@ -69,6 +71,12 @@ public class ColumnExpr extends AbstractAmberExpr {
     return _column;
   }
 
+
+  public Type getType()
+  {
+    return getColumn().getType();
+  }
+  
   /**
    * Returns a boolean expression.
    */

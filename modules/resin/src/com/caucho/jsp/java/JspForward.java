@@ -110,9 +110,8 @@ public class JspForward extends JspNode {
       out.print(getRuntimeAttribute(_page));
     }
     else {
-      out.print("pageContext.forward(\"");
-      out.print(_page);
-      out.print("\"");
+      out.print("pageContext.forward(");
+      out.print(generateParameterValue(String.class, _page));
     }
 
     if (_params != null) {

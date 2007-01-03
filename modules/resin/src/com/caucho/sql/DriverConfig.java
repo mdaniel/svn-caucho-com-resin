@@ -176,6 +176,10 @@ public class DriverConfig {
       throw new ConfigException(L.l("data-source `{0}' is of type `{1}' which does not implement XADataSource or ConnectionPoolDataSource.",
                                     dataSource,
                                     dataSource.getClass().getName()));
+    
+    if (_info.size() != 0) {
+      validateInitParam();
+    }
   }
 
   /**
@@ -268,7 +272,10 @@ public class DriverConfig {
    * @param value the driver's value of the property name
    */
   public void setInitParam(InitParam initParam)
+    throws ConfigException
   {
+    validateInitParam();
+    
     HashMap<String,String> paramMap = initParam.getParameters();
 
     Iterator<String> iter = paramMap.keySet().iterator();
@@ -418,7 +425,7 @@ public class DriverConfig {
    * </ul>
    */
   synchronized void initDataSource(boolean isTransactional, boolean isSpy)
-    throws SQLException
+    throws SQLException, ConfigException
   {
     if (_isStarted)
       return;
@@ -473,7 +480,24 @@ public class DriverConfig {
         _driver = new DriverWrapper(_profilerPoint, _driver);
     }
 
+    if (_info.size() > 0)
+      validateInitParam();
+    
     J2EEManagedObject.register(new JDBCDriver(this));
+  }
+
+  private void validateInitParam()
+    throws ConfigException
+  {
+    if (_jcaDataSource != null) {
+      throw new ConfigException(L.l("<init-param> cannot be used with a JCA data source.  Use the init-param key as a tag, like <key>value</key>"));
+    }
+    else if (_poolDataSource != null) {
+      throw new ConfigException(L.l("<init-param> cannot be used with a ConnectionPoolDataSource.  Use the init-param key as a tag, like <key>value</key>"));
+    }
+    else if (_xaDataSource != null) {
+      throw new ConfigException(L.l("<init-param> cannot be used with an XADataSource.  Use the init-param key as a tag, like <key>value</key>"));
+    }
   }
 
   /**
