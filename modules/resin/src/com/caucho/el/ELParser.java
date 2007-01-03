@@ -172,6 +172,8 @@ public class ELParser {
 		  if (ch > 0)
 		    exprString.append((char) ch);
 		}
+		else
+		  exprString.append((char) ch);
 	      }
 
 	      if (ch > 0)
