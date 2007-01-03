@@ -29,18 +29,14 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JClassDependency;
-import com.caucho.bytecode.JClassLoader;
-import com.caucho.bytecode.JClassLoaderWrapper;
-import com.caucho.bytecode.JClassWrapper;
-import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.*;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.config.types.PostConstructType;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.amber.AmberConfig;
@@ -64,10 +60,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.EJBHome;
-import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBLocalObject;
-import javax.ejb.EJBObject;
+import javax.ejb.*;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,6 +129,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     = new HashMap<String,EjbBaseMethod>();
 
   private BuilderProgramContainer _initProgram;
+  private ArrayList<BuilderProgram> _postConstructList
+    = new ArrayList<BuilderProgram>();
   private BuilderProgramContainer _serverProgram;
 
   private long _transactionTimeout;
@@ -296,10 +291,12 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Sets the ejb implementation class.
    */
-  public void setEJBClass(Class ejbClass)
+  public void setEJBClass(String typeName)
     throws ConfigException
   {
-    setEJBClassWrapper(new JClassWrapper(ejbClass, _jClassLoader));
+    JClass ejbClass = _jClassLoader.forName(typeName);
+
+    setEJBClassWrapper(ejbClass);
   }
 
   /**
@@ -316,13 +313,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _ejbClass = ejbClass;
 
     if (! _ejbClass.isPublic())
-      throw error(L.l("`{0}' must be public.  Bean implementations must be public.", ejbClass.getName()));
+      throw error(L.l("'{0}' must be public.  Bean implementations must be public.", ejbClass.getName()));
 
     if (_ejbClass.isFinal())
-      throw error(L.l("`{0}' must not be final.  Bean implementations must not be final.", ejbClass.getName()));
+      throw error(L.l("'{0}' must not be final.  Bean implementations must not be final.", ejbClass.getName()));
 
     if (_ejbClass.isInterface())
-      throw error(L.l("`{0}' must not be an interface.  Bean implementations must be classes.", ejbClass.getName()));
+      throw error(L.l("'{0}' must not be an interface.  Bean implementations must be classes.", ejbClass.getName()));
 
     // ejb/02e5
     JMethod constructor = null;
@@ -333,19 +330,19 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
 
     if (constructor == null)
-      throw error(L.l("`{0}' needs a public zero-arg constructor.  Bean implementations need a public zero-argument constructor.", ejbClass.getName()));
+      throw error(L.l("'{0}' needs a public zero-arg constructor.  Bean implementations need a public zero-argument constructor.", ejbClass.getName()));
 
     JClass []exn = constructor.getExceptionTypes();
     for (int i = 0; i < exn.length; i++) {
       if (! exn[i].isAssignableTo(RuntimeException.class)) {
-        throw error(L.l("{0}: constructor must not throw `{1}'.  Bean constructors must not throw checked exceptions.", ejbClass.getName(), exn[i].getName()));
+        throw error(L.l("{0}: constructor must not throw '{1}'.  Bean constructors must not throw checked exceptions.", ejbClass.getName(), exn[i].getName()));
       }
     }
 
     JMethod method = ejbClass.getMethod("finalize", new JClass[0]);
 
     if (method != null && ! method.getDeclaringClass().equals(JClass.OBJECT))
-      throw error(L.l("`{0}' may not implement finalize().  Bean implementations may not implement finalize().", ejbClass.getName()));
+      throw error(L.l("'{0}' may not implement finalize().  Bean implementations may not implement finalize().", ejbClass.getName()));
   }
 
   /**
@@ -421,13 +418,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _remoteHome = remoteHome;
 
     if (! remoteHome.isPublic())
-      throw error(L.l("`{0}' must be public.  <home> interfaces must be public.", remoteHome.getName()));
+      throw error(L.l("'{0}' must be public.  <home> interfaces must be public.", remoteHome.getName()));
     
     if (! remoteHome.isInterface())
-      throw error(L.l("`{0}' must be an interface. <home> interfaces must be interfaces.", remoteHome.getName()));
+      throw error(L.l("'{0}' must be an interface. <home> interfaces must be interfaces.", remoteHome.getName()));
 
     if (! remoteHome.isAssignableTo(EJBHome.class) && ! isAllowPOJO())
-      throw new ConfigException(L.l("`{0}' must extend EJBHome.  <home> interfaces must extend javax.ejb.EJBHome.", remoteHome.getName()));
+      throw new ConfigException(L.l("'{0}' must extend EJBHome.  <home> interfaces must extend javax.ejb.EJBHome.", remoteHome.getName()));
     
   }
   /**
@@ -463,6 +460,22 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   }
 
   /**
+   * Adds a remote interface class
+   */
+  public void addBusinessRemote(String typeName)
+  {
+    JClass remote = _jClassLoader.forName(typeName);
+
+    _remote = remote;
+
+    if (! remote.isPublic())
+      throw error(L.l("'{0}' must be public.  <business-remote> interfaces must be public.", remote.getName()));
+    
+    if (! remote.isInterface())
+      throw error(L.l("'{0}' must be an interface. <business-remote> interfaces must be interfaces.", remote.getName()));
+  }
+
+  /**
    * Sets the remote interface class.
    */
   public void setRemoteWrapper(JClass remote)
@@ -471,13 +484,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _remote = remote;
 
     if (! _remote.isPublic())
-      throw error(L.l("`{0}' must be public.  <remote> interfaces must be public.", remote.getName()));
+      throw error(L.l("'{0}' must be public.  <remote> interfaces must be public.", remote.getName()));
     
     if (! _remote.isInterface())
-      throw error(L.l("`{0}' must be an interface. <remote> interfaces must be interfaces.", remote.getName()));
+      throw error(L.l("'{0}' must be an interface. <remote> interfaces must be interfaces.", remote.getName()));
 
     if (! remote.isAssignableTo(EJBObject.class) && ! isAllowPOJO())
-      throw new ConfigException(L.l("`{0}' must extend EJBObject.  <remote> interfaces must extend javax.ejb.EJBObject.", remote.getName()));
+      throw new ConfigException(L.l("'{0}' must extend EJBObject.  <remote> interfaces must extend javax.ejb.EJBObject.", remote.getName()));
     
   }
 
@@ -522,13 +535,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _localHome = localHome;
 
     if (! localHome.isPublic())
-      throw error(L.l("`{0}' must be public.  <local-home> interfaces must be public.", localHome.getName()));
+      throw error(L.l("'{0}' must be public.  <local-home> interfaces must be public.", localHome.getName()));
     
     if (! localHome.isInterface())
-      throw error(L.l("`{0}' must be an interface. <local-home> interfaces must be interfaces.", localHome.getName()));
+      throw error(L.l("'{0}' must be an interface. <local-home> interfaces must be interfaces.", localHome.getName()));
 
     if (! localHome.isAssignableTo(EJBLocalHome.class) && ! isAllowPOJO())
-      throw new ConfigException(L.l("`{0}' must extend EJBLocalHome.  <local-home> interfaces must extend javax.ejb.EJBLocalHome.", localHome.getName()));
+      throw new ConfigException(L.l("'{0}' must extend EJBLocalHome.  <local-home> interfaces must extend javax.ejb.EJBLocalHome.", localHome.getName()));
 
   }
 
@@ -550,6 +563,22 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   }
 
   /**
+   * Adds a local interface class
+   */
+  public void addBusinessLocal(String typeName)
+  {
+    JClass local = _jClassLoader.forName(typeName);
+
+    _local = local;
+
+    if (! local.isPublic())
+      throw error(L.l("'{0}' must be public.  <local> interfaces must be public.", local.getName()));
+    
+    if (! local.isInterface())
+      throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", local.getName()));
+  }
+
+  /**
    * Sets the local interface class.
    */
   public void setLocalWrapper(JClass local)
@@ -558,13 +587,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _local = local;
 
     if (! local.isPublic())
-      throw error(L.l("`{0}' must be public.  <local> interfaces must be public.", local.getName()));
+      throw error(L.l("'{0}' must be public.  <local> interfaces must be public.", local.getName()));
     
     if (! local.isInterface())
-      throw error(L.l("`{0}' must be an interface. <local> interfaces must be interfaces.", local.getName()));
+      throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", local.getName()));
 
     if (! local.isAssignableTo(EJBLocalObject.class) && ! isAllowPOJO())
-      throw new ConfigException(L.l("`{0}' must extend EJBLocalObject.  <local> interfaces must extend javax.ejb.EJBLocalObject.", local.getName()));
+      throw new ConfigException(L.l("'{0}' must extend EJBLocalObject.  <local> interfaces must extend javax.ejb.EJBLocalObject.", local.getName()));
   }
 
   /**
@@ -744,11 +773,26 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _serverProgram.addProgram(init);
   }
 
+  public void addPostConstruct(PostConstructType postConstruct)
+  {
+    _postConstructList.add(postConstruct.getProgram(getEJBClass()));
+  }
+
   /**
    * Gets the init program.
    */
   public BuilderProgramContainer getInitProgram()
   {
+    if (_postConstructList != null) {
+      if (_initProgram == null)
+	_initProgram = new BuilderProgramContainer();
+	  
+      for (BuilderProgram program : _postConstructList)
+	_initProgram.addProgram(program);
+
+      _postConstructList = null;
+    }
+    
     return _initProgram;
   }
 
@@ -890,10 +934,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     String objectName = objectClass.getName();
 
     if (! objectClass.isPublic())
-      throw error(L.l("`{0}' must be public", objectName));
+      throw error(L.l("'{0}' must be public", objectName));
   
     if (! objectClass.isInterface())
-      throw error(L.l("`{0}' must be an interface", objectName));
+      throw error(L.l("'{0}' must be an interface", objectName));
     
     JMethod []methods = getMethods(objectClass);
     for (int i = 0; i < methods.length; i++) {
@@ -911,7 +955,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
         validateException(method, java.rmi.RemoteException.class);
       
       if (name.startsWith("ejb")) {
-        throw error(L.l("`{0}' forbidden in {1}.  Local or remote interfaces may not define ejbXXX methods.",
+        throw error(L.l("'{0}' forbidden in {1}.  Local or remote interfaces may not define ejbXXX methods.",
                         getFullMethodName(method),
                         objectName));
       }
@@ -921,7 +965,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       if (objectClass.isAssignableTo(EJBObject.class) &&
           (returnType.isAssignableTo(EJBLocalObject.class) ||
            returnType.isAssignableTo(EJBLocalHome.class)))
-        throw error(L.l("`{0}' must not return `{1}' in {2}.  Remote methods must not return local interfaces.",
+        throw error(L.l("'{0}' must not return '{1}' in {2}.  Remote methods must not return local interfaces.",
                         getFullMethodName(method),
                         getShortClassName(returnType),
                         objectClass.getName()));
@@ -931,7 +975,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
                                  method, objectClass);
 
       if (! returnType.equals(implMethod.getReturnType())) {
-        throw error(L.l("{0}: `{1}' must return {2} to match {3}.{4}.  Business methods must return the same type as the interface.",
+        throw error(L.l("{0}: '{1}' must return {2} to match {3}.{4}.  Business methods must return the same type as the interface.",
                         method.getDeclaringClass().getName(),
                         getFullMethodName(method),
                         implMethod.getReturnType().getName(),
@@ -963,39 +1007,39 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     method = getMethod(beanClass, methodName, param);
 
     if (method == null && sourceMethod != null) {
-      throw error(L.l("{0}: `{1}' expected to match {2}.{3}",
+      throw error(L.l("{0}: '{1}' expected to match {2}.{3}",
                       beanClass.getName(),
                       getFullMethodName(methodName, param),
                       getShortClassName(sourceMethod.getDeclaringClass()),
                       getFullMethodName(sourceMethod)));
     }
     else if (method == null) {
-      throw error(L.l("{0}: `{1}' expected",
+      throw error(L.l("{0}: '{1}' expected",
                       beanClass.getName(),
                       getFullMethodName(methodName, param)));
     }
     /*
     else if (Modifier.isAbstract(method.getModifiers()) &&
              getBeanManagedPersistence()) {
-      throw error(L.l("{0}: `{1}' must not be abstract",
+      throw error(L.l("{0}: '{1}' must not be abstract",
                       beanClass.getName(),
                       getFullMethodName(methodName, param)));
     }
     */
     else if (! method.isPublic()) {
-      throw error(L.l("{0}: `{1}' must be public",
+      throw error(L.l("{0}: '{1}' must be public",
                       beanClass.getName(),
                       getFullMethodName(methodName, param)));
     }
     
     if (method.isStatic()) {
-      throw error(L.l("{0}: `{1}' must not be static",
+      throw error(L.l("{0}: '{1}' must not be static",
                       beanClass.getName(),
                       getFullMethodName(methodName, param)));
     }
     
     if (method.isFinal()) {
-      throw error(L.l("{0}: `{1}' must not be final.",
+      throw error(L.l("{0}: '{1}' must not be final.",
                       beanClass.getName(),
                       getFullMethodName(methodName, param),
                       beanClass.getName()));
@@ -1049,13 +1093,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       return null;
 
     if (method.isFinal())
-      throw error(L.l("{0}: `{1}' must not be final",
+      throw error(L.l("{0}: '{1}' must not be final",
                       _ejbClass.getName(),
                       getFullMethodName(method)));
 
 
     if (method.isStatic())
-      throw error(L.l("{0}: `{1}' must not be static",
+      throw error(L.l("{0}: '{1}' must not be static",
                       _ejbClass.getName(),
                       getFullMethodName(method)));
 
@@ -1104,14 +1148,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       return null;
 
     if (method == null && sourceMethod != null) {
-      throw error(L.l("{0}: missing `{1}' needed to match {2}.{3}",
+      throw error(L.l("{0}: missing '{1}' needed to match {2}.{3}",
                       _ejbClass.getName(),
                       getFullMethodName(methodName, param),
                       getShortClassName(sourceClass),
                       getFullMethodName(sourceMethod)));
     }
     else if (method == null) {
-      throw error(L.l("{0}: expected `{1}'",
+      throw error(L.l("{0}: expected '{1}'",
                       _ejbClass.getName(),
                       getFullMethodName(methodName, param)));
     }
@@ -1120,29 +1164,29 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     if (method.isAbstract()) {
       if (method.getDeclaringClass().getName().equals("javax.ejb.EntityBean"))
-        throw error(L.l("{0}: `{1}' must not be abstract.  Entity beans must implement the methods in EntityBean.",
+        throw error(L.l("{0}: '{1}' must not be abstract.  Entity beans must implement the methods in EntityBean.",
                         _ejbClass.getName(),
                         getFullMethodName(methodName, param)));
       else if (method.getDeclaringClass().getName().equals("javax.ejb.SessionBean"))
-        throw error(L.l("{0}: `{1}' must not be abstract.  Session beans must implement the methods in SessionBean.",
+        throw error(L.l("{0}: '{1}' must not be abstract.  Session beans must implement the methods in SessionBean.",
                         _ejbClass.getName(),
                         getFullMethodName(methodName, param)));
       else if (sourceMethod != null)
-        throw error(L.l("{0}: `{1}' must not be abstract.  All methods from `{2}' must be implemented in the bean.",
+        throw error(L.l("{0}: '{1}' must not be abstract.  All methods from '{2}' must be implemented in the bean.",
                         _ejbClass.getName(),
                         getFullMethodName(methodName, param),
                         sourceClass.getName()));
       else
-        throw error(L.l("{0}: `{1}' must not be abstract.  Business methods must be implemented.",
+        throw error(L.l("{0}: '{1}' must not be abstract.  Business methods must be implemented.",
                         _ejbClass.getName(),
                         getFullMethodName(methodName, param)));
     } else if (! method.isPublic()) {
-      throw error(L.l("{0}: `{1}' must be public.  Business method implementations must be public.",
+      throw error(L.l("{0}: '{1}' must be public.  Business method implementations must be public.",
                       _ejbClass.getName(),
                       getFullMethodName(methodName, param)));
     }
     if (method.isStatic()) {
-      throw error(L.l("{0}: `{1}' must not be static.  Business method implementations must not be static.",
+      throw error(L.l("{0}: '{1}' must not be static.  Business method implementations must not be static.",
                       _ejbClass.getName(),
                       getFullMethodName(method)));
     }
@@ -1477,7 +1521,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
                       getFullMethodName(method)));
     }
     else if (method.isStatic()) {
-      throw error(L.l("{0}: `{1}' must not be static.",
+      throw error(L.l("{0}: '{1}' must not be static.",
                       _ejbClass.getName(),
                       getFullMethodName(method)));
     }
@@ -1851,7 +1895,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
           continue loop;
       }
 
-      throw new ConfigException(L.l("{2}: `{0}' must throw {1}.",
+      throw new ConfigException(L.l("{2}: '{0}' must throw {1}.",
                                     getFullMethodName(method),
                                     exn[i].getName(),
                                     method.getDeclaringClass().getName()));
@@ -1865,7 +1909,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     JClass missing = findMissingException(caller, exn);
     
     if (missing != null) {
-      throw error(L.l("{0}: `{1}' must throw {2}.",
+      throw error(L.l("{0}: '{1}' must throw {2}.",
                       caller.getDeclaringClass().getName(),
                       getFullMethodName(caller),
                       getShortClassName(missing),
@@ -1924,6 +1968,158 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
 
     return false;
+  }
+
+  protected void introspectBean(JClass type, String defaultName)
+    throws ConfigException
+  {
+    try {
+      setEJBClassWrapper(type);
+
+      String name = getEJBName();
+
+      if (name == null || name.equals(""))
+	name = defaultName;
+
+      if (name == null || name.equals("")) {
+	String className = type.getName();
+      
+	int p = className.lastIndexOf('.');
+
+	if (p > 0)
+	  name = className.substring(p + 1);
+	else
+	  name = className;
+      }
+
+      setEJBName(name);
+
+      JAnnotation local = type.getAnnotation(Local.class);
+      if (local != null) {
+	Object []values = (Object []) local.get("value");
+
+	for (int i = 0; i < values.length; i++) {
+	  if (values[i] instanceof JClass) {
+	    JClass localClass = (JClass) values[i];
+	  
+	    setLocalWrapper(localClass);
+	  }
+	  else if (values[i] instanceof Class) {
+	    setLocal((Class) values[i]);
+	  }
+	}
+      }
+
+      JAnnotation remote = type.getAnnotation(Remote.class);
+      if (remote != null) {
+	Object []values = (Object []) remote.get("value");
+
+	for (int i = 0; i < values.length; i++) {
+	  if (values[i] instanceof JClass) {
+	    JClass remoteClass = (JClass) values[i];
+	  
+	    setRemoteWrapper(remoteClass);
+	  }
+	  else if (values[i] instanceof Class) {
+	    setRemote((Class) values[i]);
+	  }
+	}
+      }
+
+      JAnnotation xa = type.getAnnotation(TransactionAttribute.class);
+      if (xa != null) {
+	MethodSignature sig = new MethodSignature();
+	sig.setMethodName("*");
+
+	EjbMethodPattern pattern = createMethod(sig);
+
+	setPatternTransaction(pattern, xa);
+      }
+
+      configureMethods(type);
+
+      /*
+      for (int i = 0; i < _initList.size(); i++)
+	addInitProgram(_initList.get(i).getBuilderProgram());
+      */
+    } catch (ConfigException e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+
+  private void configureMethods(JClass type)
+    throws ConfigException
+  {
+    JMethod []methods = type.getDeclaredMethods();
+
+    for (int i = 0; i < methods.length; i++) {
+      JMethod method = methods[i];
+      
+      JAnnotation xa = method.getAnnotation(TransactionAttribute.class);
+
+      if (xa != null) {
+	EjbMethodPattern pattern = createMethod(getSignature(method));
+
+	setPatternTransaction(pattern, xa);
+      }
+    }
+  }
+
+  private void setPatternTransaction(EjbMethodPattern pattern,
+				     JAnnotation xa)
+    throws ConfigException
+  {
+    TransactionAttributeType xaType;
+    xaType = (TransactionAttributeType) xa.get("value");
+    
+    switch (xaType) {
+    case REQUIRED:
+      pattern.setTransaction(EjbMethod.TRANS_REQUIRED);
+      break;
+	  
+    case REQUIRES_NEW:
+      pattern.setTransaction(EjbMethod.TRANS_REQUIRES_NEW);
+      break;
+	  
+    case MANDATORY:
+      pattern.setTransaction(EjbMethod.TRANS_MANDATORY);
+      break;
+	  
+    case SUPPORTS:
+      pattern.setTransaction(EjbMethod.TRANS_SUPPORTS);
+      break;
+	  
+    case NOT_SUPPORTED:
+      pattern.setTransaction(EjbMethod.TRANS_NOT_SUPPORTED);
+      break;
+	  
+    case NEVER:
+      pattern.setTransaction(EjbMethod.TRANS_NEVER);
+      break;
+      
+    default:
+      throw new IllegalStateException();
+    }
+  }
+
+  private MethodSignature getSignature(JMethod method)
+    throws ConfigException
+  {
+    MethodSignature sig = new MethodSignature();
+
+    sig.setMethodName(method.getName());
+
+    JClass []paramTypes = method.getParameterTypes();
+
+    for (int i = 0; i < paramTypes.length; i++) {
+      sig.addParam(paramTypes[i].getName());
+    }
+
+    return sig;
   }
 
   /**

@@ -12,6 +12,8 @@
 
 <s2 title="3.1.snap - Dec 21, 2006">
 <ul>
+<li>getServerPort not properly calculated with virtual-host (#1509, rep by justinwcs)</li>
+<li>Amber: mapped-superclass/metadata-complete is optional (rep by Costin Leau)</li>
 <li>server-header needs to be used for error pages (#1491, rep by Larry Gelberg)</li>
 <li>tree-loader getResources() needs to return all matching jars (#1516, rep by KnisterPeter)</li>
 <li>Resin's JSTL needs to use the http://java.sun.com/jsp/jstl/core namespace (#1487, rep by John Rehman)</li>

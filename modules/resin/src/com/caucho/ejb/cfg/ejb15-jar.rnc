@@ -14,27 +14,55 @@ cmp-field-type-Type = string
 ejb15_abstract-schema-name = element abstract-schema-name { string }
 
 ejb15_activation-config-property = element activation-config-property {
+  attribute id { string }?,
   element activation-config-property-name { string },
   element activation-config-property-value { string }
 }
 
 ejb15_activation-config = element activation-config {
+  attribute id { string }?,
   ejb15_description*,
   ejb15_activation-config-property+,
   ejb15_deployment-extension*
 }
 
+ejb15_application-exception = element application-exception {
+  attribute id { string }?,
+  ejb15_exception-class,
+  ejb15_rollback?
+}
+
+ejb15_around-invoke = element around-invoke {
+  ejb15_class?,
+  ejb15_method-name
+}
+
 ejb15_assembly-descriptor = element assembly-descriptor {
+  attribute id { string }?,
   javaee_security-role*,
 
   ejb15_method-permission*,
   ejb15_container-transaction*,
+  ejb15_interceptor-binding*,
   ejb15_message-destination*,
   ejb15_exclude-list?,
-  ejb15_deployment-extension*
+  ejb15_application-exception*
+}
+
+ejb15_business-remote = element business-remote {
+  string
+}
+
+ejb15_business-local = element business-local {
+  string
+}
+
+ejb15_class = element class {
+  string
 }
 
 ejb15_cmp-field = element cmp-field {
+  attribute id { string }?,
   ejb15_description*,
   element field-name { javaee_java-identifier },
   ejb15_deployment-extension*
@@ -45,6 +73,7 @@ ejb15_cmp-version = element cmp-version {
 }
 
 ejb15_cmr-field = element cmr-field {
+  attribute id { string }?,
   ejb15_description*,
   element cmr-field-name { javaee_string },
   element cmr-field-type { string }?,
@@ -52,6 +81,7 @@ ejb15_cmr-field = element cmr-field {
 }
 
 ejb15_container-transaction = element container-transaction {
+  attribute id { string }?,
   ejb15_description*,
   ejb15_method+,
   element trans-attribute { "Bean" | "Container" }
@@ -77,19 +107,19 @@ ejb15_ejb_env =
   ejb15_security-identity?
 
 ejb15_ejb-jar = element ejb-jar {
-  attribute l:version { "2.1" },
+  attribute id { string }?,
+
+  attribute version { "2.1" },
 
   attribute xsi:schemaLocation { string }?,
 
   attribute metadata-complete { string }?,
 
-  ejb15_description*,
+  javaee_description-Group,
 
-  ejb15_display-name*,
+  ejb15_enterprise-beans?,
 
-  ejb15_icon*,
-
-  ejb15_enterprise-beans,
+  ejb15_interceptors?,
 
   ejb15_relationships?,
 
@@ -108,18 +138,20 @@ ejb15_ejb-name = element ejb-name {
 }
 
 ejb15_ejb-relation = element ejb-relation {
+  attribute id { string }?,
+
   ejb15_description*,
 
   element ejb-relation-name { string }?,
 
   ejb15_ejb-relationship-role,
 
-  ejb15_ejb-relationship-role,
-
-  ejb15_deployment-extension*
+  ejb15_ejb-relationship-role
 }
 
 ejb15_ejb-relationship-role = element ejb-relationship-role {
+  attribute id { string }?,
+
   ejb15_description*,
 
   element ejb-relationship-role-name { javaee_string }?,
@@ -130,12 +162,12 @@ ejb15_ejb-relationship-role = element ejb-relationship-role {
 
   ejb15_relationship-role-source,
 
-  ejb15_cmr-field?,
-
-  ejb15_deployment-extension*
+  ejb15_cmr-field?
 }
 
 ejb15_enterprise-beans = element enterprise-beans {
+  attribute id { string }?,
+
   (ejb15_session
   | ejb15_entity
   | ejb15_message-driven)+
@@ -144,17 +176,19 @@ ejb15_enterprise-beans = element enterprise-beans {
 ejb15_entity = element entity {
   attribute id { string }?,
 
-  ejb15_description*,
-
-  ejb15_display-name*,
-
-  ejb15_icon*,
+  javaee_description-Group,
 
   ejb15_ejb-name,
 
-  (ejb15_home, ejb15_remote)?,
+  ejb15_mapped-name?,
 
-  (ejb15_local-home, ejb15_local)?,
+  ejb15_home?,
+
+  ejb15_remote?,
+
+  ejb15_local-home?,
+
+  ejb15_local?,
 
   ejb15_ejb-class,
 
@@ -162,7 +196,7 @@ ejb15_entity = element entity {
 
   ejb15_prim-key-class,
 
-  ejb15_reentrant?,
+  ejb15_reentrant,
 
   ejb15_cmp-version?,
 
@@ -176,12 +210,16 @@ ejb15_entity = element entity {
 
   ejb15_security-identity?,
 
-  ejb15_query*,
+  ejb15_query*
+}
 
-  ejb15_deployment-extension*
+ejb15_exception-class = element exception-class {
+  string
 }
 
 ejb15_exclude-list = element exclude-list {
+  attribute id { string }?,
+
   ejb15_description*,
 
   ejb15_method+
@@ -195,12 +233,71 @@ ejb15_icon = element icon {
   string
 }
 
+ejb15_init-method = element init-method {
+  attribute id { string }?,
+
+  element create-method { string },
+
+  element bean-method { string }
+}
+
+ejb15_interceptor = element interceptor {
+  attribute id { string }?,
+
+  ejb15_description*,
+
+  element interceptor-class { string },
+
+  ejb15_around-invoke*,
+
+  ejb15_ejb_env,
+
+  ejb15_post-activate*,
+
+  ejb15_pre-passivate*
+}
+
+ejb15_interceptors = element interceptors {
+  attribute id { string }?,
+
+  ejb15_description*,
+
+  ejb15_interceptor+
+}
+
+ejb15_interceptor-binding = element interceptor-binding {
+  attribute id { string }?,
+
+  ejb15_description*,
+
+  ejb15_ejb-name,
+
+  (element interceptor-class { string }*
+  | ejb15_interceptor-order),
+
+  element exclude-default-interceptors { javaee_boolean }?,
+
+  element exclude-class-interceptors { javaee_boolean }?,
+
+  element method { string }?
+}
+
+ejb15_interceptor-order = element interceptor-order {
+  attribute id { string }?,
+
+  element interceptor-class { string }+
+}
+
 ejb15_local = element local {
   javaee_class
 }
 
 ejb15_local-home = element local-home {
   javaee_class
+}
+
+ejb15_mapped-name = element mapped-name {
+  string
 }
 
 ejb15_message-destination = element message-destination {
@@ -237,19 +334,21 @@ ejb15_message-destination-ref = element message-destination-ref {
 ejb15_message-destination-type = element message-destination-type { string }
 
 ejb15_message-driven = element message-driven {
-  ejb15_description?,
+  attribute id { string }?,
 
-  ejb15_display-name?,
-
-  ejb15_icon?,
+  javaee_description-Group,
 
   ejb15_ejb-name,
 
-  ejb15_ejb-class,
+  ejb15_mapped-name?,
+
+  ejb15_ejb-class?,
 
   element messaging-type { javaee_class }?,
 
-  ejb15_transaction-type,
+  ejb15_timeout-method?,
+
+  ejb15_transaction-type?,
 
   ejb15_message-destination-type?,
 
@@ -257,9 +356,9 @@ ejb15_message-driven = element message-driven {
 
   ejb15_activation-config?,
 
-  ejb15_ejb_env,
+  ejb15_around-invoke*,
 
-  ejb15_deployment-extension*
+  ejb15_ejb_env
 }
 
 ejb15_method-intf = element method-intf {
@@ -270,6 +369,7 @@ ejb15_method-intf = element method-intf {
  | "ServiceEndpoint"
 }
 
+
 ejb15_method-name = element method-name {
   string
 }
@@ -277,10 +377,14 @@ ejb15_method-name = element method-name {
 ejb15_method-param = element method-param { string }
 
 ejb15_method-params = element method-params {
+  attribute id { string }?,
+
   ejb15_method-param*
 }
 
 ejb15_method-permission = element method-permission {
+  attribute id { string }?,
+
   ejb15_description*,
 
   (javaee_role-name+
@@ -290,6 +394,8 @@ ejb15_method-permission = element method-permission {
 }
 
 ejb15_method = element method {
+  attribute id { string }?,
+
   ejb15_description*,
 
   ejb15_ejb-name,
@@ -300,9 +406,24 @@ ejb15_method = element method {
 
   ejb15_method-params?
 }
+
+ejb15_named-method-Type =
+  attribute id { string }?,
+
+  ejb15_method-name,
+
+  ejb15_method-params?
   
 ejb15_persistence-type = element persistence-type {
   "Container" | "Bean"
+}
+
+ejb15_post-activate = element post-activate {
+  ejb15_named-method-Type
+}
+
+ejb15_pre-passivate = element pre-passivate {
+  ejb15_named-method-Type
 }
 
 ejb15_prim-key-class = element prim-key-class {
@@ -312,23 +433,23 @@ ejb15_prim-key-class = element prim-key-class {
 ejb15_primkey-field = element primkey-field { string }
 
 ejb15_query = element query {
+  attribute id { string }?,
+
   ejb15_description*,
 
   ejb15_query-method,
 
   element result-type-mapping { "Local" | "Remote" }?,
 
-  element ejb-ql { string },
-
-  ejb15_deployment-extension*
+  element ejb-ql { string }
 }
 
 ejb15_query-method = element query-method {
+  attribute id { string }?,
+
   ejb15_method-name,
 
-  ejb15_method-params,
-
-  ejb15_deployment-extension*
+  ejb15_method-params
 }
 
 ejb15_reentrant = element reentrant {
@@ -336,12 +457,16 @@ ejb15_reentrant = element reentrant {
 }
 
 ejb15_relationship-role-source = element relationship-role-source {
+  attribute id { string }?,
+
   ejb15_description*,
 
   ejb15_ejb-name
 }
 
 ejb15_relationships = element relationships {
+  attribute id { string }?,
+
   ejb15_description*,
 
   ejb15_ejb-relation+,
@@ -358,6 +483,18 @@ ejb15_remote = element remote {
 
 ##role-name = element role-name { string }
 
+ejb15_remove-method = element remve-method {
+  attribute id { string }?,
+
+  element bean-method { ejb15_named-method-Type },
+
+  element retain-if-exception { string }
+}
+
+ejb15_rollback = element rollback {
+  string
+}
+
 ejb15_security-identity = element security-identity {
   ejb15_description*,
 
@@ -371,17 +508,25 @@ ejb15_security-identity = element security-identity {
 ##service-ref = element service-ref { string }
 
 ejb15_session = element session {
-  javaee_description?,
+  attribute id { string }?,
 
-  javaee_display-name?,
-
-  javaee_icon?,
+  javaee_description-Group,
 
   ejb15_ejb-name,
 
-  (ejb15_home, ejb15_remote)?,
+  ejb15_mapped-name?,
 
-  (ejb15_local-home, ejb15_local)?,
+  ejb15_home?,
+
+  ejb15_remote?,
+
+  ejb15_local-home?,
+
+  ejb15_local?,
+
+  ejb15_business-local*,
+
+  ejb15_business-remote*,
 
   element service-endpoint { javaee_class }?,
 
@@ -389,13 +534,29 @@ ejb15_session = element session {
 
   element session-type { "Stateful" | "Stateless" }?,
 
+  ejb15_timeout-method?,
+
+  ejb15_init-method*,
+
+  ejb15_remove-method*,
+
   ejb15_transaction-type?,
 
+  ejb15_around-invoke*,
+
   ejb15_ejb_env,
+
+  ejb15_post-activate*,
+
+  ejb15_pre-passivate*,
 
   javaee_security-role-ref*,
 
   ejb15_security-identity?
+}
+
+ejb15_timeout-method = element timeout-method {
+  ejb15_named-method-Type
 }
 
 ejb15_trans-attribute = element trans-attribute {

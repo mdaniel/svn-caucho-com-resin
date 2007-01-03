@@ -1,41 +1,27 @@
 /*
  * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
- * Caucho Technology permits modification and use of this file in
- * source and binary form ("the Software") subject to the Caucho
- * Developer Source License 1.1 ("the License") which accompanies
- * this file.  The License is also available at
- *   http://www.caucho.com/download/cdsl1-1.xtp
+ * This file is part of Resin(R) Open Source
  *
- * In addition to the terms of the License, the following conditions
- * must be met:
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
  *
- * 1. Each copy or derived work of the Software must preserve the copyright
- *    notice and this notice unmodified.
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * 2. Each copy of the Software in source or binary form must include 
- *    an unmodified copy of the License in a plain ASCII text file named
- *    LICENSE.
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
  *
- * 3. Caucho reserves all rights to its names, trademarks and logos.
- *    In particular, the names "Resin" and "Caucho" are trademarks of
- *    Caucho and may not be used to endorse products derived from
- *    this software.  "Resin" and "Caucho" may not appear in the names
- *    of products derived from this software.
- *
- * This Software is provided "AS IS," without a warranty of any kind. 
- * ALL EXPRESS OR IMPLIED REPRESENTATIONS AND WARRANTIES, INCLUDING ANY
- * IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED.
- *
- * CAUCHO TECHNOLOGY AND ITS LICENSORS SHALL NOT BE LIABLE FOR ANY DAMAGES
- * SUFFERED BY LICENSEE OR ANY THIRD PARTY AS A RESULT OF USING OR
- * DISTRIBUTING SOFTWARE. IN NO EVENT WILL CAUCHO OR ITS LICENSORS BE LIABLE
- * FOR ANY LOST REVENUE, PROFIT OR DATA, OR FOR DIRECT, INDIRECT, SPECIAL,
- * CONSEQUENTIAL, INCIDENTAL OR PUNITIVE DAMAGES, HOWEVER CAUSED AND
- * REGARDLESS OF THE THEORY OF LIABILITY, ARISING OUT OF THE USE OF OR
- * INABILITY TO USE SOFTWARE, EVEN IF HE HAS BEEN ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGES.      
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *   Free SoftwareFoundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
@@ -87,6 +73,7 @@ public class AppClient implements EnvironmentBean
 
   private J2EEVersion _j2eeVersion = J2EEVersion.RESIN;
 
+  private boolean _isMetadataComplete;
   private Path _rootDirectory;
   private Path _workDirectory;
   private String _mainClassName;
@@ -126,6 +113,11 @@ public class AppClient implements EnvironmentBean
   public J2EEVersion getJ2EEVersion()
   {
     return _j2eeVersion;
+  }
+
+  public void setMetadataComplete(boolean isComplete)
+  {
+    _isMetadataComplete = isComplete;
   }
 
   public void setRootDirectory(Path rootDirectory)

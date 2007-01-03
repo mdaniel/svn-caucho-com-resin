@@ -55,13 +55,22 @@ public class ApplicationImpl extends Application
   private ActionListener _actionListener;
   private StateManager _stateManager;
   private ViewHandler _viewHandler;
+  private NavigationHandler _navigationHandler;
   private PropertyResolver _propertyResolver;
 
   private ExpressionFactory _jsfExpressionFactory;
-  private ELResolver _elResolver;
+  private FacesContextELResolver _elResolver;
 
   private ArrayList<Locale> _locales;
   private Locale _defaultLocale = Locale.getDefault();
+
+  private ArrayList<ELContextListener> _elContextListenerList
+    = new ArrayList<ELContextListener>();
+
+  private ELContextListener []_elContextListeners;
+
+  private HashMap<String,String> _componentClassNameMap
+    = new HashMap<String,String>();
 
   private HashMap<String,Class> _componentClassMap
     = new HashMap<String,Class>();
@@ -76,6 +85,8 @@ public class ApplicationImpl extends Application
     = new HashMap<Class,Class>();
 
   private String _messageBundle;
+
+  private boolean _isInit;
 
   public ApplicationImpl()
   {
@@ -161,12 +172,15 @@ public class ApplicationImpl extends Application
 
   public NavigationHandler getNavigationHandler()
   {
-    throw new UnsupportedOperationException();
+    return _navigationHandler;
   }
 
   public void setNavigationHandler(NavigationHandler handler)
   {
-    throw new UnsupportedOperationException();
+    if (handler == null)
+      throw new NullPointerException();
+
+    _navigationHandler = handler;
   }
 
   @Deprecated
@@ -196,6 +210,51 @@ public class ApplicationImpl extends Application
   /**
    * @Since 1.2
    */
+  public void addELResolver(ELResolver resolver)
+  {
+    if (_isInit)
+      throw new IllegalStateException(L.l("Can't add ELResolver after Application has been initialized"));
+    _elResolver.addELResolver(resolver);
+  }
+
+  /**
+   * @Since 1.2
+   */
+  public void addELContextListener(ELContextListener listener)
+  {
+    _elContextListenerList.add(listener);
+    _elContextListeners = null;
+  }
+
+  /**
+   * @Since 1.2
+   */
+  public void removeELContextListener(ELContextListener listener)
+  {
+    _elContextListenerList.remove(listener);
+    _elContextListeners = null;
+  }
+
+  /**
+   * @Since 1.2
+   */
+  public ELContextListener []getELContextListeners()
+  {
+    synchronized (_elContextListenerList) {
+      if (_elContextListeners == null) {
+	_elContextListeners
+	  = new ELContextListener[_elContextListenerList.size()];
+
+	_elContextListenerList.toArray(_elContextListeners);
+      }
+    }
+
+    return _elContextListeners;
+  }
+
+  /**
+   * @Since 1.2
+   */
   public ExpressionFactory getExpressionFactory()
   {
     return _jsfExpressionFactory;
@@ -217,6 +276,9 @@ public class ApplicationImpl extends Application
 
   public void setViewHandler(ViewHandler handler)
   {
+    if (handler == null)
+      throw new NullPointerException();
+    
     _viewHandler = handler;
   }
 
@@ -239,20 +301,8 @@ public class ApplicationImpl extends Application
     if (componentType == null)
       throw new NullPointerException();
     
-    synchronized (_componentClassMap) {
-      try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	Class cl = Class.forName(componentClass, false, loader);
-
-	Config.validate(cl, UIComponent.class);
-
-	_componentClassMap.put(componentType, cl);
-      } catch (RuntimeException e) {
-	throw e;
-      } catch (Exception e) {
-	throw new FacesException(e);
-      }
+    synchronized (_componentClassNameMap) {
+      _componentClassNameMap.put(componentType, componentClass);
     }
   }
 
@@ -262,11 +312,7 @@ public class ApplicationImpl extends Application
     if (componentType == null)
       throw new NullPointerException();
     
-    Class cl = null;
-    
-    synchronized (_componentClassMap) {
-      cl = _componentClassMap.get(componentType);
-    }
+    Class cl = getComponentClass(componentType);
 
     if (cl == null)
       throw new FacesException(L.l("'{0}' is an unknown UI componentType to create",
@@ -281,6 +327,62 @@ public class ApplicationImpl extends Application
     }
   }
 
+  private Class getComponentClass(String name)
+  {
+    synchronized (_componentClassMap) {
+      Class cl = _componentClassMap.get(name);
+
+      if (cl != null)
+	return cl;
+
+      String className = _componentClassNameMap.get(name);
+
+      if (className == null)
+	throw new FacesException(L.l("'{0}' is an unknown component type",
+				     name));
+      
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	
+	cl = Class.forName(className, false, loader);
+
+	Config.validate(cl, UIComponent.class);
+
+	_componentClassMap.put(name, cl);
+	
+	return cl;
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new FacesException(e);
+      }
+    }
+  }
+
+  /**
+   * @Since 1.2
+   */
+  public UIComponent createComponent(ValueExpression componentExpr,
+				     FacesContext context,
+				     String componentType)
+    throws FacesException
+  {
+    if (componentExpr == null
+	|| context == null
+	|| componentType == null)
+      throw new NullPointerException();
+
+    Object value = componentExpr.getValue(context.getELContext());
+
+    if (value instanceof UIComponent)
+      return (UIComponent) value;
+
+    UIComponent component = createComponent(componentType);
+
+    componentExpr.setValue(context.getELContext(), component);
+
+    return component;
+  }
   
   @Deprecated
   public UIComponent createComponent(ValueBinding componentBinding,
@@ -288,6 +390,11 @@ public class ApplicationImpl extends Application
 				     String componentType)
     throws FacesException
   {
+    if (componentBinding == null
+	|| context == null
+	|| componentType == null)
+      throw new NullPointerException();
+    
     throw new UnsupportedOperationException();
   }
 
@@ -431,12 +538,18 @@ public class ApplicationImpl extends Application
 
   public void addValidator(String validatorId, String validatorClass)
   {
+    if (validatorId == null || validatorClass == null)
+      throw new NullPointerException();
+    
     _validatorClassMap.put(validatorId, validatorClass);
   }
 
   public Validator createValidator(String validatorId)
     throws FacesException
   {
+    if (validatorId == null)
+      throw new NullPointerException();
+    
     try {
       String validatorClass = _validatorClassMap.get(validatorId);
       
@@ -469,6 +582,11 @@ public class ApplicationImpl extends Application
       = factory.createValueExpression(elContext, ref, Object.class);
 
     return new ValueBindingAdapter(expr);
+  }
+
+  public void init()
+  {
+    _isInit = true;
   }
 
   public String toString()

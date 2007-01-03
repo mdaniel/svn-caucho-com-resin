@@ -43,7 +43,7 @@ import java.util.Map;
  * Variable resolution for JSF variables
  */
 public class FacesContextELResolver extends AbstractVariableResolver {
-  private final ELResolver []_customResolvers;
+  private ELResolver []_customResolvers;
 
   /*
   private final ImplicitObjectELResolver _implicitResolver
@@ -62,6 +62,19 @@ public class FacesContextELResolver extends AbstractVariableResolver {
   public FacesContextELResolver(ELResolver []customResolvers)
   {
     _customResolvers = customResolvers;
+  }
+
+  public void addELResolver(ELResolver elResolver)
+  {
+    ELResolver []elResolvers = new ELResolver[_customResolvers.length + 1];
+
+    System.arraycopy(_customResolvers, 0,
+		     elResolvers, 0,
+		     _customResolvers.length);
+
+    elResolvers[elResolvers.length - 1] = elResolver;
+
+    _customResolvers = elResolvers;
   }
 
   public ELResolver []getCustomResolvers()
@@ -150,6 +163,16 @@ public class FacesContextELResolver extends AbstractVariableResolver {
   public Object getValue(ELContext env, Object base, Object property)
   {
     env.setPropertyResolved(false);
+
+    if (base == null && property instanceof String) {
+      ImplicitObjectExpr expr = ImplicitObjectExpr.create((String) property);
+
+      if (expr != null) {
+	env.setPropertyResolved(true);
+
+	return expr.getValue(env);
+      }
+    }
 
     for (int i = 0; i < _customResolvers.length; i++) {
       Object value = _customResolvers[i].getValue(env, base, property);

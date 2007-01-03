@@ -29,8 +29,7 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.JClass;
-import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.*;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
@@ -50,11 +49,7 @@ import com.caucho.management.j2ee.StatelessSessionBean;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.CreateException;
-import javax.ejb.EJBHome;
-import javax.ejb.EJBLocalHome;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionSynchronization;
+import javax.ejb.*;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
@@ -86,17 +81,25 @@ public class EjbSessionBean extends EjbBean {
   /**
    * Sets the ejb implementation class.
    */
-  public void setEJBClass(Class ejbClass)
+  @Override
+  public void setEJBClass(String typeName)
     throws ConfigException
   {
-    super.setEJBClass(ejbClass);
+    super.setEJBClass(typeName);
 
-    if (Modifier.isAbstract(ejbClass.getModifiers()))
+    JClass ejbClass = getEJBClassWrapper();
+
+    if (ejbClass.isAbstract())
       throw error(L.l("'{0}' must not be abstract.  Session bean implementations must be fully implemented.", ejbClass.getName()));
 
-    if (! SessionBean.class.isAssignableFrom(ejbClass) && ! isAllowPOJO())
-      throw error(L.l("'{0}' must implement SessionBean.  Session beans must implement javax.ejb.SessionBean.", ejbClass.getName()));
-
+    /*
+    if (! ejbClass.isAssignableTo(SessionBean.class)
+	&& ! ejbClass.isAnnotationPresent(Stateless.class)
+	&& ! ejbClass.isAnnotationPresent(Stateful.class))
+      throw error(L.l("'{0}' must implement SessionBean or @Stateless or @Stateful.  Session beans must implement javax.ejb.SessionBean.", ejbClass.getName()));
+    */
+      
+    introspectSession();
   }
 
   /**
@@ -302,6 +305,55 @@ public class EjbSessionBean extends EjbBean {
     }
 
     return server;
+  }
+
+  private void introspectSession()
+    throws ConfigException
+  {
+    JClass ejbClass = getEJBClassWrapper();
+    
+    if (ejbClass.isAnnotationPresent(Stateless.class))
+      introspectStateless(ejbClass);
+    else if (ejbClass.isAnnotationPresent(Stateful.class))
+      introspectStateless(ejbClass);
+  }
+
+  private void introspectStateless(JClass type)
+    throws ConfigException
+  {
+    String className = type.getName();
+    
+    JAnnotation stateless = type.getAnnotation(Stateless.class);
+    
+    setAllowPOJO(true);
+
+    setSessionType("Stateless");
+    
+    JAnnotation transaction = type.getAnnotation(TransactionManagement.class);
+    if (transaction == null)
+      setTransactionType("Container");
+    else if (TransactionManagementType.BEAN.equals(transaction.get("value")))
+      setTransactionType("Bean");
+    else {
+      setTransactionType("Container");
+    }
+
+    introspectBean(type, stateless.getString("name"));
+  }
+
+  private void configureStateful(JClass type)
+    throws ConfigException
+  {
+    String className = type.getName();
+    
+    JAnnotation stateful = type.getAnnotation(Stateful.class);
+
+    setAllowPOJO(true);
+
+    setSessionType("Stateful");
+    setTransactionType("Container");
+
+    introspectBean(type, stateful.getString("name"));
   }
 
   private void validateMethods()

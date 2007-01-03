@@ -31,19 +31,20 @@ package com.caucho.bytecode;
 
 import java.util.HashMap;
 
+import java.lang.annotation.*;
+import java.lang.reflect.*;
+
 /**
  * Wrapper around the java Class for a JClass.
  */
-public class JAnnotationWrapper extends JAnnotation {
-  private JClassLoader _loader;
-  
-  private Class _class;
+public class JAnnotationWrapper extends JAnnotation
+{
+  private Annotation _ann;
+  private HashMap<String,Object> _values;
 
-  public JAnnotationWrapper(JClassLoader loader, Class cl)
+  public JAnnotationWrapper(Annotation ann)
   {
-    _loader = loader;
-    
-    _class = cl;
+    _ann = ann;
   }
   
   /**
@@ -51,7 +52,7 @@ public class JAnnotationWrapper extends JAnnotation {
    */
   public String getType()
   {
-    return _class.getName();
+    return _ann.annotationType().getName();
   }
 
   /**
@@ -59,6 +60,29 @@ public class JAnnotationWrapper extends JAnnotation {
    */
   public HashMap<String,Object> getValueMap()
   {
-    return new HashMap<String,Object>();
+    try {
+      if (_values == null) {
+	_values = new HashMap<String,Object>();
+
+	Method []methods = _ann.annotationType().getMethods();
+
+	for (int i = 0; i < methods.length; i++) {
+	  Method method = methods[i];
+
+	  if (method.getDeclaringClass().equals(Class.class))
+	    continue;
+	  if (method.getDeclaringClass().equals(Object.class))
+	    continue;
+	  if (method.getParameterTypes().length != 0)
+	    continue;
+
+	  _values.put(method.getName(), method.invoke(_ann));
+	}
+      }
+
+      return _values;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

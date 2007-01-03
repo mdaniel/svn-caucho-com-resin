@@ -550,9 +550,9 @@ orm30_mapped-superclass = element mapped-superclass {
 
   attribute access { "FIELD" | "PROPERTY" }?,
 
-  attribute metadata-complete { t_boolean },
+  attribute metadata-complete { t_boolean }?,
 
-  element description { string },
+  element description { string }?,
 
   orm30_id-class?,
 

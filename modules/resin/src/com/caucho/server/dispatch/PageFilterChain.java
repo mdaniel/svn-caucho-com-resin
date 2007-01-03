@@ -50,8 +50,10 @@ import java.util.logging.Logger;
 /**
  * Represents the final servlet in a filter chain.
  */
-public class PageFilterChain implements FilterChain {
-  private static final Logger log = Log.open(PageFilterChain.class);
+public class PageFilterChain implements FilterChain
+{
+  private static final Logger log
+    = Logger.getLogger(PageFilterChain.class.getName());
   private static final L10N L = new L10N(PageFilterChain.class);
   
   public static String SERVLET_NAME = "javax.servlet.error.servlet_name";

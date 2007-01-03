@@ -36,8 +36,11 @@ public class ApplicationFactoryImpl extends ApplicationFactory
 
   public Application getApplication()
   {
-    if (_application == null)
-      _application = new ApplicationImpl();
+    if (_application == null) {
+      ApplicationImpl app = new ApplicationImpl();
+      app.init();
+      _application = app;
+    }
     
     return _application;
   }

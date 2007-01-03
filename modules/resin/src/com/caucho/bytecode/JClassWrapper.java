@@ -29,6 +29,8 @@
 
 package com.caucho.bytecode;
 
+import java.lang.annotation.Annotation;
+
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -333,7 +335,40 @@ public class JClassWrapper extends JClass {
 
     return jFields;
   }
+  
+  /**
+   * Returns the annotation.
+   */
+  @Override
+  public JAnnotation getAnnotation(String name)
+  {
+    Annotation []ann = _class.getAnnotations();
 
+    for (int i = 0; i < ann.length; i++) {
+      if (ann[i].annotationType().getName().equals(name))
+	return new JAnnotationWrapper(ann[i]);
+    }
+
+    return null;
+  }
+  
+  /**
+   * Returns the annotation.
+   */
+  @Override
+  public JAnnotation []getDeclaredAnnotations()
+  {
+    Annotation []ann = _class.getAnnotations();
+
+    JAnnotation []jAnn = new JAnnotation[ann.length];
+
+    for (int i = 0; i < ann.length; i++) {
+      jAnn[i] = new JAnnotationWrapper(ann[i]);
+    }
+
+    return jAnn;
+  }
+  
   public String toString()
   {
     return "JClassWrapper[" + getName() + "]";

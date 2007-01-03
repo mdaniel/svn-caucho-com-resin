@@ -128,6 +128,12 @@ javaee_init-param = element init-param {
   javaee_param-value-Type
 }
 
+javaee_injection-target = element injection-target {
+  element injection-target-class { string },
+
+  element injection-target-name { string }
+}
+
 javaee_java-identifier = string
 
 javaee_jndi-environment-refs-Group =
@@ -143,9 +149,22 @@ javaee_jndi-environment-refs-Group =
 
   javaee_resource-env-ref*,
 
-  javaee_message-destination-ref*
+  javaee_message-destination-ref*,
+
+  javaee_persistence-context-ref*,
+
+  javaee_persistence-unit-ref*,
+
+  javaee_post-construct*,
+
+  javaee_pre-destroy*
 
 javaee_jndi-name = string
+
+javaee_lifecycle-callback-Type =
+  element lifecycle-callback-class { string }?,
+
+  element lifecycle-callback-method { string }?
 
 javaee_local = element local {
   javaee_fully-qualified-class
@@ -153,6 +172,10 @@ javaee_local = element local {
 
 javaee_local-home = element local-home {
   javaee_fully-qualified-class
+}
+
+javaee_mapped-name = element mapped-name {
+  string
 }
 
 javaee_message-destination = element message-destination {
@@ -216,6 +239,49 @@ javaee_param-value-Type =
 
 javaee_path = string
 
+javaee_persistence-context-ref = element persistence-context-ref {
+  attribute id { string }?,
+
+  javaee_description*,
+
+  element persistence-context-ref-name { string },
+
+  element persistence-unit-name { string }?,
+
+  element persistence-context-type { string }?,
+
+  element persistence-property { javaee_property-Type }*,
+
+  javaee_resource-Group
+}
+
+javaee_persistence-unit-ref = element persistence-unit-ref {
+  attribute id { string }?,
+
+  javaee_description*,
+
+  element persistence-unit-ref-name { string },
+
+  element persistence-unit-name { string }?,
+
+  javaee_resource-Group
+}
+
+javaee_post-construct = element post-construct {
+  javaee_lifecycle-callback-Type
+}
+
+javaee_pre-destroy = element pre-destroy {
+  javaee_lifecycle-callback-Type
+}
+
+javaee_property-Type =
+  attribute id { string }?,
+
+  element name { string },
+
+  element value { string }
+
 javaee_remote = element remote {
   javaee_fully-qualified-class
 }
@@ -231,6 +297,11 @@ javaee_res-sharing-scope = element res-sharing-scope {
 javaee_res-type = element res-type {
   javaee_fully-qualified-class
 }
+
+javaee_resource-Group =
+  javaee_mapped-name?,
+
+  javaee_injection-target*
 
 javaee_resource-env-ref = element resource-env-ref {
   attribute id { string }?,

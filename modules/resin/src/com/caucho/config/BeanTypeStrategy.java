@@ -140,9 +140,12 @@ public class BeanTypeStrategy extends TypeStrategy {
   public Object create()
     throws Exception
   {
-    Object bean = _type.newInstance();
-
-    return bean;
+    try {
+      return _type.newInstance();
+    } catch (InstantiationException e) {
+      throw new ConfigException(L.l("Can't instantiate '{0}'.",
+				    _type.getName()), e);
+    }
   }
 
   /**

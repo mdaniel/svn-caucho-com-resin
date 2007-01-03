@@ -8,6 +8,8 @@ include "../resin/javaee.rnc"
 javaee15_application-client = element application-client {
   attribute id { string }?,
 
+  attribute metadata-complete { string }?,
+
   attribute version { string },
 
   attribute xsi:schemaLocation { string },

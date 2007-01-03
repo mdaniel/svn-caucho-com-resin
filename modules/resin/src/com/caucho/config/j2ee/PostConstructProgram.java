@@ -47,9 +47,10 @@ public class PostConstructProgram extends BuilderProgram
 
   private Method _init;
 
-  PostConstructProgram(Method init)
+  public PostConstructProgram(Method init)
   {
     _init = init;
+    _init.setAccessible(true);
   }
 
   @Override
