@@ -52,7 +52,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Configuration for a rewrite-url
+ * Configuration for a rewrite-dispatch
  */
 public class RewriteInvocation {
   private static final L10N L = new L10N(RewriteInvocation.class);
@@ -195,7 +195,38 @@ public class RewriteInvocation {
     return null;
   }
 
-  static class Program {
+  abstract static class Program {
+    private final Logger _log;
+    private final boolean _isFiner;
+    private final boolean _isFinest;
+
+    protected Program(Logger log)
+    {
+      _log = log;
+      _isFiner = log.isLoggable(Level.FINER);
+      _isFinest = log.isLoggable(Level.FINEST);
+    }
+
+    abstract public String getTagName();
+
+    final protected void logMatch(Pattern regexp, String uri)
+    {
+      if (_isFiner)
+        _log.finer(getTagName() + " " + regexp.pattern() + ": '" + uri + "'  match");
+    }
+
+    final protected void logMatch(Pattern regexp, String uri, String targetUri)
+    {
+      if (_isFiner)
+        log.finer(getTagName() + " " + regexp.pattern() + ": '" + uri + "'  -->  '" + targetUri + "'");
+    }
+
+    final protected void logNoMatch(Pattern regexp, String uri)
+    {
+      if (_isFinest)
+        _log.finest(getTagName() + " " + regexp.pattern() + ": '" + uri + "'  no match");
+    }
+
     public String rewrite(String uri)
     {
       return uri;
@@ -209,9 +240,17 @@ public class RewriteInvocation {
   }
 
   public static class Rewrite extends Program {
+    private static final Logger log = Logger.getLogger(Rewrite.class.getName());
+
     private Pattern _regexp;
     private String _replacement;
 
+    public Rewrite()
+    {
+      super(log);
+    }
+
+    @Override
     public String getTagName()
     {
       return "rewrite";
@@ -247,23 +286,39 @@ public class RewriteInvocation {
 	throw new ConfigException(L.l("{0} needs 'replacement' attribute.",
 				      getTagName()));
     }
-    
+
+    @Override
     public String rewrite(String uri)
     {
       Matcher matcher = _regexp.matcher(uri);
 
       if (matcher.find()) {
 	matcher.reset();
-	return matcher.replaceAll(_replacement);
+	String targetUri =  matcher.replaceAll(_replacement);
+
+        logMatch(_regexp, uri, targetUri);
+
+        return targetUri;
       }
-      else
-	return uri;
+      else {
+        logNoMatch(_regexp, uri);
+
+        return uri;
+      }
     }
   }
 
   public static class Accept extends Program {
+    private static final Logger log = Logger.getLogger(Accept.class.getName());
+
     private Pattern _regexp;
 
+    public Accept()
+    {
+      super(log);
+    }
+
+    @Override
     public String getTagName()
     {
       return "accept";
@@ -289,20 +344,40 @@ public class RewriteInvocation {
 				      getTagName()));
     }
 
+    @Override
     public FilterChain dispatch(String uri)
     {
       Matcher matcher = _regexp.matcher(uri);
 
-      if (matcher.find())
-	return ACCEPT_CHAIN;
-      else
-	return null;
+      if (matcher.find()) {
+        logMatch(_regexp, uri);
+
+        return ACCEPT_CHAIN;
+      }
+      else {
+        logNoMatch(_regexp, uri);
+
+        return null;
+      }
     }
   }
 
   public static class Redirect extends Program {
+    private static final Logger log = Logger.getLogger(Redirect.class.getName());
+
     private String _target;
     private Pattern _regexp;
+
+    public Redirect()
+    {
+      super(log);
+    }
+
+    @Override
+    public String getTagName()
+    {
+      return "redirect";
+    }
 
     /**
      * Sets the regular expression.
@@ -317,18 +392,24 @@ public class RewriteInvocation {
       _target = target;
     }
 
+    @Override
     public FilterChain dispatch(String uri)
     {
       Matcher matcher = _regexp.matcher(uri);
 
       if (matcher.find()) {
-	matcher.reset();
-	uri = matcher.replaceAll(_target);
+        matcher.reset();
+        String targetUri = matcher.replaceAll(_target);
 
-	return new RedirectFilterChain(uri);
+        logMatch(_regexp, uri, targetUri);
+
+        return new RedirectFilterChain(targetUri);
       }
-      else
-	return null;
+      else {
+        logNoMatch(_regexp, uri);
+
+        return null;
+      }
     }
 
     @PostConstruct
@@ -343,10 +424,24 @@ public class RewriteInvocation {
   }
 
   public static class Moved extends Program {
+    private static final Logger log = Logger.getLogger(Moved.class.getName());
+
     private int _code = 302;
-    
+
+    private String _tagName = "moved";
     private String _target;
     private Pattern _regexp;
+
+    public Moved()
+    {
+      super(log);
+    }
+
+    @Override
+    public String getTagName()
+    {
+      return _tagName;
+    }
 
     /**
      * Sets the regular expression.
@@ -369,18 +464,23 @@ public class RewriteInvocation {
       _code = code;
     }
 
+    @Override
     public FilterChain dispatch(String uri)
     {
       Matcher matcher = _regexp.matcher(uri);
 
       if (matcher.find()) {
 	matcher.reset();
-	uri = matcher.replaceAll(_target);
+	String targetUri = matcher.replaceAll(_target);
 
-	return new MovedFilterChain(_code, uri);
+        logMatch(_regexp, uri, targetUri);
+
+        return new MovedFilterChain(_code, targetUri);
       }
-      else
+      else {
+        logNoMatch(_regexp, uri);
 	return null;
+      }
     }
 
     @PostConstruct
@@ -391,10 +491,14 @@ public class RewriteInvocation {
 	throw new ConfigException(L.l("moved needs 'regexp' attribute."));
       if (_target == null)
 	throw new ConfigException(L.l("moved needs 'target' attribute."));
+
+      _tagName = "moved(" + _code + ")";
     }
   }
 
   public static class LoadBalance extends Program {
+    private static final Logger log = Logger.getLogger(LoadBalance.class.getName());
+
     private final WebApp _webApp;
     
     private Pattern _regexp;
@@ -404,7 +508,14 @@ public class RewriteInvocation {
 
     LoadBalance(WebApp webApp)
     {
+      super(log);
       _webApp = webApp;
+    }
+
+    @Override
+    public String getTagName()
+    {
+      return "load-balance";
     }
 
     /**
@@ -420,16 +531,20 @@ public class RewriteInvocation {
       _program.addProgram(program);
     }
 
+    @Override
     public FilterChain dispatch(String uri)
       throws ServletException
     {
       Matcher matcher = _regexp.matcher(uri);
 
       if (matcher.find()) {
-	return _servlet.createServletChain();
+        logMatch(_regexp, uri);
+        return _servlet.createServletChain();
       }
-      else
+      else {
+        logNoMatch(_regexp, uri);
 	return null;
+      }
     }
 
     @PostConstruct
@@ -457,9 +572,22 @@ public class RewriteInvocation {
     }
   }
 
-  public class Forward extends Program {
+  public static class Forward extends Program {
+    private static final Logger log = Logger.getLogger(Forward.class.getName());
+
     private String _target;
     private Pattern _regexp;
+
+    public Forward()
+    {
+      super(log);
+    }
+
+    @Override
+    public String getTagName()
+    {
+      return "forward";
+    }
 
     /**
      * Sets the regular expression.
@@ -474,6 +602,7 @@ public class RewriteInvocation {
       _target = target;
     }
 
+    @Override
     public FilterChain dispatch(String uri)
     {
       Matcher matcher = _regexp.matcher(uri);
@@ -483,12 +612,14 @@ public class RewriteInvocation {
 	
 	String targetUri = matcher.replaceAll(_target);
 
-	FilterChain chain = new ForwardFilterChain(targetUri);
+        logMatch(_regexp, uri, targetUri);
 
-	return chain;
+        return new ForwardFilterChain(targetUri);
       }
-      else
-	return null;
+      else {
+        logNoMatch(_regexp, uri);
+        return null;
+      }
     }
 
     @PostConstruct
@@ -503,12 +634,23 @@ public class RewriteInvocation {
   }
 
   public static class Error extends Program {
-    private int _code;
+    private static final Logger log = Logger.getLogger(Error.class.getName());
+
+    private final String _tagName;
+    private final int _code;
     private Pattern _regexp;
 
     Error(int code)
     {
+      super(log);
       _code = code;
+      _tagName = "error(" + _code + ")";
+    }
+
+    @Override
+    public String getTagName()
+    {
+      return _tagName;
     }
 
     /**
@@ -519,6 +661,7 @@ public class RewriteInvocation {
       _regexp = Pattern.compile(regexp);
     }
 
+    @Override
     public FilterChain dispatch(String uri)
     {
       Matcher matcher = _regexp.matcher(uri);
@@ -526,10 +669,14 @@ public class RewriteInvocation {
       if (matcher.find()) {
 	matcher.reset();
 
-	return new ErrorFilterChain(_code);
+        logMatch(_regexp, uri);
+
+        return new ErrorFilterChain(_code);
       }
-      else
+      else {
+        logNoMatch(_regexp, uri);
 	return null;
+      }
     }
 
     @PostConstruct

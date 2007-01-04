@@ -341,6 +341,25 @@ element rewrite-dispatch {
 
 </defun>
 
+<s1 title="Logging and Debugging">
+<p>
+Logging for the name <code>com.caucho.server.webapp.RewriteInvocation</code>
+at the "finer" level reveals successful matches.  At the "finest" level both
+successful and unsuccessful matches are logged.
+</p>
+
+<example>
+&lt;logger name="com.caucho.server.webapp.RewriteInvocation" level="finest"/&gt;
+</example>
+
+<results>
+[1998/05/08 02:51:31.000] forward ^/foo: '/baz/test.jsp'  no match
+[1998/05/08 02:51:31.000] forward ^/bar: '/baz/test.jsp'  no match
+[1998/05/08 02:51:31.000] forward ^/baz: '/baz/test.jsp'  -->  '/hogwarts/test.jsp'
+</results>
+
+</s1>
+
 </body>
 
 </document>
