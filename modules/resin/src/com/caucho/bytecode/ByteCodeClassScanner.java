@@ -121,8 +121,8 @@ public class ByteCodeClassScanner {
 
       return false;
     } catch (Throwable e) {
-      log.warning("failed scanning class " + _className);
-      log.log(Level.WARNING, e.toString(), e);
+      log.fine("failed scanning class " + _className);
+      log.log(Level.FINE, e.toString(), e);
 
       return false;
     }
@@ -409,7 +409,7 @@ public class ByteCodeClassScanner {
       }
       break;
     default:
-      throw new IllegalStateException();
+      throw new IllegalStateException("unknown code " + (char) code);
     }
   }
 

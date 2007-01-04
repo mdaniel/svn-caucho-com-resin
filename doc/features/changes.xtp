@@ -4,6 +4,7 @@
 
 <s2 title="3.0snap - Oct 6, 2006">
 <ul>
+<li>ByteCodeClassScanner should only give FINE warnings for scanned classes (#1534, rep by R Dredge)</li>
 <li>JSP jsp:forward wasn't picking up EL (#1453, rep by Katrin Kippert)</li>
 <li>EJB: return type not properly calculated for select (#1303, rep by Andrew Barton)</li>
 <li>getServerPort not properly calculated with virtual-host (#1509, rep by justinwcs)</li>
