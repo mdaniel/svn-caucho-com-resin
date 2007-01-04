@@ -791,9 +791,15 @@ public class EJBServer
   }
 
   /**
-   * Return the server for a given path and ejbName
-   *
-   * @param path the archive-path or expand-path of a module
+   * Return the ejb with the passed name.
+   */
+  public AbstractServer getServer(String ejbName)
+  {
+    return _ejbManager.getServer(ejbName);
+  }
+
+  /**
+   * Return the ejb with the passed path and name.
    */
   public AbstractServer getServer(Path path, String ejbName)
     throws NameNotFoundException

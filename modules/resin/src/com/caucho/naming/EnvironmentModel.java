@@ -29,11 +29,12 @@
 
 package com.caucho.naming;
 
+import com.caucho.util.L10N;
+
 import javax.naming.NamingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import com.caucho.util.*;
 
 /**
  * Environment based model for JNDI.
@@ -61,7 +62,7 @@ public class EnvironmentModel extends AbstractModel
   }
 
   /**
-   * Creates a new instance of MemoryModel.
+   * Creates a new instance of EnvironmentModel.
    */
   protected AbstractModel create()
   {

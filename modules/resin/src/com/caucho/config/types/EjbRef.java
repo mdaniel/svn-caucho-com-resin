@@ -56,6 +56,8 @@ public class EjbRef implements ObjectProxy {
   private static final Logger log
     = Logger.getLogger(EjbRef.class.getName());
 
+  private final Path _modulePath;
+
   private String _ejbRefName;
   private String _type;
   private Class _home;
@@ -67,6 +69,12 @@ public class EjbRef implements ObjectProxy {
 
   public EjbRef()
   {
+    _modulePath = Vfs.getPwd();
+  }
+
+  public EjbRef(Path modulePath)
+  {
+    _modulePath = modulePath;
   }
 
   protected String getTagName()
@@ -263,9 +271,12 @@ public class EjbRef implements ObjectProxy {
       }
 
       try {
-        Path path = archiveName == null ? Vfs.getPwd() : Vfs.lookup(archiveName);
+        Path path = archiveName == null ? _modulePath : _modulePath.lookup(archiveName);
 
         AbstractServer server = EJBServer.getLocal().getServer(path, ejbName);
+
+        if (server == null && archiveName == null)
+          server = EJBServer.getLocal().getServer(ejbName);
 
         if (server == null) {
           if (_ejbLink.equals(_ejbRefName))

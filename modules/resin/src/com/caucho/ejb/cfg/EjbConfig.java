@@ -45,8 +45,8 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
+import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -126,16 +126,28 @@ public class EjbConfig {
     
     Environment.addDependency(path);
 
-    String ejbModuleName = ejbModulePath.getPath();
+    String ejbModuleName;
+
+    if (path instanceof JarPath) {
+      ejbModuleName = ((JarPath) path).getContainer().getPath();
+    }
+    else {
+      ejbModuleName = path.getPath();
+    }
+
+    /* XXX: ejb/0g7a requires full path for module name
     String pwd = Vfs.getPwd().getPath();
 
     if (ejbModuleName.startsWith(pwd))
       ejbModuleName = ejbModuleName.substring(pwd.length());
-    
+
+    if (ejbModuleName.startsWith("/"))
+      ejbModuleName = ejbModuleName.substring(1);
+    */
+
     if (_ejbManager != null)
       _ejbManager.addEJBModule(ejbModuleName);
 
-    // XXX: merge?
     EjbJar ejbJar = new EjbJar(this, ejbModuleName);
 
     try {

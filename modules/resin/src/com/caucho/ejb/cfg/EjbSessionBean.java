@@ -29,7 +29,9 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.bytecode.*;
+import com.caucho.bytecode.JAnnotation;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
@@ -50,7 +52,6 @@ import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 /**
@@ -250,6 +251,7 @@ public class EjbSessionBean extends EjbBean {
     else
       server = new SessionServer(ejbManager);
 
+    server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());
     server.setRemoteName(getRemoteName());
 

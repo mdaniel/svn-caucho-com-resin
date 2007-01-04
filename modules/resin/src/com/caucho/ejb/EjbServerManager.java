@@ -667,9 +667,15 @@ public class EjbServerManager
   }
 
   /**
-   * Return the jndi name for an ejb.
-   *
-   * @param path the archive-path or expand-path of a module
+   * Return the ejb with the passed name.
+   */
+  public AbstractServer getServer(String ejbName)
+  {
+    return _envServerManager.getServer(ejbName);
+  }
+
+  /**
+   * Return the ejb with the passed path and name.
    */
   public AbstractServer getServer(Path path, String ejbName)
   {

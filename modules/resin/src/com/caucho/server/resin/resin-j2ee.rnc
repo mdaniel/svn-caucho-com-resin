@@ -45,11 +45,11 @@ r_ejb-local-ref = element ejb-local-ref {
 
   r_jndi-name?,
 
-  r_ejb-ref-type,
+  r_ejb-ref-type?,
 
-  r_local-home,
+  r_local-home?,
 
-  r_local,
+  r_local?,
 
   r_ejb-link?,
 

@@ -37,6 +37,7 @@ import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.PostConstructType;
+import com.caucho.config.types.EjbRef;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.amber.AmberConfig;
@@ -58,6 +59,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
@@ -682,6 +684,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public long getTransactionTimeout()
   {
     return _transactionTimeout;
+  }
+
+  public EjbRef createEjbRef()
+  {
+    return new EjbRef(Vfs.lookup(_ejbModuleName));
   }
 
   /**

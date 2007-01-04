@@ -86,11 +86,14 @@ public class EjbMessageBean extends EjbBean {
   /**
    * Sets the ejb implementation class.
    */
-  public void setEJBClass(Class ejbClass)
+  @Override
+  public void setEJBClass(String ejbType)
     throws ConfigException
   {
-    super.setEJBClass(ejbClass);
+    super.setEJBClass(ejbType);
 
+    Class ejbClass = getEJBClass();
+    
     if (! MessageListener.class.isAssignableFrom(ejbClass))
       throw error(L.l("'{0}' must implement javax.jms.MessageListener.  Every message-driven bean must implement MessageListener.", ejbClass.getName()));
 
@@ -303,6 +306,7 @@ public class EjbMessageBean extends EjbBean {
   {
     MessageServer server = new MessageServer(ejbManager);
 
+    server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());
 
     //Class contextImplClass = javaGen.loadClass(getSkeletonName());

@@ -65,6 +65,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   private static final L10N L = new L10N(AbstractServer.class);
 
   protected String _ejbName;
+  protected String _moduleName;
   protected String _serverId;
   protected String _handleServerId;
 
@@ -119,10 +120,12 @@ abstract public class AbstractServer implements EnvironmentBean {
     _loader = new EnvironmentClassLoader(manager.getClassLoader());
   }
 
+  /**
+   * Returns the id, module-path#ejb-name.
+   */
   public String getId()
   {
-    // XXX: s/b  module-path#ejb-name
-    return getEJBName();
+    return "" + getModuleName() + "#" + getEJBName();
   }
   
   /**
@@ -139,6 +142,22 @@ abstract public class AbstractServer implements EnvironmentBean {
   public String getEJBName()
   {
     return _ejbName;
+  }
+
+  /**
+   * Set's the module that defined this ejb.
+   */
+  public void setModuleName(String moduleName)
+  {
+    _moduleName = moduleName;
+  }
+
+  /**
+   * Returns's the module that defined this ejb.
+   */
+  public String getModuleName()
+  {
+    return _moduleName;
   }
 
   /**

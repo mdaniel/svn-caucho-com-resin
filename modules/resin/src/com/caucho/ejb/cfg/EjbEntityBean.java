@@ -125,10 +125,13 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Sets the ejb implementation class.
    */
-  public void setEJBClass(Class ejbClass)
+  @Override
+  public void setEJBClass(String ejbType)
     throws ConfigException
   {
-    super.setEJBClass(ejbClass);
+    super.setEJBClass(ejbType);
+
+    Class ejbClass = getEJBClass();
 
     if (! EntityBean.class.isAssignableFrom(ejbClass) && ! isAllowPOJO())
       throw error(L.l("`{0}' must implement EntityBean.  Entity beans must implement javax.ejb.EntityBean.", ejbClass.getName()));
@@ -1037,10 +1040,10 @@ public class EjbEntityBean extends EjbBean {
   {
     EntityServer server = new EntityServer(ejbManager);
 
+    server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());
     server.setRemoteName(getRemoteName());
 
-    // XXX: obsolete?
     server.setJndiName(getJndiName());
 
     server.setRemoteHomeClass(getRemoteHomeClass());

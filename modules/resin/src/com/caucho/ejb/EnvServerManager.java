@@ -387,7 +387,7 @@ public class EnvServerManager implements EnvironmentListener {
    */
   public void addServer(AbstractServer server)
   {
-    _serverMap.put(server.getEJBName(), server);
+    _serverMap.put(server.getId(), server);
 
     try {
       _protocolManager.addServer(server);
@@ -398,15 +398,25 @@ public class EnvServerManager implements EnvironmentListener {
 
 
   /**
-   * Returns the server specified by the serverId.
+   * Returns the server specified by the ejbName, or null if not found.
+   */
+  public AbstractServer getServer(String ejbName)
+  {
+    for  (AbstractServer server : _serverMap.values()) {
+      if (server.getEJBName().equals(ejbName)) {
+        return server;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the server specified by the path and ejbName, or null if not found.
    */
   public AbstractServer getServer(Path path, String ejbName)
   {
-    // XXX: incorrect, need to use path
-
-    AbstractServer server =  _serverMap.get(ejbName);
-
-    return server;
+    return _serverMap.get(path.getPath() + "#" + ejbName);
    }
 
    /**
