@@ -169,12 +169,7 @@ public class EntityMappingsConfig {
   {
     String className = entity.getClassName();
 
-    // jpa/0s2d
-    if ((_package == null) || className.startsWith(_package + "."))
-      _entityMap.put(entity.getClassName(), entity);
-    else
-      _entityMap.put(_package + "." + entity.getClassName(),
-                     entity);
+    addInternalClass(_entityMap, className, entity);
   }
 
   /**
@@ -270,7 +265,9 @@ public class EntityMappingsConfig {
 
   public void addMappedSuperclass(MappedSuperclassConfig mappedSuperclass)
   {
-    _mappedSuperclassMap.put(mappedSuperclass.getClassName(), mappedSuperclass);
+    String className = mappedSuperclass.getClassName();
+
+    addInternalClass(_mappedSuperclassMap, className, mappedSuperclass);
   }
 
   public MappedSuperclassConfig getMappedSuperclass(String name)
@@ -285,7 +282,9 @@ public class EntityMappingsConfig {
 
   public void addEmbeddable(EmbeddableConfig embeddable)
   {
-    _embeddableMap.put(embeddable.getClassName(), embeddable);
+    String className = embeddable.getClassName();
+
+    addInternalClass(_embeddableMap, className, embeddable);
   }
 
   public EmbeddableConfig getEmbeddable(String name)
@@ -296,6 +295,17 @@ public class EntityMappingsConfig {
   public HashMap<String, EmbeddableConfig> getEmbeddableMap()
   {
     return _embeddableMap;
+  }
+
+  private void addInternalClass(HashMap map,
+                                String className,
+                                Object config)
+  {
+    // jpa/0s2d, jpa/0ge5
+    if ((_package == null) || className.startsWith(_package + "."))
+      map.put(className, config);
+    else
+      map.put(_package + "." + className, config);
   }
 
   public String toString()

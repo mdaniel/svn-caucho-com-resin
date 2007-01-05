@@ -54,11 +54,13 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -276,6 +278,14 @@ abstract public class RelatedType extends AbstractStatefulType {
   public Class getInstanceClass()
   {
     return getInstanceClass(Entity.class);
+  }
+
+  /**
+   * Returns true if the corresponding class is abstract.
+   */
+  public boolean isAbstractClass()
+  {
+    return getBeanClass().isAbstract();
   }
 
   /**
@@ -637,9 +647,13 @@ abstract public class RelatedType extends AbstractStatefulType {
     // forces table lazy load
     getTable();
 
-    assert getId() != null : "null id for " + getName();
+    log.log(Level.FINE, "RelatedType.init() has id? " + (getId() != null));
 
-    getId().init();
+    if (this instanceof EntityType) {
+      assert getId() != null : "null id for " + getName();
+
+      getId().init();
+    }
 
     for (AmberField field : getFields()) {
       if (field.isUpdateable())

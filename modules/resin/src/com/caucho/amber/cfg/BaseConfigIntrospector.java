@@ -711,7 +711,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                           RelatedType parentType,
                           JClass type,
                           JClass idClass,
-                          EntityConfig entityConfig)
+                          MappedSuperclassConfig config)
     throws ConfigException, SQLException
   {
     ArrayList<IdField> keys = new ArrayList<IdField>();
@@ -720,8 +720,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     AttributesConfig attributesConfig = null;
 
-    if (entityConfig != null)
-      attributesConfig = entityConfig.getAttributes();
+    if (config != null)
+      attributesConfig = config.getAttributes();
 
     for (JMethod method : type.getMethods()) {
       String methodName = method.getName();
@@ -803,15 +803,15 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                          RelatedType parentType,
                          JClass type,
                          JClass idClass,
-                         EntityConfig entityConfig)
+                         MappedSuperclassConfig config)
     throws ConfigException, SQLException
   {
     ArrayList<IdField> keys = new ArrayList<IdField>();
 
     AttributesConfig attributesConfig = null;
 
-    if (entityConfig != null)
-      attributesConfig = entityConfig.getAttributes();
+    if (config != null)
+      attributesConfig = config.getAttributes();
 
     for (JField field : type.getFields()) {
       String fieldName = field.getName();
@@ -823,16 +823,14 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       JAnnotation id = _annotationCfg.getAnnotation();
       IdConfig idConfig = _annotationCfg.getIdConfig();
 
-      boolean hasId = ! _annotationCfg.isNull();
+      if (_annotationCfg.isNull()) {
+        getInternalEmbeddedIdConfig(type, field, fieldName);
+        JAnnotation embeddedId = _annotationCfg.getAnnotation();
+        EmbeddedIdConfig embeddedIdConfig = _annotationCfg.getEmbeddedIdConfig();
 
-      getInternalEmbeddedIdConfig(type, field, fieldName);
-      JAnnotation embeddedId = _annotationCfg.getAnnotation();
-      EmbeddedIdConfig embeddedIdConfig = _annotationCfg.getEmbeddedIdConfig();
-
-      boolean hasEmbeddedId = ! _annotationCfg.isNull();
-
-      if (! (hasId || hasEmbeddedId))
-        continue;
+        if (_annotationCfg.isNull())
+          continue;
+      }
 
       IdField idField = introspectId(persistenceUnit,
                                      entityType,
@@ -1324,15 +1322,12 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     throws ConfigException
   {
     EmbeddableConfig embeddableConfig = null;
-    EntityConfig entityConfig = null;
-    MappedSuperclassConfig mappedSuperConfig = null;
+    MappedSuperclassConfig mappedSuperOrEntityConfig = null;
 
     if (typeConfig instanceof EmbeddableConfig)
       embeddableConfig = (EmbeddableConfig) typeConfig;
-    else if (typeConfig instanceof EntityConfig)
-      entityConfig = (EntityConfig) typeConfig;
     else if (typeConfig instanceof MappedSuperclassConfig)
-      mappedSuperConfig = (MappedSuperclassConfig) typeConfig;
+      mappedSuperOrEntityConfig = (MappedSuperclassConfig) typeConfig;
 
     // jpa/0r37: interface fields must not be considered.
 
@@ -1366,8 +1361,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     ManyToManyConfig manyToManyConfig = null;
     VersionConfig versionConfig = null;
 
-    if (entityConfig != null) {
-      attributesConfig = entityConfig.getAttributes();
+    if (mappedSuperOrEntityConfig != null) {
+      attributesConfig = mappedSuperOrEntityConfig.getAttributes();
 
       if (attributesConfig != null) {
         idConfig = attributesConfig.getId(fieldName);
@@ -2610,12 +2605,14 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         if (joinTableAnn != null) {
           if (! joinTableAnn.getString("name").equals(""))
             sqlTable = joinTableAnn.getString("name");
+
           joinColumns = (Object []) joinTableAnn.get("joinColumns");
           inverseJoinColumns = (Object []) joinTableAnn.get("inverseJoinColumns");
         }
         else {
           if (! joinTableConfig.getName().equals(""))
             sqlTable = joinTableConfig.getName();
+
           joinColumnsConfig = joinTableConfig.getJoinColumnMap();
           inverseJoinColumnsConfig = joinTableConfig.getInverseJoinColumnMap();
         }
@@ -2978,7 +2975,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     void complete()
       throws ConfigException
     {
-      getInternalAttributeOverrideConfig(_relatedType.getBeanClass(), _field, _fieldName);
+      getInternalAttributeOverrideConfig(_relatedType.getBeanClass());
       JAnnotation attributeOverrideAnn = _annotationCfg.getAnnotation();
       AttributeOverrideConfig attributeOverrideConfig = _annotationCfg.getAttributeOverrideConfig();
 
@@ -3122,27 +3119,66 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     {
       getInternalAttributeOverrideConfig(_type);
       JAnnotation attributeOverrideAnn = _annotationCfg.getAnnotation();
-      AttributeOverrideConfig attributeOverrideConfig
-        = _annotationCfg.getAttributeOverrideConfig();
 
-      boolean hasAttributeOverride = ! _annotationCfg.isNull();
+      boolean hasAttributeOverride = (attributeOverrideAnn != null);
 
       JAnnotation attributeOverridesAnn
         = _type.getAnnotation(AttributeOverrides.class);
 
-      boolean hasAttributeOverrides = (attributeOverridesAnn != null);
+      ArrayList<AttributeOverrideConfig> attributeOverrideList = null;
+
+      if (_entityConfigMap != null) {
+        EntityConfig entityConfig = _entityConfigMap.get(_type.getName());
+
+        if (entityConfig != null)
+          attributeOverrideList = entityConfig.getAttributeOverrideList();
+      }
+
+      boolean hasAttributeOverrides = false;
+
+      if ((attributeOverrideList != null) &&
+          (attributeOverrideList.size() > 0)) {
+        hasAttributeOverrides = true;
+      }
+      else if (attributeOverridesAnn != null)
+        hasAttributeOverrides = true;
 
       if (hasAttributeOverride && hasAttributeOverrides)
         throw new ConfigException(L.l("{0} may not have both @AttributeOverride and @AttributeOverrides",
                                       _type));
 
-      Object attOverridesAnn[] = null;
+      if (hasAttributeOverride) {
+        attributeOverrideList = new ArrayList<AttributeOverrideConfig>();
 
-      if (attributeOverrideAnn != null) {
-        attOverridesAnn = new Object[] { attributeOverrideAnn };
+        // Convert annotation to configuration.
+
+        AttributeOverrideConfig attOverrideConfig
+          = convertAttributeOverrideAnnotationToConfig(attributeOverrideAnn);
+
+        attributeOverrideList.add(attOverrideConfig);
       }
-      else if (attributeOverridesAnn != null) {
-        attOverridesAnn = (Object []) attributeOverridesAnn.get("value");
+      else if (hasAttributeOverrides) {
+        if ((attributeOverrideList != null) &&
+            (attributeOverrideList.size() > 0)) {
+          // OK: attributeOverrideList came from orm.xml
+        }
+        else {
+          // Convert annotations to configurations.
+
+          attributeOverrideList = new ArrayList<AttributeOverrideConfig>();
+
+          Object attOverridesAnn[]
+            = (Object []) attributeOverridesAnn.get("value");
+
+          AttributeOverrideConfig attOverrideConfig;
+
+          for (int i = 0; i < attOverridesAnn.length; i++) {
+            attOverrideConfig
+              = convertAttributeOverrideAnnotationToConfig((JAnnotation) attOverridesAnn[i]);
+
+            attributeOverrideList.add(attOverrideConfig);
+          }
+        }
       }
       else
         return;
@@ -3151,9 +3187,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       RelatedType parent = _relatedType.getParentType();
 
-      for (int i = 0; i < attOverridesAnn.length; i++) {
+      for (int i = 0; i < attributeOverrideList.size(); i++) {
 
-        JAnnotation attOverrideAnn = (JAnnotation) attOverridesAnn[i];
+        AttributeOverrideConfig attOverrideConfig
+          = attributeOverrideList.get(i);
 
         String entityFieldName;
         String columnName;
@@ -3185,14 +3222,14 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
           columnName = toSqlName(entityFieldName);
 
-          if (entityFieldName.equals(attOverrideAnn.getString("name"))) {
+          if (entityFieldName.equals(attOverrideConfig.getName())) {
 
-            JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
+            ColumnConfig columnConfig = attOverrideConfig.getColumn();
 
-            if (columnAnn != null) {
-              columnName = columnAnn.getString("name");
-              notNull = ! columnAnn.getBoolean("nullable");
-              unique = columnAnn.getBoolean("unique");
+            if (columnConfig != null) {
+              columnName = columnConfig.getName();
+              notNull = ! columnConfig.getNullable();
+              unique = columnConfig.getUnique();
               amberType = _persistenceUnit.createType(field.getJavaType().getName());
 
               Column column = sourceTable.createColumn(columnName, amberType);
@@ -3223,14 +3260,14 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
             columnName = toSqlName(entityFieldName);
 
-            if (entityFieldName.equals(attOverrideAnn.getString("name"))) {
+            if (entityFieldName.equals(attOverrideConfig.getName())) {
 
-              JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
+              ColumnConfig columnConfig = attOverrideConfig.getColumn();
 
-              if (columnAnn != null) {
-                columnName = columnAnn.getString("name");
-                notNull = ! columnAnn.getBoolean("nullable");
-                unique = columnAnn.getBoolean("unique");
+              if (columnConfig != null) {
+                columnName = columnConfig.getName();
+                notNull = ! columnConfig.getNullable();
+                unique = columnConfig.getUnique();
                 amberType = _persistenceUnit.createType(field.getJavaType().getName());
 
                 Column column = sourceTable.createColumn(columnName, amberType);
@@ -3320,12 +3357,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, ExcludeDefaultListeners.class);
 
-    if (_entityConfigMap == null)
-      return;
-
-    EntityConfig entityConfig;
-
-    entityConfig = _entityConfigMap.get(type.getName());
+    MappedSuperclassConfig entityConfig
+      = getInternalMappedSuperclassOrEntityConfig(type.getName());
 
     if (entityConfig == null)
       return;
@@ -3338,12 +3371,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, ExcludeSuperclassListeners.class);
 
-    if (_entityConfigMap == null)
-      return;
-
-    EntityConfig entityConfig;
-
-    entityConfig = _entityConfigMap.get(type.getName());
+    MappedSuperclassConfig entityConfig
+      = getInternalMappedSuperclassOrEntityConfig(type.getName());
 
     if (entityConfig == null)
       return;
@@ -3440,14 +3469,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, IdClass.class);
 
-    EntityConfig entityConfig = null;
+    MappedSuperclassConfig entityConfig
+      = getInternalMappedSuperclassOrEntityConfig(type.getName());
 
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    if (entityConfig == null)
+      return;
 
-    if (entityConfig != null) {
-      _annotationCfg.setConfig(entityConfig.getIdClass());
-    }
+    _annotationCfg.setConfig(entityConfig.getIdClass());
   }
 
   void getInternalPrimaryKeyJoinColumnConfig(JClass type)
@@ -3484,20 +3512,18 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(field, OneToOne.class);
 
-    EntityConfig entityConfig = null;
+    MappedSuperclassConfig entityConfig
+      = getInternalMappedSuperclassOrEntityConfig(type.getName());
 
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    if (entityConfig == null)
+      return;
 
-    if (entityConfig != null) {
+    AttributesConfig attributes = entityConfig.getAttributes();
 
-      AttributesConfig attributes = entityConfig.getAttributes();
+    if (attributes != null) {
+      OneToOneConfig oneToOne = attributes.getOneToOne(fieldName);
 
-      if (attributes != null) {
-        OneToOneConfig oneToOne = attributes.getOneToOne(fieldName);
-
-        _annotationCfg.setConfig(oneToOne);
-      }
+      _annotationCfg.setConfig(oneToOne);
     }
   }
 
@@ -3507,20 +3533,18 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(field, OneToMany.class);
 
-    EntityConfig entityConfig = null;
+    MappedSuperclassConfig entityConfig
+      = getInternalMappedSuperclassOrEntityConfig(type.getName());
 
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    if (entityConfig == null)
+      return;
 
-    if (entityConfig != null) {
+    AttributesConfig attributes = entityConfig.getAttributes();
 
-      AttributesConfig attributes = entityConfig.getAttributes();
+    if (attributes != null) {
+      OneToManyConfig oneToMany = attributes.getOneToMany(fieldName);
 
-      if (attributes != null) {
-        OneToManyConfig oneToMany = attributes.getOneToMany(fieldName);
-
-        _annotationCfg.setConfig(oneToMany);
-      }
+      _annotationCfg.setConfig(oneToMany);
     }
   }
 
@@ -3530,20 +3554,18 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(field, ManyToOne.class);
 
-    EntityConfig entityConfig = null;
+    MappedSuperclassConfig entityConfig
+      = getInternalMappedSuperclassOrEntityConfig(type.getName());
 
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    if (entityConfig == null)
+      return;
 
-    if (entityConfig != null) {
+    AttributesConfig attributes = entityConfig.getAttributes();
 
-      AttributesConfig attributes = entityConfig.getAttributes();
+    if (attributes != null) {
+      ManyToOneConfig manyToOne = attributes.getManyToOne(fieldName);
 
-      if (attributes != null) {
-        ManyToOneConfig manyToOne = attributes.getManyToOne(fieldName);
-
-        _annotationCfg.setConfig(manyToOne);
-      }
+      _annotationCfg.setConfig(manyToOne);
     }
   }
 
@@ -3553,20 +3575,18 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(field, ManyToMany.class);
 
-    EntityConfig entityConfig = null;
+    MappedSuperclassConfig entityConfig
+      = getInternalMappedSuperclassOrEntityConfig(type.getName());
 
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    if (entityConfig == null)
+      return;
 
-    if (entityConfig != null) {
+    AttributesConfig attributes = entityConfig.getAttributes();
 
-      AttributesConfig attributes = entityConfig.getAttributes();
+    if (attributes != null) {
+      ManyToManyConfig manyToMany = attributes.getManyToMany(fieldName);
 
-      if (attributes != null) {
-        ManyToManyConfig manyToMany = attributes.getManyToMany(fieldName);
-
-        _annotationCfg.setConfig(manyToMany);
-      }
+      _annotationCfg.setConfig(manyToMany);
     }
   }
 
@@ -3576,20 +3596,19 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(method, javax.persistence.Id.class);
 
-    EntityConfig entityConfig = null;
+    MappedSuperclassConfig mappedSuperclassOrEntityConfig
+      = getInternalMappedSuperclassOrEntityConfig(type.getName());
 
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    if (mappedSuperclassOrEntityConfig == null)
+      return;
 
-    if (entityConfig != null) {
+    AttributesConfig attributes
+      = mappedSuperclassOrEntityConfig.getAttributes();
 
-      AttributesConfig attributes = entityConfig.getAttributes();
+    if (attributes != null) {
+      IdConfig id = attributes.getId(fieldName);
 
-      if (attributes != null) {
-        IdConfig id = attributes.getId(fieldName);
-
-        _annotationCfg.setConfig(id);
-      }
+      _annotationCfg.setConfig(id);
     }
   }
 
@@ -3600,12 +3619,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(method, ListenerType.CALLBACK_CLASS[callback]);
 
-    if (_entityConfigMap == null)
-      return;
-
-    EntityConfig entityConfig;
-
-    entityConfig = _entityConfigMap.get(type.getName());
+    MappedSuperclassConfig entityConfig
+      = getInternalMappedSuperclassOrEntityConfig(type.getName());
 
     if (entityConfig == null)
       return;
@@ -3680,15 +3695,44 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     _annotationCfg.reset(field, MapKey.class);
   }
 
-  void getInternalAttributeOverrideConfig(JClass type,
-                                          JAccessibleObject field,
-                                          String fieldName)
-  {
-    _annotationCfg.reset(field, AttributeOverride.class);
-  }
-
   void getInternalAttributeOverrideConfig(JClass type)
   {
     _annotationCfg.reset(type, AttributeOverride.class);
+  }
+
+  private MappedSuperclassConfig getInternalMappedSuperclassOrEntityConfig(String name)
+  {
+    MappedSuperclassConfig mappedSuperclassConfig = null;
+
+    if (_entityConfigMap != null)
+      mappedSuperclassConfig = _entityConfigMap.get(name);
+
+    if (mappedSuperclassConfig != null)
+      return mappedSuperclassConfig;
+
+    if (_mappedSuperclassConfigMap != null)
+      mappedSuperclassConfig = _mappedSuperclassConfigMap.get(name);
+
+    return mappedSuperclassConfig;
+  }
+
+  private static AttributeOverrideConfig convertAttributeOverrideAnnotationToConfig(JAnnotation attOverrideAnn)
+  {
+    AttributeOverrideConfig attOverrideConfig
+      = new AttributeOverrideConfig();
+
+    attOverrideConfig.setName(attOverrideAnn.getString("name"));
+
+    ColumnConfig columnConfig = new ColumnConfig();
+
+    JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
+
+    columnConfig.setName(columnAnn.getString("name"));
+    columnConfig.setNullable(columnAnn.getBoolean("nullable"));
+    columnConfig.setUnique(columnAnn.getBoolean("unique"));
+
+    attOverrideConfig.setColumn(columnConfig);
+
+    return attOverrideConfig;
   }
 }

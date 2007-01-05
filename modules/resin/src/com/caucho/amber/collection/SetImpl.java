@@ -57,10 +57,12 @@ public class SetImpl<E> extends AbstractSet<E>
   {
     _aConn = aConn;
 
-    try {
-      _query = _aConn.prepareQuery(query);
-    } catch (SQLException e) {
-      throw new AmberRuntimeException(e);
+    if (_query != null) {
+      try {
+        _query = _aConn.prepareQuery(query);
+      } catch (SQLException e) {
+        throw new AmberRuntimeException(e);
+      }
     }
   }
 

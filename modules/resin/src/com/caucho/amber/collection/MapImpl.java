@@ -62,10 +62,12 @@ public class MapImpl<K, V> extends AbstractMap<K, V>
     _aConn = aConn;
     _methodGetMapKey = methodGetMapKey;
 
-    try {
-      _query = _aConn.prepareQuery(query);
-    } catch (SQLException e) {
-      throw new AmberRuntimeException(e);
+    if (query != null) {
+      try {
+        _query = _aConn.prepareQuery(query);
+      } catch (SQLException e) {
+        throw new AmberRuntimeException(e);
+      }
     }
   }
 
@@ -153,6 +155,18 @@ public class MapImpl<K, V> extends AbstractMap<K, V>
     _expireTime = 0;
   }
 
+  /**
+   * Adds an item to the collection.
+   */
+  public void putAll(Map<? extends K, ? extends V> map)
+  {
+    // jpa/0v04
+
+    fill();
+
+    _values.putAll(map);
+  }
+
   protected boolean isValid()
   {
     return Alarm.getCurrentTime() <= _expireTime;
@@ -160,6 +174,10 @@ public class MapImpl<K, V> extends AbstractMap<K, V>
 
   private void fill()
   {
+    // jpa/0v04
+    if (_query == null)
+      return;
+
     if (Alarm.getCurrentTime() <= _expireTime)
       return;
 

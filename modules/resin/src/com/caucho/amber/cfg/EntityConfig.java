@@ -29,22 +29,19 @@
 
 package com.caucho.amber.cfg;
 
+import java.util.ArrayList;
 
 /**
  * <entity> tag in the orm.xml
  */
-public class EntityConfig extends AbstractEnhancedConfig {
+public class EntityConfig extends MappedSuperclassConfig {
   // attributes
   private String _name;
-  private String _className;
-  private boolean _isMetadataComplete;
 
   // elements
-  private String _description;
   private TableConfig _table;
   private SecondaryTableConfig _secondaryTable;
   private PrimaryKeyJoinColumnConfig _primaryKeyJoinColumn;
-  private IdClassConfig _idClass;
   private InheritanceConfig _inheritance;
   private String _discriminatorValue;
   private DiscriminatorColumnConfig _discriminatorColumn;
@@ -53,35 +50,10 @@ public class EntityConfig extends AbstractEnhancedConfig {
   private NamedQueryConfig _namedQuery;
   private NamedNativeQueryConfig _namedNativeQuery;
   private SqlResultSetMappingConfig _sqlResultSetMapping;
-  private boolean _excludeDefaultListeners;
-  private boolean _excludeSuperclassListeners;
-  private EntityListenersConfig _entityListeners;
-  private PrePersistConfig _prePersist;
-  private PostPersistConfig _postPersist;
-  private PreRemoveConfig _preRemove;
-  private PostRemoveConfig _postRemove;
-  private PreUpdateConfig _preUpdate;
-  private PostUpdateConfig _postUpdate;
-  private PostLoadConfig _postLoad;
-  private AttributeOverrideConfig _attributeOverride;
-  private AssociationOverrideConfig _associationOverride;
-  private AttributesConfig _attributes;
-
-  /**
-   * Returns the attributes.
-   */
-  public AttributesConfig getAttributes()
-  {
-    return _attributes;
-  }
-
-  /**
-   * Returns the class name.
-   */
-  public String getClassName()
-  {
-    return _className;
-  }
+  private ArrayList<AttributeOverrideConfig> _attributeOverrideList
+    = new ArrayList<AttributeOverrideConfig>();
+  private ArrayList<AssociationOverrideConfig> _associationOverrideList
+    = new ArrayList<AssociationOverrideConfig>();
 
   /**
    * Returns the entity name.
@@ -92,53 +64,11 @@ public class EntityConfig extends AbstractEnhancedConfig {
   }
 
   /**
-   * Returns true if the metadata is complete.
-   */
-  public boolean isMetaDataComplete()
-  {
-    return _isMetadataComplete;
-  }
-
-  /**
-   * Sets the attributes.
-   */
-  public void setAttributes(AttributesConfig attributes)
-  {
-    _attributes = attributes;
-  }
-
-  /**
-   * Sets the class name.
-   */
-  public void addClass(String className)
-  {
-    _className = className;
-  }
-
-  /**
-   * Sets the metadata is complete (true) or not (false).
-   */
-  public void setMetaDataComplete(boolean isMetaDataComplete)
-  {
-    _isMetadataComplete = isMetaDataComplete;
-  }
-
-  /**
    * Sets the entity name.
    */
   public void setName(String name)
   {
     _name = name;
-  }
-
-  public String getDescription()
-  {
-    return _description;
-  }
-
-  public void setDescription(String description)
-  {
-    _description = description;
   }
 
   public TableConfig getTable()
@@ -149,6 +79,26 @@ public class EntityConfig extends AbstractEnhancedConfig {
   public void setTable(TableConfig table)
   {
     _table = table;
+  }
+
+  public void addAssociationOverride(AssociationOverrideConfig associationOverride)
+  {
+    _associationOverrideList.add(associationOverride);
+  }
+
+  public ArrayList<AssociationOverrideConfig> getAssociationOverrideList()
+  {
+    return _associationOverrideList;
+  }
+
+  public void addAttributeOverride(AttributeOverrideConfig attributeOverride)
+  {
+    _attributeOverrideList.add(attributeOverride);
+  }
+
+  public ArrayList<AttributeOverrideConfig> getAttributeOverrideList()
+  {
+    return _attributeOverrideList;
   }
 
   public SecondaryTableConfig getSecondaryTable()
@@ -169,16 +119,6 @@ public class EntityConfig extends AbstractEnhancedConfig {
   public void setPrimaryKeyJoinColumn(PrimaryKeyJoinColumnConfig primaryKeyJoinColumn)
   {
     _primaryKeyJoinColumn = primaryKeyJoinColumn;
-  }
-
-  public IdClassConfig getIdClass()
-  {
-    return _idClass;
-  }
-
-  public void setIdClass(IdClassConfig idClass)
-  {
-    _idClass = idClass;
   }
 
   public InheritanceConfig getInheritance()
@@ -261,128 +201,8 @@ public class EntityConfig extends AbstractEnhancedConfig {
     _sqlResultSetMapping = sqlResultSetMapping;
   }
 
-  public boolean getExcludeDefaultListeners()
-  {
-    return _excludeDefaultListeners;
-  }
-
-  public void setExcludeDefaultListeners(boolean excludeDefaultListeners)
-  {
-    _excludeDefaultListeners = excludeDefaultListeners;
-  }
-
-  public boolean getExcludeSuperclassListeners()
-  {
-    return _excludeSuperclassListeners;
-  }
-
-  public void setExcludeSuperclassListeners(boolean excludeSuperclassListeners)
-  {
-    _excludeSuperclassListeners = excludeSuperclassListeners;
-  }
-
-  public EntityListenersConfig getEntityListeners()
-  {
-    return _entityListeners;
-  }
-
-  public void setEntityListeners(EntityListenersConfig entityListeners)
-  {
-    _entityListeners = entityListeners;
-  }
-
-  public PrePersistConfig getPrePersist()
-  {
-    return _prePersist;
-  }
-
-  public void setPrePersist(PrePersistConfig prePersist)
-  {
-    _prePersist = prePersist;
-  }
-
-  public PostPersistConfig getPostPersist()
-  {
-    return _postPersist;
-  }
-
-  public void setPostPersist(PostPersistConfig postPersist)
-  {
-    _postPersist = postPersist;
-  }
-
-  public PreRemoveConfig getPreRemove()
-  {
-    return _preRemove;
-  }
-
-  public void setPreRemove(PreRemoveConfig preRemove)
-  {
-    _preRemove = preRemove;
-  }
-
-  public PostRemoveConfig getPostRemove()
-  {
-    return _postRemove;
-  }
-
-  public void setPostRemove(PostRemoveConfig postRemove)
-  {
-    _postRemove = postRemove;
-  }
-
-  public PreUpdateConfig getPreUpdate()
-  {
-    return _preUpdate;
-  }
-
-  public void setPreUpdate(PreUpdateConfig preUpdate)
-  {
-    _preUpdate = preUpdate;
-  }
-
-  public PostUpdateConfig getPostUpdate()
-  {
-    return _postUpdate;
-  }
-
-  public void setPostUpdate(PostUpdateConfig postUpdate)
-  {
-    _postUpdate = postUpdate;
-  }
-
-  public PostLoadConfig getPostLoad()
-  {
-    return _postLoad;
-  }
-
-  public void setPostLoad(PostLoadConfig postLoad)
-  {
-    _postLoad = postLoad;
-  }
-
-  public AttributeOverrideConfig getAttributeOverride()
-  {
-    return _attributeOverride;
-  }
-
-  public void setAttributeOverride(AttributeOverrideConfig attributeOverride)
-  {
-    _attributeOverride = attributeOverride;
-  }
-
-  public AssociationOverrideConfig getAssociationOverride()
-  {
-    return _associationOverride;
-  }
-
-  public void setAssociationOverride(AssociationOverrideConfig associationOverride)
-  {
-    _associationOverride = associationOverride;
-  }
-
   public String toString()
   {
-    return "EntityConfig[" + _name + ", " + _className + "]";
+    return "EntityConfig[" + _name + ", " + getClassName() + "]";
   }
 }

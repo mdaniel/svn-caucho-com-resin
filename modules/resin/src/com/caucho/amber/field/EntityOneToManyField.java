@@ -231,7 +231,13 @@ public class EntityOneToManyField extends CollectionField {
       out.println("if (" + getter + " != null) {");
       out.pushDepth();
 
-      out.println("for (Object o : " + getter + ") {");
+      out.print("for (Object o : " + getter);
+
+      // jpa/0v04
+      if (getJavaType().isAssignableTo(Map.class))
+        out.print(".values()");
+
+      out.println(") {");
       out.pushDepth();
 
       if (_sourceField != null) {

@@ -526,7 +526,7 @@ orm30_embeddable = element embeddable {
 
   attribute access { "PROPERTY" | "FIELD" }?,
 
-  attribute metadata-complete { t_boolean },
+  attribute metadata-complete { t_boolean }?,
 
   element description { string },
 

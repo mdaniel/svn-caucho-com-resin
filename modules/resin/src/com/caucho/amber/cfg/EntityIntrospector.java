@@ -107,7 +107,11 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
       String typeName;
 
+      MappedSuperclassConfig mappedSuperOrEntityConfig = null;
+
       if (isEntity) {
+        mappedSuperOrEntityConfig = entityConfig;
+
         if (entityConfig != null)
           typeName = entityConfig.getClassName();
         else
@@ -121,6 +125,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         isMappedSuperclass = ! _annotationCfg.isNull();
 
         if (isMappedSuperclass) {
+          mappedSuperOrEntityConfig = mappedSuperConfig;
+
           if (mappedSuperConfig != null)
             typeName = mappedSuperConfig.getClassName();
           else
@@ -259,7 +265,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       // Adds sql result set mappings, if any.
       introspectSqlResultSetMappings(type, entityType, typeName);
 
-      boolean isField = isField(type, entityConfig, false);
+      boolean isField = isField(type, mappedSuperOrEntityConfig, false);
 
       if (isField)
         entityType.setFieldAccess(true);
@@ -401,18 +407,18 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       }
       else if (isField)
         introspectIdField(_persistenceUnit, entityType, parentType,
-                          type, idClass, entityConfig);
+                          type, idClass, mappedSuperOrEntityConfig);
       else {
         introspectIdMethod(_persistenceUnit, entityType, parentType,
-                           type, idClass, entityConfig);
+                           type, idClass, mappedSuperOrEntityConfig);
       }
 
       HashMap<String, IdConfig> idMap = null;
 
       AttributesConfig attributes = null;
 
-      if (entityConfig != null) {
-        attributes = entityConfig.getAttributes();
+      if (mappedSuperOrEntityConfig != null) {
+        attributes = mappedSuperOrEntityConfig.getAttributes();
 
         if (attributes != null)
           idMap = attributes.getIdMap();
@@ -430,9 +436,11 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       introspectAttributeOverrides(entityType, type);
 
       if (isField)
-        introspectFields(_persistenceUnit, entityType, parentType, type, entityConfig, false);
+        introspectFields(_persistenceUnit, entityType, parentType, type,
+                         mappedSuperOrEntityConfig, false);
       else
-        introspectMethods(_persistenceUnit, entityType, parentType, type, entityConfig);
+        introspectMethods(_persistenceUnit, entityType, parentType, type,
+                          mappedSuperOrEntityConfig);
 
       if (isEntity) {
         introspectCallbacks(type, entityType);
