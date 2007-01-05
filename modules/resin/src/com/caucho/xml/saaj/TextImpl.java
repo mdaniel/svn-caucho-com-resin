@@ -39,9 +39,11 @@ public class TextImpl extends SOAPNodeImpl
   private static final NameImpl TEXT_NAME = new NameImpl("#text");
   private StringBuilder _data;
 
-  TextImpl(SOAPFactory factory)
+  TextImpl(SOAPFactory factory, String data)
   {
     super(factory, TEXT_NAME);
+
+    _data = new StringBuilder(data);
   }
 
   public boolean isComment()

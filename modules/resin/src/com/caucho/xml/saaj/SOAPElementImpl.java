@@ -228,7 +228,7 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   public SOAPElement addTextNode(String text) 
     throws SOAPException
   {
-    appendChild(new TextImpl(text));
+    appendChild(new TextImpl(_factory, text));
 
     return this;
   }

@@ -110,7 +110,7 @@ public abstract class SOAPNodeImpl
   public void setValue(String value)
   {
     if (_firstChild == null)
-      appendChild(new TextImpl(value));
+      appendChild(new TextImpl(_factory, value));
     else {
       if (_firstChild != _lastChild)
         throw new IllegalStateException("Element has more than one child");
