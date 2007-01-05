@@ -837,6 +837,8 @@ public class AmberPersistenceUnit {
   public void initType(AbstractEnhancedType type)
     throws Exception
   {
+    log.log(Level.FINE, "Initiating type: " + type.getInstanceClassName());
+
     type.init();
 
     getGenerator().generate(type);
@@ -1183,6 +1185,9 @@ public class AmberPersistenceUnit {
     if (_entityMappings != null) {
       _entityIntrospector.setEntityConfigMap(_entityMappings.getEntityMap());
       _entityIntrospector.setMappedSuperclassConfigMap(_entityMappings.getMappedSuperclassMap());
+
+      _mappedSuperIntrospector.setEntityConfigMap(_entityMappings.getEntityMap());
+      _mappedSuperIntrospector.setMappedSuperclassConfigMap(_entityMappings.getMappedSuperclassMap());
     }
   }
 

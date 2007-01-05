@@ -238,7 +238,10 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
   public void preEnhance(JavaClass baseClass)
     throws Exception
   {
-    EntityType type = _amberContainer.getEntity(baseClass.getName());
+    RelatedType type = _amberContainer.getEntity(baseClass.getName());
+
+    if (type == null)
+      type = _amberContainer.getMappedSuperclass(baseClass.getName());
 
     if (type instanceof SubEntityType) {
       SubEntityType subType = (SubEntityType) type;

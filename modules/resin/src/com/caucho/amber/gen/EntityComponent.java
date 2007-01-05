@@ -87,7 +87,7 @@ public class EntityComponent extends AmberMappedComponent {
       if (! isEntityParent)
         generateGetEntityState(out);
 
-      generateMatch(out, isEntityParent);
+      generateMatch(out);
 
       generateFields(out);
 

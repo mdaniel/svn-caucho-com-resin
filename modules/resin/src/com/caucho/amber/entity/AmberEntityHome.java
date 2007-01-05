@@ -39,6 +39,7 @@ import com.caucho.util.L10N;
 
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -164,7 +165,10 @@ public class AmberEntityHome {
     _entityType.init();
 
     try {
-      _homeBean = (Entity) _entityType.getInstanceClass().newInstance();
+      Class instanceClass = _entityType.getInstanceClass();
+
+      if (! Modifier.isAbstract(instanceClass.getModifiers()))
+        _homeBean = (Entity) instanceClass.newInstance();
     } catch (Exception e) {
       _entityType.setConfigException(e);
 
@@ -373,6 +377,7 @@ public class AmberEntityHome {
         boolean loadFromResultSet = ! getEntityType().hasDependent();
 
         Entity cacheEntity;
+
         cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
 
         // Object does not exist.

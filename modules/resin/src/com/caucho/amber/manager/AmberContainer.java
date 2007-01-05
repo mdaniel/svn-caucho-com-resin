@@ -30,10 +30,7 @@
 package com.caucho.amber.manager;
 
 import com.caucho.amber.AmberRuntimeException;
-import com.caucho.amber.cfg.EntityConfig;
-import com.caucho.amber.cfg.EntityMappingsConfig;
-import com.caucho.amber.cfg.PersistenceConfig;
-import com.caucho.amber.cfg.PersistenceUnitConfig;
+import com.caucho.amber.cfg.*;
 import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.type.*;
@@ -303,7 +300,9 @@ public class AmberContainer {
       throw new AmberRuntimeException(_exception);
     }
 
-    return _mappedSuperclassMap.get(className);
+    MappedSuperclassType type = _mappedSuperclassMap.get(className);
+
+    return type;
   }
 
   /**
@@ -588,13 +587,17 @@ public class AmberContainer {
           boolean isMappedSuperclass
             = type.getAnnotation(javax.persistence.MappedSuperclass.class) != null;
 
-          EntityConfig entityConfig = null;
+          MappedSuperclassConfig mappedSuperclassOrEntityConfig = null;
 
-          if (entityMappings != null)
-            entityConfig = entityMappings.getEntityConfig(className);
+          if (entityMappings != null) {
+            mappedSuperclassOrEntityConfig = entityMappings.getEntityConfig(className);
+
+            if (mappedSuperclassOrEntityConfig == null)
+              mappedSuperclassOrEntityConfig = entityMappings.getMappedSuperclass(className);
+          }
 
           if (isEntity || isEmbeddable || isMappedSuperclass ||
-              (entityConfig != null)) {
+              (mappedSuperclassOrEntityConfig != null)) {
             classMap.put(className, type);
           }
         }

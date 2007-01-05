@@ -245,12 +245,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     Id id = _relatedType.getId();
 
-    if (id == null)
-      throw new IllegalStateException(L.l("`{0}' is missing a key.",
-                                          _relatedType.getName()));
-
-    // ejb/0623 as a negative test.
-    if (id instanceof CompositeId) {
+    if (id == null) {
+      if (_relatedType instanceof EntityType)
+        throw new IllegalStateException(L.l("`{0}' is missing a key.",
+                                            _relatedType.getName()));
+    } // ejb/0623 as a negative test.
+    else if (id instanceof CompositeId) {
       // jpa/0u21
       out.println();
       out.println("private " + id.getForeignTypeName() + " __caucho_compound_key = new " + id.getForeignTypeName() + "();");
@@ -261,7 +261,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    id.generateSet(out, id.generateCastFromObject("key"));
+    if (id != null)
+      id.generateSet(out, id.generateCastFromObject("key"));
 
     out.popDepth();
     out.println("}");
@@ -272,7 +273,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     out.print("return ");
-    out.print(id.toObject(id.generateGetProperty("super")));
+
+    if (id == null)
+      out.print("null");
+    else
+      out.print(id.toObject(id.generateGetProperty("super")));
+
     out.println(";");
 
     out.popDepth();
@@ -346,13 +352,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
   /**
    * Generates the match code.
    */
-  void generateMatch(JavaWriter out,
-                     boolean isEntityParent)
+  void generateMatch(JavaWriter out)
     throws IOException
   {
-    if (isEntityParent)
-      return;
-
     out.println();
     out.println("public boolean __caucho_match(String className, Object key)");
     out.println("{");
@@ -367,10 +369,25 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("else {");
     out.pushDepth();
 
+    Id id = _relatedType.getId();
+
+    if (id == null) {
+      // jpa/0ge6: MappedSuperclass
+
+      out.println("return true;");
+      out.popDepth();
+      out.println("}");
+      out.popDepth();
+      out.println("}");
+
+      return;
+    }
+
     out.println("try {");
     out.pushDepth();
-    Id id = _relatedType.getId();
+
     id.generateMatch(out, id.generateCastFromObject("key"));
+
     out.popDepth();
     out.println("} catch (ClassCastException e) {");
     out.println("  throw new IllegalArgumentException(\"Primary key type is incorrect: '\"+key.getClass().getName()+\"'\");");
@@ -693,6 +710,16 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
+
+    if (_relatedType.getId() == null) {
+      // jpa/0ge6: MappedSuperclass
+
+      out.println("return false;");
+      out.popDepth();
+      out.println("}");
+
+      return;
+    }
 
     out.println("if (__caucho_session == null)");
     out.println("  return false;");
@@ -1017,31 +1044,33 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateCreate(JavaWriter out)
     throws IOException
   {
-    ArrayList<IdField> fields = _relatedType.getId().getKeys();
-    IdField idField = fields.size() > 0 ? fields.get(0) : null;
+    if (_relatedType.getId() != null) {
+      ArrayList<IdField> fields = _relatedType.getId().getKeys();
+      IdField idField = fields.size() > 0 ? fields.get(0) : null;
 
-    boolean hasReturnGeneratedKeys = false;
+      boolean hasReturnGeneratedKeys = false;
 
-    try {
-      hasReturnGeneratedKeys = _relatedType.getPersistenceUnit().hasReturnGeneratedKeys();
-    } catch (Exception e) {
-      // Meta-data exception which is acceptable or
-      // no data-source configured. The latter will
-      // be thrown on web.xml validation. (ejb/06m0)
-    }
+      try {
+        hasReturnGeneratedKeys = _relatedType.getPersistenceUnit().hasReturnGeneratedKeys();
+      } catch (Exception e) {
+        // Meta-data exception which is acceptable or
+        // no data-source configured. The latter will
+        // be thrown on web.xml validation. (ejb/06m0)
+      }
 
-    if (! hasReturnGeneratedKeys &&
-        idField != null && idField.getType().isAutoIncrement()) {
-      out.println();
-      out.println("private static com.caucho.amber.field.Generator __caucho_id_gen;");
-      out.println("static {");
-      out.pushDepth();
-      out.println("com.caucho.amber.field.MaxGenerator gen = new com.caucho.amber.field.MaxGenerator();");
-      out.println("gen.setColumn(\"" + idField.getColumns().get(0).generateInsertName() + "\");");
-      out.println("gen.setTable(\"" + _relatedType.getName() + "\");");
-      out.println("gen.init();");
-      out.popDepth();
-      out.println("}");
+      if (! hasReturnGeneratedKeys &&
+          idField != null && idField.getType().isAutoIncrement()) {
+        out.println();
+        out.println("private static com.caucho.amber.field.Generator __caucho_id_gen;");
+        out.println("static {");
+        out.pushDepth();
+        out.println("com.caucho.amber.field.MaxGenerator gen = new com.caucho.amber.field.MaxGenerator();");
+        out.println("gen.setColumn(\"" + idField.getColumns().get(0).generateInsertName() + "\");");
+        out.println("gen.setTable(\"" + _relatedType.getName() + "\");");
+        out.println("gen.init();");
+        out.popDepth();
+        out.println("}");
+      }
     }
 
     out.println();
@@ -1051,7 +1080,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     // jpa/0ge2: MappedSuperclassType
-    if (_relatedType.getTable() == null) {
+    if ((_relatedType.getTable() == null) || (_relatedType.getId() == null)) {
       out.println("return false;");
 
       out.popDepth();
@@ -1231,7 +1260,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     // jpa/0ge2: MappedSuperclassType
-    if (_relatedType.getTable() == null) {
+    if ((_relatedType.getTable() == null) || (id == null)) {
       out.println("return;");
 
       out.popDepth();
@@ -1372,12 +1401,15 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("o.__caucho_home = __caucho_home;");
     out.println("o.__caucho_item = item;");
 
-    ArrayList<IdField> keys = _relatedType.getId().getKeys();
+    // jpa/0ge6: MappedSuperclass
+    if (_relatedType.getId() != null) {
+      ArrayList<IdField> keys = _relatedType.getId().getKeys();
 
-    for (int i = 0; i < keys.size(); i++) {
-      IdField key = keys.get(i);
+      for (int i = 0; i < keys.size(); i++) {
+        IdField key = keys.get(i);
 
-      out.println(key.generateSet("o", key.generateGet("super")) + ";");
+        out.println(key.generateSet("o", key.generateGet("super")) + ";");
+      }
     }
 
     for (int i = 0; i <= _relatedType.getLoadGroupIndex(); i++) {
@@ -1434,12 +1466,15 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("if (__caucho_home == null) throw new NullPointerException();");
     out.println("__caucho_item = item;");
 
-    ArrayList<IdField> keys = _relatedType.getId().getKeys();
+    // jpa/0ge6: MappedSuperclass
+    if (_relatedType.getId() != null) {
+      ArrayList<IdField> keys = _relatedType.getId().getKeys();
 
-    for (int i = 0; i < keys.size(); i++) {
-      IdField key = keys.get(i);
+      for (int i = 0; i < keys.size(); i++) {
+        IdField key = keys.get(i);
 
-      out.println(key.generateSet("super", key.generateGet("entity")) + ";");
+        out.println(key.generateSet("super", key.generateGet("entity")) + ";");
+      }
     }
 
     out.println("__caucho_session = aConn;");
@@ -1571,8 +1606,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
       SubEntityType sub = (SubEntityType) _relatedType;
 
       // jpa/0ge2
-      if (! sub.isParentMappedSuperclass())
-        generateHomeNew = false;
+      if (! sub.isParentMappedSuperclass()) {
+        if (! sub.getParentType().isAbstractClass())
+          generateHomeNew = false;
+      }
     }
 
     if (generateHomeNew)
@@ -1594,6 +1631,15 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    if (_relatedType.getId() == null) {
+      // jpa/0ge6: MappedSuperclass
+
+      out.println("return null;");
+      out.popDepth();
+      out.println("}");
+
+      return;
+    }
 
     out.print("Object key = ");
     int index = _relatedType.getId().generateLoadForeign(out, "rs", "index", 0);
@@ -1637,6 +1683,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
+
+    if (_relatedType.isAbstractClass() || (_relatedType.getId() == null)) {
+      out.println("return null;");
+      out.popDepth();
+      out.println("}");
+      return;
+    }
 
     Column discriminator = _relatedType.getDiscriminator();
 

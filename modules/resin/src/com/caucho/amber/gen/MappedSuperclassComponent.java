@@ -81,7 +81,7 @@ public class MappedSuperclassComponent extends AmberMappedComponent {
 
       generateGetEntityState(out);
 
-      generateMatch(out, false);
+      generateMatch(out);
 
       generateFields(out);
 

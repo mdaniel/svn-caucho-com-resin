@@ -608,24 +608,25 @@ public class AmberConnection
         return;
 
       if (! (entity instanceof Entity))
-        throw new IllegalArgumentException(L.l("refresh() operation can only be applied to an entity instance."));
+        throw new IllegalArgumentException(L.l("refresh() operation can only be applied to an entity instance. This object is of class '{0}'", entity.getClass().getName()));
 
       checkTransactionRequired("refresh");
 
       Entity instance = (Entity) entity;
 
-      Object oldEntity = getEntity(instance.getClass().getName(),
-                                   instance.__caucho_getPrimaryKey());
+      String className = instance.getClass().getName();
+      Object pk = instance.__caucho_getPrimaryKey();
+
+      Object oldEntity = getEntity(className, pk);
 
       if (oldEntity != null) {
         int state = instance.__caucho_getEntityState();
 
         if (state <= Entity.TRANSIENT || state >= Entity.P_DELETING)
-          oldEntity = null;
+          throw new IllegalArgumentException(L.l("refresh() operation can only be applied to a managed entity instance. The entity state is '{0}' for object of class '{0}' with PK '{1}'", className, pk, state == Entity.TRANSIENT ? "TRANSIENT" : "DELETING or DELETED"));
       }
-
-      if (oldEntity == null)
-        throw new IllegalArgumentException(L.l("refresh() operation can only be applied to a managed entity instance."));
+      else
+        throw new IllegalArgumentException(L.l("refresh() operation can only be applied to a managed entity instance. There was no managed instance of class '{0}' with PK '{1}'", className, pk));
 
       // Reset and refresh state.
       instance.__caucho_expire();
