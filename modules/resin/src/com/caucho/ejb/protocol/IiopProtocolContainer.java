@@ -118,6 +118,8 @@ public class IiopProtocolContainer extends ProtocolContainer {
     if (name == null)
       name = server.getEJBName();
 
+    name = name.replace('.', '_'); // XXX:
+
     if (! name.startsWith("/"))
       name = "/" + name;
 

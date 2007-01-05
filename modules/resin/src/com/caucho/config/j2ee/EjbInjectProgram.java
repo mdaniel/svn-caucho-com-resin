@@ -36,7 +36,7 @@ import com.caucho.config.types.*;
 import com.caucho.soa.client.WebServiceClient;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.util.L10N;
-import com.caucho.naming.Jndi;
+import com.caucho.naming.*;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -85,6 +85,7 @@ public class EjbInjectProgram extends BuilderProgram
   {
     try {
       Object value = null;
+      Object jndiValue = null;
 
       if (_mappedName != null && ! "".equals(_mappedName)) {
 	value = new InitialContext().lookup(_mappedName);
@@ -113,8 +114,14 @@ public class EjbInjectProgram extends BuilderProgram
 	    }
 	  }
 	      
-	  if (value == null)
+	  if (value == null) {
 	    value = manager.getLocalByInterface(_type);
+
+	    if (value instanceof ObjectProxy) {
+	      jndiValue = value;
+	      value = ((ObjectProxy) value).createObject(null);
+	    }
+	  }
 
 	  if (value == null)
 	    value = manager.getRemoteByInterface(_type);
@@ -159,7 +166,11 @@ public class EjbInjectProgram extends BuilderProgram
       // XXX: tck??? ejb30.bb.session.stateless.bm.allowed
       if (_name != null && ! "".equals(_name)) {
 	log.fine("@EJB binding " + _name + "in JNDI for " + value);
-	Jndi.rebindDeepShort(_name, value);
+
+	if (jndiValue != null)
+	  Jndi.rebindDeepShort(_name, jndiValue);
+	else
+	  Jndi.rebindDeepShort(_name, value);
       }
     } catch (RuntimeException e) {
       throw e;

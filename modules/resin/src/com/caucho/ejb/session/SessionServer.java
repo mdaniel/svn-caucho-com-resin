@@ -63,6 +63,9 @@ public class SessionServer extends AbstractServer {
 
   private boolean _isClosed;
 
+  private Object _remoteObject;
+  private boolean _isInitRemote;
+
   public SessionServer(EjbServerManager manager)
   {
     super(manager);
@@ -154,8 +157,20 @@ public class SessionServer extends AbstractServer {
   {
     if (_remoteHomeView != null)
       return _remoteHomeView;
-    else
-      return _homeContext._caucho_newRemoteInstance();
+    else if (_remoteObject != null) // XXX: always new?
+      return _remoteObject;
+    else if (_isInitRemote) {
+      return null;
+    }
+    else {
+      _isInitRemote = true;
+      
+      _remoteObject = _homeContext._caucho_newRemoteInstance();
+
+      _isInitRemote = false;
+
+      return _remoteObject;
+    }
   }
 
   /**

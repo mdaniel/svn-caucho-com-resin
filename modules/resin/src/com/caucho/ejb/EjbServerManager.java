@@ -34,11 +34,11 @@ import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.ByteCodeClassMatcher;
 import com.caucho.bytecode.ByteCodeClassScanner;
-import com.caucho.bytecode.JClassLoader;
+import com.caucho.bytecode.*;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.admin.EJBAdmin;
-import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.ejb.cfg.*;
 import com.caucho.ejb.entity.EntityKey;
 import com.caucho.ejb.entity.EntityServer;
 import com.caucho.ejb.entity.QEntityContext;
@@ -584,11 +584,18 @@ public class EjbServerManager
 
 	  if (scanner.scan()) {
 	    try {
-	      Bean bean = new Bean(this);
+	      JClass type = getJClassLoader().forName(className);
 
-	      bean.setType(className);
-
-	      bean.init();
+	      if (type.isAnnotationPresent(javax.ejb.Stateless.class)
+		  || type.isAnnotationPresent(javax.ejb.Stateful.class)) {
+		EjbSessionBean bean = new EjbSessionBean(_ejbConfig, "resin-ejb");
+		bean.setEJBClass(className);
+		_ejbConfig.setBeanConfig(bean.getEJBName(), bean);
+		System.out.println("EJB-CLASS: " + className);
+	      }
+	      else {
+		System.out.println("NO TYPE: " + type);
+	      }
 	    } catch (ConfigException e) {
 	      throw e;
 	    } catch (Exception e) {

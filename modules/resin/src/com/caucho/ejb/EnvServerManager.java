@@ -436,10 +436,16 @@ public class EnvServerManager implements EnvironmentListener
   public Object getLocalByInterface(Class type)
   {
     for (AbstractServer server : _serverMap.values()) {
-      Object local = server.getClientObject();
+      ArrayList<Class> apiList = server.getLocalApiList();
 
-      if (local != null && type.isAssignableFrom(local.getClass()))
-	return local;
+      System.out.println("LBI: " + type + " " + apiList + " " + server);
+
+      if (apiList != null) {
+	for (int i = apiList.size() - 1; i >= 0; i--) {
+	  if (type.isAssignableFrom(apiList.get(i)))
+	    return server.getClientObject();
+	}
+      }
     }
 
     return null;

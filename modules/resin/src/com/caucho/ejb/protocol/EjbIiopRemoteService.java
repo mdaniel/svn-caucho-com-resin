@@ -33,6 +33,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.iiop.IiopRemoteService;
 import com.caucho.util.Log;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,9 +69,9 @@ public class EjbIiopRemoteService extends IiopRemoteService {
   /**
    * Returns the object API class.
    */
-  public Class getObjectAPI()
+  public ArrayList<Class> getObjectAPI()
   {
-    return _server.getRemoteObjectClass();
+    return _server.getRemoteObjectList();
   }
   
   /**

@@ -74,6 +74,9 @@ public class EjbConfig {
   private ArrayList<EjbBean> _pendingBeans = new ArrayList<EjbBean>();
   private ArrayList<EjbBean> _deployingBeans = new ArrayList<EjbBean>();
 
+  private ArrayList<EjbBeanConfigProxy> _proxyList
+    = new ArrayList<EjbBeanConfigProxy>();
+
   private ArrayList<FunctionSignature> _functions =
     new ArrayList<FunctionSignature>();
   
@@ -157,6 +160,11 @@ public class EjbConfig {
     } catch (Exception e) {
       throw new ConfigException(e);
     }
+  }
+
+  public void addProxy(EjbBeanConfigProxy proxy)
+  {
+    _proxyList.add(proxy);
   }
 
   /**
@@ -402,6 +410,13 @@ public class EjbConfig {
       javaGen.setParentLoader(parentLoader);
       
       configureRelations();
+
+      for (EjbBeanConfigProxy proxy : _proxyList) {
+	EjbBean bean = _cfgBeans.get(proxy.getEJBName());
+
+	if (bean != null)
+	  proxy.getBuilderProgram().configure(bean);
+      }
       
       for (EjbBean bean : beanConfig) {
 	bean.init();

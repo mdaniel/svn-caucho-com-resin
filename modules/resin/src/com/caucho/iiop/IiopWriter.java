@@ -37,6 +37,7 @@ import org.omg.CORBA.ORB;
 import org.omg.CORBA.SystemException;
 import org.omg.CORBA.TCKind;
 import org.omg.CORBA.TypeCode;
+import org.omg.CORBA.portable.IDLEntity;
 import org.omg.SendingContext.RunTime;
 
 import javax.rmi.CORBA.ClassDesc;
@@ -44,6 +45,7 @@ import javax.rmi.CORBA.Util;
 import javax.rmi.CORBA.ValueHandler;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.*;
 
 abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream {
   static protected final int VALUE_TAG = 0x7fffff00;
@@ -569,6 +571,19 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
       write_string(valueHandler.getRMIRepositoryID(ClassDesc.class));
       write_value(valueHandler.getRMIRepositoryID((Class) obj));
       write_value(valueHandler.getRMIRepositoryID((Class) obj));
+    }
+    else if (obj instanceof IDLEntity) {
+      try {
+	Class helperClass = Class.forName(obj.getClass().getName() + "Helper", false, obj.getClass().getClassLoader());
+
+	Method writeHelper = helperClass.getMethod("write", new Class[] {
+	  org.omg.CORBA.portable.OutputStream.class, obj.getClass()
+	});
+
+	writeHelper.invoke(null, this, obj);
+      } catch (Exception e) {
+	throw new RuntimeException(e);
+      }
     }
     else {
       int oldValue = _context.getRef(obj);

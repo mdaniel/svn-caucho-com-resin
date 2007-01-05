@@ -38,6 +38,7 @@ import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
 import com.caucho.iiop.orb.*;
 
+import java.util.ArrayList;
 import java.util.logging.*;
 import javax.annotation.*;
 import javax.naming.*;
@@ -150,8 +151,11 @@ public class IiopProtocol extends Protocol {
     if (service == null)
       return null;
     else if (local == null) {
+      ArrayList<Class> apiList = new ArrayList<Class>();
+      apiList.add(service.getHomeAPI());
+      
       return new IiopSkeleton(service.getHome(),
-			      service.getHomeAPI(),
+			      apiList,
                               service.getClassLoader(),
                               host, port, url);
     }

@@ -88,8 +88,6 @@ public class Iiop10Writer extends IiopWriter
   {
     startMessage(IiopReader.MSG_REPLY);
     
-    System.out.println("CAUSE-10:" + cause);
-    
     if (cause == null) {
       write_long(0);         // service control list
     } else {

@@ -82,7 +82,8 @@ public class EjbEnterpriseBeans {
   {
     EjbBean bean = beanProxy.getBean();
 
-    _config.setBeanConfig(bean.getEJBName(), bean);
+    if (bean != null)
+      _config.setBeanConfig(bean.getEJBName(), bean);
   }
 
   public EjbMessageConfigProxy createMessageDriven()

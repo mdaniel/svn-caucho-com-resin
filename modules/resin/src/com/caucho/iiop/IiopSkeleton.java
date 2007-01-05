@@ -35,6 +35,7 @@ import org.omg.CORBA.NO_IMPLEMENT;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,19 +46,21 @@ public class IiopSkeleton extends DummyObjectImpl {
 
   private ClassLoader _loader;
   private Class _remoteClass;
+  private ArrayList<Class> _apiList;
 
   private Object _obj;
 
-  IiopSkeleton(Object obj, Class apiClass, ClassLoader loader,
+  IiopSkeleton(Object obj, ArrayList<Class> apiList, ClassLoader loader,
 	       String host, int port, String oid)
   {
-    super(new IOR(apiClass, host, port, oid));
+    super(new IOR(apiList.get(0), host, port, oid));
     
     if (obj == null)
       throw new NullPointerException();
     
     _obj = obj;
-    _remoteClass = apiClass;
+    _apiList = apiList;
+    _remoteClass = _apiList.get(0);
     _loader = loader;
   }
 
@@ -65,10 +68,10 @@ public class IiopSkeleton extends DummyObjectImpl {
   {
     return _obj;
   }
-
-  Class getRemoteClass()
+  
+  ArrayList<Class> getApiList()
   {
-    return _remoteClass;
+    return _apiList;
   }
   
   void service(Object obj, IiopReader reader, IiopWriter writer)
@@ -83,7 +86,7 @@ public class IiopSkeleton extends DummyObjectImpl {
       log.fine("IIOP-call: " + _remoteClass.getName() + "." + op);
 
     if ((method = getMethod(op)) != null) {
-      boolean isJava = !_remoteClass.getName().startsWith("com.caucho.iiop");
+      boolean isJava = ! _remoteClass.getName().startsWith("com.caucho.iiop");
       
       skelMethod = new SkeletonMethod(this, method, isJava);
       Thread thread = Thread.currentThread();
@@ -105,10 +108,13 @@ public class IiopSkeleton extends DummyObjectImpl {
 
   Method getMethod(String name)
   {
-    Method []methods = _remoteClass.getMethods();
-    for (int i = 0; i < methods.length; i++)
-      if (methods[i].getName().equals(name))
-        return methods[i];
+    for (int j = 0; j < _apiList.size(); j++) {
+      Method []methods = _apiList.get(j).getMethods();
+      
+      for (int i = 0; i < methods.length; i++)
+	if (methods[i].getName().equals(name))
+	  return methods[i];
+    }
 
     return null;
   }

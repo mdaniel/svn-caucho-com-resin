@@ -30,6 +30,7 @@
 package com.caucho.ejb;
 
 import com.caucho.config.BuilderProgram;
+import com.caucho.bytecode.JClass;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.HandleEncoder;
@@ -53,6 +54,7 @@ import javax.transaction.UserTransaction;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,7 +95,9 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected Class _remoteHomeClass;
   protected Class _remoteObjectClass;
+  protected ArrayList<Class> _remoteObjectList;
   protected Class _primaryKeyClass;
+  protected ArrayList<Class> _localApiList;
 
   protected Class _remoteStubClass;
   protected Class _homeStubClass;
@@ -270,6 +274,27 @@ abstract public class AbstractServer implements EnvironmentBean {
   /**
    * Sets the remote object class.
    */
+  public void setRemoteObjectList(ArrayList<JClass> list)
+  {
+    _remoteObjectList = new ArrayList<Class>();
+    for (int i = 0; i < list.size(); i++)
+      _remoteObjectList.add(list.get(i).getJavaClass());
+
+    if (_remoteObjectList.size() > 0)
+      _remoteObjectClass = _remoteObjectList.get(0);
+  }
+
+  /**
+   * Sets the remote object class.
+   */
+  public ArrayList<Class> getRemoteObjectList()
+  {
+    return _remoteObjectList;
+  }
+
+  /**
+   * Sets the remote object class.
+   */
   public void setRemoteObjectClass(Class cl)
   {
     _remoteObjectClass = cl;
@@ -281,6 +306,24 @@ abstract public class AbstractServer implements EnvironmentBean {
   public Class getRemoteObjectClass()
   {
     return _remoteObjectClass;
+  }
+
+  /**
+   * Sets the local api class list
+   */
+  public void setLocalApiList(ArrayList<JClass> list)
+  {
+    _localApiList = new ArrayList<Class>();
+    for (int i = 0; i < list.size(); i++)
+      _localApiList.add(list.get(i).getJavaClass());
+  }
+
+  /**
+   * Sets the remote object class.
+   */
+  public ArrayList<Class> getLocalApiList()
+  {
+    return _localApiList;
   }
 
   public HandleEncoder getHandleEncoder(String protocol)

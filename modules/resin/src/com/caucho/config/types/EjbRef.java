@@ -262,11 +262,14 @@ public class EjbRef implements ObjectProxy {
       if (_jndiName != null) {
 	Object target;
 
-	System.out.println("LOOKUP: " + _jndiName + " " + _context);
+	// XXX: JDK's iiop lookup
+	String jndiName = _jndiName.replace('.', '_');
+
+	System.out.println("LOOKUP: " + jndiName + " " + _context);
 	if (_context != null)
-	  target = _context.lookup(_jndiName);
+	  target = _context.lookup(jndiName);
 	else
-	  target = Jndi.lookup(_jndiName);
+	  target = Jndi.lookup(jndiName);
 	System.out.println("TGT: " + target);
 
 	if (target != null)

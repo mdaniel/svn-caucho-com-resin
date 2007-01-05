@@ -100,8 +100,6 @@ public class Iiop12Writer extends Iiop10Writer
     
     write_long(IiopReader.STATUS_SYSTEM_EXCEPTION);
 
-    System.out.println("CAUSE2:" + cause);
-
     if (cause == null) {
       write_long(0);         // service control list
     } else {

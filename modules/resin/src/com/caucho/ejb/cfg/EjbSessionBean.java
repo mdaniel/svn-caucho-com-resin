@@ -218,14 +218,14 @@ public class EjbSessionBean extends EjbBean {
     ArrayList<JClass> interfaceList = new ArrayList<JClass>();
 
     for (int i = 0; i < ifs.length; i++) {
-      JAnnotation local = ifs[i].getAnnotation(Local.class);
+      JAnnotation local = ifs[i].getAnnotation(javax.ejb.Local.class);
 
       if (local != null) {
 	setLocalWrapper(ifs[i]);
 	continue;
       }
       
-      JAnnotation remote = ifs[i].getAnnotation(Remote.class);
+      JAnnotation remote = ifs[i].getAnnotation(javax.ejb.Remote.class);
 
       if (remote != null || ifs[i].isAssignableTo(java.rmi.Remote.class)) {
 	setRemoteWrapper(ifs[i]);
@@ -333,7 +333,11 @@ public class EjbSessionBean extends EjbBean {
     
     ArrayList<JClass> remoteList = getRemoteList();
     if (remoteList.size() > 0)
-      server.setRemoteObjectClass(remoteList.get(0).getJavaClass());
+      server.setRemoteObjectList(remoteList);
+    
+    ArrayList<JClass> localList = getLocalList();
+    if (localList.size() > 0)
+      server.setLocalApiList(localList);
 
     Class contextImplClass = javaGen.loadClass(getSkeletonName());
     
@@ -386,7 +390,7 @@ public class EjbSessionBean extends EjbBean {
     if (ejbClass.isAnnotationPresent(Stateless.class))
       introspectStateless(ejbClass);
     else if (ejbClass.isAnnotationPresent(Stateful.class))
-      introspectStateless(ejbClass);
+      introspectStateful(ejbClass);
   }
 
   private void introspectStateless(JClass type)
@@ -413,12 +417,12 @@ public class EjbSessionBean extends EjbBean {
     if (stateless != null)
       name = stateless.getString("name");
     else
-      name = type.getClass().getName();
+      name = className;
     
     introspectBean(type, name);
   }
 
-  private void configureStateful(JClass type)
+  private void introspectStateful(JClass type)
     throws ConfigException
   {
     String className = type.getName();
@@ -430,7 +434,13 @@ public class EjbSessionBean extends EjbBean {
     setSessionType("Stateful");
     setTransactionType("Container");
 
-    introspectBean(type, stateful.getString("name"));
+    String name;
+    if (stateful != null)
+      name = stateful.getString("name");
+    else
+      name = className;
+    
+    introspectBean(type, name);
   }
 
   private void validateMethods()

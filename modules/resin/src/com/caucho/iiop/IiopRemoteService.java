@@ -29,6 +29,8 @@
 
 package com.caucho.iiop;
 
+import java.util.ArrayList;
+
 abstract public class IiopRemoteService {
   /**
    * Returns the context class loader.
@@ -43,7 +45,7 @@ abstract public class IiopRemoteService {
   /**
    * Returns the object API class.
    */
-  abstract public Class getObjectAPI();
+  abstract public ArrayList<Class> getObjectAPI();
 
   /**
    * Returns the home object.

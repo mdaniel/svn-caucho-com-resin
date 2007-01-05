@@ -37,8 +37,11 @@ import com.caucho.iiop.orb.*;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.rmi.CORBA.ValueHandler;
 
 /**
  * Protocol specific information for each request.  ServerRequest
@@ -147,7 +150,10 @@ public class IiopRequest implements ServerRequest {
 	_cos.setHost(_hostName);
 	_cos.setPort(_port);
 
-	_cosSkel = new IiopSkeleton(_cos, _cos.getClass(), _loader,
+	ArrayList<Class> apiList = new ArrayList<Class>();
+	apiList.add(_cos.getClass());
+
+	_cosSkel = new IiopSkeleton(_cos, apiList, _loader,
 				    _hostName, _port, "/NameService");
       }
 
@@ -181,7 +187,7 @@ public class IiopRequest implements ServerRequest {
 	writer = _writer10;
 	break;
       }
-
+      
       writer.init();
       writer.setHost(_hostName);
       writer.setPort(_port);
@@ -235,8 +241,28 @@ public class IiopRequest implements ServerRequest {
 					 e.minor,
 					 e.completed.value(),
 					 null);
+      } catch (org.omg.CORBA.UserException e) {
+	log.log(Level.WARNING, e.toString(), e);
+      
+	writer.startReplyUserException(_reader.getRequestId());
+
+	try {
+	  Class helperClass =
+	    Class.forName(e.getClass().getName() + "Helper", false,
+			  e.getClass().getClassLoader());
+
+	  Method writeMethod = helperClass.getMethod("write", new Class[] {
+	    org.omg.CORBA.portable.OutputStream.class, e.getClass()
+	  });
+
+	  writeMethod.invoke(null, writer, e);
+	} catch (Exception e1) {
+	  throw new RuntimeException(e1);
+	}
       } catch (java.rmi.RemoteException e) {
 	log.log(Level.WARNING, e.toString(), e);
+
+	String msg = e.toString();
 
 	writer.startReplySystemException(_reader.getRequestId(),
 					 e.toString(),

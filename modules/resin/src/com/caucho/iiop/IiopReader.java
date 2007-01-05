@@ -411,7 +411,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       if (value != null)
 	throw new IOException("user exception: " + value + " " + value.getClass().getName());
       else
-	throw new IOException("user exception: " + value + " " + value.getClass().getName());
+	throw new IOException("null user exception");
         
     default:
       throw new IOException("unknown status: " + status);
@@ -555,14 +555,25 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	  if (p < 0)
 	    throw new RuntimeException("unknown RMI: " + repId);
 
-	  String className = repId.substring(4, p);
+	  String className;
+
+	  if (repId.startsWith("IDL:omg.org")) {
+	    className = "org.omg" + repId.substring(11, p).replace('/', '.');
+
+	    int tail = className.lastIndexOf('.');
+	    className = (className.substring(0, tail) + "Package"
+			 + className.substring(tail));
+	  }
+	  else
+	    className = repId.substring(4, p);
+	  
 	  // log.fine("CLASS-NAME: " + className);
 	  if (className.equals("javax.rmi.CORBA.ClassDesc")) {
 	    return readClass();
 	  }
 	  else {
 	    Class cl = null;
-	    
+
 	    try {
 	      cl = CauchoSystem.loadClass(className);
 	    } catch (ClassNotFoundException e) {

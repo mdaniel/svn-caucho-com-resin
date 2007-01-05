@@ -154,8 +154,12 @@ abstract public class AbstractContext implements EJBContext {
    */
   public EJBObject getRemoteView()
   {
+    return null;
+    
+    /*
     throw new IllegalStateException(L.l("`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context.",
                                         getServer()));
+    */
   }
 
   /**
