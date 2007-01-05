@@ -42,7 +42,7 @@ import java.util.Map;
 /**
  * Variable resolution for JSF variables
  */
-public class FacesContextELResolver extends AbstractVariableResolver {
+public class FacesContextELResolver extends CompositeELResolver {
   private ELResolver []_customResolvers;
 
   /*

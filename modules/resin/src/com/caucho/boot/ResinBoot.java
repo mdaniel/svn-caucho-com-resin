@@ -68,6 +68,7 @@ public class ResinBoot {
 
   private Path _resinHome;
   private Path _rootDirectory;
+  private Path _logDirectory;
   private Path _resinConf;
   private String _serverId = "";
   private boolean _isVerbose;
@@ -115,7 +116,8 @@ public class ResinBoot {
 
     Config config = new Config();
 
-    ResinConfig conf = new ResinConfig(_resinHome, _rootDirectory);
+    ResinWatchdogManager manager = null;
+    ResinConfig conf = new ResinConfig(manager, _resinHome, _rootDirectory);
 
     ResinELContext elContext = new ResinBootELContext();
 
@@ -226,6 +228,11 @@ public class ResinBoot {
 	       || "--server-root".equals(arg)) {
 	_rootDirectory = Vfs.lookup(argv[i + 1]);
 	i++;
+      }
+      else if ("-log-directory".equals(arg)
+               || "--log-directory".equals(arg)) {
+        _logDirectory = _rootDirectory.lookup(argv[i + 1]);
+        i++;
       }
       else if ("-server".equals(arg)
 	       || "--server".equals(arg)) {
@@ -358,10 +365,10 @@ public class ResinBoot {
       try {
 	_server.shutdown();
 
-	System.out.println(L().l("Resin/{0} shutdown ResinWatchdogManager",
+	System.err.println(L().l("Resin/{0} shutdown ResinWatchdogManager",
 				 Version.VERSION));
       } catch (Exception e) {
-	System.out.println(L().l("Resin/{0} can't shutdown ResinWatchdogManager.\n{1}",
+	System.err.println(L().l("Resin/{0} can't shutdown ResinWatchdogManager.\n{1}",
 				 Version.VERSION, e.toString()));
 
 	log().log(Level.FINE, e.toString(), e);

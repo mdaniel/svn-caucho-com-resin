@@ -109,7 +109,8 @@ public class BaseClass extends ClassComponent {
    */
   public void addInterfaceName(String name)
   {
-    _interfaceNames.add(name);
+    if (! _interfaceNames.contains(name))
+      _interfaceNames.add(name);
   }
 
   /**

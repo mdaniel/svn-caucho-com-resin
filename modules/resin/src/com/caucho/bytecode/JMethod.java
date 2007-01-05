@@ -56,6 +56,11 @@ abstract public class JMethod extends JAccessibleObject {
   abstract public boolean isPublic();
 
   /**
+   * Returns true for a protected method.
+   */
+  abstract public boolean isProtected();
+
+  /**
    * Returns true for an abstract method.
    */
   abstract public boolean isAbstract();

@@ -160,7 +160,7 @@ public class EjbEntityBean extends EjbBean {
     EntityType type = amberPersistenceUnit.createEntity(getAbstractSchemaName(),
                                                         getEJBClassWrapper());
 
-    type.setProxyClass(getLocal());
+    type.setProxyClass(getLocalList().get(0));
 
     return type;
   }
@@ -261,6 +261,11 @@ public class EjbEntityBean extends EjbBean {
     }
     else
       return super.getFullImplName();
+  }
+  
+  public JClass getLocal()
+  {
+    return getLocalList().get(0);
   }
 
   /**
@@ -607,8 +612,8 @@ public class EjbEntityBean extends EjbBean {
 
       super.init();
 
-      if (_primKeyClass == null && ! isAllowPOJO() &&
-          (getRemote() != null || getLocal() != null))
+      if (_primKeyClass == null && ! isAllowPOJO()
+	  && (getRemoteList().size() > 0 || getLocalList().size() > 0))
         throw new ConfigException(L.l("{0}: <entity> has no primary key class.  Entity beans must define a prim-key-class.",
                                       getEJBClass().getName()));
 
@@ -616,10 +621,10 @@ public class EjbEntityBean extends EjbBean {
         validateHome(getRemoteHome());
       if (getLocalHome() != null)
         validateHome(getLocalHome());
-      if (getRemote() != null)
-        validateRemote(getRemote());
-      if (getLocal() != null)
-        validateRemote(getLocal());
+      for (JClass remote : getRemoteList())
+        validateRemote(remote);
+      for (JClass local : getLocalList())
+        validateRemote(local);
 
       validateMethods();
     } catch (LineConfigException e) {
@@ -1025,10 +1030,13 @@ public class EjbEntityBean extends EjbBean {
   protected EjbObjectView createObjectView(JClass apiClass, String prefix)
     throws ConfigException
   {
+    ArrayList<JClass> apiList = new ArrayList<JClass>();
+    apiList.add(apiClass);
+    
     if (isCMP())
-      return new EjbCmpView(this, apiClass, prefix);
+      return new EjbCmpView(this, apiList, prefix);
     else
-      return new EjbEntityView(this, apiClass, prefix);
+      return new EjbEntityView(this, apiList, prefix);
   }
 
   /**
@@ -1243,7 +1251,7 @@ public class EjbEntityBean extends EjbBean {
 
     JClass objectClass;
     if (homeClass.isAssignableTo(EJBHome.class))
-      objectClass = getRemote();
+      objectClass = getRemoteList().get(0);
     else
       objectClass = getLocal();
     String objectName = objectClass != null ? objectClass.getName() : null;

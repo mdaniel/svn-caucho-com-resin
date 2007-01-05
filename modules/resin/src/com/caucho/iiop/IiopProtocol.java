@@ -32,13 +32,15 @@ package com.caucho.iiop;
 import com.caucho.log.Log;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.RMI_IIOPResource;
+import com.caucho.naming.*;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.Protocol;
 import com.caucho.server.port.ServerRequest;
 import com.caucho.iiop.orb.*;
 
-import java.util.logging.Logger;
+import java.util.logging.*;
 import javax.annotation.*;
+import javax.naming.*;
 
 /**
  * The main class for the HTTP server.
@@ -57,7 +59,8 @@ public class IiopProtocol extends Protocol {
 
   private String _protocolName = "iiop";
 
-  private ORBImpl _orb;
+  private ORBImpl _orb = new ORBImpl();
+  private boolean _isOrbInit;
   private CosServer _cos;
 
   private IiopContext _iiopContext;
@@ -68,6 +71,12 @@ public class IiopProtocol extends Protocol {
   public IiopProtocol()
   {
     _iiopContext = new IiopContext();
+
+    try {
+      Jndi.rebindDeep("java:comp/ORB", _orb);
+    } catch (NamingException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
 
     _cos = new CosServer(this);
 
@@ -108,8 +117,8 @@ public class IiopProtocol extends Protocol {
 
   ORBImpl getOrb(String host, int port)
   {
-    if (_orb == null) {
-      _orb = new ORBImpl();
+    if (! _isOrbInit) {
+      _isOrbInit = true;
       _orb.setHost(host);
       _orb.setPort(port);
     }

@@ -54,7 +54,8 @@ import java.util.logging.Logger;
  */
 public class EjbProtocolManager {
   private static final L10N L = new L10N(EjbProtocolManager.class);
-  protected static final Logger log = Log.open(EjbProtocolManager.class);
+  protected static final Logger log
+    = Logger.getLogger(EjbProtocolManager.class.getName());
 
   private static ThreadLocal<String> _protocolLocal
     = new ThreadLocal<String>();

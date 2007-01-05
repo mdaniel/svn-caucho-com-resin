@@ -268,6 +268,7 @@ public class SimpleXMLElement
 
     return "";
   }
+  
 /*
   public Element getElement()
   {

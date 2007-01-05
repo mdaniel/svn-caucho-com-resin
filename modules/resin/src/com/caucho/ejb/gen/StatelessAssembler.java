@@ -36,10 +36,13 @@ import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
 import com.caucho.util.L10N;
 
+import java.util.ArrayList;
+
 /**
  * Assembles the generator structure.
  */
-public class StatelessAssembler extends SessionAssembler {
+public class StatelessAssembler extends SessionAssembler
+{
   private static final L10N L = new L10N(StatelessAssembler.class);
 
   public StatelessAssembler(EjbSessionBean bean, String fullClassName)
@@ -85,11 +88,11 @@ public class StatelessAssembler extends SessionAssembler {
   /**
    * Creates the home view.
    */
-  public ViewClass createView(JClass homeClass,
+  public ViewClass createView(ArrayList<JClass> apiList,
 			      String fullClassName,
 			      String viewPrefix)
   {
-    SessionView view = new SessionView(homeClass,
+    SessionView view = new SessionView(apiList,
 				       fullClassName,
 				       viewPrefix,
 				       true);

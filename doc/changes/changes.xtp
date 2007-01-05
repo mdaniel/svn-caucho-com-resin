@@ -12,6 +12,18 @@
 
 <s2 title="3.1.snap - Dec 21, 2006">
 <ul>
+<li>logging: formatted exception logs must keep the thrown exception (#1361, rep by rydenius)</li>
+<li>Quercus: updates to locking (#1504, rep by at4u)</li>
+<li>Amber: entities may have protected constructors (#1447, rep by KnisterPeter)</li>
+<li>Quercus: toLong and toDouble need implementation for Java objects (#1397, rep by dberry)</li>
+<li>session activate/passivate should call HttpSessionActivationListener for attribute values, not valueBound (#1402, rep by slonopatamus)</li>
+<li>boot: add --log-directory as command-line argument (#1537, rep by Rick Mann)</li>
+<li>Quercus: QuercusServlet needs init-param for database (#1535, rep by Markus Wolf)</li>
+<li>fixed extra error messages generated on resin.conf restart (#1405, rep by M Marich)</li>
+<li>mod_caucho: add windows read timeout for dead sockets (#1490, rep by T Fukuda)</li>
+<li>Quercus: add __CLASS__ support (#1443, rep by KnisterPeter)</li>
+<li>Servlet: getContext should normalize url (#1450, rep by lina)</li>
+<li>JSP jsp:forward wasn't picking up EL (#1453, rep by Katrin Kippert)</li>
 <li>getServerPort not properly calculated with virtual-host (#1509, rep by justinwcs)</li>
 <li>Amber: mapped-superclass/metadata-complete is optional (rep by Costin Leau)</li>
 <li>server-header needs to be used for error pages (#1491, rep by Larry Gelberg)</li>

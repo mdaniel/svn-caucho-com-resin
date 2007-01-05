@@ -36,6 +36,7 @@ import com.caucho.util.Log;
 
 import javax.annotation.*;
 import javax.ejb.EJB;
+import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
 import javax.naming.NameClassPair;
 import javax.naming.NamingEnumeration;
@@ -51,6 +52,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.omg.CORBA.ORB;
 
 /**
  * Analyzes a bean for @Inject tags.
@@ -335,22 +337,13 @@ public class InjectIntrospector {
 
     String name = ejb.name();
     String beanName = ejb.beanName();
+    String mappedName = ejb.mappedName();
 
-    String jndiName = beanName;
-    String publishJndiName = null;
-
-    if (! "".equals(beanName)
-	&& ! "".equals(name)
-	&& ! name.equals(beanName))
-      publishJndiName = name;
-
-    if ("".equals(jndiName))
-      jndiName = name;
-
+    // ejb/0f62
+    /*
     if ("".equals(jndiName))
       jndiName = fieldName;
-
-    jndiName = toFullName(jndiName);
+    */
 
     AccessibleInject inject;
 
@@ -361,7 +354,7 @@ public class InjectIntrospector {
 
     BuilderProgram program;
 
-    program = new EjbInjectProgram(jndiName, publishJndiName,
+    program = new EjbInjectProgram(name, beanName, mappedName,
 				   fieldType, inject);
 
     initList.add(program);
@@ -599,11 +592,18 @@ public class InjectIntrospector {
     else if (UserTransaction.class.equals(fieldType)) {
       jndiName = "java:comp/UserTransaction";
     }
+    else if (ORB.class.equals(fieldType)) {
+      jndiName = "java:comp/ORB";
+    }
     else if ("java.util.concurrent.Executor".equals(resourceType)) {
       jndiName = "java:comp/ThreadPool";
     }
     else {
       jndiName = prefix + name;
+    }
+    
+    if (SessionContext.class.equals(fieldType)) {
+      jndiName = "java:comp/env/sessionContext";
     }
 
     int colon = jndiName.indexOf(':');

@@ -272,7 +272,7 @@ public class EjbConfig {
       if (bean instanceof EjbEntityBean) {
 	EjbEntityBean entity = (EjbEntityBean) bean;
 
-	if (cl.equals(entity.getLocal()))
+	if (entity.getLocalList().contains(cl))
 	  return entity;
       }
     }

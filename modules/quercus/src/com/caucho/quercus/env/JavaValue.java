@@ -151,7 +151,9 @@ public class JavaValue extends ResourceValue
    */
   public long toLong()
   {
-    return 1;
+    String s = toString();
+    
+    return StringValue.toLong(s);
   }
 
   /**
@@ -159,7 +161,9 @@ public class JavaValue extends ResourceValue
    */
   public double toDouble()
   {
-    return toLong();
+    String s = toString();
+    
+    return StringValue.toDouble(s);
   }
 
   /**

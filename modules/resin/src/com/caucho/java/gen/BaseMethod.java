@@ -91,6 +91,8 @@ public class BaseMethod extends ClassComponent {
   public BaseMethod(JMethod apiMethod, JMethod implMethod)
   {
     this(apiMethod, new MethodCallChain(implMethod));
+    
+    _exceptionTypes = implMethod.getExceptionTypes();
   }
 
   /**

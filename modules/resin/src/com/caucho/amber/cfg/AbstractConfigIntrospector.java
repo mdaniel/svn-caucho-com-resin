@@ -171,11 +171,11 @@ abstract public class AbstractConfigIntrospector {
     for (JMethod ctor : type.getConstructors()) {
       JClass []param = ctor.getParameterTypes();
 
-      if (param.length == 0 && ctor.isPublic())
+      if (param.length == 0 && (ctor.isPublic() || ctor.isProtected()))
         return;
     }
 
-    throw new ConfigException(L.l("'{0}' needs a public, no-arg constructor.  Entity beans must have public, no-arg constructors.",
+    throw new ConfigException(L.l("'{0}' needs a public or protected no-arg constructor.  Entity beans must have public, no-arg constructors.",
                                   type.getName()));
   }
 

@@ -38,6 +38,8 @@ import com.caucho.java.gen.GenClass;
 import com.caucho.util.L10N;
 import com.caucho.vfs.PersistentDependency;
 
+import java.util.ArrayList;
+
 /**
  * Assembles the generator structure.
  */
@@ -126,7 +128,20 @@ abstract public class BeanAssembler {
   /**
    * Creates the home view.
    */
-  abstract public ViewClass createView(JClass homeClass,
+  public final ViewClass createView(JClass homeClass,
+				    String fullClassName,
+				    String viewPrefix)
+  {
+    ArrayList<JClass> apiList = new ArrayList<JClass>();
+    apiList.add(homeClass);
+
+    return createView(apiList, fullClassName, viewPrefix);
+  }
+
+  /**
+   * Creates the home view.
+   */
+  abstract public ViewClass createView(ArrayList<JClass> apiList,
 				       String fullClassName,
 				       String viewPrefix);
 

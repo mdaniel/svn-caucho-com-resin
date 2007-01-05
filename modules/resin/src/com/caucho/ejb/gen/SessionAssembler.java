@@ -33,10 +33,13 @@ import com.caucho.bytecode.JClass;
 import com.caucho.ejb.cfg.EjbSessionBean;
 import com.caucho.util.L10N;
 
+import java.util.ArrayList;
+
 /**
  * Assembles the generator structure.
  */
-public class SessionAssembler extends BeanAssembler {
+public class SessionAssembler extends BeanAssembler
+{
   private static final L10N L = new L10N(SessionAssembler.class);
 
   public SessionAssembler(EjbSessionBean bean, String fullClassName)
@@ -84,11 +87,11 @@ public class SessionAssembler extends BeanAssembler {
   /**
    * Creates the home view.
    */
-  public ViewClass createView(JClass homeClass,
+  public ViewClass createView(ArrayList<JClass> apiList,
 			      String fullClassName,
 			      String viewPrefix)
   {
-    SessionView view = new SessionView(homeClass,
+    SessionView view = new SessionView(apiList,
 				       fullClassName,
 				       viewPrefix,
 				       false);

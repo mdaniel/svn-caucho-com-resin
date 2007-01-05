@@ -64,29 +64,50 @@ public class PortableRemoteObjectDelegateImpl
 		       Class narrowTo)
     throws ClassCastException
   {
-    System.out.println("NARROW: " + narrowFrom + " " + narrowTo);
+    try {
+      if (narrowTo.isAssignableFrom(narrowFrom.getClass()))
+	return narrowFrom;
+
+      if (narrowFrom instanceof StubImpl) {
+	StubImpl stub = (StubImpl) narrowFrom;
+
+	if (! narrowTo.getName().startsWith("org.omg.")) {
+	  org.omg.CORBA_2_3.portable.InputStream is = null;
     
-    if (narrowTo.isAssignableFrom(narrowFrom.getClass()))
-      return narrowFrom;
+	  org.omg.CORBA_2_3.portable.OutputStream os
+	    = ((org.omg.CORBA_2_3.portable.OutputStream) stub._request("_is_a", true));
 
-    if (narrowFrom instanceof StubImpl) {
-      StubImpl stub = (StubImpl) narrowFrom;
+	  os.write_string("RMI:" + narrowTo.getName() + ":0");
 
-      // XXX: check is_a
+	  is = ((org.omg.CORBA_2_3.portable.InputStream) stub._invoke(os));
 
-      StubMarshal stubMarshal = new StubMarshal(narrowTo);
+	  boolean isA = is.read_boolean();
+	  is.close();
 
-      IiopProxyHandler handler = 
-	new IiopProxyHandler(stub.getORBImpl(),
-			     stub,
-			     stubMarshal);
+	  if (! isA)
+	    throw new ClassCastException(narrowFrom.getClass().getName());
+	}
 
-      return Proxy.newProxyInstance(narrowTo.getClassLoader(),
-				    new Class[] { narrowTo, IiopProxy.class },
-				    handler);
+	StubMarshal stubMarshal = new StubMarshal(narrowTo);
+
+	IiopProxyHandler handler = 
+	  new IiopProxyHandler(stub.getORBImpl(),
+			       stub,
+			       stubMarshal);
+
+	return Proxy.newProxyInstance(narrowTo.getClassLoader(),
+				      new Class[] { narrowTo, IiopProxy.class },
+				      handler);
+      }
+    
+      throw new ClassCastException(narrowFrom.getClass().getName());
+    } catch (ClassCastException e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
-    
-    throw new ClassCastException(narrowFrom.getClass().getName());
   }
   
   public void connect(Remote target,

@@ -35,6 +35,8 @@ import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
 
+import java.util.ArrayList;
+
 /**
  * Assembles the generator structure.
  */
@@ -121,11 +123,11 @@ public class EntityAssembler extends BeanAssembler {
   /**
    * Creates the home view.
    */
-  public ViewClass createView(JClass homeClass,
+  public ViewClass createView(ArrayList<JClass> homeClass,
 			      String fullClassName,
 			      String viewPrefix)
   {
-    EntityView view = new EntityView(homeClass,
+    EntityView view = new EntityView(homeClass.get(0),
 				     fullClassName,
 				     viewPrefix);
 

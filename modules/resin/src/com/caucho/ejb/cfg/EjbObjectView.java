@@ -37,22 +37,24 @@ import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
+import java.util.ArrayList;
 
 
 /**
  * Configuration for a particular view.
  */
-public class EjbObjectView extends EjbView {
+public class EjbObjectView extends EjbView
+{
   private static final Logger log = Log.open(EjbObjectView.class);
   private static final L10N L = new L10N(EjbObjectView.class);
 
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbObjectView(EjbBean bean, JClass apiClass, String prefix)
+  public EjbObjectView(EjbBean bean, ArrayList<JClass> apiList, String prefix)
     throws ConfigException
   {
-    super(bean, apiClass, prefix);
+    super(bean, apiList, prefix);
   }
 
   /**
@@ -62,7 +64,7 @@ public class EjbObjectView extends EjbView {
 			      String fullClassName)
     throws ConfigException
   {
-    ViewClass viewClass = assembler.createView(getApiClass(),
+    ViewClass viewClass = assembler.createView(getApiList(),
 					       fullClassName,
 					       getPrefix());
 

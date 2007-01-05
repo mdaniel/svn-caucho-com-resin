@@ -253,11 +253,6 @@ public class LogConfig extends RotateLog {
     if (_formatter instanceof ELFormatter) {
       ((ELFormatter)_formatter).init();
     }
-    /*
-    else if (_formatter == null) {
-      _formatter = new MessageFormatter();
-    }
-    */
 
     WriteStream os = null;
     

@@ -59,7 +59,7 @@ Configuration of the authenticator uses bean-style configuration in the
 </defun>
 
 <defun title="&lt;bean>" occur="*" version="Resin 3.0">
-<parents>resin, server, host, web-app</parents>
+<parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.config.types.Resource -->
 
 <p>&lt;bean> configures a custom bean resource and stores in JNDI.
@@ -148,7 +148,7 @@ will work like test.jsp.</p>
 </defun>
 
 <defun title="&lt;character-encoding>" occur="?" version="Resin 1.1" type="defun">
-<parents>resin, server, host, web-app</parents>
+<parents>resin, cluster, host, web-app</parents>
 <default>The default value is ISO-8859-1.</default>
 
 <p>&lt;character-encoding> specifies the default character
@@ -233,7 +233,7 @@ files before loading them.</p>
 </defun>
 
 <defun title="&lt;connector>" occur="*" version="Resin 3.0" type="defun">
-<parents>resin, server, host, web-app</parents>
+<parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.jca.ConnectorResource -->
 
 <p>&lt;connector> configures a JCA resource adapter and its
@@ -291,7 +291,7 @@ element resource-adapter {
 </defun>
 
 <defun title="&lt;database>" occur="*" version="Resin 3.0" type="defun">
-<parents>resin, server, host, web-app</parents>
+<parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.sql.DBPool -->
 
 <p>&lt;database> defines a database (i.e. DataSource)  resource.</p>
@@ -366,14 +366,14 @@ default to the host's value.</p>
 </defun>
 
 <defun title="&lt;ejb-server>" occur="*" version="Resin 3.0">
-<parents>resin, server, host, web-app</parents>
+<parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.ejb.EJBServer -->
 
 <p>Configures an EJB/JPA server.  See the CMP configuration for more details.</p>
 </defun>
 
 <defun title="&lt;env-entry>" occur="*" version="Resin 3.0" type="defun">
-<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+<parents>resin, host-default, host, web-app-default, web-app</parents>
   <!-- com.caucho.config.types.EnvEntry -->
 
 <p>&lt;env-entry> configures a JNDI scalar value
@@ -555,7 +555,7 @@ Jar files are recognized wihen they have a filename extension of
 </defun>
 
 <defun title="&lt;log>" occur="*" type="defun">
-<parents>resin, server, host, web-app</parents>
+<parents>resin, cluster, host, web-app</parents>
 
 <p>&lt;log> configures JDK 1.4 java.util.logger handler.</p>
 
@@ -565,7 +565,7 @@ log in detail.</p>
 </defun>
 
 <defun title="&lt;logger>" occur="*">
-<parents>resin, server, host, web-app</parents>
+<parents>resin, cluster, host, web-app</parents>
 
 <p>&lt;log> configures JDK 1.4 java.util.logger Logger level.</p>
 
@@ -770,7 +770,7 @@ use the enclosed configuration.</p>
 </defun>
 
 <defun title="&lt;resource>" occur="*" version="Resin 3.0" type="defun">
-<parents>resin, server, host, web-app</parents>
+<parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.config.types.Resource -->
 
 <p>&lt;resource> configures a custom bean resource and stores in JNDI.
@@ -832,7 +832,7 @@ r_resource = element resource {
 </defun> 
 
 <defun title="&lt;resource-deploy>" occur="*" version="Resin 3.0" type="defun">
-<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+<parents>resin, cluster, host-default, host, web-app-default, web-app</parents>
   <!-- com.caucho.jca.ResourceDeploy -->
 
 <p>&lt;resource-deploy> defines a deployment directory for .rar files.</p>
@@ -918,7 +918,7 @@ special compilation steps (in contrast with compiling-loader.)</p>
 </defun>
 
 <defun title="&lt;stderr-log>" occur="?" type="defun">
-<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+<parents>resin, cluster, host-default, host, web-app-default, web-app</parents>
 
 <p>Configures the destination for <code>System.err</code>.</p>
 
@@ -928,7 +928,7 @@ stderr-log in detail.</p>
 </defun>
 
 <defun title="&lt;stdout-log>" occur="?" type="defun">
-<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+<parents>resin, cluster, host-default, host, web-app-default, web-app</parents>
 
 <p>Configures the destination for <code>System.out</code>.</p>
 
@@ -950,7 +950,7 @@ had called <a href="javadoc|java.lang.System|setProperty(String,String)"/> befor
 </defun>
 
 <defun title="&lt;temp-dir>" occur="?" version="Resin 1.1" type="defun">
-<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+<parents>resin, cluster, host-default, host, web-app-default, web-app</parents>
 <default>Defaults to <var>WEB-INF/tmp</var></default>
 
 <p>&lt;temp-dir> configures the application temp directory.

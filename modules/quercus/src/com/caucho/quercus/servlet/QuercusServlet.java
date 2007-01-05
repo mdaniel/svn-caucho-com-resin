@@ -42,6 +42,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 
+import javax.naming.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.sql.DataSource;
@@ -202,6 +203,25 @@ public class QuercusServlet
     throws ServletException
   {
     super.init(config);
+
+    String database = config.getInitParameter("database");
+
+    System.out.println("DB: " + database);
+    if (database != null) {
+      try {
+	Context ic = new InitialContext();
+	DataSource ds;
+	
+	if (! database.startsWith("java:comp"))
+	  ds = (DataSource) ic.lookup("java:comp/env/" + database);
+	else
+	  ds = (DataSource) ic.lookup(database);
+
+	getQuercus().setDatabase(ds);
+      } catch (Exception e) {
+	throw new ServletException(e);
+      }
+    }
     
     initImpl(config);
   }

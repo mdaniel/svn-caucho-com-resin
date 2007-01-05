@@ -187,8 +187,12 @@ public class Bean {
     throws ConfigException
   {
     try {
-      bean.setEJBClassWrapper(type);
+      bean.setEJBClass(type.getName());
+      bean.init();
 
+      _ejbManager.getConfig().setBeanConfig(bean.getEJBName(), bean);
+
+      /*
       String name = _name;
 
       if (name == null || name.equals(""))
@@ -288,6 +292,7 @@ public class Bean {
       bean.init();
 
       _ejbManager.getConfig().setBeanConfig(bean.getEJBName(), bean);
+      */
     } catch (ConfigException e) {
       throw e;
     } catch (RuntimeException e) {

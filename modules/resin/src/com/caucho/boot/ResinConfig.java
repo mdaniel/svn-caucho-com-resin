@@ -38,7 +38,8 @@ import com.caucho.vfs.Path;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 
-public class ResinConfig implements EnvironmentBean {
+public class ResinConfig implements EnvironmentBean
+{
   private ArrayList<InitProgram> _clusterDefaultList
     = new ArrayList<InitProgram>();
   
@@ -47,17 +48,25 @@ public class ResinConfig implements EnvironmentBean {
 
   private ClassLoader _classLoader;
 
+  private ResinWatchdogManager _manager;
   private Path _resinHome;
   private Path _rootDirectory;
 
-  ResinConfig(Path resinHome, Path serverRoot)
+  ResinConfig(ResinWatchdogManager manager, Path resinHome, Path serverRoot)
   {
+    _manager = manager;
+    
     _resinHome = resinHome;
     _rootDirectory = serverRoot;
 
     _classLoader = new EnvironmentClassLoader();
   }
 
+  public ResinWatchdogManager getManager()
+  {
+    return _manager;
+  }
+  
   public Path getResinHome()
   {
     return _resinHome;
@@ -123,12 +132,12 @@ public class ResinConfig implements EnvironmentBean {
   {
   }
     
-    /**
-     * Ignore items we can't understand.
-     */
-    public void setSecurityManager(BuilderProgram program)
-    {
-    }
+  /**
+   * Ignore items we can't understand.
+   */
+  public void setSecurityManager(BuilderProgram program)
+  {
+  }
 
   /**
    * Finds a server.

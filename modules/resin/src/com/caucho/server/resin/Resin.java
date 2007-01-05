@@ -830,6 +830,10 @@ public class Resin implements EnvironmentBean, SchemaBean
 
 	i += 2;
       }
+      else if (argv[i].equals("-log-directory")
+               || argv[i].equals("--log-directory")) {
+        i += 2;
+      }
       else if (argv[i].equals("-config-server") ||
                argv[i].equals("--config-server")) {
         _configServer = argv[i + 1];

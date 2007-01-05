@@ -32,6 +32,7 @@ import com.caucho.config.BuilderProgram;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.config.types.*;
 import com.caucho.j2ee.J2EEVersion;
 import com.caucho.java.WorkDir;
 import com.caucho.lifecycle.Lifecycle;
@@ -201,9 +202,9 @@ public class AppClient implements EnvironmentBean
     System.setProperty(Context.SECURITY_CREDENTIALS, callback.getPassword());
   }
 
-  public ClientEjbRef createEjbRef()
+  public EjbRef createEjbRef()
   {
-    return new ClientEjbRef(_ejbContext);
+    return new EjbRef(_ejbContext);
   }
 
   public void init()

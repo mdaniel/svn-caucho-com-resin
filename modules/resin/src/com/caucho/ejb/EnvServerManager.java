@@ -64,9 +64,11 @@ import java.util.logging.Logger;
 /**
  * Manages the beans in an environment.
  */
-public class EnvServerManager implements EnvironmentListener {
+public class EnvServerManager implements EnvironmentListener
+{
   private static final L10N L = new L10N(EnvServerManager.class);
-  protected static final Logger log = Log.open(EnvServerManager.class);
+  protected static final Logger log
+    = Logger.getLogger(EnvServerManager.class.getName());
 
   /*
   private static EnvironmentLocal<EnvServerManager> _localServerManager
@@ -429,6 +431,30 @@ public class EnvServerManager implements EnvironmentListener {
 
       return _entityCache.get(_entityKey);
     }
+  }
+
+  public Object getLocalByInterface(Class type)
+  {
+    for (AbstractServer server : _serverMap.values()) {
+      Object local = server.getClientObject();
+
+      if (local != null && type.isAssignableFrom(local.getClass()))
+	return local;
+    }
+
+    return null;
+  }
+
+  public Object getRemoteByInterface(Class type)
+  {
+    for (AbstractServer server : _serverMap.values()) {
+      Object remote = server.getRemoteObject();
+
+      if (remote != null && type.isAssignableFrom(remote.getClass()))
+	return remote;
+    }
+
+    return null;
   }
 
   /**

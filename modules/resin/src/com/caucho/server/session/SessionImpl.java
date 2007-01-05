@@ -942,6 +942,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   public void load(ObjectInputStream in)
     throws IOException
   {
+    HttpSessionEvent event = null;
+    
     synchronized (_values) {
       unbind();
 
@@ -954,8 +956,21 @@ public class SessionImpl implements HttpSession, CacheListener {
 	  String key = in.readUTF();
 	  Object value = in.readObject();
 
-	  if (value != null)
-	    setAttribute(key, value);
+	  if (value != null) {
+	    synchronized (_values) {
+	      _values.put(key, value);
+	    }
+	      
+	    if (value instanceof HttpSessionActivationListener) {
+	      HttpSessionActivationListener listener
+		= (HttpSessionActivationListener) value;
+
+	      if (event == null)
+		event = new HttpSessionEvent(this);
+
+	      listener.sessionDidActivate(event);
+	    }
+	  }
 	}
       } catch (Exception e) {
 	e.printStackTrace();
@@ -967,8 +982,10 @@ public class SessionImpl implements HttpSession, CacheListener {
       listeners = _manager.getActivationListeners();
       for (int i = 0; listeners != null && i < listeners.size(); i++) {
 	HttpSessionActivationListener listener = listeners.get(i);
-	HttpSessionEvent event = new HttpSessionEvent(this);
 
+	if (event == null)
+	  event = new HttpSessionEvent(this);
+	
 	listener.sessionDidActivate(event);
       }
     }
@@ -988,6 +1005,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   public void store(ObjectOutputStream out)
     throws IOException
   {
+    HttpSessionEvent event = null;
+    
     synchronized (_values) {
       Set set = getEntrySet();
 
@@ -1002,7 +1021,10 @@ public class SessionImpl implements HttpSession, CacheListener {
       listeners = _manager.getActivationListeners();
       for (int i = 0; listeners != null && i < listeners.size(); i++) {
 	HttpSessionActivationListener listener = listeners.get(i);
-	HttpSessionEvent event = new HttpSessionEvent(this);
+
+	if (event == null)
+	  event = new HttpSessionEvent(this);
+	
 	listener.sessionWillPassivate(event);
       }
 
@@ -1027,6 +1049,16 @@ public class SessionImpl implements HttpSession, CacheListener {
 	if (ignoreNonSerializable && ! (value instanceof Serializable)) {
 	  out.writeObject(null);
 	  continue;
+	}
+	      
+	if (value instanceof HttpSessionActivationListener) {
+	  HttpSessionActivationListener listener
+	    = (HttpSessionActivationListener) value;
+
+	  if (event == null)
+	    event = new HttpSessionEvent(this);
+
+	  listener.sessionWillPassivate(event);
 	}
 
 	try {

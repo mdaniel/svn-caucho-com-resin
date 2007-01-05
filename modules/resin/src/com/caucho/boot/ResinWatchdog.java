@@ -133,6 +133,11 @@ public class ResinWatchdog extends AbstractManagedObject
     return _id;
   }
 
+  public ResinWatchdogManager getManager()
+  {
+    return _cluster.getResin().getManager();
+  }
+
   public void setVerbose(boolean isVerbose)
   {
     _isVerbose = isVerbose;
@@ -469,7 +474,7 @@ public class ResinWatchdog extends AbstractManagedObject
 	  else
 	    name = "jvm-" + _id + ".log";
 
-	  Path jvmPath = rootDirectory.lookup("log/" + name);
+	  Path jvmPath = getManager().getLogDirectory().lookup(name);
 
 	  try {
 	    jvmPath.getParent().mkdirs();

@@ -35,8 +35,8 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
-public class SimpleXMLElementArray extends ArrayValueImpl {
-
+public class SimpleXMLElementArray extends ArrayValueImpl
+{
   /**
    * This class exists solely because in PHP
    * $xml->bar[0]['attrName'] is equiv. to $xml->bar['attrName']
@@ -95,6 +95,18 @@ public class SimpleXMLElementArray extends ArrayValueImpl {
   public Value toValue()
   {
     return super.get(LongValue.ZERO).toValue();
+  }
+
+  @Override
+  public long toLong()
+  {
+    return super.get(LongValue.ZERO).toLong();
+  }
+
+  @Override
+  public double toDouble()
+  {
+    return super.get(LongValue.ZERO).toDouble();
   }
 
   public Value copy()

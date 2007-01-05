@@ -29,7 +29,8 @@
 
 package com.caucho.quercus.lib.file;
 
-public interface LockableStream extends BinaryStream {
+public interface LockableStream extends BinaryStream
+{
   /**
    * Lock the shared advisory lock.
    */

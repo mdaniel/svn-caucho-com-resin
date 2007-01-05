@@ -39,8 +39,8 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.naming.*;
+import javax.rmi.*;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,6 +56,8 @@ public class EjbRef implements ObjectProxy {
   private static final Logger log
     = Logger.getLogger(EjbRef.class.getName());
 
+  private Context _context;
+  
   private final Path _modulePath;
 
   private String _ejbRefName;
@@ -69,6 +71,13 @@ public class EjbRef implements ObjectProxy {
 
   public EjbRef()
   {
+    _modulePath = Vfs.getPwd();
+  }
+
+
+  public EjbRef(Context context)
+  {
+    _context = context;
     _modulePath = Vfs.getPwd();
   }
 
@@ -195,30 +204,29 @@ public class EjbRef implements ObjectProxy {
     if (_ejbLink != null) {
       EJBServer server = EJBServer.getLocal();
 
+      /*
       if (server == null)
         throw new ConfigException(L.l("{0} requires a local {1}", "<ejb-link>", "<ejb-server>"));
+      */
 
       bind = true;
     }
     else {
       if (_jndiName != null) {
-        _jndiName = Jndi.getFullName(_jndiName);
+        String fullJndiName = Jndi.getFullName(_jndiName);
 
-        if (! _jndiName.equals(fullEjbRefName))
+        if (! fullJndiName.equals(fullEjbRefName))
           bind = true;
       }
     }
 
     if (bind) {
-      try {
-        (new InitialContext()).unbind(fullEjbRefName);
-      }
-      catch (Exception ex) {
-        log.log(Level.FINEST, ex.toString(), ex);
-      }
-
-      Jndi.bindDeep(fullEjbRefName, this);
+      Jndi.rebindDeep(fullEjbRefName, this);
     }
+
+    EjbRefContext context = EjbRefContext.createLocal();
+
+    context.add(this);
 
     if (log.isLoggable(Level.FINER))
       log.log(Level.FINER, L.l("{0} init", this));
@@ -238,6 +246,39 @@ public class EjbRef implements ObjectProxy {
     return _target;
   }
 
+  public Object getByType(Class type)
+  {
+    try {
+      if (_home != null) {
+	if (type.isAssignableFrom(_home))
+	  return createObject(null);
+      }
+    
+      if (_remote != null) {
+	if (type.isAssignableFrom(_remote))
+	  return createObject(null);
+      }
+
+      if (_jndiName != null) {
+	Object target;
+
+	System.out.println("LOOKUP: " + _jndiName + " " + _context);
+	if (_context != null)
+	  target = _context.lookup(_jndiName);
+	else
+	  target = Jndi.lookup(_jndiName);
+	System.out.println("TGT: " + target);
+
+	if (target != null)
+	  return PortableRemoteObject.narrow(target, type);
+      }
+    } catch (Exception e) {
+      // log.log(Level.FINER, e.toString(), e);
+    }
+    
+    return null;
+  }
+
   private void resolve()
     throws NamingException
   {
@@ -245,7 +286,10 @@ public class EjbRef implements ObjectProxy {
       log.log(Level.FINEST, L.l("{0} resolving", this));
 
     if (_jndiName != null) {
-      _target = Jndi.lookup(_jndiName);
+      if (_context != null)
+	_target = _context.lookup(_jndiName);
+      else
+	_target = Jndi.lookup(_jndiName);
 
       if (_target == null)
         if (_jndiName.equals(_ejbRefName))

@@ -39,7 +39,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Represents a Quercus file open for reading
@@ -113,7 +113,7 @@ public class FileInput extends ReadStreamInput implements LockableStream {
   public boolean lock(boolean shared, boolean block)
   {
     if (! (getPath() instanceof FilePath))
-      return false;
+      return true;
 
     try {
       File file = ((FilePath) getPath()).getFile();
@@ -130,7 +130,9 @@ public class FileInput extends ReadStreamInput implements LockableStream {
         _fileLock = _fileChannel.tryLock(0, Long.MAX_VALUE, shared);
 
       return _fileLock != null;
-    } catch (IOException e) {
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      
       return false;
     }
   }
@@ -141,13 +143,16 @@ public class FileInput extends ReadStreamInput implements LockableStream {
   public boolean unlock()
   {
     try {
-      if (_fileLock != null) {
-        _fileLock.release();
+      FileLock lock = _fileLock;
+      _fileLock = null;
+      
+      if (lock != null) {
+        lock.release();
 
         return true;
       }
 
-      return false;
+      return true;
     } catch (IOException e) {
       return false;
     }
@@ -156,6 +161,29 @@ public class FileInput extends ReadStreamInput implements LockableStream {
   public Value stat()
   {
     return FileModule.statImpl(_env, getPath());
+  }
+
+  public void close()
+  {
+    try {
+      FileLock lock = _fileLock;
+      _fileLock = null;
+      
+      if (lock != null)
+	lock.release();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+    
+    try {
+      FileChannel channel = _fileChannel;
+      _fileChannel = null;
+      
+      if (channel != null)
+	channel.close();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   /**

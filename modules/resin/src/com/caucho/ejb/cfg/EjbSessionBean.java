@@ -158,13 +158,17 @@ public class EjbSessionBean extends EjbBean {
 
     try {
       if (getRemoteHome() != null)
-	validateHome(getRemoteHome(), getRemote());
-      if (getLocalHome() != null)
-	validateHome(getLocalHome(), getLocal());
-      if (getRemote() != null)
-	validateRemote(getRemote());
-      if (getLocal() != null)
-	validateRemote(getLocal());
+	validateHome(getRemoteHome(), getRemoteList().get(0));
+      
+      if (getLocalHome() != null) {
+	validateHome(getLocalHome(), getLocalList().get(0));
+      }
+      
+      for (JClass remoteApi : getRemoteList())
+	validateRemote(remoteApi);
+
+      for (JClass localApi : getLocalList())
+	validateRemote(localApi);
 
       if (getEJBClass() == null) {
 	throw error(L.l("'{0}' does not have a defined ejb-class.  Session beans must have an ejb-class.",
@@ -191,6 +195,71 @@ public class EjbSessionBean extends EjbBean {
       J2EEManagedObject.register(new StatelessSessionBean(this));
     else
       J2EEManagedObject.register(new StatefulSessionBean(this));
+  }
+
+  /**
+   * Configure initialization.
+   */
+  public void initIntrospect()
+    throws ConfigException
+  {
+    JClass type = getEJBClassWrapper();
+    
+    if (! type.isAnnotationPresent(Stateful.class)
+	&& ! type.isAnnotationPresent(Stateless.class))
+      return;
+    
+    if (_localHome != null || _localList.size() != 0
+	|| _remoteHome != null || _remoteList.size() != 0)
+      return;
+
+    JClass []ifs = type.getInterfaces();
+
+    ArrayList<JClass> interfaceList = new ArrayList<JClass>();
+
+    for (int i = 0; i < ifs.length; i++) {
+      JAnnotation local = ifs[i].getAnnotation(Local.class);
+
+      if (local != null) {
+	setLocalWrapper(ifs[i]);
+	continue;
+      }
+      
+      JAnnotation remote = ifs[i].getAnnotation(Remote.class);
+
+      if (remote != null || ifs[i].isAssignableTo(java.rmi.Remote.class)) {
+	setRemoteWrapper(ifs[i]);
+	continue;
+      }
+
+      if (ifs[i].getName().equals("java.io.Serializable"))
+	continue;
+
+      if (ifs[i].getName().equals("java.io.Externalizable"))
+	continue;
+	
+      if (ifs[i].getName().startsWith("javax.ejb"))
+	continue;
+	
+      if (ifs[i].getName().equals("java.rmi.Remote"))
+	continue;
+
+      if (! interfaceList.contains(ifs[i]))
+	interfaceList.add(ifs[i]);
+    }
+
+    if (getLocalList().size() != 0 || getRemoteList().size() != 0) {
+    }
+    else if (interfaceList.size() == 0)
+      throw new ConfigException(L.l("'{0}' has no interfaces.  Can't currently generate.",
+				    type.getName()));
+    else if (interfaceList.size() != 1)
+      throw new ConfigException(L.l("'{0}' has multiple interfaces, but none are marked as @Local or @Remote.\n{1}",
+				    type.getName(),
+				    interfaceList.toString()));
+    else {
+      setLocalWrapper(interfaceList.get(0));
+    }
   }
 
   /**
@@ -262,9 +331,9 @@ public class EjbSessionBean extends EjbBean {
     if (remoteHome != null)
       server.setRemoteHomeClass(remoteHome.getJavaClass());
     
-    JClass remote = getRemote();
-    if (remote != null)
-      server.setRemoteObjectClass(remote.getJavaClass());
+    ArrayList<JClass> remoteList = getRemoteList();
+    if (remoteList.size() > 0)
+      server.setRemoteObjectClass(remoteList.get(0).getJavaClass());
 
     Class contextImplClass = javaGen.loadClass(getSkeletonName());
     
@@ -340,7 +409,13 @@ public class EjbSessionBean extends EjbBean {
       setTransactionType("Container");
     }
 
-    introspectBean(type, stateless.getString("name"));
+    String name;
+    if (stateless != null)
+      name = stateless.getString("name");
+    else
+      name = type.getClass().getName();
+    
+    introspectBean(type, name);
   }
 
   private void configureStateful(JClass type)

@@ -3134,6 +3134,8 @@ public class QuercusParser {
       return _factory.createString(_parserLocation.getFileName());
     else if (name.equals("__LINE__"))
       return _factory.createLong(_parserLocation.getLineNumber());
+    else if (name.equals("__CLASS__") && _quercusClass != null)
+      return _factory.createString(_quercusClass.getName());
     else
       return _factory.createConst(name);
   }

@@ -1785,7 +1785,7 @@ public class WebApp extends ServletContextImpl
       uri = "/";
 
     else
-      throw new IllegalArgumentException(L.l("getContext URI `{0}' must be absolute.", uri));
+      throw new IllegalArgumentException(L.l("getContext URI '{0}' must be absolute.", uri));
 
     try {
       if (_parent != null)
@@ -2012,7 +2012,7 @@ public class WebApp extends ServletContextImpl
     if (url == null)
       throw new IllegalArgumentException(L.l("request dispatcher url can't be null."));
     else if (! url.startsWith("/"))
-      throw new IllegalArgumentException(L.l("request dispatcher url `{0}' must be absolute", url));
+      throw new IllegalArgumentException(L.l("request dispatcher url '{0}' must be absolute", url));
 
     RequestDispatcherImpl disp = getDispatcherCache().get(url);
 
@@ -2115,7 +2115,7 @@ public class WebApp extends ServletContextImpl
     if (url == null)
       throw new IllegalArgumentException(L.l("request dispatcher url can't be null."));
     else if (! url.startsWith("/"))
-      throw new IllegalArgumentException(L.l("request dispatcher url `{0}' must be absolute", url));
+      throw new IllegalArgumentException(L.l("request dispatcher url '{0}' must be absolute", url));
 
     Invocation loginInvocation = new Invocation();
     Invocation errorInvocation = new Invocation();

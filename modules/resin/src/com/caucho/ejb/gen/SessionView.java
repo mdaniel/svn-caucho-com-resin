@@ -35,6 +35,7 @@ import com.caucho.java.gen.CallChain;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Generates the skeleton for a session view.
@@ -42,19 +43,22 @@ import java.io.IOException;
 public class SessionView extends ViewClass {
   private static L10N L = new L10N(SessionView.class);
 
-  private JClass _remoteClass;
+  private ArrayList<JClass> _apiList;
   private String _prefix;
   private String _contextClassName;
   private boolean _isStateless;
   
-  public SessionView(JClass remoteClass,
+  public SessionView(ArrayList<JClass> apiList,
 		     String contextClassName,
 		     String prefix,
 		     boolean isStateless)
   {
     super(prefix, isStateless ? "StatelessObject" : "SessionObject");
 
-    addInterfaceName(remoteClass.getName());
+    for (JClass api : apiList)
+      addInterfaceName(api.getName());
+
+    _apiList = apiList;
 
     _contextClassName = contextClassName;
     _prefix = prefix;

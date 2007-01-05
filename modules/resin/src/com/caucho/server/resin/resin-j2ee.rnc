@@ -74,9 +74,9 @@ r_ejb-ref = element ejb-ref {
   & r_deployment-extension*
 }
 
-r_ejb-ref-name = element ejb-ref-name {
-  r_jndi-name-Type
-}
+r_ejb-ref-name =
+  attribute ejb-ref-name { r_jndi-name-Type }
+  | element ejb-ref-name { r_jndi-name-Type }
 
 r_ejb-ref-type = element ejb-ref-type {
   "Entity" | "Session"

@@ -32,7 +32,9 @@ package com.caucho.config.j2ee;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.NodeBuilder;
+import com.caucho.config.types.*;
 import com.caucho.soa.client.WebServiceClient;
+import com.caucho.ejb.EjbServerManager;
 import com.caucho.util.L10N;
 import com.caucho.naming.Jndi;
 
@@ -50,20 +52,23 @@ public class EjbInjectProgram extends BuilderProgram
   private static final L10N L
     = new L10N(EjbInjectProgram.class);
 
-  private String _jndiName;
+  private String _name;
+  private String _beanName;
+  private String _mappedName;
   private Class _type;
   private AccessibleInject _field;
-  private String _publishJndiName;
 
-  EjbInjectProgram(String jndiName,
-		   String publishJndiName,
+  EjbInjectProgram(String name,
+		   String beanName,
+		   String mappedName,
 		   Class type,
 		   AccessibleInject field)
     throws ConfigException
   {
     try {
-      _jndiName = jndiName;
-      _publishJndiName = publishJndiName;
+      _name = name;
+      _beanName = beanName;
+      _mappedName = mappedName;
       
       _type = type;
 
@@ -79,10 +84,63 @@ public class EjbInjectProgram extends BuilderProgram
     throws ConfigException
   {
     try {
-      Object value = new InitialContext().lookup(_jndiName);
+      Object value = null;
 
-      if (value == null)
+      if (_mappedName != null && ! "".equals(_mappedName)) {
+	value = new InitialContext().lookup(_mappedName);
+	
+	if (value == null) {
+	  log.fine(L.l("'{0}' is an unknown @EJB jndi-name.", _mappedName));
+	  return;
+	}
+      }
+      else {
+	EjbServerManager manager = EjbServerManager.getLocal();
+
+	if (manager != null) {
+	  if (_beanName != null && ! "".equals(_beanName)) {
+	    try {
+	      value = new InitialContext().lookup(manager.getRemoteJndiPrefix() + _beanName);
+	    } catch (NamingException e) {
+	      log.log(Level.FINEST, e.toString(), e);
+	    }
+	    
+	    try {
+	      if (value == null)
+		value = new InitialContext().lookup(manager.getLocalJndiPrefix() + _beanName);
+	    } catch (NamingException e) {
+	      log.log(Level.FINEST, e.toString(), e);
+	    }
+	  }
+	      
+	  if (value == null)
+	    value = manager.getLocalByInterface(_type);
+
+	  if (value == null)
+	    value = manager.getRemoteByInterface(_type);
+	}
+      }
+
+      if (value == null) {
+	EjbRefContext context = EjbRefContext.getLocal();
+
+	if (context != null)
+	  value = context.findByType(_type);
+      }
+
+      if (value == null) {
+	try {
+	  if (_name != null && ! "".equals(_name))
+	    value = new InitialContext().lookup("java:comp/env/" + _name);
+	} catch (NamingException e) {
+	  log.finest(e.toString());
+	}
+      }
+	
+      if (value == null) {
+	log.fine(L.l("'{0}' is an unknown @EJB.", _type.getName()));
 	return;
+      }
 
       if (! _type.isAssignableFrom(value.getClass())) {
 	value = PortableRemoteObject.narrow(value, _type);
@@ -90,7 +148,7 @@ public class EjbInjectProgram extends BuilderProgram
 
       if (! _type.isAssignableFrom(value.getClass())) {
 	throw new ConfigException(L.l("EJB at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
-				      _jndiName,
+				      _name,
 				      value.getClass().getName(),
 				      _field.getName(),
 				      _type.getName()));
@@ -99,8 +157,9 @@ public class EjbInjectProgram extends BuilderProgram
       _field.inject(bean, value);
 
       // XXX: tck??? ejb30.bb.session.stateless.bm.allowed
-      if (_publishJndiName != null) {
-	Jndi.rebindDeepShort(_publishJndiName, value);
+      if (_name != null && ! "".equals(_name)) {
+	log.fine("@EJB binding " + _name + "in JNDI for " + value);
+	Jndi.rebindDeepShort(_name, value);
       }
     } catch (RuntimeException e) {
       throw e;

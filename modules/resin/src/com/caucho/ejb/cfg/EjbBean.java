@@ -104,9 +104,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   private JClass _ejbClass;
   
   protected JClass _remoteHome;
-  protected JClass _remote;
+  protected ArrayList<JClass> _remoteList = new ArrayList<JClass>();
+  
   protected JClass _localHome;
-  protected JClass _local;
+  protected ArrayList<JClass> _localList = new ArrayList<JClass>();
 
   protected EjbView _remoteHomeView;
   protected EjbView _remoteView;
@@ -468,13 +469,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   {
     JClass remote = _jClassLoader.forName(typeName);
 
-    _remote = remote;
-
     if (! remote.isPublic())
       throw error(L.l("'{0}' must be public.  <business-remote> interfaces must be public.", remote.getName()));
     
     if (! remote.isInterface())
       throw error(L.l("'{0}' must be an interface. <business-remote> interfaces must be interfaces.", remote.getName()));
+    
+    if (! _remoteList.contains(remote))
+      _remoteList.add(remote);
   }
 
   /**
@@ -483,25 +485,25 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public void setRemoteWrapper(JClass remote)
     throws ConfigException
   {
-    _remote = remote;
-
-    if (! _remote.isPublic())
+    if (! remote.isPublic())
       throw error(L.l("'{0}' must be public.  <remote> interfaces must be public.", remote.getName()));
     
-    if (! _remote.isInterface())
+    if (! remote.isInterface())
       throw error(L.l("'{0}' must be an interface. <remote> interfaces must be interfaces.", remote.getName()));
 
     if (! remote.isAssignableTo(EJBObject.class) && ! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBObject.  <remote> interfaces must extend javax.ejb.EJBObject.", remote.getName()));
     
+    if (! _remoteList.contains(remote))
+      _remoteList.add(remote);
   }
 
   /**
    * Gets the remote interface class.
    */
-  public JClass getRemote()
+  public ArrayList<JClass> getRemoteList()
   {
-    return _remote;
+    return _remoteList;
   }
 
   /**
@@ -509,11 +511,13 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
    */
   public Class getRemoteClass()
   {
-    if (_remote == null)
+    if (_remoteList.size() < 1)
       return null;
     
     try {
-      return Class.forName(_remote.getName(), false, getClassLoader());
+      JClass remote = _remoteList.get(0);
+      
+      return Class.forName(remote.getName(), false, getClassLoader());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -571,13 +575,14 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   {
     JClass local = _jClassLoader.forName(typeName);
 
-    _local = local;
-
     if (! local.isPublic())
       throw error(L.l("'{0}' must be public.  <local> interfaces must be public.", local.getName()));
     
     if (! local.isInterface())
       throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", local.getName()));
+
+    if (! _localList.contains(local))
+      _localList.add(local);
   }
 
   /**
@@ -586,8 +591,6 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public void setLocalWrapper(JClass local)
     throws ConfigException
   {
-    _local = local;
-
     if (! local.isPublic())
       throw error(L.l("'{0}' must be public.  <local> interfaces must be public.", local.getName()));
     
@@ -596,14 +599,17 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
     if (! local.isAssignableTo(EJBLocalObject.class) && ! isAllowPOJO())
       throw new ConfigException(L.l("'{0}' must extend EJBLocalObject.  <local> interfaces must extend javax.ejb.EJBLocalObject.", local.getName()));
+
+    if (! _localList.contains(local))
+      _localList.add(local);
   }
 
   /**
    * Gets the local interface class.
    */
-  public JClass getLocal()
+  public ArrayList<JClass> getLocalList()
   {
-    return _local;
+    return _localList;
   }
 
   /**
@@ -819,7 +825,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     throws ConfigException
   {
     try {
-      introspect();
+      initIntrospect();
       
       assembleBeanMethods();
       
@@ -843,7 +849,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Configure initialization.
    */
-  public void introspect()
+  public void initIntrospect()
     throws ConfigException
   {
   }
@@ -867,8 +873,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       _remoteHomeView.introspect();
     }
     
-    if (_remote != null) {
-      _remoteView = createObjectView(_remote, "Remote");
+    if (_remoteList.size() > 0) {
+      _remoteView = createObjectView(_remoteList, "Remote");
       _remoteView.introspect();
     }
 
@@ -877,8 +883,8 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
       _localHomeView.introspect();
     }
     
-    if (_local != null) {
-      _localView = createObjectView(_local, "Local");
+    if (_localList.size() > 0) {
+      _localView = createObjectView(_localList, "Local");
       _localView.introspect();
     }
   }
@@ -895,10 +901,11 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Creates an object view.
    */
-  protected EjbObjectView createObjectView(JClass apiClass, String prefix)
+  protected EjbObjectView createObjectView(ArrayList<JClass> apiList,
+					   String prefix)
     throws ConfigException
   {
-    return new EjbObjectView(this, apiClass, prefix);
+    return new EjbObjectView(this, apiList, prefix);
   }
 
   /**
@@ -1263,14 +1270,16 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     if (_remoteHome != null)
       assembler.addDependency(new JClassDependency(_remoteHome));
 
-    if (_remote != null)
-      assembler.addDependency(new JClassDependency(_remote));
+    for (JClass remote : _remoteList) {
+      assembler.addDependency(new JClassDependency(remote));
+    }
 
     if (_localHome != null)
       assembler.addDependency(new JClassDependency(_localHome));
 
-    if (_local != null)
-      assembler.addDependency(new JClassDependency(_local));
+    for (JClass local : _localList) {
+      assembler.addDependency(new JClassDependency(local));
+    }
 
     return assembler.getAssembledGenerator();
   }
@@ -1624,6 +1633,29 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   /**
    * Finds the method in the class.
    *
+   * @param apiList owning class
+   * @param name method name to match
+   * @param params method parameters to match
+   *
+   * @return the matching method or null if non matches.
+   */
+  public static JMethod getMethod(ArrayList<JClass> apiList,
+				  String name,
+				  JClass []param)
+  {
+    for (int i = 0; i < apiList.size(); i++) {
+      JMethod method = getMethod(apiList.get(i), name, param);
+
+      if (method != null)
+	return method;
+    }
+
+    return null;
+  }
+  
+  /**
+   * Finds the method in the class.
+   *
    * @param cl owning class
    * @param name method name to match
    * @param params method parameters to match
@@ -1705,6 +1737,26 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     }
 
     return null;
+  }
+  
+  /**
+   * Returns all the method in the class.
+   */
+  static JMethod []getMethods(ArrayList<JClass> apiList)
+  {
+    ArrayList<JMethod> methodList = new ArrayList<JMethod>();
+
+    for (JClass api : apiList) {
+      for (JMethod method : getMethods(api)) {
+	if (! methodList.contains(method))
+	  methodList.add(method);
+      }
+    }
+
+    JMethod []methods = new JMethod[methodList.size()];
+    methodList.toArray(methods);
+
+    return methods;
   }
   
   /**

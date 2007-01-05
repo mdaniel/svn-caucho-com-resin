@@ -45,9 +45,9 @@ javaee_ejb-local-ref = element ejb-local-ref {
 
   javaee_ejb-ref-type,
 
-  javaee_local-home,
+  javaee_local-home?,
 
-  javaee_local,
+  javaee_local?,
 
   javaee_ejb-link?
 }

@@ -52,7 +52,7 @@ public class EjbView {
 
   private EjbBean _bean;
   
-  private JClass _apiClass;
+  private ArrayList<JClass> _apiList;
 
   private String _prefix;
 
@@ -66,7 +66,19 @@ public class EjbView {
     throws ConfigException
   {
     _bean = bean;
-    _apiClass = apiClass;
+    _apiList = new ArrayList<JClass>();
+    _apiList.add(apiClass);
+    _prefix = prefix;
+  }
+
+  /**
+   * Creates a new entity bean configuration.
+   */
+  public EjbView(EjbBean bean, ArrayList<JClass> apiList, String prefix)
+    throws ConfigException
+  {
+    _bean = bean;
+    _apiList = apiList;
     _prefix = prefix;
   }
 
@@ -78,12 +90,17 @@ public class EjbView {
     return _bean;
   }
 
+  protected JClass getApiClass()
+  {
+    return _apiList.get(0);
+  }
+  
   /**
    * Returns the api class for the view.
    */
-  protected JClass getApiClass()
+  protected ArrayList<JClass> getApiList()
   {
-    return _apiClass;
+    return _apiList;
   }
 
   /**
@@ -152,7 +169,7 @@ public class EjbView {
     }
     
     // find API methods with no matching implementation method
-    JMethod []apiMethods = EjbBean.getMethods(_apiClass);
+    JMethod []apiMethods = EjbBean.getMethods(_apiList);
 
     for (int i = 0; i < apiMethods.length; i++) {
       JMethod method = apiMethods[i];
@@ -194,7 +211,7 @@ public class EjbView {
   protected EjbMethod introspectBusinessMethod(JMethod implMethod)
     throws ConfigException
   {
-    JMethod apiMethod = EjbBean.getMethod(_apiClass,
+    JMethod apiMethod = EjbBean.getMethod(_apiList,
 					  implMethod.getName(),
 					  implMethod.getParameterTypes());
 

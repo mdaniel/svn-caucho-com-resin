@@ -222,8 +222,8 @@ public class JspManager extends PageManager {
       return page;
     }
 
-    if (path == null || ! path.canRead() || path.isDirectory() ||
-        ! _autoCompile) {
+    if (path == null || ! path.canRead() || path.isDirectory()
+	|| ! _autoCompile) {
       return null;
     }
 

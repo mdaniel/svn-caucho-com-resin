@@ -79,11 +79,13 @@ public class MessageFormatter extends Formatter {
 
 	Throwable rootExn = thrown;
 
+	// server/023g
+	/*
 	for (;
 	     rootExn != null && rootExn.getCause() != null;
 	     rootExn = rootExn.getCause()) {
 	}
-	
+	*/
         rootExn.printStackTrace(os.getPrintWriter());
 	
         message = sw.getString();

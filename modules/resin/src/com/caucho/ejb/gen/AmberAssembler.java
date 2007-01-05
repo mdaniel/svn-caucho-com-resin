@@ -33,6 +33,8 @@ import com.caucho.bytecode.JClass;
 import com.caucho.ejb.cfg.EjbEntityBean;
 import com.caucho.util.L10N;
 
+import java.util.ArrayList;
+
 /**
  * Assembles the generator structure.
  */
@@ -80,11 +82,11 @@ public class AmberAssembler extends EntityAssembler {
   /**
    * Creates the instance view.
    */
-  public ViewClass createView(JClass homeClass,
+  public ViewClass createView(ArrayList<JClass> apiList,
 			      String fullClassName,
 			      String viewPrefix)
   {
-    AmberView view = new AmberView(homeClass,
+    AmberView view = new AmberView(apiList.get(0),
 				   fullClassName,
 				   viewPrefix);
 

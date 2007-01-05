@@ -84,6 +84,14 @@ public class JMethodWrapper extends JMethod {
   }
 
   /**
+   * Returns true for a protected method.
+   */
+  public boolean isProtected()
+  {
+    return Modifier.isProtected(_method.getModifiers());
+  }
+
+  /**
    * Returns true for a final method.
    */
   public boolean isFinal()

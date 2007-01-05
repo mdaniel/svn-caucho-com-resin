@@ -40,6 +40,7 @@ import com.caucho.java.gen.CallChain;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -52,7 +53,9 @@ public class EjbEntityView extends EjbObjectView {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbEntityView(EjbEntityBean bean, JClass apiClass, String prefix)
+  public EjbEntityView(EjbEntityBean bean,
+		       ArrayList<JClass> apiClass,
+		       String prefix)
     throws ConfigException
   {
     super(bean, apiClass, prefix);

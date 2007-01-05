@@ -91,9 +91,9 @@ public class EjbMessageBean extends EjbBean {
     throws ConfigException
   {
     super.setEJBClass(ejbType);
-
-    Class ejbClass = getEJBClass();
     
+    Class ejbClass = getEJBClass();
+
     if (! MessageListener.class.isAssignableFrom(ejbClass))
       throw error(L.l("'{0}' must implement javax.jms.MessageListener.  Every message-driven bean must implement MessageListener.", ejbClass.getName()));
 

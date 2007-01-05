@@ -156,6 +156,14 @@ public class JavaMethod extends JMethod {
   }
 
   /**
+   * Returns true for a protected method
+   */
+  public boolean isProtected()
+  {
+    return Modifier.isProtected(getAccessFlags());
+  }
+
+  /**
    * Returns true for a private method
    */
   public boolean isPrivate()

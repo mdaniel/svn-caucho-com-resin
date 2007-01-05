@@ -431,14 +431,16 @@ public class HostContainer implements DispatchBuilder {
    */
   public WebApp getErrorWebApp()
   {
-    if (_errorWebApp == null) {
+    if (_errorWebApp == null
+	&& _classLoader != null
+	&& ! _classLoader.isModified()) {
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
       try {
 	thread.setContextClassLoader(_classLoader);
 
 	_errorWebApp = new WebApp();
-	_errorWebApp.setAppDir(getRootDirectory());
+	_errorWebApp.setAppDir(getRootDirectory().lookup("host-error"));
 	com.caucho.server.dispatch.ServletMapping file;
 	file = new ServletMapping();
 	file.addURLPattern("/");

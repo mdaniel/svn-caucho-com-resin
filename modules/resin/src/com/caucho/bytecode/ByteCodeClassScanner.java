@@ -426,7 +426,7 @@ public class ByteCodeClassScanner {
       break;
     default:
       System.out.println("UNKNOWN: " + (char) tag);
-      throw new IllegalStateException();
+      throw new IllegalStateException("UNKNOWN TYPE: " + (char) tag);
     }
   }
 

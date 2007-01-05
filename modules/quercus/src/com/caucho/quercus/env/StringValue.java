@@ -360,30 +360,38 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public double toDouble()
   {
-    int len = length();
+    return toDouble(toString());
+  }
+
+  /**
+   * Converts to a double.
+   */
+  public static double toDouble(String s)
+  {
+    int len = s.length();
     int i = 0;
     int ch = 0;
 
-    if (i < len && ((ch = charAt(i)) == '+' || ch == '-')) {
+    if (i < len && ((ch = s.charAt(i)) == '+' || ch == '-')) {
       i++;
     }
 
-    for (; i < len && '0' <= (ch = charAt(i)) && ch <= '9'; i++) {
+    for (; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
     }
 
     if (ch == '.') {
-      for (i++; i < len && '0' <= (ch = charAt(i)) && ch <= '9'; i++) {
+      for (i++; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
       }
     }
 
     if (ch == 'e' || ch == 'E') {
       int e = i++;
 
-      if (i < len && (ch = charAt(i)) == '+' || ch == '-') {
+      if (i < len && (ch = s.charAt(i)) == '+' || ch == '-') {
         i++;
       }
 
-      for (; i < len && '0' <= (ch = charAt(i)) && ch <= '9'; i++) {
+      for (; i < len && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
       }
 
       if (i == e + 1)
@@ -393,9 +401,9 @@ abstract public class StringValue extends Value implements CharSequence {
     if (i == 0)
       return 0;
     else if (i == len)
-      return Double.parseDouble(toString());
+      return Double.parseDouble(s);
     else
-      return Double.parseDouble(substring(0, i).toString());
+      return Double.parseDouble(s.substring(0, i));
   }
 
   /**

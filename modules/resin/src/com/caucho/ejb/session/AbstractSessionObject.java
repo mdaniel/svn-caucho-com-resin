@@ -139,8 +139,6 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
    */
   public boolean isIdentical(EJBObject obj) throws RemoteException
   {
-    System.out.println("GETH: " + getHandle() + " " + obj.getHandle());
-    
     return getHandle().equals(obj.getHandle());
   }
 

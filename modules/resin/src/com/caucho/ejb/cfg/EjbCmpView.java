@@ -35,6 +35,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -49,7 +50,9 @@ public class EjbCmpView extends EjbEntityView {
   /**
    * Creates a new entity bean configuration.
    */
-  public EjbCmpView(EjbEntityBean bean, JClass apiClass, String prefix)
+  public EjbCmpView(EjbEntityBean bean,
+		    ArrayList<JClass> apiClass,
+		    String prefix)
     throws ConfigException
   {
     super(bean, apiClass, prefix);

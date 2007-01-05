@@ -89,6 +89,21 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     _args = new Args(argv);
 
     Vfs.setPwd(_args.getRootDirectory());
+    
+    Path logPath = _args.getLogDirectory().lookup("watchdog-manager.log");
+
+    RotateStream stream = RotateStream.create(logPath);
+    stream.init();
+    WriteStream out = stream.getStream();
+    out.setDisableClose(true);
+
+    EnvironmentStream.setStdout(out);
+    EnvironmentStream.setStderr(out);
+
+    LogConfig log = new LogConfig();
+    log.setName("");
+    log.setPath(logPath);
+    log.init();
 
     _resin = readConfig(_args);
 
@@ -142,6 +157,11 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
   static ResinWatchdogManager getWatchdog()
   {
     return _watchdog;
+  }
+
+  Path getLogDirectory()
+  {
+    return _args.getLogDirectory();
   }
 
   /*
@@ -250,7 +270,8 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     Config config = new Config();
 
     Vfs.setPwd(args.getRootDirectory());
-    ResinConfig resin = new ResinConfig(args.getResinHome(),
+    ResinConfig resin = new ResinConfig(this,
+					args.getResinHome(),
 					args.getRootDirectory());
 
     config.configure(resin,
@@ -264,24 +285,6 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     throws Throwable
   {
     try {
-      Path logPath = Vfs.lookup("log/watchdog-manager.log");
-
-      RotateStream stream = RotateStream.create(logPath);
-      stream.init();
-      WriteStream out = stream.getStream();
-      out.setDisableClose(true);
-
-      EnvironmentStream.setStdout(out);
-      EnvironmentStream.setStderr(out);
-
-      LogConfig log = new LogConfig();
-      log.setName("");
-      //log.setLevel("finer");
-      log.setPath(logPath);
-      log.init();
-
-      //Logger.getLogger("").setLevel(Level.FINER);
-
       ResinWatchdogManager manager = new ResinWatchdogManager(argv);
 
       manager.startServer(argv);
@@ -427,6 +430,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     private String []_argv;
 
     private Path _resinConf;
+    private Path _logDirectory;
 
     private String _serverId = "";
 
@@ -436,7 +440,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     {
       _resinHome = calculateResinHome();
       _rootDirectory = calculateResinRoot(_resinHome);
-      
+
       _argv = argv;
 
       _resinConf = _resinHome.lookup("conf/resin.conf");
@@ -452,6 +456,14 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     Path getRootDirectory()
     {
       return _rootDirectory;
+    }
+
+    Path getLogDirectory()
+    {
+      if (_logDirectory != null)
+	return _logDirectory;
+      else
+	return _rootDirectory.lookup("log");
     }
 
     Path getResinConf()
@@ -499,6 +511,11 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 	  _rootDirectory = Vfs.lookup(argv[i + 1]);
 	  i++;
 	}
+        else if ("-log-directory".equals(arg)
+                 || "--log-directory".equals(arg)) {
+          _logDirectory = _rootDirectory.lookup(argv[i + 1]);
+          i++;
+        }
 	else if ("-server".equals(arg)
 		 || "--server".equals(arg)) {
 	  _serverId = argv[i + 1];

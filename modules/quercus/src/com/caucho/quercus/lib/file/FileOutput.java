@@ -185,7 +185,7 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
   public boolean lock(boolean shared, boolean block)
   {
     if (! (getPath() instanceof FilePath))
-      return false;
+      return true;
 
     try {
       File file = ((FilePath) getPath()).getFile();
@@ -217,13 +217,16 @@ public class FileOutput extends AbstractBinaryOutput implements LockableStream {
   public boolean unlock()
   {
     try {
-      if (_fileLock != null) {
-        _fileLock.release();
+      FileLock lock = _fileLock;
+      _fileLock = null;
+      
+      if (lock != null) {
+        lock.release();
 
         return true;
       }
-
-      return false;
+      else
+	return true;
     } catch (IOException e) {
       return false;
     }

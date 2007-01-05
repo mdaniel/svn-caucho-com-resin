@@ -134,6 +134,11 @@ public class EjbServerManager
     }
   }
 
+  public static EjbServerManager getLocal()
+  {
+    return EJBServer.getLocalManager();
+  }
+
   /**
    * Returns the loader.
    */
@@ -747,6 +752,23 @@ public class EjbServerManager
     if (manager != null)
       manager.removeBeans(beans, server);
   }
+  
+  /**
+   * Returns the bean by its interface.
+   */
+  public Object getLocalByInterface(Class type)
+  {
+    return _envServerManager.getLocalByInterface(type);
+  }
+
+  /**
+   * Returns the bean by its interface.
+   */
+  public Object getRemoteByInterface(Class type)
+  {
+    return _envServerManager.getRemoteByInterface(type);
+  }
+
 
   /**
    * Handles the case where the environment is starting (after init).

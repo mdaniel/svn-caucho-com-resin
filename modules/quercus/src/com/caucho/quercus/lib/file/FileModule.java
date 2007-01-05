@@ -1013,7 +1013,7 @@ public class FileModule extends AbstractQuercusModule {
     // XXX: also wouldblock is a ref
 
     if (fileV == null) {
-      env.warning(L.l("{0} is null", "handle"));
+      env.warning(L.l("flock: file is null"));
       return false;
     }
 

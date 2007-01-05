@@ -163,6 +163,10 @@ public class ClientEjbRef implements ObjectProxy {
       // TCK: ejb30.persistence.annotations.entity
       Jndi.bindDeepShort(_ejbRefName, this);
     }
+
+    ClientEjbRefContext context = ClientEjbRefContext.createLocal();
+
+    context.add(this);
   }
 
   /**

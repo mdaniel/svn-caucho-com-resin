@@ -961,10 +961,27 @@ public class WebAppContainer
    */
   public WebAppController findByURI(String uri)
   {
-    if (CauchoSystem.isCaseInsensitive())
-      uri = uri.toLowerCase();
+    WebAppController controller = _uriToAppCache.get(uri);
 
-    return findByURIImpl(uri);
+    if (controller != null)
+      return controller;
+
+    String cleanUri = uri;
+    if (CauchoSystem.isCaseInsensitive())
+      cleanUri = cleanUri.toLowerCase();
+
+    // server/105w
+    try {
+      cleanUri = InvocationDecoder.normalizeUri(cleanUri);
+    } catch (java.io.IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    controller = findByURIImpl(cleanUri);
+
+    _uriToAppCache.put(uri, controller);
+
+    return controller;
   }
 
   /**
