@@ -36,6 +36,7 @@ import com.caucho.amber.expr.ManyToOneJoinExpr;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
+import com.caucho.amber.type.EntityType;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -99,9 +100,21 @@ abstract public class AbstractQuery {
   /**
    * Sets the from list.
    */
-  public FromItem createFromItem(Table table, String name)
+  public FromItem createFromItem(Table table,
+                                 String name)
   {
-    FromItem item = new FromItem(table, name, _fromList.size());
+    return createFromItem(null, table, name);
+  }
+
+  /**
+   * Sets the from list.
+   */
+  public FromItem createFromItem(EntityType entityType,
+                                 Table table,
+                                 String name)
+  {
+    FromItem item = new FromItem(entityType, table,
+                                 name, _fromList.size());
 
     item.setQuery(this);
 
@@ -124,7 +137,7 @@ abstract public class AbstractQuery {
         return _fromList.get(i);
     }
 
-    FromItem item = createFromItem(link.getSourceTable(), name);
+    FromItem item = createFromItem(null, link.getSourceTable(), name);
 
     JoinExpr join = new ManyToOneJoinExpr(link, item, parent);
 

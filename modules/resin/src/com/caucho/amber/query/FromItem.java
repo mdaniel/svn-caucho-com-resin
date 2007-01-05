@@ -39,6 +39,8 @@ import com.caucho.amber.type.EntityType;
 public class FromItem {
   private String _name;
 
+  private EntityType _entityType;
+
   private Table _table;
 
   private AbstractQuery _query;
@@ -58,8 +60,12 @@ public class FromItem {
   private JoinSemantics _joinSemantics
     = JoinSemantics.UNKNOWN;
 
-  FromItem(Table table, String name, int index)
+  FromItem(EntityType entityType,
+           Table table,
+           String name,
+           int index)
   {
+    _entityType = entityType;
     _table = table;
     _name = name;
     _index = index;
@@ -134,6 +140,11 @@ public class FromItem {
    */
   public EntityType getEntityType()
   {
+    if (_entityType != null) {
+      // jpa/0l12
+      return _entityType;
+    }
+
     return (EntityType) getTableType();
   }
 

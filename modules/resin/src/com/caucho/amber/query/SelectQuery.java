@@ -36,7 +36,9 @@ import com.caucho.amber.expr.JoinExpr;
 import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.expr.LoadEntityExpr;
 import com.caucho.amber.expr.ManyToOneJoinExpr;
+import com.caucho.amber.table.Column;
 import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
 
@@ -637,31 +639,60 @@ public class SelectQuery extends AbstractQuery {
       }
     }
 
-    if (hasJoinExpr || _where != null) {
-      boolean hasExpr = false;
+    // jpa/0l12
+    // if (hasJoinExpr || _where != null) {
 
-      cb.append(" where ");
+    boolean hasExpr = false;
 
-      for (int i = 0; i < _fromList.size(); i++) {
-        FromItem item = _fromList.get(i);
-        AmberExpr expr = item.getJoinExpr();
+    for (int i = 0; i < _fromList.size(); i++) {
+      FromItem item = _fromList.get(i);
 
-        if (expr != null && ! item.isOuterJoin()) {
+      EntityType entityType = item.getEntityType();
+
+      // jpa/0l44
+      if (entityType != null) {
+        Column discriminator = entityType.getDiscriminator();
+
+        // jpa/0l43
+        if (entityType instanceof SubEntityType &&
+            discriminator != null) {
+          // jpa/0l12
+
           if (hasExpr)
             cb.append(" and ");
-          hasExpr = true;
+          else {
+            cb.append(" where ");
+            hasExpr = true;
+          }
 
-          expr.generateJoin(cb);
+          cb.append("(" + discriminator.getName() + " = ");
+          cb.append("'" + entityType.getDiscriminatorValue() + "')");
         }
       }
 
-      if (_where != null) {
+      AmberExpr expr = item.getJoinExpr();
+
+      if (expr != null && ! item.isOuterJoin()) {
         if (hasExpr)
           cb.append(" and ");
-        hasExpr = true;
+        else {
+          cb.append(" where ");
+          hasExpr = true;
+        }
 
-        _where.generateWhere(cb);
+        expr.generateJoin(cb);
       }
+    }
+
+    if (_where != null) {
+      if (hasExpr)
+        cb.append(" and ");
+      else {
+        cb.append(" where ");
+        hasExpr = true;
+      }
+
+      _where.generateWhere(cb);
     }
 
     if (_groupList != null) {
@@ -676,7 +707,7 @@ public class SelectQuery extends AbstractQuery {
     }
 
     if (_having != null) {
-      boolean hasExpr = false;
+      hasExpr = false;
 
       cb.append(" having ");
 

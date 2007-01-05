@@ -277,7 +277,8 @@ public class SubId extends Id {
   public void generateMatch(JavaWriter out, String key)
     throws IOException
   {
-    out.println("return " + generateEquals("super", key) + ";");
+    // jpa/0l30
+    out.println("return " + generateEquals("__caucho_getPrimaryKey()", key) + ";");
   }
 
   /**

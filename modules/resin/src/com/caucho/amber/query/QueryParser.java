@@ -968,7 +968,16 @@ public class QueryParser {
    */
   public FromItem addFromItem(Table table)
   {
-    return addFromItem(table, createTableName());
+    return addFromItem(null, table, createTableName());
+  }
+
+  /**
+   * Adds a new FromItem.
+   */
+  public FromItem addFromItem(EntityType entityType,
+                              Table table)
+  {
+    return addFromItem(entityType, table, createTableName());
   }
 
   /**
@@ -984,10 +993,20 @@ public class QueryParser {
    */
   public FromItem addFromItem(Table table, String id)
   {
+    return addFromItem(null, table, id);
+  }
+
+  /**
+   * Adds a new FromItem.
+   */
+  public FromItem addFromItem(EntityType entityType,
+                              Table table,
+                              String id)
+  {
     if (id == null)
       id = createTableName();
 
-    FromItem item = _query.createFromItem(table, id);
+    FromItem item = _query.createFromItem(entityType, table, id);
 
     item.setJoinSemantics(_joinSemantics);
 

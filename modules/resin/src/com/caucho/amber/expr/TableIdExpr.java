@@ -39,7 +39,7 @@ import com.caucho.util.L10N;
  */
 public class TableIdExpr extends SchemaExpr {
   private static final L10N L = new L10N(TableIdExpr.class);
-  
+
   private EntityType _type;
   private String _name;
 
@@ -75,7 +75,7 @@ public class TableIdExpr extends SchemaExpr {
     throws QueryParseException
   {
     throw parser.error(L.l("'{0}.{1}' is not allowed.",
-			   _name, name));
+                           _name, name));
   }
 
   /**
@@ -84,7 +84,10 @@ public class TableIdExpr extends SchemaExpr {
   public FromItem addFromItem(QueryParser parser, String id)
     throws QueryParseException
   {
-    FromItem fromItem = parser.addFromItem(getEntityType().getTable(), id);
+    // jpa/0l12
+    FromItem fromItem = parser.addFromItem(getEntityType(),
+                                           getEntityType().getTable(),
+                                           id);
 
     return fromItem;
   }
