@@ -301,7 +301,7 @@ public class EntityMappingsConfig {
                                 String className,
                                 Object config)
   {
-    // jpa/0s2d, jpa/0ge5
+    // jpa/0s2d, jpa/0ge7
     if ((_package == null) || className.startsWith(_package + "."))
       map.put(className, config);
     else
