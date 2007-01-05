@@ -1,0 +1,240 @@
+/*
+* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+*
+* This file is part of Resin(R) Open Source
+*
+* Each copy or derived work must preserve the copyright notice and this
+* notice unmodified.
+*
+* Resin Open Source is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* Resin Open Source is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+* of NON-INFRINGEMENT.  See the GNU General Public License for more
+* details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Resin Open Source; if not, write to the
+*
+*   Free Software Foundation, Inc.
+*   59 Temple Place, Suite 330
+*   Boston, MA 02111-1307  USA
+*
+* @author Emil Ong
+*/
+
+package com.caucho.xml.saaj;
+
+import javax.xml.namespace.*;
+import javax.xml.soap.*;
+import java.util.*;
+
+/**
+ * 
+ **/
+public class SOAP11FaultImpl extends SOAPBodyElementImpl 
+                             implements SOAPFault 
+{
+  private static final NameImpl SOAP_1_1_FAULT_NAME = 
+    new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Fault");
+
+  private static final Name FAULT_CODE = new NameImpl("faultcode");
+  private static final Name FAULT_STRING = new NameImpl("faultstring");
+  private static final Name FAULT_ACTOR = new NameImpl("faultactor");
+
+  protected Detail _detail;
+  protected SOAPElement _faultActor;
+  protected SOAPElement _faultCode;
+  protected SOAPElement _faultString;
+  protected Locale _faultLocale;
+
+  SOAP11FaultImpl(SOAPFactory factory)
+    throws SOAPException
+  {
+    this(factory, SOAP_1_1_FAULT_NAME);
+  }
+
+  SOAP11FaultImpl(SOAPFactory factory, NameImpl name)
+    throws SOAPException
+  {
+    super(factory, name);
+
+    _faultCode = _factory.createElement(FAULT_CODE);
+    _faultString = _factory.createElement(FAULT_STRING);
+    _faultActor = _factory.createElement(FAULT_ACTOR);
+  }
+
+  // Detail
+
+  public Detail addDetail() 
+    throws SOAPException
+  {
+    if (_detail != null)
+      throw new SOAPException("Fault already contains a valid Detail");
+
+    _detail = new DetailImpl(_factory);
+
+    return _detail;
+  }
+
+  public Detail getDetail()
+  {
+    return _detail;
+  }
+
+  public boolean hasDetail()
+  {
+    return _detail != null;
+  }
+
+  // reason
+
+  public void addFaultReasonText(String text, Locale locale) 
+    throws SOAPException
+  {
+    throw new UnsupportedOperationException("Fault reasons unsupported in SOAP 1.1");
+  }
+
+  public Iterator getFaultReasonLocales() 
+    throws SOAPException
+  {
+    throw new UnsupportedOperationException("Fault reasons unsupported in SOAP 1.1");
+  }
+
+  public String getFaultReasonText(Locale locale) 
+    throws SOAPException
+  {
+    throw new UnsupportedOperationException("Fault reasons unsupported in SOAP 1.1");
+  }
+
+  public Iterator getFaultReasonTexts() 
+    throws SOAPException
+  {
+    throw new UnsupportedOperationException("Fault reasons unsupported in SOAP 1.1");
+  }
+
+  // subcode
+
+  public void appendFaultSubcode(QName subcode) 
+    throws SOAPException
+  {
+    throw new UnsupportedOperationException("Subcodes unsupported in SOAP 1.1");
+  }
+
+  public Iterator getFaultSubcodes()
+  {
+    throw new UnsupportedOperationException("Subcodes unsupported in SOAP 1.1");
+  }
+
+  public void removeAllFaultSubcodes()
+  {
+    throw new UnsupportedOperationException("Subcodes unsupported in SOAP 1.1");
+  }
+
+  // actor
+
+  public void setFaultActor(String faultActor) 
+    throws SOAPException
+  {
+    _faultActor.setValue(faultActor);
+  }
+
+  public String getFaultActor()
+  {
+    return _faultActor.getValue();
+  }
+
+  // faultcode
+
+  public String getFaultCode()
+  {
+    return _faultCode.getValue();
+  }
+
+  public Name getFaultCodeAsName()
+  {
+    // XXX
+    throw new UnsupportedOperationException();
+  }
+
+  public QName getFaultCodeAsQName()
+  {
+    // XXX
+    throw new UnsupportedOperationException();
+  }
+
+  public void setFaultCode(Name faultCodeName) 
+    throws SOAPException
+  {
+    // XXX
+    throw new UnsupportedOperationException();
+  }
+
+  public void setFaultCode(QName faultCodeQName) 
+    throws SOAPException
+  {
+    // XXX
+    throw new UnsupportedOperationException();
+  }
+
+  public void setFaultCode(String faultCode) 
+    throws SOAPException
+  {
+    _faultCode.setValue(faultCode);
+  }
+
+  // faultstring
+
+  public String getFaultString()
+  {
+    return _faultString.getValue();
+  }
+
+  public void setFaultString(String faultString)
+    throws SOAPException
+  {
+    _faultString.setValue(faultString);
+  }
+
+  public void setFaultString(String faultString, Locale locale) 
+    throws SOAPException
+  {
+    _faultString.setValue(faultString);
+    _faultLocale = locale;
+  }
+
+  public Locale getFaultStringLocale()
+  {
+    return _faultLocale;
+  }
+
+  // faultnode
+
+  public String getFaultNode()
+  {
+    throw new UnsupportedOperationException("Fault nodes unsupported in SOAP 1.1");
+  }
+
+  public void setFaultNode(String uri) 
+    throws SOAPException
+  {
+    throw new UnsupportedOperationException("Fault nodes unsupported in SOAP 1.1");
+  }
+
+  // faultrole 
+
+  public String getFaultRole()
+  {
+    throw new UnsupportedOperationException("Fault role unsupported in SOAP 1.1");
+  }
+  
+  public void setFaultRole(String uri)
+    throws SOAPException
+  {
+    throw new UnsupportedOperationException("Fault role unsupported in SOAP 1.1");
+  }
+}

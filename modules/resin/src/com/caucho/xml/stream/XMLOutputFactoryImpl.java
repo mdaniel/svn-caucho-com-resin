@@ -145,7 +145,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public void setProperty(String name, Object value)
     throws IllegalArgumentException
   {
-    if ("javax.xml.stream.isRepairingNamespaces".equals(name)) {
+    if (IS_REPAIRING_NAMESPACES.equals(name)) {
       if (value instanceof Boolean)
         _repair = ((Boolean) value).booleanValue();
       else 
