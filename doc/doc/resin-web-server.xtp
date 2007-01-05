@@ -215,13 +215,13 @@ Starting Resin on Sat, 01 Mar 2003 19:11:52 -0500 (EST)
 <p>To install the service, use</p>
 
 <example>
-C:\&gt; resin-3.1.x\bin\httpd -install -conf conf/myconf.conf
+C:\&gt; resin-3.1.x\httpd -install -conf conf/myconf.conf
 </example>
 
 <p>To remove the service, use</p>
 
 <example>
-C:\&gt; resin-3.1.x\bin\httpd -remove
+C:\&gt; resin-3.1.x\httpd -remove
 </example>
 
 <p>You will either need to reboot the machine or start the service
