@@ -32,13 +32,11 @@ package com.caucho.ejb.protocol;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EnvServerManager;
-import com.caucho.log.Log;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
 import javax.naming.NamingException;
 import java.lang.ref.WeakReference;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -229,37 +227,43 @@ public class EjbProtocolManager {
       String localJndiName = null;
       String remoteJndiName = null;
 
-      Object localObj = server.getEJBLocalHome();
 
-      // ejb/0f00
-      // EJB 3.0 does not require home interfaces, e.g
-      // for stateless session beans
-      if (localObj == null)
-	localObj = server.getClientObject();
+      // ejb/0g11
+      // remote without a local interface should not get bound
+      // with the local prefix
+      if (server.isLocal()) {
+        Object localObj = server.getEJBLocalHome();
 
-      if (localObj != null) {
-	if (jndiName != null) {
-	  if (jndiName.startsWith("java:comp"))
-	    localJndiName = Jndi.getFullName(jndiName);
-	  else if (_localJndiPrefix != null)
-	    localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + jndiName);
-	  else
-	    throw new NamingException(L.l("<jndi-name> `{0}' requires a fully qualified name or a configured <jndi-local-prefix>",
-					  jndiName));
-	}
-	else if (_localJndiPrefix != null)
-	  localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
+        // ejb/0f00
+        // EJB 3.0 does not require home interfaces, e.g
+        // for stateless session beans
+        if (localObj == null)
+          localObj = server.getClientObject();
 
-	if (localJndiName != null) {
-	  if (log.isLoggable(Level.CONFIG))
-	    log.config(L.l("local ejb {0} has JNDI binding {1}", localObj, localJndiName));
+        if (localObj != null) {
+          if (jndiName != null) {
+            if (jndiName.startsWith("java:comp"))
+              localJndiName = Jndi.getFullName(jndiName);
+            else if (_localJndiPrefix != null)
+              localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + jndiName);
+            else
+              throw new NamingException(L.l("<jndi-name> `{0}' requires a fully qualified name or a configured <jndi-local-prefix>",
+                                            jndiName));
+          }
+          else if (_localJndiPrefix != null)
+            localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
 
-	  bindServer(localJndiName, localObj);
-	}
-	else {
-	  if (log.isLoggable(Level.FINE))
-	    log.fine(L.l("local ejb {0} has no JNDI binding", localObj));
-	}
+          if (localJndiName != null) {
+            if (log.isLoggable(Level.CONFIG))
+              log.config(L.l("local ejb {0} has JNDI binding {1}", localObj, localJndiName));
+
+            bindServer(localJndiName, localObj);
+          }
+          else {
+            if (log.isLoggable(Level.FINE))
+              log.fine(L.l("local ejb {0} has no JNDI binding", localObj));
+          }
+        }
       }
 
       // ejb/4010
