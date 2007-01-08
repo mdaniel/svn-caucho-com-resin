@@ -28,11 +28,10 @@
 
 package com.caucho.j2ee.appclient;
 
-import com.caucho.config.BuilderProgram;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.types.*;
+import com.caucho.el.*;
 import com.caucho.j2ee.J2EEVersion;
 import com.caucho.java.WorkDir;
 import com.caucho.lifecycle.Lifecycle;
@@ -40,6 +39,7 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.soa.client.WebServiceClient;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
@@ -48,6 +48,7 @@ import com.caucho.vfs.Vfs;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.el.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.security.auth.callback.Callback;
@@ -57,8 +58,7 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,11 +74,15 @@ public class AppClient implements EnvironmentBean
 
   private J2EEVersion _j2eeVersion = J2EEVersion.RESIN;
 
+  private Path _home;
+  
   private boolean _isMetadataComplete;
   private Path _rootDirectory;
   private Path _workDirectory;
   private String _mainClassName;
   private Path _clientJar;
+
+  private ArrayList<Path> _configList = new ArrayList<Path>();
 
   private Lifecycle _lifecycle = new Lifecycle(log);
   private Method _mainMethod;
@@ -91,6 +95,9 @@ public class AppClient implements EnvironmentBean
   {
     _loader = new EnvironmentClassLoader();
     _local.set(this, _loader);
+
+    _home = CauchoSystem.getResinHome();
+
   }
 
   public ClassLoader getClassLoader()
@@ -155,7 +162,7 @@ public class AppClient implements EnvironmentBean
   private void addConfig(Path path)
     throws Exception
   {
-    new Config().configureBean(this, path);
+    _configList.add(path);
   }
 
   public void setClientJar(Path clientJar)
@@ -256,8 +263,12 @@ public class AppClient implements EnvironmentBean
 
       JarPath jarPath = JarPath.create(_clientJar);
 
-      configureFrom(jarPath.lookup("META-INF/application-client.xml"), true, true);
-      configureFrom(jarPath.lookup("META-INF/resin-application-client.xml"), true, false);
+      configureFrom(jarPath.lookup("META-INF/application-client.xml"), true);
+      configureFrom(jarPath.lookup("META-INF/resin-application-client.xml"), true);
+
+      for (Path configPath : _configList) {
+	configureFrom(configPath, true);
+      }
 
       if (_mainClassName == null)
         throw new ConfigException(L.l("'main-class' is required"));
@@ -283,17 +294,26 @@ public class AppClient implements EnvironmentBean
     }
   }
 
-  private void configureFrom(Path xml, boolean optional, boolean validate)
+  private void configureFrom(Path xml, boolean optional)
     throws Exception
   {
     if (xml.canRead()) {
       if (log.isLoggable(Level.FINE))
         log.log(Level.FINE, L.l("reading configuration file {0}", xml));
 
-      if (validate)
-        new Config().configureBean(this, xml, "com/caucho/server/e_app/app-client.rnc");
-      else
-        new Config().configureBean(this, xml);
+      HashMap<String,Object> variableMap = new HashMap<String,Object>();
+      variableMap.put("resin", new ResinVar());
+
+      ELResolver varResolver = new SystemPropertiesResolver();
+      ConfigELContext elContext = new ConfigELContext(varResolver);
+      elContext.push(new MapVariableResolver(variableMap));
+
+      EL.setEnvironment(elContext, _loader);
+      EL.setVariableMap(variableMap, _loader);
+
+      Config config = new Config();
+
+      config.configureBean(this, xml, "com/caucho/server/e_app/app-client.rnc");
     }
     else {
       if (!optional)
@@ -418,6 +438,19 @@ public class AppClient implements EnvironmentBean
     public String getPassword()
     {
       return new String(_passwordCallback.getPassword());
+    }
+  }
+
+  public class ResinVar {
+    public Path getHome()
+    {
+      System.out.println("GET_HOME: " + _home);
+      return _home;
+    }
+    
+    public Path getRoot()
+    {
+      return _rootDirectory;
     }
   }
 }
