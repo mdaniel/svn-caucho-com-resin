@@ -409,7 +409,7 @@ public class ByteCodeClassScanner {
       }
       break;
     default:
-      throw new IllegalStateException("unknown code " + (char) code);
+      throw new IllegalStateException("unknown code " + (char) tag);
     }
   }
 

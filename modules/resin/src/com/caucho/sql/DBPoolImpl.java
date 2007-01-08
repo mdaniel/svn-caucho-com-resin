@@ -976,7 +976,11 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
     for (int i = 0; i < _driverList.size(); i++) {
       DriverConfig driver = _driverList.get(i);
 
-      driver.initDataSource(_isTransactional, _isSpy);
+      try {
+	driver.initDataSource(_isTransactional, _isSpy);
+      } catch (ConfigException e) {
+	throw new SQLExceptionWrapper(e);
+      }
     }
 
     try {
