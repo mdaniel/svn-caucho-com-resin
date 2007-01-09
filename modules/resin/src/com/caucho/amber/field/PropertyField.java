@@ -38,11 +38,7 @@ import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.ForeignColumn;
 import com.caucho.amber.table.Table;
-import com.caucho.amber.type.AbstractStatefulType;
-import com.caucho.amber.type.ArrayType;
-import com.caucho.amber.type.EmbeddableType;
-import com.caucho.amber.type.RelatedType;
-import com.caucho.amber.type.Type;
+import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.java.JavaWriter;
 import com.caucho.log.Log;
@@ -100,7 +96,7 @@ public class PropertyField extends AbstractField {
    * Returns the source type as
    * entity or mapped-superclass.
    */
-  public RelatedType getEntitySourceType()
+  public RelatedType getRelatedSourceType()
   {
     return (RelatedType) getSourceType();
   }
@@ -161,9 +157,9 @@ public class PropertyField extends AbstractField {
     if (! (getSourceType() instanceof RelatedType))
       return;
 
-    if (getEntitySourceType().getId() != null) {
+    if (getRelatedSourceType().getId() != null) {
       // resolve any alias
-      for (AmberField field : getEntitySourceType().getId().getKeys()) {
+      for (AmberField field : getRelatedSourceType().getId().getKeys()) {
         if (field instanceof KeyManyToOneField) {
           KeyManyToOneField key = (KeyManyToOneField) field;
 
@@ -321,10 +317,13 @@ public class PropertyField extends AbstractField {
    */
   public String generateLoadSelect(Table table, String id)
   {
-    if (getColumn().getTable() != table)
-      return null;
-    else
-      return generateSelect(id);
+    if (getColumn().getTable() != table) {
+      // jpa/0l14 as a negative test
+      if (getRelatedSourceType() instanceof EntityType)
+        return null;
+    }
+
+    return generateSelect(id);
   }
 
   /**

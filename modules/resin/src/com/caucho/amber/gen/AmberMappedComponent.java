@@ -616,7 +616,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    int index = _relatedType.generateLoad(out, "rs", "index", 0, 0);
+    int index = _relatedType.generateLoad(out, "rs", "index", 0, 0, null);
 
     out.println("__caucho_loadMask_0 |= 1L;");
 

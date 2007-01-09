@@ -524,8 +524,17 @@ abstract public class RelatedType extends AbstractStatefulType {
 
     if (subType != null)
       return subType;
-    else
+    else {
+      // jpa/0l15
+      for (EntityType subEntity : _subEntities.values()) {
+        subType = subEntity.getSubClass(discriminator);
+
+        if (subType != subEntity)
+          return subType;
+      }
+
       return this;
+    }
   }
 
   /**
@@ -534,7 +543,9 @@ abstract public class RelatedType extends AbstractStatefulType {
   public Entity createBean()
   {
     try {
-      return (Entity) getInstanceClass().newInstance();
+      Entity entity = (Entity) getInstanceClass().newInstance();
+
+      return entity;
     } catch (Exception e) {
       throw new AmberRuntimeException(e);
     }
@@ -943,11 +954,13 @@ abstract public class RelatedType extends AbstractStatefulType {
 
     boolean hasSelect = false;
 
+    /*
     if (loadGroup == 0 && getParentType() != null) {
       // jpa/0ge3
       if (getParentType() instanceof EntityType) {
         String parentSelect =
-          getParentType().generateLoadSelect(table, id, loadGroup);
+          getParentType().generateLoadSelect(table, id,
+                                             loadGroup, getMappedSuperclassFields());
 
         // jpa/0ge2
         if (parentSelect != null) {
@@ -956,9 +969,13 @@ abstract public class RelatedType extends AbstractStatefulType {
             hasSelect = true;
         }
       }
+
     }
-    else if ((getTable() == table) && // jpa/0l11
-             (loadGroup == 0 && getDiscriminator() != null)) {
+    else
+    */
+
+    if ((getTable() == table) && // jpa/0l11
+        (loadGroup == 0 && getDiscriminator() != null)) {
 
       if (id != null) {
         cb.append(id + ".");
@@ -971,7 +988,8 @@ abstract public class RelatedType extends AbstractStatefulType {
     String propSelect = super.generateLoadSelect(table,
                                                  id,
                                                  loadGroup,
-                                                 hasSelect);
+                                                 hasSelect,
+                                                 null);
     // jpa/0s26
     if (propSelect != null)
       cb.append(propSelect);

@@ -42,8 +42,6 @@ public class SubEntityType extends EntityType {
   private RelatedType _root;
   private RelatedType _parent;
 
-  private Id _id;
-
   public SubEntityType(AmberPersistenceUnit amberPersistenceUnit,
                        RelatedType parent)
   {
@@ -67,18 +65,10 @@ public class SubEntityType extends EntityType {
    */
   public Id getId()
   {
-    if (_id != null)
-      return _id;
+    if (super.getId() != null)
+      return super.getId();
     else
       return _parent.getId();
-  }
-
-  /**
-   * Sts the id.
-   */
-  public void setId(Id id)
-  {
-    _id = id;
   }
 
   /**

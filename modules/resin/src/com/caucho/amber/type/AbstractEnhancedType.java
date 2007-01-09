@@ -238,6 +238,8 @@ public abstract class AbstractEnhancedType extends Type {
             log.finest(L.l("loading bean class `{0}' from `{1}'", getBeanClass().getName(), loader));
 
           _instanceClass = Class.forName(getBeanClass().getName(), false, loader);
+
+          log.finest(L.l("loaded bean class `{0}' from `{1}'", _instanceClass, loader));
         }
         else {
           ClassLoader loader = _instanceLoader;

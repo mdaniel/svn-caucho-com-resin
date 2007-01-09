@@ -62,7 +62,8 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
 
   private ArrayList<AmberField> _fields = new ArrayList<AmberField>();
 
-  private ArrayList<AmberField> _mappedSuperclassFields;
+  private ArrayList<AmberField> _mappedSuperclassFields
+    = new ArrayList<AmberField>();
 
   private volatile boolean _isConfigured;
 
@@ -156,9 +157,6 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
    */
   public void addMappedSuperclassField(AmberField field)
   {
-    if (_mappedSuperclassFields == null)
-      _mappedSuperclassFields = new ArrayList<AmberField>();
-
     if (_mappedSuperclassFields.contains(field))
       return;
 
@@ -179,9 +177,6 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
    */
   public AmberField getMappedSuperclassField(String name)
   {
-    if (_mappedSuperclassFields == null)
-      return null;
-
     for (int i = 0; i < _mappedSuperclassFields.size(); i++) {
       AmberField field = _mappedSuperclassFields.get(i);
 
@@ -293,18 +288,54 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   /**
    * Generates a string to load the field.
    */
-  public int generateLoad(JavaWriter out, String rs,
-                          String indexVar, int index, int loadGroupIndex)
+  public int generateLoad(JavaWriter out,
+                          String rs,
+                          String indexVar,
+                          int index,
+                          int loadGroupIndex,
+                          ArrayList<AmberField> overriddenFields)
     throws IOException
   {
-    if (loadGroupIndex == 0 && _discriminator != null)
-      index++;
+    if (overriddenFields == null) {
+      if (loadGroupIndex == 0 && _discriminator != null)
+        index++;
+    }
 
-    ArrayList<AmberField> fields = getMappedSuperclassFields();
+    ArrayList<AmberField> fields = null;
 
-    if (fields != null) {
-      for (int i = 0; i < fields.size(); i++) {
-        AmberField field = fields.get(i);
+    if (this instanceof RelatedType) {
+      fields = getMappedSuperclassFields();
+
+      RelatedType parent = ((RelatedType) this).getParentType();
+
+      if (parent != null) {
+        // jpa/0l14
+        index = parent.generateLoad(out, rs, indexVar, index,
+                                    loadGroupIndex, fields);
+      }
+    }
+
+    for (int i = 0; i < 2; i++) {
+      if (fields == null) {
+        fields = getFields();
+        continue;
+      }
+
+      for (int j = 0; j < fields.size(); j++) {
+        AmberField field = fields.get(j);
+
+        // jpa/0l14, jpa/0ge3
+        if (overriddenFields != null) {
+          boolean isOverridden = false;
+
+          for (AmberField amberField : overriddenFields) {
+            if (amberField.getName().equals(field.getName()))
+              isOverridden = true;
+          }
+
+          if (isOverridden)
+            continue;
+        }
 
         if (field instanceof EntityManyToOneField) {
           ((EntityManyToOneField) field).init((RelatedType) this);
@@ -313,15 +344,8 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
         if (field.getLoadGroupIndex() == loadGroupIndex)
           index = field.generateLoad(out, rs, indexVar, index);
       }
-    }
 
-    fields = getFields();
-
-    for (int i = 0; i < fields.size(); i++) {
-      AmberField field = fields.get(i);
-
-      if (field.getLoadGroupIndex() == loadGroupIndex)
-        index = field.generateLoad(out, rs, indexVar, index);
+      fields = getFields();
     }
 
     return index;
@@ -339,7 +363,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
                                    String id,
                                    int loadGroup)
   {
-    return generateLoadSelect(table, id, loadGroup, false);
+    return generateLoadSelect(table, id, loadGroup, false, null);
   }
 
   /**
@@ -348,12 +372,32 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
   public String generateLoadSelect(Table table,
                                    String id,
                                    int loadGroup,
-                                   boolean hasSelect)
+                                   boolean hasSelect,
+                                   ArrayList<AmberField> overriddenFields)
   {
     CharBuffer cb = CharBuffer.allocate();
 
-    // jpa/0ge2
-    ArrayList<AmberField> fields = getMappedSuperclassFields();
+    ArrayList<AmberField> fields = null;
+
+    if (this instanceof RelatedType) {
+      // jpa/0ge2
+      fields = getMappedSuperclassFields();
+
+      RelatedType parent = ((RelatedType) this).getParentType();
+
+      if (parent != null) {
+        // jpa/0l14
+        String parentSelect =
+          parent.generateLoadSelect(table, id, loadGroup,
+                                    hasSelect, fields);
+
+        if (parentSelect != null) {
+          hasSelect = true;
+
+          cb.append(parentSelect);
+        }
+      }
+    }
 
     for (int i = 0; i < 2; i++) {
       if (fields == null) {
@@ -364,8 +408,24 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
       for (int j = 0; j < fields.size(); j++) {
         AmberField field = fields.get(j);
 
+        // jpa/0l14, jpa/0ge3
+        if (overriddenFields != null) {
+          boolean isOverridden = false;
+
+          for (AmberField amberField : overriddenFields) {
+            if (amberField.getName().equals(field.getName()))
+              isOverridden = true;
+          }
+
+          if (isOverridden)
+            continue;
+        }
+
         if (field.getLoadGroupIndex() != loadGroup)
           continue;
+
+        if (field instanceof EntityManyToOneField)
+          ((EntityManyToOneField) field).init((RelatedType) this);
 
         String propSelect = field.generateLoadSelect(table, id);
 

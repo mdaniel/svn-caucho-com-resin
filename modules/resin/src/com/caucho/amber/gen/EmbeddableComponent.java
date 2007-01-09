@@ -279,7 +279,7 @@ public class EmbeddableComponent extends ClassComponent {
       out.println("return 0;");
     }
     else {
-      _embeddableType.generateLoad(out, "rs", "index", 0, -1);
+      _embeddableType.generateLoad(out, "rs", "index", 0, -1, null);
 
       out.println("return index;");
     }

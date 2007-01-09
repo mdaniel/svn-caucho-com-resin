@@ -57,12 +57,15 @@ abstract public class AbstractPathExpr extends AbstractAmberExpr
 
       if (type instanceof RelatedType)
         type = ((RelatedType) type).getParentType();
+      else // XXX
+        type = null;
     }
     while ((type != null) && (field == null));
 
     if (field == null)
-      throw new AmberRuntimeException(L.l("'{0}' is an unknown field of '{1}'.",
-            fieldName, getTargetType().getName()));
+      throw new AmberRuntimeException(L.l("'{0}' is an unknown field of '{1}' which has the following list of fields '{2}'",
+                                          fieldName, getTargetType().getName(),
+                                          getTargetType().getFields()));
 
     return field.createExpr(parser, this);
   }
