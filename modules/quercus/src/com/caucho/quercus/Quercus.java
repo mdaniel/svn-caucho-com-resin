@@ -983,7 +983,17 @@ public class Quercus
         = "META-INF/services/com.caucho.quercus.QuercusModule";
       Enumeration<URL> urls = loader.getResources(quercusModule);
 
+      HashSet<URL> urlSet = new HashSet<URL>();
+
+      // get rid of duplicate entries found by multiple classloaders
+      // XXX: test
       while (urls.hasMoreElements()) {
+        URL url = urls.nextElement();
+        
+        urlSet.add(url);
+      }
+
+      for (URL url : urlSet) {
         URL url = urls.nextElement();
 
         InputStream is = null;
