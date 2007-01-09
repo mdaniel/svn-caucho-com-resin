@@ -994,8 +994,6 @@ public class Quercus
       }
 
       for (URL url : urlSet) {
-        URL url = urls.nextElement();
-
         InputStream is = null;
         ReadStream rs = null;
         try {
