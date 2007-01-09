@@ -43,7 +43,8 @@ import java.util.logging.Logger;
  * Represents a memory queue consumer.
  */
 public class MemoryQueueConsumer extends MessageConsumerImpl
-  implements QueueReceiver {
+  implements QueueReceiver
+{
   static final Logger log = Log.open(MemoryQueueConsumer.class);
   static final L10N L = new L10N(MemoryQueueConsumer.class);
 
@@ -75,8 +76,9 @@ public class MemoryQueueConsumer extends MessageConsumerImpl
    * Returns the queue.
    */
   public Queue getQueue()
+    throws JMSException
   {
-    return _queue;
+    return (Queue) getDestination();
   }
 
   /**
@@ -85,6 +87,9 @@ public class MemoryQueueConsumer extends MessageConsumerImpl
   protected MessageImpl receiveImpl()
     throws JMSException
   {
+    if (isClosed())
+      throw new javax.jms.IllegalStateException(L.l("QueueConsumer: receive called after close."));
+    
     // purgeExpiredConsumers();
     // _queue.purgeExpiredMessages();
 

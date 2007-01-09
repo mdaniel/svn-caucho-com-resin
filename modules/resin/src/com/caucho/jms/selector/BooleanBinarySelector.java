@@ -63,9 +63,10 @@ public class BooleanBinarySelector extends Selector  {
     case SelectorParser.NE:
       if (_left.isUnknown() || _right.isUnknown()) {
       }
-      else if (_left.isNumber() != _right.isNumber())
+      else if (_left.isNumber() != _right.isNumber()) {
 	throw new InvalidSelectorException(L.l("'{0}' test must have matching types.",
 					       this));
+      }
       break;
       
     case SelectorParser.AND:

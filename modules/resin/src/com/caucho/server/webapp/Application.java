@@ -29,6 +29,8 @@
 
 package com.caucho.server.webapp;
 
+import com.caucho.vfs.Path;
+
 /**
  * Resin's application implementation.
  */
@@ -36,8 +38,9 @@ public class Application extends WebApp {
   /**
    * Creates the application with its environment loader.
    */
-  public Application()
+  public Application(Path rootDirectory)
   {
+    super(rootDirectory);
   }
 
   /**

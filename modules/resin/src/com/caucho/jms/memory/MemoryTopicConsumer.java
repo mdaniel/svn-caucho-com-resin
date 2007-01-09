@@ -85,8 +85,9 @@ public class MemoryTopicConsumer extends MessageConsumerImpl
    * Returns the topic.
    */
   public Topic getTopic()
+    throws JMSException
   {
-    return _topic;
+    return (Topic) getDestination();
   }
 
   /**
@@ -124,8 +125,12 @@ public class MemoryTopicConsumer extends MessageConsumerImpl
   /**
    * Closes the consumer.
    */
+  @Override
   public void close()
+    throws JMSException
   {
+    super.close();
+    
     _topic.removeSubscriber(_queue);
   }
 

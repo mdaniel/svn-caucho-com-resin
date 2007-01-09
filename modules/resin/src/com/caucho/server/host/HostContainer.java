@@ -439,24 +439,7 @@ public class HostContainer implements DispatchBuilder {
       try {
 	thread.setContextClassLoader(_classLoader);
 
-	_errorWebApp = new WebApp();
-	_errorWebApp.setAppDir(getRootDirectory().lookup("host-error"));
-	com.caucho.server.dispatch.ServletMapping file;
-	file = new ServletMapping();
-	file.addURLPattern("/");
-	file.setServletName("resin-file");
-	file.setServletClass("com.caucho.servlets.FileServlet");
-	file.init();
-	_errorWebApp.addServletMapping(file);
-	
-	for (WebAppConfig config : _webAppDefaultList) {
-	  try {
-	    config.getBuilderProgram().configure(_errorWebApp);
-	  } catch (Throwable e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-	}
-	
+	_errorWebApp = new WebApp(getRootDirectory().lookup("caucho-host-error"));
 	_errorWebApp.init();
 	_errorWebApp.start();
       } catch (Throwable e) {

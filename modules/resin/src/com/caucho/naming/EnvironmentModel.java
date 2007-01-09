@@ -169,7 +169,10 @@ public class EnvironmentModel extends AbstractModel
 
   protected void fillList(ArrayList values)
   {
-    values.addAll(_children.keySet());
+    for (String key : _children.keySet()) {
+      if (! values.contains(key))
+	values.add(key);
+    }
 
     ClassLoader loader = _root.getClassLoader();
 

@@ -67,7 +67,8 @@ public class SelectorParser  {
   static final int OR = AND + 1;
   static final int BETWEEN = OR + 1;
   static final int LIKE = BETWEEN + 1;
-  static final int IN = LIKE + 1;
+  static final int ESCAPE = LIKE + 1;
+  static final int IN = ESCAPE + 1;
   static final int IS = IN + 1;
 
   private static IntMap _reserved;
@@ -113,7 +114,7 @@ public class SelectorParser  {
       switch (token) {
       case OR:
         scanToken();
-        left = new BooleanBinarySelector(token, left, parseAnd());
+        left = new OrSelector(left, parseAnd());
         break;
       
       default:
@@ -199,7 +200,21 @@ public class SelectorParser  {
       if (token != STRING)
         throw error("LIKE needs string pattern");
 
-      left = new LikeSelector(left, _lexeme);
+      String pattern = _lexeme;
+      char escape = '\\';
+      
+      if (peekToken() == ESCAPE) {
+	scanToken();
+	
+	token = scanToken();
+	if (token != STRING)
+	  throw error("ESCAPE needs string pattern");
+
+	if (_lexeme.length() > 0)
+	  escape = _lexeme.charAt(0);	
+      }
+
+      left = new LikeSelector(left, pattern, escape);
     }
 
     else if (token == IN) {
@@ -293,45 +308,78 @@ public class SelectorParser  {
 
     switch (token) {
     case '+':
-    case '-':
       scanToken();
       return new UnarySelector(token, parseUnary());
+    case '-':
+      scanToken();
+      return parseMinusUnary();
       
     default:
-      return parseTerm();
+      return parseTerm(false);
     }
   }
-
-  private Selector parseTerm()
+  
+  private Selector parseMinusUnary()
     throws JMSException
   {
+    Selector token = parseTerm(true);
+
+    if (token instanceof LiteralSelector)
+      return token;
+    else
+      return new UnarySelector('-', token);
+  }
+
+  private Selector parseTerm(boolean hasSign)
+    throws JMSException
+  {
+    Selector value = null;
+    String prefix;
     int token = scanToken();
 
     switch (token) {
     case TRUE:
-      return new BooleanLiteralSelector(true);
+      value = new BooleanLiteralSelector(true);
+      break;
     case FALSE:
-      return new BooleanLiteralSelector(false);
+      value = new BooleanLiteralSelector(false);
+      break;
     case IDENTIFIER:
-      return IdentifierSelector.create(_lexeme);
+      value = IdentifierSelector.create(_lexeme);
+      break;
     case STRING:
-      return new LiteralSelector(_lexeme);
+      value = new LiteralSelector(_lexeme);
+      break;
     case INTEGER:
-      return new LiteralSelector(new Long(_lexeme));
+      if (hasSign)
+	return new LiteralSelector(Long.decode("-" + _lexeme));
+      else
+	return new LiteralSelector(Long.decode(_lexeme));
     case LONG:
-      return new LiteralSelector(new Long(_lexeme));
+      if (hasSign)
+	return new LiteralSelector(Long.decode("-" + _lexeme));
+      else
+	return new LiteralSelector(Long.decode(_lexeme));
     case DOUBLE:
-      return new LiteralSelector(new Double(_lexeme));
+      if (hasSign)
+	return new LiteralSelector(new Double("-" + _lexeme));
+      else
+	return new LiteralSelector(new Double(_lexeme));
 
     case '(':
-      Selector value = parseExpr();
+      value = parseExpr();
       if (scanToken() != ')')
         throw error("expected ')'");
-      return value;
+      break;
       
     default:
       throw error("unknown token: " + token);
     }
+
+    if (hasSign)
+      return new UnarySelector('-', value);
+    else
+      return value;
   }
 
   /**
@@ -375,29 +423,12 @@ public class SelectorParser  {
     case -1:
     case '(':
     case ')':
-    case '.':
     case '*':
     case '/':
+    case '+':
+    case '-':
     case ',':
       return ch;
-      
-    case '+':
-      if ((ch = read()) >= '0' && ch <= '9')
-        break;
-      else {
-        unread(ch);
-        return '+';
-      }
-        
-    case '-':
-      if ((ch = read()) >= '0' && ch <= '9') {
-        sign = -1;
-        break;
-      }
-      else {
-        unread(ch);
-        return '-';
-      }
       
     case '=':
       return EQ;
@@ -439,7 +470,7 @@ public class SelectorParser  {
       else
         return IDENTIFIER; 
     }
-    else if (ch >= '0' && ch <= '9') {
+    else if (ch >= '0' && ch <= '9' || ch == '.') {
       _cb.clear();
 
       int type = INTEGER;
@@ -447,8 +478,30 @@ public class SelectorParser  {
       if (sign < 0)
         _cb.append('-');
 
-      for (; ch >= '0' && ch <= '9'; ch = read())
+      for (; '0' <= ch && ch <= '9'; ch = read())
         _cb.append((char) ch);
+
+      if ((ch == 'x' || ch == 'X')
+	  && _cb.length() == 1 && _cb.charAt(0) == '0') {
+	
+	_cb.append('x');
+	for (ch = read();
+	     '0' <= ch && ch <= '9'
+	       || 'a' <= ch && ch <= 'f'
+	       || 'A' <= ch && ch <= 'F';
+	     ch = read()) {
+	  _cb.append((char) ch);
+	}
+
+	_lexeme = _cb.toString();
+
+	if (ch == 'l' || ch == 'L')
+	  return LONG;
+	else {
+	  unread(ch);
+	  return INTEGER;
+	}
+      }
 
       if (ch == '.') {
         type = DOUBLE;
@@ -569,6 +622,7 @@ public class SelectorParser  {
     _reserved.put("is", IS);
     _reserved.put("in", IN);
     _reserved.put("like", LIKE);
+    _reserved.put("escape", ESCAPE);
     _reserved.put("between", BETWEEN);
   }
 }

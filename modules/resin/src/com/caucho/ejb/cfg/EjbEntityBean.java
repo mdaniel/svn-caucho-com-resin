@@ -160,7 +160,9 @@ public class EjbEntityBean extends EjbBean {
     EntityType type = amberPersistenceUnit.createEntity(getAbstractSchemaName(),
                                                         getEJBClassWrapper());
 
-    type.setProxyClass(getLocalList().get(0));
+    // XXX: why is this if statement required?
+    if (getLocalList().size() > 0)
+      type.setProxyClass(getLocalList().get(0));
 
     return type;
   }

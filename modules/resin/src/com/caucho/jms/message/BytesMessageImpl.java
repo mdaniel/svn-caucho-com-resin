@@ -540,7 +540,9 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage  {
   public void writeObject(Object obj)
     throws JMSException
   {
-    if (obj instanceof Boolean)
+    if (obj == null)
+      throw new NullPointerException();
+    else if (obj instanceof Boolean)
       writeBoolean(((Boolean) obj).booleanValue());
     else if (obj instanceof Byte)
       writeByte(((Byte) obj).byteValue());

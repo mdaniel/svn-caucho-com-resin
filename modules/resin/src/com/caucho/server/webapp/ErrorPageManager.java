@@ -509,6 +509,7 @@ public class ErrorPageManager {
 	  
 	out.println("</small>");
       }
+      out.println("</body></html>");
 
       String userAgent = request.getHeader("User-Agent");
       

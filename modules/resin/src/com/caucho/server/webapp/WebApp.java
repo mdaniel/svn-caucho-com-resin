@@ -107,7 +107,8 @@ public class WebApp extends ServletContextImpl
   private static final String DEFAULT_VERSION = "2.4";
 
   private static final L10N L = new L10N(WebApp.class);
-  private static final Logger log = Log.open(WebApp.class);
+  private static final Logger log
+    = Logger.getLogger(WebApp.class.getName());
 
   private static final int JSP_NONE = 0;
   private static final int JSP_1 = 1;
@@ -131,6 +132,9 @@ public class WebApp extends ServletContextImpl
 
   // The webApp entry
   private WebAppController _controller;
+  
+  // The webApp directory.
+  private final Path _appDir;
 
   // The context path
   private String _contextPath = "";
@@ -140,8 +144,6 @@ public class WebApp extends ServletContextImpl
 
   private String _servletVersion;
 
-  // The webApp directory.
-  private Path _appDir;
   private boolean _isAppDirSet;
   private boolean _isDynamicDeploy;
 
@@ -284,9 +286,9 @@ public class WebApp extends ServletContextImpl
   /**
    * Creates the webApp with its environment loader.
    */
-  public WebApp()
+  public WebApp(Path rootDirectory)
   {
-    this(new WebAppController("/", null, null));
+    this(new WebAppController("/", rootDirectory, null));
   }
 
   /**
@@ -294,27 +296,37 @@ public class WebApp extends ServletContextImpl
    */
   WebApp(WebAppController controller)
   {
+    String contextPath = controller.getContextPath();
+    setContextPathId(contextPath);
+
+    _controller = controller;
+    _appDir = controller.getRootDirectory();
+    
     try {
       _classLoader = new EnvironmentClassLoader(controller.getParentClassLoader());
 
       // the JSP servlet needs to initialize the JspFactory
       JspServlet.initStatic();
 
-      String contextPath = controller.getContextPath();
-      setContextPathId(contextPath);
-
-      _controller = controller;
-
       _classLoader.addParentPriorityPackages(_classLoaderHackPackages);
+
+      _classLoader.setId("web-app:" + getURL());
 
       _appLocal.set(this, _classLoader);
 
+      setParent(controller.getContainer());
+      
       // map.put("app", _appVar);
 
-      _appDir = controller.getRootDirectory();
-
-      if (_appDir.equals(CauchoSystem.getResinHome()))
-	log.warning(L.l("web-app root directory should not be the same as resin.home\n{0}", _appDir));
+      if (CauchoSystem.isTesting()) {
+      }
+      else if (_appDir.equals(CauchoSystem.getResinHome())) {
+	throw new ConfigException(L.l("web-app root-directory can not be the same as resin.home\n{0}", _appDir));
+      }
+      else if (_parent != null
+	       && _appDir.equals(_parent.getRootDirectory())) {
+	throw new ConfigException(L.l("web-app root-directory can not be the same as the host root-directory\n{0}", _appDir));
+      }
 
       _servletManager = new ServletManager();
       _servletMapper = new ServletMapper();
@@ -345,8 +357,8 @@ public class WebApp extends ServletContextImpl
       _constraintManager = new ConstraintManager();
       _errorPageManager = new ErrorPageManager();
       _errorPageManager.setWebApp(this);
-
-      setParent(controller.getContainer());
+      if (getParent() != null)
+	_errorPageManager.setParent(getParent().getErrorPageManager());
 
       _invocationDependency = new DependencyContainer();
       _invocationDependency.add(this);
@@ -375,8 +387,6 @@ public class WebApp extends ServletContextImpl
       Vfs.setPwd(parent.getDocumentDirectory(), _classLoader);
       _isAppDirSet = false;
     }
-
-    _errorPageManager.setParent(parent.getErrorPageManager());
   }
 
   /**
@@ -556,13 +566,6 @@ public class WebApp extends ServletContextImpl
    */
   public void setAppDir(Path appDir)
   {
-    _appDir = appDir;
-    _isAppDirSet = true;
-
-    WorkDir.setLocalWorkDir(appDir.lookup("WEB-INF/work"), getClassLoader());
-
-    // XXX:
-    // _classLoader.setAttribute("caucho.vfs.pwd", appDir);
   }
 
   /**
@@ -590,8 +593,6 @@ public class WebApp extends ServletContextImpl
 
     if (getServletContextName() == null)
       setDisplayName(contextPath);
-
-    _classLoader.setId("web-app:" + getURL());
   }
 
   /**
@@ -2175,6 +2176,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Maps from a URI to a real path.
    */
+  @Override
   public String getRealPath(String uri)
   {
     String realPath = _realPathCache.get(uri);

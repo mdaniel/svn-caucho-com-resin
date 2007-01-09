@@ -55,9 +55,6 @@ public class TopicSessionImpl extends SessionImpl implements TopicSession  {
   {
     checkOpen();
 
-    if (topic == null)
-      throw new NullPointerException();
-
     return new TopicPublisherImpl(this, topic);
   }
 

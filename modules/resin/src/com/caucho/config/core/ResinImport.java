@@ -84,7 +84,6 @@ public class ResinImport extends ResinControl
   public void init()
     throws Exception
   {
-    System.out.println("PATH: " + _path);
     if (_path == null) {
       if (_fileSet == null)
 	throw new ConfigException(L.l("'path' attribute missing from resin:import."));

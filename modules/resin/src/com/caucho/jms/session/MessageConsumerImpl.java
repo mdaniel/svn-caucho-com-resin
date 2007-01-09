@@ -81,10 +81,26 @@ public class MessageConsumerImpl
   }
 
   /**
+   * Returns the destination
+   */
+  protected AbstractDestination getDestination()
+    throws JMSException
+  {
+    if (_isClosed || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getDestination(): MessageConsumer is closed."));
+    
+    return _queue;
+  }
+
+  /**
    * Returns true if local messages are not sent.
    */
   public boolean getNoLocal()
+    throws JMSException
   {
+    if (_isClosed || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getNoLocal(): MessageConsumer is closed."));
+    
     return _noLocal;
   }
   
@@ -92,7 +108,11 @@ public class MessageConsumerImpl
    * Returns the message listener
    */
   public MessageListener getMessageListener()
+    throws JMSException
   {
+    if (_isClosed || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getNoLocal(): MessageConsumer is closed."));
+    
     return _messageListener;
   }
 
@@ -100,7 +120,11 @@ public class MessageConsumerImpl
    * Sets the message listener
    */
   public void setMessageListener(MessageListener listener)
+    throws JMSException
   {
+    if (_isClosed || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("setMessageListener(): MessageConsumer is closed."));
+    
     _messageListener = listener;
     _session.setAsynchronous();
   }
@@ -109,7 +133,11 @@ public class MessageConsumerImpl
    * Returns the message consumer's selector.
    */
   public String getMessageSelector()
+    throws JMSException
   {
+    if (_isClosed || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getMessageSelector(): MessageConsumer is closed."));
+    
     return _messageSelector;
   }
 
@@ -125,7 +153,11 @@ public class MessageConsumerImpl
    * Returns true if active
    */
   public boolean isActive()
+    throws JMSException
   {
+    if (_isClosed || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("isActive(): MessageConsumer is closed."));
+    
     return _session.isActive() && ! _isClosed;
   }
 
@@ -152,7 +184,8 @@ public class MessageConsumerImpl
   public Message receive(long timeout)
     throws JMSException
   {
-    _session.checkOpen();
+    if (_isClosed || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("receive(): MessageConsumer is closed."));
     
     if (Long.MAX_VALUE / 2 < timeout || timeout < 0)
       timeout = Long.MAX_VALUE / 2;
@@ -190,8 +223,8 @@ public class MessageConsumerImpl
   public Message receiveNoWait()
     throws JMSException
   {
-    if (_isClosed)
-      throw new javax.jms.IllegalStateException(L.l("can't receive when consumer is closed"));
+    if (_isClosed || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("receiveNoWait(): MessageConsumer is closed."));
     
     if (! _session.isActive())
       return null;

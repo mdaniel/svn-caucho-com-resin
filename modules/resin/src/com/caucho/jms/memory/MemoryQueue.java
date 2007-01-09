@@ -170,6 +170,11 @@ public class MemoryQueue extends AbstractDestination
 
 	  return message;
 	}
+	else {
+	  _queue.remove(i);
+	  i--;
+	  size = _queue.size();
+	}
       }
     }
 

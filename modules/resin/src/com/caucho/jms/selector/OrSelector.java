@@ -28,76 +28,29 @@
 
 package com.caucho.jms.selector;
 
-import com.caucho.util.CharBuffer;
-
+import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import java.util.regex.Pattern;
 
 /**
- * The like selector.
+ * The base selector.
  */
-public class LikeSelector extends Selector  {
-  private Selector _expr;
-  
-  private String _likeString;
-  private Pattern _pattern;
+public class OrSelector extends Selector  {
+  private Selector _left;
+  private Selector _right;
 
-  LikeSelector(Selector expr, String likeString, char escape)
+  OrSelector(Selector left, Selector right)
     throws JMSException
   {
-    _expr = expr;
+    _left = left;
+    _right = right;
 
-    _likeString = likeString;
-
-    CharBuffer cb = new CharBuffer();
-    cb.append("^");
-
-    for (int i = 0; i < likeString.length(); i++) {
-      char ch = likeString.charAt(i);
-
-      if (ch == escape && i + 1 < likeString.length()) {
-	ch = likeString.charAt(i + 1);
-
-	switch (ch) {
-	case '.': case '[': case ']': case '(': case ')': case '|':
-	case '{': case '}':
-	case '+': case '*': case '?': case '\\': case '$': case '^':
-	  cb.append('\\');
-	  cb.append(ch);
-	  break;
-	  
-	default:
-	  cb.append(ch);
-	}
-	
-	i++;
-	continue;
-      }
-
-      switch (ch) {
-      case '_':
-	cb.append(".");
-	break;
-      case '%':
-	cb.append(".*");
-	break;
-      case '.': case '[': case ']': case '(': case ')': case '|':
-      case '{': case '}':
-      case '+': case '*': case '?': case '\\': case '$': case '^':
-	cb.append('\\');
-	cb.append(ch);
-	break;
-	
-      default:
-	cb.append(ch);
-	break;
-      }
-    }
-    
-    cb.append("$");
-
-    _pattern = Pattern.compile(cb.toString());
+    if (! _left.isUnknown() && ! _left.isBoolean())
+      throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
+					     this));
+    if (! _right.isUnknown() && ! _right.isBoolean())
+      throw new InvalidSelectorException(L.l("'{0}' must have a numeric value for comparison.",
+					     this));
   }
 
   /**
@@ -123,22 +76,26 @@ public class LikeSelector extends Selector  {
   public Object evaluate(Message message)
     throws JMSException
   {
-    Object value = _expr.evaluate(message);
+    Object lvalue = _left.evaluate(message);
+    
+    if ((lvalue instanceof Boolean) && ((Boolean) lvalue).booleanValue())
+      return Boolean.TRUE;
 
-    if (value == null)
-      return null;
+    Object rvalue = _right.evaluate(message);
 
-    // jms607l
-    if (! (value instanceof String))
+    if (rvalue == null)
+      return NULL;
+
+    if ((rvalue instanceof Boolean) && ((Boolean) rvalue).booleanValue())
+      return Boolean.TRUE;
+    else if (lvalue instanceof Boolean || rvalue instanceof Boolean)
       return Boolean.FALSE;
-
-    String s = (String) value;
-
-    return _pattern.matcher(s).find() ? Boolean.TRUE : Boolean.FALSE;
+    else
+      return NULL;
   }
 
   public String toString()
   {
-    return _expr + " LIKE " + _likeString;
+    return _left + " OR " + _right;
   }
 }

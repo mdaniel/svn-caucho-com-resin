@@ -342,6 +342,13 @@ public class SessionImpl implements Session, ThreadTask {
   {
     checkOpen();
 
+    if (destination == null)
+      throw new InvalidDestinationException(L.l("destination is null.  Destination may not be null for Session.createConsumer"));
+    
+    if (! (destination instanceof AbstractDestination))
+      throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
+						destination));
+
     AbstractDestination dest = (AbstractDestination) destination;
     
     MessageConsumer consumer;
@@ -361,6 +368,14 @@ public class SessionImpl implements Session, ThreadTask {
     throws JMSException
   {
     checkOpen();
+
+    if (destination == null) {
+      return new MessageProducerImpl(this, null);
+    }
+    
+    if (! (destination instanceof AbstractDestination))
+      throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS destination for Session.createProducer.",
+						destination));
 
     AbstractDestination dest = (AbstractDestination) destination;
 
@@ -389,6 +404,13 @@ public class SessionImpl implements Session, ThreadTask {
     throws JMSException
   {
     checkOpen();
+
+    if (queue == null)
+      throw new InvalidDestinationException(L.l("queue is null.  Queue may not be null for Session.createBrowser"));
+    
+    if (! (queue instanceof AbstractDestination))
+      throw new InvalidDestinationException(L.l("'{0}' is an unknown queue.  The queue must be a Resin JMS Queue for Session.createBrowser.",
+						queue));
     
     return ((AbstractDestination) queue).createBrowser(this, messageSelector);
   }
@@ -794,71 +816,80 @@ public class SessionImpl implements Session, ThreadTask {
     _hasMessage = true;
     Thread thread = Thread.currentThread();
 
-    while (_hasMessage && isActive() && ! isStopping()) {
-      synchronized (_consumers) {
-	if (_isRunning)
-	  return;
+    try {
+      while (_hasMessage && isActive() && ! isStopping()) {
+	synchronized (_consumers) {
+	  if (_isRunning)
+	    return;
 
-	_isRunning = true;
-      }
+	  _isRunning = true;
+	}
 
-      try {
-	// _thread = Thread.currentThread();
-	_hasMessage = false;
+	try {
+	  // _thread = Thread.currentThread();
+	  _hasMessage = false;
 
-	for (int i = 0; i < _consumers.size(); i++) {
-	  MessageConsumerImpl consumer = _consumers.get(i);
-	  //AbstractDestination queue;
-	  //queue = (AbstractDestination) consumer.getDestination();
-	  //Selector selector = consumer.getSelector();
-	  MessageListener listener = consumer.getMessageListener();
+	  for (int i = 0; i < _consumers.size(); i++) {
+	    MessageConsumerImpl consumer = _consumers.get(i);
+	    //AbstractDestination queue;
+	    //queue = (AbstractDestination) consumer.getDestination();
+	    //Selector selector = consumer.getSelector();
+	    MessageListener listener = consumer.getMessageListener();
 	    
-	  if (_messageListener != null)
-	    listener = _messageListener;
+	    if (_messageListener != null)
+	      listener = _messageListener;
 	    
-	  if (consumer.isActive() && ! isStopping() && listener != null) {
-	    try {
-	      Message msg = consumer.receiveNoWait();
+	    if (consumer.isActive() && ! isStopping() && listener != null) {
+	      try {
+		Message msg = consumer.receiveNoWait();
 
-	      if (msg != null) {
-		_hasMessage = true;
+		if (msg != null) {
+		  _hasMessage = true;
 
-		if (log.isLoggable(Level.FINE))
-		  log.fine("JMS " + msg + " delivered to " + listener);
+		  if (log.isLoggable(Level.FINE))
+		    log.fine("JMS " + msg + " delivered to " + listener);
 
-		ClassLoader oldLoader = thread.getContextClassLoader();
-		try {
-		  thread.setContextClassLoader(_classLoader);
-		  listener.onMessage(msg);
-		} finally {
-		  thread.setContextClassLoader(oldLoader);
+		  ClassLoader oldLoader = thread.getContextClassLoader();
+		  try {
+		    thread.setContextClassLoader(_classLoader);
+		    listener.onMessage(msg);
+		  } finally {
+		    thread.setContextClassLoader(oldLoader);
+		  }
 		}
+	      } catch (Throwable e) {
+		log.log(Level.WARNING, e.toString(), e);
 	      }
-	    } catch (Throwable e) {
-	      log.log(Level.WARNING, e.toString(), e);
 	    }
 	  }
-	}
-      } finally {
-	// _thread = null;
+	} finally {
+	  // _thread = null;
 	
-	synchronized (_consumers) {
-	  _isRunning = false;
+	  synchronized (_consumers) {
+	    _isRunning = false;
 	  
-	  _consumers.notifyAll();
+	    _consumers.notifyAll();
+	  }
 	}
       }
+    } catch (JMSException e) {
+      throw new RuntimeException(e);
     }
+  }
+
+  public boolean isClosed()
+  {
+    return _isClosed;
   }
 
   /**
    * Checks that the session is open.
    */
   public void checkOpen()
-    throws IllegalStateException
+    throws javax.jms.IllegalStateException
   {
     if (_isClosed)
-      throw new IllegalStateException(L.l("session is closed"));
+      throw new javax.jms.IllegalStateException(L.l("session is closed"));
   }
 
   /**

@@ -47,6 +47,7 @@ public class QueueSenderImpl extends MessageProducerImpl
    * Returns the queue
    */
   public Queue getQueue()
+    throws JMSException
   {
     return (Queue) getDestination();
   }

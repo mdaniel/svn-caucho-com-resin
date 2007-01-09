@@ -34,7 +34,7 @@ import javax.jms.Message;
 /**
  * The base selector.
  */
-public class LiteralSelector extends Selector  {
+public class LiteralSelector extends Selector {
   private Object _value;
 
   LiteralSelector(Object value)

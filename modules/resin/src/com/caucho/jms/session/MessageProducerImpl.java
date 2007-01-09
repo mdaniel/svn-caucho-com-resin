@@ -64,7 +64,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Returns the producer's destination.
    */
   public Destination getDestination()
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getDestination(): message producer is closed."));
+    
     return _destination;
   }
 
@@ -72,7 +76,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Returns the default delivery mode.
    */
   public int getDeliveryMode()
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getDeliveryMode(): message producer is closed."));
+    
     return _deliveryMode;
   }
 
@@ -80,7 +88,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Sets the default delivery mode.
    */
   public void setDeliveryMode(int deliveryMode)
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("setDeliveryMode(): message producer is closed."));
+    
     _deliveryMode = deliveryMode;
   }
 
@@ -88,7 +100,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Returns true if message ids are disabled by default.
    */
   public boolean getDisableMessageID()
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getDisableMessageID(): message producer is closed."));
+
     return _disableMessageId;
   }
 
@@ -96,7 +112,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Sets true if message ids should be disabled by default.
    */
   public void setDisableMessageID(boolean disable)
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("setDisableMessageID(): message producer is closed."));
+    
     _disableMessageId = disable;
   }
 
@@ -104,7 +124,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Returns true if message timestamps are disabled by default.
    */
   public boolean getDisableMessageTimestamp()
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getDisableMessageTimestam(): message producer is closed."));
+
     return _disableMessageTimestamp;
   }
 
@@ -112,7 +136,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Sets true if message timestamps should be disabled by default.
    */
   public void setDisableMessageTimestamp(boolean disable)
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("setDeliveryMode(): message producer is closed."));
+
     _disableMessageTimestamp = disable;
   }
 
@@ -120,7 +148,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Returns the default priority
    */
   public int getPriority()
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getPriority(): message producer is closed."));
+    
     return _priority;
   }
 
@@ -128,7 +160,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Sets the default priority.
    */
   public void setPriority(int priority)
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("setDeliveryMode(): message producer is closed."));
+
     _priority = priority;
   }
 
@@ -136,7 +172,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Returns the default time to live
    */
   public long getTimeToLive()
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getTimeToLive(): message producer is closed."));
+    
     return _timeToLive;
   }
 
@@ -144,7 +184,11 @@ public class MessageProducerImpl implements MessageProducer  {
    * Sets the default time to live.
    */
   public void setTimeToLive(long timeToLive)
+    throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("setTimeToLive(): message producer is closed."));
+
     _timeToLive = timeToLive;
   }
 
@@ -207,6 +251,9 @@ public class MessageProducerImpl implements MessageProducer  {
                    long timeToLive)
     throws JMSException
   {
+    if (_session == null || _session.isClosed())
+      throw new javax.jms.IllegalStateException(L.l("getDeliveryMode(): message producer is closed."));
+    
     _session.send((AbstractDestination) destination,
 		  (MessageImpl) message,
 		  deliveryMode, priority,
@@ -231,6 +278,7 @@ public class MessageProducerImpl implements MessageProducer  {
   public void close()
     throws JMSException
   {
+    _session = null;
   }
 }
 

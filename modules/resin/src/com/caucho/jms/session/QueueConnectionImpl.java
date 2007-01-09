@@ -41,7 +41,8 @@ import javax.jms.ServerSessionPool;
  * A sample queue connection factory.
  */
 public class QueueConnectionImpl extends ConnectionImpl
-  implements QueueConnection {
+  implements QueueConnection
+{
   /**
    * Create a new queue connection.
    */

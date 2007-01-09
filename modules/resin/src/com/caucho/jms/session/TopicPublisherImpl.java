@@ -47,7 +47,11 @@ public class TopicPublisherImpl extends MessageProducerImpl
    * Returns the topic
    */
   public Topic getTopic()
+    throws JMSException
   {
+    if (_session == null)
+      throw new javax.jms.IllegalStateException(L.l("getTopic(): TopicPublisher is closed."));
+    
     return (Topic) super.getDestination();
   }
 

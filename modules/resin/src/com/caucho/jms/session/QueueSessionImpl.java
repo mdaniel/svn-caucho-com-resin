@@ -82,6 +82,9 @@ public class QueueSessionImpl extends SessionImpl implements QueueSession  {
     throws JMSException
   {
     checkOpen();
+
+    if (queue == null)
+      return new QueueSenderImpl(this, null);
     
     return (QueueSender) createProducer(queue);
   }
