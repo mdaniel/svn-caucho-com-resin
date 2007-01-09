@@ -30,105 +30,210 @@
 package javax.xml.soap;
 import java.util.*;
 
-/**
- * A container for MimeHeader objects, which represent the MIME headers present
- * in a MIME part of a message. This class is used primarily when an
- * application wants to retrieve specific attachments based on certain MIME
- * headers and values. This class will most likely be used by implementations
- * of AttachmentPart and other MIME dependent parts of the SAAJ API. See
- * Also:SOAPMessage.getAttachments(), AttachmentPart
- */
 public class MimeHeaders {
+  private final HashMap<String,ArrayList<MimeHeader>> _headers 
+    = new HashMap<String,ArrayList<MimeHeader>>();
 
-  /**
-   * Constructs a default MimeHeaders object initialized with an empty Vector
-   * object.
-   */
   public MimeHeaders()
   {
-    throw new UnsupportedOperationException();
   }
 
-
-  /**
-   * Adds a MimeHeader object with the specified name and value to this
-   * MimeHeaders object's list of headers. Note that RFC822 headers can contain
-   * only US-ASCII characters.
-   */
   public void addHeader(String name, String value)
   {
-    throw new UnsupportedOperationException();
+    if (name == null || value == null)
+      throw new IllegalArgumentException();
+
+    ArrayList<MimeHeader> list = _headers.get(name);
+
+    if (list == null) {
+      list = new ArrayList<MimeHeader>();
+      _headers.put(name, list);
+    }
+
+    list.add(new MimeHeader(name, value));
   }
 
-
-  /**
-   * Returns all the MimeHeaders in this MimeHeaders object.
-   */
   public Iterator getAllHeaders()
   {
-    throw new UnsupportedOperationException();
+    return new BlacklistHeaderIterator();
   }
 
-
-  /**
-   * Returns all of the values for the specified header as an array of String
-   * objects.
-   */
   public String[] getHeader(String name)
   {
-    throw new UnsupportedOperationException();
+    ArrayList<MimeHeader> list = _headers.get(name);
+
+    if (list == null)
+      return new String[0];
+
+    String[] values = new String[list.size()];
+
+    for (int i = 0; i < list.size(); i++)
+      values[i] = list.get(i).getValue();
+
+    return values;
   }
 
-
-  /**
-   * Returns all the MimeHeader objects whose name matches a name in the given
-   * array of names.
-   */
   public Iterator getMatchingHeaders(String[] names)
   {
-    throw new UnsupportedOperationException();
+    return new MatchingHeaderIterator(names);
   }
 
-
-  /**
-   * Returns all of the MimeHeader objects whose name does not match a name in
-   * the given array of names.
-   */
   public Iterator getNonMatchingHeaders(String[] names)
   {
-    throw new UnsupportedOperationException();
+    return new BlacklistHeaderIterator(names);
   }
 
-
-  /**
-   * Removes all the header entries from this MimeHeaders object.
-   */
   public void removeAllHeaders()
   {
-    throw new UnsupportedOperationException();
+    _headers.clear();
   }
 
-
-  /**
-   * Remove all MimeHeader objects whose name matches the given name.
-   */
   public void removeHeader(String name)
   {
-    throw new UnsupportedOperationException();
+    _headers.remove(name);
   }
 
-
-  /**
-   * Replaces the current value of the first header entry whose name matches
-   * the given name with the given value, adding a new header if no existing
-   * header name matches. This method also removes all matching headers after
-   * the first one. Note that RFC822 headers can contain only US-ASCII
-   * characters.
-   */
   public void setHeader(String name, String value)
   {
-    throw new UnsupportedOperationException();
+    if (name == null || value == null)
+      throw new IllegalArgumentException();
+
+    ArrayList<MimeHeader> list = _headers.get(name);
+
+    if (list == null) {
+      list = new ArrayList<MimeHeader>();
+      _headers.put(name, list);
+    }
+
+    if (list.size() > 0) 
+      list.set(0, new MimeHeader(name, value));
+    else
+      list.add(new MimeHeader(name, value));
   }
 
+  private class BlacklistHeaderIterator implements Iterator
+  {
+    private String[] _blackList;
+    private Iterator<Map.Entry<String,ArrayList<MimeHeader>>> _topIterator;
+    private Iterator<MimeHeader> _bottomIterator;
+
+    public BlacklistHeaderIterator()
+    {
+      this(null);
+    }
+
+    public BlacklistHeaderIterator(String[] blackList)
+    {
+      _blackList = blackList;
+      _topIterator = _headers.entrySet().iterator();
+    }
+
+    private void prepareIterator()
+    {
+      if (_bottomIterator == null || ! _bottomIterator.hasNext()) {
+        _bottomIterator = null;
+
+        while (_topIterator.hasNext()) {
+          Map.Entry<String,ArrayList<MimeHeader>> entry = _topIterator.next();
+
+          boolean ok = true;
+
+          if (_blackList != null) {
+            for (int i = 0; i < _blackList.length; i++) {
+              if (entry.getKey().equals(_blackList[i]))
+                ok = false;
+            }
+          }
+
+          if (ok) {
+            _bottomIterator = entry.getValue().iterator();
+            break;
+          }
+        }
+      }
+    }
+
+    public Object next()
+    {
+      prepareIterator();
+
+      if (_bottomIterator == null)
+        throw new NoSuchElementException();
+
+      return _bottomIterator.next();
+    }
+
+    public boolean hasNext()
+    {
+      prepareIterator();
+
+      if (_bottomIterator == null)
+        return false;
+
+      return _bottomIterator.hasNext();
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private class MatchingHeaderIterator implements Iterator
+  {
+    private int _name = -1;
+    private String[] _names;
+    private Iterator<MimeHeader> _iterator;
+
+    public MatchingHeaderIterator(String[] names)
+    {
+      _names = names;
+    }
+
+    private void prepareIterator()
+    {
+      if (_iterator == null || ! _iterator.hasNext()) {
+        _iterator = null;
+
+        for (_name++; _name < _names.length; _name++) {
+          ArrayList<MimeHeader> list = _headers.get(_names[_name]);
+
+          if (list != null) {
+            _iterator = list.iterator();
+
+            if (_iterator.hasNext())
+              break;
+
+            _iterator = null;
+          }
+        }
+      }
+    }
+
+    public Object next()
+    {
+      prepareIterator();
+
+      if (_iterator == null)
+        throw new NoSuchElementException();
+
+      return _iterator.next();
+    }
+
+    public boolean hasNext()
+    {
+      prepareIterator();
+
+      if (_iterator == null)
+        return false;
+
+      return _iterator.hasNext();
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
 }
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -32,122 +32,54 @@ import javax.xml.transform.*;
 import org.w3c.dom.*;
 import java.util.*;
 
-/**
- * The container for the SOAP-specific portion of a SOAPMessage object.
- */
 public abstract class SOAPPart implements Document, Node {
+  protected static final String CONTENT_ID = "Content-Id";
+  protected static final String CONTENT_LOCATION = "Content-Location";
 
   public SOAPPart()
   {
   }
 
-  /**
-   * Creates a MimeHeader object with the specified name and value and adds it
-   * to this SOAPPart object.
-   */
-  public abstract void addMimeHeader(String name, String value);
-
-
-  /**
-   * Retrieves all the headers for this SOAPPart object as an iterator over the
-   * MimeHeader objects.
-   */
-  public abstract Iterator getAllMimeHeaders();
-
-
-  /**
-   * Returns the content of the SOAPEnvelope as a JAXP Source object.
-   */
-  public abstract Source getContent() throws SOAPException;
-
-
-  /**
-   * Retrieves the value of the MIME header whose name is "Content-Id".
-   */
   public String getContentId()
   {
-    throw new UnsupportedOperationException();
+    String[] contentIds = getMimeHeader(CONTENT_ID);
+
+    if (contentIds != null && contentIds.length > 0)
+      return contentIds[0];
+
+    return null;
   }
 
-  /**
-   * Retrieves the value of the MIME header whose name is "Content-Location".
-   */
   public String getContentLocation()
   {
-    throw new UnsupportedOperationException();
+    String[] contentLocations = getMimeHeader(CONTENT_LOCATION);
+
+    if (contentLocations != null && contentLocations.length > 0)
+      return contentLocations[0];
+
+    return null;
   }
 
-
-  /**
-   * Gets the SOAPEnvelope object associated with this SOAPPart object. Once
-   * the SOAP envelope is obtained, it can be used to get its contents.
-   */
-  public abstract SOAPEnvelope getEnvelope() throws SOAPException;
-
-
-  /**
-   * Retrieves all MimeHeader objects that match a name in the given array.
-   */
-  public abstract Iterator getMatchingMimeHeaders(String[] names);
-
-
-  /**
-   * Gets all the values of the MimeHeader object in this SOAPPart object that
-   * is identified by the given String.
-   */
-  public abstract String[] getMimeHeader(String name);
-
-
-  /**
-   * Retrieves all MimeHeader objects whose name does not match a name in the
-   * given array.
-   */
-  public abstract Iterator getNonMatchingMimeHeaders(String[] names);
-
-
-  /**
-   * Removes all the MimeHeader objects for this SOAPEnvelope object.
-   */
-  public abstract void removeAllMimeHeaders();
-
-
-  /**
-   * Removes all MIME headers that match the given name.
-   */
-  public abstract void removeMimeHeader(String header);
-
-
-  /**
-   * Sets the content of the SOAPEnvelope object with the data from the given
-   * Source object. This Source must contain a valid SOAP document.
-   */
-  public abstract void setContent(Source source) throws SOAPException;
-
-
-  /**
-   * Sets the value of the MIME header named "Content-Id" to the given String.
-   */
   public void setContentId(String contentId)
   {
-    throw new UnsupportedOperationException();
+    setMimeHeader(CONTENT_ID, contentId);
   }
 
-
-  /**
-   * Sets the value of the MIME header "Content-Location" to the given String.
-   */
   public void setContentLocation(String contentLocation)
   {
-    throw new UnsupportedOperationException();
+    setMimeHeader(CONTENT_LOCATION, contentLocation);
   }
 
-
-  /**
-   * Changes the first header entry that matches the given header name so that
-   * its value is the given value, adding a new header with the given name and
-   * value if no existing header is a match.
-   */
+  public abstract void addMimeHeader(String name, String value);
+  public abstract Iterator getAllMimeHeaders();
+  public abstract Source getContent() throws SOAPException;
+  public abstract SOAPEnvelope getEnvelope() throws SOAPException;
+  public abstract Iterator getMatchingMimeHeaders(String[] names);
+  public abstract String[] getMimeHeader(String name);
+  public abstract Iterator getNonMatchingMimeHeaders(String[] names);
+  public abstract void removeAllMimeHeaders();
+  public abstract void removeMimeHeader(String header);
+  public abstract void setContent(Source source) throws SOAPException;
   public abstract void setMimeHeader(String name, String value);
-
 }
 

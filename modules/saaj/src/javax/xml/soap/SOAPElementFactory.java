@@ -29,54 +29,36 @@
 
 package javax.xml.soap;
 
-/**
- * public class SOAPElementFactoryextends Object SOAPElementFactory is a
- * factory for XML fragments that will eventually end up in the SOAP part.
- * These fragments can be inserted as children of the SOAPHeader or SOAPBody or
- * SOAPEnvelope. Elements created using this factory do not have the properties
- * of an element that lives inside a SOAP header document. These elements are
- * copied into the XML document tree when they are inserted. See
- * Also:SOAPFactory
- */
-class SOAPElementFactory {
+public class SOAPElementFactory {
+  private SOAPFactory _factory;
 
-  /**
-   * Deprecated. Create a SOAPElement object initialized with the given Name
-   * object.
-   */
-  public SOAPElement create(Name name) throws SOAPException
+  private SOAPElementFactory()
+    throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    _factory = SOAPFactory.newInstance();
   }
 
-
-  /**
-   * Deprecated. Create a SOAPElement object initialized with the given local
-   * name.
-   */
-  public SOAPElement create(String localName) throws SOAPException
+  public SOAPElement create(Name name) 
+    throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    return _factory.createElement(name);
   }
 
-
-  /**
-   * Deprecated. Create a new SOAPElement object with the given local name,
-   * prefix and uri.
-   */
-  public SOAPElement create(String localName, String prefix, String uri) throws SOAPException
+  public SOAPElement create(String localName) 
+    throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    return _factory.createElement(localName);
   }
 
+  public SOAPElement create(String localName, String prefix, String uri) 
+    throws SOAPException
+  {
+    return _factory.createElement(localName, prefix, uri);
+  }
 
-  /**
-   * Deprecated. Creates a new instance of SOAPElementFactory.
-   */
   public static SOAPElementFactory newInstance() throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    return new SOAPElementFactory();
   }
-
 }
 

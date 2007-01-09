@@ -29,40 +29,24 @@
 
 package javax.xml.soap;
 
-/**
- * An object that stores a MIME header name and its value. One or more
- * MimeHeader objects may be contained in a MimeHeaders object. See
- * Also:MimeHeaders
- */
 public class MimeHeader {
+  private String _name;
+  private String _value;
 
-  /**
-   * Constructs a MimeHeader object initialized with the given name and value.
-   * Parameters:name - a String giving the name of the headervalue - a String
-   * giving the value of the header
-   */
   public MimeHeader(String name, String value)
   {
-    throw new UnsupportedOperationException();
+    _name = name;
+    _value = value;
   }
 
-
-  /**
-   * Returns the name of this MimeHeader object.
-   */
   public String getName()
   {
-    throw new UnsupportedOperationException();
+    return _name;
   }
 
-
-  /**
-   * Returns the value of this MimeHeader object.
-   */
   public String getValue()
   {
-    throw new UnsupportedOperationException();
+    return _value;
   }
-
 }
 

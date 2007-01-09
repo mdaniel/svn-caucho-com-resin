@@ -28,14 +28,55 @@
 */
 
 package javax.xml.soap;
-import org.w3c.dom.*;
 
-public interface Node extends org.w3c.dom.Node {
-  public void detachNode();
-  public SOAPElement getParentElement();
-  public String getValue();
-  public void recycleNode();
-  public void setParentElement(SOAPElement parent) throws SOAPException;
-  public void setValue(String value);
+public class FactoryConfigurationError extends Error {
+
+  private Exception _exception;
+  private String _message;
+
+  public FactoryConfigurationError()
+  {
+    _exception = null;
+    _message = null;
+  }
+
+
+  public FactoryConfigurationError(Exception e)
+  {
+    _exception = e;
+    _message = null;
+  }
+
+
+  public FactoryConfigurationError(Exception e, String msg)
+  {
+    _exception = e;
+    _message = msg;
+  }
+
+
+  public FactoryConfigurationError(String msg)
+  {
+    _exception = null;
+    _message = msg;
+  }
+
+
+  public FactoryConfigurationError(String msg, Exception e)
+  {
+    _exception = e;
+    _message = msg;
+  }
+
+  public Exception getException()
+  {
+    return _exception;
+  }
+
+  public String getMessage()
+  {
+    return _message;
+  }
+
 }
 

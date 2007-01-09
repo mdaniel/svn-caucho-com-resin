@@ -29,37 +29,10 @@
 
 package javax.xml.soap;
 
-/**
- * A representation of an XML name.
- */
 public interface Name {
-
-  /**
-   * Gets the local name part of the XML name that this Name object represents.
-   */
-  abstract String getLocalName();
-
-
-  /**
-   * Returns the prefix that was specified when this Name object was
-   * initialized. This prefix is associated with the namespace for the XML name
-   * that this Name object represents.
-   */
-  abstract String getPrefix();
-
-
-  /**
-   * Gets the namespace-qualified name of the XML name that this Name object
-   * represents.
-   */
-  abstract String getQualifiedName();
-
-
-  /**
-   * Returns the URI of the namespace for the XML name that this Name object
-   * represents.
-   */
-  abstract String getURI();
-
+  public String getLocalName();
+  public String getPrefix();
+  public String getQualifiedName();
+  public String getURI();
 }
 

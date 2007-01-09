@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -29,34 +29,40 @@
 
 package javax.xml.soap;
 
-/**
- * The access point for the implementation classes of the factories defined in
- * the SAAJ API. All of the newInstance methods defined on factories in SAAJ
- * 1.3 defer to instances of this class to do the actual object creation. The
- * implementations of newInstance() methods (in SOAPFactory and MessageFactory)
- * that existed in SAAJ 1.2 have been updated to also delegate to the
- * SAAJMetaFactory when the SAAJ 1.2 defined lookup fails to locate the Factory
- * implementation class name. SAAJMetaFactory is a service provider interface.
- * There are no public methods on this class. Since: SAAJ 1.3 Author: SAAJ RI
- * Development Team
- */
 public abstract class SAAJMetaFactory {
-  protected SAAJMetaFactory()
+  private static SAAJMetaFactory _instance;
+
+  static synchronized SAAJMetaFactory getInstance()
+    throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    if (_instance == null) {
+      try {
+        Class cl = Class.forName("com.caucho.xml.saaj.SAAJMetaFactoryImpl");
+
+        _instance = (SAAJMetaFactory) cl.newInstance();
+      }
+      catch (ClassNotFoundException e) {
+        throw new SOAPException(e);
+      }
+      catch (InstantiationException e) {
+        throw new SOAPException(e);
+      }
+      catch (IllegalAccessException e) {
+        throw new SOAPException(e);
+      }
+    }
+
+    return _instance;
   }
 
+  protected SAAJMetaFactory()
+  {
+  }
 
-  /**
-   * Creates a MessageFactory object for the given String protocol.
-   */
-  protected abstract MessageFactory newMessageFactory(String protocol) throws SOAPException;
+  protected abstract MessageFactory newMessageFactory(String protocol) 
+    throws SOAPException;
 
-
-  /**
-   * Creates a SOAPFactory object for the given String protocol.
-   */
-  protected abstract SOAPFactory newSOAPFactory(String protocol) throws SOAPException;
-
+  protected abstract SOAPFactory newSOAPFactory(String protocol) 
+    throws SOAPException;
 }
 

@@ -29,34 +29,19 @@
 
 package javax.xml.soap;
 
-/**
- * A factory for creating SOAPConnection objects. Implementation of this class
- * is optional. If SOAPConnectionFactory.newInstance() throws an
- * UnsupportedOperationException then the implementation does not support the
- * SAAJ communication infrastructure. Otherwise SOAPConnection objects can be
- * created by calling createConnection() on the newly created
- * SOAPConnectionFactory object.
- */
 public abstract class SOAPConnectionFactory {
   public SOAPConnectionFactory()
   {
     throw new UnsupportedOperationException();
   }
 
+  public abstract SOAPConnection createConnection() 
+    throws SOAPException;
 
-  /**
-   * Create a new SOAPConnection.
-   */
-  public abstract SOAPConnection createConnection() throws SOAPException;
-
-
-  /**
-   * Creates an instance of the default SOAPConnectionFactory object.
-   */
-  public static SOAPConnectionFactory newInstance() throws SOAPException, UnsupportedOperationException
+  public static SOAPConnectionFactory newInstance() 
+    throws SOAPException
   {
     throw new UnsupportedOperationException();
   }
-
 }
 

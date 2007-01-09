@@ -32,26 +32,32 @@ import javax.xml.namespace.*;
 import java.util.*;
 
 public interface SOAPHeader extends SOAPElement {
-  abstract SOAPHeaderElement addHeaderElement(Name name) throws SOAPException;
-  abstract SOAPHeaderElement addHeaderElement(QName qname) throws SOAPException;
+  public SOAPHeaderElement addHeaderElement(Name name) 
+    throws SOAPException;
 
-  abstract SOAPHeaderElement addNotUnderstoodHeaderElement(QName name) throws SOAPException;
+  public SOAPHeaderElement addHeaderElement(QName qname) 
+    throws SOAPException;
 
-  abstract SOAPHeaderElement addUpgradeHeaderElement(Iterator supportedSOAPURIs) throws SOAPException;
+  public SOAPHeaderElement addNotUnderstoodHeaderElement(QName name) 
+    throws SOAPException;
 
-  abstract SOAPHeaderElement addUpgradeHeaderElement(String supportedSoapUri) throws SOAPException, SOAPException;
+  public SOAPHeaderElement addUpgradeHeaderElement(Iterator supportedSOAPURIs)
+    throws SOAPException;
 
-  abstract SOAPHeaderElement addUpgradeHeaderElement(String[] supportedSoapUris)
-    throws SOAPException, SOAPException;  
+  public SOAPHeaderElement addUpgradeHeaderElement(String supportedSoapUri) 
+    throws SOAPException;
 
-  abstract Iterator examineAllHeaderElements();
-  
-  abstract Iterator examineHeaderElements(String actor);
-  
-  abstract Iterator examineMustUnderstandHeaderElements(String actor);
-  
-  abstract Iterator extractAllHeaderElements();
-  
-  abstract Iterator extractHeaderElements(String actor);
+  public SOAPHeaderElement addUpgradeHeaderElement(String[] supportedSoapUris)
+    throws SOAPException;
+
+  public Iterator examineAllHeaderElements();
+
+  public Iterator examineHeaderElements(String actor);
+
+  public Iterator examineMustUnderstandHeaderElements(String actor);
+
+  public Iterator extractAllHeaderElements();
+
+  public Iterator extractHeaderElements(String actor);
 }
 
