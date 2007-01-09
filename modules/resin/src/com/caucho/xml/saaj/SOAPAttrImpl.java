@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -54,6 +54,25 @@ public class SOAPAttrImpl extends SOAPNodeImpl
     super(factory, name);
 
     _value = value;
+  }
+
+  public void detachNode()
+  {
+    if (getParentNode() != null) {
+      if (this == _parent._firstAttribute)
+        _parent._firstAttribute = (SOAPAttrImpl) _next;
+      else if (_previous != null)
+        _previous._next = _next;
+
+      if (this == _parent._lastAttribute)
+        _parent._lastAttribute = (SOAPAttrImpl) _previous;
+      else if (_next != null)
+        _next._previous = _previous;
+
+      _previous = null;
+      _next = null;
+      _parent = null;
+    }
   }
 
   public String getName()

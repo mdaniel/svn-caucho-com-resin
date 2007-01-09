@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -41,21 +41,33 @@ public class SOAPBodyElementImpl extends SOAPElementImpl
                                  implements SOAPBodyElement 
 {
   SOAPBodyElementImpl(SOAPFactory factory, NameImpl name)
+    throws SOAPException
   {
     super(factory, name);
   }
 
   SOAPBodyElementImpl(SOAPFactory factory, SOAPElement element)
+    throws SOAPException
   {
-    super(factory, NameImpl.fromQName(element.getElementQName()));
+    this(factory, NameImpl.fromQName(element.getElementQName()));
 
     copySOAPElement(element);
   }
 
   SOAPBodyElementImpl(SOAPFactory factory, Element element)
+    throws SOAPException
   {
-    super(factory, NameImpl.fromElement(element));
+    this(factory, NameImpl.fromElement(element));
 
     copyElement(element, true);
+  }
+
+  public void setParentElement(SOAPElement parent)
+    throws SOAPException
+  {
+    if (parent instanceof SOAPBodyImpl)
+      _parent = (SOAPBodyImpl) parent;
+    else
+      throw new SOAPException("Parent not a SOAPBody");
   }
 }

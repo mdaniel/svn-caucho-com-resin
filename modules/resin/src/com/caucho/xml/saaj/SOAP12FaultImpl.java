@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -35,7 +35,9 @@ import java.util.*;
 
 public class SOAP12FaultImpl extends SOAP11FaultImpl {
   private static final NameImpl SOAP_1_2_FAULT_NAME = 
-    new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Fault");
+    new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, 
+                 "Fault",
+                 SOAPConstants.SOAP_ENV_PREFIX);
 
   private String _faultNode;
   private String _faultRole;
@@ -59,7 +61,16 @@ public class SOAP12FaultImpl extends SOAP11FaultImpl {
   public void appendFaultSubcode(QName subcode) 
     throws SOAPException
   {
+    if (subcode.getPrefix() == null || 
+        "".equals(subcode.getPrefix()))
+      throw new SOAPException("Fault subcodes must have qualified names");
+
     SOAPElement element = _factory.createElement(subcode);
+
+    if (getNamespaceURI(subcode.getPrefix()) == null) {
+      element.addNamespaceDeclaration(subcode.getPrefix(), 
+                                      subcode.getNamespaceURI());
+    }
 
     _subcodes.add(element);
     _faultCode.addChildElement(element);

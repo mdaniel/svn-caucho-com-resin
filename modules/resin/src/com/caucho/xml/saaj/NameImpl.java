@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -58,6 +58,20 @@ public class NameImpl extends QName implements Name {
     _qualifiedName = prefix + ':' + localPart;
   }
 
+  static NameImpl fromQualifiedName(String uri, String qualifiedName)
+  {
+    int colon = qualifiedName.indexOf(':');
+
+    if (colon >= 0) {
+      String prefix = qualifiedName.substring(0, colon);
+      String localName = qualifiedName.substring(colon + 1);
+
+      return new NameImpl(uri, localName, prefix);
+    }
+
+    return new NameImpl(uri, qualifiedName);
+  }
+
   static NameImpl fromName(Name name)
   {
     if (name instanceof NameImpl)
@@ -88,19 +102,6 @@ public class NameImpl extends QName implements Name {
                           qname.getLocalPart());
     else
       return new NameImpl(qname.getLocalPart());
-  }
-
-  static NameImpl fromCauchoQName(com.caucho.xml.QName qname)
-  {
-    if (qname.getPrefix() != null)
-      return new NameImpl(qname.getNamespaceURI(),
-                          qname.getLocalName(),
-                          qname.getPrefix());
-    else if (qname.getNamespaceURI() != null)
-      return new NameImpl(qname.getNamespaceURI(),
-                          qname.getLocalName());
-    else
-      return new NameImpl(qname.getLocalName());
   }
 
   static NameImpl fromElement(Element element)
@@ -147,18 +148,6 @@ public class NameImpl extends QName implements Name {
       return new QName(name.getURI(), name.getLocalName());
     else 
       return new QName(name.getLocalName());
-  }
-
-  static com.caucho.xml.QName toCauchoQName(Name name)
-  {
-    if (name.getPrefix() != null)
-      return new com.caucho.xml.QName(name.getPrefix(), 
-                                      name.getLocalName(), 
-                                      name.getURI());
-    else if (name.getURI() != null)
-      return new com.caucho.xml.QName(name.getLocalName(), name.getURI());
-    else 
-      return new com.caucho.xml.QName(name.getLocalName());
   }
 }
 

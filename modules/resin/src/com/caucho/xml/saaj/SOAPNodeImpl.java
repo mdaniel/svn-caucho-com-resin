@@ -142,6 +142,17 @@ public abstract class SOAPNodeImpl
   {
     SOAPNodeImpl node = (SOAPNodeImpl) newChild;
 
+    try {
+      if (this instanceof SOAPElementImpl) 
+        node.setParentElement((SOAPElementImpl) this);
+    }
+    catch (SOAPException e) {
+      throw new DOMException(DOMException.HIERARCHY_REQUEST_ERR, 
+                             e.getMessage());
+    }
+
+    node._owner = _owner;
+
     if (_lastChild == null)
       _firstChild = _lastChild = node;
     else {
@@ -256,7 +267,73 @@ public abstract class SOAPNodeImpl
 
   public boolean isEqualNode(org.w3c.dom.Node arg)
   {
-    return equals(arg);
+    if (arg == null)
+      return false;
+
+    if (getNodeType() != arg.getNodeType())
+      return false;
+
+    if ((getNodeName() == null && arg.getNodeName() != null) ||
+        (getNodeName() != null && ! getNodeName().equals(arg.getNodeName())))
+      return false;
+
+    if ((getLocalName() == null && arg.getLocalName() != null) ||
+        (getLocalName() != null && ! getLocalName().equals(arg.getLocalName())))
+      return false;
+
+    if ((getNamespaceURI() == null && arg.getNamespaceURI() != null) ||
+        (getNamespaceURI() != null && 
+         ! getNamespaceURI().equals(arg.getNamespaceURI())))
+      return false;
+
+    if ((getPrefix() == null && arg.getPrefix() != null) ||
+        (getPrefix() != null && ! getPrefix().equals(arg.getPrefix())))
+      return false;
+
+    if ((getNodeValue() == null && arg.getNodeValue() != null) ||
+        (getNodeValue() != null && ! getNodeValue().equals(arg.getNodeValue())))
+      return false;
+
+    NamedNodeMap map = getAttributes();
+    NamedNodeMap otherMap = arg.getAttributes();
+
+    if ((map == null) != (otherMap == null))
+      return false;
+
+    if (map != null) {
+      if (map.getLength() != otherMap.getLength())
+        return false;
+
+      for (int i = 0; i < map.getLength(); i++) {
+        org.w3c.dom.Node attr = map.item(i);
+        org.w3c.dom.Node otherAttr = null;
+
+        if (attr.getNamespaceURI() != null)
+          otherAttr = otherMap.getNamedItemNS(attr.getNamespaceURI(),
+                                              attr.getLocalName());
+        else
+          otherAttr = otherMap.getNamedItem(attr.getLocalName());
+
+        if (otherAttr == null || ! attr.isEqualNode(otherAttr))
+          return false;
+      }
+    }
+
+    normalize();
+    arg.normalize();
+
+    NodeList children = getChildNodes();
+    NodeList otherChildren = arg.getChildNodes();
+
+    if (children.getLength() != otherChildren.getLength())
+      return false;
+
+    for (int i = 0; i < children.getLength(); i++) {
+      if (! children.item(i).isEqualNode(otherChildren.item(i)))
+        return false;
+    }
+
+    return true;
   }
 
   public boolean isSameNode(org.w3c.dom.Node other)
@@ -290,19 +367,23 @@ public abstract class SOAPNodeImpl
                              "Child does not belong to this node");
     }
 
-    SOAPElementImpl element = (SOAPElementImpl) oldChild;
-    element._parent = null;
+    SOAPNodeImpl node = (SOAPNodeImpl) oldChild;
+    node._parent = null;
 
-    if (element._previous != null)
-      element._previous._next = element._next;
+    if (node == _firstChild)
+      _firstChild = node._next;
+    else if (node._previous != null)
+      node._previous._next = node._next;
 
-    if (element._next != null)
-      element._next._previous = element._previous;
+    if (node == _lastChild)
+      _lastChild = node._previous;
+    else if (node._next != null)
+      node._next._previous = node._previous;
 
-    element._previous = null;
-    element._next = null;
+    node._previous = null;
+    node._next = null;
 
-    return element;
+    return node;
   }
 
   public org.w3c.dom.Node replaceChild(org.w3c.dom.Node newChild, 

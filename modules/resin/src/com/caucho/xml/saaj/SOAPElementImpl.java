@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -39,6 +39,11 @@ import org.w3c.dom.*;
 
 public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement 
 {
+  private static final Name ENCODING_STYLE_NAME
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE,
+                   "encodingStyle",
+                   SOAPConstants.SOAP_ENV_PREFIX);
+
   protected SOAPAttrImpl _firstAttribute;
   protected SOAPAttrImpl _lastAttribute;
 
@@ -46,16 +51,22 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   private HashMap<String,String> _namespaces = new HashMap<String,String>();
 
   SOAPElementImpl(SOAPFactory factory, NameImpl name, SOAPPart owner)
+    throws SOAPException
   {
     super(factory, name, owner);
+
+    if (name.getPrefix() != null)
+      _namespaces.put(name.getPrefix(), name.getURI());
   }
 
   SOAPElementImpl(SOAPFactory factory, NameImpl name)
+    throws SOAPException
   {
     this(factory, name, null);
   }
 
   SOAPElementImpl(SOAPFactory factory, Element element)
+    throws SOAPException
   {
     this(factory, NameImpl.fromElement(element));
 
@@ -69,7 +80,13 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
 
   protected void copySOAPElement(SOAPElement source)
   {
-    _encoding = source.getEncodingStyle();
+    try {
+      setEncodingStyle(source.getEncodingStyle());
+    }
+    catch (SOAPException e) {
+      // ignore exception... if encoding style applies, it will be set
+      // and not if not
+    }
 
     if (source instanceof SOAPElementImpl) {
       SOAPElementImpl sourceImpl = (SOAPElementImpl) source;
@@ -130,14 +147,7 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   public SOAPElement addAttribute(Name name, String value) 
     throws SOAPException
   {
-    if (name.getPrefix() != null)
-      setAttributeNS(name.getURI(), 
-                     name.getPrefix() + ':' + name.getLocalName(), 
-                     value);
-    else if (name.getURI() != null)
-      setAttributeNS(name.getURI(), name.getLocalName(), value);
-    else
-      setAttribute(name.getLocalName(), value);
+    setAttribute(NameImpl.fromName(name), value);
 
     return this;
   }
@@ -145,14 +155,7 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   public SOAPElement addAttribute(QName qname, String value) 
     throws SOAPException
   {
-    if (qname.getPrefix() != null)
-      setAttributeNS(qname.getNamespaceURI(), 
-                     qname.getPrefix() + ':' + qname.getLocalPart(), 
-                     value);
-    else if (qname.getNamespaceURI() != null)
-      setAttributeNS(qname.getNamespaceURI(), qname.getLocalPart(), value);
-    else
-      setAttribute(qname.getLocalPart(), value);
+    setAttribute(NameImpl.fromQName(qname), value);
 
     return this;
   }
@@ -191,7 +194,12 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   public SOAPElement addChildElement(String localName, String prefix) 
     throws SOAPException
   {
-    return addChildElement(getNamespaceURI(prefix), localName, prefix);
+    String uri = getNamespaceURI(prefix);
+
+    if (uri == null)
+      throw new SOAPException("Undefined prefix: " + prefix);
+
+    return addChildElement(localName, prefix, uri);
   }
 
   public SOAPElement addChildElement(String localName, 
@@ -236,7 +244,12 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   public QName createQName(String localName, String prefix) 
     throws SOAPException
   {
-    return new NameImpl(getNamespaceURI(prefix), localName, prefix);
+    String uri = getNamespaceURI(prefix);
+
+    if (uri == null)
+      throw new SOAPException("Undefined prefix: " + prefix);
+
+    return new NameImpl(uri, localName, prefix);
   }
 
   public Iterator getAllAttributes()
@@ -251,18 +264,24 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   
   public String getAttributeValue(Name name)
   {
-    if (name.getURI() != null)
-      return getAttributeNS(name.getURI(), name.getLocalName());
-    else
-      return getAttribute(name.getLocalName());
+    return getAttributeValue(NameImpl.toQName(name));
   }
 
   public String getAttributeValue(QName qname)
   {
+    // DOM specifies that the default is "", while SAAJ says null
+   
+    Attr attr = null;
+
     if (qname.getNamespaceURI() != null)
-      return getAttributeNS(qname.getNamespaceURI(), qname.getLocalPart());
+      attr = getAttributeNodeNS(qname.getNamespaceURI(), qname.getLocalPart());
     else
-      return getAttribute(qname.getLocalPart());
+      attr = getAttributeNode(qname.getLocalPart());
+
+    if (attr == null)
+      return null;
+
+    return attr.getValue();
   }
 
   public Iterator getChildElements()
@@ -291,14 +310,19 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   }
   
   public String getEncodingStyle()
+    throws SOAPException
   {
-    return _encoding;
+    return getAttributeValue(ENCODING_STYLE_NAME);
   }
 
   public void setEncodingStyle(String encodingStyle) 
     throws SOAPException
   {
-    _encoding = encodingStyle;
+    if (! SOAPConstants.URI_NS_SOAP_ENCODING.equals(encodingStyle) &&
+        ! SOAPConstants.URI_NS_SOAP_1_2_ENCODING.equals(encodingStyle))
+      throw new IllegalArgumentException("Unknown SOAP Encoding: " + encodingStyle);
+
+    addAttribute(ENCODING_STYLE_NAME, encodingStyle);
   }
 
   public Iterator getNamespacePrefixes()
@@ -317,7 +341,7 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   {
     String uri = _namespaces.get(prefix);
 
-    if (uri == null)
+    if (uri == null && getParentNode() != null)
       return ((SOAPElement) getParentNode()).getNamespaceURI(prefix);
     else
       return uri;
@@ -325,42 +349,25 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
 
   public boolean removeAttribute(Name name)
   {
-    if (name.getURI() != null) {
-      if (hasAttributeNS(name.getURI(), name.getLocalName())) {
-        removeAttributeNS(name.getURI(), name.getLocalName());
-        return true;
-      }
-      else
-        return false;
+    SOAPAttrImpl attr = null;
+
+    if (name.getURI() != null)
+      attr = (SOAPAttrImpl) getAttributeNodeNS(name.getURI(), 
+                                               name.getLocalName());
+    else
+      attr = (SOAPAttrImpl) getAttributeNode(name.getQualifiedName());
+
+    if (attr != null) {
+      attr.detachNode();
+      return true;
     }
-    else {
-      if (hasAttribute(name.getLocalName())) {
-        removeAttribute(name.getLocalName());
-        return true;
-      }
-      else
-        return false;
-    }
+
+    return false;
   }
 
   public boolean removeAttribute(QName qname)
   {
-    if (qname.getNamespaceURI() != null) {
-      if (hasAttributeNS(qname.getNamespaceURI(), qname.getLocalPart())) {
-        getAttributeNS(qname.getNamespaceURI(), qname.getLocalPart());
-        return true;
-      }
-      else
-        return false;
-    }
-    else {
-      if (hasAttribute(qname.getLocalPart())) {
-        getAttribute(qname.getLocalPart());
-        return true;
-      }
-      else
-        return false;
-    }
+    return removeAttribute((Name) NameImpl.fromQName(qname));
   }
 
   public void removeContents()
@@ -552,6 +559,21 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
       _lastAttribute = _firstAttribute = attr;
   }
 
+  private void setAttribute(NameImpl name, String value)
+  {
+    Attr attr = null;
+    
+    if (name.getURI() != null)
+      attr = getAttributeNodeNS(name.getURI(), name.getLocalName());
+    else
+      attr = getAttributeNode(name.getLocalName());
+
+    if (attr != null)
+      attr.setValue(value);
+    else
+      appendAttribute(new SOAPAttrImpl(_factory, name, value));
+  }
+
   public void setAttribute(String name, String value)
   {
     Attr attr = getAttributeNode(name);
@@ -599,8 +621,10 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
 
     if (attr != null)
       attr.setValue(value);
-    else
-      appendAttribute((SOAPAttrImpl) attr);
+    else {
+      NameImpl name = NameImpl.fromQualifiedName(namespaceURI, qualifiedName);
+      appendAttribute(new SOAPAttrImpl(_factory, name, value));
+    }
   }
 
   public void setIdAttribute(String name, boolean isId)
@@ -795,7 +819,7 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
 
       if (_name == null)
         _node = _firstChild;
-      else if (_node.getNamespaceURI() == null) {
+      else if (_name.getNamespaceURI() == null) {
         for (_node = _firstChild; _node != null; _node = _node._next) {
           if (_name.getLocalPart().equals(_node.getLocalName()))
             break;
@@ -835,7 +859,7 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
       else if (_name.getNamespaceURI() == null) {
         SOAPNodeImpl next = _node;
 
-        for (; _node != null; _node = _node._next) {
+        for (_node = _node._next; _node != null; _node = _node._next) {
           if (_name.getLocalPart().equals(_node.getNodeName()))
             break;
         }
@@ -845,7 +869,7 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
       else {
         SOAPNodeImpl next = _node;
 
-        for (; _node != null; _node = _node._next) {
+        for (_node = _node._next; _node != null; _node = _node._next) {
           if (_name.getLocalPart().equals(_node.getLocalName()) &&
               _name.getNamespaceURI().equals(_node.getNamespaceURI()))
             break;

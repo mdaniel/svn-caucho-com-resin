@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -38,6 +38,7 @@ import com.caucho.xml.QNode;
 public class SOAP11EnvelopeImpl extends SOAPEnvelopeImpl
 {
   SOAP11EnvelopeImpl(SOAPFactory factory)
+    throws SOAPException
   {
     super(factory, SOAP_1_1_ENVELOPE_NAME);
   }

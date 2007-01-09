@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -38,32 +38,45 @@ import com.caucho.xml.QNode;
 public abstract class SOAPEnvelopeImpl extends SOAPElementImpl
                                        implements SOAPEnvelope
 {
-  private SOAPHeader _header;
-  private SOAPBody _body;
+  protected SOAPHeader _header;
+  protected SOAPBody _body;
   
   // SOAP 1.1
 
   protected static final NameImpl SOAP_1_1_ENVELOPE_NAME
-    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Envelope");
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, 
+                   "Envelope",
+                   SOAPConstants.SOAP_ENV_PREFIX);
 
   protected static final NameImpl SOAP_1_1_BODY_NAME
-    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Body");
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, 
+                   "Body",
+                   SOAPConstants.SOAP_ENV_PREFIX);
 
   protected static final NameImpl SOAP_1_1_HEADER_NAME
-    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Header");
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, 
+                   "Header",
+                   SOAPConstants.SOAP_ENV_PREFIX);
 
   // SOAP 1.2
   
   protected static final NameImpl SOAP_1_2_ENVELOPE_NAME
-    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Envelope");
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, 
+                   "Envelope",
+                   SOAPConstants.SOAP_ENV_PREFIX);
 
   protected static final NameImpl SOAP_1_2_BODY_NAME
-    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Body");
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, 
+                   "Body",
+                   SOAPConstants.SOAP_ENV_PREFIX);
 
   protected static final NameImpl SOAP_1_2_HEADER_NAME
-    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Header");
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, 
+                   "Header",
+                   SOAPConstants.SOAP_ENV_PREFIX);
 
   protected SOAPEnvelopeImpl(SOAPFactory factory, NameImpl name)
+    throws SOAPException
   {
     super(factory, name);
   }
@@ -71,6 +84,9 @@ public abstract class SOAPEnvelopeImpl extends SOAPElementImpl
   public SOAPBody addBody() 
     throws SOAPException
   {
+    if (_body != null)
+      throw new SOAPException("Envelope already contains Body");
+
     _body = (SOAPBody) _factory.createElement(getBodyName());
 
     addChildElement(_body);
@@ -80,6 +96,9 @@ public abstract class SOAPEnvelopeImpl extends SOAPElementImpl
 
   public SOAPHeader addHeader() throws SOAPException
   {
+    if (_header != null)
+      throw new SOAPException("Envelope already contains Header");
+
     _header = (SOAPHeader) _factory.createElement(getHeaderName());
 
     addChildElement(_header);
@@ -109,6 +128,12 @@ public abstract class SOAPEnvelopeImpl extends SOAPElementImpl
     throws SOAPException
   {
     return _header;
+  }
+
+  public SOAPElement setElementQName(QName newName) 
+    throws SOAPException
+  {
+    throw new SOAPException("Cannot set name of SOAP Envelope");
   }
 
   protected abstract Name getBodyName();

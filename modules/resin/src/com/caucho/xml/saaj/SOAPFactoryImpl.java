@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -37,12 +37,19 @@ public class SOAPFactoryImpl extends SOAPFactory {
   private final String _protocol;
 
   public SOAPFactoryImpl()
+    throws SOAPException
   {
     this(SOAPConstants.DEFAULT_SOAP_PROTOCOL);
   }
 
   public SOAPFactoryImpl(String protocol)
+    throws SOAPException
   {
+    if (! protocol.equals(SOAPConstants.SOAP_1_1_PROTOCOL) &&
+        ! protocol.equals(SOAPConstants.SOAP_1_2_PROTOCOL) &&
+        ! protocol.equals(SOAPConstants.DYNAMIC_SOAP_PROTOCOL))
+      throw new SOAPException("Unsupported protocol : " + protocol);
+
     _protocol = protocol;
   }
 
@@ -63,7 +70,7 @@ public class SOAPFactoryImpl extends SOAPFactory {
       if ("Envelope".equals(name.getLocalName()))
         return new SOAP11EnvelopeImpl(this);
       else if ("Header".equals(name.getLocalName()))
-        return new SOAPHeaderImpl(this, NameImpl.fromName(name));
+        return new SOAP11HeaderImpl(this, NameImpl.fromName(name));
       else if ("Body".equals(name.getLocalName())) 
         return new SOAPBodyImpl(this, NameImpl.fromName(name));
       else if ("Fault".equals(name.getLocalName())) 
@@ -73,7 +80,7 @@ public class SOAPFactoryImpl extends SOAPFactory {
       if ("Envelope".equals(name.getLocalName()))
         return new SOAP12EnvelopeImpl(this);
       else if ("Header".equals(name.getLocalName()))
-        return new SOAPHeaderImpl(this, NameImpl.fromName(name));
+        return new SOAP12HeaderImpl(this, NameImpl.fromName(name));
       else if ("Body".equals(name.getLocalName())) 
         return new SOAPBodyImpl(this, NameImpl.fromName(name));
       else if ("Fault".equals(name.getLocalName())) 
@@ -131,6 +138,6 @@ public class SOAPFactoryImpl extends SOAPFactory {
   public Name createName(String localName, String prefix, String uri) 
     throws SOAPException
   {
-    return new NameImpl(localName, prefix, uri);
+    return new NameImpl(uri, localName, prefix);
   }
 }

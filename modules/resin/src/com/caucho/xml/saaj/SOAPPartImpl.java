@@ -39,6 +39,8 @@ public class SOAPPartImpl extends SOAPPart
   private SOAPFactory _factory;
   private SOAPEnvelopeImpl _envelope;
   private String _protocol;
+  private MimeHeaders _headers = new MimeHeaders();
+  private Source _content;
 
   public SOAPPartImpl(SOAPFactory factory, String protocol)
     throws SOAPException
@@ -63,39 +65,19 @@ public class SOAPPartImpl extends SOAPPart
     _envelope.addBody();
   }
 
-  public String getContentId()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public String getContentLocation()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public void setContentId(String contentId)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public void setContentLocation(String contentLocation)
-  {
-    throw new UnsupportedOperationException();
-  }
-
   public void addMimeHeader(String name, String value)
   {
-    throw new UnsupportedOperationException();
+    _headers.addHeader(name, value);
   }
 
   public Iterator getAllMimeHeaders()
   {
-    throw new UnsupportedOperationException();
+    return _headers.getAllHeaders();
   }
 
   public Source getContent() throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    return _content;
   }
 
   public SOAPEnvelope getEnvelope() throws SOAPException
@@ -105,37 +87,38 @@ public class SOAPPartImpl extends SOAPPart
 
   public Iterator getMatchingMimeHeaders(String[] names)
   {
-    throw new UnsupportedOperationException();
+    return _headers.getMatchingHeaders(names);
   }
 
   public String[] getMimeHeader(String name)
   {
-    throw new UnsupportedOperationException();
+    return _headers.getHeader(name);
   }
 
   public Iterator getNonMatchingMimeHeaders(String[] names)
   {
-    throw new UnsupportedOperationException();
+    return _headers.getNonMatchingHeaders(names);
   }
 
   public void removeAllMimeHeaders()
   {
-    throw new UnsupportedOperationException();
+    _headers.removeAllHeaders();
   }
 
   public void removeMimeHeader(String header)
   {
-    throw new UnsupportedOperationException();
+    _headers.removeHeader(header);
   }
 
-  public void setContent(Source source) throws SOAPException
+  public void setContent(Source source) 
+    throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    _content = source;
   }
 
   public void setMimeHeader(String name, String value)
   {
-    throw new UnsupportedOperationException();
+    _headers.setHeader(name, value);
   }
 
   // javax.xml.soap.Node
@@ -522,4 +505,3 @@ public class SOAPPartImpl extends SOAPPart
     throw new UnsupportedOperationException();
   }
 }
-

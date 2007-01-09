@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -36,11 +36,13 @@ public class DetailEntryImpl extends SOAPElementImpl
                              implements DetailEntry 
 {
   DetailEntryImpl(SOAPFactory factory, String name)
+    throws SOAPException
   {
     super(factory, new NameImpl(name));
   }
 
   DetailEntryImpl(SOAPFactory factory, QName name)
+    throws SOAPException
   {
     super(factory, NameImpl.fromQName(name));
   }

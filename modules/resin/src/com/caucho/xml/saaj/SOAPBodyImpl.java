@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -46,6 +46,7 @@ public class SOAPBodyImpl extends SOAPElementImpl
   private SOAPFault _fault;
 
   SOAPBodyImpl(SOAPFactory factory, NameImpl name)
+    throws SOAPException
   {
     super(factory, name);
   }
@@ -151,6 +152,7 @@ public class SOAPBodyImpl extends SOAPElementImpl
     Element child = (Element) getFirstChild();
     removeContents();
 
+    // XXX
     QDocument document = new QDocument();
     document.setDocumentElement(child);
 
@@ -165,5 +167,21 @@ public class SOAPBodyImpl extends SOAPElementImpl
   public boolean hasFault()
   {
     return _fault != null;
+  }
+
+  public SOAPElement setElementQName(QName newName) 
+    throws SOAPException
+  {
+    throw new SOAPException("Cannot set name of SOAP Body");
+  }
+
+  public void detachNode()
+  {
+    if (getParentNode() instanceof SOAPEnvelopeImpl) {
+      SOAPEnvelopeImpl parent = (SOAPEnvelopeImpl) getParentNode();
+      parent._body = null;
+    }
+
+    super.detachNode();
   }
 }

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -40,7 +40,9 @@ public class SOAP11FaultImpl extends SOAPBodyElementImpl
                              implements SOAPFault 
 {
   private static final NameImpl SOAP_1_1_FAULT_NAME = 
-    new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Fault");
+    new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, 
+                 "Fault",
+                 SOAPConstants.SOAP_ENV_PREFIX);
 
   private static final Name FAULT_CODE = new NameImpl("faultcode");
   private static final Name FAULT_STRING = new NameImpl("faultstring");
@@ -65,7 +67,9 @@ public class SOAP11FaultImpl extends SOAPBodyElementImpl
 
     _faultCode = _factory.createElement(FAULT_CODE);
     _faultString = _factory.createElement(FAULT_STRING);
-    _faultActor = _factory.createElement(FAULT_ACTOR);
+
+    addChildElement(_faultCode);
+    addChildElement(_faultString);
   }
 
   // Detail
@@ -140,11 +144,19 @@ public class SOAP11FaultImpl extends SOAPBodyElementImpl
   public void setFaultActor(String faultActor) 
     throws SOAPException
   {
+    if (_faultActor == null) {
+      _faultActor = _factory.createElement(FAULT_ACTOR);
+      addChildElement(_faultActor);
+    }
+
     _faultActor.setValue(faultActor);
   }
 
   public String getFaultActor()
   {
+    if (_faultActor == null)
+      return null;
+
     return _faultActor.getValue();
   }
 
@@ -157,33 +169,52 @@ public class SOAP11FaultImpl extends SOAPBodyElementImpl
 
   public Name getFaultCodeAsName()
   {
-    // XXX
-    throw new UnsupportedOperationException();
+    String faultcode = getFaultCode();
+    int colon = faultcode.indexOf(':');
+
+    if (colon >= 0) {
+      String prefix = faultcode.substring(0, colon);
+      String localName = faultcode.substring(colon + 1);
+      String uri = _faultCode.getNamespaceURI(prefix);
+
+      return new NameImpl(uri, localName, prefix);
+    }
+
+    return new NameImpl(faultcode);
   }
 
   public QName getFaultCodeAsQName()
   {
-    // XXX
-    throw new UnsupportedOperationException();
+    return (NameImpl) getFaultCodeAsName();
   }
 
   public void setFaultCode(Name faultCodeName) 
     throws SOAPException
   {
-    // XXX
-    throw new UnsupportedOperationException();
+    if (faultCodeName.getPrefix() == null || 
+        "".equals(faultCodeName.getPrefix()))
+      throw new SOAPException("Fault codes must have qualified names");
+
+    if (getNamespaceURI(faultCodeName.getPrefix()) == null) {
+      _faultCode.addNamespaceDeclaration(faultCodeName.getPrefix(), 
+                                         faultCodeName.getURI());
+    }
+
+    _faultCode.setValue(faultCodeName.getQualifiedName());
   }
 
   public void setFaultCode(QName faultCodeQName) 
     throws SOAPException
   {
-    // XXX
-    throw new UnsupportedOperationException();
+    setFaultCode((Name) NameImpl.fromQName(faultCodeQName));
   }
 
   public void setFaultCode(String faultCode) 
     throws SOAPException
   {
+    if (faultCode.indexOf(':') < 0)
+      throw new SOAPException("Fault codes must be qualified names");
+
     _faultCode.setValue(faultCode);
   }
 

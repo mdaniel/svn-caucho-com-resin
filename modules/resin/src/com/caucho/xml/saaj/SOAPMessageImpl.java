@@ -37,6 +37,8 @@ import javax.xml.soap.*;
 
 import org.w3c.dom.*;
 
+import com.caucho.xml.XmlPrinter;
+
 public class SOAPMessageImpl extends SOAPMessage {
   private final ArrayList<AttachmentPart> _attachments 
     = new ArrayList<AttachmentPart>();
@@ -65,17 +67,23 @@ public class SOAPMessageImpl extends SOAPMessage {
 
   public AttachmentPart createAttachmentPart()
   {
-    throw new UnsupportedOperationException();
+    return new AttachmentPartImpl();
   }
 
   public AttachmentPart createAttachmentPart(DataHandler dataHandler)
   {
-    throw new UnsupportedOperationException();
+    AttachmentPartImpl attachmentPart = new AttachmentPartImpl();
+    attachmentPart.setDataHandler(dataHandler);
+
+    return attachmentPart;
   }
 
   public AttachmentPart createAttachmentPart(Object content, String contentType)
   {
-    throw new UnsupportedOperationException();
+    AttachmentPartImpl attachmentPart = new AttachmentPartImpl();
+    attachmentPart.setContent(content, contentType);
+
+    return attachmentPart;
   }
 
   public AttachmentPart getAttachment(SOAPElement element)
@@ -116,12 +124,12 @@ public class SOAPMessageImpl extends SOAPMessage {
 
   public SOAPBody getSOAPBody() throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    return _part.getEnvelope().getBody();
   }
 
   public SOAPHeader getSOAPHeader() throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    return _part.getEnvelope().getHeader();
   }
 
   public SOAPPart getSOAPPart()
@@ -150,7 +158,8 @@ public class SOAPMessageImpl extends SOAPMessage {
     throw new UnsupportedOperationException();
   }
 
-  public void setProperty(String property, Object value) throws SOAPException
+  public void setProperty(String property, Object value) 
+    throws SOAPException
   {
     throw new UnsupportedOperationException();
   }
@@ -158,7 +167,9 @@ public class SOAPMessageImpl extends SOAPMessage {
   public void writeTo(OutputStream out)
     throws SOAPException, IOException
   {
-    throw new UnsupportedOperationException();
+    XmlPrinter printer = new XmlPrinter(out);
+
+    printer.printNode(_part);
   }
 
   // org.w3c.dom.Document
