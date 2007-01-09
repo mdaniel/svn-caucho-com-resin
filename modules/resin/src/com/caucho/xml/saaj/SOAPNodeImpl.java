@@ -90,6 +90,9 @@ public abstract class SOAPNodeImpl
   public void setParentElement(SOAPElement parent) 
     throws SOAPException
   {
+    if (parent == null)
+      throw new IllegalArgumentException();
+
     if (parent instanceof SOAPElementImpl)
       _parent = (SOAPElementImpl) parent;
     else

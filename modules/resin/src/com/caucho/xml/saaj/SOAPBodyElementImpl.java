@@ -65,6 +65,9 @@ public class SOAPBodyElementImpl extends SOAPElementImpl
   public void setParentElement(SOAPElement parent)
     throws SOAPException
   {
+    if (parent == null)
+      throw new IllegalArgumentException();
+
     if (parent instanceof SOAPBodyImpl)
       _parent = (SOAPBodyImpl) parent;
     else
