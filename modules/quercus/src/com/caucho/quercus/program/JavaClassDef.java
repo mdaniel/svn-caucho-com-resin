@@ -81,8 +81,8 @@ public class JavaClassDef extends ClassDef {
   private final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
 
-  private final HashMap<String, AbstractJavaMethod> _functionMap
-    = new HashMap<String, AbstractJavaMethod>();
+  private final FunctionMap _functionMap
+    = new FunctionMap();
 
   private final HashMap<String, JavaMethod> _getMap
     = new HashMap<String, JavaMethod>();
@@ -108,7 +108,7 @@ public class JavaClassDef extends ClassDef {
   private Method _printRImpl = null;
   private Method _varDumpImpl = null;
 
-  private JavaInvoker _cons;
+  private AbstractJavaMethod _cons;
 
   private Method _iterator;
 
@@ -414,7 +414,7 @@ public class JavaClassDef extends ClassDef {
    */
   public AbstractFunction findFunction(String name)
   {
-    return _functionMap.get(name);
+    return _functionMap.getFunction(name);
   }
 
   /**
@@ -430,7 +430,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name, Expr []args)
   {
-    AbstractJavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.getFunction(name);
 
     if (method != null) {
     }
@@ -465,7 +465,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name, Value []args)
   {
-    AbstractJavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.getFunction(name);
 
     if (method != null)
       return method.call(env, obj, args);
@@ -491,7 +491,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name)
   {
-    AbstractJavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.getFunction(name);
 
     if (method != null)
       return method.call(env, obj);
@@ -510,7 +510,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Object obj, String name, Value a1)
   {
-    AbstractJavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.getFunction(name);
 
     if (method != null)
       return method.call(env, obj, a1);
@@ -530,7 +530,7 @@ public class JavaClassDef extends ClassDef {
   public Value callMethod(Env env, Object obj, String name,
                           Value a1, Value a2)
   {
-    AbstractJavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.getFunction(name);
 
     if (method != null)
       return method.call(env, obj, a1, a2);
@@ -605,7 +605,7 @@ public class JavaClassDef extends ClassDef {
 
   private AbstractJavaMethod getMethod(Env env, String name)
   {
-    AbstractJavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.getFunction(name);
 
     if (method != null)
       return method;
@@ -687,32 +687,37 @@ public class JavaClassDef extends ClassDef {
       Method consMethod = getConsMethod(_type);
 
       if (consMethod != null)
-	_cons = new JavaMethod(_moduleContext, consMethod);
+        _cons = new JavaMethod(_moduleContext, consMethod);
       else {
-	Constructor []cons = _type.getConstructors();
+        Constructor []cons = _type.getConstructors();
+        
+        if (cons.length > 0) {
+          int i;
+          for (i = 0; i < cons.length; i++) {
+            if (cons[i].isAnnotationPresent(Construct.class))
+              break;
+          }
 
-	if (cons.length > 0) {
-	  int i;
-	  for (i = 0; i < cons.length; i++) {
-	    if (cons[i].isAnnotationPresent(Construct.class))
-	      break;
-	  }
+          if (i < cons.length) {
+            _cons = new JavaConstructor(_moduleContext, cons[i]);
+          }
+          else {
+            _cons = new JavaConstructor(_moduleContext, cons[0]);
+            for (i = 1; i < cons.length; i++) {
+              _cons = _cons.overload(new JavaConstructor(_moduleContext, cons[i]));
+            }
+          }
 
-	  if (i < cons.length)
-	    _cons = new JavaConstructor(_moduleContext, cons[i]);
-	  else
-	    _cons = new JavaConstructor(_moduleContext, cons[0]);
-
-	} else
-	  _cons = null;
+        } else
+          _cons = null;
       }
 
       try {
-	Method method = _type.getMethod("iterator", new Class[0]);
+        Method method = _type.getMethod("iterator", new Class[0]);
 
-	if (method != null &&
-	    Iterator.class.isAssignableFrom(method.getReturnType()))
-	  _iterator = method;
+        if (method != null &&
+            Iterator.class.isAssignableFrom(method.getReturnType()))
+          _iterator = method;
       } catch (Throwable e) {
       }
     } finally {
@@ -890,9 +895,7 @@ public class JavaClassDef extends ClassDef {
     Method []methods = type.getMethods();
 
     for (Method method : methods) {
-      if (_functionMap.get(method.getName()) != null)
-        continue;
-      else if (! Modifier.isPublic(method.getModifiers()))
+      if (! Modifier.isPublic(method.getModifiers()))
         continue;
 
       if ("printRImpl".equals(method.getName())) {
@@ -900,16 +903,10 @@ public class JavaClassDef extends ClassDef {
       } else if ("varDumpImpl".equals(method.getName())) {
         _varDumpImpl = method;
       } else if ("__call".equals(method.getName())) {
-	__call = new JavaMethod(moduleContext, method);
+        __call = new JavaMethod(moduleContext, method);
       } else {
-	ArrayList<Method> methodList = getMethods(methods, method.getName());
-
-	if (methodList.size() == 1)
-	  _functionMap.put(method.getName(),
-			   new JavaMethod(moduleContext, method));
-	else
-	  _functionMap.put(method.getName(),
-			   new JavaOverloadMethod(moduleContext, methodList));
+        _functionMap.addFunction(method.getName(),
+            new JavaMethod(moduleContext, method));
       }
     }
 
@@ -920,22 +917,6 @@ public class JavaClassDef extends ClassDef {
     for (Class ifc : ifcs) {
       introspectMethods(moduleContext, ifc);
     }
-  }
-
-  private ArrayList<Method> getMethods(Method []methods, String name)
-  {
-    ArrayList<Method> methodList = new ArrayList<Method>();
-
-    for (int i = 0; i < methods.length; i++) {
-      if (! Modifier.isPublic(methods[i].getModifiers()))
-	continue;
-      else if (! methods[i].getName().equals(name))
-	continue;
-
-      methodList.add(methods[i]);
-    }
-
-    return methodList;
   }
 
   /**

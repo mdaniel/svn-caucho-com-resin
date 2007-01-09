@@ -30,6 +30,7 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
@@ -38,8 +39,13 @@ import com.caucho.quercus.expr.Expr;
  */
 public class ExtValueMarshal extends Marshal
 {
-  public static final ExtValueMarshal MARSHAL = new ExtValueMarshal();
-
+  private Class _expectedClass;
+  
+  public ExtValueMarshal(Class expectedClass)
+  {
+    _expectedClass = expectedClass;
+  }
+  
   public boolean isReadOnly()
   {
     return false;
@@ -79,5 +85,20 @@ public class ExtValueMarshal extends Marshal
   public Value unmarshal(Env env, Object value)
   {
     return (Value) value;
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (_expectedClass.isAssignableFrom(argValue.getClass()))
+      return Marshal.EQUIVALENT;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return _expectedClass;
   }
 }

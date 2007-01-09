@@ -51,6 +51,20 @@ abstract public class AbstractJavaMethod extends AbstractFunction
   private static final Object [] NULL_ARGS = new Object[0];
   private static final Value [] NULL_VALUES = new Value[0];
 
+  abstract public int getMarshalingCost(Value []args);
+  
+  /**
+   * Returns an overloaded java method.
+   */
+  public AbstractJavaMethod overload(AbstractJavaMethod fun)
+  {
+    AbstractJavaMethod method = new JavaOverloadMethod(this);
+    
+    method = method.overload(fun);
+    
+    return method;
+  }
+  
   public Value call(Env env, Value []value)
   {
     return call(env, env.getThis(), value);

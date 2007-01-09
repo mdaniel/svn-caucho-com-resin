@@ -65,4 +65,21 @@ public class DoubleMarshal extends Marshal
     else
       return new DoubleValue(((Number) value).doubleValue());
   }
+  
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue instanceof DoubleValue)
+      return Marshal.EQUIVALENT;
+    if (argValue.isDoubleConvertible())
+      return Marshal.MARSHALABLE;
+    else if (argValue.isNumeric())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  public Class getExpectedClass()
+  {
+    return double.class;
+  }
 }

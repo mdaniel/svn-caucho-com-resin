@@ -63,4 +63,21 @@ public class BinaryValueMarshal extends Marshal
     else
       return new StringValueImpl(String.valueOf(value));
   }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isBinary())
+      return Marshal.SAME;
+    else if (! (argValue.isArray() || argValue.isObject()))
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return BinaryValue.class;
+  }
 }

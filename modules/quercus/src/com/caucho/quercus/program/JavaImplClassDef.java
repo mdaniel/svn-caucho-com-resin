@@ -30,7 +30,9 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.env.AbstractJavaMethod;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.FunctionMap;
 import com.caucho.quercus.env.JavaMethod;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.ObjectExtValue;
@@ -67,8 +69,9 @@ public class JavaImplClassDef extends ClassDef {
   private final HashMap<String, Expr> _constMap
     = new HashMap<String, Expr>();
 
-  private final HashMap<String, JavaMethod> _functionMap
-    = new HashMap<String, JavaMethod>();
+  // JavaMethod
+  private final FunctionMap _functionMap
+    = new FunctionMap();
 
   private JavaMethod _cons;
 
@@ -111,7 +114,7 @@ public class JavaImplClassDef extends ClassDef {
    */
   public Value callMethod(Env env, Value obj, String name, Expr []args)
   {
-    JavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.getFunction(name);
 
     if (method == null) {
       env.warning(env.getLocation().getMessagePrefix() + L.l("{0}::{1} is an unknown method.",
@@ -183,9 +186,9 @@ public class JavaImplClassDef extends ClassDef {
     return getMethod(env, name).call(env, obj, a1, a2, a3, a4, a5);
   }
 
-  private JavaMethod getMethod(Env env, String name)
+  private AbstractJavaMethod getMethod(Env env, String name)
   {
-    JavaMethod method = _functionMap.get(name);
+    AbstractJavaMethod method = _functionMap.getFunction(name);
 
     if (method == null) {
       env.error("'" + name + "' is an unknown method.");
@@ -202,7 +205,7 @@ public class JavaImplClassDef extends ClassDef {
     if (_cons != null)
       cl.setConstructor(_cons);
 
-    for (Map.Entry<String,JavaMethod> entry : _functionMap.entrySet()) {
+    for (Map.Entry<String,AbstractJavaMethod> entry : _functionMap.entrySet()) {
       cl.addMethod(entry.getKey(), entry.getValue());
     }
 
@@ -356,9 +359,7 @@ public class JavaImplClassDef extends ClassDef {
     Method []methods = type.getDeclaredMethods();
 
     for (Method method : methods) {
-      if (_functionMap.get(method.getName()) != null)
-        continue;
-      else if (! Modifier.isPublic(method.getModifiers()))
+      if (! Modifier.isPublic(method.getModifiers()))
         continue;
       else if (! Modifier.isStatic(method.getModifiers()))
         continue;
@@ -368,7 +369,7 @@ public class JavaImplClassDef extends ClassDef {
       if (method.getName().equals("__construct"))
 	_cons = javaMethod;
 
-      _functionMap.put(method.getName(), javaMethod);
+      _functionMap.addFunction(method.getName(), javaMethod);
     }
 
     introspectMethods(moduleContext, type.getSuperclass());

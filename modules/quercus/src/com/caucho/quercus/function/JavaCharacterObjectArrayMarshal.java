@@ -35,11 +35,34 @@ import com.caucho.quercus.env.Value;
 
 public class JavaCharacterObjectArrayMarshal extends JavaArrayMarshal
 {
-  public static final Marshal MARSHAL = new JavaCharacterObjectArrayMarshal();
+  public static final Marshal MARSHAL
+    = new JavaCharacterObjectArrayMarshal(Character[].class);
 
+  private JavaCharacterObjectArrayMarshal(Class expectedClass)
+  {
+    super(expectedClass);
+  }
+  
   @Override
   public Value unmarshal(Env env, Object value)
   {
     return new StringBuilderValue((Character[]) value);
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isUnicode())
+      return Marshal.EQUIVALENT;
+    else if (argValue.isArray())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return Character[].class;
   }
 }

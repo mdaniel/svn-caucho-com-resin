@@ -35,8 +35,13 @@ import com.caucho.quercus.expr.Expr;
 
 public class JavaArrayMarshal extends Marshal
 {
-  public static final Marshal MARSHAL = new JavaArrayMarshal();
-
+  private static Class _expectedClass;
+  
+  public JavaArrayMarshal(Class expectedClass)
+  {
+    _expectedClass = expectedClass;
+  }
+  
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
     return marshal(env, expr.eval(env), expectedClass);
@@ -69,5 +74,20 @@ public class JavaArrayMarshal extends Marshal
   public Value unmarshal(Env env, Object value)
   {
     return env.wrapJava(value);
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isArray())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return _expectedClass;
   }
 }

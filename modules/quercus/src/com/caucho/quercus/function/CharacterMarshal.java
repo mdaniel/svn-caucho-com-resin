@@ -61,4 +61,22 @@ public class CharacterMarshal extends Marshal
     else
       return new StringValueImpl(value.toString());
   }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isUnicode() && argValue.length() == 1) {
+      return Marshal.EQUIVALENT;
+    }
+    else if (argValue.isLongConvertible())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return char.class;
+  }
 }

@@ -61,4 +61,23 @@ public class ShortObjectMarshal extends Marshal
     else
       return new LongValue(((Number) value).longValue());
   }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue instanceof LongValue)
+      return Marshal.EQUIVALENT;
+    else if (argValue.isLongConvertible())
+      return Marshal.MARSHALABLE;
+    else if (argValue.isNumeric())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return Short.class;
+  }
 }

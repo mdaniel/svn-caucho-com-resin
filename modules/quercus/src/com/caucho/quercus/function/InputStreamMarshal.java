@@ -29,9 +29,13 @@
 
 package com.caucho.quercus.function;
 
+import java.io.InputStream;
+
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.vfs.Path;
 
 public class InputStreamMarshal extends Marshal
 {
@@ -54,6 +58,22 @@ public class InputStreamMarshal extends Marshal
 
   public Value unmarshal(Env env, Object value)
   {
-    throw new UnsupportedOperationException();
+    return env.wrapJava((InputStream)value);
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue instanceof JavaValue &&
+        InputStream.class.isAssignableFrom(argValue.toJavaObject().getClass()))
+      return Marshal.SAME;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return InputStream.class;
   }
 }

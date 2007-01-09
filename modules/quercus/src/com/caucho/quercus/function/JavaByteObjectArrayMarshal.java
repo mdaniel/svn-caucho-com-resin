@@ -35,11 +35,34 @@ import com.caucho.quercus.env.Value;
 
 public class JavaByteObjectArrayMarshal extends JavaArrayMarshal
 {
-  public static final Marshal MARSHAL = new JavaByteObjectArrayMarshal();
+  public static final Marshal MARSHAL
+    = new JavaByteObjectArrayMarshal(Byte[].class);
+  
+  private JavaByteObjectArrayMarshal(Class expectedClass)
+  {
+    super(expectedClass);
+  }
   
   @Override
   public Value unmarshal(Env env, Object value)
   {
     return new BinaryBuilderValue((Byte[]) value);
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isBinary())
+      return Marshal.EQUIVALENT;
+    else if (argValue.isArray())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return Byte[].class;
   }
 }

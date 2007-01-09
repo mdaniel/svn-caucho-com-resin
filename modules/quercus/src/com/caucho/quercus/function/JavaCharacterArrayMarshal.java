@@ -29,17 +29,42 @@
 
 package com.caucho.quercus.function;
 
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.Value;
 
 public class JavaCharacterArrayMarshal extends JavaArrayMarshal
 {
-  public static final Marshal MARSHAL = new JavaCharacterArrayMarshal();
+  public static final Marshal MARSHAL
+    = new JavaCharacterArrayMarshal(char[].class);
 
+  private JavaCharacterArrayMarshal(Class expectedClass)
+  {
+    super(expectedClass);
+  }
+  
   @Override
   public Value unmarshal(Env env, Object value)
   {
     return new StringBuilderValue((char[]) value);
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isUnicode())
+      return Marshal.EQUIVALENT;
+    else if (argValue.isArray())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return char[].class;
   }
 }

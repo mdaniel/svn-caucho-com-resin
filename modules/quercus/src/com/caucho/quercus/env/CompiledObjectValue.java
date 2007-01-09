@@ -813,8 +813,6 @@ public class CompiledObjectValue extends ObjectValue
   private void writeObject(ObjectOutputStream out)
     throws IOException
   { 
-    System.err.println("CompiledObjectArray->writeObject()");
-    
     out.writeObject(_fields);
     out.writeObject(_object);
     out.writeObject(_cl.getName());
@@ -823,8 +821,6 @@ public class CompiledObjectValue extends ObjectValue
   private void readObject(ObjectInputStream in)
     throws ClassNotFoundException, IOException
   { 
-    System.err.println("CompiledObjectArray->readObject()");
-    
     _fields = (Value []) in.readObject();
     _object = (ObjectExtValue) in.readObject();
     

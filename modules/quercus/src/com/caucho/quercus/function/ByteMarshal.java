@@ -65,4 +65,22 @@ public class ByteMarshal extends Marshal
     else
       return new LongValue(((Number) value).longValue());
   }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isBinary() && argValue.length() == 1) {
+      return Marshal.EQUIVALENT;
+    }
+    else if (argValue.isLongConvertible())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return byte.class;
+  }
 }

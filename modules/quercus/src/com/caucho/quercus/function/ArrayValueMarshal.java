@@ -31,6 +31,7 @@ package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaAdapter;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
@@ -67,5 +68,25 @@ public class ArrayValueMarshal extends Marshal
       return ((Value) value).toArrayValue(env);
     else
       return NullValue.NULL;
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isArray())
+    {
+      if (argValue instanceof JavaAdapter)
+        return Marshal.EQUIVALENT;
+      else
+        return Marshal.SAME;
+    }
+    else
+      return Marshal.MARSHALABLE;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return ArrayValue.class;
   }
 }

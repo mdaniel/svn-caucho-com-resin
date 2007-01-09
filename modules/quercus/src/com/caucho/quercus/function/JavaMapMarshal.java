@@ -30,6 +30,8 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaListAdapter;
+import com.caucho.quercus.env.JavaMapAdapter;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
@@ -80,6 +82,17 @@ public class JavaMapMarshal extends JavaMarshal {
     }
 
     return obj;
+  }
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue instanceof JavaMapAdapter &&
+        getExpectedClass().isAssignableFrom(argValue.toJavaObject().getClass()))
+      return Marshal.SAME;
+    else if (argValue.isArray())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
   }
 }
 

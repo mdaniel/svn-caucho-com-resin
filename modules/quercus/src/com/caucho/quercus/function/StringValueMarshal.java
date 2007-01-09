@@ -63,4 +63,21 @@ public class StringValueMarshal extends Marshal
     else
       return new StringValueImpl(String.valueOf(value));
   }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isString())
+      return Marshal.EQUIVALENT;
+    else if (! (argValue.isArray() || argValue.isObject()))
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return StringValue.class;
+  }
 }

@@ -30,12 +30,16 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaCalendarValue;
+import com.caucho.quercus.env.JavaURLValue;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
 import java.net.URL;
+import java.util.Calendar;
 
 public class URLMarshal extends Marshal
 {
@@ -59,5 +63,22 @@ public class URLMarshal extends Marshal
   public Value unmarshal(Env env, Object value)
   {
     return env.wrapJava((URL)value);
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue instanceof JavaURLValue)
+      return Marshal.SAME;
+    else if (argValue.isString())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return URL.class;
   }
 }

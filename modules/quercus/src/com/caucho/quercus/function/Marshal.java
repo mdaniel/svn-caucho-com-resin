@@ -40,6 +40,13 @@ import com.caucho.util.L10N;
 abstract public class Marshal {
   protected static final L10N L = new L10N(Marshal.class);
 
+  // scale to describe cost of marshaling an argument
+  public static final int SAME = 0;
+  public static final int EQUIVALENT = 1;
+  public static final int MARSHALABLE = 2;
+  public static final int DUBIOUS = 3;
+  public static final int INCOMPATIBLE = Integer.MAX_VALUE;
+  
   /**
    * Returns true if the result is a primitive boolean.
    */
@@ -98,6 +105,26 @@ abstract public class Marshal {
   public Value unmarshal(Env env, Object value)
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public final int getMarshalingCost(Value value)
+  {
+    Class expectedClass = getExpectedClass();
+    
+    if (expectedClass.equals(value.getClass()))
+      return SAME;
+    
+    return getMarshalingCostImpl(value);
+  }
+  
+  protected int getMarshalingCostImpl(Value value)
+  {
+    throw new UnsupportedOperationException(getClass().toString());
+  }
+  
+  public Class getExpectedClass()
+  {
+    throw new UnsupportedOperationException(getClass().toString());
   }
 }
 

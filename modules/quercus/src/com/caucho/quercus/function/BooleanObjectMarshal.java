@@ -67,4 +67,19 @@ public class BooleanObjectMarshal extends Marshal
 	? BooleanValue.TRUE
 	: BooleanValue.FALSE;
   }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue instanceof BooleanValue)
+      return Marshal.EQUIVALENT;
+    else
+      return Marshal.MARSHALABLE;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return Boolean.class;
+  }
 }

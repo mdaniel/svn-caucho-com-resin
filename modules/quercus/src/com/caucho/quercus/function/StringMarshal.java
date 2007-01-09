@@ -32,6 +32,7 @@ package com.caucho.quercus.function;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
@@ -67,5 +68,22 @@ public class StringMarshal extends Marshal {
       return NullValue.NULL;
     else
       return new StringValueImpl((String) value);
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue.isUnicode())
+      return Marshal.EQUIVALENT;
+    else if (! (argValue.isArray() || argValue.isObject()))
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return String.class;
   }
 }

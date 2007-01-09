@@ -30,6 +30,8 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaCalendarValue;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
@@ -54,5 +56,24 @@ public class CalendarMarshal extends Marshal
   public Value unmarshal(Env env, Object value)
   {
     return env.wrapJava((Calendar)value);
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue instanceof JavaCalendarValue)
+      return Marshal.SAME;
+    else if (argValue instanceof LongValue)
+      return Marshal.MARSHALABLE;
+    else if (argValue.isLongConvertible())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return Calendar.class;
   }
 }

@@ -31,6 +31,7 @@ package com.caucho.quercus.lib;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaValue;
+import com.caucho.quercus.env.Value;
 
 /**
  * Java object facade.
@@ -40,23 +41,8 @@ public class Java {
    * Create a new Java API object.
    */
   public static Object __construct(Env env,
-                                   String className, Object []args)
+                                   String className, Value []args)
   {
-    try {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-      Class cl = Class.forName(className, false, loader);
-
-      try {
-        return cl.newInstance();
-      } catch (Throwable e) {
-      }
-
-      return new JavaValue(env, null, env.getJavaClassDefinition(cl.getName()));
-    } catch (Throwable e) {
-      env.warning(e);
-
-      return null;
-    }
+    return JavaModule.java(env, className, args);
   }
 }

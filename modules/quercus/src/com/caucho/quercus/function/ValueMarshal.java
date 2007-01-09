@@ -30,6 +30,7 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
@@ -55,5 +56,17 @@ public class ValueMarshal extends Marshal
   public Value unmarshal(Env env, Object value)
   {
     return (Value) value;
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    return Marshal.SAME;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return Value.class;
   }
 }

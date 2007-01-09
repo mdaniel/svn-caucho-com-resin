@@ -58,16 +58,7 @@ public class JavaModule extends AbstractQuercusModule {
       JavaClassDef def = env.getJavaClassDefinition(className);
 
       if (def != null)
-	return def.callNew(env, args);
-      
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
-      Class cl = Class.forName(className, false, loader);
-
-      try {
-	return cl.newInstance();
-      } catch (Throwable e) {
-      }
+        return def.callNew(env, args);
 
       return new JavaValue(env, null, def);
     } catch (Throwable e) {

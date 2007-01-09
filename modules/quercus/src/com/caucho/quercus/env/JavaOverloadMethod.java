@@ -41,45 +41,38 @@ import java.util.Comparator;
  * Represents the introspected static function information.
  */
 public class JavaOverloadMethod extends AbstractJavaMethod {
-  private final JavaMethod []_methods;
+  private final ArrayList<AbstractJavaMethod> _methods;
 
-  /**
-   * Creates the statically introspected function.
-   *
-   * @param method the introspected method.
-   */
-  public JavaOverloadMethod(ModuleContext moduleContext,
-			    ArrayList<Method> methods)
+  public JavaOverloadMethod(AbstractJavaMethod javaMethod)
   {
-    Collections.sort(methods, OVERLOAD_COMPARATOR);
+    _methods = new ArrayList<AbstractJavaMethod>();
 
-    int length = methods.get(methods.size() - 1).getParameterTypes().length;
-
-    _methods = new JavaMethod[length + 1];
-
-    for (int i = 0; i < methods.size(); i++) {
-      Method method = methods.get(i);
-
-      JavaMethod javaMethod = new JavaMethod(moduleContext, method);
-      
-      Class []param = method.getParameterTypes();
-
-      for (int j = param.length; j >= 0; j--) {
-	if (_methods[j] == null)
-	  _methods[j] = javaMethod;
-      }
-    }
+    _methods.add(javaMethod);
+  }
+  
+  /**
+   * Returns an overloaded java method.
+   */
+  public AbstractJavaMethod overload(AbstractJavaMethod fun)
+  {
+    _methods.add(fun);
+    
+    return this;
   }
 
   /**
    * Evaluates the function.
+   * XXX: define getBestFitMethod(Expr []args)
    */
   public Value call(Env env, Object obj, Expr []args)
   {
-    if (args.length < _methods.length)
-      return _methods[args.length].call(env, obj, args);
-    else
-      return _methods[_methods.length - 1].call(env, obj, args);
+    Value []values = new Value[args.length];
+
+    for (int i = 0; i < args.length; i++) {
+      values[i] = args[i].eval(env);
+    }
+    
+    return call(env, obj, values);
   }
 
   /**
@@ -87,22 +80,61 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
    */
   public Value call(Env env, Object obj, Value []args)
   {
-    if (args.length < _methods.length)
-      return _methods[args.length].call(env, obj, args);
+    AbstractJavaMethod javaMethod = getBestFitJavaMethod(args);
+    
+    return javaMethod.call(env, obj, args);
+  }
+  
+  /**
+   * Returns the Java function that matches the args passed in.
+   */
+  private AbstractJavaMethod getBestFitJavaMethod(Value []args)
+  {
+    int size = _methods.size();
+    
+    AbstractJavaMethod minCostJavaMethod = null;
+    int minCost = Integer.MAX_VALUE;
+    
+    for (int i = 0; i < size; i++) {
+      AbstractJavaMethod javaMethod = _methods.get(i);
+      
+      int cost = javaMethod.getMarshalingCost(args);
+      
+      if (cost == 0)
+        return javaMethod;
+      
+      if (cost < minCost) {
+        minCost = cost;
+        minCostJavaMethod = javaMethod;
+      }
+    }
+    
+    if (minCostJavaMethod != null)
+      return minCostJavaMethod;
     else
-      return _methods[_methods.length - 1].call(env, obj, args);
+      return _methods.get(0);
+  }
+  
+  /**
+   * Returns the cost of marshaling for this method given the args.
+   */
+  public int getMarshalingCost(Value []args)
+  {
+    int size = _methods.size();
+    int minCost = Integer.MAX_VALUE;
+    
+    for (int i = 0; i < size; i++) {
+      int cost = _methods.get(i).getMarshalingCost(args);
+      
+      if (cost < minCost)
+        minCost = cost;
+    }
+
+    return minCost;
   }
 
   public String toString()
   {
-    return "JavaOverloadMethod[" + _methods[0] + "]";
+    return "JavaOverloadMethod[" + _methods.get(0) + "]";
   }
-
-  private static final Comparator<Method> OVERLOAD_COMPARATOR
-    = new Comparator<Method>() {
-      public int compare(Method a, Method b)
-      {
-	return a.getParameterTypes().length - b.getParameterTypes().length;
-      }
-    };
 }

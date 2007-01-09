@@ -50,7 +50,7 @@ public class JavaConstructor extends JavaInvoker {
    */
   public JavaConstructor(ModuleContext moduleContext,
 			 Constructor cons)
-  {
+  {    
     super(moduleContext,
 	  cons.getDeclaringClass().getName(),
 	  cons.getParameterTypes(),

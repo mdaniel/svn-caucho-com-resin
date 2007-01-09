@@ -29,9 +29,14 @@
 
 package com.caucho.quercus.function;
 
+import java.net.URL;
+
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaURLValue;
+import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.vfs.Path;
 
 public class PathMarshal extends Marshal
 {
@@ -56,5 +61,23 @@ public class PathMarshal extends Marshal
   {
     // XXX: need test
     return env.getQuercus().getJavaClassDefinition(value.getClass().getName()).wrap(env, value);
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue instanceof JavaValue &&
+        Path.class.isAssignableFrom(argValue.toJavaObject().getClass()))
+      return Marshal.SAME;
+    else if (argValue.isString())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return Path.class;
   }
 }

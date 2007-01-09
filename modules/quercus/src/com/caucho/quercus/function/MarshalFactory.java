@@ -79,7 +79,7 @@ public class MarshalFactory {
     final Marshal marshal;
 
     // optimized cases, new types should be added to JavaMarshall
-
+    
     if (String.class.equals(argType)) {
       marshal = StringMarshal.MARSHAL;
     }
@@ -156,7 +156,7 @@ public class MarshalFactory {
       marshal = ValueMarshal.MARSHAL;
     }
     else if (Value.class.isAssignableFrom(argType)) {
-      marshal = ExtValueMarshal.MARSHAL;
+      marshal = new ExtValueMarshal(argType);
     }
     else if (void.class.equals(argType)) {
       marshal = VoidMarshal.MARSHAL;
@@ -183,7 +183,7 @@ public class MarshalFactory {
       marshal = JavaCharacterObjectArrayMarshal.MARSHAL;
     }
     else if (argType.isArray()) {
-      marshal = JavaArrayMarshal.MARSHAL;
+      marshal = new JavaArrayMarshal(argType);
     }
     else if (Map.class.isAssignableFrom(argType)) {
       String typeName = argType.getName();

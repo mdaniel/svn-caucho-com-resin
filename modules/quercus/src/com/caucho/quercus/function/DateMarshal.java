@@ -30,11 +30,15 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaCalendarValue;
+import com.caucho.quercus.env.JavaDateValue;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class DateMarshal extends Marshal
@@ -59,5 +63,24 @@ public class DateMarshal extends Marshal
   public Value unmarshal(Env env, Object value)
   {
     return env.wrapJava((Date)value);
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    if (argValue instanceof JavaDateValue)
+      return Marshal.SAME;
+    else if (argValue instanceof LongValue)
+      return Marshal.MARSHALABLE;
+    else if (argValue.isLongConvertible())
+      return Marshal.MARSHALABLE;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return Date.class;
   }
 }

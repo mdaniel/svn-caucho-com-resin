@@ -30,10 +30,12 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 /**
  * Code for marshaling arguments.
@@ -112,6 +114,24 @@ public class JavaMarshal extends Marshal {
       return name.substring(p + 1);
     else
       return name;
+  }
+  
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    Class type = _def.getType();
+    
+    if (argValue instanceof JavaValue &&
+        type.isAssignableFrom(argValue.toJavaObject().getClass()))
+      return Marshal.SAME;
+    else
+      return Marshal.DUBIOUS;
+  }
+  
+  @Override
+  public final Class getExpectedClass()
+  {
+    return _def.getType();
   }
 }
 
