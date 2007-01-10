@@ -554,6 +554,8 @@ r_server-Basis =
 
   & r_thread-idle-min?
 
+  & r_ping*
+
   & r_protocol*
 
   & r_user-name?

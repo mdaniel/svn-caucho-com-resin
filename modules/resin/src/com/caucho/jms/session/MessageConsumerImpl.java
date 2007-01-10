@@ -166,7 +166,7 @@ public class MessageConsumerImpl
    */
   public boolean isClosed()
   {
-    return _isClosed;
+    return _isClosed || _session.isClosed();
   }
 
   /**

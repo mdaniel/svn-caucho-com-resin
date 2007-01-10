@@ -69,7 +69,7 @@ final class Util
   static String evalString(ValueExpression expr)
   {
     try {
-      return (String) expr.getValue(currentELContext());
+      return String.valueOf(expr.getValue(currentELContext()));
     } catch (ELException e) {
       throw new FacesException(e);
     }

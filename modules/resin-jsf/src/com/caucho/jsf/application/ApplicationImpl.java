@@ -62,7 +62,7 @@ public class ApplicationImpl extends Application
   private FacesContextELResolver _elResolver;
 
   private ArrayList<Locale> _locales;
-  private Locale _defaultLocale = Locale.getDefault();
+  private Locale _defaultLocale;
 
   private ArrayList<ELContextListener> _elContextListenerList
     = new ArrayList<ELContextListener>();
@@ -78,8 +78,14 @@ public class ApplicationImpl extends Application
   private HashMap<String,String> _validatorClassMap
     = new HashMap<String,String>();
 
+  private HashMap<String,String> _converterIdNameMap
+    = new HashMap<String,String>();
+
   private HashMap<String,Class> _converterIdMap
     = new HashMap<String,Class>();
+
+  private HashMap<Class,String> _converterClassNameMap
+    = new HashMap<Class,String>();
 
   private HashMap<Class,Class> _converterClassMap
     = new HashMap<Class,Class>();
@@ -127,6 +133,9 @@ public class ApplicationImpl extends Application
 
   public void setActionListener(ActionListener listener)
   {
+    if (listener == null)
+      throw new NullPointerException();
+    
     _actionListener = listener;
   }
 
@@ -395,12 +404,15 @@ public class ApplicationImpl extends Application
 	|| componentType == null)
       throw new NullPointerException();
     
-    throw new UnsupportedOperationException();
+    return createComponent(new ValueExpressionAdapter(componentBinding,
+						      UIComponent.class),
+			   context,
+			   componentType);
   }
 
   public Iterator<String> getComponentTypes()
   {
-    throw new UnsupportedOperationException();
+    return _componentClassMap.keySet().iterator();
   }
 
   public void addConverter(String converterId,
@@ -410,19 +422,7 @@ public class ApplicationImpl extends Application
       throw new NullPointerException();
     
     synchronized (_converterIdMap) {
-      try {
-	ClassLoader loader = Thread.currentThread().getContextClassLoader();
-	
-	Class cl = Class.forName(converterClass, false, loader);
-
-	Config.validate(cl, Converter.class);
-
-	_converterIdMap.put(converterId, cl);
-      } catch (RuntimeException e) {
-	throw e;
-      } catch (Exception e) {
-	throw new FacesException(e);
-      }
+      _converterIdNameMap.put(converterId, converterClass);
     }
   }
 
@@ -432,11 +432,7 @@ public class ApplicationImpl extends Application
     if (converterId == null)
       throw new NullPointerException();
     
-    Class cl = null;
-    
-    synchronized (_converterIdMap) {
-      cl = _converterIdMap.get(converterId);
-    }
+    Class cl = getConverterIdClass(converterId);
 
     if (cl == null)
       return null;
@@ -450,9 +446,41 @@ public class ApplicationImpl extends Application
     }
   }
 
+  private Class getConverterIdClass(String id)
+  {
+    synchronized (_converterIdMap) {
+      Class cl = _converterIdMap.get(id);
+
+      if (cl != null)
+	return cl;
+
+      String className = _converterIdNameMap.get(id);
+
+      if (className == null)
+	throw new FacesException(L.l("'{0}' is an unknown converter type",
+				     id));
+      
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	
+	cl = Class.forName(className, false, loader);
+
+	Config.validate(cl, Converter.class);
+
+	_converterIdMap.put(id, cl);
+	
+	return cl;
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
+	throw new FacesException(e);
+      }
+    }
+  }
+
   public Iterator<String> getConverterIds()
   {
-    return _converterIdMap.keySet().iterator();
+    return _converterIdNameMap.keySet().iterator();
   }
 
   public void addConverter(Class type,
@@ -484,11 +512,7 @@ public class ApplicationImpl extends Application
     if (type == null)
       throw new NullPointerException();
     
-    Class cl = null;
-    
-    synchronized (_converterClassMap) {
-      cl = _converterClassMap.get(type);
-    }
+    Class cl = findConverter(type);
 
     if (cl == null)
       return null;
@@ -500,6 +524,31 @@ public class ApplicationImpl extends Application
     } catch (Exception e) {
       throw new FacesException(e);
     }
+  }
+
+  private Class findConverter(Class type)
+  {
+    if (type == null)
+      return null;
+    
+    Class cl;
+    
+    synchronized (_converterClassMap) {
+      cl = _converterClassMap.get(type);
+    }
+
+    if (cl != null)
+      return cl;
+
+    Class []interfaces = type.getInterfaces();
+    for (int i = 0; i < interfaces.length; i++) {
+      cl = findConverter(interfaces[i]);
+
+      if (cl != null)
+	return cl;
+    }
+
+    return findConverter(type.getSuperclass());
   }
 
   public Iterator<Class> getConverterTypes()
@@ -517,10 +566,14 @@ public class ApplicationImpl extends Application
     ELResolver elResolver = getELResolver();
     ELContext elContext = new FacesELContext(getELResolver());
 
-    MethodExpression expr
-      = factory.createMethodExpression(elContext, ref, Object.class, param);
+    try {
+      MethodExpression expr
+	= factory.createMethodExpression(elContext, ref, Object.class, param);
 
-    return new MethodBindingAdapter(expr);
+      return new MethodBindingAdapter(expr);
+    } catch (ELException e) {
+      throw new ReferenceSyntaxException(e);
+    }
   }
 
   public Iterator<Locale> getSupportedLocales()
@@ -582,6 +635,21 @@ public class ApplicationImpl extends Application
       = factory.createValueExpression(elContext, ref, Object.class);
 
     return new ValueBindingAdapter(expr);
+  }
+
+  @Override    
+  public Object evaluateExpressionGet(FacesContext context,
+				      String expression,
+				      Class expectedType)
+  {
+    ExpressionFactory factory = getExpressionFactory();
+
+    ELContext elContext = context.getELContext();
+
+    ValueExpression expr
+      = factory.createValueExpression(elContext, expression, expectedType);
+
+    return expr.getValue(elContext);
   }
 
   public void init()

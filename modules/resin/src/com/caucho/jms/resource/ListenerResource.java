@@ -155,6 +155,7 @@ public class ListenerResource {
       _init = init;
     }
 
+    @PostConstruct
     public void init() throws ConfigException
     {
       if (_type == null)

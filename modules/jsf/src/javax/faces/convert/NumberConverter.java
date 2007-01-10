@@ -28,26 +28,221 @@
 
 package javax.faces.convert;
 
+import java.util.*;
+import java.text.*;
+
 import javax.faces.context.*;
 import javax.faces.component.*;
 
 public class NumberConverter implements Converter
 {
+  public static final String CONVERTER_ID = "javax.faces.Number";
+  public static final String CURRENCY_ID
+    = "javax.faces.converter.NumberConverter.CURRENCY";
+  public static final String NUMBER_ID
+    = "javax.faces.converter.NumberConverter.NUMBER";
+  public static final String PATTERN_ID
+    = "javax.faces.converter.NumberConverter.PATTERN";
+  public static final String PERCENT_ID
+    = "javax.faces.converter.NumberConverter.PERCENT";
+  public static final String STRING_ID
+    = "javax.faces.converter.STRING";
+  
+  private String _currencyCode;
+  private String _currencySymbol;
+  private Locale _locale;
+
+  private Integer _maxFractionDigits;
+  private Integer _minFractionDigits;
+
+  private Integer _maxIntegerDigits;
+  private Integer _minIntegerDigits;
+
+  private String _pattern;
+  private String _type = "number";
+  private boolean _isGroupingUsed = true;
+  private boolean _isIntegerOnly;
+  private boolean _isTransient;
+
+  private NumberFormat _format;
+
+  public String getCurrencyCode()
+  {
+    return _currencyCode;
+  }
+
+  public void setCurrencyCode(String value)
+  {
+    _currencyCode = value;
+    _format = null;
+  }
+
+  public String getCurrencySymbol()
+  {
+    return _currencySymbol;
+  }
+
+  public void setCurrencySymbol(String value)
+  {
+    _currencySymbol = value;
+    _format = null;
+  }
+
+  public Locale getLocale()
+  {
+    return _locale;
+  }
+
+  public void setLocale(Locale locale)
+  {
+    _locale = locale;
+    _format = null;
+  }
+
+  public int getMaxFractionDigits()
+  {
+    if (_maxFractionDigits != null)
+      return _maxFractionDigits;
+    else
+      return 0;
+  }
+
+  public void setMaxFractionDigits(int value)
+  {
+    _maxFractionDigits = value;
+    _format = null;
+  }
+
+  public int getMinFractionDigits()
+  {
+    if (_minFractionDigits != null)
+      return _minFractionDigits;
+    else
+      return 0;
+  }
+
+  public void setMinFractionDigits(int value)
+  {
+    _minFractionDigits = value;
+    _format = null;
+  }
+
+  public int getMaxIntegerDigits()
+  {
+    if (_maxIntegerDigits != null)
+      return _maxIntegerDigits;
+    else
+      return 0;
+  }
+
+  public void setMaxIntegerDigits(int value)
+  {
+    _maxIntegerDigits = value;
+    _format = null;
+  }
+
+  public int getMinIntegerDigits()
+  {
+    if (_minIntegerDigits != null)
+      return _minIntegerDigits;
+    else
+      return 0;
+  }
+
+  public void setMinIntegerDigits(int value)
+  {
+    _minIntegerDigits = value;
+    _format = null;
+  }
+
+  public void setIntegerOnly(boolean isIntegerOnly)
+  {
+    _isIntegerOnly = isIntegerOnly;
+  }
+
+  public boolean isIntegerOnly()
+  {
+    return _isIntegerOnly;
+  }
+
+  public String getPattern()
+  {
+    return _pattern;
+  }
+
+  public void setPattern(String value)
+  {
+    _pattern = value;
+    _format = null;
+  }
+
+  public String getType()
+  {
+    return _type;
+  }
+
+  public void setType(String value)
+  {
+    _type = value;
+    _format = null;
+  }
+
+  public boolean isGroupingUsed()
+  {
+    return _isGroupingUsed;
+  }
+  
+  public void setGroupingUsed(boolean value)
+  {
+    _isGroupingUsed = value;
+    _format = null;
+  }
+
+  public boolean isTransient()
+  {
+    return _isTransient;
+  }
+  
+  public void setTransient(boolean value)
+  {
+    _isTransient = value;
+  }
+
+  public void restoreState(FacesContext context, Object state)
+  {
+  }
+
+  public Object saveState(FacesContext context)
+  {
+    return null;
+  }
+  
   public Object getAsObject(FacesContext context,
 			    UIComponent component,
 			    String value)
     throws ConverterException
   {
+    if (context == null || component == null)
+      throw new NullPointerException();
+    
     // XXX: incorrect
     if (value == null)
       return null;
 
-    value = value.trim();
-
     if (value.length() == 0)
       return null;
 
-    return Double.parseDouble(value);
+    value = value.trim();
+
+    NumberFormat format = getFormat(context.getViewRoot().getLocale());
+
+    try {
+      synchronized (format) {
+	return format.parse(value);
+      }
+    } catch (ParseException e) {
+      throw new ConverterException(e);
+    }
   }
   
   public String getAsString(FacesContext context,
@@ -55,12 +250,84 @@ public class NumberConverter implements Converter
 			    Object value)
     throws ConverterException
   {
-    // XXX: incorrect
+    if (context == null || component == null)
+      throw new NullPointerException();
+    
     if (value == null)
       return "";
-    else if (value instanceof String)
-      return (String) value;
+    else if (value instanceof Number) {
+      NumberFormat format = getFormat(context.getViewRoot().getLocale());
+
+      synchronized (format) {
+	return format.format((Number) value);
+      }
+    }
     else
       return String.valueOf(value);
+  }
+
+  private NumberFormat getFormat(Locale locale)
+  {
+    synchronized (this) {
+      if (_locale == null)
+	return createFormat(locale);
+      else if (_format == null) {
+	_format = createFormat(_locale);
+      }
+
+      return _format;
+    }
+  }
+
+  private NumberFormat createFormat(Locale locale)
+  {
+    NumberFormat format;
+    
+    if (_type == null || "number".equals(_type)) {
+      if (locale != null)
+	format = NumberFormat.getNumberInstance(locale);
+      else
+	format = NumberFormat.getNumberInstance();
+    }
+    else if ("currency".equals(_type)) {
+      if (locale != null)
+	format = NumberFormat.getCurrencyInstance(locale);
+      else
+	format = NumberFormat.getCurrencyInstance();
+
+      if (_currencyCode != null)
+	format.setCurrency(Currency.getInstance(_currencyCode));
+    }
+    else if ("percent".equals(_type)) {
+      if (locale != null)
+	format = NumberFormat.getPercentInstance(locale);
+      else
+	format = NumberFormat.getPercentInstance();
+    }
+    else {
+      throw new ConverterException("'" + _type + "' is an illegal converter type.");
+    }
+
+    format.setGroupingUsed(_isGroupingUsed);
+    format.setParseIntegerOnly(_isIntegerOnly);
+
+    if (_maxFractionDigits != null)
+      format.setMaximumFractionDigits(_maxFractionDigits);
+    if (_minFractionDigits != null)
+      format.setMinimumFractionDigits(_minFractionDigits);
+    if (_maxIntegerDigits != null)
+      format.setMaximumIntegerDigits(_maxIntegerDigits);
+    if (_minIntegerDigits != null)
+      format.setMinimumIntegerDigits(_minIntegerDigits);
+
+    if (_pattern != null && format instanceof DecimalFormat)
+      ((DecimalFormat) format).applyPattern(_pattern);
+
+    return format;
+  }
+
+  public String toString()
+  {
+    return "NumberConverter[]";
   }
 }

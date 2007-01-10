@@ -50,8 +50,13 @@ public class MethodBindingAdapter extends MethodBinding
   public Object invoke(FacesContext context, Object []param)
     throws EvaluationException, javax.faces.el.MethodNotFoundException
   {
-    System.out.println("INVOKE: " + _expr);
-    return _expr.invoke(context.getELContext(), param);
+    try {
+      return _expr.invoke(context.getELContext(), param);
+    } catch (javax.el.MethodNotFoundException e) {
+      throw new javax.faces.el.MethodNotFoundException(e);
+    } catch (Exception e) {
+      throw new EvaluationException(e);
+    }
   }
 
   @Deprecated

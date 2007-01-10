@@ -101,7 +101,7 @@ public class Jndi {
 
       // server/1620
       if (value != null && value != obj)
-        log.warning(L.l("'{0}' overrides a previous JNDI resource.  The old resource is '{1}' and the new one is '{2}'",
+        log.config(L.l("'{0}' overrides a previous JNDI resource.  The old resource is '{1}' and the new one is '{2}'",
                         fullName, value, obj));
 
       return;

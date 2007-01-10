@@ -421,7 +421,7 @@ public class JdbcQueueConsumer extends MessageConsumerImpl
    */
   public void handleAlarm(Alarm alarm)
   {
-    if (_isClosed)
+    if (isClosed())
       return;
 
     try {

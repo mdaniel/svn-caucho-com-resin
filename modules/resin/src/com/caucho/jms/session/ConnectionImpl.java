@@ -42,8 +42,10 @@ import java.util.logging.Logger;
 /**
  * A connection.
  */
-public class ConnectionImpl implements Connection {
-  static final Logger log = Log.open(ConnectionImpl.class);
+public class ConnectionImpl implements Connection
+{
+  static final Logger log
+    = Logger.getLogger(ConnectionImpl.class.getName());
   static final L10N L = new L10N(ConnectionImpl.class);
 
   private static int _clientIdGenerator;
@@ -57,8 +59,8 @@ public class ConnectionImpl implements Connection {
 
   private ArrayList<SessionImpl> _sessions = new ArrayList<SessionImpl>();
 
-  private HashMap<String,TopicSubscriber> _durableSubscriberMap =
-    new HashMap<String,TopicSubscriber>();
+  private HashMap<String,TopicSubscriber> _durableSubscriberMap
+    = new HashMap<String,TopicSubscriber>();
 
   private volatile boolean _isActive;
   private volatile boolean _isStopping;

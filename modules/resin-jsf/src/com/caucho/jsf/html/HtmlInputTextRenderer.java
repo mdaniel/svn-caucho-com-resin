@@ -62,28 +62,101 @@ class HtmlInputTextRenderer extends Renderer
     ResponseWriter out = context.getResponseWriter();
 
     String id = component.getId();
+
+    String accesskey;
+    String alt;
     String dir;
     String lang;
+    int maxlength;
+    
+    String onblur;
+    String onchange;
+    String onclick;
+    String ondblclick;
+    String onfocus;
+    
+    String onkeydown;
+    String onkeypress;
+    String onkeyup;
+    
+    String onmousedown;
+    String onmousemove;
+    String onmouseout;
+    String onmouseover;
+    String onmouseup;
+    
+    String onselect;
+    
+    Integer size;
     String style;
     String styleClass;
+    String tabindex;
     String title;
     
     if (component instanceof HtmlInputText) {
       HtmlInputText htmlInput = (HtmlInputText) component;
 
+      accesskey = htmlInput.getAccesskey();
+      alt = htmlInput.getAlt();
       dir = htmlInput.getDir();
       lang = htmlInput.getLang();
+      maxlength = htmlInput.getMaxlength();
+      
+      onblur = htmlInput.getOnblur();
+      onchange = htmlInput.getOnchange();
+      onclick = htmlInput.getOnclick();
+      ondblclick = htmlInput.getOndblclick();
+      onfocus = htmlInput.getOnfocus();
+      
+      onkeydown = htmlInput.getOnkeydown();
+      onkeypress = htmlInput.getOnkeypress();
+      onkeyup = htmlInput.getOnkeyup();
+      
+      onmousedown = htmlInput.getOnmousedown();
+      onmousemove = htmlInput.getOnmousemove();
+      onmouseout = htmlInput.getOnmouseout();
+      onmouseover = htmlInput.getOnmouseover();
+      onmouseup = htmlInput.getOnmouseup();
+      
+      onselect = htmlInput.getOnselect();
+      
+      size = htmlInput.getSize();
       style = htmlInput.getStyle();
       styleClass = htmlInput.getStyleClass();
+      tabindex = htmlInput.getTabindex();
       title = htmlInput.getTitle();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
     
+      accesskey = (String) attrMap.get("accesskey");
+      alt = (String) attrMap.get("alt");
       dir = (String) attrMap.get("dir");
       lang = (String) attrMap.get("lang");
+      maxlength = (Integer) attrMap.get("maxlength");
+      
+      onblur = (String) attrMap.get("onblur");
+      onchange = (String) attrMap.get("onchange");
+      onclick = (String) attrMap.get("onclick");
+      ondblclick = (String) attrMap.get("ondblclick");
+      onfocus = (String) attrMap.get("onfocus");
+      
+      onkeydown = (String) attrMap.get("onkeydown");
+      onkeypress = (String) attrMap.get("onkeypress");
+      onkeyup = (String) attrMap.get("onkeyup");
+      
+      onmousedown = (String) attrMap.get("onmousedown");
+      onmousemove = (String) attrMap.get("onmousemove");
+      onmouseout = (String) attrMap.get("onmouseout");
+      onmouseover = (String) attrMap.get("onmouseover");
+      onmouseup = (String) attrMap.get("onmouseup");
+      
+      onselect = (String) attrMap.get("onselect");
+      
+      size = (Integer) attrMap.get("size");
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
+      tabindex = (String) attrMap.get("tabindex");
       title = (String) attrMap.get("title");
     }
 
@@ -92,17 +165,74 @@ class HtmlInputTextRenderer extends Renderer
     if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
       out.writeAttribute("id", component.getClientId(context), "id");
 
+    if (accesskey != null)
+      out.writeAttribute("accesskey", accesskey, "accesskey");
+
+    if (alt != null)
+      out.writeAttribute("alt", alt, "alt");
+
     if (dir != null)
       out.writeAttribute("dir", dir, "dir");
 
     if (lang != null)
-      out.writeAttribute("lang", lang, "dir");
+      out.writeAttribute("lang", lang, "lang");
+
+    if (maxlength > 0)
+      out.writeAttribute("maxlength", String.valueOf(maxlength), "maxlength");
+
+    if (onblur != null)
+      out.writeAttribute("onblur", onblur, "onblur");
+
+    if (onchange != null)
+      out.writeAttribute("onchange", onchange, "onchange");
+
+    if (onclick != null)
+      out.writeAttribute("onclick", onclick, "onclick");
+
+    if (ondblclick != null)
+      out.writeAttribute("ondblclick", ondblclick, "ondblclick");
+
+    if (onfocus != null)
+      out.writeAttribute("onfocus", onfocus, "onfocus");
+
+    if (onkeydown != null)
+      out.writeAttribute("onkeydown", onkeydown, "onkeydown");
+
+    if (onkeypress != null)
+      out.writeAttribute("onkeypress", onkeypress, "onkeypress");
+
+    if (onkeyup != null)
+      out.writeAttribute("onkeyup", onkeyup, "onkeyup");
+
+    if (onmousedown != null)
+      out.writeAttribute("onmousedown", onmousedown, "onmousedown");
+
+    if (onmousemove != null)
+      out.writeAttribute("onmousemove", onmousemove, "onmousemove");
+
+    if (onmouseout != null)
+      out.writeAttribute("onmouseout", onmouseout, "onmouseout");
+
+    if (onmouseover != null)
+      out.writeAttribute("onmouseover", onmouseover, "onmouseover");
+
+    if (onmouseup != null)
+      out.writeAttribute("onmouseup", onmouseup, "onmouseup");
+
+    if (onselect != null)
+      out.writeAttribute("onselect", onselect, "onselect");
+
+    if (size > 0)
+      out.writeAttribute("size", String.valueOf(size), "size");
 
     if (style != null)
       out.writeAttribute("style", style, "style");
 
     if (styleClass != null)
       out.writeAttribute("class", styleClass, "class");
+
+    if (tabindex != null)
+      out.writeAttribute("tabindex", tabindex, "tabindex");
 
     if (title != null)
       out.writeAttribute("title", title, "title");

@@ -56,12 +56,28 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("accept", value);
   }
 
+  public void setAccessKey(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("accesskey", value);
+  }
+
   public void setAcceptcharset(ValueExpression value)
   {
     if (_map == null)
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("acceptcharset", value);
+  }
+
+  public void setAlt(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("alt", value);
   }
 
   public void setBgcolor(ValueExpression value)
@@ -192,6 +208,30 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("lang", value);
   }
 
+  public void setMaxlength(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("maxlength", value);
+  }
+
+  public void setOnblur(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onblur", value);
+  }
+
+  public void setOnchange(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onchange", value);
+  }
+
   public void setOnclick(ValueExpression value)
   {
     if (_map == null)
@@ -206,6 +246,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("ondblclick", value);
+  }
+  
+  public void setOnfocus(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onfocus", value);
   }
 
   public void setOnkeydown(ValueExpression value)
@@ -280,6 +328,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("onreset", value);
   }
 
+  public void setOnselect(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("onselect", value);
+  }
+
   public void setOnsubmit(ValueExpression value)
   {
     if (_map == null)
@@ -320,6 +376,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("rules", value);
   }
 
+  public void setSize(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("size", value);
+  }
+
   public void setStyle(ValueExpression value)
   {
     if (_map == null)
@@ -342,6 +406,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("summary", value);
+  }
+
+  public void setTabindex(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("tabindex", value);
   }
 
   public void setTarget(ValueExpression value)
