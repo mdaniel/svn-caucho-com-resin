@@ -73,6 +73,21 @@ abstract public class QSocket {
 
     return len;
   }
+
+  /**
+   * Returns the remote client's inet address.
+   */
+  public long getRemoteIP()
+  {
+    InetAddress addr = getRemoteAddress();
+    byte []bytes = addr.getAddress();
+
+    long address = 0;
+    for (int i = 0; i < bytes.length; i++)
+      address = 256 * address + (bytes[i] & 0xff);
+    
+    return address;
+  }
   
   /**
    * Returns the remote client's port.

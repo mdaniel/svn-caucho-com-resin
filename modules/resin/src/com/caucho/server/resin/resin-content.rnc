@@ -398,7 +398,8 @@ r_port-Content =
     | attribute host { string }
     | element host { string })?
 
-   & (attribute port { string } | element port { string })
+   & (attribute accept-listen-backlog { r_int-Type }
+      | element accept-listen-backlog { r_int-Type })?
 
    & (attribute accept-thread-min { r_int-Type }
       | element accept-thread-min { r_int-Type })?
@@ -412,14 +413,16 @@ r_port-Content =
    & (attribute keepalive-max { r_int-Type }
       | element keepalive-max { r_int-Type })?
 
+   & (attribute port { string } | element port { string })
+
    & (attribute socket-timeout { r_period-Type }
       | element socket-timeout { r_period-Type })?
 
-   & (attribute accept-listen-backlog { r_int-Type }
-      | element accept-listen-backlog { r_int-Type })?
-
    & (attribute tcp-no-delay { string }
       | element tcp-no-delay { string })?
+
+  & (attribute throttle-concurrent-max { r_int-Type }
+     | element throttle-concurrent-max { r_int-Type })?
 
    & (r_openssl | r_jsse-ssl)?
    )

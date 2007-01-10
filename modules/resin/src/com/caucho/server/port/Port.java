@@ -121,6 +121,9 @@ public class Port
   // the server socket
   private QServerSocket _serverSocket;
 
+  // the throttle
+  private Throttle _throttle;
+
   // the selection manager
   private AbstractSelectManager _selectManager;
 
@@ -575,6 +578,33 @@ public class Port
   }
 
   /**
+   * Configures the throttle.
+   */
+  public void setThrottleConcurrentMax(int max)
+  {
+    Throttle throttle = createThrottle();
+
+    throttle.setMaxConcurrentRequests(max);
+  }
+
+  private Throttle createThrottle()
+  {
+    if (_throttle == null) {
+      _throttle = Throttle.createPro();
+
+      if (_throttle == null)
+	throw new ConfigException(L.l("throttle configuration requires Resin Professional"));
+    }
+
+    return _throttle;
+  }
+
+
+  //
+  // statistics
+  //
+  
+  /**
    * Returns the number of connections
    */
   public int getConnectionCount()
@@ -701,6 +731,9 @@ public class Port
 
     if (_server instanceof EnvironmentBean)
       Environment.addEnvironmentListener(this, ((EnvironmentBean) _server).getClassLoader());
+
+    if (_throttle == null)
+      _throttle = new Throttle();
   }
 
   /**
@@ -951,7 +984,10 @@ public class Port
         if (_serverSocket.accept(socket)) {
           conn.initSocket();
 
-          return true;
+	  if (_throttle.accept(socket))
+	    return true;
+	  else
+	    socket.close();
         }
         else {
           if (_acceptThreadMax < _idleThreadCount) {
@@ -973,6 +1009,15 @@ public class Port
     }
 
     return false;
+  }
+
+  /**
+   * Notification when a socket closes.
+   */
+  void closeSocket(QSocket socket)
+  {
+    if (_throttle != null)
+      _throttle.close(socket);
   }
 
   /**

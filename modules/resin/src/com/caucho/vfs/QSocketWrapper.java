@@ -102,21 +102,6 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the remote client's inet address.
    */
-  public long getRemoteIP()
-  {
-    InetAddress addr = _s.getInetAddress();
-    byte []bytes = addr.getAddress();
-
-    long address = 0;
-    for (int i = 0; i < bytes.length; i++)
-      address = 256 * address + (bytes[i] & 0xff);
-    
-    return address;
-  }
-
-  /**
-   * Returns the remote client's inet address.
-   */
   public InetAddress getRemoteAddress()
   {
     return _s.getInetAddress();

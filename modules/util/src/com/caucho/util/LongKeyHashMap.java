@@ -51,6 +51,16 @@ public class LongKeyHashMap<E> {
    *
    * @param initialCapacity minimum capacity of the cache
    */
+  public LongKeyHashMap()
+  {
+    this(8);
+  }
+  
+  /**
+   * Create the clock cache with a specific capacity.
+   *
+   * @param initialCapacity minimum capacity of the cache
+   */
   public LongKeyHashMap(int initialCapacity)
   {
     int capacity;

@@ -611,6 +611,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
 	} catch (Throwable e) {
 	  log.log(Level.FINE, e.toString(), e);
 	}
+
+	getPort().closeSocket(socket);
       }
     }
   }
