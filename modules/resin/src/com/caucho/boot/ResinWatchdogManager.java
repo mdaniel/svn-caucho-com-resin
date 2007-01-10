@@ -31,6 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogConfig;
@@ -132,6 +133,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
     WebAppConfig webAppConfig = new WebAppConfig();
     webAppConfig.setId("");
+    webAppConfig.setRootDirectory(new RawString("watchdog-manager"));
 
     host.addWebApp(webAppConfig);
 

@@ -1571,10 +1571,15 @@ public class WebApp extends ServletContextImpl
       if (_tempDir == null)
 	_tempDir = (Path) Environment.getLevelAttribute("caucho.temp-dir");
 
-      if (_tempDir == null)
+      if (_tempDir == null) {
 	_tempDir = getAppDir().lookup("WEB-INF/tmp");
 
-      _tempDir.mkdirs();
+	if (getAppDir().lookup("WEB-INF").isDirectory())
+	  _tempDir.mkdirs();
+      }
+      else
+	_tempDir.mkdirs();
+      
       setAttribute("javax.servlet.context.tempdir", new File(_tempDir.getNativePath()));
 
       FilterChainBuilder securityBuilder = _constraintManager.getFilterBuilder();
