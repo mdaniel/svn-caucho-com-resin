@@ -36,12 +36,7 @@ import com.caucho.quercus.env.Value;
 public class JavaCharacterObjectArrayMarshal extends JavaArrayMarshal
 {
   public static final Marshal MARSHAL
-    = new JavaCharacterObjectArrayMarshal(Character[].class);
-
-  private JavaCharacterObjectArrayMarshal(Class expectedClass)
-  {
-    super(expectedClass);
-  }
+    = new JavaCharacterObjectArrayMarshal();
   
   @Override
   public Value unmarshal(Env env, Object value)

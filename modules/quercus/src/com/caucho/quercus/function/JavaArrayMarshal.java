@@ -37,6 +37,10 @@ public class JavaArrayMarshal extends Marshal
 {
   private static Class _expectedClass;
   
+  public JavaArrayMarshal()
+  {
+  }
+  
   public JavaArrayMarshal(Class expectedClass)
   {
     _expectedClass = expectedClass;

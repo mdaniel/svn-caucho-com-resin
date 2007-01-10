@@ -36,12 +36,7 @@ import com.caucho.quercus.env.Value;
 public class JavaByteObjectArrayMarshal extends JavaArrayMarshal
 {
   public static final Marshal MARSHAL
-    = new JavaByteObjectArrayMarshal(Byte[].class);
-  
-  private JavaByteObjectArrayMarshal(Class expectedClass)
-  {
-    super(expectedClass);
-  }
+    = new JavaByteObjectArrayMarshal();
   
   @Override
   public Value unmarshal(Env env, Object value)
