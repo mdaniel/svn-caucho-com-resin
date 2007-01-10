@@ -358,6 +358,7 @@ public class EjbRef implements ObjectProxy {
         throw e;
       }
       catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
         throw new NamingException(L.l("{0} '{1}'  ejb-link '{2}' invalid ",
                                       getTagName(), _ejbRefName, _ejbLink));
       }
