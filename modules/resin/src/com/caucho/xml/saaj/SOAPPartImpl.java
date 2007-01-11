@@ -355,12 +355,12 @@ public class SOAPPartImpl extends SOAPPart
 
   public org.w3c.dom.Node getFirstChild()
   {
-    throw new UnsupportedOperationException();
+    return _envelope;
   }
 
   public org.w3c.dom.Node getLastChild()
   {
-    throw new UnsupportedOperationException();
+    return _envelope;
   }
 
   public String getLocalName()
@@ -385,7 +385,7 @@ public class SOAPPartImpl extends SOAPPart
 
   public short getNodeType()
   {
-    throw new UnsupportedOperationException();
+    return DOCUMENT_NODE;
   }
 
   public String getNodeValue()

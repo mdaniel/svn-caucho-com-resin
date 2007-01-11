@@ -56,7 +56,12 @@ public class SOAPFactoryImpl extends SOAPFactory {
   public Detail createDetail() 
     throws SOAPException
   {
-    return new DetailImpl(this);
+    if (_protocol.equals(SOAPConstants.SOAP_1_1_PROTOCOL))
+      return new SOAP11DetailImpl(this);
+    else if (_protocol.equals(SOAPConstants.SOAP_1_2_PROTOCOL))
+      return new SOAP12DetailImpl(this);
+    else
+      throw new SOAPException("Cannot create detail for protocol: " + _protocol);
   }
 
   public SOAPElement createElement(Element domElement) throws SOAPException

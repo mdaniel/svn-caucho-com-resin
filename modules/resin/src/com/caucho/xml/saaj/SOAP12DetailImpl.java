@@ -33,47 +33,17 @@ import javax.xml.namespace.*;
 import javax.xml.soap.*;
 import java.util.*;
 
-public class DetailImpl extends SOAPElementImpl
-                        implements Detail 
+public class SOAP12DetailImpl extends SOAP11DetailImpl
+                              implements Detail 
 {
-  private static final NameImpl DETAIL_NAME = new NameImpl("detail");
+  private static final NameImpl DETAIL_NAME 
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, 
+                   "Detail",
+                   SOAPConstants.SOAP_ENV_PREFIX);
 
-  private ArrayList<DetailEntry> _entries = new ArrayList<DetailEntry>();
-
-  DetailImpl(SOAPFactory factory)
+  SOAP12DetailImpl(SOAPFactory factory)
     throws SOAPException
   {
-    this(factory, DETAIL_NAME);
-  }
-
-  DetailImpl(SOAPFactory factory, NameImpl name)
-    throws SOAPException
-  {
-    super(factory, name);
-  }
-
-  public DetailEntry addDetailEntry(Name name) 
-    throws SOAPException
-  {
-    DetailEntry entry = new DetailEntryImpl(_factory, NameImpl.fromName(name));
-
-    _entries.add(entry);
-
-    return entry;
-  }
-
-  public DetailEntry addDetailEntry(QName qname)
-    throws SOAPException
-  {
-    DetailEntry entry = new DetailEntryImpl(_factory, qname);
-
-    _entries.add(entry);
-
-    return entry;
-  }
-
-  public Iterator getDetailEntries()
-  {
-    return _entries.iterator();
+    super(factory, DETAIL_NAME);
   }
 }

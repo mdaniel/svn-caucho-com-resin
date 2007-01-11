@@ -56,6 +56,17 @@ public class SOAP12FaultImpl extends SOAP11FaultImpl {
     super(factory, name);
   }
 
+  public Detail addDetail() 
+    throws SOAPException
+  {
+    if (_detail != null)
+      throw new SOAPException("Fault already contains a valid Detail");
+
+    _detail = new SOAP12DetailImpl(_factory);
+
+    return _detail;
+  }
+
   // subcode
 
   public void appendFaultSubcode(QName subcode) 

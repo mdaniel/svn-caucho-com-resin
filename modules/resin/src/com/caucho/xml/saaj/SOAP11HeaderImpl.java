@@ -244,6 +244,7 @@ public class SOAP11HeaderImpl extends SOAPElementImpl
     public HeaderElementIterator(String actor, boolean mustUnderstand)
     {
       _actor = actor;
+      _mustUnderstand = mustUnderstand;
 
       advanceHeaderElement((SOAPHeaderElement) _firstChild);
     }

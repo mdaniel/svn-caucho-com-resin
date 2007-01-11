@@ -48,8 +48,7 @@ public class TextImpl extends SOAPNodeImpl
 
   public boolean isComment()
   {
-    // XXX?
-    return false;
+    return _data.toString().startsWith("<!--");
   }
 
   // org.w3c.dom.CharacterData

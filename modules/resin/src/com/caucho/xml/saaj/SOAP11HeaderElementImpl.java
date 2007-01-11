@@ -65,6 +65,10 @@ public class SOAP11HeaderElementImpl extends SOAPElementImpl
     throws SOAPException
   {
     super(factory, name);
+
+    if (name.getURI() == null || "".equals(name.getURI()) ||
+        name.getPrefix() == null || "".equals(name.getPrefix()))
+      throw new SOAPException("Header elements must have qualified names");
   }
 
   SOAP11HeaderElementImpl(SOAPFactory factory, SOAPElement element)

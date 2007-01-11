@@ -42,10 +42,15 @@ import com.caucho.xml.XmlPrinter;
 public class SOAPMessageImpl extends SOAPMessage {
   private final ArrayList<AttachmentPart> _attachments 
     = new ArrayList<AttachmentPart>();
+
+  private final HashMap<String, Object> _properties
+    = new HashMap<String, Object>();
+
   private String _description;
   private SOAPPart _part;
   private SOAPFactory _factory;
   private String _protocol;
+  private boolean _saveRequired = true;
 
   public SOAPMessageImpl(SOAPFactory factory, String protocol)
     throws SOAPException
@@ -53,6 +58,8 @@ public class SOAPMessageImpl extends SOAPMessage {
     _factory = factory;
     _protocol = protocol;
     _part = new SOAPPartImpl(_factory, _protocol);
+    _properties.put(WRITE_XML_DECLARATION, "false");
+    _properties.put(CHARACTER_SET_ENCODING, "utf-8");
   }
 
   public void addAttachmentPart(AttachmentPart attachmentPart)
@@ -99,7 +106,7 @@ public class SOAPMessageImpl extends SOAPMessage {
 
   public Iterator getAttachments(MimeHeaders headers)
   {
-    throw new UnsupportedOperationException();
+    return new MatchingHeadersIterator(headers);
   }
 
   public String getContentDescription()
@@ -114,12 +121,29 @@ public class SOAPMessageImpl extends SOAPMessage {
 
   public MimeHeaders getMimeHeaders()
   {
-    throw new UnsupportedOperationException();
+    MimeHeaders headers = new MimeHeaders();
+
+    for (int i = 0; i < _attachments.size(); i++) {
+      Iterator iterator = _attachments.get(i).getAllMimeHeaders();
+
+      while (iterator.hasNext()) {
+        MimeHeader header = (MimeHeader) iterator.next();
+        headers.addHeader(header.getName(), header.getValue());
+      }
+    }
+
+    return headers;
   }
 
-  public Object getProperty(String property) throws SOAPException
+  public Object getProperty(String property) 
+    throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    Object o = _properties.get(property);
+
+    if (o == null)
+      throw new SOAPException("Unrecognized property : " + property);
+
+    return o;
   }
 
   public SOAPBody getSOAPBody() throws SOAPException
@@ -144,29 +168,46 @@ public class SOAPMessageImpl extends SOAPMessage {
 
   public void removeAttachments(MimeHeaders headers)
   {
-    throw new UnsupportedOperationException();
+    Iterator iterator = getAttachments(headers);
+
+    while (iterator.hasNext()) {
+      iterator.next();
+      iterator.remove();
+    }
   }
 
   public void saveChanges() 
     throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    // XXX???
+    
+    _saveRequired = false; // weird logic required by TCK
   }
 
   public boolean saveRequired()
   {
-    throw new UnsupportedOperationException();
+    return _saveRequired;
   }
 
   public void setProperty(String property, Object value) 
     throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    /* API says this is necessary, but TCK disagrees:
+     
+    if (! property.equals(WRITE_XML_DECLARATION) &&
+        ! property.equals(CHARACTER_SET_ENCODING))
+      throw new SOAPException("Unrecognized property : " + property);
+    */
+
+    _properties.put(property, value);
   }
 
   public void writeTo(OutputStream out)
     throws SOAPException, IOException
   {
+    // As specified by API
+    saveChanges();
+
     XmlPrinter printer = new XmlPrinter(out);
 
     printer.printNode(_part);
@@ -521,6 +562,76 @@ public class SOAPMessageImpl extends SOAPMessage {
   public Object setUserData(String key, Object data, UserDataHandler handler)
   {
     throw new UnsupportedOperationException();
+  }
+
+  private class MatchingHeadersIterator implements Iterator {
+    private MimeHeaders _headers;
+    private int _current = -1;
+    private int _last = -1;
+
+    public MatchingHeadersIterator(MimeHeaders headers)
+    {
+      _headers = headers;
+
+      advance();
+    }
+
+    public Object next()
+    {
+      if (hasNext()) {
+        Object next = _attachments.get(_current);
+
+        advance();
+
+        return next;
+      }
+
+      throw new NoSuchElementException();
+    }
+
+    public boolean hasNext()
+    {
+      return _current < _attachments.size();
+    }
+
+    public void remove()
+    {
+      _attachments.remove(_last);
+    }
+
+    private void advance()
+    {
+      _last = _current;
+
+      for (_current++; _current < _attachments.size(); _current++) {
+        if (attachmentMatchesHeaders(_attachments.get(_current)))
+          break;
+      }
+    }
+
+    private boolean attachmentMatchesHeaders(AttachmentPart attachment)
+    {
+      Iterator iterator = _headers.getAllHeaders();
+
+      while (iterator.hasNext()) {
+        MimeHeader header = (MimeHeader) iterator.next();
+        String[] values = attachment.getMimeHeader(header.getName());
+
+        boolean headerFound = false;
+
+        for (String value : values) {
+          if (header.getValue().equals(value)) {
+            headerFound = true;
+            break;
+          }
+        }
+
+        if (! headerFound)
+          return false;
+      }
+
+      return true;
+    }
   }
 }
 

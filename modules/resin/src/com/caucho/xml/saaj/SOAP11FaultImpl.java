@@ -80,7 +80,7 @@ public class SOAP11FaultImpl extends SOAPBodyElementImpl
     if (_detail != null)
       throw new SOAPException("Fault already contains a valid Detail");
 
-    _detail = new DetailImpl(_factory);
+    _detail = new SOAP11DetailImpl(_factory);
 
     return _detail;
   }

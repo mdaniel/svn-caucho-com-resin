@@ -33,9 +33,14 @@ import java.io.*;
 import java.util.*;
 
 import javax.activation.*;
+import javax.mail.util.ByteArrayDataSource;
 import javax.xml.soap.*;
+import javax.xml.transform.stream.StreamSource;
+
+import com.caucho.util.Base64;
 
 public class AttachmentPartImpl extends AttachmentPart {
+  private DataHandler _dataHandler;
   private MimeHeaders _headers = new MimeHeaders();
 
   public void addMimeHeader(String name, String value)
@@ -82,69 +87,153 @@ public class AttachmentPartImpl extends AttachmentPart {
 
   public void clearContent()
   {
-    throw new UnsupportedOperationException();
+    _dataHandler = null;
   }
 
   public InputStream getBase64Content() 
     throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    try {
+      InputStream is = getRawContent();
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      OutputStreamWriter w = new OutputStreamWriter(os);
+
+      Base64.encode(w, is);
+
+      return new ByteArrayInputStream(os.toByteArray());
+    }
+    catch (IOException e) {
+      throw new SOAPException(e);
+    }
   }
 
   public Object getContent() 
     throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    if (_dataHandler == null)
+      throw new SOAPException("No content available");
+
+    try {
+      // XXX
+      // seems like we shouldn't have to do this, but dataHandler.getContent()
+      // doesn't do what i expected.
+      /*
+      if ("text/xml".equals(getContentType()))
+        return new StreamSource(_dataHandler.getInputStream());
+      else*/
+        return _dataHandler.getContent();
+    }
+    catch (IOException e) {
+      throw new SOAPException(e);
+    }
   }
 
   public DataHandler getDataHandler() 
     throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    if (_dataHandler == null)
+      throw new SOAPException("DataHandler not set");
+
+    return _dataHandler;
   }
 
   public InputStream getRawContent() 
     throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    if (_dataHandler == null)
+      throw new SOAPException("Content not set");
+
+    try {
+      return _dataHandler.getInputStream();
+    }
+    catch (IOException e) {
+      throw new SOAPException(e);
+    }
   }
 
   public byte[] getRawContentBytes() 
     throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    InputStream is = getRawContent();
+
+    try {
+      if (is.available() < 0)
+        throw new SOAPException("No content available");
+
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+      for (int b = is.read(); b >= 0; b = is.read())
+        os.write(b);
+
+      // XXX reset datahandler with this byte array?
+
+      return os.toByteArray();
+    }
+    catch (IOException e) {
+      throw new SOAPException(e);
+    }
   }
 
   public int getSize() 
     throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    if (_dataHandler == null)
+      return 0;
+
+    try {
+      InputStream is = _dataHandler.getInputStream();
+      return is.available();
+    }
+    catch (IOException e) {
+      return -1;
+    }
   }
 
   public void setBase64Content(InputStream content, String contentType) 
     throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    if (content == null)
+      throw new SOAPException("Content InputStream cannot be null");
+
+    try {
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      Base64.decode(new InputStreamReader(content), os);
+
+      byte[] buffer = os.toByteArray();
+      setRawContentBytes(buffer, 0, buffer.length, contentType);
+    }
+    catch (Exception e) {
+      // IOException and any Exceptions thrown by Base64 (e.g. ArrayOutOfBounds)
+      throw new SOAPException(e);
+    }
   }
 
   public void setContent(Object object, String contentType)
   {
     setContentType(contentType);
-
-    throw new UnsupportedOperationException();
+    _dataHandler = new DataHandler(object, contentType);
   }
 
   public void setDataHandler(DataHandler dataHandler)
   {
-    throw new UnsupportedOperationException();
+    if (dataHandler == null)
+      throw new IllegalArgumentException("DataHandler cannot be null");
+
+    _dataHandler = dataHandler;
   }
 
   public void setRawContent(InputStream content, String contentType) 
     throws SOAPException
   {
     setContentType(contentType);
-
-    throw new UnsupportedOperationException();
+  
+    try {
+      DataSource source = new ByteArrayDataSource(content, contentType);
+      _dataHandler = new DataHandler(source);
+    }
+    catch (IOException e) {
+      throw new SOAPException(e);
+    }
   }
 
   public void setRawContentBytes(byte[] content, int offset, int len, 
@@ -153,7 +242,14 @@ public class AttachmentPartImpl extends AttachmentPart {
   {
     setContentType(contentType);
 
-    throw new UnsupportedOperationException();
+    try {
+      InputStream stream = new ByteArrayInputStream(content, offset, len);
+      DataSource source = new ByteArrayDataSource(stream, contentType);
+      _dataHandler = new DataHandler(source);
+    }
+    catch (IOException e) {
+      throw new SOAPException(e);
+    }
   }
 }
 

@@ -82,10 +82,13 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   {
     try {
       setEncodingStyle(source.getEncodingStyle());
-    }
-    catch (SOAPException e) {
+
       // ignore exception... if encoding style applies, it will be set
       // and not if not
+    }
+    catch (SOAPException e) {
+    }
+    catch (IllegalArgumentException e) {
     }
 
     if (source instanceof SOAPElementImpl) {
