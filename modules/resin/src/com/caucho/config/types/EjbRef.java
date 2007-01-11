@@ -64,7 +64,7 @@ public class EjbRef implements ObjectProxy {
   private String _type;
   private Class _home;
   private Class _remote;
-  private String _jndiName;
+  private String _foreignName;
   private String _ejbLink;
 
   private Object _target;
@@ -162,9 +162,9 @@ public class EjbRef implements ObjectProxy {
    * used to link the local jndi context referred to in this name to
    * a remote context.
    */
-  public void setJndiName(String jndiName)
+  public void setForeignName(String foreignName)
   {
-    _jndiName = jndiName;
+    _foreignName = foreignName;
   }
 
   /**
@@ -184,19 +184,13 @@ public class EjbRef implements ObjectProxy {
   {
     boolean bind = false;
 
-    if (_ejbRefName == null)
-      throw new ConfigException(L.l("{0} is required", "<ejb-ref-name>"));
-
-    if (_ejbLink != null &&  _jndiName != null)
-        throw new ConfigException(L.l("either {0} or {1} can be used, but not both", "<ejb-link>", "<jndi-name>"));
-
-    if (_ejbLink == null && _jndiName == null) {
+    if (_ejbLink == null && _foreignName == null) {
       EJBServer server = EJBServer.getLocal();
 
       if (server != null)
         _ejbLink = _ejbRefName;
       else
-        _jndiName = _ejbRefName;
+        _foreignName = _ejbRefName;
     }
 
     String fullEjbRefName = Jndi.getFullName(_ejbRefName);
@@ -211,13 +205,11 @@ public class EjbRef implements ObjectProxy {
 
       bind = true;
     }
-    else {
-      if (_jndiName != null) {
-        String fullJndiName = Jndi.getFullName(_jndiName);
+    else if (_foreignName != null) {
+      String fullForeignName = Jndi.getFullName(_foreignName);
 
-        if (! fullJndiName.equals(fullEjbRefName))
-          bind = true;
-      }
+      if (! fullForeignName.equals(fullEjbRefName))
+	bind = true;
     }
 
     if (bind) {
@@ -240,8 +232,14 @@ public class EjbRef implements ObjectProxy {
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    if (_target == null)
-      resolve();
+    if (_target == null) {
+      if (_home != null)
+	resolve(_home);
+      else if (_remote != null)
+	resolve(_remote);
+      else
+	resolve(null);
+    }
 
     return _target;
   }
@@ -249,30 +247,24 @@ public class EjbRef implements ObjectProxy {
   public Object getByType(Class type)
   {
     try {
-      if (_home != null) {
-	if (type.isAssignableFrom(_home))
-	  return createObject(null);
-      }
+      if (_home != null && type.isAssignableFrom(_home))
+	return createObject(null);
     
-      if (_remote != null) {
-	if (type.isAssignableFrom(_remote))
-	  return createObject(null);
-      }
+      if (_remote != null && type.isAssignableFrom(_remote))
+	return createObject(null);
 
-      if (_jndiName != null) {
+      if (_foreignName != null) {
 	Object target;
 
 	// XXX: JDK's iiop lookup
-	String jndiName = _jndiName.replace('.', '_');
+	String foreignName = _foreignName.replace('.', '_');
 
-	System.out.println("LOOKUP: " + jndiName + " " + _context);
 	if (_context != null)
-	  target = _context.lookup(jndiName);
+	  target = _context.lookup(foreignName);
 	else
-	  target = Jndi.lookup(jndiName);
-	System.out.println("TGT: " + target);
+	  target = Jndi.lookup(foreignName);
 
-	if (target != null)
+	if (target != null && type != null)
 	  return PortableRemoteObject.narrow(target, type);
       }
     } catch (Exception e) {
@@ -282,25 +274,14 @@ public class EjbRef implements ObjectProxy {
     return null;
   }
 
-  private void resolve()
+  private void resolve(Class type)
     throws NamingException
   {
     if (log.isLoggable(Level.FINEST))
       log.log(Level.FINEST, L.l("{0} resolving", this));
 
-    if (_jndiName != null) {
-      if (_context != null)
-	_target = _context.lookup(_jndiName);
-      else
-	_target = Jndi.lookup(_jndiName);
-
-      if (_target == null)
-        if (_jndiName.equals(_ejbRefName))
-          throw new NamingException(L.l("{0} '{1}' cannot be resolved",
-                                        getTagName(), _ejbRefName));
-        else
-          throw new NamingException(L.l("{0} '{1}' jndi-name '{2}' not found",
-                                        getTagName(), _ejbRefName, _jndiName));
+    if (_foreignName != null) {
+      _target = lookupByForeignJndi(_foreignName, type);
     }
     else {
       String archiveName;
@@ -320,20 +301,17 @@ public class EjbRef implements ObjectProxy {
       try {
         Path path = archiveName == null ? _modulePath : _modulePath.lookup(archiveName);
 
-        AbstractServer server = EJBServer.getLocal().getServer(path, ejbName);
+	EJBServer ejbServer = EJBServer.getLocal();
+        AbstractServer server = null;
 
-        if (server == null && archiveName == null)
-          server = EJBServer.getLocal().getServer(ejbName);
+	if (ejbServer != null) {
+	  server = ejbServer.getServer(path, ejbName);
 
-        if (server == null) {
-          if (_ejbLink.equals(_ejbRefName))
-            throw new NamingException(L.l("{0} '{1}' cannot be resolved",
-                                          getTagName(), _ejbRefName));
-          else
-            throw new NamingException(L.l("{0} '{1}' ejb-link '{2}' not found",
-                                          getTagName(), _ejbRefName, _ejbLink));
-        }
-        else {
+	  if (server == null && archiveName == null)
+	    server = ejbServer.getServer(ejbName);
+	}
+
+	if (server != null) {
           Object localHome = server.getEJBLocalHome();
 
           if (localHome != null)
@@ -352,6 +330,17 @@ public class EjbRef implements ObjectProxy {
             throw new NamingException(L.l("{0} '{1}' ejb bean found with ejb-link '{2}' has no home interface",
                                           getTagName(), _ejbRefName, _ejbLink));
           }
+	}
+	else {
+	  _target = lookupByForeignJndi(_ejbLink, type);
+	  /*
+	  if (_ejbLink.equals(_ejbRefName))
+	    throw new NamingException(L.l("{0} '{1}' cannot be resolved",
+					  getTagName(), _ejbRefName));
+	  else
+	    throw new NamingException(L.l("{0} '{1}' ejb-link '{2}' not found",
+					  getTagName(), _ejbRefName, _ejbLink));
+	  */
         }
       }
       catch (NamingException e) {
@@ -368,9 +357,44 @@ public class EjbRef implements ObjectProxy {
     }
   }
 
+  private Object lookupByForeignJndi(String foreignName, Class type)
+    throws NamingException
+  {
+    Object target;
+    
+    if (_context != null) {
+      target = _context.lookup(foreignName);
+      /*
+      try {
+	target = _context.lookup(foreignName);
+      } catch (NamingException e) {
+	log.log(Level.FINER, e.toString(), e);
+      }
+      
+      target = Jndi.lookup(Jndi.getFullName(foreignName));
+      */
+    }
+    else
+      target = Jndi.lookup(foreignName);
+
+    if (target == null) {
+      if (foreignName.equals(_ejbRefName))
+	throw new NamingException(L.l("{0} '{1}' cannot be resolved",
+				      getTagName(), _ejbRefName));
+      else
+	throw new NamingException(L.l("{0} '{1}' foreign-name '{2}' not found",
+				      getTagName(), _ejbRefName, foreignName));
+    }
+
+    if (type != null)
+      target = PortableRemoteObject.narrow(target, type);
+
+    return target;
+  }
+
   public String toString()
   {
     return getClass().getSimpleName()
-           +  "[" + _ejbRefName + ", " + _ejbLink + ", " +  _jndiName + "]";
+           +  "[" + _ejbRefName + ", " + _ejbLink + ", " +  _foreignName + "]";
   }
 }

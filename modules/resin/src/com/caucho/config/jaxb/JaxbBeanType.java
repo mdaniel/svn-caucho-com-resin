@@ -33,7 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.WeakDestroyListener;
+import com.caucho.loader.DestroyListener;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 import com.caucho.xml.QNode;
@@ -134,14 +134,6 @@ public class JaxbBeanType extends TypeStrategy {
   public void configureBean(NodeBuilder builder, Object bean, Node top)
     throws Exception
   {
-    for (int i = 0; i < _injectList.size(); i++) {
-      try {
-	_injectList.get(i).configureImpl(builder, bean);
-      } catch (Throwable e) {
-	throw builder.error(e, top);
-      }
-    }
-    
     if (_valueAttr != null) {
       _valueAttr.configure(builder, bean, ((QNode) top).getQName(), top);
 
@@ -149,25 +141,14 @@ public class JaxbBeanType extends TypeStrategy {
     }
     else
       builder.configureBeanImpl(this, bean, top);
+  }
+
+  public void init(Object bean)
+  {
+    NodeBuilder builder = NodeBuilder.getCurrentBuilder();
     
-    for (int i = 0; i < _postConstructList.size(); i++) {
-      try {
-	_postConstructList.get(i).invoke(bean);
-      } catch (Throwable e) {
-	throw builder.error(e, top);
-      }
-    }
-    
-    for (int i = 0; i < _preDestroyList.size(); i++) {
-      try {
-	Method method = _preDestroyList.get(i);
-	EnvironmentListener listener;
-	listener = new WeakDestroyListener(method, bean);
-	
-	Environment.addEnvironmentListener(listener);
-      } catch (Throwable e) {
-	throw builder.error(e, top);
-      }
+    for (int i = 0; i < _injectList.size(); i++) {
+      _injectList.get(i).configureImpl(builder, bean);
     }
   }
 
@@ -206,11 +187,18 @@ public class JaxbBeanType extends TypeStrategy {
     else
       accessType = XmlAccessType.PUBLIC_MEMBER;
 
-
     InjectIntrospector.configureClassResources(_injectList, _type);
     
     introspectMethods(accessType);
     introspectFields(accessType);
+
+    try {
+      InjectIntrospector.introspectConstruct(_injectList, _type);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   private void introspectMethods(XmlAccessType accessType)
@@ -230,7 +218,7 @@ public class JaxbBeanType extends TypeStrategy {
 
 	_postConstructList.add(getter);
       }
-      
+
       if (getter.isAnnotationPresent(PreDestroy.class)) {
 	if (getter.getParameterTypes().length != 0)
 	  throw new ConfigException(L.l("@PreDestroy method must have zero arguments."));

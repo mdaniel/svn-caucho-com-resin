@@ -122,7 +122,7 @@ public class JspViewHandler extends ViewHandler
   public String getResourceURL(FacesContext context,
 			       String path)
   {
-    throw new UnsupportedOperationException();
+    return path;
   }
 
   public void renderView(FacesContext context,
@@ -131,6 +131,7 @@ public class JspViewHandler extends ViewHandler
   {
     String viewId = viewToRender.getViewId();
 
+    System.out.println("VIEW-ID: " + viewId);
     ExternalContext extContext = context.getExternalContext();
 
     ((javax.servlet.http.HttpServletResponse) extContext.getResponse()).setContentType("text/html");

@@ -47,6 +47,8 @@ public class Jndi {
   private static Logger log = Log.open(Jndi.class);
   private static L10N L = new L10N(Jndi.class);
 
+  private Jndi() {}
+
   /**
    * Returns the full name.
    */
@@ -121,7 +123,7 @@ public class Jndi {
       bindImpl((Context) sub, parsedName.getSuffix(1).toString(), obj, fullName);
 
     else
-      throw new NamingException(L.l("`{0}' is an invalid JNDI name because `{1} is not a Context.  One of the subcontexts is not a Context as expected.",
+      throw new NamingException(L.l("'{0}' is an invalid JNDI name because '{1} is not a Context.  One of the subcontexts is not a Context as expected.",
                                     fullName, sub));
   }
 
@@ -199,7 +201,7 @@ public class Jndi {
                  fullName);
 
     else
-      throw new NamingException(L.l("`{0}' is an invalid JNDI name because `{1} is not a Context.  One of the subcontexts is not a Context as expected.",
+      throw new NamingException(L.l("'{0}' is an invalid JNDI name because '{1} is not a Context.  One of the subcontexts is not a Context as expected.",
                                     fullName, sub));
   }
 
@@ -230,7 +232,5 @@ public class Jndi {
 
     return null;
   }
-
-  private Jndi() {}
 }
 

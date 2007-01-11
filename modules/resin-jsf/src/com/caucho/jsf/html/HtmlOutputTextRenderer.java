@@ -40,7 +40,7 @@ import javax.faces.render.*;
 /**
  * The HTML text renderer
  */
-class HtmlOutputTextRenderer extends Renderer
+class HtmlOutputTextRenderer extends HtmlRenderer
 {
   public static final Renderer RENDERER = new HtmlOutputTextRenderer();
 
@@ -87,8 +87,11 @@ class HtmlOutputTextRenderer extends Renderer
       title = (String) attrMap.get("title");
     }
 
-    if (dir == null && lang == null && style == null && styleClass == null)
+    if (dir == null && lang == null
+	&& style == null && styleClass == null
+	&& (id == null || id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))) {
       return;
+    }
 
     out.startElement("span", component);
 
@@ -119,7 +122,7 @@ class HtmlOutputTextRenderer extends Renderer
     throws IOException
   {
     ResponseWriter out = context.getResponseWriter();
-
+    
     if (component instanceof HtmlOutputText) {
       HtmlOutputText htmlOutput = (HtmlOutputText) component;
 
@@ -127,8 +130,15 @@ class HtmlOutputTextRenderer extends Renderer
 
       if (value == null)
 	return;
+      
+      boolean escape = htmlOutput.isEscape();
 
-      out.writeText(value, "value");
+      String string = String.valueOf(value);
+
+      if (escape)
+	escapeText(out, string, "value");
+      else
+	out.writeText(string, "value");
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
@@ -137,8 +147,15 @@ class HtmlOutputTextRenderer extends Renderer
 
       if (value == null)
 	return;
+      
+      boolean escape = (Boolean) attrMap.get("escape");
+      
+      String string = String.valueOf(value);
 
-      out.writeText(value, "value");
+      if (escape)
+	escapeText(out, string, "value");
+      else
+	out.writeText(string, "value");
     }
   }
 

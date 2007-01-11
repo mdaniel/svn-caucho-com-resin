@@ -43,9 +43,9 @@ r_ejb-local-ref = element ejb-local-ref {
 
   r_ejb-ref-name,
 
-  r_jndi-name?,
-
   r_ejb-ref-type?,
+
+  r_foreign-name?,
 
   r_local-home?,
 
@@ -61,9 +61,9 @@ r_ejb-ref = element ejb-ref {
 
   & r_ejb-ref-name
 
-  & r_jndi-name?
-
   & r_ejb-ref-type?
+
+  & r_foreign-name?
 
   & r_home?
 
@@ -118,6 +118,10 @@ r_env-entry-value =
 r_extension-element = element extension-element {
   r_any
 }
+
+r_foreign-name =
+  attribute foreign-name { string }
+  | element foreign-name { string }
 
 r_fully-qualified-class = string
 

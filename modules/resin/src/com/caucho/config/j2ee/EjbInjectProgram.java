@@ -84,15 +84,51 @@ public class EjbInjectProgram extends BuilderProgram
     throws ConfigException
   {
     try {
-      Object value = null;
-      Object jndiValue = null;
+      Object value = lookup();
 
+      _field.inject(bean, value);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
+
+  private Object lookup()
+    throws ConfigException
+  {
+    try {
+      Object jndiValue = null;
+      Object value = null;
+      InitialContext ic = new InitialContext();
+
+      // first see if already bound by the name attribute
+      try {
+	if (_name != null && ! "".equals(_name)) {
+	  String fullName = Jndi.getFullName(_name);
+	    
+	  value = ic.lookup(fullName);
+
+	  if (value != null) {
+	    if (! _type.isAssignableFrom(value.getClass())) {
+	      value = PortableRemoteObject.narrow(value, _type);
+	    }
+	    
+	    return value;
+	  }
+	}
+      } catch (NamingException e) {
+	log.finest(e.toString());
+      }
+
+      // If not, see if it's bound by mapped-name
       if (_mappedName != null && ! "".equals(_mappedName)) {
-	value = new InitialContext().lookup(_mappedName);
+	// XXX: s/b link value for stateful(?)
+	value = ic.lookup(_mappedName);
 	
 	if (value == null) {
-	  log.fine(L.l("'{0}' is an unknown @EJB jndi-name.", _mappedName));
-	  return;
+	  log.fine(L.l("'{0}' is an unknown @EJB mapped-name.", _mappedName));
+	  return null;
 	}
       }
       else {
@@ -101,14 +137,14 @@ public class EjbInjectProgram extends BuilderProgram
 	if (manager != null) {
 	  if (_beanName != null && ! "".equals(_beanName)) {
 	    try {
-	      value = new InitialContext().lookup(manager.getRemoteJndiPrefix() + _beanName);
+	      value = ic.lookup(manager.getRemoteJndiPrefix() + _beanName);
 	    } catch (NamingException e) {
 	      log.log(Level.FINEST, e.toString(), e);
 	    }
 	    
 	    try {
 	      if (value == null)
-		value = new InitialContext().lookup(manager.getLocalJndiPrefix() + _beanName);
+		value = ic.lookup(manager.getLocalJndiPrefix() + _beanName);
 	    } catch (NamingException e) {
 	      log.log(Level.FINEST, e.toString(), e);
 	    }
@@ -134,19 +170,10 @@ public class EjbInjectProgram extends BuilderProgram
 	if (context != null)
 	  value = context.findByType(_type);
       }
-
-      if (value == null) {
-	try {
-	  if (_name != null && ! "".equals(_name))
-	    value = new InitialContext().lookup("java:comp/env/" + _name);
-	} catch (NamingException e) {
-	  log.finest(e.toString());
-	}
-      }
 	
       if (value == null) {
 	log.fine(L.l("'{0}' is an unknown @EJB.", _type.getName()));
-	return;
+	return null;
       }
 
       if (! _type.isAssignableFrom(value.getClass())) {
@@ -161,9 +188,7 @@ public class EjbInjectProgram extends BuilderProgram
 				      _type.getName()));
       }
 
-      _field.inject(bean, value);
-
-      // XXX: tck??? ejb30.bb.session.stateless.bm.allowed
+      // rebind to name
       if (_name != null && ! "".equals(_name)) {
 	log.fine("@EJB binding " + _name + "in JNDI for " + value);
 
@@ -172,11 +197,15 @@ public class EjbInjectProgram extends BuilderProgram
 	else
 	  Jndi.rebindDeepShort(_name, value);
       }
+
+      return value;
     } catch (RuntimeException e) {
       throw e;
     } catch (NamingException e) {
       log.finer(String.valueOf(e));
       log.log(Level.FINEST, e.toString(), e);
+
+      return null;
     } catch (Exception e) {
       throw new ConfigException(e);
     }

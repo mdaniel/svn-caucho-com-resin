@@ -30,6 +30,8 @@ package com.caucho.jsf.cfg;
 
 import java.util.*;
 
+import javax.annotation.*;
+
 import javax.el.*;
 
 import javax.faces.*;
@@ -57,12 +59,11 @@ public class FacesConfig
   private String _version;
 
   @XmlElement(name="application")
-  private ArrayList<ApplicationConfig> _applicationList
-    = new ArrayList<ApplicationConfig>();
+  private ApplicationConfig _application;
 
   @XmlElement(name="factory")
-  private ArrayList<FactoryConfig> _factoryList
-    = new ArrayList<FactoryConfig>();
+  private FactoryConfig _factory;
+
   /*
   @XmlElement(name="component")
   private ArrayList<ComponentConfig> _componentList
@@ -71,11 +72,13 @@ public class FacesConfig
   @XmlElement(name="converter")
   private ArrayList<ConverterConfig> _converterList
     = new ArrayList<ConverterConfig>();
+  */
 
   @XmlElement(name="managed-bean")
   private ArrayList<ManagedBeanConfig> _managedBeanList
     = new ArrayList<ManagedBeanConfig>();
 
+  /*
   @XmlElement(name="navigation-rule")
   private ArrayList<NavigationRuleConfig> _navigationRuleList
     = new ArrayList<NavigationRuleConfig>();
@@ -97,8 +100,30 @@ public class FacesConfig
     = new ArrayList<ValidatorConfig>();
   */
 
+  @XmlAttribute(name="schemaLocation")
+  public void setSchemaLocation(String location)
+  {
+  }
+  
+  public String getSchemaLocation()
+  {
+    return null;
+  }
+
   @XmlElement(name="faces-config-extension")
   private void setFacesConfigExtension(BuilderProgram program)
   {
+  }
+
+  public ArrayList<ManagedBeanConfig> getManagedBeans()
+  {
+    return _managedBeanList;
+  }
+
+  @PostConstruct
+  public void init()
+  {
+    if (_factory != null)
+      _factory.init();
   }
 }

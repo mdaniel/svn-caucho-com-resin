@@ -309,7 +309,8 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 
     output.setId(_facesContext.getViewRoot().createUniqueId());
     output.setTransient(true);
-    //output.setEscape(false);
+    if (output instanceof HtmlOutputText)
+      ((HtmlOutputText) output).setEscape(false);
     output.setRendered(true);
 
     return output;

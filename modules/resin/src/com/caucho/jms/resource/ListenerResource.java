@@ -122,6 +122,7 @@ public class ListenerResource {
     log.fine("ListenerResource[" + _destination + "] started");
   }
 
+  @PreDestroy
   public void stop() throws JMSException
   {
     _conn.stop();

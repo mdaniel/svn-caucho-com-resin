@@ -65,7 +65,9 @@ class HtmlInputTextRenderer extends Renderer
 
     String accesskey;
     String alt;
+    String autocomplete;
     String dir;
+    boolean disabled;
     String lang;
     int maxlength;
     
@@ -87,18 +89,23 @@ class HtmlInputTextRenderer extends Renderer
     
     String onselect;
     
-    Integer size;
+    boolean readonly;
+    int size;
     String style;
     String styleClass;
     String tabindex;
     String title;
+
+    Object value;
     
     if (component instanceof HtmlInputText) {
       HtmlInputText htmlInput = (HtmlInputText) component;
 
       accesskey = htmlInput.getAccesskey();
+      autocomplete = htmlInput.getAutocomplete();
       alt = htmlInput.getAlt();
       dir = htmlInput.getDir();
+      disabled = htmlInput.isDisabled();
       lang = htmlInput.getLang();
       maxlength = htmlInput.getMaxlength();
       
@@ -120,18 +127,23 @@ class HtmlInputTextRenderer extends Renderer
       
       onselect = htmlInput.getOnselect();
       
+      readonly = htmlInput.isReadonly();
       size = htmlInput.getSize();
       style = htmlInput.getStyle();
       styleClass = htmlInput.getStyleClass();
       tabindex = htmlInput.getTabindex();
       title = htmlInput.getTitle();
+      
+      value = htmlInput.getValue();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
     
       accesskey = (String) attrMap.get("accesskey");
       alt = (String) attrMap.get("alt");
+      autocomplete = (String) attrMap.get("autocomplete");
       dir = (String) attrMap.get("dir");
+      disabled = (Boolean) attrMap.get("disabled");
       lang = (String) attrMap.get("lang");
       maxlength = (Integer) attrMap.get("maxlength");
       
@@ -153,14 +165,19 @@ class HtmlInputTextRenderer extends Renderer
       
       onselect = (String) attrMap.get("onselect");
       
+      readonly = (Boolean) attrMap.get("readonly");
       size = (Integer) attrMap.get("size");
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");
       title = (String) attrMap.get("title");
+      
+      value = attrMap.get("value");
     }
 
     out.startElement("input", component);
+
+    out.writeAttribute("name", component.getClientId(context), "name");
 
     if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
       out.writeAttribute("id", component.getClientId(context), "id");
@@ -171,8 +188,14 @@ class HtmlInputTextRenderer extends Renderer
     if (alt != null)
       out.writeAttribute("alt", alt, "alt");
 
+    if ("off".equals(autocomplete))
+      out.writeAttribute("autocomplete", "off", "autocomplete");
+      
     if (dir != null)
       out.writeAttribute("dir", dir, "dir");
+
+    if (disabled)
+      out.writeAttribute("disabled", "disabled", "disabled");
 
     if (lang != null)
       out.writeAttribute("lang", lang, "lang");
@@ -222,6 +245,9 @@ class HtmlInputTextRenderer extends Renderer
     if (onselect != null)
       out.writeAttribute("onselect", onselect, "onselect");
 
+    if (readonly)
+      out.writeAttribute("readonly", "readonly", "readonly");
+
     if (size > 0)
       out.writeAttribute("size", String.valueOf(size), "size");
 
@@ -236,6 +262,11 @@ class HtmlInputTextRenderer extends Renderer
 
     if (title != null)
       out.writeAttribute("title", title, "title");
+
+    if (value != null)
+      out.writeAttribute("value", String.valueOf(value), "value");
+    else
+      out.writeAttribute("value", "", "value");
   }
 
   /**
@@ -245,6 +276,7 @@ class HtmlInputTextRenderer extends Renderer
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
+    /*
     ResponseWriter out = context.getResponseWriter();
 
     if (component instanceof HtmlInputText) {
@@ -267,6 +299,7 @@ class HtmlInputTextRenderer extends Renderer
 
       out.writeText(value, "value");
     }
+    */
   }
 
   /**

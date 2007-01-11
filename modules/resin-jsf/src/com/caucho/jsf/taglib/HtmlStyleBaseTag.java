@@ -80,6 +80,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("alt", value);
   }
 
+  public void setAutocomplete(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("autocomplete", value);
+  }
+
   public void setBgcolor(ValueExpression value)
   {
     if (_map == null)
@@ -160,6 +168,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("dir", value);
   }
 
+  public void setDisabled(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("disabled", value);
+  }
+
   public void setEnctype(ValueExpression value)
   {
     if (_map == null)
@@ -198,6 +214,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("headerClass", value);
+  }
+
+  public void setImage(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("image", value);
   }
 
   public void setLang(ValueExpression value)
@@ -368,6 +392,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("rowClasses", value);
   }
 
+  public void setReadonly(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("readonly", value);
+  }
+
   public void setRules(ValueExpression value)
   {
     if (_map == null)
@@ -430,6 +462,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("title", value);
+  }
+
+  public void setType(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("type", value);
   }
 
   public void setValue(ValueExpression value)

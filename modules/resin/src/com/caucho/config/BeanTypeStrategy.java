@@ -69,6 +69,9 @@ public class BeanTypeStrategy extends TypeStrategy {
   private ArrayList<BuilderProgram> _injectList
     = new ArrayList<BuilderProgram>();
 
+  private ArrayList<BuilderProgram> _initProgramList
+    = new ArrayList<BuilderProgram>();
+
   private final Method _setParent;
   private final Method _setLocation;
   private final Method _addDependency;
@@ -85,6 +88,7 @@ public class BeanTypeStrategy extends TypeStrategy {
     Method setParent = null;
 
     _injectList = InjectIntrospector.introspectNoInit(type);
+    InjectIntrospector.introspectConstruct(_initProgramList, type);
 
     setParent = findMethod("setParent", new Class[] { null });
 
@@ -344,27 +348,11 @@ public class BeanTypeStrategy extends TypeStrategy {
    * Initializes the bean.
    */
   public void init(Object bean)
-    throws Exception
   {
-    try {
-      for (int i = 0; i < _initList.size(); i++)
-	_initList.get(i).invoke(bean);
-    } catch (InvocationTargetException e) {
-      Throwable cause = e.getCause();
+    NodeBuilder builder = NodeBuilder.getCurrentBuilder();
 
-      if (cause instanceof Exception)
-	throw (Exception) cause;
-      else
-	throw new ConfigException(cause);
-    }
-    
-    for (int i = 0; i < _destroyList.size(); i++) {
-      Method method = _destroyList.get(i);
-      EnvironmentListener listener;
-      listener = new WeakDestroyListener(method, bean);
-	
-      Environment.addEnvironmentListener(listener);
-    }
+    for (int i = 0; i < _initProgramList.size(); i++)
+      _initProgramList.get(i).configureImpl(builder, bean);
   }
 
   /**

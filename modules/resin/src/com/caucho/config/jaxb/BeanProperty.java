@@ -40,7 +40,8 @@ import org.w3c.dom.Node;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class BeanProperty extends JaxbProperty {
+public class BeanProperty extends JaxbProperty
+{
   private final Class _type;
   private final Method _method;
   private TypeStrategy _typeStrategy;
@@ -49,6 +50,8 @@ public class BeanProperty extends JaxbProperty {
   {
     _type = type;
     _method = method;
+    
+    _typeStrategy = TypeStrategyFactory.getTypeStrategy(_type);
   }
  
   /**
@@ -82,12 +85,9 @@ public class BeanProperty extends JaxbProperty {
     throws ConfigException
   {
     try {
-      Object value = _type.newInstance();
+      Object value = _typeStrategy.configure(builder, node, bean);
 
-      if (_typeStrategy == null)
-	_typeStrategy = TypeStrategyFactory.getTypeStrategy(_type);
-
-      _typeStrategy.configureBean(builder, value, node);
+      // _typeStrategy.configureBean(builder, value, node);
       
       _method.invoke(bean, value);
     } catch (RuntimeException e) {

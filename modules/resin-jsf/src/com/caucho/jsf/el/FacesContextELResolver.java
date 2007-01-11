@@ -30,14 +30,12 @@
 package com.caucho.jsf.el;
 
 import com.caucho.el.AbstractVariableResolver;
+import com.caucho.jsf.cfg.*;
 
 import javax.el.*;
 import javax.faces.context.*;
 import java.beans.FeatureDescriptor;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Variable resolution for JSF variables
@@ -59,9 +57,17 @@ public class FacesContextELResolver extends CompositeELResolver {
     = new ResourceBundleELResolver();
   private final BeanELResolver _beanResolver = new BeanELResolver();
 
+  private final HashMap<String,ManagedBeanConfig> _managedBeanMap
+    = new  HashMap<String,ManagedBeanConfig>();
+
   public FacesContextELResolver(ELResolver []customResolvers)
   {
     _customResolvers = customResolvers;
+  }
+
+  public void addManagedBean(String name, ManagedBeanConfig managedBean)
+  {
+    _managedBeanMap.put(name, managedBean);
   }
 
   public void addELResolver(ELResolver elResolver)
@@ -192,11 +198,11 @@ public class FacesContextELResolver extends CompositeELResolver {
 	return _beanResolver.getValue(env, base, property);
     }
     else if (property instanceof String) {
+      String key = (String) property;
+      
       FacesContext facesContext
 	= (FacesContext) env.getContext(FacesContext.class);
       ExternalContext ec = facesContext.getExternalContext();
-
-      String key = (String) property;
       
       Object value = ec.getRequestMap().get(property);
 
@@ -217,6 +223,12 @@ public class FacesContextELResolver extends CompositeELResolver {
       if (value != null) {
 	env.setPropertyResolved(true);
 	return value;
+      }
+
+      ManagedBeanConfig managedBean = _managedBeanMap.get(property);
+
+      if (managedBean != null) {
+	return managedBean.create(facesContext);
       }
 
       return null;

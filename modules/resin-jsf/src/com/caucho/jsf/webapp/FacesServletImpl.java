@@ -33,6 +33,7 @@ import java.lang.reflect.*;
 import java.util.logging.*;
 
 import javax.faces.*;
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.lifecycle.*;
 
@@ -40,6 +41,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import com.caucho.config.*;
+import com.caucho.jsf.application.*;
 import com.caucho.jsf.cfg.*;
 import com.caucho.vfs.*;
 
@@ -65,6 +67,16 @@ public class FacesServletImpl extends GenericServlet
 	FacesConfig facesConfig = new FacesConfig();
 	
 	new Config().configure(facesConfig, facesPath, FACES_SCHEMA);
+
+	ApplicationFactory appFactory = (ApplicationFactory)
+	  FactoryFinder.getFactory(FactoryFinder.APPLICATION_FACTORY);
+	
+	ApplicationImpl app = new ApplicationImpl();
+	appFactory.setApplication(app);
+
+	for (ManagedBeanConfig bean : facesConfig.getManagedBeans()) {
+	  app.addManagedBean(bean.getName(), bean);
+	}
       } catch (RuntimeException e) {
 	throw e;
       } catch (Exception e) {

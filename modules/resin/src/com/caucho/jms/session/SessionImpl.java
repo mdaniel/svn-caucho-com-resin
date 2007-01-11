@@ -545,6 +545,14 @@ public class SessionImpl implements Session, ThreadTask {
 	} catch (Throwable e) {
 	}
       }
+
+      for (MessageConsumerImpl consumer : _consumers) {
+	try {
+	  consumer.close();
+	} catch (Throwable e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
+      }
     }
   }
   

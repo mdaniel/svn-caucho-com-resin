@@ -444,13 +444,15 @@ public class JdbcQueueConsumer extends MessageConsumerImpl
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      _alarm.queue(QUEUE_TIMEOUT / 4);
+      if (! _isClosed && ! _queue.isClosed())
+	_alarm.queue(QUEUE_TIMEOUT / 4);
     }
   }
 
   /**
    * Closes the consumer.
    */
+  @Override
   public void close()
     throws JMSException
   {

@@ -90,7 +90,7 @@ public class HtmlOutputText extends UIOutput
     else if (_escapeExpr != null)
       return Util.evalBoolean(_escapeExpr);
     else
-      return false;
+      return true;
   }
 
   public void setEscape(boolean isEscape)

@@ -596,7 +596,8 @@ public class JdbcTopicConsumer extends MessageConsumerImpl
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      _alarm.queue(TOPIC_TIMEOUT / 4);
+      if (! _isClosed && ! _topic.isClosed())
+	_alarm.queue(TOPIC_TIMEOUT / 4);
     }
   }
 

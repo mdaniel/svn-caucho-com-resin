@@ -78,7 +78,6 @@ public class TypeStrategyFactory {
    * Returns the appropriate strategy.
    */
   public static TypeStrategy getTypeStrategy(Class type)
-          throws Exception
   {
     TypeStrategyFactory factory = getFactory(type.getClassLoader());
 
@@ -118,7 +117,6 @@ public class TypeStrategyFactory {
   }
 
   private static TypeStrategyFactory getFactory(ClassLoader loader)
-          throws Exception
   {
     if (loader == null)
       loader = ClassLoader.getSystemClassLoader();
@@ -141,21 +139,25 @@ public class TypeStrategyFactory {
    * @throws Exception
    */
   private void init(ClassLoader loader)
-          throws Exception
   {
-    Enumeration<URL> urls = loader.getResources("META-INF/caucho/config-types.xml");
+    try {
+      Enumeration<URL> urls = loader.getResources("META-INF/caucho/config-types.xml");
 
-    while (urls.hasMoreElements()) {
-      URL url = urls.nextElement();
- 
-      InputStream is = url.openStream();
-      try {
-        new Config(loader).configure(this, is);
-      } catch (Throwable e) {
-        e.printStackTrace(); // XXX:
-      } finally {
-        is.close();
+      while (urls.hasMoreElements()) {
+	URL url = urls.nextElement();
+
+	InputStream is = url.openStream();
+	
+	try {
+	  new Config(loader).configure(this, is);
+	} finally {
+	  is.close();
+	}
       }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Throwable e) {
+      throw new ConfigException(e);
     }
   }
 

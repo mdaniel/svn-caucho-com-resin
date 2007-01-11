@@ -44,6 +44,7 @@ import javax.faces.validator.*;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
+import com.caucho.jsf.cfg.*;
 import com.caucho.jsf.el.*;
 import com.caucho.jsf.el.JsfExpressionFactoryImpl;
 import com.caucho.jsf.context.*;
@@ -110,6 +111,9 @@ public class ApplicationImpl extends Application
     addComponent(UIOutput.COMPONENT_TYPE,
 		 "javax.faces.component.UIOutput");
 
+    addComponent(HtmlCommandButton.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlCommandButton");
+
     addComponent(HtmlInputSecret.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlInputSecret");
 
@@ -126,6 +130,11 @@ public class ApplicationImpl extends Application
 		 "javax.faces.component.html.HtmlForm");
   }
   
+  public void addManagedBean(String name, ManagedBeanConfig managedBean)
+  {
+    _elResolver.addManagedBean(name, managedBean);
+  }
+
   public ActionListener getActionListener()
   {
     return _actionListener;

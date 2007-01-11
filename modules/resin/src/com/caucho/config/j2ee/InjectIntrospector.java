@@ -162,9 +162,9 @@ public class InjectIntrospector {
     }
   }
 
-  private static void
+  public static void
     introspectConstruct(ArrayList<BuilderProgram> initList, Class type)
-    throws ConfigException, ClassNotFoundException
+    throws ConfigException
   {
     if (type == null || type.equals(Object.class))
       return;
@@ -178,6 +178,14 @@ public class InjectIntrospector {
 					method.getName()));
 
 	initList.add(new PostConstructProgram(method));
+      }
+
+      if (method.isAnnotationPresent(PreDestroy.class)) {
+	if (method.getParameterTypes().length != 0)
+	  throw new ConfigException(L.l("{0}: @PreDestroy is requires zero arguments",
+					method.getName()));
+
+	initList.add(new PreDestroyProgram(method));
       }
     }
   }

@@ -85,9 +85,17 @@ public class FactoryFinder
 	  return factory;
       }
 
-      Object factory = null;
-      String className = getDefaultFactory(factoryName);
+      String className = null;
 
+      HashMap<String,String> nameMap = _factoryNameMap.get(loader);
+      if (nameMap != null) {
+	className = nameMap.get(factoryName);
+      }
+
+      if (className == null)
+	className = getDefaultFactory(factoryName);
+
+      Object factory = null;
       if (className != null)
 	factory = createFactory(className, factoryClass, factory, loader);
 
@@ -122,6 +130,12 @@ public class FactoryFinder
       }
 
       map.put(factoryName, implName);
+      
+      HashMap<String,Object> objectMap = _factoryMap.get(loader);
+
+      if (objectMap != null) {
+	objectMap.remove(factoryName);
+      }
     }
   }
 

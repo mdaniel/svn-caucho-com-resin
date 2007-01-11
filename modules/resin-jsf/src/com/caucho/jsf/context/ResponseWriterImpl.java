@@ -56,6 +56,9 @@ public class ResponseWriterImpl extends ResponseWriter
   public void write(char ch)
     throws IOException
   {
+    if (_inElement)
+      closeElement();
+    
     _out.write(ch);
   }
   

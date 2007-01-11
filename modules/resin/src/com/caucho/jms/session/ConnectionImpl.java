@@ -193,7 +193,11 @@ public class ConnectionImpl implements Connection
 
     try {
       for (int i = 0; i < _sessions.size(); i++) {
-	_sessions.get(i).stop();
+	try {
+	  _sessions.get(i).stop();
+	} catch (Throwable e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
       }
     } finally {
       _isActive = false;

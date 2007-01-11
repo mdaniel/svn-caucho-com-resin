@@ -42,6 +42,15 @@ public class HtmlBasicRenderKit extends RenderKit {
 
   public HtmlBasicRenderKit()
   {
+    addRenderer("javax.faces.Command", "javax.faces.Button",
+		HtmlCommandButtonRenderer.RENDERER);
+    
+    addRenderer("javax.faces.Command", "javax.faces.Link",
+		HtmlCommandLinkRenderer.RENDERER);
+    
+    addRenderer("javax.faces.Form", "javax.faces.Form",
+		HtmlFormRenderer.RENDERER);
+    
     addRenderer("javax.faces.Input", "javax.faces.Secret",
 		HtmlInputSecretRenderer.RENDERER);
     
