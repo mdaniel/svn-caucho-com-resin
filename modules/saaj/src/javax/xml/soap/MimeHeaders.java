@@ -40,7 +40,7 @@ public class MimeHeaders {
 
   public void addHeader(String name, String value)
   {
-    if (name == null || value == null)
+    if (name == null || "".equals(name))
       throw new IllegalArgumentException();
 
     ArrayList<MimeHeader> list = _headers.get(name);
@@ -95,7 +95,7 @@ public class MimeHeaders {
 
   public void setHeader(String name, String value)
   {
-    if (name == null || value == null)
+    if (name == null || "".equals(name))
       throw new IllegalArgumentException();
 
     ArrayList<MimeHeader> list = _headers.get(name);
