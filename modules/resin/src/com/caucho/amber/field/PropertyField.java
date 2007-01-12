@@ -246,10 +246,12 @@ public class PropertyField extends AbstractField {
       return;
     }
     else {
-      // jpa/0g06, jpa/0g0k
-      out.println("if (__caucho_session != null && __caucho_session.isInTransaction()) {");
+      // jpa/0g06, jpa/0g0k, jpa/0j5f
+      out.println("if ((" + loadVar + " & " + mask + "L) == 0 && __caucho_session != null) {");
       out.println("  __caucho_load_" + maskGroup + "(__caucho_session);");
-      out.println("  __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) this);");
+      out.println();
+      out.println("  if (__caucho_session.isInTransaction())");
+      out.println("    __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) this);");
       out.println("}");
       out.println();
     }

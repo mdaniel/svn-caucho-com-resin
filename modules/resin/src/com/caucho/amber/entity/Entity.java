@@ -130,6 +130,11 @@ public interface Entity extends MappedSuperclass
   public AmberConnection __caucho_getConnection();
 
   /**
+   * Returns true if the entity is dirty.
+   */
+  public boolean __caucho_isDirty();
+
+  /**
    * Returns true if the entity matches.
    */
   public boolean __caucho_match(String className, Object key);

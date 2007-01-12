@@ -350,6 +350,32 @@ abstract public class AmberMappedComponent extends ClassComponent {
   }
 
   /**
+   * Generates the isDirty code.
+   */
+  void generateIsDirty(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public boolean __caucho_isDirty()");
+    out.println("{");
+    out.pushDepth();
+
+    int dirtyCount = _relatedType.getDirtyIndex();
+
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("if (__caucho_dirtyMask_" + i + " != 0L)");
+      out.println("  return true;");
+      out.println();
+    }
+
+    out.println("return false;");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+
+  /**
    * Generates the match code.
    */
   void generateMatch(JavaWriter out)
@@ -745,6 +771,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  return true;");
     out.println("}");
     out.println();
+
     out.println("boolean isDirty = false;");
 
     int dirtyCount = _relatedType.getDirtyIndex();

@@ -779,6 +779,10 @@ public class EntityManyToOneField extends CascadableField {
     if (_aliasField == null) {
       out.println("if ((" + loadVar + " & " + loadMask + "L) == 0 && __caucho_session != null) {");
       out.println("  __caucho_load_0(__caucho_session);");
+      out.println();
+      // jpa/0j5f
+      out.println("  if (__caucho_session.isInTransaction())");
+      out.println("    __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) this);");
       out.println("}");
 
       out.println();
@@ -831,7 +835,9 @@ public class EntityManyToOneField extends CascadableField {
       long dirtyMask = (1L << (getIndex() % 64));
 
       out.println(dirtyVar + " |= " + dirtyMask + "L;");
+
       out.println(loadVar + " |= " + loadMask + "L;");
+
       out.println("__caucho_session.update((com.caucho.amber.entity.Entity) this);");
 
       out.println("__caucho_session.addCompletion(__caucho_home.createManyToOneCompletion(\"" + getName() + "\", (com.caucho.amber.entity.Entity) this, v));");
@@ -859,9 +865,15 @@ public class EntityManyToOneField extends CascadableField {
 
     out.println("if (" + getter + " != null) {");
     out.pushDepth();
-    out.println("int state = ((com.caucho.amber.entity.Entity) " + getter + ").__caucho_getEntityState();");
 
-    // jpa/0j5c
+    String relatedEntity = "((com.caucho.amber.entity.Entity) " + getter + ")";
+    out.println("int state = " + relatedEntity + ".__caucho_getEntityState();");
+
+    // jpa/0j5e as a negative test.
+    out.println("if (" + relatedEntity + ".__caucho_getConnection() == null) {");
+    out.pushDepth();
+
+    // jpa/0j5c as a positive test.
     out.println("if (this.__caucho_state < com.caucho.amber.entity.Entity.P_DELETING");
     out.println("    && (state <= com.caucho.amber.entity.Entity.P_NEW || ");
     out.println("        state >= com.caucho.amber.entity.Entity.P_DELETED))");
@@ -872,6 +884,10 @@ public class EntityManyToOneField extends CascadableField {
                           getEntityTargetType().getName() + "\")");
 
     out.println("  throw new IllegalStateException" + errorString + ";");
+
+    out.popDepth();
+    out.println("}");
+
     out.popDepth();
     out.println("}");
 

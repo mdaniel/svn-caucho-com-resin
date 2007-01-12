@@ -240,6 +240,10 @@ public class EntityOneToManyField extends CollectionField {
       out.println(") {");
       out.pushDepth();
 
+      // XXX
+      out.println("if (o == null)");
+      out.println("  continue;");
+
       if (_sourceField != null) {
         String typeName = getEntityTargetType().getJavaTypeName();
         String setter = _sourceField.getSetterName();

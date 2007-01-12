@@ -372,8 +372,17 @@ public class AmberConnection
       Entity instance = (Entity) entity;
 
       // jpa/0k12
-      if (instance.__caucho_getConnection() == null)
-        throw new IllegalArgumentException(L.l("remove() operation can only be applied to a managed entity. This entity instance is detached which means it was probably removed or needs to be merged."));
+      if (instance.__caucho_getConnection() == null) {
+        if (instance.__caucho_getEntityType() == null) {
+          // Ignore this entity; only post-remove child entities.
+          instance.__caucho_cascadePostRemove(this);
+
+          // jpa/0ga7
+          return;
+        }
+        else
+          throw new IllegalArgumentException(L.l("remove() operation can only be applied to a managed entity. This entity instance is detached which means it was probably removed or needs to be merged."));
+      }
 
       int state = instance.__caucho_getEntityState();
 
@@ -1192,6 +1201,8 @@ public class AmberConnection
     if (entity == null)
       return false;
 
+    // jpa/11a6: if (entity.__caucho_getEntityState() != Entity.P_TRANSACTIONAL)
+    // jpa/0j5f
     if (entity.__caucho_getEntityState() >= Entity.P_DELETING)
       return false;
 
@@ -2168,8 +2179,15 @@ public class AmberConnection
       instance.__caucho_makePersistent(null, (EntityType) null);
       createInternal(instance);
     }
-    else // jpa/0ga5
+    else if (instance.__caucho_isDirty()) {
+      // OK: jpa/0ga6
+    }
+    else if (! contains(instance)) {
+      // jpa/0ga5 (tck):
+      // See entitytest.persist.basic.persistBasicTest4 vs.
+      //     callback.inheritance.preUpdateTest
       throw new EntityExistsException(L.l("Trying to persist an entity that is detached or already exists. Entity state '{0}'", state));
+    }
 
     // jpa/0h27
     // Post-persist child entities.
