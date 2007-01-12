@@ -465,11 +465,19 @@ public class DependentEntityOneToOneField extends CascadableField {
 
     AmberPersistenceUnit persistenceUnit = getSourceType().getPersistenceUnit();
 
-    String className = getJavaType().getName();
-    EntityType entity = persistenceUnit.getEntity(className);
+    Table table;
 
-    // jpa/0ge4
-    Table table = entity.getTable();
+    if (persistenceUnit.isJPA()) {
+      String className = getJavaType().getName();
+      EntityType entity = persistenceUnit.getEntity(className);
+
+      // jpa/0ge4
+      table = entity.getTable();
+    }
+    else {
+      // ejb/0691
+      table = getEntityTargetType().getTable();
+    }
 
     out.println("if (\"" + table.getName() + "\".equals(table)) {");
     out.pushDepth();

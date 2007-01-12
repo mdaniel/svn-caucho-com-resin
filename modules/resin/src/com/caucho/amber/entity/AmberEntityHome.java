@@ -29,6 +29,7 @@
 package com.caucho.amber.entity;
 
 import com.caucho.amber.AmberException;
+import com.caucho.amber.AmberObjectNotFoundException;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.CacheUpdate;
@@ -321,11 +322,13 @@ public class AmberEntityHome {
   {
     EntityItem item = findEntityItem(aConn, key, isLoad, preloadedProperties);
 
-    if (item == null)
-      return null;
+    if (item == null) {
+      if (_manager.isJPA())
+        return null;
 
-    // XXX: why isn't this thrown?
-    // throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
+      // ejb/0604
+      throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
+    }
 
     return item.copy(aConn);
   }
@@ -382,8 +385,13 @@ public class AmberEntityHome {
         cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
 
         // Object does not exist.
-        if (cacheEntity == null)
-          return null;
+        if (cacheEntity == null) {
+          if (_manager.isJPA())
+            return null;
+
+          // ejb/0604
+          throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
+        }
 
         if (isLoad) {
           cacheEntity.__caucho_retrieve(aConn, preloadedProperties);

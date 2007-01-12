@@ -120,9 +120,9 @@ public class BurlapProtocol extends ProtocolContainer {
       int p = queryString.indexOf('=');
 
       if (p >= 0)
-	objectId = queryString.substring(p + 1);
+        objectId = queryString.substring(p + 1);
       else
-	objectId = queryString;
+        objectId = queryString;
     }
 
     AbstractServer server = getProtocolManager().getServerByEJBName(serverId);
@@ -135,18 +135,19 @@ public class BurlapProtocol extends ProtocolContainer {
       else
         return null; // XXX: should return error skeleton
       /*
-	ArrayList children = getServerContainer().getRemoteChildren(serverId);
+        ArrayList children = getServerContainer().getRemoteChildren(serverId);
 
-	if (children != null && children.size() > 0)
-	return new NameContextSkeleton(this, serverId);
-	else
-	return null; // XXX: should return error skeleton
+        if (children != null && children.size() > 0)
+        return new NameContextSkeleton(this, serverId);
+        else
+        return null; // XXX: should return error skeleton
       */
     }
     else if (objectId != null) {
       Object key = server.getHandleEncoder("burlap").objectIdToKey(objectId);
 
-      EJBObject obj = server.getContext(key, false).getRemoteView();
+      // ejb/0604
+      EJBObject obj = server.getContext(key, true).getRemoteView();
 
       Class objectSkelClass = getObjectSkelClass(server);
 
@@ -163,24 +164,24 @@ public class BurlapProtocol extends ProtocolContainer {
       Object remote = server.getRemoteObject();
 
       if (remote instanceof EJBHome) {
-	Class homeSkelClass = getHomeSkelClass(server);
+        Class homeSkelClass = getHomeSkelClass(server);
 
-	BurlapSkeleton skel = (BurlapSkeleton) homeSkelClass.newInstance();
-	skel._setServer(server);
-	skel._setResolver(_resolver);
-	skel._setObject(remote);
+        BurlapSkeleton skel = (BurlapSkeleton) homeSkelClass.newInstance();
+        skel._setServer(server);
+        skel._setResolver(_resolver);
+        skel._setObject(remote);
 
-	return skel;
+        return skel;
       }
       else if (remote instanceof EJBObject) {
-	Class skelClass = getObjectSkelClass(server);
+        Class skelClass = getObjectSkelClass(server);
 
-	BurlapSkeleton skel = (BurlapSkeleton) skelClass.newInstance();
-	skel._setServer(server);
-	skel._setResolver(_resolver);
-	skel._setObject(remote);
+        BurlapSkeleton skel = (BurlapSkeleton) skelClass.newInstance();
+        skel._setServer(server);
+        skel._setResolver(_resolver);
+        skel._setObject(remote);
 
-	return skel;
+        return skel;
       }
     }
 
@@ -203,14 +204,14 @@ public class BurlapProtocol extends ProtocolContainer {
     throws Exception
   {
     Class homeSkelClass = (Class) _homeSkeletonMap.get(server);
-    
+
     if (homeSkelClass != null)
       return homeSkelClass;
-    
+
     Class remoteHomeClass = server.getRemoteHomeClass();
 
     homeSkelClass = BurlapSkeletonGenerator.generate(remoteHomeClass,
-                                                        getWorkPath());
+                                                     getWorkPath());
 
     _homeSkeletonMap.put(server, homeSkelClass);
 
@@ -224,14 +225,14 @@ public class BurlapProtocol extends ProtocolContainer {
     throws Exception
   {
     Class objectSkelClass = (Class) _objectSkeletonMap.get(server);
-    
+
     if (objectSkelClass != null)
       return objectSkelClass;
-    
+
     Class remoteObjectClass = server.getRemoteObjectClass();
 
     objectSkelClass = BurlapSkeletonGenerator.generate(remoteObjectClass,
-                                                        getWorkPath());
+                                                       getWorkPath());
 
     _objectSkeletonMap.put(server, objectSkelClass);
 

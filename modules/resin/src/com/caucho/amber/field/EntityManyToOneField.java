@@ -114,7 +114,7 @@ public class EntityManyToOneField extends CascadableField {
    * Returns the source type as
    * entity or mapped-superclass.
    */
-  public RelatedType getEntityRelatedType()
+  public RelatedType getRelatedType()
   {
     return (RelatedType) getSourceType();
   }
@@ -239,7 +239,7 @@ public class EntityManyToOneField extends CascadableField {
   public void init()
     throws ConfigException
   {
-    init(getEntityRelatedType());
+    init(getRelatedType());
   }
 
   /**
@@ -250,8 +250,8 @@ public class EntityManyToOneField extends CascadableField {
   {
     Table sourceTable = relatedType.getTable();
 
-    if (sourceTable == null) {
-      // jpa/0ge3
+    if (sourceTable == null || ! relatedType.getPersistenceUnit().isJPA()) {
+      // jpa/0ge3, ejb/0602
       super.init();
       _targetLoadIndex = relatedType.getLoadGroupIndex();
       return;
@@ -280,7 +280,15 @@ public class EntityManyToOneField extends CascadableField {
 
     for (Column keyColumn : targetIdColumns) {
 
-      String columnName = getName().toUpperCase() + '_' + keyColumn.getName();
+      String columnName;
+
+      if (getRelatedType().getPersistenceUnit().isJPA())
+        columnName = getName().toUpperCase() + '_' + keyColumn.getName();
+      else {
+        // ejb/0602
+        columnName = keyColumn.getName();
+      }
+
       boolean nullable = true;
       boolean unique = false;
 
@@ -606,7 +614,7 @@ public class EntityManyToOneField extends CascadableField {
     out.pushDepth();
 
     // ejb/06h0
-    String extClassName = getEntityRelatedType().getInstanceClassName(); // getEntityRelatedType().getName() + "__ResinExt";
+    String extClassName = getRelatedType().getInstanceClassName(); // getRelatedType().getName() + "__ResinExt";
     out.println(extClassName + " item = (" + extClassName + ") __caucho_item.getEntity();");
 
     out.println("item.__caucho_item_" + getGetterName() + "(__caucho_session);");
@@ -722,7 +730,7 @@ public class EntityManyToOneField extends CascadableField {
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
     // jpa/0o05
     if (! dst.equals("super")) { // || isLazy())) {
-      out.println("((" + getEntityRelatedType().getInstanceClassName() + ") " + dst + ")." +
+      out.println("((" + getRelatedType().getInstanceClassName() + ") " + dst + ")." +
                   generateSuperSetter(generateSuperGetter()) + ";");
     }
 
@@ -751,7 +759,7 @@ public class EntityManyToOneField extends CascadableField {
     if (src.equals("super"))
       return var;
     else
-      return "((" + getEntityRelatedType().getInstanceClassName() + ") " + src + ")." + var;
+      return "((" + getRelatedType().getInstanceClassName() + ") " + src + ")." + var;
   }
 
   /**
@@ -778,7 +786,8 @@ public class EntityManyToOneField extends CascadableField {
 
     if (_aliasField == null) {
       out.println("if ((" + loadVar + " & " + loadMask + "L) == 0 && __caucho_session != null) {");
-      out.println("  __caucho_load_0(__caucho_session);");
+      // ejb/0602
+      out.println("  __caucho_load_" + group + "(__caucho_session);");
       out.println();
       // jpa/0j5f
       out.println("  if (__caucho_session.isInTransaction())");
@@ -879,7 +888,7 @@ public class EntityManyToOneField extends CascadableField {
     out.println("        state >= com.caucho.amber.entity.Entity.P_DELETED))");
 
     String errorString = ("(\"amber flush: unable to flush " +
-                          getEntityRelatedType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
+                          getRelatedType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
                           "with non-managed dependent relationship many-to-one to "+
                           getEntityTargetType().getName() + "\")");
 

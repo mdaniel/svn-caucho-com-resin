@@ -337,8 +337,11 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
             continue;
         }
 
-        if (field instanceof EntityManyToOneField) {
-          ((EntityManyToOneField) field).init((RelatedType) this);
+        // ejb/0602
+        if (getPersistenceUnit().isJPA()) {
+          if (field instanceof EntityManyToOneField) {
+            ((EntityManyToOneField) field).init((RelatedType) this);
+          }
         }
 
         if (field.getLoadGroupIndex() == loadGroupIndex)
@@ -424,8 +427,11 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
         if (field.getLoadGroupIndex() != loadGroup)
           continue;
 
-        if (field instanceof EntityManyToOneField)
-          ((EntityManyToOneField) field).init((RelatedType) this);
+        // ejb/0602
+        if (getPersistenceUnit().isJPA()) {
+          if (field instanceof EntityManyToOneField)
+            ((EntityManyToOneField) field).init((RelatedType) this);
+        }
 
         String propSelect = field.generateLoadSelect(table, id);
 

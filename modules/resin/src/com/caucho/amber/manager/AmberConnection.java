@@ -454,10 +454,14 @@ public class AmberConnection
 
       return (T) load(entityClass, primaryKey, preloadedProperties);
     } catch (AmberObjectNotFoundException e) {
-      // JPA: should not throw at all, returns null only.
-      // log.log(Level.FINER, e.toString(), e);
+      if (_persistenceUnit.isJPA()) {
+        // JPA: should not throw at all, returns null only.
+        // log.log(Level.FINER, e.toString(), e);
+        return null;
+      }
 
-      return null;
+      // ejb/0604
+      throw e;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
