@@ -62,41 +62,202 @@ class HtmlInputSecretRenderer extends Renderer
     ResponseWriter out = context.getResponseWriter();
 
     String id = component.getId();
+
+    String accesskey;
+    String alt;
+    String autocomplete;
     String dir;
+    boolean disabled;
     String lang;
+    int maxlength;
+    
+    String onblur;
+    String onchange;
+    String onclick;
+    String ondblclick;
+    String onfocus;
+    
+    String onkeydown;
+    String onkeypress;
+    String onkeyup;
+    
+    String onmousedown;
+    String onmousemove;
+    String onmouseout;
+    String onmouseover;
+    String onmouseup;
+    
+    String onselect;
+    
+    boolean readonly;
+    boolean redisplay;
+    int size;
     String style;
     String styleClass;
+    String tabindex;
     String title;
-    
-    if (component instanceof HtmlInputText) {
-      HtmlInputText htmlInput = (HtmlInputText) component;
 
+    Object value;
+
+    System.out.println("COMP: " + component);
+    if (component instanceof HtmlInputSecret) {
+      HtmlInputSecret htmlInput = (HtmlInputSecret) component;
+
+      accesskey = htmlInput.getAccesskey();
+      autocomplete = htmlInput.getAutocomplete();
+      alt = htmlInput.getAlt();
       dir = htmlInput.getDir();
+      disabled = htmlInput.isDisabled();
       lang = htmlInput.getLang();
+      maxlength = htmlInput.getMaxlength();
+      onblur = htmlInput.getOnblur();
+      onchange = htmlInput.getOnchange();
+      onclick = htmlInput.getOnclick();
+      ondblclick = htmlInput.getOndblclick();
+      onfocus = htmlInput.getOnfocus();
+      
+      onkeydown = htmlInput.getOnkeydown();
+      onkeypress = htmlInput.getOnkeypress();
+      onkeyup = htmlInput.getOnkeyup();
+      
+      onmousedown = htmlInput.getOnmousedown();
+      onmousemove = htmlInput.getOnmousemove();
+      onmouseout = htmlInput.getOnmouseout();
+      onmouseover = htmlInput.getOnmouseover();
+      onmouseup = htmlInput.getOnmouseup();
+      
+      onselect = htmlInput.getOnselect();
+      
+      readonly = htmlInput.isReadonly();
+      redisplay = htmlInput.isRedisplay();
+      size = htmlInput.getSize();
       style = htmlInput.getStyle();
       styleClass = htmlInput.getStyleClass();
+      tabindex = htmlInput.getTabindex();
       title = htmlInput.getTitle();
+      
+      value = htmlInput.getValue();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
     
+      accesskey = (String) attrMap.get("accesskey");
+      alt = (String) attrMap.get("alt");
+      autocomplete = (String) attrMap.get("autocomplete");
       dir = (String) attrMap.get("dir");
+      disabled = (Boolean) attrMap.get("disabled");
       lang = (String) attrMap.get("lang");
+      maxlength = (Integer) attrMap.get("maxlength");
+      
+      onblur = (String) attrMap.get("onblur");
+      onchange = (String) attrMap.get("onchange");
+      onclick = (String) attrMap.get("onclick");
+      ondblclick = (String) attrMap.get("ondblclick");
+      onfocus = (String) attrMap.get("onfocus");
+      
+      onkeydown = (String) attrMap.get("onkeydown");
+      onkeypress = (String) attrMap.get("onkeypress");
+      onkeyup = (String) attrMap.get("onkeyup");
+      
+      onmousedown = (String) attrMap.get("onmousedown");
+      onmousemove = (String) attrMap.get("onmousemove");
+      onmouseout = (String) attrMap.get("onmouseout");
+      onmouseover = (String) attrMap.get("onmouseover");
+      onmouseup = (String) attrMap.get("onmouseup");
+      
+      onselect = (String) attrMap.get("onselect");
+      
+      readonly = (Boolean) attrMap.get("readonly");
+      redisplay = (Boolean) attrMap.get("redisplay");
+      size = (Integer) attrMap.get("size");
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
+      tabindex = (String) attrMap.get("tabindex");
       title = (String) attrMap.get("title");
+      
+      value = attrMap.get("value");
     }
 
     out.startElement("input", component);
 
+    out.writeAttribute("type", "password", "type");
+    
+    out.writeAttribute("name", component.getClientId(context), "name");
+
     if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
       out.writeAttribute("id", component.getClientId(context), "id");
 
+    if (accesskey != null)
+      out.writeAttribute("accesskey", accesskey, "accesskey");
+
+    if (alt != null)
+      out.writeAttribute("alt", alt, "alt");
+
+    if ("off".equals(autocomplete))
+      out.writeAttribute("autocomplete", "off", "autocomplete");
+      
     if (dir != null)
       out.writeAttribute("dir", dir, "dir");
 
+    if (disabled)
+      out.writeAttribute("disabled", "disabled", "disabled");
+
     if (lang != null)
-      out.writeAttribute("lang", lang, "dir");
+      out.writeAttribute("lang", lang, "lang");
+
+    if (maxlength > 0)
+      out.writeAttribute("maxlength", String.valueOf(maxlength), "maxlength");
+
+    if (onblur != null)
+      out.writeAttribute("onblur", onblur, "onblur");
+
+    if (onchange != null)
+      out.writeAttribute("onchange", onchange, "onchange");
+
+    if (onclick != null)
+      out.writeAttribute("onclick", onclick, "onclick");
+
+    if (ondblclick != null)
+      out.writeAttribute("ondblclick", ondblclick, "ondblclick");
+
+    if (onfocus != null)
+      out.writeAttribute("onfocus", onfocus, "onfocus");
+
+    if (onkeydown != null)
+      out.writeAttribute("onkeydown", onkeydown, "onkeydown");
+
+    if (onkeypress != null)
+      out.writeAttribute("onkeypress", onkeypress, "onkeypress");
+
+    if (onkeyup != null)
+      out.writeAttribute("onkeyup", onkeyup, "onkeyup");
+
+    if (onmousedown != null)
+      out.writeAttribute("onmousedown", onmousedown, "onmousedown");
+
+    if (onmousemove != null)
+      out.writeAttribute("onmousemove", onmousemove, "onmousemove");
+
+    if (onmouseout != null)
+      out.writeAttribute("onmouseout", onmouseout, "onmouseout");
+
+    if (onmouseover != null)
+      out.writeAttribute("onmouseover", onmouseover, "onmouseover");
+
+    if (onmouseup != null)
+      out.writeAttribute("onmouseup", onmouseup, "onmouseup");
+
+    if (onselect != null)
+      out.writeAttribute("onselect", onselect, "onselect");
+
+    if (readonly)
+      out.writeAttribute("readonly", "readonly", "readonly");
+
+    if (redisplay)
+      out.writeAttribute("redisplay", "redisplay", "redisplay");
+
+    if (size > 0)
+      out.writeAttribute("size", String.valueOf(size), "size");
 
     if (style != null)
       out.writeAttribute("style", style, "style");
@@ -104,8 +265,14 @@ class HtmlInputSecretRenderer extends Renderer
     if (styleClass != null)
       out.writeAttribute("class", styleClass, "class");
 
+    if (tabindex != null)
+      out.writeAttribute("tabindex", tabindex, "tabindex");
+
     if (title != null)
       out.writeAttribute("title", title, "title");
+
+    if (redisplay && value != null)
+      out.writeAttribute("value", String.valueOf(value), "value");
   }
 
   /**
@@ -115,6 +282,7 @@ class HtmlInputSecretRenderer extends Renderer
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
+    /*
     ResponseWriter out = context.getResponseWriter();
 
     if (component instanceof HtmlInputText) {
@@ -137,6 +305,7 @@ class HtmlInputSecretRenderer extends Renderer
 
       out.writeText(value, "value");
     }
+    */
   }
 
   /**

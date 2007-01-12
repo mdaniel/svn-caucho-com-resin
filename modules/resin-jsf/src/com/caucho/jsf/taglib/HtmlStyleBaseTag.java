@@ -376,6 +376,22 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("prependId", value);
   }
 
+  public void setReadonly(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("readonly", value);
+  }
+
+  public void setRedisplay(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("redisplay", value);
+  }
+
   public void setRendered(ValueExpression value)
   {
     if (_map == null)
@@ -390,14 +406,6 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("rowClasses", value);
-  }
-
-  public void setReadonly(ValueExpression value)
-  {
-    if (_map == null)
-      _map = new HashMap<String,ValueExpression>(8);
-      
-    _map.put("readonly", value);
   }
 
   public void setRules(ValueExpression value)

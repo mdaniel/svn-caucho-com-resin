@@ -114,6 +114,9 @@ public class ApplicationImpl extends Application
     addComponent(HtmlCommandButton.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlCommandButton");
 
+    addComponent(HtmlInputHidden.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlInputHidden");
+
     addComponent(HtmlInputSecret.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlInputSecret");
 
@@ -128,6 +131,12 @@ public class ApplicationImpl extends Application
 
     addComponent(HtmlForm.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlForm");
+
+    addComponent(HtmlSelectBooleanCheckbox.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlSelectBooleanCheckbox");
+
+    addComponent(HtmlSelectManyCheckbox.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlSelectManyCheckbox");
   }
   
   public void addManagedBean(String name, ManagedBeanConfig managedBean)

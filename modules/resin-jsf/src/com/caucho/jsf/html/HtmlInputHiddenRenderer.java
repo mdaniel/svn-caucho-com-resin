@@ -71,16 +71,12 @@ class HtmlInputHiddenRenderer extends Renderer
     }
 
     out.startElement("input", component);
-  }
+    out.writeAttribute("type", "hidden", "type");
 
-  /**
-   * Renders the content for the component.
-   */
-  @Override
-  public void encodeChildren(FacesContext context, UIComponent component)
-    throws IOException
-  {
-    ResponseWriter out = context.getResponseWriter();
+    out.writeAttribute("name", component.getClientId(context), "name");
+
+    if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
+      out.writeAttribute("id", component.getClientId(context), "id");
 
     if (component instanceof HtmlInputHidden) {
       HtmlInputHidden htmlInput = (HtmlInputHidden) component;
@@ -90,7 +86,7 @@ class HtmlInputHiddenRenderer extends Renderer
       if (value == null)
 	return;
 
-      out.writeText(value, "value");
+      out.writeAttribute("value", String.valueOf(value), "value");
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
@@ -100,8 +96,17 @@ class HtmlInputHiddenRenderer extends Renderer
       if (value == null)
 	return;
 
-      out.writeText(value, "value");
+      out.writeAttribute("value", String.valueOf(value), "value");
     }
+  }
+
+  /**
+   * Renders the content for the component.
+   */
+  @Override
+  public void encodeChildren(FacesContext context, UIComponent component)
+    throws IOException
+  {
   }
 
   /**

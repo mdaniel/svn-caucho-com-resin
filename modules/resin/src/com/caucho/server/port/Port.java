@@ -731,9 +731,6 @@ public class Port
 
     if (_server instanceof EnvironmentBean)
       Environment.addEnvironmentListener(this, ((EnvironmentBean) _server).getClassLoader());
-
-    if (_throttle == null)
-      _throttle = new Throttle();
   }
 
   /**
@@ -753,6 +750,9 @@ public class Port
 
     if (_port == 0)
       return;
+
+    if (_throttle == null)
+      _throttle = new Throttle();
     
     if (_serverSocket != null) {
       if (_port == 0) {

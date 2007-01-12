@@ -86,6 +86,12 @@ public class HtmlBasicRenderKit extends RenderKit {
     
     addRenderer("javax.faces.Panel", "javax.faces.Group",
 		HtmlPanelGroupRenderer.RENDERER);
+    
+    addRenderer("javax.faces.SelectBoolean", "javax.faces.Checkbox",
+		HtmlBooleanCheckboxRenderer.RENDERER);
+    
+    addRenderer("javax.faces.SelectMany", "javax.faces.Checkbox",
+		HtmlSelectManyCheckboxRenderer.RENDERER);
   }
   
   public void addRenderer(String family,
