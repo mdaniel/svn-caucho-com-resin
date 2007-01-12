@@ -1684,7 +1684,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    if (_relatedType.isAbstractClass() || (_relatedType.getId() == null)) {
+    if (_relatedType.isAbstractClass() || _relatedType.getId() == null) {
       out.println("return null;");
       out.popDepth();
       out.println("}");

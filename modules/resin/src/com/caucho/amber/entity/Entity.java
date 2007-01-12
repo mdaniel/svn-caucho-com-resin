@@ -40,7 +40,8 @@ import java.util.Map;
 /**
  * An entity instance
  */
-public interface Entity extends MappedSuperclass {
+public interface Entity extends MappedSuperclass
+{
   public static final int TRANSIENT = 0;
   public static final int P_NEW = 1;
   public static final int P_NON_TRANSACTIONAL = 2;

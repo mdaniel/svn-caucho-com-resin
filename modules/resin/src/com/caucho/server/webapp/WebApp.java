@@ -144,7 +144,6 @@ public class WebApp extends ServletContextImpl
 
   private String _servletVersion;
 
-  private boolean _isAppDirSet;
   private boolean _isDynamicDeploy;
 
   // Any war-generators.
@@ -315,6 +314,9 @@ public class WebApp extends ServletContextImpl
       _appLocal.set(this, _classLoader);
 
       setParent(controller.getContainer());
+
+      Vfs.setPwd(_appDir, _classLoader);
+      WorkDir.setLocalWorkDir(_appDir.lookup("WEB-INF/work"), _classLoader);
       
       // map.put("app", _appVar);
 
@@ -381,12 +383,6 @@ public class WebApp extends ServletContextImpl
 
     if (parent == null)
       return;
-
-    if (! _isAppDirSet) {
-      setAppDir(parent.getDocumentDirectory());
-      Vfs.setPwd(parent.getDocumentDirectory(), _classLoader);
-      _isAppDirSet = false;
-    }
   }
 
   /**
@@ -462,11 +458,6 @@ public class WebApp extends ServletContextImpl
       id = id.substring(0, id.length() - 1);
 
     setContextPath(id);
-
-    if (! _isAppDirSet && _parent != null) {
-      setAppDir(_parent.getDocumentDirectory().lookup("./" + id));
-      _isAppDirSet = false;
-    }
   }
 
   /**

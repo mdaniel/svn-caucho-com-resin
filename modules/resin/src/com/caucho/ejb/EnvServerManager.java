@@ -121,6 +121,7 @@ public class EnvServerManager implements EnvironmentListener
 
       _classLoader = (EnvironmentClassLoader) Thread.currentThread().getContextClassLoader();
       _workPath = WorkDir.getLocalWorkDir(_classLoader).lookup("ejb");
+      
       _classLoader.addLoader(new SimpleLoader(_workPath));
 
       try {
@@ -437,8 +438,6 @@ public class EnvServerManager implements EnvironmentListener
   {
     for (AbstractServer server : _serverMap.values()) {
       ArrayList<Class> apiList = server.getLocalApiList();
-
-      System.out.println("LBI: " + type + " " + apiList + " " + server);
 
       if (apiList != null) {
 	for (int i = apiList.size() - 1; i >= 0; i--) {

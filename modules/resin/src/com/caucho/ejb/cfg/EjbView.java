@@ -155,8 +155,8 @@ public class EjbView {
       
       String name = method.getName();
 
-      if (JClass.OBJECT.getMethod(name, method.getParameterTypes()) != null &&
-	  ! name.equals("toString")) {
+      if (JClass.OBJECT.getMethod(name, method.getParameterTypes()) != null
+	  && ! name.equals("toString")) {
       }
       else if (name.startsWith("ejb"))
 	ejbMethod = introspectEJBMethod(method);
@@ -240,19 +240,19 @@ public class EjbView {
     throws ConfigException
   {
     if (! implMethod.isPublic()) {
-      throw error(L.l("{0}: `{1}' must be public.  Business method implementations must be public.",
+      throw error(L.l("{0}: '{1}' must be public.  Business method implementations must be public.",
                       implMethod.getDeclaringClass().getName(),
                       getFullMethodName(implMethod)));
     }
     
     if (implMethod.isStatic()) {
-      throw error(L.l("{0}: `{1}' must not be static.  Business method implementations must not be static.",
+      throw error(L.l("{0}: '{1}' must not be static.  Business method implementations must not be static.",
                       implMethod.getDeclaringClass().getName(),
                       getFullMethodName(implMethod)));
     }
     
     if (implMethod.isAbstract()) {
-      throw error(L.l("{0}: `{1}' must not be abstract.  Business methods must be implemented.",
+      throw error(L.l("{0}: '{1}' must not be abstract.  Business methods must be implemented.",
                       implMethod.getDeclaringClass().getName(),
                       getFullMethodName(implMethod)));
     }
@@ -295,7 +295,7 @@ public class EjbView {
 					       String expectedName,
 					       JMethod matchMethod)
   {
-    return error(L.l("{0}: missing `{1}' method needed to match {2}.{3}",
+    return error(L.l("{0}: missing '{1}' method needed to match {2}.{3}",
 		     expectedClass.getName(),
 		     getFullMethodName(expectedName,
 				       matchMethod.getParameterTypes()),

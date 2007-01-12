@@ -324,6 +324,7 @@ public class AmberEntityHome {
     if (item == null)
       return null;
 
+    // XXX: why isn't this thrown?
     // throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
 
     return item.copy(aConn);

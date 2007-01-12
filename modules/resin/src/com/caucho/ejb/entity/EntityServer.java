@@ -614,7 +614,7 @@ public class EntityServer extends AbstractServer {
     try {
       if (cxt == null) {
 	EntityItem amberItem = null;
-	
+
 	if (_isCMP) {
 	  AmberConnection aConn;
 	  aConn = _amberEntityHome.getManager().getCacheConnection();
@@ -638,6 +638,11 @@ public class EntityServer extends AbstractServer {
 	    throw exn;
 	  } finally {
 	    aConn.freeConnection();
+	  }
+
+	  if (amberItem == null) {
+	    throw new ObjectNotFoundException(L.l("'{0}' is an unknown entity.",
+						  getEJBName() + "[" + key + "]"));
 	  }
 	}
 

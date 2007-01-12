@@ -641,7 +641,8 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Configure initialization.
    */
-  public void introspect()
+  @Override
+  public void initIntrospect()
     throws ConfigException
   {
     if (isCMP()) {
@@ -1020,6 +1021,7 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Creates the views.
    */
+  @Override
   protected EjbHomeView createHomeView(JClass homeClass, String prefix)
     throws ConfigException
   {
@@ -1029,12 +1031,11 @@ public class EjbEntityBean extends EjbBean {
   /**
    * Creates the views.
    */
-  protected EjbObjectView createObjectView(JClass apiClass, String prefix)
+  @Override
+  protected EjbObjectView createObjectView(ArrayList<JClass> apiList,
+					   String prefix)
     throws ConfigException
   {
-    ArrayList<JClass> apiList = new ArrayList<JClass>();
-    apiList.add(apiClass);
-    
     if (isCMP())
       return new EjbCmpView(this, apiList, prefix);
     else

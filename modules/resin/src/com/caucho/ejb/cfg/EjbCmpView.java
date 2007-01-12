@@ -51,11 +51,11 @@ public class EjbCmpView extends EjbEntityView {
    * Creates a new entity bean configuration.
    */
   public EjbCmpView(EjbEntityBean bean,
-		    ArrayList<JClass> apiClass,
+		    ArrayList<JClass> apiList,
 		    String prefix)
     throws ConfigException
   {
-    super(bean, apiClass, prefix);
+    super(bean, apiList, prefix);
 
     _entityBean = bean;
   }
@@ -63,6 +63,7 @@ public class EjbCmpView extends EjbEntityView {
   /**
    * Introspects an ejb method.
    */
+  @Override
   protected EjbMethod introspectEJBMethod(JMethod method)
     throws ConfigException
   {
@@ -81,6 +82,7 @@ public class EjbCmpView extends EjbEntityView {
   /**
    * Creates a new business method.
    */
+  @Override
   protected EjbMethod createBusinessMethod(JMethod apiMethod,
 					   JMethod implMethod)
     throws ConfigException
@@ -88,9 +90,9 @@ public class EjbCmpView extends EjbEntityView {
     String methodName = implMethod.getName();
     JClass []paramTypes = implMethod.getParameterTypes();
 
-    if (methodName.startsWith("get") &&
-	methodName.length() > 3 &&
-	paramTypes.length == 0) {
+    if (methodName.startsWith("get")
+	&& methodName.length() > 3
+	&& paramTypes.length == 0) {
       String fieldName = toFieldName(methodName.substring(3));
 
       CmpField field = _entityBean.getCmpField(fieldName);
@@ -200,7 +202,6 @@ public class EjbCmpView extends EjbEntityView {
 				      getFullMethodName(implMethod)));
     }
       
-
     return super.createBusinessMethod(apiMethod, implMethod);
   }
 

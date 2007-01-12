@@ -285,7 +285,8 @@ abstract public class RelatedType extends AbstractStatefulType {
    */
   public boolean isAbstractClass()
   {
-    return getBeanClass().isAbstract();
+    // ejb/0600 - EJB 2.1 are not abstract in this sense
+    return getBeanClass().isAbstract() && _proxyClass == null;
   }
 
   /**
