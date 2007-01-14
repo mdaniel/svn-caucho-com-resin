@@ -46,6 +46,7 @@ import javax.servlet.jsp.tagext.*;
  */
 public class FacesSelectItemTag extends UIComponentELTag
 {
+  private ValueExpression _itemDisabled;
   private ValueExpression _itemLabel;
   private ValueExpression _itemValue;
   private String _id;
@@ -80,6 +81,11 @@ public class FacesSelectItemTag extends UIComponentELTag
     _itemValue = expr;
   }
   
+  public void setItemDisabled(ValueExpression expr)
+  {
+    _itemDisabled = expr;
+  }
+  
   /**
    * Sets the overridden properties of the tag
    */
@@ -87,6 +93,9 @@ public class FacesSelectItemTag extends UIComponentELTag
   protected void setProperties(UIComponent component)
   {
     super.setProperties(component);
+
+    if (_itemDisabled != null)
+      component.setValueExpression("itemDisabled", _itemDisabled);
 
     if (_itemLabel != null)
       component.setValueExpression("itemLabel", _itemLabel);

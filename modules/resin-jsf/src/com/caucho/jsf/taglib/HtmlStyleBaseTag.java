@@ -176,6 +176,22 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("disabled", value);
   }
 
+  public void setDisabledClass(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("disabledClass", value);
+  }
+
+  public void setEnabledClass(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("enabledClass", value);
+  }
+
   public void setEnctype(ValueExpression value)
   {
     if (_map == null)
@@ -230,6 +246,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("lang", value);
+  }
+
+  public void setLayout(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("layout", value);
   }
 
   public void setMaxlength(ValueExpression value)

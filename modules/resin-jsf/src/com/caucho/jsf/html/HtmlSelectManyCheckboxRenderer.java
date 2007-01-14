@@ -67,10 +67,13 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
     String id = component.getId();
 
     String accesskey;
+    int border;
     String dir;
     boolean disabled;
-    String image;
+    String disabledClass;
+    String enabledClass;
     String lang;
+    String layout;
     
     String onblur;
     String onchange;
@@ -96,15 +99,19 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
     String tabindex;
     String title;
     Object value;
-    
+
     if (component instanceof HtmlSelectManyCheckbox) {
       HtmlSelectManyCheckbox htmlComponent
 	= (HtmlSelectManyCheckbox) component;
 
       accesskey = htmlComponent.getAccesskey();
+      border = htmlComponent.getBorder();
       dir = htmlComponent.getDir();
       disabled = htmlComponent.isDisabled();
+      disabledClass = htmlComponent.getDisabledClass();
+      enabledClass = htmlComponent.getDisabledClass();
       lang = htmlComponent.getLang();
+      layout = htmlComponent.getLayout();
       
       onblur = htmlComponent.getOnblur();
       onchange = htmlComponent.getOnchange();
@@ -136,10 +143,13 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       Map<String,Object> attrMap = component.getAttributes();
     
       accesskey = (String) attrMap.get("accesskey");
+      border = (Integer) attrMap.get("border");
       dir = (String) attrMap.get("dir");
       disabled = (Boolean) attrMap.get("disabled");
-      image = (String) attrMap.get("image");
+      disabledClass = (String) attrMap.get("disabledClass");
+      enabledClass = (String) attrMap.get("enabledClass");
       lang = (String) attrMap.get("lang");
+      layout = (String) attrMap.get("layout");
       
       onblur = (String) attrMap.get("onblur");
       onchange = (String) attrMap.get("onchange");
@@ -168,23 +178,71 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       value = attrMap.get("value");
     }
 
-    out.startElement("input", component);
+    UIViewRoot viewRoot = context.getViewRoot();
     
-    out.writeAttribute("type", "checkbox", "type");
-      
-    out.writeAttribute("name", component.getClientId(context), "name");
+    out.startElement("table", component);
+
+    if (border > 0)
+      out.writeAttribute("border", border, "border");
+
+    if (style != null)
+      out.writeAttribute("style", style, "style");
+
+    if (styleClass != null)
+      out.writeAttribute("class", styleClass, "class");
+
+    String clientId = component.getClientId(context);
+    out.writeAttribute("name", clientId, "name");
     
     if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
-      out.writeAttribute("id", component.getClientId(context), "id");
+      out.writeAttribute("id", clientId, "id");
+
+    if (disabled)
+      out.writeAttribute("disabled", "disabled", "disabled");
+
+    if (! "pageDirection".equals(layout)) {
+      out.startElement("tr", component);
+    }
+
+    int childCount = component.getChildCount();
+    for (int i = 0; i < childCount; i++) {
+      UIComponent child = component.getChildren().get(i);
+
+      String childId = clientId + ":" + i;
+	
+      if ("pageDirection".equals(layout)) {
+	out.startElement("tr", child);
+      }
+      
+      out.startElement("td", child);
+
+      if (child instanceof UISelectItem) {
+	UISelectItem selectItem = (UISelectItem) child;
+
+	out.startElement("input", child);
+	out.writeAttribute("id", childId, "id");
+	out.writeAttribute("name", child.getClientId(context), "name");
+	out.writeAttribute("type", "checkbox", "type");
+
+	if (selectItem.isItemDisabled()) {
+	  out.writeAttribute("disabled", "disabled", "disabled");
+
+	  if (disabledClass != null)
+	    out.writeAttribute("class", disabledClass, "disabledClass");
+	}
+	else {
+	  if (enabledClass != null)
+	    out.writeAttribute("class", enabledClass, "enabledClass");
+	}
+
+	if (selectItem.getItemValue().equals(value))
+	  out.writeAttribute("checked", "checked", "value");
 
     if (accesskey != null)
       out.writeAttribute("accesskey", accesskey, "accesskey");
 
     if (dir != null)
       out.writeAttribute("dir", dir, "dir");
-
-    if (disabled)
-      out.writeAttribute("disabled", "disabled", "disabled");
 
     if (lang != null)
       out.writeAttribute("lang", lang, "lang");
@@ -234,22 +292,32 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
     if (readonly)
       out.writeAttribute("readonly", "readonly", "readonly");
 
-    if (style != null)
-      out.writeAttribute("style", style, "style");
-
-    if (styleClass != null)
-      out.writeAttribute("class", styleClass, "class");
-
     if (tabindex != null)
       out.writeAttribute("tabindex", tabindex, "tabindex");
 
     if (title != null)
       out.writeAttribute("title", title, "title");
+      
+	out.endElement("input");
 
-    if ("true".equals(String.valueOf(value)))
-      out.writeAttribute("checked", "checked", "checked");
+	out.startElement("label", child);
+	out.writeAttribute("for", childId, "for");
+	out.writeText(selectItem.getItemLabel(), "itemLabel");
+	out.endElement("label");
+      }
+      
+      out.endElement("td");
 
-    out.endElement("input");
+      if ("pageDirection".equals(layout)) {
+	out.endElement("tr");
+      }
+    }
+
+    if (! "pageDirection".equals(layout)) {
+      out.endElement("tr");
+    }
+
+    out.endElement("table");
   }
 
   /**
