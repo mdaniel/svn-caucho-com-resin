@@ -38,6 +38,7 @@ import javax.faces.context.*;
 import javax.faces.render.*;
 
 import javax.servlet.*;
+import javax.servlet.http.*;
 
 public class JspViewHandler extends ViewHandler
 {
@@ -115,8 +116,22 @@ public class JspViewHandler extends ViewHandler
   {
     if (context == null || viewId == null)
       throw new NullPointerException();
+    
+    ExternalContext extContext = context.getExternalContext();
 
-    return viewId;
+    HttpServletRequest request
+      = (HttpServletRequest) extContext.getRequest();
+
+    String contextPath = request.getContextPath();
+    String servletPath = request.getServletPath();
+    String pathInfo = request.getPathInfo();
+
+    if (pathInfo == null)
+      return contextPath + servletPath;
+    else if (servletPath == null)
+      return contextPath + pathInfo;
+    else
+      return contextPath + servletPath + pathInfo;
   }
 
   public String getResourceURL(FacesContext context,
@@ -131,7 +146,6 @@ public class JspViewHandler extends ViewHandler
   {
     String viewId = viewToRender.getViewId();
 
-    System.out.println("VIEW-ID: " + viewId);
     ExternalContext extContext = context.getExternalContext();
 
     ((javax.servlet.http.HttpServletResponse) extContext.getResponse()).setContentType("text/html");

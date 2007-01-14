@@ -52,6 +52,21 @@ class HtmlInputTextRenderer extends Renderer
   {
     return true;
   }
+
+  /**
+   * Decodes the data from the form.
+   */
+  @Override
+  public void decode(FacesContext context, UIComponent component)
+  {
+    String clientId = component.getClientId(context);
+
+    ExternalContext ext = context.getExternalContext();
+    Map<String,String> paramMap = ext.getRequestParameterMap();
+
+    System.out.println("CIE: " + clientId + " " + paramMap);
+  }
+  
   /**
    * Renders the open tag for the text.
    */

@@ -143,8 +143,6 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     _parentUIComponentTag
       = getParentUIComponentClassicTagBase(pageContext);
 
-    _component = null;
-    
     _component = findComponent(_facesContext);
 
     pageContext.setAttribute("caucho.jsf.parent", this);
@@ -172,8 +170,12 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   {
     UIComponent verbatim = createVerbatimComponentFromBodyContent();
 
-    if (verbatim != null && _component != null)
-      _component.getChildren().add(verbatim);
+    if (verbatim != null) {
+      UIComponent component = getComponentInstance();
+
+      if (component != null)
+	component.getChildren().add(verbatim);
+    }
 
     return getDoAfterBodyValue();
   }

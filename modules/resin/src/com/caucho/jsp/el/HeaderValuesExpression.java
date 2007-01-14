@@ -59,7 +59,7 @@ public class HeaderValuesExpression extends AbstractValueExpression
 
     ServletELContext servletEnv = (ServletELContext) env;
     
-    return servletEnv.getHeaderValues(servletEnv);
+    return servletEnv.getHeaderValues();
   }
 
   public String getExpressionString()

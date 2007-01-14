@@ -321,6 +321,7 @@ public abstract class UIComponentBase extends UIComponent
 	continue;
 
       base = findComponent(base, v);
+      System.out.println("FIND2: " + v + " " + base);
 
       if (i + 1 == values.length)
 	return base;
@@ -335,6 +336,8 @@ public abstract class UIComponentBase extends UIComponent
 
   private static UIComponent findComponent(UIComponent comp, String id)
   {
+    System.out.println("FIND: " + id + " " + comp + " " + comp.getId());
+    
     if (id.equals(comp.getId()))
       return comp;
     
@@ -358,9 +361,11 @@ public abstract class UIComponentBase extends UIComponent
     */
 
     Iterator iter = comp.getFacetsAndChildren();
+    System.out.println("COMP: " + comp + " " + comp.getChildCount());
     while (iter.hasNext()) {
       UIComponent child = (UIComponent) iter.next();
 
+      System.out.println("CHILD: " + child + " " + child.getId());
       if (id.equals(child.getId()))
 	return child;
       
@@ -794,9 +799,9 @@ public abstract class UIComponentBase extends UIComponent
   {
     private ArrayList<UIComponent> _list = new ArrayList<UIComponent>();
     
-    private UIComponent _parent;
+    private UIComponentBase _parent;
 
-    ComponentList(UIComponent parent)
+    ComponentList(UIComponentBase parent)
     {
       _parent = parent;
     }
@@ -807,6 +812,8 @@ public abstract class UIComponentBase extends UIComponent
       UIComponent child = (UIComponent) o;
 
       setParent(child);
+
+      _parent._facetsAndChildren = null;
 
       return _list.add(o);
     }
@@ -819,6 +826,8 @@ public abstract class UIComponentBase extends UIComponent
       _list.add(i, o);
       
       setParent(child);
+      
+      _parent._facetsAndChildren = null;
     }
 
     @Override
@@ -834,6 +843,8 @@ public abstract class UIComponentBase extends UIComponent
 	isChange = true;
       }
 
+      _parent._facetsAndChildren = null;
+      
       return isChange;
     }
 
@@ -851,6 +862,8 @@ public abstract class UIComponentBase extends UIComponent
 
       _list.add(i, child);
 
+      _parent._facetsAndChildren = null;
+      
       return old;
     }
 
@@ -865,6 +878,8 @@ public abstract class UIComponentBase extends UIComponent
 	old.setParent(null);
       }
 
+      _parent._facetsAndChildren = null;
+      
       return old;
     }
 
@@ -876,6 +891,8 @@ public abstract class UIComponentBase extends UIComponent
       if (_list.remove(comp)) {
 	comp.setParent(null);
 
+	_parent._facetsAndChildren = null;
+      
 	return true;
       }
       else

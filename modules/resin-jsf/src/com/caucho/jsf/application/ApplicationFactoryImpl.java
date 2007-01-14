@@ -34,6 +34,14 @@ public class ApplicationFactoryImpl extends ApplicationFactory
 {
   private Application _application;
 
+  public ApplicationFactoryImpl()
+  {
+  }
+
+  public ApplicationFactoryImpl(ApplicationFactory previous)
+  {
+  }
+
   public Application getApplication()
   {
     if (_application == null) {

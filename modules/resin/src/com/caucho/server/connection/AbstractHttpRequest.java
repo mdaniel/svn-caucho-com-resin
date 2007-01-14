@@ -1487,10 +1487,10 @@ public abstract class AbstractHttpRequest
    */
   protected final SessionManager getSessionManager()
   {
-    WebApp app = getWebApp();
+    WebApp webApp = getWebApp();
 
-    if (app != null)
-      return app.getSessionManager();
+    if (webApp != null)
+      return webApp.getSessionManager();
     else
       return null;
   }
