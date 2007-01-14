@@ -28,54 +28,49 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.ELParser;
-import com.caucho.el.Expr;
+import com.caucho.el.*;
+import com.caucho.jsp.PageContextImpl;
+import com.caucho.vfs.WriteStream;
 
-import javax.el.ELContext;
+import javax.el.*;
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.PageContext;
+import java.io.IOException;
+import java.util.*;
 
-/**
- * Parses the expression.
- */
-public class JspELParser extends ELParser {
-  /**
-   * Creates a new JspELParser
-   */
-  public JspELParser(ELContext env, String string)
+public class ApplicationScopeExpression extends AbstractValueExpression
+  implements FieldGenerator
+{
+  public static final ValueExpression EXPR
+    = new ApplicationScopeExpression();
+
+  public ValueExpression createField(String field)
   {
-    super(env, string);
+    return new ApplicationFieldExpression(field);
   }
-
-  protected ELParser create(String string)
-  {
-    ELParser parser = new JspELParser(_elContext, string);
-
-    copyTo(parser);
-
-    return parser;
-  }
-
+  
   /**
-   * Creates the implicit object for the name.
+   * Evaluate the expr as an object.
+   *
+   * @param env the page context
    */
-  protected Expr createImplicitObjectExpr(String name)
+  @Override
+  public Object getValue(ELContext env)
+    throws ELException
   {
-    /*
-    if (name.equals("pageContext") ||
-        name.equals("applicationScope") ||
-        name.equals("sessionScope") ||
-        name.equals("requestScope") ||
-        name.equals("pageScope") ||
-        name.equals("param") ||
-        name.equals("paramValues") ||
-        name.equals("header") ||
-        name.equals("headerValues") ||
-        name.equals("cookie") ||
-        name.equals("initParam"))
-      return new ImplicitObjectExpr(name);
-    else
-      return null;
-    */
+    if (! (env instanceof ServletELContext))
+      return env.getELResolver().getValue(env, null, "applicationScope");
+
+    env.setPropertyResolved(true);
+    ServletELContext servletEnv = (ServletELContext) env;
     
-    return null;
+    return servletEnv.getApplicationScope();
+  }
+
+  public String getExpressionString()
+  {
+    return "applicationScope";
   }
 }

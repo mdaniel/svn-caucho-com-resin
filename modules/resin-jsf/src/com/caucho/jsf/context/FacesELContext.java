@@ -30,15 +30,22 @@
 package com.caucho.jsf.context;
 
 import javax.el.*;
+import javax.faces.context.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
 import com.caucho.util.*;
+import com.caucho.jsp.el.*;
+import com.caucho.jsf.el.*;
 
-public class FacesELContext extends ELContext
+public class FacesELContext extends ServletELContext
 {
+  private FacesContext _facesContext;
   private ELResolver _elResolver;
   
-  public FacesELContext(ELResolver elResolver)
+  public FacesELContext(FacesContext facesContext, ELResolver elResolver)
   {
+    _facesContext = facesContext;
     _elResolver = elResolver;
   }
     
@@ -54,6 +61,33 @@ public class FacesELContext extends ELContext
 
   public javax.el.VariableMapper getVariableMapper()
   {
-    return null;
+    return JsfImplicitVariableMapper.MAPPER;
+  }
+
+  // ServletELContext
+
+  public Object getRequestScope()
+  {
+    return _facesContext.getExternalContext().getRequestMap();
+  }
+
+  public Object getSessionScope()
+  {
+    return _facesContext.getExternalContext().getSessionMap();
+  }
+
+  public Object getApplicationScope()
+  {
+    return _facesContext.getExternalContext().getApplicationMap();
+  }
+
+  public ServletContext getApplication()
+  {
+    return (ServletContext) _facesContext.getExternalContext().getContext();
+  }
+
+  public HttpServletRequest getRequest()
+  {
+    return (HttpServletRequest) _facesContext.getExternalContext().getRequest();
   }
 }

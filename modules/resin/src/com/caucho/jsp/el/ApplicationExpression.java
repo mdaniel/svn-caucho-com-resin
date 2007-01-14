@@ -28,54 +28,44 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.ELParser;
-import com.caucho.el.Expr;
+import com.caucho.el.*;
+import com.caucho.jsp.PageContextImpl;
+import com.caucho.vfs.WriteStream;
 
-import javax.el.ELContext;
+import javax.el.*;
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.PageContext;
+import java.io.IOException;
+import java.util.*;
 
-/**
- * Parses the expression.
- */
-public class JspELParser extends ELParser {
+public class ApplicationExpression extends AbstractValueExpression
+{
+  public static final ValueExpression EXPR
+    = new ApplicationExpression();
+  
   /**
-   * Creates a new JspELParser
+   * Evaluate the expr as an object.
+   *
+   * @param env the page context
    */
-  public JspELParser(ELContext env, String string)
+  @Override
+  public Object getValue(ELContext env)
+    throws ELException
   {
-    super(env, string);
-  }
+    if (! (env instanceof ServletELContext))
+      return env.getELResolver().getValue(env, null, "application");
 
-  protected ELParser create(String string)
-  {
-    ELParser parser = new JspELParser(_elContext, string);
+    ServletELContext servletEnv = (ServletELContext) env;
 
-    copyTo(parser);
-
-    return parser;
-  }
-
-  /**
-   * Creates the implicit object for the name.
-   */
-  protected Expr createImplicitObjectExpr(String name)
-  {
-    /*
-    if (name.equals("pageContext") ||
-        name.equals("applicationScope") ||
-        name.equals("sessionScope") ||
-        name.equals("requestScope") ||
-        name.equals("pageScope") ||
-        name.equals("param") ||
-        name.equals("paramValues") ||
-        name.equals("header") ||
-        name.equals("headerValues") ||
-        name.equals("cookie") ||
-        name.equals("initParam"))
-      return new ImplicitObjectExpr(name);
-    else
-      return null;
-    */
+    env.setPropertyResolved(true);
     
-    return null;
+    return servletEnv.getApplication();
+  }
+
+  public String getExpressionString()
+  {
+    return "application";
   }
 }

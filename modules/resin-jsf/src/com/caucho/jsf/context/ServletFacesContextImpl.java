@@ -339,7 +339,7 @@ public class ServletFacesContextImpl extends FacesContext
       throw new IllegalStateException(getClass().getName() + " is closed");
     
     if (_elContext == null) {
-      _elContext = new FacesELContext(getApplication().getELResolver());
+      _elContext = new FacesELContext(this, getApplication().getELResolver());
       _elContext.putContext(FacesContext.class, this);
     }
 

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -32,50 +33,15 @@ import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 
 import javax.el.ELContext;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.jsp.*;
+import java.util.*;
 
 /**
  * Parses the expression.
  */
-public class JspELParser extends ELParser {
-  /**
-   * Creates a new JspELParser
-   */
-  public JspELParser(ELContext env, String string)
-  {
-    super(env, string);
-  }
-
-  protected ELParser create(String string)
-  {
-    ELParser parser = new JspELParser(_elContext, string);
-
-    copyTo(parser);
-
-    return parser;
-  }
-
-  /**
-   * Creates the implicit object for the name.
-   */
-  protected Expr createImplicitObjectExpr(String name)
-  {
-    /*
-    if (name.equals("pageContext") ||
-        name.equals("applicationScope") ||
-        name.equals("sessionScope") ||
-        name.equals("requestScope") ||
-        name.equals("pageScope") ||
-        name.equals("param") ||
-        name.equals("paramValues") ||
-        name.equals("header") ||
-        name.equals("headerValues") ||
-        name.equals("cookie") ||
-        name.equals("initParam"))
-      return new ImplicitObjectExpr(name);
-    else
-      return null;
-    */
-    
-    return null;
-  }
+abstract public class PageContextELContext extends ServletELContext
+{
+  abstract public PageContext getPageContext();
 }

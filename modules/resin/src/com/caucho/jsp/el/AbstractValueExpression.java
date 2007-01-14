@@ -28,54 +28,54 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.ELParser;
-import com.caucho.el.Expr;
+import javax.el.*;
 
-import javax.el.ELContext;
-
-/**
- * Parses the expression.
- */
-public class JspELParser extends ELParser {
-  /**
-   * Creates a new JspELParser
-   */
-  public JspELParser(ELContext env, String string)
+abstract public class AbstractValueExpression extends ValueExpression
+{
+  public boolean isReadOnly(ELContext env)
   {
-    super(env, string);
+    env.setPropertyResolved(true);
+    
+    return true;
   }
 
-  protected ELParser create(String string)
+  public boolean isLiteralText()
   {
-    ELParser parser = new JspELParser(_elContext, string);
-
-    copyTo(parser);
-
-    return parser;
+    return false;
   }
 
-  /**
-   * Creates the implicit object for the name.
-   */
-  protected Expr createImplicitObjectExpr(String name)
+  public Class getType(ELContext env)
   {
-    /*
-    if (name.equals("pageContext") ||
-        name.equals("applicationScope") ||
-        name.equals("sessionScope") ||
-        name.equals("requestScope") ||
-        name.equals("pageScope") ||
-        name.equals("param") ||
-        name.equals("paramValues") ||
-        name.equals("header") ||
-        name.equals("headerValues") ||
-        name.equals("cookie") ||
-        name.equals("initParam"))
-      return new ImplicitObjectExpr(name);
+    Object value = getValue(env);
+
+    if (env.isPropertyResolved())
+      return value.getClass();
     else
       return null;
-    */
-    
-    return null;
+  }
+
+  public Class getExpectedType()
+  {
+    return Object.class;
+  }
+  
+  public void setValue(ELContext env, Object value)
+  {
+    throw new PropertyNotWritableException(getClass().getName());
+  }
+  
+  public int hashCode()
+  {
+    return getExpressionString().hashCode();
+  }
+  
+  public boolean equals(Object o)
+  {
+    return (this == o);
+  }
+
+  public String toString()
+  {
+    return getExpressionString();
   }
 }

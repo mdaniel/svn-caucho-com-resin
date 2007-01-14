@@ -30,6 +30,7 @@
 package com.caucho.jsf.el;
 
 import com.caucho.el.AbstractVariableResolver;
+import com.caucho.jsp.el.*;
 import com.caucho.jsf.cfg.*;
 
 import javax.el.*;
@@ -166,11 +167,36 @@ public class FacesContextELResolver extends CompositeELResolver {
   }
   
   @Override
+  public Class getType(ELContext env, Object base, Object property)
+  {
+    if (base != null) {
+      if (base instanceof ResourceBundle) {
+	env.setPropertyResolved(true);
+
+	return ResourceBundle.class;
+      }
+    }
+    else if (base == null && property instanceof String) {
+      ImplicitObjectExpr expr = ImplicitObjectExpr.create((String) property);
+
+      if (expr != null) {
+	env.setPropertyResolved(true);
+
+	return null;
+      }
+    }
+
+    return super.getType(env, base, property);
+  }
+  
+  @Override
   public Object getValue(ELContext env, Object base, Object property)
   {
     env.setPropertyResolved(false);
 
-    if (base == null && property instanceof String) {
+    if (base == null
+	&& ! (env instanceof ServletELContext)
+	&& property instanceof String) {
       ImplicitObjectExpr expr = ImplicitObjectExpr.create((String) property);
 
       if (expr != null) {
@@ -194,6 +220,8 @@ public class FacesContextELResolver extends CompositeELResolver {
 	return _listResolver.getValue(env, base, property);
       else if (base.getClass().isArray())
 	return _arrayResolver.getValue(env, base, property);
+      else if (base instanceof ResourceBundle)
+	return _bundleResolver.getValue(env, base, property);
       else
 	return _beanResolver.getValue(env, base, property);
     }
@@ -242,6 +270,28 @@ public class FacesContextELResolver extends CompositeELResolver {
   {
     env.setPropertyResolved(false);
 
+    if (base != null) {
+      if (base instanceof List) {
+	env.setPropertyResolved(true);
+
+	return false;
+      }
+      else if (base instanceof ResourceBundle) {
+	env.setPropertyResolved(true);
+
+	return true;
+      }
+    }
+    else if (base == null && property instanceof String) {
+      ImplicitObjectExpr expr = ImplicitObjectExpr.create((String) property);
+
+      if (expr != null) {
+	env.setPropertyResolved(true);
+
+	return true;
+      }
+    }
+
     for (int i = 0; i < _customResolvers.length; i++) {
       boolean value = _customResolvers[i].isReadOnly(env, base, property);
 
@@ -268,15 +318,22 @@ public class FacesContextELResolver extends CompositeELResolver {
 	_listResolver.setValue(env, base, property, value);
       else if (base.getClass().isArray())
 	_arrayResolver.setValue(env, base, property, value);
+      else if (base instanceof ResourceBundle)
+	_bundleResolver.setValue(env, base, property, value);
       else
 	_beanResolver.setValue(env, base, property, value);
     }
     else if (property instanceof String) {
+      String key = (String) property;
+      ImplicitObjectExpr expr = ImplicitObjectExpr.create(key);
+
+      if (expr != null)
+	throw new PropertyNotWritableException(key);
+      
       FacesContext facesContext
 	= (FacesContext) env.getContext(FacesContext.class);
       ExternalContext ec = facesContext.getExternalContext();
 
-      String key = (String) property;
       
       Object oldValue = ec.getRequestMap().get(key);
 

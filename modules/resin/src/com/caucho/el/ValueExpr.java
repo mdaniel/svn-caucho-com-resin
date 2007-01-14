@@ -62,6 +62,15 @@ public class ValueExpr extends Expr {
   @Override
   public Expr createField(String field)
   {
+    if (_valExpr instanceof FieldGenerator) {
+      FieldGenerator gen = (FieldGenerator) _valExpr;
+      
+      ValueExpression fieldExpr = gen.createField(field);
+
+      if (fieldExpr != null)
+	return new ValueExpr(field, fieldExpr);
+    }
+    
     Expr arrayExpr = createField(new StringLiteral(field));
 
     return new PathExpr(arrayExpr, _name + '.' + field);

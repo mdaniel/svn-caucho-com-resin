@@ -41,6 +41,8 @@ import javax.faces.convert.*;
 import javax.faces.el.*;
 import javax.faces.event.*;
 import javax.faces.validator.*;
+import javax.servlet.*;
+import javax.servlet.jsp.*;
 
 import com.caucho.config.*;
 import com.caucho.util.*;
@@ -48,6 +50,7 @@ import com.caucho.jsf.cfg.*;
 import com.caucho.jsf.el.*;
 import com.caucho.jsf.el.JsfExpressionFactoryImpl;
 import com.caucho.jsf.context.*;
+import com.caucho.server.webapp.WebApp;
 
 public class ApplicationImpl extends Application
 {
@@ -97,19 +100,30 @@ public class ApplicationImpl extends Application
 
   public ApplicationImpl()
   {
-    _jsfExpressionFactory = new JsfExpressionFactoryImpl();
+    WebApp webApp = WebApp.getLocal();
+    
+    JspFactory jspFactory = JspFactory.getDefaultFactory();
 
+    JspApplicationContext appContext
+      = jspFactory.getJspApplicationContext(webApp);
+
+    _jsfExpressionFactory = appContext.getExpressionFactory();
+    appContext.addELResolver(FacesJspELResolver.RESOLVER);
+    
     ELResolver []customResolvers = new ELResolver[0];
     _elResolver = new FacesContextELResolver(customResolvers);
 
     addComponent(UIInput.COMPONENT_TYPE,
 		 "javax.faces.component.UIInput");
 
-    addComponent(UIViewRoot.COMPONENT_TYPE,
-		 "javax.faces.component.UIViewRoot");
-
     addComponent(UIOutput.COMPONENT_TYPE,
 		 "javax.faces.component.UIOutput");
+
+    addComponent(UISelectItem.COMPONENT_TYPE,
+		 "javax.faces.component.UISelectItem");
+
+    addComponent(UIViewRoot.COMPONENT_TYPE,
+		 "javax.faces.component.UIViewRoot");
 
     addComponent(HtmlCommandButton.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlCommandButton");
@@ -582,7 +596,8 @@ public class ApplicationImpl extends Application
     ExpressionFactory factory = getExpressionFactory();
 
     ELResolver elResolver = getELResolver();
-    ELContext elContext = new FacesELContext(getELResolver());
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+    ELContext elContext = new FacesELContext(facesContext, getELResolver());
 
     try {
       MethodExpression expr
@@ -647,7 +662,8 @@ public class ApplicationImpl extends Application
     ExpressionFactory factory = getExpressionFactory();
 
     ELResolver elResolver = getELResolver();
-    ELContext elContext = new FacesELContext(getELResolver());
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+    ELContext elContext = new FacesELContext(facesContext, getELResolver());
 
     ValueExpression expr
       = factory.createValueExpression(elContext, ref, Object.class);

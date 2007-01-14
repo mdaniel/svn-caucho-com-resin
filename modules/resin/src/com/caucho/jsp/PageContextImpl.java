@@ -32,9 +32,7 @@ package com.caucho.jsp;
 import com.caucho.el.EL;
 import com.caucho.el.ExprEnv;
 import com.caucho.jsp.cfg.JspPropertyGroup;
-import com.caucho.jsp.el.ExpressionEvaluatorImpl;
-import com.caucho.jsp.el.JspApplicationContextImpl;
-import com.caucho.jsp.el.PageContextELResolver;
+import com.caucho.jsp.el.*;
 import com.caucho.jstl.JstlPageContext;
 import com.caucho.log.Log;
 import com.caucho.server.connection.AbstractHttpRequest;
@@ -1837,7 +1835,7 @@ public class PageContextImpl extends PageContext
     }
   }
 
-  public class PageELContext extends ELContext {
+  public class PageELContext extends ServletELContext {
     public PageELContext()
     {
       putContext(JspContext.class, PageContextImpl.this);
@@ -1846,6 +1844,32 @@ public class PageContextImpl extends PageContext
     public PageContextImpl getPageContext()
     {
       return PageContextImpl.this;
+    }
+
+    @Override
+    public ServletContext getApplication()
+    {
+      return PageContextImpl.this.getApplication();
+    }
+
+    @Override
+    public Object getApplicationScope()
+    {
+      return new PageContextAttributeMap(PageContextImpl.this,
+					 APPLICATION_SCOPE);
+    }
+
+    @Override
+    public HttpServletRequest getRequest()
+    {
+      return (HttpServletRequest) PageContextImpl.this.getRequest();
+    }
+
+    @Override
+    public Object getRequestScope()
+    {
+      return new PageContextAttributeMap(PageContextImpl.this,
+					 REQUEST_SCOPE);
     }
     
     public ELResolver getELResolver()
@@ -1874,13 +1898,18 @@ public class PageContextImpl extends PageContext
     }
   }
 
-  public class PageVariableMapper extends javax.el.VariableMapper {
+  public class PageVariableMapper extends ImplicitVariableMapper {
     public ValueExpression resolveVariable(String var)
     {
-      Object v = getAttribute(var);
+      ValueExpression expr = super.resolveVariable(var);
 
-      if (v instanceof ValueExpression)
-	return (ValueExpression) v;
+      if (expr != null)
+	return expr;
+
+      Object value = getAttribute(var);
+
+      if (value instanceof ValueExpression)
+	return (ValueExpression) value;
       else
 	return null;
     }

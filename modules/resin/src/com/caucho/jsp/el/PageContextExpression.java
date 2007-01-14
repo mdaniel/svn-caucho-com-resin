@@ -28,54 +28,43 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
+import com.caucho.jsp.PageContextImpl;
+import com.caucho.vfs.WriteStream;
 
-import javax.el.ELContext;
+import javax.el.*;
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.PageContext;
+import java.io.IOException;
+import java.util.*;
 
-/**
- * Parses the expression.
- */
-public class JspELParser extends ELParser {
+public class PageContextExpression extends AbstractValueExpression
+{
+  public static final ValueExpression EXPR
+    = new PageContextExpression();
+  
   /**
-   * Creates a new JspELParser
+   * Evaluate the expr as an object.
+   *
+   * @param env the page context
    */
-  public JspELParser(ELContext env, String string)
+  @Override
+  public Object getValue(ELContext env)
+    throws ELException
   {
-    super(env, string);
-  }
-
-  protected ELParser create(String string)
-  {
-    ELParser parser = new JspELParser(_elContext, string);
-
-    copyTo(parser);
-
-    return parser;
-  }
-
-  /**
-   * Creates the implicit object for the name.
-   */
-  protected Expr createImplicitObjectExpr(String name)
-  {
-    /*
-    if (name.equals("pageContext") ||
-        name.equals("applicationScope") ||
-        name.equals("sessionScope") ||
-        name.equals("requestScope") ||
-        name.equals("pageScope") ||
-        name.equals("param") ||
-        name.equals("paramValues") ||
-        name.equals("header") ||
-        name.equals("headerValues") ||
-        name.equals("cookie") ||
-        name.equals("initParam"))
-      return new ImplicitObjectExpr(name);
-    else
+    if (! (env instanceof PageContextImpl.PageELContext))
       return null;
-    */
     
-    return null;
+    PageContextImpl page
+      = ((PageContextImpl.PageELContext) env).getPageContext();
+    
+    return page;
+  }
+
+  public String getExpressionString()
+  {
+    return "pageContext";
   }
 }
