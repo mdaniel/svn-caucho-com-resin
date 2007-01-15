@@ -36,7 +36,6 @@ import com.caucho.util.Log;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.SessionBean;
-import java.rmi.RemoteException;
 import java.util.logging.Logger;
 
 /**
@@ -108,7 +107,6 @@ abstract public class AbstractSessionServer extends AbstractServer {
    * Returns the EJBHome stub for the container
    */
   public EJBHome getEJBHome()
-    throws RemoteException
   {
     if (_remoteHome == null) {
       try {

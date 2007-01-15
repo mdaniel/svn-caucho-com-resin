@@ -322,10 +322,7 @@ public class EjbSessionBean extends EjbBean {
 
     server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());
-    server.setRemoteName(getRemoteName());
-
-    // XXX: obsolete?
-    server.setJndiName(getJndiName());
+    server.setMappedName(getMappedName());
 
     JClass remoteHome = getRemoteHome();
     if (remoteHome != null)

@@ -487,7 +487,6 @@ public class EntityServer extends AbstractServer {
    * Returns the EJBHome stub for the container
    */
   public EJBHome getEJBHome()
-    throws RemoteException
   {
     return _remoteHomeView;
     /*

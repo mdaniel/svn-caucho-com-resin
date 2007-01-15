@@ -62,10 +62,6 @@ public class JVMRemoteHomeProxy implements ObjectProxy, java.io.Serializable {
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    try {
-      return _server.getEJBHome();
-    } catch (java.rmi.RemoteException e) {
-      throw new RuntimeException(e);
-    }
+    return _server.getEJBHome();
   }
 }

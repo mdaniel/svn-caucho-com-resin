@@ -90,13 +90,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 
   private String _ejbName;
 
-  // The published remote name as used by IIOP, Hessian, and 
+  // The published name as used by IIOP, Hessian, and
   // jndi-remote-prefix/jndi-local-prefix
-  private String _remoteName;
+  private String _mappedName;
   
-  // Overridden remote-name for jndi-remote-prefix
-  private String _jndiName;
-
   private String _location = "";
 
   // these classes are loaded with the parent (configuration) loader, not
@@ -250,39 +247,24 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   }
     
   /**
-   * The remote-name is the remote published name
+   * The mapped-name is the remote published name
    * used by IIOP, Hessian, and jndi-remote-prefix, jndi-local-prefix.
+   * The default is the EJBName.
    */
-  public void setRemoteName(String remoteName)
+  public void setMappedName(String mappedName)
   {
-    _remoteName = remoteName;
+    _mappedName = mappedName;
   }
     
   /**
-   * The remote-name is the remote published name
+   * The mapped-name is the published name
    * used by IIOP, Hessian, and jndi-remote-prefix, jndi-local-prefix.
    */
-  public String getRemoteName()
+  public String getMappedName()
   {
-    return _remoteName;
+    return _mappedName == null ? getEJBName() : _mappedName;
   }
     
-  /**
-   * Sets the jndiName (overrides remote-name for the JNDI prefixes)
-   */
-  public void setJndiName(String jndiName)
-  {
-    _jndiName = jndiName;
-  }
-
-  /**
-   * Sets the jndiName (overrides remote-name for the JNDI prefixes)
-   */
-  public String getJndiName()
-  {
-    return _jndiName;
-  }
-
   /**
    * Returns the kind of bean.
    */

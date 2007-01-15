@@ -68,13 +68,10 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected String _ejbName;
   protected String _moduleName;
-  protected String _serverId;
   protected String _handleServerId;
 
-  // remote published name for IIOP, Hessian, JNDI
-  protected String _remoteName;
-  // override of remote-name (obsolete?)
-  protected String _jndiName;
+  // name for IIOP, Hessian, JNDI
+  protected String _mappedName;
 
   private Context _jndiEnv;
 
@@ -165,86 +162,40 @@ abstract public class AbstractServer implements EnvironmentBean {
   }
 
   /**
-   * Sets the remote name.  Canonical form has leading and trailing
-   * slashes trimmed.
+   * Sets the mapped name, default is to use the EJBName. This is the name for
+   * both JNDI and the protocols such as IIOP and Hessian.
    */
-  public void setRemoteName(String remoteName)
+  public void setMappedName(String mappedName)
   {
-    if (remoteName == null)
+    if (mappedName == null) {
+      _mappedName = null;
       return;
+    }
 
-    while (remoteName.startsWith("/"))
-      remoteName = remoteName.substring(1);
+    while (mappedName.startsWith("/"))
+      mappedName = mappedName.substring(1);
 
-    while (remoteName.endsWith("/"))
-      remoteName = remoteName.substring(0, remoteName.length() - 1);
+    while (mappedName.endsWith("/"))
+      mappedName = mappedName.substring(0, mappedName.length() - 1);
 
-    _remoteName = remoteName;
+
+    _mappedName = mappedName;
   }
 
   /**
-   * Returns the remote name.
+   * Returns the mapped name.
    */
-  public String getRemoteName()
+  public String getMappedName()
   {
-    return _remoteName;
+    return _mappedName == null ? getEJBName() : _mappedName;
   }
 
   /**
-   * Sets the jndi name (overrides remote name for jndi, obsolete?).
-   */
-  public void setJndiName(String jndiName)
-  {
-    if (jndiName == null)
-      return;
-
-    while (jndiName.startsWith("/"))
-      jndiName = jndiName.substring(1);
-
-    while (jndiName.endsWith("/"))
-      jndiName = jndiName.substring(0, jndiName.length() - 1);
-
-
-    _jndiName = jndiName;
-  }
-
-  /**
-   * Returns the jndi name.
-   */
-  public String getJndiName()
-  {
-    return _jndiName;
-  }
-
-  /**
-   * Returns the protocol id, used by implementations of
-   * {@link com.caucho.ejb.protocol.ProtocolContainer} as the identity of the
-   * home.  Always starts with a "/" but does not end with a "/".
+   * The name to use for remoting protocols, such as IIOP and Hessian.
    */
   public String getProtocolId()
   {
-    if (_serverId == null) {
-      String serverId = getRemoteName();
-
-      if (serverId == null)
-	serverId = getJndiName();
-
-      if (serverId == null)
-	serverId = getEJBName();
-
-      if (serverId.startsWith("java:comp/env"))
-        serverId = serverId.substring(13);
-
-      if (! serverId.startsWith("/"))
-        serverId = "/" + serverId;
-
-      while (serverId.endsWith("/"))
-        serverId = serverId.substring(0, serverId.length() - 1);
-
-      _serverId = serverId;
-    }
-
-    return _serverId;
+    return "/" + getMappedName();
   }
 
   /**
@@ -583,7 +534,6 @@ abstract public class AbstractServer implements EnvironmentBean {
    * Returns the EJBHome stub for the container
    */
   public EJBHome getEJBHome()
-    throws RemoteException
   {
     return _remoteHomeView;
   }
@@ -811,8 +761,8 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   public String toString()
   {
-    if (getRemoteName() != null)
-      return getClass().getSimpleName() + "[" + getEJBName() + "," + getRemoteName() + "]";
+    if (getMappedName() != null)
+      return getClass().getSimpleName() + "[" + getEJBName() + "," + getMappedName() + "]";
     else
       return getClass().getSimpleName() + "[" + getEJBName() + "]";
   }

@@ -1053,9 +1053,7 @@ public class EjbEntityBean extends EjbBean {
 
     server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());
-    server.setRemoteName(getRemoteName());
-
-    server.setJndiName(getJndiName());
+    server.setMappedName(getMappedName());
 
     server.setRemoteHomeClass(getRemoteHomeClass());
     server.setRemoteObjectClass(getRemoteClass());

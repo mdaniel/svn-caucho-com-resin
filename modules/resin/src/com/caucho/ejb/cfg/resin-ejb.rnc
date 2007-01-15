@@ -112,8 +112,7 @@ r_ejb-bean = element ejb-bean {
   & r_icon?
   & r_ejb-name
   & r_ejb_env
-  & r_jndi-name?
-  & r_remote-name?
+  & r_mapped-name?
   & r_security-identity?
 }
 
@@ -127,8 +126,7 @@ r_ejb-client-jar =
 
 r_ejb-ref-Link = element ejb-ref {
     r_ejb-ref-name
-
-    & r_jndi-name
+    & r_mapped-name?
   }
 r_ejb_env =
   r_env-entry*
@@ -270,7 +268,7 @@ r_entity = element entity {
 
   r_ejb-name,
 
-  r_jndi-name?,
+  r_mapped-name?,
 
   ((r_home, r_remote?)?,
 
@@ -349,6 +347,10 @@ r_message-destination = element message-destination {
 
   r_deployment-extension*
 }
+
+r_mapped-name =
+  attribute mapped-name { string }
+  | element mapped-name { string }
 
 r_message-destination-link = element message-destination-link { j2ee_class }
 
@@ -526,10 +528,6 @@ r_remote = element remote {
   j2ee_class
 }
 
-r_remote-name =
-  attribute remote-name { string }
-  | element remote-name { string }
-
 r_resource-env-ref = element resource-env-ref { string }
 r_resource-ref = element resource-ref { string }
 
@@ -560,7 +558,7 @@ r_session = element session {
 
   r_ejb-name,
 
-  r_jndi-name?,
+  r_mapped-name?,
 
   (r_home, r_remote)?,
 

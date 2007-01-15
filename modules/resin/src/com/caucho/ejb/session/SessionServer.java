@@ -44,7 +44,6 @@ import javax.ejb.EJBLocalHome;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import java.lang.reflect.Constructor;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -135,7 +134,6 @@ public class SessionServer extends AbstractServer {
    */
   @Override
   public EJBHome getEJBHome()
-    throws RemoteException
   {
     return _remoteHomeView;
   }
