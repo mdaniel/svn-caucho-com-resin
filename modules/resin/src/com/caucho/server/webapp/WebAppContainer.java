@@ -56,6 +56,7 @@ import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
@@ -94,7 +95,7 @@ public class WebAppContainer
   private Path _docDir;
 
   // dispatch mapping
-  private RewriteInvocation _rewriteInvocation;
+  private RewriteDispatch _rewriteDispatch;
 
   // List of default ear webApp configurations
   private ArrayList<EarConfig> _earDefaultList
@@ -327,13 +328,13 @@ public class WebAppContainer
   /**
    * Adds rewrite-dispatch.
    */
-  public RewriteInvocation createRewriteDispatch()
+  public RewriteDispatch createRewriteDispatch()
   {
-    if (_rewriteInvocation == null) {
-      _rewriteInvocation = new RewriteInvocation();
+    if (_rewriteDispatch == null) {
+      _rewriteDispatch = new RewriteDispatch();
     }
 
-    return _rewriteInvocation;
+    return _rewriteDispatch;
   }
 
   /**
@@ -709,30 +710,42 @@ public class WebAppContainer
       return;
     }
 
-    if (_rewriteInvocation != null) {
-      FilterChain chain = _rewriteInvocation.map(invocation.getURI(),
-						 invocation);
-
-      if (chain != null) {
-	Server server = (Server) _dispatchServer;
-	invocation.setWebApp(server.getErrorWebApp());
-	invocation.setFilterChain(chain);
-	return;
-      }
-    }
+    FilterChain chain;
 
     WebApp app = getWebApp(invocation, true);
 
-    if (app != null)
+    boolean isAlwaysModified;
+
+    if (app != null) {
       app.buildInvocation(invocation);
+      chain = invocation.getFilterChain();
+      isAlwaysModified = false;
+    }
     else {
       int code = HttpServletResponse.SC_NOT_FOUND;
-      FilterChain chain = new ErrorFilterChain(code);
+      chain = new ErrorFilterChain(code);
       ContextFilterChain contextChain = new ContextFilterChain(chain);
       contextChain.setErrorPageManager(_errorPageManager);
+      chain = contextChain;
       invocation.setFilterChain(contextChain);
-      invocation.setDependency(AlwaysModified.create());
+      isAlwaysModified = true;
     }
+
+    if (_rewriteDispatch != null) {
+      FilterChain rewriteChain = _rewriteDispatch.map(invocation.getURI(),
+                                                        invocation,
+                                                        chain);
+
+      if (rewriteChain != chain) {
+	Server server = (Server) _dispatchServer;
+	invocation.setWebApp(server.getErrorWebApp());
+	invocation.setFilterChain(rewriteChain);
+        isAlwaysModified = false;
+      }
+    }
+
+    if (isAlwaysModified)
+      invocation.setDependency(AlwaysModified.create());
   }
 
   /**

@@ -75,8 +75,6 @@ import java.util.logging.Logger;
  * </pre>
  */
 public class IPConstraint extends AbstractConstraint {
-  /** updated 2004-11-19 Sam to accept <allow> and <deny> */
-
   static final Logger log = Log.open(IPConstraint.class);
   static L10N L = new L10N(IPConstraint.class);
 

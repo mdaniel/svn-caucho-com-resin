@@ -138,6 +138,13 @@ public abstract class Section extends ContainerNode {
     return sb.toString();
   }
 
+  public Defun createDefun()
+  {
+    Defun defun = new Defun(getDocument());
+    addItem(defun);
+    return defun;
+  }
+
   public DefinitionList createDl()
   {
     DefinitionList list = new DefinitionList(getDocument());

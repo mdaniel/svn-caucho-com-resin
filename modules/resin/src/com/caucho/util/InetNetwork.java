@@ -113,6 +113,14 @@ public class InetNetwork {
   }
 
   /**
+   * Get the long representation of the address.
+   */
+  public long getAddress()
+  {
+    return _address;
+  }
+
+  /**
    * Returns true if the address is in this network.
    */
   public boolean isMatch(InetAddress inetAddress)
@@ -144,6 +152,42 @@ public class InetNetwork {
   public boolean isMatch(long address)
   {
     return (_address & _mask) == (address & _mask);
+  }
+
+  /**
+   * Returns true if the address is in this network.
+   * @param inetAddress a numerical address represented as a string
+   */
+  public boolean isMatch(String inetAddress)
+  {
+    int i = 0;
+    int len = inetAddress.length();
+
+    long address = 0;
+    int digits = 0;
+
+    int ch = 0;
+    while (i < len) {
+      if (inetAddress.charAt(i) == '/')
+        break;
+
+      int digit = 0;
+      for (; i < len && (ch = inetAddress.charAt(i)) >= '0' && ch <= '9'; i++)
+        digit = 10 * digit + ch - '0';
+
+      address = 256 * address + digit;
+
+      digits++;
+
+      if (i < len && ch == '.')
+        i++;
+    }
+
+    while (digits++ < 4) {
+      address *= 256;
+    }
+
+    return isMatch(address);
   }
 
   /**

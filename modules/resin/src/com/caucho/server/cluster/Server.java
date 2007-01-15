@@ -61,7 +61,7 @@ import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.ErrorPage;
-import com.caucho.server.webapp.RewriteInvocation;
+import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
@@ -575,7 +575,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Adds rewrite-dispatch.
    */
-  public RewriteInvocation createRewriteDispatch()
+  public RewriteDispatch createRewriteDispatch()
   {
     return _hostContainer.createRewriteDispatch();
   }

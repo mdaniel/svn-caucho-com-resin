@@ -61,6 +61,133 @@ r_cache-mapping = element cache-mapping {
      | element s-max-age { r_period })?
 }
 
+r_conditions-Content =
+  element and { r_conditions-Content }*
+
+  & element auth-type-equals {
+      (attribute value { string }
+       | element value { string })
+
+      & (attribute ignore-case { string }
+         | element ignore-case { string })*
+     }*
+
+  & element auth-type-exists { empty }*
+
+  & element cookie-equals {
+      (attribute name { string }
+       | element name { string })
+
+      & (attribute value { string }
+         | element value { string })
+
+      & (attribute ignore-case { string }
+         | element ignore-case { string })*
+     }*
+
+  & element cookie-exists {
+      (attribute name { string }
+       | element name { string })
+     }*
+
+  & element cookie-matches {
+      (attribute name { string }
+       | element name { string })
+
+      & (attribute regexp { string }
+         | element regexp { string })
+
+      & (attribute ignore-case { string }
+         | element ignore-case { string })*
+     }*
+
+  & element expr { string }*
+
+  & element header-equals {
+      (attribute name { string }
+       | element name { string })
+
+      & (attribute value { string }
+         | element value { string })
+
+      & (attribute ignore-case { string }
+         | element ignore-case { string })*
+     }*
+
+  & element header-exists {
+      (attribute name { string }
+       | element name { string })
+     }*
+
+  & element header-matches {
+      (attribute name { string }
+       | element name { string })
+
+      & (attribute regexp { string }
+         | element regexp { string })
+
+      & (attribute ignore-case { string }
+         | element ignore-case { string })*
+     }*
+
+  & element locale-matches {
+      (attribute regexp { string }
+       | element regexp { string })
+
+      & (attribute ignore-case { string }
+         | element ignore-case { string })*
+     }*
+
+  & element method-equals {
+      (attribute value { string }
+       | element value { string })
+
+      & (attribute ignore-case { string }
+         | element ignore-case { string })*
+     }*
+
+  & element not { r_conditions-Content }*
+
+  & element or { r_conditions-Content }*
+
+  & element param-equals {
+      (attribute name { string }
+       | element name { string })
+
+      & (attribute value { string }
+         | element value { string })
+
+      & (attribute ignore-case { string }
+         | element ignore-case { string })*
+     }*
+
+  & element param-exists {
+      (attribute name { string }
+       | element name { string })
+     }*
+
+  & element param-matches {
+      (attribute name { string }
+       | element name { string })
+
+      & (attribute regexp { string }
+         | element regexp { string })
+
+      & (attribute ignore-case { string }
+         | element ignore-case { string })*
+     }*
+
+  & element remote-addr {
+      (attribute value { string }
+       | element value { string })
+     }*
+
+  & element role {
+      (attribute value { string }
+       | element value { string })
+     }*
+
+
 r_constraint = element constraint {
   r_resin-type,
 
@@ -422,32 +549,58 @@ r_rest = element rest {
 }
 
 r_rewrite-dispatch = element rewrite-dispatch {
-  element dispatch {
-     (attribute regexp { string }
-      | element regexp { string })
+  (attribute case-insensitive { string }
+   | element case-insensitive { string })?
+
+  & element dispatch {
+       (attribute regexp { string }
+        | element regexp { string })
+
+       & (attribute secure { r_boolean-Type }
+          | element secure { r_boolean-Type })?
+
+       & (element conditions { r_conditions-Content } )*
    }*
 
    & element forbidden {
        (attribute regexp { string }
         | element regexp { string })
+
+       & (attribute secure { r_boolean-Type }
+          | element secure { r_boolean-Type })?
+
+       & (element conditions { r_conditions-Content } )*
      }*
 
    & element forward {
        (attribute regexp { string }
         | element regexp { string })
 
+       & (attribute secure { r_boolean-Type }
+          | element secure { r_boolean-Type })?
+
        & (attribute target { string }
           | element target { string })
+
+       & (element conditions { r_conditions-Content } )*
      }*
 
    & element gone {
        (attribute regexp { string }
         | element regexp { string })
+
+       & (attribute secure { r_boolean-Type }
+          | element secure { r_boolean-Type })*
+
+       & (element conditions { r_conditions-Content } )?
      }*
 
    & element load-balance {
        (attribute regexp { string }
         | element regexp { string })
+
+       & (attribute secure { r_boolean-Type }
+          | element secure { r_boolean-Type })?
 
        & (attribute cluster { string }
           | element cluster { string })
@@ -460,35 +613,57 @@ r_rewrite-dispatch = element rewrite-dispatch {
 
        & (attribute sticky-sessions { r_boolean-Type }
           | element sticky-sessions { r_boolean-Type })?
+
+       & (element conditions { r_conditions-Content } )*
      }*
 
    & element moved-permanently {
        (attribute regexp { string }
         | element regexp { string })
 
+       & (attribute secure { r_boolean-Type }
+          | element secure { r_boolean-Type })?
+
        & (attribute target { string }
           | element target { string })
+
+       & (element conditions { r_conditions-Content } )*
      }*
 
    & element not-found {
        (attribute regexp { string }
         | element regexp { string })
+
+       & (attribute secure { r_boolean-Type }
+          | element secure { r_boolean-Type })?
+
+       & (element conditions { r_conditions-Content } )*
      }*
 
    & element redirect {
        (attribute regexp { string }
         | element regexp { string })
 
+       & (attribute secure { r_boolean-Type }
+          | element secure { r_boolean-Type })?
+
        & (attribute target { string }
-          | element target { string })
+            | element target { string })
+
+       & (element conditions { r_conditions-Content } )*
      }*
 
   & element rewrite {
      (attribute regexp { string }
       | element regexp { string })
 
-     & (attribute replacement { string }
-        | element replacement { string })
+       & (attribute secure { r_boolean-Type }
+          | element secure { r_boolean-Type })?
+
+       & (attribute replacement { string }
+          | element replacement { string })
+
+       & (element conditions { r_conditions-Content } )*
    }*
 }
 

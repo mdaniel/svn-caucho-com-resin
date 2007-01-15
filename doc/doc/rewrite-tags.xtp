@@ -15,16 +15,100 @@ URL aliasing, rewriting, dispatching, and redirection.</p>
 
 <localtoc/>
 
+<defun title="&lt;and&gt;">
+<parents>conditions</parents>
+
+<p>
+Contains one or more conditions and evaluates to true if all of the contained
+conditions evaluate to true, false if any of the contained conditions does not
+evaluate to true.
+</p>
+
+</defun>
+
+<defun title="&lt;conditions&gt;">
+<parents>dispatch, forward, forbidden, gone, moved-permanently, not-found, redirect, rewrite</parents>
+
+<p>
+Contains one or more conditions that further refine the match of the enclosing
+tag beyond the information provided by the url.  If all contained conditions evaluate
+to true, then the enclosing tag is applied.
+</p>
+
+</defun>
+
+<defun title="&lt;cookie-equals&gt;">
+<parents>conditions</parents>
+
+<p>
+Evaluates to true if the value of a cookie with a given <var/name/> is exactly
+the given <var/value/>, false if it is not.  If the named cookie does not exist
+it will never match.
+</p>
+
+<deftable-childtags>
+<tr><td>ignore-case</td>
+    <td>If true, ignore case when doing the comparison</td>
+    <td>false</td></tr>
+<tr><td>name</td>
+    <td>Name of the cookie</td>
+    <td>required</td></tr>
+<tr><td>value</td>
+    <td>The value for the exact match</td>
+    <td>required</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;cookie-exists&gt;">
+<parents>conditions</parents>
+
+<p>
+Evaluates to true if a cookie with a given <var/name/> exists, false if it does not.
+</p>
+
+<deftable-childtags>
+<tr><td>name</td>
+    <td>Name of the cookie</td>
+    <td>required</td></tr>
+</deftable-childtags>
+</defun>
+
+<defun title="&lt;cookie-matches&gt;">
+<parents>conditions</parents>
+
+<p>
+Evaluates to true if the value of a cookie with a given <var/name/> matches a
+regular expression <var/regexp/>, false if it does not.  If the named cookie
+does not exist it has a value of the empty string for the purposes of the
+comparison.
+</p>
+
+<deftable-childtags>
+<tr><td>name</td>
+    <td>Name of the cookie</td>
+    <td>required</td></tr>
+<tr><td>regexp</td>
+    <td>The regular expression to match</td>
+    <td>required</td></tr>
+<tr><td>ignore-case</td>
+    <td>If true, ignore case when doing the comparison</td>
+    <td>false</td></tr>
+</deftable-childtags>
+
+</defun>
+
 <defun title="&lt;dispatch>">
 <parents>rewrite-dispatch</parents>
 
-<p>&lt;dispatch> matches the current URL, passing the request to the
+<p>If &lt;dispatch> matches the current URL, the rest of the items in the enclosing
+rewqrite-dispatch are not considered and the request passes immediately to
 normal servlet evaluation.  &lt;dispatch> is often used to specify URLs
 which should be handled normally before a more general pattern which
 modifies the URL.</p>
 
 <p>For example, the following pattern uses &lt;dispatch> to handle
-images and *.php files normally, but forward all other requests to
+images and *.php files normally, but forward's all other requests to
 /index.php.</p>
 
 <example title="Mediawiki dispatch in resin-web.xml">
@@ -61,6 +145,23 @@ for a matching URL.</p>
 &lt;/web-app>
 </example>
 
+<deftable-childtags>
+<tr><td>conditions</td>
+    <td>A list of extended <a href="#conditions">conditions</a>
+        that must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td>regexp</td>
+    <td>A regexp that must match the URL</td>
+    <td>required</td></tr>
+<tr><td>secure</td>
+    <td>True to only match requests that are using an SSL connection,
+        false to only match requests that are not using an SSL connection</td>
+    <td>do not consider SSL</td></tr>
+<tr><td>port</td>
+    <td>A port number that must match the server port number for the connection</td>
+    <td>do not consider port</td></tr>
+</deftable-childtags>
+
 <def title="forbidden grammar">
 element forward {
   regexp
@@ -92,6 +193,67 @@ element forward {
   regexp &amp; target
 }
 </def>
+</defun>
+
+<defun title="&lt;header-equals&gt;">
+<parents>conditions</parents>
+
+<p>
+Evaluates to true if the value of a cookie with a given <var/name/> is exactly the given
+<var/value/>, false if it is not.  If the named cookie does not exist it
+will never match.
+</p>
+
+<deftable-childtags>
+<tr><td>name</td>
+    <td>Name of the header</td>
+    <td>required</td></tr>
+<tr><td>value</td>
+    <td>The value for the exact match</td>
+    <td>required</td></tr>
+<tr><td>ignore-case</td>
+    <td>If true, ignore case when doing the comparison</td>
+    <td>false</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;header-exists&gt;">
+<parents>conditions</parents>
+
+<p>
+Evaluates to true if a header with a given <var/name/> exists, false if it does not.
+</p>
+
+<deftable-childtags>
+<tr><td>name</td>
+    <td>Name of the header</td>
+    <td>required</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;header-matches&gt;">
+<parents>conditions</parents>
+
+<p>
+Evaluates to true if the value of a header with a given <var/name/> matches a regular
+expression <var/regexp/>, false if it does not.  If the named header does not
+exist it has a value of the empty string for the purposes of the comparison.
+</p>
+
+<deftable-childtags>
+<tr><td>name</td>
+    <td>Name of the header</td>
+    <td>required</td></tr>
+<tr><td>regexp</td>
+    <td>The regular expression to match</td>
+    <td>required</td></tr>
+<tr><td>ignore-case</td>
+    <td>If true, ignore case when doing the comparison</td>
+    <td>false</td></tr>
+</deftable-childtags>
+
 </defun>
 
 <defun title="&lt;gone>">
@@ -170,7 +332,6 @@ element load-balance {
 
 </defun>
 
-
 <defun title="&lt;moved-permanently>">
 <parents>rewrite-dispatch</parents>
 
@@ -189,10 +350,33 @@ indicating that the resource has moved.</p>
 </example>
 
 <def title="moved-permanently grammar">
-element forward {
-  regexp &amp; target
+element moved-permanently {
+  regexp &amp; target &amp; secure? &amp; port?
 }
 </def>
+
+</defun>
+
+<defun title="&lt;not&gt;">
+<parents>conditions</parents>
+
+<p>
+Contains one or more conditions and evaluates to true only if none of the
+contained conditions evaluate to true, false if any of the contained conditions
+evaluate to true.
+</p>
+
+</defun>
+
+<defun title="&lt;or&gt;">
+<parents>conditions</parents>
+
+<p>
+Contains one or more conditions and evaluates to true if any of the contained
+conditions evaluate to true, false only if all of the contained conditions
+evaluate to false.
+</p>
+
 </defun>
 
 <defun title="&lt;not-found>">
@@ -265,6 +449,15 @@ element forward {
 </def>
 </defun>
 
+<defun title="&lt;regexp>">
+<parents>dispatch, forward, forbidden, gone, moved-permanently, not-found, redirect, rewrite</parents>
+
+<p>
+&lt;regexp> is a regular expression pattern used to match against the URL when
+considering whether or not to execute a program.
+</p>
+</defun>
+
 <defun title="&lt;rewrite>">
 <parents>rewrite-dispatch</parents>
 
@@ -326,7 +519,15 @@ dispatch based on regexp patterns.</p>
 &lt;/web-app>
 </example>
 
-<def title="rewrite-dispatch schema">
+<deftable-childtags>
+<tr><td>case-insensitive</td>
+    <td>If true, ignore case when matching URL's</td>
+    <td>The value of
+        <a href="env-tags.xtp#case-insensitive">case-insensitive</a>
+        in the enclosing enviroment</td></tr>
+</deftable-childtags>
+
+<def title="rewrite-dispatch grammar">
 element rewrite-dispatch {
   (dispatch { regexp }
   | forward { regexp &amp; target }
@@ -341,6 +542,43 @@ element rewrite-dispatch {
 
 </defun>
 
+<defun title="&lt;secure&gt;">
+<parents>dispatch, forward, forbidden, gone, moved-permanently, not-found, redirect, rewrite</parents>
+
+<p>
+&lt;secure> specifies a condition for the ssl status of the request. If <var/secure/> is true,
+then the request must be using ssl for the program to match.  If <var/secure/> is
+false, then the request must not be using ssl for the program to match.  If
+<var/secure/> is not specified, the ssl status of the request is not considered when
+testing if the program matches.
+</p>
+
+<example title="secure example">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;rewrite-dispatch&gt;
+    &lt;redirect regexp='^/foo' target='/insecure' secure='false'/&gt;
+    &lt;redirect regexp='^/foo' target='/secure' secure='true'/&gt;
+
+    &lt;redirect regexp='^/bar' target='/public'/&gt;
+  &lt;/rewrite-dispatch&gt;
+&lt;/web-app&gt;
+</example>
+
+<results>
+http://localhost:8080/foo/index.html
+  --> redirect to /insecure/index.html
+
+https://localhost:8080/foo/index.html
+  --> redirect to /secure/index.html
+
+http://localhost:8080/bar/index.html
+  --> redirect to /public/index.html
+
+https://localhost:8080/bar/index.html
+  --> redirect to /public/index.html
+</results>
+</defun>
+
 <s1 title="Logging and Debugging">
 <p>
 Logging for the name <code>com.caucho.server.webapp.RewriteInvocation</code>
@@ -348,7 +586,7 @@ at the "finer" level reveals successful matches.  At the "finest" level both
 successful and unsuccessful matches are logged.
 </p>
 
-<example>
+<example title="Logging example">
 &lt;logger name="com.caucho.server.webapp.RewriteInvocation" level="finest"/&gt;
 </example>
 

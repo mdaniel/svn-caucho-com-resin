@@ -136,7 +136,7 @@ element listener {
 <parents>resin, cluster, host, web-app</parents>
 <default>true on Windows, false on Unix.</default>
 
-<p>&lt;case-ensensitive> specifies whether the environment
+<p>&lt;case-insensitive> specifies whether the environment
 context is case sensitive or insensitive.</p>
 
 <p>Because some operating systems are case-insensitive, it is important

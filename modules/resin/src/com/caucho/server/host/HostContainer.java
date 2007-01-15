@@ -33,7 +33,6 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.log.Log;
 import com.caucho.make.AlwaysModified;
-import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.dispatch.DispatchBuilder;
 import com.caucho.server.dispatch.DispatchServer;
@@ -41,9 +40,10 @@ import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.e_app.EarConfig;
-import com.caucho.server.webapp.RewriteInvocation;
+import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
+import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -74,7 +74,7 @@ public class HostContainer implements DispatchBuilder {
   private Path _rootDir;
 
   // dispatch mapping
-  private RewriteInvocation _rewriteInvocation;
+  private RewriteDispatch _rewriteDispatch;
 
   // List of default host configurations
   private ArrayList<HostConfig> _hostDefaultList = new ArrayList<HostConfig>();
@@ -271,13 +271,13 @@ public class HostContainer implements DispatchBuilder {
   /**
    * Adds rewrite-dispatch.
    */
-  public RewriteInvocation createRewriteDispatch()
+  public RewriteDispatch createRewriteDispatch()
   {
-    if (_rewriteInvocation == null) {
-      _rewriteInvocation = new RewriteInvocation();
+    if (_rewriteDispatch == null) {
+      _rewriteDispatch = new RewriteDispatch();
     }
 
-    return _rewriteInvocation;
+    return _rewriteDispatch;
   }
 
   /**
@@ -307,35 +307,42 @@ public class HostContainer implements DispatchBuilder {
 
     invocation.setHostName(hostName);
 
-    if (_rewriteInvocation != null) {
-      String url;
-
-      if (invocation.isSecure())
-	url = "https://" + hostName + invocation.getURI();
-      else
-	url = "http://" + hostName + invocation.getURI();
-      
-      FilterChain chain = _rewriteInvocation.map(url, invocation);
-
-      if (chain != null) {
-	Server server = (Server) _dispatchServer;
-	invocation.setWebApp(server.getErrorWebApp());
-	invocation.setFilterChain(chain);
-	return;
-      }
-    }
+    boolean isAlwaysModified;
 
     Host host = getHost(hostName, rawPort);
 
     if (host != null) {
       host.buildInvocation(invocation);
+      isAlwaysModified = false;
     }
     else {
       FilterChain chain = new ErrorFilterChain(404);
       invocation.setFilterChain(chain);
       invocation.setWebApp(getErrorWebApp());
-      invocation.setDependency(AlwaysModified.create());
+      isAlwaysModified = true;
     }
+
+    if (_rewriteDispatch != null) {
+      String url;
+
+      if (invocation.isSecure())
+        url = "https://" + hostName + invocation.getURI();
+      else
+        url = "http://" + hostName + invocation.getURI();
+
+      FilterChain chain = invocation.getFilterChain();
+      FilterChain rewriteChain = _rewriteDispatch.map(url, invocation, chain);
+
+      if (rewriteChain != chain) {
+        Server server = (Server) _dispatchServer;
+        invocation.setWebApp(server.getErrorWebApp());
+        invocation.setFilterChain(rewriteChain);
+        isAlwaysModified = false;
+      }
+    }
+
+    if (isAlwaysModified)
+      invocation.setDependency(AlwaysModified.create());
   }
 
   public ArrayList<HostController> getHostList()

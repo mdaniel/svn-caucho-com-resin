@@ -39,21 +39,21 @@ r_ejb-link = element ejb-link {
 }
 
 r_ejb-local-ref = element ejb-local-ref {
-  r_description*,
+  r_description*
 
-  r_ejb-ref-name,
+  & r_ejb-ref-name
 
-  r_ejb-ref-type?,
+  & r_ejb-ref-type?
 
-  r_foreign-name?,
+  & r_foreign-name?
 
-  r_local-home?,
+  & r_local-home?
 
-  r_local?,
+  & r_local?
 
-  r_ejb-link?,
+  & r_ejb-link?
 
-  r_deployment-extension*
+  & r_deployment-extension*
 }
 
 r_ejb-ref = element ejb-ref {

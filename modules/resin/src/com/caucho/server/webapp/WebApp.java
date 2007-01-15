@@ -37,7 +37,6 @@ import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.ResourceRef;
 import com.caucho.config.types.Validator;
-import com.caucho.java.WorkDir;
 import com.caucho.jsp.JspServlet;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -62,6 +61,7 @@ import com.caucho.server.host.Host;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
+import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.security.AbstractLogin;
 import com.caucho.server.security.ConstraintManager;
 import com.caucho.server.security.LoginConfig;
@@ -74,12 +74,12 @@ import com.caucho.soa.client.WebServiceClient;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.java.WorkDir;
 
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
@@ -212,7 +212,7 @@ public class WebApp extends ServletContextImpl
   private Throwable _configException;
 
   // dispatch mapping
-  private RewriteInvocation _rewriteInvocation;
+  private RewriteDispatch _rewriteDispatch;
 
   private LruCache<String,String> _realPathCache =
     new LruCache<String,String>(1024);
@@ -1004,12 +1004,12 @@ public class WebApp extends ServletContextImpl
   /**
    * Adds rewrite-dispatch.
    */
-  public RewriteInvocation createRewriteDispatch()
+  public RewriteDispatch createRewriteDispatch()
   {
-    if (_rewriteInvocation == null)
-      _rewriteInvocation = new RewriteInvocation(this);
+    if (_rewriteDispatch == null)
+      _rewriteDispatch = new RewriteDispatch(this);
 
-    return _rewriteInvocation;
+    return _rewriteDispatch;
   }
 
   /**
@@ -1861,13 +1861,13 @@ public class WebApp extends ServletContextImpl
 	if (entry != null && ! entry.isModified()) {
 	  chain = entry.getFilterChain();
 	} else {
-	  if (_rewriteInvocation != null) {
-	    chain = _rewriteInvocation.map(invocation.getContextURI(),
-					   invocation);
-	  }
+          chain = _servletMapper.mapServlet(invocation);
 
-	  if (chain == null)
-	    chain = _servletMapper.mapServlet(invocation);
+          if (_rewriteDispatch != null) {
+	    chain = _rewriteDispatch.map(invocation.getContextURI(),
+					   invocation,
+                                           chain);
+	  }
 
 	  // server/13s[o-r]
 	  _filterMapper.buildDispatchChain(invocation, chain);
