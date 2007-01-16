@@ -53,6 +53,14 @@ abstract public class ObjectValue extends Value {
   abstract public String getParentName();
 
   /**
+   * Returns true for an object.
+   */
+  public boolean isObject()
+  {
+    return true;
+  }
+
+  /**
    * Adds a new value.
    */
   public Value putField(String key, String value)

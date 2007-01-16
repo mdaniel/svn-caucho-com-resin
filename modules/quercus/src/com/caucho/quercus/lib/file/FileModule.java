@@ -350,7 +350,8 @@ public class FileModule extends AbstractQuercusModule {
    */
   public String dirname(String path)
   {
-    // quercus/1601
+    if (path == null)
+      return ".";
 
     int len = path.length();
 

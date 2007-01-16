@@ -108,6 +108,14 @@ public class Var extends Value
   }
 
   /**
+   * Returns true for an object.
+   */
+  public boolean isObject()
+  {
+    return _value.isObject();
+  }
+
+  /**
    * Returns true for a set type.
    */
   public boolean isset()

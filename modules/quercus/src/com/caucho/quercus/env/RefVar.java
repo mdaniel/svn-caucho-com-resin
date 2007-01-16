@@ -141,6 +141,14 @@ public class RefVar extends Value
   }
 
   /**
+   * Returns true for an object.
+   */
+  public boolean isObject()
+  {
+    return _var.isObject();
+  }
+
+  /**
    * Returns true for an array.
    */
   public boolean isArray()

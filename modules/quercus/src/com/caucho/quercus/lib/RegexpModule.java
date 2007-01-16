@@ -1428,11 +1428,15 @@ public class RegexpModule
             if (tail > 0) {
               StringValue hex = regexp.substring(i + 2, tail);
 
-              if (hex.length() == 1)
+              int length = hex.length();
+
+              if (length == 1)
                 sb.append("x0" + hex);
-              else if (hex.length() == 2)
+              else if (length == 2)
                 sb.append("x" + hex);
-              else if (hex.length() == 4)
+              else if (length == 3)
+                sb.append("u0" + hex);
+              else if (length == 4)
                 sb.append("u" + hex);
               else
                 throw new QuercusRuntimeException(L.l("illegal hex escape"));

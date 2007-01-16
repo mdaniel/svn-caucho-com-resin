@@ -88,6 +88,14 @@ public class JavaAdapterVar extends Var
   }
 
   /**
+   * Returns true for an object.
+   */
+  public boolean isObject()
+  {
+    return getValue().isObject();
+  }
+
+  /**
    * Returns true for a set type.
    */
   public boolean isset()

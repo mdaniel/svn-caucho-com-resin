@@ -43,12 +43,16 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 public class MbstringModule
   extends AbstractQuercusModule
 {
+  private static final HashMap<String,StringValue> _iniMap
+  = new HashMap<String,StringValue>();
+
   private static final Logger log =
                        Logger.getLogger(MbstringModule.class.getName());
   private static final L10N L = new L10N(MbstringModule.class);
@@ -63,6 +67,14 @@ public class MbstringModule
   public String []getLoadedExtensions()
   {
     return new String[] { "mbstring" };
+  }
+
+  /**
+   * Returns the default quercus.ini values.
+   */
+  public Map<String,StringValue> getDefaultIni()
+  {
+    return _iniMap;
   }
 
   /**
@@ -1195,5 +1207,10 @@ public class MbstringModule
       } else
         return BooleanValue.TRUE;
     }
+  }
+
+  static {
+    addIni(_iniMap, "mbstring.http_input", "pass", PHP_INI_ALL);
+    addIni(_iniMap, "mbstring.http_output", "pass", PHP_INI_ALL);
   }
 }

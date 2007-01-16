@@ -217,7 +217,7 @@ public class ClassesModule extends AbstractQuercusModule {
    */
   public static boolean is_object(@ReadOnly Value value)
   {
-    return value instanceof ObjectValue;
+    return value.isObject();
   }
 
   /**

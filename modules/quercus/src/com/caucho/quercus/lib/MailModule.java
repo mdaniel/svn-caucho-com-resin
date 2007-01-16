@@ -34,6 +34,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import javax.mail.Address;
@@ -71,6 +72,7 @@ public class MailModule extends AbstractQuercusModule {
 
     try {
       Properties props = new Properties();
+      props.put( "mail.smtp.auth", "true");
 
       StringValue host = env.getIni("SMTP");
       if (host != null && ! host.toString().equals(""))
@@ -88,7 +90,6 @@ public class MailModule extends AbstractQuercusModule {
       smtp = mailSession.getTransport("smtp");
 
       MimeMessage msg = new MimeMessage(mailSession);
-      msg.setFrom();
       msg.setSubject(subject);
       msg.setContent(message.toString(), "text/plain");
 
@@ -98,10 +99,19 @@ public class MailModule extends AbstractQuercusModule {
       if (additionalHeaders != null)
         addHeaders(msg, additionalHeaders);
 
+      Address []from = msg.getFrom();
+      if (from == null || from.length == 0) {
+        log.fine(L.l("mail 'From' not set, setting to Java System property 'user.name'"));
+        msg.setFrom();
+      }
+
       msg.saveChanges();
 
       if (addrList.size() == 0)
         throw new QuercusModuleException(L.l("mail has no recipients"));
+
+      from = msg.getFrom();
+      log.fine(L.l("sending mail, From: {0}, To: {1}", from[0], to));
 
       String username = env.getIniString("smtp_username");
       String password = env.getIniString("smtp_password");
@@ -172,6 +182,8 @@ public class MailModule extends AbstractQuercusModule {
     int i = 0;
     int len = headers.length();
 
+    CharBuffer buffer = CharBuffer.allocate();
+
     while (true) {
       char ch;
 
@@ -183,31 +195,39 @@ public class MailModule extends AbstractQuercusModule {
       if (len <= i)
         return;
 
-      StringBuilder name = new StringBuilder();
+      buffer.clear();
 
       for (;
            i < len && (! Character.isWhitespace(ch = headers.charAt(i)) &&
                        ch != ':');
            i++) {
-        name.append((char) ch);
+        buffer.append((char) ch);
       }
 
       for (;
-           i < len && (Character.isWhitespace(ch = headers.charAt(i)) ||
-                       ch == ':');
+           i < len && ((ch = headers.charAt(i)) == ' ' ||
+                        ch == '\t' ||
+                        ch == '\f' ||
+                        ch == ':');
            i++) {
       }
 
-      StringBuilder value = new StringBuilder();
+      String name = buffer.toString();
+      buffer.clear();
 
       for (;
            i < len && ((ch = headers.charAt(i)) != '\r' &&
                        ch != '\n');
            i++) {
-        value.append((char) ch);
+        buffer.append((char) ch);
       }
 
-      msg.addHeader(name.toString(), value.toString());
+      String value = buffer.toString();
+
+      if (name.equals("From"))
+        msg.setFrom(new InternetAddress(value));
+      else
+        msg.addHeader(name, value);
     }
   }
 }
