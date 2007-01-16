@@ -332,7 +332,7 @@ public class EjbRef implements ObjectProxy {
           }
 	}
 	else {
-	  _target = lookupByForeignJndi(_ejbLink, type);
+          _target = lookupByForeignJndi(_ejbLink, type);
 	  /*
 	  if (_ejbLink.equals(_ejbRefName))
 	    throw new NamingException(L.l("{0} '{1}' cannot be resolved",
@@ -363,7 +363,7 @@ public class EjbRef implements ObjectProxy {
     Object target;
     
     if (_context != null) {
-      target = _context.lookup(foreignName);
+      target = _context.lookup(Jndi.getFullName(foreignName));
       /*
       try {
 	target = _context.lookup(foreignName);
