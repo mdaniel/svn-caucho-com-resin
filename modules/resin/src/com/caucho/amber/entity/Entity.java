@@ -120,6 +120,11 @@ public interface Entity extends MappedSuperclass
   public int __caucho_getEntityState();
 
   /**
+   * Sets the entity state.
+   */
+  public void __caucho_setEntityState(int state);
+
+  /**
    * Sets the connection.
    */
   public void __caucho_setConnection(AmberConnection aConn);

@@ -274,7 +274,9 @@ public class PropertyField extends AbstractField {
 
       out.println("try {");
       out.pushDepth();
+
       out.println(generateSuperSetter("v") + ";");
+
       out.popDepth();
       out.println("} catch (Exception e1) {");
       out.pushDepth();
@@ -447,18 +449,30 @@ public class PropertyField extends AbstractField {
 
     out.println(";");
 
-    // jpa/0t17
+    // jpa/1417 as a negative test.
     if (columnType instanceof ArrayType) {
       ArrayType arrayType = (ArrayType) columnType;
       String primitiveType = arrayType.getPrimitiveArrayTypeName();
-      out.print(getJavaTypeName());
-      out.print(" " + var + "_temp = new ");
+
+      out.print(getJavaTypeName() + " " + var + "_temp = null;");
+      out.println();
+
+      // jpa/110d
+      out.print("if (" + var + " != null) {");
+      out.pushDepth();
+
+      out.print(var + "_temp = new ");
       String instanceJavaType = arrayType.getJavaObjectTypeName();
       out.println(instanceJavaType + "[" + var + ".length];");
       out.println("for (int i=0; i < " + var + ".length; i++)");
       out.print("  " + var + "_temp[i] = new ");
       out.print(instanceJavaType);
       out.println("(" + var + "[i]);");
+
+      out.popDepth();
+      out.println("}");
+
+      out.println();
       out.println(generateSuperSetter(var + "_temp") + ";");
     }
     else

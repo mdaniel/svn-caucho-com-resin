@@ -810,8 +810,12 @@ public class AmberConnection
     // if (shouldRetrieveFromCache())
     entity = getEntity(cl.getName(), key);
 
-    if (entity != null)
+    if (entity != null) {
+      // jpa/0j5f
+      setTransactionalState(entity);
+
       return entity;
+    }
 
     AmberEntityHome entityHome = _persistenceUnit.getEntityHome(cl.getName());
 
@@ -1205,7 +1209,13 @@ public class AmberConnection
     if (entity == null)
       return false;
 
-    // jpa/11a6: if (entity.__caucho_getEntityState() != Entity.P_TRANSACTIONAL)
+    if (isInTransaction()) {
+      if (entity.__caucho_getEntityState() != Entity.P_TRANSACTIONAL) {
+        // jpa/11a6
+        return false;
+      }
+    }
+
     // jpa/0j5f
     if (entity.__caucho_getEntityState() >= Entity.P_DELETING)
       return false;
@@ -2027,6 +2037,18 @@ public class AmberConnection
   {
     // ejb/0d01
     return (! isInTransaction());
+  }
+
+  public void setTransactionalState(Entity entity)
+  {
+    if (isInTransaction()) {
+      // jpa/0ga8
+      entity.__caucho_setConnection(this);
+
+      // jpa/0j5f
+      if (entity.__caucho_getEntityState() < Entity.P_DELETING)
+        entity.__caucho_setEntityState(Entity.P_TRANSACTIONAL);
+    }
   }
 
   //

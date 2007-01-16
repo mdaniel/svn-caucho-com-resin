@@ -483,6 +483,16 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.popDepth();
     out.println("}");
+
+    out.println();
+    out.println("public void __caucho_setEntityState(int state)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("__caucho_state = state;");
+
+    out.popDepth();
+    out.println("}");
   }
 
   /**

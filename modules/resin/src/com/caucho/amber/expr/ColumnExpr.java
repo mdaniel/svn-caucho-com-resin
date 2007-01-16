@@ -121,6 +121,11 @@ public class ColumnExpr extends AbstractAmberExpr {
    */
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
+    if (from.isOuterJoin() && type == AmberExpr.IS_INNER_JOIN) {
+      // jpa/115a
+      return false;
+    }
+
     if (_fromItem == from)
       return true;
     else if (_fromItem == null && _parent.getChildFromItem() == from)

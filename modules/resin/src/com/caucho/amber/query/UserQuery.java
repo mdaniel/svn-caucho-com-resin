@@ -118,7 +118,7 @@ public class UserQuery implements AmberQuery {
   /**
    * Returns the compiled query.
    */
-  AbstractQuery getQuery()
+  public AbstractQuery getQuery()
   {
     return _query;
   }

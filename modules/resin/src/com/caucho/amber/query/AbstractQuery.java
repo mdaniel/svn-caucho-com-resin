@@ -208,7 +208,7 @@ abstract public class AbstractQuery {
   /**
    * Returns the arg list.
    */
-  ArgExpr []getArgList()
+  public ArgExpr []getArgList()
   {
     return _argList;
   }

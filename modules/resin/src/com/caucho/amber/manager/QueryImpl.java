@@ -36,6 +36,7 @@ import com.caucho.amber.cfg.FieldResultConfig;
 import com.caucho.amber.cfg.SqlResultSetMappingConfig;
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityItem;
+import com.caucho.amber.expr.ArgExpr;
 import com.caucho.amber.query.AbstractQuery;
 import com.caucho.amber.query.SelectQuery;
 import com.caucho.amber.query.UserQuery;
@@ -550,10 +551,21 @@ public class QueryImpl implements Query {
   public Query setParameter(int index, Object value)
   {
     try {
+
+      // jpa/141h
+      ArgExpr arg = checkParameterIndex(index);
+
       if (value == null) {
         _userQuery.setNull(index, java.sql.Types.JAVA_OBJECT);
         return this;
       }
+
+      // jpa/141i
+      boolean valueIsNumber = value instanceof Number;
+      boolean typeIsNumber = arg.getType().isNumeric();
+
+      if (valueIsNumber && ! typeIsNumber)
+        throw new IllegalArgumentException(L.l("Type mismatch for parameter index '{0}'. Value '{1}' is not valid.", index, value));
 
       if (value instanceof Byte)
         _userQuery.setByte(index, ((Byte) value).byteValue());
@@ -592,6 +604,9 @@ public class QueryImpl implements Query {
   public Query setParameter(int index, Date value, TemporalType type)
   {
     try {
+
+      checkParameterIndex(index);
+
       if (value == null)
         _userQuery.setNull(index, Types.JAVA_OBJECT);
       else {
@@ -621,6 +636,9 @@ public class QueryImpl implements Query {
   public Query setParameter(int index, Calendar value, TemporalType type)
   {
     try {
+
+      checkParameterIndex(index);
+
       if (value == null)
         _userQuery.setNull(index, Types.JAVA_OBJECT);
       else {
@@ -866,5 +884,21 @@ public class QueryImpl implements Query {
     }
 
     return object;
+  }
+
+  private ArgExpr checkParameterIndex(int index)
+  {
+    // jpa/141h
+
+    ArgExpr args[] = _userQuery.getQuery().getArgList();
+
+    int len = args.length;
+
+    for (int i = 0; i < len; i++) {
+      if (args[i].getIndex() == index)
+        return args[i];
+    }
+
+    throw new IllegalArgumentException(L.l("Parameter index '{0}' is invalid for query {1}", index, _userQuery.getQuery()));
   }
 }

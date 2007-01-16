@@ -404,6 +404,9 @@ public class AmberEntityHome {
         item.loadEntity(0, preloadedProperties);
       }
 
+      // jpa/0ga8
+      aConn.setTransactionalState(item.getEntity());
+
       return item;
     } catch (Exception e) {
       throw AmberException.create(e);

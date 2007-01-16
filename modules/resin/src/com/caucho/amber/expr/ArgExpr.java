@@ -80,26 +80,10 @@ public class ArgExpr extends AbstractAmberExpr {
     _sqlIndex = -1;
   }
 
-  /*
-   * Returns a new ArgExpr with the same state,
-   * except its _sqlIndex will be the next one
-   * when generated.
-   *
-  public ArgExpr getNextClone()
-  {
-    // jpa/114e
-    ArgExpr arg = new ArgExpr(_parser, _name, _index);
-
-    arg.setType(_type);
-
-    return arg;
-  }
-  */
-
   /**
    * Returns the index value
    */
-  int getIndex()
+  public int getIndex()
   {
     return _index;
   }
@@ -180,45 +164,48 @@ public class ArgExpr extends AbstractAmberExpr {
                            Type []argTypes, Object []argValues)
     throws SQLException
   {
-    if (_name == null) {
+    try {
+      if (_name == null) {
 
-      // jpa/141d (enum type)
-      if (getType() != null) {
-        if (! ((getType() instanceof UtilDateType) ||
-               (getType() instanceof CalendarType))) {
-          argTypes[_index - 1] = getType();
+        // jpa/141d (enum type)
+        if (getType() != null) {
+          if (! ((getType() instanceof UtilDateType) ||
+                 (getType() instanceof CalendarType))) {
+            argTypes[_index - 1] = getType();
+          }
         }
-      }
 
-      if (argTypes[_index - 1] != null) {
-
-        argTypes[_index - 1].setParameter(pstmt, _sqlIndex + 1,
-                                          argValues[_index - 1]);
-        // jpa/141e
-      }
-      else
-        pstmt.setString(_sqlIndex + 1, null);
-    }
-    else {
-      // jpa/141d (enum type)
-      if (getType() != null) {
-        // jpa/1410, jpa/1413
-        if (! ((getType() instanceof UtilDateType) ||
-               (getType() instanceof CalendarType))) {
-          argTypes[i - 1] = getType();
+        if (argTypes[_index - 1] != null) {
+          argTypes[_index - 1].setParameter(pstmt, _sqlIndex + 1,
+                                            argValues[_index - 1]);
+          // jpa/141e
         }
+        else
+          pstmt.setString(_sqlIndex + 1, null);
       }
+      else {
+        // jpa/141d (enum type)
+        if (getType() != null) {
+          // jpa/1410, jpa/1413
+          if (! ((getType() instanceof UtilDateType) ||
+                 (getType() instanceof CalendarType))) {
+            argTypes[i - 1] = getType();
+          }
+        }
 
-      if (argTypes[i - 1] != null) {
-        // jpa/141g
+        if (argTypes[i - 1] != null) {
+          // jpa/141g
 
-        // jpa/1217 argTypes[i - 1].setParameter(pstmt, _sqlIndex + 1, argValues[i - 1]);
-        argTypes[i - 1].setParameter(pstmt, i, argValues[i - 1]);
+          // jpa/1217 argTypes[i - 1].setParameter(pstmt, _sqlIndex + 1, argValues[i - 1]);
+          argTypes[i - 1].setParameter(pstmt, i, argValues[i - 1]);
+        }
+        else
+          pstmt.setString(_sqlIndex + 1, null);
       }
-      else
-        pstmt.setString(_sqlIndex + 1, null);
+    } catch (Exception e) {
+      // jpa/141h
+      throw new IllegalArgumentException(e);
     }
-
   }
 
   public String toString()
