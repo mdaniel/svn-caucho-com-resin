@@ -87,6 +87,15 @@ public class CustomTag extends GenericTag
       out.println();
     }
 
+    if (JspIdConsumer.class.isAssignableFrom(_tag.getTagClass())) {
+      String shortName = className;
+      int p = shortName.lastIndexOf('.');
+      if (p >= 0)
+	shortName = shortName.substring(p + 1);
+
+      out.println(name + ".setJspId(\"" + shortName + "-" + _gen.generateJspId() + "\");");      
+    }
+
     fillAttributes(out, name);
 
     printVarDeclare(out, VariableInfo.AT_BEGIN);
@@ -349,15 +358,6 @@ public class CustomTag extends GenericTag
     out.print(var + " = new ");
     out.printClass(_tag.getTagClass());
     out.println("();");
-
-    if (JspIdConsumer.class.isAssignableFrom(_tag.getTagClass())) {
-      String shortName = className;
-      int p = shortName.lastIndexOf('.');
-      if (p >= 0)
-	shortName = shortName.substring(p + 1);
-
-      out.print(var + ".setJspId(\"" + shortName + "-" + _gen.generateJspId() + "\");");      
-    }
 
     if (_tag.getAnalyzedTag().getHasInjection()) {
       out.println("_jsp_inject_" + _tag.getId() + ".configure(" + var + ");");

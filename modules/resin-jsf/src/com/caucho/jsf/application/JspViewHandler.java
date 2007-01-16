@@ -74,7 +74,7 @@ public class JspViewHandler extends ViewHandler
   {
     if (context == null)
       throw new NullPointerException();
-    
+
     if (viewId == null) {
       ExternalContext extContext = context.getExternalContext();
 
@@ -122,22 +122,27 @@ public class JspViewHandler extends ViewHandler
     HttpServletRequest request
       = (HttpServletRequest) extContext.getRequest();
 
-    String contextPath = request.getContextPath();
     String servletPath = request.getServletPath();
     String pathInfo = request.getPathInfo();
 
     if (pathInfo == null)
-      return contextPath + servletPath;
+      return servletPath;
     else if (servletPath == null)
-      return contextPath + pathInfo;
+      return pathInfo;
     else
-      return contextPath + servletPath + pathInfo;
+      return servletPath + pathInfo;
   }
 
   public String getResourceURL(FacesContext context,
 			       String path)
   {
-    return path;
+    
+    ExternalContext extContext = context.getExternalContext();
+
+    HttpServletRequest request
+      = (HttpServletRequest) extContext.getRequest();
+    
+    return request.getContextPath() + path;
   }
 
   public void renderView(FacesContext context,
@@ -163,16 +168,32 @@ public class JspViewHandler extends ViewHandler
     */
   }
 
+  @Override
   public UIViewRoot restoreView(FacesContext context,
 				String viewId)
     throws FacesException
   {
-    return null;
+    Map<String,Object> sessionMap
+      = context.getExternalContext().getSessionMap();
+
+    System.out.println("GET: " + sessionMap);
+    
+    return (UIViewRoot) sessionMap.get(viewId);
   }
 
+  @Override
   public void writeState(FacesContext context)
     throws IOException
   {
+    UIViewRoot viewRoot = context.getViewRoot();
+
+    if (viewRoot != null) {
+      Map<String,Object> sessionMap
+	= context.getExternalContext().getSessionMap();
+
+      sessionMap.put(viewRoot.getViewId(), viewRoot);
+      System.out.println("PUT: " + viewRoot);
+    }
   }
 
   public String toString()

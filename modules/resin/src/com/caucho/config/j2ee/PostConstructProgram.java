@@ -75,6 +75,38 @@ public class PostConstructProgram extends BuilderProgram
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  public int hashCode()
+  {
+    return _init.getName().hashCode();
+  }
+
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof PostConstructProgram))
+      return false;
+
+    PostConstructProgram program = (PostConstructProgram) o;
+    Method init = program._init;
+
+    if (! _init.getName().equals(_init.getName()))
+      return false;
+
+    Class []aParam = _init.getParameterTypes();
+    Class []bParam = init.getParameterTypes();
+
+    if (aParam.length != bParam.length)
+      return false;
+
+    for (int i = 0; i < aParam.length; i++) {
+      if (! aParam[i].equals(bParam[i]))
+	return false;
+    }
+
+    return true;
+  }
+
   @Override
   public String toString()
   {

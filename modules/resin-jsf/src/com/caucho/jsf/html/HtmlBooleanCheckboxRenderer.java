@@ -53,6 +53,30 @@ class HtmlBooleanCheckboxRenderer extends Renderer
   {
     return true;
   }
+
+  /**
+   * Decodes the data from the form.
+   */
+  @Override
+  public void decode(FacesContext context, UIComponent component)
+  {
+    String clientId = component.getClientId(context);
+
+    ExternalContext ext = context.getExternalContext();
+    Map<String,String> paramMap = ext.getRequestParameterMap();
+
+    String value = paramMap.get(clientId);
+
+    if (value != null) {
+      if ("on".equalsIgnoreCase(value)
+	  || "true".equalsIgnoreCase(value)
+	  || "yes".equalsIgnoreCase(value)) {
+	((EditableValueHolder) component).setSubmittedValue("true");
+      }
+      else
+	((EditableValueHolder) component).setSubmittedValue("false");
+    }
+  }
   
   /**
    * Renders the open tag for the text.

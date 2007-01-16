@@ -54,7 +54,7 @@ public class UISelectItem extends UIComponentBase
   private Object _itemValue;
   private ValueExpression _itemValueExpr;
 
-  private SelectItem _value;
+  private Object _value;
   private ValueExpression _valueExpr;
 
   public UISelectItem()
@@ -133,17 +133,17 @@ public class UISelectItem extends UIComponentBase
     _itemValue = value;
   }
 
-  public SelectItem getValue()
+  public Object getValue()
   {
     if (_value != null)
       return _value;
     else if (_valueExpr != null)
-      return (SelectItem) Util.eval(_valueExpr);
+      return Util.eval(_valueExpr);
     else
       return null;
   }
 
-  public void setValue(SelectItem value)
+  public void setValue(Object value)
   {
     _value = value;
   }
@@ -214,7 +214,7 @@ public class UISelectItem extends UIComponentBase
 	
       case VALUE:
 	if (expr != null && expr.isLiteralText())
-	  _value = (SelectItem) Util.eval(expr);
+	  _value = Util.eval(expr);
 	else
 	  _valueExpr = expr;
 	return;
@@ -279,7 +279,7 @@ public class UISelectItem extends UIComponentBase
 				  Object.class,
 				  context);
 
-    _value = (SelectItem) state[9];
+    _value = state[9];
     _valueExpr = Util.restore(state[10],
 			      Object.class,
 			      context);

@@ -52,6 +52,24 @@ class HtmlInputHiddenRenderer extends Renderer
   {
     return true;
   }
+
+  /**
+   * Decodes the data from the form.
+   */
+  @Override
+  public void decode(FacesContext context, UIComponent component)
+  {
+    String clientId = component.getClientId(context);
+
+    ExternalContext ext = context.getExternalContext();
+    Map<String,String> paramMap = ext.getRequestParameterMap();
+
+    String value = paramMap.get(clientId);
+
+    if (value != null)
+      ((EditableValueHolder) component).setSubmittedValue(value);
+  }
+  
   /**
    * Renders the open tag for the text.
    */

@@ -35,6 +35,7 @@ import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
+import javax.faces.convert.*;
 import javax.faces.context.*;
 import javax.faces.render.*;
 
@@ -53,6 +54,44 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
   public boolean getRendersChildren()
   {
     return true;
+  }
+
+  /**
+   * Decodes the data from the form.
+   */
+  @Override
+  public void decode(FacesContext context, UIComponent component)
+  {
+    String clientId = component.getClientId(context);
+
+    ExternalContext ext = context.getExternalContext();
+    Map<String,String[]> paramMap = ext.getRequestParameterValuesMap();
+
+    String []value = paramMap.get(clientId);
+
+    if (value != null)
+      ((EditableValueHolder) component).setSubmittedValue(value);
+  }
+
+  public Object getConvertedValue(FacesContext context,
+				  UIComponent component,
+				  Object submittedValue)
+    throws ConverterException
+  {
+    Converter converter = null;//component.getConverter();
+
+    UISelectMany uiSelectMany = (UISelectMany) component;
+
+    Object value = submittedValue;
+    /*
+    if (converter != null)
+      value = converter.getAsObject(context, component, value);
+    */
+
+    uiSelectMany.setSelectedValues((Object []) value);
+    uiSelectMany.setValid(true);
+
+    return value;
   }
   
   /**
@@ -109,7 +148,7 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
       dir = htmlComponent.getDir();
       disabled = htmlComponent.isDisabled();
       disabledClass = htmlComponent.getDisabledClass();
-      enabledClass = htmlComponent.getDisabledClass();
+      enabledClass = htmlComponent.getEnabledClass();
       lang = htmlComponent.getLang();
       layout = htmlComponent.getLayout();
       
@@ -235,68 +274,76 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
 	    out.writeAttribute("class", enabledClass, "enabledClass");
 	}
 
-	if (selectItem.getItemValue().equals(value))
-	  out.writeAttribute("checked", "checked", "value");
+	if (value instanceof String[]) {
+	  String []values = (String []) value;
 
-    if (accesskey != null)
-      out.writeAttribute("accesskey", accesskey, "accesskey");
+	  for (int j = 0; j < values.length; j++) {
+	    if (values[j].equals(selectItem.getItemValue())) {
+	      out.writeAttribute("checked", "checked", "value");
+	      break;
+	    }
+	  }
+	}
 
-    if (dir != null)
-      out.writeAttribute("dir", dir, "dir");
+	if (accesskey != null)
+	  out.writeAttribute("accesskey", accesskey, "accesskey");
 
-    if (lang != null)
-      out.writeAttribute("lang", lang, "lang");
+	if (dir != null)
+	  out.writeAttribute("dir", dir, "dir");
 
-    if (onblur != null)
-      out.writeAttribute("onblur", onblur, "onblur");
+	if (lang != null)
+	  out.writeAttribute("lang", lang, "lang");
 
-    if (onchange != null)
-      out.writeAttribute("onchange", onchange, "onchange");
+	if (onblur != null)
+	  out.writeAttribute("onblur", onblur, "onblur");
 
-    if (onclick != null)
-      out.writeAttribute("onclick", onclick, "onclick");
+	if (onchange != null)
+	  out.writeAttribute("onchange", onchange, "onchange");
 
-    if (ondblclick != null)
-      out.writeAttribute("ondblclick", ondblclick, "ondblclick");
+	if (onclick != null)
+	  out.writeAttribute("onclick", onclick, "onclick");
 
-    if (onfocus != null)
-      out.writeAttribute("onfocus", onfocus, "onfocus");
+	if (ondblclick != null)
+	  out.writeAttribute("ondblclick", ondblclick, "ondblclick");
 
-    if (onkeydown != null)
-      out.writeAttribute("onkeydown", onkeydown, "onkeydown");
+	if (onfocus != null)
+	  out.writeAttribute("onfocus", onfocus, "onfocus");
 
-    if (onkeypress != null)
-      out.writeAttribute("onkeypress", onkeypress, "onkeypress");
+	if (onkeydown != null)
+	  out.writeAttribute("onkeydown", onkeydown, "onkeydown");
 
-    if (onkeyup != null)
-      out.writeAttribute("onkeyup", onkeyup, "onkeyup");
+	if (onkeypress != null)
+	  out.writeAttribute("onkeypress", onkeypress, "onkeypress");
 
-    if (onmousedown != null)
-      out.writeAttribute("onmousedown", onmousedown, "onmousedown");
+	if (onkeyup != null)
+	  out.writeAttribute("onkeyup", onkeyup, "onkeyup");
 
-    if (onmousemove != null)
-      out.writeAttribute("onmousemove", onmousemove, "onmousemove");
+	if (onmousedown != null)
+	  out.writeAttribute("onmousedown", onmousedown, "onmousedown");
 
-    if (onmouseout != null)
-      out.writeAttribute("onmouseout", onmouseout, "onmouseout");
+	if (onmousemove != null)
+	  out.writeAttribute("onmousemove", onmousemove, "onmousemove");
 
-    if (onmouseover != null)
-      out.writeAttribute("onmouseover", onmouseover, "onmouseover");
+	if (onmouseout != null)
+	  out.writeAttribute("onmouseout", onmouseout, "onmouseout");
 
-    if (onmouseup != null)
-      out.writeAttribute("onmouseup", onmouseup, "onmouseup");
+	if (onmouseover != null)
+	  out.writeAttribute("onmouseover", onmouseover, "onmouseover");
 
-    if (onselect != null)
-      out.writeAttribute("onselect", onselect, "onselect");
+	if (onmouseup != null)
+	  out.writeAttribute("onmouseup", onmouseup, "onmouseup");
 
-    if (readonly)
-      out.writeAttribute("readonly", "readonly", "readonly");
+	if (onselect != null)
+	  out.writeAttribute("onselect", onselect, "onselect");
 
-    if (tabindex != null)
-      out.writeAttribute("tabindex", tabindex, "tabindex");
+	if (readonly)
+	  out.writeAttribute("readonly", "readonly", "readonly");
 
-    if (title != null)
-      out.writeAttribute("title", title, "title");
+	if (tabindex != null)
+	  out.writeAttribute("tabindex", tabindex, "tabindex");
+
+	if (title != null)
+	  out.writeAttribute("title", title, "title");
       
 	out.endElement("input");
 

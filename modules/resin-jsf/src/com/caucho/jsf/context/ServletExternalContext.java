@@ -65,7 +65,8 @@ public class ServletExternalContext extends ExternalContext {
     throws IOException
   {
     try {
-      _request.getRequestDispatcher(path).include(_request, _response);
+      //_request.getRequestDispatcher(path).include(_request, _response);
+      _request.getRequestDispatcher(path).forward(_request, _response);
     } catch (ServletException e) {
       throw new FacesException(e);
     }

@@ -28,19 +28,25 @@
 
 package com.caucho.jsf.lifecycle;
 
+import com.caucho.util.*;
+
 import java.util.*;
 
 import javax.faces.*;
 import javax.faces.application.*;
+import javax.faces.component.*;
 import javax.faces.context.*;
 import javax.faces.event.*;
 import javax.faces.lifecycle.*;
+import javax.faces.render.*;
 
 /**
  * The default lifecycle implementation
  */
 public class LifecycleImpl extends Lifecycle
 {
+  private static final L10N L = new L10N(LifecycleImpl.class);
+  
   private ArrayList<PhaseListener> _phaseList = new ArrayList<PhaseListener>();
   private PhaseListener []_phaseListeners = new PhaseListener[0];
   
@@ -82,6 +88,105 @@ public class LifecycleImpl extends Lifecycle
   {
     if (context.getResponseComplete() || context.getRenderResponse())
       return;
+
+    restoreView(context);
+    
+    if (context.getResponseComplete() || context.getRenderResponse())
+      return;
+
+    UIViewRoot viewRoot = context.getViewRoot();
+
+    viewRoot.processDecodes(context);
+    
+    if (context.getResponseComplete() || context.getRenderResponse())
+      return;
+    
+    viewRoot.processValidators(context);
+    
+    if (context.getResponseComplete() || context.getRenderResponse())
+      return;
+    
+    viewRoot.processUpdates(context);
+    
+    if (context.getResponseComplete() || context.getRenderResponse())
+      return;
+    
+    viewRoot.processApplication(context);
+  }
+
+  private void restoreView(FacesContext context)
+    throws FacesException
+  {
+    ViewHandler view = context.getApplication().getViewHandler();
+
+    view.initView(context);
+
+    UIViewRoot viewRoot = context.getViewRoot();
+    
+    if (viewRoot != null) {
+      ExternalContext extContext = context.getExternalContext();
+      
+      viewRoot.setLocale(extContext.getRequestLocale());
+
+      // XXX: binding
+
+      return;
+    }
+
+    String viewId = calculateViewId(context);
+
+    String renderKitId = view.calculateRenderKitId(context);
+
+    RenderKitFactory renderKitFactory
+      = (RenderKitFactory) FactoryFinder.getFactory(FactoryFinder.RENDER_KIT_FACTORY);
+    
+    RenderKit renderKit = renderKitFactory.getRenderKit(context, renderKitId);
+
+    ResponseStateManager stateManager = renderKit.getResponseStateManager();
+
+    if (stateManager.isPostback(context)) {
+      viewRoot = view.restoreView(context,  viewId);
+
+      if (viewRoot == null)
+	throw new ViewExpiredException(L.l("{0} is an expired view",
+					 viewId));
+    }
+    else {
+      context.renderResponse();
+      
+      viewRoot = view.createView(context, viewId);
+    }
+
+    context.setViewRoot(viewRoot);
+  }
+
+  private String calculateViewId(FacesContext context)
+  {
+    ExternalContext extContext = context.getExternalContext();
+
+    String servletPath = extContext.getRequestServletPath();
+    String pathInfo = extContext.getRequestPathInfo();
+
+    String path;
+    int dot;
+
+    if (servletPath != null
+	&& (dot = servletPath.lastIndexOf('.')) > 0
+	&& servletPath.lastIndexOf('/') < dot) {
+      // /test/foo.jsp
+
+      return servletPath.substring(0, dot) + ".jsp";
+    }
+    else if (pathInfo != null) {
+      dot = pathInfo.lastIndexOf('.');
+
+      if (dot > 0)
+	return pathInfo.substring(0, dot) + ".jsp";
+      else
+	return pathInfo + ".jsp";
+    }
+    else
+      throw new FacesException("no view-id found");
   }
   
   public void render(FacesContext context)
@@ -95,6 +200,8 @@ public class LifecycleImpl extends Lifecycle
 
     try {
       view.renderView(context, context.getViewRoot());
+
+      view.writeState(context); // XXX:
     } catch (java.io.IOException e) {
       throw new FacesException(e);
     }

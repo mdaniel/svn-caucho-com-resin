@@ -138,6 +138,10 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   {
     PageContext pageContext = this.pageContext;
 
+    this.bodyContent = null;
+    _created = false;
+    _component = null;
+    
     _facesContext = FacesContext.getCurrentInstance();
 
     _parentUIComponentTag

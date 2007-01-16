@@ -177,7 +177,11 @@ public class InjectIntrospector {
 	  throw new ConfigException(L.l("{0}: @PostConstruct is requires zero arguments",
 					method.getName()));
 
-	initList.add(new PostConstructProgram(method));
+	PostConstructProgram initProgram
+	  = new PostConstructProgram(method);
+
+	if (! initList.contains(initProgram))
+	  initList.add(initProgram);
       }
 
       if (method.isAnnotationPresent(PreDestroy.class)) {

@@ -134,7 +134,7 @@ public class EjbEntityBean extends EjbBean {
     Class ejbClass = getEJBClass();
 
     if (! EntityBean.class.isAssignableFrom(ejbClass) && ! isAllowPOJO())
-      throw error(L.l("`{0}' must implement EntityBean.  Entity beans must implement javax.ejb.EntityBean.", ejbClass.getName()));
+      throw error(L.l("'{0}' must implement EntityBean.  Entity beans must implement javax.ejb.EntityBean.", ejbClass.getName()));
 
 
     validateNonFinalMethod("setEntityContext",
@@ -225,7 +225,7 @@ public class EjbEntityBean extends EjbBean {
       */
     }
     else
-      throw new ConfigException(L.l("`{0}' is an known persistence-type.  <persistence-type> must either be `Bean' or `Container'.", type));
+      throw new ConfigException(L.l("'{0}' is an known persistence-type.  <persistence-type> must either be 'Bean' or 'Container'.", type));
   }
 
   /**
@@ -279,7 +279,7 @@ public class EjbEntityBean extends EjbBean {
     _cmpVersion = version;
 
     if (! version.equals("1.x") && ! version.equals("2.x"))
-      throw error(L.l("CMP version `{0}' is not currently supported.  Only CMP version 1.x and 2.x are supported.", version));
+      throw error(L.l("CMP version '{0}' is not currently supported.  Only CMP version 1.x and 2.x are supported.", version));
   }
 
   /**
@@ -1007,12 +1007,12 @@ public class EjbEntityBean extends EjbBean {
                       method.getFullName()));
     }
     else if (method.isStatic()) {
-      throw error(L.l("{0}: `{1}' must not be static. ejbSelect methods must not be static.",
+      throw error(L.l("{0}: '{1}' must not be static. ejbSelect methods must not be static.",
                       getEJBClass().getName(),
                       method.getFullName()));
     }
     else if (! method.isAbstract()) {
-      throw error(L.l("{0}: `{1}' must be abstract. ejbSelect methods must be abstract.",
+      throw error(L.l("{0}: '{1}' must be abstract. ejbSelect methods must be abstract.",
                       getEJBClass().getName(),
                       method.getFullName()));
     }
@@ -1116,7 +1116,7 @@ public class EjbEntityBean extends EjbBean {
       }
 
       if (method.getReturnType().isAssignableTo(EntityBean.class))
-        throw error(L.l("{0}: `{1}' must not return entity bean `{2}'.  Entity bean methods must always return local or remote interfaces.",
+        throw error(L.l("{0}: '{1}' must not return entity bean '{2}'.  Entity bean methods must always return local or remote interfaces.",
                         getEJBClass().getName(),
                         method.getFullName(),
                         method.getReturnType().getShortName()));
@@ -1131,18 +1131,18 @@ public class EjbEntityBean extends EjbBean {
           validateNonFinalMethod(method.getName(), method.getParameterTypes());
         }
         else {
-          throw error(L.l("{0}: `{1}' forbidden. CMP entity beans must not implement ejbFind methods.",
+          throw error(L.l("{0}: '{1}' forbidden. CMP entity beans must not implement ejbFind methods.",
                           method.getDeclaringClass().getName(),
                           method.getFullName()));
         }
       }
       else if (name.startsWith("ejbSelect")) {
         if (! method.isAbstract())
-          throw error(L.l("{0}: `{1}' must be abstract. ejbSelect methods must be abstract.",
+          throw error(L.l("{0}: '{1}' must be abstract. ejbSelect methods must be abstract.",
                           method.getDeclaringClass().getName(),
                           method.getFullName()));
         if (! method.isPublic())
-          throw error(L.l("{0}: `{1}' must be public.",
+          throw error(L.l("{0}: '{1}' must be public.",
                           method.getDeclaringClass().getName(),
                           method.getFullName()));
         validateException(method, FinderException.class);
@@ -1150,7 +1150,7 @@ public class EjbEntityBean extends EjbBean {
       else if (name.startsWith("ejbCreate")) {
         validateNonFinalMethod(method.getName(), method.getParameterTypes());
         if (! isPrimaryKeyClass(method.getReturnType()))
-          throw error(L.l("{0}: `{1}' must return `{2}'.  ejbCreate methods must return the primary key.",
+          throw error(L.l("{0}: '{1}' must return '{2}'.  ejbCreate methods must return the primary key.",
                           method.getDeclaringClass().getName(),
                           method.getFullName(),
                           getClassName(primKeyClass)));
@@ -1161,7 +1161,7 @@ public class EjbEntityBean extends EjbBean {
         validateNonFinalMethod(method.getName(), method.getParameterTypes());
 
         if (! method.getReturnType().getName().equals("void"))
-          throw error(L.l("{0}: `{1}' must return void. ejbPostCreate methods must return void.",
+          throw error(L.l("{0}: '{1}' must return void. ejbPostCreate methods must return void.",
                           method.getDeclaringClass().getName(),
                           method.getFullName()));
       }
@@ -1174,7 +1174,7 @@ public class EjbEntityBean extends EjbBean {
       }
       else if (name.equals("ejbRemove")) {
         if (method.getParameterTypes().length != 0)
-          throw error(L.l("{0}: `{1}' must have no arguments.",
+          throw error(L.l("{0}: '{1}' must have no arguments.",
                           method.getDeclaringClass().getName(),
                           method.getFullName()));
       }
@@ -1182,7 +1182,7 @@ public class EjbEntityBean extends EjbBean {
         JClass []types = method.getParameterTypes();
 
         if (types.length != 1 || ! types[0].getName().equals("javax.ejb.Timer"))
-          throw error(L.l("{0}: `{1}' must have one javax.ejb.Timer argument.",
+          throw error(L.l("{0}: '{1}' must have one javax.ejb.Timer argument.",
                           method.getDeclaringClass().getName(),
                           method.getFullName()));
       }
@@ -1191,10 +1191,10 @@ public class EjbEntityBean extends EjbBean {
       else if (name.equals("finalize") &&
                method.getParameterTypes().length == 0 &&
                ! method.getDeclaringClass().getName().equals("java.lang.Object"))
-        throw error(L.l("{0}: Entity beans must not define `finalize'.",
+        throw error(L.l("{0}: Entity beans must not define 'finalize'.",
                         getEJBClass().getClass()));
       else if (name.startsWith("ejb")) {
-        throw error(L.l("{0}: `{1}' must not start with `ejb'.  ejbXXX methods are reserved by the EJB spec.",
+        throw error(L.l("{0}: '{1}' must not start with 'ejb'.  ejbXXX methods are reserved by the EJB spec.",
                         method.getDeclaringClass().getName(),
                         method.getFullName()));
       }
@@ -1213,7 +1213,7 @@ public class EjbEntityBean extends EjbBean {
         else if (method.getName().startsWith("ejbSelect")) {
         }
         else {
-          throw error(L.l("{0}: `{1}' must not be abstract.  Only CMP methods may be abstract.",
+          throw error(L.l("{0}: '{1}' must not be abstract.  Only CMP methods may be abstract.",
                           method.getDeclaringClass().getName(),
                           method.getFullName()));
         }
@@ -1225,13 +1225,13 @@ public class EjbEntityBean extends EjbBean {
                                                    method.getParameterTypes());
 
           if (persist != null && ! isAbstract)
-            throw error(L.l("`{0}' must be abstract in {1}",
+            throw error(L.l("'{0}' must be abstract in {1}",
                             method.getFullName(),
                             method.getDeclaringClass().getName()));
         }
 
         if (persist == null && isAbstract)
-          throw error(L.l("`{0}' must not be abstract in {1}",
+          throw error(L.l("'{0}' must not be abstract in {1}",
                           method.getFullName(),
                           method.getDeclaringClass().getName()));
         */
@@ -1262,16 +1262,16 @@ public class EjbEntityBean extends EjbBean {
     JClass primKeyClass = getPrimKeyClass();
 
     if (! homeClass.isPublic())
-      throw error(L.l("`{0}' must be public. Entity beans must be public.", homeName));
+      throw error(L.l("'{0}' must be public. Entity beans must be public.", homeName));
 
     if (beanClass.isFinal())
-      throw error(L.l("`{0}' must not be final.  Entity beans must not be final.", beanName));
+      throw error(L.l("'{0}' must not be final.  Entity beans must not be final.", beanName));
 
     if (! isCMP() && beanClass.isAbstract())
-      throw error(L.l("`{0}' must not be abstract. BMP entity beans must not be abstract.", beanName));
+      throw error(L.l("'{0}' must not be abstract. BMP entity beans must not be abstract.", beanName));
 
     if (! homeClass.isInterface())
-      throw error(L.l("`{0}' must be an interface.", homeName));
+      throw error(L.l("'{0}' must be an interface.", homeName));
 
     JMethod []methods = getMethods(homeClass);
     for (int i = 0; i < methods.length; i++) {
@@ -1293,7 +1293,7 @@ public class EjbEntityBean extends EjbBean {
         validateException(method, CreateException.class);
 
         if (! retType.equals(objectClass))
-          throw error(L.l("{0}: `{1}' must return {2}.  Create methods must return the local or remote interface.",
+          throw error(L.l("{0}: '{1}' must return {2}.  Create methods must return the local or remote interface.",
                           homeName,
                           method.getFullName(),
                           objectName));
@@ -1303,13 +1303,13 @@ public class EjbEntityBean extends EjbBean {
           validateNonFinalMethod(createName, param, method, homeClass);
 
         if (! isPrimaryKeyClass(implMethod.getReturnType()))
-          throw error(L.l("{0}: `{1}' must return `{2}'.  ejbCreate methods must return the primary key.",
+          throw error(L.l("{0}: '{1}' must return '{2}'.  ejbCreate methods must return the primary key.",
                           beanName,
                           getFullMethodName(createName, param),
                           getClassName(primKeyClass)));
 
         if (! hasException(implMethod, CreateException.class)) {
-          throw error(L.l("{0}: `{1}' must throw {2}.  ejbCreate methods must throw CreateException.",
+          throw error(L.l("{0}: '{1}' must throw {2}.  ejbCreate methods must throw CreateException.",
                           implMethod.getDeclaringClass().getName(),
                           implMethod.getFullName(),
                           "CreateException"));
@@ -1323,7 +1323,7 @@ public class EjbEntityBean extends EjbBean {
                                             method, homeClass);
 
         if (! implMethod.getReturnType().getName().equals("void"))
-          throw error(L.l("{0}: `{1}' must return {2}. ejbPostCreate methods must return void.",
+          throw error(L.l("{0}: '{1}' must return {2}. ejbPostCreate methods must return void.",
                           beanName,
                           getFullMethodName(createName, param),
                           "void"));
@@ -1337,13 +1337,13 @@ public class EjbEntityBean extends EjbBean {
 
           /*
            if (param.length != 1 || ! param[0].equals(primKeyClass))
-             throw error(L.l("`{0}' expected as only argument of {1} in {2}. findByPrimaryKey must take the primary key as its only argument.",
+             throw error(L.l("'{0}' expected as only argument of {1} in {2}. findByPrimaryKey must take the primary key as its only argument.",
                              getClassName(primKeyClass),
                              name, homeName));
            */
 
           if (! objectClass.equals(method.getReturnType()))
-            throw error(L.l("{0}: `{1}' must return `{2}'.  Find methods must return the remote or local interface.",
+            throw error(L.l("{0}: '{1}' must return '{2}'.  Find methods must return the remote or local interface.",
                             homeName,
                             method.getFullName(),
                             objectName));
@@ -1359,25 +1359,25 @@ public class EjbEntityBean extends EjbBean {
 
           if (objectClass.equals(method.getReturnType())) {
             if (impl != null && ! isPrimaryKeyClass(impl.getReturnType()))
-              throw error(L.l("{0}: `{1}' must return primary key `{2}'.  ejbFind methods must return the primary key",
+              throw error(L.l("{0}: '{1}' must return primary key '{2}'.  ejbFind methods must return the primary key",
                               beanName,
                               impl.getFullName(),
                               getClassName(primKeyClass)));
           }
           else if (method.getReturnType().isAssignableTo(Collection.class)) {
             if (impl != null && ! impl.getReturnType().isAssignableTo(Collection.class))
-              throw error(L.l("{0}: `{1}' must return collection.",
+              throw error(L.l("{0}: '{1}' must return collection.",
                               beanName,
                               impl.getFullName()));
           }
           else if (method.getReturnType().isAssignableTo(Enumeration.class)) {
             if (! impl.getReturnType().isAssignableTo(Enumeration.class))
-              throw error(L.l("{0}: `{1}' must return enumeration.",
+              throw error(L.l("{0}: '{1}' must return enumeration.",
                               beanName,
                               impl.getFullName()));
           }
           else
-            throw error(L.l("{0}: `{1}' must return `{2}' or a collection. ejbFind methods must return the primary key or a collection.",
+            throw error(L.l("{0}: '{1}' must return '{2}' or a collection. ejbFind methods must return the primary key or a collection.",
                             homeName,
                             method.getFullName(),
                             objectName));
@@ -1386,7 +1386,7 @@ public class EjbEntityBean extends EjbBean {
           String query = findQuery(method);
 
           if (query == null) {
-            throw error(L.l("{0}: `{1}' expects an ejb-ql query.  All find methods need queries defined in the EJB deployment descriptor.",
+            throw error(L.l("{0}: '{1}' expects an ejb-ql query.  All find methods need queries defined in the EJB deployment descriptor.",
                             homeName,
                             method.getFullName()));
           }
@@ -1398,24 +1398,24 @@ public class EjbEntityBean extends EjbBean {
             (! retType.isAssignableTo(Collection.class) &&
              ! Enumeration.class.getName().equals(retType.getName()) ||
                                                                      name.equals("findByPrimaryKey"))) {
-          throw error(L.l("{0}: `{1}' must return {2} or a collection. ejbFind methods must return the primary key or a collection.",
+          throw error(L.l("{0}: '{1}' must return {2} or a collection. ejbFind methods must return the primary key or a collection.",
                           homeName,
                           method.getFullName(),
                           objectName));
         }
       }
       else if (name.startsWith("ejbSelect")) {
-        throw error(L.l("{0}: `{1}' forbidden.  ejbSelect methods may not be exposed in the remote or local interface.",
+        throw error(L.l("{0}: '{1}' forbidden.  ejbSelect methods may not be exposed in the remote or local interface.",
                         homeName,
                         method.getFullName()));
       }
       else if (name.startsWith("ejb")) {
-        throw error(L.l("{0}: `{1}' forbidden.  Only ejbXXX methods defined by the spec are allowed.",
+        throw error(L.l("{0}: '{1}' forbidden.  Only ejbXXX methods defined by the spec are allowed.",
                         homeName,
                         method.getFullName()));
       }
       else if (name.startsWith("remove")) {
-        throw error(L.l("{0}: `{1}' forbidden.  removeXXX methods are reserved by the spec.",
+        throw error(L.l("{0}: '{1}' forbidden.  removeXXX methods are reserved by the spec.",
                         homeName,
                         method.getFullName()));
       }
@@ -1425,7 +1425,7 @@ public class EjbEntityBean extends EjbBean {
         if (homeClass.isAssignableTo(EJBHome.class) &&
             (retType.isAssignableTo(EJBLocalObject.class) ||
              retType.isAssignableTo(EJBLocalHome.class)))
-          throw error(L.l("{1}: `{0}' must not return local interface.",
+          throw error(L.l("{1}: '{0}' must not return local interface.",
                           homeClass.getName(),
                           method.getFullName()));
 
@@ -1436,7 +1436,7 @@ public class EjbEntityBean extends EjbBean {
                                             method, homeClass);
 
         if (! retType.equals(implMethod.getReturnType()))
-          throw error(L.l("{0}: `{1}' must return {2}.",
+          throw error(L.l("{0}: '{1}' must return {2}.",
                           beanName,
                           implMethod.getFullName(),
                           method.getReturnType().getName()));
@@ -1447,7 +1447,7 @@ public class EjbEntityBean extends EjbBean {
 
     // ejb/0588
     if (! hasFindByPrimaryKey && ! isAllowPOJO() && objectClass != null)
-      throw error(L.l("{0}: expected `{1}'. All entity homes must define findByPrimaryKey.",
+      throw error(L.l("{0}: expected '{1}'. All entity homes must define findByPrimaryKey.",
                       homeName,
                       getFullMethodName("findByPrimaryKey",
                                         new JClass[] {

@@ -71,7 +71,7 @@ public class UIForm extends UIComponentBase implements NamingContainer
     else if (_isPrependIdExpr != null)
       return Util.evalBoolean(_isPrependIdExpr);
     else
-      return false;
+      return true;
   }
 
   public void setPrependId(boolean value)
@@ -131,6 +131,89 @@ public class UIForm extends UIComponentBase implements NamingContainer
   public void setSubmitted(boolean isSubmitted)
   {
     _isSubmitted = isSubmitted;
+  }
+
+  /**
+   * @Since 1.2
+   */
+  @Override
+  public String getContainerClientId(FacesContext context)
+  {
+    if (isPrependId())
+      return getClientId(context);
+    else
+      return null;
+  }
+
+  //
+  // decode
+  //
+
+  /**
+   * Recursively calls the decodes for any children, then calls
+   * decode().
+   */
+  public void processDecodes(FacesContext context)
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    try {
+      if (! isRendered())
+        return;
+
+      decode(context);
+
+      Iterator iter = getFacetsAndChildren();
+      while (iter.hasNext()) {
+	UIComponent child = (UIComponent) iter.next();
+	
+	child.processDecodes(context);
+      }
+    } catch (RuntimeException e) {
+      context.renderResponse();
+
+      throw e;
+    }
+  }
+
+  //
+  // validators
+  //
+
+  /**
+   * Recursively calls the validators for any children, then calls
+   * decode().
+   */
+  public void processValidators(FacesContext context)
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (! isSubmitted())
+      return;
+
+    super.processValidators(context);
+  }
+
+  //
+  // updates
+  //
+
+  /**
+   * Recursively calls the updates for any children, then calls
+   * update().
+   */
+  @Override
+  public void processUpdates(FacesContext context)
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (! isSubmitted())
+      return;
+
+    super.processUpdates(context);
   }
 
   //

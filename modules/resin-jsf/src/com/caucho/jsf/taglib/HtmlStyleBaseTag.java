@@ -72,6 +72,16 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("acceptcharset", value);
   }
 
+  /*
+  public void setActionListener(MethodExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("actionListener", value);
+  }
+  */
+
   public void setAlt(ValueExpression value)
   {
     if (_map == null)
@@ -150,6 +160,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("columnClasses", value);
+  }
+
+  public void setCols(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("cols", value);
   }
 
   public void setConverter(ValueExpression value)
@@ -232,12 +250,28 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("headerClass", value);
   }
 
+  public void setHeight(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("height", value);
+  }
+
   public void setImage(ValueExpression value)
   {
     if (_map == null)
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("image", value);
+  }
+
+  public void setIsmap(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("ismap", value);
   }
 
   public void setLang(ValueExpression value)
@@ -254,6 +288,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("layout", value);
+  }
+
+  public void setLongdesc(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("longdesc", value);
   }
 
   public void setMaxlength(ValueExpression value)
@@ -440,6 +482,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("rules", value);
   }
 
+  public void setRows(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("rows", value);
+  }
+
   public void setSize(ValueExpression value)
   {
     if (_map == null)
@@ -502,6 +552,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("type", value);
+  }
+
+  public void setUsemap(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("usemap", value);
   }
 
   public void setValue(ValueExpression value)

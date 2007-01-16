@@ -457,7 +457,7 @@ public class UIInput extends UIOutput
   public void validate(FacesContext context)
   {
     Object submittedValue = getSubmittedValue();
-
+    System.out.println("SUBMIT: " + submittedValue);
     if (submittedValue == null)
       return;
 
@@ -467,6 +467,7 @@ public class UIInput extends UIOutput
       value = getConvertedValue(context, submittedValue);
 
       validateValue(context, value);
+      System.out.println("V: " + value + " " + isValid());
 
       if (! isValid()) {
 	context.renderResponse();
@@ -488,6 +489,7 @@ public class UIInput extends UIOutput
     }
 
     Object oldValue = getValue();
+    System.out.println("SET: " + value);
     setValue(value);
     setSubmittedValue(null);
 

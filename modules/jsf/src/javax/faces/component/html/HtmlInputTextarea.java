@@ -623,8 +623,9 @@ public class HtmlInputTextarea extends UIInput
 	return;
 
       case DISABLED:
-	if (expr != null && expr.isLiteralText())
+	if (expr != null && expr.isLiteralText()) {
 	  _disabled = Util.evalBoolean(expr);
+	}
 	else
 	  _disabledExpr = expr;
 	return;

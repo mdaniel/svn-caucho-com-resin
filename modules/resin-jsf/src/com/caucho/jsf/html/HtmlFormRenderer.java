@@ -53,6 +53,22 @@ class HtmlFormRenderer extends Renderer
   {
     return true;
   }
+
+  /**
+   * Decodes the data from the form.
+   */
+  @Override
+  public void decode(FacesContext context, UIComponent component)
+  {
+    String clientId = component.getClientId(context);
+
+    ExternalContext ext = context.getExternalContext();
+    Map<String,String> paramMap = ext.getRequestParameterMap();
+
+    String value = paramMap.get(clientId);
+
+    ((UIForm) component).setSubmitted(value != null);
+  }
   
   /**
    * Renders the open tag for the text.
@@ -158,6 +174,7 @@ class HtmlFormRenderer extends Renderer
 
     out.startElement("form", component);
 
+    out.writeAttribute("name", component.getClientId(context), "name");
     if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
       out.writeAttribute("id", component.getClientId(context), "id");
 
@@ -168,7 +185,9 @@ class HtmlFormRenderer extends Renderer
     Application app = context.getApplication();
     ExternalContext extContext = context.getExternalContext();
 
-    String action = app.getViewHandler().getActionURL(context, viewId);
+    ViewHandler view = app.getViewHandler();
+    String action = view.getResourceURL(context,
+					view.getActionURL(context, viewId));
     String encodedAction = extContext.encodeActionURL(action);
 
     out.writeAttribute("action", encodedAction, "action");
@@ -184,6 +203,8 @@ class HtmlFormRenderer extends Renderer
 
     if (enctype != null)
       out.writeAttribute("enctype", enctype, "enctype");
+    else
+      out.writeAttribute("enctype", "application/x-www-form-urlencoded", "enctype");
 
     if (lang != null)
       out.writeAttribute("lang", lang, "lang");
@@ -270,6 +291,13 @@ class HtmlFormRenderer extends Renderer
     throws IOException
   {
     ResponseWriter out = context.getResponseWriter();
+
+    context.getApplication().getViewHandler().writeState(context);
+
+    out.startElement("input", component);
+    out.writeAttribute("type", "hidden", "type");
+    out.writeAttribute("value", component.getClientId(context), "value");
+    out.endElement("input");
 
     out.endElement("form");
   }

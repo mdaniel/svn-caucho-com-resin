@@ -174,19 +174,22 @@ public abstract class UIComponentBase extends UIComponent
 
     for (UIComponent ptr = getParent(); ptr != null; ptr = ptr.getParent()) {
       if (ptr instanceof NamingContainer) {
-	parentId = ptr.getClientId(context);
+	parentId = ptr.getContainerClientId(context);
+	System.out.println("CIG: " + parentId + " " + ptr);
 	break;
       }
     }
 
     String myId = getId();
 
-    if (myId == null)
+    if (myId == null) {
       myId = context.getViewRoot().createUniqueId();
+      setId(myId);
+    }
 
     if (parentId != null)
       myId = parentId + NamingContainer.SEPARATOR_CHAR + myId;
-
+    
     Renderer renderer = getRenderer(context);
     
     if (renderer != null)
@@ -321,7 +324,6 @@ public abstract class UIComponentBase extends UIComponent
 	continue;
 
       base = findComponent(base, v);
-      System.out.println("FIND2: " + v + " " + base);
 
       if (i + 1 == values.length)
 	return base;
@@ -336,8 +338,6 @@ public abstract class UIComponentBase extends UIComponent
 
   private static UIComponent findComponent(UIComponent comp, String id)
   {
-    System.out.println("FIND: " + id + " " + comp + " " + comp.getId());
-    
     if (id.equals(comp.getId()))
       return comp;
     
@@ -361,11 +361,9 @@ public abstract class UIComponentBase extends UIComponent
     */
 
     Iterator iter = comp.getFacetsAndChildren();
-    System.out.println("COMP: " + comp + " " + comp.getChildCount());
     while (iter.hasNext()) {
       UIComponent child = (UIComponent) iter.next();
 
-      System.out.println("CHILD: " + child + " " + child.getId());
       if (id.equals(child.getId()))
 	return child;
       

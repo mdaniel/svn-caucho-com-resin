@@ -210,7 +210,6 @@ public class AbstractAuthenticator implements ServletAuthenticator {
   {
     String digestPassword = getPasswordDigest(request, response, app,
 					      user, password);
-
     Principal principal = loginImpl(request, response, app, user,
 				    digestPassword);
 

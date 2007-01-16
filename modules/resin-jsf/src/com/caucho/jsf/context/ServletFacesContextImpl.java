@@ -169,13 +169,16 @@ public class ServletFacesContextImpl extends FacesContext
   {
     if (_isClosed)
       throw new IllegalStateException(getClass().getName() + " is closed");
-    
+
+    return _uiViewRoot;
+    /*
     if (_uiViewRoot == null) {
       _uiViewRoot = getApplication().getViewHandler().createView(this,
 								 null);
     }
     
     return _uiViewRoot;
+    */
   }
 
   /**

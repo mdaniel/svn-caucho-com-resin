@@ -64,7 +64,10 @@ class HtmlInputTextRenderer extends Renderer
     ExternalContext ext = context.getExternalContext();
     Map<String,String> paramMap = ext.getRequestParameterMap();
 
-    System.out.println("CIE: " + clientId + " " + paramMap);
+    String value = paramMap.get(clientId);
+
+    if (value != null)
+      ((EditableValueHolder) component).setSubmittedValue(value);
   }
   
   /**

@@ -174,15 +174,19 @@ class HtmlCommandButtonRenderer extends Renderer
       value = attrMap.get("value");
     }
 
-    out.startElement("image", component);
+    out.startElement("input", component);
     if (image != null && ! "".equals(image)) {
       out.writeAttribute("type", "image", "type");
 
-      out.writeAttribute("src", image, "src");
+      ViewHandler view = context.getApplication().getViewHandler();
+      
+      String src = view.getResourceURL(context, image);
+      
+      ExternalContext extContext = context.getExternalContext();
+
+      out.writeAttribute("src", extContext.encodeActionURL(src), "src");
     }
     else {
-      out.startElement("input", component);
-      
       if ("reset".equals(type))
 	out.writeAttribute("type", "reset", "type");
       else

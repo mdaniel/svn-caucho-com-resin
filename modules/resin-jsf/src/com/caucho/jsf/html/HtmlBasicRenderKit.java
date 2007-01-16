@@ -35,6 +35,9 @@ import javax.faces.context.*;
 import javax.faces.render.*;
 
 public class HtmlBasicRenderKit extends RenderKit {
+  private ResponseStateManager _responseStateManager
+    = new ResponseStateManagerImpl();
+  
   private HashMap<Key,Renderer> _rendererMap
     = new HashMap<Key,Renderer>();
 
@@ -50,6 +53,9 @@ public class HtmlBasicRenderKit extends RenderKit {
     
     addRenderer("javax.faces.Form", "javax.faces.Form",
 		HtmlFormRenderer.RENDERER);
+    
+    addRenderer("javax.faces.Graphic", "javax.faces.Image",
+		HtmlGraphicImageRenderer.RENDERER);
     
     addRenderer("javax.faces.Input", "javax.faces.Secret",
 		HtmlInputSecretRenderer.RENDERER);
@@ -92,6 +98,9 @@ public class HtmlBasicRenderKit extends RenderKit {
     
     addRenderer("javax.faces.SelectMany", "javax.faces.Checkbox",
 		HtmlSelectManyCheckboxRenderer.RENDERER);
+    
+    addRenderer("javax.faces.SelectOne", "javax.faces.Listbox",
+		HtmlSelectOneListboxRenderer.RENDERER);
   }
   
   public void addRenderer(String family,
@@ -114,7 +123,7 @@ public class HtmlBasicRenderKit extends RenderKit {
 
   public ResponseStateManager getResponseStateManager()
   {
-    return null;
+    return _responseStateManager;
   }
 
   public ResponseWriter createResponseWriter(Writer writer,
