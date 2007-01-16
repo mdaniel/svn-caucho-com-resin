@@ -187,9 +187,12 @@ public class MysqliModule extends AbstractQuercusModule {
    */
   public static boolean mysqli_close(Env env, Mysqli conn)
   {
+    if (conn != null) {
+      // php/1418
+      //return conn.close(env);
 
-    if (conn != null)
-      return conn.close(env);
+      return true;
+    }
     else
       return false;
   }

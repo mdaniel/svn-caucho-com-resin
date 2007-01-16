@@ -108,7 +108,8 @@ public class MysqlModule extends AbstractQuercusModule {
       if (conn == getConnection(env))
         env.removeSpecialValue("caucho.mysql");
 
-      conn.close(env);
+      // php/1418
+      //conn.close(env);
 
       return true;
     }

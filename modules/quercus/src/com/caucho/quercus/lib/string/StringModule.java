@@ -2297,15 +2297,15 @@ v   *
       ArrayValue subjectArray = (ArrayValue) subject;
       ArrayValue resultArray = new ArrayValueImpl();
 
-      for (Value value : subjectArray.values()) {
+      for (Map.Entry<Value, Value> entry : subjectArray.entrySet()) {
         Value result = strReplaceImpl(env,
-				      search,
-				      replace,
-				      value.toStringValue(),
-				      count,
-				      isInsensitive);
+                  search,
+                  replace,
+                  entry.getValue().toStringValue(),
+                  count,
+                  isInsensitive);
 
-        resultArray.append(result);
+        resultArray.append(entry.getKey(), result);
       }
 
       return resultArray;

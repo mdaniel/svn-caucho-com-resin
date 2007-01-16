@@ -57,4 +57,16 @@ public class ReferenceMarshal extends Marshal
   {
     throw new UnsupportedOperationException();
   }
+
+  @Override
+  protected int getMarshalingCostImpl(Value argValue)
+  {
+    return Marshal.SAME;
+  }
+  
+  @Override
+  public Class getExpectedClass()
+  {
+    return Value.class;
+  }
 }

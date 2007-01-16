@@ -34,6 +34,7 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.lib.VariableModule;
+import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleStartupListener;
@@ -3176,12 +3177,16 @@ public class Env {
 
       int head = 0;
       int tail;
-      while ((tail = includePath.indexOf(':', head)) >= 0) {
-        String subpath = includePath.substring(head, tail);
 
+      String pathSeparator = FileModule.PATH_SEPARATOR;
+      int length = pathSeparator.length();
+
+      while ((tail = includePath.indexOf(pathSeparator, head)) >= 0) {
+        String subpath = includePath.substring(head, tail);
+        
         _includePathList.add(subpath);
 
-        head = tail + 1;
+        head = tail + length;
       }
 
       String subpath = includePath.substring(head);
