@@ -213,7 +213,6 @@ public class CompositeId extends Id {
 
     }
     else {
-
       ArrayList fields;
 
       if (getEmbeddedIdField() == null) {
@@ -230,19 +229,19 @@ public class CompositeId extends Id {
       for (int i = 0; i < fields.size(); i++) {
         AmberField field = (AmberField) fields.get(i);
 
-        // XXX: ejb/06x2
-        boolean isFieldAccess = ! getOwnerType().getPersistenceUnit().isJPA()
-          && getOwnerType().isFieldAccess();
-
-        if (isFieldAccess)
+        if (getOwnerType().isFieldAccess())
           out.println(field.generateSet("key", "a" + i) + ";");
         else {
           String setter = field.getName();
 
-          setter = "set" + Character.toUpperCase(setter.charAt(0)) +
-            (setter.length() == 1 ? "" : setter.substring(1));
+          if (getOwnerType().getPersistenceUnit().isJPA()) {
+            setter = "set" + Character.toUpperCase(setter.charAt(0)) +
+              (setter.length() == 1 ? "" : setter.substring(1));
 
-          out.println("key." + setter + "(a" + i + ");");
+            out.println("key." + setter + "(a" + i + ");");
+          }
+          else // XXX: ejb/06x2, ejb/06if
+            out.println("key." + setter + " = a" + i + ";");
         }
       }
     }
