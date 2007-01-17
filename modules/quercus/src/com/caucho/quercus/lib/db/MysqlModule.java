@@ -636,12 +636,16 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns the MySQL server version.
    */
+  @ReturnNullAsFalse
   public String mysql_get_server_info(Env env, @Optional Mysqli conn)
-  {
+  { 
     if (conn == null)
       conn = getConnection(env);
-
-    return conn.get_server_info();
+    
+    if (conn.isConnected())
+      return conn.get_server_info();
+    else
+      return null;
   }
 
   /**

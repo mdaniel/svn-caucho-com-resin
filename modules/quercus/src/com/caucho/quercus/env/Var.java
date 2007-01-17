@@ -740,10 +740,20 @@ public class Var extends Value
    */
   public Value getArg(Value index)
   {
+    return _value.getArg(index);
+    
+    /*
+     * php/0921, php/3921
+     * 
+     * Commented out:
+     * may get infinite recursion if a new ArgGetValue is created
+     * for NULL values (i.e. getArg(index).toRefVar())
+     * 
     if (_value.isset())
       return _value.getArg(index);
     else
       return new ArgGetValue(this, index); // php/3d2p
+    */
   }
 
   /**

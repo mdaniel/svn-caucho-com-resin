@@ -627,12 +627,16 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns the MySQL server version.
    */
+  @ReturnNullAsFalse
   public static String mysqli_get_server_info(@NotNull Mysqli conn)
   {
     if (conn == null)
       return null;
 
-    return conn.get_server_info();
+    if (conn.isConnected())
+      return conn.get_server_info();
+    else
+      return null;
   }
 
   /**

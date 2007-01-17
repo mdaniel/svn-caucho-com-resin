@@ -232,8 +232,17 @@ public class ServerArrayValue extends ArrayValueImpl {
                   new StringValueImpl(request.getQueryString()));
       }
 
+      // XXX: a better way?
+      // getRealPath() returns a native path
+      // need to convert windows paths to resin paths
+      String root = request.getRealPath("/");
+      if (root.indexOf('\\') >= 0) {
+        root = root.replace('\\', '/');
+        root = '/' + root;
+      }
+      
       super.put(DOCUMENT_ROOT_V,
-                new StringValueImpl(request.getRealPath("/")));
+                new StringValueImpl(root));
 
       super.put(SCRIPT_NAME_V,
                 new StringValueImpl(request.getContextPath() +
