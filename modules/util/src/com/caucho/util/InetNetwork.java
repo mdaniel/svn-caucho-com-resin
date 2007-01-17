@@ -28,12 +28,16 @@
 
 package com.caucho.util;
 
+import java.util.logging.*;
 import java.net.InetAddress;
 
 /**
  * Represents an internet network mask.
  */
 public class InetNetwork {
+  private static final Logger log
+    = Logger.getLogger(InetNetwork.class.getName());
+  
   private long _address;
   private long _mask;
   private int _maskIndex;
@@ -136,6 +140,20 @@ public class InetNetwork {
       address = 256 * address + (bytes[i] & 0xff);
 
     return (_address & _mask) == (address & _mask);
+  }
+
+  /**
+   * Returns true if the address is in this network.
+   */
+  public boolean isMatch(String address)
+  {
+    try {
+      return isMatch(InetAddress.getByName(address));
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+
+      return false;
+    }
   }
 
   /**

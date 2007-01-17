@@ -29,7 +29,7 @@
 
 package com.caucho.server.rewrite;
 
-import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * A rewrite condition that passes if the {@link java.util.Locale} of the
@@ -45,9 +45,8 @@ public class LocaleMatchesCondition
     return "locale-matches";
   }
 
-  protected String getValue(ServletRequest request)
+  protected String getValue(HttpServletRequest request)
   {
     return String.valueOf(request.getLocale());
   }
-
 }

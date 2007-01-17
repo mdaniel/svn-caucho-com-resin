@@ -30,7 +30,7 @@
 package com.caucho.server.rewrite;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.regex.Pattern;
 
 abstract public class AbstractMatchesCondition
@@ -75,11 +75,11 @@ abstract public class AbstractMatchesCondition
       _regexp = Pattern.compile(_regexp.pattern(), Pattern.CASE_INSENSITIVE);
   }
 
-  abstract protected String getValue(ServletRequest request);
+  abstract protected String getValue(HttpServletRequest request);
 
-  public boolean evaluate(RewriteContext rewriteContext)
+  public boolean isMatch(HttpServletRequest request)
   {
-    String value = getValue(rewriteContext.getRequest());
+    String value = getValue(request);
 
     if (value == null)
         value = "";

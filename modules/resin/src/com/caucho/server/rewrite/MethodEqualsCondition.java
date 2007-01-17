@@ -44,11 +44,8 @@ public class MethodEqualsCondition
     return "method-equals";
   }
 
-  protected String getValue(ServletRequest request)
+  protected String getValue(HttpServletRequest request)
   {
-    if (request instanceof HttpServletRequest)
-      return ((HttpServletRequest) request).getMethod();
-    else
-      return null;
+    return request.getMethod();
   }
 }

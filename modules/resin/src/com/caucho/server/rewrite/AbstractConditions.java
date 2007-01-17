@@ -55,6 +55,20 @@ abstract public class AbstractConditions
     add(condition);
   }
 
+  public void addRequire(RequireConfig require)
+  {
+    _conditions.add(require.getCondition());
+  }
+
+  public void addForbid(RequireConfig require)
+  {
+    Condition condition = require.getCondition();
+    NotConditions not = new NotConditions();
+    not.addCondition(require.getCondition());
+
+    _conditions.add(not);
+  }
+
   public AndConditions createAnd()
   {
     return new AndConditions(_rewriteDispatch);
@@ -184,6 +198,4 @@ abstract public class AbstractConditions
   {
     return _rewriteDispatch.getParseContext();
   }
-
-  abstract public boolean evaluate(RewriteContext rewriteContext);
 }

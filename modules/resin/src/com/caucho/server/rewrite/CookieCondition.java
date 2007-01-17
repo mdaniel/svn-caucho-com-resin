@@ -29,34 +29,51 @@
 
 package com.caucho.server.rewrite;
 
-import java.util.ArrayList;
-import javax.servlet.http.*;
+import java.util.regex.*;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Cookie;
+import javax.annotation.PostConstruct;
 
-public class OrConditions
-  extends AbstractConditions
+/**
+ * A rewrite condition that passes if a named cookie has a value
+ * that matches a regular expression.  If a cookie does not exist,
+ * it has a value of "" (empty string) for purposes of comparison
+ * to the regular expression pattern.
+ */
+public class CookieCondition
+  extends AbstractCondition
 {
-  public OrConditions(RewriteDispatch rewriteDispatch)
+  private String _name;
+  private Pattern _regexp;
+
+  CookieCondition(String name)
   {
-    super(rewriteDispatch);
+    _name = name;
   }
-  
-  public OrConditions()
+
+  public void setRegexp(Pattern regexp)
   {
-    super(null);
+    _regexp = regexp;
   }
 
   public String getTagName()
   {
-    return "or";
+    return "cookie";
   }
 
   public boolean isMatch(HttpServletRequest request)
   {
-    ArrayList<Condition> conditions = getConditions();
+    Cookie[] cookies = request.getCookies();
 
-    for (int i = 0; i < conditions.size(); i++) {
-      if (conditions.get(i).isMatch(request))
-	return true;
+    if (cookies != null) {
+      for (int i = 0; i < cookies.length; i++) {
+	Cookie cookie = cookies[i];
+	
+	if (cookie.getName().equals(_name)) {
+	  return _regexp == null || _regexp.matcher(cookie.getValue()).find();
+	}
+      }
     }
 
     return false;

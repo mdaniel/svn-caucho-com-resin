@@ -29,7 +29,7 @@
 
 package com.caucho.server.rewrite;
 
-import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import javax.annotation.PostConstruct;
 
 /**
@@ -61,7 +61,7 @@ public class ParamExistsCondition
     required(_name, "name");
   }
 
-  protected String getValue(ServletRequest request)
+  protected String getValue(HttpServletRequest request)
   {
     return request.getParameter(_name);
   }

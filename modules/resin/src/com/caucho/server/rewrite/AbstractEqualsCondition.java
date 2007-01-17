@@ -33,6 +33,7 @@ import com.caucho.util.L10N;
 import com.caucho.config.ConfigException;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
@@ -82,9 +83,9 @@ abstract public class AbstractEqualsCondition
     required(_value, "value");
   }
 
-  public boolean evaluate(RewriteContext rewriteContext)
+  public boolean isMatch(HttpServletRequest request)
   {
-    String value = getValue(rewriteContext.getRequest());
+    String value = getValue(request);
 
     if (value == null)
       return false;
@@ -98,5 +99,5 @@ abstract public class AbstractEqualsCondition
   /**
    * Returns the value, if it is null then the comparison always fails.
    */
-  protected abstract String getValue(ServletRequest request);
+  protected abstract String getValue(HttpServletRequest request);
 }

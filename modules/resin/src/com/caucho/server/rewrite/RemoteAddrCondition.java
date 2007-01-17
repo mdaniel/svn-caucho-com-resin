@@ -32,36 +32,27 @@ package com.caucho.server.rewrite;
 import com.caucho.util.InetNetwork;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 public class RemoteAddrCondition
   extends AbstractCondition
 {
   private InetNetwork _value;
 
+  public RemoteAddrCondition(InetNetwork value)
+  {
+    _value = value;
+  }
+
   public String getTagName()
   {
     return "remote-addr";
   }
 
-  /**
-   * Sets the network to match, required.
-   */
-  public void setValue(InetNetwork value)
+  public boolean isMatch(HttpServletRequest request)
   {
-    _value = value;
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    required(_value, "value");
-  }
-
-  public boolean evaluate(RewriteContext rewriteContext)
-  {
-    String remoteAddr = rewriteContext.getRequest().getRemoteAddr();
+    String remoteAddr = request.getRemoteAddr();
 
     return remoteAddr != null && _value.isMatch(remoteAddr);
   }
-
 }

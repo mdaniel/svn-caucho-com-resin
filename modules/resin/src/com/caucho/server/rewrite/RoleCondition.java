@@ -62,13 +62,8 @@ public class RoleCondition
     required(_value, "value");
   }
 
-  public boolean evaluate(RewriteContext rewriteContext)
+  public boolean isMatch(HttpServletRequest request)
   {
-    ServletRequest request = rewriteContext.getRequest();
-    
-    if (request instanceof HttpServletRequest)
-      return ((HttpServletRequest) request).isUserInRole(_value);
-
-    return false;
+    return request.isUserInRole(_value);
   }
 }

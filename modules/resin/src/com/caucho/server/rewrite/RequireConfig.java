@@ -30,7 +30,10 @@
 package com.caucho.server.rewrite;
 
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.config.types.RawString;
+import com.caucho.util.InetNetwork;
 
+import java.util.regex.*;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 import javax.el.FunctionMapper;
@@ -39,72 +42,61 @@ import javax.servlet.ServletRequest;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
 
-public class RewriteContext
-  extends ELContext
+public class RequireConfig
 {
-  private RewriteDispatch _rewriteDispatch;
+  private AbstractCondition _condition;
+  
+  private String _regexp;
+  private boolean _isIgnoreCase;
 
-  private ServletRequest _request;
-  private ServletResponse _response;
-
-  public RewriteContext()
+  /**
+   * Sets the el expression.
+   */
+  public void setExpr(RawString expr)
   {
+    _condition = new ExprCondition(expr.getValue());
+  }
+  
+  public void setHeader(String header)
+  {
+    _condition = new HeaderCondition(header);
+  }
+  
+  public void setCookie(String cookie)
+  {
+    _condition = new CookieCondition(cookie);
+  }
+  
+  public void setParam(String cookie)
+  {
+    _condition = new ParamCondition(cookie);
+  }
+  
+  public void setRemoteAddr(String addr)
+  {
+    _condition = new RemoteAddrCondition(InetNetwork.create(addr));
   }
 
-  public RewriteContext(RewriteDispatch rewriteDispatch)
+  public void setRegexp(String regexp)
   {
-    _rewriteDispatch = rewriteDispatch;
+    _regexp = regexp;
   }
 
-  public RewriteContext(HttpServletRequest request)
+  public void setIgnoreCase(boolean ignoreCase)
   {
-    _request = request;
-    _rewriteDispatch = null;
+    _isIgnoreCase = ignoreCase;
   }
-
-  public void setRequest(ServletRequest request)
+  
+  Condition getCondition()
   {
-    _request = request;
-  }
+    if (_regexp == null) {
+    }
+    else if (_isIgnoreCase)
+      _condition.setRegexp(Pattern.compile(_regexp, Pattern.CASE_INSENSITIVE));
+    else
+      _condition.setRegexp(Pattern.compile(_regexp));
 
-  public ServletRequest getRequest()
-  {
-    return _request;
-  }
-
-  public void setResponse(ServletResponse response)
-  {
-    _response = response;
-  }
-
-  public ServletResponse getResponse()
-  {
-    return _response;
-  }
-
-  public ELResolver getELResolver()
-  {
-    return null;
-  }
-
-  public FunctionMapper getFunctionMapper()
-  {
-    return null;
-  }
-
-  public VariableMapper getVariableMapper()
-  {
-    return null;
-  }
-
-  FilterChain map(String uri,
-                  Invocation invocation,
-                  FilterChain next,
-                  int start)
-    throws ServletException
-  {
-    return _rewriteDispatch.map(this, uri, invocation, next, start);
+    return _condition;
   }
 }

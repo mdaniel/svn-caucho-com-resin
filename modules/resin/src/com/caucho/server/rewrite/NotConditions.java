@@ -30,10 +30,16 @@
 package com.caucho.server.rewrite;
 
 import java.util.ArrayList;
+import javax.servlet.http.*;
 
 public class NotConditions
   extends AbstractConditions
 {
+  public NotConditions()
+  {
+    super(null);
+  }
+
   public NotConditions(RewriteDispatch rewriteDispatch)
   {
     super(rewriteDispatch);
@@ -44,21 +50,15 @@ public class NotConditions
     return "not";
   }
 
-  public boolean evaluate(RewriteContext rewriteContext)
+  public boolean isMatch(HttpServletRequest request)
   {
-    boolean pass = true;
-
     ArrayList<Condition> conditions = getConditions();
 
     for (int i = 0; i < conditions.size(); i++) {
-      boolean result = conditions.get(i).evaluate(rewriteContext);
-
-      if (result) {
-        pass = false;
-        break;
-      }
+      if (conditions.get(i).isMatch(request))
+	return false;
     }
 
-    return pass;
+    return true;
   }
 }

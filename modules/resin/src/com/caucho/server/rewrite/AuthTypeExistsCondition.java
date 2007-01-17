@@ -44,11 +44,8 @@ public class AuthTypeExistsCondition
     return "auth-type-exists";
   }
 
-  protected String getValue(ServletRequest request)
+  protected String getValue(HttpServletRequest request)
   {
-    if (request instanceof HttpServletRequest)
-      return ((HttpServletRequest) request).getAuthType();
-    else
-      return null;
+    return request.getAuthType();
   }
 }

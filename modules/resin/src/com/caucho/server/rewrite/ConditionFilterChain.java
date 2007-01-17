@@ -33,6 +33,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,31 +43,27 @@ class ConditionFilterChain
 {
   private static final Logger log = Logger.getLogger(ConditionFilterChain.class.getName());
 
-  private final RewriteContext _rewriteContext;
   private final String _logPrefix;
   private final String _uri;
   private final String _targetUri;
   private final FilterChain _failChain;
-  private final AbstractConditions _conditions;
+  private final Condition []_conditions;
   private final FilterChain _passChain;
 
   private final boolean _isFiner;
   private final boolean _isFinest;
 
-  public ConditionFilterChain(RewriteContext rewriteContext,
-                              String logPrefix,
+  public ConditionFilterChain(String logPrefix,
                               String uri,
                               String targetUri,
-                              AbstractConditions conditions,
+                              Condition []conditions,
                               FilterChain passChain,
                               FilterChain failChain)
   {
-    assert rewriteContext != null;
     assert conditions != null;
     assert passChain != null;
     assert failChain != null;
 
-    _rewriteContext = rewriteContext;
     _logPrefix = logPrefix;
     _uri = uri;
     _targetUri = targetUri;
@@ -82,20 +79,21 @@ class ConditionFilterChain
   public void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
-    _rewriteContext.setRequest(request);
-    _rewriteContext.setResponse(response);
-
-    boolean pass = _conditions.evaluate(_rewriteContext);
-
-    FilterChain next = pass ? _passChain : _failChain;
-
-    if (_isFiner) {
-      if (pass)
-        log.finer(_logPrefix + " '" + _uri + "' --> '" + _targetUri + "'");
-      else if (_isFinest)
-        log.finest(_logPrefix + " '" + _uri + "' --> '" + _targetUri + "'  failed conditions");
+    HttpServletRequest req = (HttpServletRequest) request;
+    
+    for (int i = 0; i < _conditions.length; i++) {
+      if (! _conditions[i].isMatch(req)) {
+	if (_isFiner)
+	  log.finer(_logPrefix + " '" + _uri + "' --> '" + _targetUri + "'");
+	
+	_failChain.doFilter(request, response);
+	return;
+      }
     }
 
-    next.doFilter(_rewriteContext.getRequest(), _rewriteContext.getResponse());
+    if (_isFiner)
+      log.finer(_logPrefix + " '" + _uri + "' --> '" + _targetUri + "'");
+    
+    _passChain.doFilter(request, response);
   }
 }

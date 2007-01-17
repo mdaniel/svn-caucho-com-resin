@@ -44,7 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 public class AuthTypeEqualsCondition
  extends AbstractEqualsCondition
 {
-  private L10N L = new L10N(AuthTypeEqualsCondition.class);
+  private static final L10N L = new L10N(AuthTypeEqualsCondition.class);
 
   public String getTagName()
   {
@@ -69,11 +69,8 @@ public class AuthTypeEqualsCondition
     }
   }
 
-  protected String getValue(ServletRequest request)
+  protected String getValue(HttpServletRequest request)
   {
-    if (request instanceof HttpServletRequest)
-      return ((HttpServletRequest) request).getAuthType();
-    else
-      return null;
+    return request.getAuthType();
   }
 }

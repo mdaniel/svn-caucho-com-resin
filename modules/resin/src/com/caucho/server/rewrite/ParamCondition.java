@@ -29,36 +29,43 @@
 
 package com.caucho.server.rewrite;
 
-import java.util.ArrayList;
-import javax.servlet.http.*;
+import java.util.regex.*;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.annotation.PostConstruct;
 
-public class OrConditions
-  extends AbstractConditions
+/**
+* A rewrite condition that passes if the value of a named header is exactly
+* equal to a specified value.
+*/
+public class ParamCondition
+  extends AbstractCondition
 {
-  public OrConditions(RewriteDispatch rewriteDispatch)
+  private final String _param;
+  private Pattern _pattern;
+
+  ParamCondition(String param)
   {
-    super(rewriteDispatch);
+    _param = param;
   }
   
-  public OrConditions()
-  {
-    super(null);
-  }
-
   public String getTagName()
   {
-    return "or";
+    return "param";
+  }
+
+  public void setRegexp(Pattern pattern)
+  {
+    _pattern = pattern;
   }
 
   public boolean isMatch(HttpServletRequest request)
   {
-    ArrayList<Condition> conditions = getConditions();
+    String value = request.getParameter(_param);
 
-    for (int i = 0; i < conditions.size(); i++) {
-      if (conditions.get(i).isMatch(request))
-	return true;
-    }
-
-    return false;
+    if (value == null)
+      return false;
+    else
+      return _pattern == null || _pattern.matcher(value).find();
   }
 }

@@ -63,11 +63,8 @@ public class HeaderEqualsCondition
     required(_name, "name");
   }
 
-  protected String getValue(ServletRequest request)
+  protected String getValue(HttpServletRequest request)
   {
-    if (request instanceof HttpServletRequest)
-      return ((HttpServletRequest) request).getHeader(_name);
-    else
-      return null;
+    return request.getHeader(_name);
   }
 }

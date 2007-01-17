@@ -287,9 +287,9 @@ public class RewriteDispatch {
 
       Matcher matcher = program.matcher(uri);
 
-      if (!matcher.find()) {
+      if (! matcher.find()) {
         if (_isFinest)
-          log.finest(program.getLogPrefix() + " no match");
+          log.finest(program.getLogPrefix() + " does not match " + uri);
 
         continue;
       }
@@ -298,7 +298,7 @@ public class RewriteDispatch {
 
       FilterChain programChain = program.dispatch(targetUri);
 
-      AbstractConditions conditions = program.getConditions();
+      Condition []conditions = program.getConditions();
 
       if (conditions != null) {
         FilterChain passChain;
@@ -323,8 +323,7 @@ public class RewriteDispatch {
                                        nextChain,
                                        i + 1);
 
-        nextChain = new ConditionFilterChain(rewriteContext,
-                                             program.getLogPrefix(),
+        nextChain = new ConditionFilterChain(program.getLogPrefix(),
                                              uri,
                                              targetUri,
                                              conditions,
@@ -358,8 +357,9 @@ public class RewriteDispatch {
     private Pattern _regexp;
     private Boolean _secure = null;
     private int _port = -1;
-    private AndConditions _conditions;
     private String _logPrefix;
+    private ArrayList<Condition> _conditionList = new ArrayList<Condition>();
+    private Condition []_conditions;
 
     protected Program()
     {
@@ -386,7 +386,7 @@ public class RewriteDispatch {
     }
 
     /**
-     * Set's the requirement that the request be secure or not secure for the
+     * Sets the requirement that the request be secure or not secure for the
      * program to match, default is to match both.
      */
     public void setSecure(boolean secure)
@@ -427,15 +427,54 @@ public class RewriteDispatch {
      * Create a set of conditions that must pass for the program to match,
      * default is no conditions.
      */
-    public AndConditions createConditions()
+    public Condition createConditions()
     {
-      if (_conditions == null)
-        _conditions = new AndConditions(RewriteDispatch.this);
+      Condition condition = new AndConditions(RewriteDispatch.this);
 
-      return _conditions;
+      _conditionList.add(condition);
+
+      return condition;
     }
 
-    AbstractConditions getConditions()
+    /**
+     * Adds an 'or' condition
+     */
+    public void addOr(OrConditions condition)
+    {
+      _conditionList.add(condition);
+    }
+
+    /**
+     * Adds a 'not' condition
+     */
+    public void addNot(NotConditions condition)
+    {
+      _conditionList.add(condition);
+    }
+
+    /**
+     * Adds an 'and' condition
+     */
+    public void addAnd(AndConditions condition)
+    {
+      _conditionList.addAll(condition.getConditions());
+    }
+
+    public void addRequire(RequireConfig require)
+    {
+      _conditionList.add(require.getCondition());
+    }
+
+    public void addForbid(RequireConfig require)
+    {
+      Condition condition = require.getCondition();
+      NotConditions not = new NotConditions();
+      not.addCondition(require.getCondition());
+
+      _conditionList.add(not);
+    }
+
+    public Condition []getConditions()
     {
       return _conditions;
     }
@@ -464,6 +503,11 @@ public class RewriteDispatch {
         _logPrefix = _logPrefix + " (port " + getPort() + ")";
 
       required(_regexp, "regexp");
+
+      if (_conditionList.size() > 0) {
+	_conditions = new Condition[_conditionList.size()];
+	_conditionList.toArray(_conditions);
+      }
     }
 
     public String getLogPrefix()
@@ -486,7 +530,6 @@ public class RewriteDispatch {
     {
       return null;
     }
-
   }
 
   public class Accept extends Program {

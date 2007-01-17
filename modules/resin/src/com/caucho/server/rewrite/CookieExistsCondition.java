@@ -63,16 +63,16 @@ public class CookieExistsCondition
     required(_name, "name");
   }
 
-  protected String getValue(ServletRequest request)
+  protected String getValue(HttpServletRequest request)
   {
-    if (request instanceof HttpServletRequest) {
-      Cookie[] cookies = ((HttpServletRequest) request).getCookies();
+    Cookie[] cookies = request.getCookies();
 
-      if (cookies != null) {
-        for (Cookie cookie : cookies) {
-          if (cookie.getName().equals(_name))
-            return cookie.getValue();
-        }
+    if (cookies != null) {
+      for (int i = 0; i < cookies.length; i++) {
+	Cookie cookie = cookies[i];
+	
+	if (cookie.getName().equals(_name))
+	  return cookie.getValue();
       }
     }
 

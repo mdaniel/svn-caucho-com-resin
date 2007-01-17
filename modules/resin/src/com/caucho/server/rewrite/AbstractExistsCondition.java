@@ -30,7 +30,7 @@
 package com.caucho.server.rewrite;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * A rewrite condition that passes if a value is not null.
@@ -43,13 +43,13 @@ abstract public class AbstractExistsCondition
   {
   }
 
-  public boolean evaluate(RewriteContext rewriteContext)
+  public boolean isMatch(HttpServletRequest request)
   {
-    return getValue(rewriteContext.getRequest()) != null;
+    return getValue(request) != null;
   }
 
   /**
    * Returns the value, if it is not null then it exists.
    */
-  protected abstract String getValue(ServletRequest request);
+  protected abstract String getValue(HttpServletRequest request);
 }

@@ -38,6 +38,7 @@ import com.caucho.util.L10N;
 import javax.annotation.PostConstruct;
 import javax.el.ELContext;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
@@ -48,7 +49,7 @@ public class ExprCondition
 {
   private static final L10N L = new L10N(ExprCondition.class);
 
-  private final AbstractConditions _conditions;
+  private AbstractConditions _conditions;
 
   private Expr _expr;
 
@@ -56,6 +57,14 @@ public class ExprCondition
   {
     _conditions = conditions;
   }
+
+  public ExprCondition(String expr)
+  {
+    ELContext elContext = new RewriteContext();
+    
+    _expr = new ELParser(elContext, expr).parse();
+  }
+
 
   public String getTagName()
   {
@@ -78,8 +87,8 @@ public class ExprCondition
       throw new ConfigException(L.l("`{0}' is required", "#text"));
   }
 
-  public boolean evaluate(RewriteContext rewriteContext)
+  public boolean isMatch(HttpServletRequest request)
   {
-    return _expr.evalBoolean(rewriteContext);
+    return _expr.evalBoolean(new RewriteContext(request));
   }
 }

@@ -61,133 +61,6 @@ r_cache-mapping = element cache-mapping {
      | element s-max-age { r_period })?
 }
 
-r_conditions-Content =
-  element and { r_conditions-Content }*
-
-  & element auth-type-equals {
-      (attribute value { string }
-       | element value { string })
-
-      & (attribute ignore-case { string }
-         | element ignore-case { string })*
-     }*
-
-  & element auth-type-exists { empty }*
-
-  & element cookie-equals {
-      (attribute name { string }
-       | element name { string })
-
-      & (attribute value { string }
-         | element value { string })
-
-      & (attribute ignore-case { string }
-         | element ignore-case { string })*
-     }*
-
-  & element cookie-exists {
-      (attribute name { string }
-       | element name { string })
-     }*
-
-  & element cookie-matches {
-      (attribute name { string }
-       | element name { string })
-
-      & (attribute regexp { string }
-         | element regexp { string })
-
-      & (attribute ignore-case { string }
-         | element ignore-case { string })*
-     }*
-
-  & element expr { string }*
-
-  & element header-equals {
-      (attribute name { string }
-       | element name { string })
-
-      & (attribute value { string }
-         | element value { string })
-
-      & (attribute ignore-case { string }
-         | element ignore-case { string })*
-     }*
-
-  & element header-exists {
-      (attribute name { string }
-       | element name { string })
-     }*
-
-  & element header-matches {
-      (attribute name { string }
-       | element name { string })
-
-      & (attribute regexp { string }
-         | element regexp { string })
-
-      & (attribute ignore-case { string }
-         | element ignore-case { string })*
-     }*
-
-  & element locale-matches {
-      (attribute regexp { string }
-       | element regexp { string })
-
-      & (attribute ignore-case { string }
-         | element ignore-case { string })*
-     }*
-
-  & element method-equals {
-      (attribute value { string }
-       | element value { string })
-
-      & (attribute ignore-case { string }
-         | element ignore-case { string })*
-     }*
-
-  & element not { r_conditions-Content }*
-
-  & element or { r_conditions-Content }*
-
-  & element param-equals {
-      (attribute name { string }
-       | element name { string })
-
-      & (attribute value { string }
-         | element value { string })
-
-      & (attribute ignore-case { string }
-         | element ignore-case { string })*
-     }*
-
-  & element param-exists {
-      (attribute name { string }
-       | element name { string })
-     }*
-
-  & element param-matches {
-      (attribute name { string }
-       | element name { string })
-
-      & (attribute regexp { string }
-         | element regexp { string })
-
-      & (attribute ignore-case { string }
-         | element ignore-case { string })*
-     }*
-
-  & element remote-addr {
-      (attribute value { string }
-       | element value { string })
-     }*
-
-  & element role {
-      (attribute value { string }
-       | element value { string })
-     }*
-
-
 r_constraint = element constraint {
   r_resin-type,
 
@@ -548,6 +421,46 @@ r_rest = element rest {
   & (element jaxb-package { string }* | element jaxb-class { string }*)?
 }
 
+r_rewrite-conditions-Content =
+  element and { r_rewrite-conditions-Content }*
+
+  & element forbid {
+      r_rewrite-require-Content
+     }*
+
+  & element not { r_rewrite-conditions-Content }*
+
+  & element or { r_rewrite-conditions-Content }*
+
+  & element require {
+      r_rewrite-require-Content
+     }*
+
+r_rewrite-conditions-Type =
+  r_rewrite-conditions-Content
+
+r_rewrite-require-Content =
+  ((attribute cookie { string }
+   | element cookie { string })
+
+   | (attribute expr { string }
+      | element expr { string })
+
+   | (attribute header { string }
+      | element header { string })
+
+   | (attribute param { string }
+      | element param { string })
+
+   | (attribute remote-addr { string }
+      | element remote-addr { string }))
+
+  & (attribute regexp { string }
+     | element regexp { string })?
+
+  & (attribute ignore-case { string }
+     | element ignore-case { string })?
+
 r_rewrite-dispatch = element rewrite-dispatch {
   (attribute case-insensitive { string }
    | element case-insensitive { string })?
@@ -559,7 +472,7 @@ r_rewrite-dispatch = element rewrite-dispatch {
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?
 
-       & (element conditions { r_conditions-Content } )*
+       & r_rewrite-conditions-Type
    }*
 
    & element forbidden {
@@ -569,7 +482,7 @@ r_rewrite-dispatch = element rewrite-dispatch {
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?
 
-       & (element conditions { r_conditions-Content } )*
+       & r_rewrite-conditions-Type
      }*
 
    & element forward {
@@ -582,7 +495,7 @@ r_rewrite-dispatch = element rewrite-dispatch {
        & (attribute target { string }
           | element target { string })
 
-       & (element conditions { r_conditions-Content } )*
+       & r_rewrite-conditions-Type
      }*
 
    & element gone {
@@ -592,7 +505,7 @@ r_rewrite-dispatch = element rewrite-dispatch {
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })*
 
-       & (element conditions { r_conditions-Content } )?
+       & r_rewrite-conditions-Type
      }*
 
    & element load-balance {
@@ -614,7 +527,7 @@ r_rewrite-dispatch = element rewrite-dispatch {
        & (attribute sticky-sessions { r_boolean-Type }
           | element sticky-sessions { r_boolean-Type })?
 
-       & (element conditions { r_conditions-Content } )*
+       & r_rewrite-conditions-Type
      }*
 
    & element moved-permanently {
@@ -627,7 +540,7 @@ r_rewrite-dispatch = element rewrite-dispatch {
        & (attribute target { string }
           | element target { string })
 
-       & (element conditions { r_conditions-Content } )*
+       & r_rewrite-conditions-Type
      }*
 
    & element not-found {
@@ -637,7 +550,7 @@ r_rewrite-dispatch = element rewrite-dispatch {
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?
 
-       & (element conditions { r_conditions-Content } )*
+       & r_rewrite-conditions-Type
      }*
 
    & element redirect {
@@ -650,7 +563,7 @@ r_rewrite-dispatch = element rewrite-dispatch {
        & (attribute target { string }
             | element target { string })
 
-       & (element conditions { r_conditions-Content } )*
+       & r_rewrite-conditions-Type
      }*
 
   & element rewrite {
@@ -663,7 +576,7 @@ r_rewrite-dispatch = element rewrite-dispatch {
        & (attribute replacement { string }
           | element replacement { string })
 
-       & (element conditions { r_conditions-Content } )*
+       & r_rewrite-conditions-Type
    }*
 }
 

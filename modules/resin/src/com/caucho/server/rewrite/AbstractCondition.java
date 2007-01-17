@@ -32,6 +32,8 @@ package com.caucho.server.rewrite;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
+import java.util.regex.*;
+
 abstract public class AbstractCondition
   implements Condition
 {
@@ -53,8 +55,8 @@ abstract public class AbstractCondition
                                     getTagName(), name));
   }
 
-  /**
-   * Returns true if the condition passes.
-   */
-  abstract public boolean evaluate(RewriteContext rewriteContext);
+  protected void setRegexp(Pattern regexp)
+  {
+    
+  }
 }

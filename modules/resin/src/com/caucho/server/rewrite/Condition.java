@@ -29,15 +29,18 @@
 
 package com.caucho.server.rewrite;
 
+import javax.servlet.http.*;
+
 public interface Condition
 {
   /**
-   * Returns a descriptive name for the tag, for logging and for error messages.
+   * Returns a descriptive name for the tag, for logging and for
+   * error messages.
    */
   public String getTagName();
 
   /**
    * Returns true if the condition passes.
    */
-  public boolean evaluate(RewriteContext rewriteContext);
+  public boolean isMatch(HttpServletRequest request);
 }
