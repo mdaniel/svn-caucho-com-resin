@@ -262,8 +262,7 @@ public class AmberConnection
       if (entity == null)
         return;
 
-      if (! (entity instanceof Entity))
-        throw new IllegalArgumentException(L.l("persist() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit."));
+      checkEntityType(entity, "persist");
 
       checkTransactionRequired("persist");
 
@@ -310,8 +309,7 @@ public class AmberConnection
   {
     try {
 
-      if (! (entityT instanceof Entity))
-        throw new IllegalArgumentException(L.l("merge() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit."));
+      checkEntityType(entityT, "merge");
 
       flushInternal();
 
@@ -325,8 +323,18 @@ public class AmberConnection
           throw new UnsupportedOperationException(L.l("Merge operation for detached instances is not supported"));
         }
         else {
-          // new entity instance
-          persist(entity);
+          try {
+            // new entity instance
+            persist(entity);
+          } catch (Exception e) {
+            if (e.getCause() instanceof SQLException) {
+              // OK: jpa/0ga3, entity exists in the database
+              log.log(Level.FINER, e.toString(), e);
+            }
+            else {
+              throw e;
+            }
+          }
         }
       }
       else if (state >= com.caucho.amber.entity.Entity.P_DELETING) {
@@ -364,8 +372,7 @@ public class AmberConnection
       if (entity == null)
         return;
 
-      if (! (entity instanceof Entity))
-        throw new IllegalArgumentException(L.l("remove() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit."));
+      checkEntityType(entity, "remove");
 
       checkTransactionRequired("remove");
 
@@ -2136,6 +2143,23 @@ public class AmberConnection
 
     if (! (_isXA || _isInTransaction))
       throw new TransactionRequiredException(L.l("{0}() operation can only be executed in the scope of a transaction.", operation));
+  }
+
+  private void checkEntityType(Object entity, String operation)
+  {
+    if (! (entity instanceof Entity))
+      throw new IllegalArgumentException(L.l(operation + "() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit."));
+
+    if (_persistenceUnit.isJPA()) {
+      String className = entity.getClass().getName();
+
+      EntityType entityType = (EntityType) _persistenceUnit.getEntity(className);
+
+      // jpa/0m08
+      if (entityType == null) {
+        throw new IllegalArgumentException(L.l(operation + "() operation can only be applied to an entity instance. If the argument is an entity, the class '{0}' must be specified in the orm.xml or annotated with @Entity and must be in the scope of a persistence unit.", className));
+      }
+    }
   }
 
   /**
