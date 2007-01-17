@@ -64,8 +64,8 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   private NamespaceReaderContext _namespaceTracker;
 
-  private String _version;
-  private String _encoding = "UTF-8";
+  private String _version = "1.0";
+  private String _encoding = "utf-8";
   private String _encodingScheme;
 
   private String _publicId;
@@ -222,14 +222,16 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   public String getAttributeValue(String namespaceURI, String localName)
   {
-    if (namespaceURI == null)
-      namespaceURI = XMLConstants.DEFAULT_NS_PREFIX;
-
     for (int i = _attrCount - 1; i >= 0; i--) {
       QName name = _attrNames[i];
 
-      if (name.getLocalPart().equals(localName) &&
-          name.getNamespaceURI().equals(namespaceURI))
+      // namespaceURI == null means ignore namespace
+      if (namespaceURI == null) {
+        if (name.getLocalPart().equals(localName)) 
+          return _attrValues[i];
+      }
+      else if (name.getLocalPart().equals(localName) &&
+               name.getNamespaceURI().equals(namespaceURI))
         return _attrValues[i];
     }
 
@@ -779,7 +781,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     if ("lt".equals(s))     return "<";
     if ("gt".equals(s))     return ">";
     if (s.startsWith("#x"))
-      return ""+((char)Integer.parseInt(s.substring(1), 16));
+      return ""+((char)Integer.parseInt(s.substring(2), 16));
     if (s.startsWith("#"))
       return ""+((char)Integer.parseInt(s.substring(1)));
 
@@ -1020,10 +1022,10 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
       if (ch != '>')
         throw error(L.l("Expected '>' at end of '<?xml' declaration at {0}",
                         charName(ch)));
-
-      skipWhitespace();
-      unread();
     }
+
+    skipWhitespace();
+    unread();
   }
 
   /**

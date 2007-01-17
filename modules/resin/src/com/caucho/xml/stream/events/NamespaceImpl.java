@@ -65,4 +65,24 @@ public class NamespaceImpl extends AttributeImpl implements Namespace {
   {
     return NAMESPACE;
   }
+
+  public String toString()
+  {
+    return "xmlns:" + _prefix + "=" + _namespaceURI;
+  }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof Namespace))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    Namespace namespace = (Namespace) o;
+    
+    return getNamespaceURI().equals(namespace.getNamespaceURI()) &&
+           getPrefix().equals(namespace.getPrefix());
+  }
 }

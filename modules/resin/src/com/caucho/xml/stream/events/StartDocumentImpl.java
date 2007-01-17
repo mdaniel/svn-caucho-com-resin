@@ -114,5 +114,60 @@ public class StartDocumentImpl extends XMLEventImpl implements StartDocument {
       throw new XMLStreamException(e);
     }
   }
+
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("<?xml version=\"" + _version + "\"");
+
+    if (_encodingSet)
+      sb.append(" encoding=\"" + _characterEncodingScheme + "\"");
+
+    if (_standaloneSet)
+      sb.append(" standalone=\"" + _standaloneSet + "\"");
+
+    sb.append("?>");
+
+    return sb.toString();
+  }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof StartDocument))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    StartDocument start = (StartDocument) o;
+
+    if (getCharacterEncodingScheme() != null) {
+      if (! getCharacterEncodingScheme().equals
+            (start.getCharacterEncodingScheme()))
+        return false;
+    }
+    else if (start.getCharacterEncodingScheme() != null)
+      return false;
+
+    if (getSystemId() != null) {
+      if (! getSystemId().equals(start.getSystemId()))
+        return false;
+    }
+    else if (start.getSystemId() != null)
+      return false;
+
+    if (getVersion() != null) {
+      if (! getVersion().equals(start.getVersion()))
+        return false;
+    }
+    else if (start.getVersion() != null)
+      return false;
+
+    return encodingSet() == start.encodingSet() &&
+           isStandalone() == start.isStandalone() &&
+           standaloneSet() == start.standaloneSet();
+  }
 }
 

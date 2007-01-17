@@ -76,5 +76,20 @@ public class ProcessingInstructionImpl extends XMLEventImpl
       throw new XMLStreamException(e);
     }
   }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof ProcessingInstruction))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    ProcessingInstruction instruction = (ProcessingInstruction) o;
+    
+    return getData().equals(instruction.getData()) &&
+           getTarget().equals(instruction.getTarget());
+  }
 }
 

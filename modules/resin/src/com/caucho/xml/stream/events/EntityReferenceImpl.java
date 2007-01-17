@@ -37,13 +37,13 @@ import java.io.Writer;
 public class EntityReferenceImpl extends XMLEventImpl 
   implements EntityReference 
 {
-  private final EntityDeclaration _declaration;
   private final String _name;
+  private final EntityDeclaration _declaration;
 
   public EntityReferenceImpl(String name, EntityDeclaration declaration)
   {
-    _declaration = declaration;
     _name = name;
+    _declaration = declaration;
   }
 
   public EntityDeclaration getDeclaration()
@@ -65,6 +65,21 @@ public class EntityReferenceImpl extends XMLEventImpl
     throws XMLStreamException
   {
     // XXX
+  }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof EntityReference))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    EntityReference entity = (EntityReference) o;
+    
+    return getName().equals(entity.getName()) &&
+           getDeclaration().equals(entity.getDeclaration());
   }
 }
 

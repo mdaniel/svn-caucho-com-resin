@@ -72,5 +72,21 @@ public class NotationDeclarationImpl extends XMLEventImpl
   {
     // XXX
   }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof NotationDeclaration))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    NotationDeclaration decl = (NotationDeclaration) o;
+    
+    return getName().equals(decl.getName()) &&
+           getPublicId().equals(decl.getPublicId()) &&
+           getSystemId().equals(decl.getSystemId());
+  }
 }
 

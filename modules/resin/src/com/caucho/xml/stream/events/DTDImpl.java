@@ -75,5 +75,23 @@ public class DTDImpl extends XMLEventImpl implements DTD {
   {
     // XXX
   }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof DTD))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    DTD dtd = (DTD) o;
+
+    return 
+      getDocumentTypeDeclaration().equals(dtd.getDocumentTypeDeclaration()) &&
+      getEntities().equals(dtd.getEntities()) &&
+      getNotations().equals(dtd.getNotations()) &&
+      getProcessedDTD().equals(dtd.getProcessedDTD());
+  }
 }
 

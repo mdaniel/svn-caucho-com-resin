@@ -76,5 +76,21 @@ public class EndElementImpl extends XMLEventImpl implements EndElement {
       throw new XMLStreamException(e);
     }
   }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof EndElement))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    EndElement end = (EndElement) o;
+    
+    // XXX Check namespaces
+
+    return getName().equals(end.getName());
+  }
 }
 

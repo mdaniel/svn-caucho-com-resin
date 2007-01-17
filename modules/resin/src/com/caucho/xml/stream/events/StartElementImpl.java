@@ -99,6 +99,9 @@ public class StartElementImpl extends XMLEventImpl implements StartElement {
 
       for (Attribute attribute : _attributes.values())
         attribute.writeAsEncodedUnicode(writer);
+
+      for (Namespace namespace : _namespaces.values())
+        namespace.writeAsEncodedUnicode(writer);
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -107,7 +110,73 @@ public class StartElementImpl extends XMLEventImpl implements StartElement {
 
   public String toString()
   {
-    return "StartElement[" + _name + "]";
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append("StartElement[" + _name);
+
+    for (Attribute attribute : _attributes.values()) {
+      sb.append(" ");
+      sb.append(attribute.toString());
+    }
+
+    for (Namespace namespace : _namespaces.values()) {
+      sb.append(" ");
+      sb.append(namespace.toString());
+    }
+    
+    sb.append("]");
+
+    return sb.toString();
+  }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof StartElement))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    StartElement start = (StartElement) o;
+
+    // Namespaces
+    
+    int namespaceCount = 0;
+    Iterator namespaces = start.getNamespaces();
+    
+    while (namespaces.hasNext()) {
+      Namespace ns2 = (Namespace) namespaces.next();
+      namespaceCount++;
+
+      Namespace ns1 = _namespaces.get(ns2.getPrefix());
+
+      if (! ns2.equals(ns1))
+        return false;
+    }
+
+    if (namespaceCount < _namespaces.size())
+      return false;
+
+    // Attributes
+
+    int attributeCount = 0;
+    Iterator attributes = start.getAttributes();
+    
+    while (attributes.hasNext()) {
+      Attribute a2 = (Attribute) attributes.next();
+      attributeCount++;
+
+      Attribute a1 = _attributes.get(a2.getName());
+
+      if (! a2.equals(a1))
+        return false;
+    }
+
+    if (attributeCount < _attributes.size())
+      return false;
+
+    return getName().equals(start.getName());
   }
 }
 

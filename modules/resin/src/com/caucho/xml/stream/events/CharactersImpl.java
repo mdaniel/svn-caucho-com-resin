@@ -96,5 +96,22 @@ public class CharactersImpl extends XMLEventImpl implements Characters {
   {
     return "Characters[" + _data + "]";
   }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof Characters))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    Characters characters = (Characters) o;
+
+    return getData().equals(characters.getData()) &&
+           isCData() == characters.isCData() &&
+           isIgnorableWhiteSpace() == characters.isIgnorableWhiteSpace() &&
+           isWhiteSpace() == characters.isWhiteSpace();
+  }
 }
 

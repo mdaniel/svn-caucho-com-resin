@@ -95,5 +95,24 @@ public class EntityDeclarationImpl extends XMLEventImpl
   {
     // XXX
   }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof EntityDeclaration))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    EntityDeclaration entity = (EntityDeclaration) o;
+    
+    return getBaseURI().equals(entity.getBaseURI()) &&
+           getName().equals(entity.getName()) &&
+           getNotationName().equals(entity.getNotationName()) &&
+           getPublicId().equals(entity.getPublicId()) &&
+           getReplacementText().equals(entity.getReplacementText()) &&
+           getSystemId().equals(entity.getSystemId());
+  }
 }
 

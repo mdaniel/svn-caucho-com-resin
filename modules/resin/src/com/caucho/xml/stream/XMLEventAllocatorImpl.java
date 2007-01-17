@@ -142,7 +142,7 @@ public class XMLEventAllocatorImpl implements XMLEventAllocator {
           Namespace namespace = 
             new NamespaceImpl(reader.getNamespaceURI(i), prefix);
                             
-          namespaces.put(reader.getNamespacePrefix(i), namespace);
+          namespaces.put(prefix, namespace);
         }
 
         // bypass factory

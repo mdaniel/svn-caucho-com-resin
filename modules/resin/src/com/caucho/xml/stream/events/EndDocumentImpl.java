@@ -44,5 +44,10 @@ public class EndDocumentImpl extends XMLEventImpl implements EndDocument {
   {
     // XXX
   }
+
+  public boolean equals(Object o) 
+  {
+    return o instanceof EndDocument;
+  }
 }
 

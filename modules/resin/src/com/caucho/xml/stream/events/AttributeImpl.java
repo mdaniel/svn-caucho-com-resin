@@ -95,5 +95,27 @@ public class AttributeImpl extends XMLEventImpl implements Attribute {
       throw new XMLStreamException(e);
     }
   }
+
+  public String toString()
+  {
+    return _name + "=\"" + _value + "\"";
+  }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof Attribute))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    Attribute attr = (Attribute) o;
+
+    return getName().equals(attr.getName()) &&
+           getDTDType().equals(attr.getDTDType()) &&
+           getValue().equals(attr.getValue()) &&
+           isSpecified() == attr.isSpecified();
+  }
 }
 

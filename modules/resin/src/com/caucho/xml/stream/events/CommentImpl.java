@@ -62,5 +62,19 @@ public class CommentImpl extends XMLEventImpl implements Comment {
       throw new XMLStreamException(e);
     }
   }
+
+  public boolean equals(Object o) 
+  {
+    if (! (o instanceof Comment))
+      return false;
+    if (o == null)
+      return false;
+    if (this == o)
+      return true;
+
+    Comment comment = (Comment) o;
+
+    return getText().equals(comment.getText());
+  }
 }
 
