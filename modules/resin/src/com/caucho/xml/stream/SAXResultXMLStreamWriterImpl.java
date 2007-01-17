@@ -32,15 +32,16 @@ package com.caucho.xml.stream;
 import com.caucho.util.L10N;
 import com.caucho.xml.QDocument;
 
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.ext.LexicalHandler;
+import org.xml.sax.helpers.AttributesImpl;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.sax.SAXResult;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,38 +49,43 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
+public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   private static final Logger log
-    = Logger.getLogger(DOMResultXMLStreamWriterImpl.class.getName());
+    = Logger.getLogger(SAXResultXMLStreamWriterImpl.class.getName());
   private static final L10N L
-    = new L10N(DOMResultXMLStreamWriterImpl.class);
+    = new L10N(SAXResultXMLStreamWriterImpl.class);
 
-  private DOMResult _result;
-  private Document _document;
-  private Node _current;
+  private LexicalHandler _lexicalHandler;
+  private ContentHandler _contentHandler;
+
+  // current element data
+  private String _uri;
+  private String _localName;
+  private String _qName;
+  private AttributesImpl _attributes = null;
+
   private boolean _currentIsEmpty = false;
+  private boolean _ended = false;
 
   private SimpleNamespaceContext _context = new SimpleNamespaceContext(null);
 
-  public DOMResultXMLStreamWriterImpl(DOMResult result)
+  public SAXResultXMLStreamWriterImpl(SAXResult result)
     throws XMLStreamException
   {
-    _result = result;
-
-    _current = result.getNode();
-    
-    if (_current == null) {
-      _current = _document = new QDocument();
-      result.setNode(_document);
-    }
-    else
-      _document = _current.getOwnerDocument();
+    _lexicalHandler = result.getLexicalHandler();
+    _contentHandler = result.getHandler();
   }
 
   public void close() 
     throws XMLStreamException
   {
-    writeEndDocument();
+    try {
+      if (! _ended)
+        _contentHandler.endDocument();
+    }
+    catch (SAXException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void flush() 
@@ -120,100 +126,73 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void setPrefix(String prefix, String uri)
     throws XMLStreamException
   {
-    _context.declare(prefix, uri);
+    try {
+      _context.declare(prefix, uri);
+      _contentHandler.startPrefixMapping(prefix, uri);
+    }
+    catch (SAXException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeAttribute(String localName, String value)
     throws XMLStreamException
   {
-    try {
-      ((Element) _current).setAttribute(localName, value);
-    }
-    catch (ClassCastException e) {
-      throw new XMLStreamException(e);
-    }
-    catch (DOMException e) {
-      throw new XMLStreamException(e);
-    }
+    // XXX other types?
+    _attributes.addAttribute("", localName, localName, "CDATA", value);
   }
 
   public void writeAttribute(String namespaceURI, String localName,
                              String value)
     throws XMLStreamException
   {
-    writeAttribute(_context.declare(namespaceURI),
-                   namespaceURI,
-                   localName,
-                   value);
+    _attributes.addAttribute(namespaceURI, localName, localName, 
+                             "CDATA", value);
   }
 
   public void writeAttribute(String prefix, String namespaceURI,
                              String localName, String value)
     throws XMLStreamException
   {
-    try {
-      _context.declare(prefix, namespaceURI);
-      ((Element) _current).setAttributeNS(namespaceURI, 
-                                          prefix + ":" + localName, value);
-    }
-    catch (ClassCastException e) {
-      throw new XMLStreamException(e);
-    }
-    catch (DOMException e) {
-      throw new XMLStreamException(e);
-    }
+    _attributes.addAttribute(namespaceURI, localName, prefix + ':' + localName, 
+                             "CDATA", value);
   }
 
   public void writeCData(String data)
     throws XMLStreamException
   {
-    if (_currentIsEmpty) {
-      popContext();
-      _currentIsEmpty = false;
-    }
-
-    try {
-      _current.appendChild(_document.createCDATASection(data));
-    }
-    catch (DOMException e) {
-      throw new XMLStreamException(e);
-    }
+    // XXX
+    throw new UnsupportedOperationException();
   }
 
   public void writeCharacters(char[] text, int start, int len)
     throws XMLStreamException
   {
-    writeCharacters(new String(text, start, len));
+    try {
+      _contentHandler.characters(text, start, len);
+    }
+    catch (SAXException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeCharacters(String text)
     throws XMLStreamException
   {
-    if (_currentIsEmpty) {
-      popContext();
-      _currentIsEmpty = false;
-    }
-
-    try {
-      _current.appendChild(_document.createTextNode(text));
-    }
-    catch (DOMException e) {
-      throw new XMLStreamException(e);
-    }
+    char[] array = text.toCharArray();
+    writeCharacters(array, 0, array.length);
   }
 
   public void writeComment(String data)
     throws XMLStreamException
   {
-    if (_currentIsEmpty) {
-      popContext();
-      _currentIsEmpty = false;
-    }
-
     try {
-      _current.appendChild(_document.createComment(data));
+      if (_lexicalHandler != null) {
+        char[] array = data.toCharArray();
+        _lexicalHandler.comment(array, 0, array.length);
+      }
     }
-    catch (DOMException e) {
+    catch (SAXException e) {
       throw new XMLStreamException(e);
     }
   }
@@ -221,12 +200,19 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeDefaultNamespace(String namespaceURI)
     throws XMLStreamException
   {
-    _context.declare("", namespaceURI);
+    try {
+      _context.declare("", namespaceURI);
+      _contentHandler.startPrefixMapping("", namespaceURI);
+    }
+    catch (SAXException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeDTD(String dtd)
     throws XMLStreamException
   {
+    // XXX: lexicalHandler
     throw new UnsupportedOperationException();
   }
 
@@ -236,27 +222,30 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
     if (_currentIsEmpty)
       popContext();
 
-    try {
-      Node parent = _current;
-      _current = _document.createElement(localName);
-      parent.appendChild(_current);
+    pushContext();
 
-      if (! (parent instanceof Document))
-        pushContext();
+    _uri = null;
+    _localName = localName;
+    _qName = localName;
+    _attributes = new AttributesImpl();
 
-      _currentIsEmpty = true;
-    }
-    catch (DOMException e) {
-      throw new XMLStreamException(e);
-    }
+    _currentIsEmpty = true;
   }
 
   public void writeEmptyElement(String namespaceURI, String localName)
     throws XMLStreamException
   {
-    writeEmptyElement(_context.declare(namespaceURI),
-                      localName,
-                      namespaceURI);
+    if (_currentIsEmpty)
+      popContext();
+
+    pushContext();
+
+    _uri = namespaceURI;
+    _localName = localName;
+    _qName = localName;
+    _attributes = new AttributesImpl();
+
+    _currentIsEmpty = true;
   }
 
   public void writeEmptyElement(String prefix, String localName,
@@ -266,85 +255,65 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
     if (_currentIsEmpty)
       popContext();
 
-    try {
-      Node parent = _current;
-      _current = _document.createElementNS(namespaceURI, 
-                                           prefix + ":" + localName);
-      parent.appendChild(_current);
+    pushContext();
 
-      if (! (parent instanceof Document))
-        pushContext();
+    _uri = namespaceURI;
+    _localName = localName;
+    _qName = prefix + ':' + localName;
+    _attributes = new AttributesImpl();
 
-      _currentIsEmpty = true;
-    }
-    catch (DOMException e) {
-      throw new XMLStreamException(e);
-    }
+    _currentIsEmpty = true;
   }
 
   public void writeEndDocument()
     throws XMLStreamException
   {
-    while (_context != null)
-      popContext();
+    try {
+      _contentHandler.endDocument();
+      _ended = true;
+    }
+    catch (SAXException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeEndElement()
     throws XMLStreamException
   {
-    try {
-      popContext();
-
-      if (_currentIsEmpty)
-        popContext();
-
-      _currentIsEmpty = false;
-    } 
-    catch (ClassCastException e) {
-      throw new XMLStreamException(e);
-    }
+    popContext();
   }
 
   public void writeEntityRef(String name)
     throws XMLStreamException
   {
-    if (_currentIsEmpty) {
-      popContext();
-      _currentIsEmpty = false;
-    }
-
-    try {
-      _current.appendChild(_document.createEntityReference(name));
-    }
-    catch (DOMException e) {
-      throw new XMLStreamException(e);
-    }
+    // XXX
+    throw new UnsupportedOperationException();
   }
 
   public void writeNamespace(String prefix, String namespaceURI)
     throws XMLStreamException
   {
     _context.declare(prefix, namespaceURI);
+    _attributes.addAttribute(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, 
+                             prefix, 
+                             XMLConstants.XMLNS_ATTRIBUTE + ':' + prefix,
+                             "CDATA", 
+                             namespaceURI);
   }
 
   public void writeProcessingInstruction(String target)
     throws XMLStreamException
   {
-    writeProcessingInstruction(target, "");
+    writeProcessingInstruction(target, null);
   }
 
   public void writeProcessingInstruction(String target, String data)
     throws XMLStreamException
   {
-    if (_currentIsEmpty) {
-      popContext();
-      _currentIsEmpty = false;
-    }
-
     try {
-      _current.appendChild(_document.createProcessingInstruction(target, data));
+      _contentHandler.processingInstruction(target, data);
     }
-    catch (DOMException e) {
+    catch (SAXException e) {
       throw new XMLStreamException(e);
     }
   }
@@ -352,23 +321,32 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeStartDocument()
     throws XMLStreamException
   {
-    writeStartDocument("1.0");
+    try {
+      _contentHandler.startDocument();
+    }
+    catch (SAXException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeStartDocument(String version)
     throws XMLStreamException
   {
-    writeStartDocument(version, "utf-8");
+    try {
+      _contentHandler.startDocument();
+    }
+    catch (SAXException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeStartDocument(String version, String encoding)
     throws XMLStreamException
   {
     try {
-      _document.setXmlVersion(version);
-      // XXX encoding
+      _contentHandler.startDocument();
     }
-    catch (DOMException e) {
+    catch (SAXException e) {
       throw new XMLStreamException(e);
     }
   }
@@ -381,27 +359,28 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
       _currentIsEmpty = false;
     }
 
-    try {
-      Node parent = _current;
-      _current = _document.createElement(localName);
-      parent.appendChild(_current);
+    pushContext();
 
-      if (! (parent instanceof Document))
-        pushContext();
-
-      _currentIsEmpty = false;
-    }
-    catch (DOMException e) {
-      throw new XMLStreamException(e);
-    }
+    _uri = null;
+    _localName = localName;
+    _qName = localName;
+    _attributes = new AttributesImpl();
   }
 
   public void writeStartElement(String namespaceURI, String localName)
     throws XMLStreamException
   {
-    writeStartElement(_context.declare(namespaceURI),
-                      localName,
-                      namespaceURI);
+    if (_currentIsEmpty) {
+      popContext();
+      _currentIsEmpty = false;
+    }
+
+    pushContext();
+
+    _uri = namespaceURI;
+    _localName = localName;
+    _qName = localName;
+    _attributes = new AttributesImpl();
   }
 
   public void writeStartElement(String prefix, String localName,
@@ -413,50 +392,45 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
       _currentIsEmpty = false;
     }
 
-    try {
-      Node parent = _current;
-      _current = _document.createElementNS(namespaceURI, 
-                                           prefix + ":" + localName);
-      parent.appendChild(_current);
+    pushContext();
 
-      if (! (parent instanceof Document))
-        pushContext();
-
-      _currentIsEmpty = false;
-    }
-    catch (DOMException e) {
-      throw new XMLStreamException(e);
-    }
+    _uri = namespaceURI;
+    _localName = localName;
+    _qName = prefix + ':' + localName;
+    _attributes = new AttributesImpl();
   }
 
   //////////////////////////////////////////////////////////////////////////
 
   private void pushContext()
+    throws XMLStreamException
   {
-    _context = new SimpleNamespaceContext(_context);
+    try {
+      _contentHandler.startElement(_uri, _localName, _qName, _attributes);
+      _context = new SimpleNamespaceContext(_context);
+    }
+    catch (SAXException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   private void popContext()
+    throws XMLStreamException
   {
-    if (_current instanceof Element) {
-      Element element = (Element) _current;
-      
-      for (Map.Entry<String,String> entry : 
-           _context.getPrefixMap().entrySet()) {
+    try {
+      if (_currentIsEmpty)
+        _contentHandler.startElement(_uri, _localName, _qName, _attributes);
 
-        if ("".equals(entry.getKey()))
-          element.setAttribute("xmlns", entry.getValue());
-        else
-          element.setAttributeNS("http://www.w3.org/2000/xmlns/", 
-                                 "xmlns:" + entry.getKey(),
-                                 entry.getValue());
-      }
-    }
+      for (String prefix : _context.getPrefixMap().keySet())
+        _contentHandler.endPrefixMapping(prefix);
 
-    if (_context != null)
+      _contentHandler.endElement(_uri, _localName, _qName);
+
       _context = _context.getParent();
-
-    _current = _current.getParentNode();
+    }
+    catch (SAXException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   // XXX switch to NamespaceWriterContext

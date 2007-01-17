@@ -33,12 +33,14 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLStreamConstants;
+import static javax.xml.stream.XMLStreamConstants.*;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.events.*;
 
-public class XMLEventWriterImpl implements XMLEventWriter, XMLStreamConstants {
+import java.util.Iterator;
+
+public class XMLEventWriterImpl implements XMLEventWriter {
   private XMLStreamWriter _out;
 
   public XMLEventWriterImpl(XMLStreamWriter out)
@@ -143,8 +145,9 @@ public class XMLEventWriterImpl implements XMLEventWriter, XMLStreamConstants {
       QName name = startElement.getName();
 
       if (name.getPrefix() != null && ! "".equals(name.getPrefix())) {
-        _out.writeStartElement(name.getPrefix(), name.getNamespaceURI(),
-                               name.getLocalPart());
+        _out.writeStartElement(name.getPrefix(), 
+                               name.getLocalPart(),
+                               name.getNamespaceURI());
       }
       else if (name.getNamespaceURI() != null && 
                ! "".equals(name.getNamespaceURI())) {
@@ -152,6 +155,18 @@ public class XMLEventWriterImpl implements XMLEventWriter, XMLStreamConstants {
       }
       else 
         _out.writeStartElement(name.getLocalPart());
+
+      // Attributes
+      Iterator attributes = startElement.getAttributes();
+
+      while (attributes.hasNext())
+        add((Attribute) attributes.next());
+
+      // Namespaces
+      Iterator namespaces = startElement.getNamespaces();
+
+      while (namespaces.hasNext())
+        add((Namespace) namespaces.next());
     }
     else
       throw new XMLStreamException();

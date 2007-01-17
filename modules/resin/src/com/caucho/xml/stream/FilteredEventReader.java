@@ -24,10 +24,12 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong
  */
 
 package com.caucho.xml.stream;
+
+import java.util.NoSuchElementException;
 
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.XMLEventReader;
@@ -35,46 +37,105 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
 class FilteredEventReader implements XMLEventReader {
+  private XMLEventReader _reader;
+  private EventFilter _filter;
 
-  public FilteredEventReader(XMLEventReader reader,
-                             EventFilter filter)
+  private XMLEvent _current;
+  private XMLEvent _next;
+
+  public FilteredEventReader(XMLEventReader reader, EventFilter filter)
   {
-    throw new UnsupportedOperationException();
+    _reader = reader;
+    _filter = filter;
   }
 
   public void close() throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    _reader.close();
   }
 
   public String getElementText() throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    return _reader.getElementText();
   }
 
   public Object getProperty(String name) throws IllegalArgumentException
   {
-    throw new UnsupportedOperationException();
+    return _reader.getProperty(name);
   }
 
   public boolean hasNext()
   {
-    throw new UnsupportedOperationException();
+    try {
+      peek();
+
+      return _next != null;
+    } 
+    catch (XMLStreamException e) {
+      return false;
+    }
   }
 
   public XMLEvent nextEvent() throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    if (_next != null) {
+      _current = _next;
+      _next = null;
+    }
+    else {
+      while (_reader.hasNext()) {
+        _current = _reader.nextEvent(); 
+
+        if (_filter.accept(_current))
+          break;
+
+        _current = null;
+      }
+    }
+
+    if (_current == null)
+      throw new NoSuchElementException();
+
+    return _current;
   }
 
   public XMLEvent nextTag() throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    if (_next != null) {
+      _current = _next;
+      _next = null;
+    }
+    else {
+      while (_reader.hasNext()) {
+        _current = _reader.nextTag(); 
+
+        if (_filter.accept(_current))
+          break;
+
+        _current = null;
+      }
+    }
+
+    if (_current == null)
+      throw new NoSuchElementException();
+
+    return _current;
   }
 
   public XMLEvent peek() throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    if (_next == null) {
+      while (_reader.hasNext()) {
+        _next = _reader.nextEvent(); 
+
+        if (_filter.accept(_next))
+          break;
+
+        _next = null;
+      }
+    }
+
+    return _next;
   }
 
   public void remove()
@@ -84,7 +145,11 @@ class FilteredEventReader implements XMLEventReader {
 
   public XMLEvent next()
   {
-    throw new UnsupportedOperationException();
+    try {
+      return nextEvent();
+    }
+    catch (XMLStreamException e) {
+      return null;
+    }
   }
-
 }

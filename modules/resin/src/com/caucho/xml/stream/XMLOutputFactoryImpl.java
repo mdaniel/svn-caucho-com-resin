@@ -37,6 +37,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -116,6 +117,9 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   {
     if (result instanceof DOMResult) {
       return new DOMResultXMLStreamWriterImpl((DOMResult) result);
+    }
+    else if (result instanceof SAXResult) {
+      return new SAXResultXMLStreamWriterImpl((SAXResult) result);
     }
     else if (result instanceof StreamResult) {
       Writer writer = ((StreamResult) result).getWriter();

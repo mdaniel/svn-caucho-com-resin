@@ -28,70 +28,74 @@
 */
 
 package com.caucho.xml.stream;
+
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.events.*;
 import java.util.Iterator;
+import java.util.HashMap;
+
+import com.caucho.xml.stream.events.*;
 
 public class XMLEventFactoryImpl extends XMLEventFactory {
 
-  protected XMLEventFactoryImpl()
+  public XMLEventFactoryImpl()
   {
   }
 
   public Attribute createAttribute(QName name, String value)
   {
-    throw new UnsupportedOperationException();
+    return new AttributeImpl(name, value);
   }
 
   public Attribute createAttribute(String localName, String value)
   {
-    throw new UnsupportedOperationException();
+    return new AttributeImpl(new QName(localName), value);
   }
 
   public Attribute createAttribute(String prefix, String namespaceURI,
                                    String localName, String value)
   {
-    throw new UnsupportedOperationException();
+    return new AttributeImpl(new QName(namespaceURI, localName, prefix), value);
   }
 
   public Characters createCData(String content)
   {
-    throw new UnsupportedOperationException();
+    return new CharactersImpl(content, true, false, false);
   }
 
   public Characters createCharacters(String content)
   {
-    throw new UnsupportedOperationException();
+    return new CharactersImpl(content, false, false, false);
   }
 
   public Comment createComment(String text)
   {
-    throw new UnsupportedOperationException();
+    return new CommentImpl(text);
   }
 
   public DTD createDTD(String dtd)
   {
-    throw new UnsupportedOperationException();
+    return new DTDImpl(dtd);
   }
 
   public EndDocument createEndDocument()
   {
-    throw new UnsupportedOperationException();
+    return new EndDocumentImpl();
   }
 
   public EndElement createEndElement(QName name, Iterator namespaces)
   {
-    throw new UnsupportedOperationException();
+    return new EndElementImpl(name, namespaces);
   }
 
   public EndElement createEndElement(String prefix,
                                               String namespaceUri,
                                               String localName)
   {
-    throw new UnsupportedOperationException();
+    return new EndElementImpl(new QName(namespaceUri, localName, prefix));
   }
 
   public EndElement createEndElement(String prefix,
@@ -99,76 +103,79 @@ public class XMLEventFactoryImpl extends XMLEventFactory {
                                               String localName,
                                               Iterator namespaces)
   {
-    throw new UnsupportedOperationException();
+    return new EndElementImpl(new QName(namespaceUri, localName, prefix),
+                              namespaces);
   }
 
   public EntityReference
     createEntityReference(String name, EntityDeclaration declaration)
   {
-    throw new UnsupportedOperationException();
+    return new EntityReferenceImpl(name, declaration);
   }
 
   public Characters createIgnorableSpace(String content)
   {
-    throw new UnsupportedOperationException();
+    return new CharactersImpl(content, false, true, false);
   }
 
   public Namespace createNamespace(String namespaceURI)
   {
-    throw new UnsupportedOperationException();
+    return new NamespaceImpl(namespaceURI, null);
   }
 
   public Namespace createNamespace(String prefix, String namespaceUri)
   {
-    throw new UnsupportedOperationException();
+    return new NamespaceImpl(namespaceUri, prefix);
   }
 
   public ProcessingInstruction
     createProcessingInstruction(String target, String data)
   {
-    throw new UnsupportedOperationException();
+    return new ProcessingInstructionImpl(target, data);
   }
 
   public Characters createSpace(String content)
   {
-    throw new UnsupportedOperationException();
+    return new CharactersImpl(content, false, false, true);
   }
 
   public StartDocument createStartDocument()
   {
-    throw new UnsupportedOperationException();
+    return new StartDocumentImpl();
   }
 
   public StartDocument createStartDocument(String encoding)
   {
-    throw new UnsupportedOperationException();
+    return new StartDocumentImpl(true, encoding, null, "1.0", false, false);
   }
 
   public StartDocument createStartDocument(String encoding,
                                                     String version)
   {
-    throw new UnsupportedOperationException();
+    return new StartDocumentImpl(true, encoding, null, version, false, false);
   }
 
   public StartDocument createStartDocument(String encoding,
                                                     String version,
                                                     boolean standalone)
   {
-    throw new UnsupportedOperationException();
+    return new StartDocumentImpl(true, encoding, 
+                                 null, version, 
+                                 standalone, true);
   }
 
   public StartElement createStartElement(QName name,
-                                                  Iterator attributes,
-                                                  Iterator namespaces)
+                                         Iterator attributes,
+                                         Iterator namespaces)
   {
-    throw new UnsupportedOperationException();
+    return createStartElement(name, attributes, namespaces, null);
   }
 
   public StartElement createStartElement(String prefix,
-                                                  String namespaceUri,
-                                                  String localName)
+                                         String namespaceUri,
+                                         String localName)
   {
-    throw new UnsupportedOperationException();
+    return createStartElement(prefix, namespaceUri, localName, null, null);
   }
 
   public StartElement createStartElement(String prefix,
@@ -177,7 +184,8 @@ public class XMLEventFactoryImpl extends XMLEventFactory {
                                                   Iterator attributes,
                                                   Iterator namespaces)
   {
-    throw new UnsupportedOperationException();
+    return createStartElement(prefix, namespaceUri, localName, 
+                              attributes, namespaces, null);
   }
 
   public StartElement createStartElement(String prefix,
@@ -187,7 +195,33 @@ public class XMLEventFactoryImpl extends XMLEventFactory {
                                                   Iterator namespaces,
                                                   NamespaceContext context)
   {
-    throw new UnsupportedOperationException();
+    return createStartElement(new QName(namespaceUri, localName, prefix),
+                              attributes, namespaces, context);
+  }
+
+  private StartElement createStartElement(QName name,
+                                          Iterator attributes,
+                                          Iterator namespaces,
+                                          NamespaceContext context)
+  {
+    HashMap<QName, Attribute> attributeMap = new HashMap<QName, Attribute>();
+    HashMap<String, Namespace> namespaceMap = new HashMap<String, Namespace>();
+
+    if (attributes != null) {
+      while (attributes.hasNext()) {
+        Attribute attribute = (Attribute) attributes.next();
+        attributeMap.put(attribute.getName(), attribute);
+      }
+    }
+
+    if (namespaces != null) {
+      while (namespaces.hasNext()) {
+        Namespace namespace = (Namespace) namespaces.next();
+        namespaceMap.put(namespace.getPrefix(), namespace);
+      }
+    }
+
+    return new StartElementImpl(name, attributeMap, namespaceMap, context);
   }
 
   public void setLocation(Location location)

@@ -69,47 +69,47 @@ public abstract class XMLEventImpl implements XMLEvent {
 
   public boolean isAttribute()
   {
-    return false;
+    return getEventType() == ATTRIBUTE;
   }
 
   public boolean isCharacters()
   {
-    return false;
+    return getEventType() == CHARACTERS;
   }
 
   public boolean isEndDocument()
   {
-    return false;
+    return getEventType() == END_DOCUMENT;
   }
 
   public boolean isEndElement()
   {
-    return false;
+    return getEventType() == END_ELEMENT;
   }
 
   public boolean isEntityReference()
   {
-    return false;
+    return getEventType() == ENTITY_REFERENCE;
   }
 
   public boolean isNamespace()
   {
-    return false;
+    return getEventType() == NAMESPACE;
   }
 
   public boolean isProcessingInstruction()
   {
-    return false;
+    return getEventType() == PROCESSING_INSTRUCTION;
   }
 
   public boolean isStartDocument()
   {
-    return false;
+    return getEventType() == START_DOCUMENT;
   }
 
   public boolean isStartElement()
   {
-    return false;
+    return getEventType() == START_ELEMENT;
   }
 
   public abstract void writeAsEncodedUnicode(Writer writer) 

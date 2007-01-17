@@ -40,7 +40,7 @@ public class EntityReferenceImpl extends XMLEventImpl
   private final EntityDeclaration _declaration;
   private final String _name;
 
-  public EntityReferenceImpl(EntityDeclaration declaration, String name)
+  public EntityReferenceImpl(String name, EntityDeclaration declaration)
   {
     _declaration = declaration;
     _name = name;

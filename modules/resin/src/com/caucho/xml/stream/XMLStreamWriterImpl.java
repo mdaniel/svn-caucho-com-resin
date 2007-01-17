@@ -31,6 +31,7 @@ package com.caucho.xml.stream;
 
 import com.caucho.vfs.WriteStream;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -105,7 +106,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void setDefaultNamespace(String uri)
     throws XMLStreamException
   {
-    _tracker.declare(null, uri, _repair);
+    _tracker.declare(XMLConstants.DEFAULT_NS_PREFIX, uri, _repair);
   }
 
   public void setNamespaceContext(NamespaceContext context)

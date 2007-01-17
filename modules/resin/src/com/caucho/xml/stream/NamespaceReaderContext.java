@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  *  Maintains a stack of namespace contexts
@@ -53,6 +54,11 @@ public class NamespaceReaderContext extends NamespaceContextImpl
     = new NamespaceBinding(null, null, 0);
   private NamespaceBinding _nullAttrBinding
     = new NamespaceBinding(null, null, 0);
+
+  protected void remove(String prefix, String uri)
+  {
+    _bindings.remove(prefix);
+  }
 
   /**
    * declares a new namespace prefix in the current context
@@ -93,6 +99,9 @@ public class NamespaceReaderContext extends NamespaceContextImpl
   
   public String getNamespaceURI(String prefix)
   {
+    if (prefix == null)
+      throw new IllegalArgumentException("Prefix may not be null");
+
     NamespaceBinding binding = _bindings.get(prefix);
 
     if (binding != null)
@@ -108,14 +117,38 @@ public class NamespaceReaderContext extends NamespaceContextImpl
     return uri;
   }
 
+  // inefficient, but the TCK uses it and virtually nobody else should
+  public String getPrefix(String uri)
+  {
+    if (uri == null)
+      throw new IllegalArgumentException("URI may not be null");
+    else if ("".equals(uri))
+      throw new IllegalArgumentException("URI may not be empty");
+    else if (XMLConstants.XML_NS_URI.equals(uri))
+      return XMLConstants.XML_NS_PREFIX;
+    else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(uri))
+      return XMLConstants.XMLNS_ATTRIBUTE;
+
+    Iterator<NamespaceBinding> iterator = _bindings.values().iterator();
+
+    while (iterator.hasNext()) {
+      NamespaceBinding binding = iterator.next();
+
+      if (uri.equals(binding.getUri()))
+        return binding.getPrefix();
+    }
+
+    return null;
+  }
+
+  public Iterator getPrefixes(String uri)
+  {
+    return new PrefixIterator(uri);
+  }
+
   // <-- javax.xml.namespace.NamespaceContext 
   
   // --> used by StaxIntern 
-  public int getDepth()
-  {
-    return _stack.size() - 1;
-  }
-
   public int getNumDecls()
   {
     ElementBinding eltBinding = _stack.get(_stack.size() - 1);
@@ -181,7 +214,7 @@ public class NamespaceReaderContext extends NamespaceContextImpl
     NamespaceBinding binding;
 
     // default namespace
-    if (prefix == null)
+    if (prefix == null || XMLConstants.DEFAULT_NS_PREFIX.equals(prefix))
       binding = _nullAttrBinding;
     else
       binding = _bindings.get(prefix);
@@ -194,6 +227,55 @@ public class NamespaceReaderContext extends NamespaceContextImpl
       _bindings.put(prefix, binding);
 
       return binding;
+    }
+  }
+
+  private class PrefixIterator implements Iterator {
+    private String _uri;
+    private String _prefix;
+    private Iterator<NamespaceBinding> _iterator;
+
+    public PrefixIterator(String uri)
+    {
+      _uri = uri;
+      _iterator = _bindings.values().iterator();
+      advance();
+    }
+
+    public boolean hasNext()
+    {
+      return _prefix != null;
+    }
+
+    public Object next()
+    {
+      if (! hasNext())
+        throw new NoSuchElementException();
+
+      String prefix = _prefix;
+
+      advance();
+
+      return prefix;
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    private void advance()
+    {
+      _prefix = null;
+
+      while (_iterator.hasNext()) {
+        NamespaceBinding binding = _iterator.next();
+
+        if (_uri.equals(binding.getUri())) {
+          _prefix = binding.getPrefix();
+          break;
+        }
+      }
     }
   }
 }

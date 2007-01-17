@@ -56,6 +56,11 @@ public abstract class NamespaceContextImpl implements NamespaceContext
     _stack.add(null);
   }
 
+  public int getDepth()
+  {
+    return _stack.size() - 1;
+  }
+
   /**
    * Creates a new subcontext and enters it
    */
@@ -78,10 +83,14 @@ public abstract class NamespaceContextImpl implements NamespaceContext
         Decl decl = oldBinding.get(i);
         NamespaceBinding binding = decl.getBinding();
 
-        _version++;
+        if (decl.getOldUri() == null)
+          remove(binding.getPrefix(), binding.getUri());
+        else {
+          _version++;
 
-        binding.setUri(decl.getOldUri());
-        binding.setVersion(_version);
+          binding.setUri(decl.getOldUri());
+          binding.setVersion(_version);
+        }
       }
 
       eltBinding.clear();
@@ -115,6 +124,7 @@ public abstract class NamespaceContextImpl implements NamespaceContext
    * declares a new namespace prefix in the current context
    */
   public abstract void declare(String prefix, String uri);
+  protected abstract void remove(String prefix, String uri);
 
   public String getNamespaceURI(String prefix)
   {

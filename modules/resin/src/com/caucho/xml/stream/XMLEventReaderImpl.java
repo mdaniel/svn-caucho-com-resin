@@ -33,27 +33,30 @@ import com.caucho.util.L10N;
 import com.caucho.xml.stream.events.*;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLStreamConstants;
+import static javax.xml.stream.XMLStreamConstants.*;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.Namespace;
-import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.events.*;
+import javax.xml.stream.util.XMLEventAllocator;
+
 import java.util.HashMap;
 
-public class XMLEventReaderImpl implements XMLEventReader, XMLStreamConstants {
+public class XMLEventReaderImpl implements XMLEventReader {
   public static final L10N L = new L10N(XMLEventReaderImpl.class);
 
+  private final XMLEventAllocator _allocator;
   private final XMLStreamReader _in;
   private XMLEvent _current = null;
   private XMLEvent _next = null;
 
-  public XMLEventReaderImpl(XMLStreamReader in)
+  public XMLEventReaderImpl(XMLEventAllocator allocator, XMLStreamReader in)
     throws XMLStreamException
   {
     _in = in;
-    _next = getEvent();
+    _allocator = allocator;
+    _next = _allocator.allocate(_in);
   }
 
   public void close() 
@@ -92,7 +95,7 @@ public class XMLEventReaderImpl implements XMLEventReader, XMLStreamConstants {
     }
     else {
       _in.next();
-      _current = getEvent();
+      _current = _allocator.allocate(_in);
     }
 
     return _current;
@@ -106,7 +109,7 @@ public class XMLEventReaderImpl implements XMLEventReader, XMLStreamConstants {
     }
     else {
       _in.nextTag();
-      _current = getEvent();
+      _current = _allocator.allocate(_in);
     }
 
     return _current;
@@ -116,7 +119,7 @@ public class XMLEventReaderImpl implements XMLEventReader, XMLStreamConstants {
   {
     if (_next == null) {
       _in.next();
-      _next = getEvent();
+      _next = _allocator.allocate(_in);
     }
 
     return _next;
@@ -135,96 +138,6 @@ public class XMLEventReaderImpl implements XMLEventReader, XMLStreamConstants {
     catch (XMLStreamException e) {
       return null;
     }
-  }
-
-  private XMLEvent getEvent()
-    throws XMLStreamException
-  {
-    switch (_in.getEventType()) {
-      case ATTRIBUTE: 
-        // won't happen: our stream reader does not return attributes
-        // independent of start elements/empty elements
-        break;
-
-      case CDATA:
-        return new CharactersImpl(_in.getText(), true, false, false);
-
-      case CHARACTERS: 
-        return new CharactersImpl(_in.getText(), false, false, false);
-
-      case COMMENT:
-        return new CommentImpl(_in.getText());
-
-      case DTD:
-        // XXX
-        break;
-
-      case END_DOCUMENT:
-        return new EndDocumentImpl();
-
-      case END_ELEMENT:
-        return new EndElementImpl(_in.getName());
-
-      case ENTITY_DECLARATION:
-        // XXX
-        break;
-
-      case ENTITY_REFERENCE:
-        // XXX
-        break;
-
-      case NAMESPACE:
-        // won't happen: our stream reader does not return attributes
-        // independent of start elements/empty elements
-        break;
-
-      case NOTATION_DECLARATION:
-        // XXX
-        break;
-
-      case PROCESSING_INSTRUCTION:
-        return new ProcessingInstructionImpl(_in.getPIData(), 
-                                             _in.getPITarget());
-
-      case SPACE:
-        return new CharactersImpl(_in.getText(), false, true, true);
-
-      case START_DOCUMENT:
-        boolean encodingSet = true;
-        String encoding = _in.getCharacterEncodingScheme();
-
-        if (encoding == null) {
-          encoding = "utf-8"; // XXX
-          encodingSet = false;
-        }
-
-        return new StartDocumentImpl(encodingSet, encoding, 
-                                     null /* XXX: system id */, 
-                                     _in.getVersion(), 
-                                     _in.isStandalone(), _in.standaloneSet());
-
-      case START_ELEMENT:
-        HashMap<QName,Attribute> attributes = new HashMap<QName,Attribute>();
-
-        for (int i = 0; i < _in.getAttributeCount(); i++) {
-          Attribute attribute = new AttributeImpl(_in.getAttributeName(i),
-                                                  _in.getAttributeValue(i));
-          attributes.put(_in.getAttributeName(i), attribute);
-        }
-
-        HashMap<String,Namespace> namespaces= new HashMap<String,Namespace>();
-
-        for (int i = 0; i < _in.getNamespaceCount(); i++) {
-          Namespace namespace = new NamespaceImpl(_in.getNamespacePrefix(i),
-                                                  _in.getNamespaceURI(i));
-          namespaces.put(_in.getNamespacePrefix(i), namespace);
-        }
-
-        return new StartElementImpl(_in.getName(), attributes, namespaces,
-                                    _in.getNamespaceContext());
-    }
-
-    throw new XMLStreamException("Event type = " + _in.getEventType());
   }
 }
 

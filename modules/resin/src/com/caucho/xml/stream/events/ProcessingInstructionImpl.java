@@ -37,13 +37,13 @@ import java.io.Writer;
 public class ProcessingInstructionImpl extends XMLEventImpl 
   implements ProcessingInstruction 
 {
-  private final String _data;
   private final String _target;
+  private final String _data;
 
-  public ProcessingInstructionImpl(String data, String target)
+  public ProcessingInstructionImpl(String target, String data)
   {
-    _data = data;
     _target = target;
+    _data = data;
   }
 
   public String getData()

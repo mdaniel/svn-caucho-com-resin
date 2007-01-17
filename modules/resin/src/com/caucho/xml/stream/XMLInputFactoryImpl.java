@@ -31,6 +31,9 @@ package com.caucho.xml.stream;
 import javax.xml.stream.*;
 import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -72,21 +75,24 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createXMLEventReader(InputStream stream)
     throws XMLStreamException
   {
-    return new XMLEventReaderImpl(createXMLStreamReader(stream));
+    return new XMLEventReaderImpl(getEventAllocator(),
+                                  createXMLStreamReader(stream));
   }
 
   public XMLEventReader 
     createXMLEventReader(InputStream stream, String encoding)
     throws XMLStreamException
   {
-    return new XMLEventReaderImpl(createXMLStreamReader(stream, encoding));
+    return new XMLEventReaderImpl(getEventAllocator(),
+                                  createXMLStreamReader(stream, encoding));
   }
 
   public XMLEventReader 
     createXMLEventReader(Reader reader)
     throws XMLStreamException
   {
-    return new XMLEventReaderImpl(createXMLStreamReader(reader));
+    return new XMLEventReaderImpl(getEventAllocator(),
+                                  createXMLStreamReader(reader));
   }
 
   /**
@@ -96,28 +102,29 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createXMLEventReader(Source source)
     throws XMLStreamException
   {
-    throw new JAXPNotSupportedInStAXException();
+    return new XMLEventReaderImpl(getEventAllocator(),
+                                  createXMLStreamReader(source));
   }
 
   public XMLEventReader 
     createXMLEventReader(String systemId, InputStream stream)
     throws XMLStreamException
   {
-    return new XMLEventReaderImpl(createXMLStreamReader(systemId, stream));
+    return new XMLEventReaderImpl(getEventAllocator(),
+                                  createXMLStreamReader(systemId, stream));
   }
 
-  public XMLEventReader 
-    createXMLEventReader(String systemId, Reader reader)
+  public XMLEventReader createXMLEventReader(String systemId, Reader reader)
     throws XMLStreamException
   {
-    return new XMLEventReaderImpl(createXMLStreamReader(systemId, reader));
+    return new XMLEventReaderImpl(getEventAllocator(),
+                                  createXMLStreamReader(systemId, reader));
   }
 
-  public XMLEventReader 
-    createXMLEventReader(XMLStreamReader reader)
+  public XMLEventReader createXMLEventReader(XMLStreamReader reader)
     throws XMLStreamException
   {
-    return new XMLEventReaderImpl(reader);
+    return new XMLEventReaderImpl(getEventAllocator(), reader);
   }
 
   //
@@ -154,10 +161,19 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
   /**
    *  "Support of this method is optional."
    */ 
-  public XMLStreamReader 
-    createXMLStreamReader(Source source)
+  public XMLStreamReader createXMLStreamReader(Source source)
     throws XMLStreamException
   {
+    if (source instanceof StreamSource) {
+      StreamSource streamSource = (StreamSource) source;
+
+      return new XMLStreamReaderImpl(streamSource.getInputStream());
+    }
+    else if (source instanceof DOMSource)
+      throw new JAXPNotSupportedInStAXException();
+    else if (source instanceof SAXSource)
+      throw new JAXPNotSupportedInStAXException();
+
     throw new JAXPNotSupportedInStAXException();
   }
 

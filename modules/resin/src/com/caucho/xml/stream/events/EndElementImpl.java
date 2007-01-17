@@ -38,10 +38,17 @@ import java.util.Iterator;
 
 public class EndElementImpl extends XMLEventImpl implements EndElement {
   private final QName _name;
+  private final Iterator _namespaces;
+
+  public EndElementImpl(QName name, Iterator namespaces)
+  {
+    _name = name;
+    _namespaces = namespaces;
+  }
 
   public EndElementImpl(QName name)
   {
-    _name = name;
+    this(name, null);
   }
 
   public QName getName()
@@ -51,8 +58,7 @@ public class EndElementImpl extends XMLEventImpl implements EndElement {
 
   public Iterator getNamespaces()
   {
-    // XXX
-    throw new UnsupportedOperationException();
+    return _namespaces;
   }
 
   public int getEventType()

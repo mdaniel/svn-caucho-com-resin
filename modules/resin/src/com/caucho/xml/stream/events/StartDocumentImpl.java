@@ -42,6 +42,11 @@ public class StartDocumentImpl extends XMLEventImpl implements StartDocument {
   private final boolean _isStandalone;
   private final boolean _standaloneSet;
 
+  public StartDocumentImpl()
+  {
+    this(false, null, null, "1.0", false, false);
+  }
+
   public StartDocumentImpl(boolean encodingSet, String characterEncodingScheme,
                            String systemId, String version, 
                            boolean isStandalone, boolean standaloneSet)

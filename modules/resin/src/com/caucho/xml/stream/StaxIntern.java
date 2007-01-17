@@ -28,6 +28,7 @@
 
 package com.caucho.xml.stream;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
 /**
@@ -104,7 +105,7 @@ public class StaxIntern {
         _localName = new String(buf, colon + 1, length - colon - 1);
       }
       else {
-        _prefix = null;
+        _prefix = XMLConstants.DEFAULT_NS_PREFIX;
         _localName = new String(buf, 0, length);
       }
 

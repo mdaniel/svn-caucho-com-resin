@@ -65,6 +65,11 @@ public class NamespaceWriterContext extends NamespaceContextImpl
 
     _repair = repair;
   }
+  
+  protected void remove(String prefix, String uri)
+  {
+    _bindings.remove(uri);
+  }
 
   public void declare(String prefix, String uri)
   {
