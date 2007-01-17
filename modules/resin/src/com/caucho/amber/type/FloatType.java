@@ -107,11 +107,12 @@ public class FloatType extends Type {
     out.println("if (" + value + " == null)");
     out.println("  " + pstmt + ".setNull(" + index + "++, java.sql.Types.REAL);");
     out.println("else");
-    // out.println("  " + pstmt + ".setFloat(" + index + "++, " +
-    //             value + ".floatValue());");
-    // jpa/0u21
-    out.println("  " + pstmt + ".setString(" + index + "++, " +
-                value + ".toString());");
+    // jpa/0gh0
+    out.println("  " + pstmt + ".setFloat(" + index + "++, " +
+                value + ".floatValue());");
+    // XXX: jpa/0u21
+    // out.println("  " + pstmt + ".setString(" + index + "++, " +
+    // value + ".toString());");
   }
 
   /**

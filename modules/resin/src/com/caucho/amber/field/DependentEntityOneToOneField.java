@@ -187,6 +187,10 @@ public class DependentEntityOneToOneField extends CascadableField {
   public boolean generateFlushCheck(JavaWriter out)
     throws IOException
   {
+    // ejb/06bi
+    if (! getEntitySourceType().getPersistenceUnit().isJPA())
+      return false;
+
     String getter = generateSuperGetter();
 
     out.println("if (" + getter + " != null) {");

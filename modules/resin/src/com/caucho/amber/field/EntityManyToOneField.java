@@ -870,6 +870,10 @@ public class EntityManyToOneField extends CascadableField {
   public boolean generateFlushCheck(JavaWriter out)
     throws IOException
   {
+    // ejb/06bi
+    if (! getRelatedType().getPersistenceUnit().isJPA())
+      return false;
+
     String getter = generateSuperGetter();
 
     out.println("if (" + getter + " != null) {");
@@ -922,8 +926,8 @@ public class EntityManyToOneField extends CascadableField {
     if (! source.equals("this") && ! source.equals("super"))
       var = source + "." + var;
 
-    if (! isAbstract()) {
-      // jpa/1004
+    if (! (isAbstract() && getRelatedType().getPersistenceUnit().isJPA())) {
+      // jpa/1004, ejb/06bi
       out.println("if (" + var + " != null) {");
     }
     else {

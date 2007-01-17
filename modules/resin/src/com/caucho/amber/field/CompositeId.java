@@ -175,10 +175,11 @@ public class CompositeId extends Id {
     out.println();
     out.println(getForeignTypeName() + " key = new " + getForeignTypeName() + "();");
 
-    if (! isEmbeddedId()) {
+    if (getOwnerType().getPersistenceUnit().isJPA() && ! isEmbeddedId()) {
       String args = "";
 
       ArrayList<IdField> keys = getKeys();
+
       for (int i = 0; i < keys.size(); i++) {
         KeyPropertyField key = (KeyPropertyField) keys.get(i);
 
@@ -212,13 +213,28 @@ public class CompositeId extends Id {
 
     }
     else {
-      EmbeddableType embeddable = (EmbeddableType) getEmbeddedIdField().getType();
 
-      ArrayList<AmberField> fields = embeddable.getFields();
+      ArrayList fields;
+
+      if (getEmbeddedIdField() == null) {
+        // ejb/06x2
+        fields = getKeys();
+      }
+      else {
+        EmbeddableType embeddable
+          = (EmbeddableType) getEmbeddedIdField().getType();
+
+        fields = embeddable.getFields();
+      }
+
       for (int i = 0; i < fields.size(); i++) {
-        AmberField field = fields.get(i);
+        AmberField field = (AmberField) fields.get(i);
 
-        if (getOwnerType().isFieldAccess())
+        // XXX: ejb/06x2
+        boolean isFieldAccess = ! getOwnerType().getPersistenceUnit().isJPA()
+          && getOwnerType().isFieldAccess();
+
+        if (isFieldAccess)
           out.println(field.generateSet("key", "a" + i) + ";");
         else {
           String setter = field.getName();
@@ -276,9 +292,10 @@ public class CompositeId extends Id {
 
     out.print(getForeignTypeName() + " key = new " + getForeignTypeName() + "(");
 
-    if (isEmbeddedId()) {
+    if (isEmbeddedId() || ! getOwnerType().getPersistenceUnit().isJPA()) {
       out.println(");");
 
+      // ejb/06x2
       for (int i = 0; i < keys.size(); i++) {
         out.println(keys.get(i).generateSetKeyProperty("key", "a" + i) + ";");
       }
@@ -472,12 +489,13 @@ public class CompositeId extends Id {
     out.println("if (" + obj + " != null) {");
     out.pushDepth();
 
-    if (! isEmbeddedId()) {
+    AmberPersistenceUnit persistenceUnit
+      = getOwnerType().getPersistenceUnit();
+
+    // ejb/06ie
+    if (persistenceUnit.isJPA() && ! isEmbeddedId()) {
 
       // jpa/0u21
-
-      AmberPersistenceUnit persistenceUnit
-        = getOwnerType().getPersistenceUnit();
 
       EmbeddableType embeddable
         = persistenceUnit.getEmbeddable(_keyClass.getName());
@@ -536,7 +554,19 @@ public class CompositeId extends Id {
     else {
       out.println(getForeignTypeName() + " " + obj + "_key = (" + getForeignTypeName() + ") " + obj + ";");
 
-      getEmbeddedIdField().generateSet(out, obj+"_key");
+      if (getEmbeddedIdField() == null) {
+        // ejb/06ie
+
+        ArrayList<IdField> keys = getKeys();
+
+        for (int i = 0; i < keys.size(); i++) {
+          IdField key = keys.get(i);
+
+          key.generateSet(out, key.generateGetKeyProperty(obj + "_key"));
+        }
+      }
+      else
+        getEmbeddedIdField().generateSet(out, obj+"_key");
     }
 
     out.popDepth();
@@ -600,7 +630,8 @@ public class CompositeId extends Id {
                           String obj, String index)
     throws IOException
   {
-    if (! isEmbeddedId()) {
+    // ejb/06x2
+    if (getOwnerType().getPersistenceUnit().isJPA() && ! isEmbeddedId()) {
 
       // XXX: jpa/0u21
 
@@ -660,7 +691,19 @@ public class CompositeId extends Id {
       }
     }
     else {
-      getEmbeddedIdField().generateSet(out, pstmt, obj, index);
+      if (getEmbeddedIdField() == null) {
+        // ejb/06x2
+
+        ArrayList<IdField> keys = getKeys();
+
+        for (int i = 0; i < keys.size(); i++) {
+          IdField key = keys.get(i);
+
+          key.generateSet(out, pstmt, obj, index);
+        }
+      }
+      else
+        getEmbeddedIdField().generateSet(out, pstmt, obj, index);
     }
   }
 
