@@ -29,38 +29,55 @@
 
 package com.caucho.xml.saaj;
 
-import com.caucho.xml.*;
-import org.w3c.dom.*;
-import javax.xml.soap.*;
+import java.util.*;
+
+import javax.xml.XMLConstants;
 import javax.xml.namespace.*;
-import java.io.*;
+import javax.xml.soap.*;
 
-public class MessageFactoryImpl extends MessageFactory {
-  private final String _protocol;
-  private final SOAPFactory _soapFactory;
+import org.w3c.dom.*;
 
-  public MessageFactoryImpl()
+public class SOAP12BodyImpl extends SOAP11BodyImpl
+{
+  static final NameImpl ENCODING_STYLE_NAME
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE,
+                   "encodingStyle",
+                   SOAPConstants.SOAP_ENV_PREFIX);
+
+  SOAP12BodyImpl(SOAPFactory factory, NameImpl name)
     throws SOAPException
   {
-    this(SOAPConstants.DEFAULT_SOAP_PROTOCOL);
+    super(factory, name);
   }
 
-  public MessageFactoryImpl(String protocol)
+  public SOAPElement addAttribute(Name name, String value) 
     throws SOAPException
   {
-    _protocol = protocol;
-    _soapFactory = SOAPFactory.newInstance(protocol);
+    if (name.equals(ENCODING_STYLE_NAME))
+      throw new SOAPException("encodingStyle illegal for this element");
+
+    return super.addAttribute(name, value);
   }
 
-  public SOAPMessage createMessage() 
+  public SOAPElement addAttribute(QName qname, String value) 
     throws SOAPException
   {
-    return new SOAPMessageImpl(_soapFactory, _protocol);
+    if (qname.equals(ENCODING_STYLE_NAME))
+      throw new SOAPException("encodingStyle illegal for this element");
+
+    return super.addAttribute(qname, value);
   }
 
-  public SOAPMessage createMessage(MimeHeaders headers, InputStream in)
-    throws IOException, SOAPException
+  public String getEncodingStyle()
+    throws SOAPException
   {
-    return new SOAPMessageImpl(_soapFactory, _protocol, headers, in);
+    // optimization
+    return null; 
+  }
+
+  public void setEncodingStyle(String encodingStyle) 
+    throws SOAPException
+  {
+    throw new SOAPException("encodingStyle illegal for this element");
   }
 }

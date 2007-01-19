@@ -38,7 +38,7 @@ import javax.xml.soap.*;
 public class SOAP12HeaderImpl extends SOAP11HeaderImpl
 {
   private static final Name ENCODING_STYLE_NAME
-    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENCODING,
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE,
                    "encodingStyle",
                    SOAPConstants.SOAP_ENV_PREFIX);
 
@@ -64,10 +64,29 @@ public class SOAP12HeaderImpl extends SOAP11HeaderImpl
     return this;
   }
 
+  public SOAPElement addAttribute(Name name, String value) 
+    throws SOAPException
+  {
+    if (name.equals(ENCODING_STYLE_NAME))
+      throw new SOAPException("encodingStyle illegal for this element");
+
+    return super.addAttribute(name, value);
+  }
+
+  public SOAPElement addAttribute(QName qname, String value) 
+    throws SOAPException
+  {
+    if (qname.equals(ENCODING_STYLE_NAME))
+      throw new SOAPException("encodingStyle illegal for this element");
+
+    return super.addAttribute(qname, value);
+  }
+
   public String getEncodingStyle()
     throws SOAPException
   {
-    throw new SOAPException("encodingStyle illegal for this element");
+    // optimization
+    return null;
   }
 
   public void setEncodingStyle(String encodingStyle) 

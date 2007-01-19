@@ -72,6 +72,7 @@ public abstract class SOAPNodeImpl
   public void setOwner(Document owner)
   {
     _owner = owner;
+    // XXX deep set?
   }
   
   // javax.xml.soap.Node

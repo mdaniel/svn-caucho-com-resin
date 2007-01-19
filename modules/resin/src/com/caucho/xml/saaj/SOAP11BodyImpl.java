@@ -40,12 +40,12 @@ import org.w3c.dom.*;
 import com.caucho.xml.QDocument;
 import com.caucho.xml.QNode;
 
-public class SOAPBodyImpl extends SOAPElementImpl
+public class SOAP11BodyImpl extends SOAPElementImpl
                           implements SOAPBody 
 {
   private SOAPFault _fault;
 
-  SOAPBodyImpl(SOAPFactory factory, NameImpl name)
+  SOAP11BodyImpl(SOAPFactory factory, NameImpl name)
     throws SOAPException
   {
     super(factory, name);
@@ -149,14 +149,10 @@ public class SOAPBodyImpl extends SOAPElementImpl
     if (getFirstChild() == null || getFirstChild() != getLastChild())
       throw new SOAPException("Body does not have exactly one child");
 
-    Element child = (Element) getFirstChild();
+    SOAPElementImpl child = (SOAPElementImpl) getFirstChild();
     removeContents();
 
-    // XXX
-    QDocument document = new QDocument();
-    document.setDocumentElement(child);
-
-    return document;
+    return new SimpleDocument(child);
   }
 
   public SOAPFault getFault()

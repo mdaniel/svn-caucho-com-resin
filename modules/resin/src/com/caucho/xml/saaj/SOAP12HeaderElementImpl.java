@@ -38,7 +38,7 @@ import com.caucho.xml.QNode;
 public class SOAP12HeaderElementImpl extends SOAP11HeaderElementImpl 
 {
   static final Name ENCODING_STYLE_NAME
-    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENCODING,
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE,
                    "encodingStyle",
                    SOAPConstants.SOAP_ENV_PREFIX);
 

@@ -29,6 +29,8 @@
 
 package com.caucho.xml.saaj;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 import javax.xml.XMLConstants;
@@ -54,9 +56,6 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
     throws SOAPException
   {
     super(factory, name, owner);
-
-    if (name.getPrefix() != null)
-      _namespaces.put(name.getPrefix(), name.getURI());
   }
 
   SOAPElementImpl(SOAPFactory factory, NameImpl name)
@@ -68,9 +67,18 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   SOAPElementImpl(SOAPFactory factory, Element element)
     throws SOAPException
   {
+    this(factory, element, false);
+  }
+
+  SOAPElementImpl(SOAPFactory factory, Element element, boolean deepCopy)
+    throws SOAPException
+  {
     this(factory, NameImpl.fromElement(element));
 
-    copyElement(element, true);
+    if (deepCopy)
+      deepCopy(element);
+    else 
+      copyElement(element, true);
   }
 
   protected void setOwner(SOAPPart owner)
@@ -113,6 +121,44 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
          node = node.getNextSibling())
       appendChild(node);
 
+    copyAttributesAndNamespaces(source, addNamespaces);
+  
+    // don't need to set parent because this element should be added 
+    // as a child to another element.  Ditto for siblings.
+  }  
+  
+  protected void deepCopy(Element source)
+    throws SOAPException
+  {
+    _name = NameImpl.fromElement(source);
+
+    for (org.w3c.dom.Node node = source.getFirstChild(); 
+         node != null; 
+         node = node.getNextSibling()) {
+      if (node instanceof org.w3c.dom.CharacterData) {
+        addTextNode(((org.w3c.dom.CharacterData) node).getData());
+      }
+      else if (node instanceof Element) {
+        SOAPElementImpl child = 
+          new SOAPElementImpl(_factory, NameImpl.fromNode(node));
+        child.deepCopy((Element) node);
+
+        appendChild(child);
+      }
+      else {
+        appendChild(node.cloneNode(true));
+      }
+    }
+
+    copyAttributesAndNamespaces(source, true);
+   
+    // don't need to set parent because this element should be added 
+    // as a child to another element.  Ditto for siblings.
+  }
+
+  private void copyAttributesAndNamespaces(Element source, 
+                                           boolean addNamespaces)
+  {
     if (source instanceof SOAPElementImpl) {
       // more efficient when we have an element
       for (Attr attr = ((SOAPElementImpl) source)._firstAttribute;
@@ -140,9 +186,6 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
         setAttributeNode(attr);
       }
     }
-    
-    // don't need to set parent because this element should be added 
-    // as a child to another element.  Ditto for siblings.
   }
   
   // javax.xml.soap.Element
@@ -321,9 +364,13 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   public void setEncodingStyle(String encodingStyle) 
     throws SOAPException
   {
-    if (! SOAPConstants.URI_NS_SOAP_ENCODING.equals(encodingStyle) &&
-        ! SOAPConstants.URI_NS_SOAP_1_2_ENCODING.equals(encodingStyle))
-      throw new IllegalArgumentException("Unknown SOAP Encoding: " + encodingStyle);
+    // TCK required syntax check
+    try {
+      new URL(encodingStyle);
+    }
+    catch (MalformedURLException e) {
+      throw new IllegalArgumentException(e);
+    }
 
     addAttribute(ENCODING_STYLE_NAME, encodingStyle);
   }
@@ -344,8 +391,15 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   {
     String uri = _namespaces.get(prefix);
 
-    if (uri == null && getParentNode() != null)
-      return ((SOAPElement) getParentNode()).getNamespaceURI(prefix);
+    if (uri == null) {
+      if (prefix.equals(_name.getPrefix()))
+        return _name.getURI();
+
+      if (getParentNode() != null)
+        return ((SOAPElement) getParentNode()).getNamespaceURI(prefix);
+
+      return null;
+    }
     else
       return uri;
   }
@@ -595,9 +649,19 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
       attr.setValue(newAttr.getValue());
       return attr;
     }
-    else {
+    else if (newAttr instanceof SOAPAttrImpl) {
       appendAttribute((SOAPAttrImpl) newAttr);
       return newAttr;
+    }
+    else {
+      SOAPAttrImpl soapAttr = 
+        new SOAPAttrImpl(_factory, NameImpl.fromNode(newAttr));
+
+      soapAttr.setValue(newAttr.getValue());
+
+      appendAttribute(soapAttr);
+
+      return soapAttr;
     }
   }
 

@@ -77,7 +77,7 @@ public class SOAPFactoryImpl extends SOAPFactory {
       else if ("Header".equals(name.getLocalName()))
         return new SOAP11HeaderImpl(this, NameImpl.fromName(name));
       else if ("Body".equals(name.getLocalName())) 
-        return new SOAPBodyImpl(this, NameImpl.fromName(name));
+        return new SOAP11BodyImpl(this, NameImpl.fromName(name));
       else if ("Fault".equals(name.getLocalName())) 
         return new SOAP11FaultImpl(this, NameImpl.fromName(name));
     }
@@ -87,7 +87,7 @@ public class SOAPFactoryImpl extends SOAPFactory {
       else if ("Header".equals(name.getLocalName()))
         return new SOAP12HeaderImpl(this, NameImpl.fromName(name));
       else if ("Body".equals(name.getLocalName())) 
-        return new SOAPBodyImpl(this, NameImpl.fromName(name));
+        return new SOAP12BodyImpl(this, NameImpl.fromName(name));
       else if ("Fault".equals(name.getLocalName())) 
         return new SOAP12FaultImpl(this, NameImpl.fromName(name));
     }

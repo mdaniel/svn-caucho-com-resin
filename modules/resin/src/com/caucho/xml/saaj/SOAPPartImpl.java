@@ -29,9 +29,11 @@
 
 package com.caucho.xml.saaj;
 
+import com.caucho.xml.*;
 import javax.xml.soap.*;
 import javax.xml.transform.*;
 import org.w3c.dom.*;
+import org.xml.sax.*;
 import java.util.*;
 
 public class SOAPPartImpl extends SOAPPart 
@@ -42,7 +44,7 @@ public class SOAPPartImpl extends SOAPPart
   private MimeHeaders _headers = new MimeHeaders();
   private Source _content;
 
-  public SOAPPartImpl(SOAPFactory factory, String protocol)
+  SOAPPartImpl(SOAPFactory factory, String protocol)
     throws SOAPException
   {
     _factory = factory;
@@ -56,6 +58,10 @@ public class SOAPPartImpl extends SOAPPart
       envelopeName = SOAPEnvelopeImpl.SOAP_1_1_ENVELOPE_NAME;
     else if (SOAPConstants.SOAP_1_2_PROTOCOL.equals(_protocol))
       envelopeName = SOAPEnvelopeImpl.SOAP_1_2_ENVELOPE_NAME;
+    else if (SOAPConstants.DYNAMIC_SOAP_PROTOCOL.equals(_protocol))
+      // this constructor does not get its structure from an
+      // external input -> cannot do dynamic protocol detection
+      throw new UnsupportedOperationException();
     else
       throw new SOAPException("Unknown SOAP protocol: " + _protocol);
 
@@ -63,6 +69,30 @@ public class SOAPPartImpl extends SOAPPart
     _envelope.setOwner((Document) this);
     _envelope.addHeader();
     _envelope.addBody();
+  }
+
+  SOAPPartImpl(SOAPFactory factory, String protocol, Document document)
+    throws SOAPException
+  {
+    _factory = factory;
+    _protocol = protocol;
+    
+    Name envelopeName = null;
+
+    if (SOAPConstants.SOAP_1_1_PROTOCOL.equals(_protocol))
+      envelopeName = SOAPEnvelopeImpl.SOAP_1_1_ENVELOPE_NAME;
+    else if (SOAPConstants.SOAP_1_2_PROTOCOL.equals(_protocol))
+      envelopeName = SOAPEnvelopeImpl.SOAP_1_2_ENVELOPE_NAME;
+    else if (SOAPConstants.DYNAMIC_SOAP_PROTOCOL.equals(_protocol))
+      // dynamic protocol is a special SAAJ "protocol" that means
+      // get the version from the input.
+      envelopeName = NameImpl.fromElement(document.getDocumentElement());
+    else
+      throw new SOAPException("Unknown SOAP protocol: " + _protocol);
+
+    _envelope = (SOAPEnvelopeImpl) _factory.createElement(envelopeName);
+    _envelope.setOwner((Document) this);
+    _envelope.deepCopy(document.getDocumentElement());
   }
 
   public void addMimeHeader(String name, String value)
@@ -380,7 +410,7 @@ public class SOAPPartImpl extends SOAPPart
 
   public String getNodeName()
   {
-    throw new UnsupportedOperationException();
+    return "#document";
   }
 
   public short getNodeType()

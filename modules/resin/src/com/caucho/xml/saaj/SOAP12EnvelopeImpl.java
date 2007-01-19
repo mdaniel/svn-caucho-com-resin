@@ -37,6 +37,11 @@ import com.caucho.xml.QNode;
 
 public class SOAP12EnvelopeImpl extends SOAPEnvelopeImpl
 {
+  static final NameImpl ENCODING_STYLE_NAME
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE,
+                   "encodingStyle",
+                   SOAPConstants.SOAP_ENV_PREFIX);
+
   SOAP12EnvelopeImpl(SOAPFactory factory)
     throws SOAPException
   {
@@ -51,5 +56,92 @@ public class SOAP12EnvelopeImpl extends SOAPEnvelopeImpl
   protected Name getHeaderName()
   {
     return SOAP_1_2_HEADER_NAME;
+  }
+
+  public String getEncodingStyle()
+    throws SOAPException
+  {
+    // optimization
+    return null;
+  }
+
+  public void setEncodingStyle(String encodingStyle) 
+    throws SOAPException
+  {
+    throw new SOAPException("encodingStyle illegal for this element");
+  }
+
+  public SOAPElement addAttribute(Name name, String value) 
+    throws SOAPException
+  {
+    if (name.equals(ENCODING_STYLE_NAME))
+      throw new SOAPException("encodingStyle illegal for this element");
+
+    return super.addAttribute(name, value);
+  }
+
+  public SOAPElement addAttribute(QName qname, String value) 
+    throws SOAPException
+  {
+    if (qname.equals(ENCODING_STYLE_NAME))
+      throw new SOAPException("encodingStyle illegal for this element");
+
+    return super.addAttribute(qname, value);
+  }
+
+  public SOAPElement addChildElement(Name name)
+    throws SOAPException
+  {
+    if (_body != null)
+      throw new SOAPException("SOAP 1.2 does not allow elements after the body");
+
+    return super.addChildElement(name);
+  }
+
+  public SOAPElement addChildElement(QName qname)
+    throws SOAPException
+  {
+    if (_body != null)
+      throw new SOAPException("SOAP 1.2 does not allow elements after the body");
+
+    return super.addChildElement(qname);
+  }
+
+  public SOAPElement addChildElement(SOAPElement element)
+    throws SOAPException
+  {
+    if (_body != null)
+      throw new SOAPException("SOAP 1.2 does not allow elements after the body");
+
+    return super.addChildElement(element);
+  }
+
+  public SOAPElement addChildElement(String localName)
+    throws SOAPException
+  {
+    if (_body != null)
+      throw new SOAPException("SOAP 1.2 does not allow elements after the body");
+
+    return super.addChildElement(localName);
+  }
+
+  public SOAPElement addChildElement(String localName, String prefix)
+    throws SOAPException
+  {
+    if (_body != null)
+      throw new SOAPException("SOAP 1.2 does not allow elements after the body");
+
+    return super.addChildElement(localName, prefix);
+  }
+
+  public SOAPElement addChildElement(String localName, 
+                                     String prefix, 
+                                     String uri)
+    throws SOAPException
+  {
+    if (_body != null)
+      throw new SOAPException("SOAP 1.2 does not allow elements after the body");
+
+    return super.addChildElement(localName, prefix, uri);
   }
 }

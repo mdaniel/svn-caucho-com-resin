@@ -41,10 +41,14 @@ public class SOAP11HeaderImpl extends SOAPElementImpl
   private static final NameImpl QNAME_NAME = new NameImpl("qname");
 
   protected static final NameImpl SOAP_1_1_SUPPORTED_ENVELOPE_NAME 
-    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "SupportedEnvelope");
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, 
+                   "SupportedEnvelope",
+                   SOAPConstants.SOAP_ENV_PREFIX);
 
   protected static final NameImpl SOAP_1_2_SUPPORTED_ENVELOPE_NAME 
-    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "SupportedEnvelope");
+    = new NameImpl(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, 
+                   "SupportedEnvelope",
+                   SOAPConstants.SOAP_ENV_PREFIX);
 
   protected NameImpl _supportedEnvelopeName;
   protected NameImpl _upgradeName;

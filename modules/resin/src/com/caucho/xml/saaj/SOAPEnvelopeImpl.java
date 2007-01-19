@@ -87,9 +87,12 @@ public abstract class SOAPEnvelopeImpl extends SOAPElementImpl
     if (_body != null)
       throw new SOAPException("Envelope already contains Body");
 
-    _body = (SOAPBody) _factory.createElement(getBodyName());
+    // addChildElement might check if _body != null for SOAP 1.2
+    SOAPBody body = (SOAPBody) _factory.createElement(getBodyName());
 
-    addChildElement(_body);
+    addChildElement(body);
+
+    _body = body;
 
     return _body;
   }
@@ -101,7 +104,20 @@ public abstract class SOAPEnvelopeImpl extends SOAPElementImpl
 
     _header = (SOAPHeader) _factory.createElement(getHeaderName());
 
+    // make sure the ordering is correct if a header is inserted
+    // after the body
+    SOAPBody body = _body;
+
+    if (body != null)
+      body.detachNode();
+
     addChildElement(_header);
+
+    if (body != null) {
+      addChildElement(body);
+
+      _body = body;
+    }
 
     return _header;
   }

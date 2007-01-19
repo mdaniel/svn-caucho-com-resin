@@ -33,6 +33,7 @@ import java.io.*;
 import java.util.*;
 
 import javax.activation.*;
+import javax.imageio.*;
 import javax.mail.util.ByteArrayDataSource;
 import javax.xml.soap.*;
 import javax.xml.transform.stream.StreamSource;
@@ -40,6 +41,17 @@ import javax.xml.transform.stream.StreamSource;
 import com.caucho.util.Base64;
 
 public class AttachmentPartImpl extends AttachmentPart {
+  static 
+  {
+    try {
+      // Make sure the data handler gets its DataContentHandlers from us.
+      // Setting the command map is not sufficient.
+      DataHandler.setDataContentHandlerFactory(SAAJCommandMap.COMMAND_MAP);
+    }
+    catch (Error e) {
+    }
+  }
+
   private DataHandler _dataHandler;
   private MimeHeaders _headers = new MimeHeaders();
 
@@ -80,6 +92,19 @@ public class AttachmentPartImpl extends AttachmentPart {
 
   public void setMimeHeader(String name, String value)
   {
+    try {
+      if (CONTENT_TYPE.equals(name)) {
+        if (_dataHandler != null && 
+            ! value.equals(_dataHandler.getContentType())) {
+          Object o = _dataHandler.getContent();
+          _dataHandler = new DataHandler(o, value);
+        }
+      }
+    }
+    catch (IOException e) {
+      // do nothing?
+    }
+
     _headers.setHeader(name, value);
   }
 
@@ -114,17 +139,10 @@ public class AttachmentPartImpl extends AttachmentPart {
       throw new SOAPException("No content available");
 
     try {
-      // XXX
-      // seems like we shouldn't have to do this, but dataHandler.getContent()
-      // doesn't do what i expected.
-      /*
-      if ("text/xml".equals(getContentType()))
-        return new StreamSource(_dataHandler.getInputStream());
-      else*/
-        return _dataHandler.getContent();
+      return _dataHandler.getContent();
     }
     catch (IOException e) {
-      throw new SOAPException(e);
+      return new SOAPException(e);
     }
   }
 
@@ -154,16 +172,9 @@ public class AttachmentPartImpl extends AttachmentPart {
   public byte[] getRawContentBytes() 
     throws SOAPException
   {
-    InputStream is = getRawContent();
-
     try {
-      if (is.available() < 0)
-        throw new SOAPException("No content available");
-
       ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-      for (int b = is.read(); b >= 0; b = is.read())
-        os.write(b);
+      _dataHandler.writeTo(os);
 
       // XXX reset datahandler with this byte array?
 
@@ -180,13 +191,13 @@ public class AttachmentPartImpl extends AttachmentPart {
     if (_dataHandler == null)
       return 0;
 
-    try {
-      InputStream is = _dataHandler.getInputStream();
-      return is.available();
-    }
-    catch (IOException e) {
-      return -1;
-    }
+    byte[] buffer = getRawContentBytes();
+
+    _dataHandler = 
+      new DataHandler(new ByteArrayDataSource(buffer, getContentType()));
+    _dataHandler.setCommandMap(SAAJCommandMap.COMMAND_MAP);
+
+    return buffer.length;
   }
 
   public void setBase64Content(InputStream content, String contentType) 
@@ -212,6 +223,7 @@ public class AttachmentPartImpl extends AttachmentPart {
   {
     setContentType(contentType);
     _dataHandler = new DataHandler(object, contentType);
+    _dataHandler.setCommandMap(SAAJCommandMap.COMMAND_MAP);
   }
 
   public void setDataHandler(DataHandler dataHandler)
@@ -225,11 +237,15 @@ public class AttachmentPartImpl extends AttachmentPart {
   public void setRawContent(InputStream content, String contentType) 
     throws SOAPException
   {
+    if (content == null)
+      throw new SOAPException("InputStream cannot be null");
+
     setContentType(contentType);
   
     try {
       DataSource source = new ByteArrayDataSource(content, contentType);
       _dataHandler = new DataHandler(source);
+      _dataHandler.setCommandMap(SAAJCommandMap.COMMAND_MAP);
     }
     catch (IOException e) {
       throw new SOAPException(e);
@@ -246,6 +262,7 @@ public class AttachmentPartImpl extends AttachmentPart {
       InputStream stream = new ByteArrayInputStream(content, offset, len);
       DataSource source = new ByteArrayDataSource(stream, contentType);
       _dataHandler = new DataHandler(source);
+      _dataHandler.setCommandMap(SAAJCommandMap.COMMAND_MAP);
     }
     catch (IOException e) {
       throw new SOAPException(e);

@@ -104,17 +104,24 @@ public class NameImpl extends QName implements Name {
       return new NameImpl(qname.getLocalPart());
   }
 
-  static NameImpl fromElement(Element element)
+  static NameImpl fromElement(org.w3c.dom.Element element)
   {
-    if (element.getPrefix() != null) 
-      return new NameImpl(element.getNamespaceURI(),
-                          element.getLocalName(), 
-                          element.getPrefix());
-    else if (element.getNamespaceURI() != null)
-      return new NameImpl(element.getNamespaceURI(),
-                          element.getLocalName());
-    else
-      return new NameImpl(element.getLocalName());
+    return fromNode(element);
+  }
+    
+  static NameImpl fromNode(org.w3c.dom.Node node)
+  {
+    if (node.getPrefix() != null) 
+      return new NameImpl(node.getNamespaceURI(),
+                          node.getLocalName(), 
+                          node.getPrefix());
+    else if (node.getNamespaceURI() != null)
+      return new NameImpl(node.getNamespaceURI(),
+                          node.getLocalName());
+    else if (node.getLocalName() != null)
+      return new NameImpl(node.getLocalName());
+    else 
+      return new NameImpl(node.getNodeName());
   }
 
   public String getLocalName()

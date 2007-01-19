@@ -29,274 +29,19 @@
 
 package com.caucho.xml.saaj;
 
-import java.io.*;
-import java.util.*;
-import javax.activation.*;
-
-import javax.xml.XMLConstants;
 import javax.xml.soap.*;
-
+import javax.xml.transform.*;
 import org.w3c.dom.*;
-import org.xml.sax.*;
+import java.util.*;
 
-import com.caucho.xml.Xml;
-import com.caucho.xml.XmlPrinter;
+public class SimpleDocument implements Document
+{
+  private SOAPElementImpl _root;
 
-public class SOAPMessageImpl extends SOAPMessage {
-  private static final Name SOAP_NAMESPACE_NAME
-    = new NameImpl(XMLConstants.XMLNS_ATTRIBUTE_NS_URI,
-                   SOAPConstants.SOAP_ENV_PREFIX,
-                   XMLConstants.XMLNS_ATTRIBUTE);
-
-  private final ArrayList<AttachmentPart> _attachments 
-    = new ArrayList<AttachmentPart>();
-
-  private final HashMap<String, Object> _properties
-    = new HashMap<String, Object>();
-
-  private String _description;
-  private SOAPPart _part;
-  private SOAPFactory _factory;
-  private String _protocol;
-  private boolean _saveRequired = true;
-
-  SOAPMessageImpl(SOAPFactory factory, String protocol)
-    throws SOAPException
+  public SimpleDocument(SOAPElementImpl root)
   {
-    _factory = factory;
-    _protocol = protocol;
-    _properties.put(WRITE_XML_DECLARATION, "false");
-    _properties.put(CHARACTER_SET_ENCODING, "utf-8");
-
-    _part = new SOAPPartImpl(_factory, _protocol);
-  }
-
-  SOAPMessageImpl(SOAPFactory factory, String protocol, 
-                  MimeHeaders headers, InputStream in)
-    throws IOException, SOAPException
-  {
-    _factory = factory;
-    _protocol = protocol;
-    _properties.put(WRITE_XML_DECLARATION, "false");
-    _properties.put(CHARACTER_SET_ENCODING, "utf-8");
-
-    try {
-      Document doc = new Xml().parseDocument(in);
-      _part = new SOAPPartImpl(_factory, _protocol, doc);
-    }
-    catch (SAXException e) {
-      throw new SOAPException(e);
-    }
-  }
-
-  public void addAttachmentPart(AttachmentPart attachmentPart)
-  {
-    _attachments.add(attachmentPart);
-  }
-
-  public int countAttachments()
-  {
-    return _attachments.size();
-  }
-
-  public AttachmentPart createAttachmentPart()
-  {
-    return new AttachmentPartImpl();
-  }
-
-  public AttachmentPart createAttachmentPart(DataHandler dataHandler)
-  {
-    AttachmentPartImpl attachmentPart = new AttachmentPartImpl();
-    attachmentPart.setDataHandler(dataHandler);
-
-    return attachmentPart;
-  }
-
-  public AttachmentPart createAttachmentPart(Object content, String contentType)
-  {
-    AttachmentPartImpl attachmentPart = new AttachmentPartImpl();
-    attachmentPart.setContent(content, contentType);
-
-    return attachmentPart;
-  }
-
-  public AttachmentPart getAttachment(SOAPElement element)
-    throws SOAPException
-  {
-    String href = element.getAttribute("href");
-
-    if (href != null && ! "".equals(href)) {
-      // XXX other prefixes for contentId?
-      if (href.startsWith("cid:")) {
-        String contentId = '<' + href.substring("cid:".length()) + '>';
-        return findAttachmentByContentId(contentId);
-      }
-      else
-        return findAttachmentByContentLocation(href);
-    }
-
-    href = element.getValue();
-
-    if (href != null && ! "".equals(href)) {
-      if (href.startsWith("cid:")) {
-        String contentId = '<' + href.substring("cid:".length()) + '>';
-        return findAttachmentByContentId(contentId);
-      }
-      else
-        return findAttachmentByContentLocation(href);
-    }
-
-    return null;
-  }
-  
-  private AttachmentPart findAttachmentByContentId(String contentId)
-  {
-    for (int i = 0; i < _attachments.size(); i++) {
-      if (contentId.equals(_attachments.get(i).getContentId()))
-        return _attachments.get(i);
-    }
-
-    return null;
-  }
-
-  private AttachmentPart findAttachmentByContentLocation(String contentLocation)
-  {
-    for (int i = 0; i < _attachments.size(); i++) {
-      if (contentLocation.equals(_attachments.get(i).getContentLocation()))
-        return _attachments.get(i);
-    }
-
-    return null;
-  }
-
-  public Iterator getAttachments()
-  {
-    return _attachments.iterator();
-  }
-
-  public Iterator getAttachments(MimeHeaders headers)
-  {
-    return new MatchingHeadersIterator(headers);
-  }
-
-  public String getContentDescription()
-  {
-    return _description;
-  }
-
-  public void setContentDescription(String description)
-  {
-    _description = description;
-  }
-
-  public MimeHeaders getMimeHeaders()
-  {
-    MimeHeaders headers = new MimeHeaders();
-
-    for (int i = 0; i < _attachments.size(); i++) {
-      Iterator iterator = _attachments.get(i).getAllMimeHeaders();
-
-      while (iterator.hasNext()) {
-        MimeHeader header = (MimeHeader) iterator.next();
-        headers.addHeader(header.getName(), header.getValue());
-      }
-    }
-
-    return headers;
-  }
-
-  public Object getProperty(String property) 
-    throws SOAPException
-  {
-    Object o = _properties.get(property);
-
-    if (o == null)
-      throw new SOAPException("Unrecognized property : " + property);
-
-    return o;
-  }
-
-  public SOAPBody getSOAPBody() throws SOAPException
-  {
-    return _part.getEnvelope().getBody();
-  }
-
-  public SOAPHeader getSOAPHeader() throws SOAPException
-  {
-    return _part.getEnvelope().getHeader();
-  }
-
-  public SOAPPart getSOAPPart()
-  {
-    return _part;
-  }
-
-  public void removeAllAttachments()
-  {
-    _attachments.clear();
-  }
-
-  public void removeAttachments(MimeHeaders headers)
-  {
-    Iterator iterator = getAttachments(headers);
-
-    while (iterator.hasNext()) {
-      iterator.next();
-      iterator.remove();
-    }
-  }
-
-  public void saveChanges() 
-    throws SOAPException
-  {
-    // XXX???
-    
-    _saveRequired = false; // weird logic required by TCK
-  }
-
-  public boolean saveRequired()
-  {
-    return _saveRequired;
-  }
-
-  public void setProperty(String property, Object value) 
-    throws SOAPException
-  {
-    /* API says this is necessary, but TCK disagrees:
-     
-    if (! property.equals(WRITE_XML_DECLARATION) &&
-        ! property.equals(CHARACTER_SET_ENCODING))
-      throw new SOAPException("Unrecognized property : " + property);
-    */
-
-    _properties.put(property, value);
-  }
-
-  public void writeTo(OutputStream out)
-    throws SOAPException, IOException
-  {
-    // As specified by API
-    saveChanges();
-
-    XmlPrinter printer = new XmlPrinter(out);
-    printer.setEncoding((String) _properties.get(CHARACTER_SET_ENCODING));
-
-    boolean printDeclaration = 
-      Boolean.valueOf((String) _properties.get(WRITE_XML_DECLARATION));
-
-    printer.setPrintDeclaration(printDeclaration);
-
-    // ensure that the soap envelope prefix is defined when we do output
-    SOAPEnvelope envelope = _part.getEnvelope();
-    String value = envelope.getAttributeValue(SOAP_NAMESPACE_NAME);
-
-    if (value == null)
-      envelope.addAttribute(SOAP_NAMESPACE_NAME, envelope.getNamespaceURI());
-
-    printer.printNode(_part);
-
-    if (value == null)
-      envelope.removeAttribute(SOAP_NAMESPACE_NAME);
+    _root = root;
+    _root.setOwner(this);
   }
 
   // org.w3c.dom.Document
@@ -364,7 +109,7 @@ public class SOAPMessageImpl extends SOAPMessage {
 
   public Element getDocumentElement()
   {
-    throw new UnsupportedOperationException();
+    return _root;
   }
 
   public String getDocumentURI()
@@ -500,12 +245,12 @@ public class SOAPMessageImpl extends SOAPMessage {
 
   public org.w3c.dom.Node getFirstChild()
   {
-    throw new UnsupportedOperationException();
+    return _root;
   }
 
   public org.w3c.dom.Node getLastChild()
   {
-    throw new UnsupportedOperationException();
+    return _root;
   }
 
   public String getLocalName()
@@ -525,12 +270,12 @@ public class SOAPMessageImpl extends SOAPMessage {
 
   public String getNodeName()
   {
-    throw new UnsupportedOperationException();
+    return "#document";
   }
 
   public short getNodeType()
   {
-    throw new UnsupportedOperationException();
+    return DOCUMENT_NODE;
   }
 
   public String getNodeValue()
@@ -649,75 +394,4 @@ public class SOAPMessageImpl extends SOAPMessage {
   {
     throw new UnsupportedOperationException();
   }
-
-  private class MatchingHeadersIterator implements Iterator {
-    private MimeHeaders _headers;
-    private int _current = -1;
-    private int _last = -1;
-
-    public MatchingHeadersIterator(MimeHeaders headers)
-    {
-      _headers = headers;
-
-      advance();
-    }
-
-    public Object next()
-    {
-      if (hasNext()) {
-        Object next = _attachments.get(_current);
-
-        advance();
-
-        return next;
-      }
-
-      throw new NoSuchElementException();
-    }
-
-    public boolean hasNext()
-    {
-      return _current < _attachments.size();
-    }
-
-    public void remove()
-    {
-      _attachments.remove(_last);
-    }
-
-    private void advance()
-    {
-      _last = _current;
-
-      for (_current++; _current < _attachments.size(); _current++) {
-        if (attachmentMatchesHeaders(_attachments.get(_current)))
-          break;
-      }
-    }
-
-    private boolean attachmentMatchesHeaders(AttachmentPart attachment)
-    {
-      Iterator iterator = _headers.getAllHeaders();
-
-      while (iterator.hasNext()) {
-        MimeHeader header = (MimeHeader) iterator.next();
-        String[] values = attachment.getMimeHeader(header.getName());
-
-        boolean headerFound = false;
-
-        for (String value : values) {
-          if (header.getValue().equals(value)) {
-            headerFound = true;
-            break;
-          }
-        }
-
-        if (! headerFound)
-          return false;
-      }
-
-      return true;
-    }
-  }
 }
-
