@@ -767,14 +767,13 @@ public class XmlPrinter implements XMLWriter {
         print(version);
         print("\"");
 
-	if (encoding == null ||
-	    encoding.equals("") ||
-	    encoding.equalsIgnoreCase("UTF-16") ||
-	    encoding.equalsIgnoreCase("US-ASCII")) {
-	}
-	else
+        if (encoding == null ||
+            encoding.equals("") ||
+            encoding.equalsIgnoreCase("US-ASCII")) {
+        }
+        else
           print(" encoding=\"" + encoding + "\"");
-          
+
         if (_standalone != null &&
             (_standalone.equals("true") || _standalone.equals("yes")))
           print(" standalone=\"yes\"");
