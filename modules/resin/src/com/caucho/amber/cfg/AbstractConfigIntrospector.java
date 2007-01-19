@@ -175,7 +175,8 @@ abstract public class AbstractConfigIntrospector {
         return;
     }
 
-    throw new ConfigException(L.l("'{0}' needs a public or protected no-arg constructor.  Entity beans must have public, no-arg constructors.",
+    // jpa/0gb2
+    throw new ConfigException(L.l("'{0}' needs a public or protected no-arg constructor.  Entity beans must have a public or protected no-arg constructor.",
                                   type.getName()));
   }
 

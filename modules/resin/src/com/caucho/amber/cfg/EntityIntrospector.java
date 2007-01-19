@@ -400,7 +400,11 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         }
 
         // XXX: temp. introspects idClass as an embeddable type.
-        _persistenceUnit.getEmbeddableIntrospector().introspect(idClass);
+        EmbeddableType embeddable
+          = _persistenceUnit.getEmbeddableIntrospector().introspect(idClass);
+
+        // jpa/0i49
+        embeddable.setFieldAccess(isField);
       }
 
       if (entityType.getId() != null) {
