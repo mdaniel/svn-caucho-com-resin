@@ -40,6 +40,7 @@ import com.caucho.ejb.cfg.EjbMethod;
 import com.caucho.ejb.cfg.EjbMethodPattern;
 import com.caucho.ejb.cfg.EjbSessionBean;
 import com.caucho.ejb.cfg.MethodSignature;
+import com.caucho.ejb.cfg.EjbMessageBean;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -104,8 +105,10 @@ public class Bean {
     }
     else if (_type.getAnnotation(Entity.class) != null) {
     }
+    else if (_type.getAnnotation(MessageDriven.class) != null) {
+    }
     else
-      throw new ConfigException(L.l("{0} is an unknown bean type.  Beans expect Entity, Stateful, or Stateless class annotations.",
+      throw new ConfigException(L.l("{0} is an unknown bean type.  Beans expect MessageDriven, Entity, Stateful, or Stateless class annotations.",
 				    _type.getName()));
   }
 
@@ -126,14 +129,18 @@ public class Bean {
   {
     if (_type == null)
       throw new ConfigException(L.l("type is a require attribute of ejb-server"));
+
     JAnnotation stateless = _type.getAnnotation(Stateless.class);
     JAnnotation stateful = _type.getAnnotation(Stateful.class);
+    JAnnotation messageDriven = _type.getAnnotation(MessageDriven.class);
 
     try {
       if (stateless != null)
 	configureStateless(_type);
       else if (stateful != null)
 	configureStateful(_type);
+      else if (messageDriven != null)
+        configureMessageDriven(_type);
       else
 	throw new ConfigException(L.l("only stateless beans are currently supported."));
     } catch (RuntimeException e) {
@@ -181,6 +188,30 @@ public class Bean {
     bean.setTransactionType("Container");
 
     configureBean(bean, type, stateful.getString("name"));
+  }
+
+  private void configureMessageDriven(JClass type)
+    throws ConfigException
+  {
+    JAnnotation messageDriven = type.getAnnotation(MessageDriven.class);
+
+    EjbMessageBean bean = new EjbMessageBean(_ejbManager.getConfig(), getEJBModuleName());
+    bean.setAllowPOJO(true);
+
+    /**
+     // how does xa work for mdb?
+
+    JAnnotation transaction = type.getAnnotation(TransactionManagement.class);
+    if (transaction == null)
+      bean.setTransactionType("Container");
+    else if (TransactionManagementType.BEAN.equals(transaction.get("value")))
+      bean.setTransactionType("Bean");
+    else {
+      bean.setTransactionType("Container");
+    }
+     */
+
+    configureBean(bean, type, messageDriven.getString("name"));
   }
 
   private void configureBean(EjbBean bean, JClass type, String defaultName)

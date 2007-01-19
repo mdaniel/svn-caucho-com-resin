@@ -35,7 +35,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The RemoteHome annotation for remote interfaces.
+ * The MessageDriven annotation for message driven beans.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

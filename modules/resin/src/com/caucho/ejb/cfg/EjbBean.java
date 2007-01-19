@@ -887,7 +887,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
 					   String prefix)
     throws ConfigException
   {
-    return new EjbObjectView(this, apiList, prefix);
+   return new EjbObjectView(this, apiList, prefix);
   }
 
   /**

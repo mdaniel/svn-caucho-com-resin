@@ -88,8 +88,6 @@ public class JavaCompiler {
 
   /**
    * Creates a new compiler.
-   *
-   * @param loader the parent class loader for the compiler.
    */
   public static JavaCompiler create()
   {

@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
@@ -41,6 +42,7 @@ import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.MessageDriven;
 import javax.ejb.MessageDrivenBean;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -48,12 +50,15 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.naming.NamingException;
 import java.lang.reflect.Modifier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Configuration for an ejb entity bean.
  */
 public class EjbMessageBean extends EjbBean {
-  private static L10N L = new L10N(EjbMessageBean.class);
+  private static final Logger log = Logger.getLogger(EjbMessageBean.class.getName());
+  private static final L10N L = new L10N(EjbMessageBean.class);
 
   private ConnectionFactory _connectionFactory;
   private Destination _destination;
@@ -78,6 +83,7 @@ public class EjbMessageBean extends EjbBean {
   /**
    * Returns the kind of bean.
    */
+  @Override
   public String getEJBKind()
   {
     return "message";
@@ -134,11 +140,13 @@ public class EjbMessageBean extends EjbBean {
   public void setDestination(JndiBuilder destination)
     throws ConfigException, NamingException
   {
-    if (! (destination.getObject() instanceof Destination))
+    Object obj = destination.getObject();
+
+    if (! (obj instanceof Destination))
       throw new ConfigException(L.l("`{0}' needs to implement javax.jms.Destination.",
-				    destination.getObject()));
+				    obj));
     
-    _destination = (Destination) destination.getObject();
+    _destination = (Destination) obj;
   }
 
   /**
@@ -278,6 +286,23 @@ public class EjbMessageBean extends EjbBean {
     return new ActivationConfig();
   }
 
+  private void addActivationConfigProperty(String name, String value)
+  {
+    if ("destination".equals(name)) {
+      JndiBuilder jndiBuilder = new JndiBuilder();
+      jndiBuilder.addText(value);
+      try {
+        setDestination(jndiBuilder);
+      }
+      catch (NamingException e) {
+        throw new ConfigException(e);
+      }
+    }
+    else
+      log.log(Level.FINE, L.l("activation-config-property '{0}' is unknown, ignored",
+                              name));
+  }
+
   /**
    * Sets the number of message consumers.
    */
@@ -291,15 +316,65 @@ public class EjbMessageBean extends EjbBean {
    * Initialize
    */
   @PostConstruct
+  @Override
   public void init()
     throws ConfigException
   {
+    super.init();
+
     J2EEManagedObject.register(new com.caucho.management.j2ee.MessageDrivenBean(this));
+  }
+
+  /**
+   * Obtain and apply initialization from annotations.
+   */
+  @Override
+  public void initIntrospect()
+    throws ConfigException
+  {
+    JClass type = getEJBClassWrapper();
+
+    if (! type.isAnnotationPresent(MessageDriven.class)
+        && ! type.isAnnotationPresent(MessageDriven.class))
+      return;
+
+    // ejb 3.0 simplified section 10.1.3
+    // The name annotation element defaults to the unqualiﬁed name of the bean
+    // class.
+
+    if (getEJBName() == null) {
+      String typeName = type.getName();
+
+      int i = typeName.lastIndexOf('.');
+
+      setEJBName(typeName.substring(i + 1));
+    }
+
+    JClass []ifs = type.getInterfaces();
+
+    // XXX: annotations in super classes?
+
+    JAnnotation messageDriven = type.getAnnotation(javax.ejb.MessageDriven.class);
+
+    if (messageDriven != null) {
+
+      javax.ejb.ActivationConfigProperty[] properties
+        = (javax.ejb.ActivationConfigProperty[])
+        messageDriven.get("activationConfig");
+
+      if (properties != null) {
+
+        for (javax.ejb.ActivationConfigProperty property : properties)
+          addActivationConfigProperty(property.propertyName(),
+                                      property.propertyValue());
+      }
+    }
   }
 
   /**
    * Deploys the bean.
    */
+  @Override
   public AbstractServer deployServer(EjbServerManager ejbManager,
 				     JavaClassGenerator javaGen)
     throws ClassNotFoundException
@@ -323,7 +398,12 @@ public class EjbMessageBean extends EjbBean {
 
   public class ActivationConfig {
     public void addActivationConfigProperty(ActivationConfigProperty prop)
+      throws NamingException
     {
+      String name = prop.getActivationConfigPropertyName();
+      String value = prop.getActivationConfigPropertyValue();
+
+      EjbMessageBean.this.addActivationConfigProperty(name, value);
     }
   }
 
@@ -336,9 +416,19 @@ public class EjbMessageBean extends EjbBean {
       _name = name;
     }
 
+    public String getActivationConfigPropertyName()
+    {
+      return _name;
+    }
+
     public void setActivationConfigPropertyValue(String value)
     {
       _value = value;
+    }
+
+    public String getActivationConfigPropertyValue()
+    {
+      return _value;
     }
   }
 

@@ -63,9 +63,9 @@ public interface ServletRequest {
    * this returns the virtual host name, e.g. "vhost1.caucho.com".
    *
    * This call returns the host name as the client sees it, which means that
-   * if ipchains or proxying is involved this call returns the correct call for
-   * forming urls, but may not contain the host that Resin is actually listeing
-   * on.
+   * if ipchains, load balancing, or proxying is involved this call returns the
+   * correct call for forming urls, but may not contain the host that Resin is
+   * actually listening on.
    */
   public String getServerName();
 
@@ -73,8 +73,9 @@ public interface ServletRequest {
    * Returns the server port used by the client, e.g. 80.
    *
    * This call returns the port number as the client sees it, which means that
-   * if ipchains or proxying is involved this call returns the correct call for
-   * forming urls, but may not return the actual port that Resin is listening on.
+   * if ipchains, load balancing, or proxying is involved this call returns the
+   * correct call for forming urls, but may not return the actual port that
+   * Resin is listening on.
    *
    * This call should not be used to test for an ssl connection
    * (getServerPort() == 443), {@link #isSecure()} is provided for that purpose.
@@ -100,8 +101,9 @@ public interface ServletRequest {
 
   /**
    * This call returns the ip of the host actually used to connect to the Resin
-   * server,  which means that if ipchains or proxying is involved this call
-   * <i>does not</i> return the correct host for forming urls.
+   * server,  which means that if ipchains, load balancing, or proxying is
+   * involved this call <i>does not</i> return the correct host for
+   * forming urls.
    *
    * @since 2.4
    */
@@ -110,9 +112,10 @@ public interface ServletRequest {
   /**
    * Returns the IP address of the local host, i.e. the server.
    *
-   * This call returns the name of the host actaully used to connect to the Resin
-   * server,  which means that if ipchains or proxying is involved this call
-   * <i>does not</i> return the correct host for forming urls.
+   * This call returns the name of the host actaully used to connect to the
+   * Resin server,  which means that if ipchains, load balancing, or proxying
+   * is involved this call <i>does not</i> return the correct host for
+   * forming urls.
    *
    * @since 2.4
    */
@@ -122,8 +125,9 @@ public interface ServletRequest {
    * Returns the port of the local host.
    *
    * This call returns the port number actually used to connect to the Resin
-   * server,  which means that if ipchains or proxying is involved this call
-   * <i>does not</i> return the correct port for forming urls.
+   * server,  which means that if ipchains, load balancing, or proxying is
+   * involved this call <i>does not</i> return the correct port for
+   * forming urls.
    *
    * This call should not be used to test for an ssl connection
    * (getServerPort() == 443), {@link #isSecure()} is provided for that purpose.

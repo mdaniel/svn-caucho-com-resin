@@ -221,6 +221,8 @@ public class EjbConfig {
    */
   public EjbBean getBeanConfig(String name)
   {
+    assert name != null;
+
     return _cfgBeans.get(name);
   }
 

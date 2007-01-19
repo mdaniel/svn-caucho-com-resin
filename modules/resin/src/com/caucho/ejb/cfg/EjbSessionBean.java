@@ -198,7 +198,7 @@ public class EjbSessionBean extends EjbBean {
   }
 
   /**
-   * Configure initialization.
+   * Obtain and apply initialization from annotations.
    */
   public void initIntrospect()
     throws ConfigException
