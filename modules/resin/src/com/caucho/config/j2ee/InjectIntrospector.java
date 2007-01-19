@@ -34,9 +34,15 @@ import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import javax.annotation.*;
+import org.omg.CORBA.ORB;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+import javax.annotation.Resources;
 import javax.ejb.EJB;
 import javax.ejb.SessionContext;
+import javax.ejb.MessageDrivenContext;
 import javax.naming.InitialContext;
 import javax.naming.NameClassPair;
 import javax.naming.NamingEnumeration;
@@ -52,7 +58,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.omg.CORBA.ORB;
 
 /**
  * Analyzes a bean for @Inject tags.
@@ -616,6 +621,9 @@ public class InjectIntrospector {
     
     if (SessionContext.class.equals(fieldType)) {
       jndiName = "java:comp/env/sessionContext";
+    }
+    else if (MessageDrivenContext.class.equals(fieldType)) {
+      jndiName = "java:comp/env/messageDrivenContext";
     }
 
     int colon = jndiName.indexOf(':');

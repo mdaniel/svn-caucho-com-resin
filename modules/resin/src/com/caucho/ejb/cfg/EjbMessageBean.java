@@ -33,6 +33,9 @@ import com.caucho.bytecode.JAnnotation;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JMethod;
 import com.caucho.config.ConfigException;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
@@ -44,6 +47,7 @@ import com.caucho.util.L10N;
 import javax.annotation.PostConstruct;
 import javax.ejb.MessageDriven;
 import javax.ejb.MessageDrivenBean;
+import javax.ejb.ActivationConfigProperty;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.MessageListener;
@@ -52,6 +56,7 @@ import javax.naming.NamingException;
 import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
 
 /**
  * Configuration for an ejb entity bean.
@@ -350,21 +355,18 @@ public class EjbMessageBean extends EjbBean {
       setEJBName(typeName.substring(i + 1));
     }
 
-    JClass []ifs = type.getInterfaces();
-
     // XXX: annotations in super classes?
 
     JAnnotation messageDriven = type.getAnnotation(javax.ejb.MessageDriven.class);
 
     if (messageDriven != null) {
 
-      javax.ejb.ActivationConfigProperty[] properties
-        = (javax.ejb.ActivationConfigProperty[])
-        messageDriven.get("activationConfig");
+      ActivationConfigProperty[] properties
+        = (ActivationConfigProperty[]) messageDriven.get("activationConfig");
 
       if (properties != null) {
 
-        for (javax.ejb.ActivationConfigProperty property : properties)
+        for (ActivationConfigProperty property : properties)
           addActivationConfigProperty(property.propertyName(),
                                       property.propertyValue());
       }
@@ -383,6 +385,7 @@ public class EjbMessageBean extends EjbBean {
 
     server.setModuleName(getEJBModuleName());
     server.setEJBName(getEJBName());
+    server.setMappedName(getMappedName());
 
     //Class contextImplClass = javaGen.loadClass(getSkeletonName());
     //server.setContextImplClass(contextImplClass);
@@ -391,13 +394,47 @@ public class EjbMessageBean extends EjbBean {
     server.setDestination(_destination);
     server.setConsumerMax(_consumerMax);
     
-    server.setInitProgram(getInitProgram());
+    Class beanClass = javaGen.loadClass(getEJBClass().getName());
+
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(server.getClassLoader());
+
+      ArrayList<BuilderProgram> initList;
+      initList = InjectIntrospector.introspect(beanClass);
+
+      BuilderProgramContainer initContainer = getInitProgram();
+
+      if (initList != null && initList.size() > 0) {
+        if (initContainer == null)
+          initContainer = new BuilderProgramContainer();
+
+        for (BuilderProgram init : initList) {
+          initContainer.addProgram(init);
+        }
+      }
+
+      server.setInitProgram(initContainer);
+
+      try {
+        if (getServerProgram() != null)
+          getServerProgram().configure(server);
+      } catch (ConfigException e) {
+        throw e;
+      } catch (Throwable e) {
+        throw new ConfigException(e);
+      }
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
 
     return server;
   }
 
   public class ActivationConfig {
-    public void addActivationConfigProperty(ActivationConfigProperty prop)
+    public void addActivationConfigProperty(ActivationConfigPropertyConfig prop)
       throws NamingException
     {
       String name = prop.getActivationConfigPropertyName();
@@ -407,7 +444,7 @@ public class EjbMessageBean extends EjbBean {
     }
   }
 
-  public static class ActivationConfigProperty {
+  public static class ActivationConfigPropertyConfig {
     String _name;
     String _value;
 

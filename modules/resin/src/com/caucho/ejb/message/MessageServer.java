@@ -35,6 +35,7 @@ import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.naming.Jndi;
 
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
@@ -90,15 +91,36 @@ public class MessageServer extends AbstractServer {
   /**
    * Initialize the server
    */
+  @Override
   public void init()
     throws Exception
   {
-    super.init();
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_loader);
+
+      super.init();
+
+      // XXX:
+      // Should be a resin-specific name, like
+      // java:comp/env/resin-ejb/messageDrivenContext, since storing it in
+      // JNDI is a resin-specific implementation
+      // It needs to match InjectIntrospector
+      Jndi.rebindDeep("java:comp/env/ejbContext", _context);
+      Jndi.rebindDeep("java:comp/env/messageDrivenContext", _context);
+
+      log.config("initialized message bean: " + this);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   /**
    * Starts the server.
    */
+  @Override
   public void start()
     throws Exception
   {
@@ -140,6 +162,7 @@ public class MessageServer extends AbstractServer {
   {
   }
 
+  @Override
   public AbstractContext getContext(Object obj, boolean foo)
   {
     throw new UnsupportedOperationException();
@@ -158,6 +181,7 @@ public class MessageServer extends AbstractServer {
   /**
    * Cleans up the entity server nicely.
    */
+  @Override
   public void destroy()
   {
     try {
@@ -200,14 +224,19 @@ public class MessageServer extends AbstractServer {
 	bean.setMessageDrivenContext(_context);
       }
 
+      getInitProgram().configure(_listener);
+
       Method create = null;
 
-      try {
-	create = cl.getMethod("ejbCreate", new Class[0]);
-	create.invoke(_listener, new Object[0]);
-      } catch (NoSuchMethodException e) {
+      if (_listener instanceof MessageDrivenBean) {
+        try {
+          create = cl.getMethod("ejbCreate", new Class[0]);
+          create.invoke(_listener, new Object[0]);
+        }
+        catch (NoSuchMethodException e) {
+        }
       }
-      
+
       // XXX: ejb/090c
       // XXX: doesn't seem to be properly handling the sessions
       boolean transacted = false; 
