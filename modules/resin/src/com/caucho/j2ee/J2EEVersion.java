@@ -124,7 +124,9 @@ public enum J2EEVersion {
           throw new ConfigException(L.l("version must be '{0}' for namespace '{1}'", "1.4", ns));
       }
       else if (ns.equals(JAVAEE_NAMESPACE)) {
-        if (version.equals("5"))
+        if (version.equals("5") || 
+            version.equals("5.0") ||
+            version.equals("2.5")) // XXX For TCK emitted web.xmls
           return JAVAEE5;
         else
           throw new ConfigException(L.l("version must be '{0}' for namespace '{1}'", "5", ns));
