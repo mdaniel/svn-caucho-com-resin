@@ -1,0 +1,21 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.0.23 Release Notes</title>
+  </header>
+
+<body>
+
+<summary objsummary='localtoc'/>
+
+<section title="misc bugs">
+
+<ul>
+<li>isapi: fixed issues with chunked encoding.</li>
+<li>jdbc clustering: fixed issues with selecting primary server</li>
+</ul>
+
+</section>
+
+</body>
+</document>

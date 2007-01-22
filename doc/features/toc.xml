@@ -4,14 +4,15 @@
     <item link="overview.xtp" title="Feature Overview"/>
 
     <item link="release-notes.xtp" title="Release Notes">
+      <item link="resin-3.0.23.xtp" title="Resin 3.0.23"/>
       <item link="resin-3.0.22.xtp" title="Resin 3.0.22"/>
       <item link="resin-3.0.21.xtp" title="Resin 3.0.21"/>
       <item link="resin-3.0.20.xtp" title="Resin 3.0.20"/>
-      <item link="resin-3.0.19.xtp" title="Resin 3.0.19"/>
-      <item link="resin-3.0.18.xtp" title="Resin 3.0.18"/>
-      <item link="resin-3.0.17.xtp" title="Resin 3.0.17"/>
-      <item link="resin-3.0.16.xtp" title="Resin 3.0.16"/>
       <item link="release-notes-archive.xtp" title="Archive">
+        <item link="resin-3.0.19.xtp" title="Resin 3.0.19"/>
+        <item link="resin-3.0.18.xtp" title="Resin 3.0.18"/>
+        <item link="resin-3.0.17.xtp" title="Resin 3.0.17"/>
+        <item link="resin-3.0.16.xtp" title="Resin 3.0.16"/>
         <item link="resin-3.0.15.xtp" title="Resin 3.0.15"/>
         <item link="resin-3.0.14.xtp" title="Resin 3.0.14"/>
         <item link="resin-3.0.13.xtp" title="Resin 3.0.13"/>
