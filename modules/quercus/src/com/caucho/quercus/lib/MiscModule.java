@@ -201,7 +201,7 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   /**
-   * Comples and evaluates an expression.
+   * Logs the expression.
    */
   public Value resin_debug(String code)
   {
@@ -211,7 +211,7 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   /**
-   * Comples and evaluates an expression.
+   * Dumps the Java stack to standard out.
    */
   public Value resin_thread_dump()
   {
@@ -219,6 +219,15 @@ public class MiscModule extends AbstractQuercusModule {
 
     return NullValue.NULL;
   }
+
+  /**
+   * Returns an array containing the PHP call stack.
+   */
+  public Value resin_call_stack(Env env)
+  {
+    return env.getCallStack();
+  }
+
 
   /**
    * Dumps the stack.

@@ -335,6 +335,26 @@ public class Env {
   }
 
   //
+  // debugging
+  //
+
+  /*
+   * Returns the PHP call stack.
+   */
+  public ArrayValue getCallStack()
+  {
+    ArrayValue array = new ArrayValueImpl();
+    
+    for (int i = _callStackTop; i >= 0; i++) {
+      String fun = _callStack[i].toString();
+
+      array.put(new StringValueImpl(fun));
+    }
+    
+    return array;
+  }
+
+  //
   // i18n
   //
 

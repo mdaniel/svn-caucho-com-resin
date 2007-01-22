@@ -1,0 +1,69 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>List of PHP Applications Running Well on Quercus</title>
+    <date>January 22, 2006</date>
+    
+    <description>
+      <p>List of popular PHP applications working well with Quercus and configuration needed to get them running on Quercus.</p>
+
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+    <localtoc/>
+
+<s1 title="DokuWiki 2006-11-06">
+
+</s1>
+
+<s1 title="Dragonfly CMS 9.0.6.1.7">
+
+</s1>
+
+<s1 title="Drupal 4.7.4">
+
+</s1>
+
+<s1 title="Gallery2 2.1.2">
+
+</s1>
+
+<s1 title="Joomla 1.0.11">
+
+</s1>
+
+<s1 title="MediaWiki 1.9">
+
+</s1>
+
+<s1 title="Phorum 5.1.16a">
+
+</s1>
+
+<s1 title="phpBB 2.0.21">
+
+</s1>
+
+<s1 title="phpMyAdmin 2.9.1.1">
+
+</s1>
+
+<s1 title="PHProjekt 5.2">
+
+</s1>
+
+<s1 title="PHP-Nuke 7.9">
+
+</s1>
+
+<s1 title="Wordpress 2.0.5">
+
+</s1>
+
+<s1 title="Xoops 2.0.16">
+
+</s1>
+  </body>
+</document>

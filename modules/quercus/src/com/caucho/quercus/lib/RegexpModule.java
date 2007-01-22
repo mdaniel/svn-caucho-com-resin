@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
@@ -165,8 +166,11 @@ public class RegexpModule
    * php/151u
    * The array that preg_match (PHP 5) returns does not have trailing unmatched
    * groups. Therefore, an unmatched group should not be added to the array
-   * unless a matched group appears after it.
-   * (Only preg_match exhibits this odd behavior).
+   * unless a matched group appears after it.  A couple applications like
+   * Gallery2 expect this behavior in order to function correctly.
+   * 
+   * Only preg_match and preg_match_all(PREG_SET_ORDER) exhibits this odd
+   * behavior.
    *
    * @param env the calling environment
    */
@@ -181,6 +185,9 @@ public class RegexpModule
       env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
       return 0;
     }
+
+    NamedPatterns namedPatterns = new NamedPatterns(patternString);
+    patternString = namedPatterns.cleanPattern(patternString);
 
     Pattern pattern = compileRegexp(patternString);
     Matcher matcher = pattern.matcher(string);
@@ -235,6 +242,10 @@ public class RegexpModule
           part.append(new LongValue(matcher.start(i)));
 
           regs.put(new LongValue(i), part);
+          
+          Value name = namedPatterns.get(i);
+          if (name != null)
+            regs.put(name, part);
         }
         else {
           // php/151u
@@ -243,7 +254,13 @@ public class RegexpModule
             regs.put(new LongValue(j), StringValue.EMPTY);
           }
 
-          regs.put(new LongValue(i), new StringValueImpl(group));
+          StringValue match = new StringValueImpl(group);
+          
+          regs.put(new LongValue(i), match);
+          
+          Value name = namedPatterns.get(i);
+          if (name != null)
+            regs.put(name, match);
         }
       }
 
@@ -270,10 +287,21 @@ public class RegexpModule
       return 0;
     }
 
-    if (((flags & PREG_PATTERN_ORDER) != 0) && ((flags & PREG_SET_ORDER) != 0)) {
-      env.warning((L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
-      return 0;
+    if ((flags & PREG_PATTERN_ORDER) == 0) {
+      // php/152m
+      if ((flags & PREG_SET_ORDER) == 0) {
+        flags = flags | PREG_PATTERN_ORDER;
+      }
     }
+    else {
+      if ((flags & PREG_SET_ORDER) != 0) {
+        env.warning((L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
+        return 0;
+      }
+    }
+
+    NamedPatterns namedPatterns = new NamedPatterns(patternString);
+    patternString = namedPatterns.getCleanedPattern();
 
     Pattern pattern = compileRegexp(patternString);
 
@@ -290,7 +318,7 @@ public class RegexpModule
 
     if ((flags & PREG_PATTERN_ORDER) != 0) {
       return pregMatchAllPatternOrder(env, pattern, subject,
-				      matches, flags, offset);
+				      matches, namedPatterns, flags, offset);
     }
     else if ((flags & PREG_SET_ORDER) != 0) {
       return pregMatchAllSetOrder(env, pattern, subject,
@@ -309,6 +337,7 @@ public class RegexpModule
 					     Pattern pattern,
 					     StringValue subject,
 					     ArrayValue matches,
+                         NamedPatterns namedPatterns,
 					     int flags,
 					     int offset)
   {
@@ -322,6 +351,12 @@ public class RegexpModule
       ArrayValue values = new ArrayValueImpl();
       matches.put(values);
       matchList[j] = values;
+      
+      Value patternName = namedPatterns.get(j);
+      
+      // XXX: named subpatterns causing conflicts with array indexes?
+      if (patternName != null)
+        matches.put(patternName, values);
     }
 
     if (! (matcher.find())) {
@@ -386,24 +421,51 @@ public class RegexpModule
       ArrayValue matchResult = new ArrayValueImpl();
       matches.put(matchResult);
 
-      for (int j = 0; j <= matcher.groupCount(); j++) {
-	int start = matcher.start(j);
-	int end = matcher.end(j);
-	  
-	StringValue groupValue = subject.substring(start, end);
+      for (int i = 0; i <= matcher.groupCount(); i++) {
+        int start = matcher.start(i);
+        int end = matcher.end(i);
 
-	Value result = NullValue.NULL;
+        // group is unmatched, skip
+        if (end - start <= 0)
+          continue;
+        
+        StringValue groupValue = subject.substring(start, end);
 
-	if (groupValue != null) {
-	  if ((flags & PREG_OFFSET_CAPTURE) != 0) {
-	    result = new ArrayValueImpl();
-	    result.put(groupValue);
-	    result.put(LongValue.create(start));
-	  } else {
-	    result = groupValue;
-	  }
-	}
-	matchResult.put(result);
+        Value result = NullValue.NULL;
+
+        if (groupValue != null) {
+
+          if ((flags & PREG_OFFSET_CAPTURE) != 0) {
+            
+            // php/152n
+            // add unmatched groups first
+            for (int j = matchResult.getSize(); j < i; j++) {
+              ArrayValue part = new ArrayValueImpl();
+
+              part.append(StringValue.EMPTY);
+              part.append(LongValue.MINUS_ONE);
+
+              matchResult.put(LongValue.create(j), part);
+            }
+            
+            
+            result = new ArrayValueImpl();
+            result.put(groupValue);
+            result.put(LongValue.create(start));
+          } else {
+            
+            
+            // php/
+            // add unmatched groups that was skipped
+            for (int j = matchResult.getSize(); j < i; j++) {
+              matchResult.put(LongValue.create(j), StringValue.EMPTY);
+            }
+            
+            result = groupValue;
+          }
+        }
+        
+        matchResult.put(result);
       }
     } while (matcher.find());
 
@@ -1256,7 +1318,7 @@ public class RegexpModule
 
     if (! isGreedy)
       cleanRegexp = toNonGreedy(cleanRegexp);
-
+    
     pattern = Pattern.compile(cleanRegexp, flags);
 
     _patternCache.put(rawRegexp, pattern);
@@ -1684,6 +1746,109 @@ public class RegexpModule
 	    sb.append(ch);
 	}
       }
+    }
+  }
+  
+  /*
+   * Holds PCRE named subpatterns.
+   */
+  static class NamedPatterns
+  {
+    private StringValue _pattern;
+
+    private HashMap<Integer,StringValue> _patternMap;
+
+    NamedPatterns(StringValue pattern)
+    {
+      _pattern = cleanPattern(pattern);
+    }
+    
+    private StringValue cleanPattern(StringValue pattern)
+    {
+      StringBuilderValue sb = new StringBuilderValue();
+      int length = pattern.length();
+      
+      int groupCount = 1;
+      
+      for (int i = 0; i < length; i++) {
+        char ch = pattern.charAt(i);
+        sb.append(ch);
+        
+        if (ch != '(')
+          continue;
+
+        if (++i >= length)
+          break;
+        
+        ch = pattern.charAt(i);
+        
+        if (ch != '?') {
+          sb.append(ch);
+
+          groupCount++;
+          continue;
+        }
+
+        if (++i >= length)
+          break;
+        
+        ch = pattern.charAt(i);
+
+        if (ch != 'P') {
+          sb.append('?');
+          sb.append(ch);
+          
+          continue;
+        }
+
+        if (++i >= length)
+          break;
+
+        ch = pattern.charAt(i);
+
+        if (ch == '<') {
+          if (++i >= length)
+            break;
+          
+          int start = i;
+          for (; i < length && pattern.charAt(i) != '>'; i++) {
+          }
+
+          StringValue name = pattern.substring(start, i);
+
+          add(groupCount, name);
+        }
+        else if (ch == '=') {
+          //XXX: named back references (?P=name)
+          throw new UnsupportedOperationException("back references to named subpatterns");
+        }
+        else {
+          throw new QuercusModuleException("bad PCRE named subpattern");
+        }
+      }
+      
+      return sb;
+    }
+    
+    StringValue getCleanedPattern()
+    {
+      return _pattern;
+    }
+    
+    void add(int group, StringValue name)
+    {
+      if (_patternMap == null)
+        _patternMap = new HashMap<Integer,StringValue>();
+      
+      _patternMap.put(Integer.valueOf(group), name);
+    }
+    
+    StringValue get(int group)
+    { 
+      if (_patternMap == null)
+        return null;
+      else
+        return _patternMap.get(Integer.valueOf(group));
     }
   }
 
