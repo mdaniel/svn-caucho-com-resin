@@ -153,15 +153,18 @@ public class ObjectConverter  {
   }
 
   /**
-   * Returns a property as a byte[]
+   * Returns a property as a string
    */
   public static String toString(Object obj)
     throws JMSException
   {
     if (obj == null)
       return null;
-    else
+    else if (! (obj instanceof byte[]))
       return obj.toString();
+    else
+      throw new MessageFormatException(L.l("can't convert '{0}' to String",
+					   obj.getClass().getName()));
   }
 
   /**

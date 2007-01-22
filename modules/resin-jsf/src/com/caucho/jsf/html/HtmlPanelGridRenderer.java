@@ -63,10 +63,15 @@ class HtmlPanelGridRenderer extends Renderer
 
     String bgcolor = null;
     int border = -1;
+    String captionClass = null;
+    String captionStyle = null;
     String cellpadding = null;
     String cellspacing = null;
+    int columns;
+    String columnClasses = null;
     String dir = null;
     String frame = null;
+    String headerClass = null;
     String lang = null;
     String onclick = null;
     String ondblclick = null;
@@ -84,16 +89,23 @@ class HtmlPanelGridRenderer extends Renderer
     String summary = null;
     String title = null;
     String width = null;
+
+    String id = component.getId();
     
     if (component instanceof HtmlPanelGrid) {
       HtmlPanelGrid html = (HtmlPanelGrid) component;
 
       bgcolor = html.getBgcolor();
       border = html.getBorder();
+      captionClass = html.getCaptionClass();
+      captionStyle = html.getCaptionStyle();
       cellpadding = html.getCellpadding();
       cellspacing = html.getCellspacing();
+      columns = html.getColumns();
+      columnClasses = html.getColumnClasses();
       dir = html.getDir();
       frame = html.getFrame();
+      headerClass = html.getHeaderClass();
       lang = html.getLang();
       onclick = html.getOnclick();
       ondblclick = html.getOndblclick();
@@ -116,11 +128,27 @@ class HtmlPanelGridRenderer extends Renderer
       Map<String,Object> attrMap = component.getAttributes();
     
       bgcolor = (String) attrMap.get("bgcolor");
+      captionClass = (String) attrMap.get("captionClass");
+      captionStyle = (String) attrMap.get("captionStyle");
+      columns = (Integer) attrMap.get("columns");
+      headerClass = (String) attrMap.get("headerClass");
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
     }
 
+    String []columnClassArray = null;
+
+    if (columnClasses != null) {
+      columnClassArray = columnClasses.split("[ \t,]+");
+      
+      if (columnClassArray.length == 0)
+	columnClassArray = null;
+    }
+
     out.startElement("table", component);
+
+    if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
+      out.writeAttribute("id", component.getClientId(context), "id");
 
     if (bgcolor != null)
       out.writeAttribute("bgcolor", bgcolor, "bgcolor");
@@ -190,6 +218,48 @@ class HtmlPanelGridRenderer extends Renderer
     
     if (width != null)
       out.writeAttribute("width", width, "width");
+
+    UIComponent caption = component.getFacet("caption");
+    if (caption != null && caption.isRendered()) {
+      out.startElement("caption", caption);
+
+      if (captionClass != null)
+	out.writeAttribute("class", captionClass, "captionClass");
+
+      if (captionStyle != null)
+	out.writeAttribute("style", captionStyle, "captionStyle");
+
+      caption.encodeBegin(context);
+      caption.encodeChildren(context);
+      caption.encodeEnd(context);
+      
+      out.endElement("caption");
+    }
+    
+    UIComponent header = component.getFacet("header");
+    if (header != null && header.isRendered()) {
+      out.startElement("thead", header);
+      
+      out.startElement("tr", header);
+      out.startElement("th", header);
+
+      if (headerClass != null)
+	out.writeAttribute("class", headerClass, "headerClass");
+
+      if (columns > 0)
+	out.writeAttribute("colspan", columns, "columns");
+
+      out.writeAttribute("scope", "colgroup", "scope");
+
+      header.encodeBegin(context);
+      header.encodeChildren(context);
+      header.encodeEnd(context);
+      
+      out.endElement("th");
+      out.endElement("tr");
+      
+      out.endElement("thead");
+    }
   }
 
 
@@ -200,19 +270,43 @@ class HtmlPanelGridRenderer extends Renderer
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
-
+    String columnClasses;
+    String rowClasses;
     int columns = 0;
+
+    ResponseWriter out = context.getResponseWriter();
     
     if (component instanceof HtmlPanelGrid) {
       HtmlPanelGrid html = (HtmlPanelGrid) component;
-
+      
+      columnClasses = html.getColumnClasses();
+      rowClasses = html.getRowClasses();
       columns = html.getColumns();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
     
+      columnClasses = (String) attrMap.get("columnClasses");
+      rowClasses = (String) attrMap.get("rowClasses");
       columns = (Integer) attrMap.get("columns");
+    }
+
+    String []columnClassArray = null;
+
+    if (columnClasses != null) {
+      columnClassArray = columnClasses.split("[ \t,]+");
+      
+      if (columnClassArray.length == 0)
+	columnClassArray = null;
+    }
+
+    String []rowClassArray = null;
+
+    if (rowClasses != null) {
+      rowClassArray = rowClasses.split("[ \t,]+");
+      
+      if (rowClassArray.length == 0)
+	rowClassArray = null;
     }
 
     int size = component.getChildCount();
@@ -225,31 +319,63 @@ class HtmlPanelGridRenderer extends Renderer
     List<UIComponent> children = component.getChildren();
     int count = 0;
 
+    out.startElement("tbody", component);
+
     for (int i = 0; i < size; i++) {
       UIComponent child = children.get(i);
 
       if (! child.isRendered())
 	continue;
 
-      if (count % columns == 0) {
+      int column = count % columns;
+      int row = count / columns;
+
+      if (column == 0) {
 	if (count > 0) {
 	  out.endElement("tr");
 	}
 
 	out.startElement("tr", child);
+
+	if (rowClassArray != null) {
+	  String v = rowClassArray[row % rowClassArray.length];
+	  
+	  out.writeAttribute("class", v, "rowClasses");
+	}
       }
 
       count++;
 
+      if (columnClassArray != null) {
+	String v = columnClassArray[column % columnClassArray.length];
+	  
+	out.writeAttribute("class", v, "columnClasses");
+      }
+      
       out.startElement("td", child);
-      child.encodeBegin(context);
-      child.encodeChildren(context);
-      child.encodeEnd(context);
+      if (child instanceof UIColumn) {
+	int subCount = child.getChildCount();
+	
+	for (int j = 0; j < subCount; j++) {
+	  UIComponent subChild = child.getChildren().get(j);
+	  
+	  subChild.encodeBegin(context);
+	  subChild.encodeChildren(context);
+	  subChild.encodeEnd(context);
+	}
+      }
+      else {
+	child.encodeBegin(context);
+	child.encodeChildren(context);
+	child.encodeEnd(context);
+      }
       out.endElement("td");
     }
 
     if (count > 0)
       out.endElement("tr");
+    
+    out.endElement("tbody");
   }
 
   /**
@@ -259,7 +385,48 @@ class HtmlPanelGridRenderer extends Renderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
+    String footerClass;
+    int columns;
+    
     ResponseWriter out = context.getResponseWriter();
+    
+    if (component instanceof HtmlPanelGrid) {
+      HtmlPanelGrid html = (HtmlPanelGrid) component;
+      
+      columns = html.getColumns();
+      footerClass = html.getFooterClass();
+    }
+    else {
+      Map<String,Object> attrMap = component.getAttributes();
+    
+      columns = (Integer) attrMap.get("columns");
+      footerClass = (String) attrMap.get("footerClass");
+    }
+    
+    UIComponent footer = component.getFacet("footer");
+    if (footer != null && footer.isRendered()) {
+      out.startElement("tfoot", footer);
+      
+      out.startElement("tr", footer);
+      out.startElement("td", footer);
+
+      if (columns > 0)
+	out.writeAttribute("colspan", columns, "columns");
+
+      if (footerClass != null)
+	out.writeAttribute("class", footerClass, "footerClass");
+
+      //out.writeAttribute("scope", "colgroup", "scope");
+
+      footer.encodeBegin(context);
+      footer.encodeChildren(context);
+      footer.encodeEnd(context);
+      
+      out.endElement("td");
+      out.endElement("tr");
+      
+      out.endElement("tfoot");
+    }
 
     out.endElement("table");
   }

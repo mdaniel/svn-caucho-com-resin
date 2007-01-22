@@ -46,11 +46,6 @@ public class FacesException extends RuntimeException
 
   public FacesException(Throwable cause)
   {
-    super(cause);
+    super(cause.getMessage(), cause);
   }
 }
-
-  
-
-  
-  

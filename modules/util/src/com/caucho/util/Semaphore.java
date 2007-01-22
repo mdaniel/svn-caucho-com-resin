@@ -30,6 +30,7 @@
 package com.caucho.util;
 
 import java.util.logging.Logger;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The Semaphore handles timed locks.

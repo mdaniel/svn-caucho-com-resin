@@ -34,7 +34,13 @@ import java.util.*;
 import javax.faces.context.*;
 import javax.faces.render.*;
 
-public class HtmlBasicRenderKit extends RenderKit {
+import com.caucho.util.*;
+import com.caucho.vfs.*;
+
+public class HtmlBasicRenderKit extends RenderKit
+{
+  private static final L10N L = new L10N(HtmlBasicRenderKit.class);
+  
   private ResponseStateManager _responseStateManager
     = new ResponseStateManagerImpl();
   
@@ -50,6 +56,9 @@ public class HtmlBasicRenderKit extends RenderKit {
     
     addRenderer("javax.faces.Command", "javax.faces.Link",
 		HtmlCommandLinkRenderer.RENDERER);
+    
+    addRenderer("javax.faces.Data", "javax.faces.Table",
+		HtmlDataTableRenderer.RENDERER);
     
     addRenderer("javax.faces.Form", "javax.faces.Form",
 		HtmlFormRenderer.RENDERER);
@@ -99,8 +108,20 @@ public class HtmlBasicRenderKit extends RenderKit {
     addRenderer("javax.faces.SelectMany", "javax.faces.Checkbox",
 		HtmlSelectManyCheckboxRenderer.RENDERER);
     
+    addRenderer("javax.faces.SelectMany", "javax.faces.Listbox",
+		HtmlSelectManyListboxRenderer.RENDERER);
+    
+    addRenderer("javax.faces.SelectMany", "javax.faces.Menu",
+		HtmlSelectManyMenuRenderer.RENDERER);
+    
     addRenderer("javax.faces.SelectOne", "javax.faces.Listbox",
 		HtmlSelectOneListboxRenderer.RENDERER);
+    
+    addRenderer("javax.faces.SelectOne", "javax.faces.Menu",
+		HtmlSelectOneMenuRenderer.RENDERER);
+    
+    addRenderer("javax.faces.SelectOne", "javax.faces.Radio",
+		HtmlSelectOneRadioRenderer.RENDERER);
   }
   
   public void addRenderer(String family,
@@ -115,7 +136,7 @@ public class HtmlBasicRenderKit extends RenderKit {
   {
     if (family == null || rendererType == null)
       return null;
-    
+
     _key.init(family, rendererType);
     
     return _rendererMap.get(_key);
@@ -130,12 +151,28 @@ public class HtmlBasicRenderKit extends RenderKit {
 					     String contentTypeList,
 					     String characterEncoding)
   {
+    if (contentTypeList != null
+	&& contentTypeList.indexOf("text/html") < 0
+	&& contentTypeList.indexOf("application/xhtml+xml") < 0
+	&& contentTypeList.indexOf("application/xml") < 0
+	&& contentTypeList.indexOf("text/xml") < 0) {
+      throw new IllegalArgumentException(L.l("'{0}' does not have a matching ResponseWriter.",
+					     contentTypeList));
+    }
+
+    if (characterEncoding != null) {
+
+	if (Encoding.getWriteEncoding(characterEncoding) == null)
+	  throw new IllegalArgumentException(L.l("'{0}' is an unknown character encoding for ResponseWriter.",
+						 characterEncoding));
+    }
+    
     return new HtmlResponseWriter(writer, contentTypeList, characterEncoding);
   }
 
   public ResponseStream createResponseStream(OutputStream out)
   {
-    throw new UnsupportedOperationException();
+    return new HtmlResponseStream(out);
   }
 
   public String toString()

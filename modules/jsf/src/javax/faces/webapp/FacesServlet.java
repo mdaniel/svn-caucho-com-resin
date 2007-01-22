@@ -87,8 +87,15 @@ public final class FacesServlet implements Servlet
       log.log(Level.FINER, e.toString(), e);
     } catch (RuntimeException e) {
       throw e;
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof RuntimeException)
+	throw (RuntimeException) e.getCause();
+      else if (e.getCause() instanceof ServletException)
+	throw (ServletException) e.getCause();
+      else
+	throw new ServletException(e);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new ServletException(e);
     }
 
     _facesContextFactory = (FacesContextFactory)

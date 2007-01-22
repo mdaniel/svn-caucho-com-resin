@@ -157,6 +157,10 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     throws ServletException
   {
     _servletClassName = servletClassName;
+
+    // JSF is special
+    if ("javax.faces.webapp.FacesServlet".equals(servletClassName))
+      _loadOnStartup = 0;
   }
 
   /**

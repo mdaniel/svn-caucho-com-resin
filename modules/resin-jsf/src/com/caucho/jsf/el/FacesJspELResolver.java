@@ -126,7 +126,6 @@ public class FacesJspELResolver extends ELResolver {
 	  case FACES_CONTEXT:
 	    return facesContext;
 	  case VIEW:
-	    System.out.println("V: " + facesContext.getViewRoot());
 	    return facesContext.getViewRoot();
 	  }
 	}
@@ -160,14 +159,14 @@ public class FacesJspELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
-
-    if (base == null
-	&& property instanceof String) {
+    if (base == null && property instanceof String) {
       String key = (String) property;
       
       Type type = _typeMap.get(key);
 
       if (type != null) {
+	env.setPropertyResolved(true);
+
 	throw new PropertyNotWritableException(key);
       }
     }

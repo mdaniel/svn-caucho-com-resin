@@ -58,6 +58,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.concurrent.*;
 
 /**
  * Analyzes a bean for @Inject tags.
@@ -590,6 +591,19 @@ public class InjectIntrospector {
     if (resourceType.equals("") || resourceType.equals("java.lang.Object"))
       resourceType = fieldType.getName();
 
+    AccessibleInject inject;
+
+    if (field instanceof Field)
+      inject = new FieldInject((Field) field);
+    else
+      inject = new PropertyInject((Method) field);
+
+    if (Executor.class.equals(fieldType)
+	|| ExecutorService.class.equals(fieldType)
+	|| ScheduledExecutorService.class.equals(fieldType)) {
+      return new ExecutorInjectProgram(inject);
+    }
+
     if (true) {
       // TCK indicates this logic is incorrect
     }
@@ -611,9 +625,6 @@ public class InjectIntrospector {
     }
     else if (ORB.class.equals(fieldType)) {
       jndiName = "java:comp/ORB";
-    }
-    else if ("java.util.concurrent.Executor".equals(resourceType)) {
-      jndiName = "java:comp/ThreadPool";
     }
     else {
       jndiName = prefix + name;

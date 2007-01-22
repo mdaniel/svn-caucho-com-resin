@@ -175,16 +175,24 @@ class HtmlCommandLinkRenderer extends Renderer
       value = attrMap.get("value");
     }
 
+    String hiddenFieldName = "jsf-link";
+    for (UIComponent ptr = component.getParent();
+	 ptr != null;
+	 ptr = ptr.getParent()) {
+      if (ptr instanceof UIForm) {
+	hiddenFieldName = (ptr.getClientId(context)
+			   + NamingContainer.SEPARATOR_CHAR
+			   + "jsf-link");
+	break;
+      }
+    }
+
     if (disabled)
       out.startElement("span", component);
     else
       out.startElement("a", component);
 
     out.writeAttribute("href", "#", "href");
-    /*
-    if (value != null)
-      out.writeAttribute("value", String.valueOf(value), "value");
-    */
       
     //out.writeAttribute("name", component.getClientId(context), "name");
     
@@ -203,8 +211,10 @@ class HtmlCommandLinkRenderer extends Renderer
     if (dir != null)
       out.writeAttribute("dir", dir, "dir");
 
+    /*
     if (disabled)
       out.writeAttribute("disabled", "disabled", "disabled");
+    */
 
     if (hreflang != null)
       out.writeAttribute("hreflang", hreflang, "hreflang");
@@ -215,8 +225,34 @@ class HtmlCommandLinkRenderer extends Renderer
     if (onblur != null)
       out.writeAttribute("onblur", onblur, "onblur");
 
-    if (onclick != null)
-      out.writeAttribute("onclick", onclick, "onclick");
+    String clientId = component.getClientId(context);
+
+    StringBuilder clickJs = new StringBuilder();
+    clickJs.append("document.forms['");
+    clickJs.append(clientId);
+    clickJs.append("']['");
+    clickJs.append(hiddenFieldName);
+    clickJs.append("'].value='");
+    clickJs.append(clientId);
+    clickJs.append("';");
+
+    // uiparam
+
+    clickJs.append("return false;");
+
+    if (disabled) {
+    }
+    else {
+      if (onclick != null) {
+	String code = ("var a = function(){" + onclick + "};"
+		       + "var b = function() {" + clickJs + "};"
+		       + "return a() && b();");
+      
+	out.writeAttribute("onclick", code, "onclick");
+      }
+      else
+	out.writeAttribute("onclick", clickJs.toString(), "onclick");
+    }
 
     if (ondblclick != null)
       out.writeAttribute("ondblclick", ondblclick, "ondblclick");
@@ -268,6 +304,37 @@ class HtmlCommandLinkRenderer extends Renderer
 
     if (title != null)
       out.writeAttribute("title", title, "title");
+
+    if (type != null)
+      out.writeAttribute("type", type, "type");
+
+    if (disabled) {
+      if (value != null)
+	out.writeAttribute("value", String.valueOf(value), "value");
+
+      out.endElement("span");
+      return;
+    }
+    int childCount = component.getChildCount();
+
+    if (childCount > 0) {
+      List<UIComponent> children = component.getChildren();
+
+      for (int i = 0; i < childCount; i++) {
+	UIComponent child = children.get(i);
+
+	if (child instanceof UIParameter)
+	  continue;
+      
+	if (child.isRendered()) {
+	  child.encodeBegin(context);
+	  child.encodeChildren(context);
+	  child.encodeEnd(context);
+	}
+      }
+    }
+
+    out.endElement("a");
   }
 
   /**
@@ -277,22 +344,6 @@ class HtmlCommandLinkRenderer extends Renderer
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
-    int childCount = component.getChildCount();
-
-    if (childCount == 0)
-      return;
-
-    List<UIComponent> children = component.getChildren();
-
-    for (int i = 0; i < childCount; i++) {
-      UIComponent child = children.get(i);
-
-      if (child.isRendered()) {
-	child.encodeBegin(context);
-	child.encodeChildren(context);
-	child.encodeEnd(context);
-      }
-    }
   }
 
   /**
@@ -302,9 +353,6 @@ class HtmlCommandLinkRenderer extends Renderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
-    
-    out.endElement("a");
   }
 
   public String toString()

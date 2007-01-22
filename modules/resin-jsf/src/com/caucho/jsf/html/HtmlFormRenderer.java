@@ -296,7 +296,8 @@ class HtmlFormRenderer extends Renderer
 
     out.startElement("input", component);
     out.writeAttribute("type", "hidden", "type");
-    out.writeAttribute("value", component.getClientId(context), "value");
+    out.writeAttribute("name", component.getClientId(context), "name");
+    out.writeAttribute("value", "true", "value");
     out.endElement("input");
 
     out.endElement("form");

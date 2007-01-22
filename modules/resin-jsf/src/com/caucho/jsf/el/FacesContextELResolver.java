@@ -54,16 +54,17 @@ public class FacesContextELResolver extends CompositeELResolver {
   private final MapELResolver _mapResolver = new MapELResolver();
   private final ListELResolver _listResolver = new ListELResolver();
   private final ArrayELResolver _arrayResolver = new ArrayELResolver();
-  private final ResourceBundleELResolver _bundleResolver
-    = new ResourceBundleELResolver();
+  private final JsfResourceBundleELResolver _bundleResolver;
   private final BeanELResolver _beanResolver = new BeanELResolver();
 
   private final HashMap<String,ManagedBeanConfig> _managedBeanMap
     = new  HashMap<String,ManagedBeanConfig>();
 
-  public FacesContextELResolver(ELResolver []customResolvers)
+  public FacesContextELResolver(ELResolver []customResolvers,
+				JsfResourceBundleELResolver bundleResolver)
   {
     _customResolvers = customResolvers;
+    _bundleResolver = bundleResolver;
   }
 
   public void addManagedBean(String name, ManagedBeanConfig managedBean)
@@ -169,12 +170,8 @@ public class FacesContextELResolver extends CompositeELResolver {
   @Override
   public Class getType(ELContext env, Object base, Object property)
   {
+    System.out.println("GETT: " + base + " " + property);
     if (base != null) {
-      if (base instanceof ResourceBundle) {
-	env.setPropertyResolved(true);
-
-	return ResourceBundle.class;
-      }
     }
     else if (base == null && property instanceof String) {
       ImplicitObjectExpr expr = ImplicitObjectExpr.create((String) property);
@@ -182,11 +179,21 @@ public class FacesContextELResolver extends CompositeELResolver {
       if (expr != null) {
 	env.setPropertyResolved(true);
 
-	return null;
+	return Object.class;
       }
+
+      Class type = _bundleResolver.getType(env, base, property);
+      System.out.println("BR: " + type);
+      if (env.isPropertyResolved())
+	return type;
     }
 
-    return super.getType(env, base, property);
+    Object value = getValue(env, base, property);
+
+    if (value != null)
+      return value.getClass();
+    else
+      return null;
   }
   
   @Override
@@ -195,7 +202,6 @@ public class FacesContextELResolver extends CompositeELResolver {
     env.setPropertyResolved(false);
 
     if (base == null
-	&& ! (env instanceof ServletELContext)
 	&& property instanceof String) {
       ImplicitObjectExpr expr = ImplicitObjectExpr.create((String) property);
 
@@ -204,6 +210,10 @@ public class FacesContextELResolver extends CompositeELResolver {
 
 	return expr.getValue(env);
       }
+
+      Object value = _bundleResolver.getValue(env, base, property);
+      if (env.isPropertyResolved())
+	return value;
     }
 
     for (int i = 0; i < _customResolvers.length; i++) {
@@ -271,15 +281,30 @@ public class FacesContextELResolver extends CompositeELResolver {
     env.setPropertyResolved(false);
 
     if (base != null) {
-      if (base instanceof List) {
+      if (base instanceof Map) {
 	env.setPropertyResolved(true);
-
-	return false;
+	
+	return _mapResolver.isReadOnly(env, base, property);
+      }
+      else if (base instanceof List) {
+	env.setPropertyResolved(true);
+	
+	return _listResolver.isReadOnly(env, base, property);
+      }
+      else if (base.getClass().isArray()) {
+	env.setPropertyResolved(true);
+	
+	return _arrayResolver.isReadOnly(env, base, property);
       }
       else if (base instanceof ResourceBundle) {
 	env.setPropertyResolved(true);
+	
+	return _bundleResolver.isReadOnly(env, base, property);
+      }
+      else {
+	env.setPropertyResolved(true);
 
-	return true;
+	return _beanResolver.isReadOnly(env, base, property);
       }
     }
     else if (base == null && property instanceof String) {
@@ -290,6 +315,10 @@ public class FacesContextELResolver extends CompositeELResolver {
 
 	return true;
       }
+
+      boolean value = _bundleResolver.isReadOnly(env, base, property);
+      if (env.isPropertyResolved())
+	return value;
     }
 
     for (int i = 0; i < _customResolvers.length; i++) {
@@ -329,6 +358,10 @@ public class FacesContextELResolver extends CompositeELResolver {
 
       if (expr != null)
 	throw new PropertyNotWritableException(key);
+      
+      _bundleResolver.setValue(env, base, property, value);
+      if (env.isPropertyResolved())
+	return;
       
       FacesContext facesContext
 	= (FacesContext) env.getContext(FacesContext.class);

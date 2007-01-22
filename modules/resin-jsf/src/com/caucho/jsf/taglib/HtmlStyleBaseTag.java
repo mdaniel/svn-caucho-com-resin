@@ -154,6 +154,22 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("cellspacing", value);
   }
 
+  public void setCharset(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("charset", value);
+  }
+
+  public void setColumns(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("columns", value);
+  }
+
   public void setColumnClasses(ValueExpression value)
   {
     if (_map == null)
@@ -176,6 +192,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("converter", value);
+  }
+
+  public void setCoords(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("coords", value);
   }
 
   public void setDir(ValueExpression value)
@@ -256,6 +280,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("height", value);
+  }
+
+  public void setHreflang(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("hreflang", value);
   }
 
   public void setImage(ValueExpression value)
@@ -458,12 +490,28 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("redisplay", value);
   }
 
+  public void setRel(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("rel", value);
+  }
+
   public void setRendered(ValueExpression value)
   {
     if (_map == null)
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("rendered", value);
+  }
+
+  public void setRev(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("rev", value);
   }
 
   public void setRowClasses(ValueExpression value)
@@ -488,6 +536,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("rows", value);
+  }
+
+  public void setShape(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("shape", value);
   }
 
   public void setSize(ValueExpression value)

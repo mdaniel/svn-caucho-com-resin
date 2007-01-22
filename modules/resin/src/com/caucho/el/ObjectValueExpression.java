@@ -93,12 +93,7 @@ public class ObjectValueExpression extends ValueExpression
     throws PropertyNotFoundException,
 	   ELException
   {
-    Object value = getValue(context);
-
-    if (value == null)
-      return null;
-    else
-      return value.getClass();
+    return _expr.getType(context);
   }
 
   @Override

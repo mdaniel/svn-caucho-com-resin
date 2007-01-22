@@ -20,48 +20,48 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free SoftwareFoundation, Inc.
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.util;
+package com.caucho.jsf.taglib;
+
+import java.io.*;
+
+import javax.el.*;
+
+import javax.faces.component.*;
+import javax.faces.component.html.*;
+import javax.faces.context.*;
+
+import javax.servlet.jsp.*;
+import javax.servlet.jsp.tagext.*;
 
 /**
- * Stub for java.util.concurrent.TimeUnit.
+ * The h:selectManyListbox tag
  */
-public class TimeUnit {
-  public static final TimeUnit NANOSECONDS = new TimeUnit(1L);
-  public static final TimeUnit MICROSECONDS = new TimeUnit(1000L);
-  public static final TimeUnit MILLISECONDS = new TimeUnit(1000000L);
-  public static final TimeUnit SECONDS = new TimeUnit(1000000000L);
-
-  private final long _nanos;
-
-  private TimeUnit(long nanos)
+public class HtmlSelectManyListboxTag extends HtmlStyleBaseTag {
+  public String getComponentType()
   {
-    _nanos = nanos;
+    return HtmlSelectManyListbox.COMPONENT_TYPE;
   }
-
-  public long convert(long duration, TimeUnit unit)
+  
+  public String getRendererType()
   {
-    long sourceNanos = unit._nanos;
-
-    if (sourceNanos <= _nanos)
-      return duration * (_nanos / sourceNanos);
-    else
-      return duration / (sourceNanos / _nanos);
+    return "javax.faces.Listbox";
   }
-
-  public long toMillis(long duration)
+  
+  /**
+   * Sets the overridden properties of the tag
+   */
+  @Override
+  protected void setProperties(UIComponent component)
   {
-    long msNanos = 1000000L;
-
-    if (msNanos <= _nanos)
-      return duration * (_nanos / msNanos);
-    else
-      return duration / (msNanos / _nanos);
+    component.setRendered(true);
+    
+    super.setProperties(component);
   }
 }

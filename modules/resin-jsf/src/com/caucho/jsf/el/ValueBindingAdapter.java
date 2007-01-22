@@ -45,28 +45,44 @@ public class ValueBindingAdapter extends ValueBinding
   public Object getValue(FacesContext context)
     throws EvaluationException, javax.faces.el.PropertyNotFoundException
   {
-    return _expr.getValue(context.getELContext());
+    try {
+      return _expr.getValue(context.getELContext());
+    } catch (javax.el.PropertyNotFoundException e) {
+      throw new javax.faces.el.PropertyNotFoundException(e);
+    }
   }
 
   @Deprecated
   public void setValue(FacesContext context, Object value)
     throws EvaluationException, javax.faces.el.PropertyNotFoundException
   {
-    _expr.setValue(context.getELContext(), value);
+    try {
+      _expr.setValue(context.getELContext(), value);
+    } catch (javax.el.PropertyNotFoundException e) {
+      throw new javax.faces.el.PropertyNotFoundException(e);
+    }
   }
 
   @Deprecated
   public boolean isReadOnly(FacesContext context)
     throws EvaluationException, javax.faces.el.PropertyNotFoundException
   {
-    return _expr.isReadOnly(context.getELContext());
+    try {
+      return _expr.isReadOnly(context.getELContext());
+    } catch (javax.el.PropertyNotFoundException e) {
+      throw new javax.faces.el.PropertyNotFoundException(e);
+    }
   }
 
   @Deprecated
   public Class getType(FacesContext context)
     throws EvaluationException, javax.faces.el.PropertyNotFoundException
   {
-    return _expr.getType(context.getELContext());
+    try {
+      return _expr.getType(context.getELContext());
+    } catch (javax.el.PropertyNotFoundException e) {
+      throw new javax.faces.el.PropertyNotFoundException(e);
+    }
   }
 
   @Deprecated

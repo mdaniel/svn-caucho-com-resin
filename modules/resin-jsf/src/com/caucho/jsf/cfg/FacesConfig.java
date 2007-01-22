@@ -120,6 +120,11 @@ public class FacesConfig
     return _managedBeanList;
   }
 
+  public ApplicationConfig getApplication()
+  {
+    return _application;
+  }
+
   @PostConstruct
   public void init()
   {

@@ -28,6 +28,9 @@
 
 package javax.faces.convert;
 
+import java.util.*;
+import java.text.*;
+
 import javax.faces.context.*;
 import javax.faces.component.*;
 
@@ -35,26 +38,138 @@ public class DateTimeConverter implements Converter
 {
   public static final String CONVERTER_ID
     = "javax.faces.DateTime";
+  public static final String DATE_ID
+    = "javax.faces.converter.DateTimeConverter.DATE";
   public static final String DATETIME_ID
     = "javax.faces.converter.DateTimeConverter.DATETIME";
   public static final String STRING_ID
     = "javax.faces.converter.STRING";
+  public static final String TIME_ID
+    = "javax.faces.converter.DateTimeConverter.TIME";
+
+  private String _dateStyle = "default";
+  private String _timeStyle = "default";
+  private Locale _locale;
+
+  private String _pattern;
+  private TimeZone _timeZone = TimeZone.getTimeZone("GMT");
+  private String _type = "date";
+
+  private boolean _isTransient;
+
+  private DateFormat _format;
+
+  public String getDateStyle()
+  {
+    return _dateStyle;
+  }
+
+  public void setDateStyle(String value)
+  {
+    _dateStyle = value;
+    _format = null;
+  }
+
+  public String getTimeStyle()
+  {
+    return _timeStyle;
+  }
+
+  public void setTimeStyle(String value)
+  {
+    _timeStyle = value;
+    _format = null;
+  }
+
+  public Locale getLocale()
+  {
+    return _locale;
+  }
+
+  public void setLocale(Locale locale)
+  {
+    _locale = locale;
+    _format = null;
+  }
+
+  public String getPattern()
+  {
+    return _pattern;
+  }
+
+  public void setPattern(String value)
+  {
+    _pattern = value;
+    _format = null;
+  }
+
+  public String getType()
+  {
+    return _type;
+  }
+
+  public void setType(String value)
+  {
+    _type = value;
+    _format = null;
+  }
+
+  public TimeZone getTimeZone()
+  {
+    return _timeZone;
+  }
+
+  public void setTimeZone(TimeZone value)
+  {
+    _timeZone = value;
+    _format = null;
+  }
+  
+  public void setTransient(boolean value)
+  {
+    _isTransient = value;
+  }
+  
+  public boolean isTransient()
+  {
+    return _isTransient;
+  }
+
+  public void restoreState(FacesContext context, Object state)
+  {
+  }
+
+  public Object saveState(FacesContext context)
+  {
+    return null;
+  }
   
   public Object getAsObject(FacesContext context,
 			    UIComponent component,
 			    String value)
     throws ConverterException
   {
+    if (context == null || component == null)
+      throw new NullPointerException();
+    
     // XXX: incorrect
     if (value == null)
       return null;
 
-    value = value.trim();
-
     if (value.length() == 0)
       return null;
 
-    return Byte.parseByte(value);
+    value = value.trim();
+
+    DateFormat format = getFormat(context.getViewRoot().getLocale());
+
+    try {
+      synchronized (format) {
+	return format.parse(value);
+      }
+    } catch (ParseException e) {
+      throw new ConverterException(e);
+    }
   }
   
   public String getAsString(FacesContext context,
@@ -62,17 +177,115 @@ public class DateTimeConverter implements Converter
 			    Object value)
     throws ConverterException
   {
-    // XXX: incorrect
+    if (context == null || component == null)
+      throw new NullPointerException();
+    
     if (value == null)
       return "";
-    else if (value instanceof String)
-      return (String) value;
+    else if (value instanceof Date) {
+      DateFormat format = getFormat(context.getViewRoot().getLocale());
+
+      synchronized (format) {
+	return format.format((Date) value);
+      }
+    }
     else
       return String.valueOf(value);
   }
 
+  private DateFormat getFormat(Locale locale)
+  {
+    synchronized (this) {
+      if (_locale == null)
+	return createFormat(locale);
+      else if (_format == null) {
+	_format = createFormat(_locale);
+      }
+
+      return _format;
+    }
+  }
+
+  private DateFormat createFormat(Locale locale)
+  {
+    DateFormat format;
+
+    int dateStyle = DateFormat.DEFAULT;
+    int timeStyle = DateFormat.DEFAULT;
+
+    if ("short".equals(_dateStyle)) {
+      dateStyle = DateFormat.SHORT;
+    }
+    else if ("medium".equals(_dateStyle)) {
+      dateStyle = DateFormat.MEDIUM;
+    }
+    else if ("long".equals(_dateStyle)) {
+      dateStyle = DateFormat.LONG;
+    }
+    else if ("full".equals(_dateStyle)) {
+      dateStyle = DateFormat.FULL;
+    }
+    else if ("default".equals(_dateStyle)) {
+      dateStyle = DateFormat.DEFAULT;
+    }
+    else if (_dateStyle != null)
+      throw new ConverterException("'" + _dateStyle + "' is an unknown dateStyle");
+    
+    if ("short".equals(_timeStyle)) {
+      timeStyle = DateFormat.SHORT;
+    }
+    else if ("medium".equals(_timeStyle)) {
+      timeStyle = DateFormat.MEDIUM;
+    }
+    else if ("long".equals(_timeStyle)) {
+      timeStyle = DateFormat.LONG;
+    }
+    else if ("full".equals(_timeStyle)) {
+      timeStyle = DateFormat.FULL;
+    }
+    else if ("default".equals(_timeStyle)) {
+      timeStyle = DateFormat.DEFAULT;
+    }
+    else if (_timeStyle != null)
+      throw new ConverterException("'" + _timeStyle + "' is an unknown timeStyle");
+    
+
+    if (_type == null || "date".equals(_type)) {
+      if (locale != null)
+	format = DateFormat.getDateInstance(dateStyle, locale);
+      else
+	format = DateFormat.getDateInstance(dateStyle);
+    }
+    else if ("time".equals(_type)) {
+      if (locale != null)
+	format = DateFormat.getTimeInstance(timeStyle, locale);
+      else
+	format = DateFormat.getTimeInstance(timeStyle);
+    }
+    else if ("both".equals(_type)) {
+      if (locale != null)
+	format = DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
+      else
+	format = DateFormat.getDateTimeInstance(dateStyle, timeStyle);
+    }
+    else
+      throw new ConverterException("'" + _type + "' is an unknown type");
+
+    try {
+      if (_pattern != null && format instanceof SimpleDateFormat)
+	((SimpleDateFormat) format).applyPattern(_pattern);
+    } catch (Exception e) {
+      throw new ConverterException(e);
+    }
+
+    if (_timeZone != null)
+      format.setTimeZone(_timeZone);
+
+    return format;
+  }
+
   public String toString()
   {
-    return "ByteConverter[]";
+    return "DateTimeConverter[]";
   }
 }

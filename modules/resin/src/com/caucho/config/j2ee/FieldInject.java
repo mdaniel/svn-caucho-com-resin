@@ -36,7 +36,8 @@ import java.lang.reflect.Field;
 import java.util.logging.Logger;
 
 
-public class FieldInject extends AccessibleInject {
+public class FieldInject extends AccessibleInject
+{
   private static final Logger log
     = Logger.getLogger(FieldInject.class.getName());
   private static final L10N L = new L10N(FieldInject.class);

@@ -35,7 +35,7 @@ import javax.el.*;
 import javax.faces.component.*;
 import javax.faces.context.*;
 
-public class HtmlSelectOneRadio extends UISelectMany
+public class HtmlSelectOneRadio extends UISelectOne
 {
   public static final String COMPONENT_TYPE
     = "javax.faces.HtmlSelectOneRadio";

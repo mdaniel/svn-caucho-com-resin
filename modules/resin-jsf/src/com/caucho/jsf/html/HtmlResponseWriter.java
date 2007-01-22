@@ -129,11 +129,19 @@ public class HtmlResponseWriter extends ResponseWriter
 			     String property)
     throws IOException
   {
-    _out.write(' ');
-    _out.write(name);
-    _out.write("=\"");
-    _out.write(String.valueOf(value));
-    _out.write("\"");
+    /*
+    if (name.equals(value)) {
+      _out.write(' ');
+      _out.write(name);
+    }
+    else {
+    */
+      _out.write(' ');
+      _out.write(name);
+      _out.write("=\"");
+      _out.write(String.valueOf(value));
+      _out.write("\"");
+      //}
   }
 
   public void writeURIAttribute(String name,

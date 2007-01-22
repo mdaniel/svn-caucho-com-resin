@@ -47,36 +47,70 @@ import javax.xml.bind.annotation.*;
 import com.caucho.config.*;
 import com.caucho.util.*;
 
-@XmlRootElement(name="faces-config")
 public class ManagedBeanConfig
 {
   private static final L10N L = new L10N(ManagedBeanConfig.class);
+
+  private String _configLocation;
   
-  @XmlAttribute(name="id")
   private String _id;
 
-  @XmlElement(name="managed-bean-name")
   private String _name;
 
+  private String _typeName;
   private Class _type;
+
+  private ArrayList<BeanProgram> _program
+    = new ArrayList<BeanProgram>();
 
   private Scope _scope = Scope.REQUEST;
 
+  public void setId(String id)
+  {
+  }
+
+  public void setDescription(String description)
+  {
+  }
+
+  public void setManagedBeanName(String name)
+  {
+    _name = name;
+  }
+  
   public String getName()
   {
     return _name;
   }
+
+  public void setConfigLocation(String location)
+  {
+    _configLocation = location;
+  }
   
   @XmlElement(name="managed-bean-class")
-  public void setManagedBeanClass(Class cl)
+  public void setManagedBeanClass(String cl)
   {
-    Config.checkCanInstantiate(cl);
-
-    _type = cl;
+    _typeName = cl;
   }
 
-  public Class getManagedBeanClass()
+  public String getManagedBeanClass()
   {
+    return _typeName;
+  }
+
+  public Class getType()
+  {
+    if (_type == null) {
+      try {
+	ClassLoader loader = Thread.currentThread().getContextClassLoader();
+	
+	_type = Class.forName(_typeName, false, loader);
+      } catch (Exception e) {
+	throw new ConfigException(e);
+      }
+    }
+    
     return _type;
   }
   
@@ -89,8 +123,10 @@ public class ManagedBeanConfig
       _scope = Scope.SESSION;
     else if ("application".equals(scope))
       _scope = Scope.APPLICATION;
+    else if ("none".equals(scope))
+      _scope = Scope.NONE;
     else
-      throw new ConfigException(L.l("'{0}' is an unknown managed-bean-scope.  Expected values are request, session, or application.",
+      throw new ConfigException(L.l("'{0}' is an unknown managed-bean-scope.  Expected values are request, session, application, or none.",
 				    scope));
   }
 
@@ -98,12 +134,46 @@ public class ManagedBeanConfig
   {
     return _scope.toString();
   }
+  
+  @XmlElement(name="managed-property")
+  public void setManagedProperty(ManagedProperty property)
+  {
+    property.addProgram(_program, getType());
+  }
 
+  public ManagedProperty getManagedProperty()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public void setMapEntries(MappedEntries map)
+  {
+    ArrayList<AbstractValue> keyList = map.getKeyList();
+    ArrayList<AbstractValue> valueList = map.getValueList();
+
+    for (int i = 0; i < keyList.size(); i++) {
+      _program.add(new MapBeanProgram(keyList.get(i), valueList.get(i)));
+    }
+    System.out.println("prg: " + _program);
+  }
+
+  public void setListEntries(ListEntries list)
+  {
+    for (AbstractValue value : list.getListValues()) {
+      _program.add(new ListBeanProgram(value));
+    }
+  }
+  
   public Object create(FacesContext context)
     throws FacesException
   {
     try {
-      Object value = _type.newInstance();
+      Object value = getType().newInstance();
+
+      System.out.println("PROGRAM: " + _program);
+      for (int i = 0; i < _program.size(); i++) {
+	_program.get(i).configure(context, value);
+      }
 
       ExternalContext extContext = context.getExternalContext();
 
@@ -132,6 +202,7 @@ public class ManagedBeanConfig
   enum Scope {
     REQUEST,
     SESSION,
-    APPLICATION
+    APPLICATION,
+    NONE
   };
 }

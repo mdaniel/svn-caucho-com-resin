@@ -31,6 +31,7 @@ package javax.faces.component;
 import java.util.*;
 
 import javax.el.*;
+import javax.faces.application.*;
 import javax.faces.context.*;
 
 public class UISelectMany extends UIInput
@@ -39,9 +40,6 @@ public class UISelectMany extends UIInput
   public static final String COMPONENT_TYPE = "javax.faces.SelectMany";
   public static final String INVALID_MESSAGE_ID
     = "javax.faces.component.UISelectMany.INVALID";
-
-  private Object []_selectedValues;
-  private ValueExpression _selectedValuesExpr;
 
   public UISelectMany()
   {
@@ -62,17 +60,12 @@ public class UISelectMany extends UIInput
 
   public Object []getSelectedValues()
   {
-    if (_selectedValues != null)
-      return _selectedValues;
-    else if (_selectedValuesExpr != null)
-      return (Object [])Util.eval(_selectedValuesExpr);
-    else
-      return null;
+    return (Object []) super.getValue();
   }
 
   public void setSelectedValues(Object []value)
   {
-    _selectedValues = value;
+    super.setValue(value);
   }
 
   /**
@@ -82,7 +75,7 @@ public class UISelectMany extends UIInput
   public ValueExpression getValueExpression(String name)
   {
     if ("selectedValues".equals(name))
-      return _selectedValuesExpr;
+      return super.getValueExpression("value");
     else
       return super.getValueExpression(name);
   }
@@ -94,40 +87,75 @@ public class UISelectMany extends UIInput
   public void setValueExpression(String name, ValueExpression expr)
   {
     if ("selectedValues".equals(name)) {
-      if (expr != null && expr.isLiteralText())
-	_selectedValues = (Object []) Util.eval(expr);
-      else
-	_selectedValuesExpr = expr;
+      super.setValueExpression("value", expr);
     }
     else
       super.setValueExpression(name, expr);
   }
 
   //
-  // state
+  // validate
   //
 
-  public Object saveState(FacesContext context)
+  public void validateValue(FacesContext context, Object value)
   {
-    Object []state = new Object[3];
-
-    state[0] = super.saveState(context);
+    super.validateValue(context, value);
     
-    state[1] = _selectedValues;
-    state[2] = Util.save(_selectedValuesExpr, context);
+    if (! isValid())
+      return;
 
-    return state;
+    boolean hasValue = false;
+    
+    if (value instanceof Object[]) {
+      Object []values = (Object []) value;
+
+      for (int i = 0; i < values.length; i++) {
+	hasValue = false;
+	
+	for (UIComponent child : getChildren()) {
+	  if (child instanceof UISelectItem) {
+	    UISelectItem item = (UISelectItem) child;
+
+	    if (values[i].equals(item.getItemValue())) {
+	      hasValue = true;
+	      break;
+	    }
+	  }
+	}
+
+	if (! hasValue)
+	  break;
+      }
+    }
+
+    if (! hasValue) {
+      setValid(false);
+      
+      FacesMessage msg = new FacesMessage(INVALID_MESSAGE_ID);
+      
+      context.addMessage(getClientId(context), msg);
+    }
   }
 
-  public void restoreState(FacesContext context, Object value)
+  @Override
+  protected boolean compareValues(Object oldValue, Object newValue)
   {
-    Object []state = (Object []) value;
+    if (oldValue == newValue)
+      return false;
+    else if (oldValue == null || newValue == null)
+      return true;
 
-    super.restoreState(context, state[0]);
+    Object []oldValues = (Object []) oldValue;
+    Object []newValues = (Object []) newValue;
 
-    _selectedValues = (Object []) state[1];
-    _selectedValuesExpr = Util.restore(state[2],
-				       Object.class,
-				       context);
+    if (oldValues.length != newValues.length)
+      return true;
+
+    for (int i = 0; i < oldValues.length; i++) {
+      if (! oldValues[i].equals(newValues[i]))
+	return true;
+    }
+
+    return false;
   }
 }

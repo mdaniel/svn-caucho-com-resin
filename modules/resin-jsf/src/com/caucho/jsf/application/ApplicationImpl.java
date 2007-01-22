@@ -60,10 +60,14 @@ public class ApplicationImpl extends Application
   private StateManager _stateManager;
   private ViewHandler _viewHandler;
   private NavigationHandler _navigationHandler;
+  
   private PropertyResolver _propertyResolver;
+  private VariableResolver _variableResolver;
 
   private ExpressionFactory _jsfExpressionFactory;
   private FacesContextELResolver _elResolver;
+  private JsfResourceBundleELResolver _bundleResolver
+    = new JsfResourceBundleELResolver();
 
   private ArrayList<Locale> _locales;
   private Locale _defaultLocale;
@@ -111,7 +115,11 @@ public class ApplicationImpl extends Application
     appContext.addELResolver(FacesJspELResolver.RESOLVER);
     
     ELResolver []customResolvers = new ELResolver[0];
-    _elResolver = new FacesContextELResolver(customResolvers);
+    _elResolver = new FacesContextELResolver(customResolvers,
+					     _bundleResolver);
+
+    addComponent(UIColumn.COMPONENT_TYPE,
+		 "javax.faces.component.UIColumn");
 
     addComponent(UIInput.COMPONENT_TYPE,
 		 "javax.faces.component.UIInput");
@@ -127,6 +135,12 @@ public class ApplicationImpl extends Application
 
     addComponent(HtmlCommandButton.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlCommandButton");
+
+    addComponent(HtmlCommandLink.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlCommandLink");
+
+    addComponent(HtmlDataTable.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlDataTable");
 
     addComponent(HtmlGraphicImage.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlGraphicImage");
@@ -158,17 +172,56 @@ public class ApplicationImpl extends Application
     addComponent(HtmlSelectManyCheckbox.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlSelectManyCheckbox");
 
+    addComponent(HtmlSelectManyListbox.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlSelectManyListbox");
+
+    addComponent(HtmlSelectManyMenu.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlSelectManyMenu");
+
     addComponent(HtmlSelectOneListbox.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlSelectOneListbox");
+
+    addComponent(HtmlSelectOneMenu.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlSelectOneMenu");
+
+    addComponent(HtmlSelectOneRadio.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlSelectOneRadio");
+
+    addConverter(boolean.class, BooleanConverter.class.getName());
+    addConverter(Boolean.class, BooleanConverter.class.getName());
+    
+    addConverter(char.class, CharacterConverter.class.getName());
+    addConverter(Character.class, CharacterConverter.class.getName());
+    
+    addConverter(byte.class, ByteConverter.class.getName());
+    addConverter(Byte.class, ByteConverter.class.getName());
+    addConverter(short.class, ShortConverter.class.getName());
+    addConverter(Short.class, ShortConverter.class.getName());
+    addConverter(int.class, IntegerConverter.class.getName());
+    addConverter(Integer.class, IntegerConverter.class.getName());
+    addConverter(long.class, LongConverter.class.getName());
+    addConverter(Long.class, LongConverter.class.getName());
+    addConverter(float.class, FloatConverter.class.getName());
+    addConverter(Float.class, FloatConverter.class.getName());
+    addConverter(double.class, DoubleConverter.class.getName());
+    addConverter(Double.class, DoubleConverter.class.getName());
   }
   
   public void addManagedBean(String name, ManagedBeanConfig managedBean)
   {
     _elResolver.addManagedBean(name, managedBean);
   }
+  
+  public void addResourceBundle(String name, String baseName)
+  {
+    _bundleResolver.addBundle(name, baseName);
+  }
 
   public ActionListener getActionListener()
   {
+    if (_actionListener == null)
+      _actionListener = new ActionListenerImpl();
+    
     return _actionListener;
   }
 
@@ -222,6 +275,9 @@ public class ApplicationImpl extends Application
 
   public NavigationHandler getNavigationHandler()
   {
+    if (_navigationHandler == null)
+      _navigationHandler = new NavigationHandlerImpl();
+    
     return _navigationHandler;
   }
 
@@ -236,6 +292,9 @@ public class ApplicationImpl extends Application
   @Deprecated
   public PropertyResolver getPropertyResolver()
   {
+    if (_propertyResolver == null)
+      _propertyResolver = new PropertyResolverAdapter(getELResolver());
+    
     return _propertyResolver;
   }
 
@@ -248,13 +307,16 @@ public class ApplicationImpl extends Application
   @Deprecated
   public VariableResolver getVariableResolver()
   {
-    throw new UnsupportedOperationException();
+    if (_variableResolver == null)
+      _variableResolver = new VariableResolverAdapter(getELResolver());
+
+    return _variableResolver;
   }
 
   @Deprecated
   public void setVariableResolver(VariableResolver resolver)
   {
-    throw new UnsupportedOperationException();
+    _variableResolver = resolver;
   }
 
   /**
@@ -453,7 +515,7 @@ public class ApplicationImpl extends Application
 
   public Iterator<String> getComponentTypes()
   {
-    return _componentClassMap.keySet().iterator();
+    return _componentClassNameMap.keySet().iterator();
   }
 
   public void addConverter(String converterId,
@@ -608,6 +670,9 @@ public class ApplicationImpl extends Application
     FacesContext facesContext = FacesContext.getCurrentInstance();
     ELContext elContext = new FacesELContext(facesContext, getELResolver());
 
+    if (param == null)
+      param = new Class[0];
+
     try {
       MethodExpression expr
 	= factory.createMethodExpression(elContext, ref, Object.class, param);
@@ -674,10 +739,16 @@ public class ApplicationImpl extends Application
     FacesContext facesContext = FacesContext.getCurrentInstance();
     ELContext elContext = new FacesELContext(facesContext, getELResolver());
 
-    ValueExpression expr
-      = factory.createValueExpression(elContext, ref, Object.class);
+    try {
+      ValueExpression expr
+	= factory.createValueExpression(elContext, ref, Object.class);
 
-    return new ValueBindingAdapter(expr);
+      ValueBinding binding = new ValueBindingAdapter(expr);
+
+      return binding;
+    } catch (ELException e) {
+      throw new ReferenceSyntaxException(e);
+    }
   }
 
   @Override    
@@ -703,5 +774,134 @@ public class ApplicationImpl extends Application
   public String toString()
   {
     return "ApplicationImpl[]";
+  }
+
+  static class PropertyResolverAdapter extends PropertyResolver {
+    private ELResolver _elResolver;
+
+    PropertyResolverAdapter(ELResolver elResolver)
+    {
+      _elResolver = elResolver;
+    }
+    
+    public Class getType(Object base, int index)
+      throws javax.faces.el.PropertyNotFoundException
+    {
+      try {
+	FacesContext context = FacesContext.getCurrentInstance();
+      
+	return _elResolver.getType(context.getELContext(), base, index);
+      } catch (javax.el.PropertyNotFoundException e) {
+	throw new javax.faces.el.PropertyNotFoundException(e);
+      }
+    }
+    
+    public Class getType(Object base, Object property)
+      throws javax.faces.el.PropertyNotFoundException
+    {
+      if (base == null)
+	throw new javax.faces.el.PropertyNotFoundException();
+      
+      try {
+	FacesContext context = FacesContext.getCurrentInstance();
+      
+	return _elResolver.getType(context.getELContext(), base, property);
+      } catch (javax.el.PropertyNotFoundException e) {
+	throw new javax.faces.el.PropertyNotFoundException(e);
+      }
+    }
+    
+    public Object getValue(Object base, int index)
+      throws javax.faces.el.PropertyNotFoundException
+    {
+      try {
+	FacesContext context = FacesContext.getCurrentInstance();
+      
+	return _elResolver.getValue(context.getELContext(), base, index);
+      } catch (javax.el.PropertyNotFoundException e) {
+	throw new javax.faces.el.PropertyNotFoundException(e);
+      }
+    }
+    
+    public Object getValue(Object base, Object property)
+      throws javax.faces.el.PropertyNotFoundException
+    {
+      try {
+	FacesContext context = FacesContext.getCurrentInstance();
+      
+	return _elResolver.getValue(context.getELContext(), base, property);
+      } catch (javax.el.PropertyNotFoundException e) {
+	throw new javax.faces.el.PropertyNotFoundException(e);
+      }
+    }
+    
+    public boolean isReadOnly(Object base, int index)
+      throws javax.faces.el.PropertyNotFoundException
+    {
+      try {
+	FacesContext context = FacesContext.getCurrentInstance();
+      
+	return _elResolver.isReadOnly(context.getELContext(), base, index);
+      } catch (javax.el.PropertyNotFoundException e) {
+	throw new javax.faces.el.PropertyNotFoundException(e);
+      }
+    }
+    
+    public boolean isReadOnly(Object base, Object property)
+      throws javax.faces.el.PropertyNotFoundException
+    {
+      try {
+	FacesContext context = FacesContext.getCurrentInstance();
+      
+	return _elResolver.isReadOnly(context.getELContext(), base, property);
+      } catch (javax.el.PropertyNotFoundException e) {
+	throw new javax.faces.el.PropertyNotFoundException(e);
+      }
+    }
+    
+    public void setValue(Object base, int index, Object value)
+      throws javax.faces.el.PropertyNotFoundException
+    {
+      if (base == null)
+	throw new javax.faces.el.PropertyNotFoundException();
+      
+      try {
+	FacesContext context = FacesContext.getCurrentInstance();
+      
+	_elResolver.setValue(context.getELContext(), base, index, value);
+      } catch (javax.el.PropertyNotFoundException e) {
+	throw new javax.faces.el.PropertyNotFoundException(e);
+      } catch (javax.el.PropertyNotWritableException e) {
+	throw new javax.faces.el.PropertyNotFoundException(e);
+      }
+    }
+    
+    public void setValue(Object base, Object property, Object value)
+      throws javax.faces.el.PropertyNotFoundException
+    {
+      try {
+	FacesContext context = FacesContext.getCurrentInstance();
+      
+	_elResolver.setValue(context.getELContext(), base, property, value);
+      } catch (javax.el.PropertyNotFoundException e) {
+	throw new javax.faces.el.PropertyNotFoundException(e);
+      } catch (javax.el.PropertyNotWritableException e) {
+	throw new javax.faces.el.PropertyNotFoundException(e);
+      }
+    }
+  }
+
+  static class VariableResolverAdapter extends VariableResolver {
+    private ELResolver _elResolver;
+    
+    VariableResolverAdapter(ELResolver elResolver)
+    {
+      _elResolver = elResolver;
+    }
+    
+    public Object resolveVariable(FacesContext context, String value)
+    {
+      return _elResolver.getValue(context.getELContext(), null, value);
+    }
   }
 }

@@ -577,7 +577,8 @@ public class JaxbBeanType extends TypeStrategy {
 						    Class valueType,
 						    Adapter adapter)
   {
-    setter.setAccessible(true);
+    if (setter != null)
+      setter.setAccessible(true);
 
     Class type = getter.getReturnType();
     

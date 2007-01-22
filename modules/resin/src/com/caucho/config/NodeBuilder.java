@@ -572,7 +572,7 @@ public class NodeBuilder {
   public Object putVar(String name, Object value)
   {
     ELResolver resolver = _elContext.getELResolver();
-    Object oldValue = resolver.getValue(_elContext, name, null);
+    Object oldValue = resolver.getValue(_elContext, null, name);
 
     resolver.setValue(_elContext, null, name, value);
     

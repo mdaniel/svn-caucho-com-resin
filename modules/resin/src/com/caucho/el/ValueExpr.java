@@ -91,6 +91,20 @@ public class ValueExpr extends Expr {
   }
 
   /**
+   * Sets teh value.
+   *
+   * @param env the variable environment
+   *
+   * @return the value as an object
+   */
+  @Override
+  public void setValue(ELContext env, Object value)
+    throws ELException
+  {
+    _valExpr.setValue(env, value);
+  }
+
+  /**
    * Prints the code to create an IdExpr.
    */
   @Override

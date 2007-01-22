@@ -126,6 +126,34 @@ public class PathExpr extends Expr {
 
     return env.getELResolver().getValue(env, _path, null);
   }
+  
+  /**
+   * Evaluate the expression as an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the evaluated object
+   */
+  @Override
+  public boolean isReadOnly(ELContext env)
+    throws ELException
+  {
+    return _expr.isReadOnly(env);
+  }
+  
+  /**
+   * Evaluate the expression as an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the evaluated object
+   */
+  @Override
+  public void setValue(ELContext env, Object value)
+    throws ELException
+  {
+    _expr.setValue(env, value);
+  }
 
   /**
    * Returns the method info.

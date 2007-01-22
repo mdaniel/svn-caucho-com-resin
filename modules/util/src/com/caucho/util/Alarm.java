@@ -127,6 +127,23 @@ public class Alarm implements ThreadTask {
     setListener(listener);
     setContextLoader(loader);
   }
+    
+  /**
+   * Create a new wakeup alarm with a designated listener as a callback.
+   * The alarm is not scheduled.
+   */
+  public Alarm(String name,
+	       AlarmListener listener,
+	       long delta,
+	       ClassLoader loader) 
+  {
+    _name = name;
+    
+    setListener(listener);
+    setContextLoader(loader);
+
+    queue(delta);
+  }
 
   /**
    * Creates a named alarm and schedules its wakeup.

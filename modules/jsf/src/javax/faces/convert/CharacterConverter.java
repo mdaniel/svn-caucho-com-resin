@@ -54,7 +54,7 @@ public class CharacterConverter implements Converter
     if (value.length() == 0)
       return null;
 
-    return Byte.parseByte(value);
+    return new Character(value.charAt(0));
   }
   
   public String getAsString(FacesContext context,

@@ -125,10 +125,10 @@ public class BeanELResolver extends ELResolver {
 			 Object base,
 			 Object property)
   {
-    if (base == null || ! (property instanceof String))
+    if (base == null || property == null)
       return null;
 
-    String fieldName = (String) property;
+    String fieldName = String.valueOf(property);
 
     if (fieldName.length() == 0)
       return null;
@@ -151,8 +151,8 @@ public class BeanELResolver extends ELResolver {
 
     context.setPropertyResolved(true);
 
-    if (prop == null)
-      return null;//throw new PropertyNotFoundException(fieldName);
+    if (prop == null || prop.getReadMethod() == null)
+      throw new PropertyNotFoundException("'" + property + "' is an unknown bean property of '" + base.getClass().getName() + "'");
 
     try {
       return prop.getReadMethod().invoke(base);
@@ -168,15 +168,23 @@ public class BeanELResolver extends ELResolver {
 			    Object base,
 			    Object property)
   {
+    if (base == null)
+      return false;
+    
     BeanProperties props = getProp(env, base, property);
 
     if (props != null) {
       env.setPropertyResolved(true);
 
-      return _isReadOnly;
+      if (_isReadOnly)
+	return true;
+
+      BeanProperty prop = props.getBeanProperty((String) property);
+      
+      return prop != null && prop.isReadOnly();
     }
-    else
-      return true;
+
+    throw new PropertyNotFoundException("'" + property + "' is an unknown bean property of '" + base.getClass().getName() + "'");
   }
 
   @Override
@@ -185,10 +193,10 @@ public class BeanELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
-    if (base == null || ! (property instanceof String))
+    if (base == null)
       return;
 
-    String fieldName = (String) property;
+    String fieldName = String.valueOf(property);
 
     if (fieldName.length() == 0)
       return;
@@ -211,7 +219,9 @@ public class BeanELResolver extends ELResolver {
 
     context.setPropertyResolved(true);
 
-    if (prop == null || prop.getWriteMethod() == null)
+    if (prop == null)
+      throw new PropertyNotFoundException(fieldName);
+    else if (prop.getWriteMethod() == null)
       throw new PropertyNotWritableException(fieldName);
 
     try {

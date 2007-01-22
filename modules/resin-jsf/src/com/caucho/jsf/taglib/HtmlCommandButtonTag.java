@@ -44,6 +44,8 @@ import javax.servlet.jsp.tagext.*;
  * The h:commandButton tag
  */
 public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
+  private MethodExpression _actionExpr;
+    
   public String getComponentType()
   {
     return HtmlCommandButton.COMPONENT_TYPE;
@@ -52,6 +54,11 @@ public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
   public String getRendererType()
   {
     return "javax.faces.Button";
+  }
+
+  public void setActionListener(MethodExpression expr)
+  {
+    _actionExpr = expr;
   }
   
   /**
@@ -63,5 +70,8 @@ public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
     component.setRendered(true);
     
     super.setProperties(component);
+
+    if (_actionExpr != null)
+      ((UICommand) component).setActionExpression(_actionExpr);
   }
 }

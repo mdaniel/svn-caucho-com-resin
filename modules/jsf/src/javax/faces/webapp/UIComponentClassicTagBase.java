@@ -227,24 +227,34 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 
     UIComponent parent = parentTag.getComponentInstance();
 
-    // XXX: facet
-
     String id = getId();
+    String facetName = null;
 
     if (id == null)
       id = UIViewRoot.UNIQUE_ID_PREFIX + getJspId();
 
-    _component = parent.findComponent(id);
+    if (_parent instanceof FacetTag) {
+      facetName = ((FacetTag) _parent).getName();
 
-    if (_component != null) {
-      if (verbatim != null)
-	addVerbatimBeforeComponent(parentTag, verbatim, _component);
-      
-      return _component;
+      _component = parent.getFacet(facetName);
+
+      if (_component != null)
+	return _component;
     }
+    else {
+      _component = parent.findComponent(id);
+      
 
-    if (verbatim != null) {
-      parent.getChildren().add(verbatim);
+      if (_component != null) {
+	if (verbatim != null)
+	  addVerbatimBeforeComponent(parentTag, verbatim, _component);
+      
+	return _component;
+      }
+
+      if (verbatim != null) {
+	parent.getChildren().add(verbatim);
+      }
     }
 
     String componentType = getComponentType();
@@ -257,7 +267,10 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 
     setProperties(_component);
 
-    parent.getChildren().add(_component);
+    if (facetName != null)
+      parent.getFacets().put(facetName, _component);
+    else
+      parent.getChildren().add(_component);
 
     return _component;
   }

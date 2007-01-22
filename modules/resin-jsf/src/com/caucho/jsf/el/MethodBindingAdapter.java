@@ -50,10 +50,18 @@ public class MethodBindingAdapter extends MethodBinding
   public Object invoke(FacesContext context, Object []param)
     throws EvaluationException, javax.faces.el.MethodNotFoundException
   {
+    if (context == null)
+      throw new NullPointerException();
+    
     try {
       return _expr.invoke(context.getELContext(), param);
     } catch (javax.el.MethodNotFoundException e) {
       throw new javax.faces.el.MethodNotFoundException(e);
+    } catch (ELException e) {
+      if (e.getCause() != null)
+	throw new EvaluationException(e.getCause());
+      else
+	throw new EvaluationException(e);
     } catch (Exception e) {
       throw new EvaluationException(e);
     }
@@ -63,7 +71,17 @@ public class MethodBindingAdapter extends MethodBinding
   public Class getType(FacesContext context)
     throws EvaluationException, javax.faces.el.PropertyNotFoundException
   {
-    return Object.class;
+    try {
+      MethodInfo info = _expr.getMethodInfo(context.getELContext());
+
+      return info.getReturnType();
+    } catch (javax.el.MethodNotFoundException e) {
+      throw new javax.faces.el.MethodNotFoundException(e);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EvaluationException(e);
+    }
   }
 
   public String toString()

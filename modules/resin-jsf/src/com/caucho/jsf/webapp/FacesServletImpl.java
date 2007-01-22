@@ -30,12 +30,14 @@ package com.caucho.jsf.webapp;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.*;
 import java.util.logging.*;
 
 import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.lifecycle.*;
+import javax.faces.webapp.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -51,7 +53,9 @@ public class FacesServletImpl extends GenericServlet
     = Logger.getLogger(FacesServletImpl.class.getName());
 
   private static final String FACES_SCHEMA
-    = "com/caucho/jsf/cfg/jsf-12.rnc";
+    = "com/caucho/jsf/cfg/jsf.rnc";
+
+  private ConfigException _configException;
 
   public FacesServletImpl()
   {
@@ -60,8 +64,17 @@ public class FacesServletImpl extends GenericServlet
   public void init(ServletConfig config)
     throws ServletException
   {
-    Path facesPath = Vfs.lookup("WEB-INF/faces-config.xml");
+    String path = config.getServletContext().getInitParameter(FacesServlet.CONFIG_FILES_ATTR);
 
+    if (path != null)
+      initPath(Vfs.lookup(path));
+
+    initPath(Vfs.lookup("WEB-INF/faces-config.xml"));
+  }
+    
+  private void initPath(Path facesPath)
+    throws ServletException
+  {
     if (facesPath.canRead()) {
       try {
 	FacesConfig facesConfig = new FacesConfig();
@@ -77,6 +90,20 @@ public class FacesServletImpl extends GenericServlet
 	for (ManagedBeanConfig bean : facesConfig.getManagedBeans()) {
 	  app.addManagedBean(bean.getName(), bean);
 	}
+
+	ApplicationConfig appConfig = facesConfig.getApplication();
+	if (appConfig != null) {
+	  for (Map.Entry<String,String> entry
+		 : appConfig.getResourceBundleMap().entrySet()) {
+	    app.addResourceBundle(entry.getKey(), entry.getValue());
+	  }
+	}
+      } catch (ConfigException e) {
+	e.printStackTrace();
+	
+	_configException = e;
+	
+	throw e;
       } catch (RuntimeException e) {
 	throw e;
       } catch (Exception e) {

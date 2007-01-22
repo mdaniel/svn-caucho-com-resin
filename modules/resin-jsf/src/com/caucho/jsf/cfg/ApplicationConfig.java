@@ -73,6 +73,9 @@ public class ApplicationConfig
   
   private Class _variableResolver;
 
+  private HashMap<String,String> _resourceBundleMap
+    = new HashMap<String,String>();
+
   @XmlElement(name="action-listener")
   private void setActionListener(Class actionListener)
     throws ConfigException
@@ -109,6 +112,11 @@ public class ApplicationConfig
     _stateManager = stateManager;
   }
 
+  public Class getStateManager()
+  {
+    return _stateManager;
+  }
+
   @XmlElement(name="el-resolver")
   private void setElResolver(Class elResolver)
     throws ConfigException
@@ -116,6 +124,11 @@ public class ApplicationConfig
     Config.validate(elResolver, ELResolver.class);
     
     _elResolver = elResolver;
+  }
+
+  public Class getElResolver()
+  {
+    return _elResolver;
   }
 
   @XmlElement(name="property-resolver")
@@ -127,6 +140,11 @@ public class ApplicationConfig
     _propertyResolver = propertyResolver;
   }
 
+  public Class getPropertyResolver()
+  {
+    return _propertyResolver;
+  }
+
   @XmlElement(name="variable-resolver")
   private void setVariableResolver(Class variableResolver)
     throws ConfigException
@@ -134,6 +152,29 @@ public class ApplicationConfig
     Config.validate(variableResolver, VariableResolver.class);
     
     _variableResolver = variableResolver;
+  }
+
+  public Class getVariableResolver()
+  {
+    return _variableResolver;
+  }
+
+  @XmlElement(name="resource-bundle")
+  private void setResourceBundle(ResourceBundleConfig bundle)
+    throws ConfigException
+  {
+    _resourceBundleMap.put(bundle.getVar(), bundle.getBaseName());
+  }
+
+  private ResourceBundleConfig getResourceBundle()
+    throws ConfigException
+  {
+    return null;
+  }
+
+  public HashMap<String,String> getResourceBundleMap()
+  {
+    return _resourceBundleMap;
   }
 
   @XmlElement(name="application-extension")

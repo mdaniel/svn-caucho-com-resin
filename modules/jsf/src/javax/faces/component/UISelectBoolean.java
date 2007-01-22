@@ -60,17 +60,12 @@ public class UISelectBoolean extends UIInput
 
   public boolean isSelected()
   {
-    if (_selected != null)
-      return _selected;
-    else if (_selectedExpr != null)
-      return Util.evalBoolean(_selectedExpr);
-    else
-      return false;
+    return (Boolean) getValue();
   }
 
   public void setSelected(boolean value)
   {
-    _selected = value;
+    setValue(value);
   }
 
   /**
@@ -80,7 +75,7 @@ public class UISelectBoolean extends UIInput
   public ValueExpression getValueExpression(String name)
   {
     if ("selected".equals(name))
-      return _selectedExpr;
+      return super.getValueExpression("value");
     else
       return super.getValueExpression(name);
   }
@@ -92,10 +87,7 @@ public class UISelectBoolean extends UIInput
   public void setValueExpression(String name, ValueExpression expr)
   {
     if ("selected".equals(name)) {
-      if (expr != null && expr.isLiteralText())
-	_selected = Util.evalBoolean(expr);
-      else
-	_selectedExpr = expr;
+      super.setValueExpression("value", expr);
     }
     else
       super.setValueExpression(name, expr);

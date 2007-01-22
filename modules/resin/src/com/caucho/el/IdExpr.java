@@ -80,6 +80,20 @@ public class IdExpr extends Expr {
    * @return the value as an object
    */
   @Override
+  public Class getType(ELContext env)
+    throws ELException
+  {
+    return env.getELResolver().getType(env, null, _id);
+  }
+
+  /**
+   * Evaluate the expr as an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value as an object
+   */
+  @Override
   public Object getValue(ELContext env)
     throws ELException
   {

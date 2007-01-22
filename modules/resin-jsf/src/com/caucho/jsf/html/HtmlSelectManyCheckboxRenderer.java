@@ -260,19 +260,11 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
 
 	out.startElement("input", child);
 	out.writeAttribute("id", childId, "id");
-	out.writeAttribute("name", child.getClientId(context), "name");
+	out.writeAttribute("name", clientId, "name");
 	out.writeAttribute("type", "checkbox", "type");
 
-	if (selectItem.isItemDisabled()) {
+	if (selectItem.isItemDisabled() || disabled)
 	  out.writeAttribute("disabled", "disabled", "disabled");
-
-	  if (disabledClass != null)
-	    out.writeAttribute("class", disabledClass, "disabledClass");
-	}
-	else {
-	  if (enabledClass != null)
-	    out.writeAttribute("class", enabledClass, "enabledClass");
-	}
 
 	if (value instanceof String[]) {
 	  String []values = (String []) value;
@@ -344,12 +336,27 @@ class HtmlSelectManyCheckboxRenderer extends Renderer
 
 	if (title != null)
 	  out.writeAttribute("title", title, "title");
+
+	Object itemValue = selectItem.getItemValue();
+	if (itemValue != null)
+	  out.writeAttribute("value", String.valueOf(itemValue), "value");
       
 	out.endElement("input");
 
 	out.startElement("label", child);
 	out.writeAttribute("for", childId, "for");
+
+	if (selectItem.isItemDisabled() || disabled) {
+	  if (disabledClass != null)
+	    out.writeAttribute("class", disabledClass, "disabledClass");
+	}
+	else {
+	  if (enabledClass != null)
+	    out.writeAttribute("class", enabledClass, "enabledClass");
+	}
+	
 	out.writeText(selectItem.getItemLabel(), "itemLabel");
+	
 	out.endElement("label");
       }
       

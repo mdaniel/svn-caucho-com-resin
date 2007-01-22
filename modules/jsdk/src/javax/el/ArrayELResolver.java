@@ -90,6 +90,11 @@ public class ArrayELResolver extends ELResolver {
     else if (base.getClass().isArray()) {
       context.setPropertyResolved(true);
 
+      int index = getIndex(property);
+
+      if (index < 0 || Array.getLength(base) <= index)
+	throw new PropertyNotFoundException("array index '" + index + "' is invalid");
+
       return base.getClass().getComponentType();
     }
     else
@@ -106,24 +111,12 @@ public class ArrayELResolver extends ELResolver {
     else if (base.getClass().isArray()) {
       context.setPropertyResolved(true);
 
-      int index = 0;
-
-      if (property instanceof Number)
-	index = ((Number) property).intValue();
-      else if (property instanceof String) {
-	try {
-	  index = Integer.parseInt((String) property);
-	} catch (Exception e) {
-	  throw new ELException("can't convert '" + property + "' to long.");
-	}
-      }
-      else
-	throw new ELException("can't convert '" + property + "' to long.");
+      int index = getIndex(property);
 
       if (0 <= index && index < Array.getLength(base))
 	return Array.get(base, index);
       else
-	return null;
+	throw new PropertyNotFoundException("array index '" + index + "' is invalid");
     }
     else {
       return null;
@@ -157,19 +150,27 @@ public class ArrayELResolver extends ELResolver {
     else if (base.getClass().isArray()) {
       context.setPropertyResolved(true);
 
-      int index = 0;
+      int index = getIndex(property);
 
-      if (property instanceof Number)
-	index = ((Number) property).intValue();
-      else if (property instanceof String) {
-	try {
-	  index = Integer.parseInt((String) property);
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
-      }
-
-      Array.set(base, index, value);
+      if (0 <= index && index < Array.getLength(base))
+	Array.set(base, index, value);
+      else
+	throw new PropertyNotWritableException("array index '" + index + "' is invalid");
     }
+  }
+
+  private int getIndex(Object property)
+  {
+    if (property instanceof Number)
+      return ((Number) property).intValue();
+    else if (property instanceof String) {
+      try {
+	return Integer.parseInt((String) property);
+      } catch (Exception e) {
+	throw new ELException("can't convert '" + property + "' to long.");
+      }
+    }
+    else
+      throw new ELException("can't convert '" + property + "' to long.");
   }
 }

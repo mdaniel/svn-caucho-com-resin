@@ -42,7 +42,6 @@ import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.RegistryException;
 import com.caucho.util.Semaphore;
-import com.caucho.util.TimeUnit;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
@@ -86,6 +85,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.concurrent.*;
 
 
 /**

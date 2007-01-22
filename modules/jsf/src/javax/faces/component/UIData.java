@@ -29,6 +29,7 @@
 package javax.faces.component;
 
 import java.util.*;
+import java.sql.ResultSet;
 
 import javax.el.*;
 
@@ -38,6 +39,8 @@ import javax.faces.el.*;
 import javax.faces.event.*;
 import javax.faces.model.*;
 
+import javax.servlet.jsp.jstl.sql.Result;
+
 public class UIData extends UIComponentBase
   implements NamingContainer
 {
@@ -46,6 +49,8 @@ public class UIData extends UIComponentBase
 
   private static final HashMap<String,PropEnum> _propMap
     = new HashMap<String,PropEnum>();
+
+  private static final Object[] NULL_ARRAY = new Object[0];
 
   private DataModel _dataModel;
 
@@ -142,9 +147,24 @@ public class UIData extends UIComponentBase
     if (_dataModel != null)
       return _dataModel;
     
-    // XXX:
+    Object value = getValue();
+
+    if (value == null)
+      _dataModel = new ArrayDataModel(NULL_ARRAY);
+    else if (value instanceof DataModel)
+      _dataModel = (DataModel) value;
+    else if (value instanceof List)
+      _dataModel = new ListDataModel((List) value);
+    else if (value instanceof ResultSet)
+      _dataModel = new ResultSetDataModel((ResultSet) value);
+    else if (value instanceof Result)
+      _dataModel = new ResultDataModel((Result) value);
+    else if (value.getClass().isArray())
+      _dataModel = new ArrayDataModel((Object []) value);
+    else
+      _dataModel = new ScalarDataModel(value);
     
-    return (DataModel) getValue();
+    return _dataModel;
   }
 
   protected void setDataModel(DataModel dataModel)
@@ -168,8 +188,25 @@ public class UIData extends UIComponentBase
       throw new IllegalArgumentException("UIData.setRowIndex must not be less than -1 at '" + value + "'");
     
     _rowIndex = value;
+
+    DataModel dataModel = getDataModel();
     
-    getDataModel().setRowIndex(value);
+    dataModel.setRowIndex(value);
+
+    if (_var == null) {
+    }
+    else if (value < 0) {
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      context.getExternalContext().getRequestMap().remove(_var);
+    }
+    else {
+      Object rowData = dataModel.getRowData();
+      
+      FacesContext context = FacesContext.getCurrentInstance();
+
+      context.getExternalContext().getRequestMap().put(_var, rowData);
+    }
   }
 
   public int getRowCount()

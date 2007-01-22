@@ -46,7 +46,8 @@ import java.lang.reflect.Method;
  * a[b]
  * </pre>
  */
-public class ArrayResolverExpr extends Expr {
+public class ArrayResolverExpr extends Expr
+{
   private Expr _left;
   private Expr _right;
   
@@ -188,9 +189,17 @@ public class ArrayResolverExpr extends Expr {
       throw new ELException(L.l("'{0}' is an illegal method expression.",
 				toString()));
 
-    return new MethodInfo(_right.evalString(env),
-			  returnType,
+    String name = _right.evalString(env);
+
+    try {
+      Method method = base.getClass().getMethod(name, argTypes);
+      
+      return new MethodInfo(_right.evalString(env),
+			    method.getReturnType(),
 			  argTypes);
+    } catch (NoSuchMethodException e) {
+      throw new javax.el.MethodNotFoundException(e);
+    }
   }
 
   /**
@@ -207,7 +216,7 @@ public class ArrayResolverExpr extends Expr {
     Object base = _left.getValue(env);
 
     if (base == null)
-      throw new ELException(L.l("'{0}' is an illegal method expression.",
+      throw new javax.el.MethodNotFoundException(L.l("'{0}' is an illegal method expression.",
 				toString()));
 
     String name = _right.evalString(env);
@@ -217,7 +226,7 @@ public class ArrayResolverExpr extends Expr {
 
       return method.invoke(base, args);
     } catch (NoSuchMethodException e) {
-      throw new ELException(e);
+      throw new javax.el.MethodNotFoundException(e);
     } catch (IllegalAccessException e) {
       throw new ELException(e);
     } catch (InvocationTargetException e) {

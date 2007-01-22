@@ -32,6 +32,7 @@ import java.util.*;
 
 import javax.el.*;
 import javax.faces.context.*;
+import javax.faces.application.*;
 
 public class UISelectOne extends UIInput
 {
@@ -51,5 +52,33 @@ public class UISelectOne extends UIInput
   public String getFamily()
   {
     return COMPONENT_FAMILY;
+  }
+
+  public void validateValue(FacesContext context, Object value)
+  {
+    super.validateValue(context, value);
+    
+    if (! isValid())
+      return;
+
+    boolean hasValue = false;
+    for (UIComponent child : getChildren()) {
+      if (child instanceof UISelectItem) {
+	UISelectItem item = (UISelectItem) child;
+
+	if (value.equals(item.getItemValue())) {
+	  hasValue = true;
+	  break;
+	}
+      }
+    }
+
+    if (! hasValue) {
+      FacesMessage msg = new FacesMessage(INVALID_MESSAGE_ID);
+      
+      context.addMessage(getClientId(context), msg);
+      
+      setValid(false);
+    }
   }
 }
