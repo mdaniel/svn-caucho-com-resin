@@ -9,6 +9,7 @@
   </header>
 
   <body>
+    <localtoc/>
 
     <summary/>
 
@@ -104,6 +105,50 @@ You should see:
 <results>
  Hello, World
 </results>
+
+</s1>
+
+<s1 title="Advanced Users">
+
+<p>The first argument of a Java function may be the <code>Env</code>.  The <code>Env</code> provides access to Quercus resources like printing to the browser and retrieving a PHP ini value.  For the API of <code>Env</code>, refer to the Quercus javadoc.</p>
+
+<example>
+
+package example;
+
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.module.AbstractQuercusModule;
+ 
+public class HelloModule extends AbstractQuercusModule {
+   /*
+   ** Notice the careful use of the naming
+   ** convention hello_test.  This is done
+   ** in order to prevent name collisions
+   ** among different libraries.
+   **
+   ** @param env provides access to Quercus environment resources
+   ** @param name
+   */
+   public String hello_test(Env env, String name)
+   {
+     env.println("inside HelloModule->hello_test()");
+     return "Hello, " + name;
+   }
+}
+
+</example>
+
+<p>Now <code>hello_test</code> will print "inside HelloModule->hello_test()" to the browser before returning.</p>
+
+</s1>
+
+<s1 title="Java Function Arguments/Return Marshaling">
+
+<p>Quercus does marshaling to and fro Quercus Values and Java objects.  If a Java function requires a String, Quercus will automatically convert the internal Quercus StringValue to a String.  If a Java function returns an <code>int</code>, Quercus will create a Quercus LongValue for it.</p>
+
+<p>For other Java Objects like <code>java.util.Data</code> that are returned to PHP, Quercus puts them into wrappers to expose their public methods and members to the PHP script.  Java Collection, List, and Map instances have the additional ability to be used within a PHP script like any other PHP array.</p>
+
+<p>For more information, see <a href="../../doc/quercus-java-interface.xtp">Java Interface</a>.</p>
 
 </s1>
 

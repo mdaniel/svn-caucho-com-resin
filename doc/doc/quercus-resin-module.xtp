@@ -157,6 +157,30 @@ resin_thread_dump();
 
 </defun>
 
+<defun title="resin_call_stack">
+
+<p>Returns an array containing the current PHP function call stack.</p>
+
+<example title="resin_call_stack">
+&lt;?php
+
+function foo()
+{
+  bar();
+}
+
+function bar()
+{
+  var_dump(resin_call_stack());
+}
+
+foo();
+
+?>
+</example>
+
+</defun>
+
 <defun title="resin_var_dump">
 
 <p>Produce a var_dump to the logs.  The log is at INFO level.</p>

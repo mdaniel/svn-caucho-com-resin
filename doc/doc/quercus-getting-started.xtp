@@ -106,7 +106,7 @@
 
 </s1>
 
-<s1 title="Using Databases and JNDI">
+<s1 title="Using Databases">
 
 <p>JDBC drivers are required to use databases in Quercus.  There are JDBC drivers for MySQL, Oracle, SQLite, and many other database engines.  The desired JDBC driver should be downloaded into Resin's <code>lib</code> directory.  Resin will automatically load jars in the <code>lib</code> directory upon startup.</p>
 
@@ -128,11 +128,17 @@
 
 </s1>
 
+<s1 title="JNDI">
+
+<p><code>jndi_lookup()</code> is a Quercus-only function that can be called to retrieve JNDI objects.  It is useful in a <a href="soa.xtp">SOA (Service Oriented Architecture)</a> system to locate a Java service.</p>
+
+</s1>
+
 <s1 title="Adding PHP Functions by Creating a Quercus Module">
 
 <p>The core PHP functions are implemented inside Quercus modules.  Quercus modules are the Java equivalent of PHP modules.  </p>
 
-<p>All Quercus Modules need to implement AbstractQuercusModule.  Functions defined in your modules is callable from a PHP script by calling just the function name.  So the function names need to be distinct, though Quercus does support function overloading (for Java functions only).</p>
+<p>All Quercus Modules need to implement AbstractQuercusModule.  Functions defined in your modules are callable from within PHP script by using just the function name.  Function names need to be distinct in order to prevent name collisions, though Quercus does support function overloading (for Java functions only).</p>
 
 <p>A typical Quercus Module looks like:</p>
 
@@ -210,22 +216,28 @@ public class HelloModule extends AbstractQuercusModule
 
 <p>Quercus does marshaling to and fro Quercus Values and Java objects.  If a Java function requires a String, Quercus will automatically convert the internal Quercus StringValue to a String.  If a Java function returns an <code>int</code>, Quercus will create a Quercus LongValue for it.</p>
 
-<p>For Java Objects like <code>java.util.Data</code>, Quercus puts them into wrappers to expose their public methods and members to the PHP script.  Java Collection, List, and Map instances have the additional ability to be used within a PHP script like any other PHP array.</p>
+<p>For other Java Objects like <code>java.util.Data</code> that are returned to PHP, Quercus puts them into wrappers to expose their public methods and members to the PHP script.  Java Collection, List, and Map instances have the additional ability to be used within a PHP script like any other PHP array.</p>
 
 <p>For more information, see <a href="quercus-java-interface.xtp">Java Interface</a>.</p>
 
 </s1>
 
-<s1 title="Debugging in Quercus">
+<s1 title="Quercus-specific Functions">
 
-<p>The following functions can be called from within PHP scripts:</p>
+<p>Quercus has several Quercus-only PHP functions for debugging and Java interfacing (JNDI, JMS, and JMX).  For more information, see <a href="quercus-resin-module.xtp">Resin PHP Functions</a>.</p>
+
+<p>The list of debugging functions are below:</p>
+
+<s2 title="Debugging Functions">
 
 <ol>
 <li>resin_var_dump($a) - dumps the argument to standard out</li>
 <li>resin_call_stack() - returns an array containing the PHP function call stack.</li>
-<li>resin_debug($a) - logs the argument into Resin's log</li>
+<li>resin_debug($a) - logs the argument into Resin's log at the INFO level</li>
 <li>resin_thread_dump() - dumps the Java stack to standard out</li>
 </ol>
+
+</s2>
 
 </s1>
 
