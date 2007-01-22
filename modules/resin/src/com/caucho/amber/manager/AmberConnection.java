@@ -2278,7 +2278,20 @@ public class AmberConnection
     public void commit()
     {
       try {
-        AmberConnection.this.commit();
+        // jpa/11a7
+        AmberConnection.this.beforeCompletion();
+
+        // jpa/11a7 AmberConnection.this.commit();
+        if (AmberConnection.this._conn != null) {
+          AmberConnection.this._conn.commit();
+        }
+
+        // jpa/11a7
+        AmberConnection.this.afterCompletion(Status.STATUS_COMMITTED);
+
+        if (AmberConnection.this._conn != null) {
+          closeConnectionImpl();
+        }
       } catch (SQLException e) {
         throw new PersistenceException(e);
       }
