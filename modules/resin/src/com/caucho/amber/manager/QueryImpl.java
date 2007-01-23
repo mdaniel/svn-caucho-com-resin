@@ -562,10 +562,16 @@ public class QueryImpl implements Query {
 
       // jpa/141i
       boolean valueIsNumber = value instanceof Number;
-      boolean typeIsNumber = arg.getType().isNumeric();
 
-      if (valueIsNumber && ! typeIsNumber)
-        throw new IllegalArgumentException(L.l("Type mismatch for parameter index '{0}'. Value '{1}' is not valid.", index, value));
+      if (valueIsNumber) {
+        // jpa/0w20: type is null.
+        if (arg.getType() != null) {
+          boolean typeIsNumber = arg.getType().isNumeric();
+
+          if (! typeIsNumber)
+            throw new IllegalArgumentException(L.l("Type mismatch for parameter index '{0}'. Value '{1}' is not valid.", index, value));
+        }
+      }
 
       if (value instanceof Byte)
         _userQuery.setByte(index, ((Byte) value).byteValue());

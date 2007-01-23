@@ -269,6 +269,13 @@ public class Table {
   {
     assert(! _incomingLinks.contains(link));
 
+    // XXX: jpa/0j5e, jpa/0s2d
+    for (LinkColumns l : _incomingLinks) {
+      if (l.getSourceTable().equals(link.getSourceTable()) &&
+          l.getTargetTable().equals(link.getTargetTable()))
+        return;
+    }
+
     _incomingLinks.add(link);
   }
 
