@@ -796,10 +796,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("  isDirty = true;");
     }
 
-    out.println("__caucho_session.preUpdate((com.caucho.amber.entity.Entity) this);");
-
-    generateCallbacks(out, "this", _relatedType.getPreUpdateCallbacks());
-
     out.println();
     out.println("__caucho_flush_callback();");
 
@@ -812,6 +808,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
     //  out.println("if (! (isDirty || " + version.generateIsNull() + "))");
     // }
     out.println("  return true;");
+
+    // jpa/0r10
+    out.println("__caucho_session.preUpdate((com.caucho.amber.entity.Entity) this);");
+
+    // jpa/0r10
+    generateCallbacks(out, "this", _relatedType.getPreUpdateCallbacks());
 
     out.println("com.caucho.util.CharBuffer cb = new com.caucho.util.CharBuffer();");
 

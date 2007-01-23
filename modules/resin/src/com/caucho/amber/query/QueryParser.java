@@ -261,38 +261,56 @@ public class QueryParser {
 
     try {
       Connection conn = null;
+      Statement stmt = null;
 
       try {
         DataSource ds = amberPersistenceUnit.getDataSource();
         conn = ds.getConnection();
 
-        Statement stmt = conn.createStatement();
+        stmt = conn.createStatement();
+
+        ResultSet rs = null;
 
         try {
           String sql = "select position('a' in 'abc')";
 
-          ResultSet rs = stmt.executeQuery(sql);
-          rs.close();
+          rs = stmt.executeQuery(sql);
 
         } catch (SQLException e) {
           _isDerbyDBMS = true;
           log.log(Level.FINER, e.toString(), e);
+        } finally {
+          ResultSet rsToClose = rs;
+
+          rs = null;
+
+          if (rsToClose != null)
+            rsToClose.close();
         }
 
         try {
           String sql = "select false";
 
-          ResultSet rs = stmt.executeQuery(sql);
-          rs.close();
+          rs = stmt.executeQuery(sql);
 
           _isPostgresDBMS = true;
 
         } catch (SQLException e) {
           log.log(Level.FINER, e.toString(), e);
+        } finally {
+          ResultSet rsToClose = rs;
+
+          rs = null;
+
+          if (rsToClose != null)
+            rsToClose.close();
         }
       } catch (Exception e) {
         log.log(Level.WARNING, e.toString(), e);
       } finally {
+        if (stmt != null)
+          stmt.close();
+
         if (conn != null)
           conn.close();
       }
