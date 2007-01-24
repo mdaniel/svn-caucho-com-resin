@@ -207,7 +207,7 @@ public class OrExpr extends AbstractAmberExpr {
   public void setInternalArgType(AmberExpr other)
   {
     for (int i = 0; i < _components.size(); i++)
-      setInternalArgType(other);
+      _components.get(i).setInternalArgType(other);
   }
 
   //
