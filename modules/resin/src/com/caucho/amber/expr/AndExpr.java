@@ -163,7 +163,7 @@ public class AndExpr extends AbstractAmberExpr {
   {
     for (int i = 0; i < _components.size(); i++) {
       if (_components.get(i).exists(from))
-	return true;
+        return true;
     }
 
     return false;
@@ -226,6 +226,15 @@ public class AndExpr extends AbstractAmberExpr {
     }
 
     cb.append(')');
+  }
+
+  /**
+   * Binds the argument type based on another expr.
+   */
+  public void setInternalArgType(AmberExpr other)
+  {
+    for (int i = 0; i < _components.size(); i++)
+      setInternalArgType(other);
   }
 
   //

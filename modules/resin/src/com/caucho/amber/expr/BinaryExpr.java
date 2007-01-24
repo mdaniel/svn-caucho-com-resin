@@ -242,18 +242,11 @@ public class BinaryExpr extends AbstractAmberExpr {
   {
     cb.append('(');
 
-    ArgExpr arg;
-
-    if ((_left instanceof ArgExpr) &&
-        (_right instanceof AbstractAmberExpr)) {
-      arg = (ArgExpr) _left;
-      arg.setType(((AbstractAmberExpr) _right).getType());
-    }
-
-    if ((_right instanceof ArgExpr) &&
-        (_left instanceof AbstractAmberExpr)) {
-      arg = (ArgExpr) _right;
-      arg.setType(((AbstractAmberExpr) _left).getType());
+    if ((QueryParser.EQ <= _token) &&
+        (QueryParser.GE >= _token)) {
+      // jpa/10e7
+      _left.setInternalArgType(_right);
+      _right.setInternalArgType(_left);
     }
 
     if (select)

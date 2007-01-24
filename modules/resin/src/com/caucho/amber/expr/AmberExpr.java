@@ -141,4 +141,9 @@ public interface AmberExpr {
   public EntityItem findItem(AmberConnection aConn,
                              ResultSet rs, int index)
     throws SQLException;
+
+  /**
+   * Binds the argument type based on another expr.
+   */
+  public void setInternalArgType(AmberExpr otherExpr);
 }

@@ -201,6 +201,15 @@ public class OrExpr extends AbstractAmberExpr {
     }
   }
 
+  /**
+   * Binds the argument type based on another expr.
+   */
+  public void setInternalArgType(AmberExpr other)
+  {
+    for (int i = 0; i < _components.size(); i++)
+      setInternalArgType(other);
+  }
+
   //
   // private
 

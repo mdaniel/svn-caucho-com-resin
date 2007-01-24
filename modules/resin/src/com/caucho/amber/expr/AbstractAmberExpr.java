@@ -197,4 +197,16 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   {
     return getType().findItem(aConn, rs, index);
   }
+
+  /**
+   * Binds the argument type based on another expr.
+   */
+  public void setInternalArgType(AmberExpr other)
+  {
+    if ((this instanceof ArgExpr) &&
+        (other instanceof AbstractAmberExpr)) {
+      ArgExpr arg = (ArgExpr) this;
+      arg.setType(((AbstractAmberExpr) other).getType());
+    }
+  }
 }

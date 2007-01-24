@@ -486,7 +486,9 @@ public class QueryImpl implements Query {
 
     for (int i=0; i < n; i++) {
       if (mapping.get(i).equals(name)) {
-        setParameter(i+1, value);
+        // jpa/10ee
+        ArgExpr args[] = _userQuery.getQuery().getArgList();
+        setInternalParameter(args[i], i+1, value);
         found = true;
       }
     }
@@ -550,58 +552,12 @@ public class QueryImpl implements Query {
    */
   public Query setParameter(int index, Object value)
   {
-    try {
+    // jpa/141h
+    ArgExpr arg = checkParameterIndex(index);
 
-      // jpa/141h
-      ArgExpr arg = checkParameterIndex(index);
+    setInternalParameter(arg, index, value);
 
-      if (value == null) {
-        _userQuery.setNull(index, java.sql.Types.JAVA_OBJECT);
-        return this;
-      }
-
-      // jpa/141i
-      boolean valueIsNumber = value instanceof Number;
-
-      if (valueIsNumber) {
-        // jpa/0w20: type is null.
-        if (arg.getType() != null) {
-          boolean typeIsNumber = arg.getType().isNumeric();
-
-          if (! typeIsNumber)
-            throw new IllegalArgumentException(L.l("Type mismatch for parameter index '{0}'. Value '{1}' is not valid.", index, value));
-        }
-      }
-
-      if (value instanceof Byte)
-        _userQuery.setByte(index, ((Byte) value).byteValue());
-      if (value instanceof Short)
-        _userQuery.setShort(index, ((Short) value).shortValue());
-      if (value instanceof Integer)
-        _userQuery.setInt(index, ((Integer) value).intValue());
-      if (value instanceof Long)
-        _userQuery.setLong(index, ((Long) value).longValue());
-      if (value instanceof Float)
-        _userQuery.setFloat(index, ((Float) value).floatValue());
-      if (value instanceof Double) // jpa/141a
-        _userQuery.setDouble(index, ((Double) value).doubleValue());
-      else if (value instanceof Character)
-        _userQuery.setString(index, value.toString());
-      else if (value instanceof Entity) {
-        // XXX: needs to handle Compound PK
-
-        Object pk = ((Entity) value).__caucho_getPrimaryKey();
-
-        _userQuery.setObject(index, pk);
-      }
-      else {
-        _userQuery.setObject(index, value);
-      }
-
-      return this;
-    } catch (IndexOutOfBoundsException e) {
-      throw new IllegalArgumentException(L.l("Parameter index '{0}' is not valid for setParameter()", index));
-    }
+    return this;
   }
 
   /**
@@ -906,5 +862,62 @@ public class QueryImpl implements Query {
     }
 
     throw new IllegalArgumentException(L.l("Parameter index '{0}' is invalid for query {1}", index, _userQuery.getQuery()));
+  }
+
+  /**
+   * Sets an indexed parameter.
+   */
+  private Query setInternalParameter(ArgExpr arg,
+                                     int index,
+                                     Object value)
+  {
+    try {
+      if (value == null) {
+        _userQuery.setNull(index, java.sql.Types.JAVA_OBJECT);
+        return this;
+      }
+
+      // jpa/141i
+      boolean valueIsNumber = value instanceof Number;
+
+      if (valueIsNumber) {
+        // jpa/0w20: type is null.
+        if (arg.getType() != null) {
+          boolean typeIsNumber = arg.getType().isNumeric();
+
+          if (! typeIsNumber)
+            throw new IllegalArgumentException(L.l("Type mismatch for parameter index '{0}'. Value '{1}' for type '{2}' is not valid in query '{3}'", index, value, arg.getType(), _userQuery.getQuery().getSQL()));
+        }
+      }
+
+      if (value instanceof Byte)
+        _userQuery.setByte(index, ((Byte) value).byteValue());
+      if (value instanceof Short)
+        _userQuery.setShort(index, ((Short) value).shortValue());
+      if (value instanceof Integer)
+        _userQuery.setInt(index, ((Integer) value).intValue());
+      if (value instanceof Long)
+        _userQuery.setLong(index, ((Long) value).longValue());
+      if (value instanceof Float)
+        _userQuery.setFloat(index, ((Float) value).floatValue());
+      if (value instanceof Double) // jpa/141a
+        _userQuery.setDouble(index, ((Double) value).doubleValue());
+      else if (value instanceof Character)
+        _userQuery.setString(index, value.toString());
+      else if (value instanceof Entity) {
+        // XXX: needs to handle Compound PK
+
+        Object pk = ((Entity) value).__caucho_getPrimaryKey();
+
+        _userQuery.setObject(index, pk);
+      }
+      else {
+        _userQuery.setObject(index, value);
+      }
+
+      return this;
+    } catch (IndexOutOfBoundsException e) {
+      throw new IllegalArgumentException(L.l("Parameter index '{0}' is not valid for setParameter()", index));
+    }
   }
 }
