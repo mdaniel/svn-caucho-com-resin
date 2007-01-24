@@ -1493,6 +1493,14 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     _isHeaderWritten = isWritten;
   }
+
+  /**
+   * Returns true if the headers have been written.
+   */
+  public void clearHeaderWritten()
+  {
+    _isHeaderWritten = false;
+  }
   
   /**
    * Writes the continue

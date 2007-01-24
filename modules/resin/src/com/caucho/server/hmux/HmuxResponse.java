@@ -65,6 +65,15 @@ public class HmuxResponse extends AbstractHttpResponse {
       return ((AbstractHttpRequest) _request).isTop();
     }
   }
+
+  /**
+   * Returns true if the headers have been written.
+   */
+  @Override
+  public void clearHeaderWritten()
+  {
+    // server/265a
+  }
   
   protected boolean writeHeadersInt(WriteStream os, int length)
     throws IOException

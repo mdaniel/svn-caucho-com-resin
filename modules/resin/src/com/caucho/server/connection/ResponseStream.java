@@ -196,7 +196,7 @@ class ResponseStream extends ToByteResponseStream {
       // jsp/15la
       _isFirst = true;
       _bufferStartOffset = 0;
-      _response.setHeaderWritten(false);
+      _response.clearHeaderWritten();
     }
 
     _next.setBufferOffset(_bufferStartOffset);
