@@ -201,7 +201,8 @@ public class EmbeddableComponent extends ClassComponent {
   private void generateFields(JavaWriter out)
     throws IOException
   {
-    if (_embeddableType.isIdClass())
+    // jpa/0u22
+    if (_embeddableType.isIdClass() && ! _embeddableType.isFieldAccess())
       return;
 
     ArrayList<AmberField> fields = _embeddableType.getFields();

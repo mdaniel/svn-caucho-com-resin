@@ -100,7 +100,7 @@ public class GeneratorTableType extends Type {
   {
     return _valueColumn;
   }
-  
+
   /**
    * Creates a new generator.
    */
@@ -110,8 +110,8 @@ public class GeneratorTableType extends Type {
       AmberTableGenerator gen = _genMap.get(name);
 
       if (gen == null) {
-	gen = new AmberTableGenerator(getAmberManager(), this, name);
-	_genMap.put(name, gen);
+        gen = new AmberTableGenerator(getAmberManager(), this, name);
+        _genMap.put(name, gen);
       }
 
       return gen;
@@ -125,21 +125,21 @@ public class GeneratorTableType extends Type {
     throws ConfigException
   {
     Column keyColumn = getTable().createColumn(_keyColumn,
-					       StringType.create());
+                                               StringType.create());
     keyColumn.setPrimaryKey(true);
     keyColumn.setLength(254);
 
     Column valueColumn = getTable().createColumn(_valueColumn,
-						 LongType.create());
+                                                 LongType.create());
 
     if (getAmberManager().getCreateDatabaseTables())
       getTable().createDatabaseTable(getAmberManager());
 
     for (AmberTableGenerator gen : _genMap.values()) {
       try {
-	gen.init(getAmberManager());
+        gen.init(getAmberManager());
       } catch (SQLException e) {
-	throw new ConfigException(e);
+        throw new ConfigException(e);
       }
     }
   }

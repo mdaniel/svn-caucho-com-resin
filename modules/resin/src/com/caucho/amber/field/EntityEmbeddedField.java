@@ -211,9 +211,13 @@ public class EntityEmbeddedField extends AbstractField {
     out.println("{");
     out.pushDepth();
 
-    out.println("if (__caucho_session != null)");
-    out.println("  __caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
-    out.println();
+    // XXX: must not load the entity to return the pk. Avoids StackOverflow.
+    if (! (this instanceof EmbeddedIdField)) {
+      out.println("if (__caucho_session != null)");
+      out.println("  __caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
+      out.println();
+    }
+
     out.println("return " + generateSuperGetter() + ";");
 
     out.popDepth();

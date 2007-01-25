@@ -324,11 +324,28 @@ public class AmberConnection
         }
         else {
           try {
-            // new entity instance
-            persist(entity);
+            Entity managedEntity = null;
+
+            try {
+              managedEntity = (Entity) load(entity.getClass(),
+                                            entity.__caucho_getPrimaryKey());
+            } catch (AmberObjectNotFoundException e) {
+              // JPA: should not throw at all, returns null only.
+            }
+
+            if (managedEntity == null) {
+              // new entity instance
+              persist(entity);
+            }
+            else {
+              // jpa/0ga3: existing entity
+              entity.__caucho_copyTo(managedEntity, this);
+
+              entityT = (T) managedEntity;
+            }
           } catch (Exception e) {
             if (e.getCause() instanceof SQLException) {
-              // OK: jpa/0ga3, entity exists in the database
+              // OK: entity exists in the database
               log.log(Level.FINER, e.toString(), e);
             }
             else {
@@ -818,10 +835,14 @@ public class AmberConnection
     entity = getEntity(cl.getName(), key);
 
     if (entity != null) {
-      // jpa/0j5f
-      setTransactionalState(entity);
+      if (! isInTransaction())
+        return entity;
 
-      return entity;
+      // jpa/0g0k setTransactionalState(entity);
+      if (entity.__caucho_getEntityState() == Entity.P_TRANSACTIONAL)
+        return entity;
+
+      // jpa/0j5f
     }
 
     AmberEntityHome entityHome = _persistenceUnit.getEntityHome(cl.getName());
@@ -2222,7 +2243,12 @@ public class AmberConnection
     int state = instance.__caucho_getEntityState();
 
     if (state == Entity.TRANSIENT) {
-      createInternal(instance);
+      try {
+        createInternal(instance);
+      } catch (SQLException e) {
+        // jpa/0ga3
+        throw new EntityExistsException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", instance.getClass().getName(), instance.__caucho_getPrimaryKey(), state));
+      }
     }
     else if (state >= Entity.P_DELETING) {
       // removed entity instance, reset state and persist.

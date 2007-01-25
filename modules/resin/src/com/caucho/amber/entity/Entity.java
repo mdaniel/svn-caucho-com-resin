@@ -170,9 +170,14 @@ public interface Entity extends MappedSuperclass
     throws SQLException;
 
   /**
-   * Creates a new instance based the current entity
+   * Creates a new instance based on the current entity.
    */
   public Entity __caucho_copy(AmberConnection aConn, EntityItem cacheItem);
+
+  /**
+   * Copies this entity state to an existing entity.
+   */
+  public void __caucho_copyTo(Entity targetEntity, AmberConnection aConn);
 
   /**
    * Retrieves data from the data store.

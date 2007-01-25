@@ -1437,24 +1437,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println(getClassName() + " o = new " + getClassName() + "();");
 
-    out.println("o.__caucho_home = __caucho_home;");
     out.println("o.__caucho_item = item;");
-
-    // jpa/0ge6: MappedSuperclass
-    if (_relatedType.getId() != null) {
-      ArrayList<IdField> keys = _relatedType.getId().getKeys();
-
-      for (int i = 0; i < keys.size(); i++) {
-        IdField key = keys.get(i);
-
-        out.println(key.generateSet("o", key.generateGet("super")) + ";");
-      }
-    }
-
-    for (int i = 0; i <= _relatedType.getLoadGroupIndex(); i++) {
-      // jpa/0l02
-      _relatedType.generateCopyLoadObject(out, "o", "super", i);
-    }
+    out.println();
+    out.println("this.__caucho_copyTo((com.caucho.amber.entity.Entity) o, aConn);");
 
     out.println("o.__caucho_session = aConn;");
     out.println("o.__caucho_state = __caucho_state;"); // com.caucho.amber.entity.Entity.P_NON_TRANSACTIONAL;");
@@ -1482,6 +1467,35 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println();
     out.println("return (com.caucho.amber.entity.Entity) o;");
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public void __caucho_copyTo(com.caucho.amber.entity.Entity targetEntity,");
+    out.println("                            com.caucho.amber.manager.AmberConnection aConn)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println(getClassName() + " o = (" + getClassName() + ") targetEntity;");
+
+    out.println("o.__caucho_home = __caucho_home;");
+
+    // jpa/0ge6: MappedSuperclass
+    if (_relatedType.getId() != null) {
+      ArrayList<IdField> keys = _relatedType.getId().getKeys();
+
+      for (int i = 0; i < keys.size(); i++) {
+        IdField key = keys.get(i);
+
+        out.println(key.generateSet("o", key.generateGet("super")) + ";");
+      }
+    }
+
+    for (int i = 0; i <= _relatedType.getLoadGroupIndex(); i++) {
+      // jpa/0l02
+      _relatedType.generateCopyLoadObject(out, "o", "super", i);
+    }
 
     out.popDepth();
     out.println("}");

@@ -1070,6 +1070,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       gen = genTable.createGenerator(name);
 
+      // jpa/0g60
+      genTable.init();
+
       persistenceUnit.putTableGenerator(name, gen);
     }
 
