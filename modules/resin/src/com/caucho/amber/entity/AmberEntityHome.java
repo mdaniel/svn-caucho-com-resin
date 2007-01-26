@@ -390,7 +390,7 @@ public class AmberEntityHome {
             return null;
 
           // ejb/0604
-          throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
+          throw new AmberObjectNotFoundException("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]");
         }
 
         if (isLoad) {
@@ -401,11 +401,27 @@ public class AmberEntityHome {
         item = _manager.putEntity(getRootType(), key, item);
       }
       else if (isLoad) {
+        if (aConn.isInTransaction()) {
+          if (item != null) {
+            String className = item.getEntity().getClass().getName();
+
+            int index = aConn.getTransactionEntity(className, key);
+
+            if (index < 0) {
+              // jpa/0g0k
+              item.getEntity().__caucho_expire();
+            }
+          }
+        }
+
         item.loadEntity(0, preloadedProperties);
       }
 
-      // jpa/0ga8
-      aConn.setTransactionalState(item.getEntity());
+      // XXX: jpa/0s2j
+      if (item != null) {
+        // jpa/0ga8
+        aConn.setTransactionalState(item.getEntity());
+      }
 
       return item;
     } catch (Exception e) {

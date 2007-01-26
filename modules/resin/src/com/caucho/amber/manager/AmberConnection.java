@@ -308,6 +308,8 @@ public class AmberConnection
   public <T> T merge(T entityT)
   {
     try {
+      if (entityT == null)
+        return null;
 
       checkEntityType(entityT, "merge");
 
@@ -316,6 +318,11 @@ public class AmberConnection
       Entity entity = (Entity) entityT;
 
       int state = entity.__caucho_getEntityState();
+
+      log.finest(L.l("merge(class: '{0}' PK: '{1}' state: '{2}')",
+                     entity.getClass().getName(),
+                     entity.__caucho_getPrimaryKey(),
+                     state));
 
       if (state == com.caucho.amber.entity.Entity.TRANSIENT) {
         if (contains(entity)) {
@@ -359,7 +366,8 @@ public class AmberConnection
         throw new IllegalArgumentException(L.l("Merge operation cannot be applied to a removed entity instance"));
       }
       else {
-        // managed entity instance: ignored.
+        // jpa/0s2k
+        setTransactionalState(entity);
 
         // cascade children
         entity.__caucho_cascadePrePersist(this);
@@ -1161,17 +1169,17 @@ public class AmberConnection
     return null;
   }
 
-  private Entity getTransactionEntity(String className, Object key)
+  public int getTransactionEntity(String className, Object key)
   {
     for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
 
       if (entity.__caucho_match(className, key)) {
-        return entity;
+        return i;
       }
     }
 
-    return null;
+    return -1;
   }
 
   /**
@@ -1192,11 +1200,11 @@ public class AmberConnection
 
     // jpa/0g06
     if (_isInTransaction) {
-      oldEntity = getTransactionEntity(entity.getClass().getName(),
+      int index = getTransactionEntity(entity.getClass().getName(),
                                        entity.__caucho_getPrimaryKey());
 
       // jpa/0s2d: if (! _txEntities.contains(entity)) {
-      if (oldEntity == null) {
+      if (index < 0) {
         _txEntities.add(entity);
         added = true;
       }
@@ -1359,6 +1367,15 @@ public class AmberConnection
     // jpa/0gh0
     for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
+
+      EntityType entityType = entity.__caucho_getEntityType();
+      Object key = entity.__caucho_getPrimaryKey();
+      EntityItem item = _persistenceUnit.getEntity(entityType, key);
+
+      if (item == null) {
+        // jpa/0ga8: entity has been removed and DELETE SQL was already flushed.
+        continue;
+      }
 
       entity.__caucho_flush();
     }
@@ -1743,8 +1760,19 @@ public class AmberConnection
 
     addCompletion(new RowInvalidateCompletion(table.getName(), key));
 
-    if (! _txEntities.contains(entity))
+    // jpa/0ga8, jpa/0s2d if (! _txEntities.contains(entity)) {
+    int index = getTransactionEntity(entity.getClass().getName(),
+                                     entity.__caucho_getPrimaryKey());
+
+
+    if (index < 0) {
       _txEntities.add(entity);
+    }
+    else {
+      // jpa/0s2d
+      Entity oldEntity = _txEntities.remove(index);
+      _txEntities.add(index, entity);
+    }
   }
 
   /**
@@ -2068,6 +2096,7 @@ public class AmberConnection
   }
 
   public void setTransactionalState(Entity entity)
+    throws Exception
   {
     if (isInTransaction()) {
       // jpa/0ga8
