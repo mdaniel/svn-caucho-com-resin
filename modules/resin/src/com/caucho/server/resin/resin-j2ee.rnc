@@ -149,16 +149,22 @@ r_local-home = element local-home {
   r_fully-qualified-class
 }
 
+r_mapped-name = element mapped-name {
+  string
+}
+
 r_message-destination = element message-destination {
-  r_description*,
+  r_description*
 
-  r_display-name*,
+  & r_display-name*
 
-  r_icon*,
+  & r_icon*
 
-  r_message-destination-name,
+  & r_message-destination-name
 
-  r_deployment-extension*
+  & r_deployment-extension*
+
+  & r_mapped-name
 }
 
 r_message-destination-link = element message-destination-link {
@@ -170,17 +176,19 @@ r_message-destination-name = element message-destination-name {
 }
 
 r_message-destination-ref = element message-destination-ref {
-  r_description*,
+  r_description*
 
-  r_message-destination-ref-name,
+  & r_message-destination-ref-name
 
-  r_message-destination-ref-type,
+  & r_message-destination-ref-type
 
-  r_message-destination-ref-usage,
+  & r_message-destination-ref-usage
 
-  r_message-destination-link?,
+  & r_message-destination-link?
 
-  r_deployment-extension*
+  & r_deployment-extension*
+
+  & r_foreign-name?
 }
 
 r_message-destination-ref-name = element message-destination-ref-name {

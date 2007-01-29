@@ -30,7 +30,6 @@ package com.caucho.ejb.cfg;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Signature;
-import com.caucho.j2ee.cfg.J2eeSecurityRole;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -102,45 +101,27 @@ public class EjbJar {
     _config.setBooleanFalse(literal.getFalse());
   }
 
-  public static class Relationships {
+  public static class MethodPermission {
     EjbConfig _config;
 
-    Relationships(EjbConfig config)
+    MethodPermission(EjbConfig config)
     {
       _config = config;
     }
 
-    public CmpRelation createEjbRelation()
+    public void setDescription(String description)
     {
-      return new CmpRelation(_config);
     }
 
-    public void addEjbRelation(CmpRelation rel)
-      throws ConfigException
+    public void setUnchecked(boolean unchecked)
     {
-      _config.addRelation(rel);
-    }
-  }
-
-  public static class AssemblyDescriptor {
-    EjbConfig _config;
-
-    AssemblyDescriptor(EjbConfig config)
-    {
-      _config = config;
     }
 
-    public ContainerTransaction createContainerTransaction()
+    public void setRoleName(String roleName)
     {
-      return new ContainerTransaction(_config);
     }
 
-    public MethodPermission createMethodPermission()
-    {
-      return new MethodPermission(_config);
-    }
-
-    public void addSecurityRole(J2eeSecurityRole securityRole)
+    public void setMethod(MethodSignature method)
     {
     }
   }
@@ -178,28 +159,23 @@ public class EjbJar {
     }
   }
 
-  public static class MethodPermission {
+  public static class Relationships {
     EjbConfig _config;
 
-    MethodPermission(EjbConfig config)
+    Relationships(EjbConfig config)
     {
       _config = config;
     }
 
-    public void setDescription(String description)
+    public CmpRelation createEjbRelation()
     {
-    }
-    
-    public void setUnchecked(boolean unchecked)
-    {
+      return new CmpRelation(_config);
     }
 
-    public void setRoleName(String roleName)
+    public void addEjbRelation(CmpRelation rel)
+      throws ConfigException
     {
-    }
-    
-    public void setMethod(MethodSignature method)
-    {
+      _config.addRelation(rel);
     }
   }
 }

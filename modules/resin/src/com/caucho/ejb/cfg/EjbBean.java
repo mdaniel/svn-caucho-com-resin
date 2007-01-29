@@ -38,6 +38,7 @@ import com.caucho.config.LineConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.PostConstructType;
 import com.caucho.config.types.EjbRef;
+import com.caucho.config.types.MessageDestinationRef;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.amber.AmberConfig;
@@ -679,6 +680,10 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     return new EjbRef(Vfs.lookup(_ejbModuleName));
   }
 
+  public MessageDestinationRef createMessageDestinationRef()
+  {
+    return new MessageDestinationRef(Vfs.lookup(_ejbModuleName));
+  }
   /**
    * Sets the security identity
    */
@@ -2170,4 +2175,5 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   {
     return new ConfigException(msg);
   }
+
 }

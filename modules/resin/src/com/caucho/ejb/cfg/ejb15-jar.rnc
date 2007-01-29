@@ -309,7 +309,9 @@ ejb15_message-destination = element message-destination {
 
   element message-destination-name { string },
 
-  ejb15_deployment-extension*
+  ejb15_deployment-extension*,
+
+  ejb15_mapped-name*
 }
 
 ejb15_message-destination-link

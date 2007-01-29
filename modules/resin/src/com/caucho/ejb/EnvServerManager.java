@@ -35,6 +35,7 @@ import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.admin.EJBAdmin;
 import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.ejb.cfg.MessageDestination;
 import com.caucho.ejb.entity.EntityKey;
 import com.caucho.ejb.entity.EntityServer;
 import com.caucho.ejb.entity.QEntityContext;
@@ -421,6 +422,24 @@ public class EnvServerManager implements EnvironmentListener
   {
     return _serverMap.get(path.getPath() + "#" + ejbName);
    }
+
+  public MessageDestination getMessageDestination(Path path, String name)
+  {
+    // XXX:
+    return null;
+  }
+
+  public MessageDestination getMessageDestination(String name)
+  {
+    for (EjbConfig ejbConfig : _ejbConfigList) {
+      MessageDestination dest = ejbConfig.getMessageDestination(name);
+
+      if (dest != null)
+        return dest;
+    }
+
+    return null;
+  }
 
    /**
     * Adds a new entity.

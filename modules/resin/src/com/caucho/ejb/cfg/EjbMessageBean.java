@@ -71,9 +71,8 @@ public class EjbMessageBean extends EjbBean {
   private int _acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
   private String _selector;
   private String _subscriptionName;
-  private String _destinationType;
-  private String _destinationLink;
   private int _consumerMax = 5;
+  private String _messageDestinationLink;
 
   /**
    * Creates a new message bean configuration.
@@ -116,6 +115,16 @@ public class EjbMessageBean extends EjbBean {
     if (Modifier.isAbstract(ejbClass.getModifiers()))
       throw error(L.l("'{0}' must not be abstract.  Every message-driven bean must be a fully-implemented class.",
 		      ejbClass.getName()));
+
+    // ejb 3.0 simplified section 10.1.3
+    // The name annotation element defaults to the unqualiﬁed name of the bean
+    // class.
+
+    if (getEJBName() == null) {
+      int i = ejbType.lastIndexOf('.');
+
+      setEJBName(ejbType.substring(i + 1));
+    }
 
     JMethod create = getMethod(getEJBClassWrapper(), "ejbCreate", new JClass[] {});
 
@@ -163,21 +172,29 @@ public class EjbMessageBean extends EjbBean {
   }
 
   /**
+   * @deprecated for compat with TCK
+   */
+  public void setMappedName(JndiBuilder destination)
+    throws ConfigException, NamingException
+  {
+    setDestination(destination);
+  }
+
+  /**
    * Sets the JMS destination type.
    */
   public void setMessageDestinationType(String type)
     throws ConfigException, NamingException
   {
-    _destinationType = type;
   }
 
   /**
    * Sets the JMS destination link
    */
-  public void setMessageDestinationLink(String link)
+  public void setMessageDestinationLink(String messageDestinationLink)
     throws ConfigException, NamingException
   {
-    _destinationLink = link;
+    _messageDestinationLink = messageDestinationLink;
   }
 
   /**
@@ -343,18 +360,6 @@ public class EjbMessageBean extends EjbBean {
         && ! type.isAnnotationPresent(MessageDriven.class))
       return;
 
-    // ejb 3.0 simplified section 10.1.3
-    // The name annotation element defaults to the unqualiﬁed name of the bean
-    // class.
-
-    if (getEJBName() == null) {
-      String typeName = type.getName();
-
-      int i = typeName.lastIndexOf('.');
-
-      setEJBName(typeName.substring(i + 1));
-    }
-
     // XXX: annotations in super classes?
 
     JAnnotation messageDriven = type.getAnnotation(javax.ejb.MessageDriven.class);
@@ -387,13 +392,17 @@ public class EjbMessageBean extends EjbBean {
     server.setEJBName(getEJBName());
     server.setMappedName(getMappedName());
 
+
     //Class contextImplClass = javaGen.loadClass(getSkeletonName());
     //server.setContextImplClass(contextImplClass);
     
     server.setContextImplClass(getEJBClass());
+
     server.setDestination(_destination);
+    server.setMessageDestinationLink(_messageDestinationLink);
     server.setConsumerMax(_consumerMax);
-    
+
+
     Class beanClass = javaGen.loadClass(getEJBClass().getName());
 
     Thread thread = Thread.currentThread();
@@ -486,4 +495,5 @@ public class EjbMessageBean extends EjbBean {
       setDestination(destination);
     }
   }
+
 }

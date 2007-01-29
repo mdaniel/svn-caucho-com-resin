@@ -84,6 +84,7 @@ public class EjbConfig {
   private String _booleanFalse = "0";
 
   private boolean _isAllowPOJO;
+  private HashMap<String, MessageDestination> _messageDestinations;
 
   public EjbConfig(EjbServerManager ejbManager)
   {
@@ -238,6 +239,24 @@ public class EjbConfig {
       _pendingBeans.add(bean);
     
     _cfgBeans.put(name, bean);
+  }
+
+  public void addMessageDestination(MessageDestination messageDestination)
+  {
+    if (_messageDestinations == null)
+      _messageDestinations = new HashMap<String, MessageDestination>();
+
+    String name = messageDestination.getMessageDestinationName();
+
+    _messageDestinations.put(name, messageDestination);
+  }
+
+  public MessageDestination getMessageDestination(String name)
+  {
+    if (_messageDestinations == null)
+      return null;
+
+    return _messageDestinations.get(name);
   }
 
   /**

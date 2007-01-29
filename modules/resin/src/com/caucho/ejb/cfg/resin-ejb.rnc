@@ -336,16 +336,18 @@ r_local-home =
   | element local-home { string }
 
 r_message-destination = element message-destination {
-  r_description*,
+  r_description*
 
-  r_display-name*,
+  & r_display-name*
 
-  r_icon*,
+  & r_icon*
 
-  (attribute message-destination-name { string }
-   | element message-destination-name { string }),
+  & (attribute message-destination-name { string }
+   | element message-destination-name { string })
 
-  r_deployment-extension*
+  & r_deployment-extension*
+
+  & r_mapped-name
 }
 
 r_mapped-name =
@@ -355,21 +357,23 @@ r_mapped-name =
 r_message-destination-link = element message-destination-link { j2ee_class }
 
 r_message-destination-ref = element message-destination-ref {
-  r_description*,
+  r_description*
 
-  (attribute message-destination-ref-name { string }
-   | element message-destination-ref-name { string }),
+  & (attribute message-destination-ref-name { string }
+     | element message-destination-ref-name { string })
 
-  r_message-destination-type,
+  & r_message-destination-type
 
-  element message-destination-usage {
-    "Consumes" | "Produces" | "ConsumesProduces"
-  },
+  & element message-destination-usage {
+      "Consumes" | "Produces" | "ConsumesProduces"
+    }
 
-  (attribute message-destination-link { string }
-  | element message-destination-link { string }?),
+  & (attribute message-destination-link { string }
+     | element message-destination-link { string }?)
 
-  r_deployment-extension*
+  & r_deployment-extension*
+
+  & r_foreign-name?
 }
 
 r_message-destination-type = element message-destination-type { string }

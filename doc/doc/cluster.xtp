@@ -57,10 +57,12 @@ at midnight in the local time if the time period is a day or longer.
 </p>
 
 <p>The access log formatting variables follow the Apache variables:</p>
-
+<!-- duplicated in config-log.xtp, cluster.xtp, host-tags.xtp -->
 <deftable>
 <tr><td>%b</td>
     <td>result content length</td></tr>
+<tr><td>%D</td>
+    <td>time taken to complete the request in microseconds (since 3.0.16)</td></tr>
 <tr><td>%h</td>
     <td>remote IP addr</td></tr>
 <tr><td>%{<var>xxx</var>}i</td>
@@ -78,12 +80,18 @@ at midnight in the local time if the time period is a day or longer.
 <tr><td>%{<var>xxx</var>}t</td>
     <td>request date with optional time format string.</td></tr>
 <tr><td>%T</td>
-    <td>time of request in seconds</td></tr>
+    <td>time taken to complete the request in seconds</td></tr>
 <tr><td>%u</td>
     <td>remote user</td></tr>
 <tr><td>%U</td>
     <td>request URI</td></tr>
 </deftable>
+
+<p>The default format is:</p>
+
+<def>
+"%h %l %u %t \"%r\" %&gt;s %b \"%{Referer}i\" \"%{User-Agent}i\""
+</def>
 
 <p>The default format is:</p>
 

@@ -29,7 +29,6 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBServer;
 import com.caucho.naming.Jndi;
@@ -39,8 +38,9 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
-import javax.naming.*;
-import javax.rmi.*;
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.rmi.PortableRemoteObject;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -284,77 +284,87 @@ public class EjbRef implements ObjectProxy {
       _target = lookupByForeignJndi(_foreignName, type);
     }
     else {
-      String archiveName;
-      String ejbName;
+      _target = lookupByLink(_ejbLink, type);
+    }
 
-      int hashIndex = _ejbLink.indexOf('#');
+    if (log.isLoggable(Level.CONFIG))
+      log.log(Level.CONFIG, L.l("{0} resolved", this));
+  }
 
-      if (hashIndex < 0) {
-        archiveName = null;
-        ejbName = _ejbLink;
+  private Object lookupByLink(String link, Class type)
+    throws NamingException
+  {
+    Object target = null;
+
+    String archiveName;
+    String ejbName;
+
+    int hashIndex = link.indexOf('#');
+
+    if (hashIndex < 0) {
+      archiveName = null;
+      ejbName = link;
+    }
+    else {
+      archiveName = link.substring(0, hashIndex);
+      ejbName = link.substring(hashIndex + 1);
+    }
+
+    try {
+      Path path = archiveName == null ? _modulePath : _modulePath.lookup(archiveName);
+
+      EJBServer ejbServer = EJBServer.getLocal();
+      AbstractServer server = null;
+
+      if (ejbServer != null) {
+        server = ejbServer.getServer(path, ejbName);
+
+        if (server == null && archiveName == null)
+          server = ejbServer.getServer(ejbName);
       }
-      else {
-        archiveName = _ejbLink.substring(0, hashIndex);
-        ejbName = _ejbLink.substring(hashIndex + 1);
-      }
 
-      try {
-        Path path = archiveName == null ? _modulePath : _modulePath.lookup(archiveName);
+      if (server != null) {
+        Object localHome = server.getEJBLocalHome();
 
-	EJBServer ejbServer = EJBServer.getLocal();
-        AbstractServer server = null;
+        if (localHome != null)
+          target = localHome;
 
-	if (ejbServer != null) {
-	  server = ejbServer.getServer(path, ejbName);
+        if (target == null) {
+          Object remoteHome = server.getEJBHome();
 
-	  if (server == null && archiveName == null)
-	    server = ejbServer.getServer(ejbName);
-	}
+          if (remoteHome != null)
+            target = remoteHome;
+        }
 
-	if (server != null) {
-          Object localHome = server.getEJBLocalHome();
+        if (target == null)  {
+          log.log(Level.FINE, L.l("no home interface is available for '{0}'", server));
 
-          if (localHome != null)
-            _target = localHome;
-
-          if (_target == null) {
-            Object remoteHome = server.getEJBHome();
-
-            if (remoteHome != null)
-              _target = remoteHome;
-          }
-
-          if (_target == null)  {
-            log.log(Level.FINE, L.l("no home interface is available for '{0}'", server));
-
-            throw new NamingException(L.l("{0} '{1}' ejb bean found with ejb-link '{2}' has no home interface",
-                                          getTagName(), _ejbRefName, _ejbLink));
-          }
-	}
-	else {
-          _target = lookupByForeignJndi(_ejbLink, type);
-	  /*
-	  if (_ejbLink.equals(_ejbRefName))
-	    throw new NamingException(L.l("{0} '{1}' cannot be resolved",
-					  getTagName(), _ejbRefName));
-	  else
-	    throw new NamingException(L.l("{0} '{1}' ejb-link '{2}' not found",
-					  getTagName(), _ejbRefName, _ejbLink));
-	  */
+          throw new NamingException(L.l("{0} '{1}' ejb bean found with ejb-link '{2}' has no home interface",
+                                        getTagName(), _ejbRefName, link));
         }
       }
-      catch (NamingException e) {
-        throw e;
+      else {
+        target = lookupByForeignJndi(_ejbLink, type);
+        /*
+           if (_ejbLink.equals(_ejbRefName))
+             throw new NamingException(L.l("{0} '{1}' cannot be resolved",
+                                           getTagName(), _ejbRefName));
+           else
+             throw new NamingException(L.l("{0} '{1}' ejb-link '{2}' not found",
+                                           getTagName(), _ejbRefName, _ejbLink));
+           */
       }
-      catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
-        throw new NamingException(L.l("{0} '{1}'  ejb-link '{2}' invalid ",
-                                      getTagName(), _ejbRefName, _ejbLink));
-      }
-
-      if (log.isLoggable(Level.CONFIG))
-        log.log(Level.CONFIG, L.l("{0} resolved", this));
     }
+    catch (NamingException e) {
+      throw e;
+    }
+    catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+      throw new NamingException(L.l("{0} '{1}'  ejb-link '{2}' invalid ",
+                                    getTagName(), _ejbRefName, link));
+    }
+
+    return target;
   }
 
   private Object lookupByForeignJndi(String foreignName, Class type)

@@ -37,6 +37,7 @@ import com.caucho.config.types.JndiBuilder;
 import com.caucho.config.types.PathPatternType;
 import com.caucho.config.types.Period;
 import com.caucho.ejb.cfg.EjbMethod;
+import com.caucho.ejb.cfg.MessageDestination;
 import com.caucho.ejb.metadata.Bean;
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.loader.Environment;
@@ -802,9 +803,18 @@ public class EJBServer
    * Return the ejb with the passed path and name.
    */
   public AbstractServer getServer(Path path, String ejbName)
-    throws NameNotFoundException
   {
     return _ejbManager.getServer(path, ejbName);
+  }
+
+  public MessageDestination getMessageDestination(Path path, String name)
+  {
+    return _ejbManager.getMessageDestination(path, name);
+  }
+
+  public MessageDestination getMessageDestination(String name)
+  {
+    return _ejbManager.getMessageDestination(name);
   }
 
   /**

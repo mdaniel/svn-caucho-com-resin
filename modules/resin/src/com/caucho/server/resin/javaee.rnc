@@ -183,7 +183,9 @@ javaee_message-destination = element message-destination {
 
   javaee_description-Group,
 
-  javaee_message-destination-name
+  javaee_message-destination-name,
+
+  javaee_mapped-name?
 }
 
 javaee_message-destination-link = element message-destination-link {

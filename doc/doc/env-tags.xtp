@@ -459,6 +459,38 @@ compiled files.</p>
 <p>The javac configuration is used for JSP, PHP, EJB and
 compiling-loader configuration.</p>
 
+<p>
+The eclipse compiler requires the presence of
+$RESIN_HOME/lib/eclipse-compiler.jar (which is included with Resin). It is a
+very fast compiler that was developed as part of the Eclipse project. 
+</p>
+
+<example title="Eclipse compiler">
+ &lt;javac compiler="eclipse" args="-source 1.5"/&gt;
+</example>
+
+<p>
+The internal compiler requires tools.jar from the JDK installation, so a JDK
+must be used (not a JRE).  Sometimes the internal compiler causes errors,
+creating exceptions or simply hanging and taking up a thread. The solution is
+to change the compiler to use an external compiler. 
+</p>
+
+<example title="Internal compiler">
+ &lt;javac compiler="internal" args=""/&gt;
+</example>
+
+<p>
+The javac compiler is included with the JDK. It executes that same as the
+internal compiler, however it is executed as an external process and is less
+prone to the problems described for the internal compiler.  In resin.conf with
+the javac configuration option: 
+</p>
+
+<example title="javac JDK compiler">
+ &lt;javac compiler="javac" args=""/&gt;
+</example>
+
 <deftable-childtags>
 <tr><td>compiler</td><td>Configures the Java compiler to use.  Since Resin 3.0</td><td>internal
 </td></tr><tr><td>args</td><td>Any additional arguments for the compiler.  Since Resin 3.0</td><td>none

@@ -58,6 +58,8 @@
 
     <mbean>com.caucho.jmx.MBeanConfig</mbean>
 
+    <message-destination-ref>com.caucho.config.types.MessageDestinationRef</message-destination-ref>
+
     <persistent-store>com.caucho.server.cluster.PersistentStoreConfig</persistent-store>
 
     <persistence-manager>com.caucho.amber.cfg.PersistenceManager</persistence-manager>

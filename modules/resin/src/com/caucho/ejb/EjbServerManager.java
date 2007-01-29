@@ -34,15 +34,18 @@ import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.ByteCodeClassMatcher;
 import com.caucho.bytecode.ByteCodeClassScanner;
-import com.caucho.bytecode.*;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JClassLoader;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.admin.EJBAdmin;
-import com.caucho.ejb.cfg.*;
+import com.caucho.ejb.cfg.EjbConfig;
+import com.caucho.ejb.cfg.EjbSessionBean;
+import com.caucho.ejb.cfg.EjbMessageBean;
+import com.caucho.ejb.cfg.MessageDestination;
 import com.caucho.ejb.entity.EntityKey;
 import com.caucho.ejb.entity.EntityServer;
 import com.caucho.ejb.entity.QEntityContext;
-import com.caucho.ejb.metadata.Bean;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.xa.EjbTransactionManager;
 import com.caucho.lifecycle.Lifecycle;
@@ -591,10 +594,14 @@ public class EjbServerManager
 		EjbSessionBean bean = new EjbSessionBean(_ejbConfig, "resin-ejb");
 		bean.setEJBClass(className);
 		_ejbConfig.setBeanConfig(bean.getEJBName(), bean);
-		System.out.println("EJB-CLASS: " + className);
 	      }
+              else if (type.isAnnotationPresent(javax.ejb.MessageDriven.class)) {
+                EjbMessageBean bean = new EjbMessageBean(_ejbConfig, "resin-ejb");
+                bean.setAllowPOJO(true);
+                bean.setEJBClass(className);
+                _ejbConfig.setBeanConfig(bean.getEJBName(), bean);
+              }
 	      else {
-		System.out.println("NO TYPE: " + type);
 	      }
 	    } catch (ConfigException e) {
 	      throw e;
@@ -692,6 +699,16 @@ public class EjbServerManager
   public AbstractServer getServer(Path path, String ejbName)
   {
     return _envServerManager.getServer(path, ejbName);
+  }
+
+  public MessageDestination getMessageDestination(Path path, String name)
+  {
+    return _envServerManager.getMessageDestination(path, name);
+  }
+
+  public MessageDestination getMessageDestination(String name)
+  {
+    return _envServerManager.getMessageDestination(name);
   }
 
   public AmberEntityHome getAmberEntityHome(String name)
@@ -834,6 +851,8 @@ public class EjbServerManager
       else if (annotationName.matches("javax.ejb.Stateful"))
         return true;
       else if (annotationName.matches("javax.ejb.Session"))
+        return true;
+      else if (annotationName.matches("javax.ejb.MessageDriven"))
         return true;
       else
         return false;

@@ -58,8 +58,6 @@ public class JndiInjectProgram extends BuilderProgram {
     try {
       Object value = new InitialContext().lookup(_jndiName);
 
-      ///System.out.println("XXX: inject program for " + _jndiName + " results in " + value);
-
       _method.invoke(bean, value);
     } catch (RuntimeException e) {
       throw e;

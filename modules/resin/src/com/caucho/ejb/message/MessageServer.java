@@ -54,6 +54,7 @@ public class MessageServer extends AbstractServer {
 
   private Connection _connection;
   private Destination _destination;
+  private String _messageDestinationLink;
 
   private String _subscriptionName;
   private String _selector;
@@ -78,6 +79,14 @@ public class MessageServer extends AbstractServer {
   public void setDestination(Destination destination)
   {
     _destination = destination;
+  }
+
+  /**
+   * Sets the message-destination-link, and alternative to setting the destination directly.
+   */
+  public void setMessageDestinationLink(String messageDestinationLink)
+  {
+    _messageDestinationLink = messageDestinationLink;
   }
 
   /**
@@ -130,11 +139,17 @@ public class MessageServer extends AbstractServer {
     if (factory == null)
       factory = _ejbManager.getConnectionFactory();
 
+    if (_destination == null && _messageDestinationLink != null) {
+      _destination = getContainer().getMessageDestination(_messageDestinationLink).getResolvedDestination();
+    }
+
     if (_destination == null)
-      throw new ConfigException(L.l("No destination is configured."));
+      throw new ConfigException(L.l("No destination is configured for {0} '{1}'.",
+                                    "<message-driven>", getEJBName()));
 
     if (_consumerMax <= 0)
-      throw new ConfigException(L.l("No listeners are configured."));
+      throw new ConfigException(L.l("No listeners are configured for {0} '{1}.",
+                                    "<message-driven>", getEJBName()));
 
     if (factory == null)
       throw new ConfigException(L.l("Message beans need a jms-connection-factory.  The ConnectionFactory object must be configured."));
