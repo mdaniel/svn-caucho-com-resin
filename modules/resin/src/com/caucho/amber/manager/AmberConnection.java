@@ -1368,13 +1368,15 @@ public class AmberConnection
     for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
 
-      EntityType entityType = entity.__caucho_getEntityType();
-      Object key = entity.__caucho_getPrimaryKey();
-      EntityItem item = _persistenceUnit.getEntity(entityType, key);
+      // jpa/1500
+      if (entity.__caucho_getEntityState() == Entity.P_DELETED) {
+        EntityType entityType = entity.__caucho_getEntityType();
+        Object key = entity.__caucho_getPrimaryKey();
+        EntityItem item = _persistenceUnit.getEntity(entityType, key);
 
-      if (item == null) {
-        // jpa/0ga8: entity has been removed and DELETE SQL was already flushed.
-        continue;
+        if (item == null)
+          // jpa/0ga8: entity has been removed and DELETE SQL was already flushed.
+          continue;
       }
 
       entity.__caucho_flush();
@@ -2096,7 +2098,6 @@ public class AmberConnection
   }
 
   public void setTransactionalState(Entity entity)
-    throws Exception
   {
     if (isInTransaction()) {
       // jpa/0ga8
