@@ -2074,7 +2074,6 @@ public class AmberConnection
     }
   }
 
-  /*
   public String toString()
   {
     if (_persistenceUnit != null)
@@ -2082,7 +2081,6 @@ public class AmberConnection
     else
       return "AmberConnection[closed]";
   }
-  */
 
   /**
    * Finalizer.
