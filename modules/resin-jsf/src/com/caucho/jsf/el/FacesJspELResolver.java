@@ -30,10 +30,12 @@
 package com.caucho.jsf.el;
 
 import com.caucho.el.AbstractVariableResolver;
-import com.caucho.jsp.el.*;
+import com.caucho.jsf.application.*;
 import com.caucho.jsf.cfg.*;
+import com.caucho.jsp.el.*;
 
 import javax.el.*;
+import javax.faces.component.*;
 import javax.faces.context.*;
 import java.beans.FeatureDescriptor;
 import java.util.*;
@@ -42,10 +44,26 @@ import java.util.*;
  * Variable resolution for JSF variables
  */
 public class FacesJspELResolver extends ELResolver {
-  public static ELResolver RESOLVER = new FacesJspELResolver();
+  private static final ArrayList<FeatureDescriptor> _implicitFeatureDescriptors
+    = new ArrayList<FeatureDescriptor>();
   
   private static HashMap<String,Type> _typeMap
     = new HashMap<String,Type>();
+
+  private ApplicationImpl _app;
+  private ELResolver _managedBeanResolver;
+  private ELResolver _resourceBundleResolver;
+
+  public FacesJspELResolver(ApplicationImpl app)
+  {
+    _app = app;
+
+    FacesContextELResolver facesResolver
+      = (FacesContextELResolver) _app.getELResolver();
+
+    _managedBeanResolver = facesResolver.getManagedBeanResolver();
+    _resourceBundleResolver = facesResolver.getResourceBundleResolver();
+  }
 
   @Override
   public Class<?> getCommonPropertyType(ELContext env,
@@ -74,6 +92,14 @@ public class FacesJspELResolver extends ELResolver {
   {
     ArrayList<FeatureDescriptor> descriptors
       = new ArrayList<FeatureDescriptor>();
+
+    descriptors.addAll(_implicitFeatureDescriptors);
+
+    addDescriptors(descriptors,
+		   _managedBeanResolver.getFeatureDescriptors(env, base));
+
+    addDescriptors(descriptors,
+		   _resourceBundleResolver.getFeatureDescriptors(env, base));
 
     return descriptors.iterator();
   }
@@ -112,8 +138,7 @@ public class FacesJspELResolver extends ELResolver {
   {
     env.setPropertyResolved(false);
 
-    if (base == null
-	&& property instanceof String) {
+    if (base == null && property instanceof String) {
       Type type = _typeMap.get((String) property);
 
       if (type != null) {
@@ -130,6 +155,16 @@ public class FacesJspELResolver extends ELResolver {
 	  }
 	}
       }
+
+      Object value = _managedBeanResolver.getValue(env, base, property);
+
+      if (env.isPropertyResolved())
+	return value;
+
+      value = _resourceBundleResolver.getValue(env, base, property);
+
+      if (env.isPropertyResolved())
+	return value;
     }
     
     return null;
@@ -165,8 +200,6 @@ public class FacesJspELResolver extends ELResolver {
       Type type = _typeMap.get(key);
 
       if (type != null) {
-	env.setPropertyResolved(true);
-
 	throw new PropertyNotWritableException(key);
       }
     }
@@ -177,8 +210,25 @@ public class FacesJspELResolver extends ELResolver {
     VIEW
   };
 
+  private static void addDescriptor(String name, Class type)
+  {
+    FeatureDescriptor desc = new FeatureDescriptor();
+    desc.setName(name);
+    desc.setDisplayName(name);
+    desc.setExpert(false);
+    desc.setHidden(false);
+    desc.setPreferred(true);
+    desc.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME, Boolean.TRUE);
+    desc.setValue(ELResolver.TYPE, type);
+    
+    _implicitFeatureDescriptors.add(desc);
+  }
+
   static {
     _typeMap.put("facesContext", Type.FACES_CONTEXT);
     _typeMap.put("view", Type.VIEW);
+    
+    addDescriptor("facesContext", FacesContext.class);
+    addDescriptor("view", UIViewRoot.class);
   }
 }

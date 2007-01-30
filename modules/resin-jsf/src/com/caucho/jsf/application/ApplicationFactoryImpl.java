@@ -46,7 +46,7 @@ public class ApplicationFactoryImpl extends ApplicationFactory
   {
     if (_application == null) {
       ApplicationImpl app = new ApplicationImpl();
-      app.init();
+      
       _application = app;
     }
     

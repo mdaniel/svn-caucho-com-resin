@@ -29,6 +29,7 @@
 package javax.faces;
 
 import java.lang.reflect.*;
+import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
@@ -115,13 +116,27 @@ public class FactoryFinder
 
   public static void setFactory(String factoryName, String implName)
   {
-    if (_factoryClassMap.get(factoryName) == null)
+    Class factoryClass = _factoryClassMap.get(factoryName);
+    
+    if (factoryClass == null)
       throw new IllegalArgumentException(factoryName + " is an unknown JSF factory");
 
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
     
     synchronized (_factoryNameMap) {
+      HashMap<String,Object> objectMap = _factoryMap.get(loader);
+
+      if (objectMap == null) {
+	objectMap = new HashMap<String,Object>();
+	_factoryMap.put(loader, objectMap);
+      }
+
+      Object oldFactory = objectMap.get(factoryName);
+
+      if (oldFactory == null)
+	oldFactory = getFactory(factoryName);
+      
       HashMap<String,String> map = _factoryNameMap.get(loader);
 
       if (map == null) {
@@ -130,12 +145,14 @@ public class FactoryFinder
       }
 
       map.put(factoryName, implName);
-      
-      HashMap<String,Object> objectMap = _factoryMap.get(loader);
 
-      if (objectMap != null) {
-	objectMap.remove(factoryName);
-      }
+      Object factory = createFactory(implName, factoryClass, oldFactory,
+				     loader);
+
+      if (factory == null)
+	throw new FacesException("No factory found for " + factoryName);
+
+      objectMap.put(factoryName, factory);
     }
   }
 

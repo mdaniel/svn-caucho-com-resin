@@ -314,7 +314,7 @@ class HtmlSelectManyMenuRenderer extends Renderer
       }
     }
 
-    out.writeAttribute("size", String.valueOf(size), "size");
+    out.writeAttribute("size", "1", "size");
 
     if (tabindex != null)
       out.writeAttribute("tabindex", tabindex, "tabindex");

@@ -538,7 +538,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static String phpversion(@Optional String module)
   {
-    return "5.0.4";
+    return "5.1.0";
   }
 
   /**

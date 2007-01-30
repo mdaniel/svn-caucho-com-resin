@@ -29,11 +29,7 @@
 
 package com.caucho.jsp;
 
-import com.caucho.bytecode.ByteCodeParser;
-import com.caucho.bytecode.CodeAttribute;
-import com.caucho.bytecode.CodeVisitor;
-import com.caucho.bytecode.JavaClass;
-import com.caucho.bytecode.JavaMethod;
+import com.caucho.bytecode.*;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
@@ -63,8 +59,11 @@ import java.util.logging.Logger;
  *
  * @see com.caucho.jsp.AnalyzedTag
  */
-public class TagAnalyzer {
-  private static final Logger log = Log.open(TagAnalyzer.class);
+public class TagAnalyzer
+{
+  private static final Logger log
+    = Logger.getLogger(TagAnalyzer.class.getName());
+  
   static final L10N L = new L10N(TagAnalyzer.class);
 
   private HashMap<Class,AnalyzedTag> _analyzedTags =
@@ -330,6 +329,51 @@ public class TagAnalyzer {
     analyzer.complete(tag);
   }
 
+  static IntMethodAnalyzer analyzeIntMethod(JavaClass javaClass,
+					    String name,
+					    String signature)
+  {
+    if (! "()I".equals(signature))
+      return null;
+    
+    JavaMethod method = null;
+
+    while (method == null && javaClass != null) {
+      method = javaClass.findMethod(name, signature);
+
+      if (method == null) {
+	JClass parent = javaClass.getSuperClass();
+
+	if (parent == null || ! (parent instanceof JavaClass))
+	  return null;
+	
+	javaClass = (JavaClass) parent;
+      }
+    }
+
+    if (method == null)
+      return null;
+
+    IntMethodAnalyzer analyzer = new IntMethodAnalyzer();
+
+    CodeAttribute codeAttribute = method.getCode();
+
+    if (codeAttribute == null)
+      return null;
+
+    CodeVisitor visitor = new CodeVisitor(javaClass, codeAttribute);
+    try {
+      visitor.analyze(analyzer);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    if (analyzer.isUnique())
+      return analyzer;
+    else
+      return null;
+  }
+
   static class Analyzer extends com.caucho.bytecode.Analyzer {
     public void analyze(CodeVisitor visitor)
     {
@@ -341,37 +385,34 @@ public class TagAnalyzer {
   }
   
   /**
-   * Callback analyzing the doStartTag method.
+   * Callback analyzing the methods.
    */
-  static class StartAnalyzer extends Analyzer {
-    private boolean _hasSkip;
-    private boolean _hasInclude;
-    private boolean _hasBuffered;
-    private boolean _hasStart;
-
+  static class AbstractTagMethodAnalyzer extends Analyzer {
+    private boolean _hasCode;
+    
     private int _count = 0;
     private int _value = -1;
+
+    protected boolean hasCode()
+    {
+      return _hasCode;
+    }
+
+    protected void setHasCode()
+    {
+      _hasCode = true;
+    }
 
     public void analyze(CodeVisitor visitor)
     {
       int count = _count++;
-      
+
       switch (visitor.getOpcode()) {
       case CodeVisitor.IRETURN:
 	if (count != 1)
-	  _hasStart = true;
+	  _hasCode = true;
 
-	if (_value == Tag.SKIP_BODY)
-	  _hasSkip = true;
-	else if (_value == Tag.EVAL_BODY_INCLUDE)
-	  _hasInclude = true;
-	else if (_value == BodyTag.EVAL_BODY_BUFFERED)
-	  _hasBuffered = true;
-	else {
-	  _hasSkip = true;
-	  _hasInclude = true;
-	  _hasBuffered = true;
-	}
+	addReturnValue(_value);
 	break;
 
       case CodeVisitor.ICONST_M1:
@@ -382,33 +423,106 @@ public class TagAnalyzer {
       case CodeVisitor.ICONST_4:
       case CodeVisitor.ICONST_5:
 	if (count != 0)
-	  _hasStart = true;
+	  _hasCode = true;
 	    
 	_value = visitor.getOpcode() - CodeVisitor.ICONST_0;
 	break;
 
       case CodeVisitor.BIPUSH:
 	if (count != 0)
-	  _hasStart = true;
+	  _hasCode = true;
+	
 	_value = visitor.getByteArg();
 	break;
 
       case CodeVisitor.SIPUSH:
 	if (count != 0)
-	  _hasStart = true;
+	  _hasCode = true;
+	
 	_value = visitor.getShortArg();
+	break;
+
+      case CodeVisitor.ALOAD_0:
+	if (count != 0)
+	  _hasCode = true;
+	break;
+
+      case CodeVisitor.INVOKEVIRTUAL:
+      case CodeVisitor.INVOKESPECIAL:
+	{
+	  // matching int methods have an extra opcode for 'this'
+	  if (count != 1)
+	    _hasCode = true;
+	  
+	  _value = -1;
+	
+	  int index = visitor.getShortArg();
+	  JavaClass jClass = visitor.getJavaClass();
+
+	  MethodRefConstant methodRef
+	    = jClass.getConstantPool().getMethodRef(index);
+
+	  IntMethodAnalyzer value = analyzeIntMethod(jClass,
+						     methodRef.getName(),
+						     methodRef.getType());
+
+	  if (value != null) {
+	    _value = value.getValue();
+
+	    // reset count since the subcall checks for side-effect code
+	    if (count == 1)
+	      _count = 1;
+
+	    if (value.hasCode()) {
+	      _hasCode = true;
+	    }
+	  }
+	  else {
+	    _hasCode = true;
+	  }
+	}
 	break;
 	  
       default:
-	_hasStart = true;
+	_hasCode = true;
 	_value = -1;
 	break;
       }
     }
 
+    protected void addReturnValue(int value)
+    {
+    }
+  }
+  
+  /**
+   * Callback analyzing the doStartTag method.
+   */
+  static class StartAnalyzer extends AbstractTagMethodAnalyzer {
+    private boolean _hasSkip;
+    private boolean _hasInclude;
+    private boolean _hasBuffered;
+
+    @Override
+    protected void addReturnValue(int value)
+    {
+      if (value == Tag.SKIP_BODY)
+	_hasSkip = true;
+      else if (value == Tag.EVAL_BODY_INCLUDE)
+	_hasInclude = true;
+      else if (value == BodyTag.EVAL_BODY_BUFFERED)
+	_hasBuffered = true;
+      else {
+	_hasSkip = true;
+	_hasInclude = true;
+	_hasBuffered = true;
+	setHasCode();
+      }
+    }
+
     public void complete(AnalyzedTag tag)
     {
-      tag.setDoStart(_hasStart);
+      tag.setDoStart(hasCode());
       tag.setStartReturnsSkip(_hasSkip);
       tag.setStartReturnsInclude(_hasInclude);
       tag.setStartReturnsBuffered(_hasBuffered);
@@ -418,69 +532,24 @@ public class TagAnalyzer {
   /**
    * Callback analyzing the doEndTag method.
    */
-  static class EndAnalyzer extends Analyzer {
+  static class EndAnalyzer extends AbstractTagMethodAnalyzer {
     private boolean _hasSkip;
     private boolean _hasEval;
-    private boolean _hasEnd;
 
-    private int _count = 0;
-    private int _value = -1;
-
-    public void analyze(CodeVisitor visitor)
+    @Override
+    protected void addReturnValue(int value)
     {
-      int count = _count++;
-      
-      switch (visitor.getOpcode()) {
-      case CodeVisitor.IRETURN:
-	if (count != 1)
-	  _hasEnd = true;
-
-	if (_value == Tag.SKIP_PAGE)
-	  _hasSkip = true;
-	else if (_value == Tag.EVAL_PAGE)
-	  _hasEval = true;
-	else {
-	  _hasEnd = true;
-	  _hasSkip = true;
-	  _hasEval = true;
-	}
-	break;
-
-      case CodeVisitor.ICONST_M1:
-      case CodeVisitor.ICONST_0:
-      case CodeVisitor.ICONST_1:
-      case CodeVisitor.ICONST_2:
-      case CodeVisitor.ICONST_3:
-      case CodeVisitor.ICONST_4:
-      case CodeVisitor.ICONST_5:
-	if (count != 0)
-	  _hasEnd = true;
-	    
-	_value = visitor.getOpcode() - CodeVisitor.ICONST_0;
-	break;
-
-      case CodeVisitor.BIPUSH:
-	if (count != 0)
-	  _hasEnd = true;
-	_value = visitor.getByteArg();
-	break;
-
-      case CodeVisitor.SIPUSH:
-	if (count != 0)
-	  _hasEnd = true;
-	_value = visitor.getShortArg();
-	break;
-
-      default:
-	_hasEnd = true;
-	_value = -1;
-	break;
-      }
+      if (value == Tag.SKIP_PAGE)
+	_hasSkip = true;
+      else if (value == Tag.EVAL_PAGE)
+	_hasEval = true;
+      else
+	setHasCode();
     }
 
     public void complete(AnalyzedTag tag)
     {
-      tag.setDoEnd(_hasEnd);
+      tag.setDoEnd(hasCode());
       tag.setEndReturnsSkip(_hasSkip);
       tag.setEndReturnsEval(_hasEval);
     }
@@ -489,66 +558,26 @@ public class TagAnalyzer {
   /**
    * Callback analyzing the doAfterBody method.
    */
-  static class AfterAnalyzer extends Analyzer {
-    private boolean _hasAfter;
+  static class AfterAnalyzer extends AbstractTagMethodAnalyzer {
     private boolean _hasAgain;
 
-    private int _count = 0;
-    private int _value = -1;
-
-    public void analyze(CodeVisitor visitor)
+    @Override
+    protected void addReturnValue(int value)
     {
-      int count = _count++;
-      
-      switch (visitor.getOpcode()) {
-      case CodeVisitor.IRETURN:
-	if (count != 1)
-	  _hasAfter = true;
-
-	if (_value == IterationTag.EVAL_BODY_AGAIN)
-	  _hasAgain = true;
-	else if (_value == IterationTag.SKIP_BODY) {
-	}
-	else {
-	  _hasAgain = true;
-	}
-	break;
-
-      case CodeVisitor.ICONST_M1:
-      case CodeVisitor.ICONST_0:
-      case CodeVisitor.ICONST_1:
-      case CodeVisitor.ICONST_2:
-      case CodeVisitor.ICONST_3:
-      case CodeVisitor.ICONST_4:
-      case CodeVisitor.ICONST_5:
-	if (count != 0)
-	  _hasAfter = true;
-	    
-	_value = visitor.getOpcode() - CodeVisitor.ICONST_0;
-	break;
-
-      case CodeVisitor.BIPUSH:
-	if (count != 0)
-	  _hasAfter = true;
-	_value = visitor.getByteArg();
-	break;
-
-      case CodeVisitor.SIPUSH:
-	if (count != 0)
-	  _hasAfter = true;
-	_value = visitor.getShortArg();
-	break;
-
-      default:
-	_hasAfter = true;
-	_value = -1;
-	break;
+      if (value == IterationTag.EVAL_BODY_AGAIN)
+	_hasAgain = true;
+      else if (value == IterationTag.SKIP_BODY
+	       || value == BodyTag.SKIP_PAGE) {
+      }
+      else {
+	_hasAgain = true;
+	setHasCode();
       }
     }
 
     public void complete(AnalyzedTag tag)
     {
-      tag.setDoAfter(_hasAfter);
+      tag.setDoAfter(hasCode());
       tag.setAfterReturnsAgain(_hasAgain);
     }
   }
@@ -640,6 +669,87 @@ public class TagAnalyzer {
     public void complete(AnalyzedTag tag)
     {
       tag.setDoFinally(_hasCode);
+    }
+  }
+  
+  /**
+   * Callback analyzing a zero-arg int method (for constant values).
+   */
+  static class IntMethodAnalyzer extends Analyzer
+  {
+    private int _count = 0;
+    private int _value = -1;
+
+    private boolean _hasCode;
+    
+    private int _resultValue = -1;
+    private int _resultValueCount = 0;
+
+    public boolean isUnique()
+    {
+      return _resultValueCount == 1;
+    }
+
+    public boolean hasCode()
+    {
+      return _hasCode;
+    }
+
+    public int getValue()
+    {
+      return _resultValue;
+    }
+
+    public void analyze(CodeVisitor visitor)
+    {
+      int count = _count++;
+      
+      switch (visitor.getOpcode()) {
+      case CodeVisitor.IRETURN:
+	if (count > 1)
+	  _hasCode = true;
+	
+	if (_resultValueCount == 0) {
+	  _resultValue = _value;
+	  _resultValueCount = 1;
+	}
+	else if (_value != _resultValue)
+	  _resultValueCount++;
+	break;
+
+      case CodeVisitor.ICONST_M1:
+      case CodeVisitor.ICONST_0:
+      case CodeVisitor.ICONST_1:
+      case CodeVisitor.ICONST_2:
+      case CodeVisitor.ICONST_3:
+      case CodeVisitor.ICONST_4:
+      case CodeVisitor.ICONST_5:
+	if (count > 0)
+	  _hasCode = true;
+	
+	_value = visitor.getOpcode() - CodeVisitor.ICONST_0;
+	break;
+
+      case CodeVisitor.BIPUSH:
+	if (count > 0)
+	  _hasCode = true;
+	
+	_value = visitor.getByteArg();
+	break;
+
+      case CodeVisitor.SIPUSH:
+	if (count > 0)
+	  _hasCode = true;
+	
+	_value = visitor.getShortArg();
+	break;
+	  
+      default:
+	_hasCode = true;
+	
+	_value = -1;
+	break;
+      }
     }
   }
 }

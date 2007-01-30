@@ -40,7 +40,7 @@ import javax.faces.render.*;
 /**
  * The HTML text renderer
  */
-class HtmlInputTextRenderer extends Renderer
+class HtmlInputTextRenderer extends BaseRenderer
 {
   public static final Renderer RENDERER = new HtmlInputTextRenderer();
 
@@ -281,10 +281,7 @@ class HtmlInputTextRenderer extends Renderer
     if (title != null)
       out.writeAttribute("title", title, "title");
 
-    if (value != null)
-      out.writeAttribute("value", String.valueOf(value), "value");
-    else
-      out.writeAttribute("value", "", "value");
+    out.writeAttribute("value", toString(context, component, value), "value");
   }
 
   /**

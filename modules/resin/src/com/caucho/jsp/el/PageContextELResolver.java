@@ -215,6 +215,13 @@ public class PageContextELResolver extends AbstractVariableResolver {
 	_beanResolver.setValue(env, base, property, value);
     }
     else if (property instanceof String) {
+      for (int i = 0; i < _customResolvers.length; i++) {
+	_customResolvers[i].setValue(env, base, property, value);
+
+	if (env.isPropertyResolved())
+	  return;
+      }
+      
       env.setPropertyResolved(true);
 	
       _pageContext.setAttribute(property.toString(), value);

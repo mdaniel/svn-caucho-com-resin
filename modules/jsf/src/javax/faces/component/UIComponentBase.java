@@ -37,6 +37,7 @@ import java.util.*;
 import javax.el.*;
 
 import javax.faces.*;
+import javax.faces.component.html.*;
 import javax.faces.context.*;
 import javax.faces.el.*;
 import javax.faces.event.*;
@@ -50,9 +51,15 @@ public abstract class UIComponentBase extends UIComponent
   private static final FacesListener []NULL_FACES_LISTENERS
     = new FacesListener[0];
 
+  private static final HashMap<String,Integer> _rendererToCodeMap
+    = new HashMap<String,Integer>();
+
+  private static final HashMap<Integer,String> _codeToRendererMap
+    = new HashMap<Integer,String>();
+  
   private static final WeakHashMap<Class,HashMap<String,Property>> _compMap
     = new WeakHashMap<Class,HashMap<String,Property>>();
-  
+
   private String _id;
   private String _clientId;
 
@@ -175,7 +182,6 @@ public abstract class UIComponentBase extends UIComponent
     for (UIComponent ptr = getParent(); ptr != null; ptr = ptr.getParent()) {
       if (ptr instanceof NamingContainer) {
 	parentId = ptr.getContainerClientId(context);
-	System.out.println("CIG: " + parentId + " " + ptr);
 	break;
       }
     }
@@ -494,6 +500,19 @@ public abstract class UIComponentBase extends UIComponent
 
     if (renderer != null)
       renderer.encodeChildren(context, this);
+    else {
+      int childCount = getChildCount();
+
+      for (int i = 0; i < childCount; i++) {
+	UIComponent child = _children.get(i);
+
+	if (child.isRendered()) {
+	  child.encodeBegin(context);
+	  child.encodeChildren(context);
+	  child.encodeEnd(context);
+	}
+      }
+    }
   }
 
   public void encodeEnd(FacesContext context)
@@ -736,12 +755,19 @@ public abstract class UIComponentBase extends UIComponent
   
   public Object saveState(FacesContext context)
   {
+    Integer rendererCode = _rendererToCodeMap.get(_rendererType);
+    String rendererString = null;
+
+    if (rendererCode == null)
+      rendererString = _rendererType;
+    
     return new Object[] {
       _id,
       _exprMap,
       _isRendered,
       _isRenderedExpr,
-      _rendererType,
+      rendererCode,
+      rendererString,
       (_attributeMap != null ? _attributeMap.getExtMap() : null),
     };
   }
@@ -1244,5 +1270,63 @@ public abstract class UIComponentBase extends UIComponent
     {
       return "ValueExpressionAdapter[" + getExpressionString() + "]";
     }
+  }
+
+  private static final void addRendererCode(String renderer)
+  {
+    if (renderer == null || _rendererToCodeMap.get(renderer) != null)
+      return;
+    
+    Integer code = _rendererToCodeMap.size() + 1;
+    
+    _rendererToCodeMap.put(renderer, code);
+    _codeToRendererMap.put(code, renderer);
+  }
+  
+  static {
+    addRendererCode(new UIColumn().getRendererType());
+    addRendererCode(new UICommand().getRendererType());
+    addRendererCode(new UIData().getRendererType());
+    addRendererCode(new UIForm().getRendererType());
+    addRendererCode(new UIGraphic().getRendererType());
+    addRendererCode(new UIInput().getRendererType());
+    addRendererCode(new UIMessage().getRendererType());
+    addRendererCode(new UIMessages().getRendererType());
+    addRendererCode(new UINamingContainer().getRendererType());
+    addRendererCode(new UIOutput().getRendererType());
+    addRendererCode(new UIPanel().getRendererType());
+    addRendererCode(new UIParameter().getRendererType());
+    addRendererCode(new UISelectBoolean().getRendererType());
+    addRendererCode(new UISelectItem().getRendererType());
+    addRendererCode(new UISelectItems().getRendererType());
+    addRendererCode(new UISelectMany().getRendererType());
+    addRendererCode(new UISelectOne().getRendererType());
+    addRendererCode(new UIViewRoot().getRendererType());
+    
+    addRendererCode(new HtmlColumn().getRendererType());
+    addRendererCode(new HtmlCommandButton().getRendererType());
+    addRendererCode(new HtmlCommandLink().getRendererType());
+    addRendererCode(new HtmlDataTable().getRendererType());
+    addRendererCode(new HtmlForm().getRendererType());
+    addRendererCode(new HtmlGraphicImage().getRendererType());
+    addRendererCode(new HtmlInputHidden().getRendererType());
+    addRendererCode(new HtmlInputSecret().getRendererType());
+    addRendererCode(new HtmlInputText().getRendererType());
+    addRendererCode(new HtmlInputTextarea().getRendererType());
+    addRendererCode(new HtmlMessage().getRendererType());
+    addRendererCode(new HtmlMessages().getRendererType());
+    addRendererCode(new HtmlOutputFormat().getRendererType());
+    addRendererCode(new HtmlOutputLabel().getRendererType());
+    addRendererCode(new HtmlOutputLink().getRendererType());
+    addRendererCode(new HtmlOutputText().getRendererType());
+    addRendererCode(new HtmlPanelGrid().getRendererType());
+    addRendererCode(new HtmlPanelGroup().getRendererType());
+    addRendererCode(new HtmlSelectBooleanCheckbox().getRendererType());
+    addRendererCode(new HtmlSelectManyCheckbox().getRendererType());
+    addRendererCode(new HtmlSelectManyListbox().getRendererType());
+    addRendererCode(new HtmlSelectManyMenu().getRendererType());
+    addRendererCode(new HtmlSelectOneListbox().getRendererType());
+    addRendererCode(new HtmlSelectOneMenu().getRendererType());
+    addRendererCode(new HtmlSelectOneRadio().getRendererType());
   }
 }

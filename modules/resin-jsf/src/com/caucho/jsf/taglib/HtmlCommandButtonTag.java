@@ -45,6 +45,7 @@ import javax.servlet.jsp.tagext.*;
  */
 public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
   private MethodExpression _actionExpr;
+  private MethodExpression _actionListenerExpr;
     
   public String getComponentType()
   {
@@ -54,6 +55,11 @@ public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
   public String getRendererType()
   {
     return "javax.faces.Button";
+  }
+
+  public void setAction(MethodExpression expr)
+  {
+    _actionExpr = expr;
   }
 
   public void setActionListener(MethodExpression expr)

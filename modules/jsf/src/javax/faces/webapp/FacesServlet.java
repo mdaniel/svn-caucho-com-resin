@@ -33,6 +33,7 @@ import java.lang.reflect.*;
 import java.util.logging.*;
 
 import javax.faces.*;
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.lifecycle.*;
 
@@ -121,8 +122,14 @@ public final class FacesServlet implements Servlet
     
     try {
       FacesContext.setCurrentInstance(context);
-      
-      _lifecycle.execute(context);
+
+      try {
+	_lifecycle.execute(context);
+      } catch (ViewExpiredException e) {
+	log.log(Level.FINER, e.toString(), e);
+	
+	log.fine(e.toString());
+      }
       
       _lifecycle.render(context);
     } catch (FacesException e) {

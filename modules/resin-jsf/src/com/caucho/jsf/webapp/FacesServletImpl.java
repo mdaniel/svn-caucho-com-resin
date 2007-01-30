@@ -30,6 +30,7 @@ package com.caucho.jsf.webapp;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.net.*;
 import java.util.*;
 import java.util.logging.*;
 
@@ -64,43 +65,118 @@ public class FacesServletImpl extends GenericServlet
   public void init(ServletConfig config)
     throws ServletException
   {
+    ApplicationImpl app = new ApplicationImpl();
+
+    ApplicationFactory appFactory = (ApplicationFactory)
+      FactoryFinder.getFactory(FactoryFinder.APPLICATION_FACTORY);
+
+    appFactory.setApplication(app);
+
+    FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
+    FactoryFinder.getFactory(FactoryFinder.RENDER_KIT_FACTORY);
+    FactoryFinder.getFactory(FactoryFinder.FACES_CONTEXT_FACTORY);
+
+    String factory;
+
+    factory = getServiceFactory(FactoryFinder.APPLICATION_FACTORY);
+    if (factory != null && ! "".equals(factory))
+      FactoryFinder.setFactory(FactoryFinder.APPLICATION_FACTORY, factory);
+
+    factory = getServiceFactory(FactoryFinder.LIFECYCLE_FACTORY);
+    if (factory != null && ! "".equals(factory))
+      FactoryFinder.setFactory(FactoryFinder.LIFECYCLE_FACTORY, factory);
+
+    factory = getServiceFactory(FactoryFinder.RENDER_KIT_FACTORY);
+    if (factory != null && ! "".equals(factory))
+      FactoryFinder.setFactory(FactoryFinder.RENDER_KIT_FACTORY, factory);
+
+    factory = getServiceFactory(FactoryFinder.FACES_CONTEXT_FACTORY);
+    if (factory != null && ! "".equals(factory))
+      FactoryFinder.setFactory(FactoryFinder.FACES_CONTEXT_FACTORY, factory);
+
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    try {
+      Enumeration e = loader.getResources("META-INF/faces-config.xml");
+      while (e != null && e.hasMoreElements()) {
+	URL url = (URL) e.nextElement();
+	initPath(app, Vfs.lookup(url.toString()));
+      }
+    } catch (IOException e) {
+      throw new ConfigException(e);
+    }
+
     String path = config.getServletContext().getInitParameter(FacesServlet.CONFIG_FILES_ATTR);
+    
+    String []paths = null;
 
     if (path != null)
-      initPath(Vfs.lookup(path));
+      paths = path.split("\\s*,\\s*");
 
-    initPath(Vfs.lookup("WEB-INF/faces-config.xml"));
+    for (int i = 0; paths != null && i < paths.length; i++)
+      initPath(app, Vfs.lookup("./" + paths[i]));
+
+    initPath(app, Vfs.lookup("WEB-INF/faces-config.xml"));
+  }
+
+  private static String getServiceFactory(String factoryName)
+  {
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      InputStream is = loader.getResourceAsStream("META-INF/services/" + factoryName);
+
+      try {
+	if (is != null) {
+	  BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+	  String line = reader.readLine();
+
+	  if (line != null) {
+	    if (line.indexOf('#') >= 0)
+	      line = line.substring(0, line.indexOf('#'));
+	    
+	    return line.trim();
+	  }
+	}
+      } catch (Exception e) {
+	log.log(Level.WARNING, e.toString(), e);
+      } finally {
+	is.close();
+      }
+    } catch (Exception e) {
+    }
+    
+    return null;
   }
     
-  private void initPath(Path facesPath)
+  private void initPath(ApplicationImpl app, Path facesPath)
     throws ServletException
   {
-    if (facesPath.canRead()) {
+    if (facesPath.canRead() && ! facesPath.isDirectory()) {
       try {
 	FacesConfig facesConfig = new FacesConfig();
 	
 	new Config().configure(facesConfig, facesPath, FACES_SCHEMA);
 
-	ApplicationFactory appFactory = (ApplicationFactory)
-	  FactoryFinder.getFactory(FactoryFinder.APPLICATION_FACTORY);
-	
-	ApplicationImpl app = new ApplicationImpl();
-	appFactory.setApplication(app);
+	app.setNavigationHandler(facesConfig.getNavigationHandler());
 
-	for (ManagedBeanConfig bean : facesConfig.getManagedBeans()) {
-	  app.addManagedBean(bean.getName(), bean);
-	}
+	if (app instanceof ApplicationImpl) {
+	  ApplicationImpl appImpl = (ApplicationImpl) app;
+	  
+	  for (ManagedBeanConfig bean : facesConfig.getManagedBeans()) {
+	    appImpl.addManagedBean(bean.getName(), bean);
+	  }
 
-	ApplicationConfig appConfig = facesConfig.getApplication();
-	if (appConfig != null) {
-	  for (Map.Entry<String,String> entry
-		 : appConfig.getResourceBundleMap().entrySet()) {
-	    app.addResourceBundle(entry.getKey(), entry.getValue());
+	  ApplicationConfig appConfig = facesConfig.getApplication();
+	  if (appConfig != null) {
+	    appConfig.configure(appImpl);
+	    
+	    for (ResourceBundleConfig bundle
+		   : appConfig.getResourceBundleList()) {
+	      appImpl.addResourceBundle(bundle.getVar(), bundle);
+	    }
 	  }
 	}
       } catch (ConfigException e) {
-	e.printStackTrace();
-	
 	_configException = e;
 	
 	throw e;

@@ -45,6 +45,7 @@ import javax.faces.validator.*;
 import javax.xml.bind.annotation.*;
 
 import com.caucho.config.*;
+import com.caucho.jsf.el.*;
 import com.caucho.util.*;
 
 public class ManagedBeanConfig
@@ -154,7 +155,6 @@ public class ManagedBeanConfig
     for (int i = 0; i < keyList.size(); i++) {
       _program.add(new MapBeanProgram(keyList.get(i), valueList.get(i)));
     }
-    System.out.println("prg: " + _program);
   }
 
   public void setListEntries(ListEntries list)
@@ -164,13 +164,19 @@ public class ManagedBeanConfig
     }
   }
   
-  public Object create(FacesContext context)
+  public Object create(FacesContext context,
+		       ManagedBeanELResolver.Scope createScope)
     throws FacesException
   {
     try {
       Object value = getType().newInstance();
 
-      System.out.println("PROGRAM: " + _program);
+      if (createScope.getScope() < _scope.ordinal())
+	throw new FacesException(L.l("Scope '{0}' is long for enclosing bean.",
+				     _scope));
+      else if (_scope.ordinal() < createScope.getScope())
+	createScope.setScope(_scope.ordinal());
+
       for (int i = 0; i < _program.size(); i++) {
 	_program.get(i).configure(context, value);
       }
@@ -178,16 +184,16 @@ public class ManagedBeanConfig
       ExternalContext extContext = context.getExternalContext();
 
       switch (_scope) {
-      case REQUEST:
-	extContext.getRequestMap().put(_name, value);
+      case APPLICATION:
+	extContext.getApplicationMap().put(_name, value);
 	break;
 	
       case SESSION:
 	extContext.getSessionMap().put(_name, value);
 	break;
 	
-      case APPLICATION:
-	extContext.getApplicationMap().put(_name, value);
+      case REQUEST:
+	extContext.getRequestMap().put(_name, value);
 	break;
       }
 
@@ -200,9 +206,9 @@ public class ManagedBeanConfig
   }
   
   enum Scope {
-    REQUEST,
-    SESSION,
+    NONE,
     APPLICATION,
-    NONE
+    SESSION,
+    REQUEST,
   };
 }

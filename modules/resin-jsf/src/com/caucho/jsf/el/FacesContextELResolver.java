@@ -32,9 +32,15 @@ package com.caucho.jsf.el;
 import com.caucho.el.AbstractVariableResolver;
 import com.caucho.jsp.el.*;
 import com.caucho.jsf.cfg.*;
+import com.caucho.util.*;
 
 import javax.el.*;
+import javax.faces.application.*;
+import javax.faces.component.*;
 import javax.faces.context.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
 import java.beans.FeatureDescriptor;
 import java.util.*;
 
@@ -42,6 +48,11 @@ import java.util.*;
  * Variable resolution for JSF variables
  */
 public class FacesContextELResolver extends CompositeELResolver {
+  private static final L10N L = new L10N(FacesContextELResolver.class);
+
+  private static final ArrayList<FeatureDescriptor> _implicitFeatureDescriptors
+    = new ArrayList<FeatureDescriptor>();
+  
   private ELResolver []_customResolvers;
 
   /*
@@ -57,8 +68,8 @@ public class FacesContextELResolver extends CompositeELResolver {
   private final JsfResourceBundleELResolver _bundleResolver;
   private final BeanELResolver _beanResolver = new BeanELResolver();
 
-  private final HashMap<String,ManagedBeanConfig> _managedBeanMap
-    = new  HashMap<String,ManagedBeanConfig>();
+  private final ManagedBeanELResolver _managedBeanResolver
+    = new ManagedBeanELResolver();
 
   public FacesContextELResolver(ELResolver []customResolvers,
 				JsfResourceBundleELResolver bundleResolver)
@@ -69,7 +80,17 @@ public class FacesContextELResolver extends CompositeELResolver {
 
   public void addManagedBean(String name, ManagedBeanConfig managedBean)
   {
-    _managedBeanMap.put(name, managedBean);
+    _managedBeanResolver.addManagedBean(name, managedBean);
+  }
+
+  public ManagedBeanELResolver getManagedBeanResolver()
+  {
+    return _managedBeanResolver;
+  }
+
+  public ELResolver getResourceBundleResolver()
+  {
+    return _bundleResolver;
   }
 
   public void addELResolver(ELResolver elResolver)
@@ -134,11 +155,22 @@ public class FacesContextELResolver extends CompositeELResolver {
     ArrayList<FeatureDescriptor> descriptors
       = new ArrayList<FeatureDescriptor>();
 
+    if (base == null)
+      descriptors.addAll(_implicitFeatureDescriptors);
+
     for (int i = 0; i < _customResolvers.length; i++) {
       addDescriptors(descriptors,
 		     _customResolvers[i].getFeatureDescriptors(env, base));
     }
 
+    if (base == null) {
+      addDescriptors(descriptors,
+		     _managedBeanResolver.getFeatureDescriptors(env, base));
+
+      addDescriptors(descriptors,
+		     _bundleResolver.getFeatureDescriptors(env, base));
+    }
+    
     addDescriptors(descriptors, _mapResolver.getFeatureDescriptors(env, base));
     addDescriptors(descriptors,
 		   _beanResolver.getFeatureDescriptors(env, base));
@@ -170,7 +202,6 @@ public class FacesContextELResolver extends CompositeELResolver {
   @Override
   public Class getType(ELContext env, Object base, Object property)
   {
-    System.out.println("GETT: " + base + " " + property);
     if (base != null) {
     }
     else if (base == null && property instanceof String) {
@@ -183,7 +214,7 @@ public class FacesContextELResolver extends CompositeELResolver {
       }
 
       Class type = _bundleResolver.getType(env, base, property);
-      System.out.println("BR: " + type);
+
       if (env.isPropertyResolved())
 	return type;
     }
@@ -263,11 +294,10 @@ public class FacesContextELResolver extends CompositeELResolver {
 	return value;
       }
 
-      ManagedBeanConfig managedBean = _managedBeanMap.get(property);
+      value = _managedBeanResolver.getValue(env, base, property);
 
-      if (managedBean != null) {
-	return managedBean.create(facesContext);
-      }
+      if (env.isPropertyResolved())
+	return value;
 
       return null;
     }
@@ -396,5 +426,36 @@ public class FacesContextELResolver extends CompositeELResolver {
       env.setPropertyResolved(true);
       return;
     }
+  }
+
+  private static void addDescriptor(String name, Class type)
+  {
+    FeatureDescriptor desc = new FeatureDescriptor();
+    desc.setName(name);
+    desc.setDisplayName(name);
+    desc.setExpert(false);
+    desc.setHidden(false);
+    desc.setPreferred(true);
+    desc.setValue(ELResolver.RESOLVABLE_AT_DESIGN_TIME, Boolean.TRUE);
+    desc.setValue(ELResolver.TYPE, type);
+    
+    _implicitFeatureDescriptors.add(desc);
+  }
+
+  static {
+    addDescriptor("application", Object.class);
+    addDescriptor("applicationScope", Map.class);
+    addDescriptor("cookie", Map.class);
+    addDescriptor("facesContext", FacesContext.class);
+    addDescriptor("header", Map.class);
+    addDescriptor("headerValues", Map.class);
+    addDescriptor("initParam", Map.class);
+    addDescriptor("param", Map.class);
+    addDescriptor("paramValues", Map.class);
+    addDescriptor("request", Object.class);
+    addDescriptor("requestScope", Map.class);
+    addDescriptor("session", Object.class);
+    addDescriptor("sessionScope", Map.class);
+    addDescriptor("view", UIViewRoot.class);
   }
 }

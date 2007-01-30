@@ -40,7 +40,7 @@ import javax.faces.render.*;
 /**
  * The HTML link renderer
  */
-class HtmlOutputLinkRenderer extends Renderer
+class HtmlOutputLinkRenderer extends BaseRenderer
 {
   public static final Renderer RENDERER = new HtmlOutputLinkRenderer();
 
@@ -64,30 +64,36 @@ class HtmlOutputLinkRenderer extends Renderer
     String id = component.getId();
     String dir;
     String lang;
-    String href;
     String style;
     String styleClass;
+    String target;
     String title;
+
+    Object value;
     
     if (component instanceof HtmlOutputLink) {
       HtmlOutputLink htmlOutput = (HtmlOutputLink) component;
 
       dir = htmlOutput.getDir();
       lang = htmlOutput.getLang();
-      href = htmlOutput.getTarget();
+      target = htmlOutput.getTarget();
       style = htmlOutput.getStyle();
       styleClass = htmlOutput.getStyleClass();
       title = htmlOutput.getTitle();
+
+      value = htmlOutput.getValue();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
     
       dir = (String) attrMap.get("dir");
       lang = (String) attrMap.get("lang");
-      href = (String) attrMap.get("target");
+      target = (String) attrMap.get("target");
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       title = (String) attrMap.get("title");
+
+      value = attrMap.get("value");
     }
 
     out.startElement("a", component);
@@ -98,20 +104,78 @@ class HtmlOutputLinkRenderer extends Renderer
     if (dir != null)
       out.writeAttribute("dir", dir, "dir");
 
-    if (href != null)
-      out.writeAttribute("href", lang, "href");
-
     if (lang != null)
       out.writeAttribute("lang", lang, "lang");
 
     if (style != null)
       out.writeAttribute("style", style, "style");
 
+    if (target != null)
+      out.writeAttribute("target", lang, "target");
+
     if (styleClass != null)
       out.writeAttribute("class", styleClass, "class");
 
     if (title != null)
       out.writeAttribute("title", title, "title");
+
+    int childCount = component.getChildCount();
+
+    String href = toString(context, component, value);
+
+    StringBuilder sb = null;
+    for (int i = 0; i < childCount; i++) {
+      UIComponent child = component.getChildren().get(i);
+
+      if (child instanceof UIParameter) {
+	if (sb == null) {
+	  sb = new StringBuilder().append(href);
+	  
+	  if (href.indexOf('?') < 0)
+	    sb.append('?');
+	  else
+	    sb.append('&');
+	}
+	else
+	  sb.append('&');
+	
+	UIParameter param = (UIParameter) child;
+
+	String name = param.getName();
+	Object paramValue = param.getValue();
+
+	if (name != null) {
+	  sb.append(name);
+	  sb.append('=');
+	}
+
+	sb.append(toString(context, param, paramValue));
+      }
+    }
+
+    if (sb != null)
+      out.writeAttribute("href", sb.toString(), "href");
+    else
+      out.writeAttribute("href", href, "href");
+
+    if (childCount > 0) {
+      List<UIComponent> children = component.getChildren();
+
+      for (int i = 0; i < childCount; i++) {
+	UIComponent child = children.get(i);
+
+	if (child instanceof UIParameter)
+	  continue;
+      
+	if (child.isRendered()) {
+	  child.encodeBegin(context);
+	  child.encodeChildren(context);
+	  child.encodeEnd(context);
+	}
+      }
+    }
+    
+    out.endElement("a");
   }
 
   /**
@@ -122,27 +186,6 @@ class HtmlOutputLinkRenderer extends Renderer
     throws IOException
   {
     ResponseWriter out = context.getResponseWriter();
-
-    if (component instanceof HtmlOutputLink) {
-      HtmlOutputLink htmlOutput = (HtmlOutputLink) component;
-
-      Object value = htmlOutput.getValue();
-
-      if (value == null)
-	return;
-
-      out.writeText(value, "value");
-    }
-    else {
-      Map<String,Object> attrMap = component.getAttributes();
-
-      Object value = attrMap.get("value");
-
-      if (value == null)
-	return;
-
-      out.writeText(value, "value");
-    }
   }
 
   /**
@@ -152,9 +195,6 @@ class HtmlOutputLinkRenderer extends Renderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
-    
-    out.endElement("span");
   }
 
   public String toString()

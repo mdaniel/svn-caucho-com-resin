@@ -47,8 +47,38 @@ public class JspViewHandler extends ViewHandler
   {
     if (context == null)
       throw new NullPointerException();
+
+    ExternalContext extContext = context.getExternalContext();
+
+    Locale locale;
+
+    ArrayList<Locale> supportedLocales = new ArrayList<Locale>();
+    Iterator<Locale> iter = context.getApplication().getSupportedLocales();
+
+    while (iter != null && iter.hasNext())
+      supportedLocales.add(iter.next());
     
-    return context.getApplication().getDefaultLocale();
+    iter = extContext.getRequestLocales();
+    while (iter.hasNext()) {
+      locale = iter.next();
+
+      for (int i = 0; i < supportedLocales.size(); i++) {
+	Locale supLocale = supportedLocales.get(i);
+
+	if (supLocale.equals(locale))
+	  return supLocale;
+	else if ("".equals(supLocale.getCountry())
+		 && locale.getLanguage().equals(supLocale.getLanguage()))
+	  return supLocale;
+      }
+    }
+    
+    locale = context.getApplication().getDefaultLocale();
+
+    if (locale != null)
+      return locale;
+
+    return Locale.getDefault();
   }
 
   @Override
@@ -107,6 +137,7 @@ public class JspViewHandler extends ViewHandler
 
     viewRoot.setViewId(viewId);
     viewRoot.setRenderKitId(calculateRenderKitId(context));
+    viewRoot.setLocale(calculateLocale(context));
 
     return viewRoot;
   }

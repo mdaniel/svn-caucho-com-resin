@@ -225,6 +225,7 @@ public class UIInput extends UIOutput
   public void setSubmittedValue(Object submittedValue)
   {
     _submittedValue = submittedValue;
+    _isValid = true; // XXX: jsf/3070
   }
 
   public void setValue(Object value)
@@ -485,8 +486,7 @@ public class UIInput extends UIOutput
       }
       return;
     }
-
-    System.out.println("CONVERTED: " + value);
+    
     Object oldValue = getValue();
     setValue(value);
     setSubmittedValue(null);
@@ -570,9 +570,10 @@ public class UIInput extends UIOutput
 	try {
 	  validator.validate(context, this, value);
 	} catch (ValidatorException e) {
-	  e.printStackTrace();
+	  log.log(Level.FINER, e.toString(), e);
 	  
-	  // XXX: message
+	  context.addMessage(getClientId(context), e.getFacesMessage());
+	  
 	  _isValid = false;
 	}
       }
@@ -585,40 +586,35 @@ public class UIInput extends UIOutput
 
   public Object saveState(FacesContext context)
   {
-    State state = new State();
-
-    state._parent = super.saveState(context);
-    
-    state._requiredMessage = _requiredMessage;
-    state._requiredMessageExpr = Util.save(_requiredMessageExpr, context);
-    
-    state._converterMessage = _converterMessage;
-    state._converterMessageExpr = Util.save(_converterMessageExpr, context);
-    
-    state._validatorMessage = _validatorMessage;
-    state._validatorMessageExpr = Util.save(_validatorMessageExpr, context);
-
-    return state;
+    return new Object[] {
+      super.saveState(context),
+      _requiredMessage,
+      Util.save(_requiredMessageExpr, context),
+      _converterMessage,
+      Util.save(_converterMessageExpr, context),
+      _validatorMessage,
+      Util.save(_validatorMessageExpr, context),
+      };
   }
 
   public void restoreState(FacesContext context, Object value)
   {
-    State state = (State) value;
+    Object []state = (Object []) value;
 
-    super.restoreState(context, state._parent);
+    super.restoreState(context, state[0]);
 
-    _requiredMessage = state._requiredMessage;
-    _requiredMessageExpr = Util.restore(state._requiredMessageExpr,
+    _requiredMessage = (String) state[1];
+    _requiredMessageExpr = Util.restore(state[2],
 					String.class,
 					context);
 
-    _converterMessage = state._converterMessage;
-    _converterMessageExpr = Util.restore(state._converterMessageExpr,
+    _converterMessage = (String) state[3];
+    _converterMessageExpr = Util.restore(state[4],
 					String.class,
 					context);
 
-    _validatorMessage = state._validatorMessage;
-    _validatorMessageExpr = Util.restore(state._validatorMessageExpr,
+    _validatorMessage = (String) state[5];
+    _validatorMessageExpr = Util.restore(state[6],
 					String.class,
 					context);
   }

@@ -60,7 +60,14 @@ final class Util
   static int evalInt(ValueExpression expr)
   {
     try {
-      return (Integer) expr.getValue(currentELContext());
+      Object value = expr.getValue(currentELContext());
+
+      if (value instanceof Number)
+	return ((Number) value).intValue();
+      else if (value == null)
+	return 0;
+      else
+	return (Integer) value;
     } catch (ELException e) {
       throw new FacesException(e);
     }
@@ -69,7 +76,12 @@ final class Util
   static String evalString(ValueExpression expr)
   {
     try {
-      return (String) expr.getValue(currentELContext());
+      Object value = expr.getValue(currentELContext());
+
+      if (value instanceof String || value == null)
+	return (String) value;
+      else
+	return value.toString();
     } catch (ELException e) {
       throw new FacesException(e);
     }

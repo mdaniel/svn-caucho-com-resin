@@ -36,6 +36,7 @@ import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
+import javax.faces.event.*;
 import javax.faces.render.*;
 
 /**
@@ -52,6 +53,48 @@ class HtmlCommandButtonRenderer extends Renderer
   public boolean getRendersChildren()
   {
     return true;
+  }
+
+  /**
+   * Decodes the data from the form.
+   */
+  @Override
+  public void decode(FacesContext context, UIComponent component)
+  {
+    String clientId = component.getClientId(context);
+
+    ExternalContext ext = context.getExternalContext();
+    Map<String,String> paramMap = ext.getRequestParameterMap();
+
+    String value = paramMap.get(clientId);
+
+    if (value != null) {
+      String type;
+
+      if (component instanceof HtmlCommandButton) {
+	HtmlCommandButton htmlComp = (HtmlCommandButton) component;
+
+	type = htmlComp.getType();
+      }
+      else {
+	Map<String,Object> attrMap = component.getAttributes();
+    
+	type = (String) attrMap.get("type");
+      }
+
+      if ("reset".equals(type))
+	return;
+
+      ActionEvent event = new ActionEvent(component);
+
+      component.queueEvent(event);
+    }
+    else {
+      String valueX = clientId + ".x";
+      String valueY = clientId + ".y";
+
+      // ??
+    }
   }
   
   /**

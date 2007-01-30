@@ -67,6 +67,8 @@ class HtmlOutputTextRenderer extends HtmlRenderer
     String style;
     String styleClass;
     String title;
+    boolean escape;
+    Object value;
     
     if (component instanceof HtmlOutputText) {
       HtmlOutputText htmlOutput = (HtmlOutputText) component;
@@ -76,6 +78,9 @@ class HtmlOutputTextRenderer extends HtmlRenderer
       style = htmlOutput.getStyle();
       styleClass = htmlOutput.getStyleClass();
       title = htmlOutput.getTitle();
+
+      escape = htmlOutput.isEscape();
+      value = htmlOutput.getValue();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
@@ -85,109 +90,56 @@ class HtmlOutputTextRenderer extends HtmlRenderer
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       title = (String) attrMap.get("title");
-    }
 
-    if (dir == null && lang == null
-	&& style == null && styleClass == null
-	&& (id == null || id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))) {
-      return;
-    }
+      Boolean escapeValue = (Boolean) attrMap.get("escape");
 
-    out.startElement("span", component);
-
-    if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
-      out.writeAttribute("id", component.getClientId(context), "id");
-
-    if (dir != null)
-      out.writeAttribute("dir", dir, "dir");
-
-    if (lang != null)
-      out.writeAttribute("lang", lang, "dir");
-
-    if (style != null)
-      out.writeAttribute("style", style, "style");
-
-    if (styleClass != null)
-      out.writeAttribute("class", styleClass, "class");
-
-    if (title != null)
-      out.writeAttribute("title", title, "title");
-  }
-
-  /**
-   * Renders the content for the component.
-   */
-  @Override
-  public void encodeChildren(FacesContext context, UIComponent component)
-    throws IOException
-  {
-    ResponseWriter out = context.getResponseWriter();
-    
-    if (component instanceof HtmlOutputText) {
-      HtmlOutputText htmlOutput = (HtmlOutputText) component;
-
-      Object value = htmlOutput.getValue();
-
-      if (value == null)
-	return;
-      
-      boolean escape = htmlOutput.isEscape();
-
-      String string = String.valueOf(value);
-
-      if (escape)
-	escapeText(out, string, "value");
+      if (escapeValue != null)
+	escape = escapeValue;
       else
-	out.writeText(string, "value");
-    }
-    else {
-      Map<String,Object> attrMap = component.getAttributes();
-
-      Object value = attrMap.get("value");
-
-      if (value == null)
-	return;
+	escape = true;
       
-      boolean escape = (Boolean) attrMap.get("escape");
-      
-      String string = String.valueOf(value);
-
-      if (escape)
-	escapeText(out, string, "value");
-      else
-	out.writeText(string, "value");
+      value = attrMap.get("value");
     }
-  }
 
-  /**
-   * Renders the closing tag for the component.
-   */
-  @Override
-  public void encodeEnd(FacesContext context, UIComponent component)
-    throws IOException
-  {
-    ResponseWriter out = context.getResponseWriter();
+    boolean hasSpan = false;
+
+    if (dir != null
+	|| lang != null
+	|| style != null
+	|| styleClass != null
+	|| (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))) {
+      hasSpan = true;
+      
+      out.startElement("span", component);
+
+      if (id != null && ! id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
+	out.writeAttribute("id", component.getClientId(context), "id");
+
+      if (dir != null)
+	out.writeAttribute("dir", dir, "dir");
+
+      if (lang != null)
+	out.writeAttribute("lang", lang, "dir");
+
+      if (style != null)
+	out.writeAttribute("style", style, "style");
+
+      if (styleClass != null)
+	out.writeAttribute("class", styleClass, "class");
+
+      if (title != null)
+	out.writeAttribute("title", title, "title");
+    }
     
-    if (component instanceof HtmlOutputText) {
-      HtmlOutputText htmlOutput = (HtmlOutputText) component;
+    String string = toString(context, component, value);
 
-      if (htmlOutput.getStyleClass() != null
-	  || htmlOutput.getStyle() != null
-	  || htmlOutput.getDir() != null
-	  || htmlOutput.getLang() != null) {
-	out.endElement("span");
-      }
-    }
-    else {
-      Map<String,Object> attrMap = component.getAttributes();
+    if (escape)
+      escapeText(out, string, "value");
+    else
+      out.writeText(string, "value");
 
-      if (attrMap.get("styleClass") != null
-	  || attrMap.get("style") != null
-	  || attrMap.get("dir") != null
-	  || attrMap.get("lang") != null) {
-	out.endElement("span");
-      }
-    }
+    if (hasSpan)
+      out.endElement("span");
   }
 
   public String toString()

@@ -2158,13 +2158,14 @@ public abstract class AbstractHttpRequest
 
 	String language = cb.toString();
 	String country = "";
+	String var = "";
 
-	if (cursor.current() == '-' || cursor.current() == '_') {
+	if (cursor.current() == '_' || cursor.current() == '-') {
 	  cb.clear();
 	  for (cursor.next();
 	       (ch = cursor.current()) >= 'a' && ch <= 'z' ||
 	       ch >= 'A' && ch <= 'Z' ||
-	       ch >= '0' && ch <= '0';
+	       ch >= '0' && ch <= '9';
 	       cursor.next()) {
 	    cb.append(cursor.current());
 	  }

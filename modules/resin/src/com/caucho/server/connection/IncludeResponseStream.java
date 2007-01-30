@@ -225,6 +225,7 @@ public class IncludeResponseStream extends ToByteResponseStream {
    * @param offset start offset into the buffer
    * @param length length of the data in the buffer
    */
+  @Override
   protected void writeNext(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {

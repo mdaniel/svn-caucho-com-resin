@@ -28,13 +28,68 @@
 
 package com.caucho.jsf.application;
 
+import javax.el.*;
+
+import javax.faces.application.*;
+import javax.faces.component.*;
+import javax.faces.context.*;
+import javax.faces.el.*;
 import javax.faces.event.*;
 
 public class ActionListenerImpl implements ActionListener
 {
+  private static final Object[] NULL = new Object[0];
+  
   public void processAction(ActionEvent event)
     throws AbortProcessingException
   {
+    FacesContext context = FacesContext.getCurrentInstance();
+    
+    context.renderResponse();
+
+    UIComponent comp = event.getComponent();
+
+    String fromAction = null;
+    String logicalOutcome = null;
+
+    if (comp instanceof ActionSource2) {
+      ActionSource2 actionComp = (ActionSource2) comp;
+
+      MethodExpression action = actionComp.getActionExpression();
+
+      if (action != null) {
+	fromAction = action.getExpressionString();
+	
+	Object value = action.invoke(context.getELContext(),
+				     new Object[] { event });
+
+	if (value != null)
+	  logicalOutcome = value.toString();
+      }
+    }
+    else if (comp instanceof ActionSource) {
+      ActionSource actionComp = (ActionSource) comp;
+
+      MethodBinding action = actionComp.getAction();
+
+      if (action != null) {
+	fromAction = action.getExpressionString();
+	
+	Object value = action.invoke(context, 
+				     new Object[] { event });
+
+	if (value != null)
+	  logicalOutcome = value.toString();
+      }
+    }
+
+    Application app = context.getApplication();
+
+    NavigationHandler handler = app.getNavigationHandler();
+
+    System.out.println("HANDL: " + handler);
+    if (handler != null)
+      handler.handleNavigation(context, fromAction, logicalOutcome);
   }
 
   public String toString()

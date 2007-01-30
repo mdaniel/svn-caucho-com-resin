@@ -28,6 +28,7 @@
 
 package com.caucho.jsf.cfg;
 
+import java.lang.reflect.*;
 import java.util.*;
 
 import javax.el.*;
@@ -50,4 +51,42 @@ import com.caucho.util.*;
 abstract public class AbstractValueConfig
 {
   abstract AbstractValue getValue(Class type);
+
+  protected static Method findGetter(Class type, String name)
+  {
+    if (type == null)
+      return null;
+
+    for (Method method : type.getDeclaredMethods()) {
+      if (! method.getName().equals(name))
+	continue;
+      else if (method.getParameterTypes().length != 0)
+	continue;
+      else if (Modifier.isStatic(method.getModifiers()))
+	continue;
+
+      return method;
+    }
+
+    return findGetter(type.getSuperclass(), name);
+  }
+
+  protected static Method findSetter(Class type, String name)
+  {
+    if (type == null)
+      return null;
+
+    for (Method method : type.getDeclaredMethods()) {
+      if (! method.getName().equals(name))
+	continue;
+      else if (method.getParameterTypes().length != 1)
+	continue;
+      else if (Modifier.isStatic(method.getModifiers()))
+	continue;
+
+      return method;
+    }
+
+    return findSetter(type.getSuperclass(), name);
+  }
 }

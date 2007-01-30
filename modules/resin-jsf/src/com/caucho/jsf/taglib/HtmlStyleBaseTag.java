@@ -242,6 +242,54 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("enctype", value);
   }
 
+  public void setErrorClass(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("errorClass", value);
+  }
+
+  public void setErrorStyle(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("errorStyle", value);
+  }
+
+  public void setFatalClass(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("fatalClass", value);
+  }
+
+  public void setFatalStyle(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("fatalStyle", value);
+  }
+
+  public void setInfoClass(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("infoClass", value);
+  }
+
+  public void setInfoStyle(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("infoStyle", value);
+  }
+
   public void setEscape(ValueExpression value)
   {
     if (_map == null)
@@ -256,6 +304,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("footerClass", value);
+  }
+
+  public void setFor(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("for", value);
   }
 
   public void setFrame(ValueExpression value)
@@ -336,6 +392,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("maxlength", value);
+  }
+
+  public void setName(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("name", value);
   }
 
   public void setOnblur(ValueExpression value)
@@ -546,6 +610,22 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("shape", value);
   }
 
+  public void setShowDetail(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("showDetail", value);
+  }
+
+  public void setShowSummary(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("showSummary", value);
+  }
+
   public void setSize(ValueExpression value)
   {
     if (_map == null)
@@ -624,6 +704,22 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("value", value);
+  }
+
+  public void setWarnClass(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("warnClass", value);
+  }
+
+  public void setWarnStyle(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("warnStyle", value);
   }
 
   public void setWidth(ValueExpression value)

@@ -31,12 +31,67 @@ package com.caucho.jsf.application;
 import javax.faces.application.*;
 import javax.faces.context.*;
 
+import java.util.*;
+
+import com.caucho.jsf.cfg.*;
+
 public class NavigationHandlerImpl extends NavigationHandler
 {
+  private ArrayList<NavigationRule> _ruleList
+    = new ArrayList<NavigationRule>();
+  
+  private HashMap<String,NavigationRule[]> _ruleMap
+    = new HashMap<String,NavigationRule[]>();
+
+  public void addRule(NavigationRule rule)
+  {
+    _ruleList.add(rule);
+  }
+  
   public void handleNavigation(FacesContext context,
 			       String fromAction,
 			       String outcome)
   {
+    if (outcome == null)
+      return;
+    
+    NavigationRule []ruleList;
+
+    synchronized (_ruleMap) {
+      String viewId = context.getViewRoot().getViewId();
+      
+      ruleList = _ruleMap.get(viewId);
+
+      if (ruleList== null) {
+	ruleList = findRuleList(viewId);
+      }
+
+      _ruleMap.put(viewId, ruleList);
+    }
+
+    for (int i = 0; i < ruleList.length; i++) {
+      if (ruleList[i].handleNavigation(context, fromAction, outcome))
+	return;
+    }
+  }
+
+  private NavigationRule []findRuleList(String viewId)
+  {
+    ArrayList<NavigationRule> ruleList = new ArrayList<NavigationRule>();
+    
+    for (int i = 0; i < _ruleList.size(); i++) {
+      NavigationRule rule = _ruleList.get(i);
+
+      if (rule.isMatch(viewId))
+	ruleList.add(rule);
+    }
+
+    NavigationRule []rules = new NavigationRule[ruleList.size()];
+    ruleList.toArray(rules);
+
+    Arrays.sort(rules);
+
+    return rules;
   }
 
   public String toString()

@@ -47,6 +47,9 @@ public class UIViewRoot extends UIComponentBase
 
   private Locale _locale;
 
+  private ArrayList<PhaseListener> _phaseListeners
+    = new  ArrayList<PhaseListener>();
+  
   private ArrayList<FacesEvent> _eventList;
 
   public UIViewRoot()
@@ -88,6 +91,16 @@ public class UIViewRoot extends UIComponentBase
     return _locale;
   }
 
+  public void addPhaseListener(PhaseListener listener)
+  {
+    _phaseListeners.add(listener);
+  }
+
+  public void removePhaseListener(PhaseListener listener)
+  {
+    _phaseListeners.remove(listener);
+  }
+
   public String createUniqueId()
   {
     return UNIQUE_ID_PREFIX + _unique++;
@@ -101,7 +114,7 @@ public class UIViewRoot extends UIComponentBase
     if (context == null)
       throw new NullPointerException();
 
-    broadcastEvents();
+    broadcastEvents(PhaseId.INVOKE_APPLICATION);
   }
 
   /**
@@ -157,6 +170,21 @@ public class UIViewRoot extends UIComponentBase
     }
   }
 
+  private void broadcastEvents(PhaseId phaseId)
+  {
+    if (_eventList != null) {
+      for (int i = 0; i < _eventList.size(); i++) {
+	FacesEvent event = _eventList.get(i);
+
+	if (phaseId.equals(event.getPhaseId())) {
+	  event.getComponent().broadcast(event);
+	  _eventList.remove(i);
+	  i--;
+	}
+      }
+    }
+  }
+  
   public String toString()
   {
     return getClass().getName() + "[" + getViewId() + "]";

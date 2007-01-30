@@ -47,8 +47,18 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   private int _rowNumber;
   
   public boolean absolute(int row)
+    throws SQLException
   {
-    return false;
+    if (row < getRow())
+      return false;
+
+    while (getRow() < row) {
+      System.out.println("ABS:" + getRow() + " " + row);
+      if (! next())
+	return false;
+    }
+
+    return true;
   }
 
   public void afterLast()
@@ -83,7 +93,7 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
   public boolean isBeforeFirst()
     throws SQLException
   {
-    return _rowNumber == 0;
+    return getRow() == 0;
   }
 
   public boolean isAfterLast()

@@ -58,6 +58,6 @@ public class ValueConfig extends AbstractValueConfig
   
   AbstractValue getValue(Class type)
   {
-    return new PropertyValue(_value, type);
+    return PropertyValue.create(_value, type);
   }
 }

@@ -48,6 +48,11 @@ public class ValidatorException extends FacesException
     
     this.message = msg;
   }
+
+  public FacesMessage getFacesMessage()
+  {
+    return this.message;
+  }
 }
 
   

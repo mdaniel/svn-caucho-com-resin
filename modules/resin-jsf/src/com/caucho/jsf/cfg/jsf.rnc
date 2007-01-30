@@ -1,0 +1,5 @@
+include "jsf-11.rnc"
+include "jsf-12.rnc"
+
+start = jsf11_faces-config | jsf12_faces-config
+

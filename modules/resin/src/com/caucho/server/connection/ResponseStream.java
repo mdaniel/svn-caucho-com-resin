@@ -415,8 +415,8 @@ class ResponseStream extends ToByteResponseStream {
 
       long contentLengthHeader = _response.getContentLengthHeader();
       // Can't write beyond the content length
-      if (0 < contentLengthHeader &&
-          contentLengthHeader < length + _contentLength) {
+      if (0 < contentLengthHeader
+	  && contentLengthHeader < length + _contentLength) {
 	if (lengthException(buf, offset, length, contentLengthHeader))
 	  return;
 

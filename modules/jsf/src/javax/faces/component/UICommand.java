@@ -145,9 +145,18 @@ public class UICommand extends UIComponentBase
   {
     super.broadcast(event);
 
-    if (_actionExpr != null && event instanceof ActionEvent) {
-      _actionExpr.invoke(FacesContext.getCurrentInstance().getELContext(),
-			 new Object[] { event });
+    if (event instanceof ActionEvent) {
+      ActionEvent actionEvent = (ActionEvent) event;
+      
+      FacesContext context = FacesContext.getCurrentInstance();
+      
+      if (_actionExpr != null)
+	_actionExpr.invoke(context.getELContext(), new Object[] { event });
+
+      ActionListener listener = context.getApplication().getActionListener();
+
+      if (listener != null)
+	listener.processAction(actionEvent);
     }
   }
 

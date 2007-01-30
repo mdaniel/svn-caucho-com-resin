@@ -124,7 +124,7 @@ public class ListELResolver extends ELResolver {
       if (0 <= index && index < list.size())
 	return list.get(index);
       else
-	return null;
+	throw new PropertyNotFoundException("List.getIndex '" + index + "' is an invalid index for list of length '" + list.size() + "'");
     }
     else {
       return null;
@@ -168,7 +168,10 @@ public class ListELResolver extends ELResolver {
 	}
       }
 
+      if (index < 0 || list.size() < index)
+	throw new PropertyNotFoundException("List.setValue '" + index + "' is an invalid index for list of length '" + list.size() + "'");
       list.set(index, value);
+      
     }
   }
 }

@@ -28,6 +28,7 @@
 
 package com.caucho.jsf.cfg;
 
+import java.lang.reflect.*;
 import java.util.*;
 
 import javax.el.*;
@@ -65,7 +66,7 @@ public class ListEntries extends AbstractValueConfig
 
   public void addValue(String value)
   {
-    _list.add(new PropertyValue(value, _valueClass));
+    _list.add(PropertyValue.create(value, _valueClass));
   }
 
   public void setNullValue(String value)
@@ -107,5 +108,32 @@ public class ListEntries extends AbstractValueConfig
   public Object getValue()
   {
     return _list;
+  }
+
+  public void addProgram(ArrayList<BeanProgram> program,
+			 String name,
+			 Class type)
+  {
+    String getterName = ("get"
+			 + Character.toUpperCase(name.charAt(0))
+			 + name.substring(1));
+    String setterName = ("set"
+			 + Character.toUpperCase(name.charAt(0))
+			 + name.substring(1));
+    
+    Method getter = findGetter(type, getterName);
+    Method setter = findSetter(type, setterName);
+
+    for (int i = 0; i < _list.size(); i++) {
+      if (getter != null && getter.getReturnType().isArray()) {
+	// XXX: probably want more efficient method that only allocates once
+	program.add(new ArrayPropertyBeanProgram(getter,
+						 setter,
+						 _list.get(i)));
+      }
+      else
+	program.add(new ListPropertyBeanProgram(getter, setter,
+						_list.get(i)));
+    }
   }
 }

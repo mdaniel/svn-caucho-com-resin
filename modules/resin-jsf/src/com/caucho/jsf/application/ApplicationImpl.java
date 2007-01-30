@@ -65,7 +65,9 @@ public class ApplicationImpl extends Application
   private VariableResolver _variableResolver;
 
   private ExpressionFactory _jsfExpressionFactory;
+  
   private FacesContextELResolver _elResolver;
+  
   private JsfResourceBundleELResolver _bundleResolver
     = new JsfResourceBundleELResolver();
 
@@ -112,11 +114,12 @@ public class ApplicationImpl extends Application
       = jspFactory.getJspApplicationContext(webApp);
 
     _jsfExpressionFactory = appContext.getExpressionFactory();
-    appContext.addELResolver(FacesJspELResolver.RESOLVER);
     
     ELResolver []customResolvers = new ELResolver[0];
     _elResolver = new FacesContextELResolver(customResolvers,
 					     _bundleResolver);
+    
+    appContext.addELResolver(new FacesJspELResolver(this));
 
     addComponent(UIColumn.COMPONENT_TYPE,
 		 "javax.faces.component.UIColumn");
@@ -124,8 +127,14 @@ public class ApplicationImpl extends Application
     addComponent(UIInput.COMPONENT_TYPE,
 		 "javax.faces.component.UIInput");
 
+    addComponent(UINamingContainer.COMPONENT_TYPE,
+		 "javax.faces.component.UINamingContainer");
+
     addComponent(UIOutput.COMPONENT_TYPE,
 		 "javax.faces.component.UIOutput");
+
+    addComponent(UIParameter.COMPONENT_TYPE,
+		 "javax.faces.component.UIParameter");
 
     addComponent(UISelectItem.COMPONENT_TYPE,
 		 "javax.faces.component.UISelectItem");
@@ -156,6 +165,15 @@ public class ApplicationImpl extends Application
 
     addComponent(HtmlInputTextarea.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlInputTextarea");
+
+    addComponent(HtmlMessage.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlMessage");
+
+    addComponent(HtmlMessages.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlMessages");
+
+    addComponent(HtmlOutputLink.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlOutputLink");
 
     addComponent(HtmlOutputText.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlOutputText");
@@ -205,6 +223,18 @@ public class ApplicationImpl extends Application
     addConverter(Float.class, FloatConverter.class.getName());
     addConverter(double.class, DoubleConverter.class.getName());
     addConverter(Double.class, DoubleConverter.class.getName());
+    
+    addConverter(DateTimeConverter.CONVERTER_ID,
+		 DateTimeConverter.class.getName());
+    addConverter(NumberConverter.CONVERTER_ID,
+		 NumberConverter.class.getName());
+    
+    addValidator(DoubleRangeValidator.VALIDATOR_ID,
+		 DoubleRangeValidator.class.getName());
+    addValidator(LengthValidator.VALIDATOR_ID,
+		 LengthValidator.class.getName());
+    addValidator(LongRangeValidator.VALIDATOR_ID,
+		 LongRangeValidator.class.getName());
   }
   
   public void addManagedBean(String name, ManagedBeanConfig managedBean)
@@ -212,9 +242,9 @@ public class ApplicationImpl extends Application
     _elResolver.addManagedBean(name, managedBean);
   }
   
-  public void addResourceBundle(String name, String baseName)
+  public void addResourceBundle(String name, ResourceBundleConfig bundle)
   {
-    _bundleResolver.addBundle(name, baseName);
+    _bundleResolver.addBundle(name, bundle);
   }
 
   public ActionListener getActionListener()
@@ -673,6 +703,10 @@ public class ApplicationImpl extends Application
     if (param == null)
       param = new Class[0];
 
+    if (! ref.startsWith("#{") && ! ref.endsWith("}"))
+      throw new ReferenceSyntaxException(L.l("'{0}' is an illegal MethodBinding.  MethodBindings require #{...} syntax.",
+					     ref));
+    
     try {
       MethodExpression expr
 	= factory.createMethodExpression(elContext, ref, Object.class, param);
@@ -712,6 +746,10 @@ public class ApplicationImpl extends Application
     
     try {
       String validatorClass = _validatorClassMap.get(validatorId);
+
+      if (validatorClass == null)
+	throw new FacesException(L.l("'{0}' is not a know validator.",
+				     validatorId));
       
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
@@ -719,6 +757,8 @@ public class ApplicationImpl extends Application
       Class cl = Class.forName(validatorClass, false, loader);
 
       return (Validator) cl.newInstance();
+    } catch (FacesException e) {
+      throw e;
     } catch (Exception e) {
       throw new FacesException(e);
     }
@@ -766,7 +806,7 @@ public class ApplicationImpl extends Application
     return expr.getValue(elContext);
   }
 
-  public void init()
+  public void initRequest()
   {
     _isInit = true;
   }
@@ -787,6 +827,9 @@ public class ApplicationImpl extends Application
     public Class getType(Object base, int index)
       throws javax.faces.el.PropertyNotFoundException
     {
+      if (base == null)
+	throw new javax.faces.el.PropertyNotFoundException("getType() has null base object");
+      
       try {
 	FacesContext context = FacesContext.getCurrentInstance();
       
@@ -814,6 +857,8 @@ public class ApplicationImpl extends Application
     public Object getValue(Object base, int index)
       throws javax.faces.el.PropertyNotFoundException
     {
+      if (base == null)
+	throw new javax.faces.el.PropertyNotFoundException("getValue() has null base object");
       try {
 	FacesContext context = FacesContext.getCurrentInstance();
       

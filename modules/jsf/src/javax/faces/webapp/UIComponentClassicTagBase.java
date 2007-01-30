@@ -213,6 +213,8 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   protected UIComponent findComponent(FacesContext context)
     throws JspException
   {
+    _created = false;
+    
     if (_component != null)
       return _component;
 
@@ -220,6 +222,11 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 
     if (parentTag == null) {
       _component = context.getViewRoot();
+
+      // XXX:
+      if (_component.getChildCount() == 0)
+	_created = true;
+      
       return _component;
     }
 
@@ -243,7 +250,6 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     }
     else {
       _component = parent.findComponent(id);
-      
 
       if (_component != null) {
 	if (verbatim != null)
@@ -262,6 +268,8 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     // XXX binding
 
     _component = context.getApplication().createComponent(componentType);
+
+    _created = true;
 
     _component.setId(id);
 

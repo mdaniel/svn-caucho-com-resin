@@ -32,6 +32,7 @@ import java.io.*;
 import java.util.*;
 
 import javax.faces.*;
+import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
@@ -52,6 +53,7 @@ class HtmlMessageRenderer extends Renderer
   {
     return true;
   }
+  
   /**
    * Renders the open tag for the text.
    */
@@ -59,15 +61,45 @@ class HtmlMessageRenderer extends Renderer
   public void encodeBegin(FacesContext context, UIComponent component)
     throws IOException
   {
+    UIMessage uiMessage = (UIMessage) component;
+
+    String forId = uiMessage.getFor();
+
+    Iterator<FacesMessage> iter;
+    
+    if (forId != null)
+      iter = context.getMessages(forId);
+    else
+      iter = context.getMessages();
+
     ResponseWriter out = context.getResponseWriter();
 
     String id = component.getId();
+    boolean isShowSummary;
+    boolean isShowDetail;
     
     if (component instanceof HtmlMessage) {
-      HtmlMessage htmlOutput = (HtmlMessage) component;
+      HtmlMessage htmlComp = (HtmlMessage) component;
+
+      isShowSummary = htmlComp.isShowSummary();
+      isShowDetail = htmlComp.isShowDetail();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
+
+      isShowSummary = (Boolean) attrMap.get("showSummary");
+      isShowDetail = (Boolean) attrMap.get("showDetail");
+    }
+
+    if (iter.hasNext()) {
+      FacesMessage msg = iter.next();
+
+      System.out.println("MSG: " + msg);
+      if (isShowSummary)
+	out.writeText(msg.getSummary(), "summary");
+      
+      if (isShowDetail)
+	out.writeText(msg.getDetail(), "detail");
     }
   }
 
@@ -78,14 +110,6 @@ class HtmlMessageRenderer extends Renderer
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
-
-    if (component instanceof HtmlMessage) {
-      HtmlMessage htmlOutput = (HtmlMessage) component;
-    }
-    else {
-      Map<String,Object> attrMap = component.getAttributes();
-    }
   }
 
   /**
@@ -95,7 +119,6 @@ class HtmlMessageRenderer extends Renderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
   }
 
   public String toString()

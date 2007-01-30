@@ -103,8 +103,11 @@ public class ResultSetImpl extends AbstractResultSet {
   {
     if (_rs == null)
       return false;
-    else if (_rs.next())
+    else if (_rs.next()) {
+      _rowNumber++;
+      
       return true;
+    }
     else {
       close();
 

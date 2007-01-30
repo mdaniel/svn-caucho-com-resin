@@ -12,6 +12,7 @@
 
 <s2 title="3.1.snap - Dec 21, 2006">
 <ul>
+<li>character-encoding now controls default encoding for writers (#1563, rep by asklxf)</li>
 <li>Add header conditions for rewrite-dispatch (#1547)</li>
 <li>Add throttle-concurrent-max to &lt;http></li>
 <li>ping was missing @PostConstruct</li>

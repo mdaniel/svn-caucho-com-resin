@@ -35,6 +35,7 @@ import javax.el.*;
 
 import javax.faces.application.*;
 import javax.faces.context.*;
+import javax.faces.component.*;
 import javax.faces.render.*;
 import javax.faces.webapp.*;
 
@@ -53,7 +54,7 @@ public class FacesViewTag extends UIComponentBodyTag
 
   public String getComponentType()
   {
-    return "ViewRoot";
+    return UIViewRoot.COMPONENT_TYPE;
   }
 
   public String getRendererType()
@@ -118,5 +119,16 @@ public class FacesViewTag extends UIComponentBodyTag
     } catch (IOException e) {
       throw new JspException(e);
     }
+  }
+  
+  /**
+   * Sets the overridden properties of the tag
+   */
+  @Override
+  protected void setProperties(UIComponent component)
+  {
+    component.setRendered(true);
+    
+    super.setProperties(component);
   }
 }

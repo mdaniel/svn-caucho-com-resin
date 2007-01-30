@@ -47,58 +47,28 @@ import javax.faces.validator.*;
 import javax.xml.bind.annotation.*;
 
 import com.caucho.config.*;
+import com.caucho.jsf.application.*;
 import com.caucho.util.*;
 
-@XmlRootElement(name="faces-config")
 public class FacesConfig
 {
-  @XmlAttribute(name="id")
   private String _id;
 
-  @XmlAttribute(name="version")
   private String _version;
 
-  @XmlElement(name="application")
   private ApplicationConfig _application;
 
-  @XmlElement(name="factory")
   private FactoryConfig _factory;
 
-  /*
-  @XmlElement(name="component")
-  private ArrayList<ComponentConfig> _componentList
-    = new ArrayList<ComponentConfig>();
-
-  @XmlElement(name="converter")
-  private ArrayList<ConverterConfig> _converterList
-    = new ArrayList<ConverterConfig>();
-  */
-
-  @XmlElement(name="managed-bean")
   private ArrayList<ManagedBeanConfig> _managedBeanList
     = new ArrayList<ManagedBeanConfig>();
 
-  /*
-  @XmlElement(name="navigation-rule")
-  private ArrayList<NavigationRuleConfig> _navigationRuleList
-    = new ArrayList<NavigationRuleConfig>();
+  private NavigationHandlerImpl _navigation
+    = new NavigationHandlerImpl();
 
-  @XmlElement(name="referenced-bean")
-  private ArrayList<ReferencedBeanConfig> _referencedBeanList
-    = new ArrayList<ReferencedBeanConfig>();
-
-  @XmlElement(name="render-kit")
-  private ArrayList<RenderKitConfig> _renderKitList
-    = new ArrayList<RenderKitConfig>();
-
-  @XmlElement(name="lifecycle")
-  private ArrayList<LifecycleConfig> _lifecycleList
-    = new ArrayList<LifecycleConfig>();
-
-  @XmlElement(name="validator")
-  private ArrayList<ValidatorConfig> _validatorList
-    = new ArrayList<ValidatorConfig>();
-  */
+  public void setId(String id)
+  {
+  }
 
   @XmlAttribute(name="schemaLocation")
   public void setSchemaLocation(String location)
@@ -110,11 +80,20 @@ public class FacesConfig
     return null;
   }
 
-  @XmlElement(name="faces-config-extension")
-  private void setFacesConfigExtension(BuilderProgram program)
+  public void setVersion(String version)
   {
   }
 
+  @XmlElement(name="faces-config-extension")
+  public void setFacesConfigExtension(BuilderProgram program)
+  {
+  }
+
+  public void addManagedBean(ManagedBeanConfig managedBean)
+  {
+    _managedBeanList.add(managedBean);
+  }
+  
   public ArrayList<ManagedBeanConfig> getManagedBeans()
   {
     return _managedBeanList;
@@ -123,6 +102,26 @@ public class FacesConfig
   public ApplicationConfig getApplication()
   {
     return _application;
+  }
+
+  public void setApplication(ApplicationConfig app)
+  {
+    _application = app;
+  }
+
+  public void setFactory(FactoryConfig factory)
+  {
+    _factory = factory;
+  }
+
+  public void addNavigationRule(NavigationRule rule)
+  {
+    _navigation.addRule(rule);
+  }
+
+  public NavigationHandler getNavigationHandler()
+  {
+    return _navigation;
   }
 
   @PostConstruct

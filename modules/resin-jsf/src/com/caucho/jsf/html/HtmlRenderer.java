@@ -40,7 +40,7 @@ import javax.faces.render.*;
 /**
  * The HTML text renderer
  */
-abstract class HtmlRenderer extends Renderer
+abstract class HtmlRenderer extends BaseRenderer
 {
   protected static void escapeText(ResponseWriter out,
 				   String text,

@@ -67,14 +67,18 @@ public class ApplicationConfig
   
   private Class _stateManager;
   
-  private Class _elResolver;
+  private ArrayList<ELResolver> _elResolverList
+    = new ArrayList<ELResolver>();
   
   private Class _propertyResolver;
   
   private Class _variableResolver;
 
-  private HashMap<String,String> _resourceBundleMap
-    = new HashMap<String,String>();
+  private ArrayList<ResourceBundleConfig> _resourceBundleList
+    = new ArrayList<ResourceBundleConfig>();
+
+  @XmlElement(name="locale-config")
+  private LocaleConfig _localeConfig;
 
   @XmlElement(name="action-listener")
   private void setActionListener(Class actionListener)
@@ -122,13 +126,22 @@ public class ApplicationConfig
     throws ConfigException
   {
     Config.validate(elResolver, ELResolver.class);
-    
-    _elResolver = elResolver;
+
+    try {
+      _elResolverList.add((ELResolver) elResolver.newInstance());
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
   }
 
   public Class getElResolver()
   {
-    return _elResolver;
+    return null;
+  }
+
+  public ArrayList<ELResolver> getElResolverList()
+  {
+    return _elResolverList;
   }
 
   @XmlElement(name="property-resolver")
@@ -163,7 +176,7 @@ public class ApplicationConfig
   private void setResourceBundle(ResourceBundleConfig bundle)
     throws ConfigException
   {
-    _resourceBundleMap.put(bundle.getVar(), bundle.getBaseName());
+    _resourceBundleList.add(bundle);
   }
 
   private ResourceBundleConfig getResourceBundle()
@@ -172,13 +185,51 @@ public class ApplicationConfig
     return null;
   }
 
-  public HashMap<String,String> getResourceBundleMap()
+  public ArrayList<ResourceBundleConfig> getResourceBundleList()
   {
-    return _resourceBundleMap;
+    return _resourceBundleList;
   }
 
   @XmlElement(name="application-extension")
   private void setApplicationExtension(BuilderProgram program)
   {
+  }
+
+  public void configure(Application app)
+  {
+    if (_localeConfig != null)
+      _localeConfig.configure(app);
+
+    for (int i = 0; i < _elResolverList.size(); i++)
+      app.addELResolver(_elResolverList.get(i));
+  }
+
+  public static class LocaleConfig {
+    private Locale _defaultLocale;
+    private ArrayList<Locale> _supportedLocales
+      = new ArrayList<Locale>();
+    
+    public void setId(String id)
+    {
+    }
+
+    public void setDefaultLocale(String locale)
+    {
+      _defaultLocale = LocaleUtil.createLocale(locale);
+    }
+
+    public void addSupportedLocale(String locale)
+    {
+      _supportedLocales.add(LocaleUtil.createLocale(locale));
+    }
+
+    public void configure(Application app)
+    {
+      if (_defaultLocale != null) {
+	app.setDefaultLocale(_defaultLocale);
+      }
+
+      app.setSupportedLocales(_supportedLocales);
+    }
   }
 }

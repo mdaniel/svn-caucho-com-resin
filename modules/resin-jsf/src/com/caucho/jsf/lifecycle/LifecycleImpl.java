@@ -40,6 +40,8 @@ import javax.faces.event.*;
 import javax.faces.lifecycle.*;
 import javax.faces.render.*;
 
+import com.caucho.jsf.application.*;
+
 /**
  * The default lifecycle implementation
  */
@@ -117,7 +119,12 @@ public class LifecycleImpl extends Lifecycle
   private void restoreView(FacesContext context)
     throws FacesException
   {
-    ViewHandler view = context.getApplication().getViewHandler();
+    Application app = context.getApplication();
+
+    if (app instanceof ApplicationImpl)
+      ((ApplicationImpl) app).initRequest();
+    
+    ViewHandler view = app.getViewHandler();
 
     view.initView(context);
 

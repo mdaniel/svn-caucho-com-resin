@@ -83,7 +83,12 @@ public class DateTimeConverter implements Converter
 
   public Locale getLocale()
   {
-    return _locale;
+    if (_locale != null)
+      return _locale;
+
+    FacesContext context = FacesContext.getCurrentInstance();
+    
+    return context.getViewRoot().getLocale();
   }
 
   public void setLocale(Locale locale)
@@ -149,6 +154,7 @@ public class DateTimeConverter implements Converter
 			    String value)
     throws ConverterException
   {
+    System.out.println("GAS: " + value);
     if (context == null || component == null)
       throw new NullPointerException();
     
@@ -161,13 +167,15 @@ public class DateTimeConverter implements Converter
 
     value = value.trim();
 
-    DateFormat format = getFormat(context.getViewRoot().getLocale());
+    DateFormat format = getFormat(context);
 
     try {
       synchronized (format) {
 	return format.parse(value);
       }
     } catch (ParseException e) {
+      e.printStackTrace();
+      
       throw new ConverterException(e);
     }
   }
@@ -183,7 +191,7 @@ public class DateTimeConverter implements Converter
     if (value == null)
       return "";
     else if (value instanceof Date) {
-      DateFormat format = getFormat(context.getViewRoot().getLocale());
+      DateFormat format = getFormat(context);
 
       synchronized (format) {
 	return format.format((Date) value);
@@ -192,12 +200,15 @@ public class DateTimeConverter implements Converter
     else
       return String.valueOf(value);
   }
-
-  private DateFormat getFormat(Locale locale)
+  
+  private DateFormat getFormat(FacesContext context)
   {
     synchronized (this) {
-      if (_locale == null)
+      if (_locale == null) {
+	Locale locale = context.getViewRoot().getLocale();
+	
 	return createFormat(locale);
+      }
       else if (_format == null) {
 	_format = createFormat(_locale);
       }

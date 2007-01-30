@@ -59,7 +59,8 @@ public class JavaClassLoader extends JClassLoader {
    */
   protected JClass loadClass(String name)
   {
-    if (name.startsWith("java")) {
+    // JDK classes are not loaded, but javax are (e.g. for JSF)
+    if (name.startsWith("java.") || name.startsWith("java/")) {
       return getStaticClassLoader().forName(name);
     }
 

@@ -222,24 +222,21 @@ public class UIForm extends UIComponentBase implements NamingContainer
 
   public Object saveState(FacesContext context)
   {
-    State state = new State();
-
-    state._parent = super.saveState(context);
-    
-    state._isPrependId = _isPrependId;
-    state._isPrependIdExpr = Util.save(_isPrependIdExpr, context);
-
-    return state;
+    return new Object[] {
+      super.saveState(context),
+      _isPrependId,
+      Util.save(_isPrependIdExpr, context)
+    };
   }
 
   public void restoreState(FacesContext context, Object value)
   {
-    State state = (State) value;
+    Object []state = (Object []) value;
 
-    super.restoreState(context, state._parent);
+    super.restoreState(context, state[0]);
 
-    _isPrependId = state._isPrependId;
-    _isPrependIdExpr = Util.restore(state._isPrependIdExpr,
+    _isPrependId = (Boolean) state[1];
+    _isPrependIdExpr = Util.restore(state[2],
 				    Boolean.class,
 				    context);
   }
@@ -250,13 +247,6 @@ public class UIForm extends UIComponentBase implements NamingContainer
 
   private static enum PropEnum {
     PREPEND_ID,
-  }
-
-  private static class State implements java.io.Serializable {
-    private Object _parent;
-    
-    private Boolean _isPrependId;
-    private String _isPrependIdExpr;
   }
 
   static {

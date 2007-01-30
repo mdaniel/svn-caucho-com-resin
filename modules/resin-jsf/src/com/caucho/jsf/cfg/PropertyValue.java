@@ -58,10 +58,18 @@ public class PropertyValue implements AbstractValue
   
   private Object _value;
 
-  PropertyValue(String valueString, Class type)
+  private PropertyValue(String valueString, Class type)
   {
     _valueString = valueString;
     _type = type;
+  }
+
+  public static AbstractValue create(String valueString, Class type)
+  {
+    if (valueString.indexOf("#{") >= 0)
+      return new ELValue(valueString, type);
+    else
+      return new PropertyValue(valueString, type);
   }
   
   public Object getValue(FacesContext context)

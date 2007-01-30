@@ -36,12 +36,13 @@ import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
+import javax.faces.event.*;
 import javax.faces.render.*;
 
 /**
  * The HTML command/link renderer
  */
-class HtmlCommandLinkRenderer extends Renderer
+class HtmlCommandLinkRenderer extends BaseRenderer
 {
   public static final Renderer RENDERER = new HtmlCommandLinkRenderer();
 
@@ -52,6 +53,33 @@ class HtmlCommandLinkRenderer extends Renderer
   public boolean getRendersChildren()
   {
     return true;
+  }
+
+  /**
+   * Decodes the data from the form.
+   */
+  @Override
+  public void decode(FacesContext context, UIComponent component)
+  {
+    String formId = getFormId(context, component);
+    String clientId = component.getClientId(context);
+
+    String hiddenId = clientId + ":link";
+
+    ExternalContext ext = context.getExternalContext();
+    Map<String,String> paramMap = ext.getRequestParameterMap();
+
+    String value = paramMap.get(hiddenId);
+
+    if (value != null) {
+      ActionEvent event = new ActionEvent(component);
+
+      component.queueEvent(event);
+    }
+    else {
+      String valueX = clientId + ".x";
+      String valueY = clientId + ".y";
+    }
   }
   
   /**
@@ -175,24 +203,17 @@ class HtmlCommandLinkRenderer extends Renderer
       value = attrMap.get("value");
     }
 
-    String hiddenFieldName = "jsf-link";
-    for (UIComponent ptr = component.getParent();
-	 ptr != null;
-	 ptr = ptr.getParent()) {
-      if (ptr instanceof UIForm) {
-	hiddenFieldName = (ptr.getClientId(context)
-			   + NamingContainer.SEPARATOR_CHAR
-			   + "jsf-link");
-	break;
-      }
-    }
+    String clientId = component.getClientId(context);
+    String formClientId = getFormId(context, component);
+    String hiddenFieldName = clientId + ":link";
 
     if (disabled)
       out.startElement("span", component);
-    else
+    else {
       out.startElement("a", component);
 
-    out.writeAttribute("href", "#", "href");
+      out.writeAttribute("href", "#", "href");
+    }
       
     //out.writeAttribute("name", component.getClientId(context), "name");
     
@@ -225,11 +246,9 @@ class HtmlCommandLinkRenderer extends Renderer
     if (onblur != null)
       out.writeAttribute("onblur", onblur, "onblur");
 
-    String clientId = component.getClientId(context);
-
     StringBuilder clickJs = new StringBuilder();
     clickJs.append("document.forms['");
-    clickJs.append(clientId);
+    clickJs.append(formClientId);
     clickJs.append("']['");
     clickJs.append(hiddenFieldName);
     clickJs.append("'].value='");
@@ -237,6 +256,10 @@ class HtmlCommandLinkRenderer extends Renderer
     clickJs.append("';");
 
     // uiparam
+
+    clickJs.append("document.forms['");
+    clickJs.append(formClientId);
+    clickJs.append("'].submit();");
 
     clickJs.append("return false;");
 
@@ -308,13 +331,9 @@ class HtmlCommandLinkRenderer extends Renderer
     if (type != null)
       out.writeAttribute("type", type, "type");
 
-    if (disabled) {
-      if (value != null)
-	out.writeAttribute("value", String.valueOf(value), "value");
+    if (value != null)
+      out.writeText(toString(context, component, value), "value");
 
-      out.endElement("span");
-      return;
-    }
     int childCount = component.getChildCount();
 
     if (childCount > 0) {
@@ -323,10 +342,31 @@ class HtmlCommandLinkRenderer extends Renderer
       for (int i = 0; i < childCount; i++) {
 	UIComponent child = children.get(i);
 
-	if (child instanceof UIParameter)
-	  continue;
+	if (child instanceof UIParameter) {
+	  UIParameter param = (UIParameter) child;
+	  
+	  if (! disabled) {
+	    out.startElement("input", param);
+
+	    out.writeAttribute("type", "hidden", "type");
+
+	    String paramName = param.getName();
+
+	    out.writeAttribute("name", paramName, "name");
+
+	    /*
+	    Object paramValue = param.getValue();
+
+	    out.writeAttribute("value",
+			       toString(context, param, paramValue),
+			       "value");
+	    */
+	    
+	    out.endElement("input");
+	  }
+	}
       
-	if (child.isRendered()) {
+	else if (child.isRendered()) {
 	  child.encodeBegin(context);
 	  child.encodeChildren(context);
 	  child.encodeEnd(context);
@@ -334,7 +374,28 @@ class HtmlCommandLinkRenderer extends Renderer
       }
     }
 
-    out.endElement("a");
+    if (disabled)
+      out.endElement("span");
+    else
+      out.endElement("a");
+
+    out.startElement("input", component);
+    out.writeAttribute("type", "hidden", "type");
+    out.writeAttribute("name", hiddenFieldName, "name");
+    out.endElement("input");
+  }
+
+  private String getFormId(FacesContext context, UIComponent component)
+  {
+    for (UIComponent ptr = component.getParent();
+	 ptr != null;
+	 ptr = ptr.getParent()) {
+      if (ptr instanceof UIForm) {
+	return ptr.getClientId(context);
+      }
+    }
+
+    return "";
   }
 
   /**

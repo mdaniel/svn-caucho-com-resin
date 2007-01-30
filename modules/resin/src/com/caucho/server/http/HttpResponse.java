@@ -32,6 +32,7 @@ package com.caucho.server.http;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.AbstractHttpRequest;
 import com.caucho.server.connection.AbstractHttpResponse;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.WriteStream;
@@ -272,9 +273,16 @@ public class HttpResponse extends AbstractHttpResponse {
 	os.write(_charsetBytes, 0, _charsetBytes.length);
 	os.print(_charEncoding);
       }
-      else if (_hasWriter) {
-	os.write(_charsetBytes, 0, _charsetBytes.length);
-	os.print("iso-8859-1");
+      else {
+	WebApp webApp = _request.getWebApp();
+	String charEncoding = (webApp != null
+			       ? webApp.getCharacterEncoding()
+			       : null);
+
+	if (charEncoding != null) {
+	  os.write(_charsetBytes, 0, _charsetBytes.length);
+	  os.print(charEncoding);
+	}
       }
     }
     else if (_charEncoding != null) {
@@ -283,7 +291,16 @@ public class HttpResponse extends AbstractHttpResponse {
       os.print(_charEncoding);
     }
     else {
-      os.write(_textHtmlLatin1Bytes, 0, _textHtmlLatin1Bytes.length);
+      WebApp webApp = _request.getWebApp();
+      String charEncoding = (webApp != null
+			     ? webApp.getCharacterEncoding()
+			     : null);
+
+      os.write(_textHtmlBytes, 0, _textHtmlBytes.length);
+      if (charEncoding != null) {
+	os.write(_charsetBytes, 0, _charsetBytes.length);
+	os.print(charEncoding);
+      }
     }
 
     boolean hasContentLength = false;

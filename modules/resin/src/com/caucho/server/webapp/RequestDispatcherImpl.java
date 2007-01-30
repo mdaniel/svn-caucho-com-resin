@@ -166,8 +166,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     if (! (req instanceof CauchoRequest))
       topRequest = req;
 
-    while (parentRequest instanceof HttpServletRequestWrapper &&
-	   ! (parentRequest instanceof CauchoRequest)) {
+    while (parentRequest instanceof HttpServletRequestWrapper
+	   && ! (parentRequest instanceof CauchoRequest)) {
       reqWrapper = (HttpServletRequestWrapper) parentRequest;
       parentRequest = (HttpServletRequest) reqWrapper.getRequest();
     }

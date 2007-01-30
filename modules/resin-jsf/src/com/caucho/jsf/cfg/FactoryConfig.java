@@ -29,6 +29,7 @@
 package com.caucho.jsf.cfg;
 
 import java.util.*;
+import java.lang.reflect.*;
 
 import javax.annotation.*;
 import javax.el.*;
@@ -53,6 +54,8 @@ import com.caucho.util.*;
 @XmlRootElement(name="factory")
 public class FactoryConfig
 {
+  private static final L10N L = new L10N(FactoryConfig.class);
+  
   @XmlAttribute(name="id")
   private String _id;
 
@@ -68,7 +71,13 @@ public class FactoryConfig
   private void setApplicationFactory(Class factory)
     throws ConfigException
   {
-    Config.validate(factory, ApplicationFactory.class);
+    if (! ApplicationFactory.class.isAssignableFrom(factory))
+      throw new ConfigException(L.l("application-factory '{0}' class must extend ApplicationFactory.",
+				    factory.getName()));
+
+    if (! hasConstructor(factory, ApplicationFactory.class))
+      throw new ConfigException(L.l("application-factory class '{0}' must either have an (ApplicationFactory) constructor or a null-arg constructor.",
+				    factory.getName()));
 
     _applicationFactory = factory;
   }
@@ -83,7 +92,13 @@ public class FactoryConfig
   private void setFacesContextFactory(Class factory)
     throws ConfigException
   {
-    Config.validate(factory, FacesContextFactory.class);
+    if (! FacesContextFactory.class.isAssignableFrom(factory))
+      throw new ConfigException(L.l("faces-context-factory '{0}' class must extend FacesContextFactory.",
+				    factory.getName()));
+
+    if (! hasConstructor(factory, FacesContextFactory.class))
+      throw new ConfigException(L.l("faces-context-factory class '{0}' must either have an (FacesContextFactory) constructor or a null-arg constructor.",
+				    factory.getName()));
 
     _facesContextFactory = factory;
   }
@@ -98,7 +113,13 @@ public class FactoryConfig
   private void setLifecycleFactory(Class factory)
     throws ConfigException
   {
-    Config.validate(factory, LifecycleFactory.class);
+    if (! LifecycleFactory.class.isAssignableFrom(factory))
+      throw new ConfigException(L.l("lifecycle-factory '{0}' class must extend LifecycleFactory.",
+				    factory.getName()));
+
+    if (! hasConstructor(factory, LifecycleFactory.class))
+      throw new ConfigException(L.l("lifecycle-factory class '{0}' must either have an (LifecycleFactory) constructor or a null-arg constructor.",
+				    factory.getName()));
 
     _lifecycleFactory = factory;
   }
@@ -113,7 +134,13 @@ public class FactoryConfig
   private void setRenderKitFactory(Class factory)
     throws ConfigException
   {
-    Config.validate(factory, RenderKitFactory.class);
+    if (! RenderKitFactory.class.isAssignableFrom(factory))
+      throw new ConfigException(L.l("render-kit-factory '{0}' class must extend RenderKitFactory.",
+				    factory.getName()));
+
+    if (! hasConstructor(factory, RenderKitFactory.class))
+      throw new ConfigException(L.l("render-kit-factory class '{0}' must either have an (RenderKitFactory) constructor or a null-arg constructor.",
+				    factory.getName()));
 
     _renderKitFactory = factory;
   }
@@ -161,5 +188,26 @@ public class FactoryConfig
     } catch (Exception e) {
       throw new ConfigException(e);
     }
+  }
+
+  private boolean hasConstructor(Class factoryClass, Class api)
+  {
+    try {
+      Constructor ctor = factoryClass.getConstructor(api);
+
+      if (ctor != null)
+	return true;
+    } catch (NoSuchMethodException e) {
+    }
+    
+    try {
+      Constructor ctor = factoryClass.getConstructor();
+
+      if (ctor != null)
+	return true;
+    } catch (NoSuchMethodException e) {
+    }
+
+    return false;
   }
 }

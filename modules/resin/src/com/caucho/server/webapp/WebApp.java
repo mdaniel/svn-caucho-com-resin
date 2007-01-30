@@ -37,6 +37,7 @@ import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.ResourceRef;
 import com.caucho.config.types.Validator;
+import com.caucho.i18n.CharacterEncoding;
 import com.caucho.jsp.JspServlet;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -185,6 +186,8 @@ public class WebApp extends ServletContextImpl
   private SessionManager _sessionManager;
   // True if the session manager is inherited
   private boolean _isInheritSession;
+
+  private String _characterEncoding;
 
   // The cache
   private AbstractCache _cache;
@@ -695,6 +698,14 @@ public class WebApp extends ServletContextImpl
     config.setServletContext(this);
 
     _servletManager.addServlet(config);
+  }
+
+  /**
+   * Returns the character encoding.
+   */
+  public String getCharacterEncoding()
+  {
+    return _characterEncoding;
   }
 
   /**
@@ -1609,6 +1620,8 @@ public class WebApp extends ServletContextImpl
 
       if (getSessionManager() != null)
 	getSessionManager().init();
+
+      _characterEncoding = CharacterEncoding.getLocalEncoding();
 
       for (int i = 0; i < _resourceValidators.size(); i++) {
 	Validator validator = _resourceValidators.get(i);

@@ -90,7 +90,12 @@ public class NumberConverter implements Converter
 
   public Locale getLocale()
   {
-    return _locale;
+    if (_locale != null)
+      return _locale;
+
+    FacesContext context = FacesContext.getCurrentInstance();
+    
+    return context.getViewRoot().getLocale();
   }
 
   public void setLocale(Locale locale)
@@ -297,6 +302,16 @@ public class NumberConverter implements Converter
 
       if (_currencyCode != null)
 	format.setCurrency(Currency.getInstance(_currencyCode));
+      else if (_currencySymbol != null) {
+	if (format instanceof DecimalFormat) {
+	  DecimalFormat decimalFormat = (DecimalFormat) format;
+	  DecimalFormatSymbols symbols
+	    = decimalFormat.getDecimalFormatSymbols();
+
+	  symbols.setCurrencySymbol(_currencySymbol);
+	  decimalFormat.setDecimalFormatSymbols(symbols);
+	}
+      }
     }
     else if ("percent".equals(_type)) {
       if (locale != null)

@@ -110,6 +110,11 @@ public class ManagedProperty
       ((MappedEntries) _value).addProgram(program, _name, type);
       return;
     }
+    else if (_value instanceof ListEntries) {
+      ((ListEntries) _value).addProgram(program, _name, type);
+      return;
+    }
+    
     String name = ("set"
 		   + Character.toUpperCase(_name.charAt(0))
 		   + _name.substring(1));
