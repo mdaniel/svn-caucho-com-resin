@@ -63,6 +63,13 @@ abstract public class EntityItem {
     return getEntity();
   }
 
+  public Entity loadEntity(AmberConnection aConn,
+                           int index,
+                           Map preloadedProperties)
+  {
+    return getEntity();
+  }
+
   abstract public void save(Entity item);
 
   abstract public void savePart(Entity item);

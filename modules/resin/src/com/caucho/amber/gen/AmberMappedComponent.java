@@ -1209,12 +1209,21 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // println("pstmt.close();");
 
     out.println("__caucho_item = new com.caucho.amber.entity.CacheableEntityItem(home.getHome(), new " + getClassName() + "());");
+
     out.println(getClassName() + " entity = (" + getClassName() + ") __caucho_item.getEntity();");
     out.println("entity.__caucho_home = home;");
 
     ArrayList<IdField> keys = _relatedType.getId().getKeys();
+
+    out.println("Object pk = null;");
+
     for (IdField key : keys) {
-      String value = key.generateGet("super");
+      String value;
+
+      if (keys.size() == 1)
+        value = key.getType().generateCastFromObject("(pk = __caucho_getPrimaryKey())");
+      else
+        value = key.generateGet("super");
 
       out.println(key.generateSet("entity", value) + ";");
     }
@@ -1227,6 +1236,15 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.print("entity.__caucho_loadMask_" + i + " = ");
       out.println(_relatedType.getCreateLoadMask(i) + ";");
     }
+
+    out.println();
+    out.println("if (pk == null)");
+    out.println("  pk = __caucho_getPrimaryKey();");
+
+    // jpa/0i5e
+    out.println();
+    out.println("aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.EntityType) __caucho_home.getRootType(),");
+    out.println("                                     pk, __caucho_item);");
 
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");

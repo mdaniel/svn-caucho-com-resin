@@ -118,6 +118,35 @@ public class CacheableEntityItem extends EntityItem {
   }
 
   /**
+   * Returns the cached entity.
+   *
+   * @return true if the cached value is valid.
+   */
+  public Entity loadEntity(AmberConnection aConn,
+                           int loadGroup,
+                           Map preloadedProperties)
+  {
+    long now = Alarm.getCurrentTime();
+
+    if (_expireTime < now) {
+      _expireTime = now + _home.getCacheTimeout();
+      _cacheItem.__caucho_expire();
+    }
+
+    // jpa/0v33
+
+    try {
+      _cacheItem.__caucho_setConnection(aConn);
+      _cacheItem.__caucho_retrieve(aConn, preloadedProperties);
+    } catch (SQLException e) {
+      // XXX: item is dead
+      throw new RuntimeException(e);
+    }
+
+    return _cacheItem;
+  }
+
+  /**
    * Creates a bean instance
    */
   public Entity copy(AmberConnection aConn)

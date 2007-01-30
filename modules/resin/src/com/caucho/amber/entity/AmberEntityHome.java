@@ -414,7 +414,12 @@ public class AmberEntityHome {
           }
         }
 
-        item.loadEntity(0, preloadedProperties);
+        if (_manager.isJPA()) {
+          // jpa/0v33
+          item.loadEntity(aConn, 0, preloadedProperties);
+        }
+        else
+          item.loadEntity(0, preloadedProperties);
       }
 
       // XXX: jpa/0s2j

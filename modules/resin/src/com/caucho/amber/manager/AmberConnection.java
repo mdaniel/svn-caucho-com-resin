@@ -256,13 +256,13 @@ public class AmberConnection
   /**
    * Makes the instance managed.
    */
-  public void persist(Object entity)
+  public void persist(Object entityObject)
   {
     try {
-      if (entity == null)
+      if (entityObject == null)
         return;
 
-      checkEntityType(entity, "persist");
+      Entity entity = checkEntityType(entityObject, "persist");
 
       checkTransactionRequired("persist");
 
@@ -311,18 +311,16 @@ public class AmberConnection
       if (entityT == null)
         return null;
 
-      checkEntityType(entityT, "merge");
+      Entity entity = checkEntityType(entityT, "merge");
 
       flushInternal();
 
-      Entity entity = (Entity) entityT;
-
       int state = entity.__caucho_getEntityState();
 
+      Object pk = entity.__caucho_getPrimaryKey();
+
       log.finest(L.l("merge(class: '{0}' PK: '{1}' state: '{2}')",
-                     entity.getClass().getName(),
-                     entity.__caucho_getPrimaryKey(),
-                     state));
+                     entity.getClass().getName(), pk, state));
 
       if (state == com.caucho.amber.entity.Entity.TRANSIENT) {
         if (contains(entity)) {
@@ -334,8 +332,7 @@ public class AmberConnection
             Entity managedEntity = null;
 
             try {
-              managedEntity = (Entity) load(entity.getClass(),
-                                            entity.__caucho_getPrimaryKey());
+              managedEntity = (Entity) load(entity.getClass(), pk);
             } catch (AmberObjectNotFoundException e) {
               // JPA: should not throw at all, returns null only.
             }
@@ -397,11 +394,9 @@ public class AmberConnection
       if (entity == null)
         return;
 
-      checkEntityType(entity, "remove");
+      Entity instance = checkEntityType(entity, "remove");
 
       checkTransactionRequired("remove");
-
-      Entity instance = (Entity) entity;
 
       // jpa/0k12
       if (instance.__caucho_getConnection() == null) {
@@ -413,7 +408,7 @@ public class AmberConnection
           return;
         }
         else
-          throw new IllegalArgumentException(L.l("remove() operation can only be applied to a managed entity. This entity instance is detached which means it was probably removed or needs to be merged."));
+          throw new IllegalArgumentException(L.l("remove() operation can only be applied to a managed entity. This entity instance '{0}' PK: '{1}' is detached which means it was probably removed or needs to be merged.", instance.getClass().getName(), instance.__caucho_getPrimaryKey()));
       }
 
       int state = instance.__caucho_getEntityState();
@@ -847,8 +842,9 @@ public class AmberConnection
         return entity;
 
       // jpa/0g0k setTransactionalState(entity);
-      if (entity.__caucho_getEntityState() == Entity.P_TRANSACTIONAL)
+      if (entity.__caucho_getEntityState() == Entity.P_TRANSACTIONAL) {
         return entity;
+      }
 
       // jpa/0j5f
     }
@@ -870,6 +866,14 @@ public class AmberConnection
         return null;
 
       addEntity(entity);
+
+      int index = getTransactionEntity(entity.getClass().getName(),
+                                       entity.__caucho_getPrimaryKey());
+
+      // jpa/0v33
+      if (index >= 0) {
+        setTransactionalState(_txEntities.get(index));
+      }
 
       return entity;
     }
@@ -1189,8 +1193,9 @@ public class AmberConnection
   {
     boolean added = false;
 
-    Entity oldEntity = getEntity(entity.getClass().getName(),
-                                 entity.__caucho_getPrimaryKey());
+    Object pk = entity.__caucho_getPrimaryKey();
+
+    Entity oldEntity = getEntity(entity.getClass().getName(), pk);
 
     // jpa/0s2d: if (! _entities.contains(entity)) {
     if (oldEntity == null) {
@@ -1200,8 +1205,7 @@ public class AmberConnection
 
     // jpa/0g06
     if (_isInTransaction) {
-      int index = getTransactionEntity(entity.getClass().getName(),
-                                       entity.__caucho_getPrimaryKey());
+      int index = getTransactionEntity(entity.getClass().getName(), pk);
 
       // jpa/0s2d: if (! _txEntities.contains(entity)) {
       if (index < 0) {
@@ -1763,9 +1767,7 @@ public class AmberConnection
     addCompletion(new RowInvalidateCompletion(table.getName(), key));
 
     // jpa/0ga8, jpa/0s2d if (! _txEntities.contains(entity)) {
-    int index = getTransactionEntity(entity.getClass().getName(),
-                                     entity.__caucho_getPrimaryKey());
-
+    int index = getTransactionEntity(entity.getClass().getName(), key);
 
     if (index < 0) {
       _txEntities.add(entity);
@@ -2072,6 +2074,7 @@ public class AmberConnection
     }
   }
 
+  /*
   public String toString()
   {
     if (_persistenceUnit != null)
@@ -2079,6 +2082,7 @@ public class AmberConnection
     else
       return "AmberConnection[closed]";
   }
+  */
 
   /**
    * Finalizer.
@@ -2196,7 +2200,7 @@ public class AmberConnection
       throw new TransactionRequiredException(L.l("{0}() operation can only be executed in the scope of a transaction.", operation));
   }
 
-  private void checkEntityType(Object entity, String operation)
+  private Entity checkEntityType(Object entity, String operation)
   {
     if (! (entity instanceof Entity))
       throw new IllegalArgumentException(L.l(operation + "() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit."));
@@ -2211,6 +2215,8 @@ public class AmberConnection
         throw new IllegalArgumentException(L.l(operation + "() operation can only be applied to an entity instance. If the argument is an entity, the class '{0}' must be specified in the orm.xml or annotated with @Entity and must be in the scope of a persistence unit.", className));
       }
     }
+
+    return (Entity) entity;
   }
 
   /**
