@@ -204,22 +204,43 @@ public class QuercusServlet
   {
     super.init(config);
 
+    String encoding = config.getInitParameter("script-encoding");
+    if (encoding != null) {
+      setScriptEncoding(encoding);
+    }
+    
+    String phpIniFile = config.getInitParameter("php-ini-file");
+    if (phpIniFile != null) {
+      Quercus quercus = getQuercus();
+      
+      Path path = quercus.getPwd().lookup(phpIniFile);
+      
+      setIniFile(path);
+    }
+
     String database = config.getInitParameter("database");
 
-    System.out.println("DB: " + database);
     if (database != null) {
       try {
-	Context ic = new InitialContext();
-	DataSource ds;
-	
-	if (! database.startsWith("java:comp"))
-	  ds = (DataSource) ic.lookup("java:comp/env/" + database);
-	else
-	  ds = (DataSource) ic.lookup(database);
+        Context ic = new InitialContext();
+        DataSource ds;
 
-	getQuercus().setDatabase(ds);
+        if (! database.startsWith("java:comp")) {
+          try {
+            ds = (DataSource) ic.lookup("java:comp/env/" + database);
+          }
+          catch (Exception e) {
+            // for glassfish
+            ds = (DataSource) ic.lookup(database);
+          }
+        }
+        else {
+          ds = (DataSource) ic.lookup(database);
+        }
+
+        getQuercus().setDatabase(ds);
       } catch (Exception e) {
-	throw new ServletException(e);
+        throw new ServletException(e);
       }
     }
     

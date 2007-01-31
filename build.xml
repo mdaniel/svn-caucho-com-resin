@@ -832,6 +832,20 @@
       </fileset>
     </jar>
 
+    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/quercus.jar"
+          file="${lib}/quercus.jar"/>
+    <copy tofile="${install}/php/quercus-war/WEB-INF/lib/resin-util.jar"
+          file="${lib}/resin-util.jar"/>
+
+    <jar destfile="${dist}/quercus-${version}.war">
+      <fileset dir="${install}/php/quercus-war">
+        <include name="WEB-INF/lib/quercus.jar"/>
+        <include name="WEB-INF/lib/resin-util.jar"/>
+        <include name="WEB-INF/web.xml"/>
+        <include name="index.php"/>
+      </fileset>
+    </jar>
+
     <copy tofile="${dist}/${shortproduct}-3_1-snap.zip"
           file="${dist}/${shortproduct}-${version}.zip"/>
 
@@ -890,6 +904,7 @@
     <delete dir="${install}/bin"/>
     <delete dir="${install}/doc/WEB-INF"/>
     <delete dir="${install}/cache"/>
+    <delete dir="${install}/php/quercus-war/WEB-INF/lib"/>
   </target>
 
   <target name="win32clean" if="win32binaries">
