@@ -32,6 +32,7 @@ package com.caucho.amber.gen;
 import com.caucho.amber.field.*;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
+import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.SubEntityType;
@@ -272,6 +273,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    out.println("try {");
+    out.pushDepth();
+
     out.print("return ");
 
     if (id == null)
@@ -280,6 +284,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.print(id.toObject(id.generateGetProperty("super")));
 
     out.println(";");
+
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("}");
 
     out.popDepth();
     out.println("}");
@@ -986,6 +995,14 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println(")");
     out.println("  __caucho_session.update((com.caucho.amber.entity.Entity) this);");
 
+    if (_relatedType.getPersistenceUnit().isJPA()) {
+      // XXX: jpa/0j5f
+
+      out.popDepth();
+      out.println("}");
+      return;
+    }
+
     out.println("if (__caucho_item != null) {");
     out.pushDepth();
 
@@ -1213,19 +1230,53 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println(getClassName() + " entity = (" + getClassName() + ") __caucho_item.getEntity();");
     out.println("entity.__caucho_home = home;");
 
-    ArrayList<IdField> keys = _relatedType.getId().getKeys();
+    Id id = _relatedType.getId();
 
     out.println("Object pk = null;");
 
-    for (IdField key : keys) {
-      String value;
+    if (! id.isEmbeddedId()) {
 
-      if (keys.size() == 1)
-        value = key.getType().generateCastFromObject("(pk = __caucho_getPrimaryKey())");
-      else
-        value = key.generateGet("super");
+      ArrayList<IdField> keys = id.getKeys();
 
-      out.println(key.generateSet("entity", value) + ";");
+      for (IdField key : keys) {
+        String value;
+
+        if (keys.size() == 1)
+          value = key.getType().generateCastFromObject("(pk = __caucho_getPrimaryKey())");
+        else
+          value = key.generateGet("super");
+
+        out.println(key.generateSet("entity", value) + ";");
+      }
+    }
+    else {
+      // jpa/0gh0
+
+      EmbeddableType embeddable = (EmbeddableType) id.getEmbeddedIdField().getType();
+
+      ArrayList<AmberField> fields = embeddable.getFields();
+
+      for (int i = 0; i < fields.size(); i++) {
+        AmberField field = (AmberField) fields.get(i);
+
+        String getter = field.getName();
+
+        if (_relatedType.isFieldAccess())
+          out.println(field.generateSet("__caucho_compound_key", getter) + ";");
+        else {
+          getter = Character.toUpperCase(getter.charAt(0)) +
+            (getter.length() == 1 ? "" : getter.substring(1));
+
+          String value = id.getEmbeddedIdField().generateSuperGetter() + ".get" + getter;
+
+          // jpa/0gh0
+          out.println("__caucho_compound_key.set" + getter + "(" + value + "());");
+        }
+      }
+
+      out.println("pk = __caucho_compound_key;");
+
+      out.println(id.getEmbeddedIdField().generateSet("entity", "__caucho_compound_key") + ";");
     }
 
     for (int i = 0; i < 1; i++) {
