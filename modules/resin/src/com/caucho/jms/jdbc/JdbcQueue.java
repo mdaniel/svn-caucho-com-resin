@@ -97,6 +97,8 @@ public class JdbcQueue extends JdbcDestination implements Queue {
     _jdbcManager.init();
 
     _id = createDestination(getName(), false);
+
+    super.init();
   }
 
   /**
@@ -132,7 +134,8 @@ public class JdbcQueue extends JdbcDestination implements Queue {
     purgeExpiredMessages();
     
     try {
-      _jdbcManager.getJdbcMessage().send(message, _id, expireTime);
+      JdbcMessage jdbcMessage = _jdbcManager.getJdbcMessage();
+      jdbcMessage.send(message, _id, expireTime);
     } catch (Exception e) {
       throw new JMSExceptionWrapper(e);
     }

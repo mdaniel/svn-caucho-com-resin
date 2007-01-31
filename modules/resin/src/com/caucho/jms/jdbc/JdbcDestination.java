@@ -36,6 +36,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -52,8 +53,6 @@ public class JdbcDestination extends AbstractDestination {
   static final L10N L = new L10N(JdbcDestination.class);
   
   protected JdbcManager _jdbcManager = new JdbcManager();
-  
-  private DataSource _dataSource;
   
   private String _name;
   
@@ -120,14 +119,13 @@ public class JdbcDestination extends AbstractDestination {
   }
 
   /**
-   * Initializes the JdbcQueue
+   * Initializes the JdbcDestination
    */
+  @PostConstruct
   public void init()
     throws ConfigException, SQLException
   {
     _jdbcManager.init();
-    
-    _dataSource = _jdbcManager.getDataSource();
   }
 
   /**

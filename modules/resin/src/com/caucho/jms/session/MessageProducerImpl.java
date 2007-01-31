@@ -56,6 +56,9 @@ public class MessageProducerImpl implements MessageProducer  {
 
   public MessageProducerImpl(SessionImpl session, Destination destination)
   {
+    assert session != null;
+    assert destination != null;
+
     _session = session;
     _destination = (AbstractDestination) destination;
   }
@@ -200,6 +203,8 @@ public class MessageProducerImpl implements MessageProducer  {
   public void send(Message message)
     throws JMSException
   {
+    assert message != null;
+
     send(_destination, message,
 	 _deliveryMode, _priority, _timeToLive);
   }
@@ -218,6 +223,8 @@ public class MessageProducerImpl implements MessageProducer  {
                    long timeToLive)
     throws JMSException
   {
+    assert message != null;
+
     send(_destination, message,
 	 deliveryMode, priority, timeToLive);
   }
@@ -231,6 +238,9 @@ public class MessageProducerImpl implements MessageProducer  {
   public void send(Destination destination, Message message)
     throws JMSException
   {
+    assert destination != null;
+    assert message != null;
+
     send(destination, message,
 	 _deliveryMode, _priority, _timeToLive);
   }
@@ -251,6 +261,9 @@ public class MessageProducerImpl implements MessageProducer  {
                    long timeToLive)
     throws JMSException
   {
+    assert destination != null;
+    assert message != null;
+
     if (_session == null || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getDeliveryMode(): message producer is closed."));
     

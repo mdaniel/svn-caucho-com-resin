@@ -41,6 +41,7 @@ import com.caucho.util.L10N;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.QueueReceiver;
+import javax.jms.MessageListener;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
@@ -200,9 +201,18 @@ public class JdbcQueueConsumer extends MessageConsumerImpl
     }
   }
 
+  @Override
+  public void setMessageListener(MessageListener listener)
+    throws JMSException
+  {
+    super.setMessageListener(listener,
+                             _queue.getJdbcManager().getPollInterval());
+  }
+
   /**
    * Receives a message from the queue.
    */
+  @Override
   protected MessageImpl receiveImpl()
     throws JMSException
   {
@@ -298,6 +308,7 @@ public class JdbcQueueConsumer extends MessageConsumerImpl
   /**
    * Acknowledges all received messages from the session.
    */
+  @Override
   public void acknowledge()
     throws JMSException
   {
@@ -333,6 +344,7 @@ public class JdbcQueueConsumer extends MessageConsumerImpl
   /**
    * Rollback all received messages from the session.
    */
+  @Override
   public void rollback()
     throws JMSException
   {
@@ -474,6 +486,7 @@ public class JdbcQueueConsumer extends MessageConsumerImpl
   /**
    * Returns a printable view of the queue.
    */
+  @Override
   public String toString()
   {
     return "JdbcQueueConsumer[" + _queue + "," + _consumerId + "]";

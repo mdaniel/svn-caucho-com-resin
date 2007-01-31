@@ -79,7 +79,7 @@ public class JdbcMessage
   private static final int OBJECT = 4;
   private static final int MAP = 5;
   
-  private JdbcManager _jdbcManager;
+  private final JdbcManager _jdbcManager;
   private DataSource _dataSource;
 
   private String _messageTable;
@@ -93,7 +93,7 @@ public class JdbcMessage
   }
 
   /**
-   * Initializes the JdbcQueue
+   * Initializes the JdbcMessage
    */
   public void init()
     throws ConfigException, SQLException

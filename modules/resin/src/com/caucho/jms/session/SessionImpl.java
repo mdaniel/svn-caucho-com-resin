@@ -114,6 +114,14 @@ public class SessionImpl implements Session, ThreadTask {
   }
 
   /**
+   * Returns the ClassLoader.
+   */
+  ClassLoader getClassLoader()
+  {
+    return _classLoader;
+  }
+
+  /**
    * Returns the connection's clientID
    */
   public String getClientID()
@@ -735,6 +743,8 @@ public class SessionImpl implements Session, ThreadTask {
   {
     checkOpen();
     
+    assert message != null;
+
     message.setJMSMessageID(queue.generateMessageID());
     message.setJMSDestination(queue);
     message.setJMSDeliveryMode(deliveryMode);
@@ -843,10 +853,10 @@ public class SessionImpl implements Session, ThreadTask {
 	    //queue = (AbstractDestination) consumer.getDestination();
 	    //Selector selector = consumer.getSelector();
 	    MessageListener listener = consumer.getMessageListener();
-	    
+
 	    if (_messageListener != null)
 	      listener = _messageListener;
-	    
+
 	    if (consumer.isActive() && ! isStopping() && listener != null) {
 	      try {
 		Message msg = consumer.receiveNoWait();

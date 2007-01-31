@@ -35,6 +35,7 @@ import com.caucho.jms.selector.SelectorParser;
 import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.util.AlarmListener;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -42,25 +43,28 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Session;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * A basic message consumer.
  */
 public class MessageConsumerImpl
-  implements MessageConsumer, MessageAvailableListener {
+  implements MessageConsumer, MessageAvailableListener
+{
   static final Logger log = Log.open(MessageConsumerImpl.class);
   static final L10N L = new L10N(MessageConsumerImpl.class);
 
   private final Object _consumerLock = new Object();
   
-  protected SessionImpl _session;
+  protected final SessionImpl _session;
   private AbstractDestination _queue;
   private MessageListener _messageListener;
   private String _messageSelector;
   protected Selector _selector;
   private boolean _noLocal;
-  
+
   private volatile boolean _isClosed;
+  private Alarm _pollAlarm;
 
   protected MessageConsumerImpl(SessionImpl session,
                                 String messageSelector,
@@ -122,11 +126,29 @@ public class MessageConsumerImpl
   public void setMessageListener(MessageListener listener)
     throws JMSException
   {
+    setMessageListener(listener, -1);
+  }
+
+  /**
+   * Sets the message listener with a poll interval
+   */
+  public void setMessageListener(MessageListener listener, long pollInterval)
+    throws JMSException
+  {
     if (_isClosed || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("setMessageListener(): MessageConsumer is closed."));
-    
+
+    if (_pollAlarm != null) {
+      _pollAlarm.dequeue();
+      _pollAlarm = null;
+    }
+
     _messageListener = listener;
     _session.setAsynchronous();
+
+    if (_messageListener != null && pollInterval > -1) {
+      _pollAlarm = new Alarm(new PollAlarmListener(pollInterval), pollInterval);
+    }
   }
 
   /**
@@ -299,6 +321,52 @@ public class MessageConsumerImpl
       try {
 	_consumerLock.notify();
       } catch (Throwable e) {
+      }
+    }
+  }
+
+  private class PollAlarmListener implements AlarmListener {
+    private final long _pollInterval;
+
+    public PollAlarmListener(long pollInterval)
+    {
+      _pollInterval = pollInterval;
+    }
+
+    public void handleAlarm(Alarm alarm)
+    {
+      if (isClosed())
+        return;
+
+      MessageListener messageListener = _messageListener;
+
+      if (messageListener == null)
+        return;
+
+      ClassLoader classLoader = _session.getClassLoader();
+
+      try {
+        Message msg = receiveNoWait();
+
+        if (msg != null) {
+          Thread thread = Thread.currentThread();
+
+          ClassLoader oldLoader = thread.getContextClassLoader();
+
+          try {
+            thread.setContextClassLoader(classLoader);
+            messageListener.onMessage(msg);
+          }
+          finally {
+            thread.setContextClassLoader(oldLoader);
+          }
+        }
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+      finally {
+        if (!isClosed())
+          _pollAlarm.queue(_pollInterval);
       }
     }
   }

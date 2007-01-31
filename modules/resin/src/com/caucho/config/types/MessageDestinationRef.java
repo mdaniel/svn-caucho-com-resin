@@ -78,6 +78,10 @@ public class MessageDestinationRef
     _modulePath = Vfs.getPwd();
   }
 
+  public void setDescription(String description)
+  {
+  }
+
   public void setMessageDestinationRefName(String refName)
   {
     _refName = refName;

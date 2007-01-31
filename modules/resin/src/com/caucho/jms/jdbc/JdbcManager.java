@@ -35,6 +35,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
 import javax.sql.DataSource;
+import javax.annotation.PostConstruct;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -66,6 +67,7 @@ public class JdbcManager {
   private boolean _isTruncateBlob;
 
   private long _purgeInterval = 60000L;
+  private long _pollInterval = -1;
 
   private JdbcMessage _jdbcMessage;
 
@@ -218,6 +220,23 @@ public class JdbcManager {
   }
 
   /**
+   * Sets the poll interval for destinations that have a listener, default
+   * is to do no polling.
+   */
+  public void setPollInterval(Period pollInterval)
+  {
+    _pollInterval = pollInterval.getPeriod();
+  }
+
+  /**
+   * Returns the poll interval.
+   */
+  public long getPollInterval()
+  {
+    return _pollInterval;
+  }
+
+  /**
    * Returns the JDBC message manager.
    */
   public JdbcMessage getJdbcMessage()
@@ -236,6 +255,7 @@ public class JdbcManager {
   /**
    * Initializes the JdbcManager
    */
+  @PostConstruct
   public void init()
     throws ConfigException, SQLException
   {

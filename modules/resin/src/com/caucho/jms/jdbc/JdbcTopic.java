@@ -89,7 +89,7 @@ public class JdbcTopic extends JdbcDestination implements Topic {
   }
 
   /**
-   * Initializes the JdbcQueue
+   * Initializes the JdbcTopic
    */
   @PostConstruct
   public void init()
@@ -104,6 +104,9 @@ public class JdbcTopic extends JdbcDestination implements Topic {
     _jdbcManager.init();
 
     _id = createDestination(getName(), true);
+
+    super.init();
+
   }
 
   /**
