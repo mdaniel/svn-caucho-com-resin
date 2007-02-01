@@ -101,8 +101,6 @@ class HtmlSelectManyMenuRenderer extends Renderer
     else if (value instanceof Object[])
       values = (Object []) values;
 
-    System.out.println("SVG: " + values);
-    
     uiSelectMany.setSelectedValues(values);
     uiSelectMany.setValid(true);
 

@@ -154,6 +154,22 @@ public class PageContextImpl extends PageContext
     _jspPrintWriter = new JspPrintWriter();
   }
 
+  public PageContextImpl(WebApp webApp, Servlet servlet)
+  {
+    this();
+
+    _webApp = webApp;
+    _servlet = servlet;
+
+    if (servlet instanceof Page) {
+      Page page = (Page) servlet;
+
+      _functionMap = page._caucho_getFunctionMap();
+    }
+    else
+      _functionMap = null;
+  }
+
   public void initialize(Servlet servlet,
 			 ServletRequest request,
 			 ServletResponse response,
@@ -1901,6 +1917,10 @@ public class PageContextImpl extends PageContext
   public class PageVariableMapper extends ImplicitVariableMapper {
     public ValueExpression resolveVariable(String var)
     {
+      return super.resolveVariable(var);
+      
+      /*
+	// XXX: why? wouldn't this code be dynamic?
       ValueExpression expr = super.resolveVariable(var);
 
       if (expr != null)
@@ -1912,8 +1932,8 @@ public class PageContextImpl extends PageContext
 	return (ValueExpression) value;
       else
 	return null;
+      */
     }
-  
 
     public ValueExpression setVariable(String variable,
 				       ValueExpression expr)

@@ -46,56 +46,59 @@ import javax.xml.bind.annotation.*;
 
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
+import com.caucho.jsf.el.*;
 import com.caucho.util.*;
 
-public class AttributeConfig extends DescriptionGroupConfig
+public class ComponentConfig extends DescriptionGroupConfig
 {
-  private String _name;
+  private static final L10N L = new L10N(ComponentConfig.class);
+
+  private String _configLocation;
   
+  private String _type;
   private Class _class;
-  
-  private String _defaultValue;
-  
-  private String _suggestedValue;
-
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  public void setAttributeName(String name)
-  {
-    setName(name);
-  }
 
   public void setClass(Class cl)
-    throws ConfigException
   {
-    Config.checkCanInstantiate(cl);
+    Config.validate(cl, UIComponent.class);
 
     _class = cl;
   }
 
-  public void setAttributeClass(Class cl)
+  public void setType(String type)
+  {
+    _type = type;
+  }
+
+  public void setComponentClass(Class cl)
+  {
+    setClass(cl);
+  }
+
+  public void setComponentType(String type)
+  {
+    setType(type);
+  }
+
+  public void addAttribute(AttributeConfig attr)
+  {
+  }
+
+  public void addFacet(FacetConfig facet)
+  {
+  }
+
+  public void addProperty(PropertyConfig prop)
+  {
+  }
+
+  public void setComponentExtension(BuilderProgram program)
     throws ConfigException
   {
-    Config.checkCanInstantiate(cl);
-
-    _class = cl;
   }
 
-  public void setDefaultValue(String defaultValue)
+  public void configure(Application app)
   {
-    _defaultValue = defaultValue;
-  }
-
-  public void setSuggestedValue(String suggestedValue)
-  {
-    _suggestedValue = suggestedValue;
-  }
-
-  public void setApplicationExtension(BuilderProgram program)
-    throws ConfigException
-  {
+    app.addComponent(_type, _class.getName());
   }
 }

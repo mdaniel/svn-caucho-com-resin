@@ -46,10 +46,11 @@ import javax.faces.validator.*;
 import javax.xml.bind.annotation.*;
 
 import com.caucho.config.*;
+import com.caucho.config.j2ee.*;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 
-public class ManagedProperty
+public class ManagedProperty extends DescriptionGroupConfig
 {
   private static final L10N L = new L10N(ManagedProperty.class);
   

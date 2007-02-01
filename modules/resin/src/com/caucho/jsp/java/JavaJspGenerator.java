@@ -1222,9 +1222,9 @@ public class JavaJspGenerator extends JspGenerator {
 
     try {
       if (type == null || type.equals(""))
-	_valueExprList.add(new ValueExpr(expr, null));
+	_valueExprList.add(new ValueExpr(value, expr, null));
       else
-	_valueExprList.add(new ValueExpr(expr, getBeanClass(type)));
+	_valueExprList.add(new ValueExpr(value, expr, getBeanClass(type)));
     } catch (ClassNotFoundException e) {
       throw new ELException(e);
     }
@@ -1327,18 +1327,7 @@ public class JavaJspGenerator extends JspGenerator {
       else if (BigDecimal.class.equals(retType))
 	exprType = "BigDecimalValueExpression";
       
-      out.println("private final static javax.el.ValueExpression _caucho_value_expr_" + i + " = new com.caucho.el." + exprType + "(");
-      out.print("  ");
-      expr.getExpr().printCreate(out.getWriteStream());
-      out.print(", \"");
-      out.printJavaString(expr.getExpr().getExpressionString());
-      out.print("\"");
-      if (expr.getReturnType() != null) {
-	out.print(", ");
-	out.printClass(expr.getReturnType());
-	out.print(".class");
-      }
-      out.println(");");
+      out.println("private javax.el.ValueExpression _caucho_value_expr_" + i + ";");
     }
     
     for (int i = 0; i < _methodExprList.size(); i++) {
@@ -1730,6 +1719,18 @@ public class JavaJspGenerator extends JspGenerator {
 	out.print("\", \"");
 	out.printJavaString(taglib.getURI());
 	out.print("\");");
+      }
+
+      out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, this);");
+      
+      for (int i = 0; i < _valueExprList.size(); i++) {
+	ValueExpr expr = _valueExprList.get(i);
+
+	out.print("_caucho_value_expr_" + i + " = com.caucho.jsp.JspUtil.createValueExpression(pageContext.getELContext(), ");
+	out.printClass(expr.getReturnType());
+	out.print(".class, \"");
+	out.printJavaString(expr.getExpressionString());
+	out.println("\");");
       }
 
       out.popDepth();
@@ -2234,13 +2235,20 @@ public class JavaJspGenerator extends JspGenerator {
   }
 
   static class ValueExpr {
+    private String _exprString;
     com.caucho.el.Expr _expr;
     Class _retType;
 
-    ValueExpr(com.caucho.el.Expr expr, Class retType)
+    ValueExpr(String exprString, com.caucho.el.Expr expr, Class retType)
     {
+      _exprString = exprString;
       _expr = expr;
       _retType = retType;
+    }
+
+    String getExpressionString()
+    {
+      return _exprString;
     }
 
     com.caucho.el.Expr getExpr()

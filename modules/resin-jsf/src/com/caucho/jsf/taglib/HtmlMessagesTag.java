@@ -36,37 +36,22 @@ import javax.el.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
-import javax.faces.event.*;
 
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 
 /**
- * The h:commandLink tag
+ * The h:messages tag
  */
-public class HtmlCommandLinkTag extends HtmlStyleBaseTag {
-  private MethodExpression _action;
-  
-  private ActionListener _actionListener;
-    
+public class HtmlMessagesTag extends HtmlStyleBaseTag {
   public String getComponentType()
   {
-    return HtmlCommandLink.COMPONENT_TYPE;
+    return HtmlMessages.COMPONENT_TYPE;
   }
   
   public String getRendererType()
   {
-    return "javax.faces.Link";
-  }
-
-  public void setAction(MethodExpression expr)
-  {
-    _action = expr;
-  }
-
-  public void setActionListener(MethodExpression expr)
-  {
-    _actionListener = new MethodExpressionActionListener(expr);
+    return "javax.faces.Messages";
   }
   
   /**
@@ -78,11 +63,5 @@ public class HtmlCommandLinkTag extends HtmlStyleBaseTag {
     component.setRendered(true);
     
     super.setProperties(component);
-
-    if (_action != null)
-      ((UICommand) component).setActionExpression(_action);
-    
-    if (_actionListener != null)
-      ((UICommand) component).addActionListener(_actionListener);
   }
 }

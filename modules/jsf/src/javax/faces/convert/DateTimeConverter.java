@@ -31,6 +31,7 @@ package javax.faces.convert;
 import java.util.*;
 import java.text.*;
 
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 
@@ -154,7 +155,6 @@ public class DateTimeConverter implements Converter
 			    String value)
     throws ConverterException
   {
-    System.out.println("GAS: " + value);
     if (context == null || component == null)
       throw new NullPointerException();
     
@@ -174,9 +174,52 @@ public class DateTimeConverter implements Converter
 	return format.parse(value);
       }
     } catch (ParseException e) {
-      e.printStackTrace();
+      String summary;
+      String detail;
       
-      throw new ConverterException(e);
+      if ("date".equals(_type)) {
+	summary = Util.l10n(context, DATE_ID,
+			    "{2}: \"{0}\" could not be understood as a date.",
+			    value,
+			    getExample(context),
+			    Util.getLabel(context, component));
+      
+	detail = Util.l10n(context, DATE_ID + "_detail",
+			   "{2}: \"{0}\" could not be understood as a percentage. Example: {1}.",
+			   value,
+			   getExample(context),
+			   Util.getLabel(context, component));
+      }
+      else if ("time".equals(_type)) {
+	summary = Util.l10n(context, TIME_ID,
+			    "{2}: \"{0}\" could not be understood as a time.",
+			    value,
+			    getExample(context),
+			    Util.getLabel(context, component));
+      
+	detail = Util.l10n(context, TIME_ID + "_detail",
+			   "{2}: \"{0}\" could not be understood as a time. Example: {1}.",
+			   value,
+			   getExample(context),
+			   Util.getLabel(context, component));
+      }
+      else {
+	summary = Util.l10n(context, DATETIME_ID,
+			    "{2}: \"{0}\" could not be understood as a date and time.",
+			    value,
+			    getExample(context),
+			    Util.getLabel(context, component));
+      
+	detail = Util.l10n(context, DATETIME_ID + "_detail",
+			   "{2}: \"{0}\" could not be understood as a date and time. Example: {1}.",
+			   value,
+			   getExample(context),
+			   Util.getLabel(context, component));
+      }
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+      
+      throw new ConverterException(msg, e);
     }
   }
   
@@ -293,6 +336,17 @@ public class DateTimeConverter implements Converter
       format.setTimeZone(_timeZone);
 
     return format;
+  }
+
+  private String getExample(FacesContext context)
+  {
+    DateFormat format = getFormat(context);
+
+    synchronized (format) {
+      Date date = new Date(894621091000L);
+      
+      return format.format(date);
+    }
   }
 
   public String toString()

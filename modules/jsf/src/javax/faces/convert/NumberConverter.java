@@ -31,6 +31,7 @@ package javax.faces.convert;
 import java.util.*;
 import java.text.*;
 
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 
@@ -239,14 +240,65 @@ public class NumberConverter implements Converter
 
     value = value.trim();
 
-    NumberFormat format = getFormat(context.getViewRoot().getLocale());
+    UIViewRoot viewRoot = context.getViewRoot();
+    Locale locale = null;
+    
+    if (viewRoot != null)
+      locale = viewRoot.getLocale();
+
+    NumberFormat format = getFormat(locale);
 
     try {
       synchronized (format) {
 	return format.parse(value);
       }
     } catch (ParseException e) {
-      throw new ConverterException(e);
+      String summary;
+      String detail;
+      
+      if ("percent".equals(_type)) {
+	summary = Util.l10n(context, PERCENT_ID,
+			    "{2}: \"{0}\" could not be understood as a percentage.",
+			    value,
+			    getExample(context),
+			    Util.getLabel(context, component));
+      
+	detail = Util.l10n(context, PERCENT_ID + "_detail",
+			   "{2}: \"{0}\" could not be understood as a percentage. Example: {1}.",
+			   value,
+			   getExample(context),
+			   Util.getLabel(context, component));
+      }
+      else if ("currency".equals(_type)) {
+	summary = Util.l10n(context, CURRENCY_ID,
+			    "{2}: \"{0}\" could not be understood as a currency value.",
+			    value,
+			    getExample(context),
+			    Util.getLabel(context, component));
+      
+	detail = Util.l10n(context, CURRENCY_ID + "_detail",
+			   "{2}: \"{0}\" could not be understood as a currency value. Example: {1}.",
+			   value,
+			   getExample(context),
+			   Util.getLabel(context, component));
+      }
+      else {
+	summary = Util.l10n(context, NUMBER_ID,
+			    "{2}: \"{0}\" could not be understood as a number.",
+			    value,
+			    getExample(context),
+			    Util.getLabel(context, component));
+      
+	detail = Util.l10n(context, NUMBER_ID + "_detail",
+			   "{2}: \"{0}\" could not be understood as a number. Example: {1}.",
+			   value,
+			   getExample(context),
+			   Util.getLabel(context, component));
+      }
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+      
+      throw new ConverterException(msg, e);
     }
   }
   
@@ -339,6 +391,24 @@ public class NumberConverter implements Converter
       ((DecimalFormat) format).applyPattern(_pattern);
 
     return format;
+  }
+
+  private String getExample(FacesContext context)
+  {
+    UIViewRoot viewRoot = context.getViewRoot();
+    Locale locale = null;
+
+    if (viewRoot != null)
+      locale = viewRoot.getLocale();
+    
+    NumberFormat format = getFormat(locale);
+
+    synchronized (format) {
+      if ("percentage".equals(_type))
+	return format.format(new Double(0.75));
+      else
+	return format.format(new Double(10125.25));
+    }
   }
 
   public String toString()

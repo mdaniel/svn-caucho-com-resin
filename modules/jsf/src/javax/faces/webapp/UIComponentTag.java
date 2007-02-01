@@ -89,6 +89,6 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
 
   public static boolean isValueReference(String value)
   {
-    return false;
+    return value.startsWith("#{") && value.endsWith("}");
   }
 }

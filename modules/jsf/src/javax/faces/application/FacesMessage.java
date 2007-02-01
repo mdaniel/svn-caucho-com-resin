@@ -165,6 +165,11 @@ public class FacesMessage implements java.io.Serializable
 
   public String toString()
   {
-    return "FacesMessage[" + this.summary + "]";
+    if (this.detail != null)
+      return "FacesMessage[" + this.severity + ",\"" + this.summary + "\",\"" + this.detail + "\"]";
+    else if (this.summary != null)
+      return "FacesMessage[" + this.severity + ",\"" + this.summary + "\"]";
+    else
+      return "FacesMessage[" + this.severity + "]";
   }
 }

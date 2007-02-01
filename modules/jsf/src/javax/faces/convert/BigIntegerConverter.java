@@ -28,6 +28,7 @@
 
 package javax.faces.convert;
 
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 
@@ -54,7 +55,25 @@ public class BigIntegerConverter implements Converter
     if (value.length() == 0)
       return null;
 
-    return new java.math.BigInteger(value.toString());
+    try {
+      return new java.math.BigInteger(value.toString());
+    } catch (NumberFormatException e) {
+      String summary = Util.l10n(context, BIGINTEGER_ID,
+				"{2}: \"{0}\" must be a number.",
+				 value,
+				 getExample(),
+				 Util.getLabel(context, component));
+      
+      String detail = Util.l10n(context, BIGINTEGER_ID + "_detail",
+				"{2}: \"{0}\" must be a number.  Example: {1}.",
+				value,
+				getExample(),
+				Util.getLabel(context, component));
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+
+      throw new ConverterException(msg, e);
+    }
   }
   
   public String getAsString(FacesContext context,
@@ -71,8 +90,13 @@ public class BigIntegerConverter implements Converter
       return String.valueOf(value);
   }
 
+  private String getExample()
+  {
+    return "1224";
+  }
+
   public String toString()
   {
-    return "ByteConverter[]";
+    return "BigIntegerConverter[]";
   }
 }

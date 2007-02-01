@@ -107,11 +107,29 @@ public class LengthValidator
     int len = str.length();
 
     if (len < getMinimum()) {
-      throw Util.validationExn(context, MINIMUM_MESSAGE_ID, new Object[] { value });
+      String summary = Util.l10n(context, MINIMUM_MESSAGE_ID,
+				 "{1}: Validation Error: Value is less than allowable minimum of '{0}'.",
+				 getMinimum(),
+				 Util.getLabel(context, component));
+	
+      String detail = summary;
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+	
+      throw new ValidatorException(msg);
     }
 
     if (getMaximum() < len) {
-      throw Util.validationExn(context, MAXIMUM_MESSAGE_ID, new Object[] { value });
+      String summary = Util.l10n(context, MAXIMUM_MESSAGE_ID,
+				 "{1}: Validation Error: Value is greater than allowable maximum of '{0}'.",
+				 getMaximum(),
+				 Util.getLabel(context, component));
+	
+      String detail = summary;
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+	
+      throw new ValidatorException(msg);
     }
   }
 

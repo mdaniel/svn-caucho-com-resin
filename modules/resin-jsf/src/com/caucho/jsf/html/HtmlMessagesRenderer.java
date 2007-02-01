@@ -32,6 +32,7 @@ import java.io.*;
 import java.util.*;
 
 import javax.faces.*;
+import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
@@ -52,6 +53,7 @@ class HtmlMessagesRenderer extends Renderer
   {
     return true;
   }
+  
   /**
    * Renders the open tag for the text.
    */
@@ -59,15 +61,168 @@ class HtmlMessagesRenderer extends Renderer
   public void encodeBegin(FacesContext context, UIComponent component)
     throws IOException
   {
+    UIMessages uiMessage = (UIMessages) component;
+
+    Iterator<FacesMessage> iter = context.getMessages();
+
     ResponseWriter out = context.getResponseWriter();
 
     String id = component.getId();
+
+    String dir;
+    String lang;
+    String layout;
+    String errorClass;
+    String errorStyle;
+    String fatalClass;
+    String fatalStyle;
+    String infoClass;
+    String infoStyle;
+    String style;
+    String styleClass;
+    String title;
+    boolean tooltip;
+    String warnClass;
+    String warnStyle;
+    boolean isShowSummary;
+    boolean isShowDetail;
     
     if (component instanceof HtmlMessages) {
-      HtmlMessages htmlOutput = (HtmlMessages) component;
+      HtmlMessages htmlComp = (HtmlMessages) component;
+
+      isShowSummary = htmlComp.isShowSummary();
+      isShowDetail = htmlComp.isShowDetail();
+
+      errorClass = htmlComp.getErrorClass();
+      errorStyle = htmlComp.getErrorStyle();
+
+      fatalClass = htmlComp.getFatalClass();
+      fatalStyle = htmlComp.getFatalStyle();
+
+      dir = htmlComp.getDir();
+
+      infoClass = htmlComp.getInfoClass();
+      infoStyle = htmlComp.getInfoStyle();
+      
+      lang = htmlComp.getLang();
+      layout = htmlComp.getLayout();
+      
+      style = htmlComp.getStyle();
+      styleClass = htmlComp.getStyleClass();
+      title = htmlComp.getTitle();
+      tooltip = htmlComp.isTooltip();
+
+      warnClass = htmlComp.getWarnClass();
+      warnStyle = htmlComp.getWarnStyle();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
+
+      isShowSummary = (Boolean) attrMap.get("showSummary");
+      isShowDetail = (Boolean) attrMap.get("showDetail");
+
+      dir = (String) attrMap.get("dir");
+      
+      errorClass = (String) attrMap.get("errorClass");
+      errorStyle = (String) attrMap.get("errorStyle");
+      fatalClass = (String) attrMap.get("fatalClass");
+      fatalStyle = (String) attrMap.get("fatalStyle");
+      infoClass = (String) attrMap.get("infoClass");
+      infoStyle = (String) attrMap.get("infoStyle");
+      warnClass = (String) attrMap.get("warnClass");
+      warnStyle = (String) attrMap.get("warnStyle");
+      
+      lang = (String) attrMap.get("lang");
+      layout = (String) attrMap.get("layout");
+      style = (String) attrMap.get("style");
+      styleClass = (String) attrMap.get("styleClass");
+      title = (String) attrMap.get("title");
+      tooltip = (Boolean) attrMap.get("tooltip");
+    }
+
+    boolean isFirst = true;
+
+    while (iter.hasNext()) {
+      FacesMessage msg = iter.next();
+
+      if (isFirst) {
+	if ("table".equals(layout))
+	  out.startElement("table", component);
+	else
+	  out.startElement("ul", component);
+
+	if (dir != null)
+	  out.writeAttribute("dir", dir, "dir");
+
+	if (lang != null)
+	  out.writeAttribute("lang", lang, "lang");
+
+	if (style != null)
+	  out.writeAttribute("style", style, "style");
+
+	if (styleClass != null)
+	  out.writeAttribute("class", styleClass, "styleClass");
+
+	if (title != null)
+	  out.writeAttribute("title", title, "title");
+      }
+      isFirst = false;
+      
+      if ("table".equals(layout)) {
+	out.startElement("tr", component);
+	out.startElement("td", component);
+      }
+      else
+	out.startElement("li", component);
+
+      if (FacesMessage.SEVERITY_ERROR.equals(msg.getSeverity())) {
+	if (errorClass != null)
+	  out.writeAttribute("class", errorClass, "errorClass");
+	
+	if (errorStyle != null)
+	  out.writeAttribute("style", errorStyle, "errorStyle");
+      }
+      else if (FacesMessage.SEVERITY_FATAL.equals(msg.getSeverity())) {
+	if (fatalClass != null)
+	  out.writeAttribute("class", fatalClass, "fatalClass");
+	
+	if (fatalStyle != null)
+	  out.writeAttribute("style", fatalStyle, "fatalStyle");
+      }
+      else if (FacesMessage.SEVERITY_INFO.equals(msg.getSeverity())) {
+	if (infoClass != null)
+	  out.writeAttribute("class", infoClass, "infoClass");
+	
+	if (infoStyle != null)
+	  out.writeAttribute("style", infoStyle, "infoStyle");
+      }
+      else if (FacesMessage.SEVERITY_WARN.equals(msg.getSeverity())) {
+	if (warnClass != null)
+	  out.writeAttribute("class", warnClass, "warnClass");
+	
+	if (warnStyle != null)
+	  out.writeAttribute("style", warnStyle, "warnStyle");
+      }
+
+      if (isShowSummary)
+	out.writeText(msg.getSummary(), "summary");
+      
+      if (isShowDetail)
+	out.writeText(msg.getDetail(), "detail");
+      
+      if ("table".equals(layout)) {
+	out.endElement("td");
+	out.endElement("tr");
+      }
+      else
+	out.endElement("li");
+    }
+    
+    if (! isFirst) {
+      if ("table".equals(layout))
+	out.endElement("table");
+      else
+	out.endElement("ul");
     }
   }
 
@@ -78,14 +233,6 @@ class HtmlMessagesRenderer extends Renderer
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
-
-    if (component instanceof HtmlMessages) {
-      HtmlMessages htmlOutput = (HtmlMessages) component;
-    }
-    else {
-      Map<String,Object> attrMap = component.getAttributes();
-    }
   }
 
   /**
@@ -95,7 +242,6 @@ class HtmlMessagesRenderer extends Renderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
   }
 
   public String toString()

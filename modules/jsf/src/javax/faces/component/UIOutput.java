@@ -149,7 +149,7 @@ public class UIOutput extends UIComponentBase implements ValueHolder
     return new Object[] {
       parent,
       _value,
-      _valueExpr
+      Util.save(_valueExpr, context)
     };
   }
 

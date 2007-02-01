@@ -40,46 +40,6 @@ jsf12_application = element application {
   & element application-extension { jsf12-any-Group }*
 }
 
-jsf12_faces-config = element faces-config {
-  attribute id { string }?
-
-  & attribute xsi:schemaLocation { string }
-
-  & attribute version { string }
-
-  & jsf12_application?
-
-  & jsf12_factory?
-
-  & jsf12_component*
-
-  & jsf12_converter*
-
-  & jsf12_lifecycle*
-
-  & jsf12_managed-bean*
-
-  & jsf12_navigation-rule*
-
-  & jsf12_referenced-bean*
-
-  & jsf12_render-kit?
-
-  & jsf12_validator*
-
-  & element faces-config-extension { jsf12-any-Group }*
-}
-
-jsf12_resource-bundle = element resource-bundle {
-  attribute id { string }?,
-
-  javaee_description-Group,
-
-  element base-name { javaee-class },
-
-  element var { string }
-}
-
 jsf12_attribute = element attribute {
   attribute id { string }?,
 
@@ -94,6 +54,106 @@ jsf12_attribute = element attribute {
   element suggested-value { string }?,
 
   element attribute-extension { jsf12-any-Group }*
+}
+
+jsf12_component = element component {
+  attribute id { string }?,
+
+  javaee_description-Group,
+
+  jsf12_component-type,
+
+  jsf12_component-class,
+
+  jsf12_facet*,
+
+  jsf12_attribute*,
+
+  jsf12_property*,
+
+  element component-extension { jsf12-any-Group }*
+}
+
+jsf12_component-class = element component-class {
+  string
+}
+
+jsf12_component-type = element component-type {
+  string
+}
+
+jsf12_converter = element converter {
+  attribute id {string }?,
+
+  javaee_description-Group,
+
+  (jsf12_converter-id
+
+   | jsf12_converter-for-class),
+
+  jsf12_converter-class,
+
+  jsf12_attribute*,
+
+  jsf12_property*,
+
+  element converter-extension { jsf12-any-Group }*
+}
+
+jsf12_converter-id = element converter-id {
+  string
+}
+
+jsf12_converter-for-class = element converter-for-class {
+  string
+}
+
+jsf12_converter-class = element converter-class {
+  string
+}
+
+jsf12_faces-config = element faces-config {
+  attribute id { string }?
+
+  & attribute xsi:schemaLocation { string }
+
+  & attribute version { string }
+
+  & jsf12_application*
+
+  & jsf12_factory*
+
+  & jsf12_component*
+
+  & jsf12_converter*
+
+  & jsf12_lifecycle*
+
+  & jsf12_managed-bean*
+
+  & jsf12_navigation-rule*
+
+  & jsf12_referenced-bean*
+
+  & jsf12_render-kit*
+
+  & jsf12_validator*
+
+  & element faces-config-extension { jsf12-any-Group }*
+}
+
+jsf12_facet = element facet {
+  attribute id { string }?,
+
+  javaee_description-Group,
+
+  element facet-name { string },
+
+  element facet-extension { jsf12-any-Group }*
+}
+
+jsf12_facet-name = element facet-name {
+  string
 }
 
 jsf12_factory = element factory {
@@ -253,6 +313,16 @@ jsf12_referenced-bean = element referenced-bean {
   element referenced-bean-class { javaee-class }
 }
 
+jsf12_resource-bundle = element resource-bundle {
+  attribute id { string }?,
+
+  javaee_description-Group,
+
+  element base-name { javaee-class },
+
+  element var { string }
+}
+
 jsf12_render-kit = element render-kit {
   attribute id { string }?,
 
@@ -309,14 +379,6 @@ jsf12_value = element value {
   string
 }
 
-jsf12_component = element component {
-  string
-}
-
-jsf12_converter = element converter {
-  string
-}
-
 jsf12_phase-listener = element phase-listener {
   string
 }
@@ -334,9 +396,5 @@ jsf12_from-outcome = element from-outcome {
 }
 
 jsf12_default-value = element default-value {
-  string
-}
-
-jsf12_facet = element facet {
   string
 }

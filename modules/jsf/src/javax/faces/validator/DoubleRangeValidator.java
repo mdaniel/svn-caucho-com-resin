@@ -110,22 +110,56 @@ public class DoubleRangeValidator
       try {
 	value = Double.parseDouble((String) value);
       } catch (Exception e) {
-	throw Util.validationExn(context, TYPE_MESSAGE_ID, new Object[] { value });
+	String summary = Util.l10n(context, TYPE_MESSAGE_ID,
+				   "{0}: Validation Error: Value is not of the correct type.",
+				   Util.getLabel(context, component));
+	
+	String detail = summary;
+
+	FacesMessage msg = new FacesMessage(summary, detail);
+	
+	throw new ValidatorException(msg, e);
       }
     }
 
     if (! (value instanceof Number)) {
-      throw Util.validationExn(context, TYPE_MESSAGE_ID, new Object[] { value });
+      String summary = Util.l10n(context, TYPE_MESSAGE_ID,
+				 "{0}: Validation Error: Value is not of the correct type.",
+				 Util.getLabel(context, component));
+	
+      String detail = summary;
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+	
+      throw new ValidatorException(msg);
     }
 
     Number v = (Number) value;
 
     if (v.doubleValue() < getMinimum()) {
-      throw Util.validationExn(context, MINIMUM_MESSAGE_ID, new Object[] { value });
+      String summary = Util.l10n(context, MINIMUM_MESSAGE_ID,
+				 "{1}: Validation Error: Value is less than allowable minimum of '{0}'.",
+				 getMinimum(),
+				 Util.getLabel(context, component));
+	
+      String detail = summary;
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+	
+      throw new ValidatorException(msg);
     }
 
     if (getMaximum() < v.doubleValue()) {
-      throw Util.validationExn(context, MAXIMUM_MESSAGE_ID, new Object[] { value });
+      String summary = Util.l10n(context, MAXIMUM_MESSAGE_ID,
+				 "{1}: Validation Error: Value is greater than allowable maximum of '{0}'.",
+				 getMaximum(),
+				 Util.getLabel(context, component));
+	
+      String detail = summary;
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+	
+      throw new ValidatorException(msg);
     }
   }
 

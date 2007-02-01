@@ -48,7 +48,7 @@ import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.util.*;
 
-public class AttributeConfig extends DescriptionGroupConfig
+public class FacetConfig extends DescriptionGroupConfig
 {
   private String _name;
   
@@ -63,25 +63,9 @@ public class AttributeConfig extends DescriptionGroupConfig
     _name = name;
   }
 
-  public void setAttributeName(String name)
+  public void setFacetName(String name)
   {
     setName(name);
-  }
-
-  public void setClass(Class cl)
-    throws ConfigException
-  {
-    Config.checkCanInstantiate(cl);
-
-    _class = cl;
-  }
-
-  public void setAttributeClass(Class cl)
-    throws ConfigException
-  {
-    Config.checkCanInstantiate(cl);
-
-    _class = cl;
   }
 
   public void setDefaultValue(String defaultValue)

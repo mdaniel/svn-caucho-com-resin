@@ -28,6 +28,7 @@
 
 package javax.faces.convert;
 
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 
@@ -54,7 +55,25 @@ public class IntegerConverter implements Converter
     if (value.length() == 0)
       return null;
 
-    return Integer.parseInt(value);
+    try {
+      return Integer.decode(value);
+    } catch (NumberFormatException e) {
+      String summary = Util.l10n(context, INTEGER_ID,
+				 "{2}: \"{0}\" must be an integer number.",
+				 value,
+				 getExample(),
+				 Util.getLabel(context, component));
+      
+      String detail = Util.l10n(context, INTEGER_ID + "_detail",
+				 "{2}: \"{0}\" must be a number between -2147483648 and 2147483647. Example: {1}.",
+				value,
+				getExample(),
+				Util.getLabel(context, component));
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+      
+      throw new ConverterException(msg, e);
+    }
   }
   
   public String getAsString(FacesContext context,
@@ -68,7 +87,12 @@ public class IntegerConverter implements Converter
     else if (value instanceof String)
       return (String) value;
     else
-      return String.valueOf(value);
+      return value.toString();
+  }
+
+  private String getExample()
+  {
+    return "112";
   }
 
   public String toString()

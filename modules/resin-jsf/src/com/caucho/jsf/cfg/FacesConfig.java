@@ -60,6 +60,18 @@ public class FacesConfig
 
   private FactoryConfig _factory;
 
+  private ArrayList<ComponentConfig> _componentList
+    = new ArrayList<ComponentConfig>();
+
+  private ArrayList<ConverterConfig> _converterList
+    = new ArrayList<ConverterConfig>();
+
+  private ArrayList<ValidatorConfig> _validatorList
+    = new ArrayList<ValidatorConfig>();
+
+  private ArrayList<RenderKitConfig> _renderKitList
+    = new ArrayList<RenderKitConfig>();
+
   private ArrayList<ManagedBeanConfig> _managedBeanList
     = new ArrayList<ManagedBeanConfig>();
 
@@ -99,6 +111,26 @@ public class FacesConfig
     return _managedBeanList;
   }
 
+  public void addComponent(ComponentConfig component)
+  {
+    _componentList.add(component);
+  }
+
+  public void addConverter(ConverterConfig converter)
+  {
+    _converterList.add(converter);
+  }
+
+  public void addValidator(ValidatorConfig validator)
+  {
+    _validatorList.add(validator);
+  }
+
+  public void addRenderKit(RenderKitConfig renderKit)
+  {
+    _renderKitList.add(renderKit);
+  }
+
   public ApplicationConfig getApplication()
   {
     return _application;
@@ -129,5 +161,20 @@ public class FacesConfig
   {
     if (_factory != null)
       _factory.init();
+  }
+
+  public void configure(Application app)
+  {
+    for (int i = 0; i < _componentList.size(); i++)
+      _componentList.get(i).configure(app);
+    
+    for (int i = 0; i < _converterList.size(); i++)
+      _converterList.get(i).configure(app);
+    
+    for (int i = 0; i < _validatorList.size(); i++)
+      _validatorList.get(i).configure(app);
+    
+    for (int i = 0; i < _renderKitList.size(); i++)
+      _renderKitList.get(i).configure();
   }
 }

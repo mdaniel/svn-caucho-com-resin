@@ -32,6 +32,7 @@ import java.util.*;
 
 import javax.el.*;
 
+import javax.faces.context.*;
 import javax.faces.component.*;
 
 public class HtmlOutputText extends UIOutput
@@ -245,6 +246,36 @@ public class HtmlOutputText extends UIOutput
     }
 
     super.setValueExpression(name, expr);
+  }
+
+  //
+  // state
+  //
+
+  public Object saveState(FacesContext context)
+  {
+    Object parent = super.saveState(context);
+
+    return new Object[] {
+      parent,
+      _escape,
+      Util.save(_escapeExpr, context),
+      _style,
+      Util.save(_styleExpr, context)
+    };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    if (state != null) 
+      super.restoreState(context, state[0]);
+
+    _escape = (Boolean) state[1];
+    _escapeExpr = Util.restore(state[2], Boolean.class, context);
+    _style = (String) state[3];
+    _styleExpr = Util.restore(state[4], String.class, context);
   }
 
   //

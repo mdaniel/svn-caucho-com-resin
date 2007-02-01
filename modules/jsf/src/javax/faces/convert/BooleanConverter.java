@@ -28,6 +28,7 @@
 
 package javax.faces.convert;
 
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 
@@ -45,7 +46,9 @@ public class BooleanConverter implements Converter
 			    String value)
     throws ConverterException
   {
-    // XXX: incorrect
+    if (context == null || component == null)
+      throw new NullPointerException();
+    
     if (value == null)
       return null;
 
@@ -54,7 +57,25 @@ public class BooleanConverter implements Converter
     if (value.length() == 0)
       return null;
 
-    return "true".equals(value);
+    if ("true".equalsIgnoreCase(value))
+      return true;
+    else if ("false".equalsIgnoreCase(value))
+      return true;
+    else {
+      String summary = Util.l10n(context, BOOLEAN_ID,
+				 "{1}: \"{0}\" must be 'true' or 'false'.",
+				 value, 
+				 Util.getLabel(context, component));
+      
+      String detail = Util.l10n(context, BOOLEAN_ID + "_detail",
+				"{1}: \"{0}\" must be 'true' or 'false'.  Any value other than 'true' will evaluate to 'false'.",
+				value, 
+				Util.getLabel(context, component));
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+      
+      throw new ConverterException(msg);
+    }
   }
   
   public String getAsString(FacesContext context,
@@ -62,13 +83,17 @@ public class BooleanConverter implements Converter
 			    Object value)
     throws ConverterException
   {
-    // XXX: incorrect
+    if (context == null || component == null)
+      throw new NullPointerException();
+    
     if (value == null)
       return "";
     else if (value instanceof String)
       return (String) value;
+    else if (value instanceof Boolean)
+      return value.toString();
     else
-      return String.valueOf(value);
+      return value.toString();
   }
 
   public String toString()

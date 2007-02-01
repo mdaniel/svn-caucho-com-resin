@@ -36,6 +36,7 @@ import javax.el.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
+import javax.faces.event.*;
 
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
@@ -44,8 +45,8 @@ import javax.servlet.jsp.tagext.*;
  * The h:commandButton tag
  */
 public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
-  private MethodExpression _actionExpr;
-  private MethodExpression _actionListenerExpr;
+  private MethodExpression _action;
+  private ActionListener _actionListener;
     
   public String getComponentType()
   {
@@ -59,12 +60,12 @@ public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
 
   public void setAction(MethodExpression expr)
   {
-    _actionExpr = expr;
+    _action = expr;
   }
 
   public void setActionListener(MethodExpression expr)
   {
-    _actionExpr = expr;
+    _actionListener = new MethodExpressionActionListener(expr);
   }
   
   /**
@@ -77,7 +78,10 @@ public class HtmlCommandButtonTag extends HtmlStyleBaseTag {
     
     super.setProperties(component);
 
-    if (_actionExpr != null)
-      ((UICommand) component).setActionExpression(_actionExpr);
+    if (_action != null)
+      ((UICommand) component).setActionExpression(_action);
+    
+    if (_actionListener != null)
+      ((UICommand) component).addActionListener(_actionListener);
   }
 }

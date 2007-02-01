@@ -90,8 +90,11 @@ final class Util
   static String save(ValueExpression expr,
 		     FacesContext context)
   {
-    if (expr != null)
+    if (expr != null) {
+      System.out.println("EXPR: " + expr.getExpressionString());
+      
       return expr.getExpressionString();
+    }
     else
       return null;
   }

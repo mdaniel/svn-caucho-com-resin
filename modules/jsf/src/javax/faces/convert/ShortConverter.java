@@ -28,6 +28,7 @@
 
 package javax.faces.convert;
 
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 
@@ -54,7 +55,25 @@ public class ShortConverter implements Converter
     if (value.length() == 0)
       return null;
 
-    return Short.parseShort(value);
+    try {
+      return Short.decode(value);
+    } catch (NumberFormatException e) {
+      String summary = Util.l10n(context, SHORT_ID,
+				 "{2}: \"{0}\" must be a number between -32768 and 32767.",
+				 value,
+				 getExample(),
+				 Util.getLabel(context, component));
+      
+      String detail = Util.l10n(context, SHORT_ID + "_detail",
+				"{2}: \"{0}\" must be a valid number -32768 and 32767. Example: {1}.",
+				value,
+				getExample(),
+				Util.getLabel(context, component));
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+      
+      throw new ConverterException(msg, e);
+    }
   }
   
   public String getAsString(FacesContext context,
@@ -68,7 +87,12 @@ public class ShortConverter implements Converter
     else if (value instanceof String)
       return (String) value;
     else
-      return String.valueOf(value);
+      return value.toString();
+  }
+
+  private String getExample()
+  {
+    return "112";
   }
 
   public String toString()

@@ -37,6 +37,9 @@ import java.util.Locale;
 public class LocaleUtil {
   public static Locale createLocale(String s)
   {
+    if (s == null)
+      return null;
+    
     int len = s.length();
     char ch = ' ';
 
@@ -52,7 +55,7 @@ public class LocaleUtil {
     String country = null;
     String var = null;
 
-    if (ch == '_') {
+    if (ch == '-' || ch == '_') {
       int head = ++i;
       
       for (;
@@ -65,7 +68,7 @@ public class LocaleUtil {
       country = s.substring(head, i);
     }
 
-    if (ch == '-') {
+    if (ch == '-' || ch == '_') {
       int head = ++i;
       
       for (;

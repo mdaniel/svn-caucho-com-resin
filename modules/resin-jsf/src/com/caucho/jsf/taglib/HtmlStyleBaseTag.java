@@ -682,12 +682,28 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("title", value);
   }
 
+  public void setTooltip(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("tooltip", value);
+  }
+
   public void setType(ValueExpression value)
   {
     if (_map == null)
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("type", value);
+  }
+
+  public void setUrl(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("url", value);
   }
 
   public void setUsemap(ValueExpression value)

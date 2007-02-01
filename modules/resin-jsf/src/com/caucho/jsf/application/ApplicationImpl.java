@@ -124,6 +124,9 @@ public class ApplicationImpl extends Application
     addComponent(UIColumn.COMPONENT_TYPE,
 		 "javax.faces.component.UIColumn");
 
+    addComponent(UIGraphic.COMPONENT_TYPE,
+		 "javax.faces.component.UIGraphic");
+
     addComponent(UIInput.COMPONENT_TYPE,
 		 "javax.faces.component.UIInput");
 
@@ -135,6 +138,15 @@ public class ApplicationImpl extends Application
 
     addComponent(UIParameter.COMPONENT_TYPE,
 		 "javax.faces.component.UIParameter");
+
+    addComponent(UISelectBoolean.COMPONENT_TYPE,
+		 "javax.faces.component.UISelectBoolean");
+
+    addComponent(UISelectOne.COMPONENT_TYPE,
+		 "javax.faces.component.UISelectOne");
+
+    addComponent(UISelectMany.COMPONENT_TYPE,
+		 "javax.faces.component.UISelectMany");
 
     addComponent(UISelectItem.COMPONENT_TYPE,
 		 "javax.faces.component.UISelectItem");
@@ -748,7 +760,7 @@ public class ApplicationImpl extends Application
       String validatorClass = _validatorClassMap.get(validatorId);
 
       if (validatorClass == null)
-	throw new FacesException(L.l("'{0}' is not a know validator.",
+	throw new FacesException(L.l("'{0}' is not a known validator.",
 				     validatorId));
       
       Thread thread = Thread.currentThread();

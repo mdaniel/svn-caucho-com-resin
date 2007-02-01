@@ -765,25 +765,32 @@ public abstract class UIComponentBase extends UIComponent
       _id,
       _exprMap,
       _isRendered,
-      _isRenderedExpr,
+      Util.save(_isRenderedExpr, context),
       rendererCode,
       rendererString,
       (_attributeMap != null ? _attributeMap.getExtMap() : null),
     };
   }
 
-  public void restoreState(FacesContext context, Object state)
+  public void restoreState(FacesContext context, Object stateObj)
   {
-    Object []v = (Object []) state;
+    Object []state = (Object []) stateObj;
 
-    _id = (String) v[0];
-    _exprMap = (HashMap) v[1];
+    _id = (String) state[0];
+    _exprMap = (HashMap) state[1];
 
-    _isRendered = (Boolean) v[2];
-    _isRenderedExpr = (ValueExpression) v[3];
+    _isRendered = (Boolean) state[2];
+    _isRenderedExpr = Util.restore(state[3], Boolean.class, context);
 
-    _rendererType = (String) v[4];
-    HashMap<String,Object> extMap = (HashMap) v[5];
+    Integer rendererCode = (Integer) state[4];
+    String rendererString = (String) state[5];
+
+    if (rendererCode != null)
+      _rendererType = _codeToRendererMap.get(rendererCode);
+    else
+      _rendererType = rendererString;
+    
+    HashMap<String,Object> extMap = (HashMap) state[6];
 
     if (extMap != null) {
       if (_attributeMap == null)
@@ -814,6 +821,74 @@ public abstract class UIComponentBase extends UIComponent
 	  _facets.remove(entry.getKey());
 	  break;
 	}
+      }
+    }
+  }
+
+  public static Object saveAttachedState(FacesContext context,
+					 Object attachedObject)
+  {
+    if (attachedObject == null)
+      return null;
+    else if (attachedObject instanceof List) {
+      List list = (List) attachedObject;
+
+      StateList values = new StateList();
+      int len = list.size();
+      
+      for (int i = 0; i < len; i++) {
+	values.add(saveAttachedState(context, list.get(i)));
+      }
+
+      return values;
+    }
+    else
+      return new StateHandle(context, attachedObject);
+  }
+
+  public static Object restoreAttachedState(FacesContext context,
+					    Object stateObject)
+  {
+    if (stateObject == null)
+      return null;
+    else if (stateObject instanceof StateList)
+      return stateObject;
+    else if (stateObject instanceof StateHandle)
+      return ((StateHandle) stateObject).restore(context);
+    else
+      throw new IllegalStateException("state object was not saved by saveAttachedState");
+  }
+
+  private static class StateList extends ArrayList {
+  }
+  
+  private static class StateHandle implements java.io.Serializable {
+    private Class _class;
+    private Object _state;
+
+    public StateHandle()
+    {
+    }
+
+    public StateHandle(FacesContext context, Object value)
+    {
+      _class = value.getClass();
+
+      if (value instanceof StateHolder)
+	_state = ((StateHolder) value).saveState(context);
+    }
+
+    public Object restore(FacesContext context)
+    {
+      try {
+	Object value = _class.newInstance();
+
+	if (value instanceof StateHolder)
+	  ((StateHolder) value).restoreState(context, _state);
+
+	return value;
+      } catch (Exception e) {
+	throw new RuntimeException(e);
       }
     }
   }

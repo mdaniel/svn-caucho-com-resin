@@ -78,11 +78,27 @@ public class SessionStateManager extends StateManager
     return new SerializedView(saveView(context), null);
   }
   
+  public void writeState(FacesContext context, Object state)
+  {
+    Map<String,Object> sessionMap
+      = context.getExternalContext().getSessionMap();
+
+    sessionMap.put(context.getViewRoot().getViewId(), state);
+  }
+  
   public UIViewRoot restoreView(FacesContext context,
 				String viewId,
 				String renderKitId)
   {
-    throw new UnsupportedOperationException();
+    Map<String,Object> sessionMap
+      = context.getExternalContext().getSessionMap();
+
+    Object state = sessionMap.get(viewId);
+
+    if (state == null)
+      return null;
+
+    return restoreView(context, (byte []) state);
   }
 
   private void serialize(AbstractHessianOutput out,
@@ -109,18 +125,29 @@ public class SessionStateManager extends StateManager
     if (typeId <= 0)
       out.writeString(comp.getClass().getName());
 
-    int childCount = comp.getChildCount();
-    out.writeInt(childCount);
-    
-    if (childCount > 0) {
+    int fullChildCount = comp.getChildCount();
+    if (fullChildCount > 0) {
+      int childCount = 0;
+
       List<UIComponent> children = comp.getChildren();
       
-      for (int i = 0; i < childCount; i++) {
+      for (int i = 0; i < fullChildCount; i++) {
+	UIComponent child = children.get(i);
+
+	if (! child.isTransient())
+	  childCount++;
+      }
+
+      out.writeInt(childCount);
+    
+      for (int i = 0; i < fullChildCount; i++) {
 	UIComponent child = children.get(i);
 
 	serialize(out, context, child, idMap);
       }
     }
+    else
+      out.writeInt(0);
 
     int facetCount = comp.getFacetCount();
     out.writeInt(facetCount);
@@ -137,7 +164,7 @@ public class SessionStateManager extends StateManager
   }
     
   private UIViewRoot restoreView(FacesContext context,
-				byte []data)
+				 byte []data)
   {
     if (data == null)
       return null;
@@ -162,7 +189,7 @@ public class SessionStateManager extends StateManager
     int typeId = in.readInt();
 
     Class type;
-    
+
     if (typeId > 0) {
       type = _typeList.get(typeId);
     }
@@ -177,7 +204,6 @@ public class SessionStateManager extends StateManager
     UIComponent comp = (UIComponent) type.newInstance();
 
     int childCount = in.readInt();
-    
     for (int i = 0; i < childCount; i++) {
       comp.getChildren().add(deserialize(in, context));
     }
@@ -205,7 +231,7 @@ public class SessionStateManager extends StateManager
     if (_typeMap.get(type) > 0)
       return;
     
-    _typeMap.put(type, _typeMap.size());
+    _typeMap.put(type, _typeList.size());
     _typeList.add(type);
   }
 

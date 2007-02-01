@@ -149,9 +149,11 @@ public class UICommand extends UIComponentBase
       ActionEvent actionEvent = (ActionEvent) event;
       
       FacesContext context = FacesContext.getCurrentInstance();
+
+      ActionListener []listeners = getActionListeners();
       
-      if (_actionExpr != null)
-	_actionExpr.invoke(context.getELContext(), new Object[] { event });
+      for (int i = 0; i < listeners.length; i++)
+	listeners[i].processAction(actionEvent);
 
       ActionListener listener = context.getApplication().getActionListener();
 
@@ -272,12 +274,12 @@ public class UICommand extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    State state = new State();
+    Object []state = new Object[3];
 
-    state._parent = super.saveState(context);
+    state[0] = super.saveState(context);
     
-    state._value = _value;
-    state._valueExpr = Util.save(_valueExpr, context);
+    state[1] = _value;
+    state[2] = Util.save(_valueExpr, context);
     
     //state._actionExpr = Util.save(_valueExpr, context);
 
@@ -286,12 +288,12 @@ public class UICommand extends UIComponentBase
 
   public void restoreState(FacesContext context, Object value)
   {
-    State state = (State) value;
+    Object []state = (Object []) value;
 
-    super.restoreState(context, state._parent);
+    super.restoreState(context, state[0]);
 
-    _value = state._value;
-    _valueExpr = Util.restore(state._valueExpr, String.class, context);
+    _value = state[1];
+    _valueExpr = Util.restore(state[2], String.class, context);
   }
 
   //
@@ -300,13 +302,6 @@ public class UICommand extends UIComponentBase
 
   private static enum PropEnum {
     VALUE,
-  }
-
-  private static class State implements java.io.Serializable {
-    private Object _parent;
-    
-    private Object _value;
-    private String _valueExpr;
   }
 
   static class MethodBindingAdapter extends MethodExpression {

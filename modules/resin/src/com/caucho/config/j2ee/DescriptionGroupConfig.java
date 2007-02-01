@@ -7,8 +7,9 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,30 +24,29 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson;
  */
 
-package javax.faces.render;
+package com.caucho.config.j2ee;
 
-import java.io.*;
-
-import javax.faces.context.*;
-
-public abstract class RenderKit
+public class DescriptionGroupConfig
 {
-  public abstract void addRenderer(String family,
-				   String rendererType,
-				   Renderer renderer);
-  
-  public abstract Renderer getRenderer(String family,
-				       String rendererType);
+  private String _id;
+  private String _description;
+  private String _displayName;
 
-  public abstract ResponseStateManager getResponseStateManager();
+  public void setId(String id)
+  {
+    _id = id;
+  }
 
-  public abstract ResponseWriter
-    createResponseWriter(Writer writer,
-			 String contentTypeList,
-			 String characterEncoding);
+  public void setDescription(String description)
+  {
+    _description = description;
+  }
 
-  public abstract ResponseStream createResponseStream(OutputStream out);
+  public void setDisplayName(String displayName)
+  {
+    _displayName = displayName;
+  }
 }

@@ -38,7 +38,7 @@ import javax.faces.event.*;
 
 public class ActionListenerImpl implements ActionListener
 {
-  private static final Object[] NULL = new Object[0];
+  private static final Object[] NULL_ARG = new Object[0];
   
   public void processAction(ActionEvent event)
     throws AbortProcessingException
@@ -60,8 +60,7 @@ public class ActionListenerImpl implements ActionListener
       if (action != null) {
 	fromAction = action.getExpressionString();
 	
-	Object value = action.invoke(context.getELContext(),
-				     new Object[] { event });
+	Object value = action.invoke(context.getELContext(), NULL_ARG);
 
 	if (value != null)
 	  logicalOutcome = value.toString();
@@ -75,8 +74,7 @@ public class ActionListenerImpl implements ActionListener
       if (action != null) {
 	fromAction = action.getExpressionString();
 	
-	Object value = action.invoke(context, 
-				     new Object[] { event });
+	Object value = action.invoke(context, NULL_ARG);
 
 	if (value != null)
 	  logicalOutcome = value.toString();
@@ -87,7 +85,6 @@ public class ActionListenerImpl implements ActionListener
 
     NavigationHandler handler = app.getNavigationHandler();
 
-    System.out.println("HANDL: " + handler);
     if (handler != null)
       handler.handleNavigation(context, fromAction, logicalOutcome);
   }

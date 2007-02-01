@@ -184,6 +184,29 @@ public class UIViewRoot extends UIComponentBase
       }
     }
   }
+
+  //
+  // state
+  //
+
+  public Object saveState(FacesContext context)
+  {
+    return new Object[] {
+      super.saveState(context),
+      _viewId,
+      _locale
+    };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    super.restoreState(context, state[0]);
+
+    _viewId = (String) state[1];
+    _locale = (Locale) state[2];
+  }
   
   public String toString()
   {

@@ -117,7 +117,6 @@ class HtmlInputSecretRenderer extends Renderer
 
     Object value;
 
-    System.out.println("COMP: " + component);
     if (component instanceof HtmlInputSecret) {
       HtmlInputSecret htmlInput = (HtmlInputSecret) component;
 

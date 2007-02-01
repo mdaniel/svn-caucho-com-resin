@@ -162,6 +162,8 @@ public class FacesServletImpl extends GenericServlet
 	if (app instanceof ApplicationImpl) {
 	  ApplicationImpl appImpl = (ApplicationImpl) app;
 	  
+	  facesConfig.configure(appImpl);
+	  
 	  for (ManagedBeanConfig bean : facesConfig.getManagedBeans()) {
 	    appImpl.addManagedBean(bean.getName(), bean);
 	  }

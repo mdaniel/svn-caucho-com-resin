@@ -110,4 +110,67 @@ final class Util
     else
       return null;
   }
+
+  public static String l10n(FacesContext context, String id,
+			    String defaultMessage, Object ... args)
+  {
+    String message = getMessage(context, id, defaultMessage);
+    
+    StringBuilder sb = new StringBuilder();
+
+    int len = message.length();
+    for (int i = 0; i < len; i++) {
+      char ch = message.charAt(i);
+
+      if (ch == '{' && i + 2 < len
+	  && '0' <= message.charAt(i + 1)
+	  && message.charAt(i + 1) <= '9'
+	  && message.charAt(i + 2) == '}') {
+	int index = message.charAt(i + 1) - '0';
+
+	if (index < args.length)
+	  sb.append(args[index]);
+
+	i += 2;
+      }
+      else
+	sb.append(ch);
+    }
+    
+    return sb.toString();
+  }
+
+  public static String getLabel(FacesContext context, UIComponent component)
+  {
+    String label = (String) component.getAttributes().get("label");
+
+    if (label != null && ! "".equals(label))
+      return label;
+    else
+      return component.getClientId(context);
+  }
+  
+  private static String getMessage(FacesContext context,
+				   String messageId,
+				   String defaultMessage)
+  {
+    Application app = context.getApplication();
+
+    String bundleName = app.getMessageBundle();
+
+    if (bundleName == null)
+      return defaultMessage;
+    
+    ResourceBundle bundle = app.getResourceBundle(context, bundleName);
+
+    if (bundle == null)
+      return defaultMessage;
+
+    String msg = bundle.getString(messageId);
+
+    if (msg != null)
+      return msg;
+    else
+      return defaultMessage;
+  }
 }

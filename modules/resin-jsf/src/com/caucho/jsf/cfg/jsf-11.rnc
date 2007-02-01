@@ -1,8 +1,8 @@
-include "../../server/resin/javaee.rnc"
+include "../../server/resin/j2ee-dtd.rnc"
 
 start = jsf11_faces-config
 
-javaee-class = string
+j2ee-class = string
 
 jsf11-any-Group =
   text
@@ -12,23 +12,23 @@ jsf11-any-Group =
 jsf11_application = element application {
   attribute id { string }?
 
-  & element action-listener { javaee-class }?
+  & element action-listener { j2ee-class }?
 
   & element default-render-kit-id { string }?
 
   & element message-bundle { string }?
 
-  & element navigation-handler { javaee-class }?
+  & element navigation-handler { j2ee-class }?
 
-  & element view-handler { javaee-class }?
+  & element view-handler { j2ee-class }?
 
-  & element state-manager { javaee-class }?
+  & element state-manager { j2ee-class }?
 
-  & element el-resolver { javaee-class }?
+  & element el-resolver { j2ee-class }?
 
-  & element property-resolver { javaee-class }?
+  & element property-resolver { j2ee-class }?
 
-  & element variable-resolver { javaee-class }?
+  & element variable-resolver { j2ee-class }?
  
   & jsf11_locale-config?
 
@@ -68,9 +68,9 @@ jsf11_faces-config = element faces-config {
 jsf11_application-resource-bundle = element application-resource-bundle {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
-  element base-name { javaee-class },
+  element base-name { j2ee-class },
 
   element var { string }
 }
@@ -78,11 +78,11 @@ jsf11_application-resource-bundle = element application-resource-bundle {
 jsf11_attribute = element attribute {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
   element attribute-name { string },
 
-  element attribute-class { javaee-class },
+  element attribute-class { j2ee-class },
 
   element default-value { string }?,
 
@@ -94,13 +94,13 @@ jsf11_attribute = element attribute {
 jsf11_factory = element factory {
   attribute id { string }?
 
-  & element application-factory { javaee-class }?
+  & element application-factory { j2ee-class }?
 
-  & element faces-context-factory { javaee-class }?
+  & element faces-context-factory { j2ee-class }?
 
-  & element lifecycle-factory { javaee-class }?
+  & element lifecycle-factory { j2ee-class }?
 
-  & element render-kit-factory { javaee-class }?
+  & element render-kit-factory { j2ee-class }?
 
   & element factory-extension { jsf11-any-Group }*
 }
@@ -124,11 +124,11 @@ jsf11_locale-config = element locale-config {
 jsf11_managed-bean = element managed-bean {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
   element managed-bean-name { string },
 
-  element managed-bean-class { javaee-class },
+  element managed-bean-class { j2ee-class },
 
   element managed-bean-scope { string },
 
@@ -144,7 +144,7 @@ jsf11_managed-bean = element managed-bean {
 jsf11_managed-property = element managed-property {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
   element property-name { string },
 
@@ -162,7 +162,7 @@ jsf11_managed-property = element managed-property {
 jsf11_list-entries = element list-entries {
   attribute id { string }?,
 
-  element value-class { javaee-class }?,
+  element value-class { j2ee-class }?,
 
   (jsf11_null-value
 
@@ -172,9 +172,9 @@ jsf11_list-entries = element list-entries {
 jsf11_map-entries = element map-entries {
   attribute id { string }?,
 
-  element key-class { javaee-class }?,
+  element key-class { j2ee-class }?,
 
-  element value-class { javaee-class }?,
+  element value-class { j2ee-class }?,
 
   jsf11_map-entry*
 }
@@ -191,7 +191,7 @@ jsf11_map-entry = element map-entry {
 jsf11_navigation-case = element navigation-case {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
   jsf11_from-action?,
 
@@ -205,7 +205,7 @@ jsf11_navigation-case = element navigation-case {
 jsf11_navigation-rule = element navigation-rule {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
   jsf11_from-view-id?,
 
@@ -221,11 +221,11 @@ jsf11_null-value = element null-value {
 jsf11_property = element property {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
   element property-name { string },
 
-  element property-class { javaee-class },
+  element property-class { j2ee-class },
 
   jsf11_default-value?,
 
@@ -241,21 +241,21 @@ jsf11_redirect = element redirect {
 jsf11_referenced-bean = element referenced-bean {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
   element referenced-bean-name { string },
 
-  element referenced-bean-class { javaee-class }
+  element referenced-bean-class { j2ee-class }
 }
 
 jsf11_render-kit = element render-kit {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
   element render-kit-id { string }?,
 
-  element render-kit-class { javaee-class }?,
+  element render-kit-class { j2ee-class }?,
 
   jsf11_renderer*,
 
@@ -265,13 +265,13 @@ jsf11_render-kit = element render-kit {
 jsf11_renderer = element renderer {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
   element component-family { string },
 
   element renderer-type { string },
 
-  element renderer-class { javaee-class },
+  element renderer-class { j2ee-class },
 
   jsf11_facet*,
 
@@ -287,11 +287,11 @@ jsf11_suggested-value = element suggested-value {
 jsf11_validator = element validator {
   attribute id { string }?,
 
-  javaee_description-Group,
+  j2ee-dtd_description-Group,
 
   element validator-id { string },
 
-  element validator-class { javaee-class },
+  element validator-class { j2ee-class },
 
   jsf11_attribute*,
 
@@ -309,10 +309,58 @@ jsf11_resource-bundle = element resource-bundle {
 }
 
 jsf11_component = element component {
+  attribute id { string }?,
+
+  j2ee-dtd_description-Group,
+
+  jsf11_component-type,
+
+  jsf11_component-class,
+
+  jsf11_facet*,
+
+  jsf11_attribute*,
+
+  jsf11_property*,
+
+  element component-extension { jsf11-any-Group }*
+}
+
+jsf11_component-class = element component-class {
+  string
+}
+
+jsf11_component-type = element component-type {
   string
 }
 
 jsf11_converter = element converter {
+  attribute id {string }?,
+
+  j2ee-dtd_description-Group,
+
+  (jsf11_converter-id
+
+   | jsf11_converter-for-class),
+
+  jsf11_converter-class,
+
+  jsf11_attribute*,
+
+  jsf11_property*,
+
+  element converter-extension { jsf11-any-Group }*
+}
+
+jsf11_converter-id = element converter-id {
+  string
+}
+
+jsf11_converter-for-class = element converter-for-class {
+  string
+}
+
+jsf11_converter-class = element converter-class {
   string
 }
 

@@ -343,11 +343,18 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     return output;
   }
 
-  protected void addVerbatimBeforeComponent(UIComponentClassicTagBase parent,
+  protected void addVerbatimBeforeComponent(UIComponentClassicTagBase parentTag,
 					    UIComponent verbatim,
 					    UIComponent component)
   {
-    throw new UnsupportedOperationException();
+    UIComponent parent = parentTag.getComponentInstance();
+
+    List<UIComponent> children = parent.getChildren();
+    
+    int i = children.indexOf(component);
+
+    if (i > 0)
+      children.add(i, verbatim);
   }
 
   protected void addVerbatimAfterComponent(UIComponentClassicTagBase parent,

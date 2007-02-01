@@ -101,8 +101,6 @@ class HtmlSelectManyListboxRenderer extends Renderer
     else if (value instanceof Object[])
       values = (Object []) values;
 
-    System.out.println("SVG: " + values);
-    
     uiSelectMany.setSelectedValues(values);
     uiSelectMany.setValid(true);
 
@@ -315,8 +313,6 @@ class HtmlSelectManyListboxRenderer extends Renderer
     if (title != null)
       out.writeAttribute("title", title, "title");
 
-    System.out.println("VALUES: " + values);
-    
     int childCount = component.getChildCount();
     for (int i = 0; i < childCount; i++) {
       UIComponent child = component.getChildren().get(i);

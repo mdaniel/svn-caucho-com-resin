@@ -180,7 +180,9 @@ public class JspViewHandler extends ViewHandler
 			 UIViewRoot viewToRender)
     throws IOException, FacesException
   {
-    String viewId = viewToRender.getViewId();
+    String viewId;
+
+    viewId = viewToRender.getViewId();
 
     ExternalContext extContext = context.getExternalContext();
 
@@ -204,12 +206,9 @@ public class JspViewHandler extends ViewHandler
 				String viewId)
     throws FacesException
   {
-    Map<String,Object> sessionMap
-      = context.getExternalContext().getSessionMap();
+    StateManager stateManager = context.getApplication().getStateManager();
 
-    System.out.println("GET: " + sessionMap);
-    
-    return (UIViewRoot) sessionMap.get(viewId);
+    return stateManager.restoreView(context, viewId, null);
   }
 
   @Override
@@ -219,11 +218,11 @@ public class JspViewHandler extends ViewHandler
     UIViewRoot viewRoot = context.getViewRoot();
 
     if (viewRoot != null) {
-      Map<String,Object> sessionMap
-	= context.getExternalContext().getSessionMap();
+      StateManager stateManager = context.getApplication().getStateManager();
+      
+      Object state = stateManager.saveView(context);
 
-      sessionMap.put(viewRoot.getViewId(), viewRoot);
-      System.out.println("PUT: " + viewRoot);
+      stateManager.writeState(context, state);
     }
   }
 

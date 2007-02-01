@@ -431,9 +431,16 @@ public class UIInput extends UIOutput
       log.log(Level.FINE, e.toString(), e);
       
       setValid(false);
+      
+      String summary = Util.l10n(context, UPDATE_MESSAGE_ID,
+				 "{0}: An error occurred while processing your submitted information.",
+				 Util.getLabel(context, this));
 
-      context.addMessage(getClientId(context),
-			 new FacesMessage(UPDATE_MESSAGE_ID));
+      String detail = summary;
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+
+      context.addMessage(getClientId(context), msg);
     }
   }
 
@@ -481,7 +488,14 @@ public class UIInput extends UIOutput
       if (msg != null)
 	context.addMessage(getClientId(context), msg);
       else {
-	msg = new FacesMessage(CONVERSION_MESSAGE_ID);
+	String summary = Util.l10n(context, CONVERSION_MESSAGE_ID,
+				   "{0}: Conversion error occurred.",
+				   Util.getLabel(context, this));
+
+	String detail = summary;
+
+	msg = new FacesMessage(summary, detail);
+	
 	context.addMessage(getClientId(context), msg);
       }
       return;
@@ -558,8 +572,15 @@ public class UIInput extends UIOutput
       return;
 
     if (isRequired() && (value == null || "".equals(value))) {
-      context.addMessage(getClientId(context),
-			 new FacesMessage(REQUIRED_MESSAGE_ID));
+      String summary = Util.l10n(context, REQUIRED_MESSAGE_ID,
+				 "{0}: Validation Error: Value is required.",
+				 Util.getLabel(context, this));
+
+      String detail = summary;
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+	
+      context.addMessage(getClientId(context), msg);
 
       _isValid = false;
       return;
@@ -628,19 +649,6 @@ public class UIInput extends UIOutput
     REQUIRED_MESSAGE,
     CONVERTER_MESSAGE,
     VALIDATOR_MESSAGE,
-  }
-
-  private static class State implements java.io.Serializable {
-    private Object _parent;
-    
-    private String _requiredMessage;
-    private String _requiredMessageExpr;
-    
-    private String _converterMessage;
-    private String _converterMessageExpr;
-    
-    private String _validatorMessage;
-    private String _validatorMessageExpr;
   }
 
   private static class ValueChangeListenerAdapter

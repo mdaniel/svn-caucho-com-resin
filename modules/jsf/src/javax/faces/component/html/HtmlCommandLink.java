@@ -843,6 +843,29 @@ public class HtmlCommandLink extends UICommand
   }
 
   //
+  // state
+  //
+
+  public Object saveState(FacesContext context)
+  {
+    return new Object[] {
+      super.saveState(context),
+      _title,
+      Util.save(_titleExpr, context),
+    };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    super.restoreState(context, state[0]);
+
+    _title = (String) state[1];
+    _titleExpr = Util.restore(state[2], String.class, context);
+  }
+
+  //
   // utility
   //
 

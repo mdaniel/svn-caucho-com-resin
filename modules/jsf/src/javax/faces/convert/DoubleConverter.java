@@ -28,6 +28,7 @@
 
 package javax.faces.convert;
 
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.component.*;
 
@@ -54,7 +55,25 @@ public class DoubleConverter implements Converter
     if (value.length() == 0)
       return null;
 
-    return Double.parseDouble(value);
+    try {
+      return Double.parseDouble(value);
+    } catch (NumberFormatException e) {
+      String summary = Util.l10n(context, DOUBLE_ID,
+				"{2}: \"{0}\" must be a doubleing-point number.",
+				 value,
+				 getExample(),
+				 Util.getLabel(context, component));
+      
+      String detail = Util.l10n(context, DOUBLE_ID + "_detail",
+				"{2}: \"{0}\" must be a number between 4.9E-324 and 1.80E308.  Example: {1}.",
+				value,
+				getExample(),
+				Util.getLabel(context, component));
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+      
+      throw new ConverterException(msg, e);
+    }
   }
   
   public String getAsString(FacesContext context,
@@ -68,7 +87,12 @@ public class DoubleConverter implements Converter
     else if (value instanceof String)
       return (String) value;
     else
-      return String.valueOf(value);
+      return value.toString();
+  }
+
+  private String getExample()
+  {
+    return "25.34";
   }
 
   public String toString()

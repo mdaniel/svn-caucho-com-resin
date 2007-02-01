@@ -84,8 +84,6 @@ public class ActionListenerTag extends TagSupport
 
     ActionListener listener = null;
 
-    System.out.println("CREATE: " + parent.getCreated());
-    
     if (parent.getCreated()) {
       ValueExpression bindingExpr = null;
       
@@ -94,8 +92,6 @@ public class ActionListenerTag extends TagSupport
       }
       
       if (listener == null && _type != null) {
-	System.out.println("TYPE: " + _type);
-	
 	String className = (String) _type.getValue(context.getELContext());
 
 	if (className != null) {
@@ -104,7 +100,6 @@ public class ActionListenerTag extends TagSupport
 	    ClassLoader loader = thread.getContextClassLoader();
 	    Class cl = Class.forName(className, false, loader);
 
-	    System.out.println("CL: " + cl);
 	    listener = (ActionListener) cl.newInstance();
 	  } catch (RuntimeException e) {
 	    throw e;

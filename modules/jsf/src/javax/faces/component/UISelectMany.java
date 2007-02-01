@@ -131,8 +131,14 @@ public class UISelectMany extends UIInput
     if (! hasValue) {
       setValid(false);
       
-      FacesMessage msg = new FacesMessage(INVALID_MESSAGE_ID);
-      
+      String summary = Util.l10n(context, INVALID_MESSAGE_ID,
+				 "{0}: Validation Error: Value is not valid.",
+				 Util.getLabel(context, this));
+
+      String detail = summary;
+
+      FacesMessage msg = new FacesMessage(summary, detail);
+	
       context.addMessage(getClientId(context), msg);
     }
   }

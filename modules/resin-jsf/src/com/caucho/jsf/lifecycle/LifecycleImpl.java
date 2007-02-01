@@ -154,17 +154,26 @@ public class LifecycleImpl extends Lifecycle
     if (stateManager.isPostback(context)) {
       viewRoot = view.restoreView(context,  viewId);
 
-      if (viewRoot == null)
+      if (viewRoot == null) {
+	context.renderResponse();
+      
+	viewRoot = view.createView(context, viewId);
+
+	context.setViewRoot(viewRoot);
+	
 	throw new ViewExpiredException(L.l("{0} is an expired view",
 					 viewId));
+      }
+      
+      context.setViewRoot(viewRoot);
     }
     else {
       context.renderResponse();
       
       viewRoot = view.createView(context, viewId);
-    }
 
-    context.setViewRoot(viewRoot);
+      context.setViewRoot(viewRoot);
+    }
   }
 
   private String calculateViewId(FacesContext context)
