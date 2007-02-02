@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class XMLInputFactoryImpl extends XMLInputFactory {
 
@@ -98,10 +100,12 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
   /**
    *  "Support of this method is optional."
    */ 
-  public XMLEventReader 
-    createXMLEventReader(Source source)
+  public XMLEventReader createXMLEventReader(Source source)
     throws XMLStreamException
   {
+    if (source instanceof SAXSource)
+      return new SAXSourceXMLEventReaderImpl((SAXSource) source);
+
     return new XMLEventReaderImpl(getEventAllocator(),
                                   createXMLStreamReader(source));
   }
@@ -131,8 +135,7 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
   // Stream reader
   //
   
-  public XMLStreamReader 
-    createXMLStreamReader(InputStream stream)
+  public XMLStreamReader createXMLStreamReader(InputStream stream)
     throws XMLStreamException
   {
     return new XMLStreamReaderImpl(stream);
@@ -151,8 +154,7 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     }
   }
 
-  public XMLStreamReader 
-    createXMLStreamReader(Reader reader)
+  public XMLStreamReader createXMLStreamReader(Reader reader)
     throws XMLStreamException
   {
     return new XMLStreamReaderImpl(reader);
@@ -167,10 +169,34 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     if (source instanceof StreamSource) {
       StreamSource streamSource = (StreamSource) source;
 
-      return new XMLStreamReaderImpl(streamSource.getInputStream());
+      InputStream is = streamSource.getInputStream();
+
+      if (is != null) 
+        return new XMLStreamReaderImpl(is);
+
+      Reader r = streamSource.getReader();
+
+      if (r != null)
+        return new XMLStreamReaderImpl(r);
+
+      if (streamSource.getSystemId() != null) {
+        try {
+          URL url = new URL(streamSource.getSystemId());
+
+          return new XMLStreamReaderImpl(url.openStream());
+        }
+        catch (MalformedURLException e) {
+          throw new XMLStreamException(e);
+        }
+        catch (IOException e) {
+          throw new XMLStreamException(e);
+        }
+      }
+      else 
+        throw new XMLStreamException("StreamSource contains no stream information");
     }
     else if (source instanceof DOMSource)
-      throw new JAXPNotSupportedInStAXException();
+      return new DOMSourceXMLStreamReaderImpl((DOMSource) source);
     else if (source instanceof SAXSource)
       throw new JAXPNotSupportedInStAXException();
 
@@ -184,8 +210,7 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     return new XMLStreamReaderImpl(stream, systemId);
   }
 
-  public XMLStreamReader 
-    createXMLStreamReader(String systemId, Reader reader)
+  public XMLStreamReader createXMLStreamReader(String systemId, Reader reader)
     throws XMLStreamException
   {
     return new XMLStreamReaderImpl(reader, systemId);
@@ -225,7 +250,6 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
   public void setProperty(String name, Object value)
     throws IllegalArgumentException
   {
-
     if ("javax.xml.stream.allocator".equals(name)) {
       setEventAllocator((XMLEventAllocator)value);
       return;
@@ -243,6 +267,5 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
   {
     _resolver = resolver;
   }
-
 }
 

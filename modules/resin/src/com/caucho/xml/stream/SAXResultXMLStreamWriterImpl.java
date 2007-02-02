@@ -62,7 +62,8 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   private String _uri;
   private String _localName;
   private String _qName;
-  private AttributesImpl _attributes = null;
+  private AttributesImpl _attributes = new AttributesImpl();
+  private boolean _unwritten = false;
 
   private boolean _currentIsEmpty = false;
   private boolean _ended = false;
@@ -138,6 +139,9 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeAttribute(String localName, String value)
     throws XMLStreamException
   {
+    if (! _unwritten)
+      throw new IllegalStateException();
+
     // XXX other types?
     _attributes.addAttribute("", localName, localName, "CDATA", value);
   }
@@ -146,6 +150,9 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
                              String value)
     throws XMLStreamException
   {
+    if (! _unwritten)
+      throw new IllegalStateException();
+
     _attributes.addAttribute(namespaceURI, localName, localName, 
                              "CDATA", value);
   }
@@ -154,6 +161,9 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
                              String localName, String value)
     throws XMLStreamException
   {
+    if (! _unwritten)
+      throw new IllegalStateException();
+
     _attributes.addAttribute(namespaceURI, localName, prefix + ':' + localName, 
                              "CDATA", value);
   }
@@ -168,6 +178,8 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeCharacters(char[] text, int start, int len)
     throws XMLStreamException
   {
+    handleUnwrittenStart();
+
     try {
       _contentHandler.characters(text, start, len);
     }
@@ -179,6 +191,8 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeCharacters(String text)
     throws XMLStreamException
   {
+    handleUnwrittenStart();
+
     char[] array = text.toCharArray();
     writeCharacters(array, 0, array.length);
   }
@@ -186,6 +200,8 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeComment(String data)
     throws XMLStreamException
   {
+    handleUnwrittenStart();
+
     try {
       if (_lexicalHandler != null) {
         char[] array = data.toCharArray();
@@ -200,6 +216,9 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeDefaultNamespace(String namespaceURI)
     throws XMLStreamException
   {
+    if (! _unwritten)
+      throw new IllegalStateException();
+
     try {
       _context.declare("", namespaceURI);
       _contentHandler.startPrefixMapping("", namespaceURI);
@@ -212,6 +231,8 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeDTD(String dtd)
     throws XMLStreamException
   {
+    handleUnwrittenStart();
+
     // XXX: lexicalHandler
     throw new UnsupportedOperationException();
   }
@@ -221,6 +242,8 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   {
     if (_currentIsEmpty)
       popContext();
+
+    handleUnwrittenStart();
 
     pushContext();
 
@@ -237,6 +260,8 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   {
     if (_currentIsEmpty)
       popContext();
+
+    handleUnwrittenStart();
 
     pushContext();
 
@@ -255,6 +280,8 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
     if (_currentIsEmpty)
       popContext();
 
+    handleUnwrittenStart();
+
     pushContext();
 
     _uri = namespaceURI;
@@ -268,6 +295,8 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeEndDocument()
     throws XMLStreamException
   {
+    handleUnwrittenStart();
+
     try {
       _contentHandler.endDocument();
       _ended = true;
@@ -286,6 +315,8 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeEntityRef(String name)
     throws XMLStreamException
   {
+    handleUnwrittenStart();
+
     // XXX
     throw new UnsupportedOperationException();
   }
@@ -293,6 +324,9 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeNamespace(String prefix, String namespaceURI)
     throws XMLStreamException
   {
+    if (! _unwritten)
+      throw new IllegalStateException();
+
     _context.declare(prefix, namespaceURI);
     _attributes.addAttribute(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, 
                              prefix, 
@@ -304,12 +338,16 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeProcessingInstruction(String target)
     throws XMLStreamException
   {
+    handleUnwrittenStart();
+
     writeProcessingInstruction(target, null);
   }
 
   public void writeProcessingInstruction(String target, String data)
     throws XMLStreamException
   {
+    handleUnwrittenStart();
+
     try {
       _contentHandler.processingInstruction(target, data);
     }
@@ -365,6 +403,7 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
     _localName = localName;
     _qName = localName;
     _attributes = new AttributesImpl();
+    _unwritten = true;
   }
 
   public void writeStartElement(String namespaceURI, String localName)
@@ -381,6 +420,7 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
     _localName = localName;
     _qName = localName;
     _attributes = new AttributesImpl();
+    _unwritten = true;
   }
 
   public void writeStartElement(String prefix, String localName,
@@ -398,20 +438,29 @@ public class SAXResultXMLStreamWriterImpl implements XMLStreamWriter {
     _localName = localName;
     _qName = prefix + ':' + localName;
     _attributes = new AttributesImpl();
+    _unwritten = true;
   }
 
   //////////////////////////////////////////////////////////////////////////
-
-  private void pushContext()
+  
+  private void handleUnwrittenStart()
     throws XMLStreamException
   {
     try {
-      _contentHandler.startElement(_uri, _localName, _qName, _attributes);
-      _context = new SimpleNamespaceContext(_context);
+      if (_unwritten)
+        _contentHandler.startElement(_uri, _localName, _qName, _attributes);
+
+      _unwritten = false;
     }
     catch (SAXException e) {
       throw new XMLStreamException(e);
     }
+  }
+
+  private void pushContext()
+    throws XMLStreamException
+  {
+    _context = new SimpleNamespaceContext(_context);
   }
 
   private void popContext()

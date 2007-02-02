@@ -67,13 +67,17 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
     _result = result;
 
     _current = result.getNode();
-    
+
     if (_current == null) {
       _current = _document = new QDocument();
       result.setNode(_document);
     }
-    else
-      _document = _current.getOwnerDocument();
+    else {
+      if (_current.getNodeType() == Node.DOCUMENT_NODE)
+        _document = (Document) _current;
+      else 
+        _document = _current.getOwnerDocument();
+    }
   }
 
   public void close() 

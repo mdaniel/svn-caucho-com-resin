@@ -77,7 +77,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
   public XMLEventWriter createXMLEventWriter(Result result)
     throws XMLStreamException
   {
-    throw new JAXPNotSupportedInStAXException();
+    return new XMLEventWriterImpl(createXMLStreamWriter(result));
   }
 
   public XMLEventWriter createXMLEventWriter(Writer stream)
@@ -123,7 +123,16 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
     }
     else if (result instanceof StreamResult) {
       Writer writer = ((StreamResult) result).getWriter();
-      return createXMLStreamWriter(writer);
+
+      if (writer != null) 
+        return createXMLStreamWriter(writer);
+
+      OutputStream os = ((StreamResult) result).getOutputStream();
+
+      if (os != null)
+        return createXMLStreamWriter(os);
+
+      throw new XMLStreamException("StreamResult has no output stream or writer");
     }
 
     throw new UnsupportedOperationException(L.l("Results of type {0} are not supported", result.getClass().getName()));

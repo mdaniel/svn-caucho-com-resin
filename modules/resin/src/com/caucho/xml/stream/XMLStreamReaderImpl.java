@@ -57,6 +57,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   private StaxIntern _intern;
 
   private ReadStream _is;
+  private Reader _reader;
 
   private int _col = 1;
   private int _row = 1;
@@ -109,7 +110,8 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   public XMLStreamReaderImpl(Reader r)
     throws XMLStreamException
   {
-    this(Vfs.openRead(r));
+    _reader = r;
+    init();
   }
 
   public XMLStreamReaderImpl(InputStream is, String systemId)
@@ -122,24 +124,23 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   public XMLStreamReaderImpl(Reader r, String systemId)
     throws XMLStreamException
   {
-    this(Vfs.openRead(r));
+    this(r);
     _systemId = systemId;
   }
 
   public XMLStreamReaderImpl(ReadStream is)
     throws XMLStreamException
   {
-    init(is);
+    _is = is;
+    init();
   }
 
-  public void init(ReadStream is)
+  public void init()
     throws XMLStreamException
   {
     _namespaceTracker = new NamespaceReaderContext();
     _intern = new StaxIntern(_namespaceTracker);
     
-    _is = is;
-
     _tempCharBuffer = TempCharBuffer.allocate();
     _cBuf = _tempCharBuffer.getBuffer();
 
@@ -506,7 +507,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   public boolean hasNext() throws XMLStreamException
   {
-    if (_is == null)
+    if (_is == null && _reader == null)
       return false;
 
     return _current != END_DOCUMENT;
@@ -1071,7 +1072,12 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   {
     try {
       if (_inputLength <= _inputOffset) {
-        int ch = _is.read();
+        int ch = -1;
+        
+        if (_is != null)
+          ch = _is.read();
+        else if (_reader != null)
+          ch = _reader.read();
 
         if (ch < 0)
           return ch;
@@ -1111,6 +1117,12 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
       if (_is != null) {
         _inputOffset = 0;
         _inputLength = _is.read(_inputBuf, 0, _inputBuf.length);
+
+        return _inputLength > 0;
+      }
+      else if (_reader != null) {
+        _inputOffset = 0;
+        _inputLength = _reader.read(_inputBuf, 0, _inputBuf.length);
 
         return _inputLength > 0;
       }
@@ -1166,6 +1178,18 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
     if (is != null)
       is.close();
+
+    Reader r = _reader;
+    _reader = null;
+
+    if (r != null) {
+      try {
+        r.close();
+      }
+      catch (IOException e) {
+        throw new XMLStreamException(e);
+      }
+    }
   }
 
   static class RawName {
