@@ -33,10 +33,6 @@ public class JAXBException extends Exception {
   private String _errorCode;
   private Throwable _exception;
 
-  public JAXBException()
-  {
-  }
-
   public JAXBException(String message)
   {
     super(message);

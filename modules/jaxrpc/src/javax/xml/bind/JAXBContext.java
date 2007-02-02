@@ -41,9 +41,6 @@ public abstract class JAXBContext {
   private static final Logger log =
     Logger.getLogger(JAXBContext.class.getName());
 
-  public static final String JAXB_CONTEXT_FACTORY =
-    "javax.xml.bind.context.factory";
-
   protected JAXBContext()
   {
   }
@@ -71,11 +68,7 @@ public abstract class JAXBContext {
 
   public abstract Unmarshaller createUnmarshaller() throws JAXBException;
 
-  public Validator createValidator() throws JAXBException
-  {
-    String message = "javax.xml.bind.Validator was removed in JAXB 2.0";
-    throw new UnsupportedOperationException(message);
-  }
+  public abstract Validator createValidator() throws JAXBException;
   
   /** subclasses must override */
   public void generateSchema(SchemaOutputResolver outputResolver)
@@ -142,14 +135,23 @@ public abstract class JAXBContext {
       FactoryLoader factoryLoader =
         FactoryLoader.getFactoryLoader("javax.xml.bind.JAXBContext");
       
-      Object obj = factoryLoader.newInstance(classLoader);
+      Object obj = factoryLoader.newInstance(classLoader, contextPath);
 
       if (obj != null) {
         Class c = obj.getClass();
+        
+        try {
+          Method m = c.getMethod("createContext", 
+                                 String.class, ClassLoader.class, Map.class);
+          return (JAXBContext) m.invoke(null, contextPath, classLoader, 
+                                        properties);
+        }
+        catch (NoSuchMethodException e) {
+        }
+
         Method m = c.getMethod("createContext", 
-                               String.class, ClassLoader.class, Map.class);
-        return (JAXBContext) m.invoke(null, contextPath, classLoader, 
-                                      properties);
+                               String.class, ClassLoader.class);
+        return (JAXBContext) m.invoke(null, contextPath, classLoader);
       }
 
       Class c = Class.forName("com.caucho.jaxb.JAXBContextImpl");

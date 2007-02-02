@@ -60,8 +60,9 @@ public abstract class Binder<XmlNode> {
   public abstract Object unmarshal(XmlNode xmlNode)
     throws JAXBException;
 
-  abstract <T> JAXBElement<T> unmarshal(XmlNode node, Class<T> declaredType)
-      throws JAXBException;
+  public abstract <T> JAXBElement<T> unmarshal(XmlNode node, 
+                                               Class<T> declaredType)
+    throws JAXBException;
 
   public abstract Object updateJAXB(XmlNode xmlNode) throws JAXBException;
 

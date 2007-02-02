@@ -32,6 +32,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -52,32 +53,42 @@ import java.util.HashMap;
 
 public abstract class AbstractUnmarshallerImpl implements Unmarshaller
 {
+  private static XMLReader _xmlReader;
+
+  static {
+    try {
+      _xmlReader = XMLReaderFactory.createXMLReader();
+    } catch (SAXException e) {
+      // XXX
+    }
+  }
+
+  private static final ValidationEventHandler _defaultValidationEventHandler 
+    = new DefaultValidationEventHandler() {
+      public boolean handleEvent(ValidationEvent event)
+      {
+        if (event == null)
+          throw new IllegalArgumentException();
+
+        return event.getSeverity() != ValidationEvent.FATAL_ERROR;
+      }
+    };
+
   private XMLInputFactory _factory;
   protected boolean validating;
 
   private AttachmentUnmarshaller _attachmentUnmarshaller = null;
-  private ValidationEventHandler _validationEventHandler = null;
+  private ValidationEventHandler _validationEventHandler 
+    = _defaultValidationEventHandler;
   private Listener _listener = null;
   private HashMap<String,Object> _properties = new HashMap<String,Object>();
   private Schema _schema = null;
-  private XMLReader _xmlreader = null;
   private XmlAdapter _adapter = null;
-  private UnmarshallerHandler _unmarshallerHandler = null;
   private HashMap<Class,XmlAdapter> _adapters =
     new HashMap<Class,XmlAdapter>();
 
   public AbstractUnmarshallerImpl()
   {
-  }
-
-  public UnmarshallerHandler getUnmarshallerHandler()
-  {
-    return _unmarshallerHandler;
-  }
-
-  public void setUnmarshallerHandler(UnmarshallerHandler u)
-  {
-    _unmarshallerHandler = u;
   }
 
   protected UnmarshalException createUnmarshalException(SAXException e)
@@ -117,7 +128,7 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller
 
   protected XMLReader getXMLReader() throws JAXBException
   {
-    return _xmlreader;
+    return _xmlReader;
   }
 
   public boolean isValidating() throws JAXBException
@@ -286,6 +297,8 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller
   {
     throw new UnsupportedOperationException("subclasses must override this");
   }
+
+  public abstract UnmarshallerHandler getUnmarshallerHandler();
 
   protected abstract Object unmarshal(XMLReader reader, InputSource source)
     throws JAXBException;

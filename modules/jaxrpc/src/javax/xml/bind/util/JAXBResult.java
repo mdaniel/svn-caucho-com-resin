@@ -28,40 +28,42 @@
 */
 
 package javax.xml.bind.util;
-import org.xml.sax.ContentHandler;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.UnmarshallerHandler;
 import javax.xml.transform.sax.SAXResult;
 
-/** Turn a SAX source into a JAXB value */
 public class JAXBResult extends SAXResult {
+  private Object _result;
+  private UnmarshallerHandler _handler;
 
-  private Object _result = null;
-
-  public JAXBResult(JAXBContext context) throws JAXBException
-  {
-    this(context.createUnmarshaller());
-  }
-
-  public JAXBResult(Unmarshaller unmarshaller) throws JAXBException
-  {
-    super(createContentHandler(unmarshaller));
-  }
-
-  private static ContentHandler createContentHandler(Unmarshaller unmarshaller)
+  public JAXBResult(JAXBContext context) 
     throws JAXBException
   {
-    // there doesn't seem to be a simple SAX ContentHandler->Writer
-    // adapter the comes with 
-    throw new UnsupportedOperationException();
+    if (context == null)
+      throw new JAXBException("Context may not be null");
+
+    _handler = context.createUnmarshaller().getUnmarshallerHandler();
+
+    setHandler(_handler);
+  }
+
+  public JAXBResult(Unmarshaller unmarshaller) 
+    throws JAXBException
+  {
+    if (unmarshaller == null)
+      throw new JAXBException("Unmarshaller may not be null");
+
+    _handler = unmarshaller.getUnmarshallerHandler();
+
+    setHandler(_handler);
   }
 
   public Object getResult() throws JAXBException
   {
-    return _result;
+    return _handler.getResult();
   }
-
 }
 

@@ -38,6 +38,10 @@ import java.util.Calendar;
 public final class DatatypeConverter {
   private static DatatypeConverterInterface _converter = null;
 
+  private DatatypeConverter()
+  {
+  }
+
   public static String parseAnySimpleType(String lexicalXSDAnySimpleType)
   {
     return _converter.parseAnySimpleType(lexicalXSDAnySimpleType);

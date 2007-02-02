@@ -48,13 +48,16 @@ class FactoryLoader {
   private static HashMap<String,FactoryLoader> _factoryLoaders
     = new HashMap<String,FactoryLoader>();
 
+  private static final String JAXB_CONTEXT_FACTORY
+    = "javax.xml.bind.context.factory";
+
   private String _factoryId;
 
   private WeakHashMap<ClassLoader,Object[]> _providerMap
     = new WeakHashMap<ClassLoader,Object[]>();
 
-  public static FactoryLoader getFactoryLoader(String factoryId) {
-
+  public static FactoryLoader getFactoryLoader(String factoryId) 
+  {
     FactoryLoader ret = _factoryLoaders.get(factoryId);
 
     if (ret == null) {
@@ -68,6 +71,62 @@ class FactoryLoader {
   private FactoryLoader(String factoryId)
   {
     _factoryId = factoryId;
+  }
+
+  private String classNameFromPropertiesFile(ClassLoader classLoader, 
+                                             String fileName)
+  {
+    InputStream is = null;
+    try {
+      is = classLoader.getResourceAsStream(fileName);
+
+      if (is == null)
+        return null;
+
+      Properties props = new Properties();
+      props.load(is);
+
+      return props.getProperty(JAXB_CONTEXT_FACTORY);
+    }
+    catch (IOException e) {
+      log.log(Level.FINER, "ignoring exception", e);
+
+      return null;
+    }
+    finally {
+      if (is != null) {
+        try {
+          is.close();
+        } catch (IOException e) {
+          log.log(Level.FINER, "ignoring exception", e);
+        }
+      }
+    }
+  }
+
+  public Object newInstance(ClassLoader classLoader, String contextPath)
+    throws FactoryConfigurationError
+  {
+    String[] pkgs = contextPath.split(":");
+
+    for (int i = 0; i < pkgs.length; i++) {
+      String pkg = pkgs[i].replaceAll("\\.", File.separator);
+      String fileName = /*File.separatorChar + */pkg + 
+                        File.separatorChar + "jaxb.properties";
+
+      String className = classNameFromPropertiesFile(classLoader, fileName);
+
+      if (className != null) {
+        try {
+          return classLoader.loadClass(className).newInstance();
+        }
+        catch (Exception e) {
+          throw new FactoryConfigurationError(e);
+        }
+      }
+    }
+
+    return newInstance(classLoader);
   }
 
   public Object newInstance(ClassLoader classLoader)
@@ -85,27 +144,7 @@ class FactoryLoader {
         File.separatorChar +
         "jaxb.properties";
 
-      FileInputStream is = null;
-      try {
-        is = new FileInputStream(new File(fileName));
-
-        Properties props = new Properties();
-        props.load(is);
-
-        className = props.getProperty(_factoryId);
-
-      }
-      catch (IOException e) {
-        log.log(Level.FINER, "ignoring exception", e);
-      }
-      finally {
-        if (is != null)
-          try {
-            is.close();
-          } catch (IOException e) {
-            log.log(Level.FINER, "ignoring exception", e);
-          }
-      }
+      className = classNameFromPropertiesFile(classLoader, fileName);
     }
 
     if (className == null) {

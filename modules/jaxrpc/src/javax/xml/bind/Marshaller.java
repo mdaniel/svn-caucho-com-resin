@@ -100,7 +100,7 @@ public interface Marshaller {
 
   void setSchema(Schema schema);
 
-  public static class Listener {
+  public static abstract class Listener {
 
     public Listener()
     {

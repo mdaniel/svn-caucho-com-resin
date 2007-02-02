@@ -109,7 +109,7 @@ public interface Unmarshaller {
                                         Class<T> declaredType)
       throws JAXBException;
 
-  public static class Listener {
+  public static abstract class Listener {
 
     public Listener()
     {

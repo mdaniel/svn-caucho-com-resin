@@ -34,6 +34,7 @@ import org.xml.sax.ContentHandler;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
+import javax.xml.bind.ValidationEvent;
 import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.attachment.AttachmentMarshaller;
@@ -43,6 +44,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -54,7 +56,8 @@ public abstract class AbstractMarshallerImpl implements Marshaller
   private XMLOutputFactory _factory;
   private AttachmentMarshaller _attachmentMarshaller;
   private String _encoding;
-  private ValidationEventHandler _validationEventHandler;
+  private ValidationEventHandler _validationEventHandler 
+    = _defaultValidationEventHandler;
   private Listener _listener;
   private boolean _formattedOutput = false;
   private boolean _fragment = false;
@@ -65,6 +68,17 @@ public abstract class AbstractMarshallerImpl implements Marshaller
     new HashMap<String,Object>();
   private HashMap<Class,XmlAdapter> _adapters =
     new HashMap<Class,XmlAdapter>();
+
+  private static final ValidationEventHandler _defaultValidationEventHandler 
+    = new DefaultValidationEventHandler() {
+      public boolean handleEvent(ValidationEvent event)
+      {
+        if (event == null)
+          throw new IllegalArgumentException();
+
+        return event.getSeverity() != ValidationEvent.FATAL_ERROR;
+      }
+    };
 
   private final HashMap<String,String> _ianaToJavaEncoding =
     new HashMap<String,String>();
@@ -181,38 +195,23 @@ public abstract class AbstractMarshallerImpl implements Marshaller
 
   private XMLOutputFactory getXMLOutputFactory()
   {
-    if (_factory == null)
+    if (_factory == null) {
       _factory = XMLOutputFactory.newInstance();
+      _factory.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,
+                           Boolean.TRUE);
+    }
 
     return _factory;
   }
 
   public final void marshal(Object obj, OutputStream os) throws JAXBException
   {
-    try {
-      XMLStreamWriter out = getXMLOutputFactory().createXMLStreamWriter(os);
-
-      marshal(obj, out);
-
-      out.flush();
-    }
-    catch (XMLStreamException e) {
-      throw new JAXBException(e);
-    }
+    marshal(obj, new StreamResult(os));
   }
 
   public final void marshal(Object obj, Writer w) throws JAXBException
   {
-    try {
-      XMLStreamWriter out = getXMLOutputFactory().createXMLStreamWriter(w);
-
-      marshal(obj, out);
-
-      out.flush();
-    }
-    catch (XMLStreamException e) {
-      throw new JAXBException(e);
-    }
+    marshal(obj, new StreamResult(w));
   }
 
   public <A extends XmlAdapter> void setAdapter(Class<A> type, A adapter)

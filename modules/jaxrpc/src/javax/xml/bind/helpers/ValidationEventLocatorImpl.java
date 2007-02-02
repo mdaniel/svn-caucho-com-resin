@@ -31,6 +31,7 @@ package javax.xml.bind.helpers;
 import org.w3c.dom.Node;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.LocatorImpl;
 
 import javax.xml.bind.ValidationEventLocator;
 import java.net.URL;
@@ -38,44 +39,57 @@ import java.net.URL;
 public class ValidationEventLocatorImpl implements ValidationEventLocator {
 
   private URL _url;
-  private Locator _loc;
+  private LocatorImpl _locator;
   private Node _node;
   private Object _object;
-  private int _offset;
+  private int _offset = -1;
   private SAXParseException _exception;
 
   public ValidationEventLocatorImpl()
   {
+    initLocator();
   }
 
-  public ValidationEventLocatorImpl(Locator loc)
+  public ValidationEventLocatorImpl(Locator locator)
   {
-    this._loc = loc;
+    _locator = new LocatorImpl(locator);
   }
 
   public ValidationEventLocatorImpl(Node node)
   {
-    this._node = node;
+    _node = node;
+    initLocator();
   }
 
   public ValidationEventLocatorImpl(Object object)
   {
-    this._object = object;
+    _object = object;
+    initLocator();
   }
 
   public ValidationEventLocatorImpl(SAXParseException e)
   {
-    this._exception = e;
+    _exception = e;
+    _locator = new LocatorImpl();
+    _locator.setColumnNumber(e.getColumnNumber());
+    _locator.setLineNumber(e.getLineNumber());
+  }
+
+  private void initLocator()
+  {
+    _locator = new LocatorImpl();
+    _locator.setColumnNumber(-1);
+    _locator.setLineNumber(-1);
   }
 
   public int getColumnNumber()
   {
-    return _loc.getColumnNumber();
+    return _locator.getColumnNumber();
   }
 
   public int getLineNumber()
   {
-    return _loc.getLineNumber();
+    return _locator.getLineNumber();
   }
 
   public Node getNode()
@@ -100,12 +114,12 @@ public class ValidationEventLocatorImpl implements ValidationEventLocator {
 
   public void setColumnNumber(int columnNumber)
   {
-    throw new UnsupportedOperationException();
+    _locator.setColumnNumber(columnNumber);
   }
 
   public void setLineNumber(int lineNumber)
   {
-    throw new UnsupportedOperationException();
+    _locator.setLineNumber(lineNumber);
   }
 
   public void setNode(Node node)
@@ -115,7 +129,7 @@ public class ValidationEventLocatorImpl implements ValidationEventLocator {
 
   public void setObject(Object object)
   {
-    object = _object;
+    _object = object;
   }
 
   public void setOffset(int offset)
@@ -127,6 +141,5 @@ public class ValidationEventLocatorImpl implements ValidationEventLocator {
   {
     _url = url;
   }
-
 }
 

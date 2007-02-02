@@ -60,6 +60,7 @@ public class JAXBSource extends SAXSource {
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     marshaller.marshal(contentObject, baos);
+
     return new InputSource(new ByteArrayInputStream(baos.toByteArray()));
   }
 

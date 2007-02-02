@@ -43,10 +43,17 @@ public class ValidationEventImpl implements ValidationEvent {
                              ValidationEventLocator locator,
                              Throwable linkedException)
   {
-    this._severity = severity;
-    this._message = message;
-    this._locator = locator;
-    this._linkedException = _linkedException;
+    _severity = severity;
+    _message = message;
+    _locator = locator;
+    _linkedException = linkedException;
+  }
+
+  public ValidationEventImpl(int severity,
+                             String message,
+                             ValidationEventLocator locator)
+  {
+    this(severity, message, locator, null);
   }
 
   public Throwable getLinkedException()

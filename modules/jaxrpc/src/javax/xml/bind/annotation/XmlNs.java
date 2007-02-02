@@ -34,7 +34,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 @Retention(value=RUNTIME)
-@Target(value=TYPE)
+@Target(value={})
 public @interface XmlNs {
 
   public String prefix();

@@ -35,6 +35,7 @@ import java.util.ArrayList;
 /** ValidationEventHandler implementation that collects all events */
 public class ValidationEventCollector implements ValidationEventHandler {
 
+  private boolean _dead = false;
   private ArrayList<ValidationEvent> _events = 
     new ArrayList<ValidationEvent>();
 
@@ -44,13 +45,21 @@ public class ValidationEventCollector implements ValidationEventHandler {
 
   public ValidationEvent[] getEvents()
   {
-    return (ValidationEvent[])_events.toArray(new ValidationEvent[0]);
+    ValidationEvent[] events = new ValidationEvent[_events.size()];
+    _events.toArray(events);
+
+    return events;
   }
 
   public boolean handleEvent(ValidationEvent event)
   {
-    _events.add(event);
-    return true;
+    if (event != null)
+      _events.add(event);
+
+    if (event == null || event.getSeverity() == ValidationEvent.FATAL_ERROR)
+      _dead = true;
+
+    return ! _dead;
   }
 
   public boolean hasEvents()
@@ -61,7 +70,7 @@ public class ValidationEventCollector implements ValidationEventHandler {
   public void reset()
   {
     _events.clear();
+    _dead = false;
   }
-
 }
 

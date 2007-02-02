@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 @Target(value=TYPE)
 public @interface XmlEnum {
 
-  public Class<?> value();
+  public Class<?> value() default java.lang.String.class;
 
 }
 

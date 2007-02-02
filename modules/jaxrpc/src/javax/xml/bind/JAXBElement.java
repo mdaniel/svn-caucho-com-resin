@@ -33,15 +33,15 @@ import java.io.Serializable;
 
 public class JAXBElement<T> implements Serializable {
 
-  protected Class<T> declaredType;
+  protected final Class<T> declaredType;
 
-  protected QName name;
-
-  protected boolean nil;
+  protected final QName name;
 
   protected final Class scope;
 
   protected T value;
+
+  protected boolean nil;
 
   public JAXBElement(QName name, Class<T> declaredType,
                      Class scope, T value)
