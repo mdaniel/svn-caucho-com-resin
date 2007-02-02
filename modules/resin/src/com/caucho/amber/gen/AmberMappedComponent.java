@@ -1155,7 +1155,15 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     int loadCount = _relatedType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
-      out.println("__caucho_loadMask_" + i + " = " + _relatedType.getCreateLoadMask(i) + ";");
+      out.println("__caucho_loadMask_" + i + " = 0L;");
+
+      // XXX: jpa/0l21
+
+      RelatedType parentType = _relatedType;
+
+      do {
+        out.println("__caucho_loadMask_" + i + " |= " + parentType.getCreateLoadMask(i) + ";");
+      } while ((parentType = parentType.getParentType()) != null);
     }
 
     out.println("aConn.prePersist((com.caucho.amber.entity.Entity) this);");
@@ -1279,13 +1287,21 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println(id.getEmbeddedIdField().generateSet("entity", "__caucho_compound_key") + ";");
     }
 
-    for (int i = 0; i < 1; i++) {
-      _relatedType.generateCopyUpdateObject(out, "entity", "super", i);
+    // jpa/0l21
+    for (int i = 0; i <= loadCount; i++) {
+      _relatedType.generateCopyLoadObject(out, "entity", "super", i);
     }
 
+    parentType = _relatedType;
+
+    // jpa/0l21
     for (int i = 0; i <= loadCount / 64; i++) {
-      out.print("entity.__caucho_loadMask_" + i + " = ");
-      out.println(_relatedType.getCreateLoadMask(i) + ";");
+      out.println("entity.__caucho_loadMask_" + i + " = 0L;");
+
+      do {
+        out.println("entity.__caucho_loadMask_" + i + " |= " + parentType.getCreateLoadMask(i) + ";");
+      }
+      while ((parentType = parentType.getParentType()) != null);
     }
 
     out.println();

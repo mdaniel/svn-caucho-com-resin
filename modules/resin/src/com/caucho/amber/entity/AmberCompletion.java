@@ -38,29 +38,20 @@ import java.util.logging.Logger;
 /**
  * Code to update the cache value on the completion of a transaction.
  */
-public class AmberCompletion {
-  private static final L10N L = new L10N(AmberCompletion.class);
-  private static final Logger log = Log.open(AmberCompletion.class);
-
+public interface AmberCompletion {
   /**
    * Code when the transaction completes.
    *
    * @return true if the entry should be deleted.
    */
   public boolean complete(EntityType rootType,
-			  Object key,
-			  EntityItem entityItem)
-  {
-    return false;
-  }
+                          Object key,
+                          EntityItem entityItem);
 
   /**
    * Code to update caches when a transaction completes.
    *
    * @return true if the entry should be deleted.
    */
-  public boolean complete(ResultSetCacheChunk cacheChunk)
-  {
-    return false;
-  }
+  public boolean complete(ResultSetCacheChunk cacheChunk);
 }

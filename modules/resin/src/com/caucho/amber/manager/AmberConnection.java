@@ -870,7 +870,7 @@ public class AmberConnection
       int index = getTransactionEntity(entity.getClass().getName(),
                                        entity.__caucho_getPrimaryKey());
 
-      // jpa/0v33
+      // XXX: jpa/0v33
       if (index >= 0) {
         setTransactionalState(_txEntities.get(index));
       }
@@ -1421,12 +1421,16 @@ public class AmberConnection
       // jpa/0j5c
       _entities.clear();
 
+      /* XXX: jpa/0k11 - avoids double rollback()
+         Rollback is done from com.caucho.transaction.TransactionImpl
+         to the pool item com.caucho.jca.PoolItem
       try {
         if (_conn != null)
           _conn.rollback();
       } catch (SQLException e) {
         throw new IllegalStateException(e);
       }
+      */
     }
   }
 
@@ -1760,6 +1764,11 @@ public class AmberConnection
     if (entity.__caucho_getEntityType() == null)
       return;
 
+    // XXX: also needs to check PersistenceContextType.TRANSACTION/EXTENDED.
+    // jpa/0k10
+    if (! isInTransaction())
+      return;
+
     Table table = entity.__caucho_getEntityType().getTable();
 
     Object key = entity.__caucho_getPrimaryKey();
@@ -1990,7 +1999,11 @@ public class AmberConnection
   public void cleanup()
   {
     try {
-      flushInternal();
+      // XXX: also needs to check PersistenceContextType.TRANSACTION/EXTENDED.
+      // jpa/0g04
+      if (isInTransaction()) {
+        flushInternal();
+      }
     }
     catch (RuntimeException e) {
       throw e;
@@ -2184,6 +2197,9 @@ public class AmberConnection
       home.save(this, entity);
 
     addEntity(entity);
+
+    // jpa/0h25
+    setTransactionalState(entity);
 
     Table table = home.getEntityType().getTable();
     addCompletion(new TableInvalidateCompletion(table.getName()));

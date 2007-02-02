@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 /**
  * Code to update the cache value on the completion of a transaction.
  */
-public class TableInvalidateCompletion extends AmberCompletion {
+public class TableInvalidateCompletion implements AmberCompletion {
   private static final L10N L = new L10N(TableInvalidateCompletion.class);
   private static final Logger log = Log.open(TableInvalidateCompletion.class);
 
@@ -58,16 +58,17 @@ public class TableInvalidateCompletion extends AmberCompletion {
    * @return true if the entry should be deleted.
    */
   public boolean complete(EntityType rootType,
-			  Object key,
-			  EntityItem entityItem)
+                          Object key,
+                          EntityItem entityItem)
   {
     if (rootType.getTable().getName().equals(_table)) {
+      // jpa/0k20
       entityItem.expire();
     }
     else {
       entityItem.getEntity().__caucho_invalidate_foreign(_table, null);
     }
-    
+
     return false;
   }
 

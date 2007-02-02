@@ -29,6 +29,7 @@
 package com.caucho.amber.entity;
 
 import com.caucho.amber.query.ResultSetCacheChunk;
+import com.caucho.amber.type.EntityType;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
 /**
  * Code to update the cache value on the completion of a transaction.
  */
-public class RowInvalidateCompletion extends AmberCompletion {
+public class RowInvalidateCompletion implements AmberCompletion {
   private static final L10N L = new L10N(RowInvalidateCompletion.class);
   private static final Logger log = Log.open(RowInvalidateCompletion.class);
 
@@ -58,18 +59,19 @@ public class RowInvalidateCompletion extends AmberCompletion {
    *
    * @return true if the entry should be deleted.
    */
-  public boolean complete(AmberEntityHome home,
-			  Object key,
-			  EntityItem entityItem)
+  public boolean complete(EntityType entityType,
+                          Object key,
+                          EntityItem entityItem)
   {
-    if (home.getEntityType().getTable().getName().equals(_table) &&
-	_key.equals(key)) {
+    if (entityType.getTable().getName().equals(_table) &&
+        _key.equals(key)) {
+      // jpa/0k20
       entityItem.expire();
     }
     else {
       entityItem.getEntity().__caucho_invalidate_foreign(_table, key);
     }
-    
+
     return false;
   }
 
@@ -84,7 +86,7 @@ public class RowInvalidateCompletion extends AmberCompletion {
       chunk.invalidate();
       return true;
     }
-    
+
     return false;
   }
 
@@ -101,5 +103,10 @@ public class RowInvalidateCompletion extends AmberCompletion {
     RowInvalidateCompletion comp = (RowInvalidateCompletion) o;
 
     return _table.equals(comp._table) && _key.equals(comp._key);
+  }
+
+  public String toString()
+  {
+    return "RowInvalidateCompletion[" + _table + "," + _key + "]";
   }
 }
