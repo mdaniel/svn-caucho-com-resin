@@ -48,7 +48,7 @@ abstract public class MessageWriter {
   /**
    * Starts a 1.2 message.
    */
-  public void start12Message(int type, int requestId)
+  public void start12Message(int type)
   {
   }
   

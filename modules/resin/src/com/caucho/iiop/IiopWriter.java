@@ -46,6 +46,7 @@ import javax.rmi.CORBA.ValueHandler;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.*;
+import java.util.*;
 
 abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream {
   static protected final int VALUE_TAG = 0x7fffff00;
@@ -168,7 +169,7 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   public void startRequest(byte []oid, int off, int len, String operation)
     throws IOException
   {
-    startRequest(oid, off, len, operation, (int) Alarm.getCurrentTime());
+    startRequest(oid, off, len, operation, (int) Alarm.getCurrentTime(), null);
   }
   
   /**
@@ -177,7 +178,8 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
    * @param operation the method to call
    */
   abstract public void startRequest(byte []oid, int off, int len,
-				    String operation, int requestId)
+				    String operation, int requestId,
+				    ArrayList<ServiceContext> serviceList)
     throws IOException;
 
   public void writeRequestServiceControlList()
@@ -410,7 +412,6 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
     }
 
     _out.align(4);
-
 
     int oldOffset = _context.getString(a);
 

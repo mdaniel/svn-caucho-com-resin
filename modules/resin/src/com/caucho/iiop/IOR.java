@@ -61,10 +61,10 @@ public class IOR {
   public static final int CS_UTF16 = 0x10100; // ucs-16 level 1
   
   String _typeId;
-  int major;
-  int minor;
+  int _major;
+  int _minor;
   String _host;
-  int port;
+  int _port;
   byte []oid;
   String uri;
 
@@ -92,10 +92,10 @@ public class IOR {
   {
     try {
       _typeId = typeId;
-      this.major = 1;
-      this.minor = 2;
+      _major = 1;
+      _minor = 2;
       _host = host;
-      this.port = port;
+      _port = port;
       this.uri = uri;
 
       oid = uri.getBytes("UTF8");
@@ -116,7 +116,7 @@ public class IOR {
    */
   public int getMajor()
   {
-    return major;
+    return _major;
   }
 
   /**
@@ -124,12 +124,12 @@ public class IOR {
    */
   public int getMinor()
   {
-    return minor;
+    return _minor;
   }
 
   public void setMinor(int minor)
   {
-    this.minor = minor;
+    _minor = minor;
   }
 
   /**
@@ -145,7 +145,7 @@ public class IOR {
    */
   public int getPort()
   {
-    return port;
+    return _port;
   }
 
   /**
@@ -180,7 +180,7 @@ public class IOR {
   IOR read(IiopReader is)
     throws IOException
   {
-    _typeId = is.readString();
+    _typeId = is.read_string();
     int count = is.readInt();
 
     for (int i = 0; i < count; i++) {
@@ -192,17 +192,17 @@ public class IOR {
       int sublen = is.readInt();
 
       int topEndian = is.read();
-      major = is.read();
-      minor = is.read();
+      _major = is.read();
+      _minor = is.read();
 
-      _host = is.readString();
-      port = is.read_short() & 0xffff;
+      _host = is.read_string();
+      _port = is.read_short() & 0xffff;
 
       oid = is.readBytes();
 
       uri = null;
 
-      if (minor >= 1) {
+      if (_minor >= 1) {
         int tagCount = is.readInt();
         for (int j = 0; j < tagCount; j++) {
           int compType = is.readInt();
@@ -260,8 +260,8 @@ public class IOR {
       int sublen = getInt(buf, offset + i);
       i += 4;
 
-      major = buf[offset + i++] & 0xff;
-      minor = buf[offset + i++] & 0xff;
+      _major = buf[offset + i++] & 0xff;
+      _minor = buf[offset + i++] & 0xff;
 
       i += 2;
 
@@ -273,7 +273,7 @@ public class IOR {
       i += strlen;
       
       i += i & 1;
-      port = getShort(buf, offset + i);
+      _port = getShort(buf, offset + i);
       i += 2;
 
       i += (4 - i % 4) % 4;
@@ -343,21 +343,21 @@ public class IOR {
     bb.addInt(0);
 
     bb.add(0); // encoding
-    bb.add(major);
-    bb.add(minor);
+    bb.add(_major);
+    bb.add(_minor);
 
     writeString(bb, _host);
 
     if ((bb.size() & 0x1) == 1)
       bb.add(0);
-    bb.addShort(port);
+    bb.addShort(_port);
 
     align4(bb);
     bb.addInt(oid.length);
     for (int i = 0; i < oid.length; i++)
       bb.add(oid[i]);
 
-    if (minor >= 1) {
+    if (_minor >= 1) {
       align4(bb);
       bb.addInt(1); // tagged profiles
 
@@ -399,7 +399,7 @@ public class IOR {
    */
   public String toString()
   {
-    return "IOR:" + _typeId + "//" + _host + ":" + port + "/" + bytesToHex(oid);
+    return "IOR:" + _typeId + "//" + _host + ":" + _port + "/" + bytesToHex(oid);
   }
 
   private static String toHex(int v)

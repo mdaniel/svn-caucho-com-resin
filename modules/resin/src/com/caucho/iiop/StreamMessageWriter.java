@@ -40,10 +40,10 @@ public class StreamMessageWriter extends MessageWriter
   private int _bufferLength;
   
   private int _offset;
-  private int _align;
   private int _length;
 
   private int _version;
+  private int _reqId;
 
   public StreamMessageWriter()
   {
@@ -62,7 +62,6 @@ public class StreamMessageWriter extends MessageWriter
     _out = out;
     _buffer = _out.getBuffer();
     _bufferLength = _buffer.length;
-    _align = 0;
     
     _buffer[0] = 'G';
     _buffer[1] = 'I';
@@ -78,18 +77,17 @@ public class StreamMessageWriter extends MessageWriter
     _out = out;
     _buffer = _out.getBuffer();
     _bufferLength = _buffer.length;
-    _align = 0;
   }
 
   /**
    * Starts a 1.0 message.
    */
+  @Override
   public void start10Message(int type)
   {
     _version = 0;
     
     _offset = 0;
-    _align = 0;
     _length = 12;
 
     _buffer[4] = 1;
@@ -101,13 +99,13 @@ public class StreamMessageWriter extends MessageWriter
   /**
    * Starts a 1.1 message.
    */
+  @Override
   public void start11Message(int type)
   {
     _version = 1;
     
     _offset = 0;
     _length = 12;
-    _align = 0;
 
     _buffer[4] = 1;
     _buffer[5] = 1;
@@ -118,23 +116,18 @@ public class StreamMessageWriter extends MessageWriter
   /**
    * Starts a 1.2 message.
    */
-  public void start12Message(int type, int requestId)
+  @Override
+  public void start12Message(int type)
   {
     _version = 2;
     
-    _offset = 4;
-    _length = 16;
-    _align = 0;
+    _offset = 12;
+    _length = 12;
 
     _buffer[4] = 1;
     _buffer[5] = 2;
     _buffer[6] = 0;
     _buffer[7] = (byte) type;
-
-    _buffer[12] = (byte) (requestId >> 24);
-    _buffer[13] = (byte) (requestId >> 16);
-    _buffer[14] = (byte) (requestId >> 8);
-    _buffer[15] = (byte) (requestId);
   }
 
   /**
@@ -218,7 +211,7 @@ public class StreamMessageWriter extends MessageWriter
    */
   public void align(int v)
   {
-    int delta = v - _length % v;
+    int delta = v - _offset % v;
 
     if (delta == v)
       return;
@@ -235,6 +228,7 @@ public class StreamMessageWriter extends MessageWriter
   public void flushBuffer()
   {
     try {
+      System.out.println("FLUSH:");
       int size = _length - 12;
 
       _buffer[6] = 2; // fragmented
@@ -244,17 +238,24 @@ public class StreamMessageWriter extends MessageWriter
       _buffer[10] = (byte) (size >> 8);
       _buffer[11] = (byte) (size >> 0);
 
+      /*
+      // For IIOP 1.2, the fragment is padded to align(8).
       if (_version == 2) {
-	_length += (8 - _length % 8) % 8;
+	_length += (8 - _offset) & 0x7;
       }
+      */
 
       _out.setBufferOffset(_length);
       _out.flushBuffer();
 
       _buffer[7] = IiopReader.MSG_FRAGMENT;
 
-      if (_version == 2) {
-	_offset += 4;
+      // For IIOP 1.2, the fragment header has a request id
+      if (_version >= 2) {
+	_buffer[12] = (byte) (_reqId >> 24);
+	_buffer[13] = (byte) (_reqId >> 16);
+	_buffer[14] = (byte) (_reqId >> 8);
+	_buffer[15] = (byte) (_reqId);
 	_length = 16;
       }
       else
@@ -281,7 +282,7 @@ public class StreamMessageWriter extends MessageWriter
 
     /*
     if (_version == 2) {
-      int delta = (8 - _length % 8) % 8;
+      int delta = (8 - _offset) & 0x7;
 
       for (int i = 0; i < delta; i++)
 	_buffer[_length + i] = (byte) 0xaa;

@@ -38,6 +38,11 @@ abstract public class MessageReader
   abstract public int getOffset();
   
   /**
+   * Sets the offset.
+   */
+  abstract public void setOffset(int offset);
+  
+  /**
    * Reads a byte.
    */
   abstract public int read();
@@ -78,11 +83,13 @@ abstract public class MessageReader
       offset++;
       read();
     }
+
+    int v = (((read() & 0xff) << 24)
+	     + ((read() & 0xff) << 16)
+	     + ((read() & 0xff) << 8)
+	     + (read() & 0xff));
     
-    return (((read() & 0xff) << 24)
-	    + ((read() & 0xff) << 16)
-	    + ((read() & 0xff) << 8)
-	    + (read() & 0xff));
+    return v;
   }
   
   /**

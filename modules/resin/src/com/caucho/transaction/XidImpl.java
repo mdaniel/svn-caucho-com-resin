@@ -106,7 +106,7 @@ public class XidImpl implements Xid {
     System.arraycopy(base._global, 0, _global, 0, _global.length);
   }
 
-  XidImpl(byte []global, byte []local)
+  public XidImpl(byte []global, byte []local)
   {
     _global = new byte[global.length];
     _local = new byte[local.length];

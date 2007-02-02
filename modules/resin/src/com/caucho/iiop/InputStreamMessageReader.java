@@ -28,24 +28,53 @@
 
 package com.caucho.iiop;
 
-import java.io.InputStream;
-import java.io.IOException;
+import java.io.*;
+
+import com.caucho.vfs.*;
 
 class InputStreamMessageReader extends MessageReader
 {
   private InputStream _is;
   private int _offset;
+  private int _chunkOffset;
+
+  private TempBuffer _tempBuffer;
+  private byte []_buffer;
 
   private int _length;
   private boolean _isLast;
 
-  InputStreamMessageReader(InputStream is, boolean isLast)
+  InputStreamMessageReader(InputStream is, boolean isLast, int offset)
   {
-    _is = is;
+    try {
+      _is = is;
 
-    _isLast = isLast;
-    _length = read_long();
-    //    System.out.println("LEN: " + _length);
+      _isLast = isLast;
+      
+      _length = (((_is.read() & 0xff) << 24)
+		 + ((_is.read() & 0xff) << 16)
+		 + ((_is.read() & 0xff) << 8)
+		 + ((_is.read() & 0xff)));
+
+      if (_length <= TempBuffer.SIZE) {
+	_tempBuffer = TempBuffer.allocate();
+	_buffer = _tempBuffer.getBuffer();
+      }
+      else
+	_buffer = new byte[_length + (1024 - _length % 1024) % 1024];
+
+      is.read(_buffer, 0, _length);
+
+      /*
+      if (log.isLoggable(Level.FINER))
+	writeHexGroup(_buffer, 0, _length);
+      */
+	       
+      _chunkOffset = offset;
+      _offset = offset;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
   
   /**
@@ -61,7 +90,12 @@ class InputStreamMessageReader extends MessageReader
    */
   public void setOffset(int offset)
   {
+    int delta = offset - _offset;
+    
     _offset = offset;
+
+    // XXX:
+    //_is.setBufferOffset(_is.getBufferOffset() + delta);
   }
   
   /**
@@ -70,8 +104,10 @@ class InputStreamMessageReader extends MessageReader
   public int read()
   {
     try {
-      _offset++;
-      return _is.read();
+      if (_length <= _offset - _chunkOffset)
+	readFragmentHeader();
+
+      return _buffer[_offset++ - _chunkOffset] & 0xff;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -84,7 +120,19 @@ class InputStreamMessageReader extends MessageReader
   {
     try {
       while (length > 0) {
-	int sublen = _is.read(buffer, offset, length);
+	int sublen = _length - (_offset - _chunkOffset);
+
+	if (sublen <= 0) {
+	  readFragmentHeader();
+	  sublen = _length - (_offset - _chunkOffset);
+	}
+
+	if (length < sublen)
+	  sublen = length;
+
+	System.arraycopy(_buffer, _offset - _chunkOffset,
+			 buffer, offset,
+			 sublen);
 
 	if (sublen < 0)
 	  throw new IOException("unexpected end of file");
@@ -96,5 +144,123 @@ class InputStreamMessageReader extends MessageReader
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private void readFragmentHeader()
+    throws IOException
+  {
+    if (_isLast)
+      throw new EOFException("read past end of file");
+    
+    if (_is.read() != 'G'
+	|| _is.read() != 'I'
+	|| _is.read() != 'O'
+	|| _is.read() != 'P')
+      throw new IOException("Missing GIOP header.");
+    
+    int major = _is.read();
+    int minor = _is.read();
+
+    if (major != 1)
+      throw new IOException("unknown major");
+
+    int flags = _is.read();
+    int type = _is.read();
+
+    if (type != IiopReader.MSG_FRAGMENT)
+      throw new IOException("expected fragment at " + type);
+
+    _isLast = (flags & 2) != 2;
+
+    System.out.println("FRAGMENT:");
+    _chunkOffset = _offset;
+    _length = (((_is.read() & 0xff) << 24)
+	       + ((_is.read() & 0xff) << 16)
+	       + ((_is.read() & 0xff) << 8)
+	       + ((_is.read() & 0xff)));
+
+    if (minor >= 2) {
+      int reqId = (((_is.read() & 0xff) << 24)
+		   + ((_is.read() & 0xff) << 16)
+		   + ((_is.read() & 0xff) << 8)
+		   + ((_is.read() & 0xff)));
+
+      _length -= 4;
+    }
+
+    if (_length < 0 || _length > 65536)
+      throw new RuntimeException();
+    
+    _is.read(_buffer, 0, _length);
+  }
+
+  private void writeHexGroup(byte []buffer, int offset, int length)
+  {
+    int end = offset + length;
+      
+    while (offset < end) {
+      int chunkLength = 16;
+	
+      for (int j = 0; j < chunkLength; j++) {
+	System.out.print(" ");
+	printHex(buffer[offset + j]);
+      }
+
+      System.out.print(" ");
+      for (int j = 0; j < chunkLength; j++) {
+	printCh(buffer[offset + j]);
+      }
+
+      offset += chunkLength;
+	
+      System.out.println();
+    }
+  }
+
+  private void printHex(int d)
+  {
+    int ch1 = (d >> 4) & 0xf;
+    int ch2 = d & 0xf;
+
+    if (ch1 >= 10)
+      System.out.print((char) ('a' + ch1 - 10));
+    else
+      System.out.print((char) ('0' + ch1));
+    
+    if (ch2 >= 10)
+      System.out.print((char) ('a' + ch2 - 10));
+    else
+      System.out.print((char) ('0' + ch2));
+  }
+
+  private void printCh(int d)
+  {
+    if (d >= 0x20 && d <= 0x7f)
+      System.out.print("" + ((char) d));
+    else
+      System.out.print(".");
+  }
+
+  private String toCh(int d)
+  {
+    if (d >= 0x20 && d <= 0x7f)
+      return "" + (char) d;
+    else
+      return "" + d;
+  }
+
+  private static String toHex(int v)
+  {
+    StringBuilder cb = new StringBuilder();
+    for (int i = 28; i >= 0; i -= 4) {
+      int h = (v >> i) & 0xf;
+
+      if (h >= 10)
+        cb.append((char) ('a' + h - 10));
+      else
+        cb.append(h);
+    }
+
+    return cb.toString();
   }
 }

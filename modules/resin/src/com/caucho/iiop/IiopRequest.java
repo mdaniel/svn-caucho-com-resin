@@ -31,6 +31,7 @@ package com.caucho.iiop;
 
 import com.caucho.server.connection.Connection;
 import com.caucho.server.port.ServerRequest;
+import com.caucho.transaction.*;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.iiop.orb.*;
@@ -41,6 +42,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.*;
+import javax.transaction.*;
 import javax.rmi.CORBA.ValueHandler;
 
 /**
@@ -73,6 +76,9 @@ public class IiopRequest implements ServerRequest {
 
   String _hostName;
   int _port;
+
+  TransactionManagerImpl _tm;
+  UserTransaction _ut;
   
   IiopRequest(IiopProtocol server, Connection conn)
   {
@@ -197,7 +203,12 @@ public class IiopRequest implements ServerRequest {
       if (log.isLoggable(Level.FINER))
 	log.finer("IIOP[" + _conn.getId() + "] OID: " + oid);
 
+      XidImpl xid = _reader.getXid();
+
       try {
+	if (xid != null)
+	  beginTransaction(xid);
+	
 	if (oid.equals("INIT")) {
 	  String str = _reader.readString();
 
@@ -284,6 +295,9 @@ public class IiopRequest implements ServerRequest {
 
 	//writer.write_string("RMI:" + exName + ":0");
 	writer.write_value(e);
+      } finally {
+	if (xid != null)
+	  endTransaction(xid);
       }
       
       _messageWriter.close();
@@ -295,7 +309,6 @@ public class IiopRequest implements ServerRequest {
 
       return true;
     } catch (Throwable e) {
-      e.printStackTrace();
       log.log(Level.WARNING, "IIOP[" + _conn.getId() + "] " + e.toString(), e);
       return false;
     } finally {
@@ -303,8 +316,35 @@ public class IiopRequest implements ServerRequest {
     }
   }
 
+  private void beginTransaction(XidImpl xid)
+    throws Exception
+  {
+    getUserTransaction().begin();
+  }
+
+  private void endTransaction(XidImpl xid)
+  {
+    try {
+      getUserTransaction().commit();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
   public void protocolCloseEvent()
   {
   }
 
+  private UserTransaction getUserTransaction()
+  {
+    if (_ut == null) {
+      try {
+	_ut = (UserTransaction) new InitialContext().lookup("java:comp/UserTransaction");
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString());
+      }
+    }
+
+    return _ut;
+  }
 }

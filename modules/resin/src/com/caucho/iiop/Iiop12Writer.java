@@ -30,6 +30,7 @@
 package com.caucho.iiop;
 
 import java.io.IOException;
+import java.util.*;
 
 import com.caucho.vfs.*;
 
@@ -53,15 +54,19 @@ public class Iiop12Writer extends Iiop10Writer
    *
    * @param operation the method to call
    */
+  @Override
   public void startRequest(byte []oid, int off, int len,
-			   String operation, int requestId)
+			   String operation, int requestId,
+			   ArrayList<ServiceContext> contextList)
     throws IOException
   {
-    _out.start12Message(IiopReader.MSG_REQUEST, requestId);
-    
-    int flags = 0;
+    _out.start12Message(IiopReader.MSG_REQUEST);
 
-    _out.write(1);      // response expected
+    _out.writeInt(requestId);
+    
+    int flags = 0x3;
+
+    _out.write(flags);      // response expected
     _out.write(0);
     _out.write(0);
     _out.write(0);
@@ -70,17 +75,29 @@ public class Iiop12Writer extends Iiop10Writer
     writeBytes(oid, off, len);  // object id
     
     writeString(operation);
-    
-    write_long(0);       // service context list
+
+    if (contextList != null) {
+      write_long(contextList.size()); // service context list
+
+      for (int i = 0; i < contextList.size(); i++)
+	contextList.get(i).write(this);
+    }
+    else
+      write_long(0);       // service context list
+
+    // see IiopRead12.read12Request
+    _out.align(8);
   }
+  
   /**
    * Writes the header for a request
    */
   public void startReplyOk(int requestId)
     throws IOException
   {
-    _out.start12Message(IiopReader.MSG_REPLY, requestId);
-    
+    _out.start12Message(IiopReader.MSG_REPLY);
+
+    write_long(requestId);
     write_long(IiopReader.STATUS_NO_EXCEPTION); // okay
     write_long(0);                       // service control list
   }
@@ -96,8 +113,9 @@ public class Iiop12Writer extends Iiop10Writer
 					Throwable cause)
     throws IOException
   {
-    _out.start12Message(IiopReader.MSG_REPLY, requestId);
+    _out.start12Message(IiopReader.MSG_REPLY);
     
+    write_long(requestId);
     write_long(IiopReader.STATUS_SYSTEM_EXCEPTION);
 
     if (cause == null) {
@@ -131,8 +149,9 @@ public class Iiop12Writer extends Iiop10Writer
   public void startReplyUserException(int requestId)
     throws IOException
   {
-    _out.start12Message(IiopReader.MSG_REPLY, requestId);
+    _out.start12Message(IiopReader.MSG_REPLY);
     
+    write_long(requestId);
     write_long(IiopReader.STATUS_USER_EXCEPTION);
     write_long(0);         // service control list
   }

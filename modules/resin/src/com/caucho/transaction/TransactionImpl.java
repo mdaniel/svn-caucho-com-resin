@@ -168,7 +168,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
    * Start a transaction.
    */
   void begin()
-    throws SystemException
+    throws SystemException, NotSupportedException
   {
     if (_status != Status.STATUS_NO_TRANSACTION) {
       int status = _status;
@@ -179,7 +179,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
         log.log(Level.WARNING, e.toString(), e);
       }
       
-      throw new UnsupportedOperationException(L.l("Nested transactions are not supported. The previous transaction for this thread did not commit() or rollback(). Check that every UserTransaction.begin() has its commit() or rollback() in a finally block.\nStatus was {0}.",
+      throw new NotSupportedException(L.l("Nested transactions are not supported. The previous transaction for this thread did not commit() or rollback(). Check that every UserTransaction.begin() has its commit() or rollback() in a finally block.\nStatus was {0}.",
 						  xaState(status)));
     }
 

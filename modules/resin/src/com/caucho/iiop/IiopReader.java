@@ -36,6 +36,7 @@ import com.caucho.util.ByteBuffer;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntArray;
 import com.caucho.util.L10N;
+import com.caucho.transaction.*;
 import com.caucho.vfs.*;
 
 import org.omg.CORBA.Principal;
@@ -78,6 +79,14 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   public static final int SERVICE_INVOCATION_POLICIES = 7;
   public static final int SERVICE_FORWARDED_IDENTITY = 8;
   public static final int SERVICE_UNKNOWN_EXCEPTION_INFO = 9;
+  public static final int SERVICE_RT_CORBA_PRIORITY = 10;
+  public static final int SERVICE_RT_CORBA_PRIORITY_RANGE = 11;
+  public static final int SERVICE_FT_GROUP_VERSION = 12;
+  public static final int SERVICE_FT_REQUEST = 13;
+  public static final int SERVICE_EXCEPTION_DETAIL_MESSAGE = 14;
+  public static final int SERVICE_SECURITY_ATTRIBUTE_SERVICE = 15;
+  public static final int SERVICE_ACTIVITY_SERVICE = 16;
+  public static final int SERVICE_RMI_CUSTOM_MAX_STREAM_FORMAT = 17;
 
   public static final int STATUS_NO_EXCEPTION = 0;
   public static final int STATUS_USER_EXCEPTION = 1;
@@ -108,12 +117,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   private boolean _hasMoreFragments;
   private int _flags;
 
-  private TempBuffer _tempBuffer;
-
-  private byte []_buffer;
-  private int _offset;
-  private int _length;
-  
   private int _type;
   
   private int _fragmentOffset;
@@ -123,11 +126,13 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
   private int requestId;
   private boolean responseExpected;
-  private ByteBuffer objectKey = new ByteBuffer();
+  private ByteBuffer _objectKey = new ByteBuffer();
   private CharBuffer _operation = new CharBuffer();
   private ByteBuffer principal = new ByteBuffer();
 
-  private CharBuffer _cb = new CharBuffer();
+  private XidImpl _xid;
+
+  private char []_cb = new char[256];
   
   private ValueHandler _valueHandler = Util.createValueHandler();
   private RunTime runTime = _valueHandler.getRunTimeCodeBase();
@@ -170,10 +175,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     _minor = 0;
     _type = 0;
     requestId = 0;
-    objectKey.clear();
+    _objectKey.clear();
     _operation.clear();
-    _offset = 0;
-    _length = 0;
     _fragmentOffset = 0;
 
     _context = new ReaderContext();
@@ -206,7 +209,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
   public int getOffset()
   {
-    return _offset;
+    return _in.getOffset();
   }
 
   public boolean isResponseExpected()
@@ -216,22 +219,22 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
   public ByteBuffer getObjectKey()
   {
-    return objectKey;
+    return _objectKey;
   }
 
   public CharBuffer getOperation()
   {
     return _operation;
   }
+  
+  public XidImpl getXid()
+  {
+    return _xid;
+  }
 
   public void readRequest()
     throws IOException
   {
-    if (_tempBuffer == null) {
-      _tempBuffer = TempBuffer.allocate();
-      _buffer = _tempBuffer.getBuffer();
-    }
-    
     int len = _rs.readAll(_header, 0, _header.length);
 
     if (_header[0] != 'G' ||
@@ -257,7 +260,10 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     
     _type = _header[7];
 
-    _in = new InputStreamMessageReader(_rs, ! _hasMoreFragments);
+    // IIOP 1.2 starts alignment after the 12-byte header
+    _in = new InputStreamMessageReader(_rs,
+				       ! _hasMoreFragments,
+				       _minor >= 2 ? 12 : 0);
 
     // debug
     //System.out.println("---");
@@ -316,7 +322,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     requestId = _in.read_long();
     responseExpected = _in.read() != 0;
     
-    readOctetSequence(objectKey);
+    readOctetSequence(_objectKey);
 
     readString(_operation);
     
@@ -372,11 +378,14 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     responseExpected = flags != 0;
 
     int disposition = read_long();
-    readOctetSequence(objectKey);
+    readOctetSequence(_objectKey);
     readString(_operation);
 
     readServiceContextList();
 
+    // align(8) is required for IIOP 1.2, in combination of the
+    // initial offset of 12 to align the data after the 12byte header.
+    // the ejb/1410 vs ejb/1230 (??)
     _in.align(8);
   }
 
@@ -421,12 +430,14 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   private void readServiceContextList()
     throws IOException
   {
+    _xid = null;
+    
     int length = _in.read_long();
 
     for (int i = 0; i < length; i++) {
       int serviceId = _in.read_long();
       int dataLength = _in.read_long();
-
+      
       if (serviceId == SERVICE_CODE_SET) {
         int endian = _in.read();
         int charSet = _in.read_long();
@@ -436,6 +447,25 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
         int endian = _in.read();
 
 	_unknownExn = (Throwable) read_value();
+      }
+      else if (serviceId == SERVICE_TRANSACTION) {
+	int endian = _in.read();
+
+	int timeout = _in.read_long();
+	int coord = _in.read_long();
+	int term = _in.read_long();
+	int format = _in.read_long();
+	int bqualLength = _in.read_long();
+	int xidLength = _in.read_long();
+	byte []local = new byte[bqualLength];
+	byte []global = new byte[xidLength - bqualLength];
+	_in.read(global, 0, global.length);
+	_in.read(local, 0, local.length);
+	int parents = _in.read_long();
+
+	XidImpl xid = new XidImpl(global, local);
+
+	_xid = xid;
       }
       else {
         _in.skip(dataLength);
@@ -485,7 +515,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       // writeHexGroup(16);
 
       _chunkEnd = -1;
-      align4();
+      _in.align(4);
       int startOffset = _in.getOffset();
       
       int code = read_long();
@@ -538,7 +568,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
 	  int chunkLength = _in.read_long();
 
-	  _chunkEnd = chunkLength + _offset;
+	  _chunkEnd = chunkLength + _in.getOffset();
 	  _chunkDepth++;
 	}
 
@@ -611,7 +641,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 	  if (_chunkDepth > 0) {
 	    newChunk = _in.read_long();
 	    //System.out.println("REDO:" + newChunk + " D:" + _chunkDepth);
-	    _chunkEnd = _offset + newChunk;
+	    _chunkEnd = _in.getOffset() + newChunk;
 	  }
 	}
       }
@@ -672,8 +702,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
   public Object read_fault()
   {
-    int startOffset = _offset;
-    int originalOffset = _in.getOffset();
+    int startOffset = _in.getOffset();
+    int originalOffset = startOffset;
       
     String repId = read_string();
         
@@ -696,7 +726,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
         throw new RuntimeException(e);
       }
       
-      return _valueHandler.readValue(this, _offset, cl, repId, runTime);
+      return _valueHandler.readValue(this, _in.getOffset(), cl, repId, runTime);
     }
 
     String className = null;
@@ -748,7 +778,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
       if (readHelper != null) {
 	try {
-	  _offset = startOffset;
+	  _in.setOffset(startOffset);
 	  _rs.setOffset(originalOffset);
             
 	  return readHelper.invoke(null, new Object[] { this });
@@ -894,20 +924,24 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       int delta = read_long();
 
       String v = _context.getString(offset + delta);
+      System.out.println("READ_STRING() " + (offset + delta) + " " + v);
 
       return v;
     }
-    
-    CharBuffer cb = _cb;
-    cb.clear();
 
+    char []cb = _cb;
+    if (cb.length < len) {
+      _cb = new char[len + (1024 - len % 1024) % 1024];
+      cb = _cb;
+    }
     for (int i = 0; i < len - 1; i++)
-      cb.append(read_char());
+      cb[i] = read_char();
 
     read_octet(); // null
 
-    String v = cb.toString();
+    String v = new String(cb, 0, len - 1);
 
+    System.out.println("PUT_STRING() " + offset + " " + v);
     _context.putString(offset, v);
 
     return v;
@@ -918,15 +952,19 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
    */
   public String readString(int len)
   {
-    CharBuffer cb = _cb;
-    cb.clear();
+    char []cb = _cb;
+
+    if (cb.length < len) {
+      _cb = new char[len + (1024 - len % 1024) % 1024];
+      cb = _cb;
+    }
 
     for (int i = 0; i < len - 1; i++)
-      cb.append(read_char());
+      cb[i] = read_char();
 
     read_octet(); // null
 
-    return cb.toString();
+    return new String(cb, 0, len - 1);
   }
 
   /**
@@ -952,24 +990,36 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
    */
   public String read_wstring(int len)
   {
-    CharBuffer cb = _cb;
-    cb.clear();
+    char []cb = _cb;
 
-    if (_minor == 2) {
-      for (; len > 1; len -= 2) {
-        char ch = (char) read_short();
-        cb.append(ch);
+    if (_minor >= 2) {
+      int sublen = len / 2;
+      if (cb.length < sublen) {
+	_cb = new char[sublen + (1024 - sublen % 1024) % 1024];
+	cb = _cb;
       }
+
+      for (int i = 0; i < sublen; i++) {
+        cb[i] = (char) read_short();
+      }
+
+      String v = new String(cb, 0, sublen);
+
+      return v;
     }
     else {
+      if (cb.length < len) {
+	_cb = new char[len + (1024 - len % 1024) % 1024];
+	cb = _cb;
+      }
+      
       for (int i = 0; i < len - 1; i++) {
-        char ch = (char) read_short();
-        cb.append(ch);
+        cb[i] = (char) read_short();
       }
       read_short();
-    }
 
-    return cb.toString();
+      return new String(cb, 0, len - 1);
+    }
   }
 
   /**
@@ -1219,44 +1269,26 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     bb.setLength(len);
   }
 
-  public byte []readBytes()
-    throws IOException
-  {
-    int len = _in.read_long();
-
-    if (len > 65536)
-      throw new IOException("too large chunk " + len);
-
-    byte []buf = new byte[len];
-    _in.read(buf, 0, len);
-
-    return buf;
-  }
-
-  public void readBytes(byte []buf, int off, int len)
-    throws IOException
-  {
-    System.arraycopy(_buffer, _offset, buf, off, len);
-
-    _offset += len;
-  }
-
   public String readString()
   {
     int len = _in.read_long();
 
-    if (len > 65536)
-      throw new IllegalStateException("too large chunk " + len);
+    if (len < 1 || len > 65536)
+      throw new IllegalStateException("string length problems: " + len);
     
-    CharBuffer cb = _cb;
-    cb.clear();
+    char []cb = _cb;
+
+    if (cb.length < len) {
+      _cb = new char[len + (1024 - len % 1024) % 1024];
+      cb = _cb;
+    }
+
     for (int i = 0; i < len - 1; i++) {
-      int ch = read_octet();
-      cb.append((char) ch);
+      cb[i] = (char) read_octet();
     }
     int ch = read_octet();
 
-    return cb.toString();
+    return new String(cb, 0, len - 1);
   }
 
   public void readString(CharBuffer cb)
@@ -1335,89 +1367,24 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     return _in.read();
   }
 
+  public byte []readBytes()
+    throws IOException
+  {
+    int len = _in.read_long();
+
+    if (len > 65536)
+      throw new IOException("too large chunk " + len);
+
+    byte []buf = new byte[len];
+    _in.read(buf, 0, len);
+
+    return buf;
+  }
+
   public void completeRead()
     throws IOException
   {
-    _offset = _length;
-  }
-
-  private void handleFragment()
-    throws IOException
-  {
-    if (_length < _offset)
-      throw new IllegalStateException(L.l("Read {0} past length {1}",
-					  "" + _offset, "" + _length));
-    
-    if (_length <= _offset) {
-      //System.out.println("FRAG: CHUNK:" + _chunkEnd + " " + _offset);
-      //System.out.println("FRAG-");
-      // XXX: IIOP 1.2?
-
-      while (_offset % 8 != 0) {
-	_offset++;
-	_length++;
-	
-	if (_chunkEnd > 0)
-	  _chunkEnd++;
-      }
-
-      int len = _rs.readAll(_header, 0, _header.length);
-
-      if (len != _header.length)
-	throw new EOFException("Unexpected length: " + len);
-
-      if (_header[0] != 'G' ||
-	  _header[1] != 'I' ||
-	  _header[2] != 'O' ||
-	  _header[3] != 'P') {
-
-	throw new IOException(L.l("unknown request {0},{1},{2},{3}",
-				  "" + _header[0], "" + _header[1],
-				  "" + _header[2], "" + _header[3]));
-      }
-
-      _major = _header[4];
-      _minor = _header[5];
-
-      if (_major != 1)
-	throw new IOException("unknown major");
-
-      _flags = _header[6];
-      _isBigEndian = (_flags & 1) == 0;
-      _hasMoreFragments = (_flags & 2) == 2;
-      
-      _type = _header[7];
-
-      _fragmentOffset += 8;
-
-      _rs.readAll(_buffer, _length, 4);
-      int fragLen = readInt(_buffer, _length);
-    
-      if (_minor == 2) {
-	fragLen -= 4;
-	_rs.readAll(_buffer, _length, 4);
-	int requestId = readInt(_buffer, _length);
-	//System.out.println("id: " + requestId);
-      }
-      
-      _rs.readAll(_buffer, _length, fragLen);
-
-      writeHexGroup(_buffer, _length, fragLen);
-      
-      _length += fragLen;
-
-      if (_type != MSG_FRAGMENT)
-	throw new IOException(L.l("expected Fragment at {0}", "" + _type));
-    }
-  }
-
-  private void skip(int len)
-    throws IOException
-  {
-    if (_length <= _offset && _hasMoreFragments)
-      handleFragment();
-
-    _offset += len;
+    // _in.completeRead();
   }
 
   public void close()

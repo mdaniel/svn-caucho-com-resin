@@ -67,11 +67,12 @@ public class ArrayMarshal extends Marshal
 
       if (len < 0 || len >= 65536)
 	throw new RuntimeException("sequence too long:" + len);
-	
+
       Object []obj = (Object []) Array.newInstance(_component, len);
 
-      for (int i = 0; i < len; i++)
+      for (int i = 0; i < len; i++) {
 	obj[i] = _subMarshal.unmarshal(is);
+      }
 
       return obj;
     } catch (Exception e) {

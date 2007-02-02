@@ -31,10 +31,15 @@ package com.caucho.iiop.orb;
 
 import org.omg.CORBA.*;
 
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.logging.*;
 import java.io.*;
 
+import javax.transaction.*;
+import javax.transaction.xa.*;
+
 import com.caucho.iiop.*;
+import com.caucho.transaction.*;
 import com.caucho.vfs.*;
 
 public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
@@ -63,7 +68,7 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
 	    boolean isResponseExpected)
   {
     try {
-      Iiop10Writer writer = new Iiop10Writer();
+      Iiop12Writer writer = new Iiop12Writer();
 
       writer.setOrb(_orb);
 
@@ -83,11 +88,26 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
 
       if (self instanceof StubImpl)
 	oid = ((StubImpl) self).getOid();
-      else {
+      else
 	oid = _oid;
+
+      ArrayList<ServiceContext> serviceList = null;
+
+      try {
+	TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
+	TransactionImpl xa = (TransactionImpl) tm.getTransaction();
+
+	if (xa != null) {
+	  if (serviceList == null)
+	    serviceList = new ArrayList<ServiceContext>();
+
+	  serviceList.add(new TransactionServiceContext(xa));
+	}
+      } catch (Exception e) {
+	log.log(Level.FINER, e.toString(), e);
       }
 
-      writer.startRequest(oid, 0, oid.length, op, 1);
+      writer.startRequest(oid, 0, oid.length, op, 1, serviceList);
 
       return writer;
     } catch (IOException e) {
@@ -107,7 +127,6 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
 
       return reader;
     } catch (IOException e) {
-      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }
@@ -162,8 +181,6 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
 	return true;
     }
     
-    System.out.println("IS-A: " + obj + " " + repId);
-
     return false;
   }
 
@@ -206,5 +223,51 @@ public class StubDelegateImpl extends org.omg.CORBA.portable.Delegate
   public String toString()
   {
     return "StubDelegateImpl[]";
+  }
+
+  static class TransactionServiceContext extends ServiceContext {
+    private TransactionImpl _xa;
+
+    TransactionServiceContext(TransactionImpl xa)
+    {
+      _xa = xa;
+    }
+
+    public void write(IiopWriter out)
+    {
+      try {
+	out.write_long(IiopReader.SERVICE_TRANSACTION);
+      
+	EncapsulationMessageWriter subOut = new EncapsulationMessageWriter();
+
+	subOut.write(0); // endian
+
+	subOut.align(4);
+	subOut.writeInt(_xa.getTransactionTimeout());
+	subOut.writeInt(0); // Coordinator
+	subOut.writeInt(0); // Terminator
+
+	Xid xid = _xa.getXid();
+      
+	byte []global = xid.getGlobalTransactionId();
+	byte []local = xid.getBranchQualifier();
+      
+	// otid_t
+	subOut.writeInt(0); // format
+	subOut.writeInt(local.length); // bqual_length
+	subOut.writeInt(global.length + local.length);
+	subOut.write(global, 0, global.length);
+	subOut.write(local, 0, local.length);
+      
+	subOut.align(4);
+	subOut.writeInt(0); // parents
+	subOut.close();
+
+	out.write_long(subOut.getOffset());
+	subOut.writeToWriter(out);
+      } catch (Exception e) {
+	throw new RuntimeException(e);
+      }
+    }
   }
 }
