@@ -56,7 +56,7 @@ public class QName implements Comparable, Serializable {
     if (namespace == null) {
       _prefix = null;
       _namespace = null;
-      _localName = null;
+      _localName = _fullName;
     }
     else if (namespace.equals("")) {
       _prefix = null;
@@ -97,6 +97,15 @@ public class QName implements Comparable, Serializable {
     
     if (localName != null)
       _localName = localName.intern();
+    /*
+    else {
+      int colon = qName.indexOf(':');
+
+      if (colon > 0)
+        _localName = qName.substring(0, colon).intern();
+      else
+        _localName = qName;
+    }*/
     
     if (namespace != null)
       _namespace = namespace.intern();
@@ -124,14 +133,11 @@ public class QName implements Comparable, Serializable {
     else
       _fullName = _localName;
 
-    if (namespace == null) {
-      _localName = null;
-    }
-    else if (namespace.equals("")) {
+    if ("".equals(namespace)) {
       _namespace = "";
       _localName = _fullName;
     }
-    else
+    else if (namespace != null)
       _namespace = namespace.intern();
 
     if (_namespace != null)
