@@ -52,13 +52,11 @@ public class ShortProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
   {
     return DatatypeConverter.printShort(((Short) in).shortValue());
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return Short.valueOf(DatatypeConverter.parseShort(in));
   }

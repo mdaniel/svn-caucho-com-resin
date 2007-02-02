@@ -48,13 +48,11 @@ public class ByteProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
   {
     return DatatypeConverter.printByte(((Byte) in).byteValue());
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.parseByte(in);
   }

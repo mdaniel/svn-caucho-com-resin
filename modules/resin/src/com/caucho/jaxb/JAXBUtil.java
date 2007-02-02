@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,9 +28,15 @@
 
 package com.caucho.jaxb;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventFactory;
 import javax.xml.ws.Holder;
 
 import static java.lang.Character.*;
@@ -49,8 +55,73 @@ import java.util.Map;
  * JAXB utilities.
  */
 public class JAXBUtil {
-  private static final Map<Class,String> _datatypeMap
-    = new HashMap<Class,String>();
+  private static final Map<Class,QName> _datatypeMap
+    = new HashMap<Class,QName>();
+
+  public static final XMLEventFactory EVENT_FACTORY 
+    = XMLEventFactory.newInstance();
+  public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
+  public static final String XML_SCHEMA_PREFIX = "xsd";
+
+  public static QName qnameFromNode(Node node)
+  {
+    if (node == null)
+      return null;
+
+    int colon = node.getNodeName().indexOf(':');
+
+    if (colon > 0) { 
+      String prefix = node.getNodeName().substring(0, colon);
+      String localName = node.getNodeName().substring(colon + 1);
+
+      return new QName(node.getNamespaceURI(), localName, prefix);
+    } 
+    else if (node.getNamespaceURI() != null)
+      return new QName(node.getNamespaceURI(), node.getNodeName());
+    else
+      return new QName(node.getNodeName());
+  }
+
+  public static Element elementFromQName(QName name, Node node)
+  {
+    Document doc = node.getOwnerDocument();
+
+    if (name.getPrefix() != null)
+      return doc.createElementNS(name.getNamespaceURI(),
+                                 name.getPrefix() + ':' + name.getLocalPart());
+    else if (name.getNamespaceURI() != null)
+      return doc.createElementNS(name.getNamespaceURI(), name.getLocalPart());
+    else
+      return doc.createElement(name.getLocalPart());
+  }
+
+  // skip all the whitespace and comments
+  public static Node skipIgnorableNodes(Node node) 
+  {
+    while (node != null) {
+      if (node.getNodeType() == Node.TEXT_NODE) {
+        String text = node.getTextContent();
+
+        boolean whitespace = true;
+
+        for (int i = 0; i < text.length(); i++) {
+          if (! Character.isWhitespace(text.charAt(i))) {
+            whitespace = false;
+            break;
+          }
+        }
+
+        if (! whitespace)
+          break;
+      }
+      else if (node.getNodeType() != Node.COMMENT_NODE) 
+        break;
+
+      node = node.getNextSibling();
+    }
+
+    return node;
+  }
 
   /**
    * Gets the type of a parameter.  If the type is something like Holder<T>,
@@ -259,28 +330,47 @@ public class JAXBUtil {
     return xmlName.toString();
   }
 
-  public static String getXmlSchemaDatatype(Class cl)
+  public static QName getXmlSchemaDatatype(Class cl)
   {
-    // XXX namespaces
-    
     if (_datatypeMap.containsKey(cl))
       return _datatypeMap.get(cl);
 
     String name = null;
+    String namespace = null;
+
+    Package pkg = cl.getPackage();
+
+    // look at package defaults first...
+    if (pkg.isAnnotationPresent(XmlSchema.class)) {
+      XmlSchema schema = (XmlSchema) pkg.getAnnotation(XmlSchema.class);
+
+      if (! "".equals(schema.namespace()))
+        namespace = schema.namespace();
+    }
 
     if (cl.isAnnotationPresent(XmlType.class)) {
       XmlType xmlType = (XmlType) cl.getAnnotation(XmlType.class);
 
       if (! "##default".equals(xmlType.name()))
         name = xmlType.name();
+
+      if (! "##default".equals(xmlType.namespace()))
+        namespace = xmlType.name();
     }
 
     if (name == null)
       name = identifierToXmlName(cl);
 
-    _datatypeMap.put(cl, name);
+    QName qname = null;
+    
+    if (namespace == null)
+      qname = new QName(name);
+    else
+      qname = new QName(namespace, name);
 
-    return name;
+    _datatypeMap.put(cl, qname);
+
+    return qname;
   }
 
   public static String qNameToString(QName qName)
@@ -293,37 +383,59 @@ public class JAXBUtil {
 
 
   static {
-    _datatypeMap.put(String.class, "xsd:string");
+    _datatypeMap.put(String.class, 
+                     new QName(XML_SCHEMA_NS, "string", XML_SCHEMA_PREFIX));
 
-    _datatypeMap.put(BigDecimal.class, "xsd:decimal");
+    _datatypeMap.put(BigDecimal.class,
+                     new QName(XML_SCHEMA_NS, "decimal", XML_SCHEMA_PREFIX));
 
-    _datatypeMap.put(Boolean.class, "xsd:boolean");
-    _datatypeMap.put(boolean.class, "xsd:boolean");
+    QName booleanQName = new QName(XML_SCHEMA_NS, "boolean", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(Boolean.class, booleanQName);
+    _datatypeMap.put(boolean.class, booleanQName);
 
-    _datatypeMap.put(Byte[].class, "xsd:base64Binary"); // XXX hexBinary
-    _datatypeMap.put(byte[].class, "xsd:base64Binary"); // XXX hexBinary
+    // XXX hexBinary
+    QName base64BinaryQName = 
+      new QName(XML_SCHEMA_NS, "base64Binary", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(Byte[].class, base64BinaryQName); 
+    _datatypeMap.put(byte[].class, base64BinaryQName);
 
-    _datatypeMap.put(Byte.class, "xsd:byte");
-    _datatypeMap.put(byte.class, "xsd:byte");
+    QName byteQName = 
+      new QName(XML_SCHEMA_NS, "byte", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(Byte.class, byteQName);
+    _datatypeMap.put(byte.class, byteQName);
 
-    _datatypeMap.put(Character.class, "xsd:unsignedShort");
-    _datatypeMap.put(char.class, "xsd:unsignedShort");
+    QName charQName = 
+      new QName(XML_SCHEMA_NS, "unsignedShort", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(Character.class, charQName);
+    _datatypeMap.put(char.class, charQName);
 
-    _datatypeMap.put(Calendar.class, "xsd:date");
+    // XXX timeDate, time
+    _datatypeMap.put(Calendar.class, 
+                     new QName(XML_SCHEMA_NS, "date", XML_SCHEMA_PREFIX));
 
-    _datatypeMap.put(Double.class, "xsd:double");
-    _datatypeMap.put(double.class, "xsd:double");
+    QName doubleQName = 
+      new QName(XML_SCHEMA_NS, "double", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(Double.class, doubleQName);
+    _datatypeMap.put(double.class, doubleQName);
 
-    _datatypeMap.put(Float.class, "xsd:float");
-    _datatypeMap.put(float.class, "xsd:float");
+    QName floatQName = 
+      new QName(XML_SCHEMA_NS, "float", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(Float.class, floatQName); 
+    _datatypeMap.put(float.class, floatQName);
 
-    _datatypeMap.put(Integer.class, "xsd:int");
-    _datatypeMap.put(int.class, "xsd:int");
+    QName intQName = 
+      new QName(XML_SCHEMA_NS, "int", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(Integer.class, intQName);
+    _datatypeMap.put(int.class, intQName);
 
-    _datatypeMap.put(Long.class, "xsd:long");
-    _datatypeMap.put(long.class, "xsd:long");
+    QName longQName = 
+      new QName(XML_SCHEMA_NS, "long", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(Long.class, longQName);
+    _datatypeMap.put(long.class, longQName);
 
-    _datatypeMap.put(Short.class, "xsd:short");
-    _datatypeMap.put(short.class, "xsd:short");
+    QName shortQName = 
+      new QName(XML_SCHEMA_NS, "short", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(Short.class, shortQName);
+    _datatypeMap.put(short.class, shortQName);
   }
 }

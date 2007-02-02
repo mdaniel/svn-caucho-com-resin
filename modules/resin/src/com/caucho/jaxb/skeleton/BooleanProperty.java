@@ -51,13 +51,11 @@ public class BooleanProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.printBoolean(((Boolean)in).booleanValue());
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return Boolean.valueOf(DatatypeConverter.parseBoolean(in));
   }

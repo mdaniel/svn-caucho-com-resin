@@ -29,6 +29,10 @@
 
 package com.caucho.jaxb.skeleton;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 
 import javax.xml.bind.JAXBException;
@@ -36,6 +40,9 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.namespace.QName;
+import javax.xml.stream.events.*;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -44,8 +51,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+// XXX: Make generic?
 /**
- * a List Property
+ * a List Property 
  */
 public class ListProperty extends IterableProperty {
   public ListProperty(Property componentProperty)
@@ -67,6 +75,56 @@ public class ListProperty extends IterableProperty {
     return list;
   }
 
+  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    ArrayList<Object> list = new ArrayList<Object>();
+
+    XMLEvent event = in.peek();
+
+    if (! event.isStartElement() || 
+        ! qname.equals(((StartElement) event).getName()))
+      return list; // XXX qa for null vs empty?
+
+    while (event.isStartElement() &&
+           qname.equals(((StartElement) event).getName())) {
+      list.add(_componentProperty.read(u, in, qname));
+      event = in.peek();
+    }
+
+    return list;
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+    throws JAXBException
+  {
+    Node child = node.getNode();
+
+    ArrayList<Object> list = new ArrayList<Object>();
+
+    if (child.getNodeType() != Node.ELEMENT_NODE)
+      return list; // XXX qa for null vs empty?
+    else {
+      QName nodeName = JAXBUtil.qnameFromNode(child);
+
+      if (! qname.equals(nodeName))
+        return list;
+    }
+
+    while (child != null && child.getNodeType() == Node.ELEMENT_NODE) {
+      QName nodeName = JAXBUtil.qnameFromNode(child);
+
+      if (! nodeName.equals(qname))
+        break;
+
+      list.add(_componentProperty.bindFrom(binder, node, qname));
+
+      child = node.nextSibling();
+    }
+
+    return list;
+  }
+
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -82,6 +140,62 @@ public class ListProperty extends IterableProperty {
       else
         throw new ClassCastException("Argument not a List");
     }
+  }
+
+  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    //XXX wrapper
+    
+    if (obj != null) {
+      if (obj instanceof List) {
+        List list = (List) obj;
+
+        for (Object o : list)
+          _componentProperty.write(m, out, o, qname);
+      }
+      else
+        throw new ClassCastException("Argument not a List");
+    }
+  }
+
+  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+    throws JAXBException
+  {
+    //XXX wrapper
+    
+    if (obj != null) {
+      if (obj instanceof List) {
+        List list = (List) obj;
+
+        Node child = node.getFirstChild();
+        for (Object o : list) {
+          if (child != null) {
+            // try to reuse as many of the child nodes as possible
+            Node newNode = 
+              _componentProperty.bindTo(binder, child, o, qname);
+
+            if (newNode != child) {
+              node.replaceChild(child, newNode);
+              binder.invalidate(child);
+            }
+
+            child = child.getNextSibling();
+            node = JAXBUtil.skipIgnorableNodes(node);
+          }
+          else {
+            Node newNode = JAXBUtil.elementFromQName(qname, node);
+            newNode = _componentProperty.bindTo(binder, newNode, o, qname);
+
+            node.appendChild(newNode);
+          }
+        }
+      }
+      else
+        throw new ClassCastException("Argument not a List");
+    }
+
+    return node;
   }
 
   public String getSchemaType()

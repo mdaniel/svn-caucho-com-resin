@@ -40,13 +40,11 @@ public class DateProperty extends CDataProperty {
   public static final DateProperty PROPERTY = new DateProperty();
 
   protected String write(Object in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.printDate((Calendar) in);
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.parseDate(in);
   }

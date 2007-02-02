@@ -48,11 +48,16 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
 
   private JAXBContextImpl _context;
   private Listener _listener;
+  private XMLOutputFactory _xmlOutputFactory;
   
 
   MarshallerImpl(JAXBContextImpl context)
+    throws JAXBException
   {
-    this._context = context;
+    _context = context;
+    _xmlOutputFactory = XMLOutputFactory.newInstance();
+    _xmlOutputFactory.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,
+                                  Boolean.TRUE);
   }
 
   /**
@@ -70,6 +75,7 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
       throw new MarshalException("JAXBIntrospector.isElement()==false");
     */
 
+    /*
     String name = null;
     String namespace = null;
 
@@ -83,9 +89,8 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
 
     XmlRootElement xre = (XmlRootElement) c.getAnnotation(XmlRootElement.class);
 
-    if (xre != null) {
-      name = xre.name();
-    }
+    if (xre != null)
+      name = xre.name();*/
 
     String encoding = getEncoding();
     if (encoding == null)
@@ -105,8 +110,9 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
                               getNoNSSchemaLocation());
       */
 
-
       skeleton.write(this, writer, jaxbElement, null);
+
+      writer.writeEndDocument();
     }
     catch (Exception e) {
       throw new JAXBException(e);
@@ -131,10 +137,11 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
   public void marshal(Object obj, Result result) throws JAXBException
   {
     try {
-      XMLOutputFactory factory = XMLOutputFactory.newInstance();
-      XMLStreamWriter out = factory.createXMLStreamWriter(result);
+      XMLStreamWriter out = _xmlOutputFactory.createXMLStreamWriter(result);
 
       marshal(obj, out);
+
+      out.flush();
     }
     catch (XMLStreamException e) {
       throw new JAXBException(e);

@@ -29,14 +29,89 @@
 
 package com.caucho.jaxb;
 
+import java.lang.reflect.*;
+import java.util.*;
+import javax.xml.bind.*;
+import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
+import com.caucho.jaxb.skeleton.*;
+
 public class ObjectFactorySkeleton {
-  private Class _objectFactory;
+  private JAXBContextImpl _context;
+  private Object _objectFactory;
+  //private HashMap<QName,Skeleton> _roots = new HashMap<QName,Skeleton>();
+  private HashMap<QName,Method> _roots = new HashMap<QName,Method>();
+  private HashMap<Class,ClassSkeleton> _classSkeletons 
+    = new HashMap<Class,ClassSkeleton>();
 
-  public ObjectFactorySkeleton(Class objectFactory)
+  public ObjectFactorySkeleton(JAXBContextImpl context, 
+                               Class objectFactoryClass)
+    throws JAXBException
   {
-    _objectFactory = objectFactory;
+    _context = context;
 
-    // XXX Introspection
+    try {
+      _objectFactory = objectFactoryClass.newInstance();
+    }
+    catch (Exception e) {
+      throw new JAXBException(e);
+    }
+
+    String namespace = null;
+    Package pkg = objectFactoryClass.getPackage();
+
+    if (pkg.isAnnotationPresent(XmlSchema.class)) {
+      XmlSchema schema = (XmlSchema) pkg.getAnnotation(XmlSchema.class);
+
+      if (! "".equals(schema.namespace()))
+        namespace = schema.namespace();
+    }
+
+    Method[] methods = objectFactoryClass.getMethods();
+
+    for (Method method : methods) {
+      if (method.getName().startsWith("create")) {
+        XmlElementDecl decl = method.getAnnotation(XmlElementDecl.class);
+        Class cl = method.getReturnType();
+
+        if (cl.equals(JAXBElement.class)) {
+          ParameterizedType type = 
+            (ParameterizedType) method.getGenericReturnType();
+          cl = (Class) type.getActualTypeArguments()[0];
+        }
+
+        if (decl != null) {
+          String localName = decl.name();
+
+          if (! "##default".equals(decl.namespace()))
+            namespace = decl.namespace();
+
+          QName root = null;
+
+          if (namespace == null)
+            root = new QName(localName);
+          else
+            root = new QName(localName, namespace);
+
+          _roots.put(root, method);
+        }
+        else {
+          if (! _context.hasSkeleton(cl)) {
+            ClassSkeleton skeleton = new ClassSkeleton(_context, cl);
+
+            _classSkeletons.put(cl, skeleton);
+          }
+        }
+      }
+      else if (method.getName().equals("newInstance")) {
+        // XXX
+      }
+      else if (method.getName().equals("getProperty")) {
+        // XXX
+      }
+      else if (method.getName().equals("setProperty")) {
+        // XXX
+      }
+    }
   }
 }
-

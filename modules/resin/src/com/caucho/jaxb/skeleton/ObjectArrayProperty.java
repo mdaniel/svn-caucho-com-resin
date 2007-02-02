@@ -33,6 +33,9 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.namespace.QName;
+import javax.xml.stream.events.*;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -41,6 +44,11 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import com.caucho.jaxb.BinderImpl;
+import com.caucho.jaxb.JAXBUtil;
 import com.caucho.util.L10N;
 
 /**
@@ -75,6 +83,62 @@ public class ObjectArrayProperty<T> extends ArrayProperty {
     return array;
   }
 
+  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    XMLEvent event = in.peek();
+
+    if (! event.isStartElement() || 
+        ! qname.equals(((StartElement) event).getName()))
+      return (T[]) Array.newInstance(_type, 0); // avoid ArrayList instantiation
+
+    ArrayList<T> ret = new ArrayList<T>();
+
+    while (event.isStartElement() &&
+           qname.equals(((StartElement) event).getName())) {
+      ret.add((T) _componentProperty.read(u, in, qname));
+      event = in.peek();
+    }
+
+    T[] array = (T[]) Array.newInstance(_type, ret.size());
+    ret.toArray(array);
+
+    return array;
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+    throws JAXBException
+  {
+    Node child = node.getNode();
+
+    if (child.getNodeType() != Node.ELEMENT_NODE)
+      return (T[]) Array.newInstance(_type, 0);
+    else {
+      QName nodeName = JAXBUtil.qnameFromNode(child);
+
+      if (! nodeName.equals(qname))
+        return (T[]) Array.newInstance(_type, 0);
+    }
+
+    ArrayList<T> ret = new ArrayList<T>();
+
+    while (child != null && child.getNodeType() == Node.ELEMENT_NODE) {
+      QName nodeName = JAXBUtil.qnameFromNode(child);
+
+      if (! nodeName.equals(qname))
+        break;
+
+      ret.add((T) _componentProperty.bindFrom(binder, node, qname));
+
+      child = node.nextSibling();
+    }
+
+    T[] array = (T[]) Array.newInstance(_type, ret.size());
+    ret.toArray(array);
+
+    return array;
+  }
+
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -86,5 +150,42 @@ public class ObjectArrayProperty<T> extends ArrayProperty {
       for (int i = 0; i < array.length; i++)
         _componentProperty.write(m, out, array[i], qname);
     }
+  }
+
+  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    //XXX wrapper
+    
+    if (obj != null) {
+      T[] array = (T[]) obj;
+
+      for (int i = 0; i < array.length; i++)
+        _componentProperty.write(m, out, array[i], qname);
+    }
+  }
+  
+  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+    throws JAXBException
+  {
+    QName name = JAXBUtil.qnameFromNode(node);
+    Document doc = node.getOwnerDocument(); 
+
+    if (! name.equals(qname))
+      node = JAXBUtil.elementFromQName(qname, doc);
+
+    binder.bind(obj, node);
+
+    if (obj != null) {
+      T[] array = (T[]) obj;
+
+      for (int i = 0; i < array.length; i++) {
+        Node child = JAXBUtil.elementFromQName(qname, doc);
+        node.appendChild(_componentProperty.bindTo(binder, child, 
+                                                   array[i], qname));
+      }
+    }
+
+    return node;
   }
 }

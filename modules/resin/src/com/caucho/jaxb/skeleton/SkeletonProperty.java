@@ -29,17 +29,24 @@
 
 package com.caucho.jaxb.skeleton;
 
+import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.ValidationEventHandler;
 import javax.xml.namespace.QName;
+import javax.xml.stream.events.*;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
+
+import org.w3c.dom.Node;
 
 /**
  * a property referencing some other Skeleton
@@ -69,17 +76,82 @@ public class SkeletonProperty extends Property {
       throw new IOException(L.l("Expected </{0}>, not </{1}>", 
                                 qname.getLocalPart(), in.getLocalName()));
 
-    in.nextTag();
+    // essentially a nextTag() that handles end of document gracefully
+    while (in.hasNext()) {
+      in.next();
+
+      if (in.getEventType() == in.END_ELEMENT || 
+          in.getEventType() == in.START_ELEMENT)
+        break;
+    }
 
     return ret;
   }
   
+  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    XMLEvent event = in.peek();
+
+    if (! event.isStartElement() || 
+        ! qname.equals(((StartElement) event).getName()))
+      return null;
+
+    Object ret = _skeleton.read(u, in);
+
+    while (! event.isEndElement())
+      event = in.nextEvent();
+
+    if (! ((EndElement) event).getName().equals(qname))
+      throw new IOException(L.l("Expected </{0}>, not </{1}>", 
+                                qname.getLocalPart(), 
+                                ((EndElement) event).getName()));
+
+    return ret;
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node, QName name)
+    throws JAXBException
+  {
+    Node root = node.getNode();
+
+    if (root.getNodeType() != Node.ELEMENT_NODE)
+      return null;
+
+    QName nodeName = JAXBUtil.qnameFromNode(root);
+
+    if (! name.equals(nodeName))
+      return null;
+
+    Object old = binder.getJAXBNode(root);
+
+    Object ret = _skeleton.bindFrom(binder, old, node);
+
+    binder.bind(ret, root);
+
+    return ret;
+  }
+
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
     // XXX Subclassing/anyType
     //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
     _skeleton.write(m, out, obj, qname);
+  }
+
+  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    // XXX Subclassing/anyType
+    //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
+    _skeleton.write(m, out, obj, qname);
+  }
+
+  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+    throws JAXBException
+  {
+    return _skeleton.bindTo(binder, node, obj, qname);
   }
 
   public String getSchemaType()

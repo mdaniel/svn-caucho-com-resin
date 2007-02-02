@@ -31,12 +31,12 @@ package com.caucho.jaxb;
 
 import com.caucho.jaxb.adapters.BeanAdapter;
 import com.caucho.jaxb.skeleton.Skeleton;
+import com.caucho.jaxb.skeleton.Property;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.xml.stream.*;
 
 import org.w3c.dom.*;
-import org.xml.sax.*;
 import org.xml.sax.*;
 
 import javax.xml.bind.*;
@@ -45,13 +45,17 @@ import javax.xml.bind.attachment.*;
 import javax.xml.bind.helpers.*;
 import javax.xml.namespace.QName;
 import javax.xml.stream.*;
+import javax.xml.stream.events.*;
 import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.sax.*;
 import javax.xml.validation.*;
 
-import java.net.*;
+import java.net.URL;
 import java.io.*;
 import java.util.*;
 
+// XXX extends AbstractUnmarshallerImpl
 public class UnmarshallerImpl implements Unmarshaller
 {
   private static final L10N L = new L10N(UnmarshallerImpl.class);
@@ -67,13 +71,14 @@ public class UnmarshallerImpl implements Unmarshaller
   private Schema _schema = null;
   private XMLReader _xmlreader = null;
   private XmlAdapter _adapter = null;
-  private UnmarshallerHandler _unmarshallerHandler = null;
   private HashMap<Class,XmlAdapter> _adapters
     = new HashMap<Class,XmlAdapter>();
 
   UnmarshallerImpl(JAXBContextImpl context)
+    throws JAXBException
   {
-    this._context = context;
+    _context = context;
+    setEventHandler(JAXBContextImpl.DEFAULT_VALIDATION_EVENT_HANDLER);
   }
 
   //
@@ -85,7 +90,14 @@ public class UnmarshallerImpl implements Unmarshaller
    */
   public Object unmarshal(Node node) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    try {
+      XMLInputFactory factory = _context.getXMLInputFactory();
+      
+      return unmarshal(factory.createXMLStreamReader(new DOMSource(node)));
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
   }
 
   /**
@@ -102,7 +114,35 @@ public class UnmarshallerImpl implements Unmarshaller
    */
   public Object unmarshal(XMLEventReader reader) throws JAXBException
   {
-    throw new UnsupportedOperationException();
+    try {
+      XMLEvent event = null;
+
+      while (reader.hasNext()) {
+        event = reader.peek();
+
+        if (event.isStartElement()) {
+          StartElement start = (StartElement) event;
+
+          Skeleton skel = _context.getRootElement(start.getName());
+
+          if (skel == null)
+            throw new JAXBException(L.l("'{0}' is an unknown root element",
+                  start.getName()));
+
+          return skel.read(this, reader);
+        }
+
+        event = reader.nextEvent();
+      }
+      
+      throw new JAXBException(L.l("Expected root element"));
+    }
+    catch (JAXBException e) {
+      throw e;
+    } 
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public <T> JAXBElement<T> unmarshal(XMLEventReader xmlEventReader,
@@ -117,18 +157,20 @@ public class UnmarshallerImpl implements Unmarshaller
   {
     try {
       if (reader.nextTag() != XMLStreamReader.START_ELEMENT)
-	throw new JAXBException(L.l("Expected root element"));
+        throw new JAXBException(L.l("Expected root element"));
 
-      Skeleton skel =  _context.getRootElement(reader.getName());
+      Skeleton skel = _context.getRootElement(reader.getName());
 
       if (skel == null)
-	throw new JAXBException(L.l("'{0}' is an unknown root element",
-				    reader.getName()));
+        throw new JAXBException(L.l("'{0}' is an unknown root element",
+              reader.getName()));
 
       return skel.read(this, reader);
-    } catch (JAXBException e) {
+    } 
+    catch (JAXBException e) {
       throw e;
-    } catch (Exception e) {
+    } 
+    catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -143,23 +185,14 @@ public class UnmarshallerImpl implements Unmarshaller
       XMLStreamReader reader = new XMLStreamReaderImpl(is);
 
       try {
-	if (reader.nextTag() != XMLStreamReader.START_ELEMENT)
-	  throw new JAXBException(L.l("Expected root element"));
-
-	Skeleton skel =  _context.getRootElement(reader.getName());
-
-	if (skel == null)
-	  throw new JAXBException(L.l("'{0}' is an unknown root element",
-				      reader.getName()));
-
-	return skel.read(this, reader);
-      } finally {
-	reader.close();
+        return unmarshal(reader);
+      } 
+      finally {
+        reader.close();
       }
-    } catch (JAXBException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
     }
   }
 
@@ -172,7 +205,11 @@ public class UnmarshallerImpl implements Unmarshaller
         reader.next();
 
       QName name = reader.getName();
-      T val = (T)_context.getSkeleton(declaredType).read(this, reader);
+
+      Property property = _context.createProperty(declaredType);
+
+      T val = (T) property.read(this, reader, name);
+
       return new JAXBElement<T>(name, declaredType, val);
     }
     catch (Exception e) {
@@ -186,12 +223,13 @@ public class UnmarshallerImpl implements Unmarshaller
 
   public UnmarshallerHandler getUnmarshallerHandler()
   {
-    return _unmarshallerHandler;
-  }
+    // The idea here is that we return a SAX ContentHandler which the
+    // user writes to and we use those writes to construct an object.
+    // The object is retrieved using UnmarshallerHandler.getResult().
+    // This is a "reusable" operation, so we should return a new handler
+    // (or at least a reset one) for each call of this function.
 
-  public void setUnmarshallerHandler(UnmarshallerHandler u)
-  {
-    _unmarshallerHandler = u;
+    return new UnmarshallerHandlerImpl();
   }
 
   protected UnmarshalException createUnmarshalException(SAXException e)
@@ -306,9 +344,18 @@ public class UnmarshallerImpl implements Unmarshaller
     }
   }
 
-  public Object unmarshal(InputSource source) throws JAXBException
+  public Object unmarshal(InputSource inputSource) 
+    throws JAXBException
   {
-    throw new UnsupportedOperationException("subclasses must override this");
+    try {
+      XMLEventReader reader = 
+        new SAXSourceXMLEventReaderImpl(new SAXSource(inputSource));
+
+      return unmarshal(reader);
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
+    }
   }
 
   public Object unmarshal(Reader reader) throws JAXBException
@@ -328,7 +375,7 @@ public class UnmarshallerImpl implements Unmarshaller
     try {
       XMLInputFactory factory = _context.getXMLInputFactory();
       
-      return unmarshal(factory.createXMLStreamReader(source));
+      return unmarshal(factory.createXMLEventReader(source));
     }
     catch (XMLStreamException e) {
       throw new JAXBException(e);
@@ -359,12 +406,105 @@ public class UnmarshallerImpl implements Unmarshaller
       InputStream is = url.openStream();
 
       try {
-	return unmarshal(is);
-      } finally {
-	is.close();
+        return unmarshal(is);
+      } 
+      finally {
+        is.close();
       }
     } catch (IOException e) {
       throw new JAXBException(e);
+    }
+  }
+
+  private class UnmarshallerHandlerImpl implements UnmarshallerHandler {
+    private ContentHandler _handler;
+    private SAXSourceXMLEventReaderImpl _reader;
+    private boolean _done = false;
+    private Object _result = null;
+
+    public UnmarshallerHandlerImpl()
+    {
+      _reader = new SAXSourceXMLEventReaderImpl();
+      _handler = _reader.getContentHandler();
+    }
+
+    public Object getResult()
+      throws JAXBException
+    {
+      if (! _done)
+        throw new IllegalStateException();
+
+      if (_result == null)
+        _result = unmarshal(_reader);
+
+      return _result;
+    }
+
+    public void characters(char[] ch, int start, int length)
+      throws SAXException
+    {
+      _handler.characters(ch, start, length);
+    }
+
+    public void endDocument()
+      throws SAXException
+    {
+      _handler.endDocument();
+      _done = true;
+    }
+
+    public void endElement(String uri, String localName, String qName)
+      throws SAXException
+    {
+      _handler.endElement(uri, localName, qName);
+    }
+
+    public void endPrefixMapping(String prefix)
+      throws SAXException
+    {
+      _handler.endPrefixMapping(prefix);
+    }
+
+    public void ignorableWhitespace(char[] ch, int start, int length)
+      throws SAXException
+    {
+      _handler.ignorableWhitespace(ch, start, length);
+    }
+
+    public void processingInstruction(String target, String data)
+      throws SAXException
+    {
+      _handler.processingInstruction(target, data);
+    }
+
+    public void setDocumentLocator(Locator locator)
+    {
+      _handler.setDocumentLocator(locator);
+    }
+
+    public void skippedEntity(String name)
+      throws SAXException
+    {
+      _handler.skippedEntity(name);
+    }
+
+    public void startDocument()
+      throws SAXException
+    {
+      _handler.startDocument();
+    }
+
+    public void startElement(String uri, String localName, String qName, 
+                             Attributes atts)
+      throws SAXException
+    {
+      _handler.startElement(uri, localName, qName, atts);
+    }
+
+    public void startPrefixMapping(String prefix, String uri)
+      throws SAXException
+    {
+      _handler.startPrefixMapping(prefix, uri);
     }
   }
 }

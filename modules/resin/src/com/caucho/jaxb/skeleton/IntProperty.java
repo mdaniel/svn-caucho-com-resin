@@ -49,13 +49,11 @@ public class IntProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.printInt(((Integer) in).intValue());
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.parseInt(in);
   }

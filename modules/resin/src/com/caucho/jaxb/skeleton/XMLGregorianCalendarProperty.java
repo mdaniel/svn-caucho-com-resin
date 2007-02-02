@@ -51,13 +51,12 @@ public class XMLGregorianCalendarProperty extends CDataProperty {
     = new XMLGregorianCalendarProperty();
 
   protected String write(Object in)
-    throws IOException, XMLStreamException
   {
     return ((XMLGregorianCalendar) in).toXMLFormat();
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException, JAXBException
+    throws JAXBException
   {
     return getDatatypeFactory().newXMLGregorianCalendar(in);
   }

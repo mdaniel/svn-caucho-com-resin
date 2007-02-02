@@ -51,13 +51,11 @@ public class DoubleProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
   {
     return DatatypeConverter.printDouble(((Number) in).doubleValue());
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.parseDouble(in);
   }

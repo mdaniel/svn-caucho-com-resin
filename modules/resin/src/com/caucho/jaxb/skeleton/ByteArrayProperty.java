@@ -40,13 +40,11 @@ public class ByteArrayProperty extends CDataProperty {
   public static final ByteArrayProperty PROPERTY = new ByteArrayProperty();
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
   {
     return DatatypeConverter.printBase64Binary((byte[]) in);
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.parseBase64Binary(in);
   }

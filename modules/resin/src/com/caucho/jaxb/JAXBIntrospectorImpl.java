@@ -44,11 +44,14 @@ class JAXBIntrospectorImpl extends JAXBIntrospector {
 
   public QName getElementName(Object object)
   {
+    if (! isElement(object))
+      return null;
+
     try {
       if (object instanceof JAXBElement)
         return ((JAXBElement) object).getName();
       else
-        return _context.getSkeleton(object.getClass()).getElementName(object);
+        return _context.getSkeleton(object.getClass()).getElementName();
     }
     catch (JAXBException e) {
       return null;
@@ -58,7 +61,7 @@ class JAXBIntrospectorImpl extends JAXBIntrospector {
   public boolean isElement(Object object)
   {
     return (object instanceof JAXBElement) || 
-           (getElementName(object) != null);
+           _context.hasSkeleton(object.getClass());
   }
 
 }

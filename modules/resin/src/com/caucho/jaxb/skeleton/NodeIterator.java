@@ -24,40 +24,51 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong
  */
 
 package com.caucho.jaxb.skeleton;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
-import java.math.BigDecimal;
 
-/**
- * a BigDecimal Property
- */
-public class BigDecimalProperty extends CDataProperty {
-  public static final BigDecimalProperty PROPERTY = new BigDecimalProperty();
+import org.w3c.dom.Node;
+import com.caucho.jaxb.JAXBUtil;
 
-  protected String write(Object in)
+public class NodeIterator {
+  private Node _node;
+
+  public NodeIterator(Node node)
   {
-    return DatatypeConverter.printDecimal((BigDecimal) in);
+    _node = node;
   }
 
-  protected Object read(String in)
+  public void setNode(Node node)
   {
-    return DatatypeConverter.parseDecimal(in);
+    _node = node;
   }
 
-  public String getSchemaType()
+  public Node getNode()
   {
-    return "xsd:decimal";
+    return _node;
   }
 
-  public boolean isXmlPrimitiveType()
+  public Node nextSibling()
   {
-    return true;
+    if (_node != null) 
+      _node = _node.getNextSibling();
+    
+    if (_node != null) 
+      _node = JAXBUtil.skipIgnorableNodes(_node);
+
+    return _node;
+  }
+
+  public Node firstChild()
+  {
+    if (_node != null) 
+      _node = _node.getFirstChild();
+
+    if (_node != null) 
+      _node = JAXBUtil.skipIgnorableNodes(_node);
+
+    return _node;
   }
 }
-
-

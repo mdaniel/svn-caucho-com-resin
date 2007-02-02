@@ -47,7 +47,6 @@ public class DateTimeProperty extends CDataProperty {
   public static final DateTimeProperty PROPERTY = new DateTimeProperty();
 
   protected String write(Object in)
-    throws IOException, XMLStreamException
   {
     Date date = (Date) in;
     Calendar calendar = new GregorianCalendar();
@@ -56,7 +55,6 @@ public class DateTimeProperty extends CDataProperty {
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.parseDate(in).getTime();
   }

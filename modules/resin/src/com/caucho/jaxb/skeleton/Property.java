@@ -36,15 +36,24 @@ import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
 import javax.xml.namespace.QName;
 
+import javax.xml.stream.events.*;
+import javax.xml.stream.XMLEventFactory;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
+import org.w3c.dom.Node;
+
+import com.caucho.jaxb.BinderImpl;
 
 /**
  * represents a property in a skeleton; requires an Accessor to access it
@@ -65,9 +74,25 @@ public abstract class Property {
   public abstract Object read(Unmarshaller u, XMLStreamReader in, QName name)
     throws IOException, XMLStreamException, JAXBException;
   
+  public abstract Object read(Unmarshaller u, XMLEventReader in, QName name)
+    throws IOException, XMLStreamException, JAXBException;
+  
+  public abstract Object bindFrom(BinderImpl binder, 
+                                  NodeIterator node, 
+                                  QName name)
+    throws JAXBException;
+
   public abstract void write(Marshaller m, XMLStreamWriter out, 
                              Object obj, QName name)
     throws IOException, XMLStreamException, JAXBException;
+
+  public abstract void write(Marshaller m, XMLEventWriter out, 
+                             Object obj, QName name)
+    throws IOException, XMLStreamException, JAXBException;
+
+  public abstract Node bindTo(BinderImpl binder, Node node, 
+                              Object obj, QName qname)
+    throws JAXBException;
 
   protected void writeQNameStartElement(XMLStreamWriter out, QName name)
     throws IOException, XMLStreamException

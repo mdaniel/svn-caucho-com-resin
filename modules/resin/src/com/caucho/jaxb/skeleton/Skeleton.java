@@ -30,11 +30,17 @@
 package com.caucho.jaxb.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.jaxb.BinderImpl;
+
+import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.stream.events.*;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -50,6 +56,7 @@ public abstract class Skeleton {
 
   protected JAXBContextImpl _context;
   protected QName _typeName;
+  protected QName _elementName;
 
   protected LinkedHashMap<String,Accessor> _attributeAccessors
     = new LinkedHashMap<String,Accessor>();
@@ -67,13 +74,39 @@ public abstract class Skeleton {
     return _typeName;
   }
 
+  public void setElementName(QName elementName)
+  {
+    _elementName = elementName;
+  }
+
+  // Input methods
+
   public abstract Object read(Unmarshaller u, XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException;
+  
+  public abstract Object read(Unmarshaller u, XMLEventReader in)
+    throws IOException, XMLStreamException, JAXBException;
+  
+  public abstract Object bindFrom(BinderImpl binder, 
+                                  Object existing, 
+                                  NodeIterator node)
+    throws JAXBException;
+
+  // Output methods
   
   public abstract void write(Marshaller m, XMLStreamWriter out,
                              Object obj, QName fieldName)
     throws IOException, XMLStreamException, JAXBException;
 
+  public abstract void write(Marshaller m, XMLEventWriter out,
+                             Object obj, QName fieldName)
+    throws IOException, XMLStreamException, JAXBException;
+
+  public abstract Node bindTo(BinderImpl binder, Node node, 
+                              Object obj, QName fieldName)
+    throws JAXBException;
+
+  
   protected Accessor getAccessor(QName q)
   {
     return _elementAccessors.get(q.getLocalPart());
@@ -82,8 +115,5 @@ public abstract class Skeleton {
   public abstract void generateSchema(XMLStreamWriter out)
     throws JAXBException, XMLStreamException;
 
-  public QName getElementName(Object object)
-  {
-    return null;
-  }
+  public abstract QName getElementName();
 }

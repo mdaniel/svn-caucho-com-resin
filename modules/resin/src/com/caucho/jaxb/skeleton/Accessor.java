@@ -24,17 +24,25 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong, Adam Megacz
  */
 
 package com.caucho.jaxb.skeleton;
 
+import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.util.L10N;
+
+import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.UnmarshalException;
+import javax.xml.bind.ValidationEvent;
+import javax.xml.bind.ValidationEventHandler;
+import javax.xml.bind.helpers.ValidationEventImpl;
+import javax.xml.bind.helpers.ValidationEventLocatorImpl;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -43,13 +51,14 @@ import javax.xml.bind.annotation.XmlType;
 
 import javax.xml.namespace.QName;
 
+import javax.xml.stream.events.*;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import javax.xml.XMLConstants;
-
-import java.beans.PropertyDescriptor;
 
 import java.lang.annotation.Annotation;
 
@@ -72,6 +81,7 @@ public abstract class Accessor {
 
   private static boolean _generateRICompatibleSchema = true;
 
+  protected int _order = -1;
   protected JAXBContextImpl _context;
   protected Property _property;
   protected QName _qname = null;
@@ -87,10 +97,30 @@ public abstract class Accessor {
     _context = context;
   }
 
+  public void setOrder(int order)
+  {
+    _order = order;
+  }
+
+  public boolean checkOrder(int order, ValidationEventHandler handler)
+  {
+    if (_order < 0 || _order == order)
+      return true;
+
+    ValidationEvent event = 
+      new ValidationEventImpl(ValidationEvent.ERROR, 
+                              L.l("ordering error"), 
+                              new ValidationEventLocatorImpl());
+
+    return handler.handleEvent(event);
+  }
+
   public JAXBContextImpl getContext()
   {
     return _context;
   }
+
+  // Output methods
 
   public void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
@@ -98,11 +128,38 @@ public abstract class Accessor {
     _property.write(m, out, obj, getQName());
   }
 
+  public void write(Marshaller m, XMLEventWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    _property.write(m, out, obj, getQName());
+  }
+
+  public Node bindTo(BinderImpl binder, Node node, Object obj)
+    throws JAXBException
+  {
+    return _property.bindTo(binder, node, obj, getQName());
+  }
+
+  // Input methods
+
   public Object read(Unmarshaller u, XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
   {
     return _property.read(u, in, getQName());
   }
+
+  public Object read(Unmarshaller u, XMLEventReader in)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    return _property.read(u, in, getQName());
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node)
+    throws JAXBException
+  {
+    return _property.bindFrom(binder, node, getQName());
+  }
+
 
   protected void writeStartElement(XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
@@ -178,6 +235,81 @@ public abstract class Accessor {
     out.writeEndElement();
   }
 
+  protected void writeStartElement(XMLEventWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    /* XXX convert to event based
+    XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
+    XmlElement element = getAnnotation(XmlElement.class);
+
+    if (wrapper != null) {
+      if (obj == null && ! wrapper.nillable())
+        return;
+
+      if (wrapper.name().equals("##default"))
+        out.writeStartElement(getName());
+      else if (wrapper.namespace().equals("##default"))
+        out.writeStartElement(wrapper.name());
+      else
+        out.writeStartElement(wrapper.namespace(), wrapper.name());
+
+      if (obj == null) {
+        out.writeAttribute(XML_INSTANCE_PREFIX, 
+                           XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
+                           "nil", "true");
+      }
+    }
+    else if (element != null) {
+      if (obj == null && ! element.nillable())
+        return;
+
+      if (element.name().equals("##default"))
+        out.writeStartElement(getName());
+      else if (element.namespace().equals("##default"))
+        out.writeStartElement(element.name());
+      else
+        out.writeStartElement(element.namespace(), element.name());
+
+      if (obj == null) {
+        out.writeAttribute(XML_INSTANCE_PREFIX, 
+                           XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI,
+                           "nil", "true");
+      }
+    }
+    else {
+      if (obj == null) return;
+
+      QName qname = getQName();
+
+      if (qname.getNamespaceURI() == null || "".equals(qname.getNamespaceURI()))
+        out.writeStartElement(qname.getLocalPart());
+      else
+        out.writeStartElement(qname.getNamespaceURI(), qname.getLocalPart());
+    }*/
+  }
+
+  protected void writeEndElement(XMLEventWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    /* XXX convert to event based
+    XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
+    XmlElement element = getAnnotation(XmlElement.class);
+
+    if (wrapper != null) {
+      if (obj == null && !wrapper.nillable())
+        return;
+    } 
+    else if (element != null) {
+      if (obj == null && !element.nillable())
+        return;
+    } 
+    else {
+      if (obj == null) return;
+    }
+
+    out.writeEndElement();*/
+  }
+
   private QName getTypeQName()
   {
     if (_typeQName == null) {
@@ -202,7 +334,7 @@ public abstract class Accessor {
     return _typeQName;
   }
 
-  private QName getQName()
+  protected QName getQName()
   {
     if (_qname == null) {
       XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);

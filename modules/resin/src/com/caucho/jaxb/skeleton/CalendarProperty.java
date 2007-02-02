@@ -47,13 +47,11 @@ public class CalendarProperty extends CDataProperty {
   public static final CalendarProperty PROPERTY = new CalendarProperty();
 
   protected String write(Object in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.printDateTime((Calendar) in);
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.parseDateTime(in);
   }

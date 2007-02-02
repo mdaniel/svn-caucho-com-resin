@@ -40,13 +40,11 @@ public class BigIntegerProperty extends CDataProperty {
   public static final BigIntegerProperty PROPERTY = new BigIntegerProperty();
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
   {
     return DatatypeConverter.printInteger((BigInteger) in);
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.parseInteger(in);
   }

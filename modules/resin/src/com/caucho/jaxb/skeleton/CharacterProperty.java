@@ -51,7 +51,6 @@ public class CharacterProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-    throws IOException, XMLStreamException
   {
     char ch = ((Character)in).charValue();
 
@@ -60,7 +59,6 @@ public class CharacterProperty extends CDataProperty {
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     int i = DatatypeConverter.parseUnsignedShort(in);
 

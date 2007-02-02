@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong, Adam Megacz
  */
 
 package com.caucho.jaxb;
@@ -32,10 +32,12 @@ package com.caucho.jaxb;
 import com.caucho.jaxb.skeleton.*;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
+import com.caucho.xml.QNode;
 
 import org.w3c.dom.Node;
 
 import javax.xml.bind.*;
+import javax.xml.bind.annotation.*;
 import javax.xml.datatype.*;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -48,6 +50,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -58,6 +61,9 @@ import java.util.*;
  * Entry point to API
  */
 public class JAXBContextImpl extends JAXBContext {
+  static final ValidationEventHandler DEFAULT_VALIDATION_EVENT_HANDLER
+    = new DefaultValidationEventHandler();
+
   private static final L10N L = new L10N(JAXBContextImpl.class);
 
   private static final HashSet<Class> _specialClasses = new HashSet<Class>();
@@ -98,8 +104,14 @@ public class JAXBContextImpl extends JAXBContext {
   private LinkedHashMap<Class,ClassSkeleton> _classSkeletons 
     = new LinkedHashMap<Class,ClassSkeleton>();
 
-  private HashMap<QName,Skeleton> _roots 
-    = new HashMap<QName,Skeleton>();
+  private LinkedHashMap<Class,JAXBElementSkeleton> _jaxbElementSkeletons 
+    = new LinkedHashMap<Class,JAXBElementSkeleton>();
+
+  private DynamicJAXBElementSkeleton _dynamicSkeleton;
+
+  private HashMap<QName,Skeleton> _roots = new HashMap<QName,Skeleton>();
+  private HashMap<QName,ClassSkeleton> _types 
+    = new HashMap<QName,ClassSkeleton>();
 
   public JAXBContextImpl(String contextPath,
                          ClassLoader classLoader,
@@ -122,6 +134,8 @@ public class JAXBContextImpl extends JAXBContext {
         setProperty(e.getKey(), e.getValue());
 
     DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
+    
+    _dynamicSkeleton = new DynamicJAXBElementSkeleton(this);
   }
 
   public static JAXBContext createContext(Class []classes, 
@@ -152,6 +166,8 @@ public class JAXBContextImpl extends JAXBContext {
     }
 
     DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
+
+    _dynamicSkeleton = new DynamicJAXBElementSkeleton(this);
   }
 
   public Marshaller createMarshaller()
@@ -197,7 +213,8 @@ public class JAXBContextImpl extends JAXBContext {
     return _staxOutputFactory;
   }
 
-  public String toString() {
+  public String toString() 
+  {
     StringBuilder sb = new StringBuilder();
     sb.append("JAXBContext[");
 
@@ -220,12 +237,16 @@ public class JAXBContextImpl extends JAXBContext {
 
   public Binder<Node> createBinder()
   {
-    throw new UnsupportedOperationException("XML Infoset not supported");
+    return (Binder<Node>) new BinderImpl(this);
   }
 
   public <T> Binder<T> createBinder(Class<T> domType)
   {
-    throw new UnsupportedOperationException("XML Infoset not supported");
+    if (! domType.equals(QNode.class))
+      throw new UnsupportedOperationException("Unsupported implementation: " + 
+                                              domType);
+
+    return (Binder) new BinderImpl(this);
   }
   
   public JAXBIntrospector createJAXBIntrospector()
@@ -267,24 +288,33 @@ public class JAXBContextImpl extends JAXBContext {
     out.writeEndElement(); // schema
   }
 
-  public void createSkeleton(Class c)
+  public ClassSkeleton createSkeleton(Class c)
     throws JAXBException
   {
-    if (_classSkeletons.containsKey(c))
-      return;
+    ClassSkeleton skeleton = _classSkeletons.get(c);
 
-    // XXX
-    if (c.isEnum() || c.isInterface())
-      return;
+    if (skeleton != null)
+      return skeleton;
 
-    // Breadcrumb to prevent problems with recursion
-    _classSkeletons.put(c, null); 
+    if (Object.class.equals(c))
+      skeleton = new AnyTypeSkeleton(this);
+    else {
+      // XXX
+      if (c.isEnum() || c.isInterface())
+        return null;
 
-    ClassSkeleton skeleton = new ClassSkeleton(this, c);
+      // Breadcrumb to prevent problems with recursion
+      _classSkeletons.put(c, null); 
+
+      skeleton = new ClassSkeleton(this, c);
+    }
+
     _classSkeletons.put(c, skeleton);
+
+    return skeleton;
   }
 
-  public Skeleton getSkeleton(Class c)
+  public ClassSkeleton getSkeleton(Class c)
     throws JAXBException
   {
     createSkeleton(c);
@@ -292,13 +322,25 @@ public class JAXBContextImpl extends JAXBContext {
     return _classSkeletons.get(c);
   }
 
-  public ClassSkeleton findSkeletonForObject(Object obj)
+  public boolean hasSkeleton(Class c)
+  {
+    return _classSkeletons.containsKey(c);
+  }
+
+  public ClassSkeleton findSkeletonForClass(Class cl)
     throws JAXBException
   {
-    Class cl = obj.getClass();
+    return findSkeletonForClass(cl, _jaxbElementSkeletons);
+  }
+
+  public ClassSkeleton 
+    findSkeletonForClass(Class cl, Map<Class,? extends ClassSkeleton> map)
+    throws JAXBException
+  {
+    Class givenClass = cl;
 
     while (! cl.equals(Object.class)) {
-      ClassSkeleton skeleton = _classSkeletons.get(cl);
+      ClassSkeleton skeleton = map.get(cl);
 
       if (skeleton != null)
         return skeleton;
@@ -306,7 +348,27 @@ public class JAXBContextImpl extends JAXBContext {
       cl = cl.getSuperclass();
     }
 
-    throw new JAXBException(L.l("Class {0} unknown to this JAXBContext", cl));
+    throw new JAXBException(L.l("Class {0} unknown to this JAXBContext", 
+                                givenClass));
+  }
+
+  public ClassSkeleton findSkeletonForObject(Object obj)
+    throws JAXBException
+  {
+    if (obj instanceof JAXBElement) {
+      JAXBElement element = (JAXBElement) obj;
+
+      obj = element.getValue();
+
+      try {
+        return findSkeletonForClass(obj.getClass(), _jaxbElementSkeletons);
+      }
+      catch (JAXBException e) {
+        return _dynamicSkeleton;
+      }
+    }
+    else
+      return findSkeletonForClass(obj.getClass(), _classSkeletons);
   }
 
   public Property createProperty(Type type)
@@ -405,10 +467,19 @@ public class JAXBContextImpl extends JAXBContext {
       if (rawType instanceof Class) {
         Class rawClass = (Class) rawType;
 
-        if (Map.class.equals(rawClass))
-          return new MapProperty();
+        if (Map.class.isAssignableFrom(rawClass)) {
+          Type[] args = ptype.getActualTypeArguments();
 
-        if (List.class.equals(rawClass)) {
+          if (args.length != 2)
+            throw new JAXBException(L.l("unexpected number of generic arguments for Map<>: {0}", args.length));
+
+          Property keyProperty = createProperty(args[0]);
+          Property valueProperty = createProperty(args[1]);
+
+          return new MapProperty(rawClass, keyProperty, valueProperty);
+        }
+
+        if (List.class.isAssignableFrom(rawClass)) {
           Type[] args = ptype.getActualTypeArguments();
 
           if (args.length != 1)
@@ -419,16 +490,39 @@ public class JAXBContextImpl extends JAXBContext {
         }
 
         if (Collection.class.isAssignableFrom(rawClass))
-          return new CollectionProperty();
+          throw new JAXBException(L.l("Unrecognized type: {0}", rawClass));
+          // return new CollectionProperty();
       }
     }
 
     throw new JAXBException(L.l("Unrecognized type: {0}", type.toString()));
   }
 
-  public void addRootElement(Skeleton s) 
+  public void addXmlType(QName typeName, ClassSkeleton skeleton)
+    throws JAXBException
   {
-    _roots.put(s.getTypeName(), s);
+    if (_types.containsKey(typeName)) {
+      ClassSkeleton existing = _types.get(typeName);
+
+      throw new JAXBException(L.l("Duplicate type name {0} for types {1} and {2}",
+                                  typeName,
+                                  skeleton.getType(),
+                                  existing.getType()));
+    }
+
+    _types.put(typeName, skeleton);
+  }
+
+  public void addRootElement(Skeleton s) 
+    throws JAXBException
+  {
+    if (_roots.containsKey(s.getElementName()))
+      throw new JAXBException(L.l("Duplicate name {0} for classes {1} and {2}",
+                                  s.getElementName(),
+                                  s.getClass(),
+                                  _roots.get(s.getElementName()).getClass()));
+
+    _roots.put(s.getElementName(), s);
   }
 
   public Skeleton getRootElement(QName q)
@@ -443,7 +537,7 @@ public class JAXBContextImpl extends JAXBContext {
 
     try {
       Class cl = CauchoSystem.loadClass(packageName + ".ObjectFactory");
-      _objectFactories.add(new ObjectFactorySkeleton(cl));
+      introspectObjectFactory(cl);
 
       success = true;
     }
@@ -488,6 +582,94 @@ public class JAXBContextImpl extends JAXBContext {
         throw new JAXBException(L.l("Unable to open jaxb.index for package {0}",
                                     packageName), t);
       }
+    }
+  }
+
+  private void introspectObjectFactory(Class factoryClass)
+    throws JAXBException
+  {
+    Object objectFactory = null;
+
+    try {
+      objectFactory = factoryClass.newInstance();
+    }
+    catch (Exception e) {
+      throw new JAXBException(e);
+    }
+
+    String namespace = null;
+    Package pkg = factoryClass.getPackage();
+
+    if (pkg.isAnnotationPresent(XmlSchema.class)) {
+      XmlSchema schema = (XmlSchema) pkg.getAnnotation(XmlSchema.class);
+
+      if (! "".equals(schema.namespace()))
+        namespace = schema.namespace();
+    }
+
+    Method[] methods = factoryClass.getMethods();
+
+    for (Method method : methods) {
+      if (method.getName().startsWith("create")) {
+        XmlElementDecl decl = method.getAnnotation(XmlElementDecl.class);
+        Class cl = method.getReturnType();
+
+        ClassSkeleton skeleton = null;
+        QName root = null;
+
+        if (cl.equals(JAXBElement.class)) {
+          ParameterizedType type = 
+            (ParameterizedType) method.getGenericReturnType();
+          cl = (Class) type.getActualTypeArguments()[0];
+
+          skeleton = new JAXBElementSkeleton(this, cl, method, objectFactory);
+          _jaxbElementSkeletons.put(cl, (JAXBElementSkeleton) skeleton);
+        }
+        else {
+          skeleton = getSkeleton(cl);
+
+          if (skeleton == null) 
+            skeleton = createSkeleton(cl);
+
+          skeleton.setCreateMethod(method, objectFactory);
+
+          root = skeleton.getElementName();
+        }
+
+        if (decl != null) {
+          String localName = decl.name();
+
+          if (! "##default".equals(decl.namespace()))
+            namespace = decl.namespace();
+
+          if (namespace == null)
+            root = new QName(localName);
+          else
+            root = new QName(namespace, localName);
+        }
+
+        skeleton.setElementName(root);
+        addRootElement(skeleton);
+      }
+      else if (method.getName().equals("newInstance")) {
+        // XXX
+      }
+      else if (method.getName().equals("getProperty")) {
+        // XXX
+      }
+      else if (method.getName().equals("setProperty")) {
+        // XXX
+      }
+    }
+  }
+
+  static class DefaultValidationEventHandler implements ValidationEventHandler {
+    public boolean handleEvent(ValidationEvent event)
+    {
+      if (event == null)
+        throw new IllegalArgumentException("Event may not be null");
+
+      return event.getSeverity() != ValidationEvent.FATAL_ERROR;
     }
   }
 }

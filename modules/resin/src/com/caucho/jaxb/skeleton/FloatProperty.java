@@ -51,13 +51,11 @@ public class FloatProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-      throws IOException, XMLStreamException
   {
     return DatatypeConverter.printFloat(((Number) in).floatValue());
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.parseFloat(in);
   }

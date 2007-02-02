@@ -39,13 +39,11 @@ public class StringProperty extends CDataProperty {
   public static final StringProperty PROPERTY = new StringProperty();
 
   protected String write(Object in)
-    throws IOException, XMLStreamException
   {
     return in == null ? null : in.toString();
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
   {
     return in;
   }

@@ -38,7 +38,7 @@ import java.util.Iterator;
 /**
  * a Collection Property
  */
-public class CollectionProperty extends IterableProperty {
+public abstract class CollectionProperty extends IterableProperty {
   public int size(Object o)
   {
     return ((Collection)o).size();

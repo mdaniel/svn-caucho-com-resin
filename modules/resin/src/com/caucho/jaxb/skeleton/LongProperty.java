@@ -32,6 +32,7 @@ package com.caucho.jaxb.skeleton;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.UnmarshalException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -50,14 +51,20 @@ public class LongProperty extends CDataProperty {
   }
 
   protected String write(Object in)
-    throws IOException, XMLStreamException
   {
     return DatatypeConverter.printLong(((Long) in).longValue());
   }
 
   protected Object read(String in)
-    throws IOException, XMLStreamException
+    throws JAXBException
   {
+    if ("".equals(in)) {
+      if (_isNillable)
+        return null;
+      else
+        throw new UnmarshalException("Primitives may not be null");
+    }
+
     return Long.valueOf(DatatypeConverter.parseLong(in));
   }
 

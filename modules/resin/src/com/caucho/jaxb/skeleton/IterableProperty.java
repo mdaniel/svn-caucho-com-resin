@@ -33,6 +33,9 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.namespace.QName;
+import javax.xml.stream.events.*;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -50,6 +53,12 @@ public abstract class IterableProperty extends Property {
   protected abstract Iterator getIterator(Object o);*/
   
   public Object read(Unmarshaller u, XMLStreamReader in, QName name)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public Object read(Unmarshaller u, XMLEventReader in, QName name)
     throws IOException, XMLStreamException, JAXBException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -75,6 +84,11 @@ public abstract class IterableProperty extends Property {
 
     if (_wrap != null)
       writeEndElement(out, obj);*/
+  }
+
+  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
   }
 
   protected Property getComponentProperty()
