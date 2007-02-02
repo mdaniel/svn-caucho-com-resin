@@ -1893,7 +1893,7 @@ public class AmberConnection
 
     QueryParser parser = new QueryParser(queryString);
 
-    parser.setAmberManager(_persistenceUnit);
+    parser.setPersistenceUnit(_persistenceUnit);
     parser.setLazyResult(isLazy);
 
     return parser.parse();

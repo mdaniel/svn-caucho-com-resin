@@ -157,7 +157,7 @@ public class QueryParser {
 
   private static IntMap _reserved;
 
-  private AmberPersistenceUnit _amberPersistenceUnit;
+  private AmberPersistenceUnit _persistenceUnit;
 
   // The query
   private String _sql;
@@ -247,76 +247,20 @@ public class QueryParser {
   }
 
   /**
-   * Sets the entity home manager.
+   * Sets the persistence unit.
    */
-  public void setAmberManager(AmberPersistenceUnit amberPersistenceUnit)
+  public void setPersistenceUnit(AmberPersistenceUnit persistenceUnit)
   {
-    _amberPersistenceUnit = amberPersistenceUnit;
+    _persistenceUnit = persistenceUnit;
 
     _isDerbyDBMS = false;
     _isPostgresDBMS = false;
 
-    if (amberPersistenceUnit == null)
+    if (persistenceUnit == null)
       return;
 
-    try {
-      Connection conn = null;
-      Statement stmt = null;
-
-      try {
-        DataSource ds = amberPersistenceUnit.getDataSource();
-        conn = ds.getConnection();
-
-        stmt = conn.createStatement();
-
-        ResultSet rs = null;
-
-        try {
-          String sql = "select position('a' in 'abc')";
-
-          rs = stmt.executeQuery(sql);
-
-        } catch (SQLException e) {
-          _isDerbyDBMS = true;
-          log.log(Level.FINER, e.toString(), e);
-        } finally {
-          ResultSet rsToClose = rs;
-
-          rs = null;
-
-          if (rsToClose != null)
-            rsToClose.close();
-        }
-
-        try {
-          String sql = "select false";
-
-          rs = stmt.executeQuery(sql);
-
-          _isPostgresDBMS = true;
-
-        } catch (SQLException e) {
-          log.log(Level.FINER, e.toString(), e);
-        } finally {
-          ResultSet rsToClose = rs;
-
-          rs = null;
-
-          if (rsToClose != null)
-            rsToClose.close();
-        }
-      } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
-      } finally {
-        if (stmt != null)
-          stmt.close();
-
-        if (conn != null)
-          conn.close();
-      }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
+    _isDerbyDBMS = ! persistenceUnit.hasPositionFunction();
+    _isPostgresDBMS = persistenceUnit.getFalseLiteral().equalsIgnoreCase("false");
   }
 
   /**
@@ -957,7 +901,7 @@ public class QueryParser {
     }
 
     /*
-      AmberEntityHome home = _amberPersistenceUnitenceUnitenceUnit.getHomeBySchema(schema);
+      AmberEntityHome home = _persistenceUnit.getHomeBySchema(schema);
 
       if (home == null)
       throw error(L.l("`{0}' is an unknown persistent class.",
@@ -1100,7 +1044,7 @@ public class QueryParser {
     SchemaExpr schema = null;
 
     if (! isIn) {
-      AmberEntityHome home = _amberPersistenceUnit.getHomeBySchema(name);
+      AmberEntityHome home = _persistenceUnit.getHomeBySchema(name);
 
       if (home != null) {
         EntityType type = home.getEntityType();
@@ -1126,7 +1070,7 @@ public class QueryParser {
 
         name = name + '.' + segment;
 
-        AmberEntityHome home = _amberPersistenceUnit.getHomeBySchema(name);
+        AmberEntityHome home = _persistenceUnit.getHomeBySchema(name);
 
         if (home != null) {
           schema = new TableIdExpr(home.getEntityType(), name);

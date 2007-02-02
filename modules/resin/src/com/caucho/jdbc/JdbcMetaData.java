@@ -36,6 +36,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.logging.Level;
@@ -49,6 +50,10 @@ public class JdbcMetaData {
   private static final Logger log = Log.open(JdbcMetaData.class);
 
   private DataSource _ds;
+
+  private String _falseLiteral;
+
+  private Boolean _supportsPositionFunction;
 
   /**
    * Create a new JDBC backing store.
@@ -75,28 +80,28 @@ public class JdbcMetaData {
       log.fine(L.l("Database '{0}' metadata.", name));
 
       if ("oracle".equalsIgnoreCase(name))
-	return new OracleMetaData(ds);
+        return new OracleMetaData(ds);
       else if ("resin".equalsIgnoreCase(name))
-	return new ResinMetaData(ds);
+        return new ResinMetaData(ds);
       else if ("postgres".equalsIgnoreCase(name) ||
-	       "PostgreSQL".equalsIgnoreCase(name))
-	return new PostgresMetaData(ds);
+               "PostgreSQL".equalsIgnoreCase(name))
+        return new PostgresMetaData(ds);
       else if ("mysql".equalsIgnoreCase(name))
-	return new MysqlMetaData(ds);
+        return new MysqlMetaData(ds);
       else if ("Microsoft SQL Server".equalsIgnoreCase(name))
         return new SqlServerMetaData(ds);
       else if ("Apache Derby".equalsIgnoreCase(name))
         return new DerbyMetaData(ds);
       else {
-	log.fine(name + " is an unknown database type, using generic sql");
-	return new JdbcMetaData(ds);
+        log.fine(name + " is an unknown database type, using generic sql");
+        return new JdbcMetaData(ds);
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return new JdbcMetaData(ds);
     } finally {
       try {
-	if (conn != null) conn.close();
+        if (conn != null) conn.close();
       } catch (SQLException e) {
       }
     }
@@ -120,7 +125,7 @@ public class JdbcMetaData {
       return "unknown";
     } finally {
       try {
-	if (conn != null) conn.close();
+        if (conn != null) conn.close();
       } catch (SQLException e) {
       }
     }
@@ -141,13 +146,13 @@ public class JdbcMetaData {
 
       rs = md.getTypeInfo();
       try {
-	while (rs.next()) {
-	  if (rs.getShort("DATA_TYPE") == Types.BLOB) {
-	    return rs.getString("TYPE_NAME");
-	  }
-	}
+        while (rs.next()) {
+          if (rs.getShort("DATA_TYPE") == Types.BLOB) {
+            return rs.getString("TYPE_NAME");
+          }
+        }
       } finally {
-	rs.close();
+        rs.close();
       }
 
       rs = md.getTypeInfo();
@@ -176,20 +181,20 @@ public class JdbcMetaData {
 
       rs = md.getTypeInfo();
       try {
-	while (rs.next()) {
-	  if (rs.getShort("DATA_TYPE") == Types.VARBINARY) {
-	    return rs.getString("TYPE_NAME");
-	  }
-	}
+        while (rs.next()) {
+          if (rs.getShort("DATA_TYPE") == Types.VARBINARY) {
+            return rs.getString("TYPE_NAME");
+          }
+        }
       } finally {
-	rs.close();
+        rs.close();
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       try {
-	if (conn != null)
-	  conn.close();
+        if (conn != null)
+          conn.close();
       } catch (Exception e) {
       }
     }
@@ -206,7 +211,7 @@ public class JdbcMetaData {
   }
 
   /**
-   * True if the generated ketys is supported
+   * True if the generated keys is supported
    */
   public boolean supportsGetGeneratedKeys()
   {
@@ -216,13 +221,115 @@ public class JdbcMetaData {
       try {
         DatabaseMetaData metaData = conn.getMetaData();
 
-	return metaData.supportsGetGeneratedKeys();
+        return metaData.supportsGetGeneratedKeys();
       } finally {
         conn.close();
       }
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Returns the literal for FALSE.
+   */
+  public String getFalseLiteral()
+  {
+    if (_falseLiteral != null)
+      return _falseLiteral;
+
+    Connection conn = null;
+
+    _falseLiteral = "0";
+
+    try {
+      conn = getConnection();
+
+      Statement stmt = null;
+
+      try {
+        stmt = conn.createStatement();
+
+        ResultSet rs = null;
+
+        try {
+          rs = stmt.executeQuery("select false");
+
+          _falseLiteral = "false";
+
+        } catch (SQLException e) {
+          log.log(Level.FINER, e.toString(), e);
+        } finally {
+          if (rs != null)
+            rs.close();
+        }
+      } finally {
+        if (stmt != null)
+          stmt.close();
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    } finally {
+      try {
+        if (conn != null)
+          conn.close();
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+
+    return _falseLiteral;
+  }
+
+  /**
+   * Returns true if the POSITION function is supported.
+   */
+  public boolean supportsPositionFunction()
+  {
+    if (_supportsPositionFunction != null)
+      return _supportsPositionFunction.booleanValue();
+
+    Connection conn = null;
+
+    _supportsPositionFunction = Boolean.FALSE;
+
+    try {
+      conn = getConnection();
+
+      Statement stmt = null;
+
+      try {
+        stmt = conn.createStatement();
+
+        ResultSet rs = null;
+
+        try {
+          rs = stmt.executeQuery("select position('a' in 'abc')");
+
+          _supportsPositionFunction = Boolean.TRUE;
+
+        } catch (SQLException e) {
+          log.log(Level.FINER, e.toString(), e);
+        } finally {
+          if (rs != null)
+            rs.close();
+        }
+      } finally {
+        if (stmt != null)
+          stmt.close();
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    } finally {
+      try {
+        if (conn != null)
+          conn.close();
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+
+    return _supportsPositionFunction.booleanValue();
   }
 
   /**
@@ -240,19 +347,19 @@ public class JdbcMetaData {
 
       rs = md.getTypeInfo();
       try {
-	while (rs.next()) {
-	  if (rs.getShort("DATA_TYPE") == Types.BIGINT) {
-	    return rs.getString("TYPE_NAME");
-	  }
-	}
+        while (rs.next()) {
+          if (rs.getShort("DATA_TYPE") == Types.BIGINT) {
+            return rs.getString("TYPE_NAME");
+          }
+        }
       } finally {
-	rs.close();
+        rs.close();
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       try {
-	if (conn != null) conn.close();
+        if (conn != null) conn.close();
       } catch (SQLException e) {
       }
     }
@@ -344,13 +451,13 @@ public class JdbcMetaData {
     case Types.DATE:
       type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       if (type == null)
-	type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
+        type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
       break;
 
     case Types.TIME:
       type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
       if (type == null)
-	type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
+        type = getCreateColumnSQLImpl(Types.TIMESTAMP, length, precision, scale);
       break;
 
     case Types.DOUBLE:
@@ -358,8 +465,8 @@ public class JdbcMetaData {
       break;
 
     case Types.NUMERIC:
-        type = getCreateColumnSQLImpl(Types.NUMERIC, length, precision, scale);
-        break;
+      type = getCreateColumnSQLImpl(Types.NUMERIC, length, precision, scale);
+      break;
 
     default:
       type = getCreateColumnSQLImpl(sqlType, length, precision, scale);
@@ -388,20 +495,20 @@ public class JdbcMetaData {
       rs = md.getTypeInfo();
 
       try {
-	while (rs.next()) {
-	  if (rs.getShort("DATA_TYPE") == sqlType) {
-	    String typeName = rs.getString("TYPE_NAME");
-	    String params = rs.getString("CREATE_PARAMS");
+        while (rs.next()) {
+          if (rs.getShort("DATA_TYPE") == sqlType) {
+            String typeName = rs.getString("TYPE_NAME");
+            String params = rs.getString("CREATE_PARAMS");
 
-	    if (params == null || params.equals(""))
-	      return typeName;
-	    else if (params.startsWith("(M)")) {
-	      if (length > 0)
-		return typeName + "(" + length + ")";
-	      else
-		return typeName;
-	    }
-	    else if (params.startsWith("(M,D)") || params.equals("precision,scale")) {
+            if (params == null || params.equals(""))
+              return typeName;
+            else if (params.startsWith("(M)")) {
+              if (length > 0)
+                return typeName + "(" + length + ")";
+              else
+                return typeName;
+            }
+            else if (params.startsWith("(M,D)") || params.equals("precision,scale")) {
               if (precision > 0) {
                 typeName += "(" + precision;
                 if (scale > 0) {
@@ -409,42 +516,42 @@ public class JdbcMetaData {
                 }
                 typeName += ")";
               }
-	      return typeName;
-	    }
-	    else if (params.startsWith("(")) {
-	      int tail = params.indexOf(')');
+              return typeName;
+            }
+            else if (params.startsWith("(")) {
+              int tail = params.indexOf(')');
 
-	      if (tail > 0) {
-		String value = params.substring(1, tail);
-		boolean isConstant = true;
+              if (tail > 0) {
+                String value = params.substring(1, tail);
+                boolean isConstant = true;
 
-		for (int i = 0; i < value.length(); i++) {
-		  if (value.charAt(i) >= 'a' && value.charAt(i) <= 'z')
-		    isConstant = false;
-		  else if (value.charAt(i) >= 'A' && value.charAt(i) <= 'Z')
-		    isConstant = false;
-		}
+                for (int i = 0; i < value.length(); i++) {
+                  if (value.charAt(i) >= 'a' && value.charAt(i) <= 'z')
+                    isConstant = false;
+                  else if (value.charAt(i) >= 'A' && value.charAt(i) <= 'Z')
+                    isConstant = false;
+                }
 
-		if (isConstant)
-		  return typeName + "(" + value + ")";
-	      }
+                if (isConstant)
+                  return typeName + "(" + value + ")";
+              }
 
-	      return typeName;
-	    }
-	    else {
-	      return typeName;
-	    }
-	  }
-	}
+              return typeName;
+            }
+            else {
+              return typeName;
+            }
+          }
+        }
       } finally {
-	rs.close();
+        rs.close();
       }
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       try {
-	if (conn != null)
-	  conn.close();
+        if (conn != null)
+          conn.close();
       } catch (Exception e) {
       }
     }
@@ -482,7 +589,7 @@ public class JdbcMetaData {
     case java.sql.Types.DATE:
     case java.sql.Types.TIME:
     case java.sql.Types.TIMESTAMP:
-        return "TIMESTAMP";
+      return "TIMESTAMP";
     default:
       return "VARCHAR(" + length + ")";
     }

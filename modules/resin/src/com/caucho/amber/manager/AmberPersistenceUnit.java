@@ -1168,6 +1168,22 @@ public class AmberPersistenceUnit {
   }
 
   /**
+   * Returns the FALSE SQL literal, i.e., either "false" or "0".
+   */
+  public String getFalseLiteral()
+  {
+    return getMetaData().getFalseLiteral();
+  }
+
+  /**
+   * Returns true if POSITION SQL function is allowed.
+   */
+  public boolean hasPositionFunction()
+  {
+    return getMetaData().supportsPositionFunction();
+  }
+
+  /**
    * Returns true if generated keys are allowed.
    */
   public boolean hasReturnGeneratedKeys()
