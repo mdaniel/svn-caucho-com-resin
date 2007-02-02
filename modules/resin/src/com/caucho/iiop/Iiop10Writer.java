@@ -29,6 +29,7 @@
 package com.caucho.iiop;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Iiop10Writer extends IiopWriter
 {
@@ -47,7 +48,8 @@ public class Iiop10Writer extends IiopWriter
    * @param operation the method to call
    */
   public void startRequest(byte []oid, int off, int len,
-			   String operation, int requestId)
+			   String operation, int requestId,
+			   ArrayList<ServiceContext> scl)
     throws IOException
   {
     startMessage(IiopReader.MSG_REQUEST);
