@@ -84,9 +84,11 @@ public class JdbcMetaData {
       else if ("mysql".equalsIgnoreCase(name))
 	return new MysqlMetaData(ds);
       else if ("Microsoft SQL Server".equalsIgnoreCase(name))
-	return new SqlServerMetaData(ds);
+        return new SqlServerMetaData(ds);
+      else if ("Apache Derby".equalsIgnoreCase(name))
+        return new DerbyMetaData(ds);
       else {
-	log.fine(name + " is an unknown database type");
+	log.fine(name + " is an unknown database type, using generic sql");
 	return new JdbcMetaData(ds);
       }
     } catch (SQLException e) {
@@ -271,7 +273,8 @@ public class JdbcMetaData {
    */
   public String createIdentitySQL(String sqlType)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    throw new UnsupportedOperationException(getClass().getName() +
+                                            "." + "createIdentitySQL");
   }
 
   /**
@@ -287,7 +290,8 @@ public class JdbcMetaData {
    */
   public String createSequenceSQL(String name, int size)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    throw new UnsupportedOperationException(getClass().getName() +
+                                            "." + "createSequenceSQL");
   }
 
   /**
@@ -295,7 +299,8 @@ public class JdbcMetaData {
    */
   public String selectSequenceSQL(String name)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    throw new UnsupportedOperationException(getClass().getName() +
+                                            "." + "selectSequenceSQL");
   }
 
   /**
