@@ -924,7 +924,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       int delta = read_long();
 
       String v = _context.getString(offset + delta);
-      System.out.println("READ_STRING() " + (offset + delta) + " " + v);
 
       return v;
     }
@@ -941,7 +940,6 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
     String v = new String(cb, 0, len - 1);
 
-    System.out.println("PUT_STRING() " + offset + " " + v);
     _context.putString(offset, v);
 
     return v;

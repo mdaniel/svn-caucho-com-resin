@@ -1243,8 +1243,14 @@ public class AmberConnection
 
     Entity entity = (Entity) obj;
 
+    // jpa/11a8
+    if (! _entities.contains(entity))
+      return false;
+
+    /*
     entity = getEntity(entity.getClass().getName(),
                        entity.__caucho_getPrimaryKey());
+    */
 
     if (entity == null)
       return false;
@@ -1357,13 +1363,14 @@ public class AmberConnection
    */
   public void afterCompletion(int status)
   {
-    afterCommit(status == Status.STATUS_COMMITTED);
+    // XXX: switched order, may have issues with deletes
     _isXA = false;
     _isInTransaction = false;
+    afterCommit(status == Status.STATUS_COMMITTED);
   }
 
   /**
-   * Commits a transaction.
+   * Called before the commit phase
    */
   public void beforeCommit()
     throws SQLException
@@ -1378,9 +1385,10 @@ public class AmberConnection
         Object key = entity.__caucho_getPrimaryKey();
         EntityItem item = _persistenceUnit.getEntity(entityType, key);
 
-        if (item == null)
+        if (item == null) {
           // jpa/0ga8: entity has been removed and DELETE SQL was already flushed.
           continue;
+	}
       }
 
       entity.__caucho_flush();
@@ -1392,6 +1400,9 @@ public class AmberConnection
    */
   public void afterCommit(boolean isCommit)
   {
+    if (_isXA)
+      throw new IllegalStateException("Improper call of afterCommit() in XA");
+    
     if (! _isXA)
       _isInTransaction = false;
 
@@ -2355,19 +2366,25 @@ public class AmberConnection
     {
       try {
         // jpa/11a7
-        AmberConnection.this.beforeCompletion();
+        AmberConnection.this.beforeCommit();
 
-        // jpa/11a7 AmberConnection.this.commit();
-        if (AmberConnection.this._conn != null) {
-          AmberConnection.this._conn.commit();
-        }
+	if (! _isXA) {
+	  _isInTransaction = false;
+	  
+	  // jpa/11a7 AmberConnection.this.commit();
+	  if (AmberConnection.this._conn != null) {
+	    AmberConnection.this._conn.commit();
+	  }
 
-        // jpa/11a7
-        AmberConnection.this.afterCompletion(Status.STATUS_COMMITTED);
+	  // XXX: missing finally issues if _conn.commit fails
 
-        if (AmberConnection.this._conn != null) {
-          closeConnectionImpl();
-        }
+	  // jpa/11a7
+	  AmberConnection.this.afterCommit(true);
+
+	  if (AmberConnection.this._conn != null) {
+	    closeConnectionImpl();
+	  }
+	}
       } catch (SQLException e) {
         throw new PersistenceException(e);
       }
