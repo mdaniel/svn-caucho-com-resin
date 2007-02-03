@@ -1363,10 +1363,9 @@ public class AmberConnection
    */
   public void afterCompletion(int status)
   {
-    // XXX: switched order, may have issues with deletes
+    afterCommit(status == Status.STATUS_COMMITTED);
     _isXA = false;
     _isInTransaction = false;
-    afterCommit(status == Status.STATUS_COMMITTED);
   }
 
   /**
@@ -1400,9 +1399,6 @@ public class AmberConnection
    */
   public void afterCommit(boolean isCommit)
   {
-    if (_isXA)
-      throw new IllegalStateException("Improper call of afterCommit() in XA");
-    
     if (! _isXA)
       _isInTransaction = false;
 
@@ -2368,22 +2364,20 @@ public class AmberConnection
         // jpa/11a7
         AmberConnection.this.beforeCommit();
 
-	if (! _isXA) {
-	  _isInTransaction = false;
+	_isInTransaction = false;
 	  
-	  // jpa/11a7 AmberConnection.this.commit();
-	  if (AmberConnection.this._conn != null) {
-	    AmberConnection.this._conn.commit();
-	  }
+	// jpa/11a7 AmberConnection.this.commit();
+	if (AmberConnection.this._conn != null) {
+	  AmberConnection.this._conn.commit();
+	}
 
-	  // XXX: missing finally issues if _conn.commit fails
+	// XXX: missing finally issues if _conn.commit fails
 
-	  // jpa/11a7
-	  AmberConnection.this.afterCommit(true);
+	// jpa/11a7
+	AmberConnection.this.afterCommit(true);
 
-	  if (AmberConnection.this._conn != null) {
-	    closeConnectionImpl();
-	  }
+	if (AmberConnection.this._conn != null) {
+	  closeConnectionImpl();
 	}
       } catch (SQLException e) {
         throw new PersistenceException(e);
