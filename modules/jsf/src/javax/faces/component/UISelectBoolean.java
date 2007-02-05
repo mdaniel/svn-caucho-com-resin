@@ -38,9 +38,6 @@ public class UISelectBoolean extends UIInput
   public static final String COMPONENT_FAMILY = "javax.faces.SelectBoolean";
   public static final String COMPONENT_TYPE = "javax.faces.SelectBoolean";
 
-  private Boolean _selected;
-  private ValueExpression _selectedExpr;
-
   public UISelectBoolean()
   {
     setRendererType("javax.faces.Checkbox");
@@ -60,7 +57,9 @@ public class UISelectBoolean extends UIInput
 
   public boolean isSelected()
   {
-    return (Boolean) getValue();
+    Object value = getValue();
+
+    return Boolean.TRUE.equals(value);
   }
 
   public void setSelected(boolean value)
@@ -86,9 +85,8 @@ public class UISelectBoolean extends UIInput
   @Override
   public void setValueExpression(String name, ValueExpression expr)
   {
-    if ("selected".equals(name)) {
+    if ("selected".equals(name))
       super.setValueExpression("value", expr);
-    }
     else
       super.setValueExpression(name, expr);
   }
@@ -99,25 +97,11 @@ public class UISelectBoolean extends UIInput
 
   public Object saveState(FacesContext context)
   {
-    Object []state = new Object[3];
-
-    state[0] = super.saveState(context);
-    
-    state[1] = _selected;
-    state[2] = Util.save(_selectedExpr, context);
-
-    return state;
+    return super.saveState(context);
   }
 
   public void restoreState(FacesContext context, Object value)
   {
-    Object []state = (Object []) value;
-
-    super.restoreState(context, state[0]);
-
-    _selected = (Boolean) state[1];
-    _selectedExpr = Util.restore(state[2],
-				 Boolean.class,
-				 context);
+    super.restoreState(context, value);
   }
 }

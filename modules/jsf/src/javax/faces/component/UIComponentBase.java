@@ -66,6 +66,8 @@ public abstract class UIComponentBase extends UIComponent
   private UIComponent _parent;
   
   private String _rendererType;
+  private ValueExpression _rendererTypeExpr;
+  
   private boolean _isTransient;
   
   private Boolean _isRendered;
@@ -122,6 +124,8 @@ public abstract class UIComponentBase extends UIComponent
 
     if ("rendered".equals(name))
       return _isRenderedExpr;
+    else if ("rendererType".equals(name))
+      return _rendererTypeExpr;
     
     if (_exprMap != null)
       return _exprMap.get(name);
@@ -138,14 +142,23 @@ public abstract class UIComponentBase extends UIComponent
   @Override
   public void setValueExpression(String name, ValueExpression expr)
   {
-    if (name == null)
-      throw new NullPointerException();
-
-    if (name.equals("id") || name.equals("parent"))
-      throw new IllegalArgumentException();
+    if (name.equals("id"))
+      throw new IllegalArgumentException("'id' is not a valid ValueExpression name.");
+    else if (name.equals("parent"))
+      throw new IllegalArgumentException("'parent' is not a valid ValueExpression name.");
     
     if ("rendered".equals(name)) {
-      _isRenderedExpr = expr;
+      if (expr.isLiteralText())
+	_isRendered = (Boolean) expr.getValue(null);
+      else
+	_isRenderedExpr = expr;
+      return;
+    }
+    else if ("rendererType".equals(name)) {
+      if (expr.isLiteralText())
+	_rendererType = (String) expr.getValue(null);
+      else
+	_rendererTypeExpr = expr;
       return;
     }
     
@@ -272,7 +285,12 @@ public abstract class UIComponentBase extends UIComponent
 
   public String getRendererType()
   {
-    return _rendererType;
+    if (_rendererType != null)
+      return _rendererType;
+    else if (_rendererTypeExpr != null)
+      return Util.evalString(_rendererTypeExpr);
+    else
+      return null;
   }
 
   public void setRendererType(String rendererType)
@@ -768,6 +786,7 @@ public abstract class UIComponentBase extends UIComponent
       Util.save(_isRenderedExpr, context),
       rendererCode,
       rendererString,
+      Util.save(_rendererTypeExpr, context),
       (_attributeMap != null ? _attributeMap.getExtMap() : null),
     };
   }
@@ -784,13 +803,14 @@ public abstract class UIComponentBase extends UIComponent
 
     Integer rendererCode = (Integer) state[4];
     String rendererString = (String) state[5];
+    _rendererTypeExpr = Util.restoreString(state[6], context);
 
     if (rendererCode != null)
       _rendererType = _codeToRendererMap.get(rendererCode);
     else
       _rendererType = rendererString;
     
-    HashMap<String,Object> extMap = (HashMap) state[6];
+    HashMap<String,Object> extMap = (HashMap) state[7];
 
     if (extMap != null) {
       if (_attributeMap == null)

@@ -236,9 +236,7 @@ public class UIForm extends UIComponentBase implements NamingContainer
     super.restoreState(context, state[0]);
 
     _isPrependId = (Boolean) state[1];
-    _isPrependIdExpr = Util.restore(state[2],
-				    Boolean.class,
-				    context);
+    _isPrependIdExpr = Util.restoreBoolean(state[2], context);
   }
 
   //

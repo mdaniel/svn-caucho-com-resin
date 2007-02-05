@@ -139,28 +139,25 @@ public class UIGraphic extends UIComponentBase
   // state
   //
 
+  @Override
   public Object saveState(FacesContext context)
   {
-    State state = new State();
-
-    state._parent = super.saveState(context);
-    
-    state._url = _url;
-    state._urlExpr = Util.save(_urlExpr, context);
-
-    return state;
+    return new Object[] {
+      super.saveState(context),
+      _url,
+      Util.save(_urlExpr, context),
+    };
   }
 
+  @Override
   public void restoreState(FacesContext context, Object value)
   {
-    State state = (State) value;
+    Object []state = (Object []) value;
 
-    super.restoreState(context, state._parent);
+    super.restoreState(context, state[0]);
 
-    _url = state._url;
-    _urlExpr = Util.restore(state._urlExpr,
-			    String.class,
-			    context);
+    _url = (String) state[1];
+    _urlExpr = Util.restoreString(state[2], context);
   }
 
   //
@@ -170,13 +167,6 @@ public class UIGraphic extends UIComponentBase
   private static enum PropEnum {
     URL,
     VALUE,
-  }
-
-  private static class State implements java.io.Serializable {
-    private Object _parent;
-    
-    private String _url;
-    private String _urlExpr;
   }
 
   static {

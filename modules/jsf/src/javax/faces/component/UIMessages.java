@@ -181,20 +181,17 @@ public class UIMessages extends UIComponentBase
 
     super.restoreState(context, state[0]);
 
-    if (state[1] != null)
-      _globalOnly = (Boolean) state[1];
+    _globalOnly = (Boolean) state[1];
     _globalOnlyExpr = Util.restore(state[2],
 				   Boolean.class,
 				   context);
 
-    if (state[3] != null)
-      _showDetail = (Boolean) state[3];
+    _showDetail = (Boolean) state[3];
     _showDetailExpr = Util.restore(state[4],
 				   Boolean.class,
 				   context);
 
-    if (state[5] != null)
-      _showSummary = (Boolean) state[5];
+    _showSummary = (Boolean) state[5];
     _showSummaryExpr = Util.restore(state[6],
 				    Boolean.class,
 				    context);

@@ -132,44 +132,6 @@ public class MappedEntries extends AbstractValueConfig
     }
   }
 
-  private static Method findGetter(Class type, String name)
-  {
-    if (type == null)
-      return null;
-
-    for (Method method : type.getDeclaredMethods()) {
-      if (! method.getName().equals(name))
-	continue;
-      else if (method.getParameterTypes().length != 0)
-	continue;
-      else if (Modifier.isStatic(method.getModifiers()))
-	continue;
-
-      return method;
-    }
-
-    return findGetter(type.getSuperclass(), name);
-  }
-
-  private static Method findSetter(Class type, String name)
-  {
-    if (type == null)
-      return null;
-
-    for (Method method : type.getDeclaredMethods()) {
-      if (! method.getName().equals(name))
-	continue;
-      else if (method.getParameterTypes().length != 1)
-	continue;
-      else if (Modifier.isStatic(method.getModifiers()))
-	continue;
-
-      return method;
-    }
-
-    return findSetter(type.getSuperclass(), name);
-  }
-
   public static class MapEntry {
     private String _key;
     
@@ -182,7 +144,7 @@ public class MappedEntries extends AbstractValueConfig
 
     public AbstractValue getKey(Class type)
     {
-      return new PropertyValue(_key, type);
+      return PropertyValue.create(_key, type);
     }
 
     public void setValue(String value)

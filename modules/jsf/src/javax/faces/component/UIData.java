@@ -319,40 +319,38 @@ public class UIData extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    State state = new State();
-
-    state._parent = super.saveState(context);
+    return new Object[] {
+      super.saveState(context),
     
-    state._value = _value;
-    state._valueExpr = Util.save(_valueExpr, context);
+      _value, // XXX: stateHolder issues
+      Util.save(_valueExpr, context),
     
-    state._first = _first;
-    state._firstExpr = Util.save(_firstExpr, context);
+      _first,
+      Util.save(_firstExpr, context),
     
-    state._rows = _rows;
-    state._rowsExpr = Util.save(_rowsExpr, context);
+      _rows,
+      Util.save(_rowsExpr, context),
     
-    state._var = _var;
-
-    return state;
+      _var,
+    };
   }
 
   public void restoreState(FacesContext context, Object value)
   {
-    State state = (State) value;
+    Object []state = (Object []) value;
+    
+    super.restoreState(context, state[0]);
 
-    super.restoreState(context, state._parent);
+    _value = state[1];
+    _valueExpr = Util.restore(state[2], Object.class, context);
 
-    _value = state._value;
-    _valueExpr = Util.restore(state._valueExpr, String.class, context);
+    _first = (Integer) state[3];
+    _firstExpr = Util.restore(state[4], Integer.class, context);
 
-    _first = state._first;
-    _firstExpr = Util.restore(state._firstExpr, Integer.class, context);
+    _rows = (Integer) state[5];
+    _rowsExpr = Util.restore(state[6], Integer.class, context);
 
-    _rows = state._rows;
-    _rowsExpr = Util.restore(state._firstExpr, Integer.class, context);
-
-    _var = state._var;
+    _var = (String) state[7];
   }
 
   //
@@ -363,21 +361,6 @@ public class UIData extends UIComponentBase
     VALUE,
     FIRST,
     ROWS,
-  }
-
-  private static class State implements java.io.Serializable {
-    private Object _parent;
-    
-    private Object _value;
-    private String _valueExpr;
-    
-    private Integer _first;
-    private String _firstExpr;
-    
-    private Integer _rows;
-    private String _rowsExpr;
-    
-    private String _var;
   }
 
   static {

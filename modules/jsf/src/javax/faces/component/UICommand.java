@@ -51,12 +51,13 @@ public class UICommand extends UIComponentBase
 
   private Object _value;
   private ValueExpression _valueExpr;
+
+  private Boolean _immediate;
+  private ValueExpression _immediateExpr;
   
   private MethodExpression _actionExpr;
 
   private ActionListener []_actionListeners = NULL_ACTION_LISTENERS;
-
-  private boolean _isImmediate;
 
   public UICommand()
   {
@@ -96,12 +97,17 @@ public class UICommand extends UIComponentBase
 
   public boolean isImmediate()
   {
-    return _isImmediate;
+    if (_immediate != null)
+      return _immediate;
+    else if (_immediateExpr != null)
+      return Util.evalBoolean(_immediateExpr);
+    else
+      return false;
   }
 
-  public void setImmediate(boolean isImmediate)
+  public void setImmediate(boolean immediate)
   {
-    _isImmediate = isImmediate;
+    _immediate = immediate;
   }
 
   //
@@ -114,9 +120,10 @@ public class UICommand extends UIComponentBase
   @Override
   public ValueExpression getValueExpression(String name)
   {
-    if ("value".equals(name)) {
+    if ("value".equals(name))
       return _valueExpr;
-    }
+    else if ("immediate".equals(name))
+      return _immediateExpr;
     else {
       return super.getValueExpression(name);
     }
@@ -128,12 +135,12 @@ public class UICommand extends UIComponentBase
   @Override
   public void setValueExpression(String name, ValueExpression expr)
   {
-    if ("value".equals(name)) {
+    if ("value".equals(name))
       _valueExpr = expr;
-    }
-    else {
+    else if ("immediate".equals(name))
+      _immediateExpr = expr;
+    else
       super.setValueExpression(name, expr);
-    }
   }
 
   //
@@ -274,16 +281,13 @@ public class UICommand extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    Object []state = new Object[3];
-
-    state[0] = super.saveState(context);
-    
-    state[1] = _value;
-    state[2] = Util.save(_valueExpr, context);
-    
-    //state._actionExpr = Util.save(_valueExpr, context);
-
-    return state;
+    return new Object[] {
+      super.saveState(context),
+      _value,
+      Util.save(_valueExpr, context),
+      _immediate,
+      Util.save(_immediateExpr, context),
+    };
   }
 
   public void restoreState(FacesContext context, Object value)
@@ -294,6 +298,9 @@ public class UICommand extends UIComponentBase
 
     _value = state[1];
     _valueExpr = Util.restore(state[2], String.class, context);
+    
+    _immediate = (Boolean) state[3];
+    _immediateExpr = Util.restore(state[4], Boolean.class, context);
   }
 
   //

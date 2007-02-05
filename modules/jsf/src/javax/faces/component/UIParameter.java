@@ -133,17 +133,15 @@ public class UIParameter extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    Object []state = new Object[5];
-
-    state[0] = super.saveState(context);
+    return new Object[] {
+      super.saveState(context),
     
-    state[1] = _name;
-    state[2] = Util.save(_nameExpr, context);
+      _name,
+      Util.save(_nameExpr, context),
     
-    state[3] = _value;
-    state[4] = Util.save(_valueExpr, context);
-
-    return state;
+      _value,
+      Util.save(_valueExpr, context)
+    };
   }
 
   public void restoreState(FacesContext context, Object value)
@@ -157,8 +155,8 @@ public class UIParameter extends UIComponentBase
 			     String.class,
 			     context);
 
-    _value = (String) state[1];
-    _valueExpr = Util.restore(state[2],
+    _value = (String) state[3];
+    _valueExpr = Util.restore(state[4],
 			      Object.class,
 			      context);
   }

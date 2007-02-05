@@ -61,6 +61,14 @@ public class UIInput extends UIOutput
   private static final HashMap<String,PropEnum> _propMap
     = new HashMap<String,PropEnum>();
 
+  private ValueExpression _valueExpr;
+  
+  private Boolean _required;
+  private ValueExpression _requiredExpr;
+  
+  private Boolean _immediate;
+  private ValueExpression _immediateExpr;
+
   private String _requiredMessage;
   private ValueExpression _requiredMessageExpr;
 
@@ -73,11 +81,7 @@ public class UIInput extends UIOutput
   //
 
   private boolean _isValid = true;
-  private ValueExpression _valueExpr;
   private boolean _isLocalValueSet;
-
-  private boolean _isRequired;
-  private boolean _isImmediate;
 
   private Object _submittedValue;
 
@@ -158,6 +162,10 @@ public class UIInput extends UIOutput
       switch (_propMap.get(name)) {
       case VALUE:
 	return _valueExpr;
+      case IMMEDIATE:
+	return _immediateExpr;
+      case REQUIRED:
+	return _requiredExpr;
       case REQUIRED_MESSAGE:
 	return _requiredMessageExpr;
       case CONVERTER_MESSAGE:
@@ -183,8 +191,21 @@ public class UIInput extends UIOutput
       case VALUE:
 	if (expr != null && ! expr.isLiteralText())
 	  _valueExpr = expr;
-
 	super.setValueExpression(name, expr);
+	return;
+	
+      case IMMEDIATE:
+	if (expr != null && expr.isLiteralText())
+	  _immediate = (Boolean) expr.getValue(null);
+	else
+	  _immediateExpr = expr;
+	return;
+	
+      case REQUIRED:
+	if (expr != null && expr.isLiteralText())
+	  _required = (Boolean) expr.getValue(null);
+	else
+	  _requiredExpr = expr;
 	return;
 	
       case REQUIRED_MESSAGE:
@@ -216,6 +237,36 @@ public class UIInput extends UIOutput
   //
   // EditableValueHolder properties.
   //
+
+  public boolean isRequired()
+  {
+    if (_required != null)
+      return _required;
+    else if (_requiredExpr != null)
+      return Util.evalBoolean(_requiredExpr);
+    else
+      return false;
+  }
+
+  public void setRequired(boolean required)
+  {
+    _required = required;
+  }
+
+  public boolean isImmediate()
+  {
+    if (_immediate != null)
+      return _immediate;
+    else if (_immediateExpr != null)
+      return Util.evalBoolean(_immediateExpr);
+    else
+      return false;
+  }
+
+  public void setImmediate(boolean immediate)
+  {
+    _immediate = immediate;
+  }
 
   public Object getSubmittedValue()
   {
@@ -261,26 +312,6 @@ public class UIInput extends UIOutput
   public void setValid(boolean valid)
   {
     _isValid = valid;
-  }
-
-  public boolean isRequired()
-  {
-    return _isRequired;
-  }
-
-  public void setRequired(boolean required)
-  {
-    _isRequired = required;
-  }
-
-  public boolean isImmediate()
-  {
-    return _isImmediate;
-  }
-
-  public void setImmediate(boolean immediate)
-  {
-    _isImmediate = immediate;
   }
 
   @Deprecated
@@ -609,6 +640,10 @@ public class UIInput extends UIOutput
   {
     return new Object[] {
       super.saveState(context),
+      _immediate,
+      Util.save(_immediateExpr, context),
+      _required,
+      Util.save(_requiredExpr, context),
       _requiredMessage,
       Util.save(_requiredMessageExpr, context),
       _converterMessage,
@@ -624,20 +659,22 @@ public class UIInput extends UIOutput
 
     super.restoreState(context, state[0]);
 
-    _requiredMessage = (String) state[1];
-    _requiredMessageExpr = Util.restore(state[2],
-					String.class,
-					context);
+    _immediate = (Boolean) state[1];
+    _immediateExpr = Util.restoreBoolean(state[2], context);
 
-    _converterMessage = (String) state[3];
-    _converterMessageExpr = Util.restore(state[4],
-					String.class,
-					context);
+    _required = (Boolean) state[3];
+    _requiredExpr = Util.restoreBoolean(state[4], context);
 
-    _validatorMessage = (String) state[5];
-    _validatorMessageExpr = Util.restore(state[6],
-					String.class,
-					context);
+    _requiredMessage = (String) state[5];
+    _requiredMessageExpr = Util.restoreString(state[6], context);
+
+    _converterMessage = (String) state[7];
+    _converterMessageExpr = Util.restoreString(state[8], context);
+
+    _validatorMessage = (String) state[9];
+    _validatorMessageExpr = Util.restoreString(state[10], context);
+    
+    _valueExpr = super.getValueExpression("value");
   }
 
   //
@@ -645,6 +682,8 @@ public class UIInput extends UIOutput
   //
 
   private static enum PropEnum {
+    IMMEDIATE,
+    REQUIRED,
     VALUE,
     REQUIRED_MESSAGE,
     CONVERTER_MESSAGE,
@@ -711,6 +750,8 @@ public class UIInput extends UIOutput
 
   static {
     _propMap.put("value", PropEnum.VALUE);
+    _propMap.put("immediate", PropEnum.IMMEDIATE);
+    _propMap.put("required", PropEnum.REQUIRED);
     _propMap.put("requiredMessage", PropEnum.REQUIRED_MESSAGE);
     _propMap.put("converterMessage", PropEnum.CONVERTER_MESSAGE);
     _propMap.put("validatorMessage", PropEnum.VALIDATOR_MESSAGE);

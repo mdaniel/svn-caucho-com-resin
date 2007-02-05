@@ -84,6 +84,16 @@ final class Util
       return null;
   }
 
+  static ValueExpression restoreBoolean(Object value, FacesContext context)
+  {
+    return restore(value, Boolean.class, context);
+  }
+
+  static ValueExpression restoreString(Object value, FacesContext context)
+  {
+    return restore(value, String.class, context);
+  }
+
   static ValueExpression restore(Object value,
 				 Class type,
 				 FacesContext context)
