@@ -1248,8 +1248,8 @@ public class AmberConnection
       return false;
 
     /*
-    entity = getEntity(entity.getClass().getName(),
-                       entity.__caucho_getPrimaryKey());
+      entity = getEntity(entity.getClass().getName(),
+      entity.__caucho_getPrimaryKey());
     */
 
     if (entity == null)
@@ -1387,7 +1387,7 @@ public class AmberConnection
         if (item == null) {
           // jpa/0ga8: entity has been removed and DELETE SQL was already flushed.
           continue;
-	}
+        }
       }
 
       entity.__caucho_flush();
@@ -1431,12 +1431,12 @@ public class AmberConnection
       /* XXX: jpa/0k11 - avoids double rollback()
          Rollback is done from com.caucho.transaction.TransactionImpl
          to the pool item com.caucho.jca.PoolItem
-      try {
-        if (_conn != null)
-          _conn.rollback();
-      } catch (SQLException e) {
-        throw new IllegalStateException(e);
-      }
+         try {
+         if (_conn != null)
+         _conn.rollback();
+         } catch (SQLException e) {
+         throw new IllegalStateException(e);
+         }
       */
     }
   }
@@ -1606,19 +1606,26 @@ public class AmberConnection
   public PreparedStatement prepareInsertStatement(String sql)
     throws SQLException
   {
-    PreparedStatement pstmt = _preparedStatementMap.get(sql);
+    PreparedStatement pstmt = null;
 
-    if (pstmt == null) {
-      Connection conn = getConnection();
+    try {
+      pstmt = _preparedStatementMap.get(sql);
 
-      if (_persistenceUnit.hasReturnGeneratedKeys())
-        pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-      else
-        pstmt = conn.prepareStatement(sql);
+      if (pstmt == null) {
+        Connection conn = getConnection();
 
-      _statements.add(pstmt);
+        if (_persistenceUnit.hasReturnGeneratedKeys())
+          pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        else
+          pstmt = conn.prepareStatement(sql);
 
-      _preparedStatementMap.put(sql, pstmt);
+        _statements.add(pstmt);
+
+        _preparedStatementMap.put(sql, pstmt);
+      }
+    } catch (SQLException e) {
+      if (pstmt != null)
+        pstmt.close();
     }
 
     return pstmt;
@@ -2080,6 +2087,14 @@ public class AmberConnection
     } catch (SQLException e) {
     }
 
+    for (Statement stmt : _statements) {
+      try {
+        stmt.close();
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+
     try {
       _preparedStatementMap.clear();
       _statements.clear();
@@ -2364,21 +2379,21 @@ public class AmberConnection
         // jpa/11a7
         AmberConnection.this.beforeCommit();
 
-	_isInTransaction = false;
-	  
-	// jpa/11a7 AmberConnection.this.commit();
-	if (AmberConnection.this._conn != null) {
-	  AmberConnection.this._conn.commit();
-	}
+        _isInTransaction = false;
 
-	// XXX: missing finally issues if _conn.commit fails
+        // jpa/11a7 AmberConnection.this.commit();
+        if (AmberConnection.this._conn != null) {
+          AmberConnection.this._conn.commit();
+        }
 
-	// jpa/11a7
-	AmberConnection.this.afterCommit(true);
+        // XXX: missing finally issues if _conn.commit fails
 
-	if (AmberConnection.this._conn != null) {
-	  closeConnectionImpl();
-	}
+        // jpa/11a7
+        AmberConnection.this.afterCommit(true);
+
+        if (AmberConnection.this._conn != null) {
+          closeConnectionImpl();
+        }
       } catch (SQLException e) {
         throw new PersistenceException(e);
       }

@@ -112,6 +112,8 @@ public class QueryImpl implements Query {
    */
   public List getResultList()
   {
+    ResultSet rs = null;
+
     try {
 
       Class constructorClass = null;
@@ -129,7 +131,7 @@ public class QueryImpl implements Query {
 
       ArrayList results = new ArrayList();
 
-      ResultSet rs = executeQuery();
+      rs = executeQuery();
 
       ResultSetMetaData metaData = null;
       int columnCount = -1;
@@ -356,11 +358,16 @@ public class QueryImpl implements Query {
         }
       }
 
-      rs.close();
-
       return results;
     } catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
+    } finally {
+      try {
+        if (rs != null)
+          rs.close();
+      } catch (Exception e) {
+        throw EJBExceptionWrapper.createRuntime(e);
+      }
     }
   }
 
@@ -419,21 +426,33 @@ public class QueryImpl implements Query {
   protected ResultSet executeQuery()
     throws SQLException
   {
-    ResultSet rs;
+    ResultSet rs = null;
+    PreparedStatement pstmt = null;
 
-    if (_flushMode == FlushModeType.AUTO)
-      _aConn.flushNoChecks();
+    try {
+      if (_flushMode == FlushModeType.AUTO)
+        _aConn.flushNoChecks();
 
-    if (_nativeSql == null) {
-      // JPA query.
-      rs = _userQuery.executeQuery();
+      if (_nativeSql == null) {
+        // JPA query.
+        rs = _userQuery.executeQuery();
+      }
+      else {
+        // Native query.
+
+        pstmt = _aConn.prepareStatement(_nativeSql);
+
+        rs = pstmt.executeQuery();
+      }
     }
-    else {
-      // Native query.
+    catch (SQLException e) {
+      if (rs != null)
+        rs.close();
 
-      PreparedStatement pstmt = _aConn.prepareStatement(_nativeSql);
+      if (pstmt != null)
+        pstmt.close();
 
-      rs = pstmt.executeQuery();
+      throw e;
     }
 
     return rs;
