@@ -439,6 +439,13 @@ public class QuercusClass {
     if (fun == null)
       fun = _lowerMethodMap.get(name.toLowerCase());
 
+    // php/0949
+    if (fun == null) {
+      if (name.equalsIgnoreCase("__construct")) {
+        fun = _constructor;
+      }
+    }
+
     return fun;
   }
 
