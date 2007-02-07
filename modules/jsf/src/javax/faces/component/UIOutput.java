@@ -149,10 +149,24 @@ public class UIOutput extends UIComponentBase implements ValueHolder
   {
     Object parent = super.saveState(context);
 
+    Object []converterState = null;
+
+    if (_converter != null) {
+      converterState = new Object[2];
+      converterState[0] = _converter.getClass();
+
+      if (_converter instanceof StateHolder) {
+	StateHolder holder = (StateHolder) _converter;
+
+	converterState[1] = holder.saveState(context);
+      }
+    }
+
     return new Object[] {
       parent,
       _value,
-      Util.save(_valueExpr, context)
+      Util.save(_valueExpr, context),
+      converterState,
     };
   }
 
@@ -165,5 +179,23 @@ public class UIOutput extends UIComponentBase implements ValueHolder
 
     _value = state[1];
     _valueExpr = Util.restore(state[2], String.class, context);
+
+    Object []converterState = (Object []) state[3];
+
+    if (converterState != null) {
+      try {
+	Class cl = (Class) converterState[0];
+	
+	_converter = (Converter) cl.newInstance();
+
+	if (_converter instanceof StateHolder) {
+	  StateHolder holder = (StateHolder) _converter;
+
+	  holder.restoreState(context, converterState[1]);
+	}
+      } catch (Exception e) {
+	throw new FacesException(e);
+      }
+    }
   }
 }

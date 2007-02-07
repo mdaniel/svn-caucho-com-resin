@@ -68,6 +68,8 @@ class HtmlCommandButtonRenderer extends Renderer
 
     String value = paramMap.get(clientId);
 
+    System.out.println("DECODE: " + clientId + " " + value + " " + paramMap);
+
     if (value != null) {
       String type;
 
@@ -87,6 +89,7 @@ class HtmlCommandButtonRenderer extends Renderer
 
       ActionEvent event = new ActionEvent(component);
 
+      System.out.println("QUEUE: " + event);
       component.queueEvent(event);
     }
     else {

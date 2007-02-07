@@ -74,6 +74,10 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
   {
     if (_rendered != null)
       component.getAttributes().put("rendered", _rendered);
+
+    String type = getRendererType();
+    if (type != null)
+      component.setRendererType(type);
   }
 
   protected UIComponent createComponent(FacesContext context,

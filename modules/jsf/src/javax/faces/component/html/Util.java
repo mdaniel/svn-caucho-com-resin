@@ -91,12 +91,28 @@ final class Util
 		     FacesContext context)
   {
     if (expr != null) {
-      System.out.println("EXPR: " + expr.getExpressionString());
-      
       return expr.getExpressionString();
     }
     else
       return null;
+  }
+
+  static ValueExpression restoreBoolean(Object value,
+					FacesContext context)
+  {
+    return restore(value, Boolean.class, context);
+  }
+
+  static ValueExpression restoreString(Object value,
+					FacesContext context)
+  {
+    return restore(value, String.class, context);
+  }
+
+  static ValueExpression restoreInt(Object value,
+					FacesContext context)
+  {
+    return restore(value, Integer.class, context);
   }
 
   static ValueExpression restore(Object value,

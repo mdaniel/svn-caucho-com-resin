@@ -33,6 +33,7 @@ import java.util.*;
 import javax.el.*;
 
 import javax.faces.*;
+import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.el.*;
 import javax.faces.event.*;
@@ -158,7 +159,7 @@ public class UICommand extends UIComponentBase
       FacesContext context = FacesContext.getCurrentInstance();
 
       ActionListener []listeners = getActionListeners();
-      
+
       for (int i = 0; i < listeners.length; i++)
 	listeners[i].processAction(actionEvent);
 
@@ -281,12 +282,18 @@ public class UICommand extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
+    String actionExprString = null;
+
+    if (_actionExpr != null)
+      actionExprString = _actionExpr.getExpressionString();
+    
     return new Object[] {
       super.saveState(context),
       _value,
       Util.save(_valueExpr, context),
       _immediate,
       Util.save(_immediateExpr, context),
+      actionExprString,
     };
   }
 
@@ -301,6 +308,20 @@ public class UICommand extends UIComponentBase
     
     _immediate = (Boolean) state[3];
     _immediateExpr = Util.restore(state[4], Boolean.class, context);
+
+    _actionListeners = null;
+
+    String actionExprString = (String) state[5];
+
+    if (actionExprString != null) {
+      Application app = context.getApplication();
+      ExpressionFactory factory = app.getExpressionFactory();
+      
+      _actionExpr = factory.createMethodExpression(context.getELContext(),
+						   actionExprString,
+						   Object.class,
+						   new Class[0]);
+    }
   }
 
   //
@@ -362,8 +383,12 @@ public class UICommand extends UIComponentBase
     }
   }
 
-  static class ActionListenerAdapter implements ActionListener {
+  static class ActionListenerAdapter implements ActionListener, StateHolder {
     private MethodBinding _binding;
+
+    ActionListenerAdapter()
+    {
+    }
 
     ActionListenerAdapter(MethodBinding binding)
     {
@@ -379,6 +404,34 @@ public class UICommand extends UIComponentBase
     {
       _binding.invoke(FacesContext.getCurrentInstance(),
 		      new Object[] { event });
+    }
+    
+    public Object saveState(FacesContext context)
+    {
+      return _binding.getExpressionString();
+    }
+
+    public void restoreState(FacesContext context, Object state)
+    {
+      Application app = context.getApplication();
+      
+      String expr = (String) state;
+
+      _binding = app.createMethodBinding(expr, new Class[] { ActionEvent.class });
+    }
+
+    public boolean isTransient()
+    {
+      return false;
+    }
+
+    public void setTransient(boolean isTransient)
+    {
+    }
+
+    public String toString()
+    {
+      return "ActionListenerAdapter[" + _binding + "]";
     }
   }
 

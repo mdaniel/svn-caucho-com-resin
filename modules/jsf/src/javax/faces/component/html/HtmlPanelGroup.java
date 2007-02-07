@@ -168,6 +168,46 @@ public class HtmlPanelGroup extends UIPanel
   }
 
   //
+  // state
+  //
+
+  public Object saveState(FacesContext context)
+  {
+    Object parent = super.saveState(context);
+
+    return new Object[] {
+      parent,
+      
+      _layout,
+      Util.save(_layoutExpr, context),
+      
+      _style,
+      Util.save(_styleExpr, context),
+      _styleClass,
+      Util.save(_styleClassExpr, context),
+    };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    int i = 0;
+
+    if (state != null) 
+      super.restoreState(context, state[i++]);
+
+    _layout = (String) state[i++];
+    _layoutExpr = Util.restoreString(state[i++], context);
+
+    _style = (String) state[i++];
+    _styleExpr = Util.restoreString(state[i++], context);
+
+    _styleClass = (String) state[i++];
+    _styleClassExpr = Util.restoreString(state[i++], context);
+  }
+
+  //
   // utility
   //
 

@@ -778,6 +778,26 @@ public abstract class UIComponentBase extends UIComponent
 
     if (rendererCode == null)
       rendererString = _rendererType;
+
+    Object []savedListeners = null;
+
+    if (_facesListeners.length > 0) {
+      savedListeners = new Object[2 * _facesListeners.length];
+
+      for (int i = 0; i < _facesListeners.length; i++) {
+	FacesListener listener = _facesListeners[i];
+
+	int index = 2 * i;
+	
+	savedListeners[index] = listener.getClass();
+
+	if (listener instanceof StateHolder) {
+	  StateHolder holder = (StateHolder) listener;
+	  
+	  savedListeners[index + 1] = holder.saveState(context);
+	}
+      }
+    }
     
     return new Object[] {
       _id,
@@ -788,6 +808,7 @@ public abstract class UIComponentBase extends UIComponent
       rendererString,
       Util.save(_rendererTypeExpr, context),
       (_attributeMap != null ? _attributeMap.getExtMap() : null),
+      savedListeners,
     };
   }
 
@@ -817,6 +838,32 @@ public abstract class UIComponentBase extends UIComponent
 	_attributeMap = new AttributeMap(this);
       
       _attributeMap.setExtMap(extMap);
+    }
+
+    Object []savedListeners = (Object []) state[8];
+
+    if (savedListeners != null) {
+      _facesListeners = new FacesListener[savedListeners.length / 2];
+
+      for (int i = 0; i < _facesListeners.length; i++) {
+	int index = 2 * i;
+	
+	Class cl = (Class) savedListeners[index];
+
+	try {
+	  FacesListener listener = (FacesListener) cl.newInstance();
+
+	  if (listener instanceof StateHolder) {
+	    StateHolder holder = (StateHolder) listener;
+
+	    holder.restoreState(context, savedListeners[index + 1]);
+	  }
+
+	  _facesListeners[i] = listener;
+	} catch (Exception e) {
+	  throw new FacesException(e);
+	}
+      }
     }
   }
 

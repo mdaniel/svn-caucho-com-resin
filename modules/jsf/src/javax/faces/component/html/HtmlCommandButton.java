@@ -816,6 +816,171 @@ public class HtmlCommandButton extends UICommand
   }
 
   //
+  // state
+  //
+
+  public Object saveState(FacesContext context)
+  {
+    Object parent = super.saveState(context);
+
+    return new Object[] {
+      parent,
+      
+      _accesskey,
+      Util.save(_accesskeyExpr, context),
+      _alt,
+      Util.save(_altExpr, context),
+      _dir,
+      Util.save(_dirExpr, context),
+      _disabled,
+      Util.save(_disabledExpr, context),
+      _image,
+      Util.save(_imageExpr, context),
+      _label,
+      Util.save(_labelExpr, context),
+      _lang,
+      Util.save(_langExpr, context),
+      
+      _onblur,
+      Util.save(_onblurExpr, context),
+      _onchange,
+      Util.save(_onchangeExpr, context),
+      _onclick,
+      Util.save(_onclickExpr, context),
+      _ondblclick,
+      Util.save(_ondblclickExpr, context),
+      _onfocus,
+      Util.save(_onfocusExpr, context),
+      
+      _onkeydown,
+      Util.save(_onkeydownExpr, context),
+      _onkeypress,
+      Util.save(_onkeypressExpr, context),
+      _onkeyup,
+      Util.save(_onkeyupExpr, context),
+      
+      _onmousedown,
+      Util.save(_onmousedownExpr, context),
+      _onmousemove,
+      Util.save(_onmousemoveExpr, context),
+      _onmouseout,
+      Util.save(_onmouseoutExpr, context),
+      _onmouseover,
+      Util.save(_onmouseoverExpr, context),
+      _onmouseup,
+      Util.save(_onmouseupExpr, context),
+      
+      _onselect,
+      Util.save(_onselectExpr, context),
+      
+      _readonly,
+      Util.save(_readonlyExpr, context),
+      
+      _style,
+      Util.save(_styleExpr, context),
+      _styleClass,
+      Util.save(_styleClassExpr, context),
+      _tabindex,
+      Util.save(_tabindexExpr, context),
+      _title,
+      Util.save(_titleExpr, context),
+      _type,
+      Util.save(_typeExpr, context),
+    };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    int i = 0;
+
+    if (state != null) 
+      super.restoreState(context, state[i++]);
+
+    _accesskey = (String) state[i++];
+    _accesskeyExpr = Util.restoreString(state[i++], context);
+
+    _alt = (String) state[i++];
+    _altExpr = Util.restoreString(state[i++], context);
+
+    _dir = (String) state[i++];
+    _dirExpr = Util.restoreString(state[i++], context);
+
+    _disabled = (Boolean) state[i++];
+    _disabledExpr = Util.restoreBoolean(state[i++], context);
+
+    _image = (String) state[i++];
+    _imageExpr = Util.restoreString(state[i++], context);
+
+    _label = (String) state[i++];
+    _labelExpr = Util.restoreString(state[i++], context);
+
+    _lang = (String) state[i++];
+    _langExpr = Util.restoreString(state[i++], context);
+
+    _onblur = (String) state[i++];
+    _onblurExpr = Util.restoreString(state[i++], context);
+
+    _onchange = (String) state[i++];
+    _onchangeExpr = Util.restoreString(state[i++], context);
+
+    _onclick = (String) state[i++];
+    _onclickExpr = Util.restoreString(state[i++], context);
+
+    _ondblclick = (String) state[i++];
+    _ondblclickExpr = Util.restoreString(state[i++], context);
+
+    _onfocus = (String) state[i++];
+    _onfocusExpr = Util.restoreString(state[i++], context);
+
+    _onkeydown = (String) state[i++];
+    _onkeydownExpr = Util.restoreString(state[i++], context);
+
+    _onkeypress = (String) state[i++];
+    _onkeypressExpr = Util.restoreString(state[i++], context);
+
+    _onkeyup = (String) state[i++];
+    _onkeyupExpr = Util.restoreString(state[i++], context);
+
+    _onmousedown = (String) state[i++];
+    _onmousedownExpr = Util.restoreString(state[i++], context);
+
+    _onmousemove = (String) state[i++];
+    _onmousemoveExpr = Util.restoreString(state[i++], context);
+
+    _onmouseout = (String) state[i++];
+    _onmouseoutExpr = Util.restoreString(state[i++], context);
+
+    _onmouseover = (String) state[i++];
+    _onmouseoverExpr = Util.restoreString(state[i++], context);
+
+    _onmouseup = (String) state[i++];
+    _onmouseupExpr = Util.restoreString(state[i++], context);
+
+    _onselect = (String) state[i++];
+    _onselectExpr = Util.restoreString(state[i++], context);
+
+    _readonly = (Boolean) state[i++];
+    _readonlyExpr = Util.restoreBoolean(state[i++], context);
+
+    _style = (String) state[i++];
+    _styleExpr = Util.restoreString(state[i++], context);
+
+    _styleClass = (String) state[i++];
+    _styleClassExpr = Util.restoreString(state[i++], context);
+
+    _tabindex = (String) state[i++];
+    _tabindexExpr = Util.restoreString(state[i++], context);
+
+    _title = (String) state[i++];
+    _titleExpr = Util.restoreString(state[i++], context);
+    
+    _type = (String) state[i++];
+    _typeExpr = Util.restoreString(state[i++], context);
+  }
+
+  //
   // utility
   //
 

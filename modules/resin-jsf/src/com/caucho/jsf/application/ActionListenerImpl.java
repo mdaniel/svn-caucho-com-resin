@@ -56,11 +56,13 @@ public class ActionListenerImpl implements ActionListener
       ActionSource2 actionComp = (ActionSource2) comp;
 
       MethodExpression action = actionComp.getActionExpression();
+      System.out.println("ACTION: " + action);
 
       if (action != null) {
 	fromAction = action.getExpressionString();
 	
 	Object value = action.invoke(context.getELContext(), NULL_ARG);
+	System.out.println("INVOKE: " + value);
 
 	if (value != null)
 	  logicalOutcome = value.toString();
@@ -70,6 +72,7 @@ public class ActionListenerImpl implements ActionListener
       ActionSource actionComp = (ActionSource) comp;
 
       MethodBinding action = actionComp.getAction();
+      System.out.println("ACTION2: " + action);
 
       if (action != null) {
 	fromAction = action.getExpressionString();

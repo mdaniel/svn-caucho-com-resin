@@ -33,6 +33,7 @@ import java.util.logging.*;
 
 import javax.el.*;
 
+import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.convert.*;
@@ -638,6 +639,26 @@ public class UIInput extends UIOutput
 
   public Object saveState(FacesContext context)
   {
+    Object []savedValidators = null;
+
+    if (_validators.length > 0) {
+      savedValidators = new Object[2 * _validators.length];
+
+      for (int i = 0; i < _validators.length; i++) {
+	Validator validator = _validators[i];
+
+	int index = 2 * i;
+	
+	savedValidators[index] = validator.getClass();
+
+	if (validator instanceof StateHolder) {
+	  StateHolder holder = (StateHolder) validator;
+	  
+	  savedValidators[index + 1] = holder.saveState(context);
+	}
+      }
+    }
+    
     return new Object[] {
       super.saveState(context),
       _immediate,
@@ -650,7 +671,8 @@ public class UIInput extends UIOutput
       Util.save(_converterMessageExpr, context),
       _validatorMessage,
       Util.save(_validatorMessageExpr, context),
-      };
+      savedValidators,
+    };
   }
 
   public void restoreState(FacesContext context, Object value)
@@ -675,6 +697,32 @@ public class UIInput extends UIOutput
     _validatorMessageExpr = Util.restoreString(state[10], context);
     
     _valueExpr = super.getValueExpression("value");
+
+    Object []savedValidators = (Object []) state[11];
+
+    if (savedValidators != null) {
+      _validators = new Validator[savedValidators.length / 2];
+
+      for (int i = 0; i < _validators.length; i++) {
+	int index = 2 * i;
+	
+	Class cl = (Class) savedValidators[index];
+
+	try {
+	  Validator validator = (Validator) cl.newInstance();
+
+	  if (validator instanceof StateHolder) {
+	    StateHolder holder = (StateHolder) validator;
+
+	    holder.restoreState(context, savedValidators[index + 1]);
+	  }
+
+	  _validators[i] = validator;
+	} catch (Exception e) {
+	  throw new FacesException(e);
+	}
+      }
+    }
   }
 
   //

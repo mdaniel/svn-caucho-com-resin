@@ -139,7 +139,9 @@ public class HtmlBasicRenderKit extends RenderKit
 
     _key.init(family, rendererType);
     
-    return _rendererMap.get(_key);
+    Renderer renderer = _rendererMap.get(_key);
+    
+    return renderer;
   }
 
   public ResponseStateManager getResponseStateManager()

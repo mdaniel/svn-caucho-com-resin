@@ -654,6 +654,138 @@ public class HtmlGraphicImage extends UIGraphic
   }
 
   //
+  // state
+  //
+
+  public Object saveState(FacesContext context)
+  {
+    Object parent = super.saveState(context);
+
+    return new Object[] {
+      parent,
+      _alt,
+      Util.save(_altExpr, context),
+      _dir,
+      Util.save(_dirExpr, context),
+      _height,
+      Util.save(_heightExpr, context),
+      _ismap,
+      Util.save(_ismapExpr, context),
+      _lang,
+      Util.save(_langExpr, context),
+      _longdesc,
+      Util.save(_longdescExpr, context),
+      
+      _onclick,
+      Util.save(_onclickExpr, context),
+      _ondblclick,
+      Util.save(_ondblclickExpr, context),
+      _onkeydown,
+      Util.save(_onkeydownExpr, context),
+      _onkeypress,
+      Util.save(_onkeypressExpr, context),
+      _onkeyup,
+      Util.save(_onkeyupExpr, context),
+      
+      _onmousedown,
+      Util.save(_onmousedownExpr, context),
+      _onmousemove,
+      Util.save(_onmousemoveExpr, context),
+      _onmouseout,
+      Util.save(_onmouseoutExpr, context),
+      _onmouseover,
+      Util.save(_onmouseoverExpr, context),
+      _onmouseup,
+      Util.save(_onmouseupExpr, context),
+      
+      _style,
+      Util.save(_styleExpr, context),
+      _styleClass,
+      Util.save(_styleClassExpr, context),
+      _title,
+      Util.save(_titleExpr, context),
+      _usemap,
+      Util.save(_usemapExpr, context),
+      _width,
+      Util.save(_widthExpr, context),
+    };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    int i = 0;
+
+    if (state != null) 
+      super.restoreState(context, state[i++]);
+
+    _alt = (String) state[i++];
+    _altExpr = Util.restoreString(state[i++], context);
+
+    _dir = (String) state[i++];
+    _dirExpr = Util.restoreString(state[i++], context);
+
+    _height = (String) state[i++];
+    _heightExpr = Util.restoreString(state[i++], context);
+
+    _ismap = (Boolean) state[i++];
+    _ismapExpr = Util.restoreBoolean(state[i++], context);
+
+    _lang = (String) state[i++];
+    _langExpr = Util.restoreString(state[i++], context);
+
+    _longdesc = (String) state[i++];
+    _longdescExpr = Util.restoreString(state[i++], context);
+
+    _onclick = (String) state[i++];
+    _onclickExpr = Util.restoreString(state[i++], context);
+
+    _ondblclick = (String) state[i++];
+    _ondblclickExpr = Util.restoreString(state[i++], context);
+
+    _onkeydown = (String) state[i++];
+    _onkeydownExpr = Util.restoreString(state[i++], context);
+
+    _onkeypress = (String) state[i++];
+    _onkeypressExpr = Util.restoreString(state[i++], context);
+
+    _onkeyup = (String) state[i++];
+    _onkeyupExpr = Util.restoreString(state[i++], context);
+
+    _onmousedown = (String) state[i++];
+    _onmousedownExpr = Util.restoreString(state[i++], context);
+
+    _onmousemove = (String) state[i++];
+    _onmousemoveExpr = Util.restoreString(state[i++], context);
+
+    _onmouseout = (String) state[i++];
+    _onmouseoutExpr = Util.restoreString(state[i++], context);
+
+    _onmouseover = (String) state[i++];
+    _onmouseoverExpr = Util.restoreString(state[i++], context);
+
+    _onmouseup = (String) state[i++];
+    _onmouseupExpr = Util.restoreString(state[i++], context);
+
+    _style = (String) state[i++];
+    _styleExpr = Util.restoreString(state[i++], context);
+
+    _styleClass = (String) state[i++];
+    _styleClassExpr = Util.restoreString(state[i++], context);
+
+    _title = (String) state[i++];
+    _titleExpr = Util.restoreString(state[i++], context);
+
+    _usemap = (String) state[i++];
+    _usemapExpr = Util.restoreString(state[i++], context);
+
+    _width = (String) state[i++];
+    _widthExpr = Util.restoreString(state[i++], context);
+  }
+
+
+  //
   // utility
   //
 
@@ -685,6 +817,7 @@ public class HtmlGraphicImage extends UIGraphic
     _propMap.put("alt", PropEnum.ALT);
     _propMap.put("dir", PropEnum.DIR);
     _propMap.put("height", PropEnum.HEIGHT);
+    _propMap.put("ismap", PropEnum.ISMAP);
     _propMap.put("lang", PropEnum.LANG);
     _propMap.put("longdesc", PropEnum.LONGDESC);
     _propMap.put("onclick", PropEnum.ONCLICK);

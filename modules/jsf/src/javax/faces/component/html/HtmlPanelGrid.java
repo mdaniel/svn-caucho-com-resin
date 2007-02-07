@@ -897,6 +897,183 @@ public class HtmlPanelGrid extends UIPanel
   }
 
   //
+  // state
+  //
+
+  public Object saveState(FacesContext context)
+  {
+    Object parent = super.saveState(context);
+
+    return new Object[] {
+      parent,
+      _bgcolor,
+      Util.save(_bgcolorExpr, context),
+      _border,
+      Util.save(_borderExpr, context),
+      _captionClass,
+      Util.save(_captionClassExpr, context),
+      _captionStyle,
+      Util.save(_captionStyleExpr, context),
+      _cellpadding,
+      Util.save(_cellpaddingExpr, context),
+      _cellspacing,
+      Util.save(_cellspacingExpr, context),
+      _columnClasses,
+      Util.save(_columnClassesExpr, context),
+      _columns,
+      Util.save(_columnsExpr, context),
+      _dir,
+      Util.save(_dirExpr, context),
+      _footerClass,
+      Util.save(_footerClassExpr, context),
+      _frame,
+      Util.save(_frameExpr, context),
+      _headerClass,
+      Util.save(_headerClassExpr, context),
+      _lang,
+      Util.save(_langExpr, context),
+      
+      _onclick,
+      Util.save(_onclickExpr, context),
+      _ondblclick,
+      Util.save(_ondblclickExpr, context),
+      _onkeydown,
+      Util.save(_onkeydownExpr, context),
+      _onkeypress,
+      Util.save(_onkeypressExpr, context),
+      _onkeyup,
+      Util.save(_onkeyupExpr, context),
+      
+      _onmousedown,
+      Util.save(_onmousedownExpr, context),
+      _onmousemove,
+      Util.save(_onmousemoveExpr, context),
+      _onmouseout,
+      Util.save(_onmouseoutExpr, context),
+      _onmouseover,
+      Util.save(_onmouseoverExpr, context),
+      _onmouseup,
+      Util.save(_onmouseupExpr, context),
+      
+      _rowClasses,
+      Util.save(_rowClassesExpr, context),
+      _rules,
+      Util.save(_rulesExpr, context),
+      
+      _style,
+      Util.save(_styleExpr, context),
+      _styleClass,
+      Util.save(_styleClassExpr, context),
+      _summary,
+      Util.save(_summaryExpr, context),
+      _title,
+      Util.save(_titleExpr, context),
+      _width,
+      Util.save(_widthExpr, context),
+    };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    int i = 0;
+
+    if (state != null) 
+      super.restoreState(context, state[i++]);
+
+    _bgcolor = (String) state[i++];
+    _bgcolorExpr = Util.restoreString(state[i++], context);
+
+    _border = (Integer) state[i++];
+    _borderExpr = Util.restoreInt(state[i++], context);
+
+    _captionClass = (String) state[i++];
+    _captionClassExpr = Util.restoreString(state[i++], context);
+
+    _captionStyle = (String) state[i++];
+    _captionStyleExpr = Util.restoreString(state[i++], context);
+
+    _cellpadding = (String) state[i++];
+    _cellpaddingExpr = Util.restoreString(state[i++], context);
+
+    _cellspacing = (String) state[i++];
+    _cellspacingExpr = Util.restoreString(state[i++], context);
+
+    _columnClasses = (String) state[i++];
+    _columnClassesExpr = Util.restoreString(state[i++], context);
+
+    _columns = (Integer) state[i++];
+    _columnsExpr = Util.restoreInt(state[i++], context);
+
+    _dir = (String) state[i++];
+    _dirExpr = Util.restoreString(state[i++], context);
+
+    _footerClass = (String) state[i++];
+    _footerClassExpr = Util.restoreString(state[i++], context);
+
+    _frame = (String) state[i++];
+    _frameExpr = Util.restoreString(state[i++], context);
+
+    _headerClass = (String) state[i++];
+    _headerClassExpr = Util.restoreString(state[i++], context);
+
+    _lang = (String) state[i++];
+    _langExpr = Util.restoreString(state[i++], context);
+
+    _onclick = (String) state[i++];
+    _onclickExpr = Util.restoreString(state[i++], context);
+
+    _ondblclick = (String) state[i++];
+    _ondblclickExpr = Util.restoreString(state[i++], context);
+
+    _onkeydown = (String) state[i++];
+    _onkeydownExpr = Util.restoreString(state[i++], context);
+
+    _onkeypress = (String) state[i++];
+    _onkeypressExpr = Util.restoreString(state[i++], context);
+
+    _onkeyup = (String) state[i++];
+    _onkeyupExpr = Util.restoreString(state[i++], context);
+
+    _onmousedown = (String) state[i++];
+    _onmousedownExpr = Util.restoreString(state[i++], context);
+
+    _onmousemove = (String) state[i++];
+    _onmousemoveExpr = Util.restoreString(state[i++], context);
+
+    _onmouseout = (String) state[i++];
+    _onmouseoutExpr = Util.restoreString(state[i++], context);
+
+    _onmouseover = (String) state[i++];
+    _onmouseoverExpr = Util.restoreString(state[i++], context);
+
+    _onmouseup = (String) state[i++];
+    _onmouseupExpr = Util.restoreString(state[i++], context);
+
+    _rowClasses = (String) state[i++];
+    _rowClassesExpr = Util.restoreString(state[i++], context);
+
+    _rules = (String) state[i++];
+    _rulesExpr = Util.restoreString(state[i++], context);
+
+    _style = (String) state[i++];
+    _styleExpr = Util.restoreString(state[i++], context);
+
+    _styleClass = (String) state[i++];
+    _styleClassExpr = Util.restoreString(state[i++], context);
+
+    _summary = (String) state[i++];
+    _summaryExpr = Util.restoreString(state[i++], context);
+
+    _title = (String) state[i++];
+    _titleExpr = Util.restoreString(state[i++], context);
+
+    _width = (String) state[i++];
+    _widthExpr = Util.restoreString(state[i++], context);
+  }
+
+  //
   // utility
   //
 

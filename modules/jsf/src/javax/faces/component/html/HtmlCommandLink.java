@@ -848,10 +848,72 @@ public class HtmlCommandLink extends UICommand
 
   public Object saveState(FacesContext context)
   {
+    Object parent = super.saveState(context);
+
     return new Object[] {
-      super.saveState(context),
+      parent,
+      
+      _accesskey,
+      Util.save(_accesskeyExpr, context),
+      _charset,
+      Util.save(_charsetExpr, context),
+      _coords,
+      Util.save(_coordsExpr, context),
+      _dir,
+      Util.save(_dirExpr, context),
+      _disabled,
+      Util.save(_disabledExpr, context),
+      _hreflang,
+      Util.save(_hreflangExpr, context),
+      _lang,
+      Util.save(_langExpr, context),
+      
+      _onblur,
+      Util.save(_onblurExpr, context),
+      _onclick,
+      Util.save(_onclickExpr, context),
+      _ondblclick,
+      Util.save(_ondblclickExpr, context),
+      _onfocus,
+      Util.save(_onfocusExpr, context),
+      
+      _onkeydown,
+      Util.save(_onkeydownExpr, context),
+      _onkeypress,
+      Util.save(_onkeypressExpr, context),
+      _onkeyup,
+      Util.save(_onkeyupExpr, context),
+      
+      _onmousedown,
+      Util.save(_onmousedownExpr, context),
+      _onmousemove,
+      Util.save(_onmousemoveExpr, context),
+      _onmouseout,
+      Util.save(_onmouseoutExpr, context),
+      _onmouseover,
+      Util.save(_onmouseoverExpr, context),
+      _onmouseup,
+      Util.save(_onmouseupExpr, context),
+      
+      _rel,
+      Util.save(_relExpr, context),
+      _rev,
+      Util.save(_revExpr, context),
+      _shape,
+      Util.save(_shapeExpr, context),
+      
+      _style,
+      Util.save(_styleExpr, context),
+      _styleClass,
+      Util.save(_styleClassExpr, context),
+      _tabindex,
+      Util.save(_tabindexExpr, context),
+      _target,
+      Util.save(_targetExpr, context),
       _title,
       Util.save(_titleExpr, context),
+      _type,
+      Util.save(_typeExpr, context),
     };
   }
 
@@ -859,10 +921,94 @@ public class HtmlCommandLink extends UICommand
   {
     Object []state = (Object []) value;
 
-    super.restoreState(context, state[0]);
+    int i = 0;
 
-    _title = (String) state[1];
-    _titleExpr = Util.restore(state[2], String.class, context);
+    if (state != null) 
+      super.restoreState(context, state[i++]);
+
+    _accesskey = (String) state[i++];
+    _accesskeyExpr = Util.restoreString(state[i++], context);
+
+    _charset = (String) state[i++];
+    _charsetExpr = Util.restoreString(state[i++], context);
+
+    _coords = (String) state[i++];
+    _coordsExpr = Util.restoreString(state[i++], context);
+
+    _dir = (String) state[i++];
+    _dirExpr = Util.restoreString(state[i++], context);
+
+    _disabled = (Boolean) state[i++];
+    _disabledExpr = Util.restoreBoolean(state[i++], context);
+
+    _hreflang = (String) state[i++];
+    _hreflangExpr = Util.restoreString(state[i++], context);
+
+    _lang = (String) state[i++];
+    _langExpr = Util.restoreString(state[i++], context);
+
+    _onblur = (String) state[i++];
+    _onblurExpr = Util.restoreString(state[i++], context);
+
+    _onclick = (String) state[i++];
+    _onclickExpr = Util.restoreString(state[i++], context);
+
+    _ondblclick = (String) state[i++];
+    _ondblclickExpr = Util.restoreString(state[i++], context);
+
+    _onfocus = (String) state[i++];
+    _onfocusExpr = Util.restoreString(state[i++], context);
+
+    _onkeydown = (String) state[i++];
+    _onkeydownExpr = Util.restoreString(state[i++], context);
+
+    _onkeypress = (String) state[i++];
+    _onkeypressExpr = Util.restoreString(state[i++], context);
+
+    _onkeyup = (String) state[i++];
+    _onkeyupExpr = Util.restoreString(state[i++], context);
+
+    _onmousedown = (String) state[i++];
+    _onmousedownExpr = Util.restoreString(state[i++], context);
+
+    _onmousemove = (String) state[i++];
+    _onmousemoveExpr = Util.restoreString(state[i++], context);
+
+    _onmouseout = (String) state[i++];
+    _onmouseoutExpr = Util.restoreString(state[i++], context);
+
+    _onmouseover = (String) state[i++];
+    _onmouseoverExpr = Util.restoreString(state[i++], context);
+
+    _onmouseup = (String) state[i++];
+    _onmouseupExpr = Util.restoreString(state[i++], context);
+
+    _rel = (String) state[i++];
+    _relExpr = Util.restoreString(state[i++], context);
+
+    _rev = (String) state[i++];
+    _revExpr = Util.restoreString(state[i++], context);
+
+    _shape = (String) state[i++];
+    _shapeExpr = Util.restoreString(state[i++], context);
+
+    _style = (String) state[i++];
+    _styleExpr = Util.restoreString(state[i++], context);
+
+    _styleClass = (String) state[i++];
+    _styleClassExpr = Util.restoreString(state[i++], context);
+
+    _tabindex = (String) state[i++];
+    _tabindexExpr = Util.restoreString(state[i++], context);
+
+    _target = (String) state[i++];
+    _targetExpr = Util.restoreString(state[i++], context);
+
+    _title = (String) state[i++];
+    _titleExpr = Util.restoreString(state[i++], context);
+
+    _type = (String) state[i++];
+    _typeExpr = Util.restoreString(state[i++], context);
   }
 
   //

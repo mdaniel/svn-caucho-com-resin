@@ -258,10 +258,18 @@ public class HtmlOutputText extends UIOutput
 
     return new Object[] {
       parent,
+      _dir,
+      Util.save(_dirExpr, context),
       _escape,
       Util.save(_escapeExpr, context),
+      _lang,
+      Util.save(_langExpr, context),
       _style,
-      Util.save(_styleExpr, context)
+      Util.save(_styleExpr, context),
+      _styleClass,
+      Util.save(_styleClassExpr, context),
+      _title,
+      Util.save(_titleExpr, context),
     };
   }
 
@@ -272,10 +280,18 @@ public class HtmlOutputText extends UIOutput
     if (state != null) 
       super.restoreState(context, state[0]);
 
-    _escape = (Boolean) state[1];
-    _escapeExpr = Util.restore(state[2], Boolean.class, context);
-    _style = (String) state[3];
-    _styleExpr = Util.restore(state[4], String.class, context);
+    _dir = (String) state[1];
+    _dirExpr = Util.restoreString(state[2], context);
+    _escape = (Boolean) state[3];
+    _escapeExpr = Util.restoreBoolean(state[4], context);
+    _lang = (String) state[5];
+    _langExpr = Util.restoreString(state[6], context);
+    _style = (String) state[7];
+    _styleExpr = Util.restoreString(state[8], context);
+    _styleClass = (String) state[9];
+    _styleClassExpr = Util.restoreString(state[10], context);
+    _title = (String) state[11];
+    _titleExpr = Util.restoreString(state[12], context);
   }
 
   //

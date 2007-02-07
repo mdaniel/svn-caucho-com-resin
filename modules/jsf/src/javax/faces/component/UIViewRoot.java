@@ -194,6 +194,7 @@ public class UIViewRoot extends UIComponentBase
     return new Object[] {
       super.saveState(context),
       _viewId,
+      _renderKitId,
       _locale
     };
   }
@@ -205,7 +206,8 @@ public class UIViewRoot extends UIComponentBase
     super.restoreState(context, state[0]);
 
     _viewId = (String) state[1];
-    _locale = (Locale) state[2];
+    _renderKitId = (String) state[2];
+    _locale = (Locale) state[3];
   }
   
   public String toString()

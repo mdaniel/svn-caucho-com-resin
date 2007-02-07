@@ -654,6 +654,138 @@ public class HtmlForm extends UIForm
   }
 
   //
+  // state
+  //
+
+  public Object saveState(FacesContext context)
+  {
+    Object parent = super.saveState(context);
+
+    return new Object[] {
+      parent,
+      _accept,
+      Util.save(_acceptExpr, context),
+      _acceptcharset,
+      Util.save(_acceptcharsetExpr, context),
+      _dir,
+      Util.save(_dirExpr, context),
+      _enctype,
+      Util.save(_enctypeExpr, context),
+      _lang,
+      Util.save(_langExpr, context),
+      
+      _onclick,
+      Util.save(_onclickExpr, context),
+      _ondblclick,
+      Util.save(_ondblclickExpr, context),
+      _onkeydown,
+      Util.save(_onkeydownExpr, context),
+      _onkeypress,
+      Util.save(_onkeypressExpr, context),
+      _onkeyup,
+      Util.save(_onkeyupExpr, context),
+      
+      _onmousedown,
+      Util.save(_onmousedownExpr, context),
+      _onmousemove,
+      Util.save(_onmousemoveExpr, context),
+      _onmouseout,
+      Util.save(_onmouseoutExpr, context),
+      _onmouseover,
+      Util.save(_onmouseoverExpr, context),
+      _onmouseup,
+      Util.save(_onmouseupExpr, context),
+      
+      _onreset,
+      Util.save(_onresetExpr, context),
+      _onsubmit,
+      Util.save(_onsubmitExpr, context),
+      
+      _style,
+      Util.save(_styleExpr, context),
+      _styleClass,
+      Util.save(_styleClassExpr, context),
+      _target,
+      Util.save(_targetExpr, context),
+      _title,
+      Util.save(_titleExpr, context),
+    };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    int i = 0;
+
+    if (state != null) 
+      super.restoreState(context, state[i++]);
+
+    _accept = (String) state[i++];
+    _acceptExpr = Util.restoreString(state[i++], context);
+
+    _acceptcharset = (String) state[i++];
+    _acceptcharsetExpr = Util.restoreString(state[i++], context);
+
+    _dir = (String) state[i++];
+    _dirExpr = Util.restoreString(state[i++], context);
+
+    _enctype = (String) state[i++];
+    _enctypeExpr = Util.restoreString(state[i++], context);
+
+    _lang = (String) state[i++];
+    _langExpr = Util.restoreString(state[i++], context);
+
+    _onclick = (String) state[i++];
+    _onclickExpr = Util.restoreString(state[i++], context);
+
+    _ondblclick = (String) state[i++];
+    _ondblclickExpr = Util.restoreString(state[i++], context);
+
+    _onkeydown = (String) state[i++];
+    _onkeydownExpr = Util.restoreString(state[i++], context);
+
+    _onkeypress = (String) state[i++];
+    _onkeypressExpr = Util.restoreString(state[i++], context);
+
+    _onkeyup = (String) state[i++];
+    _onkeyupExpr = Util.restoreString(state[i++], context);
+
+    _onmousedown = (String) state[i++];
+    _onmousedownExpr = Util.restoreString(state[i++], context);
+
+    _onmousemove = (String) state[i++];
+    _onmousemoveExpr = Util.restoreString(state[i++], context);
+
+    _onmouseout = (String) state[i++];
+    _onmouseoutExpr = Util.restoreString(state[i++], context);
+
+    _onmouseover = (String) state[i++];
+    _onmouseoverExpr = Util.restoreString(state[i++], context);
+
+    _onmouseup = (String) state[i++];
+    _onmouseupExpr = Util.restoreString(state[i++], context);
+
+    _onreset = (String) state[i++];
+    _onresetExpr = Util.restoreString(state[i++], context);
+
+    _onsubmit = (String) state[i++];
+    _onsubmitExpr = Util.restoreString(state[i++], context);
+
+    _style = (String) state[i++];
+    _styleExpr = Util.restoreString(state[i++], context);
+
+    _styleClass = (String) state[i++];
+    _styleClassExpr = Util.restoreString(state[i++], context);
+
+    _target = (String) state[i++];
+    _targetExpr = Util.restoreString(state[i++], context);
+
+    _title = (String) state[i++];
+    _titleExpr = Util.restoreString(state[i++], context);
+  }
+
+  //
   // utility
   //
 

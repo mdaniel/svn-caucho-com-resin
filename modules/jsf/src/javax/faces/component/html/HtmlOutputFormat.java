@@ -33,6 +33,7 @@ import java.util.*;
 import javax.el.*;
 
 import javax.faces.component.*;
+import javax.faces.context.*;
 
 public class HtmlOutputFormat extends UIOutput
 {
@@ -246,6 +247,62 @@ public class HtmlOutputFormat extends UIOutput
 
     super.setValueExpression(name, expr);
   }
+
+  //
+  // state
+  //
+
+  public Object saveState(FacesContext context)
+  {
+    Object parent = super.saveState(context);
+
+    return new Object[] {
+      parent,
+      
+      _dir,
+      Util.save(_dirExpr, context),
+      _escape,
+      Util.save(_escapeExpr, context),
+      _lang,
+      Util.save(_langExpr, context),
+      
+      _style,
+      Util.save(_styleExpr, context),
+      _styleClass,
+      Util.save(_styleClassExpr, context),
+      _title,
+      Util.save(_titleExpr, context),
+    };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+
+    int i = 0;
+
+    if (state != null) 
+      super.restoreState(context, state[i++]);
+
+    _dir = (String) state[i++];
+    _dirExpr = Util.restoreString(state[i++], context);
+
+    _escape = (Boolean) state[i++];
+    _escapeExpr = Util.restoreBoolean(state[i++], context);
+
+    _lang = (String) state[i++];
+    _langExpr = Util.restoreString(state[i++], context);
+
+    _style = (String) state[i++];
+    _styleExpr = Util.restoreString(state[i++], context);
+
+    _styleClass = (String) state[i++];
+    _styleClassExpr = Util.restoreString(state[i++], context);
+
+    _title = (String) state[i++];
+    _titleExpr = Util.restoreString(state[i++], context);
+  }
+
 
   //
   // private impl

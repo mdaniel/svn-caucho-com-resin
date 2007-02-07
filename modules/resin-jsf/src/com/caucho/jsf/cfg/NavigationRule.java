@@ -227,7 +227,6 @@ public class NavigationRule implements Comparable<NavigationRule>
 
     public void handleNavigation(FacesContext context)
     {
-      
       if (_isRedirect) {
 	try {
 	  ExternalContext extContext = context.getExternalContext();
