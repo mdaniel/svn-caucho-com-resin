@@ -47,7 +47,7 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
   implements Tag
 {
   private String _binding;
-  private String _rendered;
+  private boolean _rendered = true;
 
   public void setBinding(String binding)
     throws JspException
@@ -62,7 +62,7 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
 
   public void setRendered(String rendered)
   {
-    _rendered = rendered;
+    _rendered = "true".equals(rendered);
   }
 
   public boolean isSuppressed()
@@ -72,8 +72,7 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
 
   protected void setProperties(UIComponent component)
   {
-    if (_rendered != null)
-      component.getAttributes().put("rendered", _rendered);
+    component.setRendered(_rendered);
 
     String type = getRendererType();
     if (type != null)

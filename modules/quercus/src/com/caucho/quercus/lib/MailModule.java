@@ -72,8 +72,7 @@ public class MailModule extends AbstractQuercusModule {
 
     try {
       Properties props = new Properties();
-      props.put( "mail.smtp.auth", "true");
-
+      
       StringValue host = env.getIni("SMTP");
       if (host != null && ! host.toString().equals(""))
         props.put("mail.smtp.host", host.toString());
@@ -86,6 +85,12 @@ public class MailModule extends AbstractQuercusModule {
       if (user != null && ! user.toString().equals(""))
         props.put("mail.from", user.toString());
 
+      String username = env.getIniString("smtp_username");
+      String password = env.getIniString("smtp_password");
+
+      if (password != null && ! "".equals(password))
+	props.put( "mail.smtp.auth", "true");
+ 
       Session mailSession = Session.getInstance(props, null);
       smtp = mailSession.getTransport("smtp");
 
@@ -112,9 +117,6 @@ public class MailModule extends AbstractQuercusModule {
 
       from = msg.getFrom();
       log.fine(L.l("sending mail, From: {0}, To: {1}", from[0], to));
-
-      String username = env.getIniString("smtp_username");
-      String password = env.getIniString("smtp_password");
 
       if (password != null && ! "".equals(password))
         smtp.connect(username, password);

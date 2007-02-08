@@ -129,6 +129,7 @@ public class LifecycleImpl extends Lifecycle
     view.initView(context);
 
     UIViewRoot viewRoot = context.getViewRoot();
+    System.out.println("ROOT: " + viewRoot);
     
     if (viewRoot != null) {
       ExternalContext extContext = context.getExternalContext();

@@ -132,6 +132,7 @@ public class NavigationRule implements Comparable<NavigationRule>
   {
     NavigationCase navCase = findCase(action, outcome);
 
+    System.out.println("CASE: " + action + " " + outcome + " " + navCase);
     if (navCase != null) {
       navCase.handleNavigation(context);
       return true;
@@ -227,6 +228,8 @@ public class NavigationRule implements Comparable<NavigationRule>
 
     public void handleNavigation(FacesContext context)
     {
+      System.out.println("RED: " + _isRedirect + " " + _toViewId);
+      
       if (_isRedirect) {
 	try {
 	  ExternalContext extContext = context.getExternalContext();

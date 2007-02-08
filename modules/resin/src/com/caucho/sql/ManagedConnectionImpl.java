@@ -228,7 +228,7 @@ public class ManagedConnectionImpl
       throw new IllegalStateException();
 
     String user = _driver.getUser();
-    String password = _driver.getPassword();;
+    String password = _driver.getPassword();
 
     if (_credentials != null) {
       user = _credentials.getUserName();

@@ -106,31 +106,7 @@ public class JspViewHandler extends ViewHandler
       throw new NullPointerException();
 
     if (viewId == null) {
-      ExternalContext extContext = context.getExternalContext();
-
-      String servletPath = extContext.getRequestServletPath();
-      String pathInfo = extContext.getRequestPathInfo();
-
-      String path;
-      int dot;
-
-      if (servletPath != null
-	  && (dot = servletPath.lastIndexOf('.')) > 0
-	  && servletPath.lastIndexOf('/') < dot) {
-	// /test/foo.jsp
-
-	viewId = servletPath.substring(0, dot) + ".jsp";
-      }
-      else if (pathInfo != null) {
-	dot = pathInfo.lastIndexOf('.');
-
-	if (dot > 0)
-	  viewId = pathInfo.substring(0, dot) + ".jsp";
-	else
-	  viewId = pathInfo + ".jsp";
-      }
-      else
-	viewId = "";
+      viewId = createViewId(context);
     }
     
     UIViewRoot viewRoot = new UIViewRoot();
@@ -140,6 +116,35 @@ public class JspViewHandler extends ViewHandler
     viewRoot.setLocale(calculateLocale(context));
 
     return viewRoot;
+  }
+
+  static String createViewId(FacesContext context)
+  {
+    ExternalContext extContext = context.getExternalContext();
+
+    String servletPath = extContext.getRequestServletPath();
+    String pathInfo = extContext.getRequestPathInfo();
+
+    String path;
+    int dot;
+
+    if (servletPath != null
+	&& (dot = servletPath.lastIndexOf('.')) > 0
+	&& servletPath.lastIndexOf('/') < dot) {
+      // /test/foo.jsp
+
+      return servletPath.substring(0, dot) + ".jsp";
+    }
+    else if (pathInfo != null) {
+      dot = pathInfo.lastIndexOf('.');
+
+      if (dot > 0)
+	return pathInfo.substring(0, dot) + ".jsp";
+      else
+	return pathInfo + ".jsp";
+    }
+    else
+      return "";
   }
 
   public String getActionURL(FacesContext context,
@@ -202,6 +207,20 @@ public class JspViewHandler extends ViewHandler
   }
 
   @Override
+  public void initView(FacesContext context)
+    throws FacesException
+  {
+    super.initView(context);
+
+    String viewId = createViewId(context);
+
+    UIViewRoot viewRoot = restoreView(context, viewId);
+
+    if (viewRoot != null)
+      context.setViewRoot(viewRoot);
+  }
+
+  @Override
   public UIViewRoot restoreView(FacesContext context,
 				String viewId)
     throws FacesException
@@ -216,6 +235,7 @@ public class JspViewHandler extends ViewHandler
     throws IOException
   {
     UIViewRoot viewRoot = context.getViewRoot();
+    System.out.println("WRITE-STATE: " + viewRoot);
 
     if (viewRoot != null) {
       StateManager stateManager = context.getApplication().getStateManager();

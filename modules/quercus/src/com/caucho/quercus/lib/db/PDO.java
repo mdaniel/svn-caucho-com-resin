@@ -146,8 +146,8 @@ public class PDO implements java.io.Closeable {
 
   public PDO(Env env,
              String dsn,
-             @Optional String user,
-             @Optional String password,
+             @Optional("null") String user,
+             @Optional("null") String password,
              @Optional ArrayValue options)
   {
     _env = env;
@@ -165,8 +165,10 @@ public class PDO implements java.io.Closeable {
       if (ds == null) {
         env.warning(L.l("'{0}' is an unknown PDO data source.", dsn));
       }
-      else
+      else if (_user != null && ! "".equals(_user))
         _conn = ds.getConnection(_user, _password);
+      else
+        _conn = ds.getConnection();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

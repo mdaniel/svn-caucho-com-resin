@@ -84,6 +84,36 @@ final class Util
       return null;
   }
 
+  static Object saveWithType(ValueExpression expr,
+			       FacesContext context)
+  {
+    if (expr != null) {
+      return new Object[] { expr.getExpressionString(),
+			    expr.getExpectedType() };
+    }
+    else
+      return null;
+  }
+
+  static ValueExpression restoreWithType(Object value,
+					 FacesContext context)
+  {
+    if (value == null)
+      return null;
+
+    Object []state = (Object []) value;
+
+    String expr = (String) state[0];
+    Class type = (Class) state[1];
+
+    Application app = context.getApplication();
+    ExpressionFactory factory = app.getExpressionFactory();
+    
+    return factory.createValueExpression(context.getELContext(),
+					 expr,
+					 type);
+  }
+
   static ValueExpression restoreBoolean(Object value, FacesContext context)
   {
     return restore(value, Boolean.class, context);

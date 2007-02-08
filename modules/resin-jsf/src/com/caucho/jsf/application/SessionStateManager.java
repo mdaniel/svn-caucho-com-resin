@@ -66,7 +66,11 @@ public class SessionStateManager extends StateManager
 
       out.close();
 
-      return bos.toByteArray();
+      byte []state = bos.toByteArray();
+
+      debugState(state);
+
+      return state;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -83,7 +87,8 @@ public class SessionStateManager extends StateManager
     Map<String,Object> sessionMap
       = context.getExternalContext().getSessionMap();
 
-    sessionMap.put(context.getViewRoot().getViewId(), state);
+    //sessionMap.put(context.getViewRoot().getViewId(), state);
+    sessionMap.put("caucho.jsf.view", state);
   }
   
   public UIViewRoot restoreView(FacesContext context,
@@ -93,7 +98,7 @@ public class SessionStateManager extends StateManager
     Map<String,Object> sessionMap
       = context.getExternalContext().getSessionMap();
 
-    Object state = sessionMap.get(viewId);
+    Object state = sessionMap.get("caucho.jsf.view");
 
     if (state == null)
       return null;
@@ -233,6 +238,27 @@ public class SessionStateManager extends StateManager
     
     _typeMap.put(type, _typeList.size());
     _typeList.add(type);
+  }
+
+  private void debugState(byte []state)
+  {
+    for (int i = 0; i < state.length; i++) {
+      if (i != 0 && i % 40 == 0)
+	System.out.println();
+
+      int ch = state[i];
+
+      if ('a' <= ch && ch <= 'z'
+	  || 'A' <= ch && ch <= 'Z'
+	  || ch == ' ' || ch == '[' || ch == '.' || ch == '/')
+	System.out.print((char) ch);
+      else {
+	System.out.print("x"
+			 + Integer.toHexString((ch / 16) & 0xf)
+			 + Integer.toHexString(ch & 0xf));
+      }
+    }
+    System.out.println();
   }
 
   static {

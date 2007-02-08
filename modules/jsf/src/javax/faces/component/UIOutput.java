@@ -165,7 +165,7 @@ public class UIOutput extends UIComponentBase implements ValueHolder
     return new Object[] {
       parent,
       _value,
-      Util.save(_valueExpr, context),
+      Util.saveWithType(_valueExpr, context),
       converterState,
     };
   }
@@ -178,7 +178,7 @@ public class UIOutput extends UIComponentBase implements ValueHolder
       super.restoreState(context, state[0]);
 
     _value = state[1];
-    _valueExpr = Util.restore(state[2], String.class, context);
+    _valueExpr = Util.restoreWithType(state[2], context);
 
     Object []converterState = (Object []) state[3];
 

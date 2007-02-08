@@ -37,6 +37,7 @@ import java.util.*;
 import javax.el.*;
 
 import javax.faces.*;
+import javax.faces.application.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
 import javax.faces.el.*;
@@ -516,7 +517,7 @@ public abstract class UIComponentBase extends UIComponent
 
     Renderer renderer = getRenderer(context);
 
-    if (renderer != null)
+    if (renderer != null && renderer.getRendersChildren())
       renderer.encodeChildren(context, this);
     else {
       int childCount = getChildCount();
@@ -801,13 +802,13 @@ public abstract class UIComponentBase extends UIComponent
     
     return new Object[] {
       _id,
-      _exprMap,
+      saveExprMap(context, _exprMap),
       _isRendered,
       Util.save(_isRenderedExpr, context),
       rendererCode,
       rendererString,
       Util.save(_rendererTypeExpr, context),
-      (_attributeMap != null ? _attributeMap.getExtMap() : null),
+      (_attributeMap != null ? _attributeMap.saveState(context) : null),
       savedListeners,
     };
   }
@@ -817,7 +818,7 @@ public abstract class UIComponentBase extends UIComponent
     Object []state = (Object []) stateObj;
 
     _id = (String) state[0];
-    _exprMap = (HashMap) state[1];
+    _exprMap = restoreExprMap(context, state[1]);
 
     _isRendered = (Boolean) state[2];
     _isRenderedExpr = Util.restore(state[3], Boolean.class, context);
@@ -831,13 +832,13 @@ public abstract class UIComponentBase extends UIComponent
     else
       _rendererType = rendererString;
     
-    HashMap<String,Object> extMap = (HashMap) state[7];
+    Object extMapState = state[7];
 
-    if (extMap != null) {
+    if (extMapState != null) {
       if (_attributeMap == null)
 	_attributeMap = new AttributeMap(this);
-      
-      _attributeMap.setExtMap(extMap);
+
+      _attributeMap.restoreState(context, extMapState);
     }
 
     Object []savedListeners = (Object []) state[8];
@@ -865,6 +866,59 @@ public abstract class UIComponentBase extends UIComponent
 	}
       }
     }
+  }
+
+  private Object saveExprMap(FacesContext context,
+			     HashMap<String,ValueExpression> exprMap)
+  {
+    if (exprMap == null)
+      return null;
+
+    int size = exprMap.size();
+    
+    Object []values = new Object[3 * size];
+
+    int i = 0;
+    for (Map.Entry<String,ValueExpression> entry : exprMap.entrySet()) {
+      values[i++] = entry.getKey();
+
+      ValueExpression expr = entry.getValue();
+      values[i++] = expr.getExpressionString();
+      values[i++] = expr.getExpectedType();
+    }
+
+    return values;
+  }
+
+  private HashMap<String,ValueExpression>
+    restoreExprMap(FacesContext context, Object value)
+  {
+    if (value == null)
+      return null;
+
+    Object []state = (Object[]) value;
+
+    HashMap<String,ValueExpression> map
+      = new HashMap<String,ValueExpression>();
+    
+    Application app = context.getApplication();
+    ExpressionFactory exprFactory = app.getExpressionFactory();
+
+    int i = 0;
+    while (i < state.length) {
+      String key = (String) state[i++];
+      String exprString = (String) state[i++];
+      Class type = (Class) state[i++];
+
+      ValueExpression expr
+	= exprFactory.createValueExpression(context.getELContext(),
+					    exprString,
+					    type);
+
+      map.put(key, expr);
+    }
+
+    return map;
   }
 
   public void setTransient(boolean isTransient)
@@ -1206,14 +1260,14 @@ public abstract class UIComponentBase extends UIComponent
       }
     }
 
-    HashMap<String,Object> getExtMap()
+    Object saveState(FacesContext context)
     {
       return _extMap;
     }
 
-    void setExtMap(HashMap<String,Object> map)
+    void restoreState(FacesContext context, Object state)
     {
-      _extMap = map;
+      _extMap = (HashMap<String,Object>) state;
     }
 
     public boolean containsKey(String name)
