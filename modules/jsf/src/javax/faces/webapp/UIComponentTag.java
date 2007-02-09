@@ -34,6 +34,7 @@ import java.util.*;
 import javax.el.*;
 
 import javax.faces.*;
+import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.context.*;
 import javax.faces.el.*;
@@ -82,7 +83,21 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
   protected UIComponent createComponent(FacesContext context,
 					String newId)
   {
-    throw new UnsupportedOperationException();
+    Application app = context.getApplication();
+
+    UIComponent component;
+
+    if (_binding != null) {
+      ValueBinding binding = app.createValueBinding(_binding);
+      
+      component = app.createComponent(binding, context, getComponentType());
+    }
+    else
+      component = app.createComponent(getComponentType());
+
+    setProperties(component);
+
+    return component;
   }
 
   public static UIComponentTag getParentUIComponentTag(PageContext context)

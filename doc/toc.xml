@@ -1,7 +1,7 @@
 <navigation threaded="true">
   <item link="index.xtp" title="Resin 3.1">
     <item link="doc/index.xtp" title="Documentation"/>
-    <item link="tutorial/index.xtp" title="Tutorials"/>
+    <item link="examples/index.xtp" title="Examples"/>
     <item link="changes/index.xtp" title="Changes"/>
   </item>
 </navigation>

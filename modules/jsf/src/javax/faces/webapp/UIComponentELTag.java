@@ -68,6 +68,9 @@ public abstract class UIComponentELTag extends UIComponentClassicTagBase
 
   protected void setProperties(UIComponent component)
   {
+    if (_binding != null)
+      component.setValueExpression("binding", _rendered);
+    
     if (_rendered != null)
       component.setValueExpression("rendered", _rendered);
 
@@ -76,13 +79,19 @@ public abstract class UIComponentELTag extends UIComponentClassicTagBase
       component.setRendererType(type);
   }
 
+  @Override
   protected UIComponent createComponent(FacesContext context,
 					String newId)
     throws JspException
   {
     Application app = context.getApplication();
 
-    UIComponent component = app.createComponent(getComponentType());
+    UIComponent component;
+
+    if (_binding != null)
+      component = app.createComponent(_binding, context, getComponentType());
+    else
+      component = app.createComponent(getComponentType());
 
     setProperties(component);
 

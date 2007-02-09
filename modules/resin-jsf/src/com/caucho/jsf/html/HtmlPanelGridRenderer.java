@@ -126,11 +126,13 @@ class HtmlPanelGridRenderer extends Renderer
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
+      Integer iValue;
     
       bgcolor = (String) attrMap.get("bgcolor");
       captionClass = (String) attrMap.get("captionClass");
       captionStyle = (String) attrMap.get("captionStyle");
-      columns = (Integer) attrMap.get("columns");
+      iValue = (Integer) attrMap.get("columns");
+      columns = iValue != null ? iValue : 0;
       headerClass = (String) attrMap.get("headerClass");
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
@@ -288,7 +290,8 @@ class HtmlPanelGridRenderer extends Renderer
     
       columnClasses = (String) attrMap.get("columnClasses");
       rowClasses = (String) attrMap.get("rowClasses");
-      columns = (Integer) attrMap.get("columns");
+      Integer iValue = (Integer) attrMap.get("columns");
+      columns = iValue != null ? iValue : 0;
     }
 
     String []columnClassArray = null;
@@ -346,13 +349,13 @@ class HtmlPanelGridRenderer extends Renderer
 
       count++;
 
+      out.startElement("td", child);
       if (columnClassArray != null) {
 	String v = columnClassArray[column % columnClassArray.length];
 	  
 	out.writeAttribute("class", v, "columnClasses");
       }
       
-      out.startElement("td", child);
       if (child instanceof UIColumn) {
 	int subCount = child.getChildCount();
 	

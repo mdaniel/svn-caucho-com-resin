@@ -106,6 +106,7 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
     _map.put("bgcolor", value);
   }
 
+  /*
   public void setBinding(ValueExpression value)
   {
     if (_map == null)
@@ -113,6 +114,7 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       
     _map.put("binding", value);
   }
+  */
 
   public void setBorder(ValueExpression value)
   {
@@ -568,6 +570,14 @@ abstract public class HtmlStyleBaseTag extends UIComponentELTag {
       _map = new HashMap<String,ValueExpression>(8);
       
     _map.put("rendered", value);
+  }
+
+  public void setRequired(ValueExpression value)
+  {
+    if (_map == null)
+      _map = new HashMap<String,ValueExpression>(8);
+      
+    _map.put("required", value);
   }
 
   public void setRev(ValueExpression value)

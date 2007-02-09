@@ -847,6 +847,9 @@
       </fileset>
     </jar>
 
+    <copy tofile="${dist}/quercus-3_1-snap.war"
+          file="${dist}/quercus-${version}.war"/>
+
     <copy tofile="${dist}/${shortproduct}-3_1-snap.zip"
           file="${dist}/${shortproduct}-${version}.zip"/>
 

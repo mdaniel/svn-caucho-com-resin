@@ -73,6 +73,8 @@ public abstract class UIComponentBase extends UIComponent
   
   private Boolean _isRendered;
   private ValueExpression _isRenderedExpr;
+  
+  private ValueExpression _bindingExpr;
 
   private ComponentList _children;
   private ComponentMap _facets;
@@ -80,7 +82,8 @@ public abstract class UIComponentBase extends UIComponent
   private UIComponent []_facetsAndChildren;
 
   private AttributeMap _attributeMap;
-  private HashMap<String,ValueExpression> _exprMap;
+  
+  protected Map<String,ValueExpression> _bindings;
   
   private FacesListener []_facesListeners
     = NULL_FACES_LISTENERS;
@@ -127,9 +130,11 @@ public abstract class UIComponentBase extends UIComponent
       return _isRenderedExpr;
     else if ("rendererType".equals(name))
       return _rendererTypeExpr;
+    else if ("binding".equals(name))
+      return _bindingExpr;
     
-    if (_exprMap != null)
-      return _exprMap.get(name);
+    if (_bindings != null)
+      return _bindings.get(name);
     else
       return null;
   }
@@ -162,6 +167,10 @@ public abstract class UIComponentBase extends UIComponent
 	_rendererTypeExpr = expr;
       return;
     }
+    else if ("binding".equals(name)) {
+      _bindingExpr = expr;
+      return;
+    }
     
     try {
       if (expr != null) {
@@ -169,14 +178,14 @@ public abstract class UIComponentBase extends UIComponent
 	  getAttributes().put(name, expr.getValue(null));
 	}
 	else {
-	  if (_exprMap == null)
-	    _exprMap = new HashMap<String,ValueExpression>();
+	  if (_bindings == null)
+	    _bindings = new HashMap<String,ValueExpression>();
 	  
-	  _exprMap.put(name, expr);
+	  _bindings.put(name, expr);
 	}
       }
-      else if (_exprMap != null)
-	_exprMap.remove(name);
+      else if (_bindings != null)
+	_bindings.remove(name);
     } catch (ELException e) {
       throw new FacesException(e);
     }
@@ -802,12 +811,13 @@ public abstract class UIComponentBase extends UIComponent
     
     return new Object[] {
       _id,
-      saveExprMap(context, _exprMap),
+      saveExprMap(context, _bindings),
       _isRendered,
       Util.save(_isRenderedExpr, context),
       rendererCode,
       rendererString,
       Util.save(_rendererTypeExpr, context),
+      Util.saveWithType(_bindingExpr, context),
       (_attributeMap != null ? _attributeMap.saveState(context) : null),
       savedListeners,
     };
@@ -818,7 +828,7 @@ public abstract class UIComponentBase extends UIComponent
     Object []state = (Object []) stateObj;
 
     _id = (String) state[0];
-    _exprMap = restoreExprMap(context, state[1]);
+    _bindings = restoreExprMap(context, state[1]);
 
     _isRendered = (Boolean) state[2];
     _isRenderedExpr = Util.restore(state[3], Boolean.class, context);
@@ -832,7 +842,9 @@ public abstract class UIComponentBase extends UIComponent
     else
       _rendererType = rendererString;
     
-    Object extMapState = state[7];
+    _bindingExpr = Util.restoreWithType(state[7], context);
+	
+    Object extMapState = state[8];
 
     if (extMapState != null) {
       if (_attributeMap == null)
@@ -841,7 +853,7 @@ public abstract class UIComponentBase extends UIComponent
       _attributeMap.restoreState(context, extMapState);
     }
 
-    Object []savedListeners = (Object []) state[8];
+    Object []savedListeners = (Object []) state[9];
 
     if (savedListeners != null) {
       _facesListeners = new FacesListener[savedListeners.length / 2];
@@ -866,10 +878,13 @@ public abstract class UIComponentBase extends UIComponent
 	}
       }
     }
+
+    if (_bindingExpr != null)
+      _bindingExpr.setValue(context.getELContext(), this);
   }
 
   private Object saveExprMap(FacesContext context,
-			     HashMap<String,ValueExpression> exprMap)
+			     Map<String,ValueExpression> exprMap)
   {
     if (exprMap == null)
       return null;

@@ -180,11 +180,14 @@ class HtmlSelectOneRadioRenderer extends Renderer
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
+      Integer iValue;
     
       accesskey = (String) attrMap.get("accesskey");
-      border = (Integer) attrMap.get("border");
+
+      iValue = (Integer) attrMap.get("border");
+      border = iValue != null ? iValue : 0;
       dir = (String) attrMap.get("dir");
-      disabled = (Boolean) attrMap.get("disabled");
+      disabled = Boolean.TRUE.equals(attrMap.get("disabled"));
       disabledClass = (String) attrMap.get("disabledClass");
       enabledClass = (String) attrMap.get("enabledClass");
       lang = (String) attrMap.get("lang");
@@ -208,7 +211,7 @@ class HtmlSelectOneRadioRenderer extends Renderer
       
       onselect = (String) attrMap.get("onselect");
 
-      readonly = (Boolean) attrMap.get("readonly");
+      readonly = Boolean.TRUE.equals(attrMap.get("readonly"));
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");

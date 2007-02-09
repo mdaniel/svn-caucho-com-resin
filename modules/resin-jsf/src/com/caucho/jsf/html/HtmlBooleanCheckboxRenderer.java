@@ -159,7 +159,7 @@ class HtmlBooleanCheckboxRenderer extends Renderer
     
       accesskey = (String) attrMap.get("accesskey");
       dir = (String) attrMap.get("dir");
-      disabled = (Boolean) attrMap.get("disabled");
+      disabled = Boolean.TRUE.equals(attrMap.get("disabled"));
       image = (String) attrMap.get("image");
       lang = (String) attrMap.get("lang");
       
@@ -181,7 +181,7 @@ class HtmlBooleanCheckboxRenderer extends Renderer
       
       onselect = (String) attrMap.get("onselect");
 
-      readonly = (Boolean) attrMap.get("readonly");
+      readonly = Boolean.TRUE.equals(attrMap.get("readonly"));
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");

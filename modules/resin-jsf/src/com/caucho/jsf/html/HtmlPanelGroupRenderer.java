@@ -80,7 +80,12 @@ class HtmlPanelGroupRenderer extends Renderer
       styleClass = (String) attrMap.get("styleClass");
     }
 
-    out.startElement("table", component);
+    boolean isDiv = "block".equals(layout);
+
+    if (isDiv)
+      out.startElement("div", component);
+    else
+      out.startElement("span", component);
     
     if (layout != null)
       out.writeAttribute("layout", layout, "layout");
@@ -90,6 +95,26 @@ class HtmlPanelGroupRenderer extends Renderer
     
     if (styleClass != null)
       out.writeAttribute("class", styleClass, "styleClass");
+
+    int childCount = component.getChildCount();
+    if (childCount > 0) {
+      List<UIComponent> children = component.getChildren();
+
+      for (int i = 0; i < childCount; i++) {
+	UIComponent child = children.get(i);
+
+	if (child.isRendered()) {
+	  child.encodeBegin(context);
+	  child.encodeChildren(context);
+	  child.encodeEnd(context);
+	}
+      }
+    }
+    
+    if (isDiv)
+      out.endElement("div");
+    else
+      out.endElement("span");
   }
 
 
@@ -100,7 +125,6 @@ class HtmlPanelGroupRenderer extends Renderer
   public void encodeChildren(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
   }
 
   /**
@@ -110,9 +134,6 @@ class HtmlPanelGroupRenderer extends Renderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
-    ResponseWriter out = context.getResponseWriter();
-
-    out.endElement("table");
   }
 
   public String toString()

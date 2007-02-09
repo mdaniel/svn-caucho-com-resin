@@ -151,6 +151,9 @@ public class ApplicationImpl extends Application
     addComponent(UISelectItem.COMPONENT_TYPE,
 		 "javax.faces.component.UISelectItem");
 
+    addComponent(UISelectItems.COMPONENT_TYPE,
+		 "javax.faces.component.UISelectItems");
+
     addComponent(UIViewRoot.COMPONENT_TYPE,
 		 "javax.faces.component.UIViewRoot");
 
@@ -192,6 +195,9 @@ public class ApplicationImpl extends Application
 
     addComponent(HtmlPanelGrid.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlPanelGrid");
+
+    addComponent(HtmlPanelGroup.COMPONENT_TYPE,
+		 "javax.faces.component.html.HtmlPanelGroup");
 
     addComponent(HtmlForm.COMPONENT_TYPE,
 		 "javax.faces.component.html.HtmlForm");

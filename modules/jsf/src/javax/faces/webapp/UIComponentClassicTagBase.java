@@ -265,9 +265,11 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 
     String componentType = getComponentType();
 
-    // XXX binding
+    if (hasBinding()) {
+      // XXX: binding
+    }
 
-    _component = context.getApplication().createComponent(componentType);
+    _component = createComponent(context, id);
 
     _created = true;
 
@@ -313,6 +315,23 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
       char ch = text.charAt(i);
 
       if (! Character.isWhitespace(ch)) {
+	// check for comment
+	if (ch == '>' && text.indexOf("-->") + 2 == i) {
+	  int head = text.indexOf("<!--");
+
+	  if (head >= 0) {
+	    for (int j = 0; j < head; j++) {
+	      if (! Character.isWhitespace(text.charAt(j))) {
+		isWhitespace = false;
+		break;
+	      }
+	    }
+
+	    if (isWhitespace)
+	      return null;
+	  }
+	}
+
 	isWhitespace = false;
 	break;
       }

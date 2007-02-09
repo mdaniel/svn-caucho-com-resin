@@ -68,7 +68,7 @@ class HtmlGraphicImageRenderer extends Renderer
     String alt;
     String dir;
     String height;
-    boolean ismap;
+    boolean ismap = false;
     String lang;
     String longdesc;
     
@@ -130,7 +130,9 @@ class HtmlGraphicImageRenderer extends Renderer
       alt = (String) attrMap.get("alt");
       dir = (String) attrMap.get("dir");
       height = (String) attrMap.get("height");
-      ismap = (Boolean) attrMap.get("ismap");
+      Boolean bValue = (Boolean) attrMap.get("ismap");
+      if (bValue != null)
+	ismap = bValue;
       lang = (String) attrMap.get("lang");
       longdesc = (String) attrMap.get("longdesc");
       
