@@ -841,7 +841,14 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
     out.println("__caucho_home.generateUpdateSQLSuffix(cb);");
 
-    out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareStatement(cb.toString());");
+    out.println();
+    out.println("java.sql.PreparedStatement pstmt = null;");
+    out.println("String sql = cb.toString();");
+    out.println();
+    out.println("try {");
+    out.pushDepth();
+
+    out.println("pstmt = __caucho_session.prepareStatement(sql);");
 
     out.println("int index = 1;");
 
@@ -888,6 +895,21 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("__caucho_inc_version = false;");
     out.println();
 
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  if (pstmt != null)");
+    out.println("    __caucho_session.closeStatement(sql);");
+    out.println();
+    out.println("  if (e instanceof java.sql.SQLException)");
+    out.println("    throw (java.sql.SQLException) e;");
+    out.println();
+    out.println("  if (e instanceof RuntimeException)");
+    out.println("    throw (RuntimeException) e;");
+    out.println();
+    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("}");
+
+    out.println();
     out.println("return false;");
     out.popDepth();
     out.println("}");
@@ -1393,6 +1415,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
       return;
     }
 
+    out.println("java.sql.PreparedStatement pstmt = null;");
+    out.println("String sql = null;");
+    out.println();
+
+    out.println("try {");
+    out.pushDepth();
+
     out.print("__caucho_home.delete(__caucho_session, ");
     out.print(id.toObject(id.generateGetProperty("this")));
     out.println(");");
@@ -1404,10 +1433,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     String sql = "delete from " + table + " where " + where;
 
-    out.println("String sql = \"" + sql + "\";");
+    out.println("sql = \"" + sql + "\";");
 
     out.println();
-    out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareStatement(sql);");
+    out.println("pstmt = __caucho_session.prepareStatement(sql);");
 
     out.println("int index = 1;");
     id.generateSet(out, "pstmt", "index", "this");
@@ -1418,6 +1447,20 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("__caucho_session.postRemove((com.caucho.amber.entity.Entity) this);");
 
     generateCallbacks(out, "this", _relatedType.getPostRemoveCallbacks());
+
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  if (pstmt != null)");
+    out.println("    __caucho_session.closeStatement(sql);");
+    out.println();
+    out.println("  if (e instanceof java.sql.SQLException)");
+    out.println("    throw (java.sql.SQLException) e;");
+    out.println();
+    out.println("  if (e instanceof RuntimeException)");
+    out.println("    throw (RuntimeException) e;");
+    out.println();
+    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("}");
 
     out.popDepth();
     out.println("}");
@@ -1829,6 +1872,18 @@ abstract public class AmberMappedComponent extends ClassComponent {
       return;
     }
 
+    String rootTableName = _relatedType.getRootTableName();
+
+    if (rootTableName == null)
+      rootTableName = "";
+
+    out.println("java.sql.ResultSet rs" + rootTableName + " = null;");
+    out.println("java.sql.PreparedStatement pstmt" + rootTableName + " = null;");
+    out.println("String sql" + rootTableName + " = null;");
+    out.println();
+    out.println("try {");
+    out.pushDepth();
+
     Column discriminator = _relatedType.getDiscriminator();
 
     if (discriminator == null) {
@@ -1840,8 +1895,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("return (com.caucho.amber.entity.Entity) entity;");
     }
     else {
-
-      String rootTableName = _relatedType.getRootTableName();
 
       generateHomeNewLoading(out, rootTableName);
 
@@ -1860,9 +1913,26 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       out.println(getClassName() + " entity = (" + getClassName() + ") item.copy(aConn);");
 
-      out.println("rs" + rootTableName + ".close();");
       out.println("return (com.caucho.amber.entity.Entity) entity;");
     }
+
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  if (pstmt" + rootTableName + " != null)");
+    out.println("    __caucho_session.closeStatement(sql" + rootTableName + ");");
+    out.println();
+    out.println("  if (e instanceof java.sql.SQLException)");
+    out.println("    throw (java.sql.SQLException) e;");
+    out.println();
+    out.println("  if (e instanceof RuntimeException)");
+    out.println("    throw (RuntimeException) e;");
+    out.println();
+    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("}");
+    out.println("finally {");
+    out.println("  if (rs" + rootTableName + " != null)");
+    out.println("    rs" + rootTableName + ".close();");
+    out.println("}");
 
     out.popDepth();
     out.println("}");
@@ -1875,9 +1945,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
                               String rootTableName)
     throws IOException
   {
-    String varSuffix = rootTableName == null ? "" : rootTableName;
-
-    out.print("String sql" + varSuffix + " = \"select ");
+    out.print("sql" + rootTableName + " = \"select ");
     out.print(_relatedType.generateLoadSelect("o"));
     out.print(" from ");
 
@@ -1890,19 +1958,19 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.print(_relatedType.getId().generateMatchArgWhere("o"));
     out.println("\";");
 
-    out.println("java.sql.PreparedStatement pstmt" + varSuffix + " = aConn.prepareStatement(sql" + varSuffix + ");");
+    out.println("pstmt" + rootTableName + " = aConn.prepareStatement(sql" + rootTableName + ");");
 
     String keyType = _relatedType.getId().getForeignTypeName();
 
-    out.println(keyType + " " + "keyValue" + varSuffix + " = (" + keyType + ") key;");
+    out.println(keyType + " " + "keyValue" + rootTableName + " = (" + keyType + ") key;");
 
-    out.println("int index" + varSuffix + " = 1;");
-    _relatedType.getId().generateSetKey(out, "pstmt"+varSuffix,
-                                        "index"+varSuffix, "keyValue"+varSuffix);
+    out.println("int index" + rootTableName + " = 1;");
+    _relatedType.getId().generateSetKey(out, "pstmt"+rootTableName,
+                                        "index"+rootTableName, "keyValue"+rootTableName);
 
-    out.println("java.sql.ResultSet rs" + varSuffix + " = pstmt" + varSuffix + ".executeQuery();");
-    out.println("if (! rs" + varSuffix + ".next()) {");
-    out.println("  rs" + varSuffix + ".close();");
+    out.println("rs" + rootTableName + " = pstmt" + rootTableName + ".executeQuery();");
+    out.println("if (! rs" + rootTableName + ".next()) {");
+    out.println("  rs" + rootTableName + ".close();");
     out.println("  return null;");
     // out.println("  throw new com.caucho.amber.AmberException(key + \" has no matching object\");");
     out.println("}");

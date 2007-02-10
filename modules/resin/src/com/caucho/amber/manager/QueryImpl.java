@@ -61,12 +61,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The EJB query
  */
 public class QueryImpl implements Query {
   private static final L10N L = new L10N(QueryImpl.class);
+  private static final Logger log
+    = Logger.getLogger(QueryImpl.class.getName());
 
   private AbstractQuery _query;
   private UserQuery _userQuery;
@@ -359,14 +363,17 @@ public class QueryImpl implements Query {
       }
 
       return results;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
     } finally {
-      try {
-        if (rs != null)
+      if (rs != null) {
+        try {
           rs.close();
-      } catch (Exception e) {
-        throw EJBExceptionWrapper.createRuntime(e);
+        } catch (SQLException e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     }
   }
@@ -376,11 +383,13 @@ public class QueryImpl implements Query {
    */
   public Object getSingleResult()
   {
+    ResultSet rs = null;
+
     try {
       if (! isSelectQuery())
         throw new IllegalStateException(L.l("javax.persistence.Query.getSingleResult() can only be applied to a SELECT statement"));
 
-      ResultSet rs = executeQuery();
+      rs = executeQuery();
 
       Object value = null;
 
@@ -393,11 +402,22 @@ public class QueryImpl implements Query {
       if (rs.next())
         throw new NonUniqueResultException("Query returned more than one result for getSingleResult()");
 
-      rs.close();
-
       return value;
-    } catch (Exception e) {
+    }
+    catch (RuntimeException e) {
+      throw e;
+    }
+    catch (Exception e) {
       throw EJBExceptionWrapper.createRuntime(e);
+    }
+    finally {
+      if (rs != null) {
+        try {
+          rs.close();
+        } catch (SQLException e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+      }
     }
   }
 
@@ -450,7 +470,7 @@ public class QueryImpl implements Query {
         rs.close();
 
       if (pstmt != null)
-        pstmt.close();
+        _aConn.closeStatement(_nativeSql);
 
       throw e;
     }

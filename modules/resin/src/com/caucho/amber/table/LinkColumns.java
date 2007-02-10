@@ -32,6 +32,7 @@ import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.type.EntityType;
+import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -404,109 +405,141 @@ public class LinkColumns {
   public void beforeTargetDelete(AmberConnection aConn, Entity entity)
     throws SQLException
   {
-    // commented out: jpa/0h25
-    // aConn.flushNoChecks();
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String sql = null;
 
-    String sourceTable = _sourceTable.getName();
+    try {
+      // commented out: jpa/0h25
+      // aConn.flushNoChecks();
 
-    if (! isSourceCascadeDelete()) {
-      CharBuffer cb = new CharBuffer();
+      String sourceTable = _sourceTable.getName();
 
-      cb.append("update " + sourceTable + " set ");
+      if (! isSourceCascadeDelete()) {
+        CharBuffer cb = new CharBuffer();
 
-      ArrayList<ForeignColumn> columns = getColumns();
+        cb.append("update " + sourceTable + " set ");
 
-      for (int i = 0; i < columns.size(); i++) {
-        if (i != 0)
-          cb.append (", ");
+        ArrayList<ForeignColumn> columns = getColumns();
 
-        cb.append(columns.get(i).getName() + "=null");
+        for (int i = 0; i < columns.size(); i++) {
+          if (i != 0)
+            cb.append (", ");
+
+          cb.append(columns.get(i).getName() + "=null");
+        }
+
+        cb.append(" where ");
+
+        for (int i = 0; i < columns.size(); i++) {
+          if (i != 0)
+            cb.append (" and ");
+
+          cb.append(columns.get(i).getName() + "=?");
+        }
+
+        // See catch (Exception) below.
+        sql = cb.toString();
+
+        pstmt = aConn.prepareStatement(sql);
+
+        entity.__caucho_setKey(pstmt, 1);
+
+        pstmt.executeUpdate();
+
+        aConn.addCompletion(_sourceTable.getUpdateCompletion());
+      }
+      else if (_sourceTable.isCascadeDelete()) {
+        // if the link cascades deletes to the source and the source
+        // table also has cascade deletes, then we need to load the
+        // target entities and delete them recursively
+        //
+        // in theory, this could cause a loop, but we're ignoring that
+        // case for now
+
+        EntityType entityType = (EntityType) _sourceTable.getType();
+
+        CharBuffer cb = new CharBuffer();
+
+        cb.append("select ");
+        cb.append(entityType.getId().generateSelect("o"));
+        cb.append(" from " + sourceTable + " o");
+        cb.append(" where ");
+
+        ArrayList<ForeignColumn> columns = getColumns();
+
+        for (int i = 0; i < columns.size(); i++) {
+          if (i != 0)
+            cb.append (" and ");
+
+          cb.append(columns.get(i).getName() + "=?");
+        }
+
+        // See catch (Exception) below.
+        sql = cb.toString();
+
+        pstmt = aConn.prepareStatement(sql);
+
+        entity.__caucho_setKey(pstmt, 1);
+
+        ArrayList<Object> proxyList = new ArrayList<Object>();
+
+        rs = pstmt.executeQuery();
+        while (rs.next()) {
+          proxyList.add(entityType.getHome().loadLazy(aConn, rs, 1));
+        }
+        rs.close();
+
+        for (Object obj : proxyList) {
+          entityType.getHome().getEntityFactory().delete(aConn, obj);
+        }
+      }
+      else {
+        CharBuffer cb = new CharBuffer();
+
+        cb.append("delete from " + sourceTable +
+                  " where ");
+
+        ArrayList<ForeignColumn> columns = getColumns();
+
+        for (int i = 0; i < columns.size(); i++) {
+          if (i != 0)
+            cb.append (" and ");
+
+          cb.append(columns.get(i).getName() + "=?");
+        }
+
+        // See catch (Exception) below.
+        sql = cb.toString();
+
+        pstmt = aConn.prepareStatement(sql);
+
+        entity.__caucho_setKey(pstmt, 1);
+
+        pstmt.executeUpdate();
+
+        aConn.addCompletion(_sourceTable.getDeleteCompletion());
       }
 
-      cb.append(" where ");
-
-      for (int i = 0; i < columns.size(); i++) {
-        if (i != 0)
-          cb.append (" and ");
-
-        cb.append(columns.get(i).getName() + "=?");
-      }
-
-      PreparedStatement pstmt = aConn.prepareStatement(cb.toString());
-
-      entity.__caucho_setKey(pstmt, 1);
-
-      pstmt.executeUpdate();
-
-      aConn.addCompletion(_sourceTable.getUpdateCompletion());
+      aConn.expire();
     }
-    else if (_sourceTable.isCascadeDelete()) {
-      // if the link cascades deletes to the source and the source
-      // table also has cascade deletes, then we need to load the
-      // target entities and delete them recursively
-      //
-      // in theory, this could cause a loop, but we're ignoring that
-      // case for now
+    catch (Exception e) {
+      // Close statements only on exception.
+      // See com.caucho.amber.manager.AmberConnection for statement caching.
+      if (pstmt != null)
+        aConn.closeStatement(sql);
 
-      EntityType entityType = (EntityType) _sourceTable.getType();
+      if (e instanceof SQLException)
+        throw (SQLException) e;
 
-      CharBuffer cb = new CharBuffer();
+      if (e instanceof RuntimeException)
+        throw (RuntimeException) e;
 
-      cb.append("select ");
-      cb.append(entityType.getId().generateSelect("o"));
-      cb.append(" from " + sourceTable + " o");
-      cb.append(" where ");
-
-      ArrayList<ForeignColumn> columns = getColumns();
-
-      for (int i = 0; i < columns.size(); i++) {
-        if (i != 0)
-          cb.append (" and ");
-
-        cb.append(columns.get(i).getName() + "=?");
-      }
-
-      PreparedStatement pstmt = aConn.prepareStatement(cb.toString());
-
-      entity.__caucho_setKey(pstmt, 1);
-
-      ArrayList<Object> proxyList = new ArrayList<Object>();
-
-      ResultSet rs = pstmt.executeQuery();
-      while (rs.next()) {
-        proxyList.add(entityType.getHome().loadLazy(aConn, rs, 1));
-      }
-      rs.close();
-
-      for (Object obj : proxyList) {
-        entityType.getHome().getEntityFactory().delete(aConn, obj);
-      }
+      throw new EJBExceptionWrapper(e);
+    } finally {
+      if (rs != null)
+        rs.close();
     }
-    else {
-      CharBuffer cb = new CharBuffer();
-
-      cb.append("delete from " + sourceTable +
-                " where ");
-
-      ArrayList<ForeignColumn> columns = getColumns();
-
-      for (int i = 0; i < columns.size(); i++) {
-        if (i != 0)
-          cb.append (" and ");
-
-        cb.append(columns.get(i).getName() + "=?");
-      }
-
-      PreparedStatement pstmt = aConn.prepareStatement(cb.toString());
-
-      entity.__caucho_setKey(pstmt, 1);
-
-      pstmt.executeUpdate();
-
-      aConn.addCompletion(_sourceTable.getDeleteCompletion());
-    }
-
-    aConn.expire();
   }
 
   /**

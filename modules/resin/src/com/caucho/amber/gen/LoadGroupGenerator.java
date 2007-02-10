@@ -211,6 +211,9 @@ public class LoadGroupGenerator extends ClassComponent {
       return;
     }
 
+    out.println("java.sql.ResultSet rs = null;");
+    out.println();
+
     out.println("try {");
     out.pushDepth();
 
@@ -283,7 +286,7 @@ public class LoadGroupGenerator extends ClassComponent {
     _relatedType.getId().generateSet(out, "pstmt", "index", "super");
 
     out.println();
-    out.println("java.sql.ResultSet rs = pstmt.executeQuery();");
+    out.println("rs = pstmt.executeQuery();");
 
     out.println("if (rs.next()) {");
     out.pushDepth();
@@ -322,6 +325,15 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("  throw e;");
     out.println("} catch (Exception e) {");
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("} finally {");
+    out.println("  try {");
+    out.println("    if (rs != null)");
+    out.println("      rs.close();");
+    out.println("  } catch (RuntimeException e) {");
+    out.println("    throw e;");
+    out.println("  } catch (Exception e) {");
+    out.println("    throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("  }");
     out.println("}");
 
     out.popDepth();

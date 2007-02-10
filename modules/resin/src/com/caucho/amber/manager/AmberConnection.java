@@ -416,12 +416,16 @@ public class AmberConnection
       if (state >= com.caucho.amber.entity.Entity.P_DELETING)
         return;
 
-      Object oldEntity = getEntity(instance.getClass().getName(),
-                                   instance.__caucho_getPrimaryKey());
+      Object oldEntity;
+
+      int index = getEntity(instance.getClass().getName(),
+                            instance.__caucho_getPrimaryKey());
 
       // jpa/0ga4
-      if (oldEntity == null)
+      if (index < 0)
         throw new IllegalArgumentException(L.l("remove() operation can only be applied to a managed entity instance."));
+
+      oldEntity = _entities.get(index);
 
       // Pre-remove child entities.
       instance.__caucho_cascadePreRemove(this);
@@ -657,9 +661,9 @@ public class AmberConnection
       String className = instance.getClass().getName();
       Object pk = instance.__caucho_getPrimaryKey();
 
-      Object oldEntity = getEntity(className, pk);
+      int index = getEntity(className, pk);
 
-      if (oldEntity != null) {
+      if (index >= 0) {
         int state = instance.__caucho_getEntityState();
 
         if (state <= Entity.TRANSIENT || state >= Entity.P_DELETING)
@@ -835,9 +839,11 @@ public class AmberConnection
 
     // ejb/0d01, jpa/0gh0, jpa/0g0k
     // if (shouldRetrieveFromCache())
-    entity = getEntity(cl.getName(), key);
+    int index = getEntity(cl.getName(), key);
 
-    if (entity != null) {
+    if (index >= 0) {
+      entity = _entities.get(index);
+
       if (! isInTransaction())
         return entity;
 
@@ -865,10 +871,15 @@ public class AmberConnection
       if (entity == null)
         return null;
 
+      if (index >= 0) {
+        // jpa/0ga9: replace with managed entity.
+        _entities.remove(index);
+      }
+
       addEntity(entity);
 
-      int index = getTransactionEntity(entity.getClass().getName(),
-                                       entity.__caucho_getPrimaryKey());
+      index = getTransactionEntity(entity.getClass().getName(),
+                                   entity.__caucho_getPrimaryKey());
 
       // XXX: jpa/0v33
       if (index >= 0) {
@@ -895,10 +906,10 @@ public class AmberConnection
 
     // XXX: ejb/0d01
     // jpa/0y14 if (shouldRetrieveFromCache())
-    entity = getEntity(entityName, key);
+    int index = getEntity(entityName, key);
 
-    if (entity != null)
-      return entity;
+    if (index >= 0)
+      return _entities.get(index);
 
     try {
       entityHome.init();
@@ -929,13 +940,13 @@ public class AmberConnection
     Entity itemEntity = item.getEntity();
     EntityType entityType = itemEntity.__caucho_getEntityType();
 
-    Entity entity = getEntity(entityType.getBeanClass().getName(),
-                              itemEntity.__caucho_getPrimaryKey());
+    int index = getEntity(entityType.getBeanClass().getName(),
+                          itemEntity.__caucho_getPrimaryKey());
 
-    if (entity != null)
-      return entity;
+    if (index >= 0)
+      return _entities.get(index);
     else {
-      entity = item.copy(this);
+      Entity entity = item.copy(this);
 
       addEntity(entity);
 
@@ -987,12 +998,6 @@ public class AmberConnection
     if (key == null)
       return null;
 
-    Entity entity = null;
-
-    // XXX: ejb/0d01
-    // jpa/0y14 if (shouldRetrieveFromCache())
-    entity = getEntity(className, key);
-
     try {
       AmberEntityHome home = _persistenceUnit.getEntityHome(name);
 
@@ -1003,7 +1008,7 @@ public class AmberConnection
 
       Object obj = home.loadLazy(this, key);
 
-      entity = (Entity) obj;
+      Entity entity = (Entity) obj;
 
       addEntity(entity);
 
@@ -1160,17 +1165,17 @@ public class AmberConnection
   /**
    * Matches the entity.
    */
-  public Entity getEntity(String className, Object key)
+  public int getEntity(String className, Object key)
   {
     for (int i = _entities.size() - 1; i >= 0; i--) {
       Entity entity = _entities.get(i);
 
       if (entity.__caucho_match(className, key)) {
-        return entity;
+        return i;
       }
     }
 
-    return null;
+    return -1;
   }
 
   public int getTransactionEntity(String className, Object key)
@@ -1195,17 +1200,17 @@ public class AmberConnection
 
     Object pk = entity.__caucho_getPrimaryKey();
 
-    Entity oldEntity = getEntity(entity.getClass().getName(), pk);
+    int index = getEntity(entity.getClass().getName(), pk);
 
     // jpa/0s2d: if (! _entities.contains(entity)) {
-    if (oldEntity == null) {
+    if (index < 0) {
       _entities.add(entity);
       added = true;
     }
 
     // jpa/0g06
     if (_isInTransaction) {
-      int index = getTransactionEntity(entity.getClass().getName(), pk);
+      index = getTransactionEntity(entity.getClass().getName(), pk);
 
       // jpa/0s2d: if (! _txEntities.contains(entity)) {
       if (index < 0) {
@@ -1580,12 +1585,21 @@ public class AmberConnection
     throws SQLException
   {
     try {
-      Connection conn = getConnection();
-
       PreparedStatement pstmt = _preparedStatementMap.get(sql);
 
       if (pstmt == null) {
-        pstmt = conn.prepareStatement(sql);
+        Connection conn = getConnection();
+
+        // XXX: avoids locking issues.
+        if (_statements.size() > 0) {
+          conn = _statements.get(0).getConnection();
+        }
+
+        // XXX: avoids locking issues.
+        // See com.caucho.sql.UserConnection
+        pstmt = conn.prepareStatement(sql,
+                                      ResultSet.TYPE_FORWARD_ONLY,
+                                      ResultSet.CONCUR_READ_ONLY);
 
         _statements.add(pstmt);
 
@@ -1597,6 +1611,21 @@ public class AmberConnection
       closeConnectionImpl();
 
       throw e;
+    }
+  }
+
+  /**
+   * Closes a statement.
+   */
+  public void closeStatement(String sql)
+    throws SQLException
+  {
+    PreparedStatement pstmt = _preparedStatementMap.remove(sql);
+
+    if (pstmt != null) {
+      _statements.remove(pstmt);
+
+      pstmt.close();
     }
   }
 
@@ -1614,18 +1643,27 @@ public class AmberConnection
       if (pstmt == null) {
         Connection conn = getConnection();
 
+        // XXX: avoids locking issues.
+        if (_statements.size() > 0) {
+          conn = _statements.get(0).getConnection();
+        }
+
         if (_persistenceUnit.hasReturnGeneratedKeys())
           pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        else
-          pstmt = conn.prepareStatement(sql);
+        else {
+          // XXX: avoids locking issues.
+          // See com.caucho.sql.UserConnection
+          pstmt = conn.prepareStatement(sql,
+                                        ResultSet.TYPE_FORWARD_ONLY,
+                                        ResultSet.CONCUR_READ_ONLY);
+        }
 
         _statements.add(pstmt);
 
         _preparedStatementMap.put(sql, pstmt);
       }
     } catch (SQLException e) {
-      if (pstmt != null)
-        pstmt.close();
+      closeStatement(sql);
     }
 
     return pstmt;
@@ -1810,10 +1848,10 @@ public class AmberConnection
   public void delete(Entity entity)
     throws SQLException
   {
-    Entity oldEntity = getEntity(entity.getClass().getName(),
-                                 entity.__caucho_getPrimaryKey());
+    int index = getEntity(entity.getClass().getName(),
+                          entity.__caucho_getPrimaryKey());
 
-    if (oldEntity == null) {
+    if (index < 0) {
 
       EntityType entityType = entity.__caucho_getEntityType();
 
@@ -1832,6 +1870,8 @@ public class AmberConnection
       addEntity(entity);
     }
     else {
+      Entity oldEntity = _entities.get(index);
+
       // XXX: jpa/0k12
       oldEntity.__caucho_setConnection(this);
 
