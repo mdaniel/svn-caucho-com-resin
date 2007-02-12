@@ -64,6 +64,7 @@ public class CompositeDataValue extends Value {
       return env.wrapJava(_data.get(attrName));
     } catch (InvalidKeyException e) {
       env.warning(e);
+      return NullValue.NULL;
     }
   }
 
