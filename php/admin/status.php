@@ -9,6 +9,14 @@ require_once "inc.php";
 
 require "restricted.php";
 
+function display_left_navigation()
+{
+  echo "Summary<br>";
+  echo "<a href='thread.php'>Thread</a><br>";
+
+  echo "<hr>";
+}
+
 $mbeanServer = new MBeanServer();
 
 function format_datetime($date)
@@ -50,12 +58,11 @@ if (! empty($server->Id))
   $title = $title . " for server " . $server->Id;
 ?>
 
-<?php decorator_header("status.php", $title) ?>
-
-<table>
+<?php display_header("status.php", $title) ?>
 
 <h2>Server: <?= $server->Id ?></h2>
 
+<table class="data">
   <tr title="The server id used when starting this instance of Resin, the value of `-server'.">
     <th>Server id:</th>
     <td><?= $server->Id ? $server->Id : '\"\"' ?></td>
@@ -125,7 +132,7 @@ $proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
   </tr>
 
   <tr title="Percentage of requests that have been served from the proxy cache:">
-    <th>Block cache miss ratio:</th>
+    <th><?= info("Block cache miss ratio") ?>:</th>
     <td><?= format_miss_ratio($block_cache->HitCountTotal,
                               $block_cache->MissCountTotal) ?></td>
   </tr>
@@ -155,7 +162,7 @@ The ThreadPool manages all threads used by Resin.
 </div>
 -->
 
-<table>
+<table class="data">
   <tr>
     <th colspan='2'>Config</th>
     <th colspan='3'>Threads</th>
@@ -185,7 +192,7 @@ if ($ports) {
 ?>
 <h2>TCP ports</h2>
 
-<table>
+<table class="data">
   <tr>
     <th colspan='2'>&nbsp;</th>
   <th colspan='3'>Threads</th>
@@ -247,7 +254,7 @@ echo "<h2>Server Connectors: $cluster->Name</h2>";
 
 ?>
 
-<table>
+<table class="data">
 
   <tr>
     <th>Server</th>
@@ -301,7 +308,7 @@ if ($db_pools) {
 
 <h2>Connection pools</h2>
 
-<table>
+<table class="data">
   <tr>
     <th>&nbsp;</th>
     <th colspan='3'>Connections</th>
@@ -341,7 +348,7 @@ $store = $mbeanServer->lookup("resin:type=PersistentStore");
 
 if ($store) {
   echo "<h2>Persistent Store: $store->StoreType</h2>\n";
-  echo "<table>";
+  echo "<table class='data'>";
 
   echo "<tr><th>Object Count</th><td>$store->ObjectCount</td>\n";
   echo "<tr><th>Load Count</th><td>$store->LoadCountTotal</td>\n";
@@ -356,7 +363,7 @@ if ($store) {
 <!-- Hosts and Applications -->
 <h2>Hosts and Applications</h2>
 
-<table>
+<table class="data">
   <tr>
     <th>Host</th>
     <th>Web-App</th>
@@ -410,7 +417,7 @@ foreach ($webapps as $webapp) {
 $tcp_conn = $mbeanServer->query("resin:*,type=TcpConnection");
 $slow_conn = array();
 
-echo "<table>";
+echo "<table class='data'>";
 
 foreach ($tcp_conn as $conn_name) {
   $conn = $mbeanServer->lookup($conn_name);
@@ -420,6 +427,7 @@ foreach ($tcp_conn as $conn_name) {
   if ($conn->ActiveTime > 60000)
     $slow_conn[] = $conn;
 }
+
 
 echo "</table>";
 
@@ -445,4 +453,4 @@ foreach ($slow_conn as $slow) {
 
 ?>
 
-<?php decorator_footer("status.php"); ?>
+<?php display_footer("status.php"); ?>

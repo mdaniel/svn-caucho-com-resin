@@ -36,6 +36,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.session.QuercusSessionManager;
 import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.module.ResinModuleContext;
 import com.caucho.quercus.module.ModuleInfo;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.module.QuercusModule;
@@ -122,6 +123,12 @@ public class ResinQuercus extends Quercus
 
       return context;
     }
+  }
+
+  @Override
+  protected ModuleContext createModuleContext(ClassLoader loader)
+  {
+    return new ResinModuleContext(loader);
   }
 
   public String getCookieName()

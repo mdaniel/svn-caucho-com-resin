@@ -2750,7 +2750,7 @@ public class Env {
       def = getJavaClassDefinition(obj.getClass().getName());
     else if (def.getType() != obj.getClass()) {
       // XXX: what if types are incompatible, does it matter?
-      // if it doesn;'t matter, simplikfy this to one if with no else
+      // if it doesn't matter, simplify this to one if with no else
       def = getJavaClassDefinition(obj.getClass().getName());
     }
 

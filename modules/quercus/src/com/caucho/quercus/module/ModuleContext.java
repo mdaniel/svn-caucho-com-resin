@@ -37,6 +37,7 @@ import com.caucho.quercus.function.*;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.quercus.program.JavaImplClassDef;
+import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Constructor;
@@ -71,6 +72,9 @@ public class ModuleContext
 
   private HashMap<String, StaticFunction> _staticFunctions
     = new HashMap<String, StaticFunction>();
+  
+  private ClassDef _stdClassDef;
+  private QuercusClass _stdClass;
 
   private HashMap<String, ClassDef> _staticClasses
     = new HashMap<String, ClassDef>();
@@ -107,6 +111,12 @@ public class ModuleContext
     
     _marshalFactory = new MarshalFactory(this);
     _exprFactory = new ExprFactory();
+    
+    _stdClassDef = new InterpretedClassDef("stdClass", null, new String[0]);
+    _stdClass = new QuercusClass(_stdClassDef, null);
+
+    _staticClasses.put(_stdClass.getName(), _stdClassDef);
+    _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
   }
 
   public static ModuleContext getLocalContext(ClassLoader loader)
@@ -219,8 +229,12 @@ public class ModuleContext
 
         def = (JavaClassDef) constructor.newInstance(this, name, type);
       }
-      else
-        def = JavaClassDef.create(this, name, type);
+      else {
+	def = JavaClassDef.create(this, name, type);
+
+	if (def == null)
+	  def = createDefaultJavaClassDef(name, type);
+      }
 
       _javaClassWrappers.put(name, def);
       _lowerJavaClassWrappers.put(name.toLowerCase(), def);
@@ -273,6 +287,10 @@ public class ModuleContext
 
       def = JavaClassDef.create(this, className, type);
 
+      if (def == null)
+	def = createDefaultJavaClassDef(className, type);
+
+
       _javaClassWrappers.put(className, def);
 
       // def.introspect();
@@ -285,6 +303,12 @@ public class ModuleContext
     }
   }
 
+  protected JavaClassDef createDefaultJavaClassDef(String className,
+						   Class type)
+  {
+    return new JavaClassDef(this, className, type);
+  }
+  
   /**
    * Finds the java class wrapper.
    */
@@ -327,6 +351,14 @@ public class ModuleContext
     }
 
     return internal;
+  }
+
+  /**
+   * Returns the stdClass definition.
+   */
+  public QuercusClass getStdClass()
+  {
+    return _stdClass;
   }
 
   /**
@@ -429,11 +461,11 @@ public class ModuleContext
                                             String extension)
     throws IllegalAccessException, InstantiationException
   {
-    if (log.isLoggable(Level.FINEST)) {
+    if (log.isLoggable(Level.FINE)) {
       if (extension == null)
-        log.finest(L.l("Quercus loading class {0} with type {1}", name, type.getName()));
+        log.fine(L.l("Quercus loading class {0} with type {1}", name, type.getName()));
       else
-        log.finest(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
+        log.fine(L.l("Quercus loading class {0} with type {1} providing extension {2}", name, type.getName(), extension));
     }
 
     JavaImplClassDef def = new JavaImplClassDef(this, name, type);

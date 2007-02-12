@@ -1,35 +1,77 @@
 body {
   font: small sans-serif;
-  background: #f9f9f9;
+  background: white;
   color: black;
-  margin: 1em;
+  margin: 0em;
   padding: 0;
-}   
+}
 
-table {
+a {
+  text-decoration : none;
+}
+
+a:hover {
+  text-decoration : underline;
+}
+
+table.data {
   font-size: 100%;
   background: #ccddff;
   color: black;
   border-collapse: collapse;
 }
 
+table.threads {
+  color: black;
+  border-collapse: collapse;
+}
+
+.threads td {
+  padding: 3px;
+  border: thin solid grey;
+}
+
+.threads th {
+  padding: 3px;
+  border: thin solid grey;
+}
+
+.head th {
+  padding: 1em 0em;
+  font-size : 120%;
+  border:0;
+}
+
 h1 {
-  font-family : serif;
+  font-family : sans-serif;
   background-image: url(images/hbleed.gif);
   padding-top : .3em;
   padding-bottom : .3em;
 }
 
-td {
+hr {
+  border : 0;
+  height : 1px;
+  background-color : #002b80;
+}
+
+.data td {
   padding: 3px 4px 3px 4px;
   border: thin solid grey;
 }
 
-th {
+.data th {
   padding: 3px 4px 3px 4px;
   background: #99bbff;
   text-align: center;
   border: thin solid grey;
+}
+
+td.leftnav {
+  background : #b9cef7;
+  color : black;
+  valign : top;
+  padding : 3px;
 }
 
 td.buttons {

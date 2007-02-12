@@ -114,7 +114,7 @@ public class JavaClassDef extends ClassDef {
 
   private Marshal _marshal;
 
-  protected JavaClassDef(ModuleContext moduleContext, String name, Class type)
+  public JavaClassDef(ModuleContext moduleContext, String name, Class type)
   {
     super(name, null, new String[0]);
 
@@ -153,7 +153,7 @@ public class JavaClassDef extends ClassDef {
     else if (Collection.class.isAssignableFrom(type))
       return new JavaCollectionClassDef(moduleContext, name, type);
     else
-      return new JavaClassDef(moduleContext, name, type);
+      return null;
   }
 
   /**

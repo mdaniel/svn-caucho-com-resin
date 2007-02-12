@@ -109,6 +109,7 @@ public class Quercus
   private HashMap<String, StaticFunction> _lowerFunMap
     = new HashMap<String, StaticFunction>();
 
+  /*
   private ClassDef _stdClassDef;
   private QuercusClass _stdClass;
 
@@ -117,6 +118,7 @@ public class Quercus
 
   private HashMap<String, ClassDef> _lowerStaticClasses
     = new HashMap<String, ClassDef>();
+  */
 
   private HashMap<String, JavaClassDef> _javaClassWrappers
     = new HashMap<String, JavaClassDef>();
@@ -415,19 +417,9 @@ public class Quercus
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-      Class type;
+      def = getModuleContext().getJavaClassDefinition(className);
 
-      try {
-        type = Class.forName(className, false, loader);
-      }
-      catch (ClassNotFoundException e) {
-        throw new ClassNotFoundException(L.l("'{0}' not valid {1}", className, e.toString()));
-
-      }
-
-      def = JavaClassDef.create(getModuleContext(), className, type);
-
-      _javaClassWrappers.put(className, def);
+      addJavaClassWrapper(className, def);
 
       // def.introspect(getModuleContext());
 
@@ -439,6 +431,11 @@ public class Quercus
     }
   }
 
+  protected void addJavaClassWrapper(String className, JavaClassDef def)
+  {
+    _javaClassWrappers.put(className, def);
+  }
+  
   /**
    * Finds the java class wrapper.
    */
@@ -802,7 +799,7 @@ public class Quercus
    */
   public QuercusClass getStdClass()
   {
-    return _stdClass;
+    return _moduleContext.getStdClass();
   }
 
   /**
@@ -810,12 +807,15 @@ public class Quercus
    */
   public ClassDef findClass(String name)
   {
+    return _moduleContext.findClass(name);
+    /*
     ClassDef def = _staticClasses.get(name);
 
     if (def == null)
       def = _lowerStaticClasses.get(name.toLowerCase());
 
     return def;
+    */
   }
 
   /**
@@ -823,7 +823,10 @@ public class Quercus
    */
   public HashMap<String, ClassDef> getClassMap()
   {
+    /*
     return _staticClasses;
+    */
+    return _moduleContext.getClassMap();
   }
 
   /**
@@ -989,7 +992,7 @@ public class Quercus
       // XXX: test
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
-        
+
         urlSet.add(url);
       }
 
@@ -1044,7 +1047,7 @@ public class Quercus
             cl = Class.forName(className, false, loader);
           }
           catch (ClassNotFoundException e) {
-            throw new ClassNotFoundException(L.l("`{0}' not valid {1}", className, e.toString()));
+            throw new ClassNotFoundException(L.l("'{0}' not valid {1}", className, e.toString()));
           }
 
           introspectPhpModuleClass(cl);
@@ -1194,26 +1197,26 @@ public class Quercus
           if ("as".equals(args[i])) {
             i++;
             if (i >= args.length)
-              throw new IOException(L.l("expecting Quercus class name after `{0}' in definition for class {1}", "as", className));
+              throw new IOException(L.l("expecting Quercus class name after '{0}' in definition for class {1}", "as", className));
 
             phpClassName = args[i];
           }
           else if ("provides".equals(args[i])) {
             i++;
             if (i >= args.length)
-              throw new IOException(L.l("expecting name of extension after `{0}' in definition for class {1}", "extension", className));
+              throw new IOException(L.l("expecting name of extension after '{0}' in definition for class {1}", "extension", className));
 
             extension = args[i];
           }
           else if ("definedBy".equals(args[i])) {
             i++;
             if (i >= args.length)
-              throw new IOException(L.l("expecting name of class implementing JavaClassDef after `{0}' in definition for class {1}", "definedBy", className));
+              throw new IOException(L.l("expecting name of class implementing JavaClassDef after '{0}' in definition for class {1}", "definedBy", className));
 
             definedBy = args[i];
           }
           else {
-            throw new IOException(L.l("unknown token `{0}' in definition for class {1} ", args[i], className));
+            throw new IOException(L.l("unknown token '{0}' in definition for class {1} ", args[i], className));
           }
         }
 
@@ -1230,7 +1233,7 @@ public class Quercus
           javaClassDefClass = null;
 
         introspectJavaClass(phpClassName, cl, extension, javaClassDefClass);
-      } catch (Throwable e) {
+      } catch (Exception e) {
         log.info("Failed loading " + className + "\n" + e.toString());
         log.log(Level.FINE, e.toString(), e);
       }
@@ -1250,9 +1253,6 @@ public class Quercus
     throws IllegalAccessException, InstantiationException, ConfigException,
            NoSuchMethodException, InvocationTargetException
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine(L.l("Quercus loading class {0}", name));
-
     ModuleContext context = getLocalContext();
 
     if (type.isAnnotationPresent(ClassImplementation.class)) {
@@ -1260,9 +1260,10 @@ public class Quercus
         throw new UnimplementedException();
 
       ClassDef def = context.addClassImpl(name, type, extension);
-
+      /*
       _staticClasses.put(name, def);
       _lowerStaticClasses.put(name.toLowerCase(), def);
+      */
     }
     else {
       JavaClassDef def = context.addClass(name, type,
@@ -1271,8 +1272,10 @@ public class Quercus
       _javaClassWrappers.put(name, def);
       _lowerJavaClassWrappers.put(name.toLowerCase(), def);
 
+      /*
       _staticClasses.put(name, def);
       _lowerStaticClasses.put(name.toLowerCase(), def);
+      */
     }
 
     if (extension != null)
@@ -1302,8 +1305,10 @@ public class Quercus
 
     JavaImplClassDef def = context.addClassImpl(name, type, extension);
 
+    /*
     _staticClasses.put(name, def);
     _lowerStaticClasses.put(name.toLowerCase(), def);
+    */
   }
 
   /**
@@ -1311,13 +1316,13 @@ public class Quercus
    */
   private void initStaticClasses()
   {
+    /*
     _stdClassDef = new InterpretedClassDef("stdClass", null, new String[0]);
     _stdClass = new QuercusClass(_stdClassDef, null);
 
     _staticClasses.put(_stdClass.getName(), _stdClassDef);
     _lowerStaticClasses.put(_stdClass.getName().toLowerCase(), _stdClassDef);
 
-    /*
     InterpretedClassDef exn = new InterpretedClassDef("Exception",
 						      null,
 						      new String[0]);

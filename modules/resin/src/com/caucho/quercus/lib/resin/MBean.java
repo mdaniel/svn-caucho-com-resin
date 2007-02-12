@@ -38,6 +38,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.openmbean.*;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -120,23 +121,21 @@ public class MBean {
   {
     try {
       Object []args = new Object[values.length];
-      String []sig = new String[values.length];
 
       for (int i = 0; i < values.length; i++) {
 	args[i] = values[i].toJavaObject();
-
-	if (args[i] != null)
-	  sig[i] = args[i].getClass().getName();
-	else
-	  sig[i] = "java.lang.Object";
       }
 
-      String []mbeanSig = findClosestOperation(name, sig);
+      MBeanOperationInfo opInfo = findClosestOperation(name, args);
 
-      if (mbeanSig != null) {
-	marshall(args, mbeanSig);
+      if (opInfo != null) {
+	String []mbeanSig = createMBeanSig(opInfo);
 	
-	return unmarshall(_server.invoke(_name, name, args, mbeanSig));
+	marshall(args, mbeanSig);
+
+	Object value = _server.invoke(_name, name, args, mbeanSig);
+	
+	return unmarshall(value);
       }
       else
 	return null;
@@ -147,7 +146,19 @@ public class MBean {
     }
   }
 
-  protected String []findClosestOperation(String name, String []sig)
+  private String []createMBeanSig(MBeanOperationInfo opInfo)
+  {
+    MBeanParameterInfo []paramInfo = opInfo.getSignature();
+    String []sig = new String[paramInfo.length];
+
+    for (int i = 0; i < paramInfo.length; i++) {
+      sig[i] = paramInfo[i].getType();
+    }
+
+    return sig;
+  }
+
+  protected MBeanOperationInfo findClosestOperation(String name, Object []args)
     throws Exception
   {
     MBeanInfo info = getMbean_info();
@@ -163,8 +174,8 @@ public class MBean {
       if (! name.equals(op.getName()))
 	continue;
 
-      if (op.getSignature().length == sig.length) {
-	long cost = calculateCost(op.getSignature(), sig);
+      if (op.getSignature().length == args.length) {
+	long cost = calculateCost(op.getSignature(), args);
 
 	if (cost < bestCost) {
 	  bestCost = cost;
@@ -173,29 +184,22 @@ public class MBean {
       }
     }
 
-    if (bestOp != null) {
-      String []mbeanSig = new String[sig.length];
-
-      MBeanParameterInfo []params = bestOp.getSignature();
-
-      for (int j = 0; j < params.length; j++) {
-	mbeanSig[j] = params[j].getType();
-      }
-
-      return mbeanSig;
-    }
-      
-    return null;
+    return bestOp;
   }
 
   private static long calculateCost(MBeanParameterInfo []paramInfo,
-				    String []args)
+				    Object []args)
   {
     long cost = 0;
     
     for (int i = 0; i < paramInfo.length; i++) {
       String param = paramInfo[i].getType();
-      String arg = args[i];
+      String arg;
+
+      if (args[i] != null)
+	arg = args[i].getClass().getName();
+      else
+	arg = "java.lang.Object";
       
       if (param.equals(arg)) {
       }
@@ -232,6 +236,11 @@ public class MBean {
 	mbeans[i] = new MBean(_server, names[i]);
 
       return mbeans;
+    }
+    else if (value instanceof CompositeData) {
+      CompositeData compositeValue = (CompositeData) value;
+
+      return new CompositeDataBean(compositeValue);
     }
     else
       return value;

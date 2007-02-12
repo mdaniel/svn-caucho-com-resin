@@ -11,6 +11,36 @@ header("Cache-Control: max-age=0,private");
 header("Pragma: No-Cache"); 
 
 
+function format_datetime($date)
+{
+  return strftime("%a %b %d %H:%M:%S %Z %Y", $date->time / 1000);
+}
+
+function format_memory($memory)
+{
+  return sprintf("%.2fMeg", $memory / (1024 * 1024))
+}
+
+function format_hit_ratio($hit, $miss)
+{
+  $total = $hit + $miss;
+
+  if ($total == 0)
+    return "0.00% (0 / 0)";
+  else
+    return sprintf("%.2f%% (%d / %d)", 100 * $hit / $total, $hit, $total);
+}
+
+function format_miss_ratio($hit, $miss)
+{
+  $total = $hit + $miss;
+
+  if ($total == 0)
+    return "0.00% (0 / 0)";
+  else
+    return sprintf("%.2f%% (%d / %d)", 100 * $miss / $total, $miss, $total);
+}
+
 function uri($path)
 {
   global $home_uri;
@@ -31,10 +61,12 @@ function uri_nocache($path)
   if (is_null($home_uri))
     $home_uri = rtrim(dirname($_SERVER['PHP_SELF']), '/\\'); 
 
+  /*
   if (strstr($path, "?") === FALSE)
     $rand = "?.rand=" . mt_rand();
   else
     $rand = "&.rand=" . mt_rand();
+  */
 
   if (strncmp($path, "/", 1) === 0)
     return $path . $rand;
@@ -62,13 +94,13 @@ if (is_null($target_uri))
 $is_read_role = $request->isUserInRole("read");
 $is_write_role = $request->isUserInRole("write");
 
-$decorator_header_script = NULL;
-$decorator_header_title = NULL;
-$is_decorator_footer = false;
+$display_header_script = NULL;
+$display_header_title = NULL;
+$is_display_footer = false;
 
 /**
  * Outputs an html header.
- * A header is only output if this is the first call to decorator_header().
+ * A header is only output if this is the first call to display_header().
  * The first call establishes the title of the page.
  * 
  * @param $script the script calling the function
@@ -76,15 +108,15 @@ $is_decorator_footer = false;
  *
  * @return true if the header was output, false if a header has already been output
  */
-function decorator_header($script, $title)
+function display_header($script, $title)
 {
-  global $decorator_header_script, $decorator_header_title;
+  global $display_header_script, $display_header_title;
 
-  if (! empty($decorator_header_script))
+  if (! empty($display_header_script))
     return;
 
-  $decorator_header_script = $script;
-  $decorator_header_title = $title;
+  $display_header_script = $script;
+  $display_header_title = $title;
 
   $logout_uri = uri("logout.php");
 ?>
@@ -94,26 +126,63 @@ function decorator_header($script, $title)
 <head>
   <title><?= $title ?></title>
   <link rel='stylesheet' href='<?= uri("default.css") ?>' type='text/css' />
-  <link rel='shortcut icon' href='<?= uri("images/dragonfly.ico") ?>'>
-  <link rel='icon' href='<?= uri("images/dragonfly-tiny.png") ?>' type='image/png'>
+
+  <script language='javascript' type='text/javascript'>
+    function hide(id) { document.getElementById(id).style.display = 'none'; }
+    function show(id) { document.getElementById(id).style.display = 'true'; }
+    
+  </script>
 </head>
 
 <body>
 
-<h1><?= $title ?></h1>
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+  <td width="160" align="center"><img src='<?= uri("images/caucho-white.jpg") ?>' width='150' height='63'>
+  </td>
+
+  <td width="10">
+  </td>
+
+  <td>
+   <h1><?= $title ?></h1>
+  </td>
+</tr>
+
+<tr>
+  <td width="150" background='<?= uri("images/left_background.gif") ?>'>
+   <img src='<?= uri("images/pixel.gif") ?>' height="14">
+  </td>
+
+  <td width="10">
+  </td>
+
+  <td>
+  </td>
+</tr>
+
+
+<tr>
+  <td class="leftnav" valign="top">
+    <?php display_left_navigation(); ?>
+  </td>
+
+  <td width="10">
+  </td>
+  <td>
 
 <?php
   return true;
 }
 
 /**
- * Returns the title for the page, established by the first call to decorator_header().
+ * Returns the title for the page, established by the first call to display_header().
  */
-function decorator_header_title()
+function display_header_title()
 {
-  global $decorator_header_title;
+  global $display_header_title;
 
-  return $decorator_header_title;
+  return $display_header_title;
 ?>
 
 <?php
@@ -122,25 +191,37 @@ function decorator_header_title()
 /**
  * Outputs an html footer if needed.
  */
-function decorator_footer($script)
+function display_footer($script)
 {
-  global $decorator_header_script, $is_decorator_footer;
+  global $display_header_script, $is_display_footer;
 
-  if ($is_decorator_footer)
+  if ($is_display_footer)
     return;
 
-  if ($script !== $decorator_header_script)
+  if ($script !== $display_header_script)
     return;
 
-  $is_decorator_footer = true;
+  $is_display_footer = true;
 ?>
 <hr />
 <p>
 <em><?= resin_version() ?></em>
 </p>
 
+</td></tr></table>
+
 </body>
 </html>
 <?php
 }
+
+function info($name,$wiki="")
+{
+  if (! $wiki)
+    $wiki = $name;
+
+  echo $name;
+  echo "<sup><small><a href='http://wiki.caucho.com/Admin:$wiki' class='info'>?</a></small></sup>";
+}
+
 ?>
