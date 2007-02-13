@@ -50,7 +50,7 @@ public class AmberEntityManager extends AmberConnection
   {
     super(persistenceUnit);
 
-    register(); // initThreadConnection(); // ejb/0q00
+    initJta(); // initThreadConnection(); // ejb/0q00
   }
 
   public String toString()

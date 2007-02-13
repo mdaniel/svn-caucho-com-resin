@@ -685,7 +685,7 @@ public class EntityManyToManyField extends AssociationField {
       return;
 
     if (isCascade(cascadeType)) {
-      out.println("if (__caucho_state <= P_TRANSACTIONAL) {");
+      out.println("if (__caucho_state.ordinal() <= com.caucho.amber.entity.EntityState.P_TRANSACTIONAL.ordinal()) {");
       out.pushDepth();
 
       String amberCascade = "__amber_" + getGetterName();

@@ -195,12 +195,12 @@ public class DependentEntityOneToOneField extends CascadableField {
 
     out.println("if (" + getter + " != null) {");
     out.pushDepth();
-    out.println("int state = ((com.caucho.amber.entity.Entity) " + getter + ").__caucho_getEntityState();");
+    out.println("com.caucho.amber.entity.EntityState state = ((com.caucho.amber.entity.Entity) " + getter + ").__caucho_getEntityState();");
 
     // jpa/0s2d
-    out.println("if (this.__caucho_state < com.caucho.amber.entity.Entity.P_DELETING");
-    out.println("    && (state <= com.caucho.amber.entity.Entity.P_NEW || ");
-    out.println("        state >= com.caucho.amber.entity.Entity.P_DELETED))");
+    out.println("if (this.__caucho_state.ordinal() < com.caucho.amber.entity.EntityState.P_DELETING.ordinal()");
+    out.println("    && (state.ordinal() < com.caucho.amber.entity.EntityState.P_NEW.ordinal() || ");
+    out.println("        state.ordinal() >= com.caucho.amber.entity.EntityState.P_DELETED.ordinal()))");
 
     String errorString = ("(\"amber flush: unable to flush " +
                           getEntitySourceType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+

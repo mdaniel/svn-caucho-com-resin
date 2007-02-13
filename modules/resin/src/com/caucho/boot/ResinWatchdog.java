@@ -755,11 +755,19 @@ public class ResinWatchdog extends AbstractManagedObject
       }
     }
 
-    if (_userName != null)
-      throw new ConfigException(L.l("<user-name> requires Resin Professional and compiled JNI."));
-
-    if (_groupName != null)
-      throw new ConfigException(L.l("<group-name> requires Resin Professional and compiled JNI."));
+    if (_userName != null) {
+      if (_isSingle)
+	throw new ConfigException(L.l("<user-name> requires Resin Professional and compiled JNI started with 'start'.  Resin cannot use <user-name> when started as a foreground process."));
+      else
+	throw new ConfigException(L.l("<user-name> requires Resin Professional and compiled JNI."));
+    }
+      
+    if (_groupName != null) {
+      if (_isSingle)
+	throw new ConfigException(L.l("<group-name> requires Resin Professional and compiled JNI started with 'start'.  Resin cannot use <group-name> when started as a foreground process."));
+      else
+	throw new ConfigException(L.l("<group-name> requires Resin Professional and compiled JNI."));
+    }
 
     ProcessBuilder builder = new ProcessBuilder();
 

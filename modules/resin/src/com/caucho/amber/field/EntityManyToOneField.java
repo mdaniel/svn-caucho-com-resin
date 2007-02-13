@@ -536,7 +536,6 @@ public class EntityManyToOneField extends CascadableField {
     throws IOException
   {
     if (! isLazy()) {
-
       int group = _targetLoadIndex / 64;
       long mask = (1L << (_targetLoadIndex % 64));
       String loadVar = "__caucho_loadMask_" + group;
@@ -880,16 +879,16 @@ public class EntityManyToOneField extends CascadableField {
     out.pushDepth();
 
     String relatedEntity = "((com.caucho.amber.entity.Entity) " + getter + ")";
-    out.println("int state = " + relatedEntity + ".__caucho_getEntityState();");
+    out.println("com.caucho.amber.entity.EntityState state = " + relatedEntity + ".__caucho_getEntityState();");
 
     // jpa/0j5e as a negative test.
     out.println("if (" + relatedEntity + ".__caucho_getConnection() == null) {");
     out.pushDepth();
 
     // jpa/0j5c as a positive test.
-    out.println("if (this.__caucho_state < com.caucho.amber.entity.Entity.P_DELETING");
-    out.println("    && (state <= com.caucho.amber.entity.Entity.P_NEW || ");
-    out.println("        state >= com.caucho.amber.entity.Entity.P_DELETED))");
+    out.println("if (this.__caucho_state.ordinal() < com.caucho.amber.entity.EntityState.P_DELETING.ordinal()");
+    out.println("    && (state.ordinal() <= com.caucho.amber.entity.EntityState.P_NEW.ordinal() || ");
+    out.println("        state.ordinal() >= com.caucho.amber.entity.EntityState.P_DELETED.ordinal()))");
 
     String errorString = ("(\"amber flush: unable to flush " +
                           getRelatedType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
@@ -936,13 +935,13 @@ public class EntityManyToOneField extends CascadableField {
       // The "one" end in the many-to-one relationship.
       String amberVar = getFieldName();
 
-      out.println("int " + amberVar + "_state = (" + var + " == null) ? ");
-      out.println("com.caucho.amber.entity.Entity.TRANSIENT : ");
+      out.println("com.caucho.amber.entity.EntityState " + amberVar + "_state = (" + var + " == null) ? ");
+      out.println("com.caucho.amber.entity.EntityState.TRANSIENT : ");
       out.println("((com.caucho.amber.entity.Entity) " + amberVar + ").");
       out.println("__caucho_getEntityState();");
 
-      out.println("if (" + amberVar + "_state >= com.caucho.amber.entity.Entity.P_NEW &&");
-      out.println("    " + amberVar + "_state <= com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
+      out.println("if (" + amberVar + "_state.ordinal() >= com.caucho.amber.entity.EntityState.P_NEW.ordinal() &&");
+      out.println("    " + amberVar + "_state.ordinal() <= com.caucho.amber.entity.EntityState.P_TRANSACTIONAL.ordinal()) {");
     }
 
     out.pushDepth();

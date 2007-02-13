@@ -52,7 +52,11 @@ public class JdbcMetaData {
   private DataSource _ds;
 
   private String _falseLiteral;
+  
+  private String _longType;
+  private String _blobType;
 
+  private Boolean _supportsGetGeneratedKeys;
   private Boolean _supportsPositionFunction;
 
   /**
@@ -136,6 +140,9 @@ public class JdbcMetaData {
    */
   public String getBlobType()
   {
+    if (_blobType != null)
+      return _blobType;
+    
     Connection conn = null;
 
     try {
@@ -148,7 +155,9 @@ public class JdbcMetaData {
       try {
         while (rs.next()) {
           if (rs.getShort("DATA_TYPE") == Types.BLOB) {
-            return rs.getString("TYPE_NAME");
+            _blobType = rs.getString("TYPE_NAME");
+
+	    return _blobType;
           }
         }
       } finally {
@@ -161,7 +170,8 @@ public class JdbcMetaData {
           int dataType = rs.getShort("DATA_TYPE");
 
           if (rs.getShort("DATA_TYPE") == Types.LONGVARBINARY) {
-            return rs.getString("TYPE_NAME");
+            _blobType = rs.getString("TYPE_NAME");
+	    return _blobType;
           }
         }
       } finally {
@@ -172,7 +182,8 @@ public class JdbcMetaData {
       try {
         while (rs.next()) {
           if (rs.getShort("DATA_TYPE") == Types.BINARY) {
-            return rs.getString("TYPE_NAME");
+            _blobType = rs.getString("TYPE_NAME");
+	    return _blobType;
           }
         }
       } finally {
@@ -183,7 +194,8 @@ public class JdbcMetaData {
       try {
         while (rs.next()) {
           if (rs.getShort("DATA_TYPE") == Types.VARBINARY) {
-            return rs.getString("TYPE_NAME");
+            _blobType = rs.getString("TYPE_NAME");
+	    return _blobType;
           }
         }
       } finally {
@@ -215,13 +227,18 @@ public class JdbcMetaData {
    */
   public boolean supportsGetGeneratedKeys()
   {
+    if (_supportsGetGeneratedKeys != null)
+      return _supportsGetGeneratedKeys;
+    
     try {
       Connection conn = getConnection();
 
       try {
         DatabaseMetaData metaData = conn.getMetaData();
 
-        return metaData.supportsGetGeneratedKeys();
+        _supportsGetGeneratedKeys = metaData.supportsGetGeneratedKeys();
+
+	return _supportsGetGeneratedKeys;
       } finally {
         conn.close();
       }
@@ -287,7 +304,7 @@ public class JdbcMetaData {
   public boolean supportsPositionFunction()
   {
     if (_supportsPositionFunction != null)
-      return _supportsPositionFunction.booleanValue();
+      return _supportsPositionFunction;
 
     Connection conn = null;
 
@@ -337,6 +354,9 @@ public class JdbcMetaData {
    */
   public String getLongType()
   {
+    if (_longType != null)
+      return _longType;
+    
     Connection conn = null;
 
     try {
@@ -349,7 +369,9 @@ public class JdbcMetaData {
       try {
         while (rs.next()) {
           if (rs.getShort("DATA_TYPE") == Types.BIGINT) {
-            return rs.getString("TYPE_NAME");
+            _longType = rs.getString("TYPE_NAME");
+
+	    return _longType;
           }
         }
       } finally {
@@ -437,7 +459,10 @@ public class JdbcMetaData {
    * New version to Return SQL for the table with the given
    * SQL type.  Takes, length, precision and scale.
    */
-  public String getCreateColumnSQL(int sqlType, int length, int precision, int scale)
+  public String getCreateColumnSQL(int sqlType,
+				   int length,
+				   int precision,
+				   int scale)
   {
     String type = null;
 
@@ -482,7 +507,10 @@ public class JdbcMetaData {
   /**
    * Returns the SQL for the table with the given SQL type.
    */
-  protected String getCreateColumnSQLImpl(int sqlType, int length, int precision, int scale)
+  protected String getCreateColumnSQLImpl(int sqlType,
+					  int length,
+					  int precision,
+					  int scale)
   {
     Connection conn = null;
 
@@ -546,7 +574,7 @@ public class JdbcMetaData {
       } finally {
         rs.close();
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       try {

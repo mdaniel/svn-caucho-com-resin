@@ -102,6 +102,11 @@ public class AmberPersistenceUnit {
 
   // data source for requests in a transaction
   private DataSource _xaDataSource;
+  
+  // persistence.xml jta-data-source
+  private DataSource _jtaDataSource;
+  // persistence.xml non-jta-data-source
+  private DataSource _nonJtaDataSource;
 
   private JdbcMetaData _jdbcMetaData;
 
@@ -252,7 +257,12 @@ public class AmberPersistenceUnit {
    */
   public DataSource getDataSource()
   {
-    return _dataSource;
+    if (_jtaDataSource != null)
+      return _jtaDataSource;
+    else if (_nonJtaDataSource != null)
+      return _nonJtaDataSource;
+    else
+      return _dataSource;
   }
 
   /**
@@ -285,6 +295,30 @@ public class AmberPersistenceUnit {
   public DataSource getXADataSource()
   {
     return _xaDataSource;
+  }
+  
+  /**
+   * Sets the persistence.xml jta data source.
+   */
+  public void setJtaDataSource(DataSource dataSource)
+  {
+    _jtaDataSource = dataSource;
+  }
+  
+  /**
+   * Sets the persistence.xml non-jta data source.
+   */
+  public void setNonJtaDataSource(DataSource dataSource)
+  {
+    _nonJtaDataSource = dataSource;
+  }
+
+  /**
+   * Return true for a jta-managed persistence unit
+   */
+  public boolean isJta()
+  {
+    return _nonJtaDataSource == null || _jtaDataSource != null;
   }
 
   /**

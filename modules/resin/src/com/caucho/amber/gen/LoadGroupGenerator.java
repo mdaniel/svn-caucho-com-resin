@@ -138,15 +138,15 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println("if (aConn.isInTransaction()) {");
 
       // deleted objects are not reloaded
-      out.println("  if (com.caucho.amber.entity.Entity.P_DELETING <= __caucho_state) {");
+      out.println("  if (com.caucho.amber.entity.EntityState.P_DELETING.ordinal() <= __caucho_state.ordinal()) {");
       out.println("    return;");
       out.println("  }");
 
       // from non-transactional to transactional
-      out.println("  else if (__caucho_state < com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
-      out.println("    int state = __caucho_state;");
+      out.println("  else if (__caucho_state.ordinal() <= com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL.ordinal()) {");
+      out.println("    com.caucho.amber.entity.EntityState state = __caucho_state;");
 
-      out.println("    __caucho_state = com.caucho.amber.entity.Entity.P_TRANSACTIONAL;");
+      out.println("    __caucho_state = com.caucho.amber.entity.EntityState.P_TRANSACTIONAL;");
 
       // XXX: ejb/0d01 (create issue?)
       // jpa/0g0k: see __caucho_load_select
@@ -299,7 +299,7 @@ public class LoadGroupGenerator extends ClassComponent {
     // commented out: jpa/0r01
     // ArrayList<JMethod> postLoadCallbacks = _relatedType.getPostLoadCallbacks();
     // if (postLoadCallbacks.size() > 0 && _index == 0) {
-    //   out.println("if (__caucho_state == com.caucho.amber.entity.Entity.P_TRANSACTIONAL) {");
+    //   out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_TRANSACTIONAL) {");
     //   out.pushDepth();
     //   generateCallbacks(out, postLoadCallbacks);
     //   out.popDepth();

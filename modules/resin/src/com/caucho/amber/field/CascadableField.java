@@ -119,7 +119,7 @@ abstract public class CascadableField extends AbstractField {
       out.println("if (" + getter + " != null) {");
       out.pushDepth();
 
-      out.println(aConn + ".persistNoChecks("+ getter + ");");
+      out.println(aConn + ".persistFromCascade("+ getter + ");");
 
       out.popDepth();
       out.println("}");

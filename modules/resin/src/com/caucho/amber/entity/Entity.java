@@ -44,10 +44,11 @@ public interface Entity extends MappedSuperclass
 {
   public static final int TRANSIENT = 0;
   public static final int P_NEW = 1;
-  public static final int P_NON_TRANSACTIONAL = 2;
-  public static final int P_TRANSACTIONAL = 3;
-  public static final int P_DELETING = 4;
-  public static final int P_DELETED = 5;
+  public static final int P_PERSIST = 2;
+  public static final int P_NON_TRANSACTIONAL = 3;
+  public static final int P_TRANSACTIONAL = 4;
+  public static final int P_DELETING = 5;
+  public static final int P_DELETED = 6;
 
   /**
    * Makes the entity persistent.
@@ -117,12 +118,12 @@ public interface Entity extends MappedSuperclass
   /**
    * Get the entity state.
    */
-  public int __caucho_getEntityState();
+  public EntityState __caucho_getEntityState();
 
   /**
    * Sets the entity state.
    */
-  public void __caucho_setEntityState(int state);
+  public void __caucho_setEntityState(EntityState state);
 
   /**
    * Sets the connection.

@@ -39,4 +39,28 @@ public class DerbyMetaData extends JdbcMetaData {
   {
     super(ds);
   }
+
+  /**
+   * Returns the literal for FALSE.
+   */
+  public String getFalseLiteral()
+  {
+    return "0";
+  }
+
+  /**
+   * Returns true if the POSITION function is supported.
+   */
+  public boolean supportsPositionFunction()
+  {
+    return false;
+  }
+  
+  /**
+   * True if the generated keys is supported
+   */
+  public boolean supportsGetGeneratedKeys()
+  {
+    return true;
+  }
 }

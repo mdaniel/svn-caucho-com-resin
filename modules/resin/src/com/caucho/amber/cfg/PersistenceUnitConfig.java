@@ -170,6 +170,9 @@ public class PersistenceUnitConfig {
 
     unit.setJPA(true);
 
+    unit.setJtaDataSource(_jtaDataSource);
+    unit.setNonJtaDataSource(_nonJtaDataSource);
+    
     unit.setEntityMappingsConfig(entityMappings);
 
     unit.init();

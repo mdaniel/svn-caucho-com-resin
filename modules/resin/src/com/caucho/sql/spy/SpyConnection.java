@@ -513,7 +513,7 @@ public class SpyConnection implements java.sql.Connection {
   {
     try {
       logXA.info(_id + ":commit()");
-      
+
       _conn.commit();
     } catch (SQLException e) {
       logXA.info(_id + ":exn-commit(" + e + ")");

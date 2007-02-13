@@ -351,6 +351,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
     
     if (log.isLoggable(Level.FINER))
       log.finer("sharing xa-pool item: " + this);
+    Thread.dumpStack();
 
     UserPoolItem userPoolItem = new UserPoolItem(_cm);
     userPoolItem.associate(this, _mcf, _subject, _requestInfo);

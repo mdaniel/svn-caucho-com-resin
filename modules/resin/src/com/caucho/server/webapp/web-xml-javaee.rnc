@@ -221,7 +221,7 @@ javaee_user-data-constraint = element user-data-constraint {
 javaee_web-app-Content =
   element context-param { javaee_param-value-Type }*
 
-  & javaee_description-Group
+  & javaee_description-Group*
 
   & element distributable { empty }?
 

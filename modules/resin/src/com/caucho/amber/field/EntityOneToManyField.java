@@ -254,7 +254,7 @@ public class EntityOneToManyField extends CollectionField {
 
       switch (cascadeType) {
       case PERSIST:
-        out.print("persistNoChecks");
+        out.print("persistFromCascade");
         break;
 
       case MERGE:

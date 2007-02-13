@@ -508,11 +508,16 @@ public class ScheduledThreadPool
     {
       long expire = Alarm.getCurrentTime() + unit.toMillis(timeout);
 
-      while (! _isDone && ! _isCancelled
-	     && Alarm.getCurrentTime() < expire
-	     && ! Thread.currentThread().isInterrupted()) {
-	synchronized (this) {
-	  wait(expire - Alarm.getCurrentTime());
+      synchronized (this) {
+	while (! _isDone && ! _isCancelled
+	       && Alarm.getCurrentTime() < expire
+	       && ! Thread.currentThread().isInterrupted()) {
+	  if (! Alarm.isTest())
+	    wait(expire - Alarm.getCurrentTime());
+	  else {
+	    wait(1000);
+	    break;
+	  }
 	}
       }
 
@@ -548,6 +553,7 @@ public class ScheduledThreadPool
       } finally {
 	_thread.setContextClassLoader(oldLoader);
 	_thread = null;
+	_isDone = true;
 
 	// alarm
 

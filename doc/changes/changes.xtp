@@ -12,6 +12,8 @@
 
 <s2 title="3.1.snap - Dec 21, 2006">
 <ul>
+<li>ConnectionPool timeout defaults incorrect (#1586, rep by gschemmel)</li>
+<li>web-app description/display-name order is arbitrary (#1599, rep by kamleshjkl)</li>
 <li>character-encoding now controls default encoding for writers (#1563, rep by asklxf)</li>
 <li>Add header conditions for rewrite-dispatch (#1547)</li>
 <li>Add throttle-concurrent-max to &lt;http></li>

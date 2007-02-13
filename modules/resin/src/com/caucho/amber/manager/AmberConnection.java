@@ -145,7 +145,14 @@ public class AmberConnection
   {
     _isThreadConnection = true;
 
-    register();
+    initJta();
+  }
+
+  public void initJta()
+  {
+    // non-jta connections do not register with the local transaction
+    if (_persistenceUnit.isJta())
+      register();
   }
 
   /**
@@ -229,6 +236,7 @@ public class AmberConnection
    */
   public void postUpdate(Entity entity)
   {
+    
     try {
       _persistenceUnit.callListeners(Listener.POST_UPDATE, entity);
     } catch (RuntimeException e) {
@@ -266,7 +274,7 @@ public class AmberConnection
 
       checkTransactionRequired("persist");
 
-      persistInternal(entity);
+      persistInternal(entity, false);
 
     } catch (RuntimeException e) {
       throw e;
@@ -281,15 +289,15 @@ public class AmberConnection
    * Makes the instance managed called
    * from cascading operations.
    */
-  public void persistNoChecks(Object entity)
+  public void persistFromCascade(Object entity)
   {
     try {
       if (entity == null)
         return;
 
-      persistInternal(entity);
-
+      persistInternal(entity, true);
     } catch (EntityExistsException e) {
+      log.log(Level.FINER, e.toString(), e);
       // This is not an issue. It is the cascading
       // operation trying to persist the source
       // entity from the destination end.
@@ -315,14 +323,14 @@ public class AmberConnection
 
       flushInternal();
 
-      int state = entity.__caucho_getEntityState();
+      EntityState state = entity.__caucho_getEntityState();
 
       Object pk = entity.__caucho_getPrimaryKey();
 
       log.finest(L.l("merge(class: '{0}' PK: '{1}' state: '{2}')",
                      entity.getClass().getName(), pk, state));
 
-      if (state == com.caucho.amber.entity.Entity.TRANSIENT) {
+      if (state == EntityState.TRANSIENT) {
         if (contains(entity)) {
           // detached entity instance
           throw new UnsupportedOperationException(L.l("Merge operation for detached instances is not supported"));
@@ -358,7 +366,7 @@ public class AmberConnection
           }
         }
       }
-      else if (state >= com.caucho.amber.entity.Entity.P_DELETING) {
+      else if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
         // removed entity instance
         throw new IllegalArgumentException(L.l("Merge operation cannot be applied to a removed entity instance"));
       }
@@ -411,10 +419,15 @@ public class AmberConnection
           throw new IllegalArgumentException(L.l("remove() operation can only be applied to a managed entity. This entity instance '{0}' PK: '{1}' is detached which means it was probably removed or needs to be merged.", instance.getClass().getName(), instance.__caucho_getPrimaryKey()));
       }
 
-      int state = instance.__caucho_getEntityState();
+      EntityState state = instance.__caucho_getEntityState();
 
-      if (state >= com.caucho.amber.entity.Entity.P_DELETING)
+      if (EntityState.P_DELETING.ordinal() <= state.ordinal())
         return;
+
+      // jpa/1620
+      // In particular, required for cascading persistence, since the cascade
+      // is lazy until flush
+      flushInternal();
 
       Object oldEntity;
 
@@ -435,7 +448,6 @@ public class AmberConnection
       // jpa/0o30
       // Post-remove child entities.
       instance.__caucho_cascadePostRemove(this);
-
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -664,10 +676,12 @@ public class AmberConnection
       int index = getEntity(className, pk);
 
       if (index >= 0) {
-        int state = instance.__caucho_getEntityState();
+        EntityState state = instance.__caucho_getEntityState();
 
-        if (state <= Entity.TRANSIENT || state >= Entity.P_DELETING)
-          throw new IllegalArgumentException(L.l("refresh() operation can only be applied to a managed entity instance. The entity state is '{0}' for object of class '{0}' with PK '{1}'", className, pk, state == Entity.TRANSIENT ? "TRANSIENT" : "DELETING or DELETED"));
+        if (state.ordinal() <= EntityState.TRANSIENT.ordinal()
+	    || EntityState.P_DELETING.ordinal() <= state.ordinal()) {
+          throw new IllegalArgumentException(L.l("refresh() operation can only be applied to a managed entity instance. The entity state is '{0}' for object of class '{0}' with PK '{1}'", className, pk, state == EntityState.TRANSIENT ? "TRANSIENT" : "DELETING or DELETED"));
+	}
       }
       else
         throw new IllegalArgumentException(L.l("refresh() operation can only be applied to a managed entity instance. There was no managed instance of class '{0}' with PK '{1}'", className, pk));
@@ -710,6 +724,9 @@ public class AmberConnection
    */
   public EntityTransaction getTransaction()
   {
+    if (_isXA)
+      throw new IllegalStateException(L.l("Cannot call EntityManager.getTransaction() inside a distributed transaction."));
+    
     if (_trans == null)
       _trans = new EntityTransactionImpl();
 
@@ -848,7 +865,7 @@ public class AmberConnection
         return entity;
 
       // jpa/0g0k setTransactionalState(entity);
-      if (entity.__caucho_getEntityState() == Entity.P_TRANSACTIONAL) {
+      if (entity.__caucho_getEntityState() == EntityState.P_TRANSACTIONAL) {
         return entity;
       }
 
@@ -1260,15 +1277,16 @@ public class AmberConnection
     if (entity == null)
       return false;
 
+    EntityState state = entity.__caucho_getEntityState();
     if (isInTransaction()) {
-      if (entity.__caucho_getEntityState() != Entity.P_TRANSACTIONAL) {
+      if (state != EntityState.P_TRANSACTIONAL) {
         // jpa/11a6
         return false;
       }
     }
 
     // jpa/0j5f
-    if (entity.__caucho_getEntityState() >= Entity.P_DELETING)
+    if (EntityState.P_DELETING.ordinal() <= state.ordinal())
       return false;
 
     return true;
@@ -1284,7 +1302,7 @@ public class AmberConnection
 
       _isInTransaction = true;
       _isXA = true;
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
@@ -1384,7 +1402,7 @@ public class AmberConnection
       Entity entity = _txEntities.get(i);
 
       // jpa/1500
-      if (entity.__caucho_getEntityState() == Entity.P_DELETED) {
+      if (entity.__caucho_getEntityState() == EntityState.P_DELETED) {
         EntityType entityType = entity.__caucho_getEntityType();
         Object key = entity.__caucho_getPrimaryKey();
         EntityItem item = _persistenceUnit.getEntity(entityType, key);
@@ -1494,7 +1512,6 @@ public class AmberConnection
       checkTransactionRequired("flush");
 
       flushInternal();
-
     } catch (RuntimeException e) {
       throw e;
     } catch (SQLException e) {
@@ -1511,7 +1528,6 @@ public class AmberConnection
   {
     try {
       flushInternal();
-
     } catch (RuntimeException e) {
       throw e;
     } catch (SQLException e) {
@@ -1682,9 +1698,10 @@ public class AmberConnection
     if (! _persistenceUnit.isJPA())
       return;
 
-    int state = entity.__caucho_getEntityState();
+    EntityState state = entity.__caucho_getEntityState();
 
-    if (state > Entity.TRANSIENT && state < Entity.P_DELETING) {
+    if (EntityState.TRANSIENT.ordinal() < state.ordinal()
+	&& state.ordinal() < EntityState.P_DELETING.ordinal()) {
       // jpa/0g06
       addEntity(entity);
     }
@@ -1835,8 +1852,8 @@ public class AmberConnection
     }
     else {
       // jpa/0s2d
-      Entity oldEntity = _txEntities.remove(index);
-      _txEntities.add(index, entity);
+      Entity oldEntity = _txEntities.get(index);
+      _txEntities.set(index, entity);
     }
   }
 
@@ -1852,7 +1869,8 @@ public class AmberConnection
                           entity.__caucho_getPrimaryKey());
 
     if (index < 0) {
-
+      throw new IllegalStateException(L.l("AmberEntity[{0}:{1}} cannot be deleted since it is not managed"));
+      /*
       EntityType entityType = entity.__caucho_getEntityType();
 
       if (entityType == null)
@@ -1865,9 +1883,11 @@ public class AmberConnection
       if (entityHome == null)
         throw new AmberException(L.l("entity has no matching home"));
 
+      // XXX: this makes no sense
       entityHome.makePersistent(entity, this, true);
 
       addEntity(entity);
+      */
     }
     else {
       Entity oldEntity = _entities.get(index);
@@ -2181,8 +2201,9 @@ public class AmberConnection
       entity.__caucho_setConnection(this);
 
       // jpa/0j5f
-      if (entity.__caucho_getEntityState() < Entity.P_DELETING)
-        entity.__caucho_setEntityState(Entity.P_TRANSACTIONAL);
+      EntityState state = entity.__caucho_getEntityState();
+      if (state.ordinal() < EntityState.P_DELETING.ordinal())
+        entity.__caucho_setEntityState(EntityState.P_TRANSACTIONAL);
     }
   }
 
@@ -2304,15 +2325,16 @@ public class AmberConnection
     for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
 
-      int state = entity.__caucho_getEntityState();
+      EntityState state = entity.__caucho_getEntityState();
 
+      // jpa/0i60
       // jpa/0h27: for all entities Y referenced by a *managed*
       // entity X, where the relationship has been annotated
       // with cascade=PERSIST/ALL, the persist operation is
       // applied to Y. It is a lazy cascade as the relationship
       // is not always initialized at the time persist(X) was
       // called but must be at flush time.
-      if (state < Entity.P_DELETING) {
+      if (state.ordinal() <= EntityState.P_PERSIST.ordinal()) {
         entity.__caucho_cascadePrePersist(this);
         // entity.__caucho_cascadePostPersist(this);
       }
@@ -2343,18 +2365,18 @@ public class AmberConnection
   /**
    * Persists the entity.
    */
-  public void persistInternal(Object entity)
+  private void persistInternal(Object entity, boolean isCascade)
     throws Exception
   {
     Entity instance = (Entity) entity;
+
+    EntityState state = instance.__caucho_getEntityState();
 
     // jpa/0h24
     // Pre-persist child entities.
     instance.__caucho_cascadePrePersist(this);
 
-    int state = instance.__caucho_getEntityState();
-
-    if (state == Entity.TRANSIENT) {
+    if (state == EntityState.TRANSIENT) {
       try {
         createInternal(instance);
       } catch (SQLException e) {
@@ -2362,15 +2384,19 @@ public class AmberConnection
         throw new EntityExistsException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", instance.getClass().getName(), instance.__caucho_getPrimaryKey(), state));
       }
     }
-    else if (state >= Entity.P_DELETING) {
+    else if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
+      // jpa/0i60, jpa/1510
+
       // removed entity instance, reset state and persist.
+      if (! isCascade)
+	flushInternal();
       instance.__caucho_makePersistent(null, (EntityType) null);
       createInternal(instance);
     }
     else if (instance.__caucho_isDirty()) {
       // OK: jpa/0ga6
     }
-    else if (! contains(instance)) {
+    else if (instance.__caucho_getConnection() != this) {
       // jpa/0ga5 (tck):
       // See entitytest.persist.basic.persistBasicTest4 vs.
       //     callback.inheritance.preUpdateTest
