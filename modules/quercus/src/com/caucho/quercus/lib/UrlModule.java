@@ -216,6 +216,9 @@ public class UrlModule extends AbstractQuercusModule {
    */
   public static String urldecode(String s)
   {
+    if (s == null)
+      return "";
+  
     int len = s.length();
     StringBuilder sb = new StringBuilder();
 
