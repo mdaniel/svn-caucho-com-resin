@@ -47,13 +47,21 @@ public class OracleMetaData extends JdbcMetaData {
   }
 
   /**
+   * Returns the literal for FALSE.
+   */
+  public String getFalseLiteral()
+  {
+    return "0";
+  }
+
+  /**
    * True if blobs must be truncated on delete.
    */
   public boolean isTruncateBlobBeforeDelete()
   {
     return true;
   }
-  
+
   /**
    * Returns the SQL for the table with the given SQL type.
    */
@@ -69,6 +77,14 @@ public class OracleMetaData extends JdbcMetaData {
     }
 
     return super.getCreateColumnSQL(sqlType, length, precision, scale);
+  }
+
+  /**
+   * Returns true if the POSITION function is supported.
+   */
+  public boolean supportsPositionFunction()
+  {
+    return false;
   }
 
   /**

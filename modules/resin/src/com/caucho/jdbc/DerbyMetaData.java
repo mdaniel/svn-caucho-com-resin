@@ -55,7 +55,7 @@ public class DerbyMetaData extends JdbcMetaData {
   {
     return false;
   }
-  
+
   /**
    * True if the generated keys is supported
    */

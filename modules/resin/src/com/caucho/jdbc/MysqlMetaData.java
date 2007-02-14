@@ -45,9 +45,25 @@ public class MysqlMetaData extends JdbcMetaData {
   }
 
   /**
+   * Returns the literal for FALSE.
+   */
+  public String getFalseLiteral()
+  {
+    return "0";
+  }
+
+  /**
    * Returns true if identity is supported.
    */
   public boolean supportsIdentity()
+  {
+    return true;
+  }
+
+  /**
+   * Returns true if the POSITION function is supported.
+   */
+  public boolean supportsPositionFunction()
   {
     return true;
   }

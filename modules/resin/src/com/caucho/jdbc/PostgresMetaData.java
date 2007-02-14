@@ -46,6 +46,22 @@ public class PostgresMetaData extends JdbcMetaData {
   }
 
   /**
+   * Returns the literal for FALSE.
+   */
+  public String getFalseLiteral()
+  {
+    return "false";
+  }
+
+  /**
+   * Returns true if the POSITION function is supported.
+   */
+  public boolean supportsPositionFunction()
+  {
+    return true;
+  }
+
+  /**
    * Returns true if sequences are supported.
    */
   public boolean supportsSequences()
