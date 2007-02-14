@@ -37,6 +37,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.events.*;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -204,106 +205,63 @@ public class QNameProperty extends Property {
     out.add(JAXBUtil.EVENT_FACTORY.createEndElement(qname, null));
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
     throw new UnsupportedOperationException();
   }
 
+  public Object readAttribute(XMLStreamReader in, int i)
+    throws JAXBException
+  {
+    return resolveQName(in.getAttributeValue(i), in.getNamespaceContext());
+  }
+
   // Can't use CDataProperty because we need access to the namespace map
-  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT || ! in.getName().equals(qname))
-      throw new IOException(L.l("Expected <{0}>, not <{1}>", 
-                                qname.getLocalPart(), in.getLocalName()));
-
     in.next();
  
     Object ret = null;
 
     if (in.getEventType() == in.CHARACTERS) {
       String text = in.getText();
-      int colon = text.indexOf(':');
-
-      if (colon < 0)
-        ret = new QName(text);
-      else {
-        String prefix = text.substring(0, colon);
-
-        String namespace = in.getNamespaceURI(prefix);
-
-        if (namespace == null)
-          throw new IOException(L.l("No known namespace for prefix {0}", 
-                                    prefix));
-
-        String localName = text.substring(colon + 1);
-
-        if ("".equals(localName))
-          throw new IOException(L.l("Malformed QName: empty localName"));
-
-        ret = new QName(namespace, localName, prefix);
-      }
+      ret = resolveQName(text, in.getNamespaceContext());
     }
 
-    while(in.getEventType() != in.END_ELEMENT)
+    // essentially a nextTag() that handles end of document gracefully
+    while (in.hasNext()) {
+      if (in.getEventType() == in.END_ELEMENT)
+        break;
+
       in.next();
-
-    if (! in.getName().equals(qname))
-      throw new IOException(L.l("Expected </{0}>, not </{1}>", 
-                                qname.getLocalPart(), in.getLocalName()));
-
-    in.next();
+    }
 
     return ret;
   }
 
   // Can't use CDataProperty because we need access to the namespace map
-  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    XMLEvent event = in.peek();
-
-    if (! event.isStartElement() || 
-        ! qname.equals(((StartElement) event).getName()))
-      throw new IOException(L.l("Expected <{0}>", qname.getLocalPart()));
-
-    StartElement start = (StartElement) in.nextEvent();
+    XMLEvent event = in.nextEvent();
+    StartElement start = event.asStartElement(); 
     event = in.nextEvent();
  
     Object ret = null;
 
     if (event.isCharacters()) {
       String text = ((Characters) event).getData();
-      int colon = text.indexOf(':');
-
-      if (colon < 0)
-        ret = new QName(text);
-      else {
-        String prefix = text.substring(0, colon);
-
-        String namespace = start.getNamespaceURI(prefix);
-
-        if (namespace == null)
-          throw new IOException(L.l("No known namespace for prefix {0}", 
-                                    prefix));
-
-        String localName = text.substring(colon + 1);
-
-        if ("".equals(localName))
-          throw new IOException(L.l("Malformed QName: empty localName"));
-
-        ret = new QName(namespace, localName, prefix);
-      }
+      ret = resolveQName(text, start.getNamespaceContext());
     }
 
-    while (! event.isEndElement())
-      event = in.nextEvent();
+    while (in.hasNext()) {
+      if (event.isEndElement())
+        break;
 
-    if (! ((EndElement) event).getName().equals(qname))
-      throw new IOException(L.l("Expected </{0}>, not </{1}>", 
-                                qname.getLocalPart(), 
-                                ((EndElement) event).getName()));
+      event = in.nextEvent();
+    }
 
     return ret;
   }
@@ -312,6 +270,31 @@ public class QNameProperty extends Property {
     throws JAXBException
   {
     throw new UnsupportedOperationException();
+  }
+
+  // XXX default namespace?
+  private QName resolveQName(String text, NamespaceContext context)
+    throws JAXBException
+  {
+    int colon = text.indexOf(':');
+
+    if (colon < 0)
+      return new QName(text);
+    else {
+      String prefix = text.substring(0, colon);
+
+      String namespace = context.getNamespaceURI(prefix);
+
+      if (namespace == null)
+        throw new JAXBException(L.l("No known namespace for prefix {0}", prefix));
+
+      String localName = text.substring(colon + 1);
+
+      if ("".equals(localName))
+        throw new JAXBException(L.l("Malformed QName: empty localName"));
+
+      return new QName(namespace, localName, prefix);
+    }
   }
 
   public String getSchemaType()

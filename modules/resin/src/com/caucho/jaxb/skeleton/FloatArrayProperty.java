@@ -64,81 +64,64 @@ public class FloatArrayProperty extends ArrayProperty {
     super(FloatProperty.PRIMITIVE_PROPERTY);
   }
 
-  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
-      return new float[0]; // avoid ArrayList instantiation
+    float[] array = (float[]) previous;
 
-    ArrayList<Float> ret = new ArrayList<Float>();
+    if (array == null)
+      array = new float[1];
+    else {
+      float[] newArray = new float[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName()))
-      ret.add((Float) _componentProperty.read(u, in, qname));
-
-    float[] array = new float[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).floatValue();
-
-    return array;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    XMLEvent event = in.peek();
-
-    if (! event.isStartElement() || 
-        ! qname.equals(((StartElement) event).getName()))
-      return new float[0]; // avoid ArrayList instantiation
-
-    ArrayList<Float> ret = new ArrayList<Float>();
-
-    while (event.isStartElement() &&
-           qname.equals(((StartElement) event).getName())) {
-      ret.add((Float) _componentProperty.read(u, in, qname));
-      event = in.peek();
+      array = newArray;
     }
 
-    float[] array = new float[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).floatValue();
+    array[array.length - 1] =
+      ((Float) _componentProperty.read(u, in, null)).floatValue();
 
     return array;
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+  public Object read(Unmarshaller u, XMLEventReader in,
+                     Object previous)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    float[] array = (float[]) previous;
+
+    if (array == null)
+      array = new float[1];
+    else {
+      float[] newArray = new float[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
+
+      array = newArray;
+    }
+
+    array[array.length - 1] =
+      ((Float) _componentProperty.read(u, in, null)).floatValue();
+
+    return array;
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
-    Node child = node.getNode();
+    float[] array = (float[]) previous;
 
-    if (child.getNodeType() != Node.ELEMENT_NODE)
-      return new float[0];
+    if (array == null)
+      array = new float[1];
     else {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
+      float[] newArray = new float[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-      if (! nodeName.equals(qname))
-        return new float[0];
+      array = newArray;
     }
 
-    ArrayList<Float> ret = new ArrayList<Float>();
+    Float b = (Float) _componentProperty.bindFrom(binder, node, null);
 
-    while (child != null && child.getNodeType() == Node.ELEMENT_NODE) {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
-
-      if (! nodeName.equals(qname))
-        break;
-
-      ret.add((Float) _componentProperty.bindFrom(binder, node, qname));
-
-      child = node.nextSibling();
-    }
-
-    float[] array = new float[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).floatValue();
+    array[array.length - 1] = b.floatValue();
 
     return array;
   }

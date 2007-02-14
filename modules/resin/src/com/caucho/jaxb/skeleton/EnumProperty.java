@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,21 +28,91 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import javax.xml.stream.XMLStreamException;
+
 import java.io.IOException;
+
+import java.lang.reflect.Field;
+
+import java.util.HashMap;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.MarshalException;
+import javax.xml.bind.UnmarshalException;
+
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
+
+import javax.xml.stream.XMLStreamException;
+
+import com.caucho.util.L10N;
 
 /**
  * a string property
  */
-public class EnumProperty extends CDataProperty {
-  protected String write(Object in)
+public class EnumProperty<E extends Enum<E>> extends CDataProperty {
+  private static final L10N L = new L10N(EnumProperty.class);
+
+  private final Class<E> _enum;
+  private final HashMap<String,E> _valueMap = new HashMap<String,E>();
+  private final HashMap<E,String> _nameMap = new HashMap<E,String>();
+
+  public EnumProperty(Class<E> e)
+    throws JAXBException
   {
-    return in == null ? null : in.toString();
+    _enum = e;
+
+    try {
+      // XXX do something with this value
+      XmlEnum xmlEnum = _enum.getAnnotation(XmlEnum.class);
+
+      Field[] fields = _enum.getFields();
+
+      for (int i = 0; i < fields.length; i++) {
+        Field f = fields[i];
+
+        // We only care about actual enum fields
+        if (! fields[i].isEnumConstant())
+          continue;
+
+        XmlEnumValue xmlEnumValue = f.getAnnotation(XmlEnumValue.class);
+        E value = Enum.valueOf(_enum, f.getName());
+
+        if (xmlEnumValue != null) {
+          _valueMap.put(xmlEnumValue.value(), value);
+          _nameMap.put(value, xmlEnumValue.value());
+        }
+        else {
+          _valueMap.put(f.getName(), value);
+          _nameMap.put(value, f.getName());
+        }
+      }
+    }
+    catch (Exception ex) {
+      throw new JAXBException(L.l("Error while introspecting enum {0}", 
+                                  e.getName()), ex);
+    }
+  }
+
+  protected String write(Object in)
+    throws JAXBException
+  {
+    String out = _nameMap.get(in);
+
+    if (out == null)
+      throw new MarshalException(L.l("Unknown enum value: {0}", in));
+
+    return out;
   }
 
   protected Object read(String in)
+    throws JAXBException
   {
-    return in;
+    Object obj = _valueMap.get(in);
+
+    if (obj == null)
+      throw new UnmarshalException(L.l("Invalid enum string: {0}", in));
+
+    return obj;
   }
 
   public String getSchemaType()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong
  */
 
 package com.caucho.jaxb.skeleton;
@@ -61,66 +61,40 @@ public class ListProperty extends IterableProperty {
     _componentProperty = componentProperty;
   }
 
-  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    ArrayList<Object> list = new ArrayList<Object>();
+    ArrayList<Object> list = (ArrayList<Object>) previous;
+    
+    if (list == null)
+      list = new ArrayList<Object>();
 
-    if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
-      return list; // XXX qa for null vs empty?
-
-    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName()))
-      list.add(_componentProperty.read(u, in, qname));
+    list.add(_componentProperty.read(u, in, null));
 
     return list;
   }
 
-  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    ArrayList<Object> list = new ArrayList<Object>();
+    ArrayList<Object> list = (ArrayList<Object>) previous;
+    
+    if (list == null)
+      list = new ArrayList<Object>();
 
-    XMLEvent event = in.peek();
-
-    if (! event.isStartElement() || 
-        ! qname.equals(((StartElement) event).getName()))
-      return list; // XXX qa for null vs empty?
-
-    while (event.isStartElement() &&
-           qname.equals(((StartElement) event).getName())) {
-      list.add(_componentProperty.read(u, in, qname));
-      event = in.peek();
-    }
+    list.add(_componentProperty.read(u, in, null));
 
     return list;
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
     Node child = node.getNode();
 
     ArrayList<Object> list = new ArrayList<Object>();
 
-    if (child.getNodeType() != Node.ELEMENT_NODE)
-      return list; // XXX qa for null vs empty?
-    else {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
-
-      if (! qname.equals(nodeName))
-        return list;
-    }
-
-    while (child != null && child.getNodeType() == Node.ELEMENT_NODE) {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
-
-      if (! nodeName.equals(qname))
-        break;
-
-      list.add(_componentProperty.bindFrom(binder, node, qname));
-
-      child = node.nextSibling();
-    }
+    list.add(_componentProperty.bindFrom(binder, node, null));
 
     return list;
   }

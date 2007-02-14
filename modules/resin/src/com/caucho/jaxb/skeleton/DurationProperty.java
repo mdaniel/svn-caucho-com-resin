@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -18,7 +18,7 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * adate with Resin Open Source; if not, write to the
+ * along with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
@@ -28,41 +28,38 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
-import javax.xml.bind.*;
-import javax.xml.datatype.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
-import java.text.*;
 
-import java.lang.reflect.*;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
+import javax.xml.datatype.Duration;
+import javax.xml.stream.XMLStreamException;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 
-import com.caucho.vfs.WriteStream;
+import com.caucho.jaxb.JAXBUtil;
 
 /**
- * a Date Property
+ * Duration property
  */
-public class XMLGregorianCalendarProperty extends CDataProperty {
-  public static final XMLGregorianCalendarProperty PROPERTY 
-    = new XMLGregorianCalendarProperty();
+public class DurationProperty extends CDataProperty {
+  public static final DurationProperty PROPERTY = new DurationProperty();
 
   protected String write(Object in)
   {
-    return ((XMLGregorianCalendar) in).toXMLFormat();
+    Duration duration = (Duration) in;
+
+    return duration.toString();
   }
 
   protected Object read(String in)
     throws JAXBException
   {
-    return JAXBUtil.getDatatypeFactory().newXMLGregorianCalendar(in);
+    return JAXBUtil.getDatatypeFactory().newDuration(in);
   }
 
   public String getSchemaType()
   {
-    return "xsd:dateTime";
+    return "xsd:duration";
   }
 }
-
-

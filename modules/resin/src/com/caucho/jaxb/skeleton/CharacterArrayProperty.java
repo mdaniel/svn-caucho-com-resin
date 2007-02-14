@@ -65,81 +65,63 @@ public class CharacterArrayProperty extends ArrayProperty {
     super(CharacterProperty.PRIMITIVE_PROPERTY);
   }
 
-  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
-      return new char[0]; // avoid ArrayList instantiation
+    char[] array = (char[]) previous;
 
-    ArrayList<Character> ret = new ArrayList<Character>();
+    if (array == null)
+      array = new char[1];
+    else {
+      char[] newArray = new char[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName()))
-      ret.add((Character) _componentProperty.read(u, in, qname));
-
-    char[] array = new char[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).charValue();
-
-    return array;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    XMLEvent event = in.peek();
-
-    if (! event.isStartElement() || 
-        ! qname.equals(((StartElement) event).getName()))
-      return new char[0]; // avoid ArrayList instantiation
-
-    ArrayList<Character> ret = new ArrayList<Character>();
-
-    while (event.isStartElement() &&
-           qname.equals(((StartElement) event).getName())) {
-      ret.add((Character) _componentProperty.read(u, in, qname));
-      event = in.peek();
+      array = newArray;
     }
 
-    char[] array = new char[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).charValue();
+    array[array.length - 1] =
+      ((Character) _componentProperty.read(u, in, null)).charValue();
 
     return array;
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    char[] array = (char[]) previous;
+
+    if (array == null)
+      array = new char[1];
+    else {
+      char[] newArray = new char[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
+
+      array = newArray;
+    }
+
+    array[array.length - 1] =
+      ((Character) _componentProperty.read(u, in, null)).charValue();
+
+    return array;
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
-    Node child = node.getNode();
+    char[] array = (char[]) previous;
 
-    if (child.getNodeType() != Node.ELEMENT_NODE)
-      return new char[0];
+    if (array == null)
+      array = new char[1];
     else {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
+      char[] newArray = new char[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-      if (! nodeName.equals(qname))
-        return new char[0];
+      array = newArray;
     }
 
-    ArrayList<Character> ret = new ArrayList<Character>();
+    Character b = (Character) _componentProperty.bindFrom(binder, node, null);
 
-    while (child != null && child.getNodeType() == Node.ELEMENT_NODE) {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
-
-      if (! nodeName.equals(qname))
-        break;
-
-      ret.add((Character) _componentProperty.bindFrom(binder, node, qname));
-
-      child = node.nextSibling();
-    }
-
-    char[] array = new char[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).charValue();
+    array[array.length - 1] = b.charValue();
 
     return array;
   }

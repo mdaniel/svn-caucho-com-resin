@@ -44,6 +44,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
 public class GetterSetterAccessor extends Accessor {
@@ -53,25 +54,22 @@ public class GetterSetterAccessor extends Accessor {
   private Type _genericType;
   private String _name;
 
-  private PropertyDescriptor _propertyDescriptor;
-
-  public GetterSetterAccessor(PropertyDescriptor propertyDescriptor, 
-                              JAXBContextImpl context)
+  public GetterSetterAccessor(JAXBContextImpl context, 
+                              String name, Method get, Method set)
     throws JAXBException
   {
     super(context);
 
-    _propertyDescriptor = propertyDescriptor;
-
-    _get = _propertyDescriptor.getReadMethod();
-    _set = _propertyDescriptor.getWriteMethod();
-    _name = _propertyDescriptor.getName();
+    _get = get;
+    _set = set;
+    _name = name;
     _type = _get.getReturnType();
     _genericType = _get.getGenericReturnType();
-    _property = _context.createProperty(_genericType);
 
     if ("clazz".equals(_name))
       _name = "class";
+
+    init();
   }
 
   public Object get(Object o)
@@ -117,16 +115,22 @@ public class GetterSetterAccessor extends Accessor {
 
   public Class getType()
   {
-    return _propertyDescriptor.getPropertyType();
+    return _get.getReturnType();
   }
 
   public Type getGenericType()
   {
-    return getType();
+    return _get.getGenericReturnType();
   }
 
   public String getName()
   {
     return _name;
+  }
+
+  public String toString()
+  {
+    return "GetterSetterAccessor[" + _get.getDeclaringClass().getName() + "." +
+                                     getName() + "]";
   }
 }

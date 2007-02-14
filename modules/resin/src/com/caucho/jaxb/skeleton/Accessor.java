@@ -31,6 +31,7 @@ package com.caucho.jaxb.skeleton;
 
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.jaxb.JAXBUtil;
 import com.caucho.util.L10N;
 
 import org.w3c.dom.Node;
@@ -44,10 +45,13 @@ import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.helpers.ValidationEventImpl;
 import javax.xml.bind.helpers.ValidationEventLocatorImpl;
 
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 import javax.xml.namespace.QName;
 
@@ -70,6 +74,10 @@ import java.lang.reflect.Type;
 
 import java.io.IOException;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /** an Accessor is either a getter/setter pair or a field */
@@ -79,13 +87,31 @@ public abstract class Accessor {
   public static final String XML_SCHEMA_PREFIX = "xsd";
   public static final String XML_INSTANCE_PREFIX = "xsi";
 
+  public static final Comparator<Accessor> nameComparator 
+    = new Comparator<Accessor>() {
+      public int compare(Accessor a1, Accessor a2) 
+      {
+        return a1.getName().compareTo(a2.getName());
+      }
+
+      public boolean equals(Object o)
+      {
+        return this == o;
+      }
+    };
+
   private static boolean _generateRICompatibleSchema = true;
 
   protected int _order = -1;
   protected JAXBContextImpl _context;
+
   protected Property _property;
+
   protected QName _qname = null;
+  protected HashMap<Class,QName> _qnameMap = null;
+
   protected QName _typeQName = null;
+  protected AccessorType _accessorType = AccessorType.UNSET;
 
   public static void setGenerateRICompatibleSchema(boolean compatible)
   {
@@ -97,9 +123,156 @@ public abstract class Accessor {
     _context = context;
   }
 
+  protected void init()
+    throws JAXBException
+  {
+    // XXX wrapper
+    
+    switch (getAccessorType()) {
+      case ELEMENT: 
+        {
+          // XXX type from XmlElement
+          _property = _context.createProperty(getGenericType(), false);
+
+          XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
+
+          if (wrapper != null) {
+            _qname = qnameFromXmlElementWrapper(wrapper);
+            break;
+          }
+
+          XmlElement element = getAnnotation(XmlElement.class);
+
+          if (element != null) {
+            _qname = qnameFromXmlElement(element);
+            break;
+          }
+
+          _qname = new QName(getName());
+
+          if (! _property.isXmlPrimitiveType())
+            _context.createSkeleton(getType());
+
+          break;
+        }
+
+      case ATTRIBUTE: 
+        {
+          XmlAttribute attribute = getAnnotation(XmlAttribute.class);
+
+          String name = getName();
+          String namespace = null;
+
+          if (attribute != null) {
+            if (! attribute.name().equals("##default"))
+              name = attribute.name();
+
+            if (! attribute.namespace().equals("##default"))
+              namespace = attribute.namespace();
+          }
+
+          if (namespace == null)
+            _qname = new QName(name);
+          else
+            _qname = new QName(namespace, name);
+
+          _property = _context.createProperty(getGenericType(), false);
+
+          break;
+        }
+
+      case VALUE:
+        {
+          // XXX
+          _qname = new QName(getName());
+
+          _property = _context.createProperty(getGenericType(), false);
+
+          break;
+        }
+
+      case ELEMENTS:
+        {
+          XmlElements elements = getAnnotation(XmlElements.class);
+
+          if (elements.value().length == 0) {
+            // XXX special case : equivalent to unannotated
+          }
+
+          if (elements.value().length == 1) {
+            // XXX special case : equivalent to @XmlElement
+          }
+
+          _qnameMap = new HashMap<Class,QName>();
+          HashMap<QName,Property> propertyMap = new HashMap<QName,Property>();
+          HashMap<Class,Property> classMap = new HashMap<Class,Property>();
+
+          for (int i = 0; i < elements.value().length; i++) {
+            XmlElement element = elements.value()[i];
+
+            if (XmlElement.DEFAULT.class.equals(element.type()))
+              throw new JAXBException(L.l("@XmlElement annotations in @XmlElements must specify a type"));
+
+            QName qname = qnameFromXmlElement(element);
+            Property property = _context.createProperty(element.type());
+
+            propertyMap.put(qname, property);
+            classMap.put(element.type(), property);
+            _qnameMap.put(element.type(), qname);
+
+            if (! property.isXmlPrimitiveType())
+              _context.createSkeleton(element.type());
+          }
+
+          _property = new MultiProperty(propertyMap, classMap);
+
+          if (List.class.isAssignableFrom(getType()))
+            _property = new ListProperty(_property);
+          else if (getType().isArray()) {
+            Class cType = getType().getComponentType();
+            _property = ArrayProperty.createArrayProperty(_property, cType);
+          }
+
+          break;
+        }
+
+      case ANY_TYPE_ELEMENT_LAX:
+        _property = _context.createProperty(getGenericType(), true);
+        break;
+
+      case ANY_TYPE_ELEMENT:
+        _property = _context.createProperty(getGenericType(), false); // XXX?
+        break;
+    }
+  }
+
+  public void putQNames(HashMap<QName,Accessor> map)
+    throws JAXBException
+  {
+    if (_qname != null) {
+      if (map.containsKey(_qname))
+        throw new JAXBException(L.l("Class contains two elements with the same QName {0}", _qname));
+
+      map.put(_qname, this);
+    }
+    else {
+      for (QName qname : _qnameMap.values()) {
+        if (map.containsKey(qname))
+          throw new JAXBException(L.l("Class contains two elements with the same QName {0}", qname));
+
+        map.put(qname, this);
+      }
+    }
+  }
+
   public void setOrder(int order)
   {
     _order = order;
+  }
+
+  public int getOrder()
+  {
+    return _order;
   }
 
   public boolean checkOrder(int order, ValidationEventHandler handler)
@@ -122,44 +295,92 @@ public abstract class Accessor {
 
   // Output methods
 
+  public void writeAttribute(Marshaller m, XMLStreamWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    QName name = getQName(obj);
+    Object value = get(obj);
+
+    if (name.getNamespaceURI() == null || "".equals(name.getNamespaceURI()))
+      out.writeAttribute(name.getLocalPart(), value.toString());
+    else if (name.getPrefix() == null || "".equals(name.getPrefix())) {
+      out.writeAttribute(name.getNamespaceURI(), name.getLocalPart(), 
+                         value.toString());
+    }
+    else {
+      out.writeAttribute(name.getPrefix(), 
+                         name.getLocalPart(), 
+                         name.getNamespaceURI(), 
+                         value.toString());
+    }
+  }
+
   public void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    _property.write(m, out, obj, getQName());
+    if (getAccessorType() == AccessorType.ATTRIBUTE)
+      writeAttribute(m, out, obj);
+    else
+      _property.write(m, out, obj, getQName(obj));
+  }
+
+  public void writeAttribute(Marshaller m, XMLEventWriter out, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    QName name = getQName(obj);
+    Object value = get(obj);
+
+    out.add(JAXBUtil.EVENT_FACTORY.createAttribute(name, value.toString()));
   }
 
   public void write(Marshaller m, XMLEventWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    _property.write(m, out, obj, getQName());
+    if (getAccessorType() == AccessorType.ATTRIBUTE)
+      writeAttribute(m, out, obj);
+    else
+      _property.write(m, out, obj, getQName(obj));
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj)
     throws JAXBException
   {
-    return _property.bindTo(binder, node, obj, getQName());
+    return _property.bindTo(binder, node, obj, getQName(obj));
   }
 
-  // Input methods
+  // Input methods.  Contract: input stream or node iterator will be at
+  // a start element.
+  
 
-  public Object read(Unmarshaller u, XMLStreamReader in)
+  public Object readAttribute(XMLStreamReader in, int i)
+    throws XMLStreamException, JAXBException
+  {
+    return _property.readAttribute(in, i);
+  }
+
+  public Object readAttribute(Attribute attribute)
+    throws XMLStreamException, JAXBException
+  {
+    return _property.readAttribute(attribute);
+  }
+
+  public Object read(Unmarshaller u, XMLStreamReader in, Object parent)
     throws IOException, XMLStreamException, JAXBException
   {
-    return _property.read(u, in, getQName());
+    return _property.read(u, in, get(parent));
   }
 
-  public Object read(Unmarshaller u, XMLEventReader in)
+  public Object read(Unmarshaller u, XMLEventReader in, Object parent)
     throws IOException, XMLStreamException, JAXBException
   {
-    return _property.read(u, in, getQName());
+    return _property.read(u, in, get(parent));
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node)
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object parent)
     throws JAXBException
   {
-    return _property.bindFrom(binder, node, getQName());
+    return _property.bindFrom(binder, node, get(parent));
   }
-
 
   protected void writeStartElement(XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
@@ -205,7 +426,7 @@ public abstract class Accessor {
     else {
       if (obj == null) return;
 
-      QName qname = getQName();
+      QName qname = getQName(obj);
 
       if (qname.getNamespaceURI() == null || "".equals(qname.getNamespaceURI()))
         out.writeStartElement(qname.getLocalPart());
@@ -312,6 +533,7 @@ public abstract class Accessor {
 
   private QName getTypeQName()
   {
+    // XXX choice
     if (_typeQName == null) {
       XmlType xmlType = getAnnotation(XmlType.class);
 
@@ -334,38 +556,52 @@ public abstract class Accessor {
     return _typeQName;
   }
 
-  protected QName getQName()
+  private QName qnameFromXmlElementWrapper(XmlElementWrapper wrapper)
   {
-    if (_qname == null) {
-      XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
-      XmlElement element = getAnnotation(XmlElement.class);
+    String name = getName();
+    // XXX Namespace inheritance (@XmlSchema.elementFormDefault)
+    String namespace = null;
 
-      String name = getName();
-      // XXX Namespace inheritance (@XmlSchema.elementFormDefault)
-      String namespace = null;
+    if (! wrapper.name().equals("##default"))
+      name = wrapper.name();
 
-      if (wrapper != null) {
-        if (! wrapper.name().equals("##default"))
-          name = wrapper.name();
+    if (! wrapper.namespace().equals("##default"))
+      namespace = wrapper.namespace();
 
-        if (! wrapper.namespace().equals("##default"))
-          namespace = wrapper.namespace();
-      }
-      else if (element != null) {
-        if (! element.name().equals("##default"))
-          name = element.name();
+    if (namespace == null)
+      return new QName(name);
+    else
+      return new QName(namespace, name);
+  }
 
-        if (! element.namespace().equals("##default"))
-          namespace = element.namespace();
-      }
+  private QName qnameFromXmlElement(XmlElement element)
+  {
+    String name = getName();
+    // XXX Namespace inheritance (@XmlSchema.elementFormDefault)
+    String namespace = null;
 
-      if (namespace == null)
-        _qname = new QName(name);
-      else
-        _qname = new QName(namespace, name);
-    }
+    if (! element.name().equals("##default"))
+      name = element.name();
 
-    return _qname;
+    if (! element.namespace().equals("##default"))
+      namespace = element.namespace();
+
+    if (namespace == null)
+      return new QName(name);
+    else
+      return new QName(namespace, name);
+  }
+
+  protected QName getQName(Object obj)
+    throws JAXBException
+  {
+    if (_qname != null)
+      return _qname;
+
+    if (_qnameMap != null)
+      return _qnameMap.get(obj.getClass());
+
+    throw new JAXBException(L.l("Internal error: Unable to find QName for object {0}", obj));
   }
 
   public void generateSchema(XMLStreamWriter out)
@@ -404,6 +640,7 @@ public abstract class Accessor {
           out.writeAttribute("minOccurs", "0");
       }
 
+      // XXX propertyMap => choice
       if (_property.getMaxOccurs() != null)
         out.writeAttribute("maxOccurs", _property.getMaxOccurs());
     }
@@ -412,14 +649,53 @@ public abstract class Accessor {
     out.writeAttribute("name", getName());
   }
 
-  public boolean isXmlPrimitiveType()
-  {
-    return _property.isXmlPrimitiveType();
-  }
-
   public String getSchemaType()
   {
+    // XXX propertyMap
     return _property.getSchemaType();
+  }
+
+  public AccessorType getAccessorType()
+    throws JAXBException
+  {
+    if (_accessorType != AccessorType.UNSET)
+      return _accessorType;
+
+    if (getAnnotation(XmlValue.class) != null) {
+      if (! _property.isXmlPrimitiveType() && 
+          ! Collection.class.isAssignableFrom(getType()))
+        throw new JAXBException(L.l("XmlValue must be either a collection or a simple type"));
+
+      _accessorType = AccessorType.VALUE;
+    }
+    else if (getAnnotation(XmlAttribute.class) != null)
+      _accessorType = AccessorType.ATTRIBUTE;
+    else if (getAnnotation(XmlElements.class) != null)
+      _accessorType = AccessorType.ELEMENTS;
+    else {
+      XmlAnyElement anyElement = getAnnotation(XmlAnyElement.class);
+
+      if (anyElement != null) {
+        if (anyElement.lax())
+          _accessorType = AccessorType.ANY_TYPE_ELEMENT_LAX;
+        else
+          _accessorType = AccessorType.ANY_TYPE_ELEMENT;
+      }
+      else
+        _accessorType = AccessorType.ELEMENT;
+    }
+
+    return _accessorType;
+  }
+
+  public enum AccessorType {
+    UNSET, 
+    VALUE, 
+    ATTRIBUTE, 
+    ELEMENT, 
+    ELEMENTS, 
+    ANY_TYPE_ELEMENT, 
+    ANY_TYPE_ELEMENT_LAX
   }
 
   public abstract Object get(Object o) throws JAXBException;

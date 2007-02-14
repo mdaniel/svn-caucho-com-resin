@@ -65,81 +65,63 @@ public class BooleanArrayProperty extends ArrayProperty {
     super(BooleanProperty.PRIMITIVE_PROPERTY);
   }
 
-  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
-      return new boolean[0]; // avoid ArrayList instantiation
+    boolean[] array = (boolean[]) previous;
 
-    ArrayList<Boolean> ret = new ArrayList<Boolean>();
+    if (array == null)
+      array = new boolean[1];
+    else {
+      boolean[] newArray = new boolean[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName()))
-      ret.add((Boolean) _componentProperty.read(u, in, qname));
-
-    boolean[] array = new boolean[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).booleanValue();
-
-    return array;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    XMLEvent event = in.peek();
-
-    if (! event.isStartElement() || 
-        ! qname.equals(((StartElement) event).getName()))
-      return new boolean[0]; // avoid ArrayList instantiation
-
-    ArrayList<Boolean> ret = new ArrayList<Boolean>();
-
-    while (event.isStartElement() &&
-           qname.equals(((StartElement) event).getName())) {
-      ret.add((Boolean) _componentProperty.read(u, in, qname));
-      event = in.peek();
+      array = newArray;
     }
 
-    boolean[] array = new boolean[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).booleanValue();
+    array[array.length - 1] =
+      ((Boolean) _componentProperty.read(u, in, null)).booleanValue();
 
     return array;
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    boolean[] array = (boolean[]) previous;
+
+    if (array == null)
+      array = new boolean[1];
+    else {
+      boolean[] newArray = new boolean[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
+
+      array = newArray;
+    }
+
+    array[array.length - 1] =
+      ((Boolean) _componentProperty.read(u, in, null)).booleanValue();
+
+    return array;
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
-    Node child = node.getNode();
+    boolean[] array = (boolean[]) previous;
 
-    if (child.getNodeType() != Node.ELEMENT_NODE)
-      return new boolean[0];
+    if (array == null)
+      array = new boolean[1];
     else {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
+      boolean[] newArray = new boolean[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-      if (! nodeName.equals(qname))
-        return new boolean[0];
+      array = newArray;
     }
 
-    ArrayList<Boolean> ret = new ArrayList<Boolean>();
+    Boolean b = (Boolean) _componentProperty.bindFrom(binder, node, null);
 
-    while (child != null && child.getNodeType() == Node.ELEMENT_NODE) {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
-
-      if (! nodeName.equals(qname))
-        break;
-
-      ret.add((Boolean) _componentProperty.bindFrom(binder, node, qname));
-
-      child = node.nextSibling();
-    }
-
-    boolean[] array = new boolean[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).booleanValue();
+    array[array.length - 1] = b.booleanValue();
 
     return array;
   }

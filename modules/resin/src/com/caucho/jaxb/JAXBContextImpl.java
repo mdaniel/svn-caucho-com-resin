@@ -55,6 +55,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -109,9 +110,12 @@ public class JAXBContextImpl extends JAXBContext {
 
   private DynamicJAXBElementSkeleton _dynamicSkeleton;
 
-  private HashMap<QName,Skeleton> _roots = new HashMap<QName,Skeleton>();
+  private HashMap<QName,ClassSkeleton> _roots 
+    = new HashMap<QName,ClassSkeleton>();
   private HashMap<QName,ClassSkeleton> _types 
     = new HashMap<QName,ClassSkeleton>();
+
+  private Property _laxAnyTypeProperty = null;
 
   public JAXBContextImpl(String contextPath,
                          ClassLoader classLoader,
@@ -207,8 +211,11 @@ public class JAXBContextImpl extends JAXBContext {
 
   XMLOutputFactory getXMLOutputFactory()
   {
-    if (_staxOutputFactory == null)
+    if (_staxOutputFactory == null) {
       _staxOutputFactory = XMLOutputFactory.newInstance();
+      _staxOutputFactory.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,
+                                     Boolean.TRUE);
+    }
 
     return _staxOutputFactory;
   }
@@ -259,13 +266,22 @@ public class JAXBContextImpl extends JAXBContext {
   {
     Result result = outputResolver.createOutput("", "schema1.xsd");
 
+    XMLStreamWriter out = null;
+    
     try {
       XMLOutputFactory factory = getXMLOutputFactory();
-      XMLStreamWriter out = factory.createXMLStreamWriter(result);
+      out = factory.createXMLStreamWriter(result);
 
       out.writeStartDocument("UTF-8", "1.0");
 
+      out.writeStartElement("xsd", 
+                            "schema", 
+                            "http://www.w3.org/2001/XMLSchema");
+      out.writeAttribute("version", "1.0");
+
       generateSchemaWithoutHeader(out);
+
+      out.writeEndElement(); // schema
     }
     catch (Exception e) {
       IOException ioException = new IOException();
@@ -274,18 +290,21 @@ public class JAXBContextImpl extends JAXBContext {
 
       throw ioException;
     }
+    finally {
+      try {
+        out.close();
+      }
+      catch (XMLStreamException e) {
+        throw new IOException(e.toString());
+      }
+    }
   }
 
   public void generateSchemaWithoutHeader(XMLStreamWriter out)
     throws JAXBException, XMLStreamException
   {
-    out.writeStartElement("xsd", "schema", "http://www.w3.org/2001/XMLSchema");
-    out.writeAttribute("version", "1.0");
-
     for (Skeleton skeleton : _classSkeletons.values())
       skeleton.generateSchema(out);
-
-    out.writeEndElement(); // schema
   }
 
   public ClassSkeleton createSkeleton(Class c)
@@ -371,12 +390,36 @@ public class JAXBContextImpl extends JAXBContext {
       return findSkeletonForClass(obj.getClass(), _classSkeletons);
   }
 
+  public Property getLaxAnyTypeProperty()
+    throws JAXBException
+  {
+    if (_laxAnyTypeProperty == null)
+      _laxAnyTypeProperty = new LaxAnyTypeProperty(this);
+
+    return _laxAnyTypeProperty;
+  }
+
   public Property createProperty(Type type)
     throws JAXBException
   {
+    return createProperty(type, false);
+  }
+
+  public Property createProperty(Type type, boolean anyType)
+    throws JAXBException
+  {
     if (type instanceof Class) {
+      if (anyType && Object.class.equals(type))
+        return getLaxAnyTypeProperty();
+
       if (String.class.equals(type))
         return StringProperty.PROPERTY;
+
+      if (URI.class.equals(type))
+        return URIProperty.PROPERTY;
+
+      if (UUID.class.equals(type))
+        return UUIDProperty.PROPERTY;
 
       if (Double.class.equals(type))
         return DoubleProperty.OBJECT_PROPERTY;
@@ -441,6 +484,9 @@ public class JAXBContextImpl extends JAXBContext {
       if (Calendar.class.equals(type))
         return CalendarProperty.PROPERTY;
 
+      if (Duration.class.equals(type))
+        return DurationProperty.PROPERTY;
+
       if (XMLGregorianCalendar.class.equals(type))
         return XMLGregorianCalendarProperty.PROPERTY;
 
@@ -450,13 +496,15 @@ public class JAXBContextImpl extends JAXBContext {
       Class cl = (Class) type;
 
       if (cl.isArray()) {
-        Property componentProperty = createProperty(cl.getComponentType());
+        Property componentProperty = 
+          createProperty(cl.getComponentType(), anyType);
+
         return ArrayProperty.createArrayProperty(componentProperty,
                                                  cl.getComponentType());
       }
 
       if (cl.isEnum())
-        return new EnumProperty();
+        return new EnumProperty(cl);
 
       return new SkeletonProperty(getSkeleton(cl));
     }
@@ -473,8 +521,8 @@ public class JAXBContextImpl extends JAXBContext {
           if (args.length != 2)
             throw new JAXBException(L.l("unexpected number of generic arguments for Map<>: {0}", args.length));
 
-          Property keyProperty = createProperty(args[0]);
-          Property valueProperty = createProperty(args[1]);
+          Property keyProperty = createProperty(args[0], anyType);
+          Property valueProperty = createProperty(args[1], anyType);
 
           return new MapProperty(rawClass, keyProperty, valueProperty);
         }
@@ -485,7 +533,7 @@ public class JAXBContextImpl extends JAXBContext {
           if (args.length != 1)
             throw new JAXBException(L.l("unexpected number of generic arguments for List<>: {0}", args.length));
 
-          Property componentProperty = createProperty(args[0]);
+          Property componentProperty = createProperty(args[0], anyType);
           return new ListProperty(componentProperty);
         }
 
@@ -513,14 +561,14 @@ public class JAXBContextImpl extends JAXBContext {
     _types.put(typeName, skeleton);
   }
 
-  public void addRootElement(Skeleton s) 
+  public void addRootElement(ClassSkeleton s) 
     throws JAXBException
   {
     if (_roots.containsKey(s.getElementName()))
       throw new JAXBException(L.l("Duplicate name {0} for classes {1} and {2}",
                                   s.getElementName(),
-                                  s.getClass(),
-                                  _roots.get(s.getElementName()).getClass()));
+                                  s.getType(),
+                                  _roots.get(s.getElementName()).getType()));
 
     _roots.put(s.getElementName(), s);
   }
@@ -545,20 +593,28 @@ public class JAXBContextImpl extends JAXBContext {
       // we can still try for jaxb.index
     }
 
+    String resourceName = packageName.replace('.', '/') + "/jaxb.index";
+
+    // For some reason, this approach works when running resin...
+    InputStream is = this.getClass().getResourceAsStream('/' + resourceName);
+
+    // ...and this approach works in QA
+    if (is == null) {
+      ClassLoader classLoader = 
+        Thread.currentThread().getContextClassLoader();
+
+      is = classLoader.getResourceAsStream(resourceName);
+    }
+
+    if (is == null) {
+      if (success)
+        return;
+
+      throw new JAXBException(L.l("Unable to open jaxb.index for package {0}",
+                                  packageName));
+    }
+
     try {
-      String resourceName = packageName.replace('.', '/') + "/jaxb.index";
-
-      // For some reason, this approach works when running resin...
-      InputStream is = this.getClass().getResourceAsStream('/' + resourceName);
-
-      // ...and this approach works in QA
-      if (is == null) {
-        ClassLoader classLoader = 
-          Thread.currentThread().getContextClassLoader();
-
-        is = classLoader.getResourceAsStream(resourceName);
-      }
-
       InputStreamReader isr = new InputStreamReader(is, "utf-8");
       LineNumberReader in = new LineNumberReader(isr);
 
@@ -574,14 +630,12 @@ public class JAXBContextImpl extends JAXBContext {
           createSkeleton(cl);
         }
       }
-
-      success = true;
     }
-    catch (Throwable t) {
-      if (! success) {
-        throw new JAXBException(L.l("Unable to open jaxb.index for package {0}",
-                                    packageName), t);
-      }
+    catch (IOException e) {
+      throw new JAXBException(L.l("Error while reading jaxb.index for package {0}", packageName), e);
+    }
+    catch (ClassNotFoundException e) {
+      throw new JAXBException(e);
     }
   }
 

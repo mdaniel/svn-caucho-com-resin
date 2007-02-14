@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -64,81 +64,63 @@ public class ShortArrayProperty extends ArrayProperty {
     super(ShortProperty.PRIMITIVE_PROPERTY);
   }
 
-  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
-      return new short[0]; // avoid ArrayList instantiation
+    short[] array = (short[]) previous;
 
-    ArrayList<Short> ret = new ArrayList<Short>();
+    if (array == null)
+      array = new short[1];
+    else {
+      short[] newArray = new short[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName()))
-      ret.add((Short) _componentProperty.read(u, in, qname));
-
-    short[] array = new short[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).shortValue();
-
-    return array;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    XMLEvent event = in.peek();
-
-    if (! event.isStartElement() || 
-        ! qname.equals(((StartElement) event).getName()))
-      return new short[0]; // avoid ArrayList instantiation
-
-    ArrayList<Short> ret = new ArrayList<Short>();
-
-    while (event.isStartElement() &&
-           qname.equals(((StartElement) event).getName())) {
-      ret.add((Short) _componentProperty.read(u, in, qname));
-      event = in.peek();
+      array = newArray;
     }
 
-    short[] array = new short[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).shortValue();
+    array[array.length - 1] =
+      ((Short) _componentProperty.read(u, in, null)).shortValue();
 
     return array;
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    short[] array = (short[]) previous;
+
+    if (array == null)
+      array = new short[1];
+    else {
+      short[] newArray = new short[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
+
+      array = newArray;
+    }
+
+    array[array.length - 1] =
+      ((Short) _componentProperty.read(u, in, null)).shortValue();
+
+    return array;
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
-    Node child = node.getNode();
+    short[] array = (short[]) previous;
 
-    if (child.getNodeType() != Node.ELEMENT_NODE)
-      return new short[0];
+    if (array == null)
+      array = new short[1];
     else {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
+      short[] newArray = new short[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-      if (! nodeName.equals(qname))
-        return new short[0];
+      array = newArray;
     }
 
-    ArrayList<Short> ret = new ArrayList<Short>();
+    Short b = (Short) _componentProperty.bindFrom(binder, node, null);
 
-    while (child != null && child.getNodeType() == Node.ELEMENT_NODE) {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
-
-      if (! nodeName.equals(qname))
-        break;
-
-      ret.add((Short) _componentProperty.bindFrom(binder, node, qname));
-
-      child = node.nextSibling();
-    }
-
-    short[] array = new short[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).shortValue();
+    array[array.length - 1] = b.shortValue();
 
     return array;
   }

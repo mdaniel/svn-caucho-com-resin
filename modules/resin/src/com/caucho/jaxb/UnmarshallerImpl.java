@@ -208,7 +208,7 @@ public class UnmarshallerImpl implements Unmarshaller
 
       Property property = _context.createProperty(declaredType);
 
-      T val = (T) property.read(this, reader, name);
+      T val = (T) property.read(this, reader, name, null);
 
       return new JAXBElement<T>(name, declaredType, val);
     }

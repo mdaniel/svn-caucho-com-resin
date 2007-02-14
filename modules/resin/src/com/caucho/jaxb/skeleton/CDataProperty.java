@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong, Adam Megacz
  */
 
 package com.caucho.jaxb.skeleton;
@@ -63,23 +63,21 @@ public abstract class CDataProperty extends Property {
   protected abstract Object read(String in) 
     throws JAXBException;
 
-  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+  public Object readAttribute(XMLStreamReader in, int i)
+    throws JAXBException
+  {
+    return read(in.getAttributeValue(i));
+  }
+
+  public Object readAttribute(Attribute attribute)
+    throws JAXBException
+  {
+    return read(attribute.getValue());
+  }
+
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT) {
-      if (_isNillable)
-        return null;
-      else
-        throw new IOException(L.l("Expected <{0}>", qname.toString()));
-    }
-    else if (! in.getName().equals(qname)) {
-      if (_isNillable)
-        return null;
-      else
-        throw new IOException(L.l("Expected <{0}>, not <{1}>", 
-              qname.toString(), in.getName().toString()));
-    }
-
     in.next();
 
     Object ret = null;
@@ -89,50 +87,28 @@ public abstract class CDataProperty extends Property {
     else
       ret = read(""); // Hack when we have something like <tag></tag>
 
-    while (in.getEventType() != in.END_ELEMENT)
-      in.nextTag();
-
-    if (! in.getName().equals(qname))
-      throw new IOException(L.l("Expected </{0}>, not </{1}>", 
-            qname.getLocalPart(), in.getLocalName()));
-
     // essentially a nextTag() that handles end of document gracefully
     while (in.hasNext()) {
       in.next();
 
-      if (in.getEventType() == in.END_ELEMENT || 
-          in.getEventType() == in.START_ELEMENT)
+      if (in.getEventType() == in.END_ELEMENT)
+        break;
+    }
+
+    while (in.hasNext()) {
+      in.next();
+
+      if (in.getEventType() == in.START_ELEMENT)
         break;
     }
 
     return ret;
   }
 
-  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    XMLEvent event = null;
-    
-    event = in.peek();
-
-    if (! event.isStartElement()) {
-      if (_isNillable)
-        return null;
-      else
-        throw new IOException(L.l("Expected <{0}>", qname.toString()));
-    }
-    else if (! ((StartElement) event).getName().equals(qname)) {
-      if (_isNillable)
-        return null;
-      else
-        throw new IOException(L.l("Expected <{0}>, not <{1}>", 
-                                  qname.toString(), 
-                                  ((StartElement) event).getName().toString()));
-    }
-
-    event = in.nextEvent(); // skip start element
-
-    event = in.peek();
+    XMLEvent event = in.nextEvent(); // skip start element
 
     Object ret = null;
 
@@ -143,41 +119,23 @@ public abstract class CDataProperty extends Property {
     else
       ret = read(""); // Hack when we have something like <tag></tag>
 
-    while (! event.isEndElement())
+    while (in.hasNext()) {
+      if (event.isEndElement())
+        break;
+
       event = in.nextEvent();
-
-    if (! ((EndElement) event).getName().equals(qname)) {
-      String localName = ((EndElement) event).getName().getLocalPart();
-
-      throw new IOException(L.l("Expected </{0}>, not </{1}>", 
-                                qname.getLocalPart(), localName));
     }
+
+    if (in.hasNext())
+      in.next();
 
     return ret;
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
     Node root = node.getNode();
-
-    if (root.getNodeType() != Node.ELEMENT_NODE) {
-      if (_isNillable)
-        return null;
-      else
-        throw new UnmarshalException(L.l("Expected <{0}>", qname));
-    }
-    else {
-      QName nodeName = JAXBUtil.qnameFromNode(root);
-      
-      if (! nodeName.equals(qname)) {
-        if (_isNillable)
-          return null;
-        else
-          throw new UnmarshalException(L.l("Expected <{0}>, not <{1}>", 
-                                      qname, nodeName));
-      }
-    }
 
     Object ret = read(root.getTextContent());
 
@@ -186,7 +144,8 @@ public abstract class CDataProperty extends Property {
     return ret;
   }
 
-  protected abstract String write(Object in);
+  protected abstract String write(Object in)
+    throws JAXBException;
 
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException

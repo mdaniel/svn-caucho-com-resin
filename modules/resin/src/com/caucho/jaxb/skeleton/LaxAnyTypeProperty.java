@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,12 +24,13 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong, Adam Megacz
+ * @author Adam Megacz
  */
 
 package com.caucho.jaxb.skeleton;
 
 import com.caucho.jaxb.BinderImpl;
+import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.util.L10N;
 
@@ -51,20 +52,21 @@ import org.w3c.dom.Node;
 /**
  * a property referencing some other Skeleton
  */
-public class SkeletonProperty extends Property {
-  private static final L10N L = new L10N(SkeletonProperty.class);
+public class LaxAnyTypeProperty extends Property {
+  private static final L10N L = new L10N(LaxAnyTypeProperty.class);
 
-  private Skeleton _skeleton;
+  private LaxAnyTypeSkeleton _skeleton;
 
-  public SkeletonProperty(Skeleton skeleton)
+  public LaxAnyTypeProperty(JAXBContextImpl context)
+    throws JAXBException
   {
-    _skeleton = skeleton;
+    _skeleton = new LaxAnyTypeSkeleton(context);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Object ret = _skeleton.read(u, in);
+    Object obj = _skeleton.read(u, in);
 
     // essentially a nextTag() that handles end of document gracefully
     while (in.hasNext()) {
@@ -75,8 +77,8 @@ public class SkeletonProperty extends Property {
         break;
     }
 
-    return ret;
-  }
+    return obj;
+}
   
   public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
@@ -84,11 +86,13 @@ public class SkeletonProperty extends Property {
     Object ret = _skeleton.read(u, in);
 
     while (in.hasNext()) {
-      XMLEvent event = in.nextEvent();
+      XMLEvent event = in.peek();
 
-      if (event.isStartElement() ||
-          event.isEndElement())
+      if (event.isEndElement() ||
+          event.isStartElement())
         break;
+
+      in.nextEvent();
     }
 
     return ret;
@@ -97,30 +101,18 @@ public class SkeletonProperty extends Property {
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
-    Node root = node.getNode();
-
-    Object old = binder.getJAXBNode(root);
-
-    Object ret = _skeleton.bindFrom(binder, old, node);
-
-    binder.bind(ret, root);
-
-    return ret;
+    return _skeleton.bindFrom(binder, null, node);
   }
 
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    // XXX Subclassing/anyType
-    //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
     _skeleton.write(m, out, obj, qname);
   }
 
   public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    // XXX Subclassing/anyType
-    //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
     _skeleton.write(m, out, obj, qname);
   }
 
@@ -132,7 +124,7 @@ public class SkeletonProperty extends Property {
 
   public String getSchemaType()
   {
-    return JAXBUtil.qNameToString(_skeleton.getTypeName());
+    return "xsd:anyType";
   }
 
   public boolean isXmlPrimitiveType()
@@ -142,7 +134,7 @@ public class SkeletonProperty extends Property {
 
   public String toString()
   {
-    return "SkeletonProperty[" + _skeleton + "]";
+    return "LaxAnyTypeProperty[" + _skeleton + "]";
   }
 }
 

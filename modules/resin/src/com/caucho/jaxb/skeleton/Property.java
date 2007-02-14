@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -55,10 +55,14 @@ import org.w3c.dom.Node;
 
 import com.caucho.jaxb.BinderImpl;
 
+import com.caucho.util.L10N;
+
 /**
  * represents a property in a skeleton; requires an Accessor to access it
  */
 public abstract class Property {
+  public static final L10N L = new L10N(Property.class);
+
   public boolean isXmlPrimitiveType()
   {
     return true;
@@ -71,15 +75,31 @@ public abstract class Property {
 
   public abstract String getSchemaType();
 
-  public abstract Object read(Unmarshaller u, XMLStreamReader in, QName name)
+  public Object readAttribute(XMLStreamReader in, int i)
+    throws JAXBException
+  {
+    throw new JAXBException(L.l("Internal error: Property does not support attributes {0}", this));
+  }
+
+  public Object readAttribute(Attribute attribute)
+    throws JAXBException
+  {
+    throw new JAXBException(L.l("Internal error: Property does not support attributes {0}", this));
+  }
+
+  public abstract Object read(Unmarshaller u, 
+                              XMLStreamReader in, 
+                              Object previous)
     throws IOException, XMLStreamException, JAXBException;
   
-  public abstract Object read(Unmarshaller u, XMLEventReader in, QName name)
+  public abstract Object read(Unmarshaller u, 
+                              XMLEventReader in, 
+                              Object previous)
     throws IOException, XMLStreamException, JAXBException;
   
   public abstract Object bindFrom(BinderImpl binder, 
                                   NodeIterator node, 
-                                  QName name)
+                                  Object previous)
     throws JAXBException;
 
   public abstract void write(Marshaller m, XMLStreamWriter out, 

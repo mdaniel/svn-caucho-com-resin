@@ -52,13 +52,13 @@ public abstract class IterableProperty extends Property {
   protected abstract int size(Object o);
   protected abstract Iterator getIterator(Object o);*/
   
-  public Object read(Unmarshaller u, XMLStreamReader in, QName name)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public Object read(Unmarshaller u, XMLEventReader in, QName name)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
     throw new UnsupportedOperationException(getClass().getName());

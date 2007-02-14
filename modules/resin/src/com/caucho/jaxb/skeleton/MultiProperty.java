@@ -24,19 +24,23 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong, Adam Megacz
+ * @author Emil Ong
  */
 
 package com.caucho.jaxb.skeleton;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
+
 import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.ValidationEventHandler;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.namespace.QName;
 import javax.xml.stream.events.*;
 import javax.xml.stream.XMLEventReader;
@@ -45,105 +49,117 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
-
-import org.w3c.dom.Node;
+import java.util.Map;
 
 /**
- * a property referencing some other Skeleton
+ * a Property that multiplexes among several child properties.
  */
-public class SkeletonProperty extends Property {
-  private static final L10N L = new L10N(SkeletonProperty.class);
+public class MultiProperty extends Property {
+  private static final L10N L = new L10N(MultiProperty.class);
+  private Map<QName,Property> _qnameMap;
+  private Map<Class,Property> _classMap;
 
-  private Skeleton _skeleton;
-
-  public SkeletonProperty(Skeleton skeleton)
+  public MultiProperty(Map<QName,Property> qnameMap,
+                       Map<Class,Property> classMap)
   {
-    _skeleton = skeleton;
+    _qnameMap = qnameMap;
+    _classMap = classMap;
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Object ret = _skeleton.read(u, in);
+    Property property = _qnameMap.get(in.getName());
 
-    // essentially a nextTag() that handles end of document gracefully
-    while (in.hasNext()) {
-      in.next();
+    if (property == null)
+      throw new JAXBException(L.l("Unexpected element {0}", in.getName()));
 
-      if (in.getEventType() == in.START_ELEMENT ||
-          in.getEventType() == in.END_ELEMENT)
-        break;
-    }
-
-    return ret;
+    return property.read(u, in, previous);
   }
-  
+
   public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Object ret = _skeleton.read(u, in);
+    XMLEvent event = in.peek();
 
-    while (in.hasNext()) {
-      XMLEvent event = in.nextEvent();
+    QName readQname = event.asStartElement().getName();
 
-      if (event.isStartElement() ||
-          event.isEndElement())
-        break;
-    }
+    Property property = _qnameMap.get(readQname);
 
-    return ret;
+    if (property == null)
+      throw new JAXBException(L.l("Unexpected element {0}", readQname));
+
+    return property.read(u, in, previous);
   }
 
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
-    Node root = node.getNode();
+    QName nodeQname = JAXBUtil.qnameFromNode(node.getNode());
 
-    Object old = binder.getJAXBNode(root);
+    Property property = _qnameMap.get(nodeQname);
 
-    Object ret = _skeleton.bindFrom(binder, old, node);
+    if (property == null)
+      throw new JAXBException(L.l("Unexpected element {0}", nodeQname));
 
-    binder.bind(ret, root);
-
-    return ret;
+    return property.bindFrom(binder, node, previous);
   }
 
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    // XXX Subclassing/anyType
-    //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
-    _skeleton.write(m, out, obj, qname);
+    if (obj != null) {
+      Property property = _classMap.get(obj.getClass());
+
+      if (property == null)
+        throw new JAXBException(L.l("Unexpected object {0}", obj));
+
+      property.write(m, out, obj, qname);
+    }
   }
 
   public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    // XXX Subclassing/anyType
-    //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
-    _skeleton.write(m, out, obj, qname);
+    if (obj != null) {
+      Property property = _classMap.get(obj.getClass());
+
+      if (property == null)
+        throw new JAXBException(L.l("Unexpected object {0}", obj));
+
+      property.write(m, out, obj, qname);
+    }
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
     throws JAXBException
   {
-    return _skeleton.bindTo(binder, node, obj, qname);
+    if (obj != null) {
+      Property property = _classMap.get(obj.getClass());
+
+      if (property == null)
+        throw new JAXBException(L.l("Unexpected object {0}", obj));
+
+      return property.bindTo(binder, node, obj, qname);
+    }
+
+    return null;
   }
 
   public String getSchemaType()
   {
-    return JAXBUtil.qNameToString(_skeleton.getTypeName());
+    // XXX
+    return "";
   }
 
   public boolean isXmlPrimitiveType()
   {
+    // XXX
     return false;
   }
 
-  public String toString()
+  public String getMaxOccurs()
   {
-    return "SkeletonProperty[" + _skeleton + "]";
+    return "unbounded";
   }
 }
-
-

@@ -44,6 +44,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
 public class FieldAccessor extends Accessor {
@@ -52,7 +53,7 @@ public class FieldAccessor extends Accessor {
   private Type _genericType;
   private String _name;
 
-  public FieldAccessor(Field f, JAXBContextImpl context)
+  public FieldAccessor(JAXBContextImpl context, Field f)
     throws JAXBException
   {
     super(context);
@@ -61,8 +62,10 @@ public class FieldAccessor extends Accessor {
     _type = _field.getType();
     _genericType = _field.getGenericType();
     _name = _field.getName();
-    _property = _context.createProperty(_genericType);
 
+    init();
+
+    // XXX move these into Accessor.init()
     if (_field.isAnnotationPresent(XmlElement.class)) {
       XmlElement element = _field.getAnnotation(XmlElement.class);
 
@@ -117,5 +120,11 @@ public class FieldAccessor extends Accessor {
   public String getName()
   {
     return _name;
+  }
+
+  public String toString()
+  {
+    return "FieldAccessor[" + _field.getDeclaringClass().getName() + "." +
+                              _field.getName() + "]";
   }
 }

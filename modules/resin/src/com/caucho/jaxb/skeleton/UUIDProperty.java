@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -42,26 +42,30 @@ import java.io.*;
 import com.caucho.vfs.WriteStream;
 
 /**
- * a Date Property
+ * a UUID Property
  */
-public class XMLGregorianCalendarProperty extends CDataProperty {
-  public static final XMLGregorianCalendarProperty PROPERTY 
-    = new XMLGregorianCalendarProperty();
+public class UUIDProperty extends CDataProperty {
+  public static final UUIDProperty PROPERTY = new UUIDProperty();
 
   protected String write(Object in)
   {
-    return ((XMLGregorianCalendar) in).toXMLFormat();
+    return ((UUID) in).toString();
   }
 
   protected Object read(String in)
     throws JAXBException
   {
-    return JAXBUtil.getDatatypeFactory().newXMLGregorianCalendar(in);
+    try {
+      return UUID.fromString(in);
+    }
+    catch (IllegalArgumentException e) {
+      throw new UnmarshalException(e);
+    }
   }
 
   public String getSchemaType()
   {
-    return "xsd:dateTime";
+    return "xsd:string";
   }
 }
 

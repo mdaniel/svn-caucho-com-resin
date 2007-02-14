@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -68,37 +68,36 @@ public class MapProperty extends Property {
     _valueProperty = valueProperty;
   }
 
-  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
-      return null;
-
     in.nextTag();
 
-    Object obj = null;
+    Object obj = previous;
      
-    try {
-      obj = _mapType.newInstance();
-    }
-    catch (IllegalAccessException e) {
-      throw new JAXBException(e);
-    }
-    catch (InstantiationException e) {
-      throw new JAXBException(e);
+    if (obj == null) {
+      try {
+        obj = _mapType.newInstance();
+      }
+      catch (IllegalAccessException e) {
+        throw new JAXBException(e);
+      }
+      catch (InstantiationException e) {
+        throw new JAXBException(e);
+      }
     }
 
     Map<Object,Object> map = (Map<Object,Object>) obj;
 
     while (in.getEventType() == in.START_ELEMENT && 
            "key".equals(in.getLocalName())) {
-      Object key = _keyProperty.read(u, in, _keyName);
+      Object key = _keyProperty.read(u, in, null);
 
       if (in.getEventType() != in.START_ELEMENT ||
           ! "value".equals(in.getLocalName()))
         throw new JAXBException("Key without value while reading map");
 
-      Object value = _valueProperty.read(u, in, _valueName);
+      Object value = _valueProperty.read(u, in, null);
 
       map.put(key, value);
     }
@@ -108,41 +107,38 @@ public class MapProperty extends Property {
     return map;
   }
 
-  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    XMLEvent event = in.peek();
-
-    if (! event.isStartElement() || 
-        ! qname.equals(((StartElement) event).getName()))
-      return null;
+    XMLEvent event = in.nextEvent();
 
     event = in.nextEvent();
-    event = in.nextEvent();
 
-    Object obj = null;
+    Object obj = previous;
      
-    try {
-      obj = _mapType.newInstance();
-    }
-    catch (IllegalAccessException e) {
-      throw new JAXBException(e);
-    }
-    catch (InstantiationException e) {
-      throw new JAXBException(e);
+    if (obj == null) {
+      try {
+        obj = _mapType.newInstance();
+      }
+      catch (IllegalAccessException e) {
+        throw new JAXBException(e);
+      }
+      catch (InstantiationException e) {
+        throw new JAXBException(e);
+      }
     }
 
     Map<Object,Object> map = (Map<Object,Object>) obj;
 
     while (event.isStartElement() &&
            "key".equals(((StartElement) event).getName().getLocalPart())) {
-      Object key = _keyProperty.read(u, in, _keyName);
+      Object key = _keyProperty.read(u, in, null);
 
       if (! event.isStartElement() || 
           ! "value".equals(((StartElement) event).getName().getLocalPart()))
         throw new JAXBException("Key without value while reading map");
 
-      Object value = _valueProperty.read(u, in, _valueName);
+      Object value = _valueProperty.read(u, in, null);
 
       map.put(key, value);
 
@@ -152,7 +148,7 @@ public class MapProperty extends Property {
     return map;
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
     throw new UnsupportedOperationException();

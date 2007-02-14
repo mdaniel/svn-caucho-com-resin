@@ -43,7 +43,7 @@ public class BooleanProperty extends CDataProperty {
   public static final BooleanProperty OBJECT_PROPERTY 
     = new BooleanProperty(true);
   public static final BooleanProperty PRIMITIVE_PROPERTY 
-    = new BooleanProperty(true);
+    = new BooleanProperty(false);
 
   protected BooleanProperty(boolean isNillable)
   {

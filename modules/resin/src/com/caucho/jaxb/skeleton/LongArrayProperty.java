@@ -64,81 +64,63 @@ public class LongArrayProperty extends ArrayProperty {
     super(LongProperty.PRIMITIVE_PROPERTY);
   }
 
-  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
-      return new long[0]; // avoid ArrayList instantiation
+    long[] array = (long[]) previous;
 
-    ArrayList<Long> ret = new ArrayList<Long>();
+    if (array == null)
+      array = new long[1];
+    else {
+      long[] newArray = new long[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName()))
-      ret.add((Long) _componentProperty.read(u, in, qname));
-
-    long[] array = new long[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).longValue();
-
-    return array;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    XMLEvent event = in.peek();
-
-    if (! event.isStartElement() || 
-        ! qname.equals(((StartElement) event).getName()))
-      return new long[0]; // avoid ArrayList instantiation
-
-    ArrayList<Long> ret = new ArrayList<Long>();
-
-    while (event.isStartElement() &&
-           qname.equals(((StartElement) event).getName())) {
-      ret.add((Long) _componentProperty.read(u, in, qname));
-      event = in.peek();
+      array = newArray;
     }
 
-    long[] array = new long[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).longValue();
+    array[array.length - 1] =
+      ((Long) _componentProperty.read(u, in, null)).longValue();
 
     return array;
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    long[] array = (long[]) previous;
+
+    if (array == null)
+      array = new long[1];
+    else {
+      long[] newArray = new long[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
+
+      array = newArray;
+    }
+
+    array[array.length - 1] =
+      ((Long) _componentProperty.read(u, in, null)).longValue();
+
+    return array;
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
-    Node child = node.getNode();
+    long[] array = (long[]) previous;
 
-    if (child.getNodeType() != Node.ELEMENT_NODE)
-      return new long[0];
+    if (array == null)
+      array = new long[1];
     else {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
+      long[] newArray = new long[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-      if (! nodeName.equals(qname))
-        return new long[0];
+      array = newArray;
     }
 
-    ArrayList<Long> ret = new ArrayList<Long>();
+    Long b = (Long) _componentProperty.bindFrom(binder, node, null);
 
-    while (child != null && child.getNodeType() == Node.ELEMENT_NODE) {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
-
-      if (! nodeName.equals(qname))
-        break;
-
-      ret.add((Long) _componentProperty.bindFrom(binder, node, qname));
-
-      child = node.nextSibling();
-    }
-
-    long[] array = new long[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).longValue();
+    array[array.length - 1] = b.longValue();
 
     return array;
   }

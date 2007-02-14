@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -18,7 +18,7 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License
- * adate with Resin Open Source; if not, write to the
+ * along with Resin Open Source; if not, write to the
  *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
@@ -28,41 +28,40 @@
  */
 
 package com.caucho.jaxb.skeleton;
-import com.caucho.jaxb.*;
-import javax.xml.bind.*;
-import javax.xml.datatype.*;
-import javax.xml.namespace.*;
-import javax.xml.stream.*;
-import java.util.*;
-import java.text.*;
 
-import java.lang.reflect.*;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
+import javax.xml.stream.XMLStreamException;
 import java.io.*;
-
-import com.caucho.vfs.WriteStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
- * a Date Property
+ * URI property
  */
-public class XMLGregorianCalendarProperty extends CDataProperty {
-  public static final XMLGregorianCalendarProperty PROPERTY 
-    = new XMLGregorianCalendarProperty();
+public class URIProperty extends CDataProperty {
+  public static final URIProperty PROPERTY = new URIProperty();
 
   protected String write(Object in)
   {
-    return ((XMLGregorianCalendar) in).toXMLFormat();
+    URI uri = (URI) in;
+
+    return uri.toString();
   }
 
   protected Object read(String in)
     throws JAXBException
   {
-    return JAXBUtil.getDatatypeFactory().newXMLGregorianCalendar(in);
+    try {
+      return new URI(in);
+    }
+    catch (URISyntaxException e) {
+      throw new UnmarshalException(e);
+    }
   }
 
   public String getSchemaType()
   {
-    return "xsd:dateTime";
+    return "xsd:anyURI";
   }
 }
-
-

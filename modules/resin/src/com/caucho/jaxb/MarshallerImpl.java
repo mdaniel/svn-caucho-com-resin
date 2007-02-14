@@ -28,8 +28,10 @@
 */
 
 package com.caucho.jaxb;
+
 import com.caucho.jaxb.adapters.BeanAdapter;
 import com.caucho.jaxb.skeleton.ClassSkeleton;
+import com.caucho.xml.stream.StaxUtil;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -68,6 +70,7 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
   {
     ClassSkeleton skeleton = _context.findSkeletonForObject(jaxbElement);
     Class c = skeleton.getType();
+    writer = StaxUtil.toRepairingXMLStreamWriter(writer);
 
     /* tck/JAXBMarshall
     if (! _context.createJAXBIntrospector().isElement(jaxbElement) &&
@@ -93,6 +96,7 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
       name = xre.name();*/
 
     String encoding = getEncoding();
+
     if (encoding == null)
       encoding = "utf-8";
 

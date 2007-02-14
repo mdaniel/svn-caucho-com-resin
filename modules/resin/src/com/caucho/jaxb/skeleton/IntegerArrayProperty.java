@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -65,81 +65,63 @@ public class IntegerArrayProperty extends ArrayProperty {
     super(IntProperty.PRIMITIVE_PROPERTY);
   }
 
-  public Object read(Unmarshaller u, XMLStreamReader in, QName qname)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (in.getEventType() != in.START_ELEMENT || ! qname.equals(in.getName()))
-      return new int[0]; // avoid ArrayList instantiation
+    int[] array = (int[]) previous;
 
-    ArrayList<Integer> ret = new ArrayList<Integer>();
+    if (array == null)
+      array = new int[1];
+    else {
+      int[] newArray = new int[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-    while (in.getEventType() == in.START_ELEMENT && qname.equals(in.getName()))
-      ret.add((Integer) _componentProperty.read(u, in, qname));
-
-    int[] array = new int[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).intValue();
-
-    return array;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    XMLEvent event = in.peek();
-
-    if (! event.isStartElement() || 
-        ! qname.equals(((StartElement) event).getName()))
-      return new int[0]; // avoid ArrayList instantiation
-
-    ArrayList<Integer> ret = new ArrayList<Integer>();
-
-    while (event.isStartElement() &&
-           qname.equals(((StartElement) event).getName())) {
-      ret.add((Integer) _componentProperty.read(u, in, qname));
-      event = in.peek();
+      array = newArray;
     }
 
-    int[] array = new int[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).intValue();
+    array[array.length - 1] =
+      ((Integer) _componentProperty.read(u, in, null)).intValue();
 
     return array;
   }
 
-  public Object bindFrom(BinderImpl binder, NodeIterator node, QName qname)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    int[] array = (int[]) previous;
+
+    if (array == null)
+      array = new int[1];
+    else {
+      int[] newArray = new int[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
+
+      array = newArray;
+    }
+
+    array[array.length - 1] =
+      ((Integer) _componentProperty.read(u, in, null)).intValue();
+
+    return array;
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
-    Node child = node.getNode();
+    int[] array = (int[]) previous;
 
-    if (child.getNodeType() != Node.ELEMENT_NODE)
-      return new int[0];
+    if (array == null)
+      array = new int[1];
     else {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
+      int[] newArray = new int[array.length + 1];
+      System.arraycopy(array, 0, newArray, 0, array.length);
 
-      if (! nodeName.equals(qname))
-        return new int[0];
+      array = newArray;
     }
 
-    ArrayList<Integer> ret = new ArrayList<Integer>();
+    Integer b = (Integer) _componentProperty.bindFrom(binder, node, null);
 
-    while (child != null && child.getNodeType() == Node.ELEMENT_NODE) {
-      QName nodeName = JAXBUtil.qnameFromNode(child);
-
-      if (! nodeName.equals(qname))
-        break;
-
-      ret.add((Integer) _componentProperty.bindFrom(binder, node, qname));
-
-      child = node.nextSibling();
-    }
-
-    int[] array = new int[ret.size()];
-
-    for (int i = 0; i < ret.size(); i++)
-      array[i] = ret.get(i).intValue();
+    array[array.length - 1] = b.intValue();
 
     return array;
   }

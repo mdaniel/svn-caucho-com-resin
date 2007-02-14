@@ -33,13 +33,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.annotation.XmlAnyAttribute;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.ws.Holder;
 
 import static java.lang.Character.*;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -50,18 +58,38 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * JAXB utilities.
  */
 public class JAXBUtil {
+  private static final Logger log = Logger.getLogger(JAXBUtil.class.getName());
   private static final Map<Class,QName> _datatypeMap
     = new HashMap<Class,QName>();
 
+  private static DatatypeFactory _datatypeFactory;
+
   public static final XMLEventFactory EVENT_FACTORY 
     = XMLEventFactory.newInstance();
+
   public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
   public static final String XML_SCHEMA_PREFIX = "xsd";
+
+  public static DatatypeFactory getDatatypeFactory()
+    throws JAXBException
+  {
+    if (_datatypeFactory == null) {
+      try {
+        _datatypeFactory = DatatypeFactory.newInstance();
+      }
+      catch (DatatypeConfigurationException e) {
+        throw new JAXBException(e);
+      }
+    }
+
+    return _datatypeFactory;
+  }
 
   public static QName qnameFromNode(Node node)
   {
@@ -151,6 +179,8 @@ public class JAXBUtil {
                                      Collection<Class> jaxbClasses)
     throws JAXBException
   {
+    log.finest("Introspecting class " + cl.getName());
+
     Method[] methods = cl.getMethods();
 
     for (Method method : methods)
@@ -166,6 +196,8 @@ public class JAXBUtil {
                                       Collection<Class> jaxbClasses)
     throws JAXBException
   {
+    log.finest("Introspecting method " + method.getName());
+
     introspectType(method.getReturnType(), jaxbClasses);
 
     Type[] params = method.getGenericParameterTypes();
@@ -179,10 +211,13 @@ public class JAXBUtil {
 
     // XXX: Check for @WebFault annotation
 
+    /*
     Type[] exceptions = method.getGenericExceptionTypes();
 
-    for (Type exception : exceptions)
-      introspectType(exception, jaxbClasses);
+    for (Type exception : exceptions) {
+      if (! exception.toString().endsWith("_Exception"))
+        introspectType(exception, jaxbClasses);
+    }*/
   }
 
   /**
@@ -190,6 +225,8 @@ public class JAXBUtil {
    */
   private static void introspectType(Type type, Collection<Class> jaxbClasses)
   {
+    log.finest("  Introspecting type " + type);
+
     if (type instanceof Class) {
       Class cl = (Class) type;
 
@@ -217,12 +254,17 @@ public class JAXBUtil {
 
   public static String classBasename(Class cl)
   {
-    int i = cl.getName().lastIndexOf('$');
+    return classBasename(cl.getName());
+  }
+
+  public static String classBasename(String className)
+  {
+    int i = className.lastIndexOf('$');
 
     if (i < 0)
-      i = cl.getName().lastIndexOf('.');
+      i = className.lastIndexOf('.');
 
-    return cl.getName().substring(i + 1);
+    return className.substring(i + 1);
   }
 
   /**
@@ -381,6 +423,14 @@ public class JAXBUtil {
       return qName.getPrefix() + ':' + qName.getLocalPart();
   }
 
+  public static boolean isJAXBAnnotated(AnnotatedElement element)
+  {
+    return element.isAnnotationPresent(XmlAnyAttribute.class) ||
+           element.isAnnotationPresent(XmlAnyElement.class) ||
+           element.isAnnotationPresent(XmlAttribute.class) ||
+           element.isAnnotationPresent(XmlElement.class) ||
+           element.isAnnotationPresent(XmlElements.class);
+  }
 
   static {
     _datatypeMap.put(String.class, 

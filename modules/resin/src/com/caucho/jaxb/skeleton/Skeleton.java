@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong, Adam Megacz
  */
 
 package com.caucho.jaxb.skeleton;
@@ -45,6 +45,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
+import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
@@ -57,12 +58,16 @@ public abstract class Skeleton {
   protected JAXBContextImpl _context;
   protected QName _typeName;
   protected QName _elementName;
+  protected Skeleton _parent;
 
-  protected LinkedHashMap<String,Accessor> _attributeAccessors
-    = new LinkedHashMap<String,Accessor>();
+  protected LinkedHashMap<QName,Accessor> _attributeAccessors
+    = new LinkedHashMap<QName,Accessor>();
 
-  protected LinkedHashMap<String,Accessor> _elementAccessors 
-    = new LinkedHashMap<String,Accessor>();
+  protected LinkedHashMap<QName,Accessor> _elementAccessors 
+    = new LinkedHashMap<QName,Accessor>();
+
+  protected Accessor _anyTypeElementAccessor;
+  protected Accessor _anyTypeAttributeAccessor;
 
   protected Skeleton(JAXBContextImpl context)
   {
@@ -106,10 +111,38 @@ public abstract class Skeleton {
                               Object obj, QName fieldName)
     throws JAXBException;
 
-  
-  protected Accessor getAccessor(QName q)
+  protected Accessor getElementAccessor(QName q)
+    throws JAXBException
   {
-    return _elementAccessors.get(q.getLocalPart());
+    Accessor a = _elementAccessors.get(q);
+
+    if (a != null)
+      return a;
+
+    if (_anyTypeElementAccessor != null)
+      return _anyTypeElementAccessor;
+
+    if (_parent != null)
+      return _parent.getElementAccessor(q);
+
+    return null;
+  }
+
+  protected Accessor getAttributeAccessor(QName q)
+    throws JAXBException
+  {
+    Accessor a = _attributeAccessors.get(q);
+
+    if (a != null)
+      return a;
+
+    if (_anyTypeAttributeAccessor != null)
+      return _anyTypeAttributeAccessor;
+
+    if (_parent != null)
+      return _parent.getAttributeAccessor(q);
+
+    return null;
   }
 
   public abstract void generateSchema(XMLStreamWriter out)

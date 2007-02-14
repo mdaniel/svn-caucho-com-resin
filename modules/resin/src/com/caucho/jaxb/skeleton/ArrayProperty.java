@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -91,7 +91,12 @@ public abstract class ArrayProperty extends IterableProperty {
 
   public String getSchemaType()
   {
-    throw new UnsupportedOperationException();
+    return _componentProperty.getSchemaType();
+  }
+
+  public String getMaxOccurs()
+  {
+    return "unbounded";
   }
 
   protected boolean isPrimitiveType()

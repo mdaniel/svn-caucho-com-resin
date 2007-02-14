@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Adam Megacz
+ * @author Emil Ong, Adam Megacz
  */
 
 package com.caucho.jaxb.skeleton;
@@ -53,6 +53,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
+import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 
 import java.io.IOException;
@@ -64,10 +65,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
 public class ClassSkeleton<C> extends Skeleton {
@@ -166,7 +174,7 @@ public class ClassSkeleton<C> extends Skeleton {
           _constructor.setAccessible(true);
         }
         catch (Exception e2) {
-          throw new JAXBException(L.l("Zero-arg constructor not found for class {0}", c.getName()), e2);
+          throw new JAXBException(L.l("{0}: Zero-arg constructor not found", c.getName()), e2);
         }
       }
 
@@ -177,17 +185,15 @@ public class ClassSkeleton<C> extends Skeleton {
       String namespace = null;
 
       // look at package defaults first...
-      if (_package.isAnnotationPresent(XmlSchema.class)) {
-        XmlSchema schema = (XmlSchema) _package.getAnnotation(XmlSchema.class);
+      XmlSchema schema = (XmlSchema) _package.getAnnotation(XmlSchema.class);
 
-        if (! "".equals(schema.namespace()))
-          namespace = schema.namespace();
-      }
+      if (schema != null && ! "".equals(schema.namespace()))
+        namespace = schema.namespace();
       
       // then look at class specific overrides.
-      if (c.isAnnotationPresent(XmlRootElement.class)) {
-        XmlRootElement xre = c.getAnnotation(XmlRootElement.class);
+      XmlRootElement xre = c.getAnnotation(XmlRootElement.class);
 
+      if (xre != null) { 
         String localName = null;
         
         if ("##default".equals(xre.name()))
@@ -209,6 +215,23 @@ public class ClassSkeleton<C> extends Skeleton {
       }
 
       // order the elements, if specified
+      
+      XmlAccessOrder accessOrder = XmlAccessOrder.UNDEFINED;
+
+      XmlAccessorOrder packageOrder = 
+        _package.getAnnotation(XmlAccessorOrder.class);
+
+      XmlAccessorOrder classOrder = 
+        _class.getAnnotation(XmlAccessorOrder.class);
+
+      if (packageOrder != null)
+        accessOrder = packageOrder.value();
+
+      if (classOrder != null)
+        accessOrder = classOrder.value();
+
+      // try property orders too
+     
       XmlType xmlType = (XmlType) _class.getAnnotation(XmlType.class);
       HashMap<String,Integer> orderMap = null;
 
@@ -223,6 +246,13 @@ public class ClassSkeleton<C> extends Skeleton {
       }
 
       // Collect the fields/properties of the class
+      ArrayList<Accessor> elements = new ArrayList<Accessor>();
+
+      if (orderMap != null) {
+        for (int i = 0; i < orderMap.size(); i++)
+          elements.add(null);
+      }
+
       XmlAccessorType accessorType = c.getAnnotation(XmlAccessorType.class);
       XmlAccessType accessType = (accessorType == null ? 
                                   XmlAccessType.PUBLIC_MEMBER :
@@ -230,71 +260,186 @@ public class ClassSkeleton<C> extends Skeleton {
 
       if (accessType != XmlAccessType.FIELD) {
         // getter/setter
-        BeanInfo beanInfo = Introspector.getBeanInfo(c);
+        TreeSet<Method> methodSet = new TreeSet<Method>(methodComparator);
 
-        for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
+        Method[] declared = c.getDeclaredMethods();
+
+        for (Method m : declared)
+          methodSet.add(m);
+
+        Method[] methods = new Method[methodSet.size()];
+        methodSet.toArray(methods);
+
+        AccessibleObject.setAccessible(methods, true);
+
+        while (methodSet.size() > 0) {
+          Method m = methodSet.first();
+          methodSet.remove(m);
+
+          String name = null;
+          Method get = null;
+          Method set = null;
+
+          if (m.getName().startsWith("get")) {
+            get = m;
+
+            if (Void.TYPE.equals(get.getReturnType()))
+              continue;
+
+            name = get.getName().substring(3); // 3 == "get".length());
+
+            Class cl = get.getDeclaringClass();
+
+            try {
+              set = cl.getDeclaredMethod("set" + name, get.getReturnType());
+            }
+            catch (NoSuchMethodException e) {
+              continue;
+            }
+
+            if (! methodSet.remove(set))
+              continue;
+          } 
+          else if (m.getName().startsWith("set")) {
+            set = m;
+
+            Class[] parameterTypes = set.getParameterTypes();
+
+            if (parameterTypes.length != 1)
+              continue;
+
+            name = set.getName().substring(3); // 3 == "set".length());
+
+            Class cl = set.getDeclaringClass();
+
+            try {
+              get = cl.getDeclaredMethod("get" + name);
+            }
+            catch (NoSuchMethodException e) {
+              continue;
+            }
+
+            if (! parameterTypes[0].equals(get.getReturnType()))
+              continue;
+
+            if (! methodSet.remove(get))
+              continue;
+          }
+          else
+            continue;
+
+          name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+
           // JAXB specifies that a "class" property must be specified as "clazz"
           // because of Object.getClass()
-          if ("class".equals(property.getName()))
+          if ("class".equals(name))
             continue;
 
           // XXX special cases for Throwable specified in JAX-WS
           // Should it be in the general JAXB?
           if (Throwable.class.isAssignableFrom(c) && 
-              ("stackTrace".equals(property.getName()) ||
-               "cause".equals(property.getName()) ||
-               "localizedMessage".equals(property.getName())))
+              ("stackTrace".equals(name) ||
+               "cause".equals(name) ||
+               "localizedMessage".equals(name)))
             continue;
 
-          Method get = property.getReadMethod();
-          Method set = property.getWriteMethod();
+          // XXX PUBLIC_MEMBER
 
-          if (property.getPropertyType() == null) {
+          if (accessType == XmlAccessType.NONE &&
+              ! JAXBUtil.isJAXBAnnotated(get) &&
+              ! JAXBUtil.isJAXBAnnotated(set))
             continue;
-          }
 
           if (get != null && get.isAnnotationPresent(XmlTransient.class))
             continue;
           if (set != null && set.isAnnotationPresent(XmlTransient.class))
             continue;
 
-          Accessor a = new GetterSetterAccessor(property, _context); 
+          Accessor a = new GetterSetterAccessor(_context, name, get, set); 
 
           if (orderMap != null) {
-            Integer i = orderMap.remove(property.getName());
+            Integer i = orderMap.remove(name);
 
             if (i != null)
               a.setOrder(i.intValue());
             // XXX else throw something?
           }
 
-          addAccessor(a);
+          // XXX move to function
+          switch (a.getAccessorType()) {
+            case VALUE: 
+              if (_value != null)
+                throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
+
+              if (elements.size() > 0)
+                throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
+
+              _value = a;
+              break;
+            case ATTRIBUTE:
+              a.putQNames(_attributeAccessors);
+              break;
+            case ELEMENT:
+            case ELEMENTS:
+              if (_value != null)
+                throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
+
+              if (a.getOrder() >= 0) 
+                elements.set(a.getOrder(), a);
+              else
+                elements.add(a);
+
+              break;
+
+            case ANY_TYPE_ELEMENT:
+            case ANY_TYPE_ELEMENT_LAX:
+              if (_anyTypeElementAccessor != null)
+                throw new JAXBException(L.l("{0}: Cannot have two @XmlAnyElement annotations in a single class", _class.getName()));
+
+              _anyTypeElementAccessor = a;
+              break;
+          }
         }
-      } 
+      }
 
       if (accessType != XmlAccessType.PROPERTY) {
         // XXX Don't overwrite property accessors
-        Field[] fields = c.getDeclaredFields();
+        HashSet<Field> fieldSet = new HashSet<Field>();
+
+        Field[] declared = c.getDeclaredFields();
+
+        for (Field f : declared)
+          fieldSet.add(f);
+
+        Field[] fields = new Field[fieldSet.size()];
+        fieldSet.toArray(fields);
+
         AccessibleObject.setAccessible(fields, true);
 
         for (Field f : fields) {
-          if (Modifier.isStatic(f.getModifiers()))
+          // special case: jaxb/0250
+          // fields which are static are skipped _unless_ they are also
+          // both final and attributes
+          if (Modifier.isStatic(f.getModifiers()) &&
+              ! (Modifier.isFinal(f.getModifiers()) &&
+                 f.isAnnotationPresent(XmlAttribute.class)))
             continue;
+
           if (f.isAnnotationPresent(XmlTransient.class))
             continue;
           // jaxb/0176: transient modifier ignored
 
-          if (accessType == XmlAccessType.PUBLIC_MEMBER
-              && ! Modifier.isPublic(f.getModifiers()))
+          if (accessType == XmlAccessType.PUBLIC_MEMBER && 
+              ! Modifier.isPublic(f.getModifiers()) &&
+              ! JAXBUtil.isJAXBAnnotated(f))
             continue;
 
-          // XXX : Other annotations?
           if (accessType == XmlAccessType.NONE &&
               ! f.isAnnotationPresent(XmlElement.class) &&
               ! f.isAnnotationPresent(XmlAttribute.class))
             continue;
 
-          Accessor a = new FieldAccessor(f, _context);
+          Accessor a = new FieldAccessor(_context, f);
 
           if (orderMap != null) {
             Integer i = orderMap.remove(f.getName());
@@ -304,50 +449,68 @@ public class ClassSkeleton<C> extends Skeleton {
             // XXX else throw something?
           }
 
-          addAccessor(a);
+          switch (a.getAccessorType()) {
+            case VALUE: 
+              if (_value != null)
+                throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
+
+              if (elements.size() > 0)
+                throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
+
+              _value = a;
+              break;
+
+            case ATTRIBUTE:
+              a.putQNames(_attributeAccessors);
+              break;
+
+            case ELEMENT:
+            case ELEMENTS:
+              if (_value != null)
+                throw new JAXBException(L.l("{0}: Cannot have both @XmlValue and elements in a JAXB element", _class.getName()));
+
+              if (a.getOrder() >= 0)
+                elements.set(a.getOrder(), a);
+              else
+                elements.add(a);
+              break;
+              
+            case ANY_TYPE_ELEMENT:
+            case ANY_TYPE_ELEMENT_LAX:
+              if (_anyTypeElementAccessor != null)
+                throw new JAXBException(L.l("{0}: Cannot have two @XmlAnyElement annotations in a single class", _class.getName()));
+
+              _anyTypeElementAccessor = a;
+              break;
+          }
         }
       }
 
+      // do ordering if necessary
+      if (orderMap != null || accessOrder != XmlAccessOrder.ALPHABETICAL) {
+        for (int i = 0; i < elements.size(); i++) {
+          Accessor a = elements.get(i);
+          a.putQNames(_elementAccessors);
+        }
+      }
+      else {
+        Accessor[] elementArray = new Accessor[elements.size()];
+        elements.toArray(elementArray);
+
+        Arrays.sort(elementArray, Accessor.nameComparator);
+
+        for (int i = 0; i < elementArray.length; i++) { 
+          Accessor a = elementArray[i];
+          a.putQNames(_elementAccessors);
+        }
+      }
     }
     catch (Exception e) {
-      throw new JAXBException(e);
-    }
-  }
-
-  protected void addAccessor(Accessor a)
-    throws JAXBException
-  {
-    if (a.getAnnotation(XmlValue.class) != null) {
-      if (_value != null)
-        throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
-
-      if (! a.isXmlPrimitiveType() && 
-          ! Collection.class.isAssignableFrom(a.getType()))
-        throw new JAXBException(L.l("XmlValue must be either a collection or a simple type"));
-
-      _value = a;
-    }
-    else if (a.getAnnotation(XmlAttribute.class) != null)
-      _attributeAccessors.put(a.getName(), a);
-    else {
-      if (_value != null)
-        throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
-
-      _elementAccessors.put(a.getName(), a);
+      throw new JAXBException(L.l("{0}: Initialization error", c.getName()), e);
     }
 
-    // Make sure the field's type is in the context so that the
-    // schema generates correctly
-    /*
-    if ((a instanceof IterableProperty) && 
-        ! ((IterableProperty) p).getComponentProperty().isXmlPrimitiveType()) {
-      Property compProp = ((IterableProperty) p).getComponentProperty();
-      _context.createSkeleton(compProp.getAccessor().getType());
-    }
-    else */
-
-    if (! a.isXmlPrimitiveType())
-      _context.createSkeleton(a.getType());
+    if (! Object.class.equals(_class.getSuperclass()))
+      _parent = _context.getSkeleton(_class.getSuperclass());
   }
 
   public QName getTypeName()
@@ -417,27 +580,39 @@ public class ClassSkeleton<C> extends Skeleton {
         u.getListener().beforeUnmarshal(ret, null);
 
       if (_value != null) { 
-        Object val = _value.read(u, in);
+        Object val = _value.read(u, in, ret);
         _value.set(ret, val);
       }
       else {
+        // process the attributes
+        for (int i = 0; i < in.getAttributeCount(); i++) {
+          QName attributeName = in.getAttributeName(i);
+          Accessor a = getAttributeAccessor(attributeName);
+
+          if (a == null)
+            throw new UnmarshalException(L.l("Attribute {0} not found in {1}", 
+                                             attributeName, getType()));
+
+          a.set(ret, a.readAttribute(in, i));
+        }
+
         int i = 0;
         in.nextTag();
 
         while (in.getEventType() == in.START_ELEMENT) {
-          Accessor a = getAccessor(in.getName());
+          Accessor a = getElementAccessor(in.getName());
 
           if (a == null) {
-            throw new UnmarshalException(L.l("Child <{0}> not found", 
-                                             in.getName()));
+            throw new UnmarshalException(L.l("Child <{0}> not found in {1}", 
+                                             in.getName(), getType()));
           }
 
           if (! a.checkOrder(i++, u.getEventHandler())) {
-            throw new UnmarshalException(L.l("Child <{0}> misordered", 
-                                             in.getName()));
+            throw new UnmarshalException(L.l("Child <{0}> misordered in {1}", 
+                                             in.getName(), getType()));
           }
 
-          Object val = a.read(u, in);
+          Object val = a.read(u, in, ret);
           a.set(ret, val);
         }
       }
@@ -472,17 +647,33 @@ public class ClassSkeleton<C> extends Skeleton {
 
 
       if (_value != null) { 
-        Object val = _value.read(u, in);
+        Object val = _value.read(u, in, ret);
         _value.set(ret, val);
       }
       else {
+        XMLEvent event = in.peek();
+        StartElement start = event.asStartElement();
+        Iterator iterator = start.getAttributes();
+
+        // process the attributes
+        while (iterator.hasNext()) {
+          Attribute attribute = (Attribute) iterator.next();
+          Accessor a = getAttributeAccessor(attribute.getName());
+
+          if (a == null)
+            throw new UnmarshalException(L.l("Attribute {0} not found in {1}", 
+                                             attribute.getName(), getType()));
+
+          a.set(ret, a.readAttribute(attribute));
+        }
+
         int i = 0;
-        XMLEvent event = in.nextEvent();
+        event = in.nextEvent();
         event = in.nextEvent();
 
         while (event.isStartElement()) {
           QName name = ((StartElement) event).getName();
-          Accessor a = getAccessor(name);
+          Accessor a = getElementAccessor(name);
 
           if (a == null)
             throw new UnmarshalException(L.l("Child <{0}> not found", name));
@@ -490,7 +681,7 @@ public class ClassSkeleton<C> extends Skeleton {
           if (! a.checkOrder(i++, u.getEventHandler()))
             throw new UnmarshalException(L.l("Child <{0}> misordered", name));
 
-          Object val = a.read(u, in);
+          Object val = a.read(u, in, ret);
           a.set(ret, val);
 
           event = in.peek();
@@ -522,7 +713,7 @@ public class ClassSkeleton<C> extends Skeleton {
       ret = newInstance();
 
     if (_value != null) { 
-      Object val = _value.bindFrom(binder, node);
+      Object val = _value.bindFrom(binder, node, ret);
       _value.set(ret, val);
     }
     else {
@@ -533,7 +724,7 @@ public class ClassSkeleton<C> extends Skeleton {
         if (child.getNodeType() == Node.ELEMENT_NODE) {
           QName name = JAXBUtil.qnameFromNode(child);
 
-          Accessor a = getAccessor(name);
+          Accessor a = getElementAccessor(name);
 
           if (a == null)
             throw new UnmarshalException(L.l("Child <{0}> not found", name));
@@ -541,7 +732,7 @@ public class ClassSkeleton<C> extends Skeleton {
           if (! a.checkOrder(i++, binder.getEventHandler()))
             throw new UnmarshalException(L.l("Child <{0}> misordered", name));
 
-          Object val = a.bindFrom(binder, node);
+          Object val = a.bindFrom(binder, node, ret);
           a.set(ret, val);
         }
 
@@ -588,6 +779,9 @@ public class ClassSkeleton<C> extends Skeleton {
           out.writeStartElement(tagName.getPrefix(),
                                 tagName.getLocalPart(),
                                 tagName.getNamespaceURI());
+
+        for (Accessor a : _attributeAccessors.values())
+          a.write(m, out, a.get(obj));
 
         for (Accessor a : _elementAccessors.values())
           a.write(m, out, a.get(obj));
@@ -696,7 +890,7 @@ public class ClassSkeleton<C> extends Skeleton {
             child = JAXBUtil.skipIgnorableNodes(child);
           }
           else {
-            Node newNode = JAXBUtil.elementFromQName(a.getQName(), node);
+            Node newNode = JAXBUtil.elementFromQName(a.getQName(obj), node);
             node.appendChild(a.bindTo(binder, newNode, a.get(obj)));
           }
         }
@@ -707,7 +901,7 @@ public class ClassSkeleton<C> extends Skeleton {
         node = JAXBUtil.elementFromQName(tagName, node);
 
         for (Accessor a : _elementAccessors.values()) {
-          Node child = JAXBUtil.elementFromQName(a.getQName(), node);
+          Node child = JAXBUtil.elementFromQName(a.getQName(obj), node);
           node.appendChild(a.bindTo(binder, child, a.get(obj)));
         }
       }
@@ -814,4 +1008,18 @@ public class ClassSkeleton<C> extends Skeleton {
       out.writeEndElement(); // complexType
     }
   }
+
+  //XXX The TreeSet needs this for some reason
+  private static final Comparator methodComparator
+    = new java.util.Comparator<Method>() {
+      public int compare(Method m1, Method m2)
+      {
+        return m1.toGenericString().compareTo(m2.toGenericString());
+      }
+
+      public boolean equals(Object obj)
+      {
+        return obj == this;
+      }
+    };
 }
