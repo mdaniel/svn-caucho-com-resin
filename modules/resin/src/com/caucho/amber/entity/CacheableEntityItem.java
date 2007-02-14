@@ -84,17 +84,6 @@ public class CacheableEntityItem extends EntityItem {
    */
   public Entity loadEntity(int loadGroup)
   {
-    return loadEntity(loadGroup, null);
-  }
-
-  /**
-   * Returns the cached entity.
-   *
-   * @return true if the cached value is valid.
-   */
-  public Entity loadEntity(int loadGroup,
-                           Map preloadedProperties)
-  {
     long now = Alarm.getCurrentTime();
 
     if (_expireTime < now) {
@@ -106,7 +95,7 @@ public class CacheableEntityItem extends EntityItem {
 
     try {
       _cacheItem.__caucho_setConnection(aConn);
-      _cacheItem.__caucho_retrieve(aConn, preloadedProperties);
+      _cacheItem.__caucho_retrieve(aConn);
     } catch (SQLException e) {
       // XXX: item is dead
       throw new RuntimeException(e);
@@ -123,8 +112,7 @@ public class CacheableEntityItem extends EntityItem {
    * @return true if the cached value is valid.
    */
   public Entity loadEntity(AmberConnection aConn,
-                           int loadGroup,
-                           Map preloadedProperties)
+                           int loadGroup)
   {
     long now = Alarm.getCurrentTime();
 
@@ -137,7 +125,7 @@ public class CacheableEntityItem extends EntityItem {
 
     try {
       _cacheItem.__caucho_setConnection(aConn);
-      _cacheItem.__caucho_retrieve(aConn, preloadedProperties);
+      _cacheItem.__caucho_retrieve(aConn);
     } catch (SQLException e) {
       // XXX: item is dead
       throw new RuntimeException(e);

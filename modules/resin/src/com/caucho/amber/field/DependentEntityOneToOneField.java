@@ -277,18 +277,13 @@ public class DependentEntityOneToOneField extends CascadableField {
 
       String javaType = getJavaTypeName();
 
-      out.println("if ((preloadedProperties == null) || (! preloadedProperties.containsKey(\"" + getName() + "\"))) {");
-      out.pushDepth();
+      // jpa/0o04
+      out.println("aConn.addEntity(this);");
 
       String indexS = "_" + (_targetLoadIndex / 64);
       indexS += "_" + (1L << (_targetLoadIndex % 64));
 
       generateLoadProperty(out, indexS, "aConn");
-
-      out.popDepth();
-      out.println("} else {");
-      out.println("  " + generateSuperSetter("(" + javaType + ") preloadedProperties.get(\"" + getName() + "\")") + ";");
-      out.println("}");
     }
 
     return index;

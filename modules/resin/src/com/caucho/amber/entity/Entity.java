@@ -187,12 +187,6 @@ public interface Entity extends MappedSuperclass
     throws SQLException;
 
   /**
-   * Retrieves data from the data store.
-   */
-  public void __caucho_retrieve(AmberConnection aConn, Map preloadedProperties)
-    throws SQLException;
-
-  /**
    * Loads the entity from the database and
    * returns the number of columns consumed
    * from the result set.

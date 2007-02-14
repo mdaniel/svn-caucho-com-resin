@@ -68,12 +68,6 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println();
     out.println("protected void __caucho_load_" + _index +  "(com.caucho.amber.manager.AmberConnection aConn)");
     out.println("{");
-    out.println("  __caucho_load_" + _index + "(aConn, null);");
-    out.println("}");
-
-    out.println();
-    out.println("protected void __caucho_load_" + _index +  "(com.caucho.amber.manager.AmberConnection aConn, java.util.Map preloadedProperties)");
-    out.println("{");
     out.pushDepth();
 
     int group = _index / 64;
@@ -97,7 +91,7 @@ public class LoadGroupGenerator extends ClassComponent {
       int max = _index;
 
       for (int i = min; i <= max; i++) {
-        out.println("__caucho_load_select_" + i + "(aConn, preloadedProperties);");
+        out.println("__caucho_load_select_" + i + "(aConn);");
       }
 
       if (min <= max) {
@@ -200,7 +194,7 @@ public class LoadGroupGenerator extends ClassComponent {
     throws IOException
   {
     out.println();
-    out.println("protected void __caucho_load_select_" + _index +  "(com.caucho.amber.manager.AmberConnection aConn, java.util.Map preloadedProperties)");
+    out.println("protected void __caucho_load_select_" + _index +  "(com.caucho.amber.manager.AmberConnection aConn)");
     out.println("{");
     out.pushDepth();
 

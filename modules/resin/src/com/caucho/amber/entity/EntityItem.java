@@ -57,15 +57,8 @@ abstract public class EntityItem {
     return getEntity();
   }
 
-  public Entity loadEntity(int index,
-                           Map preloadedProperties)
-  {
-    return getEntity();
-  }
-
   public Entity loadEntity(AmberConnection aConn,
-                           int index,
-                           Map preloadedProperties)
+                           int index)
   {
     return getEntity();
   }

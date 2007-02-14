@@ -236,7 +236,7 @@ public class AmberConnection
    */
   public void postUpdate(Entity entity)
   {
-    
+
     try {
       _persistenceUnit.callListeners(Listener.POST_UPDATE, entity);
     } catch (RuntimeException e) {
@@ -477,16 +477,6 @@ public class AmberConnection
   public <T> T find(Class<T> entityClass,
                     Object primaryKey)
   {
-    return find(entityClass, primaryKey, null);
-  }
-
-  /**
-   * Find by the primary key.
-   */
-  public <T> T find(Class<T> entityClass,
-                    Object primaryKey,
-                    Map preloadedProperties)
-  {
     try {
       AmberEntityHome entityHome
         = _persistenceUnit.getEntityHome(entityClass.getName());
@@ -495,7 +485,7 @@ public class AmberConnection
         throw new IllegalArgumentException(L.l("find() operation can only be applied if the entity class is specified in the scope of a persistence unit."));
       }
 
-      return (T) load(entityClass, primaryKey, preloadedProperties);
+      return (T) load(entityClass, primaryKey);
     } catch (AmberObjectNotFoundException e) {
       if (_persistenceUnit.isJPA()) {
         // JPA: should not throw at all, returns null only.
@@ -679,9 +669,9 @@ public class AmberConnection
         EntityState state = instance.__caucho_getEntityState();
 
         if (state.ordinal() <= EntityState.TRANSIENT.ordinal()
-	    || EntityState.P_DELETING.ordinal() <= state.ordinal()) {
+            || EntityState.P_DELETING.ordinal() <= state.ordinal()) {
           throw new IllegalArgumentException(L.l("refresh() operation can only be applied to a managed entity instance. The entity state is '{0}' for object of class '{0}' with PK '{1}'", className, pk, state == EntityState.TRANSIENT ? "TRANSIENT" : "DELETING or DELETED"));
-	}
+        }
       }
       else
         throw new IllegalArgumentException(L.l("refresh() operation can only be applied to a managed entity instance. There was no managed instance of class '{0}' with PK '{1}'", className, pk));
@@ -726,7 +716,7 @@ public class AmberConnection
   {
     if (_isXA)
       throw new IllegalStateException(L.l("Cannot call EntityManager.getTransaction() inside a distributed transaction."));
-    
+
     if (_trans == null)
       _trans = new EntityTransactionImpl();
 
@@ -838,17 +828,6 @@ public class AmberConnection
                      Object key)
     throws AmberException
   {
-    return load(cl, key, null);
-  }
-
-  /**
-   * Loads the object based on the class and primary key.
-   */
-  public Object load(Class cl,
-                     Object key,
-                     Map preloadedProperties)
-    throws AmberException
-  {
     Entity entity = null;
 
     if (key == null)
@@ -883,7 +862,7 @@ public class AmberConnection
         throw new AmberException(e);
       }
 
-      entity = entityHome.load(this, key, preloadedProperties);
+      entity = entityHome.load(this, key);
 
       if (entity == null)
         return null;
@@ -945,14 +924,6 @@ public class AmberConnection
    * Returns the entity for the connection.
    */
   public Entity getEntity(EntityItem item)
-  {
-    return getEntity(item, null);
-  }
-
-  /**
-   * Returns the entity for the connection.
-   */
-  public Entity getEntity(EntityItem item, Map preloadedProperties)
   {
     Entity itemEntity = item.getEntity();
     EntityType entityType = itemEntity.__caucho_getEntityType();
@@ -1084,17 +1055,8 @@ public class AmberConnection
   /**
    * Loads the object with the given class.
    */
-  public Object loadProxy(String name, Object key)
-  {
-    return loadProxy(name, key, null);
-  }
-
-  /**
-   * Loads the object with the given class.
-   */
   public Object loadProxy(String name,
-                          Object key,
-                          Map preloadedProperties)
+                          Object key)
   {
     if (key == null)
       return null;
@@ -1104,7 +1066,7 @@ public class AmberConnection
     if (home == null)
       throw new RuntimeException(L.l("no matching home for {0}", name));
 
-    return loadProxy(home.getEntityType(), key, preloadedProperties);
+    return loadProxy(home.getEntityType(), key);
   }
 
   /**
@@ -1113,30 +1075,20 @@ public class AmberConnection
   public Object loadProxy(EntityType type,
                           Object key)
   {
-    return loadProxy(type, key, null);
-  }
-
-  /**
-   * Loads the object with the given class.
-   */
-  public Object loadProxy(EntityType type,
-                          Object key,
-                          Map preloadedProperties)
-  {
     if (key == null)
       return null;
 
     try {
       AmberEntityHome home = type.getHome();
 
-      EntityItem item = home.findEntityItem(this, key, false, preloadedProperties);
+      EntityItem item = home.findEntityItem(this, key, false);
 
       if (item == null)
         return null;
 
       EntityFactory factory = home.getEntityFactory();
 
-      Object entity = factory.getEntity(this, item, preloadedProperties);
+      Object entity = factory.getEntity(this, item);
 
       return entity;
     } catch (SQLException e) {
@@ -1145,7 +1097,6 @@ public class AmberConnection
       return null;
     }
   }
-
 
   /**
    * Loads the object based on the class and primary key.
@@ -1701,7 +1652,7 @@ public class AmberConnection
     EntityState state = entity.__caucho_getEntityState();
 
     if (EntityState.TRANSIENT.ordinal() < state.ordinal()
-	&& state.ordinal() < EntityState.P_DELETING.ordinal()) {
+        && state.ordinal() < EntityState.P_DELETING.ordinal()) {
       // jpa/0g06
       addEntity(entity);
     }
@@ -1871,22 +1822,22 @@ public class AmberConnection
     if (index < 0) {
       throw new IllegalStateException(L.l("AmberEntity[{0}:{1}} cannot be deleted since it is not managed"));
       /*
-      EntityType entityType = entity.__caucho_getEntityType();
+        EntityType entityType = entity.__caucho_getEntityType();
 
-      if (entityType == null)
+        if (entityType == null)
         return;
-      // throw new AmberException(L.l("entity has no entityType"));
+        // throw new AmberException(L.l("entity has no entityType"));
 
-      AmberEntityHome entityHome = entityType.getHome();
-      //entityHome = _persistenceUnit.getEntityHome(entity.getClass().getName());
+        AmberEntityHome entityHome = entityType.getHome();
+        //entityHome = _persistenceUnit.getEntityHome(entity.getClass().getName());
 
-      if (entityHome == null)
+        if (entityHome == null)
         throw new AmberException(L.l("entity has no matching home"));
 
-      // XXX: this makes no sense
-      entityHome.makePersistent(entity, this, true);
+        // XXX: this makes no sense
+        entityHome.makePersistent(entity, this, true);
 
-      addEntity(entity);
+        addEntity(entity);
       */
     }
     else {
@@ -2389,7 +2340,7 @@ public class AmberConnection
 
       // removed entity instance, reset state and persist.
       if (! isCascade)
-	flushInternal();
+        flushInternal();
       instance.__caucho_makePersistent(null, (EntityType) null);
       createInternal(instance);
     }

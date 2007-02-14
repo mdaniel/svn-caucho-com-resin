@@ -925,7 +925,7 @@ public class QueryImpl implements Query {
           boolean typeIsNumber = arg.getType().isNumeric();
 
           if (! typeIsNumber)
-            throw new IllegalArgumentException(L.l("Type mismatch for parameter index '{0}'. Value '{1}' for type '{2}' is not valid in query '{3}'", index, value, arg.getType(), _userQuery.getQuery().getSQL()));
+            throw new IllegalArgumentException(L.l("Type mismatch for parameter index '{0}'. Value '{1}' for type '{2}' is not valid in query '{3}'", index, value, arg.getType().getClass().getName(), _userQuery.getQuery().getSQL()));
         }
       }
 

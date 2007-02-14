@@ -594,16 +594,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("  __caucho_load_" + index + "(aConn);");
 
     out.println("}");
-
-    out.println();
-    out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn, java.util.Map preloadedProperties)");
-    out.println("  throws java.sql.SQLException");
-    out.println("{");
-
-    if (hasLoad)
-      out.println("  __caucho_load_" + index + "(aConn, preloadedProperties);");
-
-    out.println("}");
   }
 
   /**
@@ -1344,7 +1334,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("} else {");
     out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
     out.println("}");
-    
+
     out.println();
 
     out.println("aConn.postPersist((com.caucho.amber.entity.Entity) this);");
@@ -1685,7 +1675,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // jpa/0i60
     out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_TRANSACTIONAL)");
     out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_PERSIST;");
-    
+
     // out.println("if (aConn == null)");
     // out.println("  throw new com.caucho.amber.AmberException(\"Null AmberConnection when object \" + " + getDebug() + " + \" is trying to cascade persist child objects.\");");
 

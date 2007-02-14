@@ -205,18 +205,7 @@ public class AmberEntityHome {
                      Object key)
     throws AmberException
   {
-    return load(aConn, key, null);
-  }
-
-  /**
-   * Finds by the primary key.
-   */
-  public Entity load(AmberConnection aConn,
-                     Object key,
-                     Map preloadedProperties)
-    throws AmberException
-  {
-    return find(aConn, key, true, preloadedProperties);
+    return find(aConn, key, true);
   }
 
   /**
@@ -304,23 +293,7 @@ public class AmberEntityHome {
                      boolean isLoad)
     throws AmberException
   {
-    return find(aConn, key, isLoad, null);
-  }
-
-  /**
-   * Finds an entity based on the primary key.
-   *
-   * @param key the primary key
-   * @param aConn the Amber connection to associate with the loaded item
-   * @param isLoad if true, try to load the bean
-   */
-  public Entity find(AmberConnection aConn,
-                     Object key,
-                     boolean isLoad,
-                     Map preloadedProperties)
-    throws AmberException
-  {
-    EntityItem item = findEntityItem(aConn, key, isLoad, preloadedProperties);
+    EntityItem item = findEntityItem(aConn, key, isLoad);
 
     if (item == null) {
       if (_manager.isJPA())
@@ -343,22 +316,6 @@ public class AmberEntityHome {
   public EntityItem findEntityItem(AmberConnection aConn,
                                    Object key,
                                    boolean isLoad)
-    throws AmberException
-  {
-    return findEntityItem(aConn, key, isLoad, null);
-  }
-
-  /**
-   * Loads an entity based on the primary key.
-   *
-   * @param aConn the Amber connection to associate with the loaded item
-   * @param key the primary key
-   * @param isLoad if true, try to load the bean
-   */
-  public EntityItem findEntityItem(AmberConnection aConn,
-                                   Object key,
-                                   boolean isLoad,
-                                   Map preloadedProperties)
     throws AmberException
   {
     if (key == null)
@@ -394,7 +351,7 @@ public class AmberEntityHome {
         }
 
         if (isLoad) {
-          cacheEntity.__caucho_retrieve(aConn, preloadedProperties);
+          cacheEntity.__caucho_retrieve(aConn);
         }
 
         item = new CacheableEntityItem(this, cacheEntity);
@@ -416,10 +373,10 @@ public class AmberEntityHome {
 
         if (_manager.isJPA()) {
           // jpa/0v33
-          item.loadEntity(aConn, 0, preloadedProperties);
+          item.loadEntity(aConn, 0);
         }
         else
-          item.loadEntity(0, preloadedProperties);
+          item.loadEntity(0);
       }
 
       // XXX: jpa/0s2j

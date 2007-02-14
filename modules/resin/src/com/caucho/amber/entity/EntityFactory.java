@@ -49,17 +49,7 @@ public class EntityFactory {
   public Object getEntity(AmberConnection aConn,
                           EntityItem item)
   {
-    return getEntity(aConn, item, null);
-  }
-
-  /**
-   * Gets the appropriate entity given the EntityItem.
-   */
-  public Object getEntity(AmberConnection aConn,
-                          EntityItem item,
-                          Map preloadedProperties)
-  {
-    return aConn.getEntity(item, preloadedProperties);
+    return aConn.getEntity(item);
   }
 
   /**

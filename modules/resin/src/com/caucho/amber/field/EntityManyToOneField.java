@@ -545,22 +545,13 @@ public class EntityManyToOneField extends CascadableField {
 
       String javaType = getJavaTypeName();
 
-      out.println("if ((preloadedProperties == null) || (! preloadedProperties.containsKey(\"" + getName() + "\"))) {");
-      out.pushDepth();
-
-      String indexS = "_" + (_targetLoadIndex / 64);
-      indexS += "_" + (1L << (_targetLoadIndex % 64));
+      // jpa/0o05
+      String indexS = "_" + group + "_" + index;
 
       generateLoadProperty(out, indexS, "aConn");
-
-      out.popDepth();
-      out.println("} else {");
-
-      out.println("  " + generateSuperSetter("(" + javaType + ") preloadedProperties.get(\"" + getName() + "\")") + ";");
-      out.println("}");
     }
 
-    return index;
+    return ++index;
   }
 
   /**
@@ -657,11 +648,8 @@ public class EntityManyToOneField extends CascadableField {
   {
     String javaType = getJavaTypeName();
 
-    if (_targetField != null) {
-      out.println("java.util.Map map_" + index + " = new java.util.HashMap();");
-      out.println("map_" + index + ".put(\"" + _targetField.getName() + "\", this);");
-      out.println();
-    }
+    // jpa/0o04
+    out.println(session + ".addEntity(this);");
 
     // ejb/06h0
     if (isAbstract()) {
@@ -683,10 +671,7 @@ public class EntityManyToOneField extends CascadableField {
         out.print(_aliasField.generateGet("super"));
       }
 
-      if (_targetField == null)
-        out.println(");");
-      else
-        out.println(", map_" + index + ");");
+      out.println(");");
 
       out.println(generateSuperSetter("v" + index) + ";");
     }
