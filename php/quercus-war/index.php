@@ -1,4 +1,5 @@
 <html>
+<head>
 <title>
 Quercus&#153; Start Page
 </title>
@@ -41,17 +42,19 @@ Quercus&#153; Start Page
     display: <?php if (quercus_test()) echo "block"; ?>;
 }
 </style>
+</head>
 
+<body>
 <div>
 Testing for Quercus&#153;...
 </div>
 
 <div class="message" id="failure">
-PHP files doesn't appear to be interpreted by Quercus&#153;.
+PHP files are not being interpreted by Quercus&#153;.
 </div>
 
 <div class="message" id="failure_default_interpreter">
-PHP is being interpreted, but not by Quercus&#153;!  Please make sure the standard PHP interpreter is disabled.
+PHP is being interpreted, but not by Quercus&#153;!  Please check your configuration.
 </div>
 
 <div class="message" id="success">
@@ -65,8 +68,14 @@ Documentation is available at <a href="http://quercus.caucho.com">http://quercus
 <hr/>
 
 <div class="footer">
-<p>Copyright 2007 <a href="http://www.caucho.com">Caucho Technology, Inc</a>.  All rights reserved.</a></p>
-<p>Quercus&#153; is a registered trademark of Caucho Technology, Inc.</p>
+Copyright &copy; 1998-2007
+<a href="http://www.caucho.com">Caucho Technology, Inc</a>. 
+All rights reserved.<br/>
+
+Resin <sup><font size="-1">&#174;</font></sup> is a registered trademark,
+and Quercus<sup>tm</sup>, Amber<sup>tm</sup>, and Hessian<sup>tm</sup>
+are trademarks of Caucho Technology.
 </div>
+</body>
 
 </html>
