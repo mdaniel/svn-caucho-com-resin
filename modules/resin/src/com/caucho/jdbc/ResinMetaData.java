@@ -45,6 +45,14 @@ public class ResinMetaData extends JdbcMetaData {
   }
 
   /**
+   * Returns the literal for FALSE.
+   */
+  public String getFalseLiteral()
+  {
+    return "0";
+  }
+
+  /**
    * Returns the blob type.
    */
   public String getBlobType()
@@ -69,6 +77,14 @@ public class ResinMetaData extends JdbcMetaData {
   }
 
   /**
+   * Returns true if the POSITION function is supported.
+   */
+  public boolean supportsPositionFunction()
+  {
+    return false;
+  }
+
+  /**
    * Returns the identity property
    */
   public String createIdentitySQL(String sqlType)
@@ -85,5 +101,5 @@ public class ResinMetaData extends JdbcMetaData {
       return sql;
     else
       return sql + " LIMIT " + limit;
-  }    
+  }
 }
