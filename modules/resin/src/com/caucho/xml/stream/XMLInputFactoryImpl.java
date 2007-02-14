@@ -254,6 +254,10 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
       setEventAllocator((XMLEventAllocator)value);
       return;
     }
+    else if ("javax.xml.stream.isNamespaceAware".equals(name)) {
+      // XXX?
+      return;
+    }
 
     throw new IllegalArgumentException("property \""+name+"\" not supported");
   }

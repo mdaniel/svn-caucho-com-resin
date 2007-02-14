@@ -34,6 +34,7 @@ import com.caucho.vfs.WriteStream;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
@@ -63,6 +64,12 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     _ws = ws;
     _repair = repair;
     _tracker = new NamespaceWriterContext(repair);
+  }
+
+  public void setRepair(boolean repair)
+  {
+    _repair = repair;
+    _tracker.setRepair(repair);
   }
 
   public void close() throws XMLStreamException
@@ -100,6 +107,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public Object getProperty(String name)
     throws IllegalArgumentException
   {
+    if (XMLOutputFactory.IS_REPAIRING_NAMESPACES.equals(name))
+      return Boolean.valueOf(_repair);
+
     throw new PropertyNotSupportedException(name);
   }
 

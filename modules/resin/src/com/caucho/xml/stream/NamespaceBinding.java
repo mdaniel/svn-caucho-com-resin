@@ -112,6 +112,7 @@ final class NamespaceBinding
   {
     return "NamespaceBinding[prefix=" + _prefix + 
                            ",uri=" + _uri + 
-                           ",version=" + _version + "]";
+                           ",version=" + _version + 
+                           ",emit=" + _emit + "]";
   }
 }
