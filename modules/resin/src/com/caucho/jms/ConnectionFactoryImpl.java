@@ -35,17 +35,14 @@ import com.caucho.jms.jdbc.JdbcTopic;
 import com.caucho.jms.memory.MemoryQueue;
 import com.caucho.jms.memory.MemoryTopic;
 import com.caucho.jms.session.ConnectionImpl;
+import com.caucho.jms.session.QueueConnectionImpl;
+import com.caucho.jms.session.TopicConnectionImpl;
 import com.caucho.log.Log;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.JMSResource;
 import com.caucho.util.L10N;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-import javax.jms.Queue;
-import javax.jms.Topic;
+import javax.jms.*;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -57,7 +54,9 @@ import java.util.logging.Logger;
 /**
  * A sample connection factory.
  */
-public class ConnectionFactoryImpl implements ConnectionFactory  {
+public class ConnectionFactoryImpl
+  implements XAQueueConnectionFactory, XATopicConnectionFactory
+{
   static final Logger log = Log.open(ConnectionFactoryImpl.class);
   static final L10N L = new L10N(ConnectionFactoryImpl.class);
 
@@ -308,5 +307,103 @@ public class ConnectionFactoryImpl implements ConnectionFactory  {
       throw new JMSSecurityException(L.l("'{0}' is an unknown user",
 					 username));
     }
+  }
+
+  /**
+   * Creates a new queue connection
+   */
+  public QueueConnection createQueueConnection()
+    throws JMSException
+  {
+    return createQueueConnection(null, null);
+  }
+
+  /**
+   * Creates a new queue connection
+   *
+   * @param username the username to authenticate with the server.
+   * @param password the password to authenticate with the server.
+   *
+   * @return the created connection
+   */
+  public QueueConnection createQueueConnection(String username,
+                                               String password)
+    throws JMSException
+  {
+    authenticate(username, password);
+
+    QueueConnectionImpl conn = new QueueConnectionImpl(this);
+
+    addConnection(conn);
+
+    return conn;
+  }
+
+  /**
+   * Creates a new queue connection
+   */
+  public TopicConnection createTopicConnection()
+    throws JMSException
+  {
+    return createTopicConnection(null, null);
+  }
+
+  /**
+   * Creates a new queue connection
+   *
+   * @param username the username to authenticate with the server.
+   * @param password the password to authenticate with the server.
+   *
+   * @return the created connection
+   */
+  public TopicConnection createTopicConnection(String username,
+                                               String password)
+    throws JMSException
+  {
+    authenticate(username, password);
+
+    TopicConnectionImpl conn = new TopicConnectionImpl(this);
+
+    addConnection(conn);
+
+    return conn;
+  }
+
+  public XAConnection createXAConnection()
+    throws JMSException
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public XAConnection createXAConnection(String userName, String password)
+    throws JMSException
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public XAQueueConnection createXAQueueConnection()
+    throws JMSException
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public XAQueueConnection createXAQueueConnection(String userName,
+                                                   String password)
+    throws JMSException
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public XATopicConnection createXATopicConnection()
+    throws JMSException
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public XATopicConnection createXATopicConnection(String userName,
+                                                   String password)
+    throws JMSException
+  {
+    throw new UnsupportedOperationException("unimplemented");
   }
 }

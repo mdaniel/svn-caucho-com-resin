@@ -35,6 +35,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
+import com.caucho.util.L10N;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -62,6 +63,7 @@ import java.util.zip.ZipInputStream;
  */
 public class Jar implements CacheListener {
   private static final Logger log = Log.open(Jar.class);
+  private static final L10N L = new L10N(Jar.class);
   
   private static LruCache<Path,Jar> _jarCache;
 
@@ -637,7 +639,15 @@ public class Jar implements CacheListener {
     }
 
     if (_backing.getScheme().equals("file") && _backing.canRead()) {
-      jarFile = new JarFile(_backing.getNativePath());
+      try {
+        jarFile = new JarFile(_backing.getNativePath());
+      }
+      catch (IOException ex) {
+        if (log.isLoggable(Level.FINE))
+          log.log(Level.FINE, L.l("Error opening jar file `{0}'", _backing.getNativePath()));
+
+        throw ex;
+      }
 
       _jarFileRef = new SoftReference<JarFile>(jarFile);
       _jarLastModified = getLastModifiedImpl();

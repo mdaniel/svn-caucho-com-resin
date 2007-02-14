@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 /**
  * Abstract way of grabbing data from the JDBC connection.
  */
-public class OracleMetaData extends JdbcMetaData {
+public class OracleMetaData extends GenericMetaData {
   private static final Logger log = Log.open(OracleMetaData.class);
 
   protected OracleMetaData(DataSource ds)

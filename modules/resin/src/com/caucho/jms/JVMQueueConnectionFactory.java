@@ -28,48 +28,12 @@
 
 package com.caucho.jms;
 
-import com.caucho.jms.session.QueueConnectionImpl;
-
-import javax.jms.JMSException;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-  
 /**
  * A sample queue connection factory.
+ *
+ * @deprecated Use ConnectionFactoryImpl
  */
-public class JVMQueueConnectionFactory extends ConnectionFactoryImpl
-  implements QueueConnectionFactory  {
-  public JVMQueueConnectionFactory()
-  {
-  }
-
-  /**
-   * Creates a new queue connection
-   */
-  public QueueConnection createQueueConnection()
-    throws JMSException
-  {
-    return createQueueConnection(null, null);
-  }
-
-  /**
-   * Creates a new queue connection
-   *
-   * @param username the username to authenticate with the server.
-   * @param password the password to authenticate with the server.
-   *
-   * @return the created connection
-   */
-  public QueueConnection createQueueConnection(String username,
-                                               String password)
-    throws JMSException
-  {
-    authenticate(username, password);
-    
-    QueueConnectionImpl conn = new QueueConnectionImpl(this);
-
-    addConnection(conn);
-    
-    return conn;
-  }
+public class JVMQueueConnectionFactory
+  extends ConnectionFactoryImpl
+{
 }

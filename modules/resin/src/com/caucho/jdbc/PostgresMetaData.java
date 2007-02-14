@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 /**
  * Abstract way of grabbing data from the JDBC connection.
  */
-public class PostgresMetaData extends JdbcMetaData {
+public class PostgresMetaData extends GenericMetaData {
   private static final Logger log = Log.open(PostgresMetaData.class);
 
   protected PostgresMetaData(DataSource ds)

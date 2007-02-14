@@ -154,14 +154,16 @@ public class AmqDestination extends AbstractDestination
     */
   }
 
-  public void close()
+  public void destroy()
   {
     _client.close();
+
+    super.destroy();
   }
 
   public void finalize()
   {
-    close();
+    destroy();
   }
 }
 

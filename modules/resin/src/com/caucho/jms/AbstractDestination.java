@@ -36,7 +36,7 @@ import com.caucho.jms.session.MessageProducerImpl;
 import com.caucho.jms.session.QueueSenderImpl;
 import com.caucho.jms.session.SessionImpl;
 import com.caucho.jms.session.TopicPublisherImpl;
-import com.caucho.lifecycle.*;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.services.message.MessageSender;
 import com.caucho.services.message.MessageServiceException;
@@ -46,7 +46,6 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.NullEnumeration;
 import com.caucho.util.RandomUtil;
 
-import javax.annotation.*;
 import javax.jms.*;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
@@ -293,8 +292,7 @@ abstract public class AbstractDestination implements Destination, MessageSender
     return ! _lifecycle.isActive();
   }
 
-  @PostConstruct
-  public void close()
+  public void destroy()
   {
     _lifecycle.toDestroy();
   }

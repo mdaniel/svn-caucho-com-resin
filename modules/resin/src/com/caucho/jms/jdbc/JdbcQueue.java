@@ -93,7 +93,7 @@ public class JdbcQueue extends JdbcDestination implements Queue {
     
     if (getName() == null)
       throw new ConfigException(L.l("JdbcQueue requires a <queue-name> element."));
-    
+
     _jdbcManager.init();
 
     _id = createDestination(getName(), false);

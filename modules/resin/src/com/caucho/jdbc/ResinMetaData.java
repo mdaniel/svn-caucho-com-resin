@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 /**
  * Metadata for the Resin database.
  */
-public class ResinMetaData extends JdbcMetaData {
+public class ResinMetaData extends GenericMetaData {
   private static final Logger log = Log.open(ResinMetaData.class);
 
   protected ResinMetaData(DataSource ds)

@@ -34,7 +34,9 @@ import javax.sql.DataSource;
 /**
  * Metadata for the Apache Derby database.
  */
-public class DerbyMetaData extends JdbcMetaData {
+public class DerbyMetaData
+  extends GenericMetaData
+{
   protected DerbyMetaData(DataSource ds)
   {
     super(ds);
@@ -62,5 +64,31 @@ public class DerbyMetaData extends JdbcMetaData {
   public boolean supportsGetGeneratedKeys()
   {
     return true;
+  }
+
+  public boolean supportsIdentity()
+  {
+    return true;
+  }
+
+  public String createIdentitySQL(String sqlType)
+  {
+    return sqlType + " GENERATED ALWAYS AS IDENTITY";
+  }
+
+  public boolean supportsSequences()
+  {
+    // http://issues.apache.org/jira/browse/DERBY-712
+    return false;
+  }
+
+  public String selectSequenceSQL(String name)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  public String createSequenceSQL(String name, int size)
+  {
+    throw new UnsupportedOperationException();
   }
 }

@@ -104,11 +104,12 @@ public class JdbcMessage
     JdbcMetaData metaData = _jdbcManager.getMetaData();
 
     _isOracle = metaData instanceof OracleMetaData;
-      
-    String identity = "";
+
+    String longType = _jdbcManager.getLongType();
+    String identity =  longType + " PRIMARY KEY";
 
     if (metaData.supportsIdentity())
-      identity = " auto_increment";
+      identity = metaData.createIdentitySQL(identity);
     else
       _messageSequence = _messageTable + "_cseq";
 
@@ -129,12 +130,11 @@ public class JdbcMessage
       }
 
       String blob = _jdbcManager.getBlob();
-      String longType = _jdbcManager.getLongType();
-							   
+
       log.info(L.l("creating JMS message table {0}", _messageTable));
       
       sql = ("CREATE TABLE " + _messageTable + " (" +
-	     "  m_id " + longType + " PRIMARY KEY" + identity + "," +
+	     "  m_id " + identity + "," +
 	     "  queue INTEGER NOT NULL," +
 	     "  conn VARCHAR(255)," +
 	     "  consumer " + longType + "," +

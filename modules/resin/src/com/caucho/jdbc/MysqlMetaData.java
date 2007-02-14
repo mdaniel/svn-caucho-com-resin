@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 /**
  * Metadata for the MySQL database.
  */
-public class MysqlMetaData extends JdbcMetaData {
+public class MysqlMetaData extends GenericMetaData {
   private static final Logger log = Log.open(MysqlMetaData.class);
 
   protected MysqlMetaData(DataSource ds)

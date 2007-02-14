@@ -28,48 +28,16 @@
 
 package com.caucho.jms;
 
-import com.caucho.jms.session.TopicConnectionImpl;
-
-import javax.jms.JMSException;
-import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
 /**
  * A sample queue connection factory.
+ *
+ * @deprecated Use ConnectionFactoryImpl
  */
 public class JVMTopicConnectionFactory extends ConnectionFactoryImpl
   implements TopicConnectionFactory  {
   public JVMTopicConnectionFactory()
   {
-  }
-
-  /**
-   * Creates a new queue connection
-   */
-  public TopicConnection createTopicConnection()
-    throws JMSException
-  {
-    return createTopicConnection(null, null);
-  }
-
-  /**
-   * Creates a new queue connection
-   *
-   * @param username the username to authenticate with the server.
-   * @param password the password to authenticate with the server.
-   *
-   * @return the created connection
-   */
-  public TopicConnection createTopicConnection(String username,
-                                               String password)
-    throws JMSException
-  {
-    authenticate(username, password);
-    
-    TopicConnectionImpl conn = new TopicConnectionImpl(this);
-
-    addConnection(conn);
-    
-    return conn;
   }
 }

@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 /**
  * Metadata for the microsoft SQL server database.
  */
-public class SqlServerMetaData extends JdbcMetaData {
+public class SqlServerMetaData extends GenericMetaData {
   private static final Logger log = Log.open(SqlServerMetaData.class);
 
   protected SqlServerMetaData(DataSource ds)
@@ -53,10 +53,14 @@ public class SqlServerMetaData extends JdbcMetaData {
     return true;
   }
 
-    /**
-   * New version to Return SQL for the table with the given
-   * SQL type.  Takes, length, precision and scale.
+  /**
+   * Returns the identity property
    */
+  public String createIdentitySQL(String sqlType)
+  {
+    return " uniqueidentifier NOT NULL DEFAULT(NEWID())";
+  }
+
   public String getCreateColumnSQL(int sqlType, int length, int precision, int scale) {
        String type = null;
 
@@ -98,14 +102,6 @@ public class SqlServerMetaData extends JdbcMetaData {
       type = getDefaultCreateTableSQL(sqlType, length, precision, scale);
 
     return type;
-  }
-
-  /**
-   * Returns the identity property
-   */
-  public String createIdentitySQL(String sqlType)
-  {
-    return " uniqueidentifier NOT NULL DEFAULT(NEWID())";
   }
 
   public String generateBoolean(String term)

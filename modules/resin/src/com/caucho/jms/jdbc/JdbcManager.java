@@ -284,8 +284,12 @@ public class JdbcManager {
   {
     Connection conn = _dataSource.getConnection();
     
-    if (! getMetaData().supportsIdentity())
+    if (! getMetaData().supportsIdentity()) {
+      if (! getMetaData().supportsSequences())
+        throw new ConfigException(L.l("JdbcManager requires a datasource that supports either identity or sequences"));
+
       _destinationSequence = _destinationTable + "_cseq";
+    }
 
     try {
       Statement stmt = conn.createStatement();
@@ -304,15 +308,14 @@ public class JdbcManager {
 
       log.info(L.l("creating JMS destination table {0}", _destinationTable));
 
-      String identity = "";
+      String longType = getLongType();
+      String identity = longType + " PRIMARY KEY";
 
       if (getMetaData().supportsIdentity())
-	identity = " auto_increment";
+	identity = getMetaData().createIdentitySQL(identity);
 
-      String longType = getLongType();
-      
       sql = ("CREATE TABLE " + _destinationTable + " (" +
-	     "  id " + longType + " PRIMARY KEY " + identity + "," +
+	     "  id " + identity + "," +
 	     "  name VARCHAR(255)," +
 	     "  is_topic INTEGER" +
 	     ")");
@@ -354,16 +357,16 @@ public class JdbcManager {
 	log.finest(e.toString());
       }
 
-      log.info(L.l("creating JMS subscriber table {0}", _consumerTable));
+      log.info(L.l("creating JMS consumer table {0}", _consumerTable));
 
       String longType = getLongType();
-      String identity = "";
+      String identity = longType + " PRIMARY KEY";
 
       if (getMetaData().supportsIdentity())
-	identity = " auto_increment";
-      
+        identity = getMetaData().createIdentitySQL(identity);
+
       sql = ("CREATE TABLE " + _consumerTable + " (" +
-	     "  s_id " + longType + " PRIMARY KEY " + identity + "," +
+	     "  s_id " + identity + "," +
 	     "  queue " + longType + "," +
 	     "  client VARCHAR(255)," +
 	     "  name VARCHAR(255)," +
