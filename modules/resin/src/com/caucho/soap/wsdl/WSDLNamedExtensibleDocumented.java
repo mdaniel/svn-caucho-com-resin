@@ -36,16 +36,15 @@ import javax.xml.bind.annotation.XmlAttribute;
 /**
  * A WSDL element with arbitrary children.
  */
-@XmlAccessorType(XmlAccessType.FIELD)
 public abstract class WSDLNamedExtensibleDocumented 
   extends WSDLExtensibleDocumented 
 {
-  @XmlAttribute(required=true, name="name")
   private String _name;
 
   /**
    * Sets the message name.
    */
+  @XmlAttribute(required=true, name="name")
   public void setName(String name)
   {
     _name = name;

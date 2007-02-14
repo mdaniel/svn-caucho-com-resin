@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +41,7 @@ import java.util.List;
  * WSDL operation definition
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="operation", namespace="http://schemas.xmlsoap.org/wsdl/")
+@XmlType(name="tOperation", namespace="http://schemas.xmlsoap.org/wsdl/")
 public class WSDLOperation extends WSDLNamedExtensibleDocumented {
 
   @XmlElements({

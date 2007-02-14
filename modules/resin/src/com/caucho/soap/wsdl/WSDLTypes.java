@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,13 +30,12 @@ package com.caucho.soap.wsdl;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * WSDL types
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="types", namespace="http://schemas.xmlsoap.org/wsdl/")
+@XmlType(name="types", namespace="http://schemas.xmlsoap.org/wsdl/")
 public class WSDLTypes extends WSDLExtensibleDocumented 
                        implements WSDLDefinition
 {

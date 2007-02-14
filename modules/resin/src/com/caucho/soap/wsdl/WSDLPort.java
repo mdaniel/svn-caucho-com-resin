@@ -37,15 +37,14 @@ import javax.xml.namespace.QName;
 /**
  * WSDL Port definition
  */
-@XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="port", namespace="http://schemas.xmlsoap.org/wsdl/")
 public class WSDLPort extends WSDLNamedExtensibleDocumented {
-  @XmlAttribute(name="binding")
   private QName _binding;
 
   /**
    * Sets the binding name.
    */
+  @XmlAttribute(name="binding")
   public void setBinding(QName binding)
   {
     _binding = binding;

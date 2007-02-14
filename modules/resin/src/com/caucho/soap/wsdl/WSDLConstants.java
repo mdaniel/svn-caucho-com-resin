@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,14 +30,20 @@ package com.caucho.soap.wsdl;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * WSDL operation fault.
- */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="tFault", 
-         namespace="http://schemas.xmlsoap.org/wsdl/")
-public class WSDLOperationFault extends WSDLOperationPart
-{
+public interface WSDLConstants {
+  public static final String WSDL_BINDING_NAMESPACE
+    = "http://schemas.xmlsoap.org/wsdl/";
+
+  public static final String SOAP11_BINDING_NAMESPACE
+    = "http://schemas.xmlsoap.org/wsdl/soap/";
+
+  public static final String SOAP12_BINDING_NAMESPACE 
+    = "http://schemas.xmlsoap.org/wsdl/soap12/";
 }

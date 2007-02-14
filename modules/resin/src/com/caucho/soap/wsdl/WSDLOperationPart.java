@@ -38,7 +38,7 @@ public abstract class WSDLOperationPart
   extends WSDLNamedExtensibleAttributeDocumented 
 {
   @XmlAttribute(name="message")
-  private QName _message;
+  protected QName _message;
 
   /**
    * Sets the type.

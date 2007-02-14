@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,15 +40,14 @@ import java.util.List;
 /**
  * WSDL binding definition
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="binding", namespace="http://schemas.xmlsoap.org/wsdl/")
+@XmlType(name="tBinding", namespace="http://schemas.xmlsoap.org/wsdl/")
 public class WSDLBinding extends WSDLNamedExtensibleDocumented
                          implements WSDLDefinition {
   @XmlElement(name="operation", namespace="http://schemas.xmlsoap.org/wsdl/")
-  private List<WSDLBindingOperation> _operations;
+  protected List<WSDLBindingOperation> _operations;
 
   @XmlAttribute(required=true, name="type")
-  private QName _type;
+  protected QName _type;
 
   /**
    * Sets the binding type.
@@ -76,9 +75,6 @@ public class WSDLBinding extends WSDLNamedExtensibleDocumented
 
   public List<WSDLBindingOperation> getOperations()
   {
-    if (_operations == null)
-      _operations = new ArrayList<WSDLBindingOperation>();
-
     return _operations;
   }
 

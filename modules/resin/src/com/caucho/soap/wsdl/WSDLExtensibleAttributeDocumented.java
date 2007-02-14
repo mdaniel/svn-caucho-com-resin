@@ -38,14 +38,18 @@ import java.util.Map;
 /**
  * A WSDL element with arbitrary attributes.
  */
-@XmlAccessorType(XmlAccessType.FIELD)
 public abstract class WSDLExtensibleAttributeDocumented {
-  @XmlAnyAttribute
   private Map<QName,Object> _attributes;
 
+  @XmlAnyAttribute
   public Map<QName,Object> getAttributes()
   {
     return _attributes;
+  }
+
+  public void setAttributes(Map<QName,Object> attributes)
+  {
+    _attributes = attributes;
   }
 
   public void putAttribute(QName key, Object value)

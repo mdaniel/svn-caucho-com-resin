@@ -36,12 +36,12 @@ import javax.xml.bind.annotation.XmlAttribute;
 public abstract class WSDLNamedExtensibleAttributeDocumented
   extends WSDLExtensibleAttributeDocumented 
 {
-  @XmlAttribute(name="name")
   private String _name;
 
   /**
    * Returns the message name.
    */
+  @XmlAttribute(name="name")
   public String getName()
   {
     return _name;

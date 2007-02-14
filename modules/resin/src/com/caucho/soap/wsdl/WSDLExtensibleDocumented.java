@@ -36,19 +36,16 @@ import java.util.List;
  * A WSDL element with arbitrary children.
  */
 public abstract class WSDLExtensibleDocumented {
-  @XmlAnyElement(lax = true)
   private List<Object> _any;
 
+  @XmlAnyElement(lax = true)
   public List<Object> getAny()
   {
     return _any;
   }
 
-  public void addAny(Object any)
+  public void setAny(List<Object> any)
   {
-    if (_any == null)
-      _any = new ArrayList<Object>();
-
-    _any.add(any);
+    _any = any;
   }
 }

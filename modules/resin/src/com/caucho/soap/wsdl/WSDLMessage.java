@@ -38,21 +38,24 @@ import java.util.List;
 /**
  * WSDL Message definition
  */
-@XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="message", namespace="http://schemas.xmlsoap.org/wsdl/")
 public class WSDLMessage extends WSDLNamedExtensibleDocumented 
                          implements WSDLDefinition 
 {
-  @XmlElement(name="part", namespace="http://schemas.xmlsoap.org/wsdl/",
-              type=WSDLPart.class)
   private List<WSDLPart> _parts;
 
   /**
    * Returns the message part.
    */
+  @XmlElement(name="part", namespace="http://schemas.xmlsoap.org/wsdl/")
   public List<WSDLPart> getParts()
   {
     return _parts;
+  }
+
+  public void setParts(List<WSDLPart> parts)
+  {
+    _parts = parts;
   }
 
   public void addPart(WSDLPart part)
