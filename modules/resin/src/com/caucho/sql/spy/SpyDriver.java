@@ -48,6 +48,9 @@ public class SpyDriver implements java.sql.Driver {
   protected final static L10N L = new L10N(SpyDriver.class);
 
   private static int _staticId;
+
+  private SpyDataSource _spyDataSource;
+  
   private int _id;
   private int _connCount;
 
@@ -59,6 +62,7 @@ public class SpyDriver implements java.sql.Driver {
    */
   public SpyDriver(Driver driver)
   {
+    _spyDataSource = new SpyDataSource();
     _driver = driver;
     _id = _staticId++;
   }
@@ -89,7 +93,7 @@ public class SpyDriver implements java.sql.Driver {
 
       log.info(_id + ":connect(" + url + ",info=" + info + ") -> " + connId + ":" + conn);
 
-      return new SpyConnection(conn, connId);
+      return new SpyConnection(conn, _spyDataSource);
     } catch (SQLException e) {
       log.info(_id + ":exn-connect(" + e + ")");
       

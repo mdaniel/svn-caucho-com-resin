@@ -266,7 +266,9 @@ javaee_persistence-unit-ref = element persistence-unit-ref {
 
   element persistence-unit-name { string }?,
 
-  javaee_resource-Group
+  element mapped-name { string }?,
+
+  javaee_injection-target*
 }
 
 javaee_post-construct = element post-construct {

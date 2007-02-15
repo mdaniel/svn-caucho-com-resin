@@ -220,6 +220,20 @@ r_param-value-Type =
 
   r_param-value
 
+r_persistence-unit-ref = element persistence-unit-ref {
+  attribute id { string }?
+
+  & r_description-Group
+
+  & (attribute persistence-unit-ref-name { string }
+     | element persistence-unit-ref-name { string })
+
+  & (attribute persistence-unit-ref { string }
+     | element persistence-unit-ref { string })
+
+  & r_resource-Group
+}
+
 r_remote = element remote {
   r_fully-qualified-class
 }
@@ -235,6 +249,21 @@ r_res-sharing-scope = element res-sharing-scope {
 r_res-type = element res-type {
   r_fully-qualified-class
 }
+
+r_resource-Group =
+  r_ejb-ref*
+
+  & r_env-entry*
+
+  & r_resource-ref*
+
+  & r_resource-env-ref*
+
+  & r_message-ref*
+
+  & r_message-destination-ref*
+
+  & r_persistence-unit-ref*
 
 r_resource-env-ref = element resource-env-ref {
   r_description*,

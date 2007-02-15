@@ -35,7 +35,7 @@ import javax.sql.ConnectionEventListener;
 import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Spying on a connection.
@@ -45,6 +45,8 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
   protected final static L10N L = new L10N(SpyPooledConnection.class);
 
   protected int _id;
+
+  private SpyDataSource _spyDataSource;
   private int _connCount;
 
   // The underlying connection
@@ -55,6 +57,8 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
    */
   public SpyPooledConnection(PooledConnection conn, int id)
   {
+    _spyDataSource = new SpyDataSource();
+    
     _pconn = conn;
     _id = id;
   }
@@ -75,11 +79,15 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
     try {
       Connection conn = _pconn.getConnection();
 
-      int connId = _connCount++;
+      String connId = null;
+      
+      if (log.isLoggable(Level.INFO)) {
+	connId = _spyDataSource.createConnectionId();
 
-      log.info(_id + ":connect() -> " + connId + ":" + conn);
+	log.info(_id + ":connect() -> " + connId + ":" + conn);
+      }
 
-      return new SpyConnection(conn, connId);
+      return new SpyConnection(conn, _spyDataSource, connId);
     } catch (SQLException e) {
       log.info(_id + ":exn-connect(" + e + ")");
       

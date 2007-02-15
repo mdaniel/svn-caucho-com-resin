@@ -92,13 +92,9 @@ public class ORBImpl extends org.omg.CORBA.ORB
 
   WriteStream openWriter()
   {
-    try {
-      ReadWritePair pair = _path.openReadWrite();
+    ReadWritePair pair = openReadWrite();
 
-      return pair.getWriteStream();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return pair.getWriteStream();
   }
 
   ReadWritePair openReadWrite()

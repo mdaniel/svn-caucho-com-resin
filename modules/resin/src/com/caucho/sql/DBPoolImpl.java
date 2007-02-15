@@ -39,6 +39,7 @@ import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
+import com.caucho.sql.spy.*;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -186,7 +187,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   private long _transactionTimeout = 0;
 
   private boolean _isSpy;
-  private int _spyId;
+  private SpyDataSource _spyDataSource;
 
   private int _maxCloseStatements = 256;
   // The prepared statement cache size.
@@ -770,9 +771,17 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   /**
    * Returns the next spy id.
    */
-  public int newSpyId()
+  public SpyDataSource getSpyDataSource()
   {
-    return _spyId++;
+    return _spyDataSource;
+  }
+
+  /**
+   * Returns the next spy id.
+   */
+  public String newSpyId()
+  {
+    return _spyDataSource.createConnectionId();
   }
 
   /**
@@ -946,6 +955,9 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       // XXX: actually should be proxy
       // Jndi.bindDeep(name, this);
     }
+
+    if (_isSpy)
+      _spyDataSource = new SpyDataSource(_name);
   }
 
   /**

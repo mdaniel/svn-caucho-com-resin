@@ -19,44 +19,56 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.entity;
+package com.caucho.sql.spy;
 
-import com.caucho.amber.manager.AmberConnection;
-import com.caucho.amber.type.EntityType;
+import com.caucho.log.Log;
+import com.caucho.util.L10N;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
- * The state of an entity
+ * Source for spy connections
  */
-public enum EntityState {
-  TRANSIENT,
-  P_NON_TRANSACTIONAL,
-  P_PERSIST,
-  P_TRANSACTIONAL,
-  P_DELETING,
-  P_DELETED;
+public class SpyDataSource {
+  private String _name;
+  
+  private int _connIdCount;
 
-  public final boolean isTransactional()
+  /**
+   * Creates a new SpyDataSource
+   */
+  public SpyDataSource()
   {
-    return this == P_TRANSACTIONAL || this == P_PERSIST;
+    this(null);
   }
 
-  public final boolean isManaged()
+  /**
+   * Creates a new SpyDataSource
+   */
+  public SpyDataSource(String name)
   {
-    int value = ordinal();
+    if (name != null)
+      _name = name + ".";
+    else
+      _name = "";
+  }
 
-    return P_NON_TRANSACTIONAL.ordinal() < value;
+  /**
+   * Creates a connection id.
+   */
+  public String createConnectionId()
+  {
+    synchronized (this) {
+      return _name + _connIdCount++;
+    }
   }
 }

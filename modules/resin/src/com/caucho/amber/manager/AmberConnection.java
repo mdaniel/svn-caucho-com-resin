@@ -275,7 +275,6 @@ public class AmberConnection
       checkTransactionRequired("persist");
 
       persistInternal(entity, false);
-
     } catch (RuntimeException e) {
       throw e;
     } catch (SQLException e) {
@@ -342,6 +341,7 @@ public class AmberConnection
             try {
               managedEntity = (Entity) load(entity.getClass(), pk);
             } catch (AmberObjectNotFoundException e) {
+	      log.log(Level.FINEST, e.toString(), e);
               // JPA: should not throw at all, returns null only.
             }
 
@@ -844,7 +844,12 @@ public class AmberConnection
         return entity;
 
       // jpa/0g0k setTransactionalState(entity);
+      /*
       if (entity.__caucho_getEntityState() == EntityState.P_TRANSACTIONAL) {
+        return entity;
+      }
+      */
+      if (entity.__caucho_getEntityState().isTransactional()) {
         return entity;
       }
 
@@ -1230,7 +1235,7 @@ public class AmberConnection
 
     EntityState state = entity.__caucho_getEntityState();
     if (isInTransaction()) {
-      if (state != EntityState.P_TRANSACTIONAL) {
+      if (! state.isTransactional()) {
         // jpa/11a6
         return false;
       }
@@ -1348,6 +1353,17 @@ public class AmberConnection
   public void beforeCommit()
     throws SQLException
   {
+    try {
+      flushInternal();
+    } catch (SQLException e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    
+    /*
     // jpa/0gh0
     for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
@@ -1366,6 +1382,7 @@ public class AmberConnection
 
       entity.__caucho_flush();
     }
+    */
   }
 
   /**
@@ -2153,7 +2170,8 @@ public class AmberConnection
 
       // jpa/0j5f
       EntityState state = entity.__caucho_getEntityState();
-      if (state.ordinal() < EntityState.P_DELETING.ordinal())
+      //if (state.ordinal() < EntityState.P_DELETING.ordinal())
+      if (state == EntityState.P_NON_TRANSACTIONAL)
         entity.__caucho_setEntityState(EntityState.P_TRANSACTIONAL);
     }
   }
@@ -2225,15 +2243,20 @@ public class AmberConnection
     Entity entity = (Entity) obj;
 
     // jpa/0g0k: cannot call home.save because of jpa exception handling.
-    if (_persistenceUnit.isJPA())
+    if (_persistenceUnit.isJPA()) {
+      entity.__caucho_cascadePrePersist(this);
       entity.__caucho_create(this, home.getEntityType());
+      entity.__caucho_cascadePostPersist(this);
+    }
     else
       home.save(this, entity);
 
     addEntity(entity);
 
     // jpa/0h25
-    setTransactionalState(entity);
+    // XXX: not correct, since we need to keep the P_PERSIST state around
+    // and P_PERSIST is a transactional state
+    // setTransactionalState(entity);
 
     Table table = home.getEntityType().getTable();
     addCompletion(new TableInvalidateCompletion(table.getName()));
@@ -2273,6 +2296,7 @@ public class AmberConnection
   private void flushInternal()
     throws Exception
   {
+    /* XXX: moved into __caucho_flush
     for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
 
@@ -2285,11 +2309,13 @@ public class AmberConnection
       // applied to Y. It is a lazy cascade as the relationship
       // is not always initialized at the time persist(X) was
       // called but must be at flush time.
-      if (state.ordinal() <= EntityState.P_PERSIST.ordinal()) {
+
+      if (state == EntityState.P_PERSIST) {
         entity.__caucho_cascadePrePersist(this);
-        // entity.__caucho_cascadePostPersist(this);
+        entity.__caucho_cascadePostPersist(this);
       }
     }
+    */
 
     for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
@@ -2323,40 +2349,54 @@ public class AmberConnection
 
     EntityState state = instance.__caucho_getEntityState();
 
-    // jpa/0h24
-    // Pre-persist child entities.
-    instance.__caucho_cascadePrePersist(this);
+    switch (state) {
+    case TRANSIENT:
+      {
+	// jpa/0h24
+	// Pre-persist child entities.
+	//instance.__caucho_cascadePrePersist(this);
 
-    if (state == EntityState.TRANSIENT) {
-      try {
-        createInternal(instance);
-      } catch (SQLException e) {
-        // jpa/0ga3
-        throw new EntityExistsException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", instance.getClass().getName(), instance.__caucho_getPrimaryKey(), state));
+	try {
+	  createInternal(instance);
+	} catch (SQLException e) {
+	  // jpa/0ga3
+	  throw new EntityExistsException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", instance.getClass().getName(), instance.__caucho_getPrimaryKey(), state));
+	}
       }
-    }
-    else if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
-      // jpa/0i60, jpa/1510
+      break;
 
-      // removed entity instance, reset state and persist.
-      if (! isCascade)
-        flushInternal();
-      instance.__caucho_makePersistent(null, (EntityType) null);
-      createInternal(instance);
-    }
-    else if (instance.__caucho_isDirty()) {
-      // OK: jpa/0ga6
-    }
-    else if (instance.__caucho_getConnection() != this) {
-      // jpa/0ga5 (tck):
-      // See entitytest.persist.basic.persistBasicTest4 vs.
-      //     callback.inheritance.preUpdateTest
-      throw new EntityExistsException(L.l("Trying to persist an entity that is detached or already exists. Entity state '{0}'", state));
+    case P_DELETING:
+    case P_DELETED:
+      {
+	if (! isCascade) {
+	  // jpa/0i60, jpa/1510
+
+	  // removed entity instance, reset state and persist.
+	  flushInternal();
+	  instance.__caucho_makePersistent(null, (EntityType) null);
+	  createInternal(instance);
+	}
+      }
+      break;
+
+    case P_PERSIST:
+      break;
+
+    default:
+      if (instance.__caucho_getConnection() == this)
+	return;
+      else {
+	// jpa/0ga5 (tck):
+	// See entitytest.persist.basic.persistBasicTest4 vs.
+	//     callback.inheritance.preUpdateTest
+	throw new EntityExistsException(L.l("Trying to persist an entity that is detached or already exists. Entity state '{0}'", state));
+      }
     }
 
     // jpa/0h27
     // Post-persist child entities.
-    instance.__caucho_cascadePostPersist(this);
+    // XXX: should be handled by flush
+    // instance.__caucho_cascadePostPersist(this);
   }
 
   /**

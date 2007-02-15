@@ -72,7 +72,7 @@ public class ManagedConnectionImpl
   protected static L10N L = new L10N(ManagedConnectionImpl.class);
 
   // Identifier for spy, etc.
-  private int _id;
+  private String _id;
 
   private ManagedFactoryImpl _factory;
   private DBPoolImpl _dbPool;
@@ -293,7 +293,9 @@ public class ManagedConnectionImpl
     }
 
     if (dbPool.isSpy()) {
-      _driverConnection = new SpyConnection(_driverConnection, _id);
+      _driverConnection = new SpyConnection(_driverConnection,
+					    _dbPool.getSpyDataSource(),
+					    _id);
 
       if (_xaResource != null)
 	_xaResource = new SpyXAResource(_id, _xaResource);

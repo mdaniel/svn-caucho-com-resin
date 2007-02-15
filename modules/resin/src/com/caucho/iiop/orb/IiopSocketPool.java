@@ -53,7 +53,7 @@ public class IiopSocketPool
     _host = host;
     _port = port;
     HashMap<String,Object> props = new HashMap<String,Object>();
-    props.put("timeout", new Long(120000));
+    props.put("timeout", new Long(600000));
     _path = Vfs.lookup("tcp://" + host + ":" + port, props);
   }
 

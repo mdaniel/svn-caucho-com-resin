@@ -186,7 +186,7 @@ public class WebAppFilterChain implements FilterChain {
 	try {
 	  _utm.abortTransaction();
 	} catch (Throwable e) {
-	  _app.log(e.getMessage(), e);
+	  log.log(Level.WARNING, e.toString(), e);
 	}
       }
         

@@ -47,12 +47,12 @@ public class SpyXAResource implements XAResource {
   // The underlying resource
   private XAResource _xaResource;
 
-  private int _id;
+  private String _id;
 
   /**
    * Creates a new SpyXAResource
    */
-  public SpyXAResource(int id, XAResource resource)
+  public SpyXAResource(String id, XAResource resource)
   {
     _xaResource = resource;
     _id = id;

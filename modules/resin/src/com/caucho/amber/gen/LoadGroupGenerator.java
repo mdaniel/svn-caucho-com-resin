@@ -288,6 +288,9 @@ public class LoadGroupGenerator extends ClassComponent {
     _relatedType.generateLoad(out, "rs", "", 1, _index, null);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
 
+    // XXX: add isJPA test?
+    out.println("aConn.addEntity(this);");
+
     _relatedType.generateLoadEager(out, "rs", "", 1, _index);
 
     // commented out: jpa/0r01

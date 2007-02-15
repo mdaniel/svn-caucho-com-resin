@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 
 /**
- * Represents a many-to-one link pointing to an entity.
+ * Represents the dependent side of a one-to-one bidirectional link.
  */
 public class DependentEntityOneToOneField extends CascadableField {
   private static final L10N L = new L10N(DependentEntityOneToOneField.class);
@@ -191,6 +191,10 @@ public class DependentEntityOneToOneField extends CascadableField {
     if (! getEntitySourceType().getPersistenceUnit().isJPA())
       return false;
 
+    // XXX: shouldn't this only apply for cascade?  The dependent
+    // object shouldn't care about the owning object for a flush, and
+    // it's always safe to add/remove the dependent object first
+    /*
     String getter = generateSuperGetter();
 
     out.println("if (" + getter + " != null) {");
@@ -198,18 +202,16 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.println("com.caucho.amber.entity.EntityState state = ((com.caucho.amber.entity.Entity) " + getter + ").__caucho_getEntityState();");
 
     // jpa/0s2d
-    out.println("if (this.__caucho_state.ordinal() < com.caucho.amber.entity.EntityState.P_DELETING.ordinal()");
-    out.println("    && (state.ordinal() < com.caucho.amber.entity.EntityState.P_NEW.ordinal() || ");
-    out.println("        state.ordinal() >= com.caucho.amber.entity.EntityState.P_DELETED.ordinal()))");
-
+    out.println("if (! __caucho_state.isManaged())");
     String errorString = ("(\"amber flush: unable to flush " +
                           getEntitySourceType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
                           "with non-managed dependent relationship one-to-one to "+
-                          getEntityTargetType().getName() + "\")");
+                          getEntityTargetType().getName() + " with state='\" + __caucho_state + \"'\")");
 
     out.println("  throw new IllegalStateException" + errorString + ";");
     out.popDepth();
     out.println("}");
+    */
 
     return true;
   }

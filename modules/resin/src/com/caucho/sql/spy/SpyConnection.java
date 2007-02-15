@@ -33,7 +33,7 @@ import com.caucho.util.L10N;
 
 import java.sql.*;
 import java.util.Map;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Spying on a connection.
@@ -44,8 +44,10 @@ public class SpyConnection implements java.sql.Connection {
     Logger.getLogger(SpyConnection.class.getName() + ".XA");
   protected final static L10N L = new L10N(SpyConnection.class);
 
-  private int _id;
-  private int _stmtCount;
+  private SpyDataSource _spyDataSource;
+  
+  private String _id;
+  private int _stmtIdCount;
 
   // The underlying connection
   private Connection _conn;
@@ -53,8 +55,20 @@ public class SpyConnection implements java.sql.Connection {
   /**
    * Creates a new SpyConnection.
    */
-  public SpyConnection(Connection conn, int id)
+  public SpyConnection(Connection conn, SpyDataSource spyDataSource)
   {
+    _spyDataSource = spyDataSource;
+    _conn = conn;
+  }
+
+  /**
+   * Creates a new SpyConnection.
+   */
+  public SpyConnection(Connection conn,
+		       SpyDataSource spyDataSource,
+		       String id)
+  {
+    _spyDataSource = spyDataSource;
     _conn = conn;
     _id = id;
   }
@@ -68,6 +82,25 @@ public class SpyConnection implements java.sql.Connection {
   }
 
   /**
+   * Returns the id.
+   */
+  public String getId()
+  {
+    if (_id == null)
+      _id = _spyDataSource.createConnectionId();
+
+    return _id;
+  }
+
+  /**
+   * Returns a new statement id.
+   */
+  public String createStatementId()
+  {
+    return getId() + "." + _stmtIdCount++;
+  }
+
+  /**
    * JDBC api to return the connection's catalog.
    *
    * @return the JDBC catalog.
@@ -78,11 +111,11 @@ public class SpyConnection implements java.sql.Connection {
     try {
       String catalog = _conn.getCatalog();
 
-      log.info(_id + ":getCatalog() -> " + catalog);
+      log.info(getId() + ":getCatalog() -> " + catalog);
       
       return catalog;
     } catch (SQLException e) {
-      log.info(_id + ":exn-getCatalog(" + e + ")");
+      log.info(getId() + ":exn-getCatalog(" + e + ")");
       
       throw e;
     }
@@ -95,11 +128,11 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      log.info(_id + ":setCatalog(" + catalog + ")");
+      log.info(getId() + ":setCatalog(" + catalog + ")");
     
       _conn.setCatalog(catalog);
     } catch (SQLException e) {
-      log.info(_id + ":exn-setCatalog(" + e + ")");
+      log.info(getId() + ":exn-setCatalog(" + e + ")");
       throw e;
     }
   }
@@ -113,11 +146,11 @@ public class SpyConnection implements java.sql.Connection {
     try {
       DatabaseMetaData metaData = _conn.getMetaData();
       
-      log.info(_id + ":getMetaData() -> " + metaData);
+      log.info(getId() + ":getMetaData() -> " + metaData);
       
       return metaData;
     } catch (SQLException e) {
-      log.info(_id + ":exn-getMetaData(" + e + ")");
+      log.info(getId() + ":exn-getMetaData(" + e + ")");
       throw e;
     }
   }
@@ -131,11 +164,11 @@ public class SpyConnection implements java.sql.Connection {
     try {
       Map map = _conn.getTypeMap();
 
-      log.info(_id + ":getTypeMap() -> " + map);
+      log.info(getId() + ":getTypeMap() -> " + map);
       
       return map;
     } catch (SQLException e) {
-      log.info(_id + ":exn-getTypeMap(" + e + ")");
+      log.info(getId() + ":exn-getTypeMap(" + e + ")");
       throw e;
     }
   }
@@ -147,11 +180,11 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      log.info(_id + ":setTypeMap(" + map + ")");
+      log.info(getId() + ":setTypeMap(" + map + ")");
       
       _conn.setTypeMap(map);
     } catch (SQLException e) {
-      log.info(_id + ":exn-setTypeMap(" + e + ")");
+      log.info(getId() + ":exn-setTypeMap(" + e + ")");
 
       throw e;
     }
@@ -166,11 +199,11 @@ public class SpyConnection implements java.sql.Connection {
     try {
       String nativeSQL = _conn.nativeSQL(sql);
 
-      log.info(_id + ":nativeSQL() -> " + nativeSQL);
+      log.info(getId() + ":nativeSQL() -> " + nativeSQL);
       
       return nativeSQL;
     } catch (SQLException e) {
-      log.info(_id + ":exn-nativeSQL(" + e + ")");
+      log.info(getId() + ":exn-nativeSQL(" + e + ")");
 
       throw e;
     }
@@ -182,11 +215,11 @@ public class SpyConnection implements java.sql.Connection {
     try {
       int isolation = _conn.getTransactionIsolation();
 
-      log.info(_id + ":getTransactionIsolation() -> " + isolation);
+      log.info(getId() + ":getTransactionIsolation() -> " + isolation);
       
       return isolation;
     } catch (SQLException e) {
-      log.info(_id + ":exn-getTransactionIsolation(" + e + ")");
+      log.info(getId() + ":exn-getTransactionIsolation(" + e + ")");
 
       throw e;
     }
@@ -196,11 +229,11 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      log.info(_id + ":setTransactionIsolation(" + isolation + ")");
+      log.info(getId() + ":setTransactionIsolation(" + isolation + ")");
       
       _conn.setTransactionIsolation(isolation);
     } catch (SQLException e) {
-      log.info(_id + ":exn-setTransactionIsolation(" + e + ")");
+      log.info(getId() + ":exn-setTransactionIsolation(" + e + ")");
 
       throw e;
     }
@@ -212,11 +245,11 @@ public class SpyConnection implements java.sql.Connection {
     try {
       SQLWarning warning = _conn.getWarnings();
       
-      log.info(_id + ":getWarnings() -> " + warning);
+      log.info(getId() + ":getWarnings() -> " + warning);
       
       return warning;
     } catch (SQLException e) {
-      log.info(_id + ":exn-getWarnings(" + e + ")");
+      log.info(getId() + ":exn-getWarnings(" + e + ")");
 
       throw e;
     }
@@ -226,11 +259,11 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      log.info(_id + ":clearWarnings()");
+      log.info(getId() + ":clearWarnings()");
 
       _conn.clearWarnings();
     } catch (SQLException e) {
-      log.info(_id + ":exn-clearWarnings(" + e + ")");
+      log.info(getId() + ":exn-clearWarnings(" + e + ")");
 
       throw e;
     }
@@ -240,11 +273,11 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      log.info(_id + ":setReadOnly(" + readOnly + ")");
+      log.info(getId() + ":setReadOnly(" + readOnly + ")");
       
       _conn.setReadOnly(readOnly);
     } catch (SQLException e) {
-      log.info(_id + ":exn-setReadOnly(" + e + ")");
+      log.info(getId() + ":exn-setReadOnly(" + e + ")");
 
       throw e;
     }
@@ -256,12 +289,12 @@ public class SpyConnection implements java.sql.Connection {
     try {
       boolean isReadOnly = _conn.isReadOnly();
 
-      log.info(_id + "isReadOnly() -> " + isReadOnly);
+      log.info(getId() + "isReadOnly() -> " + isReadOnly);
 
       return isReadOnly;
 
     } catch (SQLException e) {
-      log.info(_id + ":exn-isReadOnly(" + e + ")");
+      log.info(getId() + ":exn-isReadOnly(" + e + ")");
 
       throw e;
     }
@@ -278,9 +311,12 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      String stmtId = _id + "." + _stmtCount++;
-      
-      log.info(stmtId + ":createStatement()");
+      String stmtId = null;
+
+      if (log.isLoggable(Level.INFO)) {
+	stmtId = createStatementId();
+	log.info(stmtId + ":createStatement()");
+      }
       
       Statement stmt;
       
@@ -288,7 +324,7 @@ public class SpyConnection implements java.sql.Connection {
       
       return new SpyStatement(stmtId, this, stmt);
     } catch (SQLException e) {
-      log.info(_id + ":exn-createStatement(" + e + ")");
+      log.info(getId() + ":exn-createStatement(" + e + ")");
       throw e;
     }
   }
@@ -304,10 +340,14 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      String stmtId = _id + "." + _stmtCount++;
+      String stmtId = null;
+
+      if (log.isLoggable(Level.INFO)) {
+	stmtId = createStatementId();
       
-      log.info(stmtId + ":createStatement(type=" + resultSetType +
-              ",concurrency=" + resultSetConcurrency + ")");
+	log.info(stmtId + ":createStatement(type=" + resultSetType +
+		 ",concurrency=" + resultSetConcurrency + ")");
+      }
       
       Statement stmt;
       
@@ -315,7 +355,7 @@ public class SpyConnection implements java.sql.Connection {
       
       return new SpyStatement(stmtId, this, stmt);
     } catch (SQLException e) {
-      log.info(_id + ":exn-createStatement(" + e + ")");
+      log.info(getId() + ":exn-createStatement(" + e + ")");
       throw e;
     }
   }
@@ -326,11 +366,15 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      String stmtId = _id + "." + _stmtCount++;
+      String stmtId = null;
+
+      if (log.isLoggable(Level.INFO)) {
+	stmtId = createStatementId();
       
-      log.info(stmtId + ":createStatement(type=" + resultSetType +
-              ",concurrency=" + resultSetConcurrency +
-              ",holdability=" + resultSetHoldability + ")");
+	log.info(stmtId + ":createStatement(type=" + resultSetType +
+		 ",concurrency=" + resultSetConcurrency +
+		 ",holdability=" + resultSetHoldability + ")");
+      }
       
       Statement stmt;
       
@@ -340,7 +384,7 @@ public class SpyConnection implements java.sql.Connection {
       
       return new SpyStatement(stmtId, this, stmt);
     } catch (SQLException e) {
-      log.info(_id + ":exn-createStatement(" + e + ")");
+      log.info(getId() + ":exn-createStatement(" + e + ")");
       throw e;
     }
   }
@@ -350,8 +394,12 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      String stmtId = _id + "." + _stmtCount++;
-      log.info(stmtId + ":prepareStatement(" + sql + ")");
+      String stmtId = null;
+
+      if (log.isLoggable(Level.INFO)) {
+	stmtId = createStatementId();
+	log.info(stmtId + ":prepareStatement(" + sql + ")");
+      }
       
       PreparedStatement stmt;
       
@@ -359,7 +407,7 @@ public class SpyConnection implements java.sql.Connection {
       
       return new SpyPreparedStatement(stmtId, this, stmt, sql);
     } catch (SQLException e) {
-      log.info(_id + ":exn-prepareStatement(" + e + ")");
+      log.info(getId() + ":exn-prepareStatement(" + e + ")");
 
       throw e;
     }
@@ -370,8 +418,12 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      String stmtId = _id + "." + _stmtCount++;
-      log.info(stmtId + ":prepareStatement(" + sql + ",type=" + resultSetType + ")");
+      String stmtId = null;
+
+      if (log.isLoggable(Level.INFO)) {
+	stmtId = createStatementId();
+	log.info(stmtId + ":prepareStatement(" + sql + ",type=" + resultSetType + ")");
+      }
       
       PreparedStatement stmt;
       
@@ -379,7 +431,7 @@ public class SpyConnection implements java.sql.Connection {
       
       return new SpyPreparedStatement(stmtId, this, stmt, sql);
     } catch (SQLException e) {
-      log.info(_id + ":exn-prepareStatement(" + e + ")");
+      log.info(getId() + ":exn-prepareStatement(" + e + ")");
 
       throw e;
     }
@@ -390,9 +442,14 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      String stmtId = _id + "." + _stmtCount++;
-      log.info(stmtId + ":prepareStatement(" + sql + ",type=" + resultSetType +
-              ",concurrency=" + resultSetConcurrency + ")");
+      String stmtId = null;
+
+      if (log.isLoggable(Level.INFO)) {
+	stmtId = createStatementId();
+	
+	log.info(stmtId + ":prepareStatement(" + sql + ",type=" + resultSetType +
+		 ",concurrency=" + resultSetConcurrency + ")");
+      }
       
       PreparedStatement stmt;
       
@@ -400,7 +457,7 @@ public class SpyConnection implements java.sql.Connection {
       
       return new SpyPreparedStatement(stmtId, this, stmt, sql);
     } catch (SQLException e) {
-      log.info(_id + ":exn-prepareStatement(" + e + ")");
+      log.info(getId() + ":exn-prepareStatement(" + e + ")");
 
       throw e;
     }
@@ -433,8 +490,8 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      String stmtId = _id + "." + _stmtCount++;
-      log.info(stmtId + ":prepareCall(" + sql + ")");
+      if (log.isLoggable(Level.INFO))
+	log.info(getId() + ":prepareCall(" + sql + ")");
       
       CallableStatement stmt;
       
@@ -442,7 +499,7 @@ public class SpyConnection implements java.sql.Connection {
       
       return stmt;
     } catch (SQLException e) {
-      log.info(_id + ":exn-prepareCall(" + e + ")");
+      log.info(getId() + ":exn-prepareCall(" + e + ")");
 
       throw e;
     }
@@ -453,8 +510,8 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      String stmtId = _id + "." + _stmtCount++;
-      log.info(stmtId + ":prepareCall(" + sql + ",type=" + resultSetType +
+      if (log.isLoggable(Level.INFO))
+	log.info(getId() + ":prepareCall(" + sql + ",type=" + resultSetType +
               ",concurrency=" + resultSetConcurrency + ")");
       
       CallableStatement stmt;
@@ -463,7 +520,7 @@ public class SpyConnection implements java.sql.Connection {
       
       return stmt;
     } catch (SQLException e) {
-      log.info(_id + ":exn-prepareCall(" + e + ")");
+      log.info(getId() + ":exn-prepareCall(" + e + ")");
 
       throw e;
     }
@@ -484,11 +541,11 @@ public class SpyConnection implements java.sql.Connection {
     try {
       boolean autoCommit = _conn.getAutoCommit();
       
-      log.info(_id + ":getAutoCommit() -> " + autoCommit);
+      log.info(getId() + ":getAutoCommit() -> " + autoCommit);
       
       return autoCommit;
     } catch (SQLException e) {
-      log.info(_id + ":exn-getAutoCommit(" + e + ")");
+      log.info(getId() + ":exn-getAutoCommit(" + e + ")");
 
       throw e;
     }
@@ -498,11 +555,11 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      logXA.info(_id + ":setAutoCommit(" + autoCommit + ")");
+      logXA.info(getId() + ":setAutoCommit(" + autoCommit + ")");
       
       _conn.setAutoCommit(autoCommit);
     } catch (SQLException e) {
-      logXA.info(_id + ":exn-setAutoCommit(" + e + ")");
+      logXA.info(getId() + ":exn-setAutoCommit(" + e + ")");
 
       throw e;
     }
@@ -512,11 +569,11 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      logXA.info(_id + ":commit()");
+      logXA.info(getId() + ":commit()");
 
       _conn.commit();
     } catch (SQLException e) {
-      logXA.info(_id + ":exn-commit(" + e + ")");
+      logXA.info(getId() + ":exn-commit(" + e + ")");
 
       throw e;
     }
@@ -526,11 +583,11 @@ public class SpyConnection implements java.sql.Connection {
     throws SQLException
   {
     try {
-      logXA.info(_id + ":rollback()");
+      logXA.info(getId() + ":rollback()");
       
       _conn.rollback();
     } catch (SQLException e) {
-      logXA.info(_id + ":exn-rollback(" + e + ")");
+      logXA.info(getId() + ":exn-rollback(" + e + ")");
 
       throw e;
     }
@@ -545,11 +602,11 @@ public class SpyConnection implements java.sql.Connection {
     try {
       boolean isClosed = _conn.isClosed();
 
-      log.info(_id + ":isClosed() -> " + isClosed);
+      log.info(getId() + ":isClosed() -> " + isClosed);
       
       return isClosed;
     } catch (SQLException e) {
-      log.info(_id + ":exn-isClosed(" + e + ")");
+      log.info(getId() + ":exn-isClosed(" + e + ")");
 
       throw e;
     }
@@ -561,12 +618,12 @@ public class SpyConnection implements java.sql.Connection {
    */
   public void close() throws SQLException
   {
-    log.info(_id + ":close()");
+    log.info(getId() + ":close()");
 
     try {
       _conn.close();
     } catch (SQLException e) {
-      log.info(_id + ":exn-close(" + e + ")");
+      log.info(getId() + ":exn-close(" + e + ")");
 
       throw e;
     }
@@ -610,6 +667,6 @@ public class SpyConnection implements java.sql.Connection {
 
   public String toString()
   {
-    return "SpyConnection[id=" + _id + ",conn=" + _conn + "]";
+    return "SpyConnection[id=" + getId() + ",conn=" + _conn + "]";
   }
 }

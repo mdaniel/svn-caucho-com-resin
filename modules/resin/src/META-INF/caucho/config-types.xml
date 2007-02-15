@@ -63,6 +63,8 @@
     <persistent-store>com.caucho.server.cluster.PersistentStoreConfig</persistent-store>
 
     <persistence-manager>com.caucho.amber.cfg.PersistenceManager</persistence-manager>
+    
+    <persistence-unit-ref>com.caucho.config.types.PersistenceUnitRef</persistence-unit-ref>
 
     <reference>com.caucho.config.types.ReferenceConfig</reference>
 

@@ -69,7 +69,7 @@ public final class BlockManager
     registerSelf();
 
     BlockManagerWriter writer = new BlockManagerWriter();
-    Thread thread = new Thread(writer, "block-manager-writer");
+    Thread thread = new Thread(writer, "resin-block-manager-writer");
     thread.setDaemon(true);
 
     thread.start();

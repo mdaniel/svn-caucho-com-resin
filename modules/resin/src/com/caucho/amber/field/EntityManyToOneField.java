@@ -293,7 +293,6 @@ public class EntityManyToOneField extends CascadableField {
       boolean unique = false;
 
       if (n > 0) {
-
         JoinColumnConfig joinColumn;
 
         if (n == 1) {
@@ -871,9 +870,7 @@ public class EntityManyToOneField extends CascadableField {
     out.pushDepth();
 
     // jpa/0j5c as a positive test.
-    out.println("if (this.__caucho_state.ordinal() < com.caucho.amber.entity.EntityState.P_DELETING.ordinal()");
-    out.println("    && (state.ordinal() <= com.caucho.amber.entity.EntityState.P_NEW.ordinal() || ");
-    out.println("        state.ordinal() >= com.caucho.amber.entity.EntityState.P_DELETED.ordinal()))");
+    out.println("if (! __caucho_state.isManaged())");
 
     String errorString = ("(\"amber flush: unable to flush " +
                           getRelatedType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
@@ -925,8 +922,7 @@ public class EntityManyToOneField extends CascadableField {
       out.println("((com.caucho.amber.entity.Entity) " + amberVar + ").");
       out.println("__caucho_getEntityState();");
 
-      out.println("if (" + amberVar + "_state.ordinal() >= com.caucho.amber.entity.EntityState.P_NEW.ordinal() &&");
-      out.println("    " + amberVar + "_state.ordinal() <= com.caucho.amber.entity.EntityState.P_TRANSACTIONAL.ordinal()) {");
+      out.println("if (" + amberVar + "_state.isTransactional()) {");
     }
 
     out.pushDepth();

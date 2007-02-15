@@ -665,7 +665,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     out.println();
-    out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_TRANSACTIONAL || __caucho_state == com.caucho.amber.entity.EntityState.P_NEW) {");
+    out.println("if (__caucho_state.isTransactional()) {");
     out.println("}");
     out.println("else if (__caucho_session == null ||");
     out.println("         ! __caucho_session.isInTransaction()) {");
@@ -779,6 +779,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  __caucho_delete_int();");
     out.println("  return true;");
     out.println("}");
+    out.println("else if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSIST) {");
+    out.println("  __caucho_cascadePrePersist(__caucho_session);");
+    out.println("}");
     out.println();
 
     out.println("boolean isDirty = false;");
@@ -801,12 +804,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println();
 
     // if (version == null)
-    out.println("if (! isDirty)");
+    out.println("if (isDirty) {");
+    out.pushDepth();
     // else {
     // jpa/0x02
     //  out.println("if (! (isDirty || " + version.generateIsNull() + "))");
     // }
-    out.println("  return true;");
+    // out.println("  return true;");
 
     // jpa/0r10
     out.println("__caucho_session.preUpdate((com.caucho.amber.entity.Entity) this);");
@@ -872,7 +876,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("}");
       out.println();
     }
-
+    
     out.println("__caucho_session.postUpdate((com.caucho.amber.entity.Entity) this);");
 
     generateCallbacks(out, "this", _relatedType.getPostUpdateCallbacks());
@@ -898,6 +902,14 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println();
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
     out.println("}");
+
+    out.popDepth();
+    out.println("}");
+    
+    out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSIST) {");
+    out.println("  __caucho_cascadePostPersist(__caucho_session);");
+    out.println("}");
+    out.println();
 
     out.println();
     out.println("return false;");
@@ -1163,7 +1175,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // commented out: jpa/0h25
     // out.println("  throw new com.caucho.amber.AmberException(\"object \" + " + getDebug() + " + \" is already persistent.\");");
 
-    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_NEW;");
+    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_PERSIST;");
 
     int loadCount = _relatedType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
@@ -1178,6 +1190,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       } while ((parentType = parentType.getParentType()) != null);
     }
 
+    out.println("__caucho_cascadePrePersist(aConn);");
     out.println("aConn.prePersist((com.caucho.amber.entity.Entity) this);");
 
     for (JMethod method : _relatedType.getPrePersistCallbacks()) {
@@ -1329,7 +1342,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  __caucho_log.fine(\"amber create \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
     out.println();
     out.println("if (aConn.isInTransaction()) {");
-    out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_TRANSACTIONAL;");
+
+    // jpa/0i60
+    // out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_TRANSACTIONAL;");
     out.println("  aConn.makeTransactional((com.caucho.amber.entity.Entity) this);");
     out.println("} else {");
     out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
@@ -1673,9 +1688,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     // jpa/0i60
+    /*
     out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_TRANSACTIONAL)");
     out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_PERSIST;");
-
+    */
+    
     // out.println("if (aConn == null)");
     // out.println("  throw new com.caucho.amber.AmberException(\"Null AmberConnection when object \" + " + getDebug() + " + \" is trying to cascade persist child objects.\");");
 

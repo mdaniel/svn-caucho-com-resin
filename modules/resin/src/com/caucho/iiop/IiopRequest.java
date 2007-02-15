@@ -34,6 +34,7 @@ import com.caucho.server.port.ServerRequest;
 import com.caucho.transaction.*;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
+import com.caucho.jca.*;
 import com.caucho.iiop.orb.*;
 
 import java.io.IOException;
@@ -77,6 +78,8 @@ public class IiopRequest implements ServerRequest {
   String _hostName;
   int _port;
 
+  private UserTransactionProxy _utm;
+
   TransactionManagerImpl _tm;
   UserTransaction _ut;
   
@@ -99,6 +102,7 @@ public class IiopRequest implements ServerRequest {
     _writer12.init(_messageWriter);
     
     _cos = _server.getCos();
+    _utm = UserTransactionProxy.getInstance();
 
     _loader = Thread.currentThread().getContextClassLoader();
   }
@@ -313,6 +317,12 @@ public class IiopRequest implements ServerRequest {
       return false;
     } finally {
       thread.setContextClassLoader(oldLoader);
+	
+      try {
+	_utm.abortTransaction();
+      } catch (Throwable e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
     }
   }
 
