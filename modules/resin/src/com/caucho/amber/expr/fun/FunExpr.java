@@ -35,6 +35,7 @@ import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParser;
+import com.caucho.amber.type.Type;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
@@ -91,6 +92,18 @@ public class FunExpr extends AbstractAmberExpr {
     }
 
     return this;
+  }
+
+  /**
+   * Returns the expr type.
+   */
+  public Type getType()
+  {
+    if (getArgs().size() == 0)
+      return super.getType();
+
+    // jpa/141j
+    return getArgs().get(0).getType();
   }
 
   /**
@@ -194,7 +207,7 @@ public class FunExpr extends AbstractAmberExpr {
    * Generates the where clause.
    */
   private void generateInternalWhere(CharBuffer cb,
-				     boolean select)
+             boolean select)
   {
     cb.append(_id);
     cb.append('(');
