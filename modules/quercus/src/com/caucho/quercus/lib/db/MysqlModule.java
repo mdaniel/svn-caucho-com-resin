@@ -599,15 +599,24 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   public static String mysql_get_client_info(Env env)
   { 
-    try {
-      Driver driver = DriverManager.getDriver("jdbc:mysql://localhost/");
-      
-      return driver.getMajorVersion() + '.' +
-             driver.getMinorVersion() + ".00";
+  {
+    String version = env.getQuercus().getMysqlVersion();
+    
+    if (version != null) {
+      return version;
     }
-    catch (SQLException e) {
-      return "0.00.00";
+    else {
+      try {
+        Driver driver = DriverManager.getDriver("jdbc:mysql://localhost/");
+        
+        return driver.getMajorVersion() + '.' +
+               driver.getMinorVersion() + ".00";
+      }
+      catch (SQLException e) {
+        return "0.00.00";
+      }
     }
+  }
   }
 
   /**

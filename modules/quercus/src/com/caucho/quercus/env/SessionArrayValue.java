@@ -83,7 +83,16 @@ public class SessionArrayValue extends ArrayValueWrapper
   {
     return _id;
   }
-  
+
+  /**
+   * Changes the session id.  Used by session_regenerate_id() where we want
+   * to change the session id, but keep the rest of the session information.
+   */
+  public void setId(String id)
+  {
+    _id = id;
+  }
+
   /**
    * Converts to an object.
    */

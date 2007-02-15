@@ -153,6 +153,9 @@ public class Quercus
 
   private String _scriptEncoding = "utf-8";
 
+  private String _phpVersion = "5.2.0";
+  private String _mySqlVersion;
+
   private boolean _isStrict;
 
   private DataSource _database;
@@ -299,6 +302,26 @@ public class Quercus
   public void setScriptEncoding(String encoding)
   {
     _scriptEncoding = encoding;
+  }
+
+  public String getMysqlVersion()
+  {
+    return _mySqlVersion;
+  }
+  
+  public void setMysqlVersion(String version)
+  {
+    _mySqlVersion = version;
+  }
+  
+  public String getPhpVersion()
+  {
+    return _phpVersion;
+  }
+  
+  public void setPhpVersion(String version)
+  {
+    _phpVersion = version;
   }
 
   /**

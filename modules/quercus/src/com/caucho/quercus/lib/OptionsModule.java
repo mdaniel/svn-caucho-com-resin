@@ -480,7 +480,7 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     env.print("<h1>Quercus</h1>");
     env.print("<pre>");
-    env.println("PHP Version => " + phpversion("std"));
+    env.println("PHP Version => " + phpversion(env, "std"));
     env.println("System => " + System.getProperty("os.name") + " "
 	      + System.getProperty("os.version") + " "
 	      + System.getProperty("os.arch"));
@@ -536,9 +536,9 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Returns the quercus version.
    */
-  public static String phpversion(@Optional String module)
+  public static String phpversion(Env env, @Optional String module)
   {
-    return "5.1.0";
+    return env.getQuercus().getPhpVersion();
   }
 
   /**

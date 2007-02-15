@@ -197,6 +197,22 @@ public class QuercusServlet
   }
 
   /**
+   * Sets the version of the client php library.
+   */
+  public void setMysqlVersion(String version)
+  {
+    getQuercus().setMysqlVersion(version);
+  }
+  
+  /**
+   * Sets the php version that Quercus is implementing.
+   */
+  public void setPhpVersion(String version)
+  {
+    getQuercus().setPhpVersion(version);
+  }
+
+  /**
    * Gets the script manager.
    */
   public void init(ServletConfig config)
@@ -216,6 +232,16 @@ public class QuercusServlet
       Path path = quercus.getPwd().lookup(phpIniFile);
       
       setIniFile(path);
+    }
+
+    String phpVersion = config.getInitParameter("php-version");
+    if (phpVersion != null) {
+      setPhpVersion(phpVersion);
+    }
+    
+    String mysqlVersion = config.getInitParameter("mysql-version");
+    if (mysqlVersion != null) {
+      setMysqlVersion(mysqlVersion);
     }
 
     String database = config.getInitParameter("database");

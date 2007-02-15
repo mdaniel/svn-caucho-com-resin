@@ -234,30 +234,34 @@ public class SessionModule extends AbstractQuercusModule
   }
 
   /**
-   * Regenerates the session id
+   * Regenerates the session id.
+   * 
+   * This function first creates a new session id.  The old session values are
+   * migrated to this new session.  Then a new session cookie is sent (XXX: send
+   * only if URL rewriting is off?).  Changing the session ID should be transparent.
+   * Therefore, session callbacks should not be called.
    */
   public static boolean session_regenerate_id(Env env,
                                               @Optional boolean deleteOld)
   {
-    SessionArrayValue session = env.getSession();
-
-    if (deleteOld)
+    String sessionId = env.generateSessionId();
+    
+    if (deleteOld) {
       session_destroy(env);
 
-    env.setSession(null);
+      SessionArrayValue session = env.createSession(sessionId, true);
+      env.setSession(session);
+    }
+    else {
+      SessionArrayValue session = env.getSession();
+      session.setId(sessionId);
+    }
 
-    String sessionId = env.generateSessionId();
-
+    // update environment to new session id
     session_id(env, sessionId);
 
-    session_start(env);
-
-    SessionArrayValue newSession = env.getSession();
-
-    if (session != null) {
-      for (Map.Entry<Value,Value> entry : session.entrySet())
-        newSession.put(entry.getKey(), entry.getValue());
-    }
+    if (env.getIni("session.use_cookies").toBoolean())
+      generateSessionCookie(env, sessionId);
 
     return true;
   }
@@ -490,39 +494,50 @@ public class SessionModule extends AbstractQuercusModule
     SessionArrayValue session = env.createSession(sessionId, create);
     sessionId = session.getId();
 
-    if (! env.getIni("session.use_trans_sid").toBoolean() && generateCookie) {
-      env.addConstant("SID", 
-          new StringValueImpl(cookieName + '=' + sessionId), 
-          false);
-
-      Cookie cookie = new Cookie(cookieName, sessionId);
-      cookie.setVersion(1);
-
-      if (response.isCommitted()) {
-        env.warning(L.l("cannot send session cookie because response is committed"));
-      }
-      else {
-        Value path = env.getIni("session.cookie_path");
-        cookie.setPath(path.toString());
-
-        Value maxAge = env.getIni("session.cookie_lifetime");
-
-        if (maxAge.toInt() != 0)
-          cookie.setMaxAge(maxAge.toInt());
-
-        Value domain = env.getIni("session.cookie_domain");
-        cookie.setDomain(domain.toString());
-
-        Value secure = env.getIni("session.cookie_secure");
-        cookie.setSecure(secure.toBoolean());
-
-        response.addCookie(cookie);
-      }
+    if (env.getIni("session.use_cookies").toBoolean() && generateCookie) {
+      generateSessionCookie(env, sessionId);
     }
-
     env.setSpecialValue("caucho.session_id", new StringValueImpl(sessionId));
 
     return true;
+  }
+
+  /**
+   * Sends a new session cookie.
+   */
+  private static void generateSessionCookie(Env env, String sessionId)
+  { 
+    final HttpServletResponse response = env.getResponse();
+   
+    String cookieName = env.getIni("session.name").toString();
+    
+    env.addConstant("SID", 
+            new StringValueImpl(cookieName + '=' + sessionId), 
+            false);
+
+    Cookie cookie = new Cookie(cookieName, sessionId);
+    cookie.setVersion(1);
+
+    if (response.isCommitted()) {
+      env.warning(L.l("cannot send session cookie because response is committed"));
+    }
+    else {
+      Value path = env.getIni("session.cookie_path");
+      cookie.setPath(path.toString());
+
+      Value maxAge = env.getIni("session.cookie_lifetime");
+
+      if (maxAge.toInt() != 0)
+        cookie.setMaxAge(maxAge.toInt());
+
+      Value domain = env.getIni("session.cookie_domain");
+      cookie.setDomain(domain.toString());
+
+      Value secure = env.getIni("session.cookie_secure");
+      cookie.setSecure(secure.toBoolean());
+
+      response.addCookie(cookie);
+    }
   }
 
   /**

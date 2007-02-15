@@ -53,6 +53,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
+import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -345,7 +346,7 @@ public class Env {
   {
     ArrayValue array = new ArrayValueImpl();
     
-    for (int i = _callStackTop; i >= 0; i++) {
+    for (int i = _callStackTop; i >= 2; i--) {
       String fun = _callStack[i].toString();
 
       array.put(new StringValueImpl(fun));
@@ -1729,19 +1730,35 @@ public class Env {
 
     default: {
       if (_scriptContext != null) {
-	Object value = _scriptContext.getAttribute(name);
+        Object value = _scriptContext.getAttribute(name);
 
-	if (value != null) {
-	  var = new Var();
-	  _globalMap.put(name, var);
+        if (value == null) {
+          Bindings bindings
+          = _scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
 
-	  var.set(wrapJava(value));
+          if (bindings != null)
+            value = bindings.get(name);
+        }
 
-	  return var;
-	}
+        if (value == null) {
+          Bindings bindings
+          = _scriptContext.getBindings(ScriptContext.GLOBAL_SCOPE);
+
+          if (bindings != null)
+            value = bindings.get(name);
+        }
+
+        if (value != null) {
+          var = new Var();
+          _globalMap.put(name, var);
+
+          var.set(wrapJava(value));
+
+          return var;
+        }
       }
     }
-    }
+    } // end switch
 
     return var;
   }
