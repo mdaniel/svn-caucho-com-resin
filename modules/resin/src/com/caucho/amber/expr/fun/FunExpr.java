@@ -207,7 +207,7 @@ public class FunExpr extends AbstractAmberExpr {
    * Generates the where clause.
    */
   private void generateInternalWhere(CharBuffer cb,
-             boolean select)
+                                     boolean select)
   {
     cb.append(_id);
     cb.append('(');
