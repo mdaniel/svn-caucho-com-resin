@@ -556,17 +556,18 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("if (home != null)");
       out.println("  __caucho_home = home;");
 
-      out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
+      // XXX: makePersistent is called in contexts other than the P_NON_TRANSACTIONAL one, so this setting is inappropriate
+      // out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
 
       int loadCount = _relatedType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
-        out.println("  __caucho_loadMask_" + i + " = 0L;");
+        out.println("__caucho_loadMask_" + i + " = 0L;");
       }
 
       int dirtyCount = _relatedType.getDirtyIndex();
       for (int i = 0; i <= dirtyCount / 64; i++) {
-        out.println("  __caucho_dirtyMask_" + i + " = 0L;");
-        out.println("  __caucho_updateMask_" + i + " = 0L;");
+        out.println("__caucho_dirtyMask_" + i + " = 0L;");
+        out.println("__caucho_updateMask_" + i + " = 0L;");
       }
 
       out.println();
@@ -1613,8 +1614,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     out.println(getClassName() + " o = (" + getClassName() + ") targetEntity;");
-
-    out.println("o.__caucho_home = __caucho_home;");
+    out.println("if (o.__caucho_home == null)");
+    out.println("  o.__caucho_home = __caucho_home;");
 
     // jpa/0ge6: MappedSuperclass
     if (_relatedType.getId() != null) {

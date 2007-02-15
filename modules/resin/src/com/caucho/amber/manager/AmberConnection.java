@@ -347,7 +347,11 @@ public class AmberConnection
 
             if (managedEntity == null) {
               // new entity instance
-              persist(entity);
+	      
+	      managedEntity = entity.getClass().newInstance();
+              entity.__caucho_copyTo(managedEntity, this);
+	      
+              persist(managedEntity);
             }
             else {
               // jpa/0ga3: existing entity
