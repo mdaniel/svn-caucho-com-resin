@@ -195,22 +195,22 @@ public class DependentEntityOneToOneField extends CascadableField {
     // object shouldn't care about the owning object for a flush, and
     // it's always safe to add/remove the dependent object first
     /*
-    String getter = generateSuperGetter();
+      String getter = generateSuperGetter();
 
-    out.println("if (" + getter + " != null) {");
-    out.pushDepth();
-    out.println("com.caucho.amber.entity.EntityState state = ((com.caucho.amber.entity.Entity) " + getter + ").__caucho_getEntityState();");
+      out.println("if (" + getter + " != null) {");
+      out.pushDepth();
+      out.println("com.caucho.amber.entity.EntityState state = ((com.caucho.amber.entity.Entity) " + getter + ").__caucho_getEntityState();");
 
-    // jpa/0s2d
-    out.println("if (! __caucho_state.isManaged())");
-    String errorString = ("(\"amber flush: unable to flush " +
-                          getEntitySourceType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
-                          "with non-managed dependent relationship one-to-one to "+
-                          getEntityTargetType().getName() + " with state='\" + __caucho_state + \"'\")");
+      // jpa/0s2d
+      out.println("if (! __caucho_state.isManaged())");
+      String errorString = ("(\"amber flush: unable to flush " +
+      getEntitySourceType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
+      "with non-managed dependent relationship one-to-one to "+
+      getEntityTargetType().getName() + " with state='\" + __caucho_state + \"'\")");
 
-    out.println("  throw new IllegalStateException" + errorString + ";");
-    out.popDepth();
-    out.println("}");
+      out.println("  throw new IllegalStateException" + errorString + ";");
+      out.popDepth();
+      out.println("}");
     */
 
     return true;
@@ -259,7 +259,6 @@ public class DependentEntityOneToOneField extends CascadableField {
       out.println(loadVar + " &= ~" + loadMask + "L;");
     }
 
-    // return index + 1;
     return index;
   }
 
@@ -271,24 +270,23 @@ public class DependentEntityOneToOneField extends CascadableField {
     throws IOException
   {
     if (! isLazy()) {
+      long group = _targetLoadIndex / 64;
+      long mask = (1L << (_targetLoadIndex % 64));
+      String loadVar = "__caucho_loadMask_" + group;
 
-      String loadVar = "__caucho_loadMask_" + (_targetLoadIndex / 64);
-      long loadMask = 1L << (_targetLoadIndex % 64);
-
-      out.println(loadVar + " |= " + loadMask + "L;");
+      out.println(loadVar + " |= " + mask + "L;");
 
       String javaType = getJavaTypeName();
 
       // jpa/0o04
       out.println("aConn.addEntity(this);");
 
-      String indexS = "_" + (_targetLoadIndex / 64);
-      indexS += "_" + (1L << (_targetLoadIndex % 64));
+      String indexS = "_" + group + "_" + index;
 
       generateLoadProperty(out, indexS, "aConn");
     }
 
-    return index;
+    return ++index;
   }
 
   /**

@@ -523,7 +523,6 @@ public class EntityManyToOneField extends CascadableField {
 
     //out.println("__caucho_loadMask_" + group + " &= ~" + mask + "L;");
 
-    // return index + 1;
     return index;
   }
 
@@ -599,7 +598,8 @@ public class EntityManyToOneField extends CascadableField {
     out.println("{");
     out.pushDepth();
 
-    out.println("if (__caucho_item != null) {");
+    // jpa/0h07: detached entity fields must not be loaded.
+    out.println("if (__caucho_session != null && __caucho_item != null) {");
     out.pushDepth();
 
     // ejb/06h0
