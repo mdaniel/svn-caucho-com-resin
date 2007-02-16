@@ -956,8 +956,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       // Jndi.bindDeep(name, this);
     }
 
-    if (_isSpy)
-      _spyDataSource = new SpyDataSource(_name);
+    _spyDataSource = new SpyDataSource(_name);
   }
 
   /**
