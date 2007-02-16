@@ -1091,7 +1091,7 @@ to define a sub-url the web server should handle, not Resin. (Resin 1.2.2)
 </td></tr><tr><td>always-load-session</td><td>Reload data from the store on every request. (resin 1.2)</td><td>false
 </td></tr><tr><td>always-save-session</td><td>Save session data to the store on every request. (resin 1.2)</td><td>false
 </td></tr><tr><td>save-only-on-shutdown</td><td>Only save session when the application shuts down. (resin 1.2.3)</td><td>false
-</td></tr><tr><td>reuse-session-id</td><td>Reuse the session id even if the session has timed out. (resin 2.0.4)</td><td>true
+</td></tr><tr><td>reuse-session-id</td><td>Reuse the session id even if the session has timed out. A value of false defeats single signon capabilities. (resin 2.0.4)</td><td>true
 </td></tr><tr><td>ignore-serialization-errors</td><td>When persisting a session, ignore any values which don't implement java.io.Serializable</td><td>false
 </td></tr><tr><td>invalidate-after-listener</td><td>. (resin 3.0)</td><td>
 </td></tr></deftable-childtags>

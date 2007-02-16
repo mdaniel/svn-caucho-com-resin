@@ -395,6 +395,11 @@ for all web-apps in foo.com, you might configure as follows:</p>
 host.  You will still need to implement a
 <a href="config|webapp#login-config">login-config</a> for each web-app.</p>
 
+<p>
+The value of <a config-tag="reuse-session-id">reuse-session-id</a> must be <code>true</code>
+for single signon.
+</p>
+
 </s1>
 
 <s1 title="Custom Login">

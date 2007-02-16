@@ -26,6 +26,29 @@ evaluate to true.
 
 </defun>
 
+<defun title="&lt;auth-type-equals&gt;">
+<parents>conditions</parents>
+
+<p>
+Evaluates to true if the authorization mechanism used in the request is the given value.
+The comparison is always case insensitive.
+</p>
+
+<deftable-childtags>
+<tr><td>value</td>
+    <td>BASIC, CLIENT-CERT, DIGEST, or FORM</td>
+    <td>required</td></tr>
+</deftable-childtags>
+</defun>
+
+<defun title="&lt;auth-type-exists&gt;">
+<parents>conditions</parents>
+
+<p>
+Evaluates to true if there is any authorization mechanism used in the request.
+</p>
+</defun>
+
 <defun title="&lt;conditions&gt;">
 <parents>dispatch, forward, forbidden, gone, moved-permanently, not-found, redirect, rewrite</parents>
 
@@ -44,6 +67,12 @@ to true, then the enclosing tag is applied.
 Evaluates to true if the value of a cookie with a given <var/name/> is exactly
 the given <var/value/>, false if it is not.  If the named cookie does not exist
 it will never match.
+</p>
+
+<p>
+The <var/Vary/> header of the reponse is updated to include "Cookie" which
+indicates to the browser and any intervening proxy cache that the response
+varies based on the submitted cookies.
 </p>
 
 <deftable-childtags>
@@ -67,6 +96,12 @@ it will never match.
 Evaluates to true if a cookie with a given <var/name/> exists, false if it does not.
 </p>
 
+<p>
+The <var/Vary/> header of the response is updated to include "Cookie" which
+indicates to the browser and any intervening proxy cache that the response
+varies based on the submitted cookies.
+</p>
+
 <deftable-childtags>
 <tr><td>name</td>
     <td>Name of the cookie</td>
@@ -82,6 +117,12 @@ Evaluates to true if the value of a cookie with a given <var/name/> matches a
 regular expression <var/regexp/>, false if it does not.  If the named cookie
 does not exist it has a value of the empty string for the purposes of the
 comparison.
+</p>
+
+<p>
+The <var/Vary/> header of the response is updated to include "Cookie" which
+indicates to the browser and any intervening proxy cache that the response
+varies based on the submitted cookies.
 </p>
 
 <deftable-childtags>
@@ -199,10 +240,18 @@ element forward {
 <parents>conditions</parents>
 
 <p>
-Evaluates to true if the value of a cookie with a given <var/name/> is exactly the given
+Evaluates to true if the value of a header with a given <var/name/> is exactly the given
 <var/value/>, false if it is not.  If the named cookie does not exist it
 will never match.
 </p>
+
+<p>
+The <var/Vary/> header of the response is updated  to include the header name
+which indicates to the browser and any intervening proxy cache that the
+response varies based on the submitted
+value of the header.
+</p>
+
 
 <deftable-childtags>
 <tr><td>name</td>
@@ -225,6 +274,13 @@ will never match.
 Evaluates to true if a header with a given <var/name/> exists, false if it does not.
 </p>
 
+<p>
+The <var/Vary/> header of the response is updated  to include the header name
+which indicates to the browser and any intervening proxy cache that the
+response varies based on the submitted value of the header.
+</p>
+
+
 <deftable-childtags>
 <tr><td>name</td>
     <td>Name of the header</td>
@@ -240,6 +296,13 @@ Evaluates to true if a header with a given <var/name/> exists, false if it does 
 Evaluates to true if the value of a header with a given <var/name/> matches a regular
 expression <var/regexp/>, false if it does not.  If the named header does not
 exist it has a value of the empty string for the purposes of the comparison.
+</p>
+
+<p>
+The <var/Vary/> header of the response is updated  to include the header name
+which indicates to the browser and any intervening proxy cache that the
+response varies based on the submitted
+value of the header.
 </p>
 
 <deftable-childtags>
@@ -329,6 +392,47 @@ element load-balance {
   regexp &amp; cluster
 }
 </def>
+
+</defun>
+
+<defun title="&lt;locale-matches&gt;">
+<parents>conditions</parents>
+
+<p>
+Evaluates to true if the value of the Locale matches a regular
+expression <var/regexp/>, false if it does not.   The comparison is always case
+insensitive.
+</p>
+
+<p>
+The Locale is a normalization of the value of the Accept-Language header.
+For example "fr" remains "fr" and "FR-CA" becomes "fr_CA".
+If the request does not include the Accept-Language header then the Locale is
+the default Locale for the server.
+</p>
+
+<!-- XXX: need qa to make sure this example is correct -->
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+
+  &lt;rewrite-dispatch&gt;
+    &lt;forward regexp='^/' target='/fr/'&gt;
+      &lt;conditions&gt;
+        &lt;locale-matches regexp="^fr"/&gt;
+      &lt;/conditions&gt;
+    &lt;/forward&gt;
+
+    &lt;forward regexp='^/' target='/en/'/&gt;
+  &lt;/rewrite-dispatch&gt;
+&lt;/web-app&gt;
+</example>
+
+<deftable-childtags>
+<tr><td>regexp</td>
+    <td>The regular expression to match</td>
+    <td>required</td></tr>
+</deftable-childtags>
 
 </defun>
 

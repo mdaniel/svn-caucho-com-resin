@@ -30,6 +30,7 @@
 package com.caucho.xml.stream;
 
 import com.caucho.vfs.WriteStream;
+import com.caucho.util.L10N;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
@@ -42,6 +43,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public class XMLStreamWriterImpl implements XMLStreamWriter {
+  private static final L10N L = new L10N(XMLStreamWriterImpl.class);
   private static final Logger log
     = Logger.getLogger(XMLStreamReaderImpl.class.getName());
 
@@ -54,6 +56,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   private ArrayList<QName> _pendingAttributeNames = new ArrayList<QName>();
   private ArrayList<String> _pendingAttributeValues = new ArrayList<String>();
 
+  private int _indent = -1;
+  private int _currentIndent;
+
   public XMLStreamWriterImpl(WriteStream ws)
   {
     this(ws, false);
@@ -64,6 +69,11 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     _ws = ws;
     _repair = repair;
     _tracker = new NamespaceWriterContext(repair);
+  }
+
+  public void setIndent(int indent)
+  {
+    _indent = indent;
   }
 
   public void setRepair(boolean repair)
@@ -234,6 +244,14 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     throw new UnsupportedOperationException();
   }
 
+  public void writeElement(String localName, String contents)
+    throws XMLStreamException
+  {
+    writeStartElement(localName);
+    writeCharacters(contents);
+    writeEndElement();
+  }
+
   public void writeEmptyElement(String localName)
     throws XMLStreamException
   {
@@ -304,12 +322,36 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void writeEndElement()
     throws XMLStreamException
   {
+    writeEndElement(null, null);
+  }
+
+  public void writeEndElement(String localName)
+    throws XMLStreamException
+  {
+    writeEndElement(null, localName);
+  }
+
+  public void writeEndElement(String namespaceURI, String localName)
+    throws XMLStreamException
+  {
     flushPending();
+
     try {
       QName name = popContext();
+
+      if ((localName != null && !localName.equals(name.getLocalPart()))
+          || (namespaceURI != null && !namespaceURI.equals(name.getNamespaceURI())))
+        throw new XMLStreamException(L.l("unbalanced close, expecting `{0}' not `{1}'",
+                                         name, new QName(namespaceURI, localName)));
+
       _ws.print("</");
       _ws.print(printQName(name));
       _ws.print(">");
+
+      if (_indent >= 0) {
+        _ws.println();
+        _currentIndent -= _indent;
+      }
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -496,11 +538,11 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     try {
       if (_pendingTagName == null) return;
-      
+
       _ws.print("<");
       _ws.print(printQName(_pendingTagName));
       
-      for(int i=0; i<_pendingAttributeNames.size(); i++) {
+      for(int i=0; i < _pendingAttributeNames.size(); i++) {
         _ws.print(" ");
         _ws.print(printQName(_pendingAttributeNames.get(i)));
         _ws.print("=\"");
@@ -514,6 +556,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
         popContext();
       } else {
         _ws.print(">");
+
+        if (_indent > -1)
+          _currentIndent += _indent;
       }
       
       _pendingTagName = null;
