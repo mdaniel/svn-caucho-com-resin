@@ -100,7 +100,7 @@ public class EntityManyToManyField extends AssociationField {
   {
     super(relatedType, name, cascadeTypes);
 
-    _targetType = source.getEntitySourceType();
+    _targetType = source.getRelatedType();
     _associationTable = source._associationTable;
     _sourceLink = source._targetLink;
     _targetLink = source._sourceLink;
@@ -136,7 +136,7 @@ public class EntityManyToManyField extends AssociationField {
    * Returns the source type as
    * entity or mapped-superclass.
    */
-  public RelatedType getEntitySourceType()
+  public RelatedType getRelatedType()
   {
     return (RelatedType) getSourceType();
   }
@@ -253,6 +253,18 @@ public class EntityManyToManyField extends AssociationField {
                                      int loadIndex)
     throws IOException
   {
+    // order matters: jpa/0s2k
+    String value = generateGet(src);
+    out.println(generateSet(dst, value) + ";");
+
+    String var = "_caucho_field_" + getGetterName();
+
+    out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
+
+    if (! dst.equals("super")) { // || isLazy())) {
+      out.println("((" + getRelatedType().getInstanceClassName() + ") " + dst + ")." +
+                  generateSuperSetter(generateSuperGetter()) + ";");
+    }
   }
 
   /**
@@ -374,12 +386,11 @@ public class EntityManyToManyField extends AssociationField {
     newEmptyCollection += ")";
 
     // jpa/0s2k
-    out.println("if (" + generateSuperGetter() + " == null)");
-    out.println("  " + generateSuperSetter(newEmptyCollection) + ";");
+    out.println(var + " = " + newEmptyCollection + ";");
 
     // if (! isAbstract())
     out.println();
-    out.println("return " + generateSuperGetter() + ";");
+    out.println("return " + var + ";");
 
     out.popDepth();
     out.println("}");
@@ -393,7 +404,7 @@ public class EntityManyToManyField extends AssociationField {
     out.print(" FROM " + getSourceType().getName() + " o,");
     out.print("  IN(o." + getName() + ") c");
     out.print(" WHERE ");
-    out.print(getEntitySourceType().getId().generateRawWhere("o"));
+    out.print(getRelatedType().getId().generateRawWhere("o"));
 
     if (_orderByFields != null) {
       out.print(" ORDER BY ");
@@ -412,7 +423,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("query = __caucho_session.prepareQuery(sql);");
 
     out.println("int index = 1;");
-    getEntitySourceType().getId().generateSet(out, "query", "index", "this");
+    getRelatedType().getId().generateSet(out, "query", "index", "this");
 
     // Ex: _caucho_getChildren = new com.caucho.amber.collection.CollectionImpl
     out.print(var);
@@ -472,7 +483,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("{");
     out.pushDepth();
 
-    String ownerType = getEntitySourceType().getInstanceClassName();
+    String ownerType = getRelatedType().getInstanceClassName();
 
     out.println("if (! (o instanceof " + ownerType + "))");
     out.println("  throw new java.lang.IllegalArgumentException((o == null ? \"null\" : o.getClass().getName()) + \" must be a " + ownerType + "\");");
@@ -594,7 +605,7 @@ public class EntityManyToManyField extends AssociationField {
     String ownerType = getSourceType().getInstanceClassName();
 
     out.println("int index = 1;");
-    getEntitySourceType().getId().generateSet(out, "query", "index", ownerType + ".this");
+    getRelatedType().getId().generateSet(out, "query", "index", ownerType + ".this");
 
     out.println("query.executeUpdate();");
 
@@ -658,7 +669,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("int index = 1;");
 
     // ejb/06h0
-    getEntitySourceType().getId().generateSet(out, "query", getSourceType().getInstanceClassName() + ".this", "index"); // "__ResinExt.this", "index");
+    getRelatedType().getId().generateSet(out, "query", getSourceType().getInstanceClassName() + ".this", "index"); // "__ResinExt.this", "index");
 
     out.println("java.sql.ResultSet rs = query.executeQuery();");
 
@@ -766,7 +777,7 @@ public class EntityManyToManyField extends AssociationField {
 
     out.print(") VALUES (");
 
-    int count = (getEntitySourceType().getId().getKeyCount() +
+    int count = (getRelatedType().getId().getKeyCount() +
                  getTargetType().getId().getKeyCount());
 
     for (int i = 0; i < count; i++) {
@@ -784,7 +795,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareInsertStatement(sql);");
 
     out.println("int index = 1;");
-    getEntitySourceType().getId().generateSet(out, "pstmt", "index", "this");
+    getRelatedType().getId().generateSet(out, "pstmt", "index", "this");
     getTargetType().getId().generateSet(out, "pstmt", "index", "v");
 
     out.println("if (pstmt.executeUpdate() == 1) {");
@@ -849,7 +860,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareStatement(sql);");
 
     out.println("int index = 1;");
-    getEntitySourceType().getId().generateSet(out, "pstmt", "index", "this");
+    getRelatedType().getId().generateSet(out, "pstmt", "index", "this");
     getTargetType().getId().generateSet(out, "pstmt", "index", "v");
 
     out.println("if (pstmt.executeUpdate() == 1) {");
@@ -1068,5 +1079,13 @@ public class EntityManyToManyField extends AssociationField {
 
     out.println("if (" + var + " != null)");
     out.println("  " + var + ".update();");
+  }
+
+  private String generateAccessor(String src, String var)
+  {
+    if (src.equals("super"))
+      return var;
+    else
+      return "((" + getRelatedType().getInstanceClassName() + ") " + src + ")." + var;
   }
 }

@@ -353,14 +353,13 @@ public class AmberConnection
           managedEntity = entity.getClass().newInstance();
           entity.__caucho_copyTo(managedEntity, this);
 
+          // XXX: needs to do a pre-persist anyways at the beginning of merge,
+          // but needs to check if the dependent entities exist.
+
           // cascade children
           entity.__caucho_cascadePrePersist(this);
 
           persist(managedEntity);
-
-          // XXX: needs to do post-persist anyways at the end of merge()???
-          // jpa/0i5g
-          entity.__caucho_cascadePostPersist(this);
 
           log.finest(L.l("merged to a new entity (persisted)"));
         }
@@ -378,6 +377,10 @@ public class AmberConnection
 
           log.finest(L.l("merged to an existing entity"));
         }
+
+        // jpa/0i5g
+        entity.__caucho_cascadePostPersist(this);
+
       } catch (Exception e) {
         if (e.getCause() instanceof SQLException) {
           // OK: entity exists in the database
@@ -413,9 +416,16 @@ public class AmberConnection
 
       checkTransactionRequired("remove");
 
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("removing entity class " + instance.getClass().getName() +
+                       " PK: " + instance.__caucho_getPrimaryKey()));
+
       // jpa/0k12
       if (instance.__caucho_getConnection() == null) {
         if (instance.__caucho_getEntityType() == null) {
+          if (log.isLoggable(Level.FINEST))
+            log.finest(L.l("remove is ignoring entity; performing only cascade post-remove"));
+
           // Ignore this entity; only post-remove child entities.
           instance.__caucho_cascadePostRemove(this);
 
@@ -428,8 +438,15 @@ public class AmberConnection
 
       EntityState state = instance.__caucho_getEntityState();
 
-      if (EntityState.P_DELETING.ordinal() <= state.ordinal())
+      if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
+        if (log.isLoggable(Level.FINEST))
+          log.finest(L.l("remove is ignoring entity in state " + state));
+
         return;
+      }
+
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("remove is flushing any lazy cascading operation"));
 
       // jpa/1620
       // In particular, required for cascading persistence, since the cascade
@@ -447,14 +464,29 @@ public class AmberConnection
 
       oldEntity = _entities.get(index);
 
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("remove is performing cascade pre-remove"));
+
       // Pre-remove child entities.
       instance.__caucho_cascadePreRemove(this);
 
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("remove is performing delete on the target entity"));
+
       delete(instance);
+
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("remove is performing cascade post-remove"));
 
       // jpa/0o30
       // Post-remove child entities.
       instance.__caucho_cascadePostRemove(this);
+
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("DONE successful remove for entity class " +
+                       instance.getClass().getName() +
+                       " PK: " + instance.__caucho_getPrimaryKey()));
+
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -1417,10 +1449,6 @@ public class AmberConnection
     for (int i = 0; i < _txEntities.size(); i++) {
       Entity entity = _txEntities.get(i);
 
-      // XXX: needs to check EXTENDED type.
-      // jpa/0h07: persistence context TRANSACTION type.
-      entity.__caucho_detach();
-
       try {
         if (isCommit)
           entity.__caucho_afterCommit();
@@ -1432,6 +1460,13 @@ public class AmberConnection
     }
 
     _txEntities.clear();
+
+    // jpa/0s2k
+    for (int i = _entities.size() - 1; i >= 0; i--) {
+      // XXX: needs to check EXTENDED type.
+      // jpa/0h07: persistence context TRANSACTION type.
+      _entities.get(i).__caucho_detach();
+    }
 
     if (! isCommit) {
       // jpa/0j5c
