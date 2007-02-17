@@ -877,7 +877,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("}");
       out.println();
     }
-    
+
     out.println("__caucho_session.postUpdate((com.caucho.amber.entity.Entity) this);");
 
     generateCallbacks(out, "this", _relatedType.getPostUpdateCallbacks());
@@ -906,7 +906,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.popDepth();
     out.println("}");
-    
+
     out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSIST) {");
     out.println("  __caucho_cascadePostPersist(__caucho_session);");
     out.println("}");
@@ -1635,6 +1635,36 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.popDepth();
     out.println("}");
+
+    out.println();
+    out.println("public void __caucho_copyDirtyMaskFrom(com.caucho.amber.entity.Entity sourceEntity)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println(getClassName() + " o = (" + getClassName() + ") sourceEntity;");
+
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("__caucho_dirtyMask_" + i + " = o.__caucho_dirtyMask_" + i + ";");
+    }
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public void __caucho_copyLoadMaskFrom(com.caucho.amber.entity.Entity sourceEntity)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println(getClassName() + " o = (" + getClassName() + ") sourceEntity;");
+
+    int loadCount = _relatedType.getLoadGroupIndex();
+
+    for (int i = 0; i <= loadCount / 64; i++) {
+      out.println("__caucho_loadMask_" + i + " = o.__caucho_loadMask_" + i + ";");
+    }
+
+    out.popDepth();
+    out.println("}");
   }
 
   /**
@@ -1693,7 +1723,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_TRANSACTIONAL)");
     out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_PERSIST;");
     */
-    
+
     // out.println("if (aConn == null)");
     // out.println("  throw new com.caucho.amber.AmberException(\"Null AmberConnection when object \" + " + getDebug() + " + \" is trying to cascade persist child objects.\");");
 

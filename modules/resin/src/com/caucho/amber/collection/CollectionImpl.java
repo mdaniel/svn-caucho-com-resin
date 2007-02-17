@@ -70,7 +70,9 @@ public class CollectionImpl<E> extends AbstractList<E>
   {
     _query = query;
 
-    setSession(((UserQuery) _query).getConnection());
+    // jpa/0s2k
+    if (_query != null)
+      setSession(((UserQuery) _query).getConnection());
   }
 
   /**

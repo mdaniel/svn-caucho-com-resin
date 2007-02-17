@@ -136,6 +136,16 @@ public interface Entity extends MappedSuperclass
   public AmberConnection __caucho_getConnection();
 
   /**
+   * Copies all the dirty mask values from a source entity.
+   */
+  public void __caucho_copyDirtyMaskFrom(Entity sourceEntity);
+
+  /**
+   * Copies all the load mask values from a source entity.
+   */
+  public void __caucho_copyLoadMaskFrom(Entity sourceEntity);
+
+  /**
    * Returns true if the entity is dirty.
    */
   public boolean __caucho_isDirty();

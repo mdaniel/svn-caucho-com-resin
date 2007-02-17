@@ -329,60 +329,63 @@ public class AmberConnection
       log.finest(L.l("merge(class: '{0}' PK: '{1}' state: '{2}')",
                      entity.getClass().getName(), pk, state));
 
-      if (state == EntityState.TRANSIENT) {
-        if (contains(entity)) {
-          // detached entity instance
-          throw new UnsupportedOperationException(L.l("Merge operation for detached instances is not supported"));
-        }
-        else {
-          try {
-            Entity managedEntity = null;
-
-            try {
-              managedEntity = (Entity) load(entity.getClass(), pk);
-            } catch (AmberObjectNotFoundException e) {
-              log.log(Level.FINEST, e.toString(), e);
-              // JPA: should not throw at all, returns null only.
-            }
-
-            if (managedEntity == null) {
-              // new entity instance
-
-              managedEntity = entity.getClass().newInstance();
-              entity.__caucho_copyTo(managedEntity, this);
-
-              persist(managedEntity);
-            }
-            else {
-              // jpa/0ga3: existing entity
-              entity.__caucho_copyTo(managedEntity, this);
-
-              entityT = (T) managedEntity;
-            }
-          } catch (Exception e) {
-            if (e.getCause() instanceof SQLException) {
-              // OK: entity exists in the database
-              log.log(Level.FINER, e.toString(), e);
-            }
-            else {
-              throw e;
-            }
-          }
-        }
-      }
-      else if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
+      if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
         // removed entity instance
         throw new IllegalArgumentException(L.l("Merge operation cannot be applied to a removed entity instance"));
       }
-      else {
+
+      try {
+        Entity managedEntity = null;
+
+        try {
+          managedEntity = (Entity) load(entity.getClass(), pk);
+        } catch (AmberObjectNotFoundException e) {
+          log.log(Level.FINEST, e.toString(), e);
+          // JPA: should not throw at all, returns null only.
+        }
+
         // jpa/0s2k
         setTransactionalState(entity);
 
-        // cascade children
-        entity.__caucho_cascadePrePersist(this);
+        if (managedEntity == null) {
+          // new entity instance
 
-        // jpa/0i5g
-        entity.__caucho_cascadePostPersist(this);
+          managedEntity = entity.getClass().newInstance();
+          entity.__caucho_copyTo(managedEntity, this);
+
+          // cascade children
+          entity.__caucho_cascadePrePersist(this);
+
+          persist(managedEntity);
+
+          // XXX: needs to do post-persist anyways at the end of merge()???
+          // jpa/0i5g
+          entity.__caucho_cascadePostPersist(this);
+
+          log.finest(L.l("merged to a new entity (persisted)"));
+        }
+        else {
+          // jpa/0ga3: existing entity
+          entity.__caucho_copyTo(managedEntity, this);
+
+          // XXX: needs to update the managed entity load mask in the copyTo???
+
+          // jpa/0h08: sets the corresponding load/dirty masks to the argument entity.
+          entity.__caucho_copyDirtyMaskFrom(managedEntity);
+          entity.__caucho_copyLoadMaskFrom(managedEntity);
+
+          entityT = (T) managedEntity;
+
+          log.finest(L.l("merged to an existing entity"));
+        }
+      } catch (Exception e) {
+        if (e.getCause() instanceof SQLException) {
+          // OK: entity exists in the database
+          log.log(Level.FINER, e.toString(), e);
+        }
+        else {
+          throw e;
+        }
       }
 
       // XXX: merge recursively for
@@ -832,6 +835,8 @@ public class AmberConnection
                      Object key)
     throws AmberException
   {
+    log.finest(L.l("loading entity class " + cl.getName() + " PK: " + key));
+
     Entity entity = null;
 
     if (key == null)
@@ -844,8 +849,11 @@ public class AmberConnection
     if (index >= 0) {
       entity = _entities.get(index);
 
-      if (! isInTransaction())
+      if (! isInTransaction()) {
+        log.finest(L.l("load returning existing entity not in transaction"));
+
         return entity;
+      }
 
       // jpa/0g0k setTransactionalState(entity);
       /*
@@ -854,6 +862,8 @@ public class AmberConnection
         }
       */
       if (entity.__caucho_getEntityState().isTransactional()) {
+        log.finest(L.l("load returning existing entity in transactional state"));
+
         return entity;
       }
 
@@ -2367,6 +2377,8 @@ public class AmberConnection
         try {
           createInternal(instance);
         } catch (SQLException e) {
+          log.log(Level.FINEST, e.toString(), e);
+
           // jpa/0ga3
           throw new EntityExistsException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", instance.getClass().getName(), instance.__caucho_getPrimaryKey(), state));
         }

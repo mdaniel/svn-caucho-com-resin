@@ -598,8 +598,14 @@ public class EntityManyToOneField extends CascadableField {
     out.println("{");
     out.pushDepth();
 
+    String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
+    long dirtyMask = (1L << (getIndex() % 64));
+
+    // jpa/0h08: do not use cached item when field is dirty.
+    out.println("boolean isDirtyField = (" + dirtyVar + " & " + dirtyMask + "L) != 0L;");
+
     // jpa/0h07: detached entity fields must not be loaded.
-    out.println("if (__caucho_session != null && __caucho_item != null) {");
+    out.println("if (__caucho_session != null && __caucho_item != null && ! isDirtyField) {");
     out.pushDepth();
 
     // ejb/06h0
@@ -705,6 +711,10 @@ public class EntityManyToOneField extends CascadableField {
                                      int updateIndex)
     throws IOException
   {
+    // order matters: jpa/0h08
+    String value = generateGet(src);
+    out.println(generateSet(dst, value) + ";");
+
     // jpa/0o05
     // if (getLoadGroupIndex() == updateIndex) {
 
@@ -722,9 +732,6 @@ public class EntityManyToOneField extends CascadableField {
 
     // commented out: jpa/0s29
     // if (_targetLoadIndex == updateIndex) { // ejb/0h20
-
-    String value = generateGet(src);
-    out.println(generateSet(dst, value) + ";");
 
     // }
 
