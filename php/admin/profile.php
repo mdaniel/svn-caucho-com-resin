@@ -174,6 +174,9 @@ function do_partition_profile($entries)
     else if (is_keepalive($stackTrace)) {
       $partition["keepalive"][] = $info;
     }
+    else if (is_accept($stackTrace)) {
+      $partition["accept"][] = $info;
+    }
     else if ($stackTrace[0]->className == "java.lang.ref.ReferenceQueue") {
     }
     else {
@@ -191,6 +194,24 @@ function is_resin_main($stackTrace)
         && $stackTrace[$i]->methodName == "waitForExit") {
       return true;
     }
+  }
+
+  return false;
+}
+
+function is_accept($stackTrace)
+{
+  if ($stackTrace[0]->className == "com.caucho.vfs.JniServerSocketImpl"
+      && $stackTrace[0]->methodName == "nativeAccept") {
+    return true;
+  }
+  else if ($stackTrace[0]->className == "java.net.PlainSocketImpl"
+           && $stackTrace[0]->methodName == "socketAccept") {
+    return true;
+  }
+  else if ($stackTrace[0]->className == "java.net.PlainSocketImpl"
+           && $stackTrace[0]->methodName == "accept") {
+    return true;
   }
 
   return false;
