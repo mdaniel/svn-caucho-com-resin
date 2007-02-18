@@ -44,7 +44,7 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
   protected final static Logger log = Log.open(SpyPooledConnection.class);
   protected final static L10N L = new L10N(SpyPooledConnection.class);
 
-  protected int _id;
+  protected String _id;
 
   private SpyDataSource _spyDataSource;
   private int _connCount;
@@ -55,7 +55,7 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
   /**
    * Creates a new SpyConnection.
    */
-  public SpyPooledConnection(PooledConnection conn, int id)
+  public SpyPooledConnection(PooledConnection conn, String id)
   {
     _spyDataSource = new SpyDataSource();
     

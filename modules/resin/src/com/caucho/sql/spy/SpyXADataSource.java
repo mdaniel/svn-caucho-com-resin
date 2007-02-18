@@ -69,7 +69,7 @@ public class SpyXADataSource implements XADataSource {
     try {
       XAConnection conn = _dataSource.getXAConnection();
 
-      int connId = _connCount++;
+      String connId = _id + "." + _connCount++;
 
       log.info(_id + ":getXAConnection() -> " + connId + ":" + conn);
 
@@ -90,7 +90,7 @@ public class SpyXADataSource implements XADataSource {
     try {
       XAConnection conn = _dataSource.getXAConnection(user, password);
 
-      int connId = _connCount++;
+      String connId = _id + "." + _connCount++;
 
       log.info(_id + ":getXAConnection(" + user + ") -> " + connId + ":" + conn);
 

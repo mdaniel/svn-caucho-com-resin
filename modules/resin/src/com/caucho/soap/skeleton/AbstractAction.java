@@ -153,7 +153,8 @@ public abstract class AbstractAction {
     // SOAP action (URI where SOAP messages are sent)
     SOAPOperation soapOperation = new SOAPOperation();
     soapOperation.setSoapAction(""); // XXX
-    _wsdlBindingOperation.addAny(soapOperation);
+    // XXX: temp build issue
+    //_wsdlBindingOperation.addAny(soapOperation);
   }
 
   public static AbstractAction createAction(Method method, 

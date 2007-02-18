@@ -69,7 +69,7 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
     try {
       PooledConnection conn = _dataSource.getPooledConnection();
 
-      int connId = _connCount++;
+      String connId = _id + "." + _connCount++;
 
       log.info(_id + ":getConnectionPool() -> " + connId + ":" + conn);
 
@@ -90,7 +90,7 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
     try {
       PooledConnection conn = _dataSource.getPooledConnection(user, password);
 
-      int connId = _connCount++;
+      String connId = _id + "." + _connCount++;
 
       log.info(_id + ":getPooledConnection(" + user + ") -> " + connId + ":" + conn);
 

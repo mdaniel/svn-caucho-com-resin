@@ -136,7 +136,8 @@ public class DirectSkeleton extends Skeleton {
         sbAnnotation.use() == javax.jws.soap.SOAPBinding.Use.ENCODED)
       throw new WebServiceException(L.l("Encoded SOAP style not supported by JAX-WS"));
 
-    _wsdlBinding.addAny(soapBinding);
+    // XXX: temp build/checkin issue
+    //_wsdlBinding.addAny(soapBinding);
     _wsdlBinding.setName(_name + "Binding");
     _wsdlBinding.setType(new QName(_namespace, _typeName, "tns"));
 
@@ -149,7 +150,8 @@ public class DirectSkeleton extends Skeleton {
     port.setBinding(new QName(_namespace, _name + "Binding", "tns"));
 
     _soapAddress.setLocation(wsdlAddress);
-    port.addAny(_soapAddress);
+    // XXX: temp build/checkin issue
+    //port.addAny(_soapAddress);
 
     _wsdlService.addPort(port);
 

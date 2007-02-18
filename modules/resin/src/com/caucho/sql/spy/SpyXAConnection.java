@@ -50,7 +50,7 @@ public class SpyXAConnection extends SpyPooledConnection
   /**
    * Creates a new SpyConnection.
    */
-  public SpyXAConnection(XAConnection conn, int id)
+  public SpyXAConnection(XAConnection conn, String id)
   {
     super(conn, id);
 

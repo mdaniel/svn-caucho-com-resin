@@ -8,7 +8,7 @@
 
 require_once "inc.php";
 
-decorator_header("digest.php", "Calculate a password digest");
+display_header("digest.php", "Calculate a password digest");
 
 $digest = NULL;
 $validation_error = NULL;
@@ -124,6 +124,6 @@ it cannot be used to reverse-engineer the original password.
 ?>
 
 <?php
-  decorator_footer("digest.php");
+  display_footer("digest.php");
 ?>
 

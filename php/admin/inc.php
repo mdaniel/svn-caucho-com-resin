@@ -129,8 +129,7 @@ function display_header($script, $title)
 
   <script language='javascript' type='text/javascript'>
     function hide(id) { document.getElementById(id).style.display = 'none'; }
-    function show(id) { document.getElementById(id).style.display = 'true'; }
-    
+    function show(id) { document.getElementById(id).style.display = ''; }
   </script>
 </head>
 
@@ -202,7 +201,9 @@ function display_footer($script)
     return;
 
   $is_display_footer = true;
+
 ?>
+</td></tr></table>
 <hr />
 <p>
 <em><?= resin_version() ?></em>
