@@ -108,7 +108,7 @@ $is_display_footer = false;
  *
  * @return true if the header was output, false if a header has already been output
  */
-function display_header($script, $title)
+function display_header($script, $title, $server)
 {
   global $display_header_script, $display_header_title;
 
@@ -143,8 +143,12 @@ function display_header($script, $title)
   <td width="10">
   </td>
 
-  <td>
-   <h1><?= $title ?></h1>
+  <td valign="top">
+   <ul class="status">
+   <li class="server">Server: <?= $server ?></li>
+   <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
+   <li><a href="<?= $script ?>">refresh</a></li>
+   </ul>
   </td>
 </tr>
 
@@ -169,6 +173,28 @@ function display_header($script, $title)
   <td width="10">
   </td>
   <td>
+
+<ul class="tabs">
+<?
+if ($script == "status.php") {
+  ?><li class="selected">Summary</li><?
+} else {
+  ?><li><a href="status.php">Summary</a></li><?
+}
+
+if ($script == "thread.php") {
+  ?><li class="selected">Threads</li><?
+} else {
+  ?><li><a href="thread.php">Threads</a></li><?
+}
+
+if ($script == "profile.php") {
+  ?><li class="selected">Profile</li><?
+} else {
+  ?><li><a href="profile.php">Profile</a></li><?
+}
+?>
+</ul>
 
 <?php
   return true;
@@ -214,6 +240,19 @@ function display_footer($script)
 </body>
 </html>
 <?php
+}
+
+function display_left_navigation()
+{
+}
+
+function row_style($i)
+{
+  switch ($i % 2) {
+  case 0: return 'ra';
+  case 1: return 'rb';
+  default: return '';
+  }
 }
 
 function info($name,$wiki="")

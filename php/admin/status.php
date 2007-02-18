@@ -5,17 +5,10 @@
  * @author Sam
  */
 
+
 require_once "inc.php";
 
 require "restricted.php";
-
-function display_left_navigation()
-{
-  echo "Summary<br>";
-  echo "<a href='thread.php'>Thread</a><br>";
-
-  echo "<hr>";
-}
 
 $mbeanServer = new MBeanServer();
 
@@ -28,7 +21,7 @@ if (! empty($server->Id))
   $title = $title . " for server " . $server->Id;
 ?>
 
-<?php display_header("status.php", $title) ?>
+<?php display_header("status.php", $title, $server->Id) ?>
 
 <h2>Server: <?= $server->Id ?></h2>
 
@@ -294,10 +287,11 @@ if ($db_pools) {
   </tr>
 
 <?php
+  $row = 0;
   foreach ($db_pools as $pool) {
 ?>
 
-  <tr>
+  <tr class='<?= row_style($row++) ?>'>
     <td><?= $pool->Name ?></td>
     <td><?= $pool->ConnectionActiveCount ?></td>
     <td><?= $pool->ConnectionIdleCount ?></td>

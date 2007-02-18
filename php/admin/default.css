@@ -1,8 +1,16 @@
+/*
+ background: #ccddff;
+ background: #99bbff;
+*/
+
 body {
-  font: small sans-serif;
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: small;
   background: white;
   color: black;
   margin: 0em;
+  margin-right: 1em;
+  margin-bottom: 1em;
   padding: 0;
 }
 
@@ -16,9 +24,69 @@ a:hover {
 
 table.data {
   font-size: 100%;
-  background: #ccddff;
   color: black;
   border-collapse: collapse;
+  background: #f4f4f4;
+}
+
+.data tr.ra {
+  background: #f4f4f4;
+}
+
+.data tr.rb {
+  background: #e4e4e4;
+}
+
+div.tab-container {
+  padding-left: 12px;
+  margin-bottom: 1px;
+  position: relative;
+}
+
+ul.status {
+  border-bottom: 1px solid gray;
+  list-style-type:none;
+  position:relative;
+  padding : 0em;
+  margin : 0em;
+  float:left;
+  border-right: 1px solid gray;
+}
+
+.status li {
+  float:left;
+  display : inline;
+  margin : 0em;
+  padding: 0.4em 0.4em 0.3em 0.4em;
+  overflow:hidden;
+  border-left: 1px solid gray;
+}
+
+li.server {
+  background : #ccddee;
+}
+
+ul.tabs {
+  border-bottom: 1px solid gray;
+  list-style-type:none;
+  position:relative;
+  padding : 0em;
+  padding-bottom : 0.4em;
+}
+
+.tabs li {
+  display : inline;
+  margin : 0em 0.4em 0em 0.4em;
+  padding: 0.4em 0.4em 0.4em 0.4em;
+  overflow:hidden;
+  border-top: 1px solid gray;
+  border-left: 1px solid gray;
+  border-right: 1px solid gray;
+}
+
+.tabs li.selected {
+  background: #ccddff;
+  border-bottom: 1px solid white;
 }
 
 table.threads {
@@ -26,20 +94,28 @@ table.threads {
   border-collapse: collapse;
 }
 
+.head th {
+  padding: 1em 0em;
+  font-size : 120%;
+  border:0;
+  background : white;
+}
+
 .threads td {
   padding: 3px;
   border: thin solid grey;
 }
 
+.threads .head th {
+  background: white;
+  border: 0;
+  padding-top: 1em;
+}
+
 .threads th {
   padding: 3px;
   border: thin solid grey;
-}
-
-.head th {
-  padding: 1em 0em;
-  font-size : 120%;
-  border:0;
+  background: #99bbff;
 }
 
 h1 {

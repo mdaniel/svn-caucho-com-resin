@@ -7,14 +7,6 @@ require_once "inc.php";
 
 require "restricted.php";
 
-function display_left_navigation()
-{
-  echo "<a href='status.php'>Summary</a><br>";
-  echo "Thread<br>";
-
-  echo "<hr>";
-}
-
 $mbeanServer = new MBeanServer();
 
 $resin = $mbeanServer->lookup("resin:type=Resin");
@@ -28,7 +20,7 @@ if (! empty($server->Id))
   $title = $title . " for server " . $server->Id;
 ?>
 
-<?php display_header("thread.php", $title) ?>
+<?php display_header("thread.php", $title, $server->Id) ?>
 
 <h2>Server: <?= $server->Id ?></h2>
 
@@ -120,7 +112,7 @@ foreach ($groups as $name) {
   echo "</th></tr>\n";
 
   echo "<tr>";
-  echo "<th style='border-width:0'>&nbsp;&nbsp;&nbsp;</th>";
+  echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
   echo "<th>id</th>";
   echo "<th>name</th>";
   echo "<th>method</th>";
