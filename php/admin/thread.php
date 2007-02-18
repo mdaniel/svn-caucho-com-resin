@@ -89,7 +89,7 @@ foreach ($thread_ids as $id) {
 }
 
 $thread_group = partition_threads($threads);
-$groups = array("active", "misc", "accept", "idle");
+$groups = array("active", "misc", "accept", "keepalive", "idle");
 
 echo "<h2>Threads</h2>\n"
 echo "<table class='threads'>\n";
@@ -102,7 +102,7 @@ foreach ($groups as $name) {
 
   usort($threads, "thread_name_cmp");
 
-  echo "<tr class='head'><th colspan='4' align='left'>$name (" . sizeof($threads) . ")";
+  echo "<tr class='head'><th colspan='5' align='left'>$name (" . sizeof($threads) . ")";
 
   $show = "hide('s_$name');show('h_$name');";
   foreach ($threads as $info) {
@@ -123,6 +123,7 @@ foreach ($groups as $name) {
   echo "<th style='border-width:0'>&nbsp;&nbsp;&nbsp;</th>";
   echo "<th>id</th>";
   echo "<th>name</th>";
+  echo "<th>method</th>";
   echo "<th>state</th>";
   echo "</tr>\n";
 
@@ -134,13 +135,21 @@ foreach ($groups as $name) {
     echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
     echo "<td>" . $id . "</td>";
     echo "<td>" . $info->threadName . "</td>";
+
+    if ($info->stackTrace[0]) {
+      echo "<td>" . $info->stackTrace[0]->className . "."
+	. $info->stackTrace[0]->methodName . "()</td>";
+    }
+    else
+      echo "<td></td>";
+    
     echo "<td>" . $info->threadState . "</td>";
 
     echo "</tr>\n";
 
     echo "<tr id='t_$id' style='display:none' class='stack_trace'>";
     echo "<td style='border-width:0'></td>";
-    echo "<td colspan='3'>";
+    echo "<td colspan='4'>";
     echo "<pre>\n";
     foreach ($info->stackTrace as $elt) {
       echo " at {$elt->className}.{$elt->methodName} ({$elt->fileName}:{$elt->lineNumber})\n";
@@ -202,9 +211,11 @@ function partition_threads($threads)
         && $stackTrace[1]->methodName == "runTasks") {
       $partition["idle"][] = $info;
     }
-    else if ($stackTrace[0]->className == "com.caucho.vfs.JniServerSocketImpl"
-             && $stackTrace[0]->methodName == "nativeAccept") {
+    else if (is_accept_thread($info)) {
       $partition["accept"][] = $info;
+    }
+    else if (is_keepalive_thread($info)) {
+      $partition["keepalive"][] = $info;
     }
     else if (preg_match("/^resin-tcp-connection/", $info->threadName)) {
       $partition["active"][] = $info;
@@ -215,6 +226,39 @@ function partition_threads($threads)
   }
 
   return $partition;
+}
+
+function is_accept_thread($info)
+{
+  foreach ($info->stackTrace as $item) {
+    if ($item->className == "com.caucho.server.port.Port"
+	&& $item->methodName == "accept")
+      return true;
+  }
+
+  return false;
+}
+
+function is_keepalive_thread($info)
+{
+  $stackTrace = $info->stackTrace;
+  
+  for ($i = 0; $i < sizeof($stackTrace); $i++) {
+    $item = $stackTrace[$i];
+  
+    if ($item->className == "com.caucho.server.port.TcpConnection"
+	&& $item->methodName == "run") {
+      $prev = $stackTrace[$i - 1];
+      
+      if ($prev->className == "com.caucho.vfs.ReadStream"
+	  && $prev->methodName == "waitForRead")
+	return true;
+      else
+	return false;
+    }
+  }
+
+  return false;
 }
 
 ?>

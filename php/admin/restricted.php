@@ -13,7 +13,7 @@ require_once "inc.php";
 
 if (! ($is_read_role || $is_write_role) ) {
 
-  decorator_header("restricted.php", "Resin Administration");
+  display_header("restricted.php", "Resin Administration");
 
   $login_uri = uri("login.php?target=$target_uri");
 ?>
@@ -29,7 +29,7 @@ if (! ($is_read_role || $is_write_role) ) {
     $is_localhost = $request->remoteAddr == $request->localAddr;
 
   if (! $is_localhost) {
-    decorator_footer("restricted.php");
+    display_footer("restricted.php");
     exit;
   }
 
@@ -72,7 +72,7 @@ the following form can be used to establish a new one.
     include "digest.php";
 
     if (empty($digest)) {
-      decorator_footer("restricted.php");
+      display_footer("restricted.php");
       exit
     }
 ?>
@@ -122,7 +122,7 @@ When prompted, use the username and password you provided.
 </p>
 
 <?php
-  decorator_footer("restricted.php");
+  display_footer("restricted.php");
   exit
 }
 ?>

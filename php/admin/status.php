@@ -19,36 +19,6 @@ function display_left_navigation()
 
 $mbeanServer = new MBeanServer();
 
-function format_datetime($date)
-{
-  return strftime("%a %b %d %H:%M:%S %Z %Y", $date->time / 1000);
-}
-
-function format_memory($memory)
-{
-  return sprintf("%.2fMeg", $memory / (1024 * 1024))
-}
-
-function format_hit_ratio($hit, $miss)
-{
-  $total = $hit + $miss;
-
-  if ($total == 0)
-    return "0.00% (0 / 0)";
-  else
-    return sprintf("%.2f%% (%d / %d)", 100 * $hit / $total, $hit, $total);
-}
-
-function format_miss_ratio($hit, $miss)
-{
-  $total = $hit + $miss;
-
-  if ($total == 0)
-    return "0.00% (0 / 0)";
-  else
-    return sprintf("%.2f%% (%d / %d)", 100 * $miss / $total, $miss, $total);
-}
-
 $resin = $mbeanServer->lookup("resin:type=Resin");
 $server = $mbeanServer->lookup("resin:type=Server");
 
