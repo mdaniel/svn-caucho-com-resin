@@ -13,7 +13,7 @@ require_once "inc.php";
 
 if (! ($is_read_role || $is_write_role) ) {
 
-  display_header("restricted.php", "Resin Administration");
+  display_header("restricted.php", "Resin Administration", "");
 
   $login_uri = uri("login.php?target=$target_uri");
 ?>
