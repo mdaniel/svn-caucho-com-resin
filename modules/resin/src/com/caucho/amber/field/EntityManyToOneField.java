@@ -711,8 +711,10 @@ public class EntityManyToOneField extends CascadableField {
                                      int updateIndex)
     throws IOException
   {
-    // order matters: jpa/0h08
+    // order matters: jpa/0h08, jpa/0h09
+
     String value = generateGet(src);
+
     out.println(generateSet(dst, value) + ";");
 
     // jpa/0o05
@@ -918,7 +920,10 @@ public class EntityManyToOneField extends CascadableField {
       // jpa/1004, ejb/06bi
       out.println("if (" + var + " != null) {");
     }
-    else {
+    else if (isCascade(CascadeType.PERSIST)) {
+      // jpa/0h09
+      out.println("if (" + var + " != null) {");
+    } else {
       // jpa/0j58: avoids breaking FK constraints.
 
       // The "one" end in the many-to-one relationship.

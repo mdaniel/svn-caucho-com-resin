@@ -583,8 +583,14 @@ abstract public class AbstractField implements AmberField {
   {
     if (obj.equals("super"))
       return generateSuperSetter(value);
-    else if (isAbstract())
+    else if (isAbstract()) {
+      if (getSourceType().isFieldAccess()) {
+        // jpa/0h09
+        return obj + "." + getSetterName() + "(" + value + ")";
+      }
+
       return obj + "." + getFieldName() + " = " + value;
+    }
     else if (_setterMethod != null)
       return obj + "." + _setterMethod.getName() + "(" + value + ")";
     else
