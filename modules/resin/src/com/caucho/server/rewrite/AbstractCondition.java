@@ -30,9 +30,10 @@
 package com.caucho.server.rewrite;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.connection.CauchoResponse;
 import com.caucho.util.L10N;
 
-import java.util.regex.*;
+import javax.servlet.http.HttpServletResponse;
 
 abstract public class AbstractCondition
   implements Condition
@@ -55,8 +56,29 @@ abstract public class AbstractCondition
                                     getTagName(), name));
   }
 
-  protected void setRegexp(Pattern regexp)
+  protected void addVary(HttpServletResponse response, String headerName)
   {
-    
+    if (response instanceof CauchoResponse) {
+      CauchoResponse res = (CauchoResponse) response;
+
+      String vary = res.getHeader("Vary");
+
+      if (vary != null) {
+        if (vary.equals(headerName)
+            || (vary.contains(headerName + ","))
+            || (vary.contains(", " + headerName)))
+        {
+        }
+        else {
+          res.setHeader("Vary", vary + ", " + headerName);
+        }
+      }
+      else {
+        res.setHeader("Vary", headerName);
+      }
+    }
+    else {
+      response.addHeader("Vary", headerName);
+    }
   }
 }

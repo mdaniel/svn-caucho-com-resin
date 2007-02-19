@@ -37,9 +37,8 @@ import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
 import javax.el.ELContext;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * A {@link RewriteDispatch} condition that is an el expression.
@@ -87,7 +86,8 @@ public class ExprCondition
       throw new ConfigException(L.l("`{0}' is required", "#text"));
   }
 
-  public boolean isMatch(HttpServletRequest request)
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
   {
     return _expr.evalBoolean(new RewriteContext(request));
   }

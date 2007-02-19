@@ -30,40 +30,59 @@
 package com.caucho.server.rewrite;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.annotation.PostConstruct;
+import java.util.regex.Pattern;
 
 /**
-* A rewrite condition that passes if the value of a named parameter is exactly
-* equal to a specified value.
+* A rewrite condition that passes if the value of a query parameter exists
+ * and matches a regular expression.
 */
-public class ParamEqualsCondition
-  extends AbstractEqualsCondition
+public class QueryParamCondition
+  extends AbstractCondition
 {
-  private String _name;
+  private final String _param;
+  private Pattern _regexp;
+  private boolean _caseInsensitive;
 
+  QueryParamCondition(String param)
+  {
+    _param = param;
+  }
+  
   public String getTagName()
   {
-    return "param-equals";
+    return "param";
   }
 
-  /**
-   * Sets the name of the param, required.
-   */
-  public void setName(String name)
+  public void setRegexp(Pattern pattern)
   {
-    _name = name;
+    _regexp = pattern;
+  }
+
+  public void setCaseInsensitive(boolean caseInsensitive)
+  {
+    _caseInsensitive = caseInsensitive;
   }
 
   @PostConstruct
   public void init()
   {
-    super.init();
-
-    required(_name, "name");
+    if (_regexp != null && _caseInsensitive)
+      _regexp = Pattern.compile(_regexp.pattern(), Pattern.CASE_INSENSITIVE);
   }
 
-  protected String getValue(HttpServletRequest request)
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
   {
-    return request.getParameter(_name);
+    String value;
+
+    // XXX: s/b only query parameters
+    value = request.getParameter(_param);
+
+    if (value == null)
+      return false;
+    else
+      return _regexp == null || _regexp.matcher(value).find();
   }
 }

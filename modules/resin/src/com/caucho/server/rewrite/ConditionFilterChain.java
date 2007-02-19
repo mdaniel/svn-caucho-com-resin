@@ -80,9 +80,10 @@ class ConditionFilterChain
     throws ServletException, IOException
   {
     HttpServletRequest req = (HttpServletRequest) request;
-    
+    HttpServletResponse res = (HttpServletResponse) response;
+
     for (int i = 0; i < _conditions.length; i++) {
-      if (! _conditions[i].isMatch(req)) {
+      if (! _conditions[i].isMatch(req, res)) {
 	if (_isFiner)
 	  log.finer(_logPrefix + " '" + _uri + "' --> '" + _targetUri + "'");
 	

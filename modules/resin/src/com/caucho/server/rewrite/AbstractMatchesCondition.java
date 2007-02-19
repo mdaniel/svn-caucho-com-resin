@@ -31,6 +31,7 @@ package com.caucho.server.rewrite;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.regex.Pattern;
 
 abstract public class AbstractMatchesCondition
@@ -77,7 +78,8 @@ abstract public class AbstractMatchesCondition
 
   abstract protected String getValue(HttpServletRequest request);
 
-  public boolean isMatch(HttpServletRequest request)
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
   {
     String value = getValue(request);
 

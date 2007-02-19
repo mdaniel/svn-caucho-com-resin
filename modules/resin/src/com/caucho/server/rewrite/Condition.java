@@ -42,5 +42,6 @@ public interface Condition
   /**
    * Returns true if the condition passes.
    */
-  public boolean isMatch(HttpServletRequest request);
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response);
 }

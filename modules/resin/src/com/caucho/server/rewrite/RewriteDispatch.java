@@ -424,20 +424,15 @@ public class RewriteDispatch {
     }
 
     /**
-     * Create a set of conditions that must pass for the program to match,
-     * default is no conditions.
+     * Add a list of conditions that must pass for the program to match.
      */
-    public Condition createConditions()
+    public void addAnd(AndConditions condition)
     {
-      Condition condition = new AndConditions(RewriteDispatch.this);
-
       _conditionList.add(condition);
-
-      return condition;
     }
 
     /**
-     * Adds an 'or' condition
+     * Add a list of conditions one of which must pass for the program to match.
      */
     public void addOr(OrConditions condition)
     {
@@ -445,7 +440,7 @@ public class RewriteDispatch {
     }
 
     /**
-     * Adds a 'not' condition
+     * Add a list of conditions that must not pass for the program to match.
      */
     public void addNot(NotConditions condition)
     {
@@ -453,23 +448,20 @@ public class RewriteDispatch {
     }
 
     /**
-     * Adds an 'and' condition
+     * Add a condition that must pass for the program to match.
      */
-    public void addAnd(AndConditions condition)
+    public void addWhen(ConditionConfig condition)
     {
-      _conditionList.addAll(condition.getConditions());
+      _conditionList.add(condition.getCondition());
     }
 
-    public void addRequire(RequireConfig require)
+    /**
+     * Add a condition that must not pass for the program to match.
+     */
+    public void addUnless(ConditionConfig condition)
     {
-      _conditionList.add(require.getCondition());
-    }
-
-    public void addForbid(RequireConfig require)
-    {
-      Condition condition = require.getCondition();
       NotConditions not = new NotConditions();
-      not.addCondition(require.getCondition());
+      not.addCondition(condition.getCondition());
 
       _conditionList.add(not);
     }

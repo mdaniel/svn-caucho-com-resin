@@ -31,8 +31,8 @@ package com.caucho.server.rewrite;
 
 import com.caucho.util.InetNetwork;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class RemoteAddrCondition
   extends AbstractCondition
@@ -49,7 +49,8 @@ public class RemoteAddrCondition
     return "remote-addr";
   }
 
-  public boolean isMatch(HttpServletRequest request)
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
   {
     String remoteAddr = request.getRemoteAddr();
 

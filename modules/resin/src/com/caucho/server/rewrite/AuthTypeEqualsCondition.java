@@ -33,13 +33,12 @@ import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
 /**
 * A rewrite condition that passes if the auth-type is exactly
 * equal to the specified value.
- * Valid auth types are  * BASIC, CLIENT-CERT, DIGEST, FORM.
+ * Valid auth types are  BASIC, CLIENT-CERT, DIGEST, FORM.
 */
 public class AuthTypeEqualsCondition
  extends AbstractEqualsCondition

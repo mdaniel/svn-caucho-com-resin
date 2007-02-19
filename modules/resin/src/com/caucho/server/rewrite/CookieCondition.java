@@ -29,27 +29,32 @@
 
 package com.caucho.server.rewrite;
 
-import java.util.regex.*;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.annotation.PostConstruct;
+import java.util.regex.Pattern;
 
 /**
- * A rewrite condition that passes if a named cookie has a value
- * that matches a regular expression.  If a cookie does not exist,
- * it has a value of "" (empty string) for purposes of comparison
- * to the regular expression pattern.
+ * A rewrite condition that passes if a named cookie exists and has a value
+ * that matches a regular expression.
  */
 public class CookieCondition
   extends AbstractCondition
 {
   private String _name;
   private Pattern _regexp;
+  private boolean _caseInsensitive;
+  private boolean _sendVary = true;
 
   CookieCondition(String name)
   {
     _name = name;
+  }
+
+  public void setCaseInsensitive(boolean caseInsensitive)
+  {
+    _caseInsensitive = caseInsensitive;
   }
 
   public void setRegexp(Pattern regexp)
@@ -57,13 +62,29 @@ public class CookieCondition
     _regexp = regexp;
   }
 
+  public void setSendVary(boolean sendVary)
+  {
+    _sendVary = sendVary;
+  }
+
   public String getTagName()
   {
     return "cookie";
   }
 
-  public boolean isMatch(HttpServletRequest request)
+  @PostConstruct
+  public void init()
   {
+    if (_regexp != null && _caseInsensitive)
+      _regexp = Pattern.compile(_regexp.pattern(), Pattern.CASE_INSENSITIVE);
+  }
+
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
+  {
+    if (_sendVary)
+      addVary(response, "Cookie");
+
     Cookie[] cookies = request.getCookies();
 
     if (cookies != null) {

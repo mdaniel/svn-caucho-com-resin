@@ -29,8 +29,9 @@
 
 package com.caucho.server.rewrite;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import javax.servlet.http.*;
 
 public class AndConditions
   extends AbstractConditions
@@ -50,14 +51,15 @@ public class AndConditions
     return "and";
   }
 
-  public boolean isMatch(HttpServletRequest request)
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
   {
     boolean pass = true;
 
     ArrayList<Condition> conditions = getConditions();
 
     for (int i = 0; i < conditions.size(); i++) {
-      if (! conditions.get(i).isMatch(request))
+      if (! conditions.get(i).isMatch(request, response))
 	return false;
     }
 

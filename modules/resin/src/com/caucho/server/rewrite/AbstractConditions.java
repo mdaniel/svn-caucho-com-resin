@@ -55,18 +55,17 @@ abstract public class AbstractConditions
     add(condition);
   }
 
-  public void addRequire(RequireConfig require)
+  public void addWhen(ConditionConfig condition)
   {
-    _conditions.add(require.getCondition());
+    add(condition.getCondition());
   }
 
-  public void addForbid(RequireConfig require)
+  public void addUnless(ConditionConfig condition)
   {
-    Condition condition = require.getCondition();
     NotConditions not = new NotConditions();
-    not.addCondition(require.getCondition());
+    not.addCondition(condition.getCondition());
 
-    _conditions.add(not);
+    add(not);
   }
 
   public AndConditions createAnd()
@@ -90,21 +89,6 @@ abstract public class AbstractConditions
     add(authTypeEqualsCondition);
   }
 
-  public void addCookieEquals(CookieEqualsCondition cookieEqualsCondition)
-  {
-    add(cookieEqualsCondition);
-  }
-
-  public void addCookieExists(CookieExistsCondition cookieExistsCondition)
-  {
-    add(cookieExistsCondition);
-  }
-
-  public void addCookieMatches(CookieMatchesCondition cookieMatchesCondition)
-  {
-    add(cookieMatchesCondition);
-  }
-
   public ExprCondition createExpr()
   {
     return new ExprCondition(this);
@@ -114,26 +98,6 @@ abstract public class AbstractConditions
   {
     expr.init();
     add(expr);
-  }
-
-  public void addHeaderEquals(HeaderEqualsCondition headerEqualsCondition)
-  {
-    add(headerEqualsCondition);
-  }
-
-  public void addHeaderExists(HeaderExistsCondition headerExistsCondition)
-  {
-    add(headerExistsCondition);
-  }
-
-  public void addHeaderMatches(HeaderMatchesCondition headerMatchesCondition)
-  {
-    add(headerMatchesCondition);
-  }
-
-  public void addMethodEquals(MethodEqualsCondition methodEqualsCondition)
-  {
-    add(methodEqualsCondition);
   }
 
   public NotConditions createNot()
@@ -156,31 +120,6 @@ abstract public class AbstractConditions
   {
     or.init();
     add(or);
-  }
-
-  public void addParamEquals(ParamEqualsCondition paramEqualsCondition)
-  {
-    add(paramEqualsCondition);
-  }
-
-  public void addParamExists(ParamExistsCondition paramExistsCondition)
-  {
-    add(paramExistsCondition);
-  }
-
-  public void addParamMatches(ParamMatchesCondition paramMatchesCondition)
-  {
-    add(paramMatchesCondition);
-  }
-
-  public void addRemoteAddr(RemoteAddrCondition remoteAddrCondition)
-  {
-    add(remoteAddrCondition);
-  }
-
-  public void addRole(RoleCondition roleCondition)
-  {
-    add(roleCondition);
   }
 
   protected ArrayList<Condition> getConditions()

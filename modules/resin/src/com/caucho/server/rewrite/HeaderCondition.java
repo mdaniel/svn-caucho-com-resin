@@ -29,10 +29,12 @@
 
 package com.caucho.server.rewrite;
 
-import java.util.regex.*;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import com.caucho.util.L10N;
+
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.regex.Pattern;
 
 /**
 * A rewrite condition that passes if the value of a named header is exactly
@@ -41,8 +43,12 @@ import javax.annotation.PostConstruct;
 public class HeaderCondition
   extends AbstractCondition
 {
+  private static final L10N L = new L10N(HeaderCondition.class);
+
   private final String _header;
-  private Pattern _pattern;
+  private Pattern _regexp;
+  private boolean _caseInsensitive = false;
+  private boolean _sendVary = true;
 
   HeaderCondition(String header)
   {
@@ -56,16 +62,37 @@ public class HeaderCondition
 
   public void setRegexp(Pattern pattern)
   {
-    _pattern = pattern;
+    _regexp = pattern;
   }
 
-  public boolean isMatch(HttpServletRequest request)
+  public void setCaseInsensitive(boolean caseInsensitive)
   {
+    _caseInsensitive = caseInsensitive;
+  }
+
+  public void setSendVary(boolean sendVary)
+  {
+    _sendVary = sendVary;
+  }
+
+  @PostConstruct
+  public void init()
+  {
+    if (_regexp != null && _caseInsensitive)
+      _regexp = Pattern.compile(_regexp.pattern(), Pattern.CASE_INSENSITIVE);
+  }
+
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
+  {
+    if (_sendVary)
+      addVary(response, _header);
+
     String value = request.getHeader(_header);
 
     if (value == null)
       return false;
     else
-      return _pattern == null || _pattern.matcher(value).find();
+      return _regexp == null || _regexp.matcher(value).find();
   }
 }

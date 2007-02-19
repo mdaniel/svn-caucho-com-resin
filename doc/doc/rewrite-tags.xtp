@@ -16,7 +16,7 @@ URL aliasing, rewriting, dispatching, and redirection.</p>
 <localtoc/>
 
 <defun title="&lt;and&gt;">
-<parents>conditions</parents>
+<parents>when, unless</parents>
 
 <p>
 Contains one or more conditions and evaluates to true if all of the contained
@@ -27,7 +27,7 @@ evaluate to true.
 </defun>
 
 <defun title="&lt;auth-type-equals&gt;">
-<parents>conditions</parents>
+<parents>when, unless</parents>
 
 <p>
 Evaluates to true if the authorization mechanism used in the request is the given value.
@@ -42,87 +42,25 @@ The comparison is always case insensitive.
 </defun>
 
 <defun title="&lt;auth-type-exists&gt;">
-<parents>conditions</parents>
+<parents>when, unless</parents>
 
 <p>
 Evaluates to true if there is any authorization mechanism used in the request.
 </p>
 </defun>
 
-<defun title="&lt;conditions&gt;">
-<parents>dispatch, forward, forbidden, gone, moved-permanently, not-found, redirect, rewrite</parents>
+<defun title="cookie">
+<parents>when, unless</parents>
 
 <p>
-Contains one or more conditions that further refine the match of the enclosing
-tag beyond the information provided by the url.  If all contained conditions evaluate
-to true, then the enclosing tag is applied.
-</p>
-
-</defun>
-
-<defun title="&lt;cookie-equals&gt;">
-<parents>conditions</parents>
-
-<p>
-Evaluates to true if the value of a cookie with a given <var/name/> is exactly
-the given <var/value/>, false if it is not.  If the named cookie does not exist
-it will never match.
+Evaluates to true if the value of a cookie with a given <var/name/> matches a regular
+expression <var/regexp/>, false if it does not or if the cookie does not exist.
 </p>
 
 <p>
-The <var/Vary/> header of the reponse is updated to include "Cookie" which
-indicates to the browser and any intervening proxy cache that the response
-varies based on the submitted cookies.
-</p>
-
-<deftable-childtags>
-<tr><td>ignore-case</td>
-    <td>If true, ignore case when doing the comparison</td>
-    <td>false</td></tr>
-<tr><td>name</td>
-    <td>Name of the cookie</td>
-    <td>required</td></tr>
-<tr><td>value</td>
-    <td>The value for the exact match</td>
-    <td>required</td></tr>
-</deftable-childtags>
-
-</defun>
-
-<defun title="&lt;cookie-exists&gt;">
-<parents>conditions</parents>
-
-<p>
-Evaluates to true if a cookie with a given <var/name/> exists, false if it does not.
-</p>
-
-<p>
-The <var/Vary/> header of the response is updated to include "Cookie" which
-indicates to the browser and any intervening proxy cache that the response
-varies based on the submitted cookies.
-</p>
-
-<deftable-childtags>
-<tr><td>name</td>
-    <td>Name of the cookie</td>
-    <td>required</td></tr>
-</deftable-childtags>
-</defun>
-
-<defun title="&lt;cookie-matches&gt;">
-<parents>conditions</parents>
-
-<p>
-Evaluates to true if the value of a cookie with a given <var/name/> matches a
-regular expression <var/regexp/>, false if it does not.  If the named cookie
-does not exist it has a value of the empty string for the purposes of the
-comparison.
-</p>
-
-<p>
-The <var/Vary/> header of the response is updated to include "Cookie" which
-indicates to the browser and any intervening proxy cache that the response
-varies based on the submitted cookies.
+The <var/Vary/> header of the response is updated to include "Cookie",
+which indicates to the browser and any intervening proxy cache that the
+response varies based on the submitted value of cookies.
 </p>
 
 <deftable-childtags>
@@ -131,8 +69,11 @@ varies based on the submitted cookies.
     <td>required</td></tr>
 <tr><td>regexp</td>
     <td>The regular expression to match</td>
-    <td>required</td></tr>
-<tr><td>ignore-case</td>
+    <td>optional</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a vary header as part of the response</td>
+    <td>true</td></tr>
+<tr><td>case-insensitive</td>
     <td>If true, ignore case when doing the comparison</td>
     <td>false</td></tr>
 </deftable-childtags>
@@ -187,10 +128,6 @@ for a matching URL.</p>
 </example>
 
 <deftable-childtags>
-<tr><td>conditions</td>
-    <td>A list of extended <a href="#conditions">conditions</a>
-        that must evaluate to true</td>
-    <td>optional</td></tr>
 <tr><td>regexp</td>
     <td>A regexp that must match the URL</td>
     <td>required</td></tr>
@@ -198,6 +135,12 @@ for a matching URL.</p>
     <td>True to only match requests that are using an SSL connection,
         false to only match requests that are not using an SSL connection</td>
     <td>do not consider SSL</td></tr>
+<tr><td><a href="#when">when</a></td>
+    <td>A condition which must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td><a href="#unless">unless</a></td>
+    <td>A condition which must not evaluate to true</td>
+    <td>optional</td></tr>
 <tr><td>port</td>
     <td>A port number that must match the server port number for the connection</td>
     <td>do not consider port</td></tr>
@@ -236,42 +179,12 @@ element forward {
 </def>
 </defun>
 
-<defun title="&lt;header-equals&gt;">
-<parents>conditions</parents>
+<defun title="header">
+<parents>when, unless</parents>
 
 <p>
-Evaluates to true if the value of a header with a given <var/name/> is exactly the given
-<var/value/>, false if it is not.  If the named cookie does not exist it
-will never match.
-</p>
-
-<p>
-The <var/Vary/> header of the response is updated  to include the header name
-which indicates to the browser and any intervening proxy cache that the
-response varies based on the submitted
-value of the header.
-</p>
-
-
-<deftable-childtags>
-<tr><td>name</td>
-    <td>Name of the header</td>
-    <td>required</td></tr>
-<tr><td>value</td>
-    <td>The value for the exact match</td>
-    <td>required</td></tr>
-<tr><td>ignore-case</td>
-    <td>If true, ignore case when doing the comparison</td>
-    <td>false</td></tr>
-</deftable-childtags>
-
-</defun>
-
-<defun title="&lt;header-exists&gt;">
-<parents>conditions</parents>
-
-<p>
-Evaluates to true if a header with a given <var/name/> exists, false if it does not.
+Evaluates to true if the value of a header with a given <var/name/> matches a regular
+expression <var/regexp/>, false if it does not or if the header does not exist.
 </p>
 
 <p>
@@ -280,39 +193,17 @@ which indicates to the browser and any intervening proxy cache that the
 response varies based on the submitted value of the header.
 </p>
 
-
-<deftable-childtags>
-<tr><td>name</td>
-    <td>Name of the header</td>
-    <td>required</td></tr>
-</deftable-childtags>
-
-</defun>
-
-<defun title="&lt;header-matches&gt;">
-<parents>conditions</parents>
-
-<p>
-Evaluates to true if the value of a header with a given <var/name/> matches a regular
-expression <var/regexp/>, false if it does not.  If the named header does not
-exist it has a value of the empty string for the purposes of the comparison.
-</p>
-
-<p>
-The <var/Vary/> header of the response is updated  to include the header name
-which indicates to the browser and any intervening proxy cache that the
-response varies based on the submitted
-value of the header.
-</p>
-
 <deftable-childtags>
 <tr><td>name</td>
     <td>Name of the header</td>
     <td>required</td></tr>
 <tr><td>regexp</td>
     <td>The regular expression to match</td>
-    <td>required</td></tr>
-<tr><td>ignore-case</td>
+    <td>optional</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a vary header as part of the response with the header name</td>
+    <td>true</td></tr>
+<tr><td>case-insensitive</td>
     <td>If true, ignore case when doing the comparison</td>
     <td>false</td></tr>
 </deftable-childtags>
@@ -395,12 +286,12 @@ element load-balance {
 
 </defun>
 
-<defun title="&lt;locale-matches&gt;">
-<parents>conditions</parents>
+<defun title="&lt;locale&gt;">
+<parents>when, unless</parents>
 
 <p>
 Evaluates to true if the value of the Locale matches a regular
-expression <var/regexp/>, false if it does not.   The comparison is always case
+expression, false if it does not.   The comparison is always case
 insensitive.
 </p>
 
@@ -418,21 +309,13 @@ the default Locale for the server.
 
   &lt;rewrite-dispatch&gt;
     &lt;forward regexp='^/' target='/fr/'&gt;
-      &lt;conditions&gt;
-        &lt;locale-matches regexp="^fr"/&gt;
-      &lt;/conditions&gt;
+      &lt;when locale="^fr"/&gt;
     &lt;/forward&gt;
 
     &lt;forward regexp='^/' target='/en/'/&gt;
   &lt;/rewrite-dispatch&gt;
 &lt;/web-app&gt;
 </example>
-
-<deftable-childtags>
-<tr><td>regexp</td>
-    <td>The regular expression to match</td>
-    <td>required</td></tr>
-</deftable-childtags>
 
 </defun>
 
@@ -462,7 +345,7 @@ element moved-permanently {
 </defun>
 
 <defun title="&lt;not&gt;">
-<parents>conditions</parents>
+<parents>when, unless</parents>
 
 <p>
 Contains one or more conditions and evaluates to true only if none of the
@@ -473,7 +356,7 @@ evaluate to true.
 </defun>
 
 <defun title="&lt;or&gt;">
-<parents>conditions</parents>
+<parents>when, unless</parents>
 
 <p>
 Contains one or more conditions and evaluates to true if any of the contained
@@ -504,6 +387,32 @@ element not-found {
   regexp
 }
 </def>
+</defun>
+
+<defun title="query-param">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of a query parameter with a given <var/name/> matches a regular
+expression <var/regexp/>, false if it does not or if the parameter does not exist.
+</p>
+
+<p>
+Form parameters submitted in the body of a POST are not available for the comparison performed by query-param.
+</p>
+
+<deftable-childtags>
+<tr><td>name</td>
+    <td>Name of the parameter</td>
+    <td>required</td></tr>
+<tr><td>regexp</td>
+    <td>The regular expression to match</td>
+    <td>optional</td></tr>
+<tr><td>case-insensitive</td>
+    <td>If true, ignore case when doing the comparison</td>
+    <td>false</td></tr>
+</deftable-childtags>
+
 </defun>
 
 <defun title="&lt;real-path>">
@@ -681,6 +590,28 @@ http://localhost:8080/bar/index.html
 https://localhost:8080/bar/index.html
   --> redirect to /public/index.html
 </results>
+</defun>
+
+<defun title="&lt;unless&gt;">
+<parents>dispatch, forward, forbidden, gone, moved-permanently, not-found, redirect, rewrite</parents>
+
+<p>
+Contains a condition that further refines the match of the enclosing tag beyond
+the information provided by the url.  If the condition does not evaluate to
+true, then the enclosing tag is applied.
+</p>
+
+</defun>
+
+<defun title="&lt;when&gt;">
+<parents>dispatch, forward, forbidden, gone, moved-permanently, not-found, redirect, rewrite</parents>
+
+<p>
+Contains a condition that further refines the match of the enclosing tag beyond
+the information provided by the url.  If the condition evaluates to true, then
+the enclosing tag is applied.
+</p>
+
 </defun>
 
 <s1 title="Logging and Debugging">

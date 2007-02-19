@@ -27,56 +27,23 @@
  * @author Sam
  */
 
-package com.caucho.server.rewrite;
+package com.caucho.config.types;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Cookie;
-import javax.annotation.PostConstruct;
+import com.caucho.config.NodeBuilder;
+import com.caucho.config.TypeStrategy;
 
-/**
-* A rewrite condition that passes if the value of a named header is exactly
-* equal to a specified value.
-*/
-public class CookieEqualsCondition
- extends AbstractEqualsCondition
+import org.w3c.dom.Node;
+
+import java.util.regex.Pattern;
+
+public class PatternTypeStrategy
+  extends TypeStrategy
 {
-  private String _name;
-
-  public String getTagName()
+  public Object configure(NodeBuilder builder, Node node, Object parent)
+    throws Exception
   {
-    return "cookie-equals";
-  }
+    String regex = builder.configureString(node);
 
-  /**
-   * Sets the name of the cookie, required.
-   */
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    super.init();
-
-    required(_name, "name");
-  }
-
-  protected String getValue(HttpServletRequest request)
-  {
-    Cookie[] cookies = request.getCookies();
-
-    if (cookies != null) {
-      for (int i = 0; i < cookies.length; i++) {
-	Cookie cookie = cookies[i];
-	
-	if (cookie.getName().equals(_name))
-	  return cookie.getValue();
-      }
-    }
-
-    return null;
+    return Pattern.compile(regex);
   }
 }

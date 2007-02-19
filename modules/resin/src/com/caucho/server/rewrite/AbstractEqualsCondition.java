@@ -30,12 +30,10 @@
 package com.caucho.server.rewrite;
 
 import com.caucho.util.L10N;
-import com.caucho.config.ConfigException;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * A rewrite condition that passes if a named value from the request exactly
@@ -83,7 +81,8 @@ abstract public class AbstractEqualsCondition
     required(_value, "value");
   }
 
-  public boolean isMatch(HttpServletRequest request)
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
   {
     String value = getValue(request);
 

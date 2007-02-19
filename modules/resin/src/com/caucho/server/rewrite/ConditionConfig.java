@@ -29,74 +29,78 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.server.dispatch.Invocation;
+import com.caucho.config.BuilderProgram;
+import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
 import com.caucho.util.InetNetwork;
+import com.caucho.util.L10N;
 
-import java.util.regex.*;
-import javax.el.ELContext;
-import javax.el.ELResolver;
-import javax.el.FunctionMapper;
-import javax.el.VariableMapper;
-import javax.servlet.ServletRequest;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletException;
+public class ConditionConfig {
+  private static final L10N L = new L10N(ConditionConfig.class);
 
-public class RequireConfig
-{
-  private AbstractCondition _condition;
-  
-  private String _regexp;
-  private boolean _isIgnoreCase;
+  private Condition _condition;
+  private BuilderProgramContainer _builderProgram;
+
+  private void setCondition(Condition condition)
+  {
+    if (_condition != null)
+      throw new ConfigException(L.l("Condition '{0}' has already been set, cannot use '{1}' here",
+                                    _condition.getTagName(), condition.getTagName()));
+
+    _condition = condition;
+  }
 
   /**
    * Sets the el expression.
    */
   public void setExpr(RawString expr)
   {
-    _condition = new ExprCondition(expr.getValue());
+    setCondition(new ExprCondition(expr.getValue()));
   }
   
   public void setHeader(String header)
   {
-    _condition = new HeaderCondition(header);
+    setCondition(new HeaderCondition(header));
   }
   
   public void setCookie(String cookie)
   {
-    _condition = new CookieCondition(cookie);
+    setCondition(new CookieCondition(cookie));
   }
   
-  public void setParam(String cookie)
+  public void setQueryParam(String queryParam)
   {
-    _condition = new ParamCondition(cookie);
+    setCondition(new QueryParamCondition(queryParam));
   }
   
   public void setRemoteAddr(String addr)
   {
-    _condition = new RemoteAddrCondition(InetNetwork.create(addr));
+    setCondition(new RemoteAddrCondition(InetNetwork.create(addr)));
   }
 
-  public void setRegexp(String regexp)
+  /**
+   * Adds an init program.
+   */
+  public void addBuilderProgram(BuilderProgram init)
   {
-    _regexp = regexp;
+    if (_builderProgram == null)
+      _builderProgram = new BuilderProgramContainer();
+
+    _builderProgram.addProgram(init);
   }
 
-  public void setIgnoreCase(boolean ignoreCase)
-  {
-    _isIgnoreCase = ignoreCase;
-  }
-  
   Condition getCondition()
   {
-    if (_regexp == null) {
-    }
-    else if (_isIgnoreCase)
-      _condition.setRegexp(Pattern.compile(_regexp, Pattern.CASE_INSENSITIVE));
-    else
-      _condition.setRegexp(Pattern.compile(_regexp));
+    if (_condition == null)
+      throw new ConfigException(L.l("A condition is required"));
 
+    if (_builderProgram != null)
+      _builderProgram.configure(_condition);
+    
+    Config.init(_condition);
+    
     return _condition;
   }
 }

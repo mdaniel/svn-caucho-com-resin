@@ -1,15 +1,19 @@
 <config-types xmlns:resin="http://caucho.com/ns/resin/core">
   <type-strategy
+    name="javax.sql.DataSource"
+    type="com.caucho.config.types.JndiTypeStrategy"/>
+
+  <type-strategy
+    name="java.io.File"
+    type="com.caucho.config.types.FileTypeStrategy"/>
+
+  <type-strategy
      name="com.caucho.vfs.Path"
      type="com.caucho.config.types.PathTypeStrategy"/>
 
   <type-strategy
-     name="java.io.File"
-     type="com.caucho.config.types.FileTypeStrategy"/>
-
-  <type-strategy
-     name="javax.sql.DataSource"
-     type="com.caucho.config.types.JndiTypeStrategy"/>
+    name="java.util.regex.Pattern"
+    type="com.caucho.config.types.PatternTypeStrategy"/>
 
   <type-strategy
      name="com.caucho.util.QDate"

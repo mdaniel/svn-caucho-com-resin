@@ -424,45 +424,72 @@ r_rest = element rest {
   & (element jaxb-package { string }* | element jaxb-class { string }*)?
 }
 
+r_rewrite-condition-Content =
+  (r_rewrite-condition-cookie
+
+   | (attribute expr { string }
+      | element expr { string })
+
+   | r_rewrite-condition-header
+
+   | r_rewrite-condition-query-param
+
+   | (attribute remote-addr { string }
+      | element remote-addr { string }))
+
+r_rewrite-condition-cookie =
+  (attribute cookie { string }
+   | element cookie { string })
+
+  & (attribute regexp { string }
+     | element regexp { string })?
+
+  & (attribute send-vary { string }
+     | element send-vary { string })?
+
+  & (attribute case-insensitive { string }
+     | element case-insensitive { string })?
+
+r_rewrite-condition-header =
+  (attribute header { string }
+   | element header { string })
+
+  & (attribute regexp { string }
+     | element regexp { string })?
+
+  & (attribute send-vary { string }
+     | element send-vary { string })?
+
+  & (attribute case-insensitive { string }
+     | element case-insensitive { string })?
+
+r_rewrite-condition-query-param =
+  (attribute query-param { string }
+   | element query-param { string })
+
+  & (attribute regexp { string }
+     | element regexp { string })?
+
+  & (attribute case-insensitive { string }
+     | element case-insensitive { string })?
+
 r_rewrite-conditions-Content =
   element and { r_rewrite-conditions-Content }*
-
-  & element forbid {
-      r_rewrite-require-Content
-     }*
 
   & element not { r_rewrite-conditions-Content }*
 
   & element or { r_rewrite-conditions-Content }*
 
-  & element require {
-      r_rewrite-require-Content
+  & element unless {
+      r_rewrite-condition-Content
+     }*
+
+  & element when {
+      r_rewrite-condition-Content
      }*
 
 r_rewrite-conditions-Type =
   r_rewrite-conditions-Content
-
-r_rewrite-require-Content =
-  ((attribute cookie { string }
-   | element cookie { string })
-
-   | (attribute expr { string }
-      | element expr { string })
-
-   | (attribute header { string }
-      | element header { string })
-
-   | (attribute param { string }
-      | element param { string })
-
-   | (attribute remote-addr { string }
-      | element remote-addr { string }))
-
-  & (attribute regexp { string }
-     | element regexp { string })?
-
-  & (attribute ignore-case { string }
-     | element ignore-case { string })?
 
 r_rewrite-dispatch = element rewrite-dispatch {
   (attribute case-insensitive { string }

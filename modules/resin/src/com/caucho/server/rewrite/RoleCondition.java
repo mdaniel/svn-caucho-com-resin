@@ -30,8 +30,8 @@
 package com.caucho.server.rewrite;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * A rewrite condition that passes if the user is in a specified role.
@@ -62,7 +62,8 @@ public class RoleCondition
     required(_value, "value");
   }
 
-  public boolean isMatch(HttpServletRequest request)
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
   {
     return request.isUserInRole(_value);
   }
