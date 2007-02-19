@@ -918,6 +918,9 @@ public class AmberConnection
       if (entity == null)
         return null;
 
+      // jpa/0o36: eager loading can change the corresponding entity index.
+      index = getEntity(cl.getName(), key);
+
       if (index >= 0) {
         // jpa/0ga9: replace with managed entity.
         _entities.remove(index);
