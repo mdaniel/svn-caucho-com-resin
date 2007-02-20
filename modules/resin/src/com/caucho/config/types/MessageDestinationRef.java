@@ -270,6 +270,6 @@ public class MessageDestinationRef
   public String toString()
   {
     return getClass().getSimpleName()
-           +  "[" + _refName + ", " + _link + ", " +  _foreignName + "]";
+           +  "[ref-name=" + _refName + ", link=" + _link + ", foreign-name=" +  _foreignName + "]";
   }
 }
