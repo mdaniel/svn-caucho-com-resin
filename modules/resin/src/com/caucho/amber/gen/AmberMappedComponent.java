@@ -612,6 +612,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
+    out.println("  __caucho_log.fine(\"amber detach \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
+
+    out.println();
     out.println("__caucho_session = null;");
 
     // jpa/0x00

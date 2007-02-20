@@ -1144,6 +1144,12 @@ public class AmberConnection
 
       Object entity = factory.getEntity(this, item);
 
+      if (_persistenceUnit.isJPA()) {
+        // jpa/0h29: eager loading.
+        Entity instance = (Entity) entity;
+        setTransactionalState(instance);
+      }
+
       return entity;
     } catch (SQLException e) {
       log.log(Level.WARNING, e.toString(), e);
