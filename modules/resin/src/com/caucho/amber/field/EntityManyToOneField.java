@@ -872,14 +872,14 @@ public class EntityManyToOneField extends CascadableField {
     out.pushDepth();
 
     String relatedEntity = "((com.caucho.amber.entity.Entity) " + getter + ")";
-    out.println("com.caucho.amber.entity.EntityState state = " + relatedEntity + ".__caucho_getEntityState();");
+    out.println("com.caucho.amber.entity.EntityState otherState = " + relatedEntity + ".__caucho_getEntityState();");
 
     // jpa/0j5e as a negative test.
     out.println("if (" + relatedEntity + ".__caucho_getConnection() == null) {");
     out.pushDepth();
 
     // jpa/0j5c as a positive test.
-    out.println("if (! __caucho_state.isManaged())");
+    out.println("if (__caucho_state.isManaged() && ! otherState.isManaged())");
 
     String errorString = ("(\"amber flush: unable to flush " +
                           getRelatedType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
