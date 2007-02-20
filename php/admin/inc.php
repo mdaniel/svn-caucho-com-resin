@@ -193,6 +193,12 @@ if ($script == "profile.php") {
 } else {
   ?><li><a href="profile.php">Profile</a></li><?
 }
+
+if ($script == "heap.php") {
+  ?><li class="selected">Heap</li><?
+} else {
+  ?><li><a href="heap.php">Heap</a></li><?
+}
 ?>
 </ul>
 
