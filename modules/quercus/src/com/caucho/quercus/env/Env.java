@@ -1540,17 +1540,16 @@ public class Env {
         }
       }
 
-      // commented out: don't add non-POST parameters to $_POST
-      /*
+      //XXX: php/081e, need to put uploaded files into $_FILES
       try {
-	_request.setCharacterEncoding(getHttpInputEncoding().toString());
+        _request.setCharacterEncoding(getHttpInputEncoding().toString());
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+          log.log(Level.FINE, e.toString(), e);
       }
 
       ArrayList<String> keys = new ArrayList<String>();
       if (_request.getParameterMap() != null)
-	keys.addAll(_request.getParameterMap().keySet());
+        keys.addAll(_request.getParameterMap().keySet());
 
       Collections.sort(keys);
 
@@ -1559,7 +1558,7 @@ public class Env {
 
         Post.addFormValue(post, key, value, getIniBoolean("magic_quotes_gpc"));
       }
-      */
+
     }
     break;
 
