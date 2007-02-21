@@ -885,7 +885,7 @@ public class QuercusParser {
       else if (expr instanceof VarVarExpr) {
 	VarVarExpr var = (VarVarExpr) expr;
 
-	statementList.add(new VarGlobalStatement(location, var));
+	statementList.add(_factory.createVarGlobal(location, var));
       }
       else
 	throw error(L.l("unknown expr {0} to global", expr));

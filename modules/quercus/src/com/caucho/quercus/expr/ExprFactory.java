@@ -1050,6 +1050,15 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a global var statement
+   */
+  public Statement createVarGlobal(Location loc,
+                VarVarExpr var)
+  {
+    return new VarGlobalStatement(loc, var);
+  }
+
+  /**
    * Creates a static statement
    */
   public Statement createStatic(Location loc,
