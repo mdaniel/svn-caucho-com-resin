@@ -653,8 +653,10 @@ public class EntityManyToOneField extends CascadableField {
   {
     String javaType = getJavaTypeName();
 
-    // jpa/0o04
-    out.println(session + ".addEntity(this);");
+    if (getSourceType() instanceof EntityType) {
+      // jpa/0o04
+      out.println(session + ".addEntity(this);");
+    }
 
     // ejb/06h0
     if (isAbstract()) {

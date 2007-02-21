@@ -278,8 +278,10 @@ public class DependentEntityOneToOneField extends CascadableField {
 
       String javaType = getJavaTypeName();
 
-      // jpa/0o04
-      out.println("aConn.addEntity(this);");
+      if (getSourceType() instanceof EntityType) {
+        // jpa/0o04
+        out.println("aConn.addEntity(this);");
+      }
 
       String indexS = "_" + group + "_" + index;
 

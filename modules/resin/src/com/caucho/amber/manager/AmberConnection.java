@@ -451,7 +451,9 @@ public class AmberConnection
       // jpa/1620
       // In particular, required for cascading persistence, since the cascade
       // is lazy until flush
-      flushInternal();
+      // jpa/0h25 flushInternal();
+      // Only flushes this entity.
+      instance.__caucho_flush();
 
       Object oldEntity;
 
@@ -2306,9 +2308,11 @@ public class AmberConnection
 
     // jpa/0g0k: cannot call home.save because of jpa exception handling.
     if (_persistenceUnit.isJPA()) {
-      entity.__caucho_cascadePrePersist(this);
+      // See persistInternal(): entity.__caucho_cascadePrePersist(this);
+
       entity.__caucho_create(this, home.getEntityType());
-      entity.__caucho_cascadePostPersist(this);
+
+      // See persistInternal(): entity.__caucho_cascadePostPersist(this);
     }
     else
       home.save(this, entity);
@@ -2416,7 +2420,7 @@ public class AmberConnection
       {
         // jpa/0h24
         // Pre-persist child entities.
-        //instance.__caucho_cascadePrePersist(this);
+        instance.__caucho_cascadePrePersist(this);
 
         try {
           createInternal(instance);
@@ -2432,18 +2436,32 @@ public class AmberConnection
     case P_DELETING:
     case P_DELETED:
       {
-        if (! isCascade) {
-          // jpa/0i60, jpa/1510
+        // jpa/0i60, jpa/1510
 
-          // removed entity instance, reset state and persist.
-          flushInternal();
-          instance.__caucho_makePersistent(null, (EntityType) null);
-          createInternal(instance);
-        }
+        /* jpa/0h25: should always flush from cascade,
+           but only flushes this entity. Related entities
+           are flushed with the cascading operations.
+
+           if (! isCascade) {
+             flushInternal();
+        */
+        instance.__caucho_flush();
+
+        // jpa/0h26
+        instance.__caucho_cascadePrePersist(this);
+
+        // removed entity instance, reset state and persist.
+        instance.__caucho_makePersistent(null, (EntityType) null);
+        createInternal(instance);
       }
       break;
 
     case P_PERSIST:
+      {
+        // jpa/0h26
+        // Pre-persist child entities.
+        instance.__caucho_cascadePrePersist(this);
+      }
       break;
 
     default:
@@ -2459,8 +2477,7 @@ public class AmberConnection
 
     // jpa/0h27
     // Post-persist child entities.
-    // XXX: should be handled by flush
-    // instance.__caucho_cascadePostPersist(this);
+    instance.__caucho_cascadePostPersist(this);
   }
 
   /**
