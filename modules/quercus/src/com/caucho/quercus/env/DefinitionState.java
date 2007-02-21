@@ -81,13 +81,13 @@ public final class DefinitionState {
 
     _isStrict = quercus.isStrict();
 
-    _funMap = new HashMap<String, AbstractFunction>(8192, 0.5F);
-    _classDefMap = new HashMap<String, ClassDef>();
+    _funMap = new HashMap<String, AbstractFunction>(256, 0.25F);
+    _classDefMap = new HashMap<String, ClassDef>(256, 0.25F);
 
     if (! _isStrict) {
-      _lowerFunMap = new HashMap<String, AbstractFunction>(8192, 0.5F);
+      _lowerFunMap = new HashMap<String, AbstractFunction>(256, 0.25F);
 
-      _lowerClassDefMap = new HashMap<String, ClassDef>();
+      _lowerClassDefMap = new HashMap<String, ClassDef>(256, 0.25F);
     }
   }
 

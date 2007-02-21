@@ -308,17 +308,17 @@ public class Quercus
   {
     return _mySqlVersion;
   }
-  
+
   public void setMysqlVersion(String version)
   {
     _mySqlVersion = version;
   }
-  
+
   public String getPhpVersion()
   {
     return _phpVersion;
   }
-  
+
   public void setPhpVersion(String version)
   {
     _phpVersion = version;

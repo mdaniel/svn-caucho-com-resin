@@ -1222,7 +1222,7 @@ public class JavaJspGenerator extends JspGenerator {
 
     try {
       if (type == null || type.equals(""))
-	_valueExprList.add(new ValueExpr(value, expr, null));
+	_valueExprList.add(new ValueExpr(value, expr, Object.class));
       else
 	_valueExprList.add(new ValueExpr(value, expr, getBeanClass(type)));
     } catch (ClassNotFoundException e) {

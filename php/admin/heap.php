@@ -19,7 +19,7 @@ if (! $server_id)
 
 $title = "Resin: Heap $server_Id";
 
-if (! $profile)
+if (! $heap)
   $title .= " - not available";
 
 ?>

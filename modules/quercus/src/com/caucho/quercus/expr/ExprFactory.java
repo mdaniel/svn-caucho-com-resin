@@ -512,9 +512,24 @@ public class ExprFactory {
 
     tail = append(left.getNext(), tail);
 
-    if (true
-	&& left.getValue() instanceof StringLiteralExpr
-	&& tail.getValue() instanceof StringLiteralExpr) {
+    if (left.getValue() instanceof BinaryLiteralExpr
+	&& tail.getValue() instanceof BinaryLiteralExpr) {
+      BinaryLiteralExpr leftString = (BinaryLiteralExpr) left.getValue();
+      BinaryLiteralExpr rightString = (BinaryLiteralExpr) tail.getValue();
+
+      try {
+	byte []bytes = (leftString.evalConstant().toString()
+			+ rightString.evalConstant().toString()).getBytes("ISO-8859-1");
+
+	Expr value = createBinary(bytes);
+
+	return createAppendImpl(value, tail.getNext());
+      } catch (java.io.UnsupportedEncodingException e) {
+	throw new RuntimeException(e);
+      }
+    }
+    else if (left.getValue() instanceof StringLiteralExpr
+	     && tail.getValue() instanceof StringLiteralExpr) {
       StringLiteralExpr leftString = (StringLiteralExpr) left.getValue();
       StringLiteralExpr rightString = (StringLiteralExpr) tail.getValue();
 

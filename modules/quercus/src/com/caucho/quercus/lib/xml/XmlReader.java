@@ -551,7 +551,8 @@ public class XmlReader
     catch (XMLStreamException ex) {
       log.log(Level.WARNING, ex.toString(), ex);
 
-      env.warning(L.l("Unable to open source data"));
+      env.warning(L.l("XML input file '{0}' cannot be opened for reading.",
+		      path));
 
       return BooleanValue.FALSE;
     }

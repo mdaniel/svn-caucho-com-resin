@@ -288,18 +288,31 @@ cse_connect(struct sockaddr_in *sin, srun_t *srun)
     return -1; /* bad socket */
   }
 
-  flags = fcntl(sock, F_GETFL);
-  fcntl(sock, F_SETFL, O_NONBLOCK|flags);
-  FD_ZERO(&write_fds);
-  FD_SET(sock, &write_fds);
+  if (sock < FD_SETSIZE) {
+    flags = fcntl(sock, F_GETFL);
+    fcntl(sock, F_SETFL, O_NONBLOCK|flags);
+    FD_ZERO(&write_fds);
+    FD_SET(sock, &write_fds);
+  }
 
   timeout.tv_sec = srun->connect_timeout;
   timeout.tv_usec = 0;
 
   if (! connect(sock, (const struct sockaddr *) sin, sizeof(*sin))) {
-    fcntl(sock, F_SETFL, flags);
+    if (sock < FD_SETSIZE) {
+      fcntl(sock, F_SETFL, flags);
+    }
 
     return sock;
+  }
+  else if (FD_SETSIZE <= sock) {
+    ERR(("%s:%d:cse_connect(): connect failed %x %d %d\n",
+	 __FILE__, __LINE__,
+	 sin->sin_addr.s_addr,
+	 ntohs(sin->sin_port), errno));
+    close(sock);
+
+    return -1;
   }
   /*
    * Solaris can return other errno for a connection that will succeed,

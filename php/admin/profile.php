@@ -53,11 +53,12 @@ if ($profile) {
     echo "<form action='profile.php' method='post' style='display:inline'>";
     echo "<select type='select' name='period'>";
     echo "  <option>10";
-    echo "  <option>20";
+    echo "  <option>25";
     echo "  <option>100";
     echo "  <option>250";
     echo "  <option selected>1000";
-    echo "  <option>5000";
+    echo "  <option>2500";
+    echo "  <option>10000";
     echo "</select>";
     echo "<input type='submit' name='action' value='start'>";
     echo "</form>";

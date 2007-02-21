@@ -487,7 +487,7 @@ public class UnicodeModule extends AbstractQuercusModule {
   }
 
   static {
-    addIni(_iniMap, "unicode.fallback_encoding", "ISO-8859-1", PHP_INI_ALL);
+    addIni(_iniMap, "unicode.fallback_encoding", "utf-8", PHP_INI_ALL);
     addIni(_iniMap, "unicode.from_error_mode", "2", PHP_INI_ALL);
     addIni(_iniMap, "unicode.from_error_subst_char", "3f", PHP_INI_ALL);
     addIni(_iniMap, "unicode.http_input_encoding", null, PHP_INI_ALL);
@@ -496,9 +496,9 @@ public class UnicodeModule extends AbstractQuercusModule {
     addIni(_iniMap, "unicode.script_encoding", null, PHP_INI_ALL);
     addIni(_iniMap, "unicode.semantics", "on", PHP_INI_ALL);
 
-    addIni(_iniMap, "iconv.input_encoding", "ISO-8859-1", PHP_INI_ALL);
-    addIni(_iniMap, "iconv.output_encoding", "ISO-8859-1", PHP_INI_ALL);
-    addIni(_iniMap, "iconv.internal_encoding", "ISO-8859-1", PHP_INI_ALL);
+    addIni(_iniMap, "iconv.input_encoding", "utf-8", PHP_INI_ALL);
+    addIni(_iniMap, "iconv.output_encoding", "utf-8", PHP_INI_ALL);
+    addIni(_iniMap, "iconv.internal_encoding", "utf-8", PHP_INI_ALL);
   }
 }
 

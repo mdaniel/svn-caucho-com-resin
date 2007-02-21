@@ -104,7 +104,10 @@ public class EjbAmberSelectMethod extends EjbBaseMethod {
 
     EjbConfig ejbConfig = getBean().getConfig();
     EjbServerManager ejbManager = ejbConfig.getEJBManager();
-    EjbEntityBean retBean = (EjbEntityBean) ejbConfig.getBeanConfig(returnEJB);
+    EjbEntityBean retBean = null;
+
+    if (returnEJB != null)
+      retBean = (EjbEntityBean) ejbConfig.getBeanConfig(returnEJB);
     
     AmberPersistenceUnit amberPersistenceUnit = ejbManager.getAmberManager();
 
