@@ -37,12 +37,13 @@ import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.convert.*;
 import javax.faces.context.*;
+import javax.faces.model.*;
 import javax.faces.render.*;
 
 /**
  * The HTML selectMany/checkbox renderer
  */
-class HtmlSelectOneMenuRenderer extends Renderer
+class HtmlSelectOneMenuRenderer extends SelectRenderer
 {
   public static final Renderer RENDERER
     = new HtmlSelectOneMenuRenderer();
@@ -269,43 +270,40 @@ class HtmlSelectOneMenuRenderer extends Renderer
     if (title != null)
       out.writeAttribute("title", title, "title");
 
-    int childCount = component.getChildCount();
-    for (int i = 0; i < childCount; i++) {
-      UIComponent child = component.getChildren().get(i);
-
+    ArrayList<SelectItem> items = getSelectItems(component);
+    for (int i = 0; i < items.size(); i++) {
       String childId = clientId + ":" + i;
       
-      if (child instanceof UISelectItem) {
-	UISelectItem selectItem = (UISelectItem) child;
+      SelectItem selectItem = items.get(i);
 
-	String itemLabel = selectItem.getItemLabel();
-	Object itemValue = selectItem.getItemValue();
-	String itemDescription = selectItem.getItemDescription();
+      String itemLabel = selectItem.getLabel();
+      Object itemValue = selectItem.getValue();
+      String itemDescription = selectItem.getDescription();
 
-	out.startElement("option", child);
+      out.startElement("option", component);
 
-	out.writeAttribute("id", childId, "id");
-	out.writeAttribute("name", child.getClientId(context), "name");
+      out.writeAttribute("id", childId, "id");
+      //out.writeAttribute("name", child.getClientId(context), "name");
 
-	if (value != null && value.equals(itemValue))
-	  out.writeAttribute("selected", "selected", "selected");
+      if (value != null && value.equals(itemValue))
+	out.writeAttribute("selected", "selected", "selected");
 
-	if (selectItem.isItemDisabled()) {
-	  out.writeAttribute("disabled", "disabled", "disabled");
+      if (selectItem.isDisabled()) {
+	out.writeAttribute("disabled", "disabled", "disabled");
 
-	  if (disabledClass != null)
-	    out.writeAttribute("class", disabledClass, "disabledClass");
-	}
-	else {
-	  if (enabledClass != null)
-	    out.writeAttribute("class", enabledClass, "enabledClass");
-	}
-      
-	String itemValueString = String.valueOf(itemValue); // XXX:
-	out.writeAttribute("value", itemValueString, "value");
-	
-	out.endElement("option");
+	if (disabledClass != null)
+	  out.writeAttribute("class", disabledClass, "disabledClass");
       }
+      else {
+	if (enabledClass != null)
+	  out.writeAttribute("class", enabledClass, "enabledClass");
+      }
+      
+      String itemValueString = toString(context, component, itemValue);
+
+      out.writeText(itemValueString, "value");
+	
+      out.endElement("option");
     }
 
     out.endElement("select");

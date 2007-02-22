@@ -37,12 +37,13 @@ import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.convert.*;
 import javax.faces.context.*;
+import javax.faces.model.*;
 import javax.faces.render.*;
 
 /**
  * The HTML selectOne/radio renderer
  */
-class HtmlSelectOneRadioRenderer extends Renderer
+class HtmlSelectOneRadioRenderer extends SelectRenderer
 {
   public static final Renderer RENDERER
     = new HtmlSelectOneRadioRenderer();
@@ -246,121 +247,117 @@ class HtmlSelectOneRadioRenderer extends Renderer
       out.startElement("tr", component);
     }
 
-    int childCount = component.getChildCount();
-    for (int i = 0; i < childCount; i++) {
-      UIComponent child = component.getChildren().get(i);
+    ArrayList<SelectItem> items = getSelectItems(component);
+
+    for (int i = 0; i < items.size(); i++) {
+      SelectItem selectItem = items.get(i);
 
       String childId = clientId + ":" + i;
 	
       if ("pageDirection".equals(layout)) {
-	out.startElement("tr", child);
+	out.startElement("tr", component);
       }
       
-      out.startElement("td", child);
+      out.startElement("td", component);
+      out.startElement("input", component);
+      out.writeAttribute("id", childId, "id");
+      out.writeAttribute("name", clientId, "name");
+      out.writeAttribute("type", "radio", "type");
 
-      if (child instanceof UISelectItem) {
-	UISelectItem selectItem = (UISelectItem) child;
+      if (selectItem.isDisabled() || disabled)
+	out.writeAttribute("disabled", "disabled", "disabled");
 
-	out.startElement("input", child);
-	out.writeAttribute("id", childId, "id");
-	out.writeAttribute("name", clientId, "name");
-	out.writeAttribute("type", "radio", "type");
+      if (value instanceof String[]) {
+	String []values = (String []) value;
 
-	if (selectItem.isItemDisabled() || disabled)
-	  out.writeAttribute("disabled", "disabled", "disabled");
-
-	if (value instanceof String[]) {
-	  String []values = (String []) value;
-
-	  for (int j = 0; j < values.length; j++) {
-	    if (values[j].equals(selectItem.getItemValue())) {
-	      out.writeAttribute("checked", "checked", "value");
-	      break;
-	    }
+	for (int j = 0; j < values.length; j++) {
+	  if (values[j].equals(selectItem.getValue())) {
+	    out.writeAttribute("checked", "checked", "value");
+	    break;
 	  }
 	}
-
-	if (accesskey != null)
-	  out.writeAttribute("accesskey", accesskey, "accesskey");
-
-	if (dir != null)
-	  out.writeAttribute("dir", dir, "dir");
-
-	if (lang != null)
-	  out.writeAttribute("lang", lang, "lang");
-
-	if (onblur != null)
-	  out.writeAttribute("onblur", onblur, "onblur");
-
-	if (onchange != null)
-	  out.writeAttribute("onchange", onchange, "onchange");
-
-	if (onclick != null)
-	  out.writeAttribute("onclick", onclick, "onclick");
-
-	if (ondblclick != null)
-	  out.writeAttribute("ondblclick", ondblclick, "ondblclick");
-
-	if (onfocus != null)
-	  out.writeAttribute("onfocus", onfocus, "onfocus");
-
-	if (onkeydown != null)
-	  out.writeAttribute("onkeydown", onkeydown, "onkeydown");
-
-	if (onkeypress != null)
-	  out.writeAttribute("onkeypress", onkeypress, "onkeypress");
-
-	if (onkeyup != null)
-	  out.writeAttribute("onkeyup", onkeyup, "onkeyup");
-
-	if (onmousedown != null)
-	  out.writeAttribute("onmousedown", onmousedown, "onmousedown");
-
-	if (onmousemove != null)
-	  out.writeAttribute("onmousemove", onmousemove, "onmousemove");
-
-	if (onmouseout != null)
-	  out.writeAttribute("onmouseout", onmouseout, "onmouseout");
-
-	if (onmouseover != null)
-	  out.writeAttribute("onmouseover", onmouseover, "onmouseover");
-
-	if (onmouseup != null)
-	  out.writeAttribute("onmouseup", onmouseup, "onmouseup");
-
-	if (onselect != null)
-	  out.writeAttribute("onselect", onselect, "onselect");
-
-	if (readonly)
-	  out.writeAttribute("readonly", "readonly", "readonly");
-
-	if (tabindex != null)
-	  out.writeAttribute("tabindex", tabindex, "tabindex");
-
-	if (title != null)
-	  out.writeAttribute("title", title, "title");
-
-	Object itemValue = selectItem.getItemValue();
-	if (itemValue != null)
-	  out.writeAttribute("value", String.valueOf(itemValue), "value");
-      
-	out.endElement("input");
-
-	out.startElement("label", child);
-	out.writeAttribute("for", childId, "for");
-
-	if (selectItem.isItemDisabled() || disabled) {
-	  if (disabledClass != null)
-	    out.writeAttribute("class", disabledClass, "disabledClass");
-	}
-	else {
-	  if (enabledClass != null)
-	    out.writeAttribute("class", enabledClass, "enabledClass");
-	}
-	
-	out.writeText(selectItem.getItemLabel(), "itemLabel");
-	out.endElement("label");
       }
+
+      if (accesskey != null)
+	out.writeAttribute("accesskey", accesskey, "accesskey");
+
+      if (dir != null)
+	out.writeAttribute("dir", dir, "dir");
+
+      if (lang != null)
+	out.writeAttribute("lang", lang, "lang");
+
+      if (onblur != null)
+	out.writeAttribute("onblur", onblur, "onblur");
+
+      if (onchange != null)
+	out.writeAttribute("onchange", onchange, "onchange");
+
+      if (onclick != null)
+	out.writeAttribute("onclick", onclick, "onclick");
+
+      if (ondblclick != null)
+	out.writeAttribute("ondblclick", ondblclick, "ondblclick");
+
+      if (onfocus != null)
+	out.writeAttribute("onfocus", onfocus, "onfocus");
+
+      if (onkeydown != null)
+	out.writeAttribute("onkeydown", onkeydown, "onkeydown");
+
+      if (onkeypress != null)
+	out.writeAttribute("onkeypress", onkeypress, "onkeypress");
+
+      if (onkeyup != null)
+	out.writeAttribute("onkeyup", onkeyup, "onkeyup");
+
+      if (onmousedown != null)
+	out.writeAttribute("onmousedown", onmousedown, "onmousedown");
+
+      if (onmousemove != null)
+	out.writeAttribute("onmousemove", onmousemove, "onmousemove");
+
+      if (onmouseout != null)
+	out.writeAttribute("onmouseout", onmouseout, "onmouseout");
+
+      if (onmouseover != null)
+	out.writeAttribute("onmouseover", onmouseover, "onmouseover");
+
+      if (onmouseup != null)
+	out.writeAttribute("onmouseup", onmouseup, "onmouseup");
+
+      if (onselect != null)
+	out.writeAttribute("onselect", onselect, "onselect");
+
+      if (readonly)
+	out.writeAttribute("readonly", "readonly", "readonly");
+
+      if (tabindex != null)
+	out.writeAttribute("tabindex", tabindex, "tabindex");
+
+      if (title != null)
+	out.writeAttribute("title", title, "title");
+
+      Object itemValue = selectItem.getValue();
+      if (itemValue != null)
+	out.writeAttribute("value", String.valueOf(itemValue), "value");
+      
+      out.endElement("input");
+
+      out.startElement("label", component);
+      out.writeAttribute("for", childId, "for");
+
+      if (selectItem.isDisabled() || disabled) {
+	if (disabledClass != null)
+	  out.writeAttribute("class", disabledClass, "disabledClass");
+      }
+      else {
+	if (enabledClass != null)
+	  out.writeAttribute("class", enabledClass, "enabledClass");
+      }
+	
+      out.writeText(selectItem.getLabel(), "itemLabel");
+      out.endElement("label");
       
       out.endElement("td");
 

@@ -256,41 +256,22 @@ class HtmlFormRenderer extends Renderer
 
     if (title != null)
       out.writeAttribute("title", title, "title");
-  }
-
-  /**
-   * Renders the content for the component.
-   */
-  @Override
-  public void encodeChildren(FacesContext context, UIComponent component)
-    throws IOException
-  {
+    
     int childCount = component.getChildCount();
 
-    if (childCount == 0)
-      return;
+    if (childCount > 0) {
+      List<UIComponent> children = component.getChildren();
 
-    List<UIComponent> children = component.getChildren();
+      for (int i = 0; i < childCount; i++) {
+	UIComponent child = children.get(i);
 
-    for (int i = 0; i < childCount; i++) {
-      UIComponent child = children.get(i);
-
-      if (child.isRendered()) {
-	child.encodeBegin(context);
-	child.encodeChildren(context);
-	child.encodeEnd(context);
+	if (child.isRendered()) {
+	  child.encodeBegin(context);
+	  child.encodeChildren(context);
+	  child.encodeEnd(context);
+	}
       }
     }
-  }
-
-  /**
-   * Renders the closing tag for the component.
-   */
-  @Override
-  public void encodeEnd(FacesContext context, UIComponent component)
-    throws IOException
-  {
-    ResponseWriter out = context.getResponseWriter();
 
     context.getApplication().getViewHandler().writeState(context);
 
@@ -301,6 +282,24 @@ class HtmlFormRenderer extends Renderer
     out.endElement("input");
 
     out.endElement("form");
+  }
+
+  /**
+   * Renders the content for the component.
+   */
+  @Override
+  public void encodeChildren(FacesContext context, UIComponent component)
+    throws IOException
+  {
+  }
+
+  /**
+   * Renders the closing tag for the component.
+   */
+  @Override
+  public void encodeEnd(FacesContext context, UIComponent component)
+    throws IOException
+  {
   }
 
   public String toString()

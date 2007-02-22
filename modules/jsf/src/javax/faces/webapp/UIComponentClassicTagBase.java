@@ -148,8 +148,9 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
       = getParentUIComponentClassicTagBase(pageContext);
 
     _component = findComponent(_facesContext);
+    System.out.println("PARENT: " + _parentUIComponentTag + " " + _component);
 
-    pageContext.setAttribute("caucho.jsf.parent", this);
+    pageContext.getRequest().setAttribute("caucho.jsf.parent", this);
     
     return getDoStartValue();
   }
@@ -193,7 +194,8 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   public int doEndTag()
     throws JspException
   {
-    pageContext.setAttribute("caucho.jsf.parent", _parentUIComponentTag);
+    pageContext.getRequest().setAttribute("caucho.jsf.parent",
+					  _parentUIComponentTag);
     
     return getDoEndValue();
   }
@@ -252,8 +254,9 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
       _component = parent.findComponent(id);
 
       if (_component != null) {
-	if (verbatim != null)
+	if (verbatim != null) {
 	  addVerbatimBeforeComponent(parentTag, verbatim, _component);
+	}
       
 	return _component;
       }
@@ -368,19 +371,34 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   {
     UIComponent parent = parentTag.getComponentInstance();
 
-    List<UIComponent> children = parent.getChildren();
-    
-    int i = children.indexOf(component);
+    int size = parent.getChildCount();
 
-    if (i > 0)
-      children.add(i, verbatim);
+    if (size > 0) {
+      List<UIComponent> children = parent.getChildren();
+
+      for (int i = 0; i < size; i++) {
+	if (children.get(i) == component)
+	  children.add(i, verbatim);
+      }
+    }
   }
 
-  protected void addVerbatimAfterComponent(UIComponentClassicTagBase parent,
+  protected void addVerbatimAfterComponent(UIComponentClassicTagBase parentTag,
 					    UIComponent verbatim,
 					    UIComponent component)
   {
-    throw new UnsupportedOperationException();
+    UIComponent parent = parentTag.getComponentInstance();
+
+    int size = parent.getChildCount();
+
+    if (size > 0) {
+      List<UIComponent> children = parent.getChildren();
+
+      for (int i = 0; i < size; i++) {
+	if (children.get(i) == component)
+	  children.add(i + 1, verbatim);
+      }
+    }
   }
 
   public List<String> getCreatedComponents()
@@ -439,6 +457,6 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     getParentUIComponentClassicTagBase(PageContext pageContext)
   {
     return (UIComponentClassicTagBase)
-      pageContext.getAttribute("caucho.jsf.parent");
+      pageContext.getRequest().getAttribute("caucho.jsf.parent");
   }
 }

@@ -111,7 +111,7 @@ class HtmlSelectOneListboxRenderer extends Renderer
     String onselect;
 
     boolean readonly;
-    int size;
+    int size = 0;
     String style;
     String styleClass;
     String tabindex;
@@ -161,7 +161,7 @@ class HtmlSelectOneListboxRenderer extends Renderer
     
       accesskey = (String) attrMap.get("accesskey");
       dir = (String) attrMap.get("dir");
-      disabled = (Boolean) attrMap.get("disabled");
+      disabled = Boolean.TRUE.equals(attrMap.get("disabled"));
       disabledClass = (String) attrMap.get("disabledClass");
       enabledClass = (String) attrMap.get("enabledClass");
       lang = (String) attrMap.get("lang");
@@ -184,8 +184,10 @@ class HtmlSelectOneListboxRenderer extends Renderer
       
       onselect = (String) attrMap.get("onselect");
 
-      readonly = (Boolean) attrMap.get("readonly");
-      size = (Integer) attrMap.get("size");
+      readonly = Boolean.TRUE.equals(attrMap.get("readonly"));
+      Integer iValue = (Integer) attrMap.get("size");
+      if (iValue != null)
+	size = iValue;
       style = (String) attrMap.get("style");
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");
@@ -194,7 +196,8 @@ class HtmlSelectOneListboxRenderer extends Renderer
       value = attrMap.get("value");
     }
 
-    System.out.println("V: " + value);
+    System.out.println("SELECT-ONE: " + value + " " + component);
+    
     UIViewRoot viewRoot = context.getViewRoot();
     
     out.startElement("select", component);
