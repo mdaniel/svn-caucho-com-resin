@@ -377,7 +377,14 @@ public class EntityEmbeddedField extends AbstractField {
   public void generateUpdate(CharBuffer sql)
   {
     if (_isUpdate) {
+      boolean isFirst = true;
+
       for (Map.Entry<String, Column> entry : _columns.entrySet()) {
+        if (isFirst)
+          isFirst = false;
+        else
+          sql.append(", ");
+
         Column column = entry.getValue();
         sql.append(column.generateUpdateSet());
       }

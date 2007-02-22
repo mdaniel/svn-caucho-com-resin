@@ -1617,6 +1617,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    out.println("if (this == targetEntity)");
+    out.println("  return;");
+    out.println();
+
     out.println(getClassName() + " o = (" + getClassName() + ") targetEntity;");
     out.println("if (o.__caucho_home == null)");
     out.println("  o.__caucho_home = __caucho_home;");
@@ -1635,6 +1639,26 @@ abstract public class AmberMappedComponent extends ClassComponent {
     for (int i = 0; i <= _relatedType.getLoadGroupIndex(); i++) {
       // jpa/0l02
       _relatedType.generateCopyLoadObject(out, "o", "super", i);
+    }
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public void __caucho_merge(com.caucho.amber.entity.Entity targetEntity,");
+    out.println("                           com.caucho.amber.manager.AmberConnection aConn,");
+    out.println("                           boolean isFullMerge)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("if (isFullMerge)");
+    out.println("  this.__caucho_copyTo(targetEntity, aConn);");
+    out.println();
+
+    out.println(getClassName() + " o = (" + getClassName() + ") targetEntity;");
+
+    for (int i = 0; i <= _relatedType.getLoadGroupIndex(); i++) {
+      _relatedType.generateCopyMergeObject(out, "o", "super", i);
     }
 
     out.popDepth();

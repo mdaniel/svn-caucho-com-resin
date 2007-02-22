@@ -386,10 +386,42 @@ public class EntityOneToManyField extends CollectionField {
     out.popDepth();
     out.println("}");
 
+    out.println();
+    out.println("com.caucho.amber.AmberQuery query = null;");
+
+    out.println();
     out.println("if (__caucho_session == null) {");
-    if (! isAbstract()) {
-      out.println("  return super." + getGetterName() + "();");
+    out.pushDepth();
+
+    String newEmptyCollection = "new " + collectionImpl;
+
+    if (param != null) {
+      newEmptyCollection += "<" + param.getPrintName();
+      if (isMap) {
+        newEmptyCollection += ", ";
+        newEmptyCollection += param2.getPrintName();
+      }
+      newEmptyCollection += ">";
     }
+
+    newEmptyCollection += "(query";
+    if (isMap) {
+      newEmptyCollection += "," + getEntityTargetType().getBeanClass().getName();
+      newEmptyCollection += ".class.getDeclaredMethod(\"get";
+      String getterMapKey = getMapKey();
+      getterMapKey = Character.toUpperCase(getterMapKey.charAt(0)) + getterMapKey.substring(1);
+      newEmptyCollection += getterMapKey; // "getId");
+      newEmptyCollection += "\", null";
+    }
+    newEmptyCollection += ")";
+
+    out.println(var + " = " + newEmptyCollection + ";");
+
+    // if (! isAbstract())
+    out.println();
+    out.println("return " + var + ";");
+
+    out.popDepth();
     out.println("}");
 
     out.println("try {");
@@ -417,7 +449,6 @@ public class EntityOneToManyField extends CollectionField {
     }
 
     out.println("\";");
-    out.println("com.caucho.amber.AmberQuery query;");
     out.println("query = __caucho_session.prepareQuery(sql);");
 
     out.println("int index = 1;");
@@ -425,32 +456,7 @@ public class EntityOneToManyField extends CollectionField {
 
     // Ex: _caucho_getChildren = new com.caucho.amber.collection.CollectionImpl
     out.print(var);
-    out.print(" = new ");
-    out.print(collectionImpl);
-
-    if (param != null) {
-      out.print("<");
-      out.print(param.getPrintName());
-      if (isMap) {
-        out.print(", ");
-        out.print(param2.getPrintName());
-      }
-      out.print(">");
-    }
-
-    out.print("(query");
-    if (isMap) {
-      out.println(",");
-      out.pushDepth();
-      out.print(getEntityTargetType().getBeanClass().getName());
-      out.print(".class.getDeclaredMethod(\"get");
-      String getterMapKey = getMapKey();
-      getterMapKey = Character.toUpperCase(getterMapKey.charAt(0)) + getterMapKey.substring(1);
-      out.print(getterMapKey); // "getId");
-      out.print("\", null)");
-      out.popDepth();
-    }
-    out.println(");");
+    out.print(" = " + newEmptyCollection + ";");
 
     /*
       out.pushDepth();

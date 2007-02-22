@@ -122,6 +122,10 @@ public class AmberConnection
 
   private QueryCacheKey _queryKey = new QueryCacheKey();
 
+  private ArrayList<Entity> _mergingEntities = new ArrayList<Entity>();
+
+  private boolean _isFlushAllowed = true;
+
   /**
    * Creates a manager instance.
    */
@@ -315,84 +319,14 @@ public class AmberConnection
   public <T> T merge(T entityT)
   {
     try {
-      if (entityT == null)
-        return null;
-
-      Entity entity = checkEntityType(entityT, "merge");
-
       flushInternal();
 
-      EntityState state = entity.__caucho_getEntityState();
+      // Cannot flush before the merge is complete.
+      _isFlushAllowed = false;
 
-      Object pk = entity.__caucho_getPrimaryKey();
+      // entityT = recursiveMerge(null, entityT);
 
-      log.finest(L.l("merge(class: '{0}' PK: '{1}' state: '{2}')",
-                     entity.getClass().getName(), pk, state));
-
-      if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
-        // removed entity instance
-        throw new IllegalArgumentException(L.l("Merge operation cannot be applied to a removed entity instance"));
-      }
-
-      try {
-        Entity managedEntity = null;
-
-        try {
-          managedEntity = (Entity) load(entity.getClass(), pk);
-        } catch (AmberObjectNotFoundException e) {
-          log.log(Level.FINEST, e.toString(), e);
-          // JPA: should not throw at all, returns null only.
-        }
-
-        // jpa/0s2k
-        setTransactionalState(entity);
-
-        if (managedEntity == null) {
-          // new entity instance
-
-          managedEntity = entity.getClass().newInstance();
-          entity.__caucho_copyTo(managedEntity, this);
-
-          // XXX: needs to do a pre-persist anyways at the beginning of merge,
-          // but needs to check if the dependent entities exist.
-
-          // cascade children
-          entity.__caucho_cascadePrePersist(this);
-
-          persist(managedEntity);
-
-          log.finest(L.l("merged to a new entity (persisted)"));
-        }
-        else {
-          // jpa/0ga3: existing entity
-          entity.__caucho_copyTo(managedEntity, this);
-
-          // XXX: needs to update the managed entity load mask in the copyTo???
-
-          // jpa/0h08: sets the corresponding load/dirty masks to the argument entity.
-          entity.__caucho_copyDirtyMaskFrom(managedEntity);
-          entity.__caucho_copyLoadMaskFrom(managedEntity);
-
-          entityT = (T) managedEntity;
-
-          log.finest(L.l("merged to an existing entity"));
-        }
-
-        // jpa/0i5g
-        entity.__caucho_cascadePostPersist(this);
-
-      } catch (Exception e) {
-        if (e.getCause() instanceof SQLException) {
-          // OK: entity exists in the database
-          log.log(Level.FINER, e.toString(), e);
-        }
-        else {
-          throw e;
-        }
-      }
-
-      // XXX: merge recursively for
-      // cascade=MERGE or cascade=ALL
+      entityT = recursiveMerge(entityT);
 
       return entityT;
 
@@ -400,6 +334,18 @@ public class AmberConnection
       throw e;
     } catch (Exception e) {
       throw new EJBExceptionWrapper(e);
+    } finally {
+      _isFlushAllowed = true;
+
+      try {
+        flushInternal();
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new EJBExceptionWrapper(e);
+      } finally {
+        _mergingEntities.clear();
+      }
     }
   }
 
@@ -518,7 +464,14 @@ public class AmberConnection
   public <T> T find(Class<T> entityClass,
                     Object primaryKey)
   {
+    // Do not flush while an entity is being loaded or merged.
+    boolean mustRestoreFlush = _isFlushAllowed;
+
     try {
+      // Do not flush while loading an entity.
+      // Broken relationships would not pass the flush validation.
+      _isFlushAllowed = false;
+
       AmberEntityHome entityHome
         = _persistenceUnit.getEntityHome(entityClass.getName());
 
@@ -540,6 +493,8 @@ public class AmberConnection
       throw e;
     } catch (Exception e) {
       throw new EJBExceptionWrapper(e);
+    } finally {
+      _isFlushAllowed = mustRestoreFlush;
     }
   }
 
@@ -2362,6 +2317,10 @@ public class AmberConnection
   private void flushInternal()
     throws Exception
   {
+    // Do not flush within merge() or while loading an entity.
+    if (! _isFlushAllowed)
+      return;
+
     /* XXX: moved into __caucho_flush
        for (int i = _txEntities.size() - 1; i >= 0; i--) {
        Entity entity = _txEntities.get(i);
@@ -2478,6 +2437,132 @@ public class AmberConnection
     // jpa/0h27
     // Post-persist child entities.
     instance.__caucho_cascadePostPersist(this);
+  }
+
+  /**
+   * Recursively merges the state of the entity into the current context.
+   */
+  public <T> T recursiveMerge(T entityT) // , T rootEntityT)
+  {
+    // jpa/0ga3, jpa/0h08, jpa/0i5g, jpa/0s2k
+
+    try {
+      if (entityT == null)
+        return null;
+
+      Entity entity = checkEntityType(entityT, "merge");
+
+      if (log.isLoggable(Level.FINEST)) {
+        String className = entity.getClass().getName();
+        Object pk = entity.__caucho_getPrimaryKey();
+        EntityState state = entity.__caucho_getEntityState();
+
+        log.finest(L.l("recursiveMerge(class: '{0}' PK: '{1}' state: '{2}')",
+                       className, pk, state));
+      }
+
+      Entity managedEntity = null;
+
+      if (_mergingEntities.contains(entity))
+        managedEntity = entity;
+      else
+        managedEntity = mergeDetachedEntity(entity, true);
+
+      return (T) managedEntity;
+
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  public Entity mergeDetachedEntity(Entity entity, boolean fullMerge)
+  {
+    try {
+      if (entity == null)
+        return entity;
+
+      EntityState state = entity.__caucho_getEntityState();
+
+      Object pk = entity.__caucho_getPrimaryKey();
+
+      log.finest(L.l("merge(class: '{0}' PK: '{1}' state: '{2}')",
+                     entity.getClass().getName(), pk, state));
+
+      if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
+        // removed entity instance
+        throw new IllegalArgumentException(L.l("Merge operation cannot be applied to a removed entity instance"));
+      }
+
+      Entity managedEntity = null;
+
+      try {
+        Entity existingEntity = null;
+
+        try {
+          existingEntity = (Entity) load(entity.getClass(), pk);
+        } catch (AmberObjectNotFoundException e) {
+          log.log(Level.FINEST, e.toString(), e);
+          // JPA: should not throw at all, returns null only.
+        }
+
+        // XXX: the original entity should remain detached jpa/0s2k
+        // setTransactionalState(entity);
+
+        if (existingEntity == null) {
+          // new entity instance
+          managedEntity = entity.getClass().newInstance();
+          managedEntity.__caucho_setPrimaryKey(pk);
+        }
+        else // jpa/0h08
+          managedEntity = existingEntity;
+
+        if (! _mergingEntities.contains(managedEntity)) {
+          _mergingEntities.add(managedEntity);
+
+          // jpa/0ga3, jpa/0h08
+          entity.__caucho_merge(managedEntity, this, fullMerge);
+
+          // jpa/0h08
+          entity.__caucho_copyDirtyMaskFrom(managedEntity);
+          entity.__caucho_copyLoadMaskFrom(managedEntity);
+        }
+
+        if (existingEntity == null) {
+          // cascade children
+          entity.__caucho_cascadePrePersist(this);
+
+          persist(managedEntity);
+
+          // jpa/0i5g
+          entity.__caucho_cascadePostPersist(this);
+
+          log.finest(L.l("merged to a new entity (persisted)"));
+        }
+        else {
+          setTransactionalState(managedEntity);
+
+          log.finest(L.l("merged to an existing entity"));
+        }
+
+      } catch (Exception e) {
+        if (e.getCause() instanceof SQLException) {
+          // OK: entity exists in the database
+          log.log(Level.FINER, e.toString(), e);
+        }
+        else {
+          throw e;
+        }
+      }
+
+      return managedEntity;
+
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
   }
 
   /**

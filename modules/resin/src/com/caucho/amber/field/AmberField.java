@@ -327,6 +327,14 @@ public interface AmberField {
     throws IOException;
 
   /**
+   * Updates the cached copy.
+   */
+  public void generateCopyMergeObject(JavaWriter out,
+                                      String dst, String src,
+                                      int loadIndex)
+    throws IOException;
+
+  /**
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,

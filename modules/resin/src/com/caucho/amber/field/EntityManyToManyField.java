@@ -253,11 +253,11 @@ public class EntityManyToManyField extends AssociationField {
                                      int loadIndex)
     throws IOException
   {
-    // order matters: jpa/0s2k
-    String value = generateGet(src);
-    out.println(generateSet(dst, value) + ";");
-
     String var = "_caucho_field_" + getGetterName();
+
+    // order matters: jpa/0s2k
+    String value = var; // generateGet(src);
+    out.println(generateSet(dst, value) + ";");
 
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
 
@@ -265,6 +265,18 @@ public class EntityManyToManyField extends AssociationField {
       out.println("((" + getRelatedType().getInstanceClassName() + ") " + dst + ")." +
                   generateSuperSetter(generateSuperGetter()) + ";");
     }
+  }
+
+  /**
+   * Updates the cached copy.
+   */
+  public void generateCopyMergeObject(JavaWriter out,
+                                      String dst, String src,
+                                      int updateIndex)
+    throws IOException
+  {
+    // XXX: jpa/0s2k, to be continued.
+    generateCopyLoadObject(out, dst, src, updateIndex);
   }
 
   /**

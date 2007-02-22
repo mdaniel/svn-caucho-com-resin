@@ -410,6 +410,39 @@ public class DependentEntityOneToOneField extends CascadableField {
   }
 
   /**
+   * Updates the cached copy.
+   */
+  public void generateCopyMergeObject(JavaWriter out,
+                                      String dst, String src,
+                                      int updateIndex)
+    throws IOException
+  {
+    if (getLoadGroupIndex() != updateIndex)
+      return;
+
+    if (! (getEntityTargetType() instanceof EntityType))
+      return;
+
+    String value = generateGet(src);
+
+    out.println("if (" + value + " != null) {");
+    out.pushDepth();
+
+    if (! isCascade(CascadeType.MERGE)) {
+      value = "(" + getJavaTypeName() + ") aConn.mergeDetachedEntity((com.caucho.amber.entity.Entity) " + value + ", false)";
+    }
+    else {
+      value = "(" + getJavaTypeName() + ") aConn.recursiveMerge(" +
+        value + ")";
+    }
+
+    out.println(generateSet(dst, value) + ";");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
    * Generates the set property.
    */
   public void generateSetProperty(JavaWriter out)

@@ -875,6 +875,26 @@ abstract public class RelatedType extends AbstractStatefulType {
   /**
    * Copy from an object.
    */
+  public void generateCopyMergeObject(JavaWriter out,
+                                      String dst, String src,
+                                      int loadGroup)
+    throws IOException
+  {
+    if (getParentType() != null)
+      getParentType().generateCopyMergeObject(out, dst, src, loadGroup);
+
+    ArrayList<AmberField> fields = getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      field.generateCopyMergeObject(out, dst, src, loadGroup);
+    }
+  }
+
+  /**
+   * Copy from an object.
+   */
   public void generateCopyUpdateObject(JavaWriter out,
                                        String dst, String src,
                                        int updateIndex)
