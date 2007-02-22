@@ -1269,7 +1269,7 @@ public abstract class JspNode {
       }
     }
     
-    int exprIndex = _gen.addExpr(expr);
+    int exprIndex = _gen.addExpr(value);
     String var = "_caucho_expr_" + exprIndex;
 
     if (boolean.class.equals(type))

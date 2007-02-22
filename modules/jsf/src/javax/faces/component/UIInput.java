@@ -278,6 +278,7 @@ public class UIInput extends UIOutput
   {
     _submittedValue = submittedValue;
     _isValid = true; // XXX: jsf/3070
+    System.out.println("SET-SUBMIT: " + submittedValue + " " + this);
   }
 
   public void setValue(Object value)
@@ -451,6 +452,7 @@ public class UIInput extends UIOutput
     if (! isLocalValueSet())
       return;
 
+    System.out.println("UPDATE: " + _valueExpr);
     if (_valueExpr == null)
       return;
 
@@ -460,6 +462,7 @@ public class UIInput extends UIOutput
       setValue(null);
       _isLocalValueSet = false;
     } catch (RuntimeException e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
       
       setValid(false);
@@ -474,6 +477,8 @@ public class UIInput extends UIOutput
 
       context.addMessage(getClientId(context), msg);
     }
+
+    System.out.println("UPDATED:");
   }
 
   @Override

@@ -67,15 +67,13 @@ class HtmlBooleanCheckboxRenderer extends Renderer
 
     String value = paramMap.get(clientId);
 
-    if (value != null) {
-      if ("on".equalsIgnoreCase(value)
-	  || "true".equalsIgnoreCase(value)
-	  || "yes".equalsIgnoreCase(value)) {
-	((EditableValueHolder) component).setSubmittedValue("true");
-      }
-      else
-	((EditableValueHolder) component).setSubmittedValue("false");
+    if ("on".equalsIgnoreCase(value)
+	|| "true".equalsIgnoreCase(value)
+	|| "yes".equalsIgnoreCase(value)) {
+      ((EditableValueHolder) component).setSubmittedValue("true");
     }
+    else
+      ((EditableValueHolder) component).setSubmittedValue("false");
   }
   
   /**
@@ -118,7 +116,8 @@ class HtmlBooleanCheckboxRenderer extends Renderer
     String styleClass;
     String tabindex;
     String title;
-    Object value;
+    
+    boolean selected;
     
     if (component instanceof HtmlSelectBooleanCheckbox) {
       HtmlSelectBooleanCheckbox htmlComponent = (HtmlSelectBooleanCheckbox) component;
@@ -152,7 +151,7 @@ class HtmlBooleanCheckboxRenderer extends Renderer
       tabindex = htmlComponent.getTabindex();
       title = htmlComponent.getTitle();
 
-      value = htmlComponent.getValue();
+      selected = htmlComponent.isSelected();
     }
     else {
       Map<String,Object> attrMap = component.getAttributes();
@@ -187,7 +186,7 @@ class HtmlBooleanCheckboxRenderer extends Renderer
       tabindex = (String) attrMap.get("tabindex");
       title = (String) attrMap.get("title");
       
-      value = attrMap.get("value");
+      selected = Boolean.TRUE.equals(attrMap.get("selected"));
     }
 
     out.startElement("input", component);
@@ -268,7 +267,7 @@ class HtmlBooleanCheckboxRenderer extends Renderer
     if (title != null)
       out.writeAttribute("title", title, "title");
 
-    if ("true".equals(String.valueOf(value)))
+    if (selected)
       out.writeAttribute("checked", "checked", "checked");
 
     out.endElement("input");

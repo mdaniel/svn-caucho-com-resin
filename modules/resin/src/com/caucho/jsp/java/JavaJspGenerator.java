@@ -138,8 +138,8 @@ public class JavaJspGenerator extends JspGenerator {
   
   protected IntMap _strings = new IntMap();
   
-  private ArrayList<com.caucho.el.Expr> _exprList
-    = new ArrayList<com.caucho.el.Expr>();
+  private ArrayList<String> _exprList
+    = new ArrayList<String>();
   
   private ArrayList<ValueExpr> _valueExprList
     = new ArrayList<ValueExpr>();
@@ -1171,15 +1171,6 @@ public class JavaJspGenerator extends JspGenerator {
     return _fragmentList.get(index);
   }
   
-  /**
-   * Adds an expression to the expression list.
-   */
-  public int addExpr(String value)
-    throws JspParseException, ELException
-  {
-    return addExpr(genExpr(value));
-  }
-  
   public com.caucho.el.Expr genExpr(String value)
     throws JspParseException, ELException
   {
@@ -1191,9 +1182,11 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Adds an expression to the expression list.
    */
-  public int addExpr(com.caucho.el.Expr expr)
-    throws JspParseException
+  public int addExpr(String expr)
+    throws JspParseException, ELException
   {
+    genExpr(expr);
+    
     int index = _exprList.indexOf(expr);
     if (index >= 0)
       return index;
@@ -1281,12 +1274,14 @@ public class JavaJspGenerator extends JspGenerator {
   private void generateExprs(JspJavaWriter out) throws IOException
   {
     for (int i = 0; i < _exprList.size(); i++) {
-      com.caucho.el.Expr expr = _exprList.get(i);
+      String expr = _exprList.get(i);
       
-      out.println("private final static com.caucho.el.Expr _caucho_expr_" + i + " =");
+      out.println("private static com.caucho.el.Expr _caucho_expr_" + i + ";");
+      /*
       out.print("  ");
       expr.printCreate(out.getWriteStream());
       out.println(";");
+      */
     }
     
     for (int i = 0; i < _valueExprList.size(); i++) {
@@ -1693,6 +1688,14 @@ public class JavaJspGenerator extends JspGenerator {
       }
 
       out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, this);");
+      
+      for (int i = 0; i < _exprList.size(); i++) {
+	String expr = _exprList.get(i);
+      
+	out.print("_caucho_expr_" + i + " = com.caucho.jsp.JspUtil.createExpr(pageContext.getELContext(), \"");
+	out.printJavaString(expr);
+	out.println("\");");
+      }
       
       for (int i = 0; i < _valueExprList.size(); i++) {
 	ValueExpr expr = _valueExprList.get(i);

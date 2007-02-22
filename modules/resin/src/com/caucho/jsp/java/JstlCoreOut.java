@@ -184,7 +184,7 @@ public class JstlCoreOut extends JstlNode {
 	  }
 	}
 	else {
-	  int defaultIndex = _gen.addExpr(defaultExpr);
+	  int defaultIndex = _gen.addExpr(_default);
 	  out.println("_caucho_expr_" + defaultIndex +
 		      ".print(out, _jsp_env, " + escapeXml + ");");
 	}
