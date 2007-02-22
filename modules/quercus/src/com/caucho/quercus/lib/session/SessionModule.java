@@ -321,6 +321,11 @@ public class SessionModule extends AbstractQuercusModule
     if (newValue != null && ! newValue.equals(""))
       env.setIni("session.save_path", newValue);
 
+    if (value.isNull() || value.length() == 0) {
+      // XXX: should we create work directory if does not exist?
+      value = new StringValueImpl(env.getWorkDir().getPath());
+    }
+    
     return value;
   }
 
@@ -394,8 +399,14 @@ public class SessionModule extends AbstractQuercusModule
     boolean generateCookie = true;
     boolean create = false;
 
-    if (callback != null)
-      callback.open(env, env.getWorkDir().getPath(), cookieName);
+    if (callback != null) {
+      String savePath = env.getIni("session.save_path").toString();
+      
+      if (savePath == null || "".equals(savePath))
+        callback.open(env, env.getWorkDir().getPath(), cookieName);
+      else
+        callback.open(env, savePath, cookieName);
+    }
 
     //
     // Use cookies to transmit session id
@@ -488,6 +499,11 @@ public class SessionModule extends AbstractQuercusModule
       }
       else if ("public".equals(cacheLimiter)) {
         response.setHeader("Cache-Control", "max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+      }
+      else if ("none".equals(cacheLimiter)) {
+      }
+      else {
+        response.setHeader("Cache-Control", cacheLimiter + ", max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
       }
     }
 
