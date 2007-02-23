@@ -1064,8 +1064,13 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   {
     if (_contentType == null)
       return null;
-    else
+
+    String charEncoding = getCharacterEncoding();
+
+    if (charEncoding != null)
       return _contentType + "; charset=" + getCharacterEncoding();
+    else
+      return _contentType;
   }
 
   /**

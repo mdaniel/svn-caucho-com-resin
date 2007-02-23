@@ -1068,9 +1068,9 @@ public final class SessionManager implements ObjectManager, AlarmListener
 	_storeManager.setAlwaysLoad(false);
       
       if (_alwaysSaveSession == SET_TRUE)
-	_sessionStore.setAlwaysSave(true);
+	_storeManager.setAlwaysSave(true);
       else if (_alwaysSaveSession == SET_FALSE)
-	_sessionStore.setAlwaysSave(false);
+	_storeManager.setAlwaysSave(false);
 
       _storeManager.init();
 

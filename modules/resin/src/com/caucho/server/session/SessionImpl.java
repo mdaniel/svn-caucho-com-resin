@@ -781,13 +781,14 @@ public class SessionImpl implements HttpSession, CacheListener {
 	names.add(entry.getKey());
 	values.add(entry.getValue());
       }
-
+      
       _values.clear();
 
       if (clusterObject != null)
 	clusterObject.update();
     }
 
+    // server/015a
     for (int i = 0; i < names.size(); i++) {
       String name = names.get(i);
       Object value = values.get(i);

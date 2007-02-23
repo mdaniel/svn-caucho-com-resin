@@ -475,7 +475,7 @@ public class RegexpModule
   /**
    * Quotes regexp values
    */
-  public static String preg_quote(String string,
+  public static String preg_quote(StringValue string,
                                   @Optional String delim)
   {
     StringBuilder sb = new StringBuilder();

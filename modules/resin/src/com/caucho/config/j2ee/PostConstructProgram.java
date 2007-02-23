@@ -30,9 +30,10 @@
 package com.caucho.config.j2ee;
 
 import com.caucho.config.BuilderProgram;
+import com.caucho.config.LineConfigException;
 import com.caucho.config.ConfigException;
 import com.caucho.config.NodeBuilder;
-import com.caucho.util.L10N;
+import com.caucho.util.*;
 
 import java.lang.reflect.*;
 import java.util.logging.Level;
@@ -62,7 +63,12 @@ public class PostConstructProgram extends BuilderProgram
     } catch (RuntimeException e) {
       throw e;
     } catch (InvocationTargetException e) {
-      throw new ConfigException(e.getCause());
+      if (e.getCause() instanceof RuntimeException)
+	throw (RuntimeException) e.getCause();
+      else if (e.getCause() instanceof LineCompileException)
+	throw new LineConfigException(e.getCause().getMessage(), e.getCause());
+      else
+	throw new ConfigException(e.getCause());
     } catch (IllegalAccessException e) {
       throw new ConfigException(e);
     }

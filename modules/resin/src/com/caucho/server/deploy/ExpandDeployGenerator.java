@@ -364,8 +364,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   protected void startImpl()
   {
     super.startImpl();
-
-    handleAlarm(_alarm);
+    
+    _alarm.queue(_cronInterval);
   }
 
   /**

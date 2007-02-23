@@ -1470,7 +1470,10 @@ public class Resin implements EnvironmentBean, SchemaBean
      */
     public Path getConf()
     {
-      return getResinConf();
+      if (Alarm.isTest())
+	return Vfs.lookup("file:/home/resin/conf/resin.conf");
+      else
+	return getResinConf();
     }
 
     /**
@@ -1478,7 +1481,10 @@ public class Resin implements EnvironmentBean, SchemaBean
      */
     public Path getHome()
     {
-      return Resin.this.getResinHome();
+      if (Alarm.isTest())
+	return Vfs.lookup("file:/home/resin");
+      else
+	return Resin.this.getResinHome();
     }
 
     /**
@@ -1488,7 +1494,10 @@ public class Resin implements EnvironmentBean, SchemaBean
      */
     public Path getRoot()
     {
-      return Resin.this.getRootDirectory();
+      if (Alarm.isTest())
+	return Vfs.lookup("file:/var/www");
+      else
+	return Resin.this.getRootDirectory();
     }
 
     /**

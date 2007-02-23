@@ -29,7 +29,7 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.AbstractEmitterObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.ServerMXBean;
@@ -37,11 +37,12 @@ import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.server.port.Port;
 import com.caucho.server.resin.ThreadPoolAdmin;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
 
 import java.util.Collection;
 import java.util.Date;
 
-public class ServerAdmin extends AbstractManagedObject
+public class ServerAdmin extends AbstractEmitterObject
   implements ServerMXBean
 {
   private Server _server;
@@ -308,7 +309,10 @@ public class ServerAdmin extends AbstractManagedObject
   public double getCpuLoadAvg()
   {
     try {
-      return CauchoSystem.getLoadAvg();
+      if (Alarm.isTest())
+	return 0;
+      else
+	return CauchoSystem.getLoadAvg();
     } catch (Exception e) {
       return 0;
     }

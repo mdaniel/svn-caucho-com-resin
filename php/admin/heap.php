@@ -35,10 +35,11 @@ if ($heap) {
 
   if ($_POST['action'] == 'dump heap') {
     $entries = $heap->dump();
+  }
+  else
+    $entries = $heap->lastDump();
 
-    if (sizeof($entries) <= 0)
-      continue;
-
+  if (sizeof($entries) > 0) {
     $topSize = $entries[0]->getTotalSize();
 
     echo "<table class='data'>";
