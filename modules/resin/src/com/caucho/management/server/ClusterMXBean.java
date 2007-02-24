@@ -53,6 +53,11 @@ public interface ClusterMXBean extends ManagedObjectMXBean {
   //
   // Hierarchy attributes
   //
+
+  /**
+   * Returns the owning ResinMXBean
+   */
+  public ResinMXBean getResin();
   
   /**
    * Returns a list of {@link ObjectName}s for the

@@ -98,16 +98,19 @@ public class LifecycleImpl extends Lifecycle
 
     UIViewRoot viewRoot = context.getViewRoot();
 
+    System.out.println("P-DECODES:");
     viewRoot.processDecodes(context);
     
     if (context.getResponseComplete() || context.getRenderResponse())
       return;
     
+    System.out.println("P-VALID:");
     viewRoot.processValidators(context);
     
     if (context.getResponseComplete() || context.getRenderResponse())
       return;
     
+    System.out.println("P-UPDATE:");
     viewRoot.processUpdates(context);
     
     if (context.getResponseComplete() || context.getRenderResponse())

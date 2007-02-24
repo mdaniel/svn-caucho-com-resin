@@ -124,7 +124,7 @@ public class UIViewRoot extends UIComponentBase
   {
     super.processDecodes(context);
 
-    broadcastEvents();
+    broadcastEvents(PhaseId.APPLY_REQUEST_VALUES);
   }
 
   /**
@@ -134,7 +134,7 @@ public class UIViewRoot extends UIComponentBase
   {
     super.processUpdates(context);
 
-    broadcastEvents();
+    broadcastEvents(PhaseId.UPDATE_MODEL_VALUES);
   }
 
   /**
@@ -145,7 +145,7 @@ public class UIViewRoot extends UIComponentBase
   {
     super.processValidators(context);
 
-    broadcastEvents();
+    broadcastEvents(PhaseId.PROCESS_VALIDATIONS);
   }
 
   @Override
@@ -155,19 +155,6 @@ public class UIViewRoot extends UIComponentBase
       _eventList = new ArrayList<FacesEvent>();
 
     _eventList.add(event);
-  }
-
-  private void broadcastEvents()
-  {
-    if (_eventList != null) {
-      for (int i = 0; i < _eventList.size(); i++) {
-	FacesEvent event = _eventList.get(i);
-
-	event.getComponent().broadcast(event);
-      }
-
-      _eventList = null;
-    }
   }
 
   private void broadcastEvents(PhaseId phaseId)

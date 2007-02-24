@@ -43,27 +43,20 @@ public class ThreadPoolAdmin extends AbstractManagedObject
   private static final Logger log
     = Logger.getLogger(ThreadPoolAdmin.class.getName());
 
-  private static ThreadPoolAdmin _admin;
-
   private final ThreadPool _threadPool;
 
   private ThreadPoolAdmin(ThreadPool threadPool)
   {
     _threadPool = threadPool;
-    
-    registerSelf();
   }
 
   /**
    * The registration needs to be controlled externally to make
    * the timing work correctly.
    */
-  public static ThreadPoolMXBean create()
+  public static ThreadPoolAdmin create()
   {
-    if (_admin == null)
-      _admin = new ThreadPoolAdmin(ThreadPool.getThreadPool());
-
-    return _admin;
+    return new ThreadPoolAdmin(ThreadPool.getThreadPool());
   }
 
   /**
@@ -120,5 +113,15 @@ public class ThreadPoolAdmin extends AbstractManagedObject
   public int getThreadIdleCount()
   {
     return _threadPool.getThreadIdleCount();
+  }
+
+  public void register()
+  {
+    registerSelf();
+  }
+
+  public void unregister()
+  {
+    unregisterSelf();
   }
 }

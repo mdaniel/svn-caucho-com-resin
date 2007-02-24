@@ -615,6 +615,7 @@ public class LruCache<K,V> {
    */
   static class ValueIterator<K,V> implements Iterator<V> {
     private LruCache<K,V> _cache;
+    private CacheItem<K,V> _nextEntry;
     private int _i = -1;
 
     ValueIterator(LruCache<K,V> cache)
@@ -633,6 +634,9 @@ public class LruCache<K,V> {
      */
     public boolean hasNext()
     {
+      if (_nextEntry != null)
+	return true;
+      
       CacheItem<K,V> []entries = _cache._entries;
       int length = entries.length;
 
@@ -654,6 +658,13 @@ public class LruCache<K,V> {
      */
     public V next()
     {
+      if (_nextEntry != null) {
+	CacheItem<K,V> entry = _nextEntry;
+	_nextEntry = entry._nextHash;
+
+	return entry._value;
+      }
+      
       CacheItem<K,V> []entries = _cache._entries;
       int length = entries.length;
 
@@ -663,6 +674,8 @@ public class LruCache<K,V> {
 	
 	if (entry != null) {
 	  _i = i;
+	  _nextEntry = entry._nextHash;
+	  
 	  return entry._value;
 	}
       }

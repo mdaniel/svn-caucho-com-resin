@@ -313,6 +313,8 @@ public class UIInput extends UIOutput
   
   public void setValid(boolean valid)
   {
+    System.out.println("SET_VALID: " + this);
+    Thread.dumpStack();
     _isValid = valid;
   }
 
@@ -446,6 +448,7 @@ public class UIInput extends UIOutput
 
   public void updateModel(FacesContext context)
   {
+    System.out.println("UPDATE-MODEL: " + isValid() + " " + isLocalValueSet() + " " + this);
     if (! isValid())
       return;
 
@@ -490,8 +493,10 @@ public class UIInput extends UIOutput
       if (! isImmediate())
 	validate(context);
 
-      if (! isValid())
+      if (! isValid()) {
+	System.out.println("INVALID: " + this);
 	context.renderResponse();
+      }
     } catch (RuntimeException e) {
       context.renderResponse();
       
@@ -619,7 +624,7 @@ public class UIInput extends UIOutput
 	
       context.addMessage(getClientId(context), msg);
 
-      _isValid = false;
+      setValid(false);
       return;
     }
 
@@ -632,7 +637,7 @@ public class UIInput extends UIOutput
 	  
 	  context.addMessage(getClientId(context), e.getFacesMessage());
 	  
-	  _isValid = false;
+	  setValid(false);
 	}
       }
     }

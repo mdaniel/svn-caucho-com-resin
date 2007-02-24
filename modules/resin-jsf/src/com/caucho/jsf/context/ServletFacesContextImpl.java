@@ -215,7 +215,8 @@ public class ServletFacesContextImpl extends FacesContext
   {
     if (_isClosed)
       throw new IllegalStateException(getClass().getName() + " is closed");
-    
+
+    Thread.dumpStack();
     _isRenderResponse = true;
   }
 
@@ -240,6 +241,7 @@ public class ServletFacesContextImpl extends FacesContext
     if (_isClosed)
       throw new IllegalStateException(getClass().getName() + " is closed");
     
+    Thread.dumpStack();
     _isResponseComplete = true;
   }
 

@@ -820,11 +820,13 @@ public class NodeBuilder {
       filename = qnode.getFilename();
       line = qnode.getLine();
     }
-    
+
     for (; e.getCause() != null; e = e.getCause()) {
       if (e instanceof LineCompileException)
         break;
       else if (e instanceof LineConfigRuntimeException)
+        break;
+      else if (e instanceof LineRuntimeException)
         break;
       else if (e instanceof CompileException)
         break;
@@ -854,7 +856,9 @@ public class NodeBuilder {
     else {
       log.log(Level.CONFIG, e.toString(), e);
       
-      String msg = filename + ":" + line + ": " + e;
+      String sourceLines = getSourceLines(systemId, line);
+      
+      String msg = filename + ":" + line + ": " + e + sourceLines;
 
       if (e instanceof RuntimeException) {
 	throw new LineRuntimeException(msg, e);

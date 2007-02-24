@@ -89,7 +89,6 @@ class HtmlCommandButtonRenderer extends Renderer
 
       ActionEvent event = new ActionEvent(component);
 
-      System.out.println("QUEUE: " + event);
       component.queueEvent(event);
     }
     else {

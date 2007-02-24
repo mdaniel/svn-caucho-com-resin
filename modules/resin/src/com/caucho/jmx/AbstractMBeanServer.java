@@ -391,7 +391,14 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     if (object == null)
       throw new NullPointerException();
 
-    MBeanContext context = getContext();
+    MBeanContext context;
+
+    try {
+      context = getContext();
+    } catch (RuntimeException e) {
+      e.printStackTrace();
+      throw e;
+    }
 
     if (context.getMBean(name) != null) {
       throw new InstanceAlreadyExistsException(String.valueOf(name));
@@ -406,7 +413,6 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     }
 
     MBeanWrapper mbean = new MBeanWrapper(context, name, object, dynMBean);
-
     return context.registerMBean(mbean, name);
   }
 

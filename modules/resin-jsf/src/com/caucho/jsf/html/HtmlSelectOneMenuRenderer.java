@@ -70,8 +70,6 @@ class HtmlSelectOneMenuRenderer extends SelectRenderer
 
     String value = paramMap.get(clientId);
 
-    System.out.println("V: " + value + " " + clientId);
-
     if (value != null)
       ((EditableValueHolder) component).setSubmittedValue(value);
   }

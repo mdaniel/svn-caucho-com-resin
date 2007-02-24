@@ -103,7 +103,7 @@ public class ServerAdmin extends AbstractEmitterObject
    */
   public ThreadPoolMXBean getThreadPool()
   {
-    return ThreadPoolAdmin.create();
+    return _server.getCluster().getResin().getThreadPoolAdmin();
   }
 
   /**

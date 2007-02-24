@@ -53,7 +53,7 @@ import com.caucho.log.RotateStream;
 import com.caucho.management.j2ee.J2EEDomain;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.JVM;
-import com.caucho.management.server.ClusterMXBean;
+import com.caucho.management.server.*;
 import com.caucho.naming.Jndi;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
@@ -152,6 +152,9 @@ public class Resin implements EnvironmentBean, SchemaBean
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
 
+  private ThreadPoolAdmin _threadPoolAdmin;
+  private ResinAdmin _resinAdmin;
+
   private InputStream _waitIn;
 
   private Socket _pingSocket;
@@ -181,52 +184,62 @@ public class Resin implements EnvironmentBean, SchemaBean
     else
       _classLoader = new EnvironmentClassLoader();
 
-    _resinLocal.set(this, _classLoader);
-
-    _lifecycle = new Lifecycle(log(), "Resin[]");
-
-    _startTime = Alarm.getCurrentTime();
-
-    String resinHome = System.getProperty("resin.home");
-
-    if (resinHome != null)
-      setResinHome(Vfs.lookup(resinHome));
-    else
-      setResinHome(Vfs.getPwd());
-
-    // server.root backwards compat
-    String serverRoot = System.getProperty("server.root");
-
-    if (serverRoot != null)
-      setRootDirectory(Vfs.lookup(serverRoot));
-
-    // watchdog/0212
-    // else
-    //  setRootDirectory(Vfs.getPwd());
-
-    _variableMap.put("resin", new Var());
-    _variableMap.put("server", new Var());
-    _variableMap.put("java", new JavaVar());
-
-    ELResolver varResolver = new SystemPropertiesResolver();
-    ConfigELContext elContext = new ConfigELContext(varResolver);
-    elContext.push(new MapVariableResolver(_variableMap));
-
-    EL.setEnvironment(elContext);
-    EL.setVariableMap(_variableMap, _classLoader);
-
-    _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
-
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
     try {
-      _variableMap.put("jndi", Jndi.class.getMethod("lookup", new Class[] { String.class }));
-      _variableMap.put("jndi:lookup", Jndi.class.getMethod("lookup", new Class[] { String.class }));
-    } catch (Exception e) {
-      throw new ConfigException(e);
+      thread.setContextClassLoader(_classLoader);
+
+      _resinLocal.set(this, _classLoader);
+
+      _lifecycle = new Lifecycle(log(), "Resin[]");
+
+      _startTime = Alarm.getCurrentTime();
+
+      String resinHome = System.getProperty("resin.home");
+
+      if (resinHome != null)
+	setResinHome(Vfs.lookup(resinHome));
+      else
+	setResinHome(Vfs.getPwd());
+
+      // server.root backwards compat
+      String serverRoot = System.getProperty("server.root");
+
+      if (serverRoot != null)
+	setRootDirectory(Vfs.lookup(serverRoot));
+
+      // watchdog/0212
+      // else
+      //  setRootDirectory(Vfs.getPwd());
+
+      _variableMap.put("resin", new Var());
+      _variableMap.put("server", new Var());
+      _variableMap.put("java", new JavaVar());
+
+      ELResolver varResolver = new SystemPropertiesResolver();
+      ConfigELContext elContext = new ConfigELContext(varResolver);
+      elContext.push(new MapVariableResolver(_variableMap));
+
+      EL.setEnvironment(elContext);
+      EL.setVariableMap(_variableMap, _classLoader);
+
+      _variableMap.put("fmt", new com.caucho.config.functions.FmtFunctions());
+
+      try {
+	_variableMap.put("jndi", Jndi.class.getMethod("lookup", new Class[] { String.class }));
+	_variableMap.put("jndi:lookup", Jndi.class.getMethod("lookup", new Class[] { String.class }));
+      } catch (Exception e) {
+	throw new ConfigException(e);
+      }
+
+      _threadPoolAdmin = ThreadPoolAdmin.create();
+      _resinAdmin = new ResinAdmin(this);
+
+      _threadPoolAdmin.register();
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
-
-    ThreadPoolAdmin.create();
-
-    new ResinAdmin(this);
   }
 
   /**
@@ -248,6 +261,16 @@ public class Resin implements EnvironmentBean, SchemaBean
   public ObjectName getObjectName()
   {
     return _objectName;
+  }
+
+  public ResinMXBean getAdmin()
+  {
+    return _resinAdmin;
+  }
+
+  public ThreadPoolMXBean getThreadPoolAdmin()
+  {
+    return _threadPoolAdmin;
   }
 
   /**
@@ -724,6 +747,8 @@ public class Resin implements EnvironmentBean, SchemaBean
     } catch (Throwable e) {
       log().log(Level.WARNING, e.toString(), e);
     }
+
+    _threadPoolAdmin.unregister();
 
     try {
       if (_isGlobal)

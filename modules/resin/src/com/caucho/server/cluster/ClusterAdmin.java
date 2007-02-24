@@ -35,6 +35,7 @@ import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.PersistentStoreMXBean;
 import com.caucho.management.server.PortMXBean;
+import com.caucho.management.server.ResinMXBean;
 import com.caucho.management.server.ServerConnectorMXBean;
 
 public class ClusterAdmin extends AbstractManagedObject
@@ -60,6 +61,11 @@ public class ClusterAdmin extends AbstractManagedObject
       return null;
 
      return clusterServer.getClusterPort().getAdmin();
+  }
+
+  public ResinMXBean getResin()
+  {
+    return _cluster.getResin().getAdmin();
   }
 
   public PersistentStoreMXBean getPersistentStore()

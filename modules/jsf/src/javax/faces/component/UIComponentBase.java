@@ -680,11 +680,13 @@ public abstract class UIComponentBase extends UIComponent
     if (context == null)
       throw new NullPointerException();
 
+    System.out.println("PROCESS-UPDATES: " + this);
     try {
       if (! isRendered())
 	return;
 
       for (UIComponent child : getFacetsAndChildrenArray()) {
+	System.out.println("PU-CHILD: " + child);
 	child.processUpdates(context);
       }
     } catch (RuntimeException e) {

@@ -321,7 +321,18 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 	return;
     }
 
-    super.log(record);
+    for (Logger ptr = this; ptr != null; ptr = ptr.getParent()) {
+      Handler handlers[] = ptr.getHandlers();
+
+      if (handlers != null) {
+	for (int i = 0; i < handlers.length; i++) {
+	  handlers[i].publish(record);
+	}
+      }
+
+      if (! ptr.getUseParentHandlers())
+	break;
+    }
   }
 
   /**

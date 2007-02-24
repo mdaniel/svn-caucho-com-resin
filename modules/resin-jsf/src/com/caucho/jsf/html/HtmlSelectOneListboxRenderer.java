@@ -69,7 +69,6 @@ class HtmlSelectOneListboxRenderer extends Renderer
 
     String value = paramMap.get(clientId);
 
-    System.out.println("CODE:" + clientId + " " +value + " " + component);
     if (value != null)
       ((EditableValueHolder) component).setSubmittedValue(value);
   }
