@@ -1152,28 +1152,12 @@ public class AmberConnection
    */
   public int getEntity(String className, Object key)
   {
-    for (int i = _entities.size() - 1; i >= 0; i--) {
-      Entity entity = _entities.get(i);
-
-      if (entity.__caucho_match(className, key)) {
-        return i;
-      }
-    }
-
-    return -1;
+    return getEntityMatch(_entities, className, key);
   }
 
   public int getTransactionEntity(String className, Object key)
   {
-    for (int i = _txEntities.size() - 1; i >= 0; i--) {
-      Entity entity = _txEntities.get(i);
-
-      if (entity.__caucho_match(className, key)) {
-        return i;
-      }
-    }
-
-    return -1;
+    return getEntityMatch(_txEntities, className, key);
   }
 
   /**
@@ -2463,7 +2447,7 @@ public class AmberConnection
 
       Entity managedEntity = null;
 
-      if (_mergingEntities.contains(entity))
+      if (containsMergingEntity(entity))
         managedEntity = entity;
       else
         managedEntity = mergeDetachedEntity(entity, true);
@@ -2483,12 +2467,13 @@ public class AmberConnection
       if (entity == null)
         return entity;
 
+      String className = entity.getClass().getName();
       EntityState state = entity.__caucho_getEntityState();
 
       Object pk = entity.__caucho_getPrimaryKey();
 
       log.finest(L.l("merge(class: '{0}' PK: '{1}' state: '{2}')",
-                     entity.getClass().getName(), pk, state));
+                     className, pk, state));
 
       if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
         // removed entity instance
@@ -2518,7 +2503,13 @@ public class AmberConnection
         else // jpa/0h08
           managedEntity = existingEntity;
 
-        if (! _mergingEntities.contains(managedEntity)) {
+        int index = getEntityMatch(_mergingEntities, className, pk);
+
+        if (index >= 0) {
+          // jpa/0o42
+          managedEntity = _mergingEntities.get(index);
+        }
+        else {
           _mergingEntities.add(managedEntity);
 
           // jpa/0ga3, jpa/0h08
@@ -2527,23 +2518,27 @@ public class AmberConnection
           // jpa/0h08
           entity.__caucho_copyDirtyMaskFrom(managedEntity);
           entity.__caucho_copyLoadMaskFrom(managedEntity);
-        }
 
-        if (existingEntity == null) {
-          // cascade children
-          entity.__caucho_cascadePrePersist(this);
+          if (existingEntity == null) {
+            // jpa/0o42
 
-          persist(managedEntity);
+            // cascade children
+            // XXX: called from persist()
+            // entity.__caucho_cascadePrePersist(this);
 
-          // jpa/0i5g
-          entity.__caucho_cascadePostPersist(this);
+            persist(managedEntity);
 
-          log.finest(L.l("merged to a new entity (persisted)"));
-        }
-        else {
-          setTransactionalState(managedEntity);
+            // jpa/0i5g
+            // XXX: called from persist()
+            // entity.__caucho_cascadePostPersist(this);
 
-          log.finest(L.l("merged to an existing entity"));
+            log.finest(L.l("merged to a new entity (persisted)"));
+          }
+          else {
+            setTransactionalState(managedEntity);
+
+            log.finest(L.l("merged to an existing entity"));
+          }
         }
 
       } catch (Exception e) {
@@ -2578,6 +2573,37 @@ public class AmberConnection
     queryImpl.setSqlResultSetMapping(map);
 
     return query;
+  }
+
+  private boolean containsMergingEntity(Entity entity)
+  {
+    if (_mergingEntities.contains(entity))
+      return true;
+
+    // jpa/0o42
+    int index = getEntityMatch(_mergingEntities,
+                               entity.getClass().getName(),
+                               entity.__caucho_getPrimaryKey());
+
+    return (index >= 0);
+  }
+
+  private static int getEntityMatch(ArrayList<Entity> list,
+                                    String className,
+                                    Object key)
+  {
+    // See also: getEntity() and getTransactionEntity().
+
+    // jpa/0o42
+    for (int i = list.size() - 1; i >= 0; i--) {
+      Entity entity = list.get(i);
+
+      if (entity.__caucho_match(className, key)) {
+        return i;
+      }
+    }
+
+    return -1;
   }
 
   private class EntityTransactionImpl implements EntityTransaction {
