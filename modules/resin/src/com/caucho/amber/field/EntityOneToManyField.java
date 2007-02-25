@@ -390,6 +390,9 @@ public class EntityOneToManyField extends CollectionField {
     out.println("com.caucho.amber.AmberQuery query = null;");
 
     out.println();
+    out.println("try {");
+    out.pushDepth();
+
     out.println("if (__caucho_session == null) {");
     out.pushDepth();
 
@@ -406,12 +409,13 @@ public class EntityOneToManyField extends CollectionField {
 
     newEmptyCollection += "(query";
     if (isMap) {
+      // jpa/0v00
       newEmptyCollection += "," + getEntityTargetType().getBeanClass().getName();
       newEmptyCollection += ".class.getDeclaredMethod(\"get";
       String getterMapKey = getMapKey();
       getterMapKey = Character.toUpperCase(getterMapKey.charAt(0)) + getterMapKey.substring(1);
       newEmptyCollection += getterMapKey; // "getId");
-      newEmptyCollection += "\", null";
+      newEmptyCollection += "\", (Class []) null)";
     }
     newEmptyCollection += ")";
 
@@ -424,9 +428,7 @@ public class EntityOneToManyField extends CollectionField {
     out.popDepth();
     out.println("}");
 
-    out.println("try {");
-    out.pushDepth();
-
+    out.println();
     out.print("String sql=\"");
 
     out.print("SELECT c");

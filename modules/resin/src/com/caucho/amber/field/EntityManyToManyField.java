@@ -372,6 +372,9 @@ public class EntityManyToManyField extends AssociationField {
     out.println("com.caucho.amber.AmberQuery query = null;");
 
     out.println();
+    out.println("try {");
+    out.pushDepth();
+
     out.println("if (__caucho_session == null) {");
     out.pushDepth();
 
@@ -393,7 +396,7 @@ public class EntityManyToManyField extends AssociationField {
       String getterMapKey = getMapKey();
       getterMapKey = Character.toUpperCase(getterMapKey.charAt(0)) + getterMapKey.substring(1);
       newEmptyCollection += getterMapKey; // "getId");
-      newEmptyCollection += "\", null";
+      newEmptyCollection += "\", (Class []) null)";
     }
     newEmptyCollection += ")";
 
@@ -407,9 +410,7 @@ public class EntityManyToManyField extends AssociationField {
     out.popDepth();
     out.println("}");
 
-    out.println("try {");
-    out.pushDepth();
-
+    out.println();
     out.print("String sql=\"");
 
     out.print("SELECT c");
