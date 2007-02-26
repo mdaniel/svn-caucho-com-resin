@@ -154,7 +154,6 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
    * Sets the servlet class.
    */
   public void setServletClass(String servletClassName)
-    throws ServletException
   {
     _servletClassName = servletClassName;
 

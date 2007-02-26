@@ -16,8 +16,7 @@ r_cache = element cache {
 
   & (attribute disk-size { r_int } | element disk-size { r_int })?
 
-  & (attribute enable { r_boolean-Type }
-     | element enable { r_boolean-Type })?
+  & r_enable?
 
   & (attribute enable-range { r_boolean-Type }
      | element enable-range { r_boolean-Type })?
@@ -74,6 +73,8 @@ r_cluster-Basis =
   & r_persistent-store?
 
   & r_ping*
+
+  & r_remote-administration?
 
   & r_rewrite-dispatch?
 
@@ -435,6 +436,10 @@ r_protocol =
 
     & r_init?
   }
+
+r_remote-administration = element remote-administration {
+  r_enable?
+}
 
 r_resin = element resin {
   r_root-directory?,

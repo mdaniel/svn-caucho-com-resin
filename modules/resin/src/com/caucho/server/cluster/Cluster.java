@@ -62,7 +62,7 @@ import java.util.logging.Logger;
 public class Cluster
   implements EnvironmentListener, EnvironmentBean, SchemaBean
 {
-  private static final L10N L = new L10N(ClusterGroup.class);
+  private static final L10N L = new L10N(Cluster.class);
   private static final Logger log = Logger.getLogger(Cluster.class.getName());
 
   static protected final EnvironmentLocal<String> _serverIdLocal
@@ -92,8 +92,6 @@ public class Cluster
 
   private ClusterServer[] _serverArray = new ClusterServer[0];
 
-  private ClusterGroup _group;
-
   private StoreManager _clusterStore;
 
   // compatibility with 3.0
@@ -108,6 +106,8 @@ public class Cluster
 
   private BuilderProgramContainer _serverProgram
     = new BuilderProgramContainer();
+
+  private RemoteAdministration _remoteAdmin;
 
   private Server _server;
 
@@ -223,6 +223,27 @@ public class Cluster
   public ClusterMXBean getAdmin()
   {
     return _admin;
+  }
+
+  /**
+   * Sets the remote administration.
+   */
+  public RemoteAdministration createRemoteAdministration()
+  {
+    try {
+      Class proAdmin = Class.forName("com.caucho.server.cluster.ProRemoteAdministration");
+
+      _remoteAdmin = (RemoteAdministration) proAdmin.newInstance();
+    } catch (Exception e) {
+      log.fine("remote-administration requires Resin Professional.");
+    }
+
+    if (_remoteAdmin == null)
+      _remoteAdmin = new RemoteAdministration();
+
+    _remoteAdmin.setCluster(this);
+
+    return _remoteAdmin;
   }
 
   /**
@@ -546,6 +567,9 @@ public class Cluster
       // if it's the empty cluster, add it
       _clusterLocal.set(this);
     }
+
+    if (_remoteAdmin != null)
+      _remoteAdmin.init();
 
     try {
       String name = _id;

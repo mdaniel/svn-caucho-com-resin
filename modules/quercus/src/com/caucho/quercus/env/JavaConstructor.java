@@ -33,7 +33,7 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.util.L10N;
 
-import java.lang.reflect.Constructor;
+import java.lang.reflect.*;
 
 /**
  * Represents the introspected static function information.
@@ -67,6 +67,13 @@ public class JavaConstructor extends JavaInvoker {
       obj = _constructor.newInstance(args);
       
       return obj;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof RuntimeException)
+	throw (RuntimeException) e.getCause();
+      else
+	throw new QuercusException(e.getCause());
     } catch (Exception e) {
       throw new QuercusException(e);
     }
