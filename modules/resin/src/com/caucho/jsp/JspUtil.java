@@ -27,37 +27,47 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.admin;
+package com.caucho.jsp;
 
-import java.lang.reflect.*;
-import javax.management.MBeanServerConnection;
+import com.caucho.el.*;
+import com.caucho.jsp.el.*;
 
-import com.caucho.config.*;
-import com.caucho.util.*;
+import javax.el.*;
+import java.io.IOException;
+import java.util.ArrayList;
 
-/**
- * Proxy implementation for Hessian clients.  Applications will generally
- * use HessianProxyFactory to create proxy clients.
- */
-public class RemoteMBeanConnectionFactory {
-  private static final L10N L = new L10N(RemoteMBeanConnectionFactory.class);
-  
-  private static Constructor _constructor;
-  
-  public static MBeanServerConnection create(String serverId)
+public class JspUtil
+{
+  public static ValueExpression createValueExpression(ELContext elContext,
+						      Class type,
+						      String exprString)
   {
-    try {
-      if (_constructor == null) {
-	Class cl = Class.forName("com.caucho.server.admin.RemoteMBeanServerConnection");
+    JspELParser parser = new JspELParser(elContext, exprString);
 
-	_constructor = cl.getConstructor(new Class[] { String.class });
-      }
+    Expr expr = parser.parse();
 
-      return (MBeanServerConnection)  _constructor.newInstance(serverId);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new ConfigException(L.l("remote mbeans require Resin Professional"));
-    }
+    return JspExpressionFactoryImpl.createValueExpression(expr,
+							  exprString,
+							  type);
+  }
+
+  public static Expr createExpr(ELContext elContext,
+				      String exprString)
+  {
+    JspELParser parser = new JspELParser(elContext, exprString);
+
+    return parser.parse();
+  }
+
+  public static MethodExpression createMethodExpression(ELContext elContext,
+							String exprString,
+							Class type,
+							Class []args)
+  {
+    JspELParser parser = new JspELParser(elContext, exprString);
+
+    Expr expr = parser.parse();
+
+    return new MethodExpressionImpl(expr, exprString, type, args);
   }
 }
