@@ -188,15 +188,15 @@ public class DeploymentService
       try {
         mxbean = getMXBean(targetModuleID.getTarget());
 
-	if ("ear".equals(plan.getArchiveType())
-	    && ! "EarDeploy".equals(mxbean.getType()))
-	  continue;
-	else if ("war".equals(plan.getArchiveType())
-		 && ! "WebAppDeploy".equals(mxbean.getType()))
-	  continue;
-	else if ("rar".equals(plan.getArchiveType())
-		 && ! "RarDeploy".equals(mxbean.getType()))
-	  continue;
+        if ("ear".equals(plan.getArchiveType())
+            && ! "EarDeploy".equals(mxbean.getType()))
+          continue;
+        else if ("war".equals(plan.getArchiveType())
+                 && ! "WebAppDeploy".equals(mxbean.getType()))
+          continue;
+        else if ("rar".equals(plan.getArchiveType())
+                 && ! "RarDeploy".equals(mxbean.getType()))
+          continue;
 
         Path deployPath = Vfs.lookup(mxbean.getArchivePath(moduleID));
 
@@ -232,16 +232,16 @@ public class DeploymentService
         failed = true;
         describe(message, targetModuleID, false, getExceptionMessage(exception));
 
-	/*
-        if (mxbean != null) {
+        /*
+          if (mxbean != null) {
           try {
-            mxbean.undeploy(moduleID);
+          mxbean.undeploy(moduleID);
           }
           catch (Throwable t) {
-            log.log(Level.FINE, t.toString(), t);
+          log.log(Level.FINE, t.toString(), t);
           }
-        }
-	*/
+          }
+        */
       }
       else
         describe(message, targetModuleID, true);
@@ -285,8 +285,13 @@ public class DeploymentService
 
         zipOutputStream.putNextEntry(zipEntry);
 
-        for (int ch = zipInputStream.read(); ch != -1; ch = zipInputStream.read())
-          zipOutputStream.write(ch);
+        try {
+          for (int ch = zipInputStream.read(); ch != -1; ch = zipInputStream.read())
+            zipOutputStream.write(ch);
+        } catch (IOException e) {
+          // XXX: unexpected end of ZLIB input stream.
+          log.log(Level.WARNING, L.l("exception copying entry {0}", zipEntry), e);
+        }
 
         zipEntry = zipInputStream.getNextEntry();
 
@@ -387,14 +392,14 @@ public class DeploymentService
       }
       catch (Exception t) {
         log.log(Level.INFO, t.toString(), t);
-	// XXX: need to handle depending on type
+        // XXX: need to handle depending on type
         //exception = t;
       }
 
       if (exception == null && mxbean != null) {
         exception = mxbean.getConfigException(targetModuleID.getModuleID());
-	// XXX: temp for types
-	exception = null;
+        // XXX: temp for types
+        exception = null;
       }
 
       if (exception != null) {

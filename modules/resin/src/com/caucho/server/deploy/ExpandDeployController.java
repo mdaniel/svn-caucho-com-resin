@@ -73,8 +73,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   }
 
   protected ExpandDeployController(String id,
-				   ClassLoader loader,
-				   Path rootDirectory)
+                                   ClassLoader loader,
+                                   Path rootDirectory)
   {
     super(id, loader);
 
@@ -83,7 +83,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     _rootDirectory = rootDirectory;
   }
-  
+
   /**
    * Gets the root directory
    */
@@ -91,7 +91,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   {
     return _rootDirectory;
   }
-  
+
   /**
    * Sets the root directory
    */
@@ -144,13 +144,13 @@ abstract public class ExpandDeployController<I extends DeployInstance>
    * Merges with the old controller.
    */
   @Override
-  protected void mergeController(DeployController oldControllerV)
+    protected void mergeController(DeployController oldControllerV)
   {
     super.mergeController(oldControllerV);
 
     ExpandDeployController<I> oldController;
     oldController = (ExpandDeployController<I>) oldControllerV;
-    
+
     if (oldController._expandCleanupFileSet != null)
       _expandCleanupFileSet = oldController._expandCleanupFileSet;
   }
@@ -164,27 +164,27 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   {
     synchronized (_archiveExpandLock) {
       if (! expandArchiveImpl()) {
-	try {
-	  Thread.sleep(2000);
-	} catch (InterruptedException e) {
-	}
-	
-	expandArchiveImpl();
+        try {
+          Thread.sleep(2000);
+        } catch (InterruptedException e) {
+        }
+
+        expandArchiveImpl();
       }
 
       Path path = getRootDirectory().lookup("META-INF/MANIFEST.MF");
       if (path.canRead()) {
-	ReadStream is = path.openRead();
-	try {
-	  _manifest = new Manifest(is);
-	} catch (IOException e) {
-	  log.warning(L.l("Manifest file cannot be read for '{0}'.\n{1}",
-			  getRootDirectory(), e));
+        ReadStream is = path.openRead();
+        try {
+          _manifest = new Manifest(is);
+        } catch (IOException e) {
+          log.warning(L.l("Manifest file cannot be read for '{0}'.\n{1}",
+                          getRootDirectory(), e));
 
-	  log.log(Level.FINE, e.toString(), e);
-	} finally {
-	  is.close();
-	}
+          log.log(Level.FINE, e.toString(), e);
+        } finally {
+          is.close();
+        }
       }
     }
   }
@@ -198,7 +198,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     DynamicClassLoader loader = Environment.getDynamicClassLoader();
     if (loader == null)
       return;
-    
+
     Manifest manifest = getManifest();
 
     if (manifest == null)
@@ -208,7 +208,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     if (main == null)
       return;
-    
+
     String classPath = main.getValue("Class-Path");
 
     Path pwd = null;
@@ -225,7 +225,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     else
       loader.addManifestClassPath(classPath, pwd);
   }
-  
+
   /**
    * Expand an archive.  The _archiveExpandLock must be obtained before the
    * expansion.
@@ -237,44 +237,44 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
     if (archivePath == null)
       return true;
-    
+
     if (! archivePath.canRead())
       return true;
 
     Path expandDir = getRootDirectory();
     Path parent = expandDir.getParent();
-    
+
     try {
       parent.mkdirs();
     } catch (Throwable e) {
     }
-    
+
     Path dependPath = expandDir.lookup("META-INF/resin-war.digest");
     Depend depend = null;
 
-      // XXX: change to a hash
+    // XXX: change to a hash
     if (dependPath.canRead()) {
       ReadStream is = null;
       try {
         is = dependPath.openRead();
 
-	String line = is.readLine();
+        String line = is.readLine();
 
         long digest;
 
-	if (line != null) {
-	  digest = Long.parseLong(line.trim());
+        if (line != null) {
+          digest = Long.parseLong(line.trim());
 
-	  depend = new Depend(archivePath, digest);
+          depend = new Depend(archivePath, digest);
 
-	  if (! depend.isModified())
-	    return true;
-	}
+          if (! depend.isModified())
+            return true;
+        }
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       } finally {
-	if (is != null)
-	  is.close();
+        if (is != null)
+          is.close();
       }
     }
 
@@ -289,15 +289,15 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
       expandDir.mkdirs();
 
-      ReadStream rs = archivePath.openRead(); 
+      ReadStream rs = archivePath.openRead();
       ZipInputStream zis = new ZipInputStream(rs);
 
       try {
-        ZipEntry entry;
+        ZipEntry entry = zis.getNextEntry();
 
         byte []buffer = new byte[1024];
-      
-        while ((entry = zis.getNextEntry()) != null) {
+
+        while (entry != null) {
           String name = entry.getName();
           Path path = expandDir.lookup(name);
 
@@ -305,14 +305,34 @@ abstract public class ExpandDeployController<I extends DeployInstance>
             path.mkdirs();
           else {
             long length = entry.getSize();
+            int bufferLen = buffer.length;
+
+            // XXX: avoids unexpected end of ZLIB input stream.
+            if (length < 0) {
+              log.log(Level.FINE, L.l("Negative size for entry {0} in {1}", entry, archivePath));
+              bufferLen = 1;
+              length = Long.MAX_VALUE;
+            }
+            else if (length < bufferLen) {
+              bufferLen = (int) length;
+            }
+
             long lastModified = entry.getTime();
             path.getParent().mkdirs();
 
             WriteStream os = path.openWrite();
             try {
               int len;
-              while ((len = zis.read(buffer, 0, buffer.length)) > 0)
+              while ((len = zis.read(buffer, 0, bufferLen)) > 0) {
                 os.write(buffer, 0, len);
+
+                // XXX: avoids unexpected end of ZLIB input stream.
+                length -= len;
+
+                if (length < bufferLen) {
+                  bufferLen = (int) length;
+                }
+              }
             } catch (IOException e) {
               log.log(Level.FINE, e.toString(), e);
             } finally {
@@ -322,6 +342,15 @@ abstract public class ExpandDeployController<I extends DeployInstance>
             if (lastModified > 0)
               path.setLastModified(lastModified);
           }
+
+          try {
+            entry = zis.getNextEntry();
+          } catch (IOException e) {
+            log.log(Level.FINE, e.toString(), e);
+
+            // XXX: avoids unexpected end of ZLIB input stream.
+            break;
+          }
         }
       } finally {
         try {
@@ -329,20 +358,20 @@ abstract public class ExpandDeployController<I extends DeployInstance>
         } catch (IOException e) {
         }
 
-	rs.close();
+        rs.close();
       }
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
       // If the jar is incomplete, it should throw an exception here.
       return false;
     }
-    
+
     try {
       dependPath.getParent().mkdirs();
       WriteStream os = dependPath.openWrite();
 
       os.println(depend.getDigest());
-      
+
       os.close();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -396,7 +425,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     throws IOException
   {
     if (_expandCleanupFileSet == null ||
-	_expandCleanupFileSet.isMatch(path, prefix))
+        _expandCleanupFileSet.isMatch(path, prefix))
       path.remove();
   }
 
