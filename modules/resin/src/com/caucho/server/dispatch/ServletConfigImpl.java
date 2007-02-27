@@ -449,10 +449,10 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       int p = protocol.lastIndexOf('.');
       protocol = protocol.substring(p + 1);
       
-      _servletName = _servletClassName + "-" + protocol;
+      setServletName(_servletClassName + "-" + protocol);
     }
     else
-      _servletName = _servletClassName;
+      setServletName(_servletClassName);
 
     // XXX: should only be for web services
     if (_jndiName != null) {

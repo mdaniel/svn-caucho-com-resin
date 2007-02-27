@@ -71,6 +71,10 @@ public class ServletMapping extends ServletConfigImpl {
       throw new ConfigException(L.l("`{0}' cannot contain newline", "url-pattern"));
 
     _mappingList.add(new Mapping(pattern, null));
+
+    // server/13f4
+    if (getServletName() == null)
+      setServletName(pattern);
   }
 
   /**

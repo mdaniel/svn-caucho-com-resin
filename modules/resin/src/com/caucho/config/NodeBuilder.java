@@ -854,8 +854,6 @@ public class NodeBuilder {
       return new LineConfigException(filename, line, e);
     }
     else {
-      log.log(Level.CONFIG, e.toString(), e);
-      
       String sourceLines = getSourceLines(systemId, line);
       
       String msg = filename + ":" + line + ": " + e + sourceLines;

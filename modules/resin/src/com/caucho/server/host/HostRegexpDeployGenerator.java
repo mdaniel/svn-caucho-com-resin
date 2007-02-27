@@ -157,8 +157,11 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
     
       Path rootDir = controller.getRootDirectory();
 
-      if (rootDir == null || ! rootDir.canRead())
+      if (rootDir == null || ! rootDir.canRead()) {
+	// server/0522
+	controller.destroy();
 	return null;
+      }
     
       synchronized (_entries) {
 	for (int i = 0; i < _entries.size(); i++) {

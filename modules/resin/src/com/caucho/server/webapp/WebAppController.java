@@ -551,7 +551,10 @@ public class WebAppController
    */
   public String toString()
   {
-    return "WebAppController$" + System.identityHashCode(this) + "[" + getId() + "]";
+    if (com.caucho.util.Alarm.isTest())
+      return "WebAppController" +  "[" + getId() + "]";
+    else
+      return "WebAppController$" + System.identityHashCode(this) + "[" + getId() + "]";
   }
 
   /**

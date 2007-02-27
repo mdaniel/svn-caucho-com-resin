@@ -104,6 +104,7 @@ public class RmiRegistry extends AbstractResourceAdapter
     
   }
 
+  @javax.annotation.PostConstruct
   public void init() throws ConfigException
   {
     if (System.getSecurityManager() == null)

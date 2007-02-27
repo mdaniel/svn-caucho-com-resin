@@ -41,12 +41,7 @@ import com.caucho.server.connection.CauchoRequest;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CompileException;
-import com.caucho.util.HTTPUtil;
-import com.caucho.util.L10N;
-import com.caucho.util.LineCompileException;
-import com.caucho.util.Log;
+import com.caucho.util.*;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.Encoding;
 
@@ -201,17 +196,27 @@ public class ErrorPageManager {
 	errorPageExn = rootExn;
       }
 
-      if (rootExn instanceof CompileException) {
+      if (rootExn instanceof DisplayableException) {
+        doStackTrace = false;
+        isCompileException = true;
+	if (compileException == null)
+	  compileException = rootExn;
+      }
+      else if (rootExn instanceof CompileException) {
         doStackTrace = false;
         isCompileException = true;
 
         // use outer exception because it might have added more location info
+	/*
         if (rootExn instanceof LineCompileException) {
 	  compileException = rootExn;
 	  
           isLineCompileException = true;
         }
 	else if (compileException == null) // ! isLineCompileException)
+          compileException = rootExn;
+	*/
+	if (compileException == null) // ! isLineCompileException)
           compileException = rootExn;
       }
       else if (rootExn instanceof LineException) {
@@ -397,7 +402,12 @@ public class ErrorPageManager {
     else
     */
 
-    if (compileException != null)
+    if (compileException instanceof DisplayableException) {
+      DisplayableException dispExn = (DisplayableException) compileException;
+
+      dispExn.print(out);
+    }
+    else if (compileException != null)
       out.println(escapeHtml(compileException.getMessage()));
     else if (! doStackTrace)
       out.println(escapeHtml(rootExn.toString()));

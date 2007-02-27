@@ -496,6 +496,14 @@ public class HostController
   }
 
   /**
+   * Returns the appropriate log for debugging.
+   */
+  protected Logger getLog()
+  {
+    return log;
+  }
+
+  /**
    * Returns equality.
    */
   public boolean equals(Object o)

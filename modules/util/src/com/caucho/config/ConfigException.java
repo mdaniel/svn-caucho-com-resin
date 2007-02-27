@@ -29,13 +29,17 @@
 package com.caucho.config;
 
 import com.caucho.util.CompileException;
+import com.caucho.util.DisplayableException;
+import com.caucho.util.Html;
+
+import java.io.PrintWriter;
 
 /**
  * Thrown by the various Builders
  */
 public class ConfigException
   extends RuntimeException
-  implements CompileException
+  implements CompileException, DisplayableException
 {
   /**
    * Create a null exception
@@ -66,5 +70,10 @@ public class ConfigException
   public ConfigException(Throwable e)
   {
     super(e);
+  }
+
+  public void print(PrintWriter out)
+  {
+    out.println(Html.escapeHtml(getMessage()));
   }
 }

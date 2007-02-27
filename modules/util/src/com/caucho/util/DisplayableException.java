@@ -26,52 +26,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.util;
 
-import java.io.*;
-import com.caucho.util.*;
+import java.io.PrintWriter;
 
-/**
- * Thrown by the various Builders
- */
-public class LineRuntimeException
-  extends RuntimeException
-  implements LineException, DisplayableException
-{
-  /**
-   * Create a null exception
-   */
-  public LineRuntimeException()
-  {
-  }
-
-  /**
-   * Creates an exception with a message
-   */
-  public LineRuntimeException(String msg)
-  {
-    super(msg);
-  }
-
-  /**
-   * Creates an exception with a message
-   */
-  public LineRuntimeException(String msg, Throwable cause)
-  {
-    super(msg, cause);
-  }
-
-  /**
-   * Creates an exception with a message
-   */
-  public LineRuntimeException(Throwable cause)
-  {
-    super(cause);
-  }
-
-  public void print(PrintWriter out)
-  {
-    out.println(Html.escapeHtml(getMessage()));
-    getCause().printStackTrace(out);
-  }
+public interface DisplayableException {
+  public void print(PrintWriter out);
 }
+
+

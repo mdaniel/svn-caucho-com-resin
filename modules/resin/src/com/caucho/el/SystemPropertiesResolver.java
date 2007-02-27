@@ -31,6 +31,8 @@ package com.caucho.el;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
+import java.util.*;
+
 /**
  * Variable resolver using the system properties (@link System#getProperty()}
  * and the environment {@link System@getenv()}.
@@ -84,8 +86,9 @@ public class SystemPropertiesResolver extends AbstractVariableResolver {
     }
 
     if ("Var".equals(var)) {
+      // server/10m5
       env.setPropertyResolved(true);
-      return this;
+      return new PropertyMap(env);
     }
 
     return null;
@@ -97,5 +100,24 @@ public class SystemPropertiesResolver extends AbstractVariableResolver {
   public String toString()
   {
     return "SystemPropertiesResolver[]";
+  }
+
+  static class PropertyMap extends AbstractMap {
+    private ELContext _env;
+
+    PropertyMap(ELContext env)
+    {
+      _env = env;
+    }
+    
+    public Object get(Object key)
+    {
+      return _env.getELResolver().getValue(_env, null, key);
+    }
+    
+    public Set entrySet()
+    {
+      throw new UnsupportedOperationException();
+    }
   }
 }

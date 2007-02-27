@@ -320,8 +320,8 @@ abstract class Generator {
 
     DocumentType dtd = xsl.getDoctype();
 
-    if (dtd != null) {
-      _context = _path.lookup(xsl.getDoctype().getSystemId());
+    if (dtd != null && dtd.getSystemId() != null) {
+      _context = _path.lookup(dtd.getSystemId());
       _topContext = _context;
     }
     
