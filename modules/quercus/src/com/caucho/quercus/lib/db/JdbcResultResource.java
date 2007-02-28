@@ -450,7 +450,9 @@ public class JdbcResultResource {
         return result;
 
       } else {
-        return NullValue.NULL;
+        // must return FALSE for mediawiki
+        // php/142t
+        return BooleanValue.FALSE;
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
