@@ -1464,8 +1464,17 @@ public class RegexpModule
     StringBuilder sb = new StringBuilder();
     char quote = 0;
 
+    boolean sawVerticalBar = false;
+
     for (int i = 0; i < len; i++) {
       char ch = regexp.charAt(i);
+
+      if (sawVerticalBar) {
+        if ((! Character.isWhitespace(ch)) &&
+            ch != '#' &&
+            ch != '|')
+          sawVerticalBar = false;
+      }
 
       switch (ch) {
       case '\\':
@@ -1559,8 +1568,18 @@ public class RegexpModule
       case '#':
         if (quote == '[' && isComments)
           sb.append("\\#");
-        else
+        else {
           sb.append(ch);
+
+          for (i++; i < len; i++) {
+            ch = regexp.charAt(i);
+            
+            sb.append(ch);
+            
+            if (ch == '\n' || ch == '\r')
+              break;
+          }
+        }
         break;
 
       case ']':
@@ -1591,6 +1610,17 @@ public class RegexpModule
 
       case '}':
         sb.append("\\}");
+        break;
+
+      case '|':
+        // php/152o
+        // php ignores subsequent vertical bars
+        //
+        // to accomodate drupal bug http://drupal.org/node/123750
+        if (! sawVerticalBar) {
+          sb.append('|');
+          sawVerticalBar = true; 
+        }
         break;
 
       default:
