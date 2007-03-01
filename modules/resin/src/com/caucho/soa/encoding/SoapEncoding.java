@@ -50,6 +50,11 @@ public class SoapEncoding implements ServiceEncoding {
   private static final Logger log =
     Logger.getLogger(SoapEncoding.class.getName());
 
+  protected final XMLOutputFactory _xmlOutputFactory 
+    = XMLOutputFactory.newInstance();
+  protected final XMLInputFactory _xmlInputFactory
+    = XMLInputFactory.newInstance();
+
   private Object _object;
   private Class _class;
   private DirectSkeleton _skeleton;
@@ -71,16 +76,15 @@ public class SoapEncoding implements ServiceEncoding {
   @PostConstruct
   public void init()
   {
+    _xmlOutputFactory.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, 
+                                  Boolean.TRUE);
   }
 
   public void invoke(InputStream is, OutputStream os)
     throws Throwable
   {
-    XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-    XMLStreamReader in = inputFactory.createXMLStreamReader(is);
-
-    XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-    XMLStreamWriter out = outputFactory.createXMLStreamWriter(os);
+    XMLStreamReader in = _xmlInputFactory.createXMLStreamReader(is);
+    XMLStreamWriter out = _xmlOutputFactory.createXMLStreamWriter(os);
 
     getSkeleton().invoke(_object, in, out);
 

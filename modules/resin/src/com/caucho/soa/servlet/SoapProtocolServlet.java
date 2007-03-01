@@ -74,8 +74,7 @@ public class SoapProtocolServlet
     throws IOException, ServletException
   {
     try {
-      _soap.invoke(request.getInputStream(),
-		   response.getOutputStream());
+      _soap.invoke(request.getInputStream(), response.getOutputStream());
     } catch (IOException e) {
       throw e;
     } catch (ServletException e) {

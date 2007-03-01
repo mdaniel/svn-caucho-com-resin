@@ -114,16 +114,19 @@ public class WebServiceClient implements ObjectProxy, java.io.Serializable {
       Object proxy = null;
 
       if (_jaxbClasses != null) {
-	Class[] jaxbClasses = _jaxbClasses.toArray(new Class[0]);
-	proxy = ProxyManager.getWebServiceProxy(_serviceClass, _url, jaxbClasses);
+        Class[] jaxbClasses = new Class[_jaxbClasses.size()];
+        _jaxbClasses.toArray(jaxbClasses);
+        proxy = ProxyManager.getWebServiceProxy(_serviceClass, 
+                                                _url, 
+                                                jaxbClasses);
       }
       else if (_jaxbPackages != null) {
-	String jaxbPackages = _jaxbPackages.toString();
-	proxy = 
-	  ProxyManager.getWebServiceProxy(_serviceClass, _url, jaxbPackages);
+        String jaxbPackages = _jaxbPackages.toString();
+        proxy = 
+          ProxyManager.getWebServiceProxy(_serviceClass, _url, jaxbPackages);
       }
       else {
-	proxy = ProxyManager.getWebServiceProxy(_serviceClass, _url);
+        proxy = ProxyManager.getWebServiceProxy(_serviceClass, _url);
       }
 
       return proxy;
