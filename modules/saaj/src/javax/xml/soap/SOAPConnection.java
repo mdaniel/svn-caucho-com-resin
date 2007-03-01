@@ -29,6 +29,8 @@
 
 package javax.xml.soap;
 
+// Optional class
+
 public abstract class SOAPConnection {
   public SOAPConnection()
   {

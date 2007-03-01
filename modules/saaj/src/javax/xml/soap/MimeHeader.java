@@ -48,5 +48,10 @@ public class MimeHeader {
   {
     return _value;
   }
+
+  public String toString()
+  {
+    return _name + ": " + _value;
+  }
 }
 

@@ -83,6 +83,9 @@ public abstract class AttachmentPart {
 
   public void setContentType(String contentType)
   {
+    if (contentType == null)
+      throw new IllegalArgumentException("content type may not be null");
+
     setMimeHeader(CONTENT_TYPE, contentType);
   }
 

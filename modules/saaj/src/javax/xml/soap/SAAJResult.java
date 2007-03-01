@@ -31,6 +31,8 @@ package javax.xml.soap;
 import javax.xml.transform.dom.*;
 
 public class SAAJResult extends DOMResult {
+  private MessageFactory _factory;
+
   public SAAJResult() throws SOAPException
   {
     super();
@@ -43,12 +45,25 @@ public class SAAJResult extends DOMResult {
 
   public SAAJResult(SOAPMessage message)
   {
-    super(message.getSOAPPart());
+    super();
+
+    try {
+      setNode(message.getSOAPPart().getEnvelope());
+    }
+    catch (SOAPException e) {
+      //???
+    }
   }
 
-  public SAAJResult(String protocol) throws SOAPException
+  public SAAJResult(String protocol) 
+    throws SOAPException
   {
-    throw new UnsupportedOperationException();
+    _factory = MessageFactory.newInstance(protocol);
+  }
+
+  public Node getResult()
+  {
+    return (Node) getNode();
   }
 }
 
