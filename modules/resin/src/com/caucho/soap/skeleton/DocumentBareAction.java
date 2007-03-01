@@ -283,7 +283,7 @@ public class DocumentBareAction extends AbstractAction {
     in.nextTag();
 
     if (_returnMarshal != null)
-      ret = _returnMarshal.deserializeReply(in);
+      ret = _returnMarshal.deserializeReply(in, ret);
 
     // document wrapped => everything must be in order
     for (int i = 0; i < _bodyArgs.length; i++)

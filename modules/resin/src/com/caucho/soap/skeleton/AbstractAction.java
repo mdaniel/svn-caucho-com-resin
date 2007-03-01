@@ -413,7 +413,7 @@ public abstract class AbstractAction {
           ParameterMarshal faultMarshal = _faultNames.get(in.getName());
 
           if (faultMarshal != null)
-            fault = (Exception) faultMarshal.deserializeReply(in);
+            fault = (Exception) faultMarshal.deserializeReply(in, fault);
         }
 
         while (in.nextTag() != XMLStreamReader.END_ELEMENT) {}
