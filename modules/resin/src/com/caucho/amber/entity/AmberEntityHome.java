@@ -381,17 +381,33 @@ public class AmberEntityHome {
       }
       else if (isLoad) {
         if (aConn.isInTransaction()) {
-          if (item != null) {
-            String className = item.getEntity().getClass().getName();
+          log.finest("findEntityItem is in transaction");
 
-            int index = aConn.getTransactionEntity(className, key);
+          String className = item.getEntity().getClass().getName();
 
-            if (index < 0) {
-              // jpa/0g0k
-              item.getEntity().__caucho_expire();
-            }
+          int index = aConn.getTransactionEntity(className, key);
+
+          EntityState state = null;
+
+          if (index >= 0) {
+            Entity txEntity = aConn.getTransactionEntity(index);
+            state = txEntity.__caucho_getEntityState();
+          }
+
+          // jpa/0ge3: the copy object is created in AmberEntityHome.find()
+          // but it is still not loaded.
+          if (index < 0 || ! state.isManaged()) {
+            log.finest("expiring entity to be loaded into the current transaction");
+
+            // jpa/0g0k
+            item.getEntity().__caucho_expire();
           }
         }
+        else {
+          log.finest("findEntityItem is not in transaction");
+        }
+
+        log.finest("findEntityItem loading entity");
 
         if (_manager.isJPA()) {
           // jpa/0v33
