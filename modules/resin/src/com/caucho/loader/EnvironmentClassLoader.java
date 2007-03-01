@@ -494,11 +494,15 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
   public String toString()
   {
+    String hashCode = "";
+    if (! com.caucho.util.Alarm.isTest())
+      hashCode = "$" + System.identityHashCode(this);
+    
     if (getId() != null)
-      return "EnvironmentClassLoader$" + System.identityHashCode(this) + "[" + getId() + "]";
+      return "EnvironmentClassLoader" + hashCode + "[" + getId() + "]";
     else {
       // return "EnvironmentClassLoader$" + System.identityHashCode(this) + getLoaders();
-      return "EnvironmentClassLoader$" + System.identityHashCode(this) + "[]";
+      return "EnvironmentClassLoader" + hashCode + "[]";
     }
   }
 

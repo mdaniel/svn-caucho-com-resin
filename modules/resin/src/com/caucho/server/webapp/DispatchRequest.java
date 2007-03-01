@@ -36,6 +36,7 @@ import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.connection.Form;
 import com.caucho.server.connection.RequestAdapter;
 import com.caucho.server.connection.ServletInputStreamImpl;
+import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.util.Alarm;
@@ -54,21 +55,22 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.logging.*;
+
 /**
  * sub-request for a include() page
  */
 class DispatchRequest extends RequestAdapter {
-  protected static final Logger log = Log.open(DispatchRequest.class);
+  protected static final Logger log
+    = Logger.getLogger(DispatchRequest.class.getName());
 
   private static final FreeList<DispatchRequest> _freeList =
     new FreeList<DispatchRequest>(32);
 
   private WebApp _webApp;
   private WebApp _oldWebApp;
+  private Invocation _invocation;
   private Form _formParser;
   private HashMapImpl<String,String[]> _form;
   protected ReadStream _readStream;
@@ -105,7 +107,8 @@ class DispatchRequest extends RequestAdapter {
     return req;
   }
 
-  void init(WebApp webApp,
+  void init(Invocation invocation,
+	    WebApp webApp,
             WebApp oldWebApp,
             HttpServletRequest request,
             HttpServletResponse response,
@@ -116,6 +119,7 @@ class DispatchRequest extends RequestAdapter {
   {
     super.init(request, response, webApp);
 
+    _invocation = invocation;
     _webApp = webApp;
     _oldWebApp = oldWebApp;
 
@@ -529,6 +533,27 @@ class DispatchRequest extends RequestAdapter {
       return false;
     else
       return ((CauchoRequest) getRequest()).authenticate();
+  }
+  
+  /**
+   * Returns true if the user represented by the current request
+   * plays the named role.
+   *
+   * @param role the named role to test.
+   * @return true if the user plays the role.
+   */
+  public boolean isUserInRole(String role)
+  {
+    HashMap<String,String> roleMap = _invocation.getSecurityRoleMap();
+    
+    if (roleMap != null) {
+      String linkRole = roleMap.get(role);
+      
+      if (linkRole != null)
+	role = linkRole;
+    }
+
+    return super.isUserInRole(role);
   }
 
   /**

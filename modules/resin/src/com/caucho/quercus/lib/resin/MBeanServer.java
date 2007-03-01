@@ -36,6 +36,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
+import com.caucho.server.cluster.Cluster;
 import com.caucho.server.admin.RemoteMBeanConnectionFactory;
 
 import javax.management.MBeanServerConnection;
@@ -62,7 +63,9 @@ public class MBeanServer {
    */
   public MBeanServer(@Optional String serverId)
   {
-    if (serverId == null || "".equals(serverId)) {
+    if (serverId == null
+	|| "".equals(serverId)
+	|| Cluster.getServerId().equals(serverId)) {
       _server = Jmx.getGlobalMBeanServer();
     }
     else {
@@ -148,6 +151,11 @@ public class MBeanServer {
     catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+  }
+
+  public String toString()
+  {
+    return "MBeanServer[" + _server + "]";
   }
 
   static {

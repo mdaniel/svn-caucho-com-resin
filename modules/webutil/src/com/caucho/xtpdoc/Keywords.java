@@ -32,6 +32,14 @@ package com.caucho.xtpdoc;
 public class Keywords {
   private StringBuilder _keywords = new StringBuilder();
 
+  public void addText(String text)
+  {
+    String []keywords = text.split("[ ,]+");
+
+    for (int i = 0; i < keywords.length; i++)
+      addKeyword(keywords[i]);
+  }
+  
   public void addKeyword(String keyword)
   {
     if (_keywords.length() > 0)

@@ -29,14 +29,17 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.util.CompileException;
+import com.caucho.util.DisplayableException;
 
+import java.io.*;
 import javax.servlet.ServletException;
 
 /**
  * Represents the final servlet in a filter chain.
  */
 public class ServletConfigException extends ServletException
-  implements CompileException {
+  implements CompileException, DisplayableException
+{
   /**
    * Creates a servlet config exception.
    */
@@ -67,5 +70,13 @@ public class ServletConfigException extends ServletException
   public ServletConfigException(Throwable e)
   {
     super(e);
+  }
+
+  public void print(PrintWriter out)
+  {
+    if (getCause() instanceof DisplayableException)
+      ((DisplayableException) getCause()).print(out);
+    else
+      out.println(getMessage());
   }
 }

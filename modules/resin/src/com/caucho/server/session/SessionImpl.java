@@ -480,7 +480,6 @@ public class SessionImpl implements HttpSession, CacheListener {
 	_isClosing = true;
     }
 
-    //System.out.println("REMOVE: " + this);
     if (! _isClosing) {
       log.warning(L.l("session {0} LRU while in use.  Consider increasing session-count.",
 		     _id));
@@ -526,13 +525,13 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     _isInvalidating = true;
 
-    invalidate(false);
+    invalidate(Logout.INVALIDATE);
   }
 
   /**
    * Invalidates the session.
    */
-  public void invalidate(boolean isLRU)
+  public void invalidate(Logout logout)
   {
     if (log.isLoggable(Level.FINE)) {
 
@@ -546,11 +545,12 @@ public class SessionImpl implements HttpSession, CacheListener {
       throw new IllegalStateException(L.l("Can't call invalidate() when session is no longer valid."));
 
     ServletAuthenticator auth = getAuthenticator();
-    if (! isLRU
-	|| ! (auth instanceof AbstractAuthenticator)
-	|| ((AbstractAuthenticator) auth).getLogoutOnSessionTimeout()) {
-      // server/12i1
-      logout(isLRU ? this : null);
+    if (! (auth instanceof AbstractAuthenticator)
+	|| logout == Logout.INVALIDATE
+	|| (logout == Logout.TIMEOUT
+	    && ((AbstractAuthenticator) auth).getLogoutOnSessionTimeout())) {
+      // server/12i1, 12ch
+      logout(logout == Logout.TIMEOUT ? this : null);
     }
 
     /*
@@ -570,7 +570,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       _manager.removeSession(this);
 
-      invalidateImpl(isLRU);
+      invalidateImpl(logout);
 
       _isValid = false;
     } finally {
@@ -615,7 +615,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    * Invalidate the session, removing it from the manager,
    * unbinding the values, and removing it from the store.
    */
-  void invalidateImpl(boolean isLRU)
+  void invalidateImpl(Logout logout)
   {
     boolean invalidateAfterListener = _manager.isInvalidateAfterListener();
     if (! invalidateAfterListener)
@@ -693,7 +693,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     synchronized (this) {
       if (_isClosing)
 	return false;
-      
+
       _useCount++;
 
       return true;
@@ -1099,6 +1099,12 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     return "SessionImpl[" + getId() + "]";
   }
+
+  enum Logout {
+    INVALIDATE,
+    LRU,
+    TIMEOUT
+  };
 
   private static Comparator KEY_COMPARATOR = new Comparator() {
       public int compare(Object aObj, Object bObj)

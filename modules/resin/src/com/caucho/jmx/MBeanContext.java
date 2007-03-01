@@ -29,8 +29,7 @@
 
 package com.caucho.jmx;
 
-import com.caucho.loader.Environment;
-import com.caucho.loader.WeakCloseListener;
+import com.caucho.loader.*;
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
 
@@ -47,8 +46,10 @@ import java.util.logging.Logger;
 /**
  * The context containing mbeans registered at a particular level.
  */
-public class MBeanContext {
-  private static final Logger log = Log.open(MBeanContext.class);
+public class MBeanContext
+{
+  private static final Logger log
+    = Logger.getLogger(MBeanContext.class.getName());
   private static final L10N L = new L10N(MBeanContext.class);
 
   // The owning MBeanServer
@@ -82,11 +83,21 @@ public class MBeanContext {
 	       ClassLoader loader,
 	       MBeanServerDelegate delegate)
   {
+    for (; loader != null
+	   && loader != ClassLoader.getSystemClassLoader()
+	   && ! (loader instanceof EnvironmentClassLoader);
+	 loader = loader.getParent()) {
+    }
+
+    if (loader == null)
+      loader = ClassLoader.getSystemClassLoader();
+    
     _mbeanServer = mbeanServer;
     _loader = loader;
     _delegate = delegate;
 
-    Environment.addClassLoaderListener(new WeakCloseListener(this), _loader);
+    Environment.addClassLoaderListener(new CloseListener(this), _loader);
+    //Environment.addClassLoaderListener(new WeakCloseListener(this), _loader);
     
     _classLoaderRepository.addClassLoader(_loader);
 
@@ -370,7 +381,7 @@ public class MBeanContext {
 
     if (_view != null)
       _view.remove(name);
-    
+
     if (_globalView != null && _globalView.remove(name) != null) {
       try {
 	sendUnregisterNotification(name);
@@ -380,16 +391,26 @@ public class MBeanContext {
     }
 
     MBeanContext context = this;
+    ClassLoader loader = context._loader.getParent();
     while (true) {
-      ClassLoader parentLoader = context._loader.getParent();
+      ClassLoader parentLoader = loader.getParent();
       
       MBeanContext parentContext = _mbeanServer.getExistingContext(parentLoader);
 
-      if (parentContext == null || parentContext == context) {
+      if (parentContext == context)
 	break;
+      else if (parentContext != null) {
+	loader = parentContext._loader;
+      }
+      else {
+	loader = parentLoader;
+	continue;
       }
 
       try {
+	if (parentContext._view != null)
+	  parentContext._view.remove(name);
+	
 	if (parentContext._globalView == null) {
 	}
 	else if (mbean == null &&

@@ -845,10 +845,38 @@
         <include name="WEB-INF/web.xml"/>
         <include name="index.php"/>
       </fileset>
+      <fileset dir="${basedir}">
+        <include name="LICENSE"/>
+      </fileset>
+    </jar>
+
+    <jar destfile="${dist}/quercus-${version}-src.jar">
+      <fileset dir="${modules}/util/src">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <include name="com/caucho/**"/>
+      </fileset>
+      <fileset dir="${modules}/quercus/src">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <include name="com/caucho/**"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="LICENSE"/>
+      </fileset>
     </jar>
 
     <copy tofile="${dist}/quercus-3_1-snap.war"
           file="${dist}/quercus-${version}.war"/>
+
+    <copy tofile="${dist}/quercus-3_1-snap-src.jar"
+          file="${dist}/quercus-${version}-src.jar"/>
 
     <copy tofile="${dist}/${shortproduct}-3_1-snap.zip"
           file="${dist}/${shortproduct}-${version}.zip"/>

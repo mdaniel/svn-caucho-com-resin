@@ -39,6 +39,7 @@ public class Header {
   private String _product;
   private String _version;
   private String _title;
+  private String _browserTitle;
   private String _author;
   private String _date;
   private Section _description;
@@ -63,6 +64,11 @@ public class Header {
   public void setTitle(String title)
   {
     _title = title;
+  }
+
+  public void setBrowserTitle(String title)
+  {
+    _browserTitle = title;
   }
 
   public String getTitle()

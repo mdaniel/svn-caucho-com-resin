@@ -1371,7 +1371,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
     SessionImpl session = _sessions.remove(id);
 
     if (session != null)
-      session.invalidateImpl(true);
+      session.invalidateImpl(SessionImpl.Logout.LRU);
   }
 
   /**
@@ -1575,14 +1575,14 @@ public final class SessionManager implements ObjectManager, AlarmListener
 	  if (_storeManager == null) {
 	    // if no persistent store then invalidate
 	    // XXX: server/12cg - single signon shouldn't logout
-	    session.invalidate();
+	    session.invalidate(SessionImpl.Logout.TIMEOUT);
 	  }
 	  else if (session.getSrunIndex() != _srunIndex && _srunIndex >= 0) {
 	    // if not the owner, then just remove
 	    _sessions.remove(session.getId());
 	  }
 	  else {
-	    session.invalidate();
+	    session.invalidate(SessionImpl.Logout.TIMEOUT);
 	  }
 	} catch (Throwable e) {
 	  log.log(Level.FINER, e.toString(), e);

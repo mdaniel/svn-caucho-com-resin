@@ -350,7 +350,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
   public void addSecurityRoleRef(SecurityRoleRef ref)
   {
     if (_roleMap == null)
-      _roleMap = new HashMap<String,String>();
+      _roleMap = new HashMap<String,String>(8);
 
     // server/12h2
     // server/12m0

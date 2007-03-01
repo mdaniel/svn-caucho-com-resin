@@ -56,6 +56,11 @@ public class RemoteMBeanConnectionFactory {
       return (MBeanServerConnection)  _constructor.newInstance(serverId);
     } catch (RuntimeException e) {
       throw e;
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof RuntimeException)
+	throw (RuntimeException) e.getCause();
+      else
+	throw new ConfigException(e.getCause());
     } catch (Exception e) {
       throw new ConfigException(L.l("remote mbeans require Resin Professional"));
     }

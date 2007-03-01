@@ -1,0 +1,23 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Quercus Security</title>
+    
+    <description>
+      <p>Description of Quercus and PHP Security Issues</p>
+
+    </description>
+  </header>
+
+  <body>
+    <summary/>
+    <localtoc/>
+
+
+<s1 title="Engine (C vs Java)">
+
+
+</s1>
+
+  </body>
+</document>

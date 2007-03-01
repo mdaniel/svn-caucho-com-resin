@@ -28,14 +28,16 @@
 
 package com.caucho.java;
 
-import com.caucho.util.CompileException;
+import java.io.*;
+import com.caucho.util.*;
 
 /**
  * Wrapper for a compile error.
  */
 public class CompileClassNotFound
   extends ClassNotFoundException
-  implements CompileException {
+  implements LineCompileException, DisplayableException
+{
   private Throwable _cause;
 
   /**
@@ -74,6 +76,11 @@ public class CompileClassNotFound
   public Throwable getCause()
   {
     return _cause;
+  }
+
+  public void print(PrintWriter out)
+  {
+    out.println(getMessage());
   }
 }
 

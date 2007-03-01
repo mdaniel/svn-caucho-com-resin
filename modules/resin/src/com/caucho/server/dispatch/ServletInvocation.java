@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  * A repository for request information gleaned from the uri.
  */
 public class ServletInvocation {
-  static final Logger log = Log.open(ServletInvocation.class);
+  static final Logger log = Logger.getLogger(ServletInvocation.class.getName());
   static final L10N L = new L10N(ServletInvocation.class);
 
   private ClassLoader _classLoader;
@@ -242,6 +242,8 @@ public class ServletInvocation {
   
     _servletName = invocation._servletName;
     _filterChain = invocation._filterChain;
+    
+    _securityRoleMap = invocation._securityRoleMap;
   }
 
   public String toString()

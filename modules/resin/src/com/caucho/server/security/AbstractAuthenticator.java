@@ -674,8 +674,10 @@ public class AbstractAuthenticator implements ServletAuthenticator {
 						 Alarm.getCurrentTime(),
 						 false, true);
 
-	if (session != null)
+	if (session != null) {
+	  session.finish();
 	  session.logout();
+	}
       }
     }
   }

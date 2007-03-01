@@ -30,9 +30,7 @@ import com.caucho.config.types.ResinType;
 import com.caucho.config.types.Validator;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
-import com.caucho.util.CompileException;
-import com.caucho.util.L10N;
-import com.caucho.util.LineCompileException;
+import com.caucho.util.*;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
@@ -789,7 +787,7 @@ public class NodeBuilder {
       return null;
   }
 
-  public static LineConfigException error(String msg, Node node)
+  public static RuntimeException error(String msg, Node node)
   {
     String filename = null;
     int line = 0;
@@ -807,11 +805,14 @@ public class NodeBuilder {
       return new LineConfigException(msg);
   }
   
-  public static LineConfigException error(Throwable e, Node node)
+  public static RuntimeException error(Throwable e, Node node)
   {
     String systemId = null;
     String filename = null;
     int line = 0;
+
+    if (e instanceof RuntimeException && e instanceof DisplayableException)
+      return (RuntimeException) e;
 
     if (node instanceof QAbstractNode) {
       QAbstractNode qnode = (QAbstractNode) node;

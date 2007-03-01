@@ -31,6 +31,7 @@ package com.caucho.server.webapp;
 
 import com.caucho.log.Log;
 import com.caucho.util.FreeList;
+import com.caucho.server.dispatch.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -67,7 +68,8 @@ class IncludeDispatchRequest extends DispatchRequest {
     return req;
   }
 
-  void init(WebApp webApp,
+  void init(Invocation invocation,
+	    WebApp webApp,
             WebApp oldWebApp,
             HttpServletRequest request,
             HttpServletResponse response,
@@ -76,7 +78,7 @@ class IncludeDispatchRequest extends DispatchRequest {
 	    String queryString, String addedQuery)
     throws ServletException
   {
-    super.init(webApp, oldWebApp, request, response,
+    super.init(invocation, webApp, oldWebApp, request, response,
 	       method, uri, servletPath, pathInfo, queryString, addedQuery);
     
     _headers = null;

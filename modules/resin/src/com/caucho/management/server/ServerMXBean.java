@@ -46,7 +46,7 @@ import java.util.Date;
  * </pre>
  */
 @Description("The Resin Server running on this JVM instance")
-public interface ServerMXBean {
+public interface ServerMXBean extends ManagedObjectMXBean {
   //
   // ID attributes
   //

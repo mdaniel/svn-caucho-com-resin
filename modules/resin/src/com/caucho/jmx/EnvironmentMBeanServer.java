@@ -57,15 +57,15 @@ public class EnvironmentMBeanServer extends AbstractMBeanServer {
   public EnvironmentMBeanServer(String domain, MBeanServerDelegate delegate)
   {
     super(domain);
-    
+
     if (Jmx.getMBeanServer() == null)
       Jmx.setMBeanServer(this);
 
     ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
-
+    
     MBeanContext context = new MBeanContext(this, systemLoader, delegate);
 
-    _localContext.set(context, systemLoader);
+    _localContext.setGlobal(context);
 	
     try {
       IntrospectionMBean mbean;

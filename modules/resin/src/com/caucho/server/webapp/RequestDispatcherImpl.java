@@ -201,7 +201,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     else
       oldWebApp = (WebApp) _webApp.getContext(req.getContextPath());
 
-    subRequest.init(invocation.getWebApp(), oldWebApp,
+    subRequest.init(invocation,
+		    invocation.getWebApp(), oldWebApp,
                     parentRequest, res, method,
 		    invocation.getURI(),
 		    invocation.getServletPath(),
@@ -405,7 +406,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     else
       oldWebApp = (WebApp) webApp.getContext(req.getContextPath());
 
-    subRequest.init(webApp, oldWebApp,
+    subRequest.init(invocation,
+		    webApp, oldWebApp,
 		    parentRequest, parentResponse,
 		    method,
                     req.getRequestURI(), req.getServletPath(),

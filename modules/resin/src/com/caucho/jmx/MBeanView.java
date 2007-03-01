@@ -30,6 +30,7 @@ package com.caucho.jmx;
 
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
+import com.caucho.loader.*;
 
 import javax.management.*;
 import java.util.ArrayList;
@@ -61,6 +62,15 @@ public class MBeanView {
             ClassLoader loader,
             String agentId)
   {
+    for (; loader != null
+	   && loader != ClassLoader.getSystemClassLoader()
+	   && ! (loader instanceof EnvironmentClassLoader);
+	 loader = loader.getParent()) {
+    }
+
+    if (loader == null)
+      loader = ClassLoader.getSystemClassLoader();
+    
     _mbeanServer = mbeanServer;
 
     _classLoader = loader;

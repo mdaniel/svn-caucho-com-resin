@@ -241,7 +241,7 @@ abstract public class PageManager {
       page = createPage(path, pageURI, className, dependList);
 
       if (page == null)
-        throw new FileNotFoundException(pageURI);
+        throw new FileNotFoundException(getWebApp().getContextPath() + pageURI);
 
       if (_autoCompile == false)
         page._caucho_setNeverModified(true);

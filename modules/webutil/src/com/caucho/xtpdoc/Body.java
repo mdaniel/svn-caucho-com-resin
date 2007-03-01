@@ -41,6 +41,7 @@ public class Body extends ContainerNode {
   private Summary _summary;
   private Navigation _navigation;
   private Index _index;
+  private String _class;
 
   public Body(Document document)
   {
@@ -60,6 +61,11 @@ public class Body extends ContainerNode {
   {
   }
   */
+
+  public void setClass(String styleClass)
+  {
+    _class = styleClass;
+  }
 
   public Summary createSummary()
   {
@@ -110,6 +116,10 @@ public class Body extends ContainerNode {
     throws XMLStreamException
   {
     out.writeStartElement("body");
+
+    if (_class != null)
+      out.writeAttribute("class", _class);
+    
     out.writeAttribute("bgcolor", "white");
     out.writeAttribute("leftmargin", "0");
 

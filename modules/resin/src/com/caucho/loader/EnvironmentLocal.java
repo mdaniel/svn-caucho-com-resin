@@ -216,7 +216,7 @@ public class EnvironmentLocal<E> {
     for (; loader != null; loader = loader.getParent()) {
       if (loader instanceof EnvironmentClassLoader) {
         EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
-
+	
         return (E) envLoader.removeAttribute(_varName);
       }
     }
@@ -237,6 +237,10 @@ public class EnvironmentLocal<E> {
     
     _globalValue = value;
 
+    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+    if (systemLoader instanceof EnvironmentClassLoader)
+      ((EnvironmentClassLoader) systemLoader).setAttribute(_varName, value);
+
     return oldValue;
   }
 
@@ -245,6 +249,10 @@ public class EnvironmentLocal<E> {
    */
   public E getGlobal()
   {
+    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+    if (systemLoader instanceof EnvironmentClassLoader)
+      return (E) ((EnvironmentClassLoader) systemLoader).getAttribute(_varName);
+      
     return _globalValue;
   }
 }

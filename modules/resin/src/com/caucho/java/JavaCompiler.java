@@ -32,6 +32,7 @@ package com.caucho.java;
 import com.caucho.bytecode.ByteCodeParser;
 import com.caucho.bytecode.JavaClass;
 import com.caucho.bytecode.SourceDebugExtensionAttribute;
+import com.caucho.config.*;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.log.Log;
 import com.caucho.make.Make;
@@ -470,8 +471,14 @@ public class JavaCompiler {
       try {
         if (_loader instanceof Make)
           ((Make) _loader).make();
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (ClassNotFoundException e) {
+	throw e;
+      } catch (IOException e) {
+	throw e;
       } catch (Exception e) {
-        throw new IOExceptionWrapper(e);
+        throw new ConfigException(e);
       }
     }
 
