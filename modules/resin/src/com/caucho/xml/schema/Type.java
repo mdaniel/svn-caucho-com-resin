@@ -28,51 +28,24 @@
 
 package com.caucho.xml.schema;
 
+import java.io.*;
 import java.util.*;
 import static javax.xml.XMLConstants.*;
 import javax.xml.bind.annotation.*;
 
-/**
- * JAXB annotated Schema data structure.
- */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="sequence", namespace=W3C_XML_SCHEMA_NS_URI)
-public class Sequence {
-  @XmlTransient
-  private Schema _schema;
+import com.caucho.java.JavaWriter;
 
-  @XmlAttribute(name="name")
-  private String _name;
-
-  @XmlElements({
-      @XmlElement(name="element", 
-                  namespace=W3C_XML_SCHEMA_NS_URI,
-                  type=com.caucho.xml.schema.Element.class)})
-  private List<Object> _contents;
-
-  public List<Object> getContents()
-  {
-    if (_contents == null)
-      _contents = new ArrayList<Object>();
-
-    return _contents;
-  }
-
-  @XmlTransient
-  public Schema getSchema()
-  {
-    return _schema;
-  }
-
-  public void setSchema(Schema schema)
-  {
-    _schema = schema;
-
-    if (_contents != null) {
-      for (int i = 0; i < _contents.size(); i++) { 
-        Element element = (Element) _contents.get(i);
-        element.setSchema(_schema);
-      }
-    }
-  }
+@XmlAccessorType(XmlAccessType.NONE)
+public abstract class Type {
+  public abstract Schema getSchema();
+  public abstract void setSchema(Schema schema);
+  public abstract String getName();
+  public abstract String getClassname();
+  public abstract String getFaultWrapperClassname();
+  public abstract String getArgumentName(int index);
+  public abstract String getJavaType(int index);
+  public abstract void writeJava(File outputDirectory, String pkg)
+    throws IOException;
+  public abstract void setEmit(boolean emit);
+  public abstract void setEmitFaultWrapper(boolean emitFaultWrapper);
 }

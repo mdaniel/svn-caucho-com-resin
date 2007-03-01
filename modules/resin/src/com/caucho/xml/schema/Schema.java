@@ -28,9 +28,15 @@
 
 package com.caucho.xml.schema;
 
+import java.io.*;
 import java.util.*;
+
 import static javax.xml.XMLConstants.*;
+
+import javax.xml.bind.*;
 import javax.xml.bind.annotation.*;
+
+import javax.xml.namespace.QName;
 
 /**
  * JAXB annotated Schema data structure.
@@ -38,28 +44,129 @@ import javax.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="schema", namespace=W3C_XML_SCHEMA_NS_URI)
 public class Schema {
+  @XmlElement(name="element", namespace=W3C_XML_SCHEMA_NS_URI)
+  private List<Element> _elements;
+
   @XmlElements({
-      @XmlElement(name="element", 
-                  namespace=W3C_XML_SCHEMA_NS_URI,
-                  type=com.caucho.xml.schema.Element.class),
-      @XmlElement(name="complexType", 
-                  namespace=W3C_XML_SCHEMA_NS_URI,
-                  type=com.caucho.xml.schema.ComplexType.class),
-      @XmlElement(name="import",
-                  namespace=W3C_XML_SCHEMA_NS_URI,
-                  type=com.caucho.xml.schema.Import.class)})
-  private List<Object> _contents;
+    @XmlElement(name="complexType", 
+                namespace=W3C_XML_SCHEMA_NS_URI,
+                type=com.caucho.xml.schema.ComplexType.class)})
+  private List<Type> _types;
+
+  @XmlElement(name="import", namespace=W3C_XML_SCHEMA_NS_URI)
+  private List<Import> _imports;
 
   @XmlAttribute(name="targetNamespace")
   private String _targetNamespace;
+
+  @XmlAttribute(name="version")
+  private String _version;
 
   public String getTargetNamespace()
   {
     return _targetNamespace;
   }
 
-  public List<Object> getContents()
+  public String getVersion()
   {
-    return _contents;
+    return _version;
+  }
+
+  public void afterUnmarshal(Unmarshaller u, Object parent)
+  {
+    if (_types != null) {
+      for (Type type : _types)
+        type.setSchema(this);
+    }
+
+    if (_elements != null) {
+      for (Element element : _elements)
+        element.setSchema(this);
+    }
+  }
+
+  public void resolveImports(Unmarshaller u)
+    throws JAXBException
+  {
+    if (_imports != null) {
+      for (int i = 0; i < _imports.size(); i++) {
+        Import imp = _imports.get(i);
+        imp.resolve(u);
+
+        if (imp.getSchema() != null)
+          imp.getSchema().resolveImports(u);
+      }
+    }
+  }
+
+  public void writeJAXBClasses(File outputDirectory, String pkg)
+    throws IOException
+  {
+    if (_types != null) {
+      for (Type type : _types)
+        type.writeJava(outputDirectory, pkg);
+    }
+
+    if (_imports != null) {
+      for (int i = 0; i < _imports.size(); i++) {
+        Import imp = _imports.get(i);
+
+        if (imp.getSchema() != null)
+          imp.getSchema().writeJAXBClasses(outputDirectory, pkg);
+      }
+    }
+
+    // XXX Elements -> ObjectFactory 
+  }
+
+  public Type getType(QName typeName)
+  {
+    if (typeName.getNamespaceURI() == null ||
+        typeName.getNamespaceURI().equals(_targetNamespace)) {
+      // look at the immediate children types
+      if (_types != null) {
+        for (int i = 0; i < _types.size(); i++) {
+          Type type = _types.get(i);
+
+          if (type.getName().equals(typeName.getLocalPart()))
+            return type;
+        }
+      }
+
+      if (_imports != null) {
+        for (int i = 0; i < _imports.size(); i++) {
+          Import imp = _imports.get(i);
+          Schema schema = imp.getSchema();
+
+          if (schema != null && 
+              (schema.getTargetNamespace() == null ||
+               schema.getTargetNamespace().equals(getTargetNamespace()))) {
+            Type type = schema.getType(typeName);
+
+            if (type != null)
+              return type;
+          }
+        }
+      }
+    }
+    else {
+      // look for the children in imported/included schema
+      if (_imports != null) {
+        for (int i = 0; i < _imports.size(); i++) {
+          Import imp = _imports.get(i);
+          Schema schema = imp.getSchema();
+
+          if (schema != null && 
+              schema.getTargetNamespace().equals(typeName.getNamespaceURI())) {
+            Type type = schema.getType(typeName);
+
+            if (type != null)
+              return type;
+          }
+        }
+      }
+    }
+
+    return null;
   }
 }

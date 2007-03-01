@@ -28,9 +28,15 @@
 
 package com.caucho.xml.schema;
 
+import java.io.*;
+import java.net.*;
 import java.util.*;
 import static javax.xml.XMLConstants.*;
+import javax.xml.bind.*;
 import javax.xml.bind.annotation.*;
+import javax.xml.stream.Location;
+
+import com.caucho.jaxb.annotation.XmlLocation;
 
 /**
  * JAXB annotated Schema data structure.
@@ -38,11 +44,18 @@ import javax.xml.bind.annotation.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="import", namespace=W3C_XML_SCHEMA_NS_URI)
 public class Import {
+  /** the imported schema */
+  @XmlTransient
+  private Schema _schema;
+
   @XmlAttribute(name="namespace")
   private String _namespace;
 
   @XmlAttribute(name="schemaLocation")
   private String _schemaLocation;
+
+  @XmlLocation
+  private Location _location;
 
   public String getNamespace()
   {
@@ -52,5 +65,46 @@ public class Import {
   public String getSchemaLocation()
   {
     return _schemaLocation;
+  }
+
+  public void resolve(Unmarshaller u)
+    throws JAXBException
+  {
+    Object obj = null;
+
+    try {
+      obj = u.unmarshal(new URL(getSchemaLocation()));
+    }
+    catch (MalformedURLException e) {
+    }
+
+    System.out.println("  _location = " + _location.getSystemId());
+
+    File file = new File(getSchemaLocation());
+
+    if (! file.exists()) {
+      if (! file.getName().startsWith("/")) {
+        file = new File(_location.getSystemId());
+
+        file = file.getParentFile();
+
+        if (file == null)
+          throw new JAXBException("File not found: " + getSchemaLocation());
+
+        file = new File(file, getSchemaLocation());
+      }
+    }
+
+    obj = u.unmarshal(file);
+
+    System.out.println("Found " + file);
+
+    if (obj instanceof Schema)
+      _schema = (Schema) obj;
+  }
+
+  public Schema getSchema()
+  {
+    return _schema;
   }
 }
