@@ -1577,6 +1577,21 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println(getClassName() + " o = new " + getClassName() + "();");
 
+    out.println();
+    out.println("return __caucho_copyTo((com.caucho.amber.entity.Entity) o, aConn, item);");
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public com.caucho.amber.entity.Entity __caucho_copyTo(com.caucho.amber.entity.Entity targetEntity,");
+    out.println("                                                      com.caucho.amber.manager.AmberConnection aConn,");
+    out.println("                                                      com.caucho.amber.entity.EntityItem item)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println(getClassName() + " o = (" + getClassName() + ") targetEntity;");
+
     out.println("o.__caucho_item = item;");
     out.println();
     out.println("this.__caucho_copyTo((com.caucho.amber.entity.Entity) o, aConn);");

@@ -121,14 +121,22 @@ public class CacheableEntityItem extends EntityItem {
       _cacheItem.__caucho_expire();
     }
 
-    // jpa/0v33
-
     try {
+      // jpa/0v33
+      // Prepared statements are cached per context so
+      // at this point, the cache item needs to use the
+      // context connection.
       _cacheItem.__caucho_setConnection(aConn);
       _cacheItem.__caucho_retrieve(aConn);
     } catch (SQLException e) {
       // XXX: item is dead
       throw new RuntimeException(e);
+    } finally {
+      // After loading the entity, all prepared statements
+      // were properly cached into the context connection.
+      // Now make the cached entity item independent
+      // from any particular context.
+      _cacheItem.__caucho_setConnection(null);
     }
 
     return _cacheItem;
@@ -140,6 +148,14 @@ public class CacheableEntityItem extends EntityItem {
   public Entity copy(AmberConnection aConn)
   {
     return _cacheItem.__caucho_copy(aConn, this);
+  }
+
+  /**
+   * Creates a bean instance
+   */
+  public Entity copyTo(Entity targetEntity, AmberConnection aConn)
+  {
+    return _cacheItem.__caucho_copyTo(targetEntity, aConn, this);
   }
 
   /**

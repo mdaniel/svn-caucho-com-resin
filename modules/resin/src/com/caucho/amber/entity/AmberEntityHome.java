@@ -293,17 +293,29 @@ public class AmberEntityHome {
                      boolean isLoad)
     throws AmberException
   {
-    EntityItem item = findEntityItem(aConn, key, isLoad);
+    try {
+      // jpa/0o01, jpa/0o41
 
-    if (item == null) {
-      if (_manager.isJPA())
-        return null;
+      // Adds the copy object to the context before anything.
+      // The cached entity should never be added to the context.
+      Entity copy = _homeBean.getClass().newInstance();
+      copy.__caucho_setPrimaryKey(key);
+      aConn.addEntity(copy);
 
-      // ejb/0604
-      throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
+      EntityItem item = findEntityItem(aConn, key, isLoad);
+
+      if (item == null) {
+        if (_manager.isJPA())
+          return null;
+
+        // ejb/0604
+        throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
+      }
+
+      return item.copyTo(copy, aConn);
+    } catch (Exception e) {
+      throw AmberException.create(e);
     }
-
-    return item.copy(aConn);
   }
 
   /**
@@ -318,6 +330,8 @@ public class AmberEntityHome {
                                    boolean isLoad)
     throws AmberException
   {
+    log.finest("findEntityItem: "+key+" "+isLoad);
+
     if (key == null)
       return null; // ejb/0a06 throw new NullPointerException("primaryKey");
 
@@ -327,6 +341,8 @@ public class AmberEntityHome {
       // XXX: ejb/0d01 should not check this.
       // jpa/0y14 if (aConn.shouldRetrieveFromCache())
       item = _manager.getEntity(getRootType(), key);
+
+      log.finest("findEntityItem item is null? "+(item == null));
 
       if (item == null) {
         if (_homeBean == null && _configException != null)
@@ -341,6 +357,8 @@ public class AmberEntityHome {
 
         cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
 
+        log.finest("findEntityItem cacheEntity is null? "+(cacheEntity == null));
+
         // Object does not exist.
         if (cacheEntity == null) {
           if (_manager.isJPA())
@@ -350,12 +368,16 @@ public class AmberEntityHome {
           throw new AmberObjectNotFoundException("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]");
         }
 
+        item = new CacheableEntityItem(this, cacheEntity);
+
+        item = _manager.putEntity(getRootType(), key, item);
+
+        // jpa/0o41
         if (isLoad) {
           cacheEntity.__caucho_retrieve(aConn);
         }
 
-        item = new CacheableEntityItem(this, cacheEntity);
-        item = _manager.putEntity(getRootType(), key, item);
+        log.finest("findEntityItem after putEntity item is null? "+(item == null));
       }
       else if (isLoad) {
         if (aConn.isInTransaction()) {
@@ -384,6 +406,8 @@ public class AmberEntityHome {
         // jpa/0ga8
         aConn.setTransactionalState(item.getEntity());
       }
+
+      log.finest("returning item is null? "+(item == null));
 
       return item;
     } catch (Exception e) {

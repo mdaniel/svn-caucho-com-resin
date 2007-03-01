@@ -288,6 +288,9 @@ public class LoadGroupGenerator extends ClassComponent {
     _relatedType.generateLoad(out, "rs", "", 1, _index, null);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
 
+    // jpa/0o01, jpa/0o04
+    // XXX: Should be handled in AmberEntityHome.find()?
+    // XXX: Will this ever add the cache entity to the context?
     if (_relatedType instanceof EntityType) {
       // XXX: add isJPA test?
       out.println("aConn.addEntity(this);");

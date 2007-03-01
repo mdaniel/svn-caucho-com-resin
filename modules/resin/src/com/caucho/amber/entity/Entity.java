@@ -186,7 +186,14 @@ public interface Entity extends MappedSuperclass
   public Entity __caucho_copy(AmberConnection aConn, EntityItem cacheItem);
 
   /**
-   * Copies this entity state into an existing entity.
+   * Copies this entity state to an existing entity.
+   */
+  public Entity __caucho_copyTo(Entity targetEntity,
+                                AmberConnection aConn,
+                                EntityItem cacheItem);
+
+  /**
+   * Copies this entity state to an existing entity.
    */
   public void __caucho_copyTo(Entity targetEntity,
                               AmberConnection aConn);

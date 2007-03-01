@@ -612,6 +612,12 @@ public class EntityManyToOneField extends CascadableField {
     String extClassName = getRelatedType().getInstanceClassName(); // getRelatedType().getName() + "__ResinExt";
     out.println(extClassName + " item = (" + extClassName + ") __caucho_item.getEntity();");
 
+    // jpa/0o01, jpa/0o04: eagerly loading.
+    // XXX: will this ever add the cached entity?
+    if (getSourceType() instanceof EntityType) {
+      out.println("__caucho_session.addEntity(this);");
+    }
+
     out.println("item.__caucho_item_" + getGetterName() + "(__caucho_session);");
 
     generateCopyLoadObject(out, "super", "item", getLoadGroupIndex());
@@ -653,10 +659,13 @@ public class EntityManyToOneField extends CascadableField {
   {
     String javaType = getJavaTypeName();
 
+    /* XXX: jpa/0o01: should be handled in AmberEntityHome.find().
+       Should not add "this" because it could be a cache item.
     if (getSourceType() instanceof EntityType) {
       // jpa/0o04
       out.println(session + ".addEntity(this);");
     }
+    */
 
     // ejb/06h0
     if (isAbstract()) {
@@ -907,7 +916,10 @@ public class EntityManyToOneField extends CascadableField {
 
     String getter = generateSuperGetter();
 
-    out.println("if (" + getter + " != null) {");
+    String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
+    long dirtyMask = (1L << (getIndex() % 64));
+
+    out.println("if ((" + getter + " != null) && (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSIST || (" + dirtyVar + " & " + dirtyMask + ") != 0L)) {");
     out.pushDepth();
 
     String relatedEntity = "((com.caucho.amber.entity.Entity) " + getter + ")";
