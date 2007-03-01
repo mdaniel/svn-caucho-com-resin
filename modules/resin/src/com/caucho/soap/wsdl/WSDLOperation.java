@@ -28,34 +28,46 @@
 
 package com.caucho.soap.wsdl;
 
+import java.io.IOException;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
+
+import static com.caucho.soap.wsdl.WSDLConstants.*;
+
+import com.caucho.java.JavaWriter;
+
+import com.caucho.xml.schema.Type;
 
 /**
  * WSDL operation definition
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="tOperation", namespace="http://schemas.xmlsoap.org/wsdl/")
+@XmlType(name="tOperation", namespace=WSDL_NAMESPACE)
 public class WSDLOperation extends WSDLNamedExtensibleDocumented {
 
-  @XmlElements({
-    @XmlElement(type=WSDLOperationInput.class,
-                name="input", namespace="http://schemas.xmlsoap.org/wsdl/"),
-    @XmlElement(type=WSDLOperationOutput.class,
-                name="output", namespace="http://schemas.xmlsoap.org/wsdl/"),
-    @XmlElement(type=WSDLOperationFault.class,
-                name="fault", namespace="http://schemas.xmlsoap.org/wsdl/")
-  })
-  private List<WSDLOperationPart> _parts;
+  @XmlElement(name="input", namespace=WSDL_NAMESPACE)
+  private List<WSDLOperationInput> _inputs;
+
+  @XmlElement(name="output", namespace=WSDL_NAMESPACE)
+  private List<WSDLOperationOutput> _outputs;
+
+  @XmlElement(name="fault", namespace=WSDL_NAMESPACE)
+  private List<WSDLOperationFault> _faults;
 
   @XmlAttribute(name="parameterOrder")
   private List<String> _parameterOrder;
+
+  @XmlTransient
+  private WSDLPortType _portType;
 
   public List<String> getParameterOrder()
   {
@@ -70,19 +82,127 @@ public class WSDLOperation extends WSDLNamedExtensibleDocumented {
     _parameterOrder.add(param);
   }
 
-  public List<WSDLOperationPart> getOperationParts()
+  public List<WSDLOperationInput> getInputs()
   {
-    if (_parts == null)
-      _parts = new ArrayList<WSDLOperationPart>();
+    if (_inputs == null)
+      _inputs = new ArrayList<WSDLOperationInput>();
 
-    return _parts;
+    return _inputs;
   }
 
-  public void addOperationPart(WSDLOperationPart part)
+  public List<WSDLOperationOutput> getOutputs()
   {
-    if (_parts == null)
-      _parts = new ArrayList<WSDLOperationPart>();
+    if (_outputs == null)
+      _outputs = new ArrayList<WSDLOperationOutput>();
 
-    _parts.add(part);
+    return _outputs;
+  }
+
+  public List<WSDLOperationFault> getFaults()
+  {
+    if (_faults == null)
+      _faults = new ArrayList<WSDLOperationFault>();
+
+    return _faults;
+  }
+
+  public void setPortType(WSDLPortType portType)
+  {
+    _portType = portType;
+  }
+
+  public WSDLPortType getPortType()
+  {
+    return _portType;
+  }
+
+  public void generateJava(JavaWriter out)
+    throws IOException
+  {
+    WSDLDefinitions wsdl = _portType.getDefinitions();
+
+    out.print("public ");
+
+    if (_outputs == null || _outputs.size() == 0)
+      out.print("void ");
+    else {
+      WSDLOperationOutput output = _outputs.get(0);
+      WSDLMessage message = output.getMessage();
+      List<WSDLPart> parts = message.getParts();
+
+      if (parts.size() == 0)
+        out.print("void ");
+      else {
+        Type type = parts.get(0).getType();
+        type.setEmit(false);
+
+        out.print(type.getJavaType(0));
+        out.print(" ");
+      }
+
+      //XXX more output parts?
+    }
+
+    out.print(getName());
+    out.print("(");
+
+    if (_inputs != null && _inputs.size() > 0) {
+      WSDLOperationInput input = _inputs.get(0);
+      WSDLMessage message = input.getMessage();
+      List<WSDLPart> parts = message.getParts();
+
+      for (int i = 0; i < parts.size(); i++) {
+        Type type = parts.get(i).getType();
+        type.setEmit(false);
+
+        int j = 0;
+
+        for (String name = type.getArgumentName(j);
+             name != null;
+             name = type.getArgumentName(j)) {
+          if (j > 0) 
+            out.print(", ");
+
+          out.print("@WebParam(name=\"");
+          out.print(name);
+          out.print("\") ");
+
+          String javaType = type.getJavaType(j);
+          out.print(javaType);
+          out.print(" arg" + j);
+          j++;
+        }
+      }
+
+      //XXX more input parts?
+    }
+
+    out.print(")");
+
+    if (_faults != null && _faults.size() > 0) {
+      out.println();
+      out.pushDepth();
+      out.print("throws ");
+
+      WSDLOperationFault fault = _faults.get(0);
+      WSDLMessage message = fault.getMessage();
+      List<WSDLPart> parts = message.getParts();
+
+      for (int i = 0; i < parts.size(); i++) {
+        Type type = parts.get(i).getType();
+        type.setEmitFaultWrapper(true);
+
+        if (i > 0)
+          out.print(", ");
+
+        out.print(type.getFaultWrapperClassname());
+      }
+
+      out.popDepth();
+
+      //XXX more fault parts?
+    }
+
+    out.println(";");
   }
 }

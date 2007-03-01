@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -32,6 +32,7 @@ package com.caucho.soap.skeleton;
 import com.caucho.jaxb.skeleton.Property;
 
 import javax.jws.WebParam;
+import static javax.xml.XMLConstants.*;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -41,7 +42,10 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 
-abstract public class ParameterMarshal {
+public abstract class ParameterMarshal {
+  protected static final String TARGET_NAMESPACE_PREFIX = "m";
+  protected static final String XML_SCHEMA_PREFIX = "xsd";
+
   protected final int _arg;
   protected final Property _property;
   protected final QName _name;
@@ -72,6 +76,9 @@ abstract public class ParameterMarshal {
     case OUT:
       return new OutParameterMarshal(arg, property, name, 
                                      marshaller, unmarshaller);
+    case INOUT:
+      return new InOutParameterMarshal(arg, property, name, 
+                                       marshaller, unmarshaller);
     default:
       throw new UnsupportedOperationException();
     }
@@ -80,6 +87,11 @@ abstract public class ParameterMarshal {
   public int getArg()
   {
     return _arg;
+  }
+
+  public QName getName()
+  {
+    return _name;
   }
 
   //
@@ -91,7 +103,7 @@ abstract public class ParameterMarshal {
   {
   }
 
-  public Object deserializeReply(XMLStreamReader in)
+  public Object deserializeReply(XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
     return null;
@@ -111,10 +123,6 @@ abstract public class ParameterMarshal {
   {
   }
 
-  public void deserializeCallDefault(Object []args)
-  {
-  }
-
   public void serializeReply(XMLStreamWriter out, Object ret)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -123,5 +131,28 @@ abstract public class ParameterMarshal {
   public void serializeReply(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
+  }
+
+  public void writeElement(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", W3C_XML_SCHEMA_NS_URI);
+    out.writeAttribute("name", _name.getLocalPart());
+
+    int colon = _property.getSchemaType().indexOf(':');
+
+    if (colon < 0) 
+      out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + 
+                                 _property.getSchemaType());
+    else 
+      out.writeAttribute("type", _property.getSchemaType());
+
+    // XXX list?
+    if (_property.getMaxOccurs() != null) {
+      out.writeAttribute("minOccurs", "0");
+      out.writeAttribute("maxOccurs", _property.getMaxOccurs());
+    }
+    else if (_property.getMinOccurs() != null)
+      out.writeAttribute("minOccurs", _property.getMinOccurs());
   }
 }

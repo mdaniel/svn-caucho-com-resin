@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -32,7 +32,10 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.namespace.QName;
+
+import com.caucho.xml.schema.Type;
 
 /**
  * WSDL message part.
@@ -41,20 +44,36 @@ import javax.xml.namespace.QName;
 @XmlRootElement(name="part", namespace="http://schemas.xmlsoap.org/wsdl/")
 public class WSDLPart extends WSDLNamedExtensibleAttributeDocumented {
   @XmlAttribute(name="type")
-  private QName _type;
+  private QName _typeName;
 
   @XmlAttribute(name="element")
   private QName _element;
 
+  @XmlTransient
+  private Type _type;
+
+  /**
+   * Sets the type name.
+   */
+  public void setTypeName(QName typeName)
+  {
+    _typeName = typeName;
+  }
+
+  public QName getTypeName()
+  {
+    return _typeName;
+  }
+
   /**
    * Sets the type.
    */
-  public void setType(QName type)
+  public void setType(Type type)
   {
     _type = type;
   }
 
-  public QName getType()
+  public Type getType()
   {
     return _type;
   }

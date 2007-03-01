@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -32,22 +32,39 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.caucho.soap.wsdl.WSDLConstants.*;
+
 /**
  * WSDL binding definition
  */
-@XmlType(name="tBinding", namespace="http://schemas.xmlsoap.org/wsdl/")
+@XmlType(name="tBinding", namespace=WSDL_NAMESPACE)
 public class WSDLBinding extends WSDLNamedExtensibleDocumented
                          implements WSDLDefinition {
-  @XmlElement(name="operation", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlElement(name="operation", namespace=WSDL_NAMESPACE)
   protected List<WSDLBindingOperation> _operations;
 
   @XmlAttribute(required=true, name="type")
   protected QName _type;
+
+  @XmlTransient
+  private WSDLPortType _portType;
+
+  @XmlTransient
+  public void setPortType(WSDLPortType portType)
+  {
+    _portType = portType;
+  }
+
+  public WSDLPortType getPortType()
+  {
+    return _portType;
+  }
 
   /**
    * Sets the binding type.

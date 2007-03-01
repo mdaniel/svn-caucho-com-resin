@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -35,8 +35,11 @@ import com.caucho.util.L10N;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 import java.lang.reflect.Method;
+import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -56,144 +59,14 @@ public class RpcAction extends AbstractAction {
                    Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
-    super(method, jaxbContext, targetNamespace);
+    super(method, jaxbContext, targetNamespace, marshaller, unmarshaller);
 
-    /*
+  }
 
-    // WSDL message name
-    String messageName = DirectSkeleton.getWebServiceName(cl) + "_" + 
-                         _methodName;
 
-    _inputMessage.setName(messageName);
-    _outputMessage.setName(messageName + "Response");
-
-    _wsdlOperation.setName(_methodName);
-    _wsdlBindingOperation.setName(_methodName);
-
-    SOAPBody soapBody = new SOAPBody();
-    soapBody.addEncodingStyle("http://schemas.xmlsoap.org/soap/encoding/");
-    soapBody.setUse(SOAPUseChoice.LITERAL);
-    soapBody.setNamespace(targetNamespace);
-
-    WSDLBindingOperationMessage bindingInput = 
-      new WSDLBindingOperationMessage();
-    bindingInput.addAny(soapBody);
-    _wsdlBindingOperation.setInput(bindingInput);
-
-    WSDLBindingOperationMessage bindingOutput = 
-      new WSDLBindingOperationMessage();
-    bindingOutput.addAny(soapBody);
-    _wsdlBindingOperation.setOutput(bindingOutput);
-
-    SOAPOperation soapOperation = new SOAPOperation();
-    soapOperation.setSoapAction("");
-    _wsdlBindingOperation.addAny(soapOperation);
-
-    _jaxbContext = jaxbContext;
-
-    //
-    // Create wrappers for input and output parameters
-    //
-    
-    switch (_jaxbStyle) {
-      case DOCUMENT_BARE:
-        prepareDocumentBareParameters();
-        break;
-
-      case DOCUMENT_WRAPPED:
-        prepareDocumentWrappedParameters();
-        break;
-
-      case RPC:
-        prepareDocumentWrappedParameters();
-        break;
-    }
-
-    for (int i = 0; i < params.length; i++) {
-      boolean isInput = true;
-      WSDLPart part = new WSDLPart();
-
-      String localName = "arg" + i; // As per JAX-WS spec
-
-      for(Annotation a : annotations[i]) {
-        if (a instanceof WebParam) {
-          WebParam webParam = (WebParam) a;
-
-          if (! "".equals(webParam.name()))
-            localName = webParam.name();
-
-          if ("".equals(webParam.targetNamespace()))
-            _argMarshall[i]._name = new QName(localName);
-          else 
-            _argMarshall[i]._name = 
-              new QName(localName, webParam.targetNamespace());
-
-          if (params[i].equals(Holder.class)) {
-            _argMarshall[i]._mode = webParam.mode();
-
-            if (_argMarshall[i]._mode == WebParam.Mode.OUT)
-              isInput = false;
-          }
-        }
-      }
-
-      part.setName(localName);
-      part.setType(marshall.getXmlSchemaDatatype());
-
-      if (isInput) {
-        _inputMessage.addPart(part);
-        _wsdlOperation.addParameterOrder(localName);
-      }
-      else {
-        _outputMessage.addPart(part);
-        _inputArgumentCount--;
-      }
-
-      argNames.put(localName, _argMarshall[i]);
-    }
-
-    WSDLOperationInput opInput = new WSDLOperationInput();
-    opInput.setMessage(new QName(targetNamespace, 
-                                 _inputMessage.getName(), 
-                                 TARGET_NAMESPACE_PREFIX));
-    _wsdlOperation.addOperationPart(opInput);
-
-    WSDLOperationOutput opOutput = new WSDLOperationOutput();
-    opOutput.setMessage(new QName(targetNamespace, 
-                                  _outputMessage.getName(), 
-                                  TARGET_NAMESPACE_PREFIX));
-    _wsdlOperation.addOperationPart(opOutput);
-
-    // XXX Can input/output messages have no parts?
-
-    _retMarshall = 
-      factory.createSerializer(method.getReturnType(), _jaxbContext);
-
-    if (method.isAnnotationPresent(WebResult.class))
-      _resultName =
-        new QName(method.getAnnotation(WebResult.class).targetNamespace(),
-                  method.getAnnotation(WebResult.class).name());
-    else
-      _resultName = new QName("return");
-
-    if (! method.getReturnType().equals(Void.class) &&
-        ! method.getReturnType().equals(void.class)) {
-      WSDLPart part = new WSDLPart();
-      part.setName(_resultName.getLocalPart());
-      part.setType(_retMarshall.getXmlSchemaDatatype());
-      _outputMessage.addPart(part);
-    }
-    */
-
-    //
-    // Exceptions -> Faults
-    //
-    
-    // XXX
-    /*Class[] exceptions = getExceptionTypes();
-
-    for (Class exception : exceptions)
-      exceptionToFault(exception);
-      */
+  protected Object readResponse(XMLStreamReader in, Object []args)
+    throws IOException, XMLStreamException, JAXBException, Throwable
+  {
+    throw new UnsupportedOperationException();
   }
 }

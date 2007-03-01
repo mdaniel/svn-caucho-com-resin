@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,18 +30,15 @@
 package com.caucho.soap.skeleton;
 
 import com.caucho.jaxb.JAXBContextImpl;
+import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.skeleton.Property;
 
-import com.caucho.soap.wsdl.SOAPOperation;
-import com.caucho.soap.wsdl.WSDLBindingOperation;
-import com.caucho.soap.wsdl.WSDLBindingOperationMessage;
-import com.caucho.soap.wsdl.WSDLMessage;
-import com.caucho.soap.wsdl.WSDLOperation;
-import com.caucho.soap.wsdl.WSDLOperationFault;
+import static com.caucho.soap.wsdl.WSDLConstants.*;
 import com.caucho.util.L10N;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
+import static javax.xml.XMLConstants.*;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -53,6 +50,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.SOAPFaultException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,7 +62,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -76,7 +74,8 @@ public abstract class AbstractAction {
     Logger.getLogger(AbstractAction.class.getName());
   private static final L10N L = new L10N(AbstractAction.class);
 
-  private static final String TARGET_NAMESPACE_PREFIX = "tns";
+  protected static final String XML_SCHEMA_PREFIX = "xsd";
+  protected static final String TARGET_NAMESPACE_PREFIX = "m";
   protected static final String SOAP_ENCODING_STYLE 
     = "http://schemas.xmlsoap.org/soap/encoding/";
 
@@ -87,46 +86,41 @@ public abstract class AbstractAction {
 
   protected final Method _method;
   protected final int _arity;
+  protected boolean _isOneway;
 
   protected String _responseName;
   protected String _operationName;
   protected QName _requestName;
   protected QName _resultName;
 
-  // XXX: add array for efficiency
-  protected final LinkedHashMap<String,ParameterMarshal> _bodyArguments
-    = new LinkedHashMap<String,ParameterMarshal>();
+  protected final HashMap<String,ParameterMarshal> _bodyArguments
+    = new HashMap<String,ParameterMarshal>();
   protected ParameterMarshal[] _bodyArgs;
 
-  protected final LinkedHashMap<String,ParameterMarshal> _headerArguments
-    = new LinkedHashMap<String,ParameterMarshal>();
+  protected final HashMap<String,ParameterMarshal> _headerArguments
+    = new HashMap<String,ParameterMarshal>();
 
-  protected ParameterMarshal _retMarshal;
+  protected ParameterMarshal _returnMarshal;
 
+  protected final HashMap<Class,ParameterMarshal> _faults
+    = new HashMap<Class,ParameterMarshal>();
+
+  protected final HashMap<QName,ParameterMarshal> _faultNames
+    = new HashMap<QName,ParameterMarshal>();
+
+  protected int _headerInputs;
+  protected int _bodyInputs;
   protected int _headerOutputs;
   protected int _bodyOutputs;
 
   protected final JAXBContextImpl _jaxbContext;
   protected final String _targetNamespace;
 
-  // 
-  // WSDL Constructs
-  //
-  
-  protected final WSDLMessage _inputMessage = new WSDLMessage();
-  protected final WSDLMessage _outputMessage = new WSDLMessage();
-  protected final ArrayList<WSDLMessage> _faultMessages 
-    = new ArrayList<WSDLMessage>();
-
-  protected final WSDLOperation _wsdlOperation = new WSDLOperation();
-  protected final ArrayList<WSDLOperationFault> _wsdlFaults 
-    = new ArrayList<WSDLOperationFault>();
-
-  protected final WSDLBindingOperation _wsdlBindingOperation 
-    = new WSDLBindingOperation();
-
-  protected AbstractAction(Method method, JAXBContextImpl jaxbContext, 
-                           String targetNamespace)
+  protected AbstractAction(Method method, 
+                           JAXBContextImpl jaxbContext, 
+                           String targetNamespace,
+                           Marshaller marshaller,
+                           Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
     _method = method;
@@ -139,22 +133,24 @@ public abstract class AbstractAction {
     _operationName = getWebMethodName(method);
     _responseName = _operationName + "Response";
 
-      _inputMessage.setName(_operationName);
-    _outputMessage.setName(_responseName);
+    Class[] exceptions = method.getExceptionTypes();
 
-    _wsdlOperation.setName(_operationName);
-    _wsdlBindingOperation.setName(_operationName);
-
-    // initialize the binding operation
-
-    _wsdlBindingOperation.setInput(new WSDLBindingOperationMessage());
-    _wsdlBindingOperation.setOutput(new WSDLBindingOperationMessage());
-
-    // SOAP action (URI where SOAP messages are sent)
-    SOAPOperation soapOperation = new SOAPOperation();
-    soapOperation.setSoapAction(""); // XXX
-    // XXX: temp build issue
-    //_wsdlBindingOperation.addAny(soapOperation);
+    for (Class exception : exceptions) {
+      QName faultName = new QName(targetNamespace, 
+                                  JAXBUtil.classBasename(exception),
+                                  TARGET_NAMESPACE_PREFIX);
+      /* XXX check for generated exception classes versus raw exceptions
+       * i.e. things like getFaultInfo()
+      Property property = jaxbContext.createProperty(exception);
+      ParameterMarshal marshal = ParameterMarshal.create(0, 
+                                                         property, 
+                                                         faultName,
+                                                         WebParam.Mode.OUT,
+                                                         marshaller, 
+                                                         unmarshaller);
+      _faults.put(exception, marshal);
+      _faultNames.put(faultName, marshal);*/
+    }
   }
 
   public static AbstractAction createAction(Method method, 
@@ -235,7 +231,8 @@ public abstract class AbstractAction {
    * Client-side invocation.
    */
   public Object invoke(String url, Object[] args)
-    throws IOException, XMLStreamException, MalformedURLException, JAXBException
+    throws IOException, XMLStreamException, MalformedURLException, 
+           JAXBException, Throwable
   {
     URL urlObject = new URL(url);
     URLConnection connection = urlObject.openConnection();
@@ -267,6 +264,9 @@ public abstract class AbstractAction {
 
       if (httpConnection.getResponseCode() != 200)
         return null; // XXX more meaningful error
+
+      if (_isOneway)
+        return null;
 
       InputStream httpIn = httpConnection.getInputStream();
       XMLStreamReader in = _xmlInputFactory.createXMLStreamReader(httpIn);
@@ -318,84 +318,8 @@ public abstract class AbstractAction {
     out.writeEndElement(); // Envelope
   }
 
-  protected Object readResponse(XMLStreamReader in, Object []args)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    Object ret = null;
-
-    in.nextTag();
-
-    if (! "Envelope".equals(in.getName().getLocalPart()))
-      throw new IOException("expected Envelope at " + in.getName());
-
-    // Header
-    if (_headerOutputs > 0) {
-      in.nextTag();
-
-      if (! "Header".equals(in.getName().getLocalPart()))
-        throw new IOException("expected <Header>");
-
-      for (int i = 0; i < _headerOutputs; i++) {
-        String tagName = in.getLocalName();
-
-        ParameterMarshal marshal = _headerArguments.get(tagName);
-
-        if (marshal == null)
-          throw new IOException(L.l("Unknown output in header <{0}>", tagName));
-
-        Object value = marshal.deserializeReply(in);
-
-        if (marshal.getArg() < 0)
-          ret = value;
-        else
-          ((Holder) args[marshal.getArg()]).value = value;
-
-        if (i + 1 < _headerOutputs)
-          in.nextTag();
-      }
-
-      if (in.nextTag() != in.END_ELEMENT)
-        throw new IOException("expected </Header>");
-    }
-
-    // Body is manditory
-    in.nextTag();
-    if (! "Body".equals(in.getName().getLocalPart()))
-      throw new IOException("expected Body");
-
-    // Body
-    if (_bodyOutputs > 0) {
-      for (int i = 0; i < _headerOutputs; i++) {
-        String tagName = in.getLocalName();
-
-        ParameterMarshal marshal = _headerArguments.get(tagName);
-
-        if (marshal == null)
-          throw new IOException(L.l("Unknown output in header <{0}>", tagName));
-
-        Object value = marshal.deserializeReply(in);
-
-        if (marshal._arg < 0)
-          ret = value;
-        else
-          ((Holder) args[marshal.getArg()]).value = value;
-
-        if (i + 1 < _headerOutputs)
-          in.nextTag();
-      }
-    }
-
-    if (in.nextTag() != in.END_ELEMENT)
-      throw new IOException(L.l("expected </Body> at <{0}>",
-            in.getName().getLocalPart()));
-
-
-    if (in.nextTag() != in.END_ELEMENT)
-      throw new IOException(L.l("expected </Envelope> at {0}",
-            in.getName().getLocalPart()));
-
-    return ret;
-  }
+  abstract protected Object readResponse(XMLStreamReader in, Object []args)
+    throws IOException, XMLStreamException, JAXBException, Throwable;
 
   /**
    * Invokes the request for a call.
@@ -405,30 +329,247 @@ public abstract class AbstractAction {
   {
   }
 
-  /**
-   * returns the WSDLMessage for the input of this method.
-   */
-  public WSDLMessage getInputMessage()
+  protected void writeFault(XMLStreamWriter out, Throwable fault)
+    throws IOException, XMLStreamException, JAXBException
   {
-    return _inputMessage;
+    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
+                          "Fault", 
+                          Skeleton.SOAP_ENVELOPE);
+
+    out.writeStartElement("faultcode");
+    out.writeCharacters(Skeleton.SOAP_ENVELOPE_PREFIX + ":Server");
+    out.writeEndElement(); // faultcode
+
+    //
+    // Marshal this exception as a fault.
+    // 
+    // faults must have exactly the same class as declared on the method,
+    // otherwise we emit an internal server error.
+    // XXX This may not be behavior required by the standard and we may 
+    // be able to improve here by casting as a superclass.
+    ParameterMarshal faultMarshal = _faults.get(fault.getClass());
+
+    if (faultMarshal == null) {
+      out.writeStartElement("faultstring");
+      out.writeCharacters(L.l("Internal server error"));
+      out.writeEndElement(); // faultstring
+    }
+    else {
+      out.writeStartElement("faultstring");
+      out.writeCharacters(fault.getMessage());
+      out.writeEndElement(); // faultstring
+
+      out.writeStartElement("detail");
+      faultMarshal.serializeReply(out, fault);
+      out.writeEndElement(); // detail 
+    }
+
+    out.writeEndElement(); // Fault
   }
 
-  /**
-   * returns the WSDLMessage for the output of this method.
-   */
-  public WSDLMessage getOutputMessage()
+  protected Throwable readFault(XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException
   {
-    return _outputMessage;
+    Throwable fault = null;
+    String message = null;
+
+    while (in.nextTag() == XMLStreamReader.START_ELEMENT) {
+      if ("faultcode".equals(in.getLocalName())) {
+        if (in.next() == XMLStreamReader.CHARACTERS) {
+          String code = in.getText();
+          int colon = code.indexOf(':');
+
+          if (colon >= 0)
+            code = code.substring(colon + 1);
+
+          if ("Server".equalsIgnoreCase(code)) {
+            // XXX Do anything with this?
+          }
+          else if ("Client".equalsIgnoreCase(code)) {
+            // XXX Do anything with this?
+          }
+          else if ("VersionMismatch".equalsIgnoreCase(code)) {
+            // XXX Do anything with this?
+          }
+          else if ("MustUnderstand".equalsIgnoreCase(code)) {
+            // XXX Do anything with this?
+          }
+        }
+
+        while (in.nextTag() != XMLStreamReader.END_ELEMENT) {}
+      }
+      else if ("faultstring".equals(in.getLocalName())) {
+        if (in.next() == XMLStreamReader.CHARACTERS)
+          message = in.getText();
+
+        while (in.nextTag() != XMLStreamReader.END_ELEMENT) {}
+      }
+      else if ("faultactor".equals(in.getLocalName())) {
+        // XXX Do anything with this?
+        while (in.nextTag() != XMLStreamReader.END_ELEMENT) {}
+      }
+      else if ("detail".equals(in.getLocalName())) {
+        if (in.nextTag() == XMLStreamReader.START_ELEMENT) {
+          ParameterMarshal faultMarshal = _faultNames.get(in.getName());
+
+          if (faultMarshal != null)
+            fault = (Exception) faultMarshal.deserializeReply(in);
+        }
+
+        while (in.nextTag() != XMLStreamReader.END_ELEMENT) {}
+      }
+    }
+
+    /*
+    if (fault == null)
+      fault = new SOAPFaultException(soapFault);*/
+
+    return fault;
   }
 
-  public WSDLOperation getOperation()
+  public void writeWSDLMessages(XMLStreamWriter out, String soapNamespaceURI)
+    throws XMLStreamException
   {
-    return _wsdlOperation;
+    out.writeStartElement(WSDL_NAMESPACE, "message");
+    out.writeAttribute("name", _operationName);
+
+    out.writeEmptyElement(WSDL_NAMESPACE, "part");
+    out.writeAttribute("name", "parameters"); // XXX partName?
+    out.writeAttribute("element", 
+                       TARGET_NAMESPACE_PREFIX + ':' + _operationName);
+
+    out.writeEndElement(); // message
+
+    if (! _isOneway) {
+      out.writeStartElement(WSDL_NAMESPACE, "message");
+      out.writeAttribute("name", _responseName);
+
+      out.writeEmptyElement(WSDL_NAMESPACE, "part");
+      out.writeAttribute("name", "parameters"); // XXX partName?
+      out.writeAttribute("element", 
+                         TARGET_NAMESPACE_PREFIX + ':' + _responseName);
+
+      out.writeEndElement(); // message
+    }
+  }
+  
+  public void writeWSDLOperation(XMLStreamWriter out, String soapNamespaceURI)
+    throws XMLStreamException
+  {
+    out.writeStartElement(WSDL_NAMESPACE, "operation");
+    out.writeAttribute("name", _operationName);
+    // XXX out.writeAttribute("parameterOrder", "");
+
+    out.writeEmptyElement(WSDL_NAMESPACE, "input");
+    out.writeAttribute("message", 
+                       TARGET_NAMESPACE_PREFIX + ':' + _operationName);
+
+    if (! _isOneway) {
+      out.writeEmptyElement(WSDL_NAMESPACE, "output");
+      out.writeAttribute("message", 
+                         TARGET_NAMESPACE_PREFIX + ':' + _responseName);
+    }
+
+    out.writeEndElement(); // operation
   }
 
-  public WSDLBindingOperation getBindingOperation()
+  public void writeWSDLBindingOperation(XMLStreamWriter out, 
+                                        String soapNamespaceURI)
+    throws XMLStreamException
   {
-    return _wsdlBindingOperation;
+    out.writeStartElement(WSDL_NAMESPACE, "operation");
+    out.writeAttribute("name", _operationName);
+    // XXX out.writeAttribute("parameterOrder", "");
+
+    out.writeEmptyElement(soapNamespaceURI, "operation");
+    out.writeAttribute("soapAction", "");
+
+    out.writeStartElement(WSDL_NAMESPACE, "input");
+    // XXX
+    out.writeEmptyElement(soapNamespaceURI, "body");
+    out.writeAttribute("use", "literal");
+
+    out.writeEndElement(); // input
+
+    if (! _isOneway) {
+      out.writeStartElement(WSDL_NAMESPACE, "output");
+      // XXX
+      out.writeEmptyElement(soapNamespaceURI, "body");
+      out.writeAttribute("use", "literal");
+
+      out.writeEndElement(); // output
+    }
+
+    out.writeEndElement(); // operation
+  }
+
+  public void writeSchema(XMLStreamWriter out, String namespace)
+    throws XMLStreamException
+  {
+    // XXX header arguments
+    
+    out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", W3C_XML_SCHEMA_NS_URI);
+    out.writeAttribute("name", _operationName);
+    out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _operationName);
+
+    if (_bodyInputs + _headerInputs == 0) {
+      out.writeEmptyElement(XML_SCHEMA_PREFIX, 
+                            "complexType", 
+                            W3C_XML_SCHEMA_NS_URI);
+      out.writeAttribute("name", _operationName);
+    }
+    else {
+      out.writeStartElement(XML_SCHEMA_PREFIX, 
+                            "complexType", 
+                            W3C_XML_SCHEMA_NS_URI);
+      out.writeAttribute("name", _operationName);
+
+      out.writeStartElement(XML_SCHEMA_PREFIX, 
+                            "sequence", 
+                            W3C_XML_SCHEMA_NS_URI);
+      
+      for (ParameterMarshal param : _bodyArguments.values()) {
+        if (! (param instanceof OutParameterMarshal))
+          param.writeElement(out);
+      }
+
+      out.writeEndElement(); // sequence
+
+      out.writeEndElement(); // complexType
+    }
+
+    out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", W3C_XML_SCHEMA_NS_URI);
+    out.writeAttribute("name", _responseName);
+    out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _operationName);
+
+    if (_bodyOutputs + _headerOutputs == 0) {
+      out.writeEmptyElement(XML_SCHEMA_PREFIX, 
+                            "complexType", 
+                            W3C_XML_SCHEMA_NS_URI);
+      out.writeAttribute("name", _responseName);
+    }
+    else {
+      out.writeStartElement(XML_SCHEMA_PREFIX, 
+                            "complexType", 
+                            W3C_XML_SCHEMA_NS_URI);
+      out.writeAttribute("name", _responseName);
+
+      out.writeStartElement(XML_SCHEMA_PREFIX, 
+                            "sequence", 
+                            W3C_XML_SCHEMA_NS_URI);
+      
+      if (_returnMarshal != null)
+        _returnMarshal.writeElement(out);
+
+      for (ParameterMarshal param : _bodyArguments.values()) {
+        if (! (param instanceof InParameterMarshal))
+          param.writeElement(out);
+      }
+
+      out.writeEndElement(); // sequence
+
+      out.writeEndElement(); // complexType
+    }
   }
 
   public boolean hasHeaderInput()
@@ -439,13 +580,6 @@ public abstract class AbstractAction {
   public int getArity()
   {
     return _arity;
-  }
-
-  protected static Class getHolderValueType(Type holder)
-  {
-    // XXX Generics and arrays
-    Type holderParams[] = ((ParameterizedType) holder).getActualTypeArguments();
-    return (Class) holderParams[0];
   }
 
   public static String getWebMethodName(Method method)

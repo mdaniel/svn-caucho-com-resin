@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -68,7 +68,7 @@ abstract public class Skeleton {
 
   abstract public Object invoke(Method method, String url, Object[] args)
     throws IOException, XMLStreamException, MalformedURLException, 
-           JAXBException;
+           JAXBException, Throwable;
 }
 
 

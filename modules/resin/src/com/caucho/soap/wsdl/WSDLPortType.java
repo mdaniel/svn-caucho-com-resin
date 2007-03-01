@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,24 +28,37 @@
 
 package com.caucho.soap.wsdl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+
+import javax.xml.bind.Unmarshaller;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
-import java.util.List;
+import javax.xml.bind.annotation.XmlTransient;
+
+import static com.caucho.soap.wsdl.WSDLConstants.*;
 
 /**
  * WSDL PortType definition
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="portType", namespace="http://schemas.xmlsoap.org/wsdl/")
+@XmlRootElement(name="portType", namespace=WSDL_NAMESPACE)
 public class WSDLPortType extends WSDLNamedExtensibleAttributeDocumented 
                           implements WSDLDefinition
 {
-  @XmlElement(name="operation", namespace="http://schemas.xmlsoap.org/wsdl/",
-              type=WSDLOperation.class)
+  @XmlElement(name="operation", namespace=WSDL_NAMESPACE)
   private List<WSDLOperation> _operations;
+
+  @XmlTransient
+  private WSDLDefinitions _definitions;
+
+  private final Map<String,WSDLOperation> _operationMap 
+    = new HashMap<String,WSDLOperation>();
 
   /**
    * Adds an operation.
@@ -67,5 +80,28 @@ public class WSDLPortType extends WSDLNamedExtensibleAttributeDocumented
       _operations = new ArrayList<WSDLOperation>();
 
     return _operations;
+  }
+
+  public void afterUnmarshal(Unmarshaller u, Object o)
+  {
+    if (_operations != null) {
+      for (WSDLOperation operation : _operations)
+        _operationMap.put(operation.getName(), operation);
+    }
+  }
+
+  public WSDLOperation getOperation(String name)
+  {
+    return _operationMap.get(name);
+  }
+
+  public WSDLDefinitions getDefinitions()
+  {
+    return _definitions;
+  }
+
+  public void setDefinitions(WSDLDefinitions definitions)
+  {
+    _definitions = definitions;
   }
 }

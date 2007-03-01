@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,13 +29,8 @@
 
 package com.caucho.soap.skeleton;
 
+import com.caucho.jaxb.skeleton.Property;
 import com.caucho.jaxb.JAXBContextImpl;
-import com.caucho.soap.wsdl.SOAPBody;
-import com.caucho.soap.wsdl.SOAPHeader;
-import com.caucho.soap.wsdl.SOAPUseChoice;
-import com.caucho.soap.wsdl.WSDLOperationInput;
-import com.caucho.soap.wsdl.WSDLOperationOutput;
-import com.caucho.soap.wsdl.WSDLPart;
 import com.caucho.util.L10N;
 
 import javax.jws.WebParam;
@@ -44,11 +39,17 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -65,8 +66,6 @@ public class DocumentBareAction extends AbstractAction {
     Logger.getLogger(DocumentBareAction.class.getName());
   private static final L10N L = new L10N(DocumentBareAction.class);
 
-  private static final String TARGET_NAMESPACE_PREFIX = "tns";
-
   public DocumentBareAction(Method method, 
                             JAXBContextImpl jaxbContext, 
                             String targetNamespace,
@@ -74,274 +73,244 @@ public class DocumentBareAction extends AbstractAction {
                             Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
-    super(method, jaxbContext, targetNamespace);
-    /*
+    super(method, jaxbContext, targetNamespace, marshaller, unmarshaller);
 
-    //
-    // Create marshallers and message/parts for the arguments/return values
-    //
+    Class[] params = method.getParameterTypes();
+    Annotation[][] paramAnn = method.getParameterAnnotations();
 
-    Type[] genericParams = _method.getGenericParameterTypes();
-    Class[] params = _method.getParameterTypes();
-    Annotation[][] annotations = _method.getParameterAnnotations();
+    ArrayList<ParameterMarshal> headerList = new ArrayList<ParameterMarshal>();
+    ArrayList<ParameterMarshal> bodyList = new ArrayList<ParameterMarshal>();
 
-    WSDLPart inputPart = null;
-    WSDLPart outputPart = null;
-
+    boolean haveInput = false;
+    boolean haveOutput = false;
+    
     for (int i = 0; i < params.length; i++) {
+      boolean isInput = true;
+      boolean isHeader = false;
+
       QName name = null;
-      String localName = "arg" + i;
-      Marshall marshall = null;
+      WebParam.Mode mode = WebParam.Mode.IN;
+      String localName = null;
 
-      WebParam webParam = (WebParam) _method.getAnnotation(WebParam.class);
+      for (Annotation ann : paramAnn[i]) {
+        if (ann instanceof WebParam) {
+          WebParam webParam = (WebParam) ann;
 
-      if (webParam != null) {
-        String partName = null;
+          if (! "".equals(webParam.name()))
+            localName = webParam.name();
 
-        if (! "".equals(webParam.partName()))
-          partName = webParam.partName();
+          if ("".equals(webParam.targetNamespace()))
+            name = new QName(localName);
+          else 
+            name = new QName(localName, webParam.targetNamespace());
 
-        if (! "".equals(webParam.name()))
-          localName = webParam.name();
+          if (params[i].equals(Holder.class)) {
+            mode = webParam.mode();
 
-        if (! "".equals(webParam.targetNamespace()))
-          name = new QName(webParam.targetNamespace(), localName);
+            if (mode == WebParam.Mode.OUT)
+              isInput = false;
+          }
+        }
+      }
+
+      if (name == null) {
+        if (localName != null)
+          name = new QName(localName);
         else
-          name = new QName(localName);
-
-        if (webParam.mode() == WebParam.Mode.OUT) {
-          if (outputPart != null)
-            throw new WebServiceException(L.l("Document bare services cannot have more than 1 input and 1 output parameter"));
-
-          if ("".equals(webParam.name()))
-            throw new WebServiceException(L.l("Document bare services must set the name of OUT parameters"));
-
-          if (! params[i].equals(Holder.class))
-            throw new WebServiceException(L.l("Output parameters must be Holder<T>s"));
-
-          outputPart = new WSDLPart();
-          outputPart.setName(partName);
-
-          Class parameterType = getHolderValueType(genericParams[i]);
-          marshall = factory.createSerializer(parameterType, _jaxbContext);
-        }
-        else if (webParam.mode() == WebParam.Mode.INOUT) {
-          if (inputPart != null || outputPart != null)
-            throw new WebServiceException(L.l("Document bare services cannot have more than 1 input and 1 output parameter"));
-
-          if ("".equals(webParam.name()))
-            throw new WebServiceException(L.l("Document bare services must set the name of INOUT parameters"));
-
-          if (! params[i].equals(Holder.class))
-            throw new WebServiceException(L.l("Output parameters must be Holder<T>s"));
-
-          inputPart = new WSDLPart();
-          inputPart.setName(partName);
-
-          outputPart = new WSDLPart();
-          outputPart.setName(partName);
-
-          Class parameterType = getHolderValueType(genericParams[i]);
-          marshall = factory.createSerializer(parameterType, _jaxbContext);
-        }
-        else {
-          if (inputPart != null)
-            throw new WebServiceException(L.l("Document bare services cannot have more than 1 input and 1 output parameter"));
-
-          inputPart = new WSDLPart();
-          inputPart.setName(partName);
-          
-          marshall = factory.createSerializer(params[i], _jaxbContext);
-        }
-
-        ParameterMarshall paramMarshall = 
-          new ParameterMarshall(i, marshall, name, webParam.mode());
-        
-        if (webParam.header()) {
-          _headerArguments.put(localName, paramMarshall);
-
-          if (webParam.mode() == WebParam.Mode.OUT || 
-              webParam.mode() == WebParam.Mode.INOUT)
-            _headerOutputs = 1;
-        }
-        else {
-          _bodyArguments.put(localName, paramMarshall);
-
-          if (webParam.mode() == WebParam.Mode.OUT || 
-              webParam.mode() == WebParam.Mode.INOUT)
-            _bodyOutputs = 1;
-        }
+          name = new QName(method.getName());
       }
-      else {
-        // 
-        // No @WebParam annotation found... assume this is an input
-        //
 
-        if (inputPart != null)
-          throw new WebServiceException(L.l("Document bare services cannot have more than 1 input and 1 output parameter"));
+      Property property = _jaxbContext.createProperty(params[i]);
 
-        inputPart = new WSDLPart();
-        inputPart.setName(localName);
-        name = new QName(localName);
+      ParameterMarshal pMarshal
+        = ParameterMarshal.create(i, property, name, mode,
+                                  marshaller, unmarshaller);
 
-        marshall = factory.createSerializer(params[i], _jaxbContext);
-
-        ParameterMarshall paramMarshall = 
-          new ParameterMarshall(i, marshall, name, WebParam.Mode.IN);
-
-        // no annotation => this goes in the body
-        _bodyArguments.put(localName, paramMarshall);
+      if (isHeader) {
+        headerList.add(pMarshal);
+        _headerArguments.put(localName, pMarshal);
       }
+      else
+        bodyList.add(pMarshal);
     }
 
-    // Check the return value
+    _bodyArgs = new ParameterMarshal[bodyList.size()];
+    bodyList.toArray(_bodyArgs);
+    System.out.println("_bodyArgs.length = " + _bodyArgs.length);
 
-    if (! _method.getReturnType().equals(Void.class) &&
-        ! _method.getReturnType().equals(void.class)) {
-      if (outputPart != null)
-        throw new WebServiceException(L.l("Document bare services cannot have more than 1 input and 1 output parameter"));
+    if (! Void.class.equals(method.getReturnType()) &&
+        ! Void.TYPE.equals(method.getReturnType())) {
+      Property property = _jaxbContext.createProperty(method.getReturnType());
 
-      outputPart = new WSDLPart();
-      Marshall marshall = 
-        factory.createSerializer(_method.getReturnType(), _jaxbContext);
+      if (method.isAnnotationPresent(WebResult.class)) {
+        WebResult webResult = (WebResult) method.getAnnotation(WebResult.class);
 
-      WebResult webResult = (WebResult) _method.getAnnotation(WebResult.class);
+        String localName = webResult.name();
 
-      QName name = null;
-      String partName = null;
-      String localName = _responseName; // XXX???
+        if ("".equals(localName))
+          localName = "return";
 
-      if (webResult != null) {
-        if (! "".equals(webResult.partName()))
-          partName = webResult.partName();
-
-        if (! "".equals(webResult.name()))
-          localName = webResult.name();
-
-        if (! "".equals(webResult.targetNamespace()))
-          name = new QName(webResult.targetNamespace(), localName);
-        else 
-          name = new QName(localName);
-
-        outputPart.setName(partName);
-        outputPart.setType(marshall.getXmlSchemaDatatype());
-
-        ParameterMarshall paramMarshall = 
-          new ParameterMarshall(-1, marshall, name, WebParam.Mode.OUT);
-
-        if (webResult.header()) {
-          _headerArguments.put(localName, paramMarshall);
-          _headerOutputs = 1;
-        }
-        else {
-          _bodyArguments.put(localName, paramMarshall); 
-          _bodyOutputs = 1;
-        }
+        _resultName = new QName(webResult.targetNamespace(), localName);
       }
-      else {
-        name = new QName(localName);
+      else
+        _resultName = new QName("return");
 
-        outputPart.setName(localName);
-
-        ParameterMarshall paramMarshall
-	  = new ParameterMarshall(-1, marshall, name, WebParam.Mode.OUT);
-
-        _bodyArguments.put(localName, paramMarshall);
-      }
+      _returnMarshal = ParameterMarshal.create(0, property, _resultName, 
+                                               WebParam.Mode.OUT,
+                                               marshaller, unmarshaller);
     }
-
-    // SOAP Binding -> binding/operation
-    
-    if (_headerArguments.size() == 0 && _bodyArguments.size() > 0) {
-      SOAPBody soapBody = new SOAPBody();
-      soapBody.addEncodingStyle(SOAP_ENCODING_STYLE);
-      soapBody.setUse(SOAPUseChoice.LITERAL);
-      soapBody.setNamespace(targetNamespace);
-
-      if (_bodyArguments.size() - _bodyOutputs > 0)
-        _wsdlBindingOperation.getInput().addAny(soapBody);
-
-      if (_bodyOutputs > 0)
-        _wsdlBindingOperation.getOutput().addAny(soapBody);
-    }
-    else if (_bodyArguments.size() == 0 && _headerArguments.size() > 0) {
-      SOAPHeader soapHeader = new SOAPHeader();
-      soapHeader.addEncodingStyle(SOAP_ENCODING_STYLE);
-      soapHeader.setUse(SOAPUseChoice.LITERAL);
-      soapHeader.setNamespace(targetNamespace);
-
-      if (_headerArguments.size() - _headerOutputs > 0)
-        _wsdlBindingOperation.getInput().addAny(soapHeader);
-
-      if (_headerOutputs > 0)
-        _wsdlBindingOperation.getOutput().addAny(soapHeader);
-    }
-    else if (_bodyArguments.size() == 1 && _headerArguments.size() == 1) {
-      SOAPBody soapBody = new SOAPBody();
-      soapBody.addEncodingStyle(SOAP_ENCODING_STYLE);
-      soapBody.setUse(SOAPUseChoice.LITERAL);
-      soapBody.setNamespace(targetNamespace);
-
-      SOAPHeader soapHeader = new SOAPHeader();
-      soapHeader.addEncodingStyle(SOAP_ENCODING_STYLE);
-      soapHeader.setUse(SOAPUseChoice.LITERAL);
-      soapHeader.setNamespace(targetNamespace);
-
-      if (_headerOutputs > 0) {
-        _wsdlBindingOperation.getInput().addAny(soapBody);
-        _wsdlBindingOperation.getOutput().addAny(soapHeader);
-      }
-      else {
-        _wsdlBindingOperation.getInput().addAny(soapHeader);
-        _wsdlBindingOperation.getOutput().addAny(soapBody);
-      }
-    }
-
-    // portType/operation/input
-    
-    WSDLOperationInput opInput = new WSDLOperationInput();
-    opInput.setMessage(new QName(targetNamespace, 
-                                 _inputMessage.getName(), 
-                                 TARGET_NAMESPACE_PREFIX));
-    _wsdlOperation.addOperationPart(opInput);
-
-    // portType/operation/output
-    
-    WSDLOperationOutput opOutput = new WSDLOperationOutput();
-    opOutput.setMessage(new QName(targetNamespace, 
-                                  _outputMessage.getName(), 
-                                  TARGET_NAMESPACE_PREFIX));
-    _wsdlOperation.addOperationPart(opOutput);
-
-    // message/part 
-    if (inputPart != null) {
-      _inputMessage.addPart(inputPart);
-
-      ParameterMarshall marshall = _bodyArguments.get(inputPart.getName());
-
-      if (marshall == null)
-        marshall = _headerArguments.get(inputPart.getName());
-    }
-
-    if (outputPart != null) {
-      _outputMessage.addPart(outputPart);
-
-      ParameterMarshall marshall = _bodyArguments.get(outputPart.getName());
-
-      if (marshall == null)
-        marshall = _headerArguments.get(outputPart.getName());
-    }
-
 
     //
-    // Exceptions -> faults
+    // Exceptions -> Faults
     //
+  }
 
-    Class[] exceptions = _method.getExceptionTypes();
+  /**
+   * Invokes the request for a call.
+   */
+  public void invoke(Object service, XMLStreamReader in, XMLStreamWriter out)
+    throws IOException, XMLStreamException, Throwable
+  {
+    // We're starting out at the point in the input stream where the 
+    // arguments are listed and the point in the output stream where
+    // the results are to be written.
+    
+    Object[] args = new Object[_arity];
 
-    // XXX multiple exceptions -> multiple faults?
-    //
-    for (Class exception : exceptions) {
-    }*/
+    // document wrapped => everything must be in order
+    for (int i = 0; i < _bodyArgs.length; i++) {
+      _bodyArgs[i].deserializeCall(in, args);
+      System.out.println("args[" + i + "] = " + args[i]);
+      // XXX lists/arrays
+    }
+
+    Object value = null;
+
+    try {
+      value = _method.invoke(service, args);
+    } 
+    catch (IllegalAccessException e) {
+      throw new Throwable(e);
+    } 
+    catch (IllegalArgumentException e) {
+      throw new Throwable(e);
+    }
+    catch (InvocationTargetException e) {
+      writeFault(out, e.getCause());
+      return;
+    }
+
+    if (! _isOneway) {
+      out.writeStartElement(TARGET_NAMESPACE_PREFIX, 
+                            _responseName, 
+                            _targetNamespace);
+      out.writeNamespace(TARGET_NAMESPACE_PREFIX, _targetNamespace);
+
+      if (_returnMarshal != null)
+        _returnMarshal.serializeReply(out, value);
+
+      for (int i = 0; i < _bodyArgs.length; i++)
+        _bodyArgs[i].serializeReply(out, args);
+
+      out.writeEndElement(); // response name
+    }
+  }
+
+  protected Object readResponse(XMLStreamReader in, Object []args)
+    throws IOException, XMLStreamException, JAXBException, Throwable
+  {
+    Object ret = null;
+
+    if (in.nextTag() != XMLStreamReader.START_ELEMENT
+        || ! "Envelope".equals(in.getLocalName()))
+      throw expectStart("Envelope", in);
+
+    if (in.nextTag() != XMLStreamReader.START_ELEMENT)
+      throw expectStart("Header", in);
+
+    if ("Header".equals(in.getLocalName())) {
+      while (in.nextTag() == XMLStreamReader.START_ELEMENT) {
+        String tagName = in.getLocalName();
+
+        ParameterMarshal marshal = _headerArguments.get(tagName);
+
+        if (marshal != null)
+          marshal.deserializeReply(in, args);
+        else {
+          int depth = 1;
+
+          while (depth > 0) {
+            switch (in.nextTag()) {
+              case XMLStreamReader.START_ELEMENT:
+                depth++;
+                break;
+              case XMLStreamReader.END_ELEMENT:
+                depth--;
+                break;
+              default:
+                throw new IOException("expected </Header>");
+            }
+          }
+        }
+      }
+
+      if (! "Header".equals(in.getLocalName()))
+        throw expectEnd("Header", in);
+
+      if (in.nextTag() != XMLStreamReader.START_ELEMENT)
+        throw expectStart("Body", in);
+    }
+
+    if (! "Body".equals(in.getLocalName()))
+      throw expectStart("Body", in);
+
+    in.nextTag();
+
+    if (in.getEventType() == XMLStreamReader.START_ELEMENT &&
+        "Fault".equals(in.getLocalName())) {
+      Throwable fault = readFault(in);
+
+      if (fault == null)
+        throw new WebServiceException(); // XXX
+
+      throw fault;
+    }
+
+    if (in.getEventType() != XMLStreamReader.START_ELEMENT &&
+        ! _responseName.equals(in.getLocalName()))
+      throw expectStart(_responseName, in);
+
+    in.nextTag();
+
+    if (_returnMarshal != null)
+      ret = _returnMarshal.deserializeReply(in);
+
+    // document wrapped => everything must be in order
+    for (int i = 0; i < _bodyArgs.length; i++)
+      _bodyArgs[i].deserializeReply(in, args);
+
+    if (in.getEventType() != XMLStreamReader.END_ELEMENT &&
+        ! _responseName.equals(in.getLocalName()))
+      throw expectEnd(_responseName, in);
+
+    if (in.nextTag() != XMLStreamReader.END_ELEMENT &&
+        ! "Body".equals(in.getLocalName()))
+      throw expectEnd("Body", in);
+
+    if (in.nextTag() != in.END_ELEMENT)
+      throw expectEnd("Envelope", in);
+
+    return ret;
+  }
+
+  private IOException expectStart(String expect, XMLStreamReader in)
+  {
+    return new IOException("expected <" + expect + "> at " + in.getName());
+  }
+
+  private IOException expectEnd(String expect, XMLStreamReader in)
+  {
+    return new IOException("expected </" + expect + "> at " + in.getName());
   }
 }
+

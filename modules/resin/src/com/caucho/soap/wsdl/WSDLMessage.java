@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -35,10 +35,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.caucho.soap.wsdl.WSDLConstants.*;
+
 /**
  * WSDL Message definition
  */
-@XmlRootElement(name="message", namespace="http://schemas.xmlsoap.org/wsdl/")
+@XmlRootElement(name="message", namespace=WSDL_NAMESPACE)
 public class WSDLMessage extends WSDLNamedExtensibleDocumented 
                          implements WSDLDefinition 
 {
@@ -47,9 +49,12 @@ public class WSDLMessage extends WSDLNamedExtensibleDocumented
   /**
    * Returns the message part.
    */
-  @XmlElement(name="part", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlElement(name="part", namespace=WSDL_NAMESPACE)
   public List<WSDLPart> getParts()
   {
+    if (_parts == null)
+      return new ArrayList<WSDLPart>();
+
     return _parts;
   }
 

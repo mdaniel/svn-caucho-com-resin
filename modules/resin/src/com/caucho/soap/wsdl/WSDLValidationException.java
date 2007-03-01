@@ -31,21 +31,25 @@ package com.caucho.soap.wsdl;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.List;
 
-import static com.caucho.soap.wsdl.WSDLConstants.*;
+/**
+ * WSDL message part.
+ */
+public class WSDLValidationException extends Exception {
+  public WSDLValidationException()
+  {
+    super();
+  }
 
-public interface WSDLConstants {
-  public static final String WSDL_NAMESPACE
-    = "http://schemas.xmlsoap.org/wsdl/";
+  public WSDLValidationException(String msg)
+  {
+    super(msg);
+  }
 
-  public static final String SOAP11_BINDING_NAMESPACE
-    = "http://schemas.xmlsoap.org/wsdl/soap/";
-
-  public static final String SOAP12_BINDING_NAMESPACE 
-    = "http://schemas.xmlsoap.org/wsdl/soap12/";
+  public WSDLValidationException(String msg, Throwable cause)
+  {
+    super(msg, cause);
+  }
 }

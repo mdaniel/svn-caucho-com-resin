@@ -54,7 +54,8 @@ public class ServiceImplInvocationHandler implements InvocationHandler
   }
 
   public Object invoke(Object proxy, Method method, Object[] args)
-    throws IOException, XMLStreamException, MalformedURLException, JAXBException
+    throws IOException, XMLStreamException, MalformedURLException, 
+           JAXBException, Throwable
   {
     Object ret = _skeleton.invoke(method, _url, args);
 

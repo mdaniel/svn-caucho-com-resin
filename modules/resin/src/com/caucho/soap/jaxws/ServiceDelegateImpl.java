@@ -109,24 +109,25 @@ public class ServiceDelegateImpl extends ServiceDelegate {
   public <T> T getPort(QName portName, Class<T> api)
   {
     try {
+      /*
       String url = null;
 
       if (portName != null)
-	url = portName.getNamespaceURI();
+        url = portName.getNamespaceURI();
 
       if (url == null)
-        url = _serviceName.getNamespaceURI();
+        url = _serviceName.getNamespaceURI();*/
       
-      Skeleton skeleton = new WebServiceIntrospector().introspect(api, url);
+      Skeleton skeleton = new WebServiceIntrospector().introspect(api, null);
 
       //System.out.println("PROXY: PORT:" + portName + " SERV:" + _serviceName + " " + _wsdl);
 
-      PortProxyHandler handler = new PortProxyHandler(skeleton, url);
+      PortProxyHandler handler = new PortProxyHandler(skeleton);
 
       return (T) Proxy.newProxyInstance(_classLoader,
-					new Class[] { api,
-						      BindingProvider.class },
-					handler);
+					                              new Class[] { api, 
+                                                      BindingProvider.class },
+                                        handler);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

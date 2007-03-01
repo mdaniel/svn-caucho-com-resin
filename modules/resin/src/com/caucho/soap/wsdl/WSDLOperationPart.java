@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,6 +29,7 @@
 package com.caucho.soap.wsdl;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.namespace.QName;
 
 /**
@@ -38,17 +39,32 @@ public abstract class WSDLOperationPart
   extends WSDLNamedExtensibleAttributeDocumented 
 {
   @XmlAttribute(name="message")
-  protected QName _message;
+  protected QName _messageName;
+
+  @XmlTransient
+  private WSDLMessage _message;
 
   /**
    * Sets the type.
    */
-  public void setMessage(QName message)
+  @XmlTransient
+  public void setMessageName(QName messageName)
+  {
+    _messageName = messageName;
+  }
+
+  public QName getMessageName()
+  {
+    return _messageName;
+  }
+
+  @XmlTransient
+  public void setMessage(WSDLMessage message)
   {
     _message = message;
   }
 
-  public QName getMessage()
+  public WSDLMessage getMessage()
   {
     return _message;
   }

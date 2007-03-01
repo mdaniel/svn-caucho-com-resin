@@ -28,26 +28,37 @@
 
 package com.caucho.soap.wsdl;
 
+import java.io.IOException;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
+
+import static com.caucho.soap.wsdl.WSDLConstants.*;
+
+import com.caucho.java.JavaWriter;
 
 /**
  * WSDL operation definition
  */
-@XmlType(name="tBindingOperation", namespace="http://schemas.xmlsoap.org/wsdl/")
+@XmlType(name="tBindingOperation", namespace=WSDL_NAMESPACE)
 public class WSDLBindingOperation extends WSDLNamedExtensibleDocumented {
-  @XmlElement(name="input", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlElement(name="input", namespace=WSDL_NAMESPACE)
   private WSDLBindingOperationMessage _input;
 
-  @XmlElement(name="output", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlElement(name="output", namespace=WSDL_NAMESPACE)
   private WSDLBindingOperationMessage _output;
 
-  @XmlElement(name="fault", namespace="http://schemas.xmlsoap.org/wsdl/")
+  @XmlElement(name="fault", namespace=WSDL_NAMESPACE)
   private List<WSDLBindingOperationFault> _faults;
+
+  @XmlTransient
+  private WSDLOperation _operation;
 
   public void setInput(WSDLBindingOperationMessage input)
   {
@@ -86,5 +97,23 @@ public class WSDLBindingOperation extends WSDLNamedExtensibleDocumented {
   public List<WSDLBindingOperationFault> getFaults()
   {
     return _faults;
+  }
+
+  public void setOperation(WSDLOperation operation)
+  {
+    _operation = operation;
+  }
+
+  public WSDLOperation getOperation()
+  {
+    return _operation;
+  }
+
+  public void generateJava(JavaWriter out)
+    throws IOException
+  {
+    out.println("@WebMethod");
+    //out.println("@WebResult");
+    getOperation().generateJava(out);
   }
 }

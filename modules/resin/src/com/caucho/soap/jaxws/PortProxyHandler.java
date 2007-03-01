@@ -33,9 +33,13 @@ import com.caucho.soap.skeleton.Skeleton;
 import com.caucho.util.L10N;
 
 import javax.xml.ws.BindingProvider;
+
+import java.io.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.net.ProtocolException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -50,7 +54,6 @@ public class PortProxyHandler implements InvocationHandler {
     = new HashMap<Method,SpecialMethod>();
   
   private Skeleton _skeleton;
-  private String _url;
 
   private HashMap<String,Object> _requestContext
     = new HashMap<String,Object>();
@@ -58,9 +61,8 @@ public class PortProxyHandler implements InvocationHandler {
   private HashMap<String,Object> _responseContext
     = new HashMap<String,Object>();
 
-  public PortProxyHandler(Skeleton skeleton, String url)
+  public PortProxyHandler(Skeleton skeleton)
   {
-    _url = url;
     _skeleton = skeleton;
   }
 
@@ -78,17 +80,23 @@ public class PortProxyHandler implements InvocationHandler {
         case HASH_CODE:
           return System.identityHashCode(this);
 
-        case GET_REQUEST_CONTEXT:
+        case GET_REQUEST_CONTEXT: 
           return _requestContext;
 
         case GET_RESPONSE_CONTEXT:
           return _responseContext;
       }
     }
-    
-    Object ret = _skeleton.invoke(method, _url, args);
 
-    return ret;
+    Object url = _requestContext.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+
+    if (url == null)
+      throw new ProtocolException("No service endpoint address specified");
+    
+    if (! (url instanceof String))
+      throw new IllegalArgumentException("Invalid service endpoint address specified");
+    
+    return _skeleton.invoke(method, (String) url, args);
   }
 
   static {

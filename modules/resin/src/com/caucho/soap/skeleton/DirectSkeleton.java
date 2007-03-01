@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,27 +30,33 @@
 package com.caucho.soap.skeleton;
 
 import com.caucho.jaxb.JAXBUtil;
-import com.caucho.soap.wsdl.*;
+import com.caucho.jaxb.JAXBContextImpl;
+import static com.caucho.soap.wsdl.WSDLConstants.*;
 import com.caucho.util.L10N;
 import com.caucho.xml.XmlPrinter;
 
 import org.w3c.dom.Node;
-
 import javax.jws.WebService;
+import static javax.xml.XMLConstants.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
 import javax.xml.namespace.QName;
+import static javax.xml.soap.SOAPConstants.*;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.soap.SOAPBinding;
+import java.io.CharArrayWriter;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -66,7 +72,10 @@ public class DirectSkeleton extends Skeleton {
     Logger.getLogger(DirectSkeleton.class.getName());
   public static final L10N L = new L10N(DirectSkeleton.class);
 
-  private JAXBContext _context;
+  private static final String TARGET_NAMESPACE_PREFIX = "m";
+
+  private boolean _separateSchema = true;
+  private JAXBContextImpl _context;
   private Marshaller _marshaller;
   private Node _wsdlNode;
 
@@ -79,23 +88,47 @@ public class DirectSkeleton extends Skeleton {
   private String _name;
   private String _typeName;
   private String _portName;
+  private String _portType;
   private String _serviceName;
-  private String _wsdlLocation;
+  private String _wsdlLocation = "REPLACE_WITH_ACTUAL_URL";
 
-  private final WSDLDefinitions _wsdl = new WSDLDefinitions();
-  private final WSDLTypes _wsdlTypes = new WSDLTypes();
-  private final WSDLPortType _wsdlPortType = new WSDLPortType();
-  private final WSDLBinding _wsdlBinding = new WSDLBinding();
-  private final WSDLService _wsdlService = new WSDLService();
-  private final SOAPAddress _soapAddress = new SOAPAddress();
+  // The URI in SOAPBinding is wrong, but matches that of JAVAEE
+  private String _soapNamespaceURI = "http://schemas.xmlsoap.org/wsdl/soap/";
+  private String _soapTransport = SOAP11_BINDING_NAMESPACE;
+  private String _soapStyle = "document";
 
-  public DirectSkeleton(Class type, String wsdlAddress)
+  private CharArrayWriter _wsdlBuffer = new CharArrayWriter();
+  private boolean _wsdlGenerated = false;
+
+  private CharArrayWriter _schemaBuffer = new CharArrayWriter();
+  private boolean _schemaGenerated = false;
+
+  private static XMLOutputFactory _outputFactory;
+
+  private static XMLOutputFactory getXMLOutputFactory()
+    throws XMLStreamException
+  {
+    if (_outputFactory == null) { 
+      _outputFactory = XMLOutputFactory.newInstance();
+      _outputFactory.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,
+                                 Boolean.TRUE);
+    }
+
+    return _outputFactory;
+  }
+
+  public DirectSkeleton(Class type, JAXBContextImpl context, String wsdlAddress)
   {
     WebService webService = (WebService) type.getAnnotation(WebService.class);
     setNamespace(type);
 
     _name = getWebServiceName(type);
     _typeName = _name + "PortType";
+
+    _portType = webService != null && 
+                ! webService.endpointInterface().equals("")
+                ? JAXBUtil.classBasename(webService.endpointInterface())
+                : JAXBUtil.classBasename(type);
 
     _serviceName = webService != null && ! webService.serviceName().equals("")
       ? webService.serviceName()
@@ -111,51 +144,7 @@ public class DirectSkeleton extends Skeleton {
       ? webService.wsdlLocation()
       : null;
 
-    _wsdl.setTargetNamespace(_namespace);
-
-    _wsdl.addDefinition(_wsdlTypes);
-
-    _wsdlPortType.setName(_typeName);
-    _wsdl.addDefinition(_wsdlPortType);
-
-    javax.jws.soap.SOAPBinding sbAnnotation = 
-      (javax.jws.soap.SOAPBinding)
-      type.getAnnotation(javax.jws.soap.SOAPBinding.class);
-
-    com.caucho.soap.wsdl.SOAPBinding soapBinding = 
-      new com.caucho.soap.wsdl.SOAPBinding();
-    soapBinding.setTransport("http://schemas.xmlsoap.org/soap/http");
-
-    if (sbAnnotation != null && 
-        sbAnnotation.style() == javax.jws.soap.SOAPBinding.Style.RPC)
-      soapBinding.setStyle(SOAPStyleChoice.RPC);
-    else
-      soapBinding.setStyle(SOAPStyleChoice.DOCUMENT);
-
-    if (sbAnnotation != null && 
-        sbAnnotation.use() == javax.jws.soap.SOAPBinding.Use.ENCODED)
-      throw new WebServiceException(L.l("Encoded SOAP style not supported by JAX-WS"));
-
-    // XXX: temp build/checkin issue
-    //_wsdlBinding.addAny(soapBinding);
-    _wsdlBinding.setName(_name + "Binding");
-    _wsdlBinding.setType(new QName(_namespace, _typeName, "tns"));
-
-    _wsdl.addDefinition(_wsdlBinding);
-
-    _wsdlService.setName(_serviceName);
-
-    WSDLPort port = new WSDLPort();
-    port.setName(_name + "Port");
-    port.setBinding(new QName(_namespace, _name + "Binding", "tns"));
-
-    _soapAddress.setLocation(wsdlAddress);
-    // XXX: temp build/checkin issue
-    //port.addAny(_soapAddress);
-
-    _wsdlService.addPort(port);
-
-    _wsdl.addDefinition(_wsdlService);
+    _context = context;
   }
 
   public String getNamespace()
@@ -198,19 +187,14 @@ public class DirectSkeleton extends Skeleton {
   public void addAction(String name, AbstractAction action)
   {
     _actionMap.put(name, action);
-
-    _wsdl.addDefinition(action.getInputMessage());
-    _wsdl.addDefinition(action.getOutputMessage());
-
-    _wsdlPortType.addOperation(action.getOperation());
-    _wsdlBinding.addOperation(action.getBindingOperation());
   }
 
   /**
    * Invokes the request on a remote object using an outbound XML stream.
    */
   public Object invoke(Method method, String url, Object[] args)
-    throws IOException, XMLStreamException, MalformedURLException, JAXBException
+    throws IOException, XMLStreamException, MalformedURLException, 
+           JAXBException, Throwable
   {
     String actionName = AbstractAction.getWebMethodName(method);
     AbstractAction action = _actionMap.get(actionName);
@@ -231,7 +215,10 @@ public class DirectSkeleton extends Skeleton {
   {
     in.nextTag();
 
-    if (! "Envelope".equals(in.getName().getLocalPart()))
+    if (in.getEventType() != XMLStreamReader.START_ELEMENT)
+      throw new IOException(L.l("expected start element, not {0}", 
+                                in.getEventType()));
+    else if (! "Envelope".equals(in.getName().getLocalPart()))
       throw new IOException(L.l("expected Envelope at {0}", in.getName()));
 
     in.nextTag();
@@ -300,72 +287,204 @@ public class DirectSkeleton extends Skeleton {
     out.writeEndElement(); // Envelope
   }
 
-  private Node getWSDLNode()
-    throws JAXBException
+  public void setSeparateSchema(boolean separateSchema) 
   {
-    if (_wsdlNode != null)
-      return _wsdlNode;
-
-    if (_context == null)
-      _context = JAXBContext.newInstance("com.caucho.soap.wsdl");
-
-    if (_marshaller == null) {
-      _marshaller = _context.createMarshaller();
-
-      try {
-        _marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-      } 
-      catch(PropertyException e) {
-        // Non fatal
-        log.finer(L.l("Unable to set prefix mapper"));
-      }
+    if (_separateSchema != separateSchema) {
+      _separateSchema = separateSchema;
+      _wsdlGenerated = false;
     }
-
-    DOMResult result = new DOMResult();
-    _marshaller.marshal(_wsdl, result);
-
-    _wsdlNode = result.getNode();
-
-    return _wsdlNode;
   }
 
-  /**
-   * Used by WebServiceIntrospector to append the schema for the WSDL.
-   */
-  public Node getTypesNode()
-    throws JAXBException
+  public void dumpWSDL(OutputStream os)
+    throws IOException, XMLStreamException, JAXBException
   {
-    Node wsdlNode = getWSDLNode();
+    OutputStreamWriter out = null;
 
-    Node definitionsNode = wsdlNode.getFirstChild();
-
-    // XXX switch from getNodeName to getLocalName when QName is fixed
-    if (definitionsNode == null ||
-        ! "definitions".equals(definitionsNode.getNodeName()))
-      throw new JAXBException(L.l("Unable to attach types node"));
-
-    Node typesNode = definitionsNode.getFirstChild();
-
-    if (typesNode == null || ! "types".equals(typesNode.getNodeName()))
-      throw new JAXBException(L.l("Unable to attach types node"));
-
-    return typesNode;
-  }
-
-  public void dumpWSDL(OutputStream w)
-    throws IOException, JAXBException
-  {
-    XmlPrinter printer = new XmlPrinter(w);
-    printer.setPrintDeclaration(true);
-    printer.printPrettyXml(getWSDLNode());
+    try {
+      out = new OutputStreamWriter(os);
+      dumpWSDL(out);
+    }
+    finally {
+      if (out != null)
+        out.close();
+    }
   }
 
   public void dumpWSDL(Writer w)
-    throws IOException, JAXBException
+    throws IOException, XMLStreamException, JAXBException
   {
-    XmlPrinter printer = new XmlPrinter(w);
+    generateWSDL();
+    _wsdlBuffer.writeTo(w);
+  }
+
+  /**
+   * To be accurate, all of the actions must have been added before this
+   * method is run for the first time.
+   **/
+  public void generateWSDL()
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (_wsdlGenerated)
+      return;
+
+    // We write to DOM so that we can pretty print it.  Since this only
+    // happens once, it's not too much of a burden.
+    DOMResult result = new DOMResult();
+    XMLOutputFactory factory = getXMLOutputFactory();
+    XMLStreamWriter out = factory.createXMLStreamWriter(result);
+
+    out.writeStartDocument("UTF-8", "1.0");
+
+    // <definitions>
+
+    out.setDefaultNamespace(WSDL_NAMESPACE);
+    out.writeStartElement(WSDL_NAMESPACE, "definitions");
+    out.writeAttribute("targetNamespace", _namespace);
+    out.writeAttribute("name", _name);
+    out.writeNamespace(TARGET_NAMESPACE_PREFIX, _namespace);
+    out.writeNamespace("soap", _soapNamespaceURI);
+
+    // <types>
+    
+    out.writeStartElement(WSDL_NAMESPACE, "types");
+
+    if (_separateSchema) {
+      out.writeStartElement(W3C_XML_SCHEMA_NS_URI, "schema");
+
+      out.writeEmptyElement(W3C_XML_SCHEMA_NS_URI, "import");
+      out.writeAttribute("namespace", _namespace);
+      out.writeAttribute("schemaLocation",  _serviceName + "_schema1.xsd");
+
+      out.writeEndElement(); // schema 
+    }
+    else
+      writeSchema(out);
+
+    out.writeEndElement(); // types
+
+    // <messages>
+
+    for (AbstractAction action : _actionMap.values())
+      action.writeWSDLMessages(out, _soapNamespaceURI);
+
+    // <portType>
+
+    out.writeStartElement(WSDL_NAMESPACE, "portType");
+    out.writeAttribute("name", _portType);
+
+    for (AbstractAction action : _actionMap.values())
+      action.writeWSDLOperation(out, _soapNamespaceURI);
+
+    out.writeEndElement(); // portType
+
+    // <binding>
+
+    out.writeStartElement(WSDL_NAMESPACE, "binding");
+    out.writeAttribute("name", _portName + "Binding");
+    out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _portType);
+
+    out.writeEmptyElement(_soapNamespaceURI, "binding");
+    out.writeAttribute("transport", _soapTransport);
+    out.writeAttribute("style", _soapStyle);
+
+    for (AbstractAction action : _actionMap.values())
+      action.writeWSDLBindingOperation(out, _soapNamespaceURI);
+
+    out.writeEndElement(); // binding
+
+    // <service>
+
+    out.writeStartElement(WSDL_NAMESPACE, "service");
+    out.writeAttribute("name", _serviceName);
+
+    out.writeStartElement(WSDL_NAMESPACE, "port");
+    out.writeAttribute("name", _portName);
+    out.writeAttribute("binding",
+                       TARGET_NAMESPACE_PREFIX + ':' + _portName + "Binding");
+
+    out.writeEmptyElement(_soapNamespaceURI, "address");
+    out.writeAttribute("location", _wsdlLocation);
+
+    out.writeEndElement(); // port
+
+    out.writeEndElement(); // service 
+
+    out.writeEndElement(); // definitions
+
+    _wsdlBuffer = new CharArrayWriter();
+
+    XmlPrinter printer = new XmlPrinter(_wsdlBuffer);
     printer.setPrintDeclaration(true);
-    printer.printPrettyXml(getWSDLNode());
+    printer.setStandalone("true");
+    printer.printPrettyXml(result.getNode());
+    
+    _wsdlGenerated = true;
+  }
+
+  public void dumpSchema(OutputStream os)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    OutputStreamWriter out = null;
+
+    try {
+      out = new OutputStreamWriter(os);
+      dumpSchema(out);
+    }
+    finally {
+      if (out != null)
+        out.close();
+    }
+  }
+
+  public void dumpSchema(Writer w)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    generateSchema();
+    _schemaBuffer.writeTo(w);
+  }
+
+  public void generateSchema()
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (_schemaGenerated)
+      return;
+
+    // We write to DOM so that we can pretty print it.  Since this only
+    // happens once, it's not too much of a burden.
+    DOMResult result = new DOMResult();
+    XMLOutputFactory factory = getXMLOutputFactory();
+    XMLStreamWriter out = factory.createXMLStreamWriter(result);
+
+    out.writeStartDocument("UTF-8", "1.0");
+
+    writeSchema(out);
+
+    _schemaBuffer = new CharArrayWriter();
+
+    XmlPrinter printer = new XmlPrinter(_schemaBuffer);
+    printer.setPrintDeclaration(true);
+    printer.setStandalone("true");
+    printer.printPrettyXml(result.getNode());
+    
+    _schemaGenerated = true;
+  }
+
+  public void writeSchema(XMLStreamWriter out)
+    throws XMLStreamException, JAXBException
+  {
+    out.writeStartElement("xsd", "schema", W3C_XML_SCHEMA_NS_URI);
+    out.writeAttribute("version", "1.0");
+    out.writeAttribute("targetNamespace", _namespace);
+    out.writeNamespace(TARGET_NAMESPACE_PREFIX, _namespace);
+
+    _context.generateSchemaWithoutHeader(out);
+
+    for (AbstractAction action : _actionMap.values())
+      action.writeSchema(out, _soapNamespaceURI);
+
+    out.writeEndElement(); // schema
+
+    out.flush();
   }
 
   /**
@@ -373,9 +492,26 @@ public class DirectSkeleton extends Skeleton {
    * annotation if present.  (Mainly for TCK, wsgen)
    */
   public void dumpWSDL(String dir)
-    throws IOException, JAXBException
+    throws IOException, XMLStreamException, JAXBException
   {
-    File child = new File(dir, _serviceName + ".wsdl");
-    dumpWSDL(new FileOutputStream(child));
+    FileWriter wsdlOut = null;
+    FileWriter xsdOut = null;
+    
+    try {
+      wsdlOut = new FileWriter(new File(dir, _serviceName + ".wsdl"));
+      dumpWSDL(wsdlOut);
+
+      if (_separateSchema) {
+        xsdOut = new FileWriter(new File(dir, _serviceName + "_schema1.xsd"));
+        dumpSchema(xsdOut);
+      }
+    }
+    finally {
+      if (wsdlOut != null)
+        wsdlOut.close();
+
+      if (xsdOut != null)
+        xsdOut.close();
+    }
   }
 }

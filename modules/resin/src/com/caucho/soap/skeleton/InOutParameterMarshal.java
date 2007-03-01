@@ -24,12 +24,13 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Emil Ong
  */
 
 package com.caucho.soap.skeleton;
 
 import com.caucho.jaxb.skeleton.Property;
+import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -41,9 +42,11 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.Holder;
 import java.io.IOException;
 
-public class OutParameterMarshal extends ParameterMarshal {
-  public OutParameterMarshal(int arg, Property property, QName name, 
-                             Marshaller marshaller, Unmarshaller unmarshaller)
+public class InOutParameterMarshal extends ParameterMarshal {
+  public static final L10N L = new L10N(InParameterMarshal.class);
+
+  public InOutParameterMarshal(int arg, Property property, QName name,
+                               Marshaller marshaller, Unmarshaller unmarshaller)
   {
     super(arg, property, name, marshaller, unmarshaller);
   }
@@ -52,10 +55,10 @@ public class OutParameterMarshal extends ParameterMarshal {
   // client
   //
 
-  public Object deserializeReply(XMLStreamReader in, Object previous)
+  public void serializeCall(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    return _property.read(_unmarshaller, in, previous);
+    _property.write(_marshaller, out, ((Holder) args[_arg]).value, _name);
   }
 
   public void deserializeReply(XMLStreamReader in, Object[] args)
@@ -70,9 +73,19 @@ public class OutParameterMarshal extends ParameterMarshal {
   //
 
   public void deserializeCall(XMLStreamReader in, Object []args)
+    throws IOException, XMLStreamException, JAXBException
   {
+    Holder h = null;
+    Object previous = null;
+
     if (args[_arg] == null)
-      args[_arg] = new Holder();
+      args[_arg] = h = new Holder();
+    else {
+      h = (Holder) args[_arg];
+      previous = h.value;
+    }
+
+    h.value = _property.read(_unmarshaller, in, previous);
   }
 
   public void serializeReply(XMLStreamWriter out, Object []args)
@@ -87,6 +100,7 @@ public class OutParameterMarshal extends ParameterMarshal {
   public void serializeReply(XMLStreamWriter out, Object ret)
     throws IOException, XMLStreamException, JAXBException
   {
+    // XXX
     _property.write(_marshaller, out, ret, _name);
   }
 

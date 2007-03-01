@@ -28,15 +28,80 @@
 
 package com.caucho.soap.wsdl;
 
+import java.io.*;
+
+import java.util.List;
+
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.JAXBException;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 
+import javax.xml.namespace.QName;
+
+import static com.caucho.soap.wsdl.WSDLConstants.*;
+
+import com.caucho.xml.schema.Schema;
+import com.caucho.xml.schema.Type;
+
 /**
  * WSDL types
  */
-@XmlType(name="types", namespace="http://schemas.xmlsoap.org/wsdl/")
+@XmlType(name="types", namespace=WSDL_NAMESPACE)
 public class WSDLTypes extends WSDLExtensibleDocumented 
                        implements WSDLDefinition
 {
+  public void writeJAXBClasses(File outputDirectory, String pkg)
+    throws IOException
+  {
+    List<Object> any = getAny();
+
+    if (any == null)
+      return;
+
+    for (int i = 0; i < any.size(); i++) { 
+      if (any.get(i) instanceof Schema) {
+        Schema schema = (Schema) any.get(i);
+        schema.writeJAXBClasses(outputDirectory, pkg);
+      }
+    }
+  }
+
+  public void resolveImports(Unmarshaller u)
+    throws JAXBException
+  {
+    List<Object> any = getAny();
+
+    if (any == null)
+      return;
+
+    for (int i = 0; i < any.size(); i++) { 
+      if (any.get(i) instanceof Schema) {
+        Schema schema = (Schema) any.get(i);
+        schema.resolveImports(u); 
+      }
+    }
+  }
+
+  public Type getType(QName typeName)
+  {
+    List<Object> any = getAny();
+
+    if (any != null) {
+      for (int i = 0; i < any.size(); i++) { 
+        if (any.get(i) instanceof Schema) {
+          Schema schema = (Schema) any.get(i);
+
+          Type type = schema.getType(typeName);
+
+          if (type != null)
+            return type;
+        }
+      }
+    }
+
+    return null;
+  }
 }

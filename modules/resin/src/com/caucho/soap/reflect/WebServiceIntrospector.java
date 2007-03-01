@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -97,7 +97,7 @@ public class WebServiceIntrospector {
     Marshaller marshaller = jaxbContext.createMarshaller();
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-    DirectSkeleton skel = new DirectSkeleton(type, wsdlLocation);
+    DirectSkeleton skel = new DirectSkeleton(type, jaxbContext, wsdlLocation);
     String namespace = skel.getNamespace();
 
     Method[] methods = type.getMethods();

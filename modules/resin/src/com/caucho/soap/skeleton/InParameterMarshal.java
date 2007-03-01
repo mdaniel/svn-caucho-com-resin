@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -67,6 +67,6 @@ public class InParameterMarshal extends ParameterMarshal {
   public void deserializeCall(XMLStreamReader in, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    args[_arg] = _property.read(_unmarshaller, in, _name);
+    args[_arg] = _property.read(_unmarshaller, in, args[_arg]);
   }
 }
