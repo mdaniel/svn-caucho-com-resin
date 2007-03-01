@@ -52,7 +52,7 @@ public class QueryParamCondition
   
   public String getTagName()
   {
-    return "param";
+    return "query-param";
   }
 
   public void setRegexp(Pattern pattern)

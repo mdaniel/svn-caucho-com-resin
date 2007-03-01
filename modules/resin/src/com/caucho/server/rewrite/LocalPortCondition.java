@@ -29,23 +29,35 @@
 
 package com.caucho.server.rewrite;
 
-import javax.servlet.ServletRequest;
+import com.caucho.util.L10N;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
-* A rewrite condition that passes if the method is exactly
-* equal to the specified value.
+* A rewrite condition that passes if the value of
+ * {@link HttpServletRequest#getLocalPort()} matches a regexp.
 */
-public class MethodEqualsCondition
- extends AbstractEqualsCondition
+public class LocalPortCondition
+  extends AbstractCondition
 {
-  public String getTagName()
+  private static final L10N L = new L10N(LocalPortCondition.class);
+
+  private final int _localPort;
+
+  LocalPortCondition(int localPort)
   {
-    return "method-equals";
+    _localPort = localPort;
   }
 
-  protected String getValue(HttpServletRequest request)
+  public String getTagName()
   {
-    return request.getMethod();
+    return "local-port";
+  }
+
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
+  {
+    return request.getLocalPort() == _localPort;
   }
 }

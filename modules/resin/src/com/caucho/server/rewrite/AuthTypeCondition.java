@@ -29,44 +29,44 @@
 
 package com.caucho.server.rewrite;
 
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.regex.Pattern;
 
 /**
-* A rewrite condition that passes if the value of a named header matches a regexp.
+* A rewrite condition that passes if the auth-type is exactly
+* equal to the specified value.
+ * Valid auth types are  BASIC, CLIENT-CERT, DIGEST, FORM.
 */
-public class HeaderCondition
+public class AuthTypeCondition
   extends AbstractCondition
 {
-  private static final L10N L = new L10N(HeaderCondition.class);
+  private static final L10N L = new L10N(AuthTypeCondition.class);
 
-  private final String _header;
-  private Pattern _regexp;
-  private boolean _caseInsensitive = false;
+  private final String _authType;
   private boolean _sendVary = true;
 
-  HeaderCondition(String header)
+  public AuthTypeCondition(String authType)
   {
-    _header = header;
+    if ("NONE".equalsIgnoreCase(authType))
+      _authType = null;
+    else if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(authType))
+      _authType = HttpServletRequest.BASIC_AUTH;
+    else if (HttpServletRequest.CLIENT_CERT_AUTH.equalsIgnoreCase(authType))
+      _authType = HttpServletRequest.CLIENT_CERT_AUTH;
+    else if (HttpServletRequest.DIGEST_AUTH.equalsIgnoreCase(authType))
+      _authType = HttpServletRequest.DIGEST_AUTH;
+    else if (HttpServletRequest.FORM_AUTH.equalsIgnoreCase(authType))
+      _authType = HttpServletRequest.FORM_AUTH;
+    else
+      throw new ConfigException(L.l("auth-type expects a 'value' of BASIC, CLIENT-CERT, DIGEST, FORM, or NONE"));
   }
-  
+
   public String getTagName()
   {
-    return "header";
-  }
-
-  public void setRegexp(Pattern pattern)
-  {
-    _regexp = pattern;
-  }
-
-  public void setCaseInsensitive(boolean caseInsensitive)
-  {
-    _caseInsensitive = caseInsensitive;
+    return "auth-type";
   }
 
   public void setSendVary(boolean sendVary)
@@ -74,24 +74,19 @@ public class HeaderCondition
     _sendVary = sendVary;
   }
 
-  @PostConstruct
-  public void init()
-  {
-    if (_regexp != null && _caseInsensitive)
-      _regexp = Pattern.compile(_regexp.pattern(), Pattern.CASE_INSENSITIVE);
-  }
-
   public boolean isMatch(HttpServletRequest request,
                          HttpServletResponse response)
   {
     if (_sendVary)
-      addVary(response, _header);
+      addVary(response, "Authorization");
 
-    String value = request.getHeader(_header);
+    String authType = request.getAuthType();
 
-    if (value == null)
-      return false;
+    if (authType == null)
+      return _authType == null;
+    else if (_authType == null)
+      return "none".equalsIgnoreCase(authType);
     else
-      return _regexp == null || _regexp.matcher(value).find();
+      return _authType.equalsIgnoreCase(authType);
   }
 }

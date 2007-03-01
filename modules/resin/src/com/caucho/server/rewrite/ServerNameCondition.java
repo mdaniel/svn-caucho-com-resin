@@ -29,24 +29,39 @@
 
 package com.caucho.server.rewrite;
 
+import com.caucho.util.L10N;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.regex.Pattern;
 
 /**
- * A rewrite condition that passes if the {@link java.util.Locale} of the
- * request matches the specified value.
- * The Locale is based in the Accept-Language header, and defaults to the
- * server's default Locale.
- */
-public class LocaleMatchesCondition
-  extends AbstractMatchesCondition
+* A rewrite condition that passes if the value of
+ * {@link javax.servlet.http.HttpServletRequest#getServerName()} matches a regexp.
+ * The match is always case-insensitive.
+*/
+public class ServerNameCondition
+  extends AbstractCondition
 {
-  public String getTagName()
+  private static final L10N L = new L10N(ServerNameCondition.class);
+
+  private final Pattern _regexp;
+
+  ServerNameCondition(String regexp)
   {
-    return "locale-matches";
+    _regexp = Pattern.compile(regexp, Pattern.CASE_INSENSITIVE);
   }
 
-  protected String getValue(HttpServletRequest request)
+  public String getTagName()
   {
-    return String.valueOf(request.getLocale());
+    return "server-name";
+  }
+
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
+  {
+    String serverName = request.getServerName();
+
+    return serverName != null && _regexp.matcher(serverName).find();
   }
 }

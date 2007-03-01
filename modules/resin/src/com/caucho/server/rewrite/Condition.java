@@ -34,6 +34,11 @@ import javax.servlet.http.*;
 public interface Condition
 {
   /**
+   * Called at initialization time.
+   */
+  public void init();
+
+  /**
    * Returns a descriptive name for the tag, for logging and for
    * error messages.
    */
@@ -44,4 +49,9 @@ public interface Condition
    */
   public boolean isMatch(HttpServletRequest request,
                          HttpServletResponse response);
+
+  /**
+   * Called at destruction time.
+   */
+  public void destroy();
 }

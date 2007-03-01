@@ -33,17 +33,16 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.log.Log;
 import com.caucho.make.AlwaysModified;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.dispatch.DispatchBuilder;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
-import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -274,7 +273,7 @@ public class HostContainer implements DispatchBuilder {
   public RewriteDispatch createRewriteDispatch()
   {
     if (_rewriteDispatch == null) {
-      _rewriteDispatch = new RewriteDispatch();
+      _rewriteDispatch = new RewriteDispatch(getErrorWebApp());
     }
 
     return _rewriteDispatch;

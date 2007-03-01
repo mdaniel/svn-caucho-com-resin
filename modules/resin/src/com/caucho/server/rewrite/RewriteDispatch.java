@@ -31,25 +31,24 @@ package com.caucho.server.rewrite;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitProgram;
-import com.caucho.server.dispatch.ErrorFilterChain;
-import com.caucho.server.dispatch.ForwardFilterChain;
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.MovedFilterChain;
-import com.caucho.server.dispatch.RedirectFilterChain;
-import com.caucho.server.dispatch.ServletConfigImpl;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.RewriteRuleMXBean;
+import com.caucho.server.dispatch.*;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.CaseInsensitive;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.el.ELContext;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
-import javax.el.ELContext;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,7 +58,8 @@ import java.util.regex.Pattern;
 /**
  * Configuration for a rewrite-dispatch
  */
-public class RewriteDispatch {
+public class RewriteDispatch
+{
   private static final L10N L = new L10N(RewriteDispatch.class);
   private static final Logger log
     = Logger.getLogger(RewriteDispatch.class.getName());
@@ -67,23 +67,32 @@ public class RewriteDispatch {
   private final static FilterChain ACCEPT_CHAIN;
 
   private final WebApp _webApp;
-
-  private final ArrayList<Program> _programList = new ArrayList<Program>();
+  private final DispatchServer _dispatchServer;
 
   private final RewriteContext _parseContext = new RewriteContext(this);
+
+  private ArrayList<AbstractRule> _ruleList = new ArrayList<AbstractRule>();
+  private AbstractRule[] _rules;
+
 
   private final boolean _isFiner;
   private final boolean _isFinest;
 
   private boolean _isCaseInsensitive = CaseInsensitive.isCaseInsensitive();
 
-  public RewriteDispatch()
+  public RewriteDispatch(DispatchServer dispatchServer)
   {
-    this(null);
+    this(dispatchServer, null);
   }
 
   public RewriteDispatch(WebApp webApp)
   {
+    this(null, webApp);
+  }
+
+  private RewriteDispatch(DispatchServer dispatchServer, WebApp webApp)
+  {
+    _dispatchServer = dispatchServer;
     _webApp = webApp;
 
     _isFiner = log.isLoggable(Level.FINER);
@@ -104,145 +113,143 @@ public class RewriteDispatch {
     return _isCaseInsensitive;
   }
 
-  private <T extends Program> T add(T program)
+  private <T extends AbstractRule> T add(T program)
   {
-    _programList.add(program);
+    _ruleList.add(program);
 
     return program;
   }
 
-  public void addProgram(Program program)
+  public void addProgram(AbstractRule rule)
   {
-    add(program);
+    add(rule);
   }
 
   /**
    * Adds an accept
    */
-  public Accept createDispatch()
+  public AcceptRule createDispatch()
   {
-    return new Accept();
+    return new AcceptRule();
   }
 
-  public void addDispatch(Accept dispatch)
+  public void addDispatch(AcceptRule dispatch)
   {
-    dispatch.init();
     add(dispatch);
   }
 
   /**
    * Adds a forbidden.
    */
-  public Error createForbidden()
+  public ErrorRule createForbidden()
   {
-    return new Error(HttpServletResponse.SC_FORBIDDEN);
+    return new ErrorRule(HttpServletResponse.SC_FORBIDDEN);
   }
 
-  public void addForbidden(Error forbidden)
+  public void addForbidden(ErrorRule forbidden)
   {
-    forbidden.init();
     add(forbidden);
   }
 
   /**
    * Adds a forward.
    */
-  public Forward createForward()
+  public ForwardRule createForward()
   {
-    return new Forward();
+    return new ForwardRule();
   }
 
-  public void addForward(Forward forward)
+  public void addForward(ForwardRule forward)
   {
-    forward.init();
     add(forward);
   }
 
   /**
    * Adds a gone.
    */
-  public Error createGone()
+  public ErrorRule createGone()
   {
-    return new Error(HttpServletResponse.SC_GONE);
+    return new ErrorRule(HttpServletResponse.SC_GONE);
   }
 
-  public void addGone(Error gone)
+  public void addGone(ErrorRule gone)
   {
-    gone.init();
     add(gone);
   }
 
   /**
    * Adds a load-balance
    */
-  public LoadBalance createLoadBalance()
+  public LoadBalanceRule createLoadBalance()
   {
     if (_webApp == null)
       throw new ConfigException(L.l("<load-balance> requires a web-app.  Host-based <rewrite-dispatch> can not use <load-balance>."));
 
-    return new LoadBalance(_webApp);
+    return new LoadBalanceRule(_webApp);
   }
 
-  public void addLoadBalance(LoadBalance loadBalance)
+  public void addLoadBalance(LoadBalanceRule loadBalance)
   {
-    loadBalance.init();
     add(loadBalance);
   }
 
   /**
    * Adds a moved permanently (301)
    */
-  public Moved createMovedPermanently()
+  public MovedRule createMovedPermanently()
   {
-    return new Moved(HttpServletResponse.SC_MOVED_PERMANENTLY);
+    return new MovedRule(HttpServletResponse.SC_MOVED_PERMANENTLY);
   }
 
-  public void addMovedPermanently(Moved moved)
+  public void addMovedPermanently(MovedRule moved)
   {
-    moved.init();
     add(moved);
   }
 
   /**
    * Adds a not-found.
    */
-  public Error createNotFound()
+  public ErrorRule createNotFound()
   {
-    return new Error(HttpServletResponse.SC_NOT_FOUND);
+    return new ErrorRule(HttpServletResponse.SC_NOT_FOUND);
   }
 
-  public void addNotFound(Error notFound)
+  public void addNotFound(ErrorRule notFound)
   {
-    notFound.init();
     add(notFound);
   }
 
   /**
    * Adds a redirect.
    */
-  public Redirect createRedirect()
+  public RedirectRule createRedirect()
   {
-    return new Redirect();
+    return new RedirectRule();
   }
 
-  public void addRedirect(Redirect redirect)
+  public void addRedirect(RedirectRule redirect)
   {
-    redirect.init();
     add(redirect);
   }
 
   /**
    * Adds a rewrite
    */
-  public Rewrite createRewrite()
+  public RewriteRule createRewrite()
   {
-    return new Rewrite();
+    return new RewriteRule();
   }
 
-  public void addRewrite(Rewrite rewrite)
+  public void addRewrite(RewriteRule rewrite)
   {
-    rewrite.init();
     add(rewrite);
+  }
+
+  @PostConstruct
+  public void init()
+  {
+    _rules = _ruleList.toArray(new AbstractRule[_ruleList.size()]);
+    _ruleList = null;
   }
 
   public FilterChain map(String uri, Invocation invocation, FilterChain next)
@@ -261,23 +268,26 @@ public class RewriteDispatch {
     if (_isFinest)
       log.finest("rewrite-dispatch check uri '" + uri + "'");
 
-    for (int i = start; i < _programList.size(); i++) {
-      Program program = _programList.get(i);
+    for (int i = start; i < _rules.length; i++) {
+      AbstractRule rule = _rules[i];
 
-      if (program.isSecureSet()) {
-        if (!invocation.isSecure() == program.isSecure()) {
+      if (!rule.isEnabled())
+        continue;
+
+      if (rule.isSecureSet()) {
+        if (!invocation.isSecure() == rule.isSecure()) {
           if (_isFinest)
-            log.finest(program.getLogPrefix()
+            log.finest(rule.getLogPrefix()
                        + (invocation.isSecure() ? " request is not secure" : " request is secure")
                        + ", no match");
           continue;
         }
       }
 
-      if (program.isPortSet()) {
-        if (invocation.getPort() != program.getPort()) {
+      if (rule.isPortSet()) {
+        if (invocation.getPort() != rule.getPort()) {
           if (_isFinest)
-            log.finest(program.getLogPrefix()
+            log.finest(rule.getLogPrefix()
                        + " request port is "
                        + invocation.getPort()
                        + ", no match");
@@ -285,20 +295,20 @@ public class RewriteDispatch {
         }
       }
 
-      Matcher matcher = program.matcher(uri);
+      Matcher matcher = rule.matcher(uri);
 
       if (! matcher.find()) {
         if (_isFinest)
-          log.finest(program.getLogPrefix() + " does not match " + uri);
+          log.finest(rule.getLogPrefix() + " does not match " + uri);
 
         continue;
       }
 
-      String targetUri = program.rewrite(uri, matcher);
+      String targetUri = rule.rewrite(uri, matcher);
 
-      FilterChain programChain = program.dispatch(targetUri);
+      FilterChain programChain = rule.dispatch(targetUri);
 
-      Condition []conditions = program.getConditions();
+      Condition []conditions = rule.getConditions();
 
       if (conditions != null) {
         FilterChain passChain;
@@ -323,7 +333,7 @@ public class RewriteDispatch {
                                        nextChain,
                                        i + 1);
 
-        nextChain = new ConditionFilterChain(program.getLogPrefix(),
+        nextChain = new ConditionFilterChain(rule.getLogPrefix(),
                                              uri,
                                              targetUri,
                                              conditions,
@@ -334,7 +344,7 @@ public class RewriteDispatch {
       }
       else {
         if (_isFiner)
-          log.finer(program.getLogPrefix() + " '" + uri + "' --> '" + targetUri + "'");
+          log.finer(rule.getLogPrefix() + " '" + uri + "' --> '" + targetUri + "'");
 
         if (programChain == null)
           continue;
@@ -353,15 +363,43 @@ public class RewriteDispatch {
     return _parseContext;
   }
 
-  public abstract class Program {
+  public void clearCache()
+  {
+    if (_webApp != null)
+      _webApp.clearCache();
+    else if (_dispatchServer != null)
+      _dispatchServer.clearCache();
+  }
+
+  @PreDestroy
+  public void destroy()
+  {
+    AbstractRule[] rules = _rules;
+    _rules = null;
+
+    if (rules != null) {
+      for (AbstractRule rule : rules) {
+        // XXX: s/b  Config.destroy(rule);
+        rule.destroy();
+      }
+    }
+  }
+
+
+  public abstract class AbstractRule
+  {
     private Pattern _regexp;
+    private String _name;
     private Boolean _secure = null;
     private int _port = -1;
-    private String _logPrefix;
+    volatile private boolean _isEnabled = true;
     private ArrayList<Condition> _conditionList = new ArrayList<Condition>();
-    private Condition []_conditions;
 
-    protected Program()
+    private Condition []_conditions;
+    private String _logPrefix;
+    private RewriteRuleAdmin _admin;
+
+    protected AbstractRule()
     {
       _logPrefix = getTagName();
     }
@@ -383,6 +421,30 @@ public class RewriteDispatch {
     public Pattern getRegexp()
     {
       return _regexp;
+    }
+
+    public void setName(String name)
+    {
+      _name = name;
+    }
+
+    public String getName()
+    {
+      return _name;
+    }
+
+    public void setEnabled(boolean isEnabled)
+    {
+      if (_isEnabled != isEnabled) {
+        _isEnabled = isEnabled;
+
+        clearCache();
+      }
+    }
+
+    public boolean isEnabled()
+    {
+      return _isEnabled;
     }
 
     /**
@@ -461,14 +523,10 @@ public class RewriteDispatch {
     public void addUnless(ConditionConfig condition)
     {
       NotConditions not = new NotConditions();
-      not.addCondition(condition.getCondition());
+      not.add(condition.getCondition());
+      Config.init(not);
 
       _conditionList.add(not);
-    }
-
-    public Condition []getConditions()
-    {
-      return _conditions;
     }
 
     /**
@@ -486,7 +544,7 @@ public class RewriteDispatch {
     public void init()
       throws ConfigException
     {
-      _logPrefix = getTagName() + " " + getRegexp().pattern();
+      _logPrefix = getTagName() + " " + _regexp.pattern();
 
       if (isSecureSet())
         _logPrefix = _logPrefix + " (secure)";
@@ -500,6 +558,23 @@ public class RewriteDispatch {
 	_conditions = new Condition[_conditionList.size()];
 	_conditionList.toArray(_conditions);
       }
+
+      _conditionList = null;
+
+      if (_name == null) {
+        if (!_isEnabled)
+          throw new ConfigException(L.l("{0} requires 'name' if enabled='false'",
+                                        getTagName()));
+      }
+      else {
+        _admin = new RewriteRuleAdmin(this);
+        _admin.register();
+      }
+    }
+
+    public Condition []getConditions()
+    {
+      return _conditions;
     }
 
     public String getLogPrefix()
@@ -522,9 +597,93 @@ public class RewriteDispatch {
     {
       return null;
     }
+
+    @PreDestroy
+    public void destroy()
+    {
+      RewriteRuleAdmin admin = _admin;
+      _admin = null;
+
+      Condition[] conditions = _conditions;
+      _conditions = null;
+
+      if (admin != null)
+        admin.unregister();
+
+      if (conditions != null) {
+
+        for (Condition condition : conditions) {
+          // XXX: s/b Config.destroy()
+          try {
+            condition.destroy();
+          }
+          catch (Exception ex) {
+            log.log(Level.FINER, ex.toString(), ex);
+          }
+        }
+      }
+    }
   }
 
-  public class Accept extends Program {
+  public class RewriteRuleAdmin
+    extends AbstractManagedObject
+    implements RewriteRuleMXBean
+  {
+    private final AbstractRule _rewriteRule;
+
+    public RewriteRuleAdmin(AbstractRule rewriteRule)
+    {
+      _rewriteRule = rewriteRule;
+    }
+
+    public String getName()
+    {
+      return _rewriteRule.getName();
+    }
+
+    @Override
+    public String getType()
+    {
+      return "RewriteRule";
+    }
+
+    public String getState()
+    {
+      if (_rewriteRule.isEnabled())
+        return "active";
+      else
+        return "stopped";
+    }
+
+    public String getRegexp()
+    {
+      return _rewriteRule.getRegexp().pattern();
+    }
+
+    public void start()
+    {
+      _rewriteRule.setEnabled(true);
+    }
+
+    public void stop()
+    {
+      _rewriteRule.setEnabled(false);
+    }
+
+    public void register()
+    {
+      registerSelf();
+    }
+
+    public void unregister()
+    {
+      unregisterSelf();
+    }
+  }
+
+  public class AcceptRule
+    extends AbstractRule
+  {
     @Override
     public String getTagName()
     {
@@ -538,11 +697,13 @@ public class RewriteDispatch {
     }
   }
 
-  public class Error extends Program {
+  public class ErrorRule
+    extends AbstractRule
+  {
     private final String _tagName;
     private final int _code;
 
-    Error(int code)
+    ErrorRule(int code)
     {
       _code = code;
       _tagName = "error(" + _code + ")";
@@ -561,7 +722,9 @@ public class RewriteDispatch {
     }
   }
 
-  public class Forward extends Program {
+  public class ForwardRule
+    extends AbstractRule
+  {
     private String _target;
 
     @Override
@@ -587,7 +750,7 @@ public class RewriteDispatch {
       return new ForwardFilterChain(uri);
     }
 
-    @PostConstruct
+    @Override
     public void init()
       throws ConfigException
     {
@@ -597,14 +760,16 @@ public class RewriteDispatch {
     }
   }
 
-  public class LoadBalance extends Program {
+  public class LoadBalanceRule
+    extends AbstractRule
+  {
     private final WebApp _webApp;
 
     private ServletConfigImpl _servlet;
 
     private BuilderProgramContainer _program = new BuilderProgramContainer();
 
-    LoadBalance(WebApp webApp)
+    LoadBalanceRule(WebApp webApp)
     {
       _webApp = webApp;
     }
@@ -627,7 +792,7 @@ public class RewriteDispatch {
       return _servlet.createServletChain();
     }
 
-    @PostConstruct
+    @Override
     public void init()
       throws ConfigException
     {
@@ -655,12 +820,14 @@ public class RewriteDispatch {
     }
   }
 
-  public class Moved extends Program {
+  public class MovedRule
+    extends AbstractRule
+  {
     private String _tagName;
     private int _code;
     private String _target;
 
-    public Moved(int statusCode)
+    public MovedRule(int statusCode)
     {
       _code = statusCode;
       _tagName = "moved(" + statusCode + ")";
@@ -688,7 +855,7 @@ public class RewriteDispatch {
       return new MovedFilterChain(_code, uri);
     }
 
-    @PostConstruct
+    @Override
     public void init()
       throws ConfigException
     {
@@ -698,7 +865,9 @@ public class RewriteDispatch {
     }
   }
 
-  public class Redirect extends Program {
+  public class RedirectRule
+    extends AbstractRule
+  {
     private String _target;
 
     @Override
@@ -724,7 +893,7 @@ public class RewriteDispatch {
       return new RedirectFilterChain(uri);
     }
 
-    @PostConstruct
+    @Override
     public void init()
       throws ConfigException
     {
@@ -734,7 +903,9 @@ public class RewriteDispatch {
     }
   }
 
-  public class Rewrite extends Program {
+  public class RewriteRule
+    extends AbstractRule
+  {
     private String _replacement;
 
     @Override
@@ -754,7 +925,7 @@ public class RewriteDispatch {
     /**
      * Init
      */
-    @PostConstruct
+    @Override
     public void init()
       throws ConfigException
     {

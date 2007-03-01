@@ -425,17 +425,45 @@ r_rest = element rest {
 }
 
 r_rewrite-condition-Content =
-  (r_rewrite-condition-cookie
+  (
+     r_rewrite-condition-auth-type
+
+   | r_rewrite-condition-cookie
+
+   | r_rewrite-condition-header
+
+   | r_rewrite-condition-locale
+
+   | r_rewrite-condition-query-param
+
+   | r_rewrite-condition-remote-user
+
+   | r_rewrite-condition-user-in-role
 
    | (attribute expr { string }
       | element expr { string })
 
-   | r_rewrite-condition-header
+   | (attribute local-port { string }
+      | element local-port { string })
 
-   | r_rewrite-condition-query-param
+   | (attribute method { string }
+      | element method { string })
 
    | (attribute remote-addr { string }
       | element remote-addr { string }))
+
+   | (attribute server-name { string }
+      | element server-name { string })
+
+   | (attribute server-port { string }
+      | element server-port { string })
+
+r_rewrite-condition-auth-type =
+  (attribute auth-type { string }
+   | element auth-type { string })
+
+  & (attribute send-vary { string }
+     | element send-vary { string })?
 
 r_rewrite-condition-cookie =
   (attribute cookie { string }
@@ -463,6 +491,13 @@ r_rewrite-condition-header =
   & (attribute case-insensitive { string }
      | element case-insensitive { string })?
 
+r_rewrite-condition-locale =
+  (attribute locale { string }
+   | element locale { string })
+
+  & (attribute send-vary { string }
+     | element send-vary { string })?
+
 r_rewrite-condition-query-param =
   (attribute query-param { string }
    | element query-param { string })
@@ -472,6 +507,20 @@ r_rewrite-condition-query-param =
 
   & (attribute case-insensitive { string }
      | element case-insensitive { string })?
+
+r_rewrite-condition-remote-user =
+  (attribute remote-user { string }
+   | element remote-user { string })
+
+  & (attribute send-vary { string }
+     | element send-vary { string })?
+
+r_rewrite-condition-user-in-role =
+  (attribute user-in-role { string }
+   | element user-in-role { string })
+
+  & (attribute send-vary { string }
+     | element send-vary { string })?
 
 r_rewrite-conditions-Content =
   element and { r_rewrite-conditions-Content }*
@@ -499,6 +548,12 @@ r_rewrite-dispatch = element rewrite-dispatch {
        (attribute regexp { string }
         | element regexp { string })
 
+       & (attribute name { string }
+          | element name { string })?
+
+       & (attribute enabled { r_boolean-Type }
+          | element enabled { r_boolean-Type })?
+
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?
 
@@ -509,6 +564,12 @@ r_rewrite-dispatch = element rewrite-dispatch {
        (attribute regexp { string }
         | element regexp { string })
 
+       & (attribute name { string }
+          | element name { string })?
+
+       & (attribute enabled { r_boolean-Type }
+          | element enabled { r_boolean-Type })?
+
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?
 
@@ -518,6 +579,12 @@ r_rewrite-dispatch = element rewrite-dispatch {
    & element forward {
        (attribute regexp { string }
         | element regexp { string })
+
+       & (attribute name { string }
+          | element name { string })?
+
+       & (attribute enabled { r_boolean-Type }
+          | element enabled { r_boolean-Type })?
 
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?
@@ -532,6 +599,12 @@ r_rewrite-dispatch = element rewrite-dispatch {
        (attribute regexp { string }
         | element regexp { string })
 
+       & (attribute name { string }
+          | element name { string })?
+
+       & (attribute enabled { r_boolean-Type }
+          | element enabled { r_boolean-Type })?
+
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })*
 
@@ -541,6 +614,12 @@ r_rewrite-dispatch = element rewrite-dispatch {
    & element load-balance {
        (attribute regexp { string }
         | element regexp { string })
+
+       & (attribute name { string }
+          | element name { string })?
+
+       & (attribute enabled { r_boolean-Type }
+          | element enabled { r_boolean-Type })?
 
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?
@@ -564,6 +643,12 @@ r_rewrite-dispatch = element rewrite-dispatch {
        (attribute regexp { string }
         | element regexp { string })
 
+       & (attribute name { string }
+          | element name { string })?
+
+       & (attribute enabled { r_boolean-Type }
+          | element enabled { r_boolean-Type })?
+
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?
 
@@ -577,6 +662,12 @@ r_rewrite-dispatch = element rewrite-dispatch {
        (attribute regexp { string }
         | element regexp { string })
 
+       & (attribute name { string }
+          | element name { string })?
+
+       & (attribute enabled { r_boolean-Type }
+          | element enabled { r_boolean-Type })?
+
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?
 
@@ -586,6 +677,12 @@ r_rewrite-dispatch = element rewrite-dispatch {
    & element redirect {
        (attribute regexp { string }
         | element regexp { string })
+
+       & (attribute name { string }
+          | element name { string })?
+
+       & (attribute enabled { r_boolean-Type }
+          | element enabled { r_boolean-Type })?
 
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?
@@ -599,6 +696,12 @@ r_rewrite-dispatch = element rewrite-dispatch {
   & element rewrite {
      (attribute regexp { string }
       | element regexp { string })
+
+       & (attribute name { string }
+          | element name { string })?
+
+       & (attribute enabled { r_boolean-Type }
+          | element enabled { r_boolean-Type })?
 
        & (attribute secure { r_boolean-Type }
           | element secure { r_boolean-Type })?

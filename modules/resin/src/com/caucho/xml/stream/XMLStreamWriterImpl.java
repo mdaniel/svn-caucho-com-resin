@@ -248,7 +248,8 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     throws XMLStreamException
   {
     writeStartElement(localName);
-    writeCharacters(contents);
+    if (contents != null)
+      writeCharacters(contents);
     writeEndElement();
   }
 

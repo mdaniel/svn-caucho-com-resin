@@ -31,72 +31,49 @@ package com.caucho.server.rewrite;
 
 import com.caucho.util.L10N;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**
- * A rewrite condition that passes if a named value from the request exactly
- * equals a specified value.
- */
-abstract public class AbstractEqualsCondition
+* A rewrite condition that passes if the value of the Locale matches
+ * a regexp.
+*/
+public class LocaleCondition
   extends AbstractCondition
 {
-  private static final L10N L =  new L10N(AbstractEqualsCondition.class);
+  private static final L10N L = new L10N(LocaleCondition.class);
 
-  private String _value;
-  private boolean _isIgnoreCase;
+  private final Pattern _regexp;
+  private boolean _sendVary = true;
 
-  public void setValue(String value)
+  LocaleCondition(String regexp)
   {
-    _value = value;
+    _regexp = Pattern.compile(regexp, Pattern.CASE_INSENSITIVE);
   }
 
-  /**
-   * Set's the value to match against, required.
-   * @return
-   */
-  public String getValue()
+  public String getTagName()
   {
-    return _value;
+    return "locale";
   }
 
-  /**
-   * Set's the ignoreCase, if true the case is unimportant in the comparison,
-   * default false.
-   */
-  public void setIgnoreCase(boolean ignoreCase)
+  public void setSendVary(boolean sendVary)
   {
-    _isIgnoreCase = ignoreCase;
-  }
-
-  public boolean isIgnoreCase()
-  {
-    return _isIgnoreCase;
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    required(_value, "value");
+    _sendVary = sendVary;
   }
 
   public boolean isMatch(HttpServletRequest request,
                          HttpServletResponse response)
   {
-    String value = getValue(request);
+    if (_sendVary)
+      addVary(response, "Accept-Language");
 
-    if (value == null)
+    Locale locale = request.getLocale();
+
+    if (locale == null)
       return false;
-
-    if (_isIgnoreCase)
-      return value.equalsIgnoreCase(_value);
     else
-      return value.equals(_value);
+      return _regexp.matcher(locale.toString()).find();
   }
-
-  /**
-   * Returns the value, if it is null then the comparison always fails.
-   */
-  protected abstract String getValue(HttpServletRequest request);
 }

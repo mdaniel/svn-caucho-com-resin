@@ -29,6 +29,8 @@
 
 package com.caucho.server.rewrite;
 
+import com.caucho.config.Config;
+
 import javax.annotation.PostConstruct;
 import javax.el.ELContext;
 import java.util.ArrayList;
@@ -37,22 +39,18 @@ abstract public class AbstractConditions
   extends AbstractCondition
 {
   private final RewriteDispatch _rewriteDispatch;
-  private final ArrayList<Condition> _conditions = new ArrayList<Condition>();
+  private ArrayList<Condition> _conditionsList = new ArrayList<Condition>();
+  private Condition[] _conditions;
 
   public AbstractConditions(RewriteDispatch rewriteDispatch)
   {
     _rewriteDispatch = rewriteDispatch;
   }
 
-  private <T extends Condition> T add(T condition)
+  public <T extends Condition> T add(T condition)
   {
-    _conditions.add(condition);
+    _conditionsList.add(condition);
     return condition;
-  }
-
-  public void addCondition(Condition condition)
-  {
-    add(condition);
   }
 
   public void addWhen(ConditionConfig condition)
@@ -63,7 +61,8 @@ abstract public class AbstractConditions
   public void addUnless(ConditionConfig condition)
   {
     NotConditions not = new NotConditions();
-    not.addCondition(condition.getCondition());
+    not.add(condition.getCondition());
+    Config.init(not);
 
     add(not);
   }
@@ -75,29 +74,7 @@ abstract public class AbstractConditions
 
   public void addAnd(AndConditions and)
   {
-    and.init();
     add(and);
-  }
-
-  public void addAuthTypeEquals(AuthTypeEqualsCondition authTypeEqualsCondition)
-  {
-    add(authTypeEqualsCondition);
-  }
-
-  public void addAuthTypeExists(AuthTypeEqualsCondition authTypeEqualsCondition)
-  {
-    add(authTypeEqualsCondition);
-  }
-
-  public ExprCondition createExpr()
-  {
-    return new ExprCondition(this);
-  }
-
-  public void addExpr(ExprCondition expr)
-  {
-    expr.init();
-    add(expr);
   }
 
   public NotConditions createNot()
@@ -107,7 +84,6 @@ abstract public class AbstractConditions
 
   public void addNot(NotConditions not)
   {
-    not.init();
     add(not);
   }
 
@@ -118,19 +94,19 @@ abstract public class AbstractConditions
 
   public void addOr(OrConditions or)
   {
-    or.init();
     add(or);
-  }
-
-  protected ArrayList<Condition> getConditions()
-  {
-    return _conditions;
   }
 
   @PostConstruct
   public void init()
   {
-    _conditions.trimToSize();
+    _conditions = _conditionsList.toArray(new Condition[_conditionsList.size()]);
+    _conditionsList = null;
+  }
+
+  protected Condition[] getConditions()
+  {
+    return _conditions;
   }
 
   ELContext getParseContext()

@@ -29,63 +29,35 @@
 
 package com.caucho.server.rewrite;
 
-import javax.annotation.PostConstruct;
+import com.caucho.util.L10N;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.regex.Pattern;
 
-abstract public class AbstractMatchesCondition
+/**
+* A rewrite condition that passes if the value of
+ * {@link javax.servlet.http.HttpServletRequest#getServerPort()} matches a regexp.
+*/
+public class ServerPortCondition
   extends AbstractCondition
 {
-  private Pattern _regexp;
-  private boolean _isIgnoreCase;
+  private static final L10N L = new L10N(ServerPortCondition.class);
 
-  /**
-   * The regular expression to compare to the value, required.
-   */
-  public void setRegexp(String regexp)
+  private final int _serverPort;
+
+  ServerPortCondition(int serverPort)
   {
-    _regexp = Pattern.compile(regexp);
+    _serverPort = serverPort;
   }
 
-  public Pattern getRegexp()
+  public String getTagName()
   {
-    return _regexp;
+    return "server-port";
   }
-
-  /**
-   * Set's the ignoreCase, if true the case is unimportant in the match,
-   * default false.
-   */
-  public void setIgnoreCase(boolean ignoreCase)
-  {
-    _isIgnoreCase = ignoreCase;
-  }
-
-  public boolean isIgnoreCase()
-  {
-    return _isIgnoreCase;
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    required(_regexp, "regexp");
-
-    if (_isIgnoreCase)
-      _regexp = Pattern.compile(_regexp.pattern(), Pattern.CASE_INSENSITIVE);
-  }
-
-  abstract protected String getValue(HttpServletRequest request);
 
   public boolean isMatch(HttpServletRequest request,
                          HttpServletResponse response)
   {
-    String value = getValue(request);
-
-    if (value == null)
-        value = "";
-
-    return _regexp.matcher(value).find();
+    return request.getServerPort() == _serverPort;
   }
 }

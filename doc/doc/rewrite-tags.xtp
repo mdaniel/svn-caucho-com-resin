@@ -26,7 +26,7 @@ evaluate to true.
 
 </defun>
 
-<defun title="&lt;auth-type-equals&gt;">
+<defun title="auth-type">
 <parents>when, unless</parents>
 
 <p>
@@ -35,18 +35,13 @@ The comparison is always case insensitive.
 </p>
 
 <deftable-childtags>
-<tr><td>value</td>
-    <td>BASIC, CLIENT-CERT, DIGEST, or FORM</td>
+<tr><td>auth-type</td>
+    <td>BASIC, CLIENT-CERT, DIGEST, FORM, or NONE</td>
     <td>required</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a vary header containing "Authorization" as part of the response</td>
+    <td>true</td></tr>
 </deftable-childtags>
-</defun>
-
-<defun title="&lt;auth-type-exists&gt;">
-<parents>when, unless</parents>
-
-<p>
-Evaluates to true if there is any authorization mechanism used in the request.
-</p>
 </defun>
 
 <defun title="cookie">
@@ -64,7 +59,7 @@ response varies based on the submitted value of cookies.
 </p>
 
 <deftable-childtags>
-<tr><td>name</td>
+<tr><td>cookie</td>
     <td>Name of the cookie</td>
     <td>required</td></tr>
 <tr><td>regexp</td>
@@ -84,7 +79,7 @@ response varies based on the submitted value of cookies.
 <parents>rewrite-dispatch</parents>
 
 <p>If &lt;dispatch> matches the current URL, the rest of the items in the enclosing
-rewqrite-dispatch are not considered and the request passes immediately to
+rewrite-dispatch are not considered and the request passes immediately to
 normal servlet evaluation.  &lt;dispatch> is often used to specify URLs
 which should be handled normally before a more general pattern which
 modifies the URL.</p>
@@ -111,6 +106,14 @@ element dispatch {
 </def>
 </defun>
 
+<defun title="&lt;enabled>">
+<p>
+Set's the initial state of the rule, default is true.  In conjunction with
+<a href="#name">name</a>, an initial enabled value of "false" is valuable for
+rules which are to be turned on and turned off at runtime.
+</p>
+</defun>
+
 <defun title="&lt;forbidden>">
 <parents>rewrite-dispatch</parents>
 
@@ -128,6 +131,12 @@ for a matching URL.</p>
 </example>
 
 <deftable-childtags>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td>name</td>
+    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+    <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
     <td>A regexp that must match the URL</td>
     <td>required</td></tr>
@@ -194,7 +203,7 @@ response varies based on the submitted value of the header.
 </p>
 
 <deftable-childtags>
-<tr><td>name</td>
+<tr><td>header</td>
     <td>Name of the header</td>
     <td>required</td></tr>
 <tr><td>regexp</td>
@@ -286,7 +295,7 @@ element load-balance {
 
 </defun>
 
-<defun title="&lt;locale&gt;">
+<defun title="locale">
 <parents>when, unless</parents>
 
 <p>
@@ -302,7 +311,6 @@ If the request does not include the Accept-Language header then the Locale is
 the default Locale for the server.
 </p>
 
-<!-- XXX: need qa to make sure this example is correct -->
 <example>
 &lt;web-app xmlns="http://caucho.com/ns/resin"
          xmlns:resin="http://caucho.com/ns/resin/core"&gt;
@@ -316,6 +324,50 @@ the default Locale for the server.
   &lt;/rewrite-dispatch&gt;
 &lt;/web-app&gt;
 </example>
+
+<deftable-childtags>
+<tr><td>locale</td>
+    <td>Regular expression to match</td>
+    <td>required</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a vary header containing "Accept-Language" as part of the response</td>
+    <td>true</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="local-port">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of the request's local port is the specified
+value, false if it does not.  The local port is the port that Resin has bound
+to and has used to receive the request.
+</p>
+
+<deftable-childtags>
+<tr><td>local-port</td>
+    <td>The local port to match.</td>
+    <td>required</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="method">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the http method used in the request is the given value.
+The comparison is always case insensitive.  Common methods include HEAD, GET,
+POST, DELETE, OPTIONS, PUT, and TRACE, although a method by any name may be
+used by a client.
+</p>
+
+<deftable-childtags>
+<tr><td>method</td>
+    <td>The method to match.</td>
+    <td>required</td></tr>
+</deftable-childtags>
 
 </defun>
 
@@ -342,6 +394,16 @@ element moved-permanently {
 }
 </def>
 
+</defun>
+
+<defun title="&lt;name>">
+<p>
+A rule can be given a <i>name</i>, which causes a JMX mbean to be registered.
+The mbean has a name like "resin:Host=default,WebApp=/,name=Foo,type=RewriteRule"
+and an interface of <a href="javadoc|com.caucho.management.server.RewriteRuleMXBean|"/>.
+It provides the <code>start()</code> and <code>stop()</code> operations, and
+the <code>enabled</code> boolean property.
+</p>
 </defun>
 
 <defun title="&lt;not&gt;">
@@ -402,7 +464,7 @@ Form parameters submitted in the body of a POST are not available for the compar
 </p>
 
 <deftable-childtags>
-<tr><td>name</td>
+<tr><td>query-param</td>
     <td>Name of the parameter</td>
     <td>required</td></tr>
 <tr><td>regexp</td>
@@ -462,13 +524,22 @@ element forward {
 </def>
 </defun>
 
-<defun title="&lt;regexp>">
-<parents>dispatch, forward, forbidden, gone, moved-permanently, not-found, redirect, rewrite</parents>
+<defun title="remote-user">
+<parents>when, unless</parents>
 
 <p>
-&lt;regexp> is a regular expression pattern used to match against the URL when
-considering whether or not to execute a program.
+Evaluates to true if the user is authenticated and has the specified name.
 </p>
+
+<deftable-childtags>
+<tr><td>remote-user</td>
+    <td>A user name.</td>
+    <td>required</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a vary header containing "Authorization" as part of the response</td>
+    <td>true</td></tr>
+</deftable-childtags>
+
 </defun>
 
 <defun title="&lt;rewrite>">
@@ -555,15 +626,15 @@ element rewrite-dispatch {
 
 </defun>
 
-<defun title="&lt;secure&gt;">
+<defun title="secure">
 <parents>dispatch, forward, forbidden, gone, moved-permanently, not-found, redirect, rewrite</parents>
 
 <p>
 &lt;secure> specifies a condition for the ssl status of the request. If <var/secure/> is true,
-then the request must be using ssl for the program to match.  If <var/secure/> is
-false, then the request must not be using ssl for the program to match.  If
+then the request must be using ssl for the rule to match.  If <var/secure/> is
+false, then the request must not be using ssl for the rule to match.  If
 <var/secure/> is not specified, the ssl status of the request is not considered when
-testing if the program matches.
+testing if the rule matches.
 </p>
 
 <example title="secure example">
@@ -592,6 +663,41 @@ https://localhost:8080/bar/index.html
 </results>
 </defun>
 
+<defun title="server-name">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of the request's server name matches the specified
+regexp, false if it does not.  The comparison is always case insensitive.
+The server name is the name that the client has used to connect to the server 
+and may not be the name of the actual server that is hosting Resin.
+</p>
+
+<deftable-childtags>
+<tr><td>server-name</td>
+    <td>A regular expression to match.</td>
+    <td>required</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="server-port">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of the request's server port is the specified
+value, false if it does not.  The server port is the port that the client has used to connect to the server 
+and may not be the actual port that Resin is bound to.
+</p>
+
+<deftable-childtags>
+<tr><td>server-port</td>
+    <td>The server port to match.</td>
+    <td>required</td></tr>
+</deftable-childtags>
+
+</defun>
+
 <defun title="&lt;unless&gt;">
 <parents>dispatch, forward, forbidden, gone, moved-permanently, not-found, redirect, rewrite</parents>
 
@@ -600,6 +706,25 @@ Contains a condition that further refines the match of the enclosing tag beyond
 the information provided by the url.  If the condition does not evaluate to
 true, then the enclosing tag is applied.
 </p>
+
+</defun>
+
+<defun title="user-in-role">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the user is authenticated and in the specified role.
+The special role of '*' means any role.
+</p>
+
+<deftable-childtags>
+<tr><td>user-in-role</td>
+    <td>A role name.</td>
+    <td>required</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a vary header containing "Authorization" as part of the response</td>
+    <td>true</td></tr>
+</deftable-childtags>
 
 </defun>
 

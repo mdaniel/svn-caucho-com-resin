@@ -55,21 +55,41 @@ public class ConditionConfig {
   /**
    * Sets the el expression.
    */
-  public void setExpr(RawString expr)
+  public void setAuthType(String authType)
   {
-    setCondition(new ExprCondition(expr.getValue()));
+    setCondition(new AuthTypeCondition(authType));
   }
-  
-  public void setHeader(String header)
-  {
-    setCondition(new HeaderCondition(header));
-  }
-  
+
   public void setCookie(String cookie)
   {
     setCondition(new CookieCondition(cookie));
   }
-  
+
+  public void setExpr(RawString expr)
+  {
+    setCondition(new ExprCondition(expr.getValue()));
+  }
+
+  public void setHeader(String header)
+  {
+    setCondition(new HeaderCondition(header));
+  }
+
+  public void setLocale(String locale)
+  {
+    setCondition(new LocaleCondition(locale));
+  }
+
+  public void setLocalPort(int localPort)
+  {
+    setCondition(new LocalPortCondition(localPort));
+  }
+
+  public void setMethod(String method)
+  {
+    setCondition(new MethodCondition(method));
+  }
+
   public void setQueryParam(String queryParam)
   {
     setCondition(new QueryParamCondition(queryParam));
@@ -78,6 +98,26 @@ public class ConditionConfig {
   public void setRemoteAddr(String addr)
   {
     setCondition(new RemoteAddrCondition(InetNetwork.create(addr)));
+  }
+
+  public void setRemoteUser(String user)
+  {
+    setCondition(new RemoteUserCondition(user));
+  }
+
+  public void setServerName(String serverName)
+  {
+    setCondition(new ServerNameCondition(serverName));
+  }
+
+  public void setServerPort(int serverPort)
+  {
+    setCondition(new ServerPortCondition(serverPort));
+  }
+
+  public void setUserInRole(String role)
+  {
+    setCondition(new UserInRoleCondition(role));
   }
 
   /**

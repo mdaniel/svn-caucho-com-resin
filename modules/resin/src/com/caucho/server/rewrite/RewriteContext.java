@@ -35,19 +35,14 @@ import javax.el.ELContext;
 import javax.el.ELResolver;
 import javax.el.FunctionMapper;
 import javax.el.VariableMapper;
-import javax.servlet.ServletRequest;
 import javax.servlet.FilterChain;
-import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
 
 public class RewriteContext
   extends ELContext
 {
   private RewriteDispatch _rewriteDispatch;
-
-  private ServletRequest _request;
-  private ServletResponse _response;
 
   public RewriteContext()
   {
@@ -60,28 +55,7 @@ public class RewriteContext
 
   public RewriteContext(HttpServletRequest request)
   {
-    _request = request;
     _rewriteDispatch = null;
-  }
-
-  public void setRequest(ServletRequest request)
-  {
-    _request = request;
-  }
-
-  public ServletRequest getRequest()
-  {
-    return _request;
-  }
-
-  public void setResponse(ServletResponse response)
-  {
-    _response = response;
-  }
-
-  public ServletResponse getResponse()
-  {
-    return _response;
   }
 
   public ELResolver getELResolver()

@@ -29,29 +29,31 @@
 
 package com.caucho.server.rewrite;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * A rewrite condition that passes if a value is not null.
- */
-abstract public class AbstractExistsCondition
+* A rewrite condition that passes if the method is exactly
+* equal to the specified value.
+*/
+public class MethodCondition
   extends AbstractCondition
 {
-  @PostConstruct
-  public void init()
+  private final String _method;
+
+  public MethodCondition(String method)
   {
+    _method = method;
+  }
+
+  public String getTagName()
+  {
+    return "method";
   }
 
   public boolean isMatch(HttpServletRequest request,
                          HttpServletResponse response)
   {
-    return getValue(request) != null;
+    return _method.equals(request.getMethod());
   }
-
-  /**
-   * Returns the value, if it is not null then it exists.
-   */
-  protected abstract String getValue(HttpServletRequest request);
 }

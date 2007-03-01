@@ -29,47 +29,48 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
-* A rewrite condition that passes if the auth-type is exactly
-* equal to the specified value.
- * Valid auth types are  BASIC, CLIENT-CERT, DIGEST, FORM.
-*/
-public class AuthTypeEqualsCondition
- extends AbstractEqualsCondition
+* A rewrite condition that passes if the client has been authenticated
+ * and the user is in the specified role, as determined by
+ * {@link HttpServletRequest#isUserInRole(String)}
+ */
+public class UserInRoleCondition
+  extends AbstractCondition
 {
-  private static final L10N L = new L10N(AuthTypeEqualsCondition.class);
+  private static final L10N L = new L10N(UserInRoleCondition.class);
+
+  private final String _role;
+  private boolean _sendVary = true;
+
+  public UserInRoleCondition(String role)
+  {
+    _role = role;
+  }
 
   public String getTagName()
   {
-    return "auth-type-equals";
+    return "user-in-role";
   }
 
-  @PostConstruct
-  public void init()
+  /**
+   * If true, send a "Vary: Authorization" in the response, default is true.
+   */
+  public void setSendVary(boolean sendVary)
   {
-    String value = getValue();
-
-    if (value.equals("BASIC")) {
-    }
-    else if (value.equals("CLIENT-CERT")) {
-    }
-    else if (value.equals("DIGEST")) {
-    }
-    else if (value.equals("FORM")) {
-    }
-    else {
-      throw new ConfigException(L.l("auth-type expects a 'value' of BASIC, CLIENT-CERT, DIGEST, or FORM"));
-    }
+    _sendVary = sendVary;
   }
 
-  protected String getValue(HttpServletRequest request)
+  public boolean isMatch(HttpServletRequest request,
+                         HttpServletResponse response)
   {
-    return request.getAuthType();
+    if (_sendVary)
+      addVary(response, "Authorization");
+
+    return request.isUserInRole(_role);
   }
 }

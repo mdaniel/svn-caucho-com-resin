@@ -40,6 +40,10 @@ abstract public class AbstractCondition
 {
   private static final L10N L =  new L10N(AbstractCondition.class);
 
+  public void init()
+  {
+  }
+
   public String getTagName()
   {
     return getClass().getName();
@@ -81,4 +85,9 @@ abstract public class AbstractCondition
       response.addHeader("Vary", headerName);
     }
   }
+  
+  public void destroy()
+  {
+  }
+
 }

@@ -24,28 +24,33 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
-package com.caucho.server.rewrite;
+package com.caucho.management.server;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import com.caucho.jmx.Description;
 
 /**
- * A rewrite condition that passes if the client making the request has
- * an auth-type.
+ * Interface for a rewrite rule.
+ *
+ * <pre>
+ * resin:type=RewriteRule,name=...
+ * </pre>
  */
-public class AuthTypeExistsCondition
-  extends AbstractExistsCondition
+@Description("A rewrite rule that rewrites a url")
+public interface RewriteRuleMXBean
+  extends ManagedObjectMXBean
 {
-  public String getTagName()
-  {
-    return "auth-type-exists";
-  }
+  @Description("The configured regular expression")
+  public String getRegexp();
 
-  protected String getValue(HttpServletRequest request)
-  {
-    return request.getAuthType();
-  }
+  @Description("The current lifecycle state")
+  public String getState();
+  
+  @Description("Enables the rewrite rule")
+  public void start();
+
+  @Description("Disables the rewrite rule")
+  public void stop();
 }

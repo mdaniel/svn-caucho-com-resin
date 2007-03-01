@@ -1924,6 +1924,20 @@ public class WebApp extends ServletContextImpl
   }
 
   /**
+   * Clears all caches, including the invocation cache, the filter cache, and the proxy cache.
+   */
+  public void clearCache()
+  {
+    // server/1kg1
+    synchronized(this) {
+      synchronized(_filterChainCache) {
+        getDispatchServer().clearCache();
+        _filterChainCache.clear();
+        _dispatcherCache = null;
+      }
+    }
+  }
+  /**
    * Fills the invocation for an include request.
    */
   public void buildIncludeInvocation(Invocation invocation)
