@@ -29,7 +29,8 @@
 package com.caucho.xml.stream;
 
 import java.io.IOException;
-import javax.xml.XMLConstants;
+import static javax.xml.XMLConstants.*;
+import org.w3c.dom.*;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -88,10 +89,14 @@ final class NamespaceBinding
     throws IOException
   {
     if (_emit) {
-      if (XMLConstants.DEFAULT_NS_PREFIX.equals(_prefix))
-        ws.print(" xmlns");
+      if (DEFAULT_NS_PREFIX.equals(_prefix)) {
+        ws.print(" ");
+        ws.print(XMLNS_ATTRIBUTE);
+      }
       else {
-        ws.print(" xmlns:");
+        ws.print(" ");
+        ws.print(XMLNS_ATTRIBUTE);
+        ws.print(":");
         ws.print(Escapifier.escape(_prefix));
       }
 

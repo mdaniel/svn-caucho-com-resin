@@ -31,7 +31,9 @@ package com.caucho.xml.stream;
 
 import com.caucho.vfs.WriteStream;
 
-import javax.xml.XMLConstants;
+import org.w3c.dom.*;
+
+import static javax.xml.XMLConstants.*;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import java.io.IOException;

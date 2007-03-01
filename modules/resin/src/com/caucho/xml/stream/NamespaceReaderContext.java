@@ -31,7 +31,7 @@ package com.caucho.xml.stream;
 
 import com.caucho.vfs.WriteStream;
 
-import javax.xml.XMLConstants;
+import static javax.xml.XMLConstants.*;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import java.io.IOException;
@@ -109,10 +109,10 @@ public class NamespaceReaderContext extends NamespaceContextImpl
 
     String uri = null;
     
-    if (XMLConstants.XML_NS_PREFIX.equals(prefix))
-      uri = XMLConstants.XML_NS_URI;
-    else if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix))
-      uri = XMLConstants.XMLNS_ATTRIBUTE_NS_URI;
+    if (XML_NS_PREFIX.equals(prefix))
+      uri = XML_NS_URI;
+    else if (XMLNS_ATTRIBUTE.equals(prefix))
+      uri = XMLNS_ATTRIBUTE_NS_URI;
 
     return uri;
   }
@@ -124,10 +124,10 @@ public class NamespaceReaderContext extends NamespaceContextImpl
       throw new IllegalArgumentException("URI may not be null");
     else if ("".equals(uri))
       throw new IllegalArgumentException("URI may not be empty");
-    else if (XMLConstants.XML_NS_URI.equals(uri))
-      return XMLConstants.XML_NS_PREFIX;
-    else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(uri))
-      return XMLConstants.XMLNS_ATTRIBUTE;
+    else if (XML_NS_URI.equals(uri))
+      return XML_NS_PREFIX;
+    else if (XMLNS_ATTRIBUTE_NS_URI.equals(uri))
+      return XMLNS_ATTRIBUTE;
 
     Iterator<NamespaceBinding> iterator = _bindings.values().iterator();
 
@@ -214,7 +214,7 @@ public class NamespaceReaderContext extends NamespaceContextImpl
     NamespaceBinding binding;
 
     // default namespace
-    if (prefix == null || XMLConstants.DEFAULT_NS_PREFIX.equals(prefix))
+    if (prefix == null || DEFAULT_NS_PREFIX.equals(prefix))
       binding = _nullAttrBinding;
     else
       binding = _bindings.get(prefix);

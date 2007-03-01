@@ -116,7 +116,7 @@ public class XMLOutputFactoryImpl extends XMLOutputFactory {
     throws XMLStreamException
   {
     if (result instanceof DOMResult) {
-      return new DOMResultXMLStreamWriterImpl((DOMResult) result);
+      return new DOMResultXMLStreamWriterImpl((DOMResult) result, _repair);
     }
     else if (result instanceof SAXResult) {
       return new SAXResultXMLStreamWriterImpl((SAXResult) result);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -37,6 +37,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import static javax.xml.XMLConstants.*;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -58,13 +59,22 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   private Document _document;
   private Node _current;
   private boolean _currentIsEmpty = false;
+  private boolean _repair = false;
 
-  private SimpleNamespaceContext _context = new SimpleNamespaceContext(null);
+  private NamespaceWriterContext _tracker;
 
   public DOMResultXMLStreamWriterImpl(DOMResult result)
     throws XMLStreamException
   {
+    this(result, false);
+  }
+
+  public DOMResultXMLStreamWriterImpl(DOMResult result, boolean repair)
+    throws XMLStreamException
+  {
     _result = result;
+    _repair = repair;
+    _tracker = new NamespaceWriterContext(repair);
 
     _current = result.getNode();
 
@@ -93,13 +103,13 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
 
   public NamespaceContext getNamespaceContext()
   {
-    return _context;
+    return _tracker;
   }
 
   public String getPrefix(String uri)
     throws XMLStreamException
   {
-    return _context.getPrefix(uri);
+    return _tracker.getPrefix(uri);
   }
 
   public Object getProperty(String name)
@@ -111,7 +121,7 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void setDefaultNamespace(String uri)
     throws XMLStreamException
   {
-    _context.declare("", uri);
+    _tracker.declare(DEFAULT_NS_PREFIX, uri, _repair);
   }
 
   public void setNamespaceContext(NamespaceContext context)
@@ -124,7 +134,7 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void setPrefix(String prefix, String uri)
     throws XMLStreamException
   {
-    _context.declare(prefix, uri);
+    _tracker.declare(prefix, uri);
   }
 
   public void writeAttribute(String localName, String value)
@@ -145,10 +155,19 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
                              String value)
     throws XMLStreamException
   {
-    writeAttribute(_context.declare(namespaceURI),
-                   namespaceURI,
-                   localName,
-                   value);
+    if (_repair) {
+      String prefix = _tracker.declare(namespaceURI);
+
+      if (prefix == null)
+        ((Element) _current).setAttributeNS(namespaceURI, localName, value);
+      else {
+        String qname = prefix + ':' + localName;
+        ((Element) _current).setAttributeNS(namespaceURI, qname, value);
+      }
+    }
+    else {
+      ((Element) _current).setAttributeNS(namespaceURI, localName, value);
+    }
   }
 
   public void writeAttribute(String prefix, String namespaceURI,
@@ -156,9 +175,13 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
     throws XMLStreamException
   {
     try {
-      _context.declare(prefix, namespaceURI);
-      ((Element) _current).setAttributeNS(namespaceURI, 
-                                          prefix + ":" + localName, value);
+      if (_repair && _tracker.getPrefix(namespaceURI) == null)
+        _tracker.declare(prefix, namespaceURI, true);
+      else
+        _tracker.declare(prefix, namespaceURI);
+
+      String qname = prefix + ':' + localName;
+      ((Element) _current).setAttributeNS(namespaceURI, qname, value);
     }
     catch (ClassCastException e) {
       throw new XMLStreamException(e);
@@ -225,7 +248,7 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeDefaultNamespace(String namespaceURI)
     throws XMLStreamException
   {
-    _context.declare("", namespaceURI);
+    _tracker.declare("", namespaceURI, true);
   }
 
   public void writeDTD(String dtd)
@@ -258,9 +281,31 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeEmptyElement(String namespaceURI, String localName)
     throws XMLStreamException
   {
-    writeEmptyElement(_context.declare(namespaceURI),
-                      localName,
-                      namespaceURI);
+    if (_currentIsEmpty)
+      popContext();
+
+    try {
+      String qname = localName;
+
+      if (_repair) {
+        String prefix = _tracker.declare(namespaceURI);
+
+        if (prefix != null)
+          qname = prefix + ':' + localName;
+      }
+
+      Node parent = _current;
+      _current = _document.createElementNS(namespaceURI, qname);
+      parent.appendChild(_current);
+
+      if (! (parent instanceof Document))
+        pushContext();
+
+      _currentIsEmpty = true;
+    }
+    catch (DOMException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeEmptyElement(String prefix, String localName,
@@ -271,9 +316,12 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
       popContext();
 
     try {
+      if (_repair && _tracker.getPrefix(namespaceURI) == null) 
+        _tracker.declare(prefix, namespaceURI, true);
+
       Node parent = _current;
-      _current = _document.createElementNS(namespaceURI, 
-                                           prefix + ":" + localName);
+      String qname = prefix + ':' + localName;
+      _current = _document.createElementNS(namespaceURI, qname);
       parent.appendChild(_current);
 
       if (! (parent instanceof Document))
@@ -289,8 +337,6 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeEndDocument()
     throws XMLStreamException
   {
-    while (_context != null)
-      popContext();
   }
 
   public void writeEndElement()
@@ -328,7 +374,18 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeNamespace(String prefix, String namespaceURI)
     throws XMLStreamException
   {
-    _context.declare(prefix, namespaceURI);
+    if (prefix == null || "".equals(prefix) || "xmlns".equals(prefix))
+      writeDefaultNamespace(namespaceURI);
+    else {
+      _tracker.declare(prefix, namespaceURI, true);
+
+      if (! (_current instanceof Element))
+        throw new XMLStreamException(L.l("Cannot write namespace without an element"));
+
+      String qname = XMLNS_ATTRIBUTE + ':' + prefix;
+
+      ((Element) _current).setAttributeNS(XML_NS_URI, qname, namespaceURI);
+    }
   }
 
   public void writeProcessingInstruction(String target)
@@ -403,9 +460,33 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   public void writeStartElement(String namespaceURI, String localName)
     throws XMLStreamException
   {
-    writeStartElement(_context.declare(namespaceURI),
-                      localName,
-                      namespaceURI);
+    if (_currentIsEmpty) {
+      popContext();
+      _currentIsEmpty = false;
+    }
+
+    try {
+      String qname = localName;
+
+      if (_repair) {
+        String prefix = _tracker.declare(namespaceURI);
+
+        if (prefix != null)
+          qname = prefix + ':' + localName;
+      }
+
+      Node parent = _current;
+      _current = _document.createElementNS(namespaceURI, qname);
+      parent.appendChild(_current);
+
+      if (! (parent instanceof Document))
+        pushContext();
+
+      _currentIsEmpty = false;
+    }
+    catch (DOMException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeStartElement(String prefix, String localName,
@@ -418,9 +499,12 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
     }
 
     try {
+      if (_repair && _tracker.getPrefix(namespaceURI) == null)
+        _tracker.declare(prefix, namespaceURI, true);
+
       Node parent = _current;
-      _current = _document.createElementNS(namespaceURI, 
-                                           prefix + ":" + localName);
+      String qname = prefix + ':' + localName;
+      _current = _document.createElementNS(namespaceURI, qname);
       parent.appendChild(_current);
 
       if (! (parent instanceof Document))
@@ -435,105 +519,19 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
 
   //////////////////////////////////////////////////////////////////////////
 
+  private boolean _flushed = true;
+
   private void pushContext()
+    throws DOMException
   {
-    _context = new SimpleNamespaceContext(_context);
+    _tracker.push();
+    _flushed = false;
   }
 
   private void popContext()
+    throws DOMException
   {
-    if (_current instanceof Element) {
-      Element element = (Element) _current;
-      
-      for (Map.Entry<String,String> entry : 
-           _context.getPrefixMap().entrySet()) {
-
-        if ("".equals(entry.getKey()))
-          element.setAttribute("xmlns", entry.getValue());
-        else
-          element.setAttributeNS("http://www.w3.org/2000/xmlns/", 
-                                 "xmlns:" + entry.getKey(),
-                                 entry.getValue());
-      }
-    }
-
-    if (_context != null)
-      _context = _context.getParent();
-
+    _tracker.pop();
     _current = _current.getParentNode();
-  }
-
-  // XXX switch to NamespaceWriterContext
-  private static class SimpleNamespaceContext implements NamespaceContext {
-    private HashMap<String,String> _uris = new HashMap<String,String>();
-    private HashMap<String,List<String>> _prefixes
-      = new HashMap<String,List<String>>();
-    private SimpleNamespaceContext _parent;
-    private int _prefixCounter = 0;
-
-    public SimpleNamespaceContext(SimpleNamespaceContext parent)
-    {
-      _parent = parent;
-    }
-
-    public String getNamespaceURI(String prefix)
-    {
-      return _uris.get(prefix);
-    }
-
-    public String getPrefix(String namespaceURI)
-    {
-      List<String> prefixes = _prefixes.get(namespaceURI);
-
-      if (prefixes == null || prefixes.size() == 0)
-        return null;
-
-      return prefixes.get(0);
-    }
-
-    public Iterator getPrefixes(String namespaceURI)
-    {
-      List<String> prefixes = _prefixes.get(namespaceURI);
-
-      if (prefixes == null) {
-        prefixes = new ArrayList<String>();
-        _prefixes.put(namespaceURI, prefixes);
-      }
-
-      return prefixes.iterator();
-    }
-
-    public HashMap<String,String> getPrefixMap()
-    {
-      return _uris;
-    }
-
-    public String declare(String namespaceURI)
-    {
-      String prefix = "ns" + _prefixCounter;
-      declare(prefix, namespaceURI);
-      _prefixCounter++;
-
-      return prefix;
-    }
-
-    public void declare(String prefix, String namespaceURI)
-    {
-      _uris.put(prefix, namespaceURI);
-
-      List<String> prefixes = _prefixes.get(namespaceURI);
-
-      if (prefixes == null) {
-        prefixes = new ArrayList<String>();
-        _prefixes.put(namespaceURI, prefixes);
-      }
-
-      prefixes.add(prefix);
-    }
-
-    public SimpleNamespaceContext getParent()
-    {
-      return _parent;
-    }
   }
 }
