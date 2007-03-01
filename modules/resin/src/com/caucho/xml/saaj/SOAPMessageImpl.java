@@ -39,6 +39,7 @@ import javax.xml.soap.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
+import com.caucho.util.Base64;
 import com.caucho.xml.Xml;
 import com.caucho.xml.XmlPrinter;
 
@@ -54,39 +55,52 @@ public class SOAPMessageImpl extends SOAPMessage {
   private final HashMap<String, Object> _properties
     = new HashMap<String, Object>();
 
+  private static Random _r = new Random();
+
   private String _description;
   private SOAPPart _part;
   private SOAPFactory _factory;
   private String _protocol;
   private boolean _saveRequired = true;
+  private MimeHeaders _headers = new MimeHeaders();
+
+  public static void setRandomSeed(long seed)
+  {
+    _r = new Random(seed);
+  }
 
   SOAPMessageImpl(SOAPFactory factory, String protocol)
     throws SOAPException
   {
-    _factory = factory;
-    _protocol = protocol;
-    _properties.put(WRITE_XML_DECLARATION, "false");
-    _properties.put(CHARACTER_SET_ENCODING, "utf-8");
-
-    _part = new SOAPPartImpl(_factory, _protocol);
+    init(factory, protocol);
+    _part = new SOAPPartImpl(factory, protocol);
   }
 
   SOAPMessageImpl(SOAPFactory factory, String protocol, 
                   MimeHeaders headers, InputStream in)
     throws IOException, SOAPException
   {
-    _factory = factory;
-    _protocol = protocol;
-    _properties.put(WRITE_XML_DECLARATION, "false");
-    _properties.put(CHARACTER_SET_ENCODING, "utf-8");
+    init(factory, protocol);
 
     try {
       Document doc = new Xml().parseDocument(in);
-      _part = new SOAPPartImpl(_factory, _protocol, doc);
+      _part = new SOAPPartImpl(factory, protocol, doc);
     }
     catch (SAXException e) {
       throw new SOAPException(e);
     }
+
+    // XXX: the RI ignores the headers argument passed into
+    // MessageFactory.createMessage(), so we will too for now.
+  }
+
+  private void init(SOAPFactory factory, String protocol)
+  {
+    _factory = factory;
+    _protocol = protocol;
+    _properties.put(WRITE_XML_DECLARATION, "false");
+    _properties.put(CHARACTER_SET_ENCODING, "utf-8");
+    _headers.addHeader("Content-Type", "text/xml");
   }
 
   public void addAttachmentPart(AttachmentPart attachmentPart)
@@ -191,18 +205,7 @@ public class SOAPMessageImpl extends SOAPMessage {
 
   public MimeHeaders getMimeHeaders()
   {
-    MimeHeaders headers = new MimeHeaders();
-
-    for (int i = 0; i < _attachments.size(); i++) {
-      Iterator iterator = _attachments.get(i).getAllMimeHeaders();
-
-      while (iterator.hasNext()) {
-        MimeHeader header = (MimeHeader) iterator.next();
-        headers.addHeader(header.getName(), header.getValue());
-      }
-    }
-
-    return headers;
+    return _headers;
   }
 
   public Object getProperty(String property) 
@@ -278,7 +281,25 @@ public class SOAPMessageImpl extends SOAPMessage {
     // As specified by API
     saveChanges();
 
-    XmlPrinter printer = new XmlPrinter(out);
+    PrintWriter w = new PrintWriter(new OutputStreamWriter(out));
+
+    String separator = null;
+
+    if (_attachments.size() > 0) {
+      separator = "------=_Part_" + _r.nextLong();
+      w.println(separator);
+
+      Iterator iterator = getMimeHeaders().getAllHeaders();
+
+      while (iterator.hasNext()) {
+        MimeHeader header = (MimeHeader) iterator.next();
+        w.println(header.getName() + ": " + header.getValue());
+      }
+
+      w.println();
+    }
+
+    XmlPrinter printer = new XmlPrinter(w);
     printer.setEncoding((String) _properties.get(CHARACTER_SET_ENCODING));
 
     boolean printDeclaration = 
@@ -297,6 +318,35 @@ public class SOAPMessageImpl extends SOAPMessage {
 
     if (value == null)
       envelope.removeAttribute(SOAP_NAMESPACE_NAME);
+
+    // write the attachments
+
+    if (_attachments.size() > 0)
+      w.println();
+
+    for (int i = 0; i < _attachments.size(); i++) {
+      w.println(separator);
+
+      AttachmentPart ap = _attachments.get(i);
+
+      Iterator iterator = ap.getAllMimeHeaders();
+
+      while (iterator.hasNext()) {
+        MimeHeader header = (MimeHeader) iterator.next();
+        w.println(header.getName() + ": " + header.getValue());
+      }
+
+      w.println();
+
+      Base64.encode(w, ap.getRawContent());
+    }
+
+    if (_attachments.size() > 0) {
+      w.println();
+      w.println(separator + "--");
+    }
+
+    w.flush();
   }
 
   // org.w3c.dom.Document

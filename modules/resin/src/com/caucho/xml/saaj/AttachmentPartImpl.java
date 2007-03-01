@@ -176,8 +176,6 @@ public class AttachmentPartImpl extends AttachmentPart {
       ByteArrayOutputStream os = new ByteArrayOutputStream();
       _dataHandler.writeTo(os);
 
-      // XXX reset datahandler with this byte array?
-
       return os.toByteArray();
     }
     catch (IOException e) {

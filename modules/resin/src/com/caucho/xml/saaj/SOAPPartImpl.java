@@ -107,6 +107,7 @@ public class SOAPPartImpl extends SOAPPart
 
   public Source getContent() throws SOAPException
   {
+    // XXX
     return _content;
   }
 
@@ -143,6 +144,7 @@ public class SOAPPartImpl extends SOAPPart
   public void setContent(Source source) 
     throws SOAPException
   {
+    // XXX
     _content = source;
   }
 

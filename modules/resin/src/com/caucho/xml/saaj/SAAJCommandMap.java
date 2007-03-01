@@ -36,6 +36,7 @@ import java.util.*;
 
 import javax.activation.*;
 import javax.imageio.*;
+import javax.imageio.stream.*;
 import javax.xml.namespace.*;
 import javax.xml.soap.*;
 import javax.xml.transform.stream.*;
@@ -137,8 +138,38 @@ public class SAAJCommandMap extends MailcapCommandMap
 
       InputStream is = source.getInputStream();
 
-      for (int b = is.read(); b >= 0; b = is.read())
-        os.write(b);
+      if (is != null) {
+        // copy the input stream and then reset it
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        for (int b = is.read(); b >= 0; b = is.read()) {
+          os.write(b);
+          baos.write(b);
+        }
+
+        source.setInputStream(new ByteArrayInputStream(baos.toByteArray()));
+      }
+      else {
+        Reader r = source.getReader();
+
+        if (r != null) {
+          CharArrayWriter copy = new CharArrayWriter();
+          
+          // XXX set encoding
+          Writer w = new OutputStreamWriter(os);
+
+          for (int ch = r.read(); ch >= 0; ch = r.read()) {
+            w.write(ch);
+            copy.write(ch);
+          }
+
+          w.flush();
+
+          source.setReader(new CharArrayReader(copy.toCharArray()));
+        }
+        else
+          throw new IOException("No data available from StreamSource");
+      }
     }
   }
 
@@ -177,15 +208,20 @@ public class SAAJCommandMap extends MailcapCommandMap
         throw new IOException("Unrecognized MIME type : " + mimeType);
 
       String formatName = mimeType.substring(slash + 1);
+
       Iterator writers = ImageIO.getImageWritersByFormatName(formatName);
 
-      if (writers.hasNext())
+      if (! writers.hasNext())
         throw new IOException("Unsupported image type : " + mimeType);
 
       ImageWriter writer = (ImageWriter) writers.next();
 
-      writer.setOutput(os);
+      MemoryCacheImageOutputStream out = new MemoryCacheImageOutputStream(os);
+
+      writer.setOutput(out);
       writer.write((BufferedImage) obj);
+
+      out.flush();
     }
   }
 }
