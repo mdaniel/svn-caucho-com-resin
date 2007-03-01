@@ -208,7 +208,6 @@ public class UnmarshallerImpl implements Unmarshaller
 
       Property property = _context.createProperty(declaredType);
 
-      // T val = (T) property.read(this, reader, name, null);
       T val = (T) property.read(this, reader, null);
 
       return new JAXBElement<T>(name, declaredType, val);
@@ -329,7 +328,11 @@ public class UnmarshallerImpl implements Unmarshaller
     FileInputStream fis = null;
     try {
       fis = new FileInputStream(f);
-      return unmarshal(fis);
+      XMLInputFactory factory = _context.getXMLInputFactory();
+      return unmarshal(factory.createXMLStreamReader(f.getAbsolutePath(), fis));
+    }
+    catch (XMLStreamException e) {
+      throw new JAXBException(e);
     }
     catch (IOException e) {
       throw new JAXBException(e);

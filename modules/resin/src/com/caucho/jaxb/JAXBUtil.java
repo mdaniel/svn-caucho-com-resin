@@ -42,6 +42,7 @@ import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.ws.Holder;
@@ -52,6 +53,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -65,8 +67,11 @@ import java.util.logging.Logger;
  */
 public class JAXBUtil {
   private static final Logger log = Logger.getLogger(JAXBUtil.class.getName());
+
   private static final Map<Class,QName> _datatypeMap
     = new HashMap<Class,QName>();
+  private static final Map<QName,Class> _classMap
+    = new HashMap<QName,Class>();
 
   private static DatatypeFactory _datatypeFactory;
 
@@ -175,8 +180,7 @@ public class JAXBUtil {
     return type;
   }
 
-  public static void introspectClass(Class cl, 
-                                     Collection<Class> jaxbClasses)
+  public static void introspectClass(Class cl, Collection<Class> jaxbClasses)
     throws JAXBException
   {
     log.finest("Introspecting class " + cl.getName());
@@ -250,6 +254,16 @@ public class JAXBUtil {
                                               "uninstantiated type variables " +
                                               "or wildcards (" + type + ")");
     }
+  }
+
+  public static String primitiveToWrapperName(Class cl)
+  {
+    if (cl.getName().equals("int"))
+      return "Integer";
+    else if (cl.getName().equals("char"))
+      return "Character";
+    else
+      return toUpperCase(cl.getName().charAt(0)) + cl.getName().substring(1);
   }
 
   public static String classBasename(Class cl)
@@ -372,6 +386,16 @@ public class JAXBUtil {
     return xmlName.toString();
   }
 
+  public static String xmlNameToClassName(String name)
+  {
+    // XXX FIXME
+
+    if (name.length() > 1)
+      return toUpperCase(name.charAt(0)) + name.substring(1);
+    else
+      return toUpperCase(name.charAt(0)) + "";
+  }
+
   public static QName getXmlSchemaDatatype(Class cl)
   {
     if (_datatypeMap.containsKey(cl))
@@ -415,6 +439,11 @@ public class JAXBUtil {
     return qname;
   }
 
+  public static Class getClassForDatatype(QName qname)
+  {
+    return _classMap.get(qname);
+  }
+
   public static String qNameToString(QName qName)
   {
     if (qName.getPrefix() == null || "".equals(qName.getPrefix()))
@@ -433,59 +462,76 @@ public class JAXBUtil {
   }
 
   static {
-    _datatypeMap.put(String.class, 
-                     new QName(XML_SCHEMA_NS, "string", XML_SCHEMA_PREFIX));
+    QName stringQName = new QName(XML_SCHEMA_NS, "string", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(String.class, stringQName);
+    _classMap.put(stringQName, String.class);
 
-    _datatypeMap.put(BigDecimal.class,
-                     new QName(XML_SCHEMA_NS, "decimal", XML_SCHEMA_PREFIX));
+    QName bigDecimalQName = 
+      new QName(XML_SCHEMA_NS, "decimal", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(BigDecimal.class, bigDecimalQName);
+    _classMap.put(bigDecimalQName, BigDecimal.class);
+
+    QName bigIntegerQName = 
+      new QName(XML_SCHEMA_NS, "integer", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(BigInteger.class, bigIntegerQName);
+    _classMap.put(bigIntegerQName, BigInteger.class);
 
     QName booleanQName = new QName(XML_SCHEMA_NS, "boolean", XML_SCHEMA_PREFIX);
     _datatypeMap.put(Boolean.class, booleanQName);
     _datatypeMap.put(boolean.class, booleanQName);
+    _classMap.put(booleanQName, boolean.class);
 
     // XXX hexBinary
     QName base64BinaryQName = 
       new QName(XML_SCHEMA_NS, "base64Binary", XML_SCHEMA_PREFIX);
     _datatypeMap.put(Byte[].class, base64BinaryQName); 
     _datatypeMap.put(byte[].class, base64BinaryQName);
+    _classMap.put(base64BinaryQName, byte[].class);
 
-    QName byteQName = 
-      new QName(XML_SCHEMA_NS, "byte", XML_SCHEMA_PREFIX);
+    QName byteQName = new QName(XML_SCHEMA_NS, "byte", XML_SCHEMA_PREFIX);
     _datatypeMap.put(Byte.class, byteQName);
     _datatypeMap.put(byte.class, byteQName);
+    _classMap.put(byteQName, byte.class);
 
     QName charQName = 
       new QName(XML_SCHEMA_NS, "unsignedShort", XML_SCHEMA_PREFIX);
     _datatypeMap.put(Character.class, charQName);
     _datatypeMap.put(char.class, charQName);
+    _classMap.put(charQName, char.class);
 
-    // XXX timeDate, time
-    _datatypeMap.put(Calendar.class, 
-                     new QName(XML_SCHEMA_NS, "date", XML_SCHEMA_PREFIX));
+    // XXX time
+    QName calendarQName = new QName(XML_SCHEMA_NS, "date", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(Calendar.class, calendarQName);
+    _classMap.put(calendarQName, Calendar.class);
 
-    QName doubleQName = 
-      new QName(XML_SCHEMA_NS, "double", XML_SCHEMA_PREFIX);
+    QName dateTimeQName = 
+      new QName(XML_SCHEMA_NS, "dateTime", XML_SCHEMA_PREFIX);
+    _datatypeMap.put(XMLGregorianCalendar.class, dateTimeQName);
+    _classMap.put(dateTimeQName, XMLGregorianCalendar.class);
+
+    QName doubleQName = new QName(XML_SCHEMA_NS, "double", XML_SCHEMA_PREFIX);
     _datatypeMap.put(Double.class, doubleQName);
     _datatypeMap.put(double.class, doubleQName);
+    _classMap.put(doubleQName, double.class);
 
-    QName floatQName = 
-      new QName(XML_SCHEMA_NS, "float", XML_SCHEMA_PREFIX);
+    QName floatQName = new QName(XML_SCHEMA_NS, "float", XML_SCHEMA_PREFIX);
     _datatypeMap.put(Float.class, floatQName); 
     _datatypeMap.put(float.class, floatQName);
+    _classMap.put(floatQName, float.class);
 
-    QName intQName = 
-      new QName(XML_SCHEMA_NS, "int", XML_SCHEMA_PREFIX);
+    QName intQName = new QName(XML_SCHEMA_NS, "int", XML_SCHEMA_PREFIX);
     _datatypeMap.put(Integer.class, intQName);
     _datatypeMap.put(int.class, intQName);
+    _classMap.put(intQName, int.class);
 
-    QName longQName = 
-      new QName(XML_SCHEMA_NS, "long", XML_SCHEMA_PREFIX);
+    QName longQName = new QName(XML_SCHEMA_NS, "long", XML_SCHEMA_PREFIX);
     _datatypeMap.put(Long.class, longQName);
     _datatypeMap.put(long.class, longQName);
+    _classMap.put(longQName, long.class);
 
-    QName shortQName = 
-      new QName(XML_SCHEMA_NS, "short", XML_SCHEMA_PREFIX);
+    QName shortQName = new QName(XML_SCHEMA_NS, "short", XML_SCHEMA_PREFIX);
     _datatypeMap.put(Short.class, shortQName);
     _datatypeMap.put(short.class, shortQName);
+    _classMap.put(shortQName, short.class);
   }
 }

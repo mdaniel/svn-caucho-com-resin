@@ -68,18 +68,18 @@ public class ObjectArrayProperty<T> extends ArrayProperty {
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Object[] array = (Object[]) previous;
+    T[] array = (T[]) previous;
 
     if (array == null)
-      array = new Object[1];
+      array = (T[]) Array.newInstance(_type, 1);
     else {
-      Object[] newArray = new Object[array.length + 1];
+      T[] newArray = (T[]) Array.newInstance(_type, array.length + 1);
       System.arraycopy(array, 0, newArray, 0, array.length);
 
       array = newArray;
     }
 
-    array[array.length - 1] = _componentProperty.read(u, in, null);
+    array[array.length - 1] = (T) _componentProperty.read(u, in, null);
 
     return array;
   }
@@ -87,18 +87,18 @@ public class ObjectArrayProperty<T> extends ArrayProperty {
   public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Object[] array = (Object[]) previous;
+    T[] array = (T[]) previous;
 
     if (array == null)
-      array = new Object[1];
+      array = (T[]) Array.newInstance(_type, 1);
     else {
-      Object[] newArray = new Object[array.length + 1];
+      T[] newArray = (T[]) Array.newInstance(_type, array.length + 1);
       System.arraycopy(array, 0, newArray, 0, array.length);
 
       array = newArray;
     }
 
-    array[array.length - 1] = _componentProperty.read(u, in, null);
+    array[array.length - 1] = (T) _componentProperty.read(u, in, null);
 
     return array;
   }
@@ -106,18 +106,19 @@ public class ObjectArrayProperty<T> extends ArrayProperty {
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
     throws JAXBException
   {
-    Object[] array = (Object[]) previous;
+    T[] array = (T[]) previous;
 
     if (array == null)
-      array = new Object[1];
+      array = (T[]) Array.newInstance(_type, 1);
     else {
-      Object[] newArray = new Object[array.length + 1];
+      T[] newArray = (T[]) Array.newInstance(_type, array.length + 1);
       System.arraycopy(array, 0, newArray, 0, array.length);
 
       array = newArray;
     }
 
-    array[array.length - 1] = _componentProperty.bindFrom(binder, node, null);
+    array[array.length - 1] = 
+      (T) _componentProperty.bindFrom(binder, node, null);
 
     return array;
   }

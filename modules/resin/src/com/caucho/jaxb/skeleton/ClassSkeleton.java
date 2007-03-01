@@ -32,6 +32,7 @@ package com.caucho.jaxb.skeleton;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
+import com.caucho.jaxb.annotation.XmlLocation;
 import com.caucho.util.L10N;
 
 import org.w3c.dom.Node;
@@ -45,6 +46,7 @@ import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 
 import javax.xml.stream.events.*;
+import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
@@ -99,6 +101,8 @@ public class ClassSkeleton<C> extends Skeleton {
   private Method _afterMarshal;
 
   private Constructor _constructor;
+
+  private Accessor _locationAccessor;
 
   /**
    * The value @XmlValue.
@@ -417,6 +421,14 @@ public class ClassSkeleton<C> extends Skeleton {
         AccessibleObject.setAccessible(fields, true);
 
         for (Field f : fields) {
+          if (f.isAnnotationPresent(XmlLocation.class)) 
+          {
+            if (! f.getType().equals(Location.class))
+              throw new JAXBException(L.l("Fields annotated by @Location must have type javax.xml.stream.Location"));
+
+            _locationAccessor = new FieldAccessor(_context, f);
+          }
+
           // special case: jaxb/0250
           // fields which are static are skipped _unless_ they are also
           // both final and attributes
@@ -572,6 +584,9 @@ public class ClassSkeleton<C> extends Skeleton {
   {
     try {
       C ret = newInstance();
+
+      if (_locationAccessor != null)
+        _locationAccessor.set(ret, in.getLocation());
 
       if (_beforeUnmarshal != null)
         _beforeUnmarshal.invoke(ret, u, /*FIXME : parent*/ null);

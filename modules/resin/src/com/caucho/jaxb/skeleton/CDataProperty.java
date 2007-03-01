@@ -63,6 +63,14 @@ public abstract class CDataProperty extends Property {
   protected abstract Object read(String in) 
     throws JAXBException;
 
+  public String getMinOccurs()
+  {
+    if (_isNillable)
+      return "0";
+
+    return null;
+  }
+
   public Object readAttribute(XMLStreamReader in, int i)
     throws JAXBException
   {
@@ -98,7 +106,8 @@ public abstract class CDataProperty extends Property {
     while (in.hasNext()) {
       in.next();
 
-      if (in.getEventType() == in.START_ELEMENT)
+      if (in.getEventType() == in.START_ELEMENT || 
+          in.getEventType() == in.END_ELEMENT)
         break;
     }
 

@@ -76,6 +76,9 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
 
     Skeleton skeleton = _context.getRootElement(name);
 
+    if (skeleton == null)
+      throw new JAXBException(L.l("No root found for element {0}", name));
+
     return skeleton.read(u, in);
   }
 
@@ -88,6 +91,9 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
 
     Skeleton skeleton = _context.getRootElement(name);
 
+    if (skeleton == null)
+      throw new JAXBException(L.l("No root found for element {0}", name));
+
     return skeleton.read(u, in);
   }
 
@@ -98,6 +104,9 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
 
     Skeleton skeleton = _context.getRootElement(name);
 
+    if (skeleton == null)
+      throw new JAXBException(L.l("No root found for element {0}", name));
+
     return skeleton.bindFrom(binder, existing, node);
   }
 
@@ -106,6 +115,9 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
     throws IOException, XMLStreamException, JAXBException
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
+
+    if (skeleton == null)
+      throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
 
     skeleton.write(m, out, obj, fieldName);
   }
@@ -116,6 +128,9 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
 
+    if (skeleton == null)
+      throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
+
     skeleton.write(m, out, obj, fieldName);
   }
 
@@ -124,6 +139,9 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
     throws JAXBException
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
+
+    if (skeleton == null)
+      throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
 
     return skeleton.bindTo(binder, node, obj, fieldName);
   }

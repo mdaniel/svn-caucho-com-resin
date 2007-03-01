@@ -68,6 +68,11 @@ public abstract class Property {
     return true;
   }
 
+  public String getMinOccurs()
+  {
+    return "0";
+  }
+
   public String getMaxOccurs()
   {
     return null;
