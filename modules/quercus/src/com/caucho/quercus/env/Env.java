@@ -4072,11 +4072,17 @@ public class Env {
 
     _session = null;
 
-    if (session != null && session.getSize() > 0) {
+    if (session != null) {
       SessionCallback callback = getSessionCallback();
 
       if (callback != null) {
-        String value = VariableModule.serialize(session.getArray());
+        String value;
+        
+        // php/1k6e
+        if (session.getSize() > 0)
+          value = VariableModule.serialize(session.getArray());
+        else
+          value = "";
 
         callback.write(this, session.getId(), value);
 
