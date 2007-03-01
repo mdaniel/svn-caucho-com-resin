@@ -153,6 +153,28 @@ abstract public class JdbcMetaData {
   abstract public boolean supportsPositionFunction();
 
   /**
+   * Returns true if the sql state is a "foreign key violation" error.
+   */
+  public boolean isForeignKeyViolationSQLState(String sqlState)
+  {
+    if (sqlState == null)
+      return false;
+
+    return sqlState.equals("23503");
+  }
+
+  /**
+   * Returns true if the sql state is a "duplicate primary key" error.
+   */
+  public boolean isUniqueConstraintSQLState(String sqlState)
+  {
+    if (sqlState == null)
+      return false;
+
+    return sqlState.equals("23000") || sqlState.equals("23505");
+  }
+
+  /**
    * Returns the long type.
    */
   abstract public String getLongType();
