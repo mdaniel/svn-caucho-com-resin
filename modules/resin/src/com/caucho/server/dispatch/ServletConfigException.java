@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,8 +29,7 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.util.CompileException;
-import com.caucho.util.DisplayableException;
+import com.caucho.util.*;
 
 import java.io.*;
 import javax.servlet.ServletException;
@@ -77,6 +77,6 @@ public class ServletConfigException extends ServletException
     if (getCause() instanceof DisplayableException)
       ((DisplayableException) getCause()).print(out);
     else
-      out.println(getMessage());
+      out.println(Html.escapeHtml(getMessage()));
   }
 }

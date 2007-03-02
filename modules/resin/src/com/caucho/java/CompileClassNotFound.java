@@ -80,7 +80,7 @@ public class CompileClassNotFound
 
   public void print(PrintWriter out)
   {
-    out.println(getMessage());
+    out.println(Html.escapeHtml(getMessage()));
   }
 }
 

@@ -811,8 +811,11 @@ public class NodeBuilder {
     String filename = null;
     int line = 0;
 
-    if (e instanceof RuntimeException && e instanceof DisplayableException)
+    if (e instanceof RuntimeException
+	&& e instanceof DisplayableException
+	&& ! ConfigException.class.equals(e.getClass())) {
       return (RuntimeException) e;
+    }
 
     if (node instanceof QAbstractNode) {
       QAbstractNode qnode = (QAbstractNode) node;
