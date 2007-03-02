@@ -542,6 +542,8 @@ public class AmberConnection
    */
   public void clear()
   {
+    log.finest("AmberConnection.clear cleaning up all entities");
+
     _entities.clear();
     _txEntities.clear();
   }
@@ -1168,6 +1170,11 @@ public class AmberConnection
     return getEntityMatch(_txEntities, className, key);
   }
 
+  public Entity getTransactionEntity(int index)
+  {
+    return _txEntities.get(index);
+  }
+
   /**
    * Adds an entity.
    */
@@ -1341,6 +1348,8 @@ public class AmberConnection
   public void commit()
     throws SQLException
   {
+    log.finest("AmberConnection.commit");
+
     try {
       flushInternal();
 
@@ -1368,6 +1377,8 @@ public class AmberConnection
         entity.__caucho_afterCommit();
       }
 
+      log.finest("cleaning up txEntities");
+
       _txEntities.clear();
     }
   }
@@ -1377,6 +1388,8 @@ public class AmberConnection
    */
   public void beforeCompletion()
   {
+    log.finest("AmberConnection.beforeCompletion");
+
     try {
       beforeCommit();
     } catch (Exception e) {
@@ -1389,6 +1402,8 @@ public class AmberConnection
    */
   public void afterCompletion(int status)
   {
+    log.finest("AmberConnection.afterCompletion");
+
     afterCommit(status == Status.STATUS_COMMITTED);
     _isXA = false;
     _isInTransaction = false;
@@ -1400,6 +1415,8 @@ public class AmberConnection
   public void beforeCommit()
     throws SQLException
   {
+    log.finest("AmberConnection.beforeCommit");
+
     try {
       flushInternal();
     } catch (SQLException e) {
@@ -1437,6 +1454,8 @@ public class AmberConnection
    */
   public void afterCommit(boolean isCommit)
   {
+    log.finest("AmberConnection.afterCommit: " + isCommit);
+
     if (! _isXA)
       _isInTransaction = false;
 
@@ -1459,6 +1478,8 @@ public class AmberConnection
         log.log(Level.WARNING, e.toString(), e);
       }
     }
+
+    log.finest("cleaning up txEntities");
 
     _txEntities.clear();
 
@@ -1492,6 +1513,8 @@ public class AmberConnection
   public void rollback()
     throws SQLException
   {
+    log.finest("AmberConnection.rollback");
+
     try {
       flushInternal();
 
@@ -2094,6 +2117,8 @@ public class AmberConnection
    */
   public void cleanup()
   {
+    log.finest("AmberConnection.cleanup");
+
     try {
       // XXX: also needs to check PersistenceContextType.TRANSACTION/EXTENDED.
       // jpa/0g04
@@ -2116,6 +2141,8 @@ public class AmberConnection
       for (int i = _entities.size() - 1; i >= 0; i--) {
         _entities.get(i).__caucho_detach();
       }
+
+      log.finest("cleaning up all entities");
 
       _entities.clear();
       _txEntities.clear();
@@ -2394,6 +2421,8 @@ public class AmberConnection
 
         entity.__caucho_afterCommit();
       }
+
+      log.finest("AmberConnection.flushInternal cleaning up all entities");
 
       _txEntities.clear();
     }

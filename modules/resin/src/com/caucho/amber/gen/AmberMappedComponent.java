@@ -348,6 +348,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("public void __caucho_expire()");
     out.println("{");
 
+    out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
+    out.println("  __caucho_log.fine(\"amber expire \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
+    out.println();
+
     int loadCount = _relatedType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("  __caucho_loadMask_" + i + " = 0L;");
