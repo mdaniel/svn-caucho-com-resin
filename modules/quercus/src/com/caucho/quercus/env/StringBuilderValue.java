@@ -901,15 +901,10 @@ public class StringBuilderValue extends UnicodeValue
 
     int newCapacity;
 
-    if (capacity < 4096) {
-      newCapacity = _buffer.length;
-
-      if (newCapacity < 64)
-	newCapacity = 64;
-
-      while (newCapacity < capacity)
-	newCapacity = 4 * newCapacity;
-    }
+    if (capacity < 256)
+      newCapacity = (capacity + 64) & ~63;
+    else if (capacity < 4096)
+      newCapacity = (capacity + 256) & ~255;
     else
       newCapacity = (capacity + 4096) & ~4095;
 

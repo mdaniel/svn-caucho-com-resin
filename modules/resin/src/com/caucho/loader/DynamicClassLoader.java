@@ -37,6 +37,7 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.make.DependencyContainer;
 import com.caucho.make.Make;
 import com.caucho.make.MakeContainer;
+import com.caucho.management.server.*;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;
@@ -72,7 +73,7 @@ import java.util.regex.Pattern;
  * the class loader chain searches like a classpath.
  */
 public class DynamicClassLoader extends java.net.URLClassLoader
-  implements Dependency, Make
+  implements Dependency, Make, DynamicClassLoaderMXBean
 {
   private static L10N _L;
   private static Logger _log;

@@ -393,12 +393,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
 
     MBeanContext context;
 
-    try {
-      context = getContext();
-    } catch (RuntimeException e) {
-      e.printStackTrace();
-      throw e;
-    }
+    context = getContext();
 
     if (context.getMBean(name) != null) {
       throw new InstanceAlreadyExistsException(String.valueOf(name));
@@ -430,7 +425,7 @@ abstract public class AbstractMBeanServer implements MBeanServer {
     Class ifc = getMBeanInterface(obj.getClass());
 
     if (ifc == null)
-      throw new NotCompliantMBeanException(L.l("{0} mbean has no MBean interface", name));
+      throw new NotCompliantMBeanException(L.l("{0} mbean has no MBean interface for class {1}", name, obj.getClass().getName()));
 
     return new IntrospectionMBean(obj, ifc);
   }

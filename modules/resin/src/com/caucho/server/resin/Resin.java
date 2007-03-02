@@ -59,6 +59,7 @@ import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.transaction.cfg.TransactionManagerConfig;
+import com.caucho.transaction.xalog.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
@@ -151,6 +152,9 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
+
+  private Path _managementPath;
+  private boolean _isManagementRemote;
 
   private ThreadPoolAdmin _threadPoolAdmin;
   private ResinAdmin _resinAdmin;
@@ -309,6 +313,17 @@ public class Resin implements EnvironmentBean, SchemaBean
   }
 
   /**
+   * Returns the server id.
+   */
+  public String getDisplayServerId()
+  {
+    if ("".equals(_serverId))
+      return "default";
+    else
+      return _serverId;
+  }
+
+  /**
    * Sets the config file.
    */
   public void setConfigFile(String configFile)
@@ -376,6 +391,22 @@ public class Resin implements EnvironmentBean, SchemaBean
   public boolean isProfessional()
   {
     return _isResinProfessional;
+  }
+
+  /**
+   * Returns the management directory.
+   */
+  public Path getManagementPath()
+  {
+    return _managementPath;
+  }
+
+  /**
+   * Return true if remote management is enabled.
+   */
+  public boolean isManagementRemote()
+  {
+    return _isManagementRemote;
   }
 
   /**
@@ -538,6 +569,11 @@ public class Resin implements EnvironmentBean, SchemaBean
     return new SecurityManagerConfig();
   }
 
+  public ManagementConfig createManagement()
+  {
+    return new ManagementConfig();
+  }
+
   /**
    * Adds a new security provider
    */
@@ -627,8 +663,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     long start = Alarm.getCurrentTime();
 
-    _j2eeDomainManagedObject = J2EEManagedObject.register(new J2EEDomain());
-    _jvmManagedObject = J2EEManagedObject.register(new JVM());
+    startManagement();
 
     // force a GC on start
     System.gc();
@@ -1025,22 +1060,6 @@ public class Resin implements EnvironmentBean, SchemaBean
     if (_classLoader != null)
       _mainThread.setContextClassLoader(_classLoader);
 
-    /*
-    if (isResinProfessional && _configServer != null) {
-      Path dbDir = Vfs.lookup("work/config");
-
-      Class cl = Class.forName("com.caucho.vfs.remote.RemotePath");
-      Constructor ctor = cl.getConstructor(new Class[] { String.class,
-							 Path.class,
-							  String.class });
-
-      Path path = (Path) ctor.newInstance(_configServer, dbDir, _serverId);
-
-      ConfigPath.setRemote(path);
-      log().info("Using configuration from " + _configServer);
-    }
-    */
-
     Path pwd = Vfs.getPwd();
 
     if (_rootDirectory == null)
@@ -1102,6 +1121,37 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     start();
+  }
+  
+  private void startManagement()
+  {
+    _j2eeDomainManagedObject = J2EEManagedObject.register(new J2EEDomain());
+    _jvmManagedObject = J2EEManagedObject.register(new JVM());
+
+    if (_managementPath != null) {
+      try {
+	_managementPath.mkdirs();
+      } catch (Exception e) {
+	throw new ConfigException(e);
+      }
+
+      try {
+	Class cl = Class.forName("com.caucho.transaction.xalog.XALogManager");
+
+	Path logPath = _managementPath.lookup("xa-" + getDisplayServerId() + ".log");
+
+	AbstractXALogManager xaLog = (AbstractXALogManager) cl.newInstance();
+
+	xaLog.setPath(logPath);
+
+	xaLog.init();
+	xaLog.start();
+      } catch (ClassNotFoundException e) {
+	log().log(Level.FINER, e.toString(), e);
+      } catch (Exception e) {
+	throw new ConfigException(e);
+      }
+    }
   }
 
   private void addRandom()
@@ -1659,6 +1709,22 @@ public class Resin implements EnvironmentBean, SchemaBean
     {
       if (_isEnable)
         System.setSecurityManager(_securityManager);
+    }
+  }
+
+  public class ManagementConfig {
+    ManagementConfig()
+    {
+    }
+
+    public void setPath(Path path)
+    {
+      _managementPath = path;
+    }
+    
+    public void setRemoteEnable(boolean isRemote)
+    {
+      _isManagementRemote = isRemote;
     }
   }
 }

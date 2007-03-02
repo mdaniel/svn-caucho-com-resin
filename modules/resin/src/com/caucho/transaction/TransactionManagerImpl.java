@@ -54,9 +54,11 @@ import java.util.logging.Logger;
  */
 public class TransactionManagerImpl
   implements TransactionManager, Serializable,
-	     ClassLoaderListener {
+	     ClassLoaderListener
+{
   private static L10N L = new L10N(TransactionManagerImpl.class);
-  private static Logger log = Log.open(TransactionManagerImpl.class);
+  private static Logger log
+    = Logger.getLogger(TransactionManagerImpl.class.getName());
   
   private static TransactionManagerImpl _tm = new TransactionManagerImpl();
 

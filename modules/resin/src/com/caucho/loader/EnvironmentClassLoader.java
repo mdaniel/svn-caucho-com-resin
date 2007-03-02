@@ -34,6 +34,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.JTAResource;
+import com.caucho.management.server.ClassLoaderMXBean;
 import com.caucho.naming.Jndi;
 import com.caucho.security.PolicyImpl;
 import com.caucho.transaction.TransactionManagerImpl;
@@ -55,7 +56,8 @@ import java.util.logging.Level;
  * From the perspective of the JDK, it's all one classloader.  Internally,
  * the class loader chain searches like a classpath.
  */
-public class EnvironmentClassLoader extends DynamicClassLoader {
+public class EnvironmentClassLoader extends DynamicClassLoader
+{
   private static boolean _isStaticInit;
 
   // listeners invoked at the start of any child environment

@@ -107,8 +107,6 @@ public class Cluster
   private BuilderProgramContainer _serverProgram
     = new BuilderProgramContainer();
 
-  private RemoteAdministration _remoteAdmin;
-
   private Server _server;
 
   private volatile boolean _isClosed;
@@ -223,27 +221,6 @@ public class Cluster
   public ClusterMXBean getAdmin()
   {
     return _admin;
-  }
-
-  /**
-   * Sets the remote administration.
-   */
-  public RemoteAdministration createRemoteAdministration()
-  {
-    try {
-      Class proAdmin = Class.forName("com.caucho.server.cluster.ProRemoteAdministration");
-
-      _remoteAdmin = (RemoteAdministration) proAdmin.newInstance();
-    } catch (Exception e) {
-      log.fine("remote-administration requires Resin Professional.");
-    }
-
-    if (_remoteAdmin == null)
-      _remoteAdmin = new RemoteAdministration();
-
-    _remoteAdmin.setCluster(this);
-
-    return _remoteAdmin;
   }
 
   /**
@@ -568,9 +545,6 @@ public class Cluster
       _clusterLocal.set(this);
     }
 
-    if (_remoteAdmin != null)
-      _remoteAdmin.init();
-
     try {
       String name = _id;
 
@@ -586,6 +560,23 @@ public class Cluster
       _objectName = objectName;
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
+    }
+
+    if (_resin.isManagementRemote()) {
+      RemoteAdministration admin = null;
+      
+      try {
+	Class proAdmin = Class.forName("com.caucho.server.cluster.ProRemoteAdministration");
+
+	admin = (RemoteAdministration) proAdmin.newInstance();
+      } catch (Exception e) {
+	log.fine("management remote requires Resin Professional.");
+      }
+
+      if (admin != null) {
+	admin.setCluster(this);
+	admin.init();
+      }
     }
   }
 

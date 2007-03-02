@@ -312,6 +312,13 @@ r_keepalive-select-enable =
   attribute keepalive-select-enable { r_boolean-Type }
   | element keepalive-select-enable { r_boolean-Type }
 
+r_management = element management {
+  r_path?
+
+  & (attribute remote-enable { r_boolean-Type }
+     | element remote-enable { r_boolean-Type })?
+}
+
 r_memory-free-min =
   attribute memory-free-min { string }
   | element memory-free-min { string }
@@ -457,6 +464,8 @@ r_resin-Basis =
 
   & (attribute environment-system-properties { string }
      | element environment-system-properties { string })?
+
+  & r_management?
 
   & r_min-free-memory?
 
