@@ -57,7 +57,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JaxbBeanType extends TypeStrategy {
+public class JaxbBeanType extends TypeStrategy
+{
   protected static final L10N L = new L10N(BeanTypeStrategy.class);
 
   private static final HashMap<Class,PrimType> _primTypes
@@ -66,9 +67,6 @@ public class JaxbBeanType extends TypeStrategy {
   private ArrayList<BuilderProgram> _injectList
     = new ArrayList<BuilderProgram>();
 
-  private ArrayList<Method> _postConstructList
-    = new ArrayList<Method>();
-  
   private ArrayList<Method> _preDestroyList
     = new ArrayList<Method>();
 
@@ -187,7 +185,7 @@ public class JaxbBeanType extends TypeStrategy {
     else
       accessType = XmlAccessType.PUBLIC_MEMBER;
 
-    InjectIntrospector.configureClassResources(_injectList, _type);
+    introspectClassResources(_type);
     
     introspectMethods(accessType);
     introspectFields(accessType);
@@ -201,6 +199,16 @@ public class JaxbBeanType extends TypeStrategy {
     }
   }
 
+  private void introspectClassResources(Class type)
+  {
+    if (type == null || Object.class.equals(type))
+      return;
+
+    introspectClassResources(type.getSuperclass());
+    
+    InjectIntrospector.configureClassResources(_injectList, type);
+  }
+
   private void introspectMethods(XmlAccessType accessType)
   {
     Method []methods = _type.getDeclaredMethods();
@@ -210,22 +218,6 @@ public class JaxbBeanType extends TypeStrategy {
       String name = getter.getName();
       String setterName;
       String propName;
-
-      if (getter.isAnnotationPresent(PostConstruct.class)) {
-	if (getter.getParameterTypes().length != 0)
-	  throw new ConfigException(L.l("@PostConstruct method must have zero arguments."));
-
-
-	_postConstructList.add(getter);
-      }
-
-      if (getter.isAnnotationPresent(PreDestroy.class)) {
-	if (getter.getParameterTypes().length != 0)
-	  throw new ConfigException(L.l("@PreDestroy method must have zero arguments."));
-
-
-	_preDestroyList.add(getter);
-      }
 
       Class retType = getter.getReturnType();
       if (void.class.equals(retType))
@@ -519,7 +511,7 @@ public class JaxbBeanType extends TypeStrategy {
 	      eltType = elt.type();
 	    else
 	      eltType = componentType;
-	    
+
 	    TypeStrategy typeMarshal = createTypeMarshal(eltType,
 							 adapter);
 
@@ -552,11 +544,13 @@ public class JaxbBeanType extends TypeStrategy {
 
 	  if (elt.type() != XmlElement.DEFAULT.class)
 	    eltType = elt.type();
+          
 	  
 	  AttributeStrategy attr = createFieldAttribute(field,
 							eltType,
 							adapter);
 
+	    
 	  if (attr != null)
 	    _attributeMap.put(eltName, attr);
 	}
@@ -652,7 +646,10 @@ public class JaxbBeanType extends TypeStrategy {
       return new CollectionProperty(typeMarshal, getter);
     }
 
-    return new BeanProperty(setter, type);
+    if (valueType != null && type.isAssignableFrom(valueType))
+      return new BeanProperty(setter, valueType);
+    else
+      return new BeanProperty(setter, type);
   }
 
   private static Class getCollectionComponent(Type type)
@@ -751,7 +748,7 @@ public class JaxbBeanType extends TypeStrategy {
 						 Adapter adapter)
   {
     field.setAccessible(true);
-    
+
     if (adapter != null) {
       if (! field.getType().isAssignableFrom(adapter.getBoundClass())) {
 	throw new ConfigException(L.l("Can't assign XmlAdapter {0} to field {1}",

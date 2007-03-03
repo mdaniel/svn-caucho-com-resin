@@ -81,8 +81,6 @@ public class EnterpriseApplication
 
   private Path _webappsPath;
 
-  private ApplicationConfig _config;
-
   private WebAppContainer _container;
 
   private boolean _hasModule;
@@ -331,8 +329,11 @@ public class EnterpriseApplication
       
     Vfs.setPwd(_rootDir, _loader);
 
-    // XXX: only if application is missing (?)
-    fillDefaultModules();
+    // server/13bb
+    if (_ejbPaths.size() == 0
+        && _webApps.size() == 0) {
+      fillDefaultModules();
+    }
 
     if (_ejbPaths.size() != 0) {
       EJBServer ejbServer = EJBServer.getLocal();

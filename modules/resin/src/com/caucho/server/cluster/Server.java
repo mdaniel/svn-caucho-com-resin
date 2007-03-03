@@ -97,7 +97,7 @@ public class Server extends ProtocolDispatchServer
 
   private final ClusterServer _clusterServer;
   private final Resin _resin;
-  
+
   private EnvironmentClassLoader _classLoader;
 
   private Throwable _configException;

@@ -34,10 +34,12 @@ import com.caucho.config.types.RawString;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
+import com.caucho.management.server.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
 import javax.annotation.PostConstruct;
+import javax.management.*;
 import java.util.ArrayList;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -48,6 +50,8 @@ import java.util.logging.Logger;
  * Environment-specific configuration.
  */
 public class LogConfig extends RotateLog {
+  private static final Logger log
+    = Logger.getLogger(LogConfig.class.getName());
   private static final L10N L = new L10N(LogConfig.class);
   
   private ArrayList<Handler> _handlers;
@@ -58,6 +62,7 @@ public class LogConfig extends RotateLog {
   private SubLogger _subLogger;
 
   private String _mbeanName;
+  
   private boolean _isInit;
 
   public LogConfig()
@@ -125,8 +130,6 @@ public class LogConfig extends RotateLog {
 	handler.setLevel(getSubLogger().getLevel());
       }
     }
-
-
   }
 
   /**
@@ -314,8 +317,11 @@ public class LogConfig extends RotateLog {
 
     if (_mbeanName != null) {
       try {
-	Jmx.register(this, Jmx.getObjectName(_mbeanName));
+        ObjectName objectName = Jmx.getObjectName(_mbeanName);
+        
+	Jmx.register(new LogAdmin(), objectName, LoggerMXBean.class);
       } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -461,6 +467,38 @@ public class LogConfig extends RotateLog {
     {
       if (_name == null)
 	throw new ConfigException(L.l("`name' is a required attribute..  Each logger must configure the log name, e.g. com.caucho.server.webapp."));
+    }
+  }
+
+  class LogAdmin extends AbstractManagedObject implements LoggerMXBean {
+    public String getType()
+    {
+      return "Logger";
+    }
+
+    public String getName()
+    {
+      return LogConfig.this.getName();
+    }
+
+    public String getLevel()
+    {
+      return LogConfig.this.getLevel();
+    }
+
+    public void setLevel(String level)
+    {
+      if (_subLogger != null) {
+        _subLogger.setLevel(level);
+        _subLogger.getLogger().setLevel(_subLogger.getLevel());
+      }
+
+      for (int i = 0; i < _subLoggers.size(); i++) {
+        SubLogger subLogger = _subLoggers.get(i);
+        
+        subLogger.setLevel(level);
+        subLogger.getLogger().setLevel(_subLogger.getLevel());
+      }
     }
   }
 }

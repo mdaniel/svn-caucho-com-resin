@@ -96,7 +96,7 @@ public class PostConstructProgram extends BuilderProgram
     PostConstructProgram program = (PostConstructProgram) o;
     Method init = program._init;
 
-    if (! _init.getName().equals(_init.getName()))
+    if (! _init.getName().equals(init.getName()))
       return false;
 
     Class []aParam = _init.getParameterTypes();

@@ -87,6 +87,8 @@ public class BeanProperty extends JaxbProperty
     try {
       Object value = _typeStrategy.configure(builder, node, bean);
 
+      System.out.println("TS: " + _typeStrategy + " " + value);
+
       // _typeStrategy.configureBean(builder, value, node);
       
       _method.invoke(bean, value);

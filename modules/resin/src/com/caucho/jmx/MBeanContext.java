@@ -334,6 +334,8 @@ public class MBeanContext
    */
   private void addMBean(ObjectName name, MBeanWrapper mbean)
   {
+    if (_mbeans == null)
+      throw new IllegalStateException(L.l("Adding MBean when context is closed"));
     if (mbean == null) {
       log.warning(L.l("'{0}' is an empty mbean", name));
       return;
