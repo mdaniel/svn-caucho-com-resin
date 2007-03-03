@@ -1454,9 +1454,7 @@ public class RegexpModule
 
   /**
    * Cleans the regexp from valid values that the Java regexps can't handle.
-   * Currently "+?".
    */
-  // XXX: not handling '['
   private static String cleanRegexp(StringValue regexp, boolean isComments)
   {
     int len = regexp.length();
@@ -1566,9 +1564,10 @@ public class RegexpModule
         break;
 
       case '#':
-        if (quote == '[' && isComments)
+        if (quote == '[') {
           sb.append("\\#");
-        else {
+        }
+        else if (isComments) {
           sb.append(ch);
 
           for (i++; i < len; i++) {
@@ -1580,6 +1579,10 @@ public class RegexpModule
               break;
           }
         }
+        else {
+          sb.append(ch);
+        }
+
         break;
 
       case ']':
