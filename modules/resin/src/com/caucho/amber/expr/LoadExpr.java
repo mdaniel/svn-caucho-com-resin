@@ -170,8 +170,19 @@ abstract public class LoadExpr extends AbstractAmberExpr {
     if (! fullSelect)
       return;
 
-    String valueSelect = type.generateLoadSelect(_fromItem.getTable(),
-                                                 _fromItem.getName());
+    String valueSelect = "";
+
+    RelatedType parentType = (RelatedType) type;
+    FromItem parentFromItem = _fromItem;
+
+    // XXX: jpa/0l47: to be continued.
+    do {
+      parentType.generateLoadSelect(parentFromItem.getTable(),
+                                    parentFromItem.getName());
+
+      // XXX: parentFromItem = ...;
+    }
+    while ((parentType = parentType.getParentType()) != null);
 
     if (valueSelect != null && ! "".equals(valueSelect)) {
       cb.append(", ");

@@ -325,7 +325,8 @@ public class EntityManyToManyField extends AssociationField {
     JType param = paramArgs.length > 0 ? paramArgs[0] : null;
     JType param2 = paramArgs.length > 1 ? paramArgs[1] : null;
 
-    String s = "private ";
+    // jpa/0l44
+    String s = "protected ";
 
     String collectionImpl;
 

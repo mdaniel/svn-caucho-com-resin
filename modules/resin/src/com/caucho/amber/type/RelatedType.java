@@ -999,10 +999,16 @@ abstract public class RelatedType extends AbstractStatefulType {
         (loadGroup == 0 && getDiscriminator() != null)) {
 
       if (id != null) {
-        cb.append(id + ".");
+        if (getDiscriminator().getTable() == getTable()) {
+          cb.append(id + ".");
+          cb.append(getDiscriminator().getName());
+        }
+        else {
+          // jpa/0l4b
+          cb.append("'" + getDiscriminatorValue() + "'");
+        }
       }
 
-      cb.append(getDiscriminator().getName());
       hasSelect = true;
     }
 

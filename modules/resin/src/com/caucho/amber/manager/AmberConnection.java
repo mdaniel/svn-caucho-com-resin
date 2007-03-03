@@ -886,6 +886,7 @@ public class AmberConnection
       if (entity == null)
         return null;
 
+      /* XXX: Should not be necessary.
       // jpa/0o36: eager loading can change the corresponding entity index.
       index = getEntity(cl.getName(), key);
 
@@ -895,6 +896,7 @@ public class AmberConnection
       }
 
       addEntity(entity);
+      */
 
       index = getTransactionEntity(entity.getClass().getName(),
                                    entity.__caucho_getPrimaryKey());
@@ -1165,6 +1167,11 @@ public class AmberConnection
     return getEntityMatch(_entities, className, key);
   }
 
+  public Entity getEntity(int index)
+  {
+    return _entities.get(index);
+  }
+
   public int getTransactionEntity(String className, Object key)
   {
     return getEntityMatch(_txEntities, className, key);
@@ -1194,13 +1201,11 @@ public class AmberConnection
 
     // jpa/0s2d: if (! _entities.contains(entity)) {
     if (index < 0) {
-      _entities.add(entity);
+      addInternalEntity(entity);
       added = true;
     }
-
-    // jpa/0g06
-    if (_isInTransaction) {
-      index = getTransactionEntity(entity.getClass().getName(), pk);
+    else if (isInTransaction()) { // jpa/0g06
+      index = getTransactionEntity(className, pk);
 
       // jpa/0s2d: if (! _txEntities.contains(entity)) {
       if (index < 0) {
@@ -1247,6 +1252,34 @@ public class AmberConnection
     }
 
     return added;
+  }
+
+  /**
+   * Adds a new entity for the given class name and key.
+   * The new entity object is supposed to be used as a
+   * copy from cache. This avoids the cache entity to
+   * be added to the context.
+   *
+   * @return null - if the entity is already in the context.
+   *         otherwise, it returns the new entity added to
+   *         the context.
+   */
+  public Entity addNewEntity(Class cl, Object key)
+    throws InstantiationException, IllegalAccessException
+  {
+    int index = getEntity(cl.getName(), key);
+
+    // If the entity is already in the context, it returns null.
+    if (index >= 0)
+      return null;
+
+    // Create a new entity for the given class and primary key.
+    Entity entity = (Entity) cl.newInstance();
+    entity.__caucho_setPrimaryKey(key);
+
+    addInternalEntity(entity);
+
+    return entity;
   }
 
   /**
@@ -2264,6 +2297,20 @@ public class AmberConnection
   //
   // ejb/0g22 (cmp) expects exception handling in
   // the public methods. See public void create(Object) above.
+
+  /**
+   * Adds an entity to the context, assuming it has not been added yet.
+   * Also, if there is a transaction, adds the entity to the list of
+   * transactional entities.
+   */
+  private void addInternalEntity(Entity entity)
+  {
+    _entities.add(entity);
+
+    // jpa/0g06
+    if (isInTransaction())
+      _txEntities.add(entity);
+  }
 
   /**
    * Saves the object.

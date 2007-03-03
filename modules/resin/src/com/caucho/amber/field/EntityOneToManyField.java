@@ -347,7 +347,7 @@ public class EntityOneToManyField extends CollectionField {
     JType param = paramArgs.length > 0 ? paramArgs[0] : null;
     JType param2 = paramArgs.length > 1 ? paramArgs[1] : null;
 
-    out.print("private ");
+    out.print("protected ");
 
     String collectionImpl;
 

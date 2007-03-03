@@ -296,12 +296,6 @@ public class AmberEntityHome {
     try {
       // jpa/0o01, jpa/0o41
 
-      // Adds the copy object to the context before anything.
-      // The cached entity should never be added to the context.
-      Entity copy = _homeBean.getClass().newInstance();
-      copy.__caucho_setPrimaryKey(key);
-      aConn.addEntity(copy);
-
       EntityItem item = findEntityItem(aConn, key, isLoad);
 
       if (item == null) {
@@ -311,6 +305,17 @@ public class AmberEntityHome {
         // ejb/0604
         throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
       }
+
+      String className = item.getEntity().getClass().getName();
+
+      // Gets the copy object from context.
+      // It was already added in findEntityItem().
+      int index = aConn.getEntity(className, key);
+
+      if (index < 0)
+        throw new IllegalStateException(L.l("AmberEntityHome.find(): unexpected result when trying to get entity class: '{0}' PK: '{1}'. The copy object must be added to the context in findEntityItem()", className, key));
+
+      Entity copy = aConn.getEntity(index);
 
       return item.copyTo(copy, aConn);
     } catch (Exception e) {
@@ -355,6 +360,7 @@ public class AmberEntityHome {
 
         Entity cacheEntity;
 
+        // __caucho_home_new() will properly add the copy object to the context.
         cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
 
         log.finest("findEntityItem cacheEntity is null? "+(cacheEntity == null));
@@ -380,10 +386,16 @@ public class AmberEntityHome {
         log.finest("findEntityItem after putEntity item is null? "+(item == null));
       }
       else if (isLoad) {
+        Class cl = item.getEntity().getClass();
+
+        // Adds the copy object to the context before anything.
+        // This will avoid the cache object to be added to the context.
+        aConn.addNewEntity(cl, key);
+
         if (aConn.isInTransaction()) {
           log.finest("findEntityItem is in transaction");
 
-          String className = item.getEntity().getClass().getName();
+          String className = cl.getName();
 
           int index = aConn.getTransactionEntity(className, key);
 

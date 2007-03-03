@@ -162,11 +162,16 @@ public class LoadEntityExpr extends LoadExpr {
     if (item == null)
       return null;
 
-    int keyLength = entityType.getId().getKeyCount();
+    int offset = entityType.getId().getKeyCount();
 
     Entity entity = item.getEntity();
 
-    _index = entity.__caucho_load(aConn, rs, index + keyLength);
+    if (entityType.getDiscriminator() != null) {
+      // jpa/0l47
+      offset++;
+    }
+
+    _index = entity.__caucho_load(aConn, rs, index + offset);
 
     item.setNumberOfLoadingColumns(_index);
 

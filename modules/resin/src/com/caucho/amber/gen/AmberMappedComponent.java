@@ -1978,6 +1978,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     Column discriminator = _relatedType.getDiscriminator();
 
     if (discriminator == null) {
+      // Adds the copy object to the context before anything.
+      // This will avoid the cache object to be added to the context.
+      out.println("aConn.addNewEntity(" + getClassName() + ".class, key);");
+
       out.println(getClassName() + " entity = new " + getClassName() + "();");
 
       out.println("entity.__caucho_home = home.getEntityType();");
@@ -1990,6 +1994,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
       generateHomeNewLoading(out, rootTableName);
 
       out.println("com.caucho.amber.entity.EntityItem item = home.findDiscriminatorEntityItem(aConn, key, rs" + rootTableName + ".getString(1));");
+
+      // Adds the copy object to the context before anything.
+      // This will avoid the cache object to be added to the context.
+      out.println("aConn.addNewEntity(item.getEntity().getClass(), key);");
 
       // jpa/0l03
       out.println("if (loadFromResultSet) {");

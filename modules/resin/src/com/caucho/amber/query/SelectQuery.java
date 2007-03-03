@@ -637,6 +637,35 @@ public class SelectQuery extends AbstractQuery {
         cb.append(" on ");
         item.getJoinExpr().generateJoin(cb);
       }
+
+      EntityType entityType = item.getEntityType();
+
+      // jpa/0l44, jpa/0l12
+      /* XXX: jpa/0l47 move this to LoadExpr.generateSelect
+      if (entityType != null) {
+        Column discriminator = entityType.getDiscriminator();
+
+        if (entityType instanceof SubEntityType &&
+            discriminator != null) {
+          // jpa/0l4b
+          // XXX: needs to use parser.createTableName()
+          FromItem discriminatorItem
+            = new FromItem((EntityType) entityType,
+                           discriminator.getTable(),
+                           item.getName() + "_disc",
+                           ++i);
+
+          discriminatorItem.setQuery(this);
+
+          _fromList.add(i, discriminatorItem);
+
+          cb.append(", ");
+          cb.append(discriminator.getTable().getName());
+          cb.append(' ');
+          cb.append(discriminatorItem.getName());
+        }
+      }
+      */
     }
 
     // jpa/0l12
@@ -646,29 +675,6 @@ public class SelectQuery extends AbstractQuery {
 
     for (int i = 0; i < _fromList.size(); i++) {
       FromItem item = _fromList.get(i);
-
-      EntityType entityType = item.getEntityType();
-
-      // jpa/0l44
-      if (entityType != null) {
-        Column discriminator = entityType.getDiscriminator();
-
-        // jpa/0l43
-        if (entityType instanceof SubEntityType &&
-            discriminator != null) {
-          // jpa/0l12
-
-          if (hasExpr)
-            cb.append(" and ");
-          else {
-            cb.append(" where ");
-            hasExpr = true;
-          }
-
-          cb.append("(" + discriminator.getName() + " = ");
-          cb.append("'" + entityType.getDiscriminatorValue() + "')");
-        }
-      }
 
       AmberExpr expr = item.getJoinExpr();
 
@@ -681,6 +687,31 @@ public class SelectQuery extends AbstractQuery {
         }
 
         expr.generateJoin(cb);
+      }
+
+      EntityType entityType = item.getEntityType();
+
+      // jpa/0l44
+      if (entityType != null) {
+        Column discriminator = entityType.getDiscriminator();
+
+        // jpa/0l43
+        if (entityType instanceof SubEntityType &&
+            discriminator != null) {
+          // jpa/0l12, jpa/0l4b
+
+          if (item.getTable() == discriminator.getTable()) {
+            if (hasExpr)
+              cb.append(" and ");
+            else {
+              cb.append(" where ");
+              hasExpr = true;
+            }
+
+            cb.append("(" + item.getName() + "." + discriminator.getName() + " = ");
+            cb.append("'" + entityType.getDiscriminatorValue() + "')");
+          }
+        }
       }
     }
 
