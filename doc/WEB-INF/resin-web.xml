@@ -62,8 +62,8 @@
     <redirect regexp="/quercus/.*" target="${app.contextPath}/doc/quercus.xtp"/>
   </rewrite-dispatch>
     
-  <web-app-deploy url-prefix="/tutorial"
-                  path="tutorial"
+  <web-app-deploy url-prefix="/examples"
+                  path="examples"
                   startup-mode="lazy">
   </web-app-deploy>
 

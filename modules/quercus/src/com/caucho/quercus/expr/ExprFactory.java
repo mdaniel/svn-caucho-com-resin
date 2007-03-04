@@ -1053,7 +1053,7 @@ public class ExprFactory {
    * Creates a global var statement
    */
   public Statement createVarGlobal(Location loc,
-                VarVarExpr var)
+                                   VarVarExpr var)
   {
     return new VarGlobalStatement(loc, var);
   }
