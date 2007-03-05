@@ -177,17 +177,17 @@ abstract public class LoadExpr extends AbstractAmberExpr {
 
     // XXX: jpa/0l47: to be continued.
     do {
-      parentType.generateLoadSelect(parentFromItem.getTable(),
-                                    parentFromItem.getName());
+      valueSelect = parentType.generateLoadSelect(parentFromItem.getTable(),
+                                                  parentFromItem.getName());
+
+      if (valueSelect != null && ! "".equals(valueSelect)) {
+        cb.append(", ");
+        cb.append(valueSelect);
+      }
 
       // XXX: parentFromItem = ...;
     }
     while ((parentType = parentType.getParentType()) != null);
-
-    if (valueSelect != null && ! "".equals(valueSelect)) {
-      cb.append(", ");
-      cb.append(valueSelect);
-    }
 
     for (int i = 0; i < _subItems.size(); i++) {
       FromItem item = _subItems.get(i);

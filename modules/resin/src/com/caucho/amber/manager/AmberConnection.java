@@ -954,8 +954,19 @@ public class AmberConnection
     int index = getEntity(itemEntity.getClass().getName(),
                           itemEntity.__caucho_getPrimaryKey());
 
-    if (index >= 0)
-      return _entities.get(index);
+    if (index >= 0) {
+      Entity entity = _entities.get(index);
+
+      if (entity.__caucho_getEntityState().isManaged())
+        return entity;
+      // else
+      // jpa/0g40: the copy object was created at some point in
+      // findEntityItem, but it is still not loaded.
+
+      itemEntity.__caucho_copyTo(entity, this);
+
+      return entity;
+    }
     else {
       Entity entity = item.copy(this);
 
@@ -2305,6 +2316,12 @@ public class AmberConnection
    */
   private void addInternalEntity(Entity entity)
   {
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(L.l("addInternalEntity(class: '{0}' PK: '{1}')",
+                     entity.getClass().getName(),
+                     entity.__caucho_getPrimaryKey()));
+    }
+
     _entities.add(entity);
 
     // jpa/0g06

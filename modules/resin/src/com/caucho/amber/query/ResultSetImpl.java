@@ -1069,9 +1069,15 @@ public class ResultSetImpl implements ResultSet {
     ResultSetCacheChunk cacheChunk = _cacheChunk;
 
     if (cacheChunk != null) {
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("ResultSetImpl.getObject({0}) cache chunk is NOT null", column));
+
       Object obj = cacheChunk.getObject(_row - 1, column - 1);
 
       if (obj instanceof EntityItem) {
+        if (log.isLoggable(Level.FINEST))
+          log.finest(L.l("ResultSetImpl: cache obj is instance of EntityItem"));
+
         EntityItem entityItem = (EntityItem) obj;
 
         Entity entity = entityItem.getEntity();
@@ -1083,10 +1089,17 @@ public class ResultSetImpl implements ResultSet {
 
         return value;
       }
-      else
+      else {
+        if (log.isLoggable(Level.FINEST))
+          log.finest(L.l("ResultSetImpl: cache obj is NOT instance of EntityItem"));
+
         return obj;
+      }
     }
     else {
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("ResultSetImpl.getObject({0}) cache chunk is null", column));
+
       int index = getColumn(column);
 
       AmberExpr expr = _resultList.get(column - 1);
@@ -1094,6 +1107,9 @@ public class ResultSetImpl implements ResultSet {
       Object value = expr.getObject(_session, _rs, index);
 
       if (expr instanceof LoadEntityExpr) {
+        if (log.isLoggable(Level.FINEST))
+          log.finest(L.l("ResultSetImpl expr is instance of LoadEntityExpr"));
+
         LoadEntityExpr entityExpr = (LoadEntityExpr) expr;
         _numberOfLoadingColumns = entityExpr.getIndex();
       }
@@ -1724,9 +1740,9 @@ public class ResultSetImpl implements ResultSet {
 
     if (rs != null) {
       try {
-	rs.close();
+        rs.close();
       } catch (SQLException e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }

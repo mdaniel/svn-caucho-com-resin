@@ -406,7 +406,7 @@ public class AmberEntityHome {
             state = txEntity.__caucho_getEntityState();
           }
 
-          // jpa/0ge3: the copy object is created in AmberEntityHome.find()
+          // jpa/0ge3: the copy object is created above calling addNewEntity(),
           // but it is still not loaded.
           if (index < 0 || ! state.isManaged()) {
             log.finest("expiring entity to be loaded into the current transaction");
