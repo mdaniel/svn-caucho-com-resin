@@ -61,7 +61,9 @@ import java.util.zip.ZipOutputStream;
 public class DeploymentService
 {
   private static final L10N L = new L10N(DeploymentService.class);
-  private static final Logger log = Logger.getLogger(DeploymentService.class.getName());
+  private static final Logger log
+    = Logger.getLogger(DeploymentService.class.getName());
+  
   private static final EnvironmentLocal<DeploymentService> _local
     = new EnvironmentLocal<DeploymentService>();
 
@@ -163,13 +165,15 @@ public class DeploymentService
   {
     String moduleID = plan.getName();
 
-    ArrayList<TargetModuleIDImpl> targetModuleIDList = new ArrayList<TargetModuleIDImpl>();
+    ArrayList<TargetModuleIDImpl> targetModuleIDList
+      = new ArrayList<TargetModuleIDImpl>();
 
     for (TargetImpl target : targets) {
       targetModuleIDList.add(new TargetModuleIDImpl(target, moduleID));
     }
 
-    TargetModuleIDImpl[] targetModuleIDs = new TargetModuleIDImpl[targetModuleIDList.size()];
+    TargetModuleIDImpl[] targetModuleIDs
+      = new TargetModuleIDImpl[targetModuleIDList.size()];
 
     targetModuleIDs = targetModuleIDList.toArray(targetModuleIDs);
 
@@ -517,7 +521,6 @@ public class DeploymentService
                          targetModuleID.getTarget().getName(),
                          targetModuleID.getModuleID()));
     else {
-      Thread.dumpStack();
       builder.append(L.l("failed for target {0} module {1}",
                          targetModuleID.getTarget().getName(),
                          targetModuleID.getModuleID()));

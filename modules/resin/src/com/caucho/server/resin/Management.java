@@ -27,67 +27,62 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.util;
+package com.caucho.server.resin;
 
-import java.util.logging.Logger;
-import java.util.concurrent.*;
+import java.util.logging.*;
+
+import com.caucho.config.*;
+import com.caucho.vfs.*;
 
 /**
- * The Semaphore handles timed locks.
+ * Configuration for management.
  */
-public class Semaphore {
-  private static final Logger log =
-    Logger.getLogger(Semaphore.class.getName());
-  
-  private volatile int _permits;
+public class Management
+{
+  private static Logger log = Logger.getLogger(Management.class.getName());
 
-  public Semaphore(int permits, boolean fair)
+  private Resin _resin;
+  private Path _path;
+  private boolean _isRemoteEnable;
+
+  void setResin(Resin resin)
   {
-    _permits = permits;
+    _resin = resin;
+  }
+
+  public Resin getResin()
+  {
+    return _resin;
   }
   
-  /**
-   * Allocates the semaphore, returns true on success.
-   */
-  public boolean tryAcquire(long timeout, TimeUnit unit)
-    throws InterruptedException
+  public void setPath(Path path)
   {
-    long ms = unit.toMillis(timeout);
-    long now = System.currentTimeMillis();
-    long expire = ms + now;
+    _path = path;
+  }
+  
+  public Path getPath()
+  {
+    return _path;
+  }
     
-    synchronized (this) {
-      do {
-	if (_permits > 0) {
-	  _permits--;
-	  return true;
-	}
-
-	now = System.currentTimeMillis();
-	long delta = expire - now;
-	if (delta > 0) {
-	  wait(delta);
-
-	  if (_permits > 0) {
-	    _permits--;
-	    return true;
-	  }
-	}
-      } while (System.currentTimeMillis() < expire);
-    }
-
-    return false;
-  }
-  
-  /**
-   * Releases the permit.
-   */
-  public void release()
+  public void setRemoteEnable(boolean isRemote)
   {
-    synchronized (this) {
-      _permits++;
+    _isRemoteEnable = isRemote;
+  }
+    
+  public boolean isRemoteEnable()
+  {
+    return _isRemoteEnable;
+  }
 
-      notifyAll();
+  public void start()
+  {
+    if (getPath() != null) {
+      try {
+	getPath().mkdirs();
+      } catch (Exception e) {
+	throw new ConfigException(e);
+      }
     }
   }
 }

@@ -153,8 +153,7 @@ public class Resin implements EnvironmentBean, SchemaBean
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
 
-  private Path _managementPath;
-  private boolean _isManagementRemote;
+  private Management _management;
 
   private ThreadPoolAdmin _threadPoolAdmin;
   private ResinAdmin _resinAdmin;
@@ -398,7 +397,10 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public Path getManagementPath()
   {
-    return _managementPath;
+    if (_management != null)
+      return _management.getPath();
+    else
+      return null;
   }
 
   /**
@@ -406,7 +408,10 @@ public class Resin implements EnvironmentBean, SchemaBean
    */
   public boolean isManagementRemote()
   {
-    return _isManagementRemote;
+    if (_management != null)
+      return _management.isRemoteEnable();
+    else
+      return false;
   }
 
   /**
@@ -569,9 +574,24 @@ public class Resin implements EnvironmentBean, SchemaBean
     return new SecurityManagerConfig();
   }
 
-  public ManagementConfig createManagement()
+  public Management createManagement()
   {
-    return new ManagementConfig();
+    if (_management == null) {
+      try {
+        Class cl = Class.forName("com.caucho.server.admin.ProManagement");
+
+        _management = (Management) cl.newInstance();
+      } catch (Exception e) {
+        log().log(Level.FINEST, e.toString(), e);
+      }
+
+      if (_management == null)
+        _management = new Management();
+
+      _management.setResin(this);
+    }
+
+    return _management;
   }
 
   /**
@@ -1128,30 +1148,9 @@ public class Resin implements EnvironmentBean, SchemaBean
     _j2eeDomainManagedObject = J2EEManagedObject.register(new J2EEDomain());
     _jvmManagedObject = J2EEManagedObject.register(new JVM());
 
-    if (_managementPath != null) {
-      try {
-	_managementPath.mkdirs();
-      } catch (Exception e) {
-	throw new ConfigException(e);
-      }
+    if (_management != null)
+      _management.start();
 
-      try {
-	Class cl = Class.forName("com.caucho.transaction.xalog.XALogManager");
-
-	Path logPath = _managementPath.lookup("xa-" + getDisplayServerId() + ".log");
-
-	AbstractXALogManager xaLog = (AbstractXALogManager) cl.newInstance();
-
-	xaLog.setPath(logPath);
-
-	xaLog.init();
-	xaLog.start();
-      } catch (ClassNotFoundException e) {
-	log().log(Level.FINER, e.toString(), e);
-      } catch (Exception e) {
-	throw new ConfigException(e);
-      }
-    }
   }
 
   private void addRandom()
@@ -1709,22 +1708,6 @@ public class Resin implements EnvironmentBean, SchemaBean
     {
       if (_isEnable)
         System.setSecurityManager(_securityManager);
-    }
-  }
-
-  public class ManagementConfig {
-    ManagementConfig()
-    {
-    }
-
-    public void setPath(Path path)
-    {
-      _managementPath = path;
-    }
-    
-    public void setRemoteEnable(boolean isRemote)
-    {
-      _isManagementRemote = isRemote;
     }
   }
 }

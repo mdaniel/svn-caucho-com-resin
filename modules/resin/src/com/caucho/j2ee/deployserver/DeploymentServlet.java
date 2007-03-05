@@ -57,7 +57,8 @@ public class DeploymentServlet
   extends GenericServlet
 {
   private static final L10N L = new L10N(DeploymentServlet.class);
-  private static final Logger log = Log.open(DeploymentServlet.class);
+  private static final Logger log
+    = Logger.getLogger(DeploymentServlet.class.getName());
 
   private static final int GET_TARGETS = 1;
   private static final int DISTRIBUTE = 2;
@@ -135,7 +136,7 @@ public class DeploymentServlet
           try {
             while (archiveIs.read() != -1) {}
           }
-          catch (Throwable t) {
+          catch (Exception t) {
             if (log.isLoggable(Level.FINEST))
               log.log(Level.FINEST, t.toString(), t);
           }

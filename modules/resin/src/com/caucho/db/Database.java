@@ -55,8 +55,10 @@ import java.util.logging.Logger;
 /**
  * Manager for a basic Java-based database.
  */
-public class Database {
-  private static final Logger log = Log.open(Database.class);
+public class Database
+{
+  private static final Logger log
+    = Logger.getLogger(Database.class.getName());
   private static final L10N L = new L10N(Database.class);
 
   private Path _dir;

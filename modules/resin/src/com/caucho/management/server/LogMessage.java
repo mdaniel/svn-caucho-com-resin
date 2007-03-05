@@ -19,38 +19,80 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.util;
-
-import java.util.Enumeration;
+package com.caucho.management.server;
 
 /**
- * A null iterator
+ * Persistent logging.
  */
-public class NullEnumeration implements Enumeration {
-  private static final NullEnumeration _singleton =
-    new NullEnumeration();
+public class LogMessage implements java.io.Serializable
+{
+  private long _timestamp;
+  private String _level;
+  private String _message;
 
-  private NullEnumeration() {}
+  private String _name;
+  private String _className;
+  private String _methodName;
 
-  public static NullEnumeration create()
+  public LogMessage()
   {
-    return _singleton;
   }
 
-  public boolean hasMoreElements()
+  public void setTimestamp(long timestamp)
   {
-    return false;
+    _timestamp = timestamp;
   }
 
-  public Object nextElement()
+  public long getTimestamp()
   {
-    return null;
+    return _timestamp;
+  }
+
+  public void setMessage(String message)
+  {
+    _message = message;
+  }
+
+  public String getMessage()
+  {
+    return _message;
+  }
+
+  public String getName()
+  {
+    return _name;
+  }
+
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  public String getClassName()
+  {
+    return _className;
+  }
+
+  public void setClassName(String className)
+  {
+    _className = className;
+  }
+
+  public String getMethodName()
+  {
+    return _methodName;
+  }
+
+  public void setMethodName(String methodName)
+  {
+    _methodName = methodName;
   }
 }
