@@ -160,6 +160,28 @@ public class NamespaceWriterContext extends NamespaceContextImpl
     return binding.getPrefix();
   }
 
+  public String getNamespaceURI(String prefix)
+  {
+    for (NamespaceBinding binding : _bindings.values()) {
+      if (prefix.equals(binding.getPrefix()))
+        return binding.getUri();
+    }
+
+    return null;
+  }
+
+  public Iterator getPrefixes(String uri)
+  {
+    ArrayList<String> prefixes = new ArrayList<String>();
+
+    for (NamespaceBinding binding : _bindings.values()) {
+      if (uri.equals(binding.getUri()))
+        prefixes.add(binding.getPrefix());
+    }
+
+    return prefixes.iterator();
+  }
+
   public void emitDeclarations(WriteStream ws)
     throws IOException
   {

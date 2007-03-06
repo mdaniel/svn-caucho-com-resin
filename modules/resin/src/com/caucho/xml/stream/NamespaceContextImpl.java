@@ -126,21 +126,6 @@ public abstract class NamespaceContextImpl implements NamespaceContext
   public abstract void declare(String prefix, String uri);
   protected abstract void remove(String prefix, String uri);
 
-  public String getNamespaceURI(String prefix)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public String getPrefix(String uri)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public Iterator getPrefixes(String uri)
-  {
-    throw new UnsupportedOperationException();
-  }
-
   static class ElementBinding
   {
     private QName _name;
