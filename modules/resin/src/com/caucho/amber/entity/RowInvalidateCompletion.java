@@ -47,6 +47,8 @@ public class RowInvalidateCompletion implements AmberCompletion {
 
   public RowInvalidateCompletion(String table, Object key)
   {
+    log.finest(L.l("RowInvalidateCompletion table: {0} key: {1}", table, key));
+
     if (table == null || key == null)
       throw new NullPointerException();
 
@@ -63,8 +65,12 @@ public class RowInvalidateCompletion implements AmberCompletion {
                           Object key,
                           EntityItem entityItem)
   {
+    log.finest(L.l("RowInvalidateCompletion.complete"));
+
     if (entityType.getTable().getName().equals(_table) &&
         _key.equals(key)) {
+      log.finest(L.l("RowInvalidateCompletion expiring table: {0} key: {1}", _table, _key));
+
       // jpa/0k20
       entityItem.expire();
     }

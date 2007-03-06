@@ -604,8 +604,14 @@ public class EntityManyToOneField extends CascadableField {
     // jpa/0h08: do not use cached item when field is dirty.
     out.println("boolean isDirtyField = (" + dirtyVar + " & " + dirtyMask + "L) != 0L;");
 
+    // jpa/0s2d: do not use the cache item when in transaction.
+    // Even if the field is not dirty, it might be that a flush()
+    // already cleaned the dirtyMask but the current transaction changes
+    // should not be overridden with the cache item.
+    out.println("boolean isInTransaction = (__caucho_session != null) && (__caucho_session.isInTransaction());");
+
     // jpa/0h07: detached entity fields must not be loaded.
-    out.println("if (__caucho_session != null && __caucho_item != null && ! isDirtyField) {");
+    out.println("if (__caucho_session != null && __caucho_item != null && ! isDirtyField && ! isInTransaction) {");
     out.pushDepth();
 
     // ejb/06h0

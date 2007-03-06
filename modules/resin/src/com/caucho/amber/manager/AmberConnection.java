@@ -2641,6 +2641,22 @@ public class AmberConnection
       Entity existingEntity = null;
 
       try {
+        boolean isManaged = entity.__caucho_getEntityState().isManaged();
+
+        if (_entities.contains(entity) && ! isManaged) {
+          // jpa/0h08: the entity was added to the context in the
+          // previous transaction but it is now detached. The second
+          // transaction is calling merge(entity). If we call load()
+          // right away, it will reuse the same object and refresh
+          // the entity with the database values.
+
+          // We need to remove the entity from the context to force
+          // the load() to create a new managed entity and load it
+          // into this context.
+          _entities.remove(entity);
+          _txEntities.remove(entity);
+        }
+
         existingEntity = (Entity) load(entity.getClass(), pk);
       } catch (AmberObjectNotFoundException e) {
         log.log(Level.FINEST, e.toString(), e);
