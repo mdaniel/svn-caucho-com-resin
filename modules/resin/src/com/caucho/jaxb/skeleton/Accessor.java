@@ -188,6 +188,10 @@ public abstract class Accessor {
 
           _property = _context.createProperty(getGenericType(), false);
 
+          if (! _property.isXmlPrimitiveType() && 
+              ! Collection.class.isAssignableFrom(getType()))
+            throw new JAXBException(L.l("XmlValue must be either a collection or a simple type"));
+
           break;
         }
 
@@ -604,6 +608,11 @@ public abstract class Accessor {
     throw new JAXBException(L.l("Internal error: Unable to find QName for object {0}", obj));
   }
 
+  protected void setQName(QName qname)
+  {
+    _qname = qname;
+  }
+
   public void generateSchema(XMLStreamWriter out)
     throws JAXBException, XMLStreamException
   {
@@ -661,13 +670,8 @@ public abstract class Accessor {
     if (_accessorType != AccessorType.UNSET)
       return _accessorType;
 
-    if (getAnnotation(XmlValue.class) != null) {
-      if (! _property.isXmlPrimitiveType() && 
-          ! Collection.class.isAssignableFrom(getType()))
-        throw new JAXBException(L.l("XmlValue must be either a collection or a simple type"));
-
+    if (getAnnotation(XmlValue.class) != null)
       _accessorType = AccessorType.VALUE;
-    }
     else if (getAnnotation(XmlAttribute.class) != null)
       _accessorType = AccessorType.ATTRIBUTE;
     else if (getAnnotation(XmlElements.class) != null)

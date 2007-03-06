@@ -183,7 +183,11 @@ public class ClassSkeleton<C> extends Skeleton {
       }
 
       _typeName = JAXBUtil.getXmlSchemaDatatype(_class);
-      _context.addXmlType(_typeName, this);
+
+      // Special case: when name="", this is an "anonymous" type, bound
+      // exclusively to a particular element name
+      if (! "".equals(_typeName.getLocalPart()))
+        _context.addXmlType(_typeName, this);
 
       // Check for the complete name of the element...
       String namespace = null;
@@ -375,8 +379,13 @@ public class ClassSkeleton<C> extends Skeleton {
               if (_value != null)
                 throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
 
-              if (elements.size() > 0)
-                throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
+              if (elements.size() > 0) {
+                // in case of propOrder
+                if (elements.size() != 1 || elements.get(0) != null)
+                  throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element (e.g. {0})", elements.get(0)));
+
+                elements.clear();
+              }
 
               _value = a;
               break;
@@ -466,8 +475,13 @@ public class ClassSkeleton<C> extends Skeleton {
               if (_value != null)
                 throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
 
-              if (elements.size() > 0)
-                throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
+              if (elements.size() > 0) {
+                // in case of propOrder & XmlValue
+                if (elements.size() != 1 || elements.get(0) != null)
+                  throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element (e.g. {0})", elements.get(0)));
+
+                elements.clear();
+              }
 
               _value = a;
               break;
@@ -780,14 +794,16 @@ public class ClassSkeleton<C> extends Skeleton {
       if (tagName == null)
         tagName = _elementName;
 
-      if (_value != null)
+      if (_value != null) {
+        _value.setQName(tagName);
         _value.write(m, out, _value.get(obj));
+      }
       else {
         if (tagName.getNamespaceURI() == null ||
             "".equals(tagName.getNamespaceURI()))
           out.writeStartElement(tagName.getLocalPart());
         else if (tagName.getPrefix() == null ||
-                 "".equals(tagName.getPrefix())) 
+                 "".equals(tagName.getPrefix()))
           out.writeStartElement(tagName.getNamespaceURI(),
                                 tagName.getLocalPart());
         else
@@ -838,8 +854,10 @@ public class ClassSkeleton<C> extends Skeleton {
       if (tagName == null)
         tagName = fieldName;
 
-      if (_value != null)
+      if (_value != null) {
+        _value.setQName(tagName);
         _value.write(m, out, _value.get(obj));
+      }
       else {
         out.add(JAXBUtil.EVENT_FACTORY.createStartElement(tagName, null, null));
 

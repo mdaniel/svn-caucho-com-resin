@@ -90,18 +90,19 @@ public abstract class CDataProperty extends Property {
 
     Object ret = null;
 
-    if (in.getEventType() == in.CHARACTERS)
+    if (in.getEventType() == in.CHARACTERS) {
       ret = read(in.getText());
+
+      // essentially a nextTag() that handles end of document gracefully
+      while (in.hasNext()) {
+        in.next();
+
+        if (in.getEventType() == in.END_ELEMENT)
+          break;
+      }
+    }
     else
       ret = read(""); // Hack when we have something like <tag></tag>
-
-    // essentially a nextTag() that handles end of document gracefully
-    while (in.hasNext()) {
-      in.next();
-
-      if (in.getEventType() == in.END_ELEMENT)
-        break;
-    }
 
     while (in.hasNext()) {
       in.next();
