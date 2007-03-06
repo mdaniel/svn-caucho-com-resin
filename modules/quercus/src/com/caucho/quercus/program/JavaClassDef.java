@@ -906,7 +906,7 @@ public class JavaClassDef extends ClassDef {
         __call = new JavaMethod(moduleContext, method);
       } else {
         _functionMap.addFunction(method.getName(),
-            new JavaMethod(moduleContext, method));
+                                 new JavaMethod(moduleContext, method));
       }
     }
 

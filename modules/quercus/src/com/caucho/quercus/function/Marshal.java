@@ -110,7 +110,7 @@ abstract public class Marshal {
   public final int getMarshalingCost(Value value)
   {
     Class expectedClass = getExpectedClass();
-    
+
     if (expectedClass.equals(value.getClass()))
       return SAME;
     

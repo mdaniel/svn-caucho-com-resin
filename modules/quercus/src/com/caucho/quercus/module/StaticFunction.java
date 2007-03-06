@@ -47,6 +47,7 @@ public class StaticFunction extends JavaInvoker {
 
   protected final QuercusModule _quercusModule;
   protected final Method _method;
+  private final int _argLength;
 
   /**
    * Creates the statically introspected function.
@@ -65,6 +66,7 @@ public class StaticFunction extends JavaInvoker {
           method.getReturnType());
 
     _method = method;
+    _argLength = method.getParameterTypes().length;
     _quercusModule = quercusModule;
   }
 
@@ -86,6 +88,11 @@ public class StaticFunction extends JavaInvoker {
   public Method getMethod()
   {
     return _method;
+  }
+
+  public int getArgumentLength()
+  {
+    return _argLength;
   }
 
   /**

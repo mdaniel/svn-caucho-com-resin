@@ -35,10 +35,11 @@ import com.caucho.quercus.expr.Expr;
 
 public class JavaArrayMarshal extends Marshal
 {
-  private static Class _expectedClass;
+  private Class _expectedClass;
   
   public JavaArrayMarshal()
   {
+    _expectedClass = Object[].class;
   }
   
   public JavaArrayMarshal(Class expectedClass)

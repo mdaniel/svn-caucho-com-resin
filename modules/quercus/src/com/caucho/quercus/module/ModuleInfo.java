@@ -30,12 +30,8 @@
 package com.caucho.quercus.module;
 
 import com.caucho.config.ConfigException;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
+import com.caucho.quercus.program.*;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Field;
@@ -66,8 +62,8 @@ public class ModuleInfo {
   private HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
 
-  private HashMap<String, StaticFunction> _staticFunctions
-    = new HashMap<String, StaticFunction>();
+  private HashMap<String, AbstractFunction> _staticFunctions
+    = new HashMap<String, AbstractFunction>();
 
   private HashMap<String, StringValue> _iniMap
     = new HashMap<String, StringValue>();
@@ -124,7 +120,7 @@ public class ModuleInfo {
   /**
    * Returns the functions.
    */
-  public HashMap<String,StaticFunction> getFunctions()
+  public HashMap<String,AbstractFunction> getFunctions()
   {
     return _staticFunctions;
   }
@@ -210,7 +206,13 @@ public class ModuleInfo {
         if (methodName.startsWith("quercus_"))
           methodName = methodName.substring(8);
 
-        _staticFunctions.put(methodName, function);
+        AbstractJavaMethod oldFunction
+          = (AbstractJavaMethod) _staticFunctions.get(methodName);
+
+        if (oldFunction != null)
+          _staticFunctions.put(methodName, oldFunction.overload(function));
+        else
+          _staticFunctions.put(methodName, function);
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
       }

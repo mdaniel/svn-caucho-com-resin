@@ -43,11 +43,7 @@ import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.parser.QuercusParser;
-import com.caucho.quercus.program.ClassDef;
-import com.caucho.quercus.program.InterpretedClassDef;
-import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.quercus.program.JavaImplClassDef;
-import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.quercus.program.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -61,7 +57,7 @@ import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.*;
+import java.sql.Connection;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -103,11 +99,11 @@ public class Quercus
   private HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
 
-  private HashMap<String, StaticFunction> _funMap
-    = new HashMap<String, StaticFunction>();
+  private HashMap<String, AbstractFunction> _funMap
+    = new HashMap<String, AbstractFunction>();
 
-  private HashMap<String, StaticFunction> _lowerFunMap
-    = new HashMap<String, StaticFunction>();
+  private HashMap<String, AbstractFunction> _lowerFunMap
+    = new HashMap<String, AbstractFunction>();
 
   /*
   private ClassDef _stdClassDef;
@@ -364,7 +360,7 @@ public class Quercus
   /**
    * Unwrap statement if necessary.
    */
-  public Statement getStatement(Statement stmt)
+  public java.sql.Statement getStatement(java.sql.Statement stmt)
   {
     return stmt;
   }
@@ -765,9 +761,9 @@ public class Quercus
   /**
    * Returns the function with the given name.
    */
-  public StaticFunction findFunction(String name)
+  public AbstractFunction findFunction(String name)
   {
-    StaticFunction fun = _funMap.get(name);
+    AbstractFunction fun = _funMap.get(name);
 
     if (fun == null)
       fun = _lowerFunMap.get(name.toLowerCase());
@@ -778,9 +774,9 @@ public class Quercus
   /**
    * Returns the function with the given name.
    */
-  public StaticFunction findFunctionImpl(String name)
+  public AbstractFunction findFunctionImpl(String name)
   {
-    StaticFunction fun = _funMap.get(name);
+    AbstractFunction fun = _funMap.get(name);
 
     return fun;
   }
@@ -788,9 +784,9 @@ public class Quercus
   /**
    * Returns the function with the given name.
    */
-  public StaticFunction findLowerFunctionImpl(String lowerName)
+  public AbstractFunction findLowerFunctionImpl(String lowerName)
   {
-    StaticFunction fun = _lowerFunMap.get(lowerName);
+    AbstractFunction fun = _lowerFunMap.get(lowerName);
 
     return fun;
   }
@@ -1115,7 +1111,7 @@ public class Quercus
     Map<String, StringValue> iniMap = info.getDefaultIni();
     _iniMap.putAll(iniMap);
 
-    for (Map.Entry<String, StaticFunction> entry : info.getFunctions().entrySet()) {
+    for (Map.Entry<String, AbstractFunction> entry : info.getFunctions().entrySet()) {
       _funMap.put(entry.getKey(), entry.getValue());
       _lowerFunMap.put(entry.getKey().toLowerCase(), entry.getValue());
     }

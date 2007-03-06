@@ -29,8 +29,10 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.module.ModuleContext;
+import com.caucho.util.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -41,13 +43,18 @@ import java.util.Comparator;
  * Represents the introspected static function information.
  */
 public class JavaOverloadMethod extends AbstractJavaMethod {
-  private final ArrayList<AbstractJavaMethod> _methods;
+  private static final L10N L = new L10N(JavaOverloadMethod.class);
+  
+  private AbstractJavaMethod [][]_methodTable = new AbstractJavaMethod[0][];
 
-  public JavaOverloadMethod(AbstractJavaMethod javaMethod)
+  public JavaOverloadMethod(AbstractJavaMethod fun)
   {
-    _methods = new ArrayList<AbstractJavaMethod>();
+    overload(fun);
+  }
 
-    _methods.add(javaMethod);
+  public int getArgumentLength()
+  {
+    throw new UnsupportedOperationException();
   }
   
   /**
@@ -55,8 +62,31 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
    */
   public AbstractJavaMethod overload(AbstractJavaMethod fun)
   {
-    _methods.add(fun);
-    
+    int len = fun.getArgumentLength();
+
+    if (_methodTable.length <= len) {
+      AbstractJavaMethod [][]methodTable = new AbstractJavaMethod[len + 1][];
+
+      System.arraycopy(_methodTable, 0, methodTable, 0, _methodTable.length);
+
+      _methodTable = methodTable;
+    }
+
+    AbstractJavaMethod []methods = _methodTable[len];
+
+    if (methods == null)
+      _methodTable[len] = new AbstractJavaMethod[] { fun };
+    else {
+      AbstractJavaMethod []newMethods
+        = new AbstractJavaMethod[methods.length + 1];
+
+      System.arraycopy(methods, 0, newMethods, 0, methods.length);
+
+      newMethods[methods.length] = fun;
+
+      _methodTable[len] = newMethods;
+    }
+
     return this;
   }
 
@@ -80,23 +110,37 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
    */
   public Value call(Env env, Object obj, Value []args)
   {
-    AbstractJavaMethod javaMethod = getBestFitJavaMethod(args);
+    if (_methodTable.length <= args.length)
+      throw new RuntimeException("too long");
+    else {
+      AbstractJavaMethod []methods = _methodTable[args.length];
+
+      if (methods == null || methods.length == 0)
+        throw new QuercusException(L.l("'{0}' method call does not match expected length", getName()));
+      else if (methods.length == 1)
+        return methods[0].call(env, obj, args);
+      else {
+        AbstractJavaMethod method
+          = getBestFitJavaMethod(_methodTable[args.length], args);
     
-    return javaMethod.call(env, obj, args);
+        return method.call(env, obj, args);
+      }
+    }
   }
   
   /**
    * Returns the Java function that matches the args passed in.
    */
-  private AbstractJavaMethod getBestFitJavaMethod(Value []args)
+  private AbstractJavaMethod getBestFitJavaMethod(AbstractJavaMethod []methods,
+                                                  Value []args)
   {
-    int size = _methods.size();
+    int size = methods.length;
     
     AbstractJavaMethod minCostJavaMethod = null;
     int minCost = Integer.MAX_VALUE;
     
     for (int i = 0; i < size; i++) {
-      AbstractJavaMethod javaMethod = _methods.get(i);
+      AbstractJavaMethod javaMethod = methods[i];
       
       int cost = javaMethod.getMarshalingCost(args);
       
@@ -112,7 +156,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
     if (minCostJavaMethod != null)
       return minCostJavaMethod;
     else
-      return _methods.get(0);
+      return methods[0];
   }
   
   /**
@@ -120,6 +164,8 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
    */
   public int getMarshalingCost(Value []args)
   {
+    throw new UnsupportedOperationException();
+    /*
     int size = _methods.size();
     int minCost = Integer.MAX_VALUE;
     
@@ -131,10 +177,25 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
     }
 
     return minCost;
+    */
+  }
+
+  @Override
+  public String getName()
+  {
+    AbstractJavaMethod method;
+
+    for (int i = 0; i < _methodTable.length; i++) {
+      if (_methodTable[i] != null)
+        return _methodTable[i][0].getName();
+    }
+
+    return "unknown";
   }
 
   public String toString()
   {
-    return "JavaOverloadMethod[" + _methods.get(0) + "]";
+
+    return "JavaOverloadMethod[" + getName() + "]";
   }
 }

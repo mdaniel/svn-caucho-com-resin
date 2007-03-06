@@ -42,6 +42,7 @@ public class JavaMethod extends JavaInvoker {
   private static final L10N L = new L10N(JavaMethod.class);
 
   private final Method _method;
+  private final int _argLength;
 
   /**
    * Creates the statically introspected function.
@@ -58,6 +59,12 @@ public class JavaMethod extends JavaInvoker {
 	  method.getReturnType());
     
     _method = method;
+    _argLength = method.getParameterTypes().length;
+  }
+
+  public int getArgumentLength()
+  {
+    return _argLength;
   }
 
   /**

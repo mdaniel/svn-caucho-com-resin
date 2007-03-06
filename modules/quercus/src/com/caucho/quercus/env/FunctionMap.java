@@ -53,7 +53,7 @@ public class FunctionMap
   public void addFunction(String name, AbstractJavaMethod fun)
   {
     AbstractJavaMethod oldFun = _funMap.get(name);
-    
+
     if (oldFun == null)
       _funMap.put(name, fun);
     else

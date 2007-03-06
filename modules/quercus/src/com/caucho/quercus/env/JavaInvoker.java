@@ -315,6 +315,11 @@ abstract public class JavaInvoker
     return _unmarshalReturn.isDouble();
   }
 
+  public String getName()
+  {
+    return _name;
+  }
+
   /**
    * Returns the marshal arguments.
    */

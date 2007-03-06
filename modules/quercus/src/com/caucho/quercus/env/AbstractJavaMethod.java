@@ -51,6 +51,11 @@ abstract public class AbstractJavaMethod extends AbstractFunction
   private static final Object [] NULL_ARGS = new Object[0];
   private static final Value [] NULL_VALUES = new Value[0];
 
+  /**
+   * Returns the number of arguments for this method.
+   */
+  abstract public int getArgumentLength();
+  
   abstract public int getMarshalingCost(Value []args);
   
   /**

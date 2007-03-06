@@ -42,6 +42,7 @@ public class JavaConstructor extends JavaInvoker {
   private static final L10N L = new L10N(JavaConstructor.class);
   
   private final Constructor _constructor;
+  private final int _argLength;
 
   /**
    * Creates the statically introspected function.
@@ -59,6 +60,12 @@ public class JavaConstructor extends JavaInvoker {
 	  cons.getDeclaringClass());
 
     _constructor = cons;
+    _argLength = cons.getParameterTypes().length;
+  }
+
+  public int getArgumentLength()
+  {
+    return _argLength;
   }
 
   public Object invoke(Object obj, Object []args)
