@@ -213,7 +213,7 @@ public class EntityOneToManyField extends CollectionField {
     generateInternalCascade(out, aConn, cascadeType);
   }
 
-  private void generateInternalCascade(JavaWriter out,
+  protected void generateInternalCascade(JavaWriter out,
                                        String aConn,
                                        CascadeType cascadeType)
     throws IOException
