@@ -37,6 +37,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 import java.lang.reflect.Method;
 import java.io.IOException;
@@ -52,20 +53,38 @@ public class RpcAction extends AbstractAction {
 
   private static final String TARGET_NAMESPACE_PREFIX = "tns";
 
-  public RpcAction(Method method, 
+  public RpcAction(Method method, Method eiMethod,
                    JAXBContextImpl jaxbContext, 
                    String targetNamespace,
                    Marshaller marshaller,
                    Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
-    super(method, jaxbContext, targetNamespace, marshaller, unmarshaller);
-
+    super(method, eiMethod, 
+          jaxbContext, targetNamespace, 
+          marshaller, unmarshaller);
   }
 
+  protected void writeMethodInvocation(XMLStreamWriter out, Object []args)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    throw new UnsupportedOperationException();
+  }
 
   protected Object readResponse(XMLStreamReader in, Object []args)
     throws IOException, XMLStreamException, JAXBException, Throwable
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  protected void writeResponse(XMLStreamWriter out, Object value, Object[] args)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  protected Object[] readMethodInvocation(XMLStreamReader in)
+    throws IOException, XMLStreamException, JAXBException
   {
     throw new UnsupportedOperationException();
   }

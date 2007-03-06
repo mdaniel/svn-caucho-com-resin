@@ -50,11 +50,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.logging.Logger;
 
 /**
  * Introspects a web service
  */
 public class WebServiceIntrospector {
+  private static final Logger log 
+    = Logger.getLogger(WebServiceIntrospector.class.getName());
   private static XMLOutputFactory _outputFactory = null;
 
   public static final L10N L = new L10N(WebServiceIntrospector.class);
@@ -82,7 +85,7 @@ public class WebServiceIntrospector {
       throw new RuntimeException(L.l("{0}: needs a @WebService annotation.",
                                      type.getName()));
     */
-    
+ 
     boolean isInterface = type.isInterface();
 
     WebService webService = (WebService) type.getAnnotation(WebService.class);
@@ -121,26 +124,8 @@ public class WebServiceIntrospector {
         AbstractAction.createAction(methods[i], jaxbContext, namespace,
                                     marshaller, unmarshaller);
 
-      String name = webMethod == null ? "" : webMethod.operationName();
-
-      if (name.equals(""))
-          name = methods[i].getName();
-
-      skel.addAction(name, action);
+      skel.addAction(methods[i], action);
     }
-
-    /* XXX
-    Node typesNode = skel.getTypesNode();
-    DOMResult result = new DOMResult(typesNode);
-
-    try {
-      XMLStreamWriter out = getStreamWriter(result);
-      jaxbContext.generateSchemaWithoutHeader(out);
-    }
-    catch (XMLStreamException e) {
-      throw new JAXBException(e);
-    }
-    */
 
     return skel;
   }

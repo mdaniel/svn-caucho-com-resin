@@ -79,8 +79,11 @@ public class DirectSkeleton extends Skeleton {
   private Marshaller _marshaller;
   private Node _wsdlNode;
 
-  private HashMap<String,AbstractAction> _actionMap
+  private HashMap<String,AbstractAction> _actionNames
     = new HashMap<String,AbstractAction>();
+
+  private HashMap<Method,AbstractAction> _actionMethods
+    = new HashMap<Method,AbstractAction>();
 
   private Class _api;
   
@@ -184,9 +187,10 @@ public class DirectSkeleton extends Skeleton {
       return JAXBUtil.classBasename(type);
   }
 
-  public void addAction(String name, AbstractAction action)
+  public void addAction(Method method, AbstractAction action)
   {
-    _actionMap.put(name, action);
+    _actionNames.put(action.getOperationName(), action);
+    _actionMethods.put(method, action);
   }
 
   /**
@@ -196,15 +200,14 @@ public class DirectSkeleton extends Skeleton {
     throws IOException, XMLStreamException, MalformedURLException, 
            JAXBException, Throwable
   {
-    String actionName = AbstractAction.getWebMethodName(method);
-    AbstractAction action = _actionMap.get(actionName);
+    AbstractAction action = _actionMethods.get(method);
 
     if (action != null)
       return action.invoke(url, args);
-    else if ("toString".equals(actionName))
+    else if ("toString".equals(method.getName()))
       return "SoapStub[" + (_api != null ? _api.getName() : "") + "]";
     else
-      throw new RuntimeException("no such method: " + actionName);
+      throw new RuntimeException(L.l("not a web method: {0}", method.getName()));
   }
   
   /**
@@ -215,11 +218,8 @@ public class DirectSkeleton extends Skeleton {
   {
     in.nextTag();
 
-    if (in.getEventType() != XMLStreamReader.START_ELEMENT)
-      throw new IOException(L.l("expected start element, not {0}", 
-                                in.getEventType()));
-    else if (! "Envelope".equals(in.getName().getLocalPart()))
-      throw new IOException(L.l("expected Envelope at {0}", in.getName()));
+    // XXX Namespace
+    in.require(XMLStreamReader.START_ELEMENT, null, "Envelope");
 
     in.nextTag();
 
@@ -240,13 +240,12 @@ public class DirectSkeleton extends Skeleton {
       in.nextTag();
     }
 
-    if (! "Body".equals(in.getName().getLocalPart()))
-      throw new IOException(L.l("expected Body at {0}", in.getName()));
+    // XXX Namespace?
+    in.require(XMLStreamReader.START_ELEMENT, null, "Body");
 
     in.nextTag();
 
     String actionName = in.getName().getLocalPart();
-    in.nextTag();
 
     out.writeStartDocument();
     out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Envelope", SOAP_ENVELOPE);
@@ -256,7 +255,7 @@ public class DirectSkeleton extends Skeleton {
 
     out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Body", SOAP_ENVELOPE);
 
-    AbstractAction action = _actionMap.get(actionName);
+    AbstractAction action = _actionNames.get(actionName);
 
     // XXX: exceptions<->faults
     if (action != null)
@@ -265,23 +264,10 @@ public class DirectSkeleton extends Skeleton {
       // XXX: fault
     }
 
-    if (in.getEventType() != in.END_ELEMENT)
-      throw new IOException("expected </" + actionName + ">, " + 
-                            "not event of type " + in.getEventType());
-    else if (! actionName.equals(in.getLocalName()))
-      throw new IOException("expected </" + actionName + ">, " +
-                            "not </" + in.getLocalName() + ">");
-
-    if (in.nextTag() != in.END_ELEMENT)
-      throw new IOException("expected </Body>, got: " + in.getName());
-    else if (! "Body".equals(in.getLocalName()))
-      throw new IOException("expected </Body>, got: " + in.getName());
-    /*
-    if (in.nextTag() != in.END_ELEMENT)
-      throw new IOException("expected </Envelope>");
-    else if (! "Envelope".equals(in.getName().getLocalPart()))
-      throw new IOException("expected </Envelope>");
-    */
+    // XXX Namespace?
+    in.require(XMLStreamReader.END_ELEMENT, null, "Body");
+    in.nextTag();
+    in.require(XMLStreamReader.END_ELEMENT, null, "Envelope");
 
     out.writeEndElement(); // Body
     out.writeEndElement(); // Envelope
@@ -364,7 +350,7 @@ public class DirectSkeleton extends Skeleton {
 
     // <messages>
 
-    for (AbstractAction action : _actionMap.values())
+    for (AbstractAction action : _actionNames.values())
       action.writeWSDLMessages(out, _soapNamespaceURI);
 
     // <portType>
@@ -372,7 +358,7 @@ public class DirectSkeleton extends Skeleton {
     out.writeStartElement(WSDL_NAMESPACE, "portType");
     out.writeAttribute("name", _portType);
 
-    for (AbstractAction action : _actionMap.values())
+    for (AbstractAction action : _actionNames.values())
       action.writeWSDLOperation(out, _soapNamespaceURI);
 
     out.writeEndElement(); // portType
@@ -387,7 +373,7 @@ public class DirectSkeleton extends Skeleton {
     out.writeAttribute("transport", _soapTransport);
     out.writeAttribute("style", _soapStyle);
 
-    for (AbstractAction action : _actionMap.values())
+    for (AbstractAction action : _actionNames.values())
       action.writeWSDLBindingOperation(out, _soapNamespaceURI);
 
     out.writeEndElement(); // binding
@@ -479,7 +465,7 @@ public class DirectSkeleton extends Skeleton {
 
     _context.generateSchemaWithoutHeader(out);
 
-    for (AbstractAction action : _actionMap.values())
+    for (AbstractAction action : _actionNames.values())
       action.writeSchema(out, _soapNamespaceURI);
 
     out.writeEndElement(); // schema

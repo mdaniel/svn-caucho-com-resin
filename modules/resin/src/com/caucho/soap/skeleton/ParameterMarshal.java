@@ -46,9 +46,9 @@ public abstract class ParameterMarshal {
   protected static final String TARGET_NAMESPACE_PREFIX = "m";
   protected static final String XML_SCHEMA_PREFIX = "xsd";
 
+  protected QName _name;
   protected final int _arg;
   protected final Property _property;
-  protected final QName _name;
   protected final Marshaller _marshaller;
   protected final Unmarshaller _unmarshaller;
 
@@ -70,17 +70,17 @@ public abstract class ParameterMarshal {
                                  Unmarshaller unmarshaller)
   {
     switch (mode) {
-    case IN:
-      return new InParameterMarshal(arg, property, name, 
-                                    marshaller, unmarshaller);
-    case OUT:
-      return new OutParameterMarshal(arg, property, name, 
-                                     marshaller, unmarshaller);
-    case INOUT:
-      return new InOutParameterMarshal(arg, property, name, 
+      case IN:
+        return new InParameterMarshal(arg, property, name, 
+                                      marshaller, unmarshaller);
+      case OUT:
+        return new OutParameterMarshal(arg, property, name, 
                                        marshaller, unmarshaller);
-    default:
-      throw new UnsupportedOperationException();
+      case INOUT:
+        return new InOutParameterMarshal(arg, property, name, 
+                                         marshaller, unmarshaller);
+      default:
+        throw new UnsupportedOperationException();
     }
   }
 
@@ -92,6 +92,11 @@ public abstract class ParameterMarshal {
   public QName getName()
   {
     return _name;
+  }
+
+  public void setName(QName name)
+  {
+    _name = name;
   }
 
   //

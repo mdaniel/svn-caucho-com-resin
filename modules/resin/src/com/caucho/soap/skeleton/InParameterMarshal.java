@@ -39,10 +39,13 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import java.util.logging.Logger;
 import java.io.IOException;
 
 public class InParameterMarshal extends ParameterMarshal {
   public static final L10N L = new L10N(InParameterMarshal.class);
+  public static final Logger log = 
+    Logger.getLogger(InParameterMarshal.class.getName());
 
   public InParameterMarshal(int arg, Property property, QName name,
                             Marshaller marshaller, Unmarshaller unmarshaller)
