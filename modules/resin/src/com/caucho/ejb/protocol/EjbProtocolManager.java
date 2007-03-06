@@ -226,7 +226,6 @@ public class EjbProtocolManager {
       // remote without a local interface should not get bound
       // with the local prefix
 
-      System.out.println("B: " + ejbName + " " + server.isLocal());
       if (server.isLocal()) {
         Object localObj = server.getEJBLocalHome();
 

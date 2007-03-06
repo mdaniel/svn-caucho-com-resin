@@ -62,8 +62,6 @@ public class BurlapResolver implements HessianRemoteResolver {
   public Object lookup(String type, String url)
     throws IOException
   {
-    System.out.println("LU: " + type + " " + url);
-    
     return null;
   }
 }

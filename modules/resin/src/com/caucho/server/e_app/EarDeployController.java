@@ -48,7 +48,8 @@ import java.util.logging.Logger;
  * A configuration entry for an Enterprise WebApp
  */
 public class EarDeployController
-  extends EnvironmentDeployController<EnterpriseApplication,EarConfig> {
+  extends EnvironmentDeployController<EnterpriseApplication,EarConfig>
+{
   private static final Logger log = Log.open(EarDeployController.class);
   private static final L10N L = new L10N(EarDeployController.class);
 

@@ -344,8 +344,9 @@ public class EnterpriseApplication
 	throw new ConfigException(L.l("Expected configured <ejb-server> in " +
 				      Thread.currentThread().getContextClassLoader()));
 
-      for (Path path : _ejbPaths)
+      for (Path path : _ejbPaths) {
 	ejbServer.addEJBJar(path);
+      }
 
       Path ejbJar = _rootDir.lookup("META-INF/ejb-jar.xml");
       if (ejbJar.canRead()) {
