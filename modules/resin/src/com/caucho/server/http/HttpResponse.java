@@ -262,7 +262,7 @@ public class HttpResponse extends AbstractHttpResponse {
     }
 
     String contentType = _contentType;
-    
+
     if (contentType == null) {
     }
     else if (contentType != "text/html") {

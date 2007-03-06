@@ -64,7 +64,7 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
 
   private boolean _hasThread;
   private boolean _isFlushing;
- 
+
   // the write queue
   private int _maxQueueLength = 32;
   private final ArrayList<AccessLogBuffer> _writeQueue
@@ -206,6 +206,37 @@ public class AccessLogWriter extends AbstractRolloverLog implements Runnable
       super.flush();
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  protected void waitForFlush(long timeout)
+  {
+    long expire;
+
+    if (! Alarm.isTest())
+      expire = Alarm.getCurrentTime() + timeout;
+    else
+      expire = System.currentTimeMillis() + timeout;
+
+    synchronized (_writeQueue) {
+      while (true) {
+        if (_writeQueue.size() == 0)
+          return;
+
+        long delta;
+        if (! Alarm.isTest())
+          delta = expire - Alarm.getCurrentTime();
+        else
+          delta = expire - System.currentTimeMillis();
+
+        if (delta < 0)
+          return;
+
+        try {
+          _writeQueue.wait(delta);
+        } catch (Exception e) {
+        }
+      }
     }
   }
 

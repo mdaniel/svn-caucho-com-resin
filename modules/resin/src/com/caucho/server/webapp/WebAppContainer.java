@@ -96,6 +96,7 @@ public class WebAppContainer
 
   // dispatch mapping
   private RewriteDispatch _rewriteDispatch;
+  private WebApp _errorWebApp;
 
   // List of default ear webApp configurations
   private ArrayList<EarConfig> _earDefaultList
@@ -703,7 +704,7 @@ public class WebAppContainer
 
       if (_dispatchServer instanceof Server) {
 	Server server = (Server) _dispatchServer;
-	invocation.setWebApp(server.getErrorWebApp());
+	invocation.setWebApp(getErrorWebApp());
       }
 
       invocation.setDependency(AlwaysModified.create());
@@ -738,7 +739,8 @@ public class WebAppContainer
 
       if (rewriteChain != chain) {
 	Server server = (Server) _dispatchServer;
-	invocation.setWebApp(server.getErrorWebApp());
+        // server/13sf
+	invocation.setWebApp(getErrorWebApp());
 	invocation.setFilterChain(rewriteChain);
         isAlwaysModified = false;
       }
@@ -1089,6 +1091,33 @@ public class WebAppContainer
 
     _earDeploy.destroy();
     _appDeploy.destroy();
+  }
+
+  /**
+   * Returns the error webApp during startup.
+   */
+  public WebApp getErrorWebApp()
+  {
+    if (_errorWebApp == null
+	&& _classLoader != null
+	&& ! _classLoader.isModified()) {
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+      try {
+	thread.setContextClassLoader(_classLoader);
+
+	_errorWebApp = new WebApp(getRootDirectory().lookup("caucho-web-app-error"));
+        _errorWebApp.setParent(this);
+	//_errorWebApp.init();
+	//_errorWebApp.start();
+      } catch (Throwable e) {
+	log.log(Level.WARNING, e.toString(), e);
+      } finally {
+	thread.setContextClassLoader(loader);
+      }
+    }
+
+    return _errorWebApp;
   }
 
   /**

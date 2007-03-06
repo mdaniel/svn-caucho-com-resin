@@ -835,6 +835,10 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   void setAccess(long now)
   {
+    // server/01k0
+    if (_useCount > 1)
+      return;
+    
     _isNew = false;
 
     if (_clusterObject != null)

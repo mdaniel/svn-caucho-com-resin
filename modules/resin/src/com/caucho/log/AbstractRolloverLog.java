@@ -101,6 +101,8 @@ public class AbstractRolloverLog {
   private long _nextPeriodEnd = -1;
   private long _nextRolloverCheckTime = -1;
 
+  private long _lastTime;
+
   private boolean _isRollingOver;
   private Path _savedPath;
   private TempStream _tempStream;
@@ -265,6 +267,11 @@ public class AbstractRolloverLog {
   public void setRolloverCount(int count)
   {
     _rolloverCount = count;
+  }
+
+  public void setLastTime(long lastTime)
+  {
+    _lastTime = lastTime;
   }
   
   /**
@@ -511,17 +518,6 @@ public class AbstractRolloverLog {
     
     String savedName = savedPath.getTail();
 
-    logInfo(L.l("Archiving access log to {0}.", savedName));
-	     
-    try {
-      WriteStream os = _os;
-      _os = null;
-      if (os != null)
-	os.close();
-    } catch (IOException e) {
-      // can't log in log routines
-    }
-
     try {
       if (! savedPath.getParent().isDirectory())
 	savedPath.getParent().mkdirs();
@@ -530,45 +526,52 @@ public class AbstractRolloverLog {
 		     savedPath.getParent()),
 		 e);
     }
-        
+
     try {
-      WriteStream os = savedPath.openWrite();
-      OutputStream out;
+      if (path.exists()) {
+        WriteStream os = savedPath.openWrite();
+        OutputStream out;
 
-      if (savedName.endsWith(".gz"))
-	out = new GZIPOutputStream(os);
-      else if (savedName.endsWith(".zip")) 
-	out = new ZipOutputStream(os);
-      else
-	out = os;
+        if (savedName.endsWith(".gz"))
+          out = new GZIPOutputStream(os);
+        else if (savedName.endsWith(".zip")) 
+          out = new ZipOutputStream(os);
+        else
+          out = os;
 
-      try {
-	path.writeToStream(out);
-      } finally {
-	try {
-	  out.close();
-	} catch (Throwable e) {
-	  // can't log in log rotation routines
-	}
+        try {
+          path.writeToStream(out);
+        } finally {
+          try {
+            out.close();
+          } catch (Throwable e) {
+            // can't log in log rotation routines
+          }
 
-	try {
-	  if (out != os)
-	    os.close();
-	} catch (Throwable e) {
-	  // can't log in log rotation routines
-	}
-
-	try {
-	  if (! path.truncate())
-	    path.remove();
-	} catch (IOException e) {
-	  path.remove();
-
-	  throw e;
-	}
+          try {
+            if (out != os)
+              os.close();
+          } catch (Throwable e) {
+            // can't log in log rotation routines
+          }
+        }
       }
     } catch (Throwable e) {
+      e.printStackTrace();
       logWarning(L.l("Error rotating logs"), e);
+    }
+
+    try {
+      try {
+        if (! path.truncate())
+          path.remove();
+      } catch (IOException e) {
+        path.remove();
+
+        throw e;
+      }
+    } catch (Exception e) {
+      logWarning(L.l("Error truncating logs"), e);
     }
 
     if (_rolloverCount > 0)

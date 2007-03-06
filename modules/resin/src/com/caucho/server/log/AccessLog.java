@@ -597,7 +597,10 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    */
   public void flush()
   {
+    // server/0213, 021q
     _logWriter.flush();
+    _logWriter.waitForFlush(5000L);
+    _logWriter.rollover();
   }
 
   /**

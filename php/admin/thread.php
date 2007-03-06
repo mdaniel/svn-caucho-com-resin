@@ -245,6 +245,9 @@ function is_keepalive_thread($info)
       if ($prev->className == "com.caucho.vfs.ReadStream"
 	  && $prev->methodName == "waitForRead")
 	return true;
+      else if ($prev->className == "com.caucho.server.port.TcpConnection"
+  	       && $prev->methodName == "waitForKeepalive")
+	return true;
       else
 	return false;
     }

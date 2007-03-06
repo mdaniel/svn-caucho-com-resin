@@ -327,8 +327,18 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   public void addJarManifestClassPath(Path path)
     throws IOException
   {
-    JarPath jar = JarPath.create(path);
-    Path manifestPath = jar.lookup("META-INF/MANIFEST.MF");
+    Path contextPath;
+    Path manifestPath;
+
+    if (path.isDirectory()) {
+      manifestPath = path.lookup("META-INF/MANIFEST.MF");
+      contextPath = path;
+    }
+    else {
+      JarPath jar = JarPath.create(path);
+      manifestPath = jar.lookup("META-INF/MANIFEST.MF");
+      contextPath = path.getParent();
+    }
 
     if (manifestPath.canRead()) {
       ReadStream is = manifestPath.openRead();
@@ -339,7 +349,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
         String classPath = main.getValue("Class-Path");
 
-        addManifestClassPath(classPath, path.getParent());
+        addManifestClassPath(classPath, contextPath);
       } catch (IOException e) {
         log().log(Level.WARNING, e.toString(), e);
 

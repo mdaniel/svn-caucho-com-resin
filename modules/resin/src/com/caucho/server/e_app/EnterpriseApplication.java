@@ -329,6 +329,8 @@ public class EnterpriseApplication
       
     Vfs.setPwd(_rootDir, _loader);
 
+    _loader.addJarManifestClassPath(_rootDir);
+    
     // server/13bb
     if (_ejbPaths.size() == 0
         && _webApps.size() == 0) {
