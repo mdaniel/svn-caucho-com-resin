@@ -1030,7 +1030,7 @@ public class MbstringModule
 
   private static String getEncoding(Env env, String encoding)
   {
-    if (encoding.length() == 0)
+    if (encoding == null || encoding.length() == 0)
       return getEncoding(env);
     else
       return encoding;
