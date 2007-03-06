@@ -37,6 +37,7 @@ import com.caucho.util.L10N;
 
 import javax.persistence.CascadeType;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -62,6 +63,26 @@ abstract public class CascadableField extends AbstractField {
     super(sourceType, name);
 
     _cascadeTypes = cascadeTypes;
+
+    if (log.isLoggable(Level.FINEST)) {
+      String s = "";
+
+      if (_cascadeTypes != null) {
+        boolean isFirst = true;
+
+        for (int i = _cascadeTypes.length - 1; i >= 0; i--) {
+          if (isFirst)
+            isFirst = false;
+          else
+            s += ", ";
+
+          s += _cascadeTypes[i];
+        }
+      }
+
+      log.finest(L.l("CascadableField.<constructor> class: '{0}' cascade: '{1}'",
+                     this.getClass().getName(), s));
+    }
   }
 
   /**
@@ -112,18 +133,7 @@ abstract public class CascadableField extends AbstractField {
     if (cascadeType != CascadeType.PERSIST)
       return;
 
-    if (isCascade(cascadeType)) {
-
-      String getter = generateSuperGetter();
-
-      out.println("if (" + getter + " != null) {");
-      out.pushDepth();
-
-      out.println(aConn + ".persistFromCascade("+ getter + ");");
-
-      out.popDepth();
-      out.println("}");
-    }
+    generateInternalCascade(out, aConn, cascadeType);
   }
 
   /**
@@ -147,34 +157,7 @@ abstract public class CascadableField extends AbstractField {
     if (cascadeType == CascadeType.PERSIST)
       return;
 
-    if (isCascade(cascadeType)) {
-
-      String getter = generateSuperGetter();
-
-      out.println("if (" + getter + " != null) {");
-      out.pushDepth();
-
-      out.print(aConn + ".");
-
-      switch (cascadeType) {
-      case MERGE:
-        out.print("merge");
-        break;
-
-      case REMOVE:
-        out.print("remove");
-        break;
-
-      case REFRESH:
-        out.print("refresh");
-        break;
-      }
-
-      out.println("("+ getter + ");");
-
-      out.popDepth();
-      out.println("}");
-    }
+    generateInternalCascade(out, aConn, cascadeType);
   }
 
   /**
@@ -193,5 +176,44 @@ abstract public class CascadableField extends AbstractField {
     throws IOException
   {
     return false;
+  }
+
+  protected void generateInternalCascade(JavaWriter out,
+                                         String aConn,
+                                         CascadeType cascadeType)
+    throws IOException
+  {
+    if (isCascade(cascadeType)) {
+
+      String getter = generateSuperGetter();
+
+      out.println("if (" + getter + " != null) {");
+      out.pushDepth();
+
+      out.print(aConn + ".");
+
+      switch (cascadeType) {
+      case PERSIST:
+        out.print("persistFromCascade");
+        break;
+
+      case MERGE:
+        out.print("merge");
+        break;
+
+      case REMOVE:
+        out.print("remove");
+        break;
+
+      case REFRESH:
+        out.print("refresh");
+        break;
+      }
+
+      out.println("("+ getter + ");");
+
+      out.popDepth();
+      out.println("}");
+    }
   }
 }

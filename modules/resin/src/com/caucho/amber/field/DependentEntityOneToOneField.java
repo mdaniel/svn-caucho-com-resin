@@ -67,6 +67,14 @@ public class DependentEntityOneToOneField extends CascadableField {
     super(relatedType, name, null);
   }
 
+  public DependentEntityOneToOneField(RelatedType relatedType,
+                                      String name,
+                                      CascadeType[] cascadeTypes)
+    throws ConfigException
+  {
+    super(relatedType, name, cascadeTypes);
+  }
+
   /**
    * Sets the target field.
    */
@@ -522,5 +530,29 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.println(loadVar + " = 0;");
     out.popDepth();
     out.println("}");
+  }
+
+  public void generatePreCascade(JavaWriter out,
+                                 String aConn,
+                                 CascadeType cascadeType)
+    throws IOException
+  {
+    if (cascadeType == CascadeType.PERSIST)
+      return;
+
+    // jpa/0o33
+    generateInternalCascade(out, aConn, cascadeType);
+  }
+
+  public void generatePostCascade(JavaWriter out,
+                                  String aConn,
+                                  CascadeType cascadeType)
+    throws IOException
+  {
+    if (cascadeType != CascadeType.PERSIST)
+      return;
+
+    // jpa/0o33
+    generateInternalCascade(out, aConn, cascadeType);
   }
 }

@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -85,6 +86,11 @@ abstract public class AbstractField implements AmberField {
     throws ConfigException
   {
     this(sourceType);
+
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(L.l("AbstractField.<constructor> class: '{0}' name: '{1}'",
+                     this.getClass().getName(), name));
+    }
 
     setName(name);
   }

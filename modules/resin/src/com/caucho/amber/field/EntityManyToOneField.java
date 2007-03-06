@@ -667,8 +667,10 @@ public class EntityManyToOneField extends CascadableField {
     }
     */
 
-    // ejb/06h0
-    if (isAbstract()) {
+    boolean isJPA = getRelatedType().getPersistenceUnit().isJPA();
+
+    // ejb/06h0, jpa/0o03
+    if (isAbstract() && (isLazy() || ! isJPA)) {
       String proxy = "aConn.loadProxy(\"" + getEntityTargetType().getName() + "\", __caucho_field_" + getName() + ")";
 
       proxy = getEntityTargetType().getProxyClass().getName() + " v" + index + " = (" + getEntityTargetType().getProxyClass().getName() + ") " + proxy + ";";

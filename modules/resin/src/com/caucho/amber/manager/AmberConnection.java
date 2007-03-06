@@ -327,8 +327,6 @@ public class AmberConnection
       // Cannot flush before the merge is complete.
       _isFlushAllowed = false;
 
-      // entityT = recursiveMerge(null, entityT);
-
       entityT = recursiveMerge(entityT);
 
     } catch (RuntimeException e) {
@@ -2582,7 +2580,7 @@ public class AmberConnection
   /**
    * Recursively merges the state of the entity into the current context.
    */
-  public <T> T recursiveMerge(T entityT) // , T rootEntityT)
+  public <T> T recursiveMerge(T entityT)
   {
     // jpa/0ga3, jpa/0h08, jpa/0i5g, jpa/0s2k
 
@@ -2654,8 +2652,7 @@ public class AmberConnection
 
       if (existingEntity == null) {
         // new entity instance
-        managedEntity = entity.getClass().newInstance();
-        managedEntity.__caucho_setPrimaryKey(pk);
+        managedEntity = addNewEntity(entity.getClass(), pk);
       }
       else {
         // jpa/0h08

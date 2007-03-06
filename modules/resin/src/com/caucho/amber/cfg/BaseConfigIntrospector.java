@@ -2886,7 +2886,22 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
         DependentEntityOneToOneField oneToOne;
 
-        oneToOne = new DependentEntityOneToOneField(_relatedType, _fieldName);
+        CascadeType cascadeTypes[] = null;
+
+        if (oneToOneAnn != null) {
+          // jpa/0o33
+
+          // XXX: runtime does not cast this
+          // cascadeType = (CascadeType []) manyToOneAnn.get("cascade");
+          Object cascade[] = (Object []) oneToOneAnn.get("cascade");
+
+          cascadeTypes = new CascadeType[cascade.length];
+
+          for (int i=0; i < cascade.length; i++)
+            cascadeTypes[i] = (CascadeType) cascade[i];
+        }
+
+        oneToOne = new DependentEntityOneToOneField(_relatedType, _fieldName, cascadeTypes);
         oneToOne.setTargetField(sourceField);
         sourceField.setTargetField(oneToOne);
         oneToOne.setLazy(isLazy);
