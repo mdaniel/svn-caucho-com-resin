@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -84,8 +84,7 @@ public class FloatArrayProperty extends ArrayProperty {
     return array;
   }
 
-  public Object read(Unmarshaller u, XMLEventReader in,
-                     Object previous)
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
     float[] array = (float[]) previous;
@@ -126,29 +125,31 @@ public class FloatArrayProperty extends ArrayProperty {
     return array;
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out, 
+                    Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     //XXX wrapper
     
-    if (obj != null) {
-      float[] array = (float[]) obj;
+    if (value != null) {
+      float[] array = (float[]) value;
 
       for (int i = 0; i < array.length; i++) 
-        FloatProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
+        FloatProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname, obj);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     //XXX wrapper
     
-    if (obj != null) {
-      float[] array = (float[]) obj;
+    if (value != null) {
+      float[] array = (float[]) value;
 
       for (int i = 0; i < array.length; i++) 
-        FloatProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
+        FloatProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname, obj);
     }
   }
   

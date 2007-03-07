@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -49,9 +49,13 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
+
 import java.lang.annotation.*;
 import java.lang.reflect.*;
+
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
@@ -111,7 +115,7 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, QName fieldName)
+                    Object obj, QName fieldName, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
@@ -119,11 +123,11 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
     if (skeleton == null)
       throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
 
-    skeleton.write(m, out, obj, fieldName);
+    skeleton.write(m, out, obj, fieldName, attributes);
   }
 
   public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, QName fieldName)
+                    Object obj, QName fieldName, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
@@ -131,11 +135,11 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
     if (skeleton == null)
       throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
 
-    skeleton.write(m, out, obj, fieldName);
+    skeleton.write(m, out, obj, fieldName, attributes);
   }
 
   public Node bindTo(BinderImpl binder, Node node, 
-                     Object obj, QName fieldName)
+                     Object obj, QName fieldName, Iterator attributes)
     throws JAXBException
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
@@ -143,7 +147,7 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
     if (skeleton == null)
       throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
 
-    return skeleton.bindTo(binder, node, obj, fieldName);
+    return skeleton.bindTo(binder, node, obj, fieldName, attributes);
   }
 
   public String toString()

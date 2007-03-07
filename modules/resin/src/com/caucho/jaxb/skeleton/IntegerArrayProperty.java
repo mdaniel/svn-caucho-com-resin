@@ -126,29 +126,31 @@ public class IntegerArrayProperty extends ArrayProperty {
     return array;
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out, 
+                    Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     //XXX wrapper
     
-    if (obj != null) {
-      int[] array = (int[]) obj;
+    if (value != null) {
+      int[] array = (int[]) value;
 
       for (int i = 0; i < array.length; i++) 
-        IntProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
+        IntProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname, obj);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     //XXX wrapper
     
-    if (obj != null) {
-      int[] array = (int[]) obj;
+    if (value != null) {
+      int[] array = (int[]) value;
 
       for (int i = 0; i < array.length; i++) 
-        IntProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
+        IntProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname, obj);
     }
   }
   

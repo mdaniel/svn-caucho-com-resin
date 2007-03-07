@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -77,6 +77,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -299,57 +300,82 @@ public abstract class Accessor {
 
   // Output methods
 
-  public void writeAttribute(Marshaller m, XMLStreamWriter out, Object obj)
+  public void writeAttribute(Marshaller m, XMLStreamWriter out, Object value)
     throws IOException, XMLStreamException, JAXBException
   {
-    QName name = getQName(obj);
-    Object value = get(obj);
+    if (value != null) {
+      QName name = getQName(value);
 
-    if (name.getNamespaceURI() == null || "".equals(name.getNamespaceURI()))
-      out.writeAttribute(name.getLocalPart(), value.toString());
-    else if (name.getPrefix() == null || "".equals(name.getPrefix())) {
-      out.writeAttribute(name.getNamespaceURI(), name.getLocalPart(), 
-                         value.toString());
-    }
-    else {
-      out.writeAttribute(name.getPrefix(), 
-                         name.getLocalPart(), 
-                         name.getNamespaceURI(), 
-                         value.toString());
+      if (name.getNamespaceURI() == null || "".equals(name.getNamespaceURI()))
+        out.writeAttribute(name.getLocalPart(), value.toString());
+      else if (name.getPrefix() == null || "".equals(name.getPrefix())) {
+        out.writeAttribute(name.getNamespaceURI(), name.getLocalPart(), 
+                           value.toString());
+      }
+      else {
+        out.writeAttribute(name.getPrefix(), 
+                           name.getLocalPart(), 
+                           name.getNamespaceURI(), 
+                           value.toString());
+      }
     }
   }
 
   public void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (getAccessorType() == AccessorType.ATTRIBUTE)
-      writeAttribute(m, out, obj);
-    else
-      _property.write(m, out, obj, getQName(obj));
-  }
-
-  public void writeAttribute(Marshaller m, XMLEventWriter out, Object obj)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    QName name = getQName(obj);
     Object value = get(obj);
 
-    out.add(JAXBUtil.EVENT_FACTORY.createAttribute(name, value.toString()));
+    if (getAccessorType() == AccessorType.ATTRIBUTE)
+      writeAttribute(m, out, value);
+    else
+      _property.write(m, out, value, getQName(obj), obj);
+  }
+
+  public void write(Marshaller m, XMLStreamWriter out, 
+                    Object obj, Iterator attributes)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    Object value = get(obj);
+
+    _property.write(m, out, value, getQName(value), obj, attributes);
+  }
+
+  public void writeAttribute(Marshaller m, XMLEventWriter out, Object value)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (value != null) {
+      QName name = getQName(value);
+      out.add(JAXBUtil.EVENT_FACTORY.createAttribute(name, value.toString()));
+    }
   }
 
   public void write(Marshaller m, XMLEventWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
+    Object value = get(obj);
+
     if (getAccessorType() == AccessorType.ATTRIBUTE)
-      writeAttribute(m, out, obj);
+      writeAttribute(m, out, value);
     else
-      _property.write(m, out, obj, getQName(obj));
+      _property.write(m, out, value, getQName(value), obj);
+  }
+
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object obj, Iterator attributes)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    Object value = get(obj);
+
+    _property.write(m, out, value, getQName(value), obj, attributes);
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj)
     throws JAXBException
   {
-    return _property.bindTo(binder, node, obj, getQName(obj));
+    Object value = get(obj);
+
+    return _property.bindTo(binder, node, value, getQName(value));
   }
 
   // Input methods.  Contract: input stream or node iterator will be at
@@ -366,6 +392,20 @@ public abstract class Accessor {
     throws XMLStreamException, JAXBException
   {
     return _property.readAttribute(attribute);
+  }
+
+  public Object read(Unmarshaller u, XMLStreamReader in, Object parent, 
+                     ClassSkeleton attributed)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    return _property.read(u, in, get(parent), attributed, parent);
+  }
+
+  public Object read(Unmarshaller u, XMLEventReader in, Object parent,
+                     ClassSkeleton attributed)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    return _property.read(u, in, get(parent), attributed, parent);
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object parent)

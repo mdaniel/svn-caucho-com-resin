@@ -125,29 +125,31 @@ public class DoubleArrayProperty extends ArrayProperty {
     return array;
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out, 
+                    Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     //XXX wrapper
     
-    if (obj != null) {
-      double[] array = (double[]) obj;
+    if (value != null) {
+      double[] array = (double[]) value;
 
       for (int i = 0; i < array.length; i++) 
-        DoubleProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
+        DoubleProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname, obj);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     //XXX wrapper
     
-    if (obj != null) {
-      double[] array = (double[]) obj;
+    if (value != null) {
+      double[] array = (double[]) value;
 
       for (int i = 0; i < array.length; i++) 
-        DoubleProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
+        DoubleProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname, obj);
     }
   }
   

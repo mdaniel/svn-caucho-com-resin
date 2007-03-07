@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -213,7 +213,7 @@ public class BinderImpl extends Binder<Node> {
 
     Node child = doc.createElement("root");
 
-    xmlNode.appendChild(skeleton.bindTo(this, child, jaxbObject, null));
+    xmlNode.appendChild(skeleton.bindTo(this, child, jaxbObject, null, null));
   }
 
   public Object unmarshal(Node xmlNode)
@@ -312,7 +312,7 @@ public class BinderImpl extends Binder<Node> {
   {
     Skeleton skeleton = _context.findSkeletonForObject(jaxbObject);
 
-    return skeleton.bindTo(this, xmlNode, jaxbObject, null);
+    return skeleton.bindTo(this, xmlNode, jaxbObject, null, null);
   }
 
   public void bind(Object jaxbObject, Node xmlNode)

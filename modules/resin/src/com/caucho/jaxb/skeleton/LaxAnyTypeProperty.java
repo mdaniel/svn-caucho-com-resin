@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -107,19 +107,19 @@ public class LaxAnyTypeProperty extends Property {
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    _skeleton.write(m, out, obj, qname);
+    _skeleton.write(m, out, obj, qname, null);
   }
 
   public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    _skeleton.write(m, out, obj, qname);
+    _skeleton.write(m, out, obj, qname, null);
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
     throws JAXBException
   {
-    return _skeleton.bindTo(binder, node, obj, qname);
+    return _skeleton.bindTo(binder, node, obj, qname, null);
   }
 
   public String getSchemaType()

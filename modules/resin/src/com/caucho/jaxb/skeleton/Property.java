@@ -31,6 +31,8 @@ package com.caucho.jaxb.skeleton;
 
 import java.io.IOException;
 
+import java.util.Iterator;
+
 import javax.xml.XMLConstants;
 
 import javax.xml.bind.JAXBException;
@@ -101,6 +103,20 @@ public abstract class Property {
                               XMLEventReader in, 
                               Object previous)
     throws IOException, XMLStreamException, JAXBException;
+
+  public Object read(Unmarshaller u, XMLStreamReader in, 
+                     Object previous, ClassSkeleton attributed, Object parent)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    return read(u, in, previous);
+  }
+  
+  public Object read(Unmarshaller u, XMLEventReader in, 
+                     Object previous, ClassSkeleton attributed, Object parent)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    return read(u, in, previous);
+  }
   
   public abstract Object bindFrom(BinderImpl binder, 
                                   NodeIterator node, 
@@ -108,16 +124,54 @@ public abstract class Property {
     throws JAXBException;
 
   public abstract void write(Marshaller m, XMLStreamWriter out, 
-                             Object obj, QName name)
+                             Object value, QName name)
     throws IOException, XMLStreamException, JAXBException;
 
   public abstract void write(Marshaller m, XMLEventWriter out, 
-                             Object obj, QName name)
+                             Object value, QName name)
     throws IOException, XMLStreamException, JAXBException;
 
   public abstract Node bindTo(BinderImpl binder, Node node, 
-                              Object obj, QName qname)
+                              Object value, QName qname)
     throws JAXBException;
+
+  public void write(Marshaller m, XMLStreamWriter out, 
+                    Object value, QName name, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    write(m, out, value, name);
+  }
+
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object value, QName name, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    write(m, out, value, name);
+  }
+
+  public void write(Marshaller m, XMLStreamWriter out, 
+                    Object value, QName name, Object obj,
+                    Iterator attributes)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    write(m, out, value, name, obj);
+  }
+
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object value, QName name, Object obj,
+                    Iterator attributes)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    write(m, out, value, name, obj);
+  }
+
+  public Node bindTo(BinderImpl binder, Node node, 
+                     Object value, QName qname,
+                     Iterator attributes)
+    throws JAXBException
+  {
+    return bindTo(binder, node, value, qname);
+  }
 
   protected void writeQNameStartElement(XMLStreamWriter out, QName name)
     throws IOException, XMLStreamException

@@ -373,45 +373,7 @@ public class ClassSkeleton<C> extends Skeleton {
             // XXX else throw something?
           }
 
-          // XXX move to function
-          switch (a.getAccessorType()) {
-            case VALUE: 
-              if (_value != null)
-                throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
-
-              if (elements.size() > 0) {
-                // in case of propOrder
-                if (elements.size() != 1 || elements.get(0) != null)
-                  throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element (e.g. {0})", elements.get(0)));
-
-                elements.clear();
-              }
-
-              _value = a;
-              break;
-            case ATTRIBUTE:
-              a.putQNames(_attributeAccessors);
-              break;
-            case ELEMENT:
-            case ELEMENTS:
-              if (_value != null)
-                throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element"));
-
-              if (a.getOrder() >= 0) 
-                elements.set(a.getOrder(), a);
-              else
-                elements.add(a);
-
-              break;
-
-            case ANY_TYPE_ELEMENT:
-            case ANY_TYPE_ELEMENT_LAX:
-              if (_anyTypeElementAccessor != null)
-                throw new JAXBException(L.l("{0}: Cannot have two @XmlAnyElement annotations in a single class", _class.getName()));
-
-              _anyTypeElementAccessor = a;
-              break;
-          }
+          processAccessor(a, elements);
         }
       }
 
@@ -455,9 +417,7 @@ public class ClassSkeleton<C> extends Skeleton {
               ! JAXBUtil.isJAXBAnnotated(f))
             continue;
 
-          if (accessType == XmlAccessType.NONE &&
-              ! f.isAnnotationPresent(XmlElement.class) &&
-              ! f.isAnnotationPresent(XmlAttribute.class))
+          if (accessType == XmlAccessType.NONE && ! JAXBUtil.isJAXBAnnotated(f))
             continue;
 
           Accessor a = new FieldAccessor(_context, f);
@@ -470,45 +430,7 @@ public class ClassSkeleton<C> extends Skeleton {
             // XXX else throw something?
           }
 
-          switch (a.getAccessorType()) {
-            case VALUE: 
-              if (_value != null)
-                throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
-
-              if (elements.size() > 0) {
-                // in case of propOrder & XmlValue
-                if (elements.size() != 1 || elements.get(0) != null)
-                  throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element (e.g. {0})", elements.get(0)));
-
-                elements.clear();
-              }
-
-              _value = a;
-              break;
-
-            case ATTRIBUTE:
-              a.putQNames(_attributeAccessors);
-              break;
-
-            case ELEMENT:
-            case ELEMENTS:
-              if (_value != null)
-                throw new JAXBException(L.l("{0}: Cannot have both @XmlValue and elements in a JAXB element", _class.getName()));
-
-              if (a.getOrder() >= 0)
-                elements.set(a.getOrder(), a);
-              else
-                elements.add(a);
-              break;
-              
-            case ANY_TYPE_ELEMENT:
-            case ANY_TYPE_ELEMENT_LAX:
-              if (_anyTypeElementAccessor != null)
-                throw new JAXBException(L.l("{0}: Cannot have two @XmlAnyElement annotations in a single class", _class.getName()));
-
-              _anyTypeElementAccessor = a;
-              break;
-          }
+          processAccessor(a, elements);
         }
       }
 
@@ -537,6 +459,50 @@ public class ClassSkeleton<C> extends Skeleton {
 
     if (! Object.class.equals(_class.getSuperclass()))
       _parent = _context.getSkeleton(_class.getSuperclass());
+  }
+
+  private void processAccessor(Accessor a, List<Accessor> elements)
+    throws JAXBException
+  {
+    switch (a.getAccessorType()) {
+      case VALUE: 
+        if (_value != null)
+          throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
+
+        if (elements.size() > 0) {
+          // in case of propOrder & XmlValue
+          if (elements.size() != 1 || elements.get(0) != null)
+            throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element (e.g. {0})", elements.get(0)));
+
+          elements.clear();
+        }
+
+        _value = a;
+        break;
+
+      case ATTRIBUTE:
+        a.putQNames(_attributeAccessors);
+        break;
+
+      case ELEMENT:
+      case ELEMENTS:
+        if (_value != null)
+          throw new JAXBException(L.l("{0}: Cannot have both @XmlValue and elements in a JAXB element", _class.getName()));
+
+        if (a.getOrder() >= 0)
+          elements.set(a.getOrder(), a);
+        else
+          elements.add(a);
+        break;
+        
+      case ANY_TYPE_ELEMENT:
+      case ANY_TYPE_ELEMENT_LAX:
+        if (_anyTypeElementAccessor != null)
+          throw new JAXBException(L.l("{0}: Cannot have two @XmlAnyElement annotations in a single class", _class.getName()));
+
+        _anyTypeElementAccessor = a;
+        break;
+    }
   }
 
   public QName getTypeName()
@@ -603,13 +569,13 @@ public class ClassSkeleton<C> extends Skeleton {
         _locationAccessor.set(ret, in.getLocation());
 
       if (_beforeUnmarshal != null)
-        _beforeUnmarshal.invoke(ret, u, /*FIXME : parent*/ null);
+        _beforeUnmarshal.invoke(ret, u, null);
 
       if (u.getListener() != null)
         u.getListener().beforeUnmarshal(ret, null);
 
-      if (_value != null) { 
-        Object val = _value.read(u, in, ret);
+      if (_value != null) {
+        Object val = _value.read(u, in, ret, this);
         _value.set(ret, val);
       }
       else {
@@ -644,10 +610,19 @@ public class ClassSkeleton<C> extends Skeleton {
           Object val = a.read(u, in, ret);
           a.set(ret, val);
         }
+
+        // essentially a nextTag() that handles end of document gracefully
+        while (in.hasNext()) {
+          in.next();
+
+          if (in.getEventType() == in.START_ELEMENT ||
+              in.getEventType() == in.END_ELEMENT)
+            break;
+        }
       }
 
       if (_afterUnmarshal != null)
-        _afterUnmarshal.invoke(ret, u, /*FIXME : parent*/ null);
+        _afterUnmarshal.invoke(ret, u, null);
 
       if (u.getListener() != null)
         u.getListener().afterUnmarshal(ret, null);
@@ -715,6 +690,14 @@ public class ClassSkeleton<C> extends Skeleton {
 
           event = in.peek();
         }
+
+        while (in.hasNext()) {
+          event = in.nextEvent();
+
+          if (event.isStartElement() ||
+              event.isEndElement())
+            break;
+        }
       }
 
       if (_afterUnmarshal != null)
@@ -776,7 +759,7 @@ public class ClassSkeleton<C> extends Skeleton {
   }
   
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, QName fieldName)
+                    Object obj, QName fieldName, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj == null)
@@ -796,7 +779,7 @@ public class ClassSkeleton<C> extends Skeleton {
 
       if (_value != null) {
         _value.setQName(tagName);
-        _value.write(m, out, _value.get(obj));
+        _value.write(m, out, obj, _attributeAccessors.values().iterator());
       }
       else {
         if (tagName.getNamespaceURI() == null ||
@@ -811,11 +794,18 @@ public class ClassSkeleton<C> extends Skeleton {
                                 tagName.getLocalPart(),
                                 tagName.getNamespaceURI());
 
+        if (attributes != null) {
+          while (attributes.hasNext()) {
+            Accessor a = (Accessor) attributes.next();
+            a.write(m, out, obj);
+          }
+        }
+
         for (Accessor a : _attributeAccessors.values())
-          a.write(m, out, a.get(obj));
+          a.write(m, out, obj);
 
         for (Accessor a : _elementAccessors.values())
-          a.write(m, out, a.get(obj));
+          a.write(m, out, obj);
         
         out.writeEndElement();
       }
@@ -835,7 +825,7 @@ public class ClassSkeleton<C> extends Skeleton {
   }
 
   public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, QName fieldName)
+                    Object obj, QName fieldName, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     // XXX: beforeMarshal/afterMarshal???
@@ -856,10 +846,15 @@ public class ClassSkeleton<C> extends Skeleton {
 
       if (_value != null) {
         _value.setQName(tagName);
-        _value.write(m, out, _value.get(obj));
+        _value.write(m, out, _value.get(obj), 
+                     _attributeAccessors.values().iterator());
       }
       else {
         out.add(JAXBUtil.EVENT_FACTORY.createStartElement(tagName, null, null));
+
+        if (attributes != null) {
+          // XXX
+        }
 
         for (Accessor a : _elementAccessors.values())
           a.write(m, out, a.get(obj));
@@ -881,7 +876,8 @@ public class ClassSkeleton<C> extends Skeleton {
     }
   }
 
-  public Node bindTo(BinderImpl binder, Node node, Object obj, QName fieldName)
+  public Node bindTo(BinderImpl binder, Node node, 
+                     Object obj, QName fieldName, Iterator attributes)
     throws JAXBException
   {
     if (obj == null)
@@ -907,6 +903,10 @@ public class ClassSkeleton<C> extends Skeleton {
         Node child = node.getFirstChild();
 
         child = JAXBUtil.skipIgnorableNodes(child);
+
+        if (attributes != null) {
+          // XXX
+        }
 
         for (Accessor a : _elementAccessors.values()) {
           if (child != null) {

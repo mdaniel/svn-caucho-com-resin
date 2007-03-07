@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -44,9 +44,13 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
+
 import java.lang.annotation.*;
 import java.lang.reflect.*;
+
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
@@ -75,7 +79,7 @@ public class DynamicJAXBElementSkeleton extends ClassSkeleton {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, QName fieldName)
+                    Object obj, QName fieldName, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (! (obj instanceof JAXBElement))
@@ -86,11 +90,11 @@ public class DynamicJAXBElementSkeleton extends ClassSkeleton {
     _accessor.setQName(element.getName());
     _accessor.setType(element.getDeclaredType());
 
-    super.write(m, out, obj, fieldName);
+    super.write(m, out, obj, fieldName, attributes);
   }
 
   public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, QName fieldName)
+                    Object obj, QName fieldName, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (! (obj instanceof JAXBElement))
@@ -101,7 +105,7 @@ public class DynamicJAXBElementSkeleton extends ClassSkeleton {
     _accessor.setQName(element.getName());
     _accessor.setType(element.getDeclaredType());
 
-    super.write(m, out, obj, fieldName);
+    super.write(m, out, obj, fieldName, attributes);
   }
 
   public Object newInstance()

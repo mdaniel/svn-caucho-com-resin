@@ -64,34 +64,13 @@ public class SkeletonProperty extends Property {
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Object ret = _skeleton.read(u, in);
-
-    // essentially a nextTag() that handles end of document gracefully
-    while (in.hasNext()) {
-      in.next();
-
-      if (in.getEventType() == in.START_ELEMENT ||
-          in.getEventType() == in.END_ELEMENT)
-        break;
-    }
-
-    return ret;
+    return _skeleton.read(u, in);
   }
-  
+
   public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Object ret = _skeleton.read(u, in);
-
-    while (in.hasNext()) {
-      XMLEvent event = in.nextEvent();
-
-      if (event.isStartElement() ||
-          event.isEndElement())
-        break;
-    }
-
-    return ret;
+    return _skeleton.read(u, in);
   }
 
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
@@ -113,7 +92,7 @@ public class SkeletonProperty extends Property {
   {
     // XXX Subclassing/anyType
     //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
-    _skeleton.write(m, out, obj, qname);
+    _skeleton.write(m, out, obj, qname, null);
   }
 
   public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
@@ -121,13 +100,13 @@ public class SkeletonProperty extends Property {
   {
     // XXX Subclassing/anyType
     //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
-    _skeleton.write(m, out, obj, qname);
+    _skeleton.write(m, out, obj, qname, null);
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
     throws JAXBException
   {
-    return _skeleton.bindTo(binder, node, obj, qname);
+    return _skeleton.bindTo(binder, node, obj, qname, null);
   }
 
   public String getSchemaType()

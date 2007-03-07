@@ -44,7 +44,10 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
+
+import java.util.Iterator;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
@@ -100,15 +103,15 @@ public abstract class Skeleton {
   // Output methods
   
   public abstract void write(Marshaller m, XMLStreamWriter out,
-                             Object obj, QName fieldName)
+                             Object obj, QName fieldName, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException;
 
   public abstract void write(Marshaller m, XMLEventWriter out,
-                             Object obj, QName fieldName)
+                             Object obj, QName fieldName, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException;
 
   public abstract Node bindTo(BinderImpl binder, Node node, 
-                              Object obj, QName fieldName)
+                              Object obj, QName fieldName, Iterator attributes)
     throws JAXBException;
 
   protected Accessor getElementAccessor(QName q)

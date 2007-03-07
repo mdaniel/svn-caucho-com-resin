@@ -114,7 +114,7 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
                               getNoNSSchemaLocation());
       */
 
-      skeleton.write(this, writer, jaxbElement, null);
+      skeleton.write(this, writer, jaxbElement, null, null);
 
       writer.writeEndDocument();
     }

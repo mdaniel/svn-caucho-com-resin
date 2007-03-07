@@ -31,6 +31,8 @@ package com.caucho.jaxb.skeleton;
 
 import java.io.IOException;
 
+import java.util.Iterator;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.MarshalException;
@@ -86,6 +88,27 @@ public abstract class CDataProperty extends Property {
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
+    return read(u, in, previous, null, null);
+  }
+
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous, 
+                     ClassSkeleton attributed, Object parent)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (attributed != null) {
+      for (int i = 0; i < in.getAttributeCount(); i++) {
+        QName attributeName = in.getAttributeName(i);
+        Accessor a = attributed.getAttributeAccessor(attributeName);
+
+        if (a == null)
+          throw new UnmarshalException(L.l("Attribute {0} not found in {1}", 
+                                           attributeName, 
+                                           attributed.getType()));
+
+        a.set(parent, a.readAttribute(in, i));
+      }
+    }
+
     in.next();
 
     Object ret = null;
@@ -118,6 +141,7 @@ public abstract class CDataProperty extends Property {
   public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
+    // XXX attributes 
     XMLEvent event = in.nextEvent(); // skip start element
 
     Object ret = null;
@@ -157,27 +181,61 @@ public abstract class CDataProperty extends Property {
   protected abstract String write(Object in)
     throws JAXBException;
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out, Object value, 
+                    QName qname, Object obj, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj != null) {
       writeQNameStartElement(out, qname);
-      out.writeCharacters(write(obj));
+
+      if (attributes != null) {
+        while (attributes.hasNext()) {
+          Accessor a = (Accessor) attributes.next();
+          a.write(m, out, obj);
+        }
+      }
+
+      out.writeCharacters(write(value));
       writeQNameEndElement(out, qname);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out, 
+                    Object value, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (obj != null) {
+    write(m, out, value, qname, null);
+  }
+
+  public void write(Marshaller m, XMLStreamWriter out, Object value,
+                    QName qname, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (value != null) {
+      writeQNameStartElement(out, qname);
+      out.writeCharacters(write(value));
+      writeQNameEndElement(out, qname);
+    }
+  }
+
+  public void write(Marshaller m, XMLEventWriter out, Object value, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    write(m, out, value, qname, null);
+  }
+
+  public void write(Marshaller m, XMLEventWriter out, Object value, 
+                    QName qname, Object obj)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (value != null) {
       out.add(JAXBUtil.EVENT_FACTORY.createStartElement(qname, null, null));
-      out.add(JAXBUtil.EVENT_FACTORY.createCharacters(write(obj)));
+      out.add(JAXBUtil.EVENT_FACTORY.createCharacters(write(value)));
       out.add(JAXBUtil.EVENT_FACTORY.createEndElement(qname, null));
     }
   }
 
-  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+  public Node bindTo(BinderImpl binder, Node node, Object value, QName qname)
     throws JAXBException
   {
     QName name = JAXBUtil.qnameFromNode(node);
@@ -187,9 +245,9 @@ public abstract class CDataProperty extends Property {
       node = JAXBUtil.elementFromQName(qname, doc);
     }
 
-    node.setTextContent(write(obj));
+    node.setTextContent(write(value));
 
-    binder.bind(obj, node);
+    binder.bind(value, node);
 
     return node;
   }

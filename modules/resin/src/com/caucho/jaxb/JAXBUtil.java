@@ -40,6 +40,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -458,7 +459,8 @@ public class JAXBUtil {
            element.isAnnotationPresent(XmlAnyElement.class) ||
            element.isAnnotationPresent(XmlAttribute.class) ||
            element.isAnnotationPresent(XmlElement.class) ||
-           element.isAnnotationPresent(XmlElements.class);
+           element.isAnnotationPresent(XmlElements.class) ||
+           element.isAnnotationPresent(XmlValue.class);
   }
 
   static {

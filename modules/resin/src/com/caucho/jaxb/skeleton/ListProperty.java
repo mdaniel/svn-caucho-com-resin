@@ -99,34 +99,36 @@ public class ListProperty extends IterableProperty {
     return list;
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out, 
+                    Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     //XXX wrapper
     
-    if (obj != null) {
-      if (obj instanceof List) {
-        List list = (List) obj;
+    if (value != null) {
+      if (value instanceof List) {
+        List list = (List) value;
 
         for (Object o : list)
-          _componentProperty.write(m, out, o, qname);
+          _componentProperty.write(m, out, o, qname, obj);
       }
       else
         throw new ClassCastException("Argument not a List");
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     //XXX wrapper
     
-    if (obj != null) {
-      if (obj instanceof List) {
-        List list = (List) obj;
+    if (value != null) {
+      if (value instanceof List) {
+        List list = (List) value;
 
         for (Object o : list)
-          _componentProperty.write(m, out, o, qname);
+          _componentProperty.write(m, out, o, qname, obj);
       }
       else
         throw new ClassCastException("Argument not a List");

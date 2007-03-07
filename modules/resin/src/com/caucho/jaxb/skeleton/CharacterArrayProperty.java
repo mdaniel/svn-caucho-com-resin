@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -126,29 +126,35 @@ public class CharacterArrayProperty extends ArrayProperty {
     return array;
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out, 
+                    Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     //XXX wrapper
     
-    if (obj != null) {
-      char[] array = (char[]) obj;
+    if (value != null) {
+      char[] array = (char[]) value;
 
-      for (int i = 0; i < array.length; i++) 
-        CharacterProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
+      for (int i = 0; i < array.length; i++) {
+        CharacterProperty.PRIMITIVE_PROPERTY.write(m, out, 
+                                                   array[i], qname, obj);
+      }
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     //XXX wrapper
     
-    if (obj != null) {
-      char[] array = (char[]) obj;
+    if (value != null) {
+      char[] array = (char[]) value;
 
-      for (int i = 0; i < array.length; i++) 
-        CharacterProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
+      for (int i = 0; i < array.length; i++) {
+        CharacterProperty.PRIMITIVE_PROPERTY.write(m, out, 
+                                                   array[i], qname, obj);
+      }
     }
   }
 
