@@ -194,6 +194,9 @@ public class Env {
   private HashMap<String, QuercusClass> _lowerClassMap
     = new HashMap<String, QuercusClass>();
 
+  private HashSet<String> _initializedClassSet
+    = new HashSet<String>();
+
   private HashMap<String, StringValue> _iniMap;
 
   // specialMap is used for implicit resources like the mysql link
@@ -2950,6 +2953,22 @@ public class Env {
     qClass.init(this);
 
     return qClass;
+  }
+
+  /**
+   * Returns true if class has already been initialized.
+   */
+  public boolean isInitializedClass(String name)
+  {
+    return _initializedClassSet.contains(name);
+  }
+  
+  /**
+   * Mark this class as being initialized.
+   */
+  public void addInitializedClass(String name)
+  {
+    _initializedClassSet.add(name);
   }
 
   /**

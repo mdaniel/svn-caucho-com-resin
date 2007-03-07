@@ -300,6 +300,9 @@ public class QuercusClass {
 
   public void init(Env env)
   {
+    if (env.isInitializedClass(getName()))
+      return;
+
     for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {
       Value val;
       Expr expr = entry.getValue();
@@ -312,6 +315,8 @@ public class QuercusClass {
 
       env.setGlobalValue(entry.getKey(), val);
     }
+
+    env.addInitializedClass(getName());
   }
 
   //
