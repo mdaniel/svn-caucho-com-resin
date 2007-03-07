@@ -61,7 +61,7 @@ public class EnterpriseApplication
   static final Logger log = Log.open(EnterpriseApplication.class);
 
   /*
-  protected static EnvironmentLocal<EJBServerInterface> _localServer
+    protected static EnvironmentLocal<EJBServerInterface> _localServer
     = new EnvironmentLocal<EJBServerInterface>("caucho.ejb-server");
   */
 
@@ -70,7 +70,7 @@ public class EnterpriseApplication
   private String _name;
 
   private String _ejbServerJndiName = "java:comp/env/cmp";
-  
+
   private Path _rootDir;
 
   private Path _earPath;
@@ -89,7 +89,7 @@ public class EnterpriseApplication
 
   private ArrayList<Path> _ejbPaths
     = new ArrayList<Path>();
-  
+
   private ArrayList<WebAppController> _webApps
     = new ArrayList<WebAppController>();
 
@@ -101,22 +101,22 @@ public class EnterpriseApplication
    * Creates the application.
    */
   EnterpriseApplication(WebAppContainer container,
-			EarDeployController controller, String name)
+                        EarDeployController controller, String name)
   {
     _container = container;
-    
+
     _controller = controller;
     _name = name;
 
     ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
-    
+
     _loader = new EnvironmentClassLoader(container.getClassLoader());
     _loader.setId("EnterpriseApplication[" + name + "]");
 
     _webappsPath = _controller.getRootDirectory().lookup("webapps");
     WorkDir.setLocalWorkDir(_controller.getRootDirectory().lookup("META-INF/work"),
-			    _loader);
-    
+                            _loader);
+
     _lifecycle = new Lifecycle(log, toString(), Level.INFO);
 
     if (controller.getArchivePath() != null)
@@ -203,21 +203,21 @@ public class EnterpriseApplication
   {
     _prefix = prefix;
   }
-  
+
   /**
    * Sets the id
    */
   public void setId(String id)
   {
   }
-  
+
   /**
    * Sets the application version.
    */
   public void setVersion(String version)
   {
   }
-  
+
   /**
    * Sets the schema location
    */
@@ -245,14 +245,14 @@ public class EnterpriseApplication
   public void setIcon(Icon icon)
   {
   }
-  
+
   /**
    * Adds a module.
    */
   public Module createModule()
   {
     _hasModule = true;
-    
+
     return new Module();
   }
 
@@ -324,33 +324,38 @@ public class EnterpriseApplication
   {
     if (! _lifecycle.toInit())
       return;
-      
+
     log.fine(this + " initializing");
-      
+
     Vfs.setPwd(_rootDir, _loader);
 
     _loader.addJarManifestClassPath(_rootDir);
-    
+
     // server/13bb
     if (_ejbPaths.size() == 0
         && _webApps.size() == 0) {
       fillDefaultModules();
+    }
+    else {
+      // XXX: tck ejb30/persistence/basic needs to add the lib/*.jar
+      // to find the META-INF/persistence.xml
+      fillDefaultLib();
     }
 
     if (_ejbPaths.size() != 0) {
       EJBServer ejbServer = EJBServer.getLocal();
 
       if (ejbServer == null)
-	throw new ConfigException(L.l("Expected configured <ejb-server> in " +
-				      Thread.currentThread().getContextClassLoader()));
+        throw new ConfigException(L.l("Expected configured <ejb-server> in " +
+                                      Thread.currentThread().getContextClassLoader()));
 
       for (Path path : _ejbPaths) {
-	ejbServer.addEJBJar(path);
+        ejbServer.addEJBJar(path);
       }
 
       Path ejbJar = _rootDir.lookup("META-INF/ejb-jar.xml");
       if (ejbJar.canRead()) {
-	ejbServer.addEJBDescriptor("META-INF/ejb-jar.xml");
+        ejbServer.addEJBDescriptor("META-INF/ejb-jar.xml");
       }
 
       ejbServer.initEJBs();
@@ -364,49 +369,55 @@ public class EnterpriseApplication
   private void fillDefaultModules()
   {
     try {
-      if (_rootDir.lookup("lib").isDirectory()) {
-	Path lib = _rootDir.lookup("lib");
+      fillDefaultLib();
 
-	for (String file : lib.list()) {
-	  if (file.endsWith(".jar")) {
-	    _loader.addJar(lib.lookup(file));
-	  }
-	}
-      }
-      
       for (String file : _rootDir.list()) {
-	if (file.endsWith(".jar")) {
-	  Path path = _rootDir.lookup(file);
-	  Path jar = JarPath.create(path);
+        if (file.endsWith(".jar")) {
+          Path path = _rootDir.lookup(file);
+          Path jar = JarPath.create(path);
 
-	  if (jar.lookup("META-INF/application-client.xml").canRead()) {
-	    // app-client jar
-	  }
-	  else if (jar.lookup("META-INF/ejb-jar.xml").canRead()) {
-	    _ejbPaths.add(path);
-      
-	    _loader.addJar(path);
-	    _loader.addJarManifestClassPath(path);
-	  }
-	  else {
-	    _ejbPaths.add(path);
-      
-	    _loader.addJar(path);
-	  }
-	}
-	else if (file.endsWith(".war")) {
-	  Module module = createModule();
-	  WebModule web = new WebModule();
-	  web.setWebURI(file);
-	  web.setContextRoot(file.substring(0, file.length() - 4));
-	  
-	  module.addWeb(web);
-	}
+          if (jar.lookup("META-INF/application-client.xml").canRead()) {
+            // app-client jar
+          }
+          else if (jar.lookup("META-INF/ejb-jar.xml").canRead()) {
+            _ejbPaths.add(path);
+
+            _loader.addJar(path);
+            _loader.addJarManifestClassPath(path);
+          }
+          else {
+            _ejbPaths.add(path);
+
+            _loader.addJar(path);
+          }
+        }
+        else if (file.endsWith(".war")) {
+          Module module = createModule();
+          WebModule web = new WebModule();
+          web.setWebURI(file);
+          web.setContextRoot(file.substring(0, file.length() - 4));
+
+          module.addWeb(web);
+        }
       }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new ConfigException(e);
+    }
+  }
+
+  private void fillDefaultLib()
+    throws Exception
+  {
+    if (_rootDir.lookup("lib").isDirectory()) {
+      Path lib = _rootDir.lookup("lib");
+
+      for (String file : lib.list()) {
+        if (file.endsWith(".jar")) {
+          _loader.addJar(lib.lookup(file));
+        }
+      }
     }
   }
 
@@ -417,7 +428,7 @@ public class EnterpriseApplication
   {
     if (! _lifecycle.toStarting())
       return;
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -427,23 +438,23 @@ public class EnterpriseApplication
       getClassLoader().start();
 
       /* XXX: double start?
-      for (int i = 0; i < _webApps.size(); i++) {
-	WebAppController controller = _webApps.get(i);
+         for (int i = 0; i < _webApps.size(); i++) {
+         WebAppController controller = _webApps.get(i);
 
-	try {
-	  controller.start();
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-      }
+         try {
+         controller.start();
+         } catch (Throwable e) {
+         log.log(Level.WARNING, e.toString(), e);
+         }
+         }
       */
 
       for (WebAppController webApp : _webApps) {
-	_container.getWebAppGenerator().update(webApp.getContextPath());
+        _container.getWebAppGenerator().update(webApp.getContextPath());
       }
     } finally {
       _lifecycle.toActive();
-      
+
       thread.setContextClassLoader(oldLoader);
     }
   }
@@ -457,7 +468,7 @@ public class EnterpriseApplication
       WebAppController controller = _webApps.get(i);
 
       if (controller.isNameMatch(name))
-	return controller;
+        return controller;
     }
 
     return null;
@@ -475,7 +486,7 @@ public class EnterpriseApplication
   {
     return _webApps;
   }
-  
+
   /**
    * Stops the e-application.
    */
@@ -483,7 +494,7 @@ public class EnterpriseApplication
   {
     if (! _lifecycle.toStopping())
       return;
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -493,15 +504,15 @@ public class EnterpriseApplication
       //log.info(this + " stopping");
 
       _loader.stop();
-      
+
       //log.fine(this + " stopped");
     } finally {
       _lifecycle.toStop();
-      
+
       thread.setContextClassLoader(oldLoader);
     }
   }
-  
+
   /**
    * destroys the e-application.
    */
@@ -511,7 +522,7 @@ public class EnterpriseApplication
 
     if (! _lifecycle.toDestroy())
       return;
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -524,9 +535,9 @@ public class EnterpriseApplication
       _webApps = null;
 
       if (webApps != null) {
-	for (WebAppController webApp : webApps) {
-	  _container.getWebAppGenerator().update(webApp.getContextPath());
-	}
+        for (WebAppController webApp : webApps) {
+          _container.getWebAppGenerator().update(webApp.getContextPath());
+        }
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -549,7 +560,7 @@ public class EnterpriseApplication
     public void setId(String id)
     {
     }
-    
+
     /**
      * Creates a new web module.
      */
@@ -561,64 +572,64 @@ public class EnterpriseApplication
       Path path = _rootDir.lookup(webUri);
 
       if (contextUrl == null)
-	contextUrl = webUri;
+        contextUrl = webUri;
 
       WebAppController controller = null;
       if (webUri.endsWith(".war")) {
-	// server/2a16
-	String name = webUri.substring(0, webUri.length() - 4);
-	int p = name.lastIndexOf('/');
-	if (p > 0)
-	  name = name.substring(p + 1);
+        // server/2a16
+        String name = webUri.substring(0, webUri.length() - 4);
+        int p = name.lastIndexOf('/');
+        if (p > 0)
+          name = name.substring(p + 1);
 
-	// XXX:
-	if (contextUrl.equals(""))
-	  contextUrl = "/" + name;
+        // XXX:
+        if (contextUrl.equals(""))
+          contextUrl = "/" + name;
 
-	if (contextUrl.endsWith(".war"))
-	  contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
+        if (contextUrl.endsWith(".war"))
+          contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
 
-	Path expandPath = _webappsPath;
-	expandPath.mkdirs();
+        Path expandPath = _webappsPath;
+        expandPath.mkdirs();
 
-	controller = new WebAppController(contextUrl,
-					  expandPath.lookup(name),
-					  _container);
+        controller = new WebAppController(contextUrl,
+                                          expandPath.lookup(name),
+                                          _container);
 
-	controller.setArchivePath(path);
+        controller.setArchivePath(path);
       } else {
-	// server/2a15
-	if (contextUrl.equals("")) {
-	  String name = webUri;
-	  int p = name.lastIndexOf('/');
-	  if (p > 0)
-	    name = name.substring(p + 1);
-	  contextUrl = "/" + name;
-	}
+        // server/2a15
+        if (contextUrl.equals("")) {
+          String name = webUri;
+          int p = name.lastIndexOf('/');
+          if (p > 0)
+            name = name.substring(p + 1);
+          contextUrl = "/" + name;
+        }
 
-	// server/2a17
-	if (contextUrl.endsWith(".war"))
-	  contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
-	
-	controller = new WebAppController(contextUrl, path, _container);
+        // server/2a17
+        if (contextUrl.endsWith(".war"))
+          contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
+
+        controller = new WebAppController(contextUrl, path, _container);
       }
 
       controller.setDynamicDeploy(true);
       if (_configException != null)
-	controller.setConfigException(_configException);
+        controller.setConfigException(_configException);
 
       controller.setManifestClassLoader(_loader);
 
       // XXX: hack for duplicates
       if (findWebAppEntry(controller.getContextPath()) == null)
-	_webApps.add(controller);
+        _webApps.add(controller);
       else
-	controller = findWebAppEntry(controller.getContextPath());
-      
+        controller = findWebAppEntry(controller.getContextPath());
+
       if (web.getWebApp() != null)
-	controller.addConfigDefault(web.getWebApp());
+        controller.addConfigDefault(web.getWebApp());
     }
-    
+
     /**
      * Adds a new ejb module.
      */
@@ -626,12 +637,12 @@ public class EnterpriseApplication
       throws Exception
     {
       _ejbPaths.add(path);
-      
+
       _loader.addJar(path);
       // ejb/0853
       _loader.addJarManifestClassPath(path);
     }
-    
+
     /**
      * Adds a new java module.
      */
@@ -639,17 +650,17 @@ public class EnterpriseApplication
       throws ConfigException
     {
       if (! path.canRead())
-	throw new ConfigException(L.l("<java> module {0} must be a valid path.",
-				      path));
+        throw new ConfigException(L.l("<java> module {0} must be a valid path.",
+                                      path));
     }
-    
+
     /**
      * Adds a new connector
      */
     public void addConnector(String path)
     {
     }
-    
+
     /**
      * Adds a new alt-dd module.
      */
