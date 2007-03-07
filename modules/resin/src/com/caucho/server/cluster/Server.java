@@ -775,6 +775,19 @@ public class Server extends ProtocolDispatchServer
     return _lifecycle.getStateName();
   }
 
+  /**
+   * Returns the select keepalive count.
+   */
+  public int getKeepaliveSelectCount()
+  {
+    AbstractSelectManager selectManager = getSelectManager();
+
+    if (selectManager != null)
+      return selectManager.getSelectCount();
+    else
+      return -1;
+  }
+
   //
   // runtime operations
   //

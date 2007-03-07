@@ -248,41 +248,64 @@ $clean['message'] = htmlentities($_GET['message']);
 
 </s1>
 
-<s1 title="Database Security issues">
+<s1 title="User data issues">
 
-<s2 title="Configuration files an dpasswords">
+<p>URL and form POST data can be easily spoofed; it does not take a
+sophisticated hacker to generate any HTTP input.  So any script that
+takes data from the internet must validate the GET, header and POST data
+before acting on it.</p>
 
-<p>PHP programs often configure the databases inside the PHP code
-itself or in included files.  As mentioned above, Quercus can make
-the confguration more secure from prying eyes by putting the
-configuration into the WEB-INF directory.</p>
+<p>The dangers of this issue is apparent to anyone who looks at
+web server logs and finds many examples of bogus URLs for programs
+not even installed on the server.</p>
 
-<p>In addition, Quercus can use Java DataSources directly, taking the
-configuration out of the PHP code entirely.  This configuration will
-take precedence over the PHP code, so you can secure an existing
-application without any changes.  The Quercus configuration looks
-like:
-</p>
+<s2 title="URLs and files">
 
-<example title="WEB-INF/resin-web.xml configuration of Java database">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+<p>Because PHP can create strings so easily, it's temping to build
+an application which selects a file based on the URL data, e.g. for
+a URL <code>http://foo.com/index.php?page=submit.php</code>.</p>
 
-  &lt;database jndi-name="jdbc/test">
-    &lt;driver type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource"
-     &lt;url>jdbc:mysql://localhost:3306/test&lt;/url>
-     &lt;user>foo&lt;/user>
-     &lt;password>bar&lt;/password>
-   &lt;/driver>
-  &lt;/database>
+<example title="Bogus index.php">
+&lt;?php
 
-  &lt;servlet-mapping url-pattern="*.php"
-                   servlet-class="com.caucho.quercus.servlet.QuercusServlet">
-    &lt;init>
-      &lt;database>jdbc/test&lt;/database>
-    &lt;/init>
-  &lt;/servlet-mapping>
-&lt;/web-app>
+include ("page/{$_GET['page']}");
+
+?>
 </example>
+
+<p>Because that example does no validation, any PHP script on the
+server at all could be displayed.  A better solution would be:</p>
+
+<example title="Better index.php">
+&lt;?php
+
+$commands = array("comment" => "comment.php",
+                  "display" => "display.php");
+
+$clean_page = $commands[$_GET['page']];
+
+if (! $clean_page)
+  die();
+
+</example>
+
+</s2>
+
+<s2 title="eval(), system(), and passthru()">
+
+<p>Any command which interprets string as PHP or executes a system
+command is especially dangerous.  Consider:</p>
+
+<example title="bogus.php">
+&lt;?php
+
+eval($_GET['data']);
+</example>
+
+<p>If the URL was
+<code>http://foo.com/bogus.php?data=passthru("cat
+/etc/passwd")</code>, you'd
+have exposed the server's passwords.</p>
 
 </s2>
 
@@ -343,6 +366,46 @@ mysql_query($sql);
 
 </s1>
 
+<s1 title="Database Security issues">
+
+<s2 title="Configuration files and passwords">
+
+<p>PHP programs often configure the databases inside the PHP code
+itself or in included files.  As mentioned above, Quercus can make
+the confguration more secure from prying eyes by putting the
+configuration into the WEB-INF directory.</p>
+
+<p>In addition, Quercus can use Java DataSources directly, taking the
+configuration out of the PHP code entirely.  This configuration will
+take precedence over the PHP code, so you can secure an existing
+application without any changes.  The Quercus configuration looks
+like:
+</p>
+
+<example title="WEB-INF/resin-web.xml configuration of Java database">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;database jndi-name="jdbc/test">
+    &lt;driver type="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource"
+     &lt;url>jdbc:mysql://localhost:3306/test&lt;/url>
+     &lt;user>foo&lt;/user>
+     &lt;password>bar&lt;/password>
+   &lt;/driver>
+  &lt;/database>
+
+  &lt;servlet-mapping url-pattern="*.php"
+                   servlet-class="com.caucho.quercus.servlet.QuercusServlet">
+    &lt;init>
+      &lt;database>jdbc/test&lt;/database>
+    &lt;/init>
+  &lt;/servlet-mapping>
+&lt;/web-app>
+</example>
+
+</s2>
+
+</s1>
+
 <s1 title="Session Security">
 
 <s2 title="URL-based sessions">
@@ -360,6 +423,20 @@ common and serious.</p>
 <example>
 http://foo.com/test.php?PHPSESSID=asdf
 </example>
+
+</s2>
+
+<s2 title="Cookie Hijacking">
+
+<p>
+Normal HTTP requests are sent in cleartext across the internet,
+including the cookie values which keep track of sessions.  Because the
+data is in the clear, it's possible for a malicious hacker to look at
+the HTTP request, copy the cookie, and forward a new request to a web
+site.  For this reason, you should use SSL for any session that passes
+any sort of important data, and also timeout any sessions which carry
+important information.
+</p>
 
 </s2>
 

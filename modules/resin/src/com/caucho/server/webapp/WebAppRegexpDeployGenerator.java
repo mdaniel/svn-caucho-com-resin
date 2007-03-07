@@ -113,8 +113,9 @@ public class WebAppRegexpDeployGenerator
     Pattern regexp = _config.getURLRegexp();
     Matcher matcher = regexp.matcher(name);
 
-    if (! matcher.find() || matcher.start() != 0)
+    if (! matcher.find() || matcher.start() != 0) {
       return null;
+    }
 
     int length = matcher.end() - matcher.start();
 
@@ -142,9 +143,10 @@ public class WebAppRegexpDeployGenerator
 	appDirPath = "./" + matcher.group(0);
       
       appDir = PathBuilder.lookupPath(appDirPath, varMap);
-      
-      if (! appDir.canRead())
+
+      if (! appDir.isDirectory() || ! appDir.canRead()) {
 	return null;
+      }
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
       

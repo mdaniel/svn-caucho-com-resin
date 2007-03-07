@@ -698,7 +698,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 
 
     _server = clusterServer.startServer();
-
+    
     /*
     ArrayList<ServerController> servers = _servers;
 

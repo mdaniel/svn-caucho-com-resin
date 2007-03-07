@@ -123,8 +123,7 @@ public class ServerAdmin extends AbstractEmitterObject
    */
   public boolean isSelectManagerEnabled()
   {
-    // return _server.isSelectManagedEnabled();
-    return false;
+    return _server.isSelectManagerEnabled();
   }
 
   /**
@@ -204,7 +203,7 @@ public class ServerAdmin extends AbstractEmitterObject
    */
   public int getSelectKeepaliveCount()
   {
-    return -1;
+    return _server.getKeepaliveSelectCount();
   }
 
   /**
