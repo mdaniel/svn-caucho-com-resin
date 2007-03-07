@@ -28,7 +28,7 @@
         additional configuration:</p>
 
       <example title="Using c:out and c:if">
-&lt;%@ taglib prefix='c' uri='http://java.sun.com/jstl/core' %&gt;
+&lt;%@ taglib prefix='c' uri='http://java.sun.com/jsp/jstl/core' %&gt;
 &lt;c:if test="${'${'}param.test == 'a'}"&gt;
   &lt;c:out value="The parameter is ${'${'}param.test}"/&gt;
 &lt;/c:if&gt;
@@ -91,7 +91,7 @@ int count;
         JSTL:</p>
 
       <example title="JSTL equivalent">
-&lt;%@ taglib prefix='c' uri='http://java.sun.com/jstl/core' %&gt;
+&lt;%@ taglib prefix='c' uri='http://java.sun.com/jsp/jstl/core' %&gt;
 &lt;jsp:scriptlet&gt;
 int count;
 &lt;/jsp:scriptlet&gt;

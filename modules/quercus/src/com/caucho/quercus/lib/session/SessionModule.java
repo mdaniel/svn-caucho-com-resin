@@ -391,7 +391,7 @@ public class SessionModule extends AbstractQuercusModule
     Value sessionIdValue = (Value) env.getSpecialValue("caucho.session_id");
     String sessionId = null;
 
-    final HttpServletResponse response = env.getResponse();
+    HttpServletResponse response = env.getResponse();
 
     env.removeConstant("SID");
 
@@ -401,7 +401,7 @@ public class SessionModule extends AbstractQuercusModule
 
     if (callback != null) {
       String savePath = env.getIni("session.save_path").toString();
-      
+
       if (savePath == null || "".equals(savePath))
         callback.open(env, env.getWorkDir().getPath(), cookieName);
       else
@@ -419,8 +419,8 @@ public class SessionModule extends AbstractQuercusModule
         Cookie []cookies = env.getRequest().getCookies();
 
         for (int i = 0; cookies != null && i < cookies.length; i++) {
-          if (cookies[i].getName().equals(cookieName) &&
-              ! "".equals(cookies[i].getValue())) {
+          if (cookies[i].getName().equals(cookieName)
+              && ! "".equals(cookies[i].getValue())) {
             sessionId = cookies[i].getValue();
             generateCookie = false;
           }
@@ -429,37 +429,20 @@ public class SessionModule extends AbstractQuercusModule
 
       if (! generateCookie)
         env.addConstant("SID", StringValue.EMPTY, false);
-      else if (sessionId == null || "".equals(sessionId)) {
-        sessionId = env.generateSessionId();
-        create = true;
-      }
     }
-    
+
     //
     // Use URL rewriting to transmit session id
-    // 
-    if (env.getIni("session.use_trans_sid").toBoolean() &&
-        ! env.getIni("session.use_only_cookies").toBoolean()) {
-      
-      if (sessionId != null) {
-      }
-      else {
+    //
+
+    if (env.getIniBoolean("session.use_trans_sid") &&
+        ! env.getIniBoolean("session.use_only_cookies")) {
+      if (sessionId == null) {
         if (sessionIdValue != null)
           sessionId = sessionIdValue.toString();
 
-        if (sessionId == null || "".equals(sessionId)) {
-          String queryString = env.getRequest().getQueryString();
-          if (queryString != null) {
-            String [] queryElements = queryString.split("&");
-
-            for (String queryElement : queryElements) {
-              String [] nameValue = queryElement.split("=");
-
-              if (nameValue.length == 2 && nameValue[0].equals(cookieName))
-                sessionId = nameValue[1];
-            }
-          }
-        }
+        if (sessionId == null || "".equals(sessionId))
+          sessionId = env.getRequest().getParameter(cookieName);
 
         if (sessionId == null || "".equals(sessionId)) {
           sessionId = env.generateSessionId();
@@ -471,6 +454,11 @@ public class SessionModule extends AbstractQuercusModule
                       false);
       
       OutputModule.pushUrlRewriter(env);
+    }
+    
+    if (sessionId == null || "".equals(sessionId)) {
+      sessionId = env.generateSessionId();
+      create = true;
     }
 
     if (response.isCommitted())
@@ -630,7 +618,7 @@ public class SessionModule extends AbstractQuercusModule
     addIni(_iniMap, "session.cookie_domain", "", PHP_INI_ALL);
     addIni(_iniMap, "session.cookie_secure", "", PHP_INI_ALL);
     addIni(_iniMap, "session.use_cookies", "1", PHP_INI_ALL);
-    addIni(_iniMap, "session.use_only_cookies", "0", PHP_INI_ALL);
+    addIni(_iniMap, "session.use_only_cookies", "1", PHP_INI_ALL);
     addIni(_iniMap, "session.referer_check", "", PHP_INI_ALL);
     addIni(_iniMap, "session.entropy_file", "", PHP_INI_ALL);
     addIni(_iniMap, "session.entropy_length", "0", PHP_INI_ALL);

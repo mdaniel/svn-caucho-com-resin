@@ -169,6 +169,9 @@ public class Document {
 
   void fillChildNavigation(NavigationItem navItem)
   {
+    if (navItem == null)
+      return;
+    
     for (NavigationItem child : navItem.getChildren()) {
       fillChildNavigation(child);
     }
