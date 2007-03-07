@@ -343,6 +343,28 @@ mysql_query($sql);
 
 </s1>
 
+<s1 title="Session Security">
+
+<s2 title="URL-based sessions">
+
+<p>We strongly discourage the use of URL-based sessions as a serious
+security risk.  By default, Quercus disables URL-based sessions.
+URL-based sessions are particular problems because users will blindly
+cut and paste URLs with their session information and post them in
+public places.  Because these kinds of security breaches occur by
+simple mistakes and not concerted hacker attempts, they are far more
+common and serious.</p>
+
+<p>The URL-based sessions in PHP look something like:</p>
+
+<example>
+http://foo.com/test.php?PHPSESSID=asdf
+</example>
+
+</s2>
+
+</s1>
+
 
   </body>
 </document>
