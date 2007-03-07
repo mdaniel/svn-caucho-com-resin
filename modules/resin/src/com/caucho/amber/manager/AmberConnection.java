@@ -2669,6 +2669,9 @@ public class AmberConnection
       if (existingEntity == null) {
         // new entity instance
         managedEntity = addNewEntity(entity.getClass(), pk);
+
+        if (managedEntity == null)
+          throw new IllegalStateException(L.l("Unable to add a new managed entity when merging object class: {0} PK: {1}.", className, pk));
       }
       else {
         // jpa/0h08

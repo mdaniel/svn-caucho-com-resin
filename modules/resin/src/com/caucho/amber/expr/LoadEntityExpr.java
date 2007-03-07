@@ -166,10 +166,12 @@ public class LoadEntityExpr extends LoadExpr {
 
     Entity entity = item.getEntity();
 
+    /* XXX: jpa/0s2c
     if (entityType.getDiscriminator() != null) {
       // jpa/0l47
       offset++;
     }
+    */
 
     _index = entity.__caucho_load(aConn, rs, index + offset);
 

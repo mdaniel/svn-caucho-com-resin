@@ -380,7 +380,19 @@ public class AmberEntityHome {
 
         // jpa/0o41
         if (isLoad) {
-          cacheEntity.__caucho_retrieve(aConn);
+          try {
+            cacheEntity.__caucho_retrieve(aConn);
+          } catch (AmberObjectNotFoundException e) {
+            // XXX: jpa/0o42, a new entity shouldn't be added to the context.
+
+            int index = aConn.getEntity(cacheEntity.getClass().getName(), key);
+
+            if (index >= 0) {
+              aConn.removeEntity(aConn.getEntity(index));
+            }
+
+            throw e;
+          }
         }
 
         log.finest("findEntityItem after putEntity item is null? "+(item == null));
