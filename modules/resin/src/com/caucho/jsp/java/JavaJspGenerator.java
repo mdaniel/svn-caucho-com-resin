@@ -134,6 +134,9 @@ public class JavaJspGenerator extends JspGenerator {
   private ArrayList<Taglib> _tagLibraryList
     = new ArrayList<Taglib>();
   
+  private ArrayList<String> _tagFileClassList
+    = new ArrayList<String>();
+  
   private PageData _pageData;
   
   protected IntMap _strings = new IntMap();
@@ -404,6 +407,12 @@ public class JavaJspGenerator extends JspGenerator {
     return taglib;
   }
 
+  void addTagFileClass(String cl)
+  {
+    if (! _tagFileClassList.contains(cl))
+      _tagFileClassList.add(cl);
+  }
+  
   private Taglib addLibrary(Taglib taglib)
     throws JspParseException
   {
@@ -1666,28 +1675,42 @@ public class JavaJspGenerator extends JspGenerator {
     out.popDepth();
     out.println("}");
 
-    if (! isTag() && _parseState.getExtends() == null) {
+    if (isTag())
+      out.println("static boolean _jsp_isTagInit;");
+
+    if (_parseState.getExtends() == null) {
       out.println();
       out.println("public void init(ServletConfig config)");
       out.println("  throws ServletException");
       out.println("{");
       out.pushDepth();
-    
-      out.println("super.init(config);");
+
+      if (isTag()) {
+        out.println("if (_jsp_isTagInit)");
+        out.println("  return;");
+        out.println("_jsp_isTagInit = true;");
+      }
 
       out.println("com.caucho.server.webapp.WebApp webApp");
       out.println("  = (com.caucho.server.webapp.WebApp) config.getServletContext();");
-      out.println("com.caucho.jsp.TaglibManager manager = webApp.getJspApplicationContext().getTaglibManager();");
+      
+      if (! isTag()) {
+        out.println("super.init(config);");
+        out.println("com.caucho.jsp.TaglibManager manager = webApp.getJspApplicationContext().getTaglibManager();");
 
-      for (Taglib taglib : _tagLibraryList) {
-	out.print("manager.addTaglibFunctions(_jsp_functionMap, \"");
-	out.printJavaString(taglib.getPrefixString());
-	out.print("\", \"");
-	out.printJavaString(taglib.getURI());
-	out.print("\");");
+        for (Taglib taglib : _tagLibraryList) {
+          out.print("manager.addTaglibFunctions(_jsp_functionMap, \"");
+          out.printJavaString(taglib.getPrefixString());
+          out.print("\", \"");
+          out.printJavaString(taglib.getURI());
+          out.print("\");");
+        }
       }
 
-      out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, this);");
+      if (! isTag())
+        out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, this);");
+      else
+        out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, null);");
       
       for (int i = 0; i < _exprList.size(); i++) {
 	String expr = _exprList.get(i);
@@ -1734,6 +1757,10 @@ public class JavaJspGenerator extends JspGenerator {
 	}
       
 	out.println("});");
+      }
+
+      for (String tagClass : _tagFileClassList) {
+        out.println("new " + tagClass + "().init(config);");
       }
 
       out.popDepth();

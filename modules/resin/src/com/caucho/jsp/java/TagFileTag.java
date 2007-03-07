@@ -153,6 +153,8 @@ public class TagFileTag extends GenericTag {
   {
     String className = _tagInfo.getTagClassName();
     Class cl = _tagClass;
+
+    _gen.addTagFileClass(className);
     
     String name = className;
 
