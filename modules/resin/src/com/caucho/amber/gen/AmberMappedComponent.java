@@ -1996,6 +1996,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       out.println("((com.caucho.amber.entity.Entity) entity).__caucho_copyLoadMaskFrom(copy);");
 
+      // jpa/0o05
+      out.println("copy.__caucho_copyTo(((com.caucho.amber.entity.Entity) entity), aConn);");
+
       out.popDepth();
       out.println("}");
       out.println();
@@ -2018,7 +2021,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       // jpa/0l47: eagerly loading optimization.
       out.println("copy = aConn.getEntity(aConn.getEntity(item.getEntity().getClass().getName(), key));");
+
       out.println("item.getEntity().__caucho_copyLoadMaskFrom(copy);");
+
+      // jpa/0o05
+      out.println("copy.__caucho_copyTo(item.getEntity(), aConn);");
 
       out.popDepth();
       out.println("}");

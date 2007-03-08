@@ -702,7 +702,7 @@ public class EntityManyToOneField extends CascadableField {
       out.println("try {");
       out.pushDepth();
 
-      // jpa/0l42: adds the other end to the context and sets its load mask
+      // jpa/0o03, jpa/0l42: adds the other end to the context and sets its load mask
       // bit corresponding to this side. This way, the other end will not
       // need to reload the current entity when eagerly fetching.
       out.println(varName + " = (" + targetTypeExt + ") " + session + ".addNewEntity(" + targetTypeExt + ".class, " + otherKey + ");");
@@ -725,15 +725,10 @@ public class EntityManyToOneField extends CascadableField {
 
         out.println(varName + ".__caucho_loadMask_" + targetGroup + " |= " + targetMask + "L;");
 
-        if (_targetField.isFieldAccess()) {
-          // jpa/0o05
-          out.println(varName + "." + _targetField.getSetterName() + "(this);");
-        }
-        else {
-          out.println(varName + "." + _targetField.generateSuperSetter("this") + ";");
-        }
+        out.println(varName + "." + _targetField.generateSuperSetter("this") + ";");
       }
 
+      // jpa/0o03
       out.println(session + ".loadFromHome(" + targetTypeExt + ".class.getName(), " + otherKey + ");");
 
       out.println(generateSuperSetter(varName) + ";");
