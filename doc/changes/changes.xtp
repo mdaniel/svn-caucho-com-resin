@@ -10,9 +10,9 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.snap - Dec 21, 2006">
+<s2 title="3.1.snap - Mar 7, 2007">
 <ul>
-<li>ConnectionPool timeout defaults incorrect (#1586, rep by gschemmel)</li>
+<li>(2007-03-07) ConnectionPool timeout defaults incorrect (#1586, rep by gschemmel)</li>
 <li>web-app description/display-name order is arbitrary (#1599, rep by kamleshjkl)</li>
 <li>character-encoding now controls default encoding for writers (#1563, rep by asklxf)</li>
 <li>Add header conditions for rewrite-dispatch (#1547)</li>

@@ -695,6 +695,8 @@
     </chmod>
 
     <mkdir dir="${dist}/${dist.name}/licenses"/>
+    <mkdir dir="${dist}/${dist.name}/log"/>
+    <mkdir dir="${dist}/${dist.name}/logs"/>
   </target>
 
   <target name="dist.package" depends="init">
