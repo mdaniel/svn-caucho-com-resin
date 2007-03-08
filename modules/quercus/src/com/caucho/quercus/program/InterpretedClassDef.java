@@ -133,8 +133,9 @@ public class InterpretedClassDef extends ClassDef
       cl.addField(entry.getKey(), 0, entry.getValue());
     }
 
+    String className = getName();
     for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {
-      cl.addStaticField(entry.getKey(), entry.getValue());
+      cl.addStaticField(className, entry.getKey(), entry.getValue());
     }
 
     for (Map.Entry<String,Expr> entry : _constMap.entrySet()) {

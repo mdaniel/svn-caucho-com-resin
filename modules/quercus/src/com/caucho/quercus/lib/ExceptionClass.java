@@ -36,6 +36,7 @@ import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
@@ -69,6 +70,22 @@ public class ExceptionClass {
     value.putField(env, "trace", ErrorModule.debug_backtrace(env));
 
     return value;
+  }
+
+  /**
+   * Returns a String representation of this Exception.
+   */
+  public static Value __toString(Env env, @This ObjectValue value)
+  {
+    StringBuilderValue sb = new StringBuilderValue();
+    
+    sb.append("ExceptionClass[" + value.getName() + "]\n");
+    sb.append(getMessage(env, value));
+    sb.append("\n");
+    sb.append(getTraceAsString(env, value));
+    sb.append("\n");
+    
+    return sb;
   }
 
   /**

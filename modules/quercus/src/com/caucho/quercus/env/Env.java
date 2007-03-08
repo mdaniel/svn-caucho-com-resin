@@ -1900,6 +1900,56 @@ public class Env {
   }
 
   /**
+   * Gets a static class field.
+   *
+   * @param className of the owning class 
+   * @param name of the variable
+   */
+  public Value getStaticClassFieldValue(String className, String name)
+  {
+    Var var = getStaticClassFieldVar(className, name);
+    
+    if (var != null) {
+      Value val = var.toValue();
+        
+      return val;
+    }
+    else
+      return NullValue.NULL;
+  }
+
+  /**
+   * Gets a static field from a class.
+   *
+   * @param className of the owning class 
+   * @param name of the variable
+   */
+  public final Var getStaticClassFieldVar(String className, String name)
+  {
+    Var var = _globalMap.get(name);
+
+    if (var == null) {
+      // import in class fields and functions
+      QuercusClass cl = findAbstractClass(className);
+      cl.init(this);
+
+      var = _globalMap.get(name);
+    }
+    
+    if (var != null)
+      return var;
+    
+    if (var == null) {
+      var = new Var();
+      var.setGlobal();
+    }
+    
+    _globalMap.put(name, var);
+
+    return var;
+  }
+
+  /**
    * Sets the calling function expression.
    */
   public void pushCall(Expr call, Value obj)

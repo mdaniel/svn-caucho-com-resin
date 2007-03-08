@@ -86,8 +86,8 @@ public class QuercusClass {
   private final IdentityHashMap<String,Expr> _constMap
     = new IdentityHashMap<String,Expr>();
 
-  private final HashMap<String,Expr> _staticFieldMap
-    = new LinkedHashMap<String,Expr>();
+  private final HashMap<String,ArrayList<StaticField>> _staticFieldsMap
+    = new LinkedHashMap<String,ArrayList<StaticField>>();
   
   public QuercusClass(ClassDef classDef, QuercusClass parent)
   {
@@ -243,11 +243,19 @@ public class QuercusClass {
   }
 
   /**
-   * Adds a static field
+   * Adds a static class field.
    */
-  public void addStaticField(String name, Expr expr)
+  public void addStaticField(String className, String name, Expr value)
   {
-    _staticFieldMap.put(name, expr);
+    ArrayList<StaticField> fieldList = _staticFieldsMap.get(className);
+    
+    if (fieldList == null) {
+      fieldList = new ArrayList<StaticField>();
+
+      _staticFieldsMap.put(className, fieldList);
+    }
+    
+    fieldList.add(new StaticField(name, value));
   }
 
   /**
@@ -300,23 +308,26 @@ public class QuercusClass {
 
   public void init(Env env)
   {
-    if (env.isInitializedClass(getName()))
-      return;
+    for (Map.Entry<String,ArrayList<StaticField>> map :
+         _staticFieldsMap.entrySet()) {
+      if (env.isInitializedClass(map.getKey()))
+        continue;
+      
+      for (StaticField field : map.getValue()) {
+        Value val;
+        Expr expr = field._expr;
 
-    for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {
-      Value val;
-      Expr expr = entry.getValue();
+        //php/096f
+        if (expr instanceof ClassConstExpr)
+          val = ((ClassConstExpr)expr).eval(env, this);
+        else
+          val = expr.eval(env);
 
-      //php/096f
-      if (expr instanceof ClassConstExpr)
-        val = ((ClassConstExpr)expr).eval(env, this);
-      else
-        val = expr.eval(env);
-
-      env.setGlobalValue(entry.getKey(), val);
+        env.setGlobalValue(field._name, val);
+      }
+      
+      env.addInitializedClass(map.getKey());
     }
-
-    env.addInitializedClass(getName());
   }
 
   //
@@ -712,6 +723,18 @@ public class QuercusClass {
   public String toString()
   {
     return "QuercusClass[" + getName() + "]";
+  }
+
+  static class StaticField
+  {
+    String _name;
+    Expr _expr;
+    
+    StaticField(String name, Expr expr)
+    {
+      _name = name;
+      _expr = expr;
+    }
   }
 }
 

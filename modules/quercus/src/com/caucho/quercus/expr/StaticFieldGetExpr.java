@@ -72,7 +72,7 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    return env.getGlobalValue(_envName);
+    return env.getStaticClassFieldValue(_className, _envName);
   }
 
   /**
@@ -84,7 +84,7 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalCopy(Env env)
   {
-    return env.getGlobalVar(_envName).copy();
+    return env.getStaticClassFieldVar(_className, _envName).copy();
   }
 
   /**
@@ -96,7 +96,7 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalArg(Env env)
   {
-    return env.getGlobalRef(_envName);
+    return env.getStaticClassFieldVar(_className, _envName);
   }
 
   /**
@@ -108,7 +108,7 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalRef(Env env)
   {
-    return env.getGlobalVar(_envName);
+    return env.getStaticClassFieldVar(_className, _envName);
   }
   
   /**
