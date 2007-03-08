@@ -205,12 +205,6 @@ public class LoadGroupGenerator extends ClassComponent {
       return;
     }
 
-    out.println("java.sql.ResultSet rs = null;");
-    out.println();
-
-    out.println("try {");
-    out.pushDepth();
-
     Table table = _relatedType.getTable();
 
     String from = null;
@@ -260,8 +254,20 @@ public class LoadGroupGenerator extends ClassComponent {
         throw new IllegalStateException();
     }
 
-    if (select == null)
+    if (select == null) {
+      if (_index > 0) {
+        // XXX: jpa/0o00
+
+        out.println("return;");
+
+        out.popDepth();
+        out.println("}");
+
+        return;
+      }
+
       select = "1";
+    }
 
     if (where == null) {
       from = table.getName() + " o";
@@ -270,6 +276,12 @@ public class LoadGroupGenerator extends ClassComponent {
     }
 
     String sql = "select " + select + " from " + from + " where " + where;
+
+    out.println("java.sql.ResultSet rs = null;");
+    out.println();
+
+    out.println("try {");
+    out.pushDepth();
 
     out.println("String sql = \"" + sql + "\";");
 

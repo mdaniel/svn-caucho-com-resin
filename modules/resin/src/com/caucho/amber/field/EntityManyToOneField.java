@@ -725,7 +725,13 @@ public class EntityManyToOneField extends CascadableField {
 
         out.println(varName + ".__caucho_loadMask_" + targetGroup + " |= " + targetMask + "L;");
 
-        out.println(varName + "." + _targetField.generateSuperSetter("this") + ";");
+        if (_targetField.isFieldAccess()) {
+          // jpa/0o05
+          out.println(varName + "." + _targetField.getSetterName() + "(this);");
+        }
+        else {
+          out.println(varName + "." + _targetField.generateSuperSetter("this") + ";");
+        }
       }
 
       out.println(session + ".loadFromHome(" + targetTypeExt + ".class.getName(), " + otherKey + ");");
