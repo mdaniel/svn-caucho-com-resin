@@ -1087,6 +1087,27 @@ public class AmberConnection
   /**
    * Loads the object with the given class.
    */
+  public Entity loadFromHome(String name, Object key)
+  {
+    try {
+      AmberEntityHome home = _persistenceUnit.getEntityHome(name);
+
+      if (home == null)
+        throw new RuntimeException(L.l("no matching home for {0}", name));
+
+      home.init();
+
+      return home.load(this, key);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new AmberRuntimeException(e);
+    }
+  }
+
+  /**
+   * Loads the object with the given class.
+   */
   public Object loadProxy(String name,
                           Object key)
   {

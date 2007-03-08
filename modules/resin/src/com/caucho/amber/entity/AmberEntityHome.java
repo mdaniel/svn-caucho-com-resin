@@ -385,6 +385,8 @@ public class AmberEntityHome {
           } catch (AmberObjectNotFoundException e) {
             // XXX: jpa/0o42, a new entity shouldn't be added to the context.
 
+            // But it is necessary and correct for jpa/0l42, the bidirectional
+            // one-to-one needs to add the other end for eagerly loading optmization.
             int index = aConn.getEntity(cacheEntity.getClass().getName(), key);
 
             if (index >= 0) {

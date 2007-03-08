@@ -92,6 +92,14 @@ public class DependentEntityOneToOneField extends CascadableField {
   }
 
   /**
+   * Gets the target load index.
+   */
+  public long getTargetLoadIndex()
+  {
+    return _targetLoadIndex;
+  }
+
+  /**
    * Returns the source type as
    * entity or mapped-superclass.
    */
@@ -282,6 +290,9 @@ public class DependentEntityOneToOneField extends CascadableField {
       long mask = (1L << (_targetLoadIndex % 64));
       String loadVar = "__caucho_loadMask_" + group;
 
+      out.println("if ((" + loadVar + " & " + mask + "L) == 0) {");
+      out.pushDepth();
+
       out.println(loadVar + " |= " + mask + "L;");
 
       String javaType = getJavaTypeName();
@@ -297,6 +308,9 @@ public class DependentEntityOneToOneField extends CascadableField {
       String indexS = "_" + group + "_" + index;
 
       generateLoadProperty(out, indexS, "aConn");
+
+      out.popDepth();
+      out.println("}");
     }
 
     return ++index;

@@ -685,19 +685,52 @@ public class EntityManyToOneField extends CascadableField {
       out.println(generateSuperSetter("v" + index) + ";");
     }
     else {
-      String targetType = _targetType.getBeanClass().getName();
-      out.print(targetType + " v"+index+" = (" + targetType + ") "+session+".find(" + targetType + ".class, ");
+      String targetTypeExt = _targetType.getInstanceClassName();
 
-      if (_aliasField == null) {
-        out.print("__caucho_field_" + getName());
+      String otherKey;
+
+      if (_aliasField == null)
+        otherKey = "__caucho_field_" + getName();
+      else
+        otherKey = _aliasField.generateGet("super");
+
+      String varName = "v" + index;
+
+      out.println(targetTypeExt + " " + varName + " = null;");
+      out.println();
+
+      out.println("try {");
+      out.pushDepth();
+
+      // jpa/0l42: adds the other end to the context and sets its load mask
+      // bit corresponding to this side. This way, the other end will not
+      // need to reload the current entity when eagerly fetching.
+      out.println(varName + " = (" + targetTypeExt + ") " + session + ".addNewEntity(" + targetTypeExt + ".class, " + otherKey + ");");
+
+      out.println();
+      out.println("if (" + varName + " == null)");
+      out.println("  " + varName + " = (" + targetTypeExt + ") " + session + ".getEntity(" + session + ".getEntity(" + targetTypeExt + ".class.getName(), " + otherKey+ "));");
+
+      out.popDepth();
+      out.println("} catch (RuntimeException e) {");
+      out.println("  throw e;");
+      out.println("} catch (Exception e) {");
+      out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+      out.println("}");
+
+      if (_targetField != null) {
+        long targetLoadIndex = _targetField.getTargetLoadIndex();
+        long targetGroup = targetLoadIndex / 64;
+        long targetMask = (1L << (targetLoadIndex % 64));
+
+        out.println(varName + ".__caucho_loadMask_" + targetGroup + " |= " + targetMask + "L;");
+
+        out.println(varName + "." + _targetField.generateSuperSetter("this") + ";");
       }
-      else {
-        out.print(_aliasField.generateGet("super"));
-      }
 
-      out.println(");");
+      out.println(session + ".loadFromHome(" + targetTypeExt + ".class.getName(), " + otherKey + ");");
 
-      out.println(generateSuperSetter("v" + index) + ";");
+      out.println(generateSuperSetter(varName) + ";");
     }
   }
 

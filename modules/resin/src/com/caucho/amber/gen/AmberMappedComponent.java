@@ -1980,12 +1980,25 @@ abstract public class AmberMappedComponent extends ClassComponent {
     if (discriminator == null) {
       // Adds the copy object to the context before anything.
       // This will avoid the cache object to be added to the context.
-      out.println("aConn.addNewEntity(" + getClassName() + ".class, key);");
+      out.println("com.caucho.amber.entity.Entity copy = aConn.addNewEntity(" + getClassName() + ".class, key);");
 
       out.println(getClassName() + " entity = new " + getClassName() + "();");
 
       out.println("entity.__caucho_home = home.getEntityType();");
       out.println("entity.__caucho_setPrimaryKey(key);");
+
+      out.println();
+      out.println("if (copy == null) {");
+      out.pushDepth();
+
+      // jpa/0l42: eagerly loading optimization.
+      out.println("copy = aConn.getEntity(aConn.getEntity(entity.getClass().getName(), key));");
+
+      out.println("((com.caucho.amber.entity.Entity) entity).__caucho_copyLoadMaskFrom(copy);");
+
+      out.popDepth();
+      out.println("}");
+      out.println();
 
       out.println("return (com.caucho.amber.entity.Entity) entity;");
     }
@@ -1997,7 +2010,19 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       // Adds the copy object to the context before anything.
       // This will avoid the cache object to be added to the context.
-      out.println("aConn.addNewEntity(item.getEntity().getClass(), key);");
+      out.println("com.caucho.amber.entity.Entity copy = aConn.addNewEntity(item.getEntity().getClass(), key);");
+
+      out.println();
+      out.println("if (copy == null) {");
+      out.pushDepth();
+
+      // jpa/0l47: eagerly loading optimization.
+      out.println("copy = aConn.getEntity(aConn.getEntity(item.getEntity().getClass().getName(), key));");
+      out.println("item.getEntity().__caucho_copyLoadMaskFrom(copy);");
+
+      out.popDepth();
+      out.println("}");
+      out.println();
 
       // jpa/0l03
       out.println("if (loadFromResultSet) {");
