@@ -46,6 +46,7 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ResinDocServlet extends HttpServlet {
@@ -71,7 +72,7 @@ public class ResinDocServlet extends HttpServlet {
     throws ServletException
   {
     super.init(config);
-    
+
     _config = new Config();
     _pwd = Vfs.lookup().createRoot();
 
@@ -105,10 +106,10 @@ public class ResinDocServlet extends HttpServlet {
     try {
       response.setContentType("text/html");
       response.addHeader("Cache-Control", "max-age=3600");
-      
-      XMLStreamWriter xmlOut 
+
+      XMLStreamWriter xmlOut
         = _outputFactory.createXMLStreamWriter(os, _encoding);
-      
+
       _config.configure(document, path);
 
       document.writeHtml(xmlOut);
