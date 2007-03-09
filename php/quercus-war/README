@@ -1,0 +1,108 @@
+Copyright (c) 1998-2007 Caucho Technology. All Rights Reserved.
+
+This is the README file for Quercus(tm)
+=======================================
+TABLE OF CONTENTS
+  I)   Introduction
+  II)  Getting Started
+  III) Quercus on Glashfish
+  IV)  Using MySQL with Quercus
+  V)   Quercus Standalone vs. Quercus under Resin Professional
+  VI)  Resources
+
+
+I) Introduction 
+---------------
+Thank you for downloading the Quercus standalone .war package.
+
+Quercus is Caucho Technology's 100% Java implementation of PHP 5.
+
+
+II) Getting Started
+-------------------
+First, make sure you are running JDK 5+.
+
+Then follow your server's steps to deploy a .war file.  After deploying,
+browse to the Quercus webapp and the index page will check to see if Quercus
+is correctly deployed or not.
+
+
+III) Quercus on Glashfish
+-------------------------
+It is simple to deploy Quercus on Glashfish.  It is no different from the
+standard procedure to deploy any other webapp on Glashfish:
+
+1) Download the latest Quercus .war file from http://quercus.caucho.com.
+
+2) Log into Glashfish web admin.
+
+3) Click on deploy Web Application (.war).
+
+4) Point Glashfish to the location of the Quercus .war file'. Then click OK.
+   Glashfish will automatically deploy Quercus.
+
+5) Quercus should now be running.  To check, browse to the Quercus webapp and
+   an index page will show up indicating the status of Quercus.  Or you can
+   click on "Launch" from Glashfish admin's "Web Applications" page and your
+   browser will go to the Quercus webapp.
+
+The following steps are only needed if you intend to use a MySQL database in
+Quercus:
+
+6) Download the MySQL Connector/J JDBC driver and place it into Glashfish's
+   lib directory.
+
+7) In Glashfish web admin, create a MySQL JDBC Connection Pool.  Specify the
+   database name, username, and password.
+
+8) In Glashfish web admin, create a JDBC Resource with a JNDI name of something
+   like "jdbc/mydb".
+
+9) Configure Quercus to use the JDBC database by adding a tag to
+   WEB-INF/web.xml:
+
+    <init-param>
+      <param-name>database</param-name>
+      <param-value>jdbc/mydb</param-value>
+    </init-param>
+
+
+IV) Using MySQL with Quercus
+-----------------------------
+Currently, Quercus standalone is only able to use JDBC databases.  This means
+that MySQL statements like
+
+  mysql_connect("localhost", "user", "pass");
+
+will ignore the arguments and will connect directly to a preconfigured JDBC
+database by JNDI.  Only Quercus that comes with Resin is able to utilize the
+arguments, but support for this in Quercus standalone will be added in the
+future.
+
+
+V) Quercus Standalone vs. Quercus bundled with Resin Professional
+-----------------------------------------------------------------
+Quercus was originally bundled only with Resin.  Some Quercus features had
+to be removed when a standalone Quercus package was created:
+
+1) Compilation of php scripts into Java classes is only available for
+   Resin Professional users.
+
+2) In Quercus standalone, Quercus currently needs to be configured with a
+   JDBC database to be able to use Php's MySQL functions.
+
+
+VI) Resources
+-------------
+1) http://quercus.caucho.com
+   This is the home page for Quercus.  Go here for documentation, guides, and
+   examples, and Quercus downloads.
+
+2) http://forum.caucho.com
+   The Caucho Forums is a good place to discuss Resin, Caucho, and Hessian.
+
+3) http://www.caucho.com
+   If you like Quercus, please come visit Caucho, the people behind Quercus.
+
+4) http://maillist.caucho.com
+   Our mailing list for all things Resin, Caucho, and Hessian.

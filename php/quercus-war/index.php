@@ -29,17 +29,17 @@ Quercus&#153; Start Page
 }
 
 #failure {
-    display: <?php echo "none"; ?>;
+    <?php echo "display: none;"; ?> 
 }
 
 #failure_default_interpreter {
     display: none;
-    display: <?php if (! quercus_test()) echo "block"; ?>;
+    <?php if (! quercus_test()) echo "display: block;"; ?> 
 }
 
 #success {
     display: none;
-    display: <?php if (quercus_test()) echo "block"; ?>;
+    <?php if (quercus_test()) echo "display: block;"; ?> 
 }
 </style>
 </head>
@@ -63,6 +63,10 @@ Congratulations!  Quercus&#153; seems to be working fine.  Have fun!
 
 <div>
 Documentation is available at <a href="http://quercus.caucho.com">http://quercus.caucho.com</a>
+</div>
+
+<div>
+The README is available <a href="README">here</a>.
 </div>
 
 <hr/>
