@@ -36,7 +36,7 @@ import javax.xml.namespace.QName;
  * WSDL message part.
  */
 public abstract class WSDLOperationPart
-  extends WSDLNamedExtensibleAttributeDocumented 
+  extends WSDLNamedExtensibleDocumented 
 {
   @XmlAttribute(name="message")
   protected QName _messageName;

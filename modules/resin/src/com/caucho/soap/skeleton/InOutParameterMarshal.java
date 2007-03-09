@@ -91,8 +91,10 @@ public class InOutParameterMarshal extends ParameterMarshal {
   public void serializeReply(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (args[_arg] instanceof Holder)
-      _property.write(_marshaller, out, ((Holder) args[_arg]).value, _name);
+    if (args[_arg] instanceof Holder) {
+      Object value = ((Holder) args[_arg]).value;
+      _property.write(_marshaller, out, value, _name);
+    }
     else
       _property.write(_marshaller, out, null, _name);
   }

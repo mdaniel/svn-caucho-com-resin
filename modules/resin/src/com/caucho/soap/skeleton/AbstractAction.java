@@ -199,7 +199,7 @@ public abstract class AbstractAction {
           localName = webParam.name();
 
         if ("".equals(webParam.targetNamespace()))
-          name = new QName(_targetNamespace, localName);
+          name = new QName(localName);
         else 
           name = new QName(webParam.targetNamespace(), localName);
 
@@ -211,12 +211,15 @@ public abstract class AbstractAction {
           }
         }
       }
+      else if (params[i].equals(Holder.class)) {
+        mode = WebParam.Mode.INOUT;
+      }
 
       if (name == null) 
         name = new QName(localName);
 
       Type type = JAXBUtil.getActualParameterType(genericParams[i]);
-      Property property = _jaxbContext.createProperty(type);
+      Property property = _jaxbContext.createProperty(type, true);
 
       ParameterMarshal pMarshal
         = ParameterMarshal.create(i, property, name, mode,
@@ -276,7 +279,7 @@ public abstract class AbstractAction {
           localName = "return";
 
         if ("".equals(webResult.targetNamespace()))
-          _resultName = new QName(_targetNamespace, localName);
+          _resultName = new QName(localName);
         else
           _resultName = new QName(webResult.targetNamespace(), localName);
       }

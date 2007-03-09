@@ -29,11 +29,13 @@
 
 package com.caucho.soap.service;
 
+import com.caucho.config.ConfigException;
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.soap.skeleton.DirectSkeleton;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -46,11 +48,17 @@ public class ServiceImplInvocationHandler implements InvocationHandler
   private String _url;
 
   public ServiceImplInvocationHandler(Class api, String url)
-    throws com.caucho.config.ConfigException, JAXBException
+    throws ConfigException, JAXBException
   {
     _api = api;
     _url = url;
-    _skeleton = new WebServiceIntrospector().introspect(api, url);
+
+    try {
+      _skeleton = new WebServiceIntrospector().introspect(api, url);
+    }
+    catch (WebServiceException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public Object invoke(Object proxy, Method method, Object[] args)

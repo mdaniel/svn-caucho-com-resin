@@ -132,10 +132,10 @@ public class DocumentBareAction extends AbstractAction {
       for (int i = 0; i < _bodyArgs.length; i++) {
         // while loop for arrays/lists
         while (in.getEventType() == in.START_ELEMENT &&
-               _bodyArgs[i].getName().equals(in.getName())) {
+               _bodyArgs[i].getName().equals(in.getName()))
           _bodyArgs[i].deserializeCall(in, args);
-        }
       }
+
     }
 
     return args;

@@ -46,6 +46,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.ws.WebServiceException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
@@ -66,7 +67,7 @@ public class WebServiceIntrospector {
    */
   public DirectSkeleton introspect(Class type)
     //throws ConfigException
-    throws JAXBException
+    throws JAXBException, WebServiceException
   {
     // matches RI stub for the WSDL location
     return introspect(type, "REPLACE_WITH_ACTUAL_URL");
@@ -77,7 +78,7 @@ public class WebServiceIntrospector {
    */
   public DirectSkeleton introspect(Class type, String wsdlLocation)
     //throws ConfigException
-    throws JAXBException
+    throws JAXBException, WebServiceException
   {
     // server/4221 vs soap/0301
     /*

@@ -89,8 +89,9 @@ public class DocumentWrappedAction extends AbstractAction {
                           _targetNamespace);
     out.writeNamespace(TARGET_NAMESPACE_PREFIX, _targetNamespace);
 
-    for (int i = 0; i < _bodyArgs.length; i++)
+    for (int i = 0; i < _bodyArgs.length; i++) {
       _bodyArgs[i].serializeCall(out, args);
+    }
 
     out.writeEndElement(); // name
   }
@@ -107,8 +108,9 @@ public class DocumentWrappedAction extends AbstractAction {
     for (int i = 0; i < _bodyArgs.length; i++) {
       // while loop for arrays/lists
       while (in.getEventType() == in.START_ELEMENT &&
-             _bodyArgs[i].getName().equals(in.getName()))
+             _bodyArgs[i].getName().equals(in.getName())) {
         _bodyArgs[i].deserializeCall(in, args);
+      }
     }
 
     // skip the method name close tag
@@ -195,8 +197,9 @@ public class DocumentWrappedAction extends AbstractAction {
     if (_returnMarshal != null) {
       // while loop for arrays/lists
       while (in.getEventType() == in.START_ELEMENT &&
-             _returnMarshal.getName().equals(in.getName()))
+             _returnMarshal.getName().equals(in.getName())) {
         ret = _returnMarshal.deserializeReply(in, ret);
+      }
     }
 
     // document wrapped => everything must be in order

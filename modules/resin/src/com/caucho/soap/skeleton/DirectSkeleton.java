@@ -121,9 +121,22 @@ public class DirectSkeleton extends Skeleton {
   }
 
   public DirectSkeleton(Class type, JAXBContextImpl context, String wsdlAddress)
+    throws WebServiceException
   {
     WebService webService = (WebService) type.getAnnotation(WebService.class);
     setNamespace(type);
+
+    _api = type;
+
+    if (webService != null && ! "".equals(webService.endpointInterface())) {
+      try {
+        ClassLoader loader = type.getClassLoader();
+        _api = loader.loadClass(webService.endpointInterface());
+      }
+      catch (ClassNotFoundException e) {
+        throw new WebServiceException(e);
+      }
+    }
 
     _name = getWebServiceName(type);
     _typeName = _name + "PortType";
