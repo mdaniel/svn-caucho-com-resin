@@ -46,8 +46,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -415,18 +417,23 @@ public class RestProtocolServlet extends GenericServlet
     }
 
     Object result = method.invoke(object, arguments.toArray());
+    
+    if (result != null) {
+      Marshaller marshaller = _context.createMarshaller();
+      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
-    Marshaller marshaller = _context.createMarshaller();
-    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+      WriteStream ws = Vfs.openWrite(out);
 
-    WriteStream ws = Vfs.openWrite(out);
-
-    try {
-      XMLStreamWriterImpl writer = new XMLStreamWriterImpl(ws);
-      marshaller.marshal(result, writer);
-    } 
-    finally {
-      ws.close();
+      try {
+        XMLStreamWriterImpl writer = new XMLStreamWriterImpl(ws);
+        marshaller.marshal(result, writer);
+      } 
+      catch (JAXBException e) {
+        ws.print(result);
+      }
+      finally {
+        ws.close();
+      }
     }
   }
 
