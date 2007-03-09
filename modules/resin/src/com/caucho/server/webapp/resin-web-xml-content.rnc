@@ -124,6 +124,9 @@ r_ear-deploy = element ear-deploy {
 
   & r_lazy-init?
 
+  & (attribute redeploy-mode { string }
+     | element redeploy-mode { string })?
+
   & (attribute require-file { string }
      | element require-file { string })*
 

@@ -46,8 +46,7 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 public class ResinDocServlet extends HttpServlet {
   private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());

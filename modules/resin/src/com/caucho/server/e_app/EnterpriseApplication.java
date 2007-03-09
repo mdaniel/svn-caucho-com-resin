@@ -331,8 +331,8 @@ public class EnterpriseApplication
 
     _loader.addJarManifestClassPath(_rootDir);
 
-    // server/13bb
-    if (_ejbPaths.size() == 0
+    // server/13bb vs TCK
+    if (true || _ejbPaths.size() == 0
         && _webApps.size() == 0) {
       fillDefaultModules();
     }

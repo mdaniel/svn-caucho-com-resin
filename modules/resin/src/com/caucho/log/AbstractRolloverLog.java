@@ -419,7 +419,7 @@ public class AbstractRolloverLog {
 	}
 	else if (path != null && getRolloverSize() <= path.getLength()) {
 	  closeLogStream();
-      
+
 	  if (getPathFormat() == null) {
 	    savedPath = getArchivePath(now);
 	  }

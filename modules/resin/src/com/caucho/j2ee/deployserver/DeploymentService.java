@@ -192,6 +192,7 @@ public class DeploymentService
       try {
         mxbean = getMXBean(targetModuleID.getTarget());
 
+        
         if ("ear".equals(plan.getArchiveType())
             && ! "EarDeploy".equals(mxbean.getType()))
           continue;
