@@ -831,7 +831,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       return;
     
     try {
-      request();
+      // XXX: tck, but no QA test
+      if ("automatic".equals(getRedeployMode()))
+        request();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {

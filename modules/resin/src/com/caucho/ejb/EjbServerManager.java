@@ -589,8 +589,10 @@ public class EjbServerManager
 	    try {
 	      JClass type = getJClassLoader().forName(className);
 
-	      if (type.isAnnotationPresent(javax.ejb.Stateless.class)
-		  || type.isAnnotationPresent(javax.ejb.Stateful.class)) {
+              if (type == null)
+                continue;
+	      else if (type.isAnnotationPresent(javax.ejb.Stateless.class)
+                       || type.isAnnotationPresent(javax.ejb.Stateful.class)) {
 		EjbSessionBean bean = new EjbSessionBean(_ejbConfig, "resin-ejb");
 		bean.setEJBClass(className);
 		_ejbConfig.setBeanConfig(bean.getEJBName(), bean);
