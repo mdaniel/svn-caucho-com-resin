@@ -10,29 +10,28 @@
     <servlet-name>Quercus Servlet</servlet-name>
     <servlet-class>com.caucho.quercus.servlet.QuercusServlet</servlet-class>
 
-    <!--
-       - Specifies the encoding Quercus should use to read in PHP scripts.
-       - Uncomment this if you're having "invalid utf-8" errors.
+    <!-- Specifies the encoding Quercus should use to read in PHP scripts.
+      -- Uncomment this if you're having "invalid utf-8" errors.
     <init-param>
       <param-name>script-encoding</param-name>
       <param-value>ISO-8859-1</param-value>
     </init-param>
-      -->
+    -->
 
     <!-- Tells Quercus to use the following JDBC database and to ignore the
-       - arguments of mysql_connect().
+      -- arguments of mysql_connect().
+    -->
     <init-param>
       <param-name>database</param-name>
-      <param-value>jdbc/mydb</param-value>
+      <param-value>jdbc/test</param-value>
     </init-param>
-      -->
 
     <!--
     <init-param>
       <param-name>php-ini-file</param-name>
       <param-value>WEB-INF/php.ini</param-value>
     </init-param>
-      -->
+    -->
   </servlet>
 
   <servlet-mapping>
