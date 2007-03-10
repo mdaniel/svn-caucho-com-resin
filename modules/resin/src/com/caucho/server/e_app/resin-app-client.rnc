@@ -3,6 +3,7 @@ namespace l = ""
 
 include "../resin/env.rnc"
 include "../resin/resin-j2ee.rnc"
+include "../webapp/resin-web-xml-content.rnc"
 
 resin_application-client = element application-client {
   attribute id { string }?
@@ -30,4 +31,6 @@ resin_application-client = element application-client {
   & element callback-handler { r_fully-qualified-class }?
 
   & r_message-destination*
+
+  & r_web-service-client*
 }
