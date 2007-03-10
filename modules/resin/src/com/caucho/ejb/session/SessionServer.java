@@ -36,6 +36,7 @@ import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.JVMObject;
 import com.caucho.naming.Jndi;
+import com.caucho.soa.client.WebServiceClient;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 
@@ -288,6 +289,14 @@ public class SessionServer extends AbstractServer {
   public void addSession(AbstractSessionContext context)
   {
     createSessionKey(context);
+  }
+
+  /**
+   * Adds a web service client.
+   */
+  public WebServiceClient createWebServiceClient()
+  {
+    return new WebServiceClient();
   }
 
   /**
