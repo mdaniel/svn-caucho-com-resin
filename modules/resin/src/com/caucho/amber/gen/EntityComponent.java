@@ -117,6 +117,8 @@ public class EntityComponent extends AmberMappedComponent {
 
       generateCopy(out);
 
+      generateDumpRelationships(out);
+
       generateMakePersistent(out);
 
       generateCascadePersist(out);

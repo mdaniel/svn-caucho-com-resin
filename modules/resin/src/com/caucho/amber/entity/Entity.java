@@ -257,7 +257,8 @@ public interface Entity extends MappedSuperclass
   public void __caucho_afterRollback();
 
   /**
-   * Loads the values from the object.
+   * Checks entity-relationship consistency and adds information to the log
+   * about relationships from this entity.
    */
-  // public void __caucho_loadFromObject(Object src);
+  public void __caucho_dumpRelationships();
 }

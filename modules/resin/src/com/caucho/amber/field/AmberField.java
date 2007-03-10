@@ -335,6 +335,13 @@ public interface AmberField {
     throws IOException;
 
   /**
+   * Checks entity-relationships from an object.
+   */
+  public void generateDumpRelationships(JavaWriter out,
+                                        int updateIndex)
+    throws IOException;
+
+  /**
    * Generates the set clause.
    */
   public void generateSet(JavaWriter out, String pstmt,

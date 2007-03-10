@@ -363,6 +363,38 @@ abstract public class AmberMappedComponent extends ClassComponent {
   }
 
   /**
+   * Generates checks for entity-relationship consistency.
+   */
+  void generateDumpRelationships(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public void __caucho_dumpRelationships()");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("if (! __caucho_log.isLoggable(java.util.logging.Level.FINEST))");
+    out.println("  return;");
+    out.println();
+
+    out.println("if (__caucho_session == null)");
+    out.println("  return;");
+    out.println();
+
+    out.println("com.caucho.amber.manager.AmberPersistenceUnit unit = __caucho_session.getPersistenceUnit();");
+    out.println();
+
+    out.println("com.caucho.amber.entity.Entity thisRef;");
+
+    for (int i = 0; i <= _relatedType.getLoadGroupIndex(); i++) {
+      _relatedType.generateDumpRelationships(out, i);
+    }
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
    * Generates the isDirty code.
    */
   void generateIsDirty(JavaWriter out)
@@ -618,6 +650,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
     out.println("  __caucho_log.fine(\"amber detach \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
+    out.println();
+
+    // jpa/0o05
+    out.println("__caucho_dumpRelationships();");
 
     out.println();
     out.println("__caucho_session = null;");

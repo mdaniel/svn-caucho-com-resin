@@ -546,7 +546,9 @@ public class EntityManyToOneField extends CascadableField {
       // jpa/0o05
       String indexS = "_" + group + "_" + index;
 
-      generateLoadProperty(out, indexS, "aConn");
+      // generateLoadProperty(out, indexS, "__caucho_session");
+
+      out.println(getGetterName() + ";");
     }
 
     return ++index;
@@ -558,45 +560,62 @@ public class EntityManyToOneField extends CascadableField {
   public void generateGetProperty(JavaWriter out)
     throws IOException
   {
+    // jpa/0h07, jpa/0h08
+    // jpa/0o03, jpa/0o05, jpa/0o09
+    // jpa/0s2d
+
     String javaType = getJavaTypeName();
 
-    int group = _targetLoadIndex / 64;
-    long mask = (1L << (_targetLoadIndex % 64));
+    int group = getLoadGroupIndex() / 64;
+    long mask = (1L << (getLoadGroupIndex() % 64));
     String loadVar = "__caucho_loadMask_" + group;
 
+    out.println();
+    out.println("public " + javaType + " " + getGetterName() + "()");
+    out.println("{");
+    out.pushDepth();
+
+    /*
     out.println();
     out.println("public " + javaType + " __caucho_item_" + getGetterName() + "(com.caucho.amber.manager.AmberConnection aConn)");
     out.println("{");
     out.pushDepth();
 
     out.println("if (aConn != null) {");
+    */
+
+    out.print("if (__caucho_session != null && ");
+    out.println("(" + loadVar + " & " + mask + "L) == 0) {");
     out.pushDepth();
 
-    String index = "_" + (_targetLoadIndex / 64);
-    index += "_" + (1L << (_targetLoadIndex % 64));
+    // jpa/0o05
+    out.println("com.caucho.amber.entity.Entity contextEntity = __caucho_session.getEntity(__caucho_session.getEntity(this.getClass().getName(), __caucho_getPrimaryKey()));");
+
+    out.println();
+
+    String index = "_" + group;
+    index += "_" + mask;
 
     if (_aliasField == null) {
-      out.println("__caucho_load_" + getLoadGroupIndex() + "(aConn);");
+      out.println("__caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
     }
 
     out.println(loadVar + " |= " + mask + "L;");
 
-    generateLoadProperty(out, index, "aConn");
+    generateLoadProperty(out, index, "__caucho_session");
 
-    out.println("return v"+index+";");
+    String varName = "v" + index;
+
+    out.println("return " + varName + ";");
 
     out.popDepth();
     out.println("}");
 
+    /*
     out.println("return null;");
 
     out.popDepth();
     out.println("}");
-
-    out.println();
-    out.println("public " + javaType + " " + getGetterName() + "()");
-    out.println("{");
-    out.pushDepth();
 
     String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
     long dirtyMask = (1L << (getIndex() % 64));
@@ -637,6 +656,9 @@ public class EntityManyToOneField extends CascadableField {
     out.println("}");
 
     out.println("else");
+    */
+
+    /*
     out.pushDepth();
     out.print("if (__caucho_session != null && ");
     out.println("(" + loadVar + " & " + mask + "L) == 0) {");
@@ -647,6 +669,7 @@ public class EntityManyToOneField extends CascadableField {
     out.popDepth();
     out.println("}");
     out.popDepth();
+    */
 
     out.println();
     out.println("return " + generateSuperGetter() + ";");
@@ -675,63 +698,75 @@ public class EntityManyToOneField extends CascadableField {
 
     boolean isJPA = getRelatedType().getPersistenceUnit().isJPA();
 
+    String targetTypeExt = _targetType.getInstanceClassName();
+
+    String otherKey;
+
+    if (_aliasField == null)
+      otherKey = "__caucho_field_" + getName();
+    else
+      otherKey = _aliasField.generateGet("super");
+
+    String varName = "v" + index;
+
+    out.println(targetTypeExt + " " + varName + " = null;");
+    out.println();
+
+    out.println("try {");
+    out.pushDepth();
+
+    // jpa/0o03, jpa/0o09, jpa/0l42: adds the other end to the context and
+    // sets its load mask bit corresponding to this side. This way,
+    // the other end will not need to reload the current entity.
+    out.println(varName + " = (" + targetTypeExt + ") " + session + ".addNewEntity(" + targetTypeExt + ".class, " + otherKey + ");");
+
+    out.println();
+    out.println("if (" + varName + " == null)");
+    out.println("  " + varName + " = (" + targetTypeExt + ") " + session + ".getEntity(" + session + ".getEntity(" + targetTypeExt + ".class.getName(), " + otherKey+ "));");
+
+    out.popDepth();
+    out.println("} catch (RuntimeException e) {");
+    out.println("  throw e;");
+    out.println("} catch (Exception e) {");
+    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("}");
+
+    generateSetTargetLoadMask(out, varName);
+
     // ejb/06h0, jpa/0o03
     if (isAbstract() && (isLazy() || ! isJPA)) {
-      String proxy = "aConn.loadProxy(\"" + getEntityTargetType().getName() + "\", __caucho_field_" + getName() + ")";
+      String proxy = session + ".loadProxy(\"" + getEntityTargetType().getName() + "\", __caucho_field_" + getName() + ")";
 
-      proxy = getEntityTargetType().getProxyClass().getName() + " v" + index + " = (" + getEntityTargetType().getProxyClass().getName() + ") " + proxy + ";";
+      proxy = /* XXX varName + " = (" + getEntityTargetType().getInstanceClassName() getProxyClass().getName() + ") " + */ proxy + ";";
 
       out.println(proxy);
-      out.println(generateSuperSetter("v" + index) + ";");
     }
     else {
-      String targetTypeExt = _targetType.getInstanceClassName();
-
-      String otherKey;
-
-      if (_aliasField == null)
-        otherKey = "__caucho_field_" + getName();
-      else
-        otherKey = _aliasField.generateGet("super");
-
-      String varName = "v" + index;
-
-      out.println(targetTypeExt + " " + varName + " = null;");
-      out.println();
-
-      out.println("try {");
-      out.pushDepth();
-
-      // jpa/0o03, jpa/0l42: adds the other end to the context and sets its load mask
-      // bit corresponding to this side. This way, the other end will not
-      // need to reload the current entity when eagerly fetching.
-      out.println(varName + " = (" + targetTypeExt + ") " + session + ".addNewEntity(" + targetTypeExt + ".class, " + otherKey + ");");
-
-      out.println();
-      out.println("if (" + varName + " == null)");
-      out.println("  " + varName + " = (" + targetTypeExt + ") " + session + ".getEntity(" + session + ".getEntity(" + targetTypeExt + ".class.getName(), " + otherKey+ "));");
-
-      out.popDepth();
-      out.println("} catch (RuntimeException e) {");
-      out.println("  throw e;");
-      out.println("} catch (Exception e) {");
-      out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
-      out.println("}");
-
-      if (_targetField != null) {
-        long targetLoadIndex = _targetField.getTargetLoadIndex();
-        long targetGroup = targetLoadIndex / 64;
-        long targetMask = (1L << (targetLoadIndex % 64));
-
-        out.println(varName + ".__caucho_loadMask_" + targetGroup + " |= " + targetMask + "L;");
-
-        out.println(varName + "." + _targetField.generateSuperSetter("this") + ";");
-      }
-
       // jpa/0o03
       out.println(session + ".loadFromHome(" + targetTypeExt + ".class.getName(), " + otherKey + ");");
+    }
 
-      out.println(generateSuperSetter(varName) + ";");
+    out.println(generateSuperSetter(varName) + ";");
+  }
+
+  void generateSetTargetLoadMask(JavaWriter out, String varName)
+    throws IOException
+  {
+    // jpa/0o0-
+
+    if (_targetField != null) {
+      long targetLoadIndex = _targetField.getTargetLoadIndex();
+      long targetGroup = targetLoadIndex / 64;
+      long targetMask = (1L << (targetLoadIndex % 64));
+
+      varName = "((" + _targetType.getInstanceClassName() + ") " + varName + ")";
+
+      out.println(varName + ".__caucho_loadMask_" + targetGroup + " |= " + targetMask + "L;");
+
+      String thisContextEntity = "(" + getSourceType().getInstanceClassName() + ") contextEntity";
+
+      // jpa/0o05
+      out.println(varName + "." + _targetField.generateSuperSetter(thisContextEntity) + ";");
     }
   }
 
@@ -834,6 +869,53 @@ public class EntityManyToOneField extends CascadableField {
 
     out.popDepth();
     out.println("}");
+  }
+
+  /**
+   * Checks entity-relationships from an object.
+   */
+  public void generateDumpRelationships(JavaWriter out,
+                                        int updateIndex)
+    throws IOException
+  {
+    // jpa/0o05
+
+    if (getLoadGroupIndex() != updateIndex)
+      return;
+
+    if (! (getEntityTargetType() instanceof EntityType))
+      return;
+
+    out.println();
+    out.println("thisRef = (com.caucho.amber.entity.Entity) " + generateSuperGetter() + ";");
+
+    out.println();
+    out.println("if (thisRef != null) {");
+    out.pushDepth();
+
+    String var = "__caucho_field_" + getName();
+
+    String logMessage = "relationship from owning side - entity class: \" + this.getClass().getName() + \" PK: \" + __caucho_getPrimaryKey() + \" to object class: \" + thisRef.getClass().getName() + \" PK: \" + " + var;
+
+    out.println("if (__caucho_session.isCacheEntity(thisRef)) {");
+    out.pushDepth();
+
+    out.println("Exception e = new IllegalStateException(\"amber dump relationship: inconsistent " + logMessage + ");");
+
+    out.println("__caucho_log.log(java.util.logging.Level.FINEST, e.toString(), e);");
+
+    out.popDepth();
+    out.println("} else {");
+    out.pushDepth();
+
+    out.println("__caucho_log.log(java.util.logging.Level.FINEST, \"amber dump relationship: consistent " + logMessage + ");");
+
+    out.popDepth();
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+
   }
 
   private String generateAccessor(String src, String var)

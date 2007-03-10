@@ -912,6 +912,25 @@ abstract public class RelatedType extends AbstractStatefulType {
   }
 
   /**
+   * Checks entity-relationships from an object.
+   */
+  public void generateDumpRelationships(JavaWriter out,
+                                        int updateIndex)
+    throws IOException
+  {
+    if (getParentType() != null) // jpa/0ge3
+      getParentType().generateDumpRelationships(out, updateIndex);
+
+    ArrayList<AmberField> fields = getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      field.generateDumpRelationships(out, updateIndex);
+    }
+  }
+
+  /**
    * Generates the select clause for a load.
    */
   public String generateKeyLoadSelect(String id)

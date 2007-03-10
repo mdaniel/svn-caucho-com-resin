@@ -283,6 +283,10 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("try {");
     out.pushDepth();
 
+    // jpa/0o05
+    out.println("com.caucho.amber.entity.Entity contextEntity = aConn.getEntity(aConn.getEntity(this.getClass().getName(), __caucho_getPrimaryKey()));");
+
+    out.println();
     out.println("String sql = \"" + sql + "\";");
 
     out.println();

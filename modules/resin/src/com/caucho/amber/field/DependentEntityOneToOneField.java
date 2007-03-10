@@ -468,6 +468,53 @@ public class DependentEntityOneToOneField extends CascadableField {
   }
 
   /**
+   * Checks entity-relationships from an object.
+   */
+  public void generateDumpRelationships(JavaWriter out,
+                                        int updateIndex)
+    throws IOException
+  {
+    // jpa/0o05
+
+    if (getLoadGroupIndex() != updateIndex)
+      return;
+
+    if (! (getEntityTargetType() instanceof EntityType))
+      return;
+
+    out.println();
+    out.println("thisRef = (com.caucho.amber.entity.Entity) " + generateSuperGetter() + ";");
+
+    out.println();
+    out.println("if (thisRef != null) {");
+    out.pushDepth();
+
+    String var = "thisRef.__caucho_getPrimaryKey()";
+
+    String logMessage = "relationship from dependent side - entity class: \" + this.getClass().getName() + \" PK: \" + __caucho_getPrimaryKey() + \" to object class: \" + thisRef.getClass().getName() + \" PK: \" + " + var;
+
+    out.println("if (__caucho_session.isCacheEntity(thisRef)) {");
+    out.pushDepth();
+
+    out.println("Exception e = new IllegalStateException(\"amber dump relationship: inconsistent " + logMessage + ");");
+
+    out.println("__caucho_log.log(java.util.logging.Level.FINEST, e.toString(), e);");
+
+    out.popDepth();
+    out.println("} else {");
+    out.pushDepth();
+
+    out.println("__caucho_log.log(java.util.logging.Level.FINEST, \"amber dump relationship: consistent " + logMessage + ");");
+
+    out.popDepth();
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+
+  }
+
+  /**
    * Generates the set property.
    */
   public void generateSetProperty(JavaWriter out)

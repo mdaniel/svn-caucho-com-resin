@@ -452,22 +452,6 @@ public class AmberConnection
   /**
    * Find by the primary key.
    */
-  /*
-    public Object find(String entityName, Object primaryKey)
-    {
-    try {
-    return load(entityName, primaryKey);
-    } catch (RuntimeException e) {
-    throw e;
-    } catch (Exception e) {
-    throw new EJBExceptionWrapper(e);
-    }
-    }
-  */
-
-  /**
-   * Find by the primary key.
-   */
   public <T> T find(Class<T> entityClass,
                     Object primaryKey)
   {
@@ -486,7 +470,14 @@ public class AmberConnection
         throw new IllegalArgumentException(L.l("find() operation can only be applied if the entity class is specified in the scope of a persistence unit."));
       }
 
-      return (T) load(entityClass, primaryKey);
+      T entity = (T) load(entityClass, primaryKey);
+
+      if (! isInTransaction()) {
+        // jpa/0o00
+        ((Entity) entity).__caucho_detach();
+      }
+
+      return entity;
     } catch (AmberObjectNotFoundException e) {
       if (_persistenceUnit.isJPA()) {
         // JPA: should not throw at all, returns null only.
@@ -1244,40 +1235,20 @@ public class AmberConnection
       }
     }
 
-    if (log.isLoggable(Level.FINEST) && _persistenceUnit.isJPA()) {
+    if (log.isLoggable(Level.FINER) && _persistenceUnit.isJPA()) {
       Entity addedEntity = entity;
 
       for (int i = _entities.size() - 1; i >= 0; i--) {
         entity = _entities.get(i);
 
-        className = entity.getClass().getName();
-        pk = entity.__caucho_getPrimaryKey();
+        if (isCacheEntity(entity)) {
+          Exception e = new Exception(L.l("amber manager: context entity(class: '{0}' PK: '{1}') is the same reference in cache.", className, pk));
 
-        AmberEntityHome entityHome = _persistenceUnit.getEntityHome(className);
-
-        if (entityHome == null) {
-          log.finest(L.l("Home not found for entity in context (class: '{0}' PK: '{1}')",
-                         className, pk));
-          continue;
-        }
-
-        EntityType rootType = entityHome.getRootType();
-
-        EntityItem item = _persistenceUnit.getEntity(rootType, pk);
-
-        if (item == null)
-          continue;
-
-        Entity itemEntity = item.getEntity();
-
-        if (itemEntity == entity) {
-          Exception e = new Exception(L.l("ERROR: context entity(class: '{0}' PK: '{1}') is the same reference in cache.", className, pk));
-
-          log.log(Level.FINEST, e.toString(), e);
+          log.log(Level.FINER, e.toString(), e);
         }
         else
-          log.finest(L.l("OK: context entity(class: '{0}' PK: '{1}') is a copy from cache.",
-                         className, pk));
+          log.finer(L.l("amber manager: context entity(class: '{0}' PK: '{1}') is a copy from cache.",
+                        className, pk));
       }
     }
 
@@ -2318,6 +2289,29 @@ public class AmberConnection
       if (state == EntityState.P_NON_TRANSACTIONAL)
         entity.__caucho_setEntityState(EntityState.P_TRANSACTIONAL);
     }
+  }
+
+  public boolean isCacheEntity(Entity entity)
+  {
+    String className = entity.getClass().getName();
+    Object pk = entity.__caucho_getPrimaryKey();
+
+    AmberEntityHome entityHome = _persistenceUnit.getEntityHome(className);
+
+    if (entityHome == null) {
+      log.finest(L.l("Home not found for entity (class: '{0}' PK: '{1}')",
+                     className, pk));
+      return false;
+    }
+
+    EntityType rootType = entityHome.getRootType();
+
+    EntityItem item = _persistenceUnit.getEntity(rootType, pk);
+
+    if (item == null)
+      return false;
+
+    return item.getEntity() == entity;
   }
 
   //
