@@ -37,7 +37,9 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.IdentityHashMap;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -229,6 +231,25 @@ public class NullValue extends Value
   /**
    * Converts to a java object.
    */
+  @Override
+  public Collection toJavaCollection(Env env, Class type)
+  {
+    return null;
+  }
+
+  /**
+   * Converts to a java object.
+   */
+  @Override
+  public List toJavaList(Env env, Class type)
+  {
+    return null;
+  }
+
+  /**
+   * Converts to a java object.
+   */
+  @Override
   public Map toJavaMap(Env env, Class type)
   {
     return null;
