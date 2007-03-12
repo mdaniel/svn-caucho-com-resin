@@ -248,7 +248,7 @@ public class ArrayModule
     ArrayValue result = new ArrayValueImpl();
 
     for (Value value : array.values()) {
-      if (! (value instanceof LongValue) && ! (value instanceof StringValue))
+      if (! (value.isLongConvertible()) && ! (value instanceof StringValue))
         env.warning("Can only count STRING and INTEGER values!");
       else {
         Value count = result.get(value);
@@ -425,7 +425,7 @@ public class ArrayModule
       return false;
     }
 
-    if (!((key instanceof StringValue) || (key instanceof LongValue))) {
+    if (!((key instanceof StringValue) || (key.isLongConvertible()))) {
       env.warning(L.l(
         "The first argument (a '{0}') should be either a string or an integer",
 	key.getType()));
@@ -525,7 +525,7 @@ public class ArrayModule
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value entryValue = entry.getValue();
 
-      if ((entryValue instanceof LongValue) ||
+      if ((entryValue.isLongConvertible()) ||
           (entryValue instanceof StringValue))
         newArray.put(entryValue, entry.getKey());
       else

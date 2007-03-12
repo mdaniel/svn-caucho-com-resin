@@ -81,6 +81,14 @@ public class DoubleValue extends NumberValue
   }
 
   /**
+   * Returns true for integer looking doubles.
+   */
+  public boolean isLongConvertible()
+  {
+    return _value == (double)((long)_value);
+  }
+
+  /**
    * Returns true for is_numeric
    */
   @Override
