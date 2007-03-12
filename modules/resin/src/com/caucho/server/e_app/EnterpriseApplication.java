@@ -82,6 +82,7 @@ public class EnterpriseApplication
   private Path _webappsPath;
 
   private WebAppContainer _container;
+  private String _version;
 
   private boolean _hasModule;
 
@@ -216,6 +217,7 @@ public class EnterpriseApplication
    */
   public void setVersion(String version)
   {
+    _version = version;
   }
 
   /**
@@ -332,14 +334,13 @@ public class EnterpriseApplication
     _loader.addJarManifestClassPath(_rootDir);
 
     // server/13bb vs TCK
-    if (true || _ejbPaths.size() == 0
-        && _webApps.size() == 0) {
-      fillDefaultModules();
-    }
-    else {
+    if ("1.4".equals(_version)) {
       // XXX: tck ejb30/persistence/basic needs to add the lib/*.jar
       // to find the META-INF/persistence.xml
       fillDefaultLib();
+    }
+    else {
+      fillDefaultModules();
     }
 
     if (_ejbPaths.size() != 0) {

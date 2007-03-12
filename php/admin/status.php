@@ -111,6 +111,34 @@ $proxy_cache = $mbeanServer->lookup("resin:type=ProxyCache");
 </table>
 
 <?php
+
+$mbean = $mbeanServer->lookup("resin:type=LoggerManager");
+if ($mbean) {
+  $messages = $mbean->findRecentMessages(10);
+
+  if (! empty($messages)) {
+    echo "<h2>Recent Messages</h2>\n";
+
+    echo "<table class='data'>\n";
+    echo "<tr><th>Date</th><th>Level</th><th>Message</th><th>Source</th></tr>\n";
+
+    $messages = array_reverse($messages);
+
+    foreach ($messages as $message) {
+      echo "<tr>";
+      echo "  <td>";
+      echo strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+      echo "</td>";
+      echo "  <td class='{$message->level}'>{$message->level}</td>";
+      echo "  <td>{$message->message}</td>";
+      echo "  <td>{$message->className}.{$message->methodName}()</td>";
+      echo "</tr>";
+    }
+
+    echo "</table>\n";
+  }
+}
+
 $thread_pool = $server->ThreadPool;
 ?>
 

@@ -413,7 +413,6 @@ public class ClusterServer {
   /**
    * Initialize
    */
-  @PostConstruct
   public void init()
     throws Exception
   {

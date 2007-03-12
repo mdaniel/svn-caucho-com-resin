@@ -30,79 +30,46 @@
 package com.caucho.management.server;
 
 /**
- * Persistent logging.
+ * Cache entry
  */
-public class LogMessage implements java.io.Serializable
+public class CacheItem implements java.io.Serializable
 {
-  private long _timestamp;
-  private String _level;
-  private String _message;
+  private String _url;
 
-  private String _name;
-  private String _className;
-  private String _methodName;
+  private long _hitCount;
+  private long _missCount;
 
-  public LogMessage()
+  public CacheItem()
   {
   }
 
-  public void setTimestamp(long timestamp)
+  public String getUrl()
   {
-    _timestamp = timestamp;
+    return _url;
   }
 
-  public long getTimestamp()
+  public void setUrl(String url)
   {
-    return _timestamp;
+    _url = url;
   }
 
-  public void setLevel(String level)
+  public long getHitCount()
   {
-    _level = level;
+    return _hitCount;
   }
 
-  public String getLevel()
+  public void setHitCount(long hitCount)
   {
-    return _level;
+    _hitCount = hitCount;
   }
 
-  public void setMessage(String message)
+  public long getMissCount()
   {
-    _message = message;
+    return _missCount;
   }
 
-  public String getMessage()
+  public void setMissCount(long missCount)
   {
-    return _message;
-  }
-
-  public String getName()
-  {
-    return _name;
-  }
-
-  public void setName(String name)
-  {
-    _name = name;
-  }
-
-  public String getClassName()
-  {
-    return _className;
-  }
-
-  public void setClassName(String className)
-  {
-    _className = className;
-  }
-
-  public String getMethodName()
-  {
-    return _methodName;
-  }
-
-  public void setMethodName(String methodName)
-  {
-    _methodName = methodName;
+    _missCount = missCount;
   }
 }

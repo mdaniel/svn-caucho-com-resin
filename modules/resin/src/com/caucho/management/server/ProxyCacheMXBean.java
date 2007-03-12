@@ -59,6 +59,11 @@ public interface ProxyCacheMXBean extends ManagedObjectMXBean {
                + " set appropriate HTTP headers")
   public long getMissCountTotal();
 
+  /**
+   * Return most used connections.
+   */
+  public CacheItem []getCacheableEntries(int max);
+
   //
   // Operations
   //

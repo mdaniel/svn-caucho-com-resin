@@ -453,7 +453,7 @@ public class Env {
 
     // quercus/1b06
     String encoding = getOutputEncoding().toString();
-    String type = getIni("default_mimetype").toString();
+    String type = getIniString("default_mimetype");
     
     if ("".equals(type) || _response == null) {
     }

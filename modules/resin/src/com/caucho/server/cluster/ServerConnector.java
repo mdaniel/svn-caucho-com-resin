@@ -34,6 +34,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadWritePair;
 import com.caucho.vfs.Vfs;
+import com.caucho.server.resin.*;
 
 import javax.management.ObjectName;
 import java.io.IOException;
@@ -212,7 +213,10 @@ public class ServerConnector
 
     _admin = new ServerConnectorAdmin(_client);
 
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
     try {
+      thread.setContextClassLoader(Resin.getLocal().getServer().getClassLoader());
       String name = getId();
 
       if (name == null)
@@ -221,6 +225,8 @@ public class ServerConnector
       _admin.register();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
   

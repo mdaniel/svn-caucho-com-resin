@@ -42,7 +42,7 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.AlwaysModified;
-import com.caucho.management.server.ServerMXBean;
+import com.caucho.management.server.*;
 import com.caucho.security.PermissionManager;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.dispatch.ErrorFilterChain;
@@ -75,9 +75,7 @@ import javax.annotation.PostConstruct;
 import javax.resource.spi.ResourceAdapter;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -786,6 +784,39 @@ public class Server extends ProtocolDispatchServer
       return selectManager.getSelectCount();
     else
       return -1;
+  }
+
+  /**
+   * Returns the cache stuff.
+   */
+  public ArrayList<CacheItem> getCacheStatistics()
+  {
+    ArrayList<Invocation> invocationList = getInvocations();
+
+    if (invocationList == null)
+      return null;
+
+    HashMap<String,CacheItem> itemMap = new HashMap<String,CacheItem>();
+
+    for (int i = 0; i < invocationList.size(); i++) {
+      Invocation inv = (Invocation) invocationList.get(i);
+
+      String uri = inv.getURI();
+      int p = uri.indexOf('?');
+      if (p >= 0)
+        uri = uri.substring(0, p);
+
+      CacheItem item = itemMap.get(uri);
+
+      if (item == null) {
+        item = new CacheItem();
+        item.setUrl(uri);
+
+        itemMap.put(uri, item);
+      }
+    }
+
+    return null;
   }
 
   //

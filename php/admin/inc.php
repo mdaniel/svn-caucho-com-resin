@@ -199,6 +199,12 @@ if ($script == "heap.php") {
 } else {
   ?><li><a href="heap.php">Heap</a></li><?
 }
+
+if ($script == "cache.php") {
+  ?><li class="selected">Cache</li><?
+} else {
+  ?><li><a href="cache.php">Cache</a></li><?
+}
 ?>
 </ul>
 

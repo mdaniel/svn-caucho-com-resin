@@ -288,7 +288,7 @@ public final class ClusterClient {
   public boolean canOpenSoft()
   {
     int state = _state;
-    
+
     if (state == ST_ACTIVE)
       return true;
     else if (ST_STARTING <= state && state < ST_ACTIVE) {
@@ -591,12 +591,16 @@ public final class ClusterClient {
         _activeCount++;
 	_connectCountTotal++;
 
+        long now = Alarm.getCurrentTime();
+        
 	if (_firstConnectTime <= 0) {
 	  if (ST_STARTING <= _state && _state < ST_ACTIVE) {
 	    _state = ST_WARMUP;
-	    _firstConnectTime = Alarm.getCurrentTime();
+	    _firstConnectTime = now;
 	  }
 	}
+        else if (_warmupTime < now - _firstConnectTime)
+          _state = ST_ACTIVE;
       }
 
       ClusterStream stream = new ClusterStream(_streamCount++, this,

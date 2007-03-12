@@ -139,7 +139,6 @@ public class DeployContainer<C extends DeployController>
     HashSet<String> keys = new LinkedHashSet<String>();
 
     _deployListGenerator.fillDeployedKeys(keys);
-
     for (String key : keys) {
       startImpl(key);
     }

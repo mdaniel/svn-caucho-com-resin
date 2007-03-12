@@ -269,6 +269,32 @@ public class DispatchServer implements Dependency {
   }
 
   /**
+   * Returns the invocations.
+   */
+  public ArrayList<Invocation> getInvocations()
+  {
+    // XXX: see if can remove this, and rely on the invocation cache existing
+    LruCache<Object,Invocation> invocationCache = _invocationCache;
+
+    if (invocationCache != null) {
+      ArrayList<Invocation> invocationList = new ArrayList<Invocation>();
+      
+      synchronized (invocationCache) {
+	Iterator<Invocation> iter;
+	iter = invocationCache.values();
+
+	while (iter.hasNext()) {
+          invocationList.add(iter.next());
+        }
+      }
+
+      return invocationList;
+    }
+
+    return null;
+  }
+
+  /**
    * Returns the invocation cache hit count.
    */
   public long getInvocationCacheHitCount()

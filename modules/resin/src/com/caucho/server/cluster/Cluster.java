@@ -527,8 +527,7 @@ public class Cluster
   /**
    * Initializes the cluster.
    */
-  @PostConstruct
-  public void init()
+  public void start()
     throws ConfigException
   {
     String serverId = _serverIdLocal.get();
@@ -560,6 +559,14 @@ public class Cluster
       _objectName = objectName;
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
+    }
+
+    for (ClusterServer server : _serverList) {
+      try {
+        server.init();
+      } catch (Exception e) {
+        throw new ConfigException(e);
+      }
     }
 
     if (_resin.isManagementRemote()) {

@@ -222,7 +222,7 @@ public class ServerAdmin extends AbstractEmitterObject
 
   /**
    * Returns the number of requests that have ended up in the keepalive state
-   * for this server in it's lifetime.
+   * for this server in its lifetime.
    */
   public long getKeepaliveCountTotal()
   {
