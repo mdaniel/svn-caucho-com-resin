@@ -133,8 +133,9 @@ public class DeployListGenerator<E extends DeployController>
         // XXX: issue with server/10tl
         controller = _generatorList.get(j).mergeController(controller, key);
       }
-	
-      return controller;
+
+      if (controller != null)
+        return controller;
     }
 
     return null;

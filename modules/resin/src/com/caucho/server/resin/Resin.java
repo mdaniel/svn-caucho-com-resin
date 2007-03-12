@@ -690,6 +690,10 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     // XXX: get the server
 
+    for (Cluster cluster : _clusters) {
+      cluster.start();
+    }
+
     ClusterServer clusterServer = findClusterServer(_serverId);
 
     if (clusterServer == null)
@@ -698,10 +702,6 @@ public class Resin implements EnvironmentBean, SchemaBean
 
 
     _server = clusterServer.startServer();
-    
-    for (Cluster cluster : _clusters) {
-      cluster.start();
-    }
 
     Environment.start(getClassLoader());
 
