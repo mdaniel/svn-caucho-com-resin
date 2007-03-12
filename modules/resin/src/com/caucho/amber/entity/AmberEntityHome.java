@@ -381,7 +381,13 @@ public class AmberEntityHome {
         // jpa/0o41
         if (isLoad) {
           try {
-            cacheEntity.__caucho_retrieve(aConn);
+            // XXX cacheEntity.__caucho_retrieve(aConn);
+            if (_manager.isJPA()) {
+              // jpa/0o03
+              item.loadEntity(aConn, 0);
+            }
+            else
+              item.loadEntity(0);
           } catch (AmberObjectNotFoundException e) {
             // XXX: jpa/0o42, a new entity shouldn't be added to the context.
 

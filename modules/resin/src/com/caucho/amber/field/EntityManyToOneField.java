@@ -548,7 +548,7 @@ public class EntityManyToOneField extends CascadableField {
 
       // generateLoadProperty(out, indexS, "__caucho_session");
 
-      out.println(getGetterName() + ";");
+      out.println(getGetterName() + "();");
     }
 
     return ++index;
@@ -584,8 +584,15 @@ public class EntityManyToOneField extends CascadableField {
     out.println("if (aConn != null) {");
     */
 
-    out.print("if (__caucho_session != null && ");
-    out.println("(" + loadVar + " & " + mask + "L) == 0) {");
+    out.print("if (__caucho_session != null");
+
+    if (isLazy())
+      out.println(" && (" + loadVar + " & " + mask + "L) == 0) {");
+    else {
+      // jpa/0o03
+      out.println(") {");
+    }
+
     out.pushDepth();
 
     // jpa/0o05

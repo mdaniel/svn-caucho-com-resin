@@ -149,10 +149,13 @@ public class LoadGroupGenerator extends ClassComponent {
       // out.println("      return;");
       out.println();
 
+      /* XXX: jpa/0o09
       int loadCount = _relatedType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
         out.println("    __caucho_loadMask_" + i + " = 0;");
       }
+      */
+
       int dirtyCount = _relatedType.getDirtyIndex();
       for (int i = 0; i <= dirtyCount / 64; i++) {
         out.println("    __caucho_dirtyMask_" + i + " = 0;");

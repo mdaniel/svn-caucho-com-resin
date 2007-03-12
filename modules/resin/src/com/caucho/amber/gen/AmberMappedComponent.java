@@ -1677,6 +1677,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println();
 
     out.println(getClassName() + " o = (" + getClassName() + ") targetEntity;");
+
     out.println("if (o.__caucho_home == null)");
     out.println("  o.__caucho_home = __caucho_home;");
 
