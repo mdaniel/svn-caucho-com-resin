@@ -109,7 +109,7 @@ public class VarVarExpr extends AbstractVarExpr {
   {
     String varName = _var.evalString(env).intern();
 
-    env.setVar(varName, value);
+    env.getVar(varName).set(value);
   }
 
   /**
