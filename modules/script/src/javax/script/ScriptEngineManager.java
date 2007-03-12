@@ -75,7 +75,7 @@ public class ScriptEngineManager {
   /**
    * Sets the global scope bindings.
    */
-  private void setBindings(Bindings globalScope)
+  public void setBindings(Bindings globalScope)
   {
     this.globalScope = globalScope;
   }
@@ -83,7 +83,7 @@ public class ScriptEngineManager {
   /**
    * Gets the global scope bindings.
    */
-  private Bindings getBindings()
+  public Bindings getBindings()
   {
     return this.globalScope;
   }
