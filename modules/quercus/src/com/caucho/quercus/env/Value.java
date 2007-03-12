@@ -445,7 +445,7 @@ abstract public class Value {
    */
   public Boolean toJavaBoolean()
   {
-    return toBoolean() ? Boolean.FALSE : Boolean.TRUE;
+    return toBoolean() ? Boolean.TRUE : Boolean.FALSE;
   }
 
   /**
