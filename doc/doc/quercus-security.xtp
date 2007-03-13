@@ -247,11 +247,11 @@ $clean['message'] = htmlentities($_GET['message']);
 </example>
 
 <ul>
-<li>htmlentities()
-<li>htmlspecialchars()
-<li>strtr()
-<li>strip_tags()
-<li>utf8_decode()
+<li>htmlentities()</li>
+<li>htmlspecialchars()</li>
+<li>strtr()</li>
+<li>strip_tags()</li>
+<li>utf8_decode()</li>
 </ul>
 
 </s1>
@@ -316,10 +316,10 @@ eval($_GET['data']);
 have exposed the server's passwords.</p>
 
 <ul>
-<li>addslashes()
-<li>escapeshellarg()
-<li>escapeshellcmd()
-<li>realpath()
+<li>addslashes()</li>
+<li>escapeshellarg()</li>
+<li>escapeshellcmd()</li>
+<li>realpath()</li>
 </ul>
 
 </s2>
