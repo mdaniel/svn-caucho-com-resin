@@ -282,6 +282,9 @@ public class JavaJspBuilder extends JspBuilder {
       }
     }
 
+    if (JspTagSupport.class.isAssignableFrom(tagClass))
+      _gen.addTagFileClass(tagClass.getName());
+    
     if (JspTagFileSupport.class.isAssignableFrom(tagClass)) {
       TagFileTag customTag = new TagFileTag();
       customTag.setGenerator(_gen);

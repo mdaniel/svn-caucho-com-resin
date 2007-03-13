@@ -796,7 +796,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("{");
     out.pushDepth();
 
-    out.println("private final java.util.HashMap<String,java.lang.reflect.Method> _jsp_functionMap = new java.util.HashMap<String,java.lang.reflect.Method>();");
+    out.println("private static final java.util.HashMap<String,java.lang.reflect.Method> _jsp_functionMap = new java.util.HashMap<String,java.lang.reflect.Method>();");
 
     out.println("private boolean _caucho_isDead;");
 

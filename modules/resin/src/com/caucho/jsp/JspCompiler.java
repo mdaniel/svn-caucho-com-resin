@@ -29,7 +29,7 @@
 
 package com.caucho.jsp;
 
-import com.caucho.config.Config;
+import com.caucho.config.*;
 import com.caucho.java.JavaCompiler;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -48,6 +48,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
+import javax.annotation.*;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.jsp.HttpJspPage;
 import javax.servlet.jsp.JspPage;
@@ -286,11 +287,14 @@ public class JspCompiler implements EnvironmentBean {
    * Initialize values based on the ServletContext.  When the calling code
    * has the ServletContext available, it can take advantage of it.
    */
-  public WebApp createWebApp()
+  public WebApp createWebApp(Path rootDirectory)
   {
     if (_app == null) {
+      if (rootDirectory == null)
+        rootDirectory = getAppDir();
+      
       WebAppController controller =
-	new WebAppController("",  getAppDir(), null);
+	new WebAppController("",  rootDirectory, null);
 
       _app = controller.getDeployInstance();
     }
@@ -314,18 +318,9 @@ public class JspCompiler implements EnvironmentBean {
    * Initialize values based on the ServletContext.  When the calling code
    * has the ServletContext available, it can take advantage of it.
    */
-  public WebApp createApplication()
+  public ApplicationConfig createApplication()
   {
-    return createWebApp();
-  }
-
-  /**
-   * Initialize values based on the ServletContext.  When the calling code
-   * has the ServletContext available, it can take advantage of it.
-   */
-  public void setApplication(WebApp webApp)
-  {
-    setWebApp(webApp);
+    return new ApplicationConfig();
   }
 
   /**
@@ -572,8 +567,7 @@ public class JspCompiler implements EnvironmentBean {
 	if (args[i].equals("-app-dir")) {
 	  Path appDir = Vfs.lookup(args[i + 1]);
 
-	  WebApp app = compiler.createWebApp();
-	  app.setDocumentDirectory(appDir);
+	  WebApp app = compiler.createWebApp(appDir);
 
 	  compiler.setWebApp(app);
 	  compiler.setAppDir(appDir);
@@ -618,9 +612,9 @@ public class JspCompiler implements EnvironmentBean {
       Path appDir = null;
 
       if (app == null && compiler.getAppDir() != null) {
-	app = compiler.createWebApp();
+	app = compiler.createWebApp(null);
 
-	app.setDocumentDirectory(compiler.getAppDir());
+	app.setRootDirectory(compiler.getAppDir());
 	compiler.setWebApp(app);
       }
 
@@ -641,7 +635,7 @@ public class JspCompiler implements EnvironmentBean {
       }
 
       thread.setContextClassLoader(loader);
-
+        
       ArrayList<String> pendingClasses = new ArrayList<String>();
 
       for (; i < args.length; i++) {
@@ -700,7 +694,6 @@ public class JspCompiler implements EnvironmentBean {
 
     uri = path.getPath().substring(appDir.getPath().length());
 
-
     if (uri.endsWith("x"))
       compiler.setXml(true);
     else
@@ -714,5 +707,41 @@ public class JspCompiler implements EnvironmentBean {
 
     if (! gen.isStatic())
       pendingClasses.add(className.replace('.', '/') + ".java");
+  }
+
+  public class ApplicationConfig {
+    private Path _rootDir;
+    private BuilderProgramContainer _builder = new BuilderProgramContainer();
+
+    ApplicationConfig()
+    {
+      _rootDir = Vfs.lookup();
+    }
+
+    public void setRootDirectory(Path path)
+    {
+      _rootDir = path;
+    }
+
+    public void setDocumentDirectory(Path path)
+    {
+      _rootDir = path;
+    }
+
+    public void setAppDir(Path path)
+    {
+      _rootDir = path;
+    }
+
+    public void addBuilderProgram(BuilderProgram program)
+    {
+      _builder.addProgram(program);
+    }
+
+    @PostConstruct
+    public void init()
+    {
+      _builder.configure(createWebApp(_rootDir));
+    }
   }
 }

@@ -29,7 +29,7 @@
 package com.caucho.jsp.java;
 
 /**
- * Represents the body for a tag file with no scripting .
+ * Represents the body for a tag file with no scripting.
  */
 abstract public class JspTagFileSupport extends JspTagSupport {
 }

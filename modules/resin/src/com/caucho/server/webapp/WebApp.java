@@ -552,7 +552,6 @@ public class WebApp extends ServletContextImpl
    */
   public void setRootDirectory(Path appDir)
   {
-    setAppDir(appDir);
   }
 
   /**
@@ -560,6 +559,7 @@ public class WebApp extends ServletContextImpl
    */
   public void setAppDir(Path appDir)
   {
+    setRootDirectory(appDir);
   }
 
   /**
