@@ -468,6 +468,14 @@ public class UnicodeModule extends AbstractQuercusModule {
                        String out_charset,
                        StringValue str)
   {
+    if (out_charset.endsWith("//TRANSLIT")) {
+      env.stub("Iconv TRANSLIT option not supported");
+
+      int length = out_charset.length() - "//TRANSLIT".length();
+
+      out_charset = out_charset.substring(0, length);
+    }
+
     try {
       return IconvUtility.decodeEncode(str, in_charset, out_charset);
     }
