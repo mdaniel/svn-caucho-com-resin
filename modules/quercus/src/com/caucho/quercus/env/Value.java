@@ -51,7 +51,8 @@ import java.util.Map;
 /**
  * Represents a PHP expression value.
  */
-abstract public class Value {
+abstract public class Value implements java.io.Serializable
+{
   protected static final L10N L = new L10N(Value.class);
 
   public static final StringValue SCALAR_V = new StringValueImpl("scalar");

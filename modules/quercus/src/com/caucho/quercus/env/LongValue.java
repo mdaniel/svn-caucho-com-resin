@@ -40,7 +40,6 @@ import java.util.IdentityHashMap;
  * Represents a PHP long value.
  */
 public class LongValue extends NumberValue
-  implements Serializable
 {
   public static final LongValue MINUS_ONE = new LongValue(-1);
   public static final LongValue ZERO = new LongValue(0);
