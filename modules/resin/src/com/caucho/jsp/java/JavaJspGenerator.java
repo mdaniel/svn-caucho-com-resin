@@ -1268,7 +1268,7 @@ public class JavaJspGenerator extends JspGenerator {
 	  args[i] = getBeanClass(types[i]);
 	}
 
-        if (sig.getReturnType == null)
+        if (sig.getReturnType() == null)
           throw error(L.l("deferredMethod signature '{0}' needs a return type.",
                           sigString));
 
