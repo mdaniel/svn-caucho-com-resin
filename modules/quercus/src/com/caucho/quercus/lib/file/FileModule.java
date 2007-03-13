@@ -117,8 +117,12 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Returns the base name of a string.
    */
+  @ReturnNullAsFalse
   public static String basename(String path, @Optional String suffix)
   {
+    if (path == null)
+      return null;
+
     int len = path.length();
 
     if (len == 0)
@@ -653,7 +657,8 @@ public class FileModule extends AbstractQuercusModule {
                            @Optional boolean useIncludePath,
                            @Optional Value context)
   {
-    
+    if (filename == null)
+      return BooleanValue.FALSE;    
 
     try {
       BinaryStream stream = fopen(env, filename, "r", useIncludePath, context);
@@ -901,6 +906,11 @@ public class FileModule extends AbstractQuercusModule {
 		      @Optional long offset,
 		      @Optional("4294967296") long maxLen)
   {
+    if (filename == null) {
+      env.warning(L.l("file name must not be null"));
+      return null;
+    }
+
     try {
       BinaryStream s = fopen(env, filename, "r", useIncludePath, context);
 
@@ -942,6 +952,11 @@ public class FileModule extends AbstractQuercusModule {
                                  @Optional int flags,
                                  @Optional Value context)
   {
+    if (filename == null) {
+      env.warning(L.l("file name must not be null"));
+      return BooleanValue.FALSE;
+    }
+
     // php/1634
 
     BinaryStream s = null;
@@ -1232,6 +1247,9 @@ public class FileModule extends AbstractQuercusModule {
   public static boolean fnmatch(Env env, String pattern, String string, 
                                 @Optional int flags)
   {
+    if (pattern == null || string == null)
+      return false;
+
     if ((flags & FNM_CASEFOLD) != 0) {
       string = string.toLowerCase();
       pattern = pattern.toLowerCase();
@@ -1294,6 +1312,16 @@ public class FileModule extends AbstractQuercusModule {
 				   @Optional boolean useIncludePath,
 				   @Optional Value context)
   {
+    if (filename == null) {
+      env.warning(L.l("file name must not be null"));
+      return null;
+    }
+    
+    if (mode == null) {
+      env.warning(L.l("fopen mode must not be null"));
+      return null;
+    }
+
     // XXX: context
     try {
       ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
@@ -1859,6 +1887,11 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean is_uploaded_file(Env env, String tail)
   {
+    if (tail == null) {
+      env.notice(L.l("file name tail is NULL"));
+      return false;
+    }
+
     return env.getUploadDirectory().lookup(tail).canRead();
   }
 
@@ -1967,6 +2000,11 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean move_uploaded_file(Env env, String tail, Path dst)
   {
+    if (tail == null) {
+      env.notice(L.l("file tail is NULL"));
+      return false;
+    }
+
     Path src = env.getUploadDirectory().lookup(tail);
 
     try {
@@ -2177,6 +2215,14 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value pathinfo(String path)
   {
+    if (path == null) {
+      ArrayValueImpl value = new ArrayValueImpl();
+      value.put("dirname", "");
+      value.put("basename", "");
+      
+      return value;
+    }
+
     int p = path.lastIndexOf('/');
 
     String dirname;
@@ -2267,6 +2313,9 @@ public class FileModule extends AbstractQuercusModule {
                         @Optional boolean useIncludePath,
                         @Optional Value context)
   {
+    if (filename == null)
+      return BooleanValue.FALSE;
+
     BinaryStream s = fopen(env, filename, "r", useIncludePath, context);
 
     if (! (s instanceof BinaryInput))
@@ -2411,12 +2460,17 @@ public class FileModule extends AbstractQuercusModule {
                               @Optional("1") int order,
                               @Optional Value context)
   {
+    if (fileName == null) {
+      env.warning(L.l("file name must not be NULL"));
+      return BooleanValue.FALSE;
+    }
+
     try {
       Path path = env.getPwd().lookup(fileName);
 
       if (!path.isDirectory()) {
-	env.warning(L.l("{0} is not a directory", path.getFullPath()));
-	return BooleanValue.FALSE;
+        env.warning(L.l("{0} is not a directory", path.getFullPath()));
+        return BooleanValue.FALSE;
       }
 
       String []values = path.list();
@@ -2426,14 +2480,14 @@ public class FileModule extends AbstractQuercusModule {
       ArrayValue result = new ArrayValueImpl();
 
       if (order == 1) {
-	for (int i = 0; i < values.length; i++)
-	  result.append(new LongValue(i), new StringValueImpl(values[i]));
+        for (int i = 0; i < values.length; i++)
+          result.append(new LongValue(i), new StringValueImpl(values[i]));
       }
       else {
-	for (int i = values.length - 1; i >= 0; i--) {
-	  result.append(new LongValue(values.length - i - 1),
-			new StringValueImpl(values[i]));
-	}
+        for (int i = values.length - 1; i >= 0; i--) {
+          result.append(new LongValue(values.length - i - 1),
+          new StringValueImpl(values[i]));
+        }
       }
 
       return result;
