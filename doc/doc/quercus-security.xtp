@@ -473,6 +473,8 @@ production system, this should be turned off:</p>
   &lt;/servlet-mapping>
 
 &lt;/web-app>
+</example>
+
 </s1>
 
   </body>
