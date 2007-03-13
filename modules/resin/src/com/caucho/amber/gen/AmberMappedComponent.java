@@ -622,15 +622,18 @@ abstract public class AmberMappedComponent extends ClassComponent {
       hasLoad = hasLoad || (_relatedType.getId() != null);
     }
 
-    out.println();
-    out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn)");
-    out.println("  throws java.sql.SQLException");
-    out.println("{");
+    // jpa/0l20
+    if (hasLoad || ! isEntityParent) {
+      out.println();
+      out.println("public void __caucho_retrieve(com.caucho.amber.manager.AmberConnection aConn)");
+      out.println("  throws java.sql.SQLException");
+      out.println("{");
 
-    if (hasLoad)
-      out.println("  __caucho_load_" + index + "(aConn);");
+      if (hasLoad)
+        out.println("  __caucho_load_" + index + "(aConn);");
 
-    out.println("}");
+      out.println("}");
+    }
   }
 
   /**
@@ -652,8 +655,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  __caucho_log.fine(\"amber detach \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
     out.println();
 
-    // jpa/0o05
-    out.println("__caucho_dumpRelationships();");
+    // jpa/0l14
+    if (_relatedType instanceof EntityType) {
+      // jpa/0o05
+      out.println("__caucho_dumpRelationships();");
+    }
 
     out.println();
     out.println("__caucho_session = null;");
@@ -2096,7 +2102,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.pushDepth();
 
       // jpa/0l47: eagerly loading optimization.
-      out.println("copy = aConn.getEntity(entity);");
+      out.println("copy = aConn.getEntity(item.getEntity());");
 
       out.println("item.getEntity().__caucho_copyLoadMaskFrom(copy);");
 

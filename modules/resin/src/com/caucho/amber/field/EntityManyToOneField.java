@@ -825,7 +825,8 @@ public class EntityManyToOneField extends CascadableField {
 
       String targetTypeExt = getEntityTargetType().getInstanceClassName();
 
-      out.println("com.caucho.amber.entity.Entity newChild = aConn.addNewEntity(" + targetTypeExt + ".class, ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey());");
+      // jpa/0l42
+      out.println("com.caucho.amber.entity.Entity newChild = aConn.addNewEntity(child.getClass(), ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey());");
 
       out.println("if (newChild == null) {");
       out.pushDepth();
