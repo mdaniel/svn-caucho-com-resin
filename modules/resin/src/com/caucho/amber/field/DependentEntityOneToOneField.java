@@ -290,10 +290,9 @@ public class DependentEntityOneToOneField extends CascadableField {
       long mask = (1L << (_targetLoadIndex % 64));
       String loadVar = "__caucho_loadMask_" + group;
 
-      out.println("if ((" + loadVar + " & " + mask + "L) == 0) {");
-      out.pushDepth();
-
-      out.println(loadVar + " |= " + mask + "L;");
+      // out.println("if ((" + loadVar + " & " + mask + "L) == 0) {");
+      // out.pushDepth();
+      // out.println(loadVar + " |= " + mask + "L;");
 
       String javaType = getJavaTypeName();
 
@@ -307,10 +306,12 @@ public class DependentEntityOneToOneField extends CascadableField {
 
       String indexS = "_" + group + "_" + index;
 
-      generateLoadProperty(out, indexS, "aConn");
+      // generateLoadProperty(out, indexS, "aConn");
 
-      out.popDepth();
-      out.println("}");
+      out.println(getGetterName() + "();");
+
+      // out.popDepth();
+      // out.println("}");
     }
 
     return ++index;
@@ -416,6 +417,9 @@ public class DependentEntityOneToOneField extends CascadableField {
   {
     if (getIndex() == updateIndex) {
       String value = generateGet(src);
+
+      value = "(" + getEntityTargetType().getInstanceClassName() + ") aConn.getEntity((com.caucho.amber.entity.Entity) " + value + ")";
+
       out.println(generateSet(dst, value) + ";");
     }
   }
@@ -429,7 +433,44 @@ public class DependentEntityOneToOneField extends CascadableField {
     throws IOException
   {
     if (getLoadGroupIndex() == updateIndex) {
+      // jpa/0o08
+      if (dst.equals("cacheEntity"))
+        return;
+
       String value = generateGet(src);
+
+      out.println("child = " + value + ";");
+
+      out.println("if (child != null) {");
+      out.pushDepth();
+
+      String targetTypeExt = getEntityTargetType().getInstanceClassName();
+
+      out.println("com.caucho.amber.entity.Entity newChild = aConn.addNewEntity(" + targetTypeExt + ".class, ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey());");
+
+      out.println("if (newChild == null) {");
+      out.pushDepth();
+
+      value = "aConn.getEntity((com.caucho.amber.entity.Entity) child)";
+
+      out.println("newChild = " + value + ";");
+
+      out.popDepth();
+      out.println("} else {");
+      out.pushDepth();
+
+      out.println("((com.caucho.amber.entity.Entity) child).__caucho_copyTo(newChild, aConn);");
+
+      out.popDepth();
+      out.println("}");
+
+      out.println("child = newChild;");
+
+      out.popDepth();
+      out.println("}");
+
+      value = "(" + targetTypeExt + ") child";
+
       out.println(generateSet(dst, value) + ";");
     }
   }

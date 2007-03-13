@@ -179,10 +179,23 @@ public class LoadGroupGenerator extends ClassComponent {
 
     out.println("item.__caucho_load_" + _index + "(aConn);");
 
+    out.println("try {");
+    out.pushDepth();
+
+    // jpa/0o01
+    out.println("Object child;");
+
     _relatedType.generateCopyLoadObject(out, "super", "item", _index);
 
     // out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
     out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
+
+    out.popDepth();
+    out.println("} catch (RuntimeException e) {");
+    out.println("  throw e;");
+    out.println("} catch (Exception e) {");
+    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("}");
 
     out.println();
     out.println("return;");
@@ -287,7 +300,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.pushDepth();
 
     // jpa/0o05
-    out.println("com.caucho.amber.entity.Entity contextEntity = aConn.getEntity(aConn.getEntity(this.getClass().getName(), __caucho_getPrimaryKey()));");
+    out.println("com.caucho.amber.entity.Entity contextEntity = aConn.getEntity(this);");
 
     out.println();
     out.println("String sql = \"" + sql + "\";");

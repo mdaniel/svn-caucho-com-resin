@@ -1068,6 +1068,8 @@ public class ResultSetImpl implements ResultSet {
   {
     ResultSetCacheChunk cacheChunk = _cacheChunk;
 
+    Object value = null;
+
     if (cacheChunk != null) {
       if (log.isLoggable(Level.FINEST))
         log.finest(L.l("ResultSetImpl.getObject({0}) cache chunk is NOT null", column));
@@ -1082,18 +1084,16 @@ public class ResultSetImpl implements ResultSet {
 
         Entity entity = entityItem.getEntity();
 
-        Object value = _session.loadProxy(entity.__caucho_getEntityType(),
-                                          entity.__caucho_getPrimaryKey());
+        value = _session.loadProxy(entity.__caucho_getEntityType(),
+                                   entity.__caucho_getPrimaryKey());
 
         _numberOfLoadingColumns = entityItem.getNumberOfLoadingColumns();
-
-        return value;
       }
       else {
         if (log.isLoggable(Level.FINEST))
           log.finest(L.l("ResultSetImpl: cache obj is NOT instance of EntityItem"));
 
-        return obj;
+        value = obj;
       }
     }
     else {
@@ -1104,7 +1104,7 @@ public class ResultSetImpl implements ResultSet {
 
       AmberExpr expr = _resultList.get(column - 1);
 
-      Object value = expr.getObject(_session, _rs, index);
+      value = expr.getObject(_session, _rs, index);
 
       if (expr instanceof LoadEntityExpr) {
         if (log.isLoggable(Level.FINEST))
@@ -1113,9 +1113,18 @@ public class ResultSetImpl implements ResultSet {
         LoadEntityExpr entityExpr = (LoadEntityExpr) expr;
         _numberOfLoadingColumns = entityExpr.getIndex();
       }
-
-      return value;
     }
+
+    // jpa/0o40
+    if (value instanceof Entity) {
+      Entity entity = (Entity) value;
+
+      _session.setTransactionalState(entity);
+
+      _session.addEntity((Entity) value);
+    }
+
+    return value;
   }
 
   /**

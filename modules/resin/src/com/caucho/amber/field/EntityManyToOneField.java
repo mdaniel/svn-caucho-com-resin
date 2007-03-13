@@ -596,7 +596,7 @@ public class EntityManyToOneField extends CascadableField {
     out.pushDepth();
 
     // jpa/0o05
-    out.println("com.caucho.amber.entity.Entity contextEntity = __caucho_session.getEntity(__caucho_session.getEntity(this.getClass().getName(), __caucho_getPrimaryKey()));");
+    out.println("com.caucho.amber.entity.Entity contextEntity = __caucho_session.getEntity(this);");
 
     out.println();
 
@@ -729,7 +729,7 @@ public class EntityManyToOneField extends CascadableField {
 
     out.println();
     out.println("if (" + varName + " == null)");
-    out.println("  " + varName + " = (" + targetTypeExt + ") " + session + ".getEntity(" + session + ".getEntity(" + targetTypeExt + ".class.getName(), " + otherKey+ "));");
+    out.println("  " + varName + " = (" + targetTypeExt + ") " + session + ".getEntity(" + targetTypeExt + ".class, " + otherKey + ");");
 
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
@@ -793,6 +793,9 @@ public class EntityManyToOneField extends CascadableField {
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
 
     String value = generateGet(src);
+
+    value = "(" + _targetType.getInstanceClassName() + ") aConn.getEntity((com.caucho.amber.entity.Entity) " + value + ")";
+
     out.println(generateSet(dst, value) + ";");
 
     // }
@@ -811,9 +814,44 @@ public class EntityManyToOneField extends CascadableField {
 
     // order matters: jpa/0h08, jpa/0h09
 
-    String value = generateGet(src);
+    // jpa/0o08
+    if (! dst.equals("cacheEntity")) {
+      String value = generateGet(src);
 
-    out.println(generateSet(dst, value) + ";");
+      out.println("child = " + value + ";");
+
+      out.println("if (child != null) {");
+      out.pushDepth();
+
+      String targetTypeExt = getEntityTargetType().getInstanceClassName();
+
+      out.println("com.caucho.amber.entity.Entity newChild = aConn.addNewEntity(" + targetTypeExt + ".class, ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey());");
+
+      out.println("if (newChild == null) {");
+      out.pushDepth();
+
+      value = "aConn.getEntity((com.caucho.amber.entity.Entity) child)";
+
+      out.println("newChild = " + value + ";");
+
+      out.popDepth();
+      out.println("} else {");
+      out.pushDepth();
+
+      out.println("((com.caucho.amber.entity.Entity) child).__caucho_copyTo(newChild, aConn);");
+
+      out.popDepth();
+      out.println("}");
+
+      out.println("child = newChild;");
+
+      out.popDepth();
+      out.println("}");
+
+      value = "(" + targetTypeExt + ") child";
+
+      out.println(generateSet(dst, value) + ";");
+    }
 
     // jpa/0o05
     // if (getLoadGroupIndex() == updateIndex) {
@@ -821,10 +859,14 @@ public class EntityManyToOneField extends CascadableField {
     // order matters: ejb/06gc
     String var = "__caucho_field_" + getName();
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
-    // jpa/0o05
-    if (! dst.equals("super")) { // || isLazy())) {
-      out.println("((" + getRelatedType().getInstanceClassName() + ") " + dst + ")." +
-                  generateSuperSetter(generateSuperGetter()) + ";");
+
+    // jpa/0o08
+    if (! dst.equals("cacheEntity")) {
+      // jpa/0o05
+      if (! dst.equals("super")) { // || isLazy())) {
+        out.println("((" + getRelatedType().getInstanceClassName() + ") " + dst + ")." +
+                    generateSuperSetter(generateSuperGetter()) + ";");
+      }
     }
 
     // jpa/0o05

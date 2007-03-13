@@ -378,6 +378,8 @@ public class AmberEntityHome {
 
         item = _manager.putEntity(getRootType(), key, item);
 
+        log.finest("findEntityItem after putEntity item is null? "+(item == null));
+
         // jpa/0o41
         if (isLoad) {
           try {
@@ -402,8 +404,6 @@ public class AmberEntityHome {
             throw e;
           }
         }
-
-        log.finest("findEntityItem after putEntity item is null? "+(item == null));
       }
       else if (isLoad) {
         Class cl = item.getEntity().getClass();

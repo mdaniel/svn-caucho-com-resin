@@ -1193,6 +1193,37 @@ public class AmberConnection
     return _entities.get(index);
   }
 
+  public Entity getEntity(Class cl, Object key)
+  {
+    int index = getEntity(cl.getName(), key);
+
+    if (index < 0)
+      return null;
+
+    return getEntity(index);
+  }
+
+  /**
+   * Returns the context entity that corresponds to the
+   * entity passed in. The entity passed in is normally a
+   * cache entity but might be the context entity itself
+   * when we want to make sure the reference is to an
+   * entity in the persistence context.
+   */
+  public Entity getEntity(Entity entity)
+  {
+    if (entity == null)
+      return null;
+
+    int index = getEntity(entity.getClass().getName(),
+                          entity.__caucho_getPrimaryKey());
+
+    if (index < 0)
+      return null;
+
+    return getEntity(index);
+  }
+
   public int getTransactionEntity(String className, Object key)
   {
     return getEntityMatch(_txEntities, className, key);
