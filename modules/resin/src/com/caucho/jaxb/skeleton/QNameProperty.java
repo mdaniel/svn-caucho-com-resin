@@ -228,14 +228,23 @@ public class QNameProperty extends Property {
     if (in.getEventType() == in.CHARACTERS) {
       String text = in.getText();
       ret = resolveQName(text, in.getNamespaceContext());
+
+      // essentially a nextTag() that handles end of document gracefully
+      while (in.hasNext()) {
+        in.next();
+
+        if (in.getEventType() == in.END_ELEMENT)
+          break;
+      }
     }
 
     // essentially a nextTag() that handles end of document gracefully
     while (in.hasNext()) {
-      if (in.getEventType() == in.END_ELEMENT)
-        break;
-
       in.next();
+
+      if (in.getEventType() == in.START_ELEMENT ||
+          in.getEventType() == in.END_ELEMENT)
+        break;
     }
 
     return ret;

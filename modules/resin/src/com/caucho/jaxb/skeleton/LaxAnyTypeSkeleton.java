@@ -120,10 +120,16 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
 
-    if (skeleton == null)
-      throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
+    if (skeleton == null) {
+      Property property = _context.getSimpleTypeProperty(obj.getClass());
 
-    skeleton.write(m, out, obj, fieldName, attributes);
+      if (property == null)
+        throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
+
+      property.write(m, out, obj, fieldName); // XXX attributes
+    }
+    else 
+      skeleton.write(m, out, obj, null, attributes);
   }
 
   public void write(Marshaller m, XMLEventWriter out,
@@ -132,10 +138,16 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
 
-    if (skeleton == null)
-      throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
+    if (skeleton == null) {
+      Property property = _context.getSimpleTypeProperty(obj.getClass());
 
-    skeleton.write(m, out, obj, fieldName, attributes);
+      if (property == null)
+        throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
+
+      property.write(m, out, obj, fieldName); // XXX attributes
+    }
+    else 
+      skeleton.write(m, out, obj, fieldName, attributes);
   }
 
   public Node bindTo(BinderImpl binder, Node node, 

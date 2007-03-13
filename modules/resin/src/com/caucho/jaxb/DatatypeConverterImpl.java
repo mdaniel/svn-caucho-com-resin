@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -41,6 +41,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  */
@@ -53,11 +54,19 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
   private final SimpleDateFormat timeFormat 
     = new SimpleDateFormat("HH:mm:ss");
   private final SimpleDateFormat dateTimeFormat
-    = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
   private final char[] hexDigits = { '0', '1', '2', '3', '4',
                                      '5', '6', '7', '8', '9',
                                      'A', 'B', 'C', 'D', 'E', 'F'};
+
+  public DatatypeConverterImpl()
+  {
+    TimeZone gmt = TimeZone.getTimeZone("GMT");
+    dateFormat.getCalendar().setTimeZone(gmt);
+    timeFormat.getCalendar().setTimeZone(gmt);
+    dateTimeFormat.getCalendar().setTimeZone(gmt);
+  }
 
   //
   // Parsers
@@ -102,6 +111,16 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
     throws IllegalArgumentException
   {
     try {
+      // ISO8601 fix
+      int colon = lexicalXSDDateTime.lastIndexOf(':');
+
+      if (lexicalXSDDateTime.length() < 3 || 
+          colon != lexicalXSDDateTime.length() - 3)
+        throw new IllegalArgumentException();
+
+      lexicalXSDDateTime = lexicalXSDDateTime.substring(0, colon) +
+                           lexicalXSDDateTime.substring(colon + 1);
+
       Date date = dateTimeFormat.parse(lexicalXSDDateTime);
       Calendar calendar = (Calendar) dateFormat.getCalendar().clone();
       calendar.setTime(date);
@@ -253,8 +272,12 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
 
   public String printDateTime(Calendar val)
   {
+    // ISO8601 fix
     dateTimeFormat.setCalendar(val);
-    return dateTimeFormat.format(val.getTime());
+    String base = dateTimeFormat.format(val.getTime());
+
+    return base.substring(0, base.length() - 2) + ':' + 
+           base.substring(base.length() - 2);
   }
 
   public String printDecimal(BigDecimal val)

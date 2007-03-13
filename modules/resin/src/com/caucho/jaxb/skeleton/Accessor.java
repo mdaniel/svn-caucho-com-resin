@@ -132,7 +132,7 @@ public abstract class Accessor {
     switch (getAccessorType()) {
       case ELEMENT: 
         {
-          // XXX type from XmlElement
+          // XXX respect the type from the XmlElement annotation
           _property = _context.createProperty(getGenericType(), false);
 
           XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
@@ -242,10 +242,12 @@ public abstract class Accessor {
         }
 
       case ANY_TYPE_ELEMENT_LAX:
+        _qname = new QName(getName());
         _property = _context.createProperty(getGenericType(), true);
         break;
 
       case ANY_TYPE_ELEMENT:
+        _qname = new QName(getName());
         _property = _context.createProperty(getGenericType(), false); // XXX?
         break;
     }
@@ -645,7 +647,7 @@ public abstract class Accessor {
     if (_qnameMap != null)
       return _qnameMap.get(obj.getClass());
 
-    throw new JAXBException(L.l("Internal error: Unable to find QName for object {0}", obj));
+    throw new JAXBException(L.l("Internal error: Unable to find QName for object {0} in {1}", obj, this));
   }
 
   protected void setQName(QName qname)

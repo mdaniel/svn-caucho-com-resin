@@ -412,86 +412,10 @@ public class JAXBContextImpl extends JAXBContext {
       if (anyType && Object.class.equals(type))
         return getLaxAnyTypeProperty();
 
-      if (String.class.equals(type))
-        return StringProperty.PROPERTY;
+      Property simpleTypeProperty = getSimpleTypeProperty((Class) type);
 
-      if (URI.class.equals(type))
-        return URIProperty.PROPERTY;
-
-      if (UUID.class.equals(type))
-        return UUIDProperty.PROPERTY;
-
-      if (Double.class.equals(type))
-        return DoubleProperty.OBJECT_PROPERTY;
-
-      if (Double.TYPE.equals(type))
-        return DoubleProperty.PRIMITIVE_PROPERTY;
-
-      if (Float.class.equals(type))
-        return FloatProperty.OBJECT_PROPERTY;
-
-      if (Float.TYPE.equals(type))
-        return FloatProperty.PRIMITIVE_PROPERTY;
-
-      if (Integer.class.equals(type))
-        return IntProperty.OBJECT_PROPERTY;
-
-      if (Integer.TYPE.equals(type))
-        return IntProperty.PRIMITIVE_PROPERTY;
-
-      if (Long.class.equals(type))
-        return LongProperty.OBJECT_PROPERTY;
-
-      if (Long.TYPE.equals(type))
-        return LongProperty.PRIMITIVE_PROPERTY;
-
-      if (Boolean.class.equals(type))
-        return BooleanProperty.OBJECT_PROPERTY;
-
-      if (Boolean.TYPE.equals(type))
-        return BooleanProperty.PRIMITIVE_PROPERTY;
-
-      if (Character.class.equals(type))
-        return CharacterProperty.OBJECT_PROPERTY;
-
-      if (Character.TYPE.equals(type))
-        return CharacterProperty.PRIMITIVE_PROPERTY;
-
-      if (Short.class.equals(type))
-        return ShortProperty.OBJECT_PROPERTY;
-
-      if (Short.TYPE.equals(type))
-        return ShortProperty.PRIMITIVE_PROPERTY;
-
-      if (Byte.class.equals(type))
-        return ByteProperty.OBJECT_PROPERTY;
-
-      if (Byte.TYPE.equals(type))
-        return ByteProperty.PRIMITIVE_PROPERTY;
-
-      if (BigDecimal.class.equals(type))
-        return BigDecimalProperty.PROPERTY;
-
-      if (BigInteger.class.equals(type))
-        return BigIntegerProperty.PROPERTY;
-
-      if (QName.class.equals(type))
-        return QNameProperty.PROPERTY;
-
-      if (Date.class.equals(type))
-        return DateTimeProperty.PROPERTY;
-
-      if (Calendar.class.equals(type))
-        return CalendarProperty.PROPERTY;
-
-      if (Duration.class.equals(type))
-        return DurationProperty.PROPERTY;
-
-      if (XMLGregorianCalendar.class.equals(type))
-        return XMLGregorianCalendarProperty.PROPERTY;
-
-      if (byte[].class.equals(type))
-        return ByteArrayProperty.PROPERTY;
+      if (simpleTypeProperty != null)
+        return simpleTypeProperty;
 
       Class cl = (Class) type;
 
@@ -546,6 +470,92 @@ public class JAXBContextImpl extends JAXBContext {
     throw new JAXBException(L.l("Unrecognized type: {0}", type.toString()));
   }
 
+  public Property getSimpleTypeProperty(Class type)
+  {
+    if (String.class.equals(type))
+      return StringProperty.PROPERTY;
+
+    if (URI.class.equals(type))
+      return URIProperty.PROPERTY;
+
+    if (UUID.class.equals(type))
+      return UUIDProperty.PROPERTY;
+
+    if (Double.class.equals(type))
+      return DoubleProperty.OBJECT_PROPERTY;
+
+    if (Double.TYPE.equals(type))
+      return DoubleProperty.PRIMITIVE_PROPERTY;
+
+    if (Float.class.equals(type))
+      return FloatProperty.OBJECT_PROPERTY;
+
+    if (Float.TYPE.equals(type))
+      return FloatProperty.PRIMITIVE_PROPERTY;
+
+    if (Integer.class.equals(type))
+      return IntProperty.OBJECT_PROPERTY;
+
+    if (Integer.TYPE.equals(type))
+      return IntProperty.PRIMITIVE_PROPERTY;
+
+    if (Long.class.equals(type))
+      return LongProperty.OBJECT_PROPERTY;
+
+    if (Long.TYPE.equals(type))
+      return LongProperty.PRIMITIVE_PROPERTY;
+
+    if (Boolean.class.equals(type))
+      return BooleanProperty.OBJECT_PROPERTY;
+
+    if (Boolean.TYPE.equals(type))
+      return BooleanProperty.PRIMITIVE_PROPERTY;
+
+    if (Character.class.equals(type))
+      return CharacterProperty.OBJECT_PROPERTY;
+
+    if (Character.TYPE.equals(type))
+      return CharacterProperty.PRIMITIVE_PROPERTY;
+
+    if (Short.class.equals(type))
+      return ShortProperty.OBJECT_PROPERTY;
+
+    if (Short.TYPE.equals(type))
+      return ShortProperty.PRIMITIVE_PROPERTY;
+
+    if (Byte.class.equals(type))
+      return ByteProperty.OBJECT_PROPERTY;
+
+    if (Byte.TYPE.equals(type))
+      return ByteProperty.PRIMITIVE_PROPERTY;
+
+    if (BigDecimal.class.equals(type))
+      return BigDecimalProperty.PROPERTY;
+
+    if (BigInteger.class.equals(type))
+      return BigIntegerProperty.PROPERTY;
+
+    if (QName.class.equals(type))
+      return QNameProperty.PROPERTY;
+
+    if (Date.class.equals(type))
+      return DateTimeProperty.PROPERTY;
+
+    if (Calendar.class.equals(type))
+      return CalendarProperty.PROPERTY;
+
+    if (Duration.class.equals(type))
+      return DurationProperty.PROPERTY;
+
+    if (XMLGregorianCalendar.class.equals(type))
+      return XMLGregorianCalendarProperty.PROPERTY;
+
+    if (byte[].class.equals(type))
+      return ByteArrayProperty.PROPERTY;
+
+    return null;
+  }
+
   public void addXmlType(QName typeName, ClassSkeleton skeleton)
     throws JAXBException
   {
@@ -584,7 +594,7 @@ public class JAXBContextImpl extends JAXBContext {
     boolean success = false;
 
     try {
-      Class cl = CauchoSystem.loadClass(packageName + ".ObjectFactory");
+      Class cl = Class.forName(packageName + ".ObjectFactory");
       introspectObjectFactory(cl);
 
       success = true;
@@ -625,7 +635,7 @@ public class JAXBContextImpl extends JAXBContext {
         String className = parts[0].trim();
 
         if (! "".equals(className)) {
-          Class cl = CauchoSystem.loadClass(packageName + "." + className);
+          Class cl = Class.forName(packageName + "." + className);
 
           createSkeleton(cl);
         }

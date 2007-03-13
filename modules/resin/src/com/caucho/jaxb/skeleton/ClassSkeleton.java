@@ -358,6 +358,21 @@ public class ClassSkeleton<C> extends Skeleton {
               ! JAXBUtil.isJAXBAnnotated(set))
             continue;
 
+          // jaxb/0456
+          if (Modifier.isStatic(get.getModifiers()) &&
+              JAXBUtil.isJAXBAnnotated(get))
+            throw new JAXBException(L.l("JAXB annotations cannot be applied to static methods: {0}", get));
+
+          // jaxb/0457
+          if (Modifier.isStatic(set.getModifiers()) &&
+              JAXBUtil.isJAXBAnnotated(set))
+            throw new JAXBException(L.l("JAXB annotations cannot be applied to static methods: {0}", set));
+
+          // jaxb/0374
+          if (Modifier.isStatic(set.getModifiers()) ||
+              Modifier.isStatic(get.getModifiers()))
+            continue;
+
           if (get != null && get.isAnnotationPresent(XmlTransient.class))
             continue;
           if (set != null && set.isAnnotationPresent(XmlTransient.class))
@@ -804,8 +819,14 @@ public class ClassSkeleton<C> extends Skeleton {
         for (Accessor a : _attributeAccessors.values())
           a.write(m, out, obj);
 
+        if (_anyTypeAttributeAccessor != null) // XXX ordering!
+          _anyTypeAttributeAccessor.write(m, out, obj);
+        
         for (Accessor a : _elementAccessors.values())
           a.write(m, out, obj);
+
+        if (_anyTypeElementAccessor != null) // XXX ordering!
+          _anyTypeElementAccessor.write(m, out, obj);
         
         out.writeEndElement();
       }

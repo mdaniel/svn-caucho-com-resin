@@ -52,6 +52,7 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 
@@ -74,6 +75,14 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
   {
     // skip everything in this subtree
     int depth = 0;
+
+    Skeleton skeleton = _context.getRootElement(in.getName());
+
+    if (skeleton != null)
+      return skeleton.read(u, in);
+
+    // XXX the following works for JAXB TCK -- check if this is correct
+    // behavior otherwise
 
     in.nextTag();
 
@@ -125,22 +134,30 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, QName fieldName)
+                    Object obj, QName fieldName, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (fieldName.getNamespaceURI() == null)
-      out.writeEmptyElement(fieldName.getLocalPart());
-    else if (fieldName.getPrefix() == null)
-      out.writeEmptyElement(fieldName.getNamespaceURI(), 
-                            fieldName.getLocalPart());
-    else
-      out.writeEmptyElement(fieldName.getPrefix(), 
-                            fieldName.getLocalPart(), 
-                            fieldName.getNamespaceURI());
+    if (obj != null) {
+      Skeleton skeleton = _context.findSkeletonForObject(obj);
+
+      if (skeleton != null)
+        skeleton.write(m, out, obj, null, attributes);
+      else {
+        if (fieldName.getNamespaceURI() == null)
+          out.writeEmptyElement(fieldName.getLocalPart());
+        else if (fieldName.getPrefix() == null)
+          out.writeEmptyElement(fieldName.getNamespaceURI(), 
+                                fieldName.getLocalPart());
+        else
+          out.writeEmptyElement(fieldName.getPrefix(), 
+                                fieldName.getLocalPart(), 
+                                fieldName.getNamespaceURI()); 
+      }
+    }
   }
 
   public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, QName fieldName)
+                    Object obj, QName fieldName, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     out.add(JAXBUtil.EVENT_FACTORY.createStartElement(fieldName, null, null));

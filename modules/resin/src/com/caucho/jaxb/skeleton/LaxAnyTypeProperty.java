@@ -66,36 +66,13 @@ public class LaxAnyTypeProperty extends Property {
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Object obj = _skeleton.read(u, in);
-
-    // essentially a nextTag() that handles end of document gracefully
-    while (in.hasNext()) {
-      in.next();
-
-      if (in.getEventType() == in.START_ELEMENT ||
-          in.getEventType() == in.END_ELEMENT)
-        break;
-    }
-
-    return obj;
-}
+    return _skeleton.read(u, in);
+  }
   
   public Object read(Unmarshaller u, XMLEventReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Object ret = _skeleton.read(u, in);
-
-    while (in.hasNext()) {
-      XMLEvent event = in.peek();
-
-      if (event.isEndElement() ||
-          event.isStartElement())
-        break;
-
-      in.nextEvent();
-    }
-
-    return ret;
+    return _skeleton.read(u, in);
   }
 
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)

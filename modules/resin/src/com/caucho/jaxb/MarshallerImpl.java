@@ -32,9 +32,11 @@ package com.caucho.jaxb;
 import com.caucho.jaxb.adapters.BeanAdapter;
 import com.caucho.jaxb.skeleton.ClassSkeleton;
 import com.caucho.xml.stream.StaxUtil;
+import com.caucho.util.L10N;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.MarshalException;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -47,6 +49,7 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 
 public class MarshallerImpl extends AbstractMarshallerImpl {
+  public static final L10N L = new L10N(MarshallerImpl.class);
 
   private JAXBContextImpl _context;
   private Listener _listener;
@@ -140,6 +143,9 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
 
   public void marshal(Object obj, Result result) throws JAXBException
   {
+    if (! _context.createJAXBIntrospector().isElement(obj))
+      throw new MarshalException(L.l("Object is not a JAXB element: {0}", obj));
+
     try {
       XMLStreamWriter out = _xmlOutputFactory.createXMLStreamWriter(result);
 
