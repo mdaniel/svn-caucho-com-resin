@@ -93,11 +93,7 @@ Script encoding is for when your scripts are in an encoding other than
 UTF-8.</p>
 
 <p>Output encoding is the charset used to display output to the browser.
-You can set it in your script by:</p>
-
-<p><b><code>ini_set("unicode.output_encoding", "MY_ENCODING");</code></b></p>
-
-<p>or in your web.xml:</p>
+You can set it in your resin-web.xml:</p>
 
 <example title="$webApp_home/WEB-INF/web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -114,8 +110,8 @@ You can set it in your script by:</p>
 
 <p>There is another encoding that you need to know about.  It is the
 unicode.runtime_encoding and it defaults to UTF-8.  It is a PHP 6 directive
-that tells Quercus what encoding to assume a binary string is in when it is
-doing implicit conversion to Unicode.  You would set runtime encoding in the
+that tells Quercus what encoding to assume a binary string is in when
+doing implicit conversions to Unicode.  You would set runtime encoding in the
 same way as you would for output encoding.</p>
 
 <p>In PHP 6, there are two types of strings, Unicode and binary.  A binary
@@ -123,14 +119,8 @@ string is a string where the data is binary, the encoding is unknown, or the
 encoding is not Unicode (UTF-16).  If you ever use a function that will likely
 return a binary string, then you probably need to set unicode.runtime_encoding.
 Quercus may convert your binary string to Unicode and then to your output
-encoding for output to the browser.  If either your runtime or output encoding
-is wrong, then you would see garbage in your browser.</p>
-
-<p>If you are still getting garbage after correctly setting your encoding
-types, then there is probably an issue with Quercus or one of its libraries.
-If that is the case, then you should file a bug report at
-<a href="http://bugs.caucho.com">http://bugs.caucho.com</a> and provide a
-simple test case.</p>
+encoding for output to the browser.  If your runtime encoding is wrong, then
+you would see garbage in your browser.</p>
 
 </s2>
 
