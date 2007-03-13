@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -41,20 +42,13 @@ import javax.servlet.jsp.PageContext;
 import java.io.IOException;
 import java.util.*;
 
-public class HeaderExpression extends AbstractValueExpression
-  implements FieldGenerator
+public class HeaderValuesFieldExpression extends AbstractValueExpression
 {
-  public static final ValueExpression EXPR
-    = new HeaderExpression();
+  private String _field;
 
-  /**
-   * Creates a field reference using this expression as the base object.
-   *
-   * @param field the string reference for the field.
-   */
-  public ValueExpression createField(String field)
+  HeaderValuesFieldExpression(String field)
   {
-    return new HeaderFieldExpression(field);
+    _field = field;
   }
   
   /**
@@ -71,22 +65,19 @@ public class HeaderExpression extends AbstractValueExpression
     
     PageContextImpl page
       = ((PageContextImpl.PageELContext) env).getPageContext();
-    
+
     HttpServletRequest req = (HttpServletRequest) page.getRequest();
-    HashMap<String,String> map = new CaseInsensitiveHashMap<String>();
-    Enumeration e = req.getHeaderNames();
 
-    while (e.hasMoreElements()) {
-      String name = (String) e.nextElement();
+    Enumeration e = req.getHeaders(_field);
+    ArrayList<String> headers = new ArrayList<String>();
+    while (e.hasMoreElements())
+      headers.add((String) e.nextElement());
 
-      map.put(name, req.getHeader(name));
-    }
-      
-    return map;
+    return headers;
   }
 
   public String getExpressionString()
   {
-    return "header";
+    return "headerValues['" + _field + "']";
   }
 }

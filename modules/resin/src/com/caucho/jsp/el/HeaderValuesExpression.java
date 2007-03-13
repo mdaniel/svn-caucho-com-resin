@@ -28,7 +28,7 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.Expr;
+import com.caucho.el.*;
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.vfs.WriteStream;
 
@@ -41,9 +41,20 @@ import java.io.IOException;
 import java.util.*;
 
 public class HeaderValuesExpression extends AbstractValueExpression
+  implements FieldGenerator
 {
   public static final ValueExpression EXPR
     = new HeaderValuesExpression();
+
+  /**
+   * Creates a field reference using this expression as the base object.
+   *
+   * @param field the string reference for the field.
+   */
+  public ValueExpression createField(String field)
+  {
+    return new HeaderValuesFieldExpression(field);
+  }
   
   /**
    * Evaluate the expr as an object.

@@ -95,6 +95,7 @@ public class TagAnalyzer
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     AnalyzedTag tag = new AnalyzedTag();
+    tag.setParent(parent);
 
     try {
       analyzeByReflection(tagClass, tag, parent);
@@ -106,24 +107,23 @@ public class TagAnalyzer
 
       try {
 	JavaClass javaClass = new ByteCodeParser().parse(is);
+        tag.setJavaClass(javaClass);
 
-	analyze(javaClass, "doStartTag", "()I", new StartAnalyzer(), tag);
-	analyze(javaClass, "doEndTag", "()I", new EndAnalyzer(), tag);
+	analyze(tag, "doStartTag", "()I", new StartAnalyzer(tag));
+	analyze(tag, "doEndTag", "()I", new EndAnalyzer(tag));
 
 	if (IterationTag.class.isAssignableFrom(tagClass)) {
-	  analyze(javaClass, "doAfterBody", "()I", new AfterAnalyzer(), tag);
+	  analyze(tag, "doAfterBody", "()I", new AfterAnalyzer(tag));
 	}
 	
 	if (BodyTag.class.isAssignableFrom(tagClass)) {
-	  analyze(javaClass, "doInitBody", "()V",
-		  new InitAnalyzer(), tag);
+	  analyze(tag, "doInitBody", "()V", new InitAnalyzer());
 	}
 	
 	if (TryCatchFinally.class.isAssignableFrom(tagClass)) {
-	  analyze(javaClass, "doCatch", "(Ljava/lang/Throwable;)V",
-		  new CatchAnalyzer(), tag);
-	  analyze(javaClass, "doFinally", "()V",
-		  new FinallyAnalyzer(), tag);
+	  analyze(tag, "doCatch", "(Ljava/lang/Throwable;)V",
+                  new CatchAnalyzer());
+	  analyze(tag, "doFinally", "()V", new FinallyAnalyzer());
 	}
       } finally {
 	is.close();
@@ -304,13 +304,25 @@ public class TagAnalyzer
   /**
    * Analyzes the code for a method
    */
-  private void analyze(JavaClass javaClass,
+  private void analyze(AnalyzedTag tag,
 		       String name,
 		       String signature,
-		       Analyzer analyzer,
-		       AnalyzedTag tag)
+		       Analyzer analyzer)
   {
-    JavaMethod method = javaClass.findMethod(name, signature);
+    JavaClass javaClass = null;
+    JavaMethod method = null;
+
+    for (AnalyzedTag defTag = tag;
+         defTag != null;
+         defTag = defTag.getParent()) {
+      method = defTag.getJavaClass().findMethod(name, signature);
+
+      if (method != null) {
+        javaClass = defTag.getJavaClass();
+        break;
+      }
+    }
+    
     if (method == null)
       return;
     
@@ -329,7 +341,7 @@ public class TagAnalyzer
     analyzer.complete(tag);
   }
 
-  static IntMethodAnalyzer analyzeIntMethod(JavaClass javaClass,
+  static IntMethodAnalyzer analyzeIntMethod(AnalyzedTag tag,
 					    String name,
 					    String signature)
   {
@@ -337,6 +349,7 @@ public class TagAnalyzer
       return null;
     
     JavaMethod method = null;
+    JavaClass javaClass = tag.getJavaClass();
 
     while (method == null && javaClass != null) {
       method = javaClass.findMethod(name, signature);
@@ -387,11 +400,19 @@ public class TagAnalyzer
   /**
    * Callback analyzing the methods.
    */
-  static class AbstractTagMethodAnalyzer extends Analyzer {
+  static class AbstractTagMethodAnalyzer extends Analyzer
+  {
+    private AnalyzedTag _tag;
+    
     private boolean _hasCode;
     
     private int _count = 0;
     private int _value = -1;
+
+    protected AbstractTagMethodAnalyzer(AnalyzedTag tag)
+    {
+      _tag = tag;
+    }
 
     protected boolean hasCode()
     {
@@ -462,7 +483,7 @@ public class TagAnalyzer
 	  MethodRefConstant methodRef
 	    = jClass.getConstantPool().getMethodRef(index);
 
-	  IntMethodAnalyzer value = analyzeIntMethod(jClass,
+	  IntMethodAnalyzer value = analyzeIntMethod(_tag,
 						     methodRef.getName(),
 						     methodRef.getType());
 
@@ -503,6 +524,11 @@ public class TagAnalyzer
     private boolean _hasInclude;
     private boolean _hasBuffered;
 
+    StartAnalyzer(AnalyzedTag tag)
+    {
+      super(tag);
+    }
+
     @Override
     protected void addReturnValue(int value)
     {
@@ -536,6 +562,11 @@ public class TagAnalyzer
     private boolean _hasSkip;
     private boolean _hasEval;
 
+    EndAnalyzer(AnalyzedTag tag)
+    {
+      super(tag);
+    }
+
     @Override
     protected void addReturnValue(int value)
     {
@@ -558,8 +589,14 @@ public class TagAnalyzer
   /**
    * Callback analyzing the doAfterBody method.
    */
-  static class AfterAnalyzer extends AbstractTagMethodAnalyzer {
+  static class AfterAnalyzer extends AbstractTagMethodAnalyzer
+  {
     private boolean _hasAgain;
+
+    AfterAnalyzer(AnalyzedTag tag)
+    {
+      super(tag);
+    }
 
     @Override
     protected void addReturnValue(int value)

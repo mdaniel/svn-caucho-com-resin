@@ -36,7 +36,7 @@ import com.caucho.jsp.cfg.TldValidator;
 import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+import com.caucho.vfs.*;
 
 import javax.servlet.jsp.tagext.FunctionInfo;
 import javax.servlet.jsp.tagext.TagExtraInfo;
@@ -254,6 +254,14 @@ public class Taglib extends TagLibraryInfo {
       if (tagFile.getName().equals(name))
 	return tagFile.getPath();
     }
+
+    /*
+    String uri = getURI();
+
+    
+    if (uri != null && uri.startsWith("urn:jsptagdir:"))
+      return Vfs.lookup().lookup("./" + uri.substring("urn:jsptagdir:".length()) + "/" + name + ".tag").getNativePath();
+    */
 
     return null;
   }

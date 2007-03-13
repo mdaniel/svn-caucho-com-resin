@@ -42,6 +42,7 @@ import com.caucho.make.ClassDependency;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
+import com.caucho.i18n.*;
 import com.caucho.vfs.*;
 import com.caucho.xml.QName;
 import com.caucho.xpath.NamespaceContext;
@@ -927,9 +928,17 @@ public class JavaJspGenerator extends JspGenerator {
     throws IOException
   {
     String encoding = Encoding.getMimeName(_parseState.getCharEncoding());
-    
-    if (encoding != null && encoding.equals("ISO-8859-1"))
+
+    if (encoding == null)
+      encoding = Encoding.getMimeName(_parseState.getPageEncoding());
+
+    if (encoding == null)
+      encoding = Encoding.getMimeName(CharacterEncoding.getLocalEncoding());
+
+    /*
+    if ("ISO-8859-1".equals(encoding))
       encoding = null;
+    */
 
     String contentType = _parseState.getContentType();
     if (contentType != null && contentType.equals("text/html"))
@@ -1258,6 +1267,10 @@ public class JavaJspGenerator extends JspGenerator {
 	for (int i = 0; i < types.length; i++) {
 	  args[i] = getBeanClass(types[i]);
 	}
+
+        if (sig.getReturnType == null)
+          throw error(L.l("deferredMethod signature '{0}' needs a return type.",
+                          sigString));
 
 	retType = getBeanClass(sig.getReturnType());
       }

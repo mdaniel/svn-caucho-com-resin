@@ -37,6 +37,7 @@ import com.caucho.xml.QName;
 import javax.servlet.jsp.HttpJspPage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.*;
 
 public class JspDirectivePage extends JspNode {
   static L10N L = new L10N(JspDirectivePage.class);
@@ -117,8 +118,14 @@ public class JspDirectivePage extends JspNode {
       }
       */
 
-      _parseState.setPageEncoding(value);
-      _parseState.setCharEncoding(value);
+      try {
+        _parseState.setPageEncoding(value);
+        _parseState.setCharEncoding(value);
+      } catch (JspParseException e) {
+        log.log(Level.FINER, e.toString(), e);
+
+        throw error(e.getMessage());
+      }
     }
     else if (LANGUAGE.equals(name)) {
       if (! value.equals("java"))

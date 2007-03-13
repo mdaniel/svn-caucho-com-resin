@@ -39,7 +39,8 @@ import java.util.ArrayList;
 /**
  * Configuration for the taglib in the .tld
  */
-public class TldTaglib implements DependencyBean {
+public class TldTaglib implements DependencyBean
+{
   private String _tlibVersion;
   private String _jspVersion;
   private String _shortName;
@@ -62,6 +63,10 @@ public class TldTaglib implements DependencyBean {
     = new ArrayList<PersistentDependency>();
 
   private boolean _isInit;
+
+  public TldTaglib()
+  {
+  }
 
   /**
    * Adds a dependency.

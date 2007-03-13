@@ -30,6 +30,7 @@ package com.caucho.jsp;
 
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
+import com.caucho.bytecode.JavaClass;
 
 import java.util.logging.Logger;
 
@@ -39,6 +40,9 @@ import java.util.logging.Logger;
 public class AnalyzedTag {
   private static final Logger log = Log.open(AnalyzedTag.class);
   static final L10N L = new L10N(AnalyzedTag.class);
+
+  private AnalyzedTag _parent;
+  private JavaClass _javaClass;
 
   private boolean _isBodyTag;
   
@@ -60,6 +64,16 @@ public class AnalyzedTag {
   private boolean _doFinally;
 
   private boolean _hasInjection;
+
+  public AnalyzedTag getParent()
+  {
+    return _parent;
+  }
+
+  public void setParent(AnalyzedTag parent)
+  {
+    _parent = parent;
+  }
 
   /**
    * Set true for a body tag.
@@ -291,5 +305,15 @@ public class AnalyzedTag {
   public void setHasInjection(boolean hasInjection)
   {
     _hasInjection = hasInjection;
+  }
+
+  public JavaClass getJavaClass()
+  {
+    return _javaClass;
+  }
+
+  public void setJavaClass(JavaClass javaClass)
+  {
+    _javaClass = javaClass;
   }
 }

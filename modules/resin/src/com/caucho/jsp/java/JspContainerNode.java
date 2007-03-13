@@ -172,12 +172,28 @@ public abstract class JspContainerNode extends JspNode {
       if (! isXml)
         _children.add(node);
     }
+    else if (node instanceof JspBody && hasJspBody()) {
+      throw node.error(L.l("tags may only have a single jsp:body tag"));
+    }
     else {
       if (_children == null)
         _children = new ArrayList<JspNode>();
 
       _children.add(node);
     }
+  }
+
+  private boolean hasJspBody()
+  {
+    if (_children == null)
+      return false;
+
+    for (int i = _children.size() - 1; i >= 0; i--) {
+      if (_children.get(i) instanceof JspBody)
+        return true;
+    }
+
+    return false;
   }
   
   /**

@@ -634,6 +634,7 @@ public class JspCompiler implements EnvironmentBean {
 	}
       }
 
+      compiler.setResourceManager(new AppDirResourceManager(appDir));
       thread.setContextClassLoader(loader);
         
       ArrayList<String> pendingClasses = new ArrayList<String>();
@@ -740,8 +741,13 @@ public class JspCompiler implements EnvironmentBean {
 
     @PostConstruct
     public void init()
+      throws Exception
     {
-      _builder.configure(createWebApp(_rootDir));
+      WebApp webApp = createWebApp(_rootDir);
+      _builder.configure(webApp);
+
+      webApp.init();
+      webApp.start();
     }
   }
 }

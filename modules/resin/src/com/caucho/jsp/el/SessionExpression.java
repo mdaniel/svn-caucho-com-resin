@@ -40,9 +40,20 @@ import java.io.IOException;
 import java.util.*;
 
 public class SessionExpression extends AbstractValueExpression
+  implements FieldGenerator
 {
   public static final ValueExpression EXPR
     = new SessionExpression();
+
+  /**
+   * Creates a field reference using this expression as the base object.
+   *
+   * @param field the string reference for the field.
+   */
+  public ValueExpression createField(String field)
+  {
+    return new SessionFieldExpression(field);
+  }
   
   /**
    * Evaluate the expr as an object.

@@ -31,6 +31,7 @@ package com.caucho.jsp.el;
 
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
+import com.caucho.util.*;
 
 import javax.el.ELContext;
 import javax.servlet.*;
@@ -71,7 +72,8 @@ abstract public class ServletELContext extends ELContext
     if (request == null)
       return null;
 
-    HashMap<String,String[]> map = new HashMap<String,String[]>();
+    HashMap<String,String[]> map
+      = new CaseInsensitiveHashMap<String[]>();
     Enumeration e = request.getHeaderNames();
 
     while (e.hasMoreElements()) {

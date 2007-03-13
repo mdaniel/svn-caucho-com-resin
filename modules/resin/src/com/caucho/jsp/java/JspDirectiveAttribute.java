@@ -185,7 +185,7 @@ public class JspDirectiveAttribute extends JspNode {
     if (_deferredValue && _deferredValueType != null)
       throw error(L.l("@attribute deferredValue and deferredValueType may not both be specified"));
     
-    if (_deferredMethod && _deferredMethodSignature != null)
+    if (_deferredMethod == Boolean.FALSE && _deferredMethodSignature != null)
       throw error(L.l("@attribute deferredMethod and deferredMethodSignature may not both be specified"));
     
     if ((_deferredValue || _deferredValueType != null)

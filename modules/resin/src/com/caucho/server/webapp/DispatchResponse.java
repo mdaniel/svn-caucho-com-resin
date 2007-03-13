@@ -44,7 +44,8 @@ import java.io.IOException;
 /**
  * Internal response for an include() or forward()
  */
-class DispatchResponse extends AbstractHttpResponse {
+class DispatchResponse extends AbstractHttpResponse
+{
   private static final FreeList<DispatchResponse> _freeList =
     new FreeList<DispatchResponse>(32);
 
@@ -149,6 +150,13 @@ class DispatchResponse extends AbstractHttpResponse {
     return false;
   }
 
+  @Override
+  public String getCharacterEncoding()
+  {
+    // jsp/17e1
+    return _next.getCharacterEncoding();
+  }
+  
   @Override
   public boolean isCommitted()
   {

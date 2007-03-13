@@ -212,7 +212,7 @@ public class ParseTagManager {
       hasTld = true;
 
       if (taglib == null) {
-        throw error(L.l("`{0}' has no matching tag.  The taglib uri must match a <uri> element in a taglib.tld.", uri));
+        throw error(L.l("'{0}' has no matching tag.  The taglib uri must match a <uri> element in a taglib.tld.", uri));
       }
     }
     else {
@@ -226,7 +226,7 @@ public class ParseTagManager {
       taglib = _taglibManager.getTaglib(prefix, uri, location);
 
       if (hasTld && taglib == null) {
-        throw error(L.l("`{0}' has no matching tag.  The taglib uri must match a <uri> element in a taglib.tld.", uri));
+        throw error(L.l("'{0}' has no matching tag.  The taglib uri must match a <uri> element in a taglib.tld.", uri));
       }
     }
 

@@ -47,7 +47,8 @@ import java.util.Map;
  * a[b]
  * </pre>
  */
-public class ArrayExpr extends Expr {
+public class ArrayExpr extends Expr
+{
   private Expr _left;
   private Expr _right;
 

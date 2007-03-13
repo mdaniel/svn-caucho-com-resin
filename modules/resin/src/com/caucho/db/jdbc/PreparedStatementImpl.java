@@ -50,7 +50,8 @@ public class PreparedStatementImpl extends StatementImpl
   private ResultSet _resultSet;
 
   private boolean _isReturnGeneratedKeys;
-  
+  private int _count;
+
   PreparedStatementImpl(ConnectionImpl conn, Query query)
   {
     super(conn);
@@ -313,8 +314,6 @@ public class PreparedStatementImpl extends StatementImpl
     
     return getUpdateCount();
   }
-
-  private int _count;
 
   public boolean execute()
     throws SQLException
