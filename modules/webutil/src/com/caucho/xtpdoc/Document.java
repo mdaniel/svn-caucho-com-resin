@@ -111,7 +111,7 @@ public class Document {
 
     NavigationItem child = null;
 
-    while (! uri.equals("")) {
+    while (! uri.equals("") && rootWebApp != null) {
       String realPath = rootWebApp.getRealPath(uri);
       
       Path path = Vfs.lookup(realPath);
