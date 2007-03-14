@@ -212,6 +212,11 @@ abstract public class CascadableField extends AbstractField {
 
       out.println("("+ getter + ");");
 
+      // XXX: jpa/0h27
+      if (cascadeType == CascadeType.PERSIST) {
+        out.println("((com.caucho.amber.entity.Entity) " + getter + ").__caucho_flush();");
+      }
+
       out.popDepth();
       out.println("}");
     }

@@ -584,7 +584,8 @@ public class EntityManyToOneField extends CascadableField {
     out.println("if (aConn != null) {");
     */
 
-    out.print("if (__caucho_session != null");
+    // jpa/0h29
+    out.print("if (__caucho_session != null && __caucho_state != com.caucho.amber.entity.EntityState.P_DELETED");
 
     if (isLazy())
       out.println(" && (" + loadVar + " & " + mask + "L) == 0) {");
@@ -719,6 +720,21 @@ public class EntityManyToOneField extends CascadableField {
     out.println(targetTypeExt + " " + varName + " = null;");
     out.println();
 
+    Id id = getEntityTargetType().getId();
+
+    String nullString = "null";
+
+    if (id instanceof CompositeId) {
+    }
+    else {
+      KeyPropertyField key = (KeyPropertyField) id.getKeys().get(0);
+      nullString = key.getColumn().getType().generateNull();
+    }
+
+    // jpa/0h27
+    out.println("if (" + otherKey + " != " + nullString + ") {");
+    out.pushDepth();
+
     out.println("try {");
     out.pushDepth();
 
@@ -749,9 +765,18 @@ public class EntityManyToOneField extends CascadableField {
       out.println(proxy);
     }
     else {
+      // jpa/0h24
+      out.println("if (! " + varName + ".__caucho_getEntityState().isManaged()) {");
+      out.pushDepth();
+
       // jpa/0o03
       out.println(session + ".loadFromHome(" + targetTypeExt + ".class.getName(), " + otherKey + ");");
+      out.popDepth();
+      out.println("}");
     }
+
+    out.popDepth();
+    out.println("}");
 
     out.println(generateSuperSetter(varName) + ";");
   }
@@ -1060,6 +1085,20 @@ public class EntityManyToOneField extends CascadableField {
       out.println(dirtyVar + " |= " + dirtyMask + "L;");
 
       out.println(loadVar + " |= " + loadMask + "L;");
+
+      out.println("try {");
+      out.pushDepth();
+
+      // XXX: jpa/0h27
+      out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSIST)");
+      out.println("  __caucho_cascadePrePersist(__caucho_session);");
+
+      out.popDepth();
+      out.println("} catch (RuntimeException e) {");
+      out.println("  throw e;");
+      out.println("} catch (Exception e) {");
+      out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+      out.println("}");
 
       out.println("__caucho_session.update((com.caucho.amber.entity.Entity) this);");
 

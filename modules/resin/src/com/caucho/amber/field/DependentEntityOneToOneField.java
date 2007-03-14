@@ -336,7 +336,9 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.println("{");
     out.pushDepth();
 
-    out.print("if (__caucho_session != null && ");
+    // jpa/0h29
+    out.print("if (__caucho_session != null && __caucho_state != com.caucho.amber.entity.EntityState.P_DELETED && ");
+
     out.println("(" + loadVar + " & " + loadMask + "L) == 0) {");
     out.pushDepth();
     out.println("__caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
@@ -574,6 +576,20 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.println(generateSuperSetter("v") + ";");
     out.println("if (__caucho_session != null) {");
     out.pushDepth();
+
+    out.println("try {");
+    out.pushDepth();
+
+    // XXX: jpa/0h27
+    out.println("if (__cauchoState == com.caucho.amber.entity.EntityState.P_PERSIST)");
+    out.println("  __caucho_cascadePrePersist(__caucho_session);");
+
+    out.popDepth();
+    out.println("} catch (RuntimeException e) {");
+    out.println("  throw e;");
+    out.println("} catch (Exception e) {");
+    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("}");
 
     String updateVar = "__caucho_updateMask_" + (_targetLoadIndex / 64);
     long updateMask = (1L << _targetLoadIndex);

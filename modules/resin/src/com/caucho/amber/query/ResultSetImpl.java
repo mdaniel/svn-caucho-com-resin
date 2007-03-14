@@ -1119,9 +1119,14 @@ public class ResultSetImpl implements ResultSet {
     if (value instanceof Entity) {
       Entity entity = (Entity) value;
 
-      _session.setTransactionalState(entity);
-
-      _session.addEntity((Entity) value);
+      if (_session.isInTransaction()) {
+        _session.setTransactionalState(entity);
+        _session.addEntity((Entity) value);
+      }
+      else {
+        // jpa/0h19
+        entity.__caucho_detach();
+      }
     }
 
     return value;

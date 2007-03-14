@@ -777,7 +777,7 @@ public class AmberConnection
   }
 
   /**
-   * Returns the amber manaber.
+   * Returns the amber manager.
    */
   public AmberPersistenceUnit getAmberManager()
   {
@@ -1089,6 +1089,14 @@ public class AmberConnection
       home.init();
 
       return home.load(this, key);
+    } catch (AmberObjectNotFoundException e) {
+      if (_persistenceUnit.isJPA()) {
+        // jpa/0h29
+        log.log(Level.FINER, e.toString(), e);
+        return null;
+      }
+
+      throw e;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -1271,6 +1279,9 @@ public class AmberConnection
 
       for (int i = _entities.size() - 1; i >= 0; i--) {
         entity = _entities.get(i);
+
+        className = entity.getClass().getName();
+        pk = entity.__caucho_getPrimaryKey();
 
         if (isCacheEntity(entity)) {
           Exception e = new Exception(L.l("amber manager: context entity(class: '{0}' PK: '{1}') is the same reference in cache.", className, pk));
