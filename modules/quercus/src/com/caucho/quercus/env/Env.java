@@ -35,7 +35,7 @@ import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.file.FileModule;
-import com.caucho.quercus.lib.string.StringModule;
+import com.caucho.quercus.lib.string.StringUtility;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.page.QuercusPage;
@@ -1544,12 +1544,6 @@ public class Env {
       }
 
       //XXX: php/081e, need to put uploaded files into $_FILES
-      try {
-        _request.setCharacterEncoding(getHttpInputEncoding().toString());
-      } catch (Exception e) {
-          log.log(Level.FINE, e.toString(), e);
-      }
-
       ArrayList<String> keys = new ArrayList<String>();
       if (_request.getParameterMap() != null)
         keys.addAll(_request.getParameterMap().keySet());
@@ -1588,7 +1582,7 @@ public class Env {
 
     case HTTP_GET_VARS:
       if (! getIniBoolean("register_long_arrays"))
-	return null;
+        return null;
       
     case _GET: {
       var = new Var();
@@ -1596,21 +1590,17 @@ public class Env {
       ArrayValue array = new ArrayValueImpl();
 
       var.set(array);
-
       _globalMap.put(name, var);
 
-      try {
-	_request.setCharacterEncoding(getHttpInputEncoding().toString());
-      } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
-
       String queryString = _request.getQueryString();
-
       if (queryString == null)
-	return var;
+        return var;
 
-      StringModule.parse_str(this, queryString, var);
+      StringUtility.parseStr(this,
+                             queryString,
+                             array,
+                             true,
+                             getHttpInputEncoding().toString());
 
       return var;
     }

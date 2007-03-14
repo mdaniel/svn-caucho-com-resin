@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.lib.string.StringModule;
+import com.caucho.quercus.lib.string.StringUtility;
 import com.caucho.vfs.*;
 
 import javax.servlet.*;
@@ -52,6 +53,11 @@ public class Post {
       if (! request.getMethod().equals("POST"))
         return;
 
+      String encoding = request.getCharacterEncoding();
+      
+      if (encoding == null)
+        encoding = env.getHttpInputEncoding().toString();
+
       String contentType = request.getHeader("Content-Type");
 
       if (contentType == null)
@@ -69,7 +75,7 @@ public class Post {
           value.append((char) ch);
         }
         
-        StringModule.parse_str(env, value.toString(), post);
+        StringUtility.parseStr(env, value.toString(), post, false, encoding);
         
         return;
       }
@@ -83,7 +89,7 @@ public class Post {
 
       ReadStream rs = new ReadStream(new VfsStream(is, null));
       MultipartStream ms = new MultipartStream(rs, boundary);
-      // ms.setEncoding(javaEncoding);
+      ms.setEncoding(encoding);
 
       readMultipartStream(env, ms, post, files, addSlashesToValues);
 

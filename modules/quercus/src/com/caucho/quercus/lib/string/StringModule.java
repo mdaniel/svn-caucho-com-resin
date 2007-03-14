@@ -1259,172 +1259,26 @@ v   *
     if (str == null)
       str = "";
     
-    try {
-      ByteToChar byteToChar = env.getByteToChar();
-      int len = str.length();
+    boolean isRef = ref instanceof Var;
 
-      boolean isRef = ref instanceof Var;
+    ArrayValue result = null;
 
-      ArrayValue result = null;
-
-      if (isRef) {
-	result = new ArrayValueImpl();
-	ref.set(result);
-      }
-      else if (ref instanceof ArrayValue) {
-	result = (ArrayValue) ref;
-	isRef = true;
-      }
-      else
-	result = new ArrayValueImpl();
-
-      for (int i = 0; i < len; i++) {
-	int ch = 0;
-	byteToChar.clear();
-
-	for (; i < len && (ch = str.charAt(i)) == '&'; i++) {
-	}
+    if (isRef) {
+      result = new ArrayValueImpl();
+      ref.set(result);
+    }
+    else if (ref instanceof ArrayValue) {
+      result = (ArrayValue) ref;
+      isRef = true;
+    }
+    else
+      result = new ArrayValueImpl();
       
-	for (; i < len && (ch = str.charAt(i)) != '='; i++) {
-	  i = addQueryChar(byteToChar, str, len, i, ch);
-	}
-
-	String key = byteToChar.getConvertedString();
-
-	byteToChar.clear();
-
-	String value;
-	if (ch == '=') {
-	  for (i++; i < len && (ch = str.charAt(i)) != '&'; i++) {
-	    i = addQueryChar(byteToChar, str, len, i, ch);
-	  }
-
-	  value = byteToChar.getConvertedString();
-	}
-	else
-	  value = "";
-
-	if (isRef) {
-	  Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
-	} else {
-	  // If key is an exsiting array, then append this value to existing array
-	  // Only use extract(EXTR_OVERWRITE) on non-array variables or
-	  // non-existing arrays
-	  int openBracketIndex = key.indexOf('[');
-	  int closeBracketIndex = key.indexOf(']');
-	  if (openBracketIndex > 0) {
-	    Value v = env.getVar(key.substring(0,openBracketIndex)).getRawValue();
-	    if (v instanceof ArrayValue) {
-	      //Check to make sure valid string (ie: foo[...])
-	      if (closeBracketIndex < 0) {
-		env.warning(L.l("invalid array " + key));
-		return NullValue.NULL;
-	      }
-	      if (closeBracketIndex > openBracketIndex + 1) {
-		String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
-		v.put(new StringValueImpl(index), new StringValueImpl(value));
-	      } else {
-		v.put(new StringValueImpl(value));
-	      }
-	    } else {
-	      Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
-	    }
-	  } else {
-	    Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
-	  }
-	}
-      }
-
-      if (! isRef) {
-	ArrayModule.extract(env, result,
-			    ArrayModule.EXTR_OVERWRITE,
-			    null);
-      }
-
-      return NullValue.NULL;
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
-  }
-
-  private static int addQueryChar(ByteToChar byteToChar, String str, int len,
-                                  int i, int ch)
-    throws IOException
-  {
-    if (str == null)
-      str = "";
-    
-    switch (ch) {
-    case '+':
-      byteToChar.addChar(' ');
-      return i;
-
-    case '%':
-      if (i + 2 < len) {
-        int d1 = hexToDigit(str.charAt(i + 1));
-        int d2 = hexToDigit(str.charAt(i + 2));
-
-        // XXX: d1 and d2 may be -1 if not valid hex chars
-        byteToChar.addByte(d1 * 16 + d2);
-
-        return i + 2;
-      }
-      else {
-        byteToChar.addByte((byte) ch);
-        return i;
-      }
-
-    default:
-      byteToChar.addByte((byte) ch);
-      return i;
-    }
-  }
-
-  public static void addQueryValue(Env env, ArrayValue array,
-                                   String key, String valueStr)
-  {
-    if (key == null)
-      key = "";
-    
-    if (valueStr == null)
-      valueStr = "";
-    
-    int p;
-
-    Value value = new StringValueImpl(valueStr);
-
-    if ((p = key.indexOf('[')) > 0 && key.endsWith("]")) {
-      String index = key.substring(p + 1, key.length() - 1);
-      key = key.substring(0, p);
-
-      Value keyValue = new StringValueImpl(key);
-
-      Value part;
-
-      if (array != null)
-        part = array.get(keyValue);
-      else
-        part = env.getVar(key);
-
-      if (! part.isArray())
-        part = new ArrayValueImpl();
-
-      if (index.equals(""))
-        part.put(value);
-      else
-        part.put(new StringValueImpl(index), value);
-
-      if (array != null)
-        array.put(keyValue, part);
-      else
-        env.setVar(key, part);
-    }
-    else {
-      if (array != null)
-        array.put(new StringValueImpl(key), value);
-      else
-        env.setVar(key, value);
-    }
+    return StringUtility.parseStr(env,
+                                  str,
+                                  result,
+                                  isRef,
+                                  env.getHttpInputEncoding().toString());
   }
 
   /**
@@ -4059,7 +3913,7 @@ v   *
   /**
    * Returns true if the character is a whitespace character.
    */
-  private static boolean isWhitespace(char ch)
+  protected static boolean isWhitespace(char ch)
   {
     return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r';
   }
@@ -4067,7 +3921,7 @@ v   *
   /**
    * Returns the uppercase equivalent of the caharacter
    */
-  private static char toUpperCase(char ch)
+  protected static char toUpperCase(char ch)
   {
     if (ch >= 'a' && ch <= 'z')
       return (char) ('A' + (ch - 'a'));
@@ -4078,7 +3932,7 @@ v   *
   /**
    * Converts an integer digit to a uuencoded char.
    */
-  private static char toUUChar(int d)
+  protected static char toUUChar(int d)
   {
     if (d == 0)
       return (char) 0x60;
@@ -4086,7 +3940,7 @@ v   *
       return (char) (0x20 + (d & 0x3f));
   }
 
-  private static char toHexChar(int d)
+  protected static char toHexChar(int d)
   {
     d &= 0xf;
     
@@ -4096,7 +3950,7 @@ v   *
       return (char) (d - 10 + 'a');
   }
 
-  private static char toUpperHexChar(int d)
+  protected static char toUpperHexChar(int d)
   {
     d &= 0xf;
     
@@ -4106,7 +3960,7 @@ v   *
       return (char) (d - 10 + 'A');
   }
 
-  private static int hexToDigit(char ch)
+  protected static int hexToDigit(char ch)
   {
     if ('0' <= ch && ch <= '9')
       return ch - '0';
@@ -4118,7 +3972,7 @@ v   *
       return -1;
   }
 
-  private static int octToDigit(char ch)
+  protected static int octToDigit(char ch)
   {
     if ('0' <= ch && ch <= '7')
       return ch - '0';

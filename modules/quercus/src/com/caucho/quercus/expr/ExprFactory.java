@@ -509,32 +509,38 @@ public class ExprFactory {
   {
     if (left == null)
       return tail;
-
+    
     tail = append(left.getNext(), tail);
-
+    
     if (left.getValue() instanceof BinaryLiteralExpr
-	&& tail.getValue() instanceof BinaryLiteralExpr) {
+        && tail.getValue() instanceof BinaryLiteralExpr) {
       BinaryLiteralExpr leftString = (BinaryLiteralExpr) left.getValue();
       BinaryLiteralExpr rightString = (BinaryLiteralExpr) tail.getValue();
 
       try {
-	byte []bytes = (leftString.evalConstant().toString()
-			+ rightString.evalConstant().toString()).getBytes("ISO-8859-1");
+        byte []bytes = (leftString.evalConstant().toString()
+            + rightString.evalConstant().toString()).getBytes("ISO-8859-1");
 
-	Expr value = createBinary(bytes);
+        Expr value = createBinary(bytes);
 
-	return createAppendImpl(value, tail.getNext());
+        return createAppendImpl(value, tail.getNext());
       } catch (java.io.UnsupportedEncodingException e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
     }
+    else if (left.getValue() instanceof BinaryLiteralExpr
+             || tail.getValue() instanceof BinaryLiteralExpr) {
+      left.setNext(tail);
+
+      return left;
+    }
     else if (left.getValue() instanceof StringLiteralExpr
-	     && tail.getValue() instanceof StringLiteralExpr) {
+             && tail.getValue() instanceof StringLiteralExpr) {
       StringLiteralExpr leftString = (StringLiteralExpr) left.getValue();
       StringLiteralExpr rightString = (StringLiteralExpr) tail.getValue();
 
       Expr value = createString(leftString.evalConstant().toString()
-				+ rightString.evalConstant().toString());
+                + rightString.evalConstant().toString());
 
       return createAppendImpl(value, tail.getNext());
     }
