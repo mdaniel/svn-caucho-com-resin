@@ -46,6 +46,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
+import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -129,7 +130,7 @@ public class JAXBContextImpl extends JAXBContext {
 
     do {
       String packageName = st.nextToken(); 
-      loadPackage(packageName);
+      loadPackage(packageName, classLoader);
     } 
     while (st.hasMoreTokens());
 
@@ -201,7 +202,7 @@ public class JAXBContextImpl extends JAXBContext {
     return _staxInputFactory.createXMLStreamReader(is);
   }
 
-  XMLInputFactory getXMLInputFactory()
+  public XMLInputFactory getXMLInputFactory()
   {
     if (_staxInputFactory == null)
       _staxInputFactory = XMLInputFactory.newInstance();
@@ -209,7 +210,7 @@ public class JAXBContextImpl extends JAXBContext {
     return _staxInputFactory;
   }
 
-  XMLOutputFactory getXMLOutputFactory()
+  public XMLOutputFactory getXMLOutputFactory()
   {
     if (_staxOutputFactory == null) {
       _staxOutputFactory = XMLOutputFactory.newInstance();
@@ -408,11 +409,18 @@ public class JAXBContextImpl extends JAXBContext {
   public Property createProperty(Type type, boolean anyType)
     throws JAXBException
   {
+    return createProperty(type, anyType, null);
+  }
+
+  public Property createProperty(Type type, boolean anyType, String mimeType)
+    throws JAXBException
+  {
     if (type instanceof Class) {
       if (anyType && Object.class.equals(type))
         return getLaxAnyTypeProperty();
 
-      Property simpleTypeProperty = getSimpleTypeProperty((Class) type);
+      Property simpleTypeProperty = 
+        getSimpleTypeProperty((Class) type, mimeType);
 
       if (simpleTypeProperty != null)
         return simpleTypeProperty;
@@ -471,6 +479,13 @@ public class JAXBContextImpl extends JAXBContext {
   }
 
   public Property getSimpleTypeProperty(Class type)
+    throws JAXBException
+  {
+    return getSimpleTypeProperty(type, null);
+  }
+
+  public Property getSimpleTypeProperty(Class type, String mimeType)
+    throws JAXBException
   {
     if (String.class.equals(type))
       return StringProperty.PROPERTY;
@@ -553,6 +568,13 @@ public class JAXBContextImpl extends JAXBContext {
     if (byte[].class.equals(type))
       return ByteArrayProperty.PROPERTY;
 
+    if (Image.class.equals(type)) {
+      if (mimeType == null)
+        return ImageProperty.getDefaultImageProperty();
+      else
+        return ImageProperty.getImageProperty(mimeType);
+    }
+
     return null;
   }
 
@@ -588,7 +610,7 @@ public class JAXBContextImpl extends JAXBContext {
     return _roots.get(q);
   }
 
-  private void loadPackage(String packageName) 
+  private void loadPackage(String packageName, ClassLoader classLoader) 
     throws JAXBException
   {
     boolean success = false;
@@ -609,12 +631,8 @@ public class JAXBContextImpl extends JAXBContext {
     InputStream is = this.getClass().getResourceAsStream('/' + resourceName);
 
     // ...and this approach works in QA
-    if (is == null) {
-      ClassLoader classLoader = 
-        Thread.currentThread().getContextClassLoader();
-
+    if (is == null)
       is = classLoader.getResourceAsStream(resourceName);
-    }
 
     if (is == null) {
       if (success)
@@ -635,7 +653,7 @@ public class JAXBContextImpl extends JAXBContext {
         String className = parts[0].trim();
 
         if (! "".equals(className)) {
-          Class cl = Class.forName(packageName + "." + className);
+          Class cl = classLoader.loadClass(packageName + "." + className);
 
           createSkeleton(cl);
         }

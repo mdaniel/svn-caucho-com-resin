@@ -80,8 +80,9 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
 
     Skeleton skeleton = _context.getRootElement(name);
 
+    // Get the AnyTypeSkeleton as a fallback
     if (skeleton == null)
-      throw new JAXBException(L.l("No root found for element {0}", name));
+      skeleton = _context.getSkeleton(Object.class);
 
     return skeleton.read(u, in);
   }
@@ -95,14 +96,15 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
 
     Skeleton skeleton = _context.getRootElement(name);
 
+    // Get the AnyTypeSkeleton as a fallback
     if (skeleton == null)
-      throw new JAXBException(L.l("No root found for element {0}", name));
+      skeleton = _context.getSkeleton(Object.class);
 
     return skeleton.read(u, in);
   }
 
   public Object bindFrom(BinderImpl binder, Object existing, NodeIterator node)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     QName name = JAXBUtil.qnameFromNode(node.getNode());
 
@@ -152,7 +154,7 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
 
   public Node bindTo(BinderImpl binder, Node node, 
                      Object obj, QName fieldName, Iterator attributes)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
 

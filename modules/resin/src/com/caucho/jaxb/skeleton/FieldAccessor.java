@@ -51,7 +51,6 @@ public class FieldAccessor extends Accessor {
   private Field _field;
   private Class _type;
   private Type _genericType;
-  private String _name;
 
   public FieldAccessor(JAXBContextImpl context, Field f)
     throws JAXBException
@@ -64,20 +63,6 @@ public class FieldAccessor extends Accessor {
     _name = _field.getName();
 
     init();
-
-    // XXX move these into Accessor.init()
-    if (_field.isAnnotationPresent(XmlElement.class)) {
-      XmlElement element = _field.getAnnotation(XmlElement.class);
-
-      if (! "##default".equals(element.name()))
-        _name = element.name();
-    }
-    else if (_field.isAnnotationPresent(XmlAttribute.class)) {
-      XmlAttribute attribute = _field.getAnnotation(XmlAttribute.class);
-
-      if (! "##default".equals(attribute.name()))
-        _name = attribute.name();
-    }
   }
 
   public Object get(Object o)

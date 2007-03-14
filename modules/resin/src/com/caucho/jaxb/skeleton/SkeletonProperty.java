@@ -74,7 +74,7 @@ public class SkeletonProperty extends Property {
   }
 
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     Node root = node.getNode();
 
@@ -104,7 +104,7 @@ public class SkeletonProperty extends Property {
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     return _skeleton.bindTo(binder, node, obj, qname, null);
   }

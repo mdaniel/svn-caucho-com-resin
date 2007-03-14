@@ -93,7 +93,7 @@ public class MultiProperty extends Property {
   }
 
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     QName nodeQname = JAXBUtil.qnameFromNode(node.getNode());
 
@@ -132,7 +132,7 @@ public class MultiProperty extends Property {
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     if (obj != null) {
       Property property = _classMap.get(obj.getClass());

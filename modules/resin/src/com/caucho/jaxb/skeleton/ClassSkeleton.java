@@ -378,6 +378,9 @@ public class ClassSkeleton<C> extends Skeleton {
           if (set != null && set.isAnnotationPresent(XmlTransient.class))
             continue;
 
+          get.setAccessible(true);
+          set.setAccessible(true);
+
           Accessor a = new GetterSetterAccessor(_context, name, get, set); 
 
           if (orderMap != null) {
@@ -731,7 +734,7 @@ public class ClassSkeleton<C> extends Skeleton {
   }
 
   public Object bindFrom(BinderImpl binder, Object existing, NodeIterator node)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     Node root = node.getNode();
     C ret = (C) existing;
@@ -899,7 +902,7 @@ public class ClassSkeleton<C> extends Skeleton {
 
   public Node bindTo(BinderImpl binder, Node node, 
                      Object obj, QName fieldName, Iterator attributes)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     if (obj == null)
       return null;

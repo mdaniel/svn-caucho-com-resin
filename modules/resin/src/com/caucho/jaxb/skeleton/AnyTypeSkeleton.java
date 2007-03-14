@@ -33,7 +33,9 @@ import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.util.L10N;
+import com.caucho.xml.stream.StaxUtil;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import javax.xml.bind.annotation.*;
@@ -45,10 +47,12 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.events.*;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.dom.DOMResult;
 import java.io.IOException;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
@@ -73,16 +77,27 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
   public Object read(Unmarshaller u, XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
   {
-    // skip everything in this subtree
-    int depth = 0;
+    DOMResult result = new DOMResult();
+    XMLOutputFactory factory = _context.getXMLOutputFactory();
+    XMLStreamWriter out = factory.createXMLStreamWriter(result);
 
+    StaxUtil.copyReaderToWriter(in, out);
+
+    Node node = result.getNode();
+
+    if (node.getNodeType() == Node.DOCUMENT_NODE)
+      node = ((Document) node).getDocumentElement();
+
+    return node;
+
+    /*
     Skeleton skeleton = _context.getRootElement(in.getName());
 
     if (skeleton != null)
       return skeleton.read(u, in);
 
-    // XXX the following works for JAXB TCK -- check if this is correct
-    // behavior otherwise
+    // skip everything in this subtree
+    int depth = 0;
 
     in.nextTag();
 
@@ -99,7 +114,7 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
     } 
     while (depth > 0);
 
-    return null;
+    return null;*/
   }
 
   public Object read(Unmarshaller u, XMLEventReader in)

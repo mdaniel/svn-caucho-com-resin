@@ -104,7 +104,7 @@ public class ObjectArrayProperty<T> extends ArrayProperty {
   }
 
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     T[] array = (T[]) previous;
 
@@ -152,7 +152,7 @@ public class ObjectArrayProperty<T> extends ArrayProperty {
   }
   
   public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     QName name = JAXBUtil.qnameFromNode(node);
     Document doc = node.getOwnerDocument(); 

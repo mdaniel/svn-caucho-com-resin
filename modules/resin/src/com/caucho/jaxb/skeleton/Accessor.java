@@ -50,6 +50,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
@@ -87,6 +88,7 @@ public abstract class Accessor {
 
   public static final String XML_SCHEMA_PREFIX = "xsd";
   public static final String XML_INSTANCE_PREFIX = "xsi";
+  public static final String XML_MIME_NS = "http://www.w3.org/2005/05/xmlmime";
 
   public static final Comparator<Accessor> nameComparator 
     = new Comparator<Accessor>() {
@@ -107,6 +109,7 @@ public abstract class Accessor {
   protected JAXBContextImpl _context;
 
   protected Property _property;
+  protected String _name;
 
   protected QName _qname = null;
   protected HashMap<Class,QName> _qnameMap = null;
@@ -128,12 +131,30 @@ public abstract class Accessor {
     throws JAXBException
   {
     // XXX wrapper
+
+    XmlElement element = getAnnotation(XmlElement.class);
+
+    if (element != null && ! "##default".equals(element.name()))
+      _name = element.name();
+    else {
+      XmlAttribute attribute = getAnnotation(XmlAttribute.class);
+      
+      if (attribute != null && ! "##default".equals(attribute.name()))
+        _name = attribute.name();
+    }
     
+    XmlMimeType xmlMimeType = getAnnotation(XmlMimeType.class);
+    String mimeType = null;
+    
+    if (xmlMimeType != null)
+      mimeType = xmlMimeType.value();
+
     switch (getAccessorType()) {
       case ELEMENT: 
         {
           // XXX respect the type from the XmlElement annotation
-          _property = _context.createProperty(getGenericType(), false);
+          _property = 
+            _context.createProperty(getGenericType(), false, mimeType);
 
           XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
 
@@ -141,8 +162,6 @@ public abstract class Accessor {
             _qname = qnameFromXmlElementWrapper(wrapper);
             break;
           }
-
-          XmlElement element = getAnnotation(XmlElement.class);
 
           if (element != null) {
             _qname = qnameFromXmlElement(element);
@@ -177,7 +196,8 @@ public abstract class Accessor {
           else
             _qname = new QName(namespace, name);
 
-          _property = _context.createProperty(getGenericType(), false);
+          _property =
+            _context.createProperty(getGenericType(), false, mimeType);
 
           break;
         }
@@ -187,7 +207,8 @@ public abstract class Accessor {
           // XXX
           _qname = new QName(getName());
 
-          _property = _context.createProperty(getGenericType(), false);
+          _property = 
+            _context.createProperty(getGenericType(), false, mimeType);
 
           if (! _property.isXmlPrimitiveType() && 
               ! Collection.class.isAssignableFrom(getType()))
@@ -213,7 +234,7 @@ public abstract class Accessor {
           HashMap<Class,Property> classMap = new HashMap<Class,Property>();
 
           for (int i = 0; i < elements.value().length; i++) {
-            XmlElement element = elements.value()[i];
+            element = elements.value()[i];
 
             if (XmlElement.DEFAULT.class.equals(element.type()))
               throw new JAXBException(L.l("@XmlElement annotations in @XmlElements must specify a type"));
@@ -373,7 +394,7 @@ public abstract class Accessor {
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     Object value = get(obj);
 
@@ -385,13 +406,13 @@ public abstract class Accessor {
   
 
   public Object readAttribute(XMLStreamReader in, int i)
-    throws XMLStreamException, JAXBException
+    throws IOException, XMLStreamException, JAXBException
   {
     return _property.readAttribute(in, i);
   }
 
   public Object readAttribute(Attribute attribute)
-    throws XMLStreamException, JAXBException
+    throws IOException, XMLStreamException, JAXBException
   {
     return _property.readAttribute(attribute);
   }
@@ -423,7 +444,7 @@ public abstract class Accessor {
   }
 
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object parent)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     return _property.bindFrom(binder, node, get(parent));
   }
@@ -694,10 +715,26 @@ public abstract class Accessor {
       // XXX propertyMap => choice
       if (_property.getMaxOccurs() != null)
         out.writeAttribute("maxOccurs", _property.getMaxOccurs());
+
+      if (isNillable())
+        out.writeAttribute("nillable", "true");
     }
 
     out.writeAttribute("type", _property.getSchemaType());
     out.writeAttribute("name", getName());
+
+    XmlMimeType xmlMimeType = getAnnotation(XmlMimeType.class);
+
+    if (xmlMimeType != null) {
+      out.writeAttribute(XML_MIME_NS, "expectedContentTypes", 
+                         xmlMimeType.value());
+    }
+  }
+
+  public boolean isNillable()
+  {
+    // XXX propertyMap
+    return _property.isNillable();
   }
 
   public String getSchemaType()

@@ -108,6 +108,11 @@ public abstract class ArrayProperty extends IterableProperty {
   {
     return _componentProperty.isXmlPrimitiveType();
   }
+
+  public boolean isNillable()
+  {
+    return true;
+  }
 }
 
 

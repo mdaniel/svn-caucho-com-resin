@@ -52,7 +52,6 @@ public class GetterSetterAccessor extends Accessor {
   private Method _set;
   private Class _type;
   private Type _genericType;
-  private String _name;
 
   public GetterSetterAccessor(JAXBContextImpl context, 
                               String name, Method get, Method set)

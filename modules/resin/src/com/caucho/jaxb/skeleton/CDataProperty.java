@@ -63,7 +63,7 @@ public abstract class CDataProperty extends Property {
   protected boolean _isNillable = true;
 
   protected abstract Object read(String in) 
-    throws JAXBException;
+    throws IOException, JAXBException;
 
   public String getMinOccurs()
   {
@@ -74,13 +74,13 @@ public abstract class CDataProperty extends Property {
   }
 
   public Object readAttribute(XMLStreamReader in, int i)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     return read(in.getAttributeValue(i));
   }
 
   public Object readAttribute(Attribute attribute)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     return read(attribute.getValue());
   }
@@ -167,7 +167,7 @@ public abstract class CDataProperty extends Property {
   }
 
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     Node root = node.getNode();
 
@@ -179,7 +179,7 @@ public abstract class CDataProperty extends Property {
   }
 
   protected abstract String write(Object in)
-    throws JAXBException;
+    throws IOException, JAXBException;
 
   public void write(Marshaller m, XMLStreamWriter out, Object value, 
                     QName qname, Object obj, Iterator attributes)
@@ -236,7 +236,7 @@ public abstract class CDataProperty extends Property {
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object value, QName qname)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     QName name = JAXBUtil.qnameFromNode(node);
 

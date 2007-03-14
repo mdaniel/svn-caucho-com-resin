@@ -88,7 +88,7 @@ public class ListProperty extends IterableProperty {
   }
 
   public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     Node child = node.getNode();
 
@@ -136,7 +136,7 @@ public class ListProperty extends IterableProperty {
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     //XXX wrapper
     
@@ -187,5 +187,10 @@ public class ListProperty extends IterableProperty {
   public String getMaxOccurs()
   {
     return "unbounded";
+  }
+
+  public boolean isNillable()
+  {
+    return true;
   }
 }

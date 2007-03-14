@@ -61,7 +61,7 @@ public class XMLGregorianCalendarProperty extends CDataProperty {
 
   public String getSchemaType()
   {
-    return "xsd:dateTime";
+    return "xsd:anySimpleType";
   }
 }
 

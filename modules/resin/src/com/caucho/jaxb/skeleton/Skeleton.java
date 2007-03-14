@@ -98,7 +98,7 @@ public abstract class Skeleton {
   public abstract Object bindFrom(BinderImpl binder, 
                                   Object existing, 
                                   NodeIterator node)
-    throws JAXBException;
+    throws IOException, JAXBException;
 
   // Output methods
   
@@ -112,7 +112,7 @@ public abstract class Skeleton {
 
   public abstract Node bindTo(BinderImpl binder, Node node, 
                               Object obj, QName fieldName, Iterator attributes)
-    throws JAXBException;
+    throws IOException, JAXBException;
 
   protected Accessor getElementAccessor(QName q)
     throws JAXBException

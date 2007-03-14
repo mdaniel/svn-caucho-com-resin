@@ -65,6 +65,9 @@ import com.caucho.util.L10N;
 public abstract class Property {
   public static final L10N L = new L10N(Property.class);
 
+  //
+  // Schema generation methods
+  // 
   public boolean isXmlPrimitiveType()
   {
     return true;
@@ -80,16 +83,25 @@ public abstract class Property {
     return null;
   }
 
+  public boolean isNillable()
+  {
+    return false;
+  }
+
   public abstract String getSchemaType();
 
+  //
+  // R/W methods
+  //
+
   public Object readAttribute(XMLStreamReader in, int i)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     throw new JAXBException(L.l("Internal error: Property does not support attributes {0}", this));
   }
 
   public Object readAttribute(Attribute attribute)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     throw new JAXBException(L.l("Internal error: Property does not support attributes {0}", this));
   }
@@ -121,7 +133,7 @@ public abstract class Property {
   public abstract Object bindFrom(BinderImpl binder, 
                                   NodeIterator node, 
                                   Object previous)
-    throws JAXBException;
+    throws IOException,JAXBException;
 
   public abstract void write(Marshaller m, XMLStreamWriter out, 
                              Object value, QName name)
@@ -133,7 +145,7 @@ public abstract class Property {
 
   public abstract Node bindTo(BinderImpl binder, Node node, 
                               Object value, QName qname)
-    throws JAXBException;
+    throws IOException,JAXBException;
 
   public void write(Marshaller m, XMLStreamWriter out, 
                     Object value, QName name, Object obj)
@@ -168,7 +180,7 @@ public abstract class Property {
   public Node bindTo(BinderImpl binder, Node node, 
                      Object value, QName qname,
                      Iterator attributes)
-    throws JAXBException
+    throws IOException, JAXBException
   {
     return bindTo(binder, node, value, qname);
   }
