@@ -59,6 +59,8 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import javax.xml.validation.Schema;
 
+import java.io.IOException;
+
 import java.util.HashMap;
 
 /**
@@ -213,7 +215,12 @@ public class BinderImpl extends Binder<Node> {
 
     Node child = doc.createElement("root");
 
-    xmlNode.appendChild(skeleton.bindTo(this, child, jaxbObject, null, null));
+    try {
+      xmlNode.appendChild(skeleton.bindTo(this, child, jaxbObject, null, null));
+    }
+    catch (IOException e) {
+      throw new JAXBException(e);
+    }
   }
 
   public Object unmarshal(Node xmlNode)
@@ -239,7 +246,12 @@ public class BinderImpl extends Binder<Node> {
       throw new UnmarshalException(L.l("Root element {0} is unknown to this context",
                                        name));
 
-    return skeleton.bindFrom(this, null, new NodeIterator(root));
+    try {
+      return skeleton.bindFrom(this, null, new NodeIterator(root));
+    }
+    catch (IOException e) {
+      throw new JAXBException(e);
+    }
   }
 
   public <T> JAXBElement<T> unmarshal(Node xmlNode, Class<T> declaredType)
@@ -261,12 +273,17 @@ public class BinderImpl extends Binder<Node> {
       throw new UnmarshalException(L.l("Type {0} is unknown to this context",
                                        declaredType));
 
-    T value = (T) skeleton.bindFrom(this, null, new NodeIterator(root));
+    try {
+      T value = (T) skeleton.bindFrom(this, null, new NodeIterator(root));
 
-    QName qname = JAXBUtil.qnameFromNode(root);
+      QName qname = JAXBUtil.qnameFromNode(root);
 
-    return new JAXBElement<T>(qname, declaredType, value);
-  }
+      return new JAXBElement<T>(qname, declaredType, value);
+    }
+    catch (IOException e) {
+      throw new JAXBException(e);
+    }
+ }
 
   public Object updateJAXB(Node xmlNode) 
     throws JAXBException
@@ -298,7 +315,12 @@ public class BinderImpl extends Binder<Node> {
       skeleton = _context.findSkeletonForObject(jaxbObject);
     }
 
-    return skeleton.bindFrom(this, jaxbObject, new NodeIterator(root));
+    try {
+      return skeleton.bindFrom(this, jaxbObject, new NodeIterator(root));
+    }
+    catch (IOException e) {
+      throw new JAXBException(e);
+    }
   }
 
   public Node updateXML(Object jaxbObject) 
@@ -312,7 +334,12 @@ public class BinderImpl extends Binder<Node> {
   {
     Skeleton skeleton = _context.findSkeletonForObject(jaxbObject);
 
-    return skeleton.bindTo(this, xmlNode, jaxbObject, null, null);
+    try {
+      return skeleton.bindTo(this, xmlNode, jaxbObject, null, null);
+    }
+    catch (IOException e) {
+      throw new JAXBException(e);
+    }
   }
 
   public void bind(Object jaxbObject, Node xmlNode)
