@@ -188,10 +188,10 @@ public class DateModule extends AbstractQuercusModule {
 
   public Value gettimeofday(@Optional boolean isFloatReturn)
   {
-    long gmtTime = Alarm.getCurrentTime();
+    long gmtTime = Alarm.getExactTime();
 
     if (isFloatReturn) {
-      return new DoubleValue(((double) Alarm.getCurrentTime()) / 1000.0);
+      return new DoubleValue(((double) gmtTime) / 1000.0);
     }
     else {
       ArrayValueImpl result = new ArrayValueImpl();

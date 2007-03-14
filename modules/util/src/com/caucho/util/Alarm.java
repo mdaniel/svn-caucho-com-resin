@@ -216,7 +216,7 @@ public class Alarm implements ThreadTask {
     if (_testTime > 0)
       return _testTime * 1000000L;
 
-    return getExactTime() * 1000000L;
+    return System.currentTimeMillis() * 1000000L;
   }
 
   /**

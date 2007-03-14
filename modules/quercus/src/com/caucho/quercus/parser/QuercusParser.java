@@ -1276,7 +1276,7 @@ public class QuercusParser {
       token = parseToken();
       if (token != ';') {
 	_peekToken = token;
-	test = parseTopExpr();
+	test = parseTopCommaExpr();
 	expect(';');
       }
 
