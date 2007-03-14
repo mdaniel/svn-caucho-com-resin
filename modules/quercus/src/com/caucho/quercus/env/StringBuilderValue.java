@@ -97,14 +97,16 @@ public class StringBuilderValue extends UnicodeValue
 
   public StringBuilderValue(char []buffer, int offset, int length)
   {
-    int capacity;
+    int newCapacity;
 
-    if (length < 64)
-      capacity = 128;
+    if (length < 256)
+      newCapacity = (length + 64) & ~63;
+    else if (length < 4096)
+      newCapacity = (length + 256) & ~255;
     else
-      capacity = 2 * length;
+      newCapacity = (length + 4096) & ~4095;
 
-    _buffer = new char[capacity];
+    _buffer = new char[newCapacity];
     _length = length;
 
     System.arraycopy(buffer, offset, _buffer, 0, length);
