@@ -1146,6 +1146,7 @@ abstract public class Value implements java.io.Serializable
   {
     if (isLongConvertible() && rValue.isLongConvertible())
       return LongValue.create(toLong() - rValue.toLong());
+    
     return DoubleValue.create(toDouble() - rValue.toDouble());
   }
 
@@ -1224,6 +1225,14 @@ abstract public class Value implements java.io.Serializable
     long rLong = rValue.toLong();
 
     return new LongValue(lLong >> rLong);
+  }
+
+  /**
+   * Returns the next array index based on this value.
+   */
+  public long nextIndex(long oldIndex)
+  {
+    return oldIndex;
   }
 
   //

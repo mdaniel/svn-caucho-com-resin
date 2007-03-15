@@ -410,6 +410,9 @@ public class JavaJspGenerator extends JspGenerator {
 
   void addTagFileClass(String cl)
   {
+    if ("com.caucho.jsp.java.JspTagFileSupport".equals(cl))
+      throw new IllegalStateException();
+    
     if (! _tagFileClassList.contains(cl))
       _tagFileClassList.add(cl);
   }

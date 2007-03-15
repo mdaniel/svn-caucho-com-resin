@@ -410,25 +410,20 @@ public abstract class Expr extends ValueExpression {
                        boolean escapeXml)
     throws IOException, ELException
   {
-    try {
-      Object obj = getValue(env);
+    Object obj = getValue(env);
 
-      if (obj == null)
-        return true;
-      else if (escapeXml) {
-        toStreamEscaped(out, obj);
-        return false;
-      }
-      else {
-        toStream(out, obj);
-        return false;
-      }
-    } catch (ELException e) {
-      // jsp/3255
-      log.log(Level.WARNING, e.toString(), e);
-
+    if (obj == null)
       return true;
+    else if (escapeXml) {
+      toStreamEscaped(out, obj);
+      return false;
     }
+    else {
+      toStream(out, obj);
+      return false;
+    }
+
+    // jsp/3255 vs jsp/3280 about throwing exceptions
   }
 
   /**

@@ -93,6 +93,9 @@ public class JstlCoreOut extends JstlNode {
   {
     os.print("<c:out");
 
+    if (! hasNamespace("c", "http://java.sun.com/jsp/jstl/core"))
+      os.print(" xmlns:c='http://java.sun.com/jsp/jstl/core'");
+
     if (_value != null) {
       os.print(" value=\"");
       printXmlText(os, _value);

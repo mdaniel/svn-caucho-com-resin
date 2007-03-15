@@ -656,8 +656,7 @@ public class ArrayValueImpl extends ArrayValue
 
 	Value value = entry.getValue();
 
-	if (key instanceof LongValue
-	    && key.toLong() + 1 == _nextAvailableIndex) {
+	if (key.nextIndex(-1) == _nextAvailableIndex) {
 	  updateNextAvailableIndex();
 	}
 
@@ -721,7 +720,7 @@ public class ArrayValueImpl extends ArrayValue
     _size++;
 
     Entry newEntry = new Entry(key);
-    updateNextAvailableIndex(newEntry);
+    _nextAvailableIndex = key.nextIndex(_nextAvailableIndex);
 
     Entry head = _entries[hash];
 
@@ -781,7 +780,7 @@ public class ArrayValueImpl extends ArrayValue
       head._prevHash = entry;
 
     _entries[hash] = entry;
-    updateNextAvailableIndex(entry);
+    _nextAvailableIndex = entry._key.nextIndex(_nextAvailableIndex);
     entry._index = hash;
   }
 
@@ -793,23 +792,9 @@ public class ArrayValueImpl extends ArrayValue
     _nextAvailableIndex = 0;
 
     for (Entry entry = _head; entry != null; entry = entry._next) {
-      updateNextAvailableIndex(entry);
+      _nextAvailableIndex = entry._key.nextIndex(_nextAvailableIndex);
     }
   }
-
-  /**
-   * Updates _nextAvailableIndex; this must be invoked for every insertion
-   */
-  private void updateNextAvailableIndex(Entry entry)
-  {
-    if (entry._key instanceof LongValue) {
-      long key = entry._key.toLong();
-	
-      if (_nextAvailableIndex <= key)
-	_nextAvailableIndex = key + 1;
-    }
-  }
-
 
   /**
    * Pops the top value.

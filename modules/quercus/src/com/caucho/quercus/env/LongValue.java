@@ -206,14 +206,36 @@ public class LongValue extends NumberValue
    * Adds to the following value.
    */
   @Override
+  public Value add(Value value)
+  {
+    return value.add(_value);
+  }
+
+  /**
+   * Adds to the following value.
+   */
+  @Override
   public Value add(long lLong)
   {
     return LongValue.create(lLong + _value);
   }
 
   /**
+   * Subtracts to the following value.
+   */
+  @Override
+  public Value sub(Value rValue)
+  {
+    if (rValue.isLongConvertible())
+      return LongValue.create(_value - rValue.toLong());
+    
+    return DoubleValue.create(_value - rValue.toDouble());
+  }
+
+  /**
    * Subtracts the following value.
    */
+  @Override
   public Value sub(long rLong)
   {
     return LongValue.create(_value - rLong);
@@ -232,6 +254,33 @@ public class LongValue extends NumberValue
     long rLong = ((LongValue) rValue)._value;
 
     return _value == rLong;
+  }
+  /**
+   * Returns true for equality
+   */
+  public int cmp(Value rValue)
+  {
+    long l = _value;
+    double r = rValue.toDouble();
+
+    if (l == r)
+      return 0;
+    else if (l < r)
+      return -1;
+    else
+      return 1;
+  }
+
+  /**
+   * Returns the next array index based on this value.
+   */
+  @Override
+  public long nextIndex(long oldIndex)
+  {
+    if (oldIndex <= _value)
+      return _value + 1;
+    else
+      return oldIndex;
   }
 
   /**

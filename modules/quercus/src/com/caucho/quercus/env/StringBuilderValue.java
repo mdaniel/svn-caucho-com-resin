@@ -45,6 +45,7 @@ public class StringBuilderValue extends UnicodeValue
 {
   private char []_buffer;
   private int _length;
+  private boolean _isCopy;
 
   private String _value;
 
@@ -110,6 +111,13 @@ public class StringBuilderValue extends UnicodeValue
     _length = length;
 
     System.arraycopy(buffer, offset, _buffer, 0, length);
+  }
+
+  private StringBuilderValue(char []buffer, int offset, int length,
+                             String copy)
+  {
+    _buffer = buffer;
+    _length = length;
   }
 
   public StringBuilderValue(char []buffer)
@@ -406,7 +414,13 @@ public class StringBuilderValue extends UnicodeValue
   @Override
   public StringValue toStringBuilder()
   {
-    return new StringBuilderValue(_buffer, 0, _length);
+    if (_isCopy)
+      return new StringBuilderValue(_buffer, 0, _length);
+    else {
+      _isCopy = true;
+      
+      return new StringBuilderValue(_buffer, 0, _length, "copy");
+    }
   }
 
   /**
@@ -506,6 +520,9 @@ public class StringBuilderValue extends UnicodeValue
   @Override
   public Value setCharValueAt(long index, String value)
   {
+    if (_isCopy)
+      copyOnWrite();
+    
     int len = _length;
 
     if (index < 0 || len <= index)
@@ -913,7 +930,18 @@ public class StringBuilderValue extends UnicodeValue
     char []buffer = new char[newCapacity];
     System.arraycopy(_buffer, 0, buffer, 0, _length);
 
+    _isCopy = false;
     _buffer = buffer;
+  }
+
+  private void copyOnWrite()
+  {
+    if (_isCopy) {
+      _isCopy = false;
+      char []buffer = new char[_buffer.length];
+      System.arraycopy(_buffer, 0, buffer, 0, _length);
+      _buffer = buffer;
+    }
   }
   
   //

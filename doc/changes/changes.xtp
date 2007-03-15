@@ -12,6 +12,8 @@
 
 <s2 title="3.1.snap - Mar 7, 2007">
 <ul>
+<li>Expect: 100-continue handling with Resin's load balancer (rep by A Balandran, #1648)</li>
+<li>JSP: ${...}  wasn't generating proper namespace for validation (rep by Matthew Schmidt)</li>
 <li>(2007-03-07) ConnectionPool timeout defaults incorrect (#1586, rep by gschemmel)</li>
 <li>web-app description/display-name order is arbitrary (#1599, rep by kamleshjkl)</li>
 <li>character-encoding now controls default encoding for writers (#1563, rep by asklxf)</li>

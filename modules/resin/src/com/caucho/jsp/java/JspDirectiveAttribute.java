@@ -65,7 +65,7 @@ public class JspDirectiveAttribute extends JspNode {
 
   private boolean _deferredValue;
   private String _deferredValueType;
-  private boolean _deferredMethod;
+  private Boolean _deferredMethod;
   private String _deferredMethodSignature;
   
   /**
@@ -116,7 +116,7 @@ public class JspDirectiveAttribute extends JspNode {
     }
     else if (DEFERRED_METHOD.equals(name)) {
       _deferredMethod = attributeToBoolean(name.getName(), value);
-      if (_deferredMethod)
+      if (Boolean.TRUE.equals(_deferredMethod))
 	_type = "javax.el.MethodExpression";
     }
     else if (DEFERRED_METHOD_SIGNATURE.equals(name)) {
@@ -185,11 +185,11 @@ public class JspDirectiveAttribute extends JspNode {
     if (_deferredValue && _deferredValueType != null)
       throw error(L.l("@attribute deferredValue and deferredValueType may not both be specified"));
     
-    if (_deferredMethod == Boolean.FALSE && _deferredMethodSignature != null)
+    if (Boolean.FALSE.equals(_deferredMethod) && _deferredMethodSignature != null)
       throw error(L.l("@attribute deferredMethod and deferredMethodSignature may not both be specified"));
     
     if ((_deferredValue || _deferredValueType != null)
-	&& (_deferredMethod || _deferredMethodSignature != null))
+	&& (_deferredMethod != null || _deferredMethodSignature != null))
       throw error(L.l("@attribute deferredValue and deferredMethod may not both be specified"));
 
     if (_deferredValue || _deferredValueType != null) {
@@ -199,7 +199,8 @@ public class JspDirectiveAttribute extends JspNode {
 	attr.getDeferredValue().setType(_deferredValueType);
     }
 
-    if (_deferredMethod || _deferredMethodSignature != null) {
+    if (Boolean.TRUE.equals(_deferredMethod)
+        || _deferredMethodSignature != null) {
       attr.setDeferredMethod(new TldAttribute.DeferredMethod());
 
       if (_deferredMethodSignature != null)

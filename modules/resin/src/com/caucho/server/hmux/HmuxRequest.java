@@ -791,12 +791,12 @@ public class HmuxRequest extends AbstractHttpRequest
 	  throw new IOException("protocol expected HMUX_STRING at " + (char) code);
 	_rawRead.readAll(valueCb, readLength());
 
-	addHeaderInt(key.getBuffer(), 0, key.length(), valueCb);
-
 	if (isLoggable)
 	  log.fine(dbgId() + "H " + key + "=" + valueCb);
 
-	_headerSize++;
+	if (addHeaderInt(key.getBuffer(), 0, key.length(), valueCb)) {
+          _headerSize++;
+        }
 	break;
 
       case CSE_CONTENT_LENGTH:

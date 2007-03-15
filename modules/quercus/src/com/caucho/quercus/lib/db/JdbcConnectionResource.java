@@ -501,8 +501,16 @@ public abstract class JdbcConnectionResource implements Closeable {
     Statement stmt = null;
 
     try {
-      stmt = getConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                             ResultSet.CONCUR_READ_ONLY);
+      Connection conn = getConnection();
+
+      // XXX: check for performance
+      boolean canSeek = true;
+      if (canSeek)
+        stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                    ResultSet.CONCUR_READ_ONLY);
+      else
+        stmt = conn.createStatement();
+        
       stmt.setEscapeProcessing(false); // php/1406
 
       if (stmt.execute(sql)) {

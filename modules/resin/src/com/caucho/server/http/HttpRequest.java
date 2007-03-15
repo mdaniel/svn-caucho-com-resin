@@ -686,15 +686,16 @@ public class HttpRequest extends AbstractHttpRequest
       int valueLength = headerOffset - valueOffset;
       headerValues[headerSize].init(headerBuffer, valueOffset, valueLength);
 
-      addHeaderInt(headerBuffer, keyOffset, keyLength,
-		   headerValues[headerSize]);
-
       if (debug) {
         log.fine(dbgId() +
                  headerKeys[headerSize] + ": " + headerValues[headerSize]);
       }
 
-      headerSize++;
+      if (addHeaderInt(headerBuffer, keyOffset, keyLength,
+                       headerValues[headerSize])) {
+        headerSize++;
+      }
+
       _headerSize = headerSize;
     }
   }

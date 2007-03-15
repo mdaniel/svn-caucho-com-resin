@@ -216,7 +216,7 @@ public class ServerConnector
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
-      thread.setContextClassLoader(Resin.getLocal().getServer().getClassLoader());
+      thread.setContextClassLoader(Resin.getLocal().getClassLoader());
       String name = getId();
 
       if (name == null)
