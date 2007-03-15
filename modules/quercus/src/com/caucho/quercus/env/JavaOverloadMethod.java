@@ -45,14 +45,31 @@ import java.util.Comparator;
 public class JavaOverloadMethod extends AbstractJavaMethod {
   private static final L10N L = new L10N(JavaOverloadMethod.class);
   
-  private AbstractJavaMethod [][]_methodTable = new AbstractJavaMethod[0][];
+  private AbstractJavaMethod [][]_methodTable
+    = new AbstractJavaMethod[0][];
+
+  private AbstractJavaMethod [][]_restMethodTable
+    = new AbstractJavaMethod[0][];
 
   public JavaOverloadMethod(AbstractJavaMethod fun)
   {
     overload(fun);
   }
 
-  public int getArgumentLength()
+  @Override
+  public int getMaxArgLength()
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  @Override
+  public int getMinArgLength()
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  @Override
+  public boolean getHasRestArgs()
   {
     throw new UnsupportedOperationException();
   }
@@ -62,32 +79,67 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
    */
   public AbstractJavaMethod overload(AbstractJavaMethod fun)
   {
-    int len = fun.getArgumentLength();
+    if (fun.getHasRestArgs()) {
+      int len = fun.getMinArgLength();
+      
+      if (_restMethodTable.length <= len) {
+        AbstractJavaMethod [][]restMethodTable
+          = new AbstractJavaMethod[len + 1][];
 
-    if (_methodTable.length <= len) {
-      AbstractJavaMethod [][]methodTable = new AbstractJavaMethod[len + 1][];
+        System.arraycopy(_restMethodTable, 0,
+                         restMethodTable, 0, _restMethodTable.length);
 
-      System.arraycopy(_methodTable, 0, methodTable, 0, _methodTable.length);
+        _restMethodTable = restMethodTable;
+      }
 
-      _methodTable = methodTable;
+      AbstractJavaMethod []methods = _restMethodTable[len];
+
+      if (methods == null)
+        _restMethodTable[len] = new AbstractJavaMethod[] { fun };
+      else {
+        AbstractJavaMethod []newMethods
+          = new AbstractJavaMethod[methods.length + 1];
+
+        System.arraycopy(methods, 0, newMethods, 0, methods.length);
+
+        newMethods[methods.length] = fun;
+
+        _restMethodTable[len] = newMethods;
+      }
+      
+      return this;
     }
-
-    AbstractJavaMethod []methods = _methodTable[len];
-
-    if (methods == null)
-      _methodTable[len] = new AbstractJavaMethod[] { fun };
     else {
-      AbstractJavaMethod []newMethods
-        = new AbstractJavaMethod[methods.length + 1];
+      int maxLen = fun.getMaxArgLength();
+      
+      if (_methodTable.length <= maxLen) {
+        AbstractJavaMethod [][]methodTable
+          = new AbstractJavaMethod[maxLen + 1][];
 
-      System.arraycopy(methods, 0, newMethods, 0, methods.length);
+        System.arraycopy(_methodTable, 0, methodTable, 0, _methodTable.length);
 
-      newMethods[methods.length] = fun;
+        _methodTable = methodTable;
+      }
+      
+      for (int len = fun.getMinArgLength(); len <= maxLen; len++) {
+        AbstractJavaMethod []methods = _methodTable[len];
 
-      _methodTable[len] = newMethods;
+        if (methods == null)
+          _methodTable[len] = new AbstractJavaMethod[] { fun };
+        else {
+          AbstractJavaMethod []newMethods
+            = new AbstractJavaMethod[methods.length + 1];
+
+          System.arraycopy(methods, 0, newMethods, 0, methods.length);
+
+          newMethods[methods.length] = fun;
+
+          _methodTable[len] = newMethods;
+        }
+      }
+
+      return this;
     }
-
-    return this;
   }
 
   /**
@@ -110,53 +162,71 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
    */
   public Value call(Env env, Object obj, Value []args)
   {
-    if (_methodTable.length <= args.length)
-      throw new RuntimeException("too long");
-    else {
-      AbstractJavaMethod []methods = _methodTable[args.length];
+    AbstractJavaMethod []methods = null;
 
-      if (methods == null || methods.length == 0)
-        throw new QuercusException(L.l("'{0}' method call does not match expected length", getName()));
-      else if (methods.length == 1)
-        return methods[0].call(env, obj, args);
-      else {
-        AbstractJavaMethod method
-          = getBestFitJavaMethod(_methodTable[args.length], args);
-    
-        return method.call(env, obj, args);
-      }
+    if (_methodTable.length <= args.length) {
+      if (_restMethodTable.length == 0)
+        throw new QuercusException(L.l("'{0}' method call has too many arguments", getName()));
     }
+    else if (_methodTable[args.length].length == 1) {
+        return _methodTable[args.length][0].call(env, obj, args);
+    }
+    else {
+      methods = _methodTable[args.length];
+    }
+    
+    AbstractJavaMethod method =
+      getBestFitJavaMethod(methods, _restMethodTable, args);
+
+    return method.call(env, obj, args);
   }
   
   /**
    * Returns the Java function that matches the args passed in.
    */
   private AbstractJavaMethod getBestFitJavaMethod(AbstractJavaMethod []methods,
+                                                  AbstractJavaMethod [][]restMethodTable,
                                                   Value []args)
   {
-    int size = methods.length;
-    
     AbstractJavaMethod minCostJavaMethod = null;
     int minCost = Integer.MAX_VALUE;
-    
-    for (int i = 0; i < size; i++) {
-      AbstractJavaMethod javaMethod = methods[i];
-      
-      int cost = javaMethod.getMarshalingCost(args);
-      
-      if (cost == 0)
-        return javaMethod;
-      
-      if (cost < minCost) {
-        minCost = cost;
-        minCostJavaMethod = javaMethod;
+
+    if (methods != null) {
+      for (int i = 0; i < methods.length; i++) {
+        AbstractJavaMethod javaMethod = methods[i];
+        
+        int cost = javaMethod.getMarshalingCost(args);
+
+        if (cost == 0)
+          return javaMethod;
+
+        if (cost <= minCost) {
+          minCost = cost;
+          minCostJavaMethod = javaMethod;
+        }
       }
     }
-    
-    if (minCostJavaMethod != null)
-      return minCostJavaMethod;
-    else
-      return methods[0];
+
+    for (int i = Math.min(args.length, restMethodTable.length) - 1; i >= 0; i--) {
+      if (restMethodTable[i] == null)
+        continue;
+      
+      for (int j = 0; j < restMethodTable[i].length; j++) {
+        AbstractJavaMethod javaMethod = restMethodTable[i][j];
+        
+        int cost = javaMethod.getMarshalingCost(args);
+
+        if (cost == 0)
+          return javaMethod;
+
+        if (cost <= minCost) {
+          minCost = cost;
+          minCostJavaMethod = javaMethod;
+        }
+      }
+    }
+
+    return minCostJavaMethod;
   }
   
   /**

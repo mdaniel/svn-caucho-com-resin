@@ -62,11 +62,6 @@ public class JavaMethod extends JavaInvoker {
     _argLength = method.getParameterTypes().length;
   }
 
-  public int getArgumentLength()
-  {
-    return _argLength;
-  }
-
   /**
    * Returns the function's method.
    *

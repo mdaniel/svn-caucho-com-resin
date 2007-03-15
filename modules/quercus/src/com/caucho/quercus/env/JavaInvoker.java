@@ -60,6 +60,9 @@ abstract public class JavaInvoker
 
   private volatile boolean _isInit;
   
+  private int _minArgumentLength;
+  private int _maxArgumentLength;
+
   private boolean _hasEnv;
   private boolean _hasThis;
   private Expr [] _defaultExprs;
@@ -156,8 +159,10 @@ abstract public class JavaInvoker
         argLength -= 1;
 
       _defaultExprs = new Expr[argLength - envOffset];
-
       _marshalArgs = new Marshal[argLength - envOffset];
+
+      _maxArgumentLength = argLength - envOffset;
+      _minArgumentLength = _maxArgumentLength;
 
       for (int i = 0; i < argLength - envOffset; i++) {
         boolean isReference = false;
@@ -165,6 +170,8 @@ abstract public class JavaInvoker
 
         for (Annotation ann : _paramAnn[i + envOffset]) {
           if (Optional.class.isAssignableFrom(ann.annotationType())) {
+            _minArgumentLength--;
+
             Optional opt = (Optional) ann;
 
             if (! opt.value().equals("")) {
@@ -201,6 +208,28 @@ abstract public class JavaInvoker
     } finally {
       _isInit = true;
     }
+  }
+
+  /**
+   * Returns the minimally required number of arguments.
+   */
+  @Override
+  public int getMinArgLength()
+  {
+    if (! _isInit)
+      init();
+    return _minArgumentLength;
+  }
+  
+  /**
+   * Returns the maximum number of arguments allowed.
+   */
+  @Override
+  public int getMaxArgLength()
+  {
+    if (! _isInit)
+      init();
+    return _maxArgumentLength;
   }
 
   /**

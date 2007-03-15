@@ -84,8 +84,13 @@ public class JavaArrayMarshal extends Marshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue.isArray())
-      return Marshal.MARSHALABLE;
+    if (argValue.isArray()) {
+      if (Value[].class.equals(_expectedClass) ||
+          Object[].class.equals(_expectedClass))
+        return Marshal.EQUIVALENT;
+      else
+        return Marshal.MARSHALABLE;
+    }
     else
       return Marshal.DUBIOUS;
   }
