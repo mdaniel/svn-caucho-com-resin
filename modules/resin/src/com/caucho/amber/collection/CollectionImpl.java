@@ -142,6 +142,10 @@ public class CollectionImpl<E> extends AbstractList<E>
   {
     fill();
 
+    // jpa/0i60
+    if (collection == null)
+      return true;
+
     return _values.addAll(index, collection);
   }
 

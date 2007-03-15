@@ -293,13 +293,26 @@ public class AmberConnection
    * Makes the instance managed called
    * from cascading operations.
    */
-  public void persistFromCascade(Object entity)
+  public void persistFromCascade(Object o)
   {
     try {
-      if (entity == null)
+      if (o == null)
         return;
 
+      Entity entity = (Entity) o;
+
+      EntityState state = entity.__caucho_getEntityState();
+
+      // XXX: jpa/0i5e
+      if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
+        if (log.isLoggable(Level.FINEST))
+          log.finest(L.l("persistFromCascade is ignoring entity in state {0}", state));
+
+        return;
+      }
+
       persistInternal(entity, true);
+
     } catch (EntityExistsException e) {
       log.log(Level.FINER, e.toString(), e);
       // This is not an issue. It is the cascading

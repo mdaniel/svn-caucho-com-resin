@@ -722,17 +722,20 @@ public class EntityManyToOneField extends CascadableField {
 
     Id id = getEntityTargetType().getId();
 
-    String nullString = "null";
+    // jpa/0s2d
+    String nullTest = otherKey + " != null";
 
+    /* XXX
     if (id instanceof CompositeId) {
     }
     else {
       KeyPropertyField key = (KeyPropertyField) id.getKeys().get(0);
-      nullString = key.getColumn().getType().generateNull();
+      nullTest = key.getColumn().getType().generateIsNotNull(otherKey);
     }
+    */
 
     // jpa/0h27
-    out.println("if (" + otherKey + " != " + nullString + ") {");
+    out.println("if (" + nullTest + ") {");
     out.pushDepth();
 
     out.println("try {");

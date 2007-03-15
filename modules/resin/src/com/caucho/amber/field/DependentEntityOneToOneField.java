@@ -581,7 +581,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.pushDepth();
 
     // XXX: jpa/0h27
-    out.println("if (__cauchoState == com.caucho.amber.entity.EntityState.P_PERSIST)");
+    out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSIST)");
     out.println("  __caucho_cascadePrePersist(__caucho_session);");
 
     out.popDepth();

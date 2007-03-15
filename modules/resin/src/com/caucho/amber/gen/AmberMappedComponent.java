@@ -484,7 +484,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     Id id = _relatedType.getId();
 
-    if (id != null)
+    // jpa/0m02
+    if (id != null && _relatedType.getParentType() == null)
       id.generatePrologue(out, completedSet);
 
     ArrayList<AmberField> fields = _relatedType.getFields();
@@ -964,6 +965,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println();
     out.println("return false;");
+
     out.popDepth();
     out.println("}");
   }

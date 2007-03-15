@@ -77,7 +77,9 @@ public class MapImpl<K, V> extends AbstractMap<K, V>
     _query = query;
     _methodGetMapKey = methodGetMapKey;
 
-    setSession(((UserQuery) _query).getConnection());
+    // jpa/0v00
+    if (_query != null)
+      setSession(((UserQuery) _query).getConnection());
   }
 
   /**
@@ -87,7 +89,9 @@ public class MapImpl<K, V> extends AbstractMap<K, V>
   {
     _aConn = aConn;
 
-    _aConn.register(this);
+    // jpa/0v00
+    if (aConn != null)
+      _aConn.register(this);
   }
 
   /**
