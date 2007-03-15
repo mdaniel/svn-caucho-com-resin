@@ -47,7 +47,7 @@
 <li>Connection pool needs to rollback after resetting the connection isolation for Oracle (#1208, rep by Will Jaynes)
 <li>./configure heuristics to catch IBM JDK 64-bit (#1311, rep by dboperations)
 <li>JSP Tag validation incorrectly fails tag variable classes (#1319, #1312rep by Bill Au)
-<li>Update ThreadPool to close overflow idle threads mroe quickly
+<li>Update ThreadPool to close overflow idle threads more quickly
 <li>&lt;database> prepared statement caching shouldn't cache with resultType (#1310, rep by gzhu)</li>
 <li>Get certificates for code signing from jar files (#1008, solved by Andrew)</li>
 <li>Hessian constructor cost could overflow with too many args (#1305, rep by Rick Mann)</li>

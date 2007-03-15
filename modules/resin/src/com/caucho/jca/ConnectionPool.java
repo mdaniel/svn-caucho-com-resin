@@ -92,10 +92,10 @@ public class ConnectionPool extends AbstractManagedObject
   private long _maxIdleTime = 30000L;
 
   // time before an active connection is closed (6h default)
-  private long _maxActiveTime = 6L * 60000L * 1000L;
+  private long _maxActiveTime = 6L * 3600L * 1000L;
 
   // time a connection is allowed to be used (24h default)
-  private long _maxPoolTime = 24L * 60000L * 1000L;
+  private long _maxPoolTime = 24L * 3600L * 1000L;
 
   // the time to wait for a connection
   private long _connectionWaitTime = 600 * 1000L;

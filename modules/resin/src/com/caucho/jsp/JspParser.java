@@ -648,6 +648,12 @@ public class JspParser {
 
     ch = read();
 
+    _jspBuilder.startElement(JSP_DIRECTIVE_TAGLIB);
+    _jspBuilder.attribute(new QName("prefix"), "resin-c");
+    _jspBuilder.attribute(new QName("uri"), JSTL_CORE_URI);
+    _jspBuilder.endAttributes();
+    _jspBuilder.endElement(JSP_DIRECTIVE_TAGLIB.getName());
+
     processTaglib("resin-c", JSTL_CORE_URI);
     
     setLocation(filename, line);
