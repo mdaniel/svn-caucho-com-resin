@@ -72,4 +72,9 @@ public class CacheItem implements java.io.Serializable
   {
     _missCount = missCount;
   }
+
+  public String toString()
+  {
+    return "CacheItem[" + _url + ",hit:" + _hitCount + ",miss:" + _missCount + "]";
+  }
 }

@@ -60,6 +60,8 @@ public class ServletInvocation {
   private String _servletName;
   private FilterChain _filterChain;
 
+  private long _requestCount;
+
   private HashMap<String,String> _securityRoleMap;
 
   /**
@@ -215,6 +217,14 @@ public class ServletInvocation {
   }
 
   /**
+   * Returns the number of requests.
+   */
+  public long getRequestCount()
+  {
+    return _requestCount;
+  }
+
+  /**
    * Service a request.
    *
    * @param request the servlet request
@@ -223,6 +233,10 @@ public class ServletInvocation {
   public void service(ServletRequest request, ServletResponse response)
     throws IOException, ServletException
   {
+    synchronized (this) {
+      _requestCount++;
+    }
+    
     _filterChain.doFilter(request, response);
   }
 

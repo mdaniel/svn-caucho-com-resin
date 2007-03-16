@@ -60,9 +60,14 @@ public interface ProxyCacheMXBean extends ManagedObjectMXBean {
   public long getMissCountTotal();
 
   /**
-   * Return most used connections.
+   * Return most used cacheable connections.
    */
   public CacheItem []getCacheableEntries(int max);
+
+  /**
+   * Return most used uncacheable connections.
+   */
+  public CacheItem []getUncacheableEntries(int max);
 
   //
   // Operations

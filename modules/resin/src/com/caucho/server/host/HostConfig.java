@@ -70,20 +70,24 @@ public class HostConfig extends DeployConfig {
     throws ConfigException
   {
     _hostName = cleanHostName(name);
-    String hostName = name.getValue();
 
-    if (hostName.indexOf("${") < 0) {
-      for (int i = 0; i < hostName.length(); i++) {
-	char ch = hostName.charAt(i);
+    if (_hostName.indexOf("${") < 0) {
+      for (int i = 0; i < _hostName.length(); i++) {
+	char ch = _hostName.charAt(i);
 
 	if (ch == ' ' || ch == '\t' || ch == ',') {
 	  throw new ConfigException(L.l("Host name `{0}' must not contain multiple names.  Use <host-alias> to specify aliases for a host.",
-					hostName));
+					_hostName));
 	}
       }
     }
 
-    _hostName = hostName;
+    if (_hostName.startsWith("xn--")) {
+      String domainName = DomainName.fromAscii(_hostName);
+      
+      if (! _hostAliases.contains(domainName))
+        _hostAliases.add(domainName);
+    }
   }
   
   /**
@@ -100,7 +104,21 @@ public class HostConfig extends DeployConfig {
   public void setId(RawString id)
     throws ConfigException
   {
-    super.setId(cleanHostName(id));
+    String cleanName = cleanHostName(id);
+    
+    setId(cleanName);
+  }
+
+  public void setId(String cleanName)
+  {
+    super.setId(cleanName);
+
+    if (cleanName.startsWith("xn--")) {
+      String name = DomainName.fromAscii(cleanName);
+      
+      if (! _hostAliases.contains(name))
+        _hostAliases.add(name);
+    }
   }
 
   /**

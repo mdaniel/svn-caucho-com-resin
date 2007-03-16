@@ -122,6 +122,14 @@ public class WebAppFilterChain implements FilterChain {
   {
     _securityRoleMap = map;
   }
+
+  /**
+   * Returns true if cacheable.
+   */
+  public FilterChain getNext()
+  {
+    return _next;
+  }
   
   /**
    * Invokes the next filter in the chain or the final servlet at

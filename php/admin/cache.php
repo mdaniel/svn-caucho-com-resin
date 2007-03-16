@@ -50,7 +50,33 @@ if (! empty($server->Id))
 
 <?php
 
+if ($proxy_cache) {
+  $cacheable = $proxy_cache->getCacheableEntries(15);
 
+  echo "<h3>Cacheable Pages</h3>";
+
+  echo "<table class='data'>";
+  echo "<tr><th>Count</th><th>url</th></tr>\n";
+  foreach ($cacheable as $item) {
+    echo "<tr>";
+    echo "<td>{$item->hitCount}</td><td>{$item->url}</td>";
+    echo "</tr>\n";
+  }
+  echo "</table>";
+
+  $uncacheable = $proxy_cache->getUncacheableEntries(15);
+  
+  echo "<h3>Uncacheable Pages</h3>";
+
+  echo "<table class='data'>";
+  echo "<tr><th>Count</th><th>url</th></tr>\n";
+  foreach ($uncacheable as $item) {
+    echo "<tr>";
+    echo "<td>{$item->missCount}</td><td>{$item->url}</td>";
+    echo "</tr>\n";
+  }
+  echo "</table>";
+}
 
 ?>
 
