@@ -52,7 +52,7 @@ import java.util.List;
 
 // XXX: Make generic?
 /**
- * a List Property 
+ * a List Property
  */
 public class ListProperty extends IterableProperty {
   public ListProperty(Property componentProperty)
@@ -64,7 +64,7 @@ public class ListProperty extends IterableProperty {
     throws IOException, XMLStreamException, JAXBException
   {
     ArrayList<Object> list = (ArrayList<Object>) previous;
-    
+
     if (list == null)
       list = new ArrayList<Object>();
 
@@ -77,7 +77,7 @@ public class ListProperty extends IterableProperty {
     throws IOException, XMLStreamException, JAXBException
   {
     ArrayList<Object> list = (ArrayList<Object>) previous;
-    
+
     if (list == null)
       list = new ArrayList<Object>();
 
@@ -98,7 +98,7 @@ public class ListProperty extends IterableProperty {
     return list;
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, 
+  public void write(Marshaller m, XMLStreamWriter out,
                     Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -114,7 +114,7 @@ public class ListProperty extends IterableProperty {
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, 
+  public void write(Marshaller m, XMLEventWriter out,
                     Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
@@ -128,6 +128,20 @@ public class ListProperty extends IterableProperty {
       else
         throw new ClassCastException("Argument not a List");
     }
+  }
+
+  public void write(Marshaller m, XMLStreamWriter out,
+                    Object value, QName name)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    // XXX
+  }
+
+  public void write(Marshaller m, XMLEventWriter out,
+                    Object value, QName name)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    // XXX
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
@@ -141,7 +155,7 @@ public class ListProperty extends IterableProperty {
         for (Object o : list) {
           if (child != null) {
             // try to reuse as many of the child nodes as possible
-            Node newNode = 
+            Node newNode =
               _componentProperty.bindTo(binder, child, o, qname);
 
             if (newNode != child) {
