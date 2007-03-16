@@ -198,14 +198,23 @@ public class AmberEntityHome {
     return _entityType.getId().toObjectKey(key);
   }
 
-  /**
-   * Finds by the primary key.
-   */
   public Entity load(AmberConnection aConn,
                      Object key)
     throws AmberException
   {
-    return find(aConn, key, true);
+    return load(aConn, key, 0, 0);
+  }
+
+  /**
+   * Finds by the primary key.
+   */
+  public Entity load(AmberConnection aConn,
+                     Object key,
+                     long notExpiringLoadMask,
+                     int notExpiringGroup)
+    throws AmberException
+  {
+    return find(aConn, key, true, notExpiringLoadMask, notExpiringGroup);
   }
 
   /**
@@ -281,6 +290,14 @@ public class AmberEntityHome {
     return _entityFactory.getEntity(aConn, item);
   }
 
+  public Entity find(AmberConnection aConn,
+                     Object key,
+                     boolean isLoad)
+    throws AmberException
+  {
+    return find(aConn, key, isLoad, 0, 0);
+  }
+
   /**
    * Finds an entity based on the primary key.
    *
@@ -290,13 +307,19 @@ public class AmberEntityHome {
    */
   public Entity find(AmberConnection aConn,
                      Object key,
-                     boolean isLoad)
+                     boolean isLoad,
+                     long notExpiringLoadMask,
+                     int notExpiringGroup)
     throws AmberException
   {
     try {
       // jpa/0o01, jpa/0o41
 
-      EntityItem item = findEntityItem(aConn, key, isLoad);
+      EntityItem item = findEntityItem(aConn,
+                                       key,
+                                       isLoad,
+                                       notExpiringLoadMask,
+                                       notExpiringGroup);
 
       if (item == null) {
         if (_manager.isJPA())
@@ -323,6 +346,14 @@ public class AmberEntityHome {
     }
   }
 
+  public EntityItem findEntityItem(AmberConnection aConn,
+                                   Object key,
+                                   boolean isLoad)
+    throws AmberException
+  {
+    return findEntityItem(aConn, key, isLoad, 0, 0);
+  }
+
   /**
    * Loads an entity based on the primary key.
    *
@@ -332,7 +363,9 @@ public class AmberEntityHome {
    */
   public EntityItem findEntityItem(AmberConnection aConn,
                                    Object key,
-                                   boolean isLoad)
+                                   boolean isLoad,
+                                   long notExpiringLoadMask,
+                                   int notExpiringGroup)
     throws AmberException
   {
     log.finest("findEntityItem: "+key+" "+isLoad);
@@ -433,6 +466,10 @@ public class AmberEntityHome {
 
             // jpa/0g0k
             item.getEntity().__caucho_expire();
+
+            // jpa/0ge4, jpa/0o0b, jpa/0o0c: bidirectional one-to-one optimization.
+            item.getEntity().__caucho_setLoadMask(notExpiringLoadMask,
+                                                  notExpiringGroup);
           }
         }
         else {

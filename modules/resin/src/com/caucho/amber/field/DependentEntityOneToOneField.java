@@ -446,7 +446,8 @@ public class DependentEntityOneToOneField extends CascadableField {
       out.println("if (child != null) {");
       out.pushDepth();
 
-      String targetTypeExt = getEntityTargetType().getInstanceClassName();
+      // jpa/0ge4
+      String targetTypeName = getJavaTypeName(); // getEntityTargetType().getInstanceClassName();
 
       // jpa/0l42
       out.println("com.caucho.amber.entity.Entity newChild = aConn.addNewEntity(child.getClass(), ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey());");
@@ -472,7 +473,7 @@ public class DependentEntityOneToOneField extends CascadableField {
       out.popDepth();
       out.println("}");
 
-      value = "(" + targetTypeExt + ") child";
+      value = "(" + targetTypeName + ") child";
 
       out.println(generateSet(dst, value) + ";");
     }

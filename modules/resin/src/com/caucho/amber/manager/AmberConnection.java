@@ -1101,10 +1101,28 @@ public class AmberConnection
     }
   }
 
+  public Entity loadFromHome(String name,
+                             Object key)
+  {
+    return loadFromHome(name, key, 0, 0);
+  }
+
   /**
    * Loads the object with the given class.
+   *
+   * @param name the class name.
+   * @param key the key.
+   * @param notExpiringLoadMask the load mask bit that will not be reset
+   *        when the entity is expiring and reloaded to a new transaction.
+   *        Normally, the bit is only set in bidirectional one-to-one
+   *        relationships where we already know the other side has already
+   *        been loaded in the second or new transactions.
+   * @param notExpiringGroup the corresponding load group.
    */
-  public Entity loadFromHome(String name, Object key)
+  public Entity loadFromHome(String name,
+                             Object key,
+                             long notExpiringLoadMask,
+                             int notExpiringGroup)
   {
     try {
       AmberEntityHome home = _persistenceUnit.getEntityHome(name);
@@ -1114,7 +1132,8 @@ public class AmberConnection
 
       home.init();
 
-      return home.load(this, key);
+      // jpa/0ge4, jpa/0o04, jpa/0o0b, jpa/0o0c: bidirectional optimization.
+      return home.load(this, key, notExpiringLoadMask, notExpiringGroup);
     } catch (AmberObjectNotFoundException e) {
       if (_persistenceUnit.isJPA()) {
         // jpa/0h29

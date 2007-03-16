@@ -596,8 +596,8 @@ public class EntityManyToOneField extends CascadableField {
 
     out.pushDepth();
 
-    // jpa/0o05
-    out.println("com.caucho.amber.entity.Entity contextEntity = __caucho_session.getEntity(this);");
+    // jpa/0o05, jpa/0ge3
+    out.println("com.caucho.amber.entity.Entity contextEntity = __caucho_session.getEntity((com.caucho.amber.entity.Entity) this);");
 
     out.println();
 
@@ -772,8 +772,17 @@ public class EntityManyToOneField extends CascadableField {
       out.println("if (! " + varName + ".__caucho_getEntityState().isManaged()) {");
       out.pushDepth();
 
-      // jpa/0o03
-      out.println(session + ".loadFromHome(" + targetTypeExt + ".class.getName(), " + otherKey + ");");
+      long targetMask = 0;
+      long targetGroup = 0;
+
+      if (_targetField != null) {
+        long targetLoadIndex = _targetField.getTargetLoadIndex();
+        targetGroup = targetLoadIndex / 64;
+        targetMask = (1L << (targetLoadIndex % 64));
+      }
+
+      // jpa/0o03, jpa/0ge4
+      out.println(session + ".loadFromHome(" + targetTypeExt + ".class.getName(), " + otherKey + ", " + targetMask + ", " + targetGroup + ");");
       out.popDepth();
       out.println("}");
     }
@@ -787,7 +796,7 @@ public class EntityManyToOneField extends CascadableField {
   void generateSetTargetLoadMask(JavaWriter out, String varName)
     throws IOException
   {
-    // jpa/0o0-
+    // jpa/0o0-, jpa/0ge4
 
     if (_targetField != null) {
       long targetLoadIndex = _targetField.getTargetLoadIndex();
@@ -798,7 +807,8 @@ public class EntityManyToOneField extends CascadableField {
 
       out.println(varName + ".__caucho_loadMask_" + targetGroup + " |= " + targetMask + "L;");
 
-      String thisContextEntity = "(" + getSourceType().getInstanceClassName() + ") contextEntity";
+      // jpa/0ge4
+      String thisContextEntity = "(" + _targetField.getJavaTypeName() /* getSourceType().getInstanceClassName() */ + ") contextEntity";
 
       // jpa/0o05
       out.println(varName + "." + _targetField.generateSuperSetter(thisContextEntity) + ";");

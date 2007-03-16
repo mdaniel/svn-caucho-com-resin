@@ -34,6 +34,7 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.EntityType;
+import com.caucho.amber.type.MappedSuperclassType;
 import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
@@ -143,12 +144,16 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.print("private static final java.util.logging.Logger __caucho_log = ");
     out.println("java.util.logging.Logger.getLogger(\"" + getBeanClassName() + "\");");
 
-    if (! isEntityParent) {
+    // jpa/0ge3 if (! isEntityParent) {
+    if (_relatedType.getParentType() == null) {
       out.println();
       out.println("protected transient com.caucho.amber.type.EntityType __caucho_home;");
       out.println("public transient com.caucho.amber.entity.EntityItem __caucho_item;");
       out.println("protected transient com.caucho.amber.manager.AmberConnection __caucho_session;");
       out.println("protected transient com.caucho.amber.entity.EntityState __caucho_state = com.caucho.amber.entity.EntityState.TRANSIENT;");
+
+      // XXX: needs to generate load masks for groups in the subclasses,
+      // but the group numbering should not always start at zero.
 
       int loadCount = _relatedType.getLoadGroupIndex();
       for (int i = 0; i <= loadCount / 64; i++) {
@@ -1798,6 +1803,32 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("}");
   }
 
+  void generateSetLoadMask(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public void __caucho_setLoadMask(long loadMask, int loadGroup)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("switch (loadGroup) {");
+    out.pushDepth();
+
+    int loadCount = _relatedType.getLoadGroupIndex();
+
+    for (int i = 0; i <= loadCount / 64; i++) {
+      out.println("case " + i + ":");
+      out.println("  __caucho_loadMask_" + i + " = loadMask;");
+      out.println("  break;");
+    }
+
+    out.popDepth();
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+  }
+
   /**
    * Generates the copy
    */
@@ -1958,6 +1989,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     boolean generateHomeNew = true;
 
+    // jpa/0ge2
+    if (_relatedType instanceof MappedSuperclassType)
+      generateHomeNew = false;
+
+    /* XXX
     if (_relatedType instanceof SubEntityType) {
       SubEntityType sub = (SubEntityType) _relatedType;
 
@@ -1967,6 +2003,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
           generateHomeNew = false;
       }
     }
+    */
 
     if (generateHomeNew)
       generateHomeNew(out);
