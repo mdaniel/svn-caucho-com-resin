@@ -1084,8 +1084,15 @@ public class ResultSetImpl implements ResultSet {
 
         Entity entity = entityItem.getEntity();
 
-        value = _session.loadProxy(entity.__caucho_getEntityType(),
-                                   entity.__caucho_getPrimaryKey());
+        if (entity.__caucho_getEntityType().getParentType() == null) {
+          value = _session.loadProxy(entity.__caucho_getEntityType(),
+                                     entity.__caucho_getPrimaryKey());
+        }
+        else {
+          // jpa/0l4a
+          value = _session.loadFromHome(entity.getClass().getName(),
+                                        entity.__caucho_getPrimaryKey());
+        }
 
         _numberOfLoadingColumns = entityItem.getNumberOfLoadingColumns();
       }

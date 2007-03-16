@@ -1916,6 +1916,20 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
     com.caucho.amber.field.Id id = targetType.getId();
 
+    RelatedType parentType = targetType;
+
+    int idCols;
+
+    // XXX: jpa/0l48
+    while ((idCols = id.getColumns().size()) == 0) {
+      parentType = parentType.getParentType();
+
+      if (parentType == null)
+        break;
+
+      id = parentType.getId();
+    }
+
     int size;
     Object joinColumnCfg[] = null;
 
@@ -1926,11 +1940,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       joinColumnCfg = joinColumnMap.values().toArray();
     }
 
-    if (id.getColumns().size() != size) {
+    if (idCols != size) {
       throw error(field, L.l("Number of @JoinColumns for '{1}' ({0}) does not match the number of primary key columns for '{3}' ({2}).",
                              "" + size,
                              field.getName(),
-                             id.getColumns().size(),
+                             idCols,
                              targetType.getName()));
     }
 

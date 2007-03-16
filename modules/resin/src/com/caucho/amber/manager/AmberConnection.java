@@ -295,12 +295,15 @@ public class AmberConnection
    */
   public void persistFromCascade(Object o)
   {
+    // jpa/0h25, jpa/0i5e
+
     try {
       if (o == null)
         return;
 
       Entity entity = (Entity) o;
 
+      /* XXX: jpa/0h25
       EntityState state = entity.__caucho_getEntityState();
 
       // XXX: jpa/0i5e
@@ -310,6 +313,7 @@ public class AmberConnection
 
         return;
       }
+      */
 
       persistInternal(entity, true);
 
@@ -411,6 +415,11 @@ public class AmberConnection
         return;
       }
 
+      // jpa/0h25, jpa/0i5e
+      // Do not flush dependent objects for cascading persistence
+      // when this entity is being removed.
+      instance.__caucho_setEntityState(EntityState.P_DELETING);
+
       if (log.isLoggable(Level.FINEST))
         log.finest(L.l("remove is flushing any lazy cascading operation"));
 
@@ -420,6 +429,10 @@ public class AmberConnection
       // jpa/0h25 flushInternal();
       // Only flushes this entity.
       instance.__caucho_flush();
+
+      // jpa/0h25, jpa/0i5e
+      // Restores original state.
+      instance.__caucho_setEntityState(state);
 
       Object oldEntity;
 
@@ -2612,7 +2625,13 @@ public class AmberConnection
            if (! isCascade) {
              flushInternal();
         */
-        instance.__caucho_flush();
+
+        // jpa/0h25
+        if (_entities.contains(instance))
+          instance.__caucho_flush();
+        // else
+        // if the entity is not in the context the flush
+        // was already applied to it for deleting.
 
         // jpa/0h26
         instance.__caucho_cascadePrePersist(this);
