@@ -81,7 +81,7 @@ public class OutParameterMarshal extends ParameterMarshal {
     if (args[_arg] instanceof Holder)
       _property.write(_marshaller, out, ((Holder) args[_arg]).value, _name);
     else
-      _property.write(_marshaller, out, null, _name);
+      _property.write(_marshaller, out, args[_arg], _name);
   }
 
   public void serializeReply(XMLStreamWriter out, Object ret)
@@ -104,5 +104,10 @@ public class OutParameterMarshal extends ParameterMarshal {
     }
     else
       out.writeStartElement(_name.getLocalPart());
+  }
+
+  public String toString()
+  {
+    return "OutParameterMarshal[" + _name + "," + _property + "]";
   }
 }

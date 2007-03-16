@@ -260,7 +260,7 @@ public class DirectSkeleton extends Skeleton {
 
     String actionName = in.getName().getLocalPart();
 
-    out.writeStartDocument();
+    out.writeStartDocument("UTF-8", "1.0");
     out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Envelope", SOAP_ENVELOPE);
     out.writeNamespace(SOAP_ENVELOPE_PREFIX, SOAP_ENVELOPE);
     //out.writeNamespace("xsi", XMLNS_XSI);

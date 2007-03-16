@@ -479,7 +479,7 @@ public abstract class AbstractAction {
   protected void writeRequest(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    out.writeStartDocument();
+    out.writeStartDocument("UTF-8", "1.0");
     out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
                           "Envelope", 
                           Skeleton.SOAP_ENVELOPE);
