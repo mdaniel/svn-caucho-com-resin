@@ -4111,7 +4111,7 @@ public class QuercusParser {
 	expect('}');
       }
       else if (token == SIMPLE_STRING_ESCAPE ||
-                token == COMPLEX_BINARY_ESCAPE) {
+               token == SIMPLE_BINARY_ESCAPE) {
 	int ch = read();
 	
 	_sb.setLength(0);
@@ -4159,7 +4159,7 @@ public class QuercusParser {
 	_peek = ch;
       }
       else
-	throw new IllegalStateException();
+	throw error("unexpected token");
 
       expr = _factory.createAppend(expr, tail);
 
@@ -4168,9 +4168,16 @@ public class QuercusParser {
       else
 	token = parseEscapedString('"');
 
-      if (_sb.length() > 0)
-	expr = _factory.createAppend(expr,
-					 _factory.createString(_sb.toString()));
+      if (_sb.length() > 0) {
+        Expr string;
+      
+        if (isUnicode)
+          string = _factory.createString(_sb.toString());
+        else
+          string = _factory.createBinary(_sb.toString().getBytes());
+        
+	expr = _factory.createAppend(expr, string);
+      }
 
       if (token == STRING)
 	return expr;

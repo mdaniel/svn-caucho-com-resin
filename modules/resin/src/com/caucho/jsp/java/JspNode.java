@@ -568,8 +568,17 @@ public abstract class JspNode {
       case '&':
 	cb.append("&amp;");
 	break;
+      case '<':
+	cb.append("&lt;");
+	break;
+      case '>':
+	cb.append("&gt;");
+	break;
       case '"':
 	cb.append("&quot;");
+	break;
+      case '\'':
+	cb.append("&apos;");
 	break;
       default:
 	cb.append(ch);

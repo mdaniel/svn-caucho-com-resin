@@ -1316,14 +1316,6 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Returns the array ref for an argument.
-   */
-  public Value getArgRef(Value index)
-  {
-    return getRef(index);
-  }
-
-  /**
    * Returns the value for a field, creating an array if the field
    * is unset.
    */

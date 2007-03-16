@@ -222,9 +222,12 @@ public class ResinModule
   public ArrayValue mbean_explode(String name)
   {
     try {
-      ObjectName objectName = new ObjectName(name);
-
       ArrayValueImpl exploded = new ArrayValueImpl();
+      
+      if (name == null)
+        return exploded;
+      
+      ObjectName objectName = new ObjectName(name);
 
       exploded.put(":domain:", objectName.getDomain());
 

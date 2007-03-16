@@ -726,20 +726,6 @@ public class JavaAdapterVar extends Var
   }
 
   /**
-   * Returns the array ref.
-   */
-  public Value getArgRef(Value index)
-  {
-    setRaw(getValue());
-    
-    Value value = super.getArgRef(index);
-    
-    setValue(getRawValue());
-    
-    return value;
-  }
-
-  /**
    * Returns the value, creating an object if unset.
    */
   public Value getArray(Value index)

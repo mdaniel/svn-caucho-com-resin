@@ -271,8 +271,12 @@ public class ObjectExtValue extends ObjectValue
 
   public Value put(Value index, Value value)
   {
+    // php/0d94
+    /*
     throw new QuercusException(L.l("Object of type '{0}' cannot be used as an array",
 				   getClassName()));
+    */
+    return NullValue.NULL;
   }
 
   public Value put(Value value)
