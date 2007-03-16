@@ -90,16 +90,12 @@ public class SkeletonProperty extends Property {
   public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    // XXX Subclassing/anyType
-    //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
     _skeleton.write(m, out, obj, qname, null);
   }
 
   public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    // XXX Subclassing/anyType
-    //Skeleton skeleton = getAccessor().getContext().findSkeletonForObject(obj);
     _skeleton.write(m, out, obj, qname, null);
   }
 

@@ -30,7 +30,6 @@
 package com.caucho.jaxb.skeleton;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.namespace.QName;
 import javax.xml.stream.events.*;
 import javax.xml.stream.XMLStreamException;

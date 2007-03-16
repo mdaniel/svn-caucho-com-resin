@@ -62,19 +62,18 @@ public class ImageProperty extends CDataProperty {
   private ImageReader _imageReader;
   private ImageWriter _imageWriter;
 
-  public static ImageProperty getDefaultImageProperty()
-    throws JAXBException
-  {
-    return getImageProperty(DEFAULT_IMAGE_MIME_TYPE);
-  }
-
   public static ImageProperty getImageProperty(String mimeType)
     throws JAXBException
   {
     ImageProperty property = _mimeTypePropertyMap.get(mimeType);
 
     if (property == null) {
-      property = new ImageProperty(mimeType);
+      if (mimeType == null) {
+        property = new ImageProperty(DEFAULT_IMAGE_MIME_TYPE);
+        _mimeTypePropertyMap.put(DEFAULT_IMAGE_MIME_TYPE, property);
+      }
+      else
+        property = new ImageProperty(mimeType);
 
       _mimeTypePropertyMap.put(mimeType, property);
     }

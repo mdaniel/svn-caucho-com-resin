@@ -43,6 +43,7 @@ import javax.xml.bind.Binder;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.MarshalException;
 import javax.xml.bind.PropertyException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.UnmarshalException;
@@ -208,6 +209,9 @@ public class BinderImpl extends Binder<Node> {
 
     Skeleton skeleton = _context.findSkeletonForObject(jaxbObject);
 
+    if (skeleton == null)
+      throw new MarshalException(L.l("Unable to marshal {0}: its type unknown to this JAXBContext", jaxbObject));
+
     Document doc = xmlNode.getOwnerDocument();
 
     if (xmlNode.getNodeType() == Node.DOCUMENT_NODE)
@@ -300,12 +304,9 @@ public class BinderImpl extends Binder<Node> {
     if (jaxbObject == null)
       throw new JAXBException(L.l("Unknown xmlNode"));
 
-    Skeleton skeleton = null;
-    
-    try {
-      skeleton = _context.findSkeletonForObject(jaxbObject);
-    }
-    catch (JAXBException e) {
+    Skeleton skeleton = _context.findSkeletonForObject(jaxbObject);
+
+    if (skeleton == null) {
       // we strip the JAXBElement when we bind objects, so rewrap
       // the object and try again
       QName qname = JAXBUtil.qnameFromNode(root);
@@ -313,6 +314,10 @@ public class BinderImpl extends Binder<Node> {
       jaxbObject = new JAXBElement(qname, jaxbObject.getClass(), jaxbObject);
 
       skeleton = _context.findSkeletonForObject(jaxbObject);
+
+      if (skeleton == null)
+        throw new UnmarshalException(L.l("Type {0} is unknown to this context",
+                                         jaxbObject.getClass()));
     }
 
     try {
@@ -333,6 +338,9 @@ public class BinderImpl extends Binder<Node> {
     throws JAXBException
   {
     Skeleton skeleton = _context.findSkeletonForObject(jaxbObject);
+
+    if (skeleton == null)
+      throw new MarshalException(L.l("Unable to update {0}: its type unknown to this JAXBContext", jaxbObject));
 
     try {
       return skeleton.bindTo(this, xmlNode, jaxbObject, null, null);

@@ -72,6 +72,10 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
     throws JAXBException
   {
     ClassSkeleton skeleton = _context.findSkeletonForObject(jaxbElement);
+
+    if (skeleton == null)
+      throw new MarshalException(L.l("Unable to marshal {0}: its type unknown to this JAXBContext", jaxbElement));
+
     Class c = skeleton.getType();
     writer = StaxUtil.toRepairingXMLStreamWriter(writer);
 

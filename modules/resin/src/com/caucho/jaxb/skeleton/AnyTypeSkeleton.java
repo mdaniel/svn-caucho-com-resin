@@ -155,19 +155,27 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
     if (obj != null) {
       Skeleton skeleton = _context.findSkeletonForObject(obj);
 
-      if (skeleton != null)
+      if (skeleton != null) {
         skeleton.write(m, out, obj, null, attributes);
-      else {
-        if (fieldName.getNamespaceURI() == null)
-          out.writeEmptyElement(fieldName.getLocalPart());
-        else if (fieldName.getPrefix() == null)
-          out.writeEmptyElement(fieldName.getNamespaceURI(), 
-                                fieldName.getLocalPart());
-        else
-          out.writeEmptyElement(fieldName.getPrefix(), 
-                                fieldName.getLocalPart(), 
-                                fieldName.getNamespaceURI()); 
+        return;
       }
+
+      Property property = _context.getSimpleTypeProperty(obj.getClass());
+
+      if (property != null) {
+        property.write(m, out, obj, fieldName);
+        return;
+      }
+
+      if (fieldName.getNamespaceURI() == null)
+        out.writeEmptyElement(fieldName.getLocalPart());
+      else if (fieldName.getPrefix() == null)
+        out.writeEmptyElement(fieldName.getNamespaceURI(), 
+                              fieldName.getLocalPart());
+      else
+        out.writeEmptyElement(fieldName.getPrefix(), 
+                              fieldName.getLocalPart(), 
+                              fieldName.getNamespaceURI()); 
     }
   }
 

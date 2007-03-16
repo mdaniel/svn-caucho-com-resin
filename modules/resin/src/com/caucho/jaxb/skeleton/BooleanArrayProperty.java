@@ -31,7 +31,6 @@ package com.caucho.jaxb.skeleton;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.namespace.QName;
 import javax.xml.stream.events.*;
 import javax.xml.stream.XMLStreamException;
@@ -127,30 +126,25 @@ public class BooleanArrayProperty extends ArrayProperty {
   }
 
   public void write(Marshaller m, XMLStreamWriter out, 
-                    Object value, QName qname, Object obj)
+                    Object value, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    //XXX wrapper
-    
     if (value != null) {
       boolean[] array = (boolean[]) value;
 
-      for (int i = 0; i < array.length; i++) 
-        BooleanProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname, obj);
+      for (int i = 0; i < array.length; i++)
+        BooleanProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, 
-                    Object value, QName qname, Object obj)
+  public void write(Marshaller m, XMLEventWriter out, Object value, QName qname)
     throws IOException, XMLStreamException, JAXBException
   {
-    //XXX wrapper
-    
     if (value != null) {
       boolean[] array = (boolean[]) value;
 
       for (int i = 0; i < array.length; i++) 
-        BooleanProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname, obj);
+        BooleanProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
     }
   }
   

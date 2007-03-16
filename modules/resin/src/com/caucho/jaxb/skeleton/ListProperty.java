@@ -38,7 +38,6 @@ import com.caucho.jaxb.JAXBUtil;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.namespace.QName;
 import javax.xml.stream.events.*;
 import javax.xml.stream.XMLEventReader;
@@ -103,8 +102,6 @@ public class ListProperty extends IterableProperty {
                     Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    //XXX wrapper
-    
     if (value != null) {
       if (value instanceof List) {
         List list = (List) value;
@@ -121,8 +118,6 @@ public class ListProperty extends IterableProperty {
                     Object value, QName qname, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    //XXX wrapper
-    
     if (value != null) {
       if (value instanceof List) {
         List list = (List) value;
@@ -138,8 +133,6 @@ public class ListProperty extends IterableProperty {
   public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
     throws IOException, JAXBException
   {
-    //XXX wrapper
-    
     if (obj != null) {
       if (obj instanceof List) {
         List list = (List) obj;

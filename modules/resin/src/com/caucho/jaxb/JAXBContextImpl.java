@@ -36,6 +36,7 @@ import com.caucho.xml.QNode;
 
 import org.w3c.dom.Node;
 
+import javax.activation.DataHandler;
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.*;
@@ -88,6 +89,8 @@ public class JAXBContextImpl extends JAXBContext {
     _specialClasses.add(Date.class);
     _specialClasses.add(Calendar.class);
     _specialClasses.add(XMLGregorianCalendar.class);
+    _specialClasses.add(UUID.class);
+    _specialClasses.add(DataHandler.class);
   }
 
   private String[] _packages;
@@ -355,7 +358,6 @@ public class JAXBContextImpl extends JAXBContext {
 
   public ClassSkeleton 
     findSkeletonForClass(Class cl, Map<Class,? extends ClassSkeleton> map)
-    throws JAXBException
   {
     Class givenClass = cl;
 
@@ -368,24 +370,23 @@ public class JAXBContextImpl extends JAXBContext {
       cl = cl.getSuperclass();
     }
 
-    throw new JAXBException(L.l("Class {0} unknown to this JAXBContext", 
-                                givenClass));
+    return null;
   }
 
   public ClassSkeleton findSkeletonForObject(Object obj)
-    throws JAXBException
   {
     if (obj instanceof JAXBElement) {
       JAXBElement element = (JAXBElement) obj;
 
       obj = element.getValue();
 
-      try {
-        return findSkeletonForClass(obj.getClass(), _jaxbElementSkeletons);
-      }
-      catch (JAXBException e) {
-        return _dynamicSkeleton;
-      }
+      ClassSkeleton skeleton = 
+        findSkeletonForClass(obj.getClass(), _jaxbElementSkeletons);
+
+      if (skeleton == null)
+        skeleton = _dynamicSkeleton;
+      
+      return skeleton;
     }
     else
       return findSkeletonForClass(obj.getClass(), _classSkeletons);
@@ -568,12 +569,11 @@ public class JAXBContextImpl extends JAXBContext {
     if (byte[].class.equals(type))
       return ByteArrayProperty.PROPERTY;
 
-    if (Image.class.equals(type)) {
-      if (mimeType == null)
-        return ImageProperty.getDefaultImageProperty();
-      else
-        return ImageProperty.getImageProperty(mimeType);
-    }
+    if (Image.class.equals(type))
+      return ImageProperty.getImageProperty(mimeType);
+
+    if (DataHandler.class.equals(type))
+      return DataHandlerProperty.PROPERTY;
 
     return null;
   }

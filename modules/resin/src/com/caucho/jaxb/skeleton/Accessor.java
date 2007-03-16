@@ -50,6 +50,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
@@ -142,6 +143,12 @@ public abstract class Accessor {
       if (attribute != null && ! "##default".equals(attribute.name()))
         _name = attribute.name();
     }
+
+    XmlID xmlID = getAnnotation(XmlID.class);
+
+    // jaxb/02d1
+    if (xmlID != null && ! String.class.equals(getType()))
+      throw new JAXBException(L.l("Fields or properties annotated with XmlID must have type String: {0}", this));
     
     XmlMimeType xmlMimeType = getAnnotation(XmlMimeType.class);
     String mimeType = null;
@@ -156,22 +163,22 @@ public abstract class Accessor {
           _property = 
             _context.createProperty(getGenericType(), false, mimeType);
 
+          if (element != null)
+            _qname = qnameFromXmlElement(element);
+          else {
+            _qname = new QName(getName());
+
+            if (! _property.isXmlPrimitiveType())
+              _context.createSkeleton(getType());
+          }
+
           XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
 
           if (wrapper != null) {
-            _qname = qnameFromXmlElementWrapper(wrapper);
-            break;
+            _property = new WrapperProperty(_property, wrapper, 
+                                            _qname.getNamespaceURI(), 
+                                            _qname.getLocalPart());
           }
-
-          if (element != null) {
-            _qname = qnameFromXmlElement(element);
-            break;
-          }
-
-          _qname = new QName(getName());
-
-          if (! _property.isXmlPrimitiveType())
-            _context.createSkeleton(getType());
 
           break;
         }
@@ -258,6 +265,8 @@ public abstract class Accessor {
             Class cType = getType().getComponentType();
             _property = ArrayProperty.createArrayProperty(_property, cType);
           }
+
+          // XXX Wrapper
 
           break;
         }
@@ -720,7 +729,13 @@ public abstract class Accessor {
         out.writeAttribute("nillable", "true");
     }
 
-    out.writeAttribute("type", _property.getSchemaType());
+    XmlID xmlID = getAnnotation(XmlID.class);
+
+    if (xmlID != null)
+      out.writeAttribute("type", "xsd:ID"); // jaxb/22d0
+    else
+      out.writeAttribute("type", _property.getSchemaType());
+
     out.writeAttribute("name", getName());
 
     XmlMimeType xmlMimeType = getAnnotation(XmlMimeType.class);

@@ -39,6 +39,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
@@ -462,6 +463,7 @@ public class JAXBUtil {
            element.isAnnotationPresent(XmlElement.class) ||
            element.isAnnotationPresent(XmlElements.class) ||
            element.isAnnotationPresent(XmlElementRef.class) ||
+           element.isAnnotationPresent(XmlID.class) ||
            element.isAnnotationPresent(XmlValue.class);
   }
 

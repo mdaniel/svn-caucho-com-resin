@@ -31,7 +31,6 @@ package com.caucho.jaxb.skeleton;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.namespace.QName;
 import javax.xml.stream.events.*;
 import javax.xml.stream.XMLEventReader;
@@ -47,49 +46,6 @@ import java.util.Iterator;
  */
 public abstract class IterableProperty extends Property {
   protected Property _componentProperty = null;
-
-  /*
-  protected abstract int size(Object o);
-  protected abstract Iterator getIterator(Object o);*/
-  
-  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    /* XXX
-    if (obj == null) {
-      if (_wrap == null || !_wrap.nillable()) return;
-    }
-
-    if (_wrap != null)
-      writeStartElement(out, obj);
-
-    if (obj != null) {
-      Iterator it = getIterator(obj);
-
-      while (it.hasNext())
-        _componentProperty.write(m, out, it.next());
-    }
-
-    if (_wrap != null)
-      writeEndElement(out, obj);*/
-  }
-
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-  }
 
   protected Property getComponentProperty()
   {
