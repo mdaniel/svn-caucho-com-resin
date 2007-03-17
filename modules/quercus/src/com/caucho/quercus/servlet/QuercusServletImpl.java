@@ -96,7 +96,7 @@ public class QuercusServletImpl
       VfsStream s = new VfsStream(null, out);
       ws = new WriteStream(s);
 
-      Env env = new Env(getQuercus(), page, ws, request, response);
+      Env env = getQuercus().createEnv(page, ws, request, response);
       try {
         env.setGlobalValue("request", env.wrapJava(request));
         env.setGlobalValue("response", env.wrapJava(request));

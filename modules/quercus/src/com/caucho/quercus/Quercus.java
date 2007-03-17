@@ -52,6 +52,7 @@ import com.caucho.util.TimedCache;
 import com.caucho.vfs.*;
 
 import javax.sql.DataSource;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
@@ -179,6 +180,14 @@ public class Quercus
     _sessionManager = createSessionManager();
 
     _workDir = getWorkDir();
+  }
+
+  public Env createEnv(QuercusPage page,
+                       WriteStream out,
+                       HttpServletRequest request,
+                       HttpServletResponse response)
+  {
+    return new Env(this, page, out, request, response);
   }
   
   /**
