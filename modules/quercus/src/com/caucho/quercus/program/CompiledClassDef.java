@@ -46,7 +46,6 @@ import java.util.ArrayList;
  */
 public class CompiledClassDef extends ClassDef {
   private final Class _compiledClass;
-  private final Method _init;
   
   private final ArrayList<String> _fieldNames
     = new ArrayList<String>();
@@ -63,12 +62,6 @@ public class CompiledClassDef extends ClassDef {
     super(name, parent, ifaceList);
 
     _compiledClass = compiledClass;
-    try {
-      _init = compiledClass.getMethod("init",
-				      new Class[] { QuercusClass.class });
-    } catch (Exception e) {
-      throw new QuercusRuntimeException(e);
-    }
   }
 
   /**
@@ -77,7 +70,9 @@ public class CompiledClassDef extends ClassDef {
   public void initClass(QuercusClass cl)
   {
     try {
-      _init.invoke(null, cl);
+      CompiledClass compClass = (CompiledClass) _compiledClass.newInstance();
+
+      compClass.init(cl);
     } catch (Exception e) {
       throw new QuercusRuntimeException(e);
     }
