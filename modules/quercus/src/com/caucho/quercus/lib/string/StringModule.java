@@ -52,6 +52,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -1583,6 +1584,40 @@ v   *
     }
 
     return false;
+  }
+
+  /**
+   * Gets locale-specific symbols.
+   */
+  public static ArrayValue localeconv(Env env)
+  {
+    ArrayValueImpl array = new ArrayValueImpl();
+
+    Locale money = env.getLocaleInfo().getMonetary();
+    
+    DecimalFormatSymbols decimal = new DecimalFormatSymbols(money);
+    Currency currency = NumberFormat.getInstance(money).getCurrency();
+    
+    array.put("decimal_point", decimal.getDecimalSeparator());
+    array.put("thousands_sep", decimal.getGroupingSeparator());
+    //array.put("grouping", "");
+    array.put("int_curr_symbol", decimal.getInternationalCurrencySymbol());
+    array.put("currency_symbol", decimal.getCurrencySymbol());
+    array.put("mon_decimal_point", decimal.getMonetaryDecimalSeparator());
+    array.put("mon_thousands_sep", decimal.getGroupingSeparator());
+    //array.put("mon_grouping", "");
+    array.put("positive_sign", "");
+    array.put("negative_sign", decimal.getMinusSign());
+    array.put("int_frac_digits", currency.getDefaultFractionDigits());
+    array.put("frac_digits", currency.getDefaultFractionDigits());
+    //array.put("p_cs_precedes", "");
+    //array.put("p_sep_by_space", "");
+    //array.put("n_cs_precedes", "");
+    //array.put("n_sep_by_space", "");
+    //array.put("p_sign_posn", "");
+    //array.put("n_sign_posn", "");
+    
+    return array;
   }
 
   /**
