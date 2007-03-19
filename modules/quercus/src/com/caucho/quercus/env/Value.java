@@ -870,7 +870,9 @@ abstract public class Value implements java.io.Serializable
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName, Expr []args)
+  public Value callMethod(Env env,
+                          int hash, char []name, int nameLen,
+                          Expr []args)
   {
     Value []value = new Value[args.length];
 
@@ -878,101 +880,111 @@ abstract public class Value implements java.io.Serializable
       value[i] = args[i].eval(env);
     }
 
-    return callMethod(env, methodName, value);
+    return callMethod(env, hash, name, nameLen,
+                      value);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName, Value []args)
+  public Value callMethod(Env env,
+                          int hash, char []name, int nameLen,
+                          Value []args)
   {
     switch (args.length) {
     case 0:
-      return callMethod(env, methodName);
+      return callMethod(env, hash, name, nameLen);
 
     case 1:
-      return callMethod(env, methodName, args[0]);
+      return callMethod(env, hash, name, nameLen,
+                        args[0]);
 
     case 2:
-      return callMethod(env, methodName, args[0], args[1]);
+      return callMethod(env, hash, name, nameLen,
+                        args[0], args[1]);
 
     case 3:
-      return callMethod(env, methodName, args[0], args[1], args[2]);
+      return callMethod(env, hash, name, nameLen,
+                        args[0], args[1], args[2]);
 
     case 4:
-      return callMethod(env, methodName, args[0], args[1], args[2],
-			args[3]);
+      return callMethod(env, hash, name, nameLen,
+                        args[0], args[1], args[2], args[3]);
 
     case 5:
-      return callMethod(env, methodName, args[0], args[1], args[2],
-			args[3], args[4]);
+      return callMethod(env, hash, name, nameLen,
+                        args[0], args[1], args[2], args[3], args[4]);
 
     default:
-      return errorNoMethod(env, methodName);
+      return errorNoMethod(env, name, nameLen);
     }
   }
 
   /**
    * Evaluates a method with 0 args.
    */
-  public Value callMethod(Env env, String methodName)
+  public Value callMethod(Env env,
+                          int hash, char []name, int nameLen)
   {
-    return errorNoMethod(env, methodName);
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method with 1 arg.
    */
-  public Value callMethod(Env env, String methodName, Value a0)
+  public Value callMethod(Env env,
+                          int hash, char []name, int nameLen,
+                          Value a0)
   {
-    return errorNoMethod(env, methodName);
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method with 1 arg.
    */
-  public Value callMethod(Env env, String methodName, Value a0, Value a1)
+  public Value callMethod(Env env,
+                          int hash, char []name, int nameLen,
+                          Value a0, Value a1)
   {
-    return errorNoMethod(env, methodName);
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method with 3 args.
    */
-  public Value callMethod(Env env, String methodName,
+  public Value callMethod(Env env, 
+                          int hash, char []name, int nameLen,
 			  Value a0, Value a1, Value a2)
   {
-    return errorNoMethod(env, methodName);
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method with 4 args.
    */
-  public Value callMethod(Env env, String methodName,
+  public Value callMethod(Env env, 
+                          int hash, char []name, int nameLen,
 			  Value a0, Value a1, Value a2, Value a3)
   {
-    return errorNoMethod(env, methodName);
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method with 5 args.
    */
-  public Value callMethod(Env env, String methodName,
+  public Value callMethod(Env env, 
+                          int hash, char []name, int nameLen,
 			  Value a0, Value a1, Value a2, Value a3, Value a5)
   {
-    return errorNoMethod(env, methodName);
-  }
-
-  private Value errorNoMethod(Env env, String methodName)
-  {
-    return env.error(L.l("{0}: '{1}' is an unknown method.",
-			 toDebugString(), methodName));
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName, Expr []args)
+  public Value callMethodRef(Env env, 
+                             int hash, char []name, int nameLen,
+                             Expr []args)
   {
     Value []value = new Value[args.length];
 
@@ -980,96 +992,388 @@ abstract public class Value implements java.io.Serializable
       value[i] = args[i].eval(env);
     }
 
-    return callMethodRef(env, methodName, value);
+    return callMethodRef(env, hash, name, nameLen, value);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName, Value []args)
+  public Value callMethodRef(Env env,
+                             int hash, char []name, int nameLen,
+                             Value []args)
   {
     switch (args.length) {
     case 0:
-      return callMethodRef(env, methodName);
+      return callMethodRef(env, hash, name, nameLen);
 
     case 1:
-      return callMethodRef(env, methodName, args[0]);
+      return callMethodRef(env, hash, name, nameLen,
+                           args[0]);
 
     case 2:
-      return callMethodRef(env, methodName, args[0], args[1]);
+      return callMethodRef(env, hash, name, nameLen,
+                           args[0], args[1]);
 
     case 3:
-      return callMethodRef(env, methodName, args[0], args[1], args[2]);
+      return callMethodRef(env, hash, name, nameLen,
+                           args[0], args[1], args[2]);
 
     case 4:
-      return callMethodRef(env, methodName, args[0], args[1], args[2],
-			args[3]);
+      return callMethodRef(env, hash, name, nameLen,
+                           args[0], args[1], args[2], args[3]);
 
     case 5:
-      return callMethodRef(env, methodName, args[0], args[1], args[2],
-			args[3], args[4]);
+      return callMethodRef(env, hash, name, nameLen,
+                           args[0], args[1], args[2], args[3], args[4]);
 
     default:
-      return env.error(L.l("{0}: '{1}' is an unknown method.",
-			   toString(), methodName));
+      return errorNoMethod(env, name, nameLen);
     }
   }
 
   /**
    * Evaluates a method with 0 args.
    */
-  public Value callMethodRef(Env env, String methodName)
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen)
   {
-    return env.error(L.l("{0}: '{1}' is an unknown method.",
-			 toString(), methodName));
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method with 1 arg.
    */
-  public Value callMethodRef(Env env, String methodName, Value a0)
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value a0)
   {
-    return env.error(L.l("{0}: '{1}' is an unknown method.",
-			 toString(), methodName));
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method with 1 arg.
    */
-  public Value callMethodRef(Env env, String methodName, Value a0, Value a1)
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value a0, Value a1)
   {
-    return env.error(L.l("{0}: '{1}' is an unknown method.",
-			 toString(), methodName));
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method with 3 args.
    */
-  public Value callMethodRef(Env env, String methodName,
-			  Value a0, Value a1, Value a2)
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value a0, Value a1, Value a2)
   {
-    return env.error(L.l("{0}: '{1}' is an unknown method.",
-			 toString(), methodName));
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method with 4 args.
    */
-  public Value callMethodRef(Env env, String methodName,
-			  Value a0, Value a1, Value a2, Value a3)
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value a0, Value a1, Value a2, Value a3)
   {
-    return env.error(L.l("{0}: '{1}' is an unknown method.",
-			 toString(), methodName));
+    return errorNoMethod(env, name, nameLen);
   }
 
   /**
    * Evaluates a method with 5 args.
    */
-  public Value callMethodRef(Env env, String methodName,
-			  Value a0, Value a1, Value a2, Value a3, Value a5)
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value a0, Value a1, Value a2, Value a3, Value a5)
   {
-    return env.error(L.l("{0}: '{1}' is an unknown method.",
-			 toString(), methodName));
+    return errorNoMethod(env, name, nameLen);
+  }
+
+  //
+  // Methods from StringValue
+  //
+
+  /**
+   * Evaluates a method.
+   */
+  public Value callMethod(Env env, StringValue nameValue, Expr []args)
+  {
+    Value []value = new Value[args.length];
+
+    for (int i = 0; i < args.length; i++) {
+      value[i] = args[i].eval(env);
+    }
+
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+
+    return callMethod(env, hash, name, nameLen,
+                      value);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value callMethod(Env env,
+                          StringValue nameValue,
+                          Value []args)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    switch (args.length) {
+    case 0:
+      return callMethod(env, hash, name, nameLen);
+
+    case 1:
+      return callMethod(env, hash, name, nameLen,
+                        args[0]);
+
+    case 2:
+      return callMethod(env, hash, name, nameLen,
+                        args[0], args[1]);
+
+    case 3:
+      return callMethod(env, hash, name, nameLen,
+                        args[0], args[1], args[2]);
+
+    case 4:
+      return callMethod(env, hash, name, nameLen,
+                        args[0], args[1], args[2], args[3]);
+
+    case 5:
+      return callMethod(env, hash, name, nameLen,
+                        args[0], args[1], args[2], args[3], args[4]);
+
+    default:
+      return errorNoMethod(env, name, nameLen);
+    }
+  }
+
+  /**
+   * Evaluates a method with 0 args.
+   */
+  public Value callMethod(Env env, StringValue nameValue)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+
+    return callMethod(env, hash, name, nameLen);
+  }
+
+  /**
+   * Evaluates a method with 1 arg.
+   */
+  public Value callMethod(Env env,
+                          StringValue nameValue,
+                          Value a0)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethod(env, hash, name, nameLen,
+                      a0);
+  }
+
+  /**
+   * Evaluates a method with 1 arg.
+   */
+  public Value callMethod(Env env,
+                          StringValue nameValue,
+                          Value a0, Value a1)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethod(env, hash, name, nameLen,
+                      a0, a1);
+  }
+
+  /**
+   * Evaluates a method with 3 args.
+   */
+  public Value callMethod(Env env, 
+                          StringValue nameValue,
+			  Value a0, Value a1, Value a2)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethod(env, hash, name, nameLen,
+                      a0, a1, a2);
+  }
+
+  /**
+   * Evaluates a method with 4 args.
+   */
+  public Value callMethod(Env env, 
+                          StringValue nameValue,
+			  Value a0, Value a1, Value a2, Value a3)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethod(env, hash, name, nameLen,
+                      a0, a1, a2, a3);
+  }
+
+  /**
+   * Evaluates a method with 5 args.
+   */
+  public Value callMethod(Env env, 
+                          StringValue nameValue,
+			  Value a0, Value a1, Value a2, Value a3, Value a4)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethod(env, hash, name, nameLen,
+                      a0, a1, a2, a3, a4);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value callMethodRef(Env env, 
+                             StringValue nameValue,
+                             Expr []args)
+  {
+    Value []value = new Value[args.length];
+
+    for (int i = 0; i < args.length; i++) {
+      value[i] = args[i].eval(env);
+    }
+    
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+
+    return callMethodRef(env, hash, name, nameLen, value);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  public Value callMethodRef(Env env,
+                             StringValue nameValue,
+                             Value []args)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    switch (args.length) {
+    case 0:
+      return callMethodRef(env, hash, name, nameLen);
+
+    case 1:
+      return callMethodRef(env, hash, name, nameLen,
+                           args[0]);
+
+    case 2:
+      return callMethodRef(env, hash, name, nameLen,
+                           args[0], args[1]);
+
+    case 3:
+      return callMethodRef(env, hash, name, nameLen,
+                           args[0], args[1], args[2]);
+
+    case 4:
+      return callMethodRef(env, hash, name, nameLen,
+                           args[0], args[1], args[2], args[3]);
+
+    case 5:
+      return callMethodRef(env, hash, name, nameLen,
+                           args[0], args[1], args[2], args[3], args[4]);
+
+    default:
+      return errorNoMethod(env, name, nameLen);
+    }
+  }
+
+  /**
+   * Evaluates a method with 0 args.
+   */
+  public Value callMethodRef(Env env, StringValue nameValue)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethodRef(env, hash, name, nameLen);
+  }
+
+  /**
+   * Evaluates a method with 1 arg.
+   */
+  public Value callMethodRef(Env env, StringValue nameValue,
+                             Value a0)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethodRef(env, hash, name, nameLen,
+                         a0);
+  }
+
+  /**
+   * Evaluates a method with 2 args.
+   */
+  public Value callMethodRef(Env env, StringValue nameValue,
+                             Value a0, Value a1)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethodRef(env, hash, name, nameLen,
+                         a0, a1);
+  }
+
+  /**
+   * Evaluates a method with 3 args.
+   */
+  public Value callMethodRef(Env env, StringValue nameValue,
+                             Value a0, Value a1, Value a2)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethodRef(env, hash, name, nameLen,
+                         a0, a1, a2);
+  }
+
+  /**
+   * Evaluates a method with 4 args.
+   */
+  public Value callMethodRef(Env env, StringValue nameValue,
+                             Value a0, Value a1, Value a2, Value a3)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethodRef(env, hash, name, nameLen,
+                         a0, a1, a2, a3);
+  }
+
+  /**
+   * Evaluates a method with 5 args.
+   */
+  public Value callMethodRef(Env env, StringValue nameValue,
+                             Value a0, Value a1, Value a2, Value a3, Value a4)
+  {
+    char []name = nameValue.getRawCharArray();
+    int nameLen = nameValue.length();
+    int hash = MethodMap.hash(name, nameLen);
+    
+    return callMethodRef(env, hash, name, nameLen,
+                         a0, a1, a2, a3, a4);
   }
 
   /**
@@ -1078,6 +1382,17 @@ abstract public class Value implements java.io.Serializable
   public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
     return NullValue.NULL;
+  }
+
+  private Value errorNoMethod(Env env, char []name, int nameLen)
+  {
+    return errorNoMethod(env, new String(name, 0, nameLen));
+  }
+
+  private Value errorNoMethod(Env env, String methodName)
+  {
+    return env.error(L.l("{0}: '{1}' is an unknown method.",
+			 toDebugString(), methodName));
   }
 
   //

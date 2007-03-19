@@ -81,8 +81,8 @@ public class JavaClassDef extends ClassDef {
   private final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
 
-  private final FunctionMap _functionMap
-    = new FunctionMap();
+  private final MethodMap<AbstractJavaMethod> _functionMap
+    = new MethodMap<AbstractJavaMethod>();
 
   private final HashMap<String, JavaMethod> _getMap
     = new HashMap<String, JavaMethod>();
@@ -414,7 +414,7 @@ public class JavaClassDef extends ClassDef {
    */
   public AbstractFunction findFunction(String name)
   {
-    return _functionMap.getFunction(name);
+    return _functionMap.get(name);
   }
 
   /**
@@ -428,15 +428,15 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj, String name, Expr []args)
+  public Value callMethod(Env env, Object obj,
+                          int hash, char []name, int nameLen,
+                          Expr []args)
   {
-    AbstractJavaMethod method = _functionMap.getFunction(name);
+    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
-    if (method != null) {
-    }
-    else if (method == null) {
-      env.warning(env.getLocation().getMessagePrefix() + L.l("{0}::{1} is an unknown method.",
-                                          _name, name));
+    if (method == null) {
+      env.warning(L.l("{0}::{1} is an unknown method.",
+                      _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
     }
@@ -447,32 +447,38 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Value value, String name, Expr []args)
+  public Value callMethod(Env env, Value value,
+                          int hash, char []name, int nameLen,
+                          Expr []args)
   {
-    return callMethod(env, value.toJavaObject(), name, args);
+    return callMethod(env, value.toJavaObject(), hash, name, nameLen, args);
   }
 
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Value value, String name, Value []args)
+  public Value callMethod(Env env, Value value,
+                          int hash, char []name, int nameLen,
+                          Value []args)
   {
-    return callMethod(env, value.toJavaObject(), name, args);
+    return callMethod(env, value.toJavaObject(), hash, name, nameLen, args);
   }
 
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj, String name, Value []args)
+  public Value callMethod(Env env, Object obj,
+                          int hash, char []name, int nameLen,
+                          Value []args)
   {
-    AbstractJavaMethod method = _functionMap.getFunction(name);
+    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
       return method.call(env, obj, args);
     else if (__call != null) {
       Value []extArgs = new Value[args.length + 1];
 
-      extArgs[0] = new StringValueImpl(name);
+      extArgs[0] = new StringBuilderValue(name, nameLen);
 
       System.arraycopy(args, 0, extArgs, 1, args.length);
       
@@ -480,7 +486,7 @@ public class JavaClassDef extends ClassDef {
     }
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
-		    _name, name));
+		    _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
     }
@@ -489,17 +495,18 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj, String name)
+  public Value callMethod(Env env, Object obj,
+                          int hash, char []name, int nameLen)
   {
-    AbstractJavaMethod method = _functionMap.getFunction(name);
+    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
       return method.call(env, obj);
     else if (__call != null)
-      return __call.call(env, obj, new StringValueImpl(name));
+      return __call.call(env, obj, new StringBuilderValue(name, nameLen));
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
-		    _name, name));
+		    _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
     }
@@ -508,17 +515,19 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj, String name, Value a1)
+  public Value callMethod(Env env, Object obj,
+                          int hash, char []name, int nameLen,
+                          Value a1)
   {
-    AbstractJavaMethod method = _functionMap.getFunction(name);
+    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
       return method.call(env, obj, a1);
     else if (__call != null)
-      return __call.call(env, obj, new StringValueImpl(name), a1);
+      return __call.call(env, obj, new StringBuilderValue(name, nameLen), a1);
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
-		    _name, name));
+		    _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
     }
@@ -527,18 +536,20 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj, String name,
+  public Value callMethod(Env env, Object obj,
+                          int hash, char []name, int nameLen,
                           Value a1, Value a2)
   {
-    AbstractJavaMethod method = _functionMap.getFunction(name);
+    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
 
     if (method != null)
       return method.call(env, obj, a1, a2);
     else if (__call != null)
-      return __call.call(env, obj, new StringValueImpl(name), a1, a2);
+      return __call.call(env, obj, new StringBuilderValue(name, nameLen),
+                         a1, a2);
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
-		    _name, name));
+		    _name, toMethod(name, nameLen)));
 
       return NullValue.NULL;
     }
@@ -547,28 +558,68 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj, String name,
+  public Value callMethod(Env env, Object obj,
+                          int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3)
   {
-    return getMethod(env, name).call(env, obj, a1, a2, a3);
+    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
+
+    if (method != null)
+      return method.call(env, obj, a1, a2, a3);
+    else if (__call != null)
+      return __call.call(env, obj, new StringBuilderValue(name, nameLen),
+                         a1, a2, a3);
+    else {
+      env.error(L.l("'{0}::{1}' is an unknown method",
+		    _name, toMethod(name, nameLen)));
+
+      return NullValue.NULL;
+    }
   }
 
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj, String name,
+  public Value callMethod(Env env, Object obj,
+                          int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3, Value a4)
   {
-    return getMethod(env, name).call(env, obj, a1, a2, a3, a4);
+    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
+
+    if (method != null)
+      return method.call(env, obj, a1, a2, a3, a4);
+    else if (__call != null)
+      return __call.call(env, obj, new StringBuilderValue(name, nameLen),
+                         a1, a2, a3, a4);
+    else {
+      env.error(L.l("'{0}::{1}' is an unknown method",
+		    _name, toMethod(name, nameLen)));
+
+      return NullValue.NULL;
+    }
   }
 
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Object obj, String name,
+  public Value callMethod(Env env, Object obj,
+                          int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return getMethod(env, name).call(env, obj, a1, a2, a3, a4, a5);
+    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
+
+    if (method != null)
+      return method.call(env, obj, a1, a2, a3, a4, a5);
+    else if (__call != null)
+      return __call.call(env, obj,
+                         new Value[] { new StringBuilderValue(name, nameLen),
+                                       a1, a2, a3, a4, a5 });
+    else {
+      env.error(L.l("'{0}::{1}' is an unknown method",
+		    _name, toMethod(name, nameLen)));
+
+      return NullValue.NULL;
+    }
   }
 
   /**
@@ -605,7 +656,7 @@ public class JavaClassDef extends ClassDef {
 
   private AbstractJavaMethod getMethod(Env env, String name)
   {
-    AbstractJavaMethod method = _functionMap.getFunction(name);
+    AbstractJavaMethod method = _functionMap.get(name);
 
     if (method != null)
       return method;
@@ -614,6 +665,11 @@ public class JavaClassDef extends ClassDef {
     }
 
     return method;
+  }
+
+  private String toMethod(char []name, int nameLen)
+  {
+    return new String(name, 0, nameLen);
   }
 
   /**
@@ -629,8 +685,8 @@ public class JavaClassDef extends ClassDef {
     if (__get != null)
       cl.setGet(__get);
     
-    for (Map.Entry<String,AbstractJavaMethod> entry : _functionMap.entrySet()) {
-      cl.addMethod(entry.getKey(), entry.getValue());
+    for (AbstractJavaMethod value : _functionMap.values()) {
+      cl.addMethod(value.getName(), value);
     }
 
     if (__call != null)
@@ -905,8 +961,15 @@ public class JavaClassDef extends ClassDef {
       } else if ("__call".equals(method.getName())) {
         __call = new JavaMethod(moduleContext, method);
       } else {
-        _functionMap.addFunction(method.getName(),
-                                 new JavaMethod(moduleContext, method));
+        AbstractJavaMethod fun = _functionMap.get(method.getName());
+        JavaMethod newFun = new JavaMethod(moduleContext, method);
+
+        if (fun != null)
+          fun = fun.overload(newFun);
+        else
+          fun = newFun;
+
+        _functionMap.put(method.getName(), fun);
       }
     }
 

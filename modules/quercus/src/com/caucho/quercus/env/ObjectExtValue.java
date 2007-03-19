@@ -531,353 +531,169 @@ public class ObjectExtValue extends ObjectValue
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName, Expr []args)
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
+                          Expr []args)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-    
-    if (fun != null)
-      return fun.callMethod(env, this, args);
-    else if (_cl.getCall() != null) {
-      Expr []newArgs = new Expr[args.length + 1];
-      newArgs[0] = new StringLiteralExpr(methodName);
-      System.arraycopy(args, 0, newArgs, 1, args.length);
-      
-      return _cl.getCall().callMethod(env, this, newArgs);
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}",
-                           _cl.getName(), methodName));
+    return _cl.callMethod(env, this, hash, name, nameLen, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName, Value []args)
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
+                          Value []args)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethod(env, this, args);
-    else if (_cl.getCall() != null) {
-      StringValueImpl name = new StringValueImpl(methodName);
-      ArrayValue newArgs = new ArrayValueImpl();
-
-      for (int i = 0; i < args.length; i++)
-	newArgs.append(args[i]);
-      
-      return _cl.getCall().callMethod(env, this, name, newArgs);
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethod(env, this, hash, name, nameLen, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName)
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethod(env, this);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethod(env,
-				      this,
-				      new StringValueImpl(methodName),
-				      new ArrayValueImpl());
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethod(env, this, hash, name, nameLen);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName, Value a0)
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
+                          Value a0)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethod(env, this, a0);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethod(env,
-				      this,
-				      new StringValueImpl(methodName),
-				      new ArrayValueImpl()
-				      .append(a0));
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethod(env, this, hash, name, nameLen,
+                          a0);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName,
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a0, Value a1)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethod(env, this, a0, a1);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethod(env,
-				      this,
-				      new StringValueImpl(methodName),
-				      new ArrayValueImpl()
-				      .append(a0)
-				      .append(a1));
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethod(env, this, hash, name, nameLen,
+                          a0, a1);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName,
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a0, Value a1, Value a2)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethod(env, this, a0, a1, a2);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethod(env,
-				      this,
-				      new StringValueImpl(methodName),
-				      new ArrayValueImpl().append(a0)
-				      .append(a1)
-				      .append(a2));
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethod(env, this, hash, name, nameLen,
+                          a0, a1, a2);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName,
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a0, Value a1, Value a2, Value a3)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethod(env, this, a0, a1, a2, a3);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethod(env,
-				      this,
-				      new StringValueImpl(methodName),
-				      new ArrayValueImpl()
-				      .append(a0)
-				      .append(a1)
-				      .append(a2)
-				      .append(a3));
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethod(env, this, hash, name, nameLen,
+                          a0, a1, a2, a3);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName,
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethod(env, this, a0, a1, a2, a3, a4);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethod(env,
-				      this,
-				      new StringValueImpl(methodName),
-				      new ArrayValueImpl()
-				      .append(a0)
-				      .append(a1)
-				      .append(a2)
-				      .append(a3)
-				      .append(a4));
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethod(env, this, hash, name, nameLen,
+                          a0, a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName, Expr []args)
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Expr []args)
   {
-    return _cl.getFunction(methodName).callMethodRef(env, this, args);
+    return _cl.callMethodRef(env, this, hash, name, nameLen, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName, Value []args)
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value []args)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethodRef(env, this, args);
-    else if (_cl.getCall() != null) {
-      StringValueImpl name = new StringValueImpl(methodName);
-      ArrayValue newArgs = new ArrayValueImpl();
-
-      for (int i = 0; i < args.length; i++)
-	newArgs.append(args[i]);
-      
-      return _cl.getCall().callMethodRef(env, this, name, newArgs);
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethodRef(env, this, hash, name, nameLen, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName)
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethodRef(env, this);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethodRef(env,
-					 this,
-					 new StringValueImpl(methodName),
-					 new ArrayValueImpl());
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethodRef(env, this, hash, name, nameLen);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName, Value a0)
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value a0)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethodRef(env, this, a0);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethodRef(env,
-					 this,
-					 new StringValueImpl(methodName),
-					 new ArrayValueImpl()
-					 .append(a0));
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethodRef(env, this, hash, name, nameLen,
+                             a0);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName,
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0, Value a1)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethodRef(env, this, a0, a1);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethodRef(env,
-					 this,
-					 new StringValueImpl(methodName),
-					 new ArrayValueImpl()
-					 .append(a0)
-					 .append(a1));
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethodRef(env, this, hash, name, nameLen,
+                             a0, a1);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName,
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0, Value a1, Value a2)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethodRef(env, this, a0, a1, a2);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethodRef(env,
-					 this,
-					 new StringValueImpl(methodName),
-					 new ArrayValueImpl()
-					 .append(a0)
-					 .append(a1)
-					 .append(a2));
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethodRef(env, this, hash, name, nameLen,
+                             a0, a1, a2);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName,
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0, Value a1, Value a2, Value a3)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethodRef(env, this, a0, a1, a2, a3);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethodRef(env,
-					 this,
-					 new StringValueImpl(methodName),
-					 new ArrayValueImpl()
-					 .append(a0)
-					 .append(a1)
-					 .append(a2)
-					 .append(a3));
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethodRef(env, this, hash, name, nameLen,
+                             a0, a1, a2, a3);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName,
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
                              Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    AbstractFunction fun = _cl.findFunction(methodName);
-
-    if (fun != null)
-      return fun.callMethodRef(env, this, a0, a1, a2, a3, a4);
-    else if (_cl.getCall() != null) {
-      return _cl.getCall().callMethodRef(env,
-					 this,
-					 new StringValueImpl(methodName),
-					 new ArrayValueImpl()
-					 .append(a0)
-					 .append(a1)
-					 .append(a2)
-					 .append(a3)
-					 .append(a4));
-    }
-    else
-      return env.error(L.l("Call to undefined method {0}::{1}()",
-                           _cl.getName(), methodName));
+    return _cl.callMethodRef(env, this, hash, name, nameLen,
+                             a0, a1, a2, a3, a4);
   }
 
   /**

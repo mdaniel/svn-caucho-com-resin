@@ -69,6 +69,9 @@ public class RegexpModule
 
   public static final boolean [] PREG_QUOTE = new boolean[256];
 
+  private static final LruCache<StringValue, NamedPatterns> _namePatternCache
+    = new LruCache<StringValue, NamedPatterns>(1024);
+
   private static final LruCache<StringValue, Pattern> _patternCache
     = new LruCache<StringValue, Pattern>(1024);
 
@@ -186,10 +189,16 @@ public class RegexpModule
       return 0;
     }
 
-    NamedPatterns namedPatterns = new NamedPatterns(patternString);
-    patternString = namedPatterns.cleanPattern(patternString);
+    NamedPatterns namedPatterns = _namePatternCache.get(patternString);
 
-    Pattern pattern = compileRegexp(patternString);
+    if (namedPatterns == null) {
+      namedPatterns = new NamedPatterns(patternString);
+
+      _namePatternCache.put(patternString, namedPatterns);
+    }
+
+    Pattern pattern = namedPatterns.getPattern();
+    
     Matcher matcher = pattern.matcher(string);
 
     ArrayValue regs;
@@ -300,10 +309,15 @@ public class RegexpModule
       }
     }
 
-    NamedPatterns namedPatterns = new NamedPatterns(patternString);
-    patternString = namedPatterns.getCleanedPattern();
+    NamedPatterns namedPatterns = _namePatternCache.get(patternString);
 
-    Pattern pattern = compileRegexp(patternString);
+    if (namedPatterns == null) {
+      namedPatterns = new NamedPatterns(patternString);
+
+      _namePatternCache.put(patternString, namedPatterns);
+    }
+
+    Pattern pattern = namedPatterns.getPattern();
 
     ArrayValue matches;
 
@@ -337,7 +351,7 @@ public class RegexpModule
 					     Pattern pattern,
 					     StringValue subject,
 					     ArrayValue matches,
-                         NamedPatterns namedPatterns,
+                                             NamedPatterns namedPatterns,
 					     int flags,
 					     int offset)
   {
@@ -1787,13 +1801,42 @@ public class RegexpModule
    */
   static class NamedPatterns
   {
-    private StringValue _pattern;
+    private StringValue _regexp;
+    private Pattern _pattern;
 
     private HashMap<Integer,StringValue> _patternMap;
 
-    NamedPatterns(StringValue pattern)
+    NamedPatterns(StringValue regexp)
     {
-      _pattern = cleanPattern(pattern);
+      _regexp = cleanPattern(regexp);
+
+      _pattern = compileRegexp(_regexp);
+    }
+    
+    StringValue getCleanedPattern()
+    {
+      return _regexp;
+    }
+
+    Pattern getPattern()
+    {
+      return _pattern;
+    }
+    
+    void add(int group, StringValue name)
+    {
+      if (_patternMap == null)
+        _patternMap = new HashMap<Integer,StringValue>();
+      
+      _patternMap.put(Integer.valueOf(group), name);
+    }
+    
+    StringValue get(int group)
+    { 
+      if (_patternMap == null)
+        return null;
+      else
+        return _patternMap.get(Integer.valueOf(group));
     }
     
     private StringValue cleanPattern(StringValue pattern)
@@ -1861,27 +1904,6 @@ public class RegexpModule
       }
       
       return sb;
-    }
-    
-    StringValue getCleanedPattern()
-    {
-      return _pattern;
-    }
-    
-    void add(int group, StringValue name)
-    {
-      if (_patternMap == null)
-        _patternMap = new HashMap<Integer,StringValue>();
-      
-      _patternMap.put(Integer.valueOf(group), name);
-    }
-    
-    StringValue get(int group)
-    { 
-      if (_patternMap == null)
-        return null;
-      else
-        return _patternMap.get(Integer.valueOf(group));
     }
   }
 

@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.MethodMap;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
@@ -46,7 +47,10 @@ public class MethodCallExpr extends Expr {
 
   protected final Expr _objExpr;
   
-  protected final String _name;
+  protected final String _methodName;
+  protected final int _hash;
+  protected final char []_name;
+  
   protected final Expr []_args;
 
   public MethodCallExpr(Location location,
@@ -55,9 +59,12 @@ public class MethodCallExpr extends Expr {
 			ArrayList<Expr> args)
   {
     super(location);
+    
     _objExpr = objExpr;
     
-    _name = name.intern();
+    _methodName = name;
+    _name = name.toCharArray();
+    _hash = MethodMap.hash(_name, _name.length);
 
     _args = new Expr[args.size()];
     args.toArray(_args);
@@ -70,7 +77,7 @@ public class MethodCallExpr extends Expr {
 
   public String getName()
   {
-    return _name;
+    return _methodName;
   }
   
   /**
@@ -96,7 +103,7 @@ public class MethodCallExpr extends Expr {
     try {
       env.checkTimeout();
 
-      return obj.callMethod(env, _name, args);
+      return obj.callMethod(env, _hash, _name, _name.length, args);
     } finally {
       env.popCall();
     }
@@ -125,7 +132,7 @@ public class MethodCallExpr extends Expr {
     try {
       env.checkTimeout();
 
-      return obj.callMethodRef(env, _name, args);
+      return obj.callMethodRef(env, _hash, _name, _name.length, args);
     } finally {
       env.popCall();
     }
@@ -133,7 +140,7 @@ public class MethodCallExpr extends Expr {
   
   public String toString()
   {
-    return _objExpr + "->" + _name + "()";
+    return _objExpr + "->" + _methodName + "()";
   }
 }
 

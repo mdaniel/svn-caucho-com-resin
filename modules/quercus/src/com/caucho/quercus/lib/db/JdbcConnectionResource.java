@@ -429,6 +429,9 @@ public abstract class JdbcConnectionResource implements Closeable {
                                             String table)
     throws SQLException
   {
+    if (table == null || table.equals(""))
+      return null;
+    
     TableKey key = new TableKey(getURL(), catalog, schema, table);
 
     // XXX: needs invalidation on DROP or ALTER
@@ -436,7 +439,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
     if (tableMd != null && tableMd.isValid())
       return tableMd;
-
+    
     tableMd = new JdbcTableMetaData(catalog, schema, table, getMetaData());
 
     _tableMetadataMap.put(key, tableMd);
@@ -500,10 +503,55 @@ public abstract class JdbcConnectionResource implements Closeable {
 
     Statement stmt = null;
 
+    int ch;
+
+    if (sql != null && sql.length() > 2) {
+      ch = sql.charAt(0);
+
+      switch (ch) {
+      case 'a': case 'A':
+        // drop/alter clears metadata cache
+        _tableMetadataMap.clear();
+        break;
+      case 'd': case 'D':
+        if ((ch = sql.charAt(1)) == 'r' || ch == 'R') {
+          // drop/alter clears metadata cache
+          _tableMetadataMap.clear();
+        }
+        break;
+        /*
+      case 'b': case 'B':
+        // convert "begin" to begin
+        // Test for mediawiki performance
+        if (sql.equalsIgnoreCase("begin")) {
+          setAutoCommit(false);
+          return null;
+        }
+        break;
+      case 'c': case 'C':
+        // convert "commit" to begin
+        if (sql.equalsIgnoreCase("commit")) {
+          commit();
+          setAutoCommit(true);
+          return null;
+        }
+        break;
+      case 'r': case 'R':
+        // convert "rollback" to begin
+        if (sql.equalsIgnoreCase("rollback")) {
+          rollback();
+          setAutoCommit(true);
+          return null;
+        }
+        break;
+        */
+      }
+    }
+
     try {
       Connection conn = getConnection();
 
-      // XXX: check for performance
+      // XXX: test for performance
       boolean canSeek = true;
       if (canSeek)
         stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -785,6 +833,9 @@ public abstract class JdbcConnectionResource implements Closeable {
     {
       int hash = 37;
 
+      if (_url != null)
+        hash = 65537 * hash + _url.hashCode();
+
       if (_catalog != null)
         hash = 65537 * hash + _catalog.hashCode();
 
@@ -806,7 +857,7 @@ public abstract class JdbcConnectionResource implements Closeable {
 
       TableKey key = (TableKey) o;
 
-      if (_url != key._url)
+      if (! _url.equals(key._url))
         return false;
 
       if ((_catalog == null) != (key._catalog == null))

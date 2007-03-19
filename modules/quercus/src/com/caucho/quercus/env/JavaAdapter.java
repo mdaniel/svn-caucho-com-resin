@@ -769,135 +769,176 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName, Expr []args)
+  @Override
+  public Value callMethod(Env env,
+                          int hash, char []name, int nameLen,
+                          Expr []args)
   {
-    return _classDef.callMethod(env, _object, methodName, args);
+    return _classDef.callMethod(env, _object, hash, name, nameLen, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName, Value []args)
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
+                          Value []args)
   {
-    return _classDef.callMethod(env, _object, methodName, args);
+    return _classDef.callMethod(env, _object,
+                                hash, name, nameLen,
+                                args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName)
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen)
   {
-    return _classDef.callMethod(env, _object, methodName);
+    return _classDef.callMethod(env, _object, hash, name, nameLen);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName, Value a1)
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
+                          Value a1)
   {
-    return _classDef.callMethod(env, _object, methodName, a1);
+    return _classDef.callMethod(env, _object, hash, name, nameLen,
+                                a1);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName, Value a1, Value a2)
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
+                          Value a1, Value a2)
   {
-    return _classDef.callMethod(env, _object, methodName, a1, a2);
+    return _classDef.callMethod(env, _object, hash, name, nameLen,
+                                a1, a2);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName,
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3)
   {
-    return _classDef.callMethod(env, _object, methodName, a1, a2, a3);
+    return _classDef.callMethod(env, _object, hash, name, nameLen,
+                                a1, a2, a3);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName,
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3, Value a4)
   {
-    return _classDef.callMethod(env, _object, methodName, a1, a2, a3, a4);
+    return _classDef.callMethod(env, _object, hash, name, nameLen,
+                                a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethod(Env env, String methodName,
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return _classDef.callMethod(env, _object, methodName, a1, a2, a3, a4, a5);
+    return _classDef.callMethod(env, _object, hash, name, nameLen,
+                                a1, a2, a3, a4, a5);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName, Expr []args)
+  @Override
+  public Value callMethodRef(Env env,
+                             int hash, char []name, int nameLen,
+                             Expr []args)
   {
-    return _classDef.callMethod(env, _object, methodName, args);
+    return _classDef.callMethod(env, _object, hash, name, nameLen, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName, Value []args)
+  @Override
+  public Value callMethodRef(Env env,
+                             int hash, char []name, int nameLen,
+                             Value []args)
   {
-    return _classDef.callMethod(env, _object, methodName, args);
+    return _classDef.callMethod(env, _object, hash, name, nameLen, args);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName)
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen)
   {
-    return _classDef.callMethod(env, _object, methodName);
+    return _classDef.callMethod(env, _object, hash, name, nameLen);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName, Value a1)
+  @Override
+  public Value callMethodRef(Env env,
+                             int hash, char []name, int nameLen,
+                             Value a1)
   {
-    return _classDef.callMethod(env, _object, methodName, a1);
+    return _classDef.callMethod(env, _object,
+                                hash, name, nameLen,
+                                a1);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName, Value a1, Value a2)
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value a1, Value a2)
   {
-    return _classDef.callMethod(env, _object, methodName, a1, a2);
+    return _classDef.callMethod(env, _object, hash, name, nameLen,
+                                a1, a2);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName,
-                          Value a1, Value a2, Value a3)
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value a1, Value a2, Value a3)
   {
-    return _classDef.callMethod(env, _object, methodName, a1, a2, a3);
+    return _classDef.callMethod(env, _object, hash, name, nameLen,
+                                a1, a2, a3);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName,
-                          Value a1, Value a2, Value a3, Value a4)
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value a1, Value a2, Value a3, Value a4)
   {
-    return _classDef.callMethod(env, _object, methodName, a1, a2, a3, a4);
+    return _classDef.callMethod(env, _object, hash, name, nameLen,
+                                a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method.
    */
-  public Value callMethodRef(Env env, String methodName,
-                          Value a1, Value a2, Value a3, Value a4, Value a5)
+  @Override
+  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+                             Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return _classDef.callMethod(env, _object, methodName, a1, a2, a3, a4, a5);
+    return _classDef.callMethod(env, _object, hash, name, nameLen,
+                                a1, a2, a3, a4, a5);
   }
   
   @Override

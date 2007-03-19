@@ -59,6 +59,7 @@ public class RequiredExpr extends Expr {
    */
   public Value eval(Env env)
   {
+    Thread.dumpStack();
     env.warning("required argument missing");
 
     return NullValue.NULL;

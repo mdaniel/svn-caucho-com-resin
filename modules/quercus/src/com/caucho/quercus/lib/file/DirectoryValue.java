@@ -80,8 +80,11 @@ public class DirectoryValue extends ResourceValue {
   /**
    * Calls the given method.
    */
-  public Value callMethod(Env env, String method)
+  @Override
+  public Value callMethod(Env env, int hash, char []name, int nameLen)
   {
+    String method = new String(name, 0, nameLen);
+    
     if ("read".equals(method))
       return readdir();
     else if ("rewind".equals(method)) {
@@ -95,7 +98,7 @@ public class DirectoryValue extends ResourceValue {
       return BooleanValue.TRUE;
     }
     else
-      return super.callMethod(env, method);
+      return super.callMethod(env, hash, name, nameLen);
   }
 
   /**

@@ -40,13 +40,20 @@ import java.util.IdentityHashMap;
  */
 public class CallbackObjectMethod extends Callback {
   private final Value _obj;
+  
   private final String _methodName;
+  private final int _hash;
+  private final char []_name;
+  
   private final AbstractFunction _fun;
 
   public CallbackObjectMethod(Env env, Value obj, String methodName)
   {
     _obj = obj;
-    _methodName = methodName.intern();
+    _methodName = methodName;
+    _hash = MethodMap.hash(methodName);
+    _name = _methodName.toCharArray();
+    
     // _fun = env.findMethod(_obj.getType(), _methodName);
     _fun = env.findMethod(_obj.getClassName(), _methodName);
   }
@@ -58,7 +65,7 @@ public class CallbackObjectMethod extends Callback {
    */
   public Value call(Env env)
   {
-    return _obj.callMethod(env, _methodName);
+    return _obj.callMethod(env, _hash, _name, _name.length);
   }
 
   /**
@@ -68,7 +75,8 @@ public class CallbackObjectMethod extends Callback {
    */
   public Value call(Env env, Value a1)
   {
-    return _obj.callMethod(env, _methodName, a1);
+    return _obj.callMethod(env, _hash, _name, _name.length,
+                           a1);
   }
 
   /**
@@ -78,7 +86,8 @@ public class CallbackObjectMethod extends Callback {
    */
   public Value call(Env env, Value a1, Value a2)
   {
-    return _obj.callMethod(env, _methodName, a1, a2);
+    return _obj.callMethod(env, _hash, _name, _name.length,
+                           a1, a2);
   }
 
   /**
@@ -88,7 +97,8 @@ public class CallbackObjectMethod extends Callback {
    */
   public Value call(Env env, Value a1, Value a2, Value a3)
   {
-    return _obj.callMethod(env, _methodName, a1, a2, a3);
+    return _obj.callMethod(env, _hash, _name, _name.length,
+                           a1, a2, a3);
   }
 
   /**
@@ -99,7 +109,8 @@ public class CallbackObjectMethod extends Callback {
   public Value call(Env env, Value a1, Value a2, Value a3,
 			     Value a4)
   {
-    return _obj.callMethod(env, _methodName, a1, a2, a3, a4);
+    return _obj.callMethod(env, _hash, _name, _name.length,
+                           a1, a2, a3, a4);
   }
 
   /**
@@ -110,12 +121,13 @@ public class CallbackObjectMethod extends Callback {
   public Value call(Env env, Value a1, Value a2, Value a3,
 		    Value a4, Value a5)
   {
-    return _obj.callMethod(env, _methodName, a1, a2, a3, a4, a5);
+    return _obj.callMethod(env, _hash, _name, _name.length,
+                           a1, a2, a3, a4, a5);
   }
 
   public Value call(Env env, Value []args)
   {
-    return _obj.callMethod(env, _methodName, args);
+    return _obj.callMethod(env, _hash, _name, _name.length, args);
   }
 
   public void varDumpImpl(Env env,

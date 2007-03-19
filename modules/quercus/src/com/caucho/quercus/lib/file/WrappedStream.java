@@ -42,6 +42,23 @@ import java.io.UnsupportedEncodingException;
  * A stream that has its operations mediated by a Quercus object.
  */
 public class WrappedStream implements BinaryInput, BinaryOutput {
+  private static final StringBuilderValue STREAM_CLOSE
+    = new StringBuilderValue("stream_close");
+  private static final StringBuilderValue STREAM_EOF
+    = new StringBuilderValue("stream_eof");
+  private static final StringBuilderValue STREAM_FLUSH
+    = new StringBuilderValue("stream_flush");
+  private static final StringBuilderValue STREAM_OPEN
+    = new StringBuilderValue("stream_open");
+  private static final StringBuilderValue STREAM_READ
+    = new StringBuilderValue("stream_read");
+  private static final StringBuilderValue STREAM_SEEK
+    = new StringBuilderValue("stream_seek");
+  private static final StringBuilderValue STREAM_TELL
+    = new StringBuilderValue("stream_tell");
+  private static final StringBuilderValue STREAM_WRITE
+    = new StringBuilderValue("stream_write");
+  
   private byte []printBuffer = new byte[1];
 
   private Env _env;
@@ -67,7 +84,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
 
     _wrapper = qClass.callNew(_env, new Value[0]);
 
-    _wrapper.callMethod(_env, "stream_open", 
+    _wrapper.callMethod(_env, STREAM_OPEN, 
                         path, mode, options, NullValue.NULL);
   }
 
@@ -119,7 +136,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
 
   public void close()
   {
-    _wrapper.callMethod(_env, "stream_close");
+    _wrapper.callMethod(_env, STREAM_CLOSE);
   }
 
   /**
@@ -133,7 +150,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
 
       return _buffer;
     } else {
-      Value output = _wrapper.callMethod(_env, "stream_read", LongValue.ONE);
+      Value output = _wrapper.callMethod(_env, STREAM_READ, LongValue.ONE);
 
       _buffer = (int) output.toLong();
 
@@ -152,7 +169,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
 
   public int read(byte []buffer, int offset, int length)
   {
-    Value output = _wrapper.callMethod(_env, "stream_read", 
+    Value output = _wrapper.callMethod(_env, STREAM_READ, 
                                        LongValue.create(length));
 
     // XXX "0"?
@@ -175,7 +192,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
   public BinaryValue read(int length)
     throws IOException
   {
-    Value output = _wrapper.callMethod(_env, "stream_read", 
+    Value output = _wrapper.callMethod(_env, STREAM_READ, 
                                        LongValue.create(length));
 
     return output.toBinaryValue(_env);
@@ -240,7 +257,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
   {
     BinaryBuilderValue bb = new BinaryBuilderValue(buffer, offset, length);
 
-    Value output = _wrapper.callMethod(_env, "stream_write", bb);
+    Value output = _wrapper.callMethod(_env, STREAM_WRITE, bb);
 
     _writeLength = (int) output.toLong();
   }
@@ -316,7 +333,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
    */
   public boolean isEOF()
   {
-    return _wrapper.callMethod(_env, "stream_eof").toBoolean();
+    return _wrapper.callMethod(_env, STREAM_EOF).toBoolean();
   }
 
   /**
@@ -324,7 +341,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
    */
   public long getPosition()
   {
-    return _wrapper.callMethod(_env, "stream_tell").toLong();
+    return _wrapper.callMethod(_env, STREAM_TELL).toLong();
   }
 
   /**
@@ -335,7 +352,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
     LongValue offsetValue = LongValue.create(offset);
     LongValue whenceValue = LongValue.create(SEEK_SET);
 
-    return _wrapper.callMethod(_env, "stream_seek", 
+    return _wrapper.callMethod(_env, STREAM_SEEK, 
                                offsetValue, whenceValue).toBoolean();
   }
 
@@ -344,20 +361,20 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
     LongValue offsetValue = LongValue.create(offset);
     LongValue whenceValue = LongValue.create(whence);
 
-    return _wrapper.callMethod(_env, "stream_seek", 
+    return _wrapper.callMethod(_env, STREAM_SEEK, 
                                offsetValue, whenceValue).toLong();
   }
 
   public void flush()
     throws IOException
   {
-    if (! _wrapper.callMethod(_env, "stream_flush").toBoolean())
+    if (! _wrapper.callMethod(_env, STREAM_FLUSH).toBoolean())
       throw new IOException(); // Get around java.io.Flushable
   }
 
   public Value stat()
   {
-    return _wrapper.callMethod(_env, "stream_flush");
+    return _wrapper.callMethod(_env, STREAM_FLUSH);
   }
 
   private class WrappedInputStream extends InputStream {
@@ -372,7 +389,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
     public void write(int b)
       throws IOException
     {
-      _wrapper.callMethod(_env, "stream_write", LongValue.create(b));
+      _wrapper.callMethod(_env, STREAM_WRITE, LongValue.create(b));
     }
   }
 }

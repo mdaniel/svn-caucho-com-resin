@@ -30,8 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.util.L10N;
 
@@ -97,8 +96,10 @@ public class VarMethodCallExpr extends Expr {
     for (int i = 0; i < values.length; i++) {
       values[i] = _args[i].evalArg(env);
     }
-    
-    return _objExpr.eval(env).callMethod(env, _name.evalString(env), values);
+
+    StringValue methodName = _name.eval(env).toStringValue();
+
+    return _objExpr.eval(env).callMethod(env, methodName, values);
   }
   
   public String toString()

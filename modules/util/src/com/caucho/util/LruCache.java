@@ -231,7 +231,7 @@ public class LruCache<K,V> {
       removeTail();
     }
 
-    int hash = key.hashCode() & _mask;
+    int hash = okey.hashCode() & _mask;
     int count = _size1 + _size2 + 1;
 
     V oldValue = null;
@@ -243,7 +243,7 @@ public class LruCache<K,V> {
 	   item != null;
 	   item = item._nextHash) {
 	// matching item gets replaced
-	if (item._key == okey || item._key.equals(okey)) {
+	if (item._key == key || okey.equals(item._key)) {
 	  updateLru(item);
 
 	  oldValue = item._value;

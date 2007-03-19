@@ -135,6 +135,15 @@ public class ArrayValueImpl extends ArrayValue
     }
   }
 
+  public ArrayValueImpl(Value []values)
+  {
+    this();
+
+    for (int i = 0; i < values.length; i++) {
+      put(values[i]);
+    }
+  }
+
   private void copyOnWrite()
   {
     if (! _isDirty)

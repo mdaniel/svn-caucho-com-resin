@@ -1011,6 +1011,11 @@ abstract public class StringValue extends Value implements CharSequence {
     return array;
   }
 
+  public char []getRawCharArray()
+  {
+    return toCharArray();
+  }
+
   /**
    * Copies the chars
    */

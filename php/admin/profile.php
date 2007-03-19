@@ -34,11 +34,15 @@ if ($profile) {
     if ($_POST['period'] >= 10) {
       $profile->setPeriod($_POST['period']);
     }
+
+    if ($_POST['depth'] >= 1) {
+      $profile->setDepth($_POST['depth']);
+    }
   }
 
   if ($profile->active) {
-    echo "<h2>";
-    echo "Profile Active: {$profile->period}ms";
+    echo "<h2>Profile Active</h2>";
+    echo "Period: {$profile->period}ms Depth: {$profile->depth}";
 
     echo "<form action='profile.php' method='post' style='display:inline'>";
     echo "<input type='submit' name='action' value='stop'>";
@@ -49,21 +53,30 @@ if ($profile) {
   else {
     echo "<h2>";
     echo "Profile Stopped";
+    echo "</h2>";
 
     echo "<form action='profile.php' method='post' style='display:inline'>";
-    echo "<select type='select' name='period'>";
-    echo "  <option>10";
-    echo "  <option>25";
-    echo "  <option>100";
+    echo "Period: <select type='select' name='period'>";
+    echo "  <option>10ms";
+    echo "  <option>25ms";
+    echo "  <option>100ms";
+    echo "  <option>250ms";
+    echo "  <option selected>1000ms";
+    echo "  <option>2500ms";
+    echo "  <option>10000ms";
+    echo "</select>";
+    echo " Depth: <select type='select' name='depth'>";
+    echo "  <option>2";
+    echo "  <option>4";
+    echo "  <option>8";
+    echo "  <option>12";
+    echo "  <option selected>16";
+    echo "  <option>20";
+    echo "  <option>32";
     echo "  <option>250";
-    echo "  <option selected>1000";
-    echo "  <option>2500";
-    echo "  <option>10000";
     echo "</select>";
     echo "<input type='submit' name='action' value='start'>";
     echo "</form>";
-
-    echo "</h2>\n";
   }
 
   $results = $profile->getResults();
@@ -101,7 +114,7 @@ if ($profile) {
 
       echo "<tr>";
       echo "<td>";
-      printf("%.4f (%d/%d)", $entry->getCount() / $topTicks, $entry->getCount(), $topTicks);
+      printf("%.4f&nbsp;(%d/%d)", $entry->getCount() / $topTicks, $entry->getCount(), $topTicks);
       echo "</td>";
       echo "<td>";
       echo "<a id='s_{$name}_{$i}' href=\"javascript:show('t_{$name}_{$i}');hide('s_{$name}_{$i}');show('h_{$name}_{$i}');\">show</a> ";
@@ -109,7 +122,7 @@ if ($profile) {
       echo "</td>";
       echo "<td>";
       $stack = $entry->getStackTrace()[0];
-      echo "{$stack->getClassName()}.{$stack->getMethodName()}()\n";
+      echo "{$entry->getDescription()}\n";
       echo "</td>";
       echo "</tr>\n";
 
@@ -120,7 +133,7 @@ if ($profile) {
 
       echo "<pre>";
       foreach ($entry->getStackTrace() as $stack) {
-        echo "  at {$stack->getClassName()}.{$stack->getMethodName()}()\n";
+        echo "  at {$stack->getClassName()}.{$stack->getMethodName()}({$stack->getArg()})\n";
       }
       echo "</pre>";
       echo "</td>";

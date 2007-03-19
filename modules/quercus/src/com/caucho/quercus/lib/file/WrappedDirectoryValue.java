@@ -29,16 +29,21 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 
 /**
  * Represents a PHP directory listing
  */
 public class WrappedDirectoryValue extends DirectoryValue {
+  private static final StringBuilderValue DIR_CLOSEDIR
+    = new StringBuilderValue("dir_closedir");
+  private static final StringBuilderValue DIR_OPENDIR
+    = new StringBuilderValue("dir_opendir");
+  private static final StringBuilderValue DIR_READDIR
+    = new StringBuilderValue("dir_readdir");
+  private static final StringBuilderValue DIR_REWINDDIR
+    = new StringBuilderValue("dir_rewinddir");
+  
   private Env _env;
   private Value _wrapper;
 
@@ -50,7 +55,7 @@ public class WrappedDirectoryValue extends DirectoryValue {
 
   public boolean opendir(StringValue path, LongValue flags)
   {
-    return _wrapper.callMethod(_env, "dir_opendir", path, flags).toBoolean();
+    return _wrapper.callMethod(_env, DIR_OPENDIR, path, flags).toBoolean();
   }
 
   /**
@@ -58,7 +63,7 @@ public class WrappedDirectoryValue extends DirectoryValue {
    */
   public Value readdir()
   {
-    return _wrapper.callMethod(_env, "dir_readdir");
+    return _wrapper.callMethod(_env, DIR_READDIR);
   }
 
   /**
@@ -66,7 +71,7 @@ public class WrappedDirectoryValue extends DirectoryValue {
    */
   public void rewinddir()
   {
-    _wrapper.callMethod(_env, "dir_rewinddir");
+    _wrapper.callMethod(_env, DIR_REWINDDIR);
   }
 
   /**
@@ -74,7 +79,7 @@ public class WrappedDirectoryValue extends DirectoryValue {
    */
   public void close()
   {
-    _wrapper.callMethod(_env, "dir_closedir");
+    _wrapper.callMethod(_env, DIR_CLOSEDIR);
   }
 
   /**

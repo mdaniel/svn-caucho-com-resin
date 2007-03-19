@@ -46,6 +46,8 @@ public class JdbcTableMetaData {
   
   private final long _lastModified;
 
+  private long _maxIdleTime = 5000L;
+
   private final HashMap<String,JdbcColumnMetaData> _columnMap
     = new HashMap<String,JdbcColumnMetaData>();
 
@@ -124,7 +126,7 @@ public class JdbcTableMetaData {
 
   public boolean isValid()
   {
-    return Alarm.getCurrentTime() - _lastModified < 1000L;
+    return Alarm.getCurrentTime() - _lastModified <= _maxIdleTime;
   }
 
   public String toString()

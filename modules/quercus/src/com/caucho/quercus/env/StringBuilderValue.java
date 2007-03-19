@@ -125,6 +125,11 @@ public class StringBuilderValue extends UnicodeValue
     this(buffer, 0, buffer.length);
   }
 
+  public StringBuilderValue(char []buffer, int length)
+  {
+    this(buffer, 0, length);
+  }
+
   public StringBuilderValue(char []buffer, int offset, int length,
                             boolean isExact)
   {
@@ -663,6 +668,11 @@ public class StringBuilderValue extends UnicodeValue
     System.arraycopy(_buffer, 0, dest, 0, _length);
     
     return dest;
+  }
+
+  public char []getRawCharArray()
+  {
+    return _buffer;
   }
   
   /**
