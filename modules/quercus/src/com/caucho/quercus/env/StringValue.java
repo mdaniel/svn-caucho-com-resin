@@ -694,7 +694,7 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Append a Java double to the value.
    */
-  public final StringValue append(char []buf)
+  public StringValue append(char []buf)
   {
     return append(buf, 0, buf.length);
   }
