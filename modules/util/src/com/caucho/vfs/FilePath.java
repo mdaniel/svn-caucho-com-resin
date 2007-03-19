@@ -83,13 +83,16 @@ public class FilePath extends FilesystemPath {
       return getPwd();
     else if (path.length() > 0 && path.charAt(0) == '/')
       return path;
+    else if (path.length() > 1 && path.charAt(1) == ':' && isWindows())
+      //return convertFromWindowsPath(path);
+      return path;
     else {
       String dir = getPwd();
 
       if (dir.length() > 0 && dir.charAt(dir.length() - 1) == '/') 
-	return dir + path;
+        return dir + path;
       else
-	return dir + "/" + path;
+        return dir + "/" + path;
     }
   }
 
