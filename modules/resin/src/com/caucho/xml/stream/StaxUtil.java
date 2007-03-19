@@ -37,13 +37,18 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
+import java.io.IOException;
+
 import java.util.Iterator;
+
+import com.caucho.util.L10N;
 
 /**
  * Utility class to do namespace repairs on XMLStreamWriters that don't have
  * repair enabled.  Used by JAXB.
  **/
 public class StaxUtil {
+  public static final L10N L = new L10N(StaxUtil.class);
   /**
    * Ensures that a given namespace exists within the namespace context
    * given.
@@ -172,9 +177,7 @@ public class StaxUtil {
   {
     int depth = 0;
 
-    in.nextTag();
-
-    while (depth >= 0) {
+    do {
       switch (in.getEventType()) {
         case ATTRIBUTE:
           break;
@@ -200,8 +203,12 @@ public class StaxUtil {
           break;
 
         case END_ELEMENT:
-          out.writeEndElement();
           depth--;
+
+          if (depth <= 0)
+            return;
+
+          out.writeEndElement();
           break;
 
         case ENTITY_REFERENCE:
@@ -261,5 +268,32 @@ public class StaxUtil {
 
       in.next();
     } 
+    while (depth > 0);
+  }
+
+  public static String constantToString(int constant) 
+    throws XMLStreamException
+  {
+    switch(constant) {
+      case ATTRIBUTE: return "ATTRIBUTE";
+      case CDATA: return "CDATA";
+      case CHARACTERS: return "CHARACTERS";
+      case COMMENT: return "COMMENT";
+      case DTD: return "DTD";
+      case END_DOCUMENT: return "END_DOCUMENT";
+      case END_ELEMENT: return "END_ELEMENT";
+      case ENTITY_DECLARATION: return "ENTITY_DECLARATION";
+      case ENTITY_REFERENCE: return "ENTITY_REFERENCE";
+      case NAMESPACE: return "NAMESPACE";
+      case NOTATION_DECLARATION: return "NOTATION_DECLARATION";
+      case PROCESSING_INSTRUCTION: return "PROCESSING_INSTRUCTION";
+      case SPACE: return "SPACE";
+      case START_DOCUMENT: return "START_DOCUMENT";
+      case START_ELEMENT: return "START_ELEMENT";
+      case -1:
+        throw new XMLStreamException(L.l("Unexpected end of stream"));
+      default:
+        throw new RuntimeException(L.l("constantToString({0}) unknown", constant));
+    }
   }
 }

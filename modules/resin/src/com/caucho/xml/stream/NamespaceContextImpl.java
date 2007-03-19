@@ -29,11 +29,14 @@
 
 package com.caucho.xml.stream;
 
+import com.caucho.util.L10N;
+
 import com.caucho.vfs.WriteStream;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +48,8 @@ import java.util.Map;
  */
 public abstract class NamespaceContextImpl implements NamespaceContext
 {
+  public static final L10N L = new L10N(NamespaceContextImpl.class);
+
   // The stack of element bindings
   protected final ArrayList<ElementBinding> _stack
     = new ArrayList<ElementBinding>();
@@ -73,7 +78,11 @@ public abstract class NamespaceContextImpl implements NamespaceContext
    * deletes the current context and enters its parent
    */
   public void pop()
+    throws XMLStreamException
   {
+    if (_stack.size() == 0)
+      throw new XMLStreamException(L.l("Multiple root elements in document"));
+
     ElementBinding eltBinding = _stack.remove(_stack.size() - 1);
 
     if (eltBinding != null) {

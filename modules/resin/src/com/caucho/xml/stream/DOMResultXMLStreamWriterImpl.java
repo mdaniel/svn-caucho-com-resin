@@ -529,7 +529,7 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   }
 
   private void popContext()
-    throws DOMException
+    throws DOMException, XMLStreamException
   {
     _tracker.pop();
     _current = _current.getParentNode();

@@ -78,8 +78,6 @@ public class Import {
     catch (MalformedURLException e) {
     }
 
-    System.out.println("  _location = " + _location.getSystemId());
-
     File file = new File(getSchemaLocation());
 
     if (! file.exists()) {
@@ -96,8 +94,6 @@ public class Import {
     }
 
     obj = u.unmarshal(file);
-
-    System.out.println("Found " + file);
 
     if (obj instanceof Schema)
       _schema = (Schema) obj;

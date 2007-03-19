@@ -486,8 +486,10 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     throws XMLStreamException
   {
     if (type != _current)
-      throw new XMLStreamException("expected " + constantToString(type) + ", "+
-                                   "found " + constantToString(_current) +
+      throw new XMLStreamException("expected " + 
+                                   StaxUtil.constantToString(type) + ", "+
+                                   "found " + 
+                                   StaxUtil.constantToString(_current) +
                                    " at " + getLocation());
 
     if (localName != null && !localName.equals(getLocalName()))
@@ -1052,6 +1054,16 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
     int ch = _inputBuf[_inputOffset++];
 
+    _ofs++;
+
+    // XXX '\r'
+    if (ch == '\n') {
+      _row++;
+      _col = 0;
+    }
+    else
+      _col++;
+
     return ch;
   }
 
@@ -1060,8 +1072,10 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
    */
   private void unread()
   {
-    if (_inputOffset > 0)
+    if (_inputOffset > 0) {
       _inputOffset--;
+      _ofs--;
+    }
   }
 
   /**
@@ -1099,7 +1113,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   }
 
   /**
-   * Reads a character.
+   * Unreads a byte.
    */
   private void unreadByte()
   {
@@ -1290,31 +1304,6 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
     public String toString() {
       return _row+":"+_col;
-    }
-
-  }
-
-  private static String constantToString(int constant) {
-
-    switch(constant) {
-
-    case ATTRIBUTE: return "ATTRIBUTE";
-    case CDATA: return "CDATA";
-    case CHARACTERS: return "CHARACTERS";
-    case COMMENT: return "COMMENT";
-    case DTD: return "DTD";
-    case END_DOCUMENT: return "END_DOCUMENT";
-    case END_ELEMENT: return "END_ELEMENT";
-    case ENTITY_DECLARATION: return "ENTITY_DECLARATION";
-    case ENTITY_REFERENCE: return "ENTITY_REFERENCE";
-    case NAMESPACE: return "NAMESPACE";
-    case NOTATION_DECLARATION: return "NOTATION_DECLARATION";
-    case PROCESSING_INSTRUCTION: return "PROCESSING_INSTRUCTION";
-    case SPACE: return "SPACE";
-    case START_DOCUMENT: return "START_DOCUMENT";
-    case START_ELEMENT: return "START_ELEMENT";
-    default:
-      throw new RuntimeException("constantToString("+constant+") unknown");
     }
 
   }

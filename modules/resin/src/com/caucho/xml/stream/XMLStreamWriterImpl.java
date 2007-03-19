@@ -518,7 +518,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   }
 
   private QName popContext()
-    throws IOException
+    throws IOException, XMLStreamException
   {
     flushContext();
     QName name = _tracker.getElementName();

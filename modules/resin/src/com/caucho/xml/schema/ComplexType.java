@@ -325,4 +325,9 @@ public class ComplexType extends Type {
   {
     _emitFaultWrapper = emitFaultWrapper;
   }
+
+  public String toString()
+  {
+    return "ComplexType[" + _name + "]";
+  }
 }

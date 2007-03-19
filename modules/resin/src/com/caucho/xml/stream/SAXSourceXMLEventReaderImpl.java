@@ -226,6 +226,7 @@ public class SAXSourceXMLEventReaderImpl implements XMLEventReader {
     private QName _pendingEndName = null;
 
     public void characters(char[] ch, int start, int length)
+      throws SAXException
     {
       checkForPendingEndElement();
 
@@ -234,6 +235,7 @@ public class SAXSourceXMLEventReaderImpl implements XMLEventReader {
     }
 
     public void endDocument()
+      throws SAXException
     {
       checkForPendingEndElement();
 
@@ -268,6 +270,7 @@ public class SAXSourceXMLEventReaderImpl implements XMLEventReader {
     }
 
     private void checkForPendingEndElement()
+      throws SAXException
     {
       if (_pendingEndName != null) {
         Iterator iterator = _oldMappings.iterator();
@@ -276,11 +279,18 @@ public class SAXSourceXMLEventReaderImpl implements XMLEventReader {
 
         _pendingEndName = null;
         _oldMappings = new ArrayList<Namespace>();
-        _context.pop();
+        
+        try {
+          _context.pop();
+        }
+        catch (XMLStreamException e) {
+          throw new SAXException(e);
+        }
       }
     }
 
     public void ignorableWhitespace(char[] ch, int start, int length)
+      throws SAXException
     {
       checkForPendingEndElement();
 
@@ -289,6 +299,7 @@ public class SAXSourceXMLEventReaderImpl implements XMLEventReader {
     }
 
     public void processingInstruction(String target, String data)
+      throws SAXException
     {
       checkForPendingEndElement();
 
@@ -312,6 +323,7 @@ public class SAXSourceXMLEventReaderImpl implements XMLEventReader {
 
     public void startElement(String uri, String localName, String qName, 
                              Attributes atts)
+      throws SAXException
     {
       checkForPendingEndElement();
       _context.push();
@@ -380,6 +392,9 @@ public class SAXSourceXMLEventReaderImpl implements XMLEventReader {
       int colon = qName.indexOf(':');
 
       if (colon < 0) {
+        if (localName == null)
+          localName = qName;
+
         if (uri == null || "".equals(uri))
           name = new QName(localName);
         else
@@ -397,6 +412,7 @@ public class SAXSourceXMLEventReaderImpl implements XMLEventReader {
     }
 
     public void startPrefixMapping(String prefix, String uri)
+      throws SAXException
     {
       checkForPendingEndElement();
 
