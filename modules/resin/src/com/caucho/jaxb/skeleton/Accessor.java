@@ -175,9 +175,13 @@ public abstract class Accessor {
           XmlElementWrapper wrapper = getAnnotation(XmlElementWrapper.class);
 
           if (wrapper != null) {
-            _property = new WrapperProperty(_property, wrapper, 
-                                            _qname.getNamespaceURI(), 
-                                            _qname.getLocalPart());
+            WrapperProperty wrapperProperty = 
+              new WrapperProperty(_property, wrapper, 
+                                  _qname.getNamespaceURI(), 
+                                  _qname.getLocalPart());
+
+            _property = wrapperProperty;
+            _qname = wrapperProperty.getWrapperQName();
           }
 
           break;

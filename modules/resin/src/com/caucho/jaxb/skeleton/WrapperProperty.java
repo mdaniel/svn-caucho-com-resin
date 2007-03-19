@@ -33,7 +33,7 @@ import java.io.IOException;
 
 import java.util.Iterator;
 
-import javax.xml.XMLConstants;
+import static javax.xml.XMLConstants.*;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -68,6 +68,7 @@ public class WrapperProperty extends Property {
   private final String _name;
   private final String _namespace;
   private final QName _wrappedQName;
+  private final QName _wrapperQName;
   private final Property _property;
   private final boolean _nillable;
 
@@ -87,8 +88,31 @@ public class WrapperProperty extends Property {
     else
       _namespace = elementWrapper.namespace();
 
+    _wrapperQName = new QName(_namespace, _name);
     _property = property;
     _nillable = elementWrapper.nillable();
+  }
+
+  public WrapperProperty(Property property, 
+                         QName wrapperQName, QName wrappedQName)
+  {
+    _name = wrapperQName.getLocalPart();
+
+    if (wrapperQName.getNamespaceURI() != null &&
+        ! "".equals(wrapperQName.getNamespaceURI()))
+      _namespace = wrapperQName.getNamespaceURI();
+    else
+      _namespace = null;
+
+    _wrapperQName = wrapperQName;
+    _wrappedQName = wrappedQName;
+    _nillable = false;
+    _property = property;
+  }
+
+  public QName getWrapperQName()
+  {
+    return _wrapperQName;
   }
 
   //
@@ -126,17 +150,27 @@ public class WrapperProperty extends Property {
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Object ret = null;
+    if (_nillable) {
+      String nil = in.getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil");
+
+      if ("true".equals(nil)) {
+        in.nextTag(); // skip wrapper
+        // XXX make sure nothing is in between the start and end wrapper
+        in.next(); // skip wrapper
+
+        return null;
+      }
+    }
 
     in.nextTag(); // skip wrapper
 
     while (in.getEventType() == in.START_ELEMENT && 
            _wrappedQName.equals(in.getName()))
-      ret = _property.read(u, in, previous);
+      previous = _property.read(u, in, previous);
 
-    in.next();
+    in.nextTag();
 
-    return ret;
+    return previous;
   }
   
   public Object read(Unmarshaller u, XMLEventReader in, Object previous)
@@ -154,14 +188,23 @@ public class WrapperProperty extends Property {
   public void write(Marshaller m, XMLStreamWriter out, Object value, QName name)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (_namespace != null)
-      out.writeStartElement(_namespace, _name);
-    else
-      out.writeStartElement(_name);
+    if (value != null || _nillable) {
+      if (_namespace != null && ! "".equals(_namespace))
+        out.writeStartElement(_namespace, _name);
+      else
+        out.writeStartElement(_name);
+
+      if (value == null && _nillable) {
+        out.writeNamespace("xsi", W3C_XML_SCHEMA_INSTANCE_NS_URI);
+        out.writeAttribute(W3C_XML_SCHEMA_INSTANCE_NS_URI, "nil", "true");
+      }
+    }
 
     _property.write(m, out, value, name);
 
-    out.writeEndElement();
+    if (value != null || _nillable) {
+      out.writeEndElement();
+    }
   }
 
   public void write(Marshaller m, XMLEventWriter out, Object value, QName name)
