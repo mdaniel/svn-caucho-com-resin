@@ -48,7 +48,11 @@ public class JspRoot extends JspContainerNode {
 
   private String _version;
 
-  private HashMap<String,String> _namespaceMap = new HashMap<String,String>();
+  private HashMap<String,String> _namespaceMap
+    = new HashMap<String,String>();
+
+  private HashMap<String,String> _revNamespaceMap
+    = new HashMap<String,String>();
 
   /**
    * Sets the versino.
@@ -128,9 +132,20 @@ public class JspRoot extends JspContainerNode {
   /**
    * Adds a namespace, e.g. from a prefix declaration.
    */
+  @Override
   public void addNamespaceRec(String prefix, String value)
   {
     _namespaceMap.put(prefix, value);
+    _revNamespaceMap.put(value, prefix);
+  }
+
+  /**
+   * Adds a namespace, e.g. from a prefix declaration.
+   */
+  @Override
+  public String getNamespacePrefix(String uri)
+  {
+    return _revNamespaceMap.get(uri);
   }
   
   /**

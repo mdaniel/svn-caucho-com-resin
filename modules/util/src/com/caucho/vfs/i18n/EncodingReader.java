@@ -55,6 +55,7 @@ abstract public class EncodingReader extends Reader {
   {
     this.javaEncoding = encoding;
   }
+  
   /**
    * Returns a new encoding reader for the given stream and javaEncoding.
    *
@@ -65,6 +66,20 @@ abstract public class EncodingReader extends Reader {
    */
   public abstract Reader create(InputStream is, String javaEncoding)
     throws UnsupportedEncodingException;
+  
+  /**
+   * Returns a new encoding reader for the given stream and javaEncoding.
+   *
+   * @param is the input stream providing the bytes.
+   * @param javaEncoding the JDK name for the encoding.
+   *
+   * @return an encoding reader or null for ISO-8859-1.
+   */
+  public Reader create(InputStream is)
+    throws UnsupportedEncodingException
+  {
+    return create(is, getJavaEncoding());
+  }
 
   /**
    * Returns the next character using the correct encoding.

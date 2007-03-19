@@ -35,6 +35,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.Serializable;
 
 /**
@@ -319,14 +320,6 @@ public class BinaryBuilderValue extends BinaryValue
   public void appendTo(BinaryBuilderValue bb)
   {
     bb.append(_buffer, 0, _length);
-  }
-
-  /**
-   * Append to a string builder.
-   */
-  public void appendTo(StringBuilderValue sb)
-  {
-    toUnicodeValue(Env.getInstance()).appendTo(sb);
   }
 
   /**

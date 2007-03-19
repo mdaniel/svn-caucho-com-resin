@@ -127,6 +127,21 @@ public class Encoding {
   public static Reader getReadEncoding(InputStream is, String encoding)
     throws UnsupportedEncodingException
   {
+    return getReadFactory(encoding).create(is);
+  }
+
+  /**
+   * Returns a Reader to translate bytes to characters.  If a specialized
+   * reader exists in com.caucho.vfs.i18n, use it.
+   *
+   * @param is the input stream.
+   * @param encoding the encoding name.
+   *
+   * @return a reader for the translation
+   */
+  public static EncodingReader getReadFactory(String encoding)
+    throws UnsupportedEncodingException
+  {
     EncodingReader factory = null;
     
     synchronized (_readEncodingFactories) {
@@ -162,7 +177,7 @@ public class Encoding {
       }
     }
 
-    return factory.create(is, factory.getJavaEncoding());
+    return factory;
   }
 
   /**

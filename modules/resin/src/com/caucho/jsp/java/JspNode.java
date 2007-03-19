@@ -366,6 +366,17 @@ public abstract class JspNode {
   }
 
   /**
+   * Adds a namespace, e.g. from a prefix declaration.
+   */
+  public String getNamespacePrefix(String uri)
+  {
+    if (_parent != null)
+      return _parent.getNamespacePrefix(uri);
+    else
+      return null;
+  }
+
+  /**
    * Returns true if the namespace decl has been printed.
    */
   public boolean hasNamespace(QName name)

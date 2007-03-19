@@ -64,4 +64,14 @@ public class Namespace {
 
     return null;
   }
+
+  static String findPrefix(Namespace ptr, String uri)
+  {
+    for (; ptr != null; ptr = ptr._next) {
+      if (ptr._uri.equals(uri))
+	return ptr._prefix;
+    }
+
+    return null;
+  }
 }

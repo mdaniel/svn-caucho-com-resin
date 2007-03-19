@@ -78,11 +78,9 @@ abstract public class Loader {
    *
    * @param name name of the class
    */
-  protected ClassEntry getClassEntry(String name)
+  protected ClassEntry getClassEntry(String name, String pathName)
     throws ClassNotFoundException
   {
-    String pathName = name.replace('.', '/') + ".class";
-
     // Find the path corresponding to the class
     Path path = getPath(pathName);
 

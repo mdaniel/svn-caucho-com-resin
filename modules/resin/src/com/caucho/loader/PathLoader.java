@@ -81,7 +81,8 @@ public class PathLoader extends Loader implements Dependency {
    *
    * @param name name of the class
    */
-  protected ClassEntry getClassEntry(String name)
+  @Override
+  protected ClassEntry getClassEntry(String name, String pathName)
     throws ClassNotFoundException
   {
     Path path = _pathMap.get(name);

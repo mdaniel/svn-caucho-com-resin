@@ -1169,10 +1169,12 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   protected ClassEntry getClassEntry(String name)
     throws ClassNotFoundException
   {
+    String pathName = name.replace('.', '/') + ".class";
+    
     for (int i = 0; i < _loaders.size(); i++) {
       Loader loader = _loaders.get(i);
 
-      ClassEntry entry = loader.getClassEntry(name);
+      ClassEntry entry = loader.getClassEntry(name, pathName);
 
       if (entry != null)
         return entry;

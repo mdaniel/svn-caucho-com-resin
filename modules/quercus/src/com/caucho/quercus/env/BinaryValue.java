@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.*;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -161,9 +162,29 @@ abstract public class BinaryValue extends StringValue {
   @Override
   public UnicodeValue toUnicodeValue(Env env)
   {
-    String encoding = env.getRuntimeEncoding().toString();
+    StringBuilderValue sb = new StringBuilderValue();
 
-    return toUnicodeValue(env, encoding);
+    appendTo(sb);
+
+    return sb;
+  }
+
+  /**
+   * Append to a string builder.
+   */
+  public void appendTo(StringBuilderValue sb)
+  {
+    Env env = Env.getInstance();
+
+    try {
+      Reader reader = env.getRuntimeEncodingFactory().create(toInputStream());
+
+      sb.append(reader);
+
+      reader.close();
+    } catch (IOException e) {
+      throw new QuercusRuntimeException(e);
+    }
   }
 
   /**

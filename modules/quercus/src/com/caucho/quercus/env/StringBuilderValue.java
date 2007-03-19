@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.Serializable;
 
 /**
@@ -761,6 +762,49 @@ public class StringBuilderValue extends UnicodeValue
     _value = null;
 
     return this;
+  }
+
+  /**
+   * Append a Java buffer to the value.
+   */
+  @Override
+  public final StringValue append(char []buf)
+  {
+    int length = buf.length;
+    
+    if (_buffer.length < _length + length)
+      ensureCapacity(_length + length);
+
+    System.arraycopy(buf, 0, _buffer, _length, length);
+
+    _length += length;
+    _value = null;
+
+    return this;
+  }
+
+  /**
+   * Append from a read stream
+   */
+  @Override
+  public final StringValue append(Reader reader)
+    throws IOException
+  {
+    _value = null;
+    
+    while (true) {
+      if (_buffer.length <= _length)
+        ensureCapacity(_length + 1);
+
+      int sublen = _buffer.length - _length;
+      
+      int len = reader.read(_buffer, _length, sublen);
+
+      if (len <= 0)
+        return this;
+
+      _length += len;
+    }
   }
 
   /**

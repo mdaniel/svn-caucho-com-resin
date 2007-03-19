@@ -526,10 +526,11 @@ public class CompilingLoader extends Loader implements Make {
   /**
    * Loads the specified class, compiling if necessary.
    */
-  protected ClassEntry getClassEntry(String name)
+  @Override
+  protected ClassEntry getClassEntry(String name, String pathName)
     throws ClassNotFoundException
   {
-    Path classFile = _classDir.lookup(name.replace('.', '/') + ".class");
+    Path classFile = _classDir.lookup(pathName);
     String javaName = name.replace('.', '/') + _sourceExt;
     Path javaFile = _sourceDir.lookup(javaName);
 

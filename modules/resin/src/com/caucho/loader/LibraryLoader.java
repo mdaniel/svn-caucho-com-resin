@@ -264,17 +264,13 @@ public class LibraryLoader extends Loader implements Dependency {
    *
    * @param name name of the class
    */
-  protected ClassEntry getClassEntry(String name)
+  protected ClassEntry getClassEntry(String name, String pathName)
     throws ClassNotFoundException
   {
-    String pathName = name.replace('.', '/');
-    
     String pkg = "";
     int p = pathName.lastIndexOf('/');
     if (p > 0)
       pkg = pathName.substring(0, p + 1);
-         
-    pathName = pathName + ".class";
 
     Path classPath = null;
     

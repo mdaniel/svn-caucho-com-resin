@@ -770,6 +770,21 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+
+  /**
+   * Append from a read stream
+   */
+  public StringValue append(Reader reader)
+    throws IOException
+  {
+    int ch;
+    
+    while ((ch = reader.read()) >= 0) {
+      append((char) ch);
+    }
+
+    return this;
+  }
   
   /**
    * Append to a string builder.

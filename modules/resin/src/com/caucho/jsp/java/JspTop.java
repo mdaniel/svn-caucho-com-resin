@@ -49,6 +49,8 @@ public class JspTop extends JspContainerNode implements JspSegmentNode {
   private int _maxStaticFragmentIndex = -1;
 
   private HashMap<String,String> _namespaceMap = new HashMap<String,String>();
+  private HashMap<String,String> _revNamespaceMap
+    = new HashMap<String,String>();
 
   /**
    * Adds a text node.
@@ -147,9 +149,20 @@ public class JspTop extends JspContainerNode implements JspSegmentNode {
   /**
    * Adds a namespace, e.g. from a prefix declaration.
    */
+  @Override
   public void addNamespaceRec(String prefix, String value)
   {
     _namespaceMap.put(prefix, value);
+    _revNamespaceMap.put(value, prefix);
+  }
+
+  /**
+   * Adds a namespace, e.g. from a prefix declaration.
+   */
+  @Override
+  public String getNamespacePrefix(String uri)
+  {
+    return _revNamespaceMap.get(uri);
   }
 
   /**

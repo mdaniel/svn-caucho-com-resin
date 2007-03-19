@@ -660,13 +660,22 @@ public class JspParser {
 
     ch = read();
 
-    _jspBuilder.startElement(JSP_DIRECTIVE_TAGLIB);
-    _jspBuilder.attribute(new QName("prefix"), "resin-c");
-    _jspBuilder.attribute(new QName("uri"), JSTL_CORE_URI);
-    _jspBuilder.endAttributes();
-    _jspBuilder.endElement(JSP_DIRECTIVE_TAGLIB.getName());
-    
-    processTaglib("resin-c", JSTL_CORE_URI);
+    String prefix = _parseState.findPrefix(JSTL_CORE_URI);
+
+    if (prefix == null) {
+      prefix = "resin-c";
+
+      /*
+      _jspBuilder.startElement(JSP_DIRECTIVE_TAGLIB);
+      _jspBuilder.attribute(new QName("prefix"), prefix);
+      _jspBuilder.attribute(new QName("uri"), JSTL_CORE_URI);
+      _jspBuilder.endAttributes();
+      _jspBuilder.endElement(JSP_DIRECTIVE_TAGLIB.getName());
+      */
+      _jspBuilder.addNamespace(prefix, JSTL_CORE_URI);
+      
+      processTaglib(prefix, JSTL_CORE_URI);
+    }
     
     setLocation(jspPath, filename, line);
     _jspBuilder.startElement(JSTL_CORE_OUT);

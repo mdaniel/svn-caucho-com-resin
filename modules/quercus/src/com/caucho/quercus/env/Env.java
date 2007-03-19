@@ -48,10 +48,8 @@ import com.caucho.util.Alarm;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
-import com.caucho.vfs.ByteToChar;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
+import com.caucho.vfs.i18n.*;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -400,6 +398,15 @@ public class Env {
   public Value setRuntimeEncoding(String encoding)
   {
     return setIni("unicode.runtime_encoding", encoding);
+  }
+
+  /**
+   * Returns the encoding used for runtime conversions, e.g. files
+   */
+  public EncodingReader getRuntimeEncodingFactory()
+    throws IOException
+  {
+    return Encoding.getReadFactory(getRuntimeEncoding().toString());
   }
 
   /**

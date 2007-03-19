@@ -91,10 +91,14 @@ public class JstlCoreOut extends JstlNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<c:out");
+    String prefix = getNamespacePrefix("http://java.sun.com/jsp/jstl/core");
 
-    if (! hasNamespace("c", "http://java.sun.com/jsp/jstl/core"))
-      os.print(" xmlns:c='http://java.sun.com/jsp/jstl/core'");
+    if (prefix == null) {
+      prefix = "c";
+      os.print("<c:out xmlns:c='http://java.sun.com/jsp/jstl/core'");
+    }
+    else
+      os.print("<" + prefix + ":out");
 
     if (_value != null) {
       os.print(" value=\"");
@@ -105,7 +109,7 @@ public class JstlCoreOut extends JstlNode {
 
     printXmlChildren(os);
 
-    os.print("</c:out>");
+    os.print("</" + prefix + ":out>");
   }
   
   /**
