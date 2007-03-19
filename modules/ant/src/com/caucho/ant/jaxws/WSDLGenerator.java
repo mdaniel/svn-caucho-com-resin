@@ -30,6 +30,7 @@ package com.caucho.ant.jaxws;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
 
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.server.util.CauchoSystem;
@@ -39,6 +40,9 @@ import com.caucho.server.util.CauchoSystem;
  * annotated classes.
  */
 public class WSDLGenerator extends org.apache.tools.ant.Task {
+  private static final Logger log 
+    = Logger.getLogger(WSDLGenerator.class.getName());
+
   private String _sei;
   private String _destDir;
   private String _classpath;
@@ -69,81 +73,117 @@ public class WSDLGenerator extends org.apache.tools.ant.Task {
 
   public void setSei(String sei)
   {
+    System.out.println("sei = " + sei);
+
     _sei = sei;
   }
 
   public void setDestdir(String destDir)
   {
+    System.out.println("destDir = " + destDir);
+
     _destDir = destDir;
   }
 
   public void setClasspath(String classpath)
   {
+    System.out.println("classpath = " + classpath);
+
     _classpath = classpath;
   }
 
   public void setCp(String classpath)
   {
+    System.out.println("classpath = " + classpath);
+
     setClasspath(classpath);
   }
 
   public void addClasspath(ClassPath classPath)
   {
+    System.out.println("added classpath, " + classPath);
+
     _classpath = classPath.getPath();
+  }
+
+  public void addJvmarg(Jvmarg jvmarg)
+  {
   }
 
   public void setResourcedestdir(String resourceDestDir)
   {
+    System.out.println("resourceDestDir = " + resourceDestDir);
+
     _resourceDestDir = resourceDestDir;
   }
 
   public void setSourcedestdir(String sourceDestDir)
   {
+    System.out.println("sourceDestDir = " + sourceDestDir);
+
     _sourceDestDir = sourceDestDir;
   }
 
   public void setKeep(boolean keep)
   {
+    System.out.println("keep = " + keep);
+
     _keep = keep;
   }
 
   public void setVerbose(boolean verbose)
   {
+    System.out.println("verbose = " + verbose);
+
     _verbose = verbose;
   }
 
   public void setGenwsdl(boolean genWsdl)
   {
+    System.out.println("genWsdl = " + genWsdl);
+
     _genWsdl = genWsdl;
   }
 
   public void setDebug(boolean debug)
   {
+    System.out.println("debug = " + debug);
+
     _debug = debug;
   }
 
   public void setFork(boolean fork)
   {
+    System.out.println("fork = " + fork);
+
     _fork = fork;
   }
 
   public void setProtocol(String protocol)
   {
+    System.out.println("protocol = " + protocol);
+
     _protocol = protocol;
   }
 
   public void setServicename(String serviceName)
   {
+    System.out.println("serviceName = " + serviceName);
+
     _serviceName = serviceName;
   }
 
   public void setPortname(String portName)
   {
+    System.out.println("portName = " + portName);
+
     _portName = portName;
   }
   
   public void setExtension(boolean extension)
   {
+    System.out.println("extension = " + extension);
+
     _extension = extension;
   }
 
@@ -156,7 +196,7 @@ public class WSDLGenerator extends org.apache.tools.ant.Task {
     Class seiClass = null;
 
     try {
-      seiClass = CauchoSystem.loadClass(_sei);
+      seiClass = Class.forName(_sei);
     }
     catch (ClassNotFoundException e) {
       throw new org.apache.tools.ant.BuildException(e);
@@ -178,7 +218,7 @@ public class WSDLGenerator extends org.apache.tools.ant.Task {
   public static void main(String[] args)
   {
     if (args.length < 1)
-      error("usage: wsdl-gen <SEI>");
+      error("usage: WSDLGenerator <SEI>");
 
     WSDLGenerator generator = new WSDLGenerator();
 
@@ -228,6 +268,17 @@ public class WSDLGenerator extends org.apache.tools.ant.Task {
       {
         _path = path;
       }
+    }
+  }
+
+  public static class Jvmarg {
+    public void setLine(String line)
+    {
+    }
+
+    public String getLine()
+    {
+      return "";
     }
   }
 }

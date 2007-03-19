@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,10 +28,18 @@
 
 package com.caucho.ant.jaxws;
 
+import java.io.*;
+import java.util.*;
+
+import javax.xml.bind.*;
+import javax.xml.stream.*;
+
 import com.caucho.soap.reflect.WebServiceIntrospector;
+import com.caucho.soap.wsdl.*;
+
 import com.caucho.server.util.CauchoSystem;
 
-import java.io.*;
+import com.caucho.xml.schema.*;
 
 /**
  * Command-line tool and ant task to generate Java from WSDLs.
@@ -51,9 +59,33 @@ public class WSDLImporter extends org.apache.tools.ant.Task {
   private String _bindingPath;
   private Binding _binding;
 
+  public String toString()
+  {
+    return "wsdl = " + _wsdl + "\n" +
+           "destDir = " + _destDir + "\n" +
+           "sourceDestDir = " + _sourceDestDir + "\n" +
+           "keep = " + _keep + "\n" +
+           "verbose = " + _verbose + "\n" +
+           "extension = " + _extension + "\n" +
+           "debug = " + _debug + "\n" +
+           "fork = " + _fork + "\n" +
+           "wsdlLocation = " + _wsdlLocation + "\n" +
+           "catalog = " + _catalog + "\n" +
+           "package = " + _package + "\n" +
+           "bindingPath = " + _bindingPath + "\n" +
+           "binding = " + _binding + "\n";
+  }
+
   private static void error(String msg)
   {
-    System.err.println(msg);
+    System.err.print(msg);
+    System.exit(1);
+  }
+
+  private static void error(String msg, Exception e)
+  {
+    System.err.print(msg + ":" );
+    e.printStackTrace();
     System.exit(1);
   }
 
@@ -122,33 +154,77 @@ public class WSDLImporter extends org.apache.tools.ant.Task {
     _bindingPath = bindingPath;
   }
   
+  public void addJvmarg(Jvmarg jvmarg)
+  {
+  }
+
   /**
    * Executes the ant task.
    **/
   public void execute()
     throws org.apache.tools.ant.BuildException
   {
-    // XXX
+    try {
+      JAXBContext context = 
+        JAXBContext.newInstance("com.caucho.soap.wsdl:com.caucho.xml.schema");
+      Unmarshaller u = context.createUnmarshaller();
+      WSDLDefinitions wsdl = (WSDLDefinitions) u.unmarshal(new File(_wsdl));
+
+      if (_package == null)
+        _package = _binding.getPackage();
+
+      wsdl.generateJava(u, new File(_sourceDestDir), new File(_destDir), 
+                        _package);
+    }
+    catch (Exception e) {
+      throw new org.apache.tools.ant.BuildException(e);
+    }
   }
 
   public static void main(String[] args)
     throws Exception 
   {
+    if (args.length < 3)
+      error("usage: WSDLImporter <WSDL> <destination directory> <package>");
+
+    WSDLImporter importer = new WSDLImporter();
+
+    importer.setWsdl(args[0]);
+    importer.setDestdir(args[1]);
+    importer.setPackage(args[2]);
+
+    try {
+      importer.execute();
+    }
+    catch (org.apache.tools.ant.BuildException e) {
+      error("Unable to load WSDL (" + args[0] + ")", e);
+    }
+  }
+
+  public static class Jvmarg {
+    public void setLine(String line)
+    {
+    }
+
+    public String getLine()
+    {
+      return "";
+    }
   }
 
   public static class Binding {
-    private String _dir;
+    private File _dir;
     private String _includes;
     private String _excludes; // undocumented in tck
 
-    public String getDir()
+    public File getDir()
     {
       return _dir;
     }
 
     public void setDir(String dir)
     {
-      _dir = dir;
+      _dir = new File(dir);
     }
 
     public String getIncludes()
@@ -169,6 +245,60 @@ public class WSDLImporter extends org.apache.tools.ant.Task {
     public void setExcludes(String excludes)
     {
       _excludes = excludes;
+    }
+
+    public String toString()
+    {
+      return "Binding[dir=" + _dir + "," +
+                     "includes=" + _includes + "," +
+                     "excludes=" + _excludes + "]";
+    }
+
+    public String getPackage()
+    {
+      XMLStreamReader in = null;
+
+      try {
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+
+        String[] includes = _includes.split(" ");
+
+        for (int i = 0; i < includes.length; i++) {
+          File include = new File(_dir, includes[i]);
+
+          if (! include.exists())
+            continue;
+
+          in = factory.createXMLStreamReader(new FileInputStream(include));
+
+          while (in.hasNext()) {
+            in.next();
+
+            if (in.getEventType() == in.START_ELEMENT &&
+                in.getName() != null && 
+                in.getName().getLocalPart().equals("package")) {
+              String pkg = in.getAttributeValue(null, "name");
+
+              if (pkg != null)
+                return pkg;
+            }
+          }
+        }
+      }
+      catch (IOException e) {
+      }
+      catch (XMLStreamException e) {
+      }
+      finally {
+        try {
+          if (in != null)
+            in.close();
+        }
+        catch (XMLStreamException e) {
+        }
+      }
+
+      return null;
     }
   }
 }

@@ -43,7 +43,7 @@ import com.caucho.vfs.*;
  * Class loader which loads all the classes in a directory tree.
  *
  * The JAXB TCK has tests with package access classes.  This loader
- * deals with this irregularity.
+* deals with this irregularity.
  */
 public class GreedyClassLoader extends java.net.URLClassLoader
 {
@@ -51,6 +51,7 @@ public class GreedyClassLoader extends java.net.URLClassLoader
 
   private ClassLoader _parent;
   private Hashtable<String,Class> _classes = new Hashtable<String,Class>();
+  private ArrayList<Class> _jaxbClasses = new ArrayList<Class>();
   private ByteBuffer _buffer = new ByteBuffer();
   private HashMap<File,String> _problemFiles = new HashMap<File,String>();
 
@@ -84,13 +85,26 @@ public class GreedyClassLoader extends java.net.URLClassLoader
     try {
       rs.readAll(_buffer.getBuffer(), 0, (int) file.length());
 
-      Class cl = defineClass(packagePrefix + "." + className, 
-                             _buffer.getBuffer(), 0, (int) file.length());
+      Class cl = null;
 
-      if (packagePrefix == null)
+      if (packagePrefix == null) {
+        cl = defineClass(packagePrefix + "." + className, 
+                         _buffer.getBuffer(), 0, (int) file.length());
+        
+        if (! "package-info".equals(className))
+          _jaxbClasses.add(cl);
+
         _classes.put(className, cl);
-      else
+      } 
+      else {
+        cl = defineClass(className, 
+                         _buffer.getBuffer(), 0, (int) file.length());
+
+        if (! "package-info".equals(className))
+          _jaxbClasses.add(cl);
+
         _classes.put(packagePrefix + "." + className, cl);
+      }
 
       return cl;
     }
@@ -162,6 +176,6 @@ public class GreedyClassLoader extends java.net.URLClassLoader
 
   public Class[] getLoadedClasses()
   {
-    return _classes.values().toArray(new Class[0]);
+    return _jaxbClasses.toArray(new Class[0]);
   }
 }
