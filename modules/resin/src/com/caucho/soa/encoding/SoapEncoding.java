@@ -36,6 +36,7 @@ import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
@@ -68,6 +69,12 @@ public class SoapEncoding implements ServiceEncoding {
       _class = service.getClass();
   }
 
+  public void setSeparateSchema(boolean separateSchema)
+    throws JAXBException, IOException
+  {
+    getSkeleton().setSeparateSchema(separateSchema);
+  }
+
   public void setInterface(Class cl)
   {
     _class = cl;
@@ -90,6 +97,12 @@ public class SoapEncoding implements ServiceEncoding {
 
     out.flush();
   }    
+
+  public void dumpWSDL(OutputStream out)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    getSkeleton().dumpWSDL(out);
+  }
 
   private DirectSkeleton getSkeleton()
     throws JAXBException, IOException

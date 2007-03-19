@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -35,6 +35,7 @@ import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -58,6 +59,12 @@ public class SoapProtocolServlet
     _soap.setService(service);
   }
 
+  public void setSeparateSchema(boolean separateSchema)
+    throws Throwable
+  {
+    _soap.setSeparateSchema(separateSchema);
+  }
+
   public void init()
     throws ServletException
   {
@@ -74,6 +81,15 @@ public class SoapProtocolServlet
     throws IOException, ServletException
   {
     try {
+      if (request instanceof HttpServletRequest) {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+        if ("wsdl".equalsIgnoreCase(httpRequest.getQueryString())) {
+          _soap.dumpWSDL(response.getOutputStream());
+          return;
+        }
+      }
+
       _soap.invoke(request.getInputStream(), response.getOutputStream());
     } catch (IOException e) {
       throw e;
