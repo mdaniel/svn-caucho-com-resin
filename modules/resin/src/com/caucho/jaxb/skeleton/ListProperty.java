@@ -129,20 +129,6 @@ public class ListProperty extends IterableProperty {
     }
   }
 
-  public void write(Marshaller m, XMLStreamWriter out,
-                    Object value, QName name)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    // XXX
-  }
-
-  public void write(Marshaller m, XMLEventWriter out,
-                    Object value, QName name)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    // XXX
-  }
-
   public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
     throws IOException, JAXBException
   {
