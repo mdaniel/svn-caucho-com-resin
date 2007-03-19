@@ -69,7 +69,7 @@ public class OutParameterMarshal extends ParameterMarshal {
   // server
   //
 
-  public void deserializeCall(XMLStreamReader in, Object []args)
+  public void prepareArgument(Object []args)
   {
     if (args[_arg] == null)
       args[_arg] = new Holder();

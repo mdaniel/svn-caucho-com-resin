@@ -30,8 +30,10 @@
 package com.caucho.soap.skeleton;
 
 import com.caucho.jaxb.skeleton.Property;
+import com.caucho.jaxb.skeleton.WrapperProperty;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.util.L10N;
+import com.caucho.xml.stream.StaxUtil;
 
 import javax.jws.WebParam;
 import javax.jws.WebResult;
@@ -50,6 +52,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -65,6 +68,9 @@ public class DocumentBareAction extends AbstractAction {
   private final static Logger log = 
     Logger.getLogger(DocumentBareAction.class.getName());
   private static final L10N L = new L10N(DocumentBareAction.class);
+  private static final QName ITEM_NAME = new QName("item");
+
+  private int _inputArgument = -1;
 
   public DocumentBareAction(Method method, Method eiMethod,
                             JAXBContextImpl jaxbContext, 
@@ -88,15 +94,42 @@ public class DocumentBareAction extends AbstractAction {
     //
 
     // XXX header args/no args
-    // XXX check for input versus output
-    
-    // XXX check that @WebParam is not set on the argument (and for some
-    // reason set the name to "arg0")
-    if (_bodyArgs.length == 1) {
-      if ("arg0".equals(_bodyArgs[0].getName().getLocalPart()))
-        _bodyArgs[0].setName(new QName(_targetNamespace, _operationName));
+
+    if (_bodyInputs == 1) {
+      for (int i = 0; i < _bodyArgs.length; i++) {
+        if (! (_bodyArgs[i] instanceof OutParameterMarshal)) {
+          _inputArgument = i;
+          break;
+        }
+      }
+
+      // XXX check that @WebParam is not set on the argument (and for some
+      // reason explicitly set the name to "arg0")
+      if ("arg0".equals(_bodyArgs[_inputArgument].getName().getLocalPart())) {
+
+        QName argName = new QName(_targetNamespace, _operationName);
+        _bodyArgs[_inputArgument].setName(argName);
+      }
       else
-        _operationName = _bodyArgs[0].getName().getLocalPart();
+        _operationName = _bodyArgs[_inputArgument].getName().getLocalPart();
+
+      // Document bare does something strange with arrays and collections:
+      //  They are wrapped and their individual element names are <item>,
+      //  except for byte[].
+      Class[] parameterTypes = method.getParameterTypes();
+      Class inputType = parameterTypes[_inputArgument];
+
+      if ((inputType.isArray() &&
+           ! byte.class.equals(inputType.getComponentType()))
+          || Collection.class.isAssignableFrom(inputType)) {
+        WrapperProperty wrapper = 
+          new WrapperProperty(_bodyArgs[_inputArgument]._property,
+                              _bodyArgs[_inputArgument].getName(),
+                              ITEM_NAME);
+
+        _bodyArgs[_inputArgument].setName(ITEM_NAME);
+        _bodyArgs[_inputArgument]._property = wrapper;
+      }
     }
 
     if (_returnMarshal != null) {
@@ -107,14 +140,36 @@ public class DocumentBareAction extends AbstractAction {
 
       if (webResult == null || "".equals(webResult.name()))
         _returnMarshal.setName(new QName(_targetNamespace, _responseName));
+
+      Class returnType = method.getReturnType();
+
+      if ((returnType.isArray() &&
+           ! byte.class.equals(returnType.getComponentType()))
+          || Collection.class.isAssignableFrom(returnType)) {
+        WrapperProperty wrapper = 
+          new WrapperProperty(_returnMarshal._property,
+                              _returnMarshal.getName(),
+                              ITEM_NAME);
+
+        _returnMarshal.setName(ITEM_NAME);
+        _returnMarshal._property = wrapper;
+      }
     }
   }
 
   protected void writeMethodInvocation(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    for (int i = 0; i < _bodyArgs.length; i++)
-      _bodyArgs[i].serializeCall(out, args);
+    if (_bodyInputs == 0) {
+      out.writeEmptyElement(TARGET_NAMESPACE_PREFIX, 
+                            _operationName, 
+                            _targetNamespace);
+      out.writeNamespace(TARGET_NAMESPACE_PREFIX, _targetNamespace);
+    }
+    else {
+      for (int i = 0; i < _bodyArgs.length; i++)
+        _bodyArgs[i].serializeCall(out, args);
+    }
   }
 
   protected Object[] readMethodInvocation(XMLStreamReader in)
@@ -122,20 +177,15 @@ public class DocumentBareAction extends AbstractAction {
   {
     Object[] args = new Object[_arity];
 
-    if (_bodyArgs.length == 0) {
+    if (_bodyInputs == 0) {
       while (in.getEventType() != in.END_ELEMENT)
         in.nextTag();
 
       in.nextTag();
     }
     else {
-      for (int i = 0; i < _bodyArgs.length; i++) {
-        // while loop for arrays/lists
-        while (in.getEventType() == in.START_ELEMENT &&
-               _bodyArgs[i].getName().equals(in.getName()))
-          _bodyArgs[i].deserializeCall(in, args);
-      }
-
+      for (int i = 0; i < _bodyArgs.length; i++)
+        _bodyArgs[i].deserializeCall(in, args);
     }
 
     return args;

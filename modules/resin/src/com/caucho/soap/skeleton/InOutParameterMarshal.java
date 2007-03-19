@@ -72,18 +72,16 @@ public class InOutParameterMarshal extends ParameterMarshal {
   // server
   //
 
+  public void prepareArgument(Object []args)
+  {
+    args[_arg] = new Holder();
+  }
+
   public void deserializeCall(XMLStreamReader in, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    Holder h = null;
-    Object previous = null;
-
-    if (args[_arg] == null)
-      args[_arg] = h = new Holder();
-    else {
-      h = (Holder) args[_arg];
-      previous = h.value;
-    }
+    Holder h = (Holder) args[_arg];
+    Object previous = h.value;
 
     h.value = _property.read(_unmarshaller, in, previous);
   }

@@ -89,9 +89,8 @@ public class DocumentWrappedAction extends AbstractAction {
                           _targetNamespace);
     out.writeNamespace(TARGET_NAMESPACE_PREFIX, _targetNamespace);
 
-    for (int i = 0; i < _bodyArgs.length; i++) {
+    for (int i = 0; i < _bodyArgs.length; i++)
       _bodyArgs[i].serializeCall(out, args);
-    }
 
     out.writeEndElement(); // name
   }
@@ -106,11 +105,12 @@ public class DocumentWrappedAction extends AbstractAction {
 
     // document wrapped => everything must be in order
     for (int i = 0; i < _bodyArgs.length; i++) {
+      _bodyArgs[i].prepareArgument(args);
+
       // while loop for arrays/lists
       while (in.getEventType() == in.START_ELEMENT &&
-             _bodyArgs[i].getName().equals(in.getName())) {
+             _bodyArgs[i].getName().equals(in.getName()))
         _bodyArgs[i].deserializeCall(in, args);
-      }
     }
 
     // skip the method name close tag
@@ -219,5 +219,10 @@ public class DocumentWrappedAction extends AbstractAction {
     in.require(XMLStreamReader.END_ELEMENT, null, "Envelope");
 
     return ret;
+  }
+
+  public String toString()
+  {
+    return "DocumentWrappedAction[" + _method.getName() + "]";
   }
 }

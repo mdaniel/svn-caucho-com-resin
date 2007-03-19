@@ -47,8 +47,8 @@ public abstract class ParameterMarshal {
   protected static final String XML_SCHEMA_PREFIX = "xsd";
 
   protected QName _name;
+  protected Property _property;
   protected final int _arg;
-  protected final Property _property;
   protected final Marshaller _marshaller;
   protected final Unmarshaller _unmarshaller;
 
@@ -122,6 +122,10 @@ public abstract class ParameterMarshal {
   //
   // server
   //
+
+  public void prepareArgument(Object []args)
+  {
+  }
 
   public void deserializeCall(XMLStreamReader in, Object []args)
     throws IOException, XMLStreamException, JAXBException

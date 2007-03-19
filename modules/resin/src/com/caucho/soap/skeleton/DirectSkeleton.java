@@ -34,6 +34,7 @@ import com.caucho.jaxb.JAXBContextImpl;
 import static com.caucho.soap.wsdl.WSDLConstants.*;
 import com.caucho.util.L10N;
 import com.caucho.xml.XmlPrinter;
+import com.caucho.xml.stream.StaxUtil;
 
 import org.w3c.dom.Node;
 import javax.jws.WebService;
@@ -512,5 +513,10 @@ public class DirectSkeleton extends Skeleton {
       if (xsdOut != null)
         xsdOut.close();
     }
+  }
+
+  public String toString()
+  {
+    return "DirectSkeleton[" + _api + "]";
   }
 }
