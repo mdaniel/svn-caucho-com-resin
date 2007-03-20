@@ -648,10 +648,11 @@ public class MysqlModule extends AbstractQuercusModule {
   @ReturnNullAsFalse
   public String mysql_get_server_info(Env env, @Optional Mysqli conn)
   { 
-    if (conn == null)
-      conn = getConnection(env);
-    
-    if (conn.isConnected())
+    if (conn == null) {
+      conn = (Mysqli) env.getSpecialValue("caucho.mysql");
+    }
+
+    if (conn != null && conn.isConnected())
       return conn.get_server_info();
     else
       return null;

@@ -452,6 +452,11 @@ public class JdbcResultResource {
       } else {
         // must return FALSE for mediawiki
         // php/142t
+        //
+        // XXX:
+        // mysql_fetch_object returns FALSE
+        // mysqli_fetch_object returns NULL
+        // PDO::fetchObject returns FALSE
         return BooleanValue.FALSE;
       }
     } catch (SQLException e) {

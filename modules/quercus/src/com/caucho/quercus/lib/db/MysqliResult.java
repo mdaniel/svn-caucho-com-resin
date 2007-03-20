@@ -121,6 +121,14 @@ public class MysqliResult extends JdbcResultResource {
   public ArrayValue fetch_array(Env env,
                                 @Optional("MYSQLI_BOTH") int type)
   {
+    if (type != MysqlModule.MYSQL_ASSOC &&
+        type != MysqlModule.MYSQL_BOTH &&
+        type != MysqlModule.MYSQL_NUM)
+    {
+      env.warning(L.l("invalid result_type"));
+      return null;
+    }
+
     return fetchArray(env, type);
   }
 
