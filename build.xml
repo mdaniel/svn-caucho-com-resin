@@ -849,6 +849,7 @@
         <include name="WEB-INF/lib/script-10.jar"/>
         <include name="WEB-INF/web.xml"/>
         <include name="index.php"/>
+        <include name="README"/>
       </fileset>
       <fileset dir="${basedir}">
         <include name="LICENSE"/>
