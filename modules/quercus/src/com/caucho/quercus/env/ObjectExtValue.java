@@ -58,6 +58,8 @@ public class ObjectExtValue extends ObjectValue
 
   private int _size;
 
+  private boolean _hasCalledSetter = false;
+
   public ObjectExtValue(QuercusClass cl)
   {
     _cl = cl;
@@ -304,11 +306,19 @@ public class ObjectExtValue extends ObjectValue
     Entry entry = null;
 
     AbstractFunction setField = _cl.getSetField();
-    if (setField != null) {
+    if (setField != null && ! _hasCalledSetter) {
       entry = getEntry(key);
 
-      if (entry == null)
-	return setField.callMethod(env, this, new StringValueImpl(key), value);
+      if (entry == null) {
+        _hasCalledSetter = true;
+
+        Value result =
+          setField.callMethod(env, this, new StringValueImpl(key), value);
+        
+        _hasCalledSetter = false;
+        return result;
+        
+      }
     }
     else
       entry = createEntry(key);

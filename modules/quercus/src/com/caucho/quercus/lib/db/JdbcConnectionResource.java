@@ -475,6 +475,8 @@ public abstract class JdbcConnectionResource implements Closeable {
   {
     if (_connected) {
       _connected = false;
+
+      // php/1418
       //env.removeClose(this);
       //close();
     }
