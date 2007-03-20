@@ -1333,9 +1333,10 @@ public class AmberConnection
 
           log.log(Level.FINER, e.toString(), e);
         }
-        else
-          log.finer(L.l("amber manager: context entity(class: '{0}' PK: '{1}') is a copy from cache.",
-                        className, pk));
+        // Too much logging information.
+        // else
+        //   log.finer(L.l("amber manager: context entity(class: '{0}' PK: '{1}') is a copy from cache.",
+        //             className, pk));
       }
     }
 
