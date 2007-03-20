@@ -125,8 +125,6 @@ public class DirectSkeleton extends Skeleton {
     throws WebServiceException
   {
     WebService webService = (WebService) type.getAnnotation(WebService.class);
-    setNamespace(type);
-
     _api = type;
 
     if (webService != null && ! "".equals(webService.endpointInterface())) {
@@ -138,6 +136,8 @@ public class DirectSkeleton extends Skeleton {
         throw new WebServiceException(e);
       }
     }
+
+    setNamespace(type, _api);
 
     _name = getWebServiceName(type);
     _typeName = _name + "PortType";
@@ -169,26 +169,39 @@ public class DirectSkeleton extends Skeleton {
     return _namespace;
   }
 
-  private void setNamespace(Class type) 
+  private void setNamespace(Class type, Class api) 
   {
     WebService webService = (WebService) type.getAnnotation(WebService.class);
 
-    if (webService != null && ! webService.targetNamespace().equals(""))
-      _namespace = webService.targetNamespace();
-    else {
-      _namespace = null;
-      String packageName = type.getPackage().getName();
-      StringTokenizer st = new StringTokenizer(packageName, ".");
-
-      while (st.hasMoreTokens()) { 
-        if (_namespace == null) 
-          _namespace = st.nextToken();
-        else
-          _namespace = st.nextToken() + "." + _namespace;
+    // try to get the namespace from the annotation first...
+    if (webService != null) {
+      if (! "".equals(webService.targetNamespace())) {
+        _namespace = webService.targetNamespace();
+        return;
       }
+      else if (! api.equals(type)) {
+        webService = (WebService) api.getAnnotation(WebService.class);
 
-      _namespace = "http://"+_namespace+"/";
+        if (! "".equals(webService.targetNamespace())) {
+          _namespace = webService.targetNamespace();
+          return;
+        }
+      }
     }
+
+    // get the namespace from the package name
+    _namespace = null;
+    String packageName = type.getPackage().getName();
+    StringTokenizer st = new StringTokenizer(packageName, ".");
+
+    while (st.hasMoreTokens()) { 
+      if (_namespace == null) 
+        _namespace = st.nextToken();
+      else
+        _namespace = st.nextToken() + "." + _namespace;
+    }
+
+    _namespace = "http://"+_namespace+"/";
   }
 
   static String getWebServiceName(Class type) 

@@ -305,16 +305,15 @@ public abstract class AbstractAction {
                                   JAXBUtil.classBasename(exception),
                                   TARGET_NAMESPACE_PREFIX);
       /* XXX check for generated exception classes versus raw exceptions
-       * i.e. things like getFaultInfo()
+       * i.e. things like getFaultInfo()*/
       Property property = jaxbContext.createProperty(exception);
-      ParameterMarshal marshal = ParameterMarshal.create(0, 
-                                                         property, 
-                                                         faultName,
-                                                         WebParam.Mode.OUT,
-                                                         marshaller, 
-                                                         unmarshaller);
+      ParameterMarshal marshal = 
+        ParameterMarshal.create(0, property, faultName, 
+                                WebParam.Mode.OUT,
+                                marshaller, unmarshaller);
+
       _faults.put(exception, marshal);
-      _faultNames.put(faultName, marshal);*/
+      _faultNames.put(faultName, marshal);
     }
   }
 
