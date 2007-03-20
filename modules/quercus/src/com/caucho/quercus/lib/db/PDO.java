@@ -255,6 +255,7 @@ public class PDO implements java.io.Closeable {
 
     // don't want to close the underlying connection
     //php/1s0g
+    /*
     if (conn != null) {
       try {
         conn.close();
@@ -263,6 +264,7 @@ public class PDO implements java.io.Closeable {
         log.log(Level.WARNING, e.toString(), e);
       }
     }
+    */
   }
 
   public String errorCode()
