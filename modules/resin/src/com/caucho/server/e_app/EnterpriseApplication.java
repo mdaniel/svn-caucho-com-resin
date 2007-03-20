@@ -377,19 +377,27 @@ public class EnterpriseApplication
           Path path = _rootDir.lookup(file);
           Path jar = JarPath.create(path);
 
-          if (jar.lookup("META-INF/application-client.xml").canRead()) {
-            // app-client jar
-          }
-          else if (jar.lookup("META-INF/ejb-jar.xml").canRead()) {
-            _ejbPaths.add(path);
+          try {
+            if (jar.lookup("META-INF/application-client.xml").canRead()) {
+              // app-client jar
+            }
+            else if (jar.lookup("META-INF/ejb-jar.xml").canRead()) {
+              _ejbPaths.add(path);
 
-            _loader.addJar(path);
-            _loader.addJarManifestClassPath(path);
-          }
-          else {
-            _ejbPaths.add(path);
+              _loader.addJar(path);
+              _loader.addJarManifestClassPath(path);
+            }
+            else {
+              _ejbPaths.add(path);
 
-            _loader.addJar(path);
+              _loader.addJar(path);
+            }
+          }
+          catch (java.util.zip.ZipException e) {
+            // XXX: jpa tck, error in opening zip file
+            // canRead() is throwing an exception when
+            // META-INF/application-client.xml does not exist?
+            log.log(Level.WARNING, e.toString(), e);
           }
         }
         else if (file.endsWith(".war")) {

@@ -304,8 +304,12 @@ abstract public class ExpandDeployController<I extends DeployInstance>
           if (entry.isDirectory())
             path.mkdirs();
           else {
-            long length = entry.getSize();
-            int bufferLen = buffer.length;
+            long entryLength = entry.getSize();
+            long length = entryLength;
+
+            // XXX: avoids unexpected end of ZLIB input stream.
+            // XXX: This should be a really temp. workaround.
+            int bufferLen = 1; // buffer.length;
 
             // XXX: avoids unexpected end of ZLIB input stream.
             if (length < 0) {
@@ -321,20 +325,35 @@ abstract public class ExpandDeployController<I extends DeployInstance>
             path.getParent().mkdirs();
 
             WriteStream os = path.openWrite();
+            int len = 0;
             try {
-              int len;
-              while ((len = zis.read(buffer, 0, bufferLen)) > 0) {
-                os.write(buffer, 0, len);
+              if (bufferLen == 1) {
+                for (int ch = zis.read(); ch != -1; ch = zis.read())
+                  os.write(ch);
+              }
+              else {
+                while ((len = zis.read(buffer, 0, bufferLen)) > 0) {
+                  os.write(buffer, 0, len);
 
-                // XXX: avoids unexpected end of ZLIB input stream.
-                length -= len;
+                  // XXX: avoids unexpected end of ZLIB input stream.
+                  if (len < bufferLen) {
+                    for (int ch = zis.read(); ch != -1; ch = zis.read())
+                      os.write(ch);
 
-                if (length < bufferLen) {
-                  bufferLen = (int) length;
+                    break;
+                  }
+
+                  length -= len;
+
+                  if (length < bufferLen) {
+                    bufferLen = (int) length;
+                  }
                 }
               }
             } catch (IOException e) {
-              log.log(Level.FINE, e.toString(), e);
+              Exception ex = new Exception("IOException when expanding entry "+entry+" in "+archivePath+", entry.length: "+entryLength+" entry.compressed: "+entry.getCompressedSize()+", bufferLen: "+bufferLen+", read len: "+len+", remaining: "+length,e);
+
+              log.log(Level.FINE, ex.toString(), ex);
             } finally {
               os.close();
             }
