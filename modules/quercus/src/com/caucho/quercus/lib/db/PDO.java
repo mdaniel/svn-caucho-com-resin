@@ -253,6 +253,8 @@ public class PDO implements java.io.Closeable {
 
     closeStatements();
 
+    // don't want to close the underlying connection
+    //php/1s0g
     if (conn != null) {
       try {
         conn.close();
