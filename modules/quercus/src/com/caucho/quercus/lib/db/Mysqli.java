@@ -670,6 +670,14 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
+   * Closes the connection
+   */
+  public boolean close(Env env)
+  {
+    return super.close(env);
+  }
+
+  /**
    * Creates a database-specific result.
    */
   protected JdbcResultResource createResult(Statement stmt,
