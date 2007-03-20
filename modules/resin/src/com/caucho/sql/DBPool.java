@@ -253,6 +253,14 @@ public class DBPool implements DataSource {
   }
 
   /**
+   * Return the url
+   */
+  public String getURL()
+  {
+    return getPool().getURL();
+  }
+
+  /**
    * Returns the connection's user (compat).
    */
   public String getUser()
