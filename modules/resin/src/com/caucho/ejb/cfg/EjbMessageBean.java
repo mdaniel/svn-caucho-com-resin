@@ -73,6 +73,7 @@ public class EjbMessageBean extends EjbBean {
   private String _subscriptionName;
   private int _consumerMax = 5;
   private String _messageDestinationLink;
+  private Class _messagingType;
 
   /**
    * Creates a new message bean configuration.
@@ -103,9 +104,6 @@ public class EjbMessageBean extends EjbBean {
     super.setEJBClass(ejbType);
     
     Class ejbClass = getEJBClass();
-
-    if (! MessageListener.class.isAssignableFrom(ejbClass))
-      throw error(L.l("'{0}' must implement javax.jms.MessageListener.  Every message-driven bean must implement MessageListener.", ejbClass.getName()));
 
     if (! MessageDrivenBean.class.isAssignableFrom(ejbClass) &&
 	! isAllowPOJO())
@@ -161,6 +159,11 @@ public class EjbMessageBean extends EjbBean {
 				    obj));
     
     _destination = (Destination) obj;
+  }
+
+  public void setMessagingType(Class messagingType)
+  {
+    _messagingType = messagingType;
   }
 
   /**
@@ -344,6 +347,13 @@ public class EjbMessageBean extends EjbBean {
   {
     super.init();
 
+    if (! MessageListener.class.isAssignableFrom(getEJBClass())
+        && _messagingType == null)
+
+      throw error(L.l("'{0}' must implement javax.jms.MessageListener or specify {1}.",
+                      getEJBClass().getName(),
+                      isAllowPOJO() ? "messaging-type" : "messageListenerInterface"));
+
     J2EEManagedObject.register(new com.caucho.management.j2ee.MessageDrivenBean(this));
   }
 
@@ -375,6 +385,11 @@ public class EjbMessageBean extends EjbBean {
           addActivationConfigProperty(property.propertyName(),
                                       property.propertyValue());
       }
+
+      Class messageListenerInterface = (Class) messageDriven.get("messageListenerInterface");
+
+      if (messageListenerInterface != null)
+        setMessagingType(messageListenerInterface);
     }
   }
 
@@ -397,6 +412,7 @@ public class EjbMessageBean extends EjbBean {
     //server.setContextImplClass(contextImplClass);
     
     server.setContextImplClass(getEJBClass());
+    server.setMessageListenerType(_messagingType);
 
     server.setDestination(_destination);
     server.setMessageDestinationLink(_messageDestinationLink);

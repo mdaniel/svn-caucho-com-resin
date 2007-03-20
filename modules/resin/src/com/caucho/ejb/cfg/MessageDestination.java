@@ -32,11 +32,14 @@ import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
-import javax.naming.NamingException;
 import javax.jms.Destination;
+import javax.naming.NamingException;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class MessageDestination {
   private final L10N L = new L10N(MessageDestination.class);
+  private Logger log = Logger.getLogger(MessageDestination.class.getName());
 
   private String _messageDestinationName;
   private String _mappedName;
@@ -83,22 +86,34 @@ public class MessageDestination {
   private void resolve()
     throws NamingException
   {
-    if (_mappedName == null) {
-      _destination = (Destination) Jndi.lookup(_messageDestinationName);
+    Destination destination = null;
 
-      if (_destination == null) {
+    if (_mappedName == null) {
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("resolving <message-destination> '{0}'",
+                       _messageDestinationName));
+
+      destination = (Destination) Jndi.lookup(_messageDestinationName);
+
+      if (destination == null) {
         throw new NamingException(L.l("<message-destination> '{0}' could not be resolved",
                                       _messageDestinationName));
       }
     }
     else {
-      _destination = (Destination) Jndi.lookup(_mappedName);
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("resolving <message-destination> '{0}' with mapped-name '{1}'",
+                       _messageDestinationName, _mappedName));
 
-      if (_destination == null) {
+      destination = (Destination) Jndi.lookup(_mappedName);
+
+      if (destination == null) {
         throw new NamingException(L.l("<message-destination> '{0}' with mapped-name '{1}' could not be resolved",
                                       _messageDestinationName, _mappedName));
       }
     }
+
+    _destination = destination;
   }
 
   public Destination getResolvedDestination()

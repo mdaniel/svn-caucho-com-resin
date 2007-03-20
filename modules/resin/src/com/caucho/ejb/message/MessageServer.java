@@ -55,6 +55,7 @@ public class MessageServer extends AbstractServer {
   private Connection _connection;
   private Destination _destination;
   private String _messageDestinationLink;
+  private Class _messageListenerType;
 
   private String _subscriptionName;
   private String _selector;
@@ -87,6 +88,14 @@ public class MessageServer extends AbstractServer {
   public void setMessageDestinationLink(String messageDestinationLink)
   {
     _messageDestinationLink = messageDestinationLink;
+  }
+
+  /**
+   * Sets the type of the listener.
+   */
+  public void setMessageListenerType(Class messageListenerType)
+  {
+    _messageListenerType = messageListenerType;
   }
 
   /**
@@ -192,7 +201,23 @@ public class MessageServer extends AbstractServer {
   {
     return _destination;
   }
-  
+
+  private MessageListener createMessageListener()
+    throws Exception
+  {
+    Class cl = _contextImplClass;
+
+    Object listener = cl.newInstance();
+
+    if (listener instanceof MessageListener)
+      return (MessageListener) listener;
+    else if (_messageListenerType == MessageListener.class)
+      return new MessageListenerAdapter(listener);
+    else {
+      throw new ConfigException(L.l("No valid message listener interface found"));
+    }
+  }
+
   /**
    * Cleans up the entity server nicely.
    */
@@ -230,9 +255,7 @@ public class MessageServer extends AbstractServer {
     void start()
       throws Exception
     {
-      Class cl = _contextImplClass;
-    
-      _listener = (MessageListener) cl.newInstance();
+      _listener = createMessageListener();
 
       if (_listener instanceof MessageDrivenBean) {
 	MessageDrivenBean bean = (MessageDrivenBean) _listener;
@@ -245,7 +268,7 @@ public class MessageServer extends AbstractServer {
 
       if (_listener instanceof MessageDrivenBean) {
         try {
-          create = cl.getMethod("ejbCreate", new Class[0]);
+          create = _listener.getClass().getMethod("ejbCreate", new Class[0]);
           create.invoke(_listener, new Object[0]);
         }
         catch (NoSuchMethodException e) {

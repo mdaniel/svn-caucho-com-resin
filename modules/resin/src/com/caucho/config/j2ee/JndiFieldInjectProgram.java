@@ -63,7 +63,7 @@ public class JndiFieldInjectProgram extends BuilderProgram {
       Object value = new InitialContext().lookup(_jndiName);
 
       if (value == null)
-	return;
+        return;
 
       if (! _field.getType().isAssignableFrom(value.getClass())
 	  && ! _field.getType().isPrimitive()) {
@@ -75,6 +75,10 @@ public class JndiFieldInjectProgram extends BuilderProgram {
       }
 
       _field.setAccessible(true);
+
+      if (log.isLoggable(Level.FINEST))
+        log.finest(L.l("injecting value {0} from '{1}' into field {2}", value, _jndiName,  _field));
+
       _field.set(bean, value);
     } catch (RuntimeException e) {
       throw e;

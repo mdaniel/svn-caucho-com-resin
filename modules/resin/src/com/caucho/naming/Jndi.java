@@ -208,14 +208,15 @@ public class Jndi {
   // For EL
   public static Object lookup(String name)
   {
+    Exception ex = null;
+
     try {
       Object value = new InitialContext().lookup(name);
         
       if (value != null)
         return value;
     } catch (NamingException e) {
-      if (log.isLoggable(Level.FINEST))
-        log.log(Level.FINEST, e.toString(), e);
+      ex = e;
     }
 
     if (! name.startsWith("java:comp/env")) {
@@ -225,10 +226,12 @@ public class Jndi {
         if (value != null)
           return value;
       } catch (NamingException e) {
-        if (log.isLoggable(Level.FINEST))
-          log.log(Level.FINEST, e.toString(), e);
+        ex = e;
       }
     }
+
+    if (ex != null && log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, ex.toString(), ex);
 
     return null;
   }
