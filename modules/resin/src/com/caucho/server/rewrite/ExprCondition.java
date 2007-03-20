@@ -29,13 +29,10 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.RawString;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
 import com.caucho.util.L10N;
 
-import javax.annotation.PostConstruct;
 import javax.el.ELContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,18 +45,11 @@ public class ExprCondition
 {
   private static final L10N L = new L10N(ExprCondition.class);
 
-  private AbstractConditions _conditions;
-
   private Expr _expr;
-
-  public ExprCondition(AbstractConditions conditions)
-  {
-    _conditions = conditions;
-  }
 
   public ExprCondition(String expr)
   {
-    ELContext elContext = new RewriteContext();
+    ELContext elContext = new RewriteELContext();
     
     _expr = new ELParser(elContext, expr).parse();
   }
@@ -70,25 +60,9 @@ public class ExprCondition
     return "expr";
   }
 
-  /**
-   * Sets the el expression.
-   */
-  public void setText(RawString expr)
-  {
-    ELContext elContext = _conditions.getParseContext();
-    _expr = new ELParser(elContext, expr.getValue()).parse();
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    if (_expr == null)
-      throw new ConfigException(L.l("`{0}' is required", "#text"));
-  }
-
   public boolean isMatch(HttpServletRequest request,
                          HttpServletResponse response)
   {
-    return _expr.evalBoolean(new RewriteContext(request));
+    return _expr.evalBoolean(new RewriteELContext());
   }
 }

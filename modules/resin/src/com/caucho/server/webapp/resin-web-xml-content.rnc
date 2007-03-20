@@ -433,33 +433,37 @@ r_rewrite-condition-Content =
 
    | r_rewrite-condition-cookie
 
-   | r_rewrite-condition-header
-
-   | r_rewrite-condition-locale
-
-   | r_rewrite-condition-query-param
-
-   | r_rewrite-condition-remote-user
-
-   | r_rewrite-condition-user-in-role
-
    | (attribute expr { string }
       | element expr { string })
+
+   | r_rewrite-condition-header
 
    | (attribute local-port { string }
       | element local-port { string })
 
+   | r_rewrite-condition-locale
+
    | (attribute method { string }
       | element method { string })
 
+   | r_rewrite-condition-query-param
+
    | (attribute remote-addr { string }
       | element remote-addr { string }))
+
+   | r_rewrite-condition-remote-user
+
+   | (attribute secure { r_boolean-Type }
+      | element secure { r_boolean-Type })
 
    | (attribute server-name { string }
       | element server-name { string })
 
    | (attribute server-port { string }
       | element server-port { string })
+
+   | r_rewrite-condition-user-in-role
+
 
 r_rewrite-condition-auth-type =
   (attribute auth-type { string }
@@ -478,8 +482,6 @@ r_rewrite-condition-cookie =
   & (attribute send-vary { string }
      | element send-vary { string })?
 
-  & (attribute case-insensitive { string }
-     | element case-insensitive { string })?
 
 r_rewrite-condition-header =
   (attribute header { string }
@@ -490,9 +492,6 @@ r_rewrite-condition-header =
 
   & (attribute send-vary { string }
      | element send-vary { string })?
-
-  & (attribute case-insensitive { string }
-     | element case-insensitive { string })?
 
 r_rewrite-condition-locale =
   (attribute locale { string }
@@ -508,9 +507,6 @@ r_rewrite-condition-query-param =
   & (attribute regexp { string }
      | element regexp { string })?
 
-  & (attribute case-insensitive { string }
-     | element case-insensitive { string })?
-
 r_rewrite-condition-remote-user =
   (attribute remote-user { string }
    | element remote-user { string })
@@ -524,6 +520,7 @@ r_rewrite-condition-user-in-role =
 
   & (attribute send-vary { string }
      | element send-vary { string })?
+
 
 r_rewrite-conditions-Content =
   element and { r_rewrite-conditions-Content }*
@@ -544,177 +541,281 @@ r_rewrite-conditions-Type =
   r_rewrite-conditions-Content
 
 r_rewrite-dispatch = element rewrite-dispatch {
-  (attribute case-insensitive { string }
-   | element case-insensitive { string })?
+  r_rewrite-dispatch-Contents
+}
 
-  & element dispatch {
-       (attribute regexp { string }
-        | element regexp { string })
+r_rewrite-dispatch-Contents =
+  element dispatch {
+       ((attribute disable-at { string }
+         | element disable-at { string })?
 
-       & (attribute name { string }
-          | element name { string })?
+        & (attribute enable-at { string }
+           | element enable-at { string })?
 
-       & (attribute enabled { r_boolean-Type }
-          | element enabled { r_boolean-Type })?
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
 
-       & (attribute secure { r_boolean-Type }
-          | element secure { r_boolean-Type })?
+        & (attribute name { string }
+           | element name { string })?
 
-       & r_rewrite-conditions-Type
+        & (attribute regexp { string }
+           | element regexp { string })),
+
+       r_rewrite-conditions-Type
    }*
 
    & element forbidden {
-       (attribute regexp { string }
-        | element regexp { string })
+       ((attribute disable-at { string }
+         | element disable-at { string })?
 
-       & (attribute name { string }
-          | element name { string })?
+        & (attribute enable-at { string }
+           | element enable-at { string })?
 
-       & (attribute enabled { r_boolean-Type }
-          | element enabled { r_boolean-Type })?
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
 
-       & (attribute secure { r_boolean-Type }
-          | element secure { r_boolean-Type })?
+        & (attribute name { string }
+           | element name { string })?
 
-       & r_rewrite-conditions-Type
+        & (attribute regexp { string }
+           | element regexp { string })),
+
+       r_rewrite-conditions-Type
      }*
 
    & element forward {
-       (attribute regexp { string }
-        | element regexp { string })
+       ((attribute disable-at { string }
+         | element disable-at { string })?
 
-       & (attribute name { string }
-          | element name { string })?
+        & (attribute enable-at { string }
+           | element enable-at { string })?
 
-       & (attribute enabled { r_boolean-Type }
-          | element enabled { r_boolean-Type })?
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
 
-       & (attribute secure { r_boolean-Type }
-          | element secure { r_boolean-Type })?
+        & (attribute name { string }
+           | element name { string })?
 
-       & (attribute target { string }
-          | element target { string })
+        & (attribute regexp { string }
+           | element regexp { string })
 
-       & r_rewrite-conditions-Type
+        & (attribute target { string }
+           | element target { string })),
+
+       r_rewrite-conditions-Type
      }*
 
    & element gone {
-       (attribute regexp { string }
-        | element regexp { string })
+       ((attribute disable-at { string }
+         | element disable-at { string })?
 
-       & (attribute name { string }
-          | element name { string })?
+        & (attribute enable-at { string }
+           | element enable-at { string })?
+
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
+
+        & (attribute name { string }
+           | element name { string })?
+
+        & (attribute regexp { string }
+           | element regexp { string })),
+
+       r_rewrite-conditions-Type
+     }*
+
+   & element import {
+
+       (attribute dependency-check-interval { r_period-Type}
+        | element dependency-check-interval { r_period-Type})?
+
+       & (attribute disable-at { string }
+          | element disable-at { string })?
+
+       & (attribute enable-at { string }
+          | element enable-at { string })?
 
        & (attribute enabled { r_boolean-Type }
           | element enabled { r_boolean-Type })?
 
-       & (attribute secure { r_boolean-Type }
-          | element secure { r_boolean-Type })*
+       & (attribute name { string }
+          | element name { string })?
 
-       & r_rewrite-conditions-Type
+       & (attribute optional { r_boolean-Type }
+          | element optional { r_boolean-Type })?
+
+       & (attribute path { r_path-Type }
+          | element path { r_path-Type })
+
      }*
 
    & element load-balance {
-       (attribute regexp { string }
-        | element regexp { string })
+       ((attribute disable-at { string }
+         | element disable-at { string })?
 
-       & (attribute name { string }
-          | element name { string })?
+        & (attribute enable-at { string }
+           | element enable-at { string })?
 
-       & (attribute enabled { r_boolean-Type }
-          | element enabled { r_boolean-Type })?
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
 
-       & (attribute secure { r_boolean-Type }
-          | element secure { r_boolean-Type })?
+        & (attribute name { string }
+           | element name { string })?
 
-       & (attribute cluster { string }
-          | element cluster { string })
+        & (attribute regexp { string }
+           | element regexp { string })),
 
-       & (attribute connection-load-weight { r_int-Type }
-          | element connection-load-weight { r_int-Type })?
+       ((attribute cluster { string }
+         | element cluster { string })
 
-       & (attribute cpu-load-weight { r_int-Type }
-          | element cpu-load-weight { r_int-Type })?
+         & (attribute connection-load-weight { r_int-Type }
+            | element connection-load-weight { r_int-Type })?
 
-       & (attribute sticky-sessions { r_boolean-Type }
-          | element sticky-sessions { r_boolean-Type })?
+         & (attribute cpu-load-weight { r_int-Type }
+            | element cpu-load-weight { r_int-Type })?
 
-       & r_rewrite-conditions-Type
+         & (attribute sticky-sessions { r_boolean-Type }
+            | element sticky-sessions { r_boolean-Type })?),
+
+       r_rewrite-conditions-Type
+     }*
+
+   & element match {
+       ((attribute disable-at { string }
+         | element disable-at { string })?
+
+        & (attribute enable-at { string }
+           | element enable-at { string })?
+
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
+
+        & (attribute name { string }
+           | element name { string })?
+
+        & (attribute regexp { string }
+           | element regexp { string })),
+
+       r_rewrite-conditions-Type,
+
+       r_rewrite-dispatch-Contents
      }*
 
    & element moved-permanently {
-       (attribute regexp { string }
-        | element regexp { string })
+       ((attribute disable-at { string }
+         | element disable-at { string })?
 
-       & (attribute name { string }
-          | element name { string })?
+        & (attribute enable-at { string }
+           | element enable-at { string })?
 
-       & (attribute enabled { r_boolean-Type }
-          | element enabled { r_boolean-Type })?
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
 
-       & (attribute secure { r_boolean-Type }
-          | element secure { r_boolean-Type })?
+        & (attribute name { string }
+           | element name { string })?
 
-       & (attribute target { string }
-          | element target { string })
+        & (attribute regexp { string }
+           | element regexp { string })
 
-       & r_rewrite-conditions-Type
+        & (attribute target { string }
+           | element target { string })),
+
+       r_rewrite-conditions-Type
      }*
 
    & element not-found {
-       (attribute regexp { string }
-        | element regexp { string })
+       ((attribute disable-at { string }
+         | element disable-at { string })?
 
-       & (attribute name { string }
-          | element name { string })?
+        & (attribute enable-at { string }
+           | element enable-at { string })?
 
-       & (attribute enabled { r_boolean-Type }
-          | element enabled { r_boolean-Type })?
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
 
-       & (attribute secure { r_boolean-Type }
-          | element secure { r_boolean-Type })?
+        & (attribute name { string }
+           | element name { string })?
 
-       & r_rewrite-conditions-Type
+        & (attribute regexp { string }
+           | element regexp { string })),
+
+       r_rewrite-conditions-Type
      }*
 
    & element redirect {
-       (attribute regexp { string }
-        | element regexp { string })
+       ((attribute disable-at { string }
+         | element disable-at { string })?
 
-       & (attribute name { string }
-          | element name { string })?
+        & (attribute enable-at { string }
+           | element enable-at { string })?
 
-       & (attribute enabled { r_boolean-Type }
-          | element enabled { r_boolean-Type })?
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
 
-       & (attribute secure { r_boolean-Type }
-          | element secure { r_boolean-Type })?
+        & (attribute name { string }
+           | element name { string })?
 
-       & (attribute target { string }
-            | element target { string })
+        & (attribute regexp { string }
+           | element regexp { string })
 
-       & r_rewrite-conditions-Type
+        & (attribute target { string }
+           | element target { string })),
+
+       r_rewrite-conditions-Type
      }*
 
   & element rewrite {
-     (attribute regexp { string }
-      | element regexp { string })
+       ((attribute disable-at { string }
+         | element disable-at { string })?
 
-       & (attribute name { string }
-          | element name { string })?
+        & (attribute enable-at { string }
+           | element enable-at { string })?
 
-       & (attribute enabled { r_boolean-Type }
-          | element enabled { r_boolean-Type })?
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
 
-       & (attribute secure { r_boolean-Type }
-          | element secure { r_boolean-Type })?
+        & (attribute name { string }
+           | element name { string })?
 
-       & (attribute replacement { string }
-          | element replacement { string })
+        & (attribute regexp { string }
+           | element regexp { string })
 
-       & r_rewrite-conditions-Type
+        & (attribute replacement { string }
+           | element replacement { string })),
+
+       r_rewrite-conditions-Type
    }*
-}
+
+  & element set {
+       ((attribute disable-at { string }
+         | element disable-at { string })?
+
+        & (attribute enable-at { string }
+           | element enable-at { string })?
+
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
+
+        & (attribute name { string }
+           | element name { string })?
+
+        & (attribute regexp { string }
+           | element regexp { string })?
+
+        & (attribute request-character-encoding { string }
+           | element request-character-encoding { string })?
+
+        & (attribute request-secure { r_boolean-Type }
+           | element request-secure { r_boolean-Type })?
+
+        & (attribute response-character-encoding { string }
+           | element response-character-encoding { string })?
+
+        & (attribute response-content-type { string }
+           | element response-content-type { string })?),
+
+       r_rewrite-conditions-Type
+   }*
 
 r_rewrite-real-path = element rewrite-real-path {
   (element rewrite {

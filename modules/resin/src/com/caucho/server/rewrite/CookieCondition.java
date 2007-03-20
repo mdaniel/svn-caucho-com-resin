@@ -83,7 +83,7 @@ public class CookieCondition
                          HttpServletResponse response)
   {
     if (_sendVary)
-      addVary(response, "Cookie");
+      addHeaderValue(response, "Vary", "Cookie");
 
     Cookie[] cookies = request.getCookies();
 

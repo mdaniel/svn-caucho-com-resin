@@ -24,30 +24,23 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.management.server;
+package com.caucho.server.rewrite;
 
-import com.caucho.jmx.Description;
-
-/**
- * Interface for a rewrite rule.
- *
- * <pre>
- * resin:type=RewriteRule,name=...
- * </pre>
- */
-@Description("A rewrite rule that rewrites a url")
-public interface RewriteRuleMXBean
-  extends ManagedObjectMXBean
+public interface Rule
+  extends FilterChainMapper
 {
-  @Description("The current lifecycle state")
-  public String getState();
-  
-  @Description("Enables the rewrite rule")
-  public void start();
+  String getTagName();
 
-  @Description("Disables the rewrite rule")
-  public void stop();
+  public void setPassFilterChainMapper(FilterChainMapper passFilterChainMapper);
+
+  public void setFailFilterChainMapper(FilterChainMapper failFilterChainMapper);
+
+  public void register();
+
+  public void unregister();
+
+  public void destroy();
 }

@@ -85,7 +85,7 @@ public class HeaderCondition
                          HttpServletResponse response)
   {
     if (_sendVary)
-      addVary(response, _header);
+      addHeaderValue(response, "Vary", _header);
 
     String value = request.getHeader(_header);
 

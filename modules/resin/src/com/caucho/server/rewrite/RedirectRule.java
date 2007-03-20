@@ -24,56 +24,57 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
 package com.caucho.server.rewrite;
 
-import com.caucho.util.L10N;
+import com.caucho.server.dispatch.RedirectFilterChain;
+import com.caucho.config.ConfigException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.FilterChain;
+import java.util.regex.Matcher;
 
-/**
-* A rewrite condition that passes if the client has been authenticated
- * and the user is in the specified role, as determined by
- * {@link HttpServletRequest#isUserInRole(String)}
- */
-public class UserInRoleCondition
-  extends AbstractCondition
+public class RedirectRule
+  extends AbstractRuleWithConditions
 {
-  private static final L10N L = new L10N(UserInRoleCondition.class);
+  private String _target;
 
-  private final String _role;
-  private boolean _sendVary = true;
-
-  public UserInRoleCondition(String role)
+  protected RedirectRule(RewriteDispatch rewriteDispatch)
   {
-    _role = role;
+    super(rewriteDispatch);
   }
 
   public String getTagName()
   {
-    return "user-in-role";
+    return "redirect";
   }
 
-  /**
-   * If true, send a  <code>Vary: Cookie</code> in response, default is true.
-   */
-  public void setSendVary(boolean sendVary)
+  public void setTarget(String target)
   {
-    _sendVary = sendVary;
+    _target = target;
   }
 
-  public boolean isMatch(HttpServletRequest request,
-                         HttpServletResponse response)
+  @Override
+  public String rewrite(String uri, Matcher matcher)
   {
-    if (request.getUserPrincipal() != null)
-      addHeaderValue(response, "Cache-Control", "private");
+    return matcher == null ? _target : matcher.replaceAll(_target);
+  }
 
-    if (_sendVary)
-      addHeaderValue(response, "Vary", "Cookie");
+  @Override
+  public FilterChain dispatch(String uri,
+                              FilterChain accept,
+                              FilterChainMapper next)
+  {
+    return new RedirectFilterChain(uri);
+  }
 
-    return request.isUserInRole(_role);
+  @Override
+  public void init()
+    throws ConfigException
+  {
+    super.init();
+
+    required(_target, "target");
   }
 }

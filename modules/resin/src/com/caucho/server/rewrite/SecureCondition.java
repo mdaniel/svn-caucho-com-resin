@@ -29,42 +29,32 @@
 
 package com.caucho.server.rewrite;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * A rewrite condition that passes if the user is in a specified role.
- * The special role name of '*' matches any role, but does not match a
- * user that has not been authenticated.
- */
-public class RoleCondition
+* A rewrite condition that passes if the request is secure,
+ * as determined by
+ * {@link javax.servlet.http.HttpServletRequest#isSecure()}.
+*/
+public class SecureCondition
   extends AbstractCondition
 {
-  private String _value;
+  private final boolean _isSecure;
 
-  /**
-   * Sets the name of the role.
-   */
-  public void setValue(String value)
+  public SecureCondition(boolean isSecure)
   {
-    _value = value;
+    _isSecure = isSecure;
   }
 
   public String getTagName()
   {
-    return "role";
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    required(_value, "value");
+    return "secure";
   }
 
   public boolean isMatch(HttpServletRequest request,
                          HttpServletResponse response)
   {
-    return request.isUserInRole(_value);
+    return request.isSecure() == _isSecure;
   }
 }

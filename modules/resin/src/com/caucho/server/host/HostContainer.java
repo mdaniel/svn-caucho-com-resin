@@ -330,7 +330,7 @@ public class HostContainer implements DispatchBuilder {
         url = "http://" + hostName + invocation.getURI();
 
       FilterChain chain = invocation.getFilterChain();
-      FilterChain rewriteChain = _rewriteDispatch.map(url, invocation, chain);
+      FilterChain rewriteChain = _rewriteDispatch.map(url, chain);
 
       if (rewriteChain != chain) {
         Server server = (Server) _dispatchServer;

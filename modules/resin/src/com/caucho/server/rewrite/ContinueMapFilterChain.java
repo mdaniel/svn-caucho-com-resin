@@ -29,8 +29,6 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.server.dispatch.Invocation;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -40,30 +38,23 @@ import java.io.IOException;
 public class ContinueMapFilterChain
   implements FilterChain
 {
-  private final RewriteContext  _rewriteContext;
   private final String  _uri;
-  private final Invocation  _invocation;
-  private final FilterChain  _next;
-  private final int _start;
+  private final FilterChain _accept;
+  private final FilterChainMapper _nextFilterChainMapper;
 
-  public ContinueMapFilterChain(RewriteContext rewriteContext,
-                                String uri,
-                                Invocation invocation,
-                                FilterChain next,
-                                int start)
+  public ContinueMapFilterChain(String uri,
+                                FilterChain accept,
+                                FilterChainMapper nextFilterChainMapper)
   {
-    _rewriteContext = rewriteContext;
     _uri = uri;
-    _invocation = invocation;
-    _next = next;
-    _start = start;
+    _accept = accept;
+    _nextFilterChainMapper = nextFilterChainMapper;
   }
 
   public void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
-    FilterChain next
-      = _rewriteContext.map(_uri, _invocation, _next, _start);
+    FilterChain next = _nextFilterChainMapper.map(_uri, _accept);
 
     next.doFilter(request, response);
   }

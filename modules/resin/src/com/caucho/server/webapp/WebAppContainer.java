@@ -734,8 +734,7 @@ public class WebAppContainer
 
     if (_rewriteDispatch != null) {
       FilterChain rewriteChain = _rewriteDispatch.map(invocation.getURI(),
-                                                        invocation,
-                                                        chain);
+                                                      chain);
 
       if (rewriteChain != chain) {
 	Server server = (Server) _dispatchServer;

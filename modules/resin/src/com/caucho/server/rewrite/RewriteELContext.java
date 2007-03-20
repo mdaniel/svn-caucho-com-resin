@@ -24,30 +24,35 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Sam
  */
 
-package com.caucho.management.server;
+package com.caucho.server.rewrite;
 
-import com.caucho.jmx.Description;
+import javax.el.ELContext;
+import javax.el.ELResolver;
+import javax.el.FunctionMapper;
+import javax.el.VariableMapper;
 
-/**
- * Interface for a rewrite rule.
- *
- * <pre>
- * resin:type=RewriteRule,name=...
- * </pre>
- */
-@Description("A rewrite rule that rewrites a url")
-public interface RewriteRuleMXBean
-  extends ManagedObjectMXBean
+public class RewriteELContext
+  extends ELContext
 {
-  @Description("The current lifecycle state")
-  public String getState();
-  
-  @Description("Enables the rewrite rule")
-  public void start();
+  public RewriteELContext()
+  {
+  }
 
-  @Description("Disables the rewrite rule")
-  public void stop();
+  public ELResolver getELResolver()
+  {
+    return null;
+  }
+
+  public FunctionMapper getFunctionMapper()
+  {
+    return null;
+  }
+
+  public VariableMapper getVariableMapper()
+  {
+    return null;
+  }
 }

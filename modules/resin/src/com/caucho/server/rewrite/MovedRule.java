@@ -24,56 +24,61 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
 package com.caucho.server.rewrite;
 
-import com.caucho.util.L10N;
+import com.caucho.server.dispatch.MovedFilterChain;
+import com.caucho.config.ConfigException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Locale;
-import java.util.regex.Pattern;
+import javax.servlet.FilterChain;
+import java.util.regex.Matcher;
 
-/**
-* A rewrite condition that passes if the value of the Locale matches
- * a regexp.
-*/
-public class LocaleCondition
-  extends AbstractCondition
+public class MovedRule
+  extends AbstractRuleWithConditions
 {
-  private static final L10N L = new L10N(LocaleCondition.class);
+  private String _tagName;
+  private int _code;
+  private String _target;
 
-  private final Pattern _regexp;
-  private boolean _sendVary = true;
-
-  LocaleCondition(String regexp)
+  public MovedRule(RewriteDispatch rewriteDispatch, int statusCode)
   {
-    _regexp = Pattern.compile(regexp, Pattern.CASE_INSENSITIVE);
+    super(rewriteDispatch);
+
+    _code = statusCode;
+    _tagName = "moved(" + statusCode + ")";
   }
 
   public String getTagName()
   {
-    return "locale";
+    return _tagName;
   }
 
-  public void setSendVary(boolean sendVary)
+  public void setTarget(String target)
   {
-    _sendVary = sendVary;
+    _target = target;
   }
 
-  public boolean isMatch(HttpServletRequest request,
-                         HttpServletResponse response)
+  public String rewrite(String uri, Matcher matcher)
   {
-    if (_sendVary)
-      addHeaderValue(response, "Vary", "Accept-Language");
+    return matcher == null ? _target : matcher.replaceAll(_target);
+  }
 
-    Locale locale = request.getLocale();
+  @Override
+  public FilterChain dispatch(String uri,
+                              FilterChain accept,
+                              FilterChainMapper next)
+  {
+    return new MovedFilterChain(_code, uri);
+  }
 
-    if (locale == null)
-      return false;
-    else
-      return _regexp.matcher(locale.toString()).find();
+  @Override
+  public void init()
+    throws ConfigException
+  {
+    super.init();
+
+    required(_target, "target");
   }
 }

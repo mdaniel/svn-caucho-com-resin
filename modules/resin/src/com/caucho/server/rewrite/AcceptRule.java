@@ -24,56 +24,30 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
 package com.caucho.server.rewrite;
 
-import com.caucho.util.L10N;
+import javax.servlet.FilterChain;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-/**
-* A rewrite condition that passes if the client has been authenticated
- * and the user is in the specified role, as determined by
- * {@link HttpServletRequest#isUserInRole(String)}
- */
-public class UserInRoleCondition
-  extends AbstractCondition
+public class AcceptRule
+  extends AbstractRuleWithConditions
 {
-  private static final L10N L = new L10N(UserInRoleCondition.class);
-
-  private final String _role;
-  private boolean _sendVary = true;
-
-  public UserInRoleCondition(String role)
+  protected AcceptRule(RewriteDispatch rewriteDispatch)
   {
-    _role = role;
+    super(rewriteDispatch);
   }
 
   public String getTagName()
   {
-    return "user-in-role";
+    return "accept";
   }
 
-  /**
-   * If true, send a  <code>Vary: Cookie</code> in response, default is true.
-   */
-  public void setSendVary(boolean sendVary)
+  public FilterChain dispatch(String uri,
+                              FilterChain accept,
+                              FilterChainMapper next)
   {
-    _sendVary = sendVary;
-  }
-
-  public boolean isMatch(HttpServletRequest request,
-                         HttpServletResponse response)
-  {
-    if (request.getUserPrincipal() != null)
-      addHeaderValue(response, "Cache-Control", "private");
-
-    if (_sendVary)
-      addHeaderValue(response, "Vary", "Cookie");
-
-    return request.isUserInRole(_role);
+    return accept;
   }
 }

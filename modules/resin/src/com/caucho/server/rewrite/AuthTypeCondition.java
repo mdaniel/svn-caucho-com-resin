@@ -69,6 +69,9 @@ public class AuthTypeCondition
     return "auth-type";
   }
 
+  /**
+   * If true, send a "Vary: Cookie" in the response, default is true.
+   */
   public void setSendVary(boolean sendVary)
   {
     _sendVary = sendVary;
@@ -78,15 +81,23 @@ public class AuthTypeCondition
                          HttpServletResponse response)
   {
     if (_sendVary)
-      addVary(response, "Authorization");
+      addHeaderValue(response, "Vary", "Cookie");
 
     String authType = request.getAuthType();
 
     if (authType == null)
-      return _authType == null;
-    else if (_authType == null)
-      return "none".equalsIgnoreCase(authType);
-    else
-      return _authType.equalsIgnoreCase(authType);
+      authType = "none";
+
+    if (_authType == null) {
+      if ("none".equalsIgnoreCase(authType))
+        return true;
+
+      addHeaderValue(response, "Cache-Control", "private");
+      return false;
+    }
+
+    addHeaderValue(response, "Cache-Control", "private");
+
+    return _authType.equalsIgnoreCase(authType);
   }
 }

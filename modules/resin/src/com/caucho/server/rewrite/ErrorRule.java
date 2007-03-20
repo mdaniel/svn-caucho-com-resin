@@ -24,61 +24,39 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
 package com.caucho.server.rewrite;
 
-import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.ErrorFilterChain;
 
-import javax.el.ELContext;
-import javax.el.ELResolver;
-import javax.el.FunctionMapper;
-import javax.el.VariableMapper;
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
-public class RewriteContext
-  extends ELContext
+public class ErrorRule
+  extends AbstractRuleWithConditions
 {
-  private RewriteDispatch _rewriteDispatch;
+  private final String _tagName;
+  private final int _code;
 
-  public RewriteContext()
+  ErrorRule(RewriteDispatch rewriteDispatch, int code)
   {
+    super(rewriteDispatch);
+
+    _code = code;
+    _tagName = "error(" + _code + ")";
   }
 
-  public RewriteContext(RewriteDispatch rewriteDispatch)
+  public String getTagName()
   {
-    _rewriteDispatch = rewriteDispatch;
+    return _tagName;
   }
 
-  public RewriteContext(HttpServletRequest request)
+  @Override
+  public FilterChain dispatch(String uri,
+                              FilterChain accept,
+                              FilterChainMapper next)
   {
-    _rewriteDispatch = null;
-  }
-
-  public ELResolver getELResolver()
-  {
-    return null;
-  }
-
-  public FunctionMapper getFunctionMapper()
-  {
-    return null;
-  }
-
-  public VariableMapper getVariableMapper()
-  {
-    return null;
-  }
-
-  FilterChain map(String uri,
-                  Invocation invocation,
-                  FilterChain next,
-                  int start)
-    throws ServletException
-  {
-    return _rewriteDispatch.map(this, uri, invocation, next, start);
+    return new ErrorFilterChain(_code);
   }
 }

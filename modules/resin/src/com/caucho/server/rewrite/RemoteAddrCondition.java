@@ -52,6 +52,8 @@ public class RemoteAddrCondition
   public boolean isMatch(HttpServletRequest request,
                          HttpServletResponse response)
   {
+    addHeaderValue(response, "Cache-Control", "private");
+
     String remoteAddr = request.getRemoteAddr();
 
     return remoteAddr != null && _value.isMatch(remoteAddr);

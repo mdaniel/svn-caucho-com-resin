@@ -105,6 +105,11 @@ public class ConditionConfig {
     setCondition(new RemoteUserCondition(user));
   }
 
+  public void setSecure(boolean isSecure)
+  {
+    setCondition(new SecureCondition(isSecure));
+  }
+
   public void setServerName(String serverName)
   {
     setCondition(new ServerNameCondition(serverName));

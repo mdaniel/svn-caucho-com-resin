@@ -32,7 +32,6 @@ package com.caucho.server.rewrite;
 import com.caucho.config.Config;
 
 import javax.annotation.PostConstruct;
-import javax.el.ELContext;
 import java.util.ArrayList;
 
 abstract public class AbstractConditions
@@ -107,10 +106,5 @@ abstract public class AbstractConditions
   protected Condition[] getConditions()
   {
     return _conditions;
-  }
-
-  ELContext getParseContext()
-  {
-    return _rewriteDispatch.getParseContext();
   }
 }

@@ -24,56 +24,63 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
 package com.caucho.server.rewrite;
 
-import com.caucho.util.L10N;
+import com.caucho.config.ConfigException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import java.util.regex.Matcher;
 
-/**
-* A rewrite condition that passes if the client has been authenticated
- * and the user is in the specified role, as determined by
- * {@link HttpServletRequest#isUserInRole(String)}
- */
-public class UserInRoleCondition
-  extends AbstractCondition
+public class RewriteRule
+  extends AbstractRuleWithConditions
 {
-  private static final L10N L = new L10N(UserInRoleCondition.class);
+  private String _replacement;
 
-  private final String _role;
-  private boolean _sendVary = true;
-
-  public UserInRoleCondition(String role)
+  protected RewriteRule(RewriteDispatch rewriteDispatch)
   {
-    _role = role;
+    super(rewriteDispatch);
   }
 
   public String getTagName()
   {
-    return "user-in-role";
+    return "rewrite";
   }
 
   /**
-   * If true, send a  <code>Vary: Cookie</code> in response, default is true.
+   * Sets the target.
    */
-  public void setSendVary(boolean sendVary)
+  public void setReplacement(String replacement)
   {
-    _sendVary = sendVary;
+    _replacement = replacement;
   }
 
-  public boolean isMatch(HttpServletRequest request,
-                         HttpServletResponse response)
+  /**
+   * Init
+   */
+  @Override
+  public void init()
+    throws ConfigException
   {
-    if (request.getUserPrincipal() != null)
-      addHeaderValue(response, "Cache-Control", "private");
+    super.init();
 
-    if (_sendVary)
-      addHeaderValue(response, "Vary", "Cookie");
+    required(_replacement, "replacement");
+  }
 
-    return request.isUserInRole(_role);
+  @Override
+  public String rewrite(String uri, Matcher matcher)
+  {
+    return matcher == null ? _replacement : matcher.replaceAll(_replacement);
+  }
+
+  public FilterChain dispatch(String uri,
+                              FilterChain accept,
+                              FilterChainMapper next)
+    throws ServletException
+  {
+    return null;
   }
 }

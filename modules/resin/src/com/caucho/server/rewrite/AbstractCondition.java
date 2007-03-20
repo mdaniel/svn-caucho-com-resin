@@ -34,6 +34,7 @@ import com.caucho.server.connection.CauchoResponse;
 import com.caucho.util.L10N;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 abstract public class AbstractCondition
   implements Condition
@@ -60,34 +61,36 @@ abstract public class AbstractCondition
                                     getTagName(), name));
   }
 
-  protected void addVary(HttpServletResponse response, String headerName)
+  protected void addHeaderValue(HttpServletResponse response, String header, String value)
   {
+    while (response instanceof HttpServletResponseWrapper)
+      response = (HttpServletResponse) ((HttpServletResponseWrapper) response).getResponse();
+
     if (response instanceof CauchoResponse) {
       CauchoResponse res = (CauchoResponse) response;
 
-      String vary = res.getHeader("Vary");
+      String currentValue = res.getHeader(header);
 
-      if (vary != null) {
-        if (vary.equals(headerName)
-            || (vary.contains(headerName + ","))
-            || (vary.contains(", " + headerName)))
+      if (currentValue != null) {
+        if (currentValue.equals(value)
+            || (currentValue.contains(value + ","))
+            || (currentValue.contains(", " + value)))
         {
         }
         else {
-          res.setHeader("Vary", vary + ", " + headerName);
+          res.setHeader(header, currentValue + ", " + value);
         }
       }
       else {
-        res.setHeader("Vary", headerName);
+        res.setHeader(header, value);
       }
     }
     else {
-      response.addHeader("Vary", headerName);
+      response.addHeader(header, value);
     }
   }
-  
+
   public void destroy()
   {
   }
-
 }
