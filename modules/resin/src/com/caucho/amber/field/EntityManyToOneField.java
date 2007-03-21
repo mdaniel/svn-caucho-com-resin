@@ -619,9 +619,7 @@ public class EntityManyToOneField extends CascadableField {
 
     out.println(loadVar + " |= " + mask + "L;");
 
-    generateLoadProperty(out, index, "__caucho_session");
-
-    String varName = "v" + index;
+    String varName = generateLoadProperty(out, index, "__caucho_session");
 
     out.println("return " + varName + ";");
 
@@ -698,9 +696,9 @@ public class EntityManyToOneField extends CascadableField {
   /**
    * Generates the set property.
    */
-  public void generateLoadProperty(JavaWriter out,
-                                   String index,
-                                   String session)
+  public String generateLoadProperty(JavaWriter out,
+                                     String index,
+                                     String session)
     throws IOException
   {
     String javaType = getJavaTypeName();
@@ -724,9 +722,22 @@ public class EntityManyToOneField extends CascadableField {
     else
       otherKey = _aliasField.generateGet("super");
 
+    String proxyType = getEntityTargetType().getProxyClass().getName();
+    boolean isProxy = ! isJPA;
+    
     String varName = "v" + index;
+    String proxyVarName;
+
+    if (isProxy)
+      proxyVarName = "p" + index;
+    else
+      proxyVarName = varName;
+
+    if (isProxy)
+      out.println(proxyType + " " + proxyVarName + " = null;");
 
     out.println(targetTypeExt + " " + varName + " = null;");
+    
     out.println();
 
     Id id = getEntityTargetType().getId();
@@ -772,7 +783,7 @@ public class EntityManyToOneField extends CascadableField {
     if (isAbstract() && (isLazy() || ! isJPA)) {
       String proxy = session + ".loadProxy(\"" + getEntityTargetType().getName() + "\", __caucho_field_" + getName() + ")";
 
-      proxy = /* XXX varName + " = (" + getEntityTargetType().getInstanceClassName() getProxyClass().getName() + ") " + */ proxy + ";";
+      proxy = proxyVarName + " = (" + proxyType + ") " + proxy + ";";
 
       out.println(proxy);
     }
@@ -799,7 +810,9 @@ public class EntityManyToOneField extends CascadableField {
     out.popDepth();
     out.println("}");
 
-    out.println(generateSuperSetter(varName) + ";");
+    out.println(generateSuperSetter(proxyVarName) + ";");
+
+    return proxyVarName;
   }
 
   void generateSetTargetLoadMask(JavaWriter out, String varName)
@@ -839,11 +852,14 @@ public class EntityManyToOneField extends CascadableField {
     String var = "__caucho_field_" + getName();
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
 
+    // ejb/0627
+    /*
     String value = generateGet(src);
 
     value = "(" + _targetType.getInstanceClassName() + ") aConn.getEntity((com.caucho.amber.entity.Entity) " + value + ")";
 
     out.println(generateSet(dst, value) + ";");
+    */
 
     // }
   }
@@ -862,8 +878,14 @@ public class EntityManyToOneField extends CascadableField {
     // order matters: jpa/0h08, jpa/0h09
 
     // jpa/0o08, ejb/06--, ejb/0a-- and jpa/0o04
-    if (! (dst.equals("cacheEntity") || dst.equals("super"))) {
+    // ejb/0628
+    if (false &&
+        ! (dst.equals("cacheEntity")
+           || dst.equals("super")
+           || dst.equals("item"))) {
       String value = generateGet(src);
+
+      out.println("// " + dst);
 
       out.println("child = " + value + ";");
 

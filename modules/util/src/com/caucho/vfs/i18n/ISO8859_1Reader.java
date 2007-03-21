@@ -48,7 +48,7 @@ public class ISO8859_1Reader extends EncodingReader {
   /**
    * Create an ISO-8859-1 reader based on the readStream.
    */
-  private ISO8859_1Reader(InputStream is)
+  public ISO8859_1Reader(InputStream is)
   {
     this.is = is;
   }
@@ -73,5 +73,24 @@ public class ISO8859_1Reader extends EncodingReader {
     throws IOException
   {
     return is.read();
+  }
+
+  /**
+   * Reads the next character.
+   */
+  public int read(char []buf, int offset, int length)
+    throws IOException
+  {
+    for (int i = 0; i < length; i++) {
+      int ch = is.read();
+
+      if (ch < 0)
+        return i > 0 ? i : -1;
+      else {
+        buf[offset + i] = (char) ch;
+      }
+    }
+      
+    return length;
   }
 }

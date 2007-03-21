@@ -179,9 +179,11 @@ abstract public class BinaryValue extends StringValue {
     try {
       Reader reader = env.getRuntimeEncodingFactory().create(toInputStream());
 
-      sb.append(reader);
+      if (reader != null) {
+        sb.append(reader);
 
-      reader.close();
+        reader.close();
+      }
     } catch (IOException e) {
       throw new QuercusRuntimeException(e);
     }

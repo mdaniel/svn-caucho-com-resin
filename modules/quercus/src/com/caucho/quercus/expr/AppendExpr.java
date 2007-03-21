@@ -82,7 +82,9 @@ public class AppendExpr extends Expr
   @Override
   public Value eval(Env env)
   {
-    StringValue sb = _value.eval(env).toStringBuilder();
+    Value value = _value.eval(env);
+
+    StringValue sb = value.toStringBuilder();
 
     for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
       sb = sb.append(ptr._value.eval(env));
@@ -94,7 +96,9 @@ public class AppendExpr extends Expr
   @Override
   public String evalString(Env env)
   {
-    StringValue sb = _value.eval(env).toStringBuilder();
+    Value value = _value.eval(env);
+
+    StringValue sb = value.toStringBuilder();
 
     for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
       sb = sb.append(ptr._value.eval(env));

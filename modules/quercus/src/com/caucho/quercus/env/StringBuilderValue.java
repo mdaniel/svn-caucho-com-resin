@@ -791,6 +791,9 @@ public class StringBuilderValue extends UnicodeValue
     throws IOException
   {
     _value = null;
+
+    if (reader == null)
+      return this;
     
     while (true) {
       if (_buffer.length <= _length)

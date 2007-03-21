@@ -78,7 +78,12 @@ abstract public class EncodingReader extends Reader {
   public Reader create(InputStream is)
     throws UnsupportedEncodingException
   {
-    return create(is, getJavaEncoding());
+    Reader reader = create(is, getJavaEncoding());
+
+    if (reader != null)
+      return reader;
+    else
+      return new ISO8859_1Reader(is);
   }
 
   /**

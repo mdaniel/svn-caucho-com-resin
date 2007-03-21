@@ -2730,7 +2730,7 @@ public class QuercusParser {
 
     case SIMPLE_BINARY_ESCAPE:
     case COMPLEX_BINARY_ESCAPE:
-      return parseEscapedString(_lexeme, token, false);
+      return parseEscapedString(_lexeme, token, false, false);
 
     case LONG:
       return _factory.createLiteral(LongValue.create(Long.parseLong(_lexeme)));
