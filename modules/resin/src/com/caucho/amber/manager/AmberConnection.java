@@ -2557,9 +2557,8 @@ public class AmberConnection
       _entities.get(i).__caucho_detach();
     }
 
-    // XXX: It would duplicate the number of allocations as
-    // a new copy object would be allocated per find().
-    // jpa/0o0d _entities.clear();
+    // jpa/0o0d
+    _entities.clear();
   }
 
   /**

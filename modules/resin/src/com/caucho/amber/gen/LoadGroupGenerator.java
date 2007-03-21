@@ -90,9 +90,21 @@ public class LoadGroupGenerator extends ClassComponent {
 
       int max = _index;
 
+      if (min <= max) {
+        out.println("else {");
+        out.pushDepth();
+      }
+
       for (int i = min; i <= max; i++) {
         out.println("__caucho_load_select_" + i + "(aConn);");
       }
+
+      if (min <= max) {
+        out.popDepth();
+        out.println("}");
+      }
+
+      out.println();
 
       _relatedType.generatePostLoadSelect(out, 1, _index);
 
@@ -181,17 +193,21 @@ public class LoadGroupGenerator extends ClassComponent {
 
     out.println("item.__caucho_load_" + _index + "(aConn);");
 
+    /* XXX: ejb/06--, ejb/0a-- and jpa/0o04
     out.println("try {");
     out.pushDepth();
 
     // jpa/0o01
     out.println("Object child;");
+    */
 
+    // ejb/06--, ejb/0a-- and jpa/0o04
     _relatedType.generateCopyLoadObject(out, "super", "item", _index);
 
     // out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
     out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
 
+    /* XXX: ejb/06--, ejb/0a-- and jpa/0o04
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
     out.println("  throw e;");
@@ -201,11 +217,10 @@ public class LoadGroupGenerator extends ClassComponent {
 
     out.println();
     out.println("return;");
+    */
 
     out.popDepth();
     out.println("}");
-
-    out.println();
   }
 
   private void generateLoadSelect(JavaWriter out, int group, long mask)

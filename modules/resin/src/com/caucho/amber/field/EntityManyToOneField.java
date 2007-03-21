@@ -861,8 +861,8 @@ public class EntityManyToOneField extends CascadableField {
 
     // order matters: jpa/0h08, jpa/0h09
 
-    // jpa/0o08
-    if (! dst.equals("cacheEntity")) {
+    // jpa/0o08, ejb/06--, ejb/0a-- and jpa/0o04
+    if (! (dst.equals("cacheEntity") || dst.equals("super"))) {
       String value = generateGet(src);
 
       out.println("child = " + value + ";");
@@ -908,7 +908,7 @@ public class EntityManyToOneField extends CascadableField {
     String var = "__caucho_field_" + getName();
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
 
-    // jpa/0o08
+    // jpa/0o08, jpa/0o04
     if (! dst.equals("cacheEntity")) {
       // jpa/0o05
       if (! dst.equals("super")) { // || isLazy())) {

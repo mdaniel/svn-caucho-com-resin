@@ -434,8 +434,8 @@ public class DependentEntityOneToOneField extends CascadableField {
     throws IOException
   {
     if (getLoadGroupIndex() == updateIndex) {
-      // jpa/0o08
-      if (dst.equals("cacheEntity"))
+      // jpa/0o08, jpa/0o04
+      if (dst.equals("cacheEntity") || dst.equals("super"))
         return;
 
       String value = generateGet(src);
