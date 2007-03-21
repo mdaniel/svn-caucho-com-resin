@@ -142,13 +142,13 @@ public class MyBean {
 
 </s1>
 
-<s1 title="Validation and Assembly: init()">
+<s1 title="Validation and Assembly: @PostConstruct">
 
 <p>Well-written resources will validate their configuration and may
-perform additional assembly tasks.  Resin calls <code>init()</code> method
+perform additional assembly tasks.  Resin calls <code>@PostConstruct</code> methods
 after all the setter methods have been called.</p>
 
-<example title="Bean-style init()">
+<example title="Bean-style @PostConstruct">
 public class MyBean {
   private String _language;
   private String _country;
@@ -164,6 +164,7 @@ public class MyBean {
     _country = country;
   }
 
+  @PostConstruct
   public void init()
   {
     locale = new Locale(language, country);
@@ -198,6 +199,7 @@ public class MyBean {
     _country = country;
   }
 
+  @PostConstruct
   public void init() 
   {
     if (_country == null)
@@ -266,6 +268,7 @@ public class LogCleaner {
       _timestampField = timestampField;
     }
 
+    @PostConstruct
     public void init()
         throws Exception
     {
@@ -332,7 +335,7 @@ public class MyBean {
 <p>There are some unusual cases where the configured bean is just a
 configuration object and you want to return a different bean.  The
 bean can implement a method <code>Object replaceObject()</code> to return a
-different object. Called after the init(). </p>
+different object. Called after the @PostConstruct methods. </p>
 
 </s1>
 

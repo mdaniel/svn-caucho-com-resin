@@ -164,6 +164,7 @@ public class PeriodicWork implements Work {
    * Optional, called after bean is created and any setters
    * from configuration are called.
    */
+  @PostConstruct
   public void init()
     throws Exception
   {

@@ -182,13 +182,15 @@ public class MyBean {
 
 </s1>
 
-<s1 title="Validation and Assembly: init()">
+<s1 title="Validation and Assembly: @PostConstruct">
 
 <p>Well-written resources will validate their configuration and may
-perform additional assembly tasks.  Resin calls <code>init()</code> method
-after all the setter methods have been called.</p>
+perform additional assembly tasks.  Resin calls methods marked with the
+@PostConstruct annotation after all the setter methods have been called.</p>
 
-<example title="Bean-style init()">
+<example title="Bean-style @PostConstruct">
+import javax.annotation.PostConstruct;
+
 public class MyBean {
   private String _language;
   private String _country;
@@ -204,6 +206,7 @@ public class MyBean {
     _country = country;
   }
 
+  @PostConstruct
   public void init()
   {
     locale = new Locale(language, country);
@@ -217,6 +220,9 @@ Resin will attach a file name and line number that correspond to the
 configuration file.</p>
 
 <example title="Bean-style exceptions">
+import java.util.Locale;
+import javax.annotation.PostConstruct;
+
 public class MyBean {
   private String _language;
   private String _country;
@@ -238,6 +244,7 @@ public class MyBean {
     _country = country;
   }
 
+  @PostConstruct
   public void init() 
   {
     if (_country == null)
@@ -275,6 +282,9 @@ other sub-beans as the type.</p>
 </example>
 
 <example title="Bean-style java code for sub-beans">
+import javax.annotation.PostConstruct;
+import javax.sql.*;
+
 // a class to periodically clean old log records from the database
 public class LogCleaner {
   List _logTables = new LinkedList();
@@ -306,6 +316,7 @@ public class LogCleaner {
       _timestampField = timestampField;
     }
 
+    @PostConstruct
     public void init()
         throws Exception
     {
@@ -372,7 +383,7 @@ public class MyBean {
 <p>There are some unusual cases where the configured bean is just a
 configuration object and you want to return a different bean.  The
 bean can implement a method <code>Object replaceObject()</code> to return a
-different object. Called after the init(). </p>
+different object. Called after the @PostConstruct. </p>
 
 </s1>
 
@@ -483,10 +494,11 @@ MessageBean.addMessage(): example.CustomMessage@12164ea: This is message 3
 
 <p>In practice, it may make more sense to use <code>createSubBean</code> or
 <code>addSubBean</code> to set a parent-child relationship for beans, instead
-of <code>setParent</code>.  The possible issue with addSubBean is that init() is
-called before addSubBean.  The possible issue with createSubBean is that it's
+of <code>setParent</code>.  The possible issue with addSubBean is that
+@PostConstruct methods are called before addSubBean.  The possible issue with
+createSubBean is that it's
 not possible to use a resin:type with createSubBean.  So the setParent is
-useful when the init() needs the parent, and you need to use
+useful when the @PostConstruct method needs the parent, and you need to use
 resin:type.</p>
 
 </s2>
