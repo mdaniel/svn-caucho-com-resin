@@ -94,6 +94,8 @@ public class LoadGroupGenerator extends ClassComponent {
         out.println("__caucho_load_select_" + i + "(aConn);");
       }
 
+      _relatedType.generatePostLoadSelect(out, 1, _index);
+
       if (min <= max) {
         // jpa/0g0k: only makes transactional if exists.
         out.println();
@@ -328,7 +330,8 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println("aConn.addEntity(this);");
     }
 
-    _relatedType.generateLoadEager(out, "rs", "", 1, _index);
+    // XXX: Moved to __caucho_load_0()
+    // _relatedType.generateLoadEager(out, "rs", "", 1, _index);
 
     // commented out: jpa/0r01
     // ArrayList<JMethod> postLoadCallbacks = _relatedType.getPostLoadCallbacks();

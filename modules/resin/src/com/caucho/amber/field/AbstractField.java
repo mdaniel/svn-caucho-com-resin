@@ -494,10 +494,9 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
-   * Generates loading code
+   * Generates loading code after the basic fields.
    */
-  public int generateLoadEager(JavaWriter out, String rs,
-                               String indexVar, int index)
+  public int generatePostLoadSelect(JavaWriter out, int index)
     throws IOException
   {
     return index;

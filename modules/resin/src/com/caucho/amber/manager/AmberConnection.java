@@ -500,7 +500,7 @@ public class AmberConnection
 
       if (! isInTransaction()) {
         // jpa/0o00
-        ((Entity) entity).__caucho_detach();
+        detach();
       }
 
       return entity;
@@ -2536,6 +2536,30 @@ public class AmberConnection
     }
 
     return (Entity) entity;
+  }
+
+  /**
+   * Detach after non-xa.
+   */
+  private void detach()
+  {
+    log.finest("AmberConnection.detach");
+
+    if (_isXA || _isInTransaction)
+      throw new IllegalStateException("detach cannot be called within transaction");
+
+    _completionList.clear();
+
+    _txEntities.clear();
+
+    // jpa/1700
+    for (int i = _entities.size() - 1; i >= 0; i--) {
+      _entities.get(i).__caucho_detach();
+    }
+
+    // XXX: It would duplicate the number of allocations as
+    // a new copy object would be allocated per find().
+    // jpa/0o0d _entities.clear();
   }
 
   /**

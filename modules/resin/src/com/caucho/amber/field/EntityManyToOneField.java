@@ -526,11 +526,20 @@ public class EntityManyToOneField extends CascadableField {
     return index;
   }
 
-  /**
+  /* XXX: moved to generatePostLoadSelect()
    * Generates loading code
-   */
+   *
   public int generateLoadEager(JavaWriter out, String rs,
                                String indexVar, int index)
+    throws IOException
+  {
+  }
+  */
+
+  /**
+   * Generates loading code after the basic fields.
+   */
+  public int generatePostLoadSelect(JavaWriter out, int index)
     throws IOException
   {
     if (! isLazy()) {

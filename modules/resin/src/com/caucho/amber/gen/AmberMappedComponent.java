@@ -2171,7 +2171,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.popDepth();
     out.println("} catch (Exception e) {");
     out.println("  if (pstmt" + rootTableName + " != null)");
-    out.println("    __caucho_session.closeStatement(sql" + rootTableName + ");");
+    out.println("    aConn.closeStatement(sql" + rootTableName + ");");
     out.println();
     out.println("  if (e instanceof java.sql.SQLException)");
     out.println("    throw (java.sql.SQLException) e;");

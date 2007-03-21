@@ -733,10 +733,9 @@ abstract public class RelatedType extends AbstractStatefulType {
   }
 
   /**
-   * Generates a string to load the field.
+   * Generates loading code after the basic fields.
    */
-  public int generateLoadEager(JavaWriter out, String rs,
-                               String indexVar, int index, int loadGroupIndex)
+  public int generatePostLoadSelect(JavaWriter out, int index, int loadGroupIndex)
     throws IOException
   {
     if (loadGroupIndex == 0 && getDiscriminator() != null)
@@ -750,7 +749,7 @@ abstract public class RelatedType extends AbstractStatefulType {
           AmberField field = fields.get(j);
 
           if (field.getLoadGroupIndex() == loadGroupIndex)
-            index = field.generateLoadEager(out, rs, indexVar, index);
+            index = field.generatePostLoadSelect(out, index);
         }
       }
 
