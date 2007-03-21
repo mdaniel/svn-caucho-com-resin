@@ -1721,6 +1721,14 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Sets/adds field to this object.
+   */
+  public Value setThisField(Env env, String idnex, Value object)
+  {
+    return NullValue.NULL;
+  }
+
+  /**
    * Returns the field ref.
    */
   public Value putField(Env env, String index, Value object)

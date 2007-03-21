@@ -58,8 +58,6 @@ public class ObjectExtValue extends ObjectValue
 
   private int _size;
 
-  private boolean _hasCalledSetter = false;
-
   public ObjectExtValue(QuercusClass cl)
   {
     _cl = cl;
@@ -288,6 +286,15 @@ public class ObjectExtValue extends ObjectValue
   }
 
   /**
+   * Sets/adds field to this object.
+   */
+  @Override
+  public Value setThisField(Env env, String key, Value value)
+  {
+    return putFieldImpl(env, createEntry(key), value);
+  }
+
+  /**
    * Adds a new value.
    */
   public Value putFieldInit(Env env, String key, Value value)
@@ -304,25 +311,23 @@ public class ObjectExtValue extends ObjectValue
   public Value putField(Env env, String key, Value value)
   {
     Entry entry = null;
-
+    
     AbstractFunction setField = _cl.getSetField();
-    if (setField != null && ! _hasCalledSetter) {
+    if (setField != null) {
+      
       entry = getEntry(key);
-
-      if (entry == null) {
-        _hasCalledSetter = true;
-
-        Value result =
-          setField.callMethod(env, this, new StringValueImpl(key), value);
-        
-        _hasCalledSetter = false;
-        return result;
-        
-      }
+      
+      if (entry == null)
+        return setField.callMethod(env, this, new StringValueImpl(key), value);
     }
     else
       entry = createEntry(key);
 
+    return putFieldImpl(env, entry, value);
+  }
+
+  private Value putFieldImpl(Env env, Entry entry, Value value)
+  {
     Value oldValue = entry._value;
 
     if (value instanceof Var) {
