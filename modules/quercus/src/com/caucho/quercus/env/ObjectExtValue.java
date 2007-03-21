@@ -289,9 +289,26 @@ public class ObjectExtValue extends ObjectValue
    * Sets/adds field to this object.
    */
   @Override
-  public Value setThisField(Env env, String key, Value value)
+  public Value putThisField(Env env, String key, Value value)
   {
-    return putFieldImpl(env, createEntry(key), value);
+    Entry entry = createEntry(key);
+
+    Value oldValue = entry._value;
+
+    if (value instanceof Var) {
+      Var var = (Var) value;
+      var.setReference();
+
+      entry._value = var;
+    }
+    else if (oldValue instanceof Var) {
+      oldValue.set(value);
+    }
+    else {
+      entry._value = value;
+    }
+
+    return value;
   }
 
   /**
@@ -323,11 +340,6 @@ public class ObjectExtValue extends ObjectValue
     else
       entry = createEntry(key);
 
-    return putFieldImpl(env, entry, value);
-  }
-
-  private Value putFieldImpl(Env env, Entry entry, Value value)
-  {
     Value oldValue = entry._value;
 
     if (value instanceof Var) {

@@ -2878,7 +2878,10 @@ public class Env {
       _classMap.put(name, cl);
 
       if (_lowerClassMap != null)
-	_lowerClassMap.put(name.toLowerCase(), cl);
+        _lowerClassMap.put(name.toLowerCase(), cl);
+
+      // php/09b7
+      cl.init(this);
 
       return cl;
     }
@@ -2920,8 +2923,8 @@ public class Env {
         _autoload = findFunction("__autoload");
       
       if (_autoload != null) {
-	_autoload.call(this, new StringValueImpl(name));
-	return createClassImpl(name, false);
+        _autoload.call(this, new StringValueImpl(name));
+        return createClassImpl(name, false);
       }
     }
 
@@ -2987,7 +2990,6 @@ public class Env {
       qClass = qClassRef.get();
 
       if (qClass != null) {
-        qClass.init(this);
         return qClass;
       }
     }
@@ -2996,8 +2998,6 @@ public class Env {
     qClass.validate(this);
 
     _classCache.put(key, new SoftReference<QuercusClass>(qClass));
-
-    qClass.init(this);
 
     return qClass;
   }
