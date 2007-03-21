@@ -694,11 +694,11 @@ public abstract class AbstractHttpRequest
   /**
    * Adds the header, checking for known values.
    */
-  protected void addHeaderInt(char []keyBuf, int keyOff, int keyLen,
-			      CharSegment value)
+  protected boolean addHeaderInt(char []keyBuf, int keyOff, int keyLen,
+                                 CharSegment value)
   {
     if (keyLen < 4)
-      return;
+      return true;
 
     int key1 = keyBuf[keyOff];
     switch (key1) {
@@ -723,6 +723,8 @@ public abstract class AbstractHttpRequest
 	if (match(value.getBuffer(), value.getOffset(), value.length(),
 		  CONTINUE_100)) {
 	  _expect100Continue = true;
+
+          return false;
 	}
       }
       break;
@@ -735,8 +737,10 @@ public abstract class AbstractHttpRequest
       break;
       
     default:
-      return;
+      break;
     }
+
+    return true;
   }
 
   /**
