@@ -150,7 +150,7 @@ public abstract class ParameterMarshal {
 
     int colon = _property.getSchemaType().indexOf(':');
 
-    if (colon < 0) 
+    if (colon < 0)
       out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + 
                                  _property.getSchemaType());
     else 

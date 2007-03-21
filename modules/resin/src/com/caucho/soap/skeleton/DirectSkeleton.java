@@ -89,10 +89,8 @@ public class DirectSkeleton extends Skeleton {
   private Class _api;
   
   private String _namespace;
-  private String _name;
-  private String _typeName;
-  private String _portName;
   private String _portType;
+  private String _portName;
   private String _serviceName;
   private String _wsdlLocation = "REPLACE_WITH_ACTUAL_URL";
 
@@ -139,27 +137,22 @@ public class DirectSkeleton extends Skeleton {
 
     setNamespace(type, _api);
 
-    _name = getWebServiceName(type);
-    _typeName = _name + "PortType";
+    _portType = getWebServiceName(type);
 
-    _portType = webService != null && 
-                ! webService.endpointInterface().equals("")
-                ? JAXBUtil.classBasename(webService.endpointInterface())
-                : JAXBUtil.classBasename(type);
+    if (webService != null && ! "".equals(webService.portName()))
+      _portName = webService.portName();
+    else
+      _portName = _portType + "Port";
 
-    _serviceName = webService != null && ! webService.serviceName().equals("")
-      ? webService.serviceName()
-      : _name + "HttpBinding";
+    if (webService != null && ! "".equals(webService.serviceName()))
+      _serviceName = webService.serviceName();
+    else
+      _serviceName = JAXBUtil.classBasename(type) + "Service";
 
-    _portName =
-      webService != null && ! webService.portName().equals("")
-      ? webService.portName()
-      : _name + "HttpPort";
-
-    _wsdlLocation =
-      webService != null && ! webService.wsdlLocation().equals("")
-      ? webService.wsdlLocation()
-      : null;
+    if (webService != null && ! "".equals(webService.wsdlLocation()))
+      _wsdlLocation = webService.wsdlLocation();
+    else
+      _wsdlLocation = null;
 
     _context = context;
   }
@@ -353,7 +346,7 @@ public class DirectSkeleton extends Skeleton {
     out.setDefaultNamespace(WSDL_NAMESPACE);
     out.writeStartElement(WSDL_NAMESPACE, "definitions");
     out.writeAttribute("targetNamespace", _namespace);
-    out.writeAttribute("name", _name);
+    out.writeAttribute("name", _serviceName);
     out.writeNamespace(TARGET_NAMESPACE_PREFIX, _namespace);
     out.writeNamespace("soap", _soapNamespaceURI);
 

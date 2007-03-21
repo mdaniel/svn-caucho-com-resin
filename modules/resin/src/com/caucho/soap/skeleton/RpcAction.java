@@ -45,13 +45,11 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * Invokes a SOAP request on a Java POJO method
+ * Behaves like a DocumentWrappedAction most of the time... except for the WSDL?
  */
-public class RpcAction extends AbstractAction {
+public class RpcAction extends DocumentWrappedAction {
   private final static Logger log = Logger.getLogger(RpcAction.class.getName());
   public static final L10N L = new L10N(RpcAction.class);
-
-  private static final String TARGET_NAMESPACE_PREFIX = "tns";
 
   public RpcAction(Method method, Method eiMethod,
                    JAXBContextImpl jaxbContext, 
@@ -64,28 +62,5 @@ public class RpcAction extends AbstractAction {
           jaxbContext, targetNamespace, 
           marshaller, unmarshaller);
   }
-
-  protected void writeMethodInvocation(XMLStreamWriter out, Object []args)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  protected Object readResponse(XMLStreamReader in, Object []args)
-    throws IOException, XMLStreamException, JAXBException, Throwable
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  protected void writeResponse(XMLStreamWriter out, Object value, Object[] args)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  protected Object[] readMethodInvocation(XMLStreamReader in)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
+  
 }

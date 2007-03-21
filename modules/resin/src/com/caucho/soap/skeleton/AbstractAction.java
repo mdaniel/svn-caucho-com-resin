@@ -761,7 +761,7 @@ public abstract class AbstractAction {
 
     out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", W3C_XML_SCHEMA_NS_URI);
     out.writeAttribute("name", _responseName);
-    out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _operationName);
+    out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _responseName);
 
     if (_bodyOutputs + _headerOutputs == 0) {
       out.writeEmptyElement(XML_SCHEMA_PREFIX, 
