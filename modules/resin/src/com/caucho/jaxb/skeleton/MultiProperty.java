@@ -55,20 +55,23 @@ import java.util.Map;
  */
 public class MultiProperty extends Property {
   private static final L10N L = new L10N(MultiProperty.class);
-  private Map<QName,Property> _qnameMap;
-  private Map<Class,Property> _classMap;
+  private Map<QName,Property> _qnameToPropertyMap;
+  private Map<Class,Property> _classToPropertyMap;
+  private Map<Class,QName> _classToQNameMap;
 
-  public MultiProperty(Map<QName,Property> qnameMap,
-                       Map<Class,Property> classMap)
+  public MultiProperty(Map<QName,Property> qnameToPropertyMap,
+                       Map<Class,Property> classToPropertyMap,
+                       Map<Class,QName> classToQNameMap)
   {
-    _qnameMap = qnameMap;
-    _classMap = classMap;
+    _qnameToPropertyMap = qnameToPropertyMap;
+    _classToPropertyMap = classToPropertyMap;
+    _classToQNameMap = classToQNameMap;
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
     throws IOException, XMLStreamException, JAXBException
   {
-    Property property = _qnameMap.get(in.getName());
+    Property property = _qnameToPropertyMap.get(in.getName());
 
     if (property == null)
       throw new JAXBException(L.l("Unexpected element {0}", in.getName()));
@@ -83,7 +86,7 @@ public class MultiProperty extends Property {
 
     QName readQname = event.asStartElement().getName();
 
-    Property property = _qnameMap.get(readQname);
+    Property property = _qnameToPropertyMap.get(readQname);
 
     if (property == null)
       throw new JAXBException(L.l("Unexpected element {0}", readQname));
@@ -96,7 +99,7 @@ public class MultiProperty extends Property {
   {
     QName nodeQname = JAXBUtil.qnameFromNode(node.getNode());
 
-    Property property = _qnameMap.get(nodeQname);
+    Property property = _qnameToPropertyMap.get(nodeQname);
 
     if (property == null)
       throw new JAXBException(L.l("Unexpected element {0}", nodeQname));
@@ -108,7 +111,12 @@ public class MultiProperty extends Property {
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj != null) {
-      Property property = _classMap.get(obj.getClass());
+      Class cl = obj.getClass();
+
+      Property property = _classToPropertyMap.get(cl);
+
+      if (qname == null) 
+        qname = _classToQNameMap.get(cl);
 
       if (property == null)
         throw new JAXBException(L.l("Unexpected object {0}", obj));
@@ -121,7 +129,7 @@ public class MultiProperty extends Property {
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj != null) {
-      Property property = _classMap.get(obj.getClass());
+      Property property = _classToPropertyMap.get(obj.getClass());
 
       if (property == null)
         throw new JAXBException(L.l("Unexpected object {0}", obj));
@@ -134,7 +142,7 @@ public class MultiProperty extends Property {
     throws IOException, JAXBException
   {
     if (obj != null) {
-      Property property = _classMap.get(obj.getClass());
+      Property property = _classToPropertyMap.get(obj.getClass());
 
       if (property == null)
         throw new JAXBException(L.l("Unexpected object {0}", obj));

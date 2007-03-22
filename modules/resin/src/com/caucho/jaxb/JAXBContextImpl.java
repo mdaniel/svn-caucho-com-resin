@@ -439,6 +439,18 @@ public class JAXBContextImpl extends JAXBContext {
       if (cl.isEnum())
         return new EnumProperty(cl);
 
+      // XXX Map
+
+      if (List.class.isAssignableFrom(cl)) {
+        Property property = new SkeletonProperty(getSkeleton(Object.class));
+        return new ListProperty(property);
+      }
+
+      if (Collection.class.isAssignableFrom(cl)) {
+        Property property = new SkeletonProperty(getSkeleton(Object.class));
+        return new CollectionProperty(property);
+      }
+
       return new SkeletonProperty(getSkeleton(cl));
     }
     else if (type instanceof ParameterizedType) {

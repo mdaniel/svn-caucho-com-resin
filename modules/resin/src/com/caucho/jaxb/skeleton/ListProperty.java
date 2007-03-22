@@ -47,142 +47,20 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-// XXX: Make generic?
 /**
  * a List Property
  */
-public class ListProperty extends IterableProperty {
+public class ListProperty extends CollectionProperty {
   public ListProperty(Property componentProperty)
   {
-    _componentProperty = componentProperty;
+    super(componentProperty);
   }
 
-  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
+  protected void validateType(Object obj)
   {
-    ArrayList<Object> list = (ArrayList<Object>) previous;
-
-    if (list == null)
-      list = new ArrayList<Object>();
-
-    list.add(_componentProperty.read(u, in, null));
-
-    return list;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    ArrayList<Object> list = (ArrayList<Object>) previous;
-
-    if (list == null)
-      list = new ArrayList<Object>();
-
-    list.add(_componentProperty.read(u, in, null));
-
-    return list;
-  }
-
-  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
-    throws IOException, JAXBException
-  {
-    Node child = node.getNode();
-
-    ArrayList<Object> list = new ArrayList<Object>();
-
-    list.add(_componentProperty.bindFrom(binder, node, null));
-
-    return list;
-  }
-
-  public void write(Marshaller m, XMLStreamWriter out,
-                    Object value, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (value != null) {
-      if (value instanceof List) {
-        List list = (List) value;
-
-        for (Object o : list)
-          _componentProperty.write(m, out, o, qname);
-      }
-      else
-        throw new ClassCastException("Argument not a List");
-    }
-  }
-
-  public void write(Marshaller m, XMLEventWriter out, Object value, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (value != null) {
-      if (value instanceof List) {
-        List list = (List) value;
-
-        for (Object o : list)
-          _componentProperty.write(m, out, o, qname);
-      }
-      else
-        throw new ClassCastException("Argument not a List");
-    }
-  }
-
-  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
-    throws IOException, JAXBException
-  {
-    if (obj != null) {
-      if (obj instanceof List) {
-        List list = (List) obj;
-
-        Node child = node.getFirstChild();
-        for (Object o : list) {
-          if (child != null) {
-            // try to reuse as many of the child nodes as possible
-            Node newNode =
-              _componentProperty.bindTo(binder, child, o, qname);
-
-            if (newNode != child) {
-              node.replaceChild(child, newNode);
-              binder.invalidate(child);
-            }
-
-            child = child.getNextSibling();
-            node = JAXBUtil.skipIgnorableNodes(node);
-          }
-          else {
-            Node newNode = JAXBUtil.elementFromQName(qname, node);
-            newNode = _componentProperty.bindTo(binder, newNode, o, qname);
-
-            node.appendChild(newNode);
-          }
-        }
-      }
-      else
-        throw new ClassCastException("Argument not a List");
-    }
-
-    return node;
-  }
-
-  public String getSchemaType()
-  {
-    return _componentProperty.getSchemaType();
-  }
-
-  public boolean isXmlPrimitiveType()
-  {
-    return getComponentProperty().isXmlPrimitiveType();
-  }
-
-  public String getMaxOccurs()
-  {
-    return "unbounded";
-  }
-
-  public boolean isNillable()
-  {
-    return true;
+    if (! (obj instanceof List))
+      throw new ClassCastException(L.l("Argument is not a List: {0}", obj));
   }
 }

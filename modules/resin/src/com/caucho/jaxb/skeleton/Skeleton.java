@@ -47,9 +47,11 @@ import javax.xml.stream.XMLStreamWriter;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 public abstract class Skeleton {
@@ -63,11 +65,14 @@ public abstract class Skeleton {
   protected QName _elementName;
   protected Skeleton _parent;
 
-  protected LinkedHashMap<QName,Accessor> _attributeAccessors
-    = new LinkedHashMap<QName,Accessor>();
+  protected HashMap<QName,Accessor> _attributeQNameToAccessorMap
+    = new HashMap<QName,Accessor>();
 
-  protected LinkedHashMap<QName,Accessor> _elementAccessors 
-    = new LinkedHashMap<QName,Accessor>();
+  protected HashMap<QName,Accessor> _elementQNameToAccessorMap
+    = new HashMap<QName,Accessor>();
+
+  protected List<Accessor> _attributeAccessors = new ArrayList<Accessor>();
+  protected List<Accessor> _elementAccessors = new ArrayList<Accessor>();
 
   protected Accessor _anyTypeElementAccessor;
   protected Accessor _anyTypeAttributeAccessor;
@@ -117,7 +122,7 @@ public abstract class Skeleton {
   protected Accessor getElementAccessor(QName q)
     throws JAXBException
   {
-    Accessor a = _elementAccessors.get(q);
+    Accessor a = _elementQNameToAccessorMap.get(q);
 
     if (a != null)
       return a;
@@ -134,7 +139,7 @@ public abstract class Skeleton {
   protected Accessor getAttributeAccessor(QName q)
     throws JAXBException
   {
-    Accessor a = _attributeAccessors.get(q);
+    Accessor a = _attributeQNameToAccessorMap.get(q);
 
     if (a != null)
       return a;

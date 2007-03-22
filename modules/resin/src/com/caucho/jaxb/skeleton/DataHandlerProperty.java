@@ -33,7 +33,6 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
@@ -65,139 +64,33 @@ import com.caucho.util.Base64;
  * Note that DataHandler fields/properties are not affected by XmlMimeType
  * annotations.
  */
-public class DataHandlerProperty extends Property {
+public class DataHandlerProperty extends CDataProperty {
   public static final DataHandlerProperty PROPERTY = new DataHandlerProperty();
   private static final String DEFAULT_DATA_HANDLER_MIME_TYPE 
     = "application/octet-stream";
 
-  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    return read(u, in, previous, null, null);
-  }
-
-  public Object read(Unmarshaller u, XMLStreamReader in, Object previous, 
-                     ClassSkeleton attributed, Object parent)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (attributed != null) {
-      for (int i = 0; i < in.getAttributeCount(); i++) {
-        QName attributeName = in.getAttributeName(i);
-        Accessor a = attributed.getAttributeAccessor(attributeName);
-
-        if (a == null)
-          throw new UnmarshalException(L.l("Attribute {0} not found in {1}", 
-                                           attributeName, 
-                                           attributed.getType()));
-
-        a.set(parent, a.readAttribute(in, i));
-      }
-    }
-
-    in.next();
-
-    Object ret = null;
-
-    if (in.getEventType() == in.CHARACTERS) {
-      byte[] buffer = Base64.decodeToByteArray(in.getText());
-      ByteArrayDataSource bads = 
-        new ByteArrayDataSource(buffer, DEFAULT_DATA_HANDLER_MIME_TYPE);
-      ret = new DataHandler(bads);
-
-      // essentially a nextTag() that handles end of document gracefully
-      while (in.hasNext()) {
-        in.next();
-
-        if (in.getEventType() == in.END_ELEMENT)
-          break;
-      }
-    }
-
-    while (in.hasNext()) {
-      in.next();
-
-      if (in.getEventType() == in.START_ELEMENT || 
-          in.getEventType() == in.END_ELEMENT)
-        break;
-    }
-
-    return ret;
-  }
-
-  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
+  protected Object read(String in) 
     throws IOException, JAXBException
   {
-    throw new UnsupportedOperationException();
+    byte[] buffer = Base64.decodeToByteArray(in);
+    ByteArrayDataSource bads = 
+      new ByteArrayDataSource(buffer, DEFAULT_DATA_HANDLER_MIME_TYPE);
+    return new DataHandler(bads);
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object value, 
-                    QName qname, Object obj, Iterator attributes)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    if (obj != null) {
-      writeQNameStartElement(out, qname);
-
-      if (attributes != null) {
-        while (attributes.hasNext()) {
-          Accessor a = (Accessor) attributes.next();
-          a.write(m, out, obj);
-        }
-      }
-
-      if (value != null) {
-        DataHandler handler = (DataHandler) value;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        handler.writeTo(baos);
-
-        out.writeCharacters(Base64.encodeFromByteArray(baos.toByteArray()));
-      }
-
-      writeQNameEndElement(out, qname);
-    }
-  }
-
-  public void write(Marshaller m, XMLStreamWriter out, 
-                    Object value, QName qname)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    write(m, out, value, qname, null);
-  }
-
-  public void write(Marshaller m, XMLStreamWriter out, Object value,
-                    QName qname, Object obj)
-    throws IOException, XMLStreamException, JAXBException
+  protected String write(Object value)
+    throws IOException, JAXBException
   {
     if (value != null) {
-      writeQNameStartElement(out, qname);
-
       DataHandler handler = (DataHandler) value;
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
       handler.writeTo(baos);
 
-      out.writeCharacters(Base64.encodeFromByteArray(baos.toByteArray()));
-
-      writeQNameEndElement(out, qname);
+      return Base64.encodeFromByteArray(baos.toByteArray());
     }
-  }
 
-  public void write(Marshaller m, XMLEventWriter out, Object value, QName name)
-    throws IOException, XMLStreamException, JAXBException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  public Node bindTo(BinderImpl binder, Node node, Object value, QName qname)
-    throws IOException,JAXBException
-  {
-    throw new UnsupportedOperationException();
+    return "";
   }
 
   public String getSchemaType()

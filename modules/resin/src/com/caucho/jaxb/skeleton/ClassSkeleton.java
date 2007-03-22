@@ -70,6 +70,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -254,11 +255,9 @@ public class ClassSkeleton<C> extends Skeleton {
       }
 
       // Collect the fields/properties of the class
-      ArrayList<Accessor> elements = new ArrayList<Accessor>();
-
       if (orderMap != null) {
         for (int i = 0; i < orderMap.size(); i++)
-          elements.add(null);
+          _elementAccessors.add(null);
       }
 
       XmlAccessorType accessorType = c.getAnnotation(XmlAccessorType.class);
@@ -391,7 +390,7 @@ public class ClassSkeleton<C> extends Skeleton {
             // XXX else throw something?
           }
 
-          processAccessor(a, elements);
+          processAccessor(a);
         }
       }
 
@@ -448,26 +447,23 @@ public class ClassSkeleton<C> extends Skeleton {
             // XXX else throw something?
           }
 
-          processAccessor(a, elements);
+          processAccessor(a);
         }
       }
 
       // do ordering if necessary
       if (orderMap != null || accessOrder != XmlAccessOrder.ALPHABETICAL) {
-        for (int i = 0; i < elements.size(); i++) {
-          Accessor a = elements.get(i);
-          a.putQNames(_elementAccessors);
+        for (int i = 0; i < _elementAccessors.size(); i++) {
+          Accessor a = _elementAccessors.get(i);
+          a.putQNames(_elementQNameToAccessorMap);
         }
       }
       else {
-        Accessor[] elementArray = new Accessor[elements.size()];
-        elements.toArray(elementArray);
+        Collections.sort(_elementAccessors, Accessor.nameComparator);
 
-        Arrays.sort(elementArray, Accessor.nameComparator);
-
-        for (int i = 0; i < elementArray.length; i++) { 
-          Accessor a = elementArray[i];
-          a.putQNames(_elementAccessors);
+        for (int i = 0; i < _elementAccessors.size(); i++) { 
+          Accessor a = _elementAccessors.get(i);
+          a.putQNames(_elementQNameToAccessorMap);
         }
       }
     }
@@ -479,7 +475,7 @@ public class ClassSkeleton<C> extends Skeleton {
       _parent = _context.getSkeleton(_class.getSuperclass());
   }
 
-  private void processAccessor(Accessor a, List<Accessor> elements)
+  private void processAccessor(Accessor a)
     throws JAXBException
   {
     switch (a.getAccessorType()) {
@@ -487,19 +483,20 @@ public class ClassSkeleton<C> extends Skeleton {
         if (_value != null)
           throw new JAXBException(L.l("Cannot have two @XmlValue annotated fields or properties"));
 
-        if (elements.size() > 0) {
+        if (_elementAccessors.size() > 0) {
           // in case of propOrder & XmlValue
-          if (elements.size() != 1 || elements.get(0) != null)
-            throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element (e.g. {0})", elements.get(0)));
+          if (_elementAccessors.size() != 1 || _elementAccessors.get(0) != null)
+            throw new JAXBException(L.l("Cannot have both @XmlValue and elements in a JAXB element (e.g. {0})", _elementAccessors.get(0)));
 
-          elements.clear();
+          _elementAccessors.clear();
         }
 
         _value = a;
         break;
 
       case ATTRIBUTE:
-        a.putQNames(_attributeAccessors);
+        a.putQNames(_attributeQNameToAccessorMap);
+        _attributeAccessors.add(a);
         break;
 
       case ELEMENT:
@@ -508,9 +505,9 @@ public class ClassSkeleton<C> extends Skeleton {
           throw new JAXBException(L.l("{0}: Cannot have both @XmlValue and elements in a JAXB element", _class.getName()));
 
         if (a.getOrder() >= 0)
-          elements.set(a.getOrder(), a);
+          _elementAccessors.set(a.getOrder(), a);
         else
-          elements.add(a);
+          _elementAccessors.add(a);
         break;
         
       case ANY_TYPE_ELEMENT:
@@ -797,7 +794,7 @@ public class ClassSkeleton<C> extends Skeleton {
 
       if (_value != null) {
         _value.setQName(tagName);
-        _value.write(m, out, obj, _attributeAccessors.values().iterator());
+        _value.write(m, out, obj, _attributeAccessors.iterator());
       }
       else {
         if (tagName.getNamespaceURI() == null ||
@@ -819,13 +816,13 @@ public class ClassSkeleton<C> extends Skeleton {
           }
         }
 
-        for (Accessor a : _attributeAccessors.values())
+        for (Accessor a : _attributeAccessors)
           a.write(m, out, obj);
 
         if (_anyTypeAttributeAccessor != null) // XXX ordering!
           _anyTypeAttributeAccessor.write(m, out, obj);
         
-        for (Accessor a : _elementAccessors.values())
+        for (Accessor a : _elementAccessors)
           a.write(m, out, obj);
 
         if (_anyTypeElementAccessor != null) // XXX ordering!
@@ -870,8 +867,7 @@ public class ClassSkeleton<C> extends Skeleton {
 
       if (_value != null) {
         _value.setQName(tagName);
-        _value.write(m, out, _value.get(obj), 
-                     _attributeAccessors.values().iterator());
+        _value.write(m, out, _value.get(obj), _attributeAccessors.iterator());
       }
       else {
         out.add(JAXBUtil.EVENT_FACTORY.createStartElement(tagName, null, null));
@@ -880,7 +876,7 @@ public class ClassSkeleton<C> extends Skeleton {
           // XXX
         }
 
-        for (Accessor a : _elementAccessors.values())
+        for (Accessor a : _elementAccessors)
           a.write(m, out, a.get(obj));
 
         out.add(JAXBUtil.EVENT_FACTORY.createEndElement(tagName, null));
@@ -932,7 +928,7 @@ public class ClassSkeleton<C> extends Skeleton {
           // XXX
         }
 
-        for (Accessor a : _elementAccessors.values()) {
+        for (Accessor a : _elementAccessors) {
           if (child != null) {
             // try to reuse as many of the child nodes as possible
             Node newNode = a.bindTo(binder, child, a.get(obj));
@@ -957,7 +953,7 @@ public class ClassSkeleton<C> extends Skeleton {
 
         node = JAXBUtil.elementFromQName(tagName, node);
 
-        for (Accessor a : _elementAccessors.values()) {
+        for (Accessor a : _elementAccessors) {
           Node child = JAXBUtil.elementFromQName(a.getQName(obj), node);
           node.appendChild(a.bindTo(binder, child, a.get(obj)));
         }
@@ -1041,7 +1037,7 @@ public class ClassSkeleton<C> extends Skeleton {
       out.writeEmptyElement(XML_SCHEMA_PREFIX, "restriction", XML_SCHEMA_NS);
       out.writeAttribute("base", _value.getSchemaType());
 
-      for (Accessor accessor : _attributeAccessors.values())
+      for (Accessor accessor : _attributeAccessors)
         accessor.generateSchema(out);
 
       out.writeEndElement(); // simpleType
@@ -1054,12 +1050,12 @@ public class ClassSkeleton<C> extends Skeleton {
 
       out.writeStartElement(XML_SCHEMA_PREFIX, "sequence", XML_SCHEMA_NS);
 
-      for (Accessor accessor : _elementAccessors.values())
+      for (Accessor accessor : _elementAccessors)
         accessor.generateSchema(out);
 
       out.writeEndElement(); // sequence
 
-      for (Accessor accessor : _attributeAccessors.values())
+      for (Accessor accessor : _attributeAccessors)
         accessor.generateSchema(out);
 
       out.writeEndElement(); // complexType

@@ -32,6 +32,7 @@ package com.caucho.jaxb.skeleton;
 import java.io.IOException;
 
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.xml.XMLConstants;
 
@@ -169,9 +170,8 @@ public abstract class Property {
     write(m, out, value, name, obj);
   }
 
-  public void write(Marshaller m, XMLEventWriter out, 
-                    Object value, QName name, Object obj,
-                    Iterator attributes)
+  public void write(Marshaller m, XMLEventWriter out, Object value, 
+                    QName name, Object obj, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     write(m, out, value, name, obj);

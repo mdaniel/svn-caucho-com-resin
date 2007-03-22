@@ -78,8 +78,8 @@ import java.io.IOException;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -121,6 +121,10 @@ public abstract class Accessor {
   public static void setGenerateRICompatibleSchema(boolean compatible)
   {
     _generateRICompatibleSchema = compatible;
+  }
+
+  protected Accessor()
+  {
   }
 
   protected Accessor(JAXBContextImpl context)
@@ -241,8 +245,11 @@ public abstract class Accessor {
           }
 
           _qnameMap = new HashMap<Class,QName>();
-          HashMap<QName,Property> propertyMap = new HashMap<QName,Property>();
-          HashMap<Class,Property> classMap = new HashMap<Class,Property>();
+          HashMap<Class,QName> classToQNameMap = new HashMap<Class,QName>();
+          HashMap<QName,Property> qnameToPropertyMap = 
+            new HashMap<QName,Property>();
+          HashMap<Class,Property> classToPropertyMap = 
+            new HashMap<Class,Property>();
 
           for (int i = 0; i < elements.value().length; i++) {
             element = elements.value()[i];
@@ -253,15 +260,18 @@ public abstract class Accessor {
             QName qname = qnameFromXmlElement(element);
             Property property = _context.createProperty(element.type());
 
-            propertyMap.put(qname, property);
-            classMap.put(element.type(), property);
+            qnameToPropertyMap.put(qname, property);
+            classToPropertyMap.put(element.type(), property);
+            classToQNameMap.put(element.type(), qname);
             _qnameMap.put(element.type(), qname);
 
             if (! property.isXmlPrimitiveType())
               _context.createSkeleton(element.type());
           }
 
-          _property = new MultiProperty(propertyMap, classMap);
+          _property = new MultiProperty(qnameToPropertyMap, 
+                                        classToPropertyMap,
+                                        classToQNameMap);
 
           if (List.class.isAssignableFrom(getType()))
             _property = new ListProperty(_property);
@@ -350,8 +360,8 @@ public abstract class Accessor {
       }
       else {
         out.writeAttribute(name.getPrefix(), 
-                           name.getLocalPart(), 
                            name.getNamespaceURI(), 
+                           name.getLocalPart(), 
                            value.toString());
       }
     }

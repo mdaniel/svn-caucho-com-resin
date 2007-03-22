@@ -37,7 +37,6 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import com.caucho.util.L10N;
 

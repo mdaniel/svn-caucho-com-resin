@@ -53,9 +53,12 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
+
 import java.io.IOException;
+
 import java.lang.annotation.*;
 import java.lang.reflect.*;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.logging.Logger;
@@ -66,7 +69,7 @@ import java.util.logging.Logger;
 public class AnyTypeSkeleton extends ClassSkeleton<Object> {
   private static final Logger log 
     = Logger.getLogger(AnyTypeSkeleton.class.getName());
-  private static final L10N L = new L10N(JAXBElementSkeleton.class);
+  private static final L10N L = new L10N(AnyTypeSkeleton.class);
 
   public AnyTypeSkeleton(JAXBContextImpl context)
     throws JAXBException
@@ -156,6 +159,14 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
       Skeleton skeleton = _context.findSkeletonForObject(obj);
 
       if (skeleton != null) {
+        String typeName = StaxUtil.qnameToString(out, skeleton.getTypeName());
+
+        // XXX if (typeName == null) {}
+
+        XmlInstanceWrapper instanceWrapper = 
+          new XmlInstanceWrapper(typeName, attributes);
+
+        Iterator extendedAttributes = instanceWrapper.getExtendedIterator();
         skeleton.write(m, out, obj, null, attributes);
         return;
       }
@@ -163,7 +174,15 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
       Property property = _context.getSimpleTypeProperty(obj.getClass());
 
       if (property != null) {
-        property.write(m, out, obj, fieldName);
+        XmlInstanceWrapper instanceWrapper = 
+          new XmlInstanceWrapper(property.getSchemaType());
+
+        Iterator extendedAttributes = instanceWrapper.getExtendedIterator();
+
+        // XXX the second obj here is a hack: we just need it not to be null.
+        // Figure out if the api is wrong or there is a reasonable value for
+        // the fifth argument instead of this second obj.
+        property.write(m, out, obj, fieldName, obj, extendedAttributes);
         return;
       }
 

@@ -28,41 +28,171 @@
  */
 
 package com.caucho.jaxb.skeleton;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import com.caucho.jaxb.BinderImpl;
+import com.caucho.jaxb.JAXBUtil;
+
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
+import java.io.IOException;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+
+import com.caucho.util.L10N;
 
 /**
  * a Collection Property
  */
-public abstract class CollectionProperty extends IterableProperty {
-  public int size(Object o)
+public class CollectionProperty extends IterableProperty {
+  public static final L10N L = new L10N(CollectionProperty.class);
+
+  public CollectionProperty(Property componentProperty)
   {
-    return ((Collection)o).size();
+    _componentProperty = componentProperty;
   }
 
-  public Iterator getIterator(Object o)
+  public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
+    throws IOException, XMLStreamException, JAXBException
   {
-    return ((Collection)o).iterator();
+    Collection collection = (Collection) previous;
+
+    if (collection == null)
+      collection = createCollection();
+
+    collection.add(_componentProperty.read(u, in, null));
+
+    return collection;
   }
 
-  public void generateSchema(XMLStreamWriter out)
-    throws XMLStreamException
+  public Object read(Unmarshaller u, XMLEventReader in, Object previous)
+    throws IOException, XMLStreamException, JAXBException
   {
-    throw new UnsupportedOperationException();
+    Collection collection = (Collection) previous;
+
+    if (collection == null)
+      collection = createCollection();
+
+    collection.add(_componentProperty.read(u, in, null));
+
+    return collection;
+  }
+
+  public Object bindFrom(BinderImpl binder, NodeIterator node, Object previous)
+    throws IOException, JAXBException
+  {
+    Node child = node.getNode();
+
+    Collection collection = (Collection) previous;
+
+    collection.add(_componentProperty.bindFrom(binder, node, null));
+
+    return collection;
+  }
+
+  public void write(Marshaller m, XMLStreamWriter out,
+                    Object value, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (value != null) {
+      validateType(value);
+
+      Collection collection = (Collection) value;
+
+      for (Object o : collection)
+        _componentProperty.write(m, out, o, qname);
+    }
+  }
+
+  public void write(Marshaller m, XMLEventWriter out, Object value, QName qname)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (value != null) {
+      validateType(value);
+
+      Collection collection = (Collection) value;
+
+      for (Object o : collection)
+        _componentProperty.write(m, out, o, qname);
+    }
+  }
+
+  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+    throws IOException, JAXBException
+  {
+    if (obj != null) {
+      validateType(obj);
+
+      Collection collection = (Collection) obj;
+
+      Node child = node.getFirstChild();
+      for (Object o : collection) {
+        if (child != null) {
+          // try to reuse as many of the child nodes as possible
+          Node newNode =
+            _componentProperty.bindTo(binder, child, o, qname);
+
+          if (newNode != child) {
+            node.replaceChild(child, newNode);
+            binder.invalidate(child);
+          }
+
+          child = child.getNextSibling();
+          node = JAXBUtil.skipIgnorableNodes(node);
+        }
+        else {
+          Node newNode = JAXBUtil.elementFromQName(qname, node);
+          newNode = _componentProperty.bindTo(binder, newNode, o, qname);
+
+          node.appendChild(newNode);
+        }
+      }
+    }
+
+    return node;
   }
 
   public String getSchemaType()
   {
-    throw new UnsupportedOperationException();
+    return _componentProperty.getSchemaType();
   }
-  
+
   public boolean isXmlPrimitiveType()
   {
-    return false;
+    return getComponentProperty().isXmlPrimitiveType();
+  }
+
+  public String getMaxOccurs()
+  {
+    return "unbounded";
+  }
+
+  public boolean isNillable()
+  {
+    return true;
+  }
+
+  protected Collection createCollection()
+  {
+    return new ArrayList();
+  }
+
+  protected void validateType(Object obj)
+  {
+    if (! (obj instanceof Collection))
+      throw new ClassCastException(L.l("Argument is not a Collection: {0}", obj));
   }
 }
 

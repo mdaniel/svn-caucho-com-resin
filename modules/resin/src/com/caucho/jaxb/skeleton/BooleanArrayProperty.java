@@ -41,7 +41,6 @@ import javax.xml.stream.XMLEventWriter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

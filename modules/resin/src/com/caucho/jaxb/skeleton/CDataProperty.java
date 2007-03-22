@@ -53,6 +53,7 @@ import org.w3c.dom.Node;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.util.L10N;
+import com.caucho.xml.stream.StaxUtil;
 
 /**
  * helper class for properties that are represented as a "flat" CDATA block
