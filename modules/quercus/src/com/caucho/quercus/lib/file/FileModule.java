@@ -92,6 +92,11 @@ public class FileModule extends AbstractQuercusModule {
   public static final int GLOB_BRACE = 1024;
   public static final int GLOB_ONLYDIR = 8192;
 
+  public static final int PATHINFO_DIRNAME = 1;
+  public static final int PATHINFO_BASENAME = 2;
+  public static final int PATHINFO_EXTENSION = 4;
+  public static final int PATHINFO_FILENAME = 8;
+
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
 
@@ -2213,13 +2218,20 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Parses the path, splitting it into parts.
    */
-  public static Value pathinfo(String path)
+  public static Value pathinfo(String path, @Optional Value optionsV)
   {
+    if (optionsV == null)
+      return StringValue.EMPTY;
+    
     if (path == null) {
+      if (! (optionsV instanceof DefaultValue)) {
+        return StringValue.EMPTY;
+      }
+
       ArrayValueImpl value = new ArrayValueImpl();
-      value.put("dirname", "");
       value.put("basename", "");
-      
+      value.put("filename", "");
+
       return value;
     }
 
@@ -2231,21 +2243,43 @@ public class FileModule extends AbstractQuercusModule {
       path = path.substring(p + 1);
     }
     else {
-      dirname = "";
+      dirname = ".";
     }
 
     p = path.indexOf('.');
+    
+    String filename = path;
     String ext = "";
-    if (p > 0)
+    
+    if (p > 0) {
+      filename = path.substring(0, p);
       ext = path.substring(p + 1);
+    }
 
-    ArrayValueImpl value = new ArrayValueImpl();
+    if (! (optionsV instanceof DefaultValue)) {
+      int options = optionsV.toInt();
 
-    value.put("dirname", dirname);
-    value.put("basename", path);
-    value.put("extension", ext);
+      if ((options & PATHINFO_DIRNAME) == PATHINFO_DIRNAME)
+        return new StringValueImpl(dirname);
+      else if ((options & PATHINFO_BASENAME) == PATHINFO_BASENAME)
+        return new StringValueImpl(path);
+      else if ((options & PATHINFO_EXTENSION) == PATHINFO_EXTENSION)
+        return new StringValueImpl(ext);
+      else if ((options & PATHINFO_FILENAME) == PATHINFO_FILENAME)
+        return new StringValueImpl(filename);
+      else
+        return StringValue.EMPTY;
+    }
+    else {
+      ArrayValueImpl value = new ArrayValueImpl();
 
-    return value;
+      value.put("dirname", dirname);
+      value.put("basename", path);
+      value.put("extension", ext);
+      value.put("filename", filename);
+
+      return value;
+    }
   }
 
   public static int pclose(Env env, @NotNull BinaryStream stream)

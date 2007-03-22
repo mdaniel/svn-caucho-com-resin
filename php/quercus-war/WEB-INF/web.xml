@@ -21,10 +21,12 @@
     <!-- Tells Quercus to use the following JDBC database and to ignore the
       -- arguments of mysql_connect().
     -->
+    <!--
     <init-param>
       <param-name>database</param-name>
       <param-value>jdbc/test</param-value>
     </init-param>
+    -->
 
     <!--
     <init-param>

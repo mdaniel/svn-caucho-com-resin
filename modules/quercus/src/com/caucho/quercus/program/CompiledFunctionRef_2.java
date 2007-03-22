@@ -56,6 +56,15 @@ abstract public class CompiledFunctionRef_2 extends CompiledFunctionRef {
   }
 
   /**
+   * Returns this function's name.
+   */
+  @Override
+  public String getName()
+  {
+    return _name;
+  }
+
+  /**
    * Binds the user's arguments to the actual arguments.
    *
    * @param args the user's arguments

@@ -37,7 +37,6 @@ import java.util.*;
 public class MethodMap<V>
 {
   private Entry<V> []_entries = new Entry[16];
-  private ArrayList<V> _values = new ArrayList<V>();
   private int _size;
     
   public void put(char []buffer, int length, V value)
@@ -61,10 +60,10 @@ public class MethodMap<V>
     }
     
     entry = new Entry<V>(buffer, value);
-    _values.add(value);
 
     entry._next = _entries[bucket];
     _entries[bucket] = entry;
+    _size++;
 
   }
 
@@ -99,9 +98,9 @@ public class MethodMap<V>
     return get(hash, key, key.length);
   }
 
-  public ArrayList<V> values()
+  public Iterable<V> values()
   {
-    return _values;
+    return new ValueIterator(_entries);
   }
 
   private boolean match(char []a, char []b, int length)
@@ -200,6 +199,54 @@ public class MethodMap<V>
     {
       _key = key;
       _value = value;
+    }
+  }
+
+  final static class ValueIterator<V> implements Iterable<V>, Iterator<V>
+  {
+    int _index;
+    Entry<V> []_entries;
+    Entry<V> _next;
+    
+    public ValueIterator(Entry<V> []entries)
+    {
+      _entries = entries;
+
+      getNext();
+    }
+    
+    private void getNext()
+    {
+      Entry<V> entry = null;
+      while (_index < _entries.length &&
+             (entry = _entries[_index++]) == null) {
+      }
+
+      _next = entry;
+    }
+
+    public boolean hasNext()
+    {
+      return _next != null;
+    }
+    
+    public V next()
+    {
+      V value = _next._value;
+      
+      getNext();
+
+      return value;
+    }
+    
+    public Iterator<V> iterator()
+    {
+      return this;
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
     }
   }
 }

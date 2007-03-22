@@ -230,12 +230,11 @@ public class QuercusClass {
   }
   
   /**
-   * Returns a set of the method names and their values
-   * @return a set of the method names and their values
+   * Returns the declared functions.
    */
-  public Set<Map.Entry<String, AbstractFunction>> getClassMethods()
+  public Iterable<AbstractFunction> getClassMethods()
   {
-    return _classDef.functionSet();
+    return _methodMap.values();
   }
 
   /**
@@ -303,14 +302,15 @@ public class QuercusClass {
   {
     if (! _classDef.isAbstract() && ! _classDef.isInterface()) {
       for (AbstractFunction absFun : _methodMap.values()) {
-	if (! (absFun instanceof Function))
-	  continue;
+        if (! (absFun instanceof Function))
+          continue;
 
-	Function fun = (Function) absFun;
+        Function fun = (Function) absFun;
 
-	if (fun.isAbstract())
-	  throw env.errorException(L.l("Abstract function '{0}' must be implemented in concrete class {1}.",
-			      fun.getName(), getName()));
+        if (fun.isAbstract()) {
+          throw env.errorException(L.l("Abstract function '{0}' must be implemented in concrete class {1}.",
+                                        fun.getName(), getName()));
+        }
       }
     }
   }

@@ -62,6 +62,15 @@ abstract public class CompiledFunction_3 extends CompiledFunction {
   }
 
   /**
+   * Returns this function's name.
+   */
+  @Override
+  public String getName()
+  {
+    return _name;
+  }
+
+  /**
    * Binds the user's arguments to the actual arguments.
    *
    * @param args the user's arguments

@@ -43,6 +43,9 @@ abstract public class CompiledFunction extends AbstractFunction {
     = Logger.getLogger(CompiledFunction.class.getName());
   private static final L10N L = new L10N(CompiledFunction.class);
 
+  @Override
+  public abstract String getName();
+
   public Value callRef(Env env, Value []argValues)
   {
     return call(env, argValues).copyReturn();

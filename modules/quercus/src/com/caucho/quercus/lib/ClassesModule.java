@@ -103,12 +103,12 @@ public class ClassesModule extends AbstractQuercusModule {
     }
 
     if (cl == null)
-      return null;
+      return NullValue.NULL;
 
     ArrayValue methArray = new ArrayValueImpl();
 
-    for (Map.Entry<String, AbstractFunction> entry: cl.getClassMethods()) {
-      Value key = StringValue.create(entry.getKey());
+    for (AbstractFunction fun : cl.getClassMethods()) {
+      Value key = StringValue.create(fun.getName());
 
       methArray.append(key);
     }
