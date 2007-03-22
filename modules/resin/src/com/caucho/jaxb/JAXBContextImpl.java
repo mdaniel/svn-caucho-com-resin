@@ -416,6 +416,13 @@ public class JAXBContextImpl extends JAXBContext {
   public Property createProperty(Type type, boolean anyType, String mimeType)
     throws JAXBException
   {
+    return createProperty(type, anyType, null, false);
+  }
+
+  public Property createProperty(Type type, boolean anyType, String mimeType, 
+                                 boolean xmlList)
+    throws JAXBException
+  {
     if (type instanceof Class) {
       if (anyType && Object.class.equals(type))
         return getLaxAnyTypeProperty();
@@ -423,8 +430,13 @@ public class JAXBContextImpl extends JAXBContext {
       Property simpleTypeProperty = 
         getSimpleTypeProperty((Class) type, mimeType);
 
-      if (simpleTypeProperty != null)
+      if (simpleTypeProperty != null) {
+        // jaxb/12gb
+        if (simpleTypeProperty == ByteArrayProperty.PROPERTY && xmlList)
+          throw new JAXBException(L.l("@XmlList applied to byte[] valued fields or properties"));
+
         return simpleTypeProperty;
+      }
 
       Class cl = (Class) type;
 
@@ -432,8 +444,19 @@ public class JAXBContextImpl extends JAXBContext {
         Property componentProperty = 
           createProperty(cl.getComponentType(), anyType);
 
-        return ArrayProperty.createArrayProperty(componentProperty,
-                                                 cl.getComponentType());
+        if (xmlList) {
+          if (! (componentProperty instanceof CDataProperty))
+            throw new JAXBException(L.l("Elements annotated with @XmlList or @XmlValue must be simple XML types"));
+
+          Class componentType = cl.getComponentType();
+          CDataProperty cdataProperty = (CDataProperty) componentProperty;
+
+          return XmlListArrayProperty.createXmlListArrayProperty(cdataProperty,
+                                                                 componentType);
+        }
+        else 
+          return ArrayProperty.createArrayProperty(componentProperty,
+                                                   cl.getComponentType());
       }
 
       if (cl.isEnum())
@@ -443,12 +466,22 @@ public class JAXBContextImpl extends JAXBContext {
 
       if (List.class.isAssignableFrom(cl)) {
         Property property = new SkeletonProperty(getSkeleton(Object.class));
-        return new ListProperty(property);
+
+        if (xmlList) {
+          throw new JAXBException(L.l("Elements annotated with @XmlList or @XmlValue must be simple XML types"));
+        }
+        else
+          return new ListProperty(property);
       }
 
       if (Collection.class.isAssignableFrom(cl)) {
         Property property = new SkeletonProperty(getSkeleton(Object.class));
-        return new CollectionProperty(property);
+
+        if (xmlList) {
+          throw new JAXBException(L.l("Elements annotated with @XmlList or @XmlValue must be simple XML types"));
+        }
+        else
+          return new CollectionProperty(property);
       }
 
       return new SkeletonProperty(getSkeleton(cl));
@@ -472,19 +505,27 @@ public class JAXBContextImpl extends JAXBContext {
           return new MapProperty(rawClass, keyProperty, valueProperty);
         }
 
-        if (List.class.isAssignableFrom(rawClass)) {
+        if (Collection.class.isAssignableFrom(rawClass)) {
           Type[] args = ptype.getActualTypeArguments();
 
           if (args.length != 1)
             throw new JAXBException(L.l("unexpected number of generic arguments for List<>: {0}", args.length));
 
           Property componentProperty = createProperty(args[0], anyType);
-          return new ListProperty(componentProperty);
-        }
 
-        if (Collection.class.isAssignableFrom(rawClass))
-          throw new JAXBException(L.l("Unrecognized type: {0}", rawClass));
-          // return new CollectionProperty();
+          if (xmlList) {
+            if (! (componentProperty instanceof CDataProperty))
+              throw new JAXBException(L.l("Elements annotated with @XmlList or @XmlValue must be simple XML types"));
+
+            CDataProperty cdataProperty = (CDataProperty) componentProperty;
+
+            return new XmlListCollectionProperty(cdataProperty, rawClass);
+          }
+          else if (List.class.isAssignableFrom(rawClass))
+            return new ListProperty(componentProperty);
+          else
+            return new CollectionProperty(componentProperty);
+        }
       }
     }
 

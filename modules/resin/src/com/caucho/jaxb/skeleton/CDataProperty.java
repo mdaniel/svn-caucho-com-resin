@@ -59,7 +59,7 @@ import com.caucho.xml.stream.StaxUtil;
  * helper class for properties that are represented as a "flat" CDATA block
  */
 public abstract class CDataProperty extends Property {
-  private static final L10N L = new L10N(CDataProperty.class);
+  public static final L10N L = new L10N(CDataProperty.class);
 
   protected boolean _isNillable = true;
 

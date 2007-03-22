@@ -200,7 +200,7 @@ public class WrapperProperty extends Property {
       }
     }
 
-    _property.write(m, out, value, name);
+    _property.write(m, out, value, _wrappedQName);
 
     if (value != null || _nillable) {
       out.writeEndElement();

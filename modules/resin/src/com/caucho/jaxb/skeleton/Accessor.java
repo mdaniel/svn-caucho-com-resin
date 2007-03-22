@@ -51,6 +51,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
@@ -164,8 +165,11 @@ public abstract class Accessor {
       case ELEMENT: 
         {
           // XXX respect the type from the XmlElement annotation
+
+          boolean xmlList = (getAnnotation(XmlList.class) != null);
+
           _property = 
-            _context.createProperty(getGenericType(), false, mimeType);
+            _context.createProperty(getGenericType(), false, mimeType, xmlList);
 
           if (element != null)
             _qname = qnameFromXmlElement(element);
@@ -211,6 +215,7 @@ public abstract class Accessor {
           else
             _qname = new QName(namespace, name);
 
+          // XXX XmlList value?
           _property =
             _context.createProperty(getGenericType(), false, mimeType);
 
@@ -223,7 +228,7 @@ public abstract class Accessor {
           _qname = new QName(getName());
 
           _property = 
-            _context.createProperty(getGenericType(), false, mimeType);
+            _context.createProperty(getGenericType(), false, mimeType, true);
 
           if (! _property.isXmlPrimitiveType() && 
               ! Collection.class.isAssignableFrom(getType()))
@@ -234,6 +239,9 @@ public abstract class Accessor {
 
       case ELEMENTS:
         {
+          if (getAnnotation(XmlList.class) != null)
+            throw new JAXBException(L.l("@XmlList cannot be used with @XmlElements"));
+
           XmlElements elements = getAnnotation(XmlElements.class);
 
           if (elements.value().length == 0) {
