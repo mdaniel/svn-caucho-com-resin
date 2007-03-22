@@ -783,6 +783,10 @@ public class EntityManyToOneField extends CascadableField {
     if (isAbstract() && (isLazy() || ! isJPA)) {
       String proxy = session + ".loadProxy(\"" + getEntityTargetType().getName() + "\", __caucho_field_" + getName() + ")";
 
+      // jpa/0o09
+      if (isJPA)
+        proxyType = targetTypeExt;
+
       proxy = proxyVarName + " = (" + proxyType + ") " + proxy + ";";
 
       out.println(proxy);
@@ -853,15 +857,15 @@ public class EntityManyToOneField extends CascadableField {
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
 
     // ejb/0627
-    /*
-    String value = generateGet(src);
+    if (getRelatedType().getPersistenceUnit().isJPA()) {
+      // jpa/0h0a
 
-    value = "(" + _targetType.getInstanceClassName() + ") aConn.getEntity((com.caucho.amber.entity.Entity) " + value + ")";
+      String value = generateGet(src);
 
-    out.println(generateSet(dst, value) + ";");
-    */
+      value = "(" + _targetType.getInstanceClassName() + ") aConn.getEntity((com.caucho.amber.entity.Entity) " + value + ")";
 
-    // }
+      out.println(generateSet(dst, value) + ";");
+    }
   }
 
   /**
@@ -875,19 +879,21 @@ public class EntityManyToOneField extends CascadableField {
     if (getLoadGroupIndex() != updateIndex)
       return;
 
+    boolean isJPA = getEntitySourceType().getPersistenceUnit().isJPA();
+
     // order matters: jpa/0h08, jpa/0h09
 
     // jpa/0o08, ejb/06--, ejb/0a-- and jpa/0o04
-    // ejb/0628
-    if (false &&
+    // ejb/0628 vs. jpa/0h0a
+    if (isJPA &&
         ! (dst.equals("cacheEntity")
-           || dst.equals("super")
-           || dst.equals("item"))) {
+           || dst.equals("super"))) {
       String value = generateGet(src);
 
       out.println("// " + dst);
 
-      out.println("child = " + value + ";");
+      // jpa/0h0a: gets the cache object to copy from.
+      out.println("child = aConn.getCacheEntity((com.caucho.amber.entity.Entity) " + value + ");");
 
       out.println("if (child != null) {");
       out.pushDepth();
@@ -934,8 +940,20 @@ public class EntityManyToOneField extends CascadableField {
     if (! dst.equals("cacheEntity")) {
       // jpa/0o05
       if (! dst.equals("super")) { // || isLazy())) {
+        String targetObject;
+
+        if (isJPA) {
+          // jpa/0h0a
+
+          String targetTypeExt = getEntityTargetType().getInstanceClassName();
+
+          targetObject = "(" + targetTypeExt + ") child";
+        }
+        else
+          targetObject = generateSuperGetter();
+
         out.println("((" + getRelatedType().getInstanceClassName() + ") " + dst + ")." +
-                    generateSuperSetter(generateSuperGetter()) + ";");
+                    generateSuperSetter(targetObject) + ";");
       }
     }
 

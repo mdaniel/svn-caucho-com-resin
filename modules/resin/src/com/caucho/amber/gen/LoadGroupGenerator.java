@@ -118,10 +118,11 @@ public class LoadGroupGenerator extends ClassComponent {
         out.println("}");
       }
 
+      // jpa/0o09
       // needs to be after load to prevent loop if toString() expects data
       out.println();
       out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-      out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this);");
+      out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this.getClass().getName());");
 
       // ejb/06j2
       if (_relatedType.getHasLoadCallback()) {

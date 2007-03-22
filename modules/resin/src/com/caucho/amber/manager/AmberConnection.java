@@ -2381,6 +2381,16 @@ public class AmberConnection
 
   public boolean isCacheEntity(Entity entity)
   {
+    return entity == getCacheEntity(entity);
+  }
+
+  public Entity getCacheEntity(Entity entity)
+  {
+    // jpa/0h0a
+
+    if (entity == null)
+      return null;
+
     String className = entity.getClass().getName();
     Object pk = entity.__caucho_getPrimaryKey();
 
@@ -2389,7 +2399,7 @@ public class AmberConnection
     if (entityHome == null) {
       log.finest(L.l("Home not found for entity (class: '{0}' PK: '{1}')",
                      className, pk));
-      return false;
+      return null;
     }
 
     EntityType rootType = entityHome.getRootType();
@@ -2397,9 +2407,9 @@ public class AmberConnection
     EntityItem item = _persistenceUnit.getEntity(rootType, pk);
 
     if (item == null)
-      return false;
+      return null;
 
-    return item.getEntity() == entity;
+    return item.getEntity();
   }
 
   //
