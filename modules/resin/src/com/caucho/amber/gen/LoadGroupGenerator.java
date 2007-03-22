@@ -75,7 +75,6 @@ public class LoadGroupGenerator extends ClassComponent {
 
     // jpa/0ge2: MappedSuperclassType
     if (_relatedType.getTable() != null) {
-      generateTransactionChecks(out, group, mask);
 
       int min = 0;
 
@@ -89,6 +88,8 @@ public class LoadGroupGenerator extends ClassComponent {
       // }
 
       int max = _index;
+      
+      generateTransactionChecks(out, group, mask, min, max);
 
       if (min <= max) {
         out.println("else {");
@@ -113,6 +114,7 @@ public class LoadGroupGenerator extends ClassComponent {
         out.println();
         out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
         out.println("  aConn.makeTransactional(this);");
+      
         out.println("}");
       }
 
@@ -120,6 +122,13 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println();
       out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
       out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this);");
+
+      // ejb/06j2
+      if (_relatedType.getHasLoadCallback()) {
+        out.println();
+        out.println("System.out.println(__caucho_loadMask_0);");
+        out.println("__caucho_load_callback();");
+      }
 
       out.println();
       out.println("aConn.postLoad(this);");
@@ -138,7 +147,9 @@ public class LoadGroupGenerator extends ClassComponent {
     generateLoadSelect(out, group, mask);
   }
 
-  private void generateTransactionChecks(JavaWriter out, int group, long mask)
+  private void generateTransactionChecks(JavaWriter out,
+                                         int group, long mask,
+                                         int min, int max)
     throws IOException
   {
     // non-read-only entities must be reread in a transaction
@@ -179,6 +190,11 @@ public class LoadGroupGenerator extends ClassComponent {
       // ejb/0d01 - already loaded in the transaction
       out.println("  else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
       out.println("    return;");
+
+      for (int i = min; i <= max; i++) {
+        out.println();
+        out.println("__caucho_load_select_" + i + "(aConn);");
+      }
       out.println("}");
       out.print("else ");
     }
@@ -358,8 +374,10 @@ public class LoadGroupGenerator extends ClassComponent {
     //   out.println("}");
     // }
 
+    /* ejb/06j2
     if (_relatedType.getHasLoadCallback())
       out.println("__caucho_load_callback();");
+    */
 
     out.popDepth();
     out.println("}");
