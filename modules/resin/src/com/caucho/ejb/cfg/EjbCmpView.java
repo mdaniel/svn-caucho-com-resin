@@ -224,13 +224,13 @@ public class EjbCmpView extends EjbEntityView {
     throws ConfigException
   {
     if (! implMethod.isPublic()) {
-      throw error(L.l("{0}: `{1}' must be public.  CMP method implementations must be public.",
+      throw error(L.l("{0}: '{1}' must be public.  CMP method implementations must be public.",
                       implMethod.getDeclaringClass().getName(),
                       getFullMethodName(implMethod)));
     }
     
     if (implMethod.isStatic()) {
-      throw error(L.l("{0}: `{1}' must not be static.  CMP method implementations must not be static.",
+      throw error(L.l("{0}: '{1}' must not be static.  CMP method implementations must not be static.",
                       implMethod.getDeclaringClass().getName(),
                       getFullMethodName(implMethod)));
     }

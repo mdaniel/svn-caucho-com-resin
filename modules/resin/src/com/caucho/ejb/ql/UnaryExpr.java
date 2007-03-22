@@ -67,17 +67,17 @@ class UnaryExpr extends Expr {
     switch (_op) {
     case '+':
       if (! _expr.isNumeric())
-        throw error(L.l("`+' expects numeric expression at `{0}'", _expr));
+        throw error(L.l("'+' expects numeric expression at '{0}'", _expr));
       setJavaType(_expr.getJavaType());
       break;
     case '-':
       if (! _expr.isNumeric())
-        throw error(L.l("`-' expects numeric expression at `{0}'", _expr));
+        throw error(L.l("'-' expects numeric expression at '{0}'", _expr));
       setJavaType(_expr.getJavaType());
       break;
     case Query.NOT:
       if (! _expr.isBoolean())
-        throw error(L.l("NOT expects boolean expression at `{0}'", _expr));
+        throw error(L.l("NOT expects boolean expression at '{0}'", _expr));
       setJavaType(boolean.class);
       break;
 

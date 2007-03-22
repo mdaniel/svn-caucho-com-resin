@@ -181,7 +181,7 @@ public class EjbEntityHomeView extends EjbHomeView {
       JClass primKeyClass = ((EjbEntityBean) getBean()).getPrimKeyClass();
     
       if (paramTypes.length != 1 || ! paramTypes[0].equals(primKeyClass))
-	throw error(L.l("{0}: `{1}' expected as only argument of {2}. findByPrimaryKey must take the primary key as its only argument.",
+	throw error(L.l("{0}: '{1}' expected as only argument of {2}. findByPrimaryKey must take the primary key as its only argument.",
 			apiMethod.getDeclaringClass().getName(),
 			primKeyClass.getName(),
 			methodName));

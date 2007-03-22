@@ -157,7 +157,7 @@ public class EjbMethodPattern {
     else if (isolation.equals("row-locking"))
       _resinIsolation = RESIN_ROW_LOCK;
     else
-      throw new ConfigException(L.l("`{0}' is an unknown value for resin-isolation.  Only 'read-only', 'database', and 'row-locking' are allowed.",
+      throw new ConfigException(L.l("'{0}' is an unknown value for resin-isolation.  Only 'read-only', 'database', and 'row-locking' are allowed.",
                                     isolation));
   }
 
@@ -247,7 +247,7 @@ public class EjbMethodPattern {
     else if ("Supports".equals(type))
       _transactionType = EjbMethod.TRANS_SUPPORTS;
     else
-      throw new ConfigException(L.l("`{0}' is an unknown transaction type.  The transaction types are:\n  Required - creates a new transaction if none is active.\n  RequiresNew - always creates a new transaction.\n  Mandatory - requires an active transaction.\n  NotSupported - suspends any active transaction.\n  Never - forbids any active transaction.\n  Supports - allows a transaction or no transaction.", type));
+      throw new ConfigException(L.l("'{0}' is an unknown transaction type.  The transaction types are:\n  Required - creates a new transaction if none is active.\n  RequiresNew - always creates a new transaction.\n  Mandatory - requires an active transaction.\n  NotSupported - suspends any active transaction.\n  Never - forbids any active transaction.\n  Supports - allows a transaction or no transaction.", type));
   }
 
   /**

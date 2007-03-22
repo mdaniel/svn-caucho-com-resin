@@ -310,7 +310,7 @@ public class EntityServer extends AbstractServer {
 
       if (targetServer == null) {
         PersistentBean bean = _config.getPersistentBean();
-        throw new RuntimeException("unknown ejb `" + ejbName + "' in `" +
+        throw new RuntimeException("unknown ejb '" + ejbName + "' in '" +
                                    bean.getName() + "'");
       }
 
@@ -556,7 +556,7 @@ public class EntityServer extends AbstractServer {
   JVMObject getEJBObject(AbstractHandle handle)
   {
     if (remoteStubClass == null)
-      throw new IllegalStateException(L.l("`{0}' has no remote interface.  Local beans must be called from a local context. Remote beans need a home and a remote interface.",
+      throw new IllegalStateException(L.l("'{0}' has no remote interface.  Local beans must be called from a local context. Remote beans need a home and a remote interface.",
                                           getEJBName()));
 
     try {
@@ -576,7 +576,7 @@ public class EntityServer extends AbstractServer {
   JVMObject createEJBObject(Object primaryKey)
   {
     if (_remoteStubClass == null)
-      throw new IllegalStateException(L.l("`{0}' has no remote interface.  Local beans must be called from a local context. Remote beans need a home and a remote interface.",
+      throw new IllegalStateException(L.l("'{0}' has no remote interface.  Local beans must be called from a local context. Remote beans need a home and a remote interface.",
                                           getEJBName()));
     
     try {

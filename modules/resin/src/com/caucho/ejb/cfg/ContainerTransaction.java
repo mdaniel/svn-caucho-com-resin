@@ -82,7 +82,7 @@ public class ContainerTransaction {
     else if (trans.equals("Supports")) {
     }
     else
-      throw new ConfigException(L.l("`{0}' is an unknown transaction type.  The transaction types are:\n  Required - creates a new transaction if none is active.\n  RequiresNew - always creates a new transaction.\n  Mandatory - requires an active transaction.\n  NotSupported - suspends any active transaction.\n  Never - forbids any active transaction.\n  Supports - allows a transaction or no transaction.", trans));
+      throw new ConfigException(L.l("'{0}' is an unknown transaction type.  The transaction types are:\n  Required - creates a new transaction if none is active.\n  RequiresNew - always creates a new transaction.\n  Mandatory - requires an active transaction.\n  NotSupported - suspends any active transaction.\n  Never - forbids any active transaction.\n  Supports - allows a transaction or no transaction.", trans));
 
     _trans = trans;
   }
@@ -94,7 +94,7 @@ public class ContainerTransaction {
     EjbBean bean = _config.getBeanConfig(_method.getEJBName());
 
     if (bean == null)
-      throw new ConfigException(L.l("`{0}' is an unknown entity bean.",
+      throw new ConfigException(L.l("'{0}' is an unknown entity bean.",
                                     _method.getEJBName()));
 
     EjbMethodPattern method = bean.createMethod(_method);

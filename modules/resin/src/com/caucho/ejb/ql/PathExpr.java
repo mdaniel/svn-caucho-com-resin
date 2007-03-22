@@ -86,7 +86,7 @@ abstract class PathExpr extends Expr {
     CmrRelation relation = _bean.getRelation(fieldName);
 
     if (relation == null)
-      throw error(L.l("{0}: `{1}' is an unknown cmp-field.",
+      throw error(L.l("{0}: '{1}' is an unknown cmp-field.",
 		      _bean.getEJBClass().getName(),
                       fieldName));
 

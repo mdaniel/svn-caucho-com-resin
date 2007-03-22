@@ -214,7 +214,7 @@ public class QLParser extends Query {
       if (exn[i].isAssignableTo(FinderException.class))
         return;
 
-    throw new ConfigException(L.l("{0}: `{1}' must throw javax.ejb.FinderException.",
+    throw new ConfigException(L.l("{0}: '{1}' must throw javax.ejb.FinderException.",
 				  method.getDeclaringClass().getName(),
 				  getFullMethodName(method)));
   }
@@ -526,7 +526,7 @@ public class QLParser extends Query {
       if (token == IDENTIFIER)
         orderList.add(lexeme.toString());
       else
-        throw error(L.l("unexpected token `{0}' in order-by",
+        throw error(L.l("unexpected token '{0}' in order-by",
                         tokenName(token)));
 
       token = scanToken();
@@ -615,7 +615,7 @@ public class QLParser extends Query {
     /*
     if (! (selectExpr instanceof PathExpr) &&
         ! (selectExpr instanceof FieldExpr))
-      throw error(L.l("`{0}' is an illegal SELECT expression.  Only path expressions are allowed in SELECT.", selectExpr));
+      throw error(L.l("'{0}' is an illegal SELECT expression.  Only path expressions are allowed in SELECT.", selectExpr));
     */
     
     token = peekToken();
@@ -676,7 +676,7 @@ public class QLParser extends Query {
       token = scanToken();
 
       if (! _limitOffset.getJavaType().getName().equals("int"))
-        throw error(L.l("OFFSET `{0}' must be an integer expression",
+        throw error(L.l("OFFSET '{0}' must be an integer expression",
                         _limitMax));
     }
 
@@ -685,7 +685,7 @@ public class QLParser extends Query {
       token = scanToken();
 
       if (! _limitMax.getJavaType().getName().equals("int"))
-        throw error(L.l("LIMIT `{0}' must be an integer expression",
+        throw error(L.l("LIMIT '{0}' must be an integer expression",
                         _limitMax));
     }
 
@@ -734,7 +734,7 @@ public class QLParser extends Query {
 
       if (token == IN) {
         if (scanToken() != '(')
-          throw error(L.l("expected `(' at {0} while parsing IN(<collection-path>).",
+          throw error(L.l("expected '(' at {0} while parsing IN(<collection-path>).",
                           tokenName(token)));
 
         parseFromCollection();
@@ -778,7 +778,7 @@ public class QLParser extends Query {
     EjbEntityBean entity = ejbConfig.findEntityBySchema(table);
 
     if (entity == null)
-      throw error(L.l("`{0}' is an unknown entity-bean schema in `FROM {0} AS {1}'",
+      throw error(L.l("'{0}' is an unknown entity-bean schema in 'FROM {0} AS {1}'",
                       table, name));
 
     // _bean.addBeanDepend(info.getEJBName());
@@ -800,11 +800,11 @@ public class QLParser extends Query {
     Expr expr = parseDotExpr();
 
     if (scanToken() != ')')
-      throw error(L.l("expected `)' at {0} while parsing IN(<collection-path>).",
+      throw error(L.l("expected ')' at {0} while parsing IN(<collection-path>).",
                       tokenName(_token)));
     
     if (! (expr instanceof CollectionExpr))
-      throw error(L.l("expected <collection-path> expression at `{0}'", expr));
+      throw error(L.l("expected <collection-path> expression at '{0}'", expr));
 
     CollectionExpr collectionExpr = (CollectionExpr) expr;
 
@@ -813,7 +813,7 @@ public class QLParser extends Query {
 
     int token = scanToken();
     if (token != IDENTIFIER)
-      throw error(L.l("expected identifier expression at {0} while parsing `IN({1}) AS id'",
+      throw error(L.l("expected identifier expression at {0} while parsing 'IN({1}) AS id'",
                       tokenName(token), expr));
       
     String name = lexeme;
@@ -1034,12 +1034,12 @@ public class QLParser extends Query {
         return parseIs(new IsExpr(this, expr, NULL, isNot));
       else if (token == EMPTY) {
         if (! (expr instanceof CollectionExpr))
-          throw error(L.l("IS EMPTY requires collection path at `{0}'",
+          throw error(L.l("IS EMPTY requires collection path at '{0}'",
                           expr));
         return parseIs(new EmptyExpr(expr, isNot));
       }
       else
-        throw error(L.l("`{0}' unexpected after IS.", tokenName(token)));
+        throw error(L.l("'{0}' unexpected after IS.", tokenName(token)));
     }
     else if (token == MEMBER) {
       scanToken();
@@ -1199,7 +1199,7 @@ public class QLParser extends Query {
       expr.evalTypes();
 
       if (! expr.isExternal())
-        throw error(L.l("`{0}' must refer to an external entity bean", expr));
+        throw error(L.l("'{0}' must refer to an external entity bean", expr));
     }
 
     return expr;
@@ -1232,7 +1232,7 @@ public class QLParser extends Query {
 
       expr.evalTypes();
       if (expr.isExternal())
-        throw error(L.l("`{0}' must not refer to an external entity bean", expr));
+        throw error(L.l("'{0}' must not refer to an external entity bean", expr));
       Expr field = expr.newField(lexeme);
       expr = field;
 
@@ -1310,7 +1310,7 @@ public class QLParser extends Query {
     case '(':
       Expr expr = parseExpr();
       if ((token = scanToken()) != ')')
-        throw error(L.l("expected `)' at {0}", tokenName(token)));
+        throw error(L.l("expected ')' at {0}", tokenName(token)));
 
       return expr;
         
@@ -1335,7 +1335,7 @@ public class QLParser extends Query {
 
     int token;
     if ((token = scanToken()) != '(')
-      throw error(L.l("expected `(' at {0} while parsing function {1}()", tokenName(token), name));
+      throw error(L.l("expected '(' at {0} while parsing function {1}()", tokenName(token), name));
 
     while ((token = peekToken()) != ')' && token > 0) {
       Expr expr = parseExpr();
@@ -1347,7 +1347,7 @@ public class QLParser extends Query {
     }
 
     if (token != ')')
-      throw error(L.l("expected `)' at {0} while parsing function {1}", tokenName(token), name));
+      throw error(L.l("expected ')' at {0} while parsing function {1}", tokenName(token), name));
 
     scanToken();
 
@@ -1359,7 +1359,7 @@ public class QLParser extends Query {
 
       if (! expr.getJavaType().isAssignableTo(EntityBean.class) &&
           ! expr.getJavaType().isAssignableTo(EJBLocalObject.class))
-        throw error(L.l("OBJECT({0}) requires an entity bean as its argument at `{1}'",
+        throw error(L.l("OBJECT({0}) requires an entity bean as its argument at '{1}'",
                         expr, expr.getJavaType()));
 
       return expr;
@@ -1386,7 +1386,7 @@ public class QLParser extends Query {
     Expr oldExpr = _idMap.get(name);
     
     if (oldExpr != null)
-      throw error(L.l("`{0}' is defined twice", name));
+      throw error(L.l("'{0}' is defined twice", name));
 
     _idMap.put(name, expr);
   }
@@ -1404,7 +1404,7 @@ public class QLParser extends Query {
     PathExpr expr = _idMap.get(name);
     
     if (expr == null)
-      throw error(L.l("`{0}' is an unknown identifier", name));
+      throw error(L.l("'{0}' is an unknown identifier", name));
 
     return expr;
   }
@@ -1512,7 +1512,7 @@ public class QLParser extends Query {
       lexeme = cb.close();
 
       if (index <= 0)
-        throw error(L.l("`{0}' must refer to a positive argument",
+        throw error(L.l("'{0}' must refer to a positive argument",
                         "?" + lexeme));
 
       if (_maxArg < index)
@@ -1523,7 +1523,7 @@ public class QLParser extends Query {
       // @@ is useless?
     case '@':
       if ((ch = read()) != '@')
-        throw error(L.l("`@' expected at {0}", charName(ch)));
+        throw error(L.l("'@' expected at {0}", charName(ch)));
       return scanToken();
     }
 

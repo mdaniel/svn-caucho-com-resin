@@ -66,7 +66,7 @@ public class EjbEntityConfigProxy extends EjbBeanConfigProxy {
       _entity.setAllowPOJO(getConfig().isAllowPOJO());
     }
     else if (! (oldBean instanceof EjbEntityBean)) {
-      throw new ConfigException(L.l("entity bean `{0}' conflicts with prior {1} bean at {2}.",
+      throw new ConfigException(L.l("entity bean '{0}' conflicts with prior {1} bean at {2}.",
 				    getEJBName(), oldBean.getEJBKind(),
 				    oldBean.getLocation()));
     }

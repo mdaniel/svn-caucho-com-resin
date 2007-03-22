@@ -242,7 +242,7 @@ public class Expr {
   Expr newField(String field)
     throws ConfigException
   {
-    throw error(L.l("`{0}' can't have field `{1}'.  Only path expressions referring to a single bean have fields.", this, field));
+    throw error(L.l("'{0}' can't have field '{1}'.  Only path expressions referring to a single bean have fields.", this, field));
   }
 
   /**
@@ -251,7 +251,7 @@ public class Expr {
   FieldExpr newReference(String field)
     throws ConfigException
   {
-    throw error(L.l("`{0}' can't have reference `{1}'", this, field));
+    throw error(L.l("'{0}' can't have reference '{1}'", this, field));
   }
 
   /**
@@ -278,7 +278,7 @@ public class Expr {
   String getSelectTable(CharBuffer cb)
     throws ConfigException
   {
-    throw new IllegalStateException(L.l("`{0}' can't be used in a SELECT expression", this));
+    throw new IllegalStateException(L.l("'{0}' can't be used in a SELECT expression", this));
   }
 
   /**
@@ -305,7 +305,7 @@ public class Expr {
     if (i == 0)
       generateWhereSubExpr(cb);
     else
-      throw new IllegalStateException(L.l("`{0}' can't be used in a WHERE multi-component", this));
+      throw new IllegalStateException(L.l("'{0}' can't be used in a WHERE multi-component", this));
   }
 
   protected String keyComponent(EntityType type, int index)

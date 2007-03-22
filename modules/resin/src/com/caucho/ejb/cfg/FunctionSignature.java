@@ -130,7 +130,7 @@ public class FunctionSignature {
       cb.append((char) ch);
 
     if (cb.length() == 0)
-      throw new ConfigException(L.l("unexpected empty function name in `{0}'",
+      throw new ConfigException(L.l("unexpected empty function name in '{0}'",
                                         _signature));
 
     _name = cb.toString();
@@ -138,7 +138,7 @@ public class FunctionSignature {
     ch = skipWhitespace(ch);
 
     if (ch != '(')
-      throw new ConfigException(L.l("function syntax is `ret-type name(arg1, ..., argn)' in `{0}'",
+      throw new ConfigException(L.l("function syntax is 'ret-type name(arg1, ..., argn)' in '{0}'",
                                         _signature));
 
     ArrayList<Class> argList = new ArrayList<Class>();
@@ -158,13 +158,13 @@ public class FunctionSignature {
     _parameterTypes = argList.toArray(new Class[argList.size()]);
 
     if (ch != ')')
-      throw new ConfigException(L.l("function syntax is `ret-type name(arg1, ..., argn)' in `{0}'",
+      throw new ConfigException(L.l("function syntax is 'ret-type name(arg1, ..., argn)' in '{0}'",
                                         _signature));
 
     ch = skipWhitespace(read());
 
     if (ch != -1)
-      throw new ConfigException(L.l("function syntax is `ret-type name(arg1, ..., argn)' in `{0}'",
+      throw new ConfigException(L.l("function syntax is 'ret-type name(arg1, ..., argn)' in '{0}'",
                                         _signature));
   }
 
@@ -180,7 +180,7 @@ public class FunctionSignature {
       cb.append((char) ch);
 
     if (cb.length() == 0)
-      throw new ConfigException(L.l("unexpected empty type in `{0}'",
+      throw new ConfigException(L.l("unexpected empty type in '{0}'",
                                         _signature));
 
     String className = cb.toString();
@@ -209,7 +209,7 @@ public class FunctionSignature {
     else if ("any".equals(className))
       return Object.class;
 
-    throw new ConfigException(L.l("unknown type `{0}' in `{1}'",
+    throw new ConfigException(L.l("unknown type '{0}' in '{1}'",
                                       className, _signature));
   }
 

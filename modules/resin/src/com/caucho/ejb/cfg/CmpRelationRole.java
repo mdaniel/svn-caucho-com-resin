@@ -189,7 +189,7 @@ public class CmpRelationRole {
     if (multiplicity == null ||
         ! multiplicity.equals("One") &&
         ! multiplicity.equals("Many"))
-      throw new ConfigException(L.l("`{0}' is an unknown multiplicity.  `One' and `Many' are the only allowed values.", multiplicity));
+      throw new ConfigException(L.l("'{0}' is an unknown multiplicity.  'One' and 'Many' are the only allowed values.", multiplicity));
   }
 
   /**

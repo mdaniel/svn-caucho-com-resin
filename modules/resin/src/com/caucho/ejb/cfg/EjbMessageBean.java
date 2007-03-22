@@ -115,7 +115,7 @@ public class EjbMessageBean extends EjbBean {
 		      ejbClass.getName()));
 
     // ejb 3.0 simplified section 10.1.3
-    // The name annotation element defaults to the unqualiﬁed name of the bean
+    // The name annotation element defaults to the unqualiï¬ed name of the bean
     // class.
 
     if (getEJBName() == null) {
@@ -155,7 +155,7 @@ public class EjbMessageBean extends EjbBean {
     Object obj = destination.getObject();
 
     if (! (obj instanceof Destination))
-      throw new ConfigException(L.l("`{0}' needs to implement javax.jms.Destination.",
+      throw new ConfigException(L.l("'{0}' needs to implement javax.jms.Destination.",
 				    obj));
     
     _destination = (Destination) obj;
@@ -207,7 +207,7 @@ public class EjbMessageBean extends EjbBean {
     throws ConfigException, NamingException
   {
     if (! (factory.getObject() instanceof ConnectionFactory))
-      throw new ConfigException(L.l("`{0}' needs to implement javax.jms.ConnectionFactory.",
+      throw new ConfigException(L.l("'{0}' needs to implement javax.jms.ConnectionFactory.",
 				    factory.getObject()));
     
     _connectionFactory = (ConnectionFactory) factory.getObject();
@@ -296,7 +296,7 @@ public class EjbMessageBean extends EjbBean {
     else if (type.equals("Bean")) {
     }
     else
-      throw new ConfigException(L.l("`{0}' is an unknown transaction-type.  transaction-type must be `Bean' or `Container'.", type));
+      throw new ConfigException(L.l("'{0}' is an unknown transaction-type.  transaction-type must be 'Bean' or 'Container'.", type));
   }
 
   public void setSecurityIdentity(SecurityIdentity identity)
