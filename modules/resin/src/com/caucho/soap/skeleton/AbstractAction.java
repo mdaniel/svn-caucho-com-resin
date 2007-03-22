@@ -123,6 +123,7 @@ public abstract class AbstractAction {
 
   protected final JAXBContextImpl _jaxbContext;
   protected final String _targetNamespace;
+  protected final String _soapAction;
 
   protected static XMLOutputFactory getXMLOutputFactory()
   {
@@ -152,6 +153,7 @@ public abstract class AbstractAction {
     // binding/operation.
     _operationName = getWebMethodName(method, eiMethod);
     _responseName = _operationName + "Response";
+    _soapAction = getSOAPAction(method, eiMethod);
 
     //
     // Arguments
@@ -703,7 +705,7 @@ public abstract class AbstractAction {
     // XXX out.writeAttribute("parameterOrder", "");
 
     out.writeEmptyElement(soapNamespaceURI, "operation");
-    out.writeAttribute("soapAction", "");
+    out.writeAttribute("soapAction", _soapAction);
 
     out.writeStartElement(WSDL_NAMESPACE, "input");
     // XXX
@@ -759,37 +761,41 @@ public abstract class AbstractAction {
       out.writeEndElement(); // complexType
     }
 
-    out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", W3C_XML_SCHEMA_NS_URI);
-    out.writeAttribute("name", _responseName);
-    out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _responseName);
-
-    if (_bodyOutputs + _headerOutputs == 0) {
+    if (! _isOneway) {
       out.writeEmptyElement(XML_SCHEMA_PREFIX, 
-                            "complexType", 
+                            "element", 
                             W3C_XML_SCHEMA_NS_URI);
       out.writeAttribute("name", _responseName);
-    }
-    else {
-      out.writeStartElement(XML_SCHEMA_PREFIX, 
-                            "complexType", 
-                            W3C_XML_SCHEMA_NS_URI);
-      out.writeAttribute("name", _responseName);
+      out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _responseName);
 
-      out.writeStartElement(XML_SCHEMA_PREFIX, 
-                            "sequence", 
-                            W3C_XML_SCHEMA_NS_URI);
-      
-      if (_returnMarshal != null)
-        _returnMarshal.writeElement(out);
-
-      for (ParameterMarshal param : _bodyArguments.values()) {
-        if (! (param instanceof InParameterMarshal))
-          param.writeElement(out);
+      if (_bodyOutputs + _headerOutputs == 0) {
+        out.writeEmptyElement(XML_SCHEMA_PREFIX, 
+                              "complexType", 
+                              W3C_XML_SCHEMA_NS_URI);
+        out.writeAttribute("name", _responseName);
       }
+      else {
+        out.writeStartElement(XML_SCHEMA_PREFIX, 
+                              "complexType", 
+                              W3C_XML_SCHEMA_NS_URI);
+        out.writeAttribute("name", _responseName);
 
-      out.writeEndElement(); // sequence
+        out.writeStartElement(XML_SCHEMA_PREFIX, 
+                              "sequence", 
+                              W3C_XML_SCHEMA_NS_URI);
+        
+        if (_returnMarshal != null)
+          _returnMarshal.writeElement(out);
 
-      out.writeEndElement(); // complexType
+        for (ParameterMarshal param : _bodyArguments.values()) {
+          if (! (param instanceof InParameterMarshal))
+            param.writeElement(out);
+        }
+
+        out.writeEndElement(); // sequence
+
+        out.writeEndElement(); // complexType
+      }
     }
   }
 
@@ -835,6 +841,21 @@ public abstract class AbstractAction {
       name = webMethod.operationName();
     
     return name;
+  }
+
+  public static String getSOAPAction(Method method, Method eiMethod)
+  {
+    String action = "";
+
+    WebMethod webMethod = method.getAnnotation(WebMethod.class);
+
+    if (webMethod == null && eiMethod != null)
+      webMethod = eiMethod.getAnnotation(WebMethod.class);
+
+    if (webMethod != null)
+      action = webMethod.action();
+    
+    return action;
   }
 
   public static Method getEIMethod(Method method)
