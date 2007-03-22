@@ -61,9 +61,6 @@ public class JavaValue extends ResourceValue
 
   public JavaValue(Env env, Object object, JavaClassDef def)
   {
-    if (object == null)
-      throw new NullPointerException();
-    
     _env = env;
     _classDef = def;
     _object = object;

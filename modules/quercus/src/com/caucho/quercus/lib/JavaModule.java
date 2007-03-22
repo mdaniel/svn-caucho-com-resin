@@ -49,6 +49,7 @@ public class JavaModule extends AbstractQuercusModule {
 
   /**
    * Call the Java constructor and return the wrapped Java object.
+   * If constructor is not available, then return static class definition.
    */
   public static Object java(Env env,
 			   String className,
@@ -57,10 +58,18 @@ public class JavaModule extends AbstractQuercusModule {
     try {
       JavaClassDef def = env.getJavaClassDefinition(className);
 
-      if (def != null)
-        return def.callNew(env, args);
+      if (def == null) {
+        env.warning(L.l("could not find Java class {0}", className));
+        return null;
+      }
+      
+      Value newObj = def.callNew(env, args);
 
-      return new JavaValue(env, null, def);
+      if (newObj.isNull())
+        return new JavaValue(env, null, def);
+      else
+        return newObj;
+
     } catch (Throwable e) {
       env.warning(e);
 
@@ -69,7 +78,7 @@ public class JavaModule extends AbstractQuercusModule {
   }
 
   /**
-   * Call the Java constructor and return the wrapped Java object.
+   * Returns the static class definition of a Java class.
    */
   public static Object java_class(Env env,
 				  String className)
@@ -77,6 +86,11 @@ public class JavaModule extends AbstractQuercusModule {
     try {
       JavaClassDef def = env.getJavaClassDefinition(className);
 
+      if (def == null) {
+        env.warning(L.l("could not find Java class {0}", className));
+        return null;
+      }
+      
       return new JavaValue(env, null, def);
     } catch (Throwable e) {
       env.warning(e);
@@ -85,4 +99,3 @@ public class JavaModule extends AbstractQuercusModule {
     }
   }
 }
-

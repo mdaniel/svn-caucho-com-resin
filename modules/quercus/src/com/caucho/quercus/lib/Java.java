@@ -32,17 +32,42 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.program.JavaClassDef;
+import com.caucho.util.L10N;
 
 /**
  * Java object facade.
  */
 public class Java {
+  private static final L10N L = new L10N(Java.class);
+  
   /**
    * Create a new Java API object.
    */
   public static Object __construct(Env env,
                                    String className, Value []args)
   {
-    return JavaModule.java(env, className, args);
+    try {
+      JavaClassDef def = env.getJavaClassDefinition(className);
+
+      if (def == null) {
+        env.warning(L.l("could not find Java class ", className));
+        return null;
+      }
+
+      Value newObj = def.callNew(env, args);
+
+      if (newObj.isNull()) {
+        env.warning(L.l("public Java constructor for class {0} not found", className));
+        return null;
+      }
+
+      return newObj;
+
+    } catch (Throwable e) {
+      env.warning(e);
+
+      return null;
+    }
   }
 }
