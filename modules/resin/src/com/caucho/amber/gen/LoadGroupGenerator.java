@@ -127,7 +127,6 @@ public class LoadGroupGenerator extends ClassComponent {
       // ejb/06j2
       if (_relatedType.getHasLoadCallback()) {
         out.println();
-        out.println("System.out.println(__caucho_loadMask_0);");
         out.println("__caucho_load_callback();");
       }
 

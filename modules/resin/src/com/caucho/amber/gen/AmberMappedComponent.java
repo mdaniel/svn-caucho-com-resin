@@ -856,13 +856,15 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     out.println();
-    out.println("__caucho_flush_callback();");
-
-    out.println();
 
     // if (version == null)
     out.println("if (isDirty) {");
     out.pushDepth();
+
+    // ejb/0605
+    out.println();
+    out.println("__caucho_flush_callback();");
+
     // else {
     // jpa/0x02
     //  out.println("if (! (isDirty || " + version.generateIsNull() + "))");

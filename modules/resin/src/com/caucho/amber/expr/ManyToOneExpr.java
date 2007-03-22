@@ -172,7 +172,6 @@ public class ManyToOneExpr extends AbstractPathExpr {
   @Override
   public boolean exists(FromItem from)
   {
-    System.out.println("P: " + _parent);
     return (_fromItem == from
 	    && _parent.exists());
   }

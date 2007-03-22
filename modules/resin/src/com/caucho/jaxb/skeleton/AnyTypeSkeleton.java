@@ -159,7 +159,7 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
       Skeleton skeleton = _context.findSkeletonForObject(obj);
 
       if (skeleton != null) {
-        String typeName = StaxUtil.qnameToString(out, skeleton.getTypeName());
+        String typeName = null;//StaxUtil.qnameToString(out, skeleton.getTypeName());
 
         // XXX if (typeName == null) {}
 

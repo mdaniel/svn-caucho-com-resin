@@ -73,7 +73,7 @@ class BinaryExpr extends Expr {
   {
     /*
     if (_left.getComponentCount() != _right.getComponentCount()) {
-      throw error(L.l("`{0}' has mismatched types `{1}' != `{2}'",
+      throw error(L.l("'{0}' has mismatched types '{1}' != '{2}'",
                       this, _left.getJavaType().getName(),
                       _right.getJavaType().getName()));
     }
@@ -85,7 +85,7 @@ class BinaryExpr extends Expr {
       if (! _left.getJavaType().equals(_right.getJavaType()) &&
           _left.isNumeric() != _right.isNumeric() &&
           ! (_left.isDate() && _right.isDate()))
-        throw error(L.l("`{0}' has mismatched types `{1}' != `{2}'",
+        throw error(L.l("'{0}' has mismatched types '{1}' != '{2}'",
                         this, _left.getJavaType().getName(),
                         _right.getJavaType().getName()));
       setJavaType(boolean.class);
@@ -98,10 +98,10 @@ class BinaryExpr extends Expr {
       if (_left.isDate() && _right.isDate()) {
       }
       else if (! _left.isNumeric())
-        throw error(L.l("`{0}' expects a numeric value at {1}.  Less-than and greater-than comparisons only make sense with numbers and dates.",
+        throw error(L.l("'{0}' expects a numeric value at {1}.  Less-than and greater-than comparisons only make sense with numbers and dates.",
                         this, _left.getJavaType().getName()));
       else if (! _right.isNumeric())
-        throw error(L.l("`{0}' expects a numeric value at {1}.  Less-than and greater-than comparisons only make sense with numbers and dates.",
+        throw error(L.l("'{0}' expects a numeric value at {1}.  Less-than and greater-than comparisons only make sense with numbers and dates.",
                         this, _right.getJavaType().getName()));
       
       setJavaType(boolean.class);
@@ -110,10 +110,10 @@ class BinaryExpr extends Expr {
     case Query.AND:
     case Query.OR:
       if (! _left.isBoolean())
-        throw error(L.l("`{0}' expects a boolean value at {1}",
+        throw error(L.l("'{0}' expects a boolean value at {1}",
                         _left, _left.getJavaType().getName()));
       if (! _right.isBoolean())
-        throw error(L.l("`{0}' expects a boolean value at {1}",
+        throw error(L.l("'{0}' expects a boolean value at {1}",
                         _right, _right.getJavaType().getName()));
       
       setJavaType(boolean.class);
@@ -124,10 +124,10 @@ class BinaryExpr extends Expr {
     case '*':
     case '/':
       if (! _left.isNumeric())
-        throw error(L.l("`{0}' expects a numeric value at {1}",
+        throw error(L.l("'{0}' expects a numeric value at {1}",
                         _left, _left.getJavaType().getName()));
       if (! _right.isNumeric())
-        throw error(L.l("`{0}' expects a numeric value at {1}",
+        throw error(L.l("'{0}' expects a numeric value at {1}",
                         _right, _right.getJavaType().getName()));
 
       /*
