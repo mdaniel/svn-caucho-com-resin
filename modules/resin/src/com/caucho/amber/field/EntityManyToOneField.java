@@ -724,7 +724,7 @@ public class EntityManyToOneField extends CascadableField {
 
     String proxyType = getEntityTargetType().getProxyClass().getName();
     boolean isProxy = ! isJPA;
-    
+
     String varName = "v" + index;
     String proxyVarName;
 
@@ -737,7 +737,7 @@ public class EntityManyToOneField extends CascadableField {
       out.println(proxyType + " " + proxyVarName + " = null;");
 
     out.println(targetTypeExt + " " + varName + " = null;");
-    
+
     out.println();
 
     Id id = getEntityTargetType().getId();
@@ -827,7 +827,7 @@ public class EntityManyToOneField extends CascadableField {
 
       varName = "((" + _targetType.getInstanceClassName() + ") " + varName + ")";
 
-      out.println(varName + ".__caucho_loadMask_" + targetGroup + " |= " + targetMask + "L;");
+      out.println(varName + ".__caucho_setLoadMask(" + varName + ".__caucho_getLoadMask(" + targetGroup + ") | " + targetMask + "L, " + targetGroup + ");");
 
       // jpa/0ge4
       String thisContextEntity = "(" + _targetField.getJavaTypeName() /* getSourceType().getInstanceClassName() */ + ") contextEntity";

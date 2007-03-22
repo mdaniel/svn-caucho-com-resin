@@ -1807,7 +1807,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     throws IOException
   {
     out.println();
-    out.println("public void __caucho_setLoadMask(long loadMask, int loadGroup)");
+    out.println("public long __caucho_getLoadMask(int loadGroup)");
     out.println("{");
     out.pushDepth();
 
@@ -1815,6 +1815,27 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     int loadCount = _relatedType.getLoadGroupIndex();
+
+    for (int i = 0; i <= loadCount / 64; i++) {
+      out.println("case " + i + ":");
+      out.println("  return __caucho_loadMask_" + i + ";");
+    }
+
+    out.popDepth();
+    out.println("}");
+
+    out.println("return 0;");
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public void __caucho_setLoadMask(long loadMask, int loadGroup)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("switch (loadGroup) {");
+    out.pushDepth();
 
     for (int i = 0; i <= loadCount / 64; i++) {
       out.println("case " + i + ":");

@@ -146,6 +146,11 @@ public interface Entity extends MappedSuperclass
   public void __caucho_copyLoadMaskFrom(Entity sourceEntity);
 
   /**
+   * Returns the load mask value for a load group.
+   */
+  public long __caucho_getLoadMask(int loadGroup);
+
+  /**
    * Sets the load mask value for a load group.
    */
   public void __caucho_setLoadMask(long loadMask, int loadGroup);
