@@ -178,7 +178,6 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
     if (_isClosed)
       return;
     */
-
     _charBuffer[_charLength++] = (char) ch;
 
     if (SIZE <= _charLength)
@@ -314,13 +313,14 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
 	_in = new BufferInputStream();
       _byteBuffer[0] = (byte) ch;
       _encodingReader = Encoding.getReadEncoding(_in, getEncoding());
-    }
 
-    if (_encodingReader == null) {
-      print((char) ch);
-      return;
+      if (_encodingReader == null) {
+	print((char) ch);
+	return;
+      }
     }
     
+    _byteBuffer[0] = (byte) ch;
     _in.init(_byteBuffer, 0, 1);
 
     while ((ch = _encodingReader.read()) >= 0) {
