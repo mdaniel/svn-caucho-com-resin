@@ -50,6 +50,7 @@
       <item link="esb-hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
       <item link="esb-servlet-client/index.xtp" title="An ESB client"/>
       <item link="rest-flickr/index.xtp" title="Flickr REST"/>
+      <item link="soa-member-groups/index.xtp" title="JAX-WS example"/>
     </item>
 
     <!--
