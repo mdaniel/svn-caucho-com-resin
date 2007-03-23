@@ -741,20 +741,25 @@ abstract public class RelatedType extends AbstractStatefulType {
     if (loadGroupIndex == 0 && getDiscriminator() != null)
       index++;
 
-    ArrayList<AmberField> fields = getMappedSuperclassFields();
+    RelatedType parentType = this;
 
-    for (int i = 0; i < 2; i++) {
-      if (fields != null) {
-        for (int j = 0; j < fields.size(); j++) {
-          AmberField field = fields.get(j);
+    // jpa/0l40
+    do {
+      ArrayList<AmberField> fields = parentType.getMappedSuperclassFields();
 
-          if (field.getLoadGroupIndex() == loadGroupIndex)
+      for (int i = 0; i < 2; i++) {
+        if (fields != null) {
+          for (int j = 0; j < fields.size(); j++) {
+            AmberField field = fields.get(j);
+
+            // jpa/0l40 if (field.getLoadGroupIndex() == loadGroupIndex)
             index = field.generatePostLoadSelect(out, index);
+          }
         }
-      }
 
-      fields = getFields();
-    }
+        fields = parentType.getFields();
+      }
+    } while ((parentType = parentType.getParentType()) != null);
 
     return index;
   }

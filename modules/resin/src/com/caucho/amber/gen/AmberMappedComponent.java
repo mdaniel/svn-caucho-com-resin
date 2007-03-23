@@ -2221,7 +2221,16 @@ abstract public class AmberMappedComponent extends ClassComponent {
     throws IOException
   {
     out.print("sql" + rootTableName + " = \"select ");
-    out.print(_relatedType.generateLoadSelect("o"));
+
+    RelatedType parentType = _relatedType;
+
+    // jpa/0l32
+    if (_relatedType.getDiscriminator() != null) {
+      while (parentType.getParentType() != null)
+        parentType = parentType.getParentType();
+    }
+
+    out.print(parentType.generateLoadSelect("o"));
     out.print(" from ");
 
     if (rootTableName == null)

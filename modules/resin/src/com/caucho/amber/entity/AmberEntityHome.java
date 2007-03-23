@@ -386,6 +386,7 @@ public class AmberEntityHome {
         if (_homeBean == null && _configException != null)
           throw _configException;
 
+        // jpa/0l00, jpa/0l32
         // XXX: this is an initial optimization and bug fix also for jpa/0s29
         // XXX: another point is inheritance with many-to-one (jpa/0l40 and jpa/0s29)
         //      still get twice the number of loading SQLs.
