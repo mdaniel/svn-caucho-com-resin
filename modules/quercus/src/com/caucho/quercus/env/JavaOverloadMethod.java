@@ -162,23 +162,31 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
    */
   public Value call(Env env, Object obj, Value []args)
   {
-    AbstractJavaMethod []methods = null;
-
     if (_methodTable.length <= args.length) {
       if (_restMethodTable.length == 0)
-        throw new QuercusException(L.l("'{0}' method call has too many arguments", getName()));
-    }
-    else if (_methodTable[args.length].length == 1) {
-        return _methodTable[args.length][0].call(env, obj, args);
+        return env.error(L.l("'{0}' overloaded method call with {1} arguments has too many arguments", getName(), args.length));
+      else {
+        AbstractJavaMethod method =
+          getBestFitJavaMethod(null, _restMethodTable, args);
+
+        return method.call(env, obj, args);
+      }
     }
     else {
-      methods = _methodTable[args.length];
-    }
-    
-    AbstractJavaMethod method =
-      getBestFitJavaMethod(methods, _restMethodTable, args);
+      AbstractJavaMethod []methods = _methodTable[args.length];
 
-    return method.call(env, obj, args);
+      if (methods == null && _restMethodTable.length == 0) {
+        return env.error(L.l("'{0}' overloaded method call with {1} arguments does not match any overloaded method", getName(), args.length));
+      }
+
+      if (methods != null && methods.length == 1)
+        return _methodTable[args.length][0].call(env, obj, args);
+
+      AbstractJavaMethod method =
+        getBestFitJavaMethod(methods, _restMethodTable, args);
+
+      return method.call(env, obj, args);
+    }
   }
   
   /**
