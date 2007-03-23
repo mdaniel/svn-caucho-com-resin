@@ -348,13 +348,18 @@ public class SocketModule extends AbstractQuercusModule {
     return StreamModule.stream_set_timeout(env, stream, seconds, milliseconds);
   }
 
-  public static Value socket_write(Env env, @NotNull SocketReadWrite socket,
+  public static Value socket_write(Env env,
+                                   @NotNull SocketReadWrite socket,
                                    @NotNull InputStream is, 
                                    @Optional("-1") int length)
   {
     if (is == null)
       return BooleanValue.FALSE;
-    
+
+    // php/4800
+    if (length < 0)
+      length = Integer.MAX_VALUE;
+
     int result = socket.write(is, length);
 
     if (result < 0)

@@ -52,7 +52,6 @@ public class XmlReader
 
   private int _depth;
   private int _lastNodeType;
-  private int _lastNonTextNode;
 
   private int _currentNodeType;
 
@@ -131,8 +130,8 @@ public class XmlReader
    * @return true if the stream is open, false otherwise
    */
   private boolean streamIsOpen() {
-     return _streamReader != null;
-   }
+    return _streamReader != null;
+  }
 
   /**
    * Returns the number of attributes of the current element.
@@ -144,8 +143,8 @@ public class XmlReader
       return NullValue.NULL;
 
     try {
-            if (_currentNodeType == XMLStreamConstants.CHARACTERS)
-                    return LongValue.create(0);
+      if (_currentNodeType == XMLStreamConstants.CHARACTERS)
+        return LongValue.create(0);
 
       return LongValue.create(_streamReader.getAttributeCount());
     }
@@ -196,8 +195,8 @@ public class XmlReader
       return NullValue.NULL;
 
     try {
-            if (_currentNodeType == XMLStreamConstants.CHARACTERS)
-                    return BooleanValue.FALSE;
+      if (_currentNodeType == XMLStreamConstants.CHARACTERS)
+        return BooleanValue.FALSE;
 
       return BooleanValue.create(_hasAttribute ||  _streamReader.getAttributeCount() > 0);
     }
@@ -244,10 +243,13 @@ public class XmlReader
     if (! streamIsOpen())
       return NullValue.NULL;
 
-    // XXX: The only case I found for isEmptyElement was for something
+    // The only case I found for isEmptyElement was for something
     // like <element/>.  Even something like <element></element> was
-    // not considered empty.  Currently, <element/> is being returned as
-    // <element></element> so it can't be tested properly.
+    // not considered empty.
+    if (_currentNodeType == XMLStreamConstants.START_ELEMENT
+        && _streamReader.isEndElement())
+      return BooleanValue.TRUE;
+
     return BooleanValue.FALSE;
   }
 
@@ -262,12 +264,12 @@ public class XmlReader
 
     String name = "";
 
-          if (_currentNodeType == XMLStreamConstants.CHARACTERS)
-                  name = "#text";
-          else if (_currentNodeType == XMLStreamConstants.COMMENT)
-                  name = "#comment";
-          else
-                  name = _streamReader.getLocalName();
+    if (_currentNodeType == XMLStreamConstants.CHARACTERS)
+      name = "#text";
+    else if (_currentNodeType == XMLStreamConstants.COMMENT)
+      name = "#comment";
+    else
+      name = _streamReader.getLocalName();
 
     return StringValue.create(name);
   }
@@ -282,23 +284,24 @@ public class XmlReader
       return NullValue.NULL;
 
     try {
-            String name = "";
+      String name = "";
 
-            // XXX: Next line should be "String prefix = _streamReader.getPrefix();"
-            // but there was a NullPointerException for XMLStreamReaderImpl._name.
+      // XXX: Next line should be "String prefix = _streamReader.getPrefix();"
+      // but there was a NullPointerException for XMLStreamReaderImpl._name.
 
-            String prefix = null; // _streamReader.getPrefix();
+      // php/4618
+      String prefix = _streamReader.getPrefix();
 
-            if (_currentNodeType == XMLStreamConstants.CHARACTERS)
-                    name = "#text";
-            else if (_currentNodeType == XMLStreamConstants.COMMENT)
-                    name = "#comment";
-            else {
-                    if (prefix == null)
-                            name = _streamReader.getName().toString();
-                    else
-                            name = prefix + ":" + _streamReader.getLocalName().toString();
-            }
+      if (_currentNodeType == XMLStreamConstants.CHARACTERS)
+        name = "#text";
+      else if (_currentNodeType == XMLStreamConstants.COMMENT)
+        name = "#comment";
+      else {
+        if (prefix == null)
+          name = _streamReader.getName().toString();
+        else
+          name = prefix + ":" + _streamReader.getLocalName().toString();
+      }
 
       return StringValue.create(name);
     }
@@ -327,26 +330,26 @@ public class XmlReader
    * @return the node type, otherwise null
    */
   public Value getNodeType() {
-          if (! streamIsOpen())
-                  return NullValue.NULL;
+    if (! streamIsOpen())
+      return NullValue.NULL;
 
-          /*
-           Integer convertedInteger = _constConvertMap.get(_nextType);
+    /*
+   Integer convertedInteger = _constConvertMap.get(_nextType);
 
-           int convertedInt = convertedInteger.intValue();
+   int convertedInt = convertedInteger.intValue();
 
-           return LongValue.create(convertedInt);*/
+   return LongValue.create(convertedInt);*/
 
-          int convertedInt = SIGNIFICANT_WHITESPACE;
+    int convertedInt = SIGNIFICANT_WHITESPACE;
 
-          if (! _streamReader.isWhiteSpace()) {
-                  Integer convertedInteger =
-                  _constConvertMap.get(_streamReader.getEventType());
+    if (! _streamReader.isWhiteSpace()) {
+      Integer convertedInteger =
+        _constConvertMap.get(_streamReader.getEventType());
 
-                  convertedInt = convertedInteger.intValue();
-          }
+      convertedInt = convertedInteger.intValue();
+    }
 
-          return LongValue.create(convertedInt);
+    return LongValue.create(convertedInt);
   }
 
   /**
@@ -374,7 +377,7 @@ public class XmlReader
     // it probably should be only the text.
 
     if (_currentNodeType != XMLStreamConstants.END_ELEMENT)
-            return StringValue.create(_streamReader.getText());
+      return StringValue.create(_streamReader.getText());
 
     return StringValue.create(null);
   }
@@ -545,14 +548,14 @@ public class XmlReader
   public BooleanValue open(Env env, Path path) {
     try {
       XMLInputFactory factory = XMLInputFactory.newInstance();
-	
+
       _streamReader = factory.createXMLStreamReader(path.openRead());
     }
     catch (XMLStreamException ex) {
       log.log(Level.WARNING, ex.toString(), ex);
 
       env.warning(L.l("XML input file '{0}' cannot be opened for reading.",
-		      path));
+                      path));
 
       return BooleanValue.FALSE;
     }
@@ -568,18 +571,6 @@ public class XmlReader
   }
 
   /**
-   * Records the last node type.
-   *
-   */
-  private void updateLastNode() {
-    _lastNodeType = _currentNodeType;
-
-    if (_currentNodeType != XMLStreamConstants.CHARACTERS &&
-        _currentNodeType != XMLStreamConstants.COMMENT)
-            _lastNonTextNode = _currentNodeType;
-  }
-
-  /**
    * Updates the depth.
    *
    */
@@ -590,7 +581,7 @@ public class XmlReader
     else if ((_lastNodeType == XMLStreamConstants.CHARACTERS ||
               _lastNodeType == XMLStreamConstants.COMMENT) &&
                                                            _currentNodeType == XMLStreamConstants.END_ELEMENT)
-            _depth--;
+      _depth--;
   }
 
   /**
@@ -598,23 +589,23 @@ public class XmlReader
    *
    */
   private void updateAttribute(Env env) {
-          _hasAttribute = false;
+    _hasAttribute = false;
 
-          String key = getName(env).toString() + _depth;
+    String key = getName(env).toString() + _depth;
 
-           if (_currentNodeType == XMLStreamConstants.START_ELEMENT &&
-               _streamReader.getAttributeCount() > 0) {
-                           _startElements.put(key, _depth);
+    if (_currentNodeType == XMLStreamConstants.START_ELEMENT &&
+        _streamReader.getAttributeCount() > 0) {
+      _startElements.put(key, _depth);
 
-                           _hasAttribute = true;
-                   }
+      _hasAttribute = true;
+    }
 
-           if (_currentNodeType == XMLStreamConstants.END_ELEMENT &&
-               _startElements.containsKey(key))  {
-                                   _hasAttribute = true;
+    if (_currentNodeType == XMLStreamConstants.END_ELEMENT &&
+        _startElements.containsKey(key))  {
+      _hasAttribute = true;
 
-                                   _startElements.remove(key);
-          }
+      _startElements.remove(key);
+    }
   }
 
   /**
@@ -630,15 +621,21 @@ public class XmlReader
       if (! _streamReader.hasNext())
         return BooleanValue.FALSE;
 
-      updateLastNode();
+      _lastNodeType = _currentNodeType;
 
+      // php/4618
+      Value isEmptyElement = getIsEmptyElement();
+      
       _currentNodeType = _streamReader.next();
 
+      if (isEmptyElement.toBoolean())
+        return read(env);
+
       if (_currentNodeType == XMLStreamConstants.SPACE)
-              return read(env);
+        return read(env);
 
       if (_currentNodeType == XMLStreamConstants.END_DOCUMENT)
-              return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       updateDepth(env);
 
@@ -698,49 +695,49 @@ public class XmlReader
   }
 
   static {
-          _constConvertMap.put(XMLStreamConstants.ATTRIBUTE,
-                               ATTRIBUTE);
-          _constConvertMap.put(XMLStreamConstants.CDATA,
-                               CDATA);
-          _constConvertMap.put(XMLStreamConstants.CHARACTERS,
-                               TEXT);
-          _constConvertMap.put(XMLStreamConstants.COMMENT,
-                               COMMENT);
-          _constConvertMap.put(XMLStreamConstants.END_ELEMENT,
-                               END_ELEMENT);
-        /*
-  	_constConvertMap.put(XMLStreamConstants.END_ENTITY,
-  			END_ENTITY);
-        */
-          // XXX: XMLStreamConstants.ENTITY_DECLARATION is 17 in the BAE docs
-          // but is 15 in the Resin implementation.
-          _constConvertMap.put(XMLStreamConstants.ENTITY_DECLARATION,
-                               ENTITY); // ENTITY used twice
-          _constConvertMap.put(XMLStreamConstants.ENTITY_REFERENCE,
-                               ENTITY_REF);
-          _constConvertMap.put(XMLStreamConstants.NOTATION_DECLARATION,
-                               NOTATION);
-          _constConvertMap.put(XMLStreamConstants.PROCESSING_INSTRUCTION,
-                               PI);
-          _constConvertMap.put(XMLStreamConstants.SPACE,
-                               WHITESPACE);
-          _constConvertMap.put(XMLStreamConstants.START_ELEMENT,
-                               ELEMENT);
-        /*
-  	_constConvertMap.put(XMLStreamConstants.START_ENTITY,
-  			ENTITY);
-        */
-          // Following constants did not match
-          _constConvertMap.put(XMLStreamConstants.DTD, NONE);
-          _constConvertMap.put(XMLStreamConstants.END_DOCUMENT, NONE);
-          _constConvertMap.put(XMLStreamConstants.NAMESPACE, NONE);
-          _constConvertMap.put(XMLStreamConstants.START_DOCUMENT, NONE);
-          _constConvertMap.put(0, NONE); // Pre-Read
-          _constConvertMap.put(-1, NONE);
-          _constConvertMap.put(-1, DOC);
-          _constConvertMap.put(-1, DOC_TYPE);
-          _constConvertMap.put(-1, DOC_FRAGMENT);
-          _constConvertMap.put(-1, DOC_TYPE);
-          _constConvertMap.put(-1, XML_DECLARATION);
+    _constConvertMap.put(XMLStreamConstants.ATTRIBUTE,
+                         ATTRIBUTE);
+    _constConvertMap.put(XMLStreamConstants.CDATA,
+                         CDATA);
+    _constConvertMap.put(XMLStreamConstants.CHARACTERS,
+                         TEXT);
+    _constConvertMap.put(XMLStreamConstants.COMMENT,
+                         COMMENT);
+    _constConvertMap.put(XMLStreamConstants.END_ELEMENT,
+                         END_ELEMENT);
+    /*
+      _constConvertMap.put(XMLStreamConstants.END_ENTITY,
+                      END_ENTITY);
+    */
+    // XXX: XMLStreamConstants.ENTITY_DECLARATION is 17 in the BAE docs
+    // but is 15 in the Resin implementation.
+    _constConvertMap.put(XMLStreamConstants.ENTITY_DECLARATION,
+                         ENTITY); // ENTITY used twice
+    _constConvertMap.put(XMLStreamConstants.ENTITY_REFERENCE,
+                         ENTITY_REF);
+    _constConvertMap.put(XMLStreamConstants.NOTATION_DECLARATION,
+                         NOTATION);
+    _constConvertMap.put(XMLStreamConstants.PROCESSING_INSTRUCTION,
+                         PI);
+    _constConvertMap.put(XMLStreamConstants.SPACE,
+                         WHITESPACE);
+    _constConvertMap.put(XMLStreamConstants.START_ELEMENT,
+                         ELEMENT);
+    /*
+      _constConvertMap.put(XMLStreamConstants.START_ENTITY,
+                      ENTITY);
+    */
+    // Following constants did not match
+    _constConvertMap.put(XMLStreamConstants.DTD, NONE);
+    _constConvertMap.put(XMLStreamConstants.END_DOCUMENT, NONE);
+    _constConvertMap.put(XMLStreamConstants.NAMESPACE, NONE);
+    _constConvertMap.put(XMLStreamConstants.START_DOCUMENT, NONE);
+    _constConvertMap.put(0, NONE); // Pre-Read
+    _constConvertMap.put(-1, NONE);
+    _constConvertMap.put(-1, DOC);
+    _constConvertMap.put(-1, DOC_TYPE);
+    _constConvertMap.put(-1, DOC_FRAGMENT);
+    _constConvertMap.put(-1, DOC_TYPE);
+    _constConvertMap.put(-1, XML_DECLARATION);
   }
 }

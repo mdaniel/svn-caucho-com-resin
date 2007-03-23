@@ -447,7 +447,14 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
   public boolean isEndElement()
   {
-    return _current == END_ELEMENT;
+    if (_current == END_ELEMENT)
+      return true;
+
+    // php/4618
+    if (_current == START_ELEMENT && _isShortTag)
+      return true;
+
+    return false;
   }
 
   public boolean isStandalone()
@@ -596,8 +603,10 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     throws IOException, XMLStreamException
   {
     _namespaceTracker.push();
-    
+
     StaxIntern.Entry eltName = readName(false);
+
+    _isShortTag = false;
 
     int ch = readAttributes();
 
