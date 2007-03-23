@@ -145,7 +145,9 @@ function display_header($script, $title, $server)
 
   <td valign="top">
    <ul class="status">
+<? if (! empty($server)) { ?>
    <li class="server">Server: <?= $server ?></li>
+<? }  ?>
    <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
    <li><a href="<?= $script ?>">refresh</a></li>
    </ul>

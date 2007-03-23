@@ -8,7 +8,7 @@
 
 require_once "inc.php";
 
-display_header("digest.php", "Calculate a password digest");
+display_header("digest.php", "Calculate a password digest", "");
 
 $digest = NULL;
 $validation_error = NULL;
