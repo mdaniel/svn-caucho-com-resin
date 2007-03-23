@@ -923,5 +923,4 @@ public class ResinWatchdog extends AbstractManagedObject
       e.printStackTrace();
     }
   }
-
 }

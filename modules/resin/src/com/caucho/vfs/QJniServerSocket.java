@@ -115,7 +115,11 @@ public class QJniServerSocket {
     throws IOException
   {
     try {
-      Class cl = Class.forName("com.caucho.vfs.JniServerSocketImpl");
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+      
+      Class cl = Class.forName("com.caucho.vfs.JniServerSocketImpl",
+                               false, loader);
 
       Method method = cl.getMethod("create",
 				   new Class[] { String.class,

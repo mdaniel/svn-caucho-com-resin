@@ -81,11 +81,16 @@ public class ResinBoot {
   ResinBoot(String []argv)
     throws Exception
   {
+    _argv = argv;
+    
+    calculateResinHome();
+    
+    ClassLoader loader = ProLoader.create(_resinHome);
+    if (loader != null)
+      Thread.currentThread().setContextClassLoader(loader);
+    
     Environment.init();
 
-    _argv = argv;
-
-    calculateResinHome();
     calculateRootDirectory();
 
     parseCommandLine(argv);
