@@ -2239,7 +2239,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.print(rootTableName);
 
     out.print(" o where ");
-    out.print(_relatedType.getId().generateMatchArgWhere("o"));
+    // jpa/0s27
+    out.print(parentType.getId().generateMatchArgWhere("o"));
     out.println("\";");
 
     out.println("pstmt" + rootTableName + " = aConn.prepareStatement(sql" + rootTableName + ");");
