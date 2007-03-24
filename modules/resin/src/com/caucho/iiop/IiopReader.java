@@ -232,10 +232,13 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     return _xid;
   }
 
-  public void readRequest()
+  public boolean readRequest()
     throws IOException
   {
     int len = _rs.readAll(_header, 0, _header.length);
+
+    if (len < 0)
+      return false;
 
     if (_header[0] != 'G' ||
         _header[1] != 'I' ||
@@ -260,10 +263,9 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     
     _type = _header[7];
 
-    // IIOP 1.2 starts alignment after the 12-byte header
     _in = new InputStreamMessageReader(_rs,
 				       ! _hasMoreFragments,
-				       _minor >= 2 ? 12 : 0);
+				       0);
 
     // debug
     //System.out.println("---");
@@ -277,6 +279,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       case MSG_REPLY:
         readReply10();
         break;
+      case MSG_CLOSE_CONNECTION:
+	return false;
       case MSG_ERROR:
         throw new RuntimeException("MSG_ERROR: unknown protocol error");
       default:
@@ -291,6 +295,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       case MSG_REPLY:
         readReply10();
         break;
+      case MSG_CLOSE_CONNECTION:
+	return false;
       case MSG_ERROR:
         throw new RuntimeException("MSG_ERROR: unknown protocol error");
       default:
@@ -305,6 +311,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       case MSG_REPLY:
         readReply12();
         break;
+      case MSG_CLOSE_CONNECTION:
+	return false;
       case MSG_ERROR:
         throw new RuntimeException("MSG_ERROR: unknown protocol error");
       default:
@@ -313,6 +321,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     }
     else
       throw new IOException("unknown minor");
+
+    return true;
   }
 
   private void readRequest10()
@@ -385,8 +395,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
     // align(8) is required for IIOP 1.2, in combination of the
     // initial offset of 12 to align the data after the 12byte header.
-    // the ejb/1410 vs ejb/1230 (??)
-    _in.align(8);
+    // ejb/1410 vs ejb/1230, ejb/1141 (??)
+    //_in.align(8);
   }
 
   private void readReply12()
@@ -437,6 +447,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     for (int i = 0; i < length; i++) {
       int serviceId = _in.read_long();
       int dataLength = _in.read_long();
+
+      int startOffset = _in.setOffset(0);
       
       if (serviceId == SERVICE_CODE_SET) {
         int endian = _in.read();
@@ -470,6 +482,8 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
       else {
         _in.skip(dataLength);
       }
+
+      _in.addOffset(startOffset);
     }
   }
 
@@ -1355,6 +1369,12 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     throws IOException
   {
     _in.align(8);
+  }
+
+  public void alignMethodArgs()
+  {
+    if (_minor >= 2)
+      _in.align(8);
   }
 
   /**

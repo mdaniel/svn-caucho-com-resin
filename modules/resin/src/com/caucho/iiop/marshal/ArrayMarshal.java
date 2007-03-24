@@ -63,6 +63,7 @@ public class ArrayMarshal extends Marshal
   public Object unmarshal(org.omg.CORBA_2_3.portable.InputStream is)
   {
     try {
+      //int junk = is.read_long();  // XXX: encapsulated sequence length?
       int len = is.read_long();
 
       if (len < 0 || len >= 65536)

@@ -75,6 +75,9 @@ public class SkeletonMethod {
   {
     Object []args = new Object[_marshalArgs.length];
 
+    if (args.length > 0)
+    reader.alignMethodArgs();
+
     for (int i = 0; i < args.length; i++) {
       args[i] = _marshalArgs[i].unmarshal(reader);
     }

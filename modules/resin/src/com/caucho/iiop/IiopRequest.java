@@ -167,21 +167,13 @@ public class IiopRequest implements ServerRequest {
 				    _hostName, _port, "/NameService");
       }
 
-      int ch = _readStream.read();
-
-      if (ch < 0) {
-	log.finer("IIOP[" + _conn.getId() + "]: end of stream");
-	return false;
-      }
-
-      _readStream.unread();
-
       _reader.init(_readStream);
 
       _messageWriter.init(_writeStream);
       IiopWriter writer = _writer10;
 
-      _reader.readRequest();
+      if (! _reader.readRequest())
+	return false;
 
       switch (_reader.getMinorVersion()) {
       case 0:
@@ -307,11 +299,19 @@ public class IiopRequest implements ServerRequest {
       _messageWriter.close();
 
       _reader.completeRead();
+      /*
+      _messageWriter.start10Message(IiopReader.MSG_CLOSE_CONNECTION);
+      _messageWriter.close();
+      */
 
+      return true;
+
+      /*
       if (log.isLoggable(Level.FINER))
 	log.finer("IIOP[" + _conn.getId() + "]: recycle");
 
       return true;
+      */
     } catch (Throwable e) {
       log.log(Level.WARNING, "IIOP[" + _conn.getId() + "] " + e.toString(), e);
       return false;

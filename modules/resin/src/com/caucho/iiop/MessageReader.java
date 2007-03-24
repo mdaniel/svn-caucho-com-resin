@@ -40,7 +40,15 @@ abstract public class MessageReader
   /**
    * Sets the offset.
    */
-  abstract public void setOffset(int offset);
+  abstract public int setOffset(int offset);
+  
+  /**
+   * Sets the alignment (for sequences).
+   */
+  public void addOffset(int delta)
+  {
+    setOffset(getOffset() + delta);
+  }
   
   /**
    * Reads a byte.

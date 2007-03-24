@@ -37,6 +37,7 @@ class InputStreamMessageReader extends MessageReader
   private InputStream _is;
   private int _offset;
   private int _chunkOffset;
+  private int _align;
 
   private TempBuffer _tempBuffer;
   private byte []_buffer;
@@ -65,13 +66,13 @@ class InputStreamMessageReader extends MessageReader
 
       is.read(_buffer, 0, _length);
 
-      /*
-      if (log.isLoggable(Level.FINER))
-	writeHexGroup(_buffer, 0, _length);
-      */
+      // writeHexGroup(_buffer, 0, _length);
+
+      offset = 12;
 	       
       _chunkOffset = offset;
       _offset = offset;
+      _align = 0;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -82,20 +83,19 @@ class InputStreamMessageReader extends MessageReader
    */
   public int getOffset()
   {
-    return _offset;
+    return _offset + _align;
   }
 
   /**
    * Sets the offset.
    */
-  public void setOffset(int offset)
+  public int setOffset(int offset)
   {
-    int delta = offset - _offset;
-    
-    _offset = offset;
+    int oldOffset = _offset + _align;
 
-    // XXX:
-    //_is.setBufferOffset(_is.getBufferOffset() + delta);
+    _align = offset - _offset;
+
+    return oldOffset;
   }
   
   /**
@@ -172,7 +172,6 @@ class InputStreamMessageReader extends MessageReader
 
     _isLast = (flags & 2) != 2;
 
-    System.out.println("FRAGMENT:");
     _chunkOffset = _offset;
     _length = (((_is.read() & 0xff) << 24)
 	       + ((_is.read() & 0xff) << 16)

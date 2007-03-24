@@ -86,7 +86,7 @@ public class Iiop12Writer extends Iiop10Writer
       write_long(0);       // service context list
 
     // see IiopRead12.read12Request
-    _out.align(8);
+    //_out.align(8);
   }
   
   /**

@@ -139,4 +139,15 @@ public class Iiop10Writer extends IiopWriter
   {
     _out.start10Message(type);
   }
+  
+  /**
+   * Writes the header for a request
+   *
+   * @param operation the method to call
+   */
+  public void sendClose()
+    throws IOException
+  {
+    startMessage(IiopReader.MSG_CLOSE_CONNECTION);
+  }
 }
