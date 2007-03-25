@@ -182,6 +182,11 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
     _context = new ReaderContext();
   }
 
+  public ValueHandler getValueHandler()
+  {
+    return _valueHandler;
+  }
+
   public int getMajorVersion()
   {
     return _major;
@@ -1162,7 +1167,7 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
   {
     int kind = read_long();
 
-    //System.out.println("KIND: " + kind);
+    //System.out.println("KIND: " + Integer.toHexString(kind) + " " + kind);
 
     try {
     switch (kind) {
@@ -1373,8 +1378,9 @@ public class IiopReader extends org.omg.CORBA_2_3.portable.InputStream {
 
   public void alignMethodArgs()
   {
-    if (_minor >= 2)
+    if (_minor >= 2) {
       _in.align(8);
+    }
   }
 
   /**

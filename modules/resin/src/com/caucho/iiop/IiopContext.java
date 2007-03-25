@@ -69,6 +69,7 @@ public class IiopContext {
   public void setService(String url, IiopRemoteService service)
   {
     log.fine("IIOP: add-service " + url);
+    
     _serviceMap.put(url, service);
   }
 

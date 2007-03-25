@@ -87,7 +87,7 @@ public class StreamMessageWriter extends MessageWriter
   {
     _version = 0;
     
-    _offset = 0;
+    _offset = 12;
     _length = 12;
 
     _buffer[4] = 1;
@@ -104,7 +104,7 @@ public class StreamMessageWriter extends MessageWriter
   {
     _version = 1;
     
-    _offset = 0;
+    _offset = 12;
     _length = 12;
 
     _buffer[4] = 1;

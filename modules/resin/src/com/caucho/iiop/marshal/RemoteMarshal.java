@@ -55,7 +55,7 @@ public class RemoteMarshal extends Marshal
   public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
                       Object value)
   {
-    System.out.println("V: " + value);
+    //System.out.println("V: " + value);
     if (value instanceof IiopProxy) {
       IiopProxyHandler handler
 	= (IiopProxyHandler) Proxy.getInvocationHandler(value);

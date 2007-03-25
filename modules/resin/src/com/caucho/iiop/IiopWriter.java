@@ -233,6 +233,10 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
   abstract public void startReplyUserException(int requestId)
     throws IOException;
 
+  public void alignMethodArgs()
+  {
+  }
+
   /**
    * Writes an IOR to the output.
    */
@@ -595,7 +599,8 @@ abstract public class IiopWriter extends org.omg.CORBA_2_3.portable.OutputStream
 	_context.putRef(obj, getOffset());
 
 	write_long(VALUE_TAG | VALUE_ONE_REP_ID);
-	write_string(valueHandler.getRMIRepositoryID(obj.getClass()));
+	String repId = valueHandler.getRMIRepositoryID(obj.getClass());
+	write_string(repId);
 	valueHandler.writeValue(this, obj);
       }
       else {

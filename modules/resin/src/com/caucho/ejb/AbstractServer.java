@@ -249,6 +249,11 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void setRemoteObjectClass(Class cl)
   {
     _remoteObjectClass = cl;
+
+    if (_remoteObjectList == null) {
+      _remoteObjectList = new ArrayList<Class>();
+      _remoteObjectList.add(cl);
+    }
   }
 
   /**

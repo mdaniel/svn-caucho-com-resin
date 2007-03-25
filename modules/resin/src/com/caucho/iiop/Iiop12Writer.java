@@ -85,6 +85,7 @@ public class Iiop12Writer extends Iiop10Writer
     else
       write_long(0);       // service context list
 
+    // ejb/1231, ejb/1331
     // see IiopRead12.read12Request
     //_out.align(8);
   }
@@ -154,6 +155,11 @@ public class Iiop12Writer extends Iiop10Writer
     write_long(requestId);
     write_long(IiopReader.STATUS_USER_EXCEPTION);
     write_long(0);         // service control list
+  }
+
+  public void alignMethodArgs()
+  {
+    _out.align(8);
   }
 
   /**

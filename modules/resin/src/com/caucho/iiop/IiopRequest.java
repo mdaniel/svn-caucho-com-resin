@@ -284,12 +284,17 @@ public class IiopRequest implements ServerRequest {
 	// ejb/1110
 
 	writer.startReplyUserException(_reader.getRequestId());
+	String repId = _reader.getValueHandler().getRMIRepositoryID(e.getClass());
+
+	/*
 	String exName = e.getClass().getName().replace('.', '/');
 	if (exName.length() > 20)
 	  exName = exName.substring(0, 20);
 	writer.write_string("IDL:" + exName + ":1.0");
 
 	//writer.write_string("RMI:" + exName + ":0");
+	*/
+	writer.write_string(repId);
 	writer.write_value(e);
       } finally {
 	if (xid != null)

@@ -41,12 +41,15 @@ public class AnyMarshal extends Marshal {
   public void marshal(org.omg.CORBA_2_3.portable.OutputStream os,
                       Object value)
   {
-    Util.writeAny(os, value);
+    // ejb/1261
+    //Util.writeAny(os, value);
+    os.write_value((java.io.Serializable) value);
   }
 
   @Override
   public Object unmarshal(org.omg.CORBA_2_3.portable.InputStream is)
   {
-    return Util.readAny(is);
+    //return Util.readAny(is);
+    return is.read_value();
   }
 }

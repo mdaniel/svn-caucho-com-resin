@@ -32,6 +32,7 @@ package com.caucho.iiop.orb;
 import java.util.ArrayList;
 import java.lang.reflect.Method;
 
+import com.caucho.iiop.*;
 import com.caucho.iiop.marshal.Marshal;
 import com.caucho.iiop.RemoteUserException;
 
@@ -84,6 +85,10 @@ public class MethodMarshal {
     try {
       org.omg.CORBA_2_3.portable.OutputStream os
 	= ((org.omg.CORBA_2_3.portable.OutputStream) obj._request(_name, true));
+
+      // ejb/1331
+      if (_args.length > 0)
+	((IiopWriter) os).alignMethodArgs();
     
       for (int i = 0; i < _args.length; i++) {
 	_args[i].marshal(os, args[i]);

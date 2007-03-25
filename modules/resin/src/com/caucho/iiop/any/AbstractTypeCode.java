@@ -221,7 +221,7 @@ abstract public class AbstractTypeCode extends TypeCode
    */
   public void writeValue(IiopWriter os, Object value)
   {
-    System.out.println("V: " + value);
+    //System.out.println("V: " + value);
     
     throw new UnsupportedOperationException(getClass().getName());
   }

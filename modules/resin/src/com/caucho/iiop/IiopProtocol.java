@@ -164,8 +164,10 @@ public class IiopProtocol extends Protocol {
 
       if (obj == null)
         return null;
+      
+      ArrayList<Class> apiList = service.getObjectAPI();
 
-      return new IiopSkeleton(obj, service.getObjectAPI(),
+      return new IiopSkeleton(obj, apiList,
                               service.getClassLoader(),
                               host, port, url + '?' + local);
     }

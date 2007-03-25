@@ -150,7 +150,7 @@ public class ValueTypeCode extends AbstractTypeCode
     short modifier = is.read_short();
 	
     ValueTypeCode typeCode = new ValueTypeCode(id, name, modifier);
-    System.out.println("V: " + id);
+    //System.out.println("V: " + id);
     // XXX: save
 	
     TypeCode base = is.read_TypeCode();
@@ -163,7 +163,7 @@ public class ValueTypeCode extends AbstractTypeCode
       
       typeCode.addMember(fieldName, fieldType, visibility);
 
-      System.out.println("V: " + fieldName + " " + fieldType);
+      //System.out.println("V: " + fieldName + " " + fieldType);
     }
 
     return typeCode;
