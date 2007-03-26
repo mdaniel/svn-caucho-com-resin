@@ -37,6 +37,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.BinaryStream;
 import com.caucho.quercus.lib.file.FileModule;
@@ -66,9 +67,9 @@ public class ZipModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public ZipDirectory zip_open(Env env,
-                               String filename)
+                               @NotNull String filename)
   {
-    if (filename == null || filename == "")
+    if (filename == null || filename.length() == 0)
       return null;
 
     BinaryStream s = FileModule.fopen(env, filename, "rb", false, null);
@@ -76,7 +77,7 @@ public class ZipModule extends AbstractQuercusModule {
     if (s == null)
       return null;
 
-    return new ZipDirectory((BinaryInput)s);
+    return new ZipDirectory((BinaryInput) s);
   }
 
   /**
@@ -87,10 +88,10 @@ public class ZipModule extends AbstractQuercusModule {
   public QuercusZipEntry zip_read(Env env,
                                   @NotNull ZipDirectory directory)
   {
-    try {
-      if (directory == null)
-        return null;
+    if (directory == null)
+      return null;
 
+    try {
       QuercusZipEntry qze = directory.zip_read();
       zip_entry_open(env, directory, qze, "rb");
 
@@ -104,8 +105,6 @@ public class ZipModule extends AbstractQuercusModule {
   /**
    * Returns the file name.
    *
-   * @param env
-   * @param zipEntry
    * @return false if zipEntry is null
    */
   public Value zip_entry_name(Env env,
@@ -120,7 +119,6 @@ public class ZipModule extends AbstractQuercusModule {
   /**
    * Returns the file's uncompressed size.
    *
-   * @param zipEntry
    * @return false if zipEntry is null
    */
   public Value zip_entry_filesize(@NotNull QuercusZipEntry entry)
@@ -138,15 +136,13 @@ public class ZipModule extends AbstractQuercusModule {
   {
     if (directory == null)
       return false;
+
     return directory.zip_close();
   }
 
   /**
    * Opens entry for decompression.
    *
-   * @param file
-   * @param entry
-   * @param mode ignored - always "rb" from fopen()
    * @return true on success or false on failure
    */
   public boolean zip_entry_open(Env env,
@@ -163,7 +159,6 @@ public class ZipModule extends AbstractQuercusModule {
   /**
    * Closes this entry's stream.
    *
-   * @param entry
    * @return true if successful, else false;
    */
   public boolean zip_entry_close(Env env,
@@ -172,6 +167,7 @@ public class ZipModule extends AbstractQuercusModule {
     try {
       if (entry == null)
         return false;
+
       return entry.zip_entry_close();
 
     } catch (IOException e) {
@@ -184,16 +180,15 @@ public class ZipModule extends AbstractQuercusModule {
   /**
    * Reads and decompresses entry's compressed data.
    *
-   * @param entry
-   * @param length
    * @return false or decompressed BinaryValue
    */
-  public Value zip_entry_read(Env env,
-                              @NotNull QuercusZipEntry entry,
-                              @Optional("1024") int length)
+  @ReturnNullAsFalse
+  public BinaryBuilderValue zip_entry_read(Env env,
+                                           @NotNull QuercusZipEntry entry,
+                                           @Optional("1024") int length)
   {
     if (entry == null)
-      return BooleanValue.FALSE;
+      return null;
 
     return entry.zip_entry_read(env, length);
   }
@@ -202,7 +197,6 @@ public class ZipModule extends AbstractQuercusModule {
    * Returns the compression method used for this entry.
    * Only "deflate" and "store" are supported.
    *
-   * @param entry
    * @return empty string, stored or deflated
    */
   public String zip_entry_compressionmethod(@NotNull QuercusZipEntry entry)
@@ -216,13 +210,12 @@ public class ZipModule extends AbstractQuercusModule {
   /**
    * Returns the size of the compressed data.
    *
-   * @param entry
    * @return -1, or compressed size
    */
-  public Value zip_entry_compressedsize(@NotNull QuercusZipEntry entry)
+  public long zip_entry_compressedsize(@NotNull QuercusZipEntry entry)
   {
     if (entry == null)
-      return new LongValue(-1);
+      return -1;
 
     return entry.zip_entry_compressedsize();
   }

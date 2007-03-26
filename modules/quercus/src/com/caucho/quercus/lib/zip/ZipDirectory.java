@@ -29,11 +29,8 @@
 package com.caucho.quercus.lib.zip;
 
 import com.caucho.quercus.lib.file.BinaryInput;
-import com.caucho.quercus.lib.file.ReadStreamInput;
-import com.caucho.vfs.*;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.zip.ZipEntry;
 
 /**
@@ -41,8 +38,7 @@ import java.util.zip.ZipEntry;
  */
 public class ZipDirectory
 {
-  private BinaryInput _oldIn;
-  private ReadStreamInput _in;
+  private BinaryInput _in;
   private byte[] _tmpBuf;
   private ZipEntry _currentEntry;
 
@@ -51,10 +47,7 @@ public class ZipDirectory
 
   public ZipDirectory(BinaryInput in)
   {
-    _oldIn = in;
-    
-    VfsStream s = new VfsStream(in.getInputStream(), null);
-    _in = new ReadStreamInput(new ReadStream(s));
+    _in = in;
     _tmpBuf = new byte[32];
     _eof = false;
   }
@@ -70,14 +63,10 @@ public class ZipDirectory
     long position = _in.getPosition();
     ZipEntry entry = readEntry();
 
-    // If not using ZipInputStream to decompress,
-    //   then get entry's position AFTER readEntry() to skip over zip header
-    //long position = _in.getPosition();
-
     if (entry == null)
       return null;
     else
-      return new QuercusZipEntry(position, entry);
+      return new QuercusZipEntry(entry, _in.openCopy(), position);
   }
 
   /**
@@ -151,7 +140,7 @@ public class ZipDirectory
     }
 
     if (extraLength > 0)
-      _in.skip(extraLength);
+      skip(extraLength);
 
     ZipEntry entry = new ZipEntry(name);
     entry.setMethod(compressionMethod);
@@ -161,6 +150,13 @@ public class ZipDirectory
 
     _currentEntry = entry;
     return entry;
+  }
+
+  private void skip(long len)
+    throws IOException
+  {
+    while (len-- > 0 && _in.read() != -1) {
+    }
   }
 
   /**
@@ -177,23 +173,13 @@ public class ZipDirectory
     if (_ddescriptor)
       length += 12;
 
-    _in.skip(length);
+    skip(length);
     _currentEntry = null;
-  }
-
-  /**
-   * Opens a decompressed stream positioned at this entry's position.
-   */
-  protected InputStream openInputStream(QuercusZipEntry entry)
-    throws IOException
-  {
-    return new ZipEntryInputStream(_in.openCopy(), entry);
   }
 
   public boolean zip_close()
   {
     _in.close();
-    _oldIn.close();
 
     return true;
   }

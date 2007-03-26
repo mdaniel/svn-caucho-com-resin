@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.zip;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
 import com.caucho.vfs.*;
+import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.zip.ZipEntry;
@@ -39,37 +40,30 @@ import java.util.zip.ZipInputStream;
 
 /**
  * Input from a compressed stream.
- * XXX: might want to replace ZipInputStream with an Inflater so
- *     that we don't read this entry's header twice
  */
 public class ZipEntryInputStream extends ReadStreamInput
 {
-  private BinaryInput _in;
-  private ZipInputStream _zipIn;
-  private QuercusZipEntry _entry;
-  
-  public ZipEntryInputStream(BinaryInput in, QuercusZipEntry entry)
+  private static final L10N L = new L10N(ZipEntryInputStream.class);
+
+  private final BinaryInput _in;
+  private final long _position;
+
+  public ZipEntryInputStream(BinaryInput in, long position)
     throws IOException
   {
-    init(in, entry);
-  }
-
-  protected void init(BinaryInput in, QuercusZipEntry entry)
-    throws IOException
-  {
-    in.setPosition(entry.getPosition());
-
     _in = in;
-    _zipIn = new ZipInputStream(in.getInputStream());
-    _entry = entry;
+    _position = position;
 
-    ZipEntry curEntry = _zipIn.getNextEntry();
+    in.setPosition(_position);
+
+    ZipInputStream zipInputStream = new ZipInputStream(in.getInputStream());
+
+    ZipEntry curEntry = zipInputStream.getNextEntry();
 
     if (curEntry == null)
-      throw new IOException("Zip entry " +
-          entry.getZipEntry().getName() + " not found.");
+      throw new IOException(L.l("ZipEntry at position {0} not found", _position));
 
-    init(new ReadStream(new VfsStream(_zipIn, null)));
+    init(new ReadStream(new VfsStream(zipInputStream, null)));
   }
 
   /**
@@ -78,7 +72,7 @@ public class ZipEntryInputStream extends ReadStreamInput
   public BinaryInput openCopy()
     throws IOException
   {
-    return new ZipEntryInputStream(_in.openCopy(), _entry);
+    return new ZipEntryInputStream(_in.openCopy(), _position);
   }
 
   public String toString()

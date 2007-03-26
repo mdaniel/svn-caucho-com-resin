@@ -545,6 +545,8 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   private int readNext()
     throws IOException, XMLStreamException
   {
+    _cBufLength = 0;
+
     // we pop the namespace context when the user is finished
     // working with the END_ELEMENT event
     if (_current == END_ELEMENT)

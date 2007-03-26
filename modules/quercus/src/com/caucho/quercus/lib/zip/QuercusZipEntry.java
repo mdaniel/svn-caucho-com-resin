@@ -29,17 +29,14 @@
 package com.caucho.quercus.lib.zip;
 
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
@@ -48,14 +45,19 @@ public class QuercusZipEntry {
                              Logger.getLogger(QuercusZipEntry.class.getName());
   private static final L10N L = new L10N(QuercusZipEntry.class);
 
-  private InputStream _in;
-  private long _position;
-  private ZipEntry _entry;
+  private final ZipEntry _entry;
+  private final BinaryInput _binaryInput;
+  private final long _position;
 
-  public QuercusZipEntry(long position, ZipEntry zipEntry)
+  private ZipEntryInputStream _in;
+
+  public QuercusZipEntry(ZipEntry zipEntry,
+                         BinaryInput binaryInput,
+                         long position)
   {
-    _position = position;
     _entry = zipEntry;
+    _binaryInput = binaryInput;
+    _position = position;
   }
 
   /**
@@ -84,12 +86,13 @@ public class QuercusZipEntry {
       if (_in != null)
         return true;
 
-      _in = directory.openInputStream(this);
+      _in = new ZipEntryInputStream(_binaryInput.openCopy(), _position);
+
       return true;
 
     } catch (IOException e) {
       env.warning(L.l(e.toString()));
-      log.log(Level.FINE,  e.toString(),  e);
+
       return false;
     }
   }
@@ -103,22 +106,25 @@ public class QuercusZipEntry {
     if (_in == null)
       return false;
 
-    _in.close();
+    ZipEntryInputStream in = _in;
+    _in = null;
+
+    in.close();
+
     return true;
   }
 
   /**
    * Reads and decompresses entry's compressed data.
    *
-   * @param entry
-   * @param length
    * @return decompressed BinaryValue or FALSE on error
    */
-  public Value zip_entry_read(Env env,
-                                @Optional("1024") int length)
+  @ReturnNullAsFalse
+  public BinaryBuilderValue zip_entry_read(Env env,
+                                           @Optional("1024") int length)
   {
     if (_in == null)
-      return BooleanValue.FALSE;
+      return null;
 
     BinaryBuilderValue bbv = new BinaryBuilderValue();
     TempBuffer tb = TempBuffer.allocate();
@@ -133,15 +139,16 @@ public class QuercusZipEntry {
         bbv.append(buffer, 0, sublen);
         length -= sublen;
       }
+
       if (bbv.length() < 0)
-        return BooleanValue.FALSE;
+        return null;
 
       return bbv;
 
     } catch (IOException e) {
       env.warning(L.l(e.toString()));
-      log.log(Level.FINE,  e.toString(),  e);
-      return BooleanValue.FALSE;
+
+      return null;
     } finally {
       TempBuffer.free(tb);
     }
@@ -152,12 +159,12 @@ public class QuercusZipEntry {
    *
    * @return -1, or compressed size
    */
-  public Value zip_entry_compressedsize()
+  public long zip_entry_compressedsize()
   {
     if (_entry == null)
-      return new LongValue(-1);
+      return -1;
 
-    return new LongValue(_entry.getCompressedSize());
+    return _entry.getCompressedSize();
   }
 
   /**
@@ -182,21 +189,8 @@ public class QuercusZipEntry {
     }
   }
 
-  /**
-   * Returns the position fo this entry in the stream.
-   */
-  public long getPosition()
-  {
-    return _position;
-  }
-
-  public ZipEntry getZipEntry()
-  {
-    return _entry;
-  }
-
   public String toString()
   {
-    return "QuercusZipEntry[]";
+    return "QuercusZipEntry[" + _entry.getName() + "]";
   }
 }

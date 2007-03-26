@@ -164,13 +164,7 @@ public class XmlReader
     if (! streamIsOpen())
       return NullValue.NULL;
 
-    // XXX: Not sure how to do this one.  StreamReaderImpl.getLocation() is
-    // unsupported and Location.getLocationURI() doesn't exist either though
-    // it's in the web documentation.
-
-    // return StringValue.create(_streamReader.getLocation().getLocationURI());
-
-    return NullValue.NULL;
+    return StringValue.create(_streamReader.getLocation().getSystemId());
   }
 
   /**
@@ -373,9 +367,6 @@ public class XmlReader
     if (! streamIsOpen())
       return NullValue.NULL;
 
-    // XXX: This is returning an end of line along with the text when
-    // it probably should be only the text.
-
     if (_currentNodeType != XMLStreamConstants.END_ELEMENT)
       return StringValue.create(_streamReader.getText());
 
@@ -549,7 +540,7 @@ public class XmlReader
     try {
       XMLInputFactory factory = XMLInputFactory.newInstance();
 
-      _streamReader = factory.createXMLStreamReader(path.openRead());
+      _streamReader = factory.createXMLStreamReader(path.getNativePath(), path.openRead());
     }
     catch (XMLStreamException ex) {
       log.log(Level.WARNING, ex.toString(), ex);
@@ -623,11 +614,11 @@ public class XmlReader
 
       _lastNodeType = _currentNodeType;
 
-      // php/4618
       Value isEmptyElement = getIsEmptyElement();
       
       _currentNodeType = _streamReader.next();
 
+      // php/4618
       if (isEmptyElement.toBoolean())
         return read(env);
 
