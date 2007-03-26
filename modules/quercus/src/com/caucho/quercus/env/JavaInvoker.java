@@ -580,16 +580,14 @@ abstract public class JavaInvoker
                                               _defaultExprs[i],
                                               _param[k]);
       } else {
-	      env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
-                        _name, _marshalArgs.length, args.length));
+        boolean isValue = _marshalArgs[i].isValue();
 
-        return NullValue.NULL;
+	    value = env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
+                        _name, _marshalArgs.length, args.length), isValue);
 
-        /*
-        javaArgs[k] = _marshalArgs[i].marshal(env,
-					      NullValue.NULL,
-					      _param[k]);
-        */
+        //return NullValue.NULL;
+
+        javaArgs[k] = _marshalArgs[i].marshal(env, value, _param[k]);
       }
 
       k++;

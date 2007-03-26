@@ -47,27 +47,6 @@ public class Java {
   public static Object __construct(Env env,
                                    String className, Value []args)
   {
-    try {
-      JavaClassDef def = env.getJavaClassDefinition(className);
-
-      if (def == null) {
-        env.warning(L.l("could not find Java class ", className));
-        return null;
-      }
-
-      Value newObj = def.callNew(env, args);
-
-      if (newObj.isNull()) {
-        env.warning(L.l("public Java constructor for class {0} not found", className));
-        return null;
-      }
-
-      return newObj;
-
-    } catch (Throwable e) {
-      env.warning(e);
-
-      return null;
-    }
+    return JavaModule.java(env, className, args);
   }
 }

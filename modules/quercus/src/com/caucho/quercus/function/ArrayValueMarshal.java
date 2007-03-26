@@ -50,6 +50,15 @@ public class ArrayValueMarshal extends Marshal
     return false;
   }
       
+  /**
+   * Return true if is a Value.
+   */
+  @Override
+  public boolean isValue()
+  {
+    return true;
+  }
+  
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
     return expr.eval(env).toArrayValue(env);

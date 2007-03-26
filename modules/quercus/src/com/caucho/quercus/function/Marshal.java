@@ -95,6 +95,14 @@ abstract public class Marshal {
     return false;
   }
 
+  /**
+   * Return true if is a Value.
+   */
+  public boolean isValue()
+  {
+    return false;
+  }
+  
   abstract public Object marshal(Env env, Expr expr, Class argClass);
 
   public Object marshal(Env env, Value value, Class argClass)

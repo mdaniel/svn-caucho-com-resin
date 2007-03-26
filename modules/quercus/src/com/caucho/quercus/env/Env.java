@@ -3547,6 +3547,19 @@ public class Env {
   }
 
   /**
+   * A warning that returns null or a NullValue.
+   */
+  public Value warning(String msg, boolean returnNullValue)
+  {
+    Value value = warning(msg);
+    
+    if (returnNullValue)
+      return value;
+    else
+      return null;
+  }
+  
+  /**
    * A runtime strict warning.
    */
   public Value strict(String msg)

@@ -43,6 +43,15 @@ public class UnicodeValueMarshal extends Marshal
   {
     return true;
   }
+  
+  /**
+   * Return true if is a Value.
+   */
+  @Override
+  public boolean isValue()
+  {
+    return true;
+  }
 
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
