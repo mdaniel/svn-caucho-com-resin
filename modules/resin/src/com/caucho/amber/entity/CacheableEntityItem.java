@@ -189,6 +189,7 @@ public class CacheableEntityItem extends EntityItem {
   /**
    * Expire the value from the cache.
    */
+  @Override
   public void expire()
   {
     _cacheItem.__caucho_expire();

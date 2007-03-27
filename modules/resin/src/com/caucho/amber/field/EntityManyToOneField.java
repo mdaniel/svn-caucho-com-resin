@@ -63,7 +63,8 @@ public class EntityManyToOneField extends CascadableField {
   private LinkColumns _linkColumns;
 
   private RelatedType _targetType;
-
+  
+  private int _keyLoadIndex;
   private int _targetLoadIndex;
 
   private DependentEntityOneToOneField _targetField;
@@ -232,6 +233,9 @@ public class EntityManyToOneField extends CascadableField {
   {
     _aliasField = alias;
   }
+
+  /**
+   * Overrides the load-group index to 
 
   /**
    * Initializes the field.

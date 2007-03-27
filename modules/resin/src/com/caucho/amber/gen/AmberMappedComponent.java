@@ -1088,6 +1088,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       return;
     }
 
+    /*
     out.println("if (__caucho_item != null) {");
     out.pushDepth();
 
@@ -1099,9 +1100,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // jpa/0o01
     out.println("Object child;");
 
-    if (isEntityParent) {
+    if (! isEntityParent) {
       // if loaded in transaction, then copy results
-      // ejb/0a06, ejb/0893
+      // ejb/0600, ejb/0a06, ejb/0893
       out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
       out.pushDepth();
       out.println("item.__caucho_loadMask_0 = 1L;");
@@ -1126,7 +1127,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       //}
     }
 
-    if (isEntityParent) {
+    if (! isEntityParent) {
       out.popDepth();
       out.println("}");
     }
@@ -1155,6 +1156,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.popDepth();
     out.println("}");
+    */
 
     out.popDepth();
     out.println("}");
