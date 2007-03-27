@@ -138,8 +138,16 @@ public class CollectionField extends CascadableField {
       out.println("if (" + getter + " != null) {");
       out.pushDepth();
 
-      out.println("for (Object o : " + getter + ")");
+      out.println("for (Object o : " + getter + ") {");
       out.pushDepth();
+
+      // jpa/0i60
+      out.println();
+      out.println("com.caucho.amber.entity.Entity child = (com.caucho.amber.entity.Entity) o;");
+      out.println();
+      out.println("if (com.caucho.amber.entity.EntityState.P_DELETING.ordinal() <= child.__caucho_getEntityState().ordinal())");
+      out.println("  continue;");
+      out.println();
 
       out.print(aConn + ".");
 
@@ -164,6 +172,7 @@ public class CollectionField extends CascadableField {
       out.println("(o);");
 
       out.popDepth();
+      out.println("}");
 
       out.popDepth();
       out.println("}");
