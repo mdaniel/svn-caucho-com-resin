@@ -305,9 +305,9 @@ public class SelectQuery extends AbstractQuery {
       if (join == null)
         continue;
 
-      // jpa/1178
-      if (getParentQuery() != null)
-        break;
+      // XXX: jpa/1173, jpa/1178
+      // if (getParentQuery() != null)
+      //   break;
 
       FromItem joinParent = join.getJoinParent();
       FromItem joinTarget = join.getJoinTarget();

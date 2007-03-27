@@ -58,6 +58,11 @@ public class KeyColumnExpr extends ColumnExpr {
    */
   public boolean usesFrom(FromItem from, int type, boolean isNot)
   {
+    if (_parent instanceof ManyToOneExpr) {
+      // jpa/0h1c
+      return false;
+    }
+
     FromItem fromItem = _parent.getChildFromItem();
 
     // ejb/0j00 vs ejb/0h13 vs ejb/0t00
