@@ -64,7 +64,6 @@ public class EntityManyToOneField extends CascadableField {
 
   private RelatedType _targetType;
   
-  private int _keyLoadIndex;
   private int _targetLoadIndex;
 
   private DependentEntityOneToOneField _targetField;
@@ -252,12 +251,15 @@ public class EntityManyToOneField extends CascadableField {
   public void init(RelatedType relatedType)
     throws ConfigException
   {
+    int loadGroupIndex = getEntitySourceType().getDefaultLoadGroupIndex();
+    super.setLoadGroupIndex(loadGroupIndex);
+    _targetLoadIndex = relatedType.nextLoadGroupIndex();
+    
     Table sourceTable = relatedType.getTable();
 
     if (sourceTable == null || ! relatedType.getPersistenceUnit().isJPA()) {
       // jpa/0ge3, ejb/0602
       super.init();
-      _targetLoadIndex = relatedType.getLoadGroupIndex();
       return;
     }
 
@@ -579,14 +581,17 @@ public class EntityManyToOneField extends CascadableField {
 
     String javaType = getJavaTypeName();
 
-    int group = getLoadGroupIndex() / 64;
-    long mask = (1L << (getLoadGroupIndex() % 64));
-    String loadVar = "__caucho_loadMask_" + group;
-
     out.println();
     out.println("public " + javaType + " " + getGetterName() + "()");
     out.println("{");
     out.pushDepth();
+
+    int keyLoadIndex = getLoadGroupIndex();
+    int entityLoadIndex = _targetLoadIndex;
+    
+    int group = entityLoadIndex / 64;
+    long mask = (1L << (entityLoadIndex % 64));
+    String loadVar = "__caucho_loadMask_" + group;
 
     /*
     out.println();

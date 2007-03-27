@@ -246,6 +246,14 @@ abstract public class AbstractField implements AmberField {
   }
 
   /**
+   * Returns the property's group index.
+   */
+  protected void setLoadGroupIndex(int index)
+  {
+    _loadGroupIndex = index;
+  }
+
+  /**
    * Returns the load group mask.
    */
   public long getCreateLoadMask(int group)
