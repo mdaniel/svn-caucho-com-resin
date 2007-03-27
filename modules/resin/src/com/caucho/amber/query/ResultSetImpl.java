@@ -34,6 +34,7 @@ import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.LoadEntityExpr;
 import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.type.EntityType;
 import com.caucho.util.L10N;
 
 import java.io.InputStream;
@@ -1084,13 +1085,32 @@ public class ResultSetImpl implements ResultSet {
 
         Entity entity = entityItem.getEntity();
 
-        if (entity.__caucho_getEntityType().getParentType() == null) {
-          value = _session.loadProxy(entity.__caucho_getEntityType(),
+        int index = getColumn(column);
+
+        AmberExpr expr = _resultList.get(column - 1);
+
+        EntityType entityType = entity.__caucho_getEntityType();
+
+        boolean forceLoad = false;
+
+        // jpa/0gf1
+        // XXX: assert.
+        if (expr instanceof LoadEntityExpr) {
+          LoadEntityExpr entityExpr = (LoadEntityExpr) expr;
+
+          if (entityType != entityExpr.getEntityType()) {
+            forceLoad = true;
+            entityType = entityExpr.getEntityType();
+          }
+        }
+
+        if (entityType.getParentType() == null && ! forceLoad) {
+          value = _session.loadProxy(entityType,
                                      entity.__caucho_getPrimaryKey());
         }
         else {
           // jpa/0l4a
-          value = _session.loadFromHome(entity.getClass().getName(),
+          value = _session.loadFromHome(entityType.getBeanClass().getName(),
                                         entity.__caucho_getPrimaryKey());
         }
 
