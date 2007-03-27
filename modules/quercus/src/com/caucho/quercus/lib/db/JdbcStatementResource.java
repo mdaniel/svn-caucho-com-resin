@@ -315,7 +315,9 @@ public class JdbcStatementResource {
         if (_metaData == null)
           _metaData = _rs.getMetaData();
 
+        JdbcResultResource resultResource = getResultMetadata();
         int size = _results.length;
+
         for (int i = 0; i < size; i++) {
           _results[i].set(_resultResource.getColumnValue(env, _rs, _metaData, i + 1));
         }

@@ -438,7 +438,14 @@ public class MysqlModule extends AbstractQuercusModule {
     if (result == null)
       return BooleanValue.FALSE;
 
-    return result.fetch_object(env);
+    Value value = result.fetch_object(env);
+
+    // php/142t
+    // must return FALSE for mediawiki
+    if (value == NullValue.NULL)
+      value = BooleanValue.FALSE;
+
+    return value;
   }
 
   /**

@@ -136,7 +136,7 @@ public class XmlModule extends AbstractQuercusModule {
   {
     switch (code) {
     case XML_ERROR_NONE:
-      return StringValue.create("");
+      return StringValue.create("No error");
       
     case XML_ERROR_SYNTAX:
       return StringValue.create("syntax error");

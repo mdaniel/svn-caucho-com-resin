@@ -2694,9 +2694,9 @@ v   *
    *
    * @param value the argument value
    */
-  public static long strlen(Value value)
+  public static Value strlen(Value value)
   {
-    return value.length();
+    return LongValue.create(value.length());
   }
 
   /**

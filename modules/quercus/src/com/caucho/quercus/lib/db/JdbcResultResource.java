@@ -311,6 +311,9 @@ public class JdbcResultResource {
       //generate flags
       long flags = 0;
 
+      // per the ResultSet javadocs, rs.getString() may return null
+      // for an SQL NULL
+      // XXX: need to check for nulls?
       if (_rs.getString(4).indexOf("YES") == -1)
         flags += MysqliModule.NOT_NULL_FLAG;
 
@@ -335,7 +338,9 @@ public class JdbcResultResource {
       if (_rs.getString(2).indexOf("zerofill") != -1)
         flags += MysqliModule.ZEROFILL_FLAG;
 
-      if ((_rs.getString(3).indexOf("bin") != -1) ||
+      // php/1f73 - null check
+      if ((_rs.getString(3) != null &&
+           _rs.getString(3).indexOf("bin") != -1) ||
           (type == Types.LONGVARBINARY) ||
           (type == Types.DATE) ||
           (type == Types.TIMESTAMP))
@@ -450,18 +455,11 @@ public class JdbcResultResource {
         return result;
 
       } else {
-        // must return FALSE for mediawiki
-        // php/142t
-        //
-        // XXX:
-        // mysql_fetch_object returns FALSE
-        // mysqli_fetch_object returns NULL
-        // PDO::fetchObject returns FALSE
-        return BooleanValue.FALSE;
+        return NullValue.NULL;
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
     }
   }
 
