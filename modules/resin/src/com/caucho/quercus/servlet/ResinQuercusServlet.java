@@ -106,7 +106,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
 	ws = Vfs.openWrite(out);
       }
 
-      Env env = new Env(getQuercus(), page, ws, request, response);
+      Env env = getQuercus().createEnv(page, ws, request, response);
       try {
         env.setGlobalValue("request", env.wrapJava(request));
         env.setGlobalValue("response", env.wrapJava(request));
