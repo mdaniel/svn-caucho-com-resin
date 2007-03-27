@@ -93,8 +93,9 @@ public class Bean {
   public void setType(String typeName)
     throws ConfigException, ClassNotFoundException
   {
+    System.out.println("PRE:");
     _type = _ejbManager.getJClassLoader().forName(typeName);
-
+    System.out.println("POST:");
     if (_type == null) {
       throw new ConfigException(L.l("'{0}' is an unknown type",
 				    typeName));
@@ -123,7 +124,6 @@ public class Bean {
   /**
    * Initializes the bean.
    */
-  @PostConstruct
   public void init()
     throws ConfigException
   {

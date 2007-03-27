@@ -157,6 +157,36 @@ public class Environment {
    * Add listener.
    *
    * @param listener object to listen for environment create/destroy
+   * @param loader the context class loader
+   */
+  public static void addChildLoaderListener(AddLoaderListener listener)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    addChildLoaderListener(listener, loader);
+  }
+  
+  /**
+   * Add listener.
+   *
+   * @param listener object to listen for environment create/destroy
+   * @param loader the context class loader
+   */
+  public static void addChildLoaderListener(AddLoaderListener listener,
+					    ClassLoader loader)
+  {
+    for (; loader != null; loader = loader.getParent()) {
+      if (loader instanceof EnvironmentClassLoader) {
+        ((EnvironmentClassLoader) loader).addLoaderListener(listener);
+        return;
+      }
+    }
+  }
+  
+  /**
+   * Add listener.
+   *
+   * @param listener object to listen for environment create/destroy
    */
   public static void addClassLoaderListener(ClassLoaderListener listener)
   {

@@ -30,7 +30,7 @@
 package com.caucho.amber.manager;
 
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.AddLoaderListener;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -40,12 +40,16 @@ import java.net.URL;
 /**
  * Listener for environment start to detect and load persistence.xml
  */
-public class PersistenceEnvironmentListener implements EnvironmentListener {
+public class PersistenceEnvironmentListener implements AddLoaderListener
+{
+  public PersistenceEnvironmentListener()
+  {
+  }
+  
   /**
    * Handles the case where the environment is starting (after init).
    */
-  public void environmentStart(EnvironmentClassLoader loader)
-    throws Throwable
+  public void addLoader(EnvironmentClassLoader loader)
   {
     Path pwd = Vfs.getPwd(loader);
 

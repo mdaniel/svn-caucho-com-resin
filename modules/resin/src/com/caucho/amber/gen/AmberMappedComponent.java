@@ -1053,6 +1053,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    out.println("com.caucho.amber.manager.AmberConnection aConn = __caucho_session;");
     out.println("com.caucho.amber.entity.EntityState state = __caucho_state;");
     int dirtyCount = _relatedType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {

@@ -64,6 +64,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private static EnvironmentLocal<ArrayList<EnvironmentListener>> _childListeners
     = new EnvironmentLocal<ArrayList<EnvironmentListener>>();
 
+  // listeners invoked when a Loader is added
+  private static EnvironmentLocal<ArrayList<AddLoaderListener>> _addLoaderListeners
+    = new EnvironmentLocal<ArrayList<AddLoaderListener>>();
+
   // The owning bean
   private EnvironmentBean _owner;
 
@@ -304,9 +308,13 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     if (_lifecycle.isStarting()) {
       try {
-        listener.environmentStart(this);
+	listener.environmentStart(this);
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Error e) {
+	throw e;
       } catch (Throwable e) {
-        log().log(Level.WARNING, e.toString(), e);
+	throw new RuntimeException(e);
       }
     }
   }
@@ -365,6 +373,68 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     }
 
     return listeners;
+  }
+
+  /**
+   * Adds a child listener.
+   */
+  void addLoaderListener(AddLoaderListener listener)
+  {
+    synchronized (_addLoaderListeners) {
+      ArrayList<AddLoaderListener> listeners
+        = _addLoaderListeners.getLevel(this);
+
+      if (listeners == null) {
+        listeners = new ArrayList<AddLoaderListener>();
+
+        _addLoaderListeners.set(listeners, this);
+      }
+
+      listeners.add(listener);
+    }
+
+    listener.addLoader(this);
+  }
+
+  /**
+   * Returns the listeners.
+   */
+  protected ArrayList<AddLoaderListener> getLoaderListeners()
+  {
+    ArrayList<AddLoaderListener> listeners;
+    listeners = new ArrayList<AddLoaderListener>();
+
+    // add the descendent listeners
+    synchronized (_addLoaderListeners) {
+      ClassLoader loader;
+
+      for (loader = this; loader != null; loader = loader.getParent()) {
+        if (loader instanceof EnvironmentClassLoader) {
+          ArrayList<AddLoaderListener> childListeners;
+          childListeners = _addLoaderListeners.getLevel(loader);
+
+          if (childListeners != null)
+            listeners.addAll(childListeners);
+        }
+      }
+    }
+
+    return listeners;
+  }
+
+  /**
+   * Adds a listener to detect class loader changes.
+   */
+  @Override
+  protected void sendAddLoaderEventImpl()
+  {
+    ArrayList<AddLoaderListener> listeners = getLoaderListeners();
+    
+    for (int i = 0;
+	 listeners != null && i < listeners.size();
+	 i++) {
+      listeners.get(i).addLoader(this);
+    }
   }
 
   /**

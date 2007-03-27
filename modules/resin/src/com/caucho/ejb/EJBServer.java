@@ -93,6 +93,8 @@ public class EJBServer
   private ArrayList<Path> _descriptors;
   private ArrayList<Path> _ejbJars = new ArrayList<Path>();
 
+  private ArrayList<Bean> _beanList = new ArrayList<Bean>();
+
   private EntityIntrospector _entityIntrospector;
 
   private MergePath _mergePath;
@@ -170,7 +172,7 @@ public class EJBServer
 
     // _entityIntrospector = new EntityIntrospector(_ejbManager);
 
-    Environment.addChildEnvironmentListener(new PersistenceEnvironmentListener());
+    //Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
   }
 
   public void addJarUrls(EnvironmentClassLoader loader, Path root)
@@ -365,6 +367,7 @@ public class EJBServer
    */
   public void addBean(Bean bean)
   {
+    _beanList.add(bean);
   }
 
   /**
@@ -726,6 +729,11 @@ public class EJBServer
 
       _ejbManager.setJDBCIsolation(jdbcIsolation);
 
+      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+
+      for (int i = 0; i < _beanList.size(); i++)
+	_beanList.get(i).init();
+      
       // _entityIntrospector.init();
 
       initAllEjbs();

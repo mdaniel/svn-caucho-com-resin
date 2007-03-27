@@ -46,10 +46,7 @@ import com.caucho.vfs.Path;
 
 import javax.sql.DataSource;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -104,6 +101,9 @@ public class AmberContainer {
 
   private HashMap<String,Throwable> _listenerExceptionMap
     = new HashMap<String,Throwable>();
+
+  private HashSet<Path> _persistenceRootSet
+    = new HashSet<Path>();
 
   private AmberContainer()
   {
@@ -255,6 +255,10 @@ public class AmberContainer {
     return _jClassLoader;
   }
 
+  public void init()
+  {
+  }
+  
   /**
    * Returns the EmbeddableType for an introspected class.
    */
@@ -481,11 +485,14 @@ public class AmberContainer {
    */
   public void addPersistenceRoot(Path root)
   {
+    if (_persistenceRootSet.contains(root))
+      return;
+    _persistenceRootSet.add(root);
+    
     Path persistenceXml = root.lookup("META-INF/persistence.xml");
     InputStream is = null;
 
     try {
-
       Path ormXml = root.lookup("META-INF/orm.xml");
 
       EntityMappingsConfig entityMappings = null;

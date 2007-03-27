@@ -143,6 +143,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   // Lifecycle
   protected final Lifecycle _lifecycle = new Lifecycle();
 
+  private boolean _hasNewLoader = true;
+
   private long _lastNullCheck;
 
   /**
@@ -287,6 +289,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     else
       addLoader(loader, _loaders.size());
 
+    _hasNewLoader = true;
   }
 
   /**
@@ -314,6 +317,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (loader instanceof ClassLoaderListener)
       addListener(new WeakLoaderListener((ClassLoaderListener) loader));
+
+    _hasNewLoader = true;
   }
 
   public ArrayList<Loader> getLoaders()
@@ -667,6 +672,25 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   }
 
   /**
+   * Adds a listener to detect class loader changes.
+   */
+  private void sendAddLoaderEvent()
+  {
+    if (_hasNewLoader) {
+      _hasNewLoader = false;
+
+      sendAddLoaderEventImpl();
+    }
+  }
+
+  /**
+   * Adds a listener to detect class loader changes.
+   */
+  protected void sendAddLoaderEventImpl()
+  {
+  }
+
+  /**
    * Add to the list of packages that don't use the hack.
    */
   public void addParentPriorityPackages(String []pkg)
@@ -998,9 +1022,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
           listener.classLoaderInit(this);
         }
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
     }
+
+    sendAddLoaderEvent();
   }
 
   /**
@@ -1078,7 +1104,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       }
     }
     else {
-
       try {
         cl = findClass(name);
       } catch (ClassNotFoundException e) {
@@ -1116,6 +1141,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (_lifecycle.isBeforeInit())
       init();
+    
+    if (_hasNewLoader)
+      sendAddLoaderEvent();
+
     /*
     if (! _lifecycle.isActive())
       return super.findClass(name);

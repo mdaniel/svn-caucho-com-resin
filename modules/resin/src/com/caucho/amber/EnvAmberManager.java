@@ -64,8 +64,10 @@ import java.util.logging.Logger;
  * The resource configuration in Resin's web.xml will use bean-style
  * configuration to configure the ManagecConnectionFactory.
  */
-public class EnvAmberManager {
-  private static final Logger log = Log.open(AmberPersistenceUnit.class);
+public class EnvAmberManager
+{
+  private static final Logger log
+    = Logger.getLogger(AmberPersistenceUnit.class.getName());
   private static final L10N L = new L10N(AmberPersistenceUnit.class);
 
   private static EnvironmentLocal<EnvAmberManager> _localManager
@@ -114,7 +116,6 @@ public class EnvAmberManager {
     }
 
     // _enhancer = new AmberEnhancer(this);
-
     EnhancerManager.create().addClassEnhancer(_enhancer);
 
     try {
