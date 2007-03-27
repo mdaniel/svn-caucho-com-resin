@@ -391,7 +391,9 @@ public class EnvServerManager implements EnvironmentListener
    */
   public void addServer(AbstractServer server)
   {
-    _serverMap.put(server.getId(), server);
+    String id = server.getId();
+    
+    _serverMap.put(id, server);
 
     try {
       _protocolManager.addServer(server);
@@ -421,7 +423,7 @@ public class EnvServerManager implements EnvironmentListener
   public AbstractServer getServer(Path path, String ejbName)
   {
     return _serverMap.get(path.getPath() + "#" + ejbName);
-   }
+  }
 
   public MessageDestination getMessageDestination(Path path, String name)
   {

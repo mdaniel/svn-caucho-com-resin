@@ -31,6 +31,7 @@ package com.caucho.ejb.gen;
 
 import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
+import com.caucho.ejb.cfg.*;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -41,9 +42,11 @@ import java.io.IOException;
 public class StatelessBean extends SessionBean {
   private static final L10N L = new L10N(StatelessBean.class);
   
-  public StatelessBean(JClass ejbClass, String contextClassName)
+  public StatelessBean(EjbSessionBean bean,
+		       JClass ejbClass,
+		       String contextClassName)
   {
-    super(ejbClass, contextClassName);
+    super(bean, ejbClass, contextClassName);
   }
 
   protected void generateContext(JavaWriter out)

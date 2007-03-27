@@ -67,6 +67,8 @@ public class EjbRef implements ObjectProxy {
   private String _foreignName;
   private String _ejbLink;
 
+  private String _typeName;
+
   private Object _target;
 
   public EjbRef()
@@ -371,7 +373,7 @@ public class EjbRef implements ObjectProxy {
     throws NamingException
   {
     Object target;
-    
+
     if (_context != null) {
       target = _context.lookup(Jndi.getFullName(foreignName));
       /*

@@ -65,7 +65,9 @@ public class StatelessAssembler extends SessionAssembler
 				 String contextClassName,
 				 String implClassName)
   {
-    _genClass.addComponent(new StatelessBean(beanClass, contextClassName));
+    _genClass.addComponent(new StatelessBean(_sessionBean,
+					     beanClass,
+					     contextClassName));
   }
 
   /**

@@ -42,9 +42,13 @@ public class SessionAssembler extends BeanAssembler
 {
   private static final L10N L = new L10N(SessionAssembler.class);
 
+  protected final EjbSessionBean _sessionBean;
+
   public SessionAssembler(EjbSessionBean bean, String fullClassName)
   {
     super(bean, fullClassName);
+
+    _sessionBean = bean;
 
     setSuperClass();
   }
@@ -64,7 +68,9 @@ public class SessionAssembler extends BeanAssembler
 				 String contextClassName,
 				 String implClassName)
   {
-    _genClass.addComponent(new SessionBean(beanClass, contextClassName));
+    _genClass.addComponent(new SessionBean(_sessionBean,
+					   beanClass,
+					   contextClassName));
   }
 
   /**

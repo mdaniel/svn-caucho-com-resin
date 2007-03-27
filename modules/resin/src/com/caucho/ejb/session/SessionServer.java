@@ -105,7 +105,7 @@ public class SessionServer extends AbstractServer {
       
       _localHome = getSessionContext().createLocalHome();
       _remoteHomeView = getSessionContext().createRemoteHomeView();
-      
+
       log.config("initialized session bean: " + this);
     } finally {
       thread.setContextClassLoader(oldLoader);

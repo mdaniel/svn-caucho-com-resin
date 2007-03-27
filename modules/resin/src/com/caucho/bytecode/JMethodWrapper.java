@@ -29,6 +29,8 @@
 
 package com.caucho.bytecode;
 
+import java.lang.annotation.Annotation;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -172,12 +174,21 @@ public class JMethodWrapper extends JMethod {
 
     return jTypes;
   }
-
+  
   /**
-   * Returns the annotations.
+   * Returns the annotation.
    */
+  @Override
   public JAnnotation []getDeclaredAnnotations()
   {
-    return new JAnnotation[0];
+    Annotation []ann = _method.getAnnotations();
+
+    JAnnotation []jAnn = new JAnnotation[ann.length];
+
+    for (int i = 0; i < ann.length; i++) {
+      jAnn[i] = new JAnnotationWrapper(ann[i]);
+    }
+
+    return jAnn;
   }
 }

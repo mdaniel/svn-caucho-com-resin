@@ -357,7 +357,7 @@ public class Bean {
   {
     TransactionAttributeType xaType;
     xaType = (TransactionAttributeType) xa.get("value");
-    
+
     switch (xaType) {
     case REQUIRED:
       pattern.setTransaction(EjbMethod.TRANS_REQUIRED);

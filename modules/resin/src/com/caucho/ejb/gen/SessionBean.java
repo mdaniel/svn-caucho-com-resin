@@ -31,6 +31,7 @@ package com.caucho.ejb.gen;
 
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
+import com.caucho.ejb.cfg.EjbSessionBean;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
@@ -44,11 +45,15 @@ import java.io.IOException;
 public class SessionBean extends ClassComponent {
   private static final L10N L = new L10N(SessionBean.class);
 
+  private EjbSessionBean _bean;
   private JClass _ejbClass;
   protected String _contextClassName;
   
-  public SessionBean(JClass ejbClass, String contextClassName)
+  public SessionBean(EjbSessionBean bean,
+		     JClass ejbClass,
+		     String contextClassName)
   {
+    _bean = bean;
     _ejbClass = ejbClass;
     _contextClassName = contextClassName;
   }
@@ -148,6 +153,10 @@ public class SessionBean extends ClassComponent {
   protected void generateNewInstance(JavaWriter out)
     throws IOException
   {
+    // ejb/0g27
+    if (_bean.getLocalHome() == null && _bean.getLocalList().size() == 0)
+      return;
+    
     out.println();
     out.println("protected Object _caucho_newInstance()");
     out.println("{");
@@ -180,11 +189,15 @@ public class SessionBean extends ClassComponent {
   protected void generateNewRemoteInstance(JavaWriter out)
     throws IOException
   {
+    // ejb/0g27
+    if (_bean.getRemoteHome() == null && _bean.getRemoteList().size() == 0)
+      return;
+    
     out.println();
     out.println("protected Object _caucho_newRemoteInstance()");
     out.println("{");
     out.pushDepth();
-    
+
     out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
 
     out.println("Bean bean = new Bean(cxt);");
