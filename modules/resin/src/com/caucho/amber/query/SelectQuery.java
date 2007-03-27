@@ -337,16 +337,21 @@ public class SelectQuery extends AbstractQuery {
                && ! isJoinParent(item)
                && ! usesFromData(item)) {
 
+        boolean isManyToOne = false;
         boolean isManyToMany = false;
 
-        // jpa/1144
         if (join instanceof ManyToOneJoinExpr) {
+          // jpa/0h1c
+          isManyToOne = true;
+
+          // jpa/1144
           ManyToOneJoinExpr manyToOneJoinExpr;
           manyToOneJoinExpr = (ManyToOneJoinExpr) join;
           isManyToMany = manyToOneJoinExpr.isManyToMany();
         }
 
-        if (item.isOuterJoin() || exists(joinTarget) || isManyToMany) {
+        // jpa/1144, jpa/0h1c, jpa/114g
+        if (isManyToMany || (isManyToOne && ! (item.isInnerJoin() || isFromInnerJoin(item)))) {
           // Optimization for common children query:
           // SELECT o FROM TestBean o WHERE o.parent.id=?
           // jpa/0h1k
@@ -433,8 +438,9 @@ public class SelectQuery extends AbstractQuery {
   public boolean exists(FromItem item)
   {
     // jpa/0h1b vs jpa/114g
-    if (_where != null && _where.exists(item))
+    if (_where != null && _where.exists(item)) {
       return true;
+    }
 
     if (_orderList != null) {
       for (AmberExpr orderBy : _orderList) {
@@ -472,8 +478,9 @@ public class SelectQuery extends AbstractQuery {
       }
     }
 
-    if (_where != null && _where.usesFrom(item, type))
+    if (_where != null && _where.usesFrom(item, type)) {
       return true;
+    }
 
     if (_orderList != null) {
       for (int j = 0; j < _orderList.size(); j++) {
