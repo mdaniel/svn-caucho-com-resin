@@ -253,7 +253,7 @@ public abstract class AbstractEnhancedType extends Type {
           _instanceClass = Class.forName(getInstanceClassName(), false, loader);
         }
       } catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
+        throw new AmberRuntimeException(e);
       }
 
       if (! validationInterface.isAssignableFrom(_instanceClass)) {
