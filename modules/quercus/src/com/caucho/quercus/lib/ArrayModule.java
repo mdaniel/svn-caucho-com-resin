@@ -2549,7 +2549,7 @@ public class ArrayModule
    *
    * @return true on success, and false on failure
    */
-  public boolean array_multisort(Env env, Value[] arrays)
+  static public boolean array_multisort(Env env, Value[] arrays)
   {
     int maxsize = 0;
     for(int i=0; i<arrays.length; i++)
