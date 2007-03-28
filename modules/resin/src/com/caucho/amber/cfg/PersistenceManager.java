@@ -48,7 +48,7 @@ public class PersistenceManager
     = Logger.getLogger(PersistenceManager.class.getName());
 
   private AmberContainer _amberManager;
-  
+
   /**
    * Create a persistence manager
    */
@@ -66,7 +66,7 @@ public class PersistenceManager
   @PostConstruct
   public void init()
   {
-    Environment.addChildEnvironmentListener(new PersistenceEnvironmentListener());
+    Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
   }
 }
 
