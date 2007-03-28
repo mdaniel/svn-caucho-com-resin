@@ -1091,7 +1091,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // Explicitly invalidates the corresponding cache item.
     out.println("com.caucho.amber.entity.Entity cacheEntity = aConn.getCacheEntity(this);");
 
-    out.println("if (cacheEntity != null");
+    out.println("if (cacheEntity != null)");
     out.println("  cacheEntity.__caucho_expire();");
 
 
@@ -1428,10 +1428,15 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("if (pk == null)");
     out.println("  pk = __caucho_getPrimaryKey();");
 
-    // jpa/0i5e
+    // jpa/0i5e, jpa/1641
+    // caching entity must only occur after the commit completes to
+    // handle rollbacks and also so the cache doesn't have an
+    // item in the middle of a transaction
+    /*
     out.println();
     out.println("aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.EntityType) __caucho_home.getRootType(),");
     out.println("                                     pk, __caucho_item);");
+    */
 
     out.println();
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");

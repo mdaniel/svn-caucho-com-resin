@@ -368,7 +368,8 @@ public class AmberEntityHome {
                                    int notExpiringGroup)
     throws AmberException
   {
-    log.finest("findEntityItem: "+key+" "+isLoad);
+    if (log.isLoggable(Level.FINEST))
+      log.finest("findEntityItem: "+key+" "+isLoad);
 
     if (key == null)
       return null; // ejb/0a06 throw new NullPointerException("primaryKey");
@@ -380,7 +381,8 @@ public class AmberEntityHome {
       // jpa/0y14 if (aConn.shouldRetrieveFromCache())
       item = _manager.getEntity(getRootType(), key);
 
-      log.finest("findEntityItem item is null? "+(item == null));
+      if (log.isLoggable(Level.FINEST))
+	log.finest("findEntityItem item is null? "+(item == null));
 
       if (item == null) {
         if (_homeBean == null && _configException != null)
