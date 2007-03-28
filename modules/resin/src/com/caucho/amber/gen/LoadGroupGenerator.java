@@ -88,7 +88,7 @@ public class LoadGroupGenerator extends ClassComponent {
       // }
 
       int max = _index;
-      
+
       generateTransactionChecks(out, group, mask, min, max);
 
       if (min <= max) {
@@ -97,7 +97,9 @@ public class LoadGroupGenerator extends ClassComponent {
       }
 
       for (int i = min; i <= max; i++) {
-        out.println("__caucho_load_select_" + i + "(aConn);");
+        // jpa/0l48: inheritance optimization.
+        out.println("if ((__caucho_loadMask_" + group + " & " + (1L << (i % 64)) + "L) == 0)");
+        out.println("  __caucho_load_select_" + i + "(aConn);");
       }
 
       if (min <= max) {
@@ -114,7 +116,7 @@ public class LoadGroupGenerator extends ClassComponent {
         out.println();
         out.println("if ((__caucho_loadMask_0 & 1L) != 0) {");
         out.println("  aConn.makeTransactional(this);");
-      
+
         out.println("}");
       }
 
@@ -192,8 +194,10 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println("    return;");
 
       for (int i = min; i <= max; i++) {
+        // jpa/0l48: inheritance optimization.
+        out.println("if ((__caucho_loadMask_" + group + " & " + (1L << (i % 64)) + "L) == 0)");
+        out.println("  __caucho_load_select_" + i + "(aConn);");
         out.println();
-        out.println("__caucho_load_select_" + i + "(aConn);");
       }
       out.println("}");
       out.print("else ");

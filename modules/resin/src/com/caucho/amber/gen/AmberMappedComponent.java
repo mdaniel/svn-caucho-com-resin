@@ -1088,6 +1088,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
       return;
     }
 
+    // Explicitly invalidates the corresponding cache item.
+    out.println("com.caucho.amber.entity.Entity cacheEntity = aConn.getCacheEntity(this);");
+
+    out.println("if (cacheEntity != null");
+    out.println("  cacheEntity.__caucho_expire();");
+
+
     /*
     out.println("if (__caucho_item != null) {");
     out.pushDepth();
