@@ -624,9 +624,15 @@ public class VariableModule extends AbstractQuercusModule {
     }
     else if ("array".equals(type)) {
       if (value.isArray())
-	var.set(value);
-      else
-	var.set(new ArrayValueImpl().append(value));
+        var.set(value);
+      else {
+        ArrayValueImpl array = new ArrayValueImpl();
+        var.set(array);
+        
+        if (! value.isNull())
+          array.append(value);
+      }
+
       return true;
     }
     else
