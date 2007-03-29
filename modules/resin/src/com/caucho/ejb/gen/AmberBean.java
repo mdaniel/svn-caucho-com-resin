@@ -183,10 +183,11 @@ public class AmberBean extends EntityBean {
 
       out.println("_ejb_state = com.caucho.ejb.entity.EntityObject._CAUCHO_IS_DEAD;");
 
-      out.println("_ejb_trans.getAmberConnection().delete(this);");
+      //out.println("_ejb_trans.getAmberConnection().delete(this);");
+      out.println("__caucho_delete();");
 
       out.popDepth();
-      out.println("} catch (Throwable e) {");
+      out.println("} catch (Exception e) {");
       out.println("  log.log(java.util.logging.Level.WARNING, e.toString(), e);");
       out.println("}");
 

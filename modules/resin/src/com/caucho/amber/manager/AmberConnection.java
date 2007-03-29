@@ -2036,7 +2036,9 @@ public class AmberConnection
                           entity.__caucho_getPrimaryKey());
 
     if (index < 0) {
-      throw new IllegalStateException(L.l("AmberEntity[{0}:{1}} cannot be deleted since it is not managed"));
+      throw new IllegalStateException(L.l("AmberEntity[{0}:{1}] cannot be deleted since it is not managed",
+					  entity.getClass().getName(),
+					  entity.__caucho_getPrimaryKey()));
       /*
         EntityType entityType = entity.__caucho_getEntityType();
 

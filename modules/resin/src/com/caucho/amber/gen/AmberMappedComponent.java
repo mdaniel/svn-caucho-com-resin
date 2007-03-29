@@ -1074,11 +1074,14 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("__caucho_updateMask_" + i + " = 0L;");
     }
 
+    out.println("if (aConn != null) {");
+    out.pushDepth();
+    
     out.print("if (updateMask_0 != 0L");
     for (int i = 1; i <= dirtyCount / 64; i++)
       out.print(" || updateMask_" + i + " != 0L");
     out.println(")");
-    out.println("  __caucho_session.update((com.caucho.amber.entity.Entity) this);");
+    out.println("  aConn.update((com.caucho.amber.entity.Entity) this);");
 
     if (_relatedType.getPersistenceUnit().isJPA()) {
       // XXX: jpa/0j5f
@@ -1164,6 +1167,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.popDepth();
     out.println("}");
     */
+    
+    out.popDepth();
+    out.println("}");
 
     out.popDepth();
     out.println("}");
