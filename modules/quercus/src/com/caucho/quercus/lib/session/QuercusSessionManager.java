@@ -172,6 +172,11 @@ public class QuercusSessionManager {
     _cookieLength = cookieLength;
   }
 
+  protected void setSessionTimeout(long sessionTimeout)
+  {
+    _sessionTimeout = sessionTimeout;
+  }
+
   /**
    * Returns the current number of active sessions.
    */
@@ -416,7 +421,7 @@ public class QuercusSessionManager {
   protected SessionArrayValue create(Env env, String key, long now)
   {
     SessionArrayValue session
-      = new SessionArrayValue(key, now, _sessionTimeout);
+      = createSessionValue(key, now, _sessionTimeout);
 
     // If another thread has created and stored a new session,
     // putIfNew will return the old session
@@ -428,6 +433,15 @@ public class QuercusSessionManager {
     return (SessionArrayValue)session.copy(env);
   }
 
+  /**
+   * Creates a new SessionArrayValue instance.
+   */
+  protected SessionArrayValue createSessionValue(String key, long now,
+						 long sessionTimeout)
+  {
+    return new SessionArrayValue(key, now, _sessionTimeout);
+  }
+  
   /**
    * Loads the session from the backing store.  
    *

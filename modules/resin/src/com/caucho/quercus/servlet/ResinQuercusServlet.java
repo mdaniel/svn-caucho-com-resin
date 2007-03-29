@@ -40,6 +40,7 @@ import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.server.connection.CauchoResponse;
 import com.caucho.server.session.SessionManager;
+import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -80,6 +81,8 @@ public class ResinQuercusServlet extends QuercusServletImpl
     
     quercus.setWebApp(_webApp);
     getQuercus().setPwd(Vfs.lookup());
+
+    quercus.setIni("caucho.server_id", Resin.getLocal().getServerId());
   }
 
   /**

@@ -70,7 +70,7 @@ public class SessionArrayValue extends ArrayValueWrapper
                            long maxInactiveInterval, ArrayValue array)
   {
     super(array);
-    
+
     _id = id;
     _accessTime = now;
     _maxInactiveInterval = maxInactiveInterval;
