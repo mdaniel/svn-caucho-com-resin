@@ -188,14 +188,18 @@ public class ModuleInfo {
         continue;
        */
 
+      Class []params = method.getParameterTypes();
+
+      // php/1a10
+      if ("getLoadedExtensions".equals(method.getName()))
+        continue;
+
       if (hasCheckedException(method)) {
 	log.warning(L.l("Module method '{0}.{1}' may not throw checked exceptions",
 			method.getDeclaringClass().getName(),
 			method.getName()));
 	continue;
       }
-
-      Class []params = method.getParameterTypes();
 
       try {
         StaticFunction function

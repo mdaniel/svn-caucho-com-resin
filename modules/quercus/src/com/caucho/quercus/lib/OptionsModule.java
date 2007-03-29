@@ -59,6 +59,16 @@ public class OptionsModule extends AbstractQuercusModule {
   public static final int ASSERT_WARNING = 4;
   public static final int ASSERT_QUIET_EVAL = 5;
 
+  public static final int CREDITS_GROUP = 1;
+  public static final int CREDITS_GENERAL = 2;
+  public static final int CREDITS_SAPI = 4;
+  public static final int CREDITS_MODULES = 8;
+  public static final int CREDITS_DOCS = 16;
+  public static final int CREDITS_FULLPAGE = 32;
+  public static final int CREDITS_QA = 64;
+  public static final int CREDITS_ALL = -1;
+
+
   public static final int INFO_GENERAL = 1;
   public static final int INFO_CREDITS = 2;
   public static final int INFO_CONFIGURATION = 4;
@@ -66,8 +76,7 @@ public class OptionsModule extends AbstractQuercusModule {
   public static final int INFO_ENVIRONMENT = 16;
   public static final int INFO_VARIABLES = 32;
   public static final int INFO_LICENSE = 64;
-
-  private static final Value _SERVER = StringValue.create("_SERVER");
+  public static final int INFO_ALL = -1;
 
   private static final HashMap<String,StringValue> _iniMap
     = new HashMap<String,StringValue>();
@@ -83,16 +92,26 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Checks the assertion
    */
-  public static boolean quercus_assert(Env env, String code)
+  public static Value quercus_assert(Env env, String code)
   {
     try {
       Quercus quercus = env.getQuercus();
       
       QuercusProgram program = quercus.parseCode(code);
+
+      program = program.createExprReturn();
       
       Value value = program.execute(env);
+
+      boolean result = value.toBoolean();
+
+      if (!result) {
+        env.warning(L.l("Assertion \"{0}\" failed", code));
+        return NullValue.NULL;
+      }
+
+      return BooleanValue.TRUE;
       
-      return value.toBoolean();
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -105,57 +124,62 @@ public class OptionsModule extends AbstractQuercusModule {
 				     int code,
 				     @Optional("-1") Value value)
   {
-    Value result = NullValue.NULL;
+    Value result = null;
+    Value longResult = null;
     
     if (value.equals(LongValue.MINUS_ONE)) {
       switch (code) {
       case ASSERT_ACTIVE:
-	result = env.getIni("assert.active");
+	longResult = env.getIni("assert.active");
 	break;
       case ASSERT_WARNING:
-	result = env.getIni("assert.warning");
+	longResult = env.getIni("assert.warning");
 	break;
       case ASSERT_BAIL:
-	result = env.getIni("assert.bail");
+	longResult = env.getIni("assert.bail");
 	break;
       case ASSERT_QUIET_EVAL:
-	result = env.getIni("assert.quiet_eval");
+	longResult = env.getIni("assert.quiet_eval");
 	break;
       case ASSERT_CALLBACK:
 	result = env.getIni("assert.callback");
 	break;
       default:
-	result = BooleanValue.FALSE;
+        env.warning(L.l("unknown value {0}", code));
+        result = BooleanValue.FALSE;
 	break;
       }
     }
     else {
       switch (code) {
       case ASSERT_ACTIVE:
-	result = env.setIni("assert.active", value.toString());
+	longResult = env.setIni("assert.active", value.toString());
 	break;
       case ASSERT_WARNING:
-	result = env.setIni("assert.warning", value.toString());
+	longResult = env.setIni("assert.warning", value.toString());
 	break;
       case ASSERT_BAIL:
-	result = env.setIni("assert.bail", value.toString());
+	longResult = env.setIni("assert.bail", value.toString());
 	break;
       case ASSERT_QUIET_EVAL:
-	result = env.setIni("assert.quiet_eval", value.toString());
+	longResult = env.setIni("assert.quiet_eval", value.toString());
 	break;
       case ASSERT_CALLBACK:
 	result = env.setIni("assert.callback", value.toString());
 	break;
       default:
+        env.warning(L.l("unknown value {0}", code));
 	result = BooleanValue.FALSE;
 	break;
       }
     }
 
-    if (result == null)
-      result = NullValue.NULL;
-
-    return result;
+    if (longResult != null)
+      return longResult.toLongValue();
+    else if (result != null)
+      return result;
+    else
+      return NullValue.NULL;
   }
 
   /**
@@ -193,19 +217,19 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Sets an environment name/value pair.
    */
-  public static BooleanValue putenv(Env env, StringValue settings)
+  public static boolean putenv(Env env, StringValue settings)
   {
     int eqIndex = settings.indexOf('=');
 
     if (eqIndex < 0)
-      return BooleanValue.FALSE;
+      return false;
 
     StringValue key = settings.substring(0, eqIndex);
     StringValue val = settings.substring(eqIndex + 1);
 
     env.getQuercus().setServerEnv(key, val);
 
-    return BooleanValue.TRUE;
+    return true;
   }
 
   /**
@@ -363,7 +387,7 @@ public class OptionsModule extends AbstractQuercusModule {
     if (v != null)
       return v.toString();
     else
-      return null;
+      return "";
   }
 
   /**
@@ -452,14 +476,14 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Sets an initialization value.
    */
-  public static Value ini_set(Env env, String varName, String value)
+  public static StringValue ini_set(Env env, String varName, String value)
   {
-    Value oldValue = env.setIni(varName, value);
+    StringValue oldValue = env.setIni(varName, value);
 
     if (oldValue != null)
       return oldValue;
     else
-      return NullValue.NULL;
+      return StringValue.EMPTY;
   }
 
   /**

@@ -64,6 +64,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -88,8 +89,8 @@ public class Quercus
   private HashMap<String, InternStringValue> _internMap
     = new HashMap<String, InternStringValue>();
 
-  private HashMap<String, QuercusModule> _modules
-    = new HashMap<String, QuercusModule>();
+  private HashMap<String, ModuleInfo> _modules
+    = new HashMap<String, ModuleInfo>();
 
   private HashSet<ModuleStartupListener> _moduleStartupListeners
     = new HashSet<ModuleStartupListener>();
@@ -862,7 +863,9 @@ public class Quercus
    */
   public QuercusModule findModule(String name)
   {
-    return _modules.get(name);
+    ModuleInfo moduleInfo =  _modules.get(name);
+
+    return moduleInfo == null ? null : moduleInfo.getModule();
   }
 
   /**
@@ -896,17 +899,16 @@ public class Quercus
   {
     ArrayValue value = null;
 
-    for (QuercusModule module : _modules.values()) {
-      String []ext = module.getLoadedExtensions();
-      boolean hasExt = false;
+    for (ModuleInfo moduleInfo : _modules.values()) {
+      Set<String> extensionSet = moduleInfo.getLoadedExtensions();
 
-      for (int i = 0; i < ext.length; i++) {
-        if (name.equals(ext[i]))
-          hasExt = true;
-      }
+      if (extensionSet.contains(name)) {
+        for (String functionName : moduleInfo.getFunctions().keySet()) {
+          if (value == null)
+            value = new ArrayValueImpl();
 
-      if (hasExt) {
-        value = new ArrayValueImpl();
+          value.put(functionName);
+        }
       }
     }
 
@@ -1104,7 +1106,7 @@ public class Quercus
     ModuleInfo info = context.addModule(module.getClass().getName(),
 					module);
 
-    _modules.put(info.getName(), info.getModule());
+    _modules.put(info.getName(), info);
 
     if (info.getModule() instanceof ModuleStartupListener)
       _moduleStartupListeners.add((ModuleStartupListener)info.getModule());

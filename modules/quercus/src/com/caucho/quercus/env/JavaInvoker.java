@@ -571,7 +571,6 @@ abstract public class JavaInvoker
     }
 
     for (int i = 0; i < _marshalArgs.length; i++) {
-      Value value;
 
       if (i < args.length && args[i] != null)
         javaArgs[k] = _marshalArgs[i].marshal(env, args[i], _param[k]);
@@ -580,8 +579,8 @@ abstract public class JavaInvoker
                                               _defaultExprs[i],
                                               _param[k]);
       } else {
-        value = env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
-                                _name, _marshalArgs.length, args.length));
+        env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
+                        _name, _marshalArgs.length, args.length));
 
         //return NullValue.NULL;
 

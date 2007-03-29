@@ -38,6 +38,7 @@ import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.BinaryOutput;
 import com.caucho.quercus.lib.file.BinaryStream;
 import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.lib.OutputModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.vfs.StreamImplOutputStream;
@@ -155,6 +156,11 @@ public class ZlibModule extends AbstractQuercusModule {
     } finally {
       is.close();
     }
+  }
+
+  public static Value ob_gzhandler(Env env, StringValue buffer, int state)
+  {
+    return OutputModule.ob_gzhandler(env, buffer, state);
   }
 
   /**

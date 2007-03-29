@@ -1113,13 +1113,16 @@ public class Env {
    */
   public Value getConfigVar(String var)
   {
-    return _quercus.getIni(var);
+    StringValue value =  _quercus.getIni(var);
+
+    // php/1a0d
+    return value == null ? BooleanValue.FALSE : value;
   }
 
   /**
    * Sets an ini value.
    */
-  public Value setIni(String var, String value)
+  public StringValue setIni(String var, String value)
   {
     StringValue oldValue = getIni(var);
 
