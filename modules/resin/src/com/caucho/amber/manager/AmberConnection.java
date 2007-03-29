@@ -1625,9 +1625,12 @@ public class AmberConnection
       _entities.get(i).__caucho_detach();
     }
 
-    if (! isCommit) {
-      // jpa/0j5c
-      _entities.clear();
+    // jpa/0h60
+    _entities.clear();
+
+    // if (! isCommit) {
+    // jpa/0j5c
+
 
       /* XXX: jpa/0k11 - avoids double rollback()
          Rollback is done from com.caucho.transaction.TransactionImpl
@@ -1639,7 +1642,7 @@ public class AmberConnection
          throw new IllegalStateException(e);
          }
       */
-    }
+    // }
   }
 
   /**
@@ -2051,8 +2054,8 @@ public class AmberConnection
 
     if (index < 0) {
       throw new IllegalStateException(L.l("AmberEntity[{0}:{1}] cannot be deleted since it is not managed",
-					  entity.getClass().getName(),
-					  entity.__caucho_getPrimaryKey()));
+            entity.getClass().getName(),
+            entity.__caucho_getPrimaryKey()));
       /*
         EntityType entityType = entity.__caucho_getEntityType();
 
