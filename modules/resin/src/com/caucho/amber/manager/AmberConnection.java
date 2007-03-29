@@ -304,15 +304,15 @@ public class AmberConnection
       Entity entity = (Entity) o;
 
       /* XXX: jpa/0h25
-      EntityState state = entity.__caucho_getEntityState();
+         EntityState state = entity.__caucho_getEntityState();
 
-      // XXX: jpa/0i5e
-      if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
-        if (log.isLoggable(Level.FINEST))
-          log.finest(L.l("persistFromCascade is ignoring entity in state {0}", state));
+         // XXX: jpa/0i5e
+         if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
+         if (log.isLoggable(Level.FINEST))
+         log.finest(L.l("persistFromCascade is ignoring entity in state {0}", state));
 
-        return;
-      }
+         return;
+         }
       */
 
       persistInternal(entity, true);
@@ -910,8 +910,8 @@ public class AmberConnection
       index = getEntity(cl.getName(), key);
 
       if (index >= 0) {
-        // jpa/0ga9: replace with managed entity.
-        _entities.remove(index);
+      // jpa/0ga9: replace with managed entity.
+      _entities.remove(index);
       }
 
       addEntity(entity);
@@ -1632,16 +1632,16 @@ public class AmberConnection
     // jpa/0j5c
 
 
-      /* XXX: jpa/0k11 - avoids double rollback()
-         Rollback is done from com.caucho.transaction.TransactionImpl
-         to the pool item com.caucho.jca.PoolItem
-         try {
-         if (_conn != null)
-         _conn.rollback();
-         } catch (SQLException e) {
-         throw new IllegalStateException(e);
-         }
-      */
+    /* XXX: jpa/0k11 - avoids double rollback()
+       Rollback is done from com.caucho.transaction.TransactionImpl
+       to the pool item com.caucho.jca.PoolItem
+       try {
+       if (_conn != null)
+       _conn.rollback();
+       } catch (SQLException e) {
+       throw new IllegalStateException(e);
+       }
+    */
     // }
   }
 
@@ -2054,8 +2054,8 @@ public class AmberConnection
 
     if (index < 0) {
       throw new IllegalStateException(L.l("AmberEntity[{0}:{1}] cannot be deleted since it is not managed",
-            entity.getClass().getName(),
-            entity.__caucho_getPrimaryKey()));
+                                          entity.getClass().getName(),
+                                          entity.__caucho_getPrimaryKey()));
       /*
         EntityType entityType = entity.__caucho_getEntityType();
 
@@ -2700,7 +2700,7 @@ public class AmberConnection
            are flushed with the cascading operations.
 
            if (! isCascade) {
-             flushInternal();
+           flushInternal();
         */
 
         // jpa/0h25
