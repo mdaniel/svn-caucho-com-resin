@@ -1088,6 +1088,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       out.popDepth();
       out.println("}");
+      
+      out.popDepth();
+      out.println("}");
       return;
     }
 
