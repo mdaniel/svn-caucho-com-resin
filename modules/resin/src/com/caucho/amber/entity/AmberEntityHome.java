@@ -82,7 +82,7 @@ public class AmberEntityHome {
       Class cl = Class.forName("com.caucho.ejb.entity.EntityObject");
       _cauchoGetBeanMethod = cl.getMethod("_caucho_getBean", new Class[0]);
     } catch (Throwable e) {
-      log.log(Level.FINEST, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
     }
   }
 
@@ -259,7 +259,7 @@ public class AmberEntityHome {
           entity = (Entity) _cauchoGetBeanMethod.invoke(value, new Object[0]);
           entity.__caucho_makePersistent(aConn, item);
         } catch (Throwable e) {
-          log.log(Level.FINEST, e.toString(), e);
+          log.log(Level.FINER, e.toString(), e);
         }
       }
 
@@ -368,8 +368,8 @@ public class AmberEntityHome {
                                    int notExpiringGroup)
     throws AmberException
   {
-    if (log.isLoggable(Level.FINEST))
-      log.finest("findEntityItem: "+key+" "+isLoad);
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "findEntityItem: "+key+" "+isLoad);
 
     if (key == null)
       return null; // ejb/0a06 throw new NullPointerException("primaryKey");
@@ -381,8 +381,8 @@ public class AmberEntityHome {
       // jpa/0y14 if (aConn.shouldRetrieveFromCache())
       item = _manager.getEntity(getRootType(), key);
 
-      if (log.isLoggable(Level.FINEST))
-	log.finest("findEntityItem item is null? "+(item == null));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, "findEntityItem item is null? "+(item == null));
 
       if (item == null) {
         if (_homeBean == null && _configException != null)
@@ -399,7 +399,8 @@ public class AmberEntityHome {
         // __caucho_home_new() will properly add the copy object to the context.
         cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
 
-        log.finest("findEntityItem cacheEntity is null? "+(cacheEntity == null));
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, "findEntityItem cacheEntity is null? "+(cacheEntity == null));
 
         // Object does not exist.
         if (cacheEntity == null) {
@@ -414,7 +415,8 @@ public class AmberEntityHome {
 
         item = _manager.putEntity(getRootType(), key, item);
 
-        log.finest("findEntityItem after putEntity item is null? "+(item == null));
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, "findEntityItem after putEntity item is null? "+(item == null));
 
         // jpa/0o41
         if (isLoad) {
@@ -449,7 +451,8 @@ public class AmberEntityHome {
         aConn.addNewEntity(cl, key);
 
         if (aConn.isInTransaction()) {
-          log.finest("findEntityItem is in transaction");
+          if (log.isLoggable(Level.FINER))
+            log.log(Level.FINER, "findEntityItem is in transaction");
 
           String className = cl.getName();
 
@@ -465,7 +468,8 @@ public class AmberEntityHome {
           // jpa/0ge3: the copy object is created above calling addNewEntity(),
           // but it is still not loaded.
           if (index < 0 || ! state.isManaged()) {
-            log.finest("expiring entity to be loaded into the current transaction");
+            if (log.isLoggable(Level.FINER))
+              log.log(Level.FINER, "expiring entity to be loaded into the current transaction");
 
             // jpa/0g0k
             item.getEntity().__caucho_expire();
@@ -476,10 +480,12 @@ public class AmberEntityHome {
           }
         }
         else {
-          log.finest("findEntityItem is not in transaction");
+          if (log.isLoggable(Level.FINER))
+            log.log(Level.FINER, "findEntityItem is not in transaction");
         }
 
-        log.finest("findEntityItem loading entity");
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, "findEntityItem loading entity");
 
         if (_manager.isJPA()) {
           // jpa/0v33
@@ -495,7 +501,8 @@ public class AmberEntityHome {
         aConn.setTransactionalState(item.getEntity());
       }
 
-      log.finest("returning item is null? "+(item == null));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, "returning item is null? "+(item == null));
 
       return item;
     } catch (Exception e) {

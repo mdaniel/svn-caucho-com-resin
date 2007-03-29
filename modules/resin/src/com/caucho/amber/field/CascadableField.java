@@ -64,7 +64,7 @@ abstract public class CascadableField extends AbstractField {
 
     _cascadeTypes = cascadeTypes;
 
-    if (log.isLoggable(Level.FINEST)) {
+    if (log.isLoggable(Level.FINER)) {
       String s = "";
 
       if (_cascadeTypes != null) {
@@ -80,8 +80,8 @@ abstract public class CascadableField extends AbstractField {
         }
       }
 
-      log.finest(L.l("CascadableField.<constructor> class: '{0}' cascade: '{1}'",
-                     this.getClass().getName(), s));
+      log.log(Level.FINER, L.l("CascadableField.<constructor> class: '{0}' cascade: '{1}'",
+                               this.getClass().getName(), s));
     }
   }
 

@@ -102,7 +102,7 @@ public class AmberPersistenceUnit {
 
   // data source for requests in a transaction
   private DataSource _xaDataSource;
-  
+
   // persistence.xml jta-data-source
   private DataSource _jtaDataSource;
   // persistence.xml non-jta-data-source
@@ -296,7 +296,7 @@ public class AmberPersistenceUnit {
   {
     return _xaDataSource;
   }
-  
+
   /**
    * Sets the persistence.xml jta data source.
    */
@@ -304,7 +304,7 @@ public class AmberPersistenceUnit {
   {
     _jtaDataSource = dataSource;
   }
-  
+
   /**
    * Sets the persistence.xml non-jta data source.
    */
@@ -871,7 +871,8 @@ public class AmberPersistenceUnit {
   public void initType(AbstractEnhancedType type)
     throws Exception
   {
-    log.log(Level.FINE, "Initiating type: " + type.getInstanceClassName());
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "Initiating type: " + type.getInstanceClassName());
 
     type.init();
 

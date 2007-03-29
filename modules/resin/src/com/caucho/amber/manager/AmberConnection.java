@@ -386,15 +386,15 @@ public class AmberConnection
 
       checkTransactionRequired("remove");
 
-      if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("removing entity class " + instance.getClass().getName() +
-                       " PK: " + instance.__caucho_getPrimaryKey()));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("removing entity class " + instance.getClass().getName() +
+                                 " PK: " + instance.__caucho_getPrimaryKey()));
 
       // jpa/0k12
       if (instance.__caucho_getConnection() == null) {
         if (instance.__caucho_getEntityType() == null) {
-          if (log.isLoggable(Level.FINEST))
-            log.finest(L.l("remove is ignoring entity; performing only cascade post-remove"));
+          if (log.isLoggable(Level.FINER))
+            log.log(Level.FINER, L.l("remove is ignoring entity; performing only cascade post-remove"));
 
           // Ignore this entity; only post-remove child entities.
           instance.__caucho_cascadePostRemove(this);
@@ -409,8 +409,8 @@ public class AmberConnection
       EntityState state = instance.__caucho_getEntityState();
 
       if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
-        if (log.isLoggable(Level.FINEST))
-          log.finest(L.l("remove is ignoring entity in state " + state));
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("remove is ignoring entity in state " + state));
 
         return;
       }
@@ -420,8 +420,8 @@ public class AmberConnection
       // when this entity is being removed.
       instance.__caucho_setEntityState(EntityState.P_DELETING);
 
-      if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("remove is flushing any lazy cascading operation"));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("remove is flushing any lazy cascading operation"));
 
       // jpa/1620
       // In particular, required for cascading persistence, since the cascade
@@ -445,28 +445,28 @@ public class AmberConnection
 
       oldEntity = _entities.get(index);
 
-      if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("remove is performing cascade pre-remove"));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("remove is performing cascade pre-remove"));
 
       // Pre-remove child entities.
       instance.__caucho_cascadePreRemove(this);
 
-      if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("remove is performing delete on the target entity"));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("remove is performing delete on the target entity"));
 
       delete(instance);
 
-      if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("remove is performing cascade post-remove"));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("remove is performing cascade post-remove"));
 
       // jpa/0o30
       // Post-remove child entities.
       instance.__caucho_cascadePostRemove(this);
 
-      if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("DONE successful remove for entity class " +
-                       instance.getClass().getName() +
-                       " PK: " + instance.__caucho_getPrimaryKey()));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("DONE successful remove for entity class " +
+                                 instance.getClass().getName() +
+                                 " PK: " + instance.__caucho_getPrimaryKey()));
 
     } catch (RuntimeException e) {
       throw e;
@@ -557,7 +557,8 @@ public class AmberConnection
    */
   public void clear()
   {
-    log.finest("AmberConnection.clear cleaning up all entities");
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "AmberConnection.clear cleaning up all entities");
 
     _entities.clear();
     _txEntities.clear();
@@ -850,7 +851,8 @@ public class AmberConnection
                      Object key)
     throws AmberException
   {
-    log.finest(L.l("loading entity class " + cl.getName() + " PK: " + key));
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, L.l("loading entity class " + cl.getName() + " PK: " + key));
 
     Entity entity = null;
 
@@ -865,7 +867,8 @@ public class AmberConnection
       entity = _entities.get(index);
 
       if (! isInTransaction()) {
-        log.finest(L.l("load returning existing entity not in transaction"));
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("load returning existing entity not in transaction"));
 
         return entity;
       }
@@ -877,7 +880,8 @@ public class AmberConnection
         }
       */
       if (entity.__caucho_getEntityState().isTransactional()) {
-        log.finest(L.l("load returning existing entity in transactional state"));
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("load returning existing entity in transactional state"));
 
         return entity;
       }
@@ -1136,8 +1140,10 @@ public class AmberConnection
       return home.load(this, key, notExpiringLoadMask, notExpiringGroup);
     } catch (AmberObjectNotFoundException e) {
       if (_persistenceUnit.isJPA()) {
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, e.toString(), e);
+
         // jpa/0h29
-        log.log(Level.FINER, e.toString(), e);
         return null;
       }
 
@@ -1297,9 +1303,9 @@ public class AmberConnection
     Object pk = entity.__caucho_getPrimaryKey();
     String className = entity.getClass().getName();
 
-    if (log.isLoggable(Level.FINEST)) {
-      log.finest(L.l("addEntity(class: '{0}' PK: '{1}')",
-                     className, pk));
+    if (log.isLoggable(Level.FINER)) {
+      log.log(Level.FINER, L.l("addEntity(class: '{0}' PK: '{1}')",
+                               className, pk));
     }
 
     int index = getEntity(className, pk);
@@ -1470,7 +1476,8 @@ public class AmberConnection
   public void commit()
     throws SQLException
   {
-    log.finest("AmberConnection.commit");
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "AmberConnection.commit");
 
     try {
       flushInternal();
@@ -1499,7 +1506,8 @@ public class AmberConnection
         entity.__caucho_afterCommit();
       }
 
-      log.finest("cleaning up txEntities");
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, "cleaning up txEntities");
 
       _txEntities.clear();
     }
@@ -1510,7 +1518,8 @@ public class AmberConnection
    */
   public void beforeCompletion()
   {
-    log.finest("AmberConnection.beforeCompletion");
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "AmberConnection.beforeCompletion");
 
     try {
       beforeCommit();
@@ -1524,7 +1533,8 @@ public class AmberConnection
    */
   public void afterCompletion(int status)
   {
-    log.finest("AmberConnection.afterCompletion");
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "AmberConnection.afterCompletion");
 
     afterCommit(status == Status.STATUS_COMMITTED);
     _isXA = false;
@@ -1537,7 +1547,8 @@ public class AmberConnection
   public void beforeCommit()
     throws SQLException
   {
-    log.finest("AmberConnection.beforeCommit");
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "AmberConnection.beforeCommit");
 
     try {
       flushInternal();
@@ -1576,7 +1587,8 @@ public class AmberConnection
    */
   public void afterCommit(boolean isCommit)
   {
-    log.finest("AmberConnection.afterCommit: " + isCommit);
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "AmberConnection.afterCommit: " + isCommit);
 
     if (! _isXA)
       _isInTransaction = false;
@@ -1601,7 +1613,8 @@ public class AmberConnection
       }
     }
 
-    log.finest("cleaning up txEntities");
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "cleaning up txEntities");
 
     _txEntities.clear();
 
@@ -1635,7 +1648,8 @@ public class AmberConnection
   public void rollback()
     throws SQLException
   {
-    log.finest("AmberConnection.rollback");
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "AmberConnection.rollback");
 
     try {
       flushInternal();
@@ -2241,7 +2255,8 @@ public class AmberConnection
    */
   public void cleanup()
   {
-    log.finest("AmberConnection.cleanup");
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "AmberConnection.cleanup");
 
     try {
       // XXX: also needs to check PersistenceContextType.TRANSACTION/EXTENDED.
@@ -2266,7 +2281,8 @@ public class AmberConnection
         _entities.get(i).__caucho_detach();
       }
 
-      log.finest("cleaning up all entities");
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, "cleaning up all entities");
 
       _entities.clear();
       _txEntities.clear();
@@ -2399,8 +2415,9 @@ public class AmberConnection
     AmberEntityHome entityHome = _persistenceUnit.getEntityHome(className);
 
     if (entityHome == null) {
-      log.finest(L.l("Home not found for entity (class: '{0}' PK: '{1}')",
-                     className, pk));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("Home not found for entity (class: '{0}' PK: '{1}')",
+                                 className, pk));
       return null;
     }
 
@@ -2429,10 +2446,10 @@ public class AmberConnection
    */
   private void addInternalEntity(Entity entity)
   {
-    if (log.isLoggable(Level.FINEST)) {
-      log.finest(L.l("addInternalEntity(class: '{0}' PK: '{1}')",
-                     entity.getClass().getName(),
-                     entity.__caucho_getPrimaryKey()));
+    if (log.isLoggable(Level.FINER)) {
+      log.log(Level.FINER, L.l("addInternalEntity(class: '{0}' PK: '{1}')",
+                               entity.getClass().getName(),
+                               entity.__caucho_getPrimaryKey()));
     }
 
     _entities.add(entity);
@@ -2555,7 +2572,8 @@ public class AmberConnection
    */
   private void detach()
   {
-    log.finest("AmberConnection.detach");
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "AmberConnection.detach");
 
     if (_isXA || _isInTransaction)
       throw new IllegalStateException("detach cannot be called within transaction");
@@ -2622,7 +2640,8 @@ public class AmberConnection
         entity.__caucho_afterCommit();
       }
 
-      log.finest("AmberConnection.flushInternal cleaning up all entities");
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, "AmberConnection.flushInternal cleaning up all entities");
 
       _txEntities.clear();
     }
@@ -2648,7 +2667,7 @@ public class AmberConnection
         try {
           createInternal(instance);
         } catch (SQLException e) {
-          log.log(Level.FINEST, e.toString(), e);
+          log.log(Level.FINER, e.toString(), e);
 
           String sqlState = e.getSQLState();
 
@@ -2734,13 +2753,13 @@ public class AmberConnection
 
       Entity entity = checkEntityType(entityT, "merge");
 
-      if (log.isLoggable(Level.FINEST)) {
+      if (log.isLoggable(Level.FINER)) {
         String className = entity.getClass().getName();
         Object pk = entity.__caucho_getPrimaryKey();
         EntityState state = entity.__caucho_getEntityState();
 
-        log.finest(L.l("recursiveMerge(class: '{0}' PK: '{1}' state: '{2}')",
-                       className, pk, state));
+        log.log(Level.FINER, L.l("recursiveMerge(class: '{0}' PK: '{1}' state: '{2}')",
+                                 className, pk, state));
       }
 
       Entity managedEntity = null;
@@ -2770,8 +2789,9 @@ public class AmberConnection
 
       Object pk = entity.__caucho_getPrimaryKey();
 
-      log.finest(L.l("merge(class: '{0}' PK: '{1}' state: '{2}')",
-                     className, pk, state));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("merge(class: '{0}' PK: '{1}' state: '{2}')",
+                                 className, pk, state));
 
       if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
         // removed entity instance
@@ -2803,7 +2823,8 @@ public class AmberConnection
 
         existingEntity = (Entity) load(entity.getClass(), pk);
       } catch (AmberObjectNotFoundException e) {
-        log.log(Level.FINEST, e.toString(), e);
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, e.toString(), e);
         // JPA: should not throw at all, returns null only.
       }
 
@@ -2848,12 +2869,14 @@ public class AmberConnection
           // XXX: called from persist()
           // entity.__caucho_cascadePostPersist(this);
 
-          log.finest(L.l("merged to a new entity (persisted)"));
+          if (log.isLoggable(Level.FINER))
+            log.log(Level.FINER, L.l("merged to a new entity (persisted)"));
         }
         else {
           setTransactionalState(managedEntity);
 
-          log.finest(L.l("merged to an existing entity"));
+          if (log.isLoggable(Level.FINER))
+            log.log(Level.FINER, L.l("merged to an existing entity"));
         }
 
         // jpa/0ga3, jpa/0h08, jpa/0o4-

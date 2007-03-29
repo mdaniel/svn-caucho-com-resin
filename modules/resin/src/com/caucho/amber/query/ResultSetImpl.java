@@ -1072,14 +1072,14 @@ public class ResultSetImpl implements ResultSet {
     Object value = null;
 
     if (cacheChunk != null) {
-      if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("ResultSetImpl.getObject({0}) cache chunk is NOT null", column));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("ResultSetImpl.getObject({0}) cache chunk is NOT null", column));
 
       Object obj = cacheChunk.getObject(_row - 1, column - 1);
 
       if (obj instanceof EntityItem) {
-        if (log.isLoggable(Level.FINEST))
-          log.finest(L.l("ResultSetImpl: cache obj is instance of EntityItem"));
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("ResultSetImpl: cache obj is instance of EntityItem"));
 
         EntityItem entityItem = (EntityItem) obj;
 
@@ -1117,15 +1117,15 @@ public class ResultSetImpl implements ResultSet {
         _numberOfLoadingColumns = entityItem.getNumberOfLoadingColumns();
       }
       else {
-        if (log.isLoggable(Level.FINEST))
-          log.finest(L.l("ResultSetImpl: cache obj is NOT instance of EntityItem"));
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("ResultSetImpl: cache obj is NOT instance of EntityItem"));
 
         value = obj;
       }
     }
     else {
-      if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("ResultSetImpl.getObject({0}) cache chunk is null", column));
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("ResultSetImpl.getObject({0}) cache chunk is null", column));
 
       int index = getColumn(column);
 
@@ -1134,8 +1134,8 @@ public class ResultSetImpl implements ResultSet {
       value = expr.getObject(_session, _rs, index);
 
       if (expr instanceof LoadEntityExpr) {
-        if (log.isLoggable(Level.FINEST))
-          log.finest(L.l("ResultSetImpl expr is instance of LoadEntityExpr"));
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("ResultSetImpl expr is instance of LoadEntityExpr"));
 
         LoadEntityExpr entityExpr = (LoadEntityExpr) expr;
         _numberOfLoadingColumns = entityExpr.getIndex();

@@ -87,9 +87,9 @@ abstract public class AbstractField implements AmberField {
   {
     this(sourceType);
 
-    if (log.isLoggable(Level.FINEST)) {
-      log.finest(L.l("AbstractField.<constructor> class: '{0}' name: '{1}'",
-                     this.getClass().getName(), name));
+    if (log.isLoggable(Level.FINER)) {
+      log.log(Level.FINER, L.l("AbstractField.<constructor> class: '{0}' name: '{1}'",
+                               this.getClass().getName(), name));
     }
 
     setName(name);

@@ -270,7 +270,8 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     if (type != null) {
       // type is EntityType or MappedSuperclassType
 
-      log.info("Amber enhancing class " + className);
+      if (log.isLoggable(Level.INFO))
+        log.log(Level.INFO, "Amber enhancing class " + className);
 
       // XXX: _amberContainerenceUnitenceUnit.configure();
 
@@ -303,7 +304,8 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     // Type can be null for subclasses and inner classes that need fixups
     if (listenerType != null) {
-      log.info("Amber enhancing class " + className);
+      if (log.isLoggable(Level.INFO))
+        log.log(Level.INFO, "Amber enhancing class " + className);
 
       listenerType.init();
 
@@ -322,7 +324,8 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     // Type can be null for subclasses and inner classes that need fixups
     if (embeddableType != null) {
-      log.info("Amber enhancing class " + className);
+      if (log.isLoggable(Level.INFO))
+        log.log(Level.INFO, "Amber enhancing class " + className);
 
       embeddableType.init();
 

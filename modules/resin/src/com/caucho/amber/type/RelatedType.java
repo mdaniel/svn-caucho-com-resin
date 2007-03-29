@@ -659,7 +659,8 @@ abstract public class RelatedType extends AbstractStatefulType {
     // forces table lazy load
     getTable();
 
-    log.log(Level.FINE, "RelatedType.init() has id? " + (getId() != null));
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "RelatedType.init() has id? " + (getId() != null));
 
     if (this instanceof EntityType) {
       assert getId() != null : "null id for " + getName();

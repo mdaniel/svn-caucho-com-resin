@@ -234,12 +234,13 @@ public abstract class AbstractEnhancedType extends Type {
         if (isEnhanced()) {
           ClassLoader loader = getPersistenceUnit().getEnhancedLoader();
 
-          if (log.isLoggable(Level.FINEST))
-            log.finest(L.l("loading bean class `{0}' from `{1}'", getBeanClass().getName(), loader));
+          if (log.isLoggable(Level.FINER))
+            log.log(Level.FINER, L.l("loading bean class `{0}' from `{1}'", getBeanClass().getName(), loader));
 
           _instanceClass = Class.forName(getBeanClass().getName(), false, loader);
 
-          log.finest(L.l("loaded bean class `{0}' from `{1}'", _instanceClass, loader));
+          if (log.isLoggable(Level.FINER))
+            log.log(Level.FINER, L.l("loaded bean class `{0}' from `{1}'", _instanceClass, loader));
         }
         else {
           ClassLoader loader = _instanceLoader;
@@ -247,8 +248,8 @@ public abstract class AbstractEnhancedType extends Type {
           if (loader == null)
             loader = getPersistenceUnit().getEnhancedLoader();
 
-          if (log.isLoggable(Level.FINEST))
-            log.finest(L.l("loading instance class `{0}' from `{1}'", getInstanceClassName(), loader));
+          if (log.isLoggable(Level.FINER))
+            log.log(Level.FINER, L.l("loading instance class `{0}' from `{1}'", getInstanceClassName(), loader));
 
           _instanceClass = Class.forName(getInstanceClassName(), false, loader);
         }
