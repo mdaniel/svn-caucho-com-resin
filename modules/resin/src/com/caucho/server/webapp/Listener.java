@@ -33,6 +33,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.NodeBuilderProgram;
 import com.caucho.config.types.InitProgram;
+import com.caucho.config.j2ee.DescriptionGroupConfig;
 import com.caucho.util.L10N;
 
 import javax.servlet.ServletContextAttributeListener;
@@ -46,7 +47,7 @@ import javax.servlet.http.HttpSessionListener;
 /**
  * Configuration for the listener
  */
-public class Listener {
+public class Listener extends DescriptionGroupConfig {
   static L10N L = new L10N(Listener.class);
 
   // The listener class

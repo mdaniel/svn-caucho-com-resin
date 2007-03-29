@@ -92,7 +92,7 @@ public class JstlCoreForEach extends JstlNode {
     else if (STEP.equals(name))
       _step = value;
     else
-      throw error(L.l("`{0}' is an unknown attribute for <{1}>.",
+      throw error(L.l("'{0}' is an unknown attribute for <{1}>.",
                       name.getName(), getTagName()));
   }
   
@@ -111,7 +111,7 @@ public class JstlCoreForEach extends JstlNode {
     else if (STEP.equals(name))
       _stepAttr = value;
     else
-      throw error(L.l("`{0}' is an unknown jsp:attribute for <{1}>.",
+      throw error(L.l("'{0}' is an unknown jsp:attribute for <{1}>.",
                       name.getName(), getTagName()));
   }
 
@@ -328,6 +328,7 @@ public class JstlCoreForEach extends JstlNode {
   /**
    * Generates the code for the c:forEach tag.
    */
+  @Override
   public void generate(JspJavaWriter out)
     throws Exception
   {
@@ -344,11 +345,11 @@ public class JstlCoreForEach extends JstlNode {
     throws Exception
   {
     if (_begin == null && _beginAttr == null)
-      throw error(L.l("required attribute `begin' missing from <{0}>",
+      throw error(L.l("required attribute 'begin' missing from <{0}>",
                       getTagName()));
 
     if (_end == null && _endAttr == null)
-      throw error(L.l("required attribute `end' missing from <{0}>",
+      throw error(L.l("required attribute 'end' missing from <{0}>",
                       getTagName()));
 
     int uniqueId = _gen.uniqueId();

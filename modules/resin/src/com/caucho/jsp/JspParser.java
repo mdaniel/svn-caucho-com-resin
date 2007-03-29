@@ -357,6 +357,9 @@ public class JspParser {
 	stream.setEncoding("UTF-8");
       }
       break;
+
+    case -1:
+      break;
       
     default:
       stream.unread();
