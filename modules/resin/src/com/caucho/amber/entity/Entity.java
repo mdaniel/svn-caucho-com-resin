@@ -111,6 +111,11 @@ public interface Entity extends MappedSuperclass
   public Object __caucho_getPrimaryKey();
 
   /**
+   * Gets the corresponding cache entity referenced by __caucho_item.
+   */
+  public Entity __caucho_getCacheEntity();
+
+  /**
    * Get the entity type.
    */
   public EntityType __caucho_getEntityType();

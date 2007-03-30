@@ -893,22 +893,27 @@ public class EntityManyToOneField extends CascadableField {
     if (getLoadGroupIndex() != updateIndex)
       return;
 
+    String var = "__caucho_field_" + getName();
+
     boolean isJPA = getEntitySourceType().getPersistenceUnit().isJPA();
 
     // order matters: jpa/0h08, jpa/0h09
 
-    // jpa/0o08, ejb/06--, ejb/0a-- and jpa/0o04
+    // jpa/0h20, jpa/0o08, ejb/06--, ejb/0a-- and jpa/0o04
     // ejb/0628 vs. jpa/0h0a
     if (isJPA &&
         ! (dst.equals("cacheEntity")
-           || dst.equals("super"))) {
+           || dst.equals("super")
+           || dst.equals("item"))) {
       String value = generateGet(src);
 
       out.println("// " + dst);
 
       if (_targetType instanceof EntityType) {
+        String targetTypeExt = getEntityTargetType().getInstanceClassName();
+
         // jpa/0h0a: gets the cache object to copy from.
-        out.println("child = aConn.getCacheEntity((com.caucho.amber.entity.Entity) " + value + ");");
+        out.println("child = aConn.getCacheEntity(" + targetTypeExt + ".class, " + var + ");");
       }
       else {
         // XXX: jpa/0l14
@@ -953,13 +958,12 @@ public class EntityManyToOneField extends CascadableField {
     // if (getLoadGroupIndex() == updateIndex) {
 
     // order matters: ejb/06gc
-    String var = "__caucho_field_" + getName();
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
 
     // jpa/0o08, jpa/0o04
     if (! dst.equals("cacheEntity")) {
-      // jpa/0o05
-      if (! dst.equals("super")) { // || isLazy())) {
+      // jpa/0o05, jpa/0h20
+      if (! (dst.equals("super") || dst.equals("item"))) { // || isLazy())) {
         String targetObject;
 
         if (isJPA) {

@@ -2412,8 +2412,22 @@ public class AmberConnection
     if (entity == null)
       return null;
 
-    String className = entity.getClass().getName();
-    Object pk = entity.__caucho_getPrimaryKey();
+    // XXX: jpa/0h20, the cache entity is only available after commit.
+    Entity cacheEntity = entity.__caucho_getCacheEntity();
+
+    if (cacheEntity != null)
+      return cacheEntity;
+
+    return getCacheEntity(entity.getClass(), entity.__caucho_getPrimaryKey());
+  }
+
+  // jpa/0h20
+  public Entity getCacheEntity(Class cl, Object pk)
+  {
+    if (pk == null)
+      return null;
+
+    String className = cl.getName();
 
     AmberEntityHome entityHome = _persistenceUnit.getEntityHome(className);
 

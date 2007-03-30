@@ -72,7 +72,7 @@ public class EntityComponent extends AmberMappedComponent {
       RelatedType parentType = getEntityType().getParentType();
 
       boolean isEntityParent = ((parentType != null)
-				&& (parentType instanceof EntityType));
+                                && (parentType instanceof EntityType));
 
       generateHeader(out, isEntityParent);
 
@@ -81,6 +81,8 @@ public class EntityComponent extends AmberMappedComponent {
       HashSet<Object> completedSet = new HashSet<Object>();
 
       generatePrologue(out, completedSet);
+
+      generateGetCacheEntity(out);
 
       generateGetEntityType(out);
 

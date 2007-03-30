@@ -503,6 +503,27 @@ abstract public class AmberMappedComponent extends ClassComponent {
   }
 
   /**
+   * Generates the __caucho_getCacheEntity()
+   */
+  void generateGetCacheEntity(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public com.caucho.amber.entity.Entity __caucho_getCacheEntity()");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("if (__caucho_item == null)");
+    out.println("  return null;");
+
+    out.println();
+    out.println("return __caucho_item.getEntity();");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
    * Generates the entity type
    */
   void generateGetEntityType(JavaWriter out)
@@ -1094,6 +1115,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     // jpa/0l20: only expires the cache entity if the entity has been changed.
 
+    /* XXX: jpa/0h20
     // jpa/0l14 as a negative test.
     // Explicitly invalidates the corresponding cache item.
     if (_relatedType instanceof EntityType) {
@@ -1102,10 +1124,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("if (cacheEntity != null)");
       out.println("  cacheEntity.__caucho_expire();");
     }
+    */
 
     out.popDepth();
     out.println("}");
 
+    /* jpa/0h20
     if (_relatedType.getPersistenceUnit().isJPA()) {
       // XXX: jpa/0j5f
 
@@ -1116,9 +1140,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("}");
       return;
     }
+    */
 
-    // jpa/0l20
-    out.println("else if (__caucho_item != null) {");
+    // jpa/0h20, jpa/0l20
+    out.println();
+    out.println("if (__caucho_item != null) {");
     out.pushDepth();
 
     out.println(_extClassName + " item = (" + _extClassName + ") __caucho_item.getEntity();");

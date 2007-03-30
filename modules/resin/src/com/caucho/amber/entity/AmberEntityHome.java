@@ -413,11 +413,6 @@ public class AmberEntityHome {
 
         item = new CacheableEntityItem(this, cacheEntity);
 
-        item = _manager.putEntity(getRootType(), key, item);
-
-        if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, "findEntityItem after putEntity item is null? "+(item == null));
-
         // jpa/0o41
         if (isLoad) {
           try {
@@ -441,6 +436,15 @@ public class AmberEntityHome {
 
             throw e;
           }
+        }
+
+        // The cache entity is added after commit.
+        if (! aConn.isInTransaction()) {
+          // jpa/0g0p: only adds the cache entity if it is not within a transaction.
+          item = _manager.putEntity(getRootType(), key, item);
+
+          if (log.isLoggable(Level.FINER))
+            log.log(Level.FINER, "findEntityItem after putEntity item is null? "+(item == null));
         }
       }
       else if (isLoad) {
@@ -562,7 +566,11 @@ public class AmberEntityHome {
                                           subEntity);
 
       item = new CacheableEntityItem(this, cacheEntity);
-      item = _manager.putEntity(getRootType(), key, item);
+
+      // The cache entity is added after commit.
+      if (! aConn.isInTransaction()) {
+        item = _manager.putEntity(getRootType(), key, item);
+      }
     }
 
     return item;
