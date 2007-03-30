@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -28,25 +28,20 @@
 */
 
 package javax.xml.ws;
+
 import java.util.concurrent.Future;
 
-/** XXX */
 public interface Dispatch<T> extends BindingProvider {
+  public T invoke(T msg)
+    throws WebServiceException;
 
-  /** XXX */
-  abstract T invoke(T msg);
+  public Response<T> invokeAsync(T msg)
+    throws WebServiceException;
 
+  public Future<?> invokeAsync(T msg, AsyncHandler<T> async)
+    throws WebServiceException;
 
-  /** XXX */
-  abstract T invokeAsync(T msg);
-
-
-  /** XXX */
-  abstract Future<T> invokeAsync(Dispatch msg, AsyncHandler<T> async);
-
-
-  /** XXX */
-  abstract void invokeOneWay(T msg);
-
+  public void invokeOneWay(T msg)
+    throws WebServiceException;
 }
 

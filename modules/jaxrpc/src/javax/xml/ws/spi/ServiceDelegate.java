@@ -31,59 +31,47 @@ package javax.xml.ws.spi;
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Dispatch;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.Service.Mode;
 import javax.xml.ws.handler.HandlerResolver;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 
-/** XXX */
 public abstract class ServiceDelegate {
-  /** XXX */
-  public abstract void addPort(QName portName, String bindingId, String endpointAddress);
+  public abstract void addPort(QName portName, 
+                               String bindingId, 
+                               String endpointAddress)
+    throws WebServiceException;
 
+  public abstract <T> Dispatch<T> createDispatch(QName portName, 
+                                                 Class<T> type, 
+                                                 Mode mode)
+    throws WebServiceException;
 
-  /** XXX */
-  public abstract <T> Dispatch<T> createDispatch(QName portName, Class<T> type, Mode mode);
+  public abstract Dispatch<Object> createDispatch(QName portName, 
+                                                  JAXBContext context, 
+                                                  Mode mode);
+    /// XXX throws ServiceException;
 
+  public abstract <T> T getPort(Class<T> serviceEndpointInterface)
+    throws WebServiceException;
 
-  /** XXX */
-  public abstract Dispatch<Object> createDispatch(QName portName, JAXBContext context, Mode mode);
+  public abstract <T> T getPort(QName portName, 
+                                Class<T> serviceEndpointInterface)
+    throws WebServiceException;
 
-  /** XXX */
-  public abstract Executor getExecutor();
+  public abstract Iterator<QName> getPorts()
+    throws WebServiceException;
 
-
-  /** XXX */
-  public abstract HandlerResolver getHandlerResolver();
-
-
-  /** XXX */
-  public abstract <T> T getPort(Class<T> serviceEndpointInterface);
-
-
-  /** XXX */
-  public abstract <T> T getPort(QName portName, Class<T> serviceEndpointInterface);
-
-
-  /** XXX */
-  public abstract Iterator<QName> getPorts();
-
-
-  /** XXX */
   public abstract QName getServiceName();
 
-
-  /** XXX */
   public abstract URL getWSDLDocumentLocation();
 
-
-  /** XXX */
+  public abstract Executor getExecutor();
   public abstract void setExecutor(Executor executor);
 
-
-  /** XXX */
+  public abstract HandlerResolver getHandlerResolver();
   public abstract void setHandlerResolver(HandlerResolver handlerResolver);
-
 }
 

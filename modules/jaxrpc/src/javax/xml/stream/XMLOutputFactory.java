@@ -92,8 +92,11 @@ public abstract class XMLOutputFactory
       cl = FactoryLoader.getFactoryLoader(factoryId).newClass(classLoader);
 
       if (cl != null)
-	_factoryMap.put(classLoader, cl);
+        _factoryMap.put(classLoader, cl);
     }
+
+    if (cl == null)
+      throw new FactoryConfigurationError();
 
     try {
       return (XMLOutputFactory) cl.newInstance();

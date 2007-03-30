@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -31,11 +31,7 @@ package javax.xml.ws;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-/** XXX */
 public interface Response<T> extends Future<T> {
-
-  /** XXX */
-  abstract Map<String,Object> getContext();
-
+  public Map<String,Object> getContext();
 }
 

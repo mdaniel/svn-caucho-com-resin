@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -30,43 +30,27 @@
 package javax.xml.ws;
 import java.util.Map;
 
-/** XXX */
 public interface BindingProvider {
+  static final String ENDPOINT_ADDRESS_PROPERTY
+    = "javax.xml.ws.service.endpoint.address";
 
-  /** XXX */
-  static final String ENDPOINT_ADDRESS_PROPERTY="javax.xml.ws.service.endpoint.address";
+  static final String PASSWORD_PROPERTY
+    = "javax.xml.ws.security.auth.password";
 
+  static final String SESSION_MAINTAIN_PROPERTY
+    = "javax.xml.ws.session.maintain";
 
-  /** XXX */
-  static final String PASSWORD_PROPERTY="javax.xml.ws.security.auth.password";
+  static final String SOAPACTION_URI_PROPERTY
+    = "javax.xml.ws.soap.http.soapaction.uri";
 
+  static final String SOAPACTION_USE_PROPERTY
+    = "javax.xml.ws.soap.http.soapaction.use";
 
-  /** XXX */
-  static final String SESSION_MAINTAIN_PROPERTY="javax.xml.ws.session.maintain";
+  static final String USERNAME_PROPERTY
+    = "javax.xml.ws.security.auth.username";
 
-
-  /** XXX */
-  static final String SOAPACTION_URI_PROPERTY="javax.xml.ws.soap.http.soapaction.uri";
-
-
-  /** XXX */
-  static final String SOAPACTION_USE_PROPERTY="javax.xml.ws.soap.http.soapaction.use";
-
-
-  /** XXX */
-  static final String USERNAME_PROPERTY="javax.xml.ws.security.auth.username";
-
-
-  /** XXX */
-  abstract Binding getBinding();
-
-
-  /** XXX */
-  abstract Map<String,Object> getRequestContext();
-
-
-  /** XXX */
-  abstract Map<String,Object> getResponseContext();
-
+  public Binding getBinding();
+  public Map<String,Object> getRequestContext();
+  public Map<String,Object> getResponseContext();
 }
 

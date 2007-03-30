@@ -31,21 +31,17 @@ package javax.xml.ws.soap;
 import javax.xml.soap.SOAPFault;
 import javax.xml.ws.ProtocolException;
 
-/** XXX */
 public class SOAPFaultException extends ProtocolException {
+  private SOAPFault _fault;
 
-  /** XXX */
   public SOAPFaultException(SOAPFault fault)
   {
-    throw new UnsupportedOperationException();
+    _fault = fault;
   }
 
-
-  /** XXX */
   public SOAPFault getFault()
   {
-    throw new UnsupportedOperationException();
+    return _fault;
   }
-
 }
 

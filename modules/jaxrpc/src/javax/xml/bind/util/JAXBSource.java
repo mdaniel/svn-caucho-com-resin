@@ -28,7 +28,11 @@
 */
 
 package javax.xml.bind.util;
+
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -44,12 +48,26 @@ public class JAXBSource extends SAXSource {
     throws JAXBException
   {
     super(createInputSource(context.createMarshaller(), contentObject));
+
+    try {
+      setXMLReader(XMLReaderFactory.createXMLReader());
+    }
+    catch (SAXException e) {
+      throw new JAXBException(e);
+    }
   }
 
   public JAXBSource(Marshaller marshaller, Object contentObject)
     throws JAXBException
   {
     super(createInputSource(marshaller, contentObject));
+
+    try {
+      setXMLReader(XMLReaderFactory.createXMLReader());
+    }
+    catch (SAXException e) {
+      throw new JAXBException(e);
+    }
   }
 
   private static InputSource createInputSource(Marshaller marshaller,
@@ -63,6 +81,5 @@ public class JAXBSource extends SAXSource {
 
     return new InputSource(new ByteArrayInputStream(baos.toByteArray()));
   }
-
 }
 

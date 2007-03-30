@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -29,35 +29,26 @@
 
 package javax.xml.ws;
 
-/** XXX */
 public class WebServiceException extends RuntimeException {
 
-  /** XXX */
   public WebServiceException()
   {
-    throw new UnsupportedOperationException();
+    super();
   }
 
-
-  /** XXX */
   public WebServiceException(String message)
   {
-    throw new UnsupportedOperationException();
+    super(message);
   }
 
-
-  /** XXX */
   public WebServiceException(String message, Throwable cause)
   {
-    throw new UnsupportedOperationException();
+    super(message, cause);
   }
 
-
-  /** XXX */
   public WebServiceException(Throwable cause)
   {
-    throw new UnsupportedOperationException();
+    super(cause);
   }
-
 }
 

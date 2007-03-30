@@ -30,21 +30,17 @@
 package javax.xml.ws.http;
 import javax.xml.ws.ProtocolException;
 
-/** XXX */
 public class HTTPException extends ProtocolException {
+  private int _statusCode;
 
-  /** XXX */
   public HTTPException(int statusCode)
   {
-    throw new UnsupportedOperationException();
+    _statusCode = statusCode;
   }
 
-
-  /** XXX */
   public int getStatusCode()
   {
-    throw new UnsupportedOperationException();
+    return _statusCode;
   }
-
 }
 

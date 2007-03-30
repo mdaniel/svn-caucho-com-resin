@@ -29,35 +29,26 @@
 
 package javax.xml.ws;
 
-/** XXX */
 public class ProtocolException extends WebServiceException {
 
-  /** XXX */
   public ProtocolException()
   {
-    throw new UnsupportedOperationException();
+    super();
   }
 
-
-  /** XXX */
   public ProtocolException(String message)
   {
-    throw new UnsupportedOperationException();
+    super(message);
   }
 
-
-  /** XXX */
   public ProtocolException(String message, Throwable cause)
   {
-    throw new UnsupportedOperationException();
+    super(message, cause);
   }
 
-
-  /** XXX */
   public ProtocolException(Throwable cause)
   {
-    throw new UnsupportedOperationException();
+    super(cause);
   }
-
 }
 

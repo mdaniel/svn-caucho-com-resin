@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -55,7 +55,7 @@ public abstract class AbstractMarshallerImpl implements Marshaller
 {
   private XMLOutputFactory _factory;
   private AttachmentMarshaller _attachmentMarshaller;
-  private String _encoding;
+  private String _encoding = "UTF-8";
   private ValidationEventHandler _validationEventHandler 
     = _defaultValidationEventHandler;
   private Listener _listener;
