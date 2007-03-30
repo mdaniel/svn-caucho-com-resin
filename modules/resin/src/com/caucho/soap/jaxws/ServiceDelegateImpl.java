@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,20 +29,30 @@
 
 package com.caucho.soap.jaxws;
 
+import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.soap.skeleton.Skeleton;
 import com.caucho.util.L10N;
 
+import javax.activation.DataSource;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.Source;
+
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.HandlerResolver;
 import javax.xml.ws.spi.ServiceDelegate;
+
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
@@ -54,11 +64,15 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     = Logger.getLogger(ServiceDelegateImpl.class.getName());
   private final static L10N L = new L10N(ServiceDelegateImpl.class);
 
+  private final Map<QName,Port> _portMap = new HashMap<QName,Port>();
+
   private final ClassLoader _classLoader;
 
   private final URL _wsdl;
   private final QName _serviceName;
   private final Class _serviceClass;
+
+  private Executor _executor = ScheduledThreadPool.getLocal();
 
   ServiceDelegateImpl(URL wsdl, QName serviceName, Class serviceClass)
   {
@@ -69,31 +83,58 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     _serviceClass = serviceClass;
   }
 
-  public void addPort(QName portName,
-		      String bindingId,
-		      String endpointAddress)
+  public void addPort(QName portName, String bindingId, String endpointAddress)
   {
-    throw new UnsupportedOperationException();
+    _portMap.put(portName, new Port(bindingId, endpointAddress));
   }
 
   public <T> Dispatch<T> createDispatch(QName portName,
-					Class<T> type,
-					Service.Mode mode)
+                                        Class<T> type,
+                                        Service.Mode mode)
+    throws WebServiceException
   {
-    throw new UnsupportedOperationException();
+    Port port = _portMap.get(portName);
+
+    if (port == null)
+      throw new WebServiceException(L.l("{0} is an unknown port", portName));
+
+    if (Source.class.equals(type)) {
+      return (Dispatch<T>) new SourceDispatch(port.getBindingId(),
+                                              port.getEndpointAddress(),
+                                              mode, _executor);
+    }
+    else if (SOAPMessage.class.equals(type)) {
+      return (Dispatch<T>) new SOAPMessageDispatch(port.getBindingId(),
+                                                   port.getEndpointAddress(),
+                                                   mode, _executor);
+    }
+    else if (DataSource.class.equals(type)) {
+      return (Dispatch<T>) new DataSourceDispatch(port.getBindingId(),
+                                                  port.getEndpointAddress(),
+                                                  mode, _executor);
+    }
+
+    throw new WebServiceException(L.l("{0} is an unsupported Dispatch type",
+                                      type));
   }
 
-
   public Dispatch<Object> createDispatch(QName portName,
-					 JAXBContext context,
-					 Service.Mode mode)
+					                               JAXBContext context,
+                                         Service.Mode mode)
+    throws WebServiceException
   {
-    throw new UnsupportedOperationException();
+    Port port = _portMap.get(portName);
+
+    if (port == null)
+      throw new WebServiceException(L.l("{0} is an unknown port", portName));
+
+    return new JAXBDispatch(port.getBindingId(), port.getEndpointAddress(),
+                            mode, _executor, context);
   }
 
   public Executor getExecutor()
   {
-    throw new UnsupportedOperationException();
+    return _executor;
   }
 
   public HandlerResolver getHandlerResolver()
@@ -109,18 +150,7 @@ public class ServiceDelegateImpl extends ServiceDelegate {
   public <T> T getPort(QName portName, Class<T> api)
   {
     try {
-      /*
-      String url = null;
-
-      if (portName != null)
-        url = portName.getNamespaceURI();
-
-      if (url == null)
-        url = _serviceName.getNamespaceURI();*/
-      
       Skeleton skeleton = new WebServiceIntrospector().introspect(api, null);
-
-      //System.out.println("PROXY: PORT:" + portName + " SERV:" + _serviceName + " " + _wsdl);
 
       PortProxyHandler handler = new PortProxyHandler(skeleton);
 
@@ -154,6 +184,7 @@ public class ServiceDelegateImpl extends ServiceDelegate {
 
   public void setExecutor(Executor executor)
   {
+    _executor = executor;
   }
 
   public void setHandlerResolver(HandlerResolver handlerResolver)
@@ -164,5 +195,26 @@ public class ServiceDelegateImpl extends ServiceDelegate {
   {
     return ("ServiceDelegateImpl[" + getServiceName().getNamespaceURI()
 	    + "," + getServiceName().getLocalPart() + "]");
+  }
+
+  private static class Port {
+    private final String _bindingId;
+    private final String _endpointAddress;
+
+    public Port(String bindingId, String endpointAddress)
+    {
+      _bindingId = bindingId;
+      _endpointAddress = endpointAddress;
+    }
+
+    public String getBindingId()
+    {
+      return _bindingId;
+    }
+
+    public String getEndpointAddress()
+    {
+      return _endpointAddress;
+    }
   }
 }
