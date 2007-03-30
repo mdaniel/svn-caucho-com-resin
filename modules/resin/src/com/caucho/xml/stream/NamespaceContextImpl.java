@@ -204,6 +204,11 @@ public abstract class NamespaceContextImpl implements NamespaceContext
     {
       return _newUri;
     }
+
+    public String toString()
+    {
+      return "Decl[binding=" + _binding + ",prefix=" + _prefix + ",oldUri=" + _oldUri + ",newUri=" + _newUri + "]";
+    }
   }
 
   static class PrefixIterator

@@ -55,7 +55,10 @@ public class NameImpl extends QName implements Name {
   {
     super(namespaceURI, localPart, prefix);
 
-    _qualifiedName = prefix + ':' + localPart;
+    if (prefix != null && ! "".equals(prefix))
+      _qualifiedName = prefix + ':' + localPart;
+    else 
+      _qualifiedName = localPart;
   }
 
   static NameImpl fromQualifiedName(String uri, String qualifiedName)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -79,6 +79,9 @@ public class DOMSourceXMLStreamReaderImpl implements XMLStreamReader {
     throws XMLStreamException
   {
     _current = node;
+
+    if (node.getNodeType() == Node.ELEMENT_NODE)
+      _first = false;
 
     init();
   }
@@ -614,12 +617,7 @@ public class DOMSourceXMLStreamReaderImpl implements XMLStreamReader {
 
   public boolean hasNext() throws XMLStreamException
   {
-    if (_current == null || getEventType() == END_DOCUMENT)
-      return false;
-
-    return _current.getFirstChild() != null ||
-           _current.getNextSibling() != null ||
-           _current.getParentNode() != null;
+    return (_current != null && getEventType() != END_DOCUMENT);
   }
 
   public int next() throws XMLStreamException
@@ -643,12 +641,15 @@ public class DOMSourceXMLStreamReaderImpl implements XMLStreamReader {
       else 
         _current = _current.getParentNode();
     }
-    else if (_current.getFirstChild() != null)
+    else if (_current.getFirstChild() != null) {
       _current = _current.getFirstChild();
-    else if (isStartElement())
+    }
+    else if (isStartElement()) {
       _ending = true;
-    else if (_current.getNextSibling() != null)
+    }
+    else if (_current.getNextSibling() != null) {
       _current = _current.getNextSibling();
+    }
     else {
       _current = _current.getParentNode();
       _ending = true;

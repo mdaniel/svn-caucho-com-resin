@@ -215,6 +215,9 @@ public abstract class SOAPNodeImpl
 
   public String getNamespaceURI()
   {
+    if ("".equals(_name.getURI()))
+      return null;
+
     return _name.getURI();
   }
 

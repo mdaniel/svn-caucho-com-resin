@@ -281,7 +281,8 @@ public class SOAPMessageImpl extends SOAPMessage {
     // As specified by API
     saveChanges();
 
-    PrintWriter w = new PrintWriter(new OutputStreamWriter(out));
+    OutputStreamWriter osw = new OutputStreamWriter(out);
+    PrintWriter w = new PrintWriter(osw);
 
     String separator = null;
 

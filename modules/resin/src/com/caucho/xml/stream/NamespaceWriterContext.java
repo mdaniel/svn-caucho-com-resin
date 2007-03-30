@@ -188,4 +188,16 @@ public class NamespaceWriterContext extends NamespaceContextImpl
     for (NamespaceBinding binding : _bindings.values())
       binding.emit(ws);
   }
+
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("NamespaceWriterContext:\n");
+
+    for (Map.Entry<String,NamespaceBinding> entry : _bindings.entrySet())
+      sb.append(entry.getKey() + "->" + entry.getValue() + "\n");
+
+    return sb.toString();
+  }
 }

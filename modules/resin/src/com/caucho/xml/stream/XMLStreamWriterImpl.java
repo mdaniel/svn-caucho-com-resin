@@ -30,6 +30,7 @@
 package com.caucho.xml.stream;
 
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.util.L10N;
 
 import javax.xml.XMLConstants;
@@ -39,6 +40,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -69,6 +72,16 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     _ws = ws;
     _repair = repair;
     _tracker = new NamespaceWriterContext(repair);
+  }
+
+  public XMLStreamWriterImpl(Writer w, boolean repair)
+  {
+    this(Vfs.openWrite(w), repair);
+  }
+
+  public XMLStreamWriterImpl(OutputStream os, boolean repair)
+  {
+    this(Vfs.openWrite(os), repair);
   }
 
   public void setIndent(int indent)

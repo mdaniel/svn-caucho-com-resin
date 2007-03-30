@@ -205,7 +205,7 @@ public class StaxUtil {
         case END_ELEMENT:
           depth--;
 
-          if (depth <= 0)
+          if (depth < 0)
             return;
 
           out.writeEndElement();
@@ -262,13 +262,19 @@ public class StaxUtil {
                                  value);
           }
 
+          for (int i = 0; i < in.getNamespaceCount(); i++)
+            out.writeNamespace(in.getNamespacePrefix(i), in.getNamespaceURI(i));
+
           depth++;
           break;
       }
 
-      in.next();
+      if (in.hasNext())
+        in.next();
+      else
+        break;
     } 
-    while (depth > 0);
+    while (depth >= 0);
   }
 
   public static String constantToString(int constant) 
@@ -295,5 +301,45 @@ public class StaxUtil {
       default:
         throw new RuntimeException(L.l("constantToString({0}) unknown", constant));
     }
+  }
+
+  public static String printStreamState(XMLStreamReader in)
+    throws XMLStreamException
+  {
+    StringBuilder sb = new StringBuilder(constantToString(in.getEventType()));
+
+    if (in.getEventType() == in.START_ELEMENT ||
+        in.getEventType() == in.END_ELEMENT) {
+      sb.append(": ");
+      sb.append(in.getName());
+    }
+    else if (in.getEventType() == in.CHARACTERS) {
+      sb.append(": ");
+      sb.append(in.getText());
+    }
+
+    return sb.toString();
+  }
+
+  public static String qnameToString(XMLStreamWriter out, QName qname)
+    throws XMLStreamException
+  {
+    if (qname.getNamespaceURI() == null || "".equals(qname.getNamespaceURI()))
+      return qname.getLocalPart();
+
+    NamespaceContext context = out.getNamespaceContext();
+    String prefix = context.getPrefix(qname.getNamespaceURI());
+
+    if (prefix == null) {
+      if (qname.getPrefix() != null && ! "".equals(qname.getPrefix())) {
+        out.writeNamespace(qname.getPrefix(), qname.getNamespaceURI());
+
+        return qname.getPrefix() + ':' + qname.getLocalPart();
+      }
+
+      return null;
+    }
+    else
+      return prefix + ':' + qname.getLocalPart();
   }
 }
