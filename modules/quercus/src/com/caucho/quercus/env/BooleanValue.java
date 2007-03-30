@@ -57,10 +57,12 @@ public class BooleanValue extends Value
     return value ? TRUE : FALSE;
   }
 
-  public static BooleanValue create(Boolean value)
+  public static Value create(Boolean value)
   {
-    if (value == null)
-      return FALSE;
+    if (value == null) {
+      // php/3c23
+      return NullValue.NULL;
+    }
     else if (Boolean.TRUE.equals(value))
       return TRUE;
     else

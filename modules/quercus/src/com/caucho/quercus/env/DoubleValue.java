@@ -56,10 +56,12 @@ public class DoubleValue extends NumberValue
     return new DoubleValue(value);
   }
 
-  public static DoubleValue create(Number value)
+  public static Value create(Number value)
   {
-    if (value == null)
-      return DoubleValue.ZERO;
+    if (value == null) {
+      // php/3c2d
+      return NullValue.NULL;
+    }
     else
       return new DoubleValue(value.doubleValue());
   }
