@@ -63,8 +63,8 @@ public class EntityManyToOneField extends CascadableField {
   private LinkColumns _linkColumns;
 
   private RelatedType _targetType;
-  
-  private int _targetLoadIndex;
+
+  private int _targetLoadIndex = -1;
 
   private DependentEntityOneToOneField _targetField;
   private PropertyField _aliasField;
@@ -234,7 +234,7 @@ public class EntityManyToOneField extends CascadableField {
   }
 
   /**
-   * Overrides the load-group index to 
+   * Overrides the load-group index to
 
   /**
    * Initializes the field.
@@ -251,10 +251,15 @@ public class EntityManyToOneField extends CascadableField {
   public void init(RelatedType relatedType)
     throws ConfigException
   {
+    if (_targetLoadIndex >= 0) {
+      // jpa/0l40
+      return;
+    }
+
     int loadGroupIndex = getEntitySourceType().getDefaultLoadGroupIndex();
     super.setLoadGroupIndex(loadGroupIndex);
     _targetLoadIndex = relatedType.nextLoadGroupIndex();
-    
+
     Table sourceTable = relatedType.getTable();
 
     if (sourceTable == null || ! relatedType.getPersistenceUnit().isJPA()) {
@@ -588,7 +593,7 @@ public class EntityManyToOneField extends CascadableField {
 
     int keyLoadIndex = getLoadGroupIndex();
     int entityLoadIndex = _targetLoadIndex;
-    
+
     int group = entityLoadIndex / 64;
     long mask = (1L << (entityLoadIndex % 64));
     String loadVar = "__caucho_loadMask_" + group;
@@ -901,8 +906,14 @@ public class EntityManyToOneField extends CascadableField {
 
       out.println("// " + dst);
 
-      // jpa/0h0a: gets the cache object to copy from.
-      out.println("child = aConn.getCacheEntity((com.caucho.amber.entity.Entity) " + value + ");");
+      if (_targetType instanceof EntityType) {
+        // jpa/0h0a: gets the cache object to copy from.
+        out.println("child = aConn.getCacheEntity((com.caucho.amber.entity.Entity) " + value + ");");
+      }
+      else {
+        // XXX: jpa/0l14
+        out.println("child = null;");
+      }
 
       out.println("if (child != null) {");
       out.pushDepth();

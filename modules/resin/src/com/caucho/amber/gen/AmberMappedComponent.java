@@ -1094,11 +1094,14 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     // jpa/0l20: only expires the cache entity if the entity has been changed.
 
+    // jpa/0l14 as a negative test.
     // Explicitly invalidates the corresponding cache item.
-    out.println("com.caucho.amber.entity.Entity cacheEntity = aConn.getCacheEntity(this);");
+    if (_relatedType instanceof EntityType) {
+      out.println("com.caucho.amber.entity.Entity cacheEntity = aConn.getCacheEntity(this);");
 
-    out.println("if (cacheEntity != null)");
-    out.println("  cacheEntity.__caucho_expire();");
+      out.println("if (cacheEntity != null)");
+      out.println("  cacheEntity.__caucho_expire();");
+    }
 
     out.popDepth();
     out.println("}");
