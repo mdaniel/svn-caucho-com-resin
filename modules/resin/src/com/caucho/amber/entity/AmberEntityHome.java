@@ -546,9 +546,10 @@ public class AmberEntityHome {
   {
     EntityItem item = null;
 
+    // jpa/0l20
     // XXX: ejb/0d01
-    if (aConn.shouldRetrieveFromCache())
-      item = _manager.getEntity(getRootType(), key);
+    // if (aConn.shouldRetrieveFromCache())
+    item = _manager.getEntity(getRootType(), key);
 
     if (item == null) {
       EntityType subEntity
