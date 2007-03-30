@@ -401,6 +401,8 @@ public class JAXBContextImpl extends JAXBContext {
     return _laxAnyTypeProperty;
   }
 
+  // XXX clean up all this argument tiering
+
   public Property createProperty(Type type)
     throws JAXBException
   {
@@ -416,11 +418,18 @@ public class JAXBContextImpl extends JAXBContext {
   public Property createProperty(Type type, boolean anyType, String mimeType)
     throws JAXBException
   {
-    return createProperty(type, anyType, null, false);
+    return createProperty(type, anyType, mimeType, false);
   }
 
   public Property createProperty(Type type, boolean anyType, String mimeType, 
                                  boolean xmlList)
+    throws JAXBException
+  {
+    return createProperty(type, anyType, mimeType, xmlList, false);
+  }
+
+  public Property createProperty(Type type, boolean anyType, String mimeType, 
+                                 boolean xmlList, boolean xmlValue)
     throws JAXBException
   {
     if (type instanceof Class) {
@@ -432,7 +441,8 @@ public class JAXBContextImpl extends JAXBContext {
 
       if (simpleTypeProperty != null) {
         // jaxb/12gb
-        if (simpleTypeProperty == ByteArrayProperty.PROPERTY && xmlList)
+        if (simpleTypeProperty == ByteArrayProperty.PROPERTY && 
+            xmlList && ! xmlValue)
           throw new JAXBException(L.l("@XmlList applied to byte[] valued fields or properties"));
 
         return simpleTypeProperty;

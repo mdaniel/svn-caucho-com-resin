@@ -499,6 +499,14 @@ public class ClassSkeleton<C> extends Skeleton {
         _attributeAccessors.add(a);
         break;
 
+      case ANY_ATTRIBUTE:
+        if (_anyTypeAttributeAccessor != null)
+          throw new JAXBException(L.l("Cannot have two fields or properties with @XmlAnyAttribute annotation"));
+
+        _anyTypeAttributeAccessor = a;
+        _attributeAccessors.add(a);
+        break;
+
       case ELEMENT:
       case ELEMENTS:
         if (_value != null)
@@ -603,7 +611,7 @@ public class ClassSkeleton<C> extends Skeleton {
             throw new UnmarshalException(L.l("Attribute {0} not found in {1}", 
                                              attributeName, getType()));
 
-          a.set(ret, a.readAttribute(in, i));
+          a.set(ret, a.readAttribute(in, i, ret));
         }
 
         int i = 0;
@@ -683,7 +691,7 @@ public class ClassSkeleton<C> extends Skeleton {
             throw new UnmarshalException(L.l("Attribute {0} not found in {1}", 
                                              attribute.getName(), getType()));
 
-          a.set(ret, a.readAttribute(attribute));
+          a.set(ret, a.readAttribute(attribute, ret));
         }
 
         int i = 0;
@@ -819,9 +827,6 @@ public class ClassSkeleton<C> extends Skeleton {
         for (Accessor a : _attributeAccessors)
           a.write(m, out, obj);
 
-        if (_anyTypeAttributeAccessor != null) // XXX ordering!
-          _anyTypeAttributeAccessor.write(m, out, obj);
-        
         for (Accessor a : _elementAccessors)
           a.write(m, out, obj);
 
@@ -963,6 +968,11 @@ public class ClassSkeleton<C> extends Skeleton {
     binder.bind(obj, node);
 
     return node;
+  }
+
+  public boolean isRootElement()
+  {
+    return _elementName != null;
   }
 
   public QName getElementName()

@@ -45,6 +45,7 @@ import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.helpers.ValidationEventImpl;
 import javax.xml.bind.helpers.ValidationEventLocatorImpl;
 
+import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -83,6 +84,7 @@ import java.util.Iterator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** an Accessor is either a getter/setter pair or a field */
 public abstract class Accessor {
@@ -222,13 +224,20 @@ public abstract class Accessor {
           break;
         }
 
+      case ANY_ATTRIBUTE:
+        {
+          if (! Map.class.isAssignableFrom(getType()))
+            throw new JAXBException(L.l("Fields or properties annotated with @XmlAnyAttribute must be Maps"));
+          break;
+        }
+
       case VALUE:
         {
           // XXX
           _qname = new QName(getName());
 
-          _property = 
-            _context.createProperty(getGenericType(), false, mimeType, true);
+          _property = _context.createProperty(getGenericType(), false, mimeType,
+                                              true, true);
 
           if (! _property.isXmlPrimitiveType() && 
               ! Collection.class.isAssignableFrom(getType()))
@@ -375,15 +384,48 @@ public abstract class Accessor {
     }
   }
 
+  public void writeAnyAttribute(Marshaller m, XMLStreamWriter out, Map map)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    if (map != null) {
+      for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
+        QName name = (QName) entry.getKey();
+        String value = (String) entry.getValue();
+
+        if (name.getNamespaceURI() == null || "".equals(name.getNamespaceURI()))
+          out.writeAttribute(name.getLocalPart(), value.toString());
+        else if (name.getPrefix() == null || "".equals(name.getPrefix())) {
+          out.writeAttribute(name.getNamespaceURI(), name.getLocalPart(), 
+                             value.toString());
+        }
+        else {
+          out.writeAttribute(name.getPrefix(), 
+                             name.getNamespaceURI(), 
+                             name.getLocalPart(), 
+                             value.toString());
+        }
+      }
+    }
+  }
+
   public void write(Marshaller m, XMLStreamWriter out, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     Object value = get(obj);
 
-    if (getAccessorType() == AccessorType.ATTRIBUTE)
-      writeAttribute(m, out, value);
-    else
-      _property.write(m, out, value, getQName(obj), obj);
+    switch (getAccessorType()) {
+      case ATTRIBUTE:
+        writeAttribute(m, out, value);
+        break;
+        
+      case ANY_ATTRIBUTE:
+        writeAnyAttribute(m, out, (Map) value);
+        break;
+
+      default:
+        _property.write(m, out, value, getQName(obj), obj);
+        break;
+    }
   }
 
   public void write(Marshaller m, XMLStreamWriter out, 
@@ -436,13 +478,24 @@ public abstract class Accessor {
   // a start element.
   
 
-  public Object readAttribute(XMLStreamReader in, int i)
+  public Object readAttribute(XMLStreamReader in, int i, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    return _property.readAttribute(in, i);
+    if (getAccessorType() == AccessorType.ANY_ATTRIBUTE) {
+      Map map = (Map) get(obj);
+
+      if (map == null)
+        map = new HashMap(); // XXX other maps
+
+      map.put(in.getAttributeName(i), in.getAttributeValue(i));
+
+      return map;
+    }
+    else 
+      return _property.readAttribute(in, i);
   }
 
-  public Object readAttribute(Attribute attribute)
+  public Object readAttribute(Attribute attribute, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     return _property.readAttribute(attribute);
@@ -788,6 +841,8 @@ public abstract class Accessor {
 
     if (getAnnotation(XmlValue.class) != null)
       _accessorType = AccessorType.VALUE;
+    else if (getAnnotation(XmlAnyAttribute.class) != null)
+      _accessorType = AccessorType.ANY_ATTRIBUTE;
     else if (getAnnotation(XmlAttribute.class) != null)
       _accessorType = AccessorType.ATTRIBUTE;
     else if (getAnnotation(XmlElements.class) != null)
@@ -811,6 +866,7 @@ public abstract class Accessor {
   public enum AccessorType {
     UNSET, 
     VALUE, 
+    ANY_ATTRIBUTE, 
     ATTRIBUTE, 
     ELEMENT, 
     ELEMENTS, 

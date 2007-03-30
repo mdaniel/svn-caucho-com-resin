@@ -47,12 +47,14 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.events.*;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
 
 import java.io.IOException;
 
@@ -183,6 +185,22 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
         // Figure out if the api is wrong or there is a reasonable value for
         // the fifth argument instead of this second obj.
         property.write(m, out, obj, fieldName, obj, extendedAttributes);
+        return;
+      }
+
+      if (obj instanceof Node) {
+        XMLInputFactory factory = _context.getXMLInputFactory();
+        DOMSource source = new DOMSource((Node) obj);
+        XMLStreamReader in = factory.createXMLStreamReader(source);
+
+        System.out.print("1 : ");
+        System.out.println(out.getNamespaceContext().toString());
+
+        StaxUtil.copyReaderToWriter(in, out);
+        
+        System.out.print("2 : ");
+        System.out.println(out.getNamespaceContext().toString());
+
         return;
       }
 

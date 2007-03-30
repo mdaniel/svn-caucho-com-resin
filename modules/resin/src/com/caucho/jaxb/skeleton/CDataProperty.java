@@ -106,7 +106,7 @@ public abstract class CDataProperty extends Property {
                                            attributeName, 
                                            attributed.getType()));
 
-        a.set(parent, a.readAttribute(in, i));
+        a.set(parent, a.readAttribute(in, i, parent));
       }
     }
 
