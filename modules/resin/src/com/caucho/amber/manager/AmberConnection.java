@@ -1409,6 +1409,7 @@ public class AmberConnection
   {
     // these aren't necessary because the AmberConnection is added as
     // a close callback to the UserTransaction
+    _depth++;
   }
 
   /**
@@ -1416,6 +1417,10 @@ public class AmberConnection
    */
   public void popDepth()
   {
+    _depth--;
+
+    if (_depth == 0 && ! _isRegistered)
+      freeConnection();
   }
   
   /**

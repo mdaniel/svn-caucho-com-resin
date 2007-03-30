@@ -2,6 +2,12 @@
 
 <a href='changes-2.xtp'>Resin 2.1 changes</a>
 
+<s2 title="3.0.snap - Jan 18, 2007">
+<ul>
+<li>EJB collections not closing JDBC connectiond (#1286, rep by plehov)</li>
+</ul>
+</s2>
+
 <s2 title="3.0.23 - Jan 18, 2007">
 <ul>
 <li>ByteCodeClassScanner should only give FINE warnings for scanned classes (#1534, rep by R Dredge)</li>
