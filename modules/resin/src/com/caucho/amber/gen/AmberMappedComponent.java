@@ -1076,7 +1076,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("if (aConn != null) {");
     out.pushDepth();
-    
+
     out.print("if (updateMask_0 != 0L");
     for (int i = 1; i <= dirtyCount / 64; i++)
       out.print(" || updateMask_" + i + " != 0L");
@@ -1088,7 +1088,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       out.popDepth();
       out.println("}");
-      
+
       out.popDepth();
       out.println("}");
       return;
@@ -1170,7 +1170,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.popDepth();
     out.println("}");
     */
-    
+
     out.popDepth();
     out.println("}");
 
@@ -2210,9 +2210,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.popDepth();
       out.println("}");
 
-      out.println(getClassName() + " entity = (" + getClassName() + ") item.copy(aConn);");
+      // jpa/0l20
+      // out.println(getClassName() + " entity = (" + getClassName() + ") item.copy(aConn);");
+      // out.println("return (com.caucho.amber.entity.Entity) entity;");
 
-      out.println("return (com.caucho.amber.entity.Entity) entity;");
+      out.println("return (com.caucho.amber.entity.Entity) item.getEntity();");
     }
 
     out.popDepth();
