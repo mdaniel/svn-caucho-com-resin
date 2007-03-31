@@ -2402,10 +2402,16 @@ public class AmberConnection
 
   public boolean isCacheEntity(Entity entity)
   {
-    return entity == getCacheEntity(entity);
+    return entity == getCacheEntity(entity, true);
   }
 
   public Entity getCacheEntity(Entity entity)
+  {
+    return getCacheEntity(entity, false);
+  }
+
+  public Entity getCacheEntity(Entity entity,
+                               boolean isDebug)
   {
     // jpa/0h0a
 
@@ -2418,11 +2424,18 @@ public class AmberConnection
     if (cacheEntity != null)
       return cacheEntity;
 
-    return getCacheEntity(entity.getClass(), entity.__caucho_getPrimaryKey());
+    return getCacheEntity(entity.getClass(),
+                          entity.__caucho_getPrimaryKey(),
+                          isDebug);
+  }
+
+  public Entity getCacheEntity(Class cl, Object pk)
+  {
+    return getCacheEntity(cl, pk, false);
   }
 
   // jpa/0h20
-  public Entity getCacheEntity(Class cl, Object pk)
+  public Entity getCacheEntity(Class cl, Object pk, boolean isDebug)
   {
     if (pk == null)
       return null;
@@ -2444,6 +2457,10 @@ public class AmberConnection
 
     if (item == null)
       return null;
+
+    // jpa/0o0b
+    if (isDebug)
+      return item.getEntity();
 
     // XXX: jpa/0h31, expires the child cache entity.
     if (isInTransaction()) {
