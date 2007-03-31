@@ -2445,6 +2445,24 @@ public class AmberConnection
     if (item == null)
       return null;
 
+    // XXX: jpa/0h31, expires the child cache entity.
+    if (isInTransaction()) {
+      int index = getTransactionEntity(className, pk);
+
+      EntityState state = null;
+
+      if (index >= 0) {
+        Entity txEntity = getTransactionEntity(index);
+        state = txEntity.__caucho_getEntityState();
+      }
+
+      if (index < 0 || ! state.isManaged()) {
+        item.getEntity().__caucho_expire();
+      }
+
+      return null;
+    }
+
     return item.getEntity();
   }
 
