@@ -47,7 +47,7 @@ public class ThreadPool {
 
   private static final ThreadPool _globalThreadPool = new ThreadPool();
 
-  private static int _g_id;
+  private int _g_id;
     
   private int _threadMax = 8192;
   
@@ -77,13 +77,13 @@ public class ThreadPool {
   
   private Item _idleHead;
 
-  private static int _threadCount;
+  private int _threadCount;
   // number of threads in the idle stack
-  private static int _idleCount;
+  private int _idleCount;
   // number of threads which are in the process of starting
-  private static int _startCount;
+  private int _startCount;
 
-  private static int _scheduleWaitCount;
+  private int _scheduleWaitCount;
 
   private ThreadPool()
   {

@@ -12,6 +12,11 @@
 
 <s2 title="3.1.snap - Mar 7, 2007">
 <ul>
+<li>Servlet listener needs to handle description tag (#1635, rep by dpasek)</li>
+<li>Amber: enhanced classes with &lt;resource> (#1622, rep by jarnbjo)</li>
+<li>JSP: restore velocity syntax (#1612, rep by T. Weihs)</li>
+<li>JSP: resin-c:out namespace wasn't created for validation. (#1631, rep by Steve Ferguson)</li>
+<li>OpenSSL: Add call to OpenSSL_add_all_algorithms (fixed! by Tom Hintz)</li>
 <li>Expect: 100-continue handling with Resin's load balancer (rep by A Balandran, #1648)</li>
 <li>JSP: ${...}  wasn't generating proper namespace for validation (rep by Matthew Schmidt, #1647)</li>
 <li>(2007-03-07) ConnectionPool timeout defaults incorrect (#1586, rep by gschemmel)</li>
