@@ -83,5 +83,10 @@ public class TextMessageImpl extends MessageImpl implements TextMessage  {
 
     newMsg._text = _text;
   }
+
+  public String toString()
+  {
+    return "TextMessageImpl[]";
+  }
 }
 

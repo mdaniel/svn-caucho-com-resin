@@ -59,6 +59,8 @@
  */
 module AP_MODULE_DECLARE_DATA caucho_module;
 
+static time_t g_start_time;
+
 #define DEFAULT_PORT 6802
 
 void
@@ -191,6 +193,7 @@ cse_create_server_config(apr_pool_t *p, server_rec *s)
   memset(config, 0, sizeof(config_t));
 
   config->web_pool = p;
+  config->start_time = g_start_time;
   cse_init_config(config);
 
   return (void *) config;
@@ -985,42 +988,80 @@ caucho_host_status(request_rec *r, config_t *config, resin_host_t *host)
   web_app_t *app;
   location_t *loc;
   unsigned int now = (unsigned int) (r->request_time / 1000000);
+  time_t time_now = time(0);
   
   /* check updates as appropriate */
   cse_match_host(config, host->name, host->port, now);
 
-  if (! *host->name)
-    ap_rprintf(r, "<h2>Default Virtual Host</h2>\n");
-  else if (host->port)
-    ap_rprintf(r, "<h2>Virtual Host: %s:%d</h2>\n", host->name, host->port);
+  if (host->canonical == host)
+    ap_rprintf(r, "<h2>");
   else
-    ap_rprintf(r, "<h2>Virtual Host: %s</h2>\n", host->name);
-    
-  jvm_status(&host->cluster, r);
+    ap_rprintf(r, "<h3>Alias ");
+  
+  if (! *host->name)
+    ap_rprintf(r, "Default Virtual Host");
+  else if (host->port)
+    ap_rprintf(r, "Virtual Host: %s:%d", host->name, host->port);
+  else
+    ap_rprintf(r, "Virtual Host: %s", host->name);
 
-  ap_rputs("<p><center><table border=2 cellspacing=0 cellpadding=2 width='80%'>\n", r);
-  ap_rputs("<tr><th width=\"50%\">web-app\n", r);
-  ap_rputs("    <th>url-pattern\n", r);
-
-  app = host->applications;
-    
-  for (; app; app = app->next) {
-    for (loc = app->locations; loc; loc = loc->next) {
-      if (! strcasecmp(loc->prefix, "/META-INF") ||
-	  ! strcasecmp(loc->prefix, "/WEB-INF"))
-	continue;
-	
-      ap_rprintf(r, "<tr bgcolor='#ffcc66'><td>%s<td>%s%s%s%s%s</tr>\n", 
-		 *app->context_path ? app->context_path : "/",
-		 loc->prefix,
-		 ! loc->is_exact && ! loc->suffix ? "/*" : 
-		 loc->suffix && loc->prefix[0] ? "/" : "",
-		 loc->suffix ? "*" : "",
-		 loc->suffix ? loc->suffix : "",
-		 loc->ignore ? " (ignore)" : "");
-    }
+  if (host->canonical == host) {
   }
-  ap_rputs("</table></center>\n", r);
+  else if (! host->canonical)
+    ap_rprintf(r, " -> <font color='red'>null</font>");
+  else if (host->canonical->port)
+    ap_rprintf(r, " -> %s:%d", host->canonical->name, host->canonical->port);
+  else if (! host->canonical->name[0])
+    ap_rprintf(r, " -> default", host->canonical->name);
+  else
+    ap_rprintf(r, " -> %s", host->canonical->name);
+  
+  if (host->canonical == host)
+    ap_rprintf(r, "</h2>");
+  else
+    ap_rprintf(r, "</h3>");
+
+  if (host->error_message[0])
+    ap_rprintf(r, "<h3 color='red'>Error: %s</h3>\n", host->error_message);
+
+  ap_rprintf(r, "<p style='margin-left:2em'>");
+
+  if (host->config_source[0]) {
+    ap_rprintf(r, "<b>Source:</b> %s<br />\n",
+	       host->config_source);
+  }
+  
+  ap_rprintf(r, "<b>Last-Update:</b> %s</p><br />\n",
+	     ctime(&host->last_update));
+  ap_rprintf(r, "</p>\n");
+
+  if (host->canonical == host) {
+    jvm_status(&host->cluster, r);
+
+    ap_rputs("<p><center><table border=2 cellspacing=0 cellpadding=2 width='80%'>\n", r);
+    ap_rputs("<tr><th width=\"50%\">web-app\n", r);
+    ap_rputs("    <th>url-pattern\n", r);
+
+    app = host->applications;
+    
+    for (; app; app = app->next) {
+      for (loc = app->locations; loc; loc = loc->next) {
+	if (! strcasecmp(loc->prefix, "/META-INF") ||
+	    ! strcasecmp(loc->prefix, "/WEB-INF"))
+	  continue;
+	
+	ap_rprintf(r, "<tr bgcolor='#ffcc66'><td>%s<td>%s%s%s%s%s</tr>\n", 
+		   *app->context_path ? app->context_path : "/",
+		   loc->prefix,
+		   ! loc->is_exact && ! loc->suffix ? "/*" : 
+		   loc->suffix && loc->prefix[0] ? "/" : "",
+		   loc->suffix ? "*" : "",
+		   loc->suffix ? loc->suffix : "",
+		   loc->ignore ? " (ignore)" : "");
+      }
+    }
+    ap_rputs("</table></center>\n", r);
+  }
 }
 
 /**
@@ -1032,6 +1073,7 @@ caucho_status(request_rec *r)
 {
   config_t *config;
   resin_host_t *host;
+  time_t now = time(0);
  
   if (! r->handler || strcmp(r->handler, "caucho-status"))
     return DECLINED;
@@ -1056,12 +1098,21 @@ caucho_status(request_rec *r)
     ap_rprintf(r, "<h2 color='red'>Error : %s</h2>\n", config->error);
 
   ap_rprintf(r, "<table border='0'>");
-  ap_rprintf(r, "<tr><th>Session Cookie</th><td>'%s'</td></tr>",
+  ap_rprintf(r, "<tr><td><b>Start Time</b></td><td>%s</td></tr>\n",
+	     ctime(&config->start_time));
+  ap_rprintf(r, "<tr><td><b>Now</b></td><td>%s</td></tr>\n",
+	     ctime(&now));
+  ap_rprintf(r, "<tr><td><b>Session Cookie</b></td><td>'%s'</td></tr>\n",
 	     config->session_cookie);
-  ap_rprintf(r, "<tr><th>Session URL</th><td>'%s'</td></tr>",
+  ap_rprintf(r, "<tr><td><b>Session URL</b></td><td>'%s'</td></tr>\n",
 	     config->session_url_prefix);
-  ap_rprintf(r, "<tr><th>Config Check Interval</th><td>%ds</td></tr>",
+  ap_rprintf(r, "<tr><td><b>Config Check Interval</b></b></td><td>%ds</td></tr>\n",
 	     config->update_interval);
+  if (config->config_path && config->config_path[0]) {
+    ap_rprintf(r, "<tr><td><b>Config Cache File</b></td><td>%s</td></tr>\n",
+	       config->config_path);
+  }
+  
   ap_rprintf(r, "</table>");
   
   ap_rprintf(r, "<h2>Configuration Cluster</h2>\n");
@@ -1223,6 +1274,8 @@ static int
 prefork_post_config(apr_pool_t *p, apr_pool_t *plog,
 		    apr_pool_t *dummy, server_rec *ptemp)
 {
+  g_start_time = time(0);
+  
   ap_add_version_component(p, VERSION);
 
   return OK;

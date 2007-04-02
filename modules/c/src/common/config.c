@@ -406,6 +406,8 @@ cse_create_host(config_t *config, const char *host_name, int port)
   host->next = config->hosts;
   host->cluster.config = config;
   config->hosts = host;
+
+  sprintf(host->config_source, "unconfigured");
   
   pool = cse_create_pool(config);
 
@@ -464,10 +466,11 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   int is_change = 1;
   mem_pool_t *pool = 0;
   cluster_t cluster;
-  int live_time = -1;
-  int dead_time = -1;
+  int max_idle_time = -1;
+  int fail_recover_time = -1;
   char error_page[1024];
   char etag[sizeof(host->etag)];
+  int is_valid = 0; /* true if the request completed */
   resin_host_t *old_canonical = host->canonical;
   
   memset(&cluster, 0, sizeof(cluster));
@@ -480,6 +483,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
   error_page[0] = 0;
 
   host->canonical = host;
+
+  strcpy(host->error_message, "incomplete configuration");
 
   LOG(("%s:%d:read_config(): hmux config %s:%d\n",
        __FILE__, __LINE__, host->name, host->port));
@@ -553,6 +558,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
     case HMUX_DISPATCH_ETAG:
       hmux_read_string(s, etag, sizeof(etag));
       LOG(("%s:%d:read_config(): hmux etag %s\n", __FILE__, __LINE__, etag));
+
+      is_valid = 1;
       break;
 
     case HMUX_DISPATCH_NO_CHANGE:
@@ -561,7 +568,17 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       LOG(("%s:%d:read_config(); hmux no-change %s\n",
 	   __FILE__, __LINE__, host->etag));
 
+      {
+	char buf[128];
+	buf[0] = 0;
+
+	ctime_r(&host->last_update, buf);
+
+	sprintf(host->config_source, "Resin-ETag (%s)", buf);
+      }
+
       is_change = 0;
+      is_valid = 1;
       break;
 	
     case HMUX_HEADER:
@@ -581,11 +598,13 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	  host->config->error_page[len - 1] = 0;
 	}
 	else if (! strcmp(buffer, "live-time"))
-	  live_time = resin_atoi(value);
+	  max_idle_time = resin_atoi(value);
 	else if (! strcmp(buffer, "dead-time"))
-	  dead_time = resin_atoi(value);
+	  fail_recover_time = resin_atoi(value);
 	else if (! strcmp(buffer, "last-update")) {
 	  int last_update = resin_atoi(value);
+
+	  /* If server started after the file, don't update time. */
 	  if (host && host->config->start_time < last_update) {
 	    host->last_update = last_update;
 	  }
@@ -634,10 +653,10 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	    ERR(("srun value for host %s cannot be resolved"));
 	  }
 	  else {
-	    if (live_time > 0)
-	      srun->srun->live_time = live_time;
-	    if (dead_time > 0)
-	      srun->srun->dead_time = dead_time;
+	    if (max_idle_time > 0)
+	      srun->srun->live_time = max_idle_time;
+	    if (fail_recover_time > 0)
+	      srun->srun->dead_time = fail_recover_time;
 	  }
 	}
       }
@@ -645,6 +664,21 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
     case HMUX_EXIT:
     case HMUX_QUIT:
+      if (! is_valid) {
+	ERR(("%s:%d:read_config(): host %s:%d exit without valid data\n",
+	     __FILE__, __LINE__, host->name, host->port, etag));
+	
+	is_change = 0;
+	*p_is_change = is_change;
+	host->has_data = 0;
+	host->canonical = old_canonical;
+	host->last_update = 0;
+
+	return -1;
+      }
+
+      host->error_message[0] = 0;
+      
       if (is_change > 0 || ! host->etag || ! *host->etag) {
 	mem_pool_t *old_pool = host->pool;
 	g_update_count++;
@@ -680,6 +714,12 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	   __FILE__, __LINE__, code));
       
       host->canonical = old_canonical;
+      host->has_data = 0;
+      host->last_update = 0;
+      
+      sprintf(host->error_message,
+	      "%s:%d:read_config(): hmux unknown %d\n",
+	      __FILE__, __LINE__, code);
       
       if (pool)
 	cse_free_pool(pool);
@@ -882,6 +922,7 @@ read_all_config_impl(config_t *config)
 	int p;
 	int port = 0;
 	int ch;
+	int is_change = 0;
 	
 	hmux_read_string(&s, buffer, sizeof(buffer));
 	LOG(("%s:%d:read_all_config_impl(): hmux host %s\n",
@@ -896,7 +937,17 @@ read_all_config_impl(config_t *config)
 	}
       
 	host = cse_create_host(config, buffer, port);
-	read_config(&s, config, host, 0, &is_change);
+	
+	if (read_config(&s, config, host, 0, &is_change) > 0) {
+	  char buf[128];
+	  time_t time = host->last_update;
+	  buf[0] = 0;
+
+	  ctime_r(&time, buf);
+
+	  sprintf(host->config_source, "Cache File (%s, %s)",
+		  config->config_path, buf);
+	}
       }
       break;
 
@@ -974,16 +1025,29 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
 
     code = cse_read_byte(&s);
     if (code != HMUX_CHANNEL) {
+      host->last_update = prev_update;
+      
       cse_close(&s, "protocol");
       return 0;
     }
     
     len = hmux_read_len(&s);
 
-    if (read_config(&s, host->config, host, now, &is_change) == HMUX_QUIT)
-      cse_recycle(&s, time(0));
+    if (read_config(&s, host->config, host, now, &is_change) == HMUX_QUIT) {
+      cse_recycle(&s, now);
+    }
     else
       cse_close(&s, "close");
+
+    if (is_change > 0) {
+      char buf[128];
+      time_t now = host->last_update;
+      buf[0] = 0;
+
+      ctime_r(&now, buf);
+
+      sprintf(host->config_source, "Resin (%s)", buf);
+    }
 
     if (is_change > 0
 	|| prev_update < host->config->start_time
@@ -1436,6 +1500,7 @@ cse_match_request(config_t *config, const char *host, int port,
   int test_port;
   int test_count;
   resin_host_t *test_match_host;
+  int no_host_update_interval = 2000;
   
   resin_host_t *match_host;
 
@@ -1478,7 +1543,7 @@ cse_match_request(config_t *config, const char *host, int port,
   else if (test_port && test_port != port) {
   }
   else if (! test_match_host &&
-	   config->last_update + config->update_interval < now) {
+	   config->last_update + no_host_update_interval < now) {
   }
   else if (test_match_host &&
 	   test_match_host->last_update + config->update_interval < now) {

@@ -164,12 +164,15 @@ typedef struct resin_host_t {
   int port;
 
   int has_data;
-  int last_update;
+  time_t last_update;
   char etag[32];  /* etag for the last configuration update. */
 
   cluster_t cluster;
   
   struct web_app_t *applications;
+
+  char error_message[1024];
+  char config_source[1024];
 } resin_host_t;
 
 typedef struct config_t {
@@ -198,6 +201,8 @@ typedef struct config_t {
   char session_url_prefix[256];
   char alt_session_url_prefix[256];
   char session_cookie[256];
+
+  char error_message[1024];
   char *iis_priority;
   int override_iis_authentication;
   
