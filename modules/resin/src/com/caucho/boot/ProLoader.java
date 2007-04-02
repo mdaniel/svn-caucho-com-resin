@@ -170,8 +170,9 @@ public class ProLoader extends SecureClassLoader
   {
     Path path = _libexec.lookup("lib" + name + ".so");
 
-    if (path.canRead())
+    if (path.canRead()) {
       return path.getNativePath();
+    }
     
     path = _libexec.lookup("lib" + name + ".jnilib");
 
