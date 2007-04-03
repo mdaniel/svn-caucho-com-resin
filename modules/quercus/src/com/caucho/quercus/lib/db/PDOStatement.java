@@ -169,7 +169,8 @@ public class PDOStatement
         name = new StringBuilder();
         continue;
       }
-      else if (name != null && (ch == -1 || !Character.isJavaIdentifierStart(ch))) {
+      // XXX: check what characters are allowed
+      else if (name != null && (ch == -1 || !Character.isJavaIdentifierPart(ch))) {
         if (_parameterNameMap == null)
           _parameterNameMap = new IntMap();
 
