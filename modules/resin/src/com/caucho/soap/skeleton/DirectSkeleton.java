@@ -45,13 +45,17 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
 import javax.xml.namespace.QName;
 import static javax.xml.soap.SOAPConstants.*;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPBinding;
+
+import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -59,10 +63,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -105,7 +111,17 @@ public class DirectSkeleton extends Skeleton {
   private CharArrayWriter _schemaBuffer = new CharArrayWriter();
   private boolean _schemaGenerated = false;
 
+  private static XMLInputFactory _inputFactory;
   private static XMLOutputFactory _outputFactory;
+
+  private static XMLInputFactory getXMLInputFactory()
+    throws XMLStreamException
+  {
+    if (_inputFactory == null)
+      _inputFactory = XMLInputFactory.newInstance();
+
+    return _inputFactory;
+  }
 
   private static XMLOutputFactory getXMLOutputFactory()
     throws XMLStreamException
@@ -243,19 +259,22 @@ public class DirectSkeleton extends Skeleton {
 
     in.nextTag();
 
-    if ("Header".equals(in.getName().getLocalPart())) {
-      int depth = 1;
+    XMLStreamReader header = null;
 
-      while (depth > 0) {
-        switch (in.nextTag()) {
-          case XMLStreamReader.START_ELEMENT:
-            depth++;
-            break;
-          case XMLStreamReader.END_ELEMENT:
-            depth--;
-            break;
-        }
-      }
+    if ("Header".equals(in.getName().getLocalPart())) {
+      in.nextTag();
+
+      XMLOutputFactory outputFactory = getXMLOutputFactory();
+      CharArrayWriter writer = new CharArrayWriter();
+      StreamResult result = new StreamResult(writer);
+      XMLStreamWriter xmlWriter = outputFactory.createXMLStreamWriter(result);
+
+      StaxUtil.copyReaderToWriter(in, xmlWriter);
+
+      CharArrayReader reader = new CharArrayReader(writer.toCharArray());
+
+      XMLInputFactory inputFactory = getXMLInputFactory();
+      header = inputFactory.createXMLStreamReader(reader);
 
       in.nextTag();
     }
@@ -273,13 +292,11 @@ public class DirectSkeleton extends Skeleton {
     //out.writeNamespace("xsi", XMLNS_XSI);
     out.writeNamespace("xsd", XMLNS_XSD);
 
-    out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Body", SOAP_ENVELOPE);
-
     AbstractAction action = _actionNames.get(actionName);
 
     // XXX: exceptions<->faults
     if (action != null)
-      action.invoke(service, in, out);
+      action.invoke(service, header, in, out);
     else {
       // XXX: fault
     }
@@ -289,7 +306,6 @@ public class DirectSkeleton extends Skeleton {
     in.nextTag();
     in.require(XMLStreamReader.END_ELEMENT, null, "Envelope");
 
-    out.writeEndElement(); // Body
     out.writeEndElement(); // Envelope
   }
 

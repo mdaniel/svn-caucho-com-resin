@@ -55,21 +55,26 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -87,6 +92,9 @@ public abstract class AbstractAction {
   protected static final String TARGET_NAMESPACE_PREFIX = "m";
   protected static final String SOAP_ENCODING_STYLE 
     = "http://schemas.xmlsoap.org/soap/encoding/";
+  public final static String SOAP_ENVELOPE_PREFIX = "soapenv";
+  public final static String SOAP_ENVELOPE =
+    "http://schemas.xmlsoap.org/soap/envelope/";
 
   protected static XMLOutputFactory _xmlOutputFactory;
   protected static XMLInputFactory _xmlInputFactory 
@@ -103,12 +111,14 @@ public abstract class AbstractAction {
 
   protected final HashMap<String,ParameterMarshal> _bodyArguments
     = new HashMap<String,ParameterMarshal>();
-  protected ParameterMarshal[] _bodyArgs;
+  protected final ParameterMarshal[] _bodyArgs;
 
   protected final HashMap<String,ParameterMarshal> _headerArguments
     = new HashMap<String,ParameterMarshal>();
+  protected final ParameterMarshal[] _headerArgs;
 
-  protected ParameterMarshal _returnMarshal;
+  protected final ParameterMarshal _returnMarshal;
+  protected final boolean _headerReturn;
 
   protected final HashMap<Class,ParameterMarshal> _faults
     = new HashMap<Class,ParameterMarshal>();
@@ -212,6 +222,8 @@ public abstract class AbstractAction {
             throw new WebServiceException(L.l("Method {0} annotated with @Oneway, but contains output argument", method.getName()));
           }
         }
+
+        isHeader = webParam.header();
       }
       else if (params[i].equals(Holder.class)) {
         mode = WebParam.Mode.INOUT;
@@ -255,6 +267,9 @@ public abstract class AbstractAction {
       }
     }
 
+    _headerArgs = new ParameterMarshal[headerList.size()];
+    headerList.toArray(_headerArgs);
+
     _bodyArgs = new ParameterMarshal[bodyList.size()];
     bodyList.toArray(_bodyArgs);
 
@@ -275,6 +290,8 @@ public abstract class AbstractAction {
         webResult = eiMethod.getAnnotation(WebResult.class);
 
       if (webResult != null) {
+        _headerReturn = webResult.header();
+
         String localName = webResult.name();
 
         if ("".equals(localName))
@@ -285,29 +302,38 @@ public abstract class AbstractAction {
         else
           _resultName = new QName(webResult.targetNamespace(), localName);
       }
-      else
+      else {
+        _headerReturn = false;
         _resultName = new QName("return"); // XXX namespace?
+      }
 
       _returnMarshal = ParameterMarshal.create(0, property, _resultName, 
                                                WebParam.Mode.OUT,
                                                marshaller, unmarshaller);
 
-      // XXX header return?
       _bodyOutputs++;
+
+      if (_headerReturn)
+        _headerOutputs++;
+    }
+    else {
+      _headerReturn = false;
+      _returnMarshal = null;
     }
 
     //
     // Exceptions
     //
 
+    /*
     Class[] exceptions = method.getExceptionTypes();
 
     for (Class exception : exceptions) {
       QName faultName = new QName(targetNamespace, 
                                   JAXBUtil.classBasename(exception),
                                   TARGET_NAMESPACE_PREFIX);
-      /* XXX check for generated exception classes versus raw exceptions
-       * i.e. things like getFaultInfo()*/
+      // XXX check for generated exception classes versus raw exceptions
+      // i.e. things like getFaultInfo()
       Property property = jaxbContext.createProperty(exception);
       ParameterMarshal marshal = 
         ParameterMarshal.create(0, property, faultName, 
@@ -316,7 +342,7 @@ public abstract class AbstractAction {
 
       _faults.put(exception, marshal);
       _faultNames.put(faultName, marshal);
-    }
+    }*/
   }
 
   public static AbstractAction createAction(Method method, 
@@ -515,14 +541,15 @@ public abstract class AbstractAction {
   /**
    * Invokes the request for a call.
    */
-  public void invoke(Object service, XMLStreamReader in, XMLStreamWriter out)
+  public void invoke(Object service, XMLStreamReader header,
+                     XMLStreamReader in, XMLStreamWriter out)
     throws IOException, XMLStreamException, Throwable
   {
     // We're starting out at the point in the input stream where the 
     // method name is listed (with the arguments as children) and the 
     // point in the output stream where the results are to be written.
     
-    Object[] args = readMethodInvocation(in);
+    Object[] args = readMethodInvocation(header, in);
 
     Object value = null;
 
@@ -540,12 +567,65 @@ public abstract class AbstractAction {
       return;
     }
 
-    if (! _isOneway)
+    if (! _isOneway) {
+      if (_headerOutputs > 0) {
+        out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Header", SOAP_ENVELOPE);
+
+        if (_returnMarshal != null && _headerReturn)
+          _returnMarshal.serializeReply(out, value);
+
+        for (int i = 0; i < _headerArgs.length; i++)
+          _headerArgs[i].serializeReply(out, args);
+
+        out.writeEndElement(); // Header
+      }
+
+      out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Body", SOAP_ENVELOPE);
       writeResponse(out, value, args);
+      out.writeEndElement(); // Body
+    }
+  }
+
+  protected void readHeaders(XMLStreamReader header, Object[] args)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    for (int i = 0; i < _headerArgs.length; i++)
+      _headerArgs[i].prepareArgument(args);
+
+    if (header != null) {
+      header.nextTag();
+
+      while (header.getEventType() == header.START_ELEMENT) {
+        ParameterMarshal arg = _headerArguments.get(header.getLocalName());
+
+        if (arg == null) {
+          if (log.isLoggable(Level.FINER))
+            log.finer(L.l("Unknown header argument: {0}", header.getName()));
+
+          // skip this subtree
+          int depth = 1;
+
+          while (depth > 0) {
+            switch (header.nextTag()) {
+              case XMLStreamReader.START_ELEMENT:
+                depth++;
+                break;
+              case XMLStreamReader.END_ELEMENT:
+                depth--;
+                break;
+            }
+          }
+        }
+        else {
+          arg.deserializeCall(header, args);
+        }
+      }
+    }
   }
 
   // reads the method invocation and returns the arguments
-  abstract protected Object[] readMethodInvocation(XMLStreamReader in)
+  abstract protected Object[] readMethodInvocation(XMLStreamReader header,
+                                                   XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException;
 
   abstract protected void writeResponse(XMLStreamWriter out, 

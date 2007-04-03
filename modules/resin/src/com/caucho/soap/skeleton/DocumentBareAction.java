@@ -83,11 +83,12 @@ public class DocumentBareAction extends AbstractAction {
           jaxbContext, targetNamespace, 
           marshaller, unmarshaller);
 
-    if (_bodyInputs + _headerInputs > 1)
-      throw new WebServiceException(L.l("Document bare methods may not have more than one input argument"));
+    if (_bodyInputs > 1) {
+      throw new WebServiceException(L.l("Document bare methods may not have more than one input argument: {0}.{1} has {2} input args", method.getDeclaringClass().getName(), method.getName(), _bodyInputs));
+    }
 
-    if (_bodyOutputs + _headerOutputs > 1)
-      throw new WebServiceException(L.l("Document bare methods may not have more than one output argument (including the return value)"));
+    if (_bodyOutputs > 1)
+      throw new WebServiceException(L.l("Document bare methods may not have more than one output argument: {0}.{1} has {2} output args (including the return value)", method.getDeclaringClass().getName(), method.getName(), _bodyOutputs));
 
     //
     // Fix the argument/response names
@@ -172,10 +173,13 @@ public class DocumentBareAction extends AbstractAction {
     }
   }
 
-  protected Object[] readMethodInvocation(XMLStreamReader in)
+  protected Object[] readMethodInvocation(XMLStreamReader header, 
+                                          XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
   {
     Object[] args = new Object[_arity];
+
+    readHeaders(header, args);
 
     if (_bodyInputs == 0) {
       while (in.getEventType() != in.END_ELEMENT)
@@ -194,7 +198,7 @@ public class DocumentBareAction extends AbstractAction {
   protected void writeResponse(XMLStreamWriter out, Object value, Object[] args)
     throws IOException, XMLStreamException, JAXBException
   {
-    if (_returnMarshal != null)
+    if (_returnMarshal != null && ! _headerReturn)
       _returnMarshal.serializeReply(out, value);
 
     for (int i = 0; i < _bodyArgs.length; i++)

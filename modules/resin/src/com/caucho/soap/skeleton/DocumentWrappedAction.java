@@ -35,6 +35,8 @@ import com.caucho.jaxb.skeleton.Property;
 
 import com.caucho.util.L10N;
 
+import com.caucho.xml.stream.StaxUtil;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -95,13 +97,16 @@ public class DocumentWrappedAction extends AbstractAction {
     out.writeEndElement(); // name
   }
 
-  protected Object[] readMethodInvocation(XMLStreamReader in)
+  protected Object[] readMethodInvocation(XMLStreamReader header, 
+                                          XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
   {
+    Object[] args = new Object[_arity];
+
+    readHeaders(header, args);
+
     // skip the method name
     in.nextTag();
-
-    Object[] args = new Object[_arity];
 
     // document wrapped => everything must be in order
     for (int i = 0; i < _bodyArgs.length; i++) {
@@ -127,7 +132,7 @@ public class DocumentWrappedAction extends AbstractAction {
                           _targetNamespace);
     out.writeNamespace(TARGET_NAMESPACE_PREFIX, _targetNamespace);
 
-    if (_returnMarshal != null)
+    if (_returnMarshal != null && ! _headerReturn)
       _returnMarshal.serializeReply(out, value);
 
     for (int i = 0; i < _bodyArgs.length; i++)
@@ -148,7 +153,9 @@ public class DocumentWrappedAction extends AbstractAction {
     in.require(XMLStreamReader.START_ELEMENT, null, null);
 
     if ("Header".equals(in.getLocalName())) {
-      while (in.nextTag() == XMLStreamReader.START_ELEMENT) {
+      in.nextTag();
+
+      while (in.getEventType() == XMLStreamReader.START_ELEMENT) {
         String tagName = in.getLocalName();
 
         ParameterMarshal marshal = _headerArguments.get(tagName);
@@ -174,6 +181,8 @@ public class DocumentWrappedAction extends AbstractAction {
       }
 
       in.require(XMLStreamReader.END_ELEMENT, null, "Header");
+
+      in.nextTag();
     }
 
     in.require(XMLStreamReader.START_ELEMENT, null, "Body");
