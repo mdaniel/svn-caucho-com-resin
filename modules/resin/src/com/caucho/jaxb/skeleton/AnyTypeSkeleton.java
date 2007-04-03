@@ -193,14 +193,8 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
         DOMSource source = new DOMSource((Node) obj);
         XMLStreamReader in = factory.createXMLStreamReader(source);
 
-        System.out.print("1 : ");
-        System.out.println(out.getNamespaceContext().toString());
-
         StaxUtil.copyReaderToWriter(in, out);
         
-        System.out.print("2 : ");
-        System.out.println(out.getNamespaceContext().toString());
-
         return;
       }
 

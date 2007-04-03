@@ -116,6 +116,9 @@ public class XmlListCollectionProperty extends CDataProperty {
 
       return collection;
     }
+    catch (JAXBException e) {
+      throw e;
+    }
     catch (Exception e) {
       throw new JAXBException(e);
     }

@@ -572,6 +572,9 @@ public class ClassSkeleton<C> extends Skeleton {
         return (C)con.newInstance(NO_ARGS);
       }
     }
+    catch (JAXBException e) {
+      throw e;
+    }
     catch (Exception e) {
       throw new JAXBException(e);
     }

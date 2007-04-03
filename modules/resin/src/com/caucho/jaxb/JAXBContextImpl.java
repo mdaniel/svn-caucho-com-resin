@@ -121,6 +121,14 @@ public class JAXBContextImpl extends JAXBContext {
 
   private Property _laxAnyTypeProperty = null;
 
+  public static JAXBContext createContext(String contextPath,
+                                          ClassLoader classLoader,
+                                          Map<String,?> properties)
+    throws JAXBException
+  {
+    return new JAXBContextImpl(contextPath, classLoader, properties);
+  }
+
   public JAXBContextImpl(String contextPath,
                          ClassLoader classLoader,
                          Map<String,?> properties)
@@ -161,8 +169,9 @@ public class JAXBContextImpl extends JAXBContext {
     _classLoader = null;
 
     for(Class c : classes) {
-      // XXX pull out to JAX-WS?
-      if (! c.isPrimitive() &&
+      if (c.getName().endsWith(".ObjectFactory"))
+        introspectObjectFactory(c);
+      else if (! c.isPrimitive() && // XXX pull out to JAX-WS?
           ! c.isArray() && 
           ! _specialClasses.contains(c))
         createSkeleton(c);
@@ -659,7 +668,10 @@ public class JAXBContextImpl extends JAXBContext {
   public void addRootElement(ClassSkeleton s) 
     throws JAXBException
   {
-    if (_roots.containsKey(s.getElementName()))
+    ClassSkeleton old = _roots.get(s.getElementName());
+
+    // Use != here to check duplicate puts; equals() isn't necessary
+    if (old != null && old != s)
       throw new JAXBException(L.l("Duplicate name {0} for classes {1} and {2}",
                                   s.getElementName(),
                                   s.getType(),

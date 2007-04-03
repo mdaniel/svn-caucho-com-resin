@@ -125,6 +125,9 @@ public class MarshallerImpl extends AbstractMarshallerImpl {
 
       writer.writeEndDocument();
     }
+    catch (JAXBException e) {
+      throw e;
+    }
     catch (Exception e) {
       throw new JAXBException(e);
     }
