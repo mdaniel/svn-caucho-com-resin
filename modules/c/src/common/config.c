@@ -572,7 +572,11 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	char buf[128];
 	buf[0] = 0;
 
+#ifndef WIN32
 	ctime_r(&host->last_update, buf);
+#else
+	strcpy(buf, ctime(&host->last_update));
+#endif
 
 	sprintf(host->config_source, "Resin-ETag (%s)", buf);
       }
@@ -943,7 +947,11 @@ read_all_config_impl(config_t *config)
 	  time_t time = host->last_update;
 	  buf[0] = 0;
 
+#ifndef WIN32
 	  ctime_r(&time, buf);
+#else
+	  strcpy(buf, ctime(&time));
+#endif
 
 	  sprintf(host->config_source, "Cache File (%s, %s)",
 		  config->config_path, buf);
@@ -1044,7 +1052,11 @@ cse_update_host_from_resin(resin_host_t *host, time_t now)
       time_t now = host->last_update;
       buf[0] = 0;
 
+#ifndef WIN32
       ctime_r(&now, buf);
+#else
+	  strcpy(buf, ctime(&now));
+#endif
 
       sprintf(host->config_source, "Resin (%s)", buf);
     }
