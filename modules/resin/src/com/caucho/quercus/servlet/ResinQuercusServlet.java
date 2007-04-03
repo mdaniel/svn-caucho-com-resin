@@ -180,8 +180,8 @@ public class ResinQuercusServlet extends QuercusServletImpl
 
   Path getPath(HttpServletRequest req)
   {
-    String scriptPath = req.getServletPath();
-    String pathInfo = req.getPathInfo();
+    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
+    String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
 
     Path pwd = Vfs.lookup();
 

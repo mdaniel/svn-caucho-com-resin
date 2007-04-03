@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusRequestAdapter;
+
 import javax.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
@@ -227,9 +229,15 @@ public class ServerArrayValue extends ArrayValueImpl {
       super.put(REQUEST_METHOD_V,
                 new StringValueImpl(request.getMethod()));
 
-      if (request.getQueryString() != null) {
+      String queryString = QuercusRequestAdapter.getPageQueryString(request);
+      String requestURI = QuercusRequestAdapter.getPageURI(request);
+      String servletPath = QuercusRequestAdapter.getPageServletPath(request);
+      String pathInfo = QuercusRequestAdapter.getPagePathInfo(request);
+      String contextPath = QuercusRequestAdapter.getPageContextPath(request);
+
+      if (queryString != null) {
         super.put(QUERY_STRING_V,
-                  new StringValueImpl(request.getQueryString()));
+                  new StringValueImpl(queryString));
       }
 
       // XXX: a better way?
@@ -245,11 +253,8 @@ public class ServerArrayValue extends ArrayValueImpl {
                 new StringValueImpl(root));
 
       super.put(SCRIPT_NAME_V,
-                new StringValueImpl(request.getContextPath() +
-                                    request.getServletPath()));
-
-      String requestURI = request.getRequestURI();
-      String queryString = request.getQueryString();
+                new StringValueImpl(contextPath +
+                                    servletPath));
 
       if (queryString != null)
         requestURI = requestURI + '?' + queryString;
@@ -257,21 +262,17 @@ public class ServerArrayValue extends ArrayValueImpl {
       super.put(REQUEST_URI_V,
                 new StringValueImpl(requestURI));
       super.put(SCRIPT_FILENAME_V,
-                new StringValueImpl(request.getRealPath(request.getServletPath())));
+                new StringValueImpl(request.getRealPath(servletPath)));
 
-      if (request.getPathInfo() != null) {
+      if (pathInfo != null) {
         super.put(PATH_INFO_V,
-                  new StringValueImpl(request.getPathInfo()));
+                  new StringValueImpl(pathInfo));
         super.put(PATH_TRANSLATED_V,
-                  new StringValueImpl(request.getRealPath(request.getPathInfo())));
+                  new StringValueImpl(request.getRealPath(pathInfo)));
       }
 
       if (request.isSecure())
         super.put(HTTPS_V, new StringValueImpl("on"));
-
-      String contextPath = request.getContextPath();
-      String servletPath = request.getServletPath();
-      String pathInfo = request.getPathInfo();
 
       if (pathInfo == null)
         super.put(PHP_SELF_V, new StringValueImpl(contextPath + servletPath));

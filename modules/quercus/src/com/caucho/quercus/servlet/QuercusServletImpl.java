@@ -34,6 +34,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusDieException;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusLineRuntimeException;
+import com.caucho.quercus.QuercusRequestAdapter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.module.QuercusModule;
@@ -167,8 +168,8 @@ public class QuercusServletImpl
 
   Path getPath(HttpServletRequest req)
   {
-    String scriptPath = req.getServletPath();
-    String pathInfo = req.getPathInfo();
+    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
+    String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
 
     Path pwd = new FilePath(System.getProperty("user.dir"));
 
