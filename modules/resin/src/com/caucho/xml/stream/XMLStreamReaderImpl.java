@@ -492,16 +492,44 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   public void require(int type, String namespaceURI, String localName)
     throws XMLStreamException
   {
-    if (type != _current)
-      throw new XMLStreamException("expected " + 
-                                   StaxUtil.constantToString(type) + ", "+
-                                   "found " + 
-                                   StaxUtil.constantToString(_current) +
-                                   " at " + getLocation());
+    if (type != _current) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("expected ");
+      sb.append(StaxUtil.constantToString(type));
 
-    if (localName != null && !localName.equals(getLocalName()))
-      throw new XMLStreamException("expected <"+localName+">, found " +
-                                   "<"+getLocalName()+"> at " + getLocation());
+      if (type == START_ELEMENT || type == END_ELEMENT) {
+        sb.append('(');
+        sb.append(localName);
+        sb.append(')');
+      }
+
+      sb.append(", found ");
+      sb.append(StaxUtil.constantToString(_current));
+
+      if (_current == START_ELEMENT || _current == END_ELEMENT) {
+        sb.append('(');
+        sb.append(getLocalName());
+        sb.append(')');
+      }
+
+      sb.append(" at ");
+      sb.append(getLocation());
+
+      throw new XMLStreamException(sb.toString());
+    }
+
+    if (localName != null && !localName.equals(getLocalName())) {
+      if (type == START_ELEMENT) {
+        throw new XMLStreamException("expected <" + localName + ">, found " +
+                                     "<" + getLocalName() + "> at " +
+                                     getLocation());
+      }
+      else if (type == END_ELEMENT) {
+        throw new XMLStreamException("expected </" + localName + ">, found " +
+                                     "</" + getLocalName() + "> at " +
+                                     getLocation());
+      }
+    }
 
     if (namespaceURI != null && !namespaceURI.equals(getNamespaceURI()))
       throw new XMLStreamException("expected xmlns="+namespaceURI+

@@ -205,8 +205,11 @@ public class StaxUtil {
         case END_ELEMENT:
           depth--;
 
-          if (depth < 0)
+          if (depth < 0) {
+            out.flush();
+
             return;
+          }
 
           out.writeEndElement();
           break;
@@ -257,8 +260,8 @@ public class StaxUtil {
                                  value);
             else
               out.writeAttribute(qname.getPrefix(), 
-                                 qname.getLocalPart(),
                                  qname.getNamespaceURI(),
+                                 qname.getLocalPart(),
                                  value);
           }
 
@@ -275,6 +278,8 @@ public class StaxUtil {
         break;
     } 
     while (depth >= 0);
+
+    out.flush();
   }
 
   public static String constantToString(int constant) 
