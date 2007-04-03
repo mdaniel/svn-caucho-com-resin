@@ -58,4 +58,9 @@ public class WSDLService extends WSDLNamedExtensibleDocumented
   {
     return _ports;
   }
+
+  public String toString()
+  {
+    return "WSDLService[name=" + getName() + "]";
+  }
 }

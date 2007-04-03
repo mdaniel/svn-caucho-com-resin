@@ -102,6 +102,9 @@ public class WSDLDefinitions extends WSDLExtensibleDocumented {
   private final Map<QName,WSDLBinding> _bindingMap 
     = new HashMap<QName,WSDLBinding>();
 
+  @XmlTransient
+  private String _endpointAddress;
+
   /**
    * Sets the definition name.
    */
@@ -177,6 +180,45 @@ public class WSDLDefinitions extends WSDLExtensibleDocumented {
       return _services = new ArrayList<WSDLService>();
 
     return _services;
+  }
+
+  public String getEndpointAddress(QName serviceName, QName portName)
+  {
+    if (_endpointAddress == null) {
+      if (! serviceName.getNamespaceURI().equals(getTargetNamespace()))
+        return null;
+
+      // dig down to find the <soap:address location="..."/>
+      if (_services != null) {
+        for (int i = 0; i < _services.size(); i++) {
+          WSDLService service = _services.get(i);
+
+          if (serviceName.getLocalPart().equals(service.getName())) {
+            List<WSDLPort> ports = service.getPorts();
+
+            for (int j = 0; j < ports.size(); j++) {
+              WSDLPort port = ports.get(j);
+
+              if (portName.getLocalPart().equals(port.getName())) {
+                List<Object> any = port.getAny();
+
+                for (int k = 0; k < any.size(); k++) {
+                  if (any.get(k) instanceof SOAPAddress) {
+                    SOAPAddress address = (SOAPAddress) any.get(k);
+
+                    _endpointAddress = address.getLocation();
+
+                    return _endpointAddress;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return _endpointAddress;
   }
 
   public void afterUnmarshal(Unmarshaller u, Object o)

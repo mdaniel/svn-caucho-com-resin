@@ -30,12 +30,20 @@ package com.caucho.soap.wsdl;
 
 import com.caucho.log.Log;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
+
+import javax.jws.WebService;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+
+import javax.xml.ws.WebServiceException;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -45,6 +53,79 @@ public class WSDLParser {
   private final static Logger log = Log.open(WSDLParser.class);
   private final static L10N L = new L10N(WSDLParser.class);
   private static JAXBContext _context = null;
+
+  public static WSDLDefinitions parse(Class api)
+    throws WebServiceException
+  {
+    WebService service = (WebService) api.getAnnotation(WebService.class);
+
+    if (service == null)
+      return null;
+
+    String wsdlLocation = null;
+
+    if (! "".equals(service.wsdlLocation())) {
+      wsdlLocation = service.wsdlLocation();
+    } 
+    else if (! "".equals(service.endpointInterface())) {
+      try {
+        ClassLoader loader = api.getClassLoader();
+        Class ei = loader.loadClass(service.endpointInterface());
+
+        service = (WebService) api.getAnnotation(WebService.class);
+
+        if (service == null)
+          return null;
+
+        if (! "".equals(service.wsdlLocation()))
+          wsdlLocation = service.wsdlLocation();
+      }
+      catch (ClassNotFoundException e) {
+      }
+    }
+
+    if (wsdlLocation == null)
+      return null;
+
+    return parse(wsdlLocation);
+  }
+
+  public static WSDLDefinitions parse(URL wsdlLocation)
+    throws WebServiceException
+  {
+    return parse(wsdlLocation.toString());
+  }
+
+  public static WSDLDefinitions parse(String wsdlLocation)
+    throws WebServiceException
+  {
+    InputStream is = null;
+
+    if (log.isLoggable(Level.FINER))
+      log.finer("Getting WSDL: " + wsdlLocation);
+
+    try {
+      is = Vfs.openRead(wsdlLocation);
+
+      return parse(is);
+    }
+    catch (IOException e) {
+      throw new WebServiceException(L.l("Unable to download WSDL: {0}", 
+                                        wsdlLocation), e);
+    }
+    catch (JAXBException e) {
+      throw new WebServiceException(L.l("Unable to parse WSDL: {0}", 
+                                        wsdlLocation), e);
+    }
+    finally {
+      try {
+        if (is != null)
+          is.close();
+      }
+      catch (IOException e) {
+      }
+    }
+  }
 
   /**
    * Starts a WSDL element.

@@ -90,11 +90,12 @@ public class SOAPMessageDispatch extends AbstractDispatch<SOAPMessage> {
 
   private final MessageFactory _factory;
 
-  public SOAPMessageDispatch(String bindingId, String endpointAddress,
-                             Service.Mode mode, Executor executor)
+  public SOAPMessageDispatch(String bindingId, 
+                             Service.Mode mode, 
+                             Executor executor)
     throws WebServiceException
   {
-    super(bindingId, endpointAddress, mode, executor);
+    super(bindingId, mode, executor);
 
     try {
       if (URI_NS_SOAP_1_1_ENVELOPE.equals(bindingId))

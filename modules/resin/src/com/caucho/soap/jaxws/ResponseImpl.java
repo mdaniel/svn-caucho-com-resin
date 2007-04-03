@@ -30,20 +30,28 @@
 package com.caucho.soap.jaxws;
 
 import java.util.Map;
+
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import javax.xml.ws.Response;
 
+import com.caucho.util.Alarm;
+
 public class ResponseImpl<T> implements Response<T>  {
+  private final static Logger log 
+    = Logger.getLogger(ResponseImpl.class.getName());
+
   private T _value;
   private Map<String,Object> _context;
   private boolean _done = false;
   private boolean _cancelled = false;
+  private Exception _exception = null;
 
-  /*
-  public ResponseImpl(Class<T> type)
-  {
-  }*/
- 
   public Map<String,Object> getContext()
   {
     return _context;
@@ -55,22 +63,43 @@ public class ResponseImpl<T> implements Response<T>  {
   }
 
   public T get()
-    throws InterruptedException
+    throws InterruptedException, CancellationException, ExecutionException
   {
     synchronized(this) {
       while (! _done && ! _cancelled)
         wait();
+
+      if (_cancelled)
+        throw new CancellationException();
+
+      if (_exception != null)
+        throw new ExecutionException(_exception);
 
       return _value;
     }
   }
 
   public T get(long timeout, TimeUnit unit)
-    throws InterruptedException
+    throws InterruptedException, CancellationException, ExecutionException
   {
+    long expire = unit.toMillis(timeout) + Alarm.getExactTime();
+
     synchronized(this) {
-      if (! _done && ! _cancelled)
-        wait(unit.toMillis(timeout));
+      if (Alarm.isTest()) {
+        // When Alarm.isTest(), getExactTime returns the test time
+        while (! _done && ! _cancelled && Alarm.getExactTime() < expire)
+          wait(expire - Alarm.getExactTime());
+      }
+      else {
+        while (! _done && ! _cancelled && Alarm.getCurrentTime() < expire)
+          wait(expire - Alarm.getCurrentTime());
+      }
+
+      if (_cancelled)
+        throw new CancellationException();
+
+      if (_exception != null)
+        throw new ExecutionException(_exception);
 
       return _value;
     }
@@ -82,7 +111,17 @@ public class ResponseImpl<T> implements Response<T>  {
       _done = true;
       _value = value;
 
-      notify();
+      notifyAll();
+    }
+  }
+
+  public void setException(Exception e)
+  {
+    synchronized(this) {
+      _done = true;
+      _exception = e;
+
+      notifyAll();
     }
   }
 
@@ -91,7 +130,7 @@ public class ResponseImpl<T> implements Response<T>  {
     synchronized(this) {
       _cancelled = true;
 
-      notify();
+      notifyAll();
 
       return true;
     }
@@ -99,16 +138,12 @@ public class ResponseImpl<T> implements Response<T>  {
 
   public boolean isDone()
   {
-    synchronized(this) {
-      return _done;
-    }
+    return _done;
   }
 
   public boolean isCancelled()
   {
-    synchronized(this) {
-      return _cancelled;
-    }
+    return _cancelled;
   }
 }
 

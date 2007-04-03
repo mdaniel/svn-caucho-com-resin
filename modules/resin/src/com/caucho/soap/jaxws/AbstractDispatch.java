@@ -40,6 +40,7 @@ import com.caucho.xml.stream.XMLStreamWriterImpl;
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 
+import javax.xml.soap.SOAPException;
 import static javax.xml.soap.SOAPConstants.*;
 
 import javax.xml.ws.AsyncHandler;
@@ -50,6 +51,7 @@ import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.HandlerResolver;
+import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.spi.ServiceDelegate;
 
 import java.io.ByteArrayInputStream;
@@ -67,11 +69,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -81,32 +85,41 @@ import org.w3c.dom.Node;
  */
 public abstract class AbstractDispatch<T> implements Dispatch<T> {
   private final static L10N L = new L10N(AbstractDispatch.class);
+  private final static Logger log 
+    = Logger.getLogger(AbstractDispatch.class.getName());
 
   protected final String _bindingId;
-  protected final URL _url;
   protected final Service.Mode _mode;
   protected final Executor _executor;
 
-  public AbstractDispatch(String bindingId, String endpointAddress,
-                          Service.Mode mode, Executor executor)
+  protected final Binding _binding;
+  protected final HashMap<String,Object> _requestContext 
+    = new HashMap<String,Object>();
+  protected final HashMap<String,Object> _responseContext 
+    = new HashMap<String,Object>();
+
+  public AbstractDispatch(String bindingId, 
+                          Service.Mode mode, 
+                          Executor executor)
     throws WebServiceException
   {
-    if (! URI_NS_SOAP_1_2_ENVELOPE.equals(bindingId) &&
-        ! URI_NS_SOAP_1_1_ENVELOPE.equals(bindingId))
-      throw new WebServiceException(L.l("{0} is not a supported binding id", 
-                                        bindingId));
-
     _bindingId = bindingId;
     _mode = mode;
-
-    try {
-      _url = new URL(endpointAddress);
-    }
-    catch (MalformedURLException e) {
-      throw new WebServiceException(e);
-    }
-
     _executor = executor;
+
+    if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
+        bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING) ||
+        bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING) ||
+        bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING)) {
+      try {
+        _binding = new SOAPBindingImpl(bindingId);
+      }
+      catch (SOAPException e) {
+        throw new WebServiceException(e);
+      }
+    }
+    else
+      _binding = null; // XXX: HTTP Binding, others
   }
 
   //
@@ -116,6 +129,9 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
   public T invoke(T msg)
     throws WebServiceException
   {
+    if (log.isLoggable(Level.FINEST))
+      log.finest("AbstractDispatch.invoke(" + msg + ")");
+
     ResponseImpl<T> response = new ResponseImpl<T>();
 
     invokeNow(msg, response);
@@ -130,6 +146,9 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
 
   public Response<T> invokeAsync(T msg)
   {
+    if (log.isLoggable(Level.FINEST))
+      log.finest("AbstractDispatch.invokeAsync(" + msg + ")");
+    
     ResponseImpl<T> response = new ResponseImpl<T>();
 
     _executor.execute(new AsyncInvoker(msg, response));
@@ -139,6 +158,9 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
 
   public Future<?> invokeAsync(T msg, AsyncHandler<T> handler)
   {
+    if (log.isLoggable(Level.FINEST))
+      log.finest("AbstractDispatch.invokeAsync(" + msg + "," + handler + ")");
+    
     ResponseImpl<T> response = new ResponseImpl<T>();
 
     _executor.execute(new AsyncInvoker(msg, response, handler));
@@ -149,6 +171,9 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
   public void invokeOneWay(T msg)
     throws WebServiceException
   {
+    if (log.isLoggable(Level.FINEST))
+      log.finest("AbstractDispatch.invokeOneWay(" + msg + ")");
+    
     invokeNow(msg, null);
   }
 
@@ -158,17 +183,17 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
 
   public Binding getBinding()
   {
-    return null;
+    return _binding;
   }
 
   public Map<String,Object> getRequestContext()
   {
-    return null;
+    return _requestContext;
   }
 
   public Map<String,Object> getResponseContext()
   {
-    return null;
+    return _responseContext;
   }
 
   protected abstract void writeRequest(T msg, OutputStream out)
@@ -180,11 +205,20 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
   private void invokeNow(T msg, ResponseImpl<T> response)
     throws WebServiceException
   {
+    if (log.isLoggable(Level.FINEST))
+      log.finest("AbstractDispatch.invokeNow(" + msg + ")");
+
     InputStream in = null;
     OutputStream out = null;
 
     try {
-      URLConnection connection = _url.openConnection();
+      String urlSpec = (String) _requestContext.get(ENDPOINT_ADDRESS_PROPERTY); 
+
+      if (urlSpec == null)
+        throw new WebServiceException(L.l("Endpoint address not set"));
+
+      URL url = new URL(urlSpec);
+      URLConnection connection = url.openConnection();
 
       if (response != null)
         connection.setDoInput(true);
@@ -328,8 +362,7 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
         invokeNow(_msg, _response);
       }
       catch (Exception e) {
-        // XXX do something w/ this exception by setting something in
-        // _response
+        _response.setException(e);
       }
 
       if (_handler != null)

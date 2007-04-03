@@ -32,12 +32,15 @@ package com.caucho.soap.jaxws;
 import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.soap.skeleton.Skeleton;
+import com.caucho.soap.wsdl.WSDLDefinitions;
+import com.caucho.soap.wsdl.WSDLParser;
 import com.caucho.util.L10N;
 
 import javax.activation.DataSource;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
+import static javax.xml.soap.SOAPConstants.*;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
 
@@ -64,7 +67,8 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     = Logger.getLogger(ServiceDelegateImpl.class.getName());
   private final static L10N L = new L10N(ServiceDelegateImpl.class);
 
-  private final Map<QName,Port> _portMap = new HashMap<QName,Port>();
+  private final Map<QName,PortInfoImpl> _portMap 
+    = new HashMap<QName,PortInfoImpl>();
 
   private final ClassLoader _classLoader;
 
@@ -85,7 +89,10 @@ public class ServiceDelegateImpl extends ServiceDelegate {
 
   public void addPort(QName portName, String bindingId, String endpointAddress)
   {
-    _portMap.put(portName, new Port(bindingId, endpointAddress));
+    PortInfoImpl portInfo = 
+      new PortInfoImpl(bindingId, portName, _serviceName, endpointAddress);
+
+    _portMap.put(portName, portInfo);
   }
 
   public <T> Dispatch<T> createDispatch(QName portName,
@@ -93,29 +100,44 @@ public class ServiceDelegateImpl extends ServiceDelegate {
                                         Service.Mode mode)
     throws WebServiceException
   {
-    Port port = _portMap.get(portName);
+    PortInfoImpl port = _portMap.get(portName);
+    String bindingId = URI_NS_SOAP_ENVELOPE;
+    String endpointAddress = null;
 
-    if (port == null)
-      throw new WebServiceException(L.l("{0} is an unknown port", portName));
+    if (port != null) {
+      bindingId = port.getBindingID();
+      endpointAddress = port.getEndpointAddress();
+    }
+
+    if (endpointAddress == null)
+      endpointAddress = findEndpointAddress();
+
+    Dispatch<T> dispatch = null;
 
     if (Source.class.equals(type)) {
-      return (Dispatch<T>) new SourceDispatch(port.getBindingId(),
-                                              port.getEndpointAddress(),
-                                              mode, _executor);
+      dispatch = (Dispatch<T>) new SourceDispatch(bindingId, mode, _executor);
     }
     else if (SOAPMessage.class.equals(type)) {
-      return (Dispatch<T>) new SOAPMessageDispatch(port.getBindingId(),
-                                                   port.getEndpointAddress(),
-                                                   mode, _executor);
+      dispatch = 
+        (Dispatch<T>) new SOAPMessageDispatch(bindingId, mode, _executor);
     }
     else if (DataSource.class.equals(type)) {
-      return (Dispatch<T>) new DataSourceDispatch(port.getBindingId(),
-                                                  port.getEndpointAddress(),
-                                                  mode, _executor);
+      dispatch = 
+        (Dispatch<T>) new DataSourceDispatch(bindingId, mode, _executor);
     }
 
-    throw new WebServiceException(L.l("{0} is an unsupported Dispatch type",
-                                      type));
+    if (dispatch == null) {
+      throw new WebServiceException(L.l("{0} is an unsupported Dispatch type",
+                                        type));
+    }
+
+    if (endpointAddress != null) {
+      Map<String,Object> requestContext = dispatch.getRequestContext();
+      requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, 
+                         endpointAddress);
+    }
+
+    return dispatch;
   }
 
   public Dispatch<Object> createDispatch(QName portName,
@@ -123,13 +145,28 @@ public class ServiceDelegateImpl extends ServiceDelegate {
                                          Service.Mode mode)
     throws WebServiceException
   {
-    Port port = _portMap.get(portName);
+    PortInfoImpl port = _portMap.get(portName);
+    String bindingId = URI_NS_SOAP_ENVELOPE;
+    String endpointAddress = null;
 
-    if (port == null)
-      throw new WebServiceException(L.l("{0} is an unknown port", portName));
+    if (port != null) {
+      bindingId = port.getBindingID();
+      endpointAddress = port.getEndpointAddress();
+    }
 
-    return new JAXBDispatch(port.getBindingId(), port.getEndpointAddress(),
-                            mode, _executor, context);
+    if (endpointAddress == null)
+      endpointAddress = findEndpointAddress();
+
+    JAXBDispatch dispatch = 
+      new JAXBDispatch(bindingId, mode, _executor, context);
+
+    if (endpointAddress != null) {
+      Map<String,Object> requestContext = dispatch.getRequestContext();
+      requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
+                         endpointAddress);
+    }
+
+    return dispatch;
   }
 
   public Executor getExecutor()
@@ -148,34 +185,45 @@ public class ServiceDelegateImpl extends ServiceDelegate {
   }
 
   public <T> T getPort(QName portName, Class<T> api)
+    throws WebServiceException
   {
     try {
       Skeleton skeleton = new WebServiceIntrospector().introspect(api, null);
 
       PortProxyHandler handler = new PortProxyHandler(skeleton);
 
+      WSDLDefinitions definitions = WSDLParser.parse(api);
+      String endpointAddress = findEndpointAddress();
+
+      // XXX bindingId
+
+      PortInfoImpl portInfo = 
+        new PortInfoImpl(null, portName, _serviceName, endpointAddress);
+
+      _portMap.put(portName, portInfo);
+
       return (T) Proxy.newProxyInstance(_classLoader,
 					                              new Class[] { api, 
                                                       BindingProvider.class },
                                         handler);
-    } catch (RuntimeException e) {
+    }
+    catch (WebServiceException e) {
       throw e;
-    } catch (Exception e) {
-      // XXX:
-      throw new RuntimeException(e);
+    }
+    catch (Exception e) {
+      throw new WebServiceException(e);
     }
   }
 
   public Iterator<QName> getPorts()
   {
-    throw new UnsupportedOperationException();
+    return _portMap.keySet().iterator();
   }
 
   public QName getServiceName()
   {
     return _serviceName;
   }
-
 
   public URL getWSDLDocumentLocation()
   {
@@ -197,24 +245,30 @@ public class ServiceDelegateImpl extends ServiceDelegate {
 	    + "," + getServiceName().getLocalPart() + "]");
   }
 
-  private static class Port {
-    private final String _bindingId;
-    private final String _endpointAddress;
-
-    public Port(String bindingId, String endpointAddress)
-    {
-      _bindingId = bindingId;
-      _endpointAddress = endpointAddress;
+  private String findEndpointAddress()
+  {
+    if (getWSDLDocumentLocation() != null) {
+      int p = getWSDLDocumentLocation().toString().lastIndexOf('?');
+      return getWSDLDocumentLocation().toString().substring(0, p);
     }
+    else
+      return null;
 
-    public String getBindingId()
-    {
-      return _bindingId;
-    }
+    /*
+    WSDLDefinitions definitions = WSDLParser.parse(getWSDLDocumentLocation());
 
-    public String getEndpointAddress()
-    {
-      return _endpointAddress;
-    }
+    if (definitions != null) {
+      endpointAddress = 
+        definitions.getEndpointAddress(_serviceName, portName);
+
+      if (endpointAddress != null && endpointAddress.indexOf(':') < 0) {
+        definitions = WSDLParser.parse(endpointAddress);
+
+        if (definitions != null) {
+          endpointAddress = 
+            definitions.getEndpointAddress(_serviceName, portName);
+        }
+      }
+    }*/
   }
 }

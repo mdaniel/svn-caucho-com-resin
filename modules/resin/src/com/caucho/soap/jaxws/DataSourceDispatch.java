@@ -87,11 +87,12 @@ public class DataSourceDispatch extends AbstractDispatch<DataSource> {
     = Logger.getLogger(DataSourceDispatch.class.getName());
   private final static L10N L = new L10N(DataSourceDispatch.class);
 
-  public DataSourceDispatch(String bindingId, String endpointAddress,
-                            Service.Mode mode, Executor executor)
+  public DataSourceDispatch(String bindingId, 
+                            Service.Mode mode, 
+                            Executor executor)
     throws WebServiceException
   {
-    super(bindingId, endpointAddress, mode, executor);
+    super(bindingId, mode, executor);
   }
 
   protected void writeRequest(DataSource msg, OutputStream out)
