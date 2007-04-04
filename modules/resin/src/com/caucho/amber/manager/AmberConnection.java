@@ -456,6 +456,9 @@ public class AmberConnection
 
       delete(instance);
 
+      // jpa/0o30: flushes the owning side delete.
+      instance.__caucho_flush();
+
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("remove is performing cascade post-remove"));
 
@@ -2905,7 +2908,7 @@ public class AmberConnection
         _mergingEntities.add(managedEntity);
 
         if (isFullMerge) {
-          entity.__caucho_copyTo(managedEntity, this);
+          entity.__caucho_copyTo(managedEntity, this, true);
         }
 
         if (existingEntity == null) {

@@ -214,6 +214,13 @@ public interface Entity extends MappedSuperclass
                               AmberConnection aConn);
 
   /**
+   * Copies this entity state to an existing entity.
+   */
+  public void __caucho_copyTo(Entity targetEntity,
+                              AmberConnection aConn,
+                              boolean isFullMerge);
+
+  /**
    * Merges this entity state into an existing entity.
    */
   public void __caucho_merge(Entity targetEntity,

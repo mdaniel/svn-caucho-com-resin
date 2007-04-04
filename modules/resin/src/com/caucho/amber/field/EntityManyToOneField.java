@@ -912,8 +912,22 @@ public class EntityManyToOneField extends CascadableField {
       if (_targetType instanceof EntityType) {
         String targetTypeExt = getEntityTargetType().getInstanceClassName();
 
+        // jpa/0s2e
+        out.println("if (isFullMerge)");
+        out.println("  child = " + value + ";");
+        out.println("else {");
+        out.pushDepth();
+
         // jpa/0h0a: gets the cache object to copy from.
         out.println("child = aConn.getCacheEntity(" + targetTypeExt + ".class, " + var + ");");
+
+        // jpa/0o36: the cache item is only available after commit.
+        out.println();
+        out.println("if (child == null && " + value + " != null)");
+        out.println("  child = ((com.caucho.amber.entity.Entity) " + value + ").__caucho_getCacheEntity();");
+
+        out.popDepth();
+        out.println("}");
       }
       else {
         // XXX: jpa/0l14

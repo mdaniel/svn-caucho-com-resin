@@ -1778,6 +1778,18 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    out.println("__caucho_copyTo(targetEntity, aConn, false);");
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public void __caucho_copyTo(com.caucho.amber.entity.Entity targetEntity,");
+    out.println("                            com.caucho.amber.manager.AmberConnection aConn,");
+    out.println("                            boolean isFullMerge)");
+    out.println("{");
+    out.pushDepth();
+
     out.println("if (this == targetEntity)");
     out.println("  return;");
     out.println();
@@ -1827,7 +1839,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     out.println("if (isFullMerge)");
-    out.println("  this.__caucho_copyTo(targetEntity, aConn);");
+    out.println("  this.__caucho_copyTo(targetEntity, aConn, true);");
     out.println();
 
     out.println(getClassName() + " o = (" + getClassName() + ") targetEntity;");
