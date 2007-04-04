@@ -112,10 +112,14 @@ public class DocumentWrappedAction extends AbstractAction {
     for (int i = 0; i < _bodyArgs.length; i++) {
       _bodyArgs[i].prepareArgument(args);
 
-      // while loop for arrays/lists
-      while (in.getEventType() == in.START_ELEMENT &&
-             _bodyArgs[i].getName().equals(in.getName()))
-        _bodyArgs[i].deserializeCall(in, args);
+      // services/1234: 
+      // don't loop when an OutParameter is incorrectly specified
+      if (! (_bodyArgs[i] instanceof OutParameterMarshal)) {
+        // while loop for arrays/lists
+        while (in.getEventType() == in.START_ELEMENT &&
+               _bodyArgs[i].getName().equals(in.getName()))
+          _bodyArgs[i].deserializeCall(in, args);
+      }
     }
 
     // skip the method name close tag
