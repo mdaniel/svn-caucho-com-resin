@@ -81,6 +81,8 @@ public class Jar implements CacheListener {
   // last time the file was checked
   private long _lastTime;
 
+  private JarCache _cache;
+
   // cached zip file to read jar entries
   private SoftReference<JarFile> _jarFileRef;
   // last time the zip file was modified
@@ -258,15 +260,9 @@ public class Jar implements CacheListener {
    */
   public boolean exists(String path)
   {
-    boolean exists;
+    JarNode node = getJarNode(path);
 
-    synchronized (this) {
-      exists = getSafeJarEntry(path) != null;
-    }
-
-    closeJarFile();
-
-    return exists;
+    return node != null;
   }
 
   /**
@@ -276,23 +272,9 @@ public class Jar implements CacheListener {
    */
   public boolean isDirectory(String path)
   {
-    boolean isDirectory;
+    JarNode node = getJarNode(path);
 
-    synchronized (this) {
-      if (! path.endsWith("/"))
-	path = path + '/';
-    
-      ZipEntry entry = getSafeJarEntry(path);
-
-      if (entry == null && (path.equals("/") || path.equals("")))
-	isDirectory = true;
-      else
-	isDirectory = entry != null && entry.isDirectory();
-    }
-
-    closeJarFile();
-
-    return isDirectory;
+    return node != null && node.isDirectory();
   }
 
   /**
@@ -302,17 +284,9 @@ public class Jar implements CacheListener {
    */
   public boolean isFile(String path)
   {
-    boolean isFile;
+    JarNode node = getJarNode(path);
 
-    synchronized (this) {
-      ZipEntry entry = getSafeJarEntry(path);
-
-      isFile = entry != null && ! entry.isDirectory();
-    }
-
-    closeJarFile();
-
-    return isFile;
+    return node != null && ! node.isDirectory();
   }
 
   /**
@@ -323,20 +297,9 @@ public class Jar implements CacheListener {
    */
   public long getLastModified(String path)
   {
-    long lastModified;
+    JarNode node = getJarNode(path);
 
-    synchronized (this) {
-      ZipEntry entry = getSafeJarEntry(path);
-
-      if (entry == null)
-	lastModified = 0;
-      else
-	lastModified = _lastModified;
-    }
-
-    closeJarFile();
-
-    return lastModified;
+    return node != null ? node.getTime() : -1;
   }
 
   /**
@@ -345,22 +308,11 @@ public class Jar implements CacheListener {
    * @param path full path to the jar entry
    * @return the length of the entry
    */
-  public long getLength(Path path)
+  public long getLength(String path)
   {
-    long length;
+    JarNode node = getJarNode(path);
 
-    synchronized (this) {
-      ZipEntry entry = getSafeJarEntry(path.getPath());
-
-      if (entry == null)
-	length = -1;
-      else
-	length = entry.getSize();
-    }
-
-    closeJarFile();
-
-    return length;
+    return node != null ? node.getSize() : -1;
   }
 
   /**
@@ -368,15 +320,9 @@ public class Jar implements CacheListener {
    */
   public boolean canRead(String path)
   {
-    boolean canRead;
+    JarNode node = getJarNode(path);
 
-    synchronized (this) {
-      canRead = _backing.canRead() && isFile(path);
-    }
-
-    closeJarFile();
-
-    return canRead;
+    return node != null && ! node.isDirectory();
   }
 
   /**
@@ -595,6 +541,36 @@ public class Jar implements CacheListener {
       return jarFile.getEntry(path);
     else
       return null;
+  }
+
+  private JarNode getJarNode(String path)
+  {
+    JarCache cache;
+
+    synchronized (this) {
+      cache = _cache;
+      
+      if (cache == null || getLastModifiedImpl() != _jarLastModified) {
+	_cache = cache = new JarCache();
+
+	try {
+	  JarFile file = getJarFile();
+
+	  Enumeration<JarEntry> e = file.entries();
+	  while (e.hasMoreElements()) {
+	    JarEntry entry = e.nextElement();
+
+	    cache.add(entry);
+	  }
+	} catch (IOException e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
+      }
+    }
+
+    closeJarFile();
+
+    return cache.get(path);
   }
 
   /**

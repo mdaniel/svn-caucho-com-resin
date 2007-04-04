@@ -64,6 +64,12 @@ abstract public class JspFragmentSupport extends JspFragment {
   {
     return this.pageContext;
   }
+  
+  public JspFragment getJspBody()
+  {
+    // jsp/102b
+    return _jspBody;
+  }
 
   /**
    * The public JspFragment interface.
@@ -100,4 +106,5 @@ abstract public class JspFragmentSupport extends JspFragment {
    */
   abstract protected void _jsp_invoke(JspWriter out)
     throws Throwable;
+
 }

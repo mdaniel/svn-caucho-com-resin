@@ -48,7 +48,6 @@ public class JniFilePath {
 	return (FilesystemPath) pathClass.newInstance();
     } catch (ClassNotFoundException e) {
     } catch (Throwable e) {
-      e.printStackTrace();
     }
     
     return null;

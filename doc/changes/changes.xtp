@@ -10,9 +10,12 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.snap - Mar 7, 2007">
+<s2 title="3.1.snap - Apr 4, 2007">
 <ul>
-<li>Servlet listener needs to handle description tag (#1635, rep by dpasek)</li>
+<li>Filter mapping with getNamedDispatcher (#1634, rep by dpasek)</li>
+<li>jsp multiple taglib definition issue (#1595, rep by Murthy Ch)</li>
+<li>jsp tag/scriptlet parse issue (#1653, rep by webvir)</li>
+<li>(2007-04-02) Servlet listener needs to handle description tag (#1635, rep by dpasek)</li>
 <li>Amber: enhanced classes with &lt;resource> (#1622, rep by jarnbjo)</li>
 <li>JSP: restore velocity syntax (#1612, rep by T. Weihs)</li>
 <li>JSP: resin-c:out namespace wasn't created for validation. (#1631, rep by Steve Ferguson)</li>

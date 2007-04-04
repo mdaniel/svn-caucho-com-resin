@@ -45,13 +45,18 @@ import java.io.PrintWriter;
 
 class NamedDispatcherImpl implements RequestDispatcher {
   private WebApp _webApp;
-  private FilterChain _filterChain;
+  
+  private FilterChain _includeFilterChain;  
+  private FilterChain _forwardFilterChain;  
+  
   private String _queryString;
 
-  NamedDispatcherImpl(FilterChain filterChain, String queryString,
-                      WebApp webApp)
+  NamedDispatcherImpl(FilterChain includeFilterChain,
+		      FilterChain forwardFilterChain,
+		      String queryString, WebApp webApp)
   {
-    _filterChain = filterChain;
+    _includeFilterChain = includeFilterChain;
+    _forwardFilterChain = forwardFilterChain;
     _queryString = queryString;
     _webApp = webApp;
   }
@@ -79,7 +84,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
     subResponse.start();
     
     try {
-      _filterChain.doFilter(req, subResponse);
+      _includeFilterChain.doFilter(req, subResponse);
     } finally {
       subResponse.finish();
     }
@@ -100,7 +105,7 @@ class NamedDispatcherImpl implements RequestDispatcher {
     
     res.setContentLength(-1);
 
-    _filterChain.doFilter(req, res);
+    _forwardFilterChain.doFilter(req, res);
 
     // this is not in a finally block so we can return a real error message
     // if it's not handled.

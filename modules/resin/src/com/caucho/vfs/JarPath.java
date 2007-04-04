@@ -152,7 +152,7 @@ public class JarPath extends FilesystemPath {
 
   public long getLength()
   {
-    return getJar().getLength(this);
+    return getJar().getLength(getPath());
   }
 
   public long getLastModified()

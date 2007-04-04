@@ -2182,17 +2182,20 @@ public class WebApp extends ServletContextImpl
    */
   public RequestDispatcher getNamedDispatcher(String servletName)
   {
-    FilterChain chain;
-
     try {
-      chain = _servletManager.createServletChain(servletName);
+      FilterChain chain = _servletManager.createServletChain(servletName);
+    
+      FilterChain includeChain
+	= _includeFilterMapper.buildFilterChain(chain, servletName);
+      FilterChain forwardChain
+	= _forwardFilterMapper.buildFilterChain(chain, servletName);
+
+      return new NamedDispatcherImpl(includeChain, forwardChain, null, this);
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
 
       return null;
     }
-
-    return new NamedDispatcherImpl(chain, null, this);
   }
 
   /**

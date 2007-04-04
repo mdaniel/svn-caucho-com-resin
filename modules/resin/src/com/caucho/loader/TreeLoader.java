@@ -215,6 +215,7 @@ public class TreeLoader extends Loader implements Dependency
       Path path = jarEntry.getJarPath();
 
       path = path.lookup(name);
+      System.out.println("P: " + path + " " + path.canRead() + " " + path.isDirectory());
 
       if (path.canRead() || path.isDirectory()) {
 	try {

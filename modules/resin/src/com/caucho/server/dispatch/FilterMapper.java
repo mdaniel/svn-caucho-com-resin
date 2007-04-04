@@ -170,4 +170,28 @@ public class FilterMapper {
 
     invocation.setFilterChain(chain);
   }
+  
+  /**
+   * Fills in the invocation.
+   */
+  public FilterChain buildFilterChain(FilterChain chain,
+				     String servletName)
+    throws ServletException
+  {
+    synchronized (_filterMap) {
+      for (int i = _filterMap.size() - 1; i >= 0; i--) {
+        FilterMapping map = _filterMap.get(i);
+
+        if (map.isMatch(servletName)) {
+          String filterName = map.getFilterName();
+        
+          Filter filter = _filterManager.createFilter(filterName);
+
+          chain = new FilterFilterChain(chain, filter);
+        }
+      }
+    }
+
+    return chain;
+  }
 }

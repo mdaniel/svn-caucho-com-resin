@@ -1695,9 +1695,11 @@ public class JspParser {
       throw error(L.l("The taglib directive requires a 'prefix' attribute.  'prefix' is the XML prefix for all tags in the taglib."));
     String prefix = values.get(p);
 
-    if (_prefixes.contains(prefix))
-      throw error(L.l("The taglib prefix '{0}' must be defined before any matching prefixes are used.",
+    if (_prefixes.contains(prefix)
+	&& _parseState.getQName(prefix) == null) {
+      throw error(L.l("The taglib prefix '{0}' must be defined before it is used.",
 		      prefix));
+    }
 
     String uri = null;
     p = keys.indexOf(URI);
