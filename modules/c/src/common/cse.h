@@ -150,6 +150,8 @@ typedef struct web_app_t {
   
   char *context_path;
 
+  int has_data;
+  
   struct location_t *locations;
 } web_app_t;
 
@@ -289,6 +291,8 @@ struct stream_t {
 #define HMUX_CLUSTER        'c'
 #define HMUX_SRUN           's'
 #define HMUX_SRUN_BACKUP    'b'
+#define HMUX_UNAVAILABLE    'u'
+#define HMUX_WEB_APP_UNAVAILABLE 'U'
 
 #define CSE_HEADER          'H'
 #define CSE_VALUE           'V'

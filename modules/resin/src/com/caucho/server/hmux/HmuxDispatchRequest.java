@@ -64,7 +64,9 @@ public class HmuxDispatchRequest {
   public static final int HMUX_NO_CHANGE = 'n';
   public static final int HMUX_CLUSTER =   'c';
   public static final int HMUX_SRUN    =   's';
-  public static final int HMUX_SRUN_BACKUP =   'b';
+  public static final int HMUX_SRUN_BACKUP = 'b';
+  public static final int HMUX_UNAVAILABLE = 'u';
+  public static final int HMUX_WEB_APP_UNAVAILABLE = 'U';
 
   private CharBuffer _cb = new CharBuffer();
 
@@ -195,23 +197,13 @@ public class HmuxDispatchRequest {
       writeString(os, HmuxRequest.HMUX_HEADER, "check-interval");
       writeString(os, HmuxRequest.HMUX_STRING,
 		  String.valueOf(_server.getDependencyCheckInterval() / 1000));
-      writeString(os, HMUX_WEB_APP, "");
 
       if (isLoggable)
 	log.fine(dbgId() + "host '" + host + "' not configured");
       return;
     }
     else if (! host.isActive()) {
-      if (etag == null) {
-	// take control until more information is known
-	writeString(os, HMUX_WEB_APP, "");
-	writeString(os, HMUX_MATCH, "/*");
-      }
-      else {
-	sendQuery(null, host, hostName, url);
-
-	writeString(os, HMUX_NO_CHANGE, "");
-      }
+      writeString(os, HMUX_UNAVAILABLE, "");
 
       if (isLoggable)
 	log.fine(dbgId() + "host '" + host + "' not active");
@@ -226,6 +218,15 @@ public class HmuxDispatchRequest {
     else if (etag.equals(host.getConfigETag())) {
       if (isLoggable)
 	log.fine(dbgId() + "host '" + host + "' no change");
+      
+      writeString(os, HMUX_NO_CHANGE, "");
+      return;
+    }
+    else if (etag.equals("h-" + host.getHostName())) {
+      if (isLoggable) {
+	log.fine(dbgId() + "host alias '" + hostName + " -> '"
+		 + host + "' no change");
+      }
       
       writeString(os, HMUX_NO_CHANGE, "");
       return;
@@ -298,7 +299,7 @@ public class HmuxDispatchRequest {
 	  if (isLoggable)
 	    log.fine(dbgId() + "not active '" + appEntry.getContextPath() + "'");
 	  
-	  writeString(os, HMUX_NO_CHANGE, "");
+	  writeString(os, HMUX_WEB_APP_UNAVAILABLE, "");
 	}
 	else {
 	  if (isLoggable)
@@ -330,9 +331,13 @@ public class HmuxDispatchRequest {
       Base64.encode(cb, crc64);
       String newETag = cb.close();
       host.setConfigETag(newETag);
-    }
     
-    writeString(os, HMUX_ETAG, host.getConfigETag());
+      writeString(os, HMUX_ETAG, host.getConfigETag());
+    }
+    else {
+      // aliased hosts use the host name as the etag
+      writeString(os, HMUX_ETAG, "h-" + host.getHostName());
+    }
   }
   
   /**

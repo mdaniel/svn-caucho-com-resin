@@ -180,6 +180,9 @@ cse_add_web_app(mem_pool_t *pool, resin_host_t *host,
   applications = app;
   app->host = host;
 
+  /* defaults to having data.  Set false if web-app is unavailable */
+  app->has_data = 1;
+
   app->context_path = cse_strdup(pool, context_path);
 
   LOG(("%s:%d:cse_add_web_app(): new web-app host:%s path:%s\n",
@@ -410,13 +413,12 @@ cse_create_host(config_t *config, const char *host_name, int port)
   sprintf(host->config_source, "unconfigured");
   
   pool = cse_create_pool(config);
-
-  /* add default match for fail-safe */
-  web_app = cse_add_application(pool, host, 0, "");
-  host->applications = web_app;
   host->pool = pool;
 
-  cse_add_match_pattern(pool, web_app, "/*");
+  if (*host_name) {
+    /* Initial configuration is an alias to the default host */
+    host->canonical = cse_create_host(config, "", 0);
+  }
   
   return host;
 }
@@ -523,7 +525,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	}
       }
       break;
-	
+      
     case HMUX_DISPATCH_WEB_APP:
       if (! pool) {
 	pool = cse_create_pool(host->config);
@@ -537,6 +539,15 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	cse_add_match_pattern(pool, web_app, "/WEB-INF/*");
 	cse_add_match_pattern(pool, web_app, "/META-INF/*");
       }
+      break;
+	
+    case HMUX_WEB_APP_UNAVAILABLE:
+      cse_skip(s, hmux_read_len(s));
+      
+      LOG(("%s:%d:read_config(): web-app unavailable\n", __FILE__, __LINE__));
+
+      if (web_app)
+	web_app->has_data = 0;
       break;
 	
     case HMUX_DISPATCH_MATCH:
@@ -560,6 +571,29 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
       LOG(("%s:%d:read_config(): hmux etag %s\n", __FILE__, __LINE__, etag));
 
       is_valid = 1;
+      break;
+	
+    case HMUX_UNAVAILABLE:
+      cse_skip(s, hmux_read_len(s));
+      
+      strcpy(host->error_message, "host unavailable/busy");
+      
+      is_change = 0;
+      is_valid = 0;
+      LOG(("%s:%d:read_config(): host unavailable\n", __FILE__, __LINE__));
+
+      if (! host->has_data) {
+	char buf[128];
+	buf[0] = 0;
+
+#ifndef WIN32
+	ctime_r(&host->last_update, buf);
+#else
+	strcpy(buf, ctime(&host->last_update));
+#endif
+
+	sprintf(host->config_source, "Unavailable (%s)", buf);
+      }
       break;
 
     case HMUX_DISPATCH_NO_CHANGE:
@@ -674,16 +708,18 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	
 	is_change = 0;
 	*p_is_change = is_change;
-	host->has_data = 0;
 	host->canonical = old_canonical;
 	host->last_update = 0;
+
+	if (pool)
+	  cse_free_pool(pool);
 
 	return -1;
       }
 
       host->error_message[0] = 0;
       
-      if (is_change > 0 || ! host->etag || ! *host->etag) {
+      if (is_change > 0) {
 	mem_pool_t *old_pool = host->pool;
 	g_update_count++;
 	host->applications = web_app;
@@ -718,7 +754,6 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	   __FILE__, __LINE__, code));
       
       host->canonical = old_canonical;
-      host->has_data = 0;
       host->last_update = 0;
       
       sprintf(host->error_message,
@@ -1424,6 +1459,10 @@ cse_is_match(config_t *config,
 
   host = host->canonical;
 
+  /* unconfigured hosts automatically match */
+  if (! host->has_data)
+    return host;
+
   normalize_uri(config, raw_uri, uri, len, unescape);
 
   has_host = 0;
@@ -1452,6 +1491,11 @@ cse_is_match(config_t *config,
 
   if (! app)
     return 0;
+
+  if (! app->has_data) {
+    host->last_update = 0;
+    return host;
+  }
 
   suburi = uri + best_len;
 
@@ -1555,7 +1599,8 @@ cse_match_request(config_t *config, const char *host, int port,
   else if (test_port && test_port != port) {
   }
   else if (! test_match_host &&
-	   config->last_update + no_host_update_interval < now) {
+	   config->last_update + config->update_interval < now) {
+    /* if non-match, the timeout is the config update time */
   }
   else if (test_match_host &&
 	   test_match_host->last_update + config->update_interval < now) {

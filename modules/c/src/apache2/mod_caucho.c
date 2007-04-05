@@ -996,7 +996,13 @@ caucho_host_status(request_rec *r, config_t *config, resin_host_t *host)
   if (host->canonical == host)
     ap_rprintf(r, "<h2>");
   else
-    ap_rprintf(r, "<h3>Alias ");
+    ap_rprintf(r, "<h3>");
+
+  if (! host->has_data)
+    ap_rprintf(r, "Unconfigured ");
+  
+  if (host->canonical != host)
+    ap_rprintf(r, "Alias ");
   
   if (! *host->name)
     ap_rprintf(r, "Default Virtual Host");
@@ -1045,6 +1051,11 @@ caucho_host_status(request_rec *r, config_t *config, resin_host_t *host)
     app = host->applications;
     
     for (; app; app = app->next) {
+      if (! app->has_data) {
+	ap_rprintf(r, "<tr bgcolor='#ffcc66'><td>%s<td>unconfigured</tr>\n", 
+		   *app->context_path ? app->context_path : "/");
+      }
+      
       for (loc = app->locations; loc; loc = loc->next) {
 	if (! strcasecmp(loc->prefix, "/META-INF") ||
 	    ! strcasecmp(loc->prefix, "/WEB-INF"))

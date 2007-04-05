@@ -634,6 +634,14 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   }
 
   /**
+   * Sets the ping query.
+   */
+  public void setPingQuery(String pingQuery)
+  {
+    _pingQuery = pingQuery;
+  }
+
+  /**
    * If true, the pool will ping when attempting to reuse a connection.
    */
   public boolean getPingOnReuse()

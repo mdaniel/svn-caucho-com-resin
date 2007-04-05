@@ -447,6 +447,16 @@ public class DBPool implements DataSource {
   }
 
   /**
+   * Set the query to 'ping' to see if the connection is still live.
+   *
+   * @param pingQuery SQL to use for ping.
+   */
+  public void setPingQuery(String pingQuery)
+  {
+    getPool().setPingQuery(pingQuery);
+  }
+
+  /**
    * If true, the pool will ping when attempting to reuse a connection.
    */
   public boolean getPingOnReuse()

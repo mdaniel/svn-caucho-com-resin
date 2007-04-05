@@ -441,6 +441,8 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
     return 0;
   }
 
+  srun->fail_time = 0;
+
   if (srun->send_buffer_size == 0) {
     int size;
     unsigned int len = sizeof(size);

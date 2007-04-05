@@ -12,6 +12,8 @@
 
 <s2 title="3.1.snap - Apr 4, 2007">
 <ul>
+<li>mod_caucho/caucho-status updates</li>
+<li>database ping-query added (#1641, rep by Andrew Jacobs)</li>
 <li>ClassLoader getResources fix (#1643)</li> 
 <li>Filter mapping with getNamedDispatcher (#1634, rep by dpasek)</li>
 <li>jsp multiple taglib definition issue (#1595, rep by Murthy Ch)</li>
