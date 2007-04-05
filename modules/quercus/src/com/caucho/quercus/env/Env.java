@@ -63,6 +63,7 @@ import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
+import java.net.URL;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -265,6 +266,9 @@ public class Env {
   private int _objectId = 0;
 
   private Logger _logger;
+
+  // hold special Quercus php import statements
+  private ImportMap _importMap;
 
   public Env(Quercus quercus,
              QuercusPage page,
@@ -2771,11 +2775,92 @@ public class Env {
    */
   public JavaClassDef getJavaClassDefinition(String className)
   {
-    JavaClassDef def = _quercus.getJavaClassDefinition(className);
+    JavaClassDef def = getJavaClassDefinition(className, true);
+    
+    if (def != null)
+      return def;
+    else
+      throw errorException(L.l("'{0}' class definition not found", className));
+  }
 
-    def.init();
+  private JavaClassDef getJavaClassDefinition(String className, boolean useImport)
+  { 
+    JavaClassDef def = null;
+    
+    try {
+      def = _quercus.getJavaClassDefinition(className);
+    }
+    catch (Throwable e) {
+      if (useImport) {
+        def = importJavaClass(className);
+      }
+    }
+
+    if (def != null)
+      def.init();
 
     return def;
+  }
+
+  /**
+   * Imports a Java class.
+   * 
+   * @param className name of class to import
+   * @return class definition of imported class, null if class not found
+   */
+  public JavaClassDef importJavaClass(String className)
+  {
+    if (_importMap == null)
+      return null;
+    
+    String fullName = _importMap.getQualified(className);
+    
+    if (fullName != null) {
+      return getJavaClassDefinition(fullName, false);
+    }
+    else {
+      ArrayList<String> wildcardList
+        = _importMap.getWildcardList();
+  
+      for (String entry : wildcardList) {
+        fullName = entry + className;
+          
+        JavaClassDef def = getJavaClassDefinition(fullName, false);
+        
+        if (def != null) {
+          _importMap.putQualified(className, fullName);
+          return def;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Adds a Quercus class import.
+   * 
+   * @param name fully qualified class import string
+   */
+  public void putQualifiedImport(String name)
+  {
+    if (_importMap == null)
+      _importMap = new ImportMap();
+    
+    _importMap.putQualified(name);
+  }
+  
+  /**
+   * Adds a Quercus class import.
+   * 
+   * @param name wildcard class import string but without the '*'
+   */
+  public void addWildcardImport(String name)
+  {
+    if (_importMap == null)
+      _importMap = new ImportMap();
+    
+    _importMap.addWildcardImport(name);
   }
 
   /**
@@ -2875,7 +2960,7 @@ public class Env {
     if (cl != null)
       return cl;
 
-    cl = createClassImpl(name, useAutoload);
+    cl = createClassImpl(name, useAutoload, true);
 
     if (cl != null) {
       _classMap.put(name, cl);
@@ -2897,9 +2982,13 @@ public class Env {
    *
    * @param name the class name
    * @param useAutoload use autoload to locate the class if necessary
+   * @param useImport import the class if necessary
+   * 
    * @return the found class or null if no class found.
    */
-  private QuercusClass createClassImpl(String name, boolean useAutoload)
+  private QuercusClass createClassImpl(String name,
+                                       boolean useAutoload,
+                                       boolean useImport)
   {
     ClassDef classDef = _defState.findClassDef(name);
 
@@ -2927,12 +3016,66 @@ public class Env {
       
       if (_autoload != null) {
         _autoload.call(this, new StringValueImpl(name));
-        return createClassImpl(name, false);
+        return createClassImpl(name, false, useImport);
+      }
+    }
+    
+    if (useImport) {
+      if (importPhpClass(name)) {
+        return createClassImpl(name, false, false);
+      }
+      else {
+        try {
+          ClassDef javaClass = getJavaClassDefinition(name, true);
+          
+          //XXX: do we want to create a QuercusClass for a JavaClassDef?
+          return createQuercusClass(javaClass, null);
+        }
+        catch (Throwable e) {
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * Imports a PHP class.
+   *
+   * @param name of the PHP class
+   * 
+   * @return true if matching php file was found and included.
+   */
+  public boolean importPhpClass(String name)
+  {
+    if (_importMap == null)
+      return false;
+    
+    String fullName = _importMap.getQualifiedPhp(name);
+    
+    URL url = null;
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    if (fullName != null) {
+      url = loader.getResource(fullName);
+    }
+    else {
+      for (String entry : _importMap.getWildcardPhpList()) {
+
+        url = loader.getResource(entry + name + ".php");
+        
+        if (url != null)
+          break;
       }
     }
 
-
-    return null;
+    if (url != null) {
+      include_once(url.toString());
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   /**

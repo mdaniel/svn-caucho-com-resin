@@ -173,6 +173,8 @@ public class QuercusParser {
   private final static int INTERFACE = 572;
   private final static int IMPLEMENTS = 573;
   
+  private final static int IMPORT = 574;
+
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
   private final static IntMap _insensitiveReserved = new IntMap();
@@ -2982,7 +2984,29 @@ public class QuercusParser {
 
 	return expr;
       }
-
+    case IMPORT:
+      {
+        String importTokenString = _lexeme;
+        
+        int ch = read();
+        while (ch == ' ' ||
+               ch == '\t' ||
+               ch == '\n' ||
+               ch == '\r' ||
+               ch == '\f') {
+          ch = read();
+        }
+        
+        _peek = ch;
+        
+        if (ch == '(') {
+          return parseFunction(null, importTokenString, false);
+        }
+        else {
+          return parseImport();
+        }
+      
+      }
     default:
       throw error(L.l("{0} is an unexpected token, expected an expression.",
 		      tokenName(token)));
@@ -4242,6 +4266,56 @@ public class QuercusParser {
 		      String.valueOf((char) ch)));
 
     return tail;
+  }
+
+  /**
+   * Parses a Quercus import.
+   */
+  private Expr parseImport()
+    throws IOException
+  {
+    boolean isWildcard = false;
+    boolean isIdentifierStart = true;
+
+    _sb.setLength(0);
+    
+    while (true) {
+      int ch = read();
+      
+      if (ch < 0) {
+        break;
+      }
+      else if (ch == '.') {
+        _sb.append((char)ch);
+        isIdentifierStart = true;
+      }
+      else if (ch == '*') {
+        //_sb.append((char)ch);
+        isWildcard = true;
+        break;
+      }
+      else if (ch == ';') {
+        _peek = ch;
+        break;
+      }
+      else if (isIdentifierStart && Character.isJavaIdentifierStart(ch)) {
+        _sb.append((char)ch);
+        isIdentifierStart = false;
+      }
+      else if ((! isIdentifierStart) && Character.isJavaIdentifierPart(ch)) {
+        _sb.append((char)ch);
+      }
+      else if (ch == ' ' || ch == '\t' ||
+               ch == '\n' || ch == '\r' || ch == '\f') {
+        break;
+      }
+      else {
+        throw error(L.l("{0} is not an unexpected character in import",
+                        String.valueOf((char)ch)));
+      }
+    }
+
+    return _factory.createImport(getLocation(), _sb.toString(), isWildcard);
   }
 
   /**

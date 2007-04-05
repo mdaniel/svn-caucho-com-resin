@@ -885,6 +885,16 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a Quercus class import.
+   */
+  public Expr createImport(Location loc,
+                           String name,
+                           boolean isWildcard)
+  {
+    return new ImportExpr(loc, name, isWildcard);
+  }
+
+  /**
    * Creates a null literal expression.
    */
   public Statement createNullStatement()
