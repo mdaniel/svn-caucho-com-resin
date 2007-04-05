@@ -970,7 +970,6 @@ public class AmberConnection
    * Returns the entity for the connection.
    */
   public Entity getEntity(EntityItem item)
-    throws InstantiationException, IllegalAccessException
   {
     Entity itemEntity = item.getEntity();
 
@@ -994,7 +993,14 @@ public class AmberConnection
     }
     else {
       // Create a new entity for the given class and primary key.
-      Entity entity = (Entity) cl.newInstance();
+      Entity entity;
+
+      try {
+        entity = (Entity) cl.newInstance();
+      } catch (Exception e) {
+        throw new AmberRuntimeException(e);
+      }
+
       entity.__caucho_setPrimaryKey(pk);
 
       // jpa/1000: avoids extra allocations.
