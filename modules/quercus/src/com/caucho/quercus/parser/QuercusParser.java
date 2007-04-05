@@ -2655,6 +2655,13 @@ public class QuercusParser {
 
     token = parseToken();
     if (token == '(') {
+      if (term instanceof ThisExpr) {
+        //php/09fj
+        
+        _peekToken = token;
+        return term.createFieldGet(_factory, name);
+      }
+
       ArrayList<Expr> args = new ArrayList<Expr>();
 
       parseFunctionArgs(args);
@@ -2662,10 +2669,6 @@ public class QuercusParser {
       if (nameExpr != null)
 	return _factory.createVarMethodCall(getLocation(), term,
 					    nameExpr, args);
-      /*
-      else if (term instanceof ThisExpr)
-	return new ThisMethodCallExpr(getLocation(), term, name, args);
-      */
       else
 	return _factory.createMethodCall(getLocation(), term, name, args);
     }
