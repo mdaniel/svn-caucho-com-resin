@@ -863,13 +863,15 @@ public class EntityManyToOneField extends CascadableField {
                                        int updateIndex)
     throws IOException
   {
-    // jpa/0s29
-    // if (getIndex() == updateIndex) {
+    // jpa/0s29, jpa/0s2j
+    if (getIndex() != updateIndex)
+      return;
 
     // order matters: ejb/06gc
     String var = "__caucho_field_" + getName();
     out.println(generateAccessor(dst, var) + " = " + generateAccessor(src, var) + ";");
 
+    /* The cache update is handled copying only the key.
     // ejb/0627
     if (getRelatedType().getPersistenceUnit().isJPA()) {
       // jpa/0h0a
@@ -880,6 +882,7 @@ public class EntityManyToOneField extends CascadableField {
 
       out.println(generateSet(dst, value) + ";");
     }
+    */
   }
 
   /**

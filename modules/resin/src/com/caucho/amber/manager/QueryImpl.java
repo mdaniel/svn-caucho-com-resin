@@ -362,6 +362,23 @@ public class QueryImpl implements Query {
         }
       }
 
+      if (log.isLoggable(Level.FINER)) {
+        if (results != null) {
+          log.log(Level.FINER, L.l("query result list size: {0}", results.size()));
+
+          java.util.Iterator it = results.iterator();
+
+          while (it.hasNext()) {
+            Object o = it.next();
+
+            if (o == null)
+              log.log(Level.FINER, L.l("  result entry: null"));
+            else
+              log.log(Level.FINER, L.l("  result entry: {0}", o.getClass().getName()));
+          }
+        }
+      }
+
       return results;
     } catch (RuntimeException e) {
       throw e;
@@ -745,6 +762,8 @@ public class QueryImpl implements Query {
   private Object getInternalNative(ResultSet rs)
     throws Exception
   {
+    // jpa/0y1-
+
     int oldEntityResult = _currEntityResult;
 
     ArrayList<EntityResultConfig> entityResults
@@ -785,7 +804,7 @@ public class QueryImpl implements Query {
 
     int oldIndex = _currIndex;
 
-    _currIndex++;
+    // jpa/0y15 _currIndex++;
 
     /* jpa/0y14
     EntityItem item = entityType.getHome().findItem(_aConn, rs, oldIndex);
@@ -806,11 +825,16 @@ public class QueryImpl implements Query {
     // jpa/0y14
     entity = (Entity) _aConn.load(className, rs.getObject(oldIndex));
 
+    // jpa/0y10
     int consumed = entity.__caucho_load(_aConn, rs, oldIndex + keyLength);
 
     // item.setNumberOfLoadingColumns(consumed);
 
-    _currIndex += consumed;
+    // XXX: jpa/0y12
+    if (consumed == 0)
+      _currIndex++;
+    else
+      _currIndex += consumed;
 
     return entity;
   }

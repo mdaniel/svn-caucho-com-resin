@@ -253,6 +253,10 @@ public class EntityManyToManyField extends AssociationField {
                                      int loadIndex)
     throws IOException
   {
+    // jpa/0s2j
+    if (dst.equals("item"))
+      return;
+
     String var = "_caucho_field_" + getGetterName();
 
     // order matters: jpa/0s2k

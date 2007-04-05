@@ -970,11 +970,14 @@ public class AmberConnection
    * Returns the entity for the connection.
    */
   public Entity getEntity(EntityItem item)
+    throws InstantiationException, IllegalAccessException
   {
     Entity itemEntity = item.getEntity();
 
-    int index = getEntity(itemEntity.getClass().getName(),
-                          itemEntity.__caucho_getPrimaryKey());
+    Class cl = itemEntity.getClass();
+    Object pk = itemEntity.__caucho_getPrimaryKey();
+
+    int index = getEntity(cl.getName(), pk);
 
     if (index >= 0) {
       Entity entity = _entities.get(index);
@@ -990,9 +993,14 @@ public class AmberConnection
       return entity;
     }
     else {
-      Entity entity = item.copy(this);
+      // Create a new entity for the given class and primary key.
+      Entity entity = (Entity) cl.newInstance();
+      entity.__caucho_setPrimaryKey(pk);
 
-      addEntity(entity);
+      // jpa/1000: avoids extra allocations.
+      addInternalEntity(entity);
+
+      item.copyTo(entity, this);
 
       return entity;
     }
