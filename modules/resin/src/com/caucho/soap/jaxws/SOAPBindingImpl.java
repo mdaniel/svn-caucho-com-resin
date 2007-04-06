@@ -47,12 +47,11 @@ import javax.xml.ws.soap.SOAPBinding;
 
 import com.caucho.util.L10N;
 
-public class SOAPBindingImpl implements SOAPBinding {
+public class SOAPBindingImpl extends AbstractBinding implements SOAPBinding {
   private final static L10N L = new L10N(SOAPBindingImpl.class);
 
   private boolean _mtom;
   private Set<String> _roles;
-  private List<Handler> _handlerChain = null;
 
   private final MessageFactory _messageFactory;
   private final SOAPFactory _soapFactory;
@@ -112,16 +111,6 @@ public class SOAPBindingImpl implements SOAPBinding {
   public void setRoles(Set<String> roles)
   {
     _roles = roles;
-  }
-
-  public List<Handler> getHandlerChain()
-  {
-    return _handlerChain;
-  }
-
-  public void setHandlerChain(List<Handler> handlerChain)
-  {
-    _handlerChain = handlerChain;
   }
 }
 

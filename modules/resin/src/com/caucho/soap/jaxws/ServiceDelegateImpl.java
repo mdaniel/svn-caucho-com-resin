@@ -41,14 +41,18 @@ import javax.activation.DataSource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import static javax.xml.soap.SOAPConstants.*;
+import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
 
+import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.HandlerResolver;
+import javax.xml.ws.http.HTTPBinding;
+import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.spi.ServiceDelegate;
 
 import java.lang.reflect.Proxy;
@@ -101,7 +105,7 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     throws WebServiceException
   {
     PortInfoImpl port = _portMap.get(portName);
-    String bindingId = URI_NS_SOAP_ENVELOPE;
+    String bindingId = SOAPBinding.SOAP11HTTP_BINDING;
     String endpointAddress = null;
 
     if (port != null) {
@@ -113,17 +117,19 @@ public class ServiceDelegateImpl extends ServiceDelegate {
       endpointAddress = findEndpointAddress();
 
     Dispatch<T> dispatch = null;
+    Binding binding = getBinding(bindingId);
 
     if (Source.class.equals(type)) {
-      dispatch = (Dispatch<T>) new SourceDispatch(bindingId, mode, _executor);
+      dispatch = (Dispatch<T>) new SourceDispatch(bindingId, binding, 
+                                                  mode, _executor);
     }
     else if (SOAPMessage.class.equals(type)) {
-      dispatch = 
-        (Dispatch<T>) new SOAPMessageDispatch(bindingId, mode, _executor);
+      dispatch = (Dispatch<T>) new SOAPMessageDispatch(bindingId, binding, 
+                                                       mode, _executor);
     }
     else if (DataSource.class.equals(type)) {
-      dispatch = 
-        (Dispatch<T>) new DataSourceDispatch(bindingId, mode, _executor);
+      dispatch = (Dispatch<T>) new DataSourceDispatch(bindingId, binding,
+                                                      mode, _executor);
     }
 
     if (dispatch == null) {
@@ -146,7 +152,7 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     throws WebServiceException
   {
     PortInfoImpl port = _portMap.get(portName);
-    String bindingId = URI_NS_SOAP_ENVELOPE;
+    String bindingId = SOAPBinding.SOAP11HTTP_BINDING;
     String endpointAddress = null;
 
     if (port != null) {
@@ -157,8 +163,9 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     if (endpointAddress == null)
       endpointAddress = findEndpointAddress();
 
+    Binding binding = getBinding(bindingId);
     JAXBDispatch dispatch = 
-      new JAXBDispatch(bindingId, mode, _executor, context);
+      new JAXBDispatch(bindingId, binding, mode, _executor, context);
 
     if (endpointAddress != null) {
       Map<String,Object> requestContext = dispatch.getRequestContext();
@@ -190,22 +197,24 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     try {
       Skeleton skeleton = new WebServiceIntrospector().introspect(api, null);
 
-      PortProxyHandler handler = new PortProxyHandler(skeleton);
-
       WSDLDefinitions definitions = WSDLParser.parse(api);
       String endpointAddress = findEndpointAddress();
 
       // XXX bindingId
+      Binding binding = getBinding(SOAPBinding.SOAP11HTTP_BINDING);
+      PortProxyHandler handler = 
+        new PortProxyHandler(skeleton, endpointAddress, binding);
 
       PortInfoImpl portInfo = 
         new PortInfoImpl(null, portName, _serviceName, endpointAddress);
 
       _portMap.put(portName, portInfo);
 
-      return (T) Proxy.newProxyInstance(_classLoader,
-					                              new Class[] { api, 
-                                                      BindingProvider.class },
-                                        handler);
+      Class[] interfaces = new Class[] {api, BindingProvider.class};
+
+      Object proxy = Proxy.newProxyInstance(_classLoader, interfaces, handler);
+
+      return (T) proxy;
     }
     catch (WebServiceException e) {
       throw e;
@@ -270,5 +279,25 @@ public class ServiceDelegateImpl extends ServiceDelegate {
         }
       }
     }*/
+  }
+
+  static Binding getBinding(String bindingId)
+    throws WebServiceException
+  {
+    if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
+        bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING) ||
+        bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING) ||
+        bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING)) {
+      try {
+        return new SOAPBindingImpl(bindingId);
+      }
+      catch (SOAPException e) {
+        throw new WebServiceException(e);
+      }
+    }
+    else if (bindingId.equals(HTTPBinding.HTTP_BINDING))
+      return new HTTPBindingImpl();
+    else
+      throw new WebServiceException(L.l("Unknown binding id: {0}", bindingId));
   }
 }

@@ -56,6 +56,7 @@ import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.HandlerResolver;
+import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.spi.ServiceDelegate;
 
 import java.io.ByteArrayInputStream;
@@ -90,17 +91,18 @@ public class SOAPMessageDispatch extends AbstractDispatch<SOAPMessage> {
 
   private final MessageFactory _factory;
 
-  public SOAPMessageDispatch(String bindingId, 
-                             Service.Mode mode, 
-                             Executor executor)
+  public SOAPMessageDispatch(String bindingId, Binding binding,
+                             Service.Mode mode, Executor executor)
     throws WebServiceException
   {
-    super(bindingId, mode, executor);
+    super(bindingId, binding, mode, executor);
 
     try {
-      if (URI_NS_SOAP_1_1_ENVELOPE.equals(bindingId))
+      if (SOAPBinding.SOAP11HTTP_BINDING.equals(bindingId) ||
+          SOAPBinding.SOAP11HTTP_MTOM_BINDING.equals(bindingId))
         _factory = MessageFactory.newInstance(SOAP_1_1_PROTOCOL);
-      else if (URI_NS_SOAP_1_2_ENVELOPE.equals(bindingId))
+      else if (SOAPBinding.SOAP12HTTP_BINDING.equals(bindingId) ||
+               SOAPBinding.SOAP12HTTP_MTOM_BINDING.equals(bindingId))
         _factory = MessageFactory.newInstance(SOAP_1_2_PROTOCOL);
       else
         throw new WebServiceException(L.l("Unsupported binding id: {0}", 

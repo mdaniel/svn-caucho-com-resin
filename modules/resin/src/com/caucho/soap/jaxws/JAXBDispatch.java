@@ -94,13 +94,11 @@ public class JAXBDispatch extends AbstractDispatch<Object> {
   private final Marshaller _marshaller;
   private final Unmarshaller _unmarshaller;
 
-  public JAXBDispatch(String bindingId, 
-                      Service.Mode mode, 
-                      Executor executor, 
-                      JAXBContext context)
+  public JAXBDispatch(String bindingId, Binding binding,
+                      Service.Mode mode, Executor executor, JAXBContext context)
     throws WebServiceException
   {
-    super(bindingId, mode, executor);
+    super(bindingId, binding, mode, executor);
 
     _context = context;
 

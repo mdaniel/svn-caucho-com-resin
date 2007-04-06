@@ -89,6 +89,7 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
     = Logger.getLogger(AbstractDispatch.class.getName());
 
   protected final String _bindingId;
+  protected final String _soapNamespace;
   protected final Service.Mode _mode;
   protected final Executor _executor;
 
@@ -98,28 +99,24 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
   protected final HashMap<String,Object> _responseContext 
     = new HashMap<String,Object>();
 
-  public AbstractDispatch(String bindingId, 
-                          Service.Mode mode, 
-                          Executor executor)
+  public AbstractDispatch(String bindingId, Binding binding,
+                          Service.Mode mode, Executor executor)
     throws WebServiceException
   {
     _bindingId = bindingId;
-    _mode = mode;
-    _executor = executor;
 
     if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
-        bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING) ||
-        bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING) ||
-        bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING)) {
-      try {
-        _binding = new SOAPBindingImpl(bindingId);
-      }
-      catch (SOAPException e) {
-        throw new WebServiceException(e);
-      }
-    }
+        bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING))
+      _soapNamespace = URI_NS_SOAP_1_1_ENVELOPE;
+    else if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING) ||
+             bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING))
+      _soapNamespace = URI_NS_SOAP_1_2_ENVELOPE;
     else
-      _binding = null; // XXX: HTTP Binding, others
+      _soapNamespace = null;
+
+    _mode = mode;
+    _executor = executor;
+    _binding = binding;
   }
 
   //
@@ -233,21 +230,13 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
       if (_mode == Service.Mode.PAYLOAD) {
         writer = new OutputStreamWriter(out);
 
-        writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        writer.write("<soapenv:Envelope xmlns:soapenv=\"" + _bindingId + "\">");
-        writer.write("<soapenv:Body>");
-
-        writer.flush();
+        JAXWSUtil.writeStartSOAPEnvelope(writer, _soapNamespace);
       }
 
       writeRequest(msg, out);
 
-      if (_mode == Service.Mode.PAYLOAD) {
-        writer.write("</soapenv:Body>");
-        writer.write("</soapenv:Envelope>");
-
-        writer.flush();
-      }
+      if (_mode == Service.Mode.PAYLOAD)
+        JAXWSUtil.writeEndSOAPEnvelope(writer);
 
       out.flush();
 
@@ -264,46 +253,7 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
       ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
       if (_mode == Service.Mode.PAYLOAD) {
-        XMLStreamReaderImpl reader = new XMLStreamReaderImpl(in);
-        
-        // skip the Envelope
-        reader.nextTag();
-
-        if (reader.getEventType() != reader.START_ELEMENT ||
-            ! _bindingId.equals(reader.getNamespaceURI()) ||
-            ! "Envelope".equals(reader.getLocalName())) {
-          throw new WebServiceException(L.l("Invalid response from server: No Envelope found"));
-        }
-
-        // find the body
-        
-        boolean foundBody = false;
-
-        while (reader.hasNext()) {
-          reader.next();
-
-          if (reader.getEventType() == reader.START_ELEMENT &&
-              _bindingId.equals(reader.getNamespaceURI()) &&
-              "Body".equals(reader.getLocalName())) {
-
-            // Copy the body contents to a StreamDataHandler
-            reader.nextTag();
-
-            XMLStreamWriterImpl xmlWriter = 
-              new XMLStreamWriterImpl(buffer, false);
-
-            StaxUtil.copyReaderToWriter(reader, xmlWriter);
-
-            xmlWriter.flush();
-
-            foundBody = true;
-
-            break;
-          }
-        }
-
-        if (! foundBody)
-          throw new WebServiceException(L.l("Invalid response from server"));
+        JAXWSUtil.extractSOAPBody(in, buffer);
       }
       else {
         // XXX is a copy necessary here or should we expect the client to

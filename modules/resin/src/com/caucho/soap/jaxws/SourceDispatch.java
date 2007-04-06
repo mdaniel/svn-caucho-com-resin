@@ -100,10 +100,11 @@ public class SourceDispatch extends AbstractDispatch<Source> {
 
   private final Transformer _transformer;
 
-  public SourceDispatch(String bindingId, Service.Mode mode, Executor executor)
+  public SourceDispatch(String bindingId, Binding binding,
+                        Service.Mode mode, Executor executor)
     throws WebServiceException
   {
-    super(bindingId, mode, executor);
+    super(bindingId, binding, mode, executor);
 
     try {
       _transformer = _transformerFactory.newTransformer();

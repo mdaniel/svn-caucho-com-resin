@@ -32,6 +32,7 @@ package com.caucho.soap.jaxws;
 import com.caucho.soap.skeleton.Skeleton;
 import com.caucho.util.L10N;
 
+import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
 
 import java.io.*;
@@ -53,17 +54,24 @@ public class PortProxyHandler implements InvocationHandler {
   private final static HashMap<Method,SpecialMethod> _specialMethods
     = new HashMap<Method,SpecialMethod>();
   
-  private Skeleton _skeleton;
+  private final Skeleton _skeleton;
 
-  private HashMap<String,Object> _requestContext
+  private final HashMap<String,Object> _requestContext
     = new HashMap<String,Object>();
 
-  private HashMap<String,Object> _responseContext
+  private final HashMap<String,Object> _responseContext
     = new HashMap<String,Object>();
 
-  public PortProxyHandler(Skeleton skeleton)
+  private final Binding _binding;
+
+  public PortProxyHandler(Skeleton skeleton, 
+                          String endpointAddress, 
+                          Binding binding)
   {
     _skeleton = skeleton;
+    _requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, 
+                        endpointAddress);
+    _binding = binding;
   }
 
   public Object invoke(Object proxy, Method method, Object[] args)
@@ -79,6 +87,9 @@ public class PortProxyHandler implements InvocationHandler {
           return false;
         case HASH_CODE:
           return System.identityHashCode(this);
+
+        case GET_BINDING: 
+          return _binding;
 
         case GET_REQUEST_CONTEXT: 
           return _requestContext;
@@ -113,6 +124,10 @@ public class PortProxyHandler implements InvocationHandler {
                                                  new Class[0]),
                           SpecialMethod.HASH_CODE);
       
+      _specialMethods.put(BindingProvider.class.getMethod("getBinding",
+                                                          new Class[0]),
+                          SpecialMethod.GET_BINDING);
+      
       _specialMethods.put(BindingProvider.class.getMethod("getRequestContext",
                                                           new Class[0]),
                           SpecialMethod.GET_REQUEST_CONTEXT);
@@ -131,6 +146,7 @@ public class PortProxyHandler implements InvocationHandler {
     EQUALS,
     HASH_CODE,
     
+    GET_BINDING,
     GET_REQUEST_CONTEXT,
     GET_RESPONSE_CONTEXT
   };
