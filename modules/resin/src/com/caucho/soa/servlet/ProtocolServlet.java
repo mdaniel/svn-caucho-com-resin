@@ -29,6 +29,8 @@
 
 package com.caucho.soa.servlet;
 
+import com.caucho.config.ConfigurationException;
+
 import javax.servlet.Servlet;
 
 /**
@@ -38,5 +40,6 @@ public interface ProtocolServlet extends Servlet {
   /**
    * Sets the application service instance.
    */
-  public void setService(Object service);
+  public void setService(Object service)
+    throws ConfigurationException;
 }

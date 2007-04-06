@@ -29,6 +29,8 @@
 
 package com.caucho.soa.encoding;
 
+import com.caucho.config.ConfigurationException;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -40,7 +42,7 @@ public interface ServiceEncoding {
     throws Throwable;
 
   public void setService(Object service)
-    throws Throwable;
+    throws ConfigurationException;
 
   public void init() throws Exception;
 }
