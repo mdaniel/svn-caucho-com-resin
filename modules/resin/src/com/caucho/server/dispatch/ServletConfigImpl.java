@@ -41,6 +41,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.server.connection.StubServletRequest;
 import com.caucho.server.connection.StubServletResponse;
 import com.caucho.soa.servlet.ProtocolServlet;
+import com.caucho.soa.servlet.ProviderServlet;
 import com.caucho.soa.servlet.SoapProtocolServlet;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -52,6 +53,7 @@ import javax.annotation.PostConstruct;
 import javax.jws.WebService;
 import javax.naming.NamingException;
 import javax.servlet.*;
+import javax.xml.ws.WebServiceProvider;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -514,13 +516,17 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       Config.checkCanInstantiate(_servletClass);
 
       if (_servletClass.isAnnotationPresent(WebService.class)) {
-	if (_protocolClass == null)
-	  _protocolClass = SoapProtocolServlet.class;
+        if (_protocolClass == null)
+          _protocolClass = SoapProtocolServlet.class;
+      } 
+      else if (_servletClass.isAnnotationPresent(WebServiceProvider.class)) {
+        if (_protocolClass == null)
+          _protocolClass = ProviderServlet.class;
       }
       else if (Servlet.class.isAssignableFrom(_servletClass)) {
       }
       else
-        throw error(L.l("'{0}' must implement javax.servlet.Servlet or have a @WebService annotation.  All servlets must implement the Servlet interface.", _servletClassName));
+        throw error(L.l("'{0}' must implement javax.servlet.Servlet or have a @WebService or @WebServiceProvider annotation.  All servlets must implement the Servlet interface.", _servletClassName));
 
       /*
       if (Modifier.isAbstract(_servletClass.getModifiers()))
@@ -623,7 +629,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     else if (SingleThreadModel.class.isAssignableFrom(servletClass)) {
       servletChain = new SingleThreadServletFilterChain(this);
     }
-    else if (servletClass.isAnnotationPresent(WebService.class))
+    else if (servletClass.isAnnotationPresent(WebService.class) ||
+             servletClass.isAnnotationPresent(WebServiceProvider.class))
       servletChain = new WebServiceFilterChain(this);
     else {
       servletChain = new ServletFilterChain(this);
@@ -654,12 +661,12 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
       Object service = createServlet(false);
 
       ProtocolServlet skeleton
-	= (ProtocolServlet) _protocolClass.newInstance();
+        = (ProtocolServlet) _protocolClass.newInstance();
 
       skeleton.setService(service);
 
       if (_protocolInit != null) {
-	_protocolInit.configure(skeleton);
+        _protocolInit.configure(skeleton);
       }
 
       skeleton.init(this);
