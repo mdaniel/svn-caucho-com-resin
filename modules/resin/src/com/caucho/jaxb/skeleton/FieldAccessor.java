@@ -48,15 +48,19 @@ import java.util.List;
 import java.util.Map;
 
 public class FieldAccessor extends Accessor {
-  private Field _field;
-  private Class _type;
-  private Type _genericType;
+  private final Package _package;
+  private final Field _field;
+  private final Class _type;
+  private final Type _genericType;
 
   public FieldAccessor(JAXBContextImpl context, Field f)
     throws JAXBException
   {
     super(context);
 
+    Class declarer = f.getDeclaringClass();
+    
+    _package = declarer.getPackage();
     _field = f;
     _type = _field.getType();
     _genericType = _field.getGenericType();
@@ -90,6 +94,11 @@ public class FieldAccessor extends Accessor {
   public <A extends Annotation> A getAnnotation(Class<A> c)
   {
     return _field.getAnnotation(c);
+  }
+
+  public <A extends Annotation> A getPackageAnnotation(Class<A> c)
+  {
+    return _package.getAnnotation(c);
   }
 
   public Class getType()

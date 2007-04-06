@@ -133,6 +133,11 @@ public class JAXBElementSkeleton<C> extends ClassSkeleton<JAXBElement<C>> {
       return null;
     }
 
+    public <A extends Annotation> A getPackageAnnotation(Class<A> c)
+    {
+      return null;
+    }
+
     public String toString()
     {
       return "JAXBElementSkeleton.ContentsAccessor[" + _contents + "]";

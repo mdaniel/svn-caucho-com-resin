@@ -54,6 +54,8 @@ import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlMimeType;
+import javax.xml.bind.annotation.XmlNsForm;
+import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
@@ -176,7 +178,13 @@ public abstract class Accessor {
           if (element != null)
             _qname = qnameFromXmlElement(element);
           else {
-            _qname = new QName(getName());
+            XmlSchema xmlSchema = getPackageAnnotation(XmlSchema.class);
+
+            if (xmlSchema != null &&
+                xmlSchema.elementFormDefault() == XmlNsForm.QUALIFIED)
+              _qname = new QName(xmlSchema.namespace(), getName());
+            else
+              _qname = new QName(getName());
 
             if (! _property.isXmlPrimitiveType())
               _context.createSkeleton(getType());
@@ -728,8 +736,13 @@ public abstract class Accessor {
   private QName qnameFromXmlElement(XmlElement element)
   {
     String name = getName();
-    // XXX Namespace inheritance (@XmlSchema.elementFormDefault)
     String namespace = null;
+
+    XmlSchema xmlSchema = getPackageAnnotation(XmlSchema.class);
+
+    if (xmlSchema != null &&
+        xmlSchema.elementFormDefault() == XmlNsForm.QUALIFIED)
+      namespace = xmlSchema.namespace();
 
     if (! element.name().equals("##default"))
       name = element.name();
@@ -880,4 +893,5 @@ public abstract class Accessor {
   public abstract Class getType();
   public abstract Type getGenericType();
   public abstract <A extends Annotation> A getAnnotation(Class<A> c);
+  public abstract <A extends Annotation> A getPackageAnnotation(Class<A> c);
 }

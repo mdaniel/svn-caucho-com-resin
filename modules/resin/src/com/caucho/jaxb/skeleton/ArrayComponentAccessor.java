@@ -97,4 +97,9 @@ public class ArrayComponentAccessor extends Accessor {
   {
     return null;
   }
+
+  public <A extends Annotation> A getPackageAnnotation(Class<A> c)
+  {
+    return null;
+  }
 }

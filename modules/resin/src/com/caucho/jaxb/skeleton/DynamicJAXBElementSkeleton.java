@@ -175,6 +175,11 @@ public class DynamicJAXBElementSkeleton extends ClassSkeleton {
     {
       return null;
     }
+
+    public <A extends Annotation> A getPackageAnnotation(Class<A> c)
+    {
+      return null;
+    }
   }
 
   public String toString()

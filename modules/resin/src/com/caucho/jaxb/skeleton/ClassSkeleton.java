@@ -79,6 +79,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ClassSkeleton<C> extends Skeleton {
@@ -451,11 +452,17 @@ public class ClassSkeleton<C> extends Skeleton {
         }
       }
 
+      if (log.isLoggable(Level.FINEST))
+        log.finest("JAXB: " + _class.getName() + " has children: ");
+
       // do ordering if necessary
       if (orderMap != null || accessOrder != XmlAccessOrder.ALPHABETICAL) {
         for (int i = 0; i < _elementAccessors.size(); i++) {
           Accessor a = _elementAccessors.get(i);
           a.putQNames(_elementQNameToAccessorMap);
+
+          if (log.isLoggable(Level.FINEST))
+            log.finest("\t" + a);
         }
       }
       else {
@@ -464,6 +471,9 @@ public class ClassSkeleton<C> extends Skeleton {
         for (int i = 0; i < _elementAccessors.size(); i++) { 
           Accessor a = _elementAccessors.get(i);
           a.putQNames(_elementQNameToAccessorMap);
+
+          if (log.isLoggable(Level.FINEST))
+            log.finest("\t" + a);
         }
       }
     }

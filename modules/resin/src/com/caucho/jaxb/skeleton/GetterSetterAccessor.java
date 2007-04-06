@@ -48,10 +48,11 @@ import java.util.List;
 import java.util.Map;
 
 public class GetterSetterAccessor extends Accessor {
-  private Method _get;
-  private Method _set;
-  private Class _type;
-  private Type _genericType;
+  private final Method _get;
+  private final Method _set;
+  private final Class _type;
+  private final Type _genericType;
+  private final Package _package;
 
   public GetterSetterAccessor(JAXBContextImpl context, 
                               String name, Method get, Method set)
@@ -59,6 +60,9 @@ public class GetterSetterAccessor extends Accessor {
   {
     super(context);
 
+    Class declarer = get.getDeclaringClass();
+
+    _package = declarer.getPackage();
     _get = get;
     _set = set;
     _name = name;
@@ -110,6 +114,11 @@ public class GetterSetterAccessor extends Accessor {
       a = _set.getAnnotation(c);
 
     return a;
+  }
+
+  public <A extends Annotation> A getPackageAnnotation(Class<A> c)
+  {
+    return _package.getAnnotation(c);
   }
 
   public Class getType()
