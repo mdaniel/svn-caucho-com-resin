@@ -1604,62 +1604,71 @@ public class AmberConnection
    */
   public void afterCommit(boolean isCommit)
   {
-    if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, "AmberConnection.afterCommit: " + isCommit);
+    try {
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, "AmberConnection.afterCommit: " + isCommit+" "+_completionList);
 
-    if (! _isXA)
-      _isInTransaction = false;
+      if (! _isXA)
+        _isInTransaction = false;
 
-    if (isCommit) {
-      if (_completionList.size() > 0) {
-        _persistenceUnit.complete(_completionList);
+      if (isCommit) {
+        if (_completionList.size() > 0) {
+          _persistenceUnit.complete(_completionList);
+        }
       }
-    }
-    _completionList.clear();
 
-    for (int i = 0; i < _txEntities.size(); i++) {
-      Entity entity = _txEntities.get(i);
+      // jpa/0k20: clears the completion list in the
+      // finally block so callbacks do not add a completion
+      // which has been just removed.
+      //
+      // _completionList.clear();
 
-      try {
-        if (isCommit)
-          entity.__caucho_afterCommit();
-        else
-          entity.__caucho_afterRollback();
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
+      for (int i = 0; i < _txEntities.size(); i++) {
+        Entity entity = _txEntities.get(i);
+
+        try {
+          if (isCommit)
+            entity.__caucho_afterCommit();
+          else
+            entity.__caucho_afterRollback();
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
+
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, "cleaning up txEntities");
+
+      _txEntities.clear();
+
+      // jpa/0s2k
+      for (int i = _entities.size() - 1; i >= 0; i--) {
+        // XXX: needs to check EXTENDED type.
+        // jpa/0h07: persistence context TRANSACTION type.
+        _entities.get(i).__caucho_detach();
+      }
+
+      // jpa/0h60
+      _entities.clear();
+
+      // if (! isCommit) {
+      // jpa/0j5c
+
+
+      /* XXX: jpa/0k11 - avoids double rollback()
+         Rollback is done from com.caucho.transaction.TransactionImpl
+         to the pool item com.caucho.jca.PoolItem
+         try {
+         if (_conn != null)
+         _conn.rollback();
+         } catch (SQLException e) {
+         throw new IllegalStateException(e);
+         }
+      */
+      // }
+    } finally {
+      _completionList.clear();
     }
-
-    if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, "cleaning up txEntities");
-
-    _txEntities.clear();
-
-    // jpa/0s2k
-    for (int i = _entities.size() - 1; i >= 0; i--) {
-      // XXX: needs to check EXTENDED type.
-      // jpa/0h07: persistence context TRANSACTION type.
-      _entities.get(i).__caucho_detach();
-    }
-
-    // jpa/0h60
-    _entities.clear();
-
-    // if (! isCommit) {
-    // jpa/0j5c
-
-
-    /* XXX: jpa/0k11 - avoids double rollback()
-       Rollback is done from com.caucho.transaction.TransactionImpl
-       to the pool item com.caucho.jca.PoolItem
-       try {
-       if (_conn != null)
-       _conn.rollback();
-       } catch (SQLException e) {
-       throw new IllegalStateException(e);
-       }
-    */
-    // }
   }
 
   /**
@@ -2604,6 +2613,7 @@ public class AmberConnection
     // and P_PERSIST is a transactional state
     // setTransactionalState(entity);
 
+    // jpa/0g0i
     Table table = home.getEntityType().getTable();
     addCompletion(new TableInvalidateCompletion(table.getName()));
   }

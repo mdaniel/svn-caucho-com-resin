@@ -2227,10 +2227,24 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("return (com.caucho.amber.entity.Entity) entity;");
     }
     else {
+      // jpa/0l40: inheritance optimization.
+      out.println("try {");
 
-      generateHomeNewLoading(out, rootTableName);
+      String keyType = _relatedType.getId().getForeignTypeName();
 
-      out.println("com.caucho.amber.entity.EntityItem item = home.findDiscriminatorEntityItem(aConn, key, rs" + rootTableName + ".getString(1));");
+      out.println("  __caucho_session = aConn;");
+      out.println("  __caucho_loadMask_0 = 0L;");
+      out.println("  __caucho_item = null;");
+      out.println();
+      out.println("  __caucho_setPrimaryKey((" + keyType + ") key);");
+      out.println("  __caucho_load_0(aConn);");
+      out.println("} catch (com.caucho.amber.AmberObjectNotFoundException e) {");
+      out.println("  return null;");
+      out.println("}");
+
+      // generateHomeNewLoading(out, rootTableName);
+
+      out.println("com.caucho.amber.entity.EntityItem item = home.findDiscriminatorEntityItem(aConn, key, __caucho_discriminator);"); // rs" + rootTableName + ".getString(1));");
 
       // Adds the copy object to the context before anything.
       // This will avoid the cache object to be added to the context.
@@ -2262,6 +2276,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       out.popDepth();
       out.println("}");
+
+      // jpa/0l40
+      out.println("item.getEntity().__caucho_setLoadMask(1L, 0);");
+      out.println("__caucho_copyTo(item.getEntity(), aConn, true);");
 
       // jpa/0l00
       // out.println(getClassName() + " entity = (" + getClassName() + ") item.copy(aConn);");

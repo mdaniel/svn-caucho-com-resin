@@ -1370,6 +1370,18 @@ abstract public class RelatedType extends AbstractStatefulType {
   {
     AmberField field = getField(name);
 
+    RelatedType parentType = this;
+
+    // jpa/0l40
+    while (field == null) {
+      parentType = parentType.getParentType();
+
+      if (parentType == null)
+        break;
+
+      field = parentType.getField(name);
+    }
+
     if (field instanceof EntityManyToOneField) {
       EntityManyToOneField manyToOne = (EntityManyToOneField) field;
 

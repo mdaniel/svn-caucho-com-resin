@@ -246,6 +246,12 @@ public class LoadGroupGenerator extends ClassComponent {
   private void generateLoadSelect(JavaWriter out, int group, long mask)
     throws IOException
   {
+    // jpa/0l40
+    if ((_index == 0) && (_relatedType.getDiscriminator() != null)) {
+      out.println();
+      out.println("String __caucho_discriminator;");
+    }
+
     out.println();
     out.println("protected void __caucho_load_select_" + _index +  "(com.caucho.amber.manager.AmberConnection aConn)");
     out.println("{");
@@ -354,9 +360,18 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("if (rs.next()) {");
     out.pushDepth();
 
+    // jpa/0l40
+    if ((_index == 0) && (_relatedType.getDiscriminator() != null)) {
+      out.println();
+      out.println("__caucho_discriminator = rs.getString(1);");
+      // out.println("com.caucho.amber.type.EntityType subEntity = (com.caucho.amber.type.EntityType) __caucho_home.getSubClass(__caucho_discriminator);");
+      // out.println("aConn.addNewEntity(subEntity.getInstanceClass(), __caucho_getPrimaryKey());");
+    }
+
     _relatedType.generateLoad(out, "rs", "", 1, _index, null);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
 
+    /* jpa/0l40: inheritance optimization.
     // jpa/0o01, jpa/0o04
     // XXX: Should be handled in AmberEntityHome.find()?
     // XXX: Will this ever add the cache entity to the context?
@@ -364,6 +379,7 @@ public class LoadGroupGenerator extends ClassComponent {
       // XXX: add isJPA test?
       out.println("aConn.addEntity(this);");
     }
+    */
 
     // XXX: Moved to __caucho_load_0()
     // _relatedType.generateLoadEager(out, "rs", "", 1, _index);

@@ -258,7 +258,7 @@ public class EntityManyToOneField extends CascadableField {
 
     int loadGroupIndex = getEntitySourceType().getDefaultLoadGroupIndex();
     super.setLoadGroupIndex(loadGroupIndex);
-    _targetLoadIndex = relatedType.nextLoadGroupIndex();
+    _targetLoadIndex = loadGroupIndex; // jpa/0l40 relatedType.nextLoadGroupIndex();
 
     Table sourceTable = relatedType.getTable();
 
