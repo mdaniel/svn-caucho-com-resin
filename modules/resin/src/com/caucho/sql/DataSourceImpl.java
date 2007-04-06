@@ -46,8 +46,8 @@ public class DataSourceImpl implements DataSource {
   protected static final Logger log = Log.open(DataSourceImpl.class);
   private static final L10N L = new L10N(DataSourceImpl.class);
 
-  private ManagedFactoryImpl _managedFactory;
-  private ConnectionManager _connManager;
+  private final ManagedFactoryImpl _managedFactory;
+  private final ConnectionManager _connManager;
 
   DataSourceImpl(ManagedFactoryImpl factory, ConnectionManager cm)
   {
@@ -85,7 +85,7 @@ public class DataSourceImpl implements DataSource {
     try {
       Credential credential = null;
 
-      if (username != null && password != null)
+      if (username != null || password != null)
 	credential = new Credential(username, password);
 
       return (Connection)  _connManager.allocateConnection(_managedFactory,

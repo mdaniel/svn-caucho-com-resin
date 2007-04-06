@@ -60,9 +60,11 @@ import java.util.logging.Logger;
  * Implementation of the connection manager.
  */
 public class ConnectionPool extends AbstractManagedObject
-  implements ConnectionManager, AlarmListener, ConnectionPoolMXBean {
+  implements ConnectionManager, AlarmListener, ConnectionPoolMXBean
+{
   private static final L10N L = new L10N(ConnectionPool.class);
-  private static final Logger log = Log.open(ConnectionPool.class);
+  private static final Logger log
+    = Logger.getLogger(ConnectionPool.class.getName());
 
   private static int _idGen;
 

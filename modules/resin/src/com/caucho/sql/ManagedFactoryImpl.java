@@ -51,8 +51,10 @@ import java.util.logging.Logger;
  * The managed factory implementation.
  */
 public class ManagedFactoryImpl
-  implements ManagedConnectionFactory, ValidatingManagedConnectionFactory {
-  protected static final Logger log = Log.open(ManagedFactoryImpl.class);
+  implements ManagedConnectionFactory, ValidatingManagedConnectionFactory
+{
+  protected static final Logger log
+    = Logger.getLogger(ManagedFactoryImpl.class.getName());
   private static final L10N L = new L10N(ManagedFactoryImpl.class);
 
   private DBPoolImpl _dbPool;
@@ -166,10 +168,12 @@ public class ManagedFactoryImpl
 
     while (iter.hasNext()) {
       ManagedConnectionImpl mConn = (ManagedConnectionImpl) iter.next();
+      Credential mCredentials = mConn.getCredentials();
 
-      if (requestInfo == mConn.getCredentials() ||
-	  requestInfo != null && requestInfo.equals(mConn.getCredentials()))
+      if (requestInfo == mCredentials
+	  || requestInfo != null && requestInfo.equals(mCredentials)) {
 	return mConn;
+      }
     }
 
     return null;

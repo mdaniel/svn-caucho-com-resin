@@ -574,7 +574,7 @@ public class DriverConfig {
     if (url == null)
       throw new SQLException(L.l("can't create connection with null url"));
 
-    Properties properties = getInfo();
+    Properties properties = new Properties(getInfo());
 
     if (user != null)
       properties.put("user", user);

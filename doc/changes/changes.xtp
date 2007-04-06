@@ -12,6 +12,8 @@
 
 <s2 title="3.1.snap - Apr 4, 2007">
 <ul>
+<li>DBPool: pooled connections with passwords could have race condition (rep by Sean Patronis)</li>
+<li>JMX: EnvironmentMBeanServer vs MBeanView deadlock (#1543, rep by lschumacher)</li>
 <li>mod_caucho/caucho-status updates</li>
 <li>database ping-query added (#1641, rep by Andrew Jacobs)</li>
 <li>ClassLoader getResources fix (#1643)</li> 

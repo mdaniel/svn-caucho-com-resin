@@ -33,12 +33,19 @@ import javax.resource.spi.ConnectionRequestInfo;
 /**
  * The credentials
  */
-public class Credential implements ConnectionRequestInfo {
-  private String _userName;
-  private String _password;
+public class Credential implements ConnectionRequestInfo
+{
+  private final String _userName;
+  private final String _password;
 
   Credential(String userName, String password)
   {
+    if (userName == null)
+      userName = "";
+    
+    if (password == null)
+      password = "";
+    
     _userName = userName;
     _password = password;
   }
@@ -77,8 +84,8 @@ public class Credential implements ConnectionRequestInfo {
 
     Credential credential = (Credential) o;
 
-    return (getUserName().equals(credential.getUserName()) &&
-	    getPassword().equals(credential.getPassword()));
+    return (getUserName().equals(credential.getUserName())
+	    && getPassword().equals(credential.getPassword()));
   }
 }
 

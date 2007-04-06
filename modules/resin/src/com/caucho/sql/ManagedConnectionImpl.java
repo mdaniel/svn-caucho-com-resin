@@ -72,15 +72,15 @@ public class ManagedConnectionImpl
   protected static L10N L = new L10N(ManagedConnectionImpl.class);
 
   // Identifier for spy, etc.
-  private String _id;
+  private final String _id;
 
-  private ManagedFactoryImpl _factory;
-  private DBPoolImpl _dbPool;
+  private final ManagedFactoryImpl _factory;
+  private final DBPoolImpl _dbPool;
   
-  private DriverConfig _driver;
-  private ConnectionConfig _connConfig;
+  private final DriverConfig _driver;
+  private final ConnectionConfig _connConfig;
 
-  private Credential _credentials;
+  private final Credential _credentials;
 
   private PooledConnection _pooledConnection;
   private Connection _driverConnection;

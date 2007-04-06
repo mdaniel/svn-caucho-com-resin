@@ -372,14 +372,14 @@ public class MBeanView {
 
       if (_classLoader == null)
 	return null;
-
-      MBeanView parentView = getParentView();
-
-      if (parentView != null)
-	return parentView.getMBean(name);
-      else
-	return null;
     }
+
+    MBeanView parentView = getParentView();
+
+    if (parentView != null)
+      return parentView.getMBean(name);
+    else
+      return null;
   }
 
   /**
