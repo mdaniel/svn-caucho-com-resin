@@ -1075,6 +1075,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     out.println("com.caucho.amber.manager.AmberConnection aConn = __caucho_session;");
+
     out.println("com.caucho.amber.entity.EntityState state = __caucho_state;");
     int dirtyCount = _relatedType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
@@ -1097,13 +1098,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("if (aConn != null) {");
     out.pushDepth();
-
-    // jpa/0l20
-    out.println();
-    out.println("Object pk = __caucho_getPrimaryKey();");
-    out.println();
-    out.println("aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.EntityType) __caucho_home.getRootType(),");
-    out.println("                                     pk, __caucho_item);");
 
     out.print("if (updateMask_0 != 0L");
     for (int i = 1; i <= dirtyCount / 64; i++)
@@ -1147,6 +1141,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("if (__caucho_item != null) {");
     out.pushDepth();
 
+    // jpa/0l20, jpa/0l43
+    out.println("Object pk = __caucho_getPrimaryKey();");
+    out.println();
+    out.println("__caucho_item = aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.EntityType) __caucho_home.getRootType(),");
+    out.println("                                                     pk, __caucho_item);");
+
+    out.println();
     out.println(_extClassName + " item = (" + _extClassName + ") __caucho_item.getEntity();");
 
     out.println("try {");

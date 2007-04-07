@@ -780,9 +780,10 @@ public class EntityManyToOneField extends CascadableField {
     // the other end will not need to reload the current entity.
     out.println(varName + " = (" + targetTypeExt + ") " + session + ".addNewEntity(" + targetTypeExt + ".class, " + otherKey + ");");
 
+    // jpa/0l43
     out.println();
     out.println("if (" + varName + " == null)");
-    out.println("  " + varName + " = (" + targetTypeExt + ") " + session + ".getEntity(" + targetTypeExt + ".class, " + otherKey + ");");
+    out.println("  " + varName + " = (" + targetTypeExt + ") " + session + ".getSubEntity(" + targetTypeExt + ".class, " + otherKey + ");");
 
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
@@ -968,7 +969,9 @@ public class EntityManyToOneField extends CascadableField {
 
       value = "(" + targetTypeExt + ") child";
 
-      out.println(generateSet(dst, value) + ";");
+      // XXX: jpa/0l43
+      out.println("if (isFullMerge)");
+      out.println("  " + generateSet(dst, value) + ";");
     }
 
     // jpa/0o05

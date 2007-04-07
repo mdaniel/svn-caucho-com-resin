@@ -1510,6 +1510,9 @@ public class AmberPersistenceUnit {
                               Object key,
                               EntityItem entity)
   {
+    if (entity == null)
+      throw new IllegalStateException(L.l("Null entity item cannot be added to the persistence unit cache"));
+
     SoftReference<EntityItem> ref = new SoftReference<EntityItem>(entity);
     EntityKey entityKey = new EntityKey(rootType, key);
 

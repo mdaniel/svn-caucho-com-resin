@@ -233,7 +233,39 @@ public class AmberEntityHome {
                              ResultSet rs, int index)
     throws SQLException
   {
-    return _homeBean.__caucho_home_find(aConn, this, rs, index);
+    EntityItem item = _homeBean.__caucho_home_find(aConn, this, rs, index);
+
+    if (item == null)
+      return null;
+
+    // XXX: add isJPA test?
+
+    // jpa/0l43
+    String className = item.getEntity().getClass().getName();
+    Object key = rs.getObject(index);
+
+    Entity copy;
+
+    try {
+      // Gets the copy object from context.
+      copy = aConn.addNewEntity(item.getEntity().getClass(), key);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new com.caucho.amber.AmberRuntimeException(e);
+    }
+
+    if (copy == null) {
+      // It was already added in findEntityItem().
+      copy = aConn.getEntity(aConn.getEntity(className, key));
+    }
+
+    item.copyTo(copy, aConn);
+
+    // jpa/0l43
+    aConn.setTransactionalState(copy);
+
+    return item;
   }
 
   /**
@@ -242,12 +274,21 @@ public class AmberEntityHome {
   public Object loadFull(AmberConnection aConn, ResultSet rs, int index)
     throws SQLException
   {
+    // jpa/0l43
+    Entity entity = aConn.getSubEntity(_homeBean.getClass(),
+                                       rs.getObject(index));
+
+    if (entity != null) {
+      if (entity.__caucho_getEntityState().isManaged())
+        return entity;
+    }
+
     EntityItem item = findItem(aConn, rs, index);
 
     if (item == null)
       return null;
 
-    Entity entity = null;
+    entity = null;
 
     Object value = _entityFactory.getEntity(aConn, item);
 
@@ -392,7 +433,7 @@ public class AmberEntityHome {
         // XXX: this is an initial optimization and bug fix also for jpa/0s29
         // XXX: another point is inheritance with many-to-one (jpa/0l40 and jpa/0s29)
         //      still get twice the number of loading SQLs.
-        boolean loadFromResultSet = ! getEntityType().hasDependent();
+        boolean loadFromResultSet = false; // ! getEntityType().hasDependent();
 
         Entity cacheEntity;
 

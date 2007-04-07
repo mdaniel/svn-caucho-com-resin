@@ -987,7 +987,8 @@ public class AmberConnection
       // jpa/0g40: the copy object was created at some point in
       // findEntityItem, but it is still not loaded.
 
-      itemEntity.__caucho_copyTo(entity, this);
+      // jpa/0l43
+      itemEntity.__caucho_copyTo(entity, this, item);
 
       return entity;
     }
@@ -1300,6 +1301,21 @@ public class AmberConnection
     return getEntity(index);
   }
 
+  public Entity getSubEntity(Class cl, Object key)
+  {
+    // jpa/0l43
+    for (int i = _entities.size() - 1; i >= 0; i--) {
+      Entity entity = _entities.get(i);
+
+      if (entity.__caucho_getPrimaryKey().equals(key)) {
+        if (cl.isAssignableFrom(entity.getClass()))
+          return entity;
+      }
+    }
+
+    return null;
+  }
+
   public int getTransactionEntity(String className, Object key)
   {
     return getEntityMatch(_txEntities, className, key);
@@ -1379,14 +1395,16 @@ public class AmberConnection
   public Entity addNewEntity(Class cl, Object key)
     throws InstantiationException, IllegalAccessException
   {
-    int index = getEntity(cl.getName(), key);
+    // jpa/0l43
+    Entity entity = getSubEntity(cl, key);
 
     // If the entity is already in the context, it returns null.
-    if (index >= 0)
+    if (entity != null)
       return null;
 
+    // XXX: needs to create based on the discriminator with inheritance.
     // Create a new entity for the given class and primary key.
-    Entity entity = (Entity) cl.newInstance();
+    entity = (Entity) cl.newInstance();
     entity.__caucho_setPrimaryKey(key);
 
     addInternalEntity(entity);
@@ -1908,6 +1926,7 @@ public class AmberConnection
     if (! _persistenceUnit.isJPA())
       return;
 
+    /* XXX: jpa/0l43
     EntityState state = entity.__caucho_getEntityState();
 
     if (EntityState.TRANSIENT.ordinal() < state.ordinal()
@@ -1915,6 +1934,7 @@ public class AmberConnection
       // jpa/0g06
       addEntity(entity);
     }
+    */
 
     /*
       if (! isInTransaction())
