@@ -62,7 +62,8 @@ import java.util.logging.Logger;
  * Proxy class for Hessian services.
  */
 public class HessianSkeleton extends AbstractSkeleton {
-  private static final Logger log = Logger.getLogger(HessianSkeleton.class.getName());
+  private static final Logger
+    log = Logger.getLogger(HessianSkeleton.class.getName());
   
   private Object _service;
   

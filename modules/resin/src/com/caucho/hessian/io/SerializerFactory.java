@@ -120,7 +120,9 @@ public class SerializerFactory extends AbstractSerializerFactory
       return serializer;
 
     if (_cachedSerializerMap != null) {
-      serializer = (Serializer) _cachedSerializerMap.get(cl);
+      synchronized (_cachedSerializerMap) {
+	serializer = (Serializer) _cachedSerializerMap.get(cl);
+      }
       
       if (serializer != null)
 	return serializer;
@@ -186,7 +188,9 @@ public class SerializerFactory extends AbstractSerializerFactory
     if (_cachedSerializerMap == null)
       _cachedSerializerMap = new HashMap(8);
 
-    _cachedSerializerMap.put(cl, serializer);
+    synchronized (_cachedSerializerMap) {
+      _cachedSerializerMap.put(cl, serializer);
+    }
 
     return serializer;
   }
@@ -225,7 +229,9 @@ public class SerializerFactory extends AbstractSerializerFactory
       return deserializer;
 
     if (_cachedDeserializerMap != null) {
-      deserializer = (Deserializer) _cachedDeserializerMap.get(cl);
+      synchronized (_cachedDeserializerMap) {
+	deserializer = (Deserializer) _cachedDeserializerMap.get(cl);
+      }
       
       if (deserializer != null)
 	return deserializer;
@@ -265,7 +271,9 @@ public class SerializerFactory extends AbstractSerializerFactory
     if (_cachedDeserializerMap == null)
       _cachedDeserializerMap = new HashMap(8);
 
-    _cachedDeserializerMap.put(cl, deserializer);
+    synchronized (_cachedDeserializerMap) {
+      _cachedDeserializerMap.put(cl, deserializer);
+    }
 
     return deserializer;
   }
@@ -369,7 +377,9 @@ public class SerializerFactory extends AbstractSerializerFactory
     Deserializer deserializer;
     
     if (_cachedTypeDeserializerMap != null) {
-      deserializer = (Deserializer) _cachedTypeDeserializerMap.get(type);
+      synchronized (_cachedTypeDeserializerMap) {
+	deserializer = (Deserializer) _cachedTypeDeserializerMap.get(type);
+      }
 
       if (deserializer != null)
 	return deserializer;
@@ -400,7 +410,9 @@ public class SerializerFactory extends AbstractSerializerFactory
       if (_cachedTypeDeserializerMap == null)
 	_cachedTypeDeserializerMap = new HashMap(8);
 
-      _cachedTypeDeserializerMap.put(type, deserializer);
+      synchronized (_cachedTypeDeserializerMap) {
+	_cachedTypeDeserializerMap.put(type, deserializer);
+      }
     }
 
     return deserializer;

@@ -196,7 +196,7 @@ public class HessianProxy implements InvocationHandler {
     }
   }
 
-  private URLConnection sendRequest(String methodName, Object []args)
+  protected URLConnection sendRequest(String methodName, Object []args)
     throws IOException
   {
     URLConnection conn = null;

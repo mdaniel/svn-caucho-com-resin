@@ -89,8 +89,9 @@ public class XmlSAXParserFactory extends SAXParserFactory {
       _namespacePrefixes = value ? 1 : 0;
     else if (key.equals("http://xml.org/sax/features/validation"))
       _validation = value ? 1 : 0;
-    else
-      throw new SAXNotRecognizedException(key);
+    else {
+      // throw new SAXNotRecognizedException(key);
+    }
   }
 
   public boolean isNamespacePrefixes()
