@@ -101,6 +101,11 @@ public interface Entity extends MappedSuperclass
     throws SQLException;
 
   /**
+   * Sets the __caucho_item.
+   */
+  public void __caucho_setCacheItem(EntityItem item);
+
+  /**
    * Set the primary key.
    */
   public void __caucho_setPrimaryKey(Object key);
@@ -114,6 +119,11 @@ public interface Entity extends MappedSuperclass
    * Gets the corresponding cache entity referenced by __caucho_item.
    */
   public Entity __caucho_getCacheEntity();
+
+  /**
+   * Gets the __caucho_item.
+   */
+  public EntityItem __caucho_getCacheItem();
 
   /**
    * Get the entity type.

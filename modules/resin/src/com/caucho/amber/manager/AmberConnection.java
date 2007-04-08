@@ -1316,6 +1316,25 @@ public class AmberConnection
     return null;
   }
 
+  /**
+   * Gets the cache item referenced by __caucho_item
+   * from an entity of class/subclass cl.
+   */
+  public EntityItem getSubEntityCacheItem(Class cl, Object key)
+  {
+    // jpa/0l4a
+    for (int i = _entities.size() - 1; i >= 0; i--) {
+      Entity entity = _entities.get(i);
+
+      if (entity.__caucho_getPrimaryKey().equals(key)) {
+        if (cl.isAssignableFrom(entity.getClass()))
+          return entity.__caucho_getCacheItem();
+      }
+    }
+
+    return null;
+  }
+
   public int getTransactionEntity(String className, Object key)
   {
     return getEntityMatch(_txEntities, className, key);

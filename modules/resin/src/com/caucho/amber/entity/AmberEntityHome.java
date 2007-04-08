@@ -422,6 +422,10 @@ public class AmberEntityHome {
       // jpa/0y14 if (aConn.shouldRetrieveFromCache())
       item = _manager.getEntity(getRootType(), key);
 
+      // jpa/0l4a
+      if (item == null)
+        item = aConn.getSubEntityCacheItem(getRootType().getInstanceClass(), key);
+
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, "findEntityItem item is null? "+(item == null));
 
@@ -456,6 +460,12 @@ public class AmberEntityHome {
 
         // jpa/0o41
         if (isLoad) {
+          Entity contextEntity = aConn.getSubEntity(cacheEntity.getClass(), key);
+
+            // jpa/0l4a
+          if (contextEntity != null)
+            contextEntity.__caucho_setCacheItem(item);
+
           try {
             // XXX cacheEntity.__caucho_retrieve(aConn);
             if (_manager.isJPA()) {
@@ -466,14 +476,8 @@ public class AmberEntityHome {
               item.loadEntity(0);
           } catch (AmberObjectNotFoundException e) {
             // XXX: jpa/0o42, a new entity shouldn't be added to the context.
-
-            // But it is necessary and correct for jpa/0l42, the bidirectional
-            // one-to-one needs to add the other end for eagerly loading optmization.
-            int index = aConn.getEntity(cacheEntity.getClass().getName(), key);
-
-            if (index >= 0) {
-              aConn.removeEntity(aConn.getEntity(index));
-            }
+            if (contextEntity != null)
+              aConn.removeEntity(contextEntity);
 
             throw e;
           }
