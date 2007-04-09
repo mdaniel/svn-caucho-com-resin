@@ -41,6 +41,7 @@ public class WelcomeFileList {
 
   // The welcome file list.
   private ArrayList<String> _welcomeFileList = new ArrayList<String>();
+  private String _id;
 
   /**
    * Adds a welcome file.
@@ -85,5 +86,15 @@ public class WelcomeFileList {
   public ArrayList<String> getWelcomeFileList()
   {
     return _welcomeFileList;
+  }
+
+  public void setId(String id)
+  {
+    _id = id;
+  }
+
+  public String getId()
+  {
+    return _id;
   }
 }
