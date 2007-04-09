@@ -248,8 +248,10 @@ public class GenericMetaData
       } finally {
         conn.close();
       }
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
+    } catch (Throwable e) {
+      // Ignores java.lang.AbstractMethodError
+      log.log(Level.FINE, e.toString(), e);
+      return false;
     }
   }
   /**
