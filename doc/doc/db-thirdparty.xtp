@@ -110,7 +110,7 @@ OracleConnectionPoolDataSource will be more efficient.</p>
   &lt;jndi-name&gt;jdbc/sqlserver&lt;/jndi-name&gt;
   &lt;driver type="com.microsoft.jdbcx.sqlserver.SQLServerDataSource"&gt;
     &lt;serverName&gt;csdevsqla01.office.foo&lt;/serverName&gt;
-    &lt;portName&gt;1433&lt;/serverName&gt;
+    &lt;portNumber&gt;1433&lt;/portNumber&gt;
     &lt;databaseName&gt;Reports&lt;/databaseName&gt;
     &lt;user&gt;XXX&lt;/user&gt;
     &lt;password&gt;YYY&lt;/password&gt;
