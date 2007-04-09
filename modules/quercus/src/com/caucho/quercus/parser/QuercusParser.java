@@ -5015,5 +5015,7 @@ public class QuercusParser {
     _insensitiveReserved.put("catch", CATCH);
     _insensitiveReserved.put("interface", INTERFACE);
     _insensitiveReserved.put("implements", IMPLEMENTS);
+
+    _insensitiveReserved.put("import", IMPORT);
   }
 }
