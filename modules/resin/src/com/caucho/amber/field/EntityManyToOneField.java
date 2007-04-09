@@ -608,14 +608,16 @@ public class EntityManyToOneField extends CascadableField {
     */
 
     // jpa/0h29
-    out.print("if (__caucho_session != null && __caucho_state != com.caucho.amber.entity.EntityState.P_DELETED");
+    out.print("if (__caucho_session != null && __caucho_state != com.caucho.amber.entity.EntityState.P_DELETED) {");
 
+    /* XXX: jpa/0h04
     if (isLazy())
       out.println(" && (" + loadVar + " & " + mask + "L) == 0) {");
     else {
       // jpa/0o03
       out.println(") {");
     }
+    */
 
     out.pushDepth();
 

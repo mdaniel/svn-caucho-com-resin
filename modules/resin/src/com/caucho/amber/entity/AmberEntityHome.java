@@ -242,7 +242,9 @@ public class AmberEntityHome {
 
     // jpa/0l43
     String className = item.getEntity().getClass().getName();
-    Object key = rs.getObject(index);
+
+    // jpa/0i4a
+    Object key = _homeBean.__caucho_load_key(aConn, rs, index); // rs.getObject(index);
 
     Entity copy;
 

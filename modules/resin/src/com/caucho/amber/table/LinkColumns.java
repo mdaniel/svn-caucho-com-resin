@@ -415,6 +415,9 @@ public class LinkColumns {
 
       String sourceTable = _sourceTable.getName();
 
+      /* jpa/0h60, the application should be responsible for deleting
+         the incoming links even when there are FK constraints.
+
       if (! isSourceCascadeDelete()) {
         CharBuffer cb = new CharBuffer();
 
@@ -449,7 +452,10 @@ public class LinkColumns {
 
         aConn.addCompletion(_sourceTable.getUpdateCompletion());
       }
-      else if (_sourceTable.isCascadeDelete()) {
+      else
+      */
+
+      if (_sourceTable.isCascadeDelete()) {
         // if the link cascades deletes to the source and the source
         // table also has cascade deletes, then we need to load the
         // target entities and delete them recursively

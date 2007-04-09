@@ -109,6 +109,14 @@ public class TypeManager {
   }
 
   /**
+   * Returns the type map.
+   */
+  public HashMap<String,Type> getTypeMap()
+  {
+    return _typeMap;
+  }
+
+  /**
    * Adds a type.
    */
   public void put(String name, Type type)

@@ -427,8 +427,13 @@ public class AmberConnection
       // In particular, required for cascading persistence, since the cascade
       // is lazy until flush
       // jpa/0h25 flushInternal();
-      // Only flushes this entity.
-      instance.__caucho_flush();
+      // Cannot flush since the delete is lazy until flush, i.e.:
+      // remove(A); // (*) __caucho_flush()
+      // remove(B);
+      // (*) would break a FK constraint if B has a reference to A.
+
+      // jpa/0h26
+      updateFlushPriority(instance);
 
       // jpa/0h25, jpa/0i5e
       // Restores original state.
@@ -457,7 +462,9 @@ public class AmberConnection
       delete(instance);
 
       // jpa/0o30: flushes the owning side delete.
-      instance.__caucho_flush();
+      // XXX: Cannot flush since the delete is lazy until flush.
+      // jpa/0h25
+      // instance.__caucho_flush();
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("remove is performing cascade post-remove"));
@@ -1643,7 +1650,7 @@ public class AmberConnection
   {
     try {
       if (log.isLoggable(Level.FINER))
-        log.log(Level.FINER, "AmberConnection.afterCommit: " + isCommit+" "+_completionList);
+        log.log(Level.FINER, "AmberConnection.afterCommit: " + isCommit);
 
       if (! _isXA)
         _isInTransaction = false;
@@ -2654,7 +2661,7 @@ public class AmberConnection
 
     // jpa/0g0i
     Table table = home.getEntityType().getTable();
-    addCompletion(new TableInvalidateCompletion(table.getName()));
+    addCompletion(new RowInsertCompletion(table.getName()));
   }
 
   private void checkTransactionRequired(String operation)
@@ -2740,10 +2747,31 @@ public class AmberConnection
        }
     */
 
+    // We avoid breaking FK constraints:
+    //
+    // 1. Assume _txEntities has the following order: A <- B <- C
+    //    XXX: Make sure priorities are handled based on owning sides
+    //    even when there are cycles in a graph.
+    //
+    // 2. Persist is done in ascending order: A(0) <- B(1) <- C(2)
+    //
+    // 3. Delete is done in descending order: C(2) -> B(1) -> A(0)
+
+    // Persists in ascending order.
+    for (int i = 0; i < _txEntities.size(); i++) {
+      Entity entity = _txEntities.get(i);
+
+      if (entity.__caucho_getEntityState() == EntityState.P_PERSIST)
+        entity.__caucho_flush();
+    }
+
+    // jpa/0h25
+    // Deletes in descending order.
     for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
 
-      entity.__caucho_flush();
+      if (entity.__caucho_getEntityState() != EntityState.P_PERSIST)
+        entity.__caucho_flush();
     }
 
     if (! isInTransaction()) {
@@ -2856,6 +2884,33 @@ public class AmberConnection
     // jpa/0h27
     // Post-persist child entities.
     instance.__caucho_cascadePostPersist(this);
+  }
+
+  /**
+   * Updates flush priorities.
+   */
+  private void updateFlushPriority(Entity updateEntity)
+  {
+    if (! isInTransaction())
+      return;
+
+    _txEntities.remove(updateEntity);
+
+    int updatePriority
+      = updateEntity.__caucho_getEntityType().getFlushPriority();
+
+    for (int i = _txEntities.size() - 1; i >= 0; i--) {
+      Entity entity = _txEntities.get(i);
+
+      int currentPriority = entity.__caucho_getEntityType().getFlushPriority();
+
+      if (updatePriority > currentPriority) {
+        _txEntities.add(i + 1, updateEntity);
+        return;
+      }
+    }
+
+    _txEntities.add(0, updateEntity);
   }
 
   /**

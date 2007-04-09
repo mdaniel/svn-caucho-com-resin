@@ -68,6 +68,7 @@ import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -1066,6 +1067,8 @@ public class AmberPersistenceUnit {
       if (! _lazyGenerate.contains(type))
         _lazyGenerate.add(type);
     }
+
+    updateFlushPriority();
   }
 
   /**
@@ -1149,6 +1152,40 @@ public class AmberPersistenceUnit {
   public EntityType getEntityByInstanceClass(String className)
   {
     return _typeManager.getEntityByInstanceClass(className);
+  }
+
+  /**
+   * Updates global entity priorities for flushing.
+   */
+  public void updateFlushPriority()
+  {
+    ArrayList<EntityType> updatingEntities
+      = new ArrayList<EntityType>();
+
+    try {
+      HashMap<String,Type> typeMap = _typeManager.getTypeMap();
+
+      Collection<Type> types = typeMap.values();
+
+      Iterator it = types.iterator();
+
+      while (it.hasNext()) {
+        Type type = (Type) it.next();
+
+        if (type instanceof EntityType) {
+          EntityType entityType = (EntityType) type;
+
+          if (updatingEntities.contains(entityType))
+            continue;
+
+          updatingEntities.add(entityType);
+
+          entityType.updateFlushPriority(updatingEntities);
+        }
+      }
+    } finally {
+      updatingEntities = null;
+    }
   }
 
   /**

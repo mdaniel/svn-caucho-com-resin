@@ -252,6 +252,12 @@ public interface Entity extends MappedSuperclass
     throws SQLException;
 
   /**
+   * Loads the entity key.
+   */
+  public Object __caucho_load_key(AmberConnection aConn, ResultSet rs, int index)
+    throws SQLException;
+
+  /**
    * Loads the entity from the database.
    */
   public void __caucho_setKey(PreparedStatement pstmt, int index)

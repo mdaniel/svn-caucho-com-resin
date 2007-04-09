@@ -2131,6 +2131,38 @@ abstract public class AmberMappedComponent extends ClassComponent {
   }
 
   /**
+   * Generates the load key.
+   */
+  void generateLoadKey(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.print("public Object __caucho_load_key(");
+    out.print("com.caucho.amber.manager.AmberConnection aConn,");
+    out.println("java.sql.ResultSet rs, int index)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
+
+    if (_relatedType.getId() == null) {
+      // jpa/0ge6: MappedSuperclass
+
+      out.println("return null;");
+      out.popDepth();
+      out.println("}");
+
+      return;
+    }
+
+    out.print("return ");
+    int index = _relatedType.getId().generateLoadForeign(out, "rs", "index", 0);
+    out.println(";");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
    * Generates the home methods
    */
   void generateHomeFind(JavaWriter out)

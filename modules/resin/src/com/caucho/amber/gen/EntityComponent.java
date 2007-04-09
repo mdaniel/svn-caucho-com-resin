@@ -141,6 +141,8 @@ public class EntityComponent extends AmberMappedComponent {
 
       generateAfterRollback(out);
 
+      generateLoadKey(out);
+
       generateHome(out);
 
       generateInternals(out);

@@ -113,6 +113,8 @@ abstract public class RelatedType extends AbstractStatefulType {
 
   private VersionField _versionField;
 
+  private int _flushPriority;
+
 
   public RelatedType(AmberPersistenceUnit amberPersistenceUnit)
   {
@@ -139,6 +141,14 @@ abstract public class RelatedType extends AbstractStatefulType {
 
     if (_rootTableName == null)
       _rootTableName = table.getName();
+  }
+
+  /**
+   * Returns the flush priority.
+   */
+  public int getFlushPriority()
+  {
+    return _flushPriority;
   }
 
   /**
@@ -1359,6 +1369,45 @@ abstract public class RelatedType extends AbstractStatefulType {
     throws SQLException
   {
     // aConn.addCompletion(_tableCompletion);
+  }
+
+  /**
+   * Updates global (persistence unit) entity priorities
+   * for flushing.
+   */
+  public int updateFlushPriority(ArrayList<EntityType> updatingEntities)
+  {
+    // jpa/0h25, jpa/0h26, jpa/0h29
+
+    _flushPriority = 0;
+
+    ArrayList<AmberField> fields = getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+      AmberField field = fields.get(i);
+
+      if (field instanceof EntityManyToOneField) {
+        EntityManyToOneField manyToOne = (EntityManyToOneField) field;
+
+        RelatedType targetRelatedType = manyToOne.getEntityTargetType();
+
+        if (targetRelatedType instanceof EntityType) {
+          EntityType targetType = (EntityType) targetRelatedType;
+
+          if (! updatingEntities.contains(targetType)) {
+            updatingEntities.add(targetType);
+            targetType.updateFlushPriority(updatingEntities);
+          }
+
+          int targetPriority = targetType.getFlushPriority();
+
+          if (targetPriority >= _flushPriority)
+            _flushPriority = targetPriority + 1;
+        }
+      }
+    }
+
+    return _flushPriority;
   }
 
   /**

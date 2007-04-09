@@ -1485,8 +1485,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       RelatedType relatedType = (RelatedType) sourceType;
 
-      relatedType.setHasDependent(true);
-
       OneToOneCompletion oneToOne = new OneToOneCompletion(relatedType,
                                                            field,
                                                            fieldName,
@@ -1507,8 +1505,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       if (isOwner)
         _depCompletions.add(oneToOne);
-      else
+      else {
         _depCompletions.add(0, oneToOne);
+        relatedType.setHasDependent(true);
+      }
 
       ArrayList<OneToOneCompletion> oneToOneList
         = _oneToOneCompletions.get(relatedType);
