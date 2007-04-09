@@ -499,8 +499,8 @@ public class LinkColumns {
         for (Object obj : proxyList) {
           entityType.getHome().getEntityFactory().delete(aConn, obj);
         }
-      }
-      else {
+      } // jpa/0i5e vs. jpa/0h25
+      else if (_sourceTable.getType() == null) {
         CharBuffer cb = new CharBuffer();
 
         cb.append("delete from " + sourceTable +

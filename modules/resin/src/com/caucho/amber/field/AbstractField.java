@@ -785,6 +785,19 @@ abstract public class AbstractField implements AmberField {
 
     // jpa/0l43 out.println(generateSet(dst, value) + ";");
 
+    boolean isJPA = getEntitySourceType().getPersistenceUnit().isJPA();
+
+    if (isJPA &&
+        ! (dst.equals("cacheEntity")
+           || dst.equals("super")
+           || dst.equals("item"))) {
+      // jpa/0j5f: merge()
+      out.println("if (isFullMerge)");
+      out.println("  " + generateSet(dst, value) + ";");
+      out.println("else");
+      out.print("  ");
+    }
+
     if (! dst.equals("super"))
       out.print(dst + ".");
 
