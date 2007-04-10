@@ -235,10 +235,12 @@ public class AmberEntityHome {
   {
     EntityItem item = _homeBean.__caucho_home_find(aConn, this, rs, index);
 
+    // ejb/0602
+    if (! _manager.isJPA())
+      return item;
+
     if (item == null)
       return null;
-
-    // XXX: add isJPA test?
 
     // jpa/0l43
     String className = item.getEntity().getClass().getName();

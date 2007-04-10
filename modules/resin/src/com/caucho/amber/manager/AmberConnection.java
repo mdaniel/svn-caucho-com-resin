@@ -2806,6 +2806,19 @@ public class AmberConnection
     switch (state) {
     case TRANSIENT:
       {
+        int index = getEntity(instance.getClass().getName(),
+                              instance.__caucho_getPrimaryKey());
+
+        // jpa/0ga3
+        if (index >= 0) {
+          Entity contextEntity = _entities.get(index);
+
+          if (contextEntity.__caucho_getEntityState().ordinal() ==
+              EntityState.P_DELETED.ordinal()) {
+            contextEntity.__caucho_flush();
+          }
+        }
+
         // jpa/0h24
         // Pre-persist child entities.
         instance.__caucho_cascadePrePersist(this);
@@ -2820,7 +2833,7 @@ public class AmberConnection
           JdbcMetaData metaData = _persistenceUnit.getMetaData();
 
           if (metaData.isUniqueConstraintSQLState(sqlState)) {
-            // jpa/0ga3
+            // jpa/0ga1
             throw new EntityExistsException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", instance.getClass().getName(), instance.__caucho_getPrimaryKey(), state));
           }
           else if (metaData.isForeignKeyViolationSQLState(sqlState)) {
@@ -2849,6 +2862,7 @@ public class AmberConnection
         // jpa/0h25
         if (_entities.contains(instance))
           instance.__caucho_flush();
+
         // else
         // if the entity is not in the context the flush
         // was already applied to it for deleting.

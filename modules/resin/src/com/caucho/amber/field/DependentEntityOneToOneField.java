@@ -416,6 +416,11 @@ public class DependentEntityOneToOneField extends CascadableField {
                                        int updateIndex)
     throws IOException
   {
+    // jpa/0ge4
+
+    /* XXX: should not be necessary to update the cache item from the
+       dependent side.
+
     if (getIndex() == updateIndex) {
       String value = generateGet(src);
 
@@ -423,6 +428,7 @@ public class DependentEntityOneToOneField extends CascadableField {
 
       out.println(generateSet(dst, value) + ";");
     }
+    */
   }
 
   /**

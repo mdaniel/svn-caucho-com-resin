@@ -64,7 +64,7 @@ public class EntityManyToOneField extends CascadableField {
 
   private RelatedType _targetType;
 
-  private int _targetLoadIndex = -1;
+  private int _targetLoadIndex;
 
   private DependentEntityOneToOneField _targetField;
   private PropertyField _aliasField;
@@ -251,18 +251,20 @@ public class EntityManyToOneField extends CascadableField {
   public void init(RelatedType relatedType)
     throws ConfigException
   {
-    if (_targetLoadIndex >= 0) {
-      // jpa/0l40
-      return;
-    }
+    boolean isJPA = relatedType.getPersistenceUnit().isJPA();
 
     int loadGroupIndex = getEntitySourceType().getDefaultLoadGroupIndex();
     super.setLoadGroupIndex(loadGroupIndex);
-    _targetLoadIndex = loadGroupIndex; // jpa/0l40 relatedType.nextLoadGroupIndex();
+
+    // jpa/0l40 vs. ejb/0602
+    if (isJPA)
+      _targetLoadIndex = loadGroupIndex;
+    else
+      _targetLoadIndex = relatedType.nextLoadGroupIndex();
 
     Table sourceTable = relatedType.getTable();
 
-    if (sourceTable == null || ! relatedType.getPersistenceUnit().isJPA()) {
+    if (sourceTable == null || ! isJPA) {
       // jpa/0ge3, ejb/0602
       super.init();
       return;
@@ -293,7 +295,7 @@ public class EntityManyToOneField extends CascadableField {
 
       String columnName;
 
-      if (getRelatedType().getPersistenceUnit().isJPA())
+      if (isJPA)
         columnName = getName().toUpperCase() + '_' + keyColumn.getName();
       else {
         // ejb/0602
