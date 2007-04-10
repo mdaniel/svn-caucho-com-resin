@@ -248,8 +248,12 @@ public class GenericMetaData
       } finally {
         conn.close();
       }
-    } catch (Throwable e) {
-      // Ignores java.lang.AbstractMethodError
+    } catch (Exception e) {
+      // Possibly older drivers: UnsupportedOperationException.
+      log.log(Level.FINE, e.toString(), e);
+      return false;
+    } catch (AbstractMethodError e) {
+      // Older drivers e.g. SQLServer.
       log.log(Level.FINE, e.toString(), e);
       return false;
     }
