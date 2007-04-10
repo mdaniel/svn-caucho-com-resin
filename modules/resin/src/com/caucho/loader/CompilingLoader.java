@@ -84,6 +84,7 @@ public class CompilingLoader extends Loader implements Make {
   public CompilingLoader()
   {
     _excludedDirectories.add("CVS");
+    _excludedDirectories.add(".svn");
   }
   
   /**
@@ -530,48 +531,50 @@ public class CompilingLoader extends Loader implements Make {
   protected ClassEntry getClassEntry(String name, String pathName)
     throws ClassNotFoundException
   {
-    Path classFile = _classDir.lookup(pathName);
-    String javaName = name.replace('.', '/') + _sourceExt;
-    Path javaFile = _sourceDir.lookup(javaName);
+    synchronized (this) {
+      Path classFile = _classDir.lookup(pathName);
+      String javaName = name.replace('.', '/') + _sourceExt;
+      Path javaFile = _sourceDir.lookup(javaName);
 
-    String tail = javaFile.getTail();
+      String tail = javaFile.getTail();
 
-    for (int i = 0; i < INNER_CLASS_SEPARATORS.length; i++) {
-      char sep = INNER_CLASS_SEPARATORS[i];
-      if (name.indexOf(sep) > 0) {
-	String subName = name.substring(0, name.indexOf(sep));
-	String subJavaName = subName.replace('.', '/') + _sourceExt;
-	Path subJava = _sourceDir.lookup(subJavaName);
+      for (int i = 0; i < INNER_CLASS_SEPARATORS.length; i++) {
+	char sep = INNER_CLASS_SEPARATORS[i];
+	if (name.indexOf(sep) > 0) {
+	  String subName = name.substring(0, name.indexOf(sep));
+	  String subJavaName = subName.replace('.', '/') + _sourceExt;
+	  Path subJava = _sourceDir.lookup(subJavaName);
 
-	if (subJava.exists()) {
-	  javaFile = subJava;
+	  if (subJava.exists()) {
+	    javaFile = subJava;
+	  }
 	}
       }
-    }
 
-    if (_requireSource && ! javaFile.exists()) {
-      boolean doRemove = true;
+      if (_requireSource && ! javaFile.exists()) {
+	boolean doRemove = true;
 
-      if (doRemove) {
-	log.finer(L.l("removing obsolete class `{0}'.", classFile.getPath()));
+	if (doRemove) {
+	  log.finer(L.l("removing obsolete class `{0}'.", classFile.getPath()));
 
-	try {
-	  classFile.remove();
-	} catch (IOException e) {
-	  log.log(Level.WARNING, e.toString(), e);
+	  try {
+	    classFile.remove();
+	  } catch (IOException e) {
+	    log.log(Level.WARNING, e.toString(), e);
+	  }
+
+	  return null;
 	}
+      }
 
+      if (! classFile.canRead() && ! javaFile.canRead())
 	return null;
-      }
+
+      return new CompilingClassEntry(this, getLoader(),
+				     name, javaFile,
+				     classFile,
+				     getCodeSource(classFile));
     }
-
-    if (! classFile.canRead() && ! javaFile.canRead())
-      return null;
-
-    return new CompilingClassEntry(this, getLoader(),
-				   name, javaFile,
-				   classFile,
-				   getCodeSource(classFile));
   }
 
   /**

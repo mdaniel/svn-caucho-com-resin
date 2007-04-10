@@ -354,20 +354,22 @@ public class ClassEntry implements Dependency {
   public void load(ByteBuffer buffer)
     throws IOException
   {
-    Path classPath = getClassPath();
+    synchronized (this) {
+      Path classPath = getClassPath();
     
-    buffer.clear();
-    long length = classPath.getLength();
-    if (length < 0)
-      throw new IOException("missing class: " + classPath);
-    ReadStream is = classPath.openRead();
-    try {
-      buffer.setLength((int) length);
-      if (is.readAll(buffer.getBuffer(), 0, (int) length) != length)
-        throw new IOException("class file length mismatch");
-    } finally {
-      is.close();
-    }      
+      buffer.clear();
+      long length = classPath.getLength();
+      if (length < 0)
+	throw new IOException("missing class: " + classPath);
+      ReadStream is = classPath.openRead();
+      try {
+	buffer.setLength((int) length);
+	if (is.readAll(buffer.getBuffer(), 0, (int) length) != length)
+	  throw new IOException("class file length mismatch");
+      } finally {
+	is.close();
+      }
+    }
   }
 
   /**

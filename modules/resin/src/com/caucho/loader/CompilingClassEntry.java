@@ -39,6 +39,7 @@ import com.caucho.vfs.Path;
 import java.io.IOException;
 import java.security.CodeSource;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 class CompilingClassEntry extends ClassEntry {
   private static final L10N L = new L10N(CompilingClassEntry.class);
@@ -139,7 +140,9 @@ class CompilingClassEntry extends ClassEntry {
     {
       return _isDone;
     }
-    public void run() {
+    
+    public void run()
+    {
       Path sourcePath = getSourcePath();
       
       long length = sourcePath.getLength();
@@ -152,6 +155,8 @@ class CompilingClassEntry extends ClassEntry {
 	setSourceLength(length);
 	setSourceLastModified(lastModified);
       } catch (Throwable e) {
+	log.log(Level.FINE, e.toString(), e);
+	
 	_compileIsModified = true;
       }
 

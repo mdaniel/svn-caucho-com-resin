@@ -87,6 +87,7 @@ public class Jar implements CacheListener {
   private SoftReference<JarFile> _jarFileRef;
   // last time the zip file was modified
   private long _jarLastModified;
+  private long _jarLength;
 
   // file to be closed
   private SoftReference<JarFile> _closeJarFileRef;
@@ -505,17 +506,18 @@ public class Jar implements CacheListener {
   {
     try {
       return getJarEntry(path);
-    } catch (Throwable e) {
+    } catch (Exception e) {
       _jarLastModified = 0;
+      _jarLength = 0;
 
       try {
 	closeJarFile();
-      } catch (Throwable e1) {
+      } catch (Exception e1) {
       }
       
       try {
 	return getJarEntry(path);
-      } catch (Throwable e1) {
+      } catch (Exception e1) {
 	log.log(Level.INFO, e1.toString(), e1);
       
 	return null;
@@ -550,11 +552,14 @@ public class Jar implements CacheListener {
     synchronized (this) {
       cache = _cache;
       
-      if (cache == null || getLastModifiedImpl() != _jarLastModified) {
-	_cache = cache = new JarCache();
-
+      if (! isCacheValid() || cache == null) {
 	try {
 	  JarFile file = getJarFile();
+
+	  if (file == null)
+	    return null;
+
+	  _cache = cache = new JarCache();
 
 	  Enumeration<JarEntry> e = file.entries();
 	  while (e.hasMoreElements()) {
@@ -583,8 +588,10 @@ public class Jar implements CacheListener {
     throws IOException
   {
     JarFile jarFile = null;
+
+    isCacheValid();
     
-    if (getLastModifiedImpl() == _jarLastModified) {
+    // if (isCacheValid()) {
       SoftReference<JarFile> jarFileRef = _jarFileRef;
 
       if (jarFileRef != null) {
@@ -593,7 +600,7 @@ public class Jar implements CacheListener {
 	if (jarFile != null)
 	  return jarFile;
       }
-    }
+      //}
 
     SoftReference<JarFile> oldJarRef = _jarFileRef;
     _jarFileRef = null;
@@ -631,7 +638,7 @@ public class Jar implements CacheListener {
 
     return jarFile;
   }
-
+  
   /**
    * Returns the last modified time for the path.
    *
@@ -641,10 +648,24 @@ public class Jar implements CacheListener {
    */
   private long getLastModifiedImpl()
   {
+    isCacheValid();
+    
+    return _lastModified;
+  }
+  
+  /**
+   * Returns the last modified time for the path.
+   *
+   * @param path path into the jar.
+   *
+   * @return the last modified time of the jar in milliseconds.
+   */
+  private boolean isCacheValid()
+  {
     long now = Alarm.getCurrentTime();
 
-    if (now == _lastTime)
-      return _lastModified;
+    if (now == _lastTime && ! Alarm.isTest())
+      return true;
 
     long oldLastModified = _lastModified;
     long oldLength = _length;
@@ -653,12 +674,15 @@ public class Jar implements CacheListener {
     _length = _backing.getLength();
     _lastTime = now;
 
-    // If the file has changed, close the old file
-    if (_lastModified != oldLastModified || _length != oldLength) {
+    if (_lastModified == oldLastModified && _length == oldLength)
+      return true;
+    else {
+      // If the file has changed, close the old file
       SoftReference<JarFile> oldFileRef = _jarFileRef;
 	
       _jarFileRef = null;
       _jarLastModified = 0;
+      _cache = null;
 
       JarFile oldCloseFile = null;
       if (_closeJarFileRef != null)
@@ -672,9 +696,9 @@ public class Jar implements CacheListener {
 	} catch (Throwable e) {
 	}
       }
-    }
 
-    return _lastModified;
+      return false;
+    }
   }
 
   /**
