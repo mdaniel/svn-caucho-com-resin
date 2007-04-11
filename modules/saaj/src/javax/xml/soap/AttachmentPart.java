@@ -33,9 +33,9 @@ import javax.activation.*;
 import java.util.*;
 
 public abstract class AttachmentPart {
-  protected static final String CONTENT_ID = "Content-ID";
-  protected static final String CONTENT_LOCATION = "Content-Location";
-  protected static final String CONTENT_TYPE = "Content-Type";
+  private static final String CONTENT_ID = "Content-ID";
+  private static final String CONTENT_LOCATION = "Content-Location";
+  private static final String CONTENT_TYPE = "Content-Type";
 
   public AttachmentPart()
   {

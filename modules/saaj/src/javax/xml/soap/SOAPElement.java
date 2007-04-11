@@ -86,8 +86,7 @@ public interface SOAPElement extends Node, Element {
 
   public QName getElementQName();
   
-  public String getEncodingStyle()
-    throws SOAPException;
+  public String getEncodingStyle();
 
   public Iterator getNamespacePrefixes();
 
@@ -106,7 +105,7 @@ public interface SOAPElement extends Node, Element {
   public SOAPElement setElementQName(QName newName) 
     throws SOAPException;
 
-  public void setEncodingStyle(String encodingStyle) 
+  public void setEncodingStyle(String encodingStyle)
     throws SOAPException;
 }
 
