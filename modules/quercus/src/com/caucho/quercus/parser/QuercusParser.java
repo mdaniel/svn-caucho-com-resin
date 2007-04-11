@@ -210,6 +210,8 @@ public class QuercusParser {
   
   private boolean _isTop;
 
+  private boolean _isNewExpr;
+
   QuercusParser(Quercus quercus)
   {
     _quercus = quercus;
@@ -233,13 +235,18 @@ public class QuercusParser {
 
   private void init(Path sourceFile, Reader is)
   {
-    _sourceFile = sourceFile;
     _is = is;
 
-    if (sourceFile != null)
+    if (sourceFile != null) {
       _parserLocation.setFileName(sourceFile.getPath());
-    else
+      _sourceFile = sourceFile;
+    }
+    else {
       _parserLocation.setFileName("eval:");
+
+      // php/2146
+      _sourceFile = new NullPath("eval:");
+    }
 
     _parserLocation.setLineNumber(1);
 
@@ -2655,7 +2662,7 @@ public class QuercusParser {
 
     token = parseToken();
     if (token == '(') {
-      if (term instanceof ThisExpr) {
+      if (_isNewExpr && term instanceof ThisExpr) {
         //php/09fj
         
         _peekToken = token;
@@ -3253,8 +3260,13 @@ public class QuercusParser {
     else {
       _peekToken = token;
       
+      boolean isNewExpr = _isNewExpr;
+      _isNewExpr = true;
+
       // nameExpr = parseTermBase();
       nameExpr = parseTermDeref();
+
+      _isNewExpr = isNewExpr;
     }
 
     token = parseToken();

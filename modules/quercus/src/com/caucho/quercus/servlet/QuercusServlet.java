@@ -34,6 +34,7 @@ import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusDieException;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusLineRuntimeException;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.module.QuercusModule;
@@ -68,6 +69,8 @@ public class QuercusServlet
 
   public QuercusServlet()
   {
+    checkJavaVersion();
+
     if (_impl == null) {
       try {
 	Class cl = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
@@ -89,7 +92,46 @@ public class QuercusServlet
     if (_impl == null)
       _impl = new QuercusServletImpl();
   }
-  
+
+  /**
+   * Make sure Quercus is running on JDK 1.5+.
+   */
+  private static void checkJavaVersion()
+  {
+    String version = System.getProperty("java.version");
+
+    if (version.startsWith("1.3.") || version.startsWith("1.4."))
+      throw new QuercusRuntimeException(L.l("Quercus requires JDK 1.5 or newer."));
+
+/*
+    int major = 0;
+    int minor = 0;
+
+    int i = 0;
+    int length = version.length();
+    while(i < length) {
+      char ch = version.charAt(i++);
+
+      if (ch == '.')
+        break;
+
+      major = major * 10 + ch - '0';
+    }
+
+    while(i < length) {
+      char ch = version.charAt(i++);
+
+      if (ch == '.')
+        break;
+
+      minor = minor * 10 + ch - '0';
+    }
+
+    if (major == 1 && minor < 5)
+      throw new QuercusRuntimeException(L.l("Quercus requires JDK 1.5 or newer."));
+*/
+  }
+
   /**
    * Set true if quercus should be compiled into Java.
    */

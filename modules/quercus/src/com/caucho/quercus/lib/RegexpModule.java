@@ -950,6 +950,9 @@ public class RegexpModule
     boolean isCaptureOffset = (flags & PREG_SPLIT_OFFSET_CAPTURE) != 0; 
     boolean isCaptureDelim = (flags & PREG_SPLIT_DELIM_CAPTURE) != 0;
 
+    GroupNeighborMap neighborMap
+      = new GroupNeighborMap(patternString, matcher.groupCount());
+
     while (matcher.find()) {
       int startPosition = head;
       StringValue unmatched;
@@ -990,24 +993,52 @@ public class RegexpModule
           int start = matcher.start(i);
           int end = matcher.end(i);
 
-          if ((start != -1 && end - start > 0) || allowEmpty) {
+          // Skip empty groups
+          if (start == -1) {
+            continue;
+          }
 
-            StringValue groupValue;
-            if (start < 0)
-              groupValue = StringValue.EMPTY;
-            else
-              groupValue = string.substring(start, end);
+          // Append empty OR neighboring groups that were skipped
+          // php/152r
+          if (allowEmpty) {
+            int group = i;
+            while (neighborMap.hasNeighbor(group)) {
+              group = neighborMap.getNeighbor(group);
+              
+              if (matcher.start(group) != -1) {
+                break;
+              }
+              
+              if (isCaptureOffset) {
+                ArrayValue part = new ArrayValueImpl();
 
-            if (isCaptureOffset) {
-              ArrayValue part = new ArrayValueImpl();
+                part.put(StringValue.EMPTY);
+                part.put(LongValue.create(startPosition));
 
-              part.put(groupValue);
-              part.put(LongValue.create(startPosition));
-
-              result.put(part);
+                result.put(part);
+              }
+              else {
+                result.put(StringValue.EMPTY);
+              }
             }
-            else
-              result.put(groupValue);
+          }
+
+          if (end - start <= 0 && ! allowEmpty) {
+            continue;
+          }
+
+          StringValue groupValue = string.substring(start, end);
+
+           if (isCaptureOffset) {
+            ArrayValue part = new ArrayValueImpl();
+
+            part.put(groupValue);
+            part.put(LongValue.create(startPosition));
+
+            result.put(part);
+          }
+          else {
+            result.put(groupValue);
           }
         }
       }
@@ -1023,83 +1054,12 @@ public class RegexpModule
 
         result.put(part);
       }
-      else
-        result.put(string.substring(head));
-    }
-
-    return result;
-
-/*
-    while ((matcher.find()) && (count < limit)) {
-
-      StringValue value;
-
-      int startPosition = head;
-
-      if (head != matcher.start() || isAllowEmpty) {
-        // If at limit, then just output the rest of string
-        if (count == limit - 1) {
-
-          value = string.substring(head);
-          head = string.length();
-        } else {
-          value = string.substring(head, matcher.start());
-          head = matcher.end();
-        }
-
-        if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
-          ArrayValue part = new ArrayValueImpl();
-          part.put(value);
-          part.put(LongValue.create(startPosition));
-
-          result.put(part);
-        } else {
-          result.put(value);
-        }
-
-        count++;
-      } else
-        head = matcher.end();
-
-      if ((flags & PREG_SPLIT_DELIM_CAPTURE) != 0) {
-	for (int i = 1; i <= matcher.groupCount(); i++) {
-	  String group = matcher.group(i);
-	  Value groupValue;
-
-	  if (group != null)
-	    groupValue = new StringValueImpl(group);
-	  else
-	    groupValue = StringValue.EMPTY;
-
-          if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
-            ArrayValue part = new ArrayValueImpl();
-            part.put(groupValue);
-            part.put(LongValue.create(matcher.start()));
-
-            result.put(part);
-          } else {
-	    result.put(groupValue);
-          }
-        }
-      }
-    }
-
-    if (head == string.length() && ! isAllowEmpty) {
-    }
-    else if ((head <= string.length()) && (count != limit)) {
-      if ((flags & PREG_SPLIT_OFFSET_CAPTURE) != 0) {
-        ArrayValue part = new ArrayValueImpl();
-        part.put(string.substring(head));
-        part.put(LongValue.create(head));
-
-        result.put(part);
-      } else {
+      else {
         result.put(string.substring(head));
       }
     }
 
     return result;
-*/
   }
 
   /**
@@ -1795,7 +1755,67 @@ public class RegexpModule
       }
     }
   }
-  
+
+  /**
+   * Holds information about the left neighbor of a particular group.
+   */
+  static class GroupNeighborMap
+  {
+    private int []_neighborMap;
+
+    private static int UNSET = -1;
+    
+    public GroupNeighborMap(StringValue regexp, int groups)
+    {
+      _neighborMap = new int[groups + 1];
+      
+      for (int i = 1; i <= groups; i++) {
+        _neighborMap[i] = UNSET;
+      }
+      
+      boolean sawVerticalBar = false;
+      int group = 0;
+      int parent = UNSET;
+      int length = regexp.length();
+      
+      for (int i = 0; i < length; i++) {
+        char ch = regexp.charAt(i);
+        
+        if (ch == '(') {
+          group++;
+          
+          if (sawVerticalBar) {
+            sawVerticalBar = false;
+            _neighborMap[group] = group - 1;
+          }
+          else {
+            _neighborMap[group] = parent;
+            parent = group;
+          }
+        }
+        else if (ch == ')') {
+          parent = _neighborMap[group];
+        }
+        else if (ch == '|') {
+          sawVerticalBar = true;
+        }
+        else {
+          continue;
+        }
+      }
+    }
+    
+    public boolean hasNeighbor(int group)
+    {
+      return _neighborMap[group] != UNSET;
+    }
+    
+    public int getNeighbor(int group)
+    {
+      return _neighborMap[group];
+    }
+  }
+
   /*
    * Holds PCRE named subpatterns.
    */
