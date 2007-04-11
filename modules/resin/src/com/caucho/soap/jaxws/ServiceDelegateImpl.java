@@ -80,6 +80,7 @@ public class ServiceDelegateImpl extends ServiceDelegate {
   private final QName _serviceName;
   private final Class _serviceClass;
 
+  private HandlerResolver _handlerResolver;
   private Executor _executor = ScheduledThreadPool.getLocal();
 
   ServiceDelegateImpl(URL wsdl, QName serviceName, Class serviceClass)
@@ -118,6 +119,9 @@ public class ServiceDelegateImpl extends ServiceDelegate {
 
     Dispatch<T> dispatch = null;
     Binding binding = getBinding(bindingId);
+
+    if (_handlerResolver != null)
+      binding.setHandlerChain(_handlerResolver.getHandlerChain(port));
 
     if (Source.class.equals(type)) {
       dispatch = (Dispatch<T>) new SourceDispatch(bindingId, binding, 
@@ -164,6 +168,10 @@ public class ServiceDelegateImpl extends ServiceDelegate {
       endpointAddress = findEndpointAddress();
 
     Binding binding = getBinding(bindingId);
+
+    if (_handlerResolver != null)
+      binding.setHandlerChain(_handlerResolver.getHandlerChain(port));
+
     JAXBDispatch dispatch = 
       new JAXBDispatch(bindingId, binding, mode, _executor, context);
 
@@ -183,7 +191,12 @@ public class ServiceDelegateImpl extends ServiceDelegate {
 
   public HandlerResolver getHandlerResolver()
   {
-    throw new UnsupportedOperationException();
+    return _handlerResolver;
+  }
+
+  public void setHandlerResolver(HandlerResolver handlerResolver)
+  {
+    _handlerResolver = handlerResolver;
   }
 
   public <T> T getPort(Class<T> serviceEndpointInterface)
@@ -198,15 +211,27 @@ public class ServiceDelegateImpl extends ServiceDelegate {
       Skeleton skeleton = new WebServiceIntrospector().introspect(api, null);
 
       WSDLDefinitions definitions = WSDLParser.parse(api);
-      String endpointAddress = findEndpointAddress();
 
-      // XXX bindingId
-      Binding binding = getBinding(SOAPBinding.SOAP11HTTP_BINDING);
+      /*
+      if (definitions == null)
+        definitions = WSDLParser.parse(getWSDLDocumentLocation());
+
+      if (definitions == null)
+        throw new WebServiceException(L.l("Unable to parse WSDL"));*/
+
+      String endpointAddress = findEndpointAddress();
+      String bindingId = SOAPBinding.SOAP11HTTP_BINDING;
+      //definitions.getBindingId(_serviceName, portName);
+
+      Binding binding = getBinding(bindingId);
       PortProxyHandler handler = 
         new PortProxyHandler(skeleton, endpointAddress, binding);
 
-      PortInfoImpl portInfo = 
-        new PortInfoImpl(null, portName, _serviceName, endpointAddress);
+      PortInfoImpl portInfo = new PortInfoImpl(bindingId, portName, 
+                                               _serviceName, endpointAddress);
+
+      if (_handlerResolver != null)
+        binding.setHandlerChain(_handlerResolver.getHandlerChain(portInfo));
 
       _portMap.put(portName, portInfo);
 
@@ -242,10 +267,6 @@ public class ServiceDelegateImpl extends ServiceDelegate {
   public void setExecutor(Executor executor)
   {
     _executor = executor;
-  }
-
-  public void setHandlerResolver(HandlerResolver handlerResolver)
-  {
   }
 
   public String toString()

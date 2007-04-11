@@ -59,8 +59,12 @@ public class WSDLParser {
   {
     WebService service = (WebService) api.getAnnotation(WebService.class);
 
-    if (service == null)
+    if (service == null) {
+      if (log.isLoggable(Level.FINER))
+        log.finer("No @WebService found on " + api);
+
       return null;
+    }
 
     String wsdlLocation = null;
 
@@ -74,8 +78,12 @@ public class WSDLParser {
 
         service = (WebService) api.getAnnotation(WebService.class);
 
-        if (service == null)
+        if (service == null) {
+          if (log.isLoggable(Level.FINER))
+            log.finer("No @WebService found on " + api);
+
           return null;
+        }
 
         if (! "".equals(service.wsdlLocation()))
           wsdlLocation = service.wsdlLocation();
@@ -84,8 +92,12 @@ public class WSDLParser {
       }
     }
 
-    if (wsdlLocation == null)
+    if (wsdlLocation == null) {
+      if (log.isLoggable(Level.FINER))
+        log.finer("No WSDL location found on " + api);
+
       return null;
+    }
 
     return parse(wsdlLocation);
   }

@@ -105,6 +105,9 @@ public class WSDLDefinitions extends WSDLExtensibleDocumented {
   @XmlTransient
   private String _endpointAddress;
 
+  @XmlTransient
+  private String _bindingId;
+
   /**
    * Sets the definition name.
    */
@@ -180,6 +183,61 @@ public class WSDLDefinitions extends WSDLExtensibleDocumented {
       return _services = new ArrayList<WSDLService>();
 
     return _services;
+  }
+
+  public String getBindingId(QName serviceName, QName portName)
+  {
+    if (_bindingId == null) {
+      if (! serviceName.getNamespaceURI().equals(getTargetNamespace()))
+        return null;
+
+      // first find out which binding we're looking for
+      QName bindingName = null;
+
+      if (_services != null) {
+        for (int i = 0; i < _services.size(); i++) {
+          WSDLService service = _services.get(i);
+
+          if (serviceName.getLocalPart().equals(service.getName())) {
+            List<WSDLPort> ports = service.getPorts();
+
+            for (int j = 0; j < ports.size(); j++) {
+              WSDLPort port = ports.get(j);
+
+              if (portName.getLocalPart().equals(port.getName())) {
+                bindingName = port.getBinding();
+                break;
+              }
+            }
+
+            if (bindingName != null)
+              break;
+          }
+        }
+      }
+
+      if (bindingName != null && _bindings != null) {
+        for (int i = 0; i < _bindings.size(); i++) {
+          WSDLBinding binding = _bindings.get(i);
+
+          if (bindingName.getLocalPart().equals(binding.getName())) {
+            List<Object> any = binding.getAny();
+
+            for (int j = 0; j < any.size(); j++) {
+              if (any.get(j) instanceof SOAPBinding) {
+                SOAPBinding soapBinding = (SOAPBinding) any.get(j);
+
+                _bindingId = soapBinding.getTransport();
+
+                return _bindingId;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return _bindingId;
   }
 
   public String getEndpointAddress(QName serviceName, QName portName)
