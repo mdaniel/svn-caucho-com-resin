@@ -282,6 +282,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   {
     JClass ejbClass = _jClassLoader.forName(typeName);
 
+    if (ejbClass == null)
+      throw error(L.l("ejb-class '{0}' not found", typeName));
+
     setEJBClassWrapper(ejbClass);
   }
 
