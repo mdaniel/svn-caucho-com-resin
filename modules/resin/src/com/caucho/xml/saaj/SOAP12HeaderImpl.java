@@ -83,7 +83,6 @@ public class SOAP12HeaderImpl extends SOAP11HeaderImpl
   }
 
   public String getEncodingStyle()
-    throws SOAPException
   {
     // optimization
     return null;

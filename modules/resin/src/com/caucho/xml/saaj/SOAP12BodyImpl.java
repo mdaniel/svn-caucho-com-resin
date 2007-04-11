@@ -69,7 +69,6 @@ public class SOAP12BodyImpl extends SOAP11BodyImpl
   }
 
   public String getEncodingStyle()
-    throws SOAPException
   {
     // optimization
     return null; 

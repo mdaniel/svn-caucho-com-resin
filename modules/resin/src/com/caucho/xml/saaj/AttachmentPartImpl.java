@@ -41,6 +41,8 @@ import javax.xml.transform.stream.StreamSource;
 import com.caucho.util.Base64;
 
 public class AttachmentPartImpl extends AttachmentPart {
+  private static final String CONTENT_TYPE = "Content-Type";
+
   static 
   {
     try {

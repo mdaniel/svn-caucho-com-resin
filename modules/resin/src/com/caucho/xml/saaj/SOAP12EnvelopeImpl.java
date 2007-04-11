@@ -59,7 +59,6 @@ public class SOAP12EnvelopeImpl extends SOAPEnvelopeImpl
   }
 
   public String getEncodingStyle()
-    throws SOAPException
   {
     // optimization
     return null;

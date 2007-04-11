@@ -356,7 +356,6 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
   }
   
   public String getEncodingStyle()
-    throws SOAPException
   {
     return getAttributeValue(ENCODING_STYLE_NAME);
   }
