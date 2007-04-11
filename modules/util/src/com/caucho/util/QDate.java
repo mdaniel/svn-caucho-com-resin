@@ -33,6 +33,7 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -107,6 +108,7 @@ public class QDate {
   private static QDate _localDate = new QDate(true);
 
   private TimeZone _timeZone;
+  private Calendar _calendar;
 
   private String _dstName;
   private String _stdName;
@@ -172,6 +174,8 @@ public class QDate {
       _dstName = _timeZone.getDisplayName(true, TimeZone.SHORT);
     }
 
+    _calendar = new GregorianCalendar(_timeZone);
+
     setLocalTime(Alarm.getCurrentTime());
   }
 
@@ -209,16 +213,16 @@ public class QDate {
       calculateSplit(time - _localTimeZone.getRawOffset());
 
       try {
-	long offset = _localTimeZone.getOffset(GregorianCalendar.AD,
-					       (int) _year,
-					       (int) _month,
-					       (int) _dayOfMonth + 1,
-					       getDayOfWeek(),
-					       (int) _timeOfDay);
+        long offset = _localTimeZone.getOffset(GregorianCalendar.AD,
+                                               (int) _year,
+                                               (int) _month,
+                                               (int) _dayOfMonth + 1,
+                                               getDayOfWeek(),
+                                               (int) _timeOfDay);
 
-	calculateSplit(time - offset);
+        calculateSplit(time - offset);
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
   }
@@ -243,6 +247,14 @@ public class QDate {
 
       return _localTimeOfEpoch + offset;
     }
+  }
+
+  /**
+   * Return the current time as a java.util.Calendar.
+   **/
+  public Calendar getCalendar()
+  {
+    return _calendar;
   }
 
   /**
@@ -1061,23 +1073,23 @@ public class QDate {
 
       int ch = string.charAt(i);
       if (ch >= '0' && ch <= '9' ||
-	  ch == 'T' &&
-	  string.charAt(i + 1) >= '0' && string.charAt(i + 1) <= '9')
-	return parseISO8601Date(string, i);
+          ch == 'T' &&
+          string.charAt(i + 1) >= '0' && string.charAt(i + 1) <= '9')
+        return parseISO8601Date(string, i);
 
       CharBuffer cb = new CharBuffer();
 
       i = scan(string, 0, cb, true);
       if (cb.length() == 0 || ! Character.isDigit(cb.charAt(0)))
-	i = scan(string, i, cb, true);
+        i = scan(string, i, cb, true);
 
       int dayOfMonth = parseInt(cb);
       i = scan(string, i, cb, true);
       String smonth = cb.toString();
       int month;
       for (month = 0; month < 12; month++) {
-	if (MONTH_NAMES[(int) month].equalsIgnoreCase(smonth))
-	  break;
+        if (MONTH_NAMES[(int) month].equalsIgnoreCase(smonth))
+          break;
       }
       if (month == 12) throw new Exception();
 
@@ -1085,9 +1097,9 @@ public class QDate {
 
       int year = parseInt(cb);
       if (cb.length() < 3 && year < 50)
-	year += 2000;
+        year += 2000;
       else if (cb.length() < 3 && year < 100)
-	year += 1900;
+        year += 1900;
 
       i = scan(string, i, cb, false);
       long timeOfDay = parseInt(cb) * 3600000;
@@ -1100,35 +1112,35 @@ public class QDate {
 
       // XXX: gross hack
       if (year <= 1600)
-	dayOfMonth--;
+        dayOfMonth--;
 
       long time = (MS_PER_DAY * (yearToDayOfEpoch(year) +
-				 monthToDayOfYear(month, isLeapYear(year)) +
-				 dayOfMonth - 1) +
-		   timeOfDay);
+            monthToDayOfYear(month, isLeapYear(year)) +
+            dayOfMonth - 1) +
+          timeOfDay);
 
       try {
-	i = scan(string, i, cb, false);
-	for (int j = 0; j < cb.length(); j++) {
-	  if ((ch = cb.charAt(j)) == ';' || ch == ' ')
-	    cb.setLength(j);
-	}
+        i = scan(string, i, cb, false);
+        for (int j = 0; j < cb.length(); j++) {
+          if ((ch = cb.charAt(j)) == ';' || ch == ' ')
+            cb.setLength(j);
+        }
 
-	ch = cb.charAt(0);
-	if (ch == '-' || ch == '+' || ch >= '0' && ch <= '9') {
+        ch = cb.charAt(0);
+        if (ch == '-' || ch == '+' || ch >= '0' && ch <= '9') {
           long zoneOffset;
-	  zoneOffset = parseInt(cb);
-	  zoneOffset = 60000 * (60 * (zoneOffset / 100) + zoneOffset % 100);
+          zoneOffset = parseInt(cb);
+          zoneOffset = 60000 * (60 * (zoneOffset / 100) + zoneOffset % 100);
 
-	  time -= zoneOffset;
+          time -= zoneOffset;
 
           setGMTTime(time);
-	} else if (cb.equalsIgnoreCase("gmt") ||
-		   cb.equalsIgnoreCase("utc")) {
+        } else if (cb.equalsIgnoreCase("gmt") ||
+            cb.equalsIgnoreCase("utc")) {
           setGMTTime(time);
-	} else {
+        } else {
           setLocalTime(time);
-	}
+        }
       } catch (Exception e) {
       }
 
@@ -1176,41 +1188,55 @@ public class QDate {
     int hour = 0;
     int minute = 0;
     int second = 0;
+    int millisecond = 0;
     if (pos < length && string.charAt(pos) == 'T') {
       pos++;
 
       if (pos < length && '0' <= (ch = string.charAt(pos)) && ch <= '9') {
-	hour = scanISOInt(string, pos, length, 2);
-	pos += 2;
+        hour = scanISOInt(string, pos, length, 2);
+        pos += 2;
+      }
+
+      // XXX: fractions can technically be used anywhere by using a
+      // , or . instead of a :
+      // e.g. 14:30,5 == 14:30:30
+
+      if (pos < length && string.charAt(pos) == ':')
+        pos++;
+
+      if (pos < length && '0' <= (ch = string.charAt(pos)) && ch <= '9') {
+        minute = scanISOInt(string, pos, length, 2);
+        pos += 2;
       }
 
       if (pos < length && string.charAt(pos) == ':')
-	pos++;
+        pos++;
 
       if (pos < length && '0' <= (ch = string.charAt(pos)) && ch <= '9') {
-	minute = scanISOInt(string, pos, length, 2);
-	pos += 2;
+        second = scanISOInt(string, pos, length, 2);
+        pos += 2;
       }
 
-      if (pos < length && string.charAt(pos) == ':')
-	pos++;
-
-      if (pos < length && '0' <= (ch = string.charAt(pos)) && ch <= '9') {
-	second = scanISOInt(string, pos, length, 2);
-	pos += 2;
+      if (pos < length && 
+          string.charAt(pos) == '.' || 
+          string.charAt(pos) == ',') {
+        pos++;
+        // XXX: fractions can be any length, not just 3
+        millisecond = scanISOInt(string, pos, length, 3);
+        pos += 3;
       }
     }
 
-    long timeOfDay = 1000 * (second + 60 * (minute + 60 * hour));
+    long timeOfDay = millisecond + 1000 * (second + 60 * (minute + 60 * hour));
 
     // XXX: gross hack
     if (year <= 1600)
       day--;
 
     long time = (MS_PER_DAY * (yearToDayOfEpoch(year) +
-			       monthToDayOfYear(month, isLeapYear(year)) +
-			       day) +
-		 timeOfDay);
+                 monthToDayOfYear(month, isLeapYear(year)) +
+                 day) +
+                timeOfDay);
 
     if (pos >= length) {
       setLocalTime(time);
@@ -1222,9 +1248,9 @@ public class QDate {
     }
 
     else if (string.charAt(pos) == '-' || string.charAt(pos) == '+') {
-      int sign = 1;
+      int sign = -1;
       if (string.charAt(pos) == '-')
-	sign = -1;
+        sign = 1;
 
       pos++;
       int tzHour = scanISOInt(string, pos, length, 2);
@@ -1232,10 +1258,10 @@ public class QDate {
       int tzMinute = 0;
 
       if (pos < length && string.charAt(pos) == ':')
-	pos++;
+        pos++;
       if (pos < length && '0' <= (ch = string.charAt(pos)) && ch <= '9') {
-	tzMinute = scanISOInt(string, pos, length, 2);
-	pos += 2;
+        tzMinute = scanISOInt(string, pos, length, 2);
+        pos += 2;
       }
 
       time += sign * 1000 * (60 * (tzMinute + 60 * tzHour));
@@ -1282,7 +1308,7 @@ public class QDate {
     for (int i = 0; i < month && i < 12; i++) {
       day += DAYS_IN_MONTH[i];
       if (i == 1 && isLeapYear)
-	day++;
+        day++;
     }
 
     return day;
@@ -1302,12 +1328,12 @@ public class QDate {
     int value = 0;
     for (int i = 0; i < digits; i++) {
       if (pos >= length)
-	throw new Exception("expected ISO8601 digit");
+        throw new Exception("expected ISO8601 digit");
       char ch = string.charAt(pos++);
       if ('0' <= ch && ch <= '9')
-	value = 10 * value + ch - '0';
+        value = 10 * value + ch - '0';
       else
-	throw new Exception("expected ISO8601 digit");
+        throw new Exception("expected ISO8601 digit");
     }
 
     return value;
@@ -1317,9 +1343,9 @@ public class QDate {
   {
     char ch;
     for (; i < string.length() &&
-	   ((ch = string.charAt(i)) == ' ' || ch == '\t' ||
-	    ch == '\n' || ch == '\r');
-	 i++) {
+           ((ch = string.charAt(i)) == ' ' || ch == '\t' ||
+           ch == '\n' || ch == '\r');
+           i++) {
     }
 
     return i;
@@ -1337,16 +1363,16 @@ public class QDate {
 
     for (; i < string.length(); i++) {
       if (! Character.isWhitespace(ch = string.charAt(i)) &&
-	  (ch != ':' && (! dash || ch != '-')))
-	break;
+          (ch != ':' && (! dash || ch != '-')))
+        break;
     }
 
     for (; i < string.length(); i++) {
       if (! Character.isWhitespace(ch = string.charAt(i)) &&
-	  (ch != ':' && (! dash || ch != '-')))
-	cb.append((char) ch);
+          (ch != ':' && (! dash || ch != '-')))
+        cb.append((char) ch);
       else
-	break;
+        break;
     }
 
     if (cb.length() == 0)
@@ -1363,13 +1389,13 @@ public class QDate {
     for (int i = 0; i < cb.length(); i++) {
       int ch = cb.charAt(i);
       if (i == 0 && ch == '-')
-	sign = -1;
+        sign = -1;
       else if (i == 0 && ch == '+') {
       }
       else if (ch >= '0' && ch <= '9')
-	value = 10 * value + ch - '0';
+        value = 10 * value + ch - '0';
       else
-	throw new Exception();
+        throw new Exception();
     }
 
     return sign * value;
@@ -1435,21 +1461,23 @@ public class QDate {
     }
     else {
       _zoneOffset = _timeZone.getOffset(GregorianCalendar.AD,
-					(int) _year,
-					(int) _month,
-					(int) _dayOfMonth + 1,
-					getDayOfWeek(),
-					(int) _timeOfDay);
+                                        (int) _year,
+                                        (int) _month,
+                                        (int) _dayOfMonth + 1,
+                                        getDayOfWeek(),
+                                        (int) _timeOfDay);
 
       if (_zoneOffset == _timeZone.getRawOffset()) {
-	_isDaylightTime = false;
-	_zoneName = _stdName;
+        _isDaylightTime = false;
+        _zoneName = _stdName;
       }
       else {
-	_isDaylightTime = true;
-	_zoneName = _dstName;
+        _isDaylightTime = true;
+        _zoneName = _dstName;
       }
     }
+
+    _calendar.setTime(new Date(_localTimeOfEpoch));
   }
 
   /**
@@ -1500,15 +1528,15 @@ public class QDate {
 
     for (_month = 0; _month < 12; _month++) {
       if (_month == 1 && _isLeapYear) {
-	if (_dayOfMonth < 29)
-	  return;
-	else
-	  _dayOfMonth -= 29;
+        if (_dayOfMonth < 29)
+          return;
+        else
+          _dayOfMonth -= 29;
       }
       else if (_dayOfMonth < DAYS_IN_MONTH[(int) _month])
-	return;
+        return;
       else
-	_dayOfMonth -= DAYS_IN_MONTH[(int) _month];
+        _dayOfMonth -= DAYS_IN_MONTH[(int) _month];
     }
   }
 
