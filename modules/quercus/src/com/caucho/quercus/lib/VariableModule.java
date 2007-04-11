@@ -38,6 +38,7 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.vfs.StringWriter;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -547,24 +548,36 @@ public class VariableModule extends AbstractQuercusModule {
   }
 
   /**
-   * Escapes a string using C syntax.
+   * Prints a value.  If isReturn is true, then returns what was supposed
+   * to be printed as a string instead.
    *
    * @param env the quercus calling environment
    * @param v the variable to print
-   * @return the escaped stringPhp
+   * @param isReturn set to true if returning instead of printing value
+   * @return the string that was supposed to be printed, or true
    */
   public static Value print_r(Env env,
 			      @ReadOnly Value v,
-			      @Optional Value isRet)
+			      @Optional boolean isReturn)
   {
-    // XXX: isRet is ignored
-
     try {
-      WriteStream out = env.getOut();
-
-      v.printR(env, out, 0, new IdentityHashMap<Value, String>());
-
-      return BooleanValue.FALSE;
+      WriteStream out;
+      
+      if (isReturn) {
+        StringWriter writer = new StringWriter();
+        out = writer.openWrite();
+        
+        v.printR(env, out, 0, new IdentityHashMap<Value, String>());
+        
+        return new StringValueImpl(writer.getString());
+      }
+      else {
+        out = env.getOut();
+        
+        v.printR(env, out, 0, new IdentityHashMap<Value, String>());
+        
+        return BooleanValue.TRUE;
+      }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
