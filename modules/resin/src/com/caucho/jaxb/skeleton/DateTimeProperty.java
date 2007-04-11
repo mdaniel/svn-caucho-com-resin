@@ -56,7 +56,7 @@ public class DateTimeProperty extends CDataProperty {
 
   protected Object read(String in)
   {
-    return DatatypeConverter.parseDate(in).getTime();
+    return DatatypeConverter.parseDateTime(in).getTime();
   }
 
   public String getSchemaType()

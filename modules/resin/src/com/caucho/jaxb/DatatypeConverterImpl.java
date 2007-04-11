@@ -31,6 +31,7 @@ package com.caucho.jaxb;
 
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 
 import javax.xml.bind.DatatypeConverterInterface;
 import javax.xml.namespace.NamespaceContext;
@@ -55,6 +56,8 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
     = new SimpleDateFormat("HH:mm:ss");
   private final SimpleDateFormat dateTimeFormat
     = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+  private final QDate _qdate = new QDate();
 
   private final char[] hexDigits = { '0', '1', '2', '3', '4',
                                      '5', '6', '7', '8', '9',
@@ -111,23 +114,11 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
     throws IllegalArgumentException
   {
     try {
-      // ISO8601 fix
-      int colon = lexicalXSDDateTime.lastIndexOf(':');
+      _qdate.parseDate(lexicalXSDDateTime);
 
-      if (lexicalXSDDateTime.length() < 3 || 
-          colon != lexicalXSDDateTime.length() - 3)
-        throw new IllegalArgumentException();
-
-      lexicalXSDDateTime = lexicalXSDDateTime.substring(0, colon) +
-                           lexicalXSDDateTime.substring(colon + 1);
-
-      Date date = dateTimeFormat.parse(lexicalXSDDateTime);
-      Calendar calendar = (Calendar) dateFormat.getCalendar().clone();
-      calendar.setTime(date);
-
-      return calendar;
+      return _qdate.getCalendar();
     }
-    catch (ParseException e) {
+    catch (Exception e) {
       throw new IllegalArgumentException(e);
     }
   }
