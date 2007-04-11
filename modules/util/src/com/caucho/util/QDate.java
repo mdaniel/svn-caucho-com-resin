@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -1115,9 +1115,9 @@ public class QDate {
         dayOfMonth--;
 
       long time = (MS_PER_DAY * (yearToDayOfEpoch(year) +
-            monthToDayOfYear(month, isLeapYear(year)) +
-            dayOfMonth - 1) +
-          timeOfDay);
+                                 monthToDayOfYear(month, isLeapYear(year)) +
+                                 dayOfMonth - 1) +
+                  timeOfDay);
 
       try {
         i = scan(string, i, cb, false);
@@ -1136,7 +1136,7 @@ public class QDate {
 
           setGMTTime(time);
         } else if (cb.equalsIgnoreCase("gmt") ||
-            cb.equalsIgnoreCase("utc")) {
+                   cb.equalsIgnoreCase("utc")) {
           setGMTTime(time);
         } else {
           setLocalTime(time);
@@ -1197,6 +1197,7 @@ public class QDate {
         pos += 2;
       }
 
+
       // XXX: fractions can technically be used anywhere by using a
       // , or . instead of a :
       // e.g. 14:30,5 == 14:30:30
@@ -1218,8 +1219,7 @@ public class QDate {
       }
 
       if (pos < length && 
-          string.charAt(pos) == '.' || 
-          string.charAt(pos) == ',') {
+          (string.charAt(pos) == '.' || string.charAt(pos) == ',')) {
         pos++;
         // XXX: fractions can be any length, not just 3
         millisecond = scanISOInt(string, pos, length, 3);
@@ -1234,8 +1234,8 @@ public class QDate {
       day--;
 
     long time = (MS_PER_DAY * (yearToDayOfEpoch(year) +
-                 monthToDayOfYear(month, isLeapYear(year)) +
-                 day) +
+                               monthToDayOfYear(month, isLeapYear(year)) +
+                               day) +
                 timeOfDay);
 
     if (pos >= length) {
@@ -1344,8 +1344,8 @@ public class QDate {
     char ch;
     for (; i < string.length() &&
            ((ch = string.charAt(i)) == ' ' || ch == '\t' ||
-           ch == '\n' || ch == '\r');
-           i++) {
+            ch == '\n' || ch == '\r');
+         i++) {
     }
 
     return i;
