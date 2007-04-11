@@ -146,6 +146,14 @@ public class PersistenceUnitConfig {
   }
 
   /**
+   * Returns true if only listed classes should be used.
+   */
+  public boolean isExcludeUnlistedClasses()
+  {
+    return _isExcludeUnlistedClasses;
+  }
+
+  /**
    * Sets true if only listed classes should be used.
    */
   public void setExcludeUnlistedClasses(boolean isExclude)
@@ -172,7 +180,7 @@ public class PersistenceUnitConfig {
 
     unit.setJtaDataSource(_jtaDataSource);
     unit.setNonJtaDataSource(_nonJtaDataSource);
-    
+
     unit.setEntityMappingsConfig(entityMappings);
 
     unit.init();

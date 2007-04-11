@@ -258,7 +258,7 @@ public class AmberContainer {
   public void init()
   {
   }
-  
+
   /**
    * Returns the EmbeddableType for an introspected class.
    */
@@ -488,7 +488,7 @@ public class AmberContainer {
     if (_persistenceRootSet.contains(root))
       return;
     _persistenceRootSet.add(root);
-    
+
     Path persistenceXml = root.lookup("META-INF/persistence.xml");
     InputStream is = null;
 
@@ -507,12 +507,6 @@ public class AmberContainer {
                                "com/caucho/amber/cfg/mapping-30.rnc");
       }
 
-      HashMap<String, JClass> classMap
-        = new HashMap<String, JClass>();
-
-      // XXX: This is not necessary when <exclude-unlisted-classes/>
-      lookupClasses(root.getPath().length(), root, classMap, entityMappings);
-
       is = persistenceXml.openRead();
 
       PersistenceConfig persistence = new PersistenceConfig();
@@ -521,9 +515,16 @@ public class AmberContainer {
       new Config().configure(persistence, is,
                              "com/caucho/amber/cfg/persistence-30.rnc");
 
+      HashMap<String, JClass> classMap
+        = new HashMap<String, JClass>();
+
       for (PersistenceUnitConfig unitConfig : persistence.getUnitList()) {
         try {
-          unitConfig.addAllClasses(classMap);
+          if (! unitConfig.isExcludeUnlistedClasses()) {
+            classMap.clear();
+            lookupClasses(root.getPath().length(), root, classMap, entityMappings);
+            unitConfig.addAllClasses(classMap);
+          }
 
           AmberPersistenceUnit unit = unitConfig.init(this, entityMappings);
 
