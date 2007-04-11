@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+* Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
 *
 * This file is part of Resin(R) Open Source
 *
@@ -30,90 +30,34 @@
 package javax.xml.ws.handler;
 import java.util.Map;
 
-/** XXX */
 public interface MessageContext extends Map<String,Object> {
-
-  /** XXX */
   static final String HTTP_REQUEST_HEADERS="javax.xml.ws.http.request.headers";
-
-
-  /** XXX */
   static final String HTTP_REQUEST_METHOD="javax.xml.ws.http.request.method";
-
-
-  /** XXX */
   static final String HTTP_RESPONSE_CODE="javax.xml.ws.http.response.code";
-
-
-  /** XXX */
   static final String HTTP_RESPONSE_HEADERS="javax.xml.ws.http.response.headers";
 
-
-  /** XXX */
-  static final String INBOUND_MESSAGE_ATTACHMENTS="javax.xml.ws.binding.attachments.inbound";
-
-
-  /** XXX */
   static final String MESSAGE_OUTBOUND_PROPERTY="javax.xml.ws.handler.message.outbound";
-
-
-  /** XXX */
+  static final String INBOUND_MESSAGE_ATTACHMENTS="javax.xml.ws.binding.attachments.inbound";
   static final String OUTBOUND_MESSAGE_ATTACHMENTS="javax.xml.ws.binding.attachments.outbound";
 
-
-  /** XXX */
   static final String PATH_INFO="javax.xml.ws.http.request.pathinfo";
-
-
-  /** XXX */
   static final String QUERY_STRING="javax.xml.ws.http.request.querystring";
 
-
-  /** XXX */
   static final String SERVLET_CONTEXT="javax.xml.ws.servlet.context";
-
-
-  /** XXX */
   static final String SERVLET_REQUEST="javax.xml.ws.servlet.request";
-
-
-  /** XXX */
   static final String SERVLET_RESPONSE="javax.xml.ws.servlet.response";
 
-
-  /** XXX */
   static final String WSDL_DESCRIPTION="javax.xml.ws.wsdl.description";
-
-
-  /** XXX */
   static final String WSDL_INTERFACE="javax.xml.ws.wsdl.interface";
-
-
-  /** XXX */
   static final String WSDL_OPERATION="javax.xml.ws.wsdl.operation";
-
-
-  /** XXX */
   static final String WSDL_PORT="javax.xml.ws.wsdl.port";
-
-
-  /** XXX */
   static final String WSDL_SERVICE="javax.xml.ws.wsdl.service";
 
-
-  /** XXX */
   abstract Scope getScope(String name);
-
-
-  /** XXX */
   abstract void setScope(String name, Scope scope);
 
-
-  /** XXX */
   public static enum Scope {
-
-      APPLICATION, HANDLER;
-
+    APPLICATION, HANDLER;
   }
 }
 
