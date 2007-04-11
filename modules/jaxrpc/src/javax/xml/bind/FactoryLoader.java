@@ -53,8 +53,8 @@ class FactoryLoader {
 
   private String _factoryId;
 
-  private WeakHashMap<ClassLoader,Object[]> _providerMap
-    = new WeakHashMap<ClassLoader,Object[]>();
+  private WeakHashMap<ClassLoader,Class[]> _providerMap
+    = new WeakHashMap<ClassLoader,Class[]>();
 
   public static FactoryLoader getFactoryLoader(String factoryId) 
   {
@@ -104,7 +104,7 @@ class FactoryLoader {
     }
   }
 
-  public Object newInstance(ClassLoader classLoader, String contextPath)
+  public Class getFactoryClass(ClassLoader classLoader, String contextPath)
     throws FactoryConfigurationError
   {
     String[] pkgs = contextPath.split(":");
@@ -118,7 +118,7 @@ class FactoryLoader {
 
       if (className != null) {
         try {
-          return classLoader.loadClass(className).newInstance();
+          return classLoader.loadClass(className);
         }
         catch (Exception e) {
           throw new FactoryConfigurationError(e);
@@ -126,15 +126,20 @@ class FactoryLoader {
       }
     }
 
-    return newInstance(classLoader);
+    return getFactoryClass(classLoader);
   }
 
-  public Object newInstance(ClassLoader classLoader)
+  public Class getFactoryClass(ClassLoader classLoader)
     throws FactoryConfigurationError
   {
     String className = null;
 
     className = System.getProperty(_factoryId);
+
+    if (className != null && log.isLoggable(Level.FINEST)) {
+      log.finest("got JAXB Context factory className from System property: " +
+                 className);
+    }
 
     if (className == null) {
       String fileName =
@@ -145,19 +150,28 @@ class FactoryLoader {
         "jaxb.properties";
 
       className = classNameFromPropertiesFile(classLoader, fileName);
+
+      if (className != null && log.isLoggable(Level.FINEST)) {
+        log.finest("got JAXB Context factory className from jaxb.properties: " +
+                   className);
+      }
     }
 
     if (className == null) {
-      Object factory = createFactory("META-INF/services/"+_factoryId,
-                                     classLoader);
-      if (factory != null)
-        return factory;
+      Class factoryClass = getFactoryClass("META-INF/services/" + _factoryId,
+                                           classLoader);
+      if (factoryClass != null && log.isLoggable(Level.FINEST)) {
+        log.finest("got JAXB Context factory class from META-INF/services: "
+                   + factoryClass.getName());
+      }
+
+      if (factoryClass != null)
+        return factoryClass;
     }
 
     if (className != null) {
-        
       try {
-        return classLoader.loadClass(className).newInstance();
+        return classLoader.loadClass(className);
       }
       catch (Exception e) {
         throw new FactoryConfigurationError(e);
@@ -167,31 +181,30 @@ class FactoryLoader {
     return null;
   }
 
-  public Object createFactory(String name, ClassLoader loader)
+  public Class getFactoryClass(String name, ClassLoader loader)
   {
-    Object[] providers = getProviderList(name, loader);
+    Class[] providers = getProviderClassList(name, loader);
 
     for (int i = 0; i < providers.length; i++) {
-      Object factory;
+      Class factoryClass;
 
-      factory = providers[i];
+      factoryClass = providers[i];
 
-      if (factory != null)
-        return factory;
+      if (factoryClass != null)
+        return factoryClass;
     }
     
     return null;
   }
   
-  private Object []getProviderList(String service, ClassLoader loader)
+  private Class[] getProviderClassList(String service, ClassLoader loader)
   {
-
-    Object []providers = _providerMap.get(loader);
+    Class[] providers = _providerMap.get(loader);
 
     if (providers != null)
       return providers;
     
-    ArrayList<Object> list = new ArrayList<Object>();
+    ArrayList<Class> list = new ArrayList<Class>();
 
     try {
       Enumeration e = loader.getResources(service);
@@ -199,16 +212,17 @@ class FactoryLoader {
       while (e.hasMoreElements()) {
         URL url = (URL) e.nextElement();
 
-        Object provider = loadProvider(url, loader);
+        Class provider = loadProviderClass(url, loader);
 
         if (provider != null)
           list.add(provider);
       }
-    } catch (Throwable e) {
+    } 
+    catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    providers = new Object[list.size()];
+    providers = new Class[list.size()];
     list.toArray(providers);
 
     _providerMap.put(loader, providers);
@@ -216,7 +230,7 @@ class FactoryLoader {
     return providers;
   }
 
-  private Object loadProvider(URL url, ClassLoader loader)
+  private Class loadProviderClass(URL url, ClassLoader loader)
   {
     InputStream is = null;
     try {
@@ -241,14 +255,14 @@ class FactoryLoader {
 
           String className = sb.toString();
 
-          Class cl = Class.forName(className, false, loader);
-
-          return (Object) cl.newInstance();
+          return Class.forName(className, false, loader);
         }
       }
-    } catch (Throwable e) {
+    } 
+    catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
-    } finally {
+    } 
+    finally {
       try {
         if (is != null)
           is.close();
@@ -259,5 +273,3 @@ class FactoryLoader {
     return null;
   }
 }
-
-
