@@ -29,20 +29,24 @@
 
 package com.caucho.xml.saaj;
 
+import com.caucho.util.*;
 import com.caucho.xml.*;
 import javax.xml.soap.*;
 import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import java.util.*;
 
 public class SOAPPartImpl extends SOAPPart 
 {
+  private static final L10N L = new L10N(SOAPPartImpl.class);
+
   private SOAPFactory _factory;
   private SOAPEnvelopeImpl _envelope;
   private String _protocol;
   private MimeHeaders _headers = new MimeHeaders();
-  private Source _content;
+  private Transformer _transformer;
 
   SOAPPartImpl(SOAPFactory factory, String protocol)
     throws SOAPException
@@ -95,6 +99,17 @@ public class SOAPPartImpl extends SOAPPart
     _envelope.deepCopy(document.getDocumentElement());
   }
 
+  private Transformer getTransformer()
+    throws TransformerException
+  {
+    if (_transformer == null) {
+      TransformerFactory transformerFactory = TransformerFactory.newInstance();
+      _transformer = transformerFactory.newTransformer();
+    }
+
+    return _transformer;
+  }
+
   public void addMimeHeader(String name, String value)
   {
     _headers.addHeader(name, value);
@@ -107,8 +122,7 @@ public class SOAPPartImpl extends SOAPPart
 
   public Source getContent() throws SOAPException
   {
-    // XXX
-    return _content;
+    return new DOMSource(this);
   }
 
   public SOAPEnvelope getEnvelope() throws SOAPException
@@ -144,8 +158,46 @@ public class SOAPPartImpl extends SOAPPart
   public void setContent(Source source) 
     throws SOAPException
   {
-    // XXX
-    _content = source;
+    org.w3c.dom.Node node = null;
+    Element element = null;
+
+    if (source instanceof DOMSource) {
+      node = ((DOMSource) source).getNode();
+    }
+    else {
+      try {
+        DOMResult result = new DOMResult();
+        getTransformer().transform(source, result);
+        node = result.getNode();
+      }
+      catch (TransformerException e) {
+        throw new SOAPException(e);
+      }
+    }
+
+    if (node.getNodeType() == DOCUMENT_NODE)
+      element = ((Document) node).getDocumentElement();
+    else if (node.getNodeType() == ELEMENT_NODE) 
+      element = (Element) node;
+    else
+      throw new SOAPException(L.l("Source (or transformed DOM) does not have a Document or Element node: {0}", source));
+
+    Name envelopeName = null;
+
+    if (SOAPConstants.SOAP_1_1_PROTOCOL.equals(_protocol))
+      envelopeName = SOAPEnvelopeImpl.SOAP_1_1_ENVELOPE_NAME;
+    else if (SOAPConstants.SOAP_1_2_PROTOCOL.equals(_protocol))
+      envelopeName = SOAPEnvelopeImpl.SOAP_1_2_ENVELOPE_NAME;
+    else if (SOAPConstants.DYNAMIC_SOAP_PROTOCOL.equals(_protocol))
+      // dynamic protocol is a special SAAJ "protocol" that means
+      // get the version from the input.
+      envelopeName = NameImpl.fromElement(element);
+    else
+      throw new SOAPException("Unknown SOAP protocol: " + _protocol);
+
+    _envelope = (SOAPEnvelopeImpl) _factory.createElement(envelopeName);
+    _envelope.setOwner((Document) this);
+    _envelope.deepCopy(element);
   }
 
   public void setMimeHeader(String name, String value)
