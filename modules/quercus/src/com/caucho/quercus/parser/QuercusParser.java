@@ -1492,6 +1492,14 @@ public class QuercusParser {
       
       expect(')');
       
+      if (_quercusClass != null &&
+          "__call".equals(name) &&
+          args.size() != 2)
+      {
+        throw error(L.l("{0}::{1} must have exactly two arguments defined",
+                        _quercusClass.getName(), name));
+      }
+
       Function function;
       
       if (isAbstract) {
@@ -1549,12 +1557,13 @@ public class QuercusParser {
       int token = parseToken();
       boolean isReference = false;
 
-      // php/076b
+      // php/076b, php/1c02
       // XXX: save arg type for type checking upon function call
       String expectedClass = null;
       if (token != ')' &&
           token != '&' &&
-          token != '$') {
+          token != '$' &&
+          token != -1) {
         _peekToken = token;
         expectedClass = parseIdentifier();
         token = parseToken();
