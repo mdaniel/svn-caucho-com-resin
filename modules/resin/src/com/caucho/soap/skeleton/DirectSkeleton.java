@@ -286,6 +286,11 @@ public class DirectSkeleton extends Skeleton {
 
     String actionName = in.getName().getLocalPart();
 
+    // services/1318: special corner case where no method name is given
+    // May happen with Document BARE methods w/no arguments
+    if ("Body".equals(actionName) && in.getEventType() == in.END_ELEMENT)
+      actionName = "";
+
     out.writeStartDocument("UTF-8", "1.0");
     out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Envelope", SOAP_ENVELOPE);
     out.writeNamespace(SOAP_ENVELOPE_PREFIX, SOAP_ENVELOPE);

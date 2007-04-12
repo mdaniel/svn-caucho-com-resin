@@ -132,6 +132,8 @@ public class DocumentBareAction extends AbstractAction {
         _bodyArgs[_inputArgument]._property = wrapper;
       }
     }
+    else if (_bodyInputs == 0)
+      _operationName = ""; // services/131[89]
 
     if (_returnMarshal != null) {
       WebResult webResult = _method.getAnnotation(WebResult.class);
@@ -181,13 +183,7 @@ public class DocumentBareAction extends AbstractAction {
 
     readHeaders(header, args);
 
-    if (_bodyInputs == 0) {
-      while (in.getEventType() != in.END_ELEMENT)
-        in.nextTag();
-
-      in.nextTag();
-    }
-    else {
+    if (_bodyInputs > 0) {
       for (int i = 0; i < _bodyArgs.length; i++)
         _bodyArgs[i].deserializeCall(in, args);
     }

@@ -579,11 +579,15 @@ public abstract class AbstractAction {
 
         out.writeEndElement(); // Header
       }
-
-      out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Body", SOAP_ENVELOPE);
-      writeResponse(out, value, args);
-      out.writeEndElement(); // Body
     }
+
+    // services/1318: We always need a body even if it is oneway
+    out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Body", SOAP_ENVELOPE);
+
+    if (! _isOneway)
+      writeResponse(out, value, args);
+
+    out.writeEndElement(); // Body
   }
 
   protected void readHeaders(XMLStreamReader header, Object[] args)
