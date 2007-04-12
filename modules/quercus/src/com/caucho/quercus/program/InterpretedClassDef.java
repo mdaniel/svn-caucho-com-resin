@@ -111,8 +111,10 @@ public class InterpretedClassDef extends ClassDef
    */
   public void initClass(QuercusClass cl)
   {
-    if (_constructor != null)
+    if (_constructor != null) {
       cl.setConstructor(_constructor);
+      cl.addMethod("__construct", _constructor);
+    }
     
     if (_getField != null)
       cl.setGet(_getField);

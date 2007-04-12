@@ -202,8 +202,10 @@ public class JavaImplClassDef extends ClassDef {
    */
   public void initClass(QuercusClass cl)
   {
-    if (_cons != null)
+    if (_cons != null) {
       cl.setConstructor(_cons);
+      cl.addMethod("__construct", _cons);
+    }
 
     for (Map.Entry<String,AbstractJavaMethod> entry : _functionMap.entrySet()) {
       cl.addMethod(entry.getKey(), entry.getValue());

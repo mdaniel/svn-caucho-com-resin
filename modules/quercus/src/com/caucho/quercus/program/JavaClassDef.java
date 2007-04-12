@@ -679,8 +679,10 @@ public class JavaClassDef extends ClassDef {
   {
     init();
     
-    if (_cons != null)
+    if (_cons != null) {
       cl.setConstructor(_cons);
+      cl.addMethod("__construct", _cons); 
+    }
 
     if (__get != null)
       cl.setGet(__get);
