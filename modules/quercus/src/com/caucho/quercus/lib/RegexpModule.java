@@ -951,7 +951,7 @@ public class RegexpModule
     boolean isCaptureDelim = (flags & PREG_SPLIT_DELIM_CAPTURE) != 0;
 
     GroupNeighborMap neighborMap
-      = new GroupNeighborMap(patternString, matcher.groupCount());
+      = new GroupNeighborMap(pattern.pattern(), matcher.groupCount());
 
     while (matcher.find()) {
       int startPosition = head;
@@ -1765,7 +1765,7 @@ public class RegexpModule
 
     private static int UNSET = -1;
     
-    public GroupNeighborMap(StringValue regexp, int groups)
+    public GroupNeighborMap(String regexp, int groups)
     {
       _neighborMap = new int[groups + 1];
       
@@ -1781,7 +1781,7 @@ public class RegexpModule
       for (int i = 0; i < length; i++) {
         char ch = regexp.charAt(i);
         
-        if (ch == '(') {
+        if (ch == '(' && i + 1 < length && regexp.charAt(i + 1) != '?') {
           group++;
           
           if (sawVerticalBar) {
@@ -1795,6 +1795,7 @@ public class RegexpModule
         }
         else if (ch == ')') {
           parent = _neighborMap[group];
+          sawVerticalBar = false;
         }
         else if (ch == '|') {
           sawVerticalBar = true;
