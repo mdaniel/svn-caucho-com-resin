@@ -1774,14 +1774,23 @@ public class RegexpModule
       }
       
       boolean sawVerticalBar = false;
+      
       int group = 0;
       int parent = UNSET;
       int length = regexp.length();
       
+      ArrayList<Boolean> openParenStack = new ArrayList<Boolean>(groups);
+      
       for (int i = 0; i < length; i++) {
         char ch = regexp.charAt(i);
         
-        if (ch == '(' && i + 1 < length && regexp.charAt(i + 1) != '?') {
+        if (ch == '(') {
+          if (i + 1 < length && regexp.charAt(i + 1) == '?') {
+            openParenStack.add(true);
+            continue;
+          }
+          
+          openParenStack.add(false);
           group++;
           
           if (sawVerticalBar) {
@@ -1794,6 +1803,9 @@ public class RegexpModule
           }
         }
         else if (ch == ')') {
+          if (openParenStack.remove(openParenStack.size() - 1))
+            continue;
+
           parent = _neighborMap[group];
           sawVerticalBar = false;
         }
