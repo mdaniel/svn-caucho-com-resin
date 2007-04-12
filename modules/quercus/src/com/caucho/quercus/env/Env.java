@@ -328,6 +328,8 @@ public class Env {
     */
 
     _startTime = Alarm.getCurrentTime();
+
+    _env.set(this);
   }
 
   public Env(Quercus quercus)
@@ -460,8 +462,6 @@ public class Env {
   
   public void start()
   {
-    _env.set(this);
-
     // quercus/1b06
     String encoding = getOutputEncoding().toString();
     String type = getIniString("default_mimetype");
