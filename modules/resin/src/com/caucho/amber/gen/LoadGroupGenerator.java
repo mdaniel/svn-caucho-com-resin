@@ -364,8 +364,6 @@ public class LoadGroupGenerator extends ClassComponent {
     if ((_index == 0) && (_relatedType.getDiscriminator() != null)) {
       out.println();
       out.println("__caucho_discriminator = rs.getString(1);");
-      // out.println("com.caucho.amber.type.EntityType subEntity = (com.caucho.amber.type.EntityType) __caucho_home.getSubClass(__caucho_discriminator);");
-      // out.println("aConn.addNewEntity(subEntity.getInstanceClass(), __caucho_getPrimaryKey());");
     }
 
     _relatedType.generateLoad(out, "rs", "", 1, _index, null);

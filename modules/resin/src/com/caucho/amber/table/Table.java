@@ -88,6 +88,16 @@ public class Table {
     _name = name;
   }
 
+  public ArrayList<LinkColumns> getIncomingLinks()
+  {
+    return _incomingLinks;
+  }
+
+  public ArrayList<LinkColumns> getOutgoingLinks()
+  {
+    return _outgoingLinks;
+  }
+
   /**
    * Gets the sql table name.
    */

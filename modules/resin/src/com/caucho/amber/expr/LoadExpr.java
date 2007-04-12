@@ -57,6 +57,7 @@ import java.util.Map;
 abstract public class LoadExpr extends AbstractAmberExpr {
   PathExpr _expr;
   FromItem _fromItem;
+  FromItem _rootItem;
   int _index;
 
   ArrayList<FromItem> _subItems = new ArrayList<FromItem>();
@@ -67,6 +68,16 @@ abstract public class LoadExpr extends AbstractAmberExpr {
       return new LoadEmbeddedExpr(expr);
 
     return new LoadEntityExpr(expr);
+  }
+
+  public static LoadExpr create(PathExpr expr,
+                                FromItem rootItem)
+  {
+    LoadExpr loadExpr = create(expr);
+
+    loadExpr._rootItem = rootItem;
+
+    return loadExpr;
   }
 
   LoadExpr(PathExpr expr)
@@ -170,12 +181,27 @@ abstract public class LoadExpr extends AbstractAmberExpr {
     if (! fullSelect)
       return;
 
+    FromItem item = _fromItem;
+
+    // jpa/0l4b
+    if (_rootItem != null) {
+      RelatedType parentType = (RelatedType) type;
+
+      while (parentType.getParentType() != null) {
+        if (parentType.getParentType() instanceof EntityType)
+          parentType = parentType.getParentType();
+        else
+          break;
+      }
+
+      item = _rootItem;
+    }
+
     String valueSelect = "";
 
     // jpa/0l12, jpa/0l47
-
-    valueSelect = type.generateLoadSelect(_fromItem.getTable(),
-                                          _fromItem.getName());
+    valueSelect = type.generateLoadSelect(item.getTable(),
+                                          item.getName());
 
     if (valueSelect != null && ! "".equals(valueSelect)) {
       cb.append(", ");
@@ -183,7 +209,7 @@ abstract public class LoadExpr extends AbstractAmberExpr {
     }
 
     for (int i = 0; i < _subItems.size(); i++) {
-      FromItem item = _subItems.get(i);
+      item = _subItems.get(i);
 
       valueSelect = type.generateLoadSelect(item.getTable(), item.getName());
 
