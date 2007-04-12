@@ -46,6 +46,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Source;
 import javax.xml.transform.Result;
 import java.awt.Image;
 import java.io.IOException;
@@ -646,6 +647,9 @@ public class JAXBContextImpl extends JAXBContext {
 
     if (DataHandler.class.equals(type))
       return DataHandlerProperty.PROPERTY;
+
+    if (Source.class.equals(type))
+      return SourceProperty.PROPERTY;
 
     return null;
   }
