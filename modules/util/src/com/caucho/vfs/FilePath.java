@@ -374,7 +374,8 @@ public class FilePath extends FilesystemPath {
 
     return false;
   }
-  
+
+  @Override
   public boolean truncate(long length)
     throws IOException
   {
