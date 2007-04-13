@@ -198,6 +198,17 @@ public class OneToManyExpr extends AbstractPathExpr {
     cb.append(_linkColumns.generateSelectSQL(id));
   }
 
+  public boolean equals(Object o)
+  {
+    if (o == null || ! getClass().equals(o.getClass()))
+      return false;
+
+    OneToManyExpr oneToMany = (OneToManyExpr) o;
+
+    return (_parent.equals(oneToMany._parent) &&
+            _linkColumns.equals(oneToMany._linkColumns));
+  }
+
   public String toString()
   {
     return "OneToManyExpr[" +  _parent + "," + _linkColumns + "]";

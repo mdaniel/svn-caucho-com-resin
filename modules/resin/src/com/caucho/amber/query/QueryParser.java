@@ -441,6 +441,8 @@ public class QueryParser {
 
     ArrayList<AmberExpr> resultList = new ArrayList<AmberExpr>();
 
+    _parsingResult = true;
+
     if (peekToken() == SELECT) {
       scanToken();
 
@@ -571,8 +573,6 @@ public class QueryParser {
     if (hasFrom && (peekToken() != FROM))
       throw error(L.l("expected FROM at {0}", tokenName(token)));
 
-    _parsingResult = true;
-
     if (resultList.size() == 0) {
 
       if (_joinFetchMap.size() > 0)
@@ -635,8 +635,12 @@ public class QueryParser {
 
     token = peekToken();
 
+    boolean hasWhere = false;
+
     if (token == WHERE) {
       scanToken();
+
+      hasWhere = true;
 
       AmberExpr expr = parseExpr();
 
@@ -714,8 +718,9 @@ public class QueryParser {
 
       _parsingHaving = false;
     }
-    else if (_havingExpr != null) // jpa/119l
+    else if (hasWhere && _havingExpr != null) { // jpa/1199, jpa/119l
       query.setHaving(_havingExpr.createBoolean().bindSelect(this));
+    }
 
     token = peekToken();
     if (token == ORDER) {
@@ -1247,12 +1252,12 @@ public class QueryParser {
     if (! _isSizeFunExpr)
       return expr;
 
-    _isSizeFunExpr = false;
-
-    if (_havingExpr == null)
+    if (_havingExpr == null) {
       _havingExpr = expr;
-    else
+    }
+    else if (expr != null) { // jpa/1199
       _havingExpr = AndExpr.create(_havingExpr, expr);
+    }
 
     return null;
   }
@@ -1293,7 +1298,9 @@ public class QueryParser {
     if (token >= EQ && token <= GE) {
       scanToken();
 
-      return parseIs(new BinaryExpr(token, expr, parseConcatExpr()));
+      AmberExpr concatExpr = parseConcatExpr();
+
+      return parseIs(new BinaryExpr(token, expr, concatExpr));
     }
     else if (token == BETWEEN) {
       scanToken();
@@ -1998,7 +2005,7 @@ public class QueryParser {
       }
 
       if (! (arg instanceof OneToManyExpr))
-        throw error(L.l("The SIZE() function is only supported for @ManyToMany or @OneToMany relationships"));
+        throw error(L.l("The SIZE() function is only supported for @ManyToMany or @OneToMany relationships. The argument '{0}' is not supported.", args.get(0)));
 
       OneToManyExpr oneToMany = (OneToManyExpr) arg;
 
@@ -2028,13 +2035,35 @@ public class QueryParser {
 
       funExpr = SizeFunExpr.create(this, args);
 
-      if (_appendResultList == null)
-        _appendResultList = new ArrayList<AmberExpr>();
+      // jpa/1199, jpa/119l
+      if (! _parsingResult) {
+        if (_query instanceof SelectQuery) {
+          SelectQuery query = (SelectQuery) _query;
+          ArrayList<AmberExpr> resultList = query.getResultList();
 
-      // jpa/1199
-      _appendResultList.add(funExpr.bindSelect(this));
+          for (AmberExpr expr : resultList) {
+            if (expr instanceof SizeFunExpr) {
+              SizeFunExpr sizeFun = (SizeFunExpr) expr;
+              AmberExpr amberExpr = sizeFun.getArgs().get(0);
 
-      _isSizeFunExpr = true;
+              // @ManyToMany
+              if (amberExpr instanceof ManyToOneExpr) {
+                amberExpr = ((ManyToOneExpr) amberExpr).getParent();
+              }
+
+              if (amberExpr.equals(arg))
+                args.set(0, amberExpr);
+            }
+          }
+        }
+
+        if (_appendResultList == null)
+          _appendResultList = new ArrayList<AmberExpr>();
+
+        _appendResultList.add(funExpr.bindSelect(this));
+
+        _isSizeFunExpr = true;
+      }
 
       break;
 

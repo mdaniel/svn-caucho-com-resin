@@ -173,6 +173,10 @@ public class FunExpr extends AbstractAmberExpr {
     if (_id.equalsIgnoreCase("avg"))
       return rs.getDouble(index);
 
+    // jpa/1199
+    if (_id.equalsIgnoreCase("size"))
+      return rs.getInt(index);
+
     return super.getObject(aConn, rs, index);
   }
 
@@ -198,7 +202,7 @@ public class FunExpr extends AbstractAmberExpr {
   /**
    * Returns the args.
    */
-  ArrayList<AmberExpr> getArgs()
+  public ArrayList<AmberExpr> getArgs()
   {
     return _args;
   }
