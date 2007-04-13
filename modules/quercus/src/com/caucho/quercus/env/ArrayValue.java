@@ -571,6 +571,7 @@ abstract public class ArrayValue extends Value {
     // arrays are uncomparable, otherwise - compare value by value"
     int lArraySize = this.getSize();
     int rArraySize = rValue.getSize();
+
     if (lArraySize < rArraySize) return -1;
     if (lArraySize > rArraySize) return 1;
     return 0;

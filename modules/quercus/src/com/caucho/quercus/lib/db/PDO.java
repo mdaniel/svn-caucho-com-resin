@@ -49,6 +49,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -760,6 +762,8 @@ public class PDO implements java.io.Closeable {
   {
     if (dsn.startsWith("mysql:"))
       return getMysqlDataSource(env, dsn);
+    if (dsn.startsWith("pgsql:"))
+      return getPgsqlDataSource(env, dsn);
     else if (dsn.startsWith("java:"))
       return getJndiDataSource(env, dsn);
     else if (dsn.startsWith("resin:"))
@@ -780,6 +784,8 @@ public class PDO implements java.io.Closeable {
   {
     HashMap<String,String> attr = parseAttr(dsn, dsn.indexOf(':'));
 
+    // XXX: more robust to get attribute values as is done in getPgsqlDataSource
+
     String host = attr.get("host");
     String port = attr.get("port");
     String dbname = attr.get("dbname");
@@ -799,12 +805,15 @@ public class PDO implements java.io.Closeable {
     if (dbname == null)
       dbname = "test";
 
+    // PHP doc does not sure user and password as attributes for mysql,
+    // but in the pgsql doc  the dsn specified user and password override arguments
+    // passed to constructor
     String user = attr.get("user");
-    if (user != null && _user == null)
+    if (user != null)
       _user = user;
 
     String password = attr.get("password");
-    if (password != null && _password == null)
+    if (password != null)
       _password = password;
 
     String driver = "com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource";
@@ -812,6 +821,62 @@ public class PDO implements java.io.Closeable {
     String url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
 
     return env.getDataSource(driver, url);
+  }
+
+  /**
+   * Opens a postgres connection based on the dsn.
+   */
+  private DataSource getPgsqlDataSource(Env env, String dsn)
+    throws Exception
+  {
+    HashMap<String,String> attr = parseAttr(dsn, dsn.indexOf(':'));
+
+    String host = "localhost";
+    String port = null;
+    String dbname = "test";
+    String user = null;
+    String password = null;
+
+    for (Map.Entry<String,String> entry : attr.entrySet()) {
+      String key = entry.getKey();
+
+      if ("host".equals(key))
+        host = entry.getValue();
+      else if ("port".equals(key))
+        port = entry.getValue();
+      else if ("dbname".equals(key))
+        dbname = entry.getValue();
+      else if ("user".equals(key))
+        user = entry.getValue();
+      else if ("password".equals(key))
+        password = entry.getValue();
+      else
+        env.warning(L.l("unknown pgsql attribute '{0}'", key));
+    }
+
+    // confirmed with PHP doc,  the dsn specified user and password override
+    // arguments passed to constructor
+    if (user != null)
+      _user = user;
+
+    if (password != null)
+      _password = password;
+
+    String driver = "org.postgresql.Driver";
+
+    StringBuilder url = new StringBuilder();
+    url.append("jdbc:postgresql://");
+    url.append(host);
+
+    if (port != null)
+      url.append(port);
+
+    url.append('/');
+    url.append(dbname);
+
+    System.out.println("XXX: " + url);
+
+    return env.getDataSource(driver, url.toString());
   }
 
   /**
@@ -843,15 +908,14 @@ public class PDO implements java.io.Closeable {
     }
 
     if (ds == null)
-      env.error(L.l("'{0}' is an unknown PDO JNDI data source.",
-                    dsn));
+      env.error(L.l("'{0}' is an unknown PDO JNDI data source.", dsn));
 
     return ds;
   }
 
   private HashMap<String,String> parseAttr(String dsn, int i)
   {
-    HashMap<String,String> attr = new HashMap<String,String>();
+    HashMap<String,String> attr = new LinkedHashMap<String,String>();
 
     int length = dsn.length();
 
@@ -884,6 +948,48 @@ public class PDO implements java.io.Closeable {
 
   public String toString()
   {
-    return "PDO[" + _dsn + "]";
+    // do not show password!
+    if (_dsn == null)
+      return "PDO[]";
+
+    int i = _dsn.indexOf(':');
+
+    if (i < 0)
+      return "PDO[]";
+
+    StringBuilder str = new StringBuilder();
+    str.append("PDO[");
+
+    str.append(_dsn, 0, i + 1);
+
+    HashMap<String,String> attr = parseAttr(_dsn, i);
+    attr.put("user", _user);
+
+    boolean first = true;
+
+    for (Map.Entry<String,String> entry : attr.entrySet()) {
+      String key = entry.getKey();
+      String value = entry.getValue();
+
+      if ("password".equalsIgnoreCase(key))
+        value = "XXXXX";
+      else if ("passwd".equalsIgnoreCase(key))
+        value = "XXXXX";
+      else if ("pass".equalsIgnoreCase(key))
+        value = "XXXXX";
+
+      if (!first)
+        str.append(' ');
+
+      first = false;
+
+      str.append(key);
+      str.append("=");
+      str.append(value);
+    }
+
+    str.append("]");
+
+    return str.toString();
   }
 }

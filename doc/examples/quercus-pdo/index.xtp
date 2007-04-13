@@ -236,7 +236,7 @@ foreach ($pdo->query($sql) as $row) {
 <p>In some cases, an application might need more control over
 the row iteration than the <code>foreach</code> pattern provides.
 For example, an application might want to avoid creating a
-&lt;table> if the database has not data.
+&lt;table> if the database has no data.
 When more control is needed, PDO lets you split out the
 iteration from retrieving the row, using <code>$stmt->fetch(...)</code>.</p>
 

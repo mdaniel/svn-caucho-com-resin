@@ -213,8 +213,11 @@ var_dump(resin_version());
 
 <defun title="xa_begin">
 
-<p>Starts a distributed transaction.  All database connections will
-automatically participate in the transaction.</p>
+<p>
+Starts a distributed transaction.  All database connections will
+automatically participate in the transaction.
+Returns TRUE for success, FALSE for failure.
+</p>
 
 <example>
 &lt;?php
@@ -231,8 +234,11 @@ xa_commit();
 
 <defun title="xa_commit">
 
-<p>Commits a distributed transaction.  All database connections will
-automatically participate in the transaction.</p>
+<p>
+Commits a distributed transaction.  All database connections will
+automatically participate in the transaction.
+Returns TRUE for success, FALSE for failure.
+</p>
 
 <example>
 &lt;?php
@@ -249,8 +255,11 @@ xa_commit();
 
 <defun title="xa_rollback">
 
-<p>Rollsback a distributed transaction.  All database connections will
-automatically participate in the transaction.</p>
+<p>
+Rolls back a distributed transaction.  All database connections will
+automatically participate in the transaction.
+Returns TRUE for success, FALSE for failure.
+</p>
 
 <example>
 &lt;?php
@@ -262,6 +271,16 @@ xa_begin();
 xa_rollback();
 ?>
 </example>
+
+</defun>
+
+<defun title="xa_rollback_only">
+
+<p>
+Marks the current distributed transaction as rollback only.  Subsequent
+attempts to commit the transaction will fail with a warning.
+Returns TRUE for success, FALSE for failure.
+</p>
 
 </defun>
 

@@ -117,70 +117,75 @@ public class ResinModule
   /**
    * Starts a new distributed transaction.
    */
-  public static Value xa_begin()
+  public static boolean xa_begin(Env env)
   {
     try {
       getUserTransaction().begin();
 
-      return NullValue.NULL;
+      return true;
     } catch (Exception e) {
-      throw new QuercusModuleException(e);
+      env.warning(e);
+      return false;
     }
   }
 
   /**
    * Commits the current transaction.
    */
-  public static Value xa_commit()
+  public static boolean xa_commit(Env env)
   {
     try {
       getUserTransaction().commit();
 
-      return NullValue.NULL;
+      return true;
     } catch (Exception e) {
-      throw new QuercusModuleException(e);
+      env.warning(e);
+      return false;
     }
   }
 
   /**
    * Complets the current transaction by rolling it back.
    */
-  public static Value xa_rollback()
+  public static boolean xa_rollback(Env env)
   {
     try {
       getUserTransaction().rollback();
 
-      return NullValue.NULL;
+      return true;
     } catch (Exception e) {
-      throw new QuercusModuleException(e);
+      env.warning(e);
+      return false;
     }
   }
 
   /**
    * Sets the rollback_only status for the current transaction.
    */
-  public static Value xa_rollback_only(String msg)
+  public static boolean xa_rollback_only(Env env)
   {
     try {
       getUserTransaction().setRollbackOnly();
 
-      return NullValue.NULL;
+      return true;
     } catch (Exception e) {
-      throw new QuercusModuleException(e);
+      env.warning(e);
+      return false;
     }
   }
 
   /**
    * Sets the timeout for the current distribued transaction.
    */
-  public static Value xa_set_timeout(int timeoutSeconds)
+  public static boolean xa_set_timeout(Env env, int timeoutSeconds)
   {
     try {
       getUserTransaction().setTransactionTimeout(timeoutSeconds);
 
-      return NullValue.NULL;
+      return true;
     } catch (Exception e) {
-      throw new QuercusModuleException(e);
+      env.warning(e);
+      return false;
     }
   }
 
@@ -189,7 +194,6 @@ public class ResinModule
    */
   public static int xa_status()
   {
-    // XXX: should return a string
     try {
       return getUserTransaction().getStatus();
     } catch (Exception e) {
@@ -217,15 +221,15 @@ public class ResinModule
   /**
    * Explode an object name into an array with key value pairs that
    * correspond to the keys and values in the object name.
-   * The domain is stored in the returned array under the key named ":".
+   * The domain is stored in the returned array under the key named ":domain:".
    */
   public ArrayValue mbean_explode(String name)
   {
     try {
       ArrayValueImpl exploded = new ArrayValueImpl();
-      
+
       if (name == null)
-        return exploded;
+        name = "";
       
       ObjectName objectName = new ObjectName(name);
 
@@ -246,7 +250,7 @@ public class ResinModule
   /**
    * Implode an array into an object name.  The array contains key value pairs
    * that become key vlaue pairs in the object name.  The key with the name
-   * ":" becomes the domain of the object name.
+   * ":domain:" becomes the domain of the object name.
    */
   public static String mbean_implode(@NotNull @ReadOnly ArrayValue exploded)
   {

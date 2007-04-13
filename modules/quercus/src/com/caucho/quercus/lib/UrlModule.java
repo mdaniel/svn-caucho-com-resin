@@ -361,7 +361,9 @@ public class UrlModule extends AbstractQuercusModule {
     CharBuffer sb = new CharBuffer();
 
     ArrayValueImpl value = new ArrayValueImpl();
-    value.put("path", "");
+
+    // XXX: php/1i04.qa contradicts:
+    // value.put("path", "");
 
     ParseUrlState state = ParseUrlState.INIT;
 

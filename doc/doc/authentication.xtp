@@ -365,12 +365,13 @@ You can implement single signon by configuring the authenticator in
 the proper environment: web-app, host, or server.  The login will last for
 all the web-apps in that environment.</p>
 
-<p>The authenticator is a resource which is shared across its <a href="env-tags.xtp">environment</a>.  For example, to configure the XML authenticator
+<p>The authenticator is a resource which is shared across its <a href="env-tags.xtp">environment</a>.
+For example, to configure the XML authenticator
 for all web-apps in foo.com, you might configure as follows:</p>
 
 <example title="Single Signon for foo.com">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;server&gt;
+  &lt;cluster id="app-tier&gt;
     &lt;http port="8080"/&gt;
 
     &lt;host id="foo.com"&gt;
@@ -378,7 +379,7 @@ for all web-apps in foo.com, you might configure as follows:</p>
 
       &lt;authenticator type="com.caucho.server.security.XmlAuthenticator"&gt;
         &lt;init&gt;
-          <!-- password: quidditch -->
+          &lt;!-- password: quidditch --&gt;
           &lt;user&gt;harry:uTOZTGaB6pooMDvqvl2LBu:user,gryffindor&lt;/user&gt;
           &lt;!-- password: pureblood --&gt;
           &lt;user&gt;dmalfoy:yI2uN1l97Rv5E6mdRnDFDB:user,slytherin&lt;/user&gt;
@@ -387,7 +388,7 @@ for all web-apps in foo.com, you might configure as follows:</p>
 
       &lt;web-app-deploy path="webapps"/&gt;
     &lt;/host&gt;
-  &lt;/server&gt;
+  &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
 
@@ -399,6 +400,60 @@ host.  You will still need to implement a
 The value of <a config-tag="reuse-session-id">reuse-session-id</a> must be <code>true</code>
 for single signon.
 </p>
+
+
+<s2 title="Single signon for virtual hosts">
+<p>
+The basis for establishing client identity is the JSESSIONID cookie.  If single
+signon is desired for virtual hosts, Resin must be configured to notify the
+browser of the proper domain name for the cookie so that the same JSESSIONID
+cookie is submitted by the browser to each virtual host.
+</p>
+
+<p>
+The <a href="#authenticator">authenticator</a> is placed at the cluster level
+so that it is common to all virtual hosts.  The
+<a href="webapp-tags.xtp#session-config">cookie-domain</a> is
+placed in a <a href="webapp-tags.xtp#web-app-default">web-app-default</a> at
+the cluster level so that it is applied as the default for all webapps in all
+virtual hosts.
+</p>
+
+<example title="Single Signon for gryffindor.hogwarts.com and slytherin.hogwarts.com">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;cluster id="app-tier&gt;
+    &lt;http port="8080"/&gt;
+
+    &lt;authenticator type="com.caucho.server.security.XmlAuthenticator"&gt;
+      ...
+    &lt;/authenticator&gt;
+
+    &lt;web-app-default&gt;
+      &lt;session-config&gt;
+        &lt;enable-url-rewriting&gt;false&lt;/enable-url-rewriting&gt;
+        &lt;cookie-domain&gt;.hogwarts.com&lt;/cookie-domain&gt;
+      &lt;/session-config&gt;
+    &lt;/web-app-default&gt;
+
+
+    &lt;host id="gryffindor.hogwarts.com"&gt;
+      ...
+    &lt;/host&gt;
+
+    &lt;host id="slytherin.hogwarts.com"&gt;
+      ...
+    &lt;/host&gt;
+  &lt;/server&gt;
+&lt;/resin&gt;
+</example>
+
+<p>
+Because of the way that browsers are restricted by the HTTP specification from
+submitting cookies to servers, it is not possible to have a single signon for
+virtual hosts that do not share some portion of their domain name.  For example,
+"gryffindor.com" and "slytherin.com" cannot share a common authentication.
+</p>
+</s2>
 
 </s1>
 
