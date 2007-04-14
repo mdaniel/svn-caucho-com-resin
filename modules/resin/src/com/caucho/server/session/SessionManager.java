@@ -873,6 +873,9 @@ public final class SessionManager implements ObjectManager, AlarmListener
    */
   public void setSessionMax(int max)
   {
+    if (max < 1)
+      throw new ConfigException(L.l("session-max '{0}' is too small.  session-max must be a positive number", max));
+    
     _sessionMax = max;
   }
 

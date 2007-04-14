@@ -39,8 +39,8 @@ import java.util.logging.Logger;
 public class ToCharResponseAdapter extends ResponseAdapter {
   private static final Logger log = Log.open(ToCharResponseAdapter.class);
   
-  private static final FreeList<ToCharResponseAdapter> _freeList =
-    new FreeList<ToCharResponseAdapter>(32);
+  private static final FreeList<ToCharResponseAdapter> _freeList
+    = new FreeList<ToCharResponseAdapter>(32);
 
   private ToCharResponseStreamWrapper _responseStream;
 
@@ -74,6 +74,7 @@ public class ToCharResponseAdapter extends ResponseAdapter {
     return _responseStream;
   }
 
+  @Override
   public void init(HttpServletResponse response)
   {
     _responseStream.start();

@@ -1029,9 +1029,13 @@ public class JavaJspGenerator extends JspGenerator {
   public Class getBeanClass(String typeName)
     throws ClassNotFoundException
   {
+    // Generics parameters should be removed and only the base class loaded
+    int p = typeName.indexOf('<');
+    if (p > 0)
+      return getBeanClass(typeName.substring(0, p));
     
     // Arrays need to use Array.newInstance(cl, new int[]);
-    int p = typeName.indexOf('[');
+    p = typeName.indexOf('[');
     if (p > 0) {
       Class cl = getBeanClass(typeName.substring(0, p));
       int count = 0;

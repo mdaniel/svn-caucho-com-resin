@@ -242,7 +242,7 @@ public class HostConfig extends DeployConfig {
   @PostConstruct
   public void init()
   {
-    if (_regexp != null && getId() == null)
+    if (_regexp != null && getHostName() == null)
       log.config(L.l("<host regexp=\"{0}\"> should include a <host-name> tag.",
 		     _regexp.pattern()));
   }

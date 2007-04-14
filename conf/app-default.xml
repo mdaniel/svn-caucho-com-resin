@@ -217,11 +217,16 @@
   <mime-mapping extension=".wbmp" mime-type="image/vnd.wap.wbmp"/>
   <mime-mapping extension=".wbxml" mime-type="application/vnd.wap.wbxml"/>
   <mime-mapping extension=".wrl" mime-type="model/vrml"/>
+  <mime-mapping extension=".wm" mime-type="audio/x-ms-wm"/>
   <mime-mapping extension=".wma" mime-type="audio/x-ms-wma"/>
+  <mime-mapping extension=".wmd" mime-type="application/x-ms-wmd"/>
+  <mime-mapping extension=".wmz" mime-type="application/x-ms-wmz"/>
   <mime-mapping extension=".wml" mime-type="text/vnd.wap.wml"/>
   <mime-mapping extension=".wmls" mime-type="text/vnd.wap.wmlscript"/>
   <mime-mapping extension=".wmlc" mime-type="application/vnd.wap.wmlc"/>
   <mime-mapping extension=".wmlsc" mime-type="application/vnd.wap.wmlscript"/>
+  <mime-mapping extension=".wmv" mime-type="audio/x-ms-wmv"/>
+  <mime-mapping extension=".wvx" mime-type="video/x-ms-wvx"/>
    
   <mime-mapping extension=".xls" mime-type="application/vnd.ms-excel"/>
   <mime-mapping extension=".xbm" mime-type="image/x-xbitmap"/>

@@ -82,6 +82,8 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
     
     _bufferCapacity = SIZE;
     _bufferSize = 0;
+
+    _encodingReader = null;
     /*
     _autoFlush = true;
     _isClosed = false;
@@ -274,8 +276,9 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   {
     if (length == 0)
       return;
-    
+
     if (_encodingReader == null) {
+      // server/1b13
       if (_in == null)
 	_in = new BufferInputStream();
       _encodingReader = Encoding.getReadEncoding(_in, getEncoding());
@@ -423,17 +426,6 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
     _tail.setLength(0);
     _charBuffer = _head.getBuffer();
     _bufferSize = 0;
-  }
-
-  /**
-   * Closes the stream.
-   */
-  public void close()
-    throws IOException
-  {
-    super.close();
-    
-    _encodingReader = null;
   }
 
   /**

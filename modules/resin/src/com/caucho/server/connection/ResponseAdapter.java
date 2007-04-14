@@ -42,11 +42,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
 
 public class ResponseAdapter extends ResponseWrapper
-  implements CauchoResponse {
-  private static final Logger log = Log.open(ResponseAdapter.class);
+  implements CauchoResponse
+{
+  private static final Logger log
+    = Logger.getLogger(ResponseAdapter.class.getName());
 
-  private static final FreeList<ResponseAdapter> _freeList =
-    new FreeList<ResponseAdapter>(32);
+  private static final FreeList<ResponseAdapter> _freeList
+    = new FreeList<ResponseAdapter>(32);
 
   protected RequestAdapter _request;
 

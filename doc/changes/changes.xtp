@@ -12,6 +12,9 @@
 
 <s2 title="3.1.snap - Apr 4, 2007">
 <ul>
+<li>JSP: issues with tag class validation with generics (#1677, rep by L Kaminsky)</li>
+<li>Session: verify session-max is valid (#1678)</li>
+<li>JSP: i18n issue with filters (#1686, fixed! by gzhu)</li>
 <li>Amber @OneToMany in subclass (#1576, rep by bregnvig)</li>
 <li>Amber with multiple data-sources (#1680, rep by Michael Sengbusch)</li>
 <li>Update ping mailer for mail-subject (#1564, rep by Abdul Karim)</li>
