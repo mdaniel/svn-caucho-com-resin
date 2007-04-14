@@ -472,16 +472,19 @@ public class EntityOneToManyField extends CollectionField {
       out.println("};");
     */
 
-    // jpa/0l43
-    out.println();
-    out.print("for (Object o : " + var);
+    // ejb/0aj2
+    if (getEntitySourceType().getPersistenceUnit().isJPA()) {
+      // jpa/0l43
+      out.println();
+      out.print("for (Object o : " + var);
 
-    // jpa/0v04
-    if (getJavaType().isAssignableTo(Map.class))
-      out.print(".values()");
+      // jpa/0v04
+      if (getJavaType().isAssignableTo(Map.class))
+        out.print(".values()");
 
-    out.println(")");
-    out.println("  __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) o);");
+      out.println(")");
+      out.println("  __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) o);");
+    }
 
     out.println();
     out.println("return " + var + ";");
