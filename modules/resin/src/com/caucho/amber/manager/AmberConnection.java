@@ -66,6 +66,7 @@ import javax.sql.DataSource;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.Transaction;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1428,9 +1429,45 @@ public class AmberConnection
     if (entity != null)
       return null;
 
-    // XXX: needs to create based on the discriminator with inheritance.
-    // Create a new entity for the given class and primary key.
-    entity = (Entity) cl.newInstance();
+    if (_persistenceUnit.isJPA()) {
+      // XXX: needs to create based on the discriminator with inheritance.
+      // Create a new entity for the given class and primary key.
+      entity = (Entity) cl.newInstance();
+    }
+    else {
+      // HelperBean__Amber -> HelperBean
+      String className = cl.getSuperclass().getName();
+
+      AmberEntityHome entityHome = _persistenceUnit.getEntityHome(className);
+
+      if (entityHome == null) {
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("Amber.addNewEntity: home not found for entity (class: '{0}' PK: '{1}')",
+                                   className, key));
+        return null;
+      }
+
+      EntityFactory factory = entityHome.getEntityFactory();
+
+      // TestBean__EJB
+      Object value = factory.getEntity(key);
+
+      Method cauchoGetBeanMethod = entityHome.getCauchoGetBeanMethod();
+      if (cauchoGetBeanMethod != null) {
+        try {
+          // Bean
+          entity = (Entity) cauchoGetBeanMethod.invoke(value, new Object[0]);
+          // entity.__caucho_makePersistent(aConn, item);
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
+      }
+
+      if (entity == null) {
+        throw new IllegalStateException(L.l("AmberConnection.addNewEntity unable to instantiate new entity with cauchoGetBeanMethod"));
+      }
+    }
+
     entity.__caucho_setPrimaryKey(key);
 
     addInternalEntity(entity);

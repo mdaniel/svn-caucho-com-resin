@@ -87,6 +87,14 @@ public class AmberEntityHome {
   }
 
   /**
+   * Returns the getBean method to instantiate the Amber object.
+   */
+  public Method getCauchoGetBeanMethod()
+  {
+    return _cauchoGetBeanMethod;
+  }
+
+  /**
    * Returns the manager.
    */
   public AmberPersistenceUnit getManager()

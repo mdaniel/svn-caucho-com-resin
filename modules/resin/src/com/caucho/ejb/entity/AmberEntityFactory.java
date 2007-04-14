@@ -54,6 +54,19 @@ public class AmberEntityFactory extends EntityFactory {
   }
 
   /**
+   * Gets the appropriate entity given the key.
+   */
+  public Object getEntity(Object key)
+  {
+    // ejb/061c
+    try {
+      return _entityServer.getContext(key, false, false).getEJBLocalObject();
+    } catch (FinderException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
    * Gets the appropriate entity given the EntityItem.
    */
   public Object getEntity(AmberConnection aConn, EntityItem item)

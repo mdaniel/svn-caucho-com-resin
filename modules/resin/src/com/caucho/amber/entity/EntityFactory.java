@@ -44,6 +44,14 @@ public class EntityFactory {
   private static final Logger log = Log.open(EntityFactory.class);
 
   /**
+   * Gets the appropriate entity given the key.
+   */
+  public Object getEntity(Object key)
+  {
+    return null;
+  }
+
+  /**
    * Gets the appropriate entity given the EntityItem.
    */
   public Object getEntity(AmberConnection aConn,

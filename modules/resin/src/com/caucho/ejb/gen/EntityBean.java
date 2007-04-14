@@ -53,10 +53,10 @@ public class EntityBean extends ClassComponent {
   protected String _contextClassName;
 
   protected BaseClass _beanClass;
-  
+
   public EntityBean(JClass ejbClass,
-		    String contextClassName,
-		    String implClassName)
+                    String contextClassName,
+                    String implClassName)
   {
     _ejbClass = ejbClass;
     _contextClassName = contextClassName;
@@ -104,9 +104,9 @@ public class EntityBean extends ClassComponent {
     throws IOException
   {
     out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\"" + _contextClassName + "\");");
-    
+
     generateContext(out);
-    
+
     _beanClass.generate(out);
   }
 
@@ -118,7 +118,7 @@ public class EntityBean extends ClassComponent {
     int p = shortContextName.lastIndexOf('.');
     if (p > 0)
       shortContextName = shortContextName.substring(p + 1);
-    
+
     out.println();
     out.println("Bean _ejb_free;");
     out.println();
@@ -131,37 +131,69 @@ public class EntityBean extends ClassComponent {
     out.println("Bean _ejb_begin(TransactionContext trans, boolean isHome, boolean doLoad)");
     out.println("{");
     out.pushDepth();
-    
-    out.println("if (trans == null || isDead()) throw new IllegalStateException();");
+
+    // ejb/061c out.println("if (trans == null || isDead()) throw new IllegalStateException();");
+    out.println("if (isDead()) throw new IllegalStateException();");
     out.println();
-    out.println("Bean ptr;");
+    out.println("Bean ptr = null;");
+
+    out.println("if (trans != null) {");
+    out.pushDepth();
+
     out.println("if (isHome)");
     out.println("  ptr = (Bean) trans.getEntity(_server, null);");
-    out.println("else");
+    out.println("else {");
     out.println("  ptr = (Bean) trans.getEntity(_server, getPrimaryKey());");
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
     out.println("if (ptr != null)");
     out.println("  return ptr;");
-    
+
     // Otherwise create the bean
+    out.println();
     out.println("synchronized (this) {");
     out.println("  ptr = _ejb_free;");
     out.println("  _ejb_free = null;");
     out.println("}");
 
+    /* XXX: Should be added if there is no transaction context yet,
+       e.g. findByPrimaryKey().
+
+       out.println();
+       out.println("if (ptr == null && trans != null) {");
+       out.pushDepth();
+
+       out.println("com.caucho.amber.manager.AmberConnection conn;");
+       out.println("conn = trans.getAmberConnection();");
+       out.println("ptr = (" + _bean.getSkeletonName() + ".Bean) conn.getSubEntity(" + _bean.getFullImplName() + ".class, getPrimaryKey());");
+
+       out.popDepth();
+       out.println("}");
+    */
+
+    out.println();
     out.println("if (ptr == null) {");
     out.pushDepth();
     out.println("ptr = new Bean(this);");
 
     if (BeanAssembler.hasMethod(_ejbClass, "ejbActivate", new JClass[0])) {
-      out.println("if (! isHome)");
+      // ejb/061c
+      out.println("if (trans != null && ! isHome)");
       out.println("  try { ptr.ejbActivate(); } catch (Exception e) { throw com.caucho.ejb.EJBExceptionWrapper.createRuntime(e); }");
     }
     out.popDepth();
     out.println("}");
-    
+
     out.println();
     out.println("ptr._ejb_trans = trans;");
-    out.println("trans.addObject(ptr);");
+
+    out.println();
+    out.println("if (trans != null)");
+    out.println("  trans.addObject(ptr);");
 
     generateLoad(out);
 
@@ -172,7 +204,7 @@ public class EntityBean extends ClassComponent {
 
 
     // XXX: need to optimize when no other transaction
-    
+
     out.println();
     out.println("public void _caucho_load()");
     out.println("  throws FinderException");
@@ -193,12 +225,12 @@ public class EntityBean extends ClassComponent {
     out.println("}");
     out.popDepth();
     out.println("}");
-    
+
     out.println();
     out.println("public void update()");
     out.println("{");
     out.println("}");
-    
+
     out.println();
     out.println("public void _caucho_killCache()");
     out.println("  throws javax.ejb.RemoveException");
@@ -224,17 +256,17 @@ public class EntityBean extends ClassComponent {
     out.pushDepth();
 
     /*
-    if (_localClass != null) {
+      if (_localClass != null) {
       println("if (viewLocal != null)");
       println("  viewLocal.destroy();");
       println("viewLocal = null;");
-    }
-    
-    if (_remoteClass != null) {
+      }
+
+      if (_remoteClass != null) {
       println("if (viewRemote != null)");
       println("  viewRemote.destroy();");
       println("viewRemote = null;");
-    }
+      }
     */
     out.println("super.destroy();");
     out.println();
@@ -246,18 +278,18 @@ public class EntityBean extends ClassComponent {
     out.println();
     out.println("if (bean != null) {");
     out.pushDepth();
-    
+
     if (hasMethod("ejbPassivate", new JClass[0])) {
       out.println("if (bean._ejb_state > QEntity._CAUCHO_IS_HOME)");
       out.println("  bean.ejbPassivate();");
     }
-    
+
     if (hasMethod("unsetEntityContext", new JClass[0]))
       out.println("bean.unsetEntityContext();");
-    
+
     out.popDepth();
     out.println("}");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -306,8 +338,8 @@ public class EntityBean extends ClassComponent {
       out.println("if (doLoad) {");
       out.println("  try {");
       if (hasMethod("ejbLoad", new JClass[0]))
-	out.println("    ptr.ejbLoad();");
-      
+        out.println("    ptr.ejbLoad();");
+
       out.println("  } catch (Exception e) { throw com.caucho.ejb.EJBExceptionWrapper.createRuntime(e); }");
       // out.println("  ptr._ejb_state = QEntity._CAUCHO_IS_DIRTY;");
       out.println("  ptr._ejb_state = QEntity._CAUCHO_IS_LOADED;");
@@ -324,7 +356,7 @@ public class EntityBean extends ClassComponent {
 
       setStatic(true);
     }
-    
+
     public void generateClassContent(JavaWriter out)
       throws IOException
     {
@@ -332,7 +364,7 @@ public class EntityBean extends ClassComponent {
       out.println("protected final static java.util.logging.Logger __caucho_log = com.caucho.log.Log.open(" + _ejbClass.getName() + ".class);");
       out.println("private static int __caucho_dbg_id;");
       out.println("private final String __caucho_id;");
-    
+
       out.println("Bean _ejb_next;");
 
       out.println(_contextClassName + " _ejb_context;");
@@ -353,14 +385,14 @@ public class EntityBean extends ClassComponent {
       out.println("try {");
       out.println("  _ejb_context = context;");
       out.println("  _ejb_state = QEntity._CAUCHO_IS_HOME;");
-    
+
       if (BeanAssembler.hasMethod(_ejbClass, "setEntityContext",
-				  new JClass[] {
-				    JClassLoader.systemForName(EntityContext.class.getName())
-				  })) {
-	out.println("  setEntityContext(context);");
+                                  new JClass[] {
+                                    JClassLoader.systemForName(EntityContext.class.getName())
+                                  })) {
+        out.println("  setEntityContext(context);");
       }
-    
+
       out.println("} catch (Exception e) {");
       out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
       out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
@@ -370,29 +402,29 @@ public class EntityBean extends ClassComponent {
       out.println("}");
 
       if (BeanAssembler.hasMethod(_ejbClass, "ejbActivate", new JClass[0])) {
-	out.println();
-	out.println("public void ejbActivate()");
-	out.println("{");
-	out.println("  if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-	out.println("    __caucho_log.fine(__caucho_id + \":activate()\");");
-	out.println();
-	out.println("  _ejb_state = _CAUCHO_IS_ACTIVE;");
-	/*
-	  if (getContainerManagedPersistence())
-	  out.println("  _caucho_setPrimaryKey(_ejb_context.getPrimaryKey());");
-	*/
-	out.println("  try {super.ejbActivate(); } catch (Exception e) { throw com.caucho.ejb.EJBExceptionWrapper.createRuntime(e); }");
-	out.println("}");
+        out.println();
+        out.println("public void ejbActivate()");
+        out.println("{");
+        out.println("  if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
+        out.println("    __caucho_log.fine(__caucho_id + \":activate()\");");
+        out.println();
+        out.println("  _ejb_state = _CAUCHO_IS_ACTIVE;");
+        /*
+          if (getContainerManagedPersistence())
+          out.println("  _caucho_setPrimaryKey(_ejb_context.getPrimaryKey());");
+        */
+        out.println("  try {super.ejbActivate(); } catch (Exception e) { throw com.caucho.ejb.EJBExceptionWrapper.createRuntime(e); }");
+        out.println("}");
       }
-    
+
       if (BeanAssembler.hasMethod(_ejbClass, "ejbPassivate", new JClass[0])) {
-	out.println();
-	out.println("public void ejbPassivate()");
-	out.println("{");
-	out.println("  if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
-	out.println("    __caucho_log.fine(__caucho_id + \":passivate()\");");
-	out.println("  super.ejbPassivate();");
-	out.println("}");
+        out.println();
+        out.println("public void ejbPassivate()");
+        out.println("{");
+        out.println("  if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
+        out.println("    __caucho_log.fine(__caucho_id + \":passivate()\");");
+        out.println("  super.ejbPassivate();");
+        out.println("}");
       }
 
       out.println();
@@ -447,9 +479,9 @@ public class EntityBean extends ClassComponent {
 
     if (BeanAssembler.hasMethod(_ejbClass, "ejbStore", new JClass[0])) {
       out.pushDepth();
-      
+
       generateStore(out);
-      
+
       out.popDepth();
     }
     out.println("}");
@@ -484,15 +516,15 @@ public class EntityBean extends ClassComponent {
     out.println("}");
     out.println("else if (_ejb_state == QEntity._CAUCHO_IS_REMOVED) {");
     out.println("  cxt.getEntityServer().removeCache(cxt.getPrimaryKey());");
-    
+
     if (isCMP())
       out.println("  _ejb_context._amber = null;");
-    
+
     out.println("  try {");
     out.println("    cxt.destroy();");
     out.println("  } catch (Exception e) {");
     out.println("  }");
-      
+
     out.println("}");
     out.println("else {");
     out.pushDepth();
@@ -512,23 +544,23 @@ public class EntityBean extends ClassComponent {
     out.println("    return;");
     out.println("  }");
     out.println("}");
-    
+
     if (hasMethod("ejbPassivate", new JClass[0])) {
       out.println("if (_ejb_state > QEntity._CAUCHO_IS_HOME)");
       out.println("  ejbPassivate();");
     }
-    
+
     if (hasMethod("unsetEntityContext", new JClass[0])) {
       out.println();
       out.println("unsetEntityContext();");
     }
-      
+
     out.popDepth();
     out.println("}");
     out.popDepth();
     out.println("}");
   }
-  
+
   /**
    * Generates the store code.
    */

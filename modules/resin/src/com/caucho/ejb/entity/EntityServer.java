@@ -64,7 +64,7 @@ import java.util.logging.Level;
  */
 public class EntityServer extends AbstractServer {
   private static final L10N L = new L10N(EntityServer.class);
-  
+
   private DataSource _dataSource;
 
   private HomeHandle _homeHandle;
@@ -95,7 +95,7 @@ public class EntityServer extends AbstractServer {
   private long _invalidateTime;
 
   private int _jdbcIsolation = -1;
-  
+
   /**
    * Creates a new EntityServer.
    *
@@ -189,11 +189,11 @@ public class EntityServer extends AbstractServer {
    * Loads an amber entity.
    */
   /*
-  public EntityItem loadEntityItem(Object key)
+    public EntityItem loadEntityItem(Object key)
     throws AmberException
-  {
+    {
     return _amberEntityHome.loadEntityItem(key);
-  }
+    }
   */
 
   /**
@@ -220,52 +220,52 @@ public class EntityServer extends AbstractServer {
     throws Exception
   {
     super.init();
-    
+
     try {
       // _isCacheable = _config.isCacheable();
       //_cacheTimeout = _config.getCacheTimeout();
 
       /*
-      if (cacheSize < 1024)
+        if (cacheSize < 1024)
         cacheSize = 1024;
       */
-      
+
       _jdbcIsolation = _ejbManager.getJDBCIsolation();
       Class []param = new Class[] { EntityServer.class };
       _contextConstructor = _contextImplClass.getConstructor(param);
 
       _homeContext = (QEntityContext) _contextConstructor.newInstance(this);
-      
+
       _localHome = _homeContext.createLocalHome();
       _remoteHomeView = _homeContext.createRemoteHomeView();
 
       /*
-      if (_homeStubClass != null) {
+        if (_homeStubClass != null) {
         _remoteHomeView = _homeContext.createRemoteHomeView();
 
-	if (_config.getJndiName() != null) {
-	  Context ic = new InitialContext();
-	  ic.rebind(_config.getJndiName(), this);
-	}
-      }
+        if (_config.getJndiName() != null) {
+        Context ic = new InitialContext();
+        ic.rebind(_config.getJndiName(), this);
+        }
+        }
       */
 
       initRelations();
 
       if (_isCMP) {
-	// _amberEntityHome = getServerManager().getAmberEntityHome(name);
-	//_amberEntityHome = getContainer().getAmberEntityHome(_config.getName());
-	_amberEntityHome.setEntityFactory(new AmberEntityFactory(this));
+        // _amberEntityHome = getServerManager().getAmberEntityHome(name);
+        //_amberEntityHome = getContainer().getAmberEntityHome(_config.getName());
+        _amberEntityHome.setEntityFactory(new AmberEntityFactory(this));
       }
-    
+
       Class primaryKeyClass = getPrimaryKeyClass();
 
       if (primaryKeyClass != null &&
-	  ! primaryKeyClass.isPrimitive() &&
-	  ! primaryKeyClass.getName().startsWith("java.lang.")) {
-	_primaryKeyFields = primaryKeyClass.getFields();
+          ! primaryKeyClass.isPrimitive() &&
+          ! primaryKeyClass.getName().startsWith("java.lang.")) {
+        _primaryKeyFields = primaryKeyClass.getFields();
       }
-      
+
       log.config("initialized entity bean: " + this);
     } catch (Exception e) {
       _exception = e;
@@ -285,38 +285,38 @@ public class EntityServer extends AbstractServer {
       return;
 
     /*
-    PersistentBean bean = _config.getPersistentBean();
-    ArrayList<PersistentBean> oldBeans = new ArrayList<PersistentBean>();
-    
-    Iterator iter = bean.getRelations();
-    while (iter.hasNext()) {
+      PersistentBean bean = _config.getPersistentBean();
+      ArrayList<PersistentBean> oldBeans = new ArrayList<PersistentBean>();
+
+      Iterator iter = bean.getRelations();
+      while (iter.hasNext()) {
       PersistentRelation rel = (PersistentRelation) iter.next();
       PersistentBean targetBean = rel.getTargetBean();
 
       addTargetBean(oldBeans, targetBean);
-    }
+      }
     */
   }
   /*
-  private void addTargetBean(ArrayList<PersistentBean> oldBeans,
-                             PersistentBean targetBean)
-  {
+    private void addTargetBean(ArrayList<PersistentBean> oldBeans,
+    PersistentBean targetBean)
+    {
     if (! oldBeans.contains(targetBean)) {
-      oldBeans.add(targetBean);
+    oldBeans.add(targetBean);
 
-      String ejbName = targetBean.getName();
-        
-      EntityServer targetServer = (EntityServer) _ejbManager.getServer(ejbName);
+    String ejbName = targetBean.getName();
 
-      if (targetServer == null) {
-        PersistentBean bean = _config.getPersistentBean();
-        throw new RuntimeException("unknown ejb '" + ejbName + "' in '" +
-                                   bean.getName() + "'");
-      }
+    EntityServer targetServer = (EntityServer) _ejbManager.getServer(ejbName);
 
-      targetServer.addRemoveListener(_homeContext);
+    if (targetServer == null) {
+    PersistentBean bean = _config.getPersistentBean();
+    throw new RuntimeException("unknown ejb '" + ejbName + "' in '" +
+    bean.getName() + "'");
     }
-  }
+
+    targetServer.addRemoveListener(_homeContext);
+    }
+    }
   */
 
   /**
@@ -344,7 +344,7 @@ public class EntityServer extends AbstractServer {
 
         cb.append(_primaryKeyFields[i].get(primaryKey));
       }
-      
+
       return cb.toString();
     } catch (IllegalAccessException e) {
       throw new EJBExceptionWrapper(e);
@@ -370,7 +370,7 @@ public class EntityServer extends AbstractServer {
     //removeListeners.add(new RemoveListener(listener, listenClass));
     RemoveListener listener = null;
     //listener = new RemoveListener(context, _config.getLocalObjectClass());
-    
+
     if (! _removeListeners.contains(listener))
       _removeListeners.add(listener);
   }
@@ -402,7 +402,7 @@ public class EntityServer extends AbstractServer {
       }
     }
   }
-  
+
   public void removeCache(Object key)
   {
     _ejbManager.removeEntity(this, key);
@@ -436,7 +436,7 @@ public class EntityServer extends AbstractServer {
     // XXX:
     if (key == null)
       return null;
-    
+
     try {
       return getContext(key, false);
     } catch (FinderException e) {
@@ -462,13 +462,13 @@ public class EntityServer extends AbstractServer {
   {
     if (! _isInit) {
       /*
-      try {
+        try {
         _config.validateJDBC();
-      } catch (ConfigException e) {
+        } catch (ConfigException e) {
         throw new EJBExceptionWrapper(e);
-      }
+        }
       */
-      
+
       _isInit = true;
     }
 
@@ -479,7 +479,7 @@ public class EntityServer extends AbstractServer {
         EJBExceptionWrapper.createRuntime(e);
       }
     }
-    
+
     return _remoteHome;
   }
 
@@ -490,25 +490,25 @@ public class EntityServer extends AbstractServer {
   {
     return _remoteHomeView;
     /*
-    if (_remoteHome == null) {
+      if (_remoteHome == null) {
       if (! _isInit) {
-        try {
-          _config.validateJDBC();
-        } catch (ConfigException e) {
-          throw new EJBExceptionWrapper(e);
-        }
-        
-        _isInit = true;
+      try {
+      _config.validateJDBC();
+      } catch (ConfigException e) {
+      throw new EJBExceptionWrapper(e);
+      }
+
+      _isInit = true;
       }
 
       try {
-        _remoteHome = _jvmClient.createHomeStub();
+      _remoteHome = _jvmClient.createHomeStub();
       } catch (Exception e) {
-        EJBExceptionWrapper.createRuntime(e);
+      EJBExceptionWrapper.createRuntime(e);
       }
-    }
-    
-    return _remoteHome;
+      }
+
+      return _remoteHome;
     */
   }
 
@@ -519,16 +519,16 @@ public class EntityServer extends AbstractServer {
   {
     if (! _isInit) {
       /*
-      try {
+        try {
         _config.validateJDBC();
-      } catch (ConfigException e) {
+        } catch (ConfigException e) {
         throw new EJBExceptionWrapper(e);
-      }
+        }
       */
-        
+
       _isInit = true;
     }
-    
+
     return _localHome;
   }
 
@@ -536,16 +536,16 @@ public class EntityServer extends AbstractServer {
   {
     if (! _isInit) {
       /*
-      try {
+        try {
         _config.validateJDBC();
-      } catch (ConfigException e) {
+        } catch (ConfigException e) {
         throw new EJBExceptionWrapper(e);
-      }
+        }
       */
-        
+
       _isInit = true;
     }
-    
+
     return _remoteHomeView;
   }
 
@@ -553,21 +553,21 @@ public class EntityServer extends AbstractServer {
    * Creates the local stub for the object in the context.
    */
   /*
-  JVMObject getEJBObject(AbstractHandle handle)
-  {
+    JVMObject getEJBObject(AbstractHandle handle)
+    {
     if (remoteStubClass == null)
-      throw new IllegalStateException(L.l("'{0}' has no remote interface.  Local beans must be called from a local context. Remote beans need a home and a remote interface.",
-                                          getEJBName()));
+    throw new IllegalStateException(L.l("'{0}' has no remote interface.  Local beans must be called from a local context. Remote beans need a home and a remote interface.",
+    getEJBName()));
 
     try {
-      JVMObject obj = (JVMObject) remoteStubClass.newInstance();
-      obj._init(this, handle);
+    JVMObject obj = (JVMObject) remoteStubClass.newInstance();
+    obj._init(this, handle);
 
-      return obj;
+    return obj;
     } catch (Exception e) {
-      throw new EJBExceptionWrapper(e);
+    throw new EJBExceptionWrapper(e);
     }
-  }
+    }
   */
 
   /**
@@ -578,7 +578,7 @@ public class EntityServer extends AbstractServer {
     if (_remoteStubClass == null)
       throw new IllegalStateException(L.l("'{0}' has no remote interface.  Local beans must be called from a local context. Remote beans need a home and a remote interface.",
                                           getEJBName()));
-    
+
     try {
       JVMObject obj = (JVMObject) _remoteStubClass.newInstance();
       obj._init(this, primaryKey);
@@ -594,7 +594,94 @@ public class EntityServer extends AbstractServer {
   {
     return getContext(key, _isCMP);
   }
-  
+
+  /**
+   * Finds the remote bean by its key.
+   *
+   * @param key the remote key
+   *
+   * @return the remote interface of the entity.
+   */
+  public AbstractContext getContext(Object key,
+                                    boolean forceLoad,
+                                    boolean isFindEntityItem)
+    throws FinderException
+  {
+    if (key == null)
+      return null;
+
+    QEntityContext cxt = _ejbManager.getEntity(this, key);
+
+    try {
+      if (cxt == null) {
+        cxt = (QEntityContext) _contextConstructor.newInstance(this);
+        cxt.setPrimaryKey(key);
+
+        cxt = _ejbManager.putEntityIfNew(this, key, cxt);
+
+        EntityItem amberItem = null;
+
+        // ejb/061c
+        if (isFindEntityItem && _isCMP) {
+          AmberConnection aConn;
+          aConn = _amberEntityHome.getManager().getCacheConnection();
+
+          try {
+            // ejb/06d3
+            amberItem = _amberEntityHome.findEntityItem(aConn,
+                                                        key,
+                                                        forceLoad);
+          } catch (AmberException e) {
+            String name = getEJBName();
+
+            FinderException exn = new ObjectNotFoundException(L.l("'{0}' is an unknown entity.",
+                                                                  name + "[" + key + "]"));
+            exn.initCause(e);
+            throw exn;
+          } finally {
+            aConn.freeConnection();
+          }
+
+          if (amberItem == null) {
+            throw new ObjectNotFoundException(L.l("'{0}' is an unknown entity.",
+                                                  getEJBName() + "[" + key + "]"));
+          }
+        }
+
+        if (amberItem != null)
+          cxt.__caucho_setAmber(amberItem);
+      }
+
+      // ejb/0d33 vs ejb/0d00
+      if (forceLoad &&
+          (! _isLoadLazyOnTransaction ||
+           getTransactionManager().getTransaction() != null)) {
+        try {
+          cxt._caucho_load();
+        } catch (Exception e) {
+          throw e;
+        }
+      }
+
+      /*
+        try {
+        cxt._caucho_load();
+        } catch (Exception e) {
+        throw e;
+        }
+      */
+
+      // XXX: ejb/061c, moved to the top.
+      // cxt = _ejbManager.putEntityIfNew(this, key, cxt);
+
+      return cxt;
+    } catch (FinderException e) {
+      throw e;
+    } catch (Exception e) {
+      throw FinderExceptionWrapper.create(e);
+    }
+  }
+
   /**
    * Finds the remote bean by its key.
    *
@@ -605,79 +692,7 @@ public class EntityServer extends AbstractServer {
   public AbstractContext getContext(Object key, boolean forceLoad)
     throws FinderException
   {
-    if (key == null)
-      return null;
-
-    QEntityContext cxt = _ejbManager.getEntity(this, key);
-
-    try {
-      if (cxt == null) {
-	EntityItem amberItem = null;
-
-	if (_isCMP) {
-	  AmberConnection aConn;
-	  aConn = _amberEntityHome.getManager().getCacheConnection();
-	    
-	  try {
-	    /*
-	    amberItem = _amberEntityHome.findEntityItem(aConn,
-							key,
-							true);
-	    */
-	    // ejb/06d3
-	    amberItem = _amberEntityHome.findEntityItem(aConn,
-							key,
-							forceLoad);
-	  } catch (AmberException e) {
-	    String name = getEJBName();
-
-	    FinderException exn = new ObjectNotFoundException(L.l("'{0}' is an unknown entity.",
-							  name + "[" + key + "]"));
-	    exn.initCause(e);
-	    throw exn;
-	  } finally {
-	    aConn.freeConnection();
-	  }
-
-	  if (amberItem == null) {
-	    throw new ObjectNotFoundException(L.l("'{0}' is an unknown entity.",
-						  getEJBName() + "[" + key + "]"));
-	  }
-	}
-
-	cxt = (QEntityContext) _contextConstructor.newInstance(this);
-	cxt.setPrimaryKey(key);
-
-	if (amberItem != null)
-	  cxt.__caucho_setAmber(amberItem);
-      }
-
-      // ejb/0d33 vs ejb/0d00
-      if (forceLoad &&
-	  (! _isLoadLazyOnTransaction ||
-	   getTransactionManager().getTransaction() != null)) {
-	try {
-	  cxt._caucho_load();
-	} catch (Exception e) {
-	  throw e;
-	}
-      }
-
-      /*
-	try {
-	  cxt._caucho_load();
-	} catch (Exception e) {
-	  throw e;
-	}
-      */
-      cxt = _ejbManager.putEntityIfNew(this, key, cxt);
-
-      return cxt;
-    } catch (FinderException e) {
-      throw e;
-    } catch (Exception e) {
-      throw FinderExceptionWrapper.create(e);
-    }
+    return getContext(key, forceLoad, true);
   }
 
   /**
@@ -697,7 +712,7 @@ public class EntityServer extends AbstractServer {
       return conn;
     }
   }
-  
+
   /**
    * Updates the named entity bean
    */
@@ -705,7 +720,7 @@ public class EntityServer extends AbstractServer {
   {
     if (key == null)
       return;
-    
+
     QEntityContext cxt = _ejbManager.getEntity(this, key);
 
     if (cxt == null)
@@ -715,7 +730,7 @@ public class EntityServer extends AbstractServer {
     // why doesn't the transaction have the update?
     cxt.update();
   }
-  
+
   /**
    * Updates the named entity bean
    */
@@ -758,13 +773,13 @@ public class EntityServer extends AbstractServer {
     switch (state) {
     case QEntity._CAUCHO_IS_REMOVED:
       return new IllegalStateException(L.l("Can't access CMP field for a removed object."));
-      
+
     case QEntity._CAUCHO_IS_DEAD:
       return new IllegalStateException(L.l("Can't access CMP field for a dead object.  The object is dead due to a runtime exception and rollback."));
-      
+
     case QEntity._CAUCHO_IS_NEW:
       return new IllegalStateException(L.l("Can't access CMP field for an uninitialized object."));
-      
+
     case QEntity._CAUCHO_IS_HOME:
       return new IllegalStateException(L.l("Can't access CMP field from a Home object."));
 
@@ -778,13 +793,13 @@ public class EntityServer extends AbstractServer {
     switch (state) {
     case QEntity._CAUCHO_IS_REMOVED:
       return new IllegalStateException(L.l("Can't set CMP field for a removed object."));
-      
+
     case QEntity._CAUCHO_IS_DEAD:
       return new IllegalStateException(L.l("Can't set CMP field for a dead object.  The object is dead due to a runtime exception and rollback."));
-      
+
     case QEntity._CAUCHO_IS_NEW:
       return new IllegalStateException(L.l("Can't set CMP field for an uninitialized object."));
-      
+
     case QEntity._CAUCHO_IS_HOME:
       return new IllegalStateException(L.l("Can't set CMP field from a Home object."));
 
@@ -792,7 +807,7 @@ public class EntityServer extends AbstractServer {
       return new IllegalStateException(L.l("Can't set CMP field from an unknown state."));
     }
   }
-  
+
   /**
    * Cleans up the entity server nicely.
    */
@@ -804,7 +819,7 @@ public class EntityServer extends AbstractServer {
 
     // only purpose of the sort is to make the qa order consistent
     Collections.sort(beans, new EntityCmp());
-    
+
     for (int i = 0; i < beans.size(); i++) {
       QEntityContext cxt = beans.get(i);
 
@@ -817,17 +832,17 @@ public class EntityServer extends AbstractServer {
 
     QEntityContext homeContext = _homeContext;
     _homeContext = null;
-    
+
     try {
       if (homeContext != null)
         homeContext.destroy();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
-    
+
     super.destroy();
   }
-  
+
   static class RemoveListener {
     QEntityContext _listener;
     Class _listenClass;
@@ -862,7 +877,7 @@ public class EntityServer extends AbstractServer {
       try {
         String sa = String.valueOf(ca.getPrimaryKey());
         String sb = String.valueOf(cb.getPrimaryKey());
-        
+
         return sa.compareTo(sb);
       } catch (Exception e) {
         return 0;
