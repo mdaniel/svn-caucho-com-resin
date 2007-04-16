@@ -630,17 +630,7 @@ public class AmberConnection
    */
   public Query createNativeQuery(String sql)
   {
-    try {
-      QueryImpl query = new QueryImpl(this);
-
-      query.setNativeSql(sql);
-
-      return query;
-    } catch (RuntimeException e) {
-      throw new IllegalArgumentException(e);
-    } catch (Exception e) {
-      throw new EJBExceptionWrapper(e);
-    }
+    return createInternalNativeQuery(sql);
   }
 
   /**
@@ -3133,12 +3123,30 @@ public class AmberConnection
   }
 
   /**
+   * Creates an instance of the named query
+   */
+  private Query createInternalNativeQuery(String sql)
+  {
+    try {
+      QueryImpl query = new QueryImpl(this);
+
+      query.setNativeSql(sql);
+
+      return query;
+    } catch (RuntimeException e) {
+      throw new IllegalArgumentException(e);
+    } catch (Exception e) {
+      throw new EJBExceptionWrapper(e);
+    }
+  }
+
+  /**
    * Creates an instance of the native query.
    */
   private Query createInternalNativeQuery(String sql,
                                           SqlResultSetMappingConfig map)
   {
-    Query query = createNativeQuery(sql);
+    Query query = createInternalNativeQuery(sql);
 
     QueryImpl queryImpl = (QueryImpl) query;
 
