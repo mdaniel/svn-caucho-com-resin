@@ -551,6 +551,7 @@ public class DriverConfig {
         conn = _poolDataSource.getPooledConnection();
       else
         conn = _poolDataSource.getPooledConnection(user, password);
+
     }
 
     return conn;

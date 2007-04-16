@@ -32,7 +32,6 @@ package com.caucho.jca;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.log.Log;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ConnectionPoolMXBean;
 import com.caucho.util.Alarm;
@@ -658,8 +657,6 @@ public class ConnectionPool extends AbstractManagedObject
                             UserPoolItem oldUserItem)
     throws ResourceException
   {
-    ManagedConnection mConn;
-
     long timeoutCount = _connectionWaitCount;
 
     while (_lifecycle.isActive()) {

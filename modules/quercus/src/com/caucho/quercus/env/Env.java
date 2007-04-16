@@ -539,6 +539,12 @@ public class Env {
     return _quercus.getDatabase();
   }
 
+  protected DataSource findDatabase(String driver, String url)
+    throws Exception
+  {
+    return _quercus.findDatabase(driver, url);
+  }
+
   /**
    * Returns the configured database.
    */
@@ -563,7 +569,7 @@ public class Env {
       return entry.getConnection();
     }
 
-    database = _quercus.findDatabase(driver, url);
+    database = findDatabase(driver, url);
     
     ConnectionEntry entry = new ConnectionEntry();
     entry.init(database, userName, password);
@@ -575,9 +581,10 @@ public class Env {
 
     if (userName == null || userName.equals(""))
       entry.setConnection(database.getConnection());
-    else
+    else {
       entry.setConnection(database.getConnection(userName, password));
-      
+    }
+
     _connMap.put(entry, entry);
       
     return entry.getConnection();
@@ -594,7 +601,7 @@ public class Env {
     if (database != null)
       return database;
     else
-      return _quercus.findDatabase(driver, url);
+      return findDatabase(driver, url);
   }
 
   /**
@@ -4409,6 +4416,11 @@ public class Env {
 	return entry._user == null;
       else
 	return _user.equals(entry._user);
+    }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[ds=" + _ds + ", user=" + _user + "]";
     }
   }
 

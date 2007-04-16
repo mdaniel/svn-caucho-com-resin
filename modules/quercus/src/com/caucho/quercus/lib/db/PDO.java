@@ -874,8 +874,6 @@ public class PDO implements java.io.Closeable {
     url.append('/');
     url.append(dbname);
 
-    System.out.println("XXX: " + url);
-
     return env.getDataSource(driver, url.toString());
   }
 

@@ -87,5 +87,11 @@ public class Credential implements ConnectionRequestInfo
     return (getUserName().equals(credential.getUserName())
 	    && getPassword().equals(credential.getPassword()));
   }
+
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[userName=" + _userName + "]";
+  }
 }
 
