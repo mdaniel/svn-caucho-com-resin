@@ -2006,6 +2006,11 @@ v   *
 	  case 'i': case 'u':
 	    ch = 'd';
           case 'd': case 'x': case 'o': case 'X':
+            sb.setLength(sb.length() - 1);
+	    if (sb.length() > 0)
+	      segments.add(new TextPrintfSegment(sb));
+            sb.setLength(0);
+	    
             if (isLeft)
               sb.append('-');
             if (isAlt)
@@ -2020,6 +2025,11 @@ v   *
             break loop;
 
           case 'e': case 'E': case 'f': case 'g': case 'G':
+            sb.setLength(sb.length() - 1);
+	    if (sb.length() > 0)
+	      segments.add(new TextPrintfSegment(sb));
+            sb.setLength(0);
+
             if (isLeft)
               sb.append('-');
             if (isAlt)
@@ -4043,7 +4053,7 @@ v   *
     {
       int p = format.indexOf('$');
 
-      return format.substring(p + 1);
+      return '%' + format.substring(p + 1);
     }
   }
 
@@ -4083,7 +4093,7 @@ v   *
     {
       long value;
 
-      if (_index < args.length)
+      if (_index > 0 && _index < args.length)
         value = args[_index].toLong();
       else
         value = 0;
