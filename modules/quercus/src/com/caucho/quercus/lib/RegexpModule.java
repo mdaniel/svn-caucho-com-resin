@@ -1308,27 +1308,25 @@ public class RegexpModule
     else if (delim == '[')
       delim = ']';
 
-    int tail = rawRegexp.lastIndexOf(delim);
+    int len = rawRegexp.length();
+
+    int flags = 0;
+
+    int tail = len - 1;
+    for (; tail >= 0; tail--) {
+      char ch = rawRegexp.charAt(tail);
+
+      if (ch == delim)
+	break;
+      else if (ch == 'e')
+        flags |= REGEXP_EVAL;
+    }
 
     if (tail <= 0)
       throw new IllegalStateException(L.l(
         "Can't find second {0} in regexp '{1}'.",
         String.valueOf((char) delim),
         rawRegexp));
-
-    int len = rawRegexp.length();
-
-    int flags = 0;
-
-    for (int i = tail + 1; i < len; i++) {
-      char ch = rawRegexp.charAt(i);
-
-      switch (ch) {
-      case 'e':
-        flags |= REGEXP_EVAL;
-        break;
-      }
-    }
 
     return flags;
   }

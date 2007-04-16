@@ -176,6 +176,8 @@ public class PageManager
       program = _programCache.get(path);
 
       if (program == null || program.isModified()) {
+	clearProgram(path, program);
+	
 	program = QuercusParser.parse(_quercus,
 				      path,
 				      _quercus.getScriptEncoding(),
@@ -196,6 +198,11 @@ public class PageManager
     } catch (Throwable e) {
       throw new IOExceptionWrapper(e);
     }
+  }
+
+  protected void clearProgram(Path path, QuercusProgram program)
+  {
+    _programCache.remove(path);
   }
 
   protected QuercusPage compilePage(QuercusProgram program, Path path)

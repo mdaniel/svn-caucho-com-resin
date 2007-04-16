@@ -4084,7 +4084,7 @@ v   *
 	_format = getIndexFormat(format);
       }
       else {
-	_format = format;
+	_format = '%' + format;
 	_index = index;
       }
     }
@@ -4113,7 +4113,7 @@ v   *
 	_format = getIndexFormat(format);
       }
       else {
-	_format = format;
+	_format = '%' + format;
 	_index = index;
       }
     }
