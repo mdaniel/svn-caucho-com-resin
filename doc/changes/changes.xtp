@@ -12,6 +12,7 @@
 
 <s2 title="3.1.snap - Apr 4, 2007">
 <ul>
+<li>Amber createNativeQuery(String sql) i.e. missing mapping was throwing NPE (#1687, rep by Michael Sengbusch)</li>
 <li>Amber native queries with parameters (#1691, rep by Michael Sengbusch)</li>
 <li>JSP: issues with tag class validation with generics (#1677, rep by L Kaminsky)</li>
 <li>Session: verify session-max is valid (#1678)</li>

@@ -630,6 +630,13 @@ public class AmberConnection
    */
   public Query createNativeQuery(String sql)
   {
+    sql = sql.trim();
+
+    char ch = sql.charAt(0);
+
+    if (ch == 'S' || ch == 's')
+      throw new UnsupportedOperationException(L.l("createNativeQuery(String sql) is not supported for select statements. Please use createNativeQuery(String sql, String map) or createNativeQuery(String sql, Class cl) to map the result to scalar values or bean classes."));
+
     return createInternalNativeQuery(sql);
   }
 
