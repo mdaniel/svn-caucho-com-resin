@@ -241,6 +241,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
       }
       out.println(");");
 
+      // jpa/0l14
+      out.println("__caucho_state = com.caucho.amber.entity.EntityState.TRANSIENT;");
+
       for (AmberField field : fields) {
         field.generatePostConstructor(out);
       }

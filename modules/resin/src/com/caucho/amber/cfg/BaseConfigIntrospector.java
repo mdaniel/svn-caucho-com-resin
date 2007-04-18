@@ -3256,50 +3256,55 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       // jpa/0ge8, jpa/0ge9
       // Similar code to create any missing configuration for keys.
 
-      ArrayList<IdField> keys = parent.getId().getKeys();
+      com.caucho.amber.field.Id parentId = parent.getId();
 
-      for (IdField field : keys) {
-        String fieldName = field.getName();
+      // jpa/0ge6
+      if (parentId != null) {
+        ArrayList<IdField> keys = parentId.getKeys();
 
-        AttributeOverrideConfig attOverrideConfig = null;
+        for (IdField field : keys) {
+          String fieldName = field.getName();
 
-        int i = 0;
+          AttributeOverrideConfig attOverrideConfig = null;
 
-        for (; i < attributeOverrideList.size(); i++) {
-          attOverrideConfig = attributeOverrideList.get(i);
+          int i = 0;
 
-          if (fieldName.equals(attOverrideConfig.getName())) {
-            break;
-          }
-        }
+          for (; i < attributeOverrideList.size(); i++) {
+            attOverrideConfig = attributeOverrideList.get(i);
 
-        if (i < attributeOverrideList.size())
-          continue;
-
-        if (field instanceof KeyPropertyField) {
-          try {
-            if (_relatedType.isFieldAccess())
-              introspectIdField(_persistenceUnit, _relatedType, null,
-                                parent.getBeanClass(), null, null);
-            else
-              introspectIdMethod(_persistenceUnit, _relatedType, null,
-                                 parent.getBeanClass(), null, null);
-          } catch (SQLException e) {
-            throw new ConfigException(e);
+            if (fieldName.equals(attOverrideConfig.getName())) {
+              break;
+            }
           }
 
-          field = _relatedType.getId().getKeys().get(0);
+          if (i < attributeOverrideList.size())
+            continue;
 
-          Column column = ((KeyPropertyField) field).getColumn();
+          if (field instanceof KeyPropertyField) {
+            try {
+              if (_relatedType.isFieldAccess())
+                introspectIdField(_persistenceUnit, _relatedType, null,
+                                  parent.getBeanClass(), null, null);
+              else
+                introspectIdMethod(_persistenceUnit, _relatedType, null,
+                                   parent.getBeanClass(), null, null);
+            } catch (SQLException e) {
+              throw new ConfigException(e);
+            }
 
-          // jpa/0ge8, jpa/0ge9, jpa/0gea
-          // Creates the missing attribute override config.
-          attOverrideConfig = createAttributeOverrideConfig(fieldName,
-                                                            column.getName(),
-                                                            ! column.isNotNull(),
-                                                            column.isUnique());
+            field = _relatedType.getId().getKeys().get(0);
 
-          attributeOverrideList.add(attOverrideConfig);
+            Column column = ((KeyPropertyField) field).getColumn();
+
+            // jpa/0ge8, jpa/0ge9, jpa/0gea
+            // Creates the missing attribute override config.
+            attOverrideConfig = createAttributeOverrideConfig(fieldName,
+                                                              column.getName(),
+                                                              ! column.isNotNull(),
+                                                              column.isUnique());
+
+            attributeOverrideList.add(attOverrideConfig);
+          }
         }
       }
 
@@ -3368,7 +3373,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         }
 
         if (_relatedType.getId() != null) {
-          keys = _relatedType.getId().getKeys();
+          ArrayList<IdField> keys = _relatedType.getId().getKeys();
 
           for (int j = 0; j < keys.size(); j++) {
 
