@@ -31,24 +31,20 @@ package com.caucho.quercus.servlet;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusDieException;
-import com.caucho.quercus.QuercusExitException;
-import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.module.QuercusModule;
-import com.caucho.quercus.page.QuercusPage;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
 
-import javax.naming.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -284,6 +280,11 @@ public class QuercusServlet
     String mysqlVersion = config.getInitParameter("mysql-version");
     if (mysqlVersion != null) {
       setMysqlVersion(mysqlVersion);
+    }
+
+    String compile = config.getInitParameter("compile");
+    if (compile != null) {
+      setCompile(compile);
     }
 
     String database = config.getInitParameter("database");
