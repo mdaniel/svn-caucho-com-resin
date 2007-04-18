@@ -2579,7 +2579,7 @@ public class AmberConnection
         state = txEntity.__caucho_getEntityState();
       }
 
-      if (index < 0 || ! state.isManaged()) {
+      if (index < 0) { // jpa/0o0b || ! state.isManaged()) {
         item.getEntity().__caucho_expire();
       }
 

@@ -39,6 +39,7 @@ import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.RelatedType;
+import com.caucho.amber.type.Type;
 import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
@@ -501,37 +502,42 @@ public class QueryParser {
           else if (expr instanceof PathExpr) {
             PathExpr pathExpr = (PathExpr) expr;
 
-            RelatedType relatedType = (RelatedType) pathExpr.getTargetType();
-            RelatedType parentType = relatedType;
-
-            while (parentType.getParentType() != null) {
-              if (parentType.getParentType() instanceof EntityType)
-                parentType = parentType.getParentType();
-              else
-                break;
-            }
-
             FromItem rootItem = null;
 
-            // jpa/0l4b
-            if (parentType != relatedType) {
-              FromItem child = pathExpr.getChildFromItem();
+            Type targetType = pathExpr.getTargetType();
 
-              Table table = relatedType.getTable(); // parentType.getTable();
-              ArrayList<LinkColumns> outgoingLinks = table.getOutgoingLinks();
+            // jpa/0w24
+            if (targetType instanceof RelatedType) {
+              RelatedType relatedType = (RelatedType) targetType;
+              RelatedType parentType = relatedType;
 
-              for (LinkColumns link : outgoingLinks) {
-                if (link.getTargetTable().equals(parentType.getTable())) {
-                  rootItem = addFromItem((EntityType) parentType,
-                                         parentType.getTable());
-
-                  JoinExpr join = new ManyToOneJoinExpr(link, rootItem, child);
-
-                  rootItem.setJoinExpr(join);
-
-                  rootItem.setJoinSemantics(FromItem.JoinSemantics.INNER);
-
+              while (parentType.getParentType() != null) {
+                if (parentType.getParentType() instanceof EntityType)
+                  parentType = parentType.getParentType();
+                else
                   break;
+              }
+
+              // jpa/0l4b
+              if (parentType != relatedType) {
+                FromItem child = pathExpr.getChildFromItem();
+
+                Table table = relatedType.getTable(); // parentType.getTable();
+                ArrayList<LinkColumns> outgoingLinks = table.getOutgoingLinks();
+
+                for (LinkColumns link : outgoingLinks) {
+                  if (link.getTargetTable().equals(parentType.getTable())) {
+                    rootItem = addFromItem((EntityType) parentType,
+                                           parentType.getTable());
+
+                    JoinExpr join = new ManyToOneJoinExpr(link, rootItem, child);
+
+                    rootItem.setJoinExpr(join);
+
+                    rootItem.setJoinSemantics(FromItem.JoinSemantics.INNER);
+
+                    break;
+                  }
                 }
               }
             }
