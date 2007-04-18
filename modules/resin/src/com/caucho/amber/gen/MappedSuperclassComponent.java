@@ -71,7 +71,9 @@ public class MappedSuperclassComponent extends AmberMappedComponent {
     try {
       generateHeader(out, false);
 
-      generateInit(out, false);
+      // jpa/0ge8 generateInit(out, false);
+
+      generateIncrementVersion(out);
 
       HashSet<Object> completedSet = new HashSet<Object>();
 
@@ -81,13 +83,13 @@ public class MappedSuperclassComponent extends AmberMappedComponent {
 
       generateGetEntityState(out);
 
-      generateMatch(out);
+      // jpa/0ge8 generateMatch(out);
 
       generateFields(out);
 
       generateMethods(out);
 
-      generateDetach(out, false);
+      // jpa/0ge8 generateDetach(out, false);
 
       generateLoad(out, false);
 
@@ -99,7 +101,7 @@ public class MappedSuperclassComponent extends AmberMappedComponent {
 
       generateResultSetLoad(out, false);
 
-      generateSetQuery(out, false);
+      // jpa/0ge8 generateSetQuery(out, false);
 
       generateCopy(out);
 
@@ -109,13 +111,15 @@ public class MappedSuperclassComponent extends AmberMappedComponent {
 
       generateCascadeRemove(out);
 
+      /* jpa/0ge8
+
       generateCreate(out);
 
-      generateDelete(out);
+      jpa/0ge8 generateDelete(out);
 
-      generateDeleteForeign(out);
+      jpa/0ge8 generateDeleteForeign(out);
 
-      generateFlush(out);
+      jpa/0ge8 generateFlush(out);
 
       generateAfterCommit(out, false);
 
@@ -124,6 +128,7 @@ public class MappedSuperclassComponent extends AmberMappedComponent {
       generateHome(out);
 
       generateInternals(out);
+      */
 
     } catch (IOException e) {
       throw e;

@@ -199,6 +199,12 @@ public class EntityIntrospector extends BaseConfigIntrospector {
 
           if (! _annotationCfg.isNull()) {
             parentType = introspect(parentClass);
+
+            if (parentClass.isAbstract() && ! type.isAbstract()) {
+              // jpa/0gg0, jpa/0gg1
+              // XXX entityType.addAbstractEntityParentFields();
+            }
+
             break;
           }
 
@@ -252,10 +258,12 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       if (entityType != null)
         return entityType;
 
-      if (isEntity)
+      if (isEntity) {
         entityType = _persistenceUnit.createEntity(entityName, type);
-      else
+      }
+      else {
         entityType = _persistenceUnit.createMappedSuperclass(entityName, type);
+      }
 
       _relatedTypeMap.put(entityName, entityType);
 

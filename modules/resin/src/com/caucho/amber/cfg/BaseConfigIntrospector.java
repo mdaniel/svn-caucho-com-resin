@@ -3179,9 +3179,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         throw new ConfigException(L.l("{0} may not have both @AttributeOverride and @AttributeOverrides",
                                       _type));
 
-      if (hasAttributeOverride) {
+      if (attributeOverrideList == null)
         attributeOverrideList = new ArrayList<AttributeOverrideConfig>();
 
+      if (hasAttributeOverride) {
         // Convert annotation to configuration.
 
         AttributeOverrideConfig attOverrideConfig
@@ -3190,14 +3191,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         attributeOverrideList.add(attOverrideConfig);
       }
       else if (hasAttributeOverrides) {
-        if ((attributeOverrideList != null) &&
-            (attributeOverrideList.size() > 0)) {
+        if (attributeOverrideList.size() > 0) {
           // OK: attributeOverrideList came from orm.xml
         }
         else {
           // Convert annotations to configurations.
-
-          attributeOverrideList = new ArrayList<AttributeOverrideConfig>();
 
           Object attOverridesAnn[]
             = (Object []) attributeOverridesAnn.get("value");
@@ -3212,12 +3210,102 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
           }
         }
       }
-      else
-        return;
 
-      Table sourceTable = _relatedType.getTable();
+      // jpa/0ge8, jpa/0ge9, jpa/0gea
+      // Fields which have not been overridden are added to the
+      // entity subclass. This makes the columns to be properly
+      // created at each entity table -- not the mapped superclass
+      // table, even because the parent might not have a valid table.
 
       RelatedType parent = _relatedType.getParentType();
+
+      ArrayList<AmberField> fields = parent.getFields();
+
+      for (AmberField field : fields) {
+        String fieldName = field.getName();
+
+        AttributeOverrideConfig attOverrideConfig = null;
+
+        int i = 0;
+
+        for (; i < attributeOverrideList.size(); i++) {
+          attOverrideConfig = attributeOverrideList.get(i);
+
+          if (fieldName.equals(attOverrideConfig.getName())) {
+            break;
+          }
+        }
+
+        if (i < attributeOverrideList.size())
+          continue;
+
+        if (field instanceof PropertyField) {
+          Column column = ((PropertyField) field).getColumn();
+
+          // jpa/0ge8, jpa/0gea
+          // Creates the missing attribute override config.
+          attOverrideConfig = createAttributeOverrideConfig(fieldName,
+                                                            column.getName(),
+                                                            ! column.isNotNull(),
+                                                            column.isUnique());
+
+          attributeOverrideList.add(attOverrideConfig);
+        }
+      }
+
+      // jpa/0ge8, jpa/0ge9
+      // Similar code to create any missing configuration for keys.
+
+      ArrayList<IdField> keys = parent.getId().getKeys();
+
+      for (IdField field : keys) {
+        String fieldName = field.getName();
+
+        AttributeOverrideConfig attOverrideConfig = null;
+
+        int i = 0;
+
+        for (; i < attributeOverrideList.size(); i++) {
+          attOverrideConfig = attributeOverrideList.get(i);
+
+          if (fieldName.equals(attOverrideConfig.getName())) {
+            break;
+          }
+        }
+
+        if (i < attributeOverrideList.size())
+          continue;
+
+        if (field instanceof KeyPropertyField) {
+          try {
+            if (_relatedType.isFieldAccess())
+              introspectIdField(_persistenceUnit, _relatedType, null,
+                                parent.getBeanClass(), null, null);
+            else
+              introspectIdMethod(_persistenceUnit, _relatedType, null,
+                                 parent.getBeanClass(), null, null);
+          } catch (SQLException e) {
+            throw new ConfigException(e);
+          }
+
+          field = _relatedType.getId().getKeys().get(0);
+
+          Column column = ((KeyPropertyField) field).getColumn();
+
+          // jpa/0ge8, jpa/0ge9, jpa/0gea
+          // Creates the missing attribute override config.
+          attOverrideConfig = createAttributeOverrideConfig(fieldName,
+                                                            column.getName(),
+                                                            ! column.isNotNull(),
+                                                            column.isUnique());
+
+          attributeOverrideList.add(attOverrideConfig);
+        }
+      }
+
+      // Overrides fields from MappedSuperclass.
+
+      Table sourceTable = _relatedType.getTable();
 
       for (int i = 0; i < attributeOverrideList.size(); i++) {
 
@@ -3230,8 +3318,6 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         boolean unique = false;
 
         Type amberType = null;
-
-        ArrayList<AmberField> fields = parent.getFields();
 
         for (int j = 0; j < fields.size(); j++) {
 
@@ -3282,7 +3368,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         }
 
         if (_relatedType.getId() != null) {
-          ArrayList<IdField> keys = _relatedType.getId().getKeys();
+          keys = _relatedType.getId().getKeys();
 
           for (int j = 0; j < keys.size(); j++) {
 
@@ -3750,18 +3836,29 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
   private static AttributeOverrideConfig convertAttributeOverrideAnnotationToConfig(JAnnotation attOverrideAnn)
   {
+    JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
+
+    return createAttributeOverrideConfig(attOverrideAnn.getString("name"),
+                                         columnAnn.getString("name"),
+                                         columnAnn.getBoolean("nullable"),
+                                         columnAnn.getBoolean("unique"));
+  }
+
+  private static AttributeOverrideConfig createAttributeOverrideConfig(String name,
+                                                                       String columnName,
+                                                                       boolean isNullable,
+                                                                       boolean isUnique)
+  {
     AttributeOverrideConfig attOverrideConfig
       = new AttributeOverrideConfig();
 
-    attOverrideConfig.setName(attOverrideAnn.getString("name"));
+    attOverrideConfig.setName(name);
 
     ColumnConfig columnConfig = new ColumnConfig();
 
-    JAnnotation columnAnn = attOverrideAnn.getAnnotation("column");
-
-    columnConfig.setName(columnAnn.getString("name"));
-    columnConfig.setNullable(columnAnn.getBoolean("nullable"));
-    columnConfig.setUnique(columnAnn.getBoolean("unique"));
+    columnConfig.setName(columnName);
+    columnConfig.setNullable(isNullable);
+    columnConfig.setUnique(isUnique);
 
     attOverrideConfig.setColumn(columnConfig);
 

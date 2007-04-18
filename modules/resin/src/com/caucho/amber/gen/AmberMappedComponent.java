@@ -809,9 +809,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
   }
 
   /**
-   * Generates the flush
+   * Generates the increment version
    */
-  void generateFlush(JavaWriter out)
+  void generateIncrementVersion(JavaWriter out)
     throws IOException
   {
     out.println();
@@ -819,19 +819,28 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    out.println("if (__caucho_inc_version)");
-    out.println("  return;");
-    out.println();
-    out.println("__caucho_inc_version = true;");
+    if (_relatedType instanceof EntityType) {
+      out.println("if (__caucho_inc_version)");
+      out.println("  return;");
+      out.println();
+      out.println("__caucho_inc_version = true;");
 
-    VersionField version = _relatedType.getVersionField();
+      VersionField version = _relatedType.getVersionField();
 
-    if (version != null)
-      version.generateIncrementVersion(out);
+      if (version != null)
+        version.generateIncrementVersion(out);
+    }
 
     out.popDepth();
     out.println("}");
+  }
 
+  /**
+   * Generates the flush
+   */
+  void generateFlush(JavaWriter out)
+    throws IOException
+  {
     out.println();
     out.println("protected void __caucho_flush_callback()");
     out.println("  throws java.sql.SQLException");
@@ -923,6 +932,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("__caucho_home.generateUpdateSQLPrefix(cb);");
 
     out.println("boolean isFirst = true;");
+
+    VersionField version = _relatedType.getVersionField();
 
     for (int i = 0; i <= dirtyCount / 64; i++) {
       // jpa/0x02 is a negative test.

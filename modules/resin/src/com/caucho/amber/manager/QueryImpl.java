@@ -962,6 +962,8 @@ public class QueryImpl implements Query {
 
       return this;
     } catch (IndexOutOfBoundsException e) {
+      log.log(Level.FINE, e.toString(), e);
+
       throw new IllegalArgumentException(L.l("Parameter index '{0}' is not valid for setParameter()", index));
     }
   }
@@ -1034,12 +1036,20 @@ public class QueryImpl implements Query {
 
         Object pk = ((Entity) value).__caucho_getPrimaryKey();
 
-        pstmt.setObject(index, pk);
+        if (pstmt == null)
+          userQuery.setObject(index, pk);
+        else
+          pstmt.setObject(index, pk);
       }
       else {
-        pstmt.setObject(index, value);
+        if (pstmt == null)
+          userQuery.setObject(index, value);
+        else
+          pstmt.setObject(index, value);
       }
     } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+
       throw new IllegalArgumentException(L.l("Parameter index '{0}' is not valid for setParameter()", index));
     }
   }

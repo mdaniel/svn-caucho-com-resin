@@ -71,10 +71,13 @@ public class EntityComponent extends AmberMappedComponent {
     try {
       RelatedType parentType = getEntityType().getParentType();
 
-      boolean isEntityParent = ((parentType != null)
-                                && (parentType instanceof EntityType));
+      boolean isEntityParent = (parentType != null)
+        && (parentType instanceof EntityType)
+        && ! parentType.getBeanClass().isAbstract();
 
       generateHeader(out, isEntityParent);
+
+      generateIncrementVersion(out);
 
       generateInit(out, isEntityParent);
 
