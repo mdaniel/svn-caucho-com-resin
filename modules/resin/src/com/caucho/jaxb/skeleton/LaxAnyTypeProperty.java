@@ -81,22 +81,22 @@ public class LaxAnyTypeProperty extends Property {
     return _skeleton.bindFrom(binder, null, node);
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out, Object obj, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
-    _skeleton.write(m, out, obj, qname, null);
+    _skeleton.write(m, out, obj, namer, null);
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLEventWriter out, Object obj, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
-    _skeleton.write(m, out, obj, qname, null);
+    _skeleton.write(m, out, obj, namer, null);
   }
 
-  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+  public Node bindTo(BinderImpl binder, Node node, Object obj, Namer namer)
     throws IOException, JAXBException
   {
-    return _skeleton.bindTo(binder, node, obj, qname, null);
+    return _skeleton.bindTo(binder, node, obj, namer, null);
   }
 
   public String getSchemaType()

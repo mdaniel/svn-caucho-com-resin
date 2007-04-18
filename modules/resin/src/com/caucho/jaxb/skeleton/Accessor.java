@@ -36,6 +36,7 @@ import com.caucho.util.L10N;
 
 import org.w3c.dom.Node;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -49,9 +50,11 @@ import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.bind.annotation.XmlNsForm;
@@ -84,12 +87,13 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /** an Accessor is either a getter/setter pair or a field */
-public abstract class Accessor {
+public abstract class Accessor implements Namer {
   public static final L10N L = new L10N(Accessor.class);
 
   public static final String XML_SCHEMA_PREFIX = "xsd";
@@ -254,6 +258,9 @@ public abstract class Accessor {
           break;
         }
 
+      case ELEMENT_REF:
+        break;
+
       case ELEMENTS:
         {
           if (getAnnotation(XmlList.class) != null)
@@ -269,12 +276,11 @@ public abstract class Accessor {
             // XXX special case : equivalent to @XmlElement
           }
 
-          _qnameMap = new HashMap<Class,QName>();
-          HashMap<Class,QName> classToQNameMap = new HashMap<Class,QName>();
-          HashMap<QName,Property> qnameToPropertyMap = 
-            new HashMap<QName,Property>();
-          HashMap<Class,Property> classToPropertyMap = 
-            new HashMap<Class,Property>();
+          _qnameMap = new LinkedHashMap<Class,QName>();
+          Map<QName,Property> qnameToPropertyMap = 
+            new LinkedHashMap<QName,Property>();
+          Map<Class,Property> classToPropertyMap = 
+            new LinkedHashMap<Class,Property>();
 
           for (int i = 0; i < elements.value().length; i++) {
             element = elements.value()[i];
@@ -287,16 +293,13 @@ public abstract class Accessor {
 
             qnameToPropertyMap.put(qname, property);
             classToPropertyMap.put(element.type(), property);
-            classToQNameMap.put(element.type(), qname);
             _qnameMap.put(element.type(), qname);
 
             if (! property.isXmlPrimitiveType())
               _context.createSkeleton(element.type());
           }
 
-          _property = new MultiProperty(qnameToPropertyMap, 
-                                        classToPropertyMap,
-                                        classToQNameMap);
+          _property = new MultiProperty(qnameToPropertyMap, classToPropertyMap);
 
           if (List.class.isAssignableFrom(getType()))
             _property = new ListProperty(_property);
@@ -330,6 +333,64 @@ public abstract class Accessor {
         throw new JAXBException(L.l("Class contains two elements with the same QName {0}", _qname));
 
       map.put(_qname, this);
+    }
+    else if (getAccessorType() == AccessorType.ELEMENT_REF) {
+      // if discovery isn't done yet, then we may not get all the root
+      // elements when we call _context.getRootElements(), so we should
+      // abort at this point
+      if (! _context.isDiscoveryFinished())
+        return;
+
+      Class cl = getType();
+
+      // XXX process this
+      XmlElementRef elementRef = getAnnotation(XmlElementRef.class);
+
+      if (Collection.class.isAssignableFrom(cl)) {
+        if (getGenericType() instanceof ParameterizedType) {
+          ParameterizedType ptype = (ParameterizedType) getGenericType();
+          Type[] args = ptype.getActualTypeArguments();
+
+          if (args.length != 1)
+            throw new JAXBException(L.l("Collections annotated with @XmlElementRef must be parameterized: {0}", getName()));
+          else if (args[0] instanceof Class)
+            cl = (Class) args[0];
+          else
+            throw new JAXBException(L.l("Unknown type {0} on field or property {1}", args[0], getName()));
+        }
+        else
+          throw new JAXBException(L.l("Collections annotated with @XmlElementRef must be parameterized: {0}", getName()));
+      }
+      else if (cl.isArray())
+        cl = cl.getComponentType();
+
+      List<ClassSkeleton> skeletons = _context.getRootElements(cl);
+
+      if (skeletons.size() == 0)
+        throw new JAXBException(L.l("The type ({0}) of field {1} is unknown to this context", cl, getName()));
+
+      Map<QName,Property> qnameToPropertyMap = new HashMap<QName,Property>();
+      Map<Class,Property> classToPropertyMap = new HashMap<Class,Property>();
+
+      for (int i = 0; i < skeletons.size(); i++) {
+        ClassSkeleton skeleton = skeletons.get(i);
+        map.put(skeleton.getElementName(), this);
+
+        QName qname = skeleton.getElementName();
+        Property property = _context.createProperty(skeleton.getType());
+
+        qnameToPropertyMap.put(qname, property);
+        classToPropertyMap.put(skeleton.getType(), property);
+      }
+
+      _property = new MultiProperty(qnameToPropertyMap, classToPropertyMap);
+
+      if (List.class.isAssignableFrom(getType()))
+        _property = new ListProperty(_property);
+      else if (getType().isArray()) {
+        Class cType = getType().getComponentType();
+        _property = ArrayProperty.createArrayProperty(_property, cType);
+      }
     }
     else {
       for (QName qname : _qnameMap.values()) {
@@ -431,7 +492,7 @@ public abstract class Accessor {
         break;
 
       default:
-        _property.write(m, out, value, getQName(obj), obj);
+        _property.write(m, out, value, this, obj);
         break;
     }
   }
@@ -442,7 +503,7 @@ public abstract class Accessor {
   {
     Object value = get(obj);
 
-    _property.write(m, out, value, getQName(value), obj, attributes);
+    _property.write(m, out, value, this, obj, attributes);
   }
 
   public void writeAttribute(Marshaller m, XMLEventWriter out, Object value)
@@ -462,7 +523,7 @@ public abstract class Accessor {
     if (getAccessorType() == AccessorType.ATTRIBUTE)
       writeAttribute(m, out, value);
     else
-      _property.write(m, out, value, getQName(value), obj);
+      _property.write(m, out, value, this, obj);
   }
 
   public void write(Marshaller m, XMLEventWriter out, 
@@ -471,7 +532,7 @@ public abstract class Accessor {
   {
     Object value = get(obj);
 
-    _property.write(m, out, value, getQName(value), obj, attributes);
+    _property.write(m, out, value, this, obj, attributes);
   }
 
   public Node bindTo(BinderImpl binder, Node node, Object obj)
@@ -479,7 +540,7 @@ public abstract class Accessor {
   {
     Object value = get(obj);
 
-    return _property.bindTo(binder, node, value, getQName(value));
+    return _property.bindTo(binder, node, value, this);
   }
 
   // Input methods.  Contract: input stream or node iterator will be at
@@ -756,7 +817,7 @@ public abstract class Accessor {
       return new QName(namespace, name);
   }
 
-  protected QName getQName(Object obj)
+  public QName getQName(Object obj)
     throws JAXBException
   {
     if (_qname != null)
@@ -764,6 +825,22 @@ public abstract class Accessor {
 
     if (_qnameMap != null)
       return _qnameMap.get(obj.getClass());
+
+    if (getAccessorType() == AccessorType.ELEMENT_REF) {
+      if (obj instanceof JAXBElement) {
+        JAXBElement element = (JAXBElement) obj;
+
+        return element.getName();
+      }
+      else {
+        ClassSkeleton skeleton = _context.findSkeletonForObject(obj);
+
+        if (skeleton == null || skeleton.getElementName() == null)
+          throw new JAXBException(L.l("Cannot find root element name for object {0}", obj));
+
+        return skeleton.getElementName();
+      }
+    }
 
     throw new JAXBException(L.l("Internal error: Unable to find QName for object {0} in {1}", obj, this));
   }
@@ -776,61 +853,170 @@ public abstract class Accessor {
   public void generateSchema(XMLStreamWriter out)
     throws JAXBException, XMLStreamException
   {
-    XmlAttribute attribute = getAnnotation(XmlAttribute.class);
-
-    if (attribute != null) {
-      out.writeEmptyElement(XML_SCHEMA_PREFIX, "attribute", 
-                            XMLConstants.W3C_XML_SCHEMA_NS_URI);
-
-      // See http://forums.java.net/jive/thread.jspa?messageID=167171
-      // Primitives are always required
-
-      if (attribute.required() || 
-          (_generateRICompatibleSchema && getType().isPrimitive()))
-        out.writeAttribute("use", "required");
-    }
-    else {
-      out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", 
-                            XMLConstants.W3C_XML_SCHEMA_NS_URI);
-
-      XmlElement element = getAnnotation(XmlElement.class);
-
-      if (! _generateRICompatibleSchema || ! getType().isPrimitive()) {
-        if (element != null) {
-          if (element.required())
-            out.writeAttribute("minOccurs", "1");
-          else
-            out.writeAttribute("minOccurs", "0");
-
-          if (element.nillable())
-            out.writeAttribute("nillable", "true");
-        }
-        else
+    switch (getAccessorType()) {
+      case ELEMENTS:
+        {
+          out.writeStartElement(XML_SCHEMA_PREFIX, "choice", 
+                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
           out.writeAttribute("minOccurs", "0");
-      }
 
-      // XXX propertyMap => choice
-      if (_property.getMaxOccurs() != null)
-        out.writeAttribute("maxOccurs", _property.getMaxOccurs());
+          if (_property.getMaxOccurs() != null)
+            out.writeAttribute("maxOccurs", _property.getMaxOccurs());
 
-      if (isNillable())
-        out.writeAttribute("nillable", "true");
-    }
+          MultiProperty multiProperty = null;
 
-    XmlID xmlID = getAnnotation(XmlID.class);
+          if (_property instanceof ListProperty) {
+            ListProperty listProperty = (ListProperty) _property;
+            multiProperty = (MultiProperty) listProperty.getComponentProperty();
+          }
+          else
+            multiProperty = (MultiProperty) _property;
 
-    if (xmlID != null)
-      out.writeAttribute("type", "xsd:ID"); // jaxb/22d0
-    else
-      out.writeAttribute("type", _property.getSchemaType());
+          Collection<Property> properties = multiProperty.getProperties();
 
-    out.writeAttribute("name", getName());
+          XmlElements xmlElements = getAnnotation(XmlElements.class);
+          XmlElement[] elements = xmlElements.value();
 
-    XmlMimeType xmlMimeType = getAnnotation(XmlMimeType.class);
+          int i = 0; 
 
-    if (xmlMimeType != null) {
-      out.writeAttribute(XML_MIME_NS, "expectedContentTypes", 
-                         xmlMimeType.value());
+          for (Property property : properties) {
+            out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", 
+                                  XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+            out.writeAttribute("type", property.getSchemaType());
+
+            if ("##default".equals(elements[i].name()))
+              out.writeAttribute("name", getName());
+            else 
+              // XXX namespace
+              out.writeAttribute("name", elements[i].name());
+
+            i++;
+          }
+
+          out.writeEndElement(); // choice
+        }
+
+        break;
+
+      case ANY_ATTRIBUTE:
+        {
+          out.writeStartElement(XML_SCHEMA_PREFIX, "anyAttribute", 
+                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+          out.writeAttribute("namespace", "##other");
+          out.writeAttribute("processContents", "skip");
+        }
+
+        break;
+
+      case ATTRIBUTE:
+        {
+          out.writeEmptyElement(XML_SCHEMA_PREFIX, "attribute", 
+                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+          // See http://forums.java.net/jive/thread.jspa?messageID=167171
+          // Primitives are always required
+
+          XmlAttribute attribute = getAnnotation(XmlAttribute.class);
+
+          if (attribute.required() || 
+              (_generateRICompatibleSchema && getType().isPrimitive()))
+            out.writeAttribute("use", "required");
+
+          XmlID xmlID = getAnnotation(XmlID.class);
+
+          if (xmlID != null)
+            out.writeAttribute("type", "xsd:ID"); // jaxb/22d0
+          else
+            out.writeAttribute("type", _property.getSchemaType());
+
+          out.writeAttribute("name", getName());
+        }
+
+        break;
+
+      case ANY_TYPE_ELEMENT:
+        {
+          out.writeEmptyElement(XML_SCHEMA_PREFIX, "any", 
+                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+          out.writeAttribute("processContents", "skip");
+
+          if (_property.getMaxOccurs() != null)
+            out.writeAttribute("maxOccurs", _property.getMaxOccurs());
+        }
+
+        break;
+
+      case ANY_TYPE_ELEMENT_LAX:
+        {
+          out.writeEmptyElement(XML_SCHEMA_PREFIX, "any", 
+                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+          out.writeAttribute("processContents", "lax");
+
+          if (_property.getMaxOccurs() != null)
+            out.writeAttribute("maxOccurs", _property.getMaxOccurs());
+        }
+
+        break;
+
+      case ELEMENT_REF:
+        {
+          out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", 
+                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+          XmlElementRef elementRef = getAnnotation(XmlElementRef.class);
+
+          if (_property.getMaxOccurs() != null)
+            out.writeAttribute("maxOccurs", _property.getMaxOccurs());
+
+          out.writeAttribute("ref", "XXX");
+        }
+      
+      case ELEMENT:
+        {
+          out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", 
+                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+          XmlElement element = getAnnotation(XmlElement.class);
+
+          if (! _generateRICompatibleSchema || ! getType().isPrimitive()) {
+            if (element != null) {
+              if (element.required())
+                out.writeAttribute("minOccurs", "1");
+              else
+                out.writeAttribute("minOccurs", "0");
+
+              if (element.nillable())
+                out.writeAttribute("nillable", "true");
+            }
+            else
+              out.writeAttribute("minOccurs", "0");
+          }
+
+          if (_property.getMaxOccurs() != null)
+            out.writeAttribute("maxOccurs", _property.getMaxOccurs());
+
+          if (element != null && element.nillable())
+            out.writeAttribute("nillable", "true");
+
+          XmlID xmlID = getAnnotation(XmlID.class);
+
+          if (xmlID != null)
+            out.writeAttribute("type", "xsd:ID"); // jaxb/22d0
+          else
+            out.writeAttribute("type", _property.getSchemaType());
+
+          out.writeAttribute("name", getName());
+
+          XmlMimeType xmlMimeType = getAnnotation(XmlMimeType.class);
+
+          if (xmlMimeType != null) {
+            out.writeAttribute(XML_MIME_NS, "expectedContentTypes", 
+                               xmlMimeType.value());
+          }
+        }
+
+        break;
     }
   }
 
@@ -852,19 +1038,56 @@ public abstract class Accessor {
     if (_accessorType != AccessorType.UNSET)
       return _accessorType;
 
-    if (getAnnotation(XmlValue.class) != null)
-      _accessorType = AccessorType.VALUE;
-    else if (getAnnotation(XmlAnyAttribute.class) != null)
-      _accessorType = AccessorType.ANY_ATTRIBUTE;
-    else if (getAnnotation(XmlAttribute.class) != null)
-      _accessorType = AccessorType.ATTRIBUTE;
-    else if (getAnnotation(XmlElements.class) != null)
-      _accessorType = AccessorType.ELEMENTS;
-    else {
-      XmlAnyElement anyElement = getAnnotation(XmlAnyElement.class);
+    XmlAnyAttribute xmlAnyAttribute = getAnnotation(XmlAnyAttribute.class);
+    XmlAnyElement xmlAnyElement = getAnnotation(XmlAnyElement.class);
+    XmlAttribute xmlAttribute = getAnnotation(XmlAttribute.class);
+    XmlElement xmlElement = getAnnotation(XmlElement.class);
+    XmlElementRef xmlElementRef = getAnnotation(XmlElementRef.class);
+    XmlElements xmlElements = getAnnotation(XmlElements.class);
+    XmlID xmlID = getAnnotation(XmlID.class);
+    XmlIDREF xmlIDREF = getAnnotation(XmlIDREF.class);
+    XmlValue xmlValue = getAnnotation(XmlValue.class);
 
-      if (anyElement != null) {
-        if (anyElement.lax())
+    Annotation[] annotations = new Annotation[] {
+      xmlAnyAttribute, xmlAnyElement, xmlAttribute, xmlElement, 
+      xmlElementRef, xmlElements, xmlID, xmlIDREF, xmlValue
+    };
+
+    int count = 0;
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < annotations.length; i++) {
+      if (annotations[i] != null) {
+        count++;
+        sb.append("@" + annotations[i].getClass().getName());
+        sb.append(", ");
+      }
+    }
+
+    if (count > 1) {
+      throw new JAXBException(L.l("Annotations {0} cannot be used together on a single field or property", sb.toString()));
+    }
+
+    if (xmlValue != null)
+      _accessorType = AccessorType.VALUE;
+
+    else if (xmlAnyAttribute != null)
+      _accessorType = AccessorType.ANY_ATTRIBUTE;
+
+    else if (xmlAttribute != null)
+      _accessorType = AccessorType.ATTRIBUTE;
+
+    else if (xmlElementRef != null) {
+      _accessorType = AccessorType.ELEMENT_REF;
+    }
+
+    else if (xmlElements != null)
+      _accessorType = AccessorType.ELEMENTS;
+
+    else {
+
+      if (xmlAnyElement != null) {
+        if (xmlAnyElement.lax())
           _accessorType = AccessorType.ANY_TYPE_ELEMENT_LAX;
         else
           _accessorType = AccessorType.ANY_TYPE_ELEMENT;
@@ -882,6 +1105,7 @@ public abstract class Accessor {
     ANY_ATTRIBUTE, 
     ATTRIBUTE, 
     ELEMENT, 
+    ELEMENT_REF, 
     ELEMENTS, 
     ANY_TYPE_ELEMENT, 
     ANY_TYPE_ELEMENT_LAX

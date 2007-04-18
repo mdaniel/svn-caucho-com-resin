@@ -154,7 +154,7 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, QName fieldName, Iterator attributes)
+                    Object obj, Namer namer, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj != null) {
@@ -184,7 +184,7 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
         // XXX the second obj here is a hack: we just need it not to be null.
         // Figure out if the api is wrong or there is a reasonable value for
         // the fifth argument instead of this second obj.
-        property.write(m, out, obj, fieldName, obj, extendedAttributes);
+        property.write(m, out, obj, namer, obj, extendedAttributes);
         return;
       }
 
@@ -197,6 +197,8 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
         
         return;
       }
+
+      QName fieldName = namer.getQName(obj);
 
       if (fieldName.getNamespaceURI() == null)
         out.writeEmptyElement(fieldName.getLocalPart());
@@ -211,15 +213,17 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
   }
 
   public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, QName fieldName, Iterator attributes)
+                    Object obj, Namer namer, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
+    QName fieldName = namer.getQName(obj);
+
     out.add(JAXBUtil.EVENT_FACTORY.createStartElement(fieldName, null, null));
     out.add(JAXBUtil.EVENT_FACTORY.createEndElement(fieldName, null));
   }
 
   public Node bindTo(BinderImpl binder, Node node, 
-                     Object obj, QName fieldName)
+                     Object obj, Namer namer)
     throws JAXBException
   {
     return node;

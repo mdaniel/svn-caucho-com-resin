@@ -108,15 +108,15 @@ public abstract class Skeleton {
   // Output methods
   
   public abstract void write(Marshaller m, XMLStreamWriter out,
-                             Object obj, QName fieldName, Iterator attributes)
+                             Object obj, Namer namer, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException;
 
   public abstract void write(Marshaller m, XMLEventWriter out,
-                             Object obj, QName fieldName, Iterator attributes)
+                             Object obj, Namer namer, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException;
 
   public abstract Node bindTo(BinderImpl binder, Node node, 
-                              Object obj, QName fieldName, Iterator attributes)
+                              Object obj, Namer namer, Iterator attributes)
     throws IOException, JAXBException;
 
   protected Accessor getElementAccessor(QName q)

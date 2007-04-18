@@ -55,6 +55,20 @@ public class MapProperty extends Property {
   private static final QName _keyName = new QName("key");
   private static final QName _valueName = new QName("value");
 
+  private static final Namer _keyNamer = new Namer() {
+    public QName getQName(Object obj)
+    {
+      return _keyName;
+    }
+  };
+
+  private static final Namer _valueNamer = new Namer() {
+    public QName getQName(Object obj)
+    {
+      return _valueName;
+    }
+  };
+
   private Class _mapType;
   private Property _keyProperty; 
   private Property _valueProperty;
@@ -154,41 +168,46 @@ public class MapProperty extends Property {
     throw new UnsupportedOperationException();
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out,
+                    Object obj, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj != null) {
       Map<Object,Object> map = (Map<Object,Object>) obj;
+      QName qname = namer.getQName(obj);
 
       writeQNameStartElement(out, qname);
 
       for (Map.Entry<Object,Object> entry : map.entrySet()) {
-        _keyProperty.write(m, out, entry.getKey(), _keyName);
-        _valueProperty.write(m, out, entry.getValue(), _valueName);
+        _keyProperty.write(m, out, entry.getKey(), _keyNamer);
+        _valueProperty.write(m, out, entry.getValue(), _valueNamer);
       }
 
       writeQNameEndElement(out, qname);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object obj, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj != null) {
       Map<Object,Object> map = (Map<Object,Object>) obj;
+      QName qname = namer.getQName(obj);
 
       out.add(JAXBUtil.EVENT_FACTORY.createStartElement(qname, null, null));
 
       for (Map.Entry<Object,Object> entry : map.entrySet()) {
-        _keyProperty.write(m, out, entry.getKey(), _keyName);
-        _valueProperty.write(m, out, entry.getValue(), _valueName);
+        _keyProperty.write(m, out, entry.getKey(), _keyNamer);
+        _valueProperty.write(m, out, entry.getValue(), _valueNamer);
       }
 
       out.add(JAXBUtil.EVENT_FACTORY.createEndElement(qname, null));
     }
   }
 
-  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+  public Node bindTo(BinderImpl binder, Node node,
+                     Object obj, Namer namer)
     throws JAXBException
   {
     throw new UnsupportedOperationException();

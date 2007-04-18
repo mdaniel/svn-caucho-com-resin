@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.MarshalException;
@@ -42,28 +43,43 @@ import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 
+import javax.xml.namespace.QName;
+
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
+import com.caucho.jaxb.JAXBUtil;
 
 import com.caucho.util.L10N;
 
 /**
- * a string property
+ * a property for an enum
  */
 public class EnumProperty<E extends Enum<E>> extends CDataProperty {
   private static final L10N L = new L10N(EnumProperty.class);
 
+  public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
+
   private final Class<E> _enum;
+  private final Class _base;
+  private final QName _baseName;
   private final HashMap<String,E> _valueMap = new HashMap<String,E>();
-  private final HashMap<E,String> _nameMap = new HashMap<E,String>();
+  private final LinkedHashMap<E,String> _nameMap 
+    = new LinkedHashMap<E,String>();
+  private final QName _typeName;
 
   public EnumProperty(Class<E> e)
     throws JAXBException
   {
     _enum = e;
+    _typeName = JAXBUtil.getXmlSchemaDatatype(_enum);
 
     try {
-      // XXX do something with this value
       XmlEnum xmlEnum = _enum.getAnnotation(XmlEnum.class);
+      _base = xmlEnum.value();
+      _baseName = JAXBUtil.getXmlSchemaDatatype(_base);
+
+      // XXX check that base is an XML simple type
 
       Field[] fields = _enum.getFields();
 
@@ -117,8 +133,24 @@ public class EnumProperty<E extends Enum<E>> extends CDataProperty {
 
   public String getSchemaType()
   {
-    return "xsd:string";
+    return JAXBUtil.qNameToString(_typeName);
   }
 
-  // XXX: schema generation
+  public void generateSchema(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    out.writeStartElement("xsd", "simpleType", XML_SCHEMA_NS);
+    out.writeAttribute("name", JAXBUtil.qNameToString(_typeName));
+
+    out.writeStartElement("xsd", "restriction", XML_SCHEMA_NS);
+    out.writeAttribute("base", JAXBUtil.qNameToString(_baseName));
+
+    for (String name : _nameMap.values()) {
+      out.writeEmptyElement("xsd", "enumeration", XML_SCHEMA_NS);
+      out.writeAttribute("value", name); 
+    }
+
+    out.writeEndElement(); // restriction
+    out.writeEndElement(); // simpleType 
+  }
 }

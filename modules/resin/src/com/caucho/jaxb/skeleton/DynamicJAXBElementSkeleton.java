@@ -79,7 +79,7 @@ public class DynamicJAXBElementSkeleton extends ClassSkeleton {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, QName fieldName, Iterator attributes)
+                    Object obj, Namer namer, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (! (obj instanceof JAXBElement))
@@ -90,11 +90,11 @@ public class DynamicJAXBElementSkeleton extends ClassSkeleton {
     _accessor.setQName(element.getName());
     _accessor.setType(element.getDeclaredType());
 
-    super.write(m, out, obj, fieldName, attributes);
+    super.write(m, out, obj, namer, attributes);
   }
 
   public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, QName fieldName, Iterator attributes)
+                    Object obj, Namer namer, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (! (obj instanceof JAXBElement))
@@ -105,7 +105,7 @@ public class DynamicJAXBElementSkeleton extends ClassSkeleton {
     _accessor.setQName(element.getName());
     _accessor.setType(element.getDeclaredType());
 
-    super.write(m, out, obj, fieldName, attributes);
+    super.write(m, out, obj, namer, attributes);
   }
 
   public Object newInstance()

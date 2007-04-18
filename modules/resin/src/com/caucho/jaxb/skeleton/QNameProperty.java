@@ -62,9 +62,11 @@ public class QNameProperty extends Property {
 
   private int _nsCounter = 0;
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out,
+                    Object obj, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
+    QName qname = namer.getQName(obj);
     writeQNameStartElement(out, qname);
 
     if (obj != null) {
@@ -125,9 +127,12 @@ public class QNameProperty extends Property {
     writeQNameEndElement(out, qname);
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object obj, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
+    QName qname = namer.getQName(obj);
+
     if (obj != null) {
       Namespace ns = null;
       QName name = (QName) obj;
@@ -275,7 +280,8 @@ public class QNameProperty extends Property {
     return ret;
   }
 
-  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+  public Node bindTo(BinderImpl binder, Node node,
+                     Object obj, Namer namer)
     throws JAXBException
   {
     throw new UnsupportedOperationException();

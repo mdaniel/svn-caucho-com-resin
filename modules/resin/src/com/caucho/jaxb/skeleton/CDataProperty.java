@@ -183,10 +183,12 @@ public abstract class CDataProperty extends Property {
     throws IOException, JAXBException;
 
   public void write(Marshaller m, XMLStreamWriter out, Object value, 
-                    QName qname, Object obj, Iterator attributes)
+                    Namer namer, Object obj, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj != null) {
+      QName qname = namer.getQName(value);
+
       writeQNameStartElement(out, qname);
 
       if (attributes != null) {
@@ -202,43 +204,50 @@ public abstract class CDataProperty extends Property {
   }
 
   public void write(Marshaller m, XMLStreamWriter out, 
-                    Object value, QName qname)
+                    Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
-    write(m, out, value, qname, null);
+    write(m, out, value, namer, null);
   }
 
   public void write(Marshaller m, XMLStreamWriter out, Object value,
-                    QName qname, Object obj)
+                    Namer namer, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     if (value != null) {
+      QName qname = namer.getQName(value);
+
       writeQNameStartElement(out, qname);
       out.writeCharacters(write(value));
       writeQNameEndElement(out, qname);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object value, QName qname)
+  public void write(Marshaller m, XMLEventWriter out, 
+                    Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
-    write(m, out, value, qname, null);
+    write(m, out, value, namer, null);
   }
 
   public void write(Marshaller m, XMLEventWriter out, Object value, 
-                    QName qname, Object obj)
+                    Namer namer, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
     if (value != null) {
+      QName qname = namer.getQName(value);
+
       out.add(JAXBUtil.EVENT_FACTORY.createStartElement(qname, null, null));
       out.add(JAXBUtil.EVENT_FACTORY.createCharacters(write(value)));
       out.add(JAXBUtil.EVENT_FACTORY.createEndElement(qname, null));
     }
   }
 
-  public Node bindTo(BinderImpl binder, Node node, Object value, QName qname)
+  public Node bindTo(BinderImpl binder, Node node, 
+                     Object value, Namer namer)
     throws IOException, JAXBException
   {
+    QName qname = namer.getQName(value);
     QName name = JAXBUtil.qnameFromNode(node);
 
     if (! name.equals(qname)) {

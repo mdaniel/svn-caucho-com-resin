@@ -125,48 +125,51 @@ public class IntegerArrayProperty extends ArrayProperty {
   }
 
   public void write(Marshaller m, XMLStreamWriter out, 
-                    Object value, QName qname)
+                    Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (value != null) {
       int[] array = (int[]) value;
 
       for (int i = 0; i < array.length; i++) 
-        IntProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
+        IntProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], namer);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object value, QName qname)
+  public void write(Marshaller m, XMLEventWriter out,
+                    Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (value != null) {
       int[] array = (int[]) value;
 
       for (int i = 0; i < array.length; i++) 
-        IntProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
+        IntProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], namer);
     }
   }
   
-  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+  public Node bindTo(BinderImpl binder, Node node,
+                     Object value, Namer namer)
     throws IOException, JAXBException
   {
+    QName qname = namer.getQName(value);
     QName name = JAXBUtil.qnameFromNode(node);
     Document doc = node.getOwnerDocument(); 
 
     if (! name.equals(qname))
       node = JAXBUtil.elementFromQName(qname, doc);
 
-    binder.bind(obj, node);
+    binder.bind(value, node);
 
-    if (obj != null) {
-      int[] array = (int[]) obj;
+    if (value != null) {
+      int[] array = (int[]) value;
 
       for (int i = 0; i < array.length; i++) {
         Node child = JAXBUtil.elementFromQName(qname, doc);
         node.appendChild(IntProperty.PRIMITIVE_PROPERTY.bindTo(binder, 
                                                                child, 
                                                                array[i], 
-                                                               qname));
+                                                               namer));
       }
     }
 

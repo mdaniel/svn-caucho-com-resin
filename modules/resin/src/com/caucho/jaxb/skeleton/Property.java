@@ -137,52 +137,52 @@ public abstract class Property {
     throws IOException,JAXBException;
 
   public abstract void write(Marshaller m, XMLStreamWriter out, 
-                             Object value, QName name)
+                             Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException;
 
   public abstract void write(Marshaller m, XMLEventWriter out, 
-                             Object value, QName name)
+                             Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException;
 
   public abstract Node bindTo(BinderImpl binder, Node node, 
-                              Object value, QName qname)
+                              Object value, Namer namer)
     throws IOException,JAXBException;
 
   public void write(Marshaller m, XMLStreamWriter out, 
-                    Object value, QName name, Object obj)
+                    Object value, Namer namer, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    write(m, out, value, name);
+    write(m, out, value, namer);
   }
 
   public void write(Marshaller m, XMLEventWriter out, 
-                    Object value, QName name, Object obj)
+                    Object value, Namer namer, Object obj)
     throws IOException, XMLStreamException, JAXBException
   {
-    write(m, out, value, name);
+    write(m, out, value, namer);
   }
 
   public void write(Marshaller m, XMLStreamWriter out, 
-                    Object value, QName name, Object obj,
+                    Object value, Namer namer, Object obj,
                     Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
-    write(m, out, value, name, obj);
+    write(m, out, value, namer, obj);
   }
 
   public void write(Marshaller m, XMLEventWriter out, Object value, 
-                    QName name, Object obj, Iterator attributes)
+                    Namer namer, Object obj, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
-    write(m, out, value, name, obj);
+    write(m, out, value, namer, obj);
   }
 
   public Node bindTo(BinderImpl binder, Node node, 
-                     Object value, QName qname,
+                     Object value, Namer namer,
                      Iterator attributes)
     throws IOException, JAXBException
   {
-    return bindTo(binder, node, value, qname);
+    return bindTo(binder, node, value, namer);
   }
 
   protected void writeQNameStartElement(XMLStreamWriter out, QName name)

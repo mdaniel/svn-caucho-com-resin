@@ -128,37 +128,40 @@ public class ClassSkeleton<C> extends Skeleton {
   }
 
   public ClassSkeleton(JAXBContextImpl context, Class<C> c)
-    throws JAXBException
   {
     super(context);
+    _class = c;
+  }
 
+  public void init() 
+    throws JAXBException
+  {
     try {
-      _class = c;
-      _package = c.getPackage();
+      _package = _class.getPackage();
 
       // check for special before and after methods
       try {
         _beforeUnmarshal =
-          c.getMethod("beforeUnmarshal", Unmarshaller.class, Object.class);
+          _class.getMethod("beforeUnmarshal", Unmarshaller.class, Object.class);
       } catch (NoSuchMethodException _) {
         // deliberate
       }
 
       try {
         _afterUnmarshal =
-          c.getMethod("afterUnmarshal", Unmarshaller.class, Object.class);
+          _class.getMethod("afterUnmarshal", Unmarshaller.class, Object.class);
       } catch (NoSuchMethodException _) {
         // deliberate
       }
 
       try {
-        _beforeMarshal = c.getMethod("beforeMarshal", Marshaller.class);
+        _beforeMarshal = _class.getMethod("beforeMarshal", Marshaller.class);
       } catch (NoSuchMethodException _) {
         // deliberate
       }
 
       try {
-        _afterMarshal = c.getMethod("afterMarshal", Marshaller.class);
+        _afterMarshal = _class.getMethod("afterMarshal", Marshaller.class);
       } catch (NoSuchMethodException _) {
         // deliberate
       }
@@ -171,16 +174,17 @@ public class ClassSkeleton<C> extends Skeleton {
       
       // Find the zero-parameter constructor
       try {
-        _constructor = c.getConstructor(NO_PARAMS);
+        _constructor = _class.getConstructor(NO_PARAMS);
         _constructor.setAccessible(true);
       }
       catch (Exception e1) {
         try {
-          _constructor = c.getDeclaredConstructor(NO_PARAMS);
+          _constructor = _class.getDeclaredConstructor(NO_PARAMS);
           _constructor.setAccessible(true);
         }
         catch (Exception e2) {
-          throw new JAXBException(L.l("{0}: Zero-arg constructor not found", c.getName()), e2);
+          throw new JAXBException(L.l("{0}: Zero-arg constructor not found", 
+                                      _class.getName()), e2);
         }
       }
 
@@ -201,7 +205,7 @@ public class ClassSkeleton<C> extends Skeleton {
         namespace = schema.namespace();
       
       // then look at class specific overrides.
-      XmlRootElement xre = c.getAnnotation(XmlRootElement.class);
+      XmlRootElement xre = _class.getAnnotation(XmlRootElement.class);
 
       if (xre != null) { 
         String localName = null;
@@ -218,8 +222,6 @@ public class ClassSkeleton<C> extends Skeleton {
           _elementName = new QName(localName);
         else
           _elementName = new QName(namespace, localName);
-
-        _typeName = _elementName;
 
         _context.addRootElement(this);
       }
@@ -261,7 +263,9 @@ public class ClassSkeleton<C> extends Skeleton {
           _elementAccessors.add(null);
       }
 
-      XmlAccessorType accessorType = c.getAnnotation(XmlAccessorType.class);
+      XmlAccessorType accessorType = 
+        _class.getAnnotation(XmlAccessorType.class);
+
       XmlAccessType accessType = (accessorType == null ? 
                                   XmlAccessType.PUBLIC_MEMBER :
                                   accessorType.value());
@@ -270,7 +274,7 @@ public class ClassSkeleton<C> extends Skeleton {
         // getter/setter
         TreeSet<Method> methodSet = new TreeSet<Method>(methodComparator);
 
-        Method[] declared = c.getDeclaredMethods();
+        Method[] declared = _class.getDeclaredMethods();
 
         for (Method m : declared)
           methodSet.add(m);
@@ -345,7 +349,7 @@ public class ClassSkeleton<C> extends Skeleton {
 
           // XXX special cases for Throwable specified in JAX-WS
           // Should it be in the general JAXB?
-          if (Throwable.class.isAssignableFrom(c) && 
+          if (Throwable.class.isAssignableFrom(_class) && 
               ("stackTrace".equals(name) ||
                "cause".equals(name) ||
                "localizedMessage".equals(name)))
@@ -399,7 +403,7 @@ public class ClassSkeleton<C> extends Skeleton {
         // XXX Don't overwrite property accessors
         HashSet<Field> fieldSet = new HashSet<Field>();
 
-        Field[] declared = c.getDeclaredFields();
+        Field[] declared = _class.getDeclaredFields();
 
         for (Field f : declared)
           fieldSet.add(f);
@@ -478,11 +482,27 @@ public class ClassSkeleton<C> extends Skeleton {
       }
     }
     catch (Exception e) {
-      throw new JAXBException(L.l("{0}: Initialization error", c.getName()), e);
+      throw new JAXBException(L.l("{0}: Initialization error", 
+                                  _class.getName()), e);
     }
 
     if (! Object.class.equals(_class.getSuperclass()))
       _parent = _context.getSkeleton(_class.getSuperclass());
+  }
+
+  /**
+   * Handles any processing that needs to happen after all ClassSkeletons
+   * have been created and all classes have been discovered.
+   **/
+  public void postProcess()
+    throws JAXBException
+  {
+    for (int i = 0; i < _elementAccessors.size(); i++) { 
+      Accessor a = _elementAccessors.get(i);
+
+      if (a.getAccessorType() == Accessor.AccessorType.ELEMENT_REF)
+        a.putQNames(_elementQNameToAccessorMap);
+    }
   }
 
   private void processAccessor(Accessor a)
@@ -518,6 +538,7 @@ public class ClassSkeleton<C> extends Skeleton {
         break;
 
       case ELEMENT:
+      case ELEMENT_REF:
       case ELEMENTS:
         if (_value != null)
           throw new JAXBException(L.l("{0}: Cannot have both @XmlValue and elements in a JAXB element", _class.getName()));
@@ -795,7 +816,7 @@ public class ClassSkeleton<C> extends Skeleton {
   }
   
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, QName fieldName, Iterator attributes)
+                    Object obj, Namer namer, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj == null)
@@ -808,7 +829,10 @@ public class ClassSkeleton<C> extends Skeleton {
       if (m.getListener() != null)
         m.getListener().beforeMarshal(obj);
 
-      QName tagName = fieldName;
+      QName tagName = null;
+      
+      if (namer != null)
+        tagName = namer.getQName(obj);
 
       if (tagName == null)
         tagName = _elementName;
@@ -864,7 +888,7 @@ public class ClassSkeleton<C> extends Skeleton {
   }
 
   public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, QName fieldName, Iterator attributes)
+                    Object obj, Namer namer, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     // XXX: beforeMarshal/afterMarshal???
@@ -878,10 +902,13 @@ public class ClassSkeleton<C> extends Skeleton {
       if (m.getListener() != null)
         m.getListener().beforeMarshal(obj);
 
-      QName tagName = _elementName; //getElementName((C) obj);
+      QName tagName = null;
       
+      if (namer != null)
+        tagName = namer.getQName(obj);
+
       if (tagName == null)
-        tagName = fieldName;
+        tagName = _elementName;
 
       if (_value != null) {
         _value.setQName(tagName);
@@ -915,13 +942,16 @@ public class ClassSkeleton<C> extends Skeleton {
   }
 
   public Node bindTo(BinderImpl binder, Node node, 
-                     Object obj, QName fieldName, Iterator attributes)
+                     Object obj, Namer namer, Iterator attributes)
     throws IOException, JAXBException
   {
     if (obj == null)
       return null;
 
-    QName tagName = fieldName;
+    QName tagName = null;
+
+    if (namer != null)
+      tagName = namer.getQName(obj);
 
     if (tagName == null)
       tagName = _elementName;
@@ -1057,8 +1087,14 @@ public class ClassSkeleton<C> extends Skeleton {
       if (! "".equals(_typeName.getLocalPart()))
         out.writeAttribute("name", _typeName.getLocalPart());
 
-      out.writeEmptyElement(XML_SCHEMA_PREFIX, "restriction", XML_SCHEMA_NS);
-      out.writeAttribute("base", _value.getSchemaType());
+      if (Collection.class.isAssignableFrom(_value.getType())) {
+        out.writeEmptyElement(XML_SCHEMA_PREFIX, "list", XML_SCHEMA_NS);
+        out.writeAttribute("itemType", _value.getSchemaType());
+      }
+      else {
+        out.writeEmptyElement(XML_SCHEMA_PREFIX, "restriction", XML_SCHEMA_NS);
+        out.writeAttribute("base", _value.getSchemaType());
+      }
 
       for (Accessor accessor : _attributeAccessors)
         accessor.generateSchema(out);
@@ -1068,6 +1104,9 @@ public class ClassSkeleton<C> extends Skeleton {
     else {
       out.writeStartElement(XML_SCHEMA_PREFIX, "complexType", XML_SCHEMA_NS);
 
+      if (Modifier.isAbstract(_class.getModifiers()))
+        out.writeAttribute("abstract", "true");
+
       if (! "".equals(_typeName.getLocalPart()))
         out.writeAttribute("name", _typeName.getLocalPart());
 
@@ -1075,6 +1114,9 @@ public class ClassSkeleton<C> extends Skeleton {
 
       for (Accessor accessor : _elementAccessors)
         accessor.generateSchema(out);
+
+      if (_anyTypeElementAccessor != null)
+        _anyTypeElementAccessor.generateSchema(out);
 
       out.writeEndElement(); // sequence
 

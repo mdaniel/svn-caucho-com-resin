@@ -47,7 +47,10 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
 import java.io.IOException;
+
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -55,17 +58,14 @@ import java.util.Map;
  */
 public class MultiProperty extends Property {
   private static final L10N L = new L10N(MultiProperty.class);
-  private Map<QName,Property> _qnameToPropertyMap;
-  private Map<Class,Property> _classToPropertyMap;
-  private Map<Class,QName> _classToQNameMap;
+  private final Map<QName,Property> _qnameToPropertyMap;
+  private final Map<Class,Property> _classToPropertyMap;
 
   public MultiProperty(Map<QName,Property> qnameToPropertyMap,
-                       Map<Class,Property> classToPropertyMap,
-                       Map<Class,QName> classToQNameMap)
+                       Map<Class,Property> classToPropertyMap)
   {
     _qnameToPropertyMap = qnameToPropertyMap;
     _classToPropertyMap = classToPropertyMap;
-    _classToQNameMap = classToQNameMap;
   }
 
   public Object read(Unmarshaller u, XMLStreamReader in, Object previous)
@@ -107,7 +107,8 @@ public class MultiProperty extends Property {
     return property.bindFrom(binder, node, previous);
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLStreamWriter out,
+                    Object obj, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj != null) {
@@ -115,30 +116,31 @@ public class MultiProperty extends Property {
 
       Property property = _classToPropertyMap.get(cl);
 
-      if (qname == null) 
-        qname = _classToQNameMap.get(cl);
-
       if (property == null)
         throw new JAXBException(L.l("Unexpected object {0}", obj));
 
-      property.write(m, out, obj, qname);
+      property.write(m, out, obj, namer);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object obj, QName qname)
+  public void write(Marshaller m, XMLEventWriter out,
+                    Object obj, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (obj != null) {
-      Property property = _classToPropertyMap.get(obj.getClass());
+      Class cl = obj.getClass();
+
+      Property property = _classToPropertyMap.get(cl);
 
       if (property == null)
         throw new JAXBException(L.l("Unexpected object {0}", obj));
 
-      property.write(m, out, obj, qname);
+      property.write(m, out, obj, namer);
     }
   }
 
-  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+  public Node bindTo(BinderImpl binder, Node node, 
+                     Object obj, Namer namer)
     throws IOException, JAXBException
   {
     if (obj != null) {
@@ -147,7 +149,7 @@ public class MultiProperty extends Property {
       if (property == null)
         throw new JAXBException(L.l("Unexpected object {0}", obj));
 
-      return property.bindTo(binder, node, obj, qname);
+      return property.bindTo(binder, node, obj, namer);
     }
 
     return null;
@@ -167,6 +169,11 @@ public class MultiProperty extends Property {
 
   public String getMaxOccurs()
   {
-    return "unbounded";
+    return null;
+  }
+
+  public Collection<Property> getProperties()
+  {
+    return _qnameToPropertyMap.values();
   }
 }

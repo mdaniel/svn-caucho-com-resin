@@ -125,33 +125,34 @@ public class CharacterArrayProperty extends ArrayProperty {
   }
 
   public void write(Marshaller m, XMLStreamWriter out, 
-                    Object value, QName qname)
+                    Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (value != null) {
       char[] array = (char[]) value;
 
-      for (int i = 0; i < array.length; i++) {
-        CharacterProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
-      }
+      for (int i = 0; i < array.length; i++)
+        CharacterProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], namer);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object value, QName qname)
+  public void write(Marshaller m, XMLEventWriter out,
+                    Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (value != null) {
       char[] array = (char[]) value;
 
-      for (int i = 0; i < array.length; i++) {
-        CharacterProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], qname);
-      }
+      for (int i = 0; i < array.length; i++)
+        CharacterProperty.PRIMITIVE_PROPERTY.write(m, out, array[i], namer);
     }
   }
 
-  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+  public Node bindTo(BinderImpl binder, Node node,
+                     Object obj, Namer namer)
     throws IOException, JAXBException
   {
+    QName qname = namer.getQName(obj);
     QName name = JAXBUtil.qnameFromNode(node);
     Document doc = node.getOwnerDocument(); 
 
@@ -168,7 +169,7 @@ public class CharacterArrayProperty extends ArrayProperty {
         node.appendChild(CharacterProperty.PRIMITIVE_PROPERTY.bindTo(binder, 
                                                                      child, 
                                                                      array[i], 
-                                                                     qname));
+                                                                     namer));
       }
     }
 

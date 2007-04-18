@@ -116,7 +116,7 @@ public class XmlInstanceWrapper extends Accessor {
   {
   }
 
-  protected QName getQName(Object obj)
+  public QName getQName(Object obj)
     throws JAXBException
   {
     return XSI_TYPE_NAME;

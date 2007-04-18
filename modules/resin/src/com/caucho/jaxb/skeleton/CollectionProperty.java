@@ -103,7 +103,7 @@ public class CollectionProperty extends IterableProperty {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object value, QName qname)
+                    Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (value != null) {
@@ -112,11 +112,12 @@ public class CollectionProperty extends IterableProperty {
       Collection collection = (Collection) value;
 
       for (Object o : collection)
-        _componentProperty.write(m, out, o, qname);
+        _componentProperty.write(m, out, o, namer);
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object value, QName qname)
+  public void write(Marshaller m, XMLEventWriter out,
+                    Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (value != null) {
@@ -125,24 +126,24 @@ public class CollectionProperty extends IterableProperty {
       Collection collection = (Collection) value;
 
       for (Object o : collection)
-        _componentProperty.write(m, out, o, qname);
+        _componentProperty.write(m, out, o, namer);
     }
   }
 
-  public Node bindTo(BinderImpl binder, Node node, Object obj, QName qname)
+  public Node bindTo(BinderImpl binder, Node node,
+                     Object value, Namer namer)
     throws IOException, JAXBException
   {
-    if (obj != null) {
-      validateType(obj);
+    if (value != null) {
+      validateType(value);
 
-      Collection collection = (Collection) obj;
+      Collection collection = (Collection) value;
 
       Node child = node.getFirstChild();
       for (Object o : collection) {
         if (child != null) {
           // try to reuse as many of the child nodes as possible
-          Node newNode =
-            _componentProperty.bindTo(binder, child, o, qname);
+          Node newNode = _componentProperty.bindTo(binder, child, o, namer);
 
           if (newNode != child) {
             node.replaceChild(child, newNode);
@@ -153,8 +154,9 @@ public class CollectionProperty extends IterableProperty {
           node = JAXBUtil.skipIgnorableNodes(node);
         }
         else {
+          QName qname = namer.getQName(value);
           Node newNode = JAXBUtil.elementFromQName(qname, node);
-          newNode = _componentProperty.bindTo(binder, newNode, o, qname);
+          newNode = _componentProperty.bindTo(binder, newNode, o, namer);
 
           node.appendChild(newNode);
         }

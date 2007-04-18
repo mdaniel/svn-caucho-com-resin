@@ -65,6 +65,7 @@ import java.util.*;
  * Entry point to API
  */
 public class JAXBContextImpl extends JAXBContext {
+  public static final String XML_SCHEMA_NS = "http://www.w3.org/2001/XMLSchema";
   static final ValidationEventHandler DEFAULT_VALIDATION_EVENT_HANDLER
     = new DefaultValidationEventHandler();
 
@@ -101,26 +102,31 @@ public class JAXBContextImpl extends JAXBContext {
   private XMLInputFactory _staxInputFactory;
   private XMLOutputFactory _staxOutputFactory;
 
-  private ArrayList<ObjectFactorySkeleton> _objectFactories 
+  private final ArrayList<ObjectFactorySkeleton> _objectFactories 
     = new ArrayList<ObjectFactorySkeleton>();
 
-  private HashMap<String,Object> _properties 
+  private final HashMap<String,Object> _properties 
     = new HashMap<String,Object>();
 
-  private LinkedHashMap<Class,ClassSkeleton> _classSkeletons 
+  private final LinkedHashMap<Class,ClassSkeleton> _classSkeletons 
     = new LinkedHashMap<Class,ClassSkeleton>();
 
-  private LinkedHashMap<Class,JAXBElementSkeleton> _jaxbElementSkeletons 
+  private final LinkedHashMap<Class,JAXBElementSkeleton> _jaxbElementSkeletons 
     = new LinkedHashMap<Class,JAXBElementSkeleton>();
 
+  private final HashMap<QName,ClassSkeleton> _roots 
+    = new HashMap<QName,ClassSkeleton>();
+  private final HashMap<QName,ClassSkeleton> _types 
+    = new HashMap<QName,ClassSkeleton>();
+
+  private final ArrayList<EnumProperty> _enums = new ArrayList<EnumProperty>();
+
+  private HashSet<Class> _pendingSkeletons = new HashSet<Class>();
+
   private DynamicJAXBElementSkeleton _dynamicSkeleton;
-
-  private HashMap<QName,ClassSkeleton> _roots 
-    = new HashMap<QName,ClassSkeleton>();
-  private HashMap<QName,ClassSkeleton> _types 
-    = new HashMap<QName,ClassSkeleton>();
-
   private Property _laxAnyTypeProperty = null;
+
+  private boolean _isDiscoveryFinished = false;
 
   public static JAXBContext createContext(String contextPath,
                                           ClassLoader classLoader,
@@ -153,6 +159,13 @@ public class JAXBContextImpl extends JAXBContext {
     DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
     
     _dynamicSkeleton = new DynamicJAXBElementSkeleton(this);
+
+    _pendingSkeletons = null;
+
+    _isDiscoveryFinished = true;
+
+    for (ClassSkeleton skeleton : _classSkeletons.values())
+      skeleton.postProcess();
   }
 
   public static JAXBContext createContext(Class []classes, 
@@ -186,6 +199,18 @@ public class JAXBContextImpl extends JAXBContext {
     DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
 
     _dynamicSkeleton = new DynamicJAXBElementSkeleton(this);
+
+    _pendingSkeletons = null;
+
+    _isDiscoveryFinished = true;
+
+    for (ClassSkeleton skeleton : _classSkeletons.values())
+      skeleton.postProcess();
+  }
+
+  public boolean isDiscoveryFinished()
+  {
+    return _isDiscoveryFinished;
   }
 
   public Marshaller createMarshaller()
@@ -288,9 +313,7 @@ public class JAXBContextImpl extends JAXBContext {
 
       out.writeStartDocument("UTF-8", "1.0");
 
-      out.writeStartElement("xsd", 
-                            "schema", 
-                            "http://www.w3.org/2001/XMLSchema");
+      out.writeStartElement("xsd", "schema", XML_SCHEMA_NS);
       out.writeAttribute("version", "1.0");
 
       generateSchemaWithoutHeader(out);
@@ -319,6 +342,9 @@ public class JAXBContextImpl extends JAXBContext {
   {
     for (Skeleton skeleton : _classSkeletons.values())
       skeleton.generateSchema(out);
+
+    for (int i = 0; i < _enums.size(); i++)
+      ((EnumProperty) _enums.get(i)).generateSchema(out);
   }
 
   public ClassSkeleton createSkeleton(Class c)
@@ -336,10 +362,16 @@ public class JAXBContextImpl extends JAXBContext {
       if (c.isEnum() || c.isInterface())
         return null;
 
-      // Breadcrumb to prevent problems with recursion
-      _classSkeletons.put(c, null); 
-
       skeleton = new ClassSkeleton(this, c);
+
+      // Breadcrumb to prevent problems with recursion
+      _classSkeletons.put(c, skeleton); 
+
+      _pendingSkeletons.add(c);
+
+      skeleton.init();
+
+      _pendingSkeletons.remove(c);
     }
 
     _classSkeletons.put(c, skeleton);
@@ -400,6 +432,23 @@ public class JAXBContextImpl extends JAXBContext {
     }
     else
       return findSkeletonForClass(obj.getClass(), _classSkeletons);
+  }
+
+  /**
+   * Finds all ClassSkeletons that are subclasses of the given class and
+   * are root elements.
+   **/
+  public List<ClassSkeleton> getRootElements(Class cl)
+  {
+    ArrayList<ClassSkeleton> list = new ArrayList<ClassSkeleton>();
+
+    for (Map.Entry<Class,ClassSkeleton> entry : _classSkeletons.entrySet()) {
+      if (cl.isAssignableFrom(entry.getKey()) && 
+          entry.getValue().isRootElement())
+        list.add(entry.getValue());
+    }
+
+    return list;
   }
 
   public Property getLaxAnyTypeProperty()
@@ -479,8 +528,12 @@ public class JAXBContextImpl extends JAXBContext {
                                                    cl.getComponentType());
       }
 
-      if (cl.isEnum())
-        return new EnumProperty(cl);
+      if (cl.isEnum()) {
+        EnumProperty enumProperty = new EnumProperty(cl);
+        _enums.add(enumProperty);
+
+        return enumProperty;
+      }
 
       // XXX Map
 
@@ -660,10 +713,12 @@ public class JAXBContextImpl extends JAXBContext {
     if (_types.containsKey(typeName)) {
       ClassSkeleton existing = _types.get(typeName);
 
-      throw new JAXBException(L.l("Duplicate type name {0} for types {1} and {2}",
-                                  typeName,
-                                  skeleton.getType(),
-                                  existing.getType()));
+      if (! _pendingSkeletons.contains(existing.getType())) {
+        throw new JAXBException(L.l("Duplicate type name {0} for types {1} and {2}",
+                                    typeName,
+                                    skeleton.getType(),
+                                    existing.getType()));
+      }
     }
 
     _types.put(typeName, skeleton);
@@ -675,11 +730,12 @@ public class JAXBContextImpl extends JAXBContext {
     ClassSkeleton old = _roots.get(s.getElementName());
 
     // Use != here to check duplicate puts; equals() isn't necessary
-    if (old != null && old != s)
+    if (old != null && old != s && ! _pendingSkeletons.contains(s.getType())) {
       throw new JAXBException(L.l("Duplicate name {0} for classes {1} and {2}",
                                   s.getElementName(),
                                   s.getType(),
                                   _roots.get(s.getElementName()).getType()));
+    }
 
     _roots.put(s.getElementName(), s);
   }

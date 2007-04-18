@@ -65,6 +65,7 @@ import com.caucho.util.L10N;
 public class WrapperProperty extends Property {
   public static final L10N L = new L10N(WrapperProperty.class);
 
+  private final Namer _wrapperNamer;
   private final String _name;
   private final String _namespace;
   private final QName _wrappedQName;
@@ -91,6 +92,13 @@ public class WrapperProperty extends Property {
     _wrapperQName = new QName(_namespace, _name);
     _property = property;
     _nillable = elementWrapper.nillable();
+
+    _wrapperNamer = new Namer() {
+      public QName getQName(Object obj)
+      {
+        return _wrapperQName;
+      }
+    };
   }
 
   public WrapperProperty(Property property, 
@@ -108,6 +116,13 @@ public class WrapperProperty extends Property {
     _wrappedQName = wrappedQName;
     _nillable = false;
     _property = property;
+
+    _wrapperNamer = new Namer() {
+      public QName getQName(Object obj)
+      {
+        return _wrapperQName;
+      }
+    };
   }
 
   public QName getWrapperQName()
@@ -185,7 +200,8 @@ public class WrapperProperty extends Property {
     throw new UnsupportedOperationException();
   }
 
-  public void write(Marshaller m, XMLStreamWriter out, Object value, QName name)
+  public void write(Marshaller m, XMLStreamWriter out, 
+                    Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     if (value != null || _nillable) {
@@ -200,20 +216,22 @@ public class WrapperProperty extends Property {
       }
     }
 
-    _property.write(m, out, value, _wrappedQName);
+    _property.write(m, out, value, _wrapperNamer);
 
     if (value != null || _nillable) {
       out.writeEndElement();
     }
   }
 
-  public void write(Marshaller m, XMLEventWriter out, Object value, QName name)
+  public void write(Marshaller m, XMLEventWriter out,
+                    Object value, Namer namer)
     throws IOException, XMLStreamException, JAXBException
   {
     throw new UnsupportedOperationException();
   }
 
-  public Node bindTo(BinderImpl binder, Node node, Object value, QName qname)
+  public Node bindTo(BinderImpl binder, Node node,
+                     Object value, Namer namer)
     throws IOException,JAXBException
   {
     throw new UnsupportedOperationException();

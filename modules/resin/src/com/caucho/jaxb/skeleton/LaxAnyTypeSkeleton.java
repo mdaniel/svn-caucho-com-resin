@@ -117,7 +117,7 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
   }
 
   public void write(Marshaller m, XMLStreamWriter out,
-                    Object obj, QName fieldName, Iterator attributes)
+                    Object obj, Namer namer, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
@@ -128,14 +128,14 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
       if (property == null)
         throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
 
-      property.write(m, out, obj, fieldName); // XXX attributes
+      property.write(m, out, obj, namer); // XXX attributes
     }
     else 
       skeleton.write(m, out, obj, null, attributes);
   }
 
   public void write(Marshaller m, XMLEventWriter out,
-                    Object obj, QName fieldName, Iterator attributes)
+                    Object obj, Namer namer, Iterator attributes)
     throws IOException, XMLStreamException, JAXBException
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
@@ -146,14 +146,14 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
       if (property == null)
         throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
 
-      property.write(m, out, obj, fieldName); // XXX attributes
+      property.write(m, out, obj, namer); // XXX attributes
     }
     else 
-      skeleton.write(m, out, obj, fieldName, attributes);
+      skeleton.write(m, out, obj, namer, attributes);
   }
 
   public Node bindTo(BinderImpl binder, Node node, 
-                     Object obj, QName fieldName, Iterator attributes)
+                     Object obj, Namer namer, Iterator attributes)
     throws IOException, JAXBException
   {
     Skeleton skeleton = _context.findSkeletonForObject(obj);
@@ -161,7 +161,7 @@ public class LaxAnyTypeSkeleton extends ClassSkeleton<Object> {
     if (skeleton == null)
       throw new JAXBException(L.l("Unknown class {0}", obj.getClass()));
 
-    return skeleton.bindTo(binder, node, obj, fieldName, attributes);
+    return skeleton.bindTo(binder, node, obj, namer, attributes);
   }
 
   public String toString()
