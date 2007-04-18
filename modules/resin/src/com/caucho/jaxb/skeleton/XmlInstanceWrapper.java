@@ -147,6 +147,11 @@ public class XmlInstanceWrapper extends Accessor {
     return null;
   }
 
+  public Package getPackage()
+  {
+    return null;
+  }
+
   public Iterator getExtendedIterator()
   {
     return new ExtendedIterator();

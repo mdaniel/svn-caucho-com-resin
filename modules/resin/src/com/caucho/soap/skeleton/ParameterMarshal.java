@@ -29,6 +29,8 @@
 
 package com.caucho.soap.skeleton;
 
+import com.caucho.jaxb.skeleton.ConstantNamer;
+import com.caucho.jaxb.skeleton.Namer;
 import com.caucho.jaxb.skeleton.Property;
 
 import javax.jws.WebParam;
@@ -51,6 +53,7 @@ public abstract class ParameterMarshal {
   protected final int _arg;
   protected final Marshaller _marshaller;
   protected final Unmarshaller _unmarshaller;
+  protected final Namer _namer;
 
   protected ParameterMarshal(int arg, Property property, QName name, 
                              Marshaller marshaller, Unmarshaller unmarshaller)
@@ -60,6 +63,7 @@ public abstract class ParameterMarshal {
     _name = name;
     _marshaller = marshaller;
     _unmarshaller = unmarshaller;
+    _namer = ConstantNamer.getConstantNamer(_name);
   }
 
   static ParameterMarshal create(int arg, 

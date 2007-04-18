@@ -138,6 +138,11 @@ public class JAXBElementSkeleton<C> extends ClassSkeleton<JAXBElement<C>> {
       return null;
     }
 
+    public Package getPackage()
+    {
+      return null;
+    }
+
     public String toString()
     {
       return "JAXBElementSkeleton.ContentsAccessor[" + _contents + "]";

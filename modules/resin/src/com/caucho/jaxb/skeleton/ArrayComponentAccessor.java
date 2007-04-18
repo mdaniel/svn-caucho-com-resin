@@ -102,4 +102,9 @@ public class ArrayComponentAccessor extends Accessor {
   {
     return null;
   }
+
+  public Package getPackage()
+  {
+    return null;
+  }
 }

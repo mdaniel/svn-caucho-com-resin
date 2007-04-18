@@ -68,15 +68,32 @@ public class StaxUtil {
     catch (NullPointerException e) {
     }
 
-    NamespaceContext context = out.getNamespaceContext();
+    getNamespacePrefix(out, namespace);
+  }
 
-    if (context.getPrefix(namespace) != null)
-      return;
+  /**
+   * Ensures that a given namespace exists within the namespace context
+   * given and returns the prefix.
+   **/
+  public static String getNamespacePrefix(XMLStreamWriter out, String namespace)
+    throws XMLStreamException
+  {
+    NamespaceContext context = out.getNamespaceContext();
+    String prefix = context.getPrefix(namespace);
+
+    if (prefix != null)
+      return prefix;
 
     if (context instanceof NamespaceWriterContext) {
       NamespaceWriterContext writerContext = (NamespaceWriterContext) context;
 
-      writerContext.declare(namespace);
+      boolean repair = writerContext.getRepair();
+
+      writerContext.setRepair(true);
+      prefix = writerContext.declare(namespace);
+      writerContext.setRepair(repair);
+
+      return prefix;
     }
     else {
       // not one of ours... 
@@ -89,7 +106,7 @@ public class StaxUtil {
         Iterator iterator = context.getPrefixes(namespace);
 
         while (iterator.hasNext()) {
-          String prefix = iterator.next().toString();
+          prefix = iterator.next().toString();
 
           if (prefix.equals(unique)) {
             i++;
@@ -104,6 +121,8 @@ public class StaxUtil {
       }
 
       out.writeNamespace(unique, namespace);
+
+      return unique;
     }
   }  
   
@@ -342,9 +361,12 @@ public class StaxUtil {
         return qname.getPrefix() + ':' + qname.getLocalPart();
       }
 
-      return null;
+      prefix = getNamespacePrefix(out, qname.getNamespaceURI());
+
+      // XXX this shouldn't be necessary
+      out.writeNamespace(prefix, qname.getNamespaceURI());
     }
-    else
-      return prefix + ':' + qname.getLocalPart();
+
+    return prefix + ':' + qname.getLocalPart();
   }
 }

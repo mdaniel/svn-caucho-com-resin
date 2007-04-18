@@ -60,7 +60,7 @@ public class InParameterMarshal extends ParameterMarshal {
   public void serializeCall(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    _property.write(_marshaller, out, args[_arg], _name);
+    _property.write(_marshaller, out, args[_arg], _namer);
   }
 
   //

@@ -101,6 +101,11 @@ public class FieldAccessor extends Accessor {
     return _package.getAnnotation(c);
   }
 
+  public Package getPackage()
+  {
+    return _package;
+  }
+
   public Class getType()
   {
     return _type;

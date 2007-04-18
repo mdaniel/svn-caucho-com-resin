@@ -180,6 +180,11 @@ public class DynamicJAXBElementSkeleton extends ClassSkeleton {
     {
       return null;
     }
+
+    public Package getPackage()
+    {
+      return _cl.getPackage();
+    }
   }
 
   public String toString()

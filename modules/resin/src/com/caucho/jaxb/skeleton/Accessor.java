@@ -33,6 +33,7 @@ import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.util.L10N;
+import com.caucho.xml.stream.StaxUtil;
 
 import org.w3c.dom.Node;
 
@@ -59,6 +60,8 @@ import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlSchema;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlSchemaTypes;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
@@ -974,45 +977,110 @@ public abstract class Accessor implements Namer {
       
       case ELEMENT:
         {
-          out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", 
-                                XMLConstants.W3C_XML_SCHEMA_NS_URI);
-
           XmlElement element = getAnnotation(XmlElement.class);
+          XmlList xmlList = getAnnotation(XmlList.class);
 
-          if (! _generateRICompatibleSchema || ! getType().isPrimitive()) {
-            if (element != null) {
-              if (element.required())
-                out.writeAttribute("minOccurs", "1");
+          if (xmlList != null) {
+            out.writeStartElement(XML_SCHEMA_PREFIX, "element", 
+                                  XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            out.writeAttribute("name", getName());
+
+            out.writeStartElement(XML_SCHEMA_PREFIX, "simpleType", 
+                                  XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+            out.writeEmptyElement(XML_SCHEMA_PREFIX, "list", 
+                                  XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            out.writeAttribute("itemType", _property.getSchemaType());
+
+            out.writeEndElement(); // simpleType
+
+            out.writeEndElement(); // element
+          }
+          else {
+            out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", 
+                                  XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+            if (! _generateRICompatibleSchema || ! getType().isPrimitive()) {
+              if (element != null) {
+                if (element.required())
+                  out.writeAttribute("minOccurs", "1");
+                else
+                  out.writeAttribute("minOccurs", "0");
+
+                if (element.nillable())
+                  out.writeAttribute("nillable", "true");
+              }
               else
                 out.writeAttribute("minOccurs", "0");
-
-              if (element.nillable())
-                out.writeAttribute("nillable", "true");
             }
-            else
-              out.writeAttribute("minOccurs", "0");
-          }
 
-          if (_property.getMaxOccurs() != null)
-            out.writeAttribute("maxOccurs", _property.getMaxOccurs());
+            if (_property.getMaxOccurs() != null)
+              out.writeAttribute("maxOccurs", _property.getMaxOccurs());
 
-          if (element != null && element.nillable())
-            out.writeAttribute("nillable", "true");
+            if ((element != null && element.nillable()) ||
+                Collection.class.isAssignableFrom(getType()) ||
+                (getType().isArray() && 
+                 ! byte.class.equals(getType().getComponentType())))
+              out.writeAttribute("nillable", "true");
 
-          XmlID xmlID = getAnnotation(XmlID.class);
 
-          if (xmlID != null)
-            out.writeAttribute("type", "xsd:ID"); // jaxb/22d0
-          else
-            out.writeAttribute("type", _property.getSchemaType());
+            String typeName = _property.getSchemaType();
 
-          out.writeAttribute("name", getName());
+            // jaxb/22d0
+            if (getAnnotation(XmlID.class) != null)
+              typeName = "xsd:ID";
 
-          XmlMimeType xmlMimeType = getAnnotation(XmlMimeType.class);
+            // look for the XmlSchemaType
+            XmlSchemaType xmlSchemaType = getAnnotation(XmlSchemaType.class);
 
-          if (xmlMimeType != null) {
-            out.writeAttribute(XML_MIME_NS, "expectedContentTypes", 
-                               xmlMimeType.value());
+            if (xmlSchemaType == null) {
+              xmlSchemaType = getPackageAnnotation(XmlSchemaType.class);
+
+              if (xmlSchemaType != null) {
+                if (XmlSchemaType.DEFAULT.class.equals(xmlSchemaType.type()))
+                  throw new JAXBException(L.l("@XmlSchemaType with name {0} on package {1} does not specify type", xmlSchemaType.name(), getPackage().getName()));
+
+                if (! getType().equals(xmlSchemaType.type()))
+                  xmlSchemaType = null;
+              }
+            }
+
+            if (xmlSchemaType == null) {
+              XmlSchemaTypes xmlSchemaTypes = 
+                getPackageAnnotation(XmlSchemaTypes.class);
+
+              if (xmlSchemaTypes != null) {
+                XmlSchemaType[] array = xmlSchemaTypes.value();
+
+                for (int i = 0; i < array.length; i++) {
+                  xmlSchemaType = array[i];
+
+                  if (XmlSchemaType.DEFAULT.class.equals(xmlSchemaType.type()))
+                    throw new JAXBException(L.l("@XmlSchemaType with name {0} on package {1} does not specify type", xmlSchemaType.name(), getPackage().getName()));
+
+                  if (getType().equals(xmlSchemaType.type()))
+                    break;
+
+                  xmlSchemaType = null;
+                }
+              }
+            }
+
+            if (xmlSchemaType != null) {
+              QName typeQName = new QName(xmlSchemaType.namespace(),
+                                          xmlSchemaType.name());
+              typeName = StaxUtil.qnameToString(out, typeQName);
+            }
+
+            out.writeAttribute("type", typeName);
+            out.writeAttribute("name", getName());
+
+            XmlMimeType xmlMimeType = getAnnotation(XmlMimeType.class);
+
+            if (xmlMimeType != null) {
+              out.writeAttribute(XML_MIME_NS, "expectedContentTypes", 
+                                 xmlMimeType.value());
+            }
           }
         }
 
@@ -1116,6 +1184,7 @@ public abstract class Accessor implements Namer {
   public abstract String getName();
   public abstract Class getType();
   public abstract Type getGenericType();
+  public abstract Package getPackage();
   public abstract <A extends Annotation> A getAnnotation(Class<A> c);
   public abstract <A extends Annotation> A getPackageAnnotation(Class<A> c);
 }

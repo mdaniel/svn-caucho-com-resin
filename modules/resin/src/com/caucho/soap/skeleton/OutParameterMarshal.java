@@ -79,15 +79,15 @@ public class OutParameterMarshal extends ParameterMarshal {
     throws IOException, XMLStreamException, JAXBException
   {
     if (args[_arg] instanceof Holder)
-      _property.write(_marshaller, out, ((Holder) args[_arg]).value, _name);
+      _property.write(_marshaller, out, ((Holder) args[_arg]).value, _namer);
     else
-      _property.write(_marshaller, out, args[_arg], _name);
+      _property.write(_marshaller, out, args[_arg], _namer);
   }
 
   public void serializeReply(XMLStreamWriter out, Object ret)
     throws IOException, XMLStreamException, JAXBException
   {
-    _property.write(_marshaller, out, ret, _name);
+    _property.write(_marshaller, out, ret, _namer);
   }
 
   private void writeName(XMLStreamWriter out)

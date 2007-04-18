@@ -217,41 +217,42 @@ public class RestProxy implements InvocationHandler {
       HttpURLConnection httpConnection = (HttpURLConnection) connection;
 
       try {
-	httpConnection.setRequestMethod(httpMethod);
-	httpConnection.setDoInput(true);
+        httpConnection.setRequestMethod(httpMethod);
+        httpConnection.setDoInput(true);
 
-	if (postValues.size() > 0) {
-	  httpConnection.setDoOutput(true);
+        if (postValues.size() > 0) {
+          httpConnection.setDoOutput(true);
 
-	  OutputStream out = httpConnection.getOutputStream();
+          OutputStream out = httpConnection.getOutputStream();
 
-	  Marshaller marshaller = _context.createMarshaller();
-	  marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
-				 Boolean.TRUE);
+          Marshaller marshaller = _context.createMarshaller();
+          marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
+              Boolean.TRUE);
 
-	  for (Object postValue : postValues)
-	    marshaller.marshal(postValue, out);
+          for (Object postValue : postValues)
+            marshaller.marshal(postValue, out);
 
-	  out.flush();
-	}
+          out.flush();
+        }
 
-	int code = httpConnection.getResponseCode();
+        int code = httpConnection.getResponseCode();
 
-	if (code == 200) {
-	  if (method.getReturnType() == null)
-	    return null;
+        if (code == 200) {
+          if (method.getReturnType() == null)
+            return null;
 
-	  Unmarshaller unmarshaller = _context.createUnmarshaller();
+          Unmarshaller unmarshaller = _context.createUnmarshaller();
 
-	  return unmarshaller.unmarshal(httpConnection.getInputStream());
-	}
-	else {
-	  log.info("request failed: " + httpConnection.getResponseMessage());
-	
-	  throw new RestException(httpConnection.getResponseMessage());
-	}
-      } finally {
-	httpConnection.disconnect();
+          return unmarshaller.unmarshal(httpConnection.getInputStream());
+        }
+        else {
+          log.finer("request failed: " + httpConnection.getResponseMessage());
+
+          throw new RestException(httpConnection.getResponseMessage());
+        }
+      }
+      finally {
+        httpConnection.disconnect();
       }
     }
     else

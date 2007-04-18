@@ -73,6 +73,11 @@ public class NamespaceWriterContext extends NamespaceContextImpl
     _bindings.remove(uri);
   }
 
+  public boolean getRepair()
+  {
+    return _repair;
+  }
+
   public void setRepair(boolean repair)
   {
     _repair = repair;

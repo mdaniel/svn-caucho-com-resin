@@ -58,7 +58,7 @@ public class InOutParameterMarshal extends ParameterMarshal {
   public void serializeCall(XMLStreamWriter out, Object []args)
     throws IOException, XMLStreamException, JAXBException
   {
-    _property.write(_marshaller, out, ((Holder) args[_arg]).value, _name);
+    _property.write(_marshaller, out, ((Holder) args[_arg]).value, _namer);
   }
 
   public void deserializeReply(XMLStreamReader in, Object[] args)
@@ -91,17 +91,17 @@ public class InOutParameterMarshal extends ParameterMarshal {
   {
     if (args[_arg] instanceof Holder) {
       Object value = ((Holder) args[_arg]).value;
-      _property.write(_marshaller, out, value, _name);
+      _property.write(_marshaller, out, value, _namer);
     }
     else
-      _property.write(_marshaller, out, null, _name);
+      _property.write(_marshaller, out, null, _namer);
   }
 
   public void serializeReply(XMLStreamWriter out, Object ret)
     throws IOException, XMLStreamException, JAXBException
   {
     // XXX
-    _property.write(_marshaller, out, ret, _name);
+    _property.write(_marshaller, out, ret, _namer);
   }
 
   private void writeName(XMLStreamWriter out)
