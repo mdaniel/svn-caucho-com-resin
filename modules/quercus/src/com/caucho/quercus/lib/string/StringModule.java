@@ -4093,7 +4093,7 @@ v   *
     {
       long value;
 
-      if (_index > 0 && _index < args.length)
+      if (_index >= 0 && _index < args.length)
         value = args[_index].toLong();
       else
         value = 0;

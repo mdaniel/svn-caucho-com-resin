@@ -746,15 +746,13 @@ public class ArrayModule
    */
   public Value array_reduce(Env env,
                             ArrayValue array,
-                            String callback,
+                            Callback callback,
                             @Optional("NULL") Value initialValue)
   {
     if (array == null)
       return NullValue.NULL;
 
-    AbstractFunction func = env.findFunction(callback.intern());
-
-    if (func == null) {
+    if (callback == null || ! callback.isValid()) {
       env.warning("The second argument, '" + callback +
                   "', should be a valid callback");
 
@@ -765,7 +763,7 @@ public class ArrayModule
 
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       try {
-        result = func.call(env, result, entry.getValue());
+        result = callback.call(env, result, entry.getValue());
       }
       catch (Throwable t) {
         // XXX: may be used for error checking later
@@ -1168,28 +1166,20 @@ public class ArrayModule
    */
   public boolean array_walk_recursive(Env env,
                                       ArrayValue array,
-                                      Value call,
+                                      Callback callback,
                                       @Optional("NULL") Value extra)
   {
     if (array == null)
       return false;
 
-    if (! (call instanceof StringValue)) {
-      env.warning("Wrong syntax for function name");
-
-      return false;
-    }
-
-    AbstractFunction callback = env.findFunction(call.toString().intern());
-
-    if (callback == null)
+    if (callback == null || ! callback.isValid())
       return true;
 
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       Value entryValue = entry.getValue();
 
       if (entryValue instanceof ArrayValue)
-        array_walk_recursive(env, (ArrayValue) entryValue, call, extra);
+        array_walk_recursive(env, (ArrayValue) entryValue, callback, extra);
       else {
         try {
           arrayWalkImpl(env, entry, extra, callback);
@@ -1213,7 +1203,7 @@ public class ArrayModule
    * @param callback the callback function
    */
   private void arrayWalkImpl(Env env, Map.Entry<Value, Value> entry,
-                             Value extra, AbstractFunction callback)
+                             Value extra, Callback callback)
   {
     callback.call(env, entry.getValue(), entry.getKey(), extra);
   }
@@ -1228,19 +1218,11 @@ public class ArrayModule
    */
   public boolean array_walk(Env env,
                             ArrayValue array,
-                            Value call,
+                            Callback callback,
                             @Optional("NULL") Value extra)
   {
     if (array == null)
       return false;
-
-    if (! (call instanceof StringValue)) {
-      env.warning("Wrong syntax for function name");
-
-      return false;
-    }
-
-    AbstractFunction callback = env.findFunction(call.toString().intern());
 
     if (callback == null)
       return true;
