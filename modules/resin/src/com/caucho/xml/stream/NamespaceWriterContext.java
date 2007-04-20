@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -48,8 +49,8 @@ import java.util.Map;
 public class NamespaceWriterContext extends NamespaceContextImpl
 {
   // map from URIs -> NamespaceBinding
-  private final HashMap<String,NamespaceBinding> _bindings
-    = new HashMap<String,NamespaceBinding>();
+  private final LinkedHashMap<String,NamespaceBinding> _bindings
+    = new LinkedHashMap<String,NamespaceBinding>();
 
   private int _uniqueId = 0;
   private NamespaceBinding _nullBinding = new NamespaceBinding(null, null, 0);

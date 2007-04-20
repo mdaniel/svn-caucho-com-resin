@@ -32,11 +32,13 @@ package com.caucho.soap.skeleton;
 import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.skeleton.Property;
+import static com.caucho.soap.wsdl.WSDLConstants.*;
 
 import com.caucho.util.L10N;
 
 import com.caucho.xml.stream.StaxUtil;
 
+import static javax.xml.XMLConstants.*;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -232,6 +234,155 @@ public class DocumentWrappedAction extends AbstractAction {
     in.require(XMLStreamReader.END_ELEMENT, null, "Envelope");
 
     return ret;
+  }
+
+  public void writeWSDLMessages(XMLStreamWriter out, String soapNamespaceURI)
+    throws XMLStreamException
+  {
+    out.writeStartElement(WSDL_NAMESPACE, "message");
+    out.writeAttribute("name", _operationName);
+
+    out.writeEmptyElement(WSDL_NAMESPACE, "part");
+    out.writeAttribute("name", "parameters"); // XXX partName?
+    out.writeAttribute("element", 
+                       TARGET_NAMESPACE_PREFIX + ':' + _operationName);
+
+    out.writeEndElement(); // message
+
+    if (! _isOneway) {
+      out.writeStartElement(WSDL_NAMESPACE, "message");
+      out.writeAttribute("name", _responseName);
+
+      out.writeEmptyElement(WSDL_NAMESPACE, "part");
+      out.writeAttribute("name", "parameters"); // XXX partName?
+      out.writeAttribute("element", 
+                         TARGET_NAMESPACE_PREFIX + ':' + _responseName);
+
+      out.writeEndElement(); // message
+    }
+  }
+
+  public void writeWSDLBindingOperation(XMLStreamWriter out, 
+                                        String soapNamespaceURI)
+    throws XMLStreamException
+  {
+    out.writeStartElement(WSDL_NAMESPACE, "operation");
+    out.writeAttribute("name", _operationName);
+    // XXX out.writeAttribute("parameterOrder", "");
+
+    out.writeEmptyElement(soapNamespaceURI, "operation");
+    out.writeAttribute("soapAction", _soapAction);
+
+    out.writeStartElement(WSDL_NAMESPACE, "input");
+    // XXX
+    out.writeEmptyElement(soapNamespaceURI, "body");
+    out.writeAttribute("use", "literal");
+
+    out.writeEndElement(); // input
+
+    if (! _isOneway) {
+      out.writeStartElement(WSDL_NAMESPACE, "output");
+      // XXX
+      out.writeEmptyElement(soapNamespaceURI, "body");
+      out.writeAttribute("use", "literal");
+
+      out.writeEndElement(); // output
+    }
+
+    out.writeEndElement(); // operation
+  }
+
+  public void writeSchema(XMLStreamWriter out, String namespace)
+    throws XMLStreamException
+  {
+    // XXX header arguments
+    
+    out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", W3C_XML_SCHEMA_NS_URI);
+    out.writeAttribute("name", _operationName);
+    out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _operationName);
+
+    if (_bodyInputs + _headerInputs == 0) {
+      out.writeEmptyElement(XML_SCHEMA_PREFIX, 
+                            "complexType", 
+                            W3C_XML_SCHEMA_NS_URI);
+      out.writeAttribute("name", _operationName);
+    }
+    else {
+      out.writeStartElement(XML_SCHEMA_PREFIX, 
+                            "complexType", 
+                            W3C_XML_SCHEMA_NS_URI);
+      out.writeAttribute("name", _operationName);
+
+      out.writeStartElement(XML_SCHEMA_PREFIX, 
+                            "sequence", 
+                            W3C_XML_SCHEMA_NS_URI);
+      
+      for (ParameterMarshal param : _bodyArguments.values()) {
+        if (! (param instanceof OutParameterMarshal))
+          param.writeElement(out);
+      }
+
+      out.writeEndElement(); // sequence
+
+      out.writeEndElement(); // complexType
+    }
+
+    if (! _isOneway) {
+      out.writeEmptyElement(XML_SCHEMA_PREFIX, 
+                            "element", 
+                            W3C_XML_SCHEMA_NS_URI);
+      out.writeAttribute("name", _responseName);
+      out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _responseName);
+
+      if (_bodyOutputs + _headerOutputs == 0) {
+        out.writeEmptyElement(XML_SCHEMA_PREFIX, 
+                              "complexType", 
+                              W3C_XML_SCHEMA_NS_URI);
+        out.writeAttribute("name", _responseName);
+      }
+      else {
+        out.writeStartElement(XML_SCHEMA_PREFIX, 
+                              "complexType", 
+                              W3C_XML_SCHEMA_NS_URI);
+        out.writeAttribute("name", _responseName);
+
+        out.writeStartElement(XML_SCHEMA_PREFIX, 
+                              "sequence", 
+                              W3C_XML_SCHEMA_NS_URI);
+        
+        if (_returnMarshal != null)
+          _returnMarshal.writeElement(out);
+
+        for (ParameterMarshal param : _bodyArguments.values()) {
+          if (! (param instanceof InParameterMarshal))
+            param.writeElement(out);
+        }
+
+        out.writeEndElement(); // sequence
+
+        out.writeEndElement(); // complexType
+      }
+    }
+  }
+
+  public void writeWSDLOperation(XMLStreamWriter out, String soapNamespaceURI)
+    throws XMLStreamException
+  {
+    out.writeStartElement(WSDL_NAMESPACE, "operation");
+    out.writeAttribute("name", _operationName);
+    // XXX out.writeAttribute("parameterOrder", "");
+
+    out.writeEmptyElement(WSDL_NAMESPACE, "input");
+    out.writeAttribute("message", 
+                       TARGET_NAMESPACE_PREFIX + ':' + _operationName);
+
+    if (! _isOneway) {
+      out.writeEmptyElement(WSDL_NAMESPACE, "output");
+      out.writeAttribute("message", 
+                         TARGET_NAMESPACE_PREFIX + ':' + _responseName);
+    }
+
+    out.writeEndElement(); // operation
   }
 
   public String toString()

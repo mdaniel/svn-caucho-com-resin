@@ -160,8 +160,6 @@ public class JAXBContextImpl extends JAXBContext {
     
     _dynamicSkeleton = new DynamicJAXBElementSkeleton(this);
 
-    _pendingSkeletons = null;
-
     _isDiscoveryFinished = true;
 
     for (ClassSkeleton skeleton : _classSkeletons.values())
@@ -199,8 +197,6 @@ public class JAXBContextImpl extends JAXBContext {
     DatatypeConverter.setDatatypeConverter(new DatatypeConverterImpl());
 
     _dynamicSkeleton = new DynamicJAXBElementSkeleton(this);
-
-    _pendingSkeletons = null;
 
     _isDiscoveryFinished = true;
 

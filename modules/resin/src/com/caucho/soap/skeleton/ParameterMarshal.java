@@ -49,11 +49,11 @@ public abstract class ParameterMarshal {
   protected static final String XML_SCHEMA_PREFIX = "xsd";
 
   protected QName _name;
+  protected Namer _namer;
   protected Property _property;
   protected final int _arg;
   protected final Marshaller _marshaller;
   protected final Unmarshaller _unmarshaller;
-  protected final Namer _namer;
 
   protected ParameterMarshal(int arg, Property property, QName name, 
                              Marshaller marshaller, Unmarshaller unmarshaller)
@@ -101,6 +101,17 @@ public abstract class ParameterMarshal {
   public void setName(QName name)
   {
     _name = name;
+    _namer = ConstantNamer.getConstantNamer(_name);
+  }
+
+  public Property getProperty()
+  {
+    return _property;
+  }
+
+  public void setProperty(Property property)
+  {
+    _property = property;
   }
 
   //

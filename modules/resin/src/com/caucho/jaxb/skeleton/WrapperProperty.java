@@ -65,7 +65,7 @@ import com.caucho.util.L10N;
 public class WrapperProperty extends Property {
   public static final L10N L = new L10N(WrapperProperty.class);
 
-  private final Namer _wrapperNamer;
+  private final Namer _wrappedNamer;
   private final String _name;
   private final String _namespace;
   private final QName _wrappedQName;
@@ -93,12 +93,7 @@ public class WrapperProperty extends Property {
     _property = property;
     _nillable = elementWrapper.nillable();
 
-    _wrapperNamer = new Namer() {
-      public QName getQName(Object obj)
-      {
-        return _wrapperQName;
-      }
-    };
+    _wrappedNamer = ConstantNamer.getConstantNamer(_wrappedQName);
   }
 
   public WrapperProperty(Property property, 
@@ -117,12 +112,7 @@ public class WrapperProperty extends Property {
     _nillable = false;
     _property = property;
 
-    _wrapperNamer = new Namer() {
-      public QName getQName(Object obj)
-      {
-        return _wrapperQName;
-      }
-    };
+    _wrappedNamer = ConstantNamer.getConstantNamer(_wrappedQName);
   }
 
   public QName getWrapperQName()
@@ -216,7 +206,7 @@ public class WrapperProperty extends Property {
       }
     }
 
-    _property.write(m, out, value, _wrapperNamer);
+    _property.write(m, out, value, _wrappedNamer);
 
     if (value != null || _nillable) {
       out.writeEndElement();

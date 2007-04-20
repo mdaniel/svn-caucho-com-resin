@@ -102,7 +102,7 @@ public class DirectSkeleton extends Skeleton {
 
   // The URI in SOAPBinding is wrong, but matches that of JAVAEE
   private String _soapNamespaceURI = "http://schemas.xmlsoap.org/wsdl/soap/";
-  private String _soapTransport = SOAP11_BINDING_NAMESPACE;
+  private String _soapTransport = "http://schemas.xmlsoap.org/soap/http";
   private String _soapStyle = "document";
 
   private CharArrayWriter _wsdlBuffer = new CharArrayWriter();
@@ -225,7 +225,7 @@ public class DirectSkeleton extends Skeleton {
 
   public void addAction(Method method, AbstractAction action)
   {
-    _actionNames.put(action.getOperationName(), action);
+    _actionNames.put(action.getInputName(), action);
     _actionMethods.put(method, action);
   }
 

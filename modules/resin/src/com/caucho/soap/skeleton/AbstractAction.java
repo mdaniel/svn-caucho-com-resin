@@ -106,6 +106,7 @@ public abstract class AbstractAction {
 
   protected String _responseName;
   protected String _operationName;
+  protected String _inputName;
   protected QName _requestName;
   protected QName _resultName;
 
@@ -162,6 +163,7 @@ public abstract class AbstractAction {
     // set the names for the input/output messages, portType/operation, and
     // binding/operation.
     _operationName = getWebMethodName(method, eiMethod);
+    _inputName = _operationName;
     _responseName = _operationName + "Response";
     _soapAction = getSOAPAction(method, eiMethod);
 
@@ -734,155 +736,6 @@ public abstract class AbstractAction {
     return fault;
   }
 
-  public void writeWSDLMessages(XMLStreamWriter out, String soapNamespaceURI)
-    throws XMLStreamException
-  {
-    out.writeStartElement(WSDL_NAMESPACE, "message");
-    out.writeAttribute("name", _operationName);
-
-    out.writeEmptyElement(WSDL_NAMESPACE, "part");
-    out.writeAttribute("name", "parameters"); // XXX partName?
-    out.writeAttribute("element", 
-                       TARGET_NAMESPACE_PREFIX + ':' + _operationName);
-
-    out.writeEndElement(); // message
-
-    if (! _isOneway) {
-      out.writeStartElement(WSDL_NAMESPACE, "message");
-      out.writeAttribute("name", _responseName);
-
-      out.writeEmptyElement(WSDL_NAMESPACE, "part");
-      out.writeAttribute("name", "parameters"); // XXX partName?
-      out.writeAttribute("element", 
-                         TARGET_NAMESPACE_PREFIX + ':' + _responseName);
-
-      out.writeEndElement(); // message
-    }
-  }
-  
-  public void writeWSDLOperation(XMLStreamWriter out, String soapNamespaceURI)
-    throws XMLStreamException
-  {
-    out.writeStartElement(WSDL_NAMESPACE, "operation");
-    out.writeAttribute("name", _operationName);
-    // XXX out.writeAttribute("parameterOrder", "");
-
-    out.writeEmptyElement(WSDL_NAMESPACE, "input");
-    out.writeAttribute("message", 
-                       TARGET_NAMESPACE_PREFIX + ':' + _operationName);
-
-    if (! _isOneway) {
-      out.writeEmptyElement(WSDL_NAMESPACE, "output");
-      out.writeAttribute("message", 
-                         TARGET_NAMESPACE_PREFIX + ':' + _responseName);
-    }
-
-    out.writeEndElement(); // operation
-  }
-
-  public void writeWSDLBindingOperation(XMLStreamWriter out, 
-                                        String soapNamespaceURI)
-    throws XMLStreamException
-  {
-    out.writeStartElement(WSDL_NAMESPACE, "operation");
-    out.writeAttribute("name", _operationName);
-    // XXX out.writeAttribute("parameterOrder", "");
-
-    out.writeEmptyElement(soapNamespaceURI, "operation");
-    out.writeAttribute("soapAction", _soapAction);
-
-    out.writeStartElement(WSDL_NAMESPACE, "input");
-    // XXX
-    out.writeEmptyElement(soapNamespaceURI, "body");
-    out.writeAttribute("use", "literal");
-
-    out.writeEndElement(); // input
-
-    if (! _isOneway) {
-      out.writeStartElement(WSDL_NAMESPACE, "output");
-      // XXX
-      out.writeEmptyElement(soapNamespaceURI, "body");
-      out.writeAttribute("use", "literal");
-
-      out.writeEndElement(); // output
-    }
-
-    out.writeEndElement(); // operation
-  }
-
-  public void writeSchema(XMLStreamWriter out, String namespace)
-    throws XMLStreamException
-  {
-    // XXX header arguments
-    
-    out.writeEmptyElement(XML_SCHEMA_PREFIX, "element", W3C_XML_SCHEMA_NS_URI);
-    out.writeAttribute("name", _operationName);
-    out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _operationName);
-
-    if (_bodyInputs + _headerInputs == 0) {
-      out.writeEmptyElement(XML_SCHEMA_PREFIX, 
-                            "complexType", 
-                            W3C_XML_SCHEMA_NS_URI);
-      out.writeAttribute("name", _operationName);
-    }
-    else {
-      out.writeStartElement(XML_SCHEMA_PREFIX, 
-                            "complexType", 
-                            W3C_XML_SCHEMA_NS_URI);
-      out.writeAttribute("name", _operationName);
-
-      out.writeStartElement(XML_SCHEMA_PREFIX, 
-                            "sequence", 
-                            W3C_XML_SCHEMA_NS_URI);
-      
-      for (ParameterMarshal param : _bodyArguments.values()) {
-        if (! (param instanceof OutParameterMarshal))
-          param.writeElement(out);
-      }
-
-      out.writeEndElement(); // sequence
-
-      out.writeEndElement(); // complexType
-    }
-
-    if (! _isOneway) {
-      out.writeEmptyElement(XML_SCHEMA_PREFIX, 
-                            "element", 
-                            W3C_XML_SCHEMA_NS_URI);
-      out.writeAttribute("name", _responseName);
-      out.writeAttribute("type", TARGET_NAMESPACE_PREFIX + ':' + _responseName);
-
-      if (_bodyOutputs + _headerOutputs == 0) {
-        out.writeEmptyElement(XML_SCHEMA_PREFIX, 
-                              "complexType", 
-                              W3C_XML_SCHEMA_NS_URI);
-        out.writeAttribute("name", _responseName);
-      }
-      else {
-        out.writeStartElement(XML_SCHEMA_PREFIX, 
-                              "complexType", 
-                              W3C_XML_SCHEMA_NS_URI);
-        out.writeAttribute("name", _responseName);
-
-        out.writeStartElement(XML_SCHEMA_PREFIX, 
-                              "sequence", 
-                              W3C_XML_SCHEMA_NS_URI);
-        
-        if (_returnMarshal != null)
-          _returnMarshal.writeElement(out);
-
-        for (ParameterMarshal param : _bodyArguments.values()) {
-          if (! (param instanceof InParameterMarshal))
-            param.writeElement(out);
-        }
-
-        out.writeEndElement(); // sequence
-
-        out.writeEndElement(); // complexType
-      }
-    }
-  }
-
   public boolean hasHeaderInput()
   {
     return false;
@@ -893,9 +746,9 @@ public abstract class AbstractAction {
     return _arity;
   }
 
-  public String getOperationName()
+  public String getInputName()
   {
-    return _operationName;
+    return _inputName;
   }
 
   public static String getWebMethodName(Method method)
@@ -967,4 +820,19 @@ public abstract class AbstractAction {
 
     return null;
   }
+
+  public abstract void writeWSDLMessages(XMLStreamWriter out, 
+                                         String soapNamespaceURI)
+    throws XMLStreamException;
+
+  public abstract void writeSchema(XMLStreamWriter out, String namespace)
+    throws XMLStreamException;
+  
+  public abstract void writeWSDLBindingOperation(XMLStreamWriter out, 
+                                                 String soapNamespaceURI)
+    throws XMLStreamException;
+
+  public abstract void writeWSDLOperation(XMLStreamWriter out, 
+                                          String soapNamespaceURI)
+    throws XMLStreamException;
 }
