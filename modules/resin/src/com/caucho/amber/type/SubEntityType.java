@@ -117,9 +117,12 @@ public class SubEntityType extends EntityType {
     if (_loadGroupIndex < 0) {
       _loadGroupIndex = _parent.getLoadGroupIndex();
 
-      // jpa/0ge2: MappedSuperclassType
-      if (_parent instanceof EntityType)
+      // jpa/0ge2: MappedSuperclassType and
+      // jpa/0gg0: abstract parent
+      if (_parent instanceof EntityType
+          && ! _parent.getBeanClass().isAbstract()) {
         _loadGroupIndex++;
+      }
 
       _defaultLoadGroupIndex = _loadGroupIndex;
     }

@@ -296,9 +296,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         tableName = tableConfig.getName();
 
       if (tableName == null || tableName.equals(""))
-        tableName = entityName.toUpperCase();
+        tableName = toSqlName(entityName);
 
-      if (isEntity) {
+      // jpa/0gg0
+      if (isEntity && ! type.isAbstract()) {
 
         InheritanceType strategy = null;
 
@@ -350,7 +351,7 @@ public class EntityIntrospector extends BaseConfigIntrospector {
                 rootEntityName = rootEntityName.substring(p + 1);
             }
 
-            rootTableName = rootEntityName.toUpperCase();
+            rootTableName = toSqlName(rootEntityName);
           }
 
           entityType.setRootTableName(rootTableName);
@@ -500,7 +501,9 @@ public class EntityIntrospector extends BaseConfigIntrospector {
     if (parent == null)
       return;
 
-    if (parent instanceof EntityType)
+    boolean isAbstract = parent.getBeanClass().isAbstract();
+
+    if (parent instanceof EntityType && ! isAbstract)
       return;
 
     _depCompletions.add(new AttributeOverrideCompletion(relatedType, type));

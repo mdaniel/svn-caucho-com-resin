@@ -265,12 +265,14 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("private " + id.getForeignTypeName() + " __caucho_compound_key = new " + id.getForeignTypeName() + "();");
     }
 
+    boolean isAbstract = _relatedType.getBeanClass().isAbstract();
+
     out.println();
     out.println("public void __caucho_setPrimaryKey(Object key)");
     out.println("{");
     out.pushDepth();
 
-    if (id != null)
+    if (id != null && ! isAbstract)
       id.generateSet(out, id.generateCastFromObject("key"));
 
     out.popDepth();
@@ -286,7 +288,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.print("return ");
 
-    if (id == null)
+    if (id == null || isAbstract)
       out.print("null");
     else
       out.print(id.toObject(id.generateGetProperty("super")));
@@ -450,7 +452,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     Id id = _relatedType.getId();
 
-    if (id == null) {
+    // jpa/0gg0
+    if (id == null || _relatedType.getBeanClass().isAbstract()) {
       // jpa/0ge6: MappedSuperclass
 
       out.println("return true;");
@@ -492,8 +495,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     Id id = _relatedType.getId();
 
+    boolean isAbstractParent = _relatedType.getParentType() == null
+      || _relatedType.getParentType().getBeanClass().isAbstract();
+
     // jpa/0m02
-    if (id != null && _relatedType.getParentType() == null)
+    if (id != null && isAbstractParent)
       id.generatePrologue(out, completedSet);
 
     ArrayList<AmberField> fields = _relatedType.getFields();
@@ -805,7 +811,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    _relatedType.generateSet(out, "pstmt", "index", "super");
+    // jpa/0gg0
+    if (! _relatedType.getBeanClass().isAbstract())
+      _relatedType.generateSet(out, "pstmt", "index", "super");
 
     out.popDepth();
     out.println("}");
@@ -856,7 +864,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    if (_relatedType.getId() == null) {
+    boolean isAbstract = _relatedType.getBeanClass().isAbstract();
+
+    if (_relatedType.getId() == null || isAbstract) {
       // jpa/0ge6: MappedSuperclass
 
       out.println("return false;");
@@ -1292,7 +1302,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateCreate(JavaWriter out)
     throws IOException
   {
-    if (_relatedType.getId() != null) {
+    boolean isAbstract = _relatedType.getBeanClass().isAbstract();
+
+    // jpa/0gg0
+    if (_relatedType.getId() != null && ! isAbstract) {
       ArrayList<IdField> fields = _relatedType.getId().getKeys();
       IdField idField = fields.size() > 0 ? fields.get(0) : null;
 
@@ -2158,7 +2171,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    if (_relatedType.getId() == null) {
+    boolean isAbstract = _relatedType.getBeanClass().isAbstract();
+
+    // jpa/0gg0
+    if (_relatedType.getId() == null || isAbstract) {
       // jpa/0ge6: MappedSuperclass
 
       out.println("return null;");
@@ -2191,7 +2207,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    if (_relatedType.getId() == null) {
+    boolean isAbstract = _relatedType.getBeanClass().isAbstract();
+
+    if (_relatedType.getId() == null || isAbstract) {
       // jpa/0ge6: MappedSuperclass
 
       out.println("return null;");

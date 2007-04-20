@@ -80,6 +80,10 @@ public class EntityType extends RelatedType {
   {
     super.setTable(table);
 
+    // jpa/0gg0
+    if (table == null)
+      return;
+
     table.setType(this);
   }
 

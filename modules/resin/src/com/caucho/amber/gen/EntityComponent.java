@@ -71,6 +71,7 @@ public class EntityComponent extends AmberMappedComponent {
     try {
       RelatedType parentType = getEntityType().getParentType();
 
+      // jpa/0gg0
       boolean isEntityParent = (parentType != null)
         && (parentType instanceof EntityType)
         && ! parentType.getBeanClass().isAbstract();

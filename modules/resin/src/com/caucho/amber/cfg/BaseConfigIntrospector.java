@@ -684,8 +684,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       throw new IllegalStateException();
     }
 
-    Column column = entityType.getTable().createColumn(columnName,
-                                                       columnType);
+    Table table = entityType.getTable();
+
+    // jpa/0gg0
+    if (table == null)
+      return;
+
+    Column column = table.createColumn(columnName, columnType);
 
     if (discriminatorAnn != null) {
       column.setNotNull(! discriminatorAnn.getBoolean("nullable"));
@@ -2103,7 +2108,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         for (ForeignColumn column : columns) {
           String columnName = column.getName();
           columnName = columnName.substring(columnName.indexOf('_'));
-          columnName = manyToManyField.getName().toUpperCase() + columnName;
+          columnName = toSqlName(manyToManyField.getName()) + columnName;
           column.setName(columnName);
         }
       }
@@ -2114,7 +2119,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
         for (ForeignColumn column : columns) {
           String columnName = column.getName();
           columnName = columnName.substring(columnName.indexOf('_'));
-          columnName = sourceField.getName().toUpperCase() + columnName;
+          columnName = toSqlName(sourceField.getName()) + columnName;
           column.setName(columnName);
         }
       }
@@ -2657,10 +2662,11 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
                                                                     _relatedType.getTable().getName() + "_",
                                                                     _relatedType);
 
-        targetColumns = AbstractConfigIntrospector.calculateColumns(mapTable,
-                                                                    // jpa/0j40
-                                                                    _fieldName.toUpperCase() + "_",
-                                                                    targetType);
+        targetColumns
+          = AbstractConfigIntrospector.calculateColumns(mapTable,
+                                                        // jpa/0j40
+                                                        toSqlName(_fieldName) + "_",
+                                                        targetType);
       }
 
       manyToManyField.setAssociationTable(mapTable);

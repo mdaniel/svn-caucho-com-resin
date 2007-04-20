@@ -30,6 +30,7 @@
 package com.caucho.amber.type;
 
 import com.caucho.amber.AmberRuntimeException;
+import com.caucho.amber.cfg.AbstractConfigIntrospector;
 import com.caucho.amber.entity.AmberCompletion;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.Entity;
@@ -126,8 +127,11 @@ abstract public class RelatedType extends AbstractStatefulType {
    */
   public Table getTable()
   {
-    if (_table == null)
-      setTable(_amberPersistenceUnit.createTable(getName()));
+    // jpa/0gg0
+    if (_table == null && ! getBeanClass().isAbstract()) {
+      String sqlName = AbstractConfigIntrospector.toSqlName(getName());
+      setTable(_amberPersistenceUnit.createTable(sqlName));
+    }
 
     return _table;
   }
@@ -138,6 +142,10 @@ abstract public class RelatedType extends AbstractStatefulType {
   public void setTable(Table table)
   {
     _table = table;
+
+    // jpa/0gg0
+    if (table == null)
+      return;
 
     if (_rootTableName == null)
       _rootTableName = table.getName();
@@ -440,6 +448,10 @@ abstract public class RelatedType extends AbstractStatefulType {
    */
   public ArrayList<Column> getColumns()
   {
+    // jpa/0gg0
+    if (getTable() == null)
+      return null;
+
     return getTable().getColumns();
   }
 

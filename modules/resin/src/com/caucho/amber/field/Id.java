@@ -96,6 +96,10 @@ public class Id {
     if (_ownerType instanceof MappedSuperclassType)
       return;
 
+    // jpa/0gg0
+    if (_ownerType.getBeanClass().isAbstract())
+      return;
+
     _columns.addAll(key.getColumns());
     // Collections.sort(_columns, new ColumnCompare());
 
