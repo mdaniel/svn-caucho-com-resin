@@ -109,7 +109,7 @@ public class EntityCreateCall extends CallChain {
     if (_isCMP) {
       String name = _bean.getEntityType().getName();
       out.println("trans.getAmberConnection().create(\"" + name + "\", bean);");
-      out.println("cxt._amber = bean.__caucho_item;");
+      out.println("cxt.__amber_cacheItem = bean.__caucho_cacheItem;");
       out.println("Object okey = bean.__caucho_getPrimaryKey();");
       out.println("cxt.postCreate(okey);");
     }

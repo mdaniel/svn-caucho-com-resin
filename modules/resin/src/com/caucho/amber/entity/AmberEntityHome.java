@@ -368,13 +368,13 @@ public class AmberEntityHome {
     try {
       // jpa/0o01, jpa/0o41
 
-      EntityItem item = findEntityItem(aConn,
-                                       key,
-                                       isLoad,
-                                       notExpiringLoadMask,
-                                       notExpiringGroup);
+      EntityItem cacheItem = findEntityItem(aConn,
+					    key,
+					    isLoad,
+					    notExpiringLoadMask,
+					    notExpiringGroup);
 
-      if (item == null) {
+      if (cacheItem == null) {
         if (_manager.isJPA())
           return null;
 
@@ -382,8 +382,20 @@ public class AmberEntityHome {
         throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
       }
 
-      String className = item.getEntity().getClass().getName();
+      Entity cacheEntity = cacheItem.getEntity();
+      AmberEntityHome home = cacheItem.getEntityHome();
+      
+      Entity entity = cacheEntity.__caucho_home_new(home, key);
+      entity.__caucho_makePersistent(aConn, cacheItem);
 
+      aConn.addEntity(entity);
+
+      if (isLoad)
+	entity.__caucho_retrieve_eager(aConn);
+      else
+	cacheItem.copyTo(entity, aConn);
+
+      /*
       // Gets the copy object from context.
       // It was already added in findEntityItem().
       int index = aConn.getEntity(className, key);
@@ -392,8 +404,9 @@ public class AmberEntityHome {
         throw new IllegalStateException(L.l("AmberEntityHome.find(): unexpected result when trying to get entity class: '{0}' PK: '{1}'. The copy object must be added to the context in findEntityItem()", className, key));
 
       Entity copy = aConn.getEntity(index);
+      */
 
-      return item.copyTo(copy, aConn);
+      return entity;
     } catch (Exception e) {
       throw AmberException.create(e);
     }
@@ -435,6 +448,7 @@ public class AmberEntityHome {
       item = _manager.getEntity(getRootType(), key);
 
       // jpa/0l4a
+      // see if a newly-created item is in the AmberConnection
       if (item == null)
         item = aConn.getSubEntityCacheItem(getRootType().getInstanceClass(), key);
 
@@ -454,7 +468,9 @@ public class AmberEntityHome {
         Entity cacheEntity;
 
         // __caucho_home_new() will properly add the copy object to the context.
-        cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
+	// XXX: the cache object should never be added to the context
+        //cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
+        cacheEntity = (Entity) _homeBean.__caucho_home_new(this, key);
 
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, "findEntityItem cacheEntity is null? "+(cacheEntity == null));
@@ -472,11 +488,13 @@ public class AmberEntityHome {
 
         // jpa/0o41
         if (isLoad) {
+	  /*
           Entity contextEntity = aConn.getSubEntity(cacheEntity.getClass(), key);
 
             // jpa/0l4a
           if (contextEntity != null)
             contextEntity.__caucho_setCacheItem(item);
+	  */
 
           try {
             // XXX cacheEntity.__caucho_retrieve(aConn);
@@ -487,9 +505,11 @@ public class AmberEntityHome {
             else
               item.loadEntity(0);
           } catch (AmberObjectNotFoundException e) {
+	    /*
             // XXX: jpa/0o42, a new entity shouldn't be added to the context.
             if (contextEntity != null)
               aConn.removeEntity(contextEntity);
+	    */
 
             throw e;
           }
@@ -509,7 +529,8 @@ public class AmberEntityHome {
 
         // Adds the copy object to the context before anything.
         // This will avoid the cache object to be added to the context.
-        aConn.addNewEntity(cl, key);
+	// XXX: the cache item should never be added to the connection
+        // aConn.addNewEntity(cl, key);
 
         if (aConn.isInTransaction()) {
           if (log.isLoggable(Level.FINER))
@@ -556,11 +577,13 @@ public class AmberEntityHome {
           item.loadEntity(0);
       }
 
+      /* XXX: the cache item should never change its state
       // XXX: jpa/0s2j
       if (item != null) {
         // jpa/0ga8
         aConn.setTransactionalState(item.getEntity());
       }
+      */
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, "returning item is null? "+(item == null));

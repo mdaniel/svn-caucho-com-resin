@@ -191,19 +191,26 @@ public interface Entity extends MappedSuperclass
   /**
    * Returns a new entity.
    */
+  /*
   public Entity __caucho_home_new(AmberConnection aConn,
                                   AmberEntityHome home,
                                   Object key)
     throws SQLException;
+  */
 
-  /**
-   * Returns a new entity.
-   */
+  /*
   public Entity __caucho_home_new(AmberConnection aConn,
                                   AmberEntityHome home,
                                   Object key,
                                   boolean loadFromResultSet)
     throws SQLException;
+  */
+  
+  /**
+   * Returns a new entity.
+   */
+  public Entity __caucho_home_new(AmberEntityHome home,
+                                  Object key);
 
   /**
    * Creates a new instance based on the current entity.
@@ -238,9 +245,15 @@ public interface Entity extends MappedSuperclass
                              boolean isFullMerge);
 
   /**
-   * Retrieves data from the data store.
+   * Retrieves data from the data store, including the eager loads.
    */
-  public void __caucho_retrieve(AmberConnection aConn)
+  public void __caucho_retrieve_eager(AmberConnection aConn)
+    throws SQLException;
+
+  /**
+   * Retrieves data from the data store, only loading own fields.
+   */
+  public void __caucho_retrieve_self(AmberConnection aConn)
     throws SQLException;
 
   /**

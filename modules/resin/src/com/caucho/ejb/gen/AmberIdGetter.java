@@ -62,6 +62,6 @@ public class AmberIdGetter extends BaseMethod {
   public void generateCall(JavaWriter out, String []args)
     throws IOException
   {
-    out.println("  return ((" + _implClassName + ") _context.__caucho_getAmber().getEntity())." + _method.getName() + "();");
+    out.println("  return _context.__caucho_getAmberCacheEntity()." + _method.getName() + "();");
   }
 }

@@ -610,7 +610,7 @@ public class EntityManyToOneField extends CascadableField {
     */
 
     // jpa/0h29
-    out.print("if (__caucho_session != null && __caucho_state != com.caucho.amber.entity.EntityState.P_DELETED) {");
+    out.println("if (__caucho_session != null && __caucho_state != com.caucho.amber.entity.EntityState.P_DELETED) {");
 
     /* XXX: jpa/0h04
     if (isLazy())
@@ -632,7 +632,8 @@ public class EntityManyToOneField extends CascadableField {
     index += "_" + mask;
 
     if (_aliasField == null) {
-      out.println("__caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
+      out.println("if ((" + loadVar + " & " + mask + "L) == 0)");
+      out.println("  __caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
     }
 
     out.println(loadVar + " |= " + mask + "L;");
@@ -776,6 +777,7 @@ public class EntityManyToOneField extends CascadableField {
     out.println("if (" + nullTest + ") {");
     out.pushDepth();
 
+    /*
     out.println("try {");
     out.pushDepth();
 
@@ -795,6 +797,11 @@ public class EntityManyToOneField extends CascadableField {
     out.println("} catch (Exception e) {");
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
     out.println("}");
+    */
+
+    out.println(varName + " = (" + targetTypeExt + ") "
+		+ session + ".loadEntity("
+		+ targetTypeExt + ".class, " + otherKey + ");");
 
     generateSetTargetLoadMask(out, varName);
 
@@ -811,6 +818,7 @@ public class EntityManyToOneField extends CascadableField {
       out.println(proxy);
     }
     else {
+      /*
       // jpa/0h24
       out.println("if (! " + varName + ".__caucho_getEntityState().isManaged()) {");
       out.pushDepth();
@@ -828,6 +836,7 @@ public class EntityManyToOneField extends CascadableField {
       out.println(session + ".loadFromHome(" + targetTypeExt + ".class.getName(), " + otherKey + ", " + targetMask + ", " + targetGroup + ");");
       out.popDepth();
       out.println("}");
+      */
     }
 
     out.popDepth();

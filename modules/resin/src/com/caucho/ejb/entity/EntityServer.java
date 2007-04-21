@@ -46,6 +46,7 @@ import com.caucho.util.L10N;
 
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
+import javax.ejb.EJBException;
 import javax.ejb.FinderException;
 import javax.ejb.HomeHandle;
 import javax.ejb.ObjectNotFoundException;
@@ -183,6 +184,14 @@ public class EntityServer extends AbstractServer {
   public void setAmberEntityHome(AmberEntityHome home)
   {
     _amberEntityHome = home;
+  }
+
+  /**
+   * Sets the amber entity home.
+   */
+  public AmberEntityHome getAmberEntityHome()
+  {
+    return _amberEntityHome;
   }
 
   /**
@@ -602,6 +611,19 @@ public class EntityServer extends AbstractServer {
    *
    * @return the remote interface of the entity.
    */
+  public AbstractContext getContext(Object key, boolean forceLoad)
+    throws FinderException
+  {
+    return getContext(key, forceLoad, true);
+  }
+
+  /**
+   * Finds the remote bean by its key.
+   *
+   * @param key the remote key
+   *
+   * @return the remote interface of the entity.
+   */
   public AbstractContext getContext(Object key,
                                     boolean forceLoad,
                                     boolean isFindEntityItem)
@@ -621,6 +643,7 @@ public class EntityServer extends AbstractServer {
 
         EntityItem amberItem = null;
 
+	  /*
         // ejb/061c
         if (isFindEntityItem && _isCMP) {
           AmberConnection aConn;
@@ -650,12 +673,13 @@ public class EntityServer extends AbstractServer {
 
         if (amberItem != null)
           cxt.__caucho_setAmber(amberItem);
+	  */
       }
 
       // ejb/0d33 vs ejb/0d00
       if (forceLoad &&
           (! _isLoadLazyOnTransaction ||
-           getTransactionManager().getTransaction() != null)) {
+           getTransactionManager().getTransaction() == null)) {
         try {
           cxt._caucho_load();
         } catch (Exception e) {
@@ -682,17 +706,26 @@ public class EntityServer extends AbstractServer {
     }
   }
 
-  /**
-   * Finds the remote bean by its key.
-   *
-   * @param key the remote key
-   *
-   * @return the remote interface of the entity.
-   */
-  public AbstractContext getContext(Object key, boolean forceLoad)
-    throws FinderException
+  public EntityItem getAmberCacheItem(Object key)
   {
-    return getContext(key, forceLoad, true);
+    if (key == null)
+      throw new NullPointerException();
+    
+    AmberConnection aConn;
+    aConn = _amberEntityHome.getManager().getCacheConnection();
+
+    try {
+      // ejb/06d3
+      EntityItem amberItem = _amberEntityHome.findEntityItem(aConn,
+							     key,
+							     true);
+
+      return amberItem;
+    } catch (AmberException e) {
+      throw new EJBException(e);
+    } finally {
+      aConn.freeConnection();
+    }
   }
 
   /**

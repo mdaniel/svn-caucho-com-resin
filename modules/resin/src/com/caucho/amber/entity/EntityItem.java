@@ -63,6 +63,11 @@ abstract public class EntityItem {
     return getEntity();
   }
 
+  public AmberEntityHome getEntityHome()
+  {
+    return null;
+  }
+
   abstract public void save(Entity item);
 
   abstract public void savePart(Entity item);

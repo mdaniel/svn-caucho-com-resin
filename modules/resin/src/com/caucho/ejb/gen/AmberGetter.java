@@ -90,7 +90,7 @@ public class AmberGetter extends BaseMethod {
 
     out.print(returnType.getPrintName());
     out.print(" value = ");
-    out.print("((" + _implClassName + ") _context.__caucho_getAmber().loadEntity(0))." + _method.getName() + "(");
+    out.print("((" + _implClassName + ") _context.__caucho_getAmberCacheItem().loadEntity(0))." + _method.getName() + "(");
     for (int i = 0; i < args.length; i++) {
       if (i != 0)
 	out.print(", ");

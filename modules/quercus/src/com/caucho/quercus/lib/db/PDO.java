@@ -950,10 +950,16 @@ public class PDO implements java.io.Closeable {
     if (_dsn == null)
       return "PDO[]";
 
-    int i = _dsn.indexOf(':');
+    if (_dsn.indexOf("pass") < 0)
+      return "PDO[" + _dsn + "]";
+
+    int i = _dsn.lastIndexOf(':');
 
     if (i < 0)
       return "PDO[]";
+
+    if (_dsn.startsWith("java:comp"))
+      return "PDO[" + _dsn + "]";
 
     StringBuilder str = new StringBuilder();
     str.append("PDO[");
@@ -961,7 +967,9 @@ public class PDO implements java.io.Closeable {
     str.append(_dsn, 0, i + 1);
 
     HashMap<String,String> attr = parseAttr(_dsn, i);
-    attr.put("user", _user);
+
+    if (_user != null && ! "".equals(_user))
+      attr.put("user", _user);
 
     boolean first = true;
 

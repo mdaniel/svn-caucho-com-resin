@@ -40,21 +40,19 @@ import java.util.Map;
  */
 public class CacheableEntityItem extends EntityItem {
   private AmberEntityHome _home;
-  private Entity _cacheItem;
+  private Entity _cacheEntity;
   private long _expireTime;
 
-  public CacheableEntityItem(AmberEntityHome home, Entity cacheItem)
+  public CacheableEntityItem(AmberEntityHome home, Entity cacheEntity)
   {
     _home = home;
-    _cacheItem = cacheItem;
-
-    _expireTime = Alarm.getCurrentTime() + _home.getCacheTimeout();
+    _cacheEntity = cacheEntity;
   }
 
   /**
    * Returns the entity home.
    */
-  AmberEntityHome getEntityHome()
+  public AmberEntityHome getEntityHome()
   {
     return _home;
   }
@@ -71,10 +69,10 @@ public class CacheableEntityItem extends EntityItem {
     if (_expireTime < now) {
       _expireTime = now + _home.getCacheTimeout();
 
-      _cacheItem.__caucho_expire();
+      _cacheEntity.__caucho_expire();
     }
 
-    return _cacheItem;
+    return _cacheEntity;
   }
 
   /**
@@ -88,14 +86,14 @@ public class CacheableEntityItem extends EntityItem {
 
     if (_expireTime < now) {
       _expireTime = now + _home.getCacheTimeout();
-      _cacheItem.__caucho_expire();
+      _cacheEntity.__caucho_expire();
     }
 
     AmberConnection aConn = _home.getManager().getCacheConnection();
 
     try {
-      _cacheItem.__caucho_setConnection(aConn);
-      _cacheItem.__caucho_retrieve(aConn);
+      _cacheEntity.__caucho_setConnection(aConn);
+      _cacheEntity.__caucho_retrieve_self(aConn);
     } catch (SQLException e) {
       // XXX: item is dead
       throw new RuntimeException(e);
@@ -103,7 +101,7 @@ public class CacheableEntityItem extends EntityItem {
       aConn.freeConnection();
     }
 
-    return _cacheItem;
+    return _cacheEntity;
   }
 
   /**
@@ -118,7 +116,7 @@ public class CacheableEntityItem extends EntityItem {
 
     if (_expireTime < now) {
       _expireTime = now + _home.getCacheTimeout();
-      _cacheItem.__caucho_expire();
+      _cacheEntity.__caucho_expire();
     }
 
     try {
@@ -126,8 +124,8 @@ public class CacheableEntityItem extends EntityItem {
       // Prepared statements are cached per context so
       // at this point, the cache item needs to use the
       // context connection.
-      _cacheItem.__caucho_setConnection(aConn);
-      _cacheItem.__caucho_retrieve(aConn);
+      _cacheEntity.__caucho_setConnection(aConn);
+      _cacheEntity.__caucho_retrieve_self(aConn);
     } catch (SQLException e) {
       // XXX: item is dead
       throw new RuntimeException(e);
@@ -136,10 +134,10 @@ public class CacheableEntityItem extends EntityItem {
       // were properly cached into the context connection.
       // Now make the cached entity item independent
       // from any particular context.
-      _cacheItem.__caucho_setConnection(null);
+      _cacheEntity.__caucho_setConnection(null);
     }
 
-    return _cacheItem;
+    return _cacheEntity;
   }
 
   /**
@@ -147,7 +145,7 @@ public class CacheableEntityItem extends EntityItem {
    */
   public Entity copy(AmberConnection aConn)
   {
-    return _cacheItem.__caucho_copy(aConn, this);
+    return _cacheEntity.__caucho_copy(aConn, this);
   }
 
   /**
@@ -155,7 +153,7 @@ public class CacheableEntityItem extends EntityItem {
    */
   public Entity copyTo(Entity targetEntity, AmberConnection aConn)
   {
-    return _cacheItem.__caucho_copyTo(targetEntity, aConn, this);
+    return _cacheEntity.__caucho_copyTo(targetEntity, aConn, this);
   }
 
   /**
@@ -166,10 +164,10 @@ public class CacheableEntityItem extends EntityItem {
     /*
       long now = Alarm.getCurrentTime();
 
-      synchronized (_cacheItem) {
+      synchronized (_cacheEntity) {
       _expireTime = now + _home.getCacheTimeout();
 
-      _cacheItem.__caucho_loadFromObject(item);
+      _cacheEntity.__caucho_loadFromObject(item);
       }
     */
   }
@@ -180,8 +178,8 @@ public class CacheableEntityItem extends EntityItem {
   public void savePart(Entity item)
   {
     /*
-      synchronized (_cacheItem) {
-      _cacheItem.__caucho_loadFromObject(item);
+      synchronized (_cacheEntity) {
+      _cacheEntity.__caucho_loadFromObject(item);
       }
     */
   }
@@ -192,16 +190,16 @@ public class CacheableEntityItem extends EntityItem {
   @Override
   public void expire()
   {
-    _cacheItem.__caucho_expire();
+    _cacheEntity.__caucho_expire();
   }
 
   Class getInstanceClass()
   {
-    return _cacheItem.getClass();
+    return _cacheEntity.getClass();
   }
 
   public String toString()
   {
-    return "CacheableEntityItem[" + _cacheItem + "]";
+    return "CacheableEntityItem[" + _cacheEntity + "]";
   }
 }

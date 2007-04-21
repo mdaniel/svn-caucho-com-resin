@@ -29,6 +29,8 @@
 package com.caucho.ejb.xa;
 
 import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.entity.AmberEntityHome;
+import com.caucho.amber.entity.Entity;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.entity.EntityServer;
 import com.caucho.ejb.entity.QEntity;
@@ -252,7 +254,7 @@ public class TransactionContext implements Synchronization {
    */
   public void addObject(TransactionObject object)
   {
-    if (_objectTop + 1 >= _objects.length) {
+    if (_objects.length <= _objectTop + 1) {
       TransactionObject []newObjects;
       newObjects = new TransactionObject[_objects.length * 2];
       for (int i = 0; i < _objectTop; i++)
@@ -298,6 +300,35 @@ public class TransactionContext implements Synchronization {
     }
 
     return null;
+  }
+
+  public Entity getAmberEntity(EntityServer server, Object key)
+  {
+    QEntity entity = getEntity(server, key);
+
+    if (entity != null)
+      return (Entity) entity;
+    
+    AmberEntityHome entityHome = server.getAmberEntityHome();
+    Class cl = entityHome.getRootType().getInstanceClass();
+    
+    return getAmberConnection().getEntity(cl, key);
+  }
+
+  public void addAmberEntity(EntityServer server, Entity entity)
+  {
+    try {
+      AmberEntityHome entityHome = server.getAmberEntityHome();
+
+      entity.__caucho_makePersistent(getAmberConnection(),
+				     entityHome.getEntityType());
+
+      addObject((TransactionObject) entity);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -482,7 +513,7 @@ public class TransactionContext implements Synchronization {
       // already calls beforeCommit().
       //
       // if (_amberConn != null)
-      // _amberConn.beforeCommit();
+      //   _amberConn.beforeCommit();
     } catch (Throwable e) {
       throw setRollbackOnly(e);
     }

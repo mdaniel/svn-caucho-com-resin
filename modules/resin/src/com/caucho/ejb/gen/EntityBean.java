@@ -142,9 +142,12 @@ public class EntityBean extends ClassComponent {
 
     out.println("if (isHome)");
     out.println("  ptr = (Bean) trans.getEntity(_server, null);");
-    out.println("else {");
-    out.println("  ptr = (Bean) trans.getEntity(_server, getPrimaryKey());");
-    out.println("}");
+    out.println("else");
+
+    if (isCMP())
+      out.println("  ptr = (Bean) trans.getAmberEntity(_server, getPrimaryKey());");
+    else
+      out.println("  ptr = (Bean) trans.getEntity(_server, getPrimaryKey());");
 
     out.popDepth();
     out.println("}");
@@ -187,13 +190,24 @@ public class EntityBean extends ClassComponent {
     }
     out.popDepth();
     out.println("}");
+    
+    if (isCMP()) {
+      out.println("if (! isHome) {");
+      out.println("  ptr.__caucho_setPrimaryKey(getPrimaryKey());");
+      out.println("  ptr.__caucho_setCacheItem(__caucho_getAmberCacheItem());");
+      out.println("}");
+    }
 
     out.println();
     out.println("ptr._ejb_trans = trans;");
 
     out.println();
     out.println("if (trans != null)");
-    out.println("  trans.addObject(ptr);");
+
+    if (isCMP())
+      out.println("  trans.addAmberEntity(_server, ptr);");
+    else
+      out.println("  trans.addObject(ptr);");
 
     generateLoad(out);
 
@@ -210,18 +224,25 @@ public class EntityBean extends ClassComponent {
     out.println("  throws FinderException");
     out.println("{");
     out.pushDepth();
-    out.println("TransactionContext trans = _server.getTransactionManager().beginSupports();");
+    out.println("TransactionContext trans = _server.getTransactionManager().beginSingleRead();");
     out.println("try {");
     out.pushDepth();
 
-    out.println("Bean bean = _ejb_begin(trans, false, true);");
+    if (isCMP()) {
+      out.println("if (trans == null)");
+      out.println("  __caucho_getAmberCacheItem();");
+      out.println("else");
+      out.println("  _ejb_begin(trans, false, true);");
+    }
+    else
+      out.println("Bean bean = _ejb_begin(trans, false, true);");
 
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
-    out.println("  trans.setRollbackOnly(e);");
+    out.println("  if (trans != null) trans.setRollbackOnly(e);");
     out.println("  throw FinderExceptionWrapper.create(e);");
     out.println("} finally {");
-    out.println("  trans.commit();");
+    out.println("  if (trans != null) trans.commit();");
     out.println("}");
     out.popDepth();
     out.println("}");
@@ -393,6 +414,12 @@ public class EntityBean extends ClassComponent {
         out.println("  setEntityContext(context);");
       }
 
+      /*
+      if (isCMP()) {
+	out.println("__caucho_setPrimaryKey(context.getPrimaryKey());");
+      }
+      */
+
       out.println("} catch (Exception e) {");
       out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
       out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
@@ -518,7 +545,7 @@ public class EntityBean extends ClassComponent {
     out.println("  cxt.getEntityServer().removeCache(cxt.getPrimaryKey());");
 
     if (isCMP())
-      out.println("  _ejb_context._amber = null;");
+      out.println("  _ejb_context.__amber_cacheItem = null;");
 
     out.println("  try {");
     out.println("    cxt.destroy();");
@@ -530,8 +557,8 @@ public class EntityBean extends ClassComponent {
     out.pushDepth();
 
     if (isCMP()) {
-      out.println("if (_ejb_context._amber == null)");
-      out.println("  _ejb_context._amber = __caucho_item;");
+      out.println("if (_ejb_context.__amber_cacheItem == null)");
+      out.println("  _ejb_context.__amber_cacheItem = __caucho_cacheItem;");
 
       _bean.generateAfterCommit(out);
     }

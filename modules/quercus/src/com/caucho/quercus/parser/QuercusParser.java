@@ -3008,11 +3008,11 @@ public class QuercusParser {
         String importTokenString = _lexeme;
         
         int ch = read();
-        while (ch == ' ' ||
-               ch == '\t' ||
-               ch == '\n' ||
-               ch == '\r' ||
-               ch == '\f') {
+        while (ch == ' '
+	       || ch == '\t'
+	       || ch == '\n'
+	       || ch == '\r'
+	       || ch == '\f') {
           ch = read();
         }
         
@@ -4302,9 +4302,10 @@ public class QuercusParser {
     boolean isIdentifierStart = true;
 
     _sb.setLength(0);
+    int ch = -1;
     
     while (true) {
-      int ch = read();
+      ch = read();
       
       if (ch < 0) {
         break;
@@ -4334,10 +4335,14 @@ public class QuercusParser {
         break;
       }
       else {
-        throw error(L.l("{0} is not an unexpected character in import",
+        throw error(L.l("'{0}' is an unexpected character in import",
                         String.valueOf((char)ch)));
       }
     }
+
+    if (ch != ';')
+      throw error(L.l("expected ';' at '{0}'",
+		      String.valueOf((char)ch)));
 
     return _factory.createImport(getLocation(), _sb.toString(), isWildcard);
   }

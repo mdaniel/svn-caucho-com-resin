@@ -76,21 +76,28 @@ public class AmberBean extends EntityBean {
     super.generateContext(out);
 
     out.println();
-    out.println("com.caucho.amber.entity.EntityItem  _amber;");
+    out.println("private com.caucho.amber.entity.EntityItem  __amber_cacheItem;");
 
     out.println();
-    out.println("protected final void __caucho_setAmber(com.caucho.amber.entity.EntityItem amber)");
+    out.println("protected final void __caucho_setAmberCacheItem(com.caucho.amber.entity.EntityItem amber)");
     out.println("{");
-    out.println("  _amber = amber;");
+    out.println("  __amber_cacheItem = amber;");
     out.println("}");
     
     out.println();
-    out.println("protected final com.caucho.amber.entity.EntityItem __caucho_getAmber()");
+    out.println("protected final com.caucho.amber.entity.EntityItem __caucho_getAmberCacheItem()");
     out.println("{");
-    out.println("  if (_amber != null)");
-    out.println("    return _amber;");
-    out.println("  else");
-    out.println("    throw new javax.ejb.EJBException(\"object no longer exists.\");");
+    out.println("  if (__amber_cacheItem == null)");
+    out.println("    __amber_cacheItem = _server.getAmberCacheItem(getPrimaryKey());");
+    out.println("  return __amber_cacheItem;");
+    out.println("}");
+    
+    out.println();
+    out.println("protected final " + getImplClassName() + " __caucho_getAmberCacheEntity()");
+    out.println("{");
+    out.println("  if (__amber_cacheItem == null)");
+    out.println("    __amber_cacheItem = _server.getAmberCacheItem(getPrimaryKey());");
+    out.println("  return (" + getImplClassName() + ") __amber_cacheItem.getEntity();");
     out.println("}");
   }
 
@@ -110,8 +117,8 @@ public class AmberBean extends EntityBean {
   {
     out.println("if (doLoad) {");
     out.println("  try {");
-    out.println("    ptr.__caucho_makePersistent(trans.getAmberConnection(), __caucho_getAmber());");
-    out.println("    ptr.__caucho_retrieve(trans.getAmberConnection());");
+    //out.println("    ptr.__caucho_makePersistent(trans.getAmberConnection(), __caucho_getAmber());");
+    out.println("    ptr.__caucho_retrieve_eager(trans.getAmberConnection());");
 
     /*
     if (hasMethod("ejbLoad", new Class[0]))

@@ -184,9 +184,11 @@ public class MailModule extends AbstractQuercusModule {
     int i = 0;
     int len = headers.length();
 
-    CharBuffer buffer = CharBuffer.allocate();
+    CharBuffer buffer = new CharBuffer();
 
-    while (true) {
+    System.out.println("HEADERS: " + headers);
+
+    while (i < len) {
       char ch;
 
       for (;
@@ -200,17 +202,17 @@ public class MailModule extends AbstractQuercusModule {
       buffer.clear();
 
       for (;
-           i < len && (! Character.isWhitespace(ch = headers.charAt(i)) &&
-                       ch != ':');
+           i < len && (! Character.isWhitespace(ch = headers.charAt(i))
+		       && ch != ':');
            i++) {
         buffer.append((char) ch);
       }
 
       for (;
-           i < len && ((ch = headers.charAt(i)) == ' ' ||
-                        ch == '\t' ||
-                        ch == '\f' ||
-                        ch == ':');
+           i < len && ((ch = headers.charAt(i)) == ' '
+		       || ch == '\t'
+		       || ch == '\f'
+		       || ch == ':');
            i++) {
       }
 
@@ -218,16 +220,19 @@ public class MailModule extends AbstractQuercusModule {
       buffer.clear();
 
       for (;
-           i < len && ((ch = headers.charAt(i)) != '\r' &&
-                       ch != '\n');
+           i < len
+	     && ((ch = headers.charAt(i)) != '\r' && ch != '\n');
            i++) {
         buffer.append((char) ch);
       }
 
       String value = buffer.toString();
 
-      if (name.equals("From"))
-        msg.setFrom(new InternetAddress(value));
+      if ("".equals(value)) {
+      }
+      else if (name.equalsIgnoreCase("From")) {
+	msg.setFrom(new InternetAddress(value));
+      }
       else
         msg.addHeader(name, value);
     }

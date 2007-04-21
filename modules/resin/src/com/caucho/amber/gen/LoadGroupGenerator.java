@@ -157,17 +157,20 @@ public class LoadGroupGenerator extends ClassComponent {
     // non-read-only entities must be reread in a transaction
     if (! _relatedType.isReadOnly()) {
       out.println("if (aConn.isInTransaction()) {");
+      out.pushDepth();
 
       // deleted objects are not reloaded
-      out.println("  if (com.caucho.amber.entity.EntityState.P_DELETING.ordinal() <= __caucho_state.ordinal()) {");
-      out.println("    return;");
-      out.println("  }");
+      out.println("if (com.caucho.amber.entity.EntityState.P_DELETING.ordinal() <= __caucho_state.ordinal()) {");
+      out.println("  return;");
+      out.println("}");
 
       // from non-transactional to transactional
-      out.println("  else if (__caucho_state.ordinal() <= com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL.ordinal()) {");
-      out.println("    com.caucho.amber.entity.EntityState state = __caucho_state;");
+      out.println("else if (__caucho_state.ordinal() <= com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL.ordinal()) {");
+      out.pushDepth();
+      
+      out.println("com.caucho.amber.entity.EntityState state = __caucho_state;");
 
-      out.println("    __caucho_state = com.caucho.amber.entity.EntityState.P_TRANSACTIONAL;");
+      out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_TRANSACTIONAL;");
 
       // XXX: ejb/0d01 (create issue?)
       // jpa/0g0k: see __caucho_load_select
@@ -185,33 +188,38 @@ public class LoadGroupGenerator extends ClassComponent {
 
       int dirtyCount = _relatedType.getDirtyIndex();
       for (int i = 0; i <= dirtyCount / 64; i++) {
-        out.println("    __caucho_dirtyMask_" + i + " = 0;");
+        out.println("__caucho_dirtyMask_" + i + " = 0;");
       }
 
-      out.println("  }");
+      out.popDepth();
+      out.println("}");
       // ejb/0d01 - already loaded in the transaction
-      out.println("  else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
-      out.println("    return;");
+      /*
+      out.println("else if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
+      out.println("  return;");
+      */
 
       for (int i = min; i <= max; i++) {
         // jpa/0l48: inheritance optimization.
+        out.println();
         out.println("if ((__caucho_loadMask_" + group + " & " + (1L << (i % 64)) + "L) == 0)");
         out.println("  __caucho_load_select_" + i + "(aConn);");
-        out.println();
       }
+
+      out.popDepth();
       out.println("}");
       out.print("else ");
     }
 
-    out.println("if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
-    out.println("  return;");
+    out.println("if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0) {");
+    out.println("}");
 
     // XXX: the load doesn't cover other load groups
-    out.println("else if (__caucho_item != null) {");
+    out.println("else if (__caucho_cacheItem != null) {");
     out.pushDepth();
-    out.println(_extClassName + " item = (" + _extClassName + ") __caucho_item.getEntity();");
+    out.println(_extClassName + " item = (" + _extClassName + ") __caucho_cacheItem.getEntity();");
 
-    out.println("item.__caucho_load_" + _index + "(aConn);");
+    out.println("item.__caucho_load_select_" + _index + "(aConn);");
 
     /* XXX: ejb/06--, ejb/0a-- and jpa/0o04
     out.println("try {");
@@ -263,6 +271,9 @@ public class LoadGroupGenerator extends ClassComponent {
 
       return;
     }
+
+    out.println("if ((__caucho_loadMask_" + group + " & " + mask + "L) != 0)");
+    out.println("  return;");
 
     Table table = _relatedType.getTable();
 

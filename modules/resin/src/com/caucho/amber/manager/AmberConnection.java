@@ -710,7 +710,7 @@ public class AmberConnection
       // Reset and refresh state.
       instance.__caucho_expire();
       instance.__caucho_makePersistent(this, (EntityType) null);
-      instance.__caucho_retrieve(this);
+      instance.__caucho_retrieve_eager(this);
     } catch (SQLException e) {
       throw new AmberRuntimeException(e);
     }
@@ -1455,7 +1455,8 @@ public class AmberConnection
           // Bean
           entity = (Entity) cauchoGetBeanMethod.invoke(value, new Object[0]);
           // entity.__caucho_makePersistent(aConn, item);
-        } catch (Throwable e) {
+        } catch (Exception e) {
+	  e.printStackTrace();
           log.log(Level.FINER, e.toString(), e);
         }
       }
@@ -1468,6 +1469,71 @@ public class AmberConnection
     entity.__caucho_setPrimaryKey(key);
 
     addInternalEntity(entity);
+
+    return entity;
+  }
+
+  /**
+   * Adds a new entity for the given class name and key.
+   */
+  public Entity loadEntity(Class cl, Object key)
+  {
+    if (key == null)
+      return null;
+    
+    // jpa/0l43
+    Entity entity = getSubEntity(cl, key);
+
+    // If the entity is already in the context, return it
+    if (entity != null)
+      return entity;
+
+    if (_persistenceUnit.isJPA()) {
+      // XXX: needs to create based on the discriminator with inheritance.
+      // Create a new entity for the given class and primary key.
+      try {
+	entity = (Entity) load(cl, key);
+      } catch (AmberException e) {
+	throw new AmberRuntimeException(e);
+      }
+    }
+    else {
+      // HelperBean__Amber -> HelperBean
+      String className = cl.getSuperclass().getName();
+
+      AmberEntityHome entityHome = _persistenceUnit.getEntityHome(className);
+
+      if (entityHome == null) {
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("Amber.addNewEntity: home not found for entity (class: '{0}' PK: '{1}')",
+                                   className, key));
+        return null;
+      }
+
+      EntityFactory factory = entityHome.getEntityFactory();
+
+      // TestBean__EJB
+      Object value = factory.getEntity(key);
+
+      Method cauchoGetBeanMethod = entityHome.getCauchoGetBeanMethod();
+      if (cauchoGetBeanMethod != null) {
+        try {
+          // Bean
+          entity = (Entity) cauchoGetBeanMethod.invoke(value, new Object[0]);
+          // entity.__caucho_makePersistent(aConn, item);
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
+      }
+
+      if (entity == null) {
+        throw new IllegalStateException(L.l("AmberConnection.addNewEntity unable to instantiate new entity with cauchoGetBeanMethod"));
+      }
+
+      entity.__caucho_setPrimaryKey(key);
+
+      addInternalEntity(entity);
+    }
 
     return entity;
   }
