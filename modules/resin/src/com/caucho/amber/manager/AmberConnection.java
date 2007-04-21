@@ -1999,6 +1999,16 @@ public class AmberConnection
     }
   }
 
+  public static void close(ResultSet rs)
+  {
+    try {
+      if (rs != null)
+	rs.close();
+    } catch (SQLException e) {
+      throw new AmberRuntimeException(e);
+    }
+  }
+
   /**
    * Prepares an insert statement.
    */

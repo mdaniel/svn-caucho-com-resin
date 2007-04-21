@@ -29,6 +29,7 @@
 package com.caucho.amber.entity;
 
 import com.caucho.amber.AmberException;
+import com.caucho.amber.AmberRuntimeException;
 import com.caucho.amber.AmberObjectNotFoundException;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.manager.AmberPersistenceUnit;
@@ -210,7 +211,7 @@ public class AmberEntityHome {
                      Object key)
     throws AmberException
   {
-    return load(aConn, key, 0, 0);
+    return find(aConn, key, true, 0, 0);
   }
 
   /**
@@ -231,7 +232,7 @@ public class AmberEntityHome {
   public Entity loadLazy(AmberConnection aConn, Object key)
     throws AmberException
   {
-    return find(aConn, key, false);
+    return find(aConn, key, false, 0, 0);
   }
 
   /**
@@ -449,8 +450,10 @@ public class AmberEntityHome {
 
       // jpa/0l4a
       // see if a newly-created item is in the AmberConnection
+      /*
       if (item == null)
         item = aConn.getSubEntityCacheItem(getRootType().getInstanceClass(), key);
+      */
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, "findEntityItem item is null? "+(item == null));
@@ -470,7 +473,7 @@ public class AmberEntityHome {
         // __caucho_home_new() will properly add the copy object to the context.
 	// XXX: the cache object should never be added to the context
         //cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
-        cacheEntity = (Entity) _homeBean.__caucho_home_new(this, key);
+        cacheEntity = (Entity) _homeBean.__caucho_home_find(aConn, this, key);
 
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, "findEntityItem cacheEntity is null? "+(cacheEntity == null));
@@ -486,15 +489,14 @@ public class AmberEntityHome {
 
         item = new CacheableEntityItem(this, cacheEntity);
 
+	  /*
         // jpa/0o41
         if (isLoad) {
-	  /*
           Entity contextEntity = aConn.getSubEntity(cacheEntity.getClass(), key);
 
             // jpa/0l4a
           if (contextEntity != null)
             contextEntity.__caucho_setCacheItem(item);
-	  */
 
           try {
             // XXX cacheEntity.__caucho_retrieve(aConn);
@@ -505,18 +507,26 @@ public class AmberEntityHome {
             else
               item.loadEntity(0);
           } catch (AmberObjectNotFoundException e) {
-	    /*
             // XXX: jpa/0o42, a new entity shouldn't be added to the context.
             if (contextEntity != null)
               aConn.removeEntity(contextEntity);
-	    */
 
             throw e;
           }
         }
+	  */
 
         // The cache entity is added after commit.
         if (! aConn.isInTransaction()) {
+	  if (isLoad) {
+            if (_manager.isJPA()) {
+              // jpa/0o03
+              item.loadEntity(aConn, 0);
+            }
+            else
+              item.loadEntity(0);
+	  }
+	  
           // jpa/0g0p: only adds the cache entity if it is not within a transaction.
           item = _manager.putEntity(getRootType(), key, item);
 
@@ -525,6 +535,7 @@ public class AmberEntityHome {
         }
       }
       else if (isLoad) {
+	/*
         Class cl = item.getEntity().getClass();
 
         // Adds the copy object to the context before anything.
@@ -568,13 +579,16 @@ public class AmberEntityHome {
 
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, "findEntityItem loading entity");
+	*/
 
-        if (_manager.isJPA()) {
-          // jpa/0v33
-          item.loadEntity(aConn, 0);
-        }
-        else
-          item.loadEntity(0);
+	if (! aConn.isInTransaction()) {
+	  if (_manager.isJPA()) {
+	    // jpa/0v33
+	    item.loadEntity(aConn, 0);
+	  }
+	  else
+	    item.loadEntity(0);
+	}
       }
 
       /* XXX: the cache item should never change its state
@@ -654,6 +668,33 @@ public class AmberEntityHome {
     }
 
     return item;
+  }
+
+  /**
+   * Instantiates a new entity for this home.
+   */
+  public Entity newEntity(Object key)
+  {
+    return (Entity) _homeBean.__caucho_home_new(this, key);
+  }
+
+  /**
+   * Loads an entity where the type is determined by a discriminator
+   *
+   * @param aConn the connection to associate with the entity
+   * @param key the primary key
+   * @param discriminator the object's discriminator
+   */
+  public Entity newDiscriminatorEntity(Object key,
+				       String discriminator)
+  {
+    if (discriminator == null || key == null)
+      throw new AmberRuntimeException(L.l("{0} is not a valid inheritance key.",
+					  key));
+    
+    EntityType subType = (EntityType) _entityType.getSubClass(discriminator);
+
+    return subType.getHome().newEntity(key);
   }
 
   /**

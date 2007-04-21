@@ -233,7 +233,9 @@ public class LoadGroupGenerator extends ClassComponent {
     _relatedType.generateCopyLoadObject(out, "super", "item", _index);
 
     // out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
-    out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
+    //out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
+    
+    out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + " & " + mask + "L;"); // mask + "L;");
 
     /* XXX: ejb/06--, ejb/0a-- and jpa/0o04
     out.popDepth();
@@ -425,14 +427,7 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("} catch (Exception e) {");
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
     out.println("} finally {");
-    out.println("  try {");
-    out.println("    if (rs != null)");
-    out.println("      rs.close();");
-    out.println("  } catch (RuntimeException e) {");
-    out.println("    throw e;");
-    out.println("  } catch (Exception e) {");
-    out.println("    throw new com.caucho.amber.AmberRuntimeException(e);");
-    out.println("  }");
+    out.println("  aConn.close(rs);");
     out.println("}");
 
     out.popDepth();

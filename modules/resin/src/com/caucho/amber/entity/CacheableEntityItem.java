@@ -47,6 +47,9 @@ public class CacheableEntityItem extends EntityItem {
   {
     _home = home;
     _cacheEntity = cacheEntity;
+
+    if (cacheEntity.__caucho_getLoadMask(0) != 0)
+      _expireTime = Alarm.getCurrentTime() + _home.getCacheTimeout();
   }
 
   /**

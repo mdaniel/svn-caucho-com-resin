@@ -680,7 +680,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     // jpa/0l20
-    if (hasLoad || ! isEntityParent) {
+    if (true || hasLoad || ! isEntityParent) {
       out.println();
       out.println("public void __caucho_retrieve_eager(com.caucho.amber.manager.AmberConnection aConn)");
       out.println("  throws java.sql.SQLException");
@@ -691,8 +691,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("  __caucho_cacheItem = aConn.findEntityItem(\"" + _relatedType.getName() + "\", __caucho_getPrimaryKey());");
       */
 
+      generateRetrieveEager(out, _relatedType);
+
+      /*
       if (hasLoad)
         out.println("  __caucho_load_" + index + "(aConn);");
+      */
 
       out.println("}");
       out.println();
@@ -705,14 +709,67 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("if (__caucho_cacheItem == null)");
       out.println("  __caucho_cacheItem = aConn.findEntityItem(\"" + _relatedType.getName() + "\", __caucho_getPrimaryKey());");
       */
+      
+      generateRetrieveSelf(out, _relatedType);
+
+      /*
+      if (isEntityParent)
+	out.println("super.__caucho_retrieve_self(aConn);");
 
       if (hasLoad) {
-	out.println("if ((__caucho_loadMask_0 & 1) == 0)");
+	long mask = 1L << (index % 64);
+	
+	out.println("if ((__caucho_loadMask_0 & " + mask + "L) == 0)");
         out.println("  __caucho_load_select_" + index + "(aConn);");
       }
+      */
 
       out.popDepth();
       out.println("}");
+    }
+  }
+
+  private void generateRetrieveEager(JavaWriter out, RelatedType relatedType)
+    throws IOException
+  {
+    if (relatedType == null)
+      return;
+
+    int index = relatedType.getLoadGroupIndex();
+
+    boolean hasLoad = (relatedType.getFields().size() > 0);
+
+    if (relatedType.getParentType() == null) {
+      index = 0;
+      hasLoad = true;
+    }
+
+    generateRetrieveEager(out, relatedType.getParentType());
+    
+    if (hasLoad)
+      out.println("__caucho_load_" + index + "(aConn);");
+  }
+
+  private void generateRetrieveSelf(JavaWriter out, RelatedType relatedType)
+    throws IOException
+  {
+    if (relatedType == null)
+      return;
+
+    int index = relatedType.getLoadGroupIndex();
+
+    boolean hasLoad = (relatedType.getFields().size() > 0);
+
+    if (relatedType.getParentType() != null) {
+      generateRetrieveSelf(out, relatedType.getParentType());
+    }
+    else {
+      index = 0;
+      hasLoad = true;
+    }
+
+    if (hasLoad) {
+      out.println("__caucho_load_select_" + index + "(aConn);");
     }
   }
 
@@ -796,7 +853,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     out.println();
-    out.println("if (__caucho_state.isTransactional()) {");
+    out.println("if (__caucho_cacheItem == null) {");
+    // the cache item does not have its state changed
+    out.println("}");
+    out.println("else if (__caucho_state.isTransactional()) {");
     out.println("}");
     out.println("else if (__caucho_session == null ||");
     out.println("         ! __caucho_session.isInTransaction()) {");
@@ -2179,8 +2239,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
     */
 
-    if (generateHomeNew)
+    if (generateHomeNew) {
       generateHomeNew(out);
+      generateHomeFindNew(out);
+    }
   }
 
   /**
@@ -2460,14 +2522,80 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("}");
   }
 
+  void generateHomeFindNew(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.print("public com.caucho.amber.entity.Entity __caucho_home_find(");
+    out.print("com.caucho.amber.manager.AmberConnection aConn, ");
+    out.print("com.caucho.amber.entity.AmberEntityHome home, ");
+    out.println("Object key)");
+    out.println("{");
+    out.pushDepth();
+
+    Column discriminator = _relatedType.getDiscriminator();
+    
+    if (_relatedType.isAbstractClass()
+	|| _relatedType.getId() == null
+	|| discriminator == null) {
+      out.println("return __caucho_home_new(home, key);");
+      out.popDepth();
+      out.println("}");
+      return;
+    }
+
+    String rootTableName = _relatedType.getRootTableName();
+
+    if (rootTableName == null)
+      rootTableName = "";
+
+    out.println("java.sql.ResultSet rs = null;");
+    out.println("java.sql.PreparedStatement pstmt = null;");
+    out.println("String sql = null;");
+    out.println();
+    out.println("try {");
+    out.pushDepth();
+
+    String keyType = _relatedType.getId().getForeignTypeName();
+
+    String discriminatorVar = "discriminator";
+
+    out.println("String " + discriminatorVar + " = null;");
+
+    generateHomeNewLoading(out, discriminatorVar);
+
+    out.println("com.caucho.amber.entity.Entity entity = home.newDiscriminatorEntity(key, " + discriminatorVar + ");");
+
+    out.println("entity.__caucho_load(aConn, rs, 1);");
+
+    out.println("return entity;");
+
+    out.popDepth();
+    out.println("} catch (RuntimeException e) {");
+    out.println("  throw e;");
+    out.println("} catch (Exception e) {");
+    out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
+    out.println("} finally {");
+    /*
+    out.println("  if (rs != null)");
+    out.println("    rs.close();");
+    out.println("  if (pstmt != null)");
+    out.println("    aConn.closeStatement(sql);");
+    */
+    out.println("}");
+
+    out.popDepth();
+    out.println("}");
+  }
+
   /**
    * Generates the loading for home_new
    */
   void generateHomeNewLoading(JavaWriter out,
-                              String rootTableName)
+                              String discriminatorVar)
     throws IOException
   {
-    out.print("sql" + rootTableName + " = \"select ");
+    out.print("sql = \"select ");
 
     RelatedType parentType = _relatedType;
 
@@ -2480,31 +2608,32 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.print(parentType.generateLoadSelect("o"));
     out.print(" from ");
 
+    /*
     if (rootTableName == null)
       out.print(_relatedType.getTable().getName());
     else
       out.print(rootTableName);
+    */
+    out.print(_relatedType.getTable().getName());
 
     out.print(" o where ");
     // jpa/0s27
     out.print(parentType.getId().generateMatchArgWhere("o"));
     out.println("\";");
 
-    out.println("pstmt" + rootTableName + " = aConn.prepareStatement(sql" + rootTableName + ");");
+    out.println("pstmt = aConn.prepareStatement(sql);");
 
     String keyType = _relatedType.getId().getForeignTypeName();
 
-    out.println(keyType + " " + "keyValue" + rootTableName + " = (" + keyType + ") key;");
+    out.println(keyType + " " + "keyValue = (" + keyType + ") key;");
 
-    out.println("int index" + rootTableName + " = 1;");
-    _relatedType.getId().generateSetKey(out, "pstmt"+rootTableName,
-                                        "index"+rootTableName, "keyValue"+rootTableName);
+    out.println("int index = 1;");
+    _relatedType.getId().generateSetKey(out, "pstmt", "index", "keyValue");
 
-    out.println("rs" + rootTableName + " = pstmt" + rootTableName + ".executeQuery();");
-    out.println("if (! rs" + rootTableName + ".next()) {");
-    out.println("  rs" + rootTableName + ".close();");
-    out.println("  return null;");
-    // out.println("  throw new com.caucho.amber.AmberException(key + \" has no matching object\");");
+    out.println("rs = pstmt.executeQuery();");
+    out.println("if (rs.next()) {");
+    out.println("  " + discriminatorVar + " = rs.getString(1);"); // XXX:
+    
     out.println("}");
   }
 

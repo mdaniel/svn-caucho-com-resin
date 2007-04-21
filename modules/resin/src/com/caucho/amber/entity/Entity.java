@@ -187,6 +187,14 @@ public interface Entity extends MappedSuperclass
                                        AmberEntityHome home,
                                        ResultSet rs, int index)
     throws SQLException;
+  
+  /**
+   * Returns a new entity. In the case of inheritance, needs to query
+   * the database.
+   */
+  public Entity __caucho_home_find(AmberConnection aConn,
+				   AmberEntityHome home,
+				   Object key);
 
   /**
    * Returns a new entity.
