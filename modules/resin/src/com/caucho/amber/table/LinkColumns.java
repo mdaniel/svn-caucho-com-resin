@@ -415,6 +415,22 @@ public class LinkColumns {
 
       String sourceTable = _sourceTable.getName();
 
+      ArrayList<LinkColumns> outgoingLinks = _sourceTable.getOutgoingLinks();
+
+      boolean isOwner = false;
+
+      // jpa/0s2d: only deletes a relationship if the owner is deleted.
+      if (outgoingLinks != null && outgoingLinks.size() > 0) {
+        // XXX: assume link columns are introspected and ordered
+        // with owning side first.
+        // XXX: also, many-to-many bidirectional either side may be
+        // the owning side.
+        LinkColumns linkColumns = outgoingLinks.get(0);
+
+        if (linkColumns._targetTable == entity.__caucho_getEntityType().getTable())
+          isOwner = true;
+      }
+
       /* jpa/0h60, the application should be responsible for deleting
          the incoming links even when there are FK constraints.
 
@@ -499,8 +515,8 @@ public class LinkColumns {
         for (Object obj : proxyList) {
           entityType.getHome().getEntityFactory().delete(aConn, obj);
         }
-      } // jpa/0i5e vs. jpa/0h25
-      else if (_sourceTable.getType() == null) {
+      } // jpa/0i5e vs. jpa/0h25, jpa/0s2d
+      else if ((_sourceTable.getType() == null) && isOwner) {
         CharBuffer cb = new CharBuffer();
 
         cb.append("delete from " + sourceTable +
