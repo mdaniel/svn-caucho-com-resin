@@ -507,7 +507,7 @@ public class AmberConnection
         throw new IllegalArgumentException(L.l("find() operation can only be applied if the entity class is specified in the scope of a persistence unit."));
       }
 
-      T entity = (T) load(entityClass, primaryKey);
+      T entity = (T) load(entityClass, primaryKey, true);
 
       if (! isInTransaction()) {
         // jpa/0o00
@@ -856,7 +856,8 @@ public class AmberConnection
    * Loads the object based on the class and primary key.
    */
   public Object load(Class cl,
-                     Object key)
+                     Object key,
+		     boolean isEager)
     throws AmberException
   {
     if (log.isLoggable(Level.FINER))
@@ -908,7 +909,7 @@ public class AmberConnection
         throw new AmberException(e);
       }
 
-      entity = entityHome.load(this, key);
+      entity = entityHome.find(this, key, isEager, 0, 0);
 
       if (entity == null)
         return null;
@@ -1243,7 +1244,7 @@ public class AmberConnection
 
     Object key = entityHome.toObjectKey(intKey);
 
-    return load(cl, key);
+    return load(cl, key, true);
   }
 
   /**
@@ -1476,7 +1477,7 @@ public class AmberConnection
   /**
    * Adds a new entity for the given class name and key.
    */
-  public Entity loadEntity(Class cl, Object key)
+  public Entity loadEntity(Class cl, Object key, boolean isEager)
   {
     if (key == null)
       return null;
@@ -1492,7 +1493,7 @@ public class AmberConnection
       // XXX: needs to create based on the discriminator with inheritance.
       // Create a new entity for the given class and primary key.
       try {
-	entity = (Entity) load(cl, key);
+	entity = (Entity) load(cl, key, isEager);
       } catch (AmberException e) {
 	throw new AmberRuntimeException(e);
       }
@@ -3118,7 +3119,7 @@ public class AmberConnection
           _txEntities.remove(entity);
         }
 
-        existingEntity = (Entity) load(entity.getClass(), pk);
+        existingEntity = (Entity) load(entity.getClass(), pk, true);
       } catch (AmberObjectNotFoundException e) {
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, e.toString(), e);

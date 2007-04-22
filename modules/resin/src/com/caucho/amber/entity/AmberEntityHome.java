@@ -244,6 +244,8 @@ public class AmberEntityHome {
   {
     EntityItem item = _homeBean.__caucho_home_find(aConn, this, rs, index);
 
+    return item;
+    /*
     // ejb/0602
     if (! _manager.isJPA())
       return item;
@@ -279,6 +281,7 @@ public class AmberEntityHome {
     aConn.setTransactionalState(copy);
 
     return item;
+    */
   }
 
   /**
@@ -448,13 +451,6 @@ public class AmberEntityHome {
       // jpa/0y14 if (aConn.shouldRetrieveFromCache())
       item = _manager.getEntity(getRootType(), key);
 
-      // jpa/0l4a
-      // see if a newly-created item is in the AmberConnection
-      /*
-      if (item == null)
-        item = aConn.getSubEntityCacheItem(getRootType().getInstanceClass(), key);
-      */
-
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, "findEntityItem item is null? "+(item == null));
 
@@ -470,9 +466,6 @@ public class AmberEntityHome {
 
         Entity cacheEntity;
 
-        // __caucho_home_new() will properly add the copy object to the context.
-	// XXX: the cache object should never be added to the context
-        //cacheEntity = (Entity) _homeBean.__caucho_home_new(aConn, this, key, loadFromResultSet);
         cacheEntity = (Entity) _homeBean.__caucho_home_find(aConn, this, key);
 
         if (log.isLoggable(Level.FINER))
@@ -488,33 +481,6 @@ public class AmberEntityHome {
         }
 
         item = new CacheableEntityItem(this, cacheEntity);
-
-	  /*
-        // jpa/0o41
-        if (isLoad) {
-          Entity contextEntity = aConn.getSubEntity(cacheEntity.getClass(), key);
-
-            // jpa/0l4a
-          if (contextEntity != null)
-            contextEntity.__caucho_setCacheItem(item);
-
-          try {
-            // XXX cacheEntity.__caucho_retrieve(aConn);
-            if (_manager.isJPA()) {
-              // jpa/0o03
-              item.loadEntity(aConn, 0);
-            }
-            else
-              item.loadEntity(0);
-          } catch (AmberObjectNotFoundException e) {
-            // XXX: jpa/0o42, a new entity shouldn't be added to the context.
-            if (contextEntity != null)
-              aConn.removeEntity(contextEntity);
-
-            throw e;
-          }
-        }
-	  */
 
         // The cache entity is added after commit.
         if (! aConn.isInTransaction()) {
@@ -535,52 +501,6 @@ public class AmberEntityHome {
         }
       }
       else if (isLoad) {
-	/*
-        Class cl = item.getEntity().getClass();
-
-        // Adds the copy object to the context before anything.
-        // This will avoid the cache object to be added to the context.
-	// XXX: the cache item should never be added to the connection
-        // aConn.addNewEntity(cl, key);
-
-        if (aConn.isInTransaction()) {
-          if (log.isLoggable(Level.FINER))
-            log.log(Level.FINER, "findEntityItem is in transaction");
-
-          String className = cl.getName();
-
-          int index = aConn.getTransactionEntity(className, key);
-
-          EntityState state = null;
-
-          if (index >= 0) {
-            Entity txEntity = aConn.getTransactionEntity(index);
-            state = txEntity.__caucho_getEntityState();
-          }
-
-          // jpa/0ge3: the copy object is created above calling addNewEntity(),
-          // but it is still not loaded.
-          if (index < 0 || ! state.isManaged()) {
-            if (log.isLoggable(Level.FINER))
-              log.log(Level.FINER, "expiring entity to be loaded into the current transaction");
-
-            // jpa/0g0k
-            item.getEntity().__caucho_expire();
-
-            // jpa/0ge4, jpa/0o0b, jpa/0o0c: bidirectional one-to-one optimization.
-            item.getEntity().__caucho_setLoadMask(notExpiringLoadMask,
-                                                  notExpiringGroup);
-          }
-        }
-        else {
-          if (log.isLoggable(Level.FINER))
-            log.log(Level.FINER, "findEntityItem is not in transaction");
-        }
-
-        if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, "findEntityItem loading entity");
-	*/
-
 	if (! aConn.isInTransaction()) {
 	  if (_manager.isJPA()) {
 	    // jpa/0v33
@@ -590,14 +510,6 @@ public class AmberEntityHome {
 	    item.loadEntity(0);
 	}
       }
-
-      /* XXX: the cache item should never change its state
-      // XXX: jpa/0s2j
-      if (item != null) {
-        // jpa/0ga8
-        aConn.setTransactionalState(item.getEntity());
-      }
-      */
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, "returning item is null? "+(item == null));

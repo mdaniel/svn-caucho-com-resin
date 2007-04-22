@@ -336,9 +336,9 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.pushDepth();
 
     // jpa/0h29
-    out.print("if (__caucho_session != null && __caucho_state != com.caucho.amber.entity.EntityState.P_DELETED && ");
-
-    out.println("(" + loadVar + " & " + loadMask + "L) == 0) {");
+    out.println("if (__caucho_session != null");
+    out.println("    && __caucho_state != com.caucho.amber.entity.EntityState.P_DELETED");
+    out.println("    && (" + loadVar + " & " + loadMask + "L) == 0) {");
     out.pushDepth();
     out.println("__caucho_load_select_" + getLoadGroupIndex() + "(__caucho_session);");
     out.println(loadVar + " |= " + loadMask + "L;");

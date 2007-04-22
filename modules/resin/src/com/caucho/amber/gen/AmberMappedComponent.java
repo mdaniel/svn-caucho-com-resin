@@ -683,46 +683,17 @@ abstract public class AmberMappedComponent extends ClassComponent {
     if (true || hasLoad || ! isEntityParent) {
       out.println();
       out.println("public void __caucho_retrieve_eager(com.caucho.amber.manager.AmberConnection aConn)");
-      out.println("  throws java.sql.SQLException");
       out.println("{");
 
-      /*
-      out.println("if (__caucho_cacheItem == null)");
-      out.println("  __caucho_cacheItem = aConn.findEntityItem(\"" + _relatedType.getName() + "\", __caucho_getPrimaryKey());");
-      */
-
       generateRetrieveEager(out, _relatedType);
-
-      /*
-      if (hasLoad)
-        out.println("  __caucho_load_" + index + "(aConn);");
-      */
 
       out.println("}");
       out.println();
       out.println("public void __caucho_retrieve_self(com.caucho.amber.manager.AmberConnection aConn)");
-      out.println("  throws java.sql.SQLException");
       out.println("{");
       out.pushDepth();
-
-      /*
-      out.println("if (__caucho_cacheItem == null)");
-      out.println("  __caucho_cacheItem = aConn.findEntityItem(\"" + _relatedType.getName() + "\", __caucho_getPrimaryKey());");
-      */
       
       generateRetrieveSelf(out, _relatedType);
-
-      /*
-      if (isEntityParent)
-	out.println("super.__caucho_retrieve_self(aConn);");
-
-      if (hasLoad) {
-	long mask = 1L << (index % 64);
-	
-	out.println("if ((__caucho_loadMask_0 & " + mask + "L) == 0)");
-        out.println("  __caucho_load_select_" + index + "(aConn);");
-      }
-      */
 
       out.popDepth();
       out.println("}");

@@ -255,14 +255,12 @@ public interface Entity extends MappedSuperclass
   /**
    * Retrieves data from the data store, including the eager loads.
    */
-  public void __caucho_retrieve_eager(AmberConnection aConn)
-    throws SQLException;
+  public void __caucho_retrieve_eager(AmberConnection aConn);
 
   /**
    * Retrieves data from the data store, only loading own fields.
    */
-  public void __caucho_retrieve_self(AmberConnection aConn)
-    throws SQLException;
+  public void __caucho_retrieve_self(AmberConnection aConn);
 
   /**
    * Loads the entity from the database and
