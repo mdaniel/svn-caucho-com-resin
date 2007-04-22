@@ -633,7 +633,7 @@ public class EntityManyToOneField extends CascadableField {
 
     if (_aliasField == null) {
       out.println("if ((" + loadVar + " & " + mask + "L) == 0)");
-      out.println("  __caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
+      out.println("  __caucho_load_select_" + getLoadGroupIndex() + "(__caucho_session);");
     }
 
     out.println(loadVar + " |= " + mask + "L;");
@@ -1145,7 +1145,7 @@ public class EntityManyToOneField extends CascadableField {
     if (_aliasField == null) {
       out.println("if ((" + loadVar + " & " + loadMask + "L) == 0 && __caucho_session != null) {");
       // ejb/0602
-      out.println("  __caucho_load_" + group + "(__caucho_session);");
+      out.println("  __caucho_load_select_" + group + "(__caucho_session);");
       out.println();
       // jpa/0j5f
       out.println("  if (__caucho_session.isInTransaction())");

@@ -340,7 +340,7 @@ public class DependentEntityOneToOneField extends CascadableField {
 
     out.println("(" + loadVar + " & " + loadMask + "L) == 0) {");
     out.pushDepth();
-    out.println("__caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
+    out.println("__caucho_load_select_" + getLoadGroupIndex() + "(__caucho_session);");
     out.println(loadVar + " |= " + loadMask + "L;");
 
     generateLoadProperty(out, index, "__caucho_session");
