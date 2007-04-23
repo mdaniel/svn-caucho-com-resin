@@ -114,6 +114,9 @@ public class QDate {
   private String _stdName;
 
   private DateFormat _dateFormat;
+  private DateFormat _shortDateFormat;
+  private DateFormat _shortTimeFormat;
+  
   private Date _date = new Date();
 
   // All times are local
@@ -985,6 +988,14 @@ public class QDate {
 	cb.append(getDayOfWeek() - 1);
 	break;
 
+      case 'x':
+        cb.append(printShortLocaleDate());
+        break;
+        
+      case 'X':
+        cb.append(printShortLocaleTime());
+        break;
+    
       case 'y':
 	cb.append(_year / 10 % 10);
 	cb.append(_year % 10);
@@ -1044,6 +1055,32 @@ public class QDate {
     return _dateFormat.format(_date);
   }
 
+  /**
+   * Returns a date in M/dd/yy format (i.e. 11/30/69 in US locale).
+   */
+  public String printShortLocaleDate()
+  {
+    _date.setTime(_localTimeOfEpoch);
+
+    if (_shortDateFormat == null)
+      _shortDateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
+
+    return _shortDateFormat.format(_date);
+  }
+  
+  /**
+   * Returns a date in H:mm:ss PM format.
+   */
+  public String printShortLocaleTime()
+  {
+    _date.setTime(_localTimeOfEpoch);
+
+    if (_shortTimeFormat == null)
+      _shortTimeFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
+
+    return _shortTimeFormat.format(_date);
+  }
+  
   /*
    * XXX: okay, this is vile.
    * Mon, 17 Jan 1994 11:14:55 -0500 (EST)
