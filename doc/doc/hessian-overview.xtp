@@ -190,6 +190,10 @@ Object obj = in.readObject(null);
 is.close();
 </example>
 
+<p>When serializing Java objects more complex than primitives
+or Strings, make sure the classes for those objects implement 
+java.io.Serializable.</p>
+
 </s1>
 
 <s1 title="Hessian with large binary data">
