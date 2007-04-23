@@ -97,9 +97,6 @@ public class CacheableEntityItem extends EntityItem {
     try {
       _cacheEntity.__caucho_setConnection(aConn);
       _cacheEntity.__caucho_retrieve_self(aConn);
-    } catch (SQLException e) {
-      // XXX: item is dead
-      throw new RuntimeException(e);
     } finally {
       aConn.freeConnection();
     }
@@ -129,9 +126,6 @@ public class CacheableEntityItem extends EntityItem {
       // context connection.
       _cacheEntity.__caucho_setConnection(aConn);
       _cacheEntity.__caucho_retrieve_self(aConn);
-    } catch (SQLException e) {
-      // XXX: item is dead
-      throw new RuntimeException(e);
     } finally {
       // After loading the entity, all prepared statements
       // were properly cached into the context connection.
