@@ -1074,7 +1074,30 @@ abstract public class RelatedType extends AbstractStatefulType {
   }
 
   /**
-   * Generates the update sql.
+   * Generates the auto insert sql.
+   */
+  public String generateAutoCreateSQL(String sql)
+  {
+    // SQLServer does not expect the ID column
+    // with GenerationType.IDENTITY or GenerationType.AUTO.
+
+    // XXX: Assume it is a single column since it is auto-generated.
+    int start = sql.indexOf("(") + 1;
+    int end = sql.indexOf(",", start) + 2;
+
+    CharBuffer cb = new CharBuffer(sql);
+    cb.delete(start, end);
+
+    end = cb.length() - 1;
+    start = end - 3;
+
+    cb.delete(start, end);
+
+    return cb.close();
+  }
+
+  /**
+   * Generates the insert sql.
    */
   public String generateCreateSQL(Table table)
   {

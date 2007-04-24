@@ -42,6 +42,7 @@ import com.caucho.bytecode.*;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.loader.Environment;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.PersistentDependency;
 
@@ -266,7 +267,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
-			  && _relatedType.getPersistenceUnit().isJPA());
+                          && _relatedType.getPersistenceUnit().isJPA());
 
     out.println();
     out.println("public void __caucho_setPrimaryKey(Object key)");
@@ -692,7 +693,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("public void __caucho_retrieve_self(com.caucho.amber.manager.AmberConnection aConn)");
       out.println("{");
       out.pushDepth();
-      
+
       generateRetrieveSelf(out, _relatedType);
 
       out.popDepth();
@@ -716,7 +717,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     }
 
     generateRetrieveEager(out, relatedType.getParentType());
-    
+
     if (hasLoad)
       out.println("__caucho_load_" + index + "(aConn);");
   }
@@ -920,7 +921,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
-			  && _relatedType.getPersistenceUnit().isJPA());
+                          && _relatedType.getPersistenceUnit().isJPA());
 
     if (_relatedType.getId() == null || isAbstract) {
       // jpa/0ge6: MappedSuperclass
@@ -1359,7 +1360,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     throws IOException
   {
     boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
-			  && _relatedType.getPersistenceUnit().isJPA());
+                          && _relatedType.getPersistenceUnit().isJPA());
 
     // jpa/0gg0
     if (_relatedType.getId() != null && ! isAbstract) {
@@ -1442,18 +1443,46 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     Table table = _relatedType.getTable();
 
-    out.print("String sql = \"");
-    out.print(_relatedType.generateCreateSQL(table));
-    out.println("\";");
+    String sql = _relatedType.generateCreateSQL(table);
+
+    out.print("String sql;");
+
+    boolean isAutoInsert = false;
+
+    // jpa/0gg0
+    if (_relatedType.getId() != null && ! isAbstract) {
+      ArrayList<IdField> fields = _relatedType.getId().getKeys();
+      IdField idField = fields.size() > 0 ? fields.get(0) : null;
+
+      boolean isIdentity = idField.getGenerator() != null
+        && idField.getGenerator().equals("identity");
+
+      if (idField != null && isIdentity) {
+        isAutoInsert = true;
+
+        out.print("sql = \"");
+        out.print(_relatedType.generateAutoCreateSQL(sql));
+        out.println("\";");
+      }
+    }
 
     _relatedType.getId().generateCheckCreateKey(out);
 
+    if (! isAutoInsert) {
+      out.print("sql = \"");
+      out.print(sql);
+      out.println("\";");
+    }
+
+    out.println();
     out.println("java.sql.PreparedStatement pstmt = aConn.prepareInsertStatement(sql);");
 
     out.println("int index = 1;");
 
-    out.println();
-    _relatedType.getId().generateSetInsert(out, "pstmt", "index");
+    if (! isAutoInsert) {
+      out.println();
+      _relatedType.getId().generateSetInsert(out, "pstmt", "index");
+    }
 
     _relatedType.generateInsertSet(out, table, "pstmt", "index", "super");
 
@@ -1467,9 +1496,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     do {
       for (Table subTable : parentType.getSecondaryTables()) {
+        sql = parentType.generateCreateSQL(subTable);
+
         out.println();
         out.print("sql = \"");
-        out.print(parentType.generateCreateSQL(subTable));
+        out.print(sql);
         out.println("\";");
 
         out.println("pstmt = aConn.prepareStatement(sql);");
@@ -2231,7 +2262,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
-			  && _relatedType.getPersistenceUnit().isJPA());
+                          && _relatedType.getPersistenceUnit().isJPA());
 
     // jpa/0gg0
     if (_relatedType.getId() == null || isAbstract) {
@@ -2268,7 +2299,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
-			  && _relatedType.getPersistenceUnit().isJPA());
+                          && _relatedType.getPersistenceUnit().isJPA());
 
     if (_relatedType.getId() == null || isAbstract) {
       // jpa/0ge6: MappedSuperclass
@@ -2456,7 +2487,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.popDepth();
     out.println("}");
-    
+
     out.println();
     out.print("protected com.caucho.amber.entity.Entity __caucho_home_new()");
     out.println("{");
@@ -2464,7 +2495,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("}");
   }
     */
-  
+
   void generateHomeNew(JavaWriter out)
     throws IOException
   {
@@ -2481,7 +2512,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("}");
       return;
     }
-    
+
     out.println(getClassName() + " entity = new " + getClassName() + "();");
 
     out.println("entity.__caucho_home = home.getEntityType();");
@@ -2505,10 +2536,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     Column discriminator = _relatedType.getDiscriminator();
-    
+
     if (_relatedType.isAbstractClass()
-	|| _relatedType.getId() == null
-	|| discriminator == null) {
+        || _relatedType.getId() == null
+        || discriminator == null) {
       out.println("return __caucho_home_new(home, key);");
       out.popDepth();
       out.println("}");
@@ -2604,7 +2635,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("rs = pstmt.executeQuery();");
     out.println("if (rs.next()) {");
     out.println("  " + discriminatorVar + " = rs.getString(1);"); // XXX:
-    
+
     out.println("}");
   }
 
