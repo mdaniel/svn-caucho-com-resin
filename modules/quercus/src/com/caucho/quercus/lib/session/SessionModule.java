@@ -535,8 +535,13 @@ public class SessionModule extends AbstractQuercusModule
         cookie.setMaxAge(maxAge.toInt());
 
       Value domain = env.getIni("session.cookie_domain");
-      cookie.setDomain(domain.toString());
 
+      // this is for 3rd party servlet containers that don't check the domain
+      // before sending the cookie
+      if (domain.length() > 0) {
+        cookie.setDomain(domain.toString());
+      }
+      
       Value secure = env.getIni("session.cookie_secure");
       cookie.setSecure(secure.toBoolean());
 
