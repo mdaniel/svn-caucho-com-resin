@@ -885,6 +885,8 @@ public class QDate {
    * <tr><td>%p<td>am/pm
    * <tr><td>%S<td>seconds
    * <tr><td>%s<td>milliseconds
+   * <tr><td>%x<td>Java locale short date
+   * <tr><td>%X<td>Java locale short time
    * <tr><td>%W<td>week in year (three-digit)
    * <tr><td>%w<td>day of week (one-digit)
    * <tr><td>%y<td>year (two-digit)

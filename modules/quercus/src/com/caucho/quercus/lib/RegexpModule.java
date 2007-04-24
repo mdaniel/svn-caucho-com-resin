@@ -250,11 +250,11 @@ public class RegexpModule
           part.append(new StringValueImpl(group));
           part.append(new LongValue(matcher.start(i)));
 
-          regs.put(new LongValue(i), part);
-          
           Value name = namedPatterns.get(i);
           if (name != null)
             regs.put(name, part);
+          
+          regs.put(new LongValue(i), part);
         }
         else {
           // php/151u
@@ -265,11 +265,11 @@ public class RegexpModule
 
           StringValue match = new StringValueImpl(group);
           
-          regs.put(new LongValue(i), match);
-          
           Value name = namedPatterns.get(i);
           if (name != null)
             regs.put(name, match);
+          
+          regs.put(new LongValue(i), match);
         }
       }
 
@@ -348,12 +348,12 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static int pregMatchAllPatternOrder(Env env,
-					     Pattern pattern,
-					     StringValue subject,
-					     ArrayValue matches,
+                                             Pattern pattern,
+                                             StringValue subject,
+                                             ArrayValue matches,
                                              NamedPatterns namedPatterns,
-					     int flags,
-					     int offset)
+                                             int flags,
+                                             int offset)
   {
     Matcher matcher = pattern.matcher(subject);
 
@@ -363,14 +363,15 @@ public class RegexpModule
 
     for (int j = 0; j <= groupCount; j++) {
       ArrayValue values = new ArrayValueImpl();
-      matches.put(values);
-      matchList[j] = values;
       
       Value patternName = namedPatterns.get(j);
       
       // XXX: named subpatterns causing conflicts with array indexes?
       if (patternName != null)
         matches.put(patternName, values);
+      
+      matches.put(values);
+      matchList[j] = values;
     }
 
     if (! (matcher.find())) {
@@ -1923,7 +1924,7 @@ public class RegexpModule
 
           StringValue name = pattern.substring(start, i);
 
-          add(groupCount, name);
+          add(groupCount++, name);
         }
         else if (ch == '=') {
           //XXX: named back references (?P=name)
