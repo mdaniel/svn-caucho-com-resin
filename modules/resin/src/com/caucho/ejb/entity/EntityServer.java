@@ -679,7 +679,7 @@ public class EntityServer extends AbstractServer {
       // ejb/0d33 vs ejb/0d00
       if (forceLoad &&
           (! _isLoadLazyOnTransaction ||
-           getTransactionManager().getTransaction() == null)) {
+           getTransactionManager().getTransaction() != null)) {
         try {
           cxt._caucho_load();
         } catch (Exception e) {

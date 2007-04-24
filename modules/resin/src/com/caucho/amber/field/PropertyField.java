@@ -208,7 +208,7 @@ public class PropertyField extends AbstractField {
 
     if (! (getSourceType() instanceof EmbeddableType)) {
       out.println("if (__caucho_session != null)");
-      out.println("  __caucho_load_" + getLoadGroupIndex() + "(__caucho_session);");
+      out.println("  __caucho_load_select_" + getLoadGroupIndex() + "(__caucho_session);");
       out.println();
     }
 

@@ -225,6 +225,7 @@ public class EntityBean extends ClassComponent {
     out.println("{");
     out.pushDepth();
     out.println("TransactionContext trans = _server.getTransactionManager().beginSingleRead();");
+
     out.println("try {");
     out.pushDepth();
 
@@ -234,15 +235,22 @@ public class EntityBean extends ClassComponent {
       out.println("else");
       out.println("  _ejb_begin(trans, false, true);");
     }
-    else
-      out.println("Bean bean = _ejb_begin(trans, false, true);");
+    else {
+      out.println("if (trans == null) {");
+      out.println("  Bean bean = _ejb_begin(trans, false, true);");
+      out.println("  bean._caucho_afterCompletion(true);");
+      out.println("}");
+      out.println("else");
+      out.println("  _ejb_begin(trans, false, true);");
+    }
 
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
     out.println("  if (trans != null) trans.setRollbackOnly(e);");
     out.println("  throw FinderExceptionWrapper.create(e);");
     out.println("} finally {");
-    out.println("  if (trans != null) trans.commit();");
+    out.println("  if (trans != null)");
+    out.println("    trans.commit();");
     out.println("}");
     out.popDepth();
     out.println("}");
