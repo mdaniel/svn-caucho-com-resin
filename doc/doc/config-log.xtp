@@ -170,6 +170,9 @@ in.</p>
     </td><td>the format for the archive filename when a rollover occurs,
         see <a href="#rollover">Rollovers</a>.
     </td><td>see below
+</td></tr><tr><td>auto-flush
+    </td><td>true to flush the memory buffer with each request
+    </td><td>false
 </td></tr><tr><td>resin:type
     </td><td>a class extending <a href="javadoc|com.caucho.server.log.AccessLog|"/>
         for custom logging

@@ -77,7 +77,7 @@ public class EclipseCompiler extends AbstractJavaCompiler {
         _hasCompiler = true;
       } catch (Exception e) {
         e.printStackTrace();
-        throw new JavaCompileException(L.l("Resin can't load org.eclipse.jdt.core.JDTCompilerAdapter.  Usually this means that the JDK tools.jar is missing from the classpath, possibly because of using a JRE instead of the JDK.  You can either add tools.jar to the classpath or change the compiler to an external one with <java compiler='javac'/> or jikes.\n\n{0}", String.valueOf(e)));
+        throw new JavaCompileException(L.l("Resin can't load org.eclipse.jdt.core.JDTCompilerAdapter.  Usually this means that eclipse-compiler.jar is missing from the classpath.  You can either add eclipse-compiler.jar to the classpath or change the compiler with <java compiler='javac'/>.\n\n{0}", String.valueOf(e)));
       }
     }
 

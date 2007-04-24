@@ -498,7 +498,19 @@ restarted.</p>
   &lt;/server&gt;
 &lt;/resin&gt;
 </example>
+
+<p>
+The default behaviour for sending mail is to contact a SMTP server at host 127.0.0.1 (the localhost) on port 25.
+System properties are used to configure a different SMTP server.
+</p>
+
+<example tite="resin.conf - smtp server configuration">
+  &lt;system-property mail.smtp.host="127.0.0.1"/&gt;
+  &lt;system-property mail.smtp.port="25"/&gt;
+</example>
+
 </s2>
+
 </defun>
 
 <defun title="&lt;rewrite-dispatch>" version="Resin 3.1">
