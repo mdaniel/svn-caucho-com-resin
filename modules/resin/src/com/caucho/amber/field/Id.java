@@ -97,7 +97,7 @@ public class Id {
       return;
 
     // jpa/0gg0
-    if (_ownerType.getBeanClass().isAbstract())
+    if (_ownerType.isAbstractClass())
       return;
 
     _columns.addAll(key.getColumns());

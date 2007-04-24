@@ -128,7 +128,7 @@ abstract public class RelatedType extends AbstractStatefulType {
   public Table getTable()
   {
     // jpa/0gg0
-    if (_table == null && ! getBeanClass().isAbstract()) {
+    if (_table == null && ! isAbstractClass()) {
       String sqlName = AbstractConfigIntrospector.toSqlName(getName());
       setTable(_amberPersistenceUnit.createTable(sqlName));
     }

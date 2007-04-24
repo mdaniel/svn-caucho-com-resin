@@ -73,6 +73,9 @@ public class LoadGroupGenerator extends ClassComponent {
     int group = _index / 64;
     long mask = (1L << (_index % 64));
 
+    out.println("boolean isLoaded = (__caucho_loadMask_"
+		+ group + " & " + mask + "L) != 0;");
+
     // jpa/0ge2: MappedSuperclassType
     if (_relatedType.getTable() != null) {
 
@@ -126,6 +129,9 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
       out.println("  __caucho_log.fine(\"amber loaded-" + _index + " \" + this.getClass().getName());");
 
+      out.println("if (! isLoaded) {");
+      out.pushDepth();
+      
       // ejb/06j2, ejb/0690
       if (_relatedType.getHasLoadCallback() && _index == 0) {
         out.println();
@@ -136,6 +142,10 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println("aConn.postLoad(this);");
 
       generateCallbacks(out, _relatedType.getPostLoadCallbacks());
+      
+      out.popDepth();
+      out.println("}");
+      
     }
 
     out.popDepth();
