@@ -58,16 +58,42 @@ implementation classes.
 &lt;!-- xml --&gt;
 
 &lt;system-property javax.xml.parsers.DocumentBuilderFactory=
-             "com.caucho.xml.parsers.XmlDocumentBuilderFactory"/&gt;
+                 "com.caucho.xml.parsers.XmlDocumentBuilderFactory"/&gt;
 &lt;system-property javax.xml.parsers.SAXParserFactory=
-             "com.caucho.xml.parsers.XmlSAXParserFactory"/&gt;
+                 "com.caucho.xml.parsers.XmlSAXParserFactory"/&gt;
 
 &lt;!--  xslt --&gt;
 
 &lt;system-property javax.xml.transform.TransformerFactory=
-             "com.caucho.xsl.Xsl"/&gt;
+                 "com.caucho.xsl.Xsl"/&gt;
 
 </example>
+</s1>
+
+<s1 title="JDK 1.5 JAXP implementation">
+
+<p>The Sun JDK 1.5 includes the Xerces and Xalan JAXP implementations packaged under a different name.</p>
+
+<example title="JDK 1.5 system-property for JAXP implementations">
+
+&lt;web-app&gt;
+  &lt;!-- xml --&gt;
+
+  &lt;system-property javax.xml.parsers.DocumentBuilderFactory=
+                   "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl"/&gt;
+
+  &lt;system-property javax.xml.parsers.SAXParserFactory=
+                   "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl"&gt;
+
+  &lt;!--  xslt --&gt;
+
+  &lt;system-property javax.xml.transform.TransformerFactory=
+                   "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl"/&gt;
+
+&lt;/web-app&gt;
+
+</example>
+
 </s1>
 
 <s1 title="Using alternative XML and XSLT implementations">
@@ -181,7 +207,7 @@ available to all of your applications put them in <code>$RESIN_HOME/lib</code>.
 
 <s1 name="crimson" title="Using Crimson">
 
-<p>Crimson is the xml parser that is included with JDK 1.4 and greater.</p>
+<p>Crimson is the xml parser that is included with JDK 1.4.</p>
 
 <example title="system-property for using Crimson">
 
@@ -190,7 +216,7 @@ available to all of your applications put them in <code>$RESIN_HOME/lib</code>.
 &lt;system-property javax.xml.parsers.DocumentBuilderFactory=
              "org.apache.crimson.jaxp.DocumentBuilderFactoryImpl"/&gt;
 &lt;system-property javax.xml.parsers.SAXParserFactory=
-             "org.apache.crimson.jaxp.SAXParserFactoryImpl""/&gt;
+             "org.apache.crimson.jaxp.SAXParserFactoryImpl"/&gt;
 
 </example>
 </s1>
