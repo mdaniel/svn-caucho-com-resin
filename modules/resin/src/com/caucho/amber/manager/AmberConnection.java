@@ -857,7 +857,7 @@ public class AmberConnection
    */
   public Object load(Class cl,
                      Object key,
-		     boolean isEager)
+                     boolean isEager)
     throws AmberException
   {
     if (log.isLoggable(Level.FINER))
@@ -1205,6 +1205,13 @@ public class AmberConnection
     if (key == null)
       return null;
 
+    int index = getEntity(type.getInstanceClass().getName(), key);
+
+    if (index >= 0) {
+      // jpa/0m30
+      return _entities.get(index);
+    }
+
     try {
       AmberEntityHome home = type.getHome();
 
@@ -1457,7 +1464,6 @@ public class AmberConnection
           entity = (Entity) cauchoGetBeanMethod.invoke(value, new Object[0]);
           // entity.__caucho_makePersistent(aConn, item);
         } catch (Exception e) {
-	  e.printStackTrace();
           log.log(Level.FINER, e.toString(), e);
         }
       }
@@ -1481,7 +1487,7 @@ public class AmberConnection
   {
     if (key == null)
       return null;
-    
+
     // jpa/0l43
     Entity entity = getSubEntity(cl, key);
 
@@ -1493,9 +1499,9 @@ public class AmberConnection
       // XXX: needs to create based on the discriminator with inheritance.
       // Create a new entity for the given class and primary key.
       try {
-	entity = (Entity) load(cl, key, isEager);
+        entity = (Entity) load(cl, key, isEager);
       } catch (AmberException e) {
-	throw new AmberRuntimeException(e);
+        throw new AmberRuntimeException(e);
       }
     }
     else {
@@ -2004,7 +2010,7 @@ public class AmberConnection
   {
     try {
       if (rs != null)
-	rs.close();
+        rs.close();
     } catch (SQLException e) {
       throw new AmberRuntimeException(e);
     }
