@@ -373,10 +373,10 @@ public class AmberEntityHome {
       // jpa/0o01, jpa/0o41
 
       EntityItem cacheItem = findEntityItem(aConn,
-					    key,
-					    isLoad,
-					    notExpiringLoadMask,
-					    notExpiringGroup);
+                                            key,
+                                            isLoad,
+                                            notExpiringLoadMask,
+                                            notExpiringGroup);
 
       if (cacheItem == null) {
         if (_manager.isJPA())
@@ -388,16 +388,28 @@ public class AmberEntityHome {
 
       Entity cacheEntity = cacheItem.getEntity();
       AmberEntityHome home = cacheItem.getEntityHome();
-      
+
       Entity entity = cacheEntity.__caucho_home_new(home, key);
       entity.__caucho_makePersistent(aConn, cacheItem);
 
+      // The entity is added for eagerly loading optimization.
       aConn.addEntity(entity);
 
-      if (isLoad)
-	entity.__caucho_retrieve_eager(aConn);
+      if (isLoad) {
+        try {
+          entity.__caucho_retrieve_eager(aConn);
+        } catch (AmberObjectNotFoundException e) {
+          // 0g0q: if the entity is not found, removes it from context.
+          aConn.removeEntity(entity);
+
+          if (_manager.isJPA())
+            return null;
+
+          throw e;
+        }
+      }
       else
-	cacheItem.copyTo(entity, aConn);
+        cacheItem.copyTo(entity, aConn);
 
       /*
       // Gets the copy object from context.
@@ -484,15 +496,15 @@ public class AmberEntityHome {
 
         // The cache entity is added after commit.
         if (! aConn.isInTransaction()) {
-	  if (isLoad) {
+          if (isLoad) {
             if (_manager.isJPA()) {
               // jpa/0o03
               item.loadEntity(aConn, 0);
             }
             else
               item.loadEntity(0);
-	  }
-	  
+          }
+
           // jpa/0g0p: only adds the cache entity if it is not within a transaction.
           item = _manager.putEntity(getRootType(), key, item);
 
@@ -501,14 +513,14 @@ public class AmberEntityHome {
         }
       }
       else if (isLoad) {
-	if (! aConn.isInTransaction()) {
-	  if (_manager.isJPA()) {
-	    // jpa/0v33
-	    item.loadEntity(aConn, 0);
-	  }
-	  else
-	    item.loadEntity(0);
-	}
+        if (! aConn.isInTransaction()) {
+          if (_manager.isJPA()) {
+            // jpa/0v33
+            item.loadEntity(aConn, 0);
+          }
+          else
+            item.loadEntity(0);
+        }
       }
 
       if (log.isLoggable(Level.FINER))
@@ -598,12 +610,12 @@ public class AmberEntityHome {
    * @param discriminator the object's discriminator
    */
   public Entity newDiscriminatorEntity(Object key,
-				       String discriminator)
+                                       String discriminator)
   {
     if (discriminator == null || key == null)
       throw new AmberRuntimeException(L.l("{0} is not a valid inheritance key.",
-					  key));
-    
+                                          key));
+
     EntityType subType = (EntityType) _entityType.getSubClass(discriminator);
 
     return subType.getHome().newEntity(key);
