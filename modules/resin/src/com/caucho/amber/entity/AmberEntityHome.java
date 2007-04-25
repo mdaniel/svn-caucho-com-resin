@@ -395,21 +395,26 @@ public class AmberEntityHome {
       // The entity is added for eagerly loading optimization.
       aConn.addEntity(entity);
 
-      if (isLoad) {
-        try {
+      try {
+        if (isLoad) {
           entity.__caucho_retrieve_eager(aConn);
-        } catch (AmberObjectNotFoundException e) {
-          // 0g0q: if the entity is not found, removes it from context.
-          aConn.removeEntity(entity);
-
-          if (_manager.isJPA())
-            return null;
-
-          throw e;
         }
+        else if (aConn.isInTransaction()) {
+          // jpa/0v33: within a transaction, cannot copy from cache.
+          entity.__caucho_retrieve_self(aConn);
+        }
+        else {
+          cacheItem.copyTo(entity, aConn);
+        }
+      } catch (AmberObjectNotFoundException e) {
+        // 0g0q: if the entity is not found, removes it from context.
+        aConn.removeEntity(entity);
+
+        if (_manager.isJPA())
+          return null;
+
+        throw e;
       }
-      else
-        cacheItem.copyTo(entity, aConn);
 
       /*
       // Gets the copy object from context.
