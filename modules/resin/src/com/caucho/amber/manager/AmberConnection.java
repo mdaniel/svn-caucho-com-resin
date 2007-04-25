@@ -1636,6 +1636,9 @@ public class AmberConnection
   {
     _isXA = isXA;
     _isInTransaction = isXA;
+
+    if (isXA && ! _isRegistered)
+      register();
   }
 
   /**
@@ -1707,6 +1710,7 @@ public class AmberConnection
     afterCommit(status == Status.STATUS_COMMITTED);
     _isXA = false;
     _isInTransaction = false;
+    _isRegistered = false; // ejb/0d19
   }
 
   /**

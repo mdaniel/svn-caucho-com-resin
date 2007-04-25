@@ -855,8 +855,9 @@ public class EntityManyToOneField extends CascadableField {
     throws IOException
   {
     // jpa/0o0-, jpa/0ge4
+    boolean isJPA = getRelatedType().getPersistenceUnit().isJPA();
 
-    if (_targetField != null) {
+    if (_targetField != null && isJPA) {
       long targetLoadIndex = _targetField.getTargetLoadIndex();
       long targetGroup = targetLoadIndex / 64;
       long targetMask = (1L << (targetLoadIndex % 64));
