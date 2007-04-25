@@ -1805,7 +1805,6 @@ public class RegexpModule
           if (openParenStack.remove(openParenStack.size() - 1))
             continue;
 
-          parent = _neighborMap[group];
           sawVerticalBar = false;
         }
         else if (ch == '|') {
