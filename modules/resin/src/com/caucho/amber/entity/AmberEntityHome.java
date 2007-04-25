@@ -372,6 +372,9 @@ public class AmberEntityHome {
     try {
       // jpa/0o01, jpa/0o41
 
+      // jpa/0l48: checks if cacheItem is new or existing (below).
+      EntityItem existingItem = _manager.getEntity(getRootType(), key);
+
       EntityItem cacheItem = findEntityItem(aConn,
                                             key,
                                             isLoad,
@@ -396,6 +399,11 @@ public class AmberEntityHome {
       aConn.addEntity(entity);
 
       try {
+        // jpa/0l48: inheritance loading optimization.
+        // Copy as much as possible from the new cache item.
+        if (existingItem == null)
+          cacheItem.copyTo(entity, aConn);
+
         if (isLoad) {
           entity.__caucho_retrieve_eager(aConn);
         }

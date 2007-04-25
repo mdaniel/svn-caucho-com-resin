@@ -1454,10 +1454,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
       ArrayList<IdField> fields = _relatedType.getId().getKeys();
       IdField idField = fields.size() > 0 ? fields.get(0) : null;
 
-      boolean isIdentity = idField.getGenerator() != null
-        && idField.getGenerator().equals("identity");
-
-      if (idField != null && isIdentity) {
+      // jpa/0gh0
+      if (idField != null
+          && idField.getGenerator() != null
+          && idField.getGenerator().equals("identity")) {
         isAutoInsert = true;
 
         out.print("sql = \"");
