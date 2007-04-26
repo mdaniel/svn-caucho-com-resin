@@ -676,7 +676,7 @@ public class EntityServer extends AbstractServer {
 	  */
       }
 
-      // ejb/0d33 vs ejb/0d00
+      // ejb/0d33 vs ejb/0d00 vs ejb/0500
       if (forceLoad &&
           (! _isLoadLazyOnTransaction ||
            getTransactionManager().getTransaction() == null)) {

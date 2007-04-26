@@ -146,8 +146,8 @@ public class BurlapProtocol extends ProtocolContainer {
     else if (objectId != null) {
       Object key = server.getHandleEncoder("burlap").objectIdToKey(objectId);
 
-      // ejb/0604
-      EJBObject obj = server.getContext(key, true).getRemoteView();
+      // ejb/0604 vs ejb/0500
+      EJBObject obj = server.getContext(key, false).getRemoteView();
 
       Class objectSkelClass = getObjectSkelClass(server);
 
