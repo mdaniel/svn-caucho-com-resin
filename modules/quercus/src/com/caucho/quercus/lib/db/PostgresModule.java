@@ -2308,6 +2308,20 @@ public class PostgresModule extends AbstractQuercusModule {
                                         @NotNull Postgres conn,
                                         String query)
   {
+    if (conn == null)
+      return null;
+
+    return pg_query_impl(env, conn, query, true);
+  }
+
+  /**
+   * Execute a query
+   */
+  private static PostgresResult pg_query_impl(Env env,
+                                              Postgres conn,
+                                              String query,
+                                              boolean reportError)
+  {
     try {
 
       // XXX: the PHP api allows conn to be optional but we
@@ -2321,7 +2335,9 @@ public class PostgresModule extends AbstractQuercusModule {
       String error = conn.error();
 
       if ((error != null) && (! error.equals(""))) {
-        env.warning(L.l("Query failed: {0}", error));
+        if (reportError)
+          env.warning(L.l("Query failed: {0}", error));
+
         return null;
       }
 
@@ -2400,8 +2416,10 @@ public class PostgresModule extends AbstractQuercusModule {
       }
 
       if (errorField == null) {
+        /* XXX: php/431g
         if (fieldCode == PGSQL_DIAG_INTERNAL_QUERY)
           return BooleanValue.FALSE;
+        */
 
         return NullValue.NULL;
       }
@@ -2419,7 +2437,8 @@ public class PostgresModule extends AbstractQuercusModule {
         Integer position = (Integer) errorField;
 
         if (position.intValue() == 0)
-          return BooleanValue.FALSE;
+          // XXX: php/431g return BooleanValue.FALSE;
+          return NullValue.NULL;
       }
 
       return StringValue.create(errorField.toString());
@@ -2645,13 +2664,16 @@ public class PostgresModule extends AbstractQuercusModule {
                                       @NotNull Postgres conn,
                                       String query)
   {
-    try {
+    if (conn == null)
+      return false;
 
-      PostgresResult result = pg_query(env, conn, query);
+    try {
+      PostgresResult result = pg_query_impl(env, conn, query, false);
 
       // We probably won't need this for now. See pg_get_result().
       // conn.setAsynchronousResult(result);
 
+      // php/431g
       // This is to be compliant with real expected results.
       // Even a SELECT * FROM doesnotexist returns true from pg_send_query.
       return true;
