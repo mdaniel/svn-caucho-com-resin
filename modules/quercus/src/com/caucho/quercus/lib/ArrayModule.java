@@ -340,15 +340,17 @@ public class ArrayModule
   /**
    * Returns the next value of the array.
    */
-  public static Value each(Value value)
+  public static Value each(Env env, Value value)
   {
-    if (value instanceof ArrayValue) {
-      ArrayValue array = (ArrayValue) value;
+    if (value.isArray()) {
+      ArrayValue array = (ArrayValue) value.toValue();
 
       return array.each();
     }
-    else
-      return BooleanValue.FALSE;
+    else {
+      env.warning("each() requires argument to be an array");
+      return NullValue.NULL;
+    }
   }
 
   /**
