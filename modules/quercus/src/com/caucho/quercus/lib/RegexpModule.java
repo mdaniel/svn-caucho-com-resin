@@ -1754,7 +1754,6 @@ public class RegexpModule
       }
     }
   }
-
   /**
    * Holds information about the left neighbor of a particular group.
    */
@@ -1773,6 +1772,7 @@ public class RegexpModule
       }
       
       boolean sawVerticalBar = false;
+      boolean isLiteral = false;
       
       int group = 0;
       int parent = UNSET;
@@ -1783,7 +1783,20 @@ public class RegexpModule
       for (int i = 0; i < length; i++) {
         char ch = regexp.charAt(i);
         
-        if (ch == '(') {
+        if (ch == '[' &&
+            (i == 0 || regexp.charAt(i - 1) != '\\')) {
+          isLiteral = true;
+          continue;
+        }
+        else if (ch == ']' &&
+                 (i == 0 || regexp.charAt(i - 1) != '\\')) {
+          isLiteral = false;
+          continue;
+        }
+        else if (isLiteral) {
+          continue;
+        }
+        else if (ch == '(') {
           if (i + 1 < length && regexp.charAt(i + 1) == '?') {
             openParenStack.add(true);
             continue;

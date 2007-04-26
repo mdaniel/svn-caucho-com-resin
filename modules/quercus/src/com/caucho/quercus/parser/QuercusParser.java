@@ -3155,8 +3155,9 @@ public class QuercusParser {
         if (args.size() != 1)
           throw error(L.l("each requires a single expression"));
 
-        //php/0490, php/3490
-        // return _factory.createEach(args.get(0));
+        // php/1721
+        // we should let ArrayModule.each() handle it
+        //return _factory.createEach(args.get(0));
       }
 
       return _factory.createFunction(getLocation(), name, args);     
