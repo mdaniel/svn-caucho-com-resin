@@ -882,6 +882,14 @@ public class Var extends Value
   }
 
   /**
+   * Sets the field.
+   */
+  public Value putThisField(Env env, String index, Value value)
+  {
+    return _value.putThisField(env, index, value);
+  }
+  
+  /**
    * Unsets the field.
    */
   public void removeField(String index)

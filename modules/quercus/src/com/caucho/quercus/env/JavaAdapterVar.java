@@ -891,6 +891,20 @@ public class JavaAdapterVar extends Var
   }
 
   /**
+   * Sets the field.
+   */
+  public Value putThisField(Env env, String index, Value value)
+  {
+    setRaw(getValue());
+    
+    Value retValue = super.putThisField(env, index, value);
+    
+    setValue(getRawValue());
+
+    return retValue;
+  }
+  
+  /**
    * Unsets the field.
    */
   public void removeField(String index)
