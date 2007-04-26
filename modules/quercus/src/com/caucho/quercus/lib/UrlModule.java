@@ -322,6 +322,9 @@ public class UrlModule extends AbstractQuercusModule {
    */
   public static String rawurlencode(String str)
   {
+    if (str == null)
+      return "";
+    
     StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < str.length(); i++) {

@@ -1764,13 +1764,14 @@ public class RegexpModule
     private static int UNSET = -1;
     
     public GroupNeighborMap(String regexp, int groups)
-    {
+    { 
       _neighborMap = new int[groups + 1];
       
       for (int i = 1; i <= groups; i++) {
         _neighborMap[i] = UNSET;
       }
       
+      boolean sawEscape = false;
       boolean sawVerticalBar = false;
       boolean isLiteral = false;
       
@@ -1782,19 +1783,22 @@ public class RegexpModule
       
       for (int i = 0; i < length; i++) {
         char ch = regexp.charAt(i);
-        
-        if (ch == '[' &&
-            (i == 0 || regexp.charAt(i - 1) != '\\')) {
+
+        if (ch == ' ' || ch == '\t' || ch == '\n' || ch == 'r' || ch == '\f') {
+          continue;
+        }
+        else if (ch == '\\') {
+          sawEscape = ! sawEscape;
+          continue;
+        }
+        else if (ch == '[' && ! sawEscape) {
           isLiteral = true;
-          continue;
         }
-        else if (ch == ']' &&
-                 (i == 0 || regexp.charAt(i - 1) != '\\')) {
+        else if (ch == ']' && ! sawEscape) {
           isLiteral = false;
-          continue;
         }
-        else if (isLiteral) {
-          continue;
+        else if (isLiteral || sawEscape) {
+          sawEscape = false;
         }
         else if (ch == '(') {
           if (i + 1 < length && regexp.charAt(i + 1) == '?') {
@@ -1824,7 +1828,6 @@ public class RegexpModule
           sawVerticalBar = true;
         }
         else {
-          continue;
         }
       }
     }
