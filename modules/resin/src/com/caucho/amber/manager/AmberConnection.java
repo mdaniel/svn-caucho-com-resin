@@ -2816,7 +2816,7 @@ public class AmberConnection
   /**
    * Detach after non-xa.
    */
-  private void detach()
+  public void detach()
   {
     if (log.isLoggable(Level.FINER))
       log.log(Level.FINER, "AmberConnection.detach");

@@ -2527,6 +2527,17 @@ abstract public class AmberMappedComponent extends ClassComponent {
   void generateHomeFindNew(JavaWriter out)
     throws IOException
   {
+    RelatedType parentType = _relatedType.getParentType();
+
+    // jpa/0ge3
+    // jpa/0l32: find(SubBean.class, "2") would try to select the
+    // discriminator column from the "sub-table".
+    if (parentType != null
+        && (parentType instanceof EntityType)
+        && ! parentType.isAbstractClass()) {
+      return;
+    }
+
     out.println();
     out.print("public com.caucho.amber.entity.Entity __caucho_home_find(");
     out.print("com.caucho.amber.manager.AmberConnection aConn, ");

@@ -28,6 +28,7 @@
 
 package com.caucho.amber.expr;
 
+import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityItem;
 import com.caucho.amber.field.AmberField;
@@ -176,80 +177,6 @@ public class LoadEntityExpr extends LoadExpr {
     _index = entity.__caucho_load(aConn, rs, index + offset);
 
     item.setNumberOfLoadingColumns(_index);
-
-    String property = joinFetchMap.get(this._expr);
-
-    Iterator eagerFieldsIterator = null;
-
-    HashSet<String> eagerFieldNames = entityType.getEagerFieldNames();
-
-    if (eagerFieldNames != null)
-      eagerFieldsIterator = eagerFieldNames.iterator();
-
-    // XXX: needs to handle field-based access
-    if (! entityType.isFieldAccess()) {
-      if (property == null)
-        if ((eagerFieldsIterator != null) && eagerFieldsIterator.hasNext())
-          property = (String) eagerFieldsIterator.next();
-    }
-
-    if (property != null) {
-
-      try {
-
-        // XXX: Review if this entity can be attached.
-        entity.__caucho_setConnection(aConn);
-
-        Class cl = entityType.getInstanceClass();
-
-        do {
-
-          String methodName = "get" +
-            Character.toUpperCase(property.charAt(0)) +
-            property.substring(1);
-
-          Method method = cl.getDeclaredMethod(methodName, null);
-
-          Object field = method.invoke(entity, null);
-
-          // XXX: for now, invoke the toString() method on
-          // the collection to fetch all the objects (join fetch).
-
-          if (field == null) {
-            try {
-              methodName = "__caucho_item_" + methodName;
-
-              method = cl.getDeclaredMethod(methodName, new Class[] {AmberConnection.class});
-
-              field = method.invoke(entity, aConn);
-            } catch (Exception ex) {
-            }
-          }
-
-          if (field != null) {
-
-            Class fieldClass = field.getClass();
-
-            method = fieldClass.getMethod("toString", null);
-
-            method.invoke(field, null);
-          }
-
-          property = null;
-
-          if ((eagerFieldsIterator != null) && (eagerFieldsIterator.hasNext()))
-            property = (String) eagerFieldsIterator.next();
-        }
-        while (property != null);
-
-      } catch (NoSuchMethodException e) {
-        log.log(Level.FINER, e.toString(), e);
-      } catch (IllegalAccessException e) {
-        log.log(Level.FINER, e.toString(), e);
-      } catch (java.lang.reflect.InvocationTargetException e) {
-        log.log(Level.FINER, e.toString(), e);
-      }
-    }
 
     return item;
   }

@@ -625,7 +625,9 @@ public class EntityManyToOneField extends CascadableField {
 
     // jpa/0o05, jpa/0ge3
     //    out.println("com.caucho.amber.entity.Entity contextEntity = __caucho_session.getEntity((com.caucho.amber.entity.Entity) this);");
-    out.println("com.caucho.amber.entity.Entity contextEntity = this;");
+
+    // jpa/0ge3
+    out.println("com.caucho.amber.entity.Entity contextEntity = (com.caucho.amber.entity.Entity) this;");
 
     out.println();
 
@@ -801,8 +803,8 @@ public class EntityManyToOneField extends CascadableField {
     */
 
     out.println(varName + " = (" + targetTypeExt + ") "
-		+ session + ".loadEntity("
-		+ targetTypeExt + ".class, " + otherKey + ", false);");
+                + session + ".loadEntity("
+                + targetTypeExt + ".class, " + otherKey + ", false);");
 
     generateSetTargetLoadMask(out, varName);
 

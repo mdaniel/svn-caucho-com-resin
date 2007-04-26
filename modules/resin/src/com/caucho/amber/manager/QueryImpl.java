@@ -36,8 +36,11 @@ import com.caucho.amber.cfg.FieldResultConfig;
 import com.caucho.amber.cfg.SqlResultSetMappingConfig;
 import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.EntityItem;
+import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.expr.ArgExpr;
+import com.caucho.amber.expr.LoadEntityExpr;
 import com.caucho.amber.query.AbstractQuery;
+import com.caucho.amber.query.ResultSetImpl;
 import com.caucho.amber.query.SelectQuery;
 import com.caucho.amber.query.UserQuery;
 import com.caucho.amber.type.CalendarType;
@@ -52,15 +55,13 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -380,6 +381,10 @@ public class QueryImpl implements Query {
         }
       }
 
+      // jpa/0h19, jpa/1160
+      if (! _aConn.isInTransaction())
+        _aConn.detach();
+
       return results;
     } catch (RuntimeException e) {
       throw e;
@@ -415,6 +420,13 @@ public class QueryImpl implements Query {
         value = rs.getObject(1);
       else // jpa/1004
         throw new NoResultException("Query returned no results for getSingleResult()");
+
+      // jpa/0h19
+      if (value instanceof Entity) {
+        Entity entity = (Entity) value;
+
+        entity.__caucho_detach();
+      }
 
       // jpa/1005
       if (rs.next())
@@ -863,6 +875,17 @@ public class QueryImpl implements Query {
     if (object instanceof Entity) {
       // _currIndex += ((ResultSetImpl) rs).getNumberOfLoadingColumns();
 
+      ArrayList<AmberExpr> resultList
+        = ((SelectQuery) _query).getResultList();
+
+      AmberExpr expr = resultList.get(oldIndex-1);
+
+      // jpa/1160
+      if (expr instanceof LoadEntityExpr) {
+        LoadEntityExpr entityExpr = (LoadEntityExpr) expr;
+        joinFetch((ResultSetImpl) rs, entityExpr, (Entity) object);
+      }
+
       return object;
     }
 
@@ -930,6 +953,80 @@ public class QueryImpl implements Query {
     }
 
     throw new IllegalArgumentException(L.l("Parameter index '{0}' is invalid for query {1}", index, _userQuery.getQuery()));
+  }
+
+  private void joinFetch(ResultSetImpl rs,
+                         LoadEntityExpr entityExpr,
+                         Entity entity)
+  {
+    String property = rs.getJoinFetchMap().get(entityExpr.getExpr());
+
+    EntityType entityType = entity.__caucho_getEntityType();
+
+    Iterator eagerFieldsIterator = null;
+
+    HashSet<String> eagerFieldNames = entityType.getEagerFieldNames();
+
+    if (eagerFieldNames != null)
+      eagerFieldsIterator = eagerFieldNames.iterator();
+
+    // XXX: needs to handle field-based access
+    if (! entityType.isFieldAccess()) {
+      if (property == null)
+        if ((eagerFieldsIterator != null) && eagerFieldsIterator.hasNext())
+          property = (String) eagerFieldsIterator.next();
+    }
+
+    if (property != null) {
+      try {
+        Class cl = entityType.getInstanceClass();
+
+        do {
+          String methodName = "get" +
+            Character.toUpperCase(property.charAt(0)) +
+            property.substring(1);
+
+          Method method = cl.getDeclaredMethod(methodName, null);
+
+          Object field = method.invoke(entity, null);
+
+          // XXX: for now, invoke the toString() method on
+          // the collection to fetch all the objects (join fetch).
+
+          if (field == null) {
+            try {
+              methodName = "__caucho_item_" + methodName;
+
+              method = cl.getDeclaredMethod(methodName, new Class[] {AmberConnection.class});
+
+              field = method.invoke(entity, _aConn);
+            } catch (Exception ex) {
+            }
+          }
+
+          if (field != null) {
+            Class fieldClass = field.getClass();
+
+            method = fieldClass.getMethod("toString", null);
+
+            method.invoke(field, null);
+          }
+
+          property = null;
+
+          if ((eagerFieldsIterator != null) && (eagerFieldsIterator.hasNext()))
+            property = (String) eagerFieldsIterator.next();
+        }
+        while (property != null);
+
+      } catch (NoSuchMethodException e) {
+        log.log(Level.FINER, e.toString(), e);
+      } catch (IllegalAccessException e) {
+        log.log(Level.FINER, e.toString(), e);
+      } catch (java.lang.reflect.InvocationTargetException e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
   }
 
   /**

@@ -177,6 +177,10 @@ public class CollectionImpl<E> extends AbstractList<E>
     if (_query == null)
       return;
 
+    // If it is detached should not be updated.
+    if (_aConn == null)
+      return;
+
     if (Alarm.getCurrentTime() <= _expireTime)
       return;
 

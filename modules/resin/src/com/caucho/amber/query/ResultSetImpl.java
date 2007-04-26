@@ -81,6 +81,14 @@ public class ResultSetImpl implements ResultSet {
   }
 
   /**
+   * Returns the join fetch map.
+   */
+  public Map<AmberExpr, String> getJoinFetchMap()
+  {
+    return _joinFetchMap;
+  }
+
+  /**
    * Sets the user query
    */
   public void setUserQuery(UserQuery userQuery)
@@ -1142,18 +1150,18 @@ public class ResultSetImpl implements ResultSet {
       }
     }
 
-    // jpa/0o40
+    // jpa/0o40, jpa/1160
     if (value instanceof Entity) {
       Entity entity = (Entity) value;
 
-      if (_session.isInTransaction()) {
+      if (_session.isInTransaction())
         _session.setTransactionalState(entity);
-        _session.addEntity((Entity) value);
-      }
-      else {
-        // jpa/0h19
-        entity.__caucho_detach();
-      }
+
+      // jpa/1160
+      // Should always add the entity to the context
+      // and detach the entities after the result
+      // list is fully retrieved. See manager.QueryImpl
+      _session.addEntity(entity);
     }
 
     return value;
