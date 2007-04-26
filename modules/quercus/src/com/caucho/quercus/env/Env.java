@@ -50,6 +50,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.*;
 import com.caucho.vfs.i18n.*;
+import com.caucho.config.ConfigException;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -902,7 +903,10 @@ public class Env {
   public Path getUploadDirectory()
   {
     if (_uploadPath == null) {
-      String realPath = getRequest().getRealPath("WEB-INF/upload");
+      String realPath = getIniString("upload_tmp_dir");
+
+      if (realPath == null)
+        realPath = getRequest().getRealPath("WEB-INF/upload");
 
       _uploadPath = getPwd().lookup(realPath);
 
@@ -1207,6 +1211,63 @@ public class Env {
       return value.toBoolean();
     else
       return false;
+  }
+
+  /**
+   * Returns an ini value.
+   */
+  public long getIniBytes(String var, long deflt)
+  {
+    Value iniValue = getIni(var);
+
+    if (iniValue == null)
+      return deflt;
+
+    String bytes = iniValue.toString();
+
+    long value = 0;
+    long sign = 1;
+    int i = 0;
+    int length = bytes.length();
+
+    if (length == 0)
+      return deflt;
+
+    if (bytes.charAt(i) == '-') {
+      sign = -1;
+      i++;
+    }
+    else if (bytes.charAt(i) == '+') {
+      i++;
+    }
+
+    if (length <= i)
+      return deflt;
+
+    int ch;
+    for (; i < length && (ch = bytes.charAt(i)) >= '0' && ch <= '9'; i++)
+      value = 10 * value + ch - '0';
+
+    value = sign * value;
+
+    if (bytes.endsWith("gb") || bytes.endsWith("g") || bytes.endsWith("G")) {
+      return value * 1024L * 1024L * 1024L;
+    }
+    else if (bytes.endsWith("mb") || bytes.endsWith("m") || bytes.endsWith("M")) {
+      return value * 1024L * 1024L;
+    }
+    else if (bytes.endsWith("kb") || bytes.endsWith("k") || bytes.endsWith("K")) {
+      return value * 1024L;
+    }
+    else if (bytes.endsWith("b") || bytes.endsWith("B")) {
+      return value;
+    }
+    else if (value < 0)
+      return value;
+    else {
+      warning(L.l("byte-valued expression '{0}' for ini value '{1}' must have units.  '16B' for bytes, '16K' for kilobytes, '16M' for megabytes, '16G' for gigabytes", var));
+      return deflt;
+    }
   }
 
   /**

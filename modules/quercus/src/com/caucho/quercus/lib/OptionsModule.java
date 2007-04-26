@@ -762,11 +762,6 @@ public class OptionsModule extends AbstractQuercusModule {
     addIni(_iniMap, "always_populate_raw_post_data", "0", PHP_INI_ALL);
     addIni(_iniMap, "allow_webdav_methods", "0", PHP_INI_ALL);
 
-    // file uploads
-    addIni(_iniMap, "file_uploads", "1", PHP_INI_SYSTEM);
-    addIni(_iniMap, "upload_tmp_dir", null, PHP_INI_SYSTEM);
-    addIni(_iniMap, "upload_max_filesize", "2M", PHP_INI_SYSTEM);
-    
     addIni(_iniMap, "memory_limit", "-1", PHP_INI_ALL);
   }
 

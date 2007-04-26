@@ -66,11 +66,14 @@ public class FileModule extends AbstractQuercusModule {
   public static final String DIRECTORY_SEPARATOR = "/";
   public static final String PATH_SEPARATOR = ":QUERCUS_PATH_SEPARATOR:";
 
-  public static final int UPLOAD_ERROR_OK = 0;
+  public static final int UPLOAD_ERR_OK = 0;
   public static final int UPLOAD_ERR_INI_SIZE = 1;
   public static final int UPLOAD_ERR_FORM_SIZE = 2;
   public static final int UPLOAD_ERR_PARTIAL = 3;
   public static final int UPLOAD_ERR_NO_FILE = 4;
+  public static final int UPLOAD_ERR_NO_TMP_DIR = 6;
+  public static final int UPLOAD_ERR_CANT_WRITE = 7;
+  public static final int UPLOAD_ERR_EXTENSION = 8;
 
   public static final int FILE_USE_INCLUDE_PATH = 1;
   public static final int FILE_APPEND = 8;
@@ -1888,14 +1891,16 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Returns true for an uploaded file.
    *
-   * @param tail the temp name of the uploaded file
+   * @param path the temp name of the uploaded file
    */
-  public static boolean is_uploaded_file(Env env, String tail)
+  public static boolean is_uploaded_file(Env env, @NotNull Path path)
   {
-    if (tail == null) {
-      env.notice(L.l("file name tail is NULL"));
+    // php/1663, php/1664
+
+    if (path == null)
       return false;
-    }
+
+    String tail = path.getTail();
 
     return env.getUploadDirectory().lookup(tail).canRead();
   }
@@ -2000,17 +2005,22 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Moves the uploaded file.
    *
-   * @param tail the temp name of the uploaded file
+   * @param path the temp name of the uploaded file
    * @param dst the destination path
    */
-  public static boolean move_uploaded_file(Env env, String tail, Path dst)
+  public static boolean move_uploaded_file(Env env, @NotNull Path src, @NotNull Path dst)
   {
-    if (tail == null) {
-      env.notice(L.l("file tail is NULL"));
-      return false;
-    }
+    // php/1665, php/1666
 
-    Path src = env.getUploadDirectory().lookup(tail);
+    if (src == null)
+      return false;
+
+    if (dst == null)
+      return false;
+
+    String tail = src.getTail();
+
+    src = env.getUploadDirectory().lookup(tail);
 
     try {
       if (src.canRead()) {
@@ -2758,6 +2768,12 @@ public class FileModule extends AbstractQuercusModule {
     addIni(_iniMap, "default_socket_timeout", "60", PHP_INI_ALL);
     addIni(_iniMap, "from", "", PHP_INI_ALL);
     addIni(_iniMap, "auto_detect_line_endings", "0", PHP_INI_ALL);
+
+    // file uploads
+    addIni(_iniMap, "file_uploads", "1", PHP_INI_SYSTEM);
+    addIni(_iniMap, "upload_tmp_dir", null, PHP_INI_SYSTEM);
+    addIni(_iniMap, "upload_max_filesize", "2M", PHP_INI_SYSTEM);
+
   }
 }
 

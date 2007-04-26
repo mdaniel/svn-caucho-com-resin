@@ -10,15 +10,16 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.snap - Apr 4, 2007">
+<s2 title="3.1.snap">
 <ul>
-<li>Amber createNativeQuery(String sql) i.e. missing mapping was throwing NPE (#1687, rep by Michael Sengbusch)</li>
-<li>Amber native queries with parameters (#1691, rep by Michael Sengbusch)</li>
+<li>Quercus: file uploads (#1434, #1435, #1615, rep by D Berry, M Bopp, snb)</li>
+<li>Amber: createNativeQuery(String sql) i.e. missing mapping was throwing NPE (#1687, rep by Michael Sengbusch)</li>
+<li>Amber: native queries with parameters (#1691, rep by Michael Sengbusch)</li>
 <li>JSP: issues with tag class validation with generics (#1677, rep by L Kaminsky)</li>
 <li>Session: verify session-max is valid (#1678)</li>
 <li>JSP: i18n issue with filters (#1686, fixed! by gzhu)</li>
-<li>Amber @OneToMany in subclass (#1576, rep by bregnvig)</li>
-<li>Amber with multiple data-sources (#1680, rep by Michael Sengbusch)</li>
+<li>Amber: @OneToMany in subclass (#1576, rep by bregnvig)</li>
+<li>Amber: with multiple data-sources (#1680, rep by Michael Sengbusch)</li>
 <li>Update ping mailer for mail-subject (#1564, rep by Abdul Karim)</li>
 <li>Hessian: add missing synchronization for HashMaps (#1588, rep by bjornm)</li>
 <li>DBPool: pooled connections with passwords could have race condition (rep by Sean Patronis)</li>

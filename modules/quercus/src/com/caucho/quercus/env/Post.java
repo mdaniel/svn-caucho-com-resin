@@ -31,9 +31,13 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.string.StringUtility;
-import com.caucho.vfs.*;
+import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.vfs.MultipartStream;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.VfsStream;
+import com.caucho.vfs.WriteStream;
 
-import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
@@ -114,6 +118,9 @@ public class Post {
   {
     ReadStream is;
 
+    // php/1667
+    long uploadMaxFilesize = env.getIniBytes("upload_max_filesize", 2 * 1024 * 1024);
+
     while ((is = ms.openRead()) != null) {
       String attr = (String) ms.getAttribute("content-disposition");
 
@@ -136,11 +143,11 @@ public class Post {
         addFormValue(post, name, new StringValueImpl(value.toString()), null, addSlashesToValues);
       }
       else {
-        Path tmpName = env.getUploadDirectory().createTempFile("php", "tmp");
+        Path tmpPath = env.getUploadDirectory().createTempFile("php", "tmp");
 
-        env.addRemovePath(tmpName);
+        env.addRemovePath(tmpPath);
 
-        WriteStream os = tmpName.openWrite();
+        WriteStream os = tmpPath.openWrite();
         try {
           os.writeStream(is);
         } finally {
@@ -165,24 +172,48 @@ public class Post {
 	  files.put(nameValue, entry);
 	}
 
-	addFormValue(entry, "name" + index, new StringValueImpl(filename),
-		     null, addSlashesToValues);
-	
-        String mimeType = getAttribute(attr, "mime-type");
-        if (mimeType != null) {
-	  addFormValue(entry, "type" + index, new StringValueImpl(mimeType),
-		       null, addSlashesToValues);
-          entry.put("type", mimeType);
-	}
-	
-	addFormValue(entry, "size" + index, new LongValue(tmpName.getLength()),
-		     null, addSlashesToValues);
-	
-	addFormValue(entry, "tmp_name" + index,
-		     new StringValueImpl(tmpName.getFullPath()),
-		     null, addSlashesToValues);
+        int error;
 
-        // XXX: error
+        if (tmpPath.getLength() > uploadMaxFilesize)
+          error = FileModule.UPLOAD_ERR_INI_SIZE;
+        else
+          error = FileModule.UPLOAD_ERR_OK;
+
+        addFormValue(entry, "name" + index, new StringValueImpl(filename),
+		     null, addSlashesToValues);
+	
+        String mimeType;
+        String tmpName;
+        long size;
+
+        if (error != FileModule.UPLOAD_ERR_INI_SIZE) {
+          tmpName = tmpPath.getFullPath();
+
+          mimeType = getAttribute(attr, "mime-type");
+
+          size = tmpPath.getLength();
+        }
+        else {
+          mimeType = "";
+          tmpName = "";
+          size = 0;
+        }
+
+        if (mimeType != null) {
+          addFormValue(entry, "type" + index, new StringValueImpl(mimeType),
+                       null, addSlashesToValues);
+
+          entry.put("type", mimeType);
+        }
+
+        addFormValue(entry, "tmp_name" + index, new StringValueImpl(tmpName),
+                     null, addSlashesToValues);
+
+        addFormValue(entry, "error" + index, new LongValue(error),
+                     null, addSlashesToValues);
+
+        addFormValue(entry, "size" + index, new LongValue(size),
+                     null, addSlashesToValues);
 
         addFormValue(files, name, entry, null, addSlashesToValues);
       }
