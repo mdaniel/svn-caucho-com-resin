@@ -794,8 +794,7 @@ public class EjbServerManager
   {
     return _envServerManager.getRemoteByInterface(type);
   }
-
-
+  
   /**
    * Handles the case where the environment is starting (after init).
    */

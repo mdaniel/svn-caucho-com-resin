@@ -422,7 +422,7 @@ public class EnvServerManager implements EnvironmentListener
    */
   public AbstractServer getServer(Path path, String ejbName)
   {
-    return _serverMap.get(path.getPath() + "#" + ejbName);
+    return _serverMap.get(path.getFullPath() + "#" + ejbName);
   }
 
   public MessageDestination getMessageDestination(Path path, String name)
@@ -458,6 +458,13 @@ public class EnvServerManager implements EnvironmentListener
   public Object getLocalByInterface(Class type)
   {
     for (AbstractServer server : _serverMap.values()) {
+      if (server.getLocalHomeClass() != null
+	  && type.isAssignableFrom(server.getLocalHomeClass())) {
+	// ejb/0gb0
+	
+	return server.getEJBLocalHome();
+      }
+      
       ArrayList<Class> apiList = server.getLocalApiList();
 
       if (apiList != null) {

@@ -332,6 +332,10 @@ public class EjbSessionBean extends EjbBean {
     if (remoteList.size() > 0)
       server.setRemoteObjectList(remoteList);
     
+    JClass localHome = getLocalHome();
+    if (localHome != null)
+      server.setLocalHomeClass(localHome.getJavaClass());
+    
     ArrayList<JClass> localList = getLocalList();
     if (localList.size() > 0)
       server.setLocalApiList(localList);
@@ -369,7 +373,9 @@ public class EjbSessionBean extends EjbBean {
 	  getServerProgram().configure(server);
       } catch (ConfigException e) {
 	throw e;
-      } catch (Throwable e) {
+      } catch (RuntimeException e) {
+	throw e;
+      } catch (Exception e) {
 	throw new ConfigException(e);
       }
     } finally {

@@ -31,12 +31,7 @@ package com.caucho.server.webapp;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
-import com.caucho.config.types.InitParam;
-import com.caucho.config.types.InitProgram;
-import com.caucho.config.types.PathBuilder;
-import com.caucho.config.types.Period;
-import com.caucho.config.types.ResourceRef;
-import com.caucho.config.types.Validator;
+import com.caucho.config.types.*;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.jsp.JspServlet;
 import com.caucho.jsp.cfg.JspConfig;
@@ -1315,6 +1310,28 @@ public class WebApp extends ServletContextImpl
   public Object getExtension(String key)
   {
     return _extensions.get(key);
+  }
+
+  /**
+   * ejb-ref configuration
+   */
+  public EjbRef createEjbRef()
+  {
+    if (_controller != null && _controller.getArchivePath() != null)
+      return new EjbRef(_controller.getArchivePath());
+    else
+      return new EjbRef();
+  }
+
+  /**
+   * ejb-local-ref configuration
+   */
+  public EjbLocalRef createEjbLocalRef()
+  {
+    if (_controller != null && _controller.getArchivePath() != null)
+      return new EjbLocalRef(_controller.getArchivePath());
+    else
+      return new EjbLocalRef();
   }
 
   /**

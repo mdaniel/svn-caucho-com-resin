@@ -53,7 +53,8 @@ import java.util.logging.Logger;
 /**
  * Server container for a session bean.
  */
-public class SessionServer extends AbstractServer {
+public class SessionServer extends AbstractServer
+{
   protected final static Logger log = Log.open(SessionServer.class);
 
   private StatefulContext _homeContext;

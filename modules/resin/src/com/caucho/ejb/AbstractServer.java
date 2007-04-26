@@ -94,6 +94,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected Class _remoteObjectClass;
   protected ArrayList<Class> _remoteObjectList;
   protected Class _primaryKeyClass;
+  protected Class _localHomeClass;
   protected ArrayList<Class> _localApiList;
 
   protected Class _remoteStubClass;
@@ -262,6 +263,22 @@ abstract public class AbstractServer implements EnvironmentBean {
   public Class getRemoteObjectClass()
   {
     return _remoteObjectClass;
+  }
+
+  /**
+   * Sets the local home class.
+   */
+  public void setLocalHomeClass(Class cl)
+  {
+    _localHomeClass = cl;
+  }
+
+  /**
+   * Gets the local home class.
+   */
+  public Class getLocalHomeClass()
+  {
+    return _localHomeClass;
   }
 
   /**
@@ -547,7 +564,6 @@ abstract public class AbstractServer implements EnvironmentBean {
    * Returns the EJBHome stub for the container
    */
   EJBHome getClientHome()
-    throws RemoteException
   {
     return getEJBHome();
   }
@@ -731,7 +747,8 @@ abstract public class AbstractServer implements EnvironmentBean {
    */
   public boolean isLocal()
   {
-    return _localHome != null;
+    return (_localHome != null
+	    || _localApiList != null && _localApiList.size() > 0);
   }
 
   /**

@@ -28,12 +28,23 @@
 
 package com.caucho.config.types;
 
+import com.caucho.vfs.*;
+
 /**
  * Configuration for the ejb-local-ref
  */
 public class EjbLocalRef
   extends EjbRef
 {
+  public EjbLocalRef()
+  {
+  }
+  
+  public EjbLocalRef(Path path)
+  {
+    super(path);
+  }
+  
   protected String getTagName()
   {
     return "<ejb-local-ref>";
