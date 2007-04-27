@@ -2891,7 +2891,7 @@ public class Env {
         = _importMap.getWildcardList();
   
       for (String entry : wildcardList) {
-        fullName = entry + className;
+        fullName = entry + '.' + className;
           
         JavaClassDef def = getJavaClassDefinition(fullName, false);
         
@@ -3130,7 +3130,7 @@ public class Env {
     else {
       for (String entry : _importMap.getWildcardPhpList()) {
 
-        url = loader.getResource(entry + name + ".php");
+        url = loader.getResource(entry + '/' + name + ".php");
         
         if (url != null)
           break;

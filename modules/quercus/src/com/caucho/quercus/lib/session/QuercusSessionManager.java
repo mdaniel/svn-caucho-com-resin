@@ -423,6 +423,8 @@ public class QuercusSessionManager {
     SessionArrayValue session
       = createSessionValue(key, now, _sessionTimeout);
 
+    load(env, session, now);
+
     // If another thread has created and stored a new session,
     // putIfNew will return the old session
     session = _sessions.putIfNew(key, session);

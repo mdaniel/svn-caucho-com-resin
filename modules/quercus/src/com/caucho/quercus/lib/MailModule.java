@@ -186,8 +186,6 @@ public class MailModule extends AbstractQuercusModule {
 
     CharBuffer buffer = new CharBuffer();
 
-    System.out.println("HEADERS: " + headers);
-
     while (i < len) {
       char ch;
 

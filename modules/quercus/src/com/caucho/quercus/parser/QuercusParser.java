@@ -3003,29 +3003,25 @@ public class QuercusParser {
 
 	return expr;
       }
+      
     case IMPORT:
       {
         String importTokenString = _lexeme;
         
-        int ch = read();
-        while (ch == ' '
-	       || ch == '\t'
-	       || ch == '\n'
-	       || ch == '\r'
-	       || ch == '\f') {
-          ch = read();
-        }
+        token = parseToken();
         
-        _peek = ch;
-        
-        if (ch == '(') {
+        if (token == '(') {
+	  _peekToken = token;
+	    
           return parseFunction(null, importTokenString, false);
         }
         else {
+	  _peekToken = token;
+	  
           return parseImport();
         }
-      
       }
+      
     default:
       throw error(L.l("{0} is an unexpected token, expected an expression.",
 		      tokenName(token)));
@@ -3468,6 +3464,51 @@ public class QuercusParser {
     }
 
     return _factory.createArrayFun(keys, values);
+  }
+
+  /**
+   * Parses a Quercus import.
+   */
+  private Expr parseImport()
+    throws IOException
+  {
+    boolean isWildcard = false;
+    boolean isIdentifierStart = true;
+
+    StringBuilder sb = new StringBuilder();
+
+    while (true) {
+      int token = parseToken();
+
+      if (token == IDENTIFIER) {
+	sb.append(_lexeme);
+
+	token = parseToken();
+
+	if (token == '.') {
+	  sb.append('.');
+	}
+	else {
+	  _peekToken = token;
+	  break;
+	}
+      }
+      else if (token == '*') {
+	if (sb.length() > 0)
+	  sb.setLength(sb.length() - 1);
+	
+	isWildcard = true;
+	break;
+      }
+      else {
+        throw error(L.l("'{0}' is an unexpected token in import",
+                        tokenName(token)));
+      }
+    }
+
+    //expect(';');
+
+    return _factory.createImport(getLocation(), sb.toString(), isWildcard);
   }
 
   private String parseIdentifier()
@@ -4295,61 +4336,6 @@ public class QuercusParser {
   }
 
   /**
-   * Parses a Quercus import.
-   */
-  private Expr parseImport()
-    throws IOException
-  {
-    boolean isWildcard = false;
-    boolean isIdentifierStart = true;
-
-    _sb.setLength(0);
-    int ch = -1;
-    
-    while (true) {
-      ch = read();
-      
-      if (ch < 0) {
-        break;
-      }
-      else if (ch == '.') {
-        _sb.append((char)ch);
-        isIdentifierStart = true;
-      }
-      else if (ch == '*') {
-        //_sb.append((char)ch);
-        isWildcard = true;
-        break;
-      }
-      else if (ch == ';') {
-        _peek = ch;
-        break;
-      }
-      else if (isIdentifierStart && Character.isJavaIdentifierStart(ch)) {
-        _sb.append((char)ch);
-        isIdentifierStart = false;
-      }
-      else if ((! isIdentifierStart) && Character.isJavaIdentifierPart(ch)) {
-        _sb.append((char)ch);
-      }
-      else if (ch == ' ' || ch == '\t' ||
-               ch == '\n' || ch == '\r' || ch == '\f') {
-        break;
-      }
-      else {
-        throw error(L.l("'{0}' is an unexpected character in import",
-                        String.valueOf((char)ch)));
-      }
-    }
-
-    if (ch != ';')
-      throw error(L.l("expected ';' at '{0}'",
-		      String.valueOf((char)ch)));
-
-    return _factory.createImport(getLocation(), _sb.toString(), isWildcard);
-  }
-
-  /**
    * XXX: parse as Unicode if and only if unicode.semantics is on.
    */
   private int parseEscapedString(char end)
@@ -4888,6 +4874,9 @@ public class QuercusParser {
 
     case LONG:
       return "integer (" + _lexeme + ")";
+      
+    case DOUBLE:
+      return "double (" + _lexeme + ")";
 
     case TEXT:
       return "TEXT (token " + token + ")";
