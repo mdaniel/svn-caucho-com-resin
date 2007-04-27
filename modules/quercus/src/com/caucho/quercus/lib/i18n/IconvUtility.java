@@ -40,8 +40,11 @@ import javax.mail.internet.MimeUtility;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.logging.*;
 
 public class IconvUtility {
+  private static final Logger log
+    = Logger.getLogger(IconvUtility.class.getName());
 
   public static BinaryValue decodeEncode(StringValue str,
                               String inCharset,
@@ -74,11 +77,26 @@ public class IconvUtility {
     char[] charBuf = tb.getBuffer();
 
     try {
-      Reader in = str.toReader(inCharset);
+      Reader in;
+
+      try {
+	in = str.toReader(inCharset);
+      } catch (IOException e) {
+	log.log(Level.WARNING, e.toString(), e);
+	
+	in = str.toReader("utf-8");
+      }
 
       TempStream ts = new TempStream();
       WriteStream out = new WriteStream(ts);
-      out.setEncoding(outCharset);
+
+      try {
+	out.setEncoding(outCharset);
+      } catch (IOException e) {
+	log.log(Level.WARNING, e.toString(), e);
+      }
+      
+      out.setEncoding("utf-8");
 
       while (offset > 0) {
         if (in.read() < 0)
@@ -101,7 +119,7 @@ public class IconvUtility {
       return new TempBufferStringValue(ts.getHead());
 
     } catch (IOException e) {
-      throw new QuercusModuleException(e.getMessage());
+      throw new QuercusModuleException(e);
     }
 
     finally {
