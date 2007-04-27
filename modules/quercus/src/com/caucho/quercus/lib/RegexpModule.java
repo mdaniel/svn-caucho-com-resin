@@ -1148,13 +1148,14 @@ public class RegexpModule
    * @param flag 0 for matching and 1 for elements that do not match
    * @return an array of either matching elements are non-matching elements
    */
-  public static ArrayValue preg_grep(Env env,
+  public static Value preg_grep(Env env,
                                      StringValue patternString,
                                      ArrayValue input,
                                      @Optional("0") int flag)
   {
-    // php/151b
-
+    if (input == null)
+      return NullValue.NULL;
+    
     Pattern pattern = compileRegexp(patternString);
 
     Matcher matcher = null;
