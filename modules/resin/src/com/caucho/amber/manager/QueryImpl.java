@@ -421,13 +421,6 @@ public class QueryImpl implements Query {
       else // jpa/1004
         throw new NoResultException("Query returned no results for getSingleResult()");
 
-      // jpa/0h19
-      if (value instanceof Entity) {
-        Entity entity = (Entity) value;
-
-        entity.__caucho_detach();
-      }
-
       // jpa/1005
       if (rs.next())
         throw new NonUniqueResultException("Query returned more than one result for getSingleResult()");
@@ -447,6 +440,10 @@ public class QueryImpl implements Query {
         } catch (SQLException e) {
           log.log(Level.FINE, e.toString(), e);
         }
+
+        // jpa/0h19
+        if (! _aConn.isInTransaction())
+          _aConn.detach();
       }
     }
   }

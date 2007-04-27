@@ -868,26 +868,36 @@ public class AmberConnection
     if (key == null)
       return null;
 
-    // ejb/0d01, jpa/0gh0, jpa/0g0k
+    // ejb/0d01, jpa/0gh0, jpa/0g0k, jpa/0j5f
     // if (shouldRetrieveFromCache())
     int index = getEntity(cl.getName(), key);
 
     if (index >= 0) {
+      // jpa/0s2d: if it contains such entity and we have
+      // PersistenceContextType.TRANSACTION, the entity is
+      // managed and we can just return it (otherwise it would
+      // be detached and not be found in _entities).
+      // XXX: for PersistenceContextType.EXTENDED???
+
       entity = _entities.get(index);
 
+      return entity;
+
+      /*
       if (! isInTransaction()) {
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, L.l("load returning existing entity not in transaction"));
 
         return entity;
       }
-
+      */
       // jpa/0g0k setTransactionalState(entity);
       /*
         if (entity.__caucho_getEntityState() == EntityState.P_TRANSACTIONAL) {
         return entity;
         }
       */
+      /*
       if (entity.__caucho_getEntityState().isTransactional()) {
         if (log.isLoggable(Level.FINER))
           log.log(Level.FINER, L.l("load returning existing entity in transactional state"));
@@ -896,6 +906,7 @@ public class AmberConnection
       }
 
       // jpa/0j5f
+      */
     }
 
     AmberEntityHome entityHome = _persistenceUnit.getEntityHome(cl.getName());
@@ -1390,6 +1401,9 @@ public class AmberConnection
       }
     }
 
+    // jpa/0s2d: merge()
+    setTransactionalState(entity);
+
     if (log.isLoggable(Level.FINER) && _persistenceUnit.isJPA()) {
       Entity addedEntity = entity;
 
@@ -1438,6 +1452,9 @@ public class AmberConnection
       // XXX: needs to create based on the discriminator with inheritance.
       // Create a new entity for the given class and primary key.
       entity = (Entity) cl.newInstance();
+
+      // jpa/0s2d
+      entity.__caucho_setEntityState(EntityState.P_NON_TRANSACTIONAL);
     }
     else {
       // HelperBean__Amber -> HelperBean
@@ -2587,6 +2604,7 @@ public class AmberConnection
 
       // jpa/0j5f
       EntityState state = entity.__caucho_getEntityState();
+
       //if (state.ordinal() < EntityState.P_DELETING.ordinal())
       if (state == EntityState.P_NON_TRANSACTIONAL)
         entity.__caucho_setEntityState(EntityState.P_TRANSACTIONAL);
@@ -2700,8 +2718,12 @@ public class AmberConnection
     _entities.add(entity);
 
     // jpa/0g06
-    if (isInTransaction())
+    if (isInTransaction()) {
       _txEntities.add(entity);
+
+      // jpa/0s2d: merge()
+      setTransactionalState(entity);
+    }
   }
 
   /**
