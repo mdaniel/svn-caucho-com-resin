@@ -29,6 +29,8 @@
 
 package com.caucho.xtpdoc;
 
+import com.caucho.config.types.RawString;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
@@ -41,6 +43,7 @@ public class Anchor extends FormattedText {
 
   private String _configTag;
   private String _href = "";
+  private String _contents = null;
 
   public Anchor(Document document)
   {
@@ -57,16 +60,48 @@ public class Anchor extends FormattedText {
     _href = href;
   }
 
+  private void setDefaultText(String text)
+  {
+    if (getItems().isEmpty()) {
+      addText(new RawString(text));
+    }
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
+    if (_configTag != null) {
+      out.writeStartElement("a");
+      // XXX: href
+
+      setDefaultText(_configTag);
+      super.writeHtml(out);
+      out.writeEndElement(); // XMLStreamWriter
+
+      return;
+    }
+
     out.writeStartElement("a");
 
     if (_href.startsWith("javadoc|")) {
       String name = _href.substring("javadoc|".length());
 
+      // XXX: method name is just stripped here
+      int i = name.indexOf('|');
+
+      while (i >= 0) {
+        if (i == 0)
+          name = name.substring(1);
+        else if (i > 0)
+          name = name.substring(0, i);
+
+        i = name.indexOf('|');
+      }
+
+      setDefaultText(name);
+
       name = name.replace('.', '/') + ".html";
-      
+
       out.writeAttribute("href", "http://www.caucho.com/resin-javadoc/" + name);
     }
     else if (_href.indexOf('|') >= 0) {

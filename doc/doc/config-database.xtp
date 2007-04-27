@@ -530,6 +530,32 @@ will happen even if the code using the connection throws an exception.</p>
 
 </s2> <!-- usage/get-connection -->
 
+<s2 name="usage/get-driver-connection" title="Getting the underlying driver connection">
+
+<p>
+The connection obtained by <code>pool.getConnection()</code> is an instance of 
+<a href="javadoc|com.caucho.sql.UserConnection|"/>.
+</p>
+
+<p>
+<code>UserConnection</code> is a wrapper around the real driver connection, it
+allows Resin to intercept the close() call and manage the underlying driver
+connection.
+</p>
+
+<p>
+In rare circumstances it is necessary to obtain the real connection returned by the driver.
+Typically this is a requirement for situations where the driver provides a
+specialized API that is not available with the standard JDBC API.
+</p>
+
+<example title="Getting the underlying driver connection">
+Connection driverConn = ((com.caucho.sql.UserConnection) connection).getConnection();
+
+// never do this: driverConn.close()
+</example>
+
+</s2>
 
 </s1> <!-- usage -->
 
