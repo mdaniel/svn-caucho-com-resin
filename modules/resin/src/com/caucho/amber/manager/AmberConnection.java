@@ -920,7 +920,13 @@ public class AmberConnection
         throw new AmberException(e);
       }
 
-      entity = entityHome.find(this, key, isEager, 0, 0);
+      boolean isLoad = true;
+
+      // jpa/0h13 as a negative test.
+      if (isInTransaction())
+        isLoad = isEager;
+
+      entity = entityHome.find(this, key, isLoad, 0, 0);
 
       if (entity == null)
         return null;
@@ -995,39 +1001,36 @@ public class AmberConnection
 
     int index = getEntity(cl.getName(), pk);
 
+    Entity entity;
+
     if (index >= 0) {
-      Entity entity = _entities.get(index);
+      entity = _entities.get(index);
 
       if (entity.__caucho_getEntityState().isManaged())
         return entity;
       // else
       // jpa/0g40: the copy object was created at some point in
       // findEntityItem, but it is still not loaded.
-
-      // jpa/0l43
-      itemEntity.__caucho_copyTo(entity, this, item);
-
-      return entity;
     }
     else {
       // Create a new entity for the given class and primary key.
-      Entity entity;
-
       try {
         entity = (Entity) cl.newInstance();
       } catch (Exception e) {
         throw new AmberRuntimeException(e);
       }
 
+      entity.__caucho_setEntityState(EntityState.P_NON_TRANSACTIONAL);
       entity.__caucho_setPrimaryKey(pk);
 
       // jpa/1000: avoids extra allocations.
       addInternalEntity(entity);
-
-      item.copyTo(entity, this);
-
-      return entity;
     }
+
+    // jpa/0l43
+    item.copyTo(entity, this);
+
+    return entity;
   }
 
   /**
@@ -1590,14 +1593,6 @@ public class AmberConnection
 
     // jpa/11a8
     if (! _entities.contains(entity))
-      return false;
-
-    /*
-      entity = getEntity(entity.getClass().getName(),
-      entity.__caucho_getPrimaryKey());
-    */
-
-    if (entity == null)
       return false;
 
     EntityState state = entity.__caucho_getEntityState();

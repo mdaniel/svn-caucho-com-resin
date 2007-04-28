@@ -375,6 +375,22 @@ public class AmberEntityHome {
       // jpa/0l48: checks if cacheItem is new or existing (below).
       EntityItem existingItem = _manager.getEntity(getRootType(), key);
 
+      String className = _entityType.getBeanClass().getName();
+
+      if (log.isLoggable(Level.FINER)) {
+        log.log(Level.FINER, L.l("AmberEntityHome.find class: {0} PK: {1} isLoad: {2} xa: {3}",
+                                 className, key, isLoad, aConn.isInTransaction()));
+        String msg;
+
+        if (existingItem == null)
+          msg = "there is not a cache item for class: {0} PK: {1}. It will try to load it.";
+        else
+          msg = "found an existing cache item for class: {0} PK: {1}.";
+
+        log.log(Level.FINER, L.l("AmberEntityHome.find: " + msg,
+                                 className, key));
+      }
+
       EntityItem cacheItem = findEntityItem(aConn,
                                             key,
                                             isLoad,
@@ -382,11 +398,14 @@ public class AmberEntityHome {
                                             notExpiringGroup);
 
       if (cacheItem == null) {
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("AmberEntityHome.find: no matching object class: {0} PK: {1}", className, key));
+
         if (_manager.isJPA())
           return null;
 
         // ejb/0604
-        throw new AmberObjectNotFoundException(("amber find: no matching object " + _entityType.getBeanClass().getName() + "[" + key + "]"));
+        throw new AmberObjectNotFoundException(("amber find: no matching object " + className + "[" + key + "]"));
       }
 
       Entity cacheEntity = cacheItem.getEntity();
@@ -400,9 +419,25 @@ public class AmberEntityHome {
 
       try {
         // jpa/0l48: inheritance loading optimization.
-        // Copy as much as possible from the new cache item.
-        if (existingItem == null)
+        // jpa/0h20: no transaction, copy from the existing cache item.
+
+        // Copy as much as possible from a new cache item or
+        // from the existing cache item if there is no transaction.
+        if (existingItem == null || ! aConn.isInTransaction()) {
+          if (log.isLoggable(Level.FINER)) {
+            String msg;
+
+            if (existingItem == null)
+              msg = "a new cache item has been loaded and";
+            else
+              msg = "since there is no transaction, the existing cache item";
+
+            log.log(Level.FINER, L.l( "AmberEntityHome.find: {0} will be copied to a context object class: {1} PK: {2}.",
+                                      msg, className, key));
+          }
+
           cacheItem.copyTo(entity, aConn);
+        }
 
         if (isLoad) {
           entity.__caucho_retrieve_eager(aConn);
@@ -411,9 +446,11 @@ public class AmberEntityHome {
           // jpa/0v33: within a transaction, cannot copy from cache.
           entity.__caucho_retrieve_self(aConn);
         }
-        else {
-          cacheItem.copyTo(entity, aConn);
-        }
+
+        // XXX: should be handled above.
+        // else if (existingItem != null) {
+        //   cacheItem.copyTo(entity, aConn);
+        // }
       } catch (AmberObjectNotFoundException e) {
         // 0g0q: if the entity is not found, removes it from context.
         aConn.removeEntity(entity);

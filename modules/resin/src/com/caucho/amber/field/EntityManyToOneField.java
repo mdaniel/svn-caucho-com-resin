@@ -977,7 +977,8 @@ public class EntityManyToOneField extends CascadableField {
       out.println("} else {");
       out.pushDepth();
 
-      out.println("((com.caucho.amber.entity.Entity) child).__caucho_copyTo(newChild, aConn);");
+      // jpa/0h13
+      out.println("((com.caucho.amber.entity.Entity) child).__caucho_copyTo(newChild, aConn, (com.caucho.amber.entity.EntityItem) null);");
 
       out.popDepth();
       out.println("}");

@@ -74,7 +74,7 @@ public class LoadGroupGenerator extends ClassComponent {
     long mask = (1L << (_index % 64));
 
     out.println("boolean isLoaded = (__caucho_loadMask_"
-		+ group + " & " + mask + "L) != 0;");
+                + group + " & " + mask + "L) != 0;");
 
     // jpa/0ge2: MappedSuperclassType
     if (_relatedType.getTable() != null) {
@@ -131,21 +131,31 @@ public class LoadGroupGenerator extends ClassComponent {
 
       out.println("if (! isLoaded) {");
       out.pushDepth();
-      
+
       // ejb/06j2, ejb/0690
       if (_relatedType.getHasLoadCallback() && _index == 0) {
         out.println();
         out.println("__caucho_load_callback();");
       }
 
+      // jpa/0r00 vs. jpa/0r01
+      out.println("if (aConn.contains(this)) {");
+      out.pushDepth();
+
       out.println();
       out.println("aConn.postLoad(this);");
 
+      // jpa/0r01: @PostLoad, with transaction.
+      // Within a transaction the entity is not copied
+      // directly from cache, so we need to invoke the
+      // callbacks after load. For jpa/0r00, see AmberMappedComponent.
       generateCallbacks(out, _relatedType.getPostLoadCallbacks());
-      
+
       out.popDepth();
       out.println("}");
-      
+
+      out.popDepth();
+      out.println("}");
     }
 
     out.popDepth();
@@ -177,7 +187,7 @@ public class LoadGroupGenerator extends ClassComponent {
       // from non-transactional to transactional
       out.println("else if (__caucho_state.ordinal() <= com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL.ordinal()) {");
       out.pushDepth();
-      
+
       out.println("com.caucho.amber.entity.EntityState state = __caucho_state;");
 
       out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_TRANSACTIONAL;");
@@ -244,7 +254,7 @@ public class LoadGroupGenerator extends ClassComponent {
 
     // out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
     //out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + ";"); // mask + "L;");
-    
+
     out.println("__caucho_loadMask_" + group + " |= item.__caucho_loadMask_" + group + " & " + mask + "L;"); // mask + "L;");
 
     /* XXX: ejb/06--, ejb/0a-- and jpa/0o04

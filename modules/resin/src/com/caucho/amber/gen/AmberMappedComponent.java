@@ -1896,11 +1896,26 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("o." + mask + " = 0L;");
     }
 
-    // See LoadGroupGenerator __caucho_load.
-    //
-    // out.println("aConn.postLoad((com.caucho.amber.entity.Entity) this);");
-    //
-    // generateCallbacks(out, "o", _relatedType.getPostLoadCallbacks());
+    // jpa/0r00 vs. jpa/0r01
+    // It will only copyTo() within a transaction if
+    // the cache item is new, i.e. the very first load.
+    out.println();
+    out.println("if (! aConn.isInTransaction()) {");
+    out.pushDepth();
+
+    out.println("aConn.postLoad(targetEntity);");
+
+    // jpa/0r00: @PostLoad, without transaction.
+    // When there is no transaction the entity is copied
+    // directly from cache. The cache copy is the object
+    // that is loaded in __caucho_load() and we cannot call
+    // postLoad() there. After copyTo(), the targetEntity
+    // has been loaded into the current persistence context
+    // and it is safe to call the post load callbacks.
+    generateCallbacks(out, "o", _relatedType.getPostLoadCallbacks());
+
+    out.popDepth();
+    out.println("}");
 
     out.println();
     out.println("return (com.caucho.amber.entity.Entity) o;");
