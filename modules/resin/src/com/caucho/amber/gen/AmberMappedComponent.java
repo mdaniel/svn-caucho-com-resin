@@ -1175,6 +1175,43 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
+
+    out.println();
+    out.println("if (__caucho_session == null) {");
+
+    int dirtyCount = _relatedType.getDirtyIndex();
+    for (int i = 0; i <= dirtyCount / 64; i++) {
+      out.println("  __caucho_updateMask_" + i + " = 0L;");
+    }
+
+    out.println("  return;");
+    out.println("}");
+
+    // jpa/0h20, jpa/0l20, jpa/0l43
+    out.println("if (__caucho_cacheItem == null)");
+    out.println("  return;");
+
+    out.println();
+    out.println("Object pk = __caucho_getPrimaryKey();");
+    out.println("__caucho_session.getPersistenceUnit().updateCacheItem((com.caucho.amber.type.EntityType) __caucho_home.getRootType(), pk, this, __caucho_cacheItem);");
+
+    out.popDepth();
+    out.println("}");
+  }
+
+  /**
+   * Generates the update cache item.
+   */
+  void generateUpdateCacheItem(JavaWriter out,
+                               boolean isEntityParent)
+    throws IOException
+  {
+    out.println();
+    out.println("public void __caucho_updateCacheItem(com.caucho.amber.entity.Entity cacheEntity)");
+    out.println("{");
+    out.pushDepth();
+
     out.println("com.caucho.amber.manager.AmberConnection aConn = __caucho_session;");
 
     out.println("com.caucho.amber.entity.EntityState state = __caucho_state;");
@@ -1183,73 +1220,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("long updateMask_" + i + " = __caucho_updateMask_" + i + ";");
     }
 
-    // XXX: there is an issue in the enhancer fixup
-    // replacing the super but it should not in this case.
-    // if (_relatedType.getParentType() != null) {
-    //   out.println();
-    //   out.println("__caucho_super_afterCommit();");
-    // }
-
-    out.println();
-    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
-
     for (int i = 0; i <= dirtyCount / 64; i++) {
       out.println("__caucho_updateMask_" + i + " = 0L;");
     }
 
-    out.println("if (aConn != null) {");
-    out.pushDepth();
-
-    out.print("if (updateMask_0 != 0L");
-    for (int i = 1; i <= dirtyCount / 64; i++)
-      out.print(" || updateMask_" + i + " != 0L");
-    out.println(") {");
-    out.pushDepth();
-
-    out.println("aConn.update((com.caucho.amber.entity.Entity) this);");
-
-    // jpa/0l20: only expires the cache entity if the entity has been changed.
-
-    /* XXX: jpa/0h20
-    // jpa/0l14 as a negative test.
-    // Explicitly invalidates the corresponding cache item.
-    if (_relatedType instanceof EntityType) {
-      out.println("com.caucho.amber.entity.Entity cacheEntity = aConn.getCacheEntity(this);");
-
-      out.println("if (cacheEntity != null)");
-      out.println("  cacheEntity.__caucho_expire();");
-    }
-    */
-
-    out.popDepth();
-    out.println("}");
-
-    /* jpa/0h20
-    if (_relatedType.getPersistenceUnit().isJPA()) {
-      // XXX: jpa/0j5f
-
-      out.popDepth();
-      out.println("}");
-
-      out.popDepth();
-      out.println("}");
-      return;
-    }
-    */
-
-    // jpa/0h20, jpa/0l20
     out.println();
-    out.println("if (__caucho_cacheItem != null) {");
-    out.pushDepth();
-
-    // jpa/0l20, jpa/0l43
-    out.println("Object pk = __caucho_getPrimaryKey();");
-    out.println();
-    out.println("__caucho_cacheItem = aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.EntityType) __caucho_home.getRootType(),");
-    out.println("                                                     pk, __caucho_cacheItem);");
-
-    out.println();
-    out.println(_extClassName + " item = (" + _extClassName + ") __caucho_cacheItem.getEntity();");
+    out.println(_extClassName + " item = (" + _extClassName + ") cacheEntity;");
 
     out.println("try {");
     out.pushDepth();
@@ -1309,12 +1285,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  throw e;");
     out.println("} catch (Exception e) {");
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
-    out.println("}");
-
-    out.popDepth();
-    out.println("}");
-
-    out.popDepth();
     out.println("}");
 
     out.popDepth();

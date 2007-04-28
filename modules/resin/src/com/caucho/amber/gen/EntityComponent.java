@@ -143,6 +143,8 @@ public class EntityComponent extends AmberMappedComponent {
 
       generateAfterCommit(out, isEntityParent);
 
+      generateUpdateCacheItem(out, isEntityParent);
+
       generateAfterRollback(out);
 
       generateLoadKey(out);

@@ -1577,6 +1577,38 @@ public class AmberPersistenceUnit {
   }
 
   /**
+   * Updates the cache item after commit.
+   */
+  public EntityItem updateCacheItem(EntityType rootType,
+                                    Object key,
+                                    Entity contextEntity,
+                                    EntityItem cacheItem)
+  {
+    if (cacheItem == null)
+      throw new IllegalStateException(L.l("Null entity item cannot be used to update the persistence unit cache"));
+
+    SoftReference<EntityItem> ref;
+
+    synchronized (_entityKey) {
+      _entityKey.init(rootType, key);
+      ref = _entityCache.get(_entityKey);
+
+      if (ref == null) {
+        ref = new SoftReference<EntityItem>(cacheItem);
+        EntityKey entityKey = new EntityKey(rootType, key);
+
+        ref = _entityCache.putIfNew(entityKey, ref);
+      }
+
+      cacheItem = ref.get();
+
+      contextEntity.__caucho_updateCacheItem(cacheItem.getEntity());
+    }
+
+    return cacheItem;
+  }
+
+  /**
    * Completions affecting the cache.
    */
   public void complete(ArrayList<AmberCompletion> completions)

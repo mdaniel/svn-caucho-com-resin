@@ -106,6 +106,11 @@ public interface Entity extends MappedSuperclass
   public void __caucho_setCacheItem(EntityItem item);
 
   /**
+   * Updates the cache item after commit.
+   */
+  public void __caucho_updateCacheItem(Entity item);
+
+  /**
    * Set the primary key.
    */
   public void __caucho_setPrimaryKey(Object key);
@@ -187,14 +192,14 @@ public interface Entity extends MappedSuperclass
                                        AmberEntityHome home,
                                        ResultSet rs, int index)
     throws SQLException;
-  
+
   /**
    * Returns a new entity. In the case of inheritance, needs to query
    * the database.
    */
   public Entity __caucho_home_find(AmberConnection aConn,
-				   AmberEntityHome home,
-				   Object key);
+                                   AmberEntityHome home,
+                                   Object key);
 
   /**
    * Returns a new entity.
@@ -213,7 +218,7 @@ public interface Entity extends MappedSuperclass
                                   boolean loadFromResultSet)
     throws SQLException;
   */
-  
+
   /**
    * Returns a new entity.
    */
