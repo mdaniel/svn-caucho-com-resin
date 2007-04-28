@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.Alarm;
@@ -74,8 +75,8 @@ public class DateModule extends AbstractQuercusModule {
   private static final long HOUR = 60 * MINUTE;
   private static final long DAY = 24 * HOUR;
 
-  private QDate _localCalendar = QDate.createLocal();
-  private QDate _gmtCalendar = new QDate();
+  private final QDate _localCalendar = QDate.createLocal();
+  private final  QDate _gmtCalendar = new QDate();
 
   /**
    * Returns the days in a given month.
@@ -612,6 +613,72 @@ public class DateModule extends AbstractQuercusModule {
 
       return sb.toString();
     }
+  }
+
+  /**
+   * Returns the time as an indexed or associative array
+   */
+  public ArrayValue localtime(@NotNull @Optional("-1") long time,
+                              @Optional("false") boolean isAssociative)
+  {
+    if (time < 0)
+      time  = Alarm.getCurrentTime();
+    else
+      time = time * 1000;
+
+    long sec;
+    long min;
+    long hour;
+    long mday;
+    long mon;
+    long year;
+    long wday;
+    long yday;
+    long isdst;
+
+    synchronized (_localCalendar) {
+      _localCalendar.setGMTTime(time);
+
+      sec = _localCalendar.getSecond();
+      min = _localCalendar.getMinute();
+      hour = _localCalendar.getHour();
+      mday = _localCalendar.getDayOfMonth();
+      mon = _localCalendar.getMonth();
+      year = _localCalendar.getYear();
+      wday = _localCalendar.getDayOfWeek();
+      yday = _localCalendar.getDayOfYear();
+      isdst = _localCalendar.isDST() ? 1 : 0;
+    }
+
+    year = year - 1900;
+    wday = wday - 1;
+    
+    ArrayValue value = new ArrayValueImpl();
+
+    if (isAssociative) {
+      value.put("tm_sec", sec);
+      value.put("tm_min", min);
+      value.put("tm_hour", hour);
+      value.put("tm_mday", mday);
+      value.put("tm_mon", mon);
+      value.put("tm_year", year);
+      value.put("tm_wday", wday);
+      value.put("tm_yday", yday);
+      value.put("tm_isdst", isdst);
+    }
+    else {
+      value.put(sec);
+      value.put(min);
+      value.put(hour);
+      value.put(mday);
+      value.put(mon);
+      value.put(year);
+      value.put(wday);
+      value.put(yday);
+      value.put(isdst);
+    }
+
+    return value;
   }
 
   /**
