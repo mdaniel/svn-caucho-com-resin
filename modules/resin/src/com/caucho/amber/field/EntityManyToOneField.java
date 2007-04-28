@@ -963,6 +963,16 @@ public class EntityManyToOneField extends CascadableField {
 
       String targetTypeExt = getEntityTargetType().getInstanceClassName();
 
+      out.println("if (isFullMerge) {");
+      out.pushDepth();
+
+      // jpa/0j5f
+      out.println("child = aConn.load(child.getClass(), ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey(), true);");
+
+      out.popDepth();
+      out.println("} else {");
+      out.pushDepth();
+
       // jpa/0l42
       out.println("com.caucho.amber.entity.Entity newChild = aConn.addNewEntity(child.getClass(), ((com.caucho.amber.entity.Entity) child).__caucho_getPrimaryKey());");
 
@@ -984,6 +994,9 @@ public class EntityManyToOneField extends CascadableField {
       out.println("}");
 
       out.println("child = newChild;");
+
+      out.popDepth();
+      out.println("}");
 
       out.popDepth();
       out.println("}");
