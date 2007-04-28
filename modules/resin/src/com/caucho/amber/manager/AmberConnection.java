@@ -860,6 +860,16 @@ public class AmberConnection
                      boolean isEager)
     throws AmberException
   {
+    return load(cl, key, isEager, 0, 0);
+  }
+
+  public Object load(Class cl,
+                     Object key,
+                     boolean isEager,
+                     long notExpiringLoadMask,
+                     int notExpiringGroup)
+    throws AmberException
+  {
     if (log.isLoggable(Level.FINER))
       log.log(Level.FINER, L.l("loading entity class " + cl.getName() + " PK: " + key));
 
@@ -926,7 +936,10 @@ public class AmberConnection
       if (isInTransaction())
         isLoad = isEager;
 
-      entity = entityHome.find(this, key, isLoad, 0, 0);
+      // jpa/0l42, jpa/0l47, jpa/0o03, jpa/0o05
+      entity = entityHome.find(this, key, isLoad,
+                               notExpiringLoadMask,
+                               notExpiringGroup);
 
       if (entity == null)
         return null;
@@ -1503,7 +1516,11 @@ public class AmberConnection
   /**
    * Adds a new entity for the given class name and key.
    */
-  public Entity loadEntity(Class cl, Object key, boolean isEager)
+  public Entity loadEntity(Class cl,
+                           Object key,
+                           boolean isEager,
+                           long notExpiringLoadMask,
+                           int notExpiringGroup)
   {
     if (key == null)
       return null;
@@ -1519,7 +1536,9 @@ public class AmberConnection
       // XXX: needs to create based on the discriminator with inheritance.
       // Create a new entity for the given class and primary key.
       try {
-        entity = (Entity) load(cl, key, isEager);
+        entity = (Entity) load(cl, key, isEager,
+                               notExpiringLoadMask,
+                               notExpiringGroup);
       } catch (AmberException e) {
         throw new AmberRuntimeException(e);
       }

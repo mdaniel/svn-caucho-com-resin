@@ -378,8 +378,9 @@ public class AmberEntityHome {
       String className = _entityType.getBeanClass().getName();
 
       if (log.isLoggable(Level.FINER)) {
-        log.log(Level.FINER, L.l("AmberEntityHome.find class: {0} PK: {1} isLoad: {2} xa: {3}",
+        log.log(Level.FINER, L.l("AmberEntityHome.find class: {0} PK: {1} isLoad: {2} xa: {3} notExpiringLoadMask: " + notExpiringLoadMask + " notExpiringGroup: " + notExpiringGroup,
                                  className, key, isLoad, aConn.isInTransaction()));
+
         String msg;
 
         if (existingItem == null)
@@ -438,6 +439,12 @@ public class AmberEntityHome {
 
           cacheItem.copyTo(entity, aConn);
         }
+
+        long loadMask = entity.__caucho_getLoadMask(notExpiringGroup);
+        loadMask |= notExpiringLoadMask;
+
+        // jpa/0l42: loading optimization.
+        entity.__caucho_setLoadMask(loadMask, notExpiringGroup);
 
         if (isLoad) {
           entity.__caucho_retrieve_eager(aConn);

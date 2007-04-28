@@ -802,9 +802,23 @@ public class EntityManyToOneField extends CascadableField {
     out.println("}");
     */
 
+    long targetGroup = 0;
+    long targetMask = 0;
+
+    // jpa/0s2e as a negative test.
+    if (_targetField != null) {
+      // jpa/0l42
+      long targetLoadIndex = _targetField.getTargetLoadIndex();
+      targetGroup = targetLoadIndex / 64;
+      targetMask = (1L << (targetLoadIndex % 64));
+    }
+
     out.println(varName + " = (" + targetTypeExt + ") "
                 + session + ".loadEntity("
-                + targetTypeExt + ".class, " + otherKey + ", false);");
+                + targetTypeExt + ".class, "
+                + otherKey + ", false, "
+                + targetMask + "L, "
+                + targetGroup + ");");
 
     generateSetTargetLoadMask(out, varName);
 
@@ -864,9 +878,9 @@ public class EntityManyToOneField extends CascadableField {
       long targetGroup = targetLoadIndex / 64;
       long targetMask = (1L << (targetLoadIndex % 64));
 
-      varName = "((" + _targetType.getInstanceClassName() + ") " + varName + ")";
-
       out.println(varName + ".__caucho_setLoadMask(" + varName + ".__caucho_getLoadMask(" + targetGroup + ") | " + targetMask + "L, " + targetGroup + ");");
+
+      varName = "((" + _targetType.getInstanceClassName() + ") " + varName + ")";
 
       // jpa/0ge4
       String thisContextEntity = "(" + _targetField.getJavaTypeName() /* getSourceType().getInstanceClassName() */ + ") contextEntity";
