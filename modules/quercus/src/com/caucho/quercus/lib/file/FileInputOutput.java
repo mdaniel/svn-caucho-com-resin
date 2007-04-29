@@ -65,7 +65,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   private String _readEncodingName;
 
   private FileLock _fileLock;
-  private FileChannel _fileChannel;
+  private RandomAccessFile _randomAccessFile;
 
   private boolean _temporary;
 
@@ -369,10 +369,23 @@ public class FileInputOutput extends AbstractBinaryOutput
   public void close()
   {
     try {
+      _env.removeClose(this);
+      
       _stream.close();
 
       if (_temporary)
         _path.remove();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+    
+    try {
+      RandomAccessFile file = _randomAccessFile;
+      _randomAccessFile = null;
+      
+      if (file != null) {
+        file.close();
+      }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -447,16 +460,16 @@ public class FileInputOutput extends AbstractBinaryOutput
     try {
       File file = ((FilePath) getPath()).getFile();
 
-      if (_fileChannel == null) {
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-
-        _fileChannel = randomAccessFile.getChannel();
+      if (_randomAccessFile == null) {
+        _randomAccessFile = new RandomAccessFile(file, "rw");
       }
+      
+      FileChannel fileChannel = _randomAccessFile.getChannel();
 
       if (block)
-        _fileLock = _fileChannel.lock(0, Long.MAX_VALUE, shared);
+        _fileLock = fileChannel.lock(0, Long.MAX_VALUE, shared);
       else 
-        _fileLock = _fileChannel.tryLock(0, Long.MAX_VALUE, shared);
+        _fileLock = fileChannel.tryLock(0, Long.MAX_VALUE, shared);
 
       return _fileLock != null;
     } catch (IOException e) {

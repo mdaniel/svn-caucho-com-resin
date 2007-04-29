@@ -692,7 +692,7 @@ public class FileModule extends AbstractQuercusModule {
 
               int ch2 = is.read();
 
-              if (ch == '\n')
+              if (ch2 == '\n')
                 bb.appendByte('\n');
               else
                 is.unread();

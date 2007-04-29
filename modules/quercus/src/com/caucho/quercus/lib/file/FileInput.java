@@ -51,13 +51,15 @@ public class FileInput extends ReadStreamInput implements LockableStream {
   private Env _env;
   private Path _path;
   private FileLock _fileLock;
-  private FileChannel _fileChannel;
+  private RandomAccessFile _randomAccessFile;
 
   public FileInput(Env env, Path path)
     throws IOException
   {
     _env = env;
-
+    
+    env.addClose(this);
+    
     _path = path;
 
     init(path.openRead());
@@ -118,16 +120,16 @@ public class FileInput extends ReadStreamInput implements LockableStream {
     try {
       File file = ((FilePath) getPath()).getFile();
 
-      if (_fileChannel == null) {
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-
-        _fileChannel = randomAccessFile.getChannel();
+      if (_randomAccessFile == null) {
+        _randomAccessFile = new RandomAccessFile(file, "rw");
       }
 
+      FileChannel fileChannel = _randomAccessFile.getChannel();
+      
       if (block)
-        _fileLock = _fileChannel.lock(0, Long.MAX_VALUE, shared);
+        _fileLock = fileChannel.lock(0, Long.MAX_VALUE, shared);
       else 
-        _fileLock = _fileChannel.tryLock(0, Long.MAX_VALUE, shared);
+        _fileLock = fileChannel.tryLock(0, Long.MAX_VALUE, shared);
 
       return _fileLock != null;
     } catch (Exception e) {
@@ -166,24 +168,28 @@ public class FileInput extends ReadStreamInput implements LockableStream {
   public void close()
   {
     try {
+      _env.removeClose(this);
+      
       FileLock lock = _fileLock;
       _fileLock = null;
       
       if (lock != null)
-	lock.release();
+        lock.release();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
     
     try {
-      FileChannel channel = _fileChannel;
-      _fileChannel = null;
+      RandomAccessFile file = _randomAccessFile;
+      _randomAccessFile = null;
       
-      if (channel != null)
-	channel.close();
+      if (file != null)
+        file.close();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
+    
+    super.close();
   }
 
   /**
