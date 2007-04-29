@@ -197,20 +197,23 @@ public final class DefinitionState {
       fun = _lowerFunMap.get(name.toLowerCase());
 
       if (fun != null) {
-	_funMap.put(name, fun);
+        copyOnWrite();
+        _funMap.put(name, fun);
 
-	return fun;
+        return fun;
       }
     }
 
     fun = findModuleFunction(name);
 
     if (fun != null) {
+      copyOnWrite();
       _funMap.put(name, fun);
 
       return fun;
     }
     else {
+      copyOnWrite();
       _funMap.put(name, new UnsetFunction(_crc));
       
       return null;
