@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BooleanValue;
@@ -39,6 +40,7 @@ import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.ResultSet;
@@ -154,6 +156,11 @@ public class Mysqli extends JdbcConnectionResource {
     }
   }
 
+  public int getaffected_rows()
+  {
+    return affected_rows();
+  }
+  
   /**
    * returns the number of affected rows.
    */
@@ -217,6 +224,14 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
+   * Quercus function to get the field 'errno'.
+   */
+  public int geterrno()
+  {
+    return errno();
+  }
+  
+  /**
    * Returns the error code for the most recent function call
    */
   public int errno()
@@ -227,6 +242,14 @@ public class Mysqli extends JdbcConnectionResource {
       return 0;
   }
 
+  /**
+   * Quercus function to get the field 'error'.
+   */
+  public String geterror()
+  {
+    return error();
+  }
+  
   /**
    * Returns the error string for the most recent function call
    */
@@ -250,15 +273,29 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
-   * Returns the host information.
-   *
-   * @deprecated
+   * Quercus function to get the field 'client_info'.
    */
-  public String get_client_info()
+  public String getclient_info(Env env)
   {
-    return validateConnection().getClientInfo();
+    return get_client_info(env);
+  }
+  
+  /**
+   * Returns the client information.
+   */
+  public String get_client_info(Env env)
+  {
+    return MysqlModule.mysql_get_client_info(env);
   }
 
+  /**
+   * Quercus function to get the field 'client_version'.
+   */
+  public int getclient_version(Env env)
+  {
+    return MysqliModule.mysqli_get_client_version(env);
+  }
+  
   /**
    * Returns the database name.
    */
@@ -266,7 +303,15 @@ public class Mysqli extends JdbcConnectionResource {
   {
     return getDbName();
   }
-
+  
+  /**
+   * Quercus function to get the field 'host_info'.
+   */
+  public String gethost_info()
+  {
+    return get_host_info();
+  }
+  
   /**
    * Returns the host information.
    */
@@ -284,6 +329,16 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
+   * Quercus function to get the field 'info'.
+   */
+  public String getinfo()
+  {
+    throw new UnimplementedException("mysqli info field");
+    
+    //return MysqliModule.mysqli_info(this);
+  }
+  
+  /**
    * Returns the port number.
    */
   public int get_port_number()
@@ -292,6 +347,14 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
+   * Quercus function to get the field 'protocol_version'.
+   */
+  public int getprotocol_version()
+  {
+    return get_proto_info();
+  }
+  
+  /**
    * Returns the protocol information.
    */
   public int get_proto_info()
@@ -299,6 +362,14 @@ public class Mysqli extends JdbcConnectionResource {
     return 10;
   }
 
+  /**
+   * Quercus function to get the field 'server_info'.
+   */
+  public String getserver_info()
+  {
+    return get_server_info();
+  }
+  
   /**
    * Returns the server information.
    */
@@ -311,6 +382,14 @@ public class Mysqli extends JdbcConnectionResource {
     }
   }
 
+  /**
+   * Quercus function to get the field 'server_version'.
+   */
+  public int getserver_version()
+  {
+    return get_server_version();
+  }
+  
   /**
    * Returns the server information.
    */
@@ -326,6 +405,14 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   /**
+   * Quercus function to get the field 'field_count'.
+   */
+  public int getfield_count()
+  {
+    return field_count();
+  }
+  
+  /**
    * Returns the number of columns in the last query.
    */
   public int field_count()
@@ -333,6 +420,14 @@ public class Mysqli extends JdbcConnectionResource {
     return validateConnection().getFieldCount();
   }
 
+  /**
+   * Quercus function to get the field 'insert_id'.
+   */
+  public Value getinsert_id()
+  {
+    return insert_id();
+  }
+  
   /**
    * returns ID generated for an AUTO_INCREMENT column by the previous
    * INSERT query on success, 0 if the previous query does not generate
@@ -530,6 +625,15 @@ public class Mysqli extends JdbcConnectionResource {
     return options(option, value);
   }
 
+  
+  /**
+   * Quercus function to get the field 'sqlstate'.
+   */
+  public String getsqlstate()
+  {
+    return sqlstate();
+  }
+  
   /**
    * Returns the SQLSTATE error
    */
@@ -630,6 +734,15 @@ public class Mysqli extends JdbcConnectionResource {
     return ((Mysqli) validateConnection()).storeResult();
   }
 
+
+  /**
+   * Quercus function to get the field 'thread_id'.
+   */
+  public int getthread_id()
+  {
+    return thread_id();
+  }
+  
   /**
    * Returns a bogus thread id
    */
@@ -658,6 +771,14 @@ public class Mysqli extends JdbcConnectionResource {
     return ((Mysqli) validateConnection()).storeResult();
   }
 
+  /**
+   * Quercus function to get the field 'warning_count'.
+   */
+  public int getwarning_count()
+  {
+    return warning_count();
+  }
+  
   /**
    * returns the number of warnings from the last query
    * in the connection object.
