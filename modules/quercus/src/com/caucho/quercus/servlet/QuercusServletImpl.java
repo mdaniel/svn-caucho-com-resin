@@ -91,11 +91,19 @@ public class QuercusServletImpl
       QuercusPage page = getQuercus().parse(path);
 
       WriteStream ws;
+      StreamImpl out;
       
-      OutputStream out = response.getOutputStream();
+      try {
+        out = new VfsStream(null, response.getOutputStream());
+      }
+      catch (IllegalStateException e) {
+        WriterStreamImpl writer = new WriterStreamImpl();
+        writer.setWriter(response.getWriter());
+        
+        out = writer;
+      }
       
-      VfsStream s = new VfsStream(null, out);
-      ws = new WriteStream(s);
+      ws = new WriteStream(out);
 
       Env env = getQuercus().createEnv(page, ws, request, response);
       try {
