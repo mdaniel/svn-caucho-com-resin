@@ -82,15 +82,14 @@ public class ArrayValueMarshal extends Marshal
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    if (argValue.isArray())
-    {
+    if (argValue.isArray()) {
       if (argValue instanceof JavaAdapter)
         return Marshal.EQUIVALENT;
       else
         return Marshal.SAME;
     }
     else
-      return Marshal.MARSHALABLE;
+      return Marshal.DUBIOUS;
   }
   
   @Override

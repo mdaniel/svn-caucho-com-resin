@@ -78,6 +78,8 @@ public class UnicodeValueMarshal extends Marshal
   {
     if (argValue.isUnicode())
       return Marshal.SAME;
+    else if (argValue.isString())
+      return Marshal.SIMILAR;
     else if (! (argValue.isArray() || argValue.isObject()))
       return Marshal.MARSHALABLE;
     else

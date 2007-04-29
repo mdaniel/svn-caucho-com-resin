@@ -67,9 +67,9 @@ public class WorkDir {
 
     // Windows uses /temp as a work dir
     if (com.caucho.server.util.CauchoSystem.isWindows())
-      path = Vfs.lookup("file:/c:/tmp/caucho");
+      path = Vfs.lookup("file:/c:/tmp/caucho/work");
     else
-      path = Vfs.lookup("file:/tmp/caucho");
+      path = Vfs.lookup("file:/tmp/caucho/work");
 
     _localWorkDir.setGlobal(path);
     

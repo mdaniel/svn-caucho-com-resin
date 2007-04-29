@@ -175,17 +175,26 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
     else {
       AbstractJavaMethod []methods = _methodTable[args.length];
 
-      if (methods == null && _restMethodTable.length == 0) {
-        return env.error(L.l("'{0}' overloaded method call with {1} arguments does not match any overloaded method", getName(), args.length));
+      if (methods != null) {
+	if (methods.length == 1)
+	  return methods[0].call(env, obj, args);
+	else {
+	  AbstractJavaMethod method
+	    = getBestFitJavaMethod(methods, _restMethodTable, args);
+
+	  return method.call(env, obj, args);
+	}
       }
+      else {
+	if (_restMethodTable.length == 0) {
+	  return env.error(L.l("'{0}' overloaded method call with {1} arguments does not match any overloaded method", getName(), args.length));
+	}
 
-      if (methods != null && methods.length == 1)
-        return _methodTable[args.length][0].call(env, obj, args);
+	AbstractJavaMethod method
+	  = getBestFitJavaMethod(methods, _restMethodTable, args);
 
-      AbstractJavaMethod method =
-        getBestFitJavaMethod(methods, _restMethodTable, args);
-
-      return method.call(env, obj, args);
+	return method.call(env, obj, args);
+      }
     }
   }
   
@@ -215,7 +224,9 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
       }
     }
 
-    for (int i = Math.min(args.length, restMethodTable.length) - 1; i >= 0; i--) {
+    for (int i = Math.min(args.length, restMethodTable.length) - 1;
+	 i >= 0;
+	 i--) {
       if (restMethodTable[i] == null)
         continue;
       

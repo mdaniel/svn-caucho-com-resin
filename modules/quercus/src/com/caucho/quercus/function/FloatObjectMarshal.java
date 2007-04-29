@@ -67,9 +67,9 @@ public class FloatObjectMarshal extends Marshal
   {
     if (argValue instanceof DoubleValue)
       return Marshal.EQUIVALENT;
-    if (argValue.isDoubleConvertible())
-      return Marshal.MARSHALABLE;
     else if (argValue.isNumeric())
+      return Marshal.SIMILAR;
+    else if (argValue.isDoubleConvertible())
       return Marshal.MARSHALABLE;
     else
       return Marshal.DUBIOUS;

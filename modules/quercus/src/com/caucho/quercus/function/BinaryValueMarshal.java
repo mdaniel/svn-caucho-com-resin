@@ -78,6 +78,8 @@ public class BinaryValueMarshal extends Marshal
   {
     if (argValue.isBinary())
       return Marshal.SAME;
+    else if (argValue.isString())
+      return Marshal.SIMILAR;
     else if (! (argValue.isArray() || argValue.isObject()))
       return Marshal.MARSHALABLE;
     else

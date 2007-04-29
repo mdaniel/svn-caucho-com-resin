@@ -43,8 +43,9 @@ abstract public class Marshal {
   // scale to describe cost of marshaling an argument
   public static final int SAME = 0;
   public static final int EQUIVALENT = 1;
-  public static final int MARSHALABLE = 2;
-  public static final int DUBIOUS = 3;
+  public static final int SIMILAR = 2;
+  public static final int MARSHALABLE = 3;
+  public static final int DUBIOUS = 4;
   public static final int INCOMPATIBLE = Integer.MAX_VALUE;
   
   /**
