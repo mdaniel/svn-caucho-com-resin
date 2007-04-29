@@ -340,16 +340,23 @@ public class ArrayModule
   /**
    * Returns the next value of the array.
    */
-  public static Value each(Env env, Value value)
+  public static Value each(Env env, @Reference Value value)
   {
-    if (value.isArray()) {
-      ArrayValue array = (ArrayValue) value.toValue();
+    if (value instanceof Var) {
+      value = value.toValue();
+      
+      if (value.isArray())
+        return value.toArrayValue(env).each();
+      else {
+        L.l("each() requires argument to be an array");
+        env.warning("each() requires argument to be an array");
 
-      return array.each();
+        return NullValue.NULL;
+      }
     }
     else {
-      env.warning("each() requires argument to be an array");
-      return NullValue.NULL;
+      L.l("each() argument must be a variable");
+      return env.error("each() argument must be a variable");
     }
   }
 
