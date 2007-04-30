@@ -158,6 +158,31 @@ INTEGRAL, and CONFIDENTIAL are allowed values.
 &lt;/security-constraint&gt;
 </example>
 
+<p>
+The default behaviour is for Resin to rewrite any url that starts with
+"http:" by replacing the "http:" part with "https:", and then send
+redirect to the browser.
+</p>
+
+<p>
+If the default rewriting of the host is not appropriate, you can set the
+<a config-tag="secure-host-name"/> for the host:
+</p>
+
+<example>
+  &lt;host id='...'&gt;
+    &lt;secure-host-name&gt;https://hogwarts.com&lt;/secure-host-name&gt;
+
+ ...
+</example>
+
+<example>
+  &lt;host id='...'&gt;
+    &lt;secure-host-name&gt;https://hogwarts.com:8443&lt;/secure-host-name&gt;
+
+  ...
+</example>
+
 </s2>
 
 <s2 title="transport-guarantee" type="defun">
