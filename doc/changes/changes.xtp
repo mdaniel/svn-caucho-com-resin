@@ -12,6 +12,7 @@
 
 <s2 title="3.1.snap">
 <ul>
+<li>Amber: @GeneratedValue with MS SQLServer was not working #1702 (rep by Michael Sengbusch)</li>
 <li>Quercus: file uploads (#1434, #1435, #1615, rep by D Berry, M Bopp, snb)</li>
 <li>Amber: createNativeQuery(String sql) i.e. missing mapping was throwing NPE (#1687, rep by Michael Sengbusch)</li>
 <li>Amber: native queries with parameters (#1691, rep by Michael Sengbusch)</li>
