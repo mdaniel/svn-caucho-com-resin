@@ -35,6 +35,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Path;
@@ -51,6 +52,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -141,6 +143,15 @@ public class PostgresModule extends AbstractQuercusModule {
   }
 
   /**
+   * pg_affected_rows() alias.
+   */
+  public static int pg_cmdtuples(Env env,
+                                 @NotNull PostgresResult result)
+  {
+    return pg_affected_rows(env, result);
+  }
+  
+  /**
    * Cancel an asynchronous query
    */
   public static boolean pg_cancel_query(Env env,
@@ -220,39 +231,39 @@ public class PostgresModule extends AbstractQuercusModule {
       String userName = "";
       String password = "";
 
-      String s = connectionString.trim();
+      HashMap<String, String> nameValueMap
+        = parseConnectionString(connectionString);
 
-      String sp[];
-
-      sp = s.split("(host=)");
-
-      if (sp.length >= 2)
-        host = sp[1].replaceAll("\\s(.*)$", "");
-
-      sp = s.split("(port=)");
-
-      if (sp.length >= 2) {
-        String portS = sp[1].replaceAll("\\s(.*)$", "");
-        try {
-          port = Integer.parseInt(portS);
-        } catch (Exception ex) {
+      String value = nameValueMap.get("host");
+      if (value != null)
+        host = nameValueMap.get("host");
+      
+      value = nameValueMap.get("port");
+      if (value != null) {
+        port = 0;
+        int len = value.length();
+        
+        for (int i = 0; i < len; i++) {
+          char ch = value.charAt(i);
+          
+          if ('0' <= ch && ch <= '9')
+            port = port * 10 + value.charAt(i) - '0';
+          else
+            break;
         }
       }
-
-      sp = s.split("(dbname=)");
-
-      if (sp.length >= 2)
-        dbName = sp[1].replaceAll("\\s(.*)$", "");
-
-      sp = s.split("(user=)");
-
-      if (sp.length >= 2)
-        userName = sp[1].replaceAll("\\s(.*)$", "");
-
-      sp = s.split("(password=)");
-
-      if (sp.length >= 2)
-        password = sp[1].replaceAll("\\s(.*)$", "");
+      
+      value = nameValueMap.get("dbname");
+      if (value != null)
+        dbName = value;
+      
+      value = nameValueMap.get("user");
+      if (value != null)
+        userName = value;
+      
+      value = nameValueMap.get("password");
+      if (value != null)
+        password = value;
 
       String driver = "org.postgresql.Driver";
       String url = "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
@@ -273,6 +284,115 @@ public class PostgresModule extends AbstractQuercusModule {
     }
   }
 
+  /**
+   * Returns the name/value pairs from the postgres connection string.
+   */
+  private static HashMap<String, String> parseConnectionString(String s)
+  {
+    HashMap<String, String> map = new HashMap<String, String>();
+    
+    char ch;
+    int len = s.length();
+    
+    int i = 0;
+    
+    CharBuffer buffer = new CharBuffer();
+    
+    while (i < len) {
+      buffer.clear();
+      
+      // skip whitespace
+      for (; i < len && Character.isWhitespace(ch = s.charAt(i)); i++) {
+      }
+      
+      // get name
+      for (;
+           i < len && ! Character.isWhitespace(ch = s.charAt(i))
+               && ch != '='
+           ; i++) {
+        buffer.append(ch);
+      }
+      
+      String name = buffer.toString();
+      buffer.clear();
+      
+      // skip until '='
+      while (i < len && (ch = s.charAt(i++)) != '=') {
+      }
+      
+      // skip whitespace
+      for (; i < len && Character.isWhitespace(ch = s.charAt(i)); i++) {
+      }
+      
+      boolean isQuoted = false;
+      
+      // value may be quoted
+      if (i < len) {
+        if ((ch = s.charAt(i++)) == '\'')
+          isQuoted = true;
+        else
+          buffer.append(ch);
+      }
+      
+      boolean isEscaped = false;
+      
+      // get value
+      loop:
+      while (i < len) {
+        ch = s.charAt(i++);
+        
+        switch(ch) {
+          case '\\':
+            if (isEscaped)
+              buffer.append(ch);
+
+            isEscaped = !isEscaped;
+            break;
+            
+          case '\'':
+            if (isEscaped) {
+              buffer.append(ch);
+              isEscaped = false;
+              break;
+            }
+            else if (isQuoted)
+              break loop;
+
+          case ' ':
+          case '\n':
+          case '\r':
+          case '\f':
+          case '\t':
+            if (isQuoted) {
+              buffer.append(ch);
+              break;
+            }
+            else if (isEscaped) {
+              buffer.append('\\');
+              break loop;
+            }
+            else
+              break loop;
+
+          default:
+            if (isEscaped) {
+              buffer.append('\\');
+              isEscaped = false;
+            }
+
+            buffer.append(ch);
+        }
+      }
+
+      String value = buffer.toString();
+      
+      if (name.length() > 0)
+        map.put(name, value);
+    }
+
+    return map;
+  }
+  
   /**
    * Get connection is busy or not
    */
@@ -998,6 +1118,17 @@ public class PostgresModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
   }
+  
+  /**
+   * Returns values from a result resource
+   */
+  public static Value pg_result(Env env,
+                                @NotNull PostgresResult result,
+                                Value row,
+                                @Optional("-1") Value fieldNameOrNumber)
+  {
+    return pg_fetch_result(env, result, row, fieldNameOrNumber);
+  }
 
   /**
    * Get a row as an enumerated array
@@ -1075,6 +1206,18 @@ public class PostgresModule extends AbstractQuercusModule {
   }
 
   /**
+   * pg_field_is_null() alias.
+   */
+  @ReturnNullAsFalse
+  public static LongValue pg_fieldisnull(Env env,
+                                         @NotNull PostgresResult result,
+                                         Value row,
+                                         @Optional("-1") Value fieldNameOrNumber)
+  {
+    return pg_field_is_null(env, result, row, fieldNameOrNumber);
+  }
+  
+  /**
    * Returns the name of a field
    */
   public static Value pg_field_name(Env env,
@@ -1095,6 +1238,16 @@ public class PostgresModule extends AbstractQuercusModule {
   }
 
   /**
+   * pg_field_name() alias.
+   */
+  public static Value pg_fieldname(Env env,
+                                   @NotNull PostgresResult result,
+                                   int fieldNumber)
+  {
+    return pg_field_name(env, result, fieldNumber);
+  }
+  
+  /**
    * Returns the field number of the named field
    *
    * @return the field number (0-based) or -1 on error
@@ -1113,6 +1266,16 @@ public class PostgresModule extends AbstractQuercusModule {
     }
   }
 
+  /**
+   * pg_field_num() alias.
+   */
+  public static int pg_fieldnum(Env env,
+                                @NotNull PostgresResult result,
+                                String fieldName)
+  {
+    return pg_field_num(env, result, fieldName);
+  }
+  
   /**
    * Returns the printed length
    */
@@ -1161,6 +1324,17 @@ public class PostgresModule extends AbstractQuercusModule {
     }
   }
 
+  /**
+   * pg_field_ptrlen() alias.
+   */
+  public static int pg_fieldprtlen(Env env,
+                                   @NotNull PostgresResult result,
+                                   Value rowNumber,
+                                   @Optional("-1") Value fieldNameOrNumber)
+  {
+    return pg_field_prtlen(env, result, rowNumber, fieldNameOrNumber);
+  }
+  
   /**
    * Returns the internal storage size of the named field
    */
@@ -1248,6 +1422,17 @@ public class PostgresModule extends AbstractQuercusModule {
   }
 
   /**
+   * pg_field_size() alias.
+   */
+  @ReturnNullAsFalse
+  public static LongValue pg_fieldsize(Env env,
+                                       @NotNull PostgresResult result,
+                                       int fieldNumber)
+  {
+    return pg_field_size(env, result, fieldNumber);
+  }
+  
+  /**
    * Returns the name or oid of the tables field
    *
    * @return By default the tables name that field belongs to
@@ -1329,6 +1514,17 @@ public class PostgresModule extends AbstractQuercusModule {
   }
 
   /**
+   * pg_field_type() alias.
+   */
+  @ReturnNullAsFalse
+  public static StringValue pg_fieldtype(Env env,
+                                          @NotNull PostgresResult result,
+                                          int fieldNumber)
+  {
+    return pg_field_type(env, result, fieldNumber);
+  }
+  
+  /**
    * Free result memory
    */
   public static boolean pg_free_result(Env env,
@@ -1345,6 +1541,15 @@ public class PostgresModule extends AbstractQuercusModule {
     }
   }
 
+  /**
+   * pg_free_result() alias.
+   */
+  public static boolean pg_freeresult(Env env,
+                                      @NotNull PostgresResult result)
+  {
+    return pg_free_result(env, result);
+  }
+  
   /**
    * Gets SQL NOTIFY message
    */
@@ -1608,6 +1813,16 @@ public class PostgresModule extends AbstractQuercusModule {
       return null;
     }
   }
+  
+  /**
+   * pg_last_error() alias.
+   */
+  @ReturnNullAsFalse
+  public static String pg_errormessage(Env env,
+                                       @Optional Postgres conn)
+  {
+    return pg_last_error(env, conn);
+  }
 
   /**
    * Returns the last notice message from PostgreSQL server
@@ -1658,6 +1873,13 @@ public class PostgresModule extends AbstractQuercusModule {
     return null;
   }
 
+  @ReturnNullAsFalse
+  public static String pg_getlastoid(Env env,
+                                   PostgresResult result)
+  {
+    return pg_last_oid(env, result);
+  }
+  
   /**
    * Close a large object
    */
@@ -1679,6 +1901,15 @@ public class PostgresModule extends AbstractQuercusModule {
       log.log(Level.FINE, ex.toString(), ex);
       return false;
     }
+  }
+  
+  /**
+   * pg_lo_close() alias.
+   */
+  public static boolean pg_loclose(Env env,
+                                   Object largeObject)
+  {
+    return pg_lo_close(env, largeObject);
   }
 
   /**
@@ -1728,6 +1959,16 @@ public class PostgresModule extends AbstractQuercusModule {
       log.log(Level.FINE, ex.toString(), ex);
       return null;
     }
+  }
+
+  /**
+   * pg_lo_create() alias
+   */
+  @ReturnNullAsFalse
+  public static LongValue pg_locreate(Env env,
+                                      @Optional Postgres conn)
+  {
+    return pg_lo_create(env, conn);
   }
 
   /**
@@ -1793,6 +2034,17 @@ public class PostgresModule extends AbstractQuercusModule {
   }
 
   /**
+   * pg_lo_export() alias.
+   */
+  public static boolean pg_loexport(Env env,
+                                     @NotNull Postgres conn,
+                                     int oid,
+                                     Path path)
+  {
+    return pg_lo_export(env, conn, oid, path);
+  }
+  
+  /**
    * Import a large object from file
    */
   @ReturnNullAsFalse
@@ -1832,6 +2084,17 @@ public class PostgresModule extends AbstractQuercusModule {
     return null;
   }
 
+  /**
+   * pg_lo_import() alias.
+   */
+  @ReturnNullAsFalse
+  public static LongValue pg_loimport(Env env,
+                                      @NotNull Postgres conn,
+                                      Path path)
+  {
+    return pg_lo_import(env, conn, path);
+  }
+  
   /**
    * Open a large object
    */
@@ -1891,6 +2154,18 @@ public class PostgresModule extends AbstractQuercusModule {
   }
 
   /**
+   * pg_lo_open() alias.
+   */
+  @ReturnNullAsFalse
+  public static Object pg_loopen(Env env,
+                                 @NotNull Postgres conn,
+                                 int oid,
+                                 String mode)
+  {
+    return pg_lo_open(env, conn, oid, mode);
+  }
+  
+  /**
    * Reads an entire large object and send straight to browser
    */
   @ReturnNullAsFalse
@@ -1911,6 +2186,16 @@ public class PostgresModule extends AbstractQuercusModule {
     return null;
   }
 
+  /**
+   * pg_lo_read_all() alias.
+   */
+  @ReturnNullAsFalse
+  public static LongValue pg_loreadall(Env env,
+                                       Object largeObject)
+  {
+    return pg_lo_read_all(env, largeObject);
+  }
+  
   /**
    * Read a large object
    */
@@ -1953,6 +2238,17 @@ public class PostgresModule extends AbstractQuercusModule {
     }
   }
 
+  /**
+   * pg_lo_read() alias.
+   */
+  @ReturnNullAsFalse
+  public static String pg_loread(Env env,
+                                 Object largeObject,
+                                 @Optional("-1") int len)
+  {
+    return pg_lo_read(env, largeObject, len);
+  }
+  
   /**
    * Seeks position within a large object
    */
@@ -2051,6 +2347,16 @@ public class PostgresModule extends AbstractQuercusModule {
   }
 
   /**
+   * pg_lo_unlink() alias.
+   */
+  public static boolean pg_lounlink(Env env,
+                                    @NotNull Postgres conn,
+                                    int oid)
+  {
+    return pg_lo_unlink(env, conn, oid);
+  }
+  
+  /**
    * Write to a large object
    */
   @ReturnNullAsFalse
@@ -2085,6 +2391,18 @@ public class PostgresModule extends AbstractQuercusModule {
   }
 
   /**
+   * pg_lo_write() alias.
+   */
+  @ReturnNullAsFalse
+  public static LongValue pg_lowrite(Env env,
+                                     @NotNull Object largeObject,
+                                     String data,
+                                     @Optional int len)
+  {
+    return pg_lo_write(env, largeObject, data, len);
+  }
+  
+  /**
    * Get meta data for table
    */
   @ReturnNullAsFalse
@@ -2104,7 +2422,6 @@ public class PostgresModule extends AbstractQuercusModule {
                                   @NotNull PostgresResult result)
   {
     try {
-
       return result.getFieldCount();
 
     } catch (Exception ex) {
@@ -2113,6 +2430,15 @@ public class PostgresModule extends AbstractQuercusModule {
     }
   }
 
+  /**
+   * pg_num_fields() alias.
+   */
+  public static int pg_numfields(Env env,
+                                 @NotNull PostgresResult result)
+  {
+    return pg_num_fields(env, result);
+  }
+  
   /**
    * Returns the number of rows in a result
    */
@@ -2138,6 +2464,15 @@ public class PostgresModule extends AbstractQuercusModule {
     return LongValue.create(numRows);
   }
 
+  /**
+   * pg_num_rows() alias.
+   */
+  public static LongValue pg_numrows(Env env,
+                                     @NotNull PostgresResult result)
+  {
+    return pg_num_rows(env, result);
+  }
+  
   /**
    * Get the options associated with the connection
    */
@@ -2314,6 +2649,18 @@ public class PostgresModule extends AbstractQuercusModule {
     return pg_query_impl(env, conn, query, true);
   }
 
+ 
+  /**
+   * pg_query() alias
+   */
+  @ReturnNullAsFalse
+  public static PostgresResult pg_exec(Env env,
+                                       @NotNull Postgres conn,
+                                       String query)
+  {
+    return pg_query(env, conn, query);
+  }
+  
   /**
    * Execute a query
    */
