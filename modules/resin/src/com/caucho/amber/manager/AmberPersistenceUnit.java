@@ -1609,6 +1609,23 @@ public class AmberPersistenceUnit {
   }
 
   /**
+   * Safely copies a cache item to a context object.
+   */
+  public Entity copyFromCacheItem(AmberConnection aConn,
+                                  Entity contextEntity,
+                                  EntityItem cacheItem)
+  {
+    if (cacheItem == null)
+      throw new IllegalStateException(L.l("Null cache item cannot be used to update a persistence context object"));
+
+    synchronized (_entityKey) {
+      cacheItem.copyTo(contextEntity, aConn);
+    }
+
+    return contextEntity;
+  }
+
+  /**
    * Completions affecting the cache.
    */
   public void complete(ArrayList<AmberCompletion> completions)

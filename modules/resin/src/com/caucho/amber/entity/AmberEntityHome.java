@@ -437,7 +437,7 @@ public class AmberEntityHome {
                                       msg, className, key));
           }
 
-          cacheItem.copyTo(entity, aConn);
+          _manager.copyFromCacheItem(aConn, entity, cacheItem);
         }
 
         long loadMask = entity.__caucho_getLoadMask(notExpiringGroup);

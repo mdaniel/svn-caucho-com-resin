@@ -1041,7 +1041,7 @@ public class AmberConnection
     }
 
     // jpa/0l43
-    item.copyTo(entity, this);
+    _persistenceUnit.copyFromCacheItem(this, entity, item);
 
     return entity;
   }
@@ -3197,7 +3197,10 @@ public class AmberConnection
         _mergingEntities.add(managedEntity);
 
         if (isFullMerge) {
+          // jpa/0o42: avoids premature loading.
+          managedEntity.__caucho_setConnection(null);
           entity.__caucho_copyTo(managedEntity, this, true);
+          managedEntity.__caucho_setConnection(this);
         }
 
         if (existingEntity == null) {
@@ -3217,14 +3220,20 @@ public class AmberConnection
             log.log(Level.FINER, L.l("merged to a new entity (persisted)"));
         }
         else {
-          setTransactionalState(managedEntity);
+          // Handled in addInternalEntity()
+          // setTransactionalState(managedEntity);
 
           if (log.isLoggable(Level.FINER))
             log.log(Level.FINER, L.l("merged to an existing entity"));
         }
 
+        // jpa/0o42: avoids premature loading.
+        managedEntity.__caucho_setConnection(null);
+
         // jpa/0ga3, jpa/0h08, jpa/0o4-
         entity.__caucho_merge(managedEntity, this, false);
+
+        managedEntity.__caucho_setConnection(this);
 
         // jpa/0h08
         entity.__caucho_copyDirtyMaskFrom(managedEntity);

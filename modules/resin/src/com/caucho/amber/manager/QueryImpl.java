@@ -788,10 +788,15 @@ public class QueryImpl implements Query {
       ArrayList<ColumnResultConfig> columnResults
         = _sqlResultSetMapping.getColumnResults();
 
+      int oldColumnResult = _currColumnResult;
+
       if (_currColumnResult == columnResults.size()) {
         _currColumnResult = 0;
       }
-      else {
+
+      // jpa/0y19
+      if (entityResults.size() == 0
+          || oldColumnResult < columnResults.size()) {
         _currColumnResult++;
 
         if (columnResults.size() > 0) {
@@ -836,11 +841,18 @@ public class QueryImpl implements Query {
 
     Entity entity = null;
 
-    // jpa/0y14
-    entity = (Entity) _aConn.load(className, rs.getObject(oldIndex));
+    int consumed;
 
-    // jpa/0y10
-    int consumed = entity.__caucho_load(_aConn, rs, oldIndex + keyLength);
+    try {
+      // jpa/0y14
+      entity = (Entity) _aConn.load(className, rs.getObject(oldIndex));
+
+      // jpa/0y10
+      consumed = entity.__caucho_load(_aConn, rs, oldIndex + keyLength);
+    } catch (Exception e) {
+      // jpa/0y1a: invalid query.
+      throw new IllegalStateException(L.l("Unable to load an entity of class '{0}' using a native query. When mapped to @EntityResult, a native query should select all fields for the corresponding entity in '{1}'", className, _nativeSql));
+    }
 
     // item.setNumberOfLoadingColumns(consumed);
 
