@@ -431,10 +431,12 @@ public class LinkColumns {
           isOwner = true;
       }
 
-      /* jpa/0h60, the application should be responsible for deleting
-         the incoming links even when there are FK constraints.
+      boolean isJPA = aConn.getPersistenceUnit().isJPA();
 
-      if (! isSourceCascadeDelete()) {
+      // ejb/06c5 vs jpa/0h60
+      // jpa/0h60, the application should be responsible for deleting
+      // the incoming links even when there are FK constraints.
+      if (! (isJPA || isSourceCascadeDelete())) {
         CharBuffer cb = new CharBuffer();
 
         cb.append("update " + sourceTable + " set ");
@@ -468,10 +470,7 @@ public class LinkColumns {
 
         aConn.addCompletion(_sourceTable.getUpdateCompletion());
       }
-      else
-      */
-
-      if (_sourceTable.isCascadeDelete()) {
+      else if (_sourceTable.isCascadeDelete()) {
         // if the link cascades deletes to the source and the source
         // table also has cascade deletes, then we need to load the
         // target entities and delete them recursively
@@ -516,7 +515,7 @@ public class LinkColumns {
           entityType.getHome().getEntityFactory().delete(aConn, obj);
         }
       } // jpa/0i5e vs. jpa/0h25, jpa/0s2d
-      else if ((_sourceTable.getType() == null) && isOwner) {
+      else if ((! isJPA) || (isOwner && (_sourceTable.getType() == null))) {
         CharBuffer cb = new CharBuffer();
 
         cb.append("delete from " + sourceTable +

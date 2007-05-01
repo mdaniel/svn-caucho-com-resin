@@ -867,8 +867,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    // jpa/0gg0
-    if (! _relatedType.getBeanClass().isAbstract())
+    // jpa/0gg0 vs jpa/06c5
+    if (! _relatedType.isAbstractClass())
       _relatedType.generateSet(out, "pstmt", "index", "super");
 
     out.popDepth();
