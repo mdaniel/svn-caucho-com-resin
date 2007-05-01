@@ -1,7 +1,7 @@
 package example;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.util.Calendar;
 
 @Entity
 @Table(name="recipes")
@@ -20,10 +20,15 @@ public class Recipe {
   private String description;
 
   @Column(nullable = false)
-  private Date date;
+  private Calendar date;
 
   @Lob
   private String instructions;
+
+  public Recipe()
+  {
+    date = Calendar.getInstance();
+  }
 
   public Category getCategory()
   {
@@ -35,12 +40,12 @@ public class Recipe {
     this.category = category;
   }
 
-  public Date getDate()
+  public Calendar getDate()
   {
     return date;
   }
 
-  public void setDate(Date date)
+  public void setDate(Calendar date)
   {
     this.date = date;
   }

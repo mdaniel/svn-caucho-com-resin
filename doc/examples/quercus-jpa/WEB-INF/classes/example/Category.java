@@ -15,7 +15,7 @@ public class Category {
 
   @Column(unique = true, nullable = false)
   private String name;
-  
+
   public void setTitle(String name)
   {
     this.name = name;

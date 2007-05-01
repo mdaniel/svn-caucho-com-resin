@@ -1,14 +1,14 @@
 <?php
-import example.*;
+import example.Category;
+import javax.persistence.Persistence;
 
-$jpa = jndi_lookup("java:comp/env/persistence/_amber_PersistenceUnit/recipes");
-$jpa = $jpa->createEntityManager();
+$jpa = Persistence::createEntityManagerFactory("recipes")->createEntityManager();
 
 $controller = "category";
 
+$form = $_REQUEST["category"];
 $action = $_REQUEST["action"];
 $id = $_REQUEST["id"];
-$form = $_REQUEST["category"];
 
 if (empty($action))
   $action = empty($id) ? "list" : "show";
@@ -45,7 +45,7 @@ function get_category() {
 $redirect = NULL;
 $view = NULL;
 
-switch ($_REQUEST["action"]) {
+switch ($action) {
   case "list":
     $view = "list";
 
@@ -70,8 +70,7 @@ switch ($_REQUEST["action"]) {
       break;
     }
 
-    if (! empty($form["name"]))
-      $category->name = $form["name"];
+    $category->name = $form["name"];
 
     if (empty($category->name)) {
       $error = "'Name' is required";
