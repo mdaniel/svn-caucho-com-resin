@@ -27,6 +27,9 @@ r_cache = element cache {
      | element max-entry-size { r_int })?
 
   & (attribute memory-size { r_int } | element memory-size { r_int })?
+
+  & (attribute rewrite-vary-as-private { r_boolean-Type }
+     | element rewrite-vary-as-private { r_boolean-Type })?
 }
 
 r_cluster = element cluster {
