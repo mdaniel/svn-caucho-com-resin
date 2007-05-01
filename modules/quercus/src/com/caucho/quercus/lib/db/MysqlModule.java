@@ -704,7 +704,7 @@ public class MysqlModule extends AbstractQuercusModule {
 
     return mysql_db_query(env,
                           databaseName,
-                          "SHOW COLUMNS FROM " + tableName,
+                          "SELECT * FROM " + tableName + " WHERE NULL",
                           conn);
   }
 

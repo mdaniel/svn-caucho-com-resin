@@ -690,13 +690,21 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Returns the last error found
    */
+  @ReturnNullAsFalse
   public static String oci_error(Env env,
                                  @Optional Value resource)
   {
+    if (resource instanceof DefaultValue)
+      return null;
+    
     JdbcConnectionResource conn = null;
 
     if (resource == null) {
-      conn = getConnection(env).validateConnection();
+      ConnectionInfo connectionInfo = (ConnectionInfo) env.getSpecialValue("caucho.oracle");
+
+      if (connectionInfo != null) {
+        conn = connectionInfo.getConnection();
+      }
     } else {
       Object object = resource.toJavaObject();
 
@@ -1860,6 +1868,7 @@ public class OracleModule extends AbstractQuercusModule {
   /**
    * Alias of oci_error()
    */
+  @ReturnNullAsFalse
   public static String ocierror(Env env,
                                 @Optional Value resource)
   {
@@ -1889,9 +1898,22 @@ public class OracleModule extends AbstractQuercusModule {
    * Fetches the next row into an array
    */
   public static Value ocifetchinto(Env env,
-                                   @NotNull Oracle conn)
+                                 @NotNull OracleStatement stmt,
+                                 @Reference Value result,
+                                 @Optional("-1") int mode)
   {
-    throw new UnimplementedException("ocifetchinto");
+    if (mode == -1)
+      mode = OCI_NUM;
+    
+    ArrayValue array = oci_fetch_array(env, stmt, mode);
+
+    if (array != null) {
+      result.set(array);
+      return LongValue.create(array.getSize());
+    }
+    else {
+      return BooleanValue.FALSE;
+    }
   }
 
   /**
