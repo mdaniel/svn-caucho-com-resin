@@ -521,7 +521,7 @@ public class Table {
       // getHome().completeDelete(aConn, key);
 
       // jpa/0h60, the application should be responsible for deleting
-      //   the incoming links even when there are FK constraints.
+      // the incoming links even when there are FK constraints.
       for (int i = 0; i < _incomingLinks.size(); i++) {
         LinkColumns link = _incomingLinks.get(i);
 

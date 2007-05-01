@@ -1175,6 +1175,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    // ejb/06c9
+    out.println("com.caucho.amber.entity.EntityState state = __caucho_state;");
+    out.println();
+
     out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
 
     out.println();
@@ -1187,12 +1191,18 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println("  return;");
     out.println("}");
+    out.println();
 
     // jpa/0h20, jpa/0l20, jpa/0l43
     out.println("if (__caucho_cacheItem == null)");
     out.println("  return;");
-
     out.println();
+
+    // ejb/06c9
+    out.println("if (com.caucho.amber.entity.EntityState.P_DELETING.ordinal() <= state.ordinal())");
+    out.println("  return;");
+    out.println();
+
     out.println("Object pk = __caucho_getPrimaryKey();");
     out.println("__caucho_session.getPersistenceUnit().updateCacheItem((com.caucho.amber.type.EntityType) __caucho_home.getRootType(), pk, this, __caucho_cacheItem);");
 
