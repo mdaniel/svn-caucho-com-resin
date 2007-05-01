@@ -77,7 +77,8 @@ import java.util.logging.Logger;
  * request implementations.
  */
 public abstract class AbstractHttpRequest
-  implements CauchoRequest, SecurityContextProvider {
+  implements CauchoRequest, SecurityContextProvider
+{
   protected static final Logger log = Log.open(AbstractHttpRequest.class);
 
   static final L10N L = new L10N(AbstractHttpRequest.class);
@@ -113,8 +114,11 @@ public abstract class AbstractHttpRequest
   private static final char []CONTINUE_100 = "100-continue".toCharArray();
   private static final char []CLOSE = "close".toCharArray();
 
-  private static final ServletRequestAttributeListener []NULL_LISTENERS =
-    new ServletRequestAttributeListener[0];
+  private static final ServletRequestAttributeListener []NULL_LISTENERS
+    = new ServletRequestAttributeListener[0];
+
+  private static final Cookie []NULL_COOKIES
+    = new Cookie[0];
   
   protected final DispatchServer _server;
   
@@ -1056,9 +1060,15 @@ public abstract class AbstractHttpRequest
       fillCookie(_cookies, rawCookie);
     }
     */
-    
-    _cookiesIn = new Cookie[_cookies.size()];
-    _cookies.toArray(_cookiesIn);
+
+    int size = _cookies.size();
+
+    if (size > 0) {
+      _cookiesIn = new Cookie[_cookies.size()];
+      _cookies.toArray(_cookiesIn);
+    }
+    else
+      _cookiesIn = NULL_COOKIES;
   }
 
   /**

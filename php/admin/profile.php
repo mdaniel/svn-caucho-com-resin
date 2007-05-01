@@ -242,10 +242,6 @@ function is_keepalive($stackTrace)
              && $stackTrace[$i - 1]->methodName == "waitForKeepalive") {
       return true;
     }
-    else if ($stackTrace[$i - 1]->className == "com.caucho.vfs.ReadStream"
-             && $stackTrace[$i - 1]->methodName == "waitForRead") {
-      return true;
-    }
   }
 
   return false;

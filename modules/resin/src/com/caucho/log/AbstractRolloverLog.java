@@ -67,6 +67,8 @@ public class AbstractRolloverLog {
   // How often to check size
   private static final long DEFAULT_ROLLOVER_CHECK_PERIOD = 600L * 1000L;
 
+  private static final long ROLLOVER_OVERFLOW_MAX = 64 * 1024 * 1024;
+
   // prefix for the rollover
   private String _rolloverPrefix;
 
@@ -106,6 +108,7 @@ public class AbstractRolloverLog {
   private boolean _isRollingOver;
   private Path _savedPath;
   private TempStream _tempStream;
+  private long _tempStreamSize;
   private ArchiveTask _archiveTask = new ArchiveTask();
 
   private WriteStream _os;
@@ -351,6 +354,13 @@ public class AbstractRolloverLog {
     throws IOException
   {
     synchronized (this) {
+      if (_isRollingOver && ROLLOVER_OVERFLOW_MAX < _tempStreamSize) {
+	try {
+	  wait();
+	} catch (Exception e) {
+	}
+      }
+      
       if (! _isRollingOver) {
 	if (_os == null)
 	  openLog();
@@ -359,9 +369,12 @@ public class AbstractRolloverLog {
 	  _os.write(buffer, offset, length);
       }
       else {
-	if (_tempStream == null)
+	if (_tempStream == null) {
 	  _tempStream = new TempStream();
+	  _tempStreamSize = 0;
+	}
 
+	_tempStreamSize += length;
 	_tempStream.write(buffer, offset, length, false);
       }
     }
@@ -557,7 +570,6 @@ public class AbstractRolloverLog {
         }
       }
     } catch (Throwable e) {
-      e.printStackTrace();
       logWarning(L.l("Error rotating logs"), e);
     }
 
@@ -768,37 +780,51 @@ public class AbstractRolloverLog {
     }
   }
 
-  void flushTempStream()
+  private void flushTempStream()
   {
     TempStream ts = _tempStream;
     _tempStream = null;
-    
-    if (ts != null) {
-      if (_os == null)
-	openLog();
+    _tempStreamSize = 0;
 
-      try {
-	ReadStream is = ts.openRead(true);
+    try {
+      if (ts != null) {
+	if (_os == null)
+	  openLog();
 
 	try {
-	  is.writeToStream(_os);
-	} finally {
-	  is.close();
+	  ReadStream is = ts.openRead(true);
+
+	  try {
+	    is.writeToStream(_os);
+	  } finally {
+	    is.close();
+	  }
+	} catch (IOException e) {
+	  e.printStackTrace();
 	}
-      } catch (IOException e) {
-	e.printStackTrace();
       }
+    } finally {
+      notifyAll();
     }
   }
 
   class ArchiveTask implements Runnable {
+    private boolean _isArchiving;
+    
     public void run()
     {
       try {
-	movePathToArchive(_savedPath);
+	synchronized (this) {
+	  Path savedPath = _savedPath;
+	  
+	  if (savedPath != null)
+	    movePathToArchive(savedPath);
+	  
+	  _savedPath = null;
+	}
       } finally {
 	// Write any new data from the temp stream to the log.
-	synchronized (this) {
+	synchronized (AbstractRolloverLog.this) {
 	  _isRollingOver = false;
 
 	  flushTempStream();

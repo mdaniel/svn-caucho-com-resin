@@ -330,9 +330,11 @@ if ($db_pools) {
 
 <?php
   }
-}
 ?>
 </table>
+<?php
+}
+?>
 
 <!-- Persistent store -->
 <?php

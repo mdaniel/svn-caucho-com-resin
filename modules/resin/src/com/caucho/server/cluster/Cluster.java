@@ -557,7 +557,7 @@ public class Cluster
       Jmx.register(_admin, objectName);
 
       _objectName = objectName;
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     }
 

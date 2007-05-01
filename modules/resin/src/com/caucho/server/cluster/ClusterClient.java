@@ -48,7 +48,8 @@ import java.util.logging.Logger;
  *  resin:name=web-a,type=ClusterServer
  * </pre>
  */
-public final class ClusterClient {
+public final class ClusterClient
+{
   private static final Logger log
     = Logger.getLogger(ClusterClient.class.getName());
 
@@ -67,6 +68,12 @@ public final class ClusterClient {
   private static final int ST_ACTIVE = 7;
   private static final int ST_CLOSED = 8;
 
+  // number of chunks in the throttling
+  private static final int WARMUP_MAX = 16;
+  private static final int WARMUP_MIN = -16;
+  private static final int []WARMUP_CONNECTION_MAX
+    = new int[] { 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 8, 8, 16, 32, 64, 128 };
+
   private ServerConnector _server;
 
   private String _debugId;
@@ -82,18 +89,27 @@ public final class ClusterClient {
 
   private int _streamCount;
 
-  private long _failRecoverTime;
   private long _warmupTime;
+  private long _warmupChunkTime;
+  
+  private long _failRecoverTime;
+  private long _failChunkTime;
 
   private volatile int _state = ST_NEW;
 
+  // current connection count
+  private volatile int _activeCount;
+  private volatile int _startingCount;
+
+  // numeric value representing the throttle state
+  private volatile int _warmupState;
+  
+  // load management data
   private volatile long _lastFailTime;
   private volatile long _lastBusyTime;
   private volatile long _firstConnectTime;
 
-  private volatile int _activeCount;
-  private volatile int _startingCount;
-  
+  // statistics
   private volatile long _keepaliveCountTotal;
   private volatile long _connectCountTotal;
   private volatile long _failCountTotal;
@@ -121,8 +137,15 @@ public final class ClusterClient {
 
     _debugId = selfId + "->" + targetId;
 
-    _failRecoverTime = server.getLoadBalanceRecoverTime();
     _warmupTime = server.getLoadBalanceWarmupTime();
+    _warmupChunkTime = _warmupTime / WARMUP_MAX;
+    if (_warmupChunkTime <= 0)
+      _warmupChunkTime = 1;
+      
+    _failRecoverTime = server.getLoadBalanceRecoverTime();
+    _failChunkTime = _failRecoverTime / WARMUP_MAX;
+    if (_failChunkTime <= 0)
+      _failChunkTime = 1;
 
     _state = ST_STARTING;
   }
@@ -258,6 +281,8 @@ public final class ClusterClient {
    */
   public String getState()
   {
+    updateWarmup();
+    
     switch (_state) {
     case ST_NEW:
       return "init";
@@ -292,49 +317,52 @@ public final class ClusterClient {
     if (state == ST_ACTIVE)
       return true;
     else if (ST_STARTING <= state && state < ST_ACTIVE) {
-      long now = Alarm.getCurrentTime();
+      updateWarmup();
 
-      if (now < _lastFailTime + _failRecoverTime)
-	return false;
-      if (now < _lastBusyTime + _failRecoverTime)
-	return false;
+      int warmupState = _warmupState;
 
-      long warmupCount;
-      long warmupTime = _warmupTime;
-
-      if (_firstConnectTime <= 0) {
-	toWarmup();
-	warmupCount = 0;
+      if (warmupState < 0) {
+	long now = Alarm.getCurrentTime();
+	
+	return (_lastFailTime - warmupState * _failChunkTime < now);
       }
-      else if (warmupTime <= 0)
-	warmupCount = Integer.MAX_VALUE;
-      else
-	warmupCount = 16 * (now - _firstConnectTime) / warmupTime;
-
-      // Warmup time splits into 16 parts.  The first 4 allow 1 request
-      // at a time.  After that, each segment doubles the allowed requests
-
-      if (warmupCount > 16) {
-	toActive();
-      
+      else if (WARMUP_MAX <= warmupState)
 	return true;
-      }
+
+      int connectionMax = WARMUP_CONNECTION_MAX[warmupState];
 
       int idleCount = getIdleCount();
       int totalCount = _activeCount + _startingCount + idleCount;
+
+      if (_firstConnectTime <= 0)
+	toWarmup();
       
-      if (totalCount <= 1)
-	return true;
-      else if (warmupCount < 8)
-	return false;
-      else if (totalCount < (1 << (warmupCount - 8))) {
-	return true;
-      }
-      else
-	return false;
+      return totalCount < connectionMax;
     }
     else {
       return false;
+    }
+  }
+
+  private void updateWarmup()
+  {
+    synchronized (this) {
+      if (! isEnabled())
+	return;
+    
+      long now = Alarm.getCurrentTime();
+      int warmupState = _warmupState;
+    
+      if (warmupState >= 0 && _firstConnectTime > 0) {
+	warmupState += (now - _firstConnectTime) / _warmupChunkTime;
+
+	if (WARMUP_MAX <= warmupState) {
+	  warmupState = WARMUP_MAX;
+	  toActive();
+	}
+      }
+
+      _warmupState = warmupState;
     }
   }
 
@@ -362,6 +390,9 @@ public final class ClusterClient {
       if (ST_STARTING <= _state && _state < ST_CLOSED) {
 	_state = ST_WARMUP;
 	_firstConnectTime = Alarm.getCurrentTime();
+
+	if (_warmupState < 0)
+	  _warmupState = 0;
       }
     }
   }
@@ -392,6 +423,73 @@ public final class ClusterClient {
     }
 
     clearRecycle();
+  }
+
+  /**
+   * Called when the socket read/write fails.
+   */
+  public void failSocket()
+  {
+    synchronized (this) {
+      _failCountTotal++;
+      
+      long now = Alarm.getCurrentTime();
+      _firstConnectTime = 0;
+
+      // only degrade one per 100ms
+      if (now - _lastFailTime >= 100) {
+	_warmupState--;
+	_lastFailTime = now;
+      }
+
+      if (_warmupState < WARMUP_MIN)
+	_warmupState = WARMUP_MIN;
+      
+      if (_state < ST_CLOSED)
+	_state = ST_FAIL;
+    }
+  }
+
+  /**
+   * Called when the socket read/write fails.
+   */
+  public void failConnect()
+  {
+    synchronized (this) {
+      _failCountTotal++;
+      
+      _firstConnectTime = 0;
+
+      // only degrade one per 100ms
+      _warmupState--;
+      _lastFailTime = Alarm.getCurrentTime();
+
+      if (_warmupState < WARMUP_MIN)
+	_warmupState = WARMUP_MIN;
+      
+      if (_state < ST_CLOSED)
+	_state = ST_FAIL;
+    }
+  }
+
+  /**
+   * Called when the server responds with "busy", e.g. HTTP 503
+   */
+  public void busy()
+  {
+    synchronized (this) {
+      _lastBusyTime = Alarm.getCurrentTime();
+      _firstConnectTime = 0;
+      
+      _warmupState--;
+      if (_warmupState < 0)
+	_warmupState = 0;
+    
+      _busyCountTotal++;
+      
+      if (_state < ST_CLOSED)
+	_state = ST_BUSY;
+    }
   }
 
   /**
@@ -598,6 +696,9 @@ public final class ClusterClient {
 	    _state = ST_WARMUP;
 	    _firstConnectTime = now;
 	  }
+
+	  if (_warmupState < 0)
+	    _warmupState = 0;
 	}
         else if (_warmupTime < now - _firstConnectTime)
           _state = ST_ACTIVE;
@@ -613,7 +714,7 @@ public final class ClusterClient {
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
 
-      toFail();
+      failConnect();
       
       return null;
     } finally {

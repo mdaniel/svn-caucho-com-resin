@@ -683,36 +683,45 @@ public class Resin implements EnvironmentBean, SchemaBean
 
     long start = Alarm.getCurrentTime();
 
-    startManagement();
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(getClassLoader());
+      
+      startManagement();
 
-    // force a GC on start
-    System.gc();
+      // force a GC on start
+      System.gc();
 
-    // XXX: get the server
+      // XXX: get the server
 
-    for (Cluster cluster : _clusters) {
-      cluster.start();
+      for (Cluster cluster : _clusters) {
+	cluster.start();
+      }
+
+      ClusterServer clusterServer = findClusterServer(_serverId);
+
+      if (clusterServer == null)
+	throw new ConfigException(L().l("server-id '{0}' has no matching <server> definition.",
+					_serverId));
+
+
+      _server = clusterServer.startServer();
+
+      Environment.start(getClassLoader());
+
+      /*
+	if (! hasListeningPort()) {
+	log().warning(L().l("-server \"{0}\" has no matching http or srun ports.  Check the resin.conf and -server values.",
+	_serverId));
+	}
+      */
+
+      log().info("Resin started in " + (Alarm.getCurrentTime() - _startTime) + "ms");
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
-
-    ClusterServer clusterServer = findClusterServer(_serverId);
-
-    if (clusterServer == null)
-      throw new ConfigException(L().l("server-id '{0}' has no matching <server> definition.",
-				    _serverId));
-
-
-    _server = clusterServer.startServer();
-
-    Environment.start(getClassLoader());
-
-    /*
-    if (! hasListeningPort()) {
-      log().warning(L().l("-server \"{0}\" has no matching http or srun ports.  Check the resin.conf and -server values.",
-                      _serverId));
-    }
-    */
-
-    log().info("Resin started in " + (Alarm.getCurrentTime() - _startTime) + "ms");
   }
 
   public Cluster findCluster(String id)

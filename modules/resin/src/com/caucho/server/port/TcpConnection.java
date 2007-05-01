@@ -470,8 +470,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
             isKeepalive = false;
 
-	    if (! port.isClosed() &&
-		(! isWaitForRead || getReadStream().waitForRead())) {
+	    if (! port.isClosed()
+		&& (! isWaitForRead || getReadStream().waitForRead())) {
 
               synchronized (_requestLock) {
 		isKeepalive = request.handleRequest();
