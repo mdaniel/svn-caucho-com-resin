@@ -3256,7 +3256,7 @@ public class PostgresModule extends AbstractQuercusModule {
       //@todo return an array
 
       if (conn == null)
-        conn = getConnection(env);
+        conn = (Postgres) env.getSpecialValue("caucho.postgres");
 
       return conn.getServerInfo();
 

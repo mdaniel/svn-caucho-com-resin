@@ -2346,6 +2346,9 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value readdir(Env env, @NotNull DirectoryValue dir)
   {
+    if (dir == null)
+      return BooleanValue.FALSE;
+    
     return dir.readdir();
   }
 
@@ -2450,6 +2453,9 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static void rewinddir(Env env, @NotNull DirectoryValue dir)
   {
+    if (dir == null)
+      return;
+    
     dir.rewinddir();
   }
 
@@ -2492,6 +2498,9 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static void closedir(Env env, @NotNull DirectoryValue dirV)
   {
+    if (dirV == null)
+      return;
+    
     dirV.close();
   }
 

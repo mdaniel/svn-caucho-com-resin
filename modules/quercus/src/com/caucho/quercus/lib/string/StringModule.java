@@ -630,7 +630,7 @@ v   *
    * @return a string of imploded values
    */
   public static Value implode(Env env,
-			      Value glueV,
+                              Value glueV,
                               Value piecesV)
   {
     StringValue glue;
@@ -645,10 +645,10 @@ v   *
       glue = piecesV.toStringValue();
     }
     else {
-      env.error(L.l("neither argument to implode is an array: {0}, {1}",
+      env.warning(L.l("neither argument to implode is an array: {0}, {1}",
 		    glueV.getClass().getName(), piecesV.getClass().getName()));
 
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
     }
 
     StringBuilderValue sb = new StringBuilderValue();
