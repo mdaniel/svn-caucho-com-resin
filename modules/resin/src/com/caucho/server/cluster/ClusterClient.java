@@ -354,7 +354,7 @@ public final class ClusterClient
       int warmupState = _warmupState;
     
       if (warmupState >= 0 && _firstConnectTime > 0) {
-	warmupState += (now - _firstConnectTime) / _warmupChunkTime;
+	warmupState = (int) ((now - _firstConnectTime) / _warmupChunkTime);
 
 	if (WARMUP_MAX <= warmupState) {
 	  warmupState = WARMUP_MAX;

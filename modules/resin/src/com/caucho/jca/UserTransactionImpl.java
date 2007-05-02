@@ -470,11 +470,19 @@ public class UserTransactionImpl implements UserTransaction {
       }
     }
 
-    if (_resources.size() > 0) {
-      log.warning("Closing dangling connections.  All connections must have a close() in a finally block.");
-    }
+    boolean hasWarning = false;
+    
     while (_resources.size() > 0) {
       UserPoolItem userPoolItem = _resources.remove(_resources.size() - 1);
+
+      if (! userPoolItem.isCloseDanglingConnections())
+	continue;
+      
+      if (! hasWarning) {
+	hasWarning = true;
+
+	log.warning("Closing dangling connections.  All connections must have a close() in a finally block.");
+      }
       
       try {
 	IllegalStateException stackTrace = userPoolItem.getAllocationStackTrace();

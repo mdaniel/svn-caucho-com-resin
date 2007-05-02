@@ -360,6 +360,14 @@ public class DBPool implements DataSource {
   }
 
   /**
+   * Set true if dangling connections should be closed.
+   */
+  public void setCloseDanglingConnections(boolean isClose)
+  {
+    _connectionPool.setCloseDanglingConnections(isClose);
+  }
+
+  /**
    * The number of connections to overflow if the connection pool fills
    * and there's a timeout.
    */

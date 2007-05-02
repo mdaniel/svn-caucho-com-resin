@@ -113,6 +113,9 @@ public class HostConfig extends DeployConfig {
   {
     super.setId(cleanName);
 
+    if (_hostName == null)
+      _hostName = cleanName;
+
     if (cleanName.startsWith("xn--")) {
       String name = DomainName.fromAscii(cleanName);
       

@@ -191,6 +191,14 @@ class UserPoolItem {
   {
     _cm.setSaveAllocationStackTrace(enable);
   }
+
+  /**
+   * Return true if connections should be closed automatically.
+   */
+  public boolean isCloseDanglingConnections()
+  {
+    return _cm.isCloseDanglingConnections();
+  }
   
   /**
    * Returns the pool item.

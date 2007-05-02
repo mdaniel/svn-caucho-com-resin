@@ -236,6 +236,8 @@ public class ResinWatchdog extends AbstractManagedObject
 
     try {
       watchdog.start(argv);
+
+      return;
     } catch (ConfigException e) {
       throw e;
     } catch (IllegalStateException e) {
@@ -377,7 +379,7 @@ public class ResinWatchdog extends AbstractManagedObject
     registerSelf();
 
     _thread = new Thread(this, "watchdog-" + _id);
-    _thread.setDaemon(true);
+    _thread.setDaemon(false);
 
     _thread.start();
   }
@@ -421,6 +423,7 @@ public class ResinWatchdog extends AbstractManagedObject
     _rootDirectory = rootDirectory;
 
     _thread = new Thread(this, "watchdog-" + _id);
+    _thread.setDaemon(false);
 
     _thread.start();
 
@@ -508,6 +511,7 @@ public class ResinWatchdog extends AbstractManagedObject
 	try {
 	  s = ss.accept();
 	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
 	} finally {
 	  ss.close();
 	}
@@ -558,13 +562,23 @@ public class ResinWatchdog extends AbstractManagedObject
 	}
 
 	try {
-	  watchdogIs.close();
+	  if (watchdogIs != null)
+	    watchdogIs.close();
 	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
+	}
+
+	try {
+	  if (s != null)
+	    s.close();
+	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
 	}
 
 	try {
 	  stdOs.close();
 	} catch (Exception e) {
+	  log.log(Level.WARNING, e.toString(), e);
 	}
 
 	long endTime = Alarm.getCurrentTime() + _shutdownWaitTime;
@@ -717,6 +731,8 @@ public class ResinWatchdog extends AbstractManagedObject
     }
 
     if (getJniBoot() != null) {
+      getJniBoot().clearSaveOnExec();
+      
       ArrayList<QServerSocket> boundSockets = new ArrayList<QServerSocket>();
 
       try {

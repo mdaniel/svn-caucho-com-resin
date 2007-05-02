@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface Boot {
+  public void clearSaveOnExec();
+  
   public Process exec(ArrayList<String> args,
 		      HashMap<String,String> env,
 		      String pwd,

@@ -110,6 +110,9 @@ public class ConnectionPool extends AbstractManagedObject
   // If true, the save a stack trace when the collection is allocated
   private boolean _saveAllocationStackTrace = false;
 
+  // If true, close dangling connections
+  private boolean _isCloseDanglingConnections = true;
+
   private final ArrayList<PoolItem> _pool = new ArrayList<PoolItem>();
 
   private final LifoSet<ManagedConnection> _idlePool
@@ -220,6 +223,22 @@ public class ConnectionPool extends AbstractManagedObject
   public void setSaveAllocationStackTrace(boolean save)
   {
     _saveAllocationStackTrace = save;
+  }
+
+  /**
+   * Returns true if dangling connections should be closed
+   */
+  public boolean isCloseDanglingConnections()
+  {
+    return _isCloseDanglingConnections;
+  }
+
+  /**
+   * True if dangling connections should be closed.
+   */
+  public void setCloseDanglingConnections(boolean isClose)
+  {
+    _isCloseDanglingConnections = isClose;
   }
 
   /**
