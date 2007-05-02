@@ -95,6 +95,11 @@ class FactoryLoader {
 
     className = System.getProperty(_factoryId);
 
+    if (className != null && log.isLoggable(Level.FINEST)) {
+      log.finest(_factoryId + ": got factory className from System property: " +
+                 className);
+    }
+
     if (className == null) {
       
       String fileName = (System.getProperty("java.home")
@@ -111,6 +116,12 @@ class FactoryLoader {
         props.load(is);
 
         className = props.getProperty(_factoryId);
+
+        if (className != null && log.isLoggable(Level.FINEST)) {
+          log.finest(_factoryId + ": got factory className from " +
+                     "jaxm.properties: " + className);
+        }
+
       } catch (IOException e) {
         log.log(Level.FINEST, "ignoring exception", e);
       }
@@ -127,8 +138,14 @@ class FactoryLoader {
     if (className == null) {
       Class cl = createFactoryClass("META-INF/services/"+_factoryId,
                                      classLoader);
-      if (cl != null)
+      if (cl != null) {
+        if (log.isLoggable(Level.FINEST)) {
+          log.finest(_factoryId + ": got factory className from " +
+                     "META-INF/services/: " + cl.getName());
+        }
+
         return cl;
+      }
     }
 
     if (className != null) {
@@ -176,8 +193,10 @@ class FactoryLoader {
 
         Class provider = loadProvider(url, loader);
 
-        if (provider != null)
+        if (provider != null) {
+          System.out.println("Loaded provider " + provider + " from url " + url);
           list.add(provider);
+        }
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);

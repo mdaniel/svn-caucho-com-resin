@@ -58,7 +58,7 @@ public abstract class MessageFactory {
 
       if (cl == null) {
         FactoryLoader factoryLoader = 
-          FactoryLoader.getFactoryLoader("javax.xml.soap.SOAPFactory");
+          FactoryLoader.getFactoryLoader("javax.xml.soap.MessageFactory");
         
         cl = factoryLoader.newClass(classLoader);
 
