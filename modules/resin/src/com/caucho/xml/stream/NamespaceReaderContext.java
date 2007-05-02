@@ -278,4 +278,10 @@ public class NamespaceReaderContext extends NamespaceContextImpl
       }
     }
   }
+
+  public void print()
+  {
+    for (NamespaceBinding binding : _bindings.values())
+      System.out.println(binding.toString());
+  }
 }

@@ -303,7 +303,7 @@ public class SOAPPartImpl extends SOAPPart
 
   public Element getDocumentElement()
   {
-    throw new UnsupportedOperationException();
+    return _envelope;
   }
 
   public String getDocumentURI()
@@ -429,7 +429,7 @@ public class SOAPPartImpl extends SOAPPart
 
   public NodeList getChildNodes()
   {
-    throw new UnsupportedOperationException();
+    return new NodeListImpl();
   }
 
   public Object getFeature(String feature, String version)
@@ -587,5 +587,22 @@ public class SOAPPartImpl extends SOAPPart
   public Object setUserData(String key, Object data, UserDataHandler handler)
   {
     throw new UnsupportedOperationException();
+  }
+
+  protected class NodeListImpl 
+    implements NodeList 
+  {
+    public int getLength()
+    {
+      return 1;
+    }
+
+    public org.w3c.dom.Node item(int i)
+    {
+      if (i != 0)
+        return null;
+
+      return _envelope;
+    }
   }
 }

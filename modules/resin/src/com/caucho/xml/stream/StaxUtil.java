@@ -29,6 +29,7 @@
 
 package com.caucho.xml.stream;
 
+import static javax.xml.XMLConstants.*;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
@@ -49,6 +50,35 @@ import com.caucho.util.L10N;
  **/
 public class StaxUtil {
   public static final L10N L = new L10N(StaxUtil.class);
+
+  public static QName resolveStringToQName(String string, XMLStreamReader in)
+    throws XMLStreamException
+  {
+    return resolveStringToQName(string, in.getNamespaceContext());
+  }
+
+  public static QName resolveStringToQName(String string, 
+                                           NamespaceContext context)
+    throws XMLStreamException
+  {
+    int colon = string.indexOf(':');
+
+    if (colon < 0)
+      return new QName(string);
+
+    if (colon + 1 >= string.length())
+      throw new XMLStreamException(L.l("Invalid qualified name: {0}", string));
+
+    String prefix = string.substring(0, colon);
+    String localName = string.substring(colon + 1);
+    String namespace = context.getNamespaceURI(prefix);
+
+    if (NULL_NS_URI.equals(namespace))
+      throw new XMLStreamException(L.l("No namespace for qualifed name: {0}", string));
+
+    return new QName(namespace, localName, prefix);
+  }
+
   /**
    * Ensures that a given namespace exists within the namespace context
    * given.

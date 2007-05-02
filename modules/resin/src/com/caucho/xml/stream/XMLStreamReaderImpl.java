@@ -59,6 +59,7 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
   private ReadStream _is;
   private Reader _reader;
 
+  private int _lastCol = 1;
   private int _col = 1;
   private int _row = 1;
   private int _ofs = 1;
@@ -1098,7 +1099,8 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     // XXX '\r'
     if (ch == '\n') {
       _row++;
-      _col = 0;
+      _lastCol = _col;
+      _col = 1;
     }
     else
       _col++;
@@ -1114,6 +1116,14 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
     if (_inputOffset > 0) {
       _inputOffset--;
       _ofs--;
+
+      if (_col > 1)
+        _col--;
+
+      if (_inputBuf[_inputOffset] == '\n') {
+        _row--;
+        _col = _lastCol;
+      }
     }
   }
 
@@ -1140,6 +1150,16 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
 
         _inputBuf[_inputLength++] = (char) ch;
         _inputOffset = _inputLength;
+
+        _ofs++;
+
+        // XXX '\r'
+        if (ch == '\n') {
+          _row++;
+          _col = 1;
+        }
+        else
+          _col++;
 
         return ch;
       }

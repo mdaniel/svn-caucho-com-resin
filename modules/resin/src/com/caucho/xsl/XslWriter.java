@@ -749,7 +749,7 @@ public class XslWriter extends Writer implements ExtendedLocator {
 
     switch (copyNode.getNodeType()) {
     case Node.ATTRIBUTE_NODE:
-      QAbstractNode oldNode = (QAbstractNode) copyNode;
+      Node oldNode = copyNode;
       attribute(oldNode.getNamespaceURI(),
                 oldNode.getPrefix(),
                 oldNode.getLocalName(),
@@ -761,7 +761,7 @@ public class XslWriter extends Writer implements ExtendedLocator {
       return;
 
     case Node.ELEMENT_NODE:
-      QElement oldElt = (QElement) copyNode;
+      Element oldElt = (Element) copyNode;
 
       /*
       String oldSystemId = _systemId;

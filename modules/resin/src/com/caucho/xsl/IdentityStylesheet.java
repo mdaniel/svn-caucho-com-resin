@@ -30,7 +30,10 @@ package com.caucho.xsl;
 
 import com.caucho.xml.QElement;
 import com.caucho.xml.XMLWriter;
+import com.caucho.xml.saaj.SOAPElementImpl;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
@@ -86,11 +89,30 @@ public class IdentityStylesheet extends StylesheetImpl {
       
     case Node.ELEMENT_NODE:
       out.pushCopy(node);
-      for (Node child = ((QElement) node).getFirstAttribute();
-           child != null;
-           child = child.getNextSibling()) {
-        applyNode(out, child);
+
+      if (node instanceof QElement) {
+        for (Node child = ((QElement) node).getFirstAttribute();
+             child != null;
+             child = child.getNextSibling()) {
+          applyNode(out, child);
+        }
       }
+      else if (node instanceof SOAPElementImpl) {
+        for (Node child = ((SOAPElementImpl) node).getFirstAttribute();
+             child != null;
+             child = child.getNextSibling()) {
+          applyNode(out, child);
+        }
+      }
+      else {
+        NamedNodeMap attributes = ((Element) node).getAttributes();
+
+        for (int i = 0; i < attributes.getLength(); i++) {
+          Node child = attributes.item(i);
+          applyNode(out, child);
+        }
+      }
+
       for (Node child = node.getFirstChild();
            child != null;
            child = child.getNextSibling()) {

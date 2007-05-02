@@ -187,6 +187,16 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
       }
     }
   }
+
+  public SOAPAttrImpl getFirstAttribute()
+  {
+    return _firstAttribute;
+  }
+  
+  public SOAPAttrImpl getLastAttribute()
+  {
+    return _lastAttribute;
+  }
   
   // javax.xml.soap.Element
   
