@@ -448,6 +448,16 @@ public class DependentEntityOneToOneField extends CascadableField {
 
       out.println("child = " + value + ";");
 
+      boolean isJPA = getEntitySourceType().getPersistenceUnit().isJPA();
+
+      if (isJPA && ! dst.equals("item")) {
+        // jpa/0o42
+        out.println("if (isFullMerge)");
+        out.println("  child = " + value + ";");
+        out.println("else {");
+        out.pushDepth();
+      }
+
       out.println("if (child != null) {");
       out.pushDepth();
 
@@ -477,6 +487,12 @@ public class DependentEntityOneToOneField extends CascadableField {
 
       out.popDepth();
       out.println("}");
+
+      if (isJPA && ! dst.equals("item")) {
+        // jpa/0o42
+        out.popDepth();
+        out.println("}");
+      }
 
       value = "(" + targetTypeName + ") child";
 

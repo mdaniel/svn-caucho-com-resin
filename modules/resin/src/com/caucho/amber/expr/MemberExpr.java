@@ -72,7 +72,7 @@ public class MemberExpr extends AbstractAmberExpr {
       // jpa/10ca
     }
     else if (collectionExpr instanceof OneToManyExpr) {
-      // ejb/06u0
+      // ejb/06u0, jpa/10c4, jpa/10c5
       OneToManyExpr oneToMany = (OneToManyExpr) collectionExpr;
       PathExpr parent = oneToMany.getParent();
 

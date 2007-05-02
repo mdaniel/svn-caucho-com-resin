@@ -1228,15 +1228,16 @@ public class EntityManyToOneField extends CascadableField {
 
       out.println();
 
+      String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
+      long dirtyMask = (1L << (getIndex() % 64));
+
+      // jpa/0o42: merge()
+      out.println(dirtyVar + " |= " + dirtyMask + "L;");
+
       out.println(generateSuperSetter("v") + ";");
       out.println();
       out.println("if (__caucho_session != null) {");
       out.pushDepth();
-
-      String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
-      long dirtyMask = (1L << (getIndex() % 64));
-
-      out.println(dirtyVar + " |= " + dirtyMask + "L;");
 
       out.println(loadVar + " |= " + loadMask + "L;");
 

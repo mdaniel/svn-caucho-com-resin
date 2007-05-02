@@ -411,9 +411,19 @@ public class EntityOneToManyField extends CollectionField {
     if (isMap) {
       // jpa/0v00
       newEmptyCollection += "," + getEntityTargetType().getBeanClass().getName();
-      newEmptyCollection += ".class.getDeclaredMethod(\"get";
+      newEmptyCollection += ".class.getDeclaredMethod(\"";
+
       String getterMapKey = getMapKey();
-      getterMapKey = Character.toUpperCase(getterMapKey.charAt(0)) + getterMapKey.substring(1);
+
+      // jpa/0j63
+      if (getterMapKey == null) {
+        getterMapKey = getEntityTargetType().getId().generateGetProperty("this");
+      }
+      else {
+        getterMapKey = "get" + Character.toUpperCase(getterMapKey.charAt(0))
+          + getterMapKey.substring(1);
+      }
+
       newEmptyCollection += getterMapKey; // "getId");
       newEmptyCollection += "\", (Class []) null)";
     }
@@ -652,9 +662,19 @@ public class EntityOneToManyField extends CollectionField {
     if (isMap) {
       out.print(", ");
       out.print(getEntityTargetType().getBeanClass().getName());
-      out.print(".class.getDeclaredMethod(\"get");
+      out.print(".class.getDeclaredMethod(\"");
+
       String getterMapKey = getMapKey();
-      getterMapKey = Character.toUpperCase(getterMapKey.charAt(0)) + getterMapKey.substring(1);
+
+      // jpa/0j63
+      if (getterMapKey == null) {
+        getterMapKey = getEntityTargetType().getId().getKey().getGetterName();
+      }
+      else {
+        getterMapKey = "get" + Character.toUpperCase(getterMapKey.charAt(0))
+          + getterMapKey.substring(1);
+      }
+
       out.print(getterMapKey); // "getId");
       out.print("\")");
     }

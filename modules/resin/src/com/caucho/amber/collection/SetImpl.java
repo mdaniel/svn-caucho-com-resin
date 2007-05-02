@@ -70,7 +70,8 @@ public class SetImpl<E> extends AbstractSet<E>
   {
     _query = query;
 
-    setSession(((UserQuery) _query).getConnection());
+    if (query != null)
+      setSession(((UserQuery) _query).getConnection());
   }
 
   /**
@@ -89,7 +90,9 @@ public class SetImpl<E> extends AbstractSet<E>
   {
     _aConn = aConn;
 
-    _aConn.register(this);
+    // jpa/0j62
+    if (aConn != null)
+      _aConn.register(this);
   }
 
   /**

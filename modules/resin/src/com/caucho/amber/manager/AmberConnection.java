@@ -3184,9 +3184,12 @@ public class AmberConnection
 
         if (isFullMerge) {
           // jpa/0o42: avoids premature loading.
-          // jpa/0s2d managedEntity.__caucho_setConnection(null);
+          managedEntity.__caucho_setConnection(null);
+
           entity.__caucho_copyTo(managedEntity, this, true);
-          // jpa/0s2d managedEntity.__caucho_setConnection(this);
+
+          // jpa/0o42
+          managedEntity.__caucho_setConnection(this);
         }
 
         if (existingEntity == null) {
@@ -3195,6 +3198,10 @@ public class AmberConnection
           // cascade children
           // XXX: called from persist()
           // entity.__caucho_cascadePrePersist(this);
+
+          // jpa/0o42
+          managedEntity.__caucho_setConnection(null);
+          managedEntity.__caucho_setEntityState(EntityState.TRANSIENT);
 
           persist(managedEntity);
 
@@ -3214,12 +3221,13 @@ public class AmberConnection
         }
 
         // jpa/0o42: avoids premature loading.
-        // jpa/0s2d managedEntity.__caucho_setConnection(null);
+        managedEntity.__caucho_setConnection(null);
 
         // jpa/0ga3, jpa/0h08, jpa/0o4-
         entity.__caucho_merge(managedEntity, this, false);
 
-        // jpa/0s2d managedEntity.__caucho_setConnection(this);
+        // jpa/0o42
+        managedEntity.__caucho_setConnection(this);
 
         // jpa/0h08
         entity.__caucho_copyDirtyMaskFrom(managedEntity);
