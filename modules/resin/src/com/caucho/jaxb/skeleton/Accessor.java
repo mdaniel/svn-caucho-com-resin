@@ -1118,7 +1118,7 @@ public abstract class Accessor implements Namer {
 
     Annotation[] annotations = new Annotation[] {
       xmlAnyAttribute, xmlAnyElement, xmlAttribute, xmlElement, 
-      xmlElementRef, xmlElements, xmlID, xmlIDREF, xmlValue
+      xmlElementRef, xmlElements, xmlIDREF, xmlValue
     };
 
     int count = 0;

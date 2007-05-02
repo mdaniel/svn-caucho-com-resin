@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -351,8 +352,10 @@ public class JAXBContextImpl extends JAXBContext {
     if (skeleton != null)
       return skeleton;
 
-    if (Object.class.equals(c))
+    if (Object.class.equals(c)) {
       skeleton = new AnyTypeSkeleton(this);
+      _classSkeletons.put(c, skeleton);
+    }
     else {
       // XXX
       if (c.isEnum() || c.isInterface())
@@ -369,8 +372,6 @@ public class JAXBContextImpl extends JAXBContext {
 
       _pendingSkeletons.remove(c);
     }
-
-    _classSkeletons.put(c, skeleton);
 
     return skeleton;
   }
@@ -597,6 +598,14 @@ public class JAXBContextImpl extends JAXBContext {
         }
       }
     }
+    else if (type instanceof GenericArrayType) {
+      Type component = ((GenericArrayType) type).getGenericComponentType();
+
+      if (byte.class.equals(component))
+        return ByteArrayProperty.PROPERTY;
+
+      // XXX other component types?
+    }
 
     throw new JAXBException(L.l("Unrecognized type: {0}", type.toString()));
   }
@@ -688,9 +697,6 @@ public class JAXBContextImpl extends JAXBContext {
     if (XMLGregorianCalendar.class.equals(type))
       return XMLGregorianCalendarProperty.PROPERTY;
 
-    if (byte[].class.equals(type))
-      return ByteArrayProperty.PROPERTY;
-
     if (Image.class.equals(type))
       return ImageProperty.getImageProperty(mimeType);
 
@@ -699,6 +705,9 @@ public class JAXBContextImpl extends JAXBContext {
 
     if (Source.class.equals(type))
       return SourceProperty.PROPERTY;
+
+    if (byte[].class.equals(type))
+      return ByteArrayProperty.PROPERTY;
 
     return null;
   }

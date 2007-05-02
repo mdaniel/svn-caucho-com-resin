@@ -60,8 +60,9 @@ class JAXBIntrospectorImpl extends JAXBIntrospector {
 
   public boolean isElement(Object object)
   {
-    return (object instanceof JAXBElement) || 
-           _context.hasSkeleton(object.getClass());
+    return (object != null) && 
+           ((object instanceof JAXBElement) || 
+            _context.hasSkeleton(object.getClass()));
   }
 
 }

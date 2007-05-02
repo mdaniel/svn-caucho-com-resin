@@ -38,6 +38,7 @@ import com.caucho.xml.stream.StaxUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import static javax.xml.XMLConstants.*;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -82,18 +83,30 @@ public class AnyTypeSkeleton extends ClassSkeleton<Object> {
   public Object read(Unmarshaller u, XMLStreamReader in)
     throws IOException, XMLStreamException, JAXBException
   {
-    DOMResult result = new DOMResult();
-    XMLOutputFactory factory = _context.getXMLOutputFactory();
-    XMLStreamWriter out = factory.createXMLStreamWriter(result);
+    String type = in.getAttributeValue(W3C_XML_SCHEMA_INSTANCE_NS_URI, "type");
 
-    StaxUtil.copyReaderToWriter(in, out);
+    if (type != null) {
+      QName typeQName = StaxUtil.resolveStringToQName(type, in);
+      Class cl = JAXBUtil.getClassForDatatype(typeQName);
+      
+      Property property = _context.createProperty(cl);
 
-    Node node = result.getNode();
+      return property.read(u, in, null);
+    }
+    else {
+      DOMResult result = new DOMResult();
+      XMLOutputFactory factory = _context.getXMLOutputFactory();
+      XMLStreamWriter out = factory.createXMLStreamWriter(result);
 
-    if (node.getNodeType() == Node.DOCUMENT_NODE)
-      node = ((Document) node).getDocumentElement();
+      StaxUtil.copyReaderToWriter(in, out);
 
-    return node;
+      Node node = result.getNode();
+
+      if (node.getNodeType() == Node.DOCUMENT_NODE)
+        node = ((Document) node).getDocumentElement();
+
+      return node;
+    }
 
     /*
     Skeleton skeleton = _context.getRootElement(in.getName());

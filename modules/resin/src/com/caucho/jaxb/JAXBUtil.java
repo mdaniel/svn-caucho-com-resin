@@ -52,6 +52,7 @@ import javax.xml.ws.Holder;
 
 import static java.lang.Character.*;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -65,10 +66,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.caucho.util.L10N;
+
 /**
  * JAXB utilities.
  */
 public class JAXBUtil {
+  private static final L10N L = new L10N(JAXBUtil.class);
   private static final Logger log = Logger.getLogger(JAXBUtil.class.getName());
 
   private static final Map<Class,QName> _datatypeMap
@@ -251,11 +255,13 @@ public class JAXBUtil {
       for (Type argument : arguments)
         introspectType(argument, jaxbClasses);
     }
+    else if (type instanceof GenericArrayType) {
+      Type component = ((GenericArrayType) type).getGenericComponentType();
+      introspectType(component, jaxbClasses);
+    }
     else if (type != null) {
       // Type variables must be instantiated
-      throw new UnsupportedOperationException("Method arguments cannot have " +
-                                              "uninstantiated type variables " +
-                                              "or wildcards (" + type + ")");
+      throw new UnsupportedOperationException(L.l("Method arguments cannot have uninstantiated type variables or wildcards ({0} of type {1})", type, type.getClass().getName()));
     }
   }
 

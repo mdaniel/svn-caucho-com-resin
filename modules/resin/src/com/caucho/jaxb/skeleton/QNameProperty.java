@@ -51,7 +51,7 @@ import org.w3c.dom.Node;
 import com.caucho.jaxb.BinderImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.util.L10N;
-
+import com.caucho.xml.stream.StaxUtil;
 /**
  * a qname property
  */
@@ -298,10 +298,12 @@ public class QNameProperty extends Property {
     else {
       String prefix = text.substring(0, colon);
 
-      String namespace = context.getNamespaceURI(prefix);
+      // NOTE!!! The Xerces StAX requires the prefixes to be interned for
+      // some reason...
+      String namespace = context.getNamespaceURI(prefix.intern());
 
       if (namespace == null)
-        throw new JAXBException(L.l("No known namespace for prefix {0}", prefix));
+        throw new JAXBException(L.l("No known namespace for prefix '{0}'", prefix));
 
       String localName = text.substring(colon + 1);
 
