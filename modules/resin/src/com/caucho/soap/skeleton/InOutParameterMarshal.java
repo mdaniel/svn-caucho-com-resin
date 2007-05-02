@@ -81,6 +81,12 @@ public class InOutParameterMarshal extends ParameterMarshal {
     throws IOException, XMLStreamException, JAXBException
   {
     Holder h = (Holder) args[_arg];
+
+    if (h == null) {
+      h = new Holder();
+      args[_arg] = h;
+    }
+
     Object previous = h.value;
 
     h.value = _property.read(_unmarshaller, in, previous);

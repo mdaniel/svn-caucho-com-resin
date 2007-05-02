@@ -32,6 +32,7 @@ package com.caucho.soap.skeleton;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.JAXBContextImpl;
 import static com.caucho.soap.wsdl.WSDLConstants.*;
+import com.caucho.soap.jaxws.HandlerChainInvoker;
 import com.caucho.util.L10N;
 import com.caucho.xml.XmlPrinter;
 import com.caucho.xml.stream.StaxUtil;
@@ -173,6 +174,11 @@ public class DirectSkeleton extends Skeleton {
     _context = context;
   }
 
+  public String getPortName()
+  {
+    return _portName;
+  }
+
   public String getNamespace()
   {
     return _namespace;
@@ -229,17 +235,25 @@ public class DirectSkeleton extends Skeleton {
     _actionMethods.put(method, action);
   }
 
+  public Object invoke(Method method, String url, Object[] args)
+    throws IOException, XMLStreamException, MalformedURLException, 
+           JAXBException, Throwable
+  {
+    return invoke(method, url, args, null);
+  }
+
   /**
    * Invokes the request on a remote object using an outbound XML stream.
    */
-  public Object invoke(Method method, String url, Object[] args)
+  public Object invoke(Method method, String url, Object[] args, 
+                       HandlerChainInvoker handlerChain)
     throws IOException, XMLStreamException, MalformedURLException, 
            JAXBException, Throwable
   {
     AbstractAction action = _actionMethods.get(method);
 
     if (action != null)
-      return action.invoke(url, args);
+      return action.invoke(url, args, handlerChain);
     else if ("toString".equals(method.getName()))
       return "SoapStub[" + (_api != null ? _api.getName() : "") + "]";
     else

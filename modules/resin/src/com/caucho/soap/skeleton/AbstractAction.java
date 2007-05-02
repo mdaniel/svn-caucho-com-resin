@@ -34,7 +34,10 @@ import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.skeleton.Property;
 
 import static com.caucho.soap.wsdl.WSDLConstants.*;
+import com.caucho.soap.jaxws.HandlerChainInvoker;
 import com.caucho.util.L10N;
+
+import javax.activation.DataHandler;
 
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
@@ -52,10 +55,16 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
+import static javax.xml.ws.handler.MessageContext.*;
 import javax.xml.ws.soap.SOAPFaultException;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -73,6 +82,7 @@ import java.net.URLConnection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -118,6 +128,10 @@ public abstract class AbstractAction {
     = new HashMap<String,ParameterMarshal>();
   protected final ParameterMarshal[] _headerArgs;
 
+  protected final HashMap<String,ParameterMarshal> _attachmentArguments
+    = new HashMap<String,ParameterMarshal>();
+  protected final ParameterMarshal[] _attachmentArgs;
+
   protected final ParameterMarshal _returnMarshal;
   protected final boolean _headerReturn;
 
@@ -127,8 +141,11 @@ public abstract class AbstractAction {
   protected final HashMap<QName,ParameterMarshal> _faultNames
     = new HashMap<QName,ParameterMarshal>();
 
+  protected int _attachmentInputs;
   protected int _headerInputs;
   protected int _bodyInputs;
+
+  protected int _attachmentOutputs;
   protected int _headerOutputs;
   protected int _bodyOutputs;
 
@@ -180,8 +197,12 @@ public abstract class AbstractAction {
     if (eiMethod != null)
       eiParamAnn = eiMethod.getParameterAnnotations();
 
-    ArrayList<ParameterMarshal> headerList = new ArrayList<ParameterMarshal>();
-    ArrayList<ParameterMarshal> bodyList = new ArrayList<ParameterMarshal>();
+    ArrayList<ParameterMarshal> attachmentList = 
+      new ArrayList<ParameterMarshal>();
+    ArrayList<ParameterMarshal> headerList = 
+      new ArrayList<ParameterMarshal>();
+    ArrayList<ParameterMarshal> bodyList = 
+      new ArrayList<ParameterMarshal>();
     
     for (int i = 0; i < params.length; i++) {
       boolean isHeader = false;
@@ -254,6 +275,19 @@ public abstract class AbstractAction {
         headerList.add(pMarshal);
         _headerArguments.put(localName, pMarshal);
       }
+      else if (DataHandler.class.equals(type)) {
+        if (pMarshal instanceof InParameterMarshal)
+          _attachmentInputs++;
+        else if (pMarshal instanceof OutParameterMarshal)
+          _attachmentOutputs++;
+        else {
+          _attachmentInputs++;
+          _attachmentOutputs++;
+        }
+
+        attachmentList.add(pMarshal);
+        _attachmentArguments.put(localName, pMarshal);
+      }
       else {
         if (pMarshal instanceof InParameterMarshal)
           _bodyInputs++;
@@ -268,6 +302,9 @@ public abstract class AbstractAction {
         _bodyArguments.put(localName, pMarshal);
       }
     }
+
+    _attachmentArgs = new ParameterMarshal[attachmentList.size()];
+    attachmentList.toArray(_attachmentArgs);
 
     _headerArgs = new ParameterMarshal[headerList.size()];
     headerList.toArray(_headerArgs);
@@ -453,7 +490,8 @@ public abstract class AbstractAction {
   /**
    * Client-side invocation.
    */
-  public Object invoke(String url, Object[] args)
+  public Object invoke(String url, Object[] args, 
+                       HandlerChainInvoker handlerChain)
     throws IOException, XMLStreamException, MalformedURLException, 
            JAXBException, Throwable
   {
@@ -476,24 +514,67 @@ public abstract class AbstractAction {
       httpConnection.setDoOutput(true);
 
       OutputStream httpOut = httpConnection.getOutputStream();
-      XMLStreamWriter out 
-        = getXMLOutputFactory().createXMLStreamWriter(httpOut);
+      XMLStreamWriter out = null;
+      DOMResult dom = null;
+
+      if (handlerChain != null) {
+        dom = new DOMResult();
+        out = getXMLOutputFactory().createXMLStreamWriter(dom);
+      }
+      else {
+        out = getXMLOutputFactory().createXMLStreamWriter(httpOut);
+      }
 
       writeRequest(out, args);
       out.flush();
 
+      if (handlerChain != null) {
+        Source source = new DOMSource(dom.getNode());
+
+        // XXX fill this in...
+        Map<String,DataHandler> attachments = new HashMap<String,DataHandler>();
+
+        Map<String,Object> httpProperties = new HashMap<String,Object>();
+        httpProperties.put(HTTP_REQUEST_METHOD, "POST");
+        httpProperties.put(HTTP_REQUEST_HEADERS, 
+                           new HashMap<String,List<String>>());
+
+        handlerChain.invoke(source, httpOut, attachments, 
+                            httpProperties, false, true);
+      }
+
       //
       // Parse the response
       // 
+
+      httpConnection.getResponseCode();
+      InputStream httpIn = httpConnection.getInputStream();
+      XMLStreamReader in = null;
+      
+      if (handlerChain != null) {
+        // XXX fill this in...
+        Map<String,DataHandler> attachments = new HashMap<String,DataHandler>();
+
+        Map<String,Object> httpProperties = new HashMap<String,Object>();
+        httpProperties.put(HTTP_RESPONSE_CODE, 
+                           Integer.valueOf(httpConnection.getResponseCode()));
+        httpProperties.put(HTTP_RESPONSE_HEADERS,
+                           httpConnection.getHeaderFields());
+
+        InputStream is = 
+          handlerChain.invoke(httpIn, attachments, httpProperties, true, true);
+
+        in = _xmlInputFactory.createXMLStreamReader(is);
+      }
+      else {
+        in = _xmlInputFactory.createXMLStreamReader(httpIn);
+      }
 
       if (httpConnection.getResponseCode() != 200)
         return null; // XXX more meaningful error
 
       if (_isOneway)
         return null;
-
-      InputStream httpIn = httpConnection.getInputStream();
-      XMLStreamReader in = _xmlInputFactory.createXMLStreamReader(httpIn);
 
       Object ret = readResponse(in, args);
 

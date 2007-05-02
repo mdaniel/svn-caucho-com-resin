@@ -30,6 +30,7 @@
 package com.caucho.soap.jaxws;
 
 import com.caucho.server.util.ScheduledThreadPool;
+import com.caucho.soap.jaxws.handlerchain.HandlerChains;
 import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.soap.skeleton.Skeleton;
 import com.caucho.soap.wsdl.WSDLDefinitions;
@@ -39,11 +40,15 @@ import com.caucho.util.L10N;
 import javax.activation.DataSource;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import static javax.xml.soap.SOAPConstants.*;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
+
+import javax.jws.HandlerChain;
 
 import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
@@ -55,6 +60,8 @@ import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.spi.ServiceDelegate;
 
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.util.Iterator;
@@ -74,6 +81,8 @@ public class ServiceDelegateImpl extends ServiceDelegate {
   private final Map<QName,PortInfoImpl> _portMap 
     = new HashMap<QName,PortInfoImpl>();
 
+  private final Unmarshaller _handlerUnmarshaller;
+
   private final ClassLoader _classLoader;
 
   private final URL _wsdl;
@@ -90,6 +99,15 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     _wsdl = wsdl;
     _serviceName = serviceName;
     _serviceClass = serviceClass;
+
+    try {
+      JAXBContext context = 
+        JAXBContext.newInstance("com.caucho.soap.jaxws.handlerchain");
+      _handlerUnmarshaller = context.createUnmarshaller();
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void addPort(QName portName, String bindingId, String endpointAddress)
@@ -227,8 +245,19 @@ public class ServiceDelegateImpl extends ServiceDelegate {
       PortProxyHandler handler = 
         new PortProxyHandler(skeleton, endpointAddress, binding);
 
+      if (portName == null)
+        portName = new QName(skeleton.getNamespace(), skeleton.getPortName());
+
       PortInfoImpl portInfo = new PortInfoImpl(bindingId, portName, 
                                                _serviceName, endpointAddress);
+
+      if (_handlerResolver == null) {
+        HandlerChain handlerChain = 
+          (HandlerChain) api.getAnnotation(HandlerChain.class);
+
+        if (handlerChain != null)
+          _handlerResolver = createHandlerResolver(api, handlerChain);
+      }
 
       if (_handlerResolver != null)
         binding.setHandlerChain(_handlerResolver.getHandlerChain(portInfo));
@@ -247,6 +276,18 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     catch (Exception e) {
       throw new WebServiceException(e);
     }
+  }
+
+  private HandlerResolver createHandlerResolver(Class cl, 
+                                                HandlerChain handlerChain)
+    throws JAXBException
+  {
+    InputStream in = cl.getResourceAsStream(handlerChain.file());
+    
+    HandlerChains handlerChains = 
+      (HandlerChains) _handlerUnmarshaller.unmarshal(in);
+
+    return handlerChains.toHandlerResolver();
   }
 
   public Iterator<QName> getPorts()

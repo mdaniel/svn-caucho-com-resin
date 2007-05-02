@@ -29,6 +29,7 @@
 
 package com.caucho.soap.jaxws;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +43,7 @@ import java.util.logging.Level;
 
 import javax.xml.ws.Binding;
 import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.LogicalHandler;
 import javax.xml.ws.soap.SOAPBinding;
 
 import com.caucho.util.L10N;
@@ -58,7 +60,24 @@ public abstract class AbstractBinding implements Binding {
 
   public void setHandlerChain(List<Handler> handlerChain)
   {
-    _handlerChain = handlerChain;
+    // According to the JAX-WS documentation, handler chains must be sorted
+    // so that all LogicalHandlers appear before protocol Handlers 
+    // (protocol Handlers are just Handlers that are not LogicalHandlers)
+    _handlerChain = new ArrayList<Handler>();
+
+    for (int i = 0; i < handlerChain.size(); i++) {
+      Handler handler = handlerChain.get(i);
+
+      if (handler instanceof LogicalHandler)
+        _handlerChain.add(handler);
+    }
+
+    for (int i = 0; i < handlerChain.size(); i++) {
+      Handler handler = handlerChain.get(i);
+
+      if (! (handler instanceof LogicalHandler))
+        _handlerChain.add(handler);
+    }
   }
 }
 

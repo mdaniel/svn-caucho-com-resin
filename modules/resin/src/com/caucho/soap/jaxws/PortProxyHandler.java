@@ -34,19 +34,21 @@ import com.caucho.util.L10N;
 
 import javax.xml.ws.Binding;
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.handler.Handler;
 
 import java.io.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.ProtocolException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 /**
  * Port handler
  */
-public class PortProxyHandler implements InvocationHandler {
+public class PortProxyHandler implements InvocationHandler, BindingProvider {
   private final static Logger log
     = Logger.getLogger(PortProxyHandler.class.getName());
   private final static L10N L = new L10N(PortProxyHandler.class);
@@ -72,6 +74,21 @@ public class PortProxyHandler implements InvocationHandler {
     _requestContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, 
                         endpointAddress);
     _binding = binding;
+  }
+
+  public Binding getBinding()
+  {
+    return _binding;
+  }
+
+  public Map<String,Object> getRequestContext()
+  {
+    return _requestContext;
+  }
+
+  public Map<String,Object> getResponseContext()
+  {
+    return _responseContext;
   }
 
   public Object invoke(Object proxy, Method method, Object[] args)
@@ -106,8 +123,14 @@ public class PortProxyHandler implements InvocationHandler {
     
     if (! (url instanceof String))
       throw new IllegalArgumentException("Invalid service endpoint address specified");
-    
-    return _skeleton.invoke(method, (String) url, args);
+
+    List<Handler> chain = _binding.getHandlerChain();
+
+    if (chain == null)
+      return _skeleton.invoke(method, (String) url, args);
+    else
+      return _skeleton.invoke(method, (String) url, args, 
+                              new HandlerChainInvoker(chain, this));
   }
 
   static {

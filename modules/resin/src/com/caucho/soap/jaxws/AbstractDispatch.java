@@ -51,6 +51,7 @@ import javax.xml.ws.Response;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.HandlerResolver;
+import javax.xml.ws.http.HTTPBinding;
 import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.ws.spi.ServiceDelegate;
 
@@ -89,9 +90,9 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
     = Logger.getLogger(AbstractDispatch.class.getName());
 
   protected final String _bindingId;
-  protected final String _soapNamespace;
-  protected final Service.Mode _mode;
   protected final Executor _executor;
+  protected Service.Mode _mode;
+  protected String _soapNamespace;
 
   protected final Binding _binding;
   protected final HashMap<String,Object> _requestContext 
@@ -104,6 +105,9 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
     throws WebServiceException
   {
     _bindingId = bindingId;
+    _mode = mode;
+    _executor = executor;
+    _binding = binding;
 
     if (bindingId.equals(SOAPBinding.SOAP11HTTP_BINDING) ||
         bindingId.equals(SOAPBinding.SOAP11HTTP_MTOM_BINDING))
@@ -111,12 +115,10 @@ public abstract class AbstractDispatch<T> implements Dispatch<T> {
     else if (bindingId.equals(SOAPBinding.SOAP12HTTP_BINDING) ||
              bindingId.equals(SOAPBinding.SOAP12HTTP_MTOM_BINDING))
       _soapNamespace = URI_NS_SOAP_1_2_ENVELOPE;
+    else if (bindingId.equals(HTTPBinding.HTTP_BINDING))
+      _mode = Service.Mode.MESSAGE;
     else
-      _soapNamespace = null;
-
-    _mode = mode;
-    _executor = executor;
-    _binding = binding;
+      throw new WebServiceException(L.l("Unknown binding id: {0}", bindingId));
   }
 
   //

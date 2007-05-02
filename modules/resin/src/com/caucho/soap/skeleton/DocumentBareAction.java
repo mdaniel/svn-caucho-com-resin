@@ -73,6 +73,7 @@ public class DocumentBareAction extends AbstractAction {
   private static final QName ITEM_NAME = new QName("item");
 
   private int _inputArgument = -1;
+  private String _partName;
   private final String _messageName;
 
   public DocumentBareAction(Method method, Method eiMethod,
@@ -312,7 +313,10 @@ public class DocumentBareAction extends AbstractAction {
 
     if (_bodyInputs > 0) {
       out.writeEmptyElement(WSDL_NAMESPACE, "part");
-      out.writeAttribute("name", _operationName); // XXX partName?
+
+      // XXX take name from @WebParam
+
+      out.writeAttribute("name", _operationName);
       out.writeAttribute("element", 
                          TARGET_NAMESPACE_PREFIX + ':' + _operationName);
     }
