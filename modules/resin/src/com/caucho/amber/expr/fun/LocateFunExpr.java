@@ -29,10 +29,13 @@
 package com.caucho.amber.expr.fun;
 
 import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 
@@ -73,6 +76,15 @@ public class LocateFunExpr extends FunExpr {
     generateInternalWhere(cb, false);
   }
 
+  /**
+   * Returns the object for the expr.
+   */
+  public Object getObject(AmberConnection aConn, ResultSet rs, int index)
+    throws SQLException
+  {
+    return rs.getInt(index);
+  }
+
   //
   // private/protected
 
@@ -92,9 +104,9 @@ public class LocateFunExpr extends FunExpr {
     // if (n > 3)
     //   throw _parser.error(L.l("expected at most 3 arguments for LOCATE"));
 
-    if (_parser.isDerbyDBMS()) {
+    if (! _parser.isPostgresDBMS()) {
 
-      // Derby.
+      // Derby (jpa/119k), MySql (ejb/0a40, jpa/119p)
 
       cb.append("locate(");
 
@@ -110,12 +122,9 @@ public class LocateFunExpr extends FunExpr {
       else
         args.get(1).generateUpdateWhere(cb);
 
-      cb.append(',');
+      if (n > 2) {
+        cb.append(',');
 
-      if (n == 2) {
-        cb.append('1');
-      }
-      else {
         AmberExpr expr = args.get(2);
 
          if (select)
@@ -129,34 +138,27 @@ public class LocateFunExpr extends FunExpr {
       return;
     }
 
-    // Postgres, MySql.
+    // Postgres: ejb/0a40, jpa/119b, jpa/119c
 
-    CharBuffer charBuffer = new CharBuffer();
-
-    charBuffer.append("position(");
+    cb.append("position(");
 
     if (select)
-      args.get(0).generateWhere(charBuffer);
+      args.get(0).generateWhere(cb);
     else
-      args.get(0).generateUpdateWhere(charBuffer);
+      args.get(0).generateUpdateWhere(cb);
 
-    charBuffer.append(" in substring(");
+    cb.append(" in ");
 
     if (select)
-      args.get(1).generateWhere(charBuffer);
+      args.get(1).generateWhere(cb);
     else
-      args.get(1).generateUpdateWhere(charBuffer);
-
-    charBuffer.append(',');
+      args.get(1).generateUpdateWhere(cb);
 
     int fromIndex = 1;
 
     AmberExpr expr = null;
 
-    if (n == 2) {
-      charBuffer.append('1');
-    }
-    else {
+    if (n > 2) {
       expr = args.get(2);
 
       try {
@@ -167,32 +169,16 @@ public class LocateFunExpr extends FunExpr {
       }
 
       if (select)
-        expr.generateWhere(charBuffer);
+        expr.generateWhere(cb);
       else
-        expr.generateUpdateWhere(charBuffer);
+        expr.generateUpdateWhere(cb);
     }
 
-    charBuffer.append(",length(");
-
-    if (select)
-      args.get(1).generateWhere(charBuffer);
-    else
-      args.get(1).generateUpdateWhere(charBuffer);
-
-    charBuffer.append(")))");
-
-    cb.append("case when ");
-    cb.append(charBuffer);
-    cb.append(" <= 0 then 0 else ");
-    cb.append(charBuffer);
+    cb.append(")");
 
     if (fromIndex > 1) {
-
-      cb.append('+');
-
-      cb.append(fromIndex-1);
+      // jpa/1190
+      throw new IllegalStateException(L.l("Postgres database does not support position() or locate() with 3rd argument (fromIndex)."));
     }
-
-    cb.append(" end");
   }
 }
