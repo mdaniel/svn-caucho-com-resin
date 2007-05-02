@@ -31,27 +31,20 @@ package javax.xml.ws.handler.soap;
 import javax.xml.bind.JAXBContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.handler.MessageContext;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-/** XXX */
-public interface SOAPMessageContext
-    extends MessageContext, Map<String,Object> {
+public interface SOAPMessageContext extends MessageContext, Map<String,Object> {
+  Object[] getHeaders(QName header, JAXBContext context, boolean allRoles)
+    throws WebServiceException;
 
-  /** XXX */
-  abstract Object[] getHeaders(QName header, JAXBContext context, boolean allRoles);
+  Set<String> getRoles();
 
-  /** XXX */
-  abstract SOAPMessage getMessage();
+  SOAPMessage getMessage();
 
-
-  /** XXX */
-  abstract List<String> getRoles();
-
-
-  /** XXX */
-  abstract void setMessage(SOAPMessage message);
-
+  void setMessage(SOAPMessage message)
+    throws WebServiceException;
 }
 

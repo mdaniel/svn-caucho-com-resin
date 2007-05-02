@@ -28,15 +28,13 @@
 */
 
 package javax.xml.ws.handler;
+
 import javax.xml.ws.LogicalMessage;
 import java.util.Map;
 
-/** XXX */
 public interface LogicalMessageContext
     extends MessageContext, Map<String,Object> {
 
-  /** XXX */
   abstract LogicalMessage getMessage();
-
 }
 

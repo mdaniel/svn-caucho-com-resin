@@ -30,19 +30,9 @@
 package javax.xml.ws.handler;
 import javax.xml.namespace.QName;
 
-/** XXX */
 public interface PortInfo {
-
-  /** XXX */
-  abstract String getBindingID();
-
-
-  /** XXX */
-  abstract QName getPortName();
-
-
-  /** XXX */
-  abstract QName getServiceName();
-
+  public String getBindingID();
+  public QName getPortName();
+  public QName getServiceName();
 }
 
