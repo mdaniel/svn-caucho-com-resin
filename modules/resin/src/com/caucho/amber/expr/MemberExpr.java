@@ -65,10 +65,14 @@ public class MemberExpr extends AbstractAmberExpr {
     if (collectionExpr instanceof IdExpr)
       collectionExpr = ((CollectionIdExpr) collectionExpr).getPath();
 
-    /* commented out: jpa/10c8-jpa/10ca
     if (itemExpr instanceof ArgExpr) {
+      // jpa/10c8, jpa/10c9
+    }
+    else if (itemExpr instanceof ManyToOneExpr) {
+      // jpa/10ca
     }
     else if (collectionExpr instanceof OneToManyExpr) {
+      // ejb/06u0
       OneToManyExpr oneToMany = (OneToManyExpr) collectionExpr;
       PathExpr parent = oneToMany.getParent();
 
@@ -85,7 +89,6 @@ public class MemberExpr extends AbstractAmberExpr {
       else
         return expr;
     }
-    */
 
     return new MemberExpr(itemExpr, collectionExpr, isNot);
   }
@@ -236,7 +239,6 @@ public class MemberExpr extends AbstractAmberExpr {
         where = join.generateJoin(manyToOneJoin, "caucho", itemWhere);
       }
       else {
-
         if (_itemExpr instanceof PathExpr) {
           itemWhere = ((PathExpr) _itemExpr).getChildFromItem().getName();
         }

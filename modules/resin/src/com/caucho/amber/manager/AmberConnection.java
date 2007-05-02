@@ -3151,20 +3151,6 @@ public class AmberConnection
       try {
         boolean isManaged = entity.__caucho_getEntityState().isManaged();
 
-        if (_entities.contains(entity) && ! isManaged) {
-          // jpa/0h08: the entity was added to the context in the
-          // previous transaction but it is now detached. The second
-          // transaction is calling merge(entity). If we call load()
-          // right away, it will reuse the same object and refresh
-          // the entity with the database values.
-
-          // We need to remove the entity from the context to force
-          // the load() to create a new managed entity and load it
-          // into this context.
-          _entities.remove(entity);
-          _txEntities.remove(entity);
-        }
-
         existingEntity = (Entity) load(entity.getClass(), pk, true);
       } catch (AmberObjectNotFoundException e) {
         if (log.isLoggable(Level.FINER))
@@ -3198,9 +3184,9 @@ public class AmberConnection
 
         if (isFullMerge) {
           // jpa/0o42: avoids premature loading.
-          managedEntity.__caucho_setConnection(null);
+          // jpa/0s2d managedEntity.__caucho_setConnection(null);
           entity.__caucho_copyTo(managedEntity, this, true);
-          managedEntity.__caucho_setConnection(this);
+          // jpa/0s2d managedEntity.__caucho_setConnection(this);
         }
 
         if (existingEntity == null) {
@@ -3228,12 +3214,12 @@ public class AmberConnection
         }
 
         // jpa/0o42: avoids premature loading.
-        managedEntity.__caucho_setConnection(null);
+        // jpa/0s2d managedEntity.__caucho_setConnection(null);
 
         // jpa/0ga3, jpa/0h08, jpa/0o4-
         entity.__caucho_merge(managedEntity, this, false);
 
-        managedEntity.__caucho_setConnection(this);
+        // jpa/0s2d managedEntity.__caucho_setConnection(this);
 
         // jpa/0h08
         entity.__caucho_copyDirtyMaskFrom(managedEntity);

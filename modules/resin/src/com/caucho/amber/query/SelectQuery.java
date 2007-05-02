@@ -350,8 +350,10 @@ public class SelectQuery extends AbstractQuery {
           isManyToMany = manyToOneJoinExpr.isManyToMany();
         }
 
-        // jpa/1144, jpa/0h1c, jpa/114g
-        if (isManyToMany || (isManyToOne && ! (item.isInnerJoin() || isFromInnerJoin(item)))) {
+        // ejb/06u0, jpa/1144, jpa/0h1c, jpa/114g
+        if (isManyToMany || (isManyToOne && ! item.isInnerJoin())) {
+          // ejb/06u0 || isFromInnerJoin(item)))) {
+
           // Optimization for common children query:
           // SELECT o FROM TestBean o WHERE o.parent.id=?
           // jpa/0h1k
