@@ -138,7 +138,7 @@ public class LocateFunExpr extends FunExpr {
       return;
     }
 
-    // Postgres: ejb/0a40, jpa/119b, jpa/119c
+    // Postgres: jpa/1190, jpa/119b, jpa/119c
 
     cb.append("position(");
 
@@ -147,18 +147,23 @@ public class LocateFunExpr extends FunExpr {
     else
       args.get(0).generateUpdateWhere(cb);
 
-    cb.append(" in ");
+    cb.append(" in substring(");
 
     if (select)
       args.get(1).generateWhere(cb);
     else
       args.get(1).generateUpdateWhere(cb);
 
+    cb.append(" from ");
+
     int fromIndex = 1;
 
     AmberExpr expr = null;
 
-    if (n > 2) {
+    if (n == 2) {
+      cb.append('1');
+    }
+    else {
       expr = args.get(2);
 
       try {
@@ -174,11 +179,6 @@ public class LocateFunExpr extends FunExpr {
         expr.generateUpdateWhere(cb);
     }
 
-    cb.append(")");
-
-    if (fromIndex > 1) {
-      // jpa/1190
-      throw new IllegalStateException(L.l("Postgres database does not support position() or locate() with 3rd argument (fromIndex)."));
-    }
+    cb.append("))");
   }
 }
