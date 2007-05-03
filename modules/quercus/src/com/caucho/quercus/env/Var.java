@@ -886,6 +886,8 @@ public class Var extends Value
    */
   public Value putThisField(Env env, String index, Value value)
   {
+    _value = _value.toAutoObject(env);
+    
     return _value.putThisField(env, index, value);
   }
   
