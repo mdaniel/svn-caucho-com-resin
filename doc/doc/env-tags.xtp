@@ -296,9 +296,9 @@ element resource-adapter {
 
 <p>&lt;database> defines a database (i.e. DataSource)  resource.</p>
 
-<p>The <a href="doc|db|config">database configuration</a> section has
+<p>The <a href="config-database.xtp">database configuration</a> section has
 more details on the configuration.  A code pattern for using databases
-is in a <a href="doc|db|tutorial/jdbc-basic/index">DataSource tutorial.</a></p>
+is in a <a href="../examples/jdbc-basic/index">DataSource tutorial.</a></p>
 
 <example>
 &lt;database jndi-name='jdbc/test_mysql'&gt;
@@ -954,7 +954,7 @@ special compilation steps (in contrast with compiling-loader.)</p>
 
 <p>Configures the destination for <code>System.err</code>.</p>
 
-<p>The <a href="doc|config|log">log configuration</a> describes
+<p>The <a href="config-log.xtp">log configuration</a> describes
 stderr-log in detail.</p>
 
 </defun>
@@ -964,7 +964,7 @@ stderr-log in detail.</p>
 
 <p>Configures the destination for <code>System.out</code>.</p>
 
-<p>The <a href="doc|config|log">log configuration</a> describes
+<p>The <a href="config-log.xtp">log configuration</a> describes
 stderr-log in detail.</p>
 </defun>
 
@@ -1013,7 +1013,7 @@ It uses a Java interface and a URL to select the web-service.</p>
 <p>The URL is defined as: <var>encoding</var>:<var>location</var>, where
 location is typically a HTTP URL.</p>
 
-<p>See the <a href="soa|tutorial/esb-hello-world">hello world tutorial</a>
+<p>See the <a href="examples|soa-hello-world/">hello world tutorial</a>
 for an example.</p>
 
 <deftable>

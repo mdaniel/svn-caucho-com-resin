@@ -202,7 +202,7 @@ public class Body extends ContainerNode {
     out.writeAttribute("alt", "");
     out.writeAttribute("width", "1");
     out.writeAttribute("height", "5");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.jpg");
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
     out.writeEndElement(); // </img>
     
     out.writeEndElement(); // </td>

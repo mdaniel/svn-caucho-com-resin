@@ -16,7 +16,7 @@ import javax.persistence.PersistenceContext;
  * The basic CourseClient shows the basic flow of any Resin-CMP client.
  */
 public class CourseServlet extends HttpServlet {
-  @PersistenceContext(name="example")
+  @PersistenceContext
   private EntityManager _manager;
 
   /**

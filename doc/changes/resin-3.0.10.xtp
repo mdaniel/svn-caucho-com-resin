@@ -138,7 +138,7 @@ without affecting the raw web-app.</p>
 <p>The EJB 3.0 @TransactionAttribute capability is now available for
 any Java class.  It is no longer restricted to SessionBeans.</p>
 
-<p>The <a href="ejb3|tutorial/resin-xa/index.xtp">@TransactionAttribute</a>
+<p>The @TransactionAttribute
 support can now be applied to any bean without any Resin-specific
 annotations.  In addition, the attribute class is configurable.</p>
 

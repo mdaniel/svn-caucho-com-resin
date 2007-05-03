@@ -15,15 +15,15 @@
 <s1 title="Configure and use a database connection" type="faq">
 
 <p>See
-the <a href="database.xtp">database configuration page</a> for the full
+the <a href="config-database.xtp">database configuration page</a> for the full
 configuration documentation.
 
 </p><p>See the <a href="db-thirdparty.xtp">thirdparty driver configuration page</a> for
 sample configurations for several database drivers.</p>
 
 <p>See the
-<a href="tutorial|db-jdbc/index.xtp">JNDI DataSource tutorial</a>
-and the <a href="tutorial|db-jdbc-ioc/index.xtp">DataSource
+<a href="../examples/db-jdbc/index.xtp">JNDI DataSource tutorial</a>
+and the <a href="../examples/db-jdbc-ioc/index.xtp">DataSource
 inversion-of-control tutorial</a> for sample JDBC usage patterns.</p>
 
 </s1>

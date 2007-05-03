@@ -31,33 +31,33 @@ enhanced SQL and direct support for objects.</p>
 <s1 title="Database Schema">
 
 <example title="House.java">
-<a href="amber|amber-table.xtp#@Entity">@Entity</a>
+<a href="doc|amber-table.xtp#@Entity">@Entity</a>
 public class House {
-  <a href="amber|amber-table.xtp#@Id">@Id</a>
-  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="id")
+  <a href="doc|amber-table.xtp#@Id">@Id</a>
+  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="id")
   public long getId()
 
-  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
+  <a href="doc|amber-table.xtp#@Basic">@Basic</a>
   public String getName()
 
-  <a href="amber|amber-table.xtp#@OneToMany">@OneToMany</a>(targetEntity=Student.class,
+  <a href="doc|amber-table.xtp#@OneToMany">@OneToMany</a>(targetEntity=Student.class,
         mappedBy="house")
   public Collection getStudentList()
 }
 </example>
 
 <example title="Student.java">
-<a href="amber|amber-table.xtp#@Entity">@Entity</a>
+<a href="doc|amber-table.xtp#@Entity">@Entity</a>
 public class Student {
-  <a href="amber|amber-table.xtp#@Id">@Id</a>
-  <a href="amber|amber-table.xtp#@Column">@Column</a>(name="id")
+  <a href="doc|amber-table.xtp#@Id">@Id</a>
+  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="id")
   public long getId()
 
-  <a href="amber|amber-table.xtp#@Basic">@Basic</a>
+  <a href="doc|amber-table.xtp#@Basic">@Basic</a>
   public String getName()
 
-  <a href="amber|amber-table.xtp#@ManyToOne">@ManyToOne</a>
-  <a href="amber|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="house")
+  <a href="doc|amber-table.xtp#@ManyToOne">@ManyToOne</a>
+  <a href="doc|amber-table.xtp#@JoinColumn">@JoinColumn</a>(name="house")
   public House getHouse()
 }
 </example>

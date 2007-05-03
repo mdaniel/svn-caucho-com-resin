@@ -98,7 +98,7 @@ specify the class name for the servlet.</p>
 <p>The <a config-tag="servlet-mapping"/>
 tag specifies the URLs which will invoke the servlet.  In our case,
 the <var>/hello</var> URL invokes the servlet.  Because the tutorial
-<a href="doc|config|webapp">webapp</a> is a sub-URL like
+<a href="doc|webapp.xtp">webapp</a> is a sub-URL like
 <var>/doc/servlet/tutorial/helloworld</var>, the actual URL to invoke
 the servlet is the combination of the two.</p>
 

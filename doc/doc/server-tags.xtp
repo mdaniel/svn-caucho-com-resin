@@ -378,7 +378,7 @@ clients, they can have longer timeouts.</p>
 <p>&lt;load-balance-connect-timeout> configures the maximum time
 a client connection to a cluster-port should
 take.  The <a href="resin-load-balance.xtp">load balance</a> and
-<a href="sessions.xtp">persistent sessions</a> use load-balance-connect-timeout
+<a href="config-sessions.xtp">persistent sessions</a> use load-balance-connect-timeout
 to connect to backend or peer servers in the cluster.</p>
 
 <p>Lower values detect failed servers more quickly, but a too-low value
@@ -444,7 +444,7 @@ contact unavailable servers.</p>
 
 <p>&lt;load-balance-idle-time> is the maximum time
 the <a href="resin-load-balance.xtp">load balancer</a>
-and <a href="sessions.xtp">distributed sessions</a> will leave an
+and <a href="config-sessions.xtp">distributed sessions</a> will leave an
 idle socket before closing it.</p>
 
 <p>The default value is normally sufficient, since it tracks the
@@ -796,7 +796,7 @@ will wait for the graceful shutdown before forcing an exit.</p>
 
 <p>&lt;socket-timeout> is the maximum time
 a socket <a href="resin-load-balance.xtp">load balancer</a>
-and <a href="sessions.xtp">distributed sessions</a> will wait for
+and <a href="config-sessions.xtp">distributed sessions</a> will wait for
 a read or write to a cluster socket.</p>
 
 <p>Crashed servers may never respond to a read request or accept a write.

@@ -19,7 +19,7 @@
 <li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
 <li>See <a href="webapp.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
 <li>See <a href="env-tags.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
-<li>See <a href="log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
+<li>See <a href="config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
 
 </s1>
@@ -38,7 +38,7 @@ in.</p>
 <deftable-childtags>
 <tr><td>path</td>
     <td>Output path for the log entries,
-see <a href="log.xtp#path">"Log Paths"</a>.</td>
+see <a href="config-log.xtp#path">"Log Paths"</a>.</td>
     <td>required</td></tr>
 <tr><td>format</td>
     <td>Access log format.</td>
@@ -127,7 +127,7 @@ see <a href="log.xtp#path">"Log Paths"</a>.</td>
 
 <p><var>resin:type</var> allows for custom logging.  Applications can
 extend a custom class from <a href="javadoc|com.caucho.http.log.AccessLog|"/>.  
-<a href="doc|config|init">Bean-style initialization</a> can be used to set bean
+<a href="doc|ioc-bean.xtp">Bean-style initialization</a> can be used to set bean
 parameters in the custom class.</p>
 
 <example>
@@ -218,7 +218,7 @@ configured explicitly.</p>
     <td>Root directory for host files</td>
     <td>parent directory</td></tr>
 <tr><td>startup-mode</td>
-    <td>'automatic', 'lazy', or 'manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a></td>
+    <td>'automatic', 'lazy', or 'manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td>
     <td>automatic</td></tr>
 </deftable-childtags>
 
@@ -343,8 +343,8 @@ details.</p>
 </td></tr><tr><td>url-regexp</td><td>A regexp to select this application.</td><td>n/a
 </td></tr><tr><td>document-directory</td><td>The document directory for
 the application, corresponding to a url of <var>/<i>id</i>/</var>. A relative path is relative to the <a config-tag="root-directory"/> of the containing <a config-tag="host"/>.  Can use regexp replacement variables.</td><td>A relative path constricted with the id or the regexp match
-</td></tr><tr><td>startup-mode</td><td>`automatic', `lazy', or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
-</td></tr><tr><td>redeploy-mode</td><td>`automatic' or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
+</td></tr><tr><td>startup-mode</td><td>`automatic', `lazy', or `manual', see <a href="resin.xtp#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
+</td></tr><tr><td>redeploy-mode</td><td>`automatic' or `manual', see <a href="resin.xtp#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
 
 </td></tr></deftable-childtags>
 

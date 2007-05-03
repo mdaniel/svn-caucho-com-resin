@@ -329,8 +329,8 @@ to bypass Apache and make a request straight to Resin.
 </p>
 
 <p>The following snippet shows the
-&lt;<a href="config|port-tags.xtp#http">http</a>&gt;
-and &lt;<a href="config|server-tags.xtp#server">server</a>&gt;
+&lt;<a href="port-tags.xtp#http">http</a>&gt;
+and &lt;<a href="server-tags.xtp#server">server</a>&gt;
 configuration for the above example.</p>
 
 <example>

@@ -104,7 +104,7 @@ Servlet 2.4 and JSP 2.0.</p>
 <s1 title="JMX 1.1">
 
 <p>Resin 3.0.2 now supports JMX 1.1.  The
-<a href="jmx|tutorial/index.xtp">JMX tutorials</a> give a good overview.</p>
+<a href="examples|jmx.xtp">JMX tutorials</a> give a good overview.</p>
 
 <p>Configuration with JMX uses the &lt;resource&gt; tag, like any other
 resource.  Registering a resource with JMX simply involves adding an

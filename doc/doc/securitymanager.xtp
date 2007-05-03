@@ -68,8 +68,9 @@ permissions in all policy files.
 
 <s1 title="java.policy syntax">
 
-<p>A useful resource is Sun's <a href="external|sun|security">documentation
-about security</a>, in particular the <a href="external|sun|security/permissions">policy permissions</a> and <a href="external|sun|security/policyfiles">policy file syntax</a> files are
+<p>A useful resource is Sun's <a href="http://java.sun.com/j2se/1.4/docs/guide/security/index.html">documentation
+about security</a>, in particular the <a href="http://java.sun.com/j2se/1.4/docs/guide/security/permissions.html">policy permissions</a> and
+<a href="http://java.sun.com/j2se/1.4/docs/guide/security/PolicyFiles.html">policy file syntax</a> files are
 useful.</p>
 
 <p>Each web-app automatically has permissions to read, write and

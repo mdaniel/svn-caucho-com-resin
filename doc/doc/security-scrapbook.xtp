@@ -102,7 +102,7 @@ listener to the ip address (interface) for the corresponding virtual host:
 <p>
 If you want to keep one .conf file for different environments,
 you can use the configuration
-<a href="doc|config|control">control statements</a>.
+<a href="doc|config-control.xtp">control statements</a>.
 </p>
 
 <example>

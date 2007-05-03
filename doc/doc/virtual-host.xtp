@@ -183,7 +183,7 @@ JVM's that correspond to the host name.</p>
 
 <s2 title="Back-end JVM's">
 <p>In the most straightforward configuration, each host specific backend JVM
-gets its own resin.conf.  The resin.conf can use <a href="doc|config|resin#resin:include">resin:include</a> to share
+gets its own resin.conf.  The resin.conf can use <a href="resin-tags.xtp#resin:include">resin:include</a> to share
 common configuration.</p>
 
 <p>In this example, the virtual hosts <code>www.gryffindor.com</code> and

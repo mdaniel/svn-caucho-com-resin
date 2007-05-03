@@ -14,11 +14,13 @@ method as a read-only transaction boundary.</p>
 
 <p>See also:</p>
 <ul>
+<!--
   <li>The <a href="../resin-xa/index.xtp">Resin Transaction</a> example for a more detailed description of method transaction enhancement.
   </li>
-<!--
-  <li>The <a href="../amber-xa/index.xtp">CMP Transaction</a> example for a traditional session bean pattern.  </li>
 -->
+
+  <li>The <a href="examples|amber-xa/index.xtp">Amber Transaction</a> example for a traditional session bean pattern.  </li>
+
 <li>The <a href="doc|ejb-annotations.xtp#@TransactionAttribute">@TransactionAttribute</a> reference.
 </li></ul>
 
@@ -99,7 +101,7 @@ import static javax.ejb.TransactionAttributeType.SUPPORTS;
 public class HelloBean implements Hello {
   private String _greeting = "Default Hello";
 
-  <a href="doc|ioc-inject.xtp#@Inject">@javax.ejb.Inject</a>
+  @javax.ejb.Resource
   public void setGreeting(String greeting)
   {
     _greeting = greeting;
@@ -126,7 +128,7 @@ value which overrides the default name of "HelloBean".</p>
 
 <s2 title="@Inject">
 
-<p>The <a href="doc|ioc-inject.xtp#@Inject">@javax.ejb.Inject</a>
+<p>The <a href="doc|ejb-annotations.xtp#@Resource">@javax.ejb.Resource</a>
 annotation tells Resin to lookup the greeting from JNDI when the
 session bean is created.  The JNDI name will be
 java:comp/env/greeting.</p>
@@ -239,7 +241,7 @@ public class HelloServlet extends GenericServlet {
 
 <s2 title="@EJB">
 
-<p>The <a href="doc|ioc-inject.xtp#@EJB">@EJB</a> annotation tells
+<p>The <a href="doc|ejb-annotations.xtp#@EJB">@EJB</a> annotation tells
 Resin to lookup the session bean in JNDI with name
 "java:comp/env/ejb/HelloBean".</p>
 

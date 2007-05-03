@@ -21,7 +21,7 @@ filters. <var/init-param/> values can use JSP EL expressions, including the
 ability to use system properties.</p>
 
 <p>Servlets, filters, and resources can be configured like beans with setter
-methods are called directly (See <a href="doc|config|init">Bean-style
+methods are called directly (See <a href="doc|ioc-bean.xtp">Bean-style
 init)</a>.</p>
 
 <p>One example use use for the bean-style servlet initialization is to avoid

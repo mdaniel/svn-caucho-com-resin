@@ -654,7 +654,7 @@ for <a config-tag="javac"/>.</p>
 
 <p>Each thread is allocated a stack, if the size of the stack is too large,
 then you may run out of memory when a higher number of threads is reached.
-Techniques to adress this are discussed in <a href="doc|performance|jvm-tuning#stack-size">JVM Tuning</a>.
+Techniques to adress this are discussed in <a href="jvm-tuning.xtp#stack-size">JVM Tuning</a>.
 
 </p></s1> <!-- os-thread -->
 

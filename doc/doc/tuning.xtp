@@ -111,7 +111,7 @@ timeout for Resin standalone.</p>
 
 <p>Since <var>socket-timeout</var> will close srun connections, its
 setting needs to take into consideration the
-&lt;<a href="config|server-tags.xtp#load-balance-idle-time">load-balance-idle-time</a>
+&lt;<a href="server-tags.xtp#load-balance-idle-time">load-balance-idle-time</a>
 setting for mod_caucho or isapi_srun.  <var>load-balance-idle-time</var> is the
 time the plugin will keep a connection open.  <var>read-timeout</var> must
 always be larger than <var>load-balance-idle-time</var>, otherwise the plugin

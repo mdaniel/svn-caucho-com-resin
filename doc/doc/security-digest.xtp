@@ -29,7 +29,7 @@ creates the digest and submits the digest password to the web server.
 <s1 title="Digest protects passwords">
 
 <p>Storing digest passwords is so important for security purposes that the
-Resin <a href="security|authentication">authenticators</a> default to assuming
+Resin <a href="authentication.xtp">authenticators</a> default to assuming
 that the passwords are stored in digest form.</p>
 
 <p>The important advantage is that a user's cleartext password is not as easily
@@ -183,7 +183,7 @@ method, the password submitted is in cleartext.  The Resin authenticator will
 digest the password before comparing it to the value retrieved from storage.
 The message is transmitted in cleartext but is stored as a digest. This method
 provides only half of the protection - the password is not protected in
-transmission (although if the form submit is being done over an <a href="security|ssl">SSL</a> connection it will be secure).</p>
+transmission (although if the form submit is being done over an <a href="ssl.xtp">SSL</a> connection it will be secure).</p>
 
 </s1>
 
@@ -240,7 +240,7 @@ passwords that are not in digest form.</p>
 <s1 title="Compatibility">
 
 <p>Authenticators are not defined by the 
-<a href="external|spec|servlet">Servlet Specification</a>, 
+<a href="http://www.jcp.org/en/jsr/detail?id=154">Servlet Specification</a>, 
 so the ability to use passwords stored as a digest depends
 upon the implementation of the Authenticator that the application server
 provides.  MD5-base64 is the most common form of digest, because it is the
@@ -248,8 +248,8 @@ default in <a href="#Using-HTTP-digest-authentication">HTTP digest
 authentication</a>.</p>
 
 <p>The use of <code>&lt;auth-method&gt;DIGEST&lt;auth-method&gt;</code> is
-defined in the <a href="external|spec|servlet">Servlet Specification</a> 
-and implemented in most application servers.</p>
+defined in the Servlet Specification and implemented in most
+application servers.</p>
 
 </s1>
 

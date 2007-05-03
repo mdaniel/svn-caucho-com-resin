@@ -10,7 +10,7 @@
 <s1 title="SwiftMQ">
 
 <p>The <a href="http://www.swiftmq.com">SwiftMQ</a> client is configured
-by adding a <a href="config-index|jndi-link">jndi-link</a> to the web.xml
+by adding a <a href="env-tags.xtp#jndi-link">jndi-link</a> to the web.xml
 or resin.conf.</p>
 
 <p>Resin needs the <var>swiftmq.jar</var> from the SwiftMQ distribution in the

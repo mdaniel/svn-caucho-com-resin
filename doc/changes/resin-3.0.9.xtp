@@ -30,7 +30,7 @@ to take extra care verifying Resin 3.0.9 before putting it into production.</p>
 
 <s1 title="EJB 3.0 experimental features">
 
-<p>See the <a href="tutorial|ejb.xtp">EJB 3.0 tutorials</a> for examples.</p>
+<p>See the <a href="examples|ejb.xtp">EJB 3.0 tutorials</a> for examples.</p>
 
 <p>Resin 3.0.9 includes an implementation the EJB 3.0 early-draft spec features.
 EJB 3.0 has a number of significant changes over EJB 2.1:
@@ -48,8 +48,6 @@ EJB 3.0 has a number of significant changes over EJB 2.1:
 <p>Resin 3.0.9 has an experimental support for annotation-based transactions.
 The annotations use the EJB 3.0 markers.  The enhancement is configured
 as part of the &lt;class-loader&gt; configuration.</p>
-
-<p>See the <a href="tutorial|ejb-resin-xa/index.xtp">@ResinEnhanced transaction tutorial</a> for an example.</p>
 
 <p>The following code instructs Resin to enhance MyBean so a transaction
 is always started when businessMethod is called.  The

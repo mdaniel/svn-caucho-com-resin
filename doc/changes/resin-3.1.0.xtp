@@ -136,7 +136,7 @@ a single resin.conf.</p>
 keepalives and timeouts.  In other words &lt;server> configures JVM
 instance information which changes from instance to instance.</p>
 
-<p>See &lt;<a href="../config/server-tags.xtp">server</a>&gt; tag
+<p>See &lt;<a href="../doc/server-tags.xtp">server</a>&gt; tag
 for the new server tags.</p>
 
 <p>The &lt;cluster> is a collection of servers serving identical content.
@@ -255,7 +255,7 @@ can now write to the client APIs without worrying about proxy generation.</p>
 
 <s1 title="JAXB for Config IoC">
 
-<p>See <a href="../ioc/tutorial/jaxb-bean-config/index.xtp">JAXB Bean
+<p>See <a href="../examples/jaxb-bean-config/index.xtp">JAXB Bean
 Configuration tutorial</a></p>
 
 </s1>

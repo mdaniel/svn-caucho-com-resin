@@ -179,7 +179,7 @@ for PHP</a>, with the same distributed capabilities as servlets already use.</p>
 <li><a href="http://www.php.net/manual/en/ref.pgsql.php">Postgres</a></li>
 <li><a href="http://www.php.net/manual/en/ref.oci8.php">Oracle OCI8</a></li>
 <li><a href="http://www.php.net/manual/en/ref.image.php">Image Library</a></li>
-<li><a href="../tutorial/quercus-json/index.xtp">JSON</a></li>
+<li><a href="../examples/quercus-json/index.xtp">JSON</a></li>
 </ul>
 </s2>
 

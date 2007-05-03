@@ -32,7 +32,7 @@
 <s1 title="Service Interface and Configuration">
 
 <p>The service used in this example is the same hello world service used
-in <a href="../hello-world/index.xtp">the simple service tutorial</a>.  The
+in <a href="../soa-hello-world/index.xtp">the simple service tutorial</a>.  The
 interface used by the frontend is shown below.</p>
 
 <example title="HelloService.java">
@@ -47,7 +47,7 @@ public interface HelloService {
 </example>
 
 <p>Configuring the service is also the same as in the <a 
-href="../hello-world/index.xtp">the simple service tutorial</a>.
+href="../soa-hello-world/index.xtp">the simple service tutorial</a>.
 </p>
 
 <example title="<servlet>">
@@ -89,7 +89,7 @@ public class ServiceFrontendServlet extends HttpServlet {
 
 <p>
 Configuring the client is nearly the same as in the 
-<a href="../hello-world/index.xtp">the simple service tutorial</a>, the
+<a href="../soa-hello-world/index.xtp">the simple service tutorial</a>, the
 only difference being adding the mapping for the servlet.</p>
 
 <example title="Client configuration">

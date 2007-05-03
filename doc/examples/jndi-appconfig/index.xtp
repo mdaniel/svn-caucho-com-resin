@@ -47,7 +47,7 @@ files relative to the base directory.</p>
 </s1>
 
 <s1 title="The java code for a custom JNDI object">
-<p>A custom JNDI object is implemented similar to a java-bean (see <a href="doc|config-init.xtp">Bean-style initialization</a>).  Setter
+<p>A custom JNDI object is implemented similar to a java-bean (see <a href="doc|ioc-bean.xtp">Bean-style initialization</a>).  Setter
 methods like <code>setFoo(String foo)</code> are used to set values
 that are specified in the configuration.</p>
 

@@ -35,7 +35,7 @@
 
 <p>The HelloService implementation for this tutorial still conforms to the
 same API as in the 
-<a href="../hello-world/index.xtp">Simple Service tutorial</a>, but 
+<a href="../soa-hello-world/index.xtp">Simple Service tutorial</a>, but 
 now has an annotated field to allow the hello message to be changed via JAXB
 configuration.
 </p>
@@ -71,7 +71,7 @@ public class HelloServiceImpl implements HelloService {
 <s1 title="Remote Interface">
 
 <p>The Java interface describes the remote API.  The API here is the same
-as in the <a href="../hello-world/index.xtp">Simple Service tutorial</a>.
+as in the <a href="../soa-hello-world/index.xtp">Simple Service tutorial</a>.
 </p>
 
 <example title="HelloService.java">
@@ -91,7 +91,7 @@ public interface HelloService {
 
 <p>
 The configuration of this service is almost identical to 
-the <a href="../hello-world/index.xtp">Simple Service tutorial</a>, but now
+the <a href="../soa-hello-world/index.xtp">Simple Service tutorial</a>, but now
 includes data to be unmarshalled into the service.  Specifically, the hello
 field is initialized from the &lt;init> child tag of &lt;web-service>.
 </p>
@@ -112,7 +112,7 @@ field is initialized from the &lt;init> child tag of &lt;web-service>.
 <p>
 Since the service API has not changed, the &lt;web-service-client> tag
 and its contents remain unchanged from the
-<a href="../hello-world/index.xtp">Simple Service tutorial</a>.
+<a href="../soa-hello-world/index.xtp">Simple Service tutorial</a>.
 </p>
 
 <example title="<web-service-client>">

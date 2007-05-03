@@ -247,8 +247,8 @@ public class BasicServlet extends HttpServlet {
 <ul>
 <li><a href="doc|database-tags.xtp">Database configuration</a> reference</li>
 <li><a href="doc|db-thirdparty.xtp">Sample configurations</a> for several database drivers</li>
-<li>Using <a href="tutorial|db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a></li>
-<li>The <a href="tutorial|ioc-injection/index.xtp">Dependency Injection</a> (or Assembly Line) pattern.</li>
+<li>Using <a href="examples|db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a></li>
+<li>The <a href="examples|ioc-injection/index.xtp">Dependency Injection</a> (or Assembly Line) pattern.</li>
 </ul>
 
 </s1>

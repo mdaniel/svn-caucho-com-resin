@@ -508,7 +508,7 @@ memory available.</d>
     </ix>
     <ix h="resin.xtp#openssl" id="certificate-chain-file">
       <d><i>As a child of <a config-tag="openssl"/></i>.
-        A file containing an intermediate (untrusted) and root (trusted) certificate. See <a href="doc|security|ssl#Certificate-Chains">Certificate Chains</a>.</d>
+        A file containing an intermediate (untrusted) and root (trusted) certificate. See <a href="ssl.xtp#Certificate-Chains">Certificate Chains</a>.</d>
     </ix>
     <ix h="resin.xtp#openssl" id="session-cache">
       <d><i>As a child of <a config-tag="openssl"/></i>.
@@ -1124,7 +1124,7 @@ Digest .</d>
     </ix>
     <ix h="webapp.xtp#login-config" id="auth-method">
       <d><i>As a child of <a config-tag="login-config"/></i>.
-        Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="security|digest">Digest Authentication</a>.
+        Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="security-digest.xtp">Digest Authentication</a>.
       </d>
     </ix>
     <ix h="webapp.xtp#login-config" id="realm-name">

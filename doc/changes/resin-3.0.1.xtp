@@ -33,7 +33,7 @@ that people stress tested their applications before deploying on 3.0.x.</p>
 discrepancies should be reported as bugs.</p>
 
 <p>In particular, Resin 3.0.1 adds support for *.tag and *.tagx files,
-see <a href="tutorial|jsp-tagfile-basic/index.xtp">.tag tutorial</a>.</p>
+see <a href="examples|jsp-tagfile-basic/index.xtp">.tag tutorial</a>.</p>
 
 <p>Resin 3.0.1 does not yet include the full support for the third
 draft of Servlet 2.4.  In particular, the ERROR dispatch configuration
@@ -100,13 +100,13 @@ resource implements <code>ResourceAdapter</code> or
 <code>ManagedConnectionFactory</code>, Resin will call them with the
 appropriate lifecycle methods.</p>
 
-<p>The <a href="doc|resource|tutorial/index.xtp">Resource
+<p>The <a href="examples|jca-connection/index.xtp">Resource
 tutorials</a> show how resources can take advantage
 of these callbacks.</p>
 
 <s2 title="CronResource (run-at)">
 
-<p>The new <a href="doc|resource|tutorial/jca-cron/index.xtp">CronResource</a> now
+<p>The new <a href="examples|jca-cron/index.xtp">CronResource</a> now
 replaces the old run-at servlets.  The CronResource accepts an
 application WorkTask which it executes at specific times, configured
 following the Unix cron syntax.</p>

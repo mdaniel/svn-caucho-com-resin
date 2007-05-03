@@ -832,7 +832,7 @@ resin:import is used to read configuration information from another file.
 <s3 title="See also">
 <ul>
 <li><a href="env-tags.xtp#resin:import">resin:import</a>
-</li><li><a href="tutorial/ioc-injection/index.xtp">Dependency Injection Tutorial</a>
+</li><li><a href="../examples/ioc-injection/index.xtp">Dependency Injection Tutorial</a>
 </li></ul>
 </s3>
 </s2> <!-- import -->

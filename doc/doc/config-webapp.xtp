@@ -252,8 +252,8 @@ handling, and for host-wide behavior.</p>
 </td></tr><tr><td>url-regexp</td><td>A regexp to select this application.</td><td>n/a
 </td></tr><tr><td>document-directory</td><td>The document directory for
 the application, corresponding to a url of <var>/<i>id</i>/</var>. A relative path is relative to the <a config-tag="root-directory"/> of the containing <a config-tag="host"/>.  Can use regexp replacement variables.</td><td>A relative path constricted with the id or the regexp match
-</td></tr><tr><td>startup-mode</td><td>`automatic', `lazy', or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
-</td></tr><tr><td>redeploy-mode</td><td>`automatic' or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
+</td></tr><tr><td>startup-mode</td><td>`automatic', `lazy', or `manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
+</td></tr><tr><td>redeploy-mode</td><td>`automatic' or `manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
 
 </td></tr></deftable-childtags>
 
@@ -380,7 +380,7 @@ defines initial values for <code>application.getInitParameter("foo")</code>.  Se
 <deftable-childtags>
 <tr><td>filter-name</td><td>The filter's name (alias)
 </td></tr><tr><td>filter-class</td><td>The filter's class (defaults to filter-name), which extends <a href="javadoc|javax.servlet.Filter|"/>
-</td></tr><tr><td>init-param</td><td>Initialization parameters, see <a href="javadoc|javax.servlet.FilterConfig|getInitParameter(String)"/>
+</td></tr><tr><td>init-param</td><td>Initialization parameters, see <a href="javadoc|javax.servlet.FilterConfig">FilterConfig.getInitParameter(String)</a>.
 </td></tr></deftable-childtags>
 
 <p>The following example defines a filter alias 'image'</p>
@@ -938,7 +938,7 @@ Defines a custom constraint.
 <default>no authentication</default>
 
 <deftable-childtags title="Servlet 2.4 definition for login-config">
-<tr><td>auth-method</td><td>Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="security|digest">Digest Authentication</a>.
+<tr><td>auth-method</td><td>Authentication method, either <var>BASIC</var> for HTTP Basic Authentication, <var>FORM</var> for form based authentication, or <var>DIGEST</var> for HTTP <a href="security-digest.xtp">Digest Authentication</a>.
 </td></tr><tr><td>realm-name</td><td>The realm name to use in HTTP authentication
 </td></tr><tr><td>form-login-config</td><td>Configuration for form login, see <a config-tag="form-login-config"/>
 </td></tr></deftable-childtags>
@@ -952,7 +952,7 @@ Defines a custom constraint.
 <p>HTTP Authentication is defined in the RFC <a href="external|spec|http-authentication">HTTP Authentication: Basic and
 Digest</a>.</p> 
 
-<p>HTTP digest authentication is discussed in <a href="security|digest">Digest Passwords</a>.
+<p>HTTP digest authentication is discussed in <a href="security-digest.xtp">Digest Passwords</a>.
 
 </p></s2>
 

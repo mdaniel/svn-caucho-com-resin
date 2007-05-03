@@ -42,7 +42,7 @@ retrieved by the example JSP.</p>
 <p>The cron times follow the Unix crontab format.  The tutorial schedules
 the work task every 5 minutes, using the "*/5" pattern.  More details for
 the cron specificiations is available in the
-<a href="resource|resource-library#CronResource">CronResource
+<a href="doc|soa-cron.xtp#CronResource">CronResource
 documentation.</a></p>
 
 <example title="sample web.xml">

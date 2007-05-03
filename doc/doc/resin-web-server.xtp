@@ -164,7 +164,7 @@ and "./start.sh stop" to stop.</p>
 necessary if you have multiple servers (JVM instances) either
 on different machines or the same machine.
 The <a href="resin-load-balance.xtp">load balancing</a> and
-<a href="sessions.xtp">distributed sessions</a> pages describe when
+<a href="config-sessions.xtp">distributed sessions</a> pages describe when
 you might use -server.</p>
 
 <p>More information on deploying on Unix is available at:</p>

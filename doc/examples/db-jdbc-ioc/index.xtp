@@ -265,10 +265,10 @@ private void doQuery(PrintWriter out)
 <s1 title="See also">
 
 <ul>
-<li><a href="db|config">Database configuration</a> reference
-</li><li><a href="db|thirdparty">Sample configurations</a> for several database drivers
-</li><li>Using <a href="doc|db|tutorial/jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
-</li><li>The <a href="doc|resource|tutorial/injection/index.xtp">Dependency Injection</a> (or Assembly Line) pattern.
+<li><a href="doc|config-database.xtp">Database configuration</a> reference
+</li><li><a href="doc|db-thirdparty.xtp">Sample configurations</a> for several database drivers
+</li><li>Using <a href="../jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
+</li><li>The <a href="../ioc-injection/index.xtp">Dependency Injection</a> (or Assembly Line) pattern.
 </li></ul>
 
 </s1>

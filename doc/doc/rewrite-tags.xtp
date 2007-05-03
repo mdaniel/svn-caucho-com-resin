@@ -127,7 +127,7 @@ images and *.php files normally, but forward's all other requests to
     <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
     <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
-    <td>A regexp that must match the <a href="URL">URL</a></td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
     <td>optional</td></tr>
 <tr><td><a href="#when">when</a></td>
     <td>A condition which must evaluate to true</td>
@@ -141,7 +141,7 @@ images and *.php files normally, but forward's all other requests to
 <defun title="enable-at">
 <p>
 Cron syntax for specifying a time or times that that the rule should be enabled,
-see <a href="disable-at"/>.
+see <a href="#disable-at">&lt;disable-at/&gt;</a>.
 </p>
 </defun>
 
@@ -183,7 +183,7 @@ for a matching URL.</p>
     <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
     <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
-    <td>A regexp that must match the <a href="URL">URL</a></td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
     <td>optional</td></tr>
 <tr><td><a href="#when">when</a></td>
     <td>A condition which must evaluate to true</td>
@@ -228,7 +228,7 @@ underlying resource has moved.</p>
     <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
     <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
-    <td>A regexp that must match the <a href="URL">URL</a></td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
     <td>optional</td></tr>
 <tr><td>target</td>
     <td>The target of the the foreward</td>
@@ -300,7 +300,7 @@ for a matching URL.</p>
     <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
     <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
-    <td>A regexp that must match the <a href="URL">URL</a></td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
     <td>optional</td></tr>
 <tr><td><a href="#when">when</a></td>
     <td>A condition which must evaluate to true</td>
@@ -448,7 +448,7 @@ and cached pages will be served directory from the web-tier.</p>
     <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
     <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
-    <td>A regexp that must match the <a href="URL">URL</a></td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
     <td>optional</td></tr>
 <tr><td>sticky-sessions</td>
     <td>Whether or not sessions should be sticky</td>
@@ -553,8 +553,8 @@ the regexp of the &lt;match> is satsified and the match is <var>enabled</var>.
 
 <p>
 Judicious use of &lt;match> will provide better performance in situations where
-there are many rules and some of them contain <a href="when">when</a> or
-<a href="if">if</a> conditions.
+there are many rules and some of them contain <a href="#when">when</a> or
+<a href="#if">if</a> conditions.
 </p>
 
 <p>
@@ -586,7 +586,7 @@ the following configuration tags are available.
     <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
     <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
-    <td>A regexp that must match the <a href="URL">URL</a></td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
     <td>optional</td></tr>
 <tr><td><a href="#when">when</a></td>
     <td>A condition which must evaluate to true</td>
@@ -629,7 +629,7 @@ indicating that the resource has moved.</p>
     <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
     <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
-    <td>A regexp that must match the <a href="URL">URL</a></td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
     <td>optional</td></tr>
 <tr><td><a href="#when">when</a></td>
     <td>A condition which must evaluate to true</td>
@@ -701,7 +701,7 @@ for a matching URL.</p>
     <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
     <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
-    <td>A regexp that must match the <a href="URL">URL</a></td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
     <td>optional</td></tr>
 <tr><td><a href="#when">when</a></td>
     <td>A condition which must evaluate to true</td>
@@ -783,7 +783,7 @@ indicating that the resource has moved.</p>
     <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
     <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
-    <td>A regexp that must match the <a href="URL">URL</a></td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
     <td>optional</td></tr>
 <tr><td><a href="#when">when</a></td>
     <td>A condition which must evaluate to true</td>
@@ -1068,7 +1068,7 @@ or servlet.
     <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
     <td>do not register an mbean</td></tr>
 <tr><td>regexp</td>
-    <td>A regexp that must match the <a href="URL">URL</a></td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
     <td>optional</td></tr>
 <tr><td>request-character-encoding</td>
     <td>Sets the character encoding of the request, used for parsing POST data, request.setCharacterEncoding(value)</td>

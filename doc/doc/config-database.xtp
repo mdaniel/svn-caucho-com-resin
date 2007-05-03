@@ -39,7 +39,7 @@ obtain connections to databases.
 <p>This &lt;database&gt; will configure a javax.sql.DataSource and
 store it in JNDI at java:comp/env/jdbc/test_mysql.  To use the data
 source, follow the database use pattern in the
-<a href="tutorial/jdbc-basic/index.xtp">DataSource tutorial.</a></p>
+<a href="../examples/jdbc-basic/index.xtp">DataSource tutorial.</a></p>
 
 <p>Sample &lt;database&gt; configurations
 are available in the <a href="db-thirdparty.xtp">thirdparty driver page.</a>
@@ -625,8 +625,8 @@ was a secure solution.
 
 <ul>
 <li><a href="db-thirdparty.xtp">Sample configurations</a> for several database drivers
-</li><li><a href="tutorial|db-jdbc/index.xtp">Basic JNDI/JDBC usage tutorial</a>
-</li><li>Using <a href="tutorial|db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
+</li><li><a href="../examples/db-jdbc/index.xtp">Basic JNDI/JDBC usage tutorial</a>
+</li><li>Using <a href="../examples/db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
 </li></ul>
 
 </s1>

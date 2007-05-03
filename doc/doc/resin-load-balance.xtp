@@ -96,7 +96,7 @@ is more robust and faster than adaptive policies.  </p>
 In this case, there are two backend servers, both configured in the conf file
 <code>app-tier.conf</code>.</p>
 
-<p>Sites using sessions will configure <a href="sessions.xtp">distributed
+<p>Sites using sessions will configure <a href="config-sessions.xtp">distributed
 sessions</a> to make sure the users see the same session values.</p>
 
 </s2>
@@ -204,7 +204,7 @@ to the appropriate host.  So <var>bacX8ZwooOz</var> would go to app-b.</p>
 <p>In the infrequent case that app-b fails, Resin will send the
 request to app-a.  The user might lose the session but that's a minor
 problem compared to showing a connection failure error.  To save sessions,
-you'll need to use <a href="sessions.xtp">distributed sessions</a>.
+you'll need to use <a href="config-sessions.xtp">distributed sessions</a>.
 Also take a look at <a href="tcp-sessions.xtp">tcp sessions</a>.</p>
 
 <p>The following example is a typical configuration for a distributed
@@ -275,7 +275,7 @@ resolves to your web-tier, then you can use:
 <s1 title="See Also">
 
 <ul>
-<li><a href="sessions.xtp">Distributed Sessions</a>
+<li><a href="config-sessions.xtp">Distributed Sessions</a>
 </li><li><a href="tcp-sessions.xtp">Distributed Sessions with Cluster Store</a>
 </li><li><a href="cluster-tags.xtp#persistent-store">&lt;persistent-store&gt;</a>
 </li></ul>

@@ -70,7 +70,7 @@ Resin tries to keep around ready for new requests.</p>
 <s1 title="Resin 3.0 Configuration Changes">
 
 <p>The Resin 3.0 configuration has changed significantly from Resin
-2.1, mostly by being stricter.  The <a href="doc|config|index">configuration documentation</a> gives more
+2.1, mostly by being stricter.  The <a href="doc|index.xtp">configuration documentation</a> gives more
 details.</p>
 
 </s1>

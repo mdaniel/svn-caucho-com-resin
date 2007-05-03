@@ -211,7 +211,7 @@ public class HelloModule extends AbstractQuercusModule
 ?>
 </example>
 
-<p>For a tutorial on how to implement your own Quercus module, see the <a href="../tutorial/quercus-module/index.xtp">Quercus Module tutorial</a>.</p>
+<p>For a tutorial on how to implement your own Quercus module, see the <a href="../examples/quercus-module/index.xtp">Quercus Module tutorial</a>.</p>
 
 </s1>
 

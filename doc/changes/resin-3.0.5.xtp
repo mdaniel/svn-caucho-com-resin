@@ -71,7 +71,7 @@ the classloader issues typical with RMI.</p>
 
 <s1 title="JCA/JMS">
 
-<p>A new <a href="../tutorial/jms-listener/index.xtp">JMS listener resource</a>
+<p>A new <a href="../examples/jms-listener/index.xtp">JMS listener resource</a>
 is available.  Applications needing to implement a JMS
 listener can use this resource to receive messages without needing to
 implement EJB message beans.</p>

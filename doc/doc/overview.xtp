@@ -85,8 +85,8 @@ stalled servers, and monitoring of JVM memory usage for applications
 with memory leaks.</p>
 
 <ul>
-<li>Resin configuration: <a href="cluster.xtp#ping">&lt;ping&gt;</a></li>
-<li>Resin configuration: <a href="server.xtp#min-free-memory">min-free-memory</a></li>
+<li>Resin configuration: <a href="cluster-tags.xtp#ping">&lt;ping&gt;</a></li>
+<li>Resin configuration: <a href="server-tags.xtp#min-free-memory">min-free-memory</a></li>
 </ul>
 
 </s2>
@@ -249,7 +249,7 @@ database driver.
 </p>
 
 <ul>
-<li><a href="database.xtp">Resin documentation: Databases</a>
+<li><a href="config-database.xtp">Resin documentation: Databases</a>
 </li><li><a href="db-thirdparty.xtp">Resin documentation: Example database configurations</a>
 </li></ul>
 </s1> <!-- db -->
@@ -316,14 +316,14 @@ database driver.
 </ul>
 </s1>
 
+<!--
 <s1 name="jca" title="Java Connector Architecture (JCA) 1.5">
 <ul>
 <li><a href="jca.xtp">Resin documentation</a></li>
-<!--
 <li><a href="external|spec|jca15">External: specification 1.5 (JSR-112)</a></li>
--->
 </ul>
 </s1>
+-->
 
 <s1 name="jsr88" title="J2EE Deployment API (JSR 88) 1.0">
 <p>Status: in progress</p>
@@ -399,7 +399,7 @@ database driver.
 -->
 </ul>
 </s1>
-
+<!--
 <s1 name="corba" title="CORBA/IDL">
 <p>
 The J2EE specification requires that containers support CORBA.  Although Resin
@@ -411,7 +411,7 @@ supports CORBA, Caucho does not recommend the use of CORBA.
 <li><a href="hessian.xtp">Hessian documentation</a></li>
 </ul>
 </s1>
-
+-->
 <!--
 <section name="j2ee" title="J2EE">
 </section>

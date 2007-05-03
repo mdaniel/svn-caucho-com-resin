@@ -1,8 +1,0 @@
-<navigation threaded="true" section="Resin : JMX : Tutorial" comment="true">
-  <item title="Tutorials" link="index.xtp">
-    <item link="basic/index.xtp" title="Basic JMX"/>
-    <item link="mbean-server/index.xtp" title="MBeanServer"/>
-    <item link="listener/index.xtp" title="Listener"/>
-    <item link="registration/index.xtp" title="Registration"/>
-  </item>
-</navigation>

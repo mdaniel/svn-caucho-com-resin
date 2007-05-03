@@ -142,7 +142,7 @@ connections.  The <var>try ... finally</var> block is very important.  Without
 the close in the finally block, Resin's database pool can loose connections.</p>
 
 <p>Configuring the database is described in the
-<a href="database.xtp">database configuration</a> page.</p>
+<a href="config-database.xtp">database configuration</a> page.</p>
 
 <example title="TestDatabase.java">
 package test;

@@ -21,14 +21,14 @@ is "setter based dependency injection."</p>
 <p>The upgraded, buzzword-compliant documentation includes:</p>
 
 <ul>
-<li><a href="tutorial|ioc-injection/index.xtp">Dependency Injection for the MovieFinder example</a>
-</li><li><a href="tutorial|db-jdbc/index.xtp">Dependency Injection for a servlet's DataSource</a>
-</li><li><a href="tutorial|ioc-periodictask/index.xtp">Dependency Injection for a PeriodicTask resource</a>
-</li><li><a href="tutorial|jmx-listener/index.xtp">Dependency Injection for a JMX client emitter/listener</a>
-</li><li><a href="tutorial|hessian/index.xtp">Dependency Injection for Hessian Service configuration</a>
+<li><a href="examples|ioc-injection/index.xtp">Dependency Injection for the MovieFinder example</a>
+</li><li><a href="examples|db-jdbc/index.xtp">Dependency Injection for a servlet's DataSource</a>
+</li><li><a href="examples|ioc-periodictask/index.xtp">Dependency Injection for a PeriodicTask resource</a>
+</li><li><a href="examples|jmx-listener/index.xtp">Dependency Injection for a JMX client emitter/listener</a>
+</li><li><a href="examples|hessian/index.xtp">Dependency Injection for Hessian Service configuration</a>
 </li></ul>
 
-<p>The main documentation on Resin's <a href="ioc.xtp">bean-style
+<p>The main documentation on Resin's <a href="doc|ioc-bean.xtp">bean-style
 init</a> has not yet been upgraded to the new buzzwords, but
 provides more information on the configuration patterns.</p>
 
@@ -77,7 +77,7 @@ method.</p>
 old configuration had caused much confusion.  (The old configuration
 still works for backward compatibility.)</p>
 
-<p><a href="config|resin.xtp#persistent-store">&lt;persistent-store&gt;</a>
+<p><a href="doc|resin-tags.xtp#persistent-store">&lt;persistent-store&gt;</a>
 configures the persistent/distributed store in the &lt;server&gt; level for
 all persistent store types: jdbc, cluster (tcp), and file.  The
 &lt;server&gt; level is required because the persistent-store needs to
@@ -85,10 +85,10 @@ communicate with other servers in the cluster to notify about
 updates.</p>
 
 <p>Each &lt;web-app&gt; needs to enable persistent store for its
-session-config individually.  The <a href="config|webapp.xtp#session-config">use-persistent-store</a>
+session-config individually.  The <a href="doc|config-webapp.xtp#session-config">use-persistent-store</a>
 attribute of the &lt;session-config&gt; enables the persistent-store.</p>
 
-<p>As usual, you can use <a href="config|webapp.xtp#web-app-default">&lt;web-app-default&gt;</a> to
+<p>As usual, you can use <a href="doc|config-webapp.xtp#web-app-default">&lt;web-app-default&gt;</a> to
 enable configuration for all web-apps.</p>
 
 <example>
@@ -144,8 +144,8 @@ enable configuration for all web-apps.</p>
 <s1 title="http/srun timeout configuration">
 
 <p>Added
-read-timeout and write-timeout for <a href="config|resin.xtp#http">http</a>
-and <a href="config|resin.xtp#srun">srun</a>
+read-timeout and write-timeout for <a href="doc|resin-tags.xtp#http">http</a>
+and <a href="doc|resin-tags.xtp#srun">srun</a>
 .</p>
 
 <example>
@@ -159,7 +159,7 @@ and <a href="config|resin.xtp#srun">srun</a>
 
 <s1 title="web-app-deploy Enchancements">
 
-<p>web-apps configured with <a href="config|webapp.xtp#web-app-deploy">web-app-deploy</a> can now be custom configured
+<p>web-apps configured with <a href="doc|webapp-tags.xtp#web-app-deploy">web-app-deploy</a> can now be custom configured
 in the resin-conf using &lt;web-app&gt; inside the web-app-deploy.
 In particular, the &lt;web-app&gt; can define a &lt;context-path&gt; different
 from the default value given by the .war name.</p>
@@ -179,7 +179,7 @@ identifier.</p>
 
 <s1 title="startup-mode, redeploy-mode, and WebAppMBean.restart()">
 
-<p>Application redeployment is now controllable through the <a href="config|webapp.xtp#web-app">web-app</a> web.xml
+<p>Application redeployment is now controllable through the <a href="doc|webapp-tags.xtp#web-app">web-app</a> web.xml
 and through JMX.</p>
 
 <p>The startup-mode has three values: "automatic", "lazy", and "manual".
@@ -327,7 +327,7 @@ Bean bean = (Bean) ic.lookup("hessian://localhost:8080/hessian/bean");
 
 <s1 title="jndi-link">
 
-<p><a href="doc|env.xtp#jndi-link">jndi-link</a> no longer
+<p><a href="doc|env-tags.xtp#jndi-link">jndi-link</a> no longer
 requires the &lt;factory&gt;.  Now it can be used
 as a symbolic link to another JNDI name.</p>
 

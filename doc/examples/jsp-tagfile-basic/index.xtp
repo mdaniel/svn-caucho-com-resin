@@ -30,7 +30,7 @@ making development simpler.</p>
 directives.  This example definine a tag attribute "a" which
 takes a <code>String</code> value.  It prints a simple message.</p>
 
-<example file="WEB-INF/tags/test.tagx">
+<example title="WEB-INF/tags/test.tagx">
 &lt;jsp:root xmlns:jsp="http://java.sun.com/JSP/Page"&gt;
   &lt;jsp:directive.attribute name="a"
                            type="java.lang.String"
@@ -60,7 +60,7 @@ uses the XML syntax, although normal JSP syntax would work, too.
 The namespace prefix <var>urn:tagfiledir:</var> tells JSP where to look
 for the tag.  In  this case it will look in WEB-INF/tags.</p>
 
-<example file="test.jsp">
+<example title="test.jsp">
 &lt;jsp:root xmlns:jsp="http://java.sun.com/JSP/Page"
           xmlns:tags="urn:jsptagdir:/WEB-INF/tags"&gt;
   &lt;tags:test a="Test 1"/&gt;&lt;br/&gt;

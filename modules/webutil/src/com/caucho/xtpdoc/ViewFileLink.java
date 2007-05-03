@@ -48,6 +48,7 @@ public class ViewFileLink implements ContentItem {
     _file = file;
   }
 
+  @Overview
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {

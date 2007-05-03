@@ -210,7 +210,7 @@ configured explicitly.</p>
     <td>Root directory for host files</td>
     <td>parent directory</td></tr>
 <tr><td>startup-mode</td>
-    <td>'automatic', 'lazy', or 'manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a></td>
+    <td>'automatic', 'lazy', or 'manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td>
     <td>automatic</td></tr>
 </deftable-childtags>
 
@@ -448,7 +448,7 @@ active cluster and the &lt;cluster&gt; definition is at the &lt;server&gt; level
 Sessions activate the persistent store with the &lt;use-persistent-store&gt;
 tag of the &lt;session-config&gt;.</p>
 
-<p>See <a href="config|sessions.xtp">Persistent sessions</a> for more details.</p>
+<p>See <a href="config-sessions.xtp">Persistent sessions</a> for more details.</p>
 
 <example>
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;

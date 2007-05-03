@@ -61,7 +61,7 @@
         <item link="virtual-host.xtp" title="Virtual Hosting"/>
         <item link="config-database.xtp" title="Database"/>
         <item link="resin-load-balance.xtp" title="Load Balancing"/>
-        <item link="sessions.xtp" title="Sessions"/>
+        <item link="config-sessions.xtp" title="Sessions"/>
         <item link="tcp-sessions.xtp" title="Clustered Sessions"/>
         <item link="tuning.xtp" title="Tuning"/>
         <item link="isp.xtp" title="ISP"/>
@@ -127,6 +127,7 @@
       <item link="jsp-actions.xtp" title="Actions"/>
       <item link="jsp-applications.xtp" title="Applications"/>
       <item link="tld-schema.xtp" title="Schema for JSP-2.0 .tld files"/>
+      <item link="jsp-velocity.xtp" title="Velocity syntax"/>
 
       <item link="jsp-templates.xtp" title="JSP Templates"/>
       <item link="jsp-faq.xtp" title="FAQ"/>
@@ -237,7 +238,6 @@
 	-->
         <item link="ide-eclipse.xtp" title="Eclipse"/>
         <item link="ide-intellij.xtp" title="IntelliJ"/>
-        <item link="ide-kawa.xtp" title="Kawa"/>
       </item>
 
       <item link="scottit.xtp" title="Scottit"/>

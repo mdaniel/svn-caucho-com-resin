@@ -253,9 +253,9 @@ element resource-adapter {
 
 <p>Defines a database resource.</p>
 
-<p>The <a href="doc|db|config">database configuration</a> section has
+<p>The <a href="config-database.xtp">database configuration</a> section has
 more details on the configuration.  A code pattern for using databases
-is in a <a href="doc|db|tutorial/jdbc-basic/index">DataSource tutorial.</a></p>
+is in a <a href="examples|jdbc-basic/index">DataSource tutorial.</a></p>
 
 <example>
 &lt;database jndi-name='jdbc/test_mysql'&gt;

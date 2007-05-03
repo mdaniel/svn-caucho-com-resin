@@ -394,7 +394,7 @@ for all web-apps in foo.com, you might configure as follows:</p>
 
 <p>Any .war in the webapps directory will share the same signon for the
 host.  You will still need to implement a
-<a href="config|webapp#login-config">login-config</a> for each web-app.</p>
+<a href="webapp-tags.xtp#login-config">login-config</a> for each web-app.</p>
 
 <p>
 The value of <a config-tag="reuse-session-id">reuse-session-id</a> must be <code>true</code>

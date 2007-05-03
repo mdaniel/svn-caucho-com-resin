@@ -193,7 +193,7 @@ If the default rewriting of the host is not appropriate, you can set the
 <parents>security-constraint</parents>
 
 <p>Defines a custom constraint.  The custom constraint specifies a <var>resin:type</var> which extends <a href="javadoc|com.caucho.server.security.AbstractConstraint|"/>.  
-<a href="doc|config|init">Bean-style initialization</a> is used to
+<a href="ioc-bean.xtp">Bean-style initialization</a> is used to
 initialize the constraint.</p>
 
 <example>

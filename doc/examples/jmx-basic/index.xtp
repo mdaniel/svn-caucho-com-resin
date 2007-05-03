@@ -102,7 +102,7 @@ a "type" property, but this example is using a name as simple as possible.</p>
 
 <p>The web.xml (or resin.conf) configures the resource with the
 &lt;resource&gt; tag just as with
-<a href="doc|resource|index">other resources</a>.  The resources is
+<a href="doc|ioc-bean.xtp">other resources</a>.  The resources is
 registered as an MBean by specifying an <var>mbean-name</var>.
 </p>
 

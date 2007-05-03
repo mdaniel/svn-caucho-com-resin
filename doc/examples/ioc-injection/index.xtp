@@ -58,11 +58,11 @@ Martin Fowler's
 <a href="http://www.martinfowler.com/articles/injection.html">Dependency
 Injection</a> article.</p>
 
-<p>More details on Resin's configuration is available at the <a href="config|init.xtp">bean-style configuration</a> page.</p>
+<p>More details on Resin's configuration is available at the <a href="doc|ioc-bean.xtp">bean-style configuration</a> page.</p>
 
 <s2 title="Configuration as Assembly Line">
 
-<figure src="../../../../images/assembler-eg1.gif"/>
+<figure src="assembler-eg1.gif"/>
 
 <p>The Dependency Injector pattern could also be called
 the Assembly pattern because it resembles an assembly
@@ -240,9 +240,9 @@ from the &lt;init-param&gt; values to assemble the dependencies.</p>
 <s1 title="See also">
 
 <ul>
-<li><a href="doc|config|init">Bean-style init</a>
-</li><li><a href="db|tutorial/jdbc-ioc/index.xtp">Servlet DataSource Configuration</a>
-</li><li><a href="protocols|tutorial/hessian-ioc/index.xtp">Hessian
+<li><a href="doc|ioc-bean.xtp">Bean-style init</a>
+</li><li><a href="../jdbc-ioc/index.xtp">Servlet DataSource Configuration</a>
+</li><li><a href="../hessian-ioc/index.xtp">Hessian
 with Dependency Injection</a>
 </li></ul>
 

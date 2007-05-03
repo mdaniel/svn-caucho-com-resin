@@ -1180,8 +1180,8 @@ INTEGRAL, and CONFIDENTIAL are allowed values.
 </td></tr><tr><td>url-regexp</td><td>A regexp to select this application.</td><td>n/a
 </td></tr><tr><td>document-directory</td><td>The document directory for
 the application, corresponding to a url of <var>/<i>id</i>/</var>. A relative path is relative to the <a config-tag="root-directory"/> of the containing <a config-tag="host"/>.  Can use regexp replacement variables.</td><td>A relative path constricted with the id or the regexp match
-</td></tr><tr><td>startup-mode</td><td>`automatic', `lazy', or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
-</td></tr><tr><td>redeploy-mode</td><td>`automatic' or `manual', see <a href="doc|config|resin#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
+</td></tr><tr><td>startup-mode</td><td>`automatic', `lazy', or `manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
+</td></tr><tr><td>redeploy-mode</td><td>`automatic' or `manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td><td>automatic
 
 </td></tr></deftable-childtags>
 
@@ -1347,7 +1347,7 @@ will normally be configured with IoC.</p>
 <p>See the <a href="soa-tags.xtp#web-service">web-service</a>
 documentation for more information.</p>
 
-<p>See the <a href="tutorial/esb-hello-world/index.xtp">hello world tutorial</a>
+<p>See the <a href="../examples/soa-hello-world/index.xtp">hello world tutorial</a>
 for an example.</p>
 
 <deftable-childtags>

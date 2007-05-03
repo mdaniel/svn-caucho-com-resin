@@ -12,22 +12,24 @@ javaee_java-identifier = string
 javaee_path = string
 javaee_variable = string
 
+## XXX: jsf-cardemo has out of order
+
 jsp21_attribute = element attribute {
-  attribute id { string }?,
+  attribute id { string }?
 
-  jsp21_description*,
+  & jsp21_description*
 
-  element name { javaee_java-identifier },
+  & element name { javaee_java-identifier }
 
-  element required { javaee_generic-boolean }?,
+  & element required { javaee_generic-boolean }?
 
-  ((element rtexprvalue { javaee_generic-boolean }?,
+  & ((element rtexprvalue { javaee_generic-boolean }?
 
-    element type { javaee_fully-qualified-class }?,
+      & element type { javaee_fully-qualified-class }?
 
-   (jsp21_deferred-value | jsp21_deferred-method)?)
+      & (jsp21_deferred-value | jsp21_deferred-method)?)
 
-   | element fragment { javaee_generic-boolean }?)
+     | element fragment { javaee_generic-boolean }?)
 }
 
 jsp21_body-content = element body-content {
@@ -88,28 +90,29 @@ jsp21_listener = element listener {
   element listener-class { javaee_fully-qualified-class }
 }
 
+## XXX: jsf-cardemo has out of order tags
 jsp21_tag = element tag {
-  attribute id { string }?,
+  attribute id { string }?
 
-  javaee_description-Group,
+  & javaee_description-Group
 
-  element name { string },
+  & element name { string }
 
-  element tag-class { javaee_fully-qualified-class },
+  & element tag-class { javaee_fully-qualified-class }
 
-  element tei-class { javaee_fully-qualified-class }?,
+  & element tei-class { javaee_fully-qualified-class }?
 
-  jsp21_body-content?,
+  & jsp21_body-content?
 
-  jsp21_variable*,
+  & jsp21_variable*
 
-  jsp21_attribute*,
+  & jsp21_attribute*
 
-  element dynamic-attributes { javaee_generic-boolean }?,
+  & element dynamic-attributes { javaee_generic-boolean }?
 
-  element example { string }?,
+  & element example { string }?
 
-  element tag-extension { jsp21_extension-Type }*
+  & element tag-extension { jsp21_extension-Type }*
 }
 
 jsp21_tag-file = element tag-file {
@@ -128,30 +131,32 @@ jsp21_tag-file = element tag-file {
 
 ## XXX: short-name is required by the schema, but the TCK has
 ## tags without the short-name
+## jsf-cardemo has description out of order
+
 jsp21_taglib = element taglib {
-  attribute version { "2.1" },
+  attribute version { "2.1" }
 
-  attribute xsi:schemaLocation { string }?,
+  & attribute xsi:schemaLocation { string }?
 
-  javaee_description-Group,
+  & javaee_description-Group
 
-  element tlib-version { javaee_dewey-version },
+  & element tlib-version { javaee_dewey-version }
 
-  element short-name { string }?,
+  & element short-name { string }?
 
-  element uri { string }?,
+  & element uri { string }?
 
-  jsp21_validator?,
+  & jsp21_validator?
 
-  jsp21_listener*,
+  & jsp21_listener*
 
-  jsp21_tag*,
+  & jsp21_tag*
 
-  jsp21_tag-file*,
+  & jsp21_tag-file*
 
-  jsp21_function*,
+  & jsp21_function*
 
-  element taglib-extension { jsp21_extension-Type }*
+  & element taglib-extension { jsp21_extension-Type }*
 }
 
 jsp21_validator = element validator {

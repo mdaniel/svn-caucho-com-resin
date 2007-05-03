@@ -26,6 +26,16 @@ overflow connection.</p>
 
 </defun>
 
+<defun title="&lt;close-dangling-connections>" version="Resin 3.1.1">
+<parents>database</parents>
+
+<p>&lt;close-dangling-connections> closes open connections at the
+end of a request and logs a warning and stack trace.</p>
+
+<default>true</default>
+
+</defun>
+
 <defun title="&lt;driver>" version="Resin 3.1">
 <parents>database</parents>
 

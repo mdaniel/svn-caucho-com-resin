@@ -37,7 +37,7 @@ If the time expires, Resin will return a 503.  The default is 15s.</p>
 
 <s1 title="Manual web-app restart cookbook">
 
-<p>A <a href="jmx|cookbook/restart.xtp">Restart cookbook</a> is available for
+<p>A <a href="doc|jmx-servlet.xtp">Restart cookbook</a> is available for
 creating an admin servlet to stop, start, or update a web-app.</p>
 
 </s1>

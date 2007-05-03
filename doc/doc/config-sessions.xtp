@@ -1,7 +1,6 @@
 <document>
   <header>
     <product>resin</product>
-    <resin-2.0>$resin/ref/sessions.xtp</resin-2.0>
     <title>Persistent and Distributed Sessions</title>
     <description>
       <p>Sessions can be persistent across server restarts, including
@@ -17,7 +16,7 @@
 
 <s1 title="&lt;persistent-store&gt;">
 <p>Configuration for persistent store uses
-the <a href="config|resin.xtp#persistent-store">persistent-store</a> tag.</p>
+the <a href="resin-tags.xtp#persistent-store">persistent-store</a> tag.</p>
 </s1>
 
 <s1 title="File Based">
@@ -187,10 +186,10 @@ in order to efficiently update them when changes occur to the server.</p>
 </example>
 
 <p>The persistent store is configured in the &lt;server&gt; with
-<a href="config|resin.xtp#persistent-store">persistent-store</a>.
+<a href="resin-tags.xtp#persistent-store">persistent-store</a>.
 Each web-app which needs distributed sessions must enable
 the persistent store with a
-<a href="config|webapp.xtp#session-config">use-persistent-store</a>
+<a href="webapp-tags.xtp#session-config">use-persistent-store</a>
 tag in the session-config.</p>
 
 <deftable>

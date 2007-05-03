@@ -197,7 +197,7 @@ public class JarLoader extends Loader implements Dependency {
 
       path = path.lookup(name);
 
-      if (path.canRead()) {
+      if (path.exists()) {
 	try {
 	  vector.add(new URL(path.getURL()));
 	} catch (Exception e) {

@@ -23,7 +23,7 @@ public class CourseServlet extends HttpServlet {
   @Resource
   private UserTransaction _uTrans;
   
-  @PersistenceContext(name="example")
+  @PersistenceContext
   private EntityManager _manager;
 
   /**

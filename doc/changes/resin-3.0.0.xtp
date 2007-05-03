@@ -174,7 +174,7 @@ EJB servers, the outer &lt;resin&gt; declaration, even individual
 session beans.</p>
 
 <p>Any of the class loader and resource configuration is allowed in
-any environment.  See the <a href="doc|config-env.xtp">environment
+any environment.  See the <a href="doc|env-tags.xtp">environment
 configuration</a> for the list.</p>
 
   </s2>
@@ -189,8 +189,8 @@ intended to make class loader configuration more clear.</p>
 
   <s2 title="reference configuration">
 
-<p><a href="doc|env.xtp#reference">reference</a> configures
-JNDI ObjectFactories, while <a href="doc|env.xtp#resource">resource</a> configures bean objects
+<p><a href="doc|env-tags.xtp#reference">reference</a> configures
+JNDI ObjectFactories, while <a href="doc|env-tags.xtp#resource">resource</a> configures bean objects
 directly.  Several third-party components expect to be configured as
 ObjectFactory references instead of configured as beans.</p>
   </s2>

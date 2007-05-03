@@ -70,6 +70,7 @@ public class JarNode
   private long _time;
 
   private boolean _isDirectory;
+  private boolean _exists;
 
   private ArrayList<JarNode> _children;
 
@@ -87,11 +88,17 @@ public class JarNode
     _size = entry.getSize();
     _time = entry.getTime();
     _isDirectory = entry.isDirectory();
+    _exists = true;
   }
 
   public boolean isDirectory()
   {
     return _isDirectory;
+  }
+
+  public boolean exists()
+  {
+    return _exists;
   }
 
   public long getSize()

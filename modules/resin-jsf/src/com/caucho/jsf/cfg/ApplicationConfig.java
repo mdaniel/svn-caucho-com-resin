@@ -55,7 +55,7 @@ public class ApplicationConfig
 
   private Class _actionListener;
 
-  @XmlElement(name="default-render-kit-it")
+  @XmlElement(name="default-render-kit-id")
   private String _defaultRenderKitId;
 
   @XmlElement(name="message-bundle")
@@ -105,6 +105,11 @@ public class ApplicationConfig
     Config.validate(viewHandler, ViewHandler.class);
     
     _viewHandler = viewHandler;
+  }
+
+  private Class getViewHandler()
+  {
+    return null;
   }
 
   @XmlElement(name="state-manager")

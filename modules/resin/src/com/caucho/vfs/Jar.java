@@ -262,8 +262,9 @@ public class Jar implements CacheListener {
   public boolean exists(String path)
   {
     JarNode node = getJarNode(path);
-
-    return node != null;
+    
+    // XXX: facelets vs issue of meta-inf
+    return node != null && node.exists();
   }
 
   /**

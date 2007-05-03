@@ -63,7 +63,7 @@ filters. <var>init-param</var> values can use JSP EL expressions, including the
 ability to use system properties.
 
 </p><p>Servlets, filters, and resources can be configured like beans with setter
-methods are called directly (See <a href="doc|config|init">Bean-style
+methods are called directly (See <a href="doc|ioc-bean.xtp">Bean-style
 init)</a>.</p>
 
 <p>One example use use for the bean-style servlet initialization is to avoid
@@ -109,8 +109,8 @@ public class TestServlet extends HttpServlet {
 </example>
 
 <p>The <code>%lt;data-source%gt;</code> xml tag corresponds to the
-<code>setDataSource</code> method of the bena.  More infomation on this
-powerful pattern is in the <a href="doc|config|init">Bean-style init</a>
+<code>setDataSource</code> method of the bean.  More infomation on this
+powerful pattern is in the <a href="doc|ioc-bean.xtp">Bean-style init</a>
 section of the documentation.</p>
 </s1> <!-- init -->
 

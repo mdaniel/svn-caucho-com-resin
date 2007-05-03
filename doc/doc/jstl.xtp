@@ -56,7 +56,7 @@
     <s1 title="Velocity syntax maps to JSTL core">
 
       <p>Resin's experimental 
-        <a href="doc|jsp|velocity">Velocity-style syntax</a> now maps
+        <a href="jsp-velocity.xtp">Velocity-style syntax</a> now maps
         directly to JSTL tags, providing a more standard basis for the
         Velocity-style syntax.</p>
 

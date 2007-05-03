@@ -294,8 +294,8 @@ instructions for Apache because the certificates are identical.  Some
 commercial signers include:</p>
 
 <ul>
-<li><a href="external|digitalid.verisign.com|server/apacheNotice.htm">Verisign</a>
-</li><li><a href="external|www.thawte.com|certs/server/request.html">Thawte Consulting</a>
+<li><a href="http://digitalid.verisign.com/server/apacheNotice.htm">Verisign</a>
+</li><li><a href="http://www.thawte.com/certs/server/request.html">Thawte Consulting</a>
 </li></ul>
 <p>You'll receive a <em>gryffindor.crt</em> file.</p>
 

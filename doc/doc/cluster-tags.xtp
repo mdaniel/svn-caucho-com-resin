@@ -65,6 +65,10 @@ the <g>ObjectName</g> <var>resin:type=ProxyCache</var>.</p>
 <tr><td>memory-size</td>
     <td>Maximum heap memory used to cache blocks.</td>
     <td>8M</td></tr>
+<tr><td>rewrite-vary-as-private</td>
+    <td>Rewrite Vary headers as Cache-Control: private to avoid browser
+and proxy-cache bugs (particularly IE).</td>
+    <td>false</td></tr>
 </deftable-childtags>
 
 <example title="cache">

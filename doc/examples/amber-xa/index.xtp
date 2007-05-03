@@ -15,8 +15,12 @@
           <p>See also:</p>
           <ul>
             <li>The <a href="../cmp-basic-field/index.xtp">basic field CMP tutorial</a> for the basics of creating entity beans.
-            </li><li>The <a href="../resin-xa/index.xtp">ResinEnhanced transaction</a> example for a simpler alternative to session beans.
-          </li></ul>
+            </li>
+<!--
+            <li>The <a href="../resin-xa/index.xtp">ResinEnhanced transaction</a> example for a simpler alternative to session beans.
+          </li>
+-->
+          </ul>
         </description>
     <type>tutorial</type>
     <tutorial-startpage>xa</tutorial-startpage>

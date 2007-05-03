@@ -145,7 +145,7 @@ try .. finally block.</p>
 <p>As with JDBC, the user must put the <code>close()</code> in a
 finally block or the connection will leak.</p>
 
-<example file="WEB-INF/classes/example/TestServlet.java">
+<example title="WEB-INF/classes/example/TestServlet.java">
 void init()
 {
   ...
@@ -196,7 +196,7 @@ the user connection factor, in this case
 "java:comp/env/factory".  The &lt;type&gt; tag is the class name of
 the factory and the &lt;init&gt; section initializes the factory.</p>
 
-<example file="WEB-INF/web.xml">
+<example title="WEB-INF/web.xml">
 &lt;resource name="factory"&gt;
   &lt;type&gt;example.ManagedConnectionFactoryImpl&lt;/type&gt;
   &lt;init&gt;

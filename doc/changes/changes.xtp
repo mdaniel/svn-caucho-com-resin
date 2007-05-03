@@ -10,12 +10,16 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.snap">
+<s2 title="3.1.snap - Apr 24, 2007">
 <ul>
+<li>DB pool: add close-dangling-connections (#1707)</li>
+<li>Cache: add rewrite-vary-as-private for IE caching bug (#1581, rep by sergek)</li>
 <li>Amber: @GeneratedValue with MS SQLServer was not working #1702 (rep by Michael Sengbusch)</li>
 <li>Quercus: file uploads (#1434, #1435, #1615, rep by D Berry, M Bopp, snb)</li>
 <li>Amber: createNativeQuery(String sql) i.e. missing mapping was throwing NPE (#1687, rep by Michael Sengbusch)</li>
 <li>Amber: native queries with parameters (#1691, rep by Michael Sengbusch)</li>
+<li>(2007-04-24) SSL: add OpenSSL_add_all_algorithms() during initialization (#1670, rep by thintz)</li>
+<li>Servlet listener needs to handle description tag (#1635, rep by dpasek)</li>
 <li>JSP: issues with tag class validation with generics (#1677, rep by L Kaminsky)</li>
 <li>Session: verify session-max is valid (#1678)</li>
 <li>JSP: i18n issue with filters (#1686, fixed! by gzhu)</li>

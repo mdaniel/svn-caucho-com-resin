@@ -65,17 +65,17 @@ Student bean and a <var>type</var> of "prefect" creates a Prefect bean.</p>
 <example title="Student.java">
 package example;
 
-<a href="amber|cmp-table.xtp#@Entity">@javax.ejb.Entity</a>(access=FIELD)
-<a href="amber|cmp-table.xtp#@Table">@javax.ejb.Table</a>(name="ejb3_inherit_student")
-<a href="amber|cmp-table.xtp#@Inheritance">@javax.ejb.Inheritance</a>(discriminatorValue="student")
-<a href="amber|cmp-table.xtp#@DiscriminatorColumn">@javax.ejb.DiscriminatorColumn</a>(name="type")
+<a href="doc|amber-table.xtp#@Entity">@javax.ejb.Entity</a>(access=FIELD)
+<a href="doc|amber-table.xtp#@Table">@javax.ejb.Table</a>(name="ejb3_inherit_student")
+<a href="doc|amber-table.xtp#@Inheritance">@javax.ejb.Inheritance</a>(discriminatorValue="student")
+<a href="doc|amber-table.xtp#@DiscriminatorColumn">@javax.ejb.DiscriminatorColumn</a>(name="type")
 public class Student {
-  <a href="ejb3|cmp-table.xtp#@Id">@javax.ejb.Id</a>(generator=AUTO)
-  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="id")
+  <a href="doc|amber-table.xtp#@Id">@javax.ejb.Id</a>(generator=AUTO)
+  <a href="doc|amber-table.xtp#@Column">@javax.ejb.Column</a>(name="id")
   private long _id;
 
-  <a href="ejb3|cmp-table.xtp#@Basic">@javax.ejb.Basic</a>
-  <a href="ejb3|cmp-table.xtp#@Column">@javax.ejb.Column</a>(name="name")
+  <a href="doc|amber-table.xtp#@Basic">@javax.ejb.Basic</a>
+  <a href="doc|amber-table.xtp#@Column">@javax.ejb.Column</a>(name="name")
   private String _name;
 
   public Student()
@@ -101,7 +101,7 @@ public class Student {
 
 <s2 title="@Inheritance">
 
-<p>The <a href="amber|cmp-table.xtp#@Inheritance">@Inheritance</a>
+<p>The <a href="doc|amber-table.xtp#@Inheritance">@Inheritance</a>
 annotation marks the entity bean as supporting inheritance.</p>
 
 <p>Amber supports two inheritance types: SINGLE_TABLE and JOINED.
@@ -125,7 +125,7 @@ and the Prefect class has a "prefect" value.</p>
 <s2 title="@DiscriminatorColumn">
 
 <p>Both SINGLE_TABLE and JOINED use a discriminator column to
-distinguish the classes.  The <a href="ejb3|cmp-table.xtp#@DiscriminatorColumn">@DiscriminatorColumn</a>
+distinguish the classes.  The <a href="doc|amber-table.xtp#@DiscriminatorColumn">@DiscriminatorColumn</a>
 annotation specifies the column name.  In this example, the column is
 "type".  The default discriminator column is "TYPE".</p>
 
@@ -136,8 +136,8 @@ package example;
 
 import static javax.ejb.AccessType.FIELD;
 
-<a href="ejb3|cmp-table.xtp#@Entity">@javax.ejb.Entity</a>(access=FIELD)
-<a href="ejb3|cmp-table.xtp#@Inheritance">@javax.ejb.Inheritance</a>(discriminatorValue="prefect")
+<a href="doc|amber-table.xtp#@Entity">@javax.ejb.Entity</a>(access=FIELD)
+<a href="doc|amber-table.xtp#@Inheritance">@javax.ejb.Inheritance</a>(discriminatorValue="prefect")
 public class Prefect {
   public Prefect()
   {
