@@ -1450,7 +1450,7 @@ public class RegexpModule
 
       switch (ch) {
       case '\\':
-        sb.append(ch);
+        //sb.append(ch);
 
         if (i + 1 < len) {
           i++;
@@ -1461,13 +1461,15 @@ public class RegexpModule
 	      '1' <= ch && ch <= '3' && i + 1 < len && '0' <= regexp.charAt(i + 1) && ch <= '7') {
             // Java's regexp requires \0 for octal
 
-            // sb.append('\\');
+            sb.append('\\');
             sb.append('0');
             sb.append(ch);
           }
           else if (ch == 'x' && i + 1 < len && regexp.charAt(i + 1) == '{') {
+            sb.append('\\');
+            
             int tail = regexp.indexOf('}', i + 1);
-
+            
             if (tail > 0) {
               StringValue hex = regexp.substring(i + 2, tail);
 
@@ -1490,9 +1492,46 @@ public class RegexpModule
               sb.append("\\x");
             }
           }
-          else
+          else if (Character.isLetter(ch)) {
+            switch (ch) {
+              case 'a':
+              case 'c':
+              case 'e':
+              case 'f':
+              case 'n':
+              case 'r':
+              case 't':
+              case 'x':
+              case 'd':
+              case 'D':
+              case 's':
+              case 'S':
+              case 'w':
+              case 'W':
+              case 'b':
+              case 'B':
+              case 'A':
+              case 'Z':
+              case 'z':
+              case 'G':
+              case 'p': //XXX: need to translate PHP properties to Java ones
+              case 'P': //XXX: need to translate PHP properties to Java ones
+              case 'X':
+              //case 'C': byte matching, not supported
+                sb.append('\\');
+                sb.append(ch);
+                break;
+              default:
+                sb.append(ch);
+            }
+          }
+          else {
+            sb.append('\\');
             sb.append(ch);
+          }
         }
+        else
+          sb.append('\\');
         break;
 
       case '[':
