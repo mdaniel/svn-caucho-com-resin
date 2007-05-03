@@ -82,6 +82,8 @@ public class AuthTypeCondition
   {
     if (_sendVary)
       addHeaderValue(response, "Vary", "Cookie");
+    else
+      addHeaderValue(response, "Cache-Control", "private");
 
     String authType = request.getAuthType();
 
@@ -89,14 +91,8 @@ public class AuthTypeCondition
       authType = "none";
 
     if (_authType == null) {
-      if ("none".equalsIgnoreCase(authType))
-        return true;
-
-      addHeaderValue(response, "Cache-Control", "private");
-      return false;
+      return ("none".equalsIgnoreCase(authType));
     }
-
-    addHeaderValue(response, "Cache-Control", "private");
 
     return _authType.equalsIgnoreCase(authType);
   }

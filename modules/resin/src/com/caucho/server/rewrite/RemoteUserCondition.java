@@ -71,12 +71,10 @@ public class RemoteUserCondition
 
     if (_sendVary)
       addHeaderValue(response, "Vary", "Cookie");
-
-    String remoteUser = request.getRemoteUser();
-
-    if (remoteUser != null)
+    else
       addHeaderValue(response, "Cache-Control", "private");
 
+    String remoteUser = request.getRemoteUser();
 
     return remoteUser != null && remoteUser.equals(_remoteUser);
   }

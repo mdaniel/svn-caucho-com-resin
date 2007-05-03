@@ -65,5 +65,33 @@ and type of arguments passed in.</p>
 
 </s1>
 
+<s1 title="rewrite-dispatch">
+
+<p>Header conditions are now available in rewrite-dispatch.</p>
+
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-dispatch>
+    &lt;redirect regexp="/test" target="/google">
+      &lt;require header="Referer" regexp="google"/>
+    &lt;/redirect>
+  &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+</s1>
+
+<s1 title="Command line arguments: --log-directory">
+
+<p>Resin 3.1.1 adds a --log-directory argument to configure
+the location for the watchdog-manager.out and jvm-*.log files.</p>
+
+<p>The log directory is relative to the --root-directory and defaults to "log".</p>
+
+</s2>
+</s1>
+
 </body>
 </document>

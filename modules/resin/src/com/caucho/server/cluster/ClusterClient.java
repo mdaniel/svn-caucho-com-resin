@@ -310,6 +310,14 @@ public final class ClusterClient
   /**
    * Returns true if the server can open a connection.
    */
+  public boolean canOpenSoftOrRecycle()
+  {
+    return getIdleCount() > 0 || canOpenSoft();
+  }
+
+  /**
+   * Returns true if the server can open a connection.
+   */
   public boolean canOpenSoft()
   {
     int state = _state;
@@ -332,8 +340,9 @@ public final class ClusterClient
       int connectionMax = WARMUP_CONNECTION_MAX[warmupState];
 
       int idleCount = getIdleCount();
-      int totalCount = _activeCount + _startingCount + idleCount;
-
+      int activeCount = _activeCount + _startingCount;
+      int totalCount = activeCount + idleCount;
+      
       if (_firstConnectTime <= 0)
 	toWarmup();
       
@@ -690,7 +699,7 @@ public final class ClusterClient
 	_connectCountTotal++;
 
         long now = Alarm.getCurrentTime();
-        
+
 	if (_firstConnectTime <= 0) {
 	  if (ST_STARTING <= _state && _state < ST_ACTIVE) {
 	    _state = ST_WARMUP;

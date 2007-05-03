@@ -68,11 +68,10 @@ public class UserInRoleCondition
   public boolean isMatch(HttpServletRequest request,
                          HttpServletResponse response)
   {
-    if (request.getUserPrincipal() != null)
-      addHeaderValue(response, "Cache-Control", "private");
-
     if (_sendVary)
       addHeaderValue(response, "Vary", "Cookie");
+    else
+      addHeaderValue(response, "Cache-Control", "private");
 
     return request.isUserInRole(_role);
   }

@@ -39,7 +39,7 @@ public class VfsStream extends StreamImpl {
   private static byte []unixNewline = new byte[] { (byte) '\n' };
 
   private InputStream is;
-  private OutputStream os;
+  private OutputStream _os;
   private boolean flushOnNewline;
   private boolean closeChildOnClose = true;
   private byte []newline = unixNewline;
@@ -77,7 +77,7 @@ public class VfsStream extends StreamImpl {
   public void init(InputStream is, OutputStream os)
   {
     this.is = is;
-    this.os = os;
+    _os = os;
     setPath(null);
     flushOnNewline = false;
     closeChildOnClose = true;
@@ -171,7 +171,7 @@ public class VfsStream extends StreamImpl {
 
   public boolean canWrite()
   {
-    return os != null;
+    return _os != null;
   }
 
   public boolean getFlushOnNewline()
@@ -195,8 +195,11 @@ public class VfsStream extends StreamImpl {
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
-    if (os != null)
+    OutputStream os = _os;
+    
+    if (os != null) {
       os.write(buf, offset, length);
+    }
   }
 
   public void flushToDisk() throws IOException
@@ -206,8 +209,8 @@ public class VfsStream extends StreamImpl {
 
   public void flush() throws IOException
   {
-    if (os != null) {
-      os.flush();
+    if (_os != null) {
+      _os.flush();
     }
   }
 
@@ -219,9 +222,9 @@ public class VfsStream extends StreamImpl {
   public void close() throws IOException
   {
     try {
-      if (os != null && closeChildOnClose) {
-        os.close();
-        os = null;
+      if (_os != null && closeChildOnClose) {
+        _os.close();
+        _os = null;
       }
     } finally {
       if (is != null && closeChildOnClose) {

@@ -243,7 +243,15 @@ public class ServerConnector
   }
   
   /**
-   * Returns true if the server is dead.
+   * Returns true if the server can open a recycled or new connection
+   */
+  public boolean canOpenSoftOrRecycle()
+  {
+    return _client.canOpenSoftOrRecycle();
+  }
+  
+  /**
+   * Returns true if the server can open a new connection
    */
   public boolean canOpenSoft()
   {

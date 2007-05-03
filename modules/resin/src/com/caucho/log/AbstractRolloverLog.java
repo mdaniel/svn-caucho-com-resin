@@ -43,6 +43,7 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.io.FilterOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,6 +51,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipOutputStream;
+import java.util.zip.DeflaterOutputStream;
 
 /**
  * Abstract class for a log that rolls over based on size or period.
@@ -389,6 +391,9 @@ public class AbstractRolloverLog {
     synchronized (this) {
       if (_os != null)
 	_os.flush();
+
+      if (_zipOut != null)
+	_zipOut.flush();
     }
   }
 
