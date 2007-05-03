@@ -91,8 +91,11 @@ public class QuercusClass {
   private final IdentityHashMap<String,Expr> _constMap
     = new IdentityHashMap<String,Expr>();
 
-  private final HashMap<String,ArrayList<StaticField>> _staticFieldsMap
+  private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap
     = new LinkedHashMap<String,ArrayList<StaticField>>();
+  
+  private final HashMap<String,Var> _staticFieldMap
+    = new HashMap<String,Var>();
   
   public QuercusClass(ClassDef classDef, QuercusClass parent)
   {
@@ -253,14 +256,14 @@ public class QuercusClass {
   /**
    * Adds a static class field.
    */
-  public void addStaticField(String className, String name, Expr value)
+  public void addStaticFieldExpr(String className, String name, Expr value)
   {
-    ArrayList<StaticField> fieldList = _staticFieldsMap.get(className);
+    ArrayList<StaticField> fieldList = _staticFieldExprMap.get(className);
     
     if (fieldList == null) {
       fieldList = new ArrayList<StaticField>();
 
-      _staticFieldsMap.put(className, fieldList);
+      _staticFieldExprMap.put(className, fieldList);
     }
     
     fieldList.add(new StaticField(name, value));
@@ -318,7 +321,7 @@ public class QuercusClass {
   public void init(Env env)
   {
     for (Map.Entry<String,ArrayList<StaticField>> map :
-         _staticFieldsMap.entrySet()) {
+         _staticFieldExprMap.entrySet()) {
       if (env.isInitializedClass(map.getKey()))
         continue;
       
@@ -332,13 +335,33 @@ public class QuercusClass {
         else
           val = expr.eval(env);
 
-        env.setGlobalValue(field._name, val);
+        Var var = new Var();
+        var.set(val);
+        //var.setGlobal();
+        
+        _staticFieldMap.put(field._name, var);
+        //env.setGlobalValue(field._name, val);
       }
       
       env.addInitializedClass(map.getKey());
     }
   }
 
+  public Var getStaticField(String name)
+  {
+    Var var = _staticFieldMap.get(name);
+    
+    if (var != null)
+      return var;
+    
+    QuercusClass parent = getParent();
+    
+    if (parent != null)
+      var = parent.getStaticField(name);
+
+    return var;
+  }
+  
   //
   // Constructors
   //

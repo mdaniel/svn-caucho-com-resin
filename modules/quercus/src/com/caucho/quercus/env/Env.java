@@ -1998,6 +1998,17 @@ public class Env {
    */
   public final Var getStaticClassFieldVar(String className, String name)
   {
+    QuercusClass cl = findAbstractClass(className);
+    
+    Var var = cl.getStaticField(name);
+    
+    if (var == null) {
+      error(L.l("{0}::${1} is an undeclared static property", className, name));
+    }
+    
+    return var;
+    
+    /*
     Var var = _globalMap.get(name);
 
     if (var == null) {
@@ -2019,6 +2030,7 @@ public class Env {
     _globalMap.put(name, var);
 
     return var;
+    */
   }
 
   /**

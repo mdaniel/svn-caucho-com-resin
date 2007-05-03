@@ -137,7 +137,7 @@ public class InterpretedClassDef extends ClassDef
 
     String className = getName();
     for (Map.Entry<String,Expr> entry : _staticFieldMap.entrySet()) {
-      cl.addStaticField(className, entry.getKey(), entry.getValue());
+      cl.addStaticFieldExpr(className, entry.getKey(), entry.getValue());
     }
 
     for (Map.Entry<String,Expr> entry : _constMap.entrySet()) {
@@ -179,7 +179,7 @@ public class InterpretedClassDef extends ClassDef
    */
   public void addStaticValue(Value name, Expr value)
   {
-    _staticFieldMap.put(getName() + "::" + name.toString(), value);
+    _staticFieldMap.put(name.toString(), value);
   }
 
   /**

@@ -42,7 +42,6 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
 
   protected final String _className;
   protected final String _varName;
-  protected final String _envName;
 
   public StaticFieldGetExpr(Location location, String className, String varName)
   {
@@ -50,8 +49,6 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
     _className = className;
     
     _varName = varName;
-
-    _envName = className + "::" + varName;
   }
 
   public StaticFieldGetExpr(String className, String varName)
@@ -59,8 +56,6 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
     _className = className;
     
     _varName = varName;
-
-    _envName = className + "::" + varName;
   }
   
   /**
@@ -72,7 +67,7 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    return env.getStaticClassFieldValue(_className, _envName);
+    return env.getStaticClassFieldValue(_className, _varName);
   }
 
   /**
@@ -84,7 +79,7 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalCopy(Env env)
   {
-    return env.getStaticClassFieldVar(_className, _envName).copy();
+    return env.getStaticClassFieldVar(_className, _varName).copy();
   }
 
   /**
@@ -96,7 +91,7 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalArg(Env env)
   {
-    return env.getStaticClassFieldVar(_className, _envName);
+    return env.getStaticClassFieldVar(_className, _varName);
   }
 
   /**
@@ -108,7 +103,7 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public Value evalRef(Env env)
   {
-    return env.getStaticClassFieldVar(_className, _envName);
+    return env.getStaticClassFieldVar(_className, _varName);
   }
   
   /**
@@ -120,7 +115,7 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public void evalAssign(Env env, Value value)
   {
-    env.setGlobalValue(_envName, value);
+    env.getStaticClassFieldVar(_className, _varName).set(value);
   }
   
   /**
@@ -132,7 +127,8 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public void evalUnset(Env env)
   {
-    // env.removeGlobal(_envName);
+    env.error(L.l("{0}::${1}: Cannot unset static variables.",
+                  _className, _varName));
   }
   
   public String toString()
