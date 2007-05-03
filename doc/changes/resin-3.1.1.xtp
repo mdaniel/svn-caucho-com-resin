@@ -1,0 +1,46 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.1.1 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 3.1.x">
+
+<p>Resin 3.1.x is a development branch.  New capabilities will be added
+along with bug fixes for future versions of the Resin 3.1.x branch.</p>
+
+<p>Deployments which need a Resin version with only bug fixes should
+use the Resin 3.0.x branch.</p>
+
+</s1>
+
+<s1 title="Amber/JPA release candidate">
+
+<p>In Resin 3.1.1, Amber is a release candidate
+for the JPA implementation. A number of bugs in Amber have 
+been fixed in Resin 3.1.1. If you were trying JPA 
+with Resin 3.1, we strongly recommend that you upgrade 
+to the latest version.</p>
+
+<p>The current stage is recommended if you want 
+to create applications with JPA or if you are
+moving applications to JPA. Either way, it will be
+worth the effort since you will not need to wait
+until the next official release to start developing
+applications.</p>
+
+<p>For now, the default persistence context type
+(TRANSACTION) is fully supported, while the EXTENDED type
+is not yet implemented, but will be included with the next
+release. Also, with the next release, we are expecting 
+significant performance gains when compared to other 
+JPA implementations.</p>
+
+</s1>
+
+</body>
+</document>
