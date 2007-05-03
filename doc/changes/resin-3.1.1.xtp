@@ -42,5 +42,28 @@ JPA implementations.</p>
 
 </s1>
 
+<s1 title="Quercus">
+
+<p>Quercus is now in beta!</p>
+
+<p>Quercus is now faster in both interpreted and compiled mode, 
+due to smarter handling of strings and faster function calls.</p>
+
+<p>Java classes are now treated the same as PHP classes.
+This means that PHP classes can now extend Java classes and you
+can instantiate a Java class using the 'new CLASSNAME()' syntax.</p>
+
+<p>Quercus supports the Quercus-only 'import' keyword within
+PHP scripts.  It is used to automatically import Java classes
+and PHP classes when needed.</p>
+
+<p>Quercus supports the overloading of Java functions.
+Quercus will determine which function to call based on the number
+and type of arguments passed in.</p>
+
+<p>PHP's try-catch will now catch Java Exceptions.</p>
+
+</s1>
+
 </body>
 </document>
