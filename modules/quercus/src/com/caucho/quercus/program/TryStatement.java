@@ -30,6 +30,7 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLanguageException;
@@ -65,20 +66,33 @@ public class TryStatement extends Statement {
       Value value = e.getValue();
 
       for (int i = 0; i < _catchList.size(); i++) {
-	Catch item = _catchList.get(i);
+        Catch item = _catchList.get(i);
 
-	if (value != null && value.isA(item.getId()) ||
-	    value == null && item.getId().equals("Exception")) {
-	  if (value != null)
-	    item.getExpr().evalAssign(env, value);
-	  else
-	    item.getExpr().evalAssign(env, NullValue.NULL);
-	  
-	  return item.getBlock().execute(env);
-	}
+        if (value != null && value.isA(item.getId()) ||
+            value == null && item.getId().equals("Exception")) {
+          if (value != null)
+            item.getExpr().evalAssign(env, value);
+          else
+            item.getExpr().evalAssign(env, NullValue.NULL);
+              
+          return item.getBlock().execute(env);
+        }
       }
 
       throw e;
+    } catch (Exception e) {
+
+      for (int i = 0; i < _catchList.size(); i++) {
+        Catch item = _catchList.get(i);
+
+        if (item.getId().equals("Exception")) {
+          item.getExpr().evalAssign(env, NullValue.NULL);
+
+          return item.getBlock().execute(env);
+        }
+      }
+
+      throw new QuercusException(e);
     }
   }
 
