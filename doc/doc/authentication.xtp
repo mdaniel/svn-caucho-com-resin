@@ -10,10 +10,11 @@
   authentication library.</p>
           
   <p>Resin provides a predefined XML authenticator for user and
-  password lookup in an XML file and a database authenticator for
-  lookup in a database using JDBC. If the predefined
-  authentication methods are inadequate, Resin provides an API to
-  write custom authentication code.</p>
+  password lookup in an XML file,  a database authenticator for
+  lookup in a database using JDBC, an LDAP authenticator for LDAP and Active
+  Directory servers, and a JAAS authenticator.  If the predefined authentication
+  methods are inadequate, Resin provides an API to write custom authentication
+  code.</p>
   </description>
 </header>
 
@@ -221,7 +222,7 @@ passwords.</p>
 <deftable>
 <tr><th>attribute</th><th>meaning</th><th>default
 </th></tr><tr><td>user</td><td>specifies an allowed user.  May be repeated.</td><td>none
-</td></tr><tr><td>password-digest</td><td>selects the signature method to protect
+</td></tr><tr><td><a href="#password-digest">password-digest</a></td><td>selects the signature method to protect
 the password</td><td>md5-base64
 </td></tr><tr><td>path</td><td>specifies a path to an XML file containing the users and passwords.</td><td>none
 </td></tr><tr><td>logout-on-session-timeout</td><td>If true, the user will be logged out when the session times out</td><td>true
@@ -237,7 +238,7 @@ file looks like:</p>
 &lt;/authenticator&gt;
 </example>
 
-<p>Sites should use password-digest to protect the passwords.</p>
+<p>Sites should use <a href="#password-digest">password-digest</a> to protect the passwords.</p>
 
 </s1>
 
@@ -263,7 +264,7 @@ persistent cookie.</td><td>none
 a persistent cookie to a user.</td><td>none
 </td></tr><tr><td>role-query</td><td>A SQL query to determine the user's role.  By
 default, all users are in role "user", but no others.</td><td>none
-</td></tr><tr><td>password-digest</td><td>Specifies the digest algorithm and format (Resin 2.0.4)</td><td>md5-base64
+</td></tr><tr><td><a href="#password-digest">password-digest</a></td><td>Specifies the digest algorithm and format (Resin 2.0.4)</td><td>md5-base64
 </td></tr><tr><td>logout-on-session-timeout</td><td>If true, the user will be logged out when the session times out (Resin 2.0.6)</td><td>true
 </td></tr></deftable>
 
@@ -301,6 +302,223 @@ default, all users are in role "user", but no others.</td><td>none
 </example>
 
 </s1>
+
+<s1 title="LdapAuthenticator" version="Resin 3.0.19">
+<p>
+The LdapAuthenticator (<a href="javadoc|com.caucho.server.security.LdapAuthenticator|"/>)
+uses jndi to contact an LDAP (or Active Directory) server for authentication purposes.
+</p>
+
+<deftable>
+<tr><th>attribute</th><th>meaning</th><th>default</th></tr>
+<tr><td>dn-prefix</td>
+    <td>string to prepend to query before portion selecting user by name</td>
+    <td>none</td></tr>
+<tr><td>dn-suffix</td>
+    <td>string to append to query after portion selecting user by name</td>
+    <td>none</td></tr>
+<tr><td><a href="#jndi-env">jndi-env</a></td>
+    <td>Add a property to the jndi provider used for connecting to the ldap server</td>
+    <td>see below</td></tr>
+<tr><td>logout-on-session-timeout</td>
+    <td>If true, the user will be logged out when the session times out</td>
+    <td>true</td></tr>
+<tr><td><a href="#password-digest">password-digest</a></td>
+     <td>selects the signature method to protect the password</td>
+     <td>md5-base64</td></tr>
+<tr><td>user-attribute</td>
+    <td>the attribute name to use in the query for matching the user</td>
+    <td>uid</td></tr>
+<tr><td>password-attribute</td>
+    <td>the attribute name to use for obtaining the password</td>
+    <td>userPassword</td></tr>
+<tr><td>url</td>
+    <td>the url for the server (since Resin 3.1.1)</td>
+    <td>ldap://localhost:389</td></tr>
+</deftable>
+
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  ...
+
+  &lt;authenticator&gt;
+    &lt;type&gt;com.caucho.server.security.LdapAuthenticator&lt;/type&gt;
+    &lt;init&gt;
+      &lt;url&gt;ldap://localhost:389&lt;/url&gt;
+      &lt;dn-suffix&gt;dc=hogwarts,dc=com&lt;/dn-suffix&gt;
+      &lt;password-digest&gt;none&lt;/password-digest&gt;
+    &lt;/init&gt;
+  &lt;/authenticator&gt;
+
+  ...
+
+&lt;/web-app&gt;
+
+</example>
+
+<s2 title="jndi-env">
+
+<p>jndi-env configures properties of the ldap provider implementation.
+Prior to 3.1.1, the url of the server is specified with
+<code>jndi-env</code> and the <code>java.naming.provider.url</code> property.
+</p>
+
+<example title="LdapAuthenticator jndi-env">
+  &lt;authenticator&gt;
+    &lt;type&gt;com.caucho.server.security.LdapAuthenticator&lt;/type&gt;
+    &lt;init&gt;
+      &lt;jndi-env java.naming.factory.initial="com.sun.jndi.ldap.LdapCtxFactory"/&gt;
+      &lt;jndi-env java.naming.provider.url="ldap://localhost:389"/&gt;
+
+      &lt;dn-suffix&gt;dc=hogwarts,dc=com&lt;/dn-suffix&gt;
+      &lt;password-digest&gt;none&lt;/password-digest&gt;
+    &lt;/init&gt;
+  &lt;/authenticator&gt;
+</example>
+</s2>
+</s1>
+
+<s1 title="JaasAuthenticator" version="Resin 3.0.12">
+<p>
+The JaasAuthenticator (<a href="javadoc|com.caucho.server.security.JaasAuthenticator|"/>)
+uses a JAAS LoginModule for authentication.  The JaasAuthenticator is an
+adapter that provides the ability to use the large number of JAAS LoginModule's
+included in the JDK for authentication purposes.
+</p>
+
+<deftable>
+<tr><th>attribute</th><th>meaning</th><th>default</th></tr>
+<tr><td><a href="#jaas-init-param">init-param</a></td>
+    <td>Add a property to the LoginModule</td>
+    <td>none</td></tr>
+<tr><td>login-module</td>
+    <td>The fully qualified class name of the LoginModule implementation</td>
+    <td>required</td></tr>
+<tr><td>logout-on-session-timeout</td>
+    <td>If true, the user will be logged out when the session times out</td>
+    <td>true</td></tr>
+<tr><td><a href="#password-digest">password-digest</a></td>
+     <td>selects the signature method to protect the password</td>
+     <td>md5-base64</td></tr>
+</deftable>
+
+<example title="JaasAuthenticator configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  &lt;authenticator type="com.caucho.server.security.JaasAuthenticator"&gt;
+    &lt;init&gt;
+      &lt;login-module&gt;com.sun.security.auth.module.Krb5LoginModule&lt;/login-module&gt;
+      &lt;init-param&gt;
+        &lt;debug&gt;true&lt;/debug&gt;
+      &lt;/init-param&gt;
+    &lt;/init&gt;
+  &lt;/authenticator&gt;
+
+&lt;/web-app&gt;
+</example>
+
+<s2 name="jaas-is-user-in-role" title="isUserInRole">
+<p>
+The isUserInRole method is supported if the LoginModule provides either an
+isUserInRole method in the Principal returned by the LoginModule, or a
+getRoles() method returning a java.util.Set. (Since 3.0.19).
+</p>
+</s2> <!-- jaas-is-user-in-role -->
+
+<s2 name="jaas-init-param" title="init-param">
+
+<p>
+&lt;init-param&gt; directives are used to configure the properties of the
+LoginModule. Existing LoginModules provide documentation of the init-param that
+are accepted. Custom LoginModule implementations retrieve the init-param values
+in the initialize method.
+</p>
+
+</s2> <!-- jaas-init-param -->
+
+<s2 name="jaas-custom" title="Custom LoginModule">
+
+<example title="Custom LoginModule - java code">
+import java.util.*;
+
+import javax.security.auth.*;
+import javax.security.auth.spi.*;
+import javax.security.auth.callback.*;
+import javax.security.auth.login.*;
+
+public class TestLoginModule implements javax.security.auth.spi.LoginModule {
+  private Subject _subject;
+  private CallbackHandler _handler;
+  private Map _state;
+ 
+  private String _userName;
+  private String _password;
+
+  public void initialize(Subject subject,
+                         CallbackHandler handler,
+                         Map sharedState,
+                         Map options)
+   {
+     _subject = subject;
+     _handler = handler;
+     _state = sharedState;
+
+     _userName = (String) _options.get("user");
+     _password = (String) _options.get("password");
+   }
+
+   public boolean login()
+     throws LoginException
+   {
+     NameCallback name = new NameCallback("");
+     PasswordCallback password = new PasswordCallback("", false);
+ 
+     _handler.handle(new Callback[] { name, password });
+
+     if (_userName.equals(name.getName()) &amp;&amp; 
+         _password.equals(password.getPassword()) {
+         _subject.getPrincipals().add(new TestPrincipal(_userName));
+       return true;
+     }
+     else
+       return false;
+   }
+
+   public boolean abort()
+   {
+     return true;
+   }
+
+   public boolean commit()
+   {
+     return _subject.getPrincipals().size() > 0;
+   }
+
+   public boolean logout()
+   {
+      return true;
+   }
+}
+</example>
+
+<example title="Custom LoginModule - resin-web.xml configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  &lt;authenticator type="com.caucho.server.security.JaasAuthenticator"&gt;
+    &lt;init&gt;
+      &lt;login-module&gt;example.TestModule&lt;/login-module&gt;
+      &lt;init-param&gt;
+        &lt;user&gt;Harry&lt;/user&gt;
+        &lt;password&gt;quidditch&lt;/password&gt;
+      &lt;/init-param&gt;
+    &lt;/init&gt;
+  &lt;/authenticator&gt;
+&lt;/web-app&gt;
+</example>
+</s2> <!-- jaas-custom -->
+
+</s1> <!-- JaasAuthenticator -->
 
 <s1 title="AuthenticationList" version="3.0.9">
 <p>AuthenticatorList 
@@ -342,7 +560,7 @@ authenticator in the list is attempted.
 
 </p></s1>
 
-<s1 title="PasswordDigest" version="Resin 2.0.4">
+<s1 title="password-digest" version="Resin 2.0.4">
 
 <p>Resin has the capability of storing the digest of
 a password instead of the password itself.  By using the password digest,

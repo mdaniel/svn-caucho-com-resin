@@ -46,7 +46,7 @@ import java.util.Hashtable;
 import java.util.logging.Level;
 
 /**
- * The LDAP authenticator uses the underlying LDAP.
+ * The LDAP authenticator uses the underlying LDAP services provided by the JDK.
  */
 public class LdapAuthenticator extends AbstractAuthenticator {
   private String _userAttribute = "uid";
@@ -78,6 +78,11 @@ public class LdapAuthenticator extends AbstractAuthenticator {
   public void addJNDIEnv(InitParam init)
   {
     _jndiEnv.putAll(init.getParameters());
+  }
+
+  public void setURL(String url)
+  {
+   _jndiEnv.put(Context.PROVIDER_URL, url);
   }
 
   public void setUserAttribute(String user)
