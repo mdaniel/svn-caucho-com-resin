@@ -68,6 +68,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -1624,20 +1625,6 @@ public class Env {
           post.put(entry.getKey(), entry.getValue());
         }
       }
-
-      //XXX: php/081e, need to put uploaded files into $_FILES
-      ArrayList<String> keys = new ArrayList<String>();
-      if (_request.getParameterMap() != null)
-        keys.addAll(_request.getParameterMap().keySet());
-
-      Collections.sort(keys);
-
-      for (String key : keys) {
-        String []value = _request.getParameterValues(key);
-
-        Post.addFormValue(post, key, value, getIniBoolean("magic_quotes_gpc"));
-      }
-
     }
     break;
 

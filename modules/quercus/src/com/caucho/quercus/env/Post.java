@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.string.StringUtility;
 import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.vfs.FilePath;
 import com.caucho.vfs.MultipartStream;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -41,6 +42,10 @@ import com.caucho.vfs.WriteStream;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
 
 /**
  * Handling of POST requests.
@@ -54,50 +59,49 @@ public class Post {
     InputStream is = null;
 
     try {
-      if (! request.getMethod().equals("POST"))
-        return;
-
-      String encoding = request.getCharacterEncoding();
-      
-      if (encoding == null)
-        encoding = env.getHttpInputEncoding().toString();
-
-      String contentType = request.getHeader("Content-Type");
-
-      if (contentType == null)
-        return;
-      else if (contentType.startsWith("application/x-www-form-urlencoded")) {
-        is = request.getInputStream();
+      if (request.getMethod().equals("POST")) {
+        String encoding = request.getCharacterEncoding();
         
-        if (is == null)
-          return;
-        
-        StringBuilder value = new StringBuilder();
-        int ch;
+        if (encoding == null)
+          encoding = env.getHttpInputEncoding().toString();
 
-        while ((ch = is.read()) >= 0) {
-          value.append((char) ch);
+        String contentType = request.getHeader("Content-Type");
+
+        if (contentType == null) {
         }
-        
-        StringUtility.parseStr(env, value.toString(), post, false, encoding);
-        
-        return;
+        else if (contentType.startsWith("application/x-www-form-urlencoded")) {
+          is = request.getInputStream();
+          
+          if (is == null)
+            return;
+          
+          StringBuilder value = new StringBuilder();
+          int ch;
+
+          while ((ch = is.read()) >= 0) {
+            value.append((char) ch);
+          }
+          
+          StringUtility.parseStr(env, value.toString(), post, false, encoding);
+        }
+        else if (contentType.startsWith("multipart/form-data")) {
+          String boundary = getBoundary(contentType);
+
+          is = request.getInputStream();
+
+          ReadStream rs = new ReadStream(new VfsStream(is, null));
+          MultipartStream ms = new MultipartStream(rs, boundary);
+          ms.setEncoding(encoding);
+
+          readMultipartStream(env, ms, post, files, addSlashesToValues);
+
+          rs.close();
+        }
       }
-      else if (! contentType.startsWith("multipart/form-data")) {
-        return;
-      }
 
-      String boundary = getBoundary(contentType);
-
-      is = request.getInputStream();
-
-      ReadStream rs = new ReadStream(new VfsStream(is, null));
-      MultipartStream ms = new MultipartStream(rs, boundary);
-      ms.setEncoding(encoding);
-
-      readMultipartStream(env, ms, post, files, addSlashesToValues);
-
-      rs.close();
+      // needs to be last or else this function will consume the inputstream
+      putRequestMap(env, post, files, request, addSlashesToValues);
+      
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
@@ -154,72 +158,88 @@ public class Post {
           os.close();
         }
 
-	int p = name.indexOf('[');
-	String index = "";
-	if (p >= 0) {
-	  index = name.substring(p);
-	  name = name.substring(0, p);
-	}
-
-	StringValue nameValue = new StringValueImpl(name);
-	Value v = files.get(nameValue).toValue();
-	ArrayValue entry = null;
-	if (v instanceof ArrayValue)
-	  entry = (ArrayValue) v;
-
-	if (entry == null) {
-	  entry = new ArrayValueImpl();
-	  files.put(nameValue, entry);
-	}
-
-        int error;
-
-        if (tmpPath.getLength() > uploadMaxFilesize)
-          error = FileModule.UPLOAD_ERR_INI_SIZE;
-        else
-          error = FileModule.UPLOAD_ERR_OK;
-
-        addFormValue(entry, "name" + index, new StringValueImpl(filename),
-		     null, addSlashesToValues);
-	
-        String mimeType;
-        String tmpName;
-        long size;
-
-        if (error != FileModule.UPLOAD_ERR_INI_SIZE) {
-          tmpName = tmpPath.getFullPath();
-
-          mimeType = getAttribute(attr, "mime-type");
-
-          size = tmpPath.getLength();
-        }
-        else {
-          mimeType = "";
-          tmpName = "";
-          size = 0;
-        }
-
-        if (mimeType != null) {
-          addFormValue(entry, "type" + index, new StringValueImpl(mimeType),
-                       null, addSlashesToValues);
-
-          entry.put("type", mimeType);
-        }
-
-        addFormValue(entry, "tmp_name" + index, new StringValueImpl(tmpName),
-                     null, addSlashesToValues);
-
-        addFormValue(entry, "error" + index, new LongValue(error),
-                     null, addSlashesToValues);
-
-        addFormValue(entry, "size" + index, new LongValue(size),
-                     null, addSlashesToValues);
-
-        addFormValue(files, name, entry, null, addSlashesToValues);
+        addFormFile(env,
+                    files,
+                    name,
+                    filename,
+                    tmpPath.getFullPath(),
+                    getAttribute(attr, "mime-type"),
+                    tmpPath.getLength(),
+                    addSlashesToValues);
       }
     }
   }
 
+  private static void addFormFile(Env env,
+                                  ArrayValue files,
+                                  String name,
+                                  String fileName,
+                                  String tmpName,
+                                  String mimeType,
+                                  long fileLength,
+                                  boolean addSlashesToValues)
+  {
+    int p = name.indexOf('[');
+    String index = "";
+    if (p >= 0) {
+      index = name.substring(p);
+      name = name.substring(0, p);
+    }
+
+    StringValue nameValue = new StringValueImpl(name);
+    Value v = files.get(nameValue).toValue();
+    ArrayValue entry = null;
+    if (v instanceof ArrayValue)
+      entry = (ArrayValue) v;
+
+    if (entry == null) {
+      entry = new ArrayValueImpl();
+      files.put(nameValue, entry);
+    }
+
+    int error;
+
+    // php/1667
+    long uploadMaxFilesize = env.getIniBytes("upload_max_filesize", 2 * 1024 * 1024);
+    
+    if (fileLength > uploadMaxFilesize)
+      error = FileModule.UPLOAD_ERR_INI_SIZE;
+    else
+      error = FileModule.UPLOAD_ERR_OK;
+
+    addFormValue(entry, "name" + index, new StringValueImpl(fileName),
+            null, addSlashesToValues);
+
+    long size;
+
+    if (error != FileModule.UPLOAD_ERR_INI_SIZE) {
+      size = fileLength;
+    }
+    else {
+      mimeType = "";
+      tmpName = "";
+      size = 0;
+    }
+
+    if (mimeType != null) {
+      addFormValue(entry, "type" + index, new StringValueImpl(mimeType),
+              null, addSlashesToValues);
+
+      entry.put("type", mimeType);
+    }
+
+    addFormValue(entry, "tmp_name" + index, new StringValueImpl(tmpName),
+            null, addSlashesToValues);
+
+    addFormValue(entry, "error" + index, new LongValue(error),
+            null, addSlashesToValues);
+
+    addFormValue(entry, "size" + index, new LongValue(size),
+            null, addSlashesToValues);
+
+    addFormValue(files, name, entry, null, addSlashesToValues);
+  }
+  
   public static void addFormValue(ArrayValue array,
                                   String key,
                                   String []formValueList,
@@ -407,6 +427,51 @@ public class Post {
     }
 
     return value.toString();
+  }
+  
+  private static void putRequestMap(Env env,
+                                    ArrayValue post,
+                                    ArrayValue files,
+                                    HttpServletRequest request,
+                                    boolean addSlashesToValues)
+  {
+    Map<String,String[]> map = request.getParameterMap();
+
+    if (map == null)
+      return;
+    
+    for (Map.Entry<String,String[]> entry : map.entrySet()) {
+      String key = entry.getKey();
+
+      int len = key.length();
+
+      if (len < 10 || ! key.endsWith(".filename"))
+        continue;
+
+      String name = key.substring(0, len - 9);
+
+      String []fileNames = request.getParameterValues(name + ".filename");
+      String []tmpNames = request.getParameterValues(name + ".file");
+      String []mimeTypes = request.getParameterValues(name + ".content-type");
+
+      for (int i = 0; i < fileNames.length; i++) {
+        long fileLength = new FilePath(tmpNames[i]).getLength();
+
+        addFormFile(env, files, name, fileNames[i], tmpNames[i], mimeTypes[i], fileLength, addSlashesToValues);
+      }
+    }
+
+    ArrayList<String> keys = new ArrayList<String>();
+
+    keys.addAll(request.getParameterMap().keySet());
+
+    Collections.sort(keys);
+
+    for (String key : keys) {
+      String []value = request.getParameterValues(key);
+      
+      Post.addFormValue(post, key, value, addSlashesToValues);
+    }
   }
 }
 
