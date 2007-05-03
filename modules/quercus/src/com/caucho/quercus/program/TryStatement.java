@@ -86,7 +86,7 @@ public class TryStatement extends Statement {
         Catch item = _catchList.get(i);
 
         if (item.getId().equals("Exception")) {
-          item.getExpr().evalAssign(env, NullValue.NULL);
+          item.getExpr().evalAssign(env, env.createException(e));
 
           return item.getBlock().execute(env);
         }

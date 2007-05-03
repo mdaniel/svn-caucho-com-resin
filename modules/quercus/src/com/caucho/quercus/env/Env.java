@@ -33,6 +33,7 @@ import com.caucho.quercus.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
+import com.caucho.quercus.lib.ExceptionClass;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.string.StringUtility;
@@ -2829,6 +2830,21 @@ public class Env {
     return new StringValueImpl(new String(buffer, offset, length));
   }
 
+  /**
+   * Creates a PHP Exception.
+   */
+  public Value createException(Exception e)
+  {
+    QuercusClass cls = findClass("Exception");
+    
+    StringValue message = new StringValueImpl(e.getMessage());
+    Value []args = { message };
+
+    Value value = cls.callNew(this, args);
+    
+    return value;
+  }
+  
   /**
    * Generate an object id.
    */
