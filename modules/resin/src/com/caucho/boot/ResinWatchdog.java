@@ -759,6 +759,8 @@ public class ResinWatchdog extends AbstractManagedObject
 
 	if (process != null)
 	  return process;
+      } catch (ConfigException e) {
+	log.warning(e.getMessage());
       } catch (Throwable e) {
 	log.log(Level.WARNING, e.toString(), e);
       } finally {

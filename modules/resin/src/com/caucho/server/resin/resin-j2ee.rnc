@@ -191,6 +191,12 @@ r_message-destination-ref = element message-destination-ref {
   & r_foreign-name?
 }
 
+## XXX:??
+
+r_message-ref = element message-ref {
+  empty
+}
+
 r_message-destination-ref-name = element message-destination-ref-name {
   r_jndi-name
 }
