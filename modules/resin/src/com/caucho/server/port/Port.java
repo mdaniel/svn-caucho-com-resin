@@ -810,7 +810,10 @@ public class Port
     _isBound = true;
 
     if (_protocol == null)
-      throw new IllegalStateException(L.l("`{0}' must have a configured protocol before starting.", this));
+      throw new IllegalStateException(L.l("'{0}' must have a configured protocol before starting.", this));
+
+    if (_throttle == null)
+      _throttle = new Throttle();
 
     _admin.register();
 
@@ -823,9 +826,8 @@ public class Port
     else
       log.info(scheme + " listening to *:" + _port);
 
-    if (_sslFactory != null) {
-      throw new UnsupportedOperationException();
-    }
+    if (_sslFactory != null)
+      _serverSocket = _sslFactory.bind(_serverSocket);
 
     if (_tcpNoDelay)
       _serverSocket.setTcpNoDelay(_tcpNoDelay);

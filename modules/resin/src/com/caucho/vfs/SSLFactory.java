@@ -43,5 +43,11 @@ public interface SSLFactory {
    */
   public QServerSocket create(InetAddress host, int port)
     throws ConfigException, IOException, GeneralSecurityException;
+  
+  /**
+   * Creates the SSL ServerSocket.
+   */
+  public QServerSocket bind(QServerSocket ss)
+    throws ConfigException, IOException, GeneralSecurityException;
 }
 

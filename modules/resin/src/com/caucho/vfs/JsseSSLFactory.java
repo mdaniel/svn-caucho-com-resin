@@ -259,5 +259,14 @@ public class JsseSSLFactory implements SSLFactory {
 
     return new QServerSocketWrapper(serverSocket);
   }
+  
+  /**
+   * Creates the SSL ServerSocket.
+   */
+  public QServerSocket bind(QServerSocket ss)
+    throws ConfigException, IOException, GeneralSecurityException
+  {
+    throw new ConfigException(L.l("jsse is not allowed here"));
+  }
 }
 
