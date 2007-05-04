@@ -122,7 +122,7 @@ while (rs.next()) {
 
 <s2 title="Configuration Files">
 
-<p>Amber currently follows the Hibernate configuration file.</p>
+<p>Amber follows the JPA specification and supports persistence.xml and orm.xml configuration files.</p>
 
 </s2>
 
