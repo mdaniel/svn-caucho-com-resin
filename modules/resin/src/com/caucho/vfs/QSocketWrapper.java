@@ -104,7 +104,10 @@ public class QSocketWrapper extends QSocket {
    */
   public InetAddress getRemoteAddress()
   {
-    return _s.getInetAddress();
+    if (_s != null)
+      return _s.getInetAddress();
+    else
+      return null;
   }
   
   /**
@@ -112,7 +115,10 @@ public class QSocketWrapper extends QSocket {
    */
   public int getRemotePort()
   {
-    return _s.getPort();
+    if (_s != null)
+      return _s.getPort();
+    else
+      return 0;
   }
 
   /**

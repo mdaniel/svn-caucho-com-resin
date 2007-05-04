@@ -7,7 +7,7 @@ require_once "inc.php";
 
 require "restricted.php";
 
-$profile = new Java("com.caucho.profile.Profile");
+$profile = @new Java("com.caucho.profile.Profile");
 
 $mbeanServer = new MBeanServer();
 
@@ -145,6 +145,8 @@ if ($profile) {
 }
 else {
   echo "<h2>Profiling is not available</h2>";
+
+  echo "<p>Profiling requires Resin Professional and compiled JNI</p>";
 }
 
 function do_partition_profile($entries)

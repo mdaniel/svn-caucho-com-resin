@@ -12,6 +12,7 @@
 
 <s2 title="3.1.snap - Apr 24, 2007">
 <ul>
+<li>FileServlet: windows security validation for bad URLs</li>
 <li>DB pool: add close-dangling-connections (#1707)</li>
 <li>Cache: add rewrite-vary-as-private for IE caching bug (#1581, rep by sergek)</li>
 <li>Amber: @GeneratedValue with MS SQLServer was not working #1702 (rep by Michael Sengbusch)</li>
