@@ -123,6 +123,9 @@ public class Mysqli extends JdbcConnectionResource {
       return false;
     }
 
+    if (port <= 0)
+      port = 3306;
+
     try {
       if (host == null || host.equals(""))
         host = "localhost";
