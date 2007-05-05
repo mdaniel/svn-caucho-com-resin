@@ -93,5 +93,15 @@ the location for the watchdog-manager.out and jvm-*.log files.</p>
 </s2>
 </s1>
 
+<s1 title="JAXB, JAX-WS, and SAAJ">
+<p>Resin 3.1.1 features development versions of JAXB, JAX-WS, and SAAJ.  All
+of the most common features have been implemented, except for Java code
+generation from Schema or WSDL.</p>
+
+<p>Resin's JAX-WS and Service-Oriented Architecture (SOA) features easy
+deployment for services and proxy creation for clients.</p>
+</s1>
+
+
 </body>
 </document>
