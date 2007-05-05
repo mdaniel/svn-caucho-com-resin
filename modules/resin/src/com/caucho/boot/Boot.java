@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface Boot {
+  public boolean isValid();
+  
   public void clearSaveOnExec();
   
   public Process exec(ArrayList<String> args,

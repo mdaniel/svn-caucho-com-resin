@@ -875,9 +875,7 @@ public class ResinWatchdog extends AbstractManagedObject
       
       Class cl = Class.forName("com.caucho.boot.JniBoot", false, loader);
 
-      Constructor ctor = cl.getConstructor(new Class[] { Path.class });
-
-      _jniBoot = (Boot) ctor.newInstance(_cluster.getResin().getResinHome());
+      _jniBoot = (Boot) cl.newInstance();
     } catch (ClassNotFoundException e) {
       log.fine(e.toString());
     } catch (IllegalStateException e) {
@@ -892,17 +890,9 @@ public class ResinWatchdog extends AbstractManagedObject
   private boolean hasBoot()
   {
     try {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
-      Class cl = Class.forName("com.caucho.boot.JniBoot", false, loader);
+      Boot boot = getJniBoot();
 
-      Method method = cl.getMethod("isValid", new Class[] { Path.class });
-
-      return (Boolean) method.invoke(null, _cluster.getResin().getResinHome());
-    } catch (ClassNotFoundException e) {
-      log.finer(e.toString());
-    } catch (IllegalStateException e) {
-      log.fine(e.toString());
+      return boot.isValid();
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
     }
