@@ -38,7 +38,7 @@ if test "X${CDPATH+set}" = Xset; then CDPATH=:; export CDPATH; fi
 
 # ### BEGIN LIBTOOL CONFIG
 
-# Libtool was configured on host adsl-70-231-135-22.dsl.snfc21.sbcglobal.net:
+# Libtool was configured on host adsl-70-231-133-233.dsl.snfc21.sbcglobal.net:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/sh"
@@ -57,7 +57,7 @@ fast_install=needless
 
 # The host system.
 host_alias=
-host=powerpc-apple-darwin8.7.0
+host=powerpc-apple-darwin8.8.0
 
 # An echo program that does not interpret backslashes.
 echo="echo"
