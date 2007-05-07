@@ -10,7 +10,7 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.snap - Apr 24, 2007">
+<s2 title="3.1.1 - May 7, 2007">
 <ul>
 <li>FileServlet: windows security validation for bad URLs</li>
 <li>DB pool: add close-dangling-connections (#1707)</li>

@@ -39,7 +39,7 @@ obtain connections to databases.
 <p>This &lt;database&gt; will configure a javax.sql.DataSource and
 store it in JNDI at java:comp/env/jdbc/test_mysql.  To use the data
 source, follow the database use pattern in the
-<a href="../examples/jdbc-basic/index.xtp">DataSource tutorial.</a></p>
+<a href="../examples/db-jdbc/index.xtp">DataSource tutorial.</a></p>
 
 <p>Sample &lt;database&gt; configurations
 are available in the <a href="db-thirdparty.xtp">thirdparty driver page.</a>

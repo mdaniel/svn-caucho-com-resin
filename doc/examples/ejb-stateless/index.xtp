@@ -17,9 +17,9 @@ method as a read-only transaction boundary.</p>
 <!--
   <li>The <a href="../resin-xa/index.xtp">Resin Transaction</a> example for a more detailed description of method transaction enhancement.
   </li>
--->
 
   <li>The <a href="examples|amber-xa/index.xtp">Amber Transaction</a> example for a traditional session bean pattern.  </li>
+-->
 
 <li>The <a href="doc|ejb-annotations.xtp#@TransactionAttribute">@TransactionAttribute</a> reference.
 </li></ul>

@@ -949,7 +949,7 @@ Defines a custom constraint.
 </td></tr></deftable-childtags>
 
 
-<p>HTTP Authentication is defined in the RFC <a href="external|spec|http-authentication">HTTP Authentication: Basic and
+<p>HTTP Authentication is defined in the RFC <a href="http://www.faqs.org/rfcs/rfc2617.thml">HTTP Authentication: Basic and
 Digest</a>.</p> 
 
 <p>HTTP digest authentication is discussed in <a href="security-digest.xtp">Digest Passwords</a>.

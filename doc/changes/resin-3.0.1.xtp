@@ -32,8 +32,7 @@ that people stress tested their applications before deploying on 3.0.x.</p>
 <p>Resin 3.0.1 implements the complete JSP 2.0 third draft.  Any
 discrepancies should be reported as bugs.</p>
 
-<p>In particular, Resin 3.0.1 adds support for *.tag and *.tagx files,
-see <a href="examples|jsp-tagfile-basic/index.xtp">.tag tutorial</a>.</p>
+<p>In particular, Resin 3.0.1 adds support for *.tag and *.tagx files.</p>
 
 <p>Resin 3.0.1 does not yet include the full support for the third
 draft of Servlet 2.4.  In particular, the ERROR dispatch configuration

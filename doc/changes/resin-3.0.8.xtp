@@ -25,7 +25,7 @@ is "setter based dependency injection."</p>
 </li><li><a href="examples|db-jdbc/index.xtp">Dependency Injection for a servlet's DataSource</a>
 </li><li><a href="examples|ioc-periodictask/index.xtp">Dependency Injection for a PeriodicTask resource</a>
 </li><li><a href="examples|jmx-listener/index.xtp">Dependency Injection for a JMX client emitter/listener</a>
-</li><li><a href="examples|hessian/index.xtp">Dependency Injection for Hessian Service configuration</a>
+</li><li><a href="examples|hessian-ioc/index.xtp">Dependency Injection for Hessian Service configuration</a>
 </li></ul>
 
 <p>The main documentation on Resin's <a href="doc|ioc-bean.xtp">bean-style

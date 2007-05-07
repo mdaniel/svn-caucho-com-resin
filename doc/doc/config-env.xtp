@@ -255,7 +255,7 @@ element resource-adapter {
 
 <p>The <a href="config-database.xtp">database configuration</a> section has
 more details on the configuration.  A code pattern for using databases
-is in a <a href="examples|jdbc-basic/index">DataSource tutorial.</a></p>
+is in a <a href="examples|db-jdbc/index.xtp">DataSource tutorial.</a></p>
 
 <example>
 &lt;database jndi-name='jdbc/test_mysql'&gt;

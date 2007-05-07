@@ -395,36 +395,36 @@ section.</a>
 </p>
 
 <p>
-The <a href="external|apache|mod_ssl">mod_ssl</a> documentation
+The <a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html">mod_ssl</a> documentation
 for Apache is a good source of information on OpenSSL.  
 </p>
 
 <deftable title="mod_ssl equivalents to Resin OpenSSL configuration">
 <tr><th>Resin</th>
-    <th><a href="external|apache|mod_ssl">mod_ssl</a></th></tr>
+    <th><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html">mod_ssl</a></th></tr>
 <tr><td>certificate-file</td>
-    <td><a href="external|apache|mod_ssl#sslcertificatefile">SSLCertificateFile</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslcertificatefile">SSLCertificateFile</a></td></tr>
 
 <tr><td>certificate-key-file</td>
-    <td><a href="external|apache|mod_ssl#sslcertificatekeyfile">SSLCertificateKeyFile</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslcertificatekeyfile">SSLCertificateKeyFile</a></td></tr>
 <tr><td>certificate-chain-file</td>
-    <td><a href="external|apache|mod_ssl#sslcertificatechainfile">SSLCertificateChainFile</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslcertificatechainfile">SSLCertificateChainFile</a></td></tr>
 <tr><td>session-cache</td>
-    <td><a href="external|apache|mod_ssl#sslsessioncache">SSLSessionCache</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslsessioncache">SSLSessionCache</a></td></tr>
 <tr><td>session-cache-timeout</td>
-    <td><a href="external|apache|mod_ssl#sslsessioncachetimeout">SSLSessionCacheTimeout</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslsessioncachetimeout">SSLSessionCacheTimeout</a></td></tr>
 <tr><td>verify-client</td>
-    <td><a href="external|apache|mod_ssl#sslverifyclient">SSLVerifyClient</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslverifyclient">SSLVerifyClient</a></td></tr>
 <tr><td>verify-depth</td>
-    <td><a href="external|apache|mod_ssl#sslverifydepth">SSLVerifyDepth</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslverifydepth">SSLVerifyDepth</a></td></tr>
 <tr><td>ca-certificate-file</td>
-    <td><a href="external|apache|mod_ssl#sslcacertificatefile">SSLCACertificateFile</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslcacertificatefile">SSLCACertificateFile</a></td></tr>
 <tr><td>ca-revocation-file</td>
-    <td><a href="external|apache|mod_ssl#sslcarevocationfile">SSLCARevocationFile</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslcarevocationfile">SSLCARevocationFile</a></td></tr>
 <tr><td>protocol</td>
-    <td><a href="external|apache|mod_ssl#sslprotocol">SSLProtocol</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslprotocol">SSLProtocol</a></td></tr>
 <tr><td>cipher-suite</td>
-    <td><a href="external|apache|mod_ssl#sslciphersuite">SSLCipherSuite</a></td></tr>
+    <td><a href="http://httpd.apache.org/docs-2.0/mod/mod_ssl.html#sslciphersuite">SSLCipherSuite</a></td></tr>
 </deftable>
 
 <p>

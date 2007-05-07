@@ -74,7 +74,7 @@ There's a more complete discussion of the URL dispatching in the
 <s2 title="Compiling Apache">
 
 <p>You need a version of Apache with DSO support enabled. Apache has
-full documentation at <a href="external|apache|dso">their website</a>.
+full documentation at <a href="http://httpd.apache.org/docs/dso.html">their website</a>.
 To check if your apache has DSO support, you can check for
 <var>mod_so.c</var> in your your httpd
 

@@ -241,7 +241,7 @@ from the &lt;init-param&gt; values to assemble the dependencies.</p>
 
 <ul>
 <li><a href="doc|ioc-bean.xtp">Bean-style init</a>
-</li><li><a href="../jdbc-ioc/index.xtp">Servlet DataSource Configuration</a>
+</li><li><a href="../db-jdbc-ioc/index.xtp">Servlet DataSource Configuration</a>
 </li><li><a href="../hessian-ioc/index.xtp">Hessian
 with Dependency Injection</a>
 </li></ul>

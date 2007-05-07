@@ -232,7 +232,7 @@ all database traffic.</p>
 
 <p>More complicated applications build on the single table
 management.  The following examples add more realistic features to
-this example: using queries to <a href="../amber-find/index.xtp">find all
+this example: using queries to <a href="../amber-query/index.xtp">find all
 courses</a> and <a href="../amber-create/index.xtp">creating</a> new database rows.
 </p>
 

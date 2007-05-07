@@ -760,7 +760,7 @@ The JDK has a simple one (but not very
 user-friendly), so you don't absolutely need to buy a profiler.</p>
 
 <p>An alternative for simple heap monitoring (garbage collection issues), are
-the <a href="external|sun|jvmstat">jvmstat tools</a>.</p>
+the <a href="http://developer.sun.com/dev/coolstuff/jvmstat">jvmstat tools</a>.</p>
 
 <p>It's a standard java argument, so "java -Xrunhprof:help" will tell you how to start it.  For example, you could 
 start Resin (unix or windows) as</p>
@@ -977,7 +977,7 @@ Resin can provide valuable insight.  This raw data reveals the headers and
 content that are submitted by the browser, and the headers and content that are
 returned by Resin.</p>
 
-<p>The <a href="external|apache|axis">Apache Axis</a> jar includes a utility
+<p>The <a href="http://ws.apache.org/axis">Apache Axis</a> jar includes a utility
 "tcpmon" that can be used to intercept and monitor the  communication between a
 browser and Resin.  Using tcpmon, you specify a "listen port" and a "target
 host" and a "target port".  For example, if you usually have Resin running on

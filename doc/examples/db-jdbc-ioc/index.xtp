@@ -267,7 +267,7 @@ private void doQuery(PrintWriter out)
 <ul>
 <li><a href="doc|config-database.xtp">Database configuration</a> reference
 </li><li><a href="doc|db-thirdparty.xtp">Sample configurations</a> for several database drivers
-</li><li>Using <a href="../jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
+</li><li>Using <a href="../db-jdbc-ioc/index.xtp">Dependency Injection for Databases</a>
 </li><li>The <a href="../ioc-injection/index.xtp">Dependency Injection</a> (or Assembly Line) pattern.
 </li></ul>
 

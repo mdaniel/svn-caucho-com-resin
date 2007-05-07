@@ -18,10 +18,9 @@ use the Resin 3.0.x branch.</p>
 
 </s1>
 
-<s1 title="Amber/JPA release candidate">
+<s1 title="Amber/JPA">
 
-<p>In Resin 3.1.1, Amber is a release candidate
-for the JPA implementation. A number of bugs in Amber have 
+<p>A number of bugs in Amber have 
 been fixed in Resin 3.1.1. If you were trying JPA 
 with Resin 3.1, we strongly recommend that you upgrade 
 to the latest version.</p>
@@ -43,8 +42,6 @@ JPA implementations.</p>
 </s1>
 
 <s1 title="Quercus">
-
-<p>Quercus is now in beta!</p>
 
 <p>Quercus is now faster in both interpreted and compiled mode, 
 due to smarter handling of strings and faster function calls.</p>
@@ -90,7 +87,6 @@ the location for the watchdog-manager.out and jvm-*.log files.</p>
 
 <p>The log directory is relative to the --root-directory and defaults to "log".</p>
 
-</s2>
 </s1>
 
 <s1 title="JAXB, JAX-WS, and SAAJ">
@@ -100,6 +96,26 @@ generation from Schema or WSDL.</p>
 
 <p>Resin's JAX-WS and Service-Oriented Architecture (SOA) features easy
 deployment for services and proxy creation for clients.</p>
+</s1>
+
+<s1 title="Administration Enhancements">
+
+<p>Resin's administration page has been cleaned up and now includes
+new features including:</p>
+
+<ul>
+<li>Thread dumps</li>
+<li>Profiling</li>
+<li>Heap dumps</li>
+<li>Cache statistics</li>
+</ul>
+
+<p>The profiling has a relatively low overhead, so many deployments can
+use it on live servers to get accurate performance information.</p>
+
+<p>We strongly recommend Resin users look at the
+new administration features.</p>
+
 </s1>
 
 

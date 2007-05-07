@@ -9,7 +9,7 @@ represents a collection of children belonging to a parent,
 like students in Gryffindor house at Hogwarts school.</p>
 
 <p>
-The <a href="../amber-many2one/index.xtp">Many-To-One tutorial</a>
+The <a href="examples|amber-many2one/index.xtp">Many-To-One tutorial</a>
 illustrated that a many-to-one relation links one source entity to another
 target entity.  A one-to-many relation links the target entity back to the
 source entity.

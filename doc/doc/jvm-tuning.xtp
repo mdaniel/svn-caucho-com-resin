@@ -128,7 +128,7 @@ JDK 5 includes a number of tools that are useful for monitoring the JVM.
 Documentation for these tools is available from the
 <a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/index.html#manage">Sun
 website</a>.  For JDK's prior to 5, Sun provides the
-<a href="external|sun|jvmstat">jvmstat tools</a>.
+<a href="http://developer.sun.com/dev/coolstuff/jvmstat">jvmstat tools</a>.
 </p>
 
 <p>
