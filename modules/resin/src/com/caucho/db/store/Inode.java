@@ -68,6 +68,12 @@ public class Inode {
   public static final int INODE_SIZE = 128;
   public static final int INLINE_BLOB_SIZE = 120;
   public static final int INODE_BLOCK_SIZE = Store.FRAGMENT_SIZE;
+  public static final int FRAGMENT_SIZE = Store.FRAGMENT_SIZE;
+  
+  public static final int MINI_FRAG_SIZE = Store.MINI_FRAG_SIZE;
+
+  public static final int MINI_FRAG_BLOB_SIZE
+    = (INLINE_BLOB_SIZE / 8) * MINI_FRAG_SIZE;
 
   public static final int INDIRECT_BLOCKS = INODE_BLOCK_SIZE / 8;
 
@@ -258,6 +264,18 @@ public class Inode {
 
       return sublen;
     }
+    else if (fileLength <= Inode.MINI_FRAG_BLOB_SIZE) {
+      long fragAddr = readMiniFragAddr(inode, inodeOffset, store, fileOffset);
+      int fragOffset = (int) (fileOffset % Inode.MINI_FRAG_SIZE);
+
+      if (MINI_FRAG_SIZE - fragOffset < sublen)
+	sublen = MINI_FRAG_SIZE - fragOffset;
+
+      store.readMiniFragment(fragAddr, fragOffset,
+			     buffer, bufferOffset, sublen);
+
+      return sublen;
+    }
 
     long fragAddr = readFragmentAddr(inode, inodeOffset, store, fileOffset);
     int fragOffset = (int) (fileOffset % Inode.INODE_BLOCK_SIZE);
@@ -287,6 +305,29 @@ public class Inode {
       System.arraycopy(buffer, offset,
 		       inode, (int) (inodeOffset + 8 + currentLength),
 		       length);
+    }
+    else if (newLength <= MINI_FRAG_BLOB_SIZE) {
+      while (length > 0) {
+	int sublen = length;
+	
+	if (MINI_FRAG_SIZE < sublen)
+	  sublen = MINI_FRAG_SIZE;
+	
+	long miniFragAddr = store.allocateMiniFragment(xa);
+
+	if (miniFragAddr == 0)
+	  throw new IllegalStateException(L.l("illegal mini fragment"));
+
+	writeMiniFragAddr(inode, inodeOffset,
+			  store, xa,
+			  currentLength, miniFragAddr);
+
+	store.writeMiniFragment(xa, miniFragAddr, 0, buffer, offset, sublen);
+
+	offset += sublen;
+	length -= sublen;
+	currentLength += sublen;
+      }
     }
     else {
       // XXX: theoretically deal with case of appending to inline, although
@@ -377,6 +418,18 @@ public class Inode {
 
 	baseOffset += 2;
       }
+
+      return sublen;
+    }
+    else if (fileLength <= Inode.MINI_FRAG_BLOB_SIZE) {
+      long fragAddr = readMiniFragAddr(inode, inodeOffset, store, fileOffset);
+      int fragOffset = (int) (fileOffset % Inode.MINI_FRAG_SIZE);
+
+      if (MINI_FRAG_SIZE - fragOffset < 2 * sublen)
+	sublen = (MINI_FRAG_SIZE - fragOffset) / 2;
+
+      store.readMiniFragment(fragAddr, fragOffset,
+			     buffer, bufferOffset, sublen);
 
       return sublen;
     }
@@ -509,46 +562,64 @@ public class Inode {
       try {
 	if (length <= INLINE_BLOB_SIZE || bytes == null)
 	  return;
+	else if (length <= MINI_FRAG_BLOB_SIZE) {
+	  for (; length > 0; length -= MINI_FRAG_SIZE) {
+	    long fragAddr = readMiniFragAddr(bytes, 0, _store, length - 1);
 
-	long initLength = length;
-	for (; length > 0; length -= INODE_BLOCK_SIZE) {
-	  long fragAddr = readFragmentAddr(bytes, 0, _store, length - 1);
-
-	  if ((fragAddr & Store.BLOCK_MASK) == 0) {
-	    String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
-	    throw stateError(msg);
-	  }
-	  else if (fragAddr < 0) {
-	    String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
+	    if ((fragAddr & Store.BLOCK_MASK) == 0) {
+	      String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
+	      throw stateError(msg);
+	    }
+	    else if (fragAddr < 0) {
+	      String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
 	    
-	    throw stateError(msg);
+	      throw stateError(msg);
+	    }
+
+	    _store.deleteMiniFragment(_xa, fragAddr);
 	  }
+	}
+	else {
+	  long initLength = length;
+	  for (; length > 0; length -= INODE_BLOCK_SIZE) {
+	    long fragAddr = readFragmentAddr(bytes, 0, _store, length - 1);
 
-	  _store.deleteFragment(_xa, fragAddr);
-
-	  int fragCount = (int) ((length - 1) / INODE_BLOCK_SIZE);
-
-	  int dblFragCount = fragCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS;
-
-	  // remove the double indirect blocks
-	  if (dblFragCount >= 0 &&
-	      dblFragCount % INDIRECT_BLOCKS == 0) {
-	    fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
+	    if ((fragAddr & Store.BLOCK_MASK) == 0) {
+	      String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
+	      throw stateError(msg);
+	    }
+	    else if (fragAddr < 0) {
+	      String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
 	    
-	    int dblIndex = (int) (fragCount / INDIRECT_BLOCKS);
+	      throw stateError(msg);
+	    }
 
-	    fragAddr = _store.readFragmentLong(fragAddr, dblIndex);
+	    _store.deleteFragment(_xa, fragAddr);
 
-	    if (fragAddr != 0)
-	      _store.deleteFragment(_xa, fragAddr);
-	  }
+	    int fragCount = (int) ((length - 1) / INODE_BLOCK_SIZE);
 
-	  // remove the indirect blocks
-	  if (fragCount == DIRECT_BLOCKS) {
-	    fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
+	    int dblFragCount = fragCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS;
 
-	    if (fragAddr != 0) {
-	      _store.deleteFragment(_xa, fragAddr);
+	    // remove the double indirect blocks
+	    if (dblFragCount >= 0 &&
+		dblFragCount % INDIRECT_BLOCKS == 0) {
+	      fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
+	    
+	      int dblIndex = (int) (fragCount / INDIRECT_BLOCKS);
+
+	      fragAddr = _store.readFragmentLong(fragAddr, dblIndex);
+
+	      if (fragAddr != 0)
+		_store.deleteFragment(_xa, fragAddr);
+	    }
+
+	    // remove the indirect blocks
+	    if (fragCount == DIRECT_BLOCKS) {
+	      fragAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
+
+	      if (fragAddr != 0) {
+		_store.deleteFragment(_xa, fragAddr);
+	      }
 	    }
 	  }
 	}
@@ -686,6 +757,31 @@ public class Inode {
     }
     else
       throw new IllegalStateException(L.l("Can't yet support data over 64M"));
+  }
+
+  /**
+   * Returns the fragment id for the given offset.
+   */
+  static long readMiniFragAddr(byte []inode, int inodeOffset,
+				   Store store, long fileOffset)
+    throws IOException
+  {
+    long fragCount = fileOffset / MINI_FRAG_SIZE;
+    
+    return readLong(inode, (int) (inodeOffset + 8 * (1 + fragCount)));
+  }
+
+  /**
+   * Writes the block id into the inode.
+   */
+  private static void writeMiniFragAddr(byte []inode, int offset,
+					Store store, StoreTransaction xa,
+					long fragLength, long fragAddr)
+    throws IOException
+  {
+    int fragCount = (int) (fragLength / MINI_FRAG_SIZE);
+    
+    writeLong(inode, offset + (fragCount + 1) * 8, fragAddr);
   }
 
   /**

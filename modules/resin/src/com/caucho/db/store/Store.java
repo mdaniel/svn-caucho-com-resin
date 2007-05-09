@@ -97,16 +97,23 @@ public class Store {
 
   private final static int ALLOC_CHUNK_SIZE = 1024 * ALLOC_BYTES_PER_BLOCK;
   
-  public final static int ALLOC_FREE     = 0x00;
-  public final static int ALLOC_ROW      = 0x01;
-  public final static int ALLOC_USED     = 0x02;
-  public final static int ALLOC_FRAGMENT = 0x03;
-  public final static int ALLOC_INDEX    = 0x04;
-  public final static int ALLOC_MASK     = 0x0f;
+  public final static int ALLOC_FREE      = 0x00;
+  public final static int ALLOC_ROW       = 0x01;
+  public final static int ALLOC_USED      = 0x02;
+  public final static int ALLOC_FRAGMENT  = 0x03;
+  public final static int ALLOC_INDEX     = 0x04;
+  public final static int ALLOC_MINI_FRAG = 0x05;
+  public final static int ALLOC_MASK      = 0x0f;
 
   public final static int FRAGMENT_SIZE = 8 * 1024;
   public final static int FRAGMENT_PER_BLOCK
     = (int) (BLOCK_SIZE / FRAGMENT_SIZE);
+  
+  public final static int MINI_FRAG_SIZE = 256;
+  public final static int MINI_FRAG_PER_BLOCK
+    = (int) ((BLOCK_SIZE - 64) / MINI_FRAG_SIZE);
+  public final static int MINI_FRAG_ALLOC_OFFSET
+    = MINI_FRAG_PER_BLOCK * MINI_FRAG_SIZE;
   
   public final static long DATA_START = BLOCK_SIZE;
   
@@ -136,10 +143,14 @@ public class Store {
   private int _allocDirtyMax;
   
   private final Object _fragmentLock = new Object();
+  private final Object _miniFragLock = new Object();
 
   private final Object _statLock = new Object();
   // number of fragments currently used
   private long _fragmentUseCount;
+  
+  // number of minifragments currently used
+  private long _miniFragmentUseCount;
 
   private SoftReference<RandomAccessWrapper> _cachedRowFile;
   
@@ -510,6 +521,17 @@ public class Store {
   }
 
   /**
+   * Allocates a new block for a mini-fragment
+   *
+   * @return the block id of the allocated block.
+   */
+  private Block allocateMiniFragmentBlock()
+    throws IOException
+  {
+    return allocateBlock(ALLOC_MINI_FRAG);
+  }
+
+  /**
    * Allocates a new block for an index
    *
    * @return the block id of the allocated block.
@@ -538,20 +560,6 @@ public class Store {
   {
     long blockIndex;
     boolean isFileExtended = false;
-
-    /*
-    switch (code) {
-    case ALLOC_ROW:
-      System.out.println("ALLOC_ROW:");
-      break;
-    case ALLOC_INDEX:
-      System.out.println("ALLOC_INDEX:");
-      break;
-    case ALLOC_FRAGMENT:
-      System.out.println("ALLOC_FRAG:");
-      break;
-    }
-    */
 
     synchronized (_allocationLock) {
       long end = _blockCount;
@@ -879,7 +887,9 @@ public class Store {
       synchronized (_allocationLock) {
 	byte []allocationTable = _allocationTable;
       
-	for (int i = 0; i < allocationTable.length; i += ALLOC_BYTES_PER_BLOCK) {
+	for (int i = 0;
+	     i < allocationTable.length;
+	     i += ALLOC_BYTES_PER_BLOCK) {
 	  int fragMask = allocationTable[i + 1] & 0xff;
 
 	  if (allocationTable[i] == ALLOC_FRAGMENT && fragMask != 0xff) {
@@ -1070,6 +1080,383 @@ public class Store {
     int id = (int) (fragmentAddress & BLOCK_OFFSET_MASK);
 
     return (int) (FRAGMENT_SIZE * id);
+  }
+  
+  /**
+   * Reads a fragment.
+   *
+   * @param fragmentAddress the address of the fragment
+   * @param fragmentOffset the offset inside the fragment to start reading
+   * @param buffer the result buffer
+   * @param offset offset into the result buffer
+   * @param length the number of bytes to read
+   *
+   * @return the number of bytes read
+   */
+  public int readMiniFragment(long fragmentAddress, int fragmentOffset,
+			  byte []buffer, int offset, int length)
+    throws IOException
+  {
+    if (MINI_FRAG_SIZE - fragmentOffset < length) {
+      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
+					     fragmentOffset, length));
+    }
+
+    Block block = readBlock(addressToBlockId(fragmentAddress));
+
+    try {
+      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+
+      synchronized (blockBuffer) {
+	System.arraycopy(blockBuffer, blockOffset + fragmentOffset,
+			 buffer, offset, length);
+      }
+
+      return length;
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Reads a miniFragment for a clob.
+   *
+   * @param fragmentAddress the address of the fragment
+   * @param fragmentOffset the offset inside the fragment to start reading
+   * @param buffer the result buffer
+   * @param offset offset into the result buffer
+   * @param length the length of the fragment in characters
+   *
+   * @return the number of characters read
+   */
+  public int readMiniFragment(long fragmentAddress, int fragmentOffset,
+			  char []buffer, int offset, int length)
+    throws IOException
+  {
+    if (MINI_FRAG_SIZE - fragmentOffset < 2 * length) {
+      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
+					     fragmentOffset, length));
+    }
+
+    Block block = readBlock(addressToBlockId(fragmentAddress));
+
+    try {
+      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+      blockOffset += fragmentOffset;
+
+      byte []blockBuffer = block.getBuffer();
+      
+      synchronized (blockBuffer) {
+	for (int i = 0; i < length; i++) {
+	  int ch1 = blockBuffer[blockOffset] & 0xff;
+	  int ch2 = blockBuffer[blockOffset + 1] & 0xff;
+
+	  buffer[offset + i] = (char) ((ch1 << 8) + ch2);
+
+	  blockOffset += 2;
+	}
+      }
+
+      return length;
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Reads a long value from a miniFragment.
+   *
+   * @return the long value
+   */
+  public long readMiniFragmentLong(long fragmentAddress,
+				   int fragmentOffset)
+    throws IOException
+  {
+    Block block = readBlock(addressToBlockId(fragmentAddress));
+
+    try {
+      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+
+      synchronized (blockBuffer) {
+	return readLong(blockBuffer, blockOffset + fragmentOffset);
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Allocates a new miniFragment.
+   *
+   * @return the fragment address
+   */
+  public long allocateMiniFragment(StoreTransaction xa)
+    throws IOException
+  {
+    long blockAddr = allocateMiniFragmentBlock(xa);
+
+    Block block = readBlock(blockAddr);
+    int fragOffset = -1;
+
+    try {
+      byte []blockBuffer = block.getBuffer();
+
+      synchronized (blockBuffer) {
+	for (int i = 0; i < MINI_FRAG_PER_BLOCK; i++) {
+	  int offset = i / 8 + MINI_FRAG_ALLOC_OFFSET;
+	  int mask = 1 << (i % 8);
+	  
+	  if ((blockBuffer[offset] & mask) == 0) {
+	    fragOffset = i;
+	    blockBuffer[offset] |= mask;
+	    block.setDirty(offset, offset + 1);
+	    break;
+	  }
+	}
+
+	if (fragOffset < 0)
+	  throw new IllegalStateException();
+
+	boolean hasFree = false;
+	for (int i = 0; i < MINI_FRAG_PER_BLOCK; i++) {
+	  int offset = i / 8 + MINI_FRAG_ALLOC_OFFSET;
+	  int mask = 1 << (i % 8);
+
+	  if ((blockBuffer[offset] & mask) == 0) {
+	    hasFree = true;
+	    break;
+	  }
+	}
+
+	if (hasFree) {
+	  int i = (int) (ALLOC_BYTES_PER_BLOCK * (blockAddr / BLOCK_SIZE));
+    
+	  synchronized (_allocationLock) {
+	    _allocationTable[i + 1]  = 0;
+	    setAllocDirty(i + 1, i + 2);
+	  }
+	}
+
+	return blockAddr + fragOffset;
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Allocates a new miniFragment.
+   *
+   * @return the fragment address
+   */
+  private long allocateMiniFragmentBlock(StoreTransaction xa)
+    throws IOException
+  {
+    while (true) {
+      synchronized (_allocationLock) {
+	byte []allocationTable = _allocationTable;
+      
+	for (int i = 0;
+	     i < allocationTable.length;
+	     i += ALLOC_BYTES_PER_BLOCK) {
+	  int fragMask = allocationTable[i + 1] & 0xff;
+
+	  if (allocationTable[i] == ALLOC_MINI_FRAG && fragMask != 0xff) {
+	    allocationTable[i + 1] = (byte) 0xff;
+
+	    setAllocDirty(i + 1, i + 2);
+
+	    _miniFragmentUseCount++;
+
+	    long fragmentAddress
+	      = BLOCK_SIZE * ((long) i / ALLOC_BYTES_PER_BLOCK);
+	    
+	    return fragmentAddress;
+	  }
+	}
+      }
+
+      // if no fragment, allocate a new one.
+      
+      Block block = allocateMiniFragmentBlock();
+      block.free();
+    }
+  }
+  
+  /**
+   * Deletes a miniFragment.
+   */
+  public void deleteMiniFragment(StoreTransaction xa, long fragmentAddress)
+    throws IOException
+  {
+    Block block = readBlock(fragmentAddress);
+
+    try {
+      int fragIndex = (int) (fragmentAddress & BLOCK_OFFSET_MASK);
+      int offset = fragIndex / 8 + MINI_FRAG_ALLOC_OFFSET;
+      int mask = 1 << (fragIndex % 8);
+      byte []blockBuffer = block.getBuffer();
+
+      synchronized (blockBuffer) {
+	blockBuffer[offset] &= ~mask;
+	block.setDirty(offset, offset + 1);
+	  
+	int i = (int) (ALLOC_BYTES_PER_BLOCK * (fragmentAddress / BLOCK_SIZE));
+	int j = (int) (fragmentAddress & 0xff);
+
+	synchronized (_allocationLock) {
+	  int fragMask = _allocationTable[i + 1] & 0xff;
+	  //System.out.println((fragmentAddress / BLOCK_SIZE) + ":" + j + " DELETE");
+
+	  if (_allocationTable[i] != ALLOC_MINI_FRAG)
+	    System.out.println("BAD ENTRY: " + fragMask);
+
+	  _allocationTable[i + 1] = 0;
+
+	  _miniFragmentUseCount--;
+	
+	  setAllocDirty(i + 1, i + 2);
+	}
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Writes a miniFragment.
+   *
+   * @param xa the owning transaction
+   * @param fragmentAddress the fragment to write
+   * @param fragmentOffset the offset into the fragment
+   * @param buffer the write buffer
+   * @param offset offset into the write buffer
+   * @param length the number of bytes to write
+   *
+   * @return the fragment id
+   */
+  public void writeMiniFragment(StoreTransaction xa,
+			    long fragmentAddress, int fragmentOffset,
+			    byte []buffer, int offset, int length)
+    throws IOException
+  {
+    if (MINI_FRAG_SIZE - fragmentOffset < length)
+      throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
+					     fragmentOffset, length));
+    
+    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
+
+    try {
+      xa.addUpdateBlock(block);
+      
+      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+
+      blockOffset += fragmentOffset;
+
+      synchronized (blockBuffer) {
+	System.arraycopy(buffer, offset,
+			 blockBuffer, blockOffset,
+			 length);
+
+	block.setDirty(blockOffset, blockOffset + length);
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Writes a character based
+   *
+   * @param miniFragmentAddress the fragment to write
+   * @param fragmentOffset the offset into the fragment
+   * @param buffer the write buffer
+   * @param offset offset into the write buffer
+   * @param length the number of bytes to write
+   */
+  public void writeMiniFragment(StoreTransaction xa,
+			    long fragmentAddress, int fragmentOffset,
+			    char []buffer, int offset, int length)
+    throws IOException
+  {
+    if (MINI_FRAG_SIZE - fragmentOffset < length)
+      throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
+					     fragmentOffset, length));
+    
+    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
+
+    try {
+      block = xa.createAutoCommitWriteBlock(block);
+	
+      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+
+      blockOffset += fragmentOffset;
+
+      synchronized (blockBuffer) {
+	int blockTail = blockOffset;
+	
+	for (int i = 0; i < length; i++) {
+	  char ch = buffer[offset + i];
+
+	  blockBuffer[blockTail] = (byte) (ch >> 8);
+	  blockBuffer[blockTail + 1] = (byte) (ch);
+
+	  blockTail += 2;
+	}
+
+	block.setDirty(blockOffset, blockTail);
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Writes a long value to a miniFragment.
+   *
+   * @return the long value
+   */
+  public void writeMiniFragmentLong(StoreTransaction xa,
+				    long fragmentAddress, int fragmentOffset,
+				    long value)
+    throws IOException
+  {
+    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
+
+    try {
+      xa.addUpdateBlock(block);
+      
+      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+      int offset = blockOffset + fragmentOffset;
+
+      synchronized (blockBuffer) {
+	writeLong(blockBuffer, offset, value);
+
+	block.setDirty(offset, offset + 8);
+      }
+    } finally {
+      block.free();
+    }
+  }
+
+  /**
+   * Returns the miniFragment offset for an id.
+   */
+  private int getMiniFragmentOffset(long fragmentAddress)
+  {
+    int id = (int) (fragmentAddress & BLOCK_OFFSET_MASK);
+
+    return (int) (MINI_FRAG_SIZE * id);
   }
 
   /**
@@ -1315,6 +1702,8 @@ public class Store {
       return "used";
     case ALLOC_FRAGMENT:
       return "fragment";
+    case ALLOC_MINI_FRAG:
+      return "mini-fragment";
     case ALLOC_INDEX:
       return "index";
     default:

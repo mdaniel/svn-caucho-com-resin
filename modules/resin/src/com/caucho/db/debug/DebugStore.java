@@ -109,6 +109,9 @@ public class DebugStore {
       case Store.ALLOC_FRAGMENT:
 	out.print('f');
 	break;
+      case Store.ALLOC_MINI_FRAG:
+	out.print('m');
+	break;
       case Store.ALLOC_INDEX:
 	out.print('i');
 	break;
