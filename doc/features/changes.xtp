@@ -4,6 +4,7 @@
 
 <s2 title="3.0.snap - Jan 18, 2007">
 <ul>
+<li>XML: QDocument needed XmlVersion (#1605)</li>
 <li>EJB collections not closing JDBC connectiond (#1286, rep by plehov)</li>
 </ul>
 </s2>

@@ -834,24 +834,24 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
   public String getVersion()
   {
-    throw new UnsupportedOperationException();
+    _version;
   }
     
   public void setVersion(String version)
     throws DOMException
   {
-    throw new UnsupportedOperationException();
+    _version = version;
   }
 
   public String getXmlVersion()
   {
-    throw new UnsupportedOperationException();
+    return _version;
   }
     
   public void setXmlVersion(String version)
     throws DOMException
   {
-    throw new UnsupportedOperationException();
+    _version = version;
   }
     
   public void setXmlStandalone(boolean value)

@@ -213,12 +213,19 @@ public class FileServlet extends GenericServlet {
         
         if ((lastCh = relPath.charAt(relPath.length() - 1)) == '.' ||
             lastCh == ' ' || lastCh == '*' || lastCh == '?' ||
-            lastCh == '/' || lastCh == '\\' ||
-            lower.endsWith("::$data") ||
-            lower.endsWith("/con") || lower.endsWith("/con/") ||
-            lower.endsWith("/aux") || lower.endsWith("/aux/") ||
-            lower.endsWith("/prn") || lower.endsWith("/prn/") ||
-            lower.endsWith("/nul") || lower.endsWith("/nul/")) {
+            lastCh == '/' || lastCh == '\\'
+            || lower.endsWith("::$data")
+            || isWindowsSpecial(lower, "/con")
+            || isWindowsSpecial(lower, "/aux")
+            || isWindowsSpecial(lower, "/prn")
+            || isWindowsSpecial(lower, "/nul")
+            || isWindowsSpecial(lower, "/com1")
+            || isWindowsSpecial(lower, "/com2")
+            || isWindowsSpecial(lower, "/com3")
+            || isWindowsSpecial(lower, "/com4")
+            || isWindowsSpecial(lower, "/lpt1")
+            || isWindowsSpecial(lower, "/lpt2")
+            || isWindowsSpecial(lower, "/lpt3")) {
           // Windows security hole with trailing '.'
           res.sendError(res.SC_NOT_FOUND);
           return;
@@ -343,6 +350,24 @@ public class FileServlet extends GenericServlet {
       OutputStream os = res.getOutputStream();
       cache.getPath().writeToStream(os);
     }
+  }
+
+  private boolean isWindowSpecial(String lower, String test)
+  {
+    int p = lower.indexOf(test);
+
+    if (p < 0)
+      return false;
+
+    int lowerLen = lower.length();
+    int testLen = test.length();
+    char ch;
+
+    if (lowerLen == p + testLen
+        || (ch = lower.charAt(p + testLen)) == '/' || ch == '.')
+      return true;
+    else
+      return false;
   }
 
   private boolean handleRange(HttpServletRequest req,
