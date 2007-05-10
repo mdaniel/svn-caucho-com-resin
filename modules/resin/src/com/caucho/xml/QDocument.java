@@ -834,7 +834,7 @@ public class QDocument extends QDocumentFragment implements CauchoDocument {
 
   public String getVersion()
   {
-    _version;
+    return _version;
   }
     
   public void setVersion(String version)

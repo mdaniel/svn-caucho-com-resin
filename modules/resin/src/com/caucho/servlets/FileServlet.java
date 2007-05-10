@@ -352,7 +352,7 @@ public class FileServlet extends GenericServlet {
     }
   }
 
-  private boolean isWindowSpecial(String lower, String test)
+  private boolean isWindowsSpecial(String lower, String test)
   {
     int p = lower.indexOf(test);
 
