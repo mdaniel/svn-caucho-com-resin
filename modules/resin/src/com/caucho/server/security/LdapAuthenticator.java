@@ -54,8 +54,8 @@ public class LdapAuthenticator extends AbstractAuthenticator {
   private String _dnPrefix;
   private String _dnSuffix;
   
-  private Hashtable<String,String> _jndiEnv =
-    new Hashtable<String,String>();
+  private Hashtable<String,String> _jndiEnv
+    = new Hashtable<String,String>();
 
   public LdapAuthenticator()
   {

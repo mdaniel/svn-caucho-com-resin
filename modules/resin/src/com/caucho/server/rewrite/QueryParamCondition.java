@@ -32,7 +32,16 @@ package com.caucho.server.rewrite;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.annotation.PostConstruct;
+
 import java.util.regex.Pattern;
+import java.util.*;
+import java.util.logging.*;
+
+import com.caucho.util.*;
+import com.caucho.java.*;
+import com.caucho.vfs.*;
+import com.caucho.i18n.*;
+import com.caucho.server.connection.*;
 
 /**
 * A rewrite condition that passes if the value of a query parameter exists
@@ -41,6 +50,9 @@ import java.util.regex.Pattern;
 public class QueryParamCondition
   extends AbstractCondition
 {
+  private static final Logger log
+    = Logger.getLogger(QueryParamCondition.class.getName());
+  
   private final String _param;
   private Pattern _regexp;
   private boolean _caseInsensitive;
@@ -75,14 +87,34 @@ public class QueryParamCondition
   public boolean isMatch(HttpServletRequest request,
                          HttpServletResponse response)
   {
-    String value;
+    String query = request.getQueryString();
 
-    // XXX: s/b only query parameters
-    value = request.getParameter(_param);
+    if (query == null)
+      return false;
+    
+    String charEncoding = request.getCharacterEncoding();
+    
+    if (charEncoding == null)
+      charEncoding = CharacterEncoding.getLocalEncoding();
 
-    if (value == null)
+    String javaEncoding = Encoding.getJavaName(charEncoding);
+
+    Form formParser = new Form();
+    HashMapImpl<String,String[]> form = new HashMapImpl<String,String[]>();
+
+    try {
+      formParser.parseQueryString(form, query, javaEncoding, true);
+    } catch (java.io.IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+    
+    String []value = form.get(_param);
+
+    if (value == null || value.length == 0)
       return false;
     else
-      return _regexp == null || _regexp.matcher(value).find();
+      return _regexp == null || _regexp.matcher(value[0]).find();
   }
 }

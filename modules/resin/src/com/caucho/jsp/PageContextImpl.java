@@ -250,8 +250,9 @@ public class PageContextImpl extends PageContext
     //  _writerStreamImpl.setWriter(_topOut);
     // _response.setPrintWriter(body.getWriter());
 
-    /*
+    // jsp/3145
     _elContext = null;
+    /*
     _elResolver = null;
     */
 
