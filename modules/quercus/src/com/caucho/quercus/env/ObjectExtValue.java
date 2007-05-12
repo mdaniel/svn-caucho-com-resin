@@ -260,29 +260,30 @@ public class ObjectExtValue extends ObjectValue
     return null;
   }
 
-  /**
-   * XXX: to handle foreach
-   */
   public Value get(Value key)
   {
-    // php/0d92 - expects exception
-    return getField(null, key.toString());
+    Env.getInstance().error(L.l("Can't use object '{0}' as array",
+				getName()));
+    
+    return NullValue.NULL;
   }
 
   public Value put(Value index, Value value)
   {
     // php/0d94
-    /*
-    throw new QuercusException(L.l("Object of type '{0}' cannot be used as an array",
-				   getClassName()));
-    */
+    
+    Env.getInstance().error(L.l("Can't use object '{0}' as array",
+				getName()));
+    
     return NullValue.NULL;
   }
 
   public Value put(Value value)
   {
-    throw new QuercusException(L.l("Object of type '{0}' cannot be used as an array",
-				   getClassName()));
+    Env.getInstance().error(L.l("Can't use object '{0}' as array",
+				getName()));
+
+    return NullValue.NULL;
   }
 
   /**

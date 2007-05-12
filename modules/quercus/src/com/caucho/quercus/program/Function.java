@@ -32,6 +32,7 @@ package com.caucho.quercus.program;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
@@ -243,6 +244,14 @@ public class Function extends AbstractFunction {
 
     HashMap<String,Var> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(values); // php/0476
+    Value oldThis;
+
+    if (isStatic()) {
+      // php/0967
+      oldThis = env.setThis(UnsetValue.NULL);
+    }
+    else
+      oldThis = env.getThis();
 
     try {
       Value value = _statement.execute(env);
@@ -256,6 +265,7 @@ public class Function extends AbstractFunction {
     } finally {
       env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
+      env.setThis(oldThis);
     }
   }
 
@@ -311,6 +321,14 @@ public class Function extends AbstractFunction {
 
     HashMap<String,Var> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(args);
+    Value oldThis;
+
+    if (isStatic()) {
+      // php/0967
+      oldThis = env.setThis(UnsetValue.NULL);
+    }
+    else
+      oldThis = env.getThis();
 
     try {
       Value value = _statement.execute(env);
@@ -324,6 +342,7 @@ public class Function extends AbstractFunction {
     } finally {
       env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
+      env.setThis(oldThis);
     }
   }
 

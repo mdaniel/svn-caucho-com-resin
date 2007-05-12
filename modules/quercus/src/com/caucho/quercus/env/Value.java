@@ -1392,7 +1392,8 @@ abstract public class Value implements java.io.Serializable
   private Value errorNoMethod(Env env, String methodName)
   {
     if (isNull())
-      return env.error(L.l("can not call method '{0}' of a null object.", methodName));
+      return env.error(L.l("Method call '{0}' is not allowed for a null value.",
+			   methodName));
     else
       return env.error(L.l("'{0}' is an unknown method of {1}.", methodName, toDebugString()));
   }

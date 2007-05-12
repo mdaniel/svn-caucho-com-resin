@@ -1126,8 +1126,9 @@ abstract public class StringValue extends Value implements CharSequence {
   public Reader toReader(String charset)
     throws UnsupportedEncodingException
   {
-    return new InputStreamReader(
-        new ByteArrayInputStream(toString().getBytes()), charset);
+    byte []bytes = toString().getBytes();
+    
+    return new InputStreamReader(new ByteArrayInputStream(bytes), charset);
   }
 
   /**

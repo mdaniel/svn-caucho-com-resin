@@ -143,6 +143,14 @@ public class FunctionInfo {
   }
 
   /**
+   * Return true if the function allows $this
+   */
+  public boolean hasThis()
+  {
+    return _classDef != null && ! _fun.isStatic();
+  }
+  
+  /**
    * Sets the owning class.
    */
   public void setDeclaringClass(ClassDef classDef)

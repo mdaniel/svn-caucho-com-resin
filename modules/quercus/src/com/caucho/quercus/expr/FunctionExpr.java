@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.AbstractFunction;
@@ -169,6 +170,7 @@ public class FunctionExpr extends Expr {
     Value []args = fun.evalArguments(env, this, _args);
 
     env.pushCall(this, NullValue.NULL);
+    Value oldThis = env.setThis(UnsetValue.NULL);
     try {
       env.checkTimeout();
 	
@@ -180,6 +182,7 @@ public class FunctionExpr extends Expr {
 	return fun.call(env, args);
     } finally {
       env.popCall();
+      env.setThis(oldThis);
     }
   }
   
