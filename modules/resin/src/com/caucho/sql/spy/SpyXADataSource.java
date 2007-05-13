@@ -71,11 +71,11 @@ public class SpyXADataSource implements XADataSource {
 
       String connId = _id + "." + _connCount++;
 
-      log.info(_id + ":getXAConnection() -> " + connId + ":" + conn);
+      log.fine(_id + ":getXAConnection() -> " + connId + ":" + conn);
 
       return new SpyXAConnection(conn, connId);
     } catch (SQLException e) {
-      log.info(_id + ":exn-connect(" + e + ")");
+      log.fine(_id + ":exn-connect(" + e + ")");
       
       throw e;
     }
@@ -92,11 +92,11 @@ public class SpyXADataSource implements XADataSource {
 
       String connId = _id + "." + _connCount++;
 
-      log.info(_id + ":getXAConnection(" + user + ") -> " + connId + ":" + conn);
+      log.fine(_id + ":getXAConnection(" + user + ") -> " + connId + ":" + conn);
 
       return new SpyXAConnection(conn, connId);
     } catch (SQLException e) {
-      log.info(_id + ":exn-connect(" + e + ")");
+      log.fine(_id + ":exn-connect(" + e + ")");
       
       throw e;
     }

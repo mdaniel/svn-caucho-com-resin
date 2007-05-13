@@ -81,15 +81,15 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
 
       String connId = null;
       
-      if (log.isLoggable(Level.INFO)) {
+      if (log.isLoggable(Level.FINE)) {
 	connId = _spyDataSource.createConnectionId();
 
-	log.info(_id + ":connect() -> " + connId + ":" + conn);
+	log.fine(_id + ":connect() -> " + connId + ":" + conn);
       }
 
       return new SpyConnection(conn, _spyDataSource, connId);
     } catch (SQLException e) {
-      log.info(_id + ":exn-connect(" + e + ")");
+      log.fine(_id + ":exn-connect(" + e + ")");
       
       throw e;
     }
@@ -101,9 +101,9 @@ public class SpyPooledConnection implements javax.sql.PooledConnection {
     try {
       _pconn.close();
 
-      log.info(_id + ":close()");
+      log.fine(_id + ":close()");
     } catch (SQLException e) {
-      log.info(_id + ":exn-close(" + e + ")");
+      log.fine(_id + ":exn-close(" + e + ")");
       
       throw e;
     }

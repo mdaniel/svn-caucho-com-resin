@@ -44,7 +44,8 @@ import java.util.logging.Logger;
  * Spying on a driver.
  */
 public class SpyDriver implements java.sql.Driver {
-  protected final static Logger log = Log.open(SpyDriver.class);
+  protected final static Logger log
+    = Logger.getLogger(SpyDriver.class.getName());
   protected final static L10N L = new L10N(SpyDriver.class);
 
   private static int _staticId;
@@ -73,29 +74,29 @@ public class SpyDriver implements java.sql.Driver {
     try {
       boolean result = _driver.acceptsURL(url);
 
-      log.info(_id + ":acceptsURL(" + url + ") -> " + result);
+      log.fine(_id + ":acceptsURL(" + url + ") -> " + result);
       
       return result;
     } catch (SQLException e) {
-      log.info(_id + ":exn-acceptURL(" + e + ")");
+      log.fine(_id + ":exn-acceptURL(" + e + ")");
       
       throw e;
     }
   }
   
-  public Connection connect(String url, Properties info)
+  public Connection connect(String url, Properties fine)
     throws SQLException
   {
     try {
-      Connection conn = _driver.connect(url, info);
+      Connection conn = _driver.connect(url, fine);
 
       int connId = _connCount++;
 
-      log.info(_id + ":connect(" + url + ",info=" + info + ") -> " + connId + ":" + conn);
+      log.fine(_id + ":connect(" + url + ",fine=" + fine + ") -> " + connId + ":" + conn);
 
       return new SpyConnection(conn, _spyDataSource);
     } catch (SQLException e) {
-      log.info(_id + ":exn-connect(" + e + ")");
+      log.fine(_id + ":exn-connect(" + e + ")");
       
       throw e;
     }
@@ -105,7 +106,7 @@ public class SpyDriver implements java.sql.Driver {
   {
       int result = _driver.getMajorVersion();
 
-      log.info(_id + ":getMajorVersion() -> " + result);
+      log.fine(_id + ":getMajorVersion() -> " + result);
 
       return result;
   }
@@ -114,34 +115,34 @@ public class SpyDriver implements java.sql.Driver {
   {
       int result = _driver.getMinorVersion();
 
-      log.info(_id + ":getMinorVersion() -> " + result);
+      log.fine(_id + ":getMinorVersion() -> " + result);
 
       return result;
   }
   
-  public DriverPropertyInfo []getPropertyInfo(String url, Properties info)
+  public DriverPropertyInfo []getPropertyInfo(String url, Properties fine)
     throws SQLException
   {
     try {
-      DriverPropertyInfo []result = _driver.getPropertyInfo(url, info);
+      DriverPropertyInfo []result = _driver.getPropertyInfo(url, fine);
 
-      Hashtable<String,String> cleanInfo 
+      Hashtable<String,String> cleanFine 
         = new Hashtable<String,String>();
       
-      if (info != null) {
-        for (Map.Entry<Object,Object> entry : info.entrySet()) {
-          cleanInfo.put((String) entry.getKey(), (String) entry.getValue());
+      if (fine != null) {
+        for (Map.Entry<Object,Object> entry : fine.entrySet()) {
+          cleanFine.put((String) entry.getKey(), (String) entry.getValue());
         }
       }
         
-      if (cleanInfo.get("password") != null)
-        cleanInfo.put("password", "****");
+      if (cleanFine.get("password") != null)
+        cleanFine.put("password", "****");
       
-      log.info(_id + ":getPropertyInfo(" + url + ") -> " + result);
+      log.fine(_id + ":getPropertyInfo(" + url + ") -> " + result);
 
       return result;
     } catch (SQLException e) {
-      log.info(_id + ":exn-getPropertyInfo(" + e + ")");
+      log.fine(_id + ":exn-getPropertyInfo(" + e + ")");
       
       throw e;
     }
@@ -151,7 +152,7 @@ public class SpyDriver implements java.sql.Driver {
   {
     boolean result = _driver.jdbcCompliant();
 
-    log.info(_id + ":jdbcCompliant() -> " + result);
+    log.fine(_id + ":jdbcCompliant() -> " + result);
 
     return result;
   }

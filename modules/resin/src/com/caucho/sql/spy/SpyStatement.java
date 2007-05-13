@@ -79,13 +79,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":addBatch(" + sql + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":addBatch(" + sql + ")");
       
       _stmt.addBatch(sql);
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-addBatch(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-addBatch(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -95,13 +95,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":cancel()");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":cancel()");
       
       _stmt.cancel();
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-cancel(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-cancel(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -111,13 +111,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":clearBatch()");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":clearBatch()");
       
       _stmt.clearBatch();
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-clearBatch(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-clearBatch(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -127,13 +127,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":clearWarnings()");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":clearWarnings()");
       
       _stmt.clearWarnings();
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-clearWarnings(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-clearWarnings(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -143,13 +143,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":close()");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":close()");
       
       _stmt.close();
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-close(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-close(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -159,15 +159,15 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":executeQuery(" + sql + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":executeQuery(" + sql + ")");
       
       ResultSet rs = _stmt.executeQuery(sql);
 
       return rs;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-executeQuery(" + sql + ") -> " + e);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-executeQuery(" + sql + ") -> " + e);
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -179,13 +179,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       int count = _stmt.executeUpdate(sql);
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":executeUpdate(" + sql + ") -> " + count);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":executeUpdate(" + sql + ") -> " + count);
       
       return count;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-executeUpdate(" + sql + ") -> " + e);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-executeUpdate(" + sql + ") -> " + e);
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -197,13 +197,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       boolean hasResult = _stmt.execute(sql);
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":execute(" + sql + ") -> " + hasResult);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":execute(" + sql + ") -> " + hasResult);
       
       return hasResult;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-execute(" + sql + ") -> " + e);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-execute(" + sql + ") -> " + e);
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -215,13 +215,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       int []result = _stmt.executeBatch();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":executeBatch()");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":executeBatch()");
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-executeBatch(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-executeBatch(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -233,13 +233,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       ResultSet result = _stmt.getResultSet();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getResultSet() -> " + result);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getResultSet() -> " + result);
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getResultSet(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getResultSet(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -251,13 +251,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       int updateCount = _stmt.getUpdateCount();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getUpdateCount() -> " + updateCount);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getUpdateCount() -> " + updateCount);
       
       return updateCount;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getUpdateCount(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getUpdateCount(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -268,8 +268,8 @@ public class SpyStatement implements java.sql.Statement {
   {
     int updateCount = _stmt.getUpdateCount();
 
-    if (log.isLoggable(Level.INFO))
-      log.info(getId() + ":getConnection()");
+    if (log.isLoggable(Level.FINE))
+      log.fine(getId() + ":getConnection()");
       
     return _conn;
   }
@@ -280,13 +280,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       int result = _stmt.getFetchDirection();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getFetchDirection() -> " + result);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getFetchDirection() -> " + result);
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getFetchDirection(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getFetchDirection(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -298,13 +298,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       int result = _stmt.getFetchSize();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getFetchSize() -> " + result);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getFetchSize() -> " + result);
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getFetchSize(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getFetchSize(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -316,13 +316,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       int result = _stmt.getMaxFieldSize();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getMaxFieldSize() -> " + result);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getMaxFieldSize() -> " + result);
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getMaxFieldSize(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getMaxFieldSize(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -334,13 +334,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       int result = _stmt.getMaxRows();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getMaxRows() -> " + result);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getMaxRows() -> " + result);
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getMaxRows(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getMaxRows(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -350,13 +350,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":setMaxRows(" + max + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":setMaxRows(" + max + ")");
 
       _stmt.setMaxRows(max);
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-setMaxRows(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-setMaxRows(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -368,13 +368,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       boolean result = _stmt.getMoreResults();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getMoreResults() -> " + result);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getMoreResults() -> " + result);
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getMoreResults(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getMoreResults(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -386,13 +386,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       int result = _stmt.getQueryTimeout();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getQueryTimeout() -> " + result);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getQueryTimeout() -> " + result);
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getQueryTimeout(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getQueryTimeout(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -404,13 +404,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       int result = _stmt.getResultSetConcurrency();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getResultSetConcurrency() -> " + result);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getResultSetConcurrency() -> " + result);
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getResultSetConcurrency(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getResultSetConcurrency(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -422,13 +422,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       int result = _stmt.getResultSetType();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getResultSetType() -> " + result);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getResultSetType() -> " + result);
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getResultSetType(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getResultSetType(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -440,13 +440,13 @@ public class SpyStatement implements java.sql.Statement {
     try {
       SQLWarning result = _stmt.getWarnings();
 
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":getWarnings() -> " + result);
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":getWarnings() -> " + result);
       
       return result;
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-getWarnings(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-getWarnings(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -456,13 +456,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":setCursorName(" + name + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":setCursorName(" + name + ")");
 
       _stmt.setCursorName(name);
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-setCursorName(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-setCursorName(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -472,13 +472,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":setEscapeProcessing(" + enable + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":setEscapeProcessing(" + enable + ")");
 
       _stmt.setEscapeProcessing(enable);
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-setEscapeProcessing(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-setEscapeProcessing(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -488,13 +488,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":setFetchDirection(" + direction + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":setFetchDirection(" + direction + ")");
 
       _stmt.setFetchDirection(direction);
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-setFetchDirection(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-setFetchDirection(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -504,13 +504,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":setFetchSize(" + rows + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":setFetchSize(" + rows + ")");
 
       _stmt.setFetchSize(rows);
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-setFetchSize(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-setFetchSize(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -520,13 +520,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":setMaxFieldSize(" + max + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":setMaxFieldSize(" + max + ")");
 
       _stmt.setMaxFieldSize(max);
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-setMaxFieldSize(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-setMaxFieldSize(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }
@@ -536,13 +536,13 @@ public class SpyStatement implements java.sql.Statement {
     throws SQLException
   {
     try {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":setQueryTimeout(" + seconds + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":setQueryTimeout(" + seconds + ")");
 
       _stmt.setQueryTimeout(seconds);
     } catch (Throwable e) {
-      if (log.isLoggable(Level.INFO))
-	log.info(getId() + ":exn-setQueryTimeout(" + e + ")");
+      if (log.isLoggable(Level.FINE))
+	log.fine(getId() + ":exn-setQueryTimeout(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }

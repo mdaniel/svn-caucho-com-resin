@@ -71,11 +71,11 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
 
       String connId = _id + "." + _connCount++;
 
-      log.info(_id + ":getConnectionPool() -> " + connId + ":" + conn);
+      log.fine(_id + ":getConnectionPool() -> " + connId + ":" + conn);
 
       return new SpyPooledConnection(conn, connId);
     } catch (SQLException e) {
-      log.info(_id + ":exn-connect(" + e + ")");
+      log.fine(_id + ":exn-connect(" + e + ")");
       
       throw e;
     }
@@ -92,11 +92,11 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
 
       String connId = _id + "." + _connCount++;
 
-      log.info(_id + ":getPooledConnection(" + user + ") -> " + connId + ":" + conn);
+      log.fine(_id + ":getPooledConnection(" + user + ") -> " + connId + ":" + conn);
 
       return new SpyPooledConnection(conn, connId);
     } catch (SQLException e) {
-      log.info(_id + ":exn-connect(" + e + ")");
+      log.fine(_id + ":exn-connect(" + e + ")");
       
       throw e;
     }

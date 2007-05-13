@@ -74,14 +74,14 @@ public class SpyXAResource implements XAResource {
   {
     try {
       boolean ok = _xaResource.setTransactionTimeout(seconds);
-      log.info(_id + ":set-transaction-timeout(" + seconds + ")->" + ok);
+      log.fine(_id + ":set-transaction-timeout(" + seconds + ")->" + ok);
 
       return ok;
     } catch (XAException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }
@@ -95,14 +95,14 @@ public class SpyXAResource implements XAResource {
     try {
       int seconds = _xaResource.getTransactionTimeout();
       
-      log.info(_id + ":transaction-timeout()->" + seconds);
+      log.fine(_id + ":transaction-timeout()->" + seconds);
 
       return seconds;
     } catch (XAException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }
@@ -119,14 +119,14 @@ public class SpyXAResource implements XAResource {
 	    
       boolean same = _xaResource.isSameRM(resource);
       
-      log.info(_id + ":is-same-rm(resource=" + resource + ")->" + same);
+      log.fine(_id + ":is-same-rm(resource=" + resource + ")->" + same);
 
       return same;
     } catch (XAException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }
@@ -145,14 +145,14 @@ public class SpyXAResource implements XAResource {
       if ((flags & TMRESUME) != 0)
         flagName += ",resume";
       
-      log.info(_id + ":start(xid=" + xid + flagName + ")");
+      log.fine(_id + ":start(xid=" + xid + flagName + ")");
 
       _xaResource.start(xid, flags);
     } catch (XAException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }
@@ -171,14 +171,14 @@ public class SpyXAResource implements XAResource {
       if ((flags & TMSUSPEND) != 0)
         flagName += ",suspend";
       
-      log.info(_id + ":end(xid=" + xid + flagName + ")");
+      log.fine(_id + ":end(xid=" + xid + flagName + ")");
 
       _xaResource.end(xid, flags);
     } catch (XAException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }
@@ -191,14 +191,14 @@ public class SpyXAResource implements XAResource {
   {
     try {
       int value = _xaResource.prepare(xid);
-      log.info(_id + ":prepare(xid=" + xid + ")->" + value);
+      log.fine(_id + ":prepare(xid=" + xid + ")->" + value);
 
       return value;
     } catch (XAException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }
@@ -210,14 +210,14 @@ public class SpyXAResource implements XAResource {
     throws XAException
   {
     try {
-      log.info(_id + ":commit(xid=" + xid + (onePhase ? ",1P)" : ",2P)"));
+      log.fine(_id + ":commit(xid=" + xid + (onePhase ? ",1P)" : ",2P)"));
 
       _xaResource.commit(xid, onePhase);
     } catch (XAException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }
@@ -229,14 +229,14 @@ public class SpyXAResource implements XAResource {
     throws XAException
   {
     try {
-      log.info(_id + ":rollback(xid=" + xid + ")");
+      log.fine(_id + ":rollback(xid=" + xid + ")");
 
       _xaResource.rollback(xid);
     } catch (XAException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }
@@ -260,14 +260,14 @@ public class SpyXAResource implements XAResource {
 	flagString += "end";
       }
       
-      log.info(_id + ":recover(flags=" + flagString + ")");
+      log.fine(_id + ":recover(flags=" + flagString + ")");
 
       return _xaResource.recover(flags);
     } catch (XAException e) {
-      log.info(e.toString());
+      log.fine(e.toString());
       throw e;
     } catch (RuntimeException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }
@@ -279,14 +279,14 @@ public class SpyXAResource implements XAResource {
     throws XAException
   {
     try {
-      log.info(_id + ":forget(xid=" + xid + ")");
+      log.fine(_id + ":forget(xid=" + xid + ")");
 
       _xaResource.forget(xid);
     } catch (XAException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     } catch (RuntimeException e) {
-      log.log(Level.INFO, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     }
   }

@@ -876,6 +876,108 @@ public class Store {
   }
   
   /**
+   * Reads a block.
+   *
+   * @param blockAddress the address of the block
+   * @param blockOffset the offset inside the block to start reading
+   * @param buffer the result buffer
+   * @param offset offset into the result buffer
+   * @param length the number of bytes to read
+   *
+   * @return the number of bytes read
+   */
+  public int readBlock(long blockAddress, int blockOffset,
+		       byte []buffer, int offset, int length)
+    throws IOException
+  {
+    if (BLOCK_SIZE - blockOffset < length) {
+      // server/13df
+      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
+					     blockOffset, length));
+    }
+
+    Block block = readBlock(addressToBlockId(blockAddress));
+
+    try {
+      byte []blockBuffer = block.getBuffer();
+
+      synchronized (blockBuffer) {
+	System.arraycopy(blockBuffer, blockOffset,
+			 buffer, offset, length);
+      }
+
+      return length;
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Reads a block for a clob.
+   *
+   * @param blockAddress the address of the block
+   * @param blockOffset the offset inside the block to start reading
+   * @param buffer the result buffer
+   * @param offset offset into the result buffer
+   * @param length the length of the block in characters
+   *
+   * @return the number of characters read
+   */
+  public int readBlock(long blockAddress, int blockOffset,
+		       char []buffer, int offset, int length)
+    throws IOException
+  {
+    if (BLOCK_SIZE - blockOffset < 2 * length) {
+      // server/13df
+      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
+					     blockOffset, length));
+    }
+
+    Block block = readBlock(addressToBlockId(blockAddress));
+
+    try {
+      byte []blockBuffer = block.getBuffer();
+      
+      synchronized (blockBuffer) {
+	for (int i = 0; i < length; i++) {
+	  int ch1 = blockBuffer[blockOffset] & 0xff;
+	  int ch2 = blockBuffer[blockOffset + 1] & 0xff;
+
+	  buffer[offset + i] = (char) ((ch1 << 8) + ch2);
+
+	  blockOffset += 2;
+	}
+      }
+
+      return length;
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Reads a long value from a block.
+   *
+   * @return the long value
+   */
+  public long readBlockLong(long blockAddress,
+			    int offset)
+    throws IOException
+  {
+    Block block = readBlock(addressToBlockId(blockAddress));
+
+    try {
+      byte []blockBuffer = block.getBuffer();
+
+      synchronized (blockBuffer) {
+	return readLong(blockBuffer, offset);
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
    * Allocates a new fragment.
    *
    * @return the fragment address
@@ -1061,6 +1163,117 @@ public class Store {
 
       byte []blockBuffer = block.getBuffer();
       int offset = blockOffset + fragmentOffset;
+
+      synchronized (blockBuffer) {
+	writeLong(blockBuffer, offset, value);
+
+	block.setDirty(offset, offset + 8);
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Writes a blockfragment.
+   *
+   * @param xa the owning transaction
+   * @param blockAddress the block to write
+   * @param blockOffset the offset into the block
+   * @param buffer the write buffer
+   * @param offset offset into the write buffer
+   * @param length the number of bytes to write
+   *
+   * @return the fragment id
+   */
+  public void writeBlock(StoreTransaction xa,
+			 long blockAddress, int blockOffset,
+			 byte []buffer, int offset, int length)
+    throws IOException
+  {
+    if (BLOCK_SIZE - blockOffset < length)
+      throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
+					     blockOffset, length));
+    
+    Block block = xa.readBlock(this, addressToBlockId(blockAddress));
+
+    try {
+      xa.addUpdateBlock(block);
+
+      byte []blockBuffer = block.getBuffer();
+
+      synchronized (blockBuffer) {
+	System.arraycopy(buffer, offset,
+			 blockBuffer, blockOffset,
+			 length);
+
+	block.setDirty(blockOffset, blockOffset + length);
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Writes a character based block
+   *
+   * @param blockAddress the fragment to write
+   * @param blockOffset the offset into the fragment
+   * @param buffer the write buffer
+   * @param offset offset into the write buffer
+   * @param length the number of bytes to write
+   */
+  public void writeBlock(StoreTransaction xa,
+			 long blockAddress, int blockOffset,
+			 char []buffer, int offset, int length)
+    throws IOException
+  {
+    if (BLOCK_SIZE - blockOffset < length)
+      throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
+					     blockOffset, length));
+    
+    Block block = xa.readBlock(this, addressToBlockId(blockAddress));
+
+    try {
+      block = xa.createAutoCommitWriteBlock(block);
+	
+      byte []blockBuffer = block.getBuffer();
+
+      synchronized (blockBuffer) {
+	int blockTail = blockOffset;
+	
+	for (int i = 0; i < length; i++) {
+	  char ch = buffer[offset + i];
+
+	  blockBuffer[blockTail] = (byte) (ch >> 8);
+	  blockBuffer[blockTail + 1] = (byte) (ch);
+
+	  blockTail += 2;
+	}
+
+	block.setDirty(blockOffset, blockTail);
+      }
+    } finally {
+      block.free();
+    }
+  }
+  
+  /**
+   * Writes a long value to a block
+   *
+   * @return the long value
+   */
+  public void writeBlockLong(StoreTransaction xa,
+			     long blockAddress, int offset,
+			     long value)
+    throws IOException
+  {
+    Block block = xa.readBlock(this, addressToBlockId(blockAddress));
+
+    try {
+      xa.addUpdateBlock(block);
+      
+      byte []blockBuffer = block.getBuffer();
 
       synchronized (blockBuffer) {
 	writeLong(blockBuffer, offset, value);
