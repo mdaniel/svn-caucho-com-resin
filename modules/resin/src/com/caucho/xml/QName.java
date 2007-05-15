@@ -55,7 +55,7 @@ public class QName implements Comparable, Serializable {
     if (namespace == null) {
       _prefix = null;
       _namespace = null;
-      _localName = null;
+      _localName = _fullName;
     }
     else if (namespace.equals("")) {
       _prefix = null;
@@ -124,7 +124,7 @@ public class QName implements Comparable, Serializable {
       _fullName = _localName;
 
     if (namespace == null) {
-      _localName = null;
+      _localName = _fullName;
     }
     else if (namespace.equals("")) {
       _namespace = "";
