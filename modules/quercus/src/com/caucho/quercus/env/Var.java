@@ -355,8 +355,6 @@ public class Var extends Value
   @Override
   public ArrayValue toArrayValue(Env env)
   {
-    System.err.println("Var->toAutoArray(): " + _value);
-  
     return _value.toArrayValue(env);
   }
 
@@ -365,8 +363,6 @@ public class Var extends Value
    */
   public Value toAutoArray()
   {
-    System.err.println("Var->toAutoArray()2: " + _value);
-    
     _value = _value.toAutoArray();
     
     return _value;
