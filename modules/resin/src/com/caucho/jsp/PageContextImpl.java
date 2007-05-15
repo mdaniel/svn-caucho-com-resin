@@ -1351,6 +1351,10 @@ public class PageContextImpl extends PageContext
     // jsp/1c51, jsp/1c54
     String prefix = (String) getAttribute("caucho.bundle.prefix");
 
+    // jsp/1c3x
+    if (key == null) 
+      key = "";
+
     if (prefix != null)
       key = prefix + key;
 
@@ -1792,8 +1796,10 @@ public class PageContextImpl extends PageContext
         return value;
 
       int p = name.indexOf(':');
-      if (p < 0)
-        return null;
+      if (p < 0) {
+        // jsp/1m43, TCK
+        throw new javax.el.ELException(L.l("'{0}' is an unknown variable", name));
+      }
 
       String prefix = name.substring(0, p);
       String suffix = name.substring(p + 1);
@@ -1828,6 +1834,7 @@ public class PageContextImpl extends PageContext
         return getApplication().getAttribute(suffix);
       else
         return null;
+                                  
     }
   }
   

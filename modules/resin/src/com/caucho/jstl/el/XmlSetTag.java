@@ -84,6 +84,8 @@ public class XmlSetTag extends TagSupport {
       Object value = evalObject(pageContext, _select);
 
       CoreSetTag.setValue(pageContext, _var, _scope, value);
+    } catch (JspException e) {
+      throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -96,17 +98,21 @@ public class XmlSetTag extends TagSupport {
    */
   public static Object evalObject(PageContextImpl pageContext,
 				  com.caucho.xpath.Expr select)
-    throws XPathException
+    throws XPathException, JspException
   {
-    Env env = XPath.createEnv();
-    env.setVarEnv(pageContext.getVarEnv());
+    try {
+      Env env = XPath.createEnv();
+      env.setVarEnv(pageContext.getVarEnv());
       
-    Node node = pageContext.getNodeEnv();
+      Node node = pageContext.getNodeEnv();
       
-    Object value = select.evalObject(node, env);
+      Object value = select.evalObject(node, env);
 
-    env.free();
+      env.free();
 
-    return value;
+      return value;
+    } catch (javax.el.ELException e) {
+      throw new JspException(e);
+    }
   }
 }

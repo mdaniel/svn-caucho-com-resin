@@ -31,10 +31,8 @@ package com.caucho.jstl;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
  * Tag representing the functions.
@@ -60,7 +58,20 @@ public class Functions {
       return ((Map) obj).size();
 
     else if (obj.getClass().isArray())
-      return ((Object []) obj).length;
+      return Array.getLength(obj);
+
+    else if (obj instanceof Iterator) {
+      Iterator iter = (Iterator) obj;
+      
+      int count = 0;
+      while (iter.hasNext()) {
+        count++;
+
+        iter.next();
+      }
+      
+      return count;
+    }
 
     else
       return 0;

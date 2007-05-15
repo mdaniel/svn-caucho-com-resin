@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -52,7 +53,7 @@ public class JstlCoreWhen extends JstlNode {
     if (TEST.equals(name))
       _test = value;
     else
-      throw error(L.l("`{0}' is an unknown attribute for <{1}>.",
+      throw error(L.l("'{0}' is an unknown attribute for <{1}>.",
                       name.getName(), getTagName()));
   }
   
@@ -65,8 +66,23 @@ public class JstlCoreWhen extends JstlNode {
     if (TEST.equals(name))
       _testAttr = value;
     else
-      throw error(L.l("`{0}' is an unknown jsp:attribute for <{1}>.",
+      throw error(L.l("'{0}' is an unknown jsp:attribute for <{1}>.",
                       name.getName(), getTagName()));
+  }
+  
+  /**
+   * Called after all the attributes from the tag.
+   */
+  @Override
+  public void endAttributes()
+    throws JspParseException
+  {
+    if (! (getParent() instanceof JstlCoreChoose)) {
+      throw error(L.l("c:when must be contained in a c:choose tag."));
+    }
+
+    if (_test == null && _testAttr == null)
+      throw error(L.l("'test' attribute missing from c:when."));
   }
 
   /**
@@ -74,8 +90,8 @@ public class JstlCoreWhen extends JstlNode {
    */
   public boolean hasScripting()
   {
-    return (super.hasScripting() ||
-	    hasScripting(_test) || hasScripting(_testAttr));
+    return (super.hasScripting()
+            || hasScripting(_test) || hasScripting(_testAttr));
   }
 
   /**
@@ -102,7 +118,7 @@ public class JstlCoreWhen extends JstlNode {
     throws Exception
   {
     if (_test == null && _testAttr == null)
-      throw error(L.l("required attribute `test' missing from <{0}>",
+      throw error(L.l("required attribute 'test' missing from <{0}>",
                       getTagName()));
 
     String ifExpr;
@@ -110,7 +126,7 @@ public class JstlCoreWhen extends JstlNode {
     if (_testAttr != null)
       ifExpr = _testAttr.generateValue(boolean.class);
     else
-      ifExpr = generateValue(boolean.class, _test);
+      ifExpr = generateJstlValue(boolean.class, _test);
 
     out.println("if (" + ifExpr + ") {");
     out.pushDepth();

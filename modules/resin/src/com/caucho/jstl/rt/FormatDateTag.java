@@ -120,6 +120,9 @@ public class FormatDateTag extends BodyTagSupport {
    */
   public void setTimeZone(Object zone)
   {
+    if ("".equals(zone))
+      zone = null;
+    
     _timeZone = zone;
   }
 
@@ -223,8 +226,13 @@ public class FormatDateTag extends BodyTagSupport {
       if (format != null)
         value = format.format(new Date(time));
 
-      if (_var == null)
+      if (_var == null) {
+        if (_scope != null)
+          throw new JspException(L.l("fmt:formatDate var must not be null when scope '{0}' is set.",
+                                     _scope));
+        
         out.print(value);
+      }
       else
         CoreSetTag.setValue(pageContext, _var, _scope, value);
     } catch (IOException e) {

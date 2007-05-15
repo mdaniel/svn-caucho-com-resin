@@ -149,8 +149,12 @@ public class FmtParseNumberTag extends BodyTagSupport {
 
       Number value = format.parse(string);
 
-      if (_var == null)
+      if (_var == null) {
+        if (_scope != null)
+          throw new JspException(L.l("fmt:parseNumber var must not be null when scope '{0}' is set.",
+                                     _scope));
         out.print(value);
+      }
       else
         CoreSetTag.setValue(pageContext, _var, _scope, value);
     } catch (IOException e) {

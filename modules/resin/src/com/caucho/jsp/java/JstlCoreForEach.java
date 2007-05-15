@@ -415,11 +415,13 @@ public class JstlCoreForEach extends JstlNode {
       out.println("\", " + _tagVar + ");");
     }
 
+    /* 
     if (_var != null) {
       out.print("Object " + oldVar + " = pageContext.getAttribute(\"");
       out.print(escapeJavaString(_var));
       out.println("\");");
     }
+    */
 
     out.print("for (int " + iVar + " = " + beginVar + "; ");
     out.print(iVar + " <= " + endVar + "; ");
@@ -441,15 +443,27 @@ public class JstlCoreForEach extends JstlNode {
     out.println("}");
 
     if (_var != null) {
+      out.print("pageContext.removeAttribute(\"");
+      out.print(escapeJavaString(_var));
+      out.println("\");");
+      
+      /*
       out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_var));
       out.println("\", " + oldVar + ");");
+      */
     }
 
     if (_varStatus != null) {
+      out.print("pageContext.removeAttribute(\"");
+      out.print(escapeJavaString(_varStatus));
+      out.println("\");");
+      
+      /*
       out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_varStatus));
       out.println("\", " + oldStatusVar + ");");
+      */
     }
   }
   
@@ -603,15 +617,29 @@ public class JstlCoreForEach extends JstlNode {
     out.println("}");
 
     if (_var != null) {
+      // jsp/1cmg
+      out.print("pageContext.removeAttribute(\"");
+      out.print(escapeJavaString(_var));
+      out.print("\");");
+      
+      /*
       out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_var));
       out.println("\", " + oldVar + ");");
+      */
     }
 
     if (_varStatus != null) {
+      // jsp/1cme
+      out.print("pageContext.removeAttribute(\"");
+      out.print(escapeJavaString(_varStatus));
+      out.println("\");");
+      
+      /*
       out.print("pageContext.pageSetOrRemove(\"");
       out.print(escapeJavaString(_varStatus));
       out.println("\", " + oldStatusVar + ");");
+      */
     }
   }
 }

@@ -33,6 +33,14 @@ import com.caucho.xml.QName;
 
 abstract public class JstlNode extends JspContainerNode {
   /**
+   * True if this is a jstl node.
+   */
+  public boolean isJstl()
+  {
+    return true;
+  }
+  
+  /**
    * Adds an attribute.
    */
   public void addAttribute(QName name, String value)

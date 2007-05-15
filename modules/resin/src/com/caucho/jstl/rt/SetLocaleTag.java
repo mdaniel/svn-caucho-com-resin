@@ -80,7 +80,9 @@ public class SetLocaleTag extends TagSupport {
 
     Locale locale = null;
 
-    if (_value instanceof Locale) {
+    if (_value == null || "".equals(_value))
+      return SKIP_BODY;
+    else if (_value instanceof Locale) {
       locale = (Locale) _value;
     }
     else if (_value instanceof String) {

@@ -43,6 +43,7 @@ import javax.el.PropertyNotFoundException;
 import javax.el.PropertyNotWritableException;
 import javax.el.ValueExpression;
 import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.JspException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -1073,8 +1074,9 @@ public abstract class Expr extends ValueExpression {
     }
   }
 
+  // XXX: does this belong in JSP?
   public static void setProperty(Object target, String property, Object value)
-    throws ELException
+    throws ELException, JspException
   {
     if (target instanceof Map) {
       Map<String,Object> map = (Map) target;
@@ -1090,11 +1092,11 @@ public abstract class Expr extends ValueExpression {
       try {
         method = BeanUtil.getSetMethod(target.getClass(), property);
       } catch (Exception e) {
-        throw new ELException(e);
+        throw new JspException(e);
       }
 
       if (method == null)
-        throw new ELException(L.l("can't find property `{0}' in `{1}'",
+        throw new JspException(L.l("can't find property `{0}' in `{1}'",
                                   property, target.getClass()));
 
       Class type = method.getParameterTypes()[0];
@@ -1177,8 +1179,12 @@ public abstract class Expr extends ValueExpression {
 	
         method.invoke(target, new Object[] { value });
       } catch (Exception e) {
-        throw new ELException(e);
+        throw new JspException(e);
       }
+    }
+    else {
+      // jsp/1c2l and JSTL TCK for exception type
+      throw new javax.servlet.jsp.JspException(L.l("null is an invalid c:set target value."));
     }
   }
 

@@ -86,11 +86,16 @@ public class XmlIfTag extends TagSupport {
       Boolean value = test ? Boolean.TRUE : Boolean.FALSE;
 
       if (_var == null) {
+        if (_scope != null || _scope.equals(""))
+          throw new JspException(L.l("var must not be null when scope '{0}' is set.",
+                                     _scope));
       }
       else
         CoreSetTag.setValue(pageContext, _var, _scope, value);
 
       return test ? EVAL_BODY_INCLUDE : SKIP_BODY;
+    } catch (JspException e) {
+      throw e;
     } catch (Exception e) {
       throw new JspException(e);
     }
@@ -101,17 +106,21 @@ public class XmlIfTag extends TagSupport {
    */
   public static boolean evalBoolean(PageContextImpl pageContext,
 				    com.caucho.xpath.Expr select)
-    throws XPathException
+    throws XPathException, JspException
   {
-    Env env = XPath.createEnv();
-    env.setVarEnv(((PageContextImpl) pageContext).getVarEnv());
+    try {
+      Env env = XPath.createEnv();
+      env.setVarEnv(((PageContextImpl) pageContext).getVarEnv());
       
-    Node node = pageContext.getNodeEnv();
+      Node node = pageContext.getNodeEnv();
       
-    boolean test = select.evalBoolean(node, env);
+      boolean test = select.evalBoolean(node, env);
 
-    env.free();
+      env.free();
 
-    return test;
+      return test;
+    } catch (javax.el.ELException e) {
+      throw new JspException(e);
+    }
   }
 }

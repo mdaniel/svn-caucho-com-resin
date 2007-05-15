@@ -56,7 +56,7 @@ public class JstlXmlIf extends JstlNode {
     else if (SCOPE.equals(name))
       _scope = value;
     else
-      throw error(L.l("`{0}' is an unknown attribute for <{1}>.",
+      throw error(L.l("'{0}' is an unknown attribute for <{1}>.",
                       name.getName(), getTagName()));
   }
   
@@ -67,8 +67,19 @@ public class JstlXmlIf extends JstlNode {
     throws JspParseException
   {
     if (false)
-      throw error(L.l("`{0}' is an unsupported jsp:attribute for <{1}>.",
+      throw error(L.l("'{0}' is an unsupported jsp:attribute for <{1}>.",
                       name.getName(), getTagName()));
+  }
+  
+  /**
+   * Called after all the attributes from the tag.
+   */
+  @Override
+  public void endAttributes()
+    throws JspParseException
+  {
+    if (_scope != null && ! "".equals(_scope) && _var == null)
+      throw error(L.l("x:if requires var attribute to be set if scope is set"));
   }
 
   /**
@@ -107,7 +118,7 @@ public class JstlXmlIf extends JstlNode {
     throws Exception
   {
     if (_select == null)
-      throw error(L.l("required attribute `select' missing from <{0}>",
+      throw error(L.l("required attribute 'select' missing from <{0}>",
                       getTagName()));
 
     String select = ("com.caucho.jstl.el.XmlIfTag.evalBoolean(pageContext, " +

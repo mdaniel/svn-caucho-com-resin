@@ -138,6 +138,9 @@ public class CoreSetTag extends BodyTagSupport {
     throws JspException
   {
     if (var == null) {
+      if (scope != null || scope.equals(""))
+        throw new JspException(L.l("var must not be null when scope '{0}' is set.",
+                                   scope));
     }
     else if (scope == null || scope.equals("page")) {
       if (value != null)

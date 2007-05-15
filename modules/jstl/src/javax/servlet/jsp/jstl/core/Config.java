@@ -28,12 +28,15 @@
 
 package javax.servlet.jsp.jstl.core;
 
+import java.util.logging.*;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 
 public class Config {
+  private static final Logger log = Logger.getLogger(Config.class.getName());
   /**
    * The application's configured locale.
    */
@@ -85,7 +88,14 @@ public class Config {
 
   public static Object get(HttpSession session, String name)
   {
-    return session.getAttribute(name);
+    try {
+      if (session != null)
+        return session.getAttribute(name);
+    } catch (IllegalStateException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return null;
   }
 
   public static Object get(ServletContext context, String name)
@@ -112,7 +122,12 @@ public class Config {
                          String name,
                          Object var)
   {
-    session.setAttribute(name, var);
+    try {
+      if (session != null)
+        session.setAttribute(name, var);
+    } catch (IllegalStateException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
   }
 
   public static void set(ServletContext context,
@@ -130,6 +145,14 @@ public class Config {
       return object;
 
     return pageContext.getServletContext().getInitParameter(name);
+  }
+
+  /**
+   * Returns an attribute from the page context.
+   */
+  public static void remove(PageContext pageContext, String name, int scope)
+  {
+    pageContext.removeAttribute(name, scope);
   }
 
   public static void remove(PageContext pageContext,

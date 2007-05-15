@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,6 +29,7 @@
 
 package com.caucho.jsp.java;
 
+import com.caucho.jsp.JspParseException;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -36,6 +38,18 @@ import java.io.IOException;
  * Special generator for a JSTL c:otherwise tag.
  */
 public class JstlCoreOtherwise extends JstlNode {
+  /**
+   * Called after all the attributes from the tag.
+   */
+  @Override
+  public void endAttributes()
+    throws JspParseException
+  {
+    if (! (getParent() instanceof JstlCoreChoose)) {
+      throw error(L.l("c:otherwise must be contained in a c:choose tag."));
+    }
+  }
+  
   /**
    * Generates the XML text representation for the tag validation.
    *

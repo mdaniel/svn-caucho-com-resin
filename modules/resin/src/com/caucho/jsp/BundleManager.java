@@ -166,6 +166,9 @@ public class BundleManager {
    */
   public LocalizationContext getBundle(String name)
   {
+    if (name == null)
+      return null;
+    
     LocalizationContext bundle = _bundleCache.get(name);
     if (bundle != null)
       return bundle != NULL_BUNDLE ? bundle : null;

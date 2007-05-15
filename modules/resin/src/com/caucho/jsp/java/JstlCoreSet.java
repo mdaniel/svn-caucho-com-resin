@@ -97,10 +97,10 @@ public class JstlCoreSet extends JstlNode {
    */
   public boolean hasScripting()
   {
-    return (super.hasScripting() ||
-	    hasScripting(_value) || hasScripting(_valueAttr) ||
-	    hasScripting(_target) || hasScripting(_targetAttr) ||
-	    hasScripting(_property) || hasScripting(_propertyAttr));
+    return (super.hasScripting()
+            || hasScripting(_value) || hasScripting(_valueAttr)
+            || hasScripting(_target) || hasScripting(_targetAttr)
+            || hasScripting(_property) || hasScripting(_propertyAttr));
   }
 
   /**

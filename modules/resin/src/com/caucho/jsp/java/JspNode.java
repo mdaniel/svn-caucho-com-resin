@@ -215,6 +215,14 @@ public abstract class JspNode {
   }
 
   /**
+   * True if this is a jstl node.
+   */
+  public boolean isJstl()
+  {
+    return false;
+  }
+
+  /**
    * Returns the static text.
    */
   public String getStaticText()
@@ -772,7 +780,8 @@ public abstract class JspNode {
     String convValue = generateParameterValue(type,
 					      strValue,
 					      allowRtexpr,
-					      attrInfo);
+					      attrInfo,
+                                              _parseState.isELIgnored());
 
     PropertyEditor editor;
     
@@ -870,7 +879,8 @@ public abstract class JspNode {
     throws Exception
   {
     if (value instanceof String)
-      return generateParameterValue(type, (String) value, true, null);
+      return generateParameterValue(type, (String) value,
+                                    true, null, _parseState.isELIgnored());
     else {
       JspAttribute attr = (JspAttribute) value;
       
@@ -991,24 +1001,37 @@ public abstract class JspNode {
     }
   }
 
+  String generateJstlValue(Class type, String value)
+    throws Exception
+  {
+    return generateParameterValue(type, value, true, null, false);
+  }
+
   String generateValue(Class type, String value)
     throws Exception
   {
-    return generateParameterValue(type, value, true, null);
+    return generateParameterValue(type, value, true, null,
+                                  _parseState.isELIgnored());
   }
 
   String generateParameterValue(Class type, String value)
     throws Exception
   {
-    return generateParameterValue(type, value, true, null);
+    return generateParameterValue(type, value, true, null,
+                                  _parseState.isELIgnored());
   }
 
   String generateParameterValue(Class type,
 				String value,
 				boolean rtexpr,
-				TagAttributeInfo attrInfo)
+				TagAttributeInfo attrInfo,
+                                boolean isELIgnored)
     throws Exception
   {
+    // jsp/1c2m
+    if (isJstl())
+      isELIgnored = false;
+    
     boolean isEmpty = value == null || value.equals("");
     if (isEmpty)
       value = "0";
@@ -1064,17 +1087,22 @@ public abstract class JspNode {
       else if (rtexpr && hasRuntimeAttribute(value)) {
         return getRuntimeAttribute(value);
       }
-      else if (rtexpr && hasELAttribute(value)) { // jsp/0138 vs jsp/18s0
+      else if (rtexpr && hasELAttribute(value, false)) {
+        // jsp/0138, jsp/18s0, jsp/1ce5
 	return generateELValue(type, value);
       }
-      else if (! rtexpr && hasELAttribute(value)) {
+      else if (! rtexpr && hasELAttribute(value, isELIgnored)) {
 	// JSP.2.3.6 says this is an error
 	// jsp/184v vs jsp/18cr
 	throw error(L.l("EL expression '{0}' is only allowed for attributes with rtexprvalue='true'.",
 			value));
       }
+      else if (rtexpr && hasDeferredAttribute(value, false)) {
+        // jsp/1c2m, jsp/1ce8
+        return generateELValue(type, value);
+      }
       else if (! rtexpr
-	       && hasDeferredAttribute(value)
+	       && hasDeferredAttribute(value, isELIgnored)
 	       && ! _gen.getParseState().isDeferredSyntaxAllowedAsLiteral()) {
 	throw error(L.l("Deferred syntax '{0}' is not allowed as a literal.",
 			value));
@@ -1198,7 +1226,7 @@ public abstract class JspNode {
 	}
 	else if (Object.class.isAssignableFrom(type))
 	  return "null";
-      
+
 	if (boolean.class.equals(type))
 	  return expr.evalBoolean(null) ? "true" : "false";
 	else if (Boolean.class.equals(type))
@@ -1432,6 +1460,22 @@ public abstract class JspNode {
   public boolean hasDeferredAttribute(String value)
   {
     return ! _parseState.isELIgnored() && value.indexOf("#{") >= 0;
+  }
+  
+  /**
+   * Returns true if the value is a runtime attribute.
+   */
+  public boolean hasELAttribute(String value, boolean isELIgnored)
+  {
+    return ! isELIgnored && value.indexOf("${") >= 0;
+  }
+  
+  /**
+   * Returns true if the value is a runtime attribute.
+   */
+  public boolean hasDeferredAttribute(String value, boolean isELIgnored)
+  {
+    return ! isELIgnored && value.indexOf("#{") >= 0;
   }
 
   /**

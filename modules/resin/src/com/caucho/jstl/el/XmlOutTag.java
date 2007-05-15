@@ -94,18 +94,22 @@ public class XmlOutTag extends TagSupport {
 			      boolean doEscape)
     throws JspException, XPathException, IOException
   {
-    Env env = XPath.createEnv();
-    env.setVarEnv(pageContext.getVarEnv());
+    try {
+      Env env = XPath.createEnv();
+      env.setVarEnv(pageContext.getVarEnv());
       
-    Node node = pageContext.getNodeEnv();
+      Node node = pageContext.getNodeEnv();
 
-    String value = select.evalString(node, env);
+      String value = select.evalString(node, env);
 
-    env.free();
+      env.free();
 
-    if (doEscape)
-      com.caucho.el.Expr.toStreamEscaped(out, value);
-    else
-      out.print(value);      
+      if (doEscape)
+        com.caucho.el.Expr.toStreamEscaped(out, value);
+      else
+        out.print(value);
+    } catch (javax.el.ELException e) {
+      throw new JspException(e);
+    }
   }
 }

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -83,8 +84,8 @@ public class JstlCoreIf extends JstlNode {
    */
   public boolean hasScripting()
   {
-    return (super.hasScripting() ||
-	    hasScripting(_test) || hasScripting(_testAttr));
+    return (super.hasScripting()
+            || hasScripting(_test) || hasScripting(_testAttr));
   }
 
   /**
@@ -122,7 +123,7 @@ public class JstlCoreIf extends JstlNode {
     if (_testAttr != null)
       ifExpr = _testAttr.generateValue(boolean.class);
     else
-      ifExpr = generateValue(boolean.class, _test);
+      ifExpr = generateJstlValue(boolean.class, _test);
 
     out.println("if (" + ifExpr + ") {");
     out.pushDepth();

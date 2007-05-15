@@ -12,6 +12,13 @@
 
 <s2 title="3.1.1 - May 7, 2007">
 <ul>
+<li>server: thread-idle-min error message was incorrect (#1724, rep by copart)</li>
+<li>jsp: tag file and JSP EL function issues (#1730, rep by webvir)</li>
+</ul>
+</s2>
+
+<s2 title="3.1.1 - May 7, 2007">
+<ul>
 <li>FileServlet: windows security validation for bad URLs</li>
 <li>DB pool: add close-dangling-connections (#1707)</li>
 <li>Cache: add rewrite-vary-as-private for IE caching bug (#1581, rep by sergek)</li>

@@ -65,6 +65,18 @@ public class JstlXmlWhen extends JstlNode {
       throw error(L.l("`{0}' is an unknown jsp:attribute for <{1}>.",
                       name.getName(), getTagName()));
   }
+  
+  /**
+   * Called after all the attributes from the tag.
+   */
+  @Override
+  public void endAttributes()
+    throws JspParseException
+  {
+    if (! (getParent() instanceof JstlCoreChoose)) {
+      throw error(L.l("x:when must be contained in a x:choose tag."));
+    }
+  }
 
   /**
    * Generates the XML text representation for the tag validation.

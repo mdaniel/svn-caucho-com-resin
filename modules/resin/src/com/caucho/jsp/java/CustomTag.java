@@ -394,7 +394,9 @@ public class CustomTag extends GenericTag
       
       TagAttributeInfo attrInfo = _tag.getAttributeInfo(name.getLocalName());
 
-      generateSetAttribute(out, var, name, value, false, false, attrInfo);
+      generateSetAttribute(out, var, name, value,
+                           attrInfo.canBeRequestTime(),
+                           false, attrInfo);
     }
   }
 

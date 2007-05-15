@@ -1204,7 +1204,7 @@ public class XmlParser extends AbstractParser {
       String path = systemId;
       if (path.startsWith("file:"))
         path = path.substring(5);
-      if (_searchPath.lookup(path).isFile()) {
+      if (_searchPath != null && _searchPath.lookup(path).isFile()) {
         _owner.addDepend(_searchPath.lookup(path));
         is = _searchPath.lookup(path).openRead();
       }

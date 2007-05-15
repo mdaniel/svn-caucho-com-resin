@@ -130,7 +130,15 @@ public class CoreUrlTag extends TagSupport implements NameValueTag {
                                         String url, String context)
     throws JspException
   {
-    CharBuffer value = CharBuffer.allocate();
+    if (context != null && ! context.startsWith("/"))
+      throw new JspException(L.l("URL context '{0}' must start with '/'",
+                                 context));
+    
+    if (context != null && (url == null || ! url.startsWith("/")))
+      throw new JspException(L.l("URL '{0}' must start with '/'",
+                                 context));
+    
+    CharBuffer value = new CharBuffer();
 
     if (url == null)
       url = "";

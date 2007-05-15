@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -119,7 +120,11 @@ public class FmtParseDateTag extends BodyTagSupport {
    */
   public void setTimeZone(Object zone)
   {
+    if ("".equals(zone))
+      zone = null;
+    
     _timeZone = zone;
+
   }
 
   /**
@@ -163,19 +168,34 @@ public class FmtParseDateTag extends BodyTagSupport {
       
       JspWriter out = pc.getOut();
 
-      String string;
+      String string = null;
 
       if (_value != null)
         string = _value;
-      else
-        string = bodyContent.getString().trim();
+      else if (bodyContent != null) {
+        string = bodyContent.getString();
+        
+        if (string != null)
+          string = string.trim();
+      }
       
       DateFormat format = getFormat();
 
-      Object value = format.parse(string);
+      Object value;
 
-      if (_var == null)
-        out.print(value);
+      if (string == null || "".equals(string))
+        value = null;
+      else
+        value = format.parse(string);
+
+      if (_var == null) {
+        if (_scope != null)
+          throw new JspException(L.l("fmt:parseDate var must not be null when scope '{0}' is set.",
+                                     _scope));
+
+        if (value != null)
+          out.print(value);
+      }
       else
         CoreSetTag.setValue(pageContext, _var, _scope, value);
     } catch (IOException e) {

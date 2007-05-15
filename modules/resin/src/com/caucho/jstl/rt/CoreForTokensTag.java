@@ -119,8 +119,14 @@ public class CoreForTokensTag extends LoopTagSupport {
 
     TokenIterator(String value, String delims)
     {
+      if (value == null)
+        value = "";
       _value = value;
-      _delims = delims.toCharArray();
+      
+      if (delims != null)
+        _delims = delims.toCharArray();
+      else
+        _delims = new char[0];
       _length = value.length();
     }
     

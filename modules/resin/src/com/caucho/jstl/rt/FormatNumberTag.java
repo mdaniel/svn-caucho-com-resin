@@ -47,7 +47,7 @@ import java.util.Locale;
 public class FormatNumberTag extends BodyTagSupport {
   private static L10N L = new L10N(FormatNumberTag.class);
   
-  private double _value;
+  private Double _value;
   private boolean _hasValue;
   
   private String _type;
@@ -72,9 +72,25 @@ public class FormatNumberTag extends BodyTagSupport {
    *
    * @param value the value.
    */
-  public void setValue(double value)
+  public void setValue(Object value)
+    throws JspException
   {
-    _value = value;
+    try {
+      if (value == null || "".equals(value)) {
+      }
+      else if (value instanceof Number)
+        _value = ((Number) value).doubleValue();
+      else if (value instanceof String) {
+        _value = Double.valueOf((String) value);
+      }
+      else {
+        throw new NumberFormatException(L.l("Expected number at '{0}'",
+                                            value));
+      }
+    } catch (NumberFormatException e) {
+      throw new JspException(new IllegalArgumentException(e.getMessage()));
+    }
+    
     _hasValue = true;
   }
 
@@ -201,7 +217,7 @@ public class FormatNumberTag extends BodyTagSupport {
 
       NumberFormat format = getFormat();
 
-      double rawValue;
+      Double rawValue = null;
       BodyContentImpl body = (BodyContentImpl) getBodyContent();
 
       if (_hasValue)
@@ -211,24 +227,28 @@ public class FormatNumberTag extends BodyTagSupport {
 
 	if (! value.equals(""))
 	  rawValue = Double.parseDouble(value);
-	else
-	  rawValue = 0;
       }
-      else
-        rawValue = 0;
 
-      if (Double.isNaN(rawValue))
-        rawValue = 0;
+      if (rawValue != null && Double.isNaN(rawValue))
+        rawValue = 0.0;
 
       String value;
 
-      if (format != null)
+      if (rawValue == null)
+        value = null;
+      else if (format != null)
         value = format.format(rawValue);
       else
         value = String.valueOf(rawValue);
 
-      if (_var == null)
-        out.print(value);
+      if (_var == null) {
+        if (_scope != null)
+          throw new JspException(L.l("fmt:formatDate var must not be null when scope '{0}' is set.",
+                                     _scope));
+
+        if (value != null)
+          out.print(value);
+      }
       else
         CoreSetTag.setValue(pageContext, _var, _scope, value);
     } catch (IOException e) {
@@ -248,7 +268,8 @@ public class FormatNumberTag extends BodyTagSupport {
 
     String type = _type;
 
-    if (type == null || type.equals("") || type.equals("number")) {
+    if (type == null || type.equals("") || type.equals("number")
+        || _pattern != null && ! "".equals(_pattern)) {
       if (locale != null)
         format = NumberFormat.getInstance(locale);
       else
@@ -271,8 +292,8 @@ public class FormatNumberTag extends BodyTagSupport {
       else
         format = NumberFormat.getCurrencyInstance();
 
-      if ((_currencyCode != null || _currencySymbol != null) &&
-          format instanceof DecimalFormat) {
+      if ((_currencyCode != null || _currencySymbol != null)
+          && format instanceof DecimalFormat) {
         DecimalFormat dFormat = (DecimalFormat) format;
         DecimalFormatSymbols dSymbols;
 

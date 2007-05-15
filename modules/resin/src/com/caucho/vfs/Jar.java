@@ -576,7 +576,10 @@ public class Jar implements CacheListener {
 
     closeJarFile();
 
-    return cache.get(path);
+    if (cache != null && path != null)
+      return cache.get(path);
+    else
+      return null;
   }
 
   /**
