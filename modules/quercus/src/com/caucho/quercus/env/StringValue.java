@@ -553,7 +553,7 @@ abstract public class StringValue extends Value implements CharSequence {
     int len = length();
 
     if (index < 0 || len <= index)
-      return StringValue.EMPTY;
+      return UnsetStringValue.UNSET;
     else {
       return StringValue.create(charAt((int) index));
     }

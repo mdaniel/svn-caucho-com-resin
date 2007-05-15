@@ -515,7 +515,7 @@ public class StringBuilderValue extends UnicodeValue
     int len = _length;
 
     if (index < 0 || len <= index)
-      return StringValue.EMPTY;
+      return UnsetStringValue.UNSET;
     else
       return StringValue.create(_buffer[(int) index]);
   }

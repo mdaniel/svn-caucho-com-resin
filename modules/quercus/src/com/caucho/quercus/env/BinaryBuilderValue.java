@@ -400,7 +400,7 @@ public class BinaryBuilderValue extends BinaryValue
     int len = _length;
 
     if (index < 0 || len <= index)
-      return StringValue.EMPTY;
+      return UnsetStringValue.UNSET;
     else
       return StringValue.create((char) (_buffer[(int) index] & 0xff));
   }
