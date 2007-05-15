@@ -67,12 +67,7 @@ public class ClassConstExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    return eval(env, env.getClass(_className));
-  }
-
-  public Value eval(Env env, QuercusClass ownerClass)
-  {
-    return ownerClass.getConstant(env, _name);
+    return env.getClass(_className).getConstant(env, _name);
   }
   
   public String toString()

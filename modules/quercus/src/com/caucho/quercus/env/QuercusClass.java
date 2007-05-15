@@ -331,7 +331,7 @@ public class QuercusClass {
 
         //php/096f
         if (expr instanceof ClassConstExpr)
-          val = ((ClassConstExpr)expr).eval(env, this);
+          val = ((ClassConstExpr)expr).eval(env);
         else
           val = expr.eval(env);
 
