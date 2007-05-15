@@ -72,9 +72,6 @@ public class Post {
         else if (contentType.startsWith("application/x-www-form-urlencoded")) {
           is = request.getInputStream();
           
-          if (is == null)
-            return;
-          
           StringBuilder value = new StringBuilder();
           int ch;
 
@@ -97,10 +94,12 @@ public class Post {
 
           rs.close();
         }
+        
+        if (post.getSize() == 0) {
+          // needs to be last or else this function will consume the inputstream
+          putRequestMap(env, post, files, request, addSlashesToValues);
+        }
       }
-
-      // needs to be last or else this function will consume the inputstream
-      putRequestMap(env, post, files, request, addSlashesToValues);
       
     } catch (IOException e) {
       e.printStackTrace();
@@ -467,7 +466,7 @@ public class Post {
 
     Collections.sort(keys);
 
-    for (String key : keys) {
+    for (String key : keys) {   
       String []value = request.getParameterValues(key);
       
       Post.addFormValue(post, key, value, addSlashesToValues);
