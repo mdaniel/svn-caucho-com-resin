@@ -43,7 +43,7 @@ import com.caucho.util.Alarm;
  * Implements an abstract queue.
  */
 abstract public class AbstractQueue
-  implements javax.jms.Destination
+  implements javax.jms.Queue
 {
   private static final Logger log
     = Logger.getLogger(AbstractQueue.class.getName());
@@ -67,6 +67,11 @@ abstract public class AbstractQueue
   {
     return getName();
   }
+  
+  public String getTopicName()
+  {
+    return getName();
+  }
 
   public TextMessage createTextMessage(String msg)
     throws JMSException
@@ -80,6 +85,7 @@ abstract public class AbstractQueue
   }
 
   public void send(Message msg, long timeout)
+    throws JMSException
   {
     long expires = Alarm.getCurrentTime() + timeout;
     
@@ -104,7 +110,7 @@ abstract public class AbstractQueue
    * Polls the next message from the store.  If no message is available,
    * wait for the timeout.
    */
-  public Message receive(long timeout)
+  public MessageImpl receive(long timeout)
   {
     return null;
   }

@@ -105,9 +105,9 @@ public class SqlUpdateTag extends BodyTagSupport implements SQLExecutionTag {
     boolean isTransaction = false;
     PageContextImpl pageContext = (PageContextImpl) this.pageContext;
     
-    try {
-      String sql;
+    String sql = null;
 
+    try {
       if (_sql != null)
         sql = _sql;
       else
@@ -118,14 +118,7 @@ public class SqlUpdateTag extends BodyTagSupport implements SQLExecutionTag {
         isTransaction = true;
 
       if (! isTransaction) {
-        DataSource ds;
-
-        if (_dataSource != null)
-          ds = SqlQueryTag.getDataSource(pageContext, _dataSource);
-        else
-          ds = SqlQueryTag.getDataSource(pageContext, null);
-
-        conn = ds.getConnection();
+        conn = SqlQueryTag.getConnection(pageContext, _dataSource);
       }
 
       Object value = null;
@@ -134,8 +127,16 @@ public class SqlUpdateTag extends BodyTagSupport implements SQLExecutionTag {
 
       ArrayList params = _params;
       _params = null;
-      Statement stmt;
+      
+      int paramCount = countParameters(sql);
 
+      if (params == null && paramCount != 0
+          || params != null && paramCount != params.size()) {
+        throw new JspException(L.l("sql:param does not match expected parameters\nin '{0}'",
+                                   sql));
+      }
+      
+      Statement stmt;
       int rows = 0;
 
       if (params == null) {
@@ -161,8 +162,14 @@ public class SqlUpdateTag extends BodyTagSupport implements SQLExecutionTag {
       stmt.close();
 
       CoreSetTag.setValue(pageContext, _var, _scope, new Integer(rows));
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (JspException e) {
+      throw e;
     } catch (Exception e) {
-      throw new JspException(e);
+      throw new JspException(L.l("sql:update '{0}' failed:\n{1}",
+                                 sql, e.getMessage()),
+                             e);
     } finally {
       if (! isTransaction && conn != null) {
         try {
@@ -174,5 +181,31 @@ public class SqlUpdateTag extends BodyTagSupport implements SQLExecutionTag {
     }
 
     return EVAL_PAGE;
+  }
+
+  private int countParameters(String sql)
+  {
+    if (sql == null)
+      return 0;
+    
+    int len = sql.length();
+    boolean inQuote = false;
+    int count = 0;
+
+    for (int i = 0; i < len; i++) {
+      char ch = sql.charAt(i);
+
+      if (ch == '\'') {
+        inQuote = ! inQuote;
+      }
+      else if (ch == '\\') {
+        i++;
+      }
+      else if (ch == '?') {
+        count++;
+      }
+    }
+
+    return count;
   }
 }

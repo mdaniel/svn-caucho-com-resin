@@ -29,11 +29,9 @@
 
 package com.caucho.jms2.connection;
 
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.QueueReceiver;
-import javax.jms.QueueSender;
-import javax.jms.QueueSession;
+import javax.jms.*;
+
+import com.caucho.jms2.queue.*;
 
 /**
  * A sample queue session.  Lets the client create queues, browsers, etc.
@@ -72,7 +70,23 @@ public class QueueSessionImpl extends SessionImpl implements QueueSession
   public QueueReceiver createReceiver(Queue queue, String messageSelector)
     throws JMSException
   {
-    return (QueueReceiver) createConsumer(queue, messageSelector);
+    checkOpen();
+
+    if (queue == null)
+      throw new InvalidDestinationException(L.l("queue is null.  Destination may not be null for Session.createReceiver"));
+    
+    if (! (queue instanceof AbstractQueue))
+      throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
+						queue));
+
+    AbstractQueue dest = (AbstractQueue) queue;
+
+    QueueReceiver receiver
+      = new QueueReceiverImpl(this, dest, messageSelector);
+    
+    // addConsumer((MessageConsumerImpl) consumer);
+
+    return receiver;
   }
 
   /**
@@ -85,9 +99,16 @@ public class QueueSessionImpl extends SessionImpl implements QueueSession
   {
     checkOpen();
 
-    if (queue == null)
+    if (queue == null) {
       return new QueueSenderImpl(this, null);
+    }
     
-    return (QueueSender) createProducer(queue);
+    if (! (queue instanceof AbstractQueue))
+      throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS destination for Session.createProducer.",
+						queue));
+
+    AbstractQueue dest = (AbstractQueue) queue;
+
+    return new QueueSenderImpl(this, dest);
   }
 }

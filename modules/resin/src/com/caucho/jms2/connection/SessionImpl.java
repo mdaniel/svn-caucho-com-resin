@@ -355,16 +355,12 @@ public class SessionImpl implements Session, ThreadTask {
 
     AbstractQueue dest = (AbstractQueue) destination;
 
-    /*
-    MessageConsumer consumer;
-    consumer = dest.createConsumer(this, messageSelector, noLocal);
+    MessageConsumer consumer
+      = new MessageConsumerImpl(this, dest, messageSelector, noLocal);
     
-    addConsumer((MessageConsumerImpl) consumer);
+    // addConsumer((MessageConsumerImpl) consumer);
 
     return consumer;
-    */
-    
-    throw new UnsupportedOperationException();
   }
 
   /**
@@ -387,8 +383,7 @@ public class SessionImpl implements Session, ThreadTask {
 
     AbstractQueue dest = (AbstractQueue) destination;
 
-    //return dest.createProducer(this);
-    throw new UnsupportedOperationException();
+    return new MessageProducerImpl(this, dest);
   }
 
   /**
@@ -740,7 +735,7 @@ public class SessionImpl implements Session, ThreadTask {
    * Adds a message to the session message queue.
    */
   public void send(AbstractQueue queue,
-                   MessageImpl message,
+                   Message message,
                    int deliveryMode,
                    int priority,
                    long expiration)
@@ -757,10 +752,6 @@ public class SessionImpl implements Session, ThreadTask {
     message.setJMSExpiration(expiration);
     message.setJMSPriority(priority);
     
-    MessageImpl destMessage = ((MessageImpl) message).copy();
-    destMessage.setSession(this);
-    destMessage.setReceive();
-
     if (_isTransacted) {
       if (_transactedMessages == null)
 	_transactedMessages = new ArrayList<TransactedMessage>();
@@ -770,7 +761,7 @@ public class SessionImpl implements Session, ThreadTask {
       _transactedMessages.add(transMsg);
     }
     else
-      queue.send(destMessage, 0);
+      queue.send(message, 0);
   }
 
   /**
@@ -934,9 +925,9 @@ public class SessionImpl implements Session, ThreadTask {
 
   static class TransactedMessage {
     private AbstractQueue _queue;
-    private MessageImpl _message;
+    private Message _message;
 
-    TransactedMessage(AbstractQueue queue, MessageImpl message)
+    TransactedMessage(AbstractQueue queue, Message message)
     {
       _queue = queue;
       _message = message;

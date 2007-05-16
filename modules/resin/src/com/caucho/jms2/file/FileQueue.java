@@ -47,7 +47,7 @@ import com.caucho.vfs.*;
 /**
  * Implements a file queue.
  */
-public class FileQueue extends AbstractQueue
+public class FileQueue extends AbstractQueue implements Topic
 {
   private static final L10N L = new L10N(FileQueue.class);
   private static final Logger log
@@ -139,7 +139,7 @@ public class FileQueue extends AbstractQueue
    * wait for the timeout.
    */
   @Override
-  public Message receive(long timeout)
+  public MessageImpl receive(long timeout)
   {
     synchronized (_queueLock) {
       for (FileQueueEntry entry = _head;
@@ -148,7 +148,7 @@ public class FileQueue extends AbstractQueue
 	if (! entry.isRead()) {
 	  entry.setRead(true);
 
-	  Message msg = entry.getMessage();
+	  MessageImpl msg = entry.getMessage();
 
 	  if (msg == null)
 	    msg = _store.readMessage(entry.getId());

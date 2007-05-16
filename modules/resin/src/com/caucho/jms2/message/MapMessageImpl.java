@@ -42,6 +42,30 @@ import java.util.HashMap;
 public class MapMessageImpl extends MessageImpl implements MapMessage  {
   private HashMap<String,Object> _map = new HashMap<String,Object>();
 
+  MapMessageImpl()
+  {
+  }
+
+  MapMessageImpl(MapMessage map)
+    throws JMSException
+  {
+    super(map);
+    
+    Enumeration e = map.getMapNames();
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+
+      _map.put(name, map.getObject(name));
+    }
+  }
+
+  MapMessageImpl(MapMessageImpl map)
+  {
+    super(map);
+
+    _map.putAll(map._map);
+  }
+
   /**
    * Returns true if the object exists.
    */
@@ -314,11 +338,7 @@ public class MapMessageImpl extends MessageImpl implements MapMessage  {
 
   public MessageImpl copy()
   {
-    MapMessageImpl msg = new MapMessageImpl();
-
-    copy(msg);
-
-    return msg;
+    return new MapMessageImpl(this);
   }
 
   protected void copy(MapMessageImpl newMsg)

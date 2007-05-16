@@ -89,9 +89,16 @@ public class MessageFactory
    * Copy the message.
    */
   public MessageImpl copy(Message msg)
+    throws JMSException
   {
     if (msg instanceof MessageImpl)
       return ((MessageImpl) msg).copy();
+    else if (msg instanceof TextMessage) {
+      return new TextMessageImpl((TextMessage) msg);
+    }
+    else if (msg instanceof MapMessage) {
+      return new MapMessageImpl((MapMessage) msg);
+    }
     else
       throw new UnsupportedOperationException();
   }

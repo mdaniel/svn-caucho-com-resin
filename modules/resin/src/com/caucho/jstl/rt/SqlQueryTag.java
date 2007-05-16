@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -41,11 +42,8 @@ import javax.servlet.jsp.jstl.sql.Result;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
+import java.sql.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,7 +55,10 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
   private String _var;
   private String _scope;
   private Object _dataSource;
+  
   private int _maxRows = -1;
+  private boolean _hasMaxRows;
+  
   private int _startRow = -1;
 
   private ArrayList<Object> _params;
@@ -98,8 +99,10 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
    * Sets the maximum number of rows.
    */
   public void setMaxRows(int maxRows)
+    throws JspException
   {
     _maxRows = maxRows;
+    _hasMaxRows = true;
   }
 
   /**
@@ -125,9 +128,10 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
   {
     Connection conn = null;
     boolean isTransaction = false;
-    try {
-      String sql;
+    
+    String sql = null;
 
+    try {
       if (_sql != null)
         sql = _sql;
       else
@@ -138,11 +142,7 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
         isTransaction = true;
 
       if (! isTransaction) {
-        DataSource ds;
-
-        ds = getDataSource(pageContext, _dataSource);
-
-        conn = ds.getConnection();
+        conn = getConnection(pageContext, _dataSource);
       }
 
       Object value = null;
@@ -152,6 +152,32 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
       ArrayList params = _params;
       _params = null;
       Statement stmt;
+      
+      int paramCount = countParameters(sql);
+
+      if (params == null && paramCount != 0
+          || params != null && paramCount != params.size()) {
+        throw new JspException(L.l("sql:param does not match expected parameters\nin '{0}'",
+                                   sql));
+      }
+
+      int maxRows = -1;
+
+      if (_hasMaxRows)
+        maxRows = _maxRows;
+      else {
+        Object maxRowsValue
+          = Config.find(pageContext, Config.SQL_MAX_ROWS);
+
+        if (maxRowsValue instanceof Number)
+          maxRows = ((Number) maxRowsValue).intValue();
+        else if (maxRowsValue != null)
+          maxRows = Integer.valueOf(String.valueOf(maxRowsValue));
+      }
+        
+      if (maxRows < -1)
+        throw new JspException(L.l("sql:query maxRows '{0}' must not be less than -1.",
+                                   maxRows));
 
       if (params == null) {
         stmt = conn.createStatement();
@@ -176,14 +202,20 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
       }
 
       Result result;
-      result = new ResultImpl(rs, _maxRows);
+      result = new ResultImpl(rs, maxRows);
 
       rs.close();
       stmt.close();
 
       CoreSetTag.setValue(pageContext, _var, _scope, result);
+    } catch (JspException e) {
+      throw e;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
-      throw new JspException(e);
+      throw new JspException(L.l("sql:query '{0}' failed:\n{1}",
+                                 sql, e.getMessage()),
+                             e);
     } finally {
       if (! isTransaction && conn != null) {
         try {
@@ -197,6 +229,32 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
     return EVAL_PAGE;
   }
 
+  private int countParameters(String sql)
+  {
+    if (sql == null)
+      return 0;
+    
+    int len = sql.length();
+    boolean inQuote = false;
+    int count = 0;
+
+    for (int i = 0; i < len; i++) {
+      char ch = sql.charAt(i);
+
+      if (ch == '\'') {
+        inQuote = ! inQuote;
+      }
+      else if (ch == '\\') {
+        i++;
+      }
+      else if (ch == '?') {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
   public static DataSource getDataSource(PageContext pageContext,
                                          Object ds)
     throws JspException
@@ -207,7 +265,7 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
     if (ds instanceof DataSource)
       return (DataSource) ds;
     else if (! (ds instanceof String))
-      throw new JspException(L.l("`{0}' is an invalid DataSource.", ds));
+      throw new JspException(L.l("'{0}' is an invalid DataSource.", ds));
 
     String key = (String) ds;
 
@@ -226,6 +284,82 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
     } catch (NamingException e) {
     }
     
-    throw new JspException(L.l("`{0}' is an invalid DataSource.", ds));
+    throw new JspException(L.l("'{0}' is an invalid DataSource.", ds));
+  }
+
+  public static Connection getConnection(PageContext pageContext,
+                                         Object ds)
+    throws JspException
+  {
+    try {
+      if (ds == null)
+        ds = Config.find(pageContext, Config.SQL_DATA_SOURCE);
+
+      if (ds instanceof DataSource)
+        return ((DataSource) ds).getConnection();
+      else if (! (ds instanceof String))
+        throw new JspException(L.l("'{0}' is an invalid DataSource.", ds));
+
+      String key = (String) ds;
+
+      try {
+        String jndiName;
+      
+        if (key.startsWith("java:comp/"))
+          jndiName = key;
+        else
+          jndiName = "java:comp/env/" + key;
+
+        Object value = new InitialContext().lookup(jndiName);
+
+        if (value instanceof DataSource)
+          return ((DataSource) value).getConnection();
+      } catch (NamingException e) {
+      }
+
+      return getDriverConnection(key);
+    } catch (SQLException e) {
+      throw new JspException(L.l("'{0}' is an invalid DataSource.\n{1}",
+                                 ds, e.getMessage()),
+                             e);
+    }
+  }
+
+  private static Connection getDriverConnection(String key)
+    throws SQLException
+  {
+    String []split = key.split(",");
+    String url = split[0];
+    String user = split.length >= 3 ? split[2] : null;
+    String password = split.length >= 4 ? split[3] : null;
+
+    try {
+      String className = null;
+
+      if (split.length >= 2)
+        className = split[1];
+
+      if (className != null) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Class cl = Class.forName(className, false, loader);
+        Driver driver = (Driver) cl.newInstance();
+
+        Properties info = new Properties();
+
+        if (user != null)
+          info.put("user", user);
+        if (password != null)
+          info.put("password", password);
+
+        return driver.connect(url, info);
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    if (user != null && password != null)
+      return DriverManager.getConnection(url, user, password);
+    else
+      return DriverManager.getConnection(url);
   }
 }

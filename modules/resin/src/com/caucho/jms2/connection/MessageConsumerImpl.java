@@ -67,10 +67,10 @@ public class MessageConsumerImpl
   private volatile boolean _isClosed;
   private Alarm _pollAlarm;
 
-  protected MessageConsumerImpl(SessionImpl session,
-                                String messageSelector,
-				AbstractQueue queue,
-                                boolean noLocal)
+  MessageConsumerImpl(SessionImpl session,
+                      AbstractQueue queue,
+                      String messageSelector,
+                      boolean noLocal)
     throws JMSException
   {
     _session = session;
@@ -282,7 +282,7 @@ public class MessageConsumerImpl
   protected MessageImpl receiveImpl()
     throws JMSException
   {
-    throw new UnsupportedOperationException();
+    return _queue.receive(0);
   }
 
   /**
@@ -372,6 +372,11 @@ public class MessageConsumerImpl
           _pollAlarm.queue(_pollInterval);
       }
     }
+  }
+
+  public String toString()
+  {
+    return "MessageConsumerImpl[" + _queue + "]";
   }
 }
 

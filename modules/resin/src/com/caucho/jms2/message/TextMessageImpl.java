@@ -43,6 +43,25 @@ import com.caucho.hessian.io.*;
 public class TextMessageImpl extends MessageImpl implements TextMessage  {
   private String _text;
 
+  public TextMessageImpl()
+  {
+  }
+
+  public TextMessageImpl(TextMessage msg)
+    throws JMSException
+  {
+    super(msg);
+
+    _text = msg.getText();
+  }
+
+  public TextMessageImpl(TextMessageImpl msg)
+  {
+    super(msg);
+
+    _text = msg._text;
+  }
+
   /**
    * Returns the message text.
    */
@@ -76,11 +95,7 @@ public class TextMessageImpl extends MessageImpl implements TextMessage  {
 
   public MessageImpl copy()
   {
-    TextMessageImpl msg = new TextMessageImpl();
-
-    copy(msg);
-
-    return msg;
+    return new TextMessageImpl(this);
   }
 
   protected void copy(TextMessageImpl newMsg)

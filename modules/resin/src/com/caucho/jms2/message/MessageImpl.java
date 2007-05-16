@@ -85,6 +85,43 @@ public class MessageImpl implements Message
   }
 
   /**
+   * Create a message, copying the properties
+   */
+  public MessageImpl(Message msg)
+    throws JMSException
+  {
+    Enumeration e = msg.getPropertyNames();
+
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+
+      setObjectProperty(name, msg.getObjectProperty(name));
+    }
+  }
+  
+  public MessageImpl(MessageImpl msg)
+  {
+    if (msg._properties != null) {
+      _properties = new HashMap<String,Object>(msg._properties);
+    }
+
+    _messageId = msg._messageId;
+    _correlationId = msg._correlationId;
+    
+    _timestamp = msg._timestamp;
+    _expiration = msg._expiration;
+    
+    _destination = msg._destination;
+    _replyTo = msg._replyTo;
+
+    _deliveryMode = msg._deliveryMode;
+    _isRedelivered = msg._isRedelivered;
+    
+    _messageType = msg._messageType;
+    _priority = msg._priority;
+  }
+
+  /**
    * Sets the session.
    */
   public void setSession(SessionImpl session)
@@ -558,6 +595,8 @@ public class MessageImpl implements Message
 
     if (name == null)
       throw new NullPointerException();
+    else if ("".equals(name))
+      throw new IllegalArgumentException();
     if (isReserved(name))
       throw new JMSException(L.l("'{0}' is a reserved property name.",
 				 name));

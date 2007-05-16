@@ -36,7 +36,8 @@ import javax.jms.TemporaryTopic;
 /**
  * A basic topic.
  */
-public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic {
+public class TemporaryTopicImpl extends MemoryTopic implements TemporaryTopic
+{
   private static int _idCount;
   
   TemporaryTopicImpl()

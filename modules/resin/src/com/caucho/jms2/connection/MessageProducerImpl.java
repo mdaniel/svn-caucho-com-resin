@@ -53,15 +53,15 @@ public class MessageProducerImpl implements MessageProducer {
   private long _timeToLive = 30 * 24 * 3600 * 1000L;
 
   protected SessionImpl _session;
-  protected AbstractQueue _destination;
+  protected AbstractQueue _queue;
 
-  public MessageProducerImpl(SessionImpl session, Destination destination)
+  public MessageProducerImpl(SessionImpl session, AbstractQueue queue)
   {
     assert session != null;
-    assert destination != null;
+    assert queue != null;
 
     _session = session;
-    _destination = (AbstractQueue) destination;
+    _queue = queue;
   }
 
   /**
@@ -73,7 +73,7 @@ public class MessageProducerImpl implements MessageProducer {
     if (_session == null || _session.isClosed())
       throw new javax.jms.IllegalStateException(L.l("getDestination(): message producer is closed."));
     
-    return _destination;
+    return _queue;
   }
 
   /**
@@ -206,7 +206,7 @@ public class MessageProducerImpl implements MessageProducer {
   {
     assert message != null;
 
-    send(_destination, message,
+    send(_queue, message,
 	 _deliveryMode, _priority, _timeToLive);
   }
   
@@ -226,7 +226,7 @@ public class MessageProducerImpl implements MessageProducer {
   {
     assert message != null;
 
-    send(_destination, message, deliveryMode, priority, timeToLive);
+    send(_queue, message, deliveryMode, priority, timeToLive);
   }
 
   /**
@@ -268,7 +268,7 @@ public class MessageProducerImpl implements MessageProducer {
       throw new javax.jms.IllegalStateException(L.l("getDeliveryMode(): message producer is closed."));
     
     _session.send((AbstractQueue) destination,
-		  (MessageImpl) message,
+		  message,
 		  deliveryMode, priority,
 		  calculateExpiration(timeToLive));
     // _session.checkThread();
@@ -292,6 +292,11 @@ public class MessageProducerImpl implements MessageProducer {
     throws JMSException
   {
     _session = null;
+  }
+
+  public String toString()
+  {
+    return getClass().getName() + "[" + _queue + "]";
   }
 }
 

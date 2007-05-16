@@ -394,8 +394,13 @@ public class CustomTag extends GenericTag
       
       TagAttributeInfo attrInfo = _tag.getAttributeInfo(name.getLocalName());
 
+      boolean isRequestTime = true;
+
+      if (attrInfo != null)
+        isRequestTime = attrInfo.canBeRequestTime();
+
       generateSetAttribute(out, var, name, value,
-                           attrInfo.canBeRequestTime(),
+                           isRequestTime,
                            false, attrInfo);
     }
   }

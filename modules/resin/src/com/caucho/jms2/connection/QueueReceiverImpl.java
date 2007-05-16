@@ -29,59 +29,40 @@
 
 package com.caucho.jms2.connection;
 
-import javax.jms.*;
-
+import com.caucho.jms2.message.*;
 import com.caucho.jms2.queue.*;
+import com.caucho.jms.selector.Selector;
+import com.caucho.jms.selector.SelectorParser;
+import com.caucho.log.Log;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.AlarmListener;
+
+import javax.jms.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
- * A basic queue.
+ * A basic message consumer.
  */
-public class QueueSenderImpl extends MessageProducerImpl
-  implements QueueSender
+public class QueueReceiverImpl extends MessageConsumerImpl
+  implements QueueReceiver
 {
-  public QueueSenderImpl(SessionImpl session, AbstractQueue queue)
+  private static final Logger log = Log.open(QueueReceiverImpl.class);
+  private static final L10N L = new L10N(QueueReceiverImpl.class);
+  
+  QueueReceiverImpl(SessionImpl session,
+                    AbstractQueue queue,
+                    String messageSelector)
+    throws JMSException
   {
-    super(session, queue);
+    super(session, queue, messageSelector, false);
   }
 
-  /**
-   * Returns the queue
-   */
   public Queue getQueue()
     throws JMSException
   {
     return (Queue) getDestination();
-  }
-
-  /**
-   * Sends a message to the queue
-   *
-   * @param queue the queue the message should be send to
-   * @param message the message to send
-   */
-  public void send(Queue queue, Message message)
-    throws JMSException
-  {
-    super.send(queue, message);
-  }
-  
-  /**
-   * Sends a message to the queue
-   *
-   * @param queue the queue the message should be send to
-   * @param message the message to send
-   * @param deliveryMode the delivery mode
-   * @param priority the priority
-   * @param timeToLive how long the message should live
-   */
-  public void send(Queue queue,
-                   Message message,
-                   int deliveryMode,
-                   int priority,
-                   long timeToLive)
-    throws JMSException
-  {
-    super.send(queue, message, deliveryMode, priority, timeToLive);
   }
 }
 
