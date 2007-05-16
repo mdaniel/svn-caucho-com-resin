@@ -72,6 +72,7 @@ public class MemoryQueue extends AbstractQueue
   }
 
   public void send(Message msg, long timeout)
+    throws JMSException
   {
     MessageImpl msgCopy = _messageFactory.copy(msg);
     

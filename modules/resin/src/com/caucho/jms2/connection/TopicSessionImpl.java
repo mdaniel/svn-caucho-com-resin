@@ -29,11 +29,9 @@
 
 package com.caucho.jms2.connection;
 
-import javax.jms.JMSException;
-import javax.jms.Topic;
-import javax.jms.TopicPublisher;
-import javax.jms.TopicSession;
-import javax.jms.TopicSubscriber;
+import javax.jms.*;
+
+import com.caucho.jms2.queue.*;
 
 /**
  * A sample topic session.  Lets the client create topics, browsers, etc.
@@ -57,7 +55,7 @@ public class TopicSessionImpl extends SessionImpl implements TopicSession
   {
     checkOpen();
 
-    return new TopicPublisherImpl(this, topic);
+    return new TopicPublisherImpl(this, (AbstractQueue) topic);
   }
 
   /**
