@@ -1,78 +1,72 @@
-Copyright (c) 1998-2005 Caucho Technology. All Rights Reserved.
+Copyright (c) 1998-2007 Caucho Technology. All Rights Reserved.
 
-This is the README file for Resin 3.0(tm)
+This is the README file for Resin 3.1(tm)
 =========================================
 
 The documentation included with Resin is in XTP format starting at
-resin-doc/index.xtp.
+http://localhost:8080/resin-doc/index.xtp.
 
-XTP assumes you've already got Resin working, so you should read this
-README up to part III: Getting Started.  The full documentation is also
-available online at http://www.caucho.com/resin-3.0 if you
-have trouble getting started.
+The full documentation is also available online at
+http://www.caucho.com/resin-3.1 if you have trouble getting started.
 
-Questions should go to our mailing list.  To subscribe, send a mail to 
-resin-interest-request@caucho.com with the body "subscribe".
+Questions should go to our mailing list or forums.
 
-You can also send us your bug reports to bugs@caucho.com
+  http://maillist.caucho.com  -- mailing lsits
+  http://forum.caucho.com     -- forum
+  http://bugs.caucho.com      -- bug reports
 
+I) Licensing/Support
+--------------------
 
-I) Licensing
-------------
-
-For pricing and licensing information for Resin 3.0 Professional,
+For pricing and licensing information for Resin 3.1 Professional,
 see http://www.caucho.com/sales/.  Resin Professional contains additional
 performance and reliability features beyond the Resin Open Source version.
 
-Resin 3.0 Open Source is released under the GPL.
+Resin 3.1 Open Source is released under the GPL.
+
+Resin licenses do not include technical support. However, we offer several
+technical support options to fit your support and budget needs.
+
+  http://www.caucho.com/sales  -- licenses and support
 
 II) Preconditions
 -----------------
 
-1) Resin needs a Java JDK before it can run.  Resin 3.0 works with 
-JDK 1.4 or greater.  You need the JDK, not the JRE because Resin needs the
-Java compiler.  We recommend using IBM's jikes compiler.
+1) Resin needs a Java JDK before it can run.  Resin 3.1 works with 
+JDK 1.5 or greater.
 
 Some locations for JDKs include:
 
   http://java.sun.com      -- Sun's site
-  http://www.ibm.com       -- IBM's JDKs.
 
-2) On Unix, Resin's wrapper.pl script expects Perl 5.
-
-3) On Windows, you'll need an unzip tool available at http://www.winzip.com
-
+2) On Windows, you'll need an unzip tool available at http://www.winzip.com
 
 III) Getting Started
 --------------------
 
-Start your Resin evaluation with Resin's included httpd server
-even if you plan to use Resin with another web server.
-
 The included HTTP/1.1 server makes it easy to evaluate Resin, JSP
 and servlets.  Just start it up.  The default configuration
-files can be used without modification.
+file is found in resin-3.1.x/conf/resin.conf.
 
 1) On Unix, you'll want to build the JNI libraries:
 
-   resin-3.0.x> ./configure
-   resin-3.0.x> make
-   resin-3.0.x> make install
+   resin-3.1.x> ./configure
+   resin-3.1.x> make
+   resin-3.1.x> make install
 
 2) To start the server:
 
-     unix> resin-3.0/bin/httpd.sh
+     unix> resin-3.1/bin/httpd.sh
 
    or
 
-     c:\> resin-3.0/httpd
+     C:\> resin-3.1/httpd
 
-   The server listens to port 8080.
+   The server listens to port 8080.  Port 8080 is the default specified
+   in the configuration file resin-3.1.x/conf/resin.conf
 
 3) Usually, Resin can find the JDK, but you may need to set JAVA_HOME in some
-   configurations.  You can also specify the JDK on the command line:
-
-   unix> resin-3.0.x/bin/httpd.sh -java_home /usr/java
+   configurations. 
 
    Starting Resin with -verbose is a great way to see what environment
    Resin is running.
@@ -81,39 +75,39 @@ files can be used without modification.
 
 5) Go through the documentation at http://localhost:8080/resin-doc
 
-6) For JSP, create test.jsp in resin-3.0.x/webapps/ROOT/test.jsp and browse
+6) For JSP, create test.jsp in resin-3.1.x/webapps/ROOT/test.jsp and browse
    http://localhost:8080/test.jsp.
 
-   Resin serves files from resin-3.0.x/webapps/ROOT/ in the default
+   Resin serves files from resin-3.1.x/webapps/ROOT/ in the default
    configuration.  All files with the extension '.jsp' are interpreted
    as jsp files.
 
-7) For Servlets, create
-   resin-3.0/webapps/ROOT/WEB-INF/classes/HelloServlet.java
-   and browse http://localhost:8080/servlet/HelloServlet
+7) For PHP, create test.php in resin-3.1.x/webapps/ROOT/test.php and browse
+   http://localhost:8080/test.php.
 
-   Resin automatically compiles Java classes in WEB-INF/classes.  
-   Add the servlet source in WEB-INF/classes and browse.
+8) To deploy a war file, place the file in resin-3.1.x/webapps/foo.war
+   Resin will expand the war file, and the application will be available
+   with the url http://localhost:8080/foo/
 
+   Resin supports the development of applications without requiring a war
+   file deployment.  Create a directory resin-3.1.x/webapps/bar to
+   correspond to url http://localhost:8080/bar/.  Java source files
+   placed in resin-3.1.x/webapps/bar/classes/ are automatically compiled
+   by Resin.
 
-IV) Plugin Configuration (unix)
--------------------------------
+   resin-3.1.x/webapps/bar/index.jsp
+     --> http://localhost:8080/bar/
+     --> http://localhost:8080/bar/index.jsp
 
-To install for Apache, you'll need to compile the plugin with:
+   resin-3.1.x/webapps/bar/WEB-INF/web.xml
+     -- servlet/jsp configuration file
 
-  configure --with-apache=/usr/local/apache
-  make
-  make install
+   resin-3.1.x/webapps/bar/WEB-INF/resin-web.xml
+     -- Resin specific configuration
 
-Full details are in resin-doc/install 
-(or online at http://www.caucho.com/resin-3.0/install/).
+   resin-3.1.x/webapps/bar/WEB-INF/classes/example/HelloServlet.java
+     -- java source file, automatically compiled by Resin
 
+9) An administration application is available at http://localhost:8080/resin-admin
+   Instructions are provided for setting a password.
 
-V) Plugin Configuration (windows)
----------------------------------
-
-To install Resin with IIS or Apache, use
-
-  c:\> resin-3.0.x\setup
-
-Full details are in the Installation section of the documentation.
