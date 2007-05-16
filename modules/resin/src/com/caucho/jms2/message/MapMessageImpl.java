@@ -42,7 +42,7 @@ import java.util.HashMap;
 public class MapMessageImpl extends MessageImpl implements MapMessage  {
   private HashMap<String,Object> _map = new HashMap<String,Object>();
 
-  MapMessageImpl()
+  public MapMessageImpl()
   {
   }
 

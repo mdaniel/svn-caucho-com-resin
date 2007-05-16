@@ -29,10 +29,9 @@
 
 package com.caucho.jms2.connection;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Topic;
-import javax.jms.TopicPublisher;
+import javax.jms.*;
+
+import com.caucho.jms2.queue.*;
 
 /**
  * A basic topic.
@@ -40,7 +39,7 @@ import javax.jms.TopicPublisher;
 public class TopicPublisherImpl extends MessageProducerImpl
   implements TopicPublisher
 {
-  public TopicPublisherImpl(SessionImpl session, Topic topic)
+  public TopicPublisherImpl(SessionImpl session, AbstractQueue topic)
   {
     super(session, topic);
   }
