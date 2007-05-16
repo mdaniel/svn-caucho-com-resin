@@ -1,13 +1,9 @@
 <document>
   <header>
-    <product>resin</product>
-    <title>Java Interface</title>
-    <date>December 20, 2006</date>
+    <title>Quercus PHP Java integration</title>
     
     <description>
-<p>Quercus types, Java-Quercus type mappings, working with Java Classes in
-PHP</p>
-
+<p>Working with Java classes in PHP, Quercus types, and Java to Quercus type mappings.</p>
     </description>
   </header>
 
@@ -15,20 +11,178 @@ PHP</p>
     <summary/>
     <localtoc/>
 
-<s1 title="Introduction">
-<p>Integrating PHP and Java</p>
+<s1 title="Working with Java classes in PHP">
 
+<s2 title="Importing classes">
+<p>
+Quercus supports the use of an import statement in PHP.  <code>import</code>
+makes any java class available to the PHP script with it's unqualified name.
+</p>
+
+<example>
+&lt;?php
+
+  import java.util.Date;
+
+  $a = new Date(123);
+
+  echo $a->time;
+?>
+</example>
+
+</s2>
+
+<s2 title="Instantiating objects by class name">
+<p>An alternative to <code>import</code> is to use 
+<code>new Java(...)</code> with the class name and any
+constructor arguments.</p>
+
+<example>
+&lt;?php
+
+  $a = new Java("java.util.Date", 123);
+
+  echo $a->time;
+
+?>
+</example>
+
+</s2>
+
+<s2 title="Calling methods">
+
+<p>
+PHP syntax is used for invoking methods.
+PHP property syntax can be used for invoking getters and setters of Java objects.
+</p>
+
+<example>
+&lt;?php
+
+  import java.util.Date;
+
+  $a = new Date(123);
+
+  echo $a->getTime();    # calls getTime()
+  echo $a->setTime(456); # calls setTime(456)
+
+  echo $a->time;      # calls getTime()
+  $a->time = 456;     # calls setTime(456)
+?>
+</example>
+
+</s2>
+
+<s2 title="Static members and methods">
+
+<p>Static methods and members are available using PHP syntax if the Java class has been imported.</p>
+
+<example>
+&lt;?php
+
+import java.util.Calendar;
+
+$calendar = Calendar::getInstance();
+
+var_dump($calendar);
+?>
+
+</example>
+
+<p>An alternative to <code>import</code> is to use <code>java_class()</code> to access static members and methods.</p>
+
+<example>
+&lt;?php
+
+  $class = java_class("java.lang.System");
+
+  # System.in
+  $in = $class->in;
+  
+  # System.currentTimeInMillis();
+  $time = $class->currentTimeInMillis();
+
+?>
+</example>
+
+</s2>
 
 </s1>
 
-<s1 title="Quercus Types">
+<s1 title="import keyword in PHP">
 
-<p>For every PHP type, there is a Quercus type that is used
-internally to represent the corresponding PHP value. All Quercus types extend
+<p>
+Quercus supports the use of an <code>import</code> statement in PHP.
+<code>import</code> makes any java class available to the PHP script with it's
+unqualified name.
+</p>
+
+<example>
+&lt;?php
+
+  import java.util.Date;
+
+  $date = new Date(123);
+
+?>
+</example>
+
+<p>
+User classes can be placed in the webapp's WEB-INF/classes directory.
+</p>
+
+<example title="WEB-INF/classes/example/MyBean.java">
+package example;
+
+public class MyBean
+{
+  int _value;
+
+  public MyBean(int value)
+  {
+    _value = value;
+  }
+
+  public int getValue()
+  {
+    return _value;
+  }
+
+  public String makeMessage()
+  {
+    return "Hello, my value is " + _value;
+  }
+}
+</example>
+
+<example title="mybean.php">
+&lt;?php
+
+  import example.MyBean;
+
+  $bean = new MyBean(123);
+
+  var_dump($bean);
+  var_dump($bean->value);
+  var_dump($bean->makeMessage());
+?>
+</example>
+
+<p>The <code>import</code> keyword will also work on PHP classes but it has a
+different functionality than for Java classes.  <code>import</code> will try to
+autoload PHP classes by including  the file WEB-INF/classes/<i>classname</i>.php
+from the application's WEB-INF/classes directory.</p>
+
+</s1>
+
+<s1 title="Quercus types">
+
+<p>For every PHP type, there is a Java type that is used
+internally to represent the corresponding PHP value. All of the Java types extend
 <code>Value</code>.</p>
 
 <deftable>
-<tr><th width="50%">PHP Type</th><th width="50%">Quercus Type
+<tr><th width="50%">PHP type</th><th width="50%">Java type
 </th></tr><tr><td>string (binary)</td><td>BinaryValue
 </td></tr><tr><td>string (unicode)</td><td>UnicodeValue
 </td></tr><tr><td>bool</td><td>BooleanValue
@@ -39,15 +193,12 @@ internally to represent the corresponding PHP value. All Quercus types extend
 </td></tr><tr><td>NULL</td><td>NullValue
 </td></tr></deftable>
 
-<p>Quercus natively supports Unicode and is compatible with the new PHP 6
-syntax.</p>
-
 </s1>
 
-<s1 title="Java Method Arguments">
+<s1 title="Java method arguments">
 
 <p>In Quercus, Java methods can be called from within PHP.  Java arguments for
-Java methods need to be marshaled to the correct type from the PHP parameters
+Java methods are marshaled to the correct type from the PHP parameters
 that were passed in.</p>
 
 <deftable>
@@ -93,13 +244,13 @@ result in a null Java argument.</p>
 
 </s1>
 
-<s1 title="Java Method Returns">
+<s1 title="Java method returns">
 
 <p>When a Java method is called from PHP code, the return value of that Java
-method needs to be marshaled into a valid Quercus value.</p>
+method is marshaled into a valid PHP value.</p>
 
 <deftable>
-<tr><th width="50%">Java Return Type</th><th>resultant PHP Type</th><th>Quercus Type
+<tr><th width="50%">Java return type</th><th>resultant PHP Type</th><th>Quercus Type
 </th></tr><tr><td>String</td><td>string (unicode)</td><td>UnicodeValue
 </td></tr><tr><td>boolean</td><td>bool</td><td>BooleanValue
 </td></tr><tr><td>byte</td><td>int</td><td>LongValue
@@ -132,7 +283,7 @@ method needs to be marshaled into a valid Quercus value.</p>
 </td></tr></deftable>
 
 <p>Java objects like Calendar and Map are placed inside JavaValues and then
-returned to the PHP environment.  A JavaValue is just a wrapper that exposes
+returned to the PHP environment.  A JavaValue is a wrapper that exposes
 the object's Java methods to PHP.  For example, if <code>$url</code> is holding
 a Java URL object, then we can use <code>$url->getHost()</code> to call the
 URL's <code>getHost()</code> method.</p>
@@ -144,77 +295,15 @@ Date.getTime().</p>
 <p>Collection, List, and Map behave just like PHP arrays.  Suppose
 <code>$map</code> holds a Java HashMap, then it's certainly valid to do
 <code>$map["foo"] = "bar"</code>.  However, there are some limitations that
-are dependant on the underlying Java type.  For example,
+are dependent on the underlying Java type.  For example,
 <code>$list[-1] = 5</code> will not be possible for a Java List because List
 indexes start at 0.</p>
 
 </s1>
 
-<s1 title="Working with Java Classes in PHP">
+<s1 title="Java method overloading">
 
-<s2 title="Instantiating Objects">
-<p>To get new instances of Java ojects, use <code>new java()</code> by passing
-in the class name and any constructor arguments.</p>
-
-<example>
-&lt;?php
-
-  $a = new java("java.util.Date", 123);
-
-  echo $a->nanoTime();
-
-?>
-</example>
-
-</s2>
-
-<s2 title="Accessing static members and functions">
-
-<p>To get the class of the Java object without calling the constructor, use <code>java_class()</code>.</p>
-
-<example>
-&lt;?php
-
-  $class = java_class("java.lang.System");
-
-  // System.in
-  $in = $class->in;
-  
-  // System.currentTimeInMillis();
-  $time = $class->currentTimeInMillis();
-
-?>
-</example>
-
-</s2>
-
-</s1>
-
-<s1 title="Special Quercus Keywords">
-<s2 title="import Keyword in PHP">
-
-<p>Quercus supports the <code>import</code> keyword to fasciliate Java coding in PHP.  User classes should be placed in the webapp's WEB-INF/classes directory.</p>
-
-<example>
-&lt;?php
-
-  import java.util.Vector;
-  import java.util.Date;
-
-  $vector = new java("Vector");
-  $date = new Date(123);
-
-?>
-</example>
-
-<p>The <code>import</code> keyword will also work on PHP classes but it has a different functionality than for Java classes.  <code>import</code> will try to autoload PHP classes/files by including {classname}.php from the webapp's WEB-INF/classes directory.</p>
-
-</s2>
-</s1>
-
-<s1 title="Java Method Overloading">
-
-<p>Quercus allows overloaded Java methods to be called from within PHP code.  Quercus will try to use the method whose arguments are the most easily marshaled (i.e. a PHP string easily goes into a Java String whereas a PHP array is a mismatch for a Java int).</p>
+<p>Quercus allows overloaded Java methods to be called from within PHP code.  Quercus will use the method whose arguments are the most easily marshaled (i.e. a PHP string easily goes into a Java String whereas a PHP array is a mismatch for a Java int).</p>
 
 <example title="MyModule.java">
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -239,7 +328,7 @@ public class MyModule extends AbstractQuercusModule
 ?>
 </example>
 
-<p>In the example above, the first Java method <code>public static void foo(String a, boolean b)</code> would be called because it requires the least amount of type coersion.</p>
+<p>In the example above, the first Java method <code>public static void foo(String a, boolean b)</code> is called because it requires the least amount of type coercion.</p>
 
 <note>Only Java methods with the same amount of arguments will be considered.</note>
 
