@@ -170,6 +170,15 @@ public class PageContextImpl extends PageContext
       _functionMap = null;
   }
 
+  public PageContextImpl(WebApp webApp, HashMap<String,Method> functionMap)
+  {
+    this();
+
+    _webApp = webApp;
+    
+    _functionMap = functionMap;
+  }
+
   public void initialize(Servlet servlet,
 			 ServletRequest request,
 			 ServletResponse response,

@@ -792,10 +792,7 @@ public class Port
       log.info(_protocol.getProtocolName() + " listening to *:" + _port);
     }
 
-    if (_tcpNoDelay)
-      _serverSocket.setTcpNoDelay(_tcpNoDelay);
-
-    _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
+    postBind();
   }
 
   /**
@@ -815,8 +812,6 @@ public class Port
     if (_throttle == null)
       _throttle = new Throttle();
 
-    _admin.register();
-
     _serverSocket = ss;
 
     String scheme = _protocol.getProtocolName();
@@ -829,10 +824,31 @@ public class Port
     if (_sslFactory != null)
       _serverSocket = _sslFactory.bind(_serverSocket);
 
+    postBind();
+  }
+
+  private void postBind()
+  {
     if (_tcpNoDelay)
       _serverSocket.setTcpNoDelay(_tcpNoDelay);
 
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
+
+    if (_keepaliveMax < 0)
+      _keepaliveMax = _server.getKeepaliveMax();
+
+    if (_keepaliveMax < 0)
+      _keepaliveMax = 256;
+
+    if (_serverSocket.isJNI() && _server.isEnableSelectManager()) {
+      _selectManager = _server.getSelectManager();
+
+      if (_selectManager == null) {
+	throw new IllegalStateException(L.l("Cannot load select manager"));
+      }
+    }
+      
+    _admin.register();
   }
 
   /**
@@ -844,8 +860,7 @@ public class Port
     QServerSocket ss;
     
     if (_socketAddress != null) {
-      ss = QJniServerSocket.createJNI(_socketAddress, _port,
-				      _acceptListenBacklog);
+      ss = QJniServerSocket.createJNI(_socketAddress, _port);
 
       if (ss == null)
 	return null;
@@ -853,7 +868,7 @@ public class Port
       log.fine("watchdog binding to " + _socketAddress.getHostName() + ":" + _port);
     }
     else {
-      ss = QJniServerSocket.createJNI(null, _port, _acceptListenBacklog);
+      ss = QJniServerSocket.createJNI(null, _port);
 
       if (ss == null)
 	return null;
@@ -871,8 +886,6 @@ public class Port
       ss.setTcpNoDelay(_tcpNoDelay);
 
     ss.setConnectionSocketTimeout((int) getSocketTimeout());
-
-    _admin.register();
 
     return ss;
   }  
@@ -892,27 +905,13 @@ public class Port
     try {
       bind();
 
-      if (_serverSocket.isJNI() && _server.isEnableSelectManager()) {
-        _selectManager = _server.getSelectManager();
-
-        if (_selectManager == null) {
-          throw new IllegalStateException(L.l("Cannot load select manager"));
-        }
-      }
-
-      if (_keepaliveMax < 0)
-        _keepaliveMax = _server.getKeepaliveMax();
-
-      if (_keepaliveMax < 0)
-        _keepaliveMax = 256;
+      _serverSocket.listen(_acceptListenBacklog);
 
       String name = "resin-port-" + _serverSocket.getLocalPort();
       Thread thread = new Thread(this, name);
       thread.setDaemon(true);
 
       thread.start();
-
-      _admin.register();
     } catch (Throwable e) {
       close();
 

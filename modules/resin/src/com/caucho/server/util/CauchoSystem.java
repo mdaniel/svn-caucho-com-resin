@@ -324,10 +324,11 @@ public class CauchoSystem {
     return _isUnix == 1;
   }
 
-  public static void setWindowsTest(boolean windows)
+  public static void setWindowsTest(boolean isWindows)
   {
     _isTesting = true;
-    _isTestWindows = windows;
+    _isTestWindows = isWindows;
+    Path.setTestWindows(isWindows);
   }
 
   public static String getLocalHost()

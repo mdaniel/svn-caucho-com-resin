@@ -30,7 +30,8 @@ package com.caucho.vfs;
 
 import java.io.IOException;
 
-public class TempStream extends StreamImpl {
+public class TempStream extends StreamImpl
+{
   private String _encoding;
   private TempBuffer _head;
   private TempBuffer _tail;

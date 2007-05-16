@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,13 +23,30 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
  */
 
-#ifndef CSE_VERSION_H
-#define CSE_VERSION_H
+package com.caucho.jms2.connection;
 
-#define VERSION "Resin/3.1.s070515"
-#define FULL_VERSION "Resin-3.1.s070515 (built Tue, 15 May 2007 04:25:28 PDT)"
+import com.caucho.jms2.memory.MemoryQueue;
 
-#endif /* CSE_VERSION_H */
+import javax.jms.TemporaryQueue;
+
+/**
+ * A temporary queue
+ */
+public class TemporaryQueueImpl extends MemoryQueue implements TemporaryQueue
+{
+  private static int _idCount;
+  
+  TemporaryQueueImpl()
+  {
+    setName("TemporaryQueue-" + _idCount++);
+  }
+
+  public void delete()
+  {
+  }
+}
 

@@ -1,0 +1,123 @@
+/*
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *   Free SoftwareFoundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.jms2.message;
+
+import java.io.*;
+import java.util.logging.*;
+
+import javax.jms.*;
+
+import com.caucho.vfs.*;
+
+/**
+ * A message factory
+ */
+public class MessageFactory
+{
+  private static final Logger log
+    = Logger.getLogger(MessageFactory.class.getName());
+
+  /**
+   * Creates a new JMS text message.
+   */
+  public TextMessage createTextMessage()
+  {
+    return new TextMessageImpl();
+  }
+
+  /**
+   * Creates a new JMS text message.
+   *
+   * @param msg initial message text
+   */
+  public TextMessage createTextMessage(String msg)
+    throws JMSException
+  {
+    TextMessage textMessage = new TextMessageImpl();
+    
+    textMessage.setText(msg);
+
+    return textMessage;
+  }
+
+  /**
+   * Returns the message type.
+   */
+  public MessageType getMessageType(Message msg)
+  {
+    if (msg instanceof TextMessage)
+      return MessageType.TEXT;
+    else if (msg instanceof BytesMessage)
+      return MessageType.BYTES;
+    else if (msg instanceof MapMessage)
+      return MessageType.MAP;
+    else if (msg instanceof ObjectMessage)
+      return MessageType.OBJECT;
+    else if (msg instanceof StreamMessage)
+      return MessageType.STREAM;
+    else
+      return MessageType.NULL;
+  }
+
+  /**
+   * Copy the message.
+   */
+  public MessageImpl copy(Message msg)
+  {
+    if (msg instanceof MessageImpl)
+      return ((MessageImpl) msg).copy();
+    else
+      throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Creates an input stream from the header.
+   */
+  public InputStream headerToInputStream(Message msg)
+  {
+    try {
+      TempStream ts = new TempStream();
+      ts.openWrite();
+      WriteStream out = new WriteStream(ts);
+
+      writeHeader(out, msg);
+
+      out.close();
+
+      return ts.openRead(true);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void writeHeader(WriteStream out, Message msg)
+  {
+  }
+}
+

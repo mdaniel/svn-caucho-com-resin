@@ -69,7 +69,8 @@ public class QJniServerSocket {
     throws IOException
   {
     try {
-      QServerSocket ss = createJNI(host, port, listenBacklog);
+      // JNI doesn't listen immediately
+      QServerSocket ss = createJNI(host, port);
 
       if (ss != null)
 	return ss;
@@ -109,9 +110,7 @@ public class QJniServerSocket {
   /**
    * Creates the SSL ServerSocket.
    */
-  public static QServerSocket createJNI(InetAddress host,
-					int port,
-					int listenBacklog)
+  public static QServerSocket createJNI(InetAddress host, int port)
     throws IOException
   {
     try {
@@ -123,7 +122,6 @@ public class QJniServerSocket {
 
       Method method = cl.getMethod("create",
 				   new Class[] { String.class,
-						 int.class,
 						 int.class });
 
       String hostAddress;
@@ -134,8 +132,7 @@ public class QJniServerSocket {
 	hostAddress = "0.0.0.0";
 
       try {
-	return (QServerSocket) method.invoke(null,
-					     hostAddress, port, listenBacklog);
+	return (QServerSocket) method.invoke(null, hostAddress, port);
       } catch (InvocationTargetException e) {
 	throw e.getTargetException();
       }

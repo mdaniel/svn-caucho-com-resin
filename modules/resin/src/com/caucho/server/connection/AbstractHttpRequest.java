@@ -299,10 +299,18 @@ public abstract class AbstractHttpRequest
   {
     // server/183c
 
-    if (_invocation == null)
+    Invocation invocation = _invocation;
+    
+    if (invocation == null)
       return true;
-    else
-      return _invocation.getWebApp().isIgnoreClientDisconnect();
+    else {
+      WebApp webApp = invocation.getWebApp();
+
+      if (webApp != null)
+	return webApp.isIgnoreClientDisconnect();
+      else
+	return true;
+    }
   }
 
   /**

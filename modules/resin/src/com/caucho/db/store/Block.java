@@ -72,8 +72,8 @@ abstract public class Block implements SyncCacheListener {
     
     _isFlushDirtyOnCommit = _store.isFlushDirtyBlocksOnCommit();
 
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " create");
+    if (log.isLoggable(Level.FINEST))
+      log.finest(this + " create");
     
     //System.out.println(this + " CREATE");
   }
@@ -153,8 +153,8 @@ abstract public class Block implements SyncCacheListener {
   {
     synchronized (this) {
       if (! _isValid) {
-	if (log.isLoggable(Level.FINER))
-	  log.finer("read db-block " + this);
+	if (log.isLoggable(Level.FINEST))
+	  log.finest("read db-block " + this);
       
 	_store.readBlock(_blockId & Store.BLOCK_MASK,
 			 getBuffer(), 0, Store.BLOCK_SIZE);
@@ -194,16 +194,16 @@ abstract public class Block implements SyncCacheListener {
       _dirtyMax = 0;
 
       if (dirtyMin < dirtyMax) {
-	if (log.isLoggable(Level.FINER))
-	  log.finer("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
+	if (log.isLoggable(Level.FINEST))
+	  log.finest("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
 
 	//System.out.println(this + " WRITE_BEGIN");
 	writeImpl(dirtyMin, dirtyMax - dirtyMin);
 	//System.out.println(this + " WRITE_END");
       }
       else {
-	if (log.isLoggable(Level.FINER))
-	  log.finer("not-dirty db-block " + this);
+	if (log.isLoggable(Level.FINEST))
+	  log.finest("not-dirty db-block " + this);
       }
       
       _isValid = true;
@@ -328,8 +328,8 @@ abstract public class Block implements SyncCacheListener {
       if (_useCount <= 0)
 	freeImpl();
 
-      if (log.isLoggable(Level.FINER))
-	log.finer("db-block remove " + this);
+      if (log.isLoggable(Level.FINEST))
+	log.finest("db-block remove " + this);
     }
   }
 

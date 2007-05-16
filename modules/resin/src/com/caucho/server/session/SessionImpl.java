@@ -534,11 +534,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   public void invalidate(Logout logout)
   {
     if (log.isLoggable(Level.FINE)) {
-
-      if (log.isLoggable(Level.FINEST))
-        log.log(Level.FINEST, "invalidate session " + _id, new Exception());
-      else
-        log.fine("invalidate session " + _id);
+      log.fine("invalidate session " + _id);
     }
 
     if (! _isValid)

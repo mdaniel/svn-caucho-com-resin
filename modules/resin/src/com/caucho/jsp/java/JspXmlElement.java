@@ -170,7 +170,8 @@ public class JspXmlElement extends JspContainerNode {
 	}
 	else {
 	  String javaValue = generateParameterValue(String.class, value,
-						    true, null);
+						    true, null,
+						    _parseState.isELIgnored());
 	  out.println("out.print(" + javaValue + ");");
 	}
         out.addText("\"");

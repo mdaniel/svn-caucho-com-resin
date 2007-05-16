@@ -1714,23 +1714,23 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("com.caucho.server.webapp.WebApp webApp");
       out.println("  = (com.caucho.server.webapp.WebApp) config.getServletContext();");
       
-      if (! isTag()) {
+      if (! isTag())
         out.println("super.init(config);");
-        out.println("com.caucho.jsp.TaglibManager manager = webApp.getJspApplicationContext().getTaglibManager();");
+      
+      out.println("com.caucho.jsp.TaglibManager manager = webApp.getJspApplicationContext().getTaglibManager();");
 
-        for (Taglib taglib : _tagLibraryList) {
-          out.print("manager.addTaglibFunctions(_jsp_functionMap, \"");
-          out.printJavaString(taglib.getPrefixString());
-          out.print("\", \"");
-          out.printJavaString(taglib.getURI());
-          out.print("\");");
-        }
+      for (Taglib taglib : _tagLibraryList) {
+	out.print("manager.addTaglibFunctions(_jsp_functionMap, \"");
+	out.printJavaString(taglib.getPrefixString());
+	out.print("\", \"");
+	out.printJavaString(taglib.getURI());
+	out.println("\");");
       }
 
       if (! isTag())
         out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, this);");
       else
-        out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, null);");
+        out.println("com.caucho.jsp.PageContextImpl pageContext = new com.caucho.jsp.PageContextImpl(webApp, _caucho_getFunctionMap());");
       
       for (int i = 0; i < _exprList.size(); i++) {
 	String expr = _exprList.get(i);

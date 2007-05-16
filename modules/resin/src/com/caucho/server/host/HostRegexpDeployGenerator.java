@@ -104,8 +104,11 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
     Pattern regexp = _config.getRegexp();
     Matcher matcher = regexp.matcher(name);
 
-    if (! matcher.find() || matcher.start() != 0)
+    System.out.println("MATCH: " + matcher + " " + name);
+    if (! matcher.find() || matcher.start() != 0) {
+      System.out.println("BAD: " + name);
       return null;
+    }
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -141,8 +144,11 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
 
       controller.setRegexpName(name);
 
+      System.out.println("ROOT: " + name + " " + _config.getRootDirectory());
+      
       controller.setRegexp(regexp);
       controller.setRootDirectoryPattern(_config.getRootDirectory());
+
 
       // XXX: not dynamic-deploy in the sense that the mappings are known
       //controller.setDynamicDeploy(true);
@@ -157,7 +163,9 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
     
       Path rootDir = controller.getRootDirectory();
 
-      if (rootDir == null || ! rootDir.canRead()) {
+      if (rootDir == null || ! rootDir.isDirectory()) {
+	System.out.println("BAD: " + rootDir);
+
 	// server/0522
 	controller.destroy();
 	return null;

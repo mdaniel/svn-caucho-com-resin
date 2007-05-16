@@ -1011,7 +1011,7 @@ public class Server extends ProtocolDispatchServer
 				    _threadIdleMax, _threadMax));
 
     if (_threadIdleMax < _threadIdleMin)
-      throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-max> ({1})",
+      throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-idle-max> ({1})",
 				    _threadIdleMin, _threadIdleMax));
 
     if (_keepaliveSelectEnable) {

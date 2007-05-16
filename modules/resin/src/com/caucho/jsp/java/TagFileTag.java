@@ -260,7 +260,8 @@ public class TagFileTag extends GenericTag {
 	String convValue = generateParameterValue(cl,
 						  (String) value,
 						  rtexprvalue,
-						  attribute);
+						  attribute,
+						  _parseState.isELIgnored());
       
 	//					attribute.allowRtexpr());
 

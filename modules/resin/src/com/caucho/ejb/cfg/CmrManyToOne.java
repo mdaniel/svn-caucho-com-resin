@@ -264,8 +264,14 @@ public class CmrManyToOne extends CmrRelation {
     ArrayList<ForeignColumn> columns = new ArrayList<ForeignColumn>();
 
     Id id = targetType.getId();
+    
+    if (id == null || id.getColumns() == null)
+      throw new IllegalStateException(L.l("Entity '{0}' has invalid id columns.",
+					  targetType.getName()));
+    
     ArrayList<Column> keys = id.getColumns();
 
+    
     if (_sqlColumns != null && _sqlColumns.length == keys.size()) {
       for (Column key : keys) {
 	String sqlColumn = getColumn(_sqlColumns, key.getName());

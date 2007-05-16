@@ -10,8 +10,13 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.1 - May 7, 2007">
+<s2 title="3.1.1 - May 15, 2007">
 <ul>
+<li>jsp: JSTL issue with EL and old-style web-app (rep by Victor, #1348)</li>
+<li>ejb: cmr-many-to-one column calculation error message cleaned up (#1540, rep by chesspoker)</li>
+<li>virtual-host: virtual host regexp issues with windows (#1689, rep by S. Avogadro)</li>
+<li>server: add socket listen() capability so ports only listen after init (#1676, rep by S Pannell)</li>
+<li>server: isIgnoreClientDisconnect needs null check (#1737, rep by lmgelberg)</li>
 <li>server: thread-idle-min error message was incorrect (#1724, rep by copart)</li>
 <li>jsp: tag file and JSP EL function issues (#1730, rep by webvir)</li>
 </ul>

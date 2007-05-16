@@ -181,13 +181,18 @@ public abstract class Path {
       int length = scheme.length();
       int ch;
 
-      if (length == 1 &&
-          ((ch = scheme.charAt(0)) >= 'a' && ch <= 'z' ||
-            ch >= 'A' && ch <= 'Z')) {
+      if (length == 1
+	  && ('a' <= (ch = scheme.charAt(0)) && ch <= 'z'
+	      || 'A' <= ch && ch <= 'Z')) {
+	if (_isTestWindows)
+	  return schemeWalk(userPath, newAttributes, "/" + userPath, 0);
+	  
         path = schemeMap.get("file");
 
         if (path != null)
           return path.schemeWalk(userPath, newAttributes, "/" + userPath, 0);
+	else
+	  return schemeWalk(userPath, newAttributes, "/" + userPath, 0);
       }
     }
 
@@ -1332,6 +1337,11 @@ public abstract class Path {
   public static final boolean isWindows()
   {
     return _separatorChar == '\\' || _isTestWindows;
+  }
+
+  public static final void setTestWindows(boolean isTest)
+  {
+    _isTestWindows = isTest;
   }
 
   protected static final char getSeparatorChar()

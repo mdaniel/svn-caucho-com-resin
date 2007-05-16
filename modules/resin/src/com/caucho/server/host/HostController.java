@@ -59,7 +59,8 @@ import java.util.regex.Pattern;
 public class HostController
   extends EnvironmentDeployController<Host,HostConfig>
 {
-  private static final Logger log = Log.open(HostController.class);
+  private static final Logger log
+    = Logger.getLogger(HostController.class.getName());
   private static final L10N L = new L10N(HostController.class);
   
   private HostContainer _container;

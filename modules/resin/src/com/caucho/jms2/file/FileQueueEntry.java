@@ -27,73 +27,74 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.jms2.file;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.nio.channels.Selector;
+import java.lang.ref.*;
+
+import javax.jms.*;
+
+import com.caucho.jms2.message.*;
 
 /**
- * Abstract socket to handle both normal sockets and bin/resin sockets.
+ * Entry in a file queue
  */
-abstract public class QServerSocket {
-  public void setTcpNoDelay(boolean delay)
+public class FileQueueEntry
+{
+  private final long _id;
+
+  FileQueueEntry _prev;
+  FileQueueEntry _next;
+
+  private long _expiresTime;
+
+  private MessageType _type;
+
+  private SoftReference<MessageImpl> _msg;
+
+  // True if the message has been read, but not yet committed
+  private boolean _isRead;
+
+  public FileQueueEntry(long id, long expiresTime)
   {
+    _id = id;
+    _expiresTime = expiresTime;
+  }
+
+  public FileQueueEntry(long id, long expiresTime, MessageImpl msg)
+  {
+    _id = id;
+    _expiresTime = expiresTime;
+    _msg = new SoftReference<MessageImpl>(msg);
   }
   
-  public boolean isTcpNoDelay()
+  public long getId()
   {
-    return false;
-  }
-  
-  public boolean isJNI()
-  {
-    return false;
+    return _id;
   }
 
-  public boolean setSaveOnExec()
+  public MessageImpl getMessage()
   {
-    return false;
+    SoftReference<MessageImpl> ref = _msg;
+
+    if (ref != null)
+      return ref.get();
+    else
+      return null;
   }
 
-  public int getSystemFD()
+  public void setMessage(MessageImpl msg)
   {
-    return -1;
+    _msg = new SoftReference<MessageImpl>(msg);
   }
 
-  /**
-   * Sets the socket's listen backlog.
-   */
-  public void listen(int backlog)
+  public boolean isRead()
   {
+    return _isRead;
   }
 
-  /**
-   * Sets the connection read timeout.
-   */
-  abstract public void setConnectionSocketTimeout(int ms);
-  
-  abstract public boolean accept(QSocket socket)
-    throws IOException;
-  
-  abstract public QSocket createSocket()
-    throws IOException;
-
-  abstract public InetAddress getLocalAddress();
-
-  abstract public int getLocalPort();
-
-  public Selector getSelector()
+  public void setRead(boolean isRead)
   {
-    return null;
+    _isRead = isRead;
   }
-
-  public boolean isClosed()
-  {
-    return false;
-  }
-  
-  abstract public void close()
-    throws IOException;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2004 Caucho Technology.  All rights reserved.
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,13 +23,22 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
  */
 
-#ifndef CSE_VERSION_H
-#define CSE_VERSION_H
+package com.caucho.jms2.connection;
 
-#define VERSION "Resin/3.1.s070515"
-#define FULL_VERSION "Resin-3.1.s070515 (built Tue, 15 May 2007 04:25:28 PDT)"
+import javax.jms.TopicConnectionFactory;
 
-#endif /* CSE_VERSION_H */
-
+/**
+ * A sample queue connection factory.
+ *
+ * @deprecated Use ConnectionFactoryImpl
+ */
+public class JVMTopicConnectionFactory extends ConnectionFactoryImpl
+  implements TopicConnectionFactory  {
+  public JVMTopicConnectionFactory()
+  {
+  }
+}

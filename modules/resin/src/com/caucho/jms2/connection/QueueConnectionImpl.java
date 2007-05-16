@@ -27,73 +27,51 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.jms2.connection;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.nio.channels.Selector;
+import javax.jms.ConnectionConsumer;
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.QueueConnection;
+import javax.jms.QueueSession;
+import javax.jms.ServerSessionPool;
 
 /**
- * Abstract socket to handle both normal sockets and bin/resin sockets.
+ * A sample queue connection factory.
  */
-abstract public class QServerSocket {
-  public void setTcpNoDelay(boolean delay)
+public class QueueConnectionImpl extends ConnectionImpl
+  implements QueueConnection
+{
+  /**
+   * Create a new queue connection.
+   */
+  public QueueConnectionImpl(ConnectionFactoryImpl factory)
   {
-  }
-  
-  public boolean isTcpNoDelay()
-  {
-    return false;
-  }
-  
-  public boolean isJNI()
-  {
-    return false;
-  }
-
-  public boolean setSaveOnExec()
-  {
-    return false;
-  }
-
-  public int getSystemFD()
-  {
-    return -1;
+    super(factory);
   }
 
   /**
-   * Sets the socket's listen backlog.
+   * Creates a new consumer (optional)
    */
-  public void listen(int backlog)
+  public ConnectionConsumer
+  createConnectionConsumer(Queue queue, String messageSelector,
+                           ServerSessionPool sessionPool, int maxMessages)
+    throws JMSException
   {
+    throw new UnsupportedOperationException();
   }
 
   /**
-   * Sets the connection read timeout.
+   * Creates a new connection session.
    */
-  abstract public void setConnectionSocketTimeout(int ms);
-  
-  abstract public boolean accept(QSocket socket)
-    throws IOException;
-  
-  abstract public QSocket createSocket()
-    throws IOException;
-
-  abstract public InetAddress getLocalAddress();
-
-  abstract public int getLocalPort();
-
-  public Selector getSelector()
+  public QueueSession createQueueSession(boolean transacted,
+                                         int acknowledgeMode)
+    throws JMSException
   {
-    return null;
-  }
+    checkOpen();
 
-  public boolean isClosed()
-  {
-    return false;
+    assignClientID();
+    
+    return new QueueSessionImpl(this, transacted, acknowledgeMode);
   }
-  
-  abstract public void close()
-    throws IOException;
 }
-

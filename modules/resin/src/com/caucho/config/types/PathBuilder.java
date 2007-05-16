@@ -123,7 +123,7 @@ public class PathBuilder {
       return (Path) obj;
 
     String value = Expr.toString(obj, env);
-    
+
     if (pwd != null)
       return pwd.lookup(value);
     else
@@ -140,7 +140,7 @@ public class PathBuilder {
    */
   public static String rewritePathString(String pathName)
   {
-    CharBuffer cb = CharBuffer.allocate();
+    CharBuffer cb = new CharBuffer();
 
     int length = pathName.length();
     for (int i = 0; i < length; i++) {
