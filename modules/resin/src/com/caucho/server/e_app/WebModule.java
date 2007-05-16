@@ -31,6 +31,8 @@ package com.caucho.server.e_app;
 
 import com.caucho.server.webapp.WebAppConfig;
 
+import java.util.*;
+
 /**
  * Configuration for the application web module
  */
@@ -38,7 +40,8 @@ public class WebModule {
   private String _webUri;
   private String _contextRoot;
 
-  private WebAppConfig _webAppConfig;
+  private ArrayList<WebAppConfig> _webAppConfig
+    = new ArrayList<WebAppConfig>();;
 
   /**
    * Sets the location to the .war file.
@@ -77,14 +80,19 @@ public class WebModule {
    */
   public void setWebApp(WebAppConfig config)
   {
-    _webAppConfig = config;
+    _webAppConfig.add(config);
   }
 
   /**
    * Customization of web-app.
    */
-  public WebAppConfig getWebApp()
+  public ArrayList<WebAppConfig> getWebAppList()
   {
     return _webAppConfig;
+  }
+
+  public void addWebAppList(ArrayList<WebAppConfig> list)
+  {
+    _webAppConfig.addAll(list);
   }
 }

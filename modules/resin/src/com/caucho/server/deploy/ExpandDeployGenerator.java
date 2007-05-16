@@ -727,6 +727,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     }
 
     controller.start();
+    
     return true;
   }
 

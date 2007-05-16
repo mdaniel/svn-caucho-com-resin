@@ -309,13 +309,12 @@ abstract public class ExpandDeployController<I extends DeployInstance>
 
             // XXX: avoids unexpected end of ZLIB input stream.
             // XXX: This should be a really temp. workaround.
-            int bufferLen = 1; // buffer.length;
+            int bufferLen = buffer.length;
 
             // XXX: avoids unexpected end of ZLIB input stream.
             if (length < 0) {
-              log.log(Level.FINE, L.l("Negative size for entry {0} in {1}", entry, archivePath));
-              bufferLen = 1;
-              length = Long.MAX_VALUE;
+              // bufferLen = 1;
+              length = Long.MAX_VALUE / 2;
             }
             else if (length < bufferLen) {
               bufferLen = (int) length;
@@ -336,12 +335,14 @@ abstract public class ExpandDeployController<I extends DeployInstance>
                   os.write(buffer, 0, len);
 
                   // XXX: avoids unexpected end of ZLIB input stream.
+                  /*
                   if (len < bufferLen) {
                     for (int ch = zis.read(); ch != -1; ch = zis.read())
                       os.write(ch);
 
                     break;
                   }
+                  */
 
                   length -= len;
 

@@ -40,6 +40,7 @@ import com.caucho.log.Log;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
+import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.JarPath;
@@ -91,6 +92,9 @@ public class EnterpriseApplication
   private ArrayList<Path> _ejbPaths
     = new ArrayList<Path>();
 
+  private ArrayList<WebModule> _webConfigList
+    = new ArrayList<WebModule>();
+
   private ArrayList<WebAppController> _webApps
     = new ArrayList<WebAppController>();
 
@@ -109,9 +113,9 @@ public class EnterpriseApplication
     _controller = controller;
     _name = name;
 
-    ClassLoader parentLoader = Thread.currentThread().getContextClassLoader();
+    ClassLoader parentLoader = container.getClassLoader();
 
-    _loader = new EnvironmentClassLoader(container.getClassLoader());
+    _loader = new EnvironmentClassLoader(parentLoader);
     _loader.setId("EnterpriseApplication[" + name + "]");
 
     _webappsPath = _controller.getRootDirectory().lookup("webapps");
@@ -256,6 +260,29 @@ public class EnterpriseApplication
     _hasModule = true;
 
     return new Module();
+  }
+
+  /**
+   * Finds a web module based on the web-uri
+   */
+  WebModule findWebModule(String webUri)
+  {
+    for (int i = 0; i < _webConfigList.size(); i++) {
+      WebModule web = _webConfigList.get(i);
+
+      if (webUri.equals(web.getWebURI()))
+        return web;
+    }
+
+    return null;
+  }
+
+  /**
+   * Finds a web module based on the web-uri
+   */
+  void addWebModule(WebModule webModule)
+  {
+    _webConfigList.add(webModule);
   }
 
   /**
@@ -444,19 +471,13 @@ public class EnterpriseApplication
     try {
       thread.setContextClassLoader(getClassLoader());
 
+      for (int i = 0; i < _webConfigList.size(); i++) {
+        WebModule web = _webConfigList.get(i);
+
+        initWeb(web);
+      }
+
       getClassLoader().start();
-
-      /* XXX: double start?
-         for (int i = 0; i < _webApps.size(); i++) {
-         WebAppController controller = _webApps.get(i);
-
-         try {
-         controller.start();
-         } catch (Throwable e) {
-         log.log(Level.WARNING, e.toString(), e);
-         }
-         }
-      */
 
       for (WebAppController webApp : _webApps) {
         _container.getWebAppGenerator().update(webApp.getContextPath());
@@ -467,6 +488,80 @@ public class EnterpriseApplication
       thread.setContextClassLoader(oldLoader);
     }
   }
+
+  void initWeb(WebModule web)
+  {
+    String webUri = web.getWebURI();
+    String contextUrl = web.getContextRoot();
+    Path path = _rootDir.lookup(webUri);
+    Path archivePath = null;
+
+    if (contextUrl == null)
+      contextUrl = webUri;
+
+    WebAppController controller = null;
+
+    if (webUri.endsWith(".war")) {
+      // server/2a16
+      String name = webUri.substring(0, webUri.length() - 4);
+      int p = name.lastIndexOf('/');
+      if (p > 0)
+        name = name.substring(p + 1);
+
+      // XXX:
+      if (contextUrl.equals(""))
+        contextUrl = "/" + name;
+
+      if (contextUrl.endsWith(".war"))
+        contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
+
+      Path expandPath = _webappsPath;
+
+      try {
+        expandPath.mkdirs();
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+
+      archivePath = path;
+      path = expandPath.lookup(name);
+    } else {
+      // server/2a15
+      if (contextUrl.equals("")) {
+        String name = webUri;
+        int p = name.lastIndexOf('/');
+        if (p > 0)
+          name = name.substring(p + 1);
+        contextUrl = "/" + name;
+      }
+
+      // server/2a17
+      if (contextUrl.endsWith(".war"))
+        contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
+    }
+
+    controller = findWebAppEntry(contextUrl);
+
+    if (controller == null) {
+      controller = new WebAppController(contextUrl,
+                                        path,
+                                        _container);
+        
+      _webApps.add(controller);
+    }
+
+    if (archivePath != null)
+      controller.setArchivePath(archivePath);
+
+    controller.setDynamicDeploy(true);
+      
+    if (_configException != null)
+      controller.setConfigException(_configException);
+
+    for (WebAppConfig config : web.getWebAppList())
+      controller.addConfigDefault(config);
+  }
+  
 
   /**
    * Returns any matching web-app.
@@ -577,66 +672,19 @@ public class EnterpriseApplication
       throws Exception
     {
       String webUri = web.getWebURI();
-      String contextUrl = web.getContextRoot();
-      Path path = _rootDir.lookup(webUri);
 
-      if (contextUrl == null)
-        contextUrl = webUri;
+      WebModule oldWeb = findWebModule(webUri);
 
-      WebAppController controller = null;
-      if (webUri.endsWith(".war")) {
-        // server/2a16
-        String name = webUri.substring(0, webUri.length() - 4);
-        int p = name.lastIndexOf('/');
-        if (p > 0)
-          name = name.substring(p + 1);
+      if (oldWeb != null) {
+        String contextUrl = web.getContextRoot();
 
-        // XXX:
-        if (contextUrl.equals(""))
-          contextUrl = "/" + name;
+        if (contextUrl != null && ! "".equals(contextUrl))
+          oldWeb.setContextRoot(contextUrl);
 
-        if (contextUrl.endsWith(".war"))
-          contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
-
-        Path expandPath = _webappsPath;
-        expandPath.mkdirs();
-
-        controller = new WebAppController(contextUrl,
-                                          expandPath.lookup(name),
-                                          _container);
-
-        controller.setArchivePath(path);
-      } else {
-        // server/2a15
-        if (contextUrl.equals("")) {
-          String name = webUri;
-          int p = name.lastIndexOf('/');
-          if (p > 0)
-            name = name.substring(p + 1);
-          contextUrl = "/" + name;
-        }
-
-        // server/2a17
-        if (contextUrl.endsWith(".war"))
-          contextUrl = contextUrl.substring(0, contextUrl.length() - 4);
-
-        controller = new WebAppController(contextUrl, path, _container);
+        oldWeb.addWebAppList(web.getWebAppList());
       }
-
-      controller.setDynamicDeploy(true);
-      if (_configException != null)
-        controller.setConfigException(_configException);
-
-      controller.setManifestClassLoader(_loader);
-
-      // XXX: hack for duplicates
-      if (findWebAppEntry(controller.getContextPath()) == null)
-        _webApps.add(controller);
       else
-        controller = findWebAppEntry(controller.getContextPath());
-
-      if (web.getWebApp() != null)
-        controller.addConfigDefault(web.getWebApp());
+        addWebModule(web);
     }
 
     /**

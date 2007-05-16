@@ -193,21 +193,10 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
 
     if (_foreignName != null) {
       try {
-
         return context.lookup(_foreignName);
-
       } catch (RuntimeException e) {
-
-        if (log.isLoggable(Level.FINE))
-          log.log(Level.FINE, e.toString(), e);
-
         throw e;
-
       } catch (NamingException e) {
-
-        if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, e.toString(), e);
-
         throw e;
       }
     }
