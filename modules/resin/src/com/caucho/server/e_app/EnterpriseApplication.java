@@ -431,7 +431,6 @@ public class EnterpriseApplication
           Module module = createModule();
           WebModule web = new WebModule();
           web.setWebURI(file);
-          web.setContextRoot(file.substring(0, file.length() - 4));
 
           module.addWeb(web);
         }
@@ -495,6 +494,8 @@ public class EnterpriseApplication
     String contextUrl = web.getContextRoot();
     Path path = _rootDir.lookup(webUri);
     Path archivePath = null;
+
+    System.out.println("WEB: " + webUri + " " + contextUrl);
 
     if (contextUrl == null)
       contextUrl = webUri;

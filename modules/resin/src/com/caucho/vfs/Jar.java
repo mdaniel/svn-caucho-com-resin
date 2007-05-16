@@ -338,74 +338,26 @@ public class Jar implements CacheListener {
   /**
    * Lists all the files in this directory.
    */
-  public String []list(String pathName) throws IOException
+  public String []list(String path) throws IOException
   {
-    if (pathName.length() > 0 && ! pathName.endsWith("/"))
-      pathName = pathName + "/";
-    if (pathName.startsWith("/"))
-      pathName = pathName.substring(1);
+    JarNode node = getJarNode(path);
 
-    ArrayList<String> list = new ArrayList<String>();
+    if (node == null)
+      return null;
 
-    String []result = null;
+    ArrayList<JarNode> children = node.getChildren();
+    if (children == null)
+      return null;
 
-    synchronized (this) {
-      JarFile jarFile = getJarFile();
+    String []names = new String[children.size()];
 
-      if (jarFile != null) {
-	Enumeration e = jarFile.entries();
-	while (e.hasMoreElements()) {
-	  ZipEntry entry = (ZipEntry) e.nextElement();
-	  String name = entry.getName();
+    for (int i = 0; i < names.length; i++) {
+      JarNode child = children.get(i);
 
-	  if (name.startsWith(pathName) && ! name.equals(pathName)) {
-	    String subName = name.substring(pathName.length());
-
-	    int p = subName.indexOf('/');
-          
-	    if (p < 0)
-	      list.add(subName);
-	    else if (p == subName.length() - 1)
-	      list.add(subName.substring(0, p));
-	  }
-	}
-
-	result = (String []) list.toArray(new String[list.size()]);
-      }
+      names[i] = child.getSegment();
     }
 
-    closeJarFile();
-
-    if (result != null) {
-      return result;
-    }
-    
-    ReadStream backingIs = _backing.openRead();
-    ZipInputStream is = new ZipInputStream(backingIs);
-
-    try {
-      ZipEntry entry;
-    
-      while ((entry = is.getNextEntry()) != null) {
-	String name = entry.getName();
-
-	if (name.startsWith(pathName) && ! name.equals(pathName)) {
-	  String subName = name.substring(pathName.length());
-
-	  int p = subName.indexOf('/');
-            
-	  if (p < 0)
-	    list.add(subName);
-	  else if (p == subName.length() - 1)
-	    list.add(subName.substring(0, p));
-	}
-      }
-    } finally {
-      is.close();
-      backingIs.close();
-    }
-
-    return (String []) list.toArray(new String[list.size()]);
+    return names;
   }
 
   /**

@@ -56,12 +56,12 @@ public class PersistenceEnvironmentListener implements AddLoaderListener
     URL []urls = loader.getURLs();
 
     for (int i = 0; i < urls.length; i++) {
-
       // XXX: workaround for tck
       String s = urls[i].toString();
+
       Path path;
-      if (s.endsWith("jar!/")) {
-        s = s.substring(9, s.length()-2);
+      if (s.endsWith("jar!/") && s.startsWith("jar:file:")) {
+        s = s.substring(9, s.length() - 2);
         path = JarPath.create(pwd.lookup(s));
       }
       else {

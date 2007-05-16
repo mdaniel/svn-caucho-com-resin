@@ -87,6 +87,9 @@ public class JarCache
 
   private JarNode addNode(String childName)
   {
+    if (childName.endsWith("/"))
+      childName = childName.substring(0, childName.length() - 1);
+        
     String mapName = childName;
 
     if (! mapName.startsWith("/"))
@@ -99,21 +102,18 @@ public class JarCache
     
     JarNode parent;
     int len = childName.length();
-    int p = childName.lastIndexOf('/', len - 2);
+    int p = childName.lastIndexOf('/', len - 1);
     
     if (p < 0) {
       parent = _root;
+
       node = new JarNode(mapName, childName);
     }
     else {
       String parentName = childName.substring(0, p + 1);
       parent = addNode(parentName);
 
-      if (childName.endsWith("/")) {
-	node = new JarNode(mapName, childName.substring(p + 1, len - 1));
-      }
-      else
-	node = new JarNode(childName, childName.substring(p + 1));
+      node = new JarNode(childName, childName.substring(p + 1));
     }
 
     _map.put(mapName, node);

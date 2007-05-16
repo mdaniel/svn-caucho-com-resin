@@ -2833,7 +2833,7 @@ public class AmberConnection
   private Entity checkEntityType(Object entity, String operation)
   {
     if (! (entity instanceof Entity))
-      throw new IllegalArgumentException(L.l(operation + "() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit."));
+      throw new IllegalArgumentException(L.l("{0}() operation can only be applied to an entity instance. If the argument is an entity, the corresponding class must be specified in the scope of a persistence unit.", operation));
 
     if (_persistenceUnit.isJPA()) {
       String className = entity.getClass().getName();
@@ -2842,7 +2842,7 @@ public class AmberConnection
 
       // jpa/0m08
       if (entityType == null) {
-        throw new IllegalArgumentException(L.l(operation + "() operation can only be applied to an entity instance. If the argument is an entity, the class '{0}' must be specified in the orm.xml or annotated with @Entity and must be in the scope of a persistence unit.", className));
+        throw new IllegalArgumentException(L.l("{0}() operation can only be applied to an entity instance. If the argument is an entity, the class '{1}' must be specified in the orm.xml or annotated with @Entity and must be in the scope of a persistence unit.", operation, className));
       }
     }
 
@@ -2858,7 +2858,7 @@ public class AmberConnection
       log.log(Level.FINER, "AmberConnection.detach");
 
     if (_isXA || _isInTransaction)
-      throw new IllegalStateException("detach cannot be called within transaction");
+      throw new IllegalStateException(L.l("detach cannot be called within transaction"));
 
     _completionList.clear();
 

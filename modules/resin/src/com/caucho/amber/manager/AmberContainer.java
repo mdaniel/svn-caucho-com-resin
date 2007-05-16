@@ -487,9 +487,11 @@ public class AmberContainer {
   {
     if (_persistenceRootSet.contains(root))
       return;
+    
     _persistenceRootSet.add(root);
 
     Path persistenceXml = root.lookup("META-INF/persistence.xml");
+    
     InputStream is = null;
 
     try {
@@ -522,14 +524,15 @@ public class AmberContainer {
         try {
           if (! unitConfig.isExcludeUnlistedClasses()) {
             classMap.clear();
-            lookupClasses(root.getPath().length(), root, classMap, entityMappings);
+            lookupClasses(root.getPath().length(), root, classMap,
+                          entityMappings);
             unitConfig.addAllClasses(classMap);
           }
 
           AmberPersistenceUnit unit = unitConfig.init(this, entityMappings);
 
           _unitMap.put(unit.getName(), unit);
-        } catch (Throwable e) {
+        } catch (Exception e) {
           addException(e);
 
           log.log(Level.WARNING, e.toString(), e);
@@ -540,7 +543,7 @@ public class AmberContainer {
       addException(e);
 
       log.warning(e.getMessage());
-    } catch (Throwable e) {
+    } catch (Exception e) {
       addException(e);
 
       log.log(Level.WARNING, e.toString(), e);
@@ -548,7 +551,7 @@ public class AmberContainer {
       try {
         if (is != null)
           is.close();
-      } catch (Throwable e) {
+      } catch (Exception e) {
       }
     }
   }
@@ -566,7 +569,6 @@ public class AmberContainer {
     Iterator<String> it = curr.iterator();
 
     while (it.hasNext()) {
-
       String s = it.next();
 
       Path path = curr.lookup(s);

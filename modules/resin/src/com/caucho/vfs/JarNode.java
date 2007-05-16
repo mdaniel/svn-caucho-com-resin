@@ -91,6 +91,16 @@ public class JarNode
     _exists = true;
   }
 
+  public String getName()
+  {
+    return _name;
+  }
+
+  public String getSegment()
+  {
+    return _segment;
+  }
+
   public boolean isDirectory()
   {
     return _isDirectory;
