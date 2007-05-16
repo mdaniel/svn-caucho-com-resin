@@ -104,9 +104,7 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
     Pattern regexp = _config.getRegexp();
     Matcher matcher = regexp.matcher(name);
 
-    System.out.println("MATCH: " + matcher + " " + name);
     if (! matcher.find() || matcher.start() != 0) {
-      System.out.println("BAD: " + name);
       return null;
     }
 
@@ -144,8 +142,6 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
 
       controller.setRegexpName(name);
 
-      System.out.println("ROOT: " + name + " " + _config.getRootDirectory());
-      
       controller.setRegexp(regexp);
       controller.setRootDirectoryPattern(_config.getRootDirectory());
 
@@ -164,8 +160,6 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
       Path rootDir = controller.getRootDirectory();
 
       if (rootDir == null || ! rootDir.isDirectory()) {
-	System.out.println("BAD: " + rootDir);
-
 	// server/0522
 	controller.destroy();
 	return null;

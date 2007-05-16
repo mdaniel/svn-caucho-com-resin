@@ -77,10 +77,19 @@ public class JstlCoreWhen extends JstlNode {
   public void endAttributes()
     throws JspParseException
   {
+  }
+  
+  /**
+   * Called after the element from the tag.
+   */
+  @Override
+  public void endElement()
+    throws JspParseException
+  {
     if (! (getParent() instanceof JstlCoreChoose)) {
       throw error(L.l("c:when must be contained in a c:choose tag."));
     }
-
+    
     if (_test == null && _testAttr == null)
       throw error(L.l("'test' attribute missing from c:when."));
   }

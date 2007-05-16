@@ -86,7 +86,7 @@ public class XmlIfTag extends TagSupport {
       Boolean value = test ? Boolean.TRUE : Boolean.FALSE;
 
       if (_var == null) {
-        if (_scope != null || _scope.equals(""))
+        if (_scope != null && ! _scope.equals(""))
           throw new JspException(L.l("var must not be null when scope '{0}' is set.",
                                      _scope));
       }
