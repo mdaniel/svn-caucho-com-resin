@@ -123,7 +123,7 @@ public class RegexpModule
                             Value regsV,
                             int flags)
   {
-    String cleanPattern = cleanRegexp(rawPattern, false);
+    String cleanPattern = cleanEregRegexp(rawPattern, false);
 
     Pattern pattern = Pattern.compile(cleanPattern, flags);
     Matcher matcher = pattern.matcher(string);
@@ -1647,6 +1647,234 @@ public class RegexpModule
     return sb.toString();
   }
 
+  /**
+   * Cleans the regexp from valid values that the Java regexps can't handle.
+   * Ereg has a different syntax so need to handle it differently from preg.
+   * XXX: find out how ereg is different from preg.
+   */
+  private static String cleanEregRegexp(StringValue regexp,
+                                        boolean isComments)
+  {
+    int len = regexp.length();
+
+    StringBuilder sb = new StringBuilder();
+    char quote = 0;
+
+    boolean sawVerticalBar = false;
+
+    for (int i = 0; i < len; i++) {
+      char ch = regexp.charAt(i);
+
+      if (sawVerticalBar) {
+        if ((! Character.isWhitespace(ch)) &&
+            ch != '#' &&
+            ch != '|')
+          sawVerticalBar = false;
+      }
+
+      switch (ch) {
+      case '\\':
+        if (quote == '[') {
+          sb.append('\\');
+          sb.append('\\');
+          continue;
+        }
+
+        if (i + 1 < len) {
+          i++;
+
+          ch = regexp.charAt(i);
+
+          if (ch == '0' ||
+	      '1' <= ch && ch <= '3' && i + 1 < len && '0' <= regexp.charAt(i + 1) && ch <= '7') {
+            // Java's regexp requires \0 for octal
+
+            sb.append('\\');
+            sb.append('0');
+            sb.append(ch);
+          }
+          else if (ch == 'x' && i + 1 < len && regexp.charAt(i + 1) == '{') {
+            sb.append('\\');
+            
+            int tail = regexp.indexOf('}', i + 1);
+            
+            if (tail > 0) {
+              StringValue hex = regexp.substring(i + 2, tail);
+
+              int length = hex.length();
+
+              if (length == 1)
+                sb.append("x0" + hex);
+              else if (length == 2)
+                sb.append("x" + hex);
+              else if (length == 3)
+                sb.append("u0" + hex);
+              else if (length == 4)
+                sb.append("u" + hex);
+              else
+                throw new QuercusRuntimeException(L.l("illegal hex escape"));
+
+              i = tail;
+            }
+            else {
+              sb.append("\\x");
+            }
+          }
+          else if (Character.isLetter(ch)) {
+            switch (ch) {
+              case 'a':
+              case 'c':
+              case 'e':
+              case 'f':
+              case 'n':
+              case 'r':
+              case 't':
+              case 'x':
+              case 'd':
+              case 'D':
+              case 's':
+              case 'S':
+              case 'w':
+              case 'W':
+              case 'b':
+              case 'B':
+              case 'A':
+              case 'Z':
+              case 'z':
+              case 'G':
+              case 'p': //XXX: need to translate PHP properties to Java ones
+              case 'P': //XXX: need to translate PHP properties to Java ones
+              case 'X':
+              //case 'C': byte matching, not supported
+                sb.append('\\');
+                sb.append(ch);
+                break;
+              default:
+                sb.append(ch);
+            }
+          }
+          else {
+            sb.append('\\');
+            sb.append(ch);
+          }
+        }
+        else
+          sb.append('\\');
+        break;
+
+      case '[':
+        if (quote == '[') {
+          if (i + 1 < len && regexp.charAt(i + 1) == ':') {
+            String test = regexp.substring(i).toString();
+            boolean hasMatch = false;
+
+            for (int j = 0; j < POSIX_CLASSES.length; j++) {
+              if (test.startsWith(POSIX_CLASSES[j])) {
+                hasMatch = true;
+
+                sb.append(REGEXP_CLASSES[j]);
+
+                i += POSIX_CLASSES[j].length() - 1;
+              }
+            }
+
+            if (! hasMatch)
+              sb.append("\\[");
+          }
+          else
+            sb.append("\\[");
+        }
+        else if (i + 1 < len && regexp.charAt(i + 1) == '['
+		 && ! (i + 2 < len && regexp.charAt(i + 2) == ':')) {
+	  // XXX: check regexp grammar
+	  // php/151n
+          sb.append("[\\[");
+	  i += 1;
+	}
+        else if (i + 2 < len &&
+		 regexp.charAt(i + 1) == '^' &&
+		 regexp.charAt(i + 2) == ']') {
+          sb.append("[^\\]");
+	  i += 2;
+	}
+        else
+          sb.append('[');
+
+        if (quote == 0)
+          quote = '[';
+        break;
+
+      case '#':
+        if (quote == '[') {
+          sb.append("\\#");
+        }
+        else if (isComments) {
+          sb.append(ch);
+
+          for (i++; i < len; i++) {
+            ch = regexp.charAt(i);
+            
+            sb.append(ch);
+            
+            if (ch == '\n' || ch == '\r')
+              break;
+          }
+        }
+        else {
+          sb.append(ch);
+        }
+
+        break;
+
+      case ']':
+        sb.append(ch);
+
+        if (quote == '[')
+          quote = 0;
+        break;
+
+      case '{':
+        if (i + 1 < len &&
+            ('0' <= (ch = regexp.charAt(i + 1)) && ch <= '9' || ch == ',')) {
+          sb.append("{");
+          for (i++;
+               i < len &&
+               ('0' <= (ch = regexp.charAt(i)) && ch <= '9' || ch == ',');
+               i++) {
+            sb.append(ch);
+          }
+
+          if (i < len)
+            sb.append(regexp.charAt(i));
+        }
+        else {
+          sb.append("\\{");
+        }
+        break;
+
+      case '}':
+        sb.append("\\}");
+        break;
+
+      case '|':
+        // php/152o
+        // php ignores subsequent vertical bars
+        //
+        // to accomodate drupal bug http://drupal.org/node/123750
+        if (! sawVerticalBar) {
+          sb.append('|');
+          sawVerticalBar = true; 
+        }
+        break;
+
+      default:
+        sb.append(ch);
+      }
+    }
+
+    return sb.toString();
+  }
+  
   /**
    * Converts to non-greedy.
    */
