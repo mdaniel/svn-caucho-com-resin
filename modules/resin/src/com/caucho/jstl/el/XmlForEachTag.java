@@ -40,6 +40,7 @@ import org.w3c.dom.NodeList;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.IterationTag;
 import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.jstl.core.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -59,7 +60,10 @@ public class XmlForEachTag extends TagSupport implements IterationTag {
   private int _end = Integer.MAX_VALUE / 2;
   private int _step = 1;
 
+  private int _count;
+
   private Iterator _iterator;
+  private Object _current;
 
   /**
    * Sets the XPath select value.
@@ -148,13 +152,25 @@ public class XmlForEachTag extends TagSupport implements IterationTag {
         _iterator = list.iterator();
       }
 
-      if (! _iterator.hasNext())
+      _count = 0;
+
+      while (_count < _begin && _iterator.hasNext()) {
+        _iterator.next();
+        _count++;
+      }
+
+      if (_end < _count || ! _iterator.hasNext())
         return SKIP_BODY;
 
-      Object value = _iterator.next();
+      _current = _iterator.next();
+      Object value = _current;
+      _count++;
 
       if (_var != null)
         pageContext.setAttribute(_var, value);
+
+      if (_varStatus != null)
+        pageContext.setAttribute(_varStatus, new Status());
 
       if (value instanceof Node)
 	pageContext.setNodeEnv((Node) value);
@@ -172,13 +188,29 @@ public class XmlForEachTag extends TagSupport implements IterationTag {
     throws JspException
   {
     PageContextImpl pageContext = (PageContextImpl) this.pageContext;
-    
-    if (! _iterator.hasNext()) {
-      pageContext.setNodeEnv(_oldEnv);
-      return SKIP_BODY;
-    }
 
-    Object value = _iterator.next();
+    int step = _step;
+    
+    Object value = null;
+    
+    do {
+      if (_end < _count || ! _iterator.hasNext()) {
+        pageContext.setNodeEnv(_oldEnv);
+        
+        if (_var != null)
+          pageContext.removeAttribute(_var);
+        
+        if (_varStatus != null)
+          pageContext.removeAttribute(_varStatus);
+        
+        return SKIP_BODY;
+      }
+
+      value = _iterator.next();
+      _count++;
+    } while (--step > 0);
+    
+    _current = value;
 
     if (_var != null)
       pageContext.setAttribute(_var, value);
@@ -186,5 +218,52 @@ public class XmlForEachTag extends TagSupport implements IterationTag {
       pageContext.setNodeEnv((Node) value);
 
     return EVAL_BODY_AGAIN;
+  }
+
+  class Status implements LoopTagStatus {
+    public Object getCurrent()
+    {
+      return _current;
+    }
+    
+    public int getIndex()
+    {
+      return _count;
+    }
+    
+    public int getCount()
+    {
+      return _count;
+    }
+    
+    public boolean isFirst()
+    {
+      return _count == _begin;
+    }
+    
+    public boolean isLast()
+    {
+      return _count == _end;
+    }
+    
+    public Integer getBegin()
+    {
+      return _begin;
+    }
+    
+    public Integer getEnd()
+    {
+      return _end;
+    }
+    
+    public Integer getStep()
+    {
+      return _step;
+    }
+    
+    public String toString()
+    {
+      return "XmlForEachTag$Status[]";
+    }
   }
 }

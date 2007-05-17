@@ -156,6 +156,12 @@ public class TempCharReader extends Reader {
     return readLength;
   }
 
+  public void unread()
+  {
+    if (_offset > 0)
+      _offset--;
+  }
+
   /**
    * Returns true if it's empty.
    */

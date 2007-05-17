@@ -494,14 +494,34 @@ public class JstlCoreForEach extends JstlNode {
       }
     }
 
-    String iterVar = "_jsp_iter_" + uniqueId;
-    String iVar = "_jsp_i_" + uniqueId;
-    out.print("java.util.Iterator " + iterVar + " = com.caucho.jstl.el.ForEachTag.getIterator(");
+    String itemsVar = "_jsp_items_" + uniqueId;
+
+    out.print("java.lang.Object " + itemsVar + " = ");
     if (_itemsAttr != null)
       out.print(_itemsAttr.generateValue(Object.class));
     else
       out.print(generateValue(Object.class, _items));
-    out.println(");");
+    out.println(";");
+
+    String mapperVar = "_jsp_vm_" + uniqueId;
+    String deferredValue = null;
+
+    if (_items != null && _items.contains("#{")) {
+      deferredValue = "_caucho_value_expr_" + _gen.addValueExpr(_items, "");
+    }
+
+    if (deferredValue != null && _var != null) {
+      out.print("javax.el.ValueExpression " + mapperVar
+                  + " = _jsp_env.getVariableMapper().resolveVariable(\"");
+      out.print(escapeJavaString(_var));
+      out.println("\");");
+    }
+    
+    String iterVar = "_jsp_iter_" + uniqueId;
+    String iVar = "_jsp_i_" + uniqueId;
+    out.println("java.util.Iterator " + iterVar
+                + " = com.caucho.jstl.rt.CoreForEachTag.getIterator("
+                + itemsVar + ");");
 
     String beginVar = null;
     if (_beginAttr != null || _begin != null) {
@@ -569,11 +589,13 @@ public class JstlCoreForEach extends JstlNode {
       out.println("\", " + _tagVar + ");");
     }
 
+    /*
     if (_var != null) {
       out.print("Object " + oldVar + " = pageContext.getAttribute(\"");
       out.print(escapeJavaString(_var));
       out.println("\");");
     }
+    */
 
     if (endVar != null) {
       String begin = beginVar == null ? "0" : beginVar;
@@ -601,6 +623,15 @@ public class JstlCoreForEach extends JstlNode {
       out.println(_tagVar + ".setCurrent(" + iVar + ", " + iterVar + ".hasNext());");
     }
 
+    if (deferredValue != null && _var != null) {
+      out.print("_jsp_env.getVariableMapper().setVariable(\"");
+      out.print(escapeJavaString(_var));
+      out.print("\", ");
+      out.print("com.caucho.jstl.rt.CoreForEachTag.getExpr(");
+      out.print(deferredValue + ", " + _tagVar + ".getIndex(), " + itemsVar);
+      out.println("));");
+    }
+
     generateChildren(out);
 
     if (! stepVar.equals("1")) {
@@ -620,13 +651,14 @@ public class JstlCoreForEach extends JstlNode {
       // jsp/1cmg
       out.print("pageContext.removeAttribute(\"");
       out.print(escapeJavaString(_var));
-      out.print("\");");
-      
-      /*
-      out.print("pageContext.pageSetOrRemove(\"");
-      out.print(escapeJavaString(_var));
-      out.println("\", " + oldVar + ");");
-      */
+      out.println("\");");
+
+      // restore EL variable
+      if (deferredValue != null && _var != null) {
+        out.print("_jsp_env.getVariableMapper().setVariable(\"");
+        out.print(escapeJavaString(_var));
+        out.println("\", " + mapperVar + ");");
+      }
     }
 
     if (_varStatus != null) {
@@ -634,12 +666,6 @@ public class JstlCoreForEach extends JstlNode {
       out.print("pageContext.removeAttribute(\"");
       out.print(escapeJavaString(_varStatus));
       out.println("\");");
-      
-      /*
-      out.print("pageContext.pageSetOrRemove(\"");
-      out.print(escapeJavaString(_varStatus));
-      out.println("\", " + oldStatusVar + ");");
-      */
     }
   }
 }

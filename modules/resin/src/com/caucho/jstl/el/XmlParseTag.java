@@ -33,7 +33,7 @@ import com.caucho.el.Expr;
 import com.caucho.jsp.BodyContentImpl;
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 import com.caucho.xml.Xml;
 import com.caucho.xml.XmlParser;
 
@@ -140,8 +140,18 @@ public class XmlParseTag extends BodyTagSupport {
           throw new JspException(L.l("'doc' attribute must be a Reader or String at `{0}'",
                                      obj));
       }
-      else if (body != null)
-        reader = body.getReader();
+      else if (body != null) {
+        TempCharReader tempReader = (TempCharReader) body.getReader();
+        int ch;
+
+        while (Character.isWhitespace((ch = tempReader.read()))) {
+        }
+
+        if (ch >= 0)
+          tempReader.unread();
+        
+        reader = tempReader;
+      }
       else
 	throw new JspException(L.l("x:parse requires a body"));
 

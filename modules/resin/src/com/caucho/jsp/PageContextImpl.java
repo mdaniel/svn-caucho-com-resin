@@ -137,7 +137,7 @@ public class PageContextImpl extends PageContext
   private ELContext _elContext;
   private ELResolver _elResolver;
   private javax.el.FunctionMapper _functionMapper;
-  private javax.el.VariableMapper _variableMapper;
+  private PageVariableMapper _variableMapper;
   private boolean _hasException;
 
   private HashMap<String,Method> _functionMap;
@@ -1757,6 +1757,19 @@ public class PageContextImpl extends PageContext
   {
     _nodeEnv = node;
   }
+
+  /**
+   * Creates an expression.
+   */
+  public ValueExpression createExpr(ValueExpression expr,
+                                    String exprString,
+                                    Class type)
+  {
+    if (_variableMapper == null || _variableMapper.isConstant())
+      return expr;
+
+    return JspUtil.createValueExpression(getELContext(), type, exprString);
+  }
   
   /**
    * Finds an attribute in any of the scopes from page to webApp.
@@ -1932,29 +1945,36 @@ public class PageContextImpl extends PageContext
   }
 
   public class PageVariableMapper extends ImplicitVariableMapper {
+    private HashMap<String,ValueExpression> _map;
+
+    final boolean isConstant()
+    {
+      return _map == null || _map.size() == 0;
+    }
+    
     public ValueExpression resolveVariable(String var)
     {
-      return super.resolveVariable(var);
+      if (_map != null) {
+        ValueExpression expr = _map.get(var);
+
+        if (expr != null)
+          return expr;
+      }
       
-      /*
-	// XXX: why? wouldn't this code be dynamic?
-      ValueExpression expr = super.resolveVariable(var);
-
-      if (expr != null)
-	return expr;
-
-      Object value = getAttribute(var);
-
-      if (value instanceof ValueExpression)
-	return (ValueExpression) value;
-      else
-	return null;
-      */
+      return super.resolveVariable(var);
     }
 
-    public ValueExpression setVariable(String variable,
+    public ValueExpression setVariable(String var,
 				       ValueExpression expr)
     {
+      // ValueExpression oldValue = getVariable(var);
+      
+      if (_map == null) {
+        _map = new HashMap<String,ValueExpression>();
+      }
+
+      _map.put(var, expr);
+      
       return expr;
     }
   }

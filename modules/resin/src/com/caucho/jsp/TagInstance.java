@@ -318,6 +318,10 @@ public class TagInstance {
           value = null;
         else if (strValue.indexOf("${") >= 0)
           value = null;
+        else if (strValue.indexOf("#{") >= 0) {
+          // jsp/1cn1 - the expression can depend on the context
+          value = null;
+        }
 
         child.addAttribute(name, value);
       } else {

@@ -33,9 +33,7 @@ import com.caucho.jstl.NameValueTag;
 import com.caucho.log.Log;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
+import com.caucho.vfs.*;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -200,9 +198,18 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
       if (_xml != null)
 	source = getSource(_xml, getCanonicalURL(pageContext, _xmlSystemId));
       else {
-	BodyContent bodyContent = getBodyContent();
+	BodyContent body = getBodyContent();
+        
+        TempCharReader tempReader = (TempCharReader) body.getReader();
+        int ch;
 
-	source = new StreamSource(bodyContent.getReader());
+        while (Character.isWhitespace((ch = tempReader.read()))) {
+        }
+
+        if (ch >= 0)
+          tempReader.unread();
+        
+	source = new StreamSource(tempReader);
 
 	if (_xmlSystemId != null)
 	  source.setSystemId(getCanonicalURL(pageContext, _xmlSystemId));

@@ -1048,8 +1048,26 @@ public abstract class JspNode {
           exprIndex = _gen.addValueExpr("", typeName);
         else
           exprIndex = _gen.addValueExpr(value, typeName);
-      
-        return ("_caucho_value_expr_" + exprIndex);
+
+        if (value.indexOf("#{") < 0)
+          return ("_caucho_value_expr_" + exprIndex);
+        else {
+          StringBuilder sb = new StringBuilder();
+
+          sb.append("pageContext.createExpr(_caucho_value_expr_");
+          sb.append(exprIndex);
+          sb.append(", \"");
+          sb.append(escapeJavaString(value));
+          sb.append("\", ");
+          if (null == typeName || "".equals(typeName)) {
+            sb.append("java.lang.Object.class)");
+          } else {
+            sb.append(escapeJavaString(typeName));
+            sb.append(".class)");
+          }
+
+          return sb.toString();
+        }
       }
       else if (type.equals(MethodExpression.class)) {
         int exprIndex;

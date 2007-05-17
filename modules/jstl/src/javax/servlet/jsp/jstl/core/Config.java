@@ -41,37 +41,47 @@ public class Config {
    * The application's configured locale.
    */
   public static final String FMT_LOCALE
-  = "javax.servlet.jsp.jstl.fmt.locale";
+    = "javax.servlet.jsp.jstl.fmt.locale";
 
   /**
    * The fallback locale if none is found.
    */
   public static final String FMT_FALLBACK_LOCALE
-  = "javax.servlet.jsp.jstl.fmt.fallbackLocale";
+    = "javax.servlet.jsp.jstl.fmt.fallbackLocale";
   
   /**
    * The current i18n localization context.
    */
   public static final String FMT_LOCALIZATION_CONTEXT
-  = "javax.servlet.jsp.jstl.fmt.localizationContext";
+    = "javax.servlet.jsp.jstl.fmt.localizationContext";
   
   /**
    * The current time zone.
    */
   public static final String FMT_TIME_ZONE
-  = "javax.servlet.jsp.jstl.fmt.timeZone";
+    = "javax.servlet.jsp.jstl.fmt.timeZone";
   
   /**
    * The current Data Source.
    */
   public static final String SQL_DATA_SOURCE
-  = "javax.servlet.jsp.jstl.sql.dataSource";
+    = "javax.servlet.jsp.jstl.sql.dataSource";
 
   /**
    * The maximum rows to read from the database.
    */
-  public static final String SQL_MAX_ROWS =
-  "javax.servlet.jsp.jstl.sql.maxRows";
+  public static final String SQL_MAX_ROWS
+    = "javax.servlet.jsp.jstl.sql.maxRows";
+
+  public static Object find(PageContext pageContext, String name)
+  {
+    Object object = pageContext.findAttribute(name);
+
+    if (object != null)
+      return object;
+
+    return pageContext.getServletContext().getInitParameter(name);
+  }
 
   /**
    * Returns an attribute from the page context.
@@ -103,12 +113,27 @@ public class Config {
     return context.getAttribute(name);
   }
 
-  public static void set(PageContext pageContext,
-                         String name,
-                         Object var,
-                         int scope)
+  /**
+   * Returns an attribute from the page context.
+   */
+  public static void remove(PageContext pageContext, String name, int scope)
   {
-    pageContext.setAttribute(name, var, scope);
+    pageContext.removeAttribute(name, scope);
+  }
+
+  public static void remove(ServletRequest request, String name)
+  {
+    request.removeAttribute(name);
+  }
+
+  public static void remove(HttpSession session, String name)
+  {
+    session.removeAttribute(name);
+  }
+
+  public static void remove(ServletContext context, String name)
+  {
+    context.removeAttribute(name);
   }
 
   public static void set(ServletRequest request,
@@ -137,42 +162,11 @@ public class Config {
     context.setAttribute(name, var);
   }
 
-  public static Object find(PageContext pageContext, String name)
+  public static void set(PageContext pageContext,
+                         String name,
+                         Object var,
+                         int scope)
   {
-    Object object = pageContext.findAttribute(name);
-
-    if (object != null)
-      return object;
-
-    return pageContext.getServletContext().getInitParameter(name);
-  }
-
-  /**
-   * Returns an attribute from the page context.
-   */
-  public static void remove(PageContext pageContext, String name, int scope)
-  {
-    pageContext.removeAttribute(name, scope);
-  }
-
-  public static void remove(PageContext pageContext,
-                            String name)
-  {
-    pageContext.removeAttribute(name);
-  }
-
-  public static void remove(ServletRequest request, String name)
-  {
-    request.removeAttribute(name);
-  }
-
-  public static void remove(HttpSession session, String name)
-  {
-    session.removeAttribute(name);
-  }
-
-  public static void remove(ServletContext context, String name)
-  {
-    context.removeAttribute(name);
+    pageContext.setAttribute(name, var, scope);
   }
 }

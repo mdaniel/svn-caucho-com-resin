@@ -154,6 +154,24 @@
     <body-content>JSP</body-content>
 
     <attribute>
+      <name>begin</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+
+    <attribute>
+      <name>end</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+
+    <attribute>
+      <name>step</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+
+    <attribute>
       <name>select</name>
       <required>true</required>
       <rtexprvalue>false</rtexprvalue>
@@ -161,6 +179,12 @@
 
     <attribute>
       <name>var</name>
+      <required>false</required>
+      <rtexprvalue>false</rtexprvalue>
+    </attribute>
+
+    <attribute>
+      <name>varStatus</name>
       <required>false</required>
       <rtexprvalue>false</rtexprvalue>
     </attribute>

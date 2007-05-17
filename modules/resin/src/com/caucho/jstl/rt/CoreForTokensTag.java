@@ -144,7 +144,7 @@ public class CoreForTokensTag extends LoopTagSupport {
       loop:
       for (; _i < _length; _i++) {
         ch = _value.charAt(_i);
-        
+
         for (int j = startDelims; j >= 0; j--) {
           if (_delims[j] == ch)
             break loop;
@@ -152,8 +152,21 @@ public class CoreForTokensTag extends LoopTagSupport {
         
         _cb.append(ch);
       }
+      
+      for (_i++; _i < _length; _i++) {
+        ch = _value.charAt(_i);
 
-      _i++;
+        boolean hasDelim = false;
+        for (int j = startDelims; j >= 0; j--) {
+          if (_delims[j] == ch) {
+            hasDelim = true;
+            break;
+          }
+        }
+
+        if (! hasDelim)
+          return _cb.toString();
+      }
 
       return _cb.toString();
     }

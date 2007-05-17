@@ -28,6 +28,8 @@
 
 package javax.servlet.jsp.jstl.core;
 
+import javax.el.ValueExpression;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.IterationTag;
@@ -39,6 +41,8 @@ abstract public class LoopTagSupport extends TagSupport
   
   protected int begin;
   protected boolean beginSpecified;
+
+  protected ValueExpression deferredExpression;
   
   protected int end = -1;
   protected boolean endSpecified;
@@ -87,7 +91,7 @@ abstract public class LoopTagSupport extends TagSupport
   protected void validateEnd()
     throws JspTagException
   {
-    if (end < 0)
+    if (this.end < 0)
       throw new JspTagException("Invalid loop tag, 'end' < 0.");
   }
 

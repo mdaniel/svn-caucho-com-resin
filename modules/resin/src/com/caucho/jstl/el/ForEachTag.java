@@ -346,25 +346,25 @@ public class ForEachTag extends TagSupport
   }
 
   public static class ArrayIterator implements Iterator {
-    private Object array;
-    private int index;
-    private int length;
+    private Object _array;
+    private int _index;
+    private int _length;
 
     ArrayIterator(Object array)
     {
-      this.array = array;
-      this.length = Array.getLength(array);
+      _array = array;
+      _length = Array.getLength(array);
     }
     
     public boolean hasNext()
     {
-      return index < length;
+      return _index < _length;
     }
     
     public Object next()
     {
-      if (index < length)
-        return Array.get(array, index++);
+      if (_index < _length)
+        return Array.get(_array, _index++);
       else
         return null;
     }

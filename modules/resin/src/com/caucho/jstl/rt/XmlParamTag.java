@@ -41,7 +41,7 @@ public class XmlParamTag extends BodyTagSupport {
   private static L10N L = new L10N(XmlParamTag.class);
   
   private String _name;
-  private String _value;
+  private Object _value;
 
   /**
    * Sets the name
@@ -58,7 +58,7 @@ public class XmlParamTag extends BodyTagSupport {
    *
    * @param value the JSP-EL expression for the value.
    */
-  public void setValue(String value)
+  public void setValue(Object value)
   {
     _value = value;
   }
@@ -78,7 +78,7 @@ public class XmlParamTag extends BodyTagSupport {
 
     NameValueTag tag = (NameValueTag) parent;
 
-    tag.addParam(_name, _value);
+    tag.addParam(_name, String.valueOf(_value));
     
     return SKIP_BODY;
   }

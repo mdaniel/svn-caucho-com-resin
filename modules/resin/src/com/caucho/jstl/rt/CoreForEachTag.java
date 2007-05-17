@@ -28,14 +28,16 @@
 
 package com.caucho.jstl.rt;
 
-import com.caucho.util.L10N;
+import com.caucho.util.*;
 
+import javax.el.*;
 import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.jstl.core.LoopTagSupport;
-import java.util.Iterator;
+import javax.servlet.jsp.jstl.core.*;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class CoreForEachTag extends LoopTagSupport {
-  private static L10N L = new L10N(CoreForEachTag.class);
+  private static final L10N L = new L10N(CoreForEachTag.class);
 
   protected int _begin;
   protected int _end;
@@ -117,6 +119,116 @@ public class CoreForEachTag extends LoopTagSupport {
   public Object next()
   {
     return _iterator.next();
+  }
+
+  public static Iterator getIterator(Object items)
+    throws JspTagException
+  {
+    if (items == null)
+      return NullIterator.create();
+    else if (items instanceof Map)
+      return ((Map) items).entrySet().iterator();
+    else if (items instanceof Collection)
+      return ((Collection) items).iterator();
+    else if (items.getClass().isArray())
+      return new ArrayIterator(items);
+    else if (items instanceof Iterator)
+      return (Iterator) items;
+    else if (items instanceof Enumeration)
+      return new EnumIterator((Enumeration) items);
+    else if (items instanceof String)
+      return new StringIterator((String) items);
+    else
+      throw new JspTagException(L.l("unknown items value `{0}'", items));
+  }
+
+  public static ValueExpression getExpr(ValueExpression expr, Integer i,
+                                        Object items)
+    throws JspTagException
+  {
+    if (items == null)
+      return expr;
+    else if (items instanceof Collection)
+      return new IndexedValueExpression(expr, i);
+    else if (items.getClass().isArray())
+      return new IndexedValueExpression(expr, i);
+    else if (items instanceof Map)
+      return new IteratedValueExpression(new IteratedExpression(expr), i);
+    else if (items instanceof Iterator)
+      return new IteratedValueExpression(new IteratedExpression(expr), i);
+    else if (items instanceof Enumeration)
+      return new IteratedValueExpression(new IteratedExpression(expr), i);
+    else if (items instanceof String)
+      return new StringTokenValueExpression(expr, i);
+    else
+      throw new JspTagException(L.l("unknown items value '{0}'", items));
+  }
+
+  public static class ArrayIterator implements Iterator {
+    private Object _array;
+    private int _index;
+    private int _length;
+
+    ArrayIterator(Object array)
+    {
+      _array = array;
+      _length = Array.getLength(array);
+    }
+    
+    public boolean hasNext()
+    {
+      return _index < _length;
+    }
+    
+    public Object next()
+    {
+      if (_index < _length)
+        return Array.get(_array, _index++);
+      else
+        return null;
+    }
+    
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  public static class StringIterator implements Iterator {
+    private String _value;
+    private int _length;
+    private int _i;
+    private StringBuilder _cb = new StringBuilder();
+
+    StringIterator(String value)
+    {
+      _value = value;
+      _length = value.length();
+    }
+    
+    public boolean hasNext()
+    {
+      return _i < _length;
+    }
+    
+    public Object next()
+    {
+      char ch = 0;
+      int begin = _i;
+      for (; _i < _length && (ch = _value.charAt(_i)) != ','; _i++) {
+      }
+
+      String value = _value.substring(begin, _i);
+
+      _i++;
+
+      return value;
+    }
+    
+    public void remove()
+    {
+      throw new UnsupportedOperationException();
+    }
   }
 
   public static class RangeIterator implements Iterator {
