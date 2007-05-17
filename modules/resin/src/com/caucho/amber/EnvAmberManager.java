@@ -108,7 +108,7 @@ public class EnvAmberManager
 
     try {
       if (_parentLoader instanceof DynamicClassLoader)
-	((DynamicClassLoader) _parentLoader).make();
+        ((DynamicClassLoader) _parentLoader).make();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -129,9 +129,9 @@ public class EnvAmberManager
     throws Throwable
   {
     /*
-    EntityManagerProxy userManager = null;//new EntityManagerProxy(this);
+      EntityManagerProxy userManager = null;//new EntityManagerProxy(this);
 
-    new InitialContext().rebind("java:comp/EntityManager", userManager);
+      new InitialContext().rebind("java:comp/EntityManager", userManager);
     */
   }
 
@@ -212,16 +212,16 @@ public class EnvAmberManager
   {
     if (! _isInit) {
       /* XXX:
-      try {
-	initEntityHomes();
-      } catch (RuntimeException e) {
-	throw e;
-      } catch (Exception e) {
-	throw new AmberRuntimeException(e);
-      }
+         try {
+         initEntityHomes();
+         } catch (RuntimeException e) {
+         throw e;
+         } catch (Exception e) {
+         throw new AmberRuntimeException(e);
+         }
       */
     }
-    
+
     return _entityHomeMap.get(name);
   }
 
@@ -281,10 +281,10 @@ public class EnvAmberManager
   /**
    * Returns the cache connection.
    */
-  public AmberConnection createAmberConnection()
+  public AmberConnection createAmberConnection(boolean isExtended)
   {
     // XXX: needs to be an EnvAmberConnection
-    return _managerList.get(0).createAmberConnection();
+    return _managerList.get(0).createAmberConnection(isExtended);
   }
 
   /**
@@ -327,9 +327,9 @@ public class EnvAmberManager
       ResultSetCacheChunk chunk = ref.get();
 
       if (chunk != null && chunk.isValid())
-	return chunk;
+        return chunk;
       else
-	return null;
+        return null;
     }
   }
 
@@ -376,15 +376,15 @@ public class EnvAmberManager
    * Sets the entity result.
    */
   public EntityItem putEntity(EntityType rootType,
-			      Object key,
-			      EntityItem entity)
+                              Object key,
+                              EntityItem entity)
   {
     SoftReference<EntityItem> ref = new SoftReference<EntityItem>(entity);
     EntityKey entityKey = new EntityKey(rootType, key);
 
     System.out.println("PUT: " + key + " " + entity);
     Thread.dumpStack();
-    
+
     ref = _entityCache.putIfNew(entityKey, ref);
 
     return ref.get();
@@ -422,24 +422,24 @@ public class EnvAmberManager
 
       iter = _entityCache.iterator();
       while (iter.hasNext()) {
-	LruCache.Entry<EntityKey,SoftReference<EntityItem>> entry;
-	entry = iter.next();
+        LruCache.Entry<EntityKey,SoftReference<EntityItem>> entry;
+        entry = iter.next();
 
-	EntityKey key = entry.getKey();
-	SoftReference<EntityItem> valueRef = entry.getValue();
-	EntityItem value = valueRef.get();
+        EntityKey key = entry.getKey();
+        SoftReference<EntityItem> valueRef = entry.getValue();
+        EntityItem value = valueRef.get();
 
-	if (value == null)
-	  continue;
+        if (value == null)
+          continue;
 
-	EntityType entityRoot = key.getEntityType();
-	Object entityKey = key.getKey();
+        EntityType entityRoot = key.getEntityType();
+        Object entityKey = key.getKey();
 
-	for (int i = 0; i < size; i++) {
-	  if (completions.get(i).complete(entityRoot, entityKey, value)) {
-	    // XXX: delete
-	  }
-	}
+        for (int i = 0; i < size; i++) {
+          if (completions.get(i).complete(entityRoot, entityKey, value)) {
+            // XXX: delete
+          }
+        }
       }
     }
 
@@ -448,17 +448,17 @@ public class EnvAmberManager
 
       iter = _queryCache.values();
       while (iter.hasNext()) {
-	SoftReference<ResultSetCacheChunk> ref = iter.next();
+        SoftReference<ResultSetCacheChunk> ref = iter.next();
 
-	ResultSetCacheChunk chunk = ref.get();
+        ResultSetCacheChunk chunk = ref.get();
 
-	if (chunk != null) {
-	  for (int i = 0; i < size; i++) {
-	    if (completions.get(i).complete(chunk)) {
-	      // XXX: delete
-	    }
-	  }
-	}
+        if (chunk != null) {
+          for (int i = 0; i < size; i++) {
+            if (completions.get(i).complete(chunk)) {
+              // XXX: delete
+            }
+          }
+        }
       }
     }
   }

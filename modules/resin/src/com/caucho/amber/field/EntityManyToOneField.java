@@ -1183,7 +1183,7 @@ public class EntityManyToOneField extends CascadableField {
       out.println("  __caucho_load_select_" + group + "(__caucho_session);");
       out.println();
       // jpa/0j5f
-      out.println("  if (__caucho_session.isInTransaction())");
+      out.println("  if (__caucho_session.isActive())");
       out.println("    __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) this);");
       out.println("}");
 

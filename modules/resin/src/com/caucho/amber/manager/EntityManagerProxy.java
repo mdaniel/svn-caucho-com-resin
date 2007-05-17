@@ -48,6 +48,8 @@ public class EntityManagerProxy implements EntityManager {
 
   private AmberPersistenceUnit _persistenceUnit;
 
+  private boolean _isExtended;
+
   public EntityManagerProxy(AmberPersistenceUnit persistenceUnit)
   {
     _persistenceUnit = persistenceUnit;
@@ -112,11 +114,21 @@ public class EntityManagerProxy implements EntityManager {
   }
 
   /**
-   * Returns the flush mode.
+   * Sets the flush mode.
    */
   public void setFlushMode(FlushModeType mode)
   {
     getCurrent().setFlushMode(mode);
+  }
+
+  /**
+   * Sets the extended type.
+   */
+  public void setExtended(boolean isExtended)
+  {
+    _isExtended = isExtended;
+
+    getCurrent().setExtended(isExtended);
   }
 
   /**
@@ -244,7 +256,7 @@ public class EntityManagerProxy implements EntityManager {
    */
   private AmberConnection getCurrent()
   {
-    return _persistenceUnit.getThreadConnection();
+    return _persistenceUnit.getThreadConnection(_isExtended);
   }
 
   public String toString()

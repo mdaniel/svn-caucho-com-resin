@@ -38,7 +38,7 @@ import java.util.Hashtable;
  */
 class EntityManagerNamingProxy implements ObjectProxy  {
   private AmberPersistenceUnit _unit;
-  
+
   EntityManagerNamingProxy(AmberPersistenceUnit unit)
   {
     _unit = unit;

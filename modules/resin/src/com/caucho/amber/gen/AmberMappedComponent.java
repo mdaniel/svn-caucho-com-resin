@@ -831,7 +831,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("else if (__caucho_state.isTransactional()) {");
     out.println("}");
     out.println("else if (__caucho_session == null ||");
-    out.println("         ! __caucho_session.isInTransaction()) {");
+    out.println("         ! __caucho_session.isActive()) {");
     out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_NON_TRANSACTIONAL;");
     out.println("  if (__caucho_cacheItem != null)");
     out.println("    __caucho_cacheItem.save((com.caucho.amber.entity.Entity) this);");
@@ -1608,7 +1608,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("if (__caucho_log.isLoggable(java.util.logging.Level.FINE))");
     out.println("  __caucho_log.fine(\"amber create \" + this.getClass().getName() + \" - PK: \" + __caucho_getPrimaryKey());");
     out.println();
-    out.println("if (aConn.isInTransaction()) {");
+    out.println("if (aConn.isActive()) {");
 
     // jpa/0i60
     // out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_TRANSACTIONAL;");
@@ -1880,7 +1880,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // It will only copyTo() within a transaction if
     // the cache item is new, i.e. the very first load.
     out.println();
-    out.println("if (! aConn.isInTransaction()) {");
+    out.println("if (! aConn.isActive()) {");
     out.pushDepth();
 
     out.println("aConn.postLoad(targetEntity);");

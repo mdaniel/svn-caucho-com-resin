@@ -308,7 +308,7 @@ public class AmberEntityHome {
 
     Object value = _entityFactory.getEntity(aConn, item);
 
-    if (aConn.isInTransaction()) {
+    if (aConn.isActive()) {
       if (value instanceof Entity)
         entity = (Entity) value;
       else if (_cauchoGetBeanMethod != null) {
@@ -379,7 +379,7 @@ public class AmberEntityHome {
 
       if (log.isLoggable(Level.FINER)) {
         log.log(Level.FINER, L.l("AmberEntityHome.find class: {0} PK: {1} isLoad: {2} xa: {3} notExpiringLoadMask: " + notExpiringLoadMask + " notExpiringGroup: " + notExpiringGroup,
-                                 className, key, isLoad, aConn.isInTransaction()));
+                                 className, key, isLoad, aConn.isActive()));
 
         String msg;
 
@@ -424,7 +424,7 @@ public class AmberEntityHome {
 
         // Copy as much as possible from a new cache item or
         // from the existing cache item if there is no transaction.
-        if (existingItem == null || ! aConn.isInTransaction()) {
+        if (existingItem == null || ! aConn.isActive()) {
           if (log.isLoggable(Level.FINER)) {
             String msg;
 
@@ -449,7 +449,7 @@ public class AmberEntityHome {
         if (isLoad) {
           entity.__caucho_retrieve_eager(aConn);
         }
-        else if (aConn.isInTransaction()) {
+        else if (aConn.isActive()) {
           // jpa/0v33: within a transaction, cannot copy from cache.
           entity.__caucho_retrieve_self(aConn);
         }
@@ -552,7 +552,7 @@ public class AmberEntityHome {
         item = new CacheableEntityItem(this, cacheEntity);
 
         // The cache entity is added after commit.
-        if (! aConn.isInTransaction()) {
+        if (! aConn.isActive()) {
           if (isLoad) {
             if (_manager.isJPA()) {
               // jpa/0o03
@@ -570,7 +570,7 @@ public class AmberEntityHome {
         }
       }
       else if (isLoad) {
-        if (! aConn.isInTransaction()) {
+        if (! aConn.isActive()) {
           if (_manager.isJPA()) {
             // jpa/0v33
             item.loadEntity(aConn, 0);
@@ -643,7 +643,7 @@ public class AmberEntityHome {
       item = new CacheableEntityItem(this, cacheEntity);
 
       // The cache entity is added after commit.
-      if (! aConn.isInTransaction()) {
+      if (! aConn.isActive()) {
         item = _manager.putEntity(getRootType(), key, item);
       }
     }

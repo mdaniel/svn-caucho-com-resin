@@ -38,6 +38,6 @@ public class CacheConnection extends AmberConnection {
    */
   CacheConnection(AmberPersistenceUnit persistenceUnit)
   {
-    super(persistenceUnit);
+    super(persistenceUnit, false);
   }
 }

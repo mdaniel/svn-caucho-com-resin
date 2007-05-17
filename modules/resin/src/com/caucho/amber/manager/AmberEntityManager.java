@@ -48,7 +48,7 @@ public class AmberEntityManager extends AmberConnection
    */
   AmberEntityManager(AmberPersistenceUnit persistenceUnit)
   {
-    super(persistenceUnit);
+    super(persistenceUnit, false);
 
     initJta(); // initThreadConnection(); // ejb/0q00
   }
@@ -56,7 +56,7 @@ public class AmberEntityManager extends AmberConnection
   public String toString()
   {
     AmberPersistenceUnit persistenceUnit = getPersistenceUnit();
-    
+
     if (persistenceUnit != null)
       return "AmberEntityManager[" + persistenceUnit.getName() + "]";
     else

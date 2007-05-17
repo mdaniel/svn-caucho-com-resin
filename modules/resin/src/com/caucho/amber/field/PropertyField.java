@@ -250,7 +250,7 @@ public class PropertyField extends AbstractField {
       out.println("if ((" + loadVar + " & " + mask + "L) == 0 && __caucho_session != null) {");
       out.println("  __caucho_load_" + maskGroup + "(__caucho_session);");
       out.println();
-      out.println("  if (__caucho_session.isInTransaction())");
+      out.println("  if (__caucho_session.isActive())");
       out.println("    __caucho_session.makeTransactional((com.caucho.amber.entity.Entity) this);");
       out.println("}");
       out.println();

@@ -1381,20 +1381,20 @@ public class AmberPersistenceUnit {
   /**
    * Returns the cache connection.
    */
-  public AmberConnection createAmberConnection()
+  public AmberConnection createAmberConnection(boolean isExtended)
   {
-    return new AmberConnection(this);
+    return new AmberConnection(this, isExtended);
   }
 
   /**
    * Returns the thread's amber connection.
    */
-  public AmberConnection getThreadConnection()
+  public AmberConnection getThreadConnection(boolean isExtended)
   {
     AmberConnection aConn = _threadConnection.get();
 
     if (aConn == null) {
-      aConn = new AmberConnection(this);
+      aConn = new AmberConnection(this, isExtended);
       aConn.initThreadConnection();
 
       _threadConnection.set(aConn);

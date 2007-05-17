@@ -110,6 +110,8 @@ public class AmberConnection
   private boolean _isInTransaction;
   private boolean _isXA;
 
+  private boolean _isExtended;
+
   private Connection _conn;
   private Connection _readConn;
 
@@ -131,9 +133,11 @@ public class AmberConnection
   /**
    * Creates a manager instance.
    */
-  AmberConnection(AmberPersistenceUnit persistenceUnit)
+  AmberConnection(AmberPersistenceUnit persistenceUnit,
+                  boolean isExtended)
   {
     _persistenceUnit = persistenceUnit;
+    _isExtended = isExtended;
   }
 
   /**
@@ -509,7 +513,7 @@ public class AmberConnection
 
       T entity = (T) load(entityClass, primaryKey, true);
 
-      if (! isInTransaction()) {
+      if (! isActive()) {
         // jpa/0o00
         detach();
       }
@@ -725,6 +729,14 @@ public class AmberConnection
   }
 
   /**
+   * Sets the extended type.
+   */
+  public void setExtended(boolean isExtended)
+  {
+    _isExtended = isExtended;
+  }
+
+  /**
    * Returns the flush mode.
    */
   public void setFlushMode(FlushModeType mode)
@@ -837,6 +849,15 @@ public class AmberConnection
   }
 
   /**
+   * Returns true if a transaction is active or
+   * this persistence context is extended.
+   */
+  public boolean isActive()
+  {
+    return _isInTransaction || _isExtended;
+  }
+
+  /**
    * Returns true if a transaction is active.
    */
   public boolean isInTransaction()
@@ -933,7 +954,7 @@ public class AmberConnection
       boolean isLoad = true;
 
       // jpa/0h13 as a negative test.
-      if (isInTransaction())
+      if (isActive())
         isLoad = isEager;
 
       // jpa/0l42, jpa/0l47, jpa/0o03, jpa/0o05
@@ -1407,7 +1428,7 @@ public class AmberConnection
       addInternalEntity(entity);
       added = true;
     }
-    else if (isInTransaction()) { // jpa/0g06
+    else if (isActive()) { // jpa/0g06
       index = getTransactionEntity(className, pk);
 
       // jpa/0s2d: if (! _txEntities.contains(entity)) {
@@ -1591,7 +1612,7 @@ public class AmberConnection
   {
     _entities.remove(entity);
 
-    if (_isInTransaction)
+    if (isActive())
       _txEntities.remove(entity);
 
     return true;
@@ -1615,7 +1636,7 @@ public class AmberConnection
       return false;
 
     EntityState state = entity.__caucho_getEntityState();
-    if (isInTransaction()) {
+    if (isActive()) {
       if (! state.isTransactional()) {
         // jpa/11a6
         return false;
@@ -2243,7 +2264,7 @@ public class AmberConnection
 
     // XXX: also needs to check PersistenceContextType.TRANSACTION/EXTENDED.
     // jpa/0k10
-    if (! isInTransaction())
+    if (! isActive())
       return;
 
     Table table = entity.__caucho_getEntityType().getTable();
@@ -2488,7 +2509,7 @@ public class AmberConnection
     try {
       // XXX: also needs to check PersistenceContextType.TRANSACTION/EXTENDED.
       // jpa/0g04
-      if (isInTransaction()) {
+      if (isActive()) {
         flushInternal();
       }
     }
@@ -2607,12 +2628,12 @@ public class AmberConnection
   public boolean shouldRetrieveFromCache()
   {
     // ejb/0d01
-    return (! isInTransaction());
+    return (! isActive());
   }
 
   public void setTransactionalState(Entity entity)
   {
-    if (isInTransaction()) {
+    if (isActive()) {
       // jpa/0ga8
       entity.__caucho_setConnection(this);
 
@@ -2688,7 +2709,7 @@ public class AmberConnection
       return item.getEntity();
 
     // XXX: jpa/0h31, expires the child cache entity.
-    if (isInTransaction()) {
+    if (isActive()) {
       int index = getTransactionEntity(className, pk);
 
       EntityState state = null;
@@ -2732,7 +2753,7 @@ public class AmberConnection
     _entities.add(entity);
 
     // jpa/0g06
-    if (isInTransaction()) {
+    if (isActive()) {
       _txEntities.add(entity);
 
       // jpa/0s2d: merge()
@@ -2826,8 +2847,8 @@ public class AmberConnection
   {
     // XXX: also needs to check PersistenceContextType.TRANSACTION/EXTENDED.
 
-    if (! (_isXA || _isInTransaction))
-      throw new TransactionRequiredException(L.l("{0}() operation can only be executed in the scope of a transaction.", operation));
+    if (! (_isXA || isActive()))
+      throw new TransactionRequiredException(L.l("{0}() operation can only be executed in the scope of a transaction or with an extended persistence context.", operation));
   }
 
   private Entity checkEntityType(Object entity, String operation)
@@ -3062,7 +3083,7 @@ public class AmberConnection
    */
   private void updateFlushPriority(Entity updateEntity)
   {
-    if (! isInTransaction())
+    if (! isActive())
       return;
 
     _txEntities.remove(updateEntity);
