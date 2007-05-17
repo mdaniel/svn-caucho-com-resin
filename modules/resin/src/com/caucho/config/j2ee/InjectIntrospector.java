@@ -29,6 +29,7 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.amber.manager.EntityManagerProxy;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
@@ -176,26 +177,26 @@ public class InjectIntrospector {
       return;
 
     introspectConstruct(initList, type.getSuperclass());
-    
+
     for (Method method : type.getDeclaredMethods()) {
       if (method.isAnnotationPresent(PostConstruct.class)) {
-	if (method.getParameterTypes().length != 0)
-	  throw new ConfigException(L.l("{0}: @PostConstruct is requires zero arguments",
-					method.getName()));
+        if (method.getParameterTypes().length != 0)
+          throw new ConfigException(L.l("{0}: @PostConstruct is requires zero arguments",
+                                        method.getName()));
 
-	PostConstructProgram initProgram
-	  = new PostConstructProgram(method);
+        PostConstructProgram initProgram
+          = new PostConstructProgram(method);
 
-	if (! initList.contains(initProgram))
-	  initList.add(initProgram);
+        if (! initList.contains(initProgram))
+          initList.add(initProgram);
       }
 
       if (method.isAnnotationPresent(PreDestroy.class)) {
-	if (method.getParameterTypes().length != 0)
-	  throw new ConfigException(L.l("{0}: @PreDestroy is requires zero arguments",
-					method.getName()));
+        if (method.getParameterTypes().length != 0)
+          throw new ConfigException(L.l("{0}: @PreDestroy is requires zero arguments",
+                                        method.getName()));
 
-	initList.add(new PreDestroyProgram(method));
+        initList.add(new PreDestroyProgram(method));
       }
     }
   }
@@ -221,11 +222,11 @@ public class InjectIntrospector {
       = (PersistenceContext) type.getAnnotation(PersistenceContext.class);
     if (pc != null) {
       String foreignName = findPersistenceContextName(pc.name(),
-						      pc.unitName());
+                                                      pc.unitName());
 
       if (! foreignName.equals(pc.name()) && ! "".equals(pc.name()))
-	initList.add(new JndiBindProgram(pc.name(), foreignName,
-					 javax.persistence.EntityManager.class));
+        initList.add(new JndiBindProgram(pc.name(), foreignName,
+                                         javax.persistence.EntityManager.class));
     }
 
     for (Field field : type.getDeclaredFields()) {
@@ -359,7 +360,7 @@ public class InjectIntrospector {
 
     // ejb/0f62
     /*
-    if ("".equals(jndiName))
+      if ("".equals(jndiName))
       jndiName = fieldName;
     */
 
@@ -373,7 +374,7 @@ public class InjectIntrospector {
     BuilderProgram program;
 
     program = new EjbInjectProgram(name, beanName, mappedName,
-				   fieldType, inject);
+                                   fieldType, inject);
 
     initList.add(program);
   }
@@ -518,6 +519,11 @@ public class InjectIntrospector {
           jndiName = ejbJndiName;
       }
 
+      if (pContext.type() == javax.persistence.PersistenceContextType.EXTENDED) {
+        Object value = new InitialContext().lookup(jndiName);
+        ((EntityManagerProxy) value).setExtended(true);
+      }
+
       initList.add(configureResource(field, fieldName, fieldType,
                                      unitName,
                                      "javax.persistence.EntityManager",
@@ -528,7 +534,7 @@ public class InjectIntrospector {
   }
 
   private static String findPersistenceContextName(String jndiName,
-						   String unitName)
+                                                   String unitName)
     throws ConfigException
   {
     String jndiPrefix = "java:comp/env/persistence";
@@ -565,7 +571,7 @@ public class InjectIntrospector {
         if (jndiName == null)
           jndiName = ejbJndiName;
 
-	return jndiName;
+        return jndiName;
       }
     } catch (RuntimeException e) {
       throw e;
@@ -599,8 +605,8 @@ public class InjectIntrospector {
       inject = new PropertyInject((Method) field);
 
     if (Executor.class.equals(fieldType)
-	|| ExecutorService.class.equals(fieldType)
-	|| ScheduledExecutorService.class.equals(fieldType)) {
+        || ExecutorService.class.equals(fieldType)
+        || ScheduledExecutorService.class.equals(fieldType)) {
       return new ExecutorInjectProgram(inject);
     }
 
@@ -629,7 +635,7 @@ public class InjectIntrospector {
     else {
       jndiName = prefix + name;
     }
-    
+
     if (SessionContext.class.equals(fieldType)) {
       jndiName = "java:comp/env/sessionContext";
     }
@@ -645,7 +651,12 @@ public class InjectIntrospector {
 
     BuilderProgram program;
 
-    if (field instanceof Method)
+    PersistenceContext pc
+      = (PersistenceContext) field.getAnnotation(PersistenceContext.class);
+
+    if (pc != null)
+      program = new PersistenceContextInjectProgram(jndiName, field, pc);
+    else if (field instanceof Method)
       program = new JndiInjectProgram(jndiName, (Method) field);
     else
       program = new JndiFieldInjectProgram(jndiName, (Field) field);
