@@ -308,11 +308,11 @@ public class TransactionContext implements Synchronization {
 
     if (entity != null)
       return (Entity) entity;
-    
+
     AmberEntityHome entityHome = server.getAmberEntityHome();
     Class cl = entityHome.getRootType().getInstanceClass();
-    
-    return getAmberConnection().getEntity(cl, key);
+
+    return getAmberConnection(false).getEntity(cl, key);
   }
 
   public void addAmberEntity(EntityServer server, Entity entity)
@@ -320,8 +320,8 @@ public class TransactionContext implements Synchronization {
     try {
       AmberEntityHome entityHome = server.getAmberEntityHome();
 
-      entity.__caucho_makePersistent(getAmberConnection(),
-				     entityHome.getEntityType());
+      entity.__caucho_makePersistent(getAmberConnection(false),
+                                     entityHome.getEntityType());
 
       addObject((TransactionObject) entity);
     } catch (RuntimeException e) {
@@ -334,10 +334,10 @@ public class TransactionContext implements Synchronization {
   /**
    * Returns the amber connection.
    */
-  public AmberConnection getAmberConnection()
+  public AmberConnection getAmberConnection(boolean isExtended)
   {
     if (_amberConn == null) {
-      _amberConn = _container.getEJBManager().getAmberManager().getThreadConnection();
+      _amberConn = _container.getEJBManager().getAmberManager().getThreadConnection(isExtended);
     }
 
     try {

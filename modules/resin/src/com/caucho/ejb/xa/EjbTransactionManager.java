@@ -70,7 +70,7 @@ public class EjbTransactionManager {
 
   private Hashtable<String,TransactionContext> _foreignTransactionMap
     = new Hashtable<String,TransactionContext>();
-  
+
   private final EnvServerManager _ejbManager;
 
   protected final TransactionManager _transactionManager;
@@ -78,7 +78,7 @@ public class EjbTransactionManager {
 
   private int _resinIsolation = -1;
   private int _jdbcIsolation = -1;
-  
+
   private long _transactionTimeout = 0;
 
   private boolean _isClosed;
@@ -93,12 +93,12 @@ public class EjbTransactionManager {
 
     UserTransaction ut = null;
     TransactionManager tm = null;
-    
+
     try {
       InitialContext ic = new InitialContext();
-      
+
       ut = (UserTransaction) ic.lookup("java:comp/UserTransaction");
-      
+
       tm = (TransactionManager) ic.lookup("java:comp/TransactionManager");
     } catch (NamingException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -118,7 +118,7 @@ public class EjbTransactionManager {
   {
     return _ejbManager;
   }
-  
+
 
   /**
    * Sets the Resin isolation.
@@ -186,7 +186,7 @@ public class EjbTransactionManager {
     TransactionContext xaContext = _threadTransaction.get();
 
     if (xaContext != null)
-      return xaContext.getAmberConnection();
+      return xaContext.getAmberConnection(false);
     else
       throw new IllegalStateException("can't get transaction outside of context");
   }
@@ -196,7 +196,7 @@ public class EjbTransactionManager {
   {
     try {
       if (_transactionManager.getTransaction() != null)
-	_userTransaction.commit();
+        _userTransaction.commit();
     } catch (Exception e) {
       throw EJBExceptionWrapper.create(e);
     }
@@ -217,7 +217,7 @@ public class EjbTransactionManager {
   {
     return _transactionManager;
   }
-  
+
   public Transaction getTransaction()
     throws EJBException
   {
@@ -266,7 +266,7 @@ public class EjbTransactionManager {
 
           _threadTransaction.set(cxt);
           cxt.pushDepth();
-        
+
           return cxt;
         }
       }
@@ -274,23 +274,23 @@ public class EjbTransactionManager {
       // Link the new context to any old context
       TransactionContext cxt = createTransaction();
       cxt.setOld(oldCxt);
-        
+
       _threadTransaction.set(cxt);
       // If there was an old transaction, use it
       if (oldTrans != null) {
         setTransaction(cxt, oldTrans);
         // This context is controlled by a user transaction
         cxt.setUserTransaction(true);
-	cxt.pushDepth();
+        cxt.pushDepth();
       }
       else {
         _userTransaction.setTransactionTimeout((int) (_transactionTimeout / 1000L));
         _userTransaction.begin();
         Transaction trans = _transactionManager.getTransaction();
 
-	setTransaction(cxt, trans);
+        setTransaction(cxt, trans);
       }
-      
+
       if (_resinIsolation == RESIN_ROW_LOCKING)
         cxt.setRowLocking(true);
 
@@ -317,11 +317,11 @@ public class EjbTransactionManager {
       Transaction trans = _transactionManager.getTransaction();
 
       if (trans == null)
-	return null;
-      
+        return null;
+
       // If in the same EJB transaction, return it
       if (cxt != null && cxt.getTransaction() == trans) {
-	cxt.pushDepth();
+        cxt.pushDepth();
         return cxt;
       }
 
@@ -329,14 +329,14 @@ public class EjbTransactionManager {
       TransactionContext newCxt = _transactionMap.get(trans);
 
       if (newCxt != null) {
-	newCxt.pushDepth();
-	return newCxt;
+        newCxt.pushDepth();
+        return newCxt;
       }
 
       // Create a new EJB context and link to any old context
       newCxt = createTransaction();
       newCxt.pushDepth();
-        
+
       _threadTransaction.set(newCxt);
       setTransaction(newCxt, trans);
       // The transaction is controlled by a user transaction
@@ -367,14 +367,14 @@ public class EjbTransactionManager {
       newCxt.setOldTrans(oldTrans);
 
       _threadTransaction.set(newCxt);
-      
+
       if (_resinIsolation == RESIN_ROW_LOCKING)
         newCxt.setRowLocking(true);
 
       _userTransaction.setTransactionTimeout((int) (_transactionTimeout / 1000L));
       _userTransaction.begin();
       Transaction trans = _transactionManager.getTransaction();
-      
+
       setTransaction(newCxt, trans);
 
       return newCxt;
@@ -399,30 +399,30 @@ public class EjbTransactionManager {
 
       // Create a new EJB transaction if necessary
       if (cxt == null || cxt.getTransaction() != trans) {
-	// check for a suspended transaction
-	if (trans != null)
-	  cxt = _transactionMap.get(trans);
-	else
-	  cxt = null;
+        // check for a suspended transaction
+        if (trans != null)
+          cxt = _transactionMap.get(trans);
+        else
+          cxt = null;
 
-	if (cxt == null) {
-	  cxt = createTransactionNoDepth();
-	  setTransaction(cxt, trans);
-	}
-	
+        if (cxt == null) {
+          cxt = createTransactionNoDepth();
+          setTransaction(cxt, trans);
+        }
+
         _threadTransaction.set(cxt);
 
-	if (trans != null) {
-	  cxt.setUserTransaction(true);
-	  cxt.pushDepth();
-	}
+        if (trans != null) {
+          cxt.setUserTransaction(true);
+          cxt.pushDepth();
+        }
       }
 
       cxt.pushDepth();
-      
+
       if (_resinIsolation == RESIN_ROW_LOCKING)
-	cxt.setRowLocking(true);
-      
+        cxt.setRowLocking(true);
+
       return cxt;
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -521,13 +521,13 @@ public class EjbTransactionManager {
    * @return the old transaction context
    */
   public void resume(TransactionContext oldCxt,
-		     Transaction oldTrans,
-		     Transaction completedTransaction)
+                     Transaction oldTrans,
+                     Transaction completedTransaction)
     throws EJBException
   {
     try {
       if (completedTransaction != null)
-	_transactionMap.remove(completedTransaction);
+        _transactionMap.remove(completedTransaction);
       _threadTransaction.set(oldCxt);
 
       if (oldTrans != null)
@@ -548,13 +548,13 @@ public class EjbTransactionManager {
       Transaction old = cxt.getTransaction();
 
       if (old != null)
-	_transactionMap.remove(old);
+        _transactionMap.remove(old);
     }
     else if (trans != null)
       _transactionMap.remove(trans);
-    
+
     cxt.setTransaction(trans);
-      
+
     if (trans != null)
       _transactionMap.put(trans, cxt);
   }
@@ -596,8 +596,8 @@ public class EjbTransactionManager {
       TransactionContext xa = _foreignTransactionMap.get(xid);
 
       if (xa != null) {
-	resume(xa, xa.getTransaction(), null);
-	return xa;
+        resume(xa, xa.getTransaction(), null);
+        return xa;
       }
 
       xa = beginRequiresNew();
@@ -625,12 +625,12 @@ public class EjbTransactionManager {
       if (xa == null) {
       }
       else if (xa.isEmpty()) {
-	_foreignTransactionMap.remove(xid);
-	xa.commit();
+        _foreignTransactionMap.remove(xid);
+        xa.commit();
       }
       else {
-	suspend();
-	//
+        suspend();
+        //
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
@@ -646,8 +646,8 @@ public class EjbTransactionManager {
       TransactionContext xa = _foreignTransactionMap.remove(xid);
 
       if (xa != null) {
-	resume(xa, xa.getTransaction(), null);
-	xa.commit();
+        resume(xa, xa.getTransaction(), null);
+        xa.commit();
       }
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
@@ -663,8 +663,8 @@ public class EjbTransactionManager {
       TransactionContext xa = _foreignTransactionMap.remove(xid);
 
       if (xa != null) {
-	resume(xa, xa.getTransaction(), null);
-	xa.rollback();
+        resume(xa, xa.getTransaction(), null);
+        xa.rollback();
       }
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
@@ -686,12 +686,11 @@ public class EjbTransactionManager {
   {
     synchronized (this) {
       if (_isClosed)
-	return;
+        return;
 
       _isClosed = true;
     }
-    
+
     _transactionMap = null;
   }
 }
-
