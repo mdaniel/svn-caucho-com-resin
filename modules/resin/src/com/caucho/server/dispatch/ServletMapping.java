@@ -213,7 +213,30 @@ public class ServletMapping extends ServletConfigImpl {
    */
   public String toString()
   {
-    return "ServletMapping[pattern=" + _urlPattern + ",name=" + getServletName() + "]";
+    StringBuilder builder = new StringBuilder();
+
+    builder.append("ServletMapping[");
+
+    for (int i = 0; i < _mappingList.size(); i++) {
+      Mapping mapping = _mappingList.get(i);
+
+      if (mapping.getUrlPattern() != null) {
+        builder.append("url-pattern=");
+        builder.append(mapping.getUrlPattern());
+        builder.append(", ");
+      }
+      else if (mapping.getUrlRegexp() != null) {
+        builder.append("url-regexp=");
+        builder.append(mapping.getUrlRegexp());
+        builder.append(", ");
+      }
+    }
+
+    builder.append(", name=");
+    builder.append(getServletName());
+    builder.append("]");
+
+    return builder.toString();
   }
 
   static class Mapping {
