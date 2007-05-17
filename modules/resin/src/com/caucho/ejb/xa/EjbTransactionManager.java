@@ -186,7 +186,7 @@ public class EjbTransactionManager {
     TransactionContext xaContext = _threadTransaction.get();
 
     if (xaContext != null)
-      return xaContext.getAmberConnection(false);
+      return xaContext.getAmberConnection();
     else
       throw new IllegalStateException("can't get transaction outside of context");
   }
