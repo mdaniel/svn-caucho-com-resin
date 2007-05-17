@@ -32,9 +32,10 @@ package com.caucho.jms2.message;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.MessageFormatException;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.*;
+import java.io.*;
+import com.caucho.vfs.*;
+import com.caucho.hessian.io.*;
 
 /**
  * A stream message.
@@ -64,6 +65,15 @@ public class MapMessageImpl extends MessageImpl implements MapMessage  {
     super(map);
 
     _map.putAll(map._map);
+  }
+
+  /**
+   * Returns the type enumeration.
+   */
+  @Override
+  public MessageType getType()
+  {
+    return MessageType.MAP;
   }
 
   /**
@@ -346,6 +356,54 @@ public class MapMessageImpl extends MessageImpl implements MapMessage  {
     super.copy(newMsg);
 
     newMsg._map = new HashMap<String,Object>(_map);
+  }
+
+  /**
+   * Serialize the body to an input stream.
+   */
+  @Override
+  public InputStream bodyToInputStream()
+    throws IOException
+  {
+    if (_map == null)
+      return null;
+    
+    TempStream body = new TempStream();
+    body.openWrite();
+      
+    StreamImplOutputStream ws = new StreamImplOutputStream(body);
+
+    Hessian2Output out = new Hessian2Output(ws);
+
+    out.writeObject(_map);
+
+    out.close();
+    
+    ws.close();
+
+    return body.openRead(true);
+  }
+
+  /**
+   * Read the body from an input stream.
+   */
+  @Override
+  public void readBody(InputStream is)
+    throws IOException, JMSException
+  {
+    if (is == null)
+      return;
+
+    Hessian2Input in = new Hessian2Input(is);
+
+    _map = (HashMap<String,Object>) in.readObject();
+
+    in.close();
+  }
+
+  public String toString()
+  {
+    return "MapMessageImpl[]";
   }
 }
 

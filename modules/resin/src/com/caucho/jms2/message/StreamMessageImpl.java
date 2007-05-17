@@ -33,6 +33,10 @@ import javax.jms.JMSException;
 import javax.jms.MessageEOFException;
 import javax.jms.StreamMessage;
 import java.util.ArrayList;
+import java.io.*;
+
+import com.caucho.vfs.*;
+import com.caucho.hessian.io.*;
 
 /**
  * A stream message.
@@ -43,6 +47,45 @@ public class StreamMessageImpl extends MessageImpl implements StreamMessage
   private int _index;
   private byte []_bytes;
   private int _bytesOffset;
+
+  public StreamMessageImpl()
+  {
+  }
+
+  StreamMessageImpl(StreamMessage stream)
+    throws JMSException
+  {
+    super(stream);
+
+    Object value;
+    while ((value = stream.readObject()) != null) {
+      writeObject(value);
+    }
+
+    reset();
+  }
+
+  StreamMessageImpl(StreamMessageImpl stream)
+  {
+    super(stream);
+
+    _values.addAll(stream._values);
+
+    try {
+      reset();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Returns the type enumeration.
+   */
+  @Override
+  public MessageType getType()
+  {
+    return MessageType.STREAM;
+  }
 
   /**
    * Sets the body for reading.
@@ -376,13 +419,10 @@ public class StreamMessageImpl extends MessageImpl implements StreamMessage
     _values.add(obj);
   }
 
+  @Override
   public MessageImpl copy()
   {
-    StreamMessageImpl msg = new StreamMessageImpl();
-
-    copy(msg);
-
-    return msg;
+    return new StreamMessageImpl(this);
   }
 
   protected void copy(StreamMessageImpl newMsg)
@@ -391,6 +431,55 @@ public class StreamMessageImpl extends MessageImpl implements StreamMessage
 
     newMsg._values = new ArrayList(_values);
     newMsg._index = 0;
+  }
+
+  /**
+   * Serialize the body to an input stream.
+   */
+  @Override
+  public InputStream bodyToInputStream()
+    throws IOException
+  {
+    if (_values == null || _values.size() == 0)
+      return null;
+    
+    TempStream body = new TempStream();
+    body.openWrite();
+      
+    StreamImplOutputStream ws = new StreamImplOutputStream(body);
+
+    Hessian2Output out = new Hessian2Output(ws);
+
+    out.writeObject(_values);
+
+    out.close();
+    
+    ws.close();
+
+    return body.openRead(true);
+  }
+
+  /**
+   * Read the body from an input stream.
+   */
+  @Override
+  public void readBody(InputStream is)
+    throws IOException, JMSException
+  {
+    if (is != null) {
+      Hessian2Input in = new Hessian2Input(is);
+
+      _values = (ArrayList<Object>) in.readObject();
+
+      in.close();
+    }
+
+    reset();
+  }
+
+  public String toString()
+  {
+    return "StreamMessageImpl[]";
   }
 }
 

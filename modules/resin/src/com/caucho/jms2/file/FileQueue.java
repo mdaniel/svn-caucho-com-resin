@@ -151,7 +151,7 @@ public class FileQueue extends AbstractQueue implements Topic
 	  MessageImpl msg = entry.getMessage();
 
 	  if (msg == null)
-	    msg = _store.readMessage(entry.getId());
+	    msg = _store.readMessage(entry.getId(), entry.getType());
 
 	  boolean autoAck = true;
 	  if (autoAck)

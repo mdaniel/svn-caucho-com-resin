@@ -30,16 +30,12 @@
 package com.caucho.jms2.message;
 
 import com.caucho.jms.JMSExceptionWrapper;
-import com.caucho.vfs.ContextLoaderObjectInputStream;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
+import com.caucho.hessian.io.*;
 
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * An object message.
@@ -47,6 +43,34 @@ import java.io.Serializable;
 public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
 {
   private TempStream _tempStream;
+
+  public ObjectMessageImpl()
+  {
+  }
+
+  public ObjectMessageImpl(ObjectMessage msg)
+    throws JMSException
+  {
+    super(msg);
+
+    setObject(msg.getObject());
+  }
+
+  public ObjectMessageImpl(ObjectMessageImpl msg)
+  {
+    super(msg);
+
+    _tempStream = msg._tempStream;
+  }
+
+  /**
+   * Returns the type enumeration.
+   */
+  @Override
+  public MessageType getType()
+  {
+    return MessageType.OBJECT;
+  }
   
   /**
    * Writes the object to the stream.
@@ -59,10 +83,10 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
     _tempStream = new TempStream(null);
     
     try {
-      WriteStream ws = new WriteStream(_tempStream);
-      ObjectOutputStream oos = new ObjectOutputStream(ws);
-      oos.writeObject(o);
-      oos.close();
+      OutputStream ws = new StreamImplOutputStream(_tempStream);
+      Hessian2Output out = new Hessian2Output(ws);
+      out.writeObject(o);
+      out.close();
       ws.close();
     } catch (Exception e) {
       throw JMSExceptionWrapper.create(e);
@@ -80,9 +104,9 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
     
     try {
       ReadStream is = _tempStream.openRead(false);
-      ObjectInputStream ois = new ContextLoaderObjectInputStream(is);
-      Serializable object = (Serializable) ois.readObject();
-      ois.close();
+      Hessian2Input in = new Hessian2Input(is);
+      Serializable object = (Serializable) in.readObject();
+      in.close();
       is.close();
 
       return object;
@@ -105,13 +129,43 @@ public class ObjectMessageImpl extends MessageImpl implements ObjectMessage
 
   public MessageImpl copy()
   {
-    ObjectMessageImpl msg = new ObjectMessageImpl();
+    return new ObjectMessageImpl(this);
+  }
 
-    copy(msg);
-    
-    msg._tempStream = _tempStream;
+  /**
+   * Serialize the body to an input stream.
+   */
+  @Override
+  public InputStream bodyToInputStream()
+    throws IOException
+  {
+    if (_tempStream != null)
+      return _tempStream.openRead(false);
+    else
+      return null;
+  }
 
-    return msg;
+  /**
+   * Read the body from an input stream.
+   */
+  @Override
+  public void readBody(InputStream is)
+    throws IOException, JMSException
+  {
+    if (is == null)
+      return;
+
+    _tempStream = new TempStream();
+    _tempStream.openWrite();
+
+    WriteStream ws = new WriteStream(_tempStream);
+    ws.writeStream(is);
+    ws.close();
+  }
+
+  public String toString()
+  {
+    return "ObjectMessageImpl[]";
   }
 }
 

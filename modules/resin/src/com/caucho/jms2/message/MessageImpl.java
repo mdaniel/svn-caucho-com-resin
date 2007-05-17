@@ -130,6 +130,14 @@ public class MessageImpl implements Message
   }
 
   /**
+   * Returns the type enumeration.
+   */
+  public MessageType getType()
+  {
+    return MessageType.NULL;
+  }
+
+  /**
    * Returns the message id.
    */
   public String getJMSMessageID()

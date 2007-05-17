@@ -72,6 +72,16 @@ public class FileQueueEntry
     return _id;
   }
 
+  public MessageType getType()
+  {
+    return _type;
+  }
+
+  public void setType(MessageType type)
+  {
+    _type = type;
+  }
+
   public MessageImpl getMessage()
   {
     SoftReference<MessageImpl> ref = _msg;

@@ -60,6 +60,8 @@ public class FileQueueStore
   private static final Logger log
     = Logger.getLogger(FileQueueStore.class.getName());
 
+  private static final MessageType []MESSAGE_TYPE = MessageType.values();
+
   private Path _path;
   private DataSource _db;
   private String _name = "default";
@@ -170,7 +172,8 @@ public class FileQueueStore
 	_sendStmt.setLong(1, _queueId);
 	_sendStmt.setLong(2, expireTime);
 	_sendStmt.setBinaryStream(3, msg.propertiesToInputStream(), 0);
-	_sendStmt.setBinaryStream(4, msg.bodyToInputStream(), 0);
+	_sendStmt.setInt(4, msg.getType().ordinal());
+	_sendStmt.setBinaryStream(5, msg.bodyToInputStream(), 0);
 
 	_sendStmt.executeUpdate();
 
@@ -204,8 +207,10 @@ public class FileQueueStore
 	while (rs.next()) {
 	  long id = rs.getLong(1);
 	  long expire = rs.getLong(2);
-
-	  fileQueue.addEntry(id, expire);
+	  MessageType type = MESSAGE_TYPE[rs.getInt(3)];
+	  
+	  FileQueueEntry entry = fileQueue.addEntry(id, expire);
+	  entry.setType(type);
 	}
 
 	rs.close();
@@ -218,7 +223,7 @@ public class FileQueueStore
   /**
    * Retrieves a message from the persistent store.
    */
-  public MessageImpl readMessage(long id)
+  public MessageImpl readMessage(long id, MessageType type)
   {
     synchronized (this) {
       try {
@@ -227,7 +232,31 @@ public class FileQueueStore
 	ResultSet rs = _readStmt.executeQuery();
 
 	if (rs.next()) {
-	  MessageImpl msg = (MessageImpl) _messageFactory.createTextMessage();
+	  MessageImpl msg;
+
+	  switch (type) {
+	  case NULL:
+	    msg = new MessageImpl();
+	    break;
+	  case BYTES:
+	    msg = new BytesMessageImpl();
+	    break;
+	  case MAP:
+	    msg = new MapMessageImpl();
+	    break;
+	  case OBJECT:
+	    msg = new ObjectMessageImpl();
+	    break;
+	  case STREAM:
+	    msg = new StreamMessageImpl();
+	    break;
+	  case TEXT:
+	    msg = new TextMessageImpl();
+	    break;
+	  default:
+	    msg = new MessageImpl();
+	    break;
+	  }
 
 	  InputStream is = rs.getBinaryStream(1);
 	  if (is != null) {
@@ -335,6 +364,7 @@ public class FileQueueStore
 	   + "  refcount integer,"
 	   + "  owner bigint,"
 	   + "  header blob,"
+	   + "  type integer,"
 	   + "  body blob"
 	   + ")");
 
@@ -382,7 +412,7 @@ public class FileQueueStore
     throws SQLException
   {
     String sql = ("insert into " + _messageTable
-		  + " (queue,expire,header,body) VALUES(?,?,?,?)");
+		  + " (queue,expire,header,type,body) VALUES(?,?,?,?,?)");
     
     _sendStmt = _conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
     
@@ -396,7 +426,7 @@ public class FileQueueStore
     
     _readStmt = _conn.prepareStatement(sql);
     
-    sql = ("select id,expire from " + _messageTable
+    sql = ("select id,expire,type from " + _messageTable
 	   + " WHERE queue=? ORDER BY id");
     
     _receiveStartStmt = _conn.prepareStatement(sql);

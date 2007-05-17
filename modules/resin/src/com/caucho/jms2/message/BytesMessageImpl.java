@@ -39,7 +39,7 @@ import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.MessageEOFException;
 import javax.jms.MessageFormatException;
-import java.io.IOException;
+import java.io.*;
 import java.util.logging.Level;
 
 /**
@@ -49,6 +49,44 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
   private TempStream _tempStream;
   private ReadStream _rs;
   private WriteStream _ws;
+
+  public BytesMessageImpl()
+  {
+  }
+
+  BytesMessageImpl(BytesMessage bytes)
+    throws JMSException
+  {
+    super(bytes);
+
+    int ch;
+    while ((ch = bytes.readUnsignedByte()) >= 0) {
+      writeByte((byte) ch);
+    }
+
+    reset();
+  }
+
+  BytesMessageImpl(BytesMessageImpl bytes)
+    throws JMSException
+  {
+    super(bytes);
+
+    bytes.reset();
+
+    _tempStream = bytes._tempStream;
+
+    reset();
+  }
+
+  /**
+   * Returns the type enumeration.
+   */
+  @Override
+  public MessageType getType()
+  {
+    return MessageType.BYTES;
+  }
 
   /**
    * Sets the body for reading.
@@ -592,11 +630,11 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
 
   public MessageImpl copy()
   {
-    BytesMessageImpl msg = new BytesMessageImpl();
-
-    copy(msg);
-
-    return msg;
+    try {
+      return new BytesMessageImpl(this);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   protected void copy(BytesMessageImpl newMsg)
@@ -612,6 +650,42 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+  }
+
+  /**
+   * Serialize the body to an input stream.
+   */
+  @Override
+  public InputStream bodyToInputStream()
+    throws IOException
+  {
+    if (_tempStream != null)
+      return _tempStream.openRead();
+    else
+      return null;
+  }
+
+  /**
+   * Read the body from an input stream.
+   */
+  @Override
+  public void readBody(InputStream is)
+    throws IOException, JMSException
+  {
+    if (is != null) {
+      WriteStream out = getWriteStream();
+
+      out.writeStream(is);
+
+      out.close();
+    }
+
+    reset();
+  }
+
+  public String toString()
+  {
+    return "BytesMessageImpl[]";
   }
 }
 

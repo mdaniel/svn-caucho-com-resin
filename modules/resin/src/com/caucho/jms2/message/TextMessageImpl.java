@@ -63,6 +63,15 @@ public class TextMessageImpl extends MessageImpl implements TextMessage  {
   }
 
   /**
+   * Returns the type enumeration.
+   */
+  @Override
+  public MessageType getType()
+  {
+    return MessageType.TEXT;
+  }
+
+  /**
    * Returns the message text.
    */
   public String getText()

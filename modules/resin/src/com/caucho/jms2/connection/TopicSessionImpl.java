@@ -83,6 +83,22 @@ public class TopicSessionImpl extends SessionImpl implements TopicSession
                                           boolean noLocal)
     throws JMSException
   {
-    return (TopicSubscriber) createConsumer(topic, messageSelector, noLocal);
+    checkOpen();
+
+    if (topic == null)
+      throw new InvalidDestinationException(L.l("topic is null.  Destination may not be null for Session.createSubscriber"));
+    
+    if (! (topic instanceof AbstractQueue))
+      throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
+						topic));
+
+    AbstractQueue dest = (AbstractQueue) topic;
+
+    TopicSubscriber subscriber
+      = new TopicSubscriberImpl(this, dest, messageSelector, noLocal);
+    
+    // addConsumer((MessageConsumerImpl) consumer);
+
+    return subscriber;
   }
 }
