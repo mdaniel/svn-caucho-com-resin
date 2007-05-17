@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -500,6 +501,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
       if (method != null)
         return generateGet(value);
     } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
     }
 
     Id id = getEntitySourceType().getId();

@@ -82,7 +82,7 @@ public class AmberEntityHome {
     try {
       Class cl = Class.forName("com.caucho.ejb.entity.EntityObject");
       _cauchoGetBeanMethod = cl.getMethod("_caucho_getBean", new Class[0]);
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     }
   }
@@ -315,7 +315,7 @@ public class AmberEntityHome {
         try {
           entity = (Entity) _cauchoGetBeanMethod.invoke(value, new Object[0]);
           entity.__caucho_makePersistent(aConn, item);
-        } catch (Throwable e) {
+        } catch (Exception e) {
           log.log(Level.FINER, e.toString(), e);
         }
       }

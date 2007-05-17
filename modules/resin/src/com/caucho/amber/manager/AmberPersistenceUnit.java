@@ -487,7 +487,7 @@ public class AmberPersistenceUnit {
 
         _amberContainer.addMappedSuperclass(className, mappedSuperclassType);
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       _amberContainer.addEntityException(className, e);
 
       throw new ConfigException(e);
@@ -984,7 +984,7 @@ public class AmberPersistenceUnit {
 
           try {
             getGenerator().generateJava(javaGen, entityType);
-          } catch (Throwable e) {
+          } catch (Exception e) {
             log.log(Level.FINER, e.toString(), e);
           }
         }
@@ -1006,7 +1006,7 @@ public class AmberPersistenceUnit {
 
         try {
           getGenerator().generateJava(javaGen, embeddableType);
-        } catch (Throwable e) {
+        } catch (Exception e) {
           log.log(Level.FINER, e.toString(), e);
         }
       }
@@ -1029,7 +1029,7 @@ public class AmberPersistenceUnit {
 
         try {
           getGenerator().generateJava(javaGen, type);
-        } catch (Throwable e) {
+        } catch (Exception e) {
           log.log(Level.FINER, e.toString(), e);
         }
       }
@@ -1101,7 +1101,7 @@ public class AmberPersistenceUnit {
 
     try {
       createType(name);
-    } catch (Throwable e) {
+    } catch (Exception e) {
     }
 
     return _entityHomeMap.get(name);

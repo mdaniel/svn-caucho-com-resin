@@ -1838,7 +1838,7 @@ public class AmberConnection
             entity.__caucho_afterCommit();
           else
             entity.__caucho_afterRollback();
-        } catch (Throwable e) {
+        } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
         }
       }
