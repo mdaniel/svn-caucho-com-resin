@@ -454,7 +454,7 @@ can specify a servlet alias defined by <code>filter</code>.
 <deftable-childtags title="Resin extensions to filter-mapping">
 <tr>
   <td>url-regexp</td>
-  <td>A regular expression matching the url</td>
+  <td>A regular expression matching the portion of the url that follows the <g>context path</g></td>
 </tr>
 <tr>
   <td>filter-name</td>
@@ -487,6 +487,17 @@ can specify a servlet alias defined by <code>filter</code>.
   &lt;/servlet-mapping&gt;
 &lt;/web-app&gt;
 </example>
+
+<p>
+<code>url-regexp</code> matches the portion of the url that follows the <g>context path</g>.  
+A webapp in <code>webapps/ROOT</code>, and a url
+<code>http://localhost/foo/hello.html</code> will have a value of <code>"/foo/hello.html"</code> for the
+purposes of the regular expression match.
+A webapp in <code>webapps/baz</code> and a url
+<code>http://localhost/baz/hello.html</code> will have a url of <code>"/hello.html"</code> for the
+purposes of the regular expression match, because "/baz" is the context path.
+</p>
+
 </defun>
 
 <defun title="&lt;form-login-config>" localtoc-indent="1" version="Servlet" type="defun">
@@ -751,7 +762,7 @@ IIS, you may need to match the server's path aliases.</p>
 </tr>
 <tr>
   <td>url-regexp</td>
-  <td>A regular expression matching the url</td>
+  <td>A regular expression matching the portion of the url that follows the <g>context path</g></td>
 </tr>
 <tr>
   <td>real-path</td>
@@ -984,7 +995,7 @@ children, <var>url-pattern</var> and <var>servlet-name</var>.
 <deftable-childtags title="Resin extensions to servlet-mapping">
 <tr>
   <td>url-regexp</td>
-  <td>A regular expression matching the url</td>
+  <td>A regular expression matching the portion of the url that follows the <g>context path</g></td>
   <td>n/a</td>
 </tr>
 <tr>
@@ -1013,6 +1024,17 @@ children, <var>url-pattern</var> and <var>servlet-name</var>.
 
 &lt;/web-app&gt;
 </example>
+
+<p>
+<code>url-regexp</code> matches the portion of the url that follows the <g>context path</g>.  
+A webapp in <code>webapps/ROOT</code>, and a url
+<code>http://localhost/foo/hello.html</code> will have a value of <code>"/foo/hello.html"</code> for the
+purposes of the regular expression match.
+A webapp in <code>webapps/baz</code> and a url
+<code>http://localhost/baz/hello.html</code> will have a url of <code>"/hello.html"</code> for the
+purposes of the regular expression match, because "/baz" is the context path.
+</p>
+
 <p>In Resin, the special <code>servlet-name</code> <var>`invoker'</var> is used to dispatch
 servlets by class name.
 </p>

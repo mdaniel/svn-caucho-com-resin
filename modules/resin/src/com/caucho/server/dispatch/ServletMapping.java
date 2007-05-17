@@ -51,8 +51,6 @@ public class ServletMapping extends ServletConfigImpl {
 
   private ArrayList<Mapping> _mappingList
     = new ArrayList<Mapping>();
-  private String _urlPattern;
-  private String _urlRegexp;
   private boolean _isStrictMapping;
   
   /**
