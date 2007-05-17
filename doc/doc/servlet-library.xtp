@@ -14,6 +14,7 @@
 <body>
 
 <summary/>
+<localtoc/>
 
 <s1 title="ErrorStatusServlet">
 
@@ -302,6 +303,35 @@ There is a bit more power using servlet-regexp and regular expressions:
                 servlet-class="com.caucho.servlets.HttpProxyServlet"&gt;
   &lt;init host='localhost:8081'/&gt;
 &lt;/servlet-regexp&gt;
+</example>
+</s1>
+
+<s1 title="SSIServlet">
+
+<p>
+<a href="javadoc|com.caucho.servlets.ssi.SSIServlet|"/> is a servlet that
+processes server side include directives.  The syntax for server side includes
+is the same as the syntax used in <a href="http://httpd.apache.org/docs/1.3/mod/mod_include.html">Apache httpd</a>.
+</p>
+
+<example title="resin-web.xml SSIServlet">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;servlet-mapping url-pattern="*.shtml"
+                   servlet-class="com.caucho.servlets.ssi.SSIServlet"/&gt;
+&lt;/web-app&gt;
+</example>
+
+<example title="test.shtml">
+&lt;h1&gt;A little test&lt;/h1&gt;
+
+&lt;!--#config timefmt="%Y-%m-%d" --&gt;
+&lt;!--#echo var="DATE_GMT" --&gt;
+
+&lt;!--#include virtual="inc.jsp" --&gt;
+
+&lt;!--#set var="a" value="$REQUEST_METHOD" --&gt;
+&lt;!--#include virtual="inc.jsp?q=$a" --&gt;
+
 </example>
 </s1>
 
