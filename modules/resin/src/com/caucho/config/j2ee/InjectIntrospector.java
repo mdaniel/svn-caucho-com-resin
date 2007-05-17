@@ -29,7 +29,6 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.amber.manager.EntityManagerProxy;
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
@@ -517,11 +516,6 @@ public class InjectIntrospector {
 
         if (jndiName == null)
           jndiName = ejbJndiName;
-      }
-
-      if (pContext.type() == javax.persistence.PersistenceContextType.EXTENDED) {
-        Object value = new InitialContext().lookup(jndiName);
-        ((EntityManagerProxy) value).setExtended(true);
       }
 
       initList.add(configureResource(field, fieldName, fieldType,
