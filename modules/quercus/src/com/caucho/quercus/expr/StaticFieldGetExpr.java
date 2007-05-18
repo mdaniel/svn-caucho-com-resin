@@ -67,7 +67,7 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    return env.getStaticClassFieldVar(_className, _varName);
+    return env.getStaticClassFieldValue(_className, _varName);
   }
 
   /**
@@ -94,6 +94,18 @@ public class StaticFieldGetExpr extends AbstractVarExpr {
     return env.getStaticClassFieldVar(_className, _varName);
   }
 
+  /**
+   * Evaluates the expression, creating an array for unassigned values.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalArray(Env env)
+  {
+    return env.getStaticClassFieldVar(_className, _varName).getArray();
+  }
+  
   /**
    * Evaluates the expression.
    *
