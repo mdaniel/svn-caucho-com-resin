@@ -144,16 +144,23 @@ public class FmtParseNumberTag extends BodyTagSupport {
 
       if (_value != null)
         string = _value;
-      else
+      else if (bodyContent != null)
         string = bodyContent.getString().trim();
+      else
+        string = null;
 
-      Number value = format.parse(string);
+      Number value = null;
+
+      if (string != null && ! "".equals(string))
+        value = format.parse(string);
 
       if (_var == null) {
         if (_scope != null)
           throw new JspException(L.l("fmt:parseNumber var must not be null when scope '{0}' is set.",
                                      _scope));
-        out.print(value);
+
+        if (value != null)
+          out.print(value);
       }
       else
         CoreSetTag.setValue(pageContext, _var, _scope, value);
@@ -191,11 +198,6 @@ public class FmtParseNumberTag extends BodyTagSupport {
         format = NumberFormat.getInstance(locale);
       else
         format = NumberFormat.getInstance();
-
-      DecimalFormat decimalFormat = (DecimalFormat) format;
-
-      if (_pattern != null)
-        decimalFormat.applyPattern(_pattern);
     }
     else if (_type.equals("percent")) {
       if (locale != null)
@@ -211,6 +213,12 @@ public class FmtParseNumberTag extends BodyTagSupport {
     }
     else
       throw new JspException(L.l("unknown formatNumber type `{0}'", _type));
+
+    if (_pattern != null) {
+      DecimalFormat decimalFormat = (DecimalFormat) format;
+
+      decimalFormat.applyPattern(_pattern);
+    }
 
     format.setParseIntegerOnly(_integerOnly);
 

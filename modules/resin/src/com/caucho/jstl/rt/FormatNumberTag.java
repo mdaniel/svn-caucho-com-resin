@@ -301,8 +301,7 @@ public class FormatNumberTag extends BodyTagSupport {
 
 	if (_currencyCode != null && dSymbols != null)
           dSymbols.setInternationalCurrencySymbol(_currencyCode);
-
-        if (_currencySymbol != null && dSymbols != null)
+        else if (_currencySymbol != null && dSymbols != null)
           dSymbols.setCurrencySymbol(_currencySymbol);
 
         dFormat.setDecimalFormatSymbols(dSymbols);

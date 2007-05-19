@@ -5,7 +5,7 @@
 
   <tag>
     <name>query</name>
-    <tag-class>com.caucho.jstl.rt.SqlQueryTag</tag-class>
+    <tag-class>com.caucho.jstl.el.SqlQueryTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>

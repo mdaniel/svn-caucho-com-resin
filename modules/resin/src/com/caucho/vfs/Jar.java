@@ -262,8 +262,9 @@ public class Jar implements CacheListener {
   public boolean exists(String path)
   {
     JarNode node = getJarNode(path);
-    
-    // XXX: facelets vs issue of meta-inf
+
+    // server/249f, server/249g
+    // XXX: facelets vs issue of meta-inf (i.e. lower case)
     return node != null && node.exists();
   }
 
@@ -528,8 +529,12 @@ public class Jar implements CacheListener {
 
     closeJarFile();
 
-    if (cache != null && path != null)
+    if (cache != null && path != null) {
+      if (path.endsWith("/"))
+        path = path.substring(0, path.length() - 1);
+      
       return cache.get(path);
+    }
     else
       return null;
   }

@@ -42,6 +42,7 @@ import javax.servlet.jsp.jstl.sql.Result;
 import javax.servlet.jsp.jstl.sql.SQLExecutionTag;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.sql.DataSource;
+import java.io.*;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -91,8 +92,12 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
    * Sets the data source.
    */
   public void setDataSource(Object dataSource)
+    throws JspException
   {
     _dataSource = dataSource;
+
+    if (this.pageContext.getAttribute("caucho.jstl.sql.conn") != null)
+      throw new JspException(L.l("sql:query cannot set data-source inside sql:transaction"));
   }
 
   /**
@@ -152,7 +157,8 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
       ArrayList params = _params;
       _params = null;
       Statement stmt;
-      
+
+      /*
       int paramCount = countParameters(sql);
 
       if (params == null && paramCount != 0
@@ -160,6 +166,7 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
         throw new JspException(L.l("sql:param does not match expected parameters\nin '{0}'",
                                    sql));
       }
+      */
 
       int maxRows = -1;
 
@@ -169,10 +176,14 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
         Object maxRowsValue
           = Config.find(pageContext, Config.SQL_MAX_ROWS);
 
-        if (maxRowsValue instanceof Number)
-          maxRows = ((Number) maxRowsValue).intValue();
-        else if (maxRowsValue != null)
-          maxRows = Integer.valueOf(String.valueOf(maxRowsValue));
+        try {
+          if (maxRowsValue instanceof Number)
+            maxRows = ((Number) maxRowsValue).intValue();
+          else if (maxRowsValue != null)
+            maxRows = Integer.valueOf(String.valueOf(maxRowsValue));
+        } catch (NumberFormatException e) {
+          throw new JspException(e.getMessage());
+        }
       }
         
       if (maxRows < -1)
@@ -283,6 +294,11 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
         return (DataSource) value;
     } catch (NamingException e) {
     }
+
+    DataSource dataSource = getDataSource(key);
+
+    if (dataSource != null)
+      return dataSource;
     
     throw new JspException(L.l("'{0}' is an invalid DataSource.", ds));
   }
@@ -325,6 +341,40 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
     }
   }
 
+  private static DataSource getDataSource(String key)
+  {
+    String []split = key.split(",");
+    String url = split[0];
+    String user = split.length >= 3 ? split[2] : null;
+    String password = split.length >= 4 ? split[3] : null;
+
+    try {
+      String className = null;
+
+      if (split.length >= 2)
+        className = split[1];
+
+      if (className != null) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Class cl = Class.forName(className, false, loader);
+        Driver driver = (Driver) cl.newInstance();
+
+        Properties info = new Properties();
+
+        if (user != null)
+          info.put("user", user);
+        if (password != null)
+          info.put("password", password);
+
+        return new DriverDataSource(driver, url, info);
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return null;
+  }
+
   private static Connection getDriverConnection(String key)
     throws SQLException
   {
@@ -361,5 +411,48 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
       return DriverManager.getConnection(url, user, password);
     else
       return DriverManager.getConnection(url);
+  }
+
+  static class DriverDataSource implements DataSource {
+    private Driver _driver;
+    private String _url;
+    private Properties _info;
+
+    DriverDataSource(Driver driver, String url, Properties info)
+    {
+      _driver = driver;
+      _url = url;
+      _info = info;
+    }
+
+    public Connection getConnection()
+      throws SQLException
+    {
+      return _driver.connect(_url, _info);
+    }
+
+    public Connection getConnection(String user, String password)
+      throws SQLException
+    {
+      return getConnection();
+    }
+
+    public PrintWriter getLogWriter()
+    {
+      return null;
+    }
+
+    public void setLogWriter(PrintWriter out)
+    {
+    }
+
+    public int getLoginTimeout()
+    {
+      return 0;
+    }
+
+    public void setLoginTimeout(int timeout)
+    {
+    }
   }
 }

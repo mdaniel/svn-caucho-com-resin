@@ -44,6 +44,8 @@ public class HtmlResponseWriter extends ResponseWriter
 
   HtmlResponseWriter(Writer out, String contentType, String encoding)
   {
+    System.out.println("HRW: " + out + " " + (out != null ? out.getClass().getName() : "null"));
+
     _out = out;
     _contentType = contentType;
     _encoding = encoding;
@@ -70,9 +72,11 @@ public class HtmlResponseWriter extends ResponseWriter
   public void write(String v)
     throws IOException
   {
+    System.out.println("WRITE: " + _out + " " + v);
+    
     if (_inElement)
       closeElement();
-    
+
     _out.write(v);
   }
   

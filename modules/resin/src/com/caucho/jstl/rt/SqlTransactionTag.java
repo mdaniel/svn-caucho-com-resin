@@ -70,7 +70,7 @@ public class SqlTransactionTag extends TagSupport implements TryCatchFinally  {
   public int doStartTag() throws JspException
   {
     if (pageContext.getAttribute("caucho.jstl.sql.conn") != null)
-      throw new JspTagException(L.l("nexted sql:transaction are forbidden"));
+      throw new JspTagException(L.l("nested sql:transaction are forbidden"));
 
     try {
       DataSource ds;
@@ -94,11 +94,23 @@ public class SqlTransactionTag extends TagSupport implements TryCatchFinally  {
       _conn = ds.getConnection();
 
       _oldIsolation = _conn.getTransactionIsolation();
+      
+      System.out.println("OLD: " + _oldIsolation);
+      System.out.println("NEW: " + isolationCode);
+
 
       _conn.setAutoCommit(false);
       
-      if (_isolation != null && isolationCode != _oldIsolation)
+      if (isolationCode < 0 || isolationCode == _oldIsolation) {
+        _oldIsolation = -1;
+      }
+      else if (isolationCode == Connection.TRANSACTION_READ_COMMITTED) {
+        _oldIsolation = -1;
+      }
+      else {
+        System.out.println("SETI: " + isolationCode);
         _conn.setTransactionIsolation(isolationCode);
+      }
 
       pageContext.setAttribute("caucho.jstl.sql.conn", _conn);
     } catch (JspException e) {
@@ -122,16 +134,22 @@ public class SqlTransactionTag extends TagSupport implements TryCatchFinally  {
   {
     try {
       pageContext.removeAttribute("caucho.jstl.sql.conn");
-      
-      if (_conn != null) {
-        Connection conn = _conn;
-        _conn = null;
 
+      Connection conn = _conn;
+      _conn = null;
+      
+      if (conn != null) {
         try {
           conn.commit();
         } finally {
           try {
-            conn.setTransactionIsolation(_oldIsolation);
+            if (_oldIsolation >= 0)
+              conn.setTransactionIsolation(_oldIsolation);
+          } catch (SQLException e) {
+          }
+
+          try {
+            conn.setAutoCommit(true);
           } catch (SQLException e) {
           }
           

@@ -126,6 +126,7 @@ public class PageContextImpl extends PageContext
   private boolean autoFlush;
   private BodyContentImpl _bodyOut;
 
+  private Locale _locale;
   private BundleManager _bundleManager;
 
   private VarEnv _varEnv;
@@ -248,6 +249,7 @@ public class PageContextImpl extends PageContext
     
     _errorPage = errorPage;
     _webApp = app;
+    _locale = null;
 
     //_topOut.init(this, bufferSize, autoFlush);
 
@@ -1340,7 +1342,11 @@ public class PageContextImpl extends PageContext
                                     Object []args,
                                     String basename)
   {
-    Object lc = getAttribute("caucho.bundle");
+    Object lc = basename;
+
+    if (lc == null)
+      lc = getAttribute("caucho.bundle");
+    
     if (lc == null)
       lc = Config.find(this, Config.FMT_LOCALIZATION_CONTEXT);
     
@@ -1368,7 +1374,10 @@ public class PageContextImpl extends PageContext
       key = prefix + key;
 
     if (lc == null) {
-      lc = getAttribute("caucho.bundle");
+      lc = basename;
+
+      if (lc == null || "".equals(lc))
+        lc = getAttribute("caucho.bundle");
       if (lc == null)
         lc = Config.find(this, Config.FMT_LOCALIZATION_CONTEXT);
     }
@@ -1464,8 +1473,9 @@ public class PageContextImpl extends PageContext
 
     if (bundle != null)
       return bundle;
-    else
+    else {
       return BundleManager.NULL_BUNDLE;
+    }
   }
 
   /**
@@ -1473,17 +1483,45 @@ public class PageContextImpl extends PageContext
    */
   public Locale getLocale()
   {
-    Object localeObj = Config.find(this, Config.FMT_LOCALE);
+    if (_locale != null)
+      return _locale;
 
-    if (localeObj instanceof Locale)
-      return (Locale) localeObj;
+    _locale = getLocaleImpl();
+
+    if (_locale != null)
+      getResponse().setLocale(_locale);
+
+    return _locale;
+  }
+
+  /**
+   * Returns the currently active locale.
+   */
+  private Locale getLocaleImpl()
+  {
+    Object localeObj = Config.find(this, Config.FMT_LOCALIZATION_CONTEXT);
+    
+    LocalizationContext lc;
+    Locale locale = null;
+    
+    if (localeObj instanceof LocalizationContext) {
+      lc = (LocalizationContext) localeObj;
+
+      locale = lc.getLocale();
+
+      if (locale != null)
+        return locale;
+    }
+
+    localeObj = Config.find(this, Config.FMT_LOCALE);
+
+      if (localeObj instanceof Locale)
+        return (Locale) localeObj;
     else if (localeObj instanceof String)
       return getLocale((String) localeObj, null);
 
-    LocalizationContext lc;
     lc = (LocalizationContext) getAttribute("caucho.bundle");
 
-    Locale locale = null;
     if (lc != null)
       locale = lc.getLocale();
 
@@ -1498,8 +1536,15 @@ public class PageContextImpl extends PageContext
       if (e != null && e.hasMoreElements())
 	locale = (Locale) e.nextElement();
     }
-    
-    return locale;
+
+    localeObj = Config.find(this, Config.FMT_FALLBACK_LOCALE);
+
+    if (localeObj instanceof Locale)
+      return (Locale) localeObj;
+    else if (localeObj instanceof String)
+      return getLocale((String) localeObj, null);
+    else
+      return null;
   }
 
   public static Locale getLocale(String value, String variant)

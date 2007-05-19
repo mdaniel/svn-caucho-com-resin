@@ -157,6 +157,7 @@ public class LifecycleImpl extends Lifecycle
 
     if (stateManager.isPostback(context)) {
       viewRoot = view.restoreView(context,  viewId);
+      System.out.println("RV: " + view + " " + viewRoot);
 
       if (viewRoot == null) {
 	context.renderResponse();

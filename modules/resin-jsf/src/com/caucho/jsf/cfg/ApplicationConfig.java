@@ -29,6 +29,8 @@
 package com.caucho.jsf.cfg;
 
 import java.util.*;
+import java.util.logging.*;
+import java.lang.reflect.*;
 
 import javax.el.*;
 
@@ -50,6 +52,10 @@ import com.caucho.util.*;
 @XmlRootElement(name="application")
 public class ApplicationConfig
 {
+  private static final Logger log
+    = Logger.getLogger(ApplicationConfig.class.getName());
+  private static final L10N L = new L10N(ApplicationConfig.class);
+  
   @XmlAttribute(name="id")
   private String _id;
 
@@ -102,14 +108,35 @@ public class ApplicationConfig
   private void setViewHandler(Class viewHandler)
     throws ConfigException
   {
-    Config.validate(viewHandler, ViewHandler.class);
+    if (! ViewHandler.class.isAssignableFrom(viewHandler))
+      throw new ConfigException(L.l("view-handler '{0}' must extend javax.faces.application.ViewHandler.",
+                                    viewHandler.getName()));
+
+    Constructor ctor = null;
+
+    try {
+      ctor = viewHandler.getConstructor(new Class[] { ViewHandler.class });
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    try {
+      if (ctor == null)
+        ctor = viewHandler.getConstructor(new Class[] { });
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
+    if (ctor == null)
+      throw new ConfigException(L.l("view-handler '{0}' must have either a zero-arg constructor or a constructor with a single ViewHandler argument.",
+                                    viewHandler.getName()));
     
     _viewHandler = viewHandler;
   }
 
   private Class getViewHandler()
   {
-    return null;
+    return _viewHandler;
   }
 
   @XmlElement(name="state-manager")
@@ -204,6 +231,39 @@ public class ApplicationConfig
   {
     if (_localeConfig != null)
       _localeConfig.configure(app);
+
+    if (_viewHandler != null) {
+      ViewHandler handler = null;
+      
+      try {
+        Constructor ctor
+          = _viewHandler.getConstructor(new Class[] { ViewHandler.class });
+        
+        ViewHandler oldHandler = app.getViewHandler();
+
+        handler = (ViewHandler) ctor.newInstance(oldHandler);
+      } catch (NoSuchMethodException e) {
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (InvocationTargetException e) {
+        throw new ConfigException(e.getCause());
+      } catch (Exception e) {
+        throw new ConfigException(e);
+      }
+
+      if (handler == null) {
+        try {
+          handler = (ViewHandler) _viewHandler.newInstance();
+        } catch (RuntimeException e) {
+          throw e;
+        } catch (Exception e) {
+          throw new ConfigException(e);
+        }
+      }
+
+      if (handler != null)
+        app.setViewHandler(handler);
+    }
 
     for (int i = 0; i < _elResolverList.size(); i++)
       app.addELResolver(_elResolverList.get(i));

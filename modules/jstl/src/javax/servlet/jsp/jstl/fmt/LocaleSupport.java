@@ -67,6 +67,6 @@ public class LocaleSupport {
   {
     JstlPageContext pc = (JstlPageContext) pageContext;
     
-    return pc.getLocalizedMessage(key, args, null);
+    return pc.getLocalizedMessage(key, args, basename);
   }
 }

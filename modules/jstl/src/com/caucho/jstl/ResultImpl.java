@@ -56,10 +56,12 @@ public class ResultImpl implements Result {
     for (int i = 0; i < _columnNames.length; i++)
       _columnNames[i] = metaData.getColumnName(i + 1);
 
+    // _isLimitedByMaxRows = maxRows >= 0;
+
     if (maxRows < 0)
       maxRows = Integer.MAX_VALUE;
 
-    while (rs.next() && maxRows-- > 0) {
+    for (; rs.next() && maxRows > 0; maxRows--) {
       Object []row = new Object[columnCount];
 
       for (int i = 0; i < columnCount; i++)
@@ -67,7 +69,7 @@ public class ResultImpl implements Result {
 
       _rows.add(row);
     }
-
+    
     if (maxRows == 0)
       _isLimitedByMaxRows = true;
   }

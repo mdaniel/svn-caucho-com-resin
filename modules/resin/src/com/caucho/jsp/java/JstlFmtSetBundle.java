@@ -65,7 +65,7 @@ public class JstlFmtSetBundle extends JstlNode {
     else if (SCOPE.equals(name))
       _scope = value;
     else
-      throw error(L.l("`{0}' is an unknown attribute for <{1}>.",
+      throw error(L.l("'{0}' is an unknown attribute for <{1}>.",
                       name.getName(), getTagName()));
   }
   
@@ -78,7 +78,7 @@ public class JstlFmtSetBundle extends JstlNode {
     if (BASENAME.equals(name))
       _basenameAttr = value;
     else
-      throw error(L.l("`{0}' is an unsupported jsp:attribute for <{1}>.",
+      throw error(L.l("'{0}' is an unsupported jsp:attribute for <{1}>.",
                       name.getName(), getTagName()));
   }
 
@@ -115,7 +115,7 @@ public class JstlFmtSetBundle extends JstlNode {
     throws Exception
   {
     if (_basename == null && _basenameAttr == null)
-      throw error(L.l("required attribute `basename' missing from `{0}'",
+      throw error(L.l("required attribute 'basename' missing from '{0}'",
                       getTagName()));
 
     String basenameExpr;

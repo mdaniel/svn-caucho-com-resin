@@ -88,6 +88,8 @@ public class SessionStateManager extends StateManager
       = context.getExternalContext().getSessionMap();
 
     //sessionMap.put(context.getViewRoot().getViewId(), state);
+    System.out.println("SAVE-SM: " + state);
+    
     sessionMap.put("caucho.jsf.view", state);
   }
   
@@ -99,6 +101,8 @@ public class SessionStateManager extends StateManager
       = context.getExternalContext().getSessionMap();
 
     Object state = sessionMap.get("caucho.jsf.view");
+
+    System.out.println("RESTORE-SM: " + state);
 
     if (state == null)
       return null;

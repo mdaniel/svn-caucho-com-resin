@@ -71,6 +71,8 @@ public class FmtRequestEncodingTag extends TagSupport {
 
       if (value != null && ! value.equals(""))
         request.setCharacterEncoding(value);
+      else if (request.getCharacterEncoding() == null)
+        request.setCharacterEncoding("ISO-8859-1");
     } catch (UnsupportedEncodingException e) {
       throw new JspException(e);
     }

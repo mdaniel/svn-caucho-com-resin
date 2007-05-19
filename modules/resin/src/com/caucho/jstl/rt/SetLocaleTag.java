@@ -40,7 +40,7 @@ import java.util.Locale;
  * Sets the i18n locale bundle for the current page.
  */
 public class SetLocaleTag extends TagSupport {
-  private static L10N L = new L10N(SetBundleTag.class);
+  private static final L10N L = new L10N(SetBundleTag.class);
   
   private Object _value;
   private String _variant;
@@ -80,8 +80,8 @@ public class SetLocaleTag extends TagSupport {
 
     Locale locale = null;
 
-    if (_value == null || "".equals(_value))
-      return SKIP_BODY;
+    if (_value == null || "".equals(_value)) {
+    }
     else if (_value instanceof Locale) {
       locale = (Locale) _value;
     }
@@ -89,6 +89,11 @@ public class SetLocaleTag extends TagSupport {
       locale = pc.getLocale((String) _value, _variant);
     }
 
+    if (locale == null)
+      locale = Locale.getDefault();
+
+    pageContext.getResponse().setLocale(locale);
+    
     CoreSetTag.setValue(pc, Config.FMT_LOCALE, _scope, locale);
 
     return SKIP_BODY;

@@ -85,7 +85,7 @@ public class SqlDateParamTag extends TagSupport {
     else if (value instanceof java.sql.Date)
       time = ((java.sql.Date) value).getTime();
     else
-      throw new JspException(L.l("sql:dateParam requires at date at `{0}'", value));
+      throw new JspException(L.l("sql:dateParam requires at date at '{0}'", value));
 
     if (value == null)
       result = null;
@@ -95,8 +95,11 @@ public class SqlDateParamTag extends TagSupport {
       result = new java.sql.Time(time);
     else if (_type.equals("date"))
       result = new java.sql.Date(time);
-    else
+    else if (_type.equals("timestamp"))
       result = new java.sql.Timestamp(time);
+    else
+      throw new JspException(L.l("sql:dateParam type='{0}' is an unknown type",
+                                 _type));
 
     Tag parent = getParent();
     for (;

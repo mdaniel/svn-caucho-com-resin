@@ -228,7 +228,7 @@
 
   <tag>
     <name>param</name>
-    <tag-class>com.caucho.jstl.rt.XmlParamTag</tag-class>
+    <tag-class>com.caucho.jstl.el.XmlParamTag</tag-class>
     <body-content>JSP</body-content>
 
     <attribute>
@@ -240,7 +240,7 @@
     <attribute>
       <name>value</name>
       <required>false</required>
-      <rtexprvalue>true</rtexprvalue>
+      <rtexprvalue>false</rtexprvalue>
     </attribute>
   </tag>
 </taglib>

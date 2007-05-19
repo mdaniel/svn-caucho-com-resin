@@ -34,6 +34,7 @@ import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
 
 import java.io.IOException;
+import javax.servlet.jsp.jstl.core.*;
 
 /**
  * Generates code for the fmt:setBundle bundle.
@@ -146,51 +147,27 @@ public class JstlFmtBundle extends JstlNode {
     out.print("Object " + oldVar + " = pageContext.putAttribute(\"caucho.bundle\", ");
     out.println("pageContext.getBundle(" + basenameExpr + "));");
 
-    String oldPrefixVar = "_caucho_bundle_prefix_" + _gen.uniqueId();
-
-    if (_prefix != null)
-      out.println("Object " + oldPrefixVar + " = pageContext.putAttribute(\"caucho.bundle.prefix\", \"" + _prefix + "\");");
-    else
-      out.println("Object " + oldPrefixVar + " = pageContext.putAttribute(\"caucho.bundle.prefix\", null);");
+    String var = _var;
+    if (var == null)
+      var = Config.FMT_LOCALIZATION_CONTEXT;
 
     /*
-    boolean hasPrefix = false;
-    Node node;
-    for (node = elt;
-         node instanceof Element;
-         node = node.getParentNode()) {
-      TagInfo tag = null;//_gen.getTag((Element) node);
-
-      if (tag == null)
-        continue;
-
-      String urn = tag.getTagLibrary().getReliableURN();
-      if (urn == null)
-        urn = tag.getTagLibrary().getURI();
-      
-      if ("bundle".equals(node.getLocalName()) &&
-          _gen.JSTL_FMT_URI.equals(urn) &&
-          ! ((Element) node).getAttribute("prefix").equals(""))
-        hasPrefix = true;
-    }
-
-    String oldPrefix = null;
-    
-    if (hasPrefix)
-      oldPrefix = "_caucho_bundle_prefix_" + _gen.uniqueId();
-    
-    String prefix = elt.getAttribute("prefix");
-    if (hasPrefix && prefix.equals("")) {
-      out.println("String " + oldPrefix + "  = _caucho_bundle_prefix;");
-      out.println("_caucho_bundle_prefix = \"\";");
-    }
-    else if (hasPrefix) {
-      int bundleIndex = _gen.addExpr(prefix);
-      
-      out.println("String " + oldPrefix + "  = _caucho_bundle_prefix;");
-      out.println("_caucho_bundle_prefix = _caucho_expr_" + bundleIndex + ".evalString(_jsp_env);");
+    if (var != null) {
+      out.print("pageContext.putAttribute(\"");
+      out.printJavaString(var);
+      out.println("\", pageContext.getAttribute(\"caucho.bundle\"));");
     }
     */
+
+    String oldPrefixVar = "_caucho_bundle_prefix_" + _gen.uniqueId();
+
+    if (_prefix != null) {
+      out.print("Object " + oldPrefixVar + " = pageContext.putAttribute(\"caucho.bundle.prefix\", ");
+      out.print(generateValue(String.class, _prefix));
+      out.println(");");
+    }
+    else
+      out.println("Object " + oldPrefixVar + " = pageContext.putAttribute(\"caucho.bundle.prefix\", null);");
 
     out.println("try {");
     out.pushDepth();

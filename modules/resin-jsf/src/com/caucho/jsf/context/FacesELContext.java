@@ -34,12 +34,17 @@ import javax.faces.context.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import java.lang.reflect.Method;
+
 import com.caucho.util.*;
 import com.caucho.jsp.el.*;
 import com.caucho.jsf.el.*;
 
 public class FacesELContext extends ServletELContext
 {
+  private static final javax.el.FunctionMapper NULL_FUNCTION_MAPPER
+    = new NullFunctionMapper();
+  
   private FacesContext _facesContext;
   private ELResolver _elResolver;
   
@@ -56,7 +61,7 @@ public class FacesELContext extends ServletELContext
 
   public javax.el.FunctionMapper getFunctionMapper()
   {
-    return null;
+    return NULL_FUNCTION_MAPPER;
   }
 
   public javax.el.VariableMapper getVariableMapper()
@@ -89,5 +94,13 @@ public class FacesELContext extends ServletELContext
   public HttpServletRequest getRequest()
   {
     return (HttpServletRequest) _facesContext.getExternalContext().getRequest();
+  }
+
+  static class NullFunctionMapper extends javax.el.FunctionMapper {
+    @Override
+    public Method resolveFunction(String prefix, String localName)
+    {
+      return null;
+    }
   }
 }

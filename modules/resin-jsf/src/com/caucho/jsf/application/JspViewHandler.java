@@ -225,6 +225,10 @@ public class JspViewHandler extends ViewHandler
 				String viewId)
     throws FacesException
   {
+    System.out.println("RV: " + context);
+    System.out.println("RV: " + context.getApplication());
+    System.out.println("RV: " + context.getApplication().getStateManager());
+
     StateManager stateManager = context.getApplication().getStateManager();
 
     return stateManager.restoreView(context, viewId, null);

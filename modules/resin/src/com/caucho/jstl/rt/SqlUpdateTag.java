@@ -84,8 +84,12 @@ public class SqlUpdateTag extends BodyTagSupport implements SQLExecutionTag {
    * Sets the data source.
    */
   public void setDataSource(Object dataSource)
+    throws JspException
   {
     _dataSource = dataSource;
+
+    if (this.pageContext.getAttribute("caucho.jstl.sql.conn") != null)
+      throw new JspException(L.l("sql:query cannot set data-source inside sql:transaction"));
   }
 
   /**

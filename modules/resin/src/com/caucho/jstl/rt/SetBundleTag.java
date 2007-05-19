@@ -33,6 +33,7 @@ import com.caucho.util.L10N;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
+import javax.servlet.jsp.jstl.core.*;
 import javax.servlet.jsp.tagext.TagSupport;
 
 /**
@@ -42,7 +43,7 @@ public class SetBundleTag extends TagSupport {
   private static L10N L = new L10N(SetBundleTag.class);
   
   private String _basename;
-  private String _var = "javax.servlet.jsp.jstl.fmt.localizationContext";
+  private String _var = Config.FMT_LOCALIZATION_CONTEXT;
   private String _scope;
 
   /**

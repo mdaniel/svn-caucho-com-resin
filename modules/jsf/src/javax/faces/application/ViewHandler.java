@@ -48,7 +48,7 @@ public abstract class ViewHandler
 
   public String calculateCharacterEncoding(FacesContext context)
   {
-    throw new UnsupportedOperationException();
+    return "UTF-8";
   }
 
   public abstract String calculateRenderKitId(FacesContext context);
