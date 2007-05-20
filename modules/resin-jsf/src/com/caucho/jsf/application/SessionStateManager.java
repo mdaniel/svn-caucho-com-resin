@@ -50,6 +50,7 @@ public class SessionStateManager extends StateManager
   private static final IntMap _typeMap = new IntMap();
   private static final ArrayList<Class> _typeList = new ArrayList();
   
+  @Override
   public Object saveView(FacesContext context)
   {
     UIViewRoot root = context.getViewRoot();
@@ -77,11 +78,13 @@ public class SessionStateManager extends StateManager
   }
 
   @Deprecated
+  @Override
   public SerializedView saveSerializedView(FacesContext context)
   {
     return new SerializedView(saveView(context), null);
   }
   
+  @Override
   public void writeState(FacesContext context, Object state)
   {
     Map<String,Object> sessionMap
@@ -93,6 +96,7 @@ public class SessionStateManager extends StateManager
     sessionMap.put("caucho.jsf.view", state);
   }
   
+  @Override
   public UIViewRoot restoreView(FacesContext context,
 				String viewId,
 				String renderKitId)

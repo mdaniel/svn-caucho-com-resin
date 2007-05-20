@@ -225,13 +225,13 @@ public class JspViewHandler extends ViewHandler
 				String viewId)
     throws FacesException
   {
-    System.out.println("RV: " + context);
-    System.out.println("RV: " + context.getApplication());
-    System.out.println("RV: " + context.getApplication().getStateManager());
+    if (context == null)
+      throw new NullPointerException();
 
+    String renderKitId = calculateRenderKitId(context);
     StateManager stateManager = context.getApplication().getStateManager();
 
-    return stateManager.restoreView(context, viewId, null);
+    return stateManager.restoreView(context, viewId, renderKitId);
   }
 
   @Override
