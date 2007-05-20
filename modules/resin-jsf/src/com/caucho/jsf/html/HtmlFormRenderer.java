@@ -273,15 +273,12 @@ class HtmlFormRenderer extends Renderer
       }
     }
 
-    context.getApplication().getViewHandler().writeState(context);
-
     out.startElement("input", component);
     out.writeAttribute("type", "hidden", "type");
     out.writeAttribute("name", component.getClientId(context), "name");
     //out.writeAttribute("value", "true", "value");
     out.endElement("input");
 
-    out.endElement("form");
   }
 
   /**
@@ -300,6 +297,10 @@ class HtmlFormRenderer extends Renderer
   public void encodeEnd(FacesContext context, UIComponent component)
     throws IOException
   {
+    context.getApplication().getViewHandler().writeState(context);
+
+    ResponseWriter out = context.getResponseWriter();
+    out.endElement("form");
   }
 
   public String toString()

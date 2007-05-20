@@ -239,7 +239,6 @@ public class JspViewHandler extends ViewHandler
     throws IOException
   {
     UIViewRoot viewRoot = context.getViewRoot();
-    System.out.println("WRITE-STATE: " + viewRoot);
 
     if (viewRoot != null) {
       StateManager stateManager = context.getApplication().getStateManager();

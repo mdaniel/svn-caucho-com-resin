@@ -41,8 +41,11 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import com.caucho.server.connection.*;
+import com.caucho.util.*;
 
 public class ServletExternalContext extends ExternalContext {
+  private static final L10N L = new L10N(ServletExternalContext.class);
+  
   private ServletContext _webApp;
   private HttpServletRequest _request;
   private HttpServletResponse _response;
@@ -66,7 +69,13 @@ public class ServletExternalContext extends ExternalContext {
   {
     try {
       //_request.getRequestDispatcher(path).include(_request, _response);
-      _request.getRequestDispatcher(path).forward(_request, _response);
+      RequestDispatcher rd = _request.getRequestDispatcher(path);
+
+      if (rd == null)
+	throw new FacesException(L.l("'{0}' is an unknown dispatcher.",
+				     path));
+      
+      rs.forward(_request, _response);
     } catch (ServletException e) {
       throw new FacesException(e);
     }
