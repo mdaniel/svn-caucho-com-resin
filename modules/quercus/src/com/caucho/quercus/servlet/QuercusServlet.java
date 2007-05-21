@@ -47,6 +47,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Enumeration;
 
 /**
  * Servlet to call PHP through javax.script.
@@ -251,69 +252,80 @@ public class QuercusServlet
   }
 
   /**
-   * Gets the script manager.
+   * Initializes the servlet.
    */
   public void init(ServletConfig config)
     throws ServletException
   {
     super.init(config);
 
-    String encoding = config.getInitParameter("script-encoding");
-    if (encoding != null) {
-      setScriptEncoding(encoding);
-    }
-    
-    String phpIniFile = config.getInitParameter("php-ini-file");
-    if (phpIniFile != null) {
-      Quercus quercus = getQuercus();
-      
-      Path path = quercus.getPwd().lookup(phpIniFile);
-      
-      setIniFile(path);
+    Enumeration paramNames = config.getInitParameterNames();
+
+    while (paramNames.hasMoreElements()) {
+      String paramName = String.valueOf(paramNames.nextElement());
+      String paramValue = config.getInitParameter(paramName);
+
+      setInitParam(paramName, paramValue);
     }
 
-    String phpVersion = config.getInitParameter("php-version");
-    if (phpVersion != null) {
-      setPhpVersion(phpVersion);
-    }
-    
-    String mysqlVersion = config.getInitParameter("mysql-version");
-    if (mysqlVersion != null) {
-      setMysqlVersion(mysqlVersion);
-    }
+    initImpl(config);
+  }
 
-    String compile = config.getInitParameter("compile");
-    if (compile != null) {
-      setCompile(compile);
+  /**
+   * Sets a named init-param to the passed value.
+   *
+   * @throws ServletException if the init-param is not recognized
+   */
+  protected void setInitParam(String paramName, String paramValue)
+    throws ServletException
+  {
+    if ("compile".equals(paramName)) {
+      setCompile(paramValue);
     }
-
-    String database = config.getInitParameter("database");
-
-    if (database != null) {
+    else if ("database".equals(paramName)) {
       try {
         Context ic = new InitialContext();
         DataSource ds;
 
-        if (! database.startsWith("java:comp")) {
+        if (! paramValue.startsWith("java:comp")) {
           try {
-            ds = (DataSource) ic.lookup("java:comp/env/" + database);
+            ds = (DataSource) ic.lookup("java:comp/env/" + paramValue);
           }
           catch (Exception e) {
             // for glassfish
-            ds = (DataSource) ic.lookup(database);
+            ds = (DataSource) ic.lookup(paramValue);
           }
         }
         else {
-          ds = (DataSource) ic.lookup(database);
+          ds = (DataSource) ic.lookup(paramValue);
         }
+
+        if (ds == null)
+          throw new ServletException(L.l("database '{0}' is not valid", paramValue));
 
         getQuercus().setDatabase(ds);
       } catch (Exception e) {
         throw new ServletException(e);
       }
     }
-    
-    initImpl(config);
+    else if ("ini-file".equals(paramName)) {
+      Quercus quercus = getQuercus();
+
+      Path path = quercus.getPwd().lookup(paramValue);
+
+      setIniFile(path);
+    }
+    else if ("mysql-version".equals(paramName)) {
+      setMysqlVersion(paramValue);
+    }
+    else if ("php-version".equals(paramName)) {
+      setPhpVersion(paramValue);
+    }
+    else if ("script-encoding".equals(paramName)) {
+      setScriptEncoding(paramValue);
+    }
+    else
+      throw new ServletException(L.l("'{0}' is not a recognized init-param", paramName));
   }
 
   private void initImpl(ServletConfig config)
@@ -323,9 +335,6 @@ public class QuercusServlet
 
     if (! _isCompileSet) {
       getQuercus().setLazyCompile(true);
-
-      // XXX: for validating QA
-      // throw new ServletException("compile must be set.");
     }
 
     _impl.init(config);
