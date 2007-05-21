@@ -60,6 +60,9 @@
     <redirect regexp="/.*/tutorial" target="${app.contextPath}/tutorial"/>
     
     <redirect regexp="/quercus/.*" target="${app.contextPath}/doc/quercus.xtp"/>
+
+    <redirect regexp="/doc/quercus-java-interface.xtp" target="${app.contextPath}/doc/quercus-java-integration.xtp"/>
+    <redirect regexp="/doc/quercus-getting-started.xtp" target="${app.contextPath}/doc/quercus-overview.xtp"/>
   </rewrite-dispatch>
     
   <web-app-deploy url-prefix="/examples"

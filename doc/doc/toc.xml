@@ -89,12 +89,11 @@
        - Quercus
       -->
     <item link="quercus.xtp" title="Quercus">
-      <item title="Getting Started" link="quercus-getting-started.xtp"/>
       <item title="Overview" link="quercus-overview.xtp"/>
       <item title="Security" link="quercus-security.xtp"/>
-      <item title="Module Status" link="quercus-module-status.xtp"/>
+      <item title="Java Integration" link="quercus-java-integration.xtp"/>
       <item title="Resin Module" link="quercus-resin-module.xtp"/>
-      <item title="Java Interface" link="quercus-java-interface.xtp"/>
+      <item title="Module Status" link="quercus-module-status.xtp"/>
       <item title="List of PHP Applications" link="quercus-list-of-applications.xtp"/>
     </item>
 

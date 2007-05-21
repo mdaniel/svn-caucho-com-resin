@@ -175,6 +175,29 @@ from the application's WEB-INF/classes directory.</p>
 
 </s1>
 
+<s1 title="HttpServletRequest and HttpSession">
+
+<p>
+QuercusServlet automatically creates the <code>$request</code> variable for PHP
+scripts.  It contains the <a href="javadoc|javax.servlet.http.HttpServletRequest"/>
+object.
+</p>
+
+<p>
+PHP sessions are not shared with servlet sessions.  The <code>$request</code>
+variable can be used to obtain the servlet session if required.
+</p>
+
+<example title="$request->getSession(true) HttpSession">
+&lt;?php
+  $session = $request->getSession(true);
+
+  $foo = $session->getAttribute("foo");
+?>
+</example>
+
+</s1>
+
 <s1 title="Quercus types">
 
 <p>For every PHP type, there is a Java type that is used

@@ -14,16 +14,6 @@
 
   <body>
 
-<s1 title="See Also">
-
-<ul>
-<li><a href="http://wiki.caucho.com/Quercus">Quercus</a> wiki page.</li>
-<li>Caucho <a href="http://bugs.caucho.com">BugTrack</a></li>
-<li>Caucho <a href="http://forum.caucho.com">Forums</a></li>
-<li>Resin <a href="http://maillist.caucho.com/">Mailing List</a></li>
-</ul>
-
-</s1>
 
 <s1 title="Introduction to Quercus">
 
@@ -105,8 +95,7 @@ objectives at hand.</li>
 
 </s3>
 
-<s3 title="Capability - powerful Java technologies at the developer's
-fingertips">
+<s3 title="Capability - powerful Java technologies at the developer's fingertips">
 
 <ul>
 
@@ -145,16 +134,21 @@ to offer.</p>
 
 </s2>
 
-<s2 title="Getting Started with Quercus">
+</s1>
 
-<p>Quercus is officially part of 3.1.0.  Please go through the Hello World
-tutorial to get a simple PHP page up and running on Quercus.</p>
+<summary/>
+<localtoc/>
 
-</s2>
+<s1 name="resources" title="Resources">
+
+<ul>
+<li><a href="http://forum.caucho.com">Caucho Forums, including a Quercus forum</a></li>
+<li><a href="http://bugs.caucho.com">Caucho Bug Tracker</a></li>
+<li><a href="http://maillist.caucho.com/mailman/listinfo">Caucho Mailing Lists</a></li>
+</ul>
 
 </s1>
 
-    <summary/>
 
   </body>
 </document>
