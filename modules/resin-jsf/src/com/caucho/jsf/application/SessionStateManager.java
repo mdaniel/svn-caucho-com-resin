@@ -95,6 +95,14 @@ public class SessionStateManager extends StateManager
     
     sessionMap.put("caucho.jsf.view", state);
   }
+
+  @Deprecated
+  public void writeState(FacesContext context,
+			 SerializedView state)
+    throws IOException
+  {
+    writeState(context, (Object) state);
+  }
   
   @Override
   public UIViewRoot restoreView(FacesContext context,
@@ -106,12 +114,19 @@ public class SessionStateManager extends StateManager
 
     Object state = sessionMap.get("caucho.jsf.view");
 
-    System.out.println("RESTORE-SM: " + state);
-
     if (state == null)
       return null;
-
-    return restoreView(context, (byte []) state);
+    else if (state instanceof byte[])
+      return restoreView(context, (byte []) state);
+    else if (state instanceof StateManager.SerializedView) {
+      StateManager.SerializedView serView
+        = (StateManager.SerializedView) state;
+      
+      return restoreView(context, (byte []) serView.getStructure());
+    }
+    else
+      throw new IllegalStateException(L.l("unexpected saved state: '{0}'",
+                                          state));
   }
 
   private void serialize(AbstractHessianOutput out,

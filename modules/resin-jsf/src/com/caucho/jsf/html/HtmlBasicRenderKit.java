@@ -146,6 +146,8 @@ public class HtmlBasicRenderKit extends RenderKit
 
   public ResponseStateManager getResponseStateManager()
   {
+    System.out.println("RSM: " + _responseStateManager);
+    
     return _responseStateManager;
   }
 

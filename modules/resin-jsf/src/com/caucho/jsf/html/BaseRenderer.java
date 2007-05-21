@@ -31,6 +31,7 @@ package com.caucho.jsf.html;
 import java.io.*;
 import java.util.*;
 
+import javax.el.*;
 import javax.faces.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
@@ -50,6 +51,41 @@ abstract class BaseRenderer extends Renderer
   public boolean getRendersChildren()
   {
     return true;
+  }
+
+  public Object getConvertedValue(FacesContext context,
+				  UIComponent component,
+				  Object submittedValue)
+    throws ConverterException
+  {
+    if (context == null || component == null)
+      throw new NullPointerException();
+    
+    if (component instanceof ValueHolder) {
+      Converter converter = ((ValueHolder) component).getConverter();
+
+      if (converter != null)
+	return converter.getAsObject(context, component,
+				     (String) submittedValue);
+    }
+
+    ValueExpression valueExpr = component.getValueExpression("value");
+      
+    if (valueExpr != null) {
+      Class type = valueExpr.getType(context.getELContext());
+
+      if (type != null) {
+        Converter converter = context.getApplication().createConverter(type);
+
+        if (converter != null) {
+          return converter.getAsObject(context,
+                                       component,
+                                       (String) submittedValue);
+        }
+      }
+    }
+
+    return submittedValue;
   }
 
   protected String toString(FacesContext context,

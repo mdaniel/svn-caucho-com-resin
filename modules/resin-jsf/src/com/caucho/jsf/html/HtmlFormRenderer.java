@@ -299,6 +299,8 @@ class HtmlFormRenderer extends Renderer
   {
     context.getApplication().getViewHandler().writeState(context);
 
+    System.out.println("WRITE-STATE: " + context.getApplication().getViewHandler());
+
     ResponseWriter out = context.getResponseWriter();
     out.endElement("form");
   }

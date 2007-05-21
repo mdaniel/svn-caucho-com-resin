@@ -53,6 +53,15 @@ public class MethodExpressionImpl extends MethodExpression
   private final Class _expectedType;
   private final Class []_expectedArgs;
 
+  // XXX: for serialization
+  public MethodExpressionImpl()
+  {
+    _expressionString = "";
+    _expr = null;
+    _expectedType = null;
+    _expectedArgs = null;
+  }
+
   public MethodExpressionImpl(Expr expr,
 			      String expressionString,
 			      Class<?> expectedType,

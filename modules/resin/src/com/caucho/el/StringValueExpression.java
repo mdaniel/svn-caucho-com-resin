@@ -72,7 +72,7 @@ public class StringValueExpression extends AbstractValueExpression
     if (_expectedType != null)
       return _expectedType;
     else
-      return String.class;
+      return _expr.getExpectedType();
   }
 
   public Class<?> getType(ELContext context)

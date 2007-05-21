@@ -231,6 +231,8 @@ public class JspViewHandler extends ViewHandler
     String renderKitId = calculateRenderKitId(context);
     StateManager stateManager = context.getApplication().getStateManager();
 
+    System.out.println("RESTORE: " + stateManager + " " + viewId + " " + renderKitId);
+
     return stateManager.restoreView(context, viewId, renderKitId);
   }
 
@@ -242,9 +244,11 @@ public class JspViewHandler extends ViewHandler
 
     if (viewRoot != null) {
       StateManager stateManager = context.getApplication().getStateManager();
-      
+
       Object state = stateManager.saveView(context);
 
+      System.out.println("SAVE: " + stateManager + " " + viewRoot.getViewId() + " " + state);
+      
       stateManager.writeState(context, state);
     }
   }

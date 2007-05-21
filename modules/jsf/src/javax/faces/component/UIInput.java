@@ -278,7 +278,6 @@ public class UIInput extends UIOutput
   {
     _submittedValue = submittedValue;
     _isValid = true; // XXX: jsf/3070
-    System.out.println("SET-SUBMIT: " + submittedValue + " " + this);
   }
 
   public void setValue(Object value)
@@ -313,8 +312,6 @@ public class UIInput extends UIOutput
   
   public void setValid(boolean valid)
   {
-    System.out.println("SET_VALID: " + this);
-    Thread.dumpStack();
     _isValid = valid;
   }
 
@@ -435,6 +432,8 @@ public class UIInput extends UIOutput
 
   public void processUpdates(FacesContext context)
   {
+    System.out.println("PROCESS-UPDATES:");
+    
     super.processUpdates(context);
 
     try {
@@ -455,7 +454,7 @@ public class UIInput extends UIOutput
     if (! isLocalValueSet())
       return;
 
-    System.out.println("UPDATE: " + _valueExpr);
+    System.out.println("UPDATE: " + _valueExpr + " " + getLocalValue());
     if (_valueExpr == null)
       return;
 
@@ -465,7 +464,6 @@ public class UIInput extends UIOutput
       setValue(null);
       _isLocalValueSet = false;
     } catch (RuntimeException e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
       
       setValid(false);
