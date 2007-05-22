@@ -81,7 +81,7 @@ public class SetTimeZoneTag extends TagSupport {
     try {
       PageContextImpl pageContext = (PageContextImpl) this.pageContext;
 
-      Object valueObj = _valueExpr.evalString(pageContext.getELContext());
+      Object valueObj = _valueExpr.evalObject(pageContext.getELContext());
       TimeZone timeZone = null;
 
       if (valueObj instanceof TimeZone) {

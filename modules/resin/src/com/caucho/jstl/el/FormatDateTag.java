@@ -222,12 +222,12 @@ public class FormatDateTag extends BodyTagSupport {
 
       if (format != null) {
         TimeZone timeZone = getTimeZone();
+
         if (timeZone != null)
           format.setTimeZone(timeZone);
-      }
 
-      if (format != null)
         value = format.format(new Date(time));
+      }
 
       if (_var == null)
         out.print(value);
