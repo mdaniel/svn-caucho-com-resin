@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -38,6 +38,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import java.io.InputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -49,42 +51,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-public class RestProxy implements InvocationHandler {
+public abstract class RestProxy implements InvocationHandler {
   private static final Logger log = Logger.getLogger(RestProxy.class.getName());
 
-  private Class _api;
   private RestEncoding _defaultRestEncoding = RestEncoding.QUERY;
   private String _url;
-  private JAXBContext _context;
+  protected Class _api;
 
   public RestProxy(Class api, String url)
-    throws JAXBException
-  {
-    init(api, url);
-
-    ArrayList<Class> classList = new ArrayList<Class>();
-    JAXBUtil.introspectClass(_api, classList);
-
-    _context = JAXBContext.newInstance(classList.toArray(new Class[0]));
-  }
-
-  public RestProxy(Class api, String url, Class[] jaxbClasses)
-    throws JAXBException
-  {
-    init(api, url);
-
-    _context = JAXBContext.newInstance(jaxbClasses);
-  }
-
-  public RestProxy(Class api, String url, String jaxbPackages)
-    throws JAXBException
-  {
-    init(api, url);
-
-    _context = JAXBContext.newInstance(jaxbPackages);
-  }
-
-  private void init(Class api, String url)
   {
     _api = api;
     _url = url;
@@ -225,12 +199,7 @@ public class RestProxy implements InvocationHandler {
 
           OutputStream out = httpConnection.getOutputStream();
 
-          Marshaller marshaller = _context.createMarshaller();
-          marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
-              Boolean.TRUE);
-
-          for (Object postValue : postValues)
-            marshaller.marshal(postValue, out);
+          writePostData(out, postValues);
 
           out.flush();
         }
@@ -241,9 +210,7 @@ public class RestProxy implements InvocationHandler {
           if (method.getReturnType() == null)
             return null;
 
-          Unmarshaller unmarshaller = _context.createUnmarshaller();
-
-          return unmarshaller.unmarshal(httpConnection.getInputStream());
+          return readResponse(httpConnection.getInputStream());
         }
         else {
           log.finer("request failed: " + httpConnection.getResponseMessage());
@@ -258,4 +225,11 @@ public class RestProxy implements InvocationHandler {
     else
       throw new RestException();
   }
+
+  protected abstract void writePostData(OutputStream out, 
+                                        ArrayList<Object> postValues)
+    throws IOException, RestException;
+
+  protected abstract Object readResponse(InputStream in)
+    throws IOException, RestException;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,26 +29,27 @@
 
 package com.caucho.soa.client;
 
-import com.caucho.soa.rest.RestProxy;
+import com.caucho.soa.rest.JAXBRestProxy;
 
 import javax.xml.bind.JAXBException;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 
-public class RestEncodingProxyFactory implements EncodingProxyFactory {
+public class JAXBRestEncodingProxyFactory implements EncodingProxyFactory {
   public Object getProxy(Class serviceInterface, String url) 
     throws MalformedURLException, JAXBException
   {
     return Proxy.newProxyInstance(serviceInterface.getClassLoader(),
                                   new Class[] { serviceInterface },
-                                  new RestProxy(serviceInterface, url));
+                                  new JAXBRestProxy(serviceInterface, url));
   }
 
   public Object getProxy(Class serviceInterface, String url, 
                          String jaxbPackages) 
     throws MalformedURLException, JAXBException
   {
-    RestProxy proxy = new RestProxy(serviceInterface, url, jaxbPackages);
+    JAXBRestProxy proxy = 
+      new JAXBRestProxy(serviceInterface, url, jaxbPackages);
 
     return Proxy.newProxyInstance(serviceInterface.getClassLoader(),
                                   new Class[] { serviceInterface }, proxy);
@@ -58,7 +59,7 @@ public class RestEncodingProxyFactory implements EncodingProxyFactory {
                          Class[] jaxbClasses)
     throws MalformedURLException, JAXBException
   {
-    RestProxy proxy = new RestProxy(serviceInterface, url, jaxbClasses);
+    JAXBRestProxy proxy = new JAXBRestProxy(serviceInterface, url, jaxbClasses);
 
     return Proxy.newProxyInstance(serviceInterface.getClassLoader(),
                                   new Class[] { serviceInterface }, proxy);

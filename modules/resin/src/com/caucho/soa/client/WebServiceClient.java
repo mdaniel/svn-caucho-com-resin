@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -179,16 +179,16 @@ public class WebServiceClient implements ObjectProxy, java.io.Serializable {
       Object proxy = null;
 
       if (_jaxbClasses != null) {
-	Class[] jaxbClasses = _jaxbClasses.toArray(new Class[0]);
-	proxy = ProxyManager.getWebServiceProxy(api, _url, jaxbClasses);
+        Class[] jaxbClasses = _jaxbClasses.toArray(new Class[0]);
+        proxy = ProxyManager.getWebServiceProxy(api, _url, jaxbClasses);
       }
       else if (_jaxbPackages != null) {
-	String jaxbPackages = _jaxbPackages.toString();
-	proxy = 
-	  ProxyManager.getWebServiceProxy(api, _url, jaxbPackages);
+        String jaxbPackages = _jaxbPackages.toString();
+        proxy = 
+          ProxyManager.getWebServiceProxy(api, _url, jaxbPackages);
       }
       else {
-	proxy = ProxyManager.getWebServiceProxy(api, _url);
+        proxy = ProxyManager.getWebServiceProxy(api, _url);
       }
 
       return proxy;

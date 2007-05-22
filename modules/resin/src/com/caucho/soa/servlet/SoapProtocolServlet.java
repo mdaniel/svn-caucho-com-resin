@@ -36,6 +36,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -90,7 +91,8 @@ public class SoapProtocolServlet
         }
       }
 
-      _soap.invoke(request.getInputStream(), response.getOutputStream());
+      _soap.invoke((HttpServletRequest) request, 
+                   (HttpServletResponse) response);
     } catch (IOException e) {
       throw e;
     } catch (ServletException e) {

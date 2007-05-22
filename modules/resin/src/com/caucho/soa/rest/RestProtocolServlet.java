@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,7 +29,6 @@
 
 package com.caucho.soa.rest;
 
-import com.caucho.jaxb.JAXBUtil;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.soa.servlet.ProtocolServlet;
 import com.caucho.vfs.Vfs;
@@ -64,7 +63,7 @@ import java.util.logging.Logger;
 /**
  * A binding for REST services.
  */
-public class RestProtocolServlet extends GenericServlet
+public abstract class RestProtocolServlet extends GenericServlet
   implements ProtocolServlet
 {
   private static final Logger log = 
@@ -82,12 +81,7 @@ public class RestProtocolServlet extends GenericServlet
   private HashMap<String,Method> _defaultMethods 
     = new HashMap<String,Method>();
 
-  private String _jaxbPackages;
-  private ArrayList<Class> _jaxbClasses = new ArrayList<Class>();
-
-  private JAXBContext _context = null;
-
-  private Object _service;
+  protected Object _service;
 
   public RestProtocolServlet()
   {
@@ -96,19 +90,6 @@ public class RestProtocolServlet extends GenericServlet
   public void setService(Object service)
   {
     _service = service;
-  }
-
-  public void addJaxbPackage(String packageName)
-  {
-    if (_jaxbPackages != null)
-      _jaxbPackages = _jaxbPackages + ";" + packageName;
-    else
-      _jaxbPackages = packageName;
-  }
-
-  public void addJaxbClass(Class cl)
-  {
-    _jaxbClasses.add(cl);
   }
 
   public void init()
@@ -132,8 +113,6 @@ public class RestProtocolServlet extends GenericServlet
       _methods.put(HEAD, new HashMap<String,Method>());
       _methods.put(POST, new HashMap<String,Method>());
       _methods.put(PUT, new HashMap<String,Method>());
-
-      ArrayList<Class> jaxbClasses = _jaxbClasses;
 
       for (Method method : cl.getMethods()) {
         if (method.getDeclaringClass().equals(Object.class))
@@ -230,23 +209,9 @@ public class RestProtocolServlet extends GenericServlet
 
           _defaultMethods.put(methodName, method);
         }
-
-        if (_context == null)
-          JAXBUtil.introspectMethod(method, jaxbClasses);
       }
-
-      if (_context != null) {
-      }
-      else if (_jaxbPackages != null) {
-        _context = JAXBContext.newInstance(_jaxbPackages);
-      }
-      else {
-        Class[] classes = jaxbClasses.toArray(new Class[jaxbClasses.size()]);
-        _context = JAXBContext.newInstance(classes);
-      }
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new ServletException(e);
     }
   }
@@ -272,11 +237,11 @@ public class RestProtocolServlet extends GenericServlet
       int endPos = pathInfo.length();
 
       if (pathInfo.length() > 0 && pathInfo.charAt(0) == '/')
-	startPos = 1;
+        startPos = 1;
 
       if (pathInfo.length() > startPos && 
-	  pathInfo.charAt(pathInfo.length() - 1) == '/')
-	endPos = pathInfo.length() - 1;
+          pathInfo.charAt(pathInfo.length() - 1) == '/')
+        endPos = pathInfo.length() - 1;
 
       pathInfo = pathInfo.substring(startPos, endPos);
 
@@ -307,7 +272,7 @@ public class RestProtocolServlet extends GenericServlet
 
     for (String entry : entries) {
       if (entry.indexOf("=") < 0)
-	continue;
+        continue;
 
       String[] nameValue = entry.split("=", 2);
 
@@ -405,10 +370,7 @@ public class RestProtocolServlet extends GenericServlet
                                      queryArguments.get(key)));
           break;
         case POST: 
-          {
-            Unmarshaller unmarshaller = _context.createUnmarshaller();
-            arguments.add(unmarshaller.unmarshal(postData));
-          }
+          arguments.add(readPostData(postData));
           break;
         case HEADER:
           arguments.add(stringToType(parameterTypes[i], req.getHeader(key)));
@@ -418,24 +380,15 @@ public class RestProtocolServlet extends GenericServlet
 
     Object result = method.invoke(object, arguments.toArray());
     
-    if (result != null) {
-      Marshaller marshaller = _context.createMarshaller();
-      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-
-      WriteStream ws = Vfs.openWrite(out);
-
-      try {
-        XMLStreamWriterImpl writer = new XMLStreamWriterImpl(ws);
-        marshaller.marshal(result, writer);
-      } 
-      catch (JAXBException e) {
-        ws.print(result);
-      }
-      finally {
-        ws.close();
-      }
-    }
+    if (result != null)
+      writeResponse(out, result);
   }
+
+  protected abstract Object readPostData(InputStream in)
+    throws IOException, RestException;
+
+  protected abstract void writeResponse(OutputStream out, Object obj)
+    throws IOException, RestException;
 
   private static Object stringToType(Class type, String arg)
     throws Throwable

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -33,6 +33,8 @@ import com.caucho.soap.reflect.WebServiceIntrospector;
 import com.caucho.soap.skeleton.DirectSkeleton;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -90,12 +92,12 @@ public class SoapEncoding implements ServiceEncoding {
   public void invoke(InputStream is, OutputStream os)
     throws Throwable
   {
-    XMLStreamReader in = _xmlInputFactory.createXMLStreamReader(is);
-    XMLStreamWriter out = _xmlOutputFactory.createXMLStreamWriter(os);
+  }
 
-    getSkeleton().invoke(_object, in, out);
-
-    out.flush();
+  public void invoke(HttpServletRequest request, HttpServletResponse response)
+    throws Throwable
+  {
+    getSkeleton().invoke(_object, request, response);
   }    
 
   public void dumpWSDL(OutputStream out)

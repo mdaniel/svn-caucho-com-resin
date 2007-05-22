@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 public class ProxyManager {
   private static final Logger log 
-    = Logger.getLogger(WebServiceClient.class.getName());
+    = Logger.getLogger(ProxyManager.class.getName());
 
   private static final HashMap<String,EncodingProxyFactory> _factories =
     new HashMap<String,EncodingProxyFactory>();
@@ -104,8 +104,13 @@ public class ProxyManager {
 
   static {
     addEncodingProxyFactory("hessian", new HessianEncodingProxyFactory());
-    addEncodingProxyFactory("rest", new RestEncodingProxyFactory());
+    addEncodingProxyFactory("hessian-rest", 
+                            new HessianRestEncodingProxyFactory());
     addEncodingProxyFactory("soap", new SoapEncodingProxyFactory());
     addEncodingProxyFactory("vm", new VMEncodingProxyFactory());
+
+    JAXBRestEncodingProxyFactory rest = new JAXBRestEncodingProxyFactory();
+    addEncodingProxyFactory("rest", rest);
+    addEncodingProxyFactory("jaxb-rest", rest);
   }
 }
