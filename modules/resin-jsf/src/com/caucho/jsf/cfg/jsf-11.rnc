@@ -37,6 +37,11 @@ jsf11_application = element application {
   & element application-extension { jsf11-any-Group }*
 }
 
+jsf11_description-Group =
+  (element description { string }
+
+   | element display-name { string })*
+
 jsf11_faces-config = element faces-config {
   attribute id { string }?
 
@@ -385,5 +390,9 @@ jsf11_default-value = element default-value {
 }
 
 jsf11_facet = element facet {
-  string
+  attribute id { string }?,
+
+  jsf11_description-Group,
+
+  element facet-name { string }
 }

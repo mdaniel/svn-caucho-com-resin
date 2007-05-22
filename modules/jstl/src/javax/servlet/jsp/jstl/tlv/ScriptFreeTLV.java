@@ -28,7 +28,73 @@
 
 package javax.servlet.jsp.jstl.tlv;
 
-import javax.servlet.jsp.tagext.TagLibraryValidator;
+import java.io.*;
+import java.util.*;
+import javax.servlet.jsp.tagext.*;
+import javax.xml.parsers.*;
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 
 public class ScriptFreeTLV extends TagLibraryValidator {
+  private boolean _isAllowDeclarations;
+  private boolean _isAllowScriptlets;
+  private boolean _isAllowExpressions;
+  private boolean _isAllowRTExpressions;
+  
+  public ValidationMessage []validate(String prefix, String uri, PageData data)
+  {
+    Map init = getInitParameters();
+
+    _isAllowDeclarations = "true".equals(init.get("allowDeclarations"));
+    _isAllowScriptlets = "true".equals(init.get("allowScriptlets"));
+    _isAllowExpressions = "true".equals(init.get("allowExpressions"));
+    _isAllowRTExpressions = "true".equals(init.get("allowRTExpressions"));
+
+    try {
+      InputStream is = data.getInputStream();
+
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      SAXParser parser = factory.newSAXParser();
+
+      DefaultHandler handler = new Handler();
+
+      parser.parse(is, handler);
+    } catch (Exception e) {
+      return new ValidationMessage[] {
+        new ValidationMessage("", e.getMessage())
+      };
+    }
+    
+    return null;
+  }
+
+  private class Handler extends DefaultHandler {
+    public void startElement(String uri, String localName,
+                             String qName,
+                             Attributes attributes)
+      throws SAXException
+    {
+      boolean isValid = true;
+      
+      if ("jsp:expression".equals(qName))
+        isValid = _isAllowExpressions;
+      else if ("jsp:declaration".equals(qName))
+        isValid = _isAllowDeclarations;
+      else if ("jsp:scriptlet".equals(qName))
+        isValid = _isAllowScriptlets;
+
+      if (! isValid)
+        throw new SAXException(qName + " is not allowed in a script-free JSP page");
+
+      if (! _isAllowRTExpressions && attributes != null) {
+        for (int i = 0; i < attributes.getLength(); i++) {
+          String value = attributes.getValue(i);
+
+          if (value != null && value.indexOf("<%=") >= 0)
+            throw new SAXException("Runtime expression " + value + " is not allowed in a script-free JSP page");
+            
+        }
+      }
+    }
+  }
 }

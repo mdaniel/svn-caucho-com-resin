@@ -326,7 +326,7 @@ public class JspParser {
 	throw error(L.l("Expected 0xff in UTF-16 header.  UTF-16 pages with the initial byte 0xfe expect 0xff immediately following.  The 0xfe 0xff sequence is used by some application to suggest UTF-16 encoding without a directive."));
       }
       else {
-	_parseState.setContentType("text/html; charset=UTF-16BE");
+	//_parseState.setContentType("text/html; charset=UTF-16BE");
 	_parseState.setPageEncoding("UTF-16BE");
 	stream.setEncoding("UTF-16BE");
       }
@@ -337,7 +337,7 @@ public class JspParser {
 	throw error(L.l("Expected 0xfe in UTF-16 header.  UTF-16 pages with the initial byte 0xff expect 0xfe immediately following.  The 0xff 0xfe sequence is used by some application to suggest UTF-16 encoding without a directive."));
       }
       else {
-	_parseState.setContentType("text/html; charset=UTF-16LE");
+	//_parseState.setContentType("text/html; charset=UTF-16LE");
 	_parseState.setPageEncoding("UTF-16LE");
 	stream.setEncoding("UTF-16LE");
       }
@@ -363,6 +363,7 @@ public class JspParser {
       
     default:
       stream.unread();
+      break;
     }
 
     ch = read();

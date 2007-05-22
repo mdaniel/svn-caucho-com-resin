@@ -207,7 +207,10 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
   public int doEndTag()
     throws JspException
   {
-    if (_varReader == null) {
+    if (_varReader != null) {
+      this.pageContext.removeAttribute(_varReader);
+    }
+    else {
       try {
 	JspWriter jspWriter = pageContext.pushBody();
           
@@ -230,9 +233,14 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
       } catch (JspException e) {
         throw e;
       } catch (ServletException e) {
-        throw new JspException(e);
-      } catch (IOException e) {
-        throw new JspException(e);
+        Throwable e1 = e;
+        
+        if (e1.getCause() != null)
+          e1 = e1.getCause();
+        
+        throw new JspException(e1.getMessage(), e1);
+      } catch (Exception e) {
+        throw new JspException(e.getMessage(), e);
       }
     }
     
@@ -248,10 +256,13 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
       throw new JspTagException(L.l("URL may not be null for `{0}'",
                                     _url));
 
+    int p;
     if (_query == null || _query.getLength() == 0) {
     }
-    else if (url.indexOf('?') > 0)
-      url = url + '&' + _query;
+    else if ((p = url.indexOf('?')) > 0) {
+      // jsp/1cip
+      url = url.substring(0, p) + '?' + _query + '&' + url.substring(p + 1);
+    }
     else
       url = url + '?' + _query;
 
@@ -279,7 +290,7 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
                                      url));
 	
 	CauchoResponse response = (CauchoResponse) pageContext.getResponse();
-	response.getResponseStream().setEncoding(null);
+	response.getResponseStream().setEncoding(_charEncoding);
 
         disp.include(pageContext.getRequest(), response);
       }
@@ -294,7 +305,8 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
     if (slash == 0 || colon < 0 || slash < 0 || slash < colon) {
       ServletRequest request = pageContext.getRequest();
       CauchoResponse response = (CauchoResponse) pageContext.getResponse();
-      response.getResponseStream().setEncoding(null);
+      System.out.println("ENCODING: " + _charEncoding);
+      response.getResponseStream().setEncoding(_charEncoding);
       
       RequestDispatcher disp = request.getRequestDispatcher(url);
 

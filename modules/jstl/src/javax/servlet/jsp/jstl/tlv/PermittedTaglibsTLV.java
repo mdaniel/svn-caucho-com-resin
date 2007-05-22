@@ -28,7 +28,68 @@
 
 package javax.servlet.jsp.jstl.tlv;
 
-import javax.servlet.jsp.tagext.TagLibraryValidator;
+import java.io.*;
+import java.util.*;
+import javax.servlet.jsp.tagext.*;
+import javax.xml.parsers.*;
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 
 public class PermittedTaglibsTLV extends TagLibraryValidator {
+  private HashSet<String> _permitted;
+  
+  public ValidationMessage []validate(String prefix, String uri, PageData data)
+  {
+    Map init = getInitParameters();
+
+    String permitted = (String) init.get("permittedTaglibs");
+
+    if (permitted == null || "".equals(permitted))
+      return null;
+
+    _permitted = new HashSet<String>();
+
+    _permitted.add("http://java.sun.com/JSP/Page");
+
+    String []values = permitted.split("[ \t\n\r]+");
+
+    for (int i = 0; i < values.length; i++) {
+      String permittedUri = values[i].trim();
+
+      if (! "".equals(permittedUri))
+        _permitted.add(permittedUri);
+    }
+
+    try {
+      InputStream is = data.getInputStream();
+
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      factory.setNamespaceAware(true);
+      SAXParser parser = factory.newSAXParser();
+
+      DefaultHandler handler = new Handler();
+
+      parser.parse(is, handler);
+    } catch (Exception e) {
+      return new ValidationMessage[] {
+        new ValidationMessage("", e.getMessage())
+      };
+    }
+    
+    return null;
+  }
+
+  private class Handler extends DefaultHandler {
+    public void startElement(String uri, String localName,
+                             String qName,
+                             Attributes attributes)
+      throws SAXException
+    {
+      if (uri != null
+          && ! "".equals(uri)
+          && ! _permitted.contains(uri)) {
+        throw new SAXException(uri + " is not a permitted tag library");
+      }
+    }
+  }
 }

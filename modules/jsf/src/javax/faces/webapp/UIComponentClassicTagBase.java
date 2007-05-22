@@ -104,7 +104,10 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
   
   public JspWriter getPreviousOut()
   {
-    throw new UnsupportedOperationException();
+    if (bodyContent != null)
+      return bodyContent.getEnclosingWriter();
+    else
+      return pageContext.getOut();
   }
 
   public void setId(String id)

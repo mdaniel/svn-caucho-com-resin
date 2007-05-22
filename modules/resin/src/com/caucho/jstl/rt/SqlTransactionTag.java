@@ -94,10 +94,6 @@ public class SqlTransactionTag extends TagSupport implements TryCatchFinally  {
       _conn = ds.getConnection();
 
       _oldIsolation = _conn.getTransactionIsolation();
-      
-      System.out.println("OLD: " + _oldIsolation);
-      System.out.println("NEW: " + isolationCode);
-
 
       _conn.setAutoCommit(false);
       
@@ -108,7 +104,6 @@ public class SqlTransactionTag extends TagSupport implements TryCatchFinally  {
         _oldIsolation = -1;
       }
       else {
-        System.out.println("SETI: " + isolationCode);
         _conn.setTransactionIsolation(isolationCode);
       }
 
@@ -124,8 +119,16 @@ public class SqlTransactionTag extends TagSupport implements TryCatchFinally  {
 
   public void doCatch(Throwable t) throws Throwable
   {
-    if (_conn != null)
-      _conn.rollback();
+    Connection conn = _conn;
+    _conn = null;
+    
+    if (conn != null) {
+      try {
+        conn.rollback();
+      } finally {
+        close(conn);
+      }
+    }
 
     throw t;
   }
@@ -142,25 +145,30 @@ public class SqlTransactionTag extends TagSupport implements TryCatchFinally  {
         try {
           conn.commit();
         } finally {
-          try {
-            if (_oldIsolation >= 0)
-              conn.setTransactionIsolation(_oldIsolation);
-          } catch (SQLException e) {
-          }
-
-          try {
-            conn.setAutoCommit(true);
-          } catch (SQLException e) {
-          }
-          
-          try {
-            conn.close();
-          } catch (SQLException e) {
-          }
+          close(conn);
         }
       }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  private void close(Connection conn)
+  {
+    try {
+      if (_oldIsolation >= 0)
+        conn.setTransactionIsolation(_oldIsolation);
+    } catch (SQLException e) {
+    }
+
+    try {
+      conn.setAutoCommit(true);
+    } catch (SQLException e) {
+    }
+          
+    try {
+      conn.close();
+    } catch (SQLException e) {
     }
   }
 }

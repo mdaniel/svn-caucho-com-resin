@@ -118,7 +118,8 @@ public class NavigationRule implements Comparable<NavigationRule>
 
   public boolean isMatch(String url)
   {
-    return _fromViewIdPattern.matcher(url).matches();
+    return (_fromViewIdPattern != null
+            && _fromViewIdPattern.matcher(url).matches());
   }
 
   public void addNavigationCase(NavigationCase navCase)

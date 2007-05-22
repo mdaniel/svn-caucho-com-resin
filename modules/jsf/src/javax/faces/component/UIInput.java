@@ -750,7 +750,7 @@ public class UIInput extends UIOutput
     implements ValueChangeListener {
     private MethodBinding _binding;
 
-    ValueChangeListenerAdapter(MethodBinding binding)
+    public ValueChangeListenerAdapter(MethodBinding binding)
     {
       _binding = binding;
     }
@@ -778,7 +778,7 @@ public class UIInput extends UIOutput
     implements Validator {
     private MethodBinding _binding;
 
-    ValidatorAdapter(MethodBinding binding)
+    public ValidatorAdapter(MethodBinding binding)
     {
       _binding = binding;
     }
