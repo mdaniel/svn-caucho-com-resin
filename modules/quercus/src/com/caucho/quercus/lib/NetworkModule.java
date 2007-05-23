@@ -159,6 +159,11 @@ public class NetworkModule extends AbstractQuercusModule {
    */
   public static Value ip2long(String ip)
   {
+    // php/1m00
+    
+    if (ip == null)
+      return LongValue.MINUS_ONE;
+    
     long v = 0;
 
     int p = 0;
@@ -197,6 +202,9 @@ public class NetworkModule extends AbstractQuercusModule {
   {
     // php/1m01
 
+    if (hostname == null)
+      return "";
+    
     InetAddress ip = null;
 
     try {
@@ -259,6 +267,12 @@ public class NetworkModule extends AbstractQuercusModule {
   public static String gethostbyaddr(Env env, String ip)
   {
     // php/1m03
+    
+    if (ip == null) {
+      env.warning("Address must not be null.");      
+
+      return null;
+    }
 
     String formIPv4 = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
                       "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
