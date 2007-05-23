@@ -100,7 +100,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, int nCmdSho
 {
 	char *name = "Resin";
     char *full_name = "Resin Web Server";
-	char *class_name = "com.caucho.server.resin.Resin";
+	char *class_name = "com.caucho.boot.ResinBoot";
 	DWORD threadId;
 
 	if (start_service(name, full_name, class_name, __argc, __argv))

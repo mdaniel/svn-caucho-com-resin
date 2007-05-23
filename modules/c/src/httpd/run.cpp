@@ -50,6 +50,8 @@ static HWND g_window;
 static int g_is_service;
 static int g_is_standalone;
 static int g_console = 0;
+static PROCESS_INFORMATION g_procInfo_buf;
+static PROCESS_INFORMATION *g_procInfo;
 
 void
 set_standalone(int is_standalone)
@@ -101,6 +103,11 @@ stop_server()
 	g_keepalive_handle = -1;
 	if (handle >= 0)
 		closesocket(handle);
+
+	if (g_procInfo) {
+		TerminateProcess(g_procInfo_buf.hProcess, 1);
+	}
+
 }
 
 void
@@ -146,7 +153,7 @@ spawn_java(char *exe, char **args)
 		while (! g_is_started) {
 			Sleep(1000);
 		}
-
+		/*
 		int sock = socket(AF_INET, SOCK_STREAM, 0);
 		if (sock < 0) {
 			fprintf(err, "can't create socket\n");
@@ -176,24 +183,23 @@ spawn_java(char *exe, char **args)
 		int port = ntohs(sin.sin_port);
 
 		listen(sock, 5);
-
+		*/
 		STARTUPINFO startInfo;
-		PROCESS_INFORMATION procInfo;
 		memset(&startInfo, 0, sizeof(startInfo));
-		memset(&procInfo, 0, sizeof(procInfo));
+		memset(&g_procInfo_buf, 0, sizeof(g_procInfo_buf));	
 		startInfo.cb = sizeof(startInfo);
 
 		char childarg[32 * 1024];
 		char portname[32];
 
 		strcpy(childarg, arg);
-
+		/*
 		if (! g_is_standalone) {
 		  strcat(childarg, " -socketwait");
 		  sprintf(portname, " %d", port);
 		  strcat(childarg, portname);
 		}
-
+		*/
 		int flag = 0;
 		if (g_is_service) {
 			flag = 0; // DETACHED_PROCESS;
@@ -203,24 +209,26 @@ spawn_java(char *exe, char **args)
 		int ok = CreateProcess(0, childarg, 0, 0, FALSE, flag, 
 					           0, 0, 
 							   &startInfo,
-							   &procInfo);
+							   &g_procInfo_buf);
 
 		if (! ok) {
-			closesocket(sock);
+			//closesocket(sock);
 			fprintf(stderr, "Couldn't start %s %s.\n", cmd, childarg);
 			return 1;
 		}
+		g_procInfo = &g_procInfo_buf;
 
-		g_keepalive_handle = sock;
-
-		WaitForSingleObject(procInfo.hProcess, INFINITE);
+		//g_keepalive_handle = sock;
+		WaitForSingleObject(g_procInfo_buf.hProcess, INFINITE);
 		DWORD status;
-		GetExitCodeProcess(procInfo.hProcess, &status);
+		GetExitCodeProcess(g_procInfo_buf.hProcess, &status);
 		if (g_keepalive_handle >= 0)
 			closesocket(g_keepalive_handle);
 		g_keepalive_handle = -1;
-		CloseHandle(procInfo.hThread);
-		CloseHandle(procInfo.hProcess);
+		CloseHandle(g_procInfo_buf.hThread);
+		CloseHandle(g_procInfo_buf.hProcess);
+
+		g_procInfo = 0;
 
 		if (status == 66 || g_is_standalone)
 			return status;
@@ -378,10 +386,12 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 			argc--;
 			argv++;
 			verbose = 1;
+			/*
 		} else if (! strncmp(argv[1], "-J", 2)) {
 		    java_argv[java_argc++] = strdup(argv[1] + 2);
 			argc--;
 			argv++;
+			*/
 		} else if (! strncmp(argv[1], "-D", 2)) {
 		    java_argv[java_argc++] = strdup(argv[1]);
 			argc--;
@@ -544,7 +554,7 @@ get_server_args(char *name, char *full_name, char *main, int argc, char **argv)
 		AllocConsole();
 	}
 
-	if (! g_console && stderr_file) {
+	if (false && ! g_console && stderr_file) {
 		CreateDirectory(rsprintf(buf, "%s/log", server_root), NULL);
 		SECURITY_ATTRIBUTES security;
 		memset(&security, 0, sizeof(security));
