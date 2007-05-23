@@ -28,6 +28,8 @@
 
 package com.caucho.make;
 
+import javax.annotation.*;
+
 import com.caucho.loader.Environment;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
@@ -49,6 +51,7 @@ public class DependencyConfig {
   /**
    * Initialize
    */
+  @PostConstruct
   public void init()
   {
     Depend depend = new Depend(_path);

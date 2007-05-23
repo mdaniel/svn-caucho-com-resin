@@ -119,8 +119,19 @@ public class FormLoginServlet extends GenericServlet {
     else if (uri != null && query != null)
       uri = uri + "?" + query;
 
-    if (uri == null)
-      throw new ServletException(L.l("No forwarding URI for form authentication.  Either the login form must specify j_uri or the session must have a saved URI."));
+    if (uri == null) {
+      log.warning(L.l("FormLogin: session has timed out for session '{0}'",
+                      req.getSession().getId()));
+      
+      RequestDispatcher disp = request.getRequestDispatcher("/");
+      if (disp != null) {
+        disp.forward(request, response);
+        return;
+      }
+      else {
+        throw new ServletException(L.l("Session has timed out for form authentication, no forwarding URI is available.  Either the login form must specify j_uri or the session must have a saved URI."));
+      }
+    }
 
     if (uri.indexOf('\n') >= 0 || uri.indexOf('\r') >= 0)
       throw new ServletException(L.l("Forwarding URI '{0}' is invalid.",
