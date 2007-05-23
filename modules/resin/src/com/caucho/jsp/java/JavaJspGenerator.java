@@ -955,6 +955,9 @@ public class JavaJspGenerator extends JspGenerator {
     }
     out.println("\");");
 
+    if (encoding == null && isXml())
+      encoding = "UTF-8";
+
     if (encoding == null) {
       // server/1204
     }

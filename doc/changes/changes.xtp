@@ -12,6 +12,9 @@
 
 <s2 title="3.1.1 - May 15, 2007">
 <ul>
+<li>watchdog: copy environment from parent to child (#1733, fixed! by gjvc)</li>
+<li>cluster: lower logging level to info for socket failure (#1750, rep by Kippert)</li>
+<li>jsp: jspx encoding defaults need to be UTF-8 (#1708, rep by ccwf)</li>
 <li>jsp: JSTL issue with EL and old-style web-app (rep by Victor, #1348)</li>
 <li>ejb: cmr-many-to-one column calculation error message cleaned up (#1540, rep by chesspoker)</li>
 <li>virtual-host: virtual host regexp issues with windows (#1689, rep by S. Avogadro)</li>

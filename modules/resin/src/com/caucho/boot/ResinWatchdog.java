@@ -76,7 +76,7 @@ public class ResinWatchdog extends AbstractManagedObject
 
   private ArrayList<String> _jvmArgs = new ArrayList<String>();
   private ArrayList<String> _watchdogArgs = new ArrayList<String>();
-  
+
   private boolean _is64bit;
   private boolean _hasXss;
   private boolean _hasXmx;
@@ -322,6 +322,8 @@ public class ResinWatchdog extends AbstractManagedObject
     builder.directory(new File(resinRoot.getNativePath()));
 
     Map<String,String> env = builder.environment();
+
+    env.putAll(System.getenv());
 
     String classPath = ResinWatchdogManager.calculateClassPath(resinHome);
 
@@ -665,19 +667,25 @@ public class ResinWatchdog extends AbstractManagedObject
 
     HashMap<String,String> env = new HashMap<String,String>();
 
+    env.putAll(System.getenv());
+    
     env.put("CLASSPATH", classPath);
 
     if (_is64bit) {
-      env.put("LD_LIBRARY_PATH",
-	      resinHome.lookup("libexec64").getNativePath());
-      env.put("DYLD_LIBRARY_PATH",
-	      resinHome.lookup("libexec64").getNativePath());
+      appendEnvPath(env,
+                    "LD_LIBRARY_PATH",
+                    resinHome.lookup("libexec64").getNativePath());
+      appendEnvPath(env,
+                    "DYLD_LIBRARY_PATH",
+                    resinHome.lookup("libexec64").getNativePath());
     }
     else {
-      env.put("LD_LIBRARY_PATH",
-	      resinHome.lookup("libexec").getNativePath());
-      env.put("DYLD_LIBRARY_PATH",
-	      resinHome.lookup("libexec").getNativePath());
+      appendEnvPath(env,
+                    "LD_LIBRARY_PATH",
+                    resinHome.lookup("libexec").getNativePath());
+      appendEnvPath(env,
+                    "DYLD_LIBRARY_PATH",
+                    resinHome.lookup("libexec").getNativePath());
     }
 
     ArrayList<String> list = new ArrayList<String>();
@@ -798,6 +806,18 @@ public class ResinWatchdog extends AbstractManagedObject
     builder.redirectErrorStream(true);
 
     return builder.start();
+  }
+
+  private void appendEnvPath(Map<String,String> env,
+                             String prop,
+                             String value)
+  {
+    String oldValue = env.get(prop);
+
+    if (oldValue != null && ! "".equals(oldValue))
+      value = value + File.pathSeparator + oldValue;
+
+    env.put(prop, value);
   }
 
   private String getJavaExe()
