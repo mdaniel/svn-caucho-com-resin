@@ -76,11 +76,11 @@ public abstract class Path {
   protected static char _separatorChar = File.separatorChar;
   protected static char _pathSeparatorChar = File.pathSeparatorChar;
   private static String _newline;
-  
+
   private static final PathKey _key = new PathKey();
 
   private static final SchemeMap DEFAULT_SCHEME_MAP = new SchemeMap();
-  
+
   private static SchemeMap _defaultSchemeMap;
 
   protected SchemeMap _schemeMap = _defaultSchemeMap;
@@ -112,43 +112,43 @@ public abstract class Path {
   }
 
   /**
-    * Returns a new path relative to the current one.
-    *
-    * <p>Path only handles scheme:xxx.  Subclasses of Path will specialize
-    * the xxx.
-    *
-    * @param userPath relative or absolute path, essentially any url.
-    * @param newAttributes attributes for the new path.
-    *
-    * @return the new path or null if the scheme doesn't exist
-    */
-   public Path lookup(String userPath, Map<String,Object> newAttributes)
-   {
-     if (newAttributes != null)
-       return lookupImpl(userPath, newAttributes);
-     
-     synchronized (_key) {
-       _key.init(this, userPath);
+   * Returns a new path relative to the current one.
+   *
+   * <p>Path only handles scheme:xxx.  Subclasses of Path will specialize
+   * the xxx.
+   *
+   * @param userPath relative or absolute path, essentially any url.
+   * @param newAttributes attributes for the new path.
+   *
+   * @return the new path or null if the scheme doesn't exist
+   */
+  public Path lookup(String userPath, Map<String,Object> newAttributes)
+  {
+    if (newAttributes != null)
+      return lookupImpl(userPath, newAttributes);
 
-       Path path = _pathLookupCache.get(_key);
+    synchronized (_key) {
+      _key.init(this, userPath);
 
-       if (path != null) {
-	 return path.cacheCopy();
-       }
-     }
+      Path path = _pathLookupCache.get(_key);
 
-     Path path = lookupImpl(userPath, null);
+      if (path != null) {
+        return path.cacheCopy();
+      }
+    }
 
-     synchronized (_key) {
-       Path copy = path.cacheCopy();
+    Path path = lookupImpl(userPath, null);
 
-       if (copy != null) {
-	 _pathLookupCache.putIfNew(new PathKey(this, userPath), copy);
-       }
-     }
+    synchronized (_key) {
+      Path copy = path.cacheCopy();
 
-     return path;
-   }
+      if (copy != null) {
+        _pathLookupCache.putIfNew(new PathKey(this, userPath), copy);
+      }
+    }
+
+    return path;
+  }
 
   /**
    * Returns a new path relative to the current one.
@@ -182,17 +182,17 @@ public abstract class Path {
       int ch;
 
       if (length == 1
-	  && ('a' <= (ch = scheme.charAt(0)) && ch <= 'z'
-	      || 'A' <= ch && ch <= 'Z')) {
-	if (_isTestWindows)
-	  return schemeWalk(userPath, newAttributes, "/" + userPath, 0);
-	  
+          && ('a' <= (ch = scheme.charAt(0)) && ch <= 'z'
+              || 'A' <= ch && ch <= 'Z')) {
+        if (_isTestWindows)
+          return schemeWalk(userPath, newAttributes, "/" + userPath, 0);
+
         path = schemeMap.get("file");
 
         if (path != null)
           return path.schemeWalk(userPath, newAttributes, "/" + userPath, 0);
-	else
-	  return schemeWalk(userPath, newAttributes, "/" + userPath, 0);
+        else
+          return schemeWalk(userPath, newAttributes, "/" + userPath, 0);
       }
     }
 
@@ -274,7 +274,7 @@ public abstract class Path {
     ArrayList<Path> list = new ArrayList<Path>();
 
     //if (exists())
-      list.add(this);
+    list.add(this);
 
     return list;
   }
@@ -303,18 +303,18 @@ public abstract class Path {
 
     int ch = uri.charAt(0);
     if (ch >= 'a' && ch <= 'z' ||
-	ch >= 'A' && ch <= 'Z') {
+        ch >= 'A' && ch <= 'Z') {
       for (i = 1; i < length; i++) {
-	ch = uri.charAt(i);
+        ch = uri.charAt(i);
 
-	if (ch == ':')
-	  return uri.substring(0, i).toLowerCase();
+        if (ch == ':')
+          return uri.substring(0, i).toLowerCase();
 
-	if (! (ch >= 'a' && ch <= 'z' ||
-	       ch >= 'A' && ch <= 'Z' ||
-	       ch >= '0' && ch <= '0' ||
-	       ch == '+' || ch == '-' || ch == '.'))
-	  break;
+        if (! (ch >= 'a' && ch <= 'z' ||
+               ch >= 'A' && ch <= 'Z' ||
+               ch >= '0' && ch <= '0' ||
+               ch == '+' || ch == '-' || ch == '.'))
+          break;
       }
     }
 
@@ -332,7 +332,7 @@ public abstract class Path {
    * @return the found path
    */
   abstract protected Path schemeWalk(String userPath,
-				     Map<String,Object> newAttributes,
+                                     Map<String,Object> newAttributes,
                                      String newPath, int offset);
 
   /**
@@ -342,7 +342,7 @@ public abstract class Path {
   {
     return escapeURL(getScheme() + ":" + getFullPath());
   }
-  
+
   /**
    * Returns the url scheme
    */
@@ -486,7 +486,7 @@ public abstract class Path {
 
   /**
    * Tests if the path refers to a symbolic link.
-   */ 
+   */
   public boolean isLink()
   {
     return false;
@@ -628,7 +628,7 @@ public abstract class Path {
   //
   // POSIX stat() related calls
   //
-  
+
   /**
    * Returns equivalent of struct stat.st_dev if appropriate.
    */
@@ -796,7 +796,14 @@ public abstract class Path {
    */
   public Iterator<String> iterator() throws IOException
   {
-    return new ArrayIterator(list());
+    String list[] = list();
+
+    // Avoids NPE when subclasses override list() and
+    // possibly return null, e.g. JarPath.
+    if (list == null)
+      list = new String[0];
+
+    return new ArrayIterator(list);
   }
 
   /**
@@ -867,13 +874,13 @@ public abstract class Path {
   {
     if (length == 0) {
       if (exists()) {
-	StreamImpl stream = openWriteImpl();
-	stream.close();
+        StreamImpl stream = openWriteImpl();
+        stream.close();
 
-	return true;
+        return true;
       }
       else
-	return false;
+        return false;
     }
     else
       throw new UnsupportedOperationException(getClass().getName() + ": truncate");
@@ -1053,9 +1060,9 @@ public abstract class Path {
   {
     synchronized (LOCK) {
       if (! exists()) {
-	WriteStream s = openWrite();
-	s.close();
-	return true;
+        WriteStream s = openWrite();
+        s.close();
+        return true;
       }
     }
 
@@ -1118,7 +1125,7 @@ public abstract class Path {
       int len;
 
       while ((len = is.read(buffer, 0, length)) > 0)
-	os.write(buffer, 0, len);
+        os.write(buffer, 0, len);
     } finally {
       TempBuffer.free(tempBuffer);
 
@@ -1142,22 +1149,22 @@ public abstract class Path {
       int length = buffer.length;
 
       while (true) {
-	int sublen = length - offset;
+        int sublen = length - offset;
 
-	if (sublen <= 0) {
-	  buffer = os.nextBuffer(offset);
-	  offset = 0;
-	  sublen = length;
-	}
+        if (sublen <= 0) {
+          buffer = os.nextBuffer(offset);
+          offset = 0;
+          sublen = length;
+        }
 
-	sublen = is.read(buffer, offset, sublen);
+        sublen = is.read(buffer, offset, sublen);
 
-	if (sublen <= 0) {
-	  os.setBufferOffset(offset);
-	  return;
-	}
+        if (sublen <= 0) {
+          os.setBufferOffset(offset);
+          return;
+        }
 
-	offset += sublen;
+        offset += sublen;
       }
     } finally {
       is.close();
@@ -1171,35 +1178,35 @@ public abstract class Path {
   {
     try {
       if (isDirectory()) {
-	String []list = list();
+        String []list = list();
 
-	long digest = 0;
+        long digest = 0;
 
-	for (int i = 0; i < list.length; i++) {
-	  digest = Crc64.generate(digest, list[i]);
-	}
+        for (int i = 0; i < list.length; i++) {
+          digest = Crc64.generate(digest, list[i]);
+        }
 
-	return digest;
+        return digest;
       }
       else if (canRead()) {
-	ReadStream is = openRead();
+        ReadStream is = openRead();
 
-	try {
-	  long digest = 0;
+        try {
+          long digest = 0;
 
-	  int ch;
+          int ch;
 
-	  while ((ch = is.read()) >= 0) {
-	    digest = Crc64.next(digest, ch);
-	  }
+          while ((ch = is.read()) >= 0) {
+            digest = Crc64.next(digest, ch);
+          }
 
-	  return digest;
-	} finally {
-	  is.close();
-	}
+          return digest;
+        } finally {
+          is.close();
+        }
       }
       else {
-	return -1; // Depend requires -1
+        return -1; // Depend requires -1
       }
     } catch (IOException e) {
       // XXX: log
@@ -1279,33 +1286,33 @@ public abstract class Path {
 
       switch (ch) {
       case ' ':
-	if (cb == null) {
-	  cb = new CharBuffer();
-	  cb.append(rawURL, 0, i);
-	}
-	cb.append("%20");
-	break;
-	
+        if (cb == null) {
+          cb = new CharBuffer();
+          cb.append(rawURL, 0, i);
+        }
+        cb.append("%20");
+        break;
+
       case '#':
-	if (cb == null) {
-	  cb = new CharBuffer();
-	  cb.append(rawURL, 0, i);
-	}
-	cb.append("%23");
-	break;
+        if (cb == null) {
+          cb = new CharBuffer();
+          cb.append(rawURL, 0, i);
+        }
+        cb.append("%23");
+        break;
 
       case '%':
-	if (cb == null) {
-	  cb = new CharBuffer();
-	  cb.append(rawURL, 0, i);
-	}
-	cb.append("%25");
-	break;
+        if (cb == null) {
+          cb = new CharBuffer();
+          cb.append(rawURL, 0, i);
+        }
+        cb.append("%25");
+        break;
 
       default:
-	if (cb != null)
-	  cb.append(ch);
-	break;
+        if (cb != null)
+          cb.append(ch);
+        break;
       }
     }
 
@@ -1428,8 +1435,8 @@ public abstract class Path {
 
   static {
     DEFAULT_SCHEME_MAP.put("file", new FilePath(null));
-    
-    //DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null)); 
+
+    //DEFAULT_SCHEME_MAP.put("jar", new JarScheme(null));
     DEFAULT_SCHEME_MAP.put("http", new HttpPath("127.0.0.1", 0));
     DEFAULT_SCHEME_MAP.put("https", new HttpsPath("127.0.0.1", 0));
     DEFAULT_SCHEME_MAP.put("tcp", new TcpPath(null, null, null, "127.0.0.1", 0));
