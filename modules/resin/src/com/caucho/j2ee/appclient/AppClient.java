@@ -35,6 +35,7 @@ import com.caucho.el.*;
 import com.caucho.j2ee.J2EEVersion;
 import com.caucho.java.WorkDir;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
@@ -75,7 +76,7 @@ public class AppClient implements EnvironmentBean
   private J2EEVersion _j2eeVersion = J2EEVersion.RESIN;
 
   private Path _home;
-  
+
   private boolean _isMetadataComplete;
   private Path _rootDirectory;
   private Path _workDirectory;
@@ -227,7 +228,7 @@ public class AppClient implements EnvironmentBean
 
     //EnvironmentClassLoader.initializeEnvironment();
     //System.setSecurityManager(new SecurityManager());
-    
+
     if (_rootDirectory == null) {
       String name = _clientJar.getTail();
 
@@ -267,8 +268,11 @@ public class AppClient implements EnvironmentBean
       configureFrom(jarPath.lookup("META-INF/resin-application-client.xml"), true);
 
       for (Path configPath : _configList) {
-	configureFrom(configPath, true);
+        configureFrom(configPath, true);
       }
+
+      // jpa/0s37
+      Environment.addChildLoaderListener(new com.caucho.amber.manager.PersistenceEnvironmentListener());
 
       if (_mainClassName == null)
         throw new ConfigException(L.l("'main-class' is required"));
@@ -328,7 +332,7 @@ public class AppClient implements EnvironmentBean
     throws Exception
   {
     init();
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -447,7 +451,7 @@ public class AppClient implements EnvironmentBean
       System.out.println("GET_HOME: " + _home);
       return _home;
     }
-    
+
     public Path getRoot()
     {
       return _rootDirectory;
