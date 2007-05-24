@@ -158,7 +158,7 @@ public class AmberPersistenceUnit {
   private HashMap<String, NamedNativeQueryConfig> _namedNativeQueryMap =
     new HashMap<String, NamedNativeQueryConfig>();
 
-  private EntityMappingsConfig _entityMappings;
+  private ArrayList<EntityMappingsConfig> _entityMappingsList;
 
   private ArrayList<EmbeddableType> _embeddableTypes
     = new ArrayList<EmbeddableType>();
@@ -1266,17 +1266,13 @@ public class AmberPersistenceUnit {
   /**
    * Sets the entity mappings config.
    */
-  public void setEntityMappingsConfig(EntityMappingsConfig entityMappings)
+  public void setEntityMappingsList(ArrayList<EntityMappingsConfig> entityMappingsList)
   {
-    _entityMappings = entityMappings;
+    _entityMappingsList = entityMappingsList;
 
-    if (_entityMappings != null) {
-      _entityIntrospector.setEntityConfigMap(_entityMappings.getEntityMap());
-      _entityIntrospector.setMappedSuperclassConfigMap(_entityMappings.getMappedSuperclassMap());
+    _entityIntrospector.setEntityMappingsList(_entityMappingsList);
 
-      _mappedSuperIntrospector.setEntityConfigMap(_entityMappings.getEntityMap());
-      _mappedSuperIntrospector.setMappedSuperclassConfigMap(_entityMappings.getMappedSuperclassMap());
-    }
+    _mappedSuperIntrospector.setEntityMappingsList(_entityMappingsList);
   }
 
   /**
@@ -1287,10 +1283,10 @@ public class AmberPersistenceUnit {
   {
     initLoaders();
 
-    if (_entityMappings != null) {
+    if (_entityMappingsList != null) {
       BaseConfigIntrospector introspector = new BaseConfigIntrospector();
 
-      introspector.initMetaData(_entityMappings, this);
+      introspector.initMetaData(_entityMappingsList, this);
     }
 
     if (_dataSource == null)

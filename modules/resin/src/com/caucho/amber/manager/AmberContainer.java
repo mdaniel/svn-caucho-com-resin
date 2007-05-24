@@ -42,13 +42,17 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.enhancer.EnhancerManager;
+import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Environment-based container.
@@ -487,27 +491,18 @@ public class AmberContainer {
   {
     if (_persistenceRootSet.contains(root))
       return;
-    
+
     _persistenceRootSet.add(root);
 
     Path persistenceXml = root.lookup("META-INF/persistence.xml");
-    
+
     InputStream is = null;
 
     try {
       Path ormXml = root.lookup("META-INF/orm.xml");
 
-      EntityMappingsConfig entityMappings = null;
-
-      if (ormXml.exists()) {
-        is = ormXml.openRead();
-
-        entityMappings = new EntityMappingsConfig();
-        entityMappings.setRoot(root);
-
-        new Config().configure(entityMappings, is,
-                               "com/caucho/amber/cfg/mapping-30.rnc");
-      }
+      EntityMappingsConfig entityMappings
+        = configureMappingFile(root, ormXml);
 
       is = persistenceXml.openRead();
 
@@ -529,7 +524,30 @@ public class AmberContainer {
             unitConfig.addAllClasses(classMap);
           }
 
-          AmberPersistenceUnit unit = unitConfig.init(this, entityMappings);
+          ArrayList<EntityMappingsConfig> entityMappingsList
+            = new ArrayList<EntityMappingsConfig>();
+
+          if (entityMappings != null)
+            entityMappingsList.add(entityMappings);
+
+          // jpa/0s2l: custom mapping-file.
+          for (String fileName : unitConfig.getMappingFiles()) {
+            Path mappingFile = root.lookup(fileName);
+
+            EntityMappingsConfig mappingFileConfig
+              = configureMappingFile(root, mappingFile);
+
+            if (mappingFileConfig != null) {
+              entityMappingsList.add(mappingFileConfig);
+
+              classMap.clear();
+              lookupClasses(root.getPath().length(), root, classMap,
+                            mappingFileConfig);
+              unitConfig.addAllClasses(classMap);
+            }
+          }
+
+          AmberPersistenceUnit unit = unitConfig.init(this, entityMappingsList);
 
           _unitMap.put(unit.getName(), unit);
         } catch (Exception e) {
@@ -566,6 +584,12 @@ public class AmberContainer {
                             EntityMappingsConfig entityMappings)
     throws Exception
   {
+    if (curr instanceof JarPath) {
+      lookupJarClasses((JarPath) curr, classMap, entityMappings);
+
+      return;
+    }
+
     Iterator<String> it = curr.iterator();
 
     while (it.hasNext()) {
@@ -586,31 +610,99 @@ public class AmberContainer {
 
         String className = packageName + s.substring(0, s.length() - 6);
 
-        JClass type = _jClassLoader.forName(className);
+        lookupClass(className, classMap, entityMappings);
+      }
+    }
+  }
 
-        if (type != null) {
+  //
+  // private
 
-          boolean isEntity
-            = type.getAnnotation(javax.persistence.Entity.class) != null;
-          boolean isEmbeddable
-            = type.getAnnotation(javax.persistence.Embeddable.class) != null;
-          boolean isMappedSuperclass
-            = type.getAnnotation(javax.persistence.MappedSuperclass.class) != null;
+  //
+  // Configures the default orm.xml or mapping files specified with
+  // mapping-file tags within a persistence-unit.
+  //
+  private EntityMappingsConfig configureMappingFile(Path root,
+                                                    Path xmlFile)
+    throws Exception
+  {
+    EntityMappingsConfig entityMappings = null;
 
-          MappedSuperclassConfig mappedSuperclassOrEntityConfig = null;
+    if (xmlFile.exists()) {
+      InputStream is = xmlFile.openRead();
 
-          if (entityMappings != null) {
-            mappedSuperclassOrEntityConfig = entityMappings.getEntityConfig(className);
+      entityMappings = new EntityMappingsConfig();
+      entityMappings.setRoot(root);
 
-            if (mappedSuperclassOrEntityConfig == null)
-              mappedSuperclassOrEntityConfig = entityMappings.getMappedSuperclass(className);
-          }
+      new Config().configure(entityMappings, is,
+                             "com/caucho/amber/cfg/mapping-30.rnc");
+    }
 
-          if (isEntity || isEmbeddable || isMappedSuperclass ||
-              (mappedSuperclassOrEntityConfig != null)) {
-            classMap.put(className, type);
-          }
+    return entityMappings;
+  }
+
+  private void lookupJarClasses(JarPath path,
+                                HashMap<String, JClass> classMap,
+                                EntityMappingsConfig entityMappings)
+    throws Exception
+  {
+    try {
+      InputStream is = path.getContainer().openRead();
+
+      try {
+        ZipInputStream zipIs = new ZipInputStream(is);
+
+        ZipEntry entry;
+
+        while ((entry = zipIs.getNextEntry()) != null) {
+          String classFileName = entry.getName();
+
+          if (! classFileName.endsWith(".class"))
+            continue;
+
+          String className
+            = classFileName.substring(0, classFileName.length() - 6);
+          className = className.replace('/', '.');
+
+          lookupClass(className, classMap, entityMappings);
         }
+
+        zipIs.close();
+      } finally {
+        is.close();
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  private void lookupClass(String className,
+                           HashMap<String, JClass> classMap,
+                           EntityMappingsConfig entityMappings)
+    throws Exception
+  {
+    JClass type = _jClassLoader.forName(className);
+
+    if (type != null) {
+      boolean isEntity
+        = type.getAnnotation(javax.persistence.Entity.class) != null;
+      boolean isEmbeddable
+        = type.getAnnotation(javax.persistence.Embeddable.class) != null;
+      boolean isMappedSuperclass
+        = type.getAnnotation(javax.persistence.MappedSuperclass.class) != null;
+
+      MappedSuperclassConfig mappedSuperclassOrEntityConfig = null;
+
+      if (entityMappings != null) {
+        mappedSuperclassOrEntityConfig = entityMappings.getEntityConfig(className);
+
+        if (mappedSuperclassOrEntityConfig == null)
+          mappedSuperclassOrEntityConfig = entityMappings.getMappedSuperclass(className);
+      }
+
+      if (isEntity || isEmbeddable || isMappedSuperclass ||
+          (mappedSuperclassOrEntityConfig != null)) {
+        classMap.put(className, type);
       }
     }
   }

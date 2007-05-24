@@ -35,6 +35,7 @@ import com.caucho.bytecode.JClass;
 import com.caucho.vfs.Path;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,6 +52,9 @@ public class PersistenceUnitConfig {
   // className -> type
   private HashMap<String, JClass> _classMap
     = new HashMap<String, JClass>();
+
+  private ArrayList<String> _mappingFiles
+    = new ArrayList<String>();
 
   /**
    * Returns the unit name.
@@ -109,8 +113,17 @@ public class PersistenceUnitConfig {
   /**
    * Sets the mapping file.
    */
-  public void addMappingFile(Path file)
+  public void addMappingFile(String fileName)
   {
+    _mappingFiles.add(fileName);
+  }
+
+  /**
+   * Returns the mapping files.
+   */
+  public ArrayList<String> getMappingFiles()
+  {
+    return _mappingFiles;
   }
 
   /**
@@ -170,7 +183,7 @@ public class PersistenceUnitConfig {
   }
 
   public AmberPersistenceUnit init(AmberContainer container,
-                                   EntityMappingsConfig entityMappings)
+                                   ArrayList<EntityMappingsConfig> entityMappings)
     throws Exception
   {
     AmberPersistenceUnit unit
@@ -181,7 +194,7 @@ public class PersistenceUnitConfig {
     unit.setJtaDataSource(_jtaDataSource);
     unit.setNonJtaDataSource(_nonJtaDataSource);
 
-    unit.setEntityMappingsConfig(entityMappings);
+    unit.setEntityMappingsList(entityMappings);
 
     unit.init();
 

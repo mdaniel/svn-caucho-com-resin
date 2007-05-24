@@ -71,11 +71,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   HashMap<String, EmbeddableConfig> _embeddableConfigMap
     = new HashMap<String, EmbeddableConfig>();
 
-  HashMap<String, EntityConfig> _entityConfigMap
-    = new HashMap<String, EntityConfig>();
+  ArrayList<EntityMappingsConfig> _entityMappingsList;
 
-  HashMap<String, MappedSuperclassConfig> _mappedSuperclassConfigMap
-    = new HashMap<String, MappedSuperclassConfig>();
+  // HashMap<String, EntityConfig> _entityConfigMap
+  //   = new HashMap<String, EntityConfig>();
+  //
+  // HashMap<String, MappedSuperclassConfig> _mappedSuperclassConfigMap
+  //   = new HashMap<String, MappedSuperclassConfig>();
 
   /**
    * Creates the introspector.
@@ -93,32 +95,77 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   /**
-   * Sets the entity config map.
+   * Sets the entity mappings list.
    */
-  public void setEntityConfigMap(HashMap<String, EntityConfig> entityConfigMap)
+  public void setEntityMappingsList(ArrayList<EntityMappingsConfig> entityMappingsList)
   {
-    _entityConfigMap = entityConfigMap;
+    _entityMappingsList = entityMappingsList;
   }
 
   /**
-   * Sets the mapped superclass config map.
+   * Returns the entity config for a class name.
    */
-  public void setMappedSuperclassConfigMap(HashMap<String, MappedSuperclassConfig>
-                                           mappedSuperclassConfigMap)
+  public EntityConfig getEntityConfig(String className)
   {
-    _mappedSuperclassConfigMap = mappedSuperclassConfigMap;
+    // jpa/0s2l: mapping-file.
+
+    HashMap<String, EntityConfig> entityMap;
+    EntityConfig entityConfig;
+
+    for (EntityMappingsConfig entityMappings : _entityMappingsList) {
+      entityMap = entityMappings.getEntityMap();
+
+      if (entityMap != null) {
+        entityConfig = entityMap.get(className);
+
+        if (entityConfig != null)
+          return entityConfig;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the mapped superclass config for a class name.
+   */
+  public MappedSuperclassConfig getMappedSuperclassConfig(String className)
+  {
+    HashMap<String, MappedSuperclassConfig> superclassMap;
+    MappedSuperclassConfig superclassConfig;
+
+    for (EntityMappingsConfig entityMappings : _entityMappingsList) {
+      superclassMap = entityMappings.getMappedSuperclassMap();
+
+      if (superclassMap != null) {
+        superclassConfig = superclassMap.get(className);
+
+        if (superclassConfig != null)
+          return superclassConfig;
+      }
+    }
+
+    return null;
   }
 
   /**
    * Initializes the persistence unit meta data:
    * default listeners and so on.
    */
-  public void initMetaData(EntityMappingsConfig entityMappings,
+  public void initMetaData(ArrayList<EntityMappingsConfig> entityMappingsList,
                            AmberPersistenceUnit persistenceUnit)
     throws ConfigException
   {
-    PersistenceUnitMetaDataConfig metaData;
-    metaData = entityMappings.getPersistenceUnitMetaData();
+    PersistenceUnitMetaDataConfig metaData = null;
+
+    for (EntityMappingsConfig entityMappings : entityMappingsList) {
+      metaData = entityMappings.getPersistenceUnitMetaData();
+
+      // It is undefined if this element occurs in multiple mapping
+      // files within the same persistence unit.
+      if (metaData != null)
+        break;
+    }
 
     if (metaData == null)
       return;
@@ -2405,11 +2452,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       EntityType targetType = persistenceUnit.getEntity(targetName);
       if (targetType == null) {
 
-        EntityConfig entityConfig = null;
-
-        if (_entityConfigMap != null) {
-          entityConfig = _entityConfigMap.get(targetName);
-        }
+        EntityConfig entityConfig = getEntityConfig(targetName);
 
         if (entityConfig == null)
           throw error(_field,
@@ -3165,12 +3208,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
 
       ArrayList<AttributeOverrideConfig> attributeOverrideList = null;
 
-      if (_entityConfigMap != null) {
-        EntityConfig entityConfig = _entityConfigMap.get(_type.getName());
+      EntityConfig entityConfig = getEntityConfig(_type.getName());
 
-        if (entityConfig != null)
-          attributeOverrideList = entityConfig.getAttributeOverrideList();
-      }
+      if (entityConfig != null)
+        attributeOverrideList = entityConfig.getAttributeOverrideList();
 
       boolean hasAttributeOverrides = false;
 
@@ -3443,10 +3484,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, Entity.class);
 
-    EntityConfig entityConfig = null;
-
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    EntityConfig entityConfig = getEntityConfig(type.getName());
 
     _annotationCfg.setConfig(entityConfig);
   }
@@ -3455,12 +3493,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, MappedSuperclass.class);
 
-    if (_mappedSuperclassConfigMap == null)
-      return;
-
-    MappedSuperclassConfig mappedSuperConfig = null;
-
-    mappedSuperConfig = _mappedSuperclassConfigMap.get(type.getName());
+    MappedSuperclassConfig mappedSuperConfig
+      = getMappedSuperclassConfig(type.getName());
 
     _annotationCfg.setConfig(mappedSuperConfig);
   }
@@ -3469,12 +3503,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, EntityListeners.class);
 
-    if (_entityConfigMap == null)
-      return;
-
-    EntityConfig entityConfig;
-
-    entityConfig = _entityConfigMap.get(type.getName());
+    EntityConfig entityConfig = getEntityConfig(type.getName());
 
     if (entityConfig == null)
       return;
@@ -3514,10 +3543,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, Inheritance.class);
 
-    EntityConfig entityConfig = null;
-
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    EntityConfig entityConfig = getEntityConfig(type.getName());
 
     if (entityConfig != null) {
       _annotationCfg.setConfig(entityConfig.getInheritance());
@@ -3528,10 +3554,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, NamedQuery.class);
 
-    EntityConfig entityConfig = null;
-
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    EntityConfig entityConfig = getEntityConfig(type.getName());
 
     if (entityConfig != null) {
       _annotationCfg.setConfig(entityConfig.getNamedQuery());
@@ -3542,10 +3565,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, NamedNativeQuery.class);
 
-    EntityConfig entityConfig = null;
-
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    EntityConfig entityConfig = getEntityConfig(type.getName());
 
     if (entityConfig != null) {
       _annotationCfg.setConfig(entityConfig.getNamedNativeQuery());
@@ -3556,10 +3576,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, SqlResultSetMapping.class);
 
-    EntityConfig entityConfig = null;
-
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    EntityConfig entityConfig = getEntityConfig(type.getName());
 
     if (entityConfig != null) {
       _annotationCfg.setConfig(entityConfig.getSqlResultSetMapping());
@@ -3570,10 +3587,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, javax.persistence.Table.class);
 
-    EntityConfig entityConfig = null;
-
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    EntityConfig entityConfig = getEntityConfig(type.getName());
 
     if (entityConfig != null) {
       _annotationCfg.setConfig(entityConfig.getTable());
@@ -3584,10 +3598,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, SecondaryTable.class);
 
-    EntityConfig entityConfig = null;
-
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    EntityConfig entityConfig = getEntityConfig(type.getName());
 
     if (entityConfig != null) {
       _annotationCfg.setConfig(entityConfig.getSecondaryTable());
@@ -3611,10 +3622,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, PrimaryKeyJoinColumn.class);
 
-    EntityConfig entityConfig = null;
-
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    EntityConfig entityConfig = getEntityConfig(type.getName());
 
     if (entityConfig != null) {
       _annotationCfg.setConfig(entityConfig.getPrimaryKeyJoinColumn());
@@ -3625,10 +3633,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     _annotationCfg.reset(type, DiscriminatorColumn.class);
 
-    EntityConfig entityConfig = null;
-
-    if (_entityConfigMap != null)
-      entityConfig = _entityConfigMap.get(type.getName());
+    EntityConfig entityConfig = getEntityConfig(type.getName());
 
     if (entityConfig != null) {
       _annotationCfg.setConfig(entityConfig.getDiscriminatorColumn());
@@ -3833,14 +3838,12 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   {
     MappedSuperclassConfig mappedSuperclassConfig = null;
 
-    if (_entityConfigMap != null)
-      mappedSuperclassConfig = _entityConfigMap.get(name);
+    mappedSuperclassConfig = getEntityConfig(name);
 
     if (mappedSuperclassConfig != null)
       return mappedSuperclassConfig;
 
-    if (_mappedSuperclassConfigMap != null)
-      mappedSuperclassConfig = _mappedSuperclassConfigMap.get(name);
+    mappedSuperclassConfig = getMappedSuperclassConfig(name);
 
     return mappedSuperclassConfig;
   }

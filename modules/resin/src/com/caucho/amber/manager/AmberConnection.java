@@ -808,8 +808,11 @@ public class AmberConnection
    */
   public void close()
   {
-    if (_persistenceUnit == null)
+    if (_persistenceUnit == null) {
+      // XXX: already closed, must throw IllegalStateException,
+      // but might add cleanup issues, needs testing.
       return;
+    }
 
     try {
       if (_isThreadConnection)
