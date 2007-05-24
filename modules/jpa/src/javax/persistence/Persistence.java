@@ -29,6 +29,8 @@
 
 package javax.persistence;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.spi.PersistenceProvider;
 import java.io.InputStream;
 import java.net.URL;
@@ -65,6 +67,20 @@ public class Persistence {
 
       if (factory != null)
         return factory;
+    }
+
+    // persistence-unit-ref
+    try {
+      InitialContext ic = new InitialContext();
+
+      // XXX: amber dependency.
+      Object value = ic.lookup("java:comp/env/persistence/_amber_PersistenceUnit/" + name);
+
+      if (value != null) {
+        return (EntityManagerFactory) value;
+      }
+    } catch (NamingException e) {
+      log.finest(e.toString());
     }
 
     return null;
