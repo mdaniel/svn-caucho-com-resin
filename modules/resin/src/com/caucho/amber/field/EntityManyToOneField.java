@@ -75,8 +75,21 @@ public class EntityManyToOneField extends CascadableField {
   private boolean _isSourceCascadeDelete;
   private boolean _isTargetCascadeDelete;
 
+  private boolean _isManyToOne;
+
   private Object _joinColumnsAnn[];
   private HashMap<String, JoinColumnConfig> _joinColumnMap = null;
+
+  public EntityManyToOneField(RelatedType relatedType,
+                              String name,
+                              CascadeType[] cascadeType,
+                              boolean isManyToOne)
+    throws ConfigException
+  {
+    super(relatedType, name, cascadeType);
+
+    _isManyToOne = isManyToOne;
+  }
 
   public EntityManyToOneField(RelatedType relatedType,
                               String name,
@@ -135,6 +148,14 @@ public class EntityManyToOneField extends CascadableField {
   {
     //return ((KeyColumn) getColumn()).getType().getForeignTypeName();
     return getEntityTargetType().getForeignTypeName();
+  }
+
+  /**
+   * Returns true if it is annotated as many-to-one.
+   */
+  public boolean isAnnotatedManyToOne()
+  {
+    return _isManyToOne;
   }
 
   /**
@@ -269,6 +290,9 @@ public class EntityManyToOneField extends CascadableField {
       super.init();
       return;
     }
+
+    // jpa/0j67
+    setSourceCascadeDelete(isCascade(CascadeType.REMOVE));
 
     int n = 0;
 
@@ -822,8 +846,15 @@ public class EntityManyToOneField extends CascadableField {
 
     generateSetTargetLoadMask(out, varName);
 
-    out.println("if (" + varName + " != null)");
-    out.println("  " + varName + ".__caucho_retrieve_eager(" + session + ");");
+    // jpa/0j67
+    out.println("if (" + varName + " != null && " + varName + " != " + generateSuperGetter() + ") {");
+    out.pushDepth();
+
+    out.println(generateSuperSetter(varName) + ";");
+    out.println(varName + ".__caucho_retrieve_eager(" + session + ");");
+
+    out.popDepth();
+    out.println("}");
 
     // ejb/06h0, jpa/0o03
     if (isAbstract() && (isLazy() || ! isJPA)) {

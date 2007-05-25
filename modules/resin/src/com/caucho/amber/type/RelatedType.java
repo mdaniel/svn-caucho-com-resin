@@ -1412,7 +1412,7 @@ abstract public class RelatedType extends AbstractStatefulType {
    */
   public int updateFlushPriority(ArrayList<EntityType> updatingEntities)
   {
-    // jpa/0h25, jpa/0h26, jpa/0h29
+    // jpa/0h25, jpa/0h26, jpa/0h29, jpa/0j67
 
     _flushPriority = 0;
 
@@ -1436,8 +1436,31 @@ abstract public class RelatedType extends AbstractStatefulType {
 
           int targetPriority = targetType.getFlushPriority();
 
-          if (targetPriority >= _flushPriority)
+          if (targetPriority >= _flushPriority) {
+            RelatedType type = null;
+
+            // jpa/0j67
+            if (! manyToOne.isAnnotatedManyToOne()) {
+              for (AmberField targetField : targetType.getFields()) {
+                if (targetField instanceof EntityManyToOneField) {
+                  EntityManyToOneField targetManyToOne = (EntityManyToOneField) targetField;
+
+                  type = targetManyToOne.getEntityTargetType();
+
+                  if (this == type) {
+                    if (targetManyToOne.isAnnotatedManyToOne()) {
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+
+            if (this == type)
+              continue;
+
             _flushPriority = targetPriority + 1;
+          }
         }
       }
     }

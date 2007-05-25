@@ -1853,9 +1853,13 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     FetchType fetchType = FetchType.EAGER;
     JClass targetClass = null;
 
-    if ((manyToOneAnn == null) && (manyToOneConfig == null)) {
-      // jpa/0o03
+    boolean isManyToOne = true;
 
+    if ((manyToOneAnn == null) && (manyToOneConfig == null)) {
+      // jpa/0j67
+      isManyToOne = false;
+
+      // jpa/0o03
       getInternalOneToOneConfig(sourceType.getBeanClass(), field, fieldName);
       manyToOneAnn = _annotationCfg.getAnnotation();
       manyToOneConfig = _annotationCfg.getOneToOneConfig();
@@ -1933,7 +1937,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
       targetName = fieldType.getName();
 
     EntityManyToOneField manyToOneField;
-    manyToOneField = new EntityManyToOneField(sourceType, fieldName, cascadeTypes);
+    manyToOneField = new EntityManyToOneField(sourceType, fieldName, cascadeTypes, isManyToOne);
 
     EntityType targetType = persistenceUnit.createEntity(targetName, fieldType);
 
