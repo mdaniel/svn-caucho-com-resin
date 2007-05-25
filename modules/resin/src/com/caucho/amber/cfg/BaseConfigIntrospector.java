@@ -107,6 +107,10 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    */
   public EntityConfig getEntityConfig(String className)
   {
+    // jpa/0r41
+    if (_entityMappingsList == null)
+      return null;
+
     // jpa/0s2l: mapping-file.
 
     HashMap<String, EntityConfig> entityMap;
@@ -131,6 +135,9 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    */
   public MappedSuperclassConfig getMappedSuperclassConfig(String className)
   {
+    if (_entityMappingsList == null)
+      return null;
+
     HashMap<String, MappedSuperclassConfig> superclassMap;
     MappedSuperclassConfig superclassConfig;
 
