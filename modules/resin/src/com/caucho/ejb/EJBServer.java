@@ -145,29 +145,29 @@ public class EJBServer
     // persistence root.
     // See com.caucho.amber.manager.PersistenceEnvironmentListener
     /*
-    try {
+      try {
       EnvironmentClassLoader envLoader = getClassLoader();
 
       ArrayList<Loader> loaders = envLoader.getLoaders();
 
       if (loaders.size() > 0) {
 
-        Loader loader = loaders.get(0);
+      Loader loader = loaders.get(0);
 
-        if (loader instanceof SimpleLoader) {
-          // Gets the root dir for the deployed ear file
-          //
-          // /tmp/caucho/tck/deploy/<ear_dir>/META-INF/work/ejb
-          // /tmp/caucho/tck/deploy/<ear_dir>/*.jar
+      if (loader instanceof SimpleLoader) {
+      // Gets the root dir for the deployed ear file
+      //
+      // /tmp/caucho/tck/deploy/<ear_dir>/META-INF/work/ejb
+      // /tmp/caucho/tck/deploy/<ear_dir>/*.jar
 
-          Path path = ((SimpleLoader) loader).getPath().lookup("../../..");
+      Path path = ((SimpleLoader) loader).getPath().lookup("../../..");
 
-          addJarUrls(envLoader, path);
-        }
+      addJarUrls(envLoader, path);
       }
-    } catch (Exception e) {
+      }
+      } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
-    }
+      }
     */
 
     // _entityIntrospector = new EntityIntrospector(_ejbManager);
@@ -350,6 +350,12 @@ public class EJBServer
     if (! ejbJar.canRead() || ! ejbJar.isFile())
       throw new ConfigException(L.l("<ejb-jar> {0} must refer to a valid jar file.",
                                     ejbJar.getURL()));
+
+    // tck: sanity check
+    if (_ejbJars.contains(ejbJar)) {
+      log.fine("EJBServer.addEJBJar already added: " + ejbJar);
+      return;
+    }
 
     _ejbJars.add(ejbJar);
   }
@@ -637,14 +643,14 @@ public class EJBServer
 
     try {
       if (_localJndiPrefix != null)
-	Jndi.bindDeepShort(_localJndiPrefix + "/resin-ejb-server", _ejbManager);
+        Jndi.bindDeepShort(_localJndiPrefix + "/resin-ejb-server", _ejbManager);
     } catch (NamingException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
     try {
       if (_localJndiPrefix != null)
-	Jndi.bindDeepShort(_localJndiPrefix + "/caucho-ejb-admin", _ejbManager);
+        Jndi.bindDeepShort(_localJndiPrefix + "/caucho-ejb-admin", _ejbManager);
     } catch (NamingException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -672,7 +678,7 @@ public class EJBServer
   {
     try {
       log.fine("Initializing ejb-server : local-jndi=" + _localJndiPrefix
-	       + " remote-jndi=" + _remoteJndiPrefix);
+               + " remote-jndi=" + _remoteJndiPrefix);
 
       ProtocolContainer protocol = new ProtocolContainer();
       if (_urlPrefix != null)
@@ -732,8 +738,8 @@ public class EJBServer
       Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
 
       for (int i = 0; i < _beanList.size(); i++)
-	_beanList.get(i).init();
-      
+        _beanList.get(i).init();
+
       // _entityIntrospector.init();
 
       initAllEjbs();
@@ -844,6 +850,4 @@ public class EJBServer
   {
     _ejbManager.destroy();
   }
-
 }
-

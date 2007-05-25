@@ -409,13 +409,13 @@ public class EnterpriseApplication
               // app-client jar
             }
             else if (jar.lookup("META-INF/ejb-jar.xml").canRead()) {
-              _ejbPaths.add(path);
+              addEjbPath(path);
 
               _loader.addJar(path);
               _loader.addJarManifestClassPath(path);
             }
             else {
-              _ejbPaths.add(path);
+              addEjbPath(path);
 
               _loader.addJar(path);
             }
@@ -547,7 +547,7 @@ public class EnterpriseApplication
       controller = new WebAppController(contextUrl,
                                         path,
                                         _container);
-        
+
       _webApps.add(controller);
     }
 
@@ -555,14 +555,14 @@ public class EnterpriseApplication
       controller.setArchivePath(archivePath);
 
     controller.setDynamicDeploy(true);
-      
+
     if (_configException != null)
       controller.setConfigException(_configException);
 
     for (WebAppConfig config : web.getWebAppList())
       controller.addConfigDefault(config);
   }
-  
+
 
   /**
    * Returns any matching web-app.
@@ -694,7 +694,7 @@ public class EnterpriseApplication
     public void addEjb(Path path)
       throws Exception
     {
-      _ejbPaths.add(path);
+      addEjbPath(path);
 
       _loader.addJar(path);
       // ejb/0853
@@ -725,5 +725,13 @@ public class EnterpriseApplication
     public void addAltDD(String path)
     {
     }
+  }
+
+  private void addEjbPath(Path ejbPath)
+  {
+    if (_ejbPaths.contains(ejbPath))
+      return;
+
+    _ejbPaths.add(ejbPath);
   }
 }
