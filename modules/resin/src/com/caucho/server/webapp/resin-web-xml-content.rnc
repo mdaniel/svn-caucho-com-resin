@@ -967,6 +967,9 @@ r_session-config = element session-config {
   & (attribute cookie-version { r_int }
      | element cookie-version { r_int })?
 
+  & (attribute distribution-id { string }
+     | element distribution-id { string })?
+
   & (attribute enable-cookies { r_boolean-Type }
      | element enable-cookies { r_boolean-Type })?
 

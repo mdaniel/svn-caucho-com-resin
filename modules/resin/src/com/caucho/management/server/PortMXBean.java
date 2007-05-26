@@ -196,4 +196,17 @@ public interface PortMXBean extends ManagedObjectMXBean {
   @Units("milliseconds")
   public long getWriteBytesTotal();
 
+  //
+  // Operations
+  //
+
+  /**
+   * Enables the port, letting it listen to new connections.
+   */
+  public void start();
+
+  /**
+   * Disables the port, stopping it from listening to connections.
+   */
+  public void stop();
 }

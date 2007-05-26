@@ -223,7 +223,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     String name = hostName + contextPath;
 
-    _distributionId = name;
+    if (_distributionId == null)
+      _distributionId = name;
 
     _persistentPath = Vfs.lookup("WEB-INF/sessions");
 
@@ -831,6 +832,11 @@ public final class SessionManager implements ObjectManager, AlarmListener
   public String getDistributionId()
   {
     return _distributionId;
+  }
+
+  public void setDistributionId(String distributionId)
+  {
+    _distributionId = distributionId;
   }
 
   /**

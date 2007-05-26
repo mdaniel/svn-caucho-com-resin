@@ -61,6 +61,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   
   private int _bufferCapacity;
   private int _bufferSize;
+
+  private boolean _isOutputStreamOnly;
   
   private boolean _isHead;
   private boolean _isClosed;
@@ -91,6 +93,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     _isHead = false;
     _isClosed = false;
     _isFinished = false;
+    _isOutputStreamOnly = false;
 
     _toByte = Encoding.getLatin1Writer();
   }
@@ -101,6 +104,11 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public boolean isCauchoResponseStream()
   {
     return true;
+  }
+
+  public void setOutputStreamOnly(boolean isOutputStreamOnly)
+  {
+    _isOutputStreamOnly = isOutputStreamOnly;
   }
 
   /**
@@ -460,7 +468,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     int charLength = _charLength;
     _charLength = 0;
 
-    if (charLength > 0) {
+    if (charLength > 0 && ! _isOutputStreamOnly) {
       _toByte.write(this, _charBuffer, 0, charLength);
 
       if (_bufferCapacity <= _byteLength + _bufferSize)

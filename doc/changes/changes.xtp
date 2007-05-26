@@ -10,9 +10,11 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.snap - May 15, 2007">
+<s2 title="3.1.snap - May 24, 2007">
 <ul>
-<li>security: update form-login with session timeout issue (#1674, rep by bthakkar)</li>
+<li>session: add &lt;distribution-id> configuration to session-config (#1593, rep by hypefiend)</li>
+<li>server: add PortMXBean.stop() and start() (#1259, rep by Bryan Choate)</li>
+<li>(2007-05-24) security: update form-login with session timeout issue (#1674, rep by bthakkar)</li>
 <li>&lt;dependency> tag was not getting initialized (#1632, rep by Clint Harris</li>
 <li>jstl: sql tags with EL and old-style web.xml issues (#1589, rep by Josh Rehman)</li>
 <li>watchdog: copy environment from parent to child (#1733, fixed! by gjvc)</li>

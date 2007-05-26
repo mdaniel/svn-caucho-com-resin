@@ -152,6 +152,26 @@ public class PortAdmin extends AbstractManagedObject
     return _port.getLifetimeWriteBytes();
   }
 
+  //
+  // Operations
+  //
+  
+  /**
+   * Enable the port, letting it listening to new requests.
+   */
+  public void start()
+  {
+    _port.enable();
+  }
+  
+  /**
+   * Disable the port, stopping it from listening to new requests.
+   */
+  public void stop()
+  {
+    _port.disable();
+  }
+
   void register()
   {
     registerSelf();

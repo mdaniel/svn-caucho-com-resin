@@ -899,25 +899,53 @@ public class Port
     if (_port == 0)
       return;
     
-    if (! _lifecycle.toActive())
+    if (! _lifecycle.toStarting())
       return;
 
     try {
       bind();
-
-      _serverSocket.listen(_acceptListenBacklog);
 
       String name = "resin-port-" + _serverSocket.getLocalPort();
       Thread thread = new Thread(this, name);
       thread.setDaemon(true);
 
       thread.start();
+      
+      enable();
     } catch (Throwable e) {
       close();
 
       log.log(Level.WARNING, e.toString(), e);
 
       throw e;
+    }
+  }
+
+  /**
+   * Starts the port listening for new connections.
+   */
+  void enable()
+  {
+    if (_lifecycle.toActive()) {
+      _serverSocket.listen(_acceptListenBacklog);
+    }
+  }
+
+  /**
+   * Stops the port from listening for new connections.
+   */
+  void disable()
+  {
+    if (_lifecycle.toStop()) {
+      _serverSocket.listen(0);
+
+      if (_port == 0) {
+      }
+      else if (_address != null)
+        log.info(_protocol.getProtocolName() + " disabled "
+                 + _address + ":" + _port);
+      else
+        log.info(_protocol.getProtocolName() + " disabled *:" + _port);
     }
   }
 
@@ -1057,7 +1085,9 @@ public class Port
   boolean keepaliveBegin(TcpConnection conn)
   {
     synchronized (_keepaliveCountLock) {
-      if (_keepaliveMax <= _keepaliveCount)
+      if (! _lifecycle.isActive())
+        return false;
+      else if (_keepaliveMax <= _keepaliveCount)
         return false;
       else if (_connectionMax <= _connectionCount + _minSpareConnection)
         return false;
@@ -1098,7 +1128,7 @@ public class Port
    */
   public void run()
   {
-    while (_lifecycle.isActive()) {
+    while (! _lifecycle.isDestroyed()) {
       boolean isStart;
 
       try {

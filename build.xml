@@ -659,7 +659,9 @@
         <include name="lib/jca-15.jar"/>
         <include name="lib/jms-11.jar"/>
         <include name="lib/jsdk-15.jar"/>
+        <!--
         <include name="lib/jsf-12.jar"/>
+        -->
         <include name="lib/jstl-11.jar"/>
         <include name="lib/jta-101.jar"/>
         <include name="lib/portlet-10.jar"/>
@@ -831,6 +833,26 @@
         <include name="com/caucho/hessian/**"/>
         <include name="com/caucho/burlap/**"/>
         <include name="com/caucho/services/**"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="apache.license"/>
+      </fileset>
+    </jar>
+
+    <jar destfile="${dist}/hessian-applet-${version}.jar">
+      <fileset dir="${modules}/resin/classes">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="com/caucho/hessian/io/Hessian2*"/>
+        <exclude name="com/caucho/hessian/io/HessianDebug*"/>
+        <include name="com/caucho/util/CharBuffer.class"/>
+        <include name="com/caucho/util/CharBuffer$CBInputStream.class"/>
+        <include name="com/caucho/util/CharSegment.class"/>
+        <include name="com/caucho/hessian/io/**"/>
+        <include name="com/caucho/hessian/client/**"/>
       </fileset>
       <fileset dir="${basedir}">
         <include name="apache.license"/>

@@ -68,6 +68,13 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
   }
 
   /**
+   * Set true for output stream only request.
+   */
+  public void setOutputStreamOnly(boolean isOutputStreamOnly)
+  {
+  }
+
+  /**
    * Sets the locale.
    */
   public void setLocale(Locale locale)
