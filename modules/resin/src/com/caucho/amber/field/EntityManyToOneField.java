@@ -850,7 +850,10 @@ public class EntityManyToOneField extends CascadableField {
     out.println("if (" + varName + " != null && " + varName + " != " + generateSuperGetter() + ") {");
     out.pushDepth();
 
-    out.println(generateSuperSetter(varName) + ";");
+    // ejb/069a
+    if (isJPA)
+      out.println(generateSuperSetter(varName) + ";");
+
     out.println(varName + ".__caucho_retrieve_eager(" + session + ");");
 
     out.popDepth();
