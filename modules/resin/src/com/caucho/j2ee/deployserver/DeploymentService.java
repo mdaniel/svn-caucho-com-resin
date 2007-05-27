@@ -63,7 +63,7 @@ public class DeploymentService
   private static final L10N L = new L10N(DeploymentService.class);
   private static final Logger log
     = Logger.getLogger(DeploymentService.class.getName());
-  
+
   private static final EnvironmentLocal<DeploymentService> _local
     = new EnvironmentLocal<DeploymentService>();
 
@@ -192,7 +192,7 @@ public class DeploymentService
       try {
         mxbean = getMXBean(targetModuleID.getTarget());
 
-        
+
         if ("ear".equals(plan.getArchiveType())
             && ! "EarDeploy".equals(mxbean.getType()))
           continue;
@@ -265,6 +265,23 @@ public class DeploymentService
   {
     if (log.isLoggable(Level.FINER))
       log.log(Level.FINER, L.l("jsr88 creating archive {0}", archivePath));
+
+    Path originalPath = archivePath;
+
+    String earFileName = archivePath.getTail();
+
+    if (earFileName.endsWith(".ear")) {
+      // Uses ".__caucho_ear" to avoid premature expansion.
+      String s = earFileName;
+      s = s.substring(0, s.length() - 3) + "__caucho_ear";
+      archivePath = archivePath.getParent().lookup(s);
+
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l("jsr88 creating temp archive {0}", archivePath));
+    }
+    else {
+      earFileName = null;
+    }
 
     WriteStream archiveStream =  null;
     ZipInputStream zipInputStream = null;
@@ -373,6 +390,14 @@ public class DeploymentService
         catch (Throwable ex) {
           log.log(Level.FINER, ex.toString(), ex);
         }
+      }
+
+      if (earFileName != null) {
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("jsr88 renaming temp archive {0} to {1}", archivePath, originalPath));
+
+        // Renames ".__caucho_ear" to ".ear" to allow expansion.
+        archivePath.renameTo(originalPath);
       }
     }
   }
