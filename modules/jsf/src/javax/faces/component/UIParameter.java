@@ -66,7 +66,7 @@ public class UIParameter extends UIComponentBase
     if (_name != null)
       return _name;
     else if (_nameExpr != null)
-      return Util.evalString(_nameExpr);
+      return Util.evalString(_nameExpr, getFacesContext());
     else
       return null;
   }
@@ -81,7 +81,7 @@ public class UIParameter extends UIComponentBase
     if (_value != null)
       return _value;
     else if (_valueExpr != null)
-      return Util.eval(_valueExpr);
+      return Util.eval(_valueExpr, getFacesContext());
     else
       return null;
   }
@@ -113,13 +113,13 @@ public class UIParameter extends UIComponentBase
   {
     if ("name".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_name = Util.evalString(expr);
+	_name = String.valueOf(expr.getValue(null));
       else
 	_nameExpr = expr;
     }
     else if ("value".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_value = Util.eval(expr);
+	_name = String.valueOf(expr.getValue(null));
       else
 	_valueExpr = expr;
     }

@@ -64,7 +64,7 @@ public class UISelectItems extends UIComponentBase
     if (_value != null)
       return _value;
     else if (_valueExpr != null)
-      return Util.eval(_valueExpr);
+      return Util.eval(_valueExpr, getFacesContext());
     else
       return null;
   }
@@ -94,7 +94,7 @@ public class UISelectItems extends UIComponentBase
   {
     if ("value".equals(name)) {
 	if (expr != null && expr.isLiteralText())
-	  _value = Util.eval(expr);
+	  _value = expr.getValue(null);
 	else
 	  _valueExpr = expr;
     }

@@ -12,6 +12,7 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>hessian: update protected methods to allow application extensions (#1627, rep by Ben Hood)</li>
 <li>session: add &lt;distribution-id> configuration to session-config (#1593, rep by hypefiend)</li>
 <li>server: add PortMXBean.stop() and start() (#1259, rep by Bryan Choate)</li>
 <li>(2007-05-24) security: update form-login with session timeout issue (#1674, rep by bthakkar)</li>

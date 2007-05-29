@@ -111,7 +111,7 @@ public class UIInput extends UIOutput
     if (_requiredMessage != null)
       return _requiredMessage;
     else if (_requiredMessageExpr != null)
-      return Util.evalString(_requiredMessageExpr);
+      return Util.evalString(_requiredMessageExpr, getFacesContext());
     else
       return null;
   }
@@ -126,7 +126,7 @@ public class UIInput extends UIOutput
     if (_converterMessage != null)
       return _converterMessage;
     else if (_converterMessageExpr != null)
-      return Util.evalString(_converterMessageExpr);
+      return Util.evalString(_converterMessageExpr, getFacesContext());
     else
       return null;
   }
@@ -141,7 +141,7 @@ public class UIInput extends UIOutput
     if (_validatorMessage != null)
       return _validatorMessage;
     else if (_validatorMessageExpr != null)
-      return Util.evalString(_validatorMessageExpr);
+      return Util.evalString(_validatorMessageExpr, getFacesContext());
     else
       return null;
   }
@@ -244,7 +244,7 @@ public class UIInput extends UIOutput
     if (_required != null)
       return _required;
     else if (_requiredExpr != null)
-      return Util.evalBoolean(_requiredExpr);
+      return Util.evalBoolean(_requiredExpr, getFacesContext());
     else
       return false;
   }
@@ -259,7 +259,7 @@ public class UIInput extends UIOutput
     if (_immediate != null)
       return _immediate;
     else if (_immediateExpr != null)
-      return Util.evalBoolean(_immediateExpr);
+      return Util.evalBoolean(_immediateExpr, getFacesContext());
     else
       return false;
   }

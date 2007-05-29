@@ -125,10 +125,8 @@ public class HessianProxy implements InvocationHandler {
     try {
       if (! _factory.isOverloadEnabled()) {
       }
-      else if (args != null)
-        methodName = methodName + "__" + args.length;
       else
-        methodName = methodName + "__0";
+        methodName = mangleName(method, args);
 
       conn = sendRequest(methodName, args);
 
@@ -194,6 +192,14 @@ public class HessianProxy implements InvocationHandler {
       } catch (Throwable e) {
       }
     }
+  }
+
+  protected String mangleName(Method method, Object []args)
+  {
+    if (args == null || args.length > 0)
+      return method.getName() + "__" + args.length;
+    else
+      return method.getName() + "__0";
   }
 
   protected URLConnection sendRequest(String methodName, Object []args)

@@ -109,7 +109,26 @@ public abstract class UIComponent implements StateHolder
 				   ContextCallback callback)
     throws FacesException
   {
-    throw new UnsupportedOperationException();
+    if (context == null || clientId == null || callback == null)
+      throw new NullPointerException();
+
+    if (clientId.equals(getClientId(context))) {
+      callback.invokeContextCallback(context, this);
+      return true;
+    }
+    else {
+      Iterator<UIComponent> iter = getFacetsAndChildren();
+
+      while (iter.hasNext()) {
+	UIComponent comp = iter.next();
+
+	boolean result = comp.invokeOnComponent(context, clientId, callback);
+	if (result)
+	  return true;
+      }
+
+      return false;
+    }
   }
 
   public abstract Map<String,UIComponent> getFacets();
@@ -148,10 +167,39 @@ public abstract class UIComponent implements StateHolder
   /**
    * @Since 1.2
    */
+  
+  /**
+   * Encodes all children
+   */
   public void encodeAll(FacesContext context)
     throws IOException
   {
-    throw new UnsupportedOperationException();
+    if (context == null)
+      throw new NullPointerException();
+    
+    if (! isRendered())
+      return;
+    
+    encodeBegin(context);
+
+    if (getRendersChildren()) {
+      encodeChildren(context);
+    }
+    else {
+      int childCount = getChildCount();
+
+      if (childCount > 0) {
+	List<UIComponent> children = getChildren();
+
+	for (int i = 0; i < childCount; i++) {
+	  UIComponent child = children.get(i);
+
+	  child.encodeAll(context);
+	}
+      }
+    }
+    
+    encodeEnd(context);
   }
 
   protected abstract void addFacesListener(FacesListener listener);

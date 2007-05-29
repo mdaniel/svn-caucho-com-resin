@@ -42,6 +42,7 @@ public class UIOutput extends UIComponentBase implements ValueHolder
   public static final String COMPONENT_TYPE = "javax.faces.Output";
 
   private Converter _converter;
+  private ValueExpression _converterExpr;
   
   private Object _value;
   private ValueExpression _valueExpr;
@@ -73,7 +74,7 @@ public class UIOutput extends UIComponentBase implements ValueHolder
     if (_value != null)
       return _value;
     else if (_valueExpr != null)
-      return Util.eval(_valueExpr);
+      return Util.eval(_valueExpr, getFacesContext());
     else
       return null;
   }
@@ -93,9 +94,10 @@ public class UIOutput extends UIComponentBase implements ValueHolder
   @Override
   public ValueExpression getValueExpression(String name)
   {
-    if ("value".equals(name)) {
+    if ("value".equals(name))
       return _valueExpr;
-    }
+    else if ("converter".equals(name))
+      return _converterExpr;
     else {
       return super.getValueExpression(name);
     }
@@ -113,6 +115,9 @@ public class UIOutput extends UIComponentBase implements ValueHolder
       else
 	_valueExpr = expr;
     }
+    else if ("converter".equals(name)) {
+      _converterExpr = expr;
+    }
     else {
       super.setValueExpression(name, expr);
     }
@@ -122,18 +127,14 @@ public class UIOutput extends UIComponentBase implements ValueHolder
   // Rendering
   //
 
-  /**
-   * Returns true, since the component renders the children.
-   */
-  @Override
-  public boolean getRendersChildren()
-  {
-    return true;
-  }
-
   public Converter getConverter()
   {
-    return _converter;
+    if (_converter != null)
+      return _converter;
+    else if (_converterExpr != null)
+      return (Converter) Util.eval(_converterExpr, getFacesContext());
+    else
+      return null;
   }
 
   public void setConverter(Converter converter)
@@ -151,22 +152,12 @@ public class UIOutput extends UIComponentBase implements ValueHolder
 
     Object []converterState = null;
 
-    if (_converter != null) {
-      converterState = new Object[2];
-      converterState[0] = _converter.getClass();
-
-      if (_converter instanceof StateHolder) {
-	StateHolder holder = (StateHolder) _converter;
-
-	converterState[1] = holder.saveState(context);
-      }
-    }
-
     return new Object[] {
       parent,
       _value,
       Util.saveWithType(_valueExpr, context),
-      converterState,
+      Util.save(_converterExpr, context),
+      saveAttachedState(context, _converter),
     };
   }
 
@@ -180,22 +171,7 @@ public class UIOutput extends UIComponentBase implements ValueHolder
     _value = state[1];
     _valueExpr = Util.restoreWithType(state[2], context);
 
-    Object []converterState = (Object []) state[3];
-
-    if (converterState != null) {
-      try {
-	Class cl = (Class) converterState[0];
-	
-	_converter = (Converter) cl.newInstance();
-
-	if (_converter instanceof StateHolder) {
-	  StateHolder holder = (StateHolder) _converter;
-
-	  holder.restoreState(context, converterState[1]);
-	}
-      } catch (Exception e) {
-	throw new FacesException(e);
-      }
-    }
+    _converterExpr = Util.restore(state[3], Converter.class, context);
+    _converter = (Converter) restoreAttachedState(context, state[4]);
   }
 }

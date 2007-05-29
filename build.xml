@@ -150,13 +150,6 @@
     </antcall>
   </target>
 
-  <target name="resin-jsf" depends="init">
-    <antcall target="module" inheritRefs="true">
-      <param name="module.name" value="resin-jsf"/>
-      <param name="module.jar" value="resin-jsf.jar"/>
-    </antcall>
-  </target>
-
   <target name="jstl" depends="init, jsdk">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jstl"/>
@@ -203,7 +196,7 @@
     </antcall>
   </target>
 
-  <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util">
+  <target name="resin-dev" depends="init, ejb, jca, jcr, jms, jsdk, jstl, jsf, jta, j2ee-deploy, j2ee-management, saaj, jaxrpc, portlet, script, resin-util">
 
     <!-- filter to insert version -->
 

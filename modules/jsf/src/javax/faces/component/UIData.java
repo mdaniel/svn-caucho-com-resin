@@ -88,7 +88,7 @@ public class UIData extends UIComponentBase
     if (_first != null)
       return _first;
     else if (_firstExpr != null)
-      return Util.evalInt(_firstExpr);
+      return Util.evalInt(_firstExpr, getFacesContext());
     else
       return 0;
   }
@@ -105,7 +105,7 @@ public class UIData extends UIComponentBase
     if (_rows != null)
       return _rows;
     else if (_rowsExpr != null)
-      return Util.evalInt(_rowsExpr);
+      return Util.evalInt(_rowsExpr, getFacesContext());
     else
       return -1;
   }
@@ -132,7 +132,7 @@ public class UIData extends UIComponentBase
     if (_value != null)
       return _value;
     else if (_valueExpr != null)
-      return Util.eval(_valueExpr);
+      return Util.eval(_valueExpr, getFacesContext());
     else
       return null;
   }

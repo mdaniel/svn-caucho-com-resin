@@ -152,7 +152,7 @@ abstract public class AbstractSkeleton {
    *
    * @return a mangled string.
    */
-  private String mangleName(Method method, boolean isFull)
+  protected String mangleName(Method method, boolean isFull)
   {
     StringBuffer sb = new StringBuffer();
     

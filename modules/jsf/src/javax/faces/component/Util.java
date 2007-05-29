@@ -39,37 +39,37 @@ import javax.faces.convert.*;
 
 final class Util
 {
-  static Object eval(ValueExpression expr)
+  static final Object eval(ValueExpression expr, FacesContext context)
   {
     try {
-      return expr.getValue(currentELContext());
+      return expr.getValue(context.getELContext());
     } catch (ELException e) {
       throw new FacesException(e);
     }
   }
   
-  static boolean evalBoolean(ValueExpression expr)
+  static final boolean evalBoolean(ValueExpression expr, FacesContext context)
   {
     try {
-      return (Boolean) expr.getValue(currentELContext());
+      return ! Boolean.FALSE.equals(expr.getValue(context.getELContext()));
     } catch (ELException e) {
       throw new FacesException(e);
     }
   }
   
-  static int evalInt(ValueExpression expr)
+  static final int evalInt(ValueExpression expr, FacesContext context)
   {
     try {
-      return (Integer) expr.getValue(currentELContext());
+      return (Integer) expr.getValue(context.getELContext());
     } catch (ELException e) {
       throw new FacesException(e);
     }
   }
   
-  static String evalString(ValueExpression expr)
+  static final String evalString(ValueExpression expr, FacesContext context)
   {
     try {
-      return (String) expr.getValue(currentELContext());
+      return (String) expr.getValue(context.getELContext());
     } catch (ELException e) {
       throw new FacesException(e);
     }
@@ -139,16 +139,6 @@ final class Util
     return factory.createValueExpression(context.getELContext(),
 					 expr,
 					 type);
-  }
-
-  static ELContext currentELContext()
-  {
-    FacesContext facesContext = FacesContext.getCurrentInstance();
-
-    if (facesContext != null)
-      return facesContext.getELContext();
-    else
-      return null;
   }
 
   public static String l10n(FacesContext context, String id,

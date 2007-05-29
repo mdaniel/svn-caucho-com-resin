@@ -105,8 +105,8 @@ public abstract class UIComponentBase extends UIComponent
       return null;
     else if (expr instanceof ValueExpressionAdapter)
       return ((ValueExpressionAdapter) expr).getBinding();
-    else // XXX:
-      throw new ClassCastException(ValueExpression.class.getName());
+    else
+      return new ValueBindingAdapter(expr);
   }
 
   @Deprecated
@@ -155,14 +155,14 @@ public abstract class UIComponentBase extends UIComponent
     
     if ("rendered".equals(name)) {
       if (expr.isLiteralText())
-	_isRendered = (Boolean) expr.getValue(null);
+	_isRendered = ! Boolean.FALSE.equals(expr.getValue(null));
       else
 	_isRenderedExpr = expr;
       return;
     }
     else if ("rendererType".equals(name)) {
       if (expr.isLiteralText())
-	_rendererType = (String) expr.getValue(null);
+	_rendererType = String.valueOf(expr.getValue(null));
       else
 	_rendererTypeExpr = expr;
       return;
@@ -200,6 +200,9 @@ public abstract class UIComponentBase extends UIComponent
     if (context == null)
       throw new NullPointerException();
 
+    if (_clientId != null)
+      return _clientId;
+
     String parentId = null;
 
     for (UIComponent ptr = getParent(); ptr != null; ptr = ptr.getParent()) {
@@ -209,11 +212,10 @@ public abstract class UIComponentBase extends UIComponent
       }
     }
 
-    String myId = getId();
+    String myId = _id;
 
     if (myId == null) {
       myId = context.getViewRoot().createUniqueId();
-      setId(myId);
     }
 
     if (parentId != null)
@@ -222,9 +224,11 @@ public abstract class UIComponentBase extends UIComponent
     Renderer renderer = getRenderer(context);
     
     if (renderer != null)
-      return renderer.convertClientId(context, myId);
+      _clientId = renderer.convertClientId(context, myId);
     else
-      return myId;
+      _clientId = myId;
+
+    return _clientId;
   }
 
   public String getFamily()
@@ -241,6 +245,7 @@ public abstract class UIComponentBase extends UIComponent
   {
     if (id == null) {
       _id = null;
+      _clientId = null;
       return;
     }
     
@@ -266,6 +271,7 @@ public abstract class UIComponentBase extends UIComponent
     }
 
     _id = id;
+    _clientId = null;
   }
 
   public UIComponent getParent()
@@ -283,7 +289,7 @@ public abstract class UIComponentBase extends UIComponent
     if (_isRendered != null)
       return _isRendered;
     else if (_isRenderedExpr != null)
-      return Util.evalBoolean(_isRenderedExpr);
+      return Util.evalBoolean(_isRenderedExpr, getFacesContext());
     else
       return true;
   }
@@ -298,7 +304,7 @@ public abstract class UIComponentBase extends UIComponent
     if (_rendererType != null)
       return _rendererType;
     else if (_rendererTypeExpr != null)
-      return Util.evalString(_rendererTypeExpr);
+      return Util.evalString(_rendererTypeExpr, getFacesContext());
     else
       return null;
   }
@@ -310,7 +316,7 @@ public abstract class UIComponentBase extends UIComponent
 
   public boolean getRendersChildren()
   {
-    Renderer renderer = getRenderer(FacesContext.getCurrentInstance());
+    Renderer renderer = getRenderer(getFacesContext());
 
     if (renderer != null)
       return renderer.getRendersChildren();
@@ -374,25 +380,6 @@ public abstract class UIComponentBase extends UIComponent
   {
     if (id.equals(comp.getId()))
       return comp;
-    
-    /*
-    UIComponent child = comp.getFacet(id);
-
-    if (child != null)
-      return child;
-
-    int childCount = comp.getChildCount();
-    if (childCount > 0) {
-      List<UIComponent> children = comp.getChildren();
-
-      for (int i = 0; i < children.size(); i++) {
-	child = children.get(i);
-
-	if (id.equals(child.getId()))
-	  return child;
-      }
-    }
-    */
 
     Iterator iter = comp.getFacetsAndChildren();
     while (iter.hasNext()) {
@@ -460,103 +447,9 @@ public abstract class UIComponentBase extends UIComponent
     return _facetsAndChildren;
   }
 
-  public void broadcast(FacesEvent event)
-    throws AbortProcessingException
-  {
-    for (int i = 0; i < _facesListeners.length; i++) {
-      if (event.isAppropriateListener(_facesListeners[i]))
-	event.processListener(_facesListeners[i]);
-    }
-  }
-  
-  /**
-   * Encodes all children
-   */
-  public void encodeAll(FacesContext context)
-    throws IOException
-  {
-    if (context == null)
-      throw new NullPointerException();
-    
-    if (! isRendered())
-      return;
-    
-    encodeBegin(context);
-
-    int childCount = getChildCount();
-
-    for (int i = 0; i < childCount; i++) {
-      UIComponent child = _children.get(i);
-
-      if (child.isRendered()) {
-	child.encodeBegin(context);
-	child.encodeChildren(context);
-	child.encodeEnd(context);
-      }
-    }
-    encodeEnd(context);
-  }
-
-  /**
-   * Starts the output rendering for the encoding.
-   */
-  public void encodeBegin(FacesContext context)
-    throws IOException
-  {
-    if (context == null)
-      throw new NullPointerException();
-
-    if (! isRendered())
-      return;
-
-    Renderer renderer = getRenderer(context);
-
-    if (renderer != null)
-      renderer.encodeBegin(context, this);
-  }
-
-  public void encodeChildren(FacesContext context)
-    throws IOException
-  {
-    if (context == null)
-      throw new NullPointerException();
-
-    if (! isRendered())
-      return;
-
-    Renderer renderer = getRenderer(context);
-
-    if (renderer != null && renderer.getRendersChildren())
-      renderer.encodeChildren(context, this);
-    else {
-      int childCount = getChildCount();
-
-      for (int i = 0; i < childCount; i++) {
-	UIComponent child = _children.get(i);
-
-	if (child.isRendered()) {
-	  child.encodeBegin(context);
-	  child.encodeChildren(context);
-	  child.encodeEnd(context);
-	}
-      }
-    }
-  }
-
-  public void encodeEnd(FacesContext context)
-    throws IOException
-  {
-    if (context == null)
-      throw new NullPointerException();
-
-    if (! isRendered())
-      return;
-
-    Renderer renderer = getRenderer(context);
-
-    if (renderer != null)
-      renderer.encodeEnd(context, this);
-  }
+  //
+  // Listeners, broadcast and event handling
+  //
 
   protected void addFacesListener(FacesListener listener)
   {
@@ -622,7 +515,22 @@ public abstract class UIComponentBase extends UIComponent
 
     if (parent != null)
       parent.queueEvent(event);
+    else
+      throw new IllegalStateException();
   }
+
+  public void broadcast(FacesEvent event)
+    throws AbortProcessingException
+  {
+    for (int i = 0; i < _facesListeners.length; i++) {
+      if (event.isAppropriateListener(_facesListeners[i]))
+	event.processListener(_facesListeners[i]);
+    }
+  }
+
+  //
+  // decoding
+  //
 
   /**
    * Recursively calls the decodes for any children, then calls
@@ -633,14 +541,14 @@ public abstract class UIComponentBase extends UIComponent
     if (context == null)
       throw new NullPointerException();
 
+    if (! isRendered())
+      return;
+
+    for (UIComponent child : getFacetsAndChildrenArray()) {
+      child.processDecodes(context);
+    }
+
     try {
-      if (! isRendered())
-        return;
-
-      for (UIComponent child : getFacetsAndChildrenArray()) {
-	child.processDecodes(context);
-      }
-
       decode(context);
     } catch (RuntimeException e) {
       context.renderResponse();
@@ -661,6 +569,10 @@ public abstract class UIComponentBase extends UIComponent
       renderer.decode(context, this);
   }
 
+  //
+  // Validation
+  //
+
   @Override
   public void processValidators(FacesContext context)
   {
@@ -675,25 +587,73 @@ public abstract class UIComponentBase extends UIComponent
     }
   }
 
+  //
+  // Model updates
+  //
+
   public void processUpdates(FacesContext context)
   {
     if (context == null)
       throw new NullPointerException();
 
-    System.out.println("PROCESS-UPDATES: " + this);
-    try {
-      if (! isRendered())
-	return;
+    if (! isRendered())
+      return;
 
-      for (UIComponent child : getFacetsAndChildrenArray()) {
-	System.out.println("PU-CHILD: " + child);
-	child.processUpdates(context);
-      }
-    } catch (RuntimeException e) {
-      context.renderResponse();
-
-      throw e;
+    for (UIComponent child : getFacetsAndChildrenArray()) {
+      child.processUpdates(context);
     }
+  }
+
+  //
+  // Encoding
+  //
+
+  /**
+   * Starts the output rendering for the encoding.
+   */
+  public void encodeBegin(FacesContext context)
+    throws IOException
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (! isRendered())
+      return;
+
+    Renderer renderer = getRenderer(context);
+
+    if (renderer != null)
+      renderer.encodeBegin(context, this);
+  }
+
+  public void encodeChildren(FacesContext context)
+    throws IOException
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (! isRendered())
+      return;
+
+    Renderer renderer = getRenderer(context);
+
+    if (renderer != null)
+      renderer.encodeChildren(context, this);
+  }
+
+  public void encodeEnd(FacesContext context)
+    throws IOException
+  {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (! isRendered())
+      return;
+
+    Renderer renderer = getRenderer(context);
+
+    if (renderer != null)
+      renderer.encodeEnd(context, this);
   }
 
   @Override
@@ -705,6 +665,11 @@ public abstract class UIComponentBase extends UIComponent
   @Override
   protected Renderer getRenderer(FacesContext context)
   {
+    String rendererType = getRendererType();
+
+    if (rendererType == null)
+      return null;
+    
     RenderKit renderKit = context.getRenderKit();
 
     if (renderKit != null)
@@ -712,6 +677,10 @@ public abstract class UIComponentBase extends UIComponent
     else
       return null;
   }
+
+  //
+  // Save the state of the component
+  //
 
   public Object processSaveState(FacesContext context)
   {
@@ -791,10 +760,26 @@ public abstract class UIComponentBase extends UIComponent
     if (rendererCode == null)
       rendererString = _rendererType;
 
-    Object []savedListeners = null;
+    Object []savedListeners = saveListeners(context);
+    
+    return new Object[] {
+      _id,
+      saveExprMap(context, _bindings),
+      _isRendered,
+      Util.save(_isRenderedExpr, context),
+      rendererCode,
+      rendererString,
+      Util.save(_rendererTypeExpr, context),
+      Util.saveWithType(_bindingExpr, context),
+      (_attributeMap != null ? _attributeMap.saveState(context) : null),
+      savedListeners,
+    };
+  }
 
+  private Object []saveListeners(FacesContext context)
+  {
     if (_facesListeners.length > 0) {
-      savedListeners = new Object[2 * _facesListeners.length];
+      Object []savedListeners = new Object[2 * _facesListeners.length];
 
       for (int i = 0; i < _facesListeners.length; i++) {
 	FacesListener listener = _facesListeners[i];
@@ -809,20 +794,11 @@ public abstract class UIComponentBase extends UIComponent
 	  savedListeners[index + 1] = holder.saveState(context);
 	}
       }
+
+      return savedListeners;
     }
-    
-    return new Object[] {
-      _id,
-      saveExprMap(context, _bindings),
-      _isRendered,
-      Util.save(_isRenderedExpr, context),
-      rendererCode,
-      rendererString,
-      Util.save(_rendererTypeExpr, context),
-      Util.saveWithType(_bindingExpr, context),
-      (_attributeMap != null ? _attributeMap.saveState(context) : null),
-      savedListeners,
-    };
+
+    return null;
   }
 
   public void restoreState(FacesContext context, Object stateObj)
@@ -857,6 +833,14 @@ public abstract class UIComponentBase extends UIComponent
 
     Object []savedListeners = (Object []) state[9];
 
+    restoreListeners(context, savedListeners);
+
+    if (_bindingExpr != null)
+      _bindingExpr.setValue(context.getELContext(), this);
+  }
+
+  private void restoreListeners(FacesContext context, Object []savedListeners)
+  {
     if (savedListeners != null) {
       _facesListeners = new FacesListener[savedListeners.length / 2];
 
@@ -880,9 +864,6 @@ public abstract class UIComponentBase extends UIComponent
 	}
       }
     }
-
-    if (_bindingExpr != null)
-      _bindingExpr.setValue(context.getELContext(), this);
   }
 
   private Object saveExprMap(FacesContext context,
@@ -971,7 +952,7 @@ public abstract class UIComponentBase extends UIComponent
     else if (attachedObject instanceof List) {
       List list = (List) attachedObject;
 
-      StateList values = new StateList();
+      ArrayList values = new ArrayList();
       int len = list.size();
       
       for (int i = 0; i < len; i++) {
@@ -989,15 +970,22 @@ public abstract class UIComponentBase extends UIComponent
   {
     if (stateObject == null)
       return null;
-    else if (stateObject instanceof StateList)
-      return stateObject;
+    else if (stateObject instanceof List) {
+      List list = (List) stateObject;
+      
+      ArrayList values = new ArrayList();
+      int size = list.size();
+
+      for (int i = 0; i < size; i++) {
+	values.add(restoreAttachedState(context, list.get(i)));
+      }
+      
+      return values;
+    }
     else if (stateObject instanceof StateHandle)
       return ((StateHandle) stateObject).restore(context);
     else
       throw new IllegalStateException("state object was not saved by saveAttachedState");
-  }
-
-  private static class StateList extends ArrayList {
   }
   
   private static class StateHandle implements java.io.Serializable {
@@ -1309,8 +1297,10 @@ public abstract class UIComponentBase extends UIComponent
       if (prop == null) {
 	if (_extMap != null)
 	  return _extMap.get(name);
-	else
+	else {
+	  // XXX: ValueExpression?
 	  return null;
+	}
       }
 
       Method getter = prop.getGetter();
@@ -1320,6 +1310,8 @@ public abstract class UIComponentBase extends UIComponent
 
       try {
 	return getter.invoke(_obj);
+      } catch (InvocationTargetException e) {
+	throw new FacesException(e.getCause());
       } catch (Exception e) {
 	throw new FacesException(e);
       }
@@ -1482,6 +1474,50 @@ public abstract class UIComponentBase extends UIComponent
     public String toString()
     {
       return "ValueExpressionAdapter[" + getExpressionString() + "]";
+    }
+  }
+
+  private static class ValueBindingAdapter extends ValueBinding
+  {
+    private final ValueExpression _expr;
+
+    ValueBindingAdapter(ValueExpression expr)
+    {
+      _expr = expr;
+    }
+
+    public Object getValue(FacesContext context)
+      throws EvaluationException
+    {
+      return _expr.getValue(context.getELContext());
+    }
+
+    public void setValue(FacesContext context, Object value)
+      throws EvaluationException
+    {
+      _expr.setValue(context.getELContext(), value);
+    }
+
+    public boolean isReadOnly(FacesContext context)
+      throws EvaluationException
+    {
+      return _expr.isReadOnly(context.getELContext());
+    }
+
+    public Class getType(FacesContext context)
+      throws EvaluationException
+    {
+      return _expr.getType(context.getELContext());
+    }
+
+    public String getExpressionString()
+    {
+      return _expr.getExpressionString();
+    }
+
+    public String toString()
+    {
+      return "ValueBindingAdapter[" + _expr + "]";
     }
   }
 

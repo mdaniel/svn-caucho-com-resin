@@ -38,7 +38,7 @@ public class UIViewRoot extends UIComponentBase
 {
   public static final String COMPONENT_FAMILY = "javax.faces.ViewRoot";
   public static final String COMPONENT_TYPE = "javax.faces.ViewRoot";
-  public static final String UNIQUE_ID_PREFIX = "_id";
+  public static final String UNIQUE_ID_PREFIX = "j_id";
 
   private String _renderKitId = "HTML_BASIC";
 

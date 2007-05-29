@@ -82,7 +82,7 @@ public class UICommand extends UIComponentBase
     if (_value != null)
       return _value;
     else if (_valueExpr != null)
-      return Util.eval(_valueExpr);
+      return Util.eval(_valueExpr, getFacesContext());
     else
       return null;
   }
@@ -101,7 +101,7 @@ public class UICommand extends UIComponentBase
     if (_immediate != null)
       return _immediate;
     else if (_immediateExpr != null)
-      return Util.evalBoolean(_immediateExpr);
+      return Util.evalBoolean(_immediateExpr, getFacesContext());
     else
       return false;
   }

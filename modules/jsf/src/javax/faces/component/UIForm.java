@@ -69,7 +69,7 @@ public class UIForm extends UIComponentBase implements NamingContainer
     if (_isPrependId != null)
       return _isPrependId;
     else if (_isPrependIdExpr != null)
-      return Util.evalBoolean(_isPrependIdExpr);
+      return Util.evalBoolean(_isPrependIdExpr, getFacesContext());
     else
       return true;
   }

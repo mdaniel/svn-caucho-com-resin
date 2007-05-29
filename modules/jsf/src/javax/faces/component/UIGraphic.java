@@ -68,7 +68,7 @@ public class UIGraphic extends UIComponentBase
     if (_url != null)
       return _url;
     else if (_urlExpr != null)
-      return Util.evalString(_urlExpr);
+      return Util.evalString(_urlExpr, getFacesContext());
     else
       return null;
   }
@@ -83,7 +83,7 @@ public class UIGraphic extends UIComponentBase
     if (_url != null)
       return _url;
     else if (_urlExpr != null)
-      return Util.eval(_urlExpr);
+      return Util.eval(_urlExpr, getFacesContext());
     else
       return null;
   }

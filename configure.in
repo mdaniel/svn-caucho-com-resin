@@ -5,7 +5,7 @@ AC_CONFIG_AUX_DIR(automake)
 dnl Get os info
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(resin, 3.0.9)
+AM_INIT_AUTOMAKE(resin, 3.1.1)
 
 FULL_VERSION="Resin $VERSION -- `date`"
 AC_SUBST(FULL_VERSION)

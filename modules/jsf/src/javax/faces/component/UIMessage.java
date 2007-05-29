@@ -69,7 +69,7 @@ public class UIMessage extends UIComponentBase
     if (_for != null)
       return _for;
     else if (_forExpr != null)
-      return Util.evalString(_forExpr);
+      return Util.evalString(_forExpr, getFacesContext());
     else
       return null;
   }
@@ -84,7 +84,7 @@ public class UIMessage extends UIComponentBase
     if (_showDetail != null)
       return _showDetail;
     else if (_showDetailExpr != null)
-      return Util.evalBoolean(_showDetailExpr);
+      return Util.evalBoolean(_showDetailExpr, getFacesContext());
     else
       return false;
   }
@@ -99,7 +99,7 @@ public class UIMessage extends UIComponentBase
     if (_showSummary != null)
       return _showSummary;
     else if (_showSummaryExpr != null)
-      return Util.evalBoolean(_showSummaryExpr);
+      return Util.evalBoolean(_showSummaryExpr, getFacesContext());
     else
       return false;
   }
@@ -133,19 +133,19 @@ public class UIMessage extends UIComponentBase
   {
     if ("for".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_for = Util.evalString(expr);
+	_for = String.valueOf(expr.getValue(null));
       else
 	_forExpr = expr;
     }
     else if ("showDetail".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_showDetail = Util.evalBoolean(expr);
+	_showDetail = ! Boolean.FALSE.equals(expr.getValue(null));
       else
 	_showDetailExpr = expr;
     }
     else if ("showSummary".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_showSummary = Util.evalBoolean(expr);
+	_showSummary = ! Boolean.FALSE.equals(expr.getValue(null));
       else
 	_showSummaryExpr = expr;
     }
