@@ -956,7 +956,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  __caucho_delete_int();");
     out.println("  return true;");
     out.println("}");
-    out.println("else if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSIST) {");
+    out.println("else if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSISTING) {");
+    // jpa/0ga2
+    out.println("  __caucho_create(__caucho_session, __caucho_home);");
+    out.println("}");
+    out.println("else if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSISTED) {");
     out.println("  __caucho_cascadePrePersist(__caucho_session);");
     out.println("}");
     out.println();
@@ -1087,10 +1091,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.popDepth();
     out.println("}");
 
-    out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSIST) {");
+    out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSISTED) {");
     out.println("  __caucho_cascadePostPersist(__caucho_session);");
     out.println("}");
-    out.println();
 
     out.println();
     out.println("return false;");
@@ -1372,8 +1375,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
       }
     }
 
+    // jpa/0ga2
     out.println();
-    out.println("public boolean __caucho_create(com.caucho.amber.manager.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
+    out.println("public boolean __caucho_lazy_create(com.caucho.amber.manager.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
     out.println("  throws java.sql.SQLException");
     out.println("{");
     out.pushDepth();
@@ -1394,7 +1398,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // commented out: jpa/0h25
     // out.println("  throw new com.caucho.amber.AmberException(\"object \" + " + getDebug() + " + \" is already persistent.\");");
 
-    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_PERSIST;");
+    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_PERSISTING;");
 
     int loadCount = _relatedType.getLoadGroupIndex();
     for (int i = 0; i <= loadCount / 64; i++) {
@@ -1409,6 +1413,29 @@ abstract public class AmberMappedComponent extends ClassComponent {
       } while ((parentType = parentType.getParentType()) != null);
     }
 
+    out.println();
+    out.println("__caucho_session = aConn;");
+    out.println("__caucho_home = home;");
+
+    out.println();
+    out.println("return true;");
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public boolean __caucho_create(com.caucho.amber.manager.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("if (__caucho_state != com.caucho.amber.entity.EntityState.P_PERSISTING)");
+    out.println("  return false;");
+
+    out.println();
+    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_PERSISTED;");
+
+    out.println();
     out.println("__caucho_cascadePrePersist(aConn);");
     out.println("aConn.prePersist((com.caucho.amber.entity.Entity) this);");
 
@@ -1425,7 +1452,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     String sql = _relatedType.generateCreateSQL(table);
 
-    out.print("String sql;");
+    out.println("String sql;");
 
     boolean isAutoInsert = false;
 
@@ -1499,10 +1526,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
         parentType.getId().generateSetGeneratedKeys(out, "pstmt");
       }
     } while ((parentType = parentType.getParentType()) != null);
-
-    out.println();
-    out.println("__caucho_session = aConn;");
-    out.println("__caucho_home = home;");
 
     // println("pstmt.close();");
 

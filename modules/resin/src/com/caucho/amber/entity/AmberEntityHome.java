@@ -481,6 +481,10 @@ public class AmberEntityHome {
 
       return entity;
     } catch (Exception e) {
+      // jpa/0u0j
+      if (_manager.isJPA() && (e instanceof RuntimeException))
+        throw (RuntimeException) e;
+
       throw AmberException.create(e);
     }
   }
@@ -585,6 +589,10 @@ public class AmberEntityHome {
 
       return item;
     } catch (Exception e) {
+      // jpa/0u0j
+      if (_manager.isJPA() && (e instanceof ClassCastException))
+        throw new IllegalArgumentException(e);
+
       throw AmberException.create(e);
     }
   }
@@ -697,7 +705,11 @@ public class AmberEntityHome {
   public void save(AmberConnection aConn, Entity entity)
     throws SQLException
   {
-    entity.__caucho_create(aConn, _entityType);
+    // Common to JPA and CMP.
+    entity.__caucho_lazy_create(aConn, _entityType);
+
+    if (! _manager.isJPA())
+      entity.__caucho_create(aConn, _entityType);
   }
 
   /**

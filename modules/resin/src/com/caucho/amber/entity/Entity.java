@@ -44,11 +44,12 @@ public interface Entity extends MappedSuperclass
 {
   public static final int TRANSIENT = 0;
   public static final int P_NEW = 1;
-  public static final int P_PERSIST = 2;
-  public static final int P_NON_TRANSACTIONAL = 3;
-  public static final int P_TRANSACTIONAL = 4;
-  public static final int P_DELETING = 5;
-  public static final int P_DELETED = 6;
+  public static final int P_PERSISTING = 2;
+  public static final int P_PERSISTED = 3;
+  public static final int P_NON_TRANSACTIONAL = 4;
+  public static final int P_TRANSACTIONAL = 5;
+  public static final int P_DELETING = 6;
+  public static final int P_DELETED = 7;
 
   /**
    * Makes the entity persistent.
@@ -98,6 +99,13 @@ public interface Entity extends MappedSuperclass
    */
   public boolean __caucho_create(AmberConnection aConn,
                                  EntityType entityType)
+    throws SQLException;
+
+  /**
+   * Changes the entity state to P_PERSISTING, but does not flush to database.
+   */
+  public boolean __caucho_lazy_create(AmberConnection aConn,
+                                      EntityType entityType)
     throws SQLException;
 
   /**

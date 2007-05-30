@@ -821,6 +821,8 @@ public class AmberConnection
       _isRegistered = false;
 
       cleanup();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
     } finally {
       _persistenceUnit = null;
     }
@@ -1749,6 +1751,12 @@ public class AmberConnection
 
     try {
       beforeCommit();
+    // XXX: need to figure out how to throw JPA exceptions at commit() time.
+    // } catch (SQLException e) {
+    //  throw e;
+    } catch (RuntimeException e) {
+      // jpa/0ga5
+      throw e;
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -2826,7 +2834,8 @@ public class AmberConnection
     if (_persistenceUnit.isJPA()) {
       // See persistInternal(): entity.__caucho_cascadePrePersist(this);
 
-      entity.__caucho_create(this, home.getEntityType());
+      // jpa/0ga2
+      entity.__caucho_lazy_create(this, home.getEntityType());
 
       // See persistInternal(): entity.__caucho_cascadePostPersist(this);
     }
@@ -2942,8 +2951,28 @@ public class AmberConnection
     for (int i = 0; i < _txEntities.size(); i++) {
       Entity entity = _txEntities.get(i);
 
-      if (entity.__caucho_getEntityState() == EntityState.P_PERSIST)
-        entity.__caucho_flush();
+      if (entity.__caucho_getEntityState().isPersist()) {
+        try {
+          entity.__caucho_flush();
+        } catch (SQLException e) {
+          log.log(Level.FINER, e.toString(), e);
+
+          String sqlState = e.getSQLState();
+
+          JdbcMetaData metaData = _persistenceUnit.getMetaData();
+
+          if (metaData.isUniqueConstraintSQLState(sqlState)) {
+            // jpa/0ga5
+            throw new EntityExistsException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), entity.__caucho_getEntityState()));
+          }
+          else if (metaData.isForeignKeyViolationSQLState(sqlState)) {
+            // jpa/0o42
+            throw new IllegalStateException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' would break a foreign key constraint. The entity state is '{2}'. Please make sure there are associated entities for all required relationships. If you are merging an entity make sure the association fields are annotated with cascade=MERGE or cascade=ALL.", entity.getClass().getName(), entity.__caucho_getPrimaryKey(), entity.__caucho_getEntityState()));
+          }
+
+          throw e;
+        }
+      }
     }
 
     // jpa/0h25
@@ -2951,7 +2980,7 @@ public class AmberConnection
     for (int i = _txEntities.size() - 1; i >= 0; i--) {
       Entity entity = _txEntities.get(i);
 
-      if (entity.__caucho_getEntityState() != EntityState.P_PERSIST)
+      if (! entity.__caucho_getEntityState().isPersist())
         entity.__caucho_flush();
     }
 
@@ -2996,7 +3025,12 @@ public class AmberConnection
 
           if (contextEntity.__caucho_getEntityState().ordinal() ==
               EntityState.P_DELETED.ordinal()) {
+            // jpa/0ga3
             contextEntity.__caucho_flush();
+          }
+          else if (entity != contextEntity) {
+            // jpa/0ga1: trying to persist a detached entity that already exists.
+            throw new EntityExistsException(L.l("Trying to persist a detached entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", instance.getClass().getName(), instance.__caucho_getPrimaryKey(), state));
           }
         }
 
@@ -3004,26 +3038,7 @@ public class AmberConnection
         // Pre-persist child entities.
         instance.__caucho_cascadePrePersist(this);
 
-        try {
-          createInternal(instance);
-        } catch (SQLException e) {
-          log.log(Level.FINER, e.toString(), e);
-
-          String sqlState = e.getSQLState();
-
-          JdbcMetaData metaData = _persistenceUnit.getMetaData();
-
-          if (metaData.isUniqueConstraintSQLState(sqlState)) {
-            // jpa/0ga1
-            throw new EntityExistsException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' that already exists. Entity state '{2}'", instance.getClass().getName(), instance.__caucho_getPrimaryKey(), state));
-          }
-          else if (metaData.isForeignKeyViolationSQLState(sqlState)) {
-            // jpa/0o42
-            throw new IllegalStateException(L.l("Trying to persist an entity of class '{0}' with PK '{1}' would break a foreign key constraint. The entity state is '{2}'. Please make sure there are associated entities for all required relationships. If you are merging an entity make sure the association fields are annotated with cascade=MERGE or cascade=ALL.", instance.getClass().getName(), instance.__caucho_getPrimaryKey(), state));
-          }
-
-          throw e;
-        }
+        createInternal(instance);
       }
       break;
 
@@ -3057,7 +3072,8 @@ public class AmberConnection
       }
       break;
 
-    case P_PERSIST:
+    case P_PERSISTING:
+    case P_PERSISTED:
       {
         // jpa/0h26
         // Pre-persist child entities.

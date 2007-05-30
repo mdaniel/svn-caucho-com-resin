@@ -43,20 +43,26 @@ import java.util.Map;
 public enum EntityState {
   TRANSIENT,
   P_NON_TRANSACTIONAL,
-  P_PERSIST,
+  P_PERSISTING,
+  P_PERSISTED,
   P_TRANSACTIONAL,
   P_DELETING,
   P_DELETED;
-
-  public final boolean isTransactional()
-  {
-    return this == P_TRANSACTIONAL || this == P_PERSIST;
-  }
 
   public final boolean isManaged()
   {
     int value = ordinal();
 
     return P_NON_TRANSACTIONAL.ordinal() < value;
+  }
+
+  public final boolean isPersist()
+  {
+    return this == P_PERSISTING || this == P_PERSISTED;
+  }
+
+  public final boolean isTransactional()
+  {
+    return this == P_TRANSACTIONAL || isPersist();
   }
 }

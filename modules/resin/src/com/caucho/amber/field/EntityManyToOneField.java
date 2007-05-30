@@ -1279,7 +1279,7 @@ public class EntityManyToOneField extends CascadableField {
       out.pushDepth();
 
       // XXX: jpa/0h27
-      out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSIST)");
+      out.println("if (__caucho_state.isPersist())");
       out.println("  __caucho_cascadePrePersist(__caucho_session);");
 
       out.popDepth();
@@ -1321,7 +1321,7 @@ public class EntityManyToOneField extends CascadableField {
     String dirtyVar = "__caucho_dirtyMask_" + (getIndex() / 64);
     long dirtyMask = (1L << (getIndex() % 64));
 
-    out.println("if ((" + getter + " != null) && (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSIST || (" + dirtyVar + " & " + dirtyMask + ") != 0L)) {");
+    out.println("if ((" + getter + " != null) && (__caucho_state.isPersist() || (" + dirtyVar + " & " + dirtyMask + ") != 0L)) {");
     out.pushDepth();
 
     String relatedEntity = "((com.caucho.amber.entity.Entity) " + getter + ")";
