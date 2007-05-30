@@ -50,6 +50,11 @@ public interface IdField extends AmberField {
   public Type getType();
 
   /**
+   * Returns true for a generator.
+   */
+  public boolean isAutoGenerate();
+
+  /**
    * Sets true if there are multiple keys.
    */
   public void setKeyField(boolean isKey);

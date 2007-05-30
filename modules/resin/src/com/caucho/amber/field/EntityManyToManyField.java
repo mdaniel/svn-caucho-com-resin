@@ -735,10 +735,23 @@ public class EntityManyToManyField extends AssociationField {
       String getter = "_caucho_field_" + getGetterName(); // generateSuperGetter();
 
       out.println("if (" + getter + " != null) {");
+      out.pushDepth();
 
-      out.println("  for (Object o : " + getter + ")");
-      out.println("    " + amberCascade + "(o);");
+      out.println();
+      out.println("for (Object o : " + getter + ") {");
+      out.pushDepth();
 
+      if (cascadeType == CascadeType.PERSIST) {
+        // jpa/0i60
+        out.println("((com.caucho.amber.entity.Entity) o).__caucho_flush();");
+      }
+
+      out.println(amberCascade + "(o);");
+
+      out.popDepth();
+      out.println("}");
+
+      out.popDepth();
       out.println("}");
 
       out.popDepth();

@@ -1974,7 +1974,9 @@ public class AmberConnection
     for (int i = 0; i < _entities.size(); i++) {
       Entity entity = _entities.get(i);
 
-      entity.__caucho_expire();
+      // jpa/0j5e
+      if (! entity.__caucho_getEntityState().isPersist())
+        entity.__caucho_expire();
     }
   }
 
@@ -3092,9 +3094,13 @@ public class AmberConnection
       }
     }
 
+    // jpa/0j5e
+    updateFlushPriority(instance);
+
     // jpa/0h27
     // Post-persist child entities.
-    instance.__caucho_cascadePostPersist(this);
+    // jpa/0i5c: lazy persist()
+    // instance.__caucho_cascadePostPersist(this);
   }
 
   /**

@@ -1345,6 +1345,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     boolean isAbstract = (_relatedType.getBeanClass().isAbstract()
                           && _relatedType.getPersistenceUnit().isJPA());
 
+    boolean isGeneratedValue = false;
+
     // jpa/0gg0
     if (_relatedType.getId() != null && ! isAbstract) {
       ArrayList<IdField> fields = _relatedType.getId().getKeys();
@@ -1359,6 +1361,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
         // no data-source configured. The latter will
         // be thrown on web.xml validation. (ejb/06m0)
       }
+
+      if (idField != null && idField.isAutoGenerate())
+        isGeneratedValue = true;
 
       if (! hasReturnGeneratedKeys &&
           idField != null && idField.getType().isAutoIncrement()) {
@@ -1382,6 +1387,66 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
+    int loadCount = 0;
+
+    // jpa/0ge2: MappedSuperclassType
+    if ((_relatedType.getTable() == null) || (_relatedType.getId() == null)) {
+      out.println("return false;");
+
+      out.popDepth();
+      out.println("}");
+    }
+    else {
+      out.println("if (__caucho_session != null)");
+      out.println("  return true;");
+      out.println();
+
+      // commented out: jpa/0h25
+      // out.println("  throw new com.caucho.amber.AmberException(\"object \" + " + getDebug() + " + \" is already persistent.\");");
+
+      out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_PERSISTING;");
+
+      loadCount = _relatedType.getLoadGroupIndex();
+      for (int i = 0; i <= loadCount / 64; i++) {
+        out.println("__caucho_loadMask_" + i + " = 0L;");
+
+        // XXX: jpa/0l21
+
+        RelatedType parentType = _relatedType;
+
+        do {
+          out.println("__caucho_loadMask_" + i + " |= " + parentType.getCreateLoadMask(i) + ";");
+        } while ((parentType = parentType.getParentType()) != null);
+      }
+
+      out.println();
+      out.println("__caucho_session = aConn;");
+      out.println("__caucho_home = home;");
+
+      if (isGeneratedValue) {
+        // jpa/0g50: generated id needs to flush the insert statement at persist() time.
+        out.println("__caucho_create(aConn, home);");
+      }
+      else {
+        // jpa/0j5e: persist() is lazy but should cascade to add entities to the context.
+        out.println();
+        out.println("__caucho_cascadePrePersist(aConn);");
+        out.println("__caucho_cascadePostPersist(aConn);");
+      }
+
+      out.println();
+      out.println("return true;");
+
+      out.popDepth();
+      out.println("}");
+    }
+
+    out.println();
+    out.println("public boolean __caucho_create(com.caucho.amber.manager.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
+    out.println("  throws java.sql.SQLException");
+    out.println("{");
+    out.pushDepth();
+
     // jpa/0ge2: MappedSuperclassType
     if ((_relatedType.getTable() == null) || (_relatedType.getId() == null)) {
       out.println("return false;");
@@ -1391,43 +1456,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
       return;
     }
-
-    out.println("if (__caucho_session != null)");
-    out.println("  return true;");
-
-    // commented out: jpa/0h25
-    // out.println("  throw new com.caucho.amber.AmberException(\"object \" + " + getDebug() + " + \" is already persistent.\");");
-
-    out.println("__caucho_state = com.caucho.amber.entity.EntityState.P_PERSISTING;");
-
-    int loadCount = _relatedType.getLoadGroupIndex();
-    for (int i = 0; i <= loadCount / 64; i++) {
-      out.println("__caucho_loadMask_" + i + " = 0L;");
-
-      // XXX: jpa/0l21
-
-      RelatedType parentType = _relatedType;
-
-      do {
-        out.println("__caucho_loadMask_" + i + " |= " + parentType.getCreateLoadMask(i) + ";");
-      } while ((parentType = parentType.getParentType()) != null);
-    }
-
-    out.println();
-    out.println("__caucho_session = aConn;");
-    out.println("__caucho_home = home;");
-
-    out.println();
-    out.println("return true;");
-
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("public boolean __caucho_create(com.caucho.amber.manager.AmberConnection aConn, com.caucho.amber.type.EntityType home)");
-    out.println("  throws java.sql.SQLException");
-    out.println("{");
-    out.pushDepth();
 
     out.println("if (__caucho_state != com.caucho.amber.entity.EntityState.P_PERSISTING)");
     out.println("  return false;");
