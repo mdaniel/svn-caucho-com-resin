@@ -109,6 +109,14 @@ public class KeyManyToOneField extends EntityManyToOneField implements IdField {
   }
 
   /**
+   * Returns true for a generator.
+   */
+  public boolean isAutoGenerate()
+  {
+    return false;
+  }
+
+  /**
    * Set true if key fields are accessed through fields.
    */
   public void setKeyField(boolean isKeyField)
