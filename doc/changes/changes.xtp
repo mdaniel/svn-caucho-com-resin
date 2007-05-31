@@ -12,6 +12,8 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>select-manager now uses epoll on Linux (#1518, rep by Greg Schroeder)</li>
+<li>jsp: response.getBufferSize() reporting (#1539, rep by Andrew Marcuse)</li>
 <li>rewrite-dispatch add &lt;proxy> option (#1445, rep by Daniel Lopez)</li>
 <li>amber: missing Java string escapes in SQL generation (#1438, rep by spoty)</li>
 <li>mod_caucho: Added CauchoStickySessions (#1423, rep by M Marich)</li>

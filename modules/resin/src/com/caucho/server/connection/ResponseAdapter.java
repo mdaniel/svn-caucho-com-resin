@@ -159,6 +159,18 @@ public class ResponseAdapter extends ResponseWrapper
     super.sendRedirect(url);
   }
 
+  @Override
+  public int getBufferSize()
+  {
+    return _responseStream.getBufferSize();
+  }
+
+  @Override
+  public void setBufferSize(int size)
+  {
+    _responseStream.setBufferSize(size);
+  }
+
   public ServletOutputStream getOutputStream() throws IOException
   {
     return _os;

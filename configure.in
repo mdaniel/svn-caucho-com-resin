@@ -17,6 +17,8 @@ AC_PROG_EGREP
 
 dnl Checks for poll.h
 AC_CHECK_HEADER(sys/poll.h, [ CFLAGS="$CFLAGS -DPOLL" ])
+dnl Checks for epoll.h
+AC_CHECK_HEADER(sys/epoll.h, [ CFLAGS="$CFLAGS -DEPOLL" ])
 
 AC_PROG_LIBTOOL			    
 #

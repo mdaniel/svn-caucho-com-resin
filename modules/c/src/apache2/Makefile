@@ -2,7 +2,7 @@
 
 CC=gcc
 CP=/bin/cp
-CFLAGS=-g -O2 -DPOLL -DHAS_JVMTI -DHAS_JVMDI   -DLINUX=2 -D_REENTRANT -D_GNU_SOURCE -D_LARGEFILE64_SOURCE   -pthread
+CFLAGS=-g -O2 -DPOLL -DEPOLL -DHAS_JVMTI -DHAS_JVMDI 
 CFLAGS_SHLIB=-fpic
 EGREP=grep -E
 LIBTOOL=EGREP="grep -E" /home/ferg/ws/test-resin/libtool --silent
@@ -11,10 +11,10 @@ LD_SHLIB=gcc
 LIBS_SHLIB=
 LDFLAGS=
 LDFLAGS_SHLIB=-shared -L/usr/lib
-APACHE_INC=-I/usr/local/apache22/include  -I/usr/local/apache22/include 
-apache_conf=/usr/local/apache22/conf/httpd.conf
-apache_dir=/usr/local/apache22
-apache_libexec=/usr/local/apache22/modules
+APACHE_INC=-I
+apache_conf=
+apache_dir=
+apache_libexec=
 resin_home=/home/ferg/ws/test-resin
 INCLUDES = $(APACHE_INC) -DRESIN_HOME=\"$(resin_home)\" -I../common
 C=../common

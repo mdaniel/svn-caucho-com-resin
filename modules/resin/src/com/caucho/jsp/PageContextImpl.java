@@ -223,6 +223,13 @@ public class PageContextImpl extends PageContext
       // JSP.12.2.3 - JSP must use PrintWriter
       _responseAdapter = ToCharResponseAdapter.create((HttpServletResponse) response);
       _response = _responseAdapter;
+
+      try {
+	// jsp/017m
+	response.setBufferSize(bufferSize);
+      } catch (Exception e) {
+	log.log(Level.FINE, e.toString(), e);
+      }
     }
     
     _responseStream = _response.getResponseStream();
@@ -234,7 +241,7 @@ public class PageContextImpl extends PageContext
     if (bufferSize != TempCharBuffer.SIZE) {
       try {
 	_responseStream.setBufferSize(bufferSize);
-      } catch (Throwable e) {
+      } catch (Exception e) {
 	log.log(Level.FINE, e.toString(), e);
       }
     }
