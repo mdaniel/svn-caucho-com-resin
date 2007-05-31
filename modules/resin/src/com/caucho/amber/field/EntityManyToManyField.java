@@ -737,6 +737,13 @@ public class EntityManyToManyField extends AssociationField {
       out.println("if (" + getter + " != null) {");
       out.pushDepth();
 
+      if (cascadeType == CascadeType.PERSIST) {
+        // XXX: jpa/0i5c
+        // For now, needs to flush the persist() with many-to-many
+        // to avoid breaking FK constraints from join tables.
+        out.println("__caucho_create(__caucho_session, __caucho_home);");
+      }
+
       out.println();
       out.println("for (Object o : " + getter + ") {");
       out.pushDepth();
