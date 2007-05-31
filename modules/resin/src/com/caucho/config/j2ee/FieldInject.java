@@ -60,6 +60,11 @@ public class FieldInject extends AccessibleInject
     return _field.getType();
   }
 
+  Class getDeclaringClass()
+  {
+    return _field.getDeclaringClass();
+  }
+
   void inject(Object bean, Object value)
     throws ConfigException
   {

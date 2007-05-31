@@ -313,6 +313,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   /**
    * Returns true if the deployment has modified.
    */
+  @Override
   public boolean isModified()
   {
     synchronized (this) {
@@ -339,6 +340,38 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     } finally {
       _isChecking = false;
     }
+  }
+
+  /**
+   * Log the reason for modification
+   */
+  @Override
+  public boolean logModified(Logger log)
+  {
+    long digest = getDigest();
+
+    if (_digest != digest) {
+      String reason = "";
+    
+      Path archiveDirectory = getArchiveDirectory();
+      if (archiveDirectory != null)
+	reason = archiveDirectory.getNativePath() + " has changed";
+    
+      Path expandDirectory = getExpandDirectory();
+      if (expandDirectory != null
+	  && ! expandDirectory.equals(archiveDirectory)) {
+	if (! "".equals(reason))
+	  reason = reason + " or ";
+	
+	reason = expandDirectory.getNativePath() + " has changed";
+      }
+
+      log.info(reason);
+
+      return true;
+    }
+
+    return false;
   }
 
   /**

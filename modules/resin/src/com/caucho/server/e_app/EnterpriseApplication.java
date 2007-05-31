@@ -309,6 +309,14 @@ public class EnterpriseApplication
   }
 
   /**
+   * Log the reason for modification.
+   */
+  public boolean logModified(Logger log)
+  {
+    return _loader.logModified(log);
+  }
+
+  /**
    * Returns true if it's modified.
    */
   public boolean isDeployError()

@@ -65,6 +65,19 @@ public class VersionDependency implements PersistentDependency {
   {
     return ! Version.FULL_VERSION.equals(_version);
   }
+  
+  /**
+   * Returns true if the underlying resource has changed.
+   */
+  public boolean logModified(Logger log)
+  {
+    if (! Version.FULL_VERSION.equals(_version)) {
+      log.info("Resin version has changed to " + Version.FULL_VERSION);
+      return true;
+    }
+    else
+      return false;
+  }
 
   /**
    * Returns a string which will recreate the dependency.

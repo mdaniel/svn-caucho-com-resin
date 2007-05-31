@@ -101,6 +101,27 @@ public class PathExistsDependency implements Dependency {
   }
 
   /**
+   * Log the reason for the modification.
+   */
+  public boolean logModified(Logger log)
+  {
+    boolean exists = _source.exists();
+
+    if (exists == _exists)
+      return false;
+    else if (exists) {
+      log.info(_source.getNativePath() + " has been created.");
+
+      return true;
+    }
+    else {
+      log.info(_source.getNativePath() + " has been deleted.");
+      
+      return true;
+    }
+  }
+
+  /**
    * Returns true if the test Dependency has the same source path as
    * this dependency.
    */

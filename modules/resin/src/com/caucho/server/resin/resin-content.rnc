@@ -94,6 +94,8 @@ r_cluster-Basis =
 
   & r_ssl-session-cookie?
 
+  & r_session-sticky-disable?
+
   & r_session-url-prefix?
 
   & r_url-character-encoding?
@@ -601,6 +603,10 @@ r_server-Content = r_server-Flow
 r_session-cookie = 
   attribute session-cookie { string }
   | element session-cookie { string }
+
+r_session-sticky-disable = 
+  attribute session-sticky-disable { string }
+  | element session-sticky-disable { string }
 
 r_session-url-prefix =
   attribute alternate-session-url-prefix { string }

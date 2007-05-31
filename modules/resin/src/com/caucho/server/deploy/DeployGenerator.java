@@ -162,6 +162,14 @@ abstract public class DeployGenerator<E extends DeployController>
     return false;
   }
 
+  /**
+   * Returns true if the deployment has modified.
+   */
+  public boolean logModified(Logger log)
+  {
+    return false;
+  }
+
   public String getState()
   {
     return _lifecycle.getStateName();

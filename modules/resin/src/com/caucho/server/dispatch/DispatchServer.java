@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * The dispatch server is responsible for building Invocations,
@@ -371,6 +372,14 @@ public class DispatchServer implements Dependency {
    * Returns true if the server has been modified and needs restarting.
    */
   public boolean isModified()
+  {
+    return false;
+  }
+
+  /**
+   * Log the reason for modification.
+   */
+  public boolean logModified(Logger log)
   {
     return false;
   }

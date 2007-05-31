@@ -1103,7 +1103,8 @@ abstract public class RelatedType extends AbstractStatefulType {
   {
     CharBuffer sql = new CharBuffer();
 
-    sql.append("insert into " + table.getName() + " (");
+    sql.append("insert into ");
+    sql.append(JavaWriter.escapeJavaString(table.getName()) + " (");
 
     boolean isFirst = true;
 

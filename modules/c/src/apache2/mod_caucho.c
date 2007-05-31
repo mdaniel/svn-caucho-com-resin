@@ -445,6 +445,27 @@ resin_session_cookie_command(cmd_parms *cmd, void *pconfig,
 }
 
 /**
+ * Set the default session cookie used by mod_caucho.
+ */
+static const char *
+resin_session_sticky_command(cmd_parms *cmd, void *pconfig,
+			     const char *cookie_arg)
+{
+  config_t *config = pconfig; /* = cse_get_server_config(cmd->server); */
+
+  if (! config)
+    return 0;
+
+  config->has_config = 1;
+
+  if (! strcmp(cookie_arg, "false")) {
+    config->disable_sticky_session_cookie = 1;
+  }
+
+  return 0;
+}
+
+/**
  * Set the default session url used by mod_caucho.
  */
 static const char *
@@ -1261,6 +1282,9 @@ static command_rec caucho_commands[] = {
     AP_INIT_TAKE1("ResinSessionCookie", resin_session_cookie_command,
 		  NULL, RSRC_CONF|ACCESS_CONF, 
 		  "Configures the session cookie."),
+    AP_INIT_TAKE1("ResinSessionSticky", resin_session_sticky_command,
+		  NULL, RSRC_CONF|ACCESS_CONF, 
+		  "Configures the session sticky."),
     AP_INIT_TAKE1("ResinSessionUrlPrefix", resin_session_url_prefix_command,
 		  NULL, RSRC_CONF|ACCESS_CONF,
 		  "Configures the session url."),

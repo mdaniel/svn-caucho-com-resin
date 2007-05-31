@@ -728,6 +728,16 @@ public class WebApp extends ServletContextImpl
     _servletManager.setLazyValidate(isLazy);
   }
 
+  public ServletMapping createServletMapping()
+  {
+    ServletMapping servletMapping = new ServletMapping();
+    
+    servletMapping.setServletContext(this);
+    servletMapping.setStrictMapping(getStrictMapping());
+
+    return servletMapping;
+  }
+  
   /**
    * Adds a servlet-mapping configuration.
    */
@@ -736,8 +746,6 @@ public class WebApp extends ServletContextImpl
   {
     // log.fine("adding servlet mapping: " + servletMapping);
 
-    servletMapping.setServletContext(this);
-    servletMapping.setStrictMapping(getStrictMapping());
     servletMapping.init(_servletMapper);
   }
 
@@ -1766,7 +1774,7 @@ public class WebApp extends ServletContextImpl
     else
       return false;
   }
-
+    
   /**
    * Returns true if the webApp has been modified.
    */
@@ -1777,6 +1785,19 @@ public class WebApp extends ServletContextImpl
     _invocationDependency.isModifiedNow();
 
     return isModified();
+  }
+
+  /**
+   * Log the reason for modification.
+   */
+  public boolean logModified(Logger log)
+  {
+    if (_lifecycle.isAfterActive()) {
+      // closed web-apps don't modify (XXX: errors?)
+      return true;
+    }
+    else
+      return _classLoader.logModified(log);
   }
 
   /**

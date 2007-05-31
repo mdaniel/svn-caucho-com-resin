@@ -32,22 +32,26 @@ package com.caucho.amber.cfg;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.bytecode.JClass;
+import com.caucho.loader.*;
 import com.caucho.vfs.Path;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import javax.persistence.spi.*;
+import java.net.URL;
+import java.util.*;
 
 /**
  * <persistence-unit> tag in the persistence.xml
  */
-public class PersistenceUnitConfig {
+public class PersistenceUnitConfig implements PersistenceUnitInfo {
   private String _name;
   private String _provider;
   private DataSource _jtaDataSource;
   private DataSource _nonJtaDataSource;
   private boolean _isExcludeUnlistedClasses;
+
+  private URL _rootUrl;
+  private DynamicClassLoader _loader;
 
   // className -> type
   private HashMap<String, JClass> _classMap
@@ -55,6 +59,13 @@ public class PersistenceUnitConfig {
 
   private ArrayList<String> _mappingFiles
     = new ArrayList<String>();
+
+  public PersistenceUnitConfig()
+  {
+    Thread thread = Thread.currentThread();
+
+    _loader = (DynamicClassLoader) thread.getContextClassLoader();
+  }
 
   /**
    * Returns the unit name.
@@ -103,11 +114,27 @@ public class PersistenceUnitConfig {
   }
 
   /**
+   * Gets the transactional data source.
+   */
+  public DataSource getJtaDataSource()
+  {
+    return _jtaDataSource;
+  }
+
+  /**
    * Sets the non-transactional data source.
    */
   public void setNonJtaDataSource(DataSource ds)
   {
     _nonJtaDataSource = ds;
+  }
+
+  /**
+   * Sets the non-transactional data source.
+   */
+  public DataSource getNonJtaDataSource()
+  {
+    return _nonJtaDataSource;
   }
 
   /**
@@ -208,6 +235,111 @@ public class PersistenceUnitConfig {
     unit.generate();
 
     return unit;
+  }
+
+  //
+  // PersistenceUnitInfo api
+  //
+
+  /**
+   * Returns the name.
+   */
+  public String getPersistenceUnitName()
+  {
+    return getName();
+  }
+
+  /**
+   * Returns the full class name of the persistence provider.
+   */
+  public String getPersistenceProviderClassName()
+  {
+    return _provider;
+  }
+
+  /**
+   * Returns the transaction handling.
+   */
+  public PersistenceUnitTransactionType getTransactionType()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the mapping file names.  The files are resource-loadable
+   * from the classpath.
+   */
+  public List<String> getMappingFileNames()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the list of jars for the managed classes.
+   */
+  public List<URL> getJarFileUrls()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the root persistence unit.
+   */
+  public URL getPersistenceUnitRootUrl()
+  {
+    return _rootUrl;
+  }
+
+  /**
+   * Returns the list of managed classes.
+   */
+  public List<String> getManagedClassNames()
+  {
+    ArrayList<String> names = new ArrayList<String>();
+    names.addAll(_classMap.keySet());
+
+    return names;
+  }
+
+  /**
+   * Returns true if only listed classes are allowed.
+   */
+  public boolean excludeUnlistedClasses()
+  {
+    return _isExcludeUnlistedClasses;
+  }
+
+  /**
+   * Returns a properties object.
+   */
+  public Properties getProperties()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns the classloader the provider should use to load classes,
+   * resources or URLs.
+   */
+  public ClassLoader getClassLoader()
+  {
+    return _loader;
+  }
+
+  /**
+   * Adds a class transformer.
+   */
+  public void addTransformer(ClassTransformer transformer)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Returns a temporary class loader.
+   */
+  public ClassLoader getNewTempClassLoader()
+  {
+    throw new UnsupportedOperationException();
   }
 
   public String toString()

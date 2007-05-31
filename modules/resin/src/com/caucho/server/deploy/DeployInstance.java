@@ -29,6 +29,7 @@
 
 package com.caucho.server.deploy;
 
+import java.util.logging.Logger;
 import com.caucho.vfs.Dependency;
 
 /**
@@ -49,6 +50,11 @@ public interface DeployInstance extends Dependency {
    * Returns true if the deployment is modified, forcing a check.
    */
   public boolean isModifiedNow();
+
+  /**
+   * Logs the reason for modification
+   */
+  public boolean logModified(Logger log);
 
   /**
    * Returns true if the deployment is modified for the timer redeploy.

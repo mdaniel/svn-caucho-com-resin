@@ -173,6 +173,7 @@ public class StartAutoRedeployAutoStrategy
     }
     else if (controller.isModified()) {
       // server/1d1k
+      controller.logModified(controller.getLog());
       controller.restartImpl();
     }
     else if (controller.isActiveIdle()) {

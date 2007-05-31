@@ -1372,8 +1372,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
         out.println("static {");
         out.pushDepth();
         out.println("com.caucho.amber.field.MaxGenerator gen = new com.caucho.amber.field.MaxGenerator();");
-        out.println("gen.setColumn(\"" + idField.getColumns().get(0).generateInsertName() + "\");");
-        out.println("gen.setTable(\"" + _relatedType.getName() + "\");");
+        out.print("gen.setColumn(\"");
+	out.printJavaString(idField.getColumns().get(0).generateInsertName());
+	out.println("\");");
+        out.print("gen.setTable(\"");
+	out.printJavaString(_relatedType.getName());
+	out.println("\");");
         out.println("gen.init();");
         out.popDepth();
         out.println("}");
@@ -1496,7 +1500,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
         isAutoInsert = true;
 
         out.print("sql = \"");
-        out.print(_relatedType.generateAutoCreateSQL(sql));
+        out.printJavaString(_relatedType.generateAutoCreateSQL(sql));
         out.println("\";");
       }
     }
@@ -1505,7 +1509,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     if (! isAutoInsert) {
       out.print("sql = \"");
-      out.print(sql);
+      out.printJavaString(sql);
       out.println("\";");
     }
 
@@ -1535,7 +1539,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
         out.println();
         out.print("sql = \"");
-        out.print(sql);
+        out.printJavaString(sql);
         out.println("\";");
 
         out.println("pstmt = aConn.prepareStatement(sql);");
@@ -1756,9 +1760,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
     String table = _relatedType.getTable().getName();
     String where = _relatedType.getId().generateMatchArgWhere(null);
 
-    String sql = "delete from " + table + " where " + where;
+    String sql = ("delete from " + table + " where " + where);
 
-    out.println("sql = \"" + sql + "\";");
+    out.print("sql = \"");
+    out.printJavaString(sql);
+    out.println("\";");
 
     out.println();
     out.println("pstmt = __caucho_session.prepareStatement(sql);");
@@ -2664,7 +2670,7 @@ abstract public class AmberMappedComponent extends ClassComponent {
         parentType = parentType.getParentType();
     }
 
-    out.print(parentType.generateLoadSelect("o"));
+    out.printJavaString(parentType.generateLoadSelect("o"));
     out.print(" from ");
 
     /*
@@ -2673,11 +2679,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
     else
       out.print(rootTableName);
     */
-    out.print(_relatedType.getTable().getName());
+    out.printJavaString(_relatedType.getTable().getName());
 
     out.print(" o where ");
     // jpa/0s27
-    out.print(parentType.getId().generateMatchArgWhere("o"));
+    out.printJavaString((parentType.getId().generateMatchArgWhere("o")));
     out.println("\";");
 
     out.println("pstmt = aConn.prepareStatement(sql);");

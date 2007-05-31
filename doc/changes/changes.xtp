@@ -12,6 +12,12 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>rewrite-dispatch add &lt;proxy> option (#1445, rep by Daniel Lopez)</li>
+<li>amber: missing Java string escapes in SQL generation (#1438, rep by spoty)</li>
+<li>mod_caucho: Added CauchoStickySessions (#1423, rep by M Marich)</li>
+<li>multiple security-constraint/http-method issues (#1419, rep by Keith Fetterman)</li>
+<li>add strict-mapping to servlet-mapping (#1377, rep by Jonah Benton)</li>
+<li>Jar modification was not properly clearning dependency (#1296, rep by ngiudici)</li>
 <li>hessian: update protected methods to allow application extensions (#1627, rep by Ben Hood)</li>
 <li>session: add &lt;distribution-id> configuration to session-config (#1593, rep by hypefiend)</li>
 <li>server: add PortMXBean.stop() and start() (#1259, rep by Bryan Choate)</li>

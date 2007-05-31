@@ -546,6 +546,13 @@ public class WebAppController
         _lifetimeClientDisconnectCount++;
     }
   }
+
+  @Override
+  protected Logger getLog()
+  {
+    return log;
+  }
+  
   /**
    * Returns a printable view.
    */

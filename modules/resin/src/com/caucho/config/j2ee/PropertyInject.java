@@ -64,6 +64,11 @@ public class PropertyInject extends AccessibleInject {
     return _type;
   }
 
+  Class getDeclaringClass()
+  {
+    return _method.getDeclaringClass();
+  }
+
   void inject(Object bean, Object value)
     throws ConfigException
   {

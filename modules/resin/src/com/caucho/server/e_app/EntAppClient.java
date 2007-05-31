@@ -402,6 +402,14 @@ public class EntAppClient implements DeployInstance, EnvironmentBean {
   }
 
   /**
+   * Log the reason for modification.
+   */
+  public boolean logModified(Logger log)
+  {
+    return false;
+  }
+
+  /**
    * Return true is the deployment had an error.
    */
   public boolean isDeployError()

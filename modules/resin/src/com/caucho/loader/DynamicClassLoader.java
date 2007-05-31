@@ -924,6 +924,22 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   }
 
   /**
+   * Logs the reason for modification.
+   */
+  public final boolean logModified(Logger log)
+  {
+    if (_lifecycle.isDestroyed())
+      return true;
+
+    DependencyContainer dependencies = _dependencies;
+
+    if (dependencies != null)
+      return dependencies.logModified(log);
+    else
+      return false;
+  }
+
+  /**
    * Returns true if any of the classes have been modified.
    */
   public final void resetDependencyCheckInterval()

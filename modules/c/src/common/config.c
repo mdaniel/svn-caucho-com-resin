@@ -452,6 +452,13 @@ handle_config_header(config_t *config, char *header, char *value)
 	  
     config->alt_session_url_prefix[len - 1] = 0;
   }
+  else if (! strcmp(header, "disable-sticky-sessions")) {
+    int len = sizeof(config->session_cookie);
+	
+    strncpy(config->session_cookie, value, len);
+		  
+    config->disable_sticky_sessions = strcmp(value, "0");
+  }
 
   return 1;
 }
@@ -828,6 +835,11 @@ write_config(config_t *config)
   if (*config->alt_session_url_prefix) {
     hmux_write_string(&s, HMUX_HEADER, "alt-session-url-prefix");
     hmux_write_string(&s, HMUX_STRING, config->alt_session_url_prefix);
+  }
+
+  if (config->disable_sticky_sessions) {
+    hmux_write_string(&s, HMUX_HEADER, "disable-sticky-sessions");
+    hmux_write_string(&s, HMUX_STRING, "1");
   }
 
   for (host = config->hosts; host; host = host->next) {

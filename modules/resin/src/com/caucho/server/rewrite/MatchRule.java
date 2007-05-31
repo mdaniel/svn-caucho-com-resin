@@ -169,6 +169,24 @@ public class MatchRule
     add(loadBalance);
   }
 
+  /**
+   * Adds a proxy
+   */
+  public ProxyRule createProxy()
+  {
+    WebApp webApp = getRewriteDispatch().getWebApp();
+
+    if (webApp == null)
+      throw new ConfigException(L.l("<proxy> requires a web-app.  Host-based <rewrite-dispatch> can not use <proxy>."));
+
+    return new ProxyRule(getRewriteDispatch(), webApp);
+  }
+
+  public void addProxy(ProxyRule proxy)
+  {
+    add(proxy);
+  }
+
   public MatchRule createMatch()
   {
     return new MatchRule(getRewriteDispatch());

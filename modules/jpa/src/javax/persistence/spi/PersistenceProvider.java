@@ -42,7 +42,7 @@ public interface PersistenceProvider {
   public EntityManagerFactory createEntityManagerFactory(String name, Map map);
 
   /**
-   * Create an return an EntityManagerFactory for the named unit.
+   * Create and return an EntityManagerFactory for the named unit.
    */
   public EntityManagerFactory
     createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map);

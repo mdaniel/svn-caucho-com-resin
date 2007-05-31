@@ -29,6 +29,8 @@
 
 package com.caucho.vfs;
 
+import java.util.logging.*;
+
 /**
  * Interface representing a resource that might change.
  */
@@ -37,4 +39,10 @@ public interface Dependency {
    * Returns true if the underlying resource has changed.
    */
   public boolean isModified();
+  
+  /**
+   * Log the reason for a modification, returning true if this
+   * dependency was modified.
+   */
+  public boolean logModified(Logger log);
 }

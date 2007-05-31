@@ -500,6 +500,17 @@ public class Host extends WebAppContainer
   }
 
   /**
+   * Log the reason for modification.
+   */
+  public boolean logModified(Logger log)
+  {
+    if (isDestroyed())
+      return true;
+    else
+      return getEnvironmentClassLoader().logModified(log);
+  }
+
+  /**
    * Returns true if the host deploy was an error
    */
   public boolean isDeployError()

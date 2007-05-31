@@ -33,6 +33,8 @@ import com.caucho.config.ConfigException;
 
 
 abstract public class AccessibleInject {
+  abstract Class getDeclaringClass();
+  
   abstract String getName();
   
   abstract Class getType();

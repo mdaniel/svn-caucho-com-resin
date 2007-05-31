@@ -116,7 +116,7 @@ public class FilterMapping extends FilterConfigImpl {
             && ! dispatcher.equals("FORWARD")
             && ! dispatcher.equals("INCLUDE")
             && ! dispatcher.equals("ERROR"))) {
-      throw new ConfigException(L.l("`{0}' is an unknown value for <dispatcher>  `REQUEST', `FORWARD', `INCLUDE', and `ERROR' are the valid values.",
+      throw new ConfigException(L.l("'{0}' is an unknown value for <dispatcher>  'REQUEST', 'FORWARD', 'INCLUDE', and 'ERROR' are the valid values.",
                                     dispatcher));
     }
 

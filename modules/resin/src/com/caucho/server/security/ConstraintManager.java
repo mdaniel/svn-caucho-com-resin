@@ -93,44 +93,51 @@ public class ConstraintManager extends FilterChainBuilder {
     HashMap<String,AbstractConstraint[]> methodMap;
     methodMap = new HashMap<String,AbstractConstraint[]>();
 
-    if (_constraints != null) {
-      for (int i = 0; i < _constraints.size(); i++) {
-        SecurityConstraint constraint = _constraints.get(i);
+    for (int i = 0; i < _constraints.size(); i++) {
+      SecurityConstraint constraint = _constraints.get(i);
         
-        if (constraint.isMatch(uri)) {
-          AbstractConstraint absConstraint = constraint.getConstraint();
+      if (constraint.isMatch(uri)) {
+	AbstractConstraint absConstraint = constraint.getConstraint();
 
-          if (absConstraint != null) {
-            ArrayList<String> methods = constraint.getMethods(uri);
+	if (absConstraint != null) {
+	  ArrayList<String> methods = constraint.getMethods(uri);
 
-            for (int j = 0; methods != null && j < methods.size(); j++) {
-              String method =  methods.get(j);
+	  for (int j = 0; methods != null && j < methods.size(); j++) {
+	    String method = methods.get(j);
 
-              AbstractConstraint []methodList = methodMap.get(method);
+	    AbstractConstraint []methodList = methodMap.get(method);
 
-              if (methodList == null)
-                methodList = absConstraint.toArray();
-              else {
-                // methodList.add(absConstraint);
-              }
+	    if (methodList == null)
+	      methodList = absConstraint.toArray();
+	    else {
+	      AbstractConstraint []newMethods = absConstraint.toArray();
+		
+	      AbstractConstraint []newList;
+		
+	      newList = new AbstractConstraint[methodList.length
+					       + newMethods.length];
 
-              methodMap.put(method, methodList);
-            }
-          
-            if (methods == null || methods.size() == 0) {
-	      AbstractConstraint []constArray = absConstraint.toArray();
-	      for (int k = 0; k < constArray.length; k++)
-		constraints.add(constArray[k]);
+	      System.arraycopy(methodList, 0, newList, 0, methodList.length);
+	      System.arraycopy(newMethods, 0, newList,
+			       methodList.length, newMethods.length);
+
+	      methodList = newList;
 	    }
-          }
 
-          break;
-        }
+	    methodMap.put(method, methodList);
+	  }
+          
+	  if (methods == null || methods.size() == 0) {
+	    AbstractConstraint []constArray = absConstraint.toArray();
+	    for (int k = 0; k < constArray.length; k++)
+	      constraints.add(constArray[k]);
+	  }
+	}
       }
     }
 
-    if (uri.endsWith("/j_security_check") &&
-        app.getLogin() instanceof FormLogin) {
+    if (uri.endsWith("/j_security_check")
+	&& app.getLogin() instanceof FormLogin) {
       RequestDispatcher disp = app.getNamedDispatcher("j_security_check");
       if (disp == null)
         throw new IllegalStateException(L.l("j_security_check is an undefined servlet"));
@@ -138,7 +145,7 @@ public class ConstraintManager extends FilterChainBuilder {
       next = new ForwardFilterChain(disp);
     }
 
-    if (constraints.size() != 0 || methodMap.size() > 0) {
+    if (constraints.size() > 0 || methodMap.size() > 0) {
       SecurityFilterChain filterChain = new SecurityFilterChain(next);
       filterChain.setWebApp(invocation.getWebApp());
       if (methodMap.size() > 0)

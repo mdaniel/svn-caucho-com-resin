@@ -134,10 +134,13 @@ public class Jar implements CacheListener {
    */
   static Jar getJar(Path backing)
   {
-    if (_jarCache != null)
-      return _jarCache.get(backing);
-    else
-      return null;
+    if (_jarCache != null) {
+      Jar jar = _jarCache.get(backing);
+
+      return jar;
+    }
+
+    return null;
   }
 
   /**
@@ -644,6 +647,7 @@ public class Jar implements CacheListener {
       _jarFileRef = null;
       _jarLastModified = 0;
       _cache = null;
+      _depend = null;
 
       JarFile oldCloseFile = null;
       if (_closeJarFileRef != null)
@@ -844,6 +848,14 @@ public class Jar implements CacheListener {
     }
 
     /**
+     * Returns true if the dependency is modified.
+     */
+    public boolean logModified(Logger log)
+    {
+      return _depend.logModified(log);
+    }
+
+    /**
      * Returns the string to recreate the Dependency.
      */
     public String getJavaCreateString()
@@ -886,6 +898,14 @@ public class Jar implements CacheListener {
     public boolean isModified()
     {
       return _isDigestModified || _jarDepend.isModified();
+    }
+
+    /**
+     * Returns true if the dependency is modified.
+     */
+    public boolean logModified(Logger log)
+    {
+      return _depend.logModified(log) || _jarDepend.logModified(log);
     }
 
     /**

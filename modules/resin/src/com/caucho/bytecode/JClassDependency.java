@@ -99,6 +99,19 @@ public class JClassDependency implements PersistentDependency {
   {
     return _isDigestModified;
   }
+  
+  /**
+   * Log the reason for modification
+   */
+  public boolean logModified(Logger log)
+  {
+    if (isModified()) {
+      log.info(_className + " is modified");
+      return true;
+    }
+    else
+      return false;
+  }
 
   /**
    * Calculates a MD5 digest of the class.

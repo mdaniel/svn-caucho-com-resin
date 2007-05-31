@@ -249,6 +249,28 @@ public class Invocation extends ServletInvocation implements Dependency {
   }
 
   /**
+   * Log the reason for modification.
+   */
+  public boolean logModified(Logger log)
+  {
+    Dependency depend = _dependency;
+
+    if (depend != null && depend.logModified(log))
+      return true;
+
+    WebApp app = _webApp;
+
+    if (app != null) {
+      depend = app.getInvocationDependency();
+
+      if (depend != null)
+	return depend.logModified(log);
+    }
+
+    return true;
+  }
+
+  /**
    * Copies from the invocation.
    */
   public void copyFrom(Invocation invocation)

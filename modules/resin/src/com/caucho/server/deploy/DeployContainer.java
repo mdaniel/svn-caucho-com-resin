@@ -107,6 +107,14 @@ public class DeployContainer<C extends DeployController>
   }
 
   /**
+   * Logs the reason for modification.
+   */
+  public boolean logModified(Logger log)
+  {
+    return _deployListGenerator.logModified(log);
+  }
+
+  /**
    * Forces updates.
    */
   public void update()

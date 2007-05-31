@@ -208,6 +208,19 @@ public class LibraryLoader extends Loader implements Dependency {
 
     return ! _newPathList.equals(_pathList);
   }
+  
+  /**
+   * True if the classes in the directory have changed.
+   */
+  public boolean logModified(Logger log)
+  {
+    if (isModified()) {
+      log.info(_path.getNativePath() + " has modified jar files");
+      return true;
+    }
+    else
+      return false;
+  }
 
   /**
    * Find all the jars in this directory and add them to jarList.

@@ -119,7 +119,7 @@ public class Persistence {
         if (provider != null)
           list.add(provider);
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
@@ -161,7 +161,7 @@ public class Persistence {
           return (PersistenceProvider) cl.newInstance();
         }
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       try {

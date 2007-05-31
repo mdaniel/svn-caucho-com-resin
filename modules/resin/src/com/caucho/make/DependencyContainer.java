@@ -194,6 +194,21 @@ public class DependencyContainer implements Dependency
   }
 
   /**
+   * Logs the reason for modification.
+   */
+  public boolean logModified(Logger log)
+  {
+    for (int i = _dependencyList.size() - 1; i >= 0; i--) {
+      Dependency dependency = _dependencyList.get(i);
+
+      if (dependency.logModified(log))
+	return true;
+    }
+      
+    return false;
+  }
+
+  /**
    * Returns true if the underlying dependencies have changed, forcing a check.
    */
   public boolean isModifiedNow()

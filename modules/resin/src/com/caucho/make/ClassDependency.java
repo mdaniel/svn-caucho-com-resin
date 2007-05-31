@@ -92,6 +92,19 @@ public class ClassDependency implements PersistentDependency {
   {
     return _isDigestModified;
   }
+  
+  /**
+   * Returns true if the underlying resource has changed.
+   */
+  public boolean logModified(Logger log)
+  {
+    if (isModified()) {
+      log.info(_cl.getName() + " digest is modified");
+      return true;
+    }
+    else
+      return false;
+  }
 
   /**
    * Calculates a MD5 digest of the class.

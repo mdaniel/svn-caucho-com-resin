@@ -203,6 +203,41 @@ public class Depend implements PersistentDependency {
   }
 
   /**
+   * Log the reason for modification
+   */
+  public boolean logModified(Logger log)
+  {
+    if (_isDigestModified) {
+      log.info(_source.getNativePath() + " digest is modified.");
+
+      return true;
+    }
+
+    long sourceLastModified = _source.getLastModified();
+    long sourceLength = _source.getLength();
+
+    // if the source was deleted and we need the source
+    if (! _requireSource && sourceLastModified == 0) {
+      return false;
+    }
+    // if the length changed
+    else if (sourceLength != _length) {
+      log.info(_source.getNativePath() + " length is modified (" +
+	       _length + " -> " + sourceLength + ")");
+
+      return true;
+    }
+    // if the source is newer than the old value
+    else if (sourceLastModified != _lastModified) {
+      log.info(_source.getNativePath() + " time is modified.");
+      
+      return true;
+    }
+    else
+      return false;
+  }
+
+  /**
    * Returns the digest.
    */
   public long getDigest()

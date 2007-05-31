@@ -185,6 +185,19 @@ public class DirectoryLoader extends Loader implements Dependency
 
     return _dependencyList.isModified();
   }
+  
+  /**
+   * True if the classes in the directory have changed.
+   */
+  public boolean logModified(Logger log)
+  {
+    if (isModified()) {
+      log.info(_dir.getNativePath() + " has modified jar files");
+      return true;
+    }
+    else
+      return false;
+  }
 
   /**
    * Find all the jars in this directory and add them to jarList.

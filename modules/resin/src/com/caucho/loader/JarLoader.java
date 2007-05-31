@@ -103,6 +103,14 @@ public class JarLoader extends Loader implements Dependency {
   {
     return _dependencyList.isModified();
   }
+  
+  /**
+   * Logs the reason for a modification.
+   */
+  public boolean logModified(Logger log)
+  {
+    return _dependencyList.logModified(log);
+  }
 
   /**
    * Adds a new jar.

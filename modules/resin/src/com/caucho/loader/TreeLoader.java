@@ -148,6 +148,19 @@ public class TreeLoader extends Loader implements Dependency
   {
     return _dependencyList.isModified();
   }
+  
+  /**
+   * True if the classes in the directory have changed.
+   */
+  public boolean logModified(Logger log)
+  {
+    if (isModified()) {
+      log.info(_dir.getNativePath() + " has modified jar files");
+      return true;
+    }
+    else
+      return false;
+  }
 
   /**
    * Sets the owning class loader.

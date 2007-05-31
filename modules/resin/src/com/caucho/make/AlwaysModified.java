@@ -29,6 +29,8 @@
 
 package com.caucho.make;
 
+import java.util.logging.Logger;
+
 import com.caucho.vfs.PersistentDependency;
 
 /**
@@ -50,6 +52,14 @@ public class AlwaysModified implements PersistentDependency {
    * Returns true if the underlying resource has changed.
    */
   public boolean isModified()
+  {
+    return true;
+  }
+  
+  /**
+   * Log the reason for modification
+   */
+  public boolean logModified(Logger log)
   {
     return true;
   }

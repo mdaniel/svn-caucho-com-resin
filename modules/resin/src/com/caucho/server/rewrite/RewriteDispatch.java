@@ -175,6 +175,16 @@ public class RewriteDispatch
     _matchRule.addNotFound(notFound);
   }
 
+  public ProxyRule createProxy()
+  {
+    return _matchRule.createProxy();
+  }
+
+  public void addProxy(ProxyRule proxy)
+  {
+    _matchRule.addProxy(proxy);
+  }
+
   public RewriteRule createRewrite()
   {
     return _matchRule.createRewrite();

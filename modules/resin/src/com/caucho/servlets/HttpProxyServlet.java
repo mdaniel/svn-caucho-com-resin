@@ -73,6 +73,14 @@ public class HttpProxyServlet extends GenericServlet {
   private int _roundRobin;
 
   /**
+   * Adds an address
+   */
+  public void addAddress(String address)
+  {
+    _hosts.add(address);
+  }
+
+  /**
    * Adds a host
    */
   public void addHost(String host)

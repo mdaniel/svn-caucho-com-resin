@@ -69,6 +69,14 @@ public class PathLoader extends Loader implements Dependency {
   }
 
   /**
+   * Returns the modified
+   */
+  public boolean logModified(Logger log)
+  {
+    return false;
+  }
+
+  /**
    * Adds a new path.
    */
   public void put(String name, Path path)

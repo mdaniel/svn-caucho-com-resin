@@ -461,6 +461,29 @@ abstract public class DeployController<I extends DeployInstance>
   }
 
   /**
+   * Log the reason for modification
+   */
+  public boolean logModified(Logger log)
+  {
+    DeployInstance instance = getDeployInstance();
+
+    if (instance != null) {
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+
+      try {
+	thread.setContextClassLoader(instance.getClassLoader());
+      
+	return instance.logModified(log);
+      } finally {
+	thread.setContextClassLoader(loader);
+      }
+    }
+    else
+      return false;
+  }
+
+  /**
    * Returns true if the entry is modified.
    */
   public boolean isModifiedNow()

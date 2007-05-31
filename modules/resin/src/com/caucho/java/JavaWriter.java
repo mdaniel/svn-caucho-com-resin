@@ -171,6 +171,37 @@ public class JavaWriter extends Writer {
   }
 
   /**
+   * Prints a Java escaped string
+   */
+  public static String escapeJavaString(String s)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    for (int i = 0; i < s.length(); i++) {
+      char ch = s.charAt(i);
+
+      switch (ch) {
+      case '\\':
+        sb.append("\\\\");
+        break;
+      case '\n':
+        sb.append("\\n");
+        break;
+      case '\r':
+        sb.append("\\r");
+        break;
+      case '"':
+        sb.append("\\\"");
+        break;
+      default:
+        sb.append(ch);
+      }
+    }
+
+    return sb.toString();
+  }
+
+  /**
    * Pushes an indentation depth.
    */
   public void pushDepth()

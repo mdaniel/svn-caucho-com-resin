@@ -379,7 +379,9 @@ public class LoadGroupGenerator extends ClassComponent {
     out.println("com.caucho.amber.entity.Entity contextEntity = aConn.getEntity(this);");
 
     out.println();
-    out.println("String sql = \"" + sql + "\";");
+    out.print("String sql = \"");
+    out.printJavaString(sql);
+    out.println("\";");
 
     out.println();
     out.println("java.sql.PreparedStatement pstmt = aConn.prepareStatement(sql);");

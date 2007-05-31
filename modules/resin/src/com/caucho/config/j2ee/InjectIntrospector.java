@@ -300,12 +300,23 @@ public class InjectIntrospector {
                                Class fieldType)
     throws ConfigException
   {
+
+    AccessibleInject inject;
+
+    if (field instanceof Field)
+      inject = new FieldInject((Field) field);
+    else
+      inject = new PropertyInject((Method) field);
+    
     if (field.isAnnotationPresent(Resource.class))
       configureResource(initList, field, fieldName, fieldType);
     else if (field.isAnnotationPresent(EJB.class))
       configureEJB(initList, field, fieldName, fieldType);
-    else if (field.isAnnotationPresent(PersistenceUnit.class))
-      configurePersistenceUnit(initList, field, fieldName, fieldType);
+    else if (field.isAnnotationPresent(PersistenceUnit.class)) {
+      PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
+
+      initList.add(new PersistenceUnitProgram(pUnit, inject));
+    }
     else if (field.isAnnotationPresent(PersistenceContext.class))
       configurePersistenceContext(initList, field, fieldName, fieldType);
     else if (field.isAnnotationPresent(WebServiceRef.class))
@@ -418,57 +429,6 @@ public class InjectIntrospector {
     }
 
     initList.add(program);
-  }
-
-  private static void configurePersistenceUnit(ArrayList<BuilderProgram> initList,
-                                               AccessibleObject field,
-                                               String fieldName,
-                                               Class fieldType)
-    throws ConfigException
-  {
-    PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
-
-    String jndiPrefix = "java:comp/env/persistence/_amber_PersistenceUnit";
-
-    String jndiName = null;
-    String unitName = pUnit.unitName();
-
-    try {
-      if (! unitName.equals(""))
-        jndiName = jndiPrefix + '/' + unitName;
-      else {
-        InitialContext ic = new InitialContext();
-
-        NamingEnumeration<NameClassPair> iter = ic.list(jndiPrefix);
-
-        if (iter == null) {
-          log.warning("Can't find configured PersistenceUnit");
-          return; // XXX: error?
-        }
-
-        String ejbJndiName = null;
-        while (iter.hasMore()) {
-          NameClassPair pair = iter.next();
-
-          if (pair.getName().equals("resin-ejb"))
-            ejbJndiName = jndiPrefix + '/' + pair.getName();
-          else {
-            jndiName = jndiPrefix + '/' + pair.getName();
-            break;
-          }
-        }
-
-        if (jndiName == null)
-          jndiName = ejbJndiName;
-      }
-
-      initList.add(configureResource(field, fieldName, fieldType,
-                                     unitName,
-                                     "javax.persistence.EntityManagerFactory",
-                                     jndiName));
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
   }
 
   private static void configurePersistenceContext(ArrayList<BuilderProgram> initList,

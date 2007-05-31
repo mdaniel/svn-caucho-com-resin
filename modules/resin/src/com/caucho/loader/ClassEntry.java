@@ -255,6 +255,36 @@ public class ClassEntry implements Dependency {
   }
 
   /**
+   * Returns true if the source file has been modified.
+   */
+  public boolean logModified(Logger log)
+  {
+    if (_depend.logModified(log)) {
+      return true;
+    }
+    else if (_sourcePath == null)
+      return false;
+      
+    else if (_sourcePath.getLastModified() != _sourceLastModified) {
+      log.info("source modified time: " + _sourcePath +
+	       " old:" + QDate.formatLocal(_sourceLastModified) +
+	       " new:" + QDate.formatLocal(_sourcePath.getLastModified()));
+
+      return true;
+    }
+    else if (_sourcePath.getLength() != _sourceLength) {
+      log.info("source modified length: " + _sourcePath +
+	       " old:" + _sourceLength +
+	       " new:" + _sourcePath.getLength());
+
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  /**
    * Returns true if the compile doesn't avoid the dependency.
    */
   public boolean compileIsModified()

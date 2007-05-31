@@ -742,6 +742,28 @@ r_rewrite-dispatch-Contents =
        r_rewrite-conditions-Type
      }*
 
+   & element proxy {
+       ((attribute disable-at { string }
+         | element disable-at { string })?
+
+        & (attribute enable-at { string }
+           | element enable-at { string })?
+
+        & (attribute enabled { r_boolean-Type }
+           | element enabled { r_boolean-Type })?
+
+        & (attribute name { string }
+           | element name { string })?
+
+        & (attribute regexp { string }
+           | element regexp { string })),
+
+       (attribute address { string }
+        | element address { string })+,
+
+       r_rewrite-conditions-Type
+     }*
+
    & element redirect {
        ((attribute disable-at { string }
          | element disable-at { string })?
@@ -913,6 +935,8 @@ r_servlet-mapping = element servlet-mapping {
      & r_servlet-Content)
 
   & (r_url-pattern | r_url-regexp)+
+
+  & r_strict-mapping?
 }
 
 r_servlet-regexp = element servlet-regexp {
