@@ -151,6 +151,14 @@ public class DispatchServer implements Dependency {
   }
 
   /**
+   * Sets URL encoding.
+   */
+  public String getURLCharacterEncoding()
+  {
+    return getInvocationDecoder().getEncoding();
+  }
+
+  /**
    * Returns the invocation decoder for configuration.
    */
   public InvocationDecoder createInvocationDecoder()

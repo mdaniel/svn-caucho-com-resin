@@ -50,7 +50,7 @@ public class TagData implements Cloneable {
    */
   public TagData(Hashtable attrs)
   {
-    this.attributes = attrs;
+    this.attributes = new Hashtable(attrs);
     if (attrs == null)
       throw new NullPointerException();
   }
@@ -72,7 +72,7 @@ public class TagData implements Cloneable {
    */
   public Object getAttribute(String attribute)
   {
-    return attributes.get(attribute);
+    return this.attributes.get(attribute);
   }
 
   /**
@@ -80,7 +80,7 @@ public class TagData implements Cloneable {
    */
   public void setAttribute(String attribute, Object value)
   {
-    attributes.put(attribute, value);
+    this.attributes.put(attribute, value);
   }
 
   /**
@@ -88,7 +88,7 @@ public class TagData implements Cloneable {
    */
   public Enumeration getAttributes()
   {
-    return attributes.keys();
+    return this.attributes.keys();
   }
 
   /**
@@ -96,7 +96,12 @@ public class TagData implements Cloneable {
    */
   public String getAttributeString(String name)
   {
-    return String.valueOf(attributes.get(name));
+    Object value = this.attributes.get(name);
+
+    if (value != null)
+      return value.toString();
+    else
+      return null;
   }
 
   /**

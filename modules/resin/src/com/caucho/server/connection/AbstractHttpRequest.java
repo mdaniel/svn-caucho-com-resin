@@ -1939,6 +1939,10 @@ public abstract class AbstractHttpRequest
         if (locale != null)
           charEncoding = Encoding.getMimeName(locale);
       }
+
+      if (charEncoding == null && _server != null)
+        charEncoding = _server.getURLCharacterEncoding();
+      
       if (charEncoding == null)
 	charEncoding = CharacterEncoding.getLocalEncoding();
 

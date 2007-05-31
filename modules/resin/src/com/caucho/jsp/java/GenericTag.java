@@ -194,7 +194,8 @@ abstract public class GenericTag extends JspContainerNode
 	jspAttr.setJspFragment(true);
       }
     }
-    
+
+    System.out.println("TD: " + tags);
     TagData tagData = new TagData(tags);
     
     _varInfo = _tagInfo.getVariableInfo(tagData);
@@ -343,7 +344,9 @@ abstract public class GenericTag extends JspContainerNode
                && ! _gen.isDeclared(var.getVarName())) {
 	String className = var.getClassName();
 
-	if (className == null)
+	if (className == null
+            || "".equals(className)
+            || "null".equals(className))
 	  className = DEFAULT_VAR_TYPE;
 
 	validateClass(className, var.getVarName());
@@ -352,13 +355,13 @@ abstract public class GenericTag extends JspContainerNode
 
         _gen.addDeclared(var.getVarName());
         
-        if ("byte".equals(var.getClassName()) ||
-            "short".equals(var.getClassName()) ||
-            "char".equals(var.getClassName()) ||
-            "int".equals(var.getClassName()) ||
-            "long".equals(var.getClassName()) ||
-            "float".equals(var.getClassName()) ||
-            "double".equals(var.getClassName()))
+        if ("byte".equals(var.getClassName())
+            || "short".equals(var.getClassName())
+            || "char".equals(var.getClassName())
+            || "int".equals(var.getClassName())
+            || "long".equals(var.getClassName())
+            || "float".equals(var.getClassName())
+            || "double".equals(var.getClassName()))
           out.println("0;");
         else if ("boolean".equals(var.getClassName()))
           out.println("false;");
@@ -704,7 +707,7 @@ abstract public class GenericTag extends JspContainerNode
 
         name = tagData.getAttributeString(attributeName);
 
-        if (name == null)
+        if (name == null || "".equals(name) || "null".equals(name))
           continue;
       }
 
@@ -727,7 +730,11 @@ abstract public class GenericTag extends JspContainerNode
 				 VariableInfo var)
     throws Exception
   {
-    if (! _gen.hasScripting() || var == null)
+    if (! _gen.hasScripting()
+        || var == null
+        || var.getVarName() == null
+        || "".equals(var.getVarName())
+        || "null".equals(var.getVarName()))
       return;
     
     if (var.getScope() == scope
@@ -737,7 +744,9 @@ abstract public class GenericTag extends JspContainerNode
 
       String className = var.getClassName();
 
-      if (className == null)
+      if (className == null
+          || "".equals(className)
+          || "null".equals(className))
 	className = DEFAULT_VAR_TYPE;
 
       /*
@@ -771,8 +780,12 @@ abstract public class GenericTag extends JspContainerNode
   protected void printVarAssign(JspJavaWriter out, int scope, VariableInfo var)
     throws Exception
   {
-    if (var.getScope() == scope ||
-        var.getScope() == VariableInfo.AT_BEGIN) {
+    if ("".equals(var.getVarName())
+        || "null".equals(var.getVarName()))
+      return;
+    
+    if (var.getScope() == scope
+        || var.getScope() == VariableInfo.AT_BEGIN) {
       if (var.getVarName() == null)
         throw error(L.l("tag variable expects a name"));
 
