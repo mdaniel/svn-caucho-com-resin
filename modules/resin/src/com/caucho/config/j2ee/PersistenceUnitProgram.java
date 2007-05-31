@@ -50,7 +50,7 @@ public class PersistenceUnitProgram extends BuilderProgram
   private static final Logger log
     = Logger.getLogger(PersistenceUnitProgram.class.getName());
   private static final L10N L = new L10N(PersistenceUnitProgram.class);
-  
+
   private static final String SERVICE
     = "META-INF/services/javax.persistence.spi.PersistenceProvider";
 
@@ -68,15 +68,15 @@ public class PersistenceUnitProgram extends BuilderProgram
   private String _unitName;
 
   PersistenceUnitProgram(PersistenceUnit persistenceUnit,
-			 AccessibleInject field)
+                         AccessibleInject field)
   {
     _field = field;
     _persistenceUnit = persistenceUnit;
 
-    if (! field.getType().isAssignableFrom(EntityManager.class))
-      throw new ConfigException(L.l("@PersistenceUnit field '{0}' of type '{0}' must be assignable from EntityManager.",
-				    field.getName(),
-				    field.getType().getName()));
+    if (! field.getType().isAssignableFrom(EntityManagerFactory.class))
+      throw new ConfigException(L.l("@PersistenceUnit field '{0}' of type '{1}' must be assignable from EntityManagerFactory.",
+                                    field.getName(),
+                                    field.getType().getName()));
 
     _name = _persistenceUnit.name();
     _unitName = _persistenceUnit.unitName();
@@ -93,7 +93,7 @@ public class PersistenceUnitProgram extends BuilderProgram
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {
-    EntityManager manager = null;
+    EntityManagerFactory factory = null;
 
     Context ic = null;
 
@@ -105,48 +105,48 @@ public class PersistenceUnitProgram extends BuilderProgram
 
     if (_jndiName != null) {
       try {
-	manager = (EntityManager) ic.lookup(_jndiName);
+        factory = (EntityManagerFactory) ic.lookup(_jndiName);
 
-	_field.inject(bean, manager);
+        _field.inject(bean, factory);
 
-	return;
+        return;
       } catch (NamingException e) {
       }
     }
 
-    manager = findAmberPersistenceUnit(ic);
+    factory = findAmberPersistenceUnit(ic);
 
-    if (manager == null) {
-      manager = findProviderPersistenceUnit();
+    if (factory == null) {
+      factory = findProviderPersistenceUnit();
     }
 
-    if (manager == null)
+    if (factory == null)
       throw new ConfigException(L.l(getLocation() + "@PersistenceUnit(unitName='{0}') is an unknown persistence-unit.",
-				    _unitName));
+                                    _unitName));
 
-    _field.inject(bean, manager);
+    _field.inject(bean, factory);
 
 
     if (_jndiName != null) {
       try {
-	Jndi.rebindDeep(_jndiName, manager);
+        Jndi.rebindDeep(_jndiName, factory);
       } catch (NamingException e) {
       }
     }
 
-      /*
-    try {
+    /*
+      try {
       if (log.isLoggable(Level.FINEST))
-        log.finest(L.l("injecting value {0} from '{1}' into field {2}", value, _jndiName,  _field));
-    } catch (RuntimeException e) {
+      log.finest(L.l("injecting value {0} from '{1}' into field {2}", value, _jndiName,  _field));
+      } catch (RuntimeException e) {
       throw e;
-    } catch (NamingException e) {
+      } catch (NamingException e) {
       log.finer(String.valueOf(e));
       log.log(Level.FINEST, e.toString(), e);
-    } catch (Exception e) {
+      } catch (Exception e) {
       throw new ConfigException(e);
-    }
-      */
+      }
+    */
   }
 
   @Override
@@ -156,7 +156,7 @@ public class PersistenceUnitProgram extends BuilderProgram
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  private EntityManager findAmberPersistenceUnit(Context ic)
+  private EntityManagerFactory findAmberPersistenceUnit(Context ic)
     throws ConfigException
   {
     try {
@@ -188,7 +188,7 @@ public class PersistenceUnitProgram extends BuilderProgram
           jndiName = ejbJndiName;
       }
 
-      return (EntityManager) ic.lookup(jndiName);
+      return (EntityManagerFactory) ic.lookup(jndiName);
     } catch (NamingException e) {
       log.finest("@PersistenceUnit amber lookup: " + e.toString());
     }
@@ -196,7 +196,7 @@ public class PersistenceUnitProgram extends BuilderProgram
     return null;
   }
 
-  private EntityManager findProviderPersistenceUnit()
+  private EntityManagerFactory findProviderPersistenceUnit()
     throws ConfigException
   {
     PersistenceUnitInfo info = findPersistenceUnitInfo(_unitName);
@@ -205,10 +205,9 @@ public class PersistenceUnitProgram extends BuilderProgram
 
     for (int i = 0; i < providers.length; i++) {
       EntityManagerFactory factory
-	= providers[i].createContainerEntityManagerFactory(info, null);
+        = providers[i].createContainerEntityManagerFactory(info, null);
 
-      if (factory != null)
-	return factory.createEntityManager();
+      return factory;
     }
 
     return null;
@@ -230,7 +229,7 @@ public class PersistenceUnitProgram extends BuilderProgram
       Iterator<PersistenceUnitInfo> iter = unitMap.values().iterator();
 
       if (iter.hasNext())
-	info = iter.next();
+        info = iter.next();
     }
     else
       info = unitMap.get(unitName);
@@ -249,17 +248,17 @@ public class PersistenceUnitProgram extends BuilderProgram
     try {
       Enumeration e = loader.getResources("META-INF/persistence.xml");
       while (e.hasMoreElements()) {
-	URL url = (URL) e.nextElement();
+        URL url = (URL) e.nextElement();
 
-	PersistenceConfig pConfig = new PersistenceConfig();
+        PersistenceConfig pConfig = new PersistenceConfig();
 
-	Path path = Vfs.lookup(url.toString());
+        Path path = Vfs.lookup(url.toString());
 
-	new Config().configure(pConfig, path);
+        new Config().configure(pConfig, path);
 
-	for (PersistenceUnitConfig pUnit : pConfig.getUnitList()) {
-	  unitMap.put(pUnit.getName(), pUnit);
-	}
+        for (PersistenceUnitConfig pUnit : pConfig.getUnitList()) {
+          unitMap.put(pUnit.getName(), pUnit);
+        }
       }
     } catch (RuntimeException e) {
       throw e;
