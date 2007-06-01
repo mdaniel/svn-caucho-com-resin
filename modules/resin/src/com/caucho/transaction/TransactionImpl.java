@@ -562,7 +562,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     try {
       callBeforeCompletion();
-    } catch (RuntimeException e) {
+    } catch (RollbackException e) {
       throw e;
     } catch (Throwable e) {
       setRollbackOnly(e);
@@ -821,6 +821,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
    * starts.
    */
   private void callBeforeCompletion()
+    throws RollbackException
   {
     int length = _syncList == null ? 0 : _syncList.size();
 
@@ -830,7 +831,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       try {
         sync.beforeCompletion();
       } catch (RuntimeException e) {
-        throw e;
+        throw new RollbackException(e);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
