@@ -194,12 +194,12 @@ abstract public class AmberMappedComponent extends ClassComponent {
       ArrayList<AmberField> fields = _relatedType.getFields();
 
       for (int i = 0; i < fields.size(); i++) {
-      AmberField field = fields.get(i);
+        AmberField field = fields.get(i);
 
-      if (field instanceof AbstractField) {
-      AbstractField f = (AbstractField) field;
-      f.generatePostConstructor(out);
-      }
+        if (field instanceof AbstractField) {
+          AbstractField f = (AbstractField) field;
+          f.generatePostConstructor(out);
+        }
       }
 
       out.popDepth();
@@ -1373,11 +1373,11 @@ abstract public class AmberMappedComponent extends ClassComponent {
         out.pushDepth();
         out.println("com.caucho.amber.field.MaxGenerator gen = new com.caucho.amber.field.MaxGenerator();");
         out.print("gen.setColumn(\"");
-	out.printJavaString(idField.getColumns().get(0).generateInsertName());
-	out.println("\");");
+        out.printJavaString(idField.getColumns().get(0).generateInsertName());
+        out.println("\");");
         out.print("gen.setTable(\"");
-	out.printJavaString(_relatedType.getName());
-	out.println("\");");
+        out.printJavaString(_relatedType.getName());
+        out.println("\");");
         out.println("gen.init();");
         out.popDepth();
         out.println("}");
@@ -1435,7 +1435,20 @@ abstract public class AmberMappedComponent extends ClassComponent {
         // jpa/0j5e: persist() is lazy but should cascade to add entities to the context.
         out.println();
         out.println("__caucho_cascadePrePersist(aConn);");
+
+        out.println("aConn.prePersist((com.caucho.amber.entity.Entity) this);");
+
+        for (JMethod method : _relatedType.getPrePersistCallbacks()) {
+          out.println(method.getName() + "();");
+        }
+
         out.println("__caucho_cascadePostPersist(aConn);");
+
+        out.println("aConn.postPersist((com.caucho.amber.entity.Entity) this);");
+
+        for (JMethod method : _relatedType.getPostPersistCallbacks()) {
+          out.println(method.getName() + "();");
+        }
       }
 
       out.println();
@@ -1469,11 +1482,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     out.println();
     out.println("__caucho_cascadePrePersist(aConn);");
-    out.println("aConn.prePersist((com.caucho.amber.entity.Entity) this);");
-
-    for (JMethod method : _relatedType.getPrePersistCallbacks()) {
-      out.println(method.getName() + "();");
-    }
 
     int dirtyCount = _relatedType.getDirtyIndex();
     for (int i = 0; i <= dirtyCount / 64; i++) {
@@ -1654,9 +1662,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
     // handle rollbacks and also so the cache doesn't have an
     // item in the middle of a transaction
     /*
-    out.println();
-    out.println("aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.EntityType) __caucho_home.getRootType(),");
-    out.println("                                     pk, __caucho_cacheItem);");
+      out.println();
+      out.println("aConn.getPersistenceUnit().putEntity((com.caucho.amber.type.EntityType) __caucho_home.getRootType(),");
+      out.println("                                     pk, __caucho_cacheItem);");
     */
 
     out.println();
@@ -1673,12 +1681,6 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("}");
 
     out.println();
-
-    out.println("aConn.postPersist((com.caucho.amber.entity.Entity) this);");
-
-    for (JMethod method : _relatedType.getPostPersistCallbacks()) {
-      out.println(method.getName() + "();");
-    }
 
     out.println();
     out.println("return false;");
@@ -1864,21 +1866,21 @@ abstract public class AmberMappedComponent extends ClassComponent {
     void generateCopy(JavaWriter out)
     throws IOException
     {
-    out.println();
-    out.println("public com.caucho.amber.entity.Entity __caucho_copy()");
-    out.println("{");
-    out.pushDepth();
+      out.println();
+      out.println("public com.caucho.amber.entity.Entity __caucho_copy()");
+      out.println("{");
+      out.pushDepth();
 
-    out.println(getClassName() + " o = new " + getClassName() + "();");
+      out.println(getClassName() + " o = new " + getClassName() + "();");
 
-    // can't load because it doesn't handle timeouts
-    out.println("o.__caucho_loadFromObject((com.caucho.amber.entity.Entity) this);");
-    out.println("o.__caucho_loadMask = 0;");
+      // can't load because it doesn't handle timeouts
+      out.println("o.__caucho_loadFromObject((com.caucho.amber.entity.Entity) this);");
+      out.println("o.__caucho_loadMask = 0;");
 
-    out.println("return o;");
+      out.println("return o;");
 
-    out.popDepth();
-    out.println("}");
+      out.popDepth();
+      out.println("}");
     }
   */
 
@@ -2170,8 +2172,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     // jpa/0i60
     /*
-    out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_TRANSACTIONAL)");
-    out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_PERSIST;");
+      out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_TRANSACTIONAL)");
+      out.println("  __caucho_state = com.caucho.amber.entity.EntityState.P_PERSIST;");
     */
 
     // out.println("if (aConn == null)");
@@ -2282,15 +2284,15 @@ abstract public class AmberMappedComponent extends ClassComponent {
       generateHomeNew = false;
 
     /* XXX
-    if (_relatedType instanceof SubEntityType) {
-      SubEntityType sub = (SubEntityType) _relatedType;
+       if (_relatedType instanceof SubEntityType) {
+         SubEntityType sub = (SubEntityType) _relatedType;
 
-      // jpa/0ge2
-      if (! sub.isParentMappedSuperclass()) {
-        if (! sub.getParentType().isAbstractClass())
-          generateHomeNew = false;
-      }
-    }
+         // jpa/0ge2
+         if (! sub.isParentMappedSuperclass()) {
+           if (! sub.getParentType().isAbstractClass())
+             generateHomeNew = false;
+         }
+       }
     */
 
     if (generateHomeNew) {
@@ -2384,9 +2386,9 @@ abstract public class AmberMappedComponent extends ClassComponent {
    * Generates the home methods
    */
   /*
-  void generateHomeNew(JavaWriter out)
+    void generateHomeNew(JavaWriter out)
     throws IOException
-  {
+    {
     out.println();
     out.print("public com.caucho.amber.entity.Entity __caucho_home_new(");
     out.print("com.caucho.amber.manager.AmberConnection aConn,");
@@ -2408,16 +2410,16 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.pushDepth();
 
     if (_relatedType.isAbstractClass() || _relatedType.getId() == null) {
-      out.println("return null;");
-      out.popDepth();
-      out.println("}");
-      return;
+    out.println("return null;");
+    out.popDepth();
+    out.println("}");
+    return;
     }
 
     String rootTableName = _relatedType.getRootTableName();
 
     if (rootTableName == null)
-      rootTableName = "";
+    rootTableName = "";
 
     out.println("java.sql.ResultSet rs" + rootTableName + " = null;");
     out.println("java.sql.PreparedStatement pstmt" + rootTableName + " = null;");
@@ -2429,94 +2431,94 @@ abstract public class AmberMappedComponent extends ClassComponent {
     Column discriminator = _relatedType.getDiscriminator();
 
     if (discriminator == null) {
-      // Adds the copy object to the context before anything.
-      // This will avoid the cache object to be added to the context.
-      out.println("com.caucho.amber.entity.Entity copy = aConn.addNewEntity(" + getClassName() + ".class, key);");
+    // Adds the copy object to the context before anything.
+    // This will avoid the cache object to be added to the context.
+    out.println("com.caucho.amber.entity.Entity copy = aConn.addNewEntity(" + getClassName() + ".class, key);");
 
-      out.println(getClassName() + " entity = (" + getClassName() + ") __caucho_home_new();");
+    out.println(getClassName() + " entity = (" + getClassName() + ") __caucho_home_new();");
 
-      out.println("entity.__caucho_home = home.getEntityType();");
-      out.println("entity.__caucho_setPrimaryKey(key);");
+    out.println("entity.__caucho_home = home.getEntityType();");
+    out.println("entity.__caucho_setPrimaryKey(key);");
 
-      /*
-      out.println();
-      out.println("if (copy == null) {");
-      out.pushDepth();
+    /*
+    out.println();
+    out.println("if (copy == null) {");
+    out.pushDepth();
 
-      // jpa/0l42: eagerly loading optimization.
-      out.println("copy = aConn.getEntity(entity);");
+    // jpa/0l42: eagerly loading optimization.
+    out.println("copy = aConn.getEntity(entity);");
 
-      out.println("((com.caucho.amber.entity.Entity) entity).__caucho_copyLoadMaskFrom(copy);");
+    out.println("((com.caucho.amber.entity.Entity) entity).__caucho_copyLoadMaskFrom(copy);");
 
-      // jpa/0o05
-      out.println("copy.__caucho_copyTo(((com.caucho.amber.entity.Entity) entity), aConn);");
+    // jpa/0o05
+    out.println("copy.__caucho_copyTo(((com.caucho.amber.entity.Entity) entity), aConn);");
 
-      out.popDepth();
-      out.println("}");
-      out.println();
+    out.popDepth();
+    out.println("}");
+    out.println();
 
-      out.println("return (com.caucho.amber.entity.Entity) entity;");
+    out.println("return (com.caucho.amber.entity.Entity) entity;");
     }
     else {
-      // jpa/0l40: inheritance optimization.
-      out.println("try {");
+    // jpa/0l40: inheritance optimization.
+    out.println("try {");
 
-      String keyType = _relatedType.getId().getForeignTypeName();
+    String keyType = _relatedType.getId().getForeignTypeName();
 
-      out.println("  __caucho_session = aConn;");
-      out.println("  __caucho_loadMask_0 = 0L;");
-      out.println("  __caucho_cacheItem = null;");
-      out.println();
-      out.println("  __caucho_setPrimaryKey((" + keyType + ") key);");
-      out.println("  __caucho_load_0(aConn);");
-      out.println("} catch (com.caucho.amber.AmberObjectNotFoundException e) {");
-      out.println("  return null;");
-      out.println("}");
+    out.println("  __caucho_session = aConn;");
+    out.println("  __caucho_loadMask_0 = 0L;");
+    out.println("  __caucho_cacheItem = null;");
+    out.println();
+    out.println("  __caucho_setPrimaryKey((" + keyType + ") key);");
+    out.println("  __caucho_load_0(aConn);");
+    out.println("} catch (com.caucho.amber.AmberObjectNotFoundException e) {");
+    out.println("  return null;");
+    out.println("}");
 
-      // generateHomeNewLoading(out, rootTableName);
+    // generateHomeNewLoading(out, rootTableName);
 
-      out.println("com.caucho.amber.entity.EntityItem item = home.findDiscriminatorEntityItem(aConn, key, __caucho_discriminator);"); // rs" + rootTableName + ".getString(1));");
+    out.println("com.caucho.amber.entity.EntityItem item = home.findDiscriminatorEntityItem(aConn, key, __caucho_discriminator);"); // rs" + rootTableName + ".getString(1));");
 
-      // Adds the copy object to the context before anything.
-      // This will avoid the cache object to be added to the context.
-      out.println("com.caucho.amber.entity.Entity copy = aConn.addNewEntity(item.getEntity().getClass(), key);");
+    // Adds the copy object to the context before anything.
+    // This will avoid the cache object to be added to the context.
+    out.println("com.caucho.amber.entity.Entity copy = aConn.addNewEntity(item.getEntity().getClass(), key);");
 
-      out.println();
-      out.println("if (copy == null) {");
-      out.pushDepth();
+    out.println();
+    out.println("if (copy == null) {");
+    out.pushDepth();
 
-      // jpa/0l47: eagerly loading optimization.
-      out.println("copy = aConn.getEntity(cacheItem.getEntity());");
+    // jpa/0l47: eagerly loading optimization.
+    out.println("copy = aConn.getEntity(cacheItem.getEntity());");
 
-      out.println("item.getEntity().__caucho_copyLoadMaskFrom(copy);");
+    out.println("item.getEntity().__caucho_copyLoadMaskFrom(copy);");
 
-      // jpa/0o05
-      out.println("copy.__caucho_copyTo(item.getEntity(), aConn);");
+    // jpa/0o05
+    out.println("copy.__caucho_copyTo(item.getEntity(), aConn);");
 
-      out.popDepth();
-      out.println("}");
-      out.println();
+    out.popDepth();
+    out.println("}");
+    out.println();
 
-      // jpa/0l03
-      out.println("if (loadFromResultSet) {");
-      out.pushDepth();
+    // jpa/0l03
+    out.println("if (loadFromResultSet) {");
+    out.pushDepth();
 
-      // generateHomeNewLoading(out, null);
+    // generateHomeNewLoading(out, null);
 
-      out.println("item.getEntity().__caucho_load(aConn, rs" + rootTableName + ", 1);");
+    out.println("item.getEntity().__caucho_load(aConn, rs" + rootTableName + ", 1);");
 
-      out.popDepth();
-      out.println("}");
+    out.popDepth();
+    out.println("}");
 
-      // jpa/0l40
-      out.println("item.getEntity().__caucho_setLoadMask(1L, 0);");
-      out.println("__caucho_copyTo(item.getEntity(), aConn, true);");
+    // jpa/0l40
+    out.println("item.getEntity().__caucho_setLoadMask(1L, 0);");
+    out.println("__caucho_copyTo(item.getEntity(), aConn, true);");
 
-      // jpa/0l00
-      // out.println(getClassName() + " entity = (" + getClassName() + ") item.copy(aConn);");
-      // out.println("return (com.caucho.amber.entity.Entity) entity;");
+    // jpa/0l00
+    // out.println(getClassName() + " entity = (" + getClassName() + ") item.copy(aConn);");
+    // out.println("return (com.caucho.amber.entity.Entity) entity;");
 
-      out.println("return (com.caucho.amber.entity.Entity) item.getEntity();");
+    out.println("return (com.caucho.amber.entity.Entity) item.getEntity();");
     }
 
     out.popDepth();
@@ -2545,8 +2547,8 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("{");
     out.println("  return new " + getClassName() + "();");
     out.println("}");
-  }
-    */
+    }
+  */
 
   void generateHomeNew(JavaWriter out)
     throws IOException
@@ -2642,10 +2644,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.println("  throw new com.caucho.amber.AmberRuntimeException(e);");
     out.println("} finally {");
     /*
-    out.println("  if (rs != null)");
-    out.println("    rs.close();");
-    out.println("  if (pstmt != null)");
-    out.println("    aConn.closeStatement(sql);");
+      out.println("  if (rs != null)");
+      out.println("    rs.close();");
+      out.println("  if (pstmt != null)");
+      out.println("    aConn.closeStatement(sql);");
     */
     out.println("}");
 
@@ -2674,10 +2676,10 @@ abstract public class AmberMappedComponent extends ClassComponent {
     out.print(" from ");
 
     /*
-    if (rootTableName == null)
-      out.print(_relatedType.getTable().getName());
-    else
-      out.print(rootTableName);
+      if (rootTableName == null)
+        out.print(_relatedType.getTable().getName());
+      else
+        out.print(rootTableName);
     */
     out.printJavaString(_relatedType.getTable().getName());
 

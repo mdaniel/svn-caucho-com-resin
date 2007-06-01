@@ -1332,12 +1332,14 @@ public class EntityManyToOneField extends CascadableField {
     out.pushDepth();
 
     // jpa/0j5c as a positive test.
-    out.println("if (__caucho_state.isManaged() && ! otherState.isManaged())");
+    out.println("if (__caucho_state.isTransactional() && ! otherState.isManaged())");
 
     String errorString = ("(\"amber flush: unable to flush " +
                           getRelatedType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
                           "with non-managed dependent relationship many-to-one to "+
-                          getEntityTargetType().getName() + "\")");
+                          getEntityTargetType().getName() +
+                          ". Current entity state: \" + __caucho_state + \" " +
+                          "and parent entity state: \" + otherState)");
 
     out.println("  throw new IllegalStateException" + errorString + ";");
 

@@ -3097,10 +3097,9 @@ public class AmberConnection
     // jpa/0j5e
     updateFlushPriority(instance);
 
-    // jpa/0h27
+    // jpa/0h27, jpa/0i5c, jpa/0j5g
     // Post-persist child entities.
-    // jpa/0i5c: lazy persist()
-    // instance.__caucho_cascadePostPersist(this);
+    instance.__caucho_cascadePostPersist(this);
   }
 
   /**
