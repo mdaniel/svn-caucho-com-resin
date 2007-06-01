@@ -12,6 +12,12 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>jndi-link updates to properly set hashtable properties (#1739, rep by hazurek)</li>
+<li>hessian: HessianSkeleton.invoke needs to skip 'c' header for backwards compat (#1458, rep by Alon Salant)</li>
+<li>boot: propagate -d64 for 64-bit systems (#1759, rep by Alex Lorberg)</li>
+<li>boot: added &lt;java-exe> to select java executable (#1769, #1767 rep by C Ward)</li>
+<li>jndi: alias java:/comp to java:comp for Spring (#1603, rep by aadi deshpande)</li>
+<li>session: allow custom session in AbstractHttpResponse.writeHeaders (#1580, rep by Takahiro Fukuda)</li>
 <li>jsp: TagData.getAttributeString not properly returning nulls (#1557, rep by Simona Borello)</li>
 <li>servlet: getParameter encoding of query string char-encoding default (#1596, rep by Yonik Seeley)</li>
 <li>select-manager now uses epoll on Linux (#1518, rep by Greg Schroeder)</li>

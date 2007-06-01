@@ -74,6 +74,7 @@ public class ResinWatchdog extends AbstractManagedObject
 
   private String []_argv;
 
+  private String _javaExe;
   private ArrayList<String> _jvmArgs = new ArrayList<String>();
   private ArrayList<String> _watchdogArgs = new ArrayList<String>();
 
@@ -162,6 +163,11 @@ public class ResinWatchdog extends AbstractManagedObject
   public int getWatchdogPort()
   {
     return _watchdogPort;
+  }
+  
+  public void setJavaExe(String javaExe)
+  {
+    _javaExe = javaExe;
   }
   
   public void addJvmArg(String arg)
@@ -354,6 +360,9 @@ public class ResinWatchdog extends AbstractManagedObject
       list.add("-Xss1m");
 
     list.addAll(_watchdogArgs);
+
+    if (! list.contains("-d32") && ! list.contains("-d64") && _is64bit)
+      list.add("-d64");
     
     list.add("com.caucho.boot.ResinWatchdogManager");
 
@@ -714,6 +723,9 @@ public class ResinWatchdog extends AbstractManagedObject
       else
 	resinArgs.add(_argv[i]);
     }
+
+    if (! list.contains("-d32") && ! list.contains("-d64") && _is64bit)
+      list.add("-d64");
     
     list.add("com.caucho.server.resin.Resin");
     list.add("-socketwait");
@@ -822,6 +834,9 @@ public class ResinWatchdog extends AbstractManagedObject
 
   private String getJavaExe()
   {
+    if (_javaExe != null)
+      return _javaExe;
+
     Path javaHome = Vfs.lookup(System.getProperty("java.home"));
 
     if (javaHome.getTail().equals("jre"))

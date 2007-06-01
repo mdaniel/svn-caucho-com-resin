@@ -54,7 +54,7 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
   // The foreign factory
   protected Class _factoryClass;
   // Properties for the object
-  protected Hashtable<String,String> _props;
+  protected Hashtable<String,String> _props = new Hashtable<String,String>();
   // The jndi-link path
   protected String _jndiName;
   // The jndi-link path
@@ -173,27 +173,25 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
     Context context;
     Hashtable<String,String> mergeEnv;
     
-    if (env == null || env.size() == 0)
-      mergeEnv = _props;
-    else if (_props == null || _props.size() == 0)
-      mergeEnv = env;
-    else {
-      mergeEnv = new Hashtable<String,String>();
-      mergeEnv.putAll(_props);
-      mergeEnv.putAll(env);
-    }
+    mergeEnv = new Hashtable<String,String>();
 
-    if (_factory != null) {
-      context = _factory.getInitialContext(mergeEnv);
-    }
-    else {
-      context = new InitialContext(mergeEnv);
-      _foreignName = Jndi.getFullName(_foreignName);
-    }
+    if (env != null && env.size() > 0)
+      mergeEnv.putAll(env);
+    if (_props != null && _props.size() > 0)
+      mergeEnv.putAll(_props);
+
+    context = new InitialContext(mergeEnv);
 
     if (_foreignName != null) {
+      String foreignName;
+
+      if (_factory != null)
+	foreignName = Jndi.getFullName(_foreignName);
+      else
+	foreignName = _foreignName;
+
       try {
-        return context.lookup(_foreignName);
+        return context.lookup(foreignName);
       } catch (RuntimeException e) {
         throw e;
       } catch (NamingException e) {
@@ -216,8 +214,12 @@ public class LinkProxy implements ObjectProxy, java.io.Serializable {
     
     Class factoryClass = _factoryClass;
 
-    if (factoryClass != null)
-      _factory = (InitialContextFactory) factoryClass.newInstance();
+    if (factoryClass != null) {
+      if (_props == null)
+	_props = new Hashtable<String,String>();
+
+      _props.put("java.naming.factory.initial", factoryClass.getName());
+    }
 
     if (log.isLoggable(Level.CONFIG)) {
       if (_foreignName != null)

@@ -77,6 +77,9 @@ public class HessianSkeleton extends AbstractSkeleton {
   {
     super(apiClass);
 
+    if (service == null)
+      service = this;
+
     _service = service;
 
     if (! apiClass.isAssignableFrom(service.getClass()))
@@ -93,6 +96,10 @@ public class HessianSkeleton extends AbstractSkeleton {
     throws Throwable
   {
     ServiceContext context = ServiceContext.getContext();
+
+    // backward compatibility for some frameworks that don't read
+    // the call type first
+    in.skipOptionalCall();
     
     String header;
     while ((header = in.readHeader()) != null) {

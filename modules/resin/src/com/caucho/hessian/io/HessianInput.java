@@ -192,6 +192,22 @@ public class HessianInput extends AbstractHessianInput {
   }
 
   /**
+   * For backward compatibility with HessianSkeleton
+   */
+  public void skipOptionalCall()
+    throws IOException
+  {
+    int tag = read();
+
+    if (tag == 'c') {
+      read();
+      read();
+    }
+    else
+      _peek = tag;
+  }
+
+  /**
    * Starts reading the call
    *
    * <p>A successful completion will have a single value:

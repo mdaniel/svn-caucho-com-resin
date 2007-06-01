@@ -114,6 +114,14 @@ abstract public class AbstractHessianInput {
     throws IOException;
 
   /**
+   * For backward compatibility with HessianSkeleton
+   */
+  public void skipOptionalCall()
+    throws IOException
+  {
+  }
+
+  /**
    * Reads a header, returning null if there are no headers.
    *
    * <pre>

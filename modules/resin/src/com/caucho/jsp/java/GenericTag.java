@@ -195,7 +195,6 @@ abstract public class GenericTag extends JspContainerNode
       }
     }
 
-    System.out.println("TD: " + tags);
     TagData tagData = new TagData(tags);
     
     _varInfo = _tagInfo.getVariableInfo(tagData);
