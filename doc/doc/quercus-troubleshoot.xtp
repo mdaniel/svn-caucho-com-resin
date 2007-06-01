@@ -1,0 +1,59 @@
+<document>
+  <header>
+    <title>Quercus Troubleshooting</title>
+    <description><p>A list of symptoms and their possible resolution.</p></description>
+  </header>
+
+  <body>
+    <localtoc/>
+
+<s1 title="java.io.CharConversionException: illegal utf8 encoding at 0x64">
+
+<def>
+java.io.CharConversionException: illegal utf8 encoding at 0x64
+  at com.caucho.vfs.i18n.UTF8Reader.read(UTF8Reader.java:109)
+  at com.caucho.vfs.i18n.UTF8Reader.read(UTF8Reader.java:177)
+  at com.caucho.quercus.env.StringBuilderValue.append(StringBuilderValue.java:804)
+</def>
+
+<p>
+Quercus defaults to UTF-8 encoding for php applications.  Some PHP
+applications use another encoding, often ISO-8859-1.
+</p>
+
+<p>To configure the web application to use ISO-8859-1 encoding, add a <code>resin-web.xml</code>
+file in the <code>${resin.home}/webapps/WEBAPPNAME/WEB-INF</code> directory.
+The resin-web.xml file configures QuercusServlet to parse <code>.php</code>
+files using ISO-8859-1 encoding, and to use ISO--8859-1 when converting binary data to strings.</p>
+
+<example title="${resin.home}/webapps/ROOT/WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+  &lt;servlet-mapping url-pattern="*.php"
+                   servlet-class="com.caucho.quercus.servlet.QuercusServlet">
+    &lt;init>
+      &lt;script-encoding>iso-8859-1&lt;/script-encoding>
+      &lt;php-ini&gt;
+        &lt;unicode.runtime_encoding&gt;iso-8859-1&lt;/unicode.runtime_encoding&gt;
+      &lt;/php-ini&gt;
+    &lt;/init>
+  &lt;/servlet-mapping>
+&lt;/web-app>
+</example>
+
+</s1>
+
+<s1 title="java.lang.ClassNotFoundException: com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
+<def>
+A link to the server could not be established
+... java.lang.ClassNotFoundException: com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource
+</def>
+
+<p>
+This message is an indication that the php application is using a MySQL database, but the database driver has not been installed.
+The <a href="quercus-overview.xtp#databases">Using databases</a> section of the
+documentation contains download links and installation instructions for MySQL.
+</p>
+</s1>
+
+</body>
+</document>

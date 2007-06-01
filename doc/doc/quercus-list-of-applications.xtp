@@ -28,6 +28,56 @@
 
 <s1 title="Gallery2 2.1.2">
 
+<ul>
+<li>
+<a href="http://gallery.menalto.com/">download</a> Gallery2
+</li>
+
+<li>
+Put the expanded contents of Gallery2 into a directory within ${resin.root},
+this creates a <g>web application</g>.  For example, putting the contents in
+<code>${resin.root}/webapps/gallery2</code> will correspond to a url like
+<code>http://localhost:8080/gallery2</code>. 
+</li>
+
+<li>
+<a href="quercus-overview.xtp#databases">Install a database driver</a>
+</li>
+
+<li>
+<p>
+Gallery requires <code>ISO-8859-1</code> encoding.  It also does a check for the
+value of <code>memory_limit</code> and requires it to have a value greater than
+16mb. These values are set in the Quercus configuration:
+</p>
+
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns"&gt;
+  &lt;servlet-mapping url-pattern="*.php"
+                   servlet-class="com.caucho.quercus.servlet.QuercusServlet"&gt;
+    &lt;init&gt;
+      &lt;script-encoding&gt;iso-8859-1&lt;/script-encoding&gt;
+      &lt;php-ini&gt;
+        &lt;unicode.runtime_encoding&gt;iso-8859-1&lt;/unicode.runtime_encoding&gt;
+        &lt;memory_limit&gt;32m&lt;/memory_limit&gt;
+      &lt;/php-ini&gt;
+    &lt;/init&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;
+</example>
+</li>
+
+<li>
+The Gallery2 installation asks for a directory to store images, makes a suggestion such as
+<code>${resin.root}/resin/webapps/gallery2/g2data</code>, and  directs you to
+pick a directory that is not web accessible.  Quercus has a special directory
+named <code>WEB-INF</code> that is not web accessible, so a good choice here is
+something like
+<code>${resin.root}/resin/webapps/gallery2/<b>WEB-INF/</b>g2data</code>.
+</li>
+
+</ul>
+
 </s1>
 
 <s1 title="Joomla 1.0.11">
@@ -35,6 +85,32 @@
 </s1>
 
 <s1 title="MediaWiki 1.9">
+
+<ul>
+<li>
+<a href="http://www.mediawiki.org/wiki/MediaWiki">download</a> MediaWiki
+</li>
+<li>
+Put the expanded contents of MediaWiki into a directory within ${resin.root}/webapps,
+this creates a <g>web application</g>.  For example, putting the contents in
+<code>${resin.root}/webapps/wiki</code> will correspond to a url like
+<code>http://localhost:8080/wiki</code>. 
+</li>
+<li>
+Start Resin. The console will show a message like "WebApp[http://localhost:8080/mediawiki-1.9.3] starting"
+and Resin will create the special configuration directory <code>${resin.root}/webapps/wiki/WEB-INF</code>.
+</li>
+<li>
+Install a database driver.
+The <a href="quercus-overview.xtp#databases">Using databases</a> section of the
+documentation contains download links and installation instructions for MySQL.nd Postgres
+If this step is not done, then MediaWiki will display an error message like
+<code>
+A link to the server could not be established
+... java.lang.ClassNotFoundException: com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource
+</code>.
+</li>
+</ul>
 
 </s1>
 

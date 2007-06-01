@@ -579,8 +579,10 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   public static Value mysql_field_len(Env env,
                                       @NotNull MysqliResult result,
-                                      int fieldOffset)
+                                      @Optional int fieldOffset)
   {
+    // gallery2 calls this function with 1 arg, so fieldOffset is optional
+
     if (result == null)
       return BooleanValue.FALSE;
 

@@ -1166,6 +1166,7 @@ id amongst different web-apps.</p>
 
 <defun title="&lt;shutdown-wait-max>" version="Resin 3.0.4" type="defun">
 <p>The maximum time Resin will wait for requests to finish before closing the web-app.</p>
+<default>15s</default>
 </defun>
 
 <defun title="&lt;strict-mapping>" version="Resin 1.2" type="defun">

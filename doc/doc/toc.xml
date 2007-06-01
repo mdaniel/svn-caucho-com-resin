@@ -95,6 +95,7 @@
       <item title="Resin Module" link="quercus-resin-module.xtp"/>
       <item title="Module Status" link="quercus-module-status.xtp"/>
       <item title="List of PHP Applications" link="quercus-list-of-applications.xtp"/>
+      <item title="Troubleshooting/FAQ" link="quercus-troubleshoot.xtp"/>
     </item>
 
     <!--

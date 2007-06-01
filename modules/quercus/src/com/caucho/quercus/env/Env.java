@@ -908,9 +908,9 @@ public class Env {
       String realPath = getIniString("upload_tmp_dir");
 
       if (realPath == null)
-        realPath = getRequest().getRealPath("WEB-INF/upload");
+        realPath = getRequest().getRealPath("/WEB-INF/upload");
 
-      _uploadPath = getPwd().lookup(realPath);
+      _uploadPath = _quercus.getPwd().lookup(realPath);
 
       try {
         if (! _uploadPath.isDirectory())
