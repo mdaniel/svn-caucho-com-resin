@@ -30,21 +30,19 @@ package com.caucho.quercus.lib.simplexml;
 
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 
-import org.w3c.dom.Document;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * PHP SimpleXML
+ *   - differences: PHP returns results in UTF-8 byte-encoding
  */
 public class SimpleXMLModule
   extends AbstractQuercusModule
@@ -53,41 +51,39 @@ public class SimpleXMLModule
     = Logger.getLogger(SimpleXMLModule.class.getName());
   private static final L10N L = new L10N(SimpleXMLModule.class);
 
+  @ReturnNullAsFalse
   public SimpleXMLElement simplexml_load_string(Env env,
-                                                InputStream data,
+                                                Value data,
                                                 @Optional String className,
-                                                @Optional int options)
+                                                @Optional int options,
+                                                @Optional Value namespaceV,
+                                                @Optional boolean isPrefix)
   {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    
-    try {
-      DocumentBuilder builder = factory.newDocumentBuilder();
-
-      Document document = builder.parse(data);
-      
-      return new SimpleXMLElement(env, document, document.getDocumentElement());
-    } catch (Exception e) {
-      log.log(Level.FINE, L.l(e.toString()), e);
+    if (data.isNull())
       return null;
-    }
+    
+    return SimpleXMLElement.__construct(env,
+                                        data,
+                                        options,
+                                        false,
+                                        namespaceV,
+                                        isPrefix);
   }
 
+  @ReturnNullAsFalse
   public SimpleXMLElement simplexml_load_file(Env env,
-                                              @NotNull Path file,
+                                              @NotNull StringValue file,
                                               @Optional String className,
-                                              @Optional int options)
+                                              @Optional int options,
+                                              @Optional Value namespaceV,
+                                              @Optional boolean isPrefix)
   {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    
-    try {
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      Document document = builder.parse(file.openRead());
-      
-      return new SimpleXMLElement(env, document, document.getDocumentElement());
-    } catch (Exception e) {
-      log.log(Level.FINE, L.l(e.toString()), e);
-      return null;
-    }
+    return SimpleXMLElement.__construct(env,
+                                        file,
+                                        options,
+                                        true,
+                                        namespaceV,
+                                        isPrefix);
   }
 
   //@todo simplexml_import_dom -- Skip until (XXX. DOM Functions implemented)

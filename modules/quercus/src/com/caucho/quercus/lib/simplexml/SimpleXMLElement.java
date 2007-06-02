@@ -26,462 +26,543 @@
  * @author Charles Reich
  */
 
-
 package com.caucho.quercus.lib.simplexml;
 
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.simplexml.node.*;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * SimpleXMLElement object oriented API facade
+ * SimpleXMLElement object oriented API facade.
+ * Also acts as the DOM document.
  */
-
 public class SimpleXMLElement
 {
-  private Env _env;
-  private Document _document;
-  private Element _element;
-
-  private Value _attributes;
-
-  private HashMap<StringValue, Value> _childMap;
-
-
-  /**
-   *  need to pass document for setting text values
-   *
-   * @param document
-   * @param element
-   */
-  public SimpleXMLElement(Env env,
-			  Document document,
-                          Element element)
+  private static final Logger log
+    = Logger.getLogger(SimpleXMLElement.class.getName());
+  private static final L10N L = new L10N(SimpleXMLElement.class);
+  
+  private SimpleNode _node;
+  private boolean _isRoot;
+  
+  protected SimpleXMLElement(SimpleNode node)
   {
-    _env = env;
-    _document = document;
-    _element = element;
+    _node = node;
   }
-
-  /**
-   *
-   * @return either ArrayValueImpl or NullValue.NULL
-   */
-  public Value attributes()
+  
+  protected SimpleXMLElement(SimpleNode node, boolean isRoot)
   {
-    NamedNodeMap attrs = _element.getAttributes();
-    int attrLength = attrs.getLength();
+    _node = node;
+    _isRoot = isRoot;
+  }
+  
+  private SimpleNode getNode()
+  {
+    return _node;
+  }
+  
+  /**
+   * Returns a new instance based on the xml from 'data'.
+   * 
+   * @param env
+   * @param data xml data
+   * @param options
+   * @param dataIsUrl
+   * @param namespaceV
+   * @param isPrefix
+   */
+  @ReturnNullAsFalse
+  public static SimpleXMLElement __construct(Env env,
+                                             Value data,
+                                             @Optional int options,
+                                             @Optional boolean dataIsUrl,
+                                             @Optional Value namespaceV,
+                                             @Optional boolean isPrefix)
+  { 
+    try {
+      String namespace = null;
 
-    if (attrLength > 0) {
-      _attributes = new ArrayValueImpl();
+      if (! namespaceV.isNull())
+        namespace = namespaceV.toString();
+      
+      Node node = parse(env, data, options, dataIsUrl, namespace, isPrefix);
+      
+      if (node == null)
+        return null;
+      
+      return new SimpleXMLElement(buildNode(env, node, namespace, isPrefix),
+                                  true);
 
-      for (int j=0; j < attrLength; j++) {
-        Node attribute = attrs.item(j);
-        StringValue nodeName = new StringValueImpl(attribute.getNodeName());
-        StringValue nodeValue = new StringValueImpl(attribute.getNodeValue());
-        _attributes.put(nodeName, nodeValue);
-      }
-
-    } else {
-
-      _attributes = NullValue.NULL;
-
+    } catch (IOException e) {
+      env.warning(e);
+      
+      return null;
     }
-
-    return _attributes;
-  }
-
-  /**
-   *
-   */
-  public void fillChildMap()
-  {
-    NodeList children = _element.getChildNodes();
-    int nodeLength = children.getLength();
-
-    _childMap = new HashMap<StringValue, Value>();
-
-    if (nodeLength == 0)
-      return;
-
-    // If <foo><bar>misc</bar></foo>, then put (bar , misc)
-    // into foo's _childMap
-    if ((nodeLength == 1) && (children.item(0).getNodeType() == Node.TEXT_NODE)) {
-      String value = children.item(0).getNodeValue();
-
-      _childMap.put(new StringValueImpl("0"), new StringValueImpl(value));
-    } else {
-      for (int i=0; i < nodeLength; i++) {
-        Node child = children.item(i);
-
-        if (child.getNodeType() != Node.ELEMENT_NODE)
-          continue;
-
-        StringValue childTagName = new StringValueImpl(child.getNodeName());
-
-        // Check to see if this is the first instance of a child
-        // with this NodeName.  If so create a new ArrayValueImpl,
-        // if not add to existing ArrayValueImpl
-        ArrayValue childArray = (ArrayValue) _childMap.get(childTagName);
-        if (childArray == null) {
-          childArray = new SimpleXMLElementArray();
-          _childMap.put(childTagName, childArray);
-        }
-
-        childArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
-      }
-
-      // Iterate over _childMap and replace all entries with only one
-      // element from ArrayValue to SimpleXMLElement
-      Set keyValues = _childMap.entrySet();
-      int keyLength = keyValues.size();
-      Iterator keyIterator = keyValues.iterator();
-      for (int i=0; i < keyLength; i++) {
-        Map.Entry entry = (Map.Entry) keyIterator.next();
-        ArrayValue childArray = (ArrayValue) entry.getValue();
-	
-        if (childArray.getSize() == 1) {
-	  Value value = childArray.get(LongValue.ZERO);
-
-          _childMap.put((StringValue) entry.getKey(), value);
-	}
-      }
+    catch (ParserConfigurationException e) {
+      env.warning(e);
+      
+      return null;
+    }
+    catch (SAXException e) {
+      env.warning(e);
+      
+      return null;
     }
   }
-
-  /**
-   * NOTE: this function does not use fillChildren()
-   *
-   * @return shallow array of immediate children()
-   */
-  public Value children()
+  
+  private static Node parse(Env env,
+                            Value data,
+                            int options,
+                            boolean dataIsUrl,
+                            String namespace,
+                            boolean isPrefix)
+    throws IOException,
+           ParserConfigurationException,
+           SAXException
   {
-    ArrayValue childArray = new ArrayValueImpl();
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder builder = factory.newDocumentBuilder();
 
-    NodeList children = _element.getChildNodes();
-    int nodeLength = children.getLength();
+    Document document = null;
 
-    for (int i = 0; i < nodeLength; i++) {
-      Node child = children.item(i);
+    if (dataIsUrl) {
+      Path path = env.lookup(data.toString());
 
-      if (child.getNodeType() != Node.ELEMENT_NODE)
-        continue;
+      // PHP throws an Exception instead
+      if (path == null) {
+        log.log(Level.FINE, L.l("Cannot read file/URL '{0}'", data));
+        env.warning(L.l("Cannot read file/URL '{0}'", data));
 
-      childArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
+        return null;
+      }
+
+      ReadStream is = path.openRead();
+
+      try {
+        document = builder.parse(is);
+      } finally {
+        is.close();
+      }
+    }
+    else if (data.isUnicode()) {
+      StringReader reader = new java.io.StringReader(data.toString());
+
+      document = builder.parse(new InputSource(reader));
+    }
+    else {
+      InputStream in = data.toInputStream();
+
+      document = builder.parse(in);
     }
 
-    if (childArray.getSize() > 0)
-      return childArray;
-    else
-      return NullValue.NULL;
+    Node root = document.getChildNodes().item(0);
+
+    return root;
   }
-
-  /**
-   *
-   * @param name
-   * @return ArrayValue or null
-   */
-  public Value __getField(String name)
+  
+  private static SimpleNode buildNode(Env env,
+                                      Node node,
+                                      String namespace,
+                                      boolean isPrefix)
   {
-    SimpleXMLElementArray simpleArray = new SimpleXMLElementArray();
+    if (node.getNodeType() == Node.TEXT_NODE) {
+      return new SimpleText(node.getNodeValue());
+    }
+    
+    // passed in namespace appears to have no effect in PHP, so just ignore
+    // it by passing in null
+    SimpleNode simpleNode = new SimpleElement(node.getNodeName(), null);
 
-    NodeList children = _element.getChildNodes();
-    int length = children.getLength();
-
-    for (int i=0; i < length; i++) {
-      Node child = children.item(i);
-
-      if (child.getNodeType() != Node.ELEMENT_NODE)
-        continue;
-
-      //Need to always return SimpleXMLElementArray (even if only 1 element)
-      //because $foo->name[0] is valid
-      if (name.equals(child.getNodeName())) {
-        simpleArray.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) child)));
+    NamedNodeMap attrs = node.getAttributes();
+    
+    if (attrs != null) {
+      int length = attrs.getLength();
+      
+      for (int i = 0; i < length; i++) {
+        Attr attr = (Attr)attrs.item(i);
+        
+        simpleNode.addAttribute(attr.getName(), attr.getValue(), namespace);
       }
     }
 
-    return simpleArray;
-  }
+    NodeList nodeList = node.getChildNodes();
 
-  /**
-   * gets the attribute 'name' from SimpleXMLElement
-   * @param name
-   * @return StringValue or null
-   */
-  public Value __get(Value name)
-  {
-    NamedNodeMap attrs = _element.getAttributes();
-    int attrLength = attrs.getLength();
-    String attrName = name.toString();
+    int length = nodeList.getLength();
+    
+    for (int i = 0; i < length; i++) {
+      Node childNode = nodeList.item(i);
 
-    for (int i = 0; i < attrLength; i++) {
-      Node attr = attrs.item(i);
-      if (attrName.equals(attr.getNodeName()))
-        return new StringValueImpl(attr.getNodeValue());
+      SimpleNode child = buildNode(env, childNode, namespace, isPrefix);
+
+      simpleNode.addChild(child);
     }
-
-    return NullValue.NULL;
+    
+    return simpleNode;
   }
 
   /**
-   * $foo['name'] = value
-   *
+   * Adds an attribute to this node.
+   * 
    * @param name
    * @param value
+   * @param namespace
+   */
+  public void addAttribute(String name,
+                           String value,
+                           @Optional String namespace)
+  {
+    _node.addAttribute(name, value, namespace);
+  }
+
+  /**
+   * Adds a child to this node.
+   * 
+   * @param env
+   * @param name of the child node
+   * @param value of the text node of the child
+   * @param namespace
+   * @return
+   */
+  public SimpleXMLElement addChild(Env env,
+                                   String name,
+                                   String value,
+                                   @Optional Value namespaceV)
+  {
+    String namespace = null;
+
+    if (! namespaceV.isNull())
+      namespace = namespaceV.toString();
+    
+    SimpleText text = new SimpleText(value);
+    
+    SimpleElement child = new SimpleElement(name, namespace);
+    if (child.getPrefix() != null && namespace == null)
+      child.setPrefix(null);
+    
+    child.addChild(text);
+
+    addChild(child);
+    
+    return new SimpleXMLElement(child);
+  }
+
+  private void addChild(SimpleNode child)
+  {
+    getNode().addChild(child);
+  }
+  
+  /**
+   * Returns the attributes of this node.
+   * 
+   * @param env
+   * @param namespaceV
+   * @param isPrefix
+   */
+  public SimpleXMLElement attributes(Env env,
+                                     @Optional Value namespaceV,
+                                     @Optional boolean isPrefix)
+  {
+    String namespace = null;
+    if (! namespaceV.isNull())
+      namespace = namespaceV.toString();
+    
+    SimpleResultSet result = new SimpleResultSet();
+
+    for (Map.Entry<String,SimpleAttribute> entry : getNode().getAttributes().entrySet()) {
+      if (entry.getValue().isSameNamespace(namespace))
+        result.addAttribute(entry.getValue());
+    }
+
+    return new SimpleXMLElement(result);
+  }
+  
+  /**
+   * Returns all the children of this node, including the attributes of
+   * this node.
+   * 
+   * @param env
+   * @param namespaceV
+   * @param isPrefix
+   */
+  public SimpleXMLElement children(Env env,
+                                   @Optional Value namespaceV,
+                                   @Optional boolean isPrefix)
+  {
+    String namespace = null;
+    if (! namespaceV.isNull())
+      namespace = namespaceV.toString();
+    
+    SimpleResultSet result = new SimpleResultSet();
+    
+    for (SimpleElement child : getNode().getElementList()) {
+      if (isPrefix) {
+        if (child.isSamePrefix(namespace) ||
+            child.getPrefix() == null
+              && getNode().isSamePrefix(namespace)) {
+          result.addChild(child);
+        }
+      }
+      else {
+        if (child.isSameNamespace(namespace) ||
+            child.getNamespace() == null
+              && getNode().isSameNamespace(namespace)) {
+          result.addChild(child);
+        }
+      }
+    }
+
+    for (Map.Entry<String,SimpleAttribute> entry : getNode().getAttributes().entrySet()) {
+      if (entry.getValue().isSameNamespace(namespace))
+        result.addAttribute(entry.getValue());
+    }
+
+    return new SimpleXMLElement(result);
+  }
+  
+  /**
+   * Converts node tree to a valid xml string.
+   * 
+   * @return xml string
+   */
+  @ReturnNullAsFalse
+  public String asXML()
+  {    
+    String xml = getNode().toXML();
+    
+    if (_isRoot) {
+      xml = "<?xml version=\"1.0\"?>\n" + xml + "\n";
+    }
+    
+    return xml;
+  }
+
+  /**
+   * Returns the name of the node.
+   * 
+   * @return name of the node
+   */
+  public String getName()
+  {
+    return getNode().getName();
+  }
+
+  /**
+   * Runs an XPath expression on this node.
+   * 
+   * @param env
+   * @param expression
+   * @return array of results
+   * @throws XPathExpressionException
+   */
+  public Value xpath(Env env, String expression)
+  {
+    try {
+      XPath xpath = XPathFactory.newInstance().newXPath();
+
+      InputSource is = new InputSource(new StringReader(asXML()));
+      NodeList nodes = (NodeList) xpath.evaluate(expression, is, XPathConstants.NODESET);
+
+      int nodeLength = nodes.getLength();
+
+      if (nodeLength == 0)
+        return NullValue.NULL;
+
+      // There are matching nodes
+      ArrayValue result = new ArrayValueImpl();
+      for (int i = 0; i < nodeLength; i++) {
+        Node node = nodes.item(i);
+        
+        boolean isPrefix = node.getPrefix() != null;
+        
+        SimpleNode simpleNode
+          = buildNode(env, nodes.item(i), node.getNamespaceURI(), isPrefix);
+        
+        SimpleXMLElement xml = new SimpleXMLElement(simpleNode);
+        
+        result.put(env.wrapJava(xml));
+      }
+
+      return result;
+    }
+    catch (XPathExpressionException e) {
+      env.warning(e);
+      log.log(Level.FINE, e.getMessage());
+      
+      return NullValue.NULL;
+    }
+  }
+  
+  /**
+   * Implementation for getting the indices of this class.
+   * i.e. <code>$a->foo[0]</code>
+   */
+  public SimpleXMLElement __get(Env env, Value indexV)
+  {
+    if (indexV.isString()) {
+      String name = indexV.toString();
+      
+      SimpleAttribute attr = getNode().getAttribute(name);
+
+      if (attr == null)
+        return null;
+
+      return new SimpleXMLElement(attr);
+    }
+    else if (indexV.isLongConvertible()) {
+      int i = indexV.toInt();
+
+      SimpleNode child = getNode().get(i);
+      
+      if (child != null)
+        return new SimpleXMLElement(child);
+      else
+        return null;
+    }
+    else
+      return null;
+  }
+  
+  /**
+   * Implementation for setting the indices of this class.
+   * i.e. <code>$a->foo[0] = "hello"</code>
    */
   public void __set(String name, String value)
   {
-    _element.setAttribute(name, value);
-
-  }
-
-  /**
-   * Converts to a string.
-   */
-  public String toString()
-  {
-    //If this is a text node, then print the value
-    NodeList children = _element.getChildNodes();
-    if ((children.getLength() == 1)
-	&& (children.item(0).getNodeType() == Node.TEXT_NODE)) {
-      return children.item(0).getNodeValue();
-    }
-
-    return "";
+    addAttribute(name, value, null);
   }
   
-/*
-  public Element getElement()
-  {
-    return _element;
-  }
-*/
   /**
-   * XXX: Currently does not work for $xml->inside->wayinside = "foo";
-   *
-   * $xml = simpleXML_load_string("<foo><inside><wayinside>bar</wayinside></inside></foo>");
-   *
-   * need to check for the following 2 cases:
-   * $xml->inside->wayinside = "New Value";
-   * or
-   * $temp = $xml->inside;
-   * $temp->wayinside = "New Value;
-   *
-   * Both are valid
-   *
+   * Implementation for getting the fields of this class.
+   * i.e. <code>$a->foo</code>
    */
-
-  public Value __setField(Env env, String name, String value)
+  public SimpleXMLElement __getField(String name)
   {
-    // find Node name
-    // $xml->foo = "bar"; (NOT $xml["foo"] = "bar";)
-    NodeList children = _element.getChildNodes();
-    int length = children.getLength();
-
-    if (length == 0)
-      return NullValue.NULL;
-
-    // loop through all children.  If there is more than one
-    // env.warning
-    int indexOfFoundChild = -1;
-    for(int i = 0; i < length; i++) {
-      if (name.equals(children.item(i).getNodeName())) {
-        if (indexOfFoundChild != -1) {
-          env.warning("Cannot assign to an array of nodes (duplicate subnodes or attr detected)");
-          return NullValue.NULL;
-        }
-        indexOfFoundChild = i;
-      }
-    }
-
-    if (indexOfFoundChild != -1) {
-      Node child = children.item(indexOfFoundChild);
-
-      while (child.hasChildNodes())
-        child.removeChild(child.getFirstChild());
-
-      child.appendChild(_document.createTextNode(value));
-    }
-
-    return NullValue.NULL;
+    SimpleElement child = getNode().getElement(name);
+    
+    if (child != null)
+      return new SimpleXMLElement(child);
+    else
+      return null; 
   }
-
+  
   /**
-   *
-   * @return this SimpleXMLElement as well formed XML
+   * Implementation for setting the fields of this class.
+   * i.e. <code>$a->foo = "hello"</code>
    */
-  public Value asXML()
+  public void __setField(String name, String value)
   {
-    return new StringValueImpl(DOMNodeUtil.asXML(_element).toString());
-  }
-
-  /**
-   * Does not support relative xpath
-   *
-   * @param path
-   * @return NodeList
-   * @throws XPathExpressionException
-   */
-  public Value xpath(String path)
-    throws XPathExpressionException
-  {
-    XPath xpath = XPathFactory.newInstance().newXPath();
-
-    InputSource is = new InputSource(new ByteArrayInputStream(asXML().toString().getBytes()));
-
-    NodeList nodes = (NodeList) xpath.evaluate(path, is, XPathConstants.NODESET);
-
-    int nodeLength = nodes.getLength();
-
-    if (nodeLength == 0)
-      return NullValue.NULL;
-
-    // There are matching nodes
-    Value result = new SimpleXMLElementArray();
-    for (int i = 0; i < nodeLength; i++) {
-      result.put(_env.wrapJava(new SimpleXMLElement(_env, _document, (Element) nodes.item(i))));
+    SimpleText text = new SimpleText(value);
+    
+    SimpleElement child = getNode().getElement(name);
+    
+    if (child == null) {
+      child = new SimpleElement(name, null);
+      getNode().addChild(child);
     }
-
-    return result;
+    else {
+      child.removeChildren();
+    }
+    
+    child.addChild(text);
   }
-
-  private void printAttributes(WriteStream out,
-                               int depth)
+  
+  /**
+   * Required for 'foreach' loops with only values specified in the loop.
+   * i.e. <code>foreach($a as $b)</code>
+   */
+  public Iterator iterator()
+  {
+    return new SimpleXMLElementIterator(getNode().iterator());
+  }
+  
+  /**
+   * Required for 'foreach' loops with name/value pairs.
+   * i.e. <code>foreach($a as $b=>$c)</code>
+   */
+  public Set<String> keySet()
+  {
+    return getNode().getAttributes().keySet();
+  }
+  
+  /**
+   * var_dump() implementation
+   */
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    attributes();
+    SimpleNode node = getNode();
 
-    // Print attributes if not null
-    if (_attributes != NullValue.NULL) {
-      printDepth(out, 4 * (depth + 1));
-      out.println("[@attributes] => Array");
-      printDepth(out, 4 * (depth + 2));
-      out.println('(');
-
-      // Iterate through each attribute ([name] => value)
-      for (Map.Entry<Value, Value> mapEntry : ((ArrayValue) _attributes).entrySet()) {
-        ArrayValue.Entry entry = (ArrayValue.Entry) mapEntry;
-        printDepth(out, 4 * (depth + 3));
-        out.println("[" + entry.getKey().toString() + "] => " + entry.getValue().toString());
-      }
-      out.println();
-      printDepth(out, 4 * (depth + 2));
-      out.println(')');
-    }
+    printDepth(out, 2 * depth);
+    out.println("object(SimpleXMLElement) (" + node.getObjectSize() + ") {");
+    
+    node.varDumpImpl(env, out, depth + 1, valueSet);
+    
+    printDepth(out, 2 * depth);
+    out.print('}');
   }
-
+  
+  /**
+   * print_r() implementation
+   */
   public void printRImpl(Env env,
                          WriteStream out,
                          int depth,
                          IdentityHashMap<Value, String> valueSet)
-    throws IOException, Throwable
+    throws IOException
   {
-    if (depth == 0) {
-      out.println("SimpleXMLElement Object");
-      out.println('(');
-    }
-
-    // Need to refill _childMap because elements might have been
-    // replaced
-    fillChildMap();
-
-    Set keyValues = _childMap.entrySet();
-    int keyLength = keyValues.size();
-    Iterator keyIterator = keyValues.iterator();
-    Map.Entry entry;
-
-    if (keyIterator.hasNext()) {
-      entry = (Map.Entry) keyIterator.next();
-
-      if (entry.getValue() instanceof StringValue) {
-        if (depth == 0) {
-          printDepth(out, 4);
-          out.print("[0] => ");
-        }
-
-        out.println(entry.getValue().toString());
-      } else {
-        if (depth != 0) {
-          out.println("SimpleXMLElement Object");
-
-          printDepth(out, 4 * depth);
-          out.println('(');
-        }
-
-        printAttributes(out, depth);
-
-        // loop through each element of _childMap
-        // but first reset iterator
-        keyIterator = keyValues.iterator();
-        for (int i = 0; i < keyLength; i++) {
-          entry = (Map.Entry) keyIterator.next();
-          printDepth(out, 4 * (depth + 1));
-          out.print("[" + entry.getKey() + "] => ");
-          if (entry.getValue() instanceof ArrayValue) {
-            out.println("Array");
-            printDepth(out, 4 * (depth + 2));
-            out.println('(');
-            // Iterate through each SimpleXMLElement
-            for (Map.Entry<Value, Value> mapEntry : ((ArrayValue) entry.getValue()).entrySet()) {
-              printDepth(out, 4 * (depth + 3));
-              out.print("[" + mapEntry.getKey().toString() + "] => ");
-              mapEntry.getValue().printR(env, out, depth + 4, valueSet);
-              out.println();
-            }
-            printDepth(out, 4 * (depth + 2));
-            out.println(')');
-          } else
-            ((Value) entry.getValue()).printR(env, out, depth + 2, valueSet);
-
-          out.println();
-        }
-
-        //Print closing parenthesis
-        if (depth != 0) {
-          printDepth(out, 4 * depth);
-          out.println(")");
-        }
-      }
-    } else {
-      if (depth != 0) {
-        out.println("SimpleXMLElement Object");
-
-        printDepth(out, 4 * depth);
-        out.println('(');
-
-        printAttributes(out, depth);
-        printDepth(out, 4 * depth);
-        out.println(')');
-      }
-    }
-
-    if (depth == 0)
-      out.println(')');
+    out.println("SimpleXMLElement Object");
+    
+    printDepth(out, 4 * depth);
+    out.println('(');
+    
+    getNode().printRImpl(env, out, depth + 1, valueSet);
+    
+    printDepth(out, 4 * depth);
+    out.println(')');
   }
 
-  protected void printDepth(WriteStream out, int depth)
+  void printDepth(WriteStream out, int depth)
     throws IOException
   {
     for (int i = 0; i < depth; i++)
       out.print(' ');
+  }
+  
+  public String toString()
+  {
+    return getNode().toString();
   }
 }
