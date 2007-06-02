@@ -109,7 +109,6 @@ public class ServletFacesContextImpl extends FacesContext
       return null;
 
     String renderKitId = viewRoot.getRenderKitId();
-
     if (renderKitId == null)
       return null;
 

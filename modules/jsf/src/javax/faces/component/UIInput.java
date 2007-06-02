@@ -50,6 +50,7 @@ public class UIInput extends UIOutput
   
   public static final String COMPONENT_FAMILY = "javax.faces.Input";
   public static final String COMPONENT_TYPE = "javax.faces.Input";
+  
   public static final String CONVERSION_MESSAGE_ID
     = "javax.faces.component.UIInput.CONVERSION";
   public static final String REQUIRED_MESSAGE_ID
@@ -277,14 +278,13 @@ public class UIInput extends UIOutput
   public void setSubmittedValue(Object submittedValue)
   {
     _submittedValue = submittedValue;
-    _isValid = true; // XXX: jsf/3070
   }
 
   public void setValue(Object value)
   {
     super.setValue(value);
 
-    _isLocalValueSet = true;
+    setLocalValueSet(true);
   }
 
   public boolean isLocalValueSet()
@@ -430,31 +430,59 @@ public class UIInput extends UIOutput
   // processing
   //
 
+  @Override
+  public void decode(FacesContext context)
+  {
+    setValid(true);
+    super.decode(context);
+  }
+
+  public void processDecodes(FacesContext context)
+  {
+    if (isRendered()) {
+      super.processDecodes(context);
+
+      if (isImmediate()) {
+	try {
+	  validate(context);
+	} catch (RuntimeException e) {
+	  context.renderResponse();
+
+	  throw e;
+	}
+
+	if (! isValid())
+	  context.renderResponse();
+      }
+    }
+  }
+
   public void processUpdates(FacesContext context)
   {
-    System.out.println("PROCESS-UPDATES:");
-    
-    super.processUpdates(context);
+    if (isRendered()) {
+      super.processUpdates(context);
 
-    try {
-      updateModel(context);
-    } catch (RuntimeException e) {
-      context.renderResponse();
+      try {
+	updateModel(context);
+      } catch (RuntimeException e) {
+	context.renderResponse();
       
-      throw e;
+	throw e;
+      }
+
+      if (! isValid())
+	context.renderResponse();
     }
   }
 
   public void updateModel(FacesContext context)
   {
-    System.out.println("UPDATE-MODEL: " + isValid() + " " + isLocalValueSet() + " " + this);
     if (! isValid())
       return;
 
     if (! isLocalValueSet())
       return;
 
-    System.out.println("UPDATE: " + _valueExpr + " " + getLocalValue());
     if (_valueExpr == null)
       return;
 
@@ -462,7 +490,7 @@ public class UIInput extends UIOutput
       _valueExpr.setValue(context.getELContext(), getLocalValue());
 
       setValue(null);
-      _isLocalValueSet = false;
+      setLocalValueSet(false);
     } catch (RuntimeException e) {
       log.log(Level.FINE, e.toString(), e);
       
@@ -478,27 +506,25 @@ public class UIInput extends UIOutput
 
       context.addMessage(getClientId(context), msg);
     }
-
-    System.out.println("UPDATED:");
   }
 
   @Override
   public void processValidators(FacesContext context)
   {
-    super.processValidators(context);
+    if (isRendered()) {
+      super.processValidators(context);
 
-    try {
-      if (! isImmediate())
-	validate(context);
+      try {
+	if (! isImmediate())
+	  validate(context);
 
-      if (! isValid()) {
-	System.out.println("INVALID: " + this);
+	if (! isValid())
+	  context.renderResponse();
+      } catch (RuntimeException e) {
 	context.renderResponse();
-      }
-    } catch (RuntimeException e) {
-      context.renderResponse();
       
-      throw e;
+	throw e;
+      }
     }
   }
 
@@ -553,15 +579,6 @@ public class UIInput extends UIOutput
     }
   }
 
-  /**
-   * Returns true
-   */
-  @Override
-  public boolean getRendersChildren()
-  {
-    return true;
-  }
-
   protected Object getConvertedValue(FacesContext context,
 				     Object submittedValue)
     throws ConverterException
@@ -608,10 +625,22 @@ public class UIInput extends UIOutput
 
   public void validateValue(FacesContext context, Object value)
   {
-    if (! isValid())
-      return;
-
-    if (isRequired() && (value == null || "".equals(value))) {
+    if (! isValid()) {
+    }
+    else if (value != null && ! "".equals(value)) {
+      for (Validator validator : getValidators()) {
+	try {
+	  validator.validate(context, this, value);
+	} catch (ValidatorException e) {
+	  log.log(Level.FINER, e.toString(), e);
+	  
+	  context.addMessage(getClientId(context), e.getFacesMessage());
+	  
+	  setValid(false);
+	}
+      }
+    }
+    else if (isRequired()) {
       String summary = Util.l10n(context, REQUIRED_MESSAGE_ID,
 				 "{0}: Validation Error: Value is required.",
 				 Util.getLabel(context, this));
@@ -626,19 +655,6 @@ public class UIInput extends UIOutput
       return;
     }
 
-    if (value != null && ! "".equals(value)) {
-      for (Validator validator : getValidators()) {
-	try {
-	  validator.validate(context, this, value);
-	} catch (ValidatorException e) {
-	  log.log(Level.FINER, e.toString(), e);
-	  
-	  context.addMessage(getClientId(context), e.getFacesMessage());
-	  
-	  setValid(false);
-	}
-      }
-    }
   }
 
   //

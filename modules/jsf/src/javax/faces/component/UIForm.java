@@ -85,16 +85,11 @@ public class UIForm extends UIComponentBase implements NamingContainer
   @Override
   public ValueExpression getValueExpression(String name)
   {
-    PropEnum prop = _propMap.get(name);
-
-    if (prop != null) {
-      switch (_propMap.get(name)) {
-      case PREPEND_ID:
-	return _isPrependIdExpr;
-      }
+    if ("prependId".equals(name)) {
+      return _isPrependIdExpr;
     }
-
-    return super.getValueExpression(name);
+    else
+      return super.getValueExpression(name);
   }
 
   /**
@@ -103,20 +98,14 @@ public class UIForm extends UIComponentBase implements NamingContainer
   @Override
   public void setValueExpression(String name, ValueExpression expr)
   {
-    PropEnum prop = _propMap.get(name);
-
-    if (prop != null) {
-      switch (_propMap.get(name)) {
-      case PREPEND_ID:
-	if (expr != null && expr.isLiteralText())
-	  _isPrependId = (Boolean) expr.getValue(null);
-	else
-	  _isPrependIdExpr = expr;
-	return;
-      }
+    if ("prependId".equals(name)) {
+      if (expr != null && expr.isLiteralText())
+	_isPrependId = (Boolean) expr.getValue(null);
+      else
+	_isPrependIdExpr = expr;
     }
-
-    super.setValueExpression(name, expr);
+    else
+      super.setValueExpression(name, expr);
   }
 
   //
@@ -141,8 +130,16 @@ public class UIForm extends UIComponentBase implements NamingContainer
   {
     if (isPrependId())
       return getClientId(context);
-    else
+    else {
+      for (UIComponent comp = getParent();
+	   comp != null;
+	   comp = comp.getParent()) {
+	if (comp instanceof NamingContainer)
+	  return comp.getContainerClientId(context);
+      }
+      
       return null;
+    }
   }
 
   //
@@ -158,22 +155,18 @@ public class UIForm extends UIComponentBase implements NamingContainer
     if (context == null)
       throw new NullPointerException();
 
-    try {
-      if (! isRendered())
-        return;
+    if (! isRendered())
+      return;
+    
+    decode(context);
 
-      decode(context);
-
+    if (isSubmitted()) {
       Iterator iter = getFacetsAndChildren();
       while (iter.hasNext()) {
 	UIComponent child = (UIComponent) iter.next();
 	
 	child.processDecodes(context);
       }
-    } catch (RuntimeException e) {
-      context.renderResponse();
-
-      throw e;
     }
   }
 
@@ -190,10 +183,9 @@ public class UIForm extends UIComponentBase implements NamingContainer
     if (context == null)
       throw new NullPointerException();
 
-    if (! isSubmitted())
-      return;
-
-    super.processValidators(context);
+    if (isSubmitted()) {
+      super.processValidators(context);
+    }
   }
 
   //
@@ -210,10 +202,9 @@ public class UIForm extends UIComponentBase implements NamingContainer
     if (context == null)
       throw new NullPointerException();
 
-    if (! isSubmitted())
-      return;
-
-    super.processUpdates(context);
+    if (isSubmitted()) {
+      super.processUpdates(context);
+    }
   }
 
   //

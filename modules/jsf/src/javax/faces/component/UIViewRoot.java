@@ -30,6 +30,8 @@ package javax.faces.component;
 
 import java.util.*;
 
+import javax.el.*;
+
 import javax.faces.application.*;
 import javax.faces.context.*;
 import javax.faces.event.*;
@@ -40,7 +42,8 @@ public class UIViewRoot extends UIComponentBase
   public static final String COMPONENT_TYPE = "javax.faces.ViewRoot";
   public static final String UNIQUE_ID_PREFIX = "j_id";
 
-  private String _renderKitId = "HTML_BASIC";
+  private String _renderKitId;
+  private ValueExpression _renderKitIdExpr;
 
   private String _viewId;
   private int _unique;
@@ -63,13 +66,20 @@ public class UIViewRoot extends UIComponentBase
   
   public String getRenderKitId()
   {
-    return _renderKitId;
+    if (_renderKitId != null)
+      return _renderKitId;
+    else if (_renderKitIdExpr != null)
+      return Util.evalString(_renderKitIdExpr, getFacesContext());
+    else
+      return null;
   }
   
   public void setRenderKitId(String renderKitId)
   {
     _renderKitId = renderKitId;
   }
+
+  
   
   public String getViewId()
   {
@@ -89,6 +99,40 @@ public class UIViewRoot extends UIComponentBase
   public Locale getLocale()
   {
     return _locale;
+  }
+
+  //
+  // expression map override
+  //
+
+  /**
+   * Returns the value expression with the given name.
+   */
+  @Override
+  public ValueExpression getValueExpression(String name)
+  {
+    if ("renderKitId".equals(name))
+      return _renderKitIdExpr;
+    else {
+      return super.getValueExpression(name);
+    }
+  }
+
+  /**
+   * Sets the value expression with the given name.
+   */
+  @Override
+  public void setValueExpression(String name, ValueExpression expr)
+  {
+    if ("renderKitId".equals(name)) {
+      if (expr != null && expr.isLiteralText())
+	_renderKitId = (String) expr.getValue(null);
+      else
+	_renderKitIdExpr = expr;
+    }
+    else {
+      super.setValueExpression(name, expr);
+    }
   }
 
   public void addPhaseListener(PhaseListener listener)
@@ -182,7 +226,9 @@ public class UIViewRoot extends UIComponentBase
       super.saveState(context),
       _viewId,
       _renderKitId,
-      _locale
+      Util.save(_renderKitIdExpr, getFacesContext()),
+      _locale,
+      _unique
     };
   }
 
@@ -194,7 +240,9 @@ public class UIViewRoot extends UIComponentBase
 
     _viewId = (String) state[1];
     _renderKitId = (String) state[2];
-    _locale = (Locale) state[3];
+    _renderKitIdExpr = Util.restoreString(state[3], context);
+    _locale = (Locale) state[4];
+    _unique = (Integer) state[5];
   }
   
   public String toString()

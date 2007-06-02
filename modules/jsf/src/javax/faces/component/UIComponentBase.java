@@ -819,7 +819,7 @@ public abstract class UIComponentBase extends UIComponent
       _rendererType = _codeToRendererMap.get(rendererCode);
     else
       _rendererType = rendererString;
-    
+
     _bindingExpr = Util.restoreWithType(state[7], context);
 	
     Object extMapState = state[8];
