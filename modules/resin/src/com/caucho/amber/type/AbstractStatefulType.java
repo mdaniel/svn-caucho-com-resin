@@ -296,8 +296,16 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
                           ArrayList<AmberField> overriddenFields)
     throws IOException
   {
-    if (overriddenFields == null) {
-      if (loadGroupIndex == 0 && _discriminator != null)
+    if (overriddenFields == null && getDiscriminator() != null) {
+      RelatedType parent = null;
+
+      if (this instanceof RelatedType)
+        parent = ((RelatedType) this).getParentType();
+
+      boolean isAbstractParent = getPersistenceUnit().isJPA()
+        && (parent == null || parent.getBeanClass().isAbstract());
+
+      if (loadGroupIndex == 0 || isAbstractParent)
         index++;
     }
 
@@ -344,6 +352,7 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
           }
         }
 
+        // jpa/0gg3
         if (field.getLoadGroupIndex() == loadGroupIndex)
           index = field.generateLoad(out, rs, indexVar, index);
       }
@@ -424,25 +433,25 @@ abstract public class AbstractStatefulType extends AbstractEnhancedType {
             continue;
         }
 
-        if (field.getLoadGroupIndex() != loadGroup)
-          continue;
-
         // ejb/0602
         if (getPersistenceUnit().isJPA()) {
           if (field instanceof EntityManyToOneField)
             ((EntityManyToOneField) field).init((RelatedType) this);
         }
 
-        String propSelect = field.generateLoadSelect(table, id);
+        // jpa/0gg3
+        if (field.getLoadGroupIndex() == loadGroup) {
+          String propSelect = field.generateLoadSelect(table, id);
 
-        if (propSelect == null)
-          continue;
+          if (propSelect == null)
+            continue;
 
-        if (hasSelect)
-          cb.append(", ");
-        hasSelect = true;
+          if (hasSelect)
+            cb.append(", ");
+          hasSelect = true;
 
-        cb.append(propSelect);
+          cb.append(propSelect);
+        }
       }
 
       fields = getFields();

@@ -401,6 +401,7 @@ public class LoadGroupGenerator extends ClassComponent {
       out.println("__caucho_discriminator = rs.getString(1);");
     }
 
+    // jpa/0gg3
     _relatedType.generateLoad(out, "rs", "", 1, _index, null);
     out.println("__caucho_loadMask_" + group + " |= " + mask + "L;");
 

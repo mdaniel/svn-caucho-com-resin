@@ -168,7 +168,8 @@ public class EntityOneToManyField extends CollectionField {
    */
   public void init()
   {
-    if (_sourceField == null || getLinkColumns() == null)
+    // jpa/0gg2
+    if (_sourceField == null) // || getLinkColumns() == null)
       throw new IllegalStateException();
   }
 
@@ -381,8 +382,12 @@ public class EntityOneToManyField extends CollectionField {
 
     out.println("if (" + var + " != null) {");
     out.pushDepth();
-    out.println(var + ".setSession(__caucho_session);");
-    out.println("return " + var + ";");
+
+    // jpa/1621
+    out.println("if (" + var + ".getSession() != null");
+    out.println("    && " + var + ".getSession() == __caucho_session)");
+    out.println("  return " + var + ";");
+
     out.popDepth();
     out.println("}");
 
@@ -429,7 +434,8 @@ public class EntityOneToManyField extends CollectionField {
     }
     newEmptyCollection += ")";
 
-    out.println(var + " = " + newEmptyCollection + ";");
+    out.println("if (" + var + " == null)");
+    out.println("  " + var + " = " + newEmptyCollection + ";");
 
     // if (! isAbstract())
     out.println();
@@ -704,6 +710,10 @@ public class EntityOneToManyField extends CollectionField {
   public void generateInvalidateForeign(JavaWriter out)
     throws IOException
   {
+    // XXX: jpa/0gg2
+    if (getEntitySourceType().getPersistenceUnit().isJPA())
+      return;
+
     Table table = getLinkColumns().getSourceTable();
 
     out.println("if (\"" + table.getName() + "\".equals(table)) {");

@@ -175,6 +175,10 @@ public class KeyPropertyField extends PropertyField implements IdField {
    */
   public String getForeignTypeName()
   {
+    // jpa/0gg2
+    if (_column == null)
+      return "";
+
     return _column.getType().getForeignTypeName();
   }
 

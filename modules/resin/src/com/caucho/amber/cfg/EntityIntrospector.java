@@ -298,8 +298,8 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       if (tableName == null || tableName.equals(""))
         tableName = toSqlName(entityName);
 
-      // jpa/0gg0
-      if (isEntity && ! type.isAbstract()) {
+      // jpa/0gg0, jpa/0gg2
+      if (isEntity) { // && ! type.isAbstract()) {
 
         InheritanceType strategy = null;
 

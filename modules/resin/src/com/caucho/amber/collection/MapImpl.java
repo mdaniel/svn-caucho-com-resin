@@ -95,6 +95,14 @@ public class MapImpl<K, V> extends AbstractMap<K, V>
   }
 
   /**
+   * Returns the session.
+   */
+  public AmberConnection getSession()
+  {
+    return _aConn;
+  }
+
+  /**
    * Returns the query.
    */
   public AmberQuery getQuery()

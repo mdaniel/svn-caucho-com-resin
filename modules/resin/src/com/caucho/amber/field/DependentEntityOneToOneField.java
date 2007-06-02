@@ -214,7 +214,7 @@ public class DependentEntityOneToOneField extends CascadableField {
     out.println("com.caucho.amber.entity.EntityState state = ((com.caucho.amber.entity.Entity) " + getter + ").__caucho_getEntityState();");
 
     // jpa/0s2d
-    out.println("if (! state.isManaged())");
+    out.println("if (__caucho_state.isTransactional() && ! state.isManaged())");
     String errorString = ("(\"amber flush: unable to flush " +
                           getEntitySourceType().getName() + "[\" + __caucho_getPrimaryKey() + \"] "+
                           "with non-managed relationship one-to-one to "+

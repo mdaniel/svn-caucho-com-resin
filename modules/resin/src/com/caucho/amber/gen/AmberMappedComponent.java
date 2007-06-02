@@ -2666,11 +2666,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
 
     RelatedType parentType = _relatedType;
 
+    /* XXX: jpa/0gg3
     // jpa/0l32
     if (_relatedType.getDiscriminator() != null) {
       while (parentType.getParentType() != null)
         parentType = parentType.getParentType();
     }
+    */
 
     out.printJavaString(parentType.generateLoadSelect("o"));
     out.print(" from ");

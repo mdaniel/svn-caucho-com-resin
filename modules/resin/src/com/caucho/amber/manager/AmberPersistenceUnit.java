@@ -419,6 +419,9 @@ public class AmberPersistenceUnit {
    */
   public Table createTable(String tableName)
   {
+    if (log.isLoggable(Level.FINER))
+      log.log(Level.FINER, "AmberPersistenceUnit.createTable: " + tableName);
+
     Table table = _tableMap.get(tableName);
 
     if (table == null) {

@@ -87,6 +87,14 @@ public class CollectionImpl<E> extends AbstractList<E>
   }
 
   /**
+   * Returns the session.
+   */
+  public AmberConnection getSession()
+  {
+    return _aConn;
+  }
+
+  /**
    * Returns the query.
    */
   public AmberQuery getQuery()

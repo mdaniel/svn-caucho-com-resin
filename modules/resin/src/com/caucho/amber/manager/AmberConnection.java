@@ -2857,7 +2857,7 @@ public class AmberConnection
   }
 
   private void checkTransactionRequired(String operation)
-    throws TransactionRequiredException
+    throws TransactionRequiredException, SQLException
   {
     // XXX: also needs to check PersistenceContextType.TRANSACTION/EXTENDED.
 
