@@ -76,21 +76,23 @@ public class ForeachStatement
     Value obj = origObj.copy();
 
     if (_key == null && ! _isRef) {
+      
       for (Value value : obj.getValueArray(env)) {
-	_value.evalAssign(env, value);
+        _value.evalAssign(env, value);
 
-	Value result = _block.execute(env);
+        Value result = _block.execute(env);
 
-	if (result == null || result instanceof ContinueValue) {
-	} else if (result instanceof BreakValue)
-	  return null;
-	else
-	  return result;
+        if (result == null || result instanceof ContinueValue) {
+        }
+        else if (result instanceof BreakValue)
+          return null;
+        else
+          return result;
       }
 
       return null;
     } else {
-      for (Value key : obj.getKeyArray()) {
+      for (Value key : obj.getKeyArray(env)) {
 	if (_key != null)
 	  _key.evalAssign(env, key);
 

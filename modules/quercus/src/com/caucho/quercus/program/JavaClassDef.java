@@ -57,6 +57,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -111,6 +112,7 @@ public class JavaClassDef extends ClassDef {
   private AbstractJavaMethod _cons;
 
   private Method _iterator;
+  private Method _keySet;
 
   private Marshal _marshal;
 
@@ -258,32 +260,32 @@ public class JavaClassDef extends ClassDef {
   {
     Object result;
 
+    FieldMarshalPair fieldPair = _fieldMap.get(name);
+    if (fieldPair != null) {
+      try {
+        result = fieldPair._field.get(obj);
+        return fieldPair._marshal.unmarshal(env, result);
+      } catch (Throwable e) {
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+      }
+    } else if (__getField != null) {
+      try {
+        return __getField.call(env, obj, new StringValueImpl(name));
+      } catch (Throwable e) {
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+      }
+    }
+    
     JavaMethod get = _getMap.get(name);
-
+    
     if (get != null) {
       try {
         return get.call(env, obj);
       } catch (Throwable e) {
         log.log(Level.FINE, L.l(e.getMessage()), e);
         return NullValue.NULL;
-      }
-    } else {
-      FieldMarshalPair fieldPair = _fieldMap.get(name);
-      if (fieldPair != null) {
-        try {
-          result = fieldPair._field.get(obj);
-          return fieldPair._marshal.unmarshal(env, result);
-        } catch (Throwable e) {
-          log.log(Level.FINE,  L.l(e.getMessage()), e);
-          return NullValue.NULL;
-        }
-      } else if (__getField != null) {
-        try {
-          return __getField.call(env, obj, new StringValueImpl(name));
-        } catch (Throwable e) {
-          log.log(Level.FINE,  L.l(e.getMessage()), e);
-          return NullValue.NULL;
-        }
       }
     }
 
@@ -322,6 +324,29 @@ public class JavaClassDef extends ClassDef {
                         String name,
                         Value value)
   {
+    FieldMarshalPair fieldPair = _fieldMap.get(name);
+    if (fieldPair != null) {
+      try {
+        Class type = fieldPair._field.getType();
+        Object marshaledValue = fieldPair._marshal.marshal(env, value, type);
+        fieldPair._field.set(obj, marshaledValue);
+
+        return value;
+
+      } catch (Throwable e) {
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+      }
+    } else if (__setField != null) {
+      try {
+        return __setField.call(env, obj, new StringValueImpl(name), value);
+      } catch (Throwable e) {
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+
+      }
+    }
+
     JavaMethod setter = _setMap.get(name);
 
     if (setter != null) {
@@ -331,33 +356,9 @@ public class JavaClassDef extends ClassDef {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
       }
-    } else {
-      FieldMarshalPair fieldPair = _fieldMap.get(name);
-      if (fieldPair != null) {
-        try {
-          Class type = fieldPair._field.getType();
-          Object marshaledValue = fieldPair._marshal.marshal(env, value, type);
-          fieldPair._field.set(obj, marshaledValue);
-
-          return value;
-
-        } catch (Throwable e) {
-          log.log(Level.FINE,  L.l(e.getMessage()), e);
-          return NullValue.NULL;
-        }
-      } else if (__setField != null) {
-        try {
-          return __setField.call(env, obj, new StringValueImpl(name), value);
-        } catch (Throwable e) {
-          log.log(Level.FINE,  L.l(e.getMessage()), e);
-          return NullValue.NULL;
-
-        }
-      }
     }
 
     return NullValue.NULL;
-
   }
 
   /**
@@ -623,6 +624,39 @@ public class JavaClassDef extends ClassDef {
   }
 
   /**
+   * Returns the field keys.
+   */
+  public Value []getKeyArray(Env env, Object obj)
+  {
+    try {
+      if (_keySet == null)
+        return new Value[0];
+      
+      Set set = (Set) _keySet.invoke(obj);
+      Iterator iter = set.iterator();
+
+      ArrayList<Value> values = new ArrayList<Value>();
+      
+      while (iter.hasNext()) {
+        Object objValue = iter.next();
+        
+        if (objValue instanceof Value)
+          values.add((Value) objValue);
+        else
+          values.add(env.wrapJava(objValue));
+      }
+
+      Value []valueArray = new Value[values.size()];
+
+      values.toArray(valueArray);
+
+      return valueArray;
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  /**
    * Returns the values for an iterator.
    */
   public Value []getValueArray(Env env, Object obj)
@@ -778,6 +812,16 @@ public class JavaClassDef extends ClassDef {
           _iterator = method;
       } catch (Throwable e) {
       }
+      
+      try {
+        Method method = _type.getMethod("keySet", new Class[0]);
+
+        if (method != null &&
+            Set.class.isAssignableFrom(method.getReturnType()))
+          _keySet = method;
+      } catch (Throwable e) {
+      }
+      
     } finally {
       _isInit = true;
     }
@@ -994,7 +1038,7 @@ public class JavaClassDef extends ClassDef {
    * @return false if printRImpl not implemented
    * @throws IOException
    */
-  protected boolean printRImpl(Env env,
+  public boolean printRImpl(Env env,
                                Object obj,
                                WriteStream out,
                                int depth,
@@ -1004,7 +1048,7 @@ public class JavaClassDef extends ClassDef {
 
     try {
       if (_printRImpl == null) {
-	return false;
+        return false;
 	
       }
       
