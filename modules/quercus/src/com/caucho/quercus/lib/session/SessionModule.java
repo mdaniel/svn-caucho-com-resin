@@ -574,7 +574,7 @@ public class SessionModule extends AbstractQuercusModule
     if (! value.isArray())
       return NullValue.NULL;
 
-    for (Value key : value.getKeyArray())
+    for (Value key : value.getKeyArray(env))
       value.remove(key);
 
     return NullValue.NULL;

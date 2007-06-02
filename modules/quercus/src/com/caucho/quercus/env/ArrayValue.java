@@ -390,7 +390,7 @@ abstract public class ArrayValue extends Value {
   /**
    * Returns the field keys.
    */
-  public Value []getKeyArray()
+  public Value []getKeyArray(Env env)
   {
     int size = getSize();
 

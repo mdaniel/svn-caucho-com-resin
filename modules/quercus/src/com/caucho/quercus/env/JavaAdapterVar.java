@@ -648,9 +648,9 @@ public class JavaAdapterVar extends Var
   /**
    * Returns the array keys.
    */
-  public Value []getKeyArray()
+  public Value []getKeyArray(Env env)
   {
-    return getValue().getKeyArray();
+    return getValue().getKeyArray(env);
   }
 
   /**

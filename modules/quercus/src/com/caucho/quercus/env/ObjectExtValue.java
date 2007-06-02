@@ -498,7 +498,7 @@ public class ObjectExtValue extends ObjectValue
   /**
    * Returns the key array
    */
-  public Value []getKeyArray()
+  public Value []getKeyArray(Env env)
   {
     Value []keys = new Value[getSize()];
 

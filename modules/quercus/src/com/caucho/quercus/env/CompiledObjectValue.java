@@ -372,7 +372,7 @@ public class CompiledObjectValue extends ObjectValue
   /**
    * Returns the key array
    */
-  public Value []getKeyArray()
+  public Value []getKeyArray(Env env)
   {
     return new Value[0];
   }

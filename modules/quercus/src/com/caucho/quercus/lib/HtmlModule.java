@@ -185,7 +185,7 @@ public class HtmlModule extends AbstractQuercusModule {
    // ArrayValue decodedArray = new ArrayValueImpl();
     //ArrayValue encodedArray = new ArrayValueImpl();
 
-    Value[] keys = HTML_SPECIALCHARS_ARRAY.getKeyArray();
+    Value[] keys = HTML_SPECIALCHARS_ARRAY.getKeyArray(env);
     Value[] values = HTML_SPECIALCHARS_ARRAY.getValueArray(env);
     int length = keys.length;
     for (int i = 0; i < length; i++) {

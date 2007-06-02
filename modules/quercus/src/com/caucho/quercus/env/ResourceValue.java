@@ -65,7 +65,7 @@ public class ResourceValue extends Value implements Closeable {
                              int depth,
                              IdentityHashMap<Value, String> valueSet)
     throws IOException
-  {
+  { 
     out.print("resource(" + toString(env) + ")");
   }
   

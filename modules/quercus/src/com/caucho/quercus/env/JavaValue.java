@@ -77,8 +77,8 @@ public class JavaValue extends ResourceValue
                             IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    // if (! _classDef.printRImpl(env, _object, out, depth, valueSet))
-    super.printRImpl(env, out, depth, valueSet);
+    if (! _classDef.printRImpl(env, _object, out, depth, valueSet))
+      super.printRImpl(env, out, depth, valueSet);
   }
   
   @Override
@@ -349,13 +349,21 @@ public class JavaValue extends ResourceValue
   }
 
   /**
+   * Returns the field keys.
+   */
+  public Value []getKeyArray(Env env)
+  {
+    return _classDef.getKeyArray(env, _object);
+  }
+  
+  /**
    * Returns the iterator values.
    */
   public Value []getValueArray(Env env)
   {
     return _classDef.getValueArray(env, _object);
   }
-
+  
   /**
    * Serializes the value.
    */

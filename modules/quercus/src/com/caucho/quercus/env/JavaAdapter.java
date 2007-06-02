@@ -383,7 +383,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the field keys.
    */
-  public Value []getKeyArray()
+  public Value []getKeyArray(Env env)
   {
     int size = getSize();
 

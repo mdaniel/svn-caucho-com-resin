@@ -680,9 +680,9 @@ public class Var extends Value
   /**
    * Returns the array keys.
    */
-  public Value []getKeyArray()
+  public Value []getKeyArray(Env env)
   {
-    return _value.getKeyArray();
+    return _value.getKeyArray(env);
   }
 
   /**
