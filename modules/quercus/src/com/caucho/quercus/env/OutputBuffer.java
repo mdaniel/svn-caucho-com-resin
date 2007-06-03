@@ -34,7 +34,9 @@ import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Represents a PHP output buffer
@@ -80,6 +82,22 @@ public class OutputBuffer {
 
     _tempStream = new TempStream();
     _out = new WriteStream(_tempStream);
+
+    try {
+      _out.setEncoding(env.getOutputEncoding().toString());
+    }
+    catch (UnsupportedEncodingException e) {
+      if (log.isLoggable(Level.WARNING))
+        log.log(Level.WARNING, e.toString(), e);
+      try {
+        _out.setEncoding("UTF-8");
+      }
+      catch (UnsupportedEncodingException e2) {
+        if (log.isLoggable(Level.WARNING))
+          log.log(Level.WARNING, e.toString(), e2);
+      }
+    }
+
     _state = 1 << PHP_OUTPUT_HANDLER_START;
     _haveFlushed = false;
   }
@@ -114,6 +132,7 @@ public class OutputBuffer {
 
       // XXX: encoding
       while ((ch = rs.read()) >= 0) {
+        System.out.println("XXX: bb.append " + Integer.toHexString(ch));
         bb.appendByte(ch);
       }
 

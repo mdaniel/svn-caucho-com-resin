@@ -377,7 +377,7 @@ public class Env {
     StringValue encoding = getIni("unicode.script_encoding");
 
     if (encoding == null)
-      encoding = getIni("unicode.fallback");
+      encoding = getIni("unicode.fallback_encoding");
 
     if (encoding != null)
       return encoding.toString();
