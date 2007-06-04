@@ -30,6 +30,7 @@
 package com.caucho.vfs;
 
 import com.caucho.loader.DynamicClassLoader;
+import com.caucho.make.DependencyList;
 import com.caucho.server.util.CauchoSystem;
 
 import java.io.IOException;
@@ -618,6 +619,30 @@ public class MergePath extends FilesystemPath {
     else {
       return pathList.get(0).lookup(pathname);
     }
+  }
+
+  /**
+   * Creates a dependency.
+   */
+  @Override
+  public PersistentDependency createDepend()
+  {
+    ArrayList<Path> pathList = ((MergePath) _root)._pathList;
+
+    if (pathList.size() == 1)
+      return pathList.get(0).createDepend();
+
+    DependencyList dependList = new DependencyList();
+    
+    for (int i = 0; i < pathList.size(); i++) {
+      Path path = pathList.get(i);
+
+      Path realPath = path.lookup(_pathname);
+
+      dependList.add(realPath.createDepend());
+    }
+
+    return dependList;
   }
 
   /**

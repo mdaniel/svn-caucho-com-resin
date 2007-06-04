@@ -31,27 +31,45 @@ command line with <code>-stdout</code>.  If it is, there will be conflicts with
 which process owns the file.</warn>
 
 <deftable-childtags>
-<tr><td>path
-    </td><td>Output path for the stream, see <a href="#path">"Log Paths"</a>.  
-    </td><td>required
-</td></tr><tr><td>timestamp
-    </td><td>a timestamp <a href="#timestamp">format string</a> 
-        to use at the beginning of each log line.
-    </td><td>no timestamp
-</td></tr><tr><td>rollover-period
-    </td><td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
+<tr>
+  <td>archive-format</td>
+  <td>the format for the archive filename when a rollover occurs,
+        see <a href="#rollover">Rollovers</a>.
+    </td>
+  <td>see below</td>
+</tr>
+<tr>
+  <td>path</td>
+  <td>Output path for the stream, see <a href="#path">"Log Paths"</a>.</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>path-format</td>
+  <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>rollover-period</td>
+  <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
         months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
-    </td><td>none
-</td></tr><tr><td>rollover-size
-    </td><td>maximum size of the file before a rollover occurs, in bytes (50000), 
+    </td>
+ <td>none</td>
+</tr>
+<tr>
+  <td>rollover-size</td>
+  <td>maximum size of the file before a rollover occurs, in bytes (50000), 
         kb (128kb), or megabytes (10mb).  
         See <a href="#rollover">Rollovers</a>.
-    </td><td>1mb
-</td></tr><tr><td>archive-format
-    </td><td>the format for the archive filename when a rollover occurs,
-        see <a href="#rollover">Rollovers</a>.
-    </td><td>see below
-</td></tr></deftable-childtags>
+    </td>
+  <td>1mb
+  </td>
+</tr>
+<tr>
+  <td>timestamp</td>
+  <td>a timestamp <a href="#timestamp">format string</a> to use at the beginning of each log line.</td>
+  <td>no timestamp</td>
+</tr>
+</deftable-childtags>
 
 <p>The default archive format is</p>
 <pre>
@@ -96,7 +114,13 @@ which process owns the file.</warn>
 <tr><td>path
     </td><td>Output path for the stream, see <a href="#path">"Log Paths"</a>.  
     </td><td>required
-</td></tr><tr><td>timestamp
+</td></tr>
+<tr>
+  <td>path-format</td>
+  <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>
+  <td>optional</td>
+</tr>
+<tr><td>timestamp
     </td><td>a timestamp <a href="#timestamp">format string</a> 
         to use at the beginning of each log line.
     </td><td>no timestamp
@@ -154,7 +178,13 @@ in.</p>
     </td><td>Output path for the log entries, see 
         <a href="#path">"Log Paths"</a>.
     </td><td>required
-</td></tr><tr><td>format
+</td></tr>
+<tr>
+  <td>path-format</td>
+  <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>
+  <td>optional</td>
+</tr>
+<tr><td>format
     </td><td>Access log format.
     </td><td>see below
 </td></tr><tr><td>rollover-period
@@ -269,12 +299,20 @@ java.util.logging.* API.</p>
 </td></tr><tr><td>level
     </td><td>The <a href="#Log-Levels">log level</a>
     </td><td>info
-</td></tr><tr><td>path
-    </td><td>Output path for the log messages, see 
+</td></tr>
+<tr>
+  <td>path</td>
+  <td>Output path for the log messages, see 
        <a href="#path">"Log Paths"</a>
-    </td><td>required
-
-</td></tr><tr><td>timestamp
+    </td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>path-format</td>
+  <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>
+  <td>optional</td>
+</tr>
+<tr><td>timestamp
     </td><td>a timestamp <a href="#timestamp">format string</a> 
         to use at the beginning of each log line.
     </td><td>"[%Y/%m/%d %H:%M:%S.%s] "
@@ -358,10 +396,13 @@ matches a logging request for both "example.hogwarts.System" and
 useful logs.</p>
 
 <deftable>
-<tr><th>log <var>name</var> value</th><th>Meaning
-</th></tr><tr><td>""</td><td>Debug everything
-</td></tr><tr><td>com.caucho.jsp</td><td>Debug jsp
-</td></tr><tr><td>com.caucho.java</td><td>Java compilation
+<tr>
+  <th>log <var>name</var> value</th>
+  <th>Meaning</th>
+</tr>
+<tr><td>""</td><td>Debug everything</td></tr>
+<tr><td>com.caucho.jsp</td><td>Debug jsp</td></tr>
+<tr><td>com.caucho.java</td><td>Java compilation
 </td></tr><tr><td>com.caucho.xsl</td><td>XSL debugging
 </td></tr><tr><td>com.caucho.server.port</td><td>TCP port debugging and threading
 </td></tr><tr><td>com.caucho.server.port.AcceptPool</td><td>port thread creation

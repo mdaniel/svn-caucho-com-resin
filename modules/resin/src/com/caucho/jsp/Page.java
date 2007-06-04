@@ -170,8 +170,9 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
    */
   protected void _caucho_addDepend(Path path)
   {
-    Depend depend = new Depend(path);
-    depend.setRequireSource(getRequireSource());
+    PersistentDependency depend = path.createDepend();
+    if (depend instanceof Depend)
+      ((Depend) depend).setRequireSource(getRequireSource());
 
     _caucho_addDepend(depend);
   }

@@ -1070,6 +1070,14 @@ public abstract class Path {
   }
 
   /**
+   * Creates a dependency.
+   */
+  public PersistentDependency createDepend()
+  {
+    return new Depend(this);
+  }
+
+  /**
    * Creates a unique temporary file as a child of this directory.
    *
    * @param prefix filename prefix

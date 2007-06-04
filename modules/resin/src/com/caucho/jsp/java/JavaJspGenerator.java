@@ -105,8 +105,8 @@ public class JavaJspGenerator extends JspGenerator {
   protected ArrayList<Depend> _cacheDepends = new ArrayList<Depend>();
   
   // dependencies for the source file itself
-  protected ArrayList<PersistentDependency> _depends =
-  new ArrayList<PersistentDependency>();
+  protected ArrayList<PersistentDependency> _depends
+    = new ArrayList<PersistentDependency>();
 
   long _lastModified; // XXX: obsolete?
   
@@ -590,7 +590,7 @@ public class JavaJspGenerator extends JspGenerator {
 
   public void addDepend(Path path)
   {
-    addDepend(new Depend(path));
+    addDepend(path.createDepend());
   }
 
   /**

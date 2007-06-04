@@ -239,7 +239,7 @@ public class JspManager extends PageManager {
 					  ".class");
 
     if (classPath.canRead())
-      page._caucho_addDepend(new Depend(classPath));
+      page._caucho_addDepend(classPath.createDepend());
 
     return page;
   }
@@ -325,7 +325,7 @@ public class JspManager extends PageManager {
     else
       page = new WrapperPage(jspPage);
 
-    page._caucho_addDepend(new Depend(classPath));
+    page._caucho_addDepend(classPath.createDepend());
 
     return page;
   }

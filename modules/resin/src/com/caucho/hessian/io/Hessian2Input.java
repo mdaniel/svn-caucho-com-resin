@@ -1431,15 +1431,20 @@ public class Hessian2Input
     case 'M':
     {
       String type = readType();
-      Deserializer reader;
-      reader = findSerializerFactory().getObjectDeserializer(type);
 
-      if (cl != reader.getType() && cl.isAssignableFrom(reader.getType()))
-        return reader.readMap(this);
+      // hessian/3bb3
+      if ("".equals(type)) {
+	Deserializer reader;
+	reader = findSerializerFactory().getDeserializer(cl);
 
-      reader = findSerializerFactory().getDeserializer(cl);
+	return reader.readMap(this);
+      }
+      else {
+	Deserializer reader;
+	reader = findSerializerFactory().getObjectDeserializer(type);
 
-      return reader.readMap(this);
+	return reader.readMap(this);
+      }
     }
 
     case 'O':
@@ -1524,9 +1529,11 @@ public class Hessian2Input
     if (tag >= 0)
       _offset--;
 
-    Object value = findSerializerFactory().getDeserializer(cl).readObject(this);
-
-    return value;
+    // hessian/3b2i
+    return readObject();
+    
+    //Object value = findSerializerFactory().getDeserializer(cl).readObject(this);
+    // return value;
   }
   
   /**

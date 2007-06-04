@@ -12,6 +12,10 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>hessian: array deserialization with Calendar (#1743, rep by Stefan Fleiter)</li>
+<li>hessian: array deserialization with interface arrays, e.g. Serializable[] (#1614, rep by ldesegur)</li>
+<li>boot: JNI/Pro classloader must be used for JniFilePath (#1758, rep by Steven Garrett)</li>
+<li>Add dependency checking for MergePath (#1488, rep by Kimberly Nicholls)</li>
 <li>GzipFilter now disables itself when servlet sets Content-Encoding to avoid double compression (#1761, rep by jkriesten)</li>
 <li>jndi-link updates to properly set hashtable properties (#1739, rep by hazurek)</li>
 <li>hessian: HessianSkeleton.invoke needs to skip 'c' header for backwards compat (#1458, rep by Alon Salant)</li>

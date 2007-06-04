@@ -467,8 +467,8 @@ r_resin-Basis =
 
   & r_cluster-default*
 
-  & (attribute environment-system-properties { string }
-     | element environment-system-properties { string })?
+  & (attribute environment-system-properties { r_boolean-Type }
+     | element environment-system-properties { r_boolean-Type })?
 
   & r_management?
 

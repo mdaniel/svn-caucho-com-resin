@@ -38,6 +38,7 @@ import com.caucho.util.CharScanner;
 import com.caucho.util.L10N;
 import com.caucho.util.StringCharCursor;
 import com.caucho.vfs.Depend;
+import com.caucho.vfs.PersistentDependency;
 import com.caucho.vfs.Path;
 import com.caucho.xml.QName;
 
@@ -102,7 +103,8 @@ public class ParseState {
 
   private String _uriPwd;
   
-  private ArrayList<Depend> _depends = new ArrayList<Depend>();
+  private ArrayList<PersistentDependency> _depends
+    = new ArrayList<PersistentDependency>();
   private LineMap _lineMap;
   
   private Namespace _namespaces;
@@ -664,7 +666,7 @@ public class ParseState {
    */
   public void addDepend(Path path)
   {
-    Depend depend = new Depend(path);
+    PersistentDependency depend = path.createDepend();
     if (! _depends.contains(depend))
       _depends.add(depend);
   }
@@ -672,7 +674,7 @@ public class ParseState {
   /**
    * Returns the dependencies
    */
-  public ArrayList<Depend> getDependList()
+  public ArrayList<PersistentDependency> getDependList()
   {
     return _depends;
   }

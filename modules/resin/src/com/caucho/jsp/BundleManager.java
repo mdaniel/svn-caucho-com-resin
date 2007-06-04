@@ -209,7 +209,7 @@ public class BundleManager {
 
       if (is instanceof ReadStream) {
         Path path = ((ReadStream) is).getPath();
-        Environment.addDependency(new Depend(path));
+        Environment.addDependency(path.createDepend());
       }
 
       ResourceBundle bundle = new PropertyResourceBundle(is);

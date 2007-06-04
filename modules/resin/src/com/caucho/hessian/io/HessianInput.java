@@ -1015,15 +1015,20 @@ public class HessianInput extends AbstractHessianInput {
     case 'M':
     {
       String type = readType();
-      Deserializer reader;
-      reader = _serializerFactory.getObjectDeserializer(type);
 
-      if (cl != reader.getType() && cl.isAssignableFrom(reader.getType()))
+      // hessian/3386
+      if ("".equals(type)) {
+	Deserializer reader;
+	reader = _serializerFactory.getDeserializer(cl);
+
+	return reader.readMap(this);
+      }
+      else {
+	Deserializer reader;
+	reader = _serializerFactory.getObjectDeserializer(type);
+
         return reader.readMap(this);
-
-      reader = _serializerFactory.getDeserializer(cl);
-
-      return reader.readMap(this);
+      }
     }
 
     case 'V':
@@ -1062,9 +1067,14 @@ public class HessianInput extends AbstractHessianInput {
 
     _peek = tag;
 
+    // hessian/332i
+    return readObject();
+    
+    /*
     Object value = _serializerFactory.getDeserializer(cl).readObject(this);
 
     return value;
+    */
   }
   
   /**
