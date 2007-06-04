@@ -258,18 +258,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value getField(Env env, Object obj, String name)
   {
-    Object result;
-
-    FieldMarshalPair fieldPair = _fieldMap.get(name);
-    if (fieldPair != null) {
-      try {
-        result = fieldPair._field.get(obj);
-        return fieldPair._marshal.unmarshal(env, result);
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-      }
-    } else if (__getField != null) {
+    if (__getField != null) {
       try {
         return __getField.call(env, obj, new StringValueImpl(name));
       } catch (Throwable e) {
@@ -285,6 +274,17 @@ public class JavaClassDef extends ClassDef {
         return get.call(env, obj);
       } catch (Throwable e) {
         log.log(Level.FINE, L.l(e.getMessage()), e);
+        return NullValue.NULL;
+      }
+    }
+
+    FieldMarshalPair fieldPair = _fieldMap.get(name);
+    if (fieldPair != null) {
+      try {
+        Object result = fieldPair._field.get(obj);
+        return fieldPair._marshal.unmarshal(env, result);
+      } catch (Throwable e) {
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
       }
     }
@@ -324,20 +324,7 @@ public class JavaClassDef extends ClassDef {
                         String name,
                         Value value)
   {
-    FieldMarshalPair fieldPair = _fieldMap.get(name);
-    if (fieldPair != null) {
-      try {
-        Class type = fieldPair._field.getType();
-        Object marshaledValue = fieldPair._marshal.marshal(env, value, type);
-        fieldPair._field.set(obj, marshaledValue);
-
-        return value;
-
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-      }
-    } else if (__setField != null) {
+    if (__setField != null) {
       try {
         return __setField.call(env, obj, new StringValueImpl(name), value);
       } catch (Throwable e) {
@@ -348,10 +335,26 @@ public class JavaClassDef extends ClassDef {
     }
 
     JavaMethod setter = _setMap.get(name);
-
+    
     if (setter != null) {
       try {
         return setter.call(env, obj, value);
+      } catch (Throwable e) {
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+      }
+    }
+    
+    FieldMarshalPair fieldPair = _fieldMap.get(name);
+
+    if (fieldPair != null) {
+      try {
+        Class type = fieldPair._field.getType();
+        Object marshaledValue = fieldPair._marshal.marshal(env, value, type);
+        fieldPair._field.set(obj, marshaledValue);
+
+        return value;
+
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
