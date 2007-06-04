@@ -256,7 +256,7 @@ class HtmlFormRenderer extends Renderer
 
     if (title != null)
       out.writeAttribute("title", title, "title");
-    
+
     int childCount = component.getChildCount();
 
     if (childCount > 0) {
@@ -265,11 +265,7 @@ class HtmlFormRenderer extends Renderer
       for (int i = 0; i < childCount; i++) {
 	UIComponent child = children.get(i);
 
-	if (child.isRendered()) {
-	  child.encodeBegin(context);
-	  child.encodeChildren(context);
-	  child.encodeEnd(context);
-	}
+	child.encodeAll(context);
       }
     }
 

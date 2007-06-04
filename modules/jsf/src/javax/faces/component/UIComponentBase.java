@@ -296,6 +296,7 @@ public abstract class UIComponentBase extends UIComponent
 
   public void setRendered(boolean isRendered)
   {
+    Thread.dumpStack();
     _isRendered = isRendered;
   }
 
@@ -693,10 +694,18 @@ public abstract class UIComponentBase extends UIComponent
     UIComponent []facetsAndChildren = getFacetsAndChildrenArray();
 
     Object []childSaveState = null;
+
+    int childSize = getChildCount();
+    int facetSize = getFacetCount();
+    int k = 1;
       
-    if (facetsAndChildren.length > 0) {
-      for (int i = 0; i < facetsAndChildren.length; i++) {
-	UIComponent child = facetsAndChildren[i];
+    if (childSize > 0) {
+      List<UIComponent> children = getChildren();
+      
+      for (int i = 0; i < childSize; i++) {
+	k++;
+	
+	UIComponent child = children.get(i);
 
 	if (child.isTransient())
 	  continue;
@@ -705,16 +714,44 @@ public abstract class UIComponentBase extends UIComponent
 
 	if (childState != null) {
 	  if (childSaveState == null)
-	    childSaveState = new Object[facetsAndChildren.length];
+	    childSaveState = new Object[1 + childSize + 2 * facetSize];
       
-	  childSaveState[i] = childState;
+	  childSaveState[k - 1] = childState;
+	}
+      }
+    }
+      
+    if (facetSize > 0) {
+      Map<String,UIComponent> facetMap = getFacets();
+
+      for (Map.Entry<String,UIComponent> entry : facetMap.entrySet()) {
+	k += 2;
+
+	UIComponent facet = entry.getValue();
+
+	if (facet.isTransient())
+	  continue;
+	
+	Object childState = facet.processSaveState(context);
+
+	if (childState != null) {
+	  if (childSaveState == null)
+	    childSaveState = new Object[1 + childSize + 2 * facetSize];
+      
+	  childSaveState[k - 2] = entry.getKey();
+	  childSaveState[k - 1] = entry.getValue();
 	}
       }
     }
 
     Object selfSaveState = saveState(context);
 
-    return new Object[] { selfSaveState, childSaveState };
+    if (childSaveState != null) {
+      childSaveState[0] = selfSaveState;
+      return childSaveState;
+    }
+    else
+      return new Object[] { selfSaveState };
   }
 
   public void processRestoreState(FacesContext context,
@@ -735,19 +772,49 @@ public abstract class UIComponentBase extends UIComponent
 
     restoreState(context, baseState[0]);
 
-    Object []childSaveState = (Object []) baseState[1];
+    if (baseState.length == 1)
+      return;
+
+    int childSize = getChildCount();
+    int facetSize = getFacetCount();
+    int k = 1;
       
-    if (facetsAndChildren.length > 0) {
-      for (int i = 0; i < facetsAndChildren.length; i++) {
-	UIComponent child = facetsAndChildren[i];
+    if (childSize > 0) {
+      List<UIComponent> children = getChildren();
+      
+      for (int i = 0; i < childSize; i++) {
+	k++;
+	
+	UIComponent child = children.get(i);
 
 	if (child.isTransient())
 	  continue;
-
-	if (childSaveState != null)
-	  child.processRestoreState(context, childSaveState[i]);
+	
+	Object childState;
+	
+	if (k <= baseState.length)
+	  childState = baseState[k - 1];
 	else
-	  child.processRestoreState(context, null);
+	  childState = null;
+
+	if (childState != null)
+	  child.processRestoreState(context, childState);
+      }
+    }
+      
+    if (facetSize > 0) {
+      Map<String,UIComponent> facetMap = getFacets();
+
+      for (; k < baseState.length; k += 2) {
+	String facetName = (String) baseState[k];
+	Object facetState = baseState[k + 1];
+
+	if (facetName != null && facetState != null) {
+	  UIComponent facet = facetMap.get(facetName);
+
+	  if (facet != null)
+	    facet.processRestoreState(context, facetState);
+	}
       }
     }
   }
@@ -770,7 +837,7 @@ public abstract class UIComponentBase extends UIComponent
       rendererCode,
       rendererString,
       Util.save(_rendererTypeExpr, context),
-      Util.saveWithType(_bindingExpr, context),
+      Util.save(_bindingExpr, context),
       (_attributeMap != null ? _attributeMap.saveState(context) : null),
       savedListeners,
     };
@@ -820,7 +887,7 @@ public abstract class UIComponentBase extends UIComponent
     else
       _rendererType = rendererString;
 
-    _bindingExpr = Util.restoreWithType(state[7], context);
+    _bindingExpr = Util.restore(state[7], UIComponent.class, context);
 	
     Object extMapState = state[8];
 

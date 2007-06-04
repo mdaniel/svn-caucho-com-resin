@@ -151,7 +151,6 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
       = getParentUIComponentClassicTagBase(pageContext);
 
     _component = findComponent(_facesContext);
-    System.out.println("PARENT: " + _parentUIComponentTag + " " + _component);
 
     pageContext.getRequest().setAttribute("caucho.jsf.parent", this);
     
@@ -250,11 +249,14 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
 
       _component = parent.getFacet(facetName);
 
+      System.out.println("PARENT-FACET: " + _component + " " + id);
       if (_component != null)
 	return _component;
     }
     else {
       _component = parent.findComponent(id);
+
+      System.out.println("PARENT-COMP: " + _component + " " + id);
 
       if (_component != null) {
 	if (verbatim != null) {
@@ -363,7 +365,6 @@ public abstract class UIComponentClassicTagBase extends UIComponentTagBase
     output.setTransient(true);
     if (output instanceof HtmlOutputText)
       ((HtmlOutputText) output).setEscape(false);
-    output.setRendered(true);
 
     return output;
   }

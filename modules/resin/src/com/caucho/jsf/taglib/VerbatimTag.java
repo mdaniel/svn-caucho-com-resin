@@ -70,15 +70,4 @@ public class VerbatimTag extends HtmlStyleBaseTag {
 
     return getDoAfterBodyValue();
   }
-  
-  /**
-   * Sets the overridden properties of the tag
-   */
-  @Override
-  protected void setProperties(UIComponent component)
-  {
-    component.setRendered(true);
-    
-    super.setProperties(component);
-  }
 }

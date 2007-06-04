@@ -257,7 +257,7 @@ abstract public class FilesystemPath extends Path {
   /**
    * Returns the root.
    */
-  protected FilesystemPath getRoot()
+  public FilesystemPath getRoot()
   {
     return _root;
   }

@@ -1507,6 +1507,18 @@ public class Hessian2Input
 
       return resolveRemote(type, url);
     }
+
+    case REF_BYTE: {
+      int ref = read();
+
+      return _refs.get(ref);
+    }
+
+    case REF_SHORT: {
+      int ref = 256 * read() + read();
+
+      return _refs.get(ref);
+    }
     }
 
     if (tag >= 0)

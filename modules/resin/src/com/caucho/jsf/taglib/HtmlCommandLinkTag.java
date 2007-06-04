@@ -75,8 +75,6 @@ public class HtmlCommandLinkTag extends HtmlStyleBaseTag {
   @Override
   protected void setProperties(UIComponent component)
   {
-    component.setRendered(true);
-    
     super.setProperties(component);
 
     if (_action != null)

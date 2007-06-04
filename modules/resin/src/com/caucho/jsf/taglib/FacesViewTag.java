@@ -112,23 +112,11 @@ public class FacesViewTag extends UIComponentBodyTag
 
       context.setResponseWriter(out);
 
-      context.getViewRoot().setRendered(true);
       context.getViewRoot().encodeAll(context);
 
       return getDoEndValue();
     } catch (IOException e) {
       throw new JspException(e);
     }
-  }
-  
-  /**
-   * Sets the overridden properties of the tag
-   */
-  @Override
-  protected void setProperties(UIComponent component)
-  {
-    component.setRendered(true);
-    
-    super.setProperties(component);
   }
 }

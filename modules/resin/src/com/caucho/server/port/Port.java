@@ -146,7 +146,8 @@ public class Port
   private final Object _keepaliveCountLock = new Object();
 
   // True if the port has been bound
-  private volatile boolean _isBound;
+  private volatile boolean _isBind;
+  private volatile boolean _isPostBind;
 
   // The port lifecycle
   private final Lifecycle _lifecycle = new Lifecycle();
@@ -740,9 +741,9 @@ public class Port
     throws Exception
   {
     synchronized (this) {
-      if (_isBound)
+      if (_isBind)
         return;
-      _isBound = true;
+      _isBind = true;
     }
 
     if (_protocol == null)
@@ -804,7 +805,7 @@ public class Port
     if (ss == null)
       throw new NullPointerException();
 
-    _isBound = true;
+    _isBind = true;
 
     if (_protocol == null)
       throw new IllegalStateException(L.l("'{0}' must have a configured protocol before starting.", this));
@@ -823,12 +824,16 @@ public class Port
 
     if (_sslFactory != null)
       _serverSocket = _sslFactory.bind(_serverSocket);
-
-    postBind();
   }
 
-  private void postBind()
+  public void postBind()
   {
+    synchronized (this) {
+      if (_isPostBind)
+        return;
+      _isPostBind = true;
+    }
+
     if (_tcpNoDelay)
       _serverSocket.setTcpNoDelay(_tcpNoDelay);
 
@@ -904,6 +909,7 @@ public class Port
 
     try {
       bind();
+      postBind();
 
       String name = "resin-port-" + _serverSocket.getLocalPort();
       Thread thread = new Thread(this, name);

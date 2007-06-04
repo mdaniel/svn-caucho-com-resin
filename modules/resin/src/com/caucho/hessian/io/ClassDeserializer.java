@@ -53,7 +53,7 @@ import java.io.IOException;
 /**
  * Deserializing a JDK 1.2 Class.
  */
-public class ClassDeserializer extends AbstractDeserializer {
+public class ClassDeserializer extends AbstractMapDeserializer {
   public ClassDeserializer()
   {
   }
@@ -81,12 +81,18 @@ public class ClassDeserializer extends AbstractDeserializer {
       
     in.readMapEnd();
 
-    return create(name);
+    Object value = create(name);
+
+    in.setRef(ref, value);
+
+    return value;
   }
   
   public Object readObject(AbstractHessianInput in, String []fieldNames)
     throws IOException
   {
+    int ref = in.addRef(null);
+    
     String name = null;
     
     for (int i = 0; i < fieldNames.length; i++) {
@@ -96,7 +102,11 @@ public class ClassDeserializer extends AbstractDeserializer {
 	in.readObject();
     }
 
-    return create(name);
+    Object value = create(name);
+
+    in.setRef(ref, value);
+
+    return value;
   }
 
   Object create(String name)

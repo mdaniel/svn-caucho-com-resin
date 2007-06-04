@@ -90,7 +90,8 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     _args = new Args(argv);
 
     Vfs.setPwd(_args.getRootDirectory());
-    
+
+    boolean isLogNew = ! _args.getLogDirectory().exists();
     Path logPath = _args.getLogDirectory().lookup("watchdog-manager.log");
 
     RotateStream stream = RotateStream.create(logPath);
@@ -139,7 +140,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
 
     WebApp webApp = host.findWebAppByURI("/");
 
-    ServletMapping servlet = new ServletMapping();
+    ServletMapping servlet = webApp.createServletMapping();
 
     servlet.setServletName("watchdog");
     servlet.addURLPattern("/watchdog");
@@ -446,7 +447,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
       _argv = argv;
 
       _resinConf = _resinHome.lookup("conf/resin.conf");
-
+      
       parseCommandLine(argv);
     }
 

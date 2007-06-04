@@ -88,12 +88,16 @@ public class CustomTag extends GenericTag
     }
 
     if (JspIdConsumer.class.isAssignableFrom(_tag.getTagClass())) {
+      out.println(name + ".setJspId(\"jsp-" + _gen.generateJspId() + "\");");
+      
+      /*
       String shortName = className;
       int p = shortName.lastIndexOf('.');
       if (p >= 0)
 	shortName = shortName.substring(p + 1);
 
-      out.println(name + ".setJspId(\"" + shortName + "-" + _gen.generateJspId() + "\");");      
+      out.println(name + ".setJspId(\"" + shortName + "-" + _gen.generateJspId() + "\");");
+      */
     }
 
     fillAttributes(out, name);

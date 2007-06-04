@@ -95,6 +95,25 @@ public class ConverterTag extends TagSupport
   protected Converter createConverter()
     throws JspException
   {
-    throw new UnsupportedOperationException();
+    try {
+      FacesContext context = FacesContext.getCurrentInstance();
+      Converter converter;
+
+      if (_binding != null) {
+	converter = (Converter) _binding.getValue(context.getELContext());
+
+	if (converter != null)
+	  return converter;
+      }
+    
+      converter = context.getApplication().createConverter(_id);
+
+      if (_binding != null)
+	_binding.setValue(context.getELContext(), converter);
+
+      return converter;
+    } catch (Exception e) {
+      throw new JspException(e);
+    }
   }
 }

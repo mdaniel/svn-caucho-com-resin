@@ -49,6 +49,7 @@ public class UIViewRoot extends UIComponentBase
   private int _unique;
 
   private Locale _locale;
+  private ValueExpression _localeExpr;
 
   private ArrayList<PhaseListener> _phaseListeners
     = new  ArrayList<PhaseListener>();
@@ -79,8 +80,6 @@ public class UIViewRoot extends UIComponentBase
     _renderKitId = renderKitId;
   }
 
-  
-  
   public String getViewId()
   {
     return _viewId;
@@ -98,7 +97,22 @@ public class UIViewRoot extends UIComponentBase
 
   public Locale getLocale()
   {
-    return _locale;
+    if (_locale != null)
+      return _locale;
+
+    Locale locale = null;
+    FacesContext context = getFacesContext();
+    
+    if (_localeExpr != null)
+      locale = toLocale(Util.eval(_localeExpr, context));
+
+    if (locale == null) {
+      ViewHandler viewHandler = context.getApplication().getViewHandler();
+			  
+      locale = viewHandler.calculateLocale(context);
+    }
+
+    return locale;
   }
 
   //
@@ -228,6 +242,7 @@ public class UIViewRoot extends UIComponentBase
       _renderKitId,
       Util.save(_renderKitIdExpr, getFacesContext()),
       _locale,
+      Util.save(_localeExpr, getFacesContext()),
       _unique
     };
   }
@@ -242,8 +257,31 @@ public class UIViewRoot extends UIComponentBase
     _renderKitId = (String) state[2];
     _renderKitIdExpr = Util.restoreString(state[3], context);
     _locale = (Locale) state[4];
-    _unique = (Integer) state[5];
+    _localeExpr = Util.restore(state[5], Object.class, context);
+    _unique = (Integer) state[6];
   }
+  
+  private Locale toLocale(Object value)
+  {
+    if (value instanceof Locale)
+      return (Locale) value;
+    else if (value instanceof String) {
+      String sValue = (String) value;
+      String []values = sValue.split("[-_]");
+
+      if (values.length > 2)
+	return new Locale(values[0], values[1], values[2]);
+      else if (values.length > 1)
+	return new Locale(values[0], values[1]);
+      else
+	return new Locale(sValue);
+    }
+    else if (value == null)
+      return null;
+    else
+      return (Locale) value;
+  }
+
   
   public String toString()
   {

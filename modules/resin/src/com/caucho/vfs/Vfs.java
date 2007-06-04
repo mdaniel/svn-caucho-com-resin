@@ -68,6 +68,8 @@ public final class Vfs {
   
   static FilesystemPath PWD;
 
+  private static boolean _isInitJNI;
+
   private Vfs() {}
   
   /**
@@ -318,6 +320,10 @@ public final class Vfs {
    */
   public static void initJNI()
   {
+    if (_isInitJNI)
+      return;
+    _isInitJNI = true;
+    
     // order matters because of static init and license checking
     FilesystemPath jniFilePath = JniFilePath.create();
 

@@ -231,9 +231,7 @@ class HtmlPanelGridRenderer extends Renderer
       if (captionStyle != null)
 	out.writeAttribute("style", captionStyle, "captionStyle");
 
-      caption.encodeBegin(context);
-      caption.encodeChildren(context);
-      caption.encodeEnd(context);
+      caption.encodeAll(context);
       
       out.endElement("caption");
     }
@@ -253,9 +251,7 @@ class HtmlPanelGridRenderer extends Renderer
 
       out.writeAttribute("scope", "colgroup", "scope");
 
-      header.encodeBegin(context);
-      header.encodeChildren(context);
-      header.encodeEnd(context);
+      header.encodeAll(context);
       
       out.endElement("th");
       out.endElement("tr");
@@ -362,15 +358,11 @@ class HtmlPanelGridRenderer extends Renderer
 	for (int j = 0; j < subCount; j++) {
 	  UIComponent subChild = child.getChildren().get(j);
 	  
-	  subChild.encodeBegin(context);
-	  subChild.encodeChildren(context);
-	  subChild.encodeEnd(context);
+	  subChild.encodeAll(context);
 	}
       }
       else {
-	child.encodeBegin(context);
-	child.encodeChildren(context);
-	child.encodeEnd(context);
+	child.encodeAll(context);
       }
       out.endElement("td");
     }
@@ -421,9 +413,7 @@ class HtmlPanelGridRenderer extends Renderer
 
       //out.writeAttribute("scope", "colgroup", "scope");
 
-      footer.encodeBegin(context);
-      footer.encodeChildren(context);
-      footer.encodeEnd(context);
+      footer.encodeAll(context);
       
       out.endElement("td");
       out.endElement("tr");

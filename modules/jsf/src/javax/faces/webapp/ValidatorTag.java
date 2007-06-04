@@ -95,6 +95,25 @@ public class ValidatorTag extends TagSupport
   protected Validator createValidator()
     throws JspException
   {
-    throw new UnsupportedOperationException();
+    try {
+      FacesContext context = FacesContext.getCurrentInstance();
+      Validator validator;
+
+      if (_binding != null) {
+	validator = (Validator) _binding.getValue(context.getELContext());
+
+	if (validator != null)
+	  return validator;
+      }
+    
+      validator = context.getApplication().createValidator(_id);
+
+      if (_binding != null)
+	_binding.setValue(context.getELContext(), validator);
+
+      return validator;
+    } catch (Exception e) {
+      throw new JspException(e);
+    }
   }
 }

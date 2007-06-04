@@ -69,7 +69,7 @@ public abstract class UIComponentELTag extends UIComponentClassicTagBase
   protected void setProperties(UIComponent component)
   {
     if (_binding != null)
-      component.setValueExpression("binding", _rendered);
+      component.setValueExpression("binding", _binding);
     
     if (_rendered != null)
       component.setValueExpression("rendered", _rendered);
@@ -88,10 +88,14 @@ public abstract class UIComponentELTag extends UIComponentClassicTagBase
 
     UIComponent component;
 
-    if (_binding != null)
+    if (_binding != null) {
       component = app.createComponent(_binding, context, getComponentType());
+      component.setValueExpression("binding", _binding);
+    }
     else
       component = app.createComponent(getComponentType());
+
+    component.setId(getId());
 
     setProperties(component);
 

@@ -215,9 +215,19 @@ public class ResinWatchdog extends AbstractManagedObject
     _userName = user;
   }
 
+  public String getUserName()
+  {
+    return _userName;
+  }
+
   public void setGroupName(String group)
   {
     _groupName = group;
+  }
+
+  public String getGroupName()
+  {
+    return _groupName;
   }
   
   /**
@@ -491,7 +501,17 @@ public class ResinWatchdog extends AbstractManagedObject
 	  Path jvmPath = getManager().getLogDirectory().lookup(name);
 
 	  try {
-	    jvmPath.getParent().mkdirs();
+	    Path dir = jvmPath.getParent();
+	    
+	    if (! dir.exists()) {
+	      dir.mkdirs();
+
+	      if (_userName != null)
+		dir.changeOwner(_userName);
+
+	      if (_groupName != null)
+		dir.changeGroup(_groupName);
+	    }
 	  } catch (Exception e) {
 	    log.log(Level.FINE, e.toString(), e);
 	  }

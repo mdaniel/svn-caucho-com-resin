@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.logging.*;
 
 /**
  * Serializing an object for known object types.
@@ -212,8 +213,8 @@ public class BeanSerializer extends AbstractSerializer {
 
 	try {
 	  value = _methods[i].invoke(obj, (Object []) null);
-	} catch (Throwable e) {
-	  // log when available
+	} catch (Exception e) {
+	  log.log(Level.FINER, e.toString(), e);
 	}
 	
 	out.writeObject(value);

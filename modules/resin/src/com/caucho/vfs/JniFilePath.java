@@ -38,7 +38,11 @@ public class JniFilePath {
   public static FilesystemPath create()
   {
     try {
-      Class pathClass = Class.forName("com.caucho.vfs.JniFilePathImpl");
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+      
+      Class pathClass
+	= Class.forName("com.caucho.vfs.JniFilePathImpl", false, loader);
 
       Method isEnabled = pathClass.getMethod("isEnabled", new Class[0]);
 

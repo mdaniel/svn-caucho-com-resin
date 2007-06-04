@@ -273,7 +273,11 @@ public class SessionStateManager extends StateManager
 
       if ('a' <= ch && ch <= 'z'
 	  || 'A' <= ch && ch <= 'Z'
-	  || ch == ' ' || ch == '[' || ch == '.' || ch == '/')
+	  || '0' <= ch && ch <= '9'
+	  || ch == ' ' || ch == '[' || ch == '.' || ch == ']'
+	  || ch == '/' || ch == '\\'
+	  || ch == '-' || ch == '_' || ch == '{' || ch == '}'
+	  || ch == '#' || ch == '$' || ch == ':')
 	System.out.print((char) ch);
       else {
 	System.out.print("x"

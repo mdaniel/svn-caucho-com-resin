@@ -131,8 +131,10 @@ public class UIOutput extends UIComponentBase implements ValueHolder
   {
     if (_converter != null)
       return _converter;
-    else if (_converterExpr != null)
+    else if (_converterExpr != null) {
+      System.out.println("CVT: " + _converterExpr);
       return (Converter) Util.eval(_converterExpr, getFacesContext());
+    }
     else
       return null;
   }
@@ -165,8 +167,7 @@ public class UIOutput extends UIComponentBase implements ValueHolder
   {
     Object []state = (Object []) value;
 
-    if (state != null) 
-      super.restoreState(context, state[0]);
+    super.restoreState(context, state[0]);
 
     _value = state[1];
     _valueExpr = Util.restoreWithType(state[2], context);

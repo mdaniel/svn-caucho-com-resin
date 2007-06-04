@@ -53,15 +53,4 @@ public class HtmlInputTextareaTag extends HtmlStyleBaseTag {
   {
     return "javax.faces.Textarea";
   }
-  
-  /**
-   * Sets the overridden properties of the tag
-   */
-  @Override
-  protected void setProperties(UIComponent component)
-  {
-    component.setRendered(true);
-    
-    super.setProperties(component);
-  }
 }

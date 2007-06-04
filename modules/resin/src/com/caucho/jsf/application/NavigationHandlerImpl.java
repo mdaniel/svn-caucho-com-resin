@@ -52,7 +52,6 @@ public class NavigationHandlerImpl extends NavigationHandler
 			       String fromAction,
 			       String outcome)
   {
-    System.out.println("HANDLE: " + fromAction + " " + outcome);
     if (outcome == null)
       return;
     
@@ -71,7 +70,6 @@ public class NavigationHandlerImpl extends NavigationHandler
     }
 
     for (int i = 0; i < ruleList.length; i++) {
-      System.out.println("RULE: " + ruleList[i]);
       if (ruleList[i].handleNavigation(context, fromAction, outcome))
 	return;
     }

@@ -86,8 +86,15 @@ public class ResinBoot {
     calculateResinHome();
     
     ClassLoader loader = ProLoader.create(_resinHome);
-    if (loader != null)
+    if (loader != null) {
+      System.setProperty("resin.home", _resinHome.getNativePath());
+      
       Thread.currentThread().setContextClassLoader(loader);
+
+      Vfs.initJNI();
+
+      _resinHome = Vfs.lookup(_resinHome.getFullPath());
+    }
     
     Environment.init();
 
@@ -144,6 +151,17 @@ public class ResinBoot {
       throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
                                       Version.VERSION, _serverId, _resinConf));
 
+    Path logDirectory = getLogDirectory();
+    if (! logDirectory.exists()) {
+      logDirectory.mkdirs();
+
+      if (_server.getUserName() != null)
+	logDirectory.changeOwner(_server.getUserName());
+      
+      if (_server.getGroupName() != null)
+	logDirectory.changeOwner(_server.getGroupName());
+    }
+    
     if (_isVerbose)
       _server.setVerbose(_isVerbose);
   }
@@ -205,6 +223,14 @@ public class ResinBoot {
     }
 
     _rootDirectory = _resinHome;
+  }
+
+  private Path getLogDirectory()
+  {
+    if (_logDirectory != null)
+      return _logDirectory;
+    else
+      return _rootDirectory.lookup("log");
   }
 
   private void parseCommandLine(String []argv)

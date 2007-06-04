@@ -47,13 +47,20 @@ import javax.servlet.jsp.tagext.*;
 public abstract class UIComponentTag extends UIComponentClassicTagBase
   implements Tag
 {
-  private String _binding;
-  private boolean _rendered = true;
+  private ValueExpression _binding;
+  private ValueExpression _rendered;
 
   public void setBinding(String binding)
     throws JspException
   {
-    _binding = binding;
+    FacesContext context = FacesContext.getCurrentInstance();
+
+    Application app = context.getApplication();
+    ExpressionFactory factory = app.getExpressionFactory();
+
+    _binding = factory.createValueExpression(context.getELContext(),
+					     binding,
+					     UIComponent.class);
   }
 
   public boolean hasBinding()
@@ -62,8 +69,16 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
   }
 
   public void setRendered(String rendered)
+    throws JspException
   {
-    _rendered = "true".equals(rendered);
+    FacesContext context = FacesContext.getCurrentInstance();
+
+    Application app = context.getApplication();
+    ExpressionFactory factory = app.getExpressionFactory();
+
+    _rendered = factory.createValueExpression(context.getELContext(),
+					     rendered,
+					     boolean.class);
   }
 
   public boolean isSuppressed()
@@ -73,7 +88,8 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
 
   protected void setProperties(UIComponent component)
   {
-    component.setRendered(_rendered);
+    if (_rendered != null)
+      component.setValueExpression("rendered", _rendered);
 
     String type = getRendererType();
     if (type != null)
@@ -88,13 +104,14 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
     UIComponent component;
 
     if (_binding != null) {
-      ValueBinding binding = app.createValueBinding(_binding);
-      
-      component = app.createComponent(binding, context, getComponentType());
+      component = app.createComponent(_binding, context, getComponentType());
+      component.setValueExpression("binding", _binding);
     }
     else
       component = app.createComponent(getComponentType());
 
+    component.setId(getId());
+    
     setProperties(component);
 
     return component;
@@ -102,7 +119,11 @@ public abstract class UIComponentTag extends UIComponentClassicTagBase
 
   public static UIComponentTag getParentUIComponentTag(PageContext context)
   {
-    return null;
+    UIComponentClassicTagBase parent;
+    
+    parent = getParentUIComponentClassicTagBase(context);
+
+    return (UIComponentTag) parent;
   }
 
   public static boolean isValueReference(String value)
