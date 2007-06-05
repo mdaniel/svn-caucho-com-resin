@@ -85,17 +85,10 @@ public class ErrorModule extends AbstractQuercusModule {
    */
   public Value die(Env env, @Optional String msg)
   {
-    try {
-      if (msg != null) {
-	env.getOut().print(msg);
-
-	throw new QuercusDieException(msg);
-      }
-      else
-	throw new QuercusDieException(msg);
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
+    if (msg != null)
+      return env.die(msg);
+    else
+      return env.die();
   }
   
   /**
@@ -336,21 +329,9 @@ public class ErrorModule extends AbstractQuercusModule {
   /**
    * Exits
    */
-  public Value exit(Env env, @Optional String msg)
+  public Value exit(Env env, @Optional Value msg)
   {
-    try {
-      if (msg != null) {
-	env.getOut().print(msg);
-
-	env.exit(msg);
-      }
-      else
-	env.exit();
-
-      throw new IllegalStateException();
-    } catch (IOException e) {
-      throw new QuercusModuleException(e);
-    }
+    return env.exit(msg);
   }
 
   /**

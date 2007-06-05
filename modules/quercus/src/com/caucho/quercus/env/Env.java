@@ -3602,15 +3602,18 @@ public class Env {
   /**
    * Handles exit/die
    */
-  public Value exit(String msg)
+  public Value exit(Value msg)
   {
+    if (msg.isNull() || msg instanceof LongValue)
+      return exit();
+
     try {
-      getOut().print(msg);
+      getOut().print(msg.toString());
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    throw new QuercusExitException(msg);
+    throw new QuercusExitException(msg.toString());
   }
 
   /**

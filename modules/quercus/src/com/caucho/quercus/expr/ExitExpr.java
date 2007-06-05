@@ -73,17 +73,13 @@ public class ExitExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    try {
-      if (_value != null) {
-	String msg = _value.evalString(env);
-	
-	env.getOut().print(msg);
-	
-	throw new QuercusExitException(msg);
-      }
-    } catch (IOException e) {
+    if (_value != null) {
+      Value msg = _value.eval(env);
+    
+      return env.exit(msg);
     }
-    throw new QuercusExitException();
+    else
+      return env.exit();
   }
 }
 
