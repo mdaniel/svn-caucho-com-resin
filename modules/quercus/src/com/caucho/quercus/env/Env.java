@@ -345,6 +345,26 @@ public class Env {
     return _env.get();
   }
 
+  public boolean hasRequest()
+  {
+    return _request != null;
+  }
+  
+  public boolean hasDatabase()
+  {
+    return _quercus.getDatabase() != null;
+  }
+  
+  public boolean isCompile()
+  {
+    return _quercus.isCompile();
+  }
+  
+  public boolean isPro()
+  {
+    return false;
+  }
+  
   //
   // debugging
   //

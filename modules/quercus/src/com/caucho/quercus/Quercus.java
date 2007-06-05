@@ -285,6 +285,14 @@ public class Quercus
   }
 
   /**
+   * true if the pages should be compiled.
+   */
+  public boolean isCompile()
+  {
+    return _pageManager.isCompile();
+  }
+  
+  /**
    * Set true if pages should be compiled.
    */
   public void setCompile(boolean isCompile)
