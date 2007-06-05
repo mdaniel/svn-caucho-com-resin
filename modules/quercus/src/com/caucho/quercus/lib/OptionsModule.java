@@ -500,12 +500,21 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     if ((what & INFO_GENERAL) != 0)
       phpinfoGeneral(env);
+    if ((what & INFO_VARIABLES) != 0)
+      phpinfoVariables(env);
   }
 
   private static void phpinfoGeneral(Env env)
   {
-    env.print("<h1>Quercus</h1>");
-    env.print("<pre>");
+    if (env.hasRequest())
+      env.println("<h1>Quercus</h1>");
+    else
+      env.println("Quercus");
+
+    if (env.hasRequest()) {
+      env.println("<pre>");
+    }
+    
     env.println("PHP Version => " + phpversion(env, "std"));
     env.println("System => " + System.getProperty("os.name") + " "
 	      + System.getProperty("os.version") + " "
@@ -520,7 +529,124 @@ public class OptionsModule extends AbstractQuercusModule {
     env.println("Debug Build => no");
     env.println("Thread Safety => enabled");
     env.println("Registered PHP Streams => php, file, http, https");
-    env.println("</pre>");
+    
+    if (env.hasRequest()) {
+      env.print("</pre>");
+    }
+  }
+  
+  private static void phpinfoVariables(Env env)
+  {
+    if (env.hasRequest()) {
+      env.println("<h2>PHP Variables</h2");
+      env.println("<table>");
+      env.println("<tr><th>Variable</th><th>Value</th></tr>");
+    }
+    else {
+      env.println("Variable => Value");
+    }
+    
+    if (env.hasRequest()) {
+      phpinfoVariable(env, "_REQUEST", env.getSpecialRef("_REQUEST"));
+      phpinfoVariable(env, "_GET", env.getSpecialRef("_GET"));
+      phpinfoVariable(env, "_POST", env.getSpecialRef("_POST"));
+    }
+
+    phpinfoVariable(env, "_SERVER", env.getSpecialRef("_SERVER"));
+    
+    if (env.hasRequest())
+      env.print("</table>");
+    
+    env.println();
+  }
+  
+  private static void phpinfoVariable(Env env, String name, Value value)
+  {
+    if (value.isArray()) {
+      ArrayValue array = value.toArrayValue(env);
+      
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
+        Value key = escape(env, entry.getKey());
+        
+        if (env.hasRequest())
+          env.print("<tr><td>");
+        
+        env.print(name + "[\"" + key + "\"]");
+        
+        if (env.hasRequest())
+          env.println("</td><td>");
+        else
+          env.print(" => ");
+        
+        phpinfoVariable(env, entry.getValue());
+        
+        if (env.hasRequest())
+          env.println("</td></tr>");
+      }
+    }
+    else {
+      if (env.hasRequest())
+        env.println("<tr><td>" + name + "</td><td>");
+      
+      phpinfoVariable(env, value);
+      
+      if (env.hasRequest())
+        env.println("</td></tr>");
+    }
+  }
+  
+  private static void phpinfoVariable(Env env, Value value)
+  {
+    if (value.isString()) {
+      env.println(escape(env, value).toString());
+    }
+    else {
+      if (env.hasRequest())
+        env.print("<pre>");
+      
+      VariableModule.var_dump(env, escape(env, value));
+      
+      if (env.hasRequest())
+        env.print("</pre>");
+    }
+  }
+  
+  private static Value escape(Env env, Value value)
+  {
+    if (value.isArray()) {
+      ArrayValue array = value.toArrayValue(env);
+      
+      ArrayValue result = new ArrayValueImpl();
+      
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
+        Value key = escape(env, entry.getKey());
+        Value val = escape(env, entry.getValue());
+        
+        result.put(key, value);
+      }
+      
+      return result;
+    }
+    else if (value.isObject()) {
+      ObjectValue obj = (ObjectValue)value.toObject(env);
+      
+      ObjectValue result = new ObjectExtValue(obj.getQuercusClass());
+      
+      for (Map.Entry<String,Value> entry : obj.entrySet()) {
+        Value key = escape(env, StringValue.create(entry.getKey()));
+        Value val = escape(env, entry.getValue());
+        
+        result.putField(env, key.toString(), val);
+      }
+      
+      return result;
+    }
+    else {
+      return HtmlModule.htmlspecialchars(env,
+                                         value,
+                                         DefaultValue.DEFAULT,
+                                         DefaultValue.DEFAULT);
+    }
   }
 
   /**
