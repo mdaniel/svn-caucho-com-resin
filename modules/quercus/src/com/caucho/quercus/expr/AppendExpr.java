@@ -84,9 +84,29 @@ public class AppendExpr extends Expr
   {
     Value value = _value.eval(env);
 
+    AppendExpr next = _next;
+    
+    /*
+    if (value.length() == 0) {
+      for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
+        Value right = ptr._value.eval(env);
+        
+        if (right.length() != 0 || right.isBinary()) {
+          value = right;
+          next = ptr._next;
+          
+          if (next == null)
+            return value;
+          
+          break;
+        }
+      }
+    }
+    */
+
     StringValue sb = value.toStringBuilder();
 
-    for (AppendExpr ptr = _next; ptr != null; ptr = ptr._next) {
+    for (AppendExpr ptr = next; ptr != null; ptr = ptr._next) {
       sb = sb.append(ptr._value.eval(env));
     }
 

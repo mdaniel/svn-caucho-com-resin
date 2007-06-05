@@ -94,6 +94,26 @@ public class BinaryBuilderValue extends BinaryValue
     this(value.getBytes());
   }
 
+  public BinaryBuilderValue(String value, boolean isBytes)
+  {
+    int length = value.length();
+    
+    if (isBytes) {
+      _buffer = new byte[length];
+      _length = length;
+      
+      for (int i = 0; i < length; i++) {
+        _buffer[i] = (byte)value.charAt(i);
+      }
+    }
+    else {
+      _buffer = new byte[length];
+      _length = length;
+
+      System.arraycopy(value.getBytes(), 0, _buffer, 0, length);
+    }
+  }
+  
   /**
    * Returns the value.
    */
@@ -314,6 +334,15 @@ public class BinaryBuilderValue extends BinaryValue
     return _value;
   }
 
+  /**
+   * Converts to a string builder
+   */
+  @Override
+  public StringValue toStringBuilder()
+  {
+    return new BinaryBuilderValue(_buffer, 0, _length);
+  }
+  
   /**
    * Append to a string builder.
    */
@@ -602,7 +631,18 @@ public class BinaryBuilderValue extends BinaryValue
   @Override
   public final StringValue append(Value v)
   {
-    if (v.isUnicode()) {
+    if (_length == 0) {
+      if (v.length() != 0) {
+        return v.toStringBuilder();
+      }
+      else {
+        return this;
+      }
+    }
+    else if (v.length() == 0) {
+      return this;
+    }
+    else if (v.isUnicode()) {
       StringBuilderValue sb = new StringBuilderValue();
 
       appendTo(sb);
@@ -791,7 +831,7 @@ public class BinaryBuilderValue extends BinaryValue
 
     return hash;
   }
-
+  
   public boolean equals(Object o)
   {
     if (o instanceof BinaryBuilderValue) {
@@ -812,6 +852,7 @@ public class BinaryBuilderValue extends BinaryValue
 
       return true;
     }
+    /*
     else if (o instanceof StringValue) {
       StringValue value = (StringValue) o;
 
@@ -828,6 +869,7 @@ public class BinaryBuilderValue extends BinaryValue
 
       return true;
     }
+    */
     else
       return false;
   }
@@ -844,9 +886,15 @@ public class BinaryBuilderValue extends BinaryValue
   public void generate(PrintWriter out)
     throws IOException
   {
+    StringBuilder sb = new StringBuilder();
+    
+    for (int i = 0; i < _length; i++) {
+      sb.append((char)_buffer[i]);
+    }
+    
     out.print("new BinaryBuilderValue(\"");
-    printJavaString(out, toString());
-    out.print("\")");
+    printJavaString(out, sb.toString());
+    out.print("\", true)");
   }
   
   //

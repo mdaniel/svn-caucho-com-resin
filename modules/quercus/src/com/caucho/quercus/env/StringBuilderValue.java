@@ -879,6 +879,13 @@ public class StringBuilderValue extends UnicodeValue
   @Override
   public final StringValue append(Value v)
   {
+    if (_length == 0) {
+      if (v.length() != 0 || v.isBinary())
+        return v.toStringBuilder();
+      else
+        return this;
+    }
+    
     _value = null;
     
     v.appendTo(this);
@@ -933,7 +940,7 @@ public class StringBuilderValue extends UnicodeValue
 
       return true;
     }
-    else if (o instanceof StringValue) {
+    else if (o instanceof UnicodeValue) {
       StringValue s = (StringValue) o;
 
       int aLength = length();

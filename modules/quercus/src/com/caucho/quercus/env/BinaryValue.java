@@ -42,7 +42,10 @@ import java.util.IdentityHashMap;
 /**
  * Represents a 8-bit binary string value.
  */
-abstract public class BinaryValue extends StringValue {
+abstract public class BinaryValue extends StringValue
+{
+  public static final StringValue EMPTY = new BinaryBuilderValue();
+
   /**
    * Convert to a binary value.
    */

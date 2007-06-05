@@ -1226,6 +1226,9 @@ abstract public class StringValue extends Value implements CharSequence {
 
     StringValue s = (StringValue) o;
 
+    if (s.isUnicode() != isUnicode())
+      return false;
+    
     int aLength = length();
     int bLength = s.length();
 
