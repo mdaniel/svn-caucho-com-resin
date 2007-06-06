@@ -141,6 +141,7 @@ public class WebApp extends ServletContextImpl
   private String _servletVersion;
 
   private boolean _isDynamicDeploy;
+  private boolean _isDisableCrossContext;
 
   // Any war-generators.
   private ArrayList<DeployGenerator> _appGenerators
@@ -669,6 +670,14 @@ public class WebApp extends ServletContextImpl
   public void setAllowServletEL(boolean allow)
   {
     _servletAllowEL = allow;
+  }
+
+  /**
+   * If true, disables getContext().
+   */
+  public void setDisableCrossContext(boolean isDisable)
+  {
+    _isDisableCrossContext = isDisable;
   }
 
   /**
@@ -1836,7 +1845,9 @@ public class WebApp extends ServletContextImpl
       throw new IllegalArgumentException(L.l("getContext URI '{0}' must be absolute.", uri));
 
     try {
-      if (_parent != null)
+      if (_isDisableCrossContext)
+	return uri.startsWith(getContextPath()) ? this : null;
+      else if (_parent != null)
         return _parent.findSubWebAppByURI(uri);
       else
         return this;

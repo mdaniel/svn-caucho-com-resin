@@ -55,4 +55,18 @@ public class IntKeyCompare extends KeyCompare {
     else
       return 1;
   }
+  
+  /**
+   * Returns a printable version of the string.
+   */
+  @Override
+  public String toString(byte []keyBuffer, int keyOffset, int length)
+  {
+    int key = (((keyBuffer[keyOffset + 0] & 0xff) << 24) +
+	       ((keyBuffer[keyOffset + 1] & 0xff) << 16) +
+	       ((keyBuffer[keyOffset + 2] & 0xff) << 8) +
+	       ((keyBuffer[keyOffset + 3] & 0xff) << 0));
+
+    return String.valueOf(key);
+  }
 }

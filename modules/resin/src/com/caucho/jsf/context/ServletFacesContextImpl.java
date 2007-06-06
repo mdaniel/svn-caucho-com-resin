@@ -239,7 +239,6 @@ public class ServletFacesContextImpl extends FacesContext
     if (_isClosed)
       throw new IllegalStateException(getClass().getName() + " is closed");
     
-    Thread.dumpStack();
     _isResponseComplete = true;
   }
 
@@ -251,6 +250,8 @@ public class ServletFacesContextImpl extends FacesContext
     
     if (message == null)
       throw new NullPointerException();
+
+    System.out.println("MSG: " + message);
 
     synchronized (_messageMap) {
       ArrayList<FacesMessage> messages = _messageMap.get(clientId);

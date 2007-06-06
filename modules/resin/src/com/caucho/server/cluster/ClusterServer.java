@@ -384,6 +384,14 @@ public class ClusterServer {
   }
 
   /**
+   * Returns true for secure.
+   */
+  public boolean isSSL()
+  {
+    return getClusterPort().isSSL();
+  }
+
+  /**
    * Returns the server connector.
    */
   public ServerConnector getServerConnector()

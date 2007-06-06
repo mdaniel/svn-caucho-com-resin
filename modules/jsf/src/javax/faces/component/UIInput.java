@@ -642,7 +642,7 @@ public class UIInput extends UIOutput
     }
     else if (isRequired()) {
       String summary = Util.l10n(context, REQUIRED_MESSAGE_ID,
-				 "{0}: Validation Error: Value is required.",
+				 "{0}: UIInput validation Error: Value is required.",
 				 Util.getLabel(context, this));
 
       String detail = summary;

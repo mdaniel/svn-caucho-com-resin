@@ -1170,6 +1170,9 @@ r_web-app-Basis =
 
   & r_description-Group
 
+  & (attribute disable-cross-context { r_boolean-Type }
+     | element disable-cross-context { r_boolean-Type })?
+
   & (attribute dispatch-wraps-filters { r_boolean-Type }
      | element dispatch-wraps-filters { r_boolean-Type })?
 

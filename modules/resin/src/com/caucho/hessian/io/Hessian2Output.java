@@ -1213,6 +1213,15 @@ public class Hessian2Output
   }
 
   /**
+   * Resets the references for streaming.
+   */
+  public void resetReferences()
+  {
+    if (_refs != null)
+      _refs.clear();
+  }
+
+  /**
    * Prints a string to the stream, encoded as UTF-8 with preceeding length
    *
    * @param v the string to print.

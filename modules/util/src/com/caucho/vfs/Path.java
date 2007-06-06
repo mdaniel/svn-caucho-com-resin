@@ -126,6 +126,8 @@ public abstract class Path {
   {
     if (newAttributes != null)
       return lookupImpl(userPath, newAttributes);
+    else if (userPath == null)
+      return this;
 
     synchronized (_key) {
       _key.init(this, userPath);
@@ -1427,7 +1429,10 @@ public abstract class Path {
 
     public int hashCode()
     {
-      return System.identityHashCode(_parent) * 65521 + _lookup.hashCode();
+      if (_parent != null)
+	return System.identityHashCode(_parent) * 65521 + _lookup.hashCode();
+      else
+	return _lookup.hashCode();
     }
 
     public boolean equals(Object test)

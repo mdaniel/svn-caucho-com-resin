@@ -29,10 +29,8 @@
 
 package com.caucho.tools.profiler;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Map;
+import java.util.*;
+import com.caucho.util.*;
 
 /**
  * Represents a unique point at which profiling is performed. Obtained from a
@@ -42,23 +40,18 @@ import java.util.Map;
 public class ProfilerPoint
   implements Comparable<ProfilerPoint>
 {
-  private static final Profiler NOOP_PROFILER = new Profiler() {
-    public void finish()
-    {
-    }
-
-    public String toString()
-    {
-      return "NoopProfiler[]";
-    }
-  };
+  private static final Profiler NOOP_PROFILER;
 
   private final ProfilerManager _profilerManager;
   private final String _name;
 
-  private long _longHashCode;
+  private LruCache<String,ProfilerPoint> _children;
 
-  private Map<ProfilerNode, ProfilerNode> _childProfilerNodesMap;
+  private long _time;
+  private long _invocationCount;
+
+  private long _minTime = Long.MAX_VALUE;
+  private long _maxTime = Long.MIN_VALUE;
 
   ProfilerPoint(ProfilerManager profilerManager, String name)
   {
@@ -79,9 +72,26 @@ public class ProfilerPoint
     return _name;
   }
 
-  public ProfilerPoint createProfilerPoint(String name)
+  public ProfilerPoint addProfilerPoint(String name)
   {
-    return getProfilerManager().getProfilerPoint(name);
+    synchronized (this) {
+      if (_children == null)
+	_children = new LruCache<String,ProfilerPoint>(1024);
+    
+      ProfilerPoint child = _children.get(name);
+
+      if (child == null) {
+	child = create(name);
+	_children.put(name, child);
+      }
+
+      return child;
+    }
+  }
+
+  protected ProfilerPoint create(String name)
+  {
+    return new ProfilerPoint(getProfilerManager(), name);
   }
 
   public Profiler start()
@@ -112,45 +122,94 @@ public class ProfilerPoint
    * Caller must synchronize on this ProfilerPoint while it uses the returned
    * map.
    */
-  Collection<ProfilerNode> getProfilerNodes()
+  List<ProfilerPoint> getChildren()
   {
-    if (_childProfilerNodesMap == null)
+    if (_children == null)
       return Collections.emptyList();
-    else
-      return _childProfilerNodesMap.values();
-  }
+    else {
+      ArrayList<ProfilerPoint> children = new ArrayList<ProfilerPoint>();
 
-  ProfilerNode getProfilerNode(ProfilerNode parentNode)
-  {
-    synchronized (this) {
-      ProfilerNode node;
-
-      if (_childProfilerNodesMap == null) {
-        _childProfilerNodesMap = new IdentityHashMap<ProfilerNode, ProfilerNode>();
-        node = null;
-      }
-      else
-        node = _childProfilerNodesMap.get(parentNode);
-
-      if (node == null) {
-        node = new ProfilerNode(parentNode, this);
-
-        _childProfilerNodesMap.put(parentNode, node);
-      }
-
-      return node;
+      Iterator<ProfilerPoint> iter = _children.values();
+      while (iter.hasNext())
+	children.add(iter.next());
+      
+      return children;
     }
   }
 
   /**
-   * Drop all of the ProfilerNode's.
+   * Increment the invocation count and add time.
+   *
+   * @param totalTime
+   */
+  void update(long totalTime)
+  {
+    synchronized (this) {
+      _invocationCount++;
+
+      if (_invocationCount > 0) {
+        _time += totalTime;
+      }
+
+      if (totalTime < _minTime)
+	_minTime = totalTime;
+
+      if (_maxTime < totalTime)
+	_maxTime = totalTime;
+    }
+  }
+
+  /**
+   * Time for this node in nanoseconds, does not include the time for child
+   * nodes.
+   */
+  public long getTime()
+  {
+    return _time;
+  }
+
+  /**
+   * Minimum time for this node in nanoseconds, does not include
+   * the time for child nodes.
+   */
+  public long getMinTime()
+  {
+    return _minTime;
+  }
+
+  /**
+   * Minimum time for this node in nanoseconds, does not include
+   * the time for child nodes.
+   */
+  public long getMaxTime()
+  {
+    return _maxTime;
+  }
+
+  void incrementInvocationCount()
+  {
+    synchronized (this) {
+      _invocationCount++;
+    }
+  }
+
+  public long getInvocationCount()
+  {
+    return _invocationCount;
+  }
+
+  /**
+   * Drop all of the children
    */
   void reset()
   {
-    synchronized (this) {
-      if (_childProfilerNodesMap != null)
-        _childProfilerNodesMap.clear();
-    }
+    _children = null;
+
+    _time = 0;
+    _invocationCount = 0;
+
+    _minTime = Long.MAX_VALUE;
+    _maxTime = Long.MIN_VALUE;
   }
 
   public boolean equals(Object o)
@@ -158,48 +217,39 @@ public class ProfilerPoint
     if (o == this)
       return true;
 
-    if (o == null)
-      return false;
-
     if (!(o instanceof ProfilerPoint))
       return false;
 
-    final ProfilerPoint other = (ProfilerPoint) o;
+    ProfilerPoint point = (ProfilerPoint) o;
 
-    if (longHashCode() != other.longHashCode())
-      return false;
-
-    return getName().equals(other.getName());
+    return getName().equals(point.getName());
   }
 
-  public int compareTo(ProfilerPoint other)
+  public int compareTo(ProfilerPoint point)
   {
-    return getName().compareTo(other.getName());
-  }
-
-  public long longHashCode()
-  {
-    if (_longHashCode == 0) {
-      long longHashCode = 7;
-
-      final int len = _name.length();
-
-      for (int i = 0; i < len; i++)
-        longHashCode = longHashCode * 33 ^ _name.charAt(i);
-
-      _longHashCode = longHashCode;
-    }
-
-    return _longHashCode;
+    return getName().compareTo(point.getName());
   }
 
   public int hashCode()
   {
-    return (int) longHashCode();
+    return getName().hashCode();
   }
 
   public String toString()
   {
     return "ProfilerPoint[" + getName() + "]";
+  }
+
+  static {
+    NOOP_PROFILER = new Profiler() {
+	public void finish()
+	{
+	}
+
+	public String toString()
+	{
+	  return "NoopProfiler[]";
+	}
+      };
   }
 }

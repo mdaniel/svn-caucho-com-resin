@@ -812,6 +812,15 @@ public class HessianOutput extends AbstractHessianOutput {
   }
 
   /**
+   * Resets the references for streaming.
+   */
+  public void resetReferences()
+  {
+    if (_refs != null)
+      _refs.clear();
+  }
+
+  /**
    * Removes a reference.
    */
   public boolean removeRef(Object obj)

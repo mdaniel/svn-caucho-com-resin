@@ -1285,6 +1285,15 @@ public class HessianInput extends AbstractHessianInput {
   }
 
   /**
+   * Resets the references for streaming.
+   */
+  public void resetReferences()
+  {
+    if (_refs != null)
+      _refs.clear();
+  }
+
+  /**
    * Resolves a remote object.
    */
   public Object resolveRemote(String type, String url)

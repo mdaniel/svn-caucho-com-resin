@@ -52,7 +52,7 @@ public final class StatementWrapper
 
   private void setSql(String sql)
   {
-    _profilerPoint = _parentProfilerPoint.createProfilerPoint(sql);
+    _profilerPoint = _parentProfilerPoint.addProfilerPoint(sql);
   }
 
   private ResultSet wrap(ResultSet resultSet)

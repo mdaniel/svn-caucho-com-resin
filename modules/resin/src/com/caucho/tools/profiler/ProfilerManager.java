@@ -48,12 +48,19 @@ import java.util.TreeSet;
  * with {@link #getLocal()}.
  */
 public class ProfilerManager {
-  private static final EnvironmentLocal<ProfilerManager> _local = new EnvironmentLocal<ProfilerManager>();
+  private static final EnvironmentLocal<ProfilerManager> _local
+    = new EnvironmentLocal<ProfilerManager>();
 
-  private final LruCache<String, ProfilerPoint> _profilerPointMap
-    = new LruCache<String, ProfilerPoint>(1024);
+  private ProfilerPoint _root;
 
   private boolean _isEnabled = false;
+
+  private ProfilerManager()
+  {
+    new ProfilerAdmin(this);
+
+    _root = new ProfilerPoint(null, "");
+  }
 
   public static ProfilerManager getLocal()
   {
@@ -69,9 +76,14 @@ public class ProfilerManager {
     }
   }
 
-  private ProfilerManager()
+  public ProfilerPoint getRoot()
   {
-    new ProfilerAdmin(this);
+    return _root;
+  }
+
+  public ProfilerPoint getProfilerPoint(String name)
+  {
+    return _root.addProfilerPoint(name);
   }
 
   /**
@@ -100,136 +112,14 @@ public class ProfilerManager {
     _isEnabled = false;
   }
 
-  public ProfilerPoint getProfilerPoint(String name)
+  public ProfilerPoint addProfilerPoint(String name)
   {
-    synchronized (_profilerPointMap) {
-      ProfilerPoint profilerPoint = _profilerPointMap.get(name);
-
-      if (profilerPoint == null) {
-        profilerPoint = new ProfilerPoint(this, name);
-        _profilerPointMap.put(name, profilerPoint);
-      }
-
-      return profilerPoint;
-    }
+    return _root.addProfilerPoint(name);
   }
 
   public CategorizingProfilerPoint getCategorizingProfilerPoint(String name)
   {
-    synchronized (_profilerPointMap) {
-      ProfilerPoint profilerPoint = _profilerPointMap.get(name);
-
-      if (profilerPoint == null) {
-        profilerPoint = new CategorizingProfilerPoint(this, name);
-        _profilerPointMap.put(name, profilerPoint);
-      }
-
-      return (CategorizingProfilerPoint) profilerPoint;
-    }
-  }
-
-  public Set<ProfilerPoint> getAllProfilerPoints()
-  {
-    synchronized (_profilerPointMap) {
-      TreeSet<ProfilerPoint> allProfilerPoints = new TreeSet<ProfilerPoint>();
-
-      Iterator<ProfilerPoint> existingValues = _profilerPointMap.values();
-
-      while (existingValues.hasNext())
-        allProfilerPoints.add(existingValues.next());
-
-      return allProfilerPoints;
-    }
-  }
-
-  /**
-   * Returns a copy of all of the ProfilerNodes.
-   */
-  public Collection<ProfilerNode> getAllProfilerNodes()
-  {
-    LinkedList<ProfilerNode> profilerNodes = new LinkedList<ProfilerNode>();
-
-    fillAllProfilerNodes(profilerNodes);
-
-    return profilerNodes;
-  }
-
-  /**
-   * Returns a copy of all of the ProfilerNodes, sorted with the given {@link
-   * Comparator}.
-   */
-  public Collection<ProfilerNode> getAllProfilerNodes(Comparator<ProfilerNode> comparator)
-  {
-    TreeSet<ProfilerNode> profilerNodes = new TreeSet<ProfilerNode>(comparator);
-
-    fillAllProfilerNodes(profilerNodes);
-
-    return profilerNodes;
-  }
-
-  /**
-   * Returns a copy of all of the ProfilerNodes that are children of the
-   * parent.
-   *
-   * @param parent the parent, null to retrieve top-lvel nodes
-   */
-  public Collection<ProfilerNode> getChildProfilerNodes(ProfilerNode parent)
-  {
-    LinkedList<ProfilerNode> profilerNodes = new LinkedList<ProfilerNode>();
-
-    fillChildProfilerNodes(parent, profilerNodes);
-
-    return profilerNodes;
-  }
-
-  /**
-   * Returns a copy of all of the ProfilerNodes that are children of the parent,
-   * sorted with the given {@link Comparator}..
-   *
-   * @param parent the parent, null to retrieve top-lvel nodes
-   */
-  public Collection<ProfilerNode> getChildProfilerNodes(ProfilerNode parent,
-                                                        Comparator<ProfilerNode> comparator)
-  {
-    TreeSet<ProfilerNode> profilerNodes = new TreeSet<ProfilerNode>(comparator);
-
-    fillChildProfilerNodes(parent, profilerNodes);
-
-    return profilerNodes;
-  }
-
-  private void fillAllProfilerNodes(Collection<ProfilerNode> profilerNodes)
-  {
-    synchronized (_profilerPointMap) {
-      Iterator<ProfilerPoint> iter = _profilerPointMap.values();
-
-      while (iter.hasNext()) {
-        ProfilerPoint profilerPoint = iter.next();
-
-        synchronized (profilerPoint) {
-          profilerNodes.addAll(profilerPoint.getProfilerNodes());
-        }
-      }
-    }
-  }
-
-  private void fillChildProfilerNodes(ProfilerNode parent,
-                                      Collection<ProfilerNode> profilerNodes)
-  {
-    synchronized (_profilerPointMap) {
-      Iterator<ProfilerPoint> iter = _profilerPointMap.values();
-
-      while (iter.hasNext()) {
-        ProfilerPoint profilerPoint = iter.next();
-
-        synchronized (profilerPoint) {
-          for (ProfilerNode profilerNode : profilerPoint.getProfilerNodes()) {
-            if (profilerNode.getParent() == parent)
-              profilerNodes.add(profilerNode);
-          }
-        }
-      }
-    }
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -237,15 +127,7 @@ public class ProfilerManager {
    */
   public void reset()
   {
-    synchronized (_profilerPointMap) {
-      Iterator<ProfilerPoint> iter = _profilerPointMap.values();
-
-      while (iter.hasNext()) {
-        ProfilerPoint profilerPoint = iter.next();
-
-        profilerPoint.reset();
-      }
-    }
+    _root.reset();
   }
 
   public String toString()

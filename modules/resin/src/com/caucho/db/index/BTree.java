@@ -454,7 +454,9 @@ public final class BTree {
 	  long oldValue = getPointer(buffer, offset);
 
 	  if (value != oldValue)
-	    throw new SQLException(L.l("BTree insert of mismatched value"));
+	    throw new SQLException(L.l("'{0}' insert of key '{1}' fails index uniqueness.",
+				       _store,
+				       _keyCompare.toString(keyBuffer, keyOffset, keyLength)));
 	}
 	
         setPointer(buffer, offset, value);

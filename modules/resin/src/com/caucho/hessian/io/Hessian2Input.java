@@ -1980,6 +1980,15 @@ public class Hessian2Input
   {
     _refs.set(i, ref);
   }
+  
+  /**
+   * Resets the references for streaming.
+   */
+  public void resetReferences()
+  {
+    if (_refs != null)
+      _refs.clear();
+  }
 
   /**
    * Resolves a remote object.

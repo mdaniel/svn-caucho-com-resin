@@ -51,7 +51,8 @@ public class ProfilerFilter
   implements Filter
 {
   private static final L10N L = new L10N(ProfilerFilter.class);
-  private static final Logger log = Logger.getLogger(ProfilerFilter.class.getName());
+  private static final Logger log
+    = Logger.getLogger(ProfilerFilter.class.getName());
 
   // can do this because an instance of Filter is created for each environment
   private final ProfilerManager _profilerManager = ProfilerManager.getLocal();
@@ -153,5 +154,4 @@ public class ProfilerFilter
   public void destroy()
   {
   }
-
 }

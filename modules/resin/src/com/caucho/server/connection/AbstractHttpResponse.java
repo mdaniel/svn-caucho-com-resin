@@ -456,14 +456,14 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   public void sendError(int code, String value)
     throws IOException
   {
-    if (isCommitted())
-      throw new IllegalStateException(L.l("sendError() forbidden after buffer has been committed."));
-      
     if (code == SC_NOT_MODIFIED && _cacheEntry != null) {
       setStatus(code, value);
       if (handleNotModified(_isTopCache))
         return;
     }
+    
+    if (isCommitted())
+      throw new IllegalStateException(L.l("sendError() forbidden after buffer has been committed."));
 
     //_currentWriter = null;
     //setStream(_originalStream);

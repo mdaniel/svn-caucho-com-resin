@@ -343,6 +343,15 @@ cse_add_host(cluster_t *cluster, const char *hostname, int port)
  * Adds a new backup to the configuration
  */
 cluster_srun_t *
+cse_add_ssl(cluster_t *cluster, const char *hostname, int port)
+{
+  return cse_add_cluster_server(cluster, hostname, port, "", -1, 0, 1);
+}
+
+/**
+ * Adds a new backup to the configuration
+ */
+cluster_srun_t *
 cse_add_backup(cluster_t *cluster, const char *hostname, int port)
 {
   return cse_add_cluster_server(cluster, hostname, port, "", -1, 1, 0);
@@ -691,6 +700,8 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 
 	  if (code == HMUX_SRUN_BACKUP)
 	    srun = cse_add_backup(&cluster, host, port);
+	  else if (code == HMUX_SRUN_SSL)
+	    srun = cse_add_ssl(&cluster, host, port);
 	  else
 	    srun = cse_add_host(&cluster, host, port);
 

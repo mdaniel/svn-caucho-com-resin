@@ -65,6 +65,7 @@ public class HmuxDispatchRequest {
   public static final int HMUX_CLUSTER =   'c';
   public static final int HMUX_SRUN    =   's';
   public static final int HMUX_SRUN_BACKUP = 'b';
+  public static final int HMUX_SRUN_SSL = 'e';
   public static final int HMUX_UNAVAILABLE = 'u';
   public static final int HMUX_WEB_APP_UNAVAILABLE = 'U';
 
@@ -384,7 +385,10 @@ public class HmuxDispatchRequest {
 	  writeString(os, HMUX_SRUN_BACKUP, srunHost);
 	else
 	*/
-	writeString(os, HMUX_SRUN, srunHost);
+	if (server.isSSL())
+	  writeString(os, HMUX_SRUN_SSL, srunHost);
+	else
+	  writeString(os, HMUX_SRUN, srunHost);
       
 	crc64 = Crc64.generate(crc64, srunHost);
       }

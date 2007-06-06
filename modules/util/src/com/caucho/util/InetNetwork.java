@@ -99,19 +99,17 @@ public class InetNetwork {
         i++;
     }
 
-    while (digits++ < 4) {
+    int mask = 8 * digits;
+    
+    for (; digits < 4; digits++) {
       address *= 256;
     }
-      
 
-    int mask;
     if (i < len && network.charAt(i) == '/') {
       mask = 0;
       for (i++; i < len && (ch = network.charAt(i)) >= '0' && ch <= '9'; i++)
         mask = 10 * mask + ch - '0';
     }
-    else
-      mask = 32;
 
     return new InetNetwork(address, mask);
   }

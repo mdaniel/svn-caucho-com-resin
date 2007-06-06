@@ -75,8 +75,9 @@ public class UISelectOne extends UIInput
 
     if (! hasValue) {
       String summary = Util.l10n(context, INVALID_MESSAGE_ID,
-				 "{0}: Validation Error: Value is not valid.",
-				 Util.getLabel(context, this));
+				 "{0}: Validation Error: UISelectOne value '{1}' is not valid.",
+				 Util.getLabel(context, this),
+				 value);
 
       String detail = summary;
 

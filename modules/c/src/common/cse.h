@@ -291,6 +291,7 @@ struct stream_t {
 #define HMUX_CLUSTER        'c'
 #define HMUX_SRUN           's'
 #define HMUX_SRUN_BACKUP    'b'
+#define HMUX_SRUN_SSL       'e'
 #define HMUX_UNAVAILABLE    'u'
 #define HMUX_WEB_APP_UNAVAILABLE 'U'
 

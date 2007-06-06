@@ -49,7 +49,7 @@ public final class ConnectionWrapper
     // XXX: need to categorize under _profilerPoint even if it is
     // not the parent in the call stack at time of execution
     // switch _profilerPoint to DatabaseProfilerPoint, move createPP to DatabasePP
-    return _profilerPoint.createProfilerPoint(sql);
+    return _profilerPoint.addProfilerPoint(sql);
   }
 
   private StatementWrapper wrap(Statement statement)
@@ -96,7 +96,7 @@ public final class ConnectionWrapper
   public PreparedStatement prepareStatement(String sql)
     throws SQLException
   {
-    ProfilerPoint profilerPoint = _profilerPoint.createProfilerPoint(sql);
+    ProfilerPoint profilerPoint = _profilerPoint.addProfilerPoint(sql);
 
     return wrap(sql, _connection.prepareStatement(sql));
   }
@@ -107,7 +107,7 @@ public final class ConnectionWrapper
                                             int resultSetHoldability)
     throws SQLException
   {
-    ProfilerPoint profilerPoint = _profilerPoint.createProfilerPoint(sql);
+    ProfilerPoint profilerPoint = _profilerPoint.addProfilerPoint(sql);
 
     return wrap(sql, _connection.prepareStatement(sql,
                                                   resultSetType,

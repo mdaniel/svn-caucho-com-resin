@@ -43,51 +43,8 @@ public class CategorizingProfilerPoint
     super(profilerManager, name);
   }
 
-  public ProfilerPoint createProfilerPoint(String name)
+  protected ProfilerPoint create(String name)
   {
-    return new ProfilerPointParentSettingDelegate(this, getProfilerManager().getProfilerPoint(name));
-  }
-
-  private static final class ProfilerPointParentSettingDelegate
-    extends ProfilerPoint
-  {
-    private final ProfilerPoint _parent;
-    private final ProfilerPoint _profilerPoint;
-
-    ProfilerPointParentSettingDelegate(ProfilerPoint parent, ProfilerPoint profilerPoint)
-    {
-      super(profilerPoint.getProfilerManager(), "ProfilerPointParentSettingDelegate{" + profilerPoint + "}");
-
-      assert parent != null;
-      assert profilerPoint != null;
-
-      _parent = parent;
-      _profilerPoint = profilerPoint;
-    }
-
-    public String getName()
-    {
-      return _profilerPoint.getName();
-    }
-
-    public Profiler start()
-    {
-      return _profilerPoint.start(_parent);
-    }
-
-    public Collection<ProfilerNode> getProfilerNodes()
-    {
-      return _profilerPoint.getProfilerNodes();
-    }
-
-    public ProfilerNode getProfilerNode(ProfilerNode parentNode)
-    {
-      return _profilerPoint.getProfilerNode(parentNode);
-    }
-
-    public void reset()
-    {
-      _profilerPoint.reset();
-    }
+    return new CategorizingProfilerPoint(getProfilerManager(), name);
   }
 }

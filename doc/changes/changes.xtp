@@ -12,6 +12,15 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>Change BTree uniqueness error message (#1690)</li>
+<li>mod_caucho: add ssl support for hmux protocol (#1496, rep by J Edwards)</li>
+<li>jstl: x:forEach with default namespace (#1646, rep by urutora90)</li>
+<li>jsp: sendError() issue with flush="true" and interaction with cached subpages (#1740, rep by johnhughbowen)</li>
+<li>hessian: add support for streaming, i.e. resetReferences() (#1626, rep by Ben Hood)</li>
+<li>hessian: add support for Collections.singletonMap (#1657, rep by dbrakhane)</li>
+<li>ProfilerServlet memory issues (#1623, rep by Bill Au)</li>
+<li>add web-app disable-cross-context (#1577, rep by Yidong Fang)</li>
+<li>rewrite: add 192.168 syntax support for remote-addr (#1735, rep by koyama)</li>
 <li>hessian: array deserialization with Calendar (#1743, rep by Stefan Fleiter)</li>
 <li>hessian: array deserialization with interface arrays, e.g. Serializable[] (#1614, rep by ldesegur)</li>
 <li>boot: JNI/Pro classloader must be used for JniFilePath (#1758, rep by Steven Garrett)</li>

@@ -32,7 +32,7 @@ package com.caucho.tools.profiler;
 class TimeComparator
   extends ProfilerNodeComparator
 {
-  protected int compareImpl(ProfilerNode o1, ProfilerNode o2)
+  protected int compareImpl(ProfilerPoint o1, ProfilerPoint o2)
   {
     return compareLong(o1.getTime(), o2.getTime());
   }

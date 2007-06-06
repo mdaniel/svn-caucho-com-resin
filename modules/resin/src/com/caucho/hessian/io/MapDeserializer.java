@@ -49,26 +49,42 @@
 package com.caucho.hessian.io;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
+import java.lang.reflect.*;
 
 /**
  * Deserializing a JDK 1.2 Map.
  */
 public class MapDeserializer extends AbstractMapDeserializer {
-  private Class type;
+  private Class _type;
+  private Constructor _ctor;
   
   public MapDeserializer(Class type)
   {
-    this.type = type;
+    if (type == null)
+      type = HashMap.class;
+    
+    _type = type;
+
+    Constructor []ctors = type.getConstructors();
+    for (int i = 0; i < ctors.length; i++) {
+      if (ctors[i].getParameterTypes().length == 0)
+	_ctor = ctors[i];
+    }
+
+    if (_ctor == null) {
+      try {
+	_ctor = HashMap.class.getConstructor(new Class[0]);
+      } catch (Exception e) {
+	throw new IllegalStateException(e);
+      }
+    }
   }
   
   public Class getType()
   {
-    if (this.type != null)
-      return this.type;
+    if (_type != null)
+      return _type;
     else
       return HashMap.class;
   }
@@ -78,15 +94,15 @@ public class MapDeserializer extends AbstractMapDeserializer {
   {
     Map map;
     
-    if (type == null)
+    if (_type == null)
       map = new HashMap();
-    else if (type.equals(Map.class))
+    else if (_type.equals(Map.class))
       map = new HashMap();
-    else if (type.equals(SortedMap.class))
+    else if (_type.equals(SortedMap.class))
       map = new TreeMap();
     else {
       try {
-        map = (Map) type.newInstance();
+        map = (Map) _ctor.newInstance();
       } catch (Exception e) {
         throw new IOExceptionWrapper(e);
       }

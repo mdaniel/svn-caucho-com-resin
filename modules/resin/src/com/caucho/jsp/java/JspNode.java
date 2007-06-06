@@ -358,7 +358,9 @@ public abstract class JspNode {
     NamespaceContext ns = null;
 
     for (Namespace ptr = _ns; ptr != null; ptr = ptr.getNext()) {
-      ns = new NamespaceContext(ns, ptr.getPrefix(), ptr.getURI());
+      // jsp/1g58
+      if (! "".equals(ptr.getPrefix()))
+	ns = new NamespaceContext(ns, ptr.getPrefix(), ptr.getURI());
     }
 
     return ns;

@@ -405,6 +405,13 @@ abstract public class AbstractHessianOutput {
     throws IOException;
 
   /**
+   * Resets the references for streaming.
+   */
+  public void resetReferences()
+  {
+  }
+
+  /**
    * Writes a generic object to the output stream.
    */
   abstract public void writeObject(Object object)

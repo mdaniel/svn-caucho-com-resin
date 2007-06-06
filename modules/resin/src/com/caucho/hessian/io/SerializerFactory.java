@@ -66,11 +66,9 @@ public class SerializerFactory extends AbstractSerializerFactory
   private static final Logger log
     = Logger.getLogger(SerializerFactory.class.getName());
   
-  private static Class _enumClass;
-  
-  private static HashMap _serializerMap;
-  private static HashMap _deserializerMap;
-  private static HashMap _typeMap;
+  private static HashMap _staticSerializerMap;
+  private static HashMap _staticDeserializerMap;
+  private static HashMap _staticTypeMap;
 
   protected Serializer _defaultSerializer;
 
@@ -115,7 +113,7 @@ public class SerializerFactory extends AbstractSerializerFactory
   {
     Serializer serializer;
 
-    serializer = (Serializer) _serializerMap.get(cl);
+    serializer = (Serializer) _staticSerializerMap.get(cl);
     if (serializer != null)
       return serializer;
 
@@ -179,7 +177,7 @@ public class SerializerFactory extends AbstractSerializerFactory
     else if (Locale.class.isAssignableFrom(cl))
       serializer = LocaleSerializer.create();
     
-    else if (_enumClass != null && _enumClass.isAssignableFrom(cl))
+    else if (Enum.class.isAssignableFrom(cl))
       serializer = new EnumSerializer(cl);
 
     if (serializer == null)
@@ -224,7 +222,7 @@ public class SerializerFactory extends AbstractSerializerFactory
   {
     Deserializer deserializer;
 
-    deserializer = (Deserializer) _deserializerMap.get(cl);
+    deserializer = (Deserializer) _staticDeserializerMap.get(cl);
     if (deserializer != null)
       return deserializer;
 
@@ -262,7 +260,7 @@ public class SerializerFactory extends AbstractSerializerFactory
     else if (Enumeration.class.isAssignableFrom(cl))
       deserializer = EnumerationDeserializer.create();
 
-    else if (_enumClass != null && _enumClass.isAssignableFrom(cl))
+    else if (Enum.class.isAssignableFrom(cl))
       deserializer = new EnumDeserializer(cl);
     
     else
@@ -386,7 +384,7 @@ public class SerializerFactory extends AbstractSerializerFactory
     }
 
 
-    deserializer = (Deserializer) _typeMap.get(type);
+    deserializer = (Deserializer) _staticTypeMap.get(type);
     if (deserializer != null)
       return deserializer;
 
@@ -420,17 +418,17 @@ public class SerializerFactory extends AbstractSerializerFactory
 
   private static void addBasic(Class cl, String typeName, int type)
   {
-    _serializerMap.put(cl, new BasicSerializer(type));
+    _staticSerializerMap.put(cl, new BasicSerializer(type));
 
     Deserializer deserializer = new BasicDeserializer(type);
-    _deserializerMap.put(cl, deserializer);
-    _typeMap.put(typeName, deserializer);
+    _staticDeserializerMap.put(cl, deserializer);
+    _staticTypeMap.put(typeName, deserializer);
   }
 
   static {
-    _serializerMap = new HashMap();
-    _deserializerMap = new HashMap();
-    _typeMap = new HashMap();
+    _staticSerializerMap = new HashMap();
+    _staticDeserializerMap = new HashMap();
+    _staticTypeMap = new HashMap();
 
     addBasic(void.class, "void", BasicSerializer.NULL);
     
@@ -466,35 +464,35 @@ public class SerializerFactory extends AbstractSerializerFactory
     addBasic(String[].class, "[string", BasicSerializer.STRING_ARRAY);
     addBasic(Object[].class, "[object", BasicSerializer.OBJECT_ARRAY);
 
-    _serializerMap.put(Class.class, new ClassSerializer());
-    _deserializerMap.put(Class.class, new ClassDeserializer());
+    _staticSerializerMap.put(Class.class, new ClassSerializer());
+    _staticDeserializerMap.put(Class.class, new ClassDeserializer());
 
-    _deserializerMap.put(Number.class, new BasicDeserializer(BasicSerializer.NUMBER));
+    _staticDeserializerMap.put(Number.class, new BasicDeserializer(BasicSerializer.NUMBER));
     
-    _serializerMap.put(BigDecimal.class, new StringValueSerializer());
+    _staticSerializerMap.put(BigDecimal.class, new StringValueSerializer());
     try {
-      _deserializerMap.put(BigDecimal.class,
+      _staticDeserializerMap.put(BigDecimal.class,
 			   new StringValueDeserializer(BigDecimal.class));
     } catch (Throwable e) {
     }
     
-    _serializerMap.put(File.class, new StringValueSerializer());
+    _staticSerializerMap.put(File.class, new StringValueSerializer());
     try {
-      _deserializerMap.put(File.class,
+      _staticDeserializerMap.put(File.class,
 			   new StringValueDeserializer(File.class));
     } catch (Throwable e) {
     }
     
-    _serializerMap.put(java.sql.Date.class, new SqlDateSerializer());
-    _serializerMap.put(java.sql.Time.class, new SqlDateSerializer());
-    _serializerMap.put(java.sql.Timestamp.class, new SqlDateSerializer());
+    _staticSerializerMap.put(java.sql.Date.class, new SqlDateSerializer());
+    _staticSerializerMap.put(java.sql.Time.class, new SqlDateSerializer());
+    _staticSerializerMap.put(java.sql.Timestamp.class, new SqlDateSerializer());
 
     try {
-      _deserializerMap.put(java.sql.Date.class,
+      _staticDeserializerMap.put(java.sql.Date.class,
 			  new SqlDateDeserializer(java.sql.Date.class));
-      _deserializerMap.put(java.sql.Time.class,
+      _staticDeserializerMap.put(java.sql.Time.class,
 			  new SqlDateDeserializer(java.sql.Time.class));
-      _deserializerMap.put(java.sql.Timestamp.class,
+      _staticDeserializerMap.put(java.sql.Timestamp.class,
 			  new SqlDateDeserializer(java.sql.Timestamp.class));
     } catch (Throwable e) {
       e.printStackTrace();
@@ -503,12 +501,7 @@ public class SerializerFactory extends AbstractSerializerFactory
     try {
       Class stackTrace = Class.forName("java.lang.StackTraceElement");
       
-      _deserializerMap.put(stackTrace, new StackTraceElementDeserializer());
-    } catch (Throwable e) {
-    }
-
-    try {
-      _enumClass = Class.forName("java.lang.Enum");
+      _staticDeserializerMap.put(stackTrace, new StackTraceElementDeserializer());
     } catch (Throwable e) {
     }
   }

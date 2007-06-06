@@ -132,7 +132,6 @@ public class UIOutput extends UIComponentBase implements ValueHolder
     if (_converter != null)
       return _converter;
     else if (_converterExpr != null) {
-      System.out.println("CVT: " + _converterExpr);
       return (Converter) Util.eval(_converterExpr, getFacesContext());
     }
     else

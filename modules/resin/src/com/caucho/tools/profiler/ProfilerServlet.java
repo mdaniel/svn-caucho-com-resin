@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * Html interface to profiling information.
@@ -173,10 +173,10 @@ public class ProfilerServlet
 
     out.endElement("tr");
 
-    Collection<ProfilerNode> children
-      =  _profilerManager.getChildProfilerNodes(null, comparator);
-
-    displayChildren(children, comparator, out, 0);
+    ProfilerPoint root = _profilerManager.getRoot();
+    
+    for (ProfilerPoint child : root.getChildren())
+      display(child, comparator, out, 1);
 
     out.endElement("table");
 
@@ -185,13 +185,15 @@ public class ProfilerServlet
     out.endElement("html");
   }
 
-  private void display(ProfilerNode node,
+  private void display(ProfilerPoint node,
                        ProfilerNodeComparator comparator,
                        XmlWriter out,
                        int depth)
   {
-    Collection<ProfilerNode> children
-      =  _profilerManager.getChildProfilerNodes(node, comparator);
+    if (node == null)
+      return;
+    
+    List<ProfilerPoint> children = node.getChildren();
 
     long thisTime = node.getTime();
     long minTime = node.getMinTime();
@@ -199,7 +201,7 @@ public class ProfilerServlet
 
     long childrenTime = 0;
 
-    for (ProfilerNode child : children) {
+    for (ProfilerPoint child : children) {
       childrenTime += child.getTime();
     }
 
@@ -297,8 +299,9 @@ public class ProfilerServlet
     out.endElement("tr");
 
     // All children
-
-    displayChildren(children, comparator, out, depth + 1);
+    
+    for (ProfilerPoint child : children)
+      display(child, comparator, out, depth + 1);
   }
 
   protected void writeXml(HttpServletRequest request,
@@ -322,21 +325,20 @@ public class ProfilerServlet
     out.startElement("profile");
     out.writeLineElement("name", contextPath);
 
-    Collection<ProfilerNode> children
-      =  _profilerManager.getChildProfilerNodes(null, comparator);
+    Collection<ProfilerPoint> children
+      = _profilerManager.getRoot().getChildren();
 
-    for (ProfilerNode child : children)
+    for (ProfilerPoint child : children)
       displayXml(child, comparator, out);
 
     out.endElement("profile");
   }
 
-  private void displayXml(ProfilerNode node,
+  private void displayXml(ProfilerPoint node,
 			  ProfilerNodeComparator comparator,
 			  XmlWriter out)
   {
-    Collection<ProfilerNode> children
-      = _profilerManager.getChildProfilerNodes(node, comparator);
+    Collection<ProfilerPoint> children = node.getChildren();
 
     long thisTime = node.getTime();
     long minTime = node.getMinTime();
@@ -344,7 +346,7 @@ public class ProfilerServlet
 
     long childrenTime = 0;
 
-    for (ProfilerNode child : children) {
+    for (ProfilerPoint child : children) {
       childrenTime += child.getTime();
     }
 
@@ -368,7 +370,7 @@ public class ProfilerServlet
     out.writeLineElement("children-time", String.valueOf(childrenTime));
     out.writeLineElement("count", String.valueOf(invocationCount));
 
-    for (ProfilerNode child : children)
+    for (ProfilerPoint child : children)
       displayXml(child, comparator, out);
     
     out.endBlockElement("node");
@@ -390,17 +392,6 @@ public class ProfilerServlet
     formatTime(cb, childrenTime);
 
     return cb.toString();
-  }
-
-  private void displayChildren(Collection<ProfilerNode> children,
-                               ProfilerNodeComparator comparator,
-                               XmlWriter out,
-                               int depth)
-  {
-    // All children
-
-    for (ProfilerNode child : children)
-      display(child, comparator, out, depth);
   }
 
   private void printTime(XmlWriter out, long time)

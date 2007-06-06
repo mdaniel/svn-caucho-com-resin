@@ -43,7 +43,8 @@ final class ThreadProfiler
   private static ThreadLocal<ThreadProfiler> _current
     = new ThreadLocal<ThreadProfiler>();
 
-  private final ArrayList<ProfilerNode> _nodeStack = new ArrayList<ProfilerNode>();
+  private final ArrayList<ProfilerPoint> _nodeStack
+    = new ArrayList<ProfilerPoint>();
   private long[] _cumulativeTimeStack = new long[16];
   private boolean[] _unwindStack = new boolean[16];
   private long[] _startTimeStack = new long[16];
@@ -77,7 +78,7 @@ final class ThreadProfiler
     boolean isParentFound = false;
 
     for (int i = 0; i < stackLen; i++) {
-      if (_nodeStack.get(i).getProfilerPoint() == guaranteedParent) {
+      if (_nodeStack.get(i) == guaranteedParent) {
         isParentFound = true;
         break;
       }
@@ -89,12 +90,12 @@ final class ThreadProfiler
     start(profilerPoint, false);
   }
 
-  private void start(ProfilerPoint profilerPoint, boolean isUnwind)
+  private void start(ProfilerPoint node, boolean isUnwind)
   {
     int stackLen = _nodeStack.size();
     int topOfStack = stackLen - 1;
 
-    ProfilerNode parentNode;
+    ProfilerPoint parentNode;
 
     /** XXX:>>
     for (int i = 0; i < stackLen; i++)
@@ -115,8 +116,7 @@ final class ThreadProfiler
 
       long parentTime = currentTimeNanoseconds() - parentStartTime;
 
-      _cumulativeTimeStack[topOfStack]
-        = _cumulativeTimeStack[topOfStack] + parentTime;
+      _cumulativeTimeStack[topOfStack] += parentTime;
     }
 
     // ensure capacity
@@ -142,8 +142,6 @@ final class ThreadProfiler
 
     long currentTime = currentTimeNanoseconds();
 
-    ProfilerNode node = profilerPoint.getProfilerNode(parentNode);
-
     _nodeStack.add(node);
 
     _unwindStack[stackLen] = isUnwind;
@@ -166,7 +164,7 @@ final class ThreadProfiler
   {
     int removeIndex = _nodeStack.size() - 1;
 
-    ProfilerNode node = _nodeStack.remove(removeIndex);
+    ProfilerPoint node = _nodeStack.remove(removeIndex);
     long startTime = _startTimeStack[removeIndex];
 
     long currentTime = currentTimeNanoseconds();

@@ -32,14 +32,14 @@ package com.caucho.tools.profiler;
 import java.util.Comparator;
 
 abstract class ProfilerNodeComparator
-  implements Comparator<ProfilerNode>
+  implements Comparator<ProfilerPoint>
 {
-  private boolean isDescendingName;
+  private boolean _isDescendingName;
   private boolean _isDescending;
 
   public void setDescendingName(boolean isDescendingName)
   {
-    this.isDescendingName = isDescendingName;
+    _isDescendingName = isDescendingName;
   }
 
   public void setDescending(boolean isDescending)
@@ -47,7 +47,7 @@ abstract class ProfilerNodeComparator
     _isDescending = isDescending;
   }
 
-  abstract protected int compareImpl(ProfilerNode o1, ProfilerNode o2);
+  abstract protected int compareImpl(ProfilerPoint o1, ProfilerPoint o2);
 
   protected int compareLong(long l1, long l2)
   {
@@ -59,7 +59,7 @@ abstract class ProfilerNodeComparator
       return 1;
   }
 
-  public int compare(ProfilerNode o1, ProfilerNode o2)
+  public int compare(ProfilerPoint o1, ProfilerPoint o2)
   {
     int cmp;
 
@@ -69,7 +69,7 @@ abstract class ProfilerNodeComparator
       cmp = compareImpl(o1, o2);
 
     if (cmp == 0) {
-      if (isDescendingName)
+      if (_isDescendingName)
         cmp = o2.getName().compareTo(o1.getName());
       else
         cmp = o1.getName().compareTo(o2.getName());
