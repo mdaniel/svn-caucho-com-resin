@@ -34,6 +34,8 @@ import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.soa.rest.RestProtocolServlet;
+import com.caucho.soa.rest.JAXBRestProtocolServlet;
+import com.caucho.soa.rest.HessianRestProtocolServlet;
 import com.caucho.soa.servlet.HessianProtocolServlet;
 import com.caucho.soa.servlet.ProtocolServlet;
 import com.caucho.soa.servlet.SoapProtocolServlet;
@@ -63,7 +65,11 @@ public class ServletProtocolConfig {
     if ("soap".equals(type))
       _type = SoapProtocolServlet.class;
     else if ("rest".equals(type))
-      _type = RestProtocolServlet.class;
+      _type = JAXBRestProtocolServlet.class;
+    else if ("jaxb-rest".equals(type))
+      _type = JAXBRestProtocolServlet.class;
+    else if ("hessian-rest".equals(type))
+      _type = HessianRestProtocolServlet.class;
     else if ("hessian".equals(type))
       _type = HessianProtocolServlet.class;
     else {
