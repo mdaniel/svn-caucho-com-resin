@@ -50,7 +50,7 @@ class SimpleElementList extends SimpleElement
 
   SimpleElementList()
   {
-    super();
+    super(null);
   }
 
   ArrayList<SimpleElement> getSameNameSiblings()
@@ -124,7 +124,7 @@ class SimpleElementList extends SimpleElement
   }
   
   @Override
-  public HashMap<String,SimpleAttribute> getAttributes()
+  public ArrayList<SimpleAttribute> getAttributes()
   {
     return _sameNameSiblings.get(0).getAttributes();
   }

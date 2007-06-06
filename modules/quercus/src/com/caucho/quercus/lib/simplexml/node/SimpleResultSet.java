@@ -29,17 +29,17 @@
 
 package com.caucho.quercus.lib.simplexml.node;
 
-import java.util.Iterator;
-
 /**
  * Represents a SimpleXML result set from SimpleXML operations.
  * There is no parent node.
  */
 public class SimpleResultSet extends SimpleElement
 {
-  public SimpleResultSet()
+  public SimpleResultSet(String name)
   {
-    super();
+    super(null);
+    
+    setQName(name);
   }
   
   @Override
@@ -47,20 +47,10 @@ public class SimpleResultSet extends SimpleElement
   {
     if (index < 0)
       return null;
-    
-    if (index <= getElementList().size()) {
+    else if (index <= getElementList().size())
       return getElementList().get(index);
-    }
-    else if (index <= getAttributes().size()) {
-      //XXX: need to put attributes in a list
-      Iterator<SimpleAttribute> iter = getAttributes().values().iterator();
-      
-      for (int i = 0; i < index - 1; i++) {
-        iter.next();
-      }
-      
-      return iter.next();
-    }
+    else if (index <= getAttributes().size())
+      return getAttributes().get(index);
     else
       return null;
   }
@@ -84,7 +74,7 @@ public class SimpleResultSet extends SimpleElement
     if (getElementList().size() > 0)
       getElementList().get(0).toXMLImpl(sb);
     else if (getAttributes().size() > 0) {
-      getAttributes().values().iterator().next().toXMLImpl(sb);
+      getAttributes().get(0).toXMLImpl(sb);
     }
   }
 }

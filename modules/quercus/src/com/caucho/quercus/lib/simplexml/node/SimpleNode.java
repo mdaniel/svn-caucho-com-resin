@@ -38,66 +38,129 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 /**
  * Represents the actual SimpleXML node implementation.
  */
 public abstract class SimpleNode
 {
-  String _namespace;
+  SimpleAttribute _namespace;
   String _prefix;
   
   String _name;
   String _value;
 
   ArrayList<SimpleNode> _children;
+  
   ArrayList<SimpleElement> _elementList;
-
   HashMap<String,SimpleElement> _elementMap;
+
+  ArrayList<SimpleAttribute> _attributeList;
   HashMap<String,SimpleAttribute> _attributeMap;
-
-  public String getNamespace()
+  
+  LinkedHashMap<String, SimpleAttribute> _namespaceMap;
+  
+  SimpleNode _parent;
+  
+  public SimpleNode getParent()
   {
-    return _namespace;
+    return _parent;
   }
-
-  public void setNamespace(String namespace)
+  
+  public void setParent(SimpleNode parent)
   {
-    _namespace = namespace;
+    _parent = parent;
   }
   
   public String getPrefix()
   {
-    return _prefix;
+    int i = _name.indexOf(':');
+    
+    if (i >= 0)
+      return _name.substring(0, i);
+    else
+      return null;
   }
   
-  public void setPrefix(String prefix)
+  public void removePrefix()
   {
-    _prefix = prefix;
+    int i = _name.indexOf(':');
+    
+    if (i >= 0)
+      _name = _name.substring(i + 1);
   }
 
-  public String getName()
+  public String getQName()
   {
     return _name;
   }
-
-  public void setName(String name)
+  
+  public String getName()
   {
-    int i = name.indexOf(':');
+    int i = _name.indexOf(':');
     
-    if (i >= 0) {
-      setPrefix(name.substring(0, i));
-      name = name.substring(i + 1);
-    }
+    if (i >= 0)
+      return _name.substring(i + 1);
+    else
+      return _name;
+  }
 
+  public void setQName(String name)
+  {
     _name = name;
   }
 
+  public SimpleAttribute getNamespace()
+  {
+    return _namespace;
+  }
+  
+  public SimpleAttribute getNamespace(String qName, boolean isRecursive)
+  {
+    SimpleAttribute namespace = _namespaceMap.get(qName);
+    
+    if (namespace != null)
+      return namespace;
+    
+    if (isRecursive && getParent() != null)
+      return _parent.getNamespace(qName, isRecursive);
+    else
+      return null;
+  }
+  
+  public void setNamespace(String namespace, String prefix)
+  {
+    SimpleAttribute attr = createNamespaceAttribute(namespace, prefix);
+
+    setNamespace(attr);
+  }
+  
+  public void setNamespace(SimpleAttribute namespace)
+  {
+    if (_namespace == null)
+      _namespace = namespace;
+  }
+  
+  public LinkedHashMap<String,SimpleAttribute> getNamespaces()
+  {
+    return _namespaceMap;
+  }
+  
   public String getValue()
   {
     return _value;
   }
-
+  
+  public static SimpleAttribute createNamespaceAttribute(String namespace,
+                                                         String prefix)
+  {
+    if (prefix != null)
+      return new SimpleAttribute("xmlns:" + prefix, namespace);
+    else
+      return new SimpleAttribute("xmlns", namespace);
+  }
+  
   public void setValue(String value)
   {
     _value = value;
@@ -169,8 +232,9 @@ public abstract class SimpleNode
 
   public void removeChildren()
   {
-    _elementList.clear();
     _children.clear();
+    
+    _elementList.clear();
     _elementMap.clear();
   }
 
@@ -188,49 +252,89 @@ public abstract class SimpleNode
 
   public void addAttribute(SimpleAttribute attribute)
   {
-    if (getPrefix() != null && attribute.getPrefix().equals("xmlns")) {
-      if (getPrefix().equals(attribute.getName())) {
-        setNamespace(attribute.getValue());    
+    addAttributeImpl(attribute);
+  }
+
+  private void addAttributeImpl(SimpleAttribute attr)
+  {
+    if (getNamespace() == null) {
+      String name;
+      
+      if (getPrefix() != null)
+        name = "xmlns:" + getPrefix();
+      else
+        name = "xmlns";
+
+      if (attr.getQName().equals(name)) {
+        setNamespace(attr);
+        addNamespace(attr);
+        
         return;
       }
     }
     
-    if (attribute.getName().equals("xmlns")
-        && attribute.getPrefix() == null) {
-      setNamespace(attribute.getValue());
+    if ("xmlns".equals(attr.getPrefix())
+        || attr.getPrefix() == null && attr.getName().equals("xmlns")) {
+      addNamespace(attr);
     }
-    else if (_attributeMap.get(attribute.getName()) == null) {
-      _attributeMap.put(attribute.getName(), attribute);
+    else if (_attributeMap.get(attr.getQName()) == null) {
+      _attributeMap.put(attr.getQName(), attr);
+      _attributeList.add(attr);
       
-      if (attribute.getPrefix() != null
-          && attribute.getNamespace() != null) {
-        SimpleAttribute nsAttr = new SimpleAttribute(attribute.getPrefix(),
-                                                     attribute.getNamespace(),
-                                                     null);
-
-        nsAttr.setPrefix("xmlns");
-        
-        addAttribute(nsAttr);
-      }
+      if (attr.getNamespace() != null)
+        if (addNamespace(attr.getNamespace()) == false)
+          attr.setNamespace(null);
+    }
+    else if (attr.getPrefix() != null) {
+      attr.removePrefix();
+      addAttributeImpl(attr);
     }
   }
-
+  
+  public boolean addNamespace(SimpleAttribute namespace)
+  {
+    if (namespace.getPrefix() == null) {
+      if (_namespaceMap.get(namespace.getQName()) == null) {
+        _namespaceMap.put(namespace.getQName(), namespace);
+        
+        return true;
+      }
+      else
+        return false;
+    }
+    else if (getNamespace(namespace.getQName(), true) == null) {
+      _namespaceMap.put(namespace.getQName(), namespace);
+      
+      return true;
+    }
+    else
+      return false;
+  }
+  
   public SimpleAttribute getAttribute(String name)
   {
     return _attributeMap.get(name);
   }
 
-  public HashMap<String,SimpleAttribute> getAttributes()
+  public ArrayList<SimpleAttribute> getAttributes()
+  {
+    return _attributeList;
+  }
+
+  public HashMap<String,SimpleAttribute> getAttributeMap()
   {
     return _attributeMap;
   }
-
+  
   public boolean isSameNamespace(String namespace)
   {
     if (namespace == null || namespace.length() == 0)
       return true;
 
-    return namespace.equals(_namespace);
+    if (getNamespace() == null)
+      return false;
+    
+    return namespace.equals(getNamespace().getValue());
   }
   
   public boolean isSamePrefix(String prefix)
@@ -238,7 +342,7 @@ public abstract class SimpleNode
     if (prefix == null || prefix.length() == 0)
       return true;
 
-    return prefix.equals(_prefix);
+    return prefix.equals(getPrefix());
   }
 
   public boolean isText()

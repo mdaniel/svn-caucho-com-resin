@@ -41,13 +41,22 @@ import java.util.IdentityHashMap;
  */
 public class SimpleAttribute extends SimpleNode
 {
+  public SimpleAttribute(String name, String value)
+  {
+    setQName(name);
+    setValue(value);
+  }
+
   public SimpleAttribute(String name, String value, String namespace)
   {
-    setName(name);
+    setQName(name);
     setValue(value);
-    setNamespace(namespace);
+    
+    if (namespace != null) {
+      setNamespace(namespace, getPrefix());
+    }
   }
-  
+
   @Override
   public boolean isAttribute()
   {

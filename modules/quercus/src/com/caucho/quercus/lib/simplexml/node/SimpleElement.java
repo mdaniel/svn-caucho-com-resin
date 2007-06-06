@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -44,21 +45,51 @@ import java.util.Map;
  */
 public class SimpleElement extends SimpleNode
 {
-  public SimpleElement()
+  public SimpleElement(SimpleNode parent)
   {
     _children = new ArrayList<SimpleNode>();
-    _elementList = new ArrayList<SimpleElement>();
     
+    _elementList = new ArrayList<SimpleElement>();
     _elementMap = new HashMap<String,SimpleElement>();
-    _attributeMap = new HashMap<String,SimpleAttribute>();
+    
+    _attributeList = new ArrayList<SimpleAttribute>();
+    _attributeMap = new LinkedHashMap<String,SimpleAttribute>();
+    
+    _namespaceMap = new LinkedHashMap<String,SimpleAttribute>();
+    
+    setParent(parent);
   }
 
-  public SimpleElement(String name, String namespace)
+  public SimpleElement(SimpleNode parent, String name, String namespace)
   {
-    this();
+    this(parent);
     
-    setName(name);
-    setNamespace(namespace);
+    setQName(name);
+
+    if (namespace != null) {
+      SimpleAttribute attr = createNamespaceAttribute(namespace, getPrefix());
+      
+      if (addNamespace(attr))
+        setNamespace(attr);
+    }
+  }
+  
+  @Override
+  public void setQName(String name)
+  {
+    super.setQName(name);
+    
+    if (getParent() == null || getPrefix() == null)
+      return;
+    
+    String prefix = getPrefix();
+    
+    String qName = "xmlns:" + prefix;
+
+    SimpleAttribute namespace = getParent().getNamespace(qName, true);
+
+    if (namespace != null)
+      setNamespace(namespace);
   }
   
   @Override
@@ -82,33 +113,28 @@ public class SimpleElement extends SimpleNode
   }
   
   @Override
+  public String getQName()
+  {
+    if (getNamespace() == null)
+      return getName();
+    else
+      return super.getQName();
+  }
+  
+  @Override
   protected void toXMLImpl(StringBuilder sb)
   {
     sb.append("<");
     
-    if (getPrefix() != null)
-      sb.append(getPrefix() + ":");
-    
-    sb.append(getName());
+    sb.append(getQName());
 
-    if (getNamespace() != null) {  
-      sb.append(" xmlns");
-      
-      if (getPrefix() != null) {
-        sb.append(":");
-        sb.append(getPrefix());
-      }
-
-      sb.append("=\"");
-      sb.append(getNamespace());
-      sb.append("\"");
+    for (Map.Entry<String,SimpleAttribute> entry : getNamespaces().entrySet()) {
+      entry.getValue().toXMLImpl(sb);
     }
     
     // add attributes, if any
-    HashMap<String,SimpleAttribute> attrs = getAttributes();
-
-    for (Map.Entry<String,SimpleAttribute> entry : attrs.entrySet()) {
-      entry.getValue().toXMLImpl(sb);
+    for (SimpleAttribute attr : getAttributes()) {
+      attr.toXMLImpl(sb);
     }
 
     // recurse through children, if any
@@ -128,11 +154,7 @@ public class SimpleElement extends SimpleNode
 
     // add closing tag
     sb.append("</");
-    
-    if (getPrefix() != null)
-      sb.append(getPrefix() + ":");
-    
-    sb.append(getName());
+    sb.append(getQName());
     sb.append(">");
   }
   
@@ -143,8 +165,8 @@ public class SimpleElement extends SimpleNode
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    HashMap<String,SimpleAttribute> attrMap = getAttributes();
-    int size = attrMap.size();
+    ArrayList<SimpleAttribute> attrList = getAttributes();
+    int size = attrList.size();
     
     if (size > 0) {
       printDepth(out, 2 * depth);
@@ -153,8 +175,8 @@ public class SimpleElement extends SimpleNode
       printDepth(out, 2 * depth);
       out.println("array(" + size + ") {");
       
-      for (Map.Entry<String,SimpleAttribute> entry : attrMap.entrySet()) {
-        entry.getValue().varDumpNested(env, out, depth + 1, valueSet);
+      for (SimpleAttribute attr : attrList) {
+        attr.varDumpNested(env, out, depth + 1, valueSet);
       }
       
       printDepth(out, 2 * depth);
@@ -212,8 +234,8 @@ public class SimpleElement extends SimpleNode
                          IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
-    HashMap<String,SimpleAttribute> attrMap = getAttributes();
-    int size = attrMap.size();
+    ArrayList<SimpleAttribute> attrList = getAttributes();
+    int size = attrList.size();
     
     if (size > 0) {
       printDepth(out, 4 * depth);
@@ -223,8 +245,8 @@ public class SimpleElement extends SimpleNode
       printDepth(out, 4 * (depth + 1));
       out.println('(');
       
-      for (Map.Entry<String,SimpleAttribute> entry : attrMap.entrySet()) {
-        entry.getValue().printRNested(env, out, depth + 2, valueSet);
+      for (SimpleAttribute attr : attrList) {
+        attr.printRNested(env, out, depth + 2, valueSet);
       }
       
       printDepth(out, 4 * (depth + 1));

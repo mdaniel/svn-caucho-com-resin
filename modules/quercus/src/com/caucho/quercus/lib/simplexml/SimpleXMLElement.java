@@ -55,6 +55,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -120,8 +121,9 @@ public class SimpleXMLElement
       if (node == null)
         return null;
       
-      return new SimpleXMLElement(buildNode(env, node, namespace, isPrefix),
-                                  true);
+      SimpleNode simpleNode = buildNode(env, null, node, namespace, isPrefix);
+      
+      return new SimpleXMLElement(simpleNode, true);
 
     } catch (IOException e) {
       env.warning(e);
@@ -191,6 +193,7 @@ public class SimpleXMLElement
   }
   
   private static SimpleNode buildNode(Env env,
+                                      SimpleNode parent,
                                       Node node,
                                       String namespace,
                                       boolean isPrefix)
@@ -201,7 +204,7 @@ public class SimpleXMLElement
     
     // passed in namespace appears to have no effect in PHP, so just ignore
     // it by passing in null
-    SimpleNode simpleNode = new SimpleElement(node.getNodeName(), null);
+    SimpleNode simpleNode = new SimpleElement(parent, node.getNodeName(), null);
 
     NamedNodeMap attrs = node.getAttributes();
     
@@ -222,7 +225,7 @@ public class SimpleXMLElement
     for (int i = 0; i < length; i++) {
       Node childNode = nodeList.item(i);
 
-      SimpleNode child = buildNode(env, childNode, namespace, isPrefix);
+      SimpleNode child = buildNode(env, simpleNode, childNode, namespace, isPrefix);
 
       simpleNode.addChild(child);
     }
@@ -264,11 +267,7 @@ public class SimpleXMLElement
       namespace = namespaceV.toString();
     
     SimpleText text = new SimpleText(value);
-    
-    SimpleElement child = new SimpleElement(name, namespace);
-    if (child.getPrefix() != null && namespace == null)
-      child.setPrefix(null);
-    
+    SimpleElement child = new SimpleElement(getNode(), name, namespace);
     child.addChild(text);
 
     addChild(child);
@@ -296,11 +295,11 @@ public class SimpleXMLElement
     if (! namespaceV.isNull())
       namespace = namespaceV.toString();
     
-    SimpleResultSet result = new SimpleResultSet();
-
-    for (Map.Entry<String,SimpleAttribute> entry : getNode().getAttributes().entrySet()) {
-      if (entry.getValue().isSameNamespace(namespace))
-        result.addAttribute(entry.getValue());
+    SimpleResultSet result = new SimpleResultSet(getNode().getName());
+    
+    for (SimpleAttribute attr : getNode().getAttributes()) {
+      if (attr.isSameNamespace(namespace))
+        result.addAttribute(attr);
     }
 
     return new SimpleXMLElement(result);
@@ -322,7 +321,7 @@ public class SimpleXMLElement
     if (! namespaceV.isNull())
       namespace = namespaceV.toString();
     
-    SimpleResultSet result = new SimpleResultSet();
+    SimpleResultSet result = new SimpleResultSet(getNode().getName());
     
     for (SimpleElement child : getNode().getElementList()) {
       if (isPrefix) {
@@ -341,9 +340,9 @@ public class SimpleXMLElement
       }
     }
 
-    for (Map.Entry<String,SimpleAttribute> entry : getNode().getAttributes().entrySet()) {
-      if (entry.getValue().isSameNamespace(namespace))
-        result.addAttribute(entry.getValue());
+    for (SimpleAttribute attr : getNode().getAttributes()) {
+      if (attr.isSameNamespace(namespace))
+        result.addAttribute(attr);
     }
 
     return new SimpleXMLElement(result);
@@ -377,6 +376,50 @@ public class SimpleXMLElement
   }
 
   /**
+   * Alias of getNamespaces().
+   */
+  public Value getDocNamespaces(Env env, @Optional boolean isRecursive)
+  {
+    return getNamespaces(env, isRecursive);
+  }
+  
+  /**
+   * Returns the namespaces used in this document.
+   */
+  public Value getNamespaces(Env env, @Optional boolean isRecursive)
+  {
+    ArrayValue array = new ArrayValueImpl();
+    
+    getNamespaces(array, getNode(), isRecursive);
+
+    return array;
+  }
+  
+  private static void getNamespaces(ArrayValue array,
+                                    SimpleNode node,
+                                    boolean isRecursive)
+  {
+    for (Map.Entry<String,SimpleAttribute> entry : node.getNamespaces().entrySet()) {
+      SimpleAttribute namespace = entry.getValue();
+      
+      String name;
+      
+      if (namespace.getPrefix() == null)
+        name = "";
+      else
+        name = namespace.getName();
+      
+      array.put(name, namespace.getValue());
+    }
+    
+    if (isRecursive) {
+      for (SimpleElement child : node.getElementList()) {
+        getNamespaces(array, child, isRecursive);
+      }
+    }
+  }
+  
+  /**
    * Runs an XPath expression on this node.
    * 
    * @param env
@@ -405,7 +448,7 @@ public class SimpleXMLElement
         boolean isPrefix = node.getPrefix() != null;
         
         SimpleNode simpleNode
-          = buildNode(env, nodes.item(i), node.getNamespaceURI(), isPrefix);
+          = buildNode(env, null, nodes.item(i), node.getNamespaceURI(), isPrefix);
         
         SimpleXMLElement xml = new SimpleXMLElement(simpleNode);
         
@@ -486,7 +529,7 @@ public class SimpleXMLElement
     SimpleElement child = getNode().getElement(name);
     
     if (child == null) {
-      child = new SimpleElement(name, null);
+      child = new SimpleElement(getNode(), name, null);
       getNode().addChild(child);
     }
     else {
@@ -511,7 +554,7 @@ public class SimpleXMLElement
    */
   public Set<String> keySet()
   {
-    return getNode().getAttributes().keySet();
+    return getNode().getAttributeMap().keySet();
   }
   
   /**
