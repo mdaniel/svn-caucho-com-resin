@@ -60,10 +60,7 @@ public class SOAPMessageProviderEncoding extends ProviderEncoding {
   {
     super(service);
 
-    ServiceMode serviceMode = 
-      (ServiceMode) _class.getAnnotation(ServiceMode.class);
-
-    if (serviceMode == null || serviceMode.value() != Service.Mode.MESSAGE)
+    if (_mode != Service.Mode.MESSAGE)
       throw new ConfigurationException(L.l("{0} implements Provider<SOAPMessage> must have @ServiceMode annotation with value Service.Mode == MESSAGE", _class.getName()));
 
     try {
@@ -91,3 +88,4 @@ public class SOAPMessageProviderEncoding extends ProviderEncoding {
     os.flush();
   }
 }
+

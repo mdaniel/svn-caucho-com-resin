@@ -31,8 +31,11 @@ package com.caucho.soa.encoding;
 
 import com.caucho.config.ConfigurationException;
 import com.caucho.soap.jaxws.JAXWSUtil;
+import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import static javax.xml.soap.SOAPConstants.*;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -57,37 +60,16 @@ import java.util.logging.Logger;
  * Invokes a service Provider.
  */
 public class SourceProviderEncoding extends ProviderEncoding {
-  private static final TransformerFactory factory 
-    = TransformerFactory.newInstance();
+  public static final L10N L = new L10N(SourceProviderEncoding.class);
+  private static final Logger log =
+    Logger.getLogger(SourceProviderEncoding.class.getName());
 
   private String _soapNamespace;
-  private final Service.Mode _mode;
-  private final Transformer _transformer;
 
   protected SourceProviderEncoding(Object service)
     throws ConfigurationException
   {
     super(service);
-
-    ServiceMode serviceMode = 
-      (ServiceMode) _class.getAnnotation(ServiceMode.class);
-
-    if (serviceMode != null)
-      _mode = serviceMode.value();
-    else
-      _mode = Service.Mode.PAYLOAD;
-
-    try {
-      _transformer = factory.newTransformer();
-
-      if (_mode == Service.Mode.PAYLOAD) {
-        _transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        _transformer.setOutputProperty(OutputKeys.INDENT, "no");
-      }
-    }
-    catch (TransformerConfigurationException e) {
-      throw new ConfigurationException(e);
-    }
 
     BindingType bindingType 
       = (BindingType) _class.getAnnotation(BindingType.class);

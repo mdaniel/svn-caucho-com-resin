@@ -38,6 +38,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -64,7 +65,8 @@ public class ProviderServlet extends GenericServlet implements ProtocolServlet
     throws IOException, ServletException
   {
     try {
-      _provider.invoke(request.getInputStream(), response.getOutputStream());
+      _provider.invoke((HttpServletRequest) request, 
+                       (HttpServletResponse) response);
     } catch (IOException e) {
       throw e;
     } catch (ServletException e) {
