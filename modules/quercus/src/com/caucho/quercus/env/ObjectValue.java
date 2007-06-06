@@ -29,8 +29,10 @@
 
 package com.caucho.quercus.env;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Represents a Quercus object value.
@@ -93,11 +95,65 @@ abstract public class ObjectValue extends Value {
   }
 
   /**
+   * Returns true for equality
+   */
+  public boolean eq(Value rValue)
+  {
+    if (rValue.isObject())
+      return cmpObject((ObjectValue)rValue) == 0;
+    else
+      return super.eq(rValue);
+  }
+  
+  /**
    * Compare two objects
    */
-  public int cmpObject(ObjectValue rValue)
+  public final int cmpObject(ObjectValue rValue)
   {
-    throw new RuntimeException("not implemented");
+    // if objects are not equal, then which object is greater is undefined
+
+    int result = getName().compareTo(rValue.getName());
+    
+    if (result != 0)
+      return result;
+    
+    Set<Map.Entry<String,Value>> aSet = entrySet();
+    Set<Map.Entry<String,Value>> bSet = rValue.entrySet();
+    
+    if (aSet.equals(bSet))
+      return 0;
+    else if (aSet.size() > bSet.size())
+      return 1;
+    else if (aSet.size() < bSet.size())
+      return -1;
+    else {
+      TreeSet<Map.Entry<String,Value>> aTree
+      = new TreeSet<Map.Entry<String,Value>>(aSet);
+
+      TreeSet<Map.Entry<String,Value>> bTree
+      = new TreeSet<Map.Entry<String,Value>>(bSet);
+
+      Iterator<Map.Entry<String,Value>> iterA = aTree.iterator();
+      Iterator<Map.Entry<String,Value>> iterB = bTree.iterator();
+
+      while (iterA.hasNext()) {
+        Map.Entry<String,Value> a = iterA.next();
+        Map.Entry<String,Value> b = iterB.next();
+
+        result = a.getKey().compareTo(b.getKey());
+
+        if (result != 0)
+          return result;
+        
+        result = a.getValue().cmp(b.getValue());
+
+        if (result != 0)
+          return result;
+      }
+
+      // should never reach this
+      return 0;
+    }
   }
 
 }

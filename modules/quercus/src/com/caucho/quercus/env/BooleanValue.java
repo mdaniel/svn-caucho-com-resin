@@ -120,18 +120,6 @@ public class BooleanValue extends Value
   /**
    * Converts to an object.
    */
-  public Value toObject(Env env)
-  {
-    Value obj = env.createObject();
-
-    obj.putField(env, "scalar", this);
-
-    return obj;
-  }
-
-  /**
-   * Converts to an object.
-   */
   public Object toObject()
   {
     return _value ? Boolean.TRUE : Boolean.FALSE;

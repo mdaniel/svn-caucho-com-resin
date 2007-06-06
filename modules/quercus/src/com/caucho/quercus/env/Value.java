@@ -249,8 +249,7 @@ abstract public class Value implements java.io.Serializable
       return 0;
     }
 
-    // XXX: check if values belong to same class; if not, incomparable
-    if (lVal instanceof ObjectValue && rVal instanceof ObjectValue)
+    if (lVal.isObject() && rVal.isObject())
       return ((ObjectValue)lVal).cmpObject((ObjectValue)rVal);
 
     if ((lVal instanceof StringValue || lVal instanceof NumberValue ||
@@ -403,7 +402,11 @@ abstract public class Value implements java.io.Serializable
    */
   public Value toObject(Env env)
   {
-    return env.createObject();
+    ObjectValue obj = env.createObject();
+    
+    obj.putField(env, "scalar", this);
+    
+    return obj;
   }
 
   public CompiledObjectValue toObjectValue()
