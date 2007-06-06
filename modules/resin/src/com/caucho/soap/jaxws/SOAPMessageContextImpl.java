@@ -95,7 +95,7 @@ public class SOAPMessageContextImpl extends AbstractMessageContextImpl
     }
   }
   
-  private MessageFactory getMessageFactory()
+  MessageFactory getMessageFactory()
     throws SOAPException
   {
     if (_messageFactory == null) {

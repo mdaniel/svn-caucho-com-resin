@@ -251,12 +251,22 @@ public class ServiceDelegateImpl extends ServiceDelegate {
       PortInfoImpl portInfo = new PortInfoImpl(bindingId, portName, 
                                                _serviceName, endpointAddress);
 
+      // Check for @HandlerChain on the service API
       if (_handlerResolver == null) {
         HandlerChain handlerChain = 
           (HandlerChain) api.getAnnotation(HandlerChain.class);
 
         if (handlerChain != null)
-          _handlerResolver = createHandlerResolver(api, handlerChain);
+          _handlerResolver = JAXWSUtil.createHandlerResolver(api, handlerChain);
+      }
+
+      // Check for @HandlerChain on the Service
+      if (_handlerResolver == null) {
+        HandlerChain handlerChain = 
+          (HandlerChain) _serviceClass.getAnnotation(HandlerChain.class);
+
+        if (handlerChain != null)
+          _handlerResolver = JAXWSUtil.createHandlerResolver(api, handlerChain);
       }
 
       if (_handlerResolver != null)
@@ -276,18 +286,6 @@ public class ServiceDelegateImpl extends ServiceDelegate {
     catch (Exception e) {
       throw new WebServiceException(e);
     }
-  }
-
-  private HandlerResolver createHandlerResolver(Class cl, 
-                                                HandlerChain handlerChain)
-    throws JAXBException
-  {
-    InputStream in = cl.getResourceAsStream(handlerChain.file());
-    
-    HandlerChains handlerChains = 
-      (HandlerChains) _handlerUnmarshaller.unmarshal(in);
-
-    return handlerChains.toHandlerResolver();
   }
 
   public Iterator<QName> getPorts()

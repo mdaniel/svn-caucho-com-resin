@@ -124,6 +124,7 @@ public class PortProxyHandler implements InvocationHandler, BindingProvider {
     if (! (url instanceof String))
       throw new IllegalArgumentException("Invalid service endpoint address specified");
 
+    // XXX cache this and the HandlerChainInvoker
     List<Handler> chain = _binding.getHandlerChain();
 
     if (chain == null)

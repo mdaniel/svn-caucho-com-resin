@@ -33,17 +33,24 @@ import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.JAXBContextImpl;
 import static com.caucho.soap.wsdl.WSDLConstants.*;
 import com.caucho.soap.jaxws.HandlerChainInvoker;
+import com.caucho.soap.jaxws.JAXWSUtil;
+import com.caucho.soap.jaxws.PortInfoImpl;
 import com.caucho.util.L10N;
 import com.caucho.xml.XmlPrinter;
 import com.caucho.xml.stream.StaxUtil;
 
 import org.w3c.dom.Node;
+import javax.activation.DataHandler;
+import javax.jws.HandlerChain;
 import javax.jws.WebService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import static javax.xml.XMLConstants.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import static javax.xml.soap.SOAPConstants.*;
 import javax.xml.stream.XMLInputFactory;
@@ -51,15 +58,25 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.ws.BindingType;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.HandlerResolver;
+import javax.xml.ws.handler.PortInfo;
+import static javax.xml.ws.handler.MessageContext.*;
 import javax.xml.ws.soap.SOAPBinding;
 
+import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -67,7 +84,11 @@ import java.io.Writer;
 
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -94,12 +115,16 @@ public class DirectSkeleton extends Skeleton {
     = new HashMap<Method,AbstractAction>();
 
   private Class _api;
+
+  private HandlerChainInvoker _handlerChain;
   
+  private String _bindingId;
   private String _namespace;
   private String _portType;
   private String _portName;
   private String _serviceName;
   private String _wsdlLocation = "REPLACE_WITH_ACTUAL_URL";
+  private PortInfo _portInfo;
 
   // The URI in SOAPBinding is wrong, but matches that of JAVAEE
   private String _soapNamespaceURI = "http://schemas.xmlsoap.org/wsdl/soap/";
@@ -136,7 +161,9 @@ public class DirectSkeleton extends Skeleton {
     return _outputFactory;
   }
 
-  public DirectSkeleton(Class type, JAXBContextImpl context, String wsdlAddress)
+  public DirectSkeleton(Class type, 
+                        JAXBContextImpl context, 
+                        String wsdlLocation)
     throws WebServiceException
   {
     WebService webService = (WebService) type.getAnnotation(WebService.class);
@@ -169,9 +196,48 @@ public class DirectSkeleton extends Skeleton {
     if (webService != null && ! "".equals(webService.wsdlLocation()))
       _wsdlLocation = webService.wsdlLocation();
     else
-      _wsdlLocation = null;
+      _wsdlLocation = wsdlLocation;
+
+    _bindingId = SOAPBinding.SOAP11HTTP_BINDING;
+    
+    BindingType bindingType = 
+      (BindingType) _api.getAnnotation(BindingType.class);
+
+    if (bindingType != null)
+      _bindingId = bindingType.value();
+
+    javax.jws.soap.SOAPBinding soapBinding = 
+      (javax.jws.soap.SOAPBinding) 
+      _api.getAnnotation(javax.jws.soap.SOAPBinding.class);
+
+    if (soapBinding != null && 
+        soapBinding.style() == javax.jws.soap.SOAPBinding.Style.RPC)
+      _soapStyle = "rpc";
 
     _context = context;
+
+    QName portName = new QName(_namespace, _portName);
+    QName serviceName = new QName(_namespace, _serviceName);
+
+    _portInfo = new PortInfoImpl(_bindingId, portName, serviceName);
+
+    HandlerChain handlerChain = 
+      (HandlerChain) _api.getAnnotation(HandlerChain.class);
+
+    if (handlerChain != null) { 
+      HandlerResolver handlerResolver = 
+        JAXWSUtil.createHandlerResolver(_api, handlerChain);
+
+      List<Handler> chain = handlerResolver.getHandlerChain(_portInfo);
+
+      if (chain != null)
+        _handlerChain = new HandlerChainInvoker(chain);
+    }
+  }
+
+  public String getWsdlLocation()
+  {
+    return _wsdlLocation;
   }
 
   public String getPortName()
@@ -231,6 +297,9 @@ public class DirectSkeleton extends Skeleton {
 
   public void addAction(Method method, AbstractAction action)
   {
+    if (log.isLoggable(Level.FINER))
+      log.finer("Adding " + action + " to " + this);
+
     _actionNames.put(action.getInputName(), action);
     _actionMethods.put(method, action);
   }
@@ -257,15 +326,41 @@ public class DirectSkeleton extends Skeleton {
     else if ("toString".equals(method.getName()))
       return "SoapStub[" + (_api != null ? _api.getName() : "") + "]";
     else
-      throw new RuntimeException(L.l("not a web method: {0}", method.getName()));
+      throw new RuntimeException(L.l("not a web method: {0}", 
+                                     method.getName()));
   }
   
   /**
    * Invokes the request on a local object using an inbound XML stream.
    */
-  public void invoke(Object service, XMLStreamReader in, XMLStreamWriter out)
+  public void invoke(Object service, 
+                     HttpServletRequest request,
+                     HttpServletResponse response)
     throws IOException, XMLStreamException, Throwable
   {
+    InputStream is = request.getInputStream();
+    OutputStream os = response.getOutputStream();
+
+    XMLStreamReader in = null;
+    XMLStreamWriter out = null;
+    DOMResult domResult = null;
+
+    if (_handlerChain != null) {
+      is = _handlerChain.invokeServerInbound(request, os);
+
+      if (is == null)
+        return;
+
+      domResult = new DOMResult();
+
+      in = getXMLInputFactory().createXMLStreamReader(is);
+      out = getXMLOutputFactory().createXMLStreamWriter(domResult);
+    }
+    else {
+      in = getXMLInputFactory().createXMLStreamReader(is);
+      out = getXMLOutputFactory().createXMLStreamWriter(os);
+    }
+
     in.nextTag();
 
     // XXX Namespace
@@ -315,9 +410,14 @@ public class DirectSkeleton extends Skeleton {
 
     // XXX: exceptions<->faults
     if (action != null)
-      action.invoke(service, header, in, out);
+      response.setStatus(action.invoke(service, header, in, out));
     else {
-      // XXX: fault
+      // skip the unknown action
+      while (in.getEventType() != in.END_ELEMENT ||
+             ! "Body".equals(in.getName().getLocalPart()))
+        in.nextTag();
+
+      writeClientFault(out);
     }
 
     // XXX Namespace?
@@ -326,6 +426,13 @@ public class DirectSkeleton extends Skeleton {
     in.require(XMLStreamReader.END_ELEMENT, null, "Envelope");
 
     out.writeEndElement(); // Envelope
+
+    out.flush();
+
+    if (_handlerChain != null) {
+      Source source = new DOMSource(domResult.getNode());
+      _handlerChain.invokeServerOutbound(source, os);
+    }
   }
 
   public void setSeparateSchema(boolean separateSchema) 
@@ -559,5 +666,21 @@ public class DirectSkeleton extends Skeleton {
   public String toString()
   {
     return "DirectSkeleton[" + _api + "]";
+  }
+
+  private void writeClientFault(XMLStreamWriter out)
+    throws IOException, XMLStreamException, JAXBException
+  {
+    out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Body", SOAP_ENVELOPE);
+    out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
+                          "Fault", 
+                          Skeleton.SOAP_ENVELOPE);
+
+    out.writeStartElement("faultcode");
+    out.writeCharacters(Skeleton.SOAP_ENVELOPE_PREFIX + ":Client");
+    out.writeEndElement(); // faultcode
+
+    out.writeEndElement(); // Fault
+    out.writeEndElement(); // Body
   }
 }

@@ -29,6 +29,8 @@
 
 package com.caucho.soap.skeleton;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -64,8 +66,8 @@ abstract public class Skeleton {
    * Invokes the request.
    */
   abstract public void invoke(Object service,
-                              XMLStreamReader in,
-                              XMLStreamWriter out)
+                              HttpServletRequest request,
+                              HttpServletResponse response)
     throws IOException, XMLStreamException, Throwable;
 
   public Object invoke(Method method, String url, Object[] args)

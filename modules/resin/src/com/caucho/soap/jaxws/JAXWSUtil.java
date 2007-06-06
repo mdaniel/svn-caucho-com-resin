@@ -31,17 +31,34 @@ package com.caucho.soap.jaxws;
 
 import java.io.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.jws.HandlerChain;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.handler.Handler;
+import javax.xml.ws.handler.HandlerResolver;
+import javax.xml.ws.handler.LogicalHandler;
 
 import com.caucho.util.L10N;
+
+import com.caucho.soap.jaxws.handlerchain.HandlerChains;
 
 import com.caucho.xml.stream.StaxUtil;
 import com.caucho.xml.stream.XMLStreamReaderImpl;
 import com.caucho.xml.stream.XMLStreamWriterImpl;
 
 public class JAXWSUtil {
+  private static final Logger log =
+    Logger.getLogger(JAXWSUtil.class.getName());
   private final static L10N L = new L10N(JAXWSUtil.class);
+  private static Unmarshaller _handlerChainUnmarshaller = null;
 
   public static void writeStartSOAPEnvelope(Writer out, String namespace)
     throws IOException
@@ -106,5 +123,59 @@ public class JAXWSUtil {
 
     if (! foundBody)
       throw new WebServiceException(L.l("Invalid response from server"));
+  }
+
+  public static HandlerResolver createHandlerResolver(Class cl, 
+                                                      HandlerChain handlerChain)
+    throws WebServiceException
+  {
+    try {
+      if (_handlerChainUnmarshaller == null) {
+        JAXBContext context = 
+          JAXBContext.newInstance("com.caucho.soap.jaxws.handlerchain");
+        _handlerChainUnmarshaller = context.createUnmarshaller();
+      }
+
+      if (log.isLoggable(Level.FINER)) {
+        log.finer("Creating handler chain for " + cl +
+                  " from file " + handlerChain.file());
+      }
+
+      InputStream is = cl.getResourceAsStream(handlerChain.file());
+
+      HandlerChains handlerChains = 
+        (HandlerChains) _handlerChainUnmarshaller.unmarshal(is);
+
+      return handlerChains;
+    }
+    catch (Exception e) {
+      throw new WebServiceException(e);
+    }
+  }
+
+  public static List<Handler> sortHandlerChain(List<Handler> handlerChain)
+  {
+    // According to the JAX-WS documentation, handler chains must be sorted
+    // so that all LogicalHandlers appear before protocol Handlers 
+    // (protocol Handlers are just Handlers that are not LogicalHandlers)
+    //
+    // XXX do this by bubbling up instead of creating a new list
+    List list = new ArrayList<Handler>();
+
+    for (int i = 0; i < handlerChain.size(); i++) {
+      Handler handler = handlerChain.get(i);
+
+      if (handler instanceof LogicalHandler)
+        list.add(handler);
+    }
+
+    for (int i = 0; i < handlerChain.size(); i++) {
+      Handler handler = handlerChain.get(i);
+
+      if (! (handler instanceof LogicalHandler))
+        list.add(handler);
+    }
+
+    return list;
   }
 }

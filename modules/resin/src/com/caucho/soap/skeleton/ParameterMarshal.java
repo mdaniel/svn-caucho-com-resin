@@ -179,4 +179,12 @@ public abstract class ParameterMarshal {
     else if (_property.getMinOccurs() != null)
       out.writeAttribute("minOccurs", _property.getMinOccurs());
   }
+
+  public String toString()
+  {
+    return "ParameterMarshal[arg=" + _arg + 
+                           ",property=" + _property + 
+                           ",name=" + _name + 
+                           ",namer=" + _namer + "]";
+  }
 }

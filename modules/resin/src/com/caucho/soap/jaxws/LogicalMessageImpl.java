@@ -48,6 +48,12 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
@@ -58,6 +64,8 @@ import com.caucho.util.L10N;
 
 public class LogicalMessageImpl implements LogicalMessage
 {
+  private static Transformer _transformer;
+
   private Source _source;
 
   public Source getPayload()
@@ -66,8 +74,23 @@ public class LogicalMessageImpl implements LogicalMessage
   }
 
   public void setPayload(Source source)
+    throws WebServiceException
   {
-    _source = source;
+    try {
+      // The payload needs to be stable, so transform stream-based 
+      // sources to DOM
+      if ((source instanceof StreamSource) || (source instanceof SAXSource)) {
+        DOMResult dom = new DOMResult();
+        getTransformer().transform(source, dom);
+
+        _source = new DOMSource(dom.getNode());
+      }
+      else 
+        _source = source;
+    }
+    catch (Exception e) {
+      throw new WebServiceException(e);
+    }
   }
 
   public void setPayload(Object payload, JAXBContext context)
@@ -97,5 +120,16 @@ public class LogicalMessageImpl implements LogicalMessage
     catch (Exception e) {
       throw new WebServiceException(e);
     }
+  }
+
+  private static Transformer getTransformer()
+    throws TransformerException
+  {
+    if (_transformer == null) {
+      TransformerFactory factory = TransformerFactory.newInstance();
+      _transformer = factory.newTransformer();
+    }
+
+    return _transformer;
   }
 }

@@ -39,6 +39,8 @@ public class Handler {
   private String _name;
   private String _class;
 
+  @XmlElement(name="handler-name",
+              namespace="http://java.sun.com/xml/ns/javaee")
   public String getHandlerName()
   {
     return _name;
@@ -49,6 +51,8 @@ public class Handler {
     _name = name;
   }
 
+  @XmlElement(name="handler-class",
+              namespace="http://java.sun.com/xml/ns/javaee")
   public String getHandlerClass()
   {
     return _class;

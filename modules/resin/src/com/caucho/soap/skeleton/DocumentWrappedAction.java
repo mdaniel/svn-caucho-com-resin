@@ -76,12 +76,13 @@ public class DocumentWrappedAction extends AbstractAction {
   public DocumentWrappedAction(Method method, Method eiMethod,
                                JAXBContextImpl jaxbContext, 
                                String targetNamespace,
+                               String wsdlLocation,
                                Marshaller marshaller,
                                Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
     super(method, eiMethod, 
-          jaxbContext, targetNamespace, 
+          jaxbContext, targetNamespace, wsdlLocation,
           marshaller, unmarshaller);
   }
 

@@ -29,28 +29,54 @@
 
 package com.caucho.soap.jaxws.handlerchain;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import javax.xml.ws.handler.HandlerResolver;
+import javax.xml.ws.handler.PortInfo;
 
 @XmlRootElement(
   name="handler-chains", 
   namespace="http://java.sun.com/xml/ns/javaee"
 )
-public class HandlerChains {
-  private HandlerChain _chain;
+public class HandlerChains implements HandlerResolver {
+  private List<HandlerChain> _chains;
 
-  public HandlerChain getHandlerChain()
+  @XmlElement(name="handler-chain",
+              namespace="http://java.sun.com/xml/ns/javaee")
+  public List<HandlerChain> getHandlerChainList()
   {
-    return _chain;
+    return _chains;
   }
 
-  public void setHandlerChain(HandlerChain chain)
+  public void setHandlerChainList(List<HandlerChain> chains)
   {
-    _chain = chain;
+    _chains = chains;
   }
 
-  public HandlerResolver toHandlerResolver()
+  public List<javax.xml.ws.handler.Handler> getHandlerChain(PortInfo portInfo)
   {
-    return new HandlerResolverImpl(_chain.toHandlerList());
+    HandlerChain defaultHandlerChain = null;
+    List<javax.xml.ws.handler.Handler> list = null;
+
+    for (int i = 0; i < _chains.size(); i++) {
+      HandlerChain chain = _chains.get(i);
+
+      if (chain.isDefault() ||
+          (chain.getPortNamePattern() != null &&
+           chain.getPortNamePattern().equals(portInfo.getPortName())) ||
+          (chain.getBindingID() != null &&
+           chain.getBindingID().equals(portInfo.getBindingID()))) {
+        if (list == null)
+          list = chain.toHandlerList();
+        else
+          list.addAll(chain.toHandlerList());
+      }
+
+      // XXX else if (chain.getProtocolBindings().equals(???)) {}
+    }
+
+    return list;
   }
 }

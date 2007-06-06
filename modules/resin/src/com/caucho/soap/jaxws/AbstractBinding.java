@@ -51,7 +51,7 @@ import com.caucho.util.L10N;
 public abstract class AbstractBinding implements Binding {
   private final static L10N L = new L10N(AbstractBinding.class);
 
-  private List<Handler> _handlerChain = null;
+  private List<Handler> _handlerChain = new ArrayList<Handler>();
 
   public List<Handler> getHandlerChain()
   {
@@ -60,24 +60,7 @@ public abstract class AbstractBinding implements Binding {
 
   public void setHandlerChain(List<Handler> handlerChain)
   {
-    // According to the JAX-WS documentation, handler chains must be sorted
-    // so that all LogicalHandlers appear before protocol Handlers 
-    // (protocol Handlers are just Handlers that are not LogicalHandlers)
-    _handlerChain = new ArrayList<Handler>();
-
-    for (int i = 0; i < handlerChain.size(); i++) {
-      Handler handler = handlerChain.get(i);
-
-      if (handler instanceof LogicalHandler)
-        _handlerChain.add(handler);
-    }
-
-    for (int i = 0; i < handlerChain.size(); i++) {
-      Handler handler = handlerChain.get(i);
-
-      if (! (handler instanceof LogicalHandler))
-        _handlerChain.add(handler);
-    }
+    _handlerChain = JAXWSUtil.sortHandlerChain(handlerChain);
   }
 }
 

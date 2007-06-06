@@ -79,12 +79,13 @@ public class DocumentBareAction extends AbstractAction {
   public DocumentBareAction(Method method, Method eiMethod,
                             JAXBContextImpl jaxbContext, 
                             String targetNamespace,
+                            String wsdlLocation,
                             Marshaller marshaller,
                             Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
   {
     super(method, eiMethod, 
-          jaxbContext, targetNamespace, 
+          jaxbContext, targetNamespace, wsdlLocation,
           marshaller, unmarshaller);
 
     _messageName = _operationName;
@@ -245,6 +246,8 @@ public class DocumentBareAction extends AbstractAction {
       }
 
       in.require(XMLStreamReader.END_ELEMENT, null, "Header");
+
+      in.nextTag();
     }
 
     in.require(XMLStreamReader.START_ELEMENT, null, "Body");
@@ -378,6 +381,11 @@ public class DocumentBareAction extends AbstractAction {
       out.writeAttribute("name", _responseName);
       out.writeAttribute("type", _returnMarshal.getProperty().getSchemaType());
     }
+  }
+
+  public String toString()
+  {
+    return "DocumentBareAction[" + _method.getName() + "]";
   }
 }
 

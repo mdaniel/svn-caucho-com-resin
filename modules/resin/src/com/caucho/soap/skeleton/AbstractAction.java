@@ -33,8 +33,10 @@ import com.caucho.jaxb.JAXBContextImpl;
 import com.caucho.jaxb.JAXBUtil;
 import com.caucho.jaxb.skeleton.Property;
 
-import static com.caucho.soap.wsdl.WSDLConstants.*;
 import com.caucho.soap.jaxws.HandlerChainInvoker;
+import static com.caucho.soap.wsdl.WSDLConstants.*;
+import com.caucho.soap.wsdl.WSDLDefinitions;
+import com.caucho.soap.wsdl.WSDLParser;
 import com.caucho.util.L10N;
 
 import javax.activation.DataHandler;
@@ -50,6 +52,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -110,6 +116,9 @@ public abstract class AbstractAction {
   protected static XMLInputFactory _xmlInputFactory 
     = XMLInputFactory.newInstance();
 
+  protected static MessageFactory _messageFactory;
+  protected static SOAPMessage _soapMessage;
+
   protected final Method _method;
   protected final int _arity;
   protected boolean _isOneway;
@@ -164,9 +173,24 @@ public abstract class AbstractAction {
     return _xmlOutputFactory;
   }
 
+  protected static SOAPFault createSOAPFault()
+    throws SOAPException
+  {
+    if (_messageFactory == null)
+      _messageFactory = MessageFactory.newInstance(); // XXX protocol
+
+    if (_soapMessage == null)
+      _soapMessage = _messageFactory.createMessage();
+
+    _soapMessage.getSOAPBody().removeContents();
+
+    return _soapMessage.getSOAPBody().addFault();
+  }
+
   protected AbstractAction(Method method, Method eiMethod,
                            JAXBContextImpl jaxbContext, 
                            String targetNamespace,
+                           String wsdlLocation,
                            Marshaller marshaller,
                            Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
@@ -187,7 +211,18 @@ public abstract class AbstractAction {
     //
     // Arguments
     //
+    
+    WSDLDefinitions wsdl = null;
 
+    try {
+      if (wsdlLocation != null) 
+        wsdl = WSDLParser.parse(wsdlLocation);
+    }
+    catch (WebServiceException e) {
+      log.fine(L.l("Unable to read WSDL from location {0}: {1}", 
+                   wsdlLocation, e));
+    }
+    
     Class[] params = method.getParameterTypes();
     Type[] genericParams = method.getGenericParameterTypes();
     Annotation[][] paramAnn = method.getParameterAnnotations();
@@ -387,6 +422,7 @@ public abstract class AbstractAction {
   public static AbstractAction createAction(Method method, 
                                             JAXBContextImpl jaxbContext, 
                                             String targetNamespace,
+                                            String wsdlLocation,
                                             Marshaller marshaller,
                                             Unmarshaller unmarshaller)
     throws JAXBException, WebServiceException
@@ -462,7 +498,7 @@ public abstract class AbstractAction {
     if (soapBinding == null)
       return new DocumentWrappedAction(method, eiMethod, 
                                        jaxbContext, targetNamespace,
-                                       marshaller, unmarshaller);
+                                       wsdlLocation, marshaller, unmarshaller);
 
     if (soapBinding.use() == SOAPBinding.Use.ENCODED)
       throw new UnsupportedOperationException(L.l("SOAP encoded style is not supported by JAX-WS"));
@@ -471,10 +507,12 @@ public abstract class AbstractAction {
       if (soapBinding.parameterStyle() == SOAPBinding.ParameterStyle.WRAPPED)
         return new DocumentWrappedAction(method, eiMethod, 
                                          jaxbContext, targetNamespace,
+                                         wsdlLocation,
                                          marshaller, unmarshaller);
       else {
         return new DocumentBareAction(method, eiMethod, 
                                       jaxbContext, targetNamespace,
+                                      wsdlLocation,
                                       marshaller, unmarshaller);
       }
     }
@@ -483,7 +521,7 @@ public abstract class AbstractAction {
         throw new UnsupportedOperationException(L.l("SOAP RPC bare style not supported"));
 
       return new RpcAction(method, eiMethod, jaxbContext, targetNamespace,
-                           marshaller, unmarshaller);
+                           wsdlLocation, marshaller, unmarshaller);
     }
   }
 
@@ -495,6 +533,7 @@ public abstract class AbstractAction {
     throws IOException, XMLStreamException, MalformedURLException, 
            JAXBException, Throwable
   {
+    XMLStreamReader in = null;
     URL urlObject = new URL(url);
     URLConnection connection = urlObject.openConnection();
 
@@ -531,16 +570,12 @@ public abstract class AbstractAction {
       if (handlerChain != null) {
         Source source = new DOMSource(dom.getNode());
 
-        // XXX fill this in...
-        Map<String,DataHandler> attachments = new HashMap<String,DataHandler>();
+        if (! handlerChain.invokeClientOutbound(source, httpOut)) {
+          source = handlerChain.getSource();
+          in = _xmlInputFactory.createXMLStreamReader(source);
 
-        Map<String,Object> httpProperties = new HashMap<String,Object>();
-        httpProperties.put(HTTP_REQUEST_METHOD, "POST");
-        httpProperties.put(HTTP_REQUEST_HEADERS, 
-                           new HashMap<String,List<String>>());
-
-        handlerChain.invoke(source, httpOut, attachments, 
-                            httpProperties, false, true);
+          return readResponse(in, args);
+        }
       }
 
       //
@@ -548,25 +583,14 @@ public abstract class AbstractAction {
       // 
 
       httpConnection.getResponseCode();
-      InputStream httpIn = httpConnection.getInputStream();
-      XMLStreamReader in = null;
       
       if (handlerChain != null) {
-        // XXX fill this in...
-        Map<String,DataHandler> attachments = new HashMap<String,DataHandler>();
-
-        Map<String,Object> httpProperties = new HashMap<String,Object>();
-        httpProperties.put(HTTP_RESPONSE_CODE, 
-                           Integer.valueOf(httpConnection.getResponseCode()));
-        httpProperties.put(HTTP_RESPONSE_HEADERS,
-                           httpConnection.getHeaderFields());
-
-        InputStream is = 
-          handlerChain.invoke(httpIn, attachments, httpProperties, true, true);
+        InputStream is = handlerChain.invokeClientInbound(httpConnection);
 
         in = _xmlInputFactory.createXMLStreamReader(is);
       }
       else {
+        InputStream httpIn = httpConnection.getInputStream();
         in = _xmlInputFactory.createXMLStreamReader(httpIn);
       }
 
@@ -576,9 +600,7 @@ public abstract class AbstractAction {
       if (_isOneway)
         return null;
 
-      Object ret = readResponse(in, args);
-
-      return ret;
+      return readResponse(in, args);
     } 
     finally {
       if (httpConnection != null)
@@ -624,7 +646,7 @@ public abstract class AbstractAction {
   /**
    * Invokes the request for a call.
    */
-  public void invoke(Object service, XMLStreamReader header,
+  public int invoke(Object service, XMLStreamReader header,
                      XMLStreamReader in, XMLStreamWriter out)
     throws IOException, XMLStreamException, Throwable
   {
@@ -647,7 +669,7 @@ public abstract class AbstractAction {
     }
     catch (InvocationTargetException e) {
       writeFault(out, e.getCause());
-      return;
+      return 500;
     }
 
     if (! _isOneway) {
@@ -671,6 +693,8 @@ public abstract class AbstractAction {
       writeResponse(out, value, args);
 
     out.writeEndElement(); // Body
+
+    return 200;
   }
 
   protected void readHeaders(XMLStreamReader header, Object[] args)
@@ -722,6 +746,7 @@ public abstract class AbstractAction {
   protected void writeFault(XMLStreamWriter out, Throwable fault)
     throws IOException, XMLStreamException, JAXBException
   {
+    out.writeStartElement(SOAP_ENVELOPE_PREFIX, "Body", SOAP_ENVELOPE);
     out.writeStartElement(Skeleton.SOAP_ENVELOPE_PREFIX, 
                           "Fault", 
                           Skeleton.SOAP_ENVELOPE);
@@ -755,13 +780,16 @@ public abstract class AbstractAction {
     }
 
     out.writeEndElement(); // Fault
+    out.writeEndElement(); // Body
   }
 
   protected Throwable readFault(XMLStreamReader in)
-    throws IOException, XMLStreamException, JAXBException
+    throws IOException, XMLStreamException, JAXBException, SOAPException
   {
     Throwable fault = null;
     String message = null;
+    String actor = null;
+    SOAPFault soapFault = createSOAPFault();
 
     while (in.nextTag() == XMLStreamReader.START_ELEMENT) {
       if ("faultcode".equals(in.getLocalName())) {
@@ -784,6 +812,8 @@ public abstract class AbstractAction {
           else if ("MustUnderstand".equalsIgnoreCase(code)) {
             // XXX Do anything with this?
           }
+
+          soapFault.setFaultCode(code);
         }
 
         while (in.nextTag() != XMLStreamReader.END_ELEMENT) {}
@@ -792,10 +822,16 @@ public abstract class AbstractAction {
         if (in.next() == XMLStreamReader.CHARACTERS)
           message = in.getText();
 
+        soapFault.setFaultString(message);
+
         while (in.nextTag() != XMLStreamReader.END_ELEMENT) {}
       }
       else if ("faultactor".equals(in.getLocalName())) {
-        // XXX Do anything with this?
+        if (in.next() == XMLStreamReader.CHARACTERS)
+          actor = in.getText();
+
+        soapFault.setFaultActor(actor);
+
         while (in.nextTag() != XMLStreamReader.END_ELEMENT) {}
       }
       else if ("detail".equals(in.getLocalName())) {
@@ -805,14 +841,11 @@ public abstract class AbstractAction {
           if (faultMarshal != null)
             fault = (Exception) faultMarshal.deserializeReply(in, fault);
         }
-
-        while (in.nextTag() != XMLStreamReader.END_ELEMENT) {}
       }
     }
 
-    /*
     if (fault == null)
-      fault = new SOAPFaultException(soapFault);*/
+      fault = new SOAPFaultException(soapFault);
 
     return fault;
   }

@@ -123,6 +123,7 @@ public class WebServiceIntrospector {
 
       AbstractAction action = 
         AbstractAction.createAction(methods[i], jaxbContext, namespace,
+                                    skel.getWsdlLocation(),
                                     marshaller, unmarshaller);
 
       skel.addAction(methods[i], action);
