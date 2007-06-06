@@ -116,7 +116,7 @@ public class DatatypeConverterImpl implements DatatypeConverterInterface {
     try {
       _qdate.parseDate(lexicalXSDDateTime);
 
-      return _qdate.getCalendar();
+      return (Calendar) _qdate.getCalendar().clone();
     }
     catch (Exception e) {
       throw new IllegalArgumentException(e);

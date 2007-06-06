@@ -59,4 +59,9 @@ public class ConstantNamer implements Namer {
   {
     return _name;
   }
+
+  public String toString()
+  {
+    return "ConstantNamer[" + _name + "]";
+  }
 }
