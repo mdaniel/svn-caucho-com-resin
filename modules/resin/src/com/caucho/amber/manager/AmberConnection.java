@@ -810,7 +810,7 @@ public class AmberConnection
   public void close()
   {
     if (_persistenceUnit == null) {
-      // jpa/0s44
+      // jpa/0s45
       throw new IllegalStateException("Entity manager is already closed.");
     }
 
