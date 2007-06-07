@@ -141,13 +141,20 @@ public class CollectionField extends CascadableField {
       out.println("for (Object o : " + getter + ") {");
       out.pushDepth();
 
-      // jpa/0i60
-      out.println();
-      out.println("com.caucho.amber.entity.Entity child = (com.caucho.amber.entity.Entity) o;");
-      out.println();
-      out.println("if (com.caucho.amber.entity.EntityState.P_DELETING.ordinal() <= child.__caucho_getEntityState().ordinal())");
-      out.println("  continue;");
-      out.println();
+      // jpa/1622
+      if (cascadeType == CascadeType.REMOVE) {
+        // jpa/0i60
+        out.println("com.caucho.amber.entity.Entity child = (com.caucho.amber.entity.Entity) o;");
+        out.println();
+
+        out.println("if (! child.__caucho_getEntityState().isTransactional())");
+        out.println("  continue;");
+        out.println();
+      }
+      // else {
+      //   out.println("if (com.caucho.amber.entity.EntityState.P_DELETING.ordinal() <= child.__caucho_getEntityState().ordinal())");
+      //   out.println("  continue;");
+      // }
 
       out.print(aConn + ".");
 

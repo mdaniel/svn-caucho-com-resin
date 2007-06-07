@@ -383,6 +383,16 @@ public class EntityOneToManyField extends CollectionField {
     out.println("if (" + var + " != null) {");
     out.pushDepth();
 
+    out.println("if (__caucho_state.isPersist()) {");
+    out.pushDepth();
+
+    out.println(var + ".setSession(__caucho_session);");
+    out.println("return " + var + ";");
+
+    out.popDepth();
+    out.println("}");
+    out.println();
+
     // jpa/1621
     out.println("if (" + var + ".getSession() != null");
     out.println("    && " + var + ".getSession() == __caucho_session)");

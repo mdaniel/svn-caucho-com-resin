@@ -393,7 +393,17 @@ public class AmberConnection
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("removing entity class " + instance.getClass().getName() +
-                                 " PK: " + instance.__caucho_getPrimaryKey()));
+                                 " PK: " + instance.__caucho_getPrimaryKey() +
+                                 " state: " + instance.__caucho_getEntityState()));
+
+      EntityState state = instance.__caucho_getEntityState();
+
+      if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, L.l("remove is ignoring entity in state " + state));
+
+        return;
+      }
 
       // jpa/0k12
       if (instance.__caucho_getConnection() == null) {
@@ -409,15 +419,6 @@ public class AmberConnection
         }
         else
           throw new IllegalArgumentException(L.l("remove() operation can only be applied to a managed entity. This entity instance '{0}' PK: '{1}' is detached which means it was probably removed or needs to be merged.", instance.getClass().getName(), instance.__caucho_getPrimaryKey()));
-      }
-
-      EntityState state = instance.__caucho_getEntityState();
-
-      if (EntityState.P_DELETING.ordinal() <= state.ordinal()) {
-        if (log.isLoggable(Level.FINER))
-          log.log(Level.FINER, L.l("remove is ignoring entity in state " + state));
-
-        return;
       }
 
       // jpa/0h25, jpa/0i5e
@@ -809,9 +810,8 @@ public class AmberConnection
   public void close()
   {
     if (_persistenceUnit == null) {
-      // XXX: already closed, must throw IllegalStateException,
-      // but might add cleanup issues, needs testing.
-      return;
+      // jpa/0s44
+      throw new IllegalStateException("Entity manager is already closed.");
     }
 
     try {

@@ -279,8 +279,13 @@ public class EntityManyToManyField extends AssociationField {
                                       int updateIndex)
     throws IOException
   {
-    // XXX: jpa/0s2k, to be continued.
+    // jpa/0s2k
     generateCopyLoadObject(out, dst, src, updateIndex);
+
+    out.println();
+
+    // jpa/0i61
+    generatePreCascade(out, "aConn", CascadeType.MERGE);
   }
 
   /**
@@ -368,8 +373,22 @@ public class EntityManyToManyField extends AssociationField {
 
     out.println("if (" + var + " != null) {");
     out.pushDepth();
+
+    out.println("if (__caucho_state.isPersist()) {");
+    out.pushDepth();
+
     out.println(var + ".setSession(__caucho_session);");
     out.println("return " + var + ";");
+
+    out.popDepth();
+    out.println("}");
+    out.println();
+
+    // jpa/1622
+    out.println("if (" + var + ".getSession() != null");
+    out.println("    && " + var + ".getSession() == __caucho_session)");
+    out.println("  return " + var + ";");
+
     out.popDepth();
     out.println("}");
 
@@ -405,8 +424,9 @@ public class EntityManyToManyField extends AssociationField {
     }
     newEmptyCollection += ")";
 
-    // jpa/0s2k
-    out.println(var + " = " + newEmptyCollection + ";");
+    // jpa/0s2k, jpa/1622
+    out.println("if (" + var + " == null)");
+    out.println("  " + var + " = " + newEmptyCollection + ";");
 
     // if (! isAbstract())
     out.println();
@@ -741,7 +761,8 @@ public class EntityManyToManyField extends AssociationField {
         // XXX: jpa/0i5c
         // For now, needs to flush the persist() with many-to-many
         // to avoid breaking FK constraints from join tables.
-        out.println("__caucho_create(__caucho_session, __caucho_home);");
+        out.println("if (__caucho_state == com.caucho.amber.entity.EntityState.P_PERSISTING)");
+        out.println("  __caucho_create(__caucho_session, __caucho_home);");
       }
 
       out.println();
@@ -751,9 +772,12 @@ public class EntityManyToManyField extends AssociationField {
       if (cascadeType == CascadeType.PERSIST) {
         // jpa/0i60
         out.println("((com.caucho.amber.entity.Entity) o).__caucho_flush();");
-      }
 
-      out.println(amberCascade + "(o);");
+        // jpa/1622
+        out.println(amberCascade + "(aConn, o);");
+      }
+      else
+        out.println(amberCascade + "(o);");
 
       out.popDepth();
       out.println("}");
@@ -779,7 +803,7 @@ public class EntityManyToManyField extends AssociationField {
 
     out.println();
     out.println("public boolean" +
-                " __amber_" + getGetterName() + "_add(Object o)");
+                " __amber_" + getGetterName() + "_add(com.caucho.amber.manager.AmberConnection aConn, Object o)");
     out.println("{");
     out.pushDepth();
 
@@ -800,7 +824,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println(varAdded + ".add(v);");
 
     out.println();
-    out.println("if (__caucho_session == null)");
+    out.println("if (aConn == null)");
     out.println("  return false;");
 
     out.println();
@@ -830,7 +854,7 @@ public class EntityManyToManyField extends AssociationField {
     out.println("try {");
     out.pushDepth();
 
-    out.println("java.sql.PreparedStatement pstmt = __caucho_session.prepareInsertStatement(sql);");
+    out.println("java.sql.PreparedStatement pstmt = aConn.prepareInsertStatement(sql);");
 
     out.println("int index = 1;");
     getRelatedType().getId().generateSet(out, "pstmt", "index", "this");
@@ -838,7 +862,7 @@ public class EntityManyToManyField extends AssociationField {
 
     out.println("if (pstmt.executeUpdate() == 1) {");
     out.pushDepth();
-    out.println("__caucho_session.addCompletion(new com.caucho.amber.entity.TableInvalidateCompletion(\"" + _targetLink.getSourceTable().getName() + "\"));");
+    out.println("aConn.addCompletion(new com.caucho.amber.entity.TableInvalidateCompletion(\"" + _targetLink.getSourceTable().getName() + "\"));");
     out.println("return true;");
     out.popDepth();
     out.println("}");

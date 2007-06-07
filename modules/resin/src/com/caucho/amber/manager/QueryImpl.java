@@ -121,6 +121,9 @@ public class QueryImpl implements Query {
     ResultSet rs = null;
 
     try {
+      // jpa/0y1b
+      if (_aConn.isInTransaction())
+        _aConn.flush();
 
       Class constructorClass = null;
 
@@ -856,11 +859,10 @@ public class QueryImpl implements Query {
 
     // item.setNumberOfLoadingColumns(consumed);
 
-    // XXX: jpa/0y12
-    if (consumed == 0)
-      _currIndex++;
-    else
-      _currIndex += consumed;
+    _currIndex++;
+
+    // jpa/0y12, jpa/0y15
+    _currIndex += consumed;
 
     return entity;
   }
