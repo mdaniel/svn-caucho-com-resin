@@ -214,6 +214,7 @@ public class StringModule extends AbstractQuercusModule {
   public static StringValue addslashes(StringValue source)
   {
     StringBuilderValue sb = new StringBuilderValue();
+
     int length = source.length();
     for (int i = 0; i < length; i++) {
       char ch = source.charAt(i);
@@ -237,7 +238,7 @@ public class StringModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValueImpl(sb.toString());
+    return sb;
   }
 
   /**
@@ -701,18 +702,18 @@ v   *
 
       int ch;
       while ((ch = is.read()) >= 0) {
-	md.update((byte) ch);
+        md.update((byte) ch);
       }
       
       byte []digest = md.digest();
       
       StringBuilderValue sb = new StringBuilderValue();
       for (int i = 0; i < digest.length; i++) {
-	int d1 = (digest[i] >> 4) & 0xf;
-	int d2 = (digest[i] & 0xf);
+        int d1 = (digest[i] >> 4) & 0xf;
+        int d2 = (digest[i] & 0xf);
 	
-	sb.append(toHexChar(d1));
-	sb.append(toHexChar(d2));
+        sb.append(toHexChar(d1));
+        sb.append(toHexChar(d2));
       }
       
       return sb;
@@ -737,24 +738,24 @@ v   *
       InputStream is = null;
       
       try {
-	is = source.openRead();
-	int d;
-	
-	while ((d = is.read()) >= 0) {
-	  md.update((byte) d);
-	}
-	
-	return digestToString(md.digest());
+        is = source.openRead();
+        int d;
+        
+        while ((d = is.read()) >= 0) {
+          md.update((byte) d);
+        }
+    
+        return digestToString(md.digest());
       } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-	
-	return BooleanValue.FALSE;
+        log.log(Level.FINE, e.toString(), e);
+    
+        return BooleanValue.FALSE;
       } finally {
-	try {
-	  if (is != null)
-	    is.close();
-	} catch (IOException e) {
-	}
+        try {
+          if (is != null)
+            is.close();
+        } catch (IOException e) {
+        }
       }
     } catch (Exception e) {
       throw new QuercusModuleException(e);
@@ -2091,9 +2092,9 @@ v   *
    * @param type padding type
    */
   public static StringValue str_pad(StringValue string,
-				    int length,
-				    @Optional("' '") String pad,
-				    @Optional("STR_PAD_RIGHT") int type)
+                                    int length,
+                                    @Optional("' '") String pad,
+                                    @Optional("STR_PAD_RIGHT") int type)
   {
     int strLen = string.length();
     int padLen = length - strLen;
@@ -2121,14 +2122,14 @@ v   *
       break;
     }
 
-    StringBuilderValue sb = new StringBuilderValue();
+    StringValue sb = new StringBuilderValue();
 
     int padStringLen = pad.length();
 
     for (int i = 0; i < leftPad; i++)
       sb.append(pad.charAt(i % padStringLen));
 
-    sb.append(string);
+    sb = sb.append(string);
 
     for (int i = 0; i < rightPad; i++)
       sb.append(pad.charAt(i % padStringLen));
@@ -2144,10 +2145,10 @@ v   *
    */
   public static Value str_repeat(StringValue string, int count)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    StringValue sb = new StringBuilderValue();
 
     for (int i = 0; i < count; i++)
-      sb.append(string);
+      sb = sb.append(string);
 
     return sb;
   }
@@ -2320,14 +2321,14 @@ v   *
 
     int searchLen = search.length();
 
-    StringBuilderValue result = null;
+    StringValue result = null;
 
     while ((next = indexOf(subject, search, head, isInsensitive)) >= head) {
       if (result == null)
-	result = new StringBuilderValue();
+        result = new StringBuilderValue();
 	
-      result.append(subject, head, next);
-      result.append(replace);
+      result = result.append(subject, head, next);
+      result = result.append(replace);
 
       if (head < next + searchLen)
         head = next + searchLen;
@@ -2341,7 +2342,7 @@ v   *
       countV.set(LongValue.create(count));
 
       if (head > 0 && head < subject.length())
-        result.append(subject, head, subject.length());
+        result = result.append(subject, head, subject.length());
 
       return result;
     }
@@ -2364,7 +2365,7 @@ v   *
       int matchLen = match.length();
 
       if (matchLen <= 0)
-	return -1;
+        return -1;
 
       char ch = Character.toLowerCase(match.charAt(0));
       loop:
@@ -3545,7 +3546,7 @@ v   *
       k++;
     }
 
-    StringBuilderValue result = new StringBuilderValue();
+    StringValue result = new StringBuilderValue();
     int len = string.length();
     int head = 0;
 
@@ -3566,7 +3567,7 @@ v   *
       }
 
       if (head != bestHead)
-        result.append(string.substring(head, bestHead));
+        result = result.append(string.substring(head, bestHead));
 
       if (bestI >= 0)
         result.append(to[bestI]);
@@ -3747,11 +3748,11 @@ v   *
     else
       end = Math.min(start + len, strLen);
 
-    StringBuilderValue result = new StringBuilderValue();
+    StringValue result = new StringBuilderValue();
 
-    result.append(string.substring(0, start));
-    result.append(replacement);
-    result.append(string.substring(end));
+    result = result.append(string.substring(0, start));
+    result = result.append(replacement);
+    result = result.append(string.substring(end));
     
     return result;
   }

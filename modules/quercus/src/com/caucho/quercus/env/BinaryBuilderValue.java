@@ -631,29 +631,22 @@ public class BinaryBuilderValue extends BinaryValue
   @Override
   public final StringValue append(Value v)
   {
-    if (_length == 0) {
-      if (v.length() != 0) {
-        return v.toStringBuilder();
-      }
-      else {
-        return this;
-      }
-    }
-    else if (v.length() == 0) {
+    if (v.length() == 0)
+      return this;
+    else if (v.isBinary()) {
+      v.appendTo(this);
+      
       return this;
     }
-    else if (v.isUnicode()) {
+    else if (_length == 0)
+      return v.toStringBuilder();
+    else {
       StringBuilderValue sb = new StringBuilderValue();
 
       appendTo(sb);
       v.appendTo(sb);
 
       return sb;
-    }
-    else {
-      v.appendTo(this);
-
-      return this;
     }
   }
 

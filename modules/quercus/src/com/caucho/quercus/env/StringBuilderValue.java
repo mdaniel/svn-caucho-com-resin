@@ -879,18 +879,17 @@ public class StringBuilderValue extends UnicodeValue
   @Override
   public final StringValue append(Value v)
   {
-    if (_length == 0) {
-      if (v.length() != 0 || v.isBinary())
-        return v.toStringBuilder();
-      else
-        return this;
-    }
-    
-    _value = null;
-    
-    v.appendTo(this);
+    if (_length == 0 && v.isBinary())
+      return v.toStringBuilder();
+    else if (v.length() == 0)
+      return this;
+    else {
+      _value = null;
+      
+      v.appendTo(this);
 
-    return this;
+      return this;
+    }
   }
 
   //

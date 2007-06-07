@@ -132,7 +132,6 @@ public class OutputBuffer {
 
       // XXX: encoding
       while ((ch = rs.read()) >= 0) {
-        System.out.println("XXX: bb.append " + Integer.toHexString(ch));
         bb.appendByte(ch);
       }
 
