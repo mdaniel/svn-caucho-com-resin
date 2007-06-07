@@ -121,10 +121,10 @@ public final class UnserializeReader {
     case 'a':
       {
         expect(':');
-        long len = readInt();
+        int len = (int) readInt();
         expect(':');
         expect('{');
-
+        
         ArrayValue array = new ArrayValueImpl((int) len);
         for (int i = 0; i < len; i++) {
           Value key = unserializeKey(env);
@@ -149,24 +149,24 @@ public final class UnserializeReader {
 
         expect('"');
         expect(':');
-        long count = readInt();
+        int count = (int) readInt();
         expect(':');
         expect('{');
 
-	QuercusClass qClass = env.findClass(className);
-	Value obj;
+        QuercusClass qClass = env.findClass(className);
+        Value obj;
 
-	if (qClass != null)
-	  obj = qClass.newInstance(env);
-	else {
-	  log.fine(L.l("{0} is an undefined class in unserialize",
-		       className));
-	  
-	  obj = env.createObject();
-	  obj.putField(env,
-		       "__Quercus_Incomplete_Class_name",
-		       new StringValueImpl(className));
-	}
+        if (qClass != null)
+          obj = qClass.newInstance(env);
+        else {
+          log.fine(L.l("{0} is an undefined class in unserialize",
+                   className));
+          
+          obj = env.createObject();
+          obj.putField(env,
+                   "__Quercus_Incomplete_Class_name",
+                   new StringValueImpl(className));
+        }
 	
         for (int i = 0; i < count; i++) {
           String key = unserializeString();
