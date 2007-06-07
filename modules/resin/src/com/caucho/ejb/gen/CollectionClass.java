@@ -49,9 +49,9 @@ public class CollectionClass extends BaseClass {
   private final static L10N L = new L10N(CollectionClass.class);
 
   private CmrRelation _oneToMany;
-  
+
   public CollectionClass(CmrRelation oneToMany,
-			 String className)
+                         String className)
   {
     _oneToMany = oneToMany;
 
@@ -71,10 +71,10 @@ public class CollectionClass extends BaseClass {
     throws IOException
   {
     generateConstructor(out);
-    
+
     generateAdd(out);
     generateRemove(out);
-    
+
     super.generateClassContent(out);
   }
 
@@ -90,7 +90,7 @@ public class CollectionClass extends BaseClass {
     out.println();
     out.println("Bean _bean;");
     out.println(sourceType + " _beanLocal;");
-    
+
     out.println();
     out.println("public " + getClassName() + "(Bean bean, com.caucho.amber.AmberQuery query)");
     out.println("{");
@@ -112,7 +112,7 @@ public class CollectionClass extends BaseClass {
     out.println("public boolean addImpl(Object v)");
     out.println("{");
     out.pushDepth();
-    
+
     EjbEntityBean targetBean = _oneToMany.getTargetBean();
     String targetType = targetBean.getLocal().getName();
 
@@ -129,20 +129,20 @@ public class CollectionClass extends BaseClass {
       JMethod setter = manyToOne.getSetter();
 
       if (setter != null) {
-	out.println(targetType + " bean = (" + targetType + ") v;");
+        out.println(targetType + " bean = (" + targetType + ") v;");
 
-	JMethod localDstSetter = targetBean.getMethod(targetBean.getLocal(),
-						      setter);
+        JMethod localDstSetter = targetBean.getMethod(targetBean.getLocal(),
+                                                      setter);
 
-	if (localDstSetter != null) {
-	  out.print("bean");
-	}
-	else {
-	  out.print("((" + targetBean.getEJBClass().getName() + ") ");
-	  out.print("((com.caucho.ejb.entity.EntityObject) bean)._caucho_getBean(_ejb_trans, true))");
-	}
-	
-	out.println("." + setter.getName() + "(_beanLocal);");
+        if (localDstSetter != null) {
+          out.print("bean");
+        }
+        else {
+          out.print("((" + targetBean.getEJBClass().getName() + ") ");
+          out.print("((com.caucho.ejb.entity.EntityObject) bean)._caucho_getBean(_ejb_trans, true))");
+        }
+
+        out.println("." + setter.getName() + "(_beanLocal);");
       }
     }
     else if (_oneToMany instanceof CmrManyToMany) {
@@ -151,13 +151,14 @@ public class CollectionClass extends BaseClass {
       JMethod getter = manyToMany.getGetter();
 
       if (manyToMany.isTargetUnique())
-	out.println("_bean.__amber_" + getter.getName() + "_remove_target(v);");
-      
-      out.println("_bean.__amber_" + getter.getName() + "_add(v);");
+        out.println("_bean.__amber_" + getter.getName() + "_remove_target(v);");
+
+      // ejb/069l
+      out.println("_bean.__amber_" + getter.getName() + "_add(_bean.__caucho_getConnection(), v);");
     }
 
     out.println("return true;");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -172,7 +173,7 @@ public class CollectionClass extends BaseClass {
     out.println("protected boolean removeImpl(Object v)");
     out.println("{");
     out.pushDepth();
-    
+
     EjbEntityBean targetBean = _oneToMany.getTargetBean();
     String targetType = targetBean.getLocal().getName();
 
@@ -190,41 +191,41 @@ public class CollectionClass extends BaseClass {
       JMethod getter = manyToOne.getGetter();
 
       if (setter != null) {
-	out.println("if (_bean != null) {");
-	out.pushDepth();
-	
-	out.println(targetType + " bean = (" + targetType + ") v;");
-	
-	out.println("if (_beanLocal != null) {");
-	out.pushDepth();
+        out.println("if (_bean != null) {");
+        out.pushDepth();
 
-	JMethod localDstSetter = targetBean.getMethod(targetBean.getLocal(),
-						      setter);
-	String bean = "bean";
+        out.println(targetType + " bean = (" + targetType + ") v;");
 
-	if (localDstSetter == null) {
-	  String beanClass = targetBean.getEJBClass().getName();
-	  
-	  out.print(beanClass + " bean1 = ((" + beanClass + ") ");
-	  out.print("((com.caucho.ejb.entity.EntityObject) bean)._caucho_getBean(_ejb_trans, true));");
+        out.println("if (_beanLocal != null) {");
+        out.pushDepth();
 
-	  bean = "bean1";
-	}
-	
-	out.println("if (_beanLocal.equals(" + bean + "." + getter.getName() + "())) {");
-	out.pushDepth();
-	
-	out.println(bean + "." + setter.getName() + "(null);");
-    
-	out.popDepth();
-	out.println("}");
-    
-	out.popDepth();
-	out.println("}");
-	
-	out.popDepth();
-	out.println("}");
-	out.println();
+        JMethod localDstSetter = targetBean.getMethod(targetBean.getLocal(),
+                                                      setter);
+        String bean = "bean";
+
+        if (localDstSetter == null) {
+          String beanClass = targetBean.getEJBClass().getName();
+
+          out.print(beanClass + " bean1 = ((" + beanClass + ") ");
+          out.print("((com.caucho.ejb.entity.EntityObject) bean)._caucho_getBean(_ejb_trans, true));");
+
+          bean = "bean1";
+        }
+
+        out.println("if (_beanLocal.equals(" + bean + "." + getter.getName() + "())) {");
+        out.pushDepth();
+
+        out.println(bean + "." + setter.getName() + "(null);");
+
+        out.popDepth();
+        out.println("}");
+
+        out.popDepth();
+        out.println("}");
+
+        out.popDepth();
+        out.println("}");
+        out.println();
       }
     }
     else if (_oneToMany instanceof CmrManyToMany) {
@@ -236,7 +237,7 @@ public class CollectionClass extends BaseClass {
     }
 
     out.println("return true;");
-    
+
     out.popDepth();
     out.println("}");
   }
