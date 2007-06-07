@@ -414,14 +414,14 @@ public class ClusterObject {
       os.close();
       os = null;
 
-      if (crc == _crc)
+      if (crc == _crc) {
+	tempStream.destroy();
 	return;
+      }
 
       _crc = crc;
 
-      //System.oout.println("STORING: " + _uniqueId);
       _storeManager.store(this, tempStream, crc);
-      //System.out.println("STORED: " + _uniqueId);
 
       if (_isPrimary)
 	_isValid = true;

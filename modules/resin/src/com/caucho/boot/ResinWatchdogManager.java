@@ -46,7 +46,7 @@ import com.caucho.server.port.Port;
 import com.caucho.server.port.ProtocolDispatchServer;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
-import com.caucho.util.L10N;
+import com.caucho.util.*;
 import com.caucho.Version;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -107,6 +107,9 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     log.setPath(logPath);
     log.init();
 
+    ThreadPool.getThreadPool().setThreadIdleMin(1);
+    ThreadPool.getThreadPool().setThreadIdleMax(5);
+
     _resin = readConfig(_args);
 
     ResinWatchdog server = _resin.findServer(_args.getServerId());
@@ -119,6 +122,10 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     }
     else
       clusterServer.setPort(6600);
+
+    clusterServer.getClusterPort().setMinSpareListen(1);
+    clusterServer.getClusterPort().setMaxSpareListen(2);
+      
     _dispatchServer = new Server(clusterServer);
 
     HostConfig hostConfig = new HostConfig();

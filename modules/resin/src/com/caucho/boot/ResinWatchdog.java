@@ -81,6 +81,9 @@ public class ResinWatchdog extends AbstractManagedObject
   private boolean _is64bit;
   private boolean _hasXss;
   private boolean _hasXmx;
+  
+  private boolean _hasWatchdogXss;
+  private boolean _hasWatchdogXmx;
 
   private Path _pwd;
   private Path _rootDirectory;
@@ -185,6 +188,11 @@ public class ResinWatchdog extends AbstractManagedObject
   public void addWatchdogArg(String arg)
   {
     _watchdogArgs.add(arg);
+    
+    if (arg.startsWith("-Xss"))
+      _hasWatchdogXss = true;
+    else if (arg.startsWith("-Xmx"))
+      _hasWatchdogXmx = true;
   }
 
   public ArrayList<String> getJvmArgs()
@@ -366,14 +374,16 @@ public class ResinWatchdog extends AbstractManagedObject
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
 
-    if (! _hasXss)
-      list.add("-Xss1m");
+    if (! _hasWatchdogXss)
+      list.add("-Xss256k");
+    if (! _hasWatchdogXmx)
+      list.add("-Xmx32m");
 
     list.addAll(_watchdogArgs);
 
     if (! list.contains("-d32") && ! list.contains("-d64") && _is64bit)
       list.add("-d64");
-    
+
     list.add("com.caucho.boot.ResinWatchdogManager");
 
     for (int i = 0; i < argv.length; i++)

@@ -430,9 +430,13 @@ class DispatchRequest extends RequestAdapter {
   @Override
   public HttpSession getSession(boolean create)
   {
-    SessionManager manager = _webApp.getSessionManager();
+    SessionManager manager = null;
 
-    setVaryCookie(manager.getCookieName());
+    if (_webApp != null)
+      manager = _webApp.getSessionManager();
+
+    if (manager != null)
+      setVaryCookie(manager.getCookieName());
 
     if (_session != null && _session.isValid()) {
       setHasCookie();

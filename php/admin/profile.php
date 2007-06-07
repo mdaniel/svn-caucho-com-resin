@@ -3,9 +3,7 @@
  * Summary of profiling
  */
 
-require_once "inc.php";
-
-require "restricted.php";
+require_once "WEB-INF/php/inc.php";
 
 $profile = @new Java("com.caucho.profile.Profile");
 

@@ -412,9 +412,9 @@ public class HmuxRequest extends AbstractHttpRequest
 
           InvocationDecoder decoder = _server.getInvocationDecoder();
 
-          decoder.splitQueryAndUnescape(invocation,
-                                        _uri.getBuffer(),
-                                        _uri.getLength());
+	  decoder.splitQueryAndUnescape(invocation,
+					_uri.getBuffer(),
+					_uri.getLength());
 
           _server.buildInvocation(_invocationKey.clone(), invocation);
         }

@@ -6,7 +6,7 @@
  * @author Sam
  */
 
-require_once "inc.php";
+require_once "WEB-INF/php/inc.php";
 
 display_header("digest.php", "Calculate a password digest", "");
 

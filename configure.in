@@ -834,6 +834,10 @@ elif test -r "/System/Library/Frameworks/JavaVM.framework/Headers/jni_md.h"; the
   echo "checking for JNI in /System/Library/Frameworks/JavaVM.framework/Headers ... found"
   JNI_INCLUDE="-I/System/Library/Frameworks/JavaVM.framework/Headers"
   JNI=yes
+elif test -r "$JAVA_HOME/include/jni.h"; then
+  JNI_INCLUDE="-I$JAVA_HOME/include"
+  JNI=yes
+  echo "checking for JNI in $JAVA_HOME/include ... found"
 else
   JNI=""
   AC_MSG_WARN([Can't find JNI directory ${JAVA_HOME}/include/$jni_os])

@@ -459,7 +459,7 @@ resin_session_sticky_command(cmd_parms *cmd, void *pconfig,
   config->has_config = 1;
 
   if (! strcmp(cookie_arg, "false")) {
-    config->disable_sticky_session_cookie = 1;
+    config->disable_sticky_sessions = 1;
   }
 
   return 0;
@@ -524,7 +524,7 @@ write_env(stream_t *s, request_rec *r)
 {
   char buf[4096];
   int ch;
-  int i;
+  int i, j;
   
   conn_rec *c = r->connection;
   const char *host;
@@ -540,10 +540,19 @@ write_env(stream_t *s, request_rec *r)
     uri = r->uri;
   else
     uri = r->unparsed_uri; /* #937 */
-  
-  for (i = 0; (ch = uri[i]) && ch != '?' && i + 1 < sizeof(buf); i++) 
-    buf[i] = ch;
-  buf[i] = 0;
+
+  j = 0;
+  for (i = 0; (ch = uri[i]) && ch != '?' && j + 2 < sizeof(buf); i++) {
+    if (ch == '%') { /* #1661 */
+      buf[j++] = '%';
+      buf[j++] = '2';
+      buf[j++] = '5';
+    }
+    else
+      buf[j++] = ch;
+  }
+  buf[j] = 0;
+
   cse_write_string(s, HMUX_URL, buf);
 
   cse_write_string(s, HMUX_METHOD, r->method);

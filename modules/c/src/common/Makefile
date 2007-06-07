@@ -1,7 +1,7 @@
 .SUFFIXES: .o .lo
 
 CC=gcc
-CFLAGS=-g -O2 -DPOLL -DEPOLL -DHAS_JVMTI -DHAS_JVMDI
+CFLAGS=-g -O2 -DPOLL -DEPOLL -DHAS_JVMTI
 CFLAGS_SHLIB=-fpic
 LIBTOOL=/home/ferg/ws/test-resin/libtool --silent
 EGREP=grep -E

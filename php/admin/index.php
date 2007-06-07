@@ -5,7 +5,7 @@
  * @author Sam
  */
 
-require "inc.php";
+require "WEB-INF/php/inc.php";
 
 redirect("status.php");
 ?>

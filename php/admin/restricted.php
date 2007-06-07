@@ -9,7 +9,7 @@
  * @author Sam
  */
 
-require_once "inc.php";
+require_once "WEB-INF/php/inc.php";
 
 if (! ($is_read_role || $is_write_role) ) {
 

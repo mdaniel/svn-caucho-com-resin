@@ -12,6 +12,15 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>reduce default watchdog footprint (#1782, rep by Rick Ross)</li>
+<li>requestDestroyed needs to be able to get session (#1775, rep by A Deshpande)</li>
+<li>mod_caucho: updates to handle '%25' url encoding (#1661, rep by resinossi)</li>
+<li>nullpointer check for null servlet name in FilterMapping (#1783, rep by everflux)</li>
+<li>configure.in updates for ibm jdk (#1370, rep by Lucien)</li>
+<li>configure.in updates for jrockit-64 and solaris-64 (#1117, #1640, rep by cms, David Sourcy)</li>
+<li>admin: change login to use forms to work with Apache/IIS (#1611, #1636, rep by dennislewis18, pat75007)</li>
+<li>ssl: openssl password can be omitted (#1736, rep by Brian Woods)</li>
+<li>hessian: fixed HessianServlet init() recursive loop (#1779, rep by Vic Cekvenich)</li>
 <li>Change BTree uniqueness error message (#1690)</li>
 <li>mod_caucho: add ssl support for hmux protocol (#1496, rep by J Edwards)</li>
 <li>jstl: x:forEach with default namespace (#1646, rep by urutora90)</li>

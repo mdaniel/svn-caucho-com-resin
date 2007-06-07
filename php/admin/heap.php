@@ -3,9 +3,7 @@
  * Summary of heap
  */
 
-require_once "inc.php";
-
-require "restricted.php";
+require_once "WEB-INF/php/inc.php";
 
 $heap = @new Java("com.caucho.profile.Heap");
 

@@ -99,6 +99,9 @@ public class FilterMapping extends FilterConfigImpl {
    */
   public void addServletName(String servletName)
   {
+    if (servletName == null)
+      throw new NullPointerException();
+    
     _servletNames.add(servletName);
   }
 
@@ -166,7 +169,7 @@ public class FilterMapping extends FilterConfigImpl {
     for (int i = 0; i < _servletNames.size(); i++) {
       String matchName = _servletNames.get(i);
 
-      if (servletName.equals(matchName) || "*".equals(matchName))
+      if (matchName.equals(servletName) || "*".equals(matchName))
 	return true;
     }
 

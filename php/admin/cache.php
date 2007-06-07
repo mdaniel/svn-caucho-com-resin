@@ -3,9 +3,7 @@
  * Summary of caching
  */
 
-require_once "inc.php";
-
-require "restricted.php";
+require_once "WEB-INF/php/inc.php";
 
 $mbeanServer = new MBeanServer();
 

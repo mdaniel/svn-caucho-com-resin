@@ -44,7 +44,7 @@ public interface ObjectManager {
   /**
    * Loads the object from the input stream.
    */
-  public void load(ObjectInputStream out, Object object)
+  public void load(ObjectInputStream in, Object object)
     throws IOException;
   
   /**

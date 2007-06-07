@@ -190,7 +190,7 @@ public class HessianServlet extends GenericServlet {
 	Class homeClass = loadClass(className);
 
 	_homeImpl = homeClass.newInstance();
-
+	
 	init(_homeImpl);
       }
       else if (getInitParameter("service-class") != null) {
@@ -294,7 +294,9 @@ public class HessianServlet extends GenericServlet {
   private void init(Object service)
     throws ServletException
   {
-    if (service instanceof Service)
+    if (! this.getClass().equals(HessianServlet.class)) {
+    }
+    else if (service instanceof Service)
       ((Service) service).init(getServletConfig());
     else if (service instanceof Servlet)
       ((Servlet) service).init(getServletConfig());
