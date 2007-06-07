@@ -71,6 +71,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
+    if (obj.isNull())
+      return env.error("Cannot use '$this' when not in object context.");
+    
     return obj.getField(env, _name);
   }
   
@@ -85,6 +88,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
+    if (obj.isNull())
+      return env.error("Cannot use '$this' when not in object context.");
+    
     return obj.getField(env, _name).copy();
   }
   
@@ -99,6 +105,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
+    if (obj.isNull())
+      return env.error("Cannot use '$this' when not in object context.");
+    
     return obj.getFieldRef(env, _name);
   }
   
@@ -113,6 +122,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
+    if (obj.isNull())
+      return env.error("Cannot use '$this' when not in object context.");
+    
     return obj.getFieldArg(env, _name);
   }
   
@@ -127,6 +139,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
+    if (obj.isNull())
+      env.error("Cannot use '$this' when not in object context.");
+    
     obj.putField(env, _name, value);
   }
 
@@ -141,6 +156,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
+    if (obj.isNull())
+      return env.error("Cannot use '$this' when not in object context.");
+    
     return obj.getFieldArray(env, _name);
   }
 
@@ -155,6 +173,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
+    if (obj.isNull())
+      return env.error("Cannot use '$this' when not in object context.");
+    
     return obj.getFieldObject(env, _name);
   }
   
@@ -169,6 +190,9 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     Value obj = env.getThis();
 
+    if (obj.isNull())
+      env.error("Cannot use '$this' when not in object context.");
+    
     obj.removeField(_name);
   }
   
