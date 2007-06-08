@@ -29,6 +29,7 @@
 package com.caucho.jsf.context;
 
 import java.util.*;
+import java.util.logging.*;
 
 import javax.el.*;
 
@@ -43,6 +44,9 @@ import javax.servlet.http.*;
 
 public class ServletFacesContextImpl extends FacesContext
 {
+  private static final Logger log
+    = Logger.getLogger(ServletFacesContextImpl.class.getName());
+  
   private final FacesContextFactoryImpl _factory;
 
   private ServletContext _webApp;
@@ -251,7 +255,8 @@ public class ServletFacesContextImpl extends FacesContext
     if (message == null)
       throw new NullPointerException();
 
-    System.out.println("MSG: " + message);
+    if (log.isLoggable(Level.FINE))
+      log.fine("FacesContext.addMessage " + clientId + " " + message);
 
     synchronized (_messageMap) {
       ArrayList<FacesMessage> messages = _messageMap.get(clientId);

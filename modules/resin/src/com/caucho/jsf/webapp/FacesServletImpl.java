@@ -65,12 +65,15 @@ public class FacesServletImpl extends GenericServlet
   public void init(ServletConfig config)
     throws ServletException
   {
-    ApplicationImpl app = new ApplicationImpl();
-
     ApplicationFactory appFactory = (ApplicationFactory)
       FactoryFinder.getFactory(FactoryFinder.APPLICATION_FACTORY);
 
-    appFactory.setApplication(app);
+    Application app = appFactory.getApplication();
+
+    if (app == null) {
+      app = new ApplicationImpl();
+      appFactory.setApplication(app);
+    }
 
     FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
     FactoryFinder.getFactory(FactoryFinder.RENDER_KIT_FACTORY);
@@ -116,6 +119,12 @@ public class FacesServletImpl extends GenericServlet
       initPath(app, Vfs.lookup("./" + paths[i]));
 
     initPath(app, Vfs.lookup("WEB-INF/faces-config.xml"));
+
+    if (app.getViewHandler() == null)
+      app.setViewHandler(new JspViewHandler());
+
+    if (app.getStateManager() == null)
+      app.setStateManager(new SessionStateManager());
   }
 
   private static String getServiceFactory(String factoryName)
@@ -148,7 +157,7 @@ public class FacesServletImpl extends GenericServlet
     return null;
   }
     
-  private void initPath(ApplicationImpl app, Path facesPath)
+  private void initPath(Application app, Path facesPath)
     throws ServletException
   {
     if (facesPath.canRead() && ! facesPath.isDirectory()) {

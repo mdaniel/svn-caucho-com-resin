@@ -40,6 +40,8 @@ import javax.faces.render.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import com.caucho.jsf.context.*;
+
 public class JspViewHandler extends ViewHandler
 {
   @Override
@@ -105,9 +107,10 @@ public class JspViewHandler extends ViewHandler
     if (context == null)
       throw new NullPointerException();
 
-    if (viewId == null) {
+    if (viewId == null)
       viewId = createViewId(context);
-    }
+    else
+      viewId = convertViewId(viewId);
     
     UIViewRoot viewRoot = new UIViewRoot();
 
@@ -145,6 +148,16 @@ public class JspViewHandler extends ViewHandler
     }
     else
       return "";
+  }
+
+  static String convertViewId(String viewId)
+  {
+    int dot = viewId.lastIndexOf('.');
+
+    if (dot > 0)
+      return viewId.substring(0, dot) + ".jsp";
+    else
+      return viewId + ".jsp";
   }
 
   public String getActionURL(FacesContext context,
@@ -185,25 +198,46 @@ public class JspViewHandler extends ViewHandler
 			 UIViewRoot viewToRender)
     throws IOException, FacesException
   {
+    if (! viewToRender.isRendered())
+      return;
+    
     String viewId;
 
     viewId = viewToRender.getViewId();
 
     ExternalContext extContext = context.getExternalContext();
+    HttpServletResponse response
+      = (javax.servlet.http.HttpServletResponse) extContext.getResponse();
+    HttpServletRequest request
+      = (javax.servlet.http.HttpServletRequest) extContext.getRequest();
 
-    ((javax.servlet.http.HttpServletResponse) extContext.getResponse()).setContentType("text/html");
+    response.setContentType("text/html");
+
+    RenderKitFactory renderKitFactory
+      = (RenderKitFactory) FactoryFinder.getFactory(FactoryFinder.RENDER_KIT_FACTORY);
+    String renderKitId = viewToRender.getRenderKitId();
+    RenderKit renderKit = renderKitFactory.getRenderKit(context, renderKitId);
+
+    String encoding = request.getCharacterEncoding();
+    ResponseWriter out = renderKit.createResponseWriter(response.getWriter(),
+							null,
+							encoding);
+
+    JspResponseWrapper resWrapper = new JspResponseWrapper();
+    resWrapper.init(response);
+    extContext.setResponse(resWrapper);
 
     extContext.dispatch(viewId);
 
-    /*
-    UIViewRoot viewRoot = context.getViewRoot();
+    extContext.setResponse(response);
 
-    if (viewRoot != null) {
-      viewRoot.setRendered(true); // XXX:
-      
-      viewRoot.encodeAll(context);
-    }
-    */
+    context.setResponseWriter(out);
+
+    out.startDocument();
+
+    viewToRender.encodeAll(context);
+    
+    out.endDocument();
   }
 
   @Override
@@ -231,8 +265,6 @@ public class JspViewHandler extends ViewHandler
     String renderKitId = calculateRenderKitId(context);
     StateManager stateManager = context.getApplication().getStateManager();
 
-    System.out.println("RESTORE: " + stateManager + " " + viewId + " " + renderKitId);
-
     return stateManager.restoreView(context, viewId, renderKitId);
   }
 
@@ -246,8 +278,6 @@ public class JspViewHandler extends ViewHandler
       StateManager stateManager = context.getApplication().getStateManager();
 
       Object state = stateManager.saveView(context);
-
-      System.out.println("SAVE: " + stateManager + " " + viewRoot.getViewId() + " " + state);
       
       stateManager.writeState(context, state);
     }

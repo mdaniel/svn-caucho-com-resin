@@ -195,8 +195,6 @@ class HtmlSelectOneListboxRenderer extends Renderer
       value = attrMap.get("value");
     }
 
-    System.out.println("SELECT-ONE: " + value + " " + component);
-    
     UIViewRoot viewRoot = context.getViewRoot();
     
     out.startElement("select", component);

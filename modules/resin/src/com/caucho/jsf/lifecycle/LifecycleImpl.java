@@ -221,8 +221,6 @@ public class LifecycleImpl extends Lifecycle
 
     try {
       view.renderView(context, context.getViewRoot());
-
-      view.writeState(context); // XXX:
     } catch (java.io.IOException e) {
       throw new FacesException(e);
     }

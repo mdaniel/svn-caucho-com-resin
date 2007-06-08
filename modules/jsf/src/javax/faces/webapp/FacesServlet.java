@@ -135,9 +135,9 @@ public final class FacesServlet implements Servlet
     } catch (FacesException e) {
       throw new ServletException(e);
     } finally {
-      FacesContext.setCurrentInstance(oldContext);
-      
       context.release();
+      
+      FacesContext.setCurrentInstance(oldContext);
     }
   }
 

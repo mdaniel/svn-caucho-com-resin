@@ -74,6 +74,7 @@ public class ServletExternalContext extends ExternalContext {
       if (rd == null)
 	throw new FacesException(L.l("'{0}' is an unknown dispatcher.",
 				     path));
+
       
       rd.forward(_request, _response);
     } catch (ServletException e) {

@@ -361,9 +361,9 @@ public class MicroHessianOutput {
     else if (object instanceof Boolean)
       writeBoolean(((Boolean) object).booleanValue());
     else if (object instanceof Integer)
-      writeInt(((Number) object).intValue());
+      writeInt(((Integer) object).intValue());
     else if (object instanceof Long)
-      writeLong(((Number) object).longValue());
+      writeLong(((Long) object).longValue());
     else if (object instanceof Date)
       writeUTCDate(((Date) object).getTime());
     else if (object instanceof byte[]) {
@@ -376,7 +376,7 @@ public class MicroHessianOutput {
       int size = vector.size();
       writeListBegin(size, null);
       for (int i = 0; i < size; i++)
-        writeObject(vector.get(i));
+        writeObject(vector.elementAt(i));
       
       writeListEnd();
     }

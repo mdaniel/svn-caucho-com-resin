@@ -31,8 +31,9 @@ package javax.faces.component;
 import java.util.*;
 
 import javax.el.*;
-import javax.faces.context.*;
 import javax.faces.application.*;
+import javax.faces.context.*;
+import javax.faces.model.*;
 
 public class UISelectOne extends UIInput
 {
@@ -57,25 +58,15 @@ public class UISelectOne extends UIInput
   public void validateValue(FacesContext context, Object value)
   {
     super.validateValue(context, value);
-    
-    if (! isValid())
+
+    if (! isValid() || value == null)
       return;
 
-    boolean hasValue = false;
-    for (UIComponent child : getChildren()) {
-      if (child instanceof UISelectItem) {
-	UISelectItem item = (UISelectItem) child;
-
-	if (value.equals(item.getItemValue())) {
-	  hasValue = true;
-	  break;
-	}
-      }
-    }
+    boolean hasValue = matchChildren(this, value);
 
     if (! hasValue) {
       String summary = Util.l10n(context, INVALID_MESSAGE_ID,
-				 "{0}: Validation Error: UISelectOne value '{1}' is not valid.",
+				 "{0}: Validation Error: UISelectOne value '{1}' does not match a valid option.",
 				 Util.getLabel(context, this),
 				 value);
 
@@ -87,5 +78,73 @@ public class UISelectOne extends UIInput
       
       setValid(false);
     }
+  }
+
+  static boolean matchChildren(UIComponent comp, Object value)
+  {
+    int count = comp.getChildCount();
+
+    if (count <= 0)
+      return false;
+
+    List<UIComponent> children = comp.getChildren();
+    
+    for (int i = 0; i < count; i++) {
+      UIComponent child = children.get(i);
+      
+      if (child instanceof UISelectItem) {
+	UISelectItem item = (UISelectItem) child;
+
+	if (value.equals(item.getItemValue())) {
+	  return true;
+	}
+      }
+      else if (child instanceof UISelectItems) {
+	UISelectItems items = (UISelectItems) child;
+
+	if (matchItems(items.getValue(), value))
+	  return true;
+      }
+    }
+
+    return false;
+  }
+
+  private static boolean matchItems(Object selectValue, Object value)
+  {
+    if (selectValue instanceof SelectItemGroup) {
+      SelectItem []items = ((SelectItemGroup) selectValue).getSelectItems();
+
+      if (items != null) {
+	for (int i = 0; i < items.length; i++) {
+	  if (matchItems(items[i], value))
+	    return true;
+	}
+      }
+    }
+    else if (selectValue instanceof SelectItem) {
+      SelectItem item = (SelectItem) selectValue;
+
+      return value.equals(item.getValue()) && ! item.isDisabled();
+    }
+    else if (selectValue instanceof SelectItem[]) {
+      SelectItem []item = (SelectItem[]) selectValue;
+
+      for (int i = 0; i < item.length; i++) {
+	if (value.equals(item[i].getValue()) && ! item[i].isDisabled())
+	  return true;
+      }
+    }
+    else if (selectValue instanceof List) {
+      List list = (List) selectValue;
+
+      int size = list.size();
+      for (int i = 0; i < size; i++) {
+	if (matchItems(list.get(i), value))
+	  return true;
+      }
+    }
+
+    return false;
   }
 }

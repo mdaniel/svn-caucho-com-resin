@@ -44,11 +44,13 @@ import javax.servlet.jsp.tagext.*;
  * The h:selectBooleanCheckbox tag
  */
 public class HtmlBooleanCheckboxTag extends HtmlStyleBaseTag {
+  @Override
   public String getComponentType()
   {
     return HtmlSelectBooleanCheckbox.COMPONENT_TYPE;
   }
   
+  @Override
   public String getRendererType()
   {
     return "javax.faces.Checkbox";

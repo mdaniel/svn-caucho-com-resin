@@ -70,8 +70,8 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
 
     String []value = paramMap.get(clientId);
 
-    if (value != null)
-      ((EditableValueHolder) component).setSubmittedValue(value);
+    if (value != null && value.length > 0)
+      ((EditableValueHolder) component).setSubmittedValue(value[0]);
   }
 
   public Object getConvertedValue(FacesContext context,
@@ -267,14 +267,11 @@ class HtmlSelectOneRadioRenderer extends SelectRenderer
       if (selectItem.isDisabled() || disabled)
 	out.writeAttribute("disabled", "disabled", "disabled");
 
-      if (value instanceof String[]) {
-	String []values = (String []) value;
+      if (value instanceof String) {
+	String values = (String) value;
 
-	for (int j = 0; j < values.length; j++) {
-	  if (values[j].equals(selectItem.getValue())) {
-	    out.writeAttribute("checked", "checked", "value");
-	    break;
-	  }
+	if (value.equals(selectItem.getValue())) {
+	  out.writeAttribute("checked", "checked", "value");
 	}
       }
 

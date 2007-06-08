@@ -282,19 +282,20 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       if (cauchoRes != null)
         cauchoRes.close();
       else {
-        try {
-          OutputStream os = res.getOutputStream();
-	  if (os != null)
-	    os.close();
-        } catch (IllegalStateException e) {
-        }
-	
+	// server/10ab
 	try {
 	  PrintWriter out = res.getWriter();
 	  if (out != null)
 	    out.close();
 	} catch (IllegalStateException e1) {
 	}
+
+        try {
+          OutputStream os = res.getOutputStream();
+	  if (os != null)
+	    os.close();
+        } catch (IllegalStateException e) {
+        }
 
 	// server/1732 wants this commented out
 	/*
@@ -384,8 +385,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     HttpServletResponseWrapper resWrapper = null;
 
     if (! _webApp.getDispatchWrapsFilters()) {
-      if (req instanceof HttpServletRequestWrapper &&
-	  ! (req instanceof CauchoRequest)) {
+      if (req instanceof HttpServletRequestWrapper
+	  && ! (req instanceof CauchoRequest)) {
 	reqWrapper = (HttpServletRequestWrapper) req;
 	parentRequest = (HttpServletRequest) reqWrapper.getRequest();
       }
@@ -487,6 +488,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     ClassLoader oldLoader = thread.getContextClassLoader();
     boolean isOkay = false;
     try {
+      System.out.println("TR: " + topResponse);
       invocation.service(topRequest, topResponse);
       isOkay = true;
     } finally {

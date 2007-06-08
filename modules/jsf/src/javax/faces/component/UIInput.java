@@ -584,12 +584,10 @@ public class UIInput extends UIOutput
     throws ConverterException
   {
     Renderer renderer = getRenderer(context);
-    
+
     if (renderer != null)
       return renderer.getConvertedValue(context, this, submittedValue);
-    else if (! (submittedValue instanceof String))
-      return submittedValue;
-    else {
+    else if (submittedValue instanceof String) {
       Converter converter = getConverter();
 
       if (converter != null)

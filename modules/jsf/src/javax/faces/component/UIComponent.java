@@ -176,7 +176,7 @@ public abstract class UIComponent implements StateHolder
   {
     if (context == null)
       throw new NullPointerException();
-    
+
     if (! isRendered()) {
       return;
     }

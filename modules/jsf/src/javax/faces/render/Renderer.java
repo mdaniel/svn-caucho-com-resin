@@ -73,14 +73,6 @@ public abstract class Renderer {
     if (context == null || component == null)
       throw new NullPointerException();
     
-    if (component instanceof ValueHolder) {
-      Converter converter = ((ValueHolder) component).getConverter();
-
-      if (converter != null)
-	return converter.getAsObject(context, component,
-				     (String) submittedValue);
-    }
-    
     return submittedValue;
   }
 }

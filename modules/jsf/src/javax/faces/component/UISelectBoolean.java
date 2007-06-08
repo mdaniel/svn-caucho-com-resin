@@ -32,6 +32,7 @@ import java.util.*;
 
 import javax.el.*;
 import javax.faces.context.*;
+import javax.faces.el.ValueBinding;
 
 public class UISelectBoolean extends UIInput
 {
@@ -89,6 +90,30 @@ public class UISelectBoolean extends UIInput
       super.setValueExpression("value", expr);
     else
       super.setValueExpression(name, expr);
+  }
+
+  /**
+   * Returns the value binding with the given name.
+   */
+  @Override
+  public ValueBinding getValueBinding(String name)
+  {
+    if ("selected".equals(name))
+      return super.getValueBinding("value");
+    else
+      return super.getValueBinding(name);
+  }
+
+  /**
+   * Sets the value binding with the given name.
+   */
+  @Override
+  public void setValueBinding(String name, ValueBinding expr)
+  {
+    if ("selected".equals(name))
+      super.setValueBinding("value", expr);
+    else
+      super.setValueBinding(name, expr);
   }
 
   //

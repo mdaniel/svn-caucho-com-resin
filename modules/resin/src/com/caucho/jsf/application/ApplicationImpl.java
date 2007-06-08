@@ -100,6 +100,8 @@ public class ApplicationImpl extends Application
   private HashMap<Class,Class> _converterClassMap
     = new HashMap<Class,Class>();
 
+  private String _defaultRenderKitId = "HTML_BASIC";
+
   private String _messageBundle;
 
   private boolean _isInit;
@@ -294,14 +296,14 @@ public class ApplicationImpl extends Application
     _defaultLocale = locale;
   }
 
-  public String getDefaultRenderKitIt()
+  public String getDefaultRenderKitId()
   {
-    throw new UnsupportedOperationException();
+    return _defaultRenderKitId;
   }
 
   public void setDefaultRenderKitId(String renderKitId)
   {
-    throw new UnsupportedOperationException();
+    _defaultRenderKitId = renderKitId;
   }
 
   public String getMessageBundle()
@@ -428,9 +430,6 @@ public class ApplicationImpl extends Application
 
   public ViewHandler getViewHandler()
   {
-    if (_viewHandler == null)
-      _viewHandler = new JspViewHandler();
-    
     return _viewHandler;
   }
 
@@ -444,9 +443,6 @@ public class ApplicationImpl extends Application
 
   public StateManager getStateManager()
   {
-    if (_stateManager == null)
-      _stateManager = new SessionStateManager();
-    
     return _stateManager;
   }
 

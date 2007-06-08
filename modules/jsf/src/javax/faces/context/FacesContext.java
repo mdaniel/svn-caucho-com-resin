@@ -32,6 +32,7 @@ import java.util.*;
 
 import javax.el.*;
 
+import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.render.*;
@@ -89,7 +90,9 @@ public abstract class FacesContext {
 
   public static FacesContext getCurrentInstance()
   {
-    return _currentInstance.get();
+    FacesContext context = _currentInstance.get();
+
+    return context;
   }
 
   public static void setCurrentInstance(FacesContext context)

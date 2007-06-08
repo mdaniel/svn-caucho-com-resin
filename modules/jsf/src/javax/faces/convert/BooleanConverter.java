@@ -60,7 +60,7 @@ public class BooleanConverter implements Converter
     if ("true".equalsIgnoreCase(value))
       return true;
     else if ("false".equalsIgnoreCase(value))
-      return true;
+      return false;
     else {
       String summary = Util.l10n(context, BOOLEAN_ID,
 				 "{1}: \"{0}\" must be 'true' or 'false'.",

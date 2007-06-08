@@ -132,7 +132,19 @@ public class UIOutput extends UIComponentBase implements ValueHolder
     if (_converter != null)
       return _converter;
     else if (_converterExpr != null) {
-      return (Converter) Util.eval(_converterExpr, getFacesContext());
+      Object object = Util.eval(_converterExpr, getFacesContext());
+
+      if (object == null)
+	return null;
+      else if (object instanceof Converter)
+	return (Converter) object;
+      else if (object instanceof String) {
+	String name = (String) object;
+	
+	return getFacesContext().getApplication().createConverter(name);
+      }
+      else
+	return (Converter) object;
     }
     else
       return null;

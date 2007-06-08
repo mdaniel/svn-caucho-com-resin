@@ -66,7 +66,7 @@ public class RequestWrapper implements ServletRequest {
    */
   public RequestWrapper(HttpServletRequest request)
   {
-    _request = request;
+    setRequest(request);
   }
   
   /**

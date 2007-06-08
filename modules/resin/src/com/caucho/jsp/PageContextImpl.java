@@ -1325,7 +1325,7 @@ public class PageContextImpl extends PageContext
       if (_responseAdapter != null) {
         // jsp/15l3
         _responseAdapter.finish();
-	// _responseAdapter.close();
+	//_responseAdapter.close();
 	ToCharResponseAdapter resAdapt = _responseAdapter;
 	ToCharResponseAdapter.free(resAdapt);
       }

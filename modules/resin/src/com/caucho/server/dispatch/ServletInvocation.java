@@ -236,7 +236,7 @@ public class ServletInvocation {
     synchronized (this) {
       _requestCount++;
     }
-    
+
     _filterChain.doFilter(request, response);
   }
 

@@ -36,6 +36,7 @@ import javax.faces.application.*;
 import javax.faces.component.*;
 import javax.faces.component.html.*;
 import javax.faces.context.*;
+import javax.faces.convert.*;
 import javax.faces.render.*;
 
 /**
@@ -118,7 +119,7 @@ class HtmlBooleanCheckboxRenderer extends Renderer
     String title;
     
     boolean selected;
-    
+
     if (component instanceof HtmlSelectBooleanCheckbox) {
       HtmlSelectBooleanCheckbox htmlComponent = (HtmlSelectBooleanCheckbox) component;
 
@@ -185,8 +186,10 @@ class HtmlBooleanCheckboxRenderer extends Renderer
       styleClass = (String) attrMap.get("styleClass");
       tabindex = (String) attrMap.get("tabindex");
       title = (String) attrMap.get("title");
-      
-      selected = Boolean.TRUE.equals(attrMap.get("selected"));
+
+      Object selectedValue = attrMap.get("selected");
+
+      selected = Boolean.TRUE.equals(selectedValue);
     }
 
     out.startElement("input", component);

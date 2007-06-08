@@ -97,26 +97,6 @@ public class FacesViewTag extends UIComponentBodyTag
   public int doEndTag()
     throws JspException
   {
-    try {
-      super.doEndTag();
-
-      FacesContext context = getFacesContext();
-
-      Application app = context.getApplication();
-      ViewHandler view = app.getViewHandler();
-      RenderKit renderKit = context.getRenderKit();
-
-      ResponseWriter out
-	= renderKit.createResponseWriter(this.pageContext.getOut(),
-					 null, null);
-
-      context.setResponseWriter(out);
-
-      context.getViewRoot().encodeAll(context);
-
-      return getDoEndValue();
-    } catch (IOException e) {
-      throw new JspException(e);
-    }
+    return super.doEndTag();
   }
 }

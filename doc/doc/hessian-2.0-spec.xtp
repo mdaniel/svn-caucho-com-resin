@@ -35,17 +35,93 @@ should not require external schema or IDL.</p>
 following requirements:</p>
 
 <ul>
-<li>It must support XML as a first class object.
-</li><li>It must not require external IDL or schema definitions; it should be
-invisible to application writers.
-</li><li>It must have sufficient power to serialize Java.
-</li><li>It must have sufficient power to support EJB.
-</li><li>It must allow non-Java clients to use web services.
-</li><li>It must allow web services to deployed as a Servlet.
-</li><li>It must be simple so it can be effectively tested.
-</li><li>It must be as fast as possible.
-</li><li>It should support transaction contexts.
-</li></ul>
+<li>It must support XML as a first class object.</li>
+<li>It must not require external IDL or schema definitions; it should be
+invisible to application writers.</li>
+<li>It must have sufficient power to serialize Java.</li>
+<li>It must have sufficient power to support EJB.</li>
+<li>It must allow non-Java clients to use web services.</li>
+<li>It must allow web services to deployed as a Servlet.</li>
+<li>It must be simple so it can be effectively tested.</li>
+<li>It must be as fast as possible.</li>
+<li>It should support transaction contexts.</li>
+</ul>
+
+</s1>
+
+<s1 title="Formal Definitions">
+
+<def>
+<var>top</var>     ::= <var>call</var>
+        ::= <var>reply</var>
+
+<var>call</var>    ::= 'c' x02 x00 <var>header</var>* <var>method</var>&nbsp;<var>object</var>* 'z'
+
+<var>reply</var>   ::= 'r' x02 x00 <var>header</var>* <var>object</var> 'z'
+        ::= 'r' x01 x00 <var>header</var>* <var>fault</var> 'z'
+
+<var>object</var>  ::= <var>null</var>
+        ::= <var>boolean</var>
+        ::= <var>int</var>
+        ::= <var>long</var>
+        ::= <var>double</var>
+        ::= <var>date</var>
+        ::= <var>string</var>
+        ::= <var>xml</var>
+        ::= <var>binary</var>
+        ::= <var>remote</var>
+        ::= <var>ref</var>
+        ::= <var>list</var>
+        ::= <var>map</var>
+
+<var>header</var>  ::= H b16 b8 header-string <var>object</var>
+<var>method</var>  ::= m b16 b8 method-string
+
+<var>fault</var>   ::= f (<var>object</var> <var>object</var>)* z
+
+<var>list</var>    ::= 'V' <var>type</var>? <var>length</var>? <var>object</var>* z
+        ::= 'v' <var>int</var> <var>int</var> <var>object</var>*
+
+<var>map</var>     ::= 'M' <var>type</var>? (<var>object</var> <var>object</var>)* 'z'
+        ::= 'O' <var>int</var> type-string <var>int</var> <var>string</var>* <var>object</var>*
+        ::= 'o' <var>int</var> <var>object</var>*
+
+<var>remote</var>  ::= 'r' <var>type</var>? <var>string</var>
+
+<var>type</var>    ::= t b16 b8 type-string
+
+<var>length</var>  ::= 'l' b32 b24 b16 b8
+        ::= 'u' <var>int</var>
+
+<var>null</var>    ::= 'N'
+
+<var>boolean</var> ::= 'T'
+        ::= 'F'
+
+<var>int</var>     ::= 'I' b32 b24 b16 b8
+        ::= [x80-xaf]
+        ::= [xc0-xcf] b8
+        ::= [xd0-xd7] b16 b8
+
+<var>long</var>    ::= 'L' b64 b56 b48 b40 b32 b24 b16 b8
+        ::= [xd8-xef]
+        ::= [xf0-xff] b8
+        ::= [x38-x3f] b16 b8
+        ::= 'a' b32 b24 b16 b8
+
+<var>double</var>  ::= 'D' b64 b56 b48 b40 b32 b24 b16 b8
+
+<var>date</var>    ::= 'd' b64 b56 b48 b40 b32 b24 b16 b8
+
+<var>string</var>  ::= ('s' b16 b8 string-data)* 'S' b16 b8 string-data
+        ::= [x00-x0f] string-data
+
+<var>xml</var>     ::= ('x' b16 b8 xml-data)* 'X' b16 b8 xml-data
+
+<var>binary</var>  ::= ('b' b16 b8 binary-data)* 'B' b16 b8 binary-data
+
+<var>ref</var>     ::= 'R' b32 b24 b16 b8
+</def>
 
 </s1>
 

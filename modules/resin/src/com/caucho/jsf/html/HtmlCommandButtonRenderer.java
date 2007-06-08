@@ -68,8 +68,6 @@ class HtmlCommandButtonRenderer extends Renderer
 
     String value = paramMap.get(clientId);
 
-    System.out.println("DECODE: " + clientId + " " + value + " " + paramMap);
-
     if (value != null) {
       String type;
 

@@ -50,7 +50,7 @@ public abstract class Application
 
   public abstract void setDefaultLocale(Locale locale);
 
-  public abstract String getDefaultRenderKitIt();
+  public abstract String getDefaultRenderKitId();
 
   public abstract void setDefaultRenderKitId(String renderKitId);
 

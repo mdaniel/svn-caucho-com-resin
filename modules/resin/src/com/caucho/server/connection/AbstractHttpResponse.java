@@ -1216,8 +1216,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     _hasOutputStream = true;
 
-    // jsp/0510
-    _responseStream.setOutputStreamOnly(true);
+    // server/10a2
+    if (! _hasWriter) {
+      // jsp/0510
+      _responseStream.setOutputStreamOnly(true);
+    }
     
     return _responseOutputStream;
   }
@@ -2030,7 +2033,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 	_responseStream.close();
       else
 	_responseStream.finish();
-    
+
       if (_responseStream != _originalResponseStream) {
 	if (isClose)
 	  _originalResponseStream.close();

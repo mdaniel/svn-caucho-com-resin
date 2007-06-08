@@ -41,7 +41,7 @@ import javax.faces.render.*;
 /**
  * The HTML form renderer
  */
-class HtmlFormRenderer extends Renderer
+class HtmlFormRenderer extends BaseRenderer
 {
   public static final Renderer RENDERER = new HtmlFormRenderer();
 
@@ -109,7 +109,7 @@ class HtmlFormRenderer extends Renderer
     String tabindex;
     String target;
     String title;
-    
+
     if (component instanceof HtmlForm) {
       HtmlForm htmlForm = (HtmlForm) component;
 
@@ -295,14 +295,7 @@ class HtmlFormRenderer extends Renderer
   {
     context.getApplication().getViewHandler().writeState(context);
 
-    System.out.println("WRITE-STATE: " + context.getApplication().getViewHandler());
-
     ResponseWriter out = context.getResponseWriter();
     out.endElement("form");
-  }
-
-  public String toString()
-  {
-    return "HtmlInputTextRenderer[]";
   }
 }

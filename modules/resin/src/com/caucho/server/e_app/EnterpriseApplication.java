@@ -503,8 +503,6 @@ public class EnterpriseApplication
     Path path = _rootDir.lookup(webUri);
     Path archivePath = null;
 
-    System.out.println("WEB: " + webUri + " " + contextUrl);
-
     if (contextUrl == null)
       contextUrl = webUri;
 

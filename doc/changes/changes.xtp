@@ -12,6 +12,7 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>hessian: MicroHessian updates for Java ME libraries (#1742, rep by Jazz Mack Smith)</li>
 <li>reduce default watchdog footprint (#1782, rep by Rick Ross)</li>
 <li>requestDestroyed needs to be able to get session (#1775, rep by A Deshpande)</li>
 <li>mod_caucho: updates to handle '%25' url encoding (#1661, rep by resinossi)</li>

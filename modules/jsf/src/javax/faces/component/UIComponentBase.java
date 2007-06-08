@@ -171,7 +171,7 @@ public abstract class UIComponentBase extends UIComponent
       _bindingExpr = expr;
       return;
     }
-    
+
     try {
       if (expr != null) {
 	if (expr.isLiteralText()) {

@@ -107,4 +107,9 @@ abstract class BaseRenderer extends Renderer
     else
       return "";
   }
+
+  public String toString()
+  {
+    return getClass().getName() + "[]";
+  }
 }
