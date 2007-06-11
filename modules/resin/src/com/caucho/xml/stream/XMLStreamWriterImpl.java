@@ -50,7 +50,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   private static final Logger log
     = Logger.getLogger(XMLStreamReaderImpl.class.getName());
 
-  private WriteStream _ws;
+  private WriteStream _out;
   private NamespaceWriterContext _tracker;
 
   private QName _pendingTagName = null;
@@ -69,7 +69,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
 
   public XMLStreamWriterImpl(WriteStream ws, boolean repair)
   {
-    _ws = ws;
+    _out = ws;
     _repair = repair;
     _tracker = new NamespaceWriterContext(repair);
   }
@@ -99,7 +99,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     try {
       flushPending();
-      _ws.close();
+      _out.close();
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -109,7 +109,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void flush() throws XMLStreamException
   {
     try {
-      _ws.flush();
+      _out.flush();
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -198,9 +198,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      _ws.print("<![CDATA[");
-      _ws.print(data);
-      _ws.print("]]>");
+      _out.print("<![CDATA[");
+      _out.print(data);
+      _out.print("]]>");
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -212,7 +212,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      Escapifier.escape(text, start, len, _ws);
+      Escapifier.escape(text, start, len, _out);
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -224,7 +224,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      Escapifier.escape(text, _ws);
+      Escapifier.escape(text, _out);
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -236,9 +236,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      _ws.print("<!--");
-      _ws.print(data);
-      _ws.print("-->");
+      _out.print("<!--");
+      _out.print(data);
+      _out.print("-->");
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -254,7 +254,14 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   public void writeDTD(String dtd)
     throws XMLStreamException
   {
-    throw new UnsupportedOperationException();
+    flushPending();
+    
+    try {
+      _out.print(dtd);
+    }
+    catch (IOException e) {
+      throw new XMLStreamException(e);
+    }
   }
 
   public void writeElement(String localName, String contents)
@@ -358,12 +365,12 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
         throw new XMLStreamException(L.l("unbalanced close, expecting `{0}' not `{1}'",
                                          name, new QName(namespaceURI, localName)));
 
-      _ws.print("</");
-      _ws.print(printQName(name));
-      _ws.print(">");
+      _out.print("</");
+      _out.print(printQName(name));
+      _out.print(">");
 
       if (_indent >= 0) {
-        _ws.println();
+        _out.println();
         _currentIndent -= _indent;
       }
     }
@@ -385,9 +392,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      _ws.print("&");
-      _ws.print(name);
-      _ws.print(";");
+      _out.print("&");
+      _out.print(name);
+      _out.print(";");
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -411,9 +418,9 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      _ws.print("<?");
-      _ws.print(target);
-      _ws.print("?>");
+      _out.print("<?");
+      _out.print(target);
+      _out.print("?>");
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -425,11 +432,11 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      _ws.print("<?");
-      _ws.print(target);
-      _ws.print(" ");
-      _ws.print(data);
-      _ws.print("?>");
+      _out.print("<?");
+      _out.print(target);
+      _out.print(" ");
+      _out.print(data);
+      _out.print("?>");
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -452,7 +459,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     throws XMLStreamException
   {
     try {
-      _ws.print("<?xml version=\""+version+"\" encoding=\""+encoding+"\"?>");
+      _out.print("<?xml version=\""+version+"\" encoding=\""+encoding+"\"?>");
     }
     catch (IOException e) {
       throw new XMLStreamException(e);
@@ -543,7 +550,7 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     throws IOException
   {
     if (_flushed) return;
-    _tracker.emitDeclarations(_ws);
+    _tracker.emitDeclarations(_out);
     _flushed = true;
   }
 
@@ -553,23 +560,23 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
     try {
       if (_pendingTagName == null) return;
 
-      _ws.print("<");
-      _ws.print(printQName(_pendingTagName));
+      _out.print("<");
+      _out.print(printQName(_pendingTagName));
       
       for(int i=0; i < _pendingAttributeNames.size(); i++) {
-        _ws.print(" ");
-        _ws.print(printQName(_pendingAttributeNames.get(i)));
-        _ws.print("=\"");
-        Escapifier.escape(_pendingAttributeValues.get(i), _ws);
-        _ws.print('"');
+        _out.print(" ");
+        _out.print(printQName(_pendingAttributeNames.get(i)));
+        _out.print("=\"");
+        Escapifier.escape(_pendingAttributeValues.get(i), _out);
+        _out.print('"');
       }
       flushContext();
 
       if (_shortTag) {
-        _ws.print("/>");
+        _out.print("/>");
         popContext();
       } else {
-        _ws.print(">");
+        _out.print(">");
 
         if (_indent > -1)
           _currentIndent += _indent;

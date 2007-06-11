@@ -1449,7 +1449,9 @@ public class Hessian2Input
 
     case 'O':
     {
-      return readObjectDefinition(cl);
+      readObjectDefinition(cl);
+
+      return readObject(cl);
     }
 
     case 'o':
@@ -1745,7 +1747,9 @@ public class Hessian2Input
     }
 
     case 'O': {
-      return readObjectDefinition(null);
+      readObjectDefinition(null);
+
+      return readObject();
     }
 
     case 'o': {
@@ -1793,7 +1797,7 @@ public class Hessian2Input
    * O type <int> (string)* <value>*
    * </pre>
    */
-  private Object readObjectDefinition(Class cl)
+  private void readObjectDefinition(Class cl)
     throws IOException
   {
     String type = readLenString();
@@ -1809,8 +1813,6 @@ public class Hessian2Input
       _classDefs = new ArrayList();
 
     _classDefs.add(def);
-
-    return readObjectInstance(cl, def);
   }
 
   private Object readObjectInstance(Class cl, ObjectDefinition def)
