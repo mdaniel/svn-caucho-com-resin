@@ -51,9 +51,8 @@ package com.caucho.hessian.io;
 public interface Hessian2Constants
 {
   public static final int INT_DIRECT_MIN = -0x10;
-  public static final int INT_DIRECT_MAX = 0x1f;
+  public static final int INT_DIRECT_MAX = 0x2f;
   public static final int INT_ZERO = 0x90;
-  // xb0-xbf is reserved
 
   public static final int INT_BYTE_MIN = -0x800;
   public static final int INT_BYTE_MAX = 0x7ff;
@@ -75,13 +74,12 @@ public interface Hessian2Constants
   public static final int LONG_SHORT_MAX = 0x3ffff;
   public static final int LONG_SHORT_ZERO = 0x3c;
 
-  public static final int STRING_DIRECT_MAX = 0x0f;
+  public static final int STRING_DIRECT_MAX = 0x1f;
   public static final int STRING_DIRECT = 0x00;
-  // 0x10-0x1f is reserved
 
   public static final int BYTES_DIRECT_MAX = 0x0f;
   public static final int BYTES_DIRECT = 0x20;
-  // 0x30-0x3f is reserved
+  // 0x30-0x37 is reserved
 
   public static final int LONG_INT = 'a';
 

@@ -77,6 +77,7 @@ public class ClassSerializer extends AbstractSerializer {
 	if (ref == 0) {
 	  out.writeInt(1);
 	  out.writeString("name");
+	  out.writeObjectBegin("java.lang.Class");
 	}
 
 	out.writeString(cl.getName());

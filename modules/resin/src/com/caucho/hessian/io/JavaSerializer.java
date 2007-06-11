@@ -170,8 +170,10 @@ public class JavaSerializer extends AbstractSerializer
       writeObject10(obj, out);
     }
     else {
-      if (ref == 0)
+      if (ref == 0) {
 	writeDefinition20(out);
+	out.writeObjectBegin(cl.getName());
+      }
 
       writeInstance(obj, out);
     }

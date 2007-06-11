@@ -58,6 +58,7 @@ import java.util.logging.*;
  * Serializing an object for known object types.
  */
 public class BeanSerializer extends AbstractSerializer {
+  private static final Object []NULL_ARGS = new Object[0];
   private Method []_methods;
   private String []_names;
   
@@ -188,8 +189,8 @@ public class BeanSerializer extends AbstractSerializer {
 
 	try {
 	  value = _methods[i].invoke(obj, (Object []) null);
-	} catch (Throwable e) {
-	  // XXX: log when available
+	} catch (Exception e) {
+	  throw new RuntimeException(e);
 	}
 
 	out.writeString(_names[i]);
@@ -205,6 +206,8 @@ public class BeanSerializer extends AbstractSerializer {
 	
 	for (int i = 0; i < _names.length; i++)
 	  out.writeString(_names[i]);
+	
+	out.writeObjectBegin(cl.getName());
       }
 
       for (int i = 0; i < _methods.length; i++) {

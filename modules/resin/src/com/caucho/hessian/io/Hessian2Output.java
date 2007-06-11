@@ -185,6 +185,29 @@ public class Hessian2Output
   }
 
   /**
+   * Writes the streaming call tag.  This would be followed by the
+   * headers and the method tag.
+   *
+   * <code><pre>
+   * C major minor
+   * </pre></code>
+   *
+   * @param method the method name to call.
+   */
+  public void startStreamingCall()
+    throws IOException
+  {
+    flushIfFull();
+    
+    int offset = _offset;
+    byte []buffer = _buffer;
+    
+    buffer[offset++] = (byte) 'C';
+    buffer[offset++] = (byte) 2;
+    buffer[offset++] = (byte) 0;
+  }
+
+  /**
    * Writes the method tag.
    *
    * <code><pre>
@@ -241,6 +264,25 @@ public class Hessian2Output
     flushIfFull();
     
     _buffer[_offset++] = (byte) 'r';
+    _buffer[_offset++] = (byte) 2;
+    _buffer[_offset++] = (byte) 0;
+  }
+
+  /**
+   * Starts the streaming reply
+   *
+   * <p>A successful completion will have a single value:
+   *
+   * <pre>
+   * r
+   * </pre>
+   */
+  public void startStreamingReply()
+    throws IOException
+  {
+    flushIfFull();
+    
+    _buffer[_offset++] = (byte) 'R';
     _buffer[_offset++] = (byte) 2;
     _buffer[_offset++] = (byte) 0;
   }
@@ -442,7 +484,7 @@ public class Hessian2Output
    * Writes the object header to the stream.
    *
    * <code><pre>
-   * Ot b16 b8 <key>* Z <value>* z
+   * O t b16 b8 <key>* Z <value>* z
    * </pre></code>
    */
   public int writeObjectBegin(String type)
@@ -452,6 +494,7 @@ public class Hessian2Output
       _classRefs = new HashMap();
 
     Integer refV = (Integer) _classRefs.get(type);
+
 
     if (refV != null) {
       int ref = refV.intValue();
@@ -473,9 +516,11 @@ public class Hessian2Output
 	flush();
 
       _buffer[_offset++] = (byte) 'O';
-
+      
       int len = type.length();
+
       writeInt(len);
+      
       printString(type, 0, len);
 
       return 0;
@@ -1148,6 +1193,7 @@ public class Hessian2Output
     }
     else if (value < 0x10000) {
       _buffer[_offset++] = (byte) (REF_SHORT);
+      _buffer[_offset++] = (byte) (value >> 8);
       _buffer[_offset++] = (byte) (value);
     }
     else {
