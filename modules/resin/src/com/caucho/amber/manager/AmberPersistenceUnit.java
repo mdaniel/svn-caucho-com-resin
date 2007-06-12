@@ -221,10 +221,17 @@ public class AmberPersistenceUnit {
   private void bindProxy()
     throws Exception
   {
-    Jndi.bindDeep(_amberContainer.getPersistenceUnitJndiPrefix() + getName(),
+    String name = getName();
+
+    // XXX: is "default" appropriate?
+    // jpa/0s2m <=> tck: ejb30/persistence/ee/packaging/ejb/resource_local/test1
+    if (name == null || "".equals(name))
+      name = "default";
+
+    Jndi.bindDeep(_amberContainer.getPersistenceUnitJndiPrefix() + name,
                   new FactoryProxy(this));
 
-    Jndi.bindDeep(_amberContainer.getPersistenceContextJndiPrefix() + getName(),
+    Jndi.bindDeep(_amberContainer.getPersistenceContextJndiPrefix() + name,
                   new EntityManagerNamingProxy(this));
   }
 

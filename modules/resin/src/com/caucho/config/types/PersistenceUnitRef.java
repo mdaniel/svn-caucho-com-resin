@@ -51,9 +51,9 @@ public class PersistenceUnitRef implements ObjectProxy {
   private static final L10N L = new L10N(EjbRef.class);
   private static final Logger log
     = Logger.getLogger(EjbRef.class.getName());
-  
+
   private String _location = "";
-  
+
   private String _persistenceUnitRefName;
   private String _persistenceUnitName;
   private String _mappedName;
@@ -61,7 +61,7 @@ public class PersistenceUnitRef implements ObjectProxy {
   // XXX: missing inject stuff, too
 
   private EntityManagerFactory _emf;
-  
+
   public PersistenceUnitRef()
   {
   }
@@ -152,16 +152,20 @@ public class PersistenceUnitRef implements ObjectProxy {
     if (_persistenceUnitRefName == null)
       return;
 
+    // jpa/0s2m
+    if (_persistenceUnitName == null)
+      _persistenceUnitName = "default";
+
     String fullJndiName = Jndi.getFullName(_persistenceUnitRefName);
 
     try {
       Object oldValue = new InitialContext().lookup(fullJndiName);
 
       if (oldValue != null)
-	return;
+        return;
     } catch (NamingException e) {
     }
-    
+
     Jndi.rebindDeep(fullJndiName, this);
   }
 
@@ -177,8 +181,8 @@ public class PersistenceUnitRef implements ObjectProxy {
       _emf = Persistence.createEntityManagerFactory(_persistenceUnitName);
 
       if (_emf == null)
-	log.warning(L.l(_location + "'{0}' is an unknown persistence-unit-name",
-			_persistenceUnitName));
+        log.warning(L.l(_location + "'{0}' is an unknown persistence-unit-name",
+                        _persistenceUnitName));
     }
 
     return _emf;

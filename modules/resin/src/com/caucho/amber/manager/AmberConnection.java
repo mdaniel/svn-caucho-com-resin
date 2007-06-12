@@ -54,13 +54,14 @@ import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.PersistenceException;
-import javax.persistence.EntityExistsException;
+import javax.persistence.RollbackException;
 import javax.persistence.TransactionRequiredException;
 import javax.sql.DataSource;
 import javax.transaction.Status;
@@ -276,6 +277,8 @@ public class AmberConnection
    */
   public void persist(Object entityObject)
   {
+    RuntimeException exn = null;
+
     try {
       if (entityObject == null)
         return;
@@ -285,12 +288,26 @@ public class AmberConnection
       checkTransactionRequired("persist");
 
       persistInternal(entity, false);
+
+      // XXX: check spec. for JTA vs. non-JTA behavior and add QA.
+      // ejb30/persistence/ee/packaging/ejb/resource_local/test14
+      if (! _persistenceUnit.isJta())
+        flushInternal();
     } catch (RuntimeException e) {
-      throw e;
+      exn = e;
     } catch (SQLException e) {
-      throw new IllegalStateException(e);
+      exn = new IllegalStateException(e);
     } catch (Exception e) {
-      throw new EJBExceptionWrapper(e);
+      exn = new EJBExceptionWrapper(e);
+    }
+
+    if (exn != null) {
+      if (! _persistenceUnit.isJta()) {
+        if (_trans != null)
+          _trans.setRollbackOnly();
+      }
+
+      throw exn;
     }
   }
 
@@ -3365,11 +3382,19 @@ public class AmberConnection
   }
 
   private class EntityTransactionImpl implements EntityTransaction {
+    private boolean _rollbackOnly;
+
     /**
      * Starts a resource transaction.
      */
     public void begin()
     {
+      // jpa/1522
+      if (isActive())
+        throw new IllegalStateException("begin() cannot be called when the entity transaction is already active.");
+
+      _rollbackOnly = false;
+
       try {
         AmberConnection.this.beginTransaction();
       } catch (SQLException e) {
@@ -3382,6 +3407,14 @@ public class AmberConnection
      */
     public void commit()
     {
+      // jpa/1523
+      if (! isActive())
+        throw new IllegalStateException("commit() cannot be called when the entity transaction is not active.");
+
+      // jpa/1525
+      if (getRollbackOnly())
+        throw new RollbackException("commit() cannot be called when the entity transaction is marked for rollback only.");
+
       try {
         // jpa/11a7
         AmberConnection.this.beforeCommit();
@@ -3411,11 +3444,36 @@ public class AmberConnection
      */
     public void rollback()
     {
+      // jpa/1524
+      if (! isActive())
+        throw new IllegalStateException("rollback() cannot be called when the entity transaction is not active.");
+
+      setRollbackOnly();
+
+      PersistenceException exn = null;
+
       try {
         AmberConnection.this.rollback();
-      } catch (SQLException e) {
-        throw new PersistenceException(e);
+      } catch (Exception e) {
+        exn = new PersistenceException(e);
+      } finally {
+        try {
+          // jpa/1501
+          AmberConnection.this.afterCommit(false);
+        } catch (PersistenceException e) {
+          exn = e;
+        } catch (Exception e) {
+          exn = new PersistenceException(e);
+        } finally {
+          // jpa/1525
+          if (AmberConnection.this._conn != null) {
+            closeConnectionImpl();
+          }
+        }
       }
+
+      if (exn != null)
+        throw exn;
     }
 
     /**
@@ -3423,6 +3481,11 @@ public class AmberConnection
      */
     public void setRollbackOnly()
     {
+      // jpa/1521
+      if (! isActive())
+        throw new IllegalStateException("setRollbackOnly() cannot be called when the entity transaction is not active.");
+
+      _rollbackOnly = true;
     }
 
     /**
@@ -3430,7 +3493,11 @@ public class AmberConnection
      */
     public boolean getRollbackOnly()
     {
-      return false;
+      // jpa/1520
+      if (! isActive())
+        throw new IllegalStateException("getRollbackOnly() cannot be called when the entity transaction is not active.");
+
+      return _rollbackOnly;
     }
 
     /**

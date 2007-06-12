@@ -359,6 +359,18 @@ public class SelectQuery extends AbstractQuery {
           // jpa/0h1k
           // jpa/114g as negative exists test
 
+          // jpa/0h1m
+          if (i + 1 < _fromList.size()) {
+            FromItem subItem = _fromList.get(i + 1);
+
+            JoinExpr nextJoin = subItem.getJoinExpr();
+
+            if (nextJoin != null
+                && nextJoin instanceof ManyToOneJoinExpr) {
+              continue;
+            }
+          }
+
           _fromList.remove(item);
 
           replaceJoin(join);
