@@ -565,7 +565,7 @@ public class JspPropertyGroup {
     throws ServletException
   {
     if (_webApp != null) {
-      ServletMapping mapping = new ServletMapping();
+      ServletMapping mapping = _webApp.createServletMapping();
       mapping.setServletName("jsp-property-group-" + _gId++);
       
       if (Boolean.TRUE.equals(_isXml))

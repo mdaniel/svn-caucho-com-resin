@@ -278,6 +278,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     throws Exception
   {
     Config config = new Config();
+    config.setIgnoreEnvironment(true);
 
     Vfs.setPwd(args.getRootDirectory());
     ResinConfig resin = new ResinConfig(this,

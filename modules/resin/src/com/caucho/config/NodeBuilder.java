@@ -134,6 +134,11 @@ public class NodeBuilder {
     return _config == null || _config.isEL();
   }
 
+  public boolean isIgnoreEnvironment()
+  {
+    return _config != null && _config.isIgnoreEnvironment();
+  }
+
   /**
    * External call to configure a bean based on a top-level node, calling
    * init() and replaceObject() when done.

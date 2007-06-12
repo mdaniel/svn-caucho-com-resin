@@ -81,22 +81,21 @@ public interface Hessian2Constants
   public static final int BYTES_DIRECT = 0x20;
   // 0x30-0x37 is reserved
 
-  public static final int LONG_INT = 'a';
+  public static final int LONG_INT = 0x77;
 
-  public static final int DOUBLE_ZERO = 'h';
-  public static final int DOUBLE_ONE = 'i';
-  public static final int DOUBLE_BYTE = 'j';
-  public static final int DOUBLE_SHORT = 'k';
+  public static final int DOUBLE_ZERO = 0x67;
+  public static final int DOUBLE_ONE = 0x68;
+  public static final int DOUBLE_BYTE = 0x69;
+  public static final int DOUBLE_SHORT = 0x6a;
 
-  public static final int DOUBLE_INT = 'n';
-  public static final int DOUBLE_256_SHORT = 'p';
+  public static final int DOUBLE_INT = 0x6b;
 
-  public static final int DOUBLE_FLOAT = 'q';
-  public static final int LENGTH_BYTE = 'u';
-  public static final int LIST_FIXED = 'v';
+  public static final int DOUBLE_FLOAT = 0x70;
+  public static final int LENGTH_BYTE = 0x6e;
+  public static final int LIST_FIXED = 0x76; // 'v'
 
-  public static final int REF_BYTE = 'e';
-  public static final int REF_SHORT = 'f';
+  public static final int REF_BYTE = 0x50;
+  public static final int REF_SHORT = 0x51;
 
-  public static final int TYPE_REF = 'T';
+  public static final int TYPE_REF = 0x75;
 }

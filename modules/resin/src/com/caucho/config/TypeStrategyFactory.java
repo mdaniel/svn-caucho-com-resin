@@ -51,7 +51,8 @@ import java.util.logging.Logger;
  * Factory for returning type strategies.
  */
 public class TypeStrategyFactory {
-  private static final Logger log = Log.open(TypeStrategyFactory.class);
+  private static final Logger log
+    = Logger.getLogger(TypeStrategyFactory.class.getName());
   private static L10N L = new L10N(TypeStrategyFactory.class);
   
   private static final HashMap<String,TypeStrategy> _primitiveTypes

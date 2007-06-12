@@ -127,6 +127,7 @@ public class ResinBoot {
     // XXX: set _isResinProfessional
 
     Config config = new Config();
+    config.setIgnoreEnvironment(true);
 
     ResinWatchdogManager manager = null;
     ResinConfig conf = new ResinConfig(manager, _resinHome, _rootDirectory);

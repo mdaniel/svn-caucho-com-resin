@@ -214,7 +214,7 @@ public class TaglibManager {
 				 String uri)
     throws JspParseException
   {
-    Taglib taglib = _taglibMap.get(uri);
+    Taglib taglib = getTaglib(prefix, uri, uri);
 
     if (taglib == null)
       return;

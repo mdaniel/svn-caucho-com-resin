@@ -12,6 +12,9 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>jsp: EL functions not properly initialized on reload (#1788, rep by Matthew Schmidt)</li>
+<li>hessian: updates for new Hessian 2.0 draft</li>
+<li>ResinWatchdog should not configure environment, e.g. &lt;log> (#1778, rep by Alex Lorberg)</li>
 <li>XMLStreamWriterImpl.writeDTD added implementation (#1757, rep by anotherbug)</li>
 <li>hessian: MicroHessian updates for Java ME libraries (#1742, rep by Jazz Mack Smith)</li>
 <li>reduce default watchdog footprint (#1782, rep by Rick Ross)</li>

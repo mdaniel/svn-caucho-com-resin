@@ -785,19 +785,6 @@ public class Hessian2Output
       return;
     }
 
-    double d256 = 256 * value;
-    int i256 = (int) d256;
-
-    if (d256 == i256 && -0x8000 <= i256 && i256 < 0x8000) {
-      buffer[offset + 0] = (byte) (DOUBLE_256_SHORT);
-      buffer[offset + 1] = (byte) (i256 >> 8);
-      buffer[offset + 2] = (byte) (i256);
-
-      _offset = offset + 3;
-
-      return;
-    }
-
     float f = (float) value;
 
     if (f == value) {

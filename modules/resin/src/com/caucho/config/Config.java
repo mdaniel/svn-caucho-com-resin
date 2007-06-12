@@ -84,6 +84,7 @@ public class Config {
   private ConfigLibrary _configLibrary;
 
   private boolean _isEL = true;
+  private boolean _isIgnoreEnvironment;
   private boolean _allowResinInclude;
 
   public Config()
@@ -123,6 +124,22 @@ public class Config {
   public void setEL(boolean isEL)
   {
     _isEL = isEL;
+  }
+
+  /**
+   * True if environment tags are ignored
+   */
+  public boolean isIgnoreEnvironment()
+  {
+    return _isIgnoreEnvironment;
+  }
+
+  /**
+   * True if environment tags are ignored
+   */
+  public void setIgnoreEnvironment(boolean isIgnore)
+  {
+    _isIgnoreEnvironment = isIgnore;
   }
 
   /**

@@ -488,7 +488,6 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     ClassLoader oldLoader = thread.getContextClassLoader();
     boolean isOkay = false;
     try {
-      System.out.println("TR: " + topResponse);
       invocation.service(topRequest, topResponse);
       isOkay = true;
     } finally {

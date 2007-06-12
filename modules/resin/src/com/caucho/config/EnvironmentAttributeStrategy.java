@@ -48,6 +48,9 @@ public class EnvironmentAttributeStrategy extends AttributeStrategy {
 			QName name, Node node)
           throws Exception
   {
+    if (builder.isIgnoreEnvironment())
+      return;
+    
     // builder.configureChildImpl(_typeStrategy, node, bean);
     Object child = builder.createResinType(node);
 

@@ -132,6 +132,7 @@ public class JavaJspGenerator extends JspGenerator {
   private final JspGenELContext _elContext;
 
   private HashMap<String,Method> _elFunctionMap = new HashMap<String,Method>();
+  
   private ArrayList<Taglib> _tagLibraryList
     = new ArrayList<Taglib>();
   

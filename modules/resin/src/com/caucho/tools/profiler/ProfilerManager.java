@@ -59,7 +59,7 @@ public class ProfilerManager {
   {
     new ProfilerAdmin(this);
 
-    _root = new ProfilerPoint(null, "");
+    _root = new ProfilerPoint(this, "");
   }
 
   public static ProfilerManager getLocal()

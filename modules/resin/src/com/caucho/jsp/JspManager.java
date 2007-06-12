@@ -42,7 +42,7 @@ import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 
-import javax.servlet.SingleThreadModel;
+import javax.servlet.*;
 import javax.servlet.jsp.HttpJspPage;
 import javax.servlet.jsp.JspFactory;
 import java.io.IOException;
@@ -55,7 +55,8 @@ import java.util.logging.Logger;
  */
 public class JspManager extends PageManager {
   private final static L10N L = new L10N(JspManager.class);
-  private final static Logger log = Log.open(JspManager.class);
+  private final static Logger log
+    = Logger.getLogger(JspManager.class.getName());
   
   private static int _count;
 
@@ -326,6 +327,10 @@ public class JspManager extends PageManager {
       page = new WrapperPage(jspPage);
 
     page._caucho_addDepend(classPath.createDepend());
+    
+    ServletConfig config = new JspServletConfig(_webApp, null, className);
+
+    page.init(config);
 
     return page;
   }
@@ -384,22 +389,13 @@ public class JspManager extends PageManager {
   {
     page.init(_webApp.getAppDir());
 
-    /*
-    ServletConfig config = null;
-
-    if (req != null)
-      config = (ServletConfig) req.getAttribute("caucho.jsp.servlet-config");
-
-    if (config == null)
-      config = new JspServletConfig(_webApp, null,
-                                    RequestAdapter.getPageServletPath(req));
-
-    if (config == null)
-      config = new JspServletConfig(_webApp, null, "/foo");
-    */
 
     page._caucho_setJspManager(this);
 
+    ServletConfig config = new JspServletConfig(_webApp, null, "/foo");
+
+    page.init(config);
+    
     return page;
   }
 
