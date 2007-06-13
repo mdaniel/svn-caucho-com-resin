@@ -31,9 +31,6 @@ package com.caucho.quercus.servlet;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.*;
-import com.caucho.quercus.QuercusDieException;
-import com.caucho.quercus.QuercusExitException;
-import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.module.QuercusModule;
@@ -92,13 +89,14 @@ public class ResinQuercusServlet extends QuercusServletImpl
                       HttpServletResponse response)
     throws ServletException, IOException
   {
+    Env env = null;
+    WriteStream ws = null;
+    
     try {
       Path path = getPath(request);
 
       QuercusPage page = getQuercus().parse(path);
 
-      WriteStream ws;
-      
       // XXX: check if correct.  PHP doesn't expect the lower levels
       // to deal with the encoding, so this may be okay
       if (response instanceof CauchoResponse) {
@@ -109,7 +107,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
 	ws = Vfs.openWrite(out);
       }
 
-      Env env = getQuercus().createEnv(page, ws, request, response);
+      env = getQuercus().createEnv(page, ws, request, response);
       try {
         env.setGlobalValue("request", env.wrapJava(request));
         env.setGlobalValue("response", env.wrapJava(request));
@@ -155,20 +153,27 @@ public class ResinQuercusServlet extends QuercusServletImpl
         throw e;
       }
       finally {
-        env.close();
-
+        if (env != null)
+          env.close();
+        
         // don't want a flush for an exception
         if (ws != null)
           ws.close();
       }
     }
     catch (QuercusDieException e) {
-      log.log(Level.FINE, e.toString(), e);
       // normal exit
+      log.log(Level.FINE, e.toString(), e);
+      
+      if (ws != null)
+        ws.close();
     }
     catch (QuercusExitException e) {
-      log.log(Level.FINER, e.toString(), e);
       // normal exit
+      log.log(Level.FINER, e.toString(), e);
+      
+      if (ws != null)
+        ws.close();
     }
     catch (RuntimeException e) {
       throw e;
