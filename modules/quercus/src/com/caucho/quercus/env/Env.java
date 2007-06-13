@@ -1715,13 +1715,15 @@ public class Env {
 
       Collections.sort(keys);
 
+      boolean isMagicQuotes = getIniBoolean("magic_quotes_gpc");
+      
       for (String key : keys) {
         String []value = _request.getParameterValues(key);
 
         Post.addFormValue(array,
-			  key,
-			  value,
-			  getIniBoolean("magic_quotes_gpc"));
+                          key,
+                          value,
+                          isMagicQuotes);
       }
 
       if (name.equals("_REQUEST") && _post != null) {
@@ -1732,10 +1734,10 @@ public class Env {
 
       Cookie []cookies = _request.getCookies();
       for (int i = 0; cookies != null && i < cookies.length; i++) {
-	Post.addFormValue(array,
-			  cookies[i].getName(),
-			  new String[] { cookies[i].getValue() },
-			  getIniBoolean("magic_quotes_gpc"));
+        Post.addFormValue(array,
+                          cookies[i].getName(),
+                          new String[] { cookies[i].getValue() },
+                          isMagicQuotes);
       }
 
       return var;
@@ -3588,6 +3590,20 @@ public class Env {
 
     _prevIncludePath = path;
   }
+  
+  /**
+   * Returns all the included files.
+   */
+  public ArrayValue getIncludedFiles()
+  {
+    ArrayValue array = new ArrayValueImpl();
+
+    for (Path path : _includeSet) {
+      array.put(path.toString());
+    }
+    
+    return array;
+  }
 
   /**
    * Handles error suppression.
@@ -4343,43 +4359,52 @@ public class Env {
    * Called when the Env is no longer needed.
    */
   public void close()
-  {
-    while (_outputBuffer != null)
-      popOutputBuffer();
-
+  { 
     try {
-      for (int i = 0; i < _shutdownList.size(); i++)
-        _shutdownList.get(i).call(this);
+      // php/1l0t
+      // output buffers callbacks may throw an exception
+      while (_outputBuffer != null) {
+        popOutputBuffer();
+      }
     }
-    catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    sessionWriteClose();
-
-    ArrayList<SoftReference<Closeable>> closeList;
-    closeList = new ArrayList<SoftReference<Closeable>>(_closeList);
-    
-    for (SoftReference<Closeable> ref : closeList) {
+    //catch (Exception e) {
+      //throw new RuntimeException(e);
+    //}
+    finally {
       try {
-        Closeable close = ref.get();
-
-        if (close != null)
-          close.close();
+        for (int i = 0; i < _shutdownList.size(); i++)
+          _shutdownList.get(i).call(this);
       }
       catch (Throwable e) {
-        log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
-    }
+      
+      sessionWriteClose();
 
-    for (int i = 0; _removePaths != null && i < _removePaths.size(); i++) {
-      Path path = _removePaths.get(i);
+      ArrayList<SoftReference<Closeable>> closeList;
+      closeList = new ArrayList<SoftReference<Closeable>>(_closeList);
+      
+      for (SoftReference<Closeable> ref : closeList) {
+        try {
+          Closeable close = ref.get();
 
-      try {
-        path.remove();
+          if (close != null)
+            close.close();
+        }
+        catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
-      catch (IOException e) {
-        log.log(Level.FINER, e.toString(), e);
+
+      for (int i = 0; _removePaths != null && i < _removePaths.size(); i++) {
+        Path path = _removePaths.get(i);
+
+        try {
+          path.remove();
+        }
+        catch (IOException e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
     }
   }

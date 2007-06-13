@@ -47,12 +47,26 @@ public class StringUtility
 {
   private static final L10N L = new L10N(StringModule.class);
   
- 
   public static Value parseStr(Env env,
                                String str,
                                ArrayValue result,
                                boolean isRef,
                                String encoding)
+  {
+    return parseStr(env,
+                    str,
+                    result,
+                    isRef,
+                    encoding,
+                    env.getIniBoolean("magic_quotes_gpc"));
+  }
+  
+  public static Value parseStr(Env env,
+                               String str,
+                               ArrayValue result,
+                               boolean isRef,
+                               String encoding,
+                               boolean isMagicQuotes)
   {
     try {
       ByteToChar byteToChar = env.getByteToChar();
@@ -87,7 +101,7 @@ public class StringUtility
           value = "";
 
         if (isRef) {
-          Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
+          Post.addFormValue(result, key, new String[] { value }, isMagicQuotes);
         } else {
           // If key is an exsiting array, then append this value to existing array
           // Only use extract(EXTR_OVERWRITE) on non-array variables or
@@ -99,20 +113,20 @@ public class StringUtility
             if (v instanceof ArrayValue) {
               //Check to make sure valid string (ie: foo[...])
               if (closeBracketIndex < 0) {
-            env.warning(L.l("invalid array " + key));
-            return NullValue.NULL;
+                env.warning(L.l("invalid array " + key));
+                return NullValue.NULL;
               }
               if (closeBracketIndex > openBracketIndex + 1) {
-            String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
-            v.put(new StringValueImpl(index), new StringValueImpl(value));
+                String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
+                v.put(new StringValueImpl(index), new StringValueImpl(value));
               } else {
-            v.put(new StringValueImpl(value));
+                v.put(new StringValueImpl(value));
               }
             } else {
-              Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
+              Post.addFormValue(result, key, new String[] { value }, isMagicQuotes);
             }
           } else {
-            Post.addFormValue(result, key, new String[] { value }, env.getIniBoolean("magic_quotes_gpc"));
+            Post.addFormValue(result, key, new String[] { value }, isMagicQuotes);
           }
         }
       }

@@ -523,7 +523,7 @@ public class ArrayValueImpl extends ArrayValue
     
     return get(index);
   }
-
+  
   /**
    * Add
    */
@@ -566,8 +566,6 @@ public class ArrayValueImpl extends ArrayValue
    */
   public Value get(Value key)
   {
-    int capacity = _entries.length;
-
     key = key.toKey();
 
     int hashMask = _hashMask;
@@ -577,12 +575,34 @@ public class ArrayValueImpl extends ArrayValue
          entry != null;
          entry = entry._nextHash) {
       if (key.equals(entry._key))
-	return entry._value.toValue(); // quercus/39a1
+        return entry._value.toValue(); // quercus/39a1
     }
 
     return UnsetValue.UNSET;
   }
 
+  /**
+   * Returns the value in the array as-is.
+   * (i.e. without calling toValue() on it).
+   */
+  @Override
+  public Value getRaw(Value key)
+  {
+    key = key.toKey();
+
+    int hashMask = _hashMask;
+    int hash = key.hashCode() & hashMask;
+
+    for (Entry entry = _entries[hash];
+         entry != null;
+         entry = entry._nextHash) {
+      if (key.equals(entry._key))
+        return entry._value;
+    }
+
+    return UnsetValue.UNSET;
+  }
+  
   /**
    * Gets a new value.
    */

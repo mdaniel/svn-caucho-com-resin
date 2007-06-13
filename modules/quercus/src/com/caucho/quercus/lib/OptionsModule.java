@@ -38,6 +38,7 @@ import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -711,6 +712,14 @@ public class OptionsModule extends AbstractQuercusModule {
     return NullValue.NULL;
   }
 
+  /**
+   * Returns an array of all the included path.
+   */
+  public static ArrayValue get_included_files(Env env)
+  {
+    return env.getIncludedFiles();
+  }
+  
   /**
    * Sets the magic quotes value.
    */

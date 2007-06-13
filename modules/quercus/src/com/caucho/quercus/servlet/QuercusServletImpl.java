@@ -87,12 +87,14 @@ public class QuercusServletImpl
                       HttpServletResponse response)
     throws ServletException, IOException
   {
+    Env env = null;
+    WriteStream ws = null;
+    
     try {
       Path path = getPath(request);
 
       QuercusPage page = getQuercus().parse(path);
 
-      WriteStream ws;
       StreamImpl out;
       
       try {
@@ -107,7 +109,7 @@ public class QuercusServletImpl
       
       ws = new WriteStream(out);
 
-      Env env = getQuercus().createEnv(page, ws, request, response);
+      env = getQuercus().createEnv(page, ws, request, response);
       try {
         env.setGlobalValue("request", env.wrapJava(request));
         env.setGlobalValue("response", env.wrapJava(response));
@@ -153,20 +155,27 @@ public class QuercusServletImpl
         throw e;
       }
       finally {
-        env.close();
-
-        // don't want a flush for an exception
+        if (env != null)
+          env.close();
+        
+        // don't want a flush for a thrown exception
         if (ws != null)
           ws.close();
       }
     }
     catch (QuercusDieException e) {
-      log.log(Level.FINE, e.toString(), e);
       // normal exit
+      log.log(Level.FINE, e.toString(), e);
+
+      if (ws != null)
+        ws.close();
     }
     catch (QuercusExitException e) {
-      log.log(Level.FINER, e.toString(), e);
       // normal exit
+      log.log(Level.FINER, e.toString(), e);
+
+      if (ws != null)
+        ws.close();
     }
     catch (RuntimeException e) {
       throw e;

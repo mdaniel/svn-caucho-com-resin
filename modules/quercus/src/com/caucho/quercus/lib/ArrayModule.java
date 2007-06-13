@@ -429,12 +429,12 @@ public class ArrayModule
     if (! searchArray.isset() || ! key.isset())
       return false;
 
-    if (!((searchArray instanceof ArrayValue) || (searchArray instanceof ObjectValue))) {
+    if (! (searchArray.isArray() || searchArray.isObject())) {
       env.warning(L.l("'" + searchArray.toString() + "' is an unexpected argument, expected ArrayValue or ObjectValue"));
       return false;
     }
 
-    if (!((key instanceof StringValue) || (key.isLongConvertible()))) {
+    if (! (key.isString() || key.isLongConvertible())) {
       env.warning(L.l(
         "The first argument (a '{0}') should be either a string or an integer",
 	key.getType()));
@@ -622,19 +622,25 @@ public class ArrayModule
         return NullValue.NULL;
       }
 
-      for (Map.Entry<Value, Value> entry : array.entrySet()) {
-        try {
-          boolean isMatch = callback.call(env, entry.getValue()).toBoolean();
+      try {
+        Value []keyArray = array.getKeyArray(env);
 
-          if (isMatch)
-            filteredArray.put(entry.getKey(), entry.getValue());
-        }
-        catch (Throwable t) {
-          log.log(Level.WARNING, t.toString(), t);
-          env.warning("An error occurred while invoking the filter callback");
+        for (int i = 0; i < keyArray.length; i++) {
+          Value key = keyArray[i];
+          Value val = array.getRaw(key);
 
-          return NullValue.NULL;
+          boolean isMatch = callback.call(env, array, key, val).toBoolean();
+
+          if (isMatch) {
+            filteredArray.put(key, val);
+          }
         }
+      }
+      catch (Throwable t) {
+        log.log(Level.WARNING, t.toString(), t);
+        env.warning("An error occurred while invoking the filter callback");
+
+        return NullValue.NULL;
       }
     }
     else {
@@ -772,6 +778,7 @@ public class ArrayModule
 
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       try {
+        // XXX: will this callback modify the array?
         result = callback.call(env, result, entry.getValue());
       }
       catch (Throwable t) {
@@ -1184,37 +1191,35 @@ public class ArrayModule
     if (callback == null || ! callback.isValid())
       return true;
 
-    for (Map.Entry<Value, Value> entry : array.entrySet()) {
-      Value entryValue = entry.getValue();
+    try {
+      Value []keyArray = array.getKeyArray(env);
 
-      if (entryValue instanceof ArrayValue)
-        array_walk_recursive(env, (ArrayValue) entryValue, callback, extra);
-      else {
-        try {
-          arrayWalkImpl(env, entry, extra, callback);
+      for (int i = 0; i < keyArray.length; i++) {
+        Value key = keyArray[i];
+        Value val = array.getRaw(key);
+
+        if (val.isArray()) {
+          boolean result = array_walk_recursive(env,
+                                                (ArrayValue)val.toValue(),
+                                                callback,
+                                                extra);
+          
+          if (! result)
+            return false;
         }
-        catch (Throwable t) {
-          log.log(Level.WARNING, t.toString(), t);
-          env.warning("An error occured while invoking the callback");
-
-          return false;
+        else {
+          callback.call(env, array, key, val, key, extra);
         }
       }
+      
+      return true;
     }
-
-    return true;
-  }
-
-  /**
-   * array_walk_recursive helper function.
-   *
-   * @param entry the entry to evaluate
-   * @param callback the callback function
-   */
-  private void arrayWalkImpl(Env env, Map.Entry<Value, Value> entry,
-                             Value extra, Callback callback)
-  {
-    callback.call(env, entry.getValue(), entry.getKey(), extra);
+    catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      env.warning("An error occured while invoking the callback", e);
+      
+      return false;
+    }
   }
 
   /**
@@ -1233,25 +1238,29 @@ public class ArrayModule
     if (array == null)
       return false;
 
-    if (callback == null)
+    if (callback == null || ! callback.isValid())
       return true;
 
-    for (Map.Entry<Value, Value> entry : array.entrySet()) {
-      try {
-        arrayWalkImpl(env, entry, extra, callback);
-      }
-      catch (Throwable t) {
-        // XXX: may be used later for error implementation
-        log.log(Level.WARNING, t.toString(), t);
-        env.warning("An error occured while invoking the callback");
+    try {
+      Value []keyArray = array.getKeyArray(env);
 
-        return false;
+      for (int i = 0; i < keyArray.length; i++) {
+        Value key = keyArray[i];
+        Value val = array.getRaw(key);
+        
+        callback.call(env, array, key, val, key, extra);
       }
+      
+      return true;
     }
-
-    return true;
+    catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      env.warning("An error occured while invoking the callback", e);
+      
+      return false;
+    }
   }
-
+  
   /**
    * Sorts the array based on values in reverse order, preserving keys
    *
@@ -1567,6 +1576,7 @@ public class ArrayModule
 
     CompareCallBack cmp;
 
+    // XXX: callback needs to be able to modify array?
     cmp = new CompareCallBack(ArrayValue.GET_VALUE, SORT_NORMAL, func, env);
 
     array.sort(cmp, KEY_RESET, STRICT);
@@ -1597,6 +1607,7 @@ public class ArrayModule
       return false;
     }
 
+    // XXX: callback needs to be able to modify array?
     array.sort(new CompareCallBack(ArrayValue.GET_VALUE, SORT_NORMAL, func,
                                    env), NO_KEY_RESET, NOT_STRICT);
 
@@ -1628,6 +1639,7 @@ public class ArrayModule
 
     CompareCallBack cmp;
 
+    // XXX: callback needs to be able to modify array?
     cmp = new CompareCallBack(ArrayValue.GET_KEY, SORT_NORMAL, func, env);
 
     array.sort(cmp, NO_KEY_RESET, NOT_STRICT);
@@ -2395,6 +2407,7 @@ public class ArrayModule
 
   /**
    * Maps the given function with the array arguments.
+   * XXX: callback modifying array?
    *
    * @param fun the function name
    * @param args the vector of array arguments
@@ -2929,6 +2942,7 @@ public class ArrayModule
    * Creates an array with all the values of the first array that are present in
    * the other arrays, using a provided callback function to determine
    * equivalence.
+   * XXX: callback modifying arrays?
    *
    * @param arrays first array is checked against the rest.  Last element is the
    * callback function.
@@ -3017,6 +3031,7 @@ public class ArrayModule
    * the other arrays, using a provided callback function to determine
    * equivalence. Also checks the keys for equivalence using an internal
    * comparison.
+   * XXX: callback modifying arrays?
    *
    * @param arrays first array is checked against the rest.  Last element is the
    * callback function.
@@ -3113,6 +3128,7 @@ public class ArrayModule
    * the other arrays, using a provided callback function to determine
    * equivalence. Also checks the keys for equivalence using a pass callback
    * function
+   * XXX: callback modifying arrays?
    *
    * @param arrays first array is checked against the rest.  Last two elements
    * are the callback functions.

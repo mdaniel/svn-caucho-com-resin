@@ -121,9 +121,6 @@ public class Post {
   {
     ReadStream is;
 
-    // php/1667
-    long uploadMaxFilesize = env.getIniBytes("upload_max_filesize", 2 * 1024 * 1024);
-
     while ((is = ms.openRead()) != null) {
       String attr = (String) ms.getAttribute("content-disposition");
 

@@ -33,6 +33,109 @@ package com.caucho.quercus.env;
  * Represents a call to a function.
  */
 abstract public class Callback extends Value {
+  
+  /*
+   * Evaluates a callback where the first argument is from an array.
+   * For ArrayModule.
+   * 
+   * @param env
+   * @param array from which a1 came from
+   * @param key index of a1 in the array
+   * @param a1 need to make a reference to this variable
+   */
+  final public Value call(Env env,
+                          ArrayValue array,
+                          Value key,
+                          Value a1)
+  {
+    Value result;  
+
+    if (a1 instanceof Var) {
+      a1 = new RefVar((Var)a1);
+
+      result = call(env, a1);
+    }
+    else {
+      a1 = new Var(a1);
+
+      result = call(env, a1);
+
+      array.put(key, a1.toValue());
+    }
+
+    return result;
+  }
+  
+  /*
+   * Evaluates a callback where the first argument is from an array.
+   * For ArrayModule.
+   * 
+   * @param env
+   * @param array from which a1 came from
+   * @param key index of a1 in the array
+   * @param a1 need to make a reference to this variable
+   * @param a2 additional argument to pass to the callback
+   */
+  final public Value call(Env env,
+                          ArrayValue array,
+                          Value key,
+                          Value a1,
+                          Value a2)
+  {
+    Value result;  
+
+    if (a1 instanceof Var) {
+      a1 = new RefVar((Var)a1);
+
+      result = call(env, a1, a2);
+    }
+    else {
+      a1 = new Var(a1);
+
+      result = call(env, a1, a2);
+
+      array.put(key, a1.toValue());
+    }
+
+    return result;
+  }
+  
+  /*
+   * Evaluates a callback where the first argument is from an array.
+   * For ArrayModule.
+   * 
+   * @param env
+   * @param array from which a1 came from
+   * @param key index of a1 in the array
+   * @param a1 need to make a reference to this variable
+   * @param a2 additional argument to pass to the callback
+   * @param a3 additional argument to pass to the callback
+   */
+  final public Value call(Env env,
+                          ArrayValue array,
+                          Value key,
+                          Value a1,
+                          Value a2,
+                          Value a3)
+  {
+    Value result;  
+
+    if (a1 instanceof Var) {
+      a1 = new RefVar((Var)a1);
+
+      result = call(env, a1, a2, a3);
+    }
+    else {
+      a1 = new Var(a1);
+
+      result = call(env, a1, a2, a3);
+
+      array.put(key, a1.toValue());
+    }
+
+    return result;
+  }
+  
   /**
    * Evaluates the callback with no arguments.
    *

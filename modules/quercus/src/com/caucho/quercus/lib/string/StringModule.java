@@ -3097,9 +3097,11 @@ v   *
     for (int i = 0; i < len; i++) {
       char ch = string.charAt(i);
 
-      if (ch == '\\' && i + 1 < len) {
-        sb.append(string.charAt(i + 1));
-        i++;
+      if (ch == '\\') {
+        if (i + 1 < len) {
+          sb.append(string.charAt(i + 1));
+          i++;
+        }
       }
       else
         sb.append(ch);

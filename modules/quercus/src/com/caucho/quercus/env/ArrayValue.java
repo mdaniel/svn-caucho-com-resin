@@ -433,6 +433,15 @@ abstract public class ArrayValue extends Value {
   abstract public Value get(Value key);
 
   /**
+   * Returns the value in the array as-is.
+   * (i.e. without calling toValue() on it).
+   */
+  public Value getRaw(Value key)
+  {
+    return get(key);
+  }
+  
+  /**
    * Removes a value.
    */
   abstract public Value remove(Value key);
