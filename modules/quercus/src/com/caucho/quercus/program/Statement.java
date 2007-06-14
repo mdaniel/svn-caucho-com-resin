@@ -160,8 +160,14 @@ abstract public class Statement {
       System.arraycopy(rootCauseStackTrace, 0, trimmedElements, 0, len);
 
       quercusEx.setStackTrace(trimmedElements);
-      rootCause.initCause(quercusEx);
-      rootCause = quercusEx;
+      try {
+        rootCause.initCause(quercusEx);
+        rootCause = quercusEx;
+      }
+      catch (IllegalStateException ex) {
+        // XXX: guard against reported bug that could not be reproduced
+        log.log(Level.FINE, ex.toString(), ex);
+      }
     }
 
     String className = _location.getClassName();
