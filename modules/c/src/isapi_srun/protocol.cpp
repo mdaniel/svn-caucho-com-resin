@@ -348,7 +348,7 @@ write_ssl(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 }
 
 static int
-hexify(char *buf, int offset, int ch)
+hexify(char *uri, int offset, int ch)
 {
   int d1 = (ch >> 4) & 0xf;
   int d2 = ch & 0xf;
@@ -384,8 +384,8 @@ write_env(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 			path_info += sizeof(ISAPI_SCRIPT) - 1;
 
 		i = 0;
-		while (i < BUF_LENGTH - 3) {
-		  char ch = *path_info++;
+		while (i < BUF_LENGTH - 6) {
+		  int ch = *path_info++ & 0xff;
 
 		  if (ch == 0)
 		    break;
@@ -656,6 +656,8 @@ send_data(stream_t *s, EXTENSION_CONTROL_BLOCK *r, config_t *config,
 				info.cchHeader = header_ptr - headers;
 				info.pszHeader = headers;
 				info.pszStatus = status;
+				/* #1802 */
+				info.fKeepConn = 1;
 				/*
 			r->dwHttpStatusCode = atoi(status_ptr);
 			r->ServerSupportFunction(r->ConnID, HSE_REQ_SEND_RESPONSE_HEADER, status, &size, (unsigned long *) headers);

@@ -302,11 +302,11 @@ BOOL WINAPI GetFilterVersion(HTTP_FILTER_VERSION *pVer)
 	pVer->dwFilterVersion = HTTP_FILTER_REVISION;
 	// Anh : Add SF_NOTIFY_AUTH_COMPLETE for IIS5.0
 	pVer->dwFlags = (SF_NOTIFY_PREPROC_HEADERS
-			 |SF_NOTIFY_LOG
+			 |SF_NOTIFY_LOG 
 			 |SF_NOTIFY_AUTH_COMPLETE);
-
 	if (g_config->override_iis_authentication)
 		pVer->dwFlags |= SF_NOTIFY_AUTHENTICATION;
+
 
 	if (! g_config->iis_priority)
 		pVer->dwFlags |= SF_NOTIFY_ORDER_DEFAULT;
