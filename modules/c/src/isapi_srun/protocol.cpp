@@ -347,6 +347,18 @@ write_ssl(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 	}
 }
 
+static int
+hexify(char *buf, int offset, int ch)
+{
+  int d1 = (ch >> 4) & 0xf;
+  int d2 = ch & 0xf;
+  uri[offset++] = '%';
+  uri[offset++] = (d1 < 10) ? (d1 + '0') : (d1 - 10 + 'A');
+  uri[offset++] = (d2 < 10) ? (d2 + '0') : (d2 - 10 + 'A');
+
+  return offset;
+}
+
 static int 
 write_env(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 {
@@ -380,12 +392,12 @@ write_env(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 		  else if (' ' <= ch && ch < 0x80 && ch != '%') {
 		    uri[i++] = ch;
 		  }
+		  else if (ch < 0x80) {
+		    i = hexify(uri, i, ch);
+		  }
 		  else {
-		    int d1 = (ch >> 4) & 0xf;
-		    int d2 = ch & 0xf;
-		    uri[i++] = '%';
-		    uri[i++] = (d1 < 10) ? (d1 + '0') : (d1 - 10 + 'A');
-		    uri[i++] = (d2 < 10) ? (d2 + '0') : (d2 - 10 + 'A');
+		    i = hexify(uri, i, 0xc0 | ((ch >> 6) & 0x1f));
+		    i = hexify(uri, i, 0x80 | (ch & 0x3f));
 		  }
 		}
 		uri[i] = 0;
