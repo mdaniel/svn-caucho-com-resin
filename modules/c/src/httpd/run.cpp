@@ -139,9 +139,12 @@ spawn_java(char *exe, char **args)
 	char arg[32 * 1024];
 	arg[0] = 0;
 	for (int i = 0; args[i]; i++) {
-		if (i > 0)
+		if (i > 0) {
 			strcat(arg, " ");
-		strcat(arg, args[i]);
+			add_path(arg, args[i]);
+		}
+		else
+			strcat(arg, args[i]);
 	}
 
     WORD wVersionRequested = MAKEWORD(1,1); 
@@ -307,9 +310,9 @@ set_jdk_args(char *exe, char *cp,
 		args[i++] = "-Djava.system.class.loader=com.caucho.loader.SystemClassLoader";
 	args[i++] = main;
 	args[i++] = "--resin-home";
-	args[i++] = resin_home;
+	args[i++] = strdup(rsprintf(buf, "\"%s\"", resin_home));
 	args[i++] = "--root-directory";
-	args[i++] = server_root;
+	args[i++] = strdup(rsprintf(buf, "\"%s\"", server_root));
 
 	while (argc > 0) {
 		args[i++] = strdup(rsprintf(buf, "\"%s\"", argv[0]));

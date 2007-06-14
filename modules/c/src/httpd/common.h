@@ -56,7 +56,7 @@ int spawn_java(char *exe, char **args);
 void stop_server();
 void start_server();
 void quit_server();
-
+void add_path(char *buf, char *path);
 void install_service(char *name, char *full_name, char **service_args);
 void remove_service(char *name);
 

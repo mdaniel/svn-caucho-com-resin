@@ -124,7 +124,7 @@ start_service(char *name, char *full_name, char *class_name, int argc, char **ar
 	return is_service;
 }
 
-static void
+void
 add_path(char *buf, char *path)
 {
   int needs_escape = 0;
