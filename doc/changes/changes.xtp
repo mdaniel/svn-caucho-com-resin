@@ -12,6 +12,14 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>jsp: fragment issues with ValueExpression code generation (#1785, rep by timur)</li>
+<li>hessian: allow disabling of Serializable check with setAllowNonSerializable (#1796, rep by Jean-Francois Poilpret)</li>
+<li>hessian: classloader fixes in HessianProxyFactory (#1795, rep by vladi5)</li>
+<li>Added &lt;secure> override for &lt;http> to handle load-balancers/proxies (#1792)</li>
+<li>boot: WatchdogManager stop needs to use server-id only to handle multiple conf files (#1781, rep by M Schmidt)</li>
+<li>Add thread-executor-task-max to &lt;server> to configure ExecutorService (#1762, rep by D Berry and G Zhu)</li>
+<li>quercus: parsing of "&lt;foo();>" (#1729, rep by obaltz)</li>
+<li>HmuxLoadBalanceServlet should not call sendError when response is committed (#1789, rep by Bradley Van Cleave)</li>
 <li>jsp: EL functions not properly initialized on reload (#1788, rep by Matthew Schmidt)</li>
 <li>hessian: updates for new Hessian 2.0 draft</li>
 <li>ResinWatchdog should not configure environment, e.g. &lt;log> (#1778, rep by Alex Lorberg)</li>

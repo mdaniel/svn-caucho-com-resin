@@ -132,6 +132,7 @@ public class Server extends ProtocolDispatchServer
   private long _shutdownWaitMax = 60 * 1000;
   
   private int _threadMax = 4096;
+  private int _threadExecutorTaskMax = -1;
   private int _threadIdleMin = 5;
   private int _threadIdleMax = 10;
 
@@ -409,6 +410,14 @@ public class Server extends ProtocolDispatchServer
 				    max));
     
     _threadMax = max;
+  }
+
+  /**
+   * Sets the maximum executor (background) thread.
+   */
+  public void setThreadExecutorTaskMax(int max)
+  {
+    _threadExecutorTaskMax = max;
   }
 
   /**
@@ -1013,6 +1022,17 @@ public class Server extends ProtocolDispatchServer
     if (_threadIdleMax < _threadIdleMin)
       throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-idle-max> ({1})",
 				    _threadIdleMin, _threadIdleMax));
+
+    if (_threadMax < _threadExecutorTaskMax)
+      throw new ConfigException(L.l("<thread-executor-task-max> ({0}) must be less than <thread-max> ({1})",
+				    _threadExecutorTaskMax, _threadMax));
+    
+    ThreadPool threadPool = ThreadPool.getThreadPool();
+    
+    threadPool.setThreadMax(_threadMax);
+    threadPool.setThreadIdleMax(_threadIdleMax);
+    threadPool.setThreadIdleMin(_threadIdleMin);
+    threadPool.setExecutorTaskMax(_threadExecutorTaskMax);
 
     if (_keepaliveSelectEnable) {
       try {

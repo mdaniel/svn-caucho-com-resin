@@ -70,6 +70,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
   private final String _id;
   private String _name;
 
+  private boolean _isSecure; // port security overrisde
+
   private final Admin _admin = new Admin();
   
   private String _state = "unknown";
@@ -85,6 +87,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
   TcpConnection(Port port, QSocket socket)
   {
     setPort(port);
+
+    _isSecure = port.isSecure();
 
     int id = getId();
 
@@ -188,7 +192,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
     if (_isClosed)
       return false;
     else
-      return _socket.isSecure();
+      return _socket.isSecure() || _isSecure;
   }
 
   /**

@@ -50,9 +50,7 @@ package com.caucho.hessian.io;
 
 import com.caucho.burlap.io.BurlapRemoteObject;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.logging.Level;
@@ -82,6 +80,8 @@ public class SerializerFactory extends AbstractSerializerFactory
   private HashMap _cachedDeserializerMap;
   private HashMap _cachedTypeDeserializerMap;
 
+  private boolean _isAllowNonSerializable;
+
   /**
    * Set true if the collection serializer should send the java type.
    */
@@ -99,6 +99,22 @@ public class SerializerFactory extends AbstractSerializerFactory
   public void addFactory(AbstractSerializerFactory factory)
   {
     _factories.add(factory);
+  }
+
+  /**
+   * If true, non-serializable objects are allowed.
+   */
+  public void setAllowNonSerializable(boolean allow)
+  {
+    _isAllowNonSerializable = allow;
+  }
+
+  /**
+   * If true, non-serializable objects are allowed.
+   */
+  public boolean isAllowNonSerializable()
+  {
+    return _isAllowNonSerializable;
   }
 
   /**
@@ -206,6 +222,11 @@ public class SerializerFactory extends AbstractSerializerFactory
   {
     if (_defaultSerializer != null)
       return _defaultSerializer;
+
+    if (! Serializable.class.isAssignableFrom(cl)
+	&& ! _isAllowNonSerializable) {
+      throw new IllegalStateException("Serialized class " + cl.getName() + " must implement java.io.Serializable");
+    }
 
     return new JavaSerializer(cl);
   }

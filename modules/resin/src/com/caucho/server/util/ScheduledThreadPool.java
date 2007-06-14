@@ -99,7 +99,7 @@ public class ScheduledThreadPool
     synchronized (_futureSet) {
       _futureSet.add(future);
     
-      _threadPool.schedule(future);
+      _threadPool.scheduleExecutorTask(future);
     }
   }
 
@@ -196,7 +196,7 @@ public class ScheduledThreadPool
     synchronized (_futureSet) {
       _futureSet.add(future);
     
-      _threadPool.schedule(future);
+      _threadPool.scheduleExecutorTask(future);
     }
 
     return future;
@@ -215,7 +215,7 @@ public class ScheduledThreadPool
     synchronized (_futureSet) {
       _futureSet.add(future);
     
-      _threadPool.schedule(future);
+      _threadPool.scheduleExecutorTask(future);
     }
 
     return future;
@@ -234,7 +234,7 @@ public class ScheduledThreadPool
     synchronized (_futureSet) {
       _futureSet.add(future);
     
-      _threadPool.schedule(future);
+      _threadPool.scheduleExecutorTask(future);
     }
 
     return future;
@@ -533,13 +533,13 @@ public class ScheduledThreadPool
 
     public void run()
     {
-      if (_isCancelled || _isDone || _isShutdown)
-	return;
-
       _thread = Thread.currentThread();
       ClassLoader oldLoader = _thread.getContextClassLoader();
       
       try {
+	if (_isCancelled || _isDone || _isShutdown)
+	  return;
+
 	_thread.setContextClassLoader(_loader);
 
 	if (_callable != null)
@@ -554,6 +554,8 @@ public class ScheduledThreadPool
 	_thread.setContextClassLoader(oldLoader);
 	_thread = null;
 	_isDone = true;
+
+	_threadPool.completeExecutorTask();
 
 	// alarm
 

@@ -71,12 +71,6 @@ public class JavaSerializer extends AbstractSerializer
   
   public JavaSerializer(Class cl)
   {
-    if (! Serializable.class.isAssignableFrom(cl)) {
-      log.fine("hessian - class " + cl.getName() + " must implement java.io.Serializable");
-      
-      throw new IllegalStateException("Serialized class " + cl.getName() + " does not implement java.io.Serializable");
-    }
-    
     _writeReplace = getWriteReplace(cl);
     if (_writeReplace != null)
       _writeReplace.setAccessible(true);

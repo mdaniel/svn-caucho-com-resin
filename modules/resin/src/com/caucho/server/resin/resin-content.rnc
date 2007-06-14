@@ -115,50 +115,6 @@ r_cluster-Flow =
 
 r_cluster-Content = r_cluster-Flow
 
-r_cluster-port-Content =
-  (attribute id { string }
-   | attribute server-id { string }
-   | element server-id { r_string-Group })?
-
-  & (attribute backup { string } | element backup { r_string-Group })?
-
-  & (attribute connection-max { r_int-Type }
-     | element connection-max { r_int-Type })?
-
-  & (attribute host { string } | element host { r_string-Group })?
-
-  & (attribute index { string } | element index { r_string-Group })?
-
-  & (attribute keepalive-max { r_int-Type }
-     | element keepalive-max { r_int-Type })?
-
-  & (attribute load-balance-weight { r_int-Type }
-     | element load-balance-weight { r_int-Type })?
-
-  & (r_openssl | r_jsse-ssl)?
-
-  & (attribute port { string } | element port { r_string-Group })
-
-  & (attribute protocol { string } | element protocol { r_string-Group })?
-
-  & (attribute read-timeout { r_period }
-     | element read-timeout { r_period })?
-
-  & (attribute socket-listen-backlog { r_int-Type }
-     | element socket-listen-backlog { r_int-Type })?
-
-  & (attribute socket-timeout { r_period }
-     | element socket-timeout { r_period })?
-
-  & (attribute tcp-no-delay { r_boolean-Type }
-     | element tcp-no-delay { r_boolean-Type })?
-
-  & (attribute timeout { r_period }
-     | element timeout { r_period })?
-
-  & (attribute write-timeout { r_period }
-     | element write-timeout { r_period })?
-
 r_cluster-port = element cluster-port {
   r_port-Content
 }
@@ -428,6 +384,9 @@ r_port-Content =
 
    & (attribute port { string } | element port { string })
 
+   & (attribute secure { r_boolean-Type }
+      | element secure { r_boolean-Type })?
+
    & (attribute socket-timeout { r_period-Type }
       | element socket-timeout { r_period-Type })?
 
@@ -575,6 +534,8 @@ r_server-Basis =
 
   & r_thread-max?
 
+  & r_thread-executor-task-max?
+
   & r_thread-idle-max?
 
   & r_thread-idle-min?
@@ -624,6 +585,10 @@ r_ssl-session-cookie =
 r_thread-max =
   attribute thread-max { string }
   | element thread-max { string }
+
+r_thread-executor-task-max =
+  attribute thread-executor-task-max { string }
+  | element thread-executor-task-max { string }
 
 r_thread-idle-max =
   attribute thread-idle-max { string }

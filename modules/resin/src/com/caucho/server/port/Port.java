@@ -92,6 +92,9 @@ public class Port
 
   // The SSL factory, if any
   private SSLFactory _sslFactory;
+  
+  // Secure override for load-balancers/proxies
+  private boolean _isSecure;
 
   private InetAddress _socketAddress;
 
@@ -427,6 +430,22 @@ public class Port
   public boolean isSSL()
   {
     return _sslFactory != null;
+  }
+
+  /**
+   * Sets true for secure
+   */
+  public void setSecure(boolean isSecure)
+  {
+    _isSecure = isSecure;
+  }
+
+  /**
+   * Return true for secure
+   */
+  public boolean isSecure()
+  {
+    return _isSecure || _sslFactory != null;
   }
 
   /**

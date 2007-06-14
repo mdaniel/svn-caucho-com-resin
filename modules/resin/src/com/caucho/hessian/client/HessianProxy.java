@@ -196,7 +196,7 @@ public class HessianProxy implements InvocationHandler {
 
   protected String mangleName(Method method, Object []args)
   {
-    if (args == null || args.length > 0)
+    if (args != null && args.length > 0)
       return method.getName() + "__" + args.length;
     else
       return method.getName() + "__0";

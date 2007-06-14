@@ -174,43 +174,6 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
     return _args.getLogDirectory();
   }
 
-  /*
-  void start()
-    throws Throwable
-  {
-    Watchdog server = _resin.findServer(_args.getServerId());
-
-    if (server == null)
-      throw new ConfigException(L().l("No matching <server> found for -server '{0}'",
-				      _args.getServerId()));
-
-    _port = new Port();
-    _port.setAddress(server.getAddress().getHostAddress());
-    _port.setPort(server.getWatchdogPort());
-
-    _port.setProtocol(new HmuxProtocol());
-    _port.setServer(_dispatchServer);
-
-    System.out.println("PORT: " + server.getAddress() + " " + server.getWatchdogPort());
-
-    //_port.bind();
-    _port.start();
-    
-    startServer(_args.getServerId(), _args.getArgv());
-
-    _lifecycle.toActive();
-
-    while (_lifecycle.isActive()) {
-      synchronized (_lifecycle) {
-	try {
-	  _lifecycle.wait(10000);
-	} catch (Exception e) {
-	}
-      }
-    }
-  }
-  */
-
   void startServer(String []argv)
     throws ConfigException
   {
@@ -255,7 +218,7 @@ public class ResinWatchdogManager extends ProtocolDispatchServer {
   {
     ResinWatchdog server = null;
     
-    server = _resin.findServer(serverId);
+    server = _activeServerMap.get(serverId);
 
     if (server == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",

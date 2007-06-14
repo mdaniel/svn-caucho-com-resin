@@ -53,6 +53,8 @@ public class ThreadPool {
   
   private int _threadIdleMax = 15;
   private int _threadIdleMin = 10;
+
+  private int _executorTaskMax = -1;
   
   private int _threadPriority = 5;
   private boolean _threadPrioritySet = false;
@@ -82,6 +84,13 @@ public class ThreadPool {
   private int _idleCount;
   // number of threads which are in the process of starting
   private int _startCount;
+
+  private final Object _executorLock = new Object();
+  // number of executor tasks running
+  private int _executorTaskCount;
+  // queue for waiting executor tasks
+  private ExecutorQueueItem _executorQueueHead;
+  private ExecutorQueueItem _executorQueueTail;
 
   private int _scheduleWaitCount;
 
@@ -166,6 +175,29 @@ public class ThreadPool {
   public int getThreadIdleMax()
   {
     return _threadIdleMax;
+  }
+
+  /**
+   * Sets the maximum number of executor threads.
+   */
+  public void setExecutorTaskMax(int max)
+  {
+    if (_threadMax < max)
+      throw new ConfigException(L.l("lt;thread-executor-max> ({0}) must be less than &lt;thread-max> ({1})",
+				    max, _threadMax));
+    
+    if (max == 0)
+      throw new ConfigException(L.l("lt;thread-executor-max> must not be zero."));
+    
+    _executorTaskMax = max;
+  }
+
+  /**
+   * Gets the maximum number of executor threads.
+   */
+  public int getExecutorTaskMax()
+  {
+    return _executorTaskMax;
   }
 
   public void setThreadPriority(int priority)
@@ -268,6 +300,59 @@ public class ThreadPool {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     schedule(task, loader, 0, MAX_EXPIRE, true);
+  }
+
+  /**
+   * Schedules an executor task.
+   */
+  public boolean scheduleExecutorTask(Runnable task)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    synchronized (_executorLock) {
+      _executorTaskCount++;
+
+      if (_executorTaskCount <= _executorTaskMax || _executorTaskMax < 0)
+	return schedule(task, loader, getDefaultPriority(), MAX_EXPIRE, true);
+      else {
+	ExecutorQueueItem item = new ExecutorQueueItem(task, loader);
+
+	if (_executorQueueTail != null)
+	  _executorQueueTail._next = item;
+	else
+	  _executorQueueHead = item;
+
+	_executorQueueTail = item;
+
+	return false;
+      }
+    }
+  }
+
+  /**
+   * Called when an executor task completes
+   */
+  public void completeExecutorTask()
+  {
+    synchronized (_executorLock) {
+      _executorTaskCount--;
+
+      assert(_executorTaskCount >= 0);
+
+      if (_executorQueueHead != null) {
+	ExecutorQueueItem item = _executorQueueHead;
+
+	_executorQueueHead = item._next;
+
+	if (_executorQueueHead == null)
+	  _executorQueueTail = null;
+
+	Runnable task = item.getRunnable();
+	ClassLoader loader = item.getLoader();
+	
+	schedule(task, loader, getDefaultPriority(), MAX_EXPIRE, true);
+      }
+    }
   }
 
   /**
@@ -788,6 +873,29 @@ public class ThreadPool {
 	  e.printStackTrace();
 	}
       }
+    }
+  }
+
+  static class ExecutorQueueItem {
+    private Runnable _runnable;
+    private ClassLoader _loader;
+
+    ExecutorQueueItem _next;
+
+    ExecutorQueueItem(Runnable runnable, ClassLoader loader)
+    {
+      _runnable = runnable;
+      _loader = loader;
+    }
+
+    Runnable getRunnable()
+    {
+      return _runnable;
+    }
+
+    ClassLoader getLoader()
+    {
+      return _loader;
     }
   }
 }

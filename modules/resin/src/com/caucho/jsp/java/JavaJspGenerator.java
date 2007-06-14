@@ -1355,7 +1355,7 @@ public class JavaJspGenerator extends JspGenerator {
       else if (BigDecimal.class.equals(retType))
 	exprType = "BigDecimalValueExpression";
       
-      out.println("private javax.el.ValueExpression _caucho_value_expr_" + i + ";");
+      out.println("private static javax.el.ValueExpression _caucho_value_expr_" + i + ";");
     }
     
     for (int i = 0; i < _methodExprList.size(); i++) {

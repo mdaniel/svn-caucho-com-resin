@@ -62,7 +62,7 @@ binary  ::= ('b' b16 b8 binary-data)* 'B' b16 b8 binary-data
 boolean ::= 'T'
         ::= 'F'
 
-        # time in GMT encoded as 64-bit long milliseconds since epoch
+        # time in UTC encoded as 64-bit long milliseconds since epoch
 date    ::= 'd' b64 b56 b48 b40 b32 b24 b16 b8
 
         # 64-bit IEEE double
@@ -187,7 +187,7 @@ x58          # utf-8 xml final chunk ('X')
 x59 - x62    # reserved
 x62          # 8-bit binary data non-final chunk ('b')
 x63          # reserved ('c' call for RPC)
-x64          # GMT time encoded as 64-bit long milliseconds since epoch ('d')
+x64          # UTC time encoded as 64-bit long milliseconds since epoch ('d')
 x65          # reserved
 x66          # reserved ('f' for fault for RPC)
 x67          # double 0.0

@@ -174,6 +174,7 @@ public class QuercusParser {
   private final static int IMPLEMENTS = 573;
   
   private final static int IMPORT = 574;
+  private final static int TEXT_PHP = 575;
 
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -492,6 +493,13 @@ public class QuercusParser {
     if (token == TEXT_ECHO) {
       parseEcho(statements);
     }
+    else if (token == TEXT_PHP) {
+      _peekToken = parseToken();
+
+      if (_peekToken == IDENTIFIER && _lexeme.equalsIgnoreCase("php")) {
+	_peekToken = -1;
+      }
+    }
     
     statements.addAll(parseStatementList());
 
@@ -662,6 +670,18 @@ public class QuercusParser {
 	  statements.add(_factory.createText(location, _lexeme));
 	}
 	break;
+
+      case TEXT_PHP:
+	if (_lexeme.length() > 0) {
+	  statements.add(_factory.createText(location, _lexeme));
+	}
+
+	_peekToken = parseToken();
+
+	if (_peekToken == IDENTIFIER && _lexeme.equalsIgnoreCase("php")) {
+	  _peekToken = -1;
+	}
+	break;
 	
       case TEXT_ECHO:
 	if (_lexeme.length() > 0)
@@ -727,6 +747,26 @@ public class QuercusParser {
       }
       else
 	return parseStatement();
+
+    case TEXT_PHP:
+      {
+	Statement stmt = null;
+	
+	if (_lexeme.length() > 0) {
+	  stmt = _factory.createText(location, _lexeme);
+	}
+
+	_peekToken = parseToken();
+
+	if (_peekToken == IDENTIFIER && _lexeme.equalsIgnoreCase("php")) {
+	  _peekToken = -1;
+	}
+
+	if (stmt == null)
+	  stmt = parseStatement();
+
+	return stmt;
+      }
       
     default:
       Statement stmt = parseStatementImpl(token);
@@ -1909,6 +1949,7 @@ public class QuercusParser {
     case '}':
     case PHP_END:
     case TEXT:
+    case TEXT_PHP:
     case TEXT_ECHO:
       break;
 
@@ -3961,37 +4002,14 @@ public class QuercusParser {
 
 	  return TEXT_ECHO;
 	}
-	else if (Character.isWhitespace(ch)) {
-	  _lexeme = sb.toString();
-
-	  return TEXT;
-	}
-	else if (ch != 'p' && ch != 'P') {
-	  sb.append("<?");
-	}
-	else if ((ch2 = read()) != 'h' && ch2 != 'H') {
-	  sb.append("<?");
-	  sb.append((char) ch);
-
-	  ch = ch2;
-	}
-	else if ((ch3 = read()) != 'p' && ch3 != 'P') {
-	  sb.append("<?");
-	  sb.append((char) ch);
-	  sb.append((char) ch2);
-
-	  ch = ch3;
-	}
-	else if (! Character.isWhitespace((ch = read()))) {
-	  sb.append("<?");
-	  sb.append((char) ch);
-	  sb.append((char) ch2);
-	  sb.append((char) ch3);
-	}
 	else {
 	  _lexeme = sb.toString();
+	  _peek = ch;
 
-	  return TEXT;
+	  if (ch == 'p' || ch == 'P')
+	    return TEXT_PHP;
+	  else
+	    return TEXT;
 	}
       }
       else {

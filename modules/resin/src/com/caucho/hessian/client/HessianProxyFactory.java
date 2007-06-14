@@ -389,7 +389,7 @@ public class HessianProxyFactory implements ServiceProxyFactory, ObjectFactory {
       handler = new HessianProxy(this, url);
     }
 
-    return Proxy.newProxyInstance(api.getClassLoader(),
+    return Proxy.newProxyInstance(loader,
                                   new Class[] { api,
                                                 HessianRemoteObject.class },
                                   handler);
