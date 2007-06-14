@@ -12,6 +12,7 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>httpd.exe issues on win32 with spaces in RESIN_HOME directory (#1554)</li>
 <li>Quercus: MediaWiki was escaping html that should be allowed</li>
 <li>jsp: fragment issues with ValueExpression code generation (#1785, rep by timur)</li>
 <li>hessian: allow disabling of Serializable check with setAllowNonSerializable (#1796, rep by Jean-Francois Poilpret)</li>

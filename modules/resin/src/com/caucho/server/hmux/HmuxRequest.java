@@ -1109,16 +1109,11 @@ public class HmuxRequest extends AbstractHttpRequest
     for (int i = 0; i < _rawURI.length(); i++) {
       char ch = _rawURI.charAt(i);
 
-      switch (ch) {
-      case ' ':
-      case '?':
-        addHex(cb, ch);
-        break;
-
-      default:
-        cb.append(ch);
-        break;
+      if (ch <= ' ' || ch >= 0x80 || ch == '%') {
+	addHex(cb, ch);
       }
+      else
+        cb.append(ch);
     }
 
     return cb.close();

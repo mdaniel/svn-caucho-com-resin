@@ -353,19 +353,42 @@ write_env(stream_t *s, EXTENSION_CONTROL_BLOCK *r)
 	int isHttp11 = 0;
 
 	char protocol[BUF_LENGTH];
-	char rawUri[BUF_LENGTH];
-	char *uri = rawUri;
+	char path_info_buffer[BUF_LENGTH];
+	char *path_info = path_info_buffer;
+	char uri_buffer[BUF_LENGTH];
+	char *uri = uri_buffer;
 	unsigned long size = sizeof(protocol);
 
 	if (r->GetServerVariable(r->ConnID, "SERVER_PROTOCOL", protocol, &size) && size > 0) {
 		protocol[size] = 0;
 		isHttp11 = ! strcmp(protocol, "HTTP/1.1");
 	}
-	size = sizeof(rawUri);
-	if (r->GetServerVariable(r->ConnID, "PATH_INFO", uri, &size) && size > 0) {
-		uri[size] = 0;
-		if (! strncmp(uri, ISAPI_SCRIPT, sizeof(ISAPI_SCRIPT) - 1))
-			uri += sizeof(ISAPI_SCRIPT) - 1;
+	size = sizeof(path_info_buffer);
+	if (r->GetServerVariable(r->ConnID, "PATH_INFO", path_info, &size) && size > 0) {
+	        int i;
+	  
+		path_info[size] = 0;
+		if (! strncmp(path_info, ISAPI_SCRIPT, sizeof(ISAPI_SCRIPT) - 1))
+			path_info += sizeof(ISAPI_SCRIPT) - 1;
+
+		i = 0;
+		while (i < BUF_LENGTH - 3) {
+		  char ch = *path_info++;
+
+		  if (ch == 0)
+		    break;
+		  else if (' ' <= ch && ch < 0x80 && ch != '%') {
+		    uri[i++] = ch;
+		  }
+		  else {
+		    int d1 = (ch >> 4) & 0xf;
+		    int d2 = ch & 0xf;
+		    uri[i++] = '%';
+		    uri[i++] = (d1 < 10) ? (d1 + '0') : (d1 - 10 + 'A');
+		    uri[i++] = (d2 < 10) ? (d2 + '0') : (d2 - 10 + 'A');
+		  }
+		}
+		uri[i] = 0;
 	}
 	else
 		uri[size] = 0;
