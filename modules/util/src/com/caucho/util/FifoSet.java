@@ -35,10 +35,10 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Stack (lifo) ordered set, used by the JCA code so recent
+ * Stack (fifo) ordered set, used by the JCA code so recent
  * connections are used first.
  */
-public class LifoSet<E> extends AbstractSet<E> {
+public class FifoSet<E> extends AbstractSet<E> {
   private final ArrayList<E> _list = new ArrayList<E>();
 
   /**
@@ -63,7 +63,7 @@ public class LifoSet<E> extends AbstractSet<E> {
   public boolean add(E o)
   {
     if (! _list.contains(o)) {
-      _list.add(0, o);
+      _list.add(o);
       return true;
     }
     else
@@ -157,10 +157,10 @@ public class LifoSet<E> extends AbstractSet<E> {
   {
     if (this == o)
       return true;
-    else if (! (o instanceof LifoSet))
+    else if (! (o instanceof FifoSet))
       return false;
 
-    LifoSet set = (LifoSet) o;
+    FifoSet set = (FifoSet) o;
 
     return _list.equals(set._list);
   }

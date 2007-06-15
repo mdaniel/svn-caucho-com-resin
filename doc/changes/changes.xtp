@@ -12,6 +12,9 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>database idle pool is now lifo to better handle load-balancing drivers (#1672)</li>
+<li>isapi_srun: enable keepalive (#1802, rep by M Weinig)</li>
+<li>isapi_srun: update uri decoding for utf-8 characters (#1629, rep by P. Sankar)</li>
 <li>httpd.exe issues on win32 with spaces in RESIN_HOME directory (#1554)</li>
 <li>Quercus: MediaWiki was escaping html that should be allowed</li>
 <li>jsp: fragment issues with ValueExpression code generation (#1785, rep by timur)</li>

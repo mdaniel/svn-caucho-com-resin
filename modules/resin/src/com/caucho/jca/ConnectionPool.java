@@ -37,7 +37,7 @@ import com.caucho.management.server.ConnectionPoolMXBean;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
-import com.caucho.util.LifoSet;
+import com.caucho.util.FifoSet;
 import com.caucho.util.WeakAlarm;
 
 import javax.resource.NotSupportedException;
@@ -115,8 +115,8 @@ public class ConnectionPool extends AbstractManagedObject
 
   private final ArrayList<PoolItem> _pool = new ArrayList<PoolItem>();
 
-  private final LifoSet<ManagedConnection> _idlePool
-    = new LifoSet<ManagedConnection>();
+  private final FifoSet<ManagedConnection> _idlePool
+    = new FifoSet<ManagedConnection>();
 
   // temporary connection list for the alarm callback
   private final ArrayList<PoolItem> _alarmConnections
@@ -126,6 +126,8 @@ public class ConnectionPool extends AbstractManagedObject
 
   // time of the last validation check
   private long _lastValidCheckTime;
+  // time the idle set was last empty
+  private long _lastIdlePoolEmptyTime;
 
   private int _idCount;
 
@@ -527,18 +529,30 @@ public class ConnectionPool extends AbstractManagedObject
         try {
           mConn.cleanup();
 
-          synchronized (_idlePool) {
-            _idlePool.add(mConn);
-          }
+	  ManagedConnection oldIdleConn = null;
 
+          synchronized (_idlePool) {
+	    long now = Alarm.getCurrentTime();
+	    
+	    if (_idlePool.size() == 0)
+	      _lastIdlePoolEmptyTime = now;
+	    
+	    if (now - _lastIdlePoolEmptyTime < _maxIdleTime) {
+	      _idlePool.add(mConn);
+
+	      return;
+	    }
+	    else {
+	      _lastIdlePoolEmptyTime = now;
+	    }
+          }
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        } finally {
           synchronized (_pool) {
             _pool.notify();
           }
-
-          return;
-        } catch (Throwable e) {
-          log.log(Level.FINE, e.toString(), e);
-        }
+	}
       }
     }
 

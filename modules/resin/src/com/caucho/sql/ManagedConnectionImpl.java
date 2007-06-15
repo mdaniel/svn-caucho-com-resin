@@ -775,6 +775,11 @@ public class ManagedConnectionImpl
     }
   }
 
+  public String toString()
+  {
+    return "ManagedConnectionImpl[" + _id + "]";
+  }
+
   class LocalTransactionImpl implements LocalTransaction {
     private boolean _oldAutoCommit;
 
