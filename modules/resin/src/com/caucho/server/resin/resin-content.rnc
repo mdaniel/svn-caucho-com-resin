@@ -206,6 +206,9 @@ r_port-Content =
    & (attribute write-timeout { r_period-Type }
       | element write-timeout { r_period-Type })?
 
+   & (attribute secure { r_boolean-Type }
+      | element secure { r_boolean-Type })?
+
    & (attribute socket-listen-backlog { r_int-Type }
       | element socket-listen-backlog { r_int-Type })?
 

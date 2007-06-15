@@ -108,6 +108,7 @@ public class Port
   private String _virtualHost;
 
   private boolean _tcpNoDelay = true;
+  private boolean _isSecure;
 
   private final PortAdmin _admin = new PortAdmin(this);
 
@@ -359,6 +360,22 @@ public class Port
   public boolean isSSL()
   {
     return _sslFactory != null;
+  }
+
+  /**
+   * Sets true for secure
+   */
+  public void setSecure(boolean isSecure)
+  {
+    _isSecure = isSecure;
+  }
+
+  /**
+   * Return true for secure
+   */
+  public boolean isSecure()
+  {
+    return _isSecure || _sslFactory != null;
   }
 
   /**

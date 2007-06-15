@@ -77,6 +77,8 @@ public class TcpConnection extends PortConnection implements ThreadTask
   private String _id = "tcp-connection-" + _g_id++;
   private String _name;
 
+  private boolean _isSecure;
+
   private final Admin _admin = new Admin();
   
   private String _state = "unknown";
@@ -110,6 +112,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
     }
 
     _socket = socket;
+    _isSecure = port.isSecure();
   }
 
   /**
@@ -215,7 +218,7 @@ public class TcpConnection extends PortConnection implements ThreadTask
     if (_isClosed)
       return false;
     else
-      return _socket.isSecure();
+      return _isSecure || _socket.isSecure();
   }
 
   /**
