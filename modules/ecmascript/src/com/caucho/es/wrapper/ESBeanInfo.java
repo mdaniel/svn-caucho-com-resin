@@ -203,9 +203,13 @@ public class ESBeanInfo {
       if (iterator != null)
 	prop.namedIterator = iterator;
     } else if (value == null || overwrite) {
-      propMap.put(name, new NamedPropertyDescriptor(name, null, null,
-						    getter, setter, 
-						    remover, iterator));
+      try {
+	propMap.put(name, new NamedPropertyDescriptor(name, null, null,
+						      getter, setter, 
+						      remover, iterator));
+      } catch (Exception e) {
+	propMap.put(name, BAD);
+      }
     } else
       propMap.put(name, BAD);
   }
