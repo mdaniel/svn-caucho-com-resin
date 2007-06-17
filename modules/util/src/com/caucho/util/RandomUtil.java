@@ -36,9 +36,10 @@ import java.util.Random;
  * System-wide random number generator.
  */
 public class RandomUtil {
-  static private long _seed = System.currentTimeMillis();
-  static private Random _random;
-  static private boolean _isTest;
+  private static long _seed = System.currentTimeMillis();
+  private static SecureRandom _secureRandom;
+  private static Random _random;
+  private static boolean _isTest;
 
   /**
    * Returns the next random long.
@@ -99,5 +100,29 @@ public class RandomUtil {
     _seed = seed;
     _isTest = true;
     _random = new Random(seed);
+  }
+
+  /**
+   * Sets the specific seed.  Only for testing.
+   */
+  public static void setSecureRandom(SecureRandom random)
+  {
+    _secureRandom = random;
+  }
+
+  /**
+   * Sets the specific seed.  Only for testing.
+   */
+  public static SecureRandom getSecureRandom()
+  {
+    if (_secureRandom == null)
+      _secureRandom = new SecureRandom();
+    
+    return _secureRandom;
+  }
+
+  public static Random getTestRandom()
+  {
+    return _random;
   }
 }

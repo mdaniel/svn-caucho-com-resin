@@ -766,8 +766,34 @@ public class QueryParser {
 
     token = peekToken();
 
-    if (! innerSelect) {
+    if (token == OFFSET) {
+      scanToken();
 
+      token = scanToken();
+      if (token != INTEGER)
+	throw error(L.l("Expected INTEGER at {0}", tokenName(token)));
+
+      int offset = Integer.parseInt(_lexeme);
+
+      token = peekToken();
+
+      query.setOffset(offset);
+    }
+
+    if (token == LIMIT) {
+      scanToken();
+
+      token = scanToken();
+      if (token != INTEGER)
+	throw error(L.l("Expected INTEGER at {0}", tokenName(token)));
+
+      int limit = Integer.parseInt(_lexeme);
+      query.setLimit(limit);
+      
+      token = peekToken();
+    }
+
+    if (! innerSelect) {
       query.setJoinFetchMap(_joinFetchMap);
 
       if (token > 0)

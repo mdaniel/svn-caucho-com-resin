@@ -12,6 +12,7 @@
 
 <s2 title="3.1.snap - May 24, 2007">
 <ul>
+<li>amber: add support for OFFSET and LIMIT for CMP backward compat (#1794, rep by frankhung)</li>
 <li>database idle pool is now lifo to better handle load-balancing drivers (#1672)</li>
 <li>isapi_srun: enable keepalive (#1802, rep by M Weinig)</li>
 <li>isapi_srun: update uri decoding for utf-8 characters (#1629, rep by P. Sankar)</li>

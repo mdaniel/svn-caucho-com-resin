@@ -81,9 +81,14 @@ public class Hessian2Input
   private static final int END_OF_DATA = -2;
 
   private static Field _detailMessageField;
+
+  private static final int SIZE = 256;
+  private static final int GAP = 16;
   
   // factory for deserializing objects in the input stream
   protected SerializerFactory _serializerFactory;
+
+  private static boolean _isCloseStreamOnClose;
   
   protected ArrayList _refs;
   protected ArrayList _classDefs;
@@ -91,10 +96,8 @@ public class Hessian2Input
   
   // the underlying input stream
   private InputStream _is;
-
-  private static final int SIZE = 256;
-  private static final int GAP = 16;
   private final byte []_buffer = new byte[SIZE];
+  
   // a peek character
   private int _offset;
   private int _length;
@@ -154,6 +157,16 @@ public class Hessian2Input
     return factory;
   }
 
+  public void setCloseStreamOnClose(boolean isClose)
+  {
+    _isCloseStreamOnClose = isClose;
+  }
+
+  public boolean isCloseStreamOnClose()
+  {
+    return _isCloseStreamOnClose;
+  }
+
   /**
    * Returns the calls method
    */
@@ -184,6 +197,27 @@ public class Hessian2Input
     
     if (tag != 'c')
       throw error("expected hessian call ('c') at code=" + tag + " ch=" + (char) tag);
+
+    int major = read();
+    int minor = read();
+
+    return (major << 16) + minor;
+  }
+
+  /**
+   * Starts reading the envelope
+   *
+   * <pre>
+   * E major minor
+   * </pre>
+   */
+  public int readEnvelope()
+    throws IOException
+  {
+    int tag = read();
+    
+    if (tag != 'E')
+      throw error("expected hessian Envelope ('E') at code=" + tag + " ch=" + (char) tag);
 
     int major = read();
     int minor = read();
@@ -2282,42 +2316,8 @@ public class Hessian2Input
       throw expect("inputStream", tag);
     }
     
-    return new InputStream() {
-	boolean _isClosed = false;
-	
-	public int read()
-	  throws IOException
-	{
-	  if (_isClosed)
-	    return -1;
+    return new ReadInputStream();
 
-	  int ch = parseByte();
-	  if (ch < 0)
-	    _isClosed = true;
-
-	  return ch;
-	}
-	
-	public int read(byte []buffer, int offset, int length)
-	  throws IOException
-	{
-	  if (_isClosed)
-	    return -1;
-
-	  int len = Hessian2Input.this.read(buffer, offset, length);
-	  if (len < 0)
-	    _isClosed = true;
-
-	  return len;
-	}
-
-	public void close()
-	  throws IOException
-	{
-	  while (read() >= 0) {
-	  }
-	}
-      };
   }
   
   /**
@@ -2327,7 +2327,7 @@ public class Hessian2Input
     throws IOException
   {
     int readLength = 0;
-    
+
     while (length > 0) {
       while (_chunkLength <= 0) {
         if (_isLastChunk)
@@ -2357,7 +2357,16 @@ public class Hessian2Input
       if (length < sublen)
         sublen = length;
 
-      sublen = _is.read(buffer, offset, sublen);
+      if (_length <= _offset && ! readBuffer())
+	return -1;
+      
+      if (_length - _offset < sublen)
+	sublen = _length - _offset;
+
+      System.arraycopy(_buffer, _offset, buffer, offset, sublen);
+
+      _offset += sublen;
+      
       offset += sublen;
       readLength += sublen;
       length -= sublen;
@@ -2431,8 +2440,51 @@ public class Hessian2Input
   }
 
   public void close()
+    throws IOException
   {
+    InputStream is = _is;
+    _is = null;
+
+    if (_isCloseStreamOnClose && is != null)
+      is.close();
   }
+  
+  class ReadInputStream extends InputStream {
+    boolean _isClosed = false;
+	
+    public int read()
+      throws IOException
+    {
+      if (_isClosed)
+	return -1;
+
+      int ch = parseByte();
+      if (ch < 0)
+	_isClosed = true;
+
+      return ch;
+    }
+	
+    public int read(byte []buffer, int offset, int length)
+      throws IOException
+    {
+      if (_isClosed)
+	return -1;
+
+      int len = Hessian2Input.this.read(buffer, offset, length);
+      if (len < 0)
+	_isClosed = true;
+
+      return len;
+    }
+
+    public void close()
+      throws IOException
+    {
+      while (read() >= 0) {
+      }
+    }
+  };
 
   final static class ObjectDefinition {
     private final String _type;

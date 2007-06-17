@@ -84,6 +84,8 @@ public class Hessian2Output
   private IdentityIntMap _refs = new IdentityIntMap();
 
   private HashMap _serializerMap = new HashMap();
+
+  private boolean _isCloseStreamOnClose;
   
   // map of classes
   private HashMap _classRefs;
@@ -106,6 +108,17 @@ public class Hessian2Output
   {
     _os = os;
   }
+  
+  public void setCloseStreamOnClose(boolean isClose)
+  {
+    _isCloseStreamOnClose = isClose;
+  }
+  
+  public boolean isCloseStreamOnClose()
+  {
+    return _isCloseStreamOnClose;
+  }
+  
 
   /**
    * Writes a complete method call.
@@ -205,6 +218,42 @@ public class Hessian2Output
     buffer[offset++] = (byte) 'C';
     buffer[offset++] = (byte) 2;
     buffer[offset++] = (byte) 0;
+  }
+  
+  /**
+   * Starts an envelope.
+   *
+   * <code><pre>
+   * E major minor
+   * m b16 b8 method-name
+   * </pre></code>
+   *
+   * @param method the method name to call.
+   */
+  public void startEnvelope(String method)
+    throws IOException
+  {
+    int offset = _offset;
+
+    if (SIZE < offset + 32) {
+      flush();
+      offset = 0;
+    }
+
+    byte []buffer = _buffer;
+    
+    buffer[offset++] = (byte) 'E';
+    buffer[offset++] = (byte) 2;
+    buffer[offset++] = (byte) 0;
+
+    buffer[offset++] = (byte) 'm';
+    int len = method.length();
+    buffer[offset++] = (byte) (len >> 8);
+    buffer[offset++] = (byte) len;
+
+    _offset = offset;
+    
+    printString(method, 0, len);
   }
 
   /**
@@ -1160,6 +1209,15 @@ public class Hessian2Output
   }
 
   /**
+   * Returns an output stream to write binary data.
+   */
+  public OutputStream getBytesOutputStream()
+    throws IOException
+  {
+    return new BytesOutputStream();
+  }
+
+  /**
    * Writes a reference.
    *
    * <code><pre>
@@ -1386,11 +1444,100 @@ public class Hessian2Output
   public final void close()
     throws IOException
   {
-    int offset = _offset;
+    OutputStream os = _os;
+    _os = null;
+
+    if (os != null) {
+      int offset = _offset;
     
-    if (offset > 0) {
-      _offset = 0;
-      _os.write(_buffer, 0, offset);
+      if (offset > 0) {
+	_offset = 0;
+	os.write(_buffer, 0, offset);
+      }
+
+      if (_isCloseStreamOnClose)
+	os.close();
+    }
+  }
+
+  class BytesOutputStream extends OutputStream {
+    private int _startOffset;
+    
+    BytesOutputStream()
+      throws IOException
+    {
+      if (SIZE < _offset + 16)
+	flush();
+
+      _startOffset = _offset;
+      _offset += 3; // skip 'b' xNN xNN
+    }
+
+    public void write(int ch)
+      throws IOException
+    {
+      if (SIZE <= _offset) {
+	int length = (_offset - _startOffset) - 3;
+	
+	_buffer[_startOffset] = (byte) 'b';
+	_buffer[_startOffset + 1] = (byte) (length >> 8);
+	_buffer[_startOffset + 2] = (byte) (length);
+
+	flush();
+
+	_startOffset = _offset;
+	_offset += 3;
+      }
+      
+      _buffer[_offset++] = (byte) ch;
+    }
+
+    public void write(byte []buffer, int offset, int length)
+      throws IOException
+    {
+      while (length > 0) {
+	int sublen = SIZE - _offset;
+
+	if (length < sublen)
+	  sublen = length;
+
+	if (sublen > 0) {
+	  System.arraycopy(buffer, offset, _buffer, _offset, sublen);
+	  _offset += sublen;
+	}
+
+	length -= sublen;
+	offset += sublen;
+	
+	if (SIZE <= _offset) {
+	  int chunkLength = (_offset - _startOffset) - 3;
+	
+	  _buffer[_startOffset] = (byte) 'b';
+	  _buffer[_startOffset + 1] = (byte) (chunkLength >> 8);
+	  _buffer[_startOffset + 2] = (byte) (chunkLength);
+
+	  flush();
+
+	  _startOffset = _offset;
+	  _offset += 3;
+	}
+      }
+    }
+
+    public void close()
+      throws IOException
+    {
+      int startOffset = _startOffset;
+      _startOffset = -1;
+
+      if (startOffset < 0)
+	return;
+      
+      int length = (_offset - startOffset) - 3;
+	
+      _buffer[startOffset] = (byte) 'B';
+      _buffer[startOffset + 1] = (byte) (length >> 8);
+      _buffer[startOffset + 2] = (byte) (length);
     }
   }
 }

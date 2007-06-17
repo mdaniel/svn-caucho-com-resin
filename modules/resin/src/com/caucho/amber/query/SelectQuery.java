@@ -64,6 +64,9 @@ public class SelectQuery extends AbstractQuery {
 
   private ArrayList<AmberExpr> _groupList;
 
+  private int _offset = -1;
+  private int _limit = -1;
+
   private Map<AmberExpr, String> _joinFetchMap;
 
   private String _sql;
@@ -246,6 +249,38 @@ public class SelectQuery extends AbstractQuery {
   public boolean isTableReadOnly()
   {
     return _isTableReadOnly;
+  }
+
+  /**
+   * Sets the OFFSET value.
+   */
+  public void setOffset(int offset)
+  {
+    _offset = offset;
+  }
+
+  /**
+   * Gets the OFFSET value.
+   */
+  public int getOffset()
+  {
+    return _offset;
+  }
+
+  /**
+   * Sets the LIMIT value.
+   */
+  public void setLimit(int limit)
+  {
+    _limit = limit;
+  }
+
+  /**
+   * Gets the LIMIT value.
+   */
+  public int getLimit()
+  {
+    return _limit;
   }
 
   /**

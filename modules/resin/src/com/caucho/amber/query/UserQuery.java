@@ -77,6 +77,16 @@ public class UserQuery implements AmberQuery {
     _argValues = new Object[argList.length];
 
     _argLength = argList.length;
+
+    if (query instanceof SelectQuery) {
+      SelectQuery select = (SelectQuery) query;
+
+      if (select.getOffset() >= 0)
+	_firstResult = select.getOffset();
+      
+      if (select.getLimit() >= 0)
+	_maxResults = select.getLimit();
+    }
   }
 
   /**
