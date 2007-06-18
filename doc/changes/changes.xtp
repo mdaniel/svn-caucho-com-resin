@@ -12,6 +12,10 @@
 
 <s2 title="3.1.snap - Jun 17, 2007">
 <ul>
+<li>ssi: add SSIFilter (#1760, rp by sergek)</li>
+<li>ssi: add support config errmsg (#1768, rep by Bill Au)</li>
+<li>ssi: add support for SSIServlet as included servlet (#1768, rep by Bill Au)</li>
+<li>add &lt;machine> configuration to better distribute session backups (#1294, rep by R Dredge)</li>
 <li>(2007-06-17) hessian: add X509Encryption and X509Signature for WS-Security capabilities (#1793, rep by Serge Merzliakov)</li>
 <li>amber: add support for OFFSET and LIMIT for CMP backward compat (#1794, rep by frankhung)</li>
 <li>database idle pool is now lifo to better handle load-balancing drivers (#1672)</li>

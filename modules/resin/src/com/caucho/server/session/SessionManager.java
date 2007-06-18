@@ -181,6 +181,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
   private int _srunIndex;
   private int _srunLength;
+  private int _machineLength;
 
   private Alarm _alarm = new Alarm(this);
 
@@ -250,6 +251,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
 	ClusterServer selfServer = null;
 
 	if (_cluster != null) {
+	  _machineLength = _cluster.getMachineList().size();
 	  _srunLength = _cluster.getServerList().length;
 	  
 	  selfServer = _cluster.getSelfServer();
@@ -1240,8 +1242,9 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     long backupCode;
 
-    if (_selfServer != null)
+    if (_selfServer != null) {
       backupCode = _selfServer.generateBackupCode();
+    }
     else
       backupCode = 0x000200010000L;
     

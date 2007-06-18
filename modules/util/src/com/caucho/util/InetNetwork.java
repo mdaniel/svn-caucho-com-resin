@@ -58,7 +58,7 @@ public class InetNetwork {
 
     _address = address;
     _maskIndex = maskIndex;
-    _mask = -1L << (32 - maskIndex);
+    _mask = -1L << (8 * bytes.length - maskIndex);
   }
   
   /**
@@ -167,7 +167,7 @@ public class InetNetwork {
    */
   public String toString()
   {
-    CharBuffer cb = CharBuffer.allocate();
+    StringBuilder cb = new StringBuilder();
 
     for (int i = 0; i < 4; i++) {
       if (i != 0)
@@ -179,6 +179,6 @@ public class InetNetwork {
     cb.append('/');
     cb.append(_maskIndex);
 
-    return cb.close();
+    return cb.toString();
   }
 }

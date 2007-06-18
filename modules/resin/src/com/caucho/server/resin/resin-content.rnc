@@ -73,6 +73,8 @@ r_cluster-Basis =
   & (attribute invocation-cache-max-url-length { r_int-Type }
      | element invocation-cache-max-url-length { r_int-Type })?
 
+  & r_machine*
+
   & r_persistent-store?
 
   & r_ping*
@@ -272,6 +274,12 @@ r_keepalive-select-thread-timeout =
 r_keepalive-select-enable =
   attribute keepalive-select-enable { r_boolean-Type }
   | element keepalive-select-enable { r_boolean-Type }
+
+r_machine = element machine {
+  attribute id { string }?
+
+  & r_server+
+}
 
 r_management = element management {
   r_path?

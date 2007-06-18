@@ -87,6 +87,9 @@ public class Cluster
   private ArrayList<InitProgram> _serverDefaultList
     = new ArrayList<InitProgram>();
 
+  private ArrayList<Machine> _machineList
+    = new ArrayList<Machine>();
+
   private ArrayList<ClusterServer> _serverList
     = new ArrayList<ClusterServer>();
 
@@ -250,11 +253,29 @@ public class Cluster
   /**
    * Adds a new server to the cluster.
    */
-  public ClusterServer createServer()
-    throws Throwable
+  public Machine createMachine()
+    throws Exception
   {
-    ClusterServer server = new ClusterServer(this);
+    Machine machine = new Machine(this);
 
+    _machineList.add(machine);
+
+    return machine;
+  }
+
+  /**
+   * Adds a new server to the cluster.
+   */
+  public ClusterServer createServer()
+    throws Exception
+  {
+    Machine machine = createMachine();
+  
+    return machine.createServer();
+  }
+
+  ClusterServer createServer(ClusterServer server)
+  {
     server.setIndex(_serverList.size());
     
     for (int i = 0; i < _serverDefaultList.size(); i++)
@@ -619,6 +640,14 @@ public class Cluster
   public ClusterServer []getServerList()
   {
     return _serverArray;
+  }
+
+  /**
+   * Returns the machine list.
+   */
+  public ArrayList<Machine> getMachineList()
+  {
+    return _machineList;
   }
 
   /**

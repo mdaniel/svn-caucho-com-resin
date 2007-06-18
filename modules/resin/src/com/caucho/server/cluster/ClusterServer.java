@@ -62,6 +62,7 @@ public class ClusterServer {
   private ObjectName _objectName;
 
   private Cluster _cluster;
+  private Machine _machine;
   private String _id = "";
 
   private int _index;
@@ -87,7 +88,14 @@ public class ClusterServer {
 
   public ClusterServer(Cluster cluster)
   {
-    _cluster = cluster;
+    this(new Machine(cluster));
+  }
+
+  public ClusterServer(Machine machine)
+  {
+    _machine = machine;
+    
+    _cluster = machine.getCluster();
 
     _clusterPort = new ClusterPort(this);
     _ports.add(_clusterPort);
@@ -126,6 +134,14 @@ public class ClusterServer {
   public Cluster getCluster()
   {
     return _cluster;
+  }
+
+  /**
+   * Returns the machine.
+   */
+  public Machine getMachine()
+  {
+    return _machine;
   }
 
   /**
@@ -445,8 +461,11 @@ public class ClusterServer {
    */
   public long generateBackupCode()
   {
-    ClusterServer []srunList = getCluster().getServerList();
+    Cluster cluster = getCluster();
+    ClusterServer []srunList = cluster.getServerList();
     int srunLength = srunList.length;
+    ArrayList<Machine> machineList = cluster.getMachineList();
+    int machineLength = machineList.size();
 
     long index = _index;
     long backupCode = index;
@@ -465,12 +484,35 @@ public class ClusterServer {
       
       backupCode |= ((index + 1L) % 2) << 16;
     }
-    else {
+    else if (machineLength == 1) {
       int sublen = srunLength - 1;
       if (sublen > 7)
 	sublen = 7;
 	
       backup = RandomUtil.nextInt(sublen);
+      
+      backupCode |= ((index + backup + 1L) % backupLength) << 16;
+    }
+    else {
+      int machineIndex = _machine.getIndex();
+      int sublen = machineLength - 1;
+      if (sublen > 7)
+	sublen = 7;
+	
+      int backupMachine = ((machineIndex + RandomUtil.nextInt(sublen) + 1)
+			   % machineLength);
+
+      Machine machine = machineList.get(backupMachine);
+      ArrayList<ClusterServer> serverList = machine.getServerList();
+
+      ClusterServer server;
+
+      if (serverList.size() > 1)
+	server = serverList.get(RandomUtil.nextInt(serverList.size()));
+      else
+	server = serverList.get(0);
+
+      backup = (int) (server.getIndex() - index + srunLength) % srunLength - 1;
       
       backupCode |= ((index + backup + 1L) % backupLength) << 16;
     }

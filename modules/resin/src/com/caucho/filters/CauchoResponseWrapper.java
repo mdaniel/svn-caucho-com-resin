@@ -95,13 +95,6 @@ public class CauchoResponseWrapper extends ResponseWrapper
     _hasError = false;
 
     _originalStream.init(this);
-    /*
-    try {
-      _originalStream.init(getStream());//response.getOutputStream());
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-    */
 
     _originalStream.start();
   } 

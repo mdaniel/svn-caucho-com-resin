@@ -345,7 +345,7 @@ public class Store {
     _path.getParent().mkdirs();
 
     if (_path.exists())
-      throw new SQLException(L.l("Table `{0}' already exists.  CREATE can not override an existing table.", _name));
+      throw new SQLException(L.l("Table '{0}' already exists.  CREATE can not override an existing table.", _name));
 
     _allocationTable = new byte[ALLOC_CHUNK_SIZE];
 

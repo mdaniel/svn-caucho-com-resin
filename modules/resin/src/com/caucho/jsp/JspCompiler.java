@@ -105,6 +105,14 @@ public class JspCompiler implements EnvironmentBean {
   }
 
   /**
+   * Returns the classloader for configuration.
+   */
+  private void setClassLoader(ClassLoader loader)
+  {
+    _loader = loader;
+  }
+
+  /**
    * Sets the destination class directory.
    */
   public void setClassDir(Path path)
@@ -553,11 +561,53 @@ public class JspCompiler implements EnvironmentBean {
     try {
       JspCompiler compiler = new JspCompiler();
 
+      int i = compiler.configureFromArgs(args);
+    
       ClassLoader loader = compiler.getClassLoader();
 
       thread.setContextClassLoader(loader);
+        
+      ArrayList<String> pendingClasses = new ArrayList<String>();
 
-      JspPropertyGroup jsp = compiler.createJsp();
+      for (; i < args.length; i++) {
+	String uri = args[i];
+
+        compiler.compilePath(pendingClasses, uri);
+      }
+
+      String files[] = new String[pendingClasses.size()];
+      pendingClasses.toArray(files);
+
+      compiler.compileBatch(files);
+    } finally {
+      Thread.currentThread().setContextClassLoader(oldLoader);
+    }
+  }
+
+  /**
+   * Callable by applications to initialize the compiler.  This call
+   * will configure the JspCompiler, but not start any compilations.
+   */
+  public int configureFromArgs(String []args)
+    throws Exception
+  {
+    if (args.length == 0) {
+      System.out.println("usage: com.caucho.jsp.JspCompiler [flags] jsp1 jsp2 ...");
+      System.out.println(" -app-dir  : The directory root of the web-app.");
+      System.out.println(" -class-dir: The working directory to use as output.");
+      System.out.println(" -conf: A configuration file for the compiler.");
+      System.exit(1);
+    }
+
+    // needed at minimum to handle the qa jsp/1933
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    try {
+      ClassLoader loader = getClassLoader();
+
+      thread.setContextClassLoader(loader);
+
+      JspPropertyGroup jsp = createJsp();
       jsp.setRequireSource(false);
 
       int i = 0;
@@ -567,21 +617,21 @@ public class JspCompiler implements EnvironmentBean {
 	if (args[i].equals("-app-dir")) {
 	  Path appDir = Vfs.lookup(args[i + 1]);
 
-	  WebApp app = compiler.createWebApp(appDir);
+	  WebApp app = createWebApp(appDir);
 
-	  compiler.setWebApp(app);
-	  compiler.setAppDir(appDir);
+	  setWebApp(app);
+	  setAppDir(appDir);
 
 	  i += 2;
 	}
 	else if (args[i].equals("-class-dir") || args[i].equals("-d")) {
-	  compiler.setClassDirectory(Vfs.lookup(args[i + 1]));
+	  setClassDirectory(Vfs.lookup(args[i + 1]));
 	  i += 2;
 	}
 	else if (args[i].equals("-conf")) {
 	  Path path = Vfs.lookup(args[i + 1]);
 
-	  new Config().configureBean(compiler, path);
+	  new Config().configureBean(this, path);
 	  hasConf = true;
 
 	  i += 2;
@@ -590,7 +640,7 @@ public class JspCompiler implements EnvironmentBean {
 	  break;
       }
 
-      WebApp app = compiler.getWebApp();
+      WebApp app = getWebApp();
       if (app != null && ! hasConf) {
 	Path appDir = app.getAppDir();
 
@@ -611,54 +661,72 @@ public class JspCompiler implements EnvironmentBean {
 
       Path appDir = null;
 
-      if (app == null && compiler.getAppDir() != null) {
-	app = compiler.createWebApp(null);
+      if (app == null && getAppDir() != null) {
+	app = createWebApp(null);
 
-	app.setRootDirectory(compiler.getAppDir());
-	compiler.setWebApp(app);
+	app.setRootDirectory(getAppDir());
+	setWebApp(app);
       }
 
       if (app != null) {
 	app.init();
 
-	appDir = compiler.getWebApp().getAppDir();
-	loader = compiler.getWebApp().getClassLoader();
+	appDir = getWebApp().getAppDir();
+	setClassLoader(getWebApp().getClassLoader());
       }
 
       if (appDir == null) {
 	appDir = Vfs.lookup();
 
-	if (compiler.getAppDir() == null && compiler.getWebApp() == null) {
+	if (getAppDir() == null && getWebApp() == null) {
 	  System.err.println(L.l("-app-dir must be specified for JspCompiler"));
-	  return;
+	  return -1;
 	}
       }
 
-      compiler.setResourceManager(new AppDirResourceManager(appDir));
-      thread.setContextClassLoader(loader);
-        
-      ArrayList<String> pendingClasses = new ArrayList<String>();
+      setResourceManager(new AppDirResourceManager(appDir));
 
-      for (; i < args.length; i++) {
-	String uri = args[i];
-
-	Path path = Vfs.lookup(uri);
-
-	if (path.isDirectory())
-	  compileDirectory(path, appDir, compiler, pendingClasses);
-	else
-	  compileJsp(path, appDir, compiler, pendingClasses);
-      }
-
-      JavaCompiler javaCompiler = JavaCompiler.create(loader);
-      javaCompiler.setClassDir(compiler.getClassDir());
-
-      String files[] = new String[pendingClasses.size()];
-      pendingClasses.toArray(files);
-
-      javaCompiler.compileBatch(files);
+      return i;
     } finally {
       Thread.currentThread().setContextClassLoader(oldLoader);
+    }
+  }
+
+  public void compilePath(ArrayList<String> pendingClasses, String uri)
+    throws Exception
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(getClassLoader());
+    
+      Path path = Vfs.lookup(uri);
+
+      if (path.isDirectory())
+	compileDirectory(path, getAppDir(), this, pendingClasses);
+      else
+	compileJsp(path, getAppDir(), this, pendingClasses);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  public void compileBatch(String []pendingClasses)
+    throws Exception
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(getClassLoader());
+    
+      JavaCompiler javaCompiler = JavaCompiler.create(getClassLoader());
+      javaCompiler.setClassDir(getClassDir());
+
+      javaCompiler.compileBatch(pendingClasses);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 

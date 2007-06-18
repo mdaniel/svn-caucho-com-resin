@@ -75,6 +75,9 @@ public class ConfigStatement extends Statement{
     if (_sizefmt != null)
       request.setAttribute("caucho.ssi.sizefmt", _sizefmt);
     
+    if (_errmsg != null)
+      request.setAttribute("caucho.ssi.errmsg", _errmsg);
+    
     if (_timefmt != null)
       request.setAttribute("caucho.ssi.timefmt", _timefmt);
   }
