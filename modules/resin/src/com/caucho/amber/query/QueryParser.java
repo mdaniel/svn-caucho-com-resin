@@ -970,7 +970,11 @@ public class QueryParser {
     else if (token == IDENTIFIER)
       id = parseIdentifier();
     else {
-      id = schema.getTailName();
+      // jpa/116c
+      if (schema instanceof OneToManySchemaExpr)
+        id = createTableName();
+      else
+        id = schema.getTailName();
     }
 
     /*
