@@ -64,10 +64,10 @@ public class EjbConfig {
   private static final Logger log = Log.open(EjbConfig.class);
 
   private EjbServerManager _ejbManager;
-  
+
   private ArrayList<FileSetType> _fileSetList = new ArrayList<FileSetType>();
   private ArrayList<Path> _pathList = new ArrayList<Path>();
-  
+
   private HashMap<String,EjbBean> _cfgBeans = new HashMap<String,EjbBean>();
   private ArrayList<CmpRelation> _relations = new ArrayList<CmpRelation>();
 
@@ -79,7 +79,7 @@ public class EjbConfig {
 
   private ArrayList<FunctionSignature> _functions =
     new ArrayList<FunctionSignature>();
-  
+
   private String _booleanTrue = "1";
   private String _booleanFalse = "0";
 
@@ -113,7 +113,7 @@ public class EjbConfig {
 
     _fileSetList.add(fileSet);
   }
-  
+
   /**
    * Adds a path for an EJB config file to the config list.
    */
@@ -127,7 +127,7 @@ public class EjbConfig {
 
     if (path.getScheme().equals("jar"))
       path.setUserPath(path.getURL());
-    
+
     Environment.addDependency(path);
 
     String ejbModuleName;
@@ -140,13 +140,13 @@ public class EjbConfig {
     }
 
     /* XXX: ejb/0g7a requires full path for module name
-    String pwd = Vfs.getPwd().getPath();
+       String pwd = Vfs.getPwd().getPath();
 
-    if (ejbModuleName.startsWith(pwd))
-      ejbModuleName = ejbModuleName.substring(pwd.length());
+       if (ejbModuleName.startsWith(pwd))
+       ejbModuleName = ejbModuleName.substring(pwd.length());
 
-    if (ejbModuleName.startsWith("/"))
-      ejbModuleName = ejbModuleName.substring(1);
+       if (ejbModuleName.startsWith("/"))
+       ejbModuleName = ejbModuleName.substring(1);
     */
 
     if (_ejbManager != null)
@@ -175,7 +175,7 @@ public class EjbConfig {
   {
     return "com/caucho/ejb/cfg/resin-ejb.rnc";
   }
-  
+
 
   /**
    * Returns the EJB manager.
@@ -237,7 +237,7 @@ public class EjbConfig {
 
     if (_cfgBeans.get(name) == null)
       _pendingBeans.add(bean);
-    
+
     _cfgBeans.put(name, bean);
   }
 
@@ -282,10 +282,10 @@ public class EjbConfig {
   {
     for (EjbBean bean : _cfgBeans.values()) {
       if (bean instanceof EjbEntityBean) {
-	EjbEntityBean entity = (EjbEntityBean) bean;
+        EjbEntityBean entity = (EjbEntityBean) bean;
 
-	if (schemaName.equals(entity.getAbstractSchemaName()))
-	  return entity;
+        if (schemaName.equals(entity.getAbstractSchemaName()))
+          return entity;
       }
     }
 
@@ -299,10 +299,10 @@ public class EjbConfig {
   {
     for (EjbBean bean : _cfgBeans.values()) {
       if (bean instanceof EjbEntityBean) {
-	EjbEntityBean entity = (EjbEntityBean) bean;
+        EjbEntityBean entity = (EjbEntityBean) bean;
 
-	if (entity.getLocalList().contains(cl))
-	  return entity;
+        if (entity.getLocalList().contains(cl))
+          return entity;
       }
     }
 
@@ -334,7 +334,7 @@ public class EjbConfig {
    * Adds a relation.
    */
   public CmpRelation findRelation(String relationName,
-                                 String sourceEJB, String sourceField)
+                                  String sourceEJB, String sourceField)
   {
     for (int i = 0; i < _relations.size(); i++) {
       CmpRelation relation = _relations.get(i);
@@ -355,32 +355,32 @@ public class EjbConfig {
     throws ConfigException
   {
     CmpRelation oldRel = findRelation(rel.getName(),
-				      rel.getSourceEJB(),
-				      rel.getSourceField());
+                                      rel.getSourceEJB(),
+                                      rel.getSourceField());
 
     if (oldRel == null) {
       _relations.add(rel);
-      
+
       return;
     }
 
     if (! rel.getTargetEJB().equals(oldRel.getTargetEJB())) {
       throw new ConfigException(L.l("relationship '{0}.{1}' target EJB '{2}' does not match old target EJB '{3}' from {4}",
-				    rel.getSourceEJB(),
-				    rel.getSourceField(),
-				    rel.getTargetEJB(),
-				    oldRel.getTargetEJB(),
-				    oldRel.getLocation()));
+                                    rel.getSourceEJB(),
+                                    rel.getSourceField(),
+                                    rel.getTargetEJB(),
+                                    oldRel.getTargetEJB(),
+                                    oldRel.getLocation()));
     }
     else if (rel.getTargetField() != oldRel.getTargetField() &&
-	     (rel.getTargetField() == null ||
-	      ! rel.getTargetField().equals(oldRel.getTargetField()))) {
+             (rel.getTargetField() == null ||
+              ! rel.getTargetField().equals(oldRel.getTargetField()))) {
       throw new ConfigException(L.l("relationship '{0}.{1}' target field '{2}' does not match old target field '{3}' from {4}",
-				    rel.getSourceEJB(),
-				    rel.getSourceField(),
-				    rel.getTargetEJB(),
-				    oldRel.getTargetEJB(),
-				    oldRel.getLocation()));
+                                    rel.getSourceEJB(),
+                                    rel.getSourceField(),
+                                    rel.getTargetEJB(),
+                                    oldRel.getTargetEJB(),
+                                    oldRel.getLocation()));
     }
 
     oldRel.merge(rel);
@@ -414,7 +414,7 @@ public class EjbConfig {
     throws ConfigException
   {
     findConfigurationFiles();
-    
+
     try {
       ArrayList<EjbBean> beanConfig = new ArrayList<EjbBean>(_pendingBeans);
       _pendingBeans.clear();
@@ -422,25 +422,25 @@ public class EjbConfig {
       _deployingBeans.addAll(beanConfig);
 
       EnvironmentClassLoader parentLoader = _ejbManager.getClassLoader();
-      
+
       Path workPath = _ejbManager.getWorkPath();
 
       JavaClassGenerator javaGen = new JavaClassGenerator();
       // need to be compatible with enhancement
       javaGen.setWorkDir(workPath);
       javaGen.setParentLoader(parentLoader);
-      
+
       configureRelations();
 
       for (EjbBeanConfigProxy proxy : _proxyList) {
-	EjbBean bean = _cfgBeans.get(proxy.getEJBName());
+        EjbBean bean = _cfgBeans.get(proxy.getEJBName());
 
-	if (bean != null)
-	  proxy.getBuilderProgram().configure(bean);
+        if (bean != null)
+          proxy.getBuilderProgram().configure(bean);
       }
-      
+
       for (EjbBean bean : beanConfig) {
-	bean.init();
+        bean.init();
       }
 
       Collections.sort(beanConfig, new BeanComparator());
@@ -448,16 +448,16 @@ public class EjbConfig {
       AmberConfig amberConfig = new AmberConfig(this);
 
       for (EjbBean bean : beanConfig) {
-	bean.configureAmber(amberConfig);
+        bean.configureAmber(amberConfig);
       }
 
       amberConfig.configureRelations();
 
       if (_ejbManager.isAutoCompile())
-	amberConfig.generate(javaGen);
+        amberConfig.generate(javaGen);
 
       for (EjbBean bean : beanConfig) {
-	bean.generate(javaGen, _ejbManager.isAutoCompile());
+        bean.generate(javaGen, _ejbManager.isAutoCompile());
       }
 
       javaGen.compilePendingJava();
@@ -477,11 +477,11 @@ public class EjbConfig {
   {
     for (FileSetType fileSet : _fileSetList) {
       for (Path path : fileSet.getPaths()) {
-	addEJBPath(fileSet.getDir(), path);
+        addEJBPath(fileSet.getDir(), path);
       }
     }
   }
-  
+
   /**
    * Configures the pending beans.
    */
@@ -490,16 +490,16 @@ public class EjbConfig {
   {
     try {
       ClassLoader parentLoader = _ejbManager.getClassLoader();
-      
+
       Path workPath = _ejbManager.getWorkPath();
 
       if (workPath == null)
-	workPath = WorkDir.getLocalWorkDir();
+        workPath = WorkDir.getLocalWorkDir();
 
       JavaClassGenerator javaGen = new JavaClassGenerator();
       javaGen.setWorkDir(workPath);
       javaGen.setParentLoader(parentLoader);
-      
+
       deployBeans(_deployingBeans, javaGen);
     } catch (RuntimeException e) {
       throw e;
@@ -512,7 +512,7 @@ public class EjbConfig {
    * Configures the pending beans.
    */
   public void deployBeans(ArrayList<EjbBean> beanConfig,
-			  JavaClassGenerator javaGen)
+                          JavaClassGenerator javaGen)
     throws Throwable
   {
     Thread thread = Thread.currentThread();
@@ -520,17 +520,26 @@ public class EjbConfig {
 
     try {
       thread.setContextClassLoader(_ejbManager.getClassLoader());
-				   
+
       _ejbManager.getAmberManager().initEntityHomes();
 
+      // ejb/0g1c
+      // XXX: TO BE REMOVED
+      if (beanConfig.size() > 0) {
+        EjbBean bean = beanConfig.remove(0);
+        beanConfig.add(bean);
+      }
+
       for (EjbBean bean : beanConfig) {
-	AbstractServer server = bean.deployServer(_ejbManager, javaGen);
-	
-	thread.setContextClassLoader(server.getClassLoader());
+        AbstractServer server = null;
 
-	server.init();
+        server = bean.deployServer(_ejbManager, javaGen);
 
-	_ejbManager.addServer(server);
+        thread.setContextClassLoader(server.getClassLoader());
+
+        server.init();
+
+        _ejbManager.addServer(server);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -545,361 +554,361 @@ public class EjbConfig {
   {
     for (CmpRelation relation : _relations) {
       try {
-	CmpRelationRole sourceRole = relation.getSourceRole();
-	CmpRelationRole targetRole = relation.getTargetRole();
+        CmpRelationRole sourceRole = relation.getSourceRole();
+        CmpRelationRole targetRole = relation.getTargetRole();
 
-	String sourceEJB = sourceRole.getEJBName();
-	EjbEntityBean sourceEntity = (EjbEntityBean) _cfgBeans.get(sourceEJB);
+        String sourceEJB = sourceRole.getEJBName();
+        EjbEntityBean sourceEntity = (EjbEntityBean) _cfgBeans.get(sourceEJB);
 
-	if (sourceEntity == null)
-	  throw new ConfigException(L.l("'{0}' is an unknown EJB bean.",
-					sourceEJB));
-      
-	String sourceField = sourceRole.getFieldName();
-	JMethod sourceMethod = sourceEntity.getFieldGetter(sourceField);
+        if (sourceEntity == null)
+          throw new ConfigException(L.l("'{0}' is an unknown EJB bean.",
+                                        sourceEJB));
 
-	JMethod sourceMapMethod = null;
+        String sourceField = sourceRole.getFieldName();
+        JMethod sourceMethod = sourceEntity.getFieldGetter(sourceField);
 
-	if (sourceField != null)
-	  sourceMapMethod = getMapMethod(sourceEntity, sourceField);
+        JMethod sourceMapMethod = null;
 
-	if (sourceField != null &&
-	    sourceMethod == null && sourceMapMethod == null)
-	  throw new ConfigException(L.l("{0}: relation field '{1}' does not have a corresponding getter method.  cmr-relations must define abstract getter methods returning a local interface.",
-					sourceEntity.getEJBClass().getName(),
-					sourceField));
+        if (sourceField != null)
+          sourceMapMethod = getMapMethod(sourceEntity, sourceField);
 
-	String targetEJB = targetRole.getEJBName();
-	EjbEntityBean targetEntity = (EjbEntityBean) _cfgBeans.get(targetEJB);
+        if (sourceField != null &&
+            sourceMethod == null && sourceMapMethod == null)
+          throw new ConfigException(L.l("{0}: relation field '{1}' does not have a corresponding getter method.  cmr-relations must define abstract getter methods returning a local interface.",
+                                        sourceEntity.getEJBClass().getName(),
+                                        sourceField));
 
-	if (targetEntity == null)
-	  throw new ConfigException(L.l("'{0}' is an unknown EJB bean.",
-					targetEJB));
-      
-	String targetField = targetRole.getFieldName();
-	JMethod targetMethod = targetEntity.getFieldGetter(targetField);
+        String targetEJB = targetRole.getEJBName();
+        EjbEntityBean targetEntity = (EjbEntityBean) _cfgBeans.get(targetEJB);
 
-	JMethod targetMapMethod = null;
+        if (targetEntity == null)
+          throw new ConfigException(L.l("'{0}' is an unknown EJB bean.",
+                                        targetEJB));
 
-	if (targetField != null)
-	  targetMapMethod = getMapMethod(targetEntity, targetField);
+        String targetField = targetRole.getFieldName();
+        JMethod targetMethod = targetEntity.getFieldGetter(targetField);
 
-	if (targetField != null &&
-	    targetMethod == null && targetMapMethod == null)
-	  throw new ConfigException(L.l("{0}: relation field '{1}' does not have a corresponding getter method.  cmr-relations must define abstract getter methods returning a local interface.",
-					targetEntity.getEJBClass().getName(),
-					targetField));
+        JMethod targetMapMethod = null;
 
-	boolean sourceOneToMany = false;
-	boolean sourceManyToOne = false;
-	boolean sourceMap = false;
+        if (targetField != null)
+          targetMapMethod = getMapMethod(targetEntity, targetField);
 
-	if (sourceMethod == null) {
-	}
-	else if (sourceMethod.getReturnType().isAssignableTo(Collection.class))
-	  sourceOneToMany = true;
-	else if (sourceMethod.getReturnType().isAssignableTo(Map.class))
-	  sourceMap = true;
-	else
-	  sourceManyToOne = true;
+        if (targetField != null &&
+            targetMethod == null && targetMapMethod == null)
+          throw new ConfigException(L.l("{0}: relation field '{1}' does not have a corresponding getter method.  cmr-relations must define abstract getter methods returning a local interface.",
+                                        targetEntity.getEJBClass().getName(),
+                                        targetField));
 
-	boolean targetOneToMany = false;
-	boolean targetManyToOne = false;
-	boolean targetMap = false;
+        boolean sourceOneToMany = false;
+        boolean sourceManyToOne = false;
+        boolean sourceMap = false;
 
-	if (targetMapMethod != null)
-	  targetMap = true;
+        if (sourceMethod == null) {
+        }
+        else if (sourceMethod.getReturnType().isAssignableTo(Collection.class))
+          sourceOneToMany = true;
+        else if (sourceMethod.getReturnType().isAssignableTo(Map.class))
+          sourceMap = true;
+        else
+          sourceManyToOne = true;
 
-	if (targetMethod == null) {
-	}
-	else if (targetMethod.getReturnType().isAssignableTo(Collection.class))
-	  targetOneToMany = true;
-	else if (targetMethod.getReturnType().isAssignableTo(Map.class))
-	  targetMap = true;
-	else
-	  targetManyToOne = true;
+        boolean targetOneToMany = false;
+        boolean targetManyToOne = false;
+        boolean targetMap = false;
 
-	if (sourceMap) {
-	  createMap(targetEntity, targetField, targetRole,
-		    sourceEntity, sourceField, sourceRole, sourceMapMethod);
-	}
-	else if (targetMap) {
-	  createMap(sourceEntity, sourceField, sourceRole,
-		    targetEntity, targetField, targetRole, targetMapMethod);
-	}
-	else if (sourceOneToMany && targetManyToOne) {
-	  CmrOneToMany srcRel = new CmrOneToMany(sourceEntity,
-						 sourceField,
-						 targetEntity,
-						 targetField);
+        if (targetMapMethod != null)
+          targetMap = true;
 
-	  srcRel.setSQLColumns(sourceRole.getSQLColumns());
-	  srcRel.setOrderBy(sourceRole.getOrderBy());
-	  // srcRel.setCascadeDelete(sourceRole.getCascadeDelete());
-	  
-	  sourceEntity.addRelation(srcRel);
-	
-	  CmrManyToOne dstRel = new CmrManyToOne(targetEntity,
-						 targetField,
-						 sourceEntity);
+        if (targetMethod == null) {
+        }
+        else if (targetMethod.getReturnType().isAssignableTo(Collection.class))
+          targetOneToMany = true;
+        else if (targetMethod.getReturnType().isAssignableTo(Map.class))
+          targetMap = true;
+        else
+          targetManyToOne = true;
 
-	  dstRel.setSQLColumns(targetRole.getSQLColumns());
-	  dstRel.setSourceCascadeDelete(targetRole.getCascadeDelete());
-	  dstRel.setTargetCascadeDelete(sourceRole.getCascadeDelete());
-      
-	  targetEntity.addRelation(dstRel);
+        if (sourceMap) {
+          createMap(targetEntity, targetField, targetRole,
+                    sourceEntity, sourceField, sourceRole, sourceMapMethod);
+        }
+        else if (targetMap) {
+          createMap(sourceEntity, sourceField, sourceRole,
+                    targetEntity, targetField, targetRole, targetMapMethod);
+        }
+        else if (sourceOneToMany && targetManyToOne) {
+          CmrOneToMany srcRel = new CmrOneToMany(sourceEntity,
+                                                 sourceField,
+                                                 targetEntity,
+                                                 targetField);
 
-	  srcRel.setTargetRelation(dstRel);
-	  dstRel.setTargetRelation(srcRel);
-	}
-	else if (sourceOneToMany && targetOneToMany) {
-	  CmrManyToMany srcRel = new CmrManyToMany(sourceEntity,
-						   sourceField,
-						   targetEntity,
-						   targetField);
+          srcRel.setSQLColumns(sourceRole.getSQLColumns());
+          srcRel.setOrderBy(sourceRole.getOrderBy());
+          // srcRel.setCascadeDelete(sourceRole.getCascadeDelete());
 
-	  srcRel.setLocation(relation.getLocation());
-	  
-	  srcRel.setRelationName(relation.getName());
-	  srcRel.setSQLTable(relation.getSQLTable());
-	  srcRel.setOrderBy(sourceRole.getOrderBy());
+          sourceEntity.addRelation(srcRel);
 
-	  srcRel.setKeySQLColumns(sourceRole.getSQLColumns());
-	  srcRel.setDstSQLColumns(targetRole.getSQLColumns());
-      
-	  sourceEntity.addRelation(srcRel);
-	  
-	  CmrManyToMany dstRel = new CmrManyToMany(targetEntity,
-						   targetField,
-						   sourceEntity,
-						   sourceField);
+          CmrManyToOne dstRel = new CmrManyToOne(targetEntity,
+                                                 targetField,
+                                                 sourceEntity);
 
-	  dstRel.setLocation(relation.getLocation());
+          dstRel.setSQLColumns(targetRole.getSQLColumns());
+          dstRel.setSourceCascadeDelete(targetRole.getCascadeDelete());
+          dstRel.setTargetCascadeDelete(sourceRole.getCascadeDelete());
 
-	  dstRel.setRelationName(relation.getName());
-	  dstRel.setSQLTable(relation.getSQLTable());
-	  dstRel.setOrderBy(targetRole.getOrderBy());
+          targetEntity.addRelation(dstRel);
 
-	  dstRel.setKeySQLColumns(targetRole.getSQLColumns());
-	  dstRel.setDstSQLColumns(sourceRole.getSQLColumns());
-      
-	  targetEntity.addRelation(dstRel);
-	  /*
-	  
-	  srcRel.setTargetRelation(dstRel);
-	  dstRel.setTargetRelation(srcRel);
-	  CmrOneToMany srcRel = new CmrOneToMany(sourceEntity,
-						 sourceField,
-						 targetEntity,
-						 targetField);
+          srcRel.setTargetRelation(dstRel);
+          dstRel.setTargetRelation(srcRel);
+        }
+        else if (sourceOneToMany && targetOneToMany) {
+          CmrManyToMany srcRel = new CmrManyToMany(sourceEntity,
+                                                   sourceField,
+                                                   targetEntity,
+                                                   targetField);
 
-	  // manyToOne.setSQLColumns(sourceRole.getSQLColumns());
-      
-	  sourceEntity.addRelation(srcRel);
-	
-	  CmrOneToMany dstRel = new CmrOneToMany(targetEntity,
-						 targetField,
-						 sourceEntity,
-						 sourceField);
+          srcRel.setLocation(relation.getLocation());
 
-	  // dstRel.setSQLColumns(sourceRole.getSQLColumns());
-      
-	  targetEntity.addRelation(dstRel);
+          srcRel.setRelationName(relation.getName());
+          srcRel.setSQLTable(relation.getSQLTable());
+          srcRel.setOrderBy(sourceRole.getOrderBy());
 
-	  srcRel.setTargetRelation(dstRel);
-	  dstRel.setTargetRelation(srcRel);
-	  */
-	}
-	else if (sourceOneToMany) {
-	  CmrManyToMany srcRel = new CmrManyToMany(sourceEntity,
-						   sourceField,
-						   targetEntity,
-						   targetField);
+          srcRel.setKeySQLColumns(sourceRole.getSQLColumns());
+          srcRel.setDstSQLColumns(targetRole.getSQLColumns());
 
-	  srcRel.setLocation(relation.getLocation());
-	  
-	  if (relation.getName() != null)
-	    srcRel.setRelationName(relation.getName());
-	  else if (relation.getSQLTable() != null)
-	    srcRel.setRelationName(relation.getSQLTable());
-	  else
-	    srcRel.setRelationName(sourceField);
+          sourceEntity.addRelation(srcRel);
 
-	  if (relation.getSQLTable() != null || relation.getName() != null)
-	    srcRel.setSQLTable(relation.getSQLTable());
-	  else
-	    srcRel.setSQLTable(sourceField);
-	  
-	  srcRel.setOrderBy(sourceRole.getOrderBy());
+          CmrManyToMany dstRel = new CmrManyToMany(targetEntity,
+                                                   targetField,
+                                                   sourceEntity,
+                                                   sourceField);
 
-	  srcRel.setKeySQLColumns(sourceRole.getSQLColumns());
-	  srcRel.setDstSQLColumns(targetRole.getSQLColumns());
-	  
-	  srcRel.setTargetUnique("One".equals(sourceRole.getMultiplicity()));
+          dstRel.setLocation(relation.getLocation());
 
-	  sourceEntity.addRelation(srcRel);
-	}
-	else if (sourceManyToOne && targetManyToOne) {
-	  if (relation.getSQLTable() != null)
-	    throw new ConfigException(L.l("cmr-field '{0}' may not have a sql-table '{1}'.  one-to-one relations do not have association tables.",
-					  sourceField,
-					  relation.getSQLTable()));
-	  
-	  CmrManyToOne srcRel = new CmrManyToOne(sourceEntity,
-						 sourceField,
-						 targetEntity);
+          dstRel.setRelationName(relation.getName());
+          dstRel.setSQLTable(relation.getSQLTable());
+          dstRel.setOrderBy(targetRole.getOrderBy());
 
-	  srcRel.setLocation(relation.getLocation());
-	  
-	  srcRel.setSQLColumns(sourceRole.getSQLColumns());
+          dstRel.setKeySQLColumns(targetRole.getSQLColumns());
+          dstRel.setDstSQLColumns(sourceRole.getSQLColumns());
 
-	  /*
-	  if (targetRole.getCascadeDelete() &&
-	      "Many".equals(sourceRole.getMultiplicity()))
-	    throw new ConfigException(L.l("'{0}' may not set cascade-delete because '{0}' has multiplicity 'Many'",
-					  targetField,
-					  sourceField));
-	  */
-					  
-	      
-	  srcRel.setSourceCascadeDelete(sourceRole.getCascadeDelete());
-	  srcRel.setTargetCascadeDelete(targetRole.getCascadeDelete());
+          targetEntity.addRelation(dstRel);
+          /*
 
-	  sourceEntity.addRelation(srcRel);
+          srcRel.setTargetRelation(dstRel);
+          dstRel.setTargetRelation(srcRel);
+          CmrOneToMany srcRel = new CmrOneToMany(sourceEntity,
+          sourceField,
+          targetEntity,
+          targetField);
 
-	  CmrManyToOne dstRel = new CmrManyToOne(targetEntity,
-						 targetField,
-						 sourceEntity);
-	  
-	  dstRel.setLocation(relation.getLocation());
-	  
-	  dstRel.setSQLColumns(targetRole.getSQLColumns());
-      
-	  targetEntity.addRelation(dstRel);
-	  
-	  if ((sourceRole.getSQLColumns() == null ||
-	       sourceRole.getSQLColumns().length == 0) &&
-	      targetRole.getSQLColumns() != null &&
-	      targetRole.getSQLColumns().length > 0) {
-	    srcRel.setDependent(true);
-	    
-	    dstRel.setSourceCascadeDelete(targetRole.getCascadeDelete());
-	    dstRel.setTargetCascadeDelete(sourceRole.getCascadeDelete());
-	  }
+          // manyToOne.setSQLColumns(sourceRole.getSQLColumns());
 
-	  if ((targetRole.getSQLColumns() == null ||
-	       targetRole.getSQLColumns().length == 0)) {
-	    // ejb/06h4
-	    // ejb/06hm
-	    dstRel.setDependent(true);
-	    
-	    srcRel.setSourceCascadeDelete(sourceRole.getCascadeDelete());
-	    srcRel.setTargetCascadeDelete(targetRole.getCascadeDelete());
-	  }
-	  
-	  srcRel.setTargetRelation(dstRel);
-	  dstRel.setTargetRelation(srcRel);
-	}
-	else if (sourceManyToOne && targetOneToMany) {
-	  CmrManyToOne srcRel = new CmrManyToOne(sourceEntity,
-						 sourceField,
-						 targetEntity);
+          sourceEntity.addRelation(srcRel);
 
-	  srcRel.setLocation(relation.getLocation());
-	  
-	  srcRel.setSQLColumns(sourceRole.getSQLColumns());
-      
-	  sourceEntity.addRelation(srcRel);
-	
-	  CmrOneToMany dstRel = new CmrOneToMany(targetEntity,
-						 targetField,
-						 sourceEntity,
-						 sourceField);
+          CmrOneToMany dstRel = new CmrOneToMany(targetEntity,
+          targetField,
+          sourceEntity,
+          sourceField);
 
-	  dstRel.setLocation(relation.getLocation());
-	  dstRel.setSQLColumns(sourceRole.getSQLColumns());
-	  dstRel.setOrderBy(targetRole.getOrderBy());
+          // dstRel.setSQLColumns(sourceRole.getSQLColumns());
 
-	  targetEntity.addRelation(dstRel);
+          targetEntity.addRelation(dstRel);
 
-	  srcRel.setTargetRelation(dstRel);
-	  dstRel.setTargetRelation(srcRel);
+          srcRel.setTargetRelation(dstRel);
+          dstRel.setTargetRelation(srcRel);
+          */
+        }
+        else if (sourceOneToMany) {
+          CmrManyToMany srcRel = new CmrManyToMany(sourceEntity,
+                                                   sourceField,
+                                                   targetEntity,
+                                                   targetField);
 
-	  if (targetRole.getCascadeDelete() &&
-	      "Many".equals(sourceRole.getMultiplicity()))
-	    throw new ConfigException(L.l("'{0}' may not set cascade-delete because '{1}' has multiplicity 'Many'",
-					  targetField,
-					  sourceField));
-	}
-	else if (sourceManyToOne) {
-	  CmrManyToOne srcRel = new CmrManyToOne(sourceEntity,
-						 sourceField,
-						 targetEntity);
+          srcRel.setLocation(relation.getLocation());
 
-	  srcRel.setSQLColumns(sourceRole.getSQLColumns());
-      
-	  srcRel.setSourceCascadeDelete(sourceRole.getCascadeDelete());
-	  srcRel.setTargetCascadeDelete(targetRole.getCascadeDelete());
+          if (relation.getName() != null)
+            srcRel.setRelationName(relation.getName());
+          else if (relation.getSQLTable() != null)
+            srcRel.setRelationName(relation.getSQLTable());
+          else
+            srcRel.setRelationName(sourceField);
 
-	  sourceEntity.addRelation(srcRel);
-	}
-	else if (targetManyToOne) {
-	  CmrManyToOne dstRel = new CmrManyToOne(targetEntity,
-						 targetField,
-						 sourceEntity);
+          if (relation.getSQLTable() != null || relation.getName() != null)
+            srcRel.setSQLTable(relation.getSQLTable());
+          else
+            srcRel.setSQLTable(sourceField);
 
-	  dstRel.setSQLColumns(targetRole.getSQLColumns());
-	  
-	  dstRel.setSourceCascadeDelete(targetRole.getCascadeDelete());
-	  dstRel.setTargetCascadeDelete(sourceRole.getCascadeDelete());
-      
-	  targetEntity.addRelation(dstRel);
-	}
-	else if (targetOneToMany) {
-	  CmrOneToMany dstRel = new CmrOneToMany(targetEntity,
-						 targetField,
-						 sourceEntity,
-						 sourceField);
+          srcRel.setOrderBy(sourceRole.getOrderBy());
 
-	  dstRel.setSQLColumns(targetRole.getSQLColumns());
-	  dstRel.setOrderBy(targetRole.getOrderBy());
-      
-	  targetEntity.addRelation(dstRel);
-	}
-	else {
-	  throw new ConfigException(L.l("unsupported relation"));
-	}
+          srcRel.setKeySQLColumns(sourceRole.getSQLColumns());
+          srcRel.setDstSQLColumns(targetRole.getSQLColumns());
+
+          srcRel.setTargetUnique("One".equals(sourceRole.getMultiplicity()));
+
+          sourceEntity.addRelation(srcRel);
+        }
+        else if (sourceManyToOne && targetManyToOne) {
+          if (relation.getSQLTable() != null)
+            throw new ConfigException(L.l("cmr-field '{0}' may not have a sql-table '{1}'.  one-to-one relations do not have association tables.",
+                                          sourceField,
+                                          relation.getSQLTable()));
+
+          CmrManyToOne srcRel = new CmrManyToOne(sourceEntity,
+                                                 sourceField,
+                                                 targetEntity);
+
+          srcRel.setLocation(relation.getLocation());
+
+          srcRel.setSQLColumns(sourceRole.getSQLColumns());
+
+          /*
+            if (targetRole.getCascadeDelete() &&
+            "Many".equals(sourceRole.getMultiplicity()))
+            throw new ConfigException(L.l("'{0}' may not set cascade-delete because '{0}' has multiplicity 'Many'",
+            targetField,
+            sourceField));
+          */
+
+
+          srcRel.setSourceCascadeDelete(sourceRole.getCascadeDelete());
+          srcRel.setTargetCascadeDelete(targetRole.getCascadeDelete());
+
+          sourceEntity.addRelation(srcRel);
+
+          CmrManyToOne dstRel = new CmrManyToOne(targetEntity,
+                                                 targetField,
+                                                 sourceEntity);
+
+          dstRel.setLocation(relation.getLocation());
+
+          dstRel.setSQLColumns(targetRole.getSQLColumns());
+
+          targetEntity.addRelation(dstRel);
+
+          if ((sourceRole.getSQLColumns() == null ||
+               sourceRole.getSQLColumns().length == 0) &&
+              targetRole.getSQLColumns() != null &&
+              targetRole.getSQLColumns().length > 0) {
+            srcRel.setDependent(true);
+
+            dstRel.setSourceCascadeDelete(targetRole.getCascadeDelete());
+            dstRel.setTargetCascadeDelete(sourceRole.getCascadeDelete());
+          }
+
+          if ((targetRole.getSQLColumns() == null ||
+               targetRole.getSQLColumns().length == 0)) {
+            // ejb/06h4
+            // ejb/06hm
+            dstRel.setDependent(true);
+
+            srcRel.setSourceCascadeDelete(sourceRole.getCascadeDelete());
+            srcRel.setTargetCascadeDelete(targetRole.getCascadeDelete());
+          }
+
+          srcRel.setTargetRelation(dstRel);
+          dstRel.setTargetRelation(srcRel);
+        }
+        else if (sourceManyToOne && targetOneToMany) {
+          CmrManyToOne srcRel = new CmrManyToOne(sourceEntity,
+                                                 sourceField,
+                                                 targetEntity);
+
+          srcRel.setLocation(relation.getLocation());
+
+          srcRel.setSQLColumns(sourceRole.getSQLColumns());
+
+          sourceEntity.addRelation(srcRel);
+
+          CmrOneToMany dstRel = new CmrOneToMany(targetEntity,
+                                                 targetField,
+                                                 sourceEntity,
+                                                 sourceField);
+
+          dstRel.setLocation(relation.getLocation());
+          dstRel.setSQLColumns(sourceRole.getSQLColumns());
+          dstRel.setOrderBy(targetRole.getOrderBy());
+
+          targetEntity.addRelation(dstRel);
+
+          srcRel.setTargetRelation(dstRel);
+          dstRel.setTargetRelation(srcRel);
+
+          if (targetRole.getCascadeDelete() &&
+              "Many".equals(sourceRole.getMultiplicity()))
+            throw new ConfigException(L.l("'{0}' may not set cascade-delete because '{1}' has multiplicity 'Many'",
+                                          targetField,
+                                          sourceField));
+        }
+        else if (sourceManyToOne) {
+          CmrManyToOne srcRel = new CmrManyToOne(sourceEntity,
+                                                 sourceField,
+                                                 targetEntity);
+
+          srcRel.setSQLColumns(sourceRole.getSQLColumns());
+
+          srcRel.setSourceCascadeDelete(sourceRole.getCascadeDelete());
+          srcRel.setTargetCascadeDelete(targetRole.getCascadeDelete());
+
+          sourceEntity.addRelation(srcRel);
+        }
+        else if (targetManyToOne) {
+          CmrManyToOne dstRel = new CmrManyToOne(targetEntity,
+                                                 targetField,
+                                                 sourceEntity);
+
+          dstRel.setSQLColumns(targetRole.getSQLColumns());
+
+          dstRel.setSourceCascadeDelete(targetRole.getCascadeDelete());
+          dstRel.setTargetCascadeDelete(sourceRole.getCascadeDelete());
+
+          targetEntity.addRelation(dstRel);
+        }
+        else if (targetOneToMany) {
+          CmrOneToMany dstRel = new CmrOneToMany(targetEntity,
+                                                 targetField,
+                                                 sourceEntity,
+                                                 sourceField);
+
+          dstRel.setSQLColumns(targetRole.getSQLColumns());
+          dstRel.setOrderBy(targetRole.getOrderBy());
+
+          targetEntity.addRelation(dstRel);
+        }
+        else {
+          throw new ConfigException(L.l("unsupported relation"));
+        }
       } catch (LineConfigException e) {
-	throw e;
+        throw e;
       } catch (ConfigException e) {
-	throw new LineConfigException(relation.getLocation() + e.getMessage(), e);
+        throw new LineConfigException(relation.getLocation() + e.getMessage(), e);
       }
     }
   }
 
   private void createMap(EjbEntityBean sourceEntity,
-			 String idField,
-			 CmpRelationRole sourceRole,
-			 EjbEntityBean targetEntity,
-			 String targetField,
-			 CmpRelationRole targetRole,
-			 JMethod targetMapMethod)
+                         String idField,
+                         CmpRelationRole sourceRole,
+                         EjbEntityBean targetEntity,
+                         String targetField,
+                         CmpRelationRole targetRole,
+                         JMethod targetMapMethod)
     throws ConfigException
   {
     CmrManyToOne srcRel = new CmrManyToOne(sourceEntity,
-					   idField,
-					   targetEntity);
+                                           idField,
+                                           targetEntity);
 
     srcRel.setSQLColumns(sourceRole.getSQLColumns());
     /*
-    dstRel.setSQLColumns(targetRole.getSQLColumns());
-    dstRel.setCascadeDelete(targetRole.getCascadeDelete());
+      dstRel.setSQLColumns(targetRole.getSQLColumns());
+      dstRel.setCascadeDelete(targetRole.getCascadeDelete());
     */
-      
+
     sourceEntity.addRelation(srcRel);
-    
+
     CmrMap map = new CmrMap(targetEntity, targetField,
-			    sourceEntity, srcRel);
+                            sourceEntity, srcRel);
 
     map.setMapMethod(targetMapMethod);
 
@@ -912,8 +921,8 @@ public class EjbConfig {
   public JMethod getMapMethod(EjbEntityBean entityBean, String field)
   {
     String methodName = ("get" +
-			 Character.toUpperCase(field.charAt(0)) +
-			 field.substring(1));
+                         Character.toUpperCase(field.charAt(0)) +
+                         field.substring(1));
 
     JMethod []methods = entityBean.getMethods(entityBean.getEJBClassWrapper());
 
@@ -921,15 +930,15 @@ public class EjbConfig {
       JMethod method = methods[i];
 
       if (! method.getName().equals(methodName))
-	continue;
+        continue;
       else if (method.getParameterTypes().length != 1)
-	continue;
+        continue;
       else if ("void".equals(method.getReturnType().getName()))
-	continue;
+        continue;
       else if (! method.isAbstract())
-	continue;
+        continue;
       else
-	return method;
+        return method;
     }
 
     return null;
@@ -963,4 +972,3 @@ public class EjbConfig {
     }
   }
 }
-
