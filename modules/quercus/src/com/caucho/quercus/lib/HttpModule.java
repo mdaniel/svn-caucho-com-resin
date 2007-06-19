@@ -32,22 +32,36 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * PHP HTTP functions
  */
 public class HttpModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(HttpModule.class);
+
+  private final static QDate _calendar = new QDate(false);
+
+  private static ArrayList<String> getHeaders(Env env)
+  {
+    ArrayList<String> headers = env.getSpecialValue("caucho.headers");
+
+    if (headers == null) {
+      headers = new ArrayList();
+      env.setSpecialValue("caucho.headers", headers);
+    }
+
+    return headers;
+  }
 
   /**
    * Adds a header.
@@ -88,31 +102,70 @@ public class HttpModule extends AbstractQuercusModule {
 	}
       }
 
-      int p = header.indexOf(':');
+      int colonIndex  = header.indexOf(':');
 
-      if (p > 0) {
-	String key = header.substring(0, p).trim();
-	String value = header.substring(p + 1).trim();
+      if (colonIndex > 0) {
+	String key = header.substring(0, colonIndex).trim();
+	String value = header.substring(colonIndex + 1).trim();
 
-	if (key.equalsIgnoreCase("Location"))
+	if (key.equalsIgnoreCase("Location")) {
 	  res.sendRedirect(value);
-	else if (replace)
+        }
+        else if (replace) {
 	  res.setHeader(key, value);
-	else
-	  res.addHeader(key, value);
 
-	if (key.equalsIgnoreCase("Content-Type")) {
+          ArrayList<String> headers = getHeaders(env);
+
+          int regionEnd = colonIndex + 1;
+
+          for (int i = 0; i < headers.size(); i++) {
+
+            String compare = headers.get(i);
+
+            if (compare.regionMatches(true, 0, header, 0, regionEnd)) {
+              headers.remove(i);
+              break;
+            }
+          }
+
+          headers.add(header);
+
+        }
+        else {
+	  res.addHeader(key, value);
+          getHeaders(env).add(header);
+        }
+
+        if (key.equalsIgnoreCase("Content-Type")) {
 	  if (value.indexOf("charset") < 0 && value.indexOf("text/") < 0)
 	    res.setCharacterEncoding("iso-8859-1");
 	
 	  env.getOut().setEncoding(res.getCharacterEncoding());
 	}
+
       }
 
       return NullValue.NULL;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+  }
+
+  /**
+   * Return a list of the headers that have been sent or are ready to send.
+   */
+
+  public static ArrayValue headers_list(Env env)
+  {
+    ArrayList<String> headersList = getHeaders(env);
+    int size = headersList.size();
+
+    ArrayValueImpl headersArray = new ArrayValueImpl(size);
+
+    for (int i = 0; i < size; i++)
+      headersArray.put(headersList.get(i));
+
+    return headersArray;
   }
 
   /**
@@ -136,8 +189,11 @@ public class HttpModule extends AbstractQuercusModule {
                                   @Optional long expire,
                                   @Optional String path,
                                   @Optional String domain,
-                                  @Optional boolean secure)
+                                  @Optional boolean secure,
+                                  @Optional boolean httpOnly)
   {
+    long now = Alarm.getCurrentTime();
+
     if (value == null || value.equals(""))
       value = "";
 
@@ -176,8 +232,12 @@ public class HttpModule extends AbstractQuercusModule {
 
     Cookie cookie = new Cookie(name, sb.toString());
 
-    if (expire > 0)
-      cookie.setMaxAge((int) (expire - Alarm.getCurrentTime() / 1000));
+    int maxAge = 0;
+
+    if (expire > 0) {
+      maxAge = (int) (expire - now / 1000);
+      cookie.setMaxAge(maxAge);
+    }
 
     if (path != null && ! path.equals(""))
       cookie.setPath(path);
@@ -189,6 +249,40 @@ public class HttpModule extends AbstractQuercusModule {
       cookie.setSecure(true);
 
     env.getResponse().addCookie(cookie);
+
+    // add to headers list
+
+    StringBuilder cookieHeader = new StringBuilder();
+    cookieHeader.append("Set-Cookie: ");
+
+    cookieHeader.append(cookie.getName());
+
+    cookieHeader.append("=");
+    cookieHeader.append(cookie.getValue());
+
+    if (maxAge == 0) {
+      cookieHeader.append("; expires=Thu, 01-Dec-1994 16:00:00 GMT");
+    }
+    else {
+      _calendar.setGMTTime(now + 1000L * (long) maxAge);
+      cookieHeader.append("; expires=");
+      cookieHeader.append(_calendar.format("%a, %d-%b-%Y %H:%M:%S GMT"));
+    }
+
+    if (path != null && ! path.equals("")) {
+      cookieHeader.append("; path=");
+      cookieHeader.append(path);
+    }
+
+    if (domain != null && ! domain.equals("")) {
+      cookieHeader.append("; domain=");
+      cookieHeader.append(domain);
+    }
+
+    if (secure)
+      cookieHeader.append("; secure");
+
+    getHeaders(env).add(cookieHeader.toString());
 
     return true;
   }
