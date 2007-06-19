@@ -77,6 +77,9 @@ public class ConfigStatement extends Statement{
 		    HttpServletResponse response)
     throws IOException, ServletException
   {
+    if (_errmsg != null)
+      request.setAttribute("caucho.ssi.errmsg", _errmsg);
+    
     if (_sizefmt != null)
       request.setAttribute("caucho.ssi.sizefmt", _sizefmt);
     

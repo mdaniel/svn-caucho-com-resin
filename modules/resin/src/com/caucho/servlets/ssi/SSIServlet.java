@@ -29,29 +29,43 @@
 
 package com.caucho.servlets.ssi;
 
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.http.*;
-import javax.servlet.*;
-
 import com.caucho.util.ByteBuffer;
-
 import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.ReadStream;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.*;
 
 /**
  * Serves server-side include files.
  */
-public class SSIServlet extends HttpServlet {
+public class SSIServlet extends HttpServlet
+{
+  private static final Logger log
+    = Logger.getLogger(SSIServlet.class.getName());
+  
   public void doGet(HttpServletRequest request,
 		    HttpServletResponse response)
     throws ServletException, IOException
   {
-    String servletPath = request.getServletPath();
-    String pathInfo = request.getPathInfo();
+    String servletPath;
+    String pathInfo;
+    
+    servletPath = (String) request.getAttribute("javax.servlet.include.servlet_path");
+    pathInfo = (String) request.getAttribute("javax.servlet.include.path_info");
+
+    if (servletPath == null && pathInfo == null) {
+      servletPath = request.getServletPath();
+      pathInfo = request.getPathInfo();
+    }
 
     String fullPath;
 
@@ -66,186 +80,39 @@ public class SSIServlet extends HttpServlet {
 
     Path path = Vfs.lookup().lookup(realPath);
 
-    Statement stmt = new Parser().parse(path);
+    Statement stmt = new SSIParser().parse(path);
 
     WriteStream out = Vfs.openWrite(response.getOutputStream());
 
     try {
       stmt.apply(out, request, response);
-    } finally {
       out.close();
-    }
-  }
+    } catch (Exception e) {
+      String errmsg = (String) request.getAttribute("caucho.ssi.errmsg");
 
-  static class Parser {
-    private int _line;
-
-    Statement parse(Path path)
-      throws IOException
-    {
-      ReadStream is = path.openRead();
-
-      try {
-	ArrayList<Statement> statements = new ArrayList<Statement>();
-      
-	parse(is, statements);
-
-	return new BlockStatement(statements);
-      } finally {
-	is.close();
-      }
-    }
-
-    /**
-     * Parses a list of statements from the ssi stream.
-     */
-    private void parse(ReadStream is, ArrayList<Statement> statements)
-      throws IOException
-    {
-      ByteBuffer bb = new ByteBuffer();
-      int ch;
-
-      while ((ch = is.read()) >= 0) {
-	if (ch != '<') {
-	  if (ch == '\n')
-	    _line++;
-	  
-	  bb.append(ch);
-	}
-	else if ((ch = is.read()) != '!') {
-	  bb.append('<');
-
-	  is.unread();
-	}
-	else if ((ch = is.read()) != '-') {
-	  bb.append('<');
-	  bb.append('!');
+      if (errmsg != null && ! response.isCommitted()) {
+	log.log(Level.FINE, e.toString(), e);
 	
-	  is.unread();
-	}
-	else if ((ch = is.read()) != '-') {
-	  bb.append('<');
-	  bb.append('!');
-	  bb.append('-');
+	response.setStatus(500, errmsg);
+	response.setContentType("text/html");
+
+	out.clearWrite();
+	out.println("<html><head>");
+	out.println("<title>" + errmsg + "</title>");
+	out.println("</head>");
 	
-	  is.unread();
-	}
-	else if ((ch = is.read()) != '#') {
-	  bb.append('<');
-	  bb.append('!');
-	  bb.append('-');
-	  bb.append('-');
-	
-	  is.unread();
-	}
-	else {
-	  if (bb.getLength() > 0) {
-	    TextStatement text;
-
-	    text = new TextStatement(bb.getBuffer(), 0, bb.getLength());
-	    
-	    statements.add(text);
-	    bb.clear();
-	  }
-
-	  statements.add(parseCommand(is));
-	}
+	out.println("<h1>" + errmsg + "</h1>");
+	out.println("</html>");
+	out.close();
       }
-
-      if (bb.getLength() > 0) {
-	statements.add(new TextStatement(bb.getBuffer(), 0, bb.getLength()));
-	bb.clear();
-      }
-    }
-
-    private Statement parseCommand(ReadStream is)
-      throws IOException
-    {
-      StringBuilder sb = new StringBuilder();
-
-      int ch;
-
-      while (Character.isLetterOrDigit((ch = is.read()))) {
-	sb.append((char) ch);
-      }
-
-      String cmd = sb.toString();
-
-      HashMap<String,String> attr = parseAttributes(is);
-
-      if ((ch = is.read()) != '-') {
-      }
-      else if ((ch = is.read()) != '-') {
-      }
-      else if ((ch = is.read()) != '>') {
-      }
-
-      if ("config".equals(cmd))
-	return ConfigStatement.create(attr, is.getPath());
-      else if ("echo".equals(cmd))
-	return EchoStatement.create(attr, is.getPath());
-      else if ("include".equals(cmd))
-	return IncludeStatement.create(attr, is.getPath());
-      else if ("set".equals(cmd))
-	return SetStatement.create(attr, is.getPath());
+      else if (e instanceof RuntimeException)
+	throw (RuntimeException) e;
+      else if (e instanceof IOException)
+	throw (IOException) e;
+      else if (e instanceof ServletException)
+	throw (ServletException) e;
       else
-	return new ErrorStatement("['" + cmd + "' is an unknown command.]");
-    }
-
-    private HashMap<String,String> parseAttributes(ReadStream is)
-      throws IOException
-    {
-      HashMap<String,String> attr = new HashMap<String,String>();
-
-      while (true) {
-	int ch;
-
-	while (Character.isWhitespace((ch = is.read()))) {
-	}
-
-	StringBuilder key = new StringBuilder();
-
-	for (; Character.isLetterOrDigit(ch); ch = is.read()) {
-	  key.append((char) ch);
-	}
-
-	for (; Character.isWhitespace(ch); ch = is.read()) {
-	}
-
-	if (ch != '=')
-	  return attr;
-
-	for (ch = is.read(); Character.isWhitespace(ch); ch = is.read()) {
-	}
-
-	StringBuilder value = new StringBuilder();
-
-	if (ch == '\'' || ch == '"') {
-	  int end = ch;
-
-	  for (ch = is.read(); ch > 0 && ch != end; ch = is.read()) {
-	    if (ch == '\\') {
-	      ch = is.read();
-
-	      if (ch == '\'' || ch == '\"')
-		value.append((char) ch);
-	      else {
-		value.append('\\');
-		is.unread();
-	      }
-	    }
-	    else
-	      value.append((char) ch);
-	  }
-	}
-	else {
-	  for (; ch > 0 && ! Character.isWhitespace(ch); ch = is.read()) {
-	    value.append((char) ch);
-	  }
-	}
-
-	attr.put(key.toString(), value.toString());
-      }
+	throw new ServletException(e);
     }
   }
 }
