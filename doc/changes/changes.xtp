@@ -126,7 +126,7 @@
 <li>JSP: resin-c:out namespace wasn't created for validation. (#1631, rep by Steve Ferguson)</li>
 <li>OpenSSL: Add call to OpenSSL_add_all_algorithms (fixed! by Tom Hintz)</li>
 <li>Expect: 100-continue handling with Resin's load balancer (rep by A Balandran, #1648)</li>
-<li>JSP: ${...}  wasn't generating proper namespace for validation (rep by Matthew Schmidt, #1647)</li>
+<li>JSP: $\{...}  wasn't generating proper namespace for validation (rep by Matthew Schmidt, #1647)</li>
 <li>(2007-03-07) ConnectionPool timeout defaults incorrect (#1586, rep by gschemmel)</li>
 <li>web-app description/display-name order is arbitrary (#1599, rep by kamleshjkl)</li>
 <li>character-encoding now controls default encoding for writers (#1563, rep by asklxf)</li>
