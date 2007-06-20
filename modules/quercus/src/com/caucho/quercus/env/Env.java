@@ -4073,12 +4073,12 @@ public class Env {
                                               getCodeName(mask) +
                                               msg);
 	*/
-        throw new QuercusExitException(locationMessagePrefix +
+        throw new QuercusErrorException(locationMessagePrefix +
                                        getCodeName(mask) +
                                        msg);
       }
       else
-        throw new QuercusExitException(msg);
+        throw new QuercusErrorException(msg);
     }
 
     return NullValue.NULL;
