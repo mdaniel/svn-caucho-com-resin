@@ -179,7 +179,7 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static int preg_match(Env env,
-                               StringValue regexp,
+                               BinaryValue regexp,
                                BinaryValue subject,
                                @Optional @Reference Value matchRef,
                                @Optional int flags,
@@ -284,7 +284,7 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static int preg_match_all(Env env,
-                                   StringValue regexp,
+                                   BinaryValue regexp,
                                    BinaryValue subject,
                                    @Reference Value matchRef,
                                    @Optional("PREG_PATTERN_ORDER") int flags,
@@ -2138,11 +2138,14 @@ public class RegexpModule
 
     private HashMap<Integer,StringValue> _patternMap;
 
-    PCREPattern(Env env, StringValue regexp)
+    PCREPattern(Env env, BinaryValue regexp)
     {
       _flags = regexpFlags(regexp);
 
-      _regexp = cleanRegexpAndAddGroups(regexp);
+      if (isUnicode())
+        _regexp = cleanRegexpAndAddGroups(regexp.toUnicodeValue(env));
+      else
+        _regexp = cleanRegexpAndAddGroups(regexp.toStringValue());
 
       _pattern = compileRegexp(_regexp);
     }
