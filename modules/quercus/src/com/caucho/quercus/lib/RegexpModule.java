@@ -56,6 +56,7 @@ public class RegexpModule
   private static final L10N L = new L10N(RegexpModule.class);
 
   private static final int REGEXP_EVAL = 0x01;
+  private static final int REGEXP_UNICODE = 0x02;
 
   public static final int PREG_PATTERN_ORDER = 0x01;
   public static final int PREG_SET_ORDER = 0x02;
@@ -69,8 +70,8 @@ public class RegexpModule
 
   public static final boolean [] PREG_QUOTE = new boolean[256];
 
-  private static final LruCache<StringValue, NamedPatterns> _namePatternCache
-    = new LruCache<StringValue, NamedPatterns>(1024);
+  private static final LruCache<StringValue, PCREPattern> _namePatternCache
+    = new LruCache<StringValue, PCREPattern>(1024);
 
   private static final LruCache<StringValue, Pattern> _patternCache
     = new LruCache<StringValue, Pattern>(1024);
@@ -178,28 +179,26 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static int preg_match(Env env,
-                               StringValue patternString,
-                               StringValue string,
+                               StringValue regexp,
+                               BinaryValue subject,
                                @Optional @Reference Value matchRef,
                                @Optional int flags,
                                @Optional int offset)
   {
-    if (patternString.length() < 2) {
+    if (regexp.length() < 2) {
       env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
       return 0;
     }
 
-    NamedPatterns namedPatterns = _namePatternCache.get(patternString);
+    PCREPattern pcrePattern = _namePatternCache.get(regexp);
 
-    if (namedPatterns == null) {
-      namedPatterns = new NamedPatterns(patternString);
+    if (pcrePattern == null) {
+      pcrePattern = new PCREPattern(env, regexp);
 
-      _namePatternCache.put(patternString, namedPatterns);
+      _namePatternCache.put(regexp, pcrePattern);
     }
 
-    Pattern pattern = namedPatterns.getPattern();
-    
-    Matcher matcher = pattern.matcher(string);
+    Matcher matcher = pcrePattern.matcher(env, subject);
 
     ArrayValue regs;
 
@@ -250,7 +249,7 @@ public class RegexpModule
           part.append(new StringValueImpl(group));
           part.append(new LongValue(matcher.start(i)));
 
-          Value name = namedPatterns.get(i);
+          Value name = pcrePattern.get(i);
           if (name != null)
             regs.put(name, part);
           
@@ -265,7 +264,7 @@ public class RegexpModule
 
           StringValue match = new StringValueImpl(group);
           
-          Value name = namedPatterns.get(i);
+          Value name = pcrePattern.get(i);
           if (name != null)
             regs.put(name, match);
           
@@ -285,13 +284,13 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static int preg_match_all(Env env,
-                                   StringValue patternString,
-                                   StringValue subject,
+                                   StringValue regexp,
+                                   BinaryValue subject,
                                    @Reference Value matchRef,
                                    @Optional("PREG_PATTERN_ORDER") int flags,
                                    @Optional int offset)
   {
-    if (patternString.length() < 2) {
+    if (regexp.length() < 2) {
       env.warning(L.l("Pattern must have at least opening and closing delimiters"));
       return 0;
     }
@@ -309,15 +308,13 @@ public class RegexpModule
       }
     }
 
-    NamedPatterns namedPatterns = _namePatternCache.get(patternString);
+    PCREPattern pcrePattern = _namePatternCache.get(regexp);
 
-    if (namedPatterns == null) {
-      namedPatterns = new NamedPatterns(patternString);
+    if (pcrePattern == null) {
+      pcrePattern = new PCREPattern(env, regexp);
 
-      _namePatternCache.put(patternString, namedPatterns);
+      _namePatternCache.put(regexp, pcrePattern);
     }
-
-    Pattern pattern = namedPatterns.getPattern();
 
     ArrayValue matches;
 
@@ -331,12 +328,20 @@ public class RegexpModule
     matchRef.set(matches);
 
     if ((flags & PREG_PATTERN_ORDER) != 0) {
-      return pregMatchAllPatternOrder(env, pattern, subject,
-				      matches, namedPatterns, flags, offset);
+      return pregMatchAllPatternOrder(env,
+                                      pcrePattern,
+                                      subject,
+				      matches,
+                                      flags,
+                                      offset);
     }
     else if ((flags & PREG_SET_ORDER) != 0) {
-      return pregMatchAllSetOrder(env, pattern, subject,
-				  matches, flags, offset);
+      return pregMatchAllSetOrder(env,
+                                  pcrePattern,
+                                  subject,
+				  matches,
+                                  flags,
+                                  offset);
     }
     else
       throw new UnsupportedOperationException();
@@ -348,14 +353,13 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static int pregMatchAllPatternOrder(Env env,
-                                             Pattern pattern,
-                                             StringValue subject,
+                                             PCREPattern pcrePattern,
+                                             BinaryValue subject,
                                              ArrayValue matches,
-                                             NamedPatterns namedPatterns,
                                              int flags,
                                              int offset)
   {
-    Matcher matcher = pattern.matcher(subject);
+    Matcher matcher = pcrePattern.matcher(env, subject);
 
     int groupCount = matcher.groupCount();
 
@@ -364,7 +368,7 @@ public class RegexpModule
     for (int j = 0; j <= groupCount; j++) {
       ArrayValue values = new ArrayValueImpl();
       
-      Value patternName = namedPatterns.get(j);
+      Value patternName = pcrePattern.get(j);
       
       // XXX: named subpatterns causing conflicts with array indexes?
       if (patternName != null)
@@ -391,7 +395,10 @@ public class RegexpModule
 	  
 	StringValue groupValue = subject.substring(start, end);
 
-	Value result = NullValue.NULL;
+        if (groupValue != null)
+          groupValue = groupValue.toUnicodeValue(env);
+
+        Value result = NullValue.NULL;
 
 	if (groupValue != null) {
 	  if ((flags & PREG_OFFSET_CAPTURE) != 0) {
@@ -416,13 +423,13 @@ public class RegexpModule
    * @param env the calling environment
    */
   private static int pregMatchAllSetOrder(Env env,
-					  Pattern pattern,
-					  StringValue subject,
+					  PCREPattern pattern,
+					  BinaryValue subject,
 					  ArrayValue matches,
 					  int flags,
 					  int offset)
   {
-    Matcher matcher = pattern.matcher(subject);
+    Matcher matcher = pattern.matcher(env, subject);
 
     if (! (matcher.find())) {
       return 0;
@@ -445,6 +452,9 @@ public class RegexpModule
           continue;
         
         StringValue groupValue = subject.substring(start, end);
+
+        if (groupValue != null)
+          groupValue = groupValue.toUnicodeValue(env);
 
         Value result = NullValue.NULL;
 
@@ -1309,6 +1319,10 @@ public class RegexpModule
       delim = '}';
     else if (delim == '[')
       delim = ']';
+    else if (delim == '(')
+      delim = ')';
+    else if (delim == '<')
+      delim = '>';
 
     int len = rawRegexp.length();
 
@@ -1322,6 +1336,8 @@ public class RegexpModule
 	break;
       else if (ch == 'e')
         flags |= REGEXP_EVAL;
+      else if (ch == 'u')
+        flags |= REGEXP_UNICODE;
     }
 
     if (tail <= 0)
@@ -2022,6 +2038,7 @@ public class RegexpModule
       }
     }
   }
+
   /**
    * Holds information about the left neighbor of a particular group.
    */
@@ -2114,31 +2131,33 @@ public class RegexpModule
   /*
    * Holds PCRE named subpatterns.
    */
-  static class NamedPatterns
-  {
-    private StringValue _regexp;
-    private Pattern _pattern;
+   static class PCREPattern {
+    private final StringValue _regexp;
+    private final Pattern _pattern;
+    private final int _flags;
 
     private HashMap<Integer,StringValue> _patternMap;
 
-    NamedPatterns(StringValue regexp)
+    PCREPattern(Env env, StringValue regexp)
     {
-      _regexp = cleanPattern(regexp);
+      _flags = regexpFlags(regexp);
+
+      _regexp = cleanRegexpAndAddGroups(regexp);
 
       _pattern = compileRegexp(_regexp);
     }
-    
-    StringValue getCleanedPattern()
+
+    public StringValue getCleanedPattern()
     {
       return _regexp;
     }
 
-    Pattern getPattern()
+    private boolean isUnicode()
     {
-      return _pattern;
+      return (_flags & REGEXP_UNICODE) != 0;
     }
-    
-    void add(int group, StringValue name)
+
+    private void add(int group, StringValue name)
     {
       if (_patternMap == null)
         _patternMap = new HashMap<Integer,StringValue>();
@@ -2146,15 +2165,23 @@ public class RegexpModule
       _patternMap.put(Integer.valueOf(group), name);
     }
     
-    StringValue get(int group)
+    public StringValue get(int group)
     { 
       if (_patternMap == null)
         return null;
       else
         return _patternMap.get(Integer.valueOf(group));
     }
-    
-    private StringValue cleanPattern(StringValue pattern)
+
+    Matcher matcher(Env env, BinaryValue value)
+    {
+      if (isUnicode())
+        return _pattern.matcher(value.toUnicodeValue(env));
+      else
+        return _pattern.matcher(value.toStringValue());
+    }
+
+    private StringValue cleanRegexpAndAddGroups(StringValue pattern)
     {
       StringBuilderValue sb = new StringBuilderValue();
       int length = pattern.length();
