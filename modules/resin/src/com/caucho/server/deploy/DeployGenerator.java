@@ -47,8 +47,10 @@ import java.util.logging.Logger;
  * The generator for the deploy
  */
 abstract public class DeployGenerator<E extends DeployController>
-  implements Dependency, EnvironmentListener {
-  private static final Logger log = Log.open(DeployGenerator.class);
+  implements Dependency, EnvironmentListener
+{
+  private static final Logger log
+    = Logger.getLogger(DeployGenerator.class.getName());
   private static final L10N L = new L10N(DeployGenerator.class);
 
   // The owning deployment container

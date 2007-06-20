@@ -353,21 +353,22 @@ public class WebAppContainer
     throws Exception
   {
     if (config.getURLRegexp() != null) {
-      DeployGenerator<WebAppController> deploy = new WebAppRegexpDeployGenerator(_appDeploy,
-							  this, config);
+      DeployGenerator<WebAppController> deploy
+	= new WebAppRegexpDeployGenerator(_appDeploy, this, config);
       _appDeploy.add(deploy);
       return;
     }
 
-    WebAppController oldEntry = _appDeploy.findController(config.getContextPath());
+    WebAppController oldEntry
+      = _appDeploy.findController(config.getContextPath());
 
     if (oldEntry != null && oldEntry.getSourceType().equals("single")) {
       throw new ConfigException(L.l("duplicate web-app '{0}' forbidden.",
 				    config.getId()));
     }
 
-    WebAppSingleDeployGenerator deploy = new WebAppSingleDeployGenerator(_appDeploy,
-						       this, config);
+    WebAppSingleDeployGenerator deploy
+      = new WebAppSingleDeployGenerator(_appDeploy, this, config);
     deploy.deploy();
 
     _appDeploy.add(deploy);
@@ -777,10 +778,11 @@ public class WebAppContainer
       buildForwardInvocation(forwardInvocation);
       buildErrorInvocation(errorInvocation);
 
-      RequestDispatcher disp = new RequestDispatcherImpl(includeInvocation,
-							 forwardInvocation,
-							 errorInvocation,
-							 getWebApp(includeInvocation, false));
+      RequestDispatcher disp
+	= new RequestDispatcherImpl(includeInvocation,
+				    forwardInvocation,
+				    errorInvocation,
+				    getWebApp(includeInvocation, false));
 
       return disp;
     } catch (Exception e) {
@@ -926,7 +928,6 @@ public class WebAppContainer
   private WebAppController getWebAppController(Invocation invocation)
   {
     WebAppController controller = findByURI(invocation.getURI());
-
     if (controller == null)
       return null;
 

@@ -47,8 +47,10 @@ import java.util.logging.Logger;
 /**
  * The generator for the web-app deploy
  */
-public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppController>
-  implements EnvironmentListener {
+public class WebAppExpandDeployGenerator
+  extends ExpandDeployGenerator<WebAppController>
+  implements EnvironmentListener
+{
   private static final Logger log = Log.open(WebAppExpandDeployGenerator.class);
 
   private final WebAppExpandDeployGeneratorAdmin _admin;
@@ -242,9 +244,50 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
         segmentName = "/ROOT";
     }
 
-    String expandName = getExpandName(segmentName.substring(1));
+    ArrayList<String> versionNames = getVersionNames(segmentName);
 
-    String archiveName = segmentName + ".war";
+    if (versionNames == null || versionNames.size() == 0)
+      return makeController(name, segmentName);
+    /*
+    else if (versionNames.size() == 1) {
+      String versionName = versionNames.get(0);
+
+      if (versionName.equals(segmentName))
+	return makeController(name, segmentName);
+      else
+	return _container.getWebAppGenerator().findController(versionName);
+    }
+    */
+
+    WebAppController controller
+      = new WebAppVersioningController(name);
+    
+    for (int i = 0; i < versionNames.size(); i++) {
+      String versionName = versionNames.get(i);
+
+      WebAppController newController
+	= _container.getWebAppGenerator().findController(versionName);
+
+      controller.addVersion(newController);
+    }
+
+    return controller;
+  }
+
+  private WebAppController makeController(String name, String versionName)
+  {
+    String version = "";
+
+    if (isVersioning()) {
+      int p = versionName.lastIndexOf('-');
+      
+      if (p > 0)
+	version = versionName.substring(p + 1);
+    }
+    
+    String expandName = getExpandName(versionName.substring(1));
+
+    String archiveName = versionName + ".war";
     Path jarPath = getArchiveDirectory().lookup("." + archiveName);
 
     Path rootDirectory;
@@ -262,7 +305,7 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
         && (jarPath == null || ! jarPath.isFile()))
       return null;
     else if (rootDirectory.isDirectory()
-             &&  ! isValidDirectory(rootDirectory, segmentName.substring(1)))
+             && ! isValidDirectory(rootDirectory, versionName.substring(1)))
       return null;
 
     WebAppConfig cfg = _webAppConfigMap.get(rootDirectory);
@@ -273,16 +316,17 @@ public class WebAppExpandDeployGenerator extends ExpandDeployGenerator<WebAppCon
     WebAppController controller
       = new WebAppController(name, rootDirectory, _container);
 
-    controller.setWarName(segmentName.substring(1));
+    controller.setWarName(versionName.substring(1));
 
     controller.setParentWebApp(_parent);
 
     controller.setDynamicDeploy(true);
     controller.setSourceType("expand");
 
+    controller.setVersion(version);
+
     return controller;
   }
-
 
   /**
    * Returns the current array of webApp entries.

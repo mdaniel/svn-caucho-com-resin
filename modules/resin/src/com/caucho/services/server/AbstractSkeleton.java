@@ -152,7 +152,7 @@ abstract public class AbstractSkeleton {
    *
    * @return a mangled string.
    */
-  protected String mangleName(Method method, boolean isFull)
+  public static String mangleName(Method method, boolean isFull)
   {
     StringBuffer sb = new StringBuffer();
     
@@ -161,7 +161,7 @@ abstract public class AbstractSkeleton {
     Class []params = method.getParameterTypes();
     for (int i = 0; i < params.length; i++) {
       sb.append('_');
-      mangleClass(sb, params[i], isFull);
+      sb.append(mangleClass(params[i], isFull));
     }
 
     return sb.toString();
@@ -170,48 +170,47 @@ abstract public class AbstractSkeleton {
   /**
    * Mangles a classname.
    */
-  private void mangleClass(StringBuffer sb, Class cl, boolean isFull)
+  public static String mangleClass(Class cl, boolean isFull)
   {
     String name = cl.getName();
 
     if (name.equals("boolean") || name.equals("java.lang.Boolean"))
-      sb.append("boolean");
-    else if (name.equals("int") || name.equals("java.lang.Integer") ||
-             name.equals("short") || name.equals("java.lang.Short") ||
-             name.equals("byte") || name.equals("java.lang.Byte"))
-      sb.append("int");
+      return "boolean";
+    else if (name.equals("int") || name.equals("java.lang.Integer")
+	     || name.equals("short") || name.equals("java.lang.Short")
+	     || name.equals("byte") || name.equals("java.lang.Byte"))
+      return "int";
     else if (name.equals("long") || name.equals("java.lang.Long"))
-      sb.append("long");
-    else if (name.equals("float") || name.equals("java.lang.Float") ||
-	     name.equals("double") || name.equals("java.lang.Double"))
-      sb.append("double");
-    else if (name.equals("java.lang.String") ||
-             name.equals("com.caucho.util.CharBuffer") ||
-             name.equals("char") || name.equals("java.lang.Character") ||
-             name.equals("java.io.Reader"))
-      sb.append("string");
-    else if (name.equals("java.util.Date") ||
-             name.equals("com.caucho.util.QDate"))
-      sb.append("date");
-    else if (InputStream.class.isAssignableFrom(cl) ||
-             name.equals("[B"))
-      sb.append("binary");
+      return "long";
+    else if (name.equals("float") || name.equals("java.lang.Float")
+	     || name.equals("double") || name.equals("java.lang.Double"))
+      return "double";
+    else if (name.equals("java.lang.String")
+	     || name.equals("com.caucho.util.CharBuffer")
+	     || name.equals("char") || name.equals("java.lang.Character")
+	     || name.equals("java.io.Reader"))
+      return "string";
+    else if (name.equals("java.util.Date")
+	     || name.equals("com.caucho.util.QDate"))
+      return "date";
+    else if (InputStream.class.isAssignableFrom(cl)
+	     || name.equals("[B"))
+      return "binary";
     else if (cl.isArray()) {
-      sb.append("[");
-      mangleClass(sb, cl.getComponentType(), isFull);
+      return "[" + mangleClass(cl.getComponentType(), isFull);
     }
-    else if (name.equals("org.w3c.dom.Node") ||
-             name.equals("org.w3c.dom.Element") ||
-             name.equals("org.w3c.dom.Document"))
-      sb.append("xml");
+    else if (name.equals("org.w3c.dom.Node")
+	     || name.equals("org.w3c.dom.Element")
+	     || name.equals("org.w3c.dom.Document"))
+      return "xml";
     else if (isFull)
-      sb.append(name);
+      return name;
     else {
       int p = name.lastIndexOf('.');
       if (p > 0)
-        sb.append(name.substring(p + 1));
+        return name.substring(p + 1);
       else
-        sb.append(name);
+        return name;
     }
   }
 }

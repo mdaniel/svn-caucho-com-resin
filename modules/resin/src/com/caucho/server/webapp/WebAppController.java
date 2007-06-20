@@ -62,6 +62,7 @@ public class WebAppController
 
   // The context path is the URL prefix for the web-app
   private String _contextPath;
+  private String _version = "";
 
   private String _warName;
 
@@ -296,6 +297,36 @@ public class WebAppController
       name = "/";
 
     return name;
+  }
+
+  /**
+   * Sets the version id.
+   */
+  protected void setVersion(String version)
+  {
+    _version = version;
+  }
+
+  /**
+   * Gets the version id.
+   */
+  public String getVersion()
+  {
+    return _version;
+  }
+  
+  /**
+   * Adds a version to the controller list.
+   */
+  protected WebAppController addVersion(WebAppController controller)
+  {
+    WebAppVersioningController versioningController
+      = new WebAppVersioningController(getContextPath());
+
+    versioningController.addVersion(this);
+    versioningController.addVersion(controller);
+
+    return versioningController;
   }
 
   /**

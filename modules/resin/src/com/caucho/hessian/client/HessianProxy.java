@@ -51,6 +51,7 @@ package com.caucho.hessian.client;
 import com.caucho.hessian.io.AbstractHessianInput;
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.HessianProtocolException;
+import com.caucho.services.server.AbstractSkeleton;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -59,6 +60,7 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.WeakHashMap;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -69,6 +71,8 @@ import java.net.URLConnection;
  */
 public class HessianProxy implements InvocationHandler {
   private HessianProxyFactory _factory;
+  private WeakHashMap<Method,String> _mangleMap
+    = new WeakHashMap<Method,String>();
   private URL _url;
   
   HessianProxy(HessianProxyFactory factory, URL url)
@@ -95,40 +99,52 @@ public class HessianProxy implements InvocationHandler {
   public Object invoke(Object proxy, Method method, Object []args)
     throws Throwable
   {
-    String methodName = method.getName();
-    Class []params = method.getParameterTypes();
+    String mangleName;
 
-    // equals and hashCode are special cased
-    if (methodName.equals("equals") &&
-        params.length == 1 && params[0].equals(Object.class)) {
-      Object value = args[0];
-      if (value == null || ! Proxy.isProxyClass(value.getClass()))
-        return new Boolean(false);
-
-      HessianProxy handler = (HessianProxy) Proxy.getInvocationHandler(value);
-
-      return new Boolean(_url.equals(handler.getURL()));
+    synchronized (_mangleMap) {
+      mangleName = _mangleMap.get(method);
     }
-    else if (methodName.equals("hashCode") && params.length == 0)
-      return new Integer(_url.hashCode());
-    else if (methodName.equals("getHessianType"))
-      return proxy.getClass().getInterfaces()[0].getName();
-    else if (methodName.equals("getHessianURL"))
-      return _url.toString();
-    else if (methodName.equals("toString") && params.length == 0)
-      return "[HessianProxy " + _url + "]";
+
+    if (mangleName == null) {
+      String methodName = method.getName();
+      Class []params = method.getParameterTypes();
+
+      // equals and hashCode are special cased
+      if (methodName.equals("equals")
+	  && params.length == 1 && params[0].equals(Object.class)) {
+	Object value = args[0];
+	if (value == null || ! Proxy.isProxyClass(value.getClass()))
+	  return new Boolean(false);
+
+	HessianProxy handler = (HessianProxy) Proxy.getInvocationHandler(value);
+
+	return new Boolean(_url.equals(handler.getURL()));
+      }
+      else if (methodName.equals("hashCode") && params.length == 0)
+	return new Integer(_url.hashCode());
+      else if (methodName.equals("getHessianType"))
+	return proxy.getClass().getInterfaces()[0].getName();
+      else if (methodName.equals("getHessianURL"))
+	return _url.toString();
+      else if (methodName.equals("toString") && params.length == 0)
+	return "HessianProxy[" + _url + "]";
+      
+      if (! _factory.isOverloadEnabled())
+	mangleName = method.getName();
+      else
+        mangleName = mangleName(method);
+
+      synchronized (_mangleMap) {
+	_mangleMap.put(method, mangleName);
+      }
+    }
 
     InputStream is = null;
     URLConnection conn = null;
     HttpURLConnection httpConn = null;
     
     try {
-      if (! _factory.isOverloadEnabled()) {
-      }
-      else
-        methodName = mangleName(method, args);
-
-      conn = sendRequest(methodName, args);
+      conn = sendRequest(mangleName, args);
 
       if (conn instanceof HttpURLConnection) {
 	httpConn = (HttpURLConnection) conn;
@@ -194,12 +210,14 @@ public class HessianProxy implements InvocationHandler {
     }
   }
 
-  protected String mangleName(Method method, Object []args)
+  protected String mangleName(Method method)
   {
-    if (args != null && args.length > 0)
-      return method.getName() + "__" + args.length;
+    Class []param = method.getParameterTypes();
+    
+    if (param == null || param.length == 0)
+      return method.getName();
     else
-      return method.getName() + "__0";
+      return AbstractSkeleton.mangleName(method, false);
   }
 
   protected URLConnection sendRequest(String methodName, Object []args)

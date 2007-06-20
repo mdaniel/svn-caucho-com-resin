@@ -697,6 +697,21 @@ abstract public class RelatedType extends AbstractStatefulType {
       field.init();
     }
 
+    // XXX: really needs to be called from the table-init code
+    for (IdGenerator idGen : _idGenMap.values()) {
+      try {
+	if (idGen instanceof SequenceIdGenerator) {
+	  ((SequenceIdGenerator) idGen).init(_amberPersistenceUnit);
+	}
+	else if (idGen instanceof AmberTableGenerator) {
+	  // jpa/0g60
+	  ((AmberTableGenerator) idGen).init(_amberPersistenceUnit);
+	}
+      } catch (SQLException e) {
+	throw new ConfigException(e);
+      }
+    }
+
     if (getMappedSuperclassFields() == null)
       return;
 
@@ -849,14 +864,6 @@ abstract public class RelatedType extends AbstractStatefulType {
     throws SQLException
   {
     IdGenerator idGen = _idGenMap.get(name);
-
-    if (idGen instanceof SequenceIdGenerator) {
-      ((SequenceIdGenerator) idGen).init(_amberPersistenceUnit);
-    }
-    else if (idGen instanceof AmberTableGenerator) {
-      // jpa/0g60
-      ((AmberTableGenerator) idGen).init(_amberPersistenceUnit);
-    }
 
     return idGen.allocate(aConn);
   }

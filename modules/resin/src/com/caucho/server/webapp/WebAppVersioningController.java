@@ -1,0 +1,233 @@
+/*
+ * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.server.webapp;
+
+import com.caucho.config.types.PathBuilder;
+import com.caucho.log.Log;
+import com.caucho.management.j2ee.J2EEManagedObject;
+import com.caucho.management.j2ee.WebModule;
+import com.caucho.server.deploy.DeployConfig;
+import com.caucho.server.deploy.DeployControllerAdmin;
+import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.server.host.Host;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
+import javax.servlet.jsp.el.ELException;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+/**
+ * A configuration entry for a web-app.
+ */
+public class WebAppVersioningController extends WebAppController {
+  private static final L10N L = new L10N(WebAppVersioningController.class);
+  private static final Logger log
+    = Logger.getLogger(WebAppController.class.getName());
+
+  private final ArrayList<WebAppController> _controllerList
+    = new ArrayList<WebAppController>();
+
+  private WebAppController _primaryController;
+
+  public WebAppVersioningController(String contextPath)
+  {
+    super(contextPath, null, null);
+  }
+
+  /**
+   * Adds a version to the controller list.
+   */
+  @Override
+  protected WebAppController addVersion(WebAppController controller)
+  {
+    _controllerList.add(controller);
+
+    Collections.sort(_controllerList, new VersionComparator());
+    
+    _primaryController = _controllerList.get(0);
+    
+    return this;
+  }
+
+  /**
+   * Merges two entries.
+   */
+  /*
+  protected WebAppController merge(WebAppController newController)
+  {
+    if (getConfig() != null && getConfig().getURLRegexp() != null)
+      return newController;
+    else if (newController.getConfig() != null &&
+	     newController.getConfig().getURLRegexp() != null)
+      return this;
+    else {
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+
+      try {
+	thread.setContextClassLoader(getParentClassLoader());
+
+	//  The contextPath comes from current web-app
+	WebAppController mergedController
+	  = new WebAppController(getContextPath(),
+				 getRootDirectory(),
+				 _container);
+
+	// server/1h1{2,3}
+	// This controller overrides configuration from the new controller
+	mergedController.mergeController(this);
+	mergedController.mergeController(newController);
+
+	return mergedController;
+      } finally {
+	thread.setContextClassLoader(oldLoader);
+      }
+    }
+  }
+  */
+
+  /**
+   * Returns the instance for a top-level request
+   * @return the request object or null for none.
+   */
+  @Override
+  public WebApp request()
+  {
+    return _primaryController.request();
+  }
+
+  /**
+   * Returns the instance for a subrequest.
+   *
+   * @return the request object or null for none.
+   */
+  @Override
+  public WebApp subrequest()
+  {
+    return _primaryController.subrequest();
+  }
+
+  /**
+   * Starts the entry.
+   */
+  @Override
+  protected WebApp startImpl()
+  {
+    return _primaryController.request();
+  }
+
+  /**
+   * Initialize the controller.
+   */
+  protected void initBegin()
+  {
+    /*
+    super.initBegin();
+    */
+  }
+  
+  /**
+   * Returns a printable view.
+   */
+  public String toString()
+  {
+    return "WebAppVersioningController" +  "[" + getId() + "]";
+  }
+
+  static class VersionComparator implements Comparator<WebAppController>
+  {
+    public int compare(WebAppController a, WebAppController b)
+    {
+      String versionA = a.getVersion();
+      String versionB = b.getVersion();
+
+      int lengthA = versionA.length();
+      int lengthB = versionB.length();
+
+      int indexA = 0;
+      int indexB = 0;
+
+      while (indexA < lengthA && indexB < lengthB) {
+	int valueA = 0;
+	int valueB = 0;
+	char chA;
+	char chB;
+
+	for (;
+	     indexA < lengthA
+	       && '0' <= (chA = versionA.charAt(indexA)) && chA <= '9';
+	     indexA++) {
+	  valueA = 10 * valueA + chA - '0';
+	}
+
+	for (;
+	     indexB < lengthB
+	       && '0' <= (chB = versionB.charAt(indexB)) && chB <= '9';
+	     indexB++) {
+	  valueB = 10 * valueB + chB - '0';
+	}
+
+	if (valueA < valueB)
+	  return 1;
+	else if (valueB < valueA)
+	  return -1;
+
+	while (indexA < lengthA && indexB < lengthB
+	       && ! ('0' <= (chA = versionA.charAt(indexA)) && chA <= '9')
+	       && ! ('0' <= (chB = versionB.charAt(indexB)) && chB <= '9')) {
+
+	  if (chA < chB)
+	    return 1;
+	  else if (chB < chA)
+	    return -1;
+
+	  indexA++;
+	  indexB++;
+	}
+
+	if (! ('0' <= (chA = versionA.charAt(indexA)) && chA <= '9'))
+	  return 1;
+	else if (! ('0' <= (chB = versionB.charAt(indexB)) && chB <= '9'))
+	  return -1;
+      }
+
+      if (indexA != lengthA)
+	return 1;
+      else if (indexB != lengthB)
+	return -1;
+      else
+	return 0;
+    }
+  }
+}

@@ -322,16 +322,6 @@ public class DeployContainer<C extends DeployController>
       if (controller != null)
 	return controller;
 
-      // server/10tl
-      /*
-      // server/0523
-      // Controllers with the same root directory are merged
-      controller = mergeWithDeployedController(newController);
-
-      if (controller != null)
-	return controller;
-      */
-
       _controllerList.add(newController);
     }
     

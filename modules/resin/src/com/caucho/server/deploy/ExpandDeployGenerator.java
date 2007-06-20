@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,7 +55,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   extends DeployGenerator<E>
   implements AlarmListener
 {
-  private static final Logger log = Log.open(ExpandDeployGenerator.class);
+  private static final Logger log
+    = Logger.getLogger(ExpandDeployGenerator.class.getName());
   private static final L10N L = new L10N(ExpandDeployGenerator.class);
 
   private static final long MIN_CRON_INTERVAL = 5000L;
@@ -69,10 +71,15 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   
   private String _expandPrefix = "";
   private String _expandSuffix = "";
+
+  private boolean _isVersioning;
   
   private ArrayList<String> _requireFiles = new ArrayList<String>();
 
   private TreeSet<String> _controllerNames = new TreeSet<String>();
+  
+  private TreeMap<String,ArrayList<String>> _versionMap
+    = new TreeMap<String,ArrayList<String>>();
 
   private FileSetType _expandCleanupFileSet;
 
@@ -259,9 +266,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   public void setExpandPrefix(String prefix)
     throws ConfigException
   {
-    if (! prefix.equals("") &&
-	! prefix.startsWith("_") &&
-	! prefix.startsWith("."))
+    if (! prefix.equals("")
+	&& ! prefix.startsWith("_")
+	&& ! prefix.startsWith("."))
       throw new ConfigException(L.l("expand-prefix '{0}' must start with '.' or '_'.",
 				    prefix));
 			       
@@ -300,6 +307,22 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     throws ConfigException
   {
     _requireFiles.add(file);
+  }
+
+  /**
+   * Sets true to enable versioning
+   */
+  public void setVersioning(boolean isVersioning)
+  {
+    _isVersioning = isVersioning;
+  }
+
+  /**
+   * Sets true to enable versioning
+   */
+  public boolean isVersioning()
+  {
+    return _isVersioning;
   }
 
   /**
@@ -553,6 +576,24 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     return archiveDigest * 65521 + expandDigest;
   }
+
+  protected ArrayList<String> getVersionNames(String name)
+  {
+    if (! isVersioning())
+      return null;
+    
+    TreeSet<String> entryNames;
+
+    try {
+      entryNames = findEntryNames();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    TreeMap<String,ArrayList<String>> versionMap = buildVersionMap(entryNames);
+
+    return versionMap.get(name);
+  }
   
   /**
    * Return the entry names for all deployed objects.
@@ -618,6 +659,39 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     return entryNames;
   }
+  
+  /**
+   * Return the entry names for all deployed objects.
+   */
+  private TreeMap<String,ArrayList<String>>
+    buildVersionMap(TreeSet<String> entryNames)
+  {
+    TreeMap<String,ArrayList<String>> versionMap;
+    versionMap = new TreeMap<String,ArrayList<String>>();
+
+    for (String name : entryNames) {
+      if (_isVersioning) {
+	String baseName = versionedNameToBaseName(name);
+
+	ArrayList<String> list = versionMap.get(baseName);
+	if (list == null)
+	  list = new ArrayList<String>();
+
+	list.add(name);
+
+	versionMap.put(baseName, list);
+      }
+      else {
+	ArrayList<String> list = new ArrayList<String>();
+
+	list.add(name);
+
+	versionMap.put(name, list);
+      }
+    }
+
+    return versionMap;
+  }
 
   protected boolean isValidDirectory(Path rootDirectory, String pathName)
   {
@@ -626,8 +700,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       return false;
     }
 
-    if (pathName.equalsIgnoreCase("web-inf") ||
-	pathName.equalsIgnoreCase("meta-inf"))
+    if (pathName.equalsIgnoreCase("web-inf")
+	|| pathName.equalsIgnoreCase("meta-inf"))
       return false;
 
     for (int j = 0; j < _requireFiles.size(); j++) {
@@ -648,11 +722,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   {
     if (_expandPrefix == null) {
     }
-    else if (_expandPrefix.equals("") &&
-	     (name.startsWith("_") ||
-	      name.startsWith(".") ||
-	      name.equalsIgnoreCase("META-INF") ||
-	      name.equalsIgnoreCase("WEB-INF"))) {
+    else if (_expandPrefix.equals("")
+	     && (name.startsWith("_")
+		 || name.startsWith(".")
+		 || name.equalsIgnoreCase("META-INF")
+		 || name.equalsIgnoreCase("WEB-INF"))) {
       return null;
     }
     else if (name.startsWith(_expandPrefix)) {
@@ -710,6 +784,19 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       return null;
     else
       return archiveName.substring(0, archiveName.length() - getExtension().length());
+  }
+
+  /**
+   * returns a version's base name.
+   */
+  private String versionedNameToBaseName(String name)
+  {
+    int p = name.lastIndexOf('-');
+    
+    if (p > 0)
+      return name.substring(0, p);
+    else
+      return name;
   }
 
   public String[] getNames()
@@ -809,7 +896,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
    */
   public boolean undeploy(String name)
   {
-    DeployController controller = getDeployContainer().findController(nameToEntryName(name));
+    DeployController controller
+      = getDeployContainer().findController(nameToEntryName(name));
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
