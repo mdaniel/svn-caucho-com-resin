@@ -309,14 +309,14 @@ public class Cluster
   /**
    * Adds a srun server.
    */
-  public ClusterClient findClient(String address, int port)
+  public ServerConnector findConnector(String address, int port)
   {
     for (int i = _serverList.size() - 1; i >= 0; i--) {
       ClusterServer server = _serverList.get(i);
       ClusterPort clusterPort = server.getClusterPort();
 
-      if (address.equals(clusterPort.getAddress()) &&
-	  port == clusterPort.getPort()) {
+      if (address.equals(clusterPort.getAddress())
+	  && port == clusterPort.getPort()) {
 	// XXX:
 	//return server.getClient();
 	return null;

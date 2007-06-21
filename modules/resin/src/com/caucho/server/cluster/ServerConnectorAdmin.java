@@ -42,9 +42,9 @@ import java.util.Date;
 public class ServerConnectorAdmin extends AbstractManagedObject
   implements ServerConnectorMXBean
 {
-  private final ClusterClient _client;
+  private final ServerConnector _client;
 
-  public ServerConnectorAdmin(ClusterClient client)
+  public ServerConnectorAdmin(ServerConnector client)
   {
     _client = client;
   }
@@ -54,7 +54,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public String getName()
   {
-    return _client.getServer().getId();
+    return _client.getId();
   }
 
   public String getType()
@@ -67,7 +67,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public ClusterMXBean getCluster()
   {
-    return _client.getServer().getCluster().getAdmin();
+    return _client.getCluster().getAdmin();
   }
 
   /**
@@ -75,7 +75,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public int getClusterIndex()
   {
-    return _client.getServer().getIndex();
+    return _client.getIndex();
   }
 
   /**
@@ -83,7 +83,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public String getAddress()
   {
-    return _client.getServer().getAddress();
+    return _client.getAddress();
   }
 
   /**
@@ -91,7 +91,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public int getPort()
   {
-    return _client.getServer().getPort();
+    return _client.getPort();
   }
 
   //
@@ -104,7 +104,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public long getRecoverTime()
   {
-    return _client.getServer().getLoadBalanceRecoverTime();
+    return _client.getLoadBalanceRecoverTime();
   }
 
   /**
@@ -112,7 +112,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public long getIdleTime()
   {
-    return _client.getServer().getLoadBalanceIdleTime();
+    return _client.getLoadBalanceIdleTime();
   }
 
   /**
@@ -120,7 +120,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public long getConnectTimeout()
   {
-    return _client.getServer().getLoadBalanceConnectTimeout();
+    return _client.getLoadBalanceConnectTimeout();
   }
 
   /**
@@ -128,7 +128,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public long getSocketTimeout()
   {
-    return _client.getServer().getSocketTimeout();
+    return _client.getSocketTimeout();
   }
 
   /**
@@ -136,7 +136,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public long getWarmupTime()
   {
-    return _client.getServer().getLoadBalanceWarmupTime();
+    return _client.getLoadBalanceWarmupTime();
   }
 
   /**
@@ -144,7 +144,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
    */
   public int getWeight()
   {
-    return _client.getServer().getLoadBalanceWeight();
+    return _client.getLoadBalanceWeight();
   }
 
   //
@@ -181,6 +181,11 @@ public class ServerConnectorAdmin extends AbstractManagedObject
     return _client.getLastFailTime();
   }
 
+  public Date getLastSuccessTime()
+  {
+    return new Date(_client.getLastSuccessTime());
+  }
+
   public long getConnectionBusyCountTotal()
   {
     return _client.getBusyCountTotal();
@@ -193,12 +198,12 @@ public class ServerConnectorAdmin extends AbstractManagedObject
 
   public long getConnectionKeepaliveCountTotal()
   {
-    return _client.getServer().getClient().getKeepaliveCountTotal();
+    return _client.getKeepaliveCountTotal();
   }
 
   public double getServerCpuLoadAvg()
   {
-    return _client.getServer().getClient().getCpuLoadAvg();
+    return _client.getCpuLoadAvg();
   }
 
   public void start()
@@ -218,7 +223,7 @@ public class ServerConnectorAdmin extends AbstractManagedObject
 
   public boolean ping()
   {
-    return _client.getServer().canConnect();
+    return _client.canConnect();
   }
 
   protected void register()

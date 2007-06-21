@@ -371,13 +371,9 @@ abstract public class StoreManager
 	if (server == null)
 	  continue;
 
-	ClusterClient client = server.getClient();
-
 	try {
-	  if (client != null) {
-	    ClusterStream s = client.open();
-	    s.close();
-	  }
+	  ClusterStream s = server.open();
+	  s.close();
 	} catch (Throwable e) {
 	}
       }

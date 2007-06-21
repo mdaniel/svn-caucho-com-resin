@@ -112,15 +112,15 @@ public class ClusterGroup {
   /**
    * Finds the srun client port matching the host and port.
    */
-  public ClusterClient findClient(String host, int port)
+  public ServerConnector findClient(String host, int port)
   {
     for (int i = _clusterList.size() - 1; i >= 0; i--) {
       Cluster cluster = _clusterList.get(i);
 
-      ClusterClient clusterClient = cluster.findClient(host, port);
+      ServerConnector serverConnector = cluster.findConnector(host, port);
 
-      if (clusterClient != null)
-	return clusterClient;
+      if (serverConnector != null)
+	return serverConnector;
     }
     
     return null;

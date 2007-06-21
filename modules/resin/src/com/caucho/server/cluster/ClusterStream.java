@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 public class ClusterStream {
   static protected final Logger log = Log.open(ClusterStream.class);
 
-  private ClusterClient _srun;
+  private ServerConnector _srun;
 
   private ReadStream _is;
   private WriteStream _os;
@@ -52,7 +52,7 @@ public class ClusterStream {
 
   private String _debugId;
 
-  ClusterStream(int count, ClusterClient client,
+  ClusterStream(int count, ServerConnector client,
 		ReadStream is, WriteStream os)
   {
     _srun = client;
@@ -65,7 +65,7 @@ public class ClusterStream {
   /**
    * Returns the cluster server.
    */
-  public ClusterClient getServer()
+  public ServerConnector getServer()
   {
     return _srun;
   }
@@ -107,8 +107,8 @@ public class ClusterStream {
    */
   public boolean isLongIdle()
   {
-    return (_srun.getServer().getLoadBalanceIdleTime() <
-	    Alarm.getCurrentTime() - _freeTime + 2000L);
+    return (_srun.getLoadBalanceIdleTime()
+	    < Alarm.getCurrentTime() - _freeTime + 2000L);
   }
 
   /**
