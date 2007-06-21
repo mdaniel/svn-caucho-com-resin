@@ -39,8 +39,8 @@ public class StringKeyCompare extends KeyCompare {
   public int compare(byte []keyBuffer, int keyOffset,
 		     byte []block, int offset, int length)
   {
-    int keyLen = keyBuffer[keyOffset];
-    int blockLen = block[offset];
+    int keyLen = keyBuffer[keyOffset] & 0xff;
+    int blockLen = block[offset] & 0xff;
 
     int keySize = 2 * keyLen;
     int blockSize = 2 * blockLen;
@@ -58,6 +58,11 @@ public class StringKeyCompare extends KeyCompare {
       else if (ch2 < ch1)
 	return 1;
     }
+
+    if (keyLen == blockLen)
+      return 0;
+
+    System.out.println("CMP: " + keyLen + " " + blockLen);
 
     if (keyLen < blockLen)
       return -1;

@@ -464,12 +464,21 @@ public class FileBacking {
 			       primary, secondary, tertiary)) {
 	//System.out.println("SAVE-INSERT: " + uniqueId);
       }
-      else if (storeSelfUpdate(conn, uniqueId, is, length)) {
-	// The second update is for the rare case where
-	// two threads try to update the database simultaneously
-      }
       else {
-	log.warning(L.l("Can't store session {0}", uniqueId));
+	// XXX: For now, avoid this case since the self-update query doesn't
+	// check for any update count, i.e. it can't tell which update is
+	// the most recent.  Also, the input stream would need to change
+	// to a tempStream to allow the re-write
+	
+	/*
+	if (storeSelfUpdate(conn, uniqueId, is, length)) {
+	  // The second update is for the rare case where
+	  // two threads try to update the database simultaneously
+	}
+	else {
+	  log.fine(L.l("Can't store session {0}", uniqueId));
+	}
+	*/
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -545,7 +554,7 @@ public class FileBacking {
 
       return true;
     } catch (SQLException e) {
-      System.out.print(e);
+      System.out.println(e);
       
       log.log(Level.FINE, e.toString(), e);
     }

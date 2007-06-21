@@ -475,7 +475,7 @@ public class QueryContext {
       if (bestBlock == null) {
       }
       else if (_isWrite)
-	_xa.lockWrite(bestBlock.getLock());
+	_xa.lockReadAndWrite(bestBlock.getLock());
       else
 	_xa.lockRead(bestBlock.getLock());
     }
@@ -526,7 +526,7 @@ public class QueryContext {
   public static void free(QueryContext queryContext)
   {
     queryContext._groupMap = null;
-    
+
     _freeList.free(queryContext);
   }
 }

@@ -162,10 +162,11 @@ public class Transaction extends StoreTransaction {
       if (_readLocks == null)
 	_readLocks = new ArrayList<Lock>();
       
-      if (! _readLocks.contains(lock)) {
-	lock.lockRead(this, _timeout);
-	_readLocks.add(lock);
-      }
+      if (_readLocks.contains(lock))
+	throw new SQLException(L.l("lockRead must not already have a read lock"));
+      
+      lock.lockRead(this, _timeout);
+      _readLocks.add(lock);
     } catch (SQLException e) {
       setRollbackOnly(e);
       
@@ -173,16 +174,40 @@ public class Transaction extends StoreTransaction {
     }
   }
 
-  
   /**
    * Acquires a new write lock.
    */
   public void lockReadAndWrite(Lock lock)
     throws SQLException
   {
-    lockWrite(lock);
+    if (_isRollbackOnly) {
+      if (_rollbackExn != null)
+	throw _rollbackExn;
+      else
+	throw new SQLException(L.l("can't get lock with rollback transaction"));
+    }
+
+    try {
+      if (_readLocks == null)
+	_readLocks = new ArrayList<Lock>();
+      if (_writeLocks == null)
+	_writeLocks = new ArrayList<Lock>();
+
+      if (_readLocks.contains(lock))
+	throw new SQLException(L.l("lockReadAndWrite cannot already have a read lock"));
+
+      if (_writeLocks.contains(lock))
+	throw new SQLException(L.l("lockReadAndWrite cannot already have a write lock"));
+      
+      lock.lockReadAndWrite(this, _timeout);
+      _readLocks.add(lock);
+      _writeLocks.add(lock);
+    } catch (SQLException e) {
+      setRollbackOnly(e);
+      
+      throw e;
+    }
   }
-  
   /**
    * Acquires a new write lock.
    */
@@ -201,19 +226,17 @@ public class Transaction extends StoreTransaction {
 	_readLocks = new ArrayList<Lock>();
       if (_writeLocks == null)
 	_writeLocks = new ArrayList<Lock>();
+
+      if (! _readLocks.contains(lock)) {
+	Thread.dumpStack();
+	throw new SQLException(L.l("lockWrite must already have a read lock"));
+      }
+
+      if (_writeLocks.contains(lock))
+	throw new SQLException(L.l("lockWrite cannot already have a write lock"));
       
-      if (_writeLocks.contains(lock)) {
-	return;
-      }
-      else if (_readLocks.contains(lock)) {
-	lock.lockWrite(this, _timeout);
-	_writeLocks.add(lock);
-      }
-      else {
-	lock.lockReadAndWrite(this, _timeout);
-	_readLocks.add(lock);
-	_writeLocks.add(lock);
-      }
+      lock.lockWrite(this, _timeout);
+      _writeLocks.add(lock);
     } catch (SQLException e) {
       setRollbackOnly(e);
       

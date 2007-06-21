@@ -754,6 +754,7 @@ public class WebApp extends ServletContextImpl
     throws ServletException
   {
     // log.fine("adding servlet mapping: " + servletMapping);
+    servletMapping.setServletContext(this);
 
     servletMapping.init(_servletMapper);
   }

@@ -373,21 +373,18 @@ abstract public class Expr {
 	if (v == null)
 	  return -1;
 	
-	int stringLength = v.length();
-	int length = 0;
+	int length = v.length();
+	int offset = 0;
 
-	buffer[length++] = (byte) stringLength;
-	for (int i = 0; i < stringLength; i++) {
-	  char ch = v.charAt(i);
+	buffer[offset++] = (byte) length;
+	for (int i = 0; i < length; i++) {
+	  int ch = v.charAt(i);
 
-	  buffer[length++] = (byte) (ch >> 8);
-	  buffer[length++] = (byte) (ch);
+	  buffer[offset++] = (byte) (ch >> 8);
+	  buffer[offset++] = (byte) (ch);
 	}
 	
-	buffer[length++] = 0;
-	buffer[length++] = 0;
-
-	return length;
+	return offset;
       }
       
       

@@ -109,4 +109,19 @@ public class CreateAttributeStrategy extends AttributeStrategy {
       }
     }
   }
+
+  /**
+   * Sets the child object.
+   */
+  public void setAttribute(Object bean, QName name, Object child)
+    throws Exception
+  {
+    if (_setterMethod != null) {
+      try {
+        _setterMethod.invoke(bean, new Object[] { child });
+      } catch (IllegalArgumentException e) {
+        throw new IllegalArgumentException(_setterMethod.getName() + ": " + e);
+      }
+    }
+  }
 }

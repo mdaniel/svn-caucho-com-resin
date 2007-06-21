@@ -137,6 +137,8 @@ class IndexExpr extends RowIterateExpr {
     try {
       long index = _index.lookup(buffer, 0, length, context.getTransaction());
 
+      //System.out.println("UPDATE: " + index + " " + _expr.evalString(context));
+
       return index;
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);

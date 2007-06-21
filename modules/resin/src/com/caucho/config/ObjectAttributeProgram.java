@@ -45,6 +45,7 @@ public class ObjectAttributeProgram extends BuilderProgram {
   /**
    * Configures the object.
    */
+  @Override
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {

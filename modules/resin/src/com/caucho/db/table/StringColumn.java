@@ -116,7 +116,7 @@ class StringColumn extends Column {
    */
   void setString(Transaction xa, byte []block, int rowOffset, String str)
   {
-    int startOffset = rowOffset + _columnOffset;
+    int offset = rowOffset + _columnOffset;
     
     if (str == null) {
       setNull(block, rowOffset);
@@ -124,9 +124,9 @@ class StringColumn extends Column {
     }
 
     int len = str.length();
-    int offset = startOffset + 1;
-    int maxOffset = offset + 2 * _maxLength;
+    int maxOffset = offset + 2 * _maxLength + 1;
 
+    block[offset++] = (byte) (len);
     for (int i = 0; i < len && offset < maxOffset; i++) {
       int ch = str.charAt(i);
 
@@ -134,7 +134,6 @@ class StringColumn extends Column {
       block[offset++] = (byte) (ch);
     }
 
-    block[startOffset] = (byte) (len);
     setNonNull(block, rowOffset);
   }
   

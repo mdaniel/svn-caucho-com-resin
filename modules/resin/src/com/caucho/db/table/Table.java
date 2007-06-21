@@ -646,7 +646,7 @@ public class Table extends Store {
 		   && (ROW_CLOCK_MIN < _rowClockTotal
 		       && 4 * _rowClockUsed < 3 * _rowClockTotal
 		       || _rowAllocCount > 8)) {
-	    //System.out.println("LOOP: used:" + _rowClockUsed + " total:" + _rowClockTotal + " frac:" + (double) _rowClockUsed / (double) (_rowClockTotal + 0.01));
+	    // System.out.println("LOOP: used:" + _rowClockUsed + " total:" + _rowClockTotal + " frac:" + (double) _rowClockUsed / (double) (_rowClockTotal + 0.01));
 	    // go around loop if there are sufficient entries, i.e. over
 	    // ROW_CLOCK_MIN and at least 1/4 free entries.
 	    isLoop = true;
@@ -684,7 +684,7 @@ public class Table extends Store {
 	if (block == null)
 	  block = xa.readBlock(this, blockId);
 	
-	xa.lockWrite(block.getLock());
+	xa.lockReadAndWrite(block.getLock());
 	try {
 	  rowOffset = 0;
 

@@ -51,7 +51,7 @@ public class TableIterator {
   private Table _table;
   private Column []_columns;
   
-  private Transaction _transaction;
+  private Transaction _xa;
   private QueryContext _queryContext;
 
   private long _blockId;
@@ -148,7 +148,7 @@ public class TableIterator {
    */
   public Transaction getTransaction()
   {
-    return _transaction;
+    return _xa;
   }
 
   /**
@@ -180,12 +180,12 @@ public class TableIterator {
     _blockId = 0;
     _rowOffset = Integer.MAX_VALUE / 2;
     _queryContext = null;
-    _transaction = xa;
+    _xa = xa;
 
     // XXX:
     /*
-    if (! _transaction.isAutoCommit())
-      _transaction.lockRead(_table.getLock());
+    if (! _xa.isAutoCommit())
+      _xa.lockRead(_table.getLock());
     */
   }
 
@@ -278,7 +278,7 @@ public class TableIterator {
       return false;
     }
 
-    block = _transaction.readBlock(_table, _blockId);
+    block = _xa.readBlock(_table, _blockId);
 
     buffer = block.getBuffer();
     _block = block;
@@ -306,7 +306,7 @@ public class TableIterator {
       if (block != null)
 	block.free();
 
-      _block = _transaction.readBlock(_table, _blockId);
+      _block = _xa.readBlock(_table, _blockId);
       _buffer = _block.getBuffer();
     }
     
@@ -428,13 +428,13 @@ public class TableIterator {
     throws SQLException
   {
     setDirty();
-    _table.delete(_transaction, _block, _buffer, _rowOffset);
+    _table.delete(_xa, _block, _buffer, _rowOffset);
   }
   
   public void setDirty()
     throws SQLException
   {
-    _transaction.addUpdateBlock(_block);
+    _xa.addUpdateBlock(_block);
 
     _block.setDirty(getRowOffset(), getRowOffset() + _rowLength);
   }

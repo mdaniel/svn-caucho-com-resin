@@ -87,7 +87,7 @@ abstract public class AbstractHessianOutput {
   /**
    * Gets the serializer factory.
    */
-  protected final SerializerFactory findSerializerFactory()
+  public final SerializerFactory findSerializerFactory()
   {
     SerializerFactory factory = _serializerFactory;
 
