@@ -110,9 +110,69 @@ public class DateModule extends AbstractQuercusModule {
    * Returns the formatted date.
    */
   public String date(String format,
-		     @Optional("time()") long time)
+                     @Optional("time()") long time)
   {
     return date(format, time, false);
+  }
+  
+  /**
+   * Returns the formatted date as an int.
+   */
+  public Value idate(Env env,
+                    String format,
+                    @Optional("time()") long time)
+  {
+    if (format.length() != 1) {
+      log.log(Level.FINE, L.l("idate format '{0}' needs to be of length one and only one", format));
+      env.warning(L.l("idate format '{0}' needs to be of length one and only one", format));
+
+      return BooleanValue.FALSE;
+    }
+    
+    switch (format.charAt(0)) {
+      case 'B':
+      case 'd':
+      case 'h': case 'H':
+      case 'i':
+      case 'I':
+      case 'L':
+      case 'm':
+      case 's':
+      case 't':
+      case 'U':
+      case 'w':
+      case 'W':
+      case 'y':
+      case 'Y':
+      case 'z':
+      case 'Z':
+        String dateString = date(format, time, false);
+
+        int sign = 1;
+        long result = 0;
+        int length = dateString.length();
+        
+        for (int i = 0; i < length; i++) {
+          char ch = dateString.charAt(i);
+          
+          if ('0' <= ch && ch <= '9')
+            result = result * 10 + ch - '0';
+          else if (ch == '-' && i == 0)
+            sign = -1;
+          else {
+            log.log(Level.FINEST, L.l("error parsing idate string '{0}'", dateString));
+            break;
+          }
+        }
+
+        return LongValue.create(result * sign);
+
+      default:
+        log.log(Level.FINE, L.l("'{0}' is not a valid idate format", format));
+        env.warning(L.l("'{0}' is not a valid idate format", format));
+        
+        return BooleanValue.FALSE;
+    }
   }
 
   /**
@@ -373,7 +433,7 @@ public class DateModule extends AbstractQuercusModule {
 
 	case 'w':
 	  {
-	    int day = calendar.getDayOfWeek();
+	    int day = calendar.getDayOfWeek() - 1;
 
 	    sb.append(day);
 	    break;
