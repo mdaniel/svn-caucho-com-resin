@@ -12,6 +12,7 @@
 
 <s2 title="3.1.snap - Jun 17, 2007">
 <ul>
+<li>Update load balancing to take slow/frozen servers into account (#1766, rep by Kevin MacClay)</li>
 <li>hessian: overload should add param types (#1621, rep by hixxxxx)</li>
 <li>sendRedirect needs to set Content-Type header for some firewalls (#1805, rep by M Hanson)</li>
 <li>amber: change auto-gen sequence initialization order (#1718)</li>

@@ -147,7 +147,7 @@ public class Hessian2Input
   /**
    * Gets the serializer factory, creating a default if necessary.
    */
-  protected final SerializerFactory findSerializerFactory()
+  public final SerializerFactory findSerializerFactory()
   {
     SerializerFactory factory = _serializerFactory;
 

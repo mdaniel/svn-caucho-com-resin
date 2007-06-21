@@ -46,7 +46,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 public class MBeanServer {
   private static Logger log = Logger.getLogger(MBeanServer.class.getName());
@@ -106,7 +106,9 @@ public class MBeanServer {
       throw new QuercusModuleException(e);
     }
     catch (IOException e) {
-      throw new QuercusModuleException(e);
+      log.log(Level.FINE, e.toString(), e);
+
+      return null;
     }
   }
 
