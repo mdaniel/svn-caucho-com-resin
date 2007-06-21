@@ -143,6 +143,10 @@ public class ResinConfig implements EnvironmentBean
   {
   }
 
+  public void addSecurityProvider(Class providerClass)
+  {
+  }
+
   /**
    * Finds a server.
    */
