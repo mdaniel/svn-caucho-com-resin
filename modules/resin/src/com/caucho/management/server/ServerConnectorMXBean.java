@@ -201,6 +201,12 @@ public interface ServerConnectorMXBean extends ManagedObjectMXBean {
   public double getServerCpuLoadAvg();
 
   /**
+   * Returns the server's latency factory
+   */
+  @Description("The latency factor of the backend server")
+  public double getLatencyFactor();
+
+  /**
    * Enables connections to the target server.
    */
   @Description("Enables connections to the target server")

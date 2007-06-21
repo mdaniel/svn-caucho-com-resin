@@ -207,6 +207,12 @@ if ($script == "cache.php") {
 } else {
   ?><li><a href="cache.php">Cache</a></li><?
 }
+
+if ($script == "cluster.php") {
+  ?><li class="selected">Cluster</li><?
+} else {
+  ?><li><a href="cluster.php">Cluster</a></li><?
+}
 ?>
 </ul>
 

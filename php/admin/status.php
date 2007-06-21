@@ -153,22 +153,22 @@ The ThreadPool manages all threads used by Resin.
 
 <table class="data">
   <tr>
-    <th colspan='2'>Config</th>
     <th colspan='3'>Threads</th>
+    <th colspan='2'>Config</th>
   </tr>
   <tr>
-    <th title="The maximum number of threads that Resin can allocate.">thread-max</th>
-    <th title="The minimum number of threads Resin should have available for new requests or other tasks.  This value causes a minimum number of idle threads, useful for situations where there is a sudden increase in the number of threads required.">thread-idle-min</th>
     <th title="The number of active threads. These threads are busy servicing requests or performing other tasks.">Active thread count</th>
     <th title="The number of idle threads. These threads are allocated but inactive, available for new requests or tasks.">Idle thread count</th>
     <th title="The current total number of threads managed by the pool.">Total count</th>
+    <th title="The maximum number of threads that Resin can allocate.">thread-max</th>
+    <th title="The minimum number of threads Resin should have available for new requests or other tasks.  This value causes a minimum number of idle threads, useful for situations where there is a sudden increase in the number of threads required.">thread-idle-min</th>
   </tr>
   <tr align='right'>
-    <td><?= $thread_pool->ThreadMax ?></td>
-    <td><?= $thread_pool->ThreadIdleMin ?></td>
     <td><?= $thread_pool->ThreadActiveCount ?></td>
     <td><?= $thread_pool->ThreadIdleCount ?></td>
     <td><?= $thread_pool->ThreadCount ?></td>
+    <td><?= $thread_pool->ThreadMax ?></td>
+    <td><?= $thread_pool->ThreadIdleMin ?></td>
   </tr>
 </table>
 
@@ -251,8 +251,9 @@ echo "<h2>Server Connectors: $cluster->Name</h2>";
     <th>Status</th>
     <th>Active</th>
     <th>Idle</th>
-    <th>Connection</th>
+    <th>Connection Miss</th>
     <th>Load</th>
+    <th>Latency</th>
     <th>Fail Total</th>
     <th>Busy Total</th>
   </tr>
@@ -271,6 +272,7 @@ foreach ($cluster->Servers as $client) {
     <td><?= format_miss_ratio($client->ConnectionKeepaliveCountTotal,
                               $client->ConnectionNewCountTotal) ?></td>
     <td><?= sprintf("%.2f", $client->ServerCpuLoadAvg) ?></td>
+    <td><?= sprintf("%.2f", $client->LatencyFactor) ?></td>
 <!-- XXX:
     <td><?= $client->LastFailTime ?></td>
     <td><?= $client->LastBusyTime ?></td>

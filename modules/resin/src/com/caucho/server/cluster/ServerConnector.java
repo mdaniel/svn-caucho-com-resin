@@ -112,6 +112,8 @@ public class ServerConnector
   private volatile int _activeCount;
   private volatile int _startingCount;
 
+  private volatile int _loadBalanceAllocateCount;
+
   // numeric value representing the throttle state
   private volatile int _warmupState;
   
@@ -121,6 +123,8 @@ public class ServerConnector
   private volatile long _lastBusyTime;
   private volatile long _firstSuccessTime;
   private volatile long _lastSuccessTime;
+  private volatile long _prevSuccessTime;
+  private volatile double _latencyFactor;
 
   // statistics
   private volatile long _keepaliveCountTotal;
@@ -336,6 +340,34 @@ public class ServerConnector
   }
 
   /**
+   * Returns the number of load balance allocations
+   */
+  public int getLoadBalanceAllocateCount()
+  {
+    return _loadBalanceAllocateCount;
+  }
+
+  /**
+   * Allocate a connection for load balancing.
+   */
+  public void allocateLoadBalance()
+  {
+    synchronized (this) {
+      _loadBalanceAllocateCount++;
+    }
+  }
+
+  /**
+   * Free a connection for load balancing.
+   */
+  public void freeLoadBalance()
+  {
+    synchronized (this) {
+      _loadBalanceAllocateCount--;
+    }
+  }
+
+  /**
    * Returns the total number of successful socket connections
    */
   public long getConnectCountTotal()
@@ -381,6 +413,14 @@ public class ServerConnector
   public long getLastSuccessTime()
   {
     return _lastSuccessTime;
+  }
+
+  /**
+   * Returns the latency factory
+   */
+  public double getLatencyFactor()
+  {
+    return _latencyFactor;
   }
 
   /**
@@ -528,8 +568,9 @@ public class ServerConnector
     else if (ST_STARTING <= state && state < ST_ACTIVE) {
       long now = Alarm.getCurrentTime();
 
-      if (now < _lastFailConnectTime + 1000L)
+      if (now < _lastFailConnectTime + 1000L) {
 	return false;
+      }
 
       int warmupState = _warmupState;
 
@@ -711,15 +752,9 @@ public class ServerConnector
   {
     int state = _state;
 
-    if (! (ST_STARTING <= state && state <= ST_ACTIVE))
+    if (! (ST_STARTING <= state && state <= ST_ACTIVE)) {
       return null;
-
-    long now = Alarm.getCurrentTime();
-
-    if (now < _lastFailTime + _failRecoverTime)
-      return null;
-    if (now < _lastBusyTime + _failRecoverTime)
-      return null;
+    }
 
     ClusterStream stream = openRecycle();
 
@@ -919,6 +954,18 @@ public class ServerConnector
 
       long now = Alarm.getCurrentTime();
 
+      long prevSuccessTime = _prevSuccessTime;
+
+      if (prevSuccessTime > 0) {
+	_latencyFactor = (0.95 * _latencyFactor
+			  + 0.05 * (now - prevSuccessTime));
+      }
+
+      if (_activeCount > 0)
+	_prevSuccessTime = now;
+      else
+	_prevSuccessTime = 0;
+	
       _lastSuccessTime = now;
 
       if (_firstSuccessTime <= 0) {

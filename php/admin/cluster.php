@@ -4,9 +4,7 @@
  */
 
 
-require_once "inc.php";
-
-require "restricted.php";
+require_once "WEB-INF/php/inc.php";
 
 $mbeanServer = new MBeanServer();
 
@@ -117,9 +115,9 @@ foreach ($resin->Clusters as $cluster) {
 
     echo "</tr>\n";
   }
-
-  echo "</table>";
 }
+
+echo "</table>";
 
 display_footer("cluster.php");
 

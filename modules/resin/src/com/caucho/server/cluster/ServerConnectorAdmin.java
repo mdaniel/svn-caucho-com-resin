@@ -186,6 +186,11 @@ public class ServerConnectorAdmin extends AbstractManagedObject
     return new Date(_client.getLastSuccessTime());
   }
 
+  public double getLatencyFactor()
+  {
+    return _client.getLatencyFactor();
+  }
+
   public long getConnectionBusyCountTotal()
   {
     return _client.getBusyCountTotal();
