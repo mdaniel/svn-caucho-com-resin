@@ -471,8 +471,8 @@ public class ErrorPageManager {
     response.setStatus(code, message);
     
     try {
-      if (handleErrorStatus(request, response, code, message) ||
-          code == HttpServletResponse.SC_NOT_MODIFIED)
+      if (handleErrorStatus(request, response, code, message)
+	  || code == HttpServletResponse.SC_NOT_MODIFIED)
         return;
 
       response.setContentType("text/html");
@@ -566,8 +566,6 @@ public class ErrorPageManager {
       return false;
     
     if (location != null && ! location.equals(request.getRequestURI())) {
-      // XXX: _responseStream.clearHeaders();
-
       request.setAttribute(AbstractHttpRequest.STATUS_CODE,
                             new Integer(code));
       request.setAttribute(AbstractHttpRequest.MESSAGE,

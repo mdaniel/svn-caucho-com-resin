@@ -296,14 +296,11 @@ public class ClusterObject {
 
     ReadStream crcIs = new ReadStream(crcStream);
 
-    ObjectInputStream in = new DistributedObjectInputStream(crcIs);
-
-    _objectManager.load(in, obj);
+    _objectManager.load(crcIs, obj);
 
     _isValid = true;
     _crc = crcStream.getCRC();
 
-    in.close();
     crcIs.close();
 
     return true;
@@ -402,14 +399,10 @@ public class ClusterObject {
     try {
       WriteStream os = new WriteStream(crcStream);
 
-      ObjectOutputStream out = new ObjectOutputStream(os);
+      _objectManager.store(os, obj);
 
-      _objectManager.store(out, obj);
-
-      out.flush();
+      os.flush();
       long crc = crcStream.getCRC();
-
-      out.close();
 
       os.close();
       os = null;

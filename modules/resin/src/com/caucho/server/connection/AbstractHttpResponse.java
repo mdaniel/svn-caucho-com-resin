@@ -490,7 +490,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
         return;
       }
       else if (errorManager != null) {
-        errorManager.sendError(getRequest(), this, code, _statusMessage);
+        errorManager.sendError(getOriginalRequest(), this,
+			       code, _statusMessage);
         // _request.killKeepalive();
         // close, but don't force a flush
         // XXX: finish(false);

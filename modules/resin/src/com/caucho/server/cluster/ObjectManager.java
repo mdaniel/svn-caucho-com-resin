@@ -29,8 +29,8 @@
 package com.caucho.server.cluster;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Base class for the distributed objects
@@ -44,7 +44,7 @@ public interface ObjectManager {
   /**
    * Loads the object from the input stream.
    */
-  public void load(ObjectInputStream in, Object object)
+  public void load(InputStream in, Object object)
     throws IOException;
   
   /**
@@ -56,7 +56,7 @@ public interface ObjectManager {
   /**
    * Stores the object in the output stream.
    */
-  public void store(ObjectOutputStream out, Object object)
+  public void store(OutputStream out, Object object)
     throws IOException;
 
   /**

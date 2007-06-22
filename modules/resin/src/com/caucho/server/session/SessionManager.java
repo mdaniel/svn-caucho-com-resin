@@ -33,6 +33,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.config.types.Period;
+import com.caucho.hessian.io.*;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterObject;
@@ -59,9 +60,7 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -1508,12 +1507,16 @@ public final class SessionManager implements ObjectManager, AlarmListener
    * @param in the input stream containing the serialized session
    * @param obj the session object to be deserialized
    */
-  public void load(ObjectInputStream in, Object obj)
+  public void load(InputStream is, Object obj)
     throws IOException
   {
     SessionImpl session = (SessionImpl) obj;
 
+    Hessian2Input in = new Hessian2Input(is);
+
     session.load(in);
+
+    in.close();
   }
 
   /**
@@ -1529,12 +1532,16 @@ public final class SessionManager implements ObjectManager, AlarmListener
   /**
    * Saves the session.
    */
-  public void store(ObjectOutputStream out, Object obj)
+  public void store(OutputStream os, Object obj)
     throws IOException
   {
     SessionImpl session = (SessionImpl) obj;
 
+    Hessian2Output out = new Hessian2Output(os);
+
     session.store(out);
+
+    out.close();
   }
 
   /**

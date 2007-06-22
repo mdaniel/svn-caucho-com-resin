@@ -30,6 +30,7 @@
 package com.caucho.server.session;
 
 import com.caucho.log.Log;
+import com.caucho.hessian.io.*;
 import com.caucho.server.cluster.ClusterObject;
 import com.caucho.server.cluster.Store;
 import com.caucho.server.security.AbstractAuthenticator;
@@ -940,7 +941,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Loads the object from the input stream.
    */
-  public void load(ObjectInputStream in)
+  public void load(Hessian2Input in)
     throws IOException
   {
     HttpSessionEvent event = null;
@@ -954,7 +955,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 	//System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
 
 	for (int i = 0; i < size; i++) {
-	  String key = in.readUTF();
+	  String key = in.readString();
 	  Object value = in.readObject();
 
 	  if (value != null) {
@@ -974,8 +975,6 @@ public class SessionImpl implements HttpSession, CacheListener {
 	  }
 	}
       } catch (Exception e) {
-	e.printStackTrace();
-	
 	throw IOExceptionWrapper.create(e);
       }
 
@@ -1003,7 +1002,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Saves the object to the input stream.
    */
-  public void store(ObjectOutputStream out)
+  public void store(Hessian2Output out)
     throws IOException
   {
     HttpSessionEvent event = null;
@@ -1046,7 +1045,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 	Map.Entry entry = entries[i];
 	Object value = entry.getValue();
 
-	out.writeUTF((String) entry.getKey());
+	out.writeString((String) entry.getKey());
 	if (ignoreNonSerializable && ! (value instanceof Serializable)) {
 	  out.writeObject(null);
 	  continue;

@@ -12,6 +12,9 @@
 
 <s2 title="3.1.snap - Jun 17, 2007">
 <ul>
+<li>error-page could operate on wrapped request (#1325, rep by slonopatamus)</li>
+<li>sessions now persist using Hessian2 (#1764, rep by Jan Kriesten)</li>
+<li>admin: basic support for clustered administration (#1165, rep by Serge Knystautas)</li>
 <li>Update load balancing to take slow/frozen servers into account (#1766, rep by Kevin MacClay)</li>
 <li>hessian: overload should add param types (#1621, rep by hixxxxx)</li>
 <li>sendRedirect needs to set Content-Type header for some firewalls (#1805, rep by M Hanson)</li>
