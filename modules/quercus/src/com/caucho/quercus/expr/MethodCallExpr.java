@@ -31,10 +31,8 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.MethodMap;
-import com.caucho.quercus.program.AbstractFunction;
+import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -99,7 +97,7 @@ public class MethodCallExpr extends Expr {
       args[i] = _args[i].evalArg(env);
 
     env.pushCall(this, obj);
-    
+
     try {
       env.checkTimeout();
 
@@ -108,7 +106,7 @@ public class MethodCallExpr extends Expr {
       env.popCall();
     }
   }
-  
+
   /**
    * Evaluates the expression.
    *

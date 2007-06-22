@@ -1018,20 +1018,51 @@ public class ImageModule extends AbstractQuercusModule {
   }
 
   /**
-   * Get font height
+   * Get font height.
+   *
+   * @param font a font previously loaded with {@link #imageloadfont},
+   *             or 1 -5 for built-in fonts
    */
-  public static int imagefontheight(QuercusImage image, int font)
+  public static int imagefontheight(int font)
   {
-    return image.getGraphics().getFontMetrics(image.getFont(font)).getHeight();
+    if (font < 1)
+      return 8;
+    else if (font == 1)
+      return 8;
+    else if (font == 2)
+      return 13;
+    else if (font == 3)
+      return 13;
+    else if (font == 4)
+      return 16;
+    else if (font == 5)
+      return 15;
+    else
+      return 15;
   }
 
   /**
-   * Get font width
+   * Get font width.
+   *
+   * @param font a font previously loaded with {@link #imageloadfont},
+   *             or 1 -5 for built-in fonts
    */
-  public static int imagefontwidth(QuercusImage image, int font)
+  public static int imagefontwidth(int font)
   {
-    return image.getGraphics().getFontMetrics(image.getFont(font))
-      .getMaxAdvance();
+    if (font < 1)
+      return 5;
+    else if (font == 1)
+      return 5;
+    else if (font == 2)
+      return 6;
+    else if (font == 3)
+      return 7;
+    else if (font == 4)
+      return 8;
+    else if (font == 5)
+      return 9;
+    else
+      return 9;
   }
 
 

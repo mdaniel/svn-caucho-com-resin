@@ -29,9 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.StringLiteralExpr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
 
@@ -262,10 +260,8 @@ public class ObjectExtValue extends ObjectValue
 
   public Value get(Value key)
   {
-    Env.getInstance().error(L.l("Can't use object '{0}' as array",
-				getName()));
-    
-    return NullValue.NULL;
+    // php/066q
+    return getField(null, key.toString());
   }
 
   public Value put(Value index, Value value)

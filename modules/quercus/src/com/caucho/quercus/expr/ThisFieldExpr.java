@@ -59,7 +59,12 @@ public class ThisFieldExpr extends AbstractVarExpr {
     
     _name = name.intern();
   }
-  
+
+  private Value cannotUseThisError(Env env)
+  {
+    return env.error("Cannot use '$this' when not in object context.");
+  }
+
   /**
    * Evaluates the expression.
    *
@@ -72,7 +77,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     Value obj = env.getThis();
 
     if (obj.isNull())
-      return env.error("Cannot use '$this' when not in object context.");
+      return cannotUseThisError(env);
     
     return obj.getField(env, _name);
   }
@@ -89,11 +94,11 @@ public class ThisFieldExpr extends AbstractVarExpr {
     Value obj = env.getThis();
 
     if (obj.isNull())
-      return env.error("Cannot use '$this' when not in object context.");
+      return cannotUseThisError(env);
     
     return obj.getField(env, _name).copy();
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -106,7 +111,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     Value obj = env.getThis();
 
     if (obj.isNull())
-      return env.error("Cannot use '$this' when not in object context.");
+      return cannotUseThisError(env);
     
     return obj.getFieldRef(env, _name);
   }
@@ -123,7 +128,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     Value obj = env.getThis();
 
     if (obj.isNull())
-      return env.error("Cannot use '$this' when not in object context.");
+      return cannotUseThisError(env);
     
     return obj.getFieldArg(env, _name);
   }
@@ -140,7 +145,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     Value obj = env.getThis();
 
     if (obj.isNull())
-      env.error("Cannot use '$this' when not in object context.");
+      cannotUseThisError(env);
     
     obj.putField(env, _name, value);
   }
@@ -157,7 +162,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     Value obj = env.getThis();
 
     if (obj.isNull())
-      return env.error("Cannot use '$this' when not in object context.");
+      return cannotUseThisError(env);
     
     return obj.getFieldArray(env, _name);
   }
@@ -174,7 +179,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     Value obj = env.getThis();
 
     if (obj.isNull())
-      return env.error("Cannot use '$this' when not in object context.");
+      return cannotUseThisError(env);
     
     return obj.getFieldObject(env, _name);
   }
@@ -191,7 +196,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
     Value obj = env.getThis();
 
     if (obj.isNull())
-      env.error("Cannot use '$this' when not in object context.");
+      cannotUseThisError(env);
     
     obj.removeField(_name);
   }
