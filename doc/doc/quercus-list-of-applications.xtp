@@ -1,11 +1,10 @@
 <document>
   <header>
     <product>resin</product>
-    <title>List of PHP Applications Running Well on Quercus</title>
-    <date>January 22, 2006</date>
+    <title>List of PHP applications that have been tested Quercus</title>
     
     <description>
-      <p>List of popular PHP applications working well with Quercus and configuration needed to get them running on Quercus.</p>
+      <p>List of popular PHP applications working well with Quercus and configuration needed to get them running.</p>
 
     </description>
   </header>
@@ -14,19 +13,19 @@
     <summary/>
     <localtoc/>
 
-<s1 title="DokuWiki 2006-11-06">
+<s1 name="dokuwiki" title="DokuWiki 2006-11-06">
 
 </s1>
 
-<s1 title="Dragonfly CMS 9.0.6.1.7">
+<s1 name="dragonflycms" title="Dragonfly CMS 9.0.6.1.7">
 
 </s1>
 
-<s1 title="Drupal 4.7.4">
+<s1 name="drupal" title="Drupal 4.7.4">
 
 </s1>
 
-<s1 title="Gallery2 2.1.2">
+<s1 name="galler2" title="Gallery2 2.1.2">
 
 <ul>
 <li>
@@ -80,11 +79,11 @@ something like
 
 </s1>
 
-<s1 title="Joomla 1.0.11">
+<s1 name="joomla" title="Joomla 1.0.11">
 
 </s1>
 
-<s1 title="MediaWiki 1.9">
+<s1 name="mediawiki" title="MediaWiki 1.9">
 
 <ul>
 <li>
@@ -103,7 +102,7 @@ and Resin will create the special configuration directory <code>${resin.root}/we
 <li>
 Install a database driver.
 The <a href="quercus-overview.xtp#databases">Using databases</a> section of the
-documentation contains download links and installation instructions for MySQL.nd Postgres
+documentation contains download links and installation instructions for MySQL and Postgres
 If this step is not done, then MediaWiki will display an error message like
 <code>
 A link to the server could not be established
@@ -114,32 +113,75 @@ A link to the server could not be established
 
 </s1>
 
-<s1 title="Phorum 5.1.16a">
+<s1 name="phorum" title="Phorum 5.1.16a">
 
 </s1>
 
-<s1 title="phpBB 2.0.21">
+<s1 name="phpbb" title="phpBB 2.0.21">
 
 </s1>
 
-<s1 title="phpMyAdmin 2.9.1.1">
+<s1 name="phpmyadmin" title="phpMyAdmin 2.9.1.1">
 
 </s1>
 
-<s1 title="PHProjekt 5.2">
+<s1 name="phpprojekt" title="PHProjekt 5.2">
 
 </s1>
 
-<s1 title="PHP-Nuke 7.9">
+<s1 name="phpnuke" title="PHP-Nuke 7.9">
 
 </s1>
 
-<s1 title="Wordpress 2.0.5">
+<s1 name="pligg" title="Pligg 0.9.6">
+
+<ul>
+<li>
+<a href="http://www.pligg.com/">download</a> Pligg
+</li>
+<li>
+Put the expanded contents of Pligg into a directory within ${resin.root}/webapps,
+this creates a <g>web application</g>.  For example, putting the contents in
+<code>${resin.root}/webapps/pligg-0.9.6</code> will correspond to a url like
+<code>http://localhost:8080/pligg-0.9.6</code>. 
+</li>
+<li>
+Start Resin. The console will show a message like "WebApp[http://localhost:8080/pligg-0.9.6] starting"
+and Resin will create the special configuration directory <code>${resin.root}/webapps/pligg-0.9.6/WEB-INF</code>.
+</li>
+<li>
+Install a database driver.
+The <a href="quercus-overview.xtp#databases">Using databases</a> section of the
+documentation contains download links and installation instructions for MySQL.
+</li>
+<li>
+<p>
+Pligg requires <code>ISO-8859-1</code> encoding. 
+Quercus defaults to UTF-8 encoding, the ISO-8859-1 encoding is set in the Quercus configuration:
+</p>
+
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns"&gt;
+  &lt;servlet-mapping url-pattern="*.php"
+                   servlet-class="com.caucho.quercus.servlet.QuercusServlet"&gt;
+    &lt;init&gt;
+      &lt;script-encoding&gt;iso-8859-1&lt;/script-encoding&gt;
+    &lt;/init&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;
+</example>
+</li>
+</ul>
 
 </s1>
 
-<s1 title="Xoops 2.0.16">
+<s1 name="wordpress" title="Wordpress 2.0.5">
 
 </s1>
+
+<s1 name="xoops" title="Xoops 2.0.16">
+
+</s1>
+
   </body>
 </document>

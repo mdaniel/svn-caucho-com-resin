@@ -168,7 +168,7 @@ You can set it in your resin-web.xml:</p>
     &lt;init>
       &lt;script-encoding>iso-8859-1&lt;/script-encoding>
       &lt;php-ini>
-        <b>&lt;unicode.output_encoding>>iso-8859-1&lt;/unicode.output_encoding></b>
+        <b>&lt;unicode.output_encoding&gt;iso-8859-1&lt;/unicode.output_encoding&gt;</b>
         &lt;unicode.runtime_encoding&gt;iso-8859-1&lt;/unicode.runtime_encoding&gt;
       &lt;/php-ini>
     &lt;/init>
@@ -180,7 +180,8 @@ You can set it in your resin-web.xml:</p>
 
 <s2 name="compiling" title="Compiling PHP Scripts for Increased Performance">
 
-<p>Quercus will automatically compile PHP scripts into Java classes for better performance.  This is available only in Resin Professional.</p>
+<p>Quercus will automatically compile PHP scripts into Java classes for better performance.
+ This is available only in Resin Professional.</p>
 
 <p>The default behaviour in Resin Professional is to execute the PHP script in
 interpreted mode, and to compile the script in the background.  When the
