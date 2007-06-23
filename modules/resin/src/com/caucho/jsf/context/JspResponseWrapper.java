@@ -77,17 +77,13 @@ public class JspResponseWrapper extends ResponseWrapper
     _stream = ((CauchoResponse) response).getResponseStream();
     
     setResponse(response);
+    _response = response;
 
     _os.init(_stream);
     _writer.init(_stream);
 
     _hasError = false;
   } 
-
-  public ServletResponse getResponse()
-  {
-    return _response;
-  }
 
   /**
    * Sets the ResponseStream

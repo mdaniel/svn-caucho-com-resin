@@ -712,7 +712,7 @@ public class ApplicationImpl extends Application
 
     ELResolver elResolver = getELResolver();
     FacesContext facesContext = FacesContext.getCurrentInstance();
-    ELContext elContext = new FacesELContext(facesContext, getELResolver());
+    ELContext elContext = new FacesELContext(facesContext, elResolver);
 
     if (param == null)
       param = new Class[0];

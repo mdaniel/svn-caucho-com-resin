@@ -476,11 +476,24 @@ public class QDate {
    */
   public int getWeek()
   {
-    int newYears = (int) ((_dayOfEpoch - _dayOfYear) % 7 + 11) % 7;
-    int normDay = (_dayOfYear - (7 - newYears) % 7);
-    int week = normDay < 0 ? -1 : normDay / 7;
-    if (newYears <= 3)
-      week++;
+    int dow4th = (int) ((_dayOfEpoch - _dayOfYear + 3) % 7 + 10) % 7;
+    int ww1monday = 3 - dow4th;
+
+    if (_dayOfYear < ww1monday)
+      return 53;
+
+    int week = (_dayOfYear - ww1monday) / 7 + 1;
+
+    if (_dayOfYear >= 360) {
+      int days = 365 + (_isLeapYear ? 1 : 0);
+      long nextNewYear = (_dayOfEpoch - _dayOfYear + days);
+      
+      int dowNext4th = (int) ((nextNewYear + 3) % 7 + 10) % 7;
+      int nextWw1Monday = 3 - dowNext4th;
+
+      if (days <= _dayOfYear - nextWw1Monday)
+	return 1;
+    }
 
     return week;
   }

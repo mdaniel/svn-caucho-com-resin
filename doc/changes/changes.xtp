@@ -12,6 +12,9 @@
 
 <s2 title="3.1.snap - Jun 17, 2007">
 <ul>
+<li>setSecurityProvider added to ResinConfig (#1815)</li>
+<li>amber: caching issues with SoftReferences (#1816, rep by frankhung)</li>
+<li>quercus: QDate change for week of year (#1810)</li>
 <li>error-page could operate on wrapped request (#1325, rep by slonopatamus)</li>
 <li>sessions now persist using Hessian2 (#1764, rep by Jan Kriesten)</li>
 <li>admin: basic support for clustered administration (#1165, rep by Serge Knystautas)</li>

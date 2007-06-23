@@ -82,6 +82,7 @@ public class JspPropertyGroup {
   private boolean _disableLog = true;
   private long _dependencyCheckInterval = Long.MIN_VALUE;
   private boolean _staticPageGeneratesClass = true;
+  private boolean _loadTldOnInit = false;
 
   private boolean _recompileOnError = false;
   private FileSetType _tldFileSet;
@@ -166,6 +167,22 @@ public class JspPropertyGroup {
   public Boolean isELIgnored()
   {
     return _isELIgnored;
+  }
+
+  /**
+   * Set true when JSP pages should load tld files.
+   */
+  public void setLoadTldOnInit(boolean isPreload)
+  {
+    _loadTldOnInit = isPreload;
+  }
+
+  /**
+   * Set true when JSP pages should load tld files.
+   */
+  public boolean isLoadTldOnInit()
+  {
+    return _loadTldOnInit;
   }
 
   /**

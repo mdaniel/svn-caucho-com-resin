@@ -57,6 +57,7 @@ public class UICommand extends UIComponentBase
   private ValueExpression _immediateExpr;
   
   private MethodExpression _actionExpr;
+  private MethodBinding _action;
 
   private ActionListener []_actionListeners = NULL_ACTION_LISTENERS;
 
@@ -185,10 +186,7 @@ public class UICommand extends UIComponentBase
   @Deprecated
   public MethodBinding getAction()
   {
-    if (_actionExpr == null)
-      return null;
-    else
-      return ((MethodBindingAdapter) _actionExpr).getBinding();
+    return _action;
   }
   
   @Deprecated
@@ -196,8 +194,8 @@ public class UICommand extends UIComponentBase
   {
     if (action == null)
       throw new NullPointerException();
-    
-    setActionExpression(new MethodBindingAdapter(action));
+
+    _action = action;
   }
 
   @Deprecated
@@ -286,7 +284,8 @@ public class UICommand extends UIComponentBase
 
     if (_actionExpr != null)
       actionExprString = _actionExpr.getExpressionString();
-    
+
+    System.out.println("SAVE-ACTION: " + _action);
     return new Object[] {
       super.saveState(context),
       _value,
@@ -294,6 +293,9 @@ public class UICommand extends UIComponentBase
       _immediate,
       Util.save(_immediateExpr, context),
       actionExprString,
+      ((_action instanceof StateHolder)
+       ? saveAttachedState(context, _action)
+       : null),
     };
   }
 
@@ -322,6 +324,9 @@ public class UICommand extends UIComponentBase
 						   Object.class,
 						   new Class[0]);
     }
+
+    if (state[6] != null)
+      _action = (MethodBinding) restoreAttachedState(context, state[6]);
   }
 
   //

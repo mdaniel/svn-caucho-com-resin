@@ -220,8 +220,10 @@ public class UIViewRoot extends UIComponentBase
     if (_eventList != null) {
       for (int i = 0; i < _eventList.size(); i++) {
 	FacesEvent event = _eventList.get(i);
+	PhaseId eventPhaseId = event.getPhaseId();
 
-	if (phaseId.equals(event.getPhaseId())) {
+	if (phaseId.equals(eventPhaseId)
+	    || PhaseId.ANY_PHASE.equals(eventPhaseId)) {
 	  event.getComponent().broadcast(event);
 	  _eventList.remove(i);
 	  i--;

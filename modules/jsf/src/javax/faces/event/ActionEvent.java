@@ -37,10 +37,13 @@ public class ActionEvent extends FacesEvent
   public ActionEvent(UIComponent component)
   {
     super(component);
+    Thread.dumpStack();
   }
 
   public boolean isAppropriateListener(FacesListener listener)
   {
+    System.out.println("APPTRO: " + listener);
+    Thread.dumpStack();
     return listener instanceof ActionListener;
   }
 

@@ -148,7 +148,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
   private StoreManager _storeManager;
 
   // If true, serialization errors should not be logged
-  private boolean _ignoreSerializationErrors = false;
+  // XXX: changed for JSF
+  private boolean _ignoreSerializationErrors = true;
 
   // List of the HttpSessionListeners from the configuration file
   private ArrayList<HttpSessionListener> _listeners;

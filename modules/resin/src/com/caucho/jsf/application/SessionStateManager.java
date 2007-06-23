@@ -69,8 +69,6 @@ public class SessionStateManager extends StateManager
 
       byte []state = bos.toByteArray();
 
-      Thread.dumpStack();
-
       debugState(state);
 
       return state;

@@ -40,6 +40,7 @@ import com.caucho.jsp.QServlet;
 import com.caucho.naming.Jndi;
 import com.caucho.server.connection.StubServletRequest;
 import com.caucho.server.connection.StubServletResponse;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.soa.servlet.ProtocolServlet;
 import com.caucho.soa.servlet.ProviderServlet;
 import com.caucho.soa.servlet.SoapProtocolServlet;
@@ -160,8 +161,13 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     _servletClassName = servletClassName;
 
     // JSF is special
-    if ("javax.faces.webapp.FacesServlet".equals(servletClassName))
-      _loadOnStartup = 0;
+    if ("javax.faces.webapp.FacesServlet".equals(_servletClassName)) {
+      if (_loadOnStartup < 0)
+	_loadOnStartup = 1;
+
+      if (_servletContext instanceof WebApp)
+	((WebApp) _servletContext).createJsp().setLoadTldOnInit(true);
+    }
   }
 
   /**

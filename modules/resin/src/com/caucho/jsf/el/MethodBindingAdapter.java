@@ -29,12 +29,18 @@
 package com.caucho.jsf.el;
 
 import javax.el.*;
+import javax.faces.application.*;
+import javax.faces.component.*;
 import javax.faces.context.*;
 import javax.faces.el.*;
 
-public class MethodBindingAdapter extends MethodBinding
+public class MethodBindingAdapter extends MethodBinding implements StateHolder
 {
-  private final MethodExpression _expr;
+  private MethodExpression _expr;
+
+  public MethodBindingAdapter()
+  {
+  }
 
   public MethodBindingAdapter(MethodExpression expr)
   {
@@ -82,6 +88,40 @@ public class MethodBindingAdapter extends MethodBinding
     } catch (Exception e) {
       throw new EvaluationException(e);
     }
+  }
+  
+  public Object saveState(FacesContext context)
+  {
+    ELContext elContext = context.getELContext();
+    
+    String expr = _expr.getExpressionString();
+    Class []types = _expr.getMethodInfo(elContext).getParamTypes();
+
+    return new Object[] { expr, types };
+  }
+
+  public void restoreState(FacesContext context, Object value)
+  {
+    Object []state = (Object []) value;
+    
+    Application app = context.getApplication();
+    ELContext elContext = context.getELContext();
+    ExpressionFactory factory = app.getExpressionFactory();
+
+    String expr = (String) state[0];
+    Class []param = (Class []) state[1];
+
+    _expr = factory.createMethodExpression(context.getELContext(),
+					   expr, Object.class, param);
+  }
+
+  public boolean isTransient()
+  {
+    return false;
+  }
+
+  public void setTransient(boolean isTransient)
+  {
   }
 
   public String toString()

@@ -103,7 +103,7 @@ and the XML header, e.g. &lt;?xml version='1.0'?&gt;</note>
 </li><li>32-bit <var>int</var>
 </li><li>64-bit <var>long</var>
 </li><li>64-bit <var>double</var>
-</li><li>ISO-8609 <var>date</var>
+</li><li>ISO-8601 <var>date</var>
 </li><li>UTF8-encoded <var>string</var>
 </li><li>UTF8-encoded <var>xml</var>
 </li><li><var>base64</var> binary data
@@ -205,7 +205,7 @@ entity.</note>
 </s2>
 
 <s2 title="date" type="defun">
-<p>An ISO8609-encoded date.</p>
+<p>An ISO8601-encoded date.</p>
 
 <results>
 &lt;date&gt;19880508T095231Z&lt;/date&gt;

@@ -171,15 +171,16 @@ public class JspViewHandler extends ViewHandler
     HttpServletRequest request
       = (HttpServletRequest) extContext.getRequest();
 
+    String contextPath = request.getContextPath();
     String servletPath = request.getServletPath();
     String pathInfo = request.getPathInfo();
 
     if (pathInfo == null)
-      return servletPath;
+      return contextPath + servletPath;
     else if (servletPath == null)
-      return pathInfo;
+      return contextPath + pathInfo;
     else
-      return servletPath + pathInfo;
+      return contextPath + servletPath + pathInfo;
   }
 
   public String getResourceURL(FacesContext context,

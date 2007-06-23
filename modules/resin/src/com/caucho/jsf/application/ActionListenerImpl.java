@@ -52,37 +52,41 @@ public class ActionListenerImpl implements ActionListener
     String fromAction = null;
     String logicalOutcome = null;
 
+    MethodExpression actionExpr = null;
+    MethodBinding action = null;
+    
     if (comp instanceof ActionSource2) {
       ActionSource2 actionComp = (ActionSource2) comp;
 
-      MethodExpression action = actionComp.getActionExpression();
-      System.out.println("ACTION: " + action);
-
-      if (action != null) {
-	fromAction = action.getExpressionString();
-	
-	Object value = action.invoke(context.getELContext(), NULL_ARG);
-	System.out.println("INVOKE: " + value);
-
-	if (value != null)
-	  logicalOutcome = value.toString();
-      }
+      actionExpr = actionComp.getActionExpression();
+      action = actionComp.getAction();
     }
     else if (comp instanceof ActionSource) {
       ActionSource actionComp = (ActionSource) comp;
 
-      MethodBinding action = actionComp.getAction();
-      System.out.println("ACTION2: " + action);
-
-      if (action != null) {
-	fromAction = action.getExpressionString();
-	
-	Object value = action.invoke(context, NULL_ARG);
-
-	if (value != null)
-	  logicalOutcome = value.toString();
-      }
+      action = actionComp.getAction();
     }
+
+    if (actionExpr != null) {
+      fromAction = actionExpr.getExpressionString();
+	
+      Object value = actionExpr.invoke(context.getELContext(), NULL_ARG);
+      System.out.println("INVOKE: " + value);
+
+      if (value != null)
+	logicalOutcome = value.toString();
+    }
+    else if (action != null) {
+      fromAction = action.getExpressionString();
+      System.out.println("ACTION-INVOKE: " + fromAction);
+	
+      Object value = action.invoke(context, NULL_ARG);
+
+      if (value != null)
+	logicalOutcome = value.toString();
+    }
+    else
+      System.out.println("NO-ACTION: " + comp);
 
     Application app = context.getApplication();
 

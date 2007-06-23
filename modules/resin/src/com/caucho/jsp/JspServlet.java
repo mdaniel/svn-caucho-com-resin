@@ -57,7 +57,7 @@ public class JspServlet extends QServlet {
   }
 
   /**
-   * Set true when JSP pages should default to xml.
+   * Set true when JSP pages should load tld files.
    */
   public void setLoadTldOnInit(boolean isPreload)
   {
@@ -83,11 +83,14 @@ public class JspServlet extends QServlet {
 
     JspManager manager = new JspManager();
 
+    WebApp webApp = (WebApp) getServletContext();
+
     manager.setXml(_isXml);
-    manager.setLoadTldOnInit(_loadTldOnInit);
+    manager.setLoadTldOnInit(_loadTldOnInit
+			     || webApp.createJsp().isLoadTldOnInit());
     manager.setPageCacheMax(_pageCacheMax);
 
-    manager.initWebApp((WebApp) getServletContext());
+    manager.initWebApp(webApp);
       
     setManager(manager);
 

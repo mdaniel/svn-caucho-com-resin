@@ -688,6 +688,7 @@ public class WebApp extends ServletContextImpl
   {
     ServletConfigImpl config = new ServletConfigImpl();
 
+    config.setServletContext(this);
     config.setAllowEL(_servletAllowEL);
 
     return config;

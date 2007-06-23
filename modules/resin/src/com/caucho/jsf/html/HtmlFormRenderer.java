@@ -186,8 +186,7 @@ class HtmlFormRenderer extends BaseRenderer
     ExternalContext extContext = context.getExternalContext();
 
     ViewHandler view = app.getViewHandler();
-    String action = view.getResourceURL(context,
-					view.getActionURL(context, viewId));
+    String action = view.getActionURL(context, viewId);
     String encodedAction = extContext.encodeActionURL(action);
 
     out.writeAttribute("action", encodedAction, "action");

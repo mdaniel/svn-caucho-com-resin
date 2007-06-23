@@ -631,8 +631,13 @@ public class UIInput extends UIOutput
 	  validator.validate(context, this, value);
 	} catch (ValidatorException e) {
 	  log.log(Level.FINER, e.toString(), e);
-	  
-	  context.addMessage(getClientId(context), e.getFacesMessage());
+
+	  if (e.getFacesMessage() != null)
+	    context.addMessage(getClientId(context), e.getFacesMessage());
+	  else {
+	    FacesMessage msg = new FacesMessage(e.getMessage(), e.toString());
+	    context.addMessage(getClientId(context), msg);
+	  }
 	  
 	  setValid(false);
 	}

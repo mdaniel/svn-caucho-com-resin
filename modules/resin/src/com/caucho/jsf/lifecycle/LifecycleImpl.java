@@ -116,6 +116,7 @@ public class LifecycleImpl extends Lifecycle
     if (context.getResponseComplete() || context.getRenderResponse())
       return;
     
+    System.out.println("PROCESS_APP:");
     viewRoot.processApplication(context);
   }
 
