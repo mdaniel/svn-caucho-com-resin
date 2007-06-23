@@ -783,7 +783,7 @@ public class RegexpModule
    */
   private static StringValue pregReplaceStringImpl(Env env,
 						   Pattern pattern,
-						   ArrayList<Replacement> replacementList,
+						   ArrayList<Replacement> replacementProgram,
 						   StringValue subject,
 						   long limit,
 						   Value countV,
@@ -799,7 +799,7 @@ public class RegexpModule
     StringBuilderValue result = null;
     int tail = 0;
 
-    int replacementLen = replacementList.size();
+    int replacementLen = replacementProgram.size();
 
     while (matcher.find() && limit-- > 0) {
       if (result == null)
@@ -820,19 +820,20 @@ public class RegexpModule
         StringBuilderValue evalString = new StringBuilderValue();
 
         for (int i = 0; i < replacementLen; i++) {
-          Replacement replacement = replacementList.get(i);
+          Replacement replacement = replacementProgram.get(i);
 
           replacement.eval(evalString, subject, matcher);
         }
 
 	try {
-	  result.append(env.evalCode(evalString.toString()));
+          if (evalString.length() > 0) // php/152z
+            result.append(env.evalCode(evalString.toString()));
 	} catch (IOException e) {
 	  throw new QuercusException(e);
 	}
       } else {
         for (int i = 0; i < replacementLen; i++) {
-          Replacement replacement = replacementList.get(i);
+          Replacement replacement = replacementProgram.get(i);
 
           replacement.eval(result, subject, matcher);
         }

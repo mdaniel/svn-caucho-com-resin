@@ -39,7 +39,8 @@ import java.util.HashMap;
 /**
  * Information about a function.
  */
-public class FunctionInfo {
+public class FunctionInfo
+{
   private final Quercus _quercus;
 
   private final String _name;
@@ -53,6 +54,7 @@ public class FunctionInfo {
   private ClassDef _classDef;
   private Function _fun;
 
+  private boolean _hasThis; // if true, override default
   private boolean _isGlobal;
   
   private boolean _isPageMain;
@@ -71,6 +73,28 @@ public class FunctionInfo {
   {
     _quercus = quercus;
     _name = name;
+  }
+
+  public FunctionInfo copy()
+  {
+    FunctionInfo copy = new FunctionInfo(_quercus, _name);
+
+    copy._varMap.putAll(_varMap);
+    copy._tempVarList.addAll(_tempVarList);
+    copy._classDef = _classDef;
+    copy._fun = _fun;
+    copy._hasThis = _hasThis;
+    copy._isGlobal = _isGlobal;
+    copy._isPageMain = _isPageMain;
+    copy._isPageStatic = _isPageStatic;
+    copy._isReturnsReference = _isReturnsReference;
+    copy._isVariableVar = _isVariableVar;
+    copy._isOutUsed = _isOutUsed;
+    copy._isVariableArgs = _isVariableArgs;
+    copy._isUsesSymbolTable = _isUsesSymbolTable;
+    copy._isReadOnly = _isReadOnly;
+
+    return copy;
   }
 
   /**
@@ -142,12 +166,17 @@ public class FunctionInfo {
     _isPageStatic = isPageStatic;
   }
 
+  public void setHasThis(boolean hasThis)
+  {
+    _hasThis = hasThis;
+  }
+
   /**
    * Return true if the function allows $this
    */
   public boolean hasThis()
   {
-    return _classDef != null && ! _fun.isStatic();
+    return _hasThis || (_classDef != null && ! _fun.isStatic());
   }
   
   /**
