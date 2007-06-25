@@ -219,35 +219,17 @@ javaee_user-data-constraint = element user-data-constraint {
 }
 
 javaee_web-app-Content =
-  element context-param { javaee_param-value-Type }*
-
-  & javaee_description-Group*
+  javaee_description-Group*
 
   & element distributable { empty }?
 
-  & javaee_jndi-environment-refs-Group
-
-  & javaee_error-page*
+  & element context-param { javaee_param-value-Type }*
 
   & javaee_filter*
 
   & javaee_filter-mapping*
 
-  & javaee_jsp-config?
-
   & javaee_listener*
-
-  & javaee_locale-encoding-mapping-list?
-
-  & javaee_login-config?
-
-  & javaee_message-destination*
-
-  & javaee_mime-mapping*
-
-  & javaee_security-constraint*
-
-  & javaee_security-role*
 
   & javaee_servlet*
 
@@ -255,7 +237,25 @@ javaee_web-app-Content =
 
   & javaee_session-config?
 
+  & javaee_mime-mapping*
+
   & javaee_welcome-file-list?
+
+  & javaee_error-page*
+
+  & javaee_jsp-config?
+
+  & javaee_security-constraint*
+
+  & javaee_login-config?
+
+  & javaee_security-role*
+
+  & javaee_jndi-environment-refs-Group
+
+  & javaee_message-destination*
+
+  & javaee_locale-encoding-mapping-list?
 
 javaee_web-app = element web-app {
   attribute id { string }?,
