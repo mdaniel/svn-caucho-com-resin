@@ -132,6 +132,12 @@ public class ApplicationImpl extends Application
     addComponent(UIInput.COMPONENT_TYPE,
 		 "javax.faces.component.UIInput");
 
+    addComponent(UIMessage.COMPONENT_TYPE,
+		 "javax.faces.component.UIMessage");
+
+    addComponent(UIMessages.COMPONENT_TYPE,
+		 "javax.faces.component.UIMessages");
+
     addComponent(UINamingContainer.COMPONENT_TYPE,
 		 "javax.faces.component.UINamingContainer");
 

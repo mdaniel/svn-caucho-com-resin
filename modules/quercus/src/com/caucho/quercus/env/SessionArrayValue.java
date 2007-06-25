@@ -34,8 +34,8 @@ import com.caucho.quercus.lib.UnserializeReader;
 import com.caucho.util.CacheListener;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -187,22 +187,45 @@ public class SessionArrayValue extends ArrayValueWrapper
   /**
    * Saves the object to the output stream.
    */
-  public void store(ObjectOutputStream out)
+  public void store(OutputStream out)
     throws IOException
   {
-    out.writeObject(encode());
+    String encode = encode();
+
+    int len = encode.length();
+
+    out.write(len >> 24);
+    out.write(len >> 16);
+    out.write(len >> 8);
+    out.write(len);
+
+    for (int i = 0; i < len; i++) {
+      char ch = encode.charAt(i);
+
+      out.write(ch >> 8);
+      out.write(ch);
+    }
   }
 
-  public void load(Env env, ObjectInputStream in)
+  public void load(Env env, InputStream in)
     throws IOException
   {
-    try {
-      String encoded = in.readObject().toString();
+    int len = (((in.read() & 0xff) << 24)
+	       + ((in.read() & 0xff) << 16)
+	       + ((in.read() & 0xff) << 8)
+	       + ((in.read() & 0xff)));
 
-      decode(env, encoded);
-    } catch (ClassNotFoundException e) {
-      log.log(Level.WARNING, "Can't deserialize session", e);
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < len; i++) {
+      char ch = (char) (((in.read() & 0xff) << 8) + (in.read() & 0xff));
+
+      sb.append(ch);
     }
+
+    String encoded = sb.toString();
+
+    decode(env, encoded);
   }
 
   /**

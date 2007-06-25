@@ -101,7 +101,7 @@ public class UIMessages extends UIComponentBase
     else if (_showSummaryExpr != null)
       return Util.evalBoolean(_showSummaryExpr, getFacesContext());
     else
-      return false;
+      return true;
   }
 
   public void setShowSummary(boolean value)

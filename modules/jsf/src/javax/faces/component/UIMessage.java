@@ -101,7 +101,7 @@ public class UIMessage extends UIComponentBase
     else if (_showSummaryExpr != null)
       return Util.evalBoolean(_showSummaryExpr, getFacesContext());
     else
-      return false;
+      return true;
   }
 
   public void setShowSummary(boolean value)
@@ -159,20 +159,18 @@ public class UIMessage extends UIComponentBase
 
   public Object saveState(FacesContext context)
   {
-    Object []state = new Object[7];
-
-    state[0] = super.saveState(context);
+    return new Object[] {
+      super.saveState(context),
     
-    state[1] = _for;
-    state[2] = Util.save(_forExpr, context);
+      _for,
+      Util.save(_forExpr, context),
     
-    state[3] = _showDetail;
-    state[4] = Util.save(_showDetailExpr, context);
+      _showDetail,
+      Util.save(_showDetailExpr, context),
     
-    state[5] = _showSummary;
-    state[6] = Util.save(_showSummaryExpr, context);
-
-    return state;
+      _showSummary,
+      Util.save(_showSummaryExpr, context)
+    };
   }
 
   public void restoreState(FacesContext context, Object value)
@@ -182,20 +180,12 @@ public class UIMessage extends UIComponentBase
     super.restoreState(context, state[0]);
 
     _for = (String) state[1];
-    _forExpr = Util.restore(state[2],
-			    String.class,
-			    context);
+    _forExpr = Util.restoreString(state[2], context);
 
-    if (state[3] != null)
-      _showDetail = (Boolean) state[3];
-    _showDetailExpr = Util.restore(state[4],
-				   Boolean.class,
-				   context);
+    _showDetail = (Boolean) state[3];
+    _showDetailExpr = Util.restoreBoolean(state[4], context);
 
-    if (state[5] != null)
-      _showSummary = (Boolean) state[5];
-    _showSummaryExpr = Util.restore(state[6],
-				    Boolean.class,
-				    context);
+    _showSummary = (Boolean) state[5];
+    _showSummaryExpr = Util.restoreBoolean(state[6], context);
   }
 }
