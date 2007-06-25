@@ -46,9 +46,10 @@ public class AmberEntityManager extends AmberConnection
   /**
    * Creates a manager instance.
    */
-  AmberEntityManager(AmberPersistenceUnit persistenceUnit)
+  AmberEntityManager(AmberPersistenceUnit persistenceUnit,
+                     boolean isAppManaged)
   {
-    super(persistenceUnit, false);
+    super(persistenceUnit, false, isAppManaged);
 
     initJta(); // initThreadConnection(); // ejb/0q00
   }

@@ -62,7 +62,7 @@ public class AmberEntityManagerFactory implements EntityManagerFactory {
    */
   public EntityManager createEntityManager(Map map)
   {
-    return new AmberEntityManager(_unit);
+    return new AmberEntityManager(_unit, true);
   }
 
   /**
