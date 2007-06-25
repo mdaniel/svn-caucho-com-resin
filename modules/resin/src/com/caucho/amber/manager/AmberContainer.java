@@ -237,7 +237,7 @@ public class AmberContainer {
   /**
    * Returns the persistence unit JNDI context.
    */
-  public String getPersistenceUnitJndiPrefix()
+  public static String getPersistenceUnitJndiPrefix()
   {
     return "java:comp/env/persistence/_amber_PersistenceUnit/";
   }
@@ -245,7 +245,7 @@ public class AmberContainer {
   /**
    * Returns the persistence unit JNDI context.
    */
-  public String getPersistenceContextJndiPrefix()
+  public static String getPersistenceContextJndiPrefix()
   {
     //return "java:comp/env/persistence/PersistenceContext/";
     return "java:comp/env/persistence/";
@@ -529,6 +529,25 @@ public class AmberContainer {
 
           if (entityMappings != null)
             entityMappingsList.add(entityMappings);
+
+          // jpa/0s2n: <jar-file>
+          for (String fileName : unitConfig.getJarFiles()) {
+            JarPath jarFile;
+
+            Path parent = root;
+
+            if (root instanceof JarPath) {
+              parent = ((JarPath) root).getContainer().getParent();
+            }
+
+            jarFile = JarPath.create(parent.lookup(fileName));
+
+            classMap.clear();
+
+            lookupJarClasses(jarFile, classMap, entityMappings);
+
+            unitConfig.addAllClasses(classMap);
+          }
 
           // jpa/0s2l: custom mapping-file.
           for (String fileName : unitConfig.getMappingFiles()) {

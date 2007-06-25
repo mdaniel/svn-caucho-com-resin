@@ -113,6 +113,8 @@ public class AmberConnection
 
   private boolean _isExtended;
 
+  private boolean _isAppManaged;
+
   private Connection _conn;
   private Connection _readConn;
 
@@ -135,10 +137,21 @@ public class AmberConnection
    * Creates a manager instance.
    */
   AmberConnection(AmberPersistenceUnit persistenceUnit,
-                  boolean isExtended)
+                  boolean isExtended,
+                  boolean isAppManaged)
   {
     _persistenceUnit = persistenceUnit;
     _isExtended = isExtended;
+    _isAppManaged = isAppManaged;
+  }
+
+  /**
+   * Creates a manager instance.
+   */
+  AmberConnection(AmberPersistenceUnit persistenceUnit,
+                  boolean isExtended)
+  {
+    this(persistenceUnit, isExtended, false);
   }
 
   /**
@@ -798,7 +811,9 @@ public class AmberConnection
   void register()
   {
     if (! _isRegistered) {
-      UserTransactionProxy.getInstance().enlistCloseResource(this);
+      if (! _isAppManaged)
+        UserTransactionProxy.getInstance().enlistCloseResource(this);
+
       UserTransactionProxy.getInstance().enlistBeginResource(this);
     }
 
@@ -810,7 +825,9 @@ public class AmberConnection
    */
   public void joinTransaction()
   {
-    throw new UnsupportedOperationException();
+    // XXX: jpa/0s46, jpa/0s47
+
+    _isInTransaction = true;
   }
 
   /**
