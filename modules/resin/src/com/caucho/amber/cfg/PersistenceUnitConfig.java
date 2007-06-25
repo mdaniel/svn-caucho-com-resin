@@ -60,6 +60,9 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   private ArrayList<String> _mappingFiles
     = new ArrayList<String>();
 
+  private ArrayList<String> _jarFiles
+    = new ArrayList<String>();
+
   public PersistenceUnitConfig()
   {
     Thread thread = Thread.currentThread();
@@ -156,8 +159,17 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Sets the jars with classes.
    */
-  public void addJarFile(Path file)
+  public void addJarFile(String fileName)
   {
+    _jarFiles.add(fileName);
+  }
+
+  /**
+   * Returns the jars with classes.
+   */
+  public ArrayList<String> getJarFiles()
+  {
+    return _jarFiles;
   }
 
   /**
