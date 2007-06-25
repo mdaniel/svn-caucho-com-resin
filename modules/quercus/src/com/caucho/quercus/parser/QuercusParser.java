@@ -3303,8 +3303,12 @@ public class QuercusParser {
     String name = null;
     Expr nameExpr = null;
 
-    if (token == IDENTIFIER)
+    if (token == IDENTIFIER
+        && !"self".equals(_lexeme) // /php/096i
+        && !"parent".equals(_lexeme)) // php/0956
+    {
       name = _lexeme;
+    }
     else {
       _peekToken = token;
       
@@ -3337,10 +3341,14 @@ public class QuercusParser {
       }
     }
 
+    Expr expr;
+
     if (name != null)
-      return _factory.createNew(getLocation(), name, args);
+      expr =  _factory.createNew(getLocation(), name, args);
     else
-      return _factory.createVarNew(getLocation(), nameExpr, args);
+      expr = _factory.createVarNew(getLocation(), nameExpr, args);
+
+    return expr;
   }
 
   /**
@@ -4904,7 +4912,10 @@ public class QuercusParser {
 
     case TEXT_ECHO:
       return "<?=";
-      
+
+    case SCOPE:
+      return "SCOPE (" + _lexeme +  ")";
+
     default:
       if (32 <= token && token < 127)
 	return "'" + (char) token + "'";
