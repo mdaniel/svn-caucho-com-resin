@@ -1599,20 +1599,22 @@ public class AmberPersistenceUnit {
       _entityKey.init(rootType, key);
       ref = _entityCache.get(_entityKey);
 
-      EntityItem oldCacheItem = ref.get();
-      
-      if (oldCacheItem == null) {
-        ref = new SoftReference<EntityItem>(cacheItem);
-        EntityKey entityKey = new EntityKey(rootType, key);
+      // jpa/0g70
+      if (ref != null) {
+        EntityItem oldCacheItem = ref.get();
 
-        ref = _entityCache.put(entityKey, ref);
+        if (oldCacheItem == null) {
+          ref = new SoftReference<EntityItem>(cacheItem);
+          EntityKey entityKey = new EntityKey(rootType, key);
 
-	oldCacheItem = ref.get();
+          ref = _entityCache.put(entityKey, ref);
 
+          oldCacheItem = ref.get();
+        }
+
+        if (oldCacheItem != null)
+          cacheItem = oldCacheItem;
       }
-
-      if (oldCacheItem != null)
-	cacheItem = oldCacheItem;
 
       contextEntity.__caucho_updateCacheItem(cacheItem.getEntity());
     }
