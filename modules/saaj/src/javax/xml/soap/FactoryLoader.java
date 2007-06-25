@@ -193,10 +193,8 @@ class FactoryLoader {
 
         Class provider = loadProvider(url, loader);
 
-        if (provider != null) {
-          System.out.println("Loaded provider " + provider + " from url " + url);
+        if (provider != null)
           list.add(provider);
-        }
       }
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
