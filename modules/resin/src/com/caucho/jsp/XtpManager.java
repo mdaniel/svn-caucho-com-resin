@@ -33,6 +33,7 @@ import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.jsp.JspFactory;
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -160,6 +161,7 @@ public class XtpManager extends PageManager {
    * @return the page or null for not found
    */
   Page createPage(Path path, String uri, String className,
+		  ServletConfig config,
 		  ArrayList<PersistentDependency> dependList)
     throws Exception
   {

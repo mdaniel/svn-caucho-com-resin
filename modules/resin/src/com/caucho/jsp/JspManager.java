@@ -124,10 +124,11 @@ public class JspManager extends PageManager {
    * @return the compiled JSP page
    */
   Page createGeneratedPage(Path path, String uri, String className,
+			   ServletConfig config,
 			   ArrayList<PersistentDependency> dependList)
     throws Exception
   {
-    return createPage(path, uri, className, dependList, true);
+    return createPage(path, uri, className, config, dependList, true);
   }
 
   /**
@@ -141,10 +142,11 @@ public class JspManager extends PageManager {
    * @return the compiled JSP page
    */
   Page createPage(Path path, String uri, String className,
+		  ServletConfig config,
 		  ArrayList<PersistentDependency> dependList)
     throws Exception
   {
-    return createPage(path, uri, className, dependList, false);
+    return createPage(path, uri, className, config, dependList, false);
   }
 
   /**
@@ -158,8 +160,9 @@ public class JspManager extends PageManager {
    * @return the compiled JSP page
    */
   private Page createPage(Path path, String uri, String className,
-		  ArrayList<PersistentDependency> dependList,
-		  boolean isGenerated)
+			  ServletConfig config,
+			  ArrayList<PersistentDependency> dependList,
+			  boolean isGenerated)
     throws Exception
   {
     Class jspClass = null;
@@ -173,7 +176,7 @@ public class JspManager extends PageManager {
     // need to load class, too
 
     //Page page = loadPage(jspClass, parseState.getLineMap(), req);
-    page = loadPage(page, null);
+    page = loadPage(page, config, null);
 
     boolean alwaysModified = false;
     if (alwaysModified)
@@ -384,7 +387,7 @@ public class JspManager extends PageManager {
    * @param jspClass the class object of the JSP file.
    * @param lineMap the java to JSP line map.
    */
-  private Page loadPage(Page page, LineMap lineMap)
+  private Page loadPage(Page page, ServletConfig config, LineMap lineMap)
     throws Exception
   {
     page.init(_webApp.getAppDir());
@@ -392,7 +395,8 @@ public class JspManager extends PageManager {
 
     page._caucho_setJspManager(this);
 
-    ServletConfig config = new JspServletConfig(_webApp, null, "/foo");
+    if (config == null)
+      config = new JspServletConfig(_webApp, null, "");
 
     page.init(config);
     

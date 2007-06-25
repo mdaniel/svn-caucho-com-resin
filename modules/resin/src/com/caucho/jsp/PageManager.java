@@ -45,6 +45,7 @@ import com.caucho.vfs.PersistentDependency;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletConfig;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -166,10 +167,12 @@ abstract public class PageManager {
     *
     * @return the compiled JSP (or XTP) page.
     */
-  public Page getPage(String uri, String pageURI, Path path)
+  public Page getPage(String uri, String pageURI,
+		      Path path,
+		      ServletConfig config)
     throws Exception
   {
-    return getPage(uri, pageURI, path, null);
+    return getPage(uri, pageURI, path, config, null);
   }
   
    /**
@@ -183,6 +186,7 @@ abstract public class PageManager {
     * @return the compiled JSP (or XTP) page.
     */
   public Page getPage(String uri, String pageURI, Path path,
+		      ServletConfig config,
 		      ArrayList<PersistentDependency> dependList)
     throws Exception
   {
@@ -238,7 +242,7 @@ abstract public class PageManager {
 
       String className = JavaCompiler.mangleName("jsp/" + rawClassName);
 
-      page = createPage(path, pageURI, className, dependList);
+      page = createPage(path, pageURI, className, config, dependList);
 
       if (page == null)
         throw new FileNotFoundException(getWebApp().getContextPath() + pageURI);
@@ -269,6 +273,7 @@ abstract public class PageManager {
    * and XtpManager define this for their specific needs.
    */
   abstract Page createPage(Path path, String uri, String className,
+			   ServletConfig config,
 			   ArrayList<PersistentDependency> dependList)
     throws Exception;
 

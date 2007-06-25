@@ -36,7 +36,7 @@ import java.util.Hashtable;
 class JspServletConfig implements ServletConfig  {
   private Hashtable init;
   private ServletContext context;
-  private String name;
+  private String _name;
 
   JspServletConfig(ServletContext context, Hashtable init, String name)
   {
@@ -44,12 +44,12 @@ class JspServletConfig implements ServletConfig  {
       init = new Hashtable();
     this.init = init;
     this.context = context;
-    this.name = name;
+    _name = name;
   }
 
   public String getServletName()
   {
-    return this.name;
+    return _name;
   }
 
   public ServletContext getServletContext()

@@ -272,6 +272,7 @@ abstract public class QServlet implements Servlet {
     Path subcontext;
 
     Page page;
+    ServletConfig config = null;
 
     String jspPath = (String) req.getAttribute("caucho.jsp.jsp-file");
     if (jspPath != null) {
@@ -279,7 +280,7 @@ abstract public class QServlet implements Servlet {
 
       subcontext = getPagePath(jspPath);
 
-      return _manager.getPage(uri, jspPath, subcontext);
+      return _manager.getPage(uri, jspPath, subcontext, config);
     }
 
     String pathInfo;
@@ -331,7 +332,7 @@ abstract public class QServlet implements Servlet {
     _webApp.getJspApplicationContext().getELListenerArray();
   }
 
-  public Page getPage(String uri, String pageURI)
+  public Page getPage(String uri, String pageURI, ServletConfig config)
     throws Exception
   {
     Path path = getPagePath(pageURI);
@@ -339,7 +340,7 @@ abstract public class QServlet implements Servlet {
     if (path == null)
       return null;
 
-    return _manager.getPage(uri, pageURI, path);
+    return _manager.getPage(uri, pageURI, path, config);
   }
 
   /**

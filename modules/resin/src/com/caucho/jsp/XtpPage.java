@@ -66,6 +66,7 @@ import org.w3c.dom.ProcessingInstruction;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
@@ -700,7 +701,9 @@ class XtpPage extends Page {
           depends.add(jspDepend);
       }
 
-      Page page = _jspManager.createGeneratedPage(path, _uri, className, depends);
+      ServletConfig config = null;
+      Page page = _jspManager.createGeneratedPage(path, _uri, className,
+						  config, depends);
       
       return page;
     } catch (IOException e) {
