@@ -29,6 +29,8 @@
 
 package com.caucho.config.types;
 
+import com.caucho.amber.manager.AmberContainer;
+import com.caucho.config.ConfigException;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBServer;
 import com.caucho.naming.Jndi;
@@ -156,17 +158,41 @@ public class PersistenceUnitRef implements ObjectProxy {
     if (_persistenceUnitName == null)
       _persistenceUnitName = "default";
 
+    if (log.isLoggable(Level.FINER))
+      log.finer(L.l("adding persistence unit ref: {0}", _persistenceUnitRefName));
+
     String fullJndiName = Jndi.getFullName(_persistenceUnitRefName);
 
     try {
       Object oldValue = new InitialContext().lookup(fullJndiName);
 
-      if (oldValue != null)
+      if (oldValue != null) {
+        if (log.isLoggable(Level.FINER))
+          log.finer(L.l("persistence unit ref {0} exists. returning.", _persistenceUnitRefName));
+
         return;
+      }
     } catch (NamingException e) {
     }
 
-    Jndi.rebindDeep(fullJndiName, this);
+    if (log.isLoggable(Level.FINER))
+      log.finer(L.l("look up persistence unit {0}", _persistenceUnitName));
+
+    // XXX: TCK, ejb30/persistence/ee/packaging/web/standalone, needs a test case.
+    try {
+      Object obj = new InitialContext().lookup(AmberContainer.getPersistenceUnitJndiPrefix()
+                                               + _persistenceUnitName);
+
+      if (log.isLoggable(Level.FINER))
+        log.finer(L.l("binding persistence-unit-ref {0} to persistence unit {1}",
+                      _persistenceUnitRefName,
+                      _persistenceUnitName));
+
+      Jndi.rebindDeep(fullJndiName, obj);
+    } catch (NamingException e) {
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, e.toString(), e);
+    }
   }
 
   /**
