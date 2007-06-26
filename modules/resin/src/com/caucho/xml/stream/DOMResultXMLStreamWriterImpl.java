@@ -166,7 +166,14 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
       }
     }
     else {
-      ((Element) _current).setAttributeNS(namespaceURI, localName, value);
+      String prefix = _tracker.getPrefix(namespaceURI);
+
+      if (prefix == null)
+        throw new XMLStreamException(L.l("No prefix defined for namespace {0}", namespaceURI));
+
+      String qname = prefix + ':' + localName;
+      
+      ((Element) _current).setAttributeNS(namespaceURI, qname, value);
     }
   }
 
@@ -293,6 +300,14 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
         if (prefix != null)
           qname = prefix + ':' + localName;
       }
+      else {
+        String prefix = _tracker.getPrefix(namespaceURI);
+
+        if (prefix == null)
+          throw new XMLStreamException(L.l("No prefix defined for namespace {0}", namespaceURI));
+
+        qname = prefix + ':' + localName;
+      }
 
       Node parent = _current;
       _current = _document.createElementNS(namespaceURI, qname);
@@ -376,6 +391,7 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
   {
     if (prefix == null || "".equals(prefix) || "xmlns".equals(prefix))
       writeDefaultNamespace(namespaceURI);
+
     else {
       _tracker.declare(prefix, namespaceURI, true);
 
@@ -473,6 +489,14 @@ public class DOMResultXMLStreamWriterImpl implements XMLStreamWriter {
 
         if (prefix != null)
           qname = prefix + ':' + localName;
+      }
+      else {
+        String prefix = _tracker.getPrefix(namespaceURI);
+
+        if (prefix == null)
+          throw new XMLStreamException(L.l("No prefix defined for namespace {0}", namespaceURI));
+
+        qname = prefix + ':' + localName;
       }
 
       Node parent = _current;

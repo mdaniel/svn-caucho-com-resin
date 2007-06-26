@@ -1058,6 +1058,14 @@ public class XMLStreamReaderImpl implements XMLStreamReader {
         char quot = data.charAt(0);
         _encoding = data.substring(1, data.indexOf(quot, 1));
         data = data.substring(data.indexOf(quot, 1)+1).trim();
+
+        try {
+          if (_is != null)
+            _is.setEncoding(_encoding);
+        }
+        catch (java.io.UnsupportedEncodingException e) {
+          throw new XMLStreamException(e);
+        }
       }
 
       ch = readByte();

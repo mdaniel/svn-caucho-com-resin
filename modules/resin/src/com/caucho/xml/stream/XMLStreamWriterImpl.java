@@ -174,8 +174,14 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
       else
         _pendingAttributeNames.add(new QName(namespaceURI, localName, prefix));
     }
-    else
-      _pendingAttributeNames.add(new QName(namespaceURI, localName));
+    else {
+      String prefix = _tracker.getPrefix(namespaceURI);
+
+      if (prefix == null)
+        throw new XMLStreamException(L.l("No prefix defined for namespace {0}", namespaceURI));
+
+      _pendingAttributeNames.add(new QName(namespaceURI, localName, prefix));
+    }
 
     _pendingAttributeValues.add(value);
   }
@@ -297,17 +303,31 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
       QName qname = null;
 
       if (_repair) {
+        // NOTE: We have to push before we declare because declare will
+        // declare the namespace in the parent context if we don't
+        flushContext();
+        _tracker.push();
+
         String prefix = _tracker.declare(namespaceURI);
 
         if (prefix == null)
           qname = new QName(namespaceURI, localName);
         else
           qname = new QName(namespaceURI, localName, prefix);
-      }
-      else
-        qname = new QName(namespaceURI, localName);
 
-      pushContext(qname);
+        _tracker.setElementName(qname);
+        _flushed = false;
+      }
+      else {
+        String prefix = _tracker.getPrefix(namespaceURI);
+
+        if (prefix == null)
+          throw new XMLStreamException(L.l("No prefix defined for namespace {0}", namespaceURI));
+
+        qname = new QName(namespaceURI, localName, prefix);
+        pushContext(qname);
+      }
+
       _pendingTagName = qname;
       _shortTag = true;
     }
@@ -322,11 +342,22 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      if (_repair && _tracker.getPrefix(namespaceURI) == null)
+      QName qname = new QName(namespaceURI, localName, prefix);
+
+      if (_repair && _tracker.getPrefix(namespaceURI) == null) {
+        // NOTE: We have to push before we declare because declare will
+        // declare the namespace in the parent context if we don't
+        flushContext();
+        _tracker.push();
+
         _tracker.declare(prefix, namespaceURI, true);
 
-      QName qname = new QName(namespaceURI, localName, prefix);
-      pushContext(qname);
+        _tracker.setElementName(qname);
+        _flushed = false;
+      }
+      else
+        pushContext(qname);
+
       _pendingTagName = qname;
       _shortTag = true;
     }
@@ -488,17 +519,31 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
       QName qname = null;
 
       if (_repair) {
+        // NOTE: We have to push before we declare because declare will
+        // declare the namespace in the parent context if we don't
+        flushContext();
+        _tracker.push();
+
         String prefix = _tracker.declare(namespaceURI);
 
         if (prefix == null)
           qname = new QName(namespaceURI, localName);
         else
           qname = new QName(namespaceURI, localName, prefix);
-      }
-      else
-        qname = new QName(namespaceURI, localName);
 
-      pushContext(qname);
+        _tracker.setElementName(qname);
+        _flushed = false;
+      }
+      else {
+        String prefix = _tracker.getPrefix(namespaceURI);
+
+        if (prefix == null)
+          throw new XMLStreamException(L.l("No prefix defined for namespace {0}", namespaceURI));
+
+        qname = new QName(namespaceURI, localName, prefix);
+        pushContext(qname);
+      }
+
       _pendingTagName = qname;
     }
     catch (IOException e) {
@@ -512,11 +557,22 @@ public class XMLStreamWriterImpl implements XMLStreamWriter {
   {
     flushPending();
     try {
-      if (_repair && _tracker.getPrefix(namespaceURI) == null)
+      QName qname = new QName(namespaceURI, localName, prefix);
+
+      if (_repair && _tracker.getPrefix(namespaceURI) == null) {
+        // NOTE: We have to push before we declare because declare will
+        // declare the namespace in the parent context if we don't
+        flushContext();
+        _tracker.push();
+
         _tracker.declare(prefix, namespaceURI, true);
 
-      QName qname = new QName(namespaceURI, localName, prefix);
-      pushContext(qname);
+        _tracker.setElementName(qname);
+        _flushed = false;
+      }
+      else
+        pushContext(qname);
+
       _pendingTagName = qname;
     }
     catch (IOException e) {
