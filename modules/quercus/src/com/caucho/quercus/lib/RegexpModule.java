@@ -1479,7 +1479,8 @@ public class RegexpModule
             // Java's regexp requires \0 for octal
 
             sb.append('\\');
-            sb.append('0');
+            // Java's regexp requires \0 for octal
+            // XXX: sb.append('0');  php/1530
             sb.append(ch);
           }
           else if (ch == 'x' && i + 1 < len && regexp.charAt(i + 1) == '{') {
@@ -1969,6 +1970,11 @@ public class RegexpModule
     void eval(StringBuilderValue sb, StringValue subject, Matcher matcher)
     {
     }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[]";
+    }
   }
 
   static class TextReplacement
@@ -1989,6 +1995,21 @@ public class RegexpModule
     {
       sb.append(_text, 0, _text.length);
     }
+
+    public String toString()
+    {
+      StringBuilder sb = new StringBuilder();
+      sb.append(getClass().getSimpleName());
+
+      sb.append('[');
+
+      for (char ch : _text)
+        sb.append(ch);
+
+      sb.append(']');
+
+      return sb.toString();
+    }
   }
 
   static class GroupReplacement
@@ -2006,6 +2027,11 @@ public class RegexpModule
       if (_group <= matcher.groupCount())
         sb.append(subject.substring(matcher.start(_group),
 				    matcher.end(_group)));
+    }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _group + "]";
     }
   }
 
@@ -2037,6 +2063,11 @@ public class RegexpModule
 	    sb.append(ch);
 	}
       }
+    }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _group + "]";
     }
   }
 
