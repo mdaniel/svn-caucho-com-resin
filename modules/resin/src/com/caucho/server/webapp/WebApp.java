@@ -324,11 +324,12 @@ public class WebApp extends ServletContextImpl
 
       // XXX: TCK ejb30/persistence/ee/packaging/web/scope, needs a test case.
 
-      Environment.addChildLoaderListener(new com.caucho.amber.manager.PersistenceEnvironmentListener());
-
       Path lib = _appDir.lookup("WEB-INF/lib");
 
+      // jpa/0g00 vs. tck
       if (lib.canRead()) {
+        Environment.addChildLoaderListener(new com.caucho.amber.manager.PersistenceEnvironmentListener());
+
         for (String file : lib.list()) {
           if (file.endsWith(".jar")) {
             Path path = lib.lookup(file);
@@ -1897,7 +1898,7 @@ public class WebApp extends ServletContextImpl
 
     try {
       if (_isDisableCrossContext)
-	return uri.startsWith(getContextPath()) ? this : null;
+        return uri.startsWith(getContextPath()) ? this : null;
       else if (_parent != null)
         return _parent.findSubWebAppByURI(uri);
       else
