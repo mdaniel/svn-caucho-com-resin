@@ -1610,7 +1610,8 @@ public class AmberPersistenceUnit {
         ref = new SoftReference<EntityItem>(cacheItem);
         EntityKey entityKey = new EntityKey(rootType, key);
 
-        ref = _entityCache.put(entityKey, ref);
+        // ejb/0628, ejb/06d0
+        ref = _entityCache.putIfNew(entityKey, ref);
 
         oldCacheItem = ref.get();
       }
