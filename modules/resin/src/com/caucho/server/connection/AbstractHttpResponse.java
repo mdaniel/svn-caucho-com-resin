@@ -1220,8 +1220,8 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     // server/10a2
     if (! _hasWriter) {
-      // jsp/0510
-      _responseStream.setOutputStreamOnly(true);
+      // jsp/0510 vs jsp/1b00
+      // _responseStream.setOutputStreamOnly(true);
     }
     
     return _responseOutputStream;

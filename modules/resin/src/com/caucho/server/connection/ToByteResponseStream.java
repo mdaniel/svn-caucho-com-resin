@@ -316,9 +316,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
     if (_isClosed)
       return;
-    else if (_isHead) {
+    else if (_isHead)
       return;
-    }
 
     if (_charLength > 0)
       flushCharBuffer();

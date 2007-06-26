@@ -258,15 +258,6 @@ public class JavaClassDef extends ClassDef {
    */
   public Value getField(Env env, Object obj, String name)
   {
-    if (__getField != null) {
-      try {
-        return __getField.call(env, obj, new StringValueImpl(name));
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-      }
-    }
-    
     JavaMethod get = _getMap.get(name);
     
     if (get != null) {
@@ -283,6 +274,15 @@ public class JavaClassDef extends ClassDef {
       try {
         Object result = fieldPair._field.get(obj);
         return fieldPair._marshal.unmarshal(env, result);
+      } catch (Throwable e) {
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+      }
+    }
+    
+    if (__getField != null) {
+      try {
+        return __getField.call(env, obj, new StringValueImpl(name));
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
@@ -324,16 +324,6 @@ public class JavaClassDef extends ClassDef {
                         String name,
                         Value value)
   {
-    if (__setField != null) {
-      try {
-        return __setField.call(env, obj, new StringValueImpl(name), value);
-      } catch (Throwable e) {
-        log.log(Level.FINE,  L.l(e.getMessage()), e);
-        return NullValue.NULL;
-
-      }
-    }
-
     JavaMethod setter = _setMap.get(name);
     
     if (setter != null) {
@@ -358,6 +348,16 @@ public class JavaClassDef extends ClassDef {
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
+      }
+    }
+    
+    if (__setField != null) {
+      try {
+        return __setField.call(env, obj, new StringValueImpl(name), value);
+      } catch (Throwable e) {
+        log.log(Level.FINE,  L.l(e.getMessage()), e);
+        return NullValue.NULL;
+
       }
     }
 
@@ -891,7 +891,6 @@ public class JavaClassDef extends ClassDef {
           JavaMethod javaMethod = new JavaMethod(moduleContext, method);
           _setMap.put(javaToQuercusConvert(methodName.substring(3, length)),
 		      new JavaMethod(moduleContext, method));
-
         } else if ("__get".equals(methodName)) {
           __get = new JavaMethod(moduleContext, method);
         } else if ("__getField".equals(methodName)) {
