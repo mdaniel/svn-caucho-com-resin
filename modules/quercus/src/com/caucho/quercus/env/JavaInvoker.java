@@ -445,9 +445,8 @@ abstract public class JavaInvoker
     for (; i < _marshalArgs.length; i++) {
       Marshal marshal = _marshalArgs[i];
       
-      Value arg = null;
       if (i < args.length && args[i] != null) {
-        arg = args[i];
+        Value arg = args[i];
 
         cost = Math.max(marshal.getMarshalingCost(arg) + cost, cost);
       }
@@ -464,7 +463,7 @@ abstract public class JavaInvoker
     // too many args passed in
     if (i != args.length)
       return Integer.MAX_VALUE;
-    
+
     return cost;
   }
   

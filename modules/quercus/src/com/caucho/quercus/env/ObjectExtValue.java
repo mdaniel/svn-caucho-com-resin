@@ -737,6 +737,15 @@ public class ObjectExtValue extends ObjectValue
     return this;
   }
 
+  public Value getObject(Env env, Value index)
+  {
+    // php/3d92
+    Env.getInstance().error(L.l("Can't use object '{0}' as array",
+                                getName()));
+
+    return NullValue.NULL;
+  }
+
   /**
    * Copy for assignment.
    */

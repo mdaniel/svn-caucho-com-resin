@@ -29,10 +29,8 @@
 
 package com.caucho.quercus.function;
 
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.UnicodeValue;
+import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.Value;
 
 public class JavaCharacterArrayMarshal extends JavaArrayMarshal
@@ -52,7 +50,7 @@ public class JavaCharacterArrayMarshal extends JavaArrayMarshal
     if (argValue.isUnicode())
       return Marshal.EQUIVALENT;
     else if (argValue.isArray())
-      return Marshal.MARSHALABLE;
+      return Marshal.SIMILAR; // php/0cib
     else
       return Marshal.DUBIOUS;
   }

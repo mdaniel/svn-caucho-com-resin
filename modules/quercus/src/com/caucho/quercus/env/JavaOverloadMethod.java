@@ -29,15 +29,8 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.module.ModuleContext;
-import com.caucho.util.*;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import com.caucho.util.L10N;
 
 /**
  * Represents the introspected static function information.
@@ -163,6 +156,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
   public Value call(Env env, Object obj, Value []args)
   {
     if (_methodTable.length <= args.length) {
+
       if (_restMethodTable.length == 0)
         return env.error(L.l("'{0}' overloaded method call with {1} arguments has too many arguments", getName(), args.length));
       else {
@@ -205,13 +199,14 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
                                                   AbstractJavaMethod [][]restMethodTable,
                                                   Value []args)
   {
+
     AbstractJavaMethod minCostJavaMethod = null;
     int minCost = Integer.MAX_VALUE;
 
     if (methods != null) {
       for (int i = 0; i < methods.length; i++) {
         AbstractJavaMethod javaMethod = methods[i];
-        
+
         int cost = javaMethod.getMarshalingCost(args);
 
         if (cost == 0)

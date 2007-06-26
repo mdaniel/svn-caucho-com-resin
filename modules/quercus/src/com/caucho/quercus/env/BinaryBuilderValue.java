@@ -29,14 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * Represents a 8-bit binary builder
@@ -391,9 +384,6 @@ public class BinaryBuilderValue extends BinaryValue
    */
   public byte[] toBytes()
   {
-    byte []buffer = _buffer;
-
-    int len = _length;
     byte[] bytes = new byte[_length];
     System.arraycopy(_buffer, 0, bytes, 0, _length);
 
@@ -638,15 +628,25 @@ public class BinaryBuilderValue extends BinaryValue
       
       return this;
     }
-    else if (_length == 0)
-      return v.toStringBuilder();
-    else {
+    else if (v.isUnicode()) {
+      // php/033c
       StringBuilderValue sb = new StringBuilderValue();
-
+      
       appendTo(sb);
       v.appendTo(sb);
 
       return sb;
+    }
+    else if (_length == 0)
+      return v.toStringBuilder();
+    else {
+      // php/033a
+      BinaryBuilderValue bb = new BinaryBuilderValue();
+
+      appendTo(bb);
+      v.appendTo(bb);
+
+      return bb;
     }
   }
 

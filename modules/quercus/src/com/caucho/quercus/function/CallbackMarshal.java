@@ -29,14 +29,10 @@
 
 package com.caucho.quercus.function;
 
-import java.util.Calendar;
-
 import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.CallbackFunction;
 import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaCalendarValue;
-import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
