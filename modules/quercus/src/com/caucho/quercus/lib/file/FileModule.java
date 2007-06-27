@@ -1545,6 +1545,8 @@ public class FileModule extends AbstractQuercusModule {
 			    @NotNull BinaryInput is,
 			    int length)
   {
+    TempBuffer tempBuf = null;
+    
     try {
       if (is == null)
 	return BooleanValue.FALSE;
@@ -1554,7 +1556,7 @@ public class FileModule extends AbstractQuercusModule {
 
       // XXX: should use the buffer directly (?)
 
-      TempBuffer tempBuf = TempBuffer.allocate();
+      tempBuf = TempBuffer.allocate();
       byte []buffer = tempBuf.getBuffer();
 
       if (buffer.length < length) {
@@ -1564,16 +1566,17 @@ public class FileModule extends AbstractQuercusModule {
       length = is.read(buffer, 0, length);
 
       if (length > 0) {
-	BinaryBuilderValue bb = new BinaryBuilderValue(buffer, 0, length);
-	TempBuffer.free(tempBuf);
-	return bb;
+        BinaryBuilderValue bb = new BinaryBuilderValue(buffer, 0, length);
+        return bb;
       }
       else {
-	TempBuffer.free(tempBuf);
-	return BooleanValue.FALSE;
+        return BinaryValue.EMPTY;
       }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
+    }
+    finally {
+      TempBuffer.free(tempBuf);
     }
   }
 
@@ -1587,12 +1590,12 @@ public class FileModule extends AbstractQuercusModule {
   {
     try {
       if (is == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       StringValue value = is.readLine(Integer.MAX_VALUE);
 
       if (value == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       return StringModule.sscanf(value, format, args);
     } catch (IOException e) {

@@ -482,6 +482,7 @@ public class MiscModule extends AbstractQuercusModule {
       if (pwd != null) {
         pwdFile = new File(pwd.getFullPath());
       }
+
       Process process = Runtime.getRuntime().exec(args, envStrings, pwdFile);
       
       ProcOpenOutput in = null;
@@ -510,15 +511,19 @@ public class MiscModule extends AbstractQuercusModule {
           else if (type.equals("file")) {
             OutputStream processOut = process.getOutputStream();
             
-            FileInput file = new FileInput(env, env.lookup(name));
+            BinaryStream stream = FileModule.fopen(env, name, mode, false, null);
             
-            int ch;
-            while ((ch = file.read()) >= 0) {
-              processOut.write(ch);
+            if (stream instanceof FileInput) {
+              FileInput file = (FileInput) stream;
+              
+              int ch;
+              while ((ch = file.read()) >= 0) {
+                processOut.write(ch);
+              }
             }
             
+            stream.close();
             processOut.close();
-            file.close();
           }
         }
         // place to put output from the command

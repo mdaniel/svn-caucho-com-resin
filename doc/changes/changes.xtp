@@ -10,6 +10,12 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
+<s2 title="3.1.2">
+<ul>
+<li>Quercus: date() day of the week format ('w') off by 1</li>
+</ul>
+</s2>
+
 <s2 title="3.1.snap - Jun 17, 2007">
 <ul>
 <li>setSecurityProvider added to ResinConfig (#1815)</li>

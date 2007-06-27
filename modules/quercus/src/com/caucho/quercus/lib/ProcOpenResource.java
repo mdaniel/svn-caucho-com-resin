@@ -77,7 +77,9 @@ public class ProcOpenResource implements Closeable
   public int pclose()
   {
     try {
-      _in.close();
+      if (_in != null)
+        _in.close();
+      
       _out.close();
       _err.close();
     
@@ -96,7 +98,9 @@ public class ProcOpenResource implements Closeable
   
   public boolean terminate()
   {
-    _in.close();
+    if (_in != null)
+      _in.close();
+
     _out.close();
     _err.close();
   

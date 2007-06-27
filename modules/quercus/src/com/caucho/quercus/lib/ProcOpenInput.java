@@ -69,7 +69,7 @@ public class ProcOpenInput extends ReadStreamInput {
     _env = env;
     _in = in;
     
-    //XXX: env.removeClose(out) to make sure out is not closed?
+    //XXX: env.removeClose(out) to make sure 'out' is not closed?
     env.removeClose(out);
     _out = out;
     
