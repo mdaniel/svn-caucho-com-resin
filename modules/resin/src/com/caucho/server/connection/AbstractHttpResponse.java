@@ -1070,7 +1070,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
     String charEncoding = getCharacterEncoding();
 
     if (charEncoding != null)
-      return _contentType + "; charset=" + getCharacterEncoding();
+      return _contentType + "; charset=" + charEncoding;
     else
       return _contentType;
   }
@@ -1102,7 +1102,6 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       return;
 
     _hasCharEncoding = true;
-    
     if (encoding == null
         || encoding.equals("ISO-8859-1")
         || encoding.equals("")) {

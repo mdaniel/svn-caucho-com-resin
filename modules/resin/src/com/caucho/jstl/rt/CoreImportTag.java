@@ -305,7 +305,6 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
     if (slash == 0 || colon < 0 || slash < 0 || slash < colon) {
       ServletRequest request = pageContext.getRequest();
       CauchoResponse response = (CauchoResponse) pageContext.getResponse();
-      System.out.println("ENCODING: " + _charEncoding);
       response.getResponseStream().setEncoding(_charEncoding);
       
       RequestDispatcher disp = request.getRequestDispatcher(url);

@@ -105,7 +105,13 @@ public class QBindingEnumeration implements NamingEnumeration {
 	cb.append(" ");
       
       try {
-        cb.append("{" + name + ", " + _context.lookup(name) + "}");
+	String valueName = String.valueOf(_context.lookup(name));
+
+	// server/158a, for QA comparison
+	if (valueName.indexOf('@') >= 0)
+	  valueName = valueName.substring(0, valueName.indexOf('@'));
+	
+        cb.append("{" + name + ", " + valueName + "}");
       } catch (Exception e) {
         cb.append("{" + name + ", " + e + "}");
       }

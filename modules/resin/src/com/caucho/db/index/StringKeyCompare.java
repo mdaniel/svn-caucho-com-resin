@@ -62,8 +62,6 @@ public class StringKeyCompare extends KeyCompare {
     if (keyLen == blockLen)
       return 0;
 
-    System.out.println("CMP: " + keyLen + " " + blockLen);
-
     if (keyLen < blockLen)
       return -1;
     else if (blockLen < keyLen)
