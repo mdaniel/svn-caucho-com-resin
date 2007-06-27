@@ -91,6 +91,7 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -322,23 +323,8 @@ public class WebApp extends ServletContextImpl
       Vfs.setPwd(_appDir, _classLoader);
       WorkDir.setLocalWorkDir(_appDir.lookup("WEB-INF/work"), _classLoader);
 
-      // XXX: TCK ejb30/persistence/ee/packaging/web/scope, needs a test case.
-
-      Path lib = _appDir.lookup("WEB-INF/lib");
-
-      // jpa/0g00 vs. tck
-      if (lib.canRead()) {
-        Environment.addChildLoaderListener(new com.caucho.amber.manager.PersistenceEnvironmentListener());
-
-        for (String file : lib.list()) {
-          if (file.endsWith(".jar")) {
-            Path path = lib.lookup(file);
-            Path jar = JarPath.create(path);
-
-            _classLoader.addJar(jar);
-          }
-        }
-      }
+      // jpa/0s2n (tck: ejb30/persistence/ee/packaging/web/scope)
+      fillDefaultLib();
 
       // map.put("app", _appVar);
 
@@ -466,6 +452,29 @@ public class WebApp extends ServletContextImpl
    */
   public void setId(String id)
   {
+  }
+
+  private void fillDefaultLib()
+    throws IOException
+  {
+    Path lib = _appDir.lookup("WEB-INF/lib");
+
+    // jpa/0g00 vs. jpa/0s2n (tck: ejb30/persistence/ee/packaging/web/scope)
+    if (lib.canRead()) {
+      Environment.addChildLoaderListener(new com.caucho.amber.manager.PersistenceEnvironmentListener());
+
+      // jpa/0s2n
+      _classLoader.addURL(lib);
+
+      for (String file : lib.list()) {
+        if (file.endsWith(".jar")) {
+          Path path = lib.lookup(file);
+          Path jar = JarPath.create(path);
+
+          _classLoader.addJar(jar);
+        }
+      }
+    }
   }
 
   /**
@@ -1669,6 +1678,9 @@ public class WebApp extends ServletContextImpl
         _tempDir.mkdirs();
 
       setAttribute("javax.servlet.context.tempdir", new File(_tempDir.getNativePath()));
+
+      // jpa/0s2n
+      fillDefaultLib();
 
       FilterChainBuilder securityBuilder = _constraintManager.getFilterBuilder();
 
