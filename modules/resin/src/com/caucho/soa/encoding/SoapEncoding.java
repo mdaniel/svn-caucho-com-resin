@@ -97,8 +97,7 @@ public class SoapEncoding implements ServiceEncoding {
   public void invoke(HttpServletRequest request, HttpServletResponse response)
     throws Throwable
   {
-    // XXX: build issues
-    // getSkeleton().invoke(_object, request, response);
+    getSkeleton().invoke(_object, request, response);
   }    
 
   public void dumpWSDL(OutputStream out)

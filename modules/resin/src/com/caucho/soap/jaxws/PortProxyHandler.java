@@ -127,7 +127,7 @@ public class PortProxyHandler implements InvocationHandler, BindingProvider {
     // XXX cache this and the HandlerChainInvoker
     List<Handler> chain = _binding.getHandlerChain();
 
-    if (chain == null)
+    if (chain == null || chain.size() == 0)
       return _skeleton.invoke(method, (String) url, args);
     else
       return _skeleton.invoke(method, (String) url, args, 
