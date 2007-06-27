@@ -32,17 +32,26 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.file.BinaryStream;
+import com.caucho.quercus.lib.file.FileInput;
 import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.lib.file.FileOutput;
+import com.caucho.quercus.lib.file.PopenInput;
+import com.caucho.quercus.lib.file.PopenOutput;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -259,15 +268,24 @@ public class MiscModule extends AbstractQuercusModule {
 			    @Optional Value output,
 			    @Optional @Reference Value result)
   {
-    String []args = new String[3];
-
     try {
-      args[0] = "sh";
-      args[1] = "-c";
+      String []args = new String[3];
+
+      if (Path.isWindows()) {
+        args[0] = "cmd";
+        args[1] = "/c";
+      }
+      else {
+        args[0] = "sh";
+        args[1] = "-c";
+      }
+
       args[2] = command;
+      
       Process process = Runtime.getRuntime().exec(args);
 
       InputStream is = process.getInputStream();
+      InputStream es = process.getErrorStream();
       OutputStream os = process.getOutputStream();
       os.close();
 
@@ -277,32 +295,35 @@ public class MiscModule extends AbstractQuercusModule {
       int ch;
       boolean hasCr = false;
       while ((ch = is.read()) >= 0) {
-	if (ch == '\n') {
-	  if (! hasCr) {
-	    line = sb.toString();
-	    sb.setLength(0);
-	    if (output != null)
-	      output.put(new StringValueImpl(line));
-	  }
-	  hasCr = false;
-	}
-	else if (ch == '\r') {
-	  line = sb.toString();
-	  sb.setLength(0);
-	  output.put(new StringValueImpl(line));
-	  hasCr = true;
-	}
-	else
-	  sb.append((char) ch);
+        if (ch == '\n') {
+          if (! hasCr) {
+            line = sb.toString();
+            sb.setLength(0);
+            if (output != null)
+              output.put(new StringValueImpl(line));
+          }
+          hasCr = false;
+        }
+        else if (ch == '\r') {
+          line = sb.toString();
+          sb.setLength(0);
+          output.put(new StringValueImpl(line));
+          hasCr = true;
+        }
+        else
+          sb.append((char) ch);
       }
 
       if (sb.length() > 0) {
-	line = sb.toString();
-	sb.setLength(0);
-	output.put(new StringValueImpl(line));
+        line = sb.toString();
+        sb.setLength(0);
+        output.put(new StringValueImpl(line));
       }
 
       is.close();
+      
+      env.getOut().writeStream(es);
+      es.close();
 
       int status = process.waitFor();
 
@@ -310,6 +331,7 @@ public class MiscModule extends AbstractQuercusModule {
 
       return line;
     } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
       env.warning(e.getMessage(), e);
 
       return null;
@@ -324,29 +346,50 @@ public class MiscModule extends AbstractQuercusModule {
     String []args = new String[3];
 
     try {
-      args[0] = "sh";
-      args[1] = "-c";
+      if (Path.isWindows()) {
+        args[0] = "cmd";
+        args[1] = "/c";
+      }
+      else {
+        args[0] = "sh";
+        args[1] = "-c";
+      }
+
       args[2] = command;
+      
       Process process = Runtime.getRuntime().exec(args);
 
       InputStream is = process.getInputStream();
+      InputStream es = process.getErrorStream();
       OutputStream os = process.getOutputStream();
       os.close();
 
       StringBuilderValue sb = new StringBuilderValue();
 
       int ch;
-      boolean hasCr = false;
       while ((ch = is.read()) >= 0) {
-	sb.append((char) ch);
+        sb.append((char) ch);
       }
 
       is.close();
+
+      if ((ch = es.read()) >= 0) {
+        env.print((char)ch);
+        
+        while ((ch = es.read()) >= 0) {
+          env.print((char)ch);
+        }
+        
+        return NullValue.NULL;
+      }
+      
+      es.close();
 
       int status = process.waitFor();
 
       return sb;
     } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
       env.warning(e.getMessage(), e);
 
       return NullValue.NULL;
@@ -362,8 +405,15 @@ public class MiscModule extends AbstractQuercusModule {
 
     try {
       String []args = new String[3];
-      args[0] = "sh";
-      args[1] = "-c";
+      if (Path.isWindows()) {
+        args[0] = "cmd";
+        args[1] = "/c";
+      }
+      else {
+        args[0] = "sh";
+        args[1] = "-c";
+      }
+
       args[2] = command;
 
       ProcessBuilder processBuilder = new ProcessBuilder(args);
@@ -388,6 +438,172 @@ public class MiscModule extends AbstractQuercusModule {
     }
   }
 
+  /*
+   * Basic implementation of proc_open.
+   * XXX: options
+   */
+  @ReturnNullAsFalse 
+  public static ProcOpenResource proc_open(Env env, 
+                                           String command, 
+                                           ArrayValue descriptorArray,
+                                           @Reference Value pipes,
+                                           @Optional Path pwd,
+                                           @Optional ArrayValue envArray,
+                                           @Optional ArrayValue options)
+  {
+    String []args = new String[3];
+
+    try {
+      if (Path.isWindows()) {
+        args[0] = "cmd";
+        args[1] = "/c";
+      }
+      else {
+        args[0] = "sh";
+        args[1] = "-c";
+      }
+
+      args[2] = command;
+
+      String []envStrings = null;
+      File pwdFile = null;
+      
+      if (envArray != null) {
+        int size = envArray.getSize();
+        
+        envStrings = new String[size];
+        
+        int i = 0;
+        for (Map.Entry<Value,Value> entry : envArray.entrySet()) {
+          envStrings[i++] = entry.getKey() + "=" + entry.getValue();
+        }
+      }
+      
+      if (pwd != null) {
+        pwdFile = new File(pwd.getFullPath());
+      }
+      Process process = Runtime.getRuntime().exec(args, envStrings, pwdFile);
+      
+      ProcOpenOutput in = null;
+      ProcOpenInput out = null;
+      ProcOpenInput es = null;
+
+      ArrayValue array = pipes.toAutoArray().toArrayValue(env);
+      pipes.set(array);
+      array.clear();
+      
+      for (Map.Entry<Value,Value> entry : descriptorArray.entrySet()) {
+        Value key = entry.getKey();
+        Value val = entry.getValue();
+
+        String type = val.get(LongValue.ZERO).toString();
+        String name = val.get(LongValue.ONE).toString();
+        String mode = val.get(LongValue.create(2)).toString();
+        
+        // input to the command
+        if (key.equals(LongValue.ZERO)) {
+          if (type.equals("pipe")) {
+            in = new ProcOpenOutput(env, process.getOutputStream());
+
+            array.put(LongValue.ZERO, env.wrapJava(in));
+          }
+          else if (type.equals("file")) {
+            OutputStream processOut = process.getOutputStream();
+            
+            FileInput file = new FileInput(env, env.lookup(name));
+            
+            int ch;
+            while ((ch = file.read()) >= 0) {
+              processOut.write(ch);
+            }
+            
+            processOut.close();
+            file.close();
+          }
+        }
+        // place to put output from the command
+        else if (key.equals(LongValue.ONE)) {
+          if (type.equals("pipe")) {
+            out = new ProcOpenInput(env, process.getInputStream());
+
+            array.put(LongValue.ONE, env.wrapJava(out));
+          }
+          else if (type.equals("file")) {
+            BinaryStream stream = FileModule.fopen(env, name, mode, false, null);
+
+            if (stream instanceof FileOutput) {
+              FileOutput file = (FileOutput) stream;
+              
+              out = new ProcOpenInput(env, process.getInputStream(), file);
+            }
+            else if (stream != null)
+              stream.close();
+          }
+        }
+        // place to put error output from the command
+        else if (key.equals(new LongValue(2))) {
+          if (type.equals("pipe")) {
+            es = new ProcOpenInput(env, process.getErrorStream());
+            
+            array.put(new LongValue(2), env.wrapJava(es));
+          }
+          else if (type.equals("file")) {
+            BinaryStream stream = FileModule.fopen(env, name, mode, false, null);
+            
+            if (stream instanceof FileOutput) {
+              FileOutput file = (FileOutput) stream;
+              
+              es = new ProcOpenInput(env, process.getErrorStream(), file);
+            }
+            else if (stream != null)
+              stream.close();
+          }
+        }
+      }
+      
+      return new ProcOpenResource(env, process, in, out, es);
+
+    } catch (Exception e) {
+
+      log.log(Level.FINE, e.getMessage(), e);
+      env.warning(e);
+
+      return null;
+    }
+  }
+  
+  /*
+   * Closes the process opened by proc_open.
+   */
+  public static int proc_close(Env env,
+                               @NotNull ProcOpenResource stream)
+  {
+    if (stream == null) {
+      log.log(Level.FINE, "input to proc_close must not be null");
+      env.warning("input to proc_close must not be null");
+      
+      return -1;
+    }
+    
+   return stream.pclose();
+  }
+  
+  /*
+   * Forcibly terminates the process opened by proc_open.
+   */
+  public static boolean proc_terminate(Env env,
+                                       @NotNull ProcOpenResource stream)
+  {
+    if (stream == null) {
+      log.log(Level.FINE, "input to proc_close must not be null");
+      env.warning("input to proc_close must not be null");
+      
+      return false;
+    }
+    
+   return stream.terminate();
+  }
+  
   /**
    * Returns the disconnect ignore setting
    */

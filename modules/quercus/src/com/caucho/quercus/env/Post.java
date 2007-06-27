@@ -102,7 +102,7 @@ public class Post {
       }
       
     } catch (IOException e) {
-      e.printStackTrace();
+      env.warning(e);
     } finally {
       try {
         if (is != null)

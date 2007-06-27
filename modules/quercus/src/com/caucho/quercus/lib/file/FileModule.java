@@ -1375,8 +1375,8 @@ public class FileModule extends AbstractQuercusModule {
           
           return input;
         } catch (IOException e) {
+          
           log.log(Level.FINE, e.toString(), e);
-
           env.warning(L.l("{0} cannot be read", path.getFullPath()));
 
           return null;
@@ -1389,8 +1389,8 @@ public class FileModule extends AbstractQuercusModule {
           else
             return new FileOutput(env, path);
         } catch (IOException e) {
+          
           log.log(Level.FINE, e.toString(), e);
-
           env.warning(L.l("{0} cannot be written", path.getFullPath()));
 
           return null;
@@ -1403,8 +1403,8 @@ public class FileModule extends AbstractQuercusModule {
           else
             return new FileOutput(env, path, true);
         } catch (IOException e) {
+          
           log.log(Level.FINE, e.toString(), e);
-
           env.warning(L.l("{0} cannot be written", path.getFullPath()));
 
           return null;
@@ -2322,8 +2322,15 @@ public class FileModule extends AbstractQuercusModule {
     String []args = new String[3];
 
     try {
-      args[0] = "sh";
-      args[1] = "-c";
+      if (Path.isWindows()) {
+        args[0] = "cmd";
+        args[1] = "/c";
+      }
+      else {
+        args[0] = "sh";
+        args[1] = "-c";
+      }
+
       args[2] = command;
 
       Process process = Runtime.getRuntime().exec(args);
