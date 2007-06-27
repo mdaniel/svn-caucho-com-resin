@@ -39,11 +39,14 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
+import java.io.CharConversionException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -207,7 +210,7 @@ public class RegexpModule
     else
       regs = new ArrayValueImpl();
 
-    if (! (matcher.find(offset))) {
+    if ((matcher == null) || (! (matcher.find(offset)))) {
       matchRef.set(regs);
       return 0;
     }
@@ -361,7 +364,7 @@ public class RegexpModule
   {
     Matcher matcher = pcrePattern.matcher(env, subject);
 
-    int groupCount = matcher.groupCount();
+    int groupCount = matcher == null ? 0 : matcher.groupCount();
 
     ArrayValue []matchList = new ArrayValue[groupCount + 1];
 
@@ -378,7 +381,7 @@ public class RegexpModule
       matchList[j] = values;
     }
 
-    if (! (matcher.find())) {
+    if (matcher == null || (! (matcher.find()))) {
       return 0;
     }
 
@@ -431,7 +434,7 @@ public class RegexpModule
   {
     Matcher matcher = pattern.matcher(env, subject);
 
-    if (! (matcher.find())) {
+    if ((matcher == null) || (! (matcher.find()))) {
       return 0;
     }
 
@@ -1243,6 +1246,11 @@ public class RegexpModule
 
   private static Pattern compileRegexp(StringValue rawRegexp)
   {
+    return compileRegexp(rawRegexp, 0);
+  }
+
+  private static Pattern compileRegexp(StringValue rawRegexp, int groupCount)
+  {
     Pattern pattern = _patternCache.get(rawRegexp);
 
     if (pattern != null)
@@ -1301,7 +1309,7 @@ public class RegexpModule
 
     StringValue regexp = rawRegexp.substring(1, tail);
 
-    String cleanRegexp = cleanRegexp(regexp, (flags & Pattern.COMMENTS) != 0);
+    String cleanRegexp = cleanRegexp(regexp, (flags & Pattern.COMMENTS) != 0, groupCount);
 
     if (! isGreedy)
       cleanRegexp = toNonGreedy(cleanRegexp);
@@ -1446,7 +1454,15 @@ public class RegexpModule
   /**
    * Cleans the regexp from valid values that the Java regexps can't handle.
    */
-  private static String cleanRegexp(StringValue regexp, boolean isComments)
+  private static String cleanRegexp(StringValue regexp,
+                                    boolean isComments)
+  {
+    return cleanRegexp(regexp,  isComments, 0);
+  }
+
+  private static String cleanRegexp(StringValue regexp,
+                                    boolean isComments,
+                                    int groupCount)
   {
     int len = regexp.length();
 
@@ -1474,13 +1490,33 @@ public class RegexpModule
 
           ch = regexp.charAt(i);
 
-          if (ch == '0' ||
-	      '1' <= ch && ch <= '3' && i + 1 < len && '0' <= regexp.charAt(i + 1) && ch <= '7') {
+          if (ch == '0') {
             // Java's regexp requires \0 for octal
 
             sb.append('\\');
-            // Java's regexp requires \0 for octal
-            // XXX: sb.append('0');  php/1530
+            sb.append('0'); // php/151l
+            sb.append(ch);
+          }
+          else if ('1' <= ch && ch <= '9') {
+            // parse as int, if is backreference then use it for that, otherwise octal
+            // php/151r, php/1530
+            int backref = 0;
+
+            for (int j = i; j < len && backref <= groupCount; j++)
+            {
+              int digit = regexp.charAt(j);
+
+              if ('0' <= digit && digit <= '9')
+                backref = (backref * 10) + (digit - '0');
+              else
+                break;
+            }
+
+            if (backref <= groupCount)
+              sb.append('\\');
+            else
+              sb.append("\\0");
+            
             sb.append(ch);
           }
           else if (ch == 'x' && i + 1 < len && regexp.charAt(i + 1) == '{') {
@@ -2164,9 +2200,12 @@ public class RegexpModule
    * Holds PCRE named subpatterns.
    */
    static class PCREPattern {
+    private static final Logger log = Logger.getLogger(PCREPattern.class.getName());
+    
     private final StringValue _regexp;
     private final Pattern _pattern;
     private final int _flags;
+    private int _groupCount;
 
     private HashMap<Integer,StringValue> _patternMap;
 
@@ -2174,12 +2213,33 @@ public class RegexpModule
     {
       _flags = regexpFlags(regexp);
 
-      if (isUnicode())
-        _regexp = cleanRegexpAndAddGroups(regexp.toUnicodeValue(env));
-      else
-        _regexp = cleanRegexpAndAddGroups(regexp.toStringValue());
+      StringValue regexpValue;
 
-      _pattern = compileRegexp(_regexp);
+      if (isUnicode()) {
+        try {
+          regexpValue = regexp.toUnicodeValue(env);
+        }
+        catch (QuercusRuntimeException ex) {
+          // php/151a
+          if (ex.getCause().getClass() == CharConversionException.class) {
+            regexpValue = null;
+            log.log(Level.FINE, ex.toString(), ex);
+          }
+          else
+            throw ex;
+        }
+      }
+      else
+        regexpValue = regexp.toStringValue();
+
+      if (regexpValue == null) {
+        _regexp = null;
+        _pattern = null;
+      }
+      else {
+        _regexp = cleanRegexpAndAddGroups(regexpValue);
+        _pattern = compileRegexp(_regexp, _groupCount);
+      }
     }
 
     public StringValue getCleanedPattern()
@@ -2208,8 +2268,11 @@ public class RegexpModule
         return _patternMap.get(Integer.valueOf(group));
     }
 
-    Matcher matcher(Env env, BinaryValue value)
+    public Matcher matcher(Env env, BinaryValue value)
     {
+      if (_regexp == null || _pattern == null)
+        return null;
+
       if (isUnicode())
         return _pattern.matcher(value.toUnicodeValue(env));
       else
@@ -2279,7 +2342,9 @@ public class RegexpModule
           throw new QuercusModuleException("bad PCRE named subpattern");
         }
       }
-      
+
+      _groupCount = groupCount - 1;
+
       return sb;
     }
   }
@@ -2303,5 +2368,6 @@ public class RegexpModule
     PREG_QUOTE['>'] = true;
     PREG_QUOTE['|'] = true;
     PREG_QUOTE[':'] = true;
+
   }
 }
