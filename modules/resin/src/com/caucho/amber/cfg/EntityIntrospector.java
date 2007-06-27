@@ -295,9 +295,6 @@ public class EntityIntrospector extends BaseConfigIntrospector {
       else if (tableConfig != null)
         tableName = tableConfig.getName();
 
-      if (tableName == null || tableName.equals(""))
-        tableName = toSqlName(entityName);
-
       // jpa/0gg0, jpa/0gg2
       if (isEntity) { // && ! type.isAbstract()) {
 
@@ -308,8 +305,21 @@ public class EntityIntrospector extends BaseConfigIntrospector {
         else if (inheritanceConfig != null)
           strategy = inheritanceConfig.getStrategy();
 
-        if ((parentType == null) ||
-            (parentType instanceof MappedSuperclassType)) {
+        boolean hasTableConfig = true;
+
+        if (tableName == null || tableName.equals("")) {
+          hasTableConfig = false;
+          tableName = toSqlName(entityName);
+        }
+
+        // jpa/0gg2
+        if (type.isAbstract()
+            && strategy != InheritanceType.JOINED
+            && ! hasTableConfig) {
+          // jpa/0gg0
+        }
+        else if ((parentType == null) ||
+                 (parentType instanceof MappedSuperclassType)) {
 
           entityType.setTable(_persistenceUnit.createTable(tableName));
         }

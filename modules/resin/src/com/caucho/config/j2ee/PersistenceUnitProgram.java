@@ -33,6 +33,7 @@ import com.caucho.config.*;
 import com.caucho.loader.*;
 import com.caucho.naming.*;
 import com.caucho.amber.cfg.*;
+import com.caucho.amber.manager.AmberPersistenceProvider;
 import com.caucho.vfs.*;
 import com.caucho.util.L10N;
 
@@ -204,6 +205,10 @@ public class PersistenceUnitProgram extends BuilderProgram
     PersistenceProvider []providers = getProviderList();
 
     for (int i = 0; i < providers.length; i++) {
+      // jpa/0s71
+      if (providers[i] instanceof AmberPersistenceProvider)
+        continue;
+
       EntityManagerFactory factory
         = providers[i].createContainerEntityManagerFactory(info, null);
 
