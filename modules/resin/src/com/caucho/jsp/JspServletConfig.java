@@ -35,7 +35,7 @@ import java.util.Hashtable;
 
 class JspServletConfig implements ServletConfig  {
   private Hashtable init;
-  private ServletContext context;
+  private ServletContext _context;
   private String _name;
 
   JspServletConfig(ServletContext context, Hashtable init, String name)
@@ -43,8 +43,11 @@ class JspServletConfig implements ServletConfig  {
     if (init == null)
       init = new Hashtable();
     this.init = init;
-    this.context = context;
+    _context = context;
     _name = name;
+
+    if (context == null)
+      throw new NullPointerException();
   }
 
   public String getServletName()
@@ -54,7 +57,7 @@ class JspServletConfig implements ServletConfig  {
 
   public ServletContext getServletContext()
   {
-    return context;
+    return _context;
   }
   
   public String getInitParameter(String name)

@@ -117,9 +117,9 @@ public class ProfilerManager {
     return _root.addProfilerPoint(name);
   }
 
-  public CategorizingProfilerPoint getCategorizingProfilerPoint(String name)
+  public ProfilerPoint getCategorizingProfilerPoint(String name)
   {
-    throw new UnsupportedOperationException();
+    return _root.addProfilerPoint(name);
   }
 
   /**

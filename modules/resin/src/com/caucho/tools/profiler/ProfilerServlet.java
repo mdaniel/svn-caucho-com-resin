@@ -175,8 +175,10 @@ public class ProfilerServlet
 
     ProfilerPoint root = _profilerManager.getRoot();
     
-    for (ProfilerPoint child : root.getChildren())
-      display(child, comparator, out, 1);
+    List<ProfilerPoint> children = root.getChildren();
+    Collections.sort(children, comparator);
+    for (ProfilerPoint child : children)
+      display(child, comparator, out, 0);
 
     out.endElement("table");
 
@@ -194,6 +196,7 @@ public class ProfilerServlet
       return;
     
     List<ProfilerPoint> children = node.getChildren();
+    Collections.sort(children, comparator);
 
     long thisTime = node.getTime();
     long minTime = node.getMinTime();
@@ -309,7 +312,6 @@ public class ProfilerServlet
     throws ServletException, IOException
   {
     ProfilerNodeComparator comparator = new TimeComparator();
-
     comparator.setDescending(true);
 
     XmlWriter out = new XmlWriter(response.getWriter());
@@ -325,9 +327,10 @@ public class ProfilerServlet
     out.startElement("profile");
     out.writeLineElement("name", contextPath);
 
-    Collection<ProfilerPoint> children
+    List<ProfilerPoint> children
       = _profilerManager.getRoot().getChildren();
 
+    Collections.sort(children, comparator);
     for (ProfilerPoint child : children)
       displayXml(child, comparator, out);
 
@@ -338,7 +341,8 @@ public class ProfilerServlet
 			  ProfilerNodeComparator comparator,
 			  XmlWriter out)
   {
-    Collection<ProfilerPoint> children = node.getChildren();
+    List<ProfilerPoint> children = node.getChildren();
+    Collections.sort(children, comparator);
 
     long thisTime = node.getTime();
     long minTime = node.getMinTime();

@@ -1107,8 +1107,8 @@ public abstract class JspNode {
       else if (rtexpr && hasRuntimeAttribute(value)) {
         return getRuntimeAttribute(value);
       }
-      else if (rtexpr && hasELAttribute(value, false)) {
-        // jsp/0138, jsp/18s0, jsp/1ce5
+      else if (rtexpr && hasELAttribute(value, isELIgnored)) {
+        // jsp/0138, jsp/18s0, jsp/1ce5, jsp/1e0a
 	return generateELValue(type, value);
       }
       else if (! rtexpr && hasELAttribute(value, isELIgnored)) {

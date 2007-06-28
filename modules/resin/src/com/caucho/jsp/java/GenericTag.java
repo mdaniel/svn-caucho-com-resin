@@ -96,6 +96,17 @@ abstract public class GenericTag extends JspContainerNode
     return _tag.isSimpleTag();
   }
 
+  /**
+   * True if this is a jstl node.
+   */
+  public boolean isJstl()
+  {
+    String uri = _tag.getTagInfo().getTagLibrary().getURI();
+    
+    return (JavaJspBuilder.JSTL_CORE_URI.equals(uri)
+	    || JavaJspBuilder.JSTL_EL_CORE_URI.equals(uri));
+  }
+
   public void setTagClass(Class cl)
   {
     _tagClass = cl;

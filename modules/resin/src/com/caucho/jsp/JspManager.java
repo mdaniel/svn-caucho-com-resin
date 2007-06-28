@@ -167,16 +167,15 @@ public class JspManager extends PageManager {
   {
     Class jspClass = null;
 
-    Page page = compile(path, uri, className, dependList, isGenerated);
+    Page page = compile(path, uri, className, config, dependList, isGenerated);
 
-    if (page == null) {
+    if (page == null)
       return null;
-    }
 
     // need to load class, too
 
     //Page page = loadPage(jspClass, parseState.getLineMap(), req);
-    page = loadPage(page, config, null);
+    //page = loadPage(page, config, null);
 
     boolean alwaysModified = false;
     if (alwaysModified)
@@ -200,6 +199,7 @@ public class JspManager extends PageManager {
   }
 
   Page compile(Path path, String uri, String className,
+	       ServletConfig config,
 	       ArrayList<PersistentDependency> dependList,
 	       boolean isGenerated)
     throws Exception
@@ -214,7 +214,8 @@ public class JspManager extends PageManager {
 
     try {
       if (_precompile || _autoCompile)
-	page = preload(className, app.getClassLoader(), app.getAppDir());
+	page = preload(className, app.getClassLoader(), app.getAppDir(),
+		       config);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -242,6 +243,8 @@ public class JspManager extends PageManager {
     Path classPath = getClassDir().lookup(className.replace('.', '/') +
 					  ".class");
 
+    loadPage(page, config, null);
+
     if (classPath.canRead())
       page._caucho_addDepend(classPath.createDepend());
 
@@ -257,7 +260,8 @@ public class JspManager extends PageManager {
    */
   Page preload(String className,
 	       ClassLoader parentLoader,
-	       Path appDir)
+	       Path appDir,
+	       ServletConfig config)
     throws Exception
   {
     DynamicClassLoader loader;
@@ -330,10 +334,8 @@ public class JspManager extends PageManager {
       page = new WrapperPage(jspPage);
 
     page._caucho_addDepend(classPath.createDepend());
-    
-    ServletConfig config = new JspServletConfig(_webApp, null, className);
 
-    page.init(config);
+    loadPage(page, config, null);
 
     return page;
   }
@@ -391,7 +393,6 @@ public class JspManager extends PageManager {
     throws Exception
   {
     page.init(_webApp.getAppDir());
-
 
     page._caucho_setJspManager(this);
 

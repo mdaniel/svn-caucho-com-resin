@@ -294,11 +294,22 @@ public class BodyContentImpl extends AbstractBodyContent {
   {
     try {
       TempCharBuffer head = _tempStream.getHead();
+      boolean isFirst = true;
 
       for (; head != null; head = head.getNext()) {
+	int offset = 0;
+	int length = head.getLength();
 	char []cbuf = head.getBuffer();
 
-	out.write(cbuf, 0, head.getLength());
+	if (isFirst && length > 0 && cbuf[0] == 0xfeff) {
+	  // skip byte-order-mark
+	  offset = 1;
+	  length--;
+	}
+
+	out.write(cbuf, offset, length);
+
+	isFirst = false;
       }
     } catch (IOException e) {
     }

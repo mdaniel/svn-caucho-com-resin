@@ -776,7 +776,11 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
     configureServlet(servlet);
 
     try {
-      if (servlet instanceof Servlet) {
+      if (servlet instanceof Page) {
+	// server/102i
+	// page already configured
+      }
+      else if (servlet instanceof Servlet) {
 	Servlet servletObj = (Servlet) servlet;
 	
 	servletObj.init(this);
@@ -826,7 +830,7 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
       QServlet jsp = (QServlet) jspConfig.createServlet(false);
 
-      Page page = jsp.getPage(servletName, jspFile, this);
+      Page page = jsp.getPage(servletName, jspFile, null);
 
       return page;
     } catch (ServletException e) {

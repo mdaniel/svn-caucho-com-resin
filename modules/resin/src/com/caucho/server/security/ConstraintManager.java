@@ -82,8 +82,8 @@ public class ConstraintManager extends FilterChainBuilder {
 
     String lower = uri.toLowerCase();
 
-    if (lower.startsWith("/web-inf") ||
-        lower.startsWith("/meta-inf")) {
+    if (lower.startsWith("/web-inf")
+	|| lower.startsWith("/meta-inf")) {
       return new ErrorFilterChain(HttpServletResponse.SC_NOT_FOUND);
     }
 
@@ -93,6 +93,7 @@ public class ConstraintManager extends FilterChainBuilder {
     HashMap<String,AbstractConstraint[]> methodMap;
     methodMap = new HashMap<String,AbstractConstraint[]>();
 
+    loop:
     for (int i = 0; i < _constraints.size(); i++) {
       SecurityConstraint constraint = _constraints.get(i);
         
@@ -109,7 +110,11 @@ public class ConstraintManager extends FilterChainBuilder {
 
 	    if (methodList == null)
 	      methodList = absConstraint.toArray();
+	    // server/12ba - the first constraint matches, following are
+	    // ignored
+	    /*
 	    else {
+	      
 	      AbstractConstraint []newMethods = absConstraint.toArray();
 		
 	      AbstractConstraint []newList;
@@ -123,6 +128,7 @@ public class ConstraintManager extends FilterChainBuilder {
 
 	      methodList = newList;
 	    }
+	    */
 
 	    methodMap.put(method, methodList);
 	  }
@@ -131,7 +137,17 @@ public class ConstraintManager extends FilterChainBuilder {
 	    AbstractConstraint []constArray = absConstraint.toArray();
 	    for (int k = 0; k < constArray.length; k++)
 	      constraints.add(constArray[k]);
+
+	    // server/12ba - the first constraint matches, following are
+	    // ignored
+	    
+	    break loop;
 	  }
+	}
+	else {
+	  // server/1233
+	  
+	  break loop;
 	}
       }
     }

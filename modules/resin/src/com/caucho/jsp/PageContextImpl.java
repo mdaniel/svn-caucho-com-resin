@@ -159,6 +159,9 @@ public class PageContextImpl extends PageContext
   {
     this();
 
+    if (webApp == null)
+      throw new NullPointerException();
+    
     _webApp = webApp;
     _servlet = servlet;
 
@@ -169,12 +172,16 @@ public class PageContextImpl extends PageContext
     }
     else
       _functionMap = null;
+
   }
 
   public PageContextImpl(WebApp webApp, HashMap<String,Method> functionMap)
   {
     this();
 
+    if (webApp == null)
+      throw new NullPointerException();
+    
     _webApp = webApp;
     
     _functionMap = functionMap;
