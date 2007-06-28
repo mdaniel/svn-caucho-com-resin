@@ -226,8 +226,6 @@ public class Env {
   private Expr [] _callStack = new Expr[256];
   private Value [] _callThisStack = new Value[256];
   private int _callStackTop;
-  
-  private Location _location = Location.UNKNOWN;
 
   private Value [] _functionArgs;
 

@@ -12,7 +12,28 @@
 
 <s2 title="3.1.2">
 <ul>
-<li>Quercus: date() day of the week format ('w') off by 1</li>
+<li>Quercus: will not append an empty string to a non-empty one (#1712)</li>
+<li>Quercus: Java exceptions can now be caught (#1455)</li>
+<li>Quercus: implemented idate() (#1721)</li>
+<li>Quercus: implemented get_included_files (#1262)</li>
+<li>Quercus: implemented headers_list() (#1797)</li>
+<li>Quercus: fixed date() day of the week format ('w') was off by 1 (#1809)</li>
+<li>Quercus: fixed cases where an error did not print out location of error</li>
+<li>Quercus: fixed exec() and similar functions for *nix and Windows (#1812)</li>
+<li>Quercus: fixed cases where database connections were not being closed (#1749)</li>
+<li>Quercus: fixed characters being quoted for Drupal (#1790)</li>
+<li>Quercus: fixed int overflow in unserialize() (#1638)</li>
+<li>Quercus: fixed to allow '&lt;?' to open php code (#1729)</li>
+<li>Quercus: fixed to allow object comparisons (#1459)</li>
+<li>Quercus: fixed ob module outputing garbage(#1755, #1763)</li>
+<li>Quercus: fixed SimpleXML (#1752)</li>
+<li>Quercus: fixed gallery 2.1 Warning: Assertion "!empty($key)" failed (#1744)</li>
+<li>Quercus: fixed unescaped backslash in character literals (#1738)</li>
+<li>Quercus: fixed Quercus producing invalid Java code (#1731)</li>
+<li>Quercus: fixed MediaWiki file upload parent directory does not exist (#1745)</li>
+<li>Quercus: fixed isset() (#1728)</li>
+<li>Quercus: fixed $_POST being overwrited by query string (#1732)</li>
+
 </ul>
 </s2>
 
