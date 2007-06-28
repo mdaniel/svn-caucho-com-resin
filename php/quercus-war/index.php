@@ -45,9 +45,11 @@ Quercus&#153; Start Page
 </head>
 
 <body>
-<div>
+<a href="http://www.caucho.com"><img border="0" src="images/caucho-white.jpg"></a>
+
+<p>
 Testing for Quercus&#153;...
-</div>
+</p>
 
 <div class="message" id="failure">
 PHP files are not being interpreted by Quercus&#153;.
@@ -58,7 +60,7 @@ PHP is being interpreted, but not by Quercus&#153;!  Please check your configura
 </div>
 
 <div class="message" id="success">
-Congratulations!  Quercus&#153; <?php quercus_version(); ?> seems to be working fine.  Have fun!
+<img src="images/dragonfly-tiny.png">Congratulations!  Quercus&#153; <?php quercus_version(); ?> seems to be working fine.  Have fun!
 </div>
 
 <div>
