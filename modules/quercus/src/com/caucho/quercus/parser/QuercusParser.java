@@ -2544,14 +2544,14 @@ public class QuercusParser {
 	  token = parseToken();
 	  
 	  if (token == ']') {
-	    term = _factory.createArrayTail(term);
+	    term = _factory.createArrayTail(getLocation(), term);
 	  }
 	  else {
 	    _peekToken = token;
 	    Expr index = parseExpr();
 	    token = parseToken();
 
-	    term = _factory.createArrayGet(term, index);
+	    term = _factory.createArrayGet(getLocation(), term, index);
 	  }
 
           if (token != ']')
@@ -2619,14 +2619,14 @@ public class QuercusParser {
 	  token = parseToken();
 	  
 	  if (token == ']') {
-	    term = _factory.createArrayTail(term);
+	    term = _factory.createArrayTail(getLocation(), term);
 	  }
 	  else {
 	    _peekToken = token;
 	    Expr index = parseExpr();
 	    token = parseToken();
 
-	    term = _factory.createArrayGet(term, index);
+	    term = _factory.createArrayGet(getLocation(), term, index);
 	  }
 
           if (token != ']')
@@ -2693,7 +2693,7 @@ public class QuercusParser {
 	if (token != ']')
 	  throw expect("']'", token);
 
-	nameExpr = _factory.createArrayGet(nameExpr, index);
+	nameExpr = _factory.createArrayGet(getLocation(), nameExpr, index);
 	break;
 	
       default:
@@ -3099,14 +3099,14 @@ public class QuercusParser {
 	  token = parseToken();
 	  
 	  if (token == ']') {
-	    lhs = _factory.createArrayTail(lhs);
+	    lhs = _factory.createArrayTail(getLocation(), lhs);
 	  }
 	  else {
 	    _peekToken = token;
 	    Expr index = parseExpr();
 	    token = parseToken();
 
-	    lhs = _factory.createArrayGet(lhs, index);
+	    lhs = _factory.createArrayGet(getLocation(), lhs, index);
 	  }
 
           if (token != ']')
@@ -4326,7 +4326,7 @@ public class QuercusParser {
 
       VarExpr var = _factory.createVar(_function.createVar(_sb.toString()));
 
-      tail = _factory.createArrayGet(tail, var);
+      tail = _factory.createArrayGet(getLocation(), tail, var);
     }
     else if ('0' <= ch && ch <= '9') {
       long index = ch - '0';
@@ -4337,7 +4337,7 @@ public class QuercusParser {
 	index = 10 * index + ch - '0';
       }
 
-      tail = _factory.createArrayGet(tail, _factory.createLong(index));
+      tail = _factory.createArrayGet(getLocation(), tail, _factory.createLong(index));
     }
     else if (isIdentifierPart((char) ch)) {
       for (;
@@ -4348,7 +4348,7 @@ public class QuercusParser {
 
       Expr constExpr = _factory.createConst(_sb.toString());
 
-      tail = _factory.createArrayGet(tail, constExpr);
+      tail = _factory.createArrayGet(getLocation(), tail, constExpr);
     }
     else
       throw error(L.l("Unexpected character at {0}",

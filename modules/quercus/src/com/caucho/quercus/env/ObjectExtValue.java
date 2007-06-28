@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.vfs.WriteStream;
@@ -268,16 +269,28 @@ public class ObjectExtValue extends ObjectValue
   {
     // php/0d94
     
-    Env.getInstance().error(L.l("Can't use object '{0}' as array",
-				getName()));
+    Env.getInstance().error(L.l("Can't use object '{0}' as array", getName()));
+    
+    return NullValue.NULL;
+  }
+  
+  public Value put(Env env, Location location, Value index, Value value)
+  {
+    env.error(location, L.l("Can't use object '{0}' as array", getName()));
     
     return NullValue.NULL;
   }
 
   public Value put(Value value)
   {
-    Env.getInstance().error(L.l("Can't use object '{0}' as array",
-				getName()));
+    Env.getInstance().error(L.l("Can't use object '{0}' as array", getName()));
+
+    return NullValue.NULL;
+  }
+  
+  public Value put(Env env, Location location, Value value)
+  {
+    env.error(location, L.l("Can't use object '{0}' as array", getName()));
 
     return NullValue.NULL;
   }
@@ -740,8 +753,15 @@ public class ObjectExtValue extends ObjectValue
   public Value getObject(Env env, Value index)
   {
     // php/3d92
-    Env.getInstance().error(L.l("Can't use object '{0}' as array",
-                                getName()));
+
+    env.error(L.l("Can't use object '{0}' as array", getName()));
+
+    return NullValue.NULL;
+  }
+  
+  public Value getObject(Env env, Location location, Value index)
+  {
+    env.error(location, L.l("Can't use object '{0}' as array", getName()));
 
     return NullValue.NULL;
   }

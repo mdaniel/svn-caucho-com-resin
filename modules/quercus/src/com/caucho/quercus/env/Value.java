@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.expr.Expr;
@@ -1767,6 +1768,15 @@ abstract public class Value implements java.io.Serializable
   {
     return NullValue.NULL;
   }
+  
+  /**
+   * Returns the value for a field, creating an object if the field
+   * is unset.
+   */
+  public Value getObject(Env env, Location location, Value index)
+  {
+    return getObject(env, index);
+  }
 
   /**
    * Sets the value ref.
@@ -1783,6 +1793,14 @@ abstract public class Value implements java.io.Serializable
   {
     return value;
   }
+  
+  /**
+   * Sets the array ref.
+   */
+  public Value put(Env env, Location location, Value index, Value value)
+  {
+    return put(index, value);
+  }
 
   /**
    * Sets the array ref.
@@ -1790,6 +1808,14 @@ abstract public class Value implements java.io.Serializable
   public Value put(Value value)
   {
     return value;
+  }
+  
+  /**
+   * Sets the array ref.
+   */
+  public Value put(Env env, Location location, Value value)
+  {
+    return put(value);
   }
 
   /**

@@ -147,18 +147,22 @@ public class ExprFactory {
 
   /**
    * Creates an array get 'a[0]' expression.
+   * @param location
    */
-  public ArrayGetExpr createArrayGet(Expr base, Expr index)
+  public ArrayGetExpr createArrayGet(Location location,
+                                     Expr base,
+                                     Expr index)
   {
-    return new ArrayGetExpr(base, index);
+    return new ArrayGetExpr(location, base, index);
   }
 
   /**
    * Creates an array tail 'a[]' expression.
+   * @param location TODO
    */
-  public ArrayTailExpr createArrayTail(Expr base)
+  public ArrayTailExpr createArrayTail(Location location, Expr base)
   {
-    return new ArrayTailExpr(base);
+    return new ArrayTailExpr(location, base);
   }
 
   /**

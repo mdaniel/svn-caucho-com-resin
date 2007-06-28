@@ -110,7 +110,7 @@ public class ThisExpr extends AbstractVarExpr {
    */
   public void evalAssign(Env env, Value value)
   {
-    env.error("can't assign $this");
+    env.error(getLocation(), "can't assign $this");
   }
   
   /**
@@ -122,7 +122,7 @@ public class ThisExpr extends AbstractVarExpr {
    */
   public void evalUnset(Env env)
   {
-    env.error("can't unset $this");
+    env.error(getLocation(), "can't unset $this");
   }
   
   public String toString()

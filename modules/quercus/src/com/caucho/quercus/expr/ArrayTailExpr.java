@@ -78,7 +78,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    return env.error("Cannot use [] as a read-value.");
+    return env.error(getLocation(), "Cannot use [] as a read-value.");
   }
 
   /**
@@ -126,9 +126,9 @@ public class ArrayTailExpr extends AbstractVarExpr {
     Value obj = _expr.evalArray(env);
 
     ArrayValue array = new ArrayValueImpl();
-
-    obj.put(array);
-
+    
+    obj.put(env, getLocation(), array);
+    
     return array;
   }
 
@@ -144,9 +144,9 @@ public class ArrayTailExpr extends AbstractVarExpr {
     Value array = _expr.evalArray(env);
 
     Value value = env.createObject();
-
-    array.put(value);
-
+    
+    array.put(env, getLocation(), value);
+    
     return value;
   }
 
@@ -161,7 +161,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
   {
     Value array = _expr.evalArray(env);
 
-    array.put(value);
+    array.put(env, getLocation(), value);
   }
 
   /**

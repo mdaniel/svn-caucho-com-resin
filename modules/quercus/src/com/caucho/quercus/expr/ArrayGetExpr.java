@@ -145,8 +145,8 @@ public class ArrayGetExpr extends AbstractVarExpr {
     Value array = _expr.evalArray(env);
 
     Value index = _index.eval(env);
-
-    return array.getObject(env, index);
+    
+    return array.getObject(env, getLocation(), index);
   }
 
   /**
@@ -189,8 +189,8 @@ public class ArrayGetExpr extends AbstractVarExpr {
     Value array = _expr.evalArray(env);
 
     Value index = _index.eval(env);
-
-    array.put(index, value);
+    
+    array.put(env, getLocation(), index, value);
   }
 
   /**
