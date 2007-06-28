@@ -2716,7 +2716,7 @@ public class QuercusParser {
         //php/09fj
         
         _peekToken = token;
-        return term.createFieldGet(_factory, name);
+        return term.createFieldGet(_factory, getLocation(), name);
       }
 
       ArrayList<Expr> args = new ArrayList<Expr>();
@@ -2732,12 +2732,12 @@ public class QuercusParser {
     else if (nameExpr != null) {
       _peekToken = token;
 
-      return term.createFieldGet(_factory, nameExpr);
+      return term.createFieldGet(_factory, getLocation(), nameExpr);
     }
     else {
       _peekToken = token;
 
-      return term.createFieldGet(_factory, name);
+      return term.createFieldGet(_factory, getLocation(), name);
     }
   }
   
@@ -3146,7 +3146,7 @@ public class QuercusParser {
     int token = parseToken();
 
     if (token == THIS) {
-      return _factory.createThis(_quercusClass);
+      return _factory.createThis(getLocation(), _quercusClass);
     }
     else if (token == '$') {
       _peekToken = token;
@@ -3236,7 +3236,7 @@ public class QuercusParser {
   {
     String var = parseIdentifier();
 
-    return _factory.createStaticFieldGet(className, var);
+    return _factory.createStaticFieldGet(getLocation(), className, var);
   }
   
   private ArrayList<Expr> parseArgs()
@@ -4248,7 +4248,7 @@ public class QuercusParser {
 	String varName = _sb.toString();
 
 	if (varName.equals("this"))
-	  tail = _factory.createThis(_quercusClass);
+	  tail = _factory.createThis(getLocation(), _quercusClass);
 	else
 	  tail = _factory.createVar(_function.createVar(varName));
 
@@ -4269,7 +4269,7 @@ public class QuercusParser {
 		_sb.append((char) ch);
 	      }
 
-	      tail = tail.createFieldGet(_factory, _sb.toString());
+	      tail = tail.createFieldGet(_factory, getLocation(), _sb.toString());
 	    }
 	    else {
 	      tail = _factory.createAppend(tail, _factory.createString("->"));

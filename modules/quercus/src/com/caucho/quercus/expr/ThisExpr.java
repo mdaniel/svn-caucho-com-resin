@@ -58,9 +58,11 @@ public class ThisExpr extends AbstractVarExpr {
    * Creates a field ref
    */
   @Override
-  public Expr createFieldGet(ExprFactory factory, String name)
+  public Expr createFieldGet(ExprFactory factory,
+                             Location location,
+                             String name)
   {
-    return new ThisFieldExpr(_quercusClass, name);
+    return new ThisFieldExpr(location, _quercusClass, name);
   }
   
   /**

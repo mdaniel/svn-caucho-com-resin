@@ -233,17 +233,21 @@ abstract public class Expr {
   /**
    * Creates a field ref
    */
-  public Expr createFieldGet(ExprFactory factory, String name)
+  public Expr createFieldGet(ExprFactory factory,
+                             Location location,
+                             String name)
   {
-    return factory.createFieldGet(this, name);
+    return factory.createFieldGet(location, this, name);
   }
 
   /**
    * Creates a field ref
    */
-  public Expr createFieldGet(ExprFactory factory, Expr name)
+  public Expr createFieldGet(ExprFactory factory,
+                             Location location,
+                             Expr name)
   {
-    return factory.createFieldVarGet(this, name);
+    return factory.createFieldVarGet(location, this, name);
   }
 
   /**

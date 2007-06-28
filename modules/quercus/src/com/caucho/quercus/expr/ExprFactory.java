@@ -140,9 +140,9 @@ public class ExprFactory {
   /**
    * Creates a this expression.
    */
-  public ThisExpr createThis(InterpretedClassDef cl)
+  public ThisExpr createThis(Location location, InterpretedClassDef cl)
   {
-    return new ThisExpr(cl);
+    return new ThisExpr(location, cl);
   }
 
   /**
@@ -164,25 +164,31 @@ public class ExprFactory {
   /**
    * Creates an object get '$a->b' expression.
    */
-  public Expr createFieldGet(Expr base, String name)
+  public Expr createFieldGet(Location location,
+                             Expr base,
+                             String name)
   {
-    return new FieldGetExpr(base, name);
+    return new FieldGetExpr(location, base, name);
   }
 
   /**
    * Creates an object get '$a->$b' expression.
    */
-  public Expr createFieldVarGet(Expr base, Expr name)
+  public Expr createFieldVarGet(Location location,
+                                Expr base,
+                                Expr name)
   {
-    return new FieldVarGetExpr(base, name);
+    return new FieldVarGetExpr(location, base, name);
   }
 
   /**
    * Creates an object get 'a::b' expression.
    */
-  public Expr createStaticFieldGet(String className, String name)
+  public Expr createStaticFieldGet(Location location,
+                                   String className,
+                                   String name)
   {
-    return new StaticFieldGetExpr(className, name);
+    return new StaticFieldGetExpr(location, className, name);
   }
 
   /**

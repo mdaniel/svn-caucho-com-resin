@@ -100,11 +100,11 @@ public class ResinQuercusServlet extends QuercusServletImpl
       // XXX: check if correct.  PHP doesn't expect the lower levels
       // to deal with the encoding, so this may be okay
       if (response instanceof CauchoResponse) {
-	ws = Vfs.openWrite(((CauchoResponse) response).getResponseStream());
+        ws = Vfs.openWrite(((CauchoResponse) response).getResponseStream());
       } else {
-	OutputStream out = response.getOutputStream();
+        OutputStream out = response.getOutputStream();
 
-	ws = Vfs.openWrite(out);
+        ws = Vfs.openWrite(out);
       }
 
       env = getQuercus().createEnv(page, ws, request, response);
@@ -114,20 +114,20 @@ public class ResinQuercusServlet extends QuercusServletImpl
 
         env.start();
 
-	String prepend = env.getIniString("auto_prepend_file");
-	if (prepend != null) {
-	  QuercusPage prependPage = getQuercus().parse(env.lookup(prepend));
-	  prependPage.executeTop(env);
-	}
+        String prepend = env.getIniString("auto_prepend_file");
+        if (prepend != null) {
+          QuercusPage prependPage = getQuercus().parse(env.lookup(prepend));
+          prependPage.executeTop(env);
+        }
 
         page.executeTop(env);
 
-	String append = env.getIniString("auto_append_file");
-	if (append != null) {
-	  QuercusPage appendPage = getQuercus().parse(env.lookup(append));
-	  appendPage.executeTop(env);
-	}
-     //   return;
+        String append = env.getIniString("auto_append_file");
+        if (append != null) {
+          QuercusPage appendPage = getQuercus().parse(env.lookup(append));
+          appendPage.executeTop(env);
+        }
+        //   return;
       }
       catch (QuercusExitException e) {
         throw e;
@@ -140,9 +140,9 @@ public class ResinQuercusServlet extends QuercusServletImpl
       catch (QuercusValueException e) {
         log.log(Level.FINE, e.toString(), e);
 	
-	ws.println(e.toString());
+        ws.println(e.toString());
 
-      //  return;
+        //  return;
       }
       catch (Throwable e) {
         if (response.isCommitted())
@@ -174,6 +174,10 @@ public class ResinQuercusServlet extends QuercusServletImpl
       
       if (ws != null)
         ws.close();
+    }
+    catch (QuercusErrorException e) {
+      // error exit
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (RuntimeException e) {
       throw e;

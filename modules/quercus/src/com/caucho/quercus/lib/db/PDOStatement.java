@@ -63,10 +63,10 @@ public class PDOStatement
 
   private static final Value[] NULL_VALUES = new Value[0];
 
-  private static final Value FETCH_FAILURE = new BooleanValue(false) {};
-  private static final Value FETCH_EXHAUSTED = new BooleanValue(false) {};
-  private static final Value FETCH_CONTINUE = new BooleanValue(false) {};
-  private static final Value FETCH_SUCCESS = new BooleanValue(true) {};
+  private static final Value FETCH_FAILURE = BooleanValue.FALSE;
+  private static final Value FETCH_EXHAUSTED = BooleanValue.FALSE;
+  private static final Value FETCH_CONTINUE = BooleanValue.FALSE;
+  private static final Value FETCH_SUCCESS = BooleanValue.TRUE;
 
   private final Env _env;
   private final PDOError _error;

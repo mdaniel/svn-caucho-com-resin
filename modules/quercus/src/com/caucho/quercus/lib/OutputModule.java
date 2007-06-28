@@ -499,7 +499,7 @@ public class OutputModule extends AbstractQuercusModule
     }
 
     if (encoding == Encoding.NONE)
-      return NullValue.NULL;
+      return BooleanValue.FALSE;
 
     GZOutputPair pair = null;
 
@@ -524,7 +524,7 @@ public class OutputModule extends AbstractQuercusModule
           pair.outputStream = new DeflaterOutputStream(siout);
         }
       } catch (IOException e) {
-        return NullValue.NULL;
+        return BooleanValue.FALSE;
       }
 
       _gzOutputPairs.put(env, pair);
@@ -532,7 +532,7 @@ public class OutputModule extends AbstractQuercusModule
       pair = _gzOutputPairs.get(env);
       
       if (pair == null)
-        return NullValue.NULL;
+        return BooleanValue.FALSE;
     }
 
     try {
@@ -546,7 +546,7 @@ public class OutputModule extends AbstractQuercusModule
       }
       
     } catch (IOException e) {
-      return NullValue.NULL;
+      return BooleanValue.FALSE;
     }
 
     Value result = new TempBufferStringValue(pair.tempStream.getHead());

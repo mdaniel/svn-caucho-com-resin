@@ -62,7 +62,8 @@ public class ThisFieldExpr extends AbstractVarExpr {
 
   private Value cannotUseThisError(Env env)
   {
-    return env.error("Cannot use '$this' when not in object context.");
+    return env.error(getLocation(),
+                     "Cannot use '$this' when not in object context.");
   }
 
   /**

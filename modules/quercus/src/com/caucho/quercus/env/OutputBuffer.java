@@ -246,9 +246,9 @@ public class OutputBuffer {
         _callback.call(_env, getContents(), LongValue.create(_state));
 
       // special code to do nothing to the buffer
-      if (result.isNull())
+      if (result == BooleanValue.FALSE)
         return;
-      
+
       clean();
 
       try {

@@ -31,6 +31,7 @@ package com.caucho.quercus.servlet;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusDieException;
+import com.caucho.quercus.QuercusErrorException;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.QuercusLineRuntimeException;
 import com.caucho.quercus.QuercusRequestAdapter;
@@ -116,20 +117,20 @@ public class QuercusServletImpl
 
         env.start();
 
-	String prepend = env.getIniString("auto_prepend_file");
-	if (prepend != null) {
-	  QuercusPage prependPage = getQuercus().parse(env.lookup(prepend));
-	  prependPage.executeTop(env);
-	}
+        String prepend = env.getIniString("auto_prepend_file");
+        if (prepend != null) {
+          QuercusPage prependPage = getQuercus().parse(env.lookup(prepend));
+          prependPage.executeTop(env);
+        }
 
         page.executeTop(env);
 
-	String append = env.getIniString("auto_append_file");
-	if (append != null) {
-	  QuercusPage appendPage = getQuercus().parse(env.lookup(append));
-	  appendPage.executeTop(env);
-	}
-     //   return;
+        String append = env.getIniString("auto_append_file");
+        if (append != null) {
+          QuercusPage appendPage = getQuercus().parse(env.lookup(append));
+          appendPage.executeTop(env);
+        }
+        //   return;
       }
       catch (QuercusExitException e) {
         throw e;
@@ -142,7 +143,7 @@ public class QuercusServletImpl
       catch (QuercusValueException e) {
         log.log(Level.FINE, e.toString(), e);
 	
-	ws.println(e.toString());
+        ws.println(e.toString());
 
       //  return;
       }
@@ -176,6 +177,10 @@ public class QuercusServletImpl
 
       if (ws != null)
         ws.close();
+    }
+    catch (QuercusErrorException e) {
+      // error exit
+      log.log(Level.FINE, e.toString(), e);
     }
     catch (RuntimeException e) {
       throw e;

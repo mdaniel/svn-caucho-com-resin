@@ -3742,6 +3742,14 @@ public class Env {
   /**
    * A fatal runtime error.
    */
+  public Value error(Location location, String msg)
+  {
+    return error(B_ERROR, location, msg + getFunctionLocation());
+  }
+  
+  /**
+   * A fatal runtime error.
+   */
   public Value error(String loc, String msg)
   {
     return error(B_ERROR, loc, msg + getFunctionLocation());
@@ -3996,14 +4004,31 @@ public class Env {
     _exceptionHandler = _prevExceptionHandler;
   }
 
+  /*
+   * Writes an error.
+   */
+  public Value error(int code, String locString, String msg)
+  {
+    return error(code, null, locString, msg);
+  }
+  
+  /*
+   * Writes an error.
+   */
+  public Value error(int code, Location location, String msg)
+  {
+    return error(code, location, "", msg);
+  }
+  
   /**
    * Writes an error.
    */
-  public Value error(int code, String loc, String msg)
+  public Value error(int code, Location location, String loc, String msg)
   {
     int mask = 1 << code;
 
-    Location location = getLocation();
+    if (location == null)
+      location = getLocation();
 
     String locationMessagePrefix = loc;
 
