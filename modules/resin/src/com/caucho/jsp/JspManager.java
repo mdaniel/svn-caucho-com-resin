@@ -243,7 +243,7 @@ public class JspManager extends PageManager {
     Path classPath = getClassDir().lookup(className.replace('.', '/') +
 					  ".class");
 
-    loadPage(page, config, null);
+    loadPage(page, config, null, uri);
 
     if (classPath.canRead())
       page._caucho_addDepend(classPath.createDepend());
@@ -335,7 +335,7 @@ public class JspManager extends PageManager {
 
     page._caucho_addDepend(classPath.createDepend());
 
-    loadPage(page, config, null);
+    loadPage(page, config, null, className);
 
     return page;
   }
@@ -389,7 +389,8 @@ public class JspManager extends PageManager {
    * @param jspClass the class object of the JSP file.
    * @param lineMap the java to JSP line map.
    */
-  private Page loadPage(Page page, ServletConfig config, LineMap lineMap)
+  private Page loadPage(Page page, ServletConfig config, LineMap lineMap,
+			String servletName)
     throws Exception
   {
     page.init(_webApp.getAppDir());
@@ -397,7 +398,7 @@ public class JspManager extends PageManager {
     page._caucho_setJspManager(this);
 
     if (config == null)
-      config = new JspServletConfig(_webApp, null, "");
+      config = new JspServletConfig(_webApp, null, servletName);
 
     page.init(config);
     

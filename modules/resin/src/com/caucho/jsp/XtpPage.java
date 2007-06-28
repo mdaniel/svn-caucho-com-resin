@@ -355,7 +355,8 @@ class XtpPage extends Page {
     try {
       page = _jspManager.preload(className,
 				 _webApp.getClassLoader(),
-				 _webApp.getAppDir());
+				 _webApp.getAppDir(),
+				 null);
 
       if (page != null) {
 	if (log.isLoggable(Level.FINE))

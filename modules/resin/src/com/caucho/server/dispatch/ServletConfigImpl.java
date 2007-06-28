@@ -830,7 +830,8 @@ public class ServletConfigImpl implements ServletConfig, AlarmListener {
 
       QServlet jsp = (QServlet) jspConfig.createServlet(false);
 
-      Page page = jsp.getPage(servletName, jspFile, null);
+      // server/105o
+      Page page = jsp.getPage(servletName, jspFile, this);
 
       return page;
     } catch (ServletException e) {

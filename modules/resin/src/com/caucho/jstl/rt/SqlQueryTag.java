@@ -158,7 +158,7 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
       _params = null;
       Statement stmt;
 
-      /*
+      // jsp/1f07
       int paramCount = countParameters(sql);
 
       if (params == null && paramCount != 0
@@ -166,7 +166,6 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
         throw new JspException(L.l("sql:param does not match expected parameters\nin '{0}'",
                                    sql));
       }
-      */
 
       int maxRows = -1;
 
