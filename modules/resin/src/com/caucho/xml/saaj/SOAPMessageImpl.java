@@ -310,14 +310,27 @@ public class SOAPMessageImpl extends SOAPMessage {
 
     // ensure that the soap envelope prefix is defined when we do output
     SOAPEnvelope envelope = _part.getEnvelope();
-    String value = envelope.getAttributeValue(SOAP_NAMESPACE_NAME);
 
-    if (value == null)
+    Iterator attrs = envelope.getAllAttributes();
+    boolean foundSoapNS = false;
+
+    while (attrs.hasNext()) {
+      Name name = (Name) attrs.next();
+      String value = envelope.getAttributeValue(name);
+
+      if (value.equals(envelope.getNamespaceURI()) &&
+          "xmlns".equals(name.getPrefix())) {
+        foundSoapNS = true;
+        break;
+      }
+    }
+
+    if (! foundSoapNS)
       envelope.addAttribute(SOAP_NAMESPACE_NAME, envelope.getNamespaceURI());
 
     printer.printNode(_part);
 
-    if (value == null)
+    if (! foundSoapNS)
       envelope.removeAttribute(SOAP_NAMESPACE_NAME);
 
     // write the attachments

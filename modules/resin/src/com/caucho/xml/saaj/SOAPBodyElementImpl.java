@@ -36,10 +36,13 @@ import javax.xml.soap.*;
 import org.w3c.dom.*;
 
 import com.caucho.xml.QNode;
+import com.caucho.util.L10N;
 
 public class SOAPBodyElementImpl extends SOAPElementImpl
                                  implements SOAPBodyElement 
 {
+  private static final L10N L = new L10N(SOAPBodyElementImpl.class);
+
   SOAPBodyElementImpl(SOAPFactory factory, NameImpl name)
     throws SOAPException
   {
@@ -71,6 +74,7 @@ public class SOAPBodyElementImpl extends SOAPElementImpl
     if ((parent instanceof SOAPBody) && (parent instanceof SOAPElementImpl))
       _parent = (SOAPElementImpl) parent;
     else
-      throw new SOAPException("Parent not a SOAPBody");
+      throw new SOAPException(L.l("Parent is a {0}, not a SOAPBody", 
+                                  parent.getClass().getName()));
   }
 }

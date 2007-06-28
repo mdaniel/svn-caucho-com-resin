@@ -34,6 +34,7 @@ import com.caucho.xml.*;
 import javax.xml.soap.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 import java.util.*;
@@ -47,6 +48,9 @@ public class SOAPPartImpl extends SOAPPart
   private String _protocol;
   private MimeHeaders _headers = new MimeHeaders();
   private Transformer _transformer;
+  private String _xmlEncoding = "utf-8";
+  private String _xmlVersion = "1.0";
+  private boolean _xmlStandalone = true;
 
   SOAPPartImpl(SOAPFactory factory, String protocol)
     throws SOAPException
@@ -94,8 +98,13 @@ public class SOAPPartImpl extends SOAPPart
     else
       throw new SOAPException("Unknown SOAP protocol: " + _protocol);
 
+    _xmlEncoding = document.getXmlEncoding();
+    _xmlVersion = document.getXmlVersion();
+    _xmlStandalone = document.getXmlStandalone();
+
     _envelope = (SOAPEnvelopeImpl) _factory.createElement(envelopeName);
     _envelope.setOwner((Document) this);
+
     _envelope.deepCopy(document.getDocumentElement());
   }
 
@@ -348,17 +357,17 @@ public class SOAPPartImpl extends SOAPPart
 
   public String getXmlEncoding()
   {
-    throw new UnsupportedOperationException();
+    return _xmlEncoding;
   }
 
   public boolean getXmlStandalone()
   {
-    throw new UnsupportedOperationException();
+    return _xmlStandalone;
   }
 
   public String getXmlVersion()
   {
-    throw new UnsupportedOperationException();
+    return _xmlVersion;
   }
 
   public org.w3c.dom.Node importNode(org.w3c.dom.Node importedNode, 
@@ -392,12 +401,12 @@ public class SOAPPartImpl extends SOAPPart
 
   public void setXmlStandalone(boolean xmlStandalone)
   {
-    throw new UnsupportedOperationException();
+    _xmlStandalone = xmlStandalone;
   }
 
   public void setXmlVersion(String xmlVersion)
   {
-    throw new UnsupportedOperationException();
+    _xmlVersion = xmlVersion;
   }
 
   // org.w3c.dom.Node

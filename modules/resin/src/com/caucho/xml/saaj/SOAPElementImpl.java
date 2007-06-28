@@ -139,11 +139,12 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
         addTextNode(((org.w3c.dom.CharacterData) node).getData());
       }
       else if (node instanceof Element) {
-        SOAPElementImpl child = 
-          new SOAPElementImpl(_factory, NameImpl.fromNode(node));
+        Name name = NameImpl.fromNode(node);
+
+        SOAPElementImpl child = (SOAPElementImpl) _factory.createElement(name);
         child.deepCopy((Element) node);
 
-        appendChild(child);
+        addChildElement(child);
       }
       else {
         appendChild(node.cloneNode(true));
@@ -729,6 +730,11 @@ public class SOAPElementImpl extends SOAPNodeImpl implements SOAPElement
 
     if (attr != null)
       attr.setIsId(isId);
+  }
+
+  public String toString()
+  {
+    return "SOAPElement(" + System.identityHashCode(this) + ")[" + _name + "]";
   }
   
   private static class AttributeIterator implements Iterator {

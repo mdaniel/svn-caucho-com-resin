@@ -63,4 +63,9 @@ public class MessageFactoryImpl extends MessageFactory {
   {
     return new SOAPMessageImpl(_soapFactory, _protocol, headers, in);
   }
+
+  public SOAPFactory getSOAPFactory()
+  {
+    return _soapFactory;
+  }
 }

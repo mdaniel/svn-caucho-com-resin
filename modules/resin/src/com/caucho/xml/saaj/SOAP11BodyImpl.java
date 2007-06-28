@@ -41,7 +41,7 @@ import com.caucho.xml.QDocument;
 import com.caucho.xml.QNode;
 
 public class SOAP11BodyImpl extends SOAPElementImpl
-                          implements SOAPBody 
+                            implements SOAPBody 
 {
   private SOAPFault _fault;
 
@@ -64,6 +64,9 @@ public class SOAP11BodyImpl extends SOAPElementImpl
 
     if (! (element instanceof SOAPBodyElement))
       child = new SOAPBodyElementImpl(_factory, element);
+
+    if (element instanceof SOAPFault)
+      _fault = (SOAPFault) element;
 
     return super.addChildElement(child);
   }
@@ -102,6 +105,8 @@ public class SOAP11BodyImpl extends SOAPElementImpl
     // XXX replace or throw exception?
     _fault = _factory.createFault();
 
+    addChildElement(_fault);
+
     return _fault;
   }
 
@@ -109,6 +114,8 @@ public class SOAP11BodyImpl extends SOAPElementImpl
     throws SOAPException
   {
     _fault = _factory.createFault(faultString, NameImpl.toQName(faultCode));
+
+    addChildElement(_fault);
 
     return _fault;
   }
@@ -121,6 +128,8 @@ public class SOAP11BodyImpl extends SOAPElementImpl
     _fault.setFaultString(faultString, locale);
     _fault.setFaultCode(faultCode);
 
+    addChildElement(_fault);
+
     return _fault;
   }
 
@@ -128,6 +137,8 @@ public class SOAP11BodyImpl extends SOAPElementImpl
     throws SOAPException
   {
     _fault = _factory.createFault(faultString, faultCode);
+
+    addChildElement(_fault);
 
     return _fault;
   }
@@ -139,6 +150,8 @@ public class SOAP11BodyImpl extends SOAPElementImpl
 
     _fault.setFaultString(faultString, locale);
     _fault.setFaultCode(faultCode);
+
+    addChildElement(_fault);
 
     return _fault;
   }

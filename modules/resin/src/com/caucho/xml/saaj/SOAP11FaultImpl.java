@@ -33,12 +33,16 @@ import javax.xml.namespace.*;
 import javax.xml.soap.*;
 import java.util.*;
 
+import com.caucho.util.L10N;
+
 /**
  * 
  **/
 public class SOAP11FaultImpl extends SOAPBodyElementImpl 
                              implements SOAPFault 
 {
+  private static final L10N L = new L10N(SOAP11FaultImpl.class);
+
   private static final NameImpl SOAP_1_1_FAULT_NAME = 
     new NameImpl(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, 
                  "Fault",
@@ -64,12 +68,30 @@ public class SOAP11FaultImpl extends SOAPBodyElementImpl
     throws SOAPException
   {
     super(factory, name);
+    /*
 
     _faultCode = _factory.createElement(FAULT_CODE);
     _faultString = _factory.createElement(FAULT_STRING);
 
     addChildElement(_faultCode);
-    addChildElement(_faultString);
+    addChildElement(_faultString);*/
+  }
+
+  public SOAPElement addChildElement(SOAPElement element) 
+    throws SOAPException
+  {
+    if (FAULT_CODE.getLocalName().equals(element.getLocalName()) &&
+        element.getNamespaceURI() == null ||
+        "".equals(element.getNamespaceURI())) {
+      _faultCode = element;
+    }
+    else if (FAULT_STRING.getLocalName().equals(element.getLocalName()) &&
+             element.getNamespaceURI() == null ||
+             "".equals(element.getNamespaceURI())) {
+      _faultString = element;
+    }
+
+    return super.addChildElement(element);
   }
 
   // Detail
@@ -164,12 +186,19 @@ public class SOAP11FaultImpl extends SOAPBodyElementImpl
 
   public String getFaultCode()
   {
+    if (_faultCode == null)
+      return null;
+
     return _faultCode.getValue();
   }
 
   public Name getFaultCodeAsName()
   {
     String faultcode = getFaultCode();
+
+    if (_faultCode == null)
+      return null;
+
     int colon = faultcode.indexOf(':');
 
     if (colon >= 0) {
@@ -193,7 +222,12 @@ public class SOAP11FaultImpl extends SOAPBodyElementImpl
   {
     if (faultCodeName.getPrefix() == null || 
         "".equals(faultCodeName.getPrefix()))
-      throw new SOAPException("Fault codes must have qualified names");
+      throw new SOAPException(L.l("Fault codes must have qualified names.  Name given: {0}", faultCodeName));
+
+    if (_faultCode == null) {
+      _faultCode = _factory.createElement(FAULT_CODE);
+      addChildElement(_faultCode);
+    }
 
     if (getNamespaceURI(faultCodeName.getPrefix()) == null) {
       _faultCode.addNamespaceDeclaration(faultCodeName.getPrefix(), 
@@ -212,8 +246,14 @@ public class SOAP11FaultImpl extends SOAPBodyElementImpl
   public void setFaultCode(String faultCode) 
     throws SOAPException
   {
+    /* XXX Should we check for a QName here?
     if (faultCode.indexOf(':') < 0)
-      throw new SOAPException("Fault codes must be qualified names");
+      throw new SOAPException(L.l("Fault codes must have qualified names.  Name given: {0}", faultCode));
+*/
+    if (_faultCode == null) {
+      _faultCode = _factory.createElement(FAULT_CODE);
+      addChildElement(_faultCode);
+    }
 
     _faultCode.setValue(faultCode);
   }
@@ -222,18 +262,31 @@ public class SOAP11FaultImpl extends SOAPBodyElementImpl
 
   public String getFaultString()
   {
+    if (_faultString == null)
+      return null;
+
     return _faultString.getValue();
   }
 
   public void setFaultString(String faultString)
     throws SOAPException
   {
+    if (_faultString == null) {
+      _faultString = _factory.createElement(FAULT_STRING);
+      addChildElement(_faultString);
+    }
+
     _faultString.setValue(faultString);
   }
 
   public void setFaultString(String faultString, Locale locale) 
     throws SOAPException
   {
+    if (_faultString == null) {
+      _faultString = _factory.createElement(FAULT_STRING);
+      addChildElement(_faultString);
+    }
+
     _faultString.setValue(faultString);
     _faultLocale = locale;
   }

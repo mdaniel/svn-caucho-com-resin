@@ -35,6 +35,8 @@ import javax.xml.soap.*;
 
 import com.caucho.xml.QNode;
 
+import org.w3c.dom.Element;
+
 public abstract class SOAPEnvelopeImpl extends SOAPElementImpl
                                        implements SOAPEnvelope
 {
@@ -150,6 +152,24 @@ public abstract class SOAPEnvelopeImpl extends SOAPElementImpl
     throws SOAPException
   {
     throw new SOAPException("Cannot set name of SOAP Envelope");
+  }
+
+  protected void deepCopy(Element source)
+    throws SOAPException
+  {
+    super.deepCopy(source);
+
+    for (SOAPNodeImpl node = _firstChild; node != null; node = node._next) {
+      if (node instanceof SOAPBody) {
+        _body = (SOAPBody) node;
+      }
+      else if (node instanceof SOAPHeader) {
+        _header = (SOAPHeader) node;
+      }
+
+      if (_body != null && _header != null)
+        break;
+    }
   }
 
   protected abstract Name getBodyName();
