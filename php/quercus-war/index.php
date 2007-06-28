@@ -9,7 +9,7 @@ Quercus&#153; Start Page
 
   function quercus_test()
   {
-    return function_exists("resin_call_stack");
+    return function_exists("quercus_version");
   }
 
 ?>
@@ -58,7 +58,7 @@ PHP is being interpreted, but not by Quercus&#153;!  Please check your configura
 </div>
 
 <div class="message" id="success">
-Congratulations!  Quercus&#153; seems to be working fine.  Have fun!
+Congratulations!  Quercus&#153; <?php quercus_version(); ?> seems to be working fine.  Have fun!
 </div>
 
 <div>

@@ -507,12 +507,12 @@ public class OptionsModule extends AbstractQuercusModule {
 
   private static void phpinfoGeneral(Env env)
   {
-    if (env.hasRequest())
+    if (hasRequest(env))
       env.println("<h1>Quercus</h1>");
     else
       env.println("Quercus");
 
-    if (env.hasRequest()) {
+    if (hasRequest(env)) {
       env.println("<pre>");
     }
     
@@ -531,14 +531,14 @@ public class OptionsModule extends AbstractQuercusModule {
     env.println("Thread Safety => enabled");
     env.println("Registered PHP Streams => php, file, http, https");
     
-    if (env.hasRequest()) {
+    if (hasRequest(env)) {
       env.print("</pre>");
     }
   }
   
   private static void phpinfoVariables(Env env)
   {
-    if (env.hasRequest()) {
+    if (hasRequest(env)) {
       env.println("<h2>PHP Variables</h2");
       env.println("<table>");
       env.println("<tr><th>Variable</th><th>Value</th></tr>");
@@ -547,7 +547,7 @@ public class OptionsModule extends AbstractQuercusModule {
       env.println("Variable => Value");
     }
     
-    if (env.hasRequest()) {
+    if (hasRequest(env)) {
       phpinfoVariable(env, "_REQUEST", env.getSpecialRef("_REQUEST"));
       phpinfoVariable(env, "_GET", env.getSpecialRef("_GET"));
       phpinfoVariable(env, "_POST", env.getSpecialRef("_POST"));
@@ -555,7 +555,7 @@ public class OptionsModule extends AbstractQuercusModule {
 
     phpinfoVariable(env, "_SERVER", env.getSpecialRef("_SERVER"));
     
-    if (env.hasRequest())
+    if (hasRequest(env))
       env.print("</table>");
     
     env.println();
@@ -569,29 +569,29 @@ public class OptionsModule extends AbstractQuercusModule {
       for (Map.Entry<Value,Value> entry : array.entrySet()) {
         Value key = escape(env, entry.getKey());
         
-        if (env.hasRequest())
+        if (hasRequest(env))
           env.print("<tr><td>");
         
         env.print(name + "[\"" + key + "\"]");
         
-        if (env.hasRequest())
+        if (hasRequest(env))
           env.println("</td><td>");
         else
           env.print(" => ");
         
         phpinfoVariable(env, entry.getValue());
         
-        if (env.hasRequest())
+        if (hasRequest(env))
           env.println("</td></tr>");
       }
     }
     else {
-      if (env.hasRequest())
+      if (hasRequest(env))
         env.println("<tr><td>" + name + "</td><td>");
       
       phpinfoVariable(env, value);
       
-      if (env.hasRequest())
+      if (hasRequest(env))
         env.println("</td></tr>");
     }
   }
@@ -602,14 +602,19 @@ public class OptionsModule extends AbstractQuercusModule {
       env.println(escape(env, value).toString());
     }
     else {
-      if (env.hasRequest())
+      if (hasRequest(env))
         env.print("<pre>");
       
       VariableModule.var_dump(env, escape(env, value));
       
-      if (env.hasRequest())
+      if (hasRequest(env))
         env.print("</pre>");
     }
+  }
+  
+  private static boolean hasRequest(Env env)
+  {
+    return env.getRequest() != null;
   }
   
   private static Value escape(Env env, Value value)
@@ -623,7 +628,7 @@ public class OptionsModule extends AbstractQuercusModule {
         Value key = escape(env, entry.getKey());
         Value val = escape(env, entry.getValue());
         
-        result.put(key, value);
+        result.put(key, val);
       }
       
       return result;
@@ -770,11 +775,6 @@ public class OptionsModule extends AbstractQuercusModule {
       else
         return new LongValue(1);
     }
-  }
-
-  public static String quercus_quercus_version(Env env)
-  {
-    return env.getQuercus().getVersion();
   }
 
   public static String zend_version()

@@ -230,15 +230,6 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns an array containing the PHP call stack.
-   */
-  public Value resin_call_stack(Env env)
-  {
-    return env.getCallStack();
-  }
-
-
-  /**
    * Dumps the stack.
    */
   public static Value dump_stack(Env env)

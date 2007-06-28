@@ -345,46 +345,6 @@ public class Env {
     return _env.get();
   }
 
-  public boolean hasRequest()
-  {
-    return _request != null;
-  }
-  
-  public boolean hasDatabase()
-  {
-    return _quercus.getDatabase() != null;
-  }
-  
-  public boolean isCompile()
-  {
-    return _quercus.isCompile();
-  }
-  
-  public boolean isPro()
-  {
-    return false;
-  }
-  
-  //
-  // debugging
-  //
-
-  /*
-   * Returns the PHP call stack.
-   */
-  public ArrayValue getCallStack()
-  {
-    ArrayValue array = new ArrayValueImpl();
-    
-    for (int i = _callStackTop; i >= 2; i--) {
-      String fun = _callStack[i].toString();
-
-      array.put(new StringValueImpl(fun));
-    }
-    
-    return array;
-  }
-
   //
   // i18n
   //

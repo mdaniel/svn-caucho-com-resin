@@ -230,12 +230,12 @@ public class Quercus
 
   public String getVersion()
   {
-    return "Resin/3.1.0";
+    return "Open Source 3.1.2";
   }
 
   public String getVersionDate()
   {
-    return "20061220T1222";
+    return "20070628T2777";
   }
 
   protected PageManager createPageManager()
@@ -290,6 +290,22 @@ public class Quercus
   public boolean isCompile()
   {
     return _pageManager.isCompile();
+  }
+  
+  /*
+   * Returns true if this is the Professional version.
+   */
+  public boolean isPro()
+  {
+    return false;
+  }
+  
+  /*
+   * Returns true if Quercus is running under Resin.
+   */
+  public boolean isResin()
+  {
+    return false;
   }
   
   /**

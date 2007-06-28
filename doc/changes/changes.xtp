@@ -12,6 +12,7 @@
 
 <s2 title="3.1.2">
 <ul>
+<li>Quercus: added php functions to query info on Quercus environment</li>
 <li>Quercus: will not append an empty string to a non-empty one (#1712)</li>
 <li>Quercus: Java exceptions can now be caught (#1455)</li>
 <li>Quercus: implemented idate() (#1721)</li>
