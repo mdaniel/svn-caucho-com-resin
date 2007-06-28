@@ -1002,14 +1002,19 @@ public class JavaClassDef extends ClassDef {
       if (! Modifier.isPublic(method.getModifiers()))
         continue;
 
-      if ("printRImpl".equals(method.getName())) {
+      String methodName = method.getName();
+      
+      if ("printRImpl".equals(methodName)) {
         _printRImpl = method;
-      } else if ("varDumpImpl".equals(method.getName())) {
+      } else if ("varDumpImpl".equals(methodName)) {
         _varDumpImpl = method;
-      } else if ("__call".equals(method.getName())) {
+      } else if ("__call".equals(methodName)) {
         __call = new JavaMethod(moduleContext, method);
       } else {
-        AbstractJavaMethod fun = _functionMap.get(method.getName());
+        if (methodName.startsWith("quercus_"))
+          methodName = methodName.substring(8);
+        
+        AbstractJavaMethod fun = _functionMap.get(methodName);
         JavaMethod newFun = new JavaMethod(moduleContext, method);
 
         if (fun != null)
@@ -1017,7 +1022,7 @@ public class JavaClassDef extends ClassDef {
         else
           fun = newFun;
 
-        _functionMap.put(method.getName(), fun);
+        _functionMap.put(methodName, fun);
       }
     }
 

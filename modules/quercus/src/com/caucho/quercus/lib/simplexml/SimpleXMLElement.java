@@ -370,7 +370,7 @@ public class SimpleXMLElement
    * 
    * @return name of the node
    */
-  public String getName()
+  public String quercus_getName()
   {
     return getNode().getName();
   }
