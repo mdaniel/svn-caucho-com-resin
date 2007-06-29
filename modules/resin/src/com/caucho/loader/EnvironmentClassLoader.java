@@ -547,10 +547,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader {
 
       TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
       // TransactionManagerImpl.setLocal(tm);
-      Jndi.bindDeep("java:comp/TransactionManager", tm);
+      //Jndi.bindDeep("java:comp/TransactionManager", tm);
 
       UserTransactionProxy ut = UserTransactionProxy.getInstance();
       Jndi.bindDeep("java:comp/UserTransaction", ut);
+      Jndi.bindDeep("java:comp/TransactionManager", ut);
 
       String oldBuilder = props.getProperty("javax.management.builder.initial");
       if (oldBuilder == null)
