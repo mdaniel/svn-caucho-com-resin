@@ -132,6 +132,9 @@ public class ResinQuercusServlet extends QuercusServletImpl
       catch (QuercusExitException e) {
         throw e;
       }
+      catch (QuercusErrorException e) {
+        throw e;
+      }
       catch (QuercusLineRuntimeException e) {
         log.log(Level.FINE, e.toString(), e);
 
