@@ -12,34 +12,33 @@
 
 <s2 title="3.1.2">
 <ul>
-<li>Quercus: added php functions to query info on Quercus environment</li>
-<li>Quercus: will not append an empty string to a non-empty one (#1712)</li>
-<li>Quercus: Java exceptions can now be caught (#1455)</li>
-<li>Quercus: implemented idate() (#1721)</li>
-<li>Quercus: implemented get_included_files (#1262)</li>
-<li>Quercus: implemented headers_list() (#1797)</li>
-<li>Quercus: fixed date() day of the week format ('w') was off by 1 (#1809)</li>
-<li>Quercus: fixed cases where an error did not print out location of error</li>
-<li>Quercus: fixed exec() and similar functions for *nix and Windows (#1812)</li>
-<li>Quercus: fixed cases where database connections were not being closed (#1749)</li>
-<li>Quercus: fixed characters being quoted for Drupal (#1790)</li>
-<li>Quercus: fixed int overflow in unserialize() (#1638)</li>
-<li>Quercus: fixed to allow '&lt;?' to open php code (#1729)</li>
-<li>Quercus: fixed to allow object comparisons (#1459)</li>
-<li>Quercus: fixed ob module outputing garbage(#1755, #1763)</li>
-<li>Quercus: fixed SimpleXML (#1752)</li>
-<li>Quercus: fixed gallery 2.1 Warning: Assertion "!empty($key)" failed (#1744)</li>
-<li>Quercus: fixed unescaped backslash in character literals (#1738)</li>
-<li>Quercus: fixed Quercus producing invalid Java code (#1731)</li>
-<li>Quercus: fixed MediaWiki file upload parent directory does not exist (#1745)</li>
-<li>Quercus: fixed isset() (#1728)</li>
-<li>Quercus: fixed $_POST being overwrited by query string (#1732)</li>
-
-</ul>
-</s2>
-
-<s2 title="3.1.snap - Jun 17, 2007">
-<ul>
+<li>quercus: array sort() with floats</li>
+<li>quercus: new self::$foo() (#1811, rep by Kibo)</li>
+<li>quercus: preg_match backreferences (#1562, rep by obaltz)</li>
+<li>quercus: /u option for preg functions</li>
+<li>quercus: pligg php application (#1800, rep by C Whalley)</li>
+<li>quercus: added php functions to query info on Quercus environment</li>
+<li>quercus: will not append an empty string to a non-empty one (#1712)</li>
+<li>quercus: Java exceptions can now be caught (#1455)</li>
+<li>quercus: implemented idate() (#1721)</li>
+<li>quercus: implemented get_included_files (#1262)</li>
+<li>quercus: implemented headers_list() (#1797)</li>
+<li>quercus: date() day of the week format ('w') was off by 1 (#1809)</li>
+<li>quercus: cases where an error did not print out location of error</li>
+<li>quercus: exec() and similar functions for *nix and Windows (#1812)</li>
+<li>quercus: cases where database connections were not being closed (#1749)</li>
+<li>quercus: characters being quoted for Drupal (#1790)</li>
+<li>quercus: int overflow in unserialize() (#1638)</li>
+<li>quercus: to allow '&lt;?' to open php code (#1729)</li>
+<li>quercus: allow object comparisons (#1459)</li>
+<li>quercus: ob module outputing garbage(#1755, #1763)</li>
+<li>quercus: SimpleXML (#1752)</li>
+<li>quercus: gallery 2.1 Warning: Assertion "!empty($key)" failed (#1744)</li>
+<li>quercus: unescaped backslash in character literals (#1738)</li>
+<li>quercus: Quercus producing invalid Java code (#1731)</li>
+<li>quercus: MediaWiki file upload parent directory does not exist (#1745)</li>
+<li>quercus: isset() (#1728)</li>
+<li>quercus: $_POST being overwrited by query string (#1732)</li>
 <li>setSecurityProvider added to ResinConfig (#1815)</li>
 <li>amber: caching issues with SoftReferences (#1816, rep by frankhung)</li>
 <li>quercus: QDate change for week of year (#1810)</li>
@@ -60,7 +59,7 @@
 <li>isapi_srun: enable keepalive (#1802, rep by M Weinig)</li>
 <li>isapi_srun: update uri decoding for utf-8 characters (#1629, rep by P. Sankar)</li>
 <li>httpd.exe issues on win32 with spaces in RESIN_HOME directory (#1554)</li>
-<li>Quercus: MediaWiki was escaping html that should be allowed</li>
+<li>quercus: MediaWiki was escaping html that should be allowed</li>
 <li>jsp: fragment issues with ValueExpression code generation (#1785, rep by timur)</li>
 <li>hessian: allow disabling of Serializable check with setAllowNonSerializable (#1796, rep by Jean-Francois Poilpret)</li>
 <li>hessian: classloader fixes in HessianProxyFactory (#1795, rep by vladi5)</li>
