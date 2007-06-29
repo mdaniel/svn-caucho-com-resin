@@ -153,11 +153,14 @@ public class SocketStream extends StreamImpl {
     } catch (IOException e) {
       if (_throwReadInterrupts)
         throw e;
-      
+
+      // server/0611
+      /*
       try {
         close();
       } catch (IOException e1) {
       }
+      */
 
       return -1;
     }

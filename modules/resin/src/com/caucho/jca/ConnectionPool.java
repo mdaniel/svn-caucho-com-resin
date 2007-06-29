@@ -638,7 +638,7 @@ public class ConnectionPool extends AbstractManagedObject
    */
   UserTransactionImpl getTransaction()
   {
-    return _tm.getTransaction();
+    return _tm.getUserTransaction();
   }
 
   /**
@@ -652,7 +652,7 @@ public class ConnectionPool extends AbstractManagedObject
     UserPoolItem userPoolItem = null;
 
     try {
-      UserTransactionImpl transaction = _tm.getTransaction();
+      UserTransactionImpl transaction = _tm.getUserTransaction();
 
       if (transaction == null)
         return allocatePool(mcf, subject, info, null).allocateUserConnection();

@@ -1958,8 +1958,8 @@ public abstract class AbstractHttpRequest
  	_formParser.parsePostData(_form, getInputStream(), javaEncoding);
       }
 
-      else if (getWebApp().doMultipartForm() &&
-               contentType.startsWith("multipart/form-data")) {
+      else if (getWebApp().doMultipartForm()
+	       && contentType.startsWith("multipart/form-data")) {
         int length = contentType.length();
         int i = contentType.indexOf("boundary=");
 

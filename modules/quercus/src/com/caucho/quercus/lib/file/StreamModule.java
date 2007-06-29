@@ -371,7 +371,7 @@ public class StreamModule extends AbstractQuercusModule {
       return false;
     
     env.stub("stream_set_blocking");
-    return false;
+    return false; 
   }
 
   public static boolean stream_set_timeout(Env env,
@@ -382,7 +382,10 @@ public class StreamModule extends AbstractQuercusModule {
     if (stream == null)
       return false;
 
-    env.stub("stream_set_timeout");
+    Object obj = stream.toJavaObject();
+    System.out.println("OBJ: " + obj + " " + stream);
+    if (obj instanceof AbstractBinaryInputOutput)
+      ((AbstractBinaryInputOutput) obj).setTimeout(1000L * seconds);
 
     return true;
   }

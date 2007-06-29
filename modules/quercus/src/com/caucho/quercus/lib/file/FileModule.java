@@ -622,6 +622,7 @@ public class FileModule extends AbstractQuercusModule {
       else
 	return BooleanValue.FALSE;
     } catch (IOException e) {
+      e.printStackTrace();
       throw new QuercusModuleException(e);
     }
   }

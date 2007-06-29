@@ -464,7 +464,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
     }
 
     if (_userTransaction != null)
-      _suspendState = _userTransaction.suspend();
+      _suspendState = _userTransaction.userSuspend();
 
     if (log.isLoggable(Level.FINER))
       log.fine(_xid + " suspended");
@@ -494,7 +494,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
     }
 
     if (_userTransaction != null)
-      _userTransaction.resume(_suspendState);
+      _userTransaction.userResume(_suspendState);
 
     _isSuspended = false;
 

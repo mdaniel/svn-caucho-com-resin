@@ -83,6 +83,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
   protected static final int HEADER_CONTENT_LENGTH = HEADER_CONTENT_TYPE + 1;
   protected static final int HEADER_DATE = HEADER_CONTENT_LENGTH + 1;
   protected static final int HEADER_SERVER = HEADER_DATE + 1;
+  protected static final int HEADER_CONNECTION = HEADER_SERVER + 1;
 
   protected CauchoRequest _originalRequest;
   protected CauchoRequest _request;
@@ -833,6 +834,11 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
       else
 	_hasCacheControl = true;
       return false;
+	
+    case HEADER_CONNECTION:
+      if ("close".equalsIgnoreCase(value))
+	_request.killKeepalive();
+      return true;
 	
     case HEADER_CONTENT_TYPE:
       setContentType(value);
@@ -2147,6 +2153,7 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     _headerCodes = new CaseInsensitiveIntMap();
     _headerCodes.put("cache-control", HEADER_CACHE_CONTROL);
+    _headerCodes.put("connection", HEADER_CONNECTION);
     _headerCodes.put("content-type", HEADER_CONTENT_TYPE);
     _headerCodes.put("content-length", HEADER_CONTENT_LENGTH);
     _headerCodes.put("date", HEADER_DATE);

@@ -46,8 +46,11 @@ import java.util.logging.Logger;
 /**
  * Implementation of the UserTransactionImpl for a thread instance.
  */
-public class UserTransactionImpl implements UserTransaction {
-  private static final Logger log = Log.open(UserTransactionImpl.class);
+public class UserTransactionImpl
+  implements UserTransaction
+{
+  private static final Logger log
+    = Logger.getLogger(UserTransactionImpl.class.getName());
   private static final L10N L = new L10N(UserTransactionImpl.class);
 
   private TransactionManagerImpl _transactionManager;
@@ -350,7 +353,7 @@ public class UserTransactionImpl implements UserTransaction {
   /**
    * Suspends the transaction.
    */
-  public UserTransactionSuspendState suspend()
+  public UserTransactionSuspendState userSuspend()
   {
     if (_xaDepth == 0)
       throw new IllegalStateException(L.l("suspend may only be called in a transaction."));
@@ -367,7 +370,7 @@ public class UserTransactionImpl implements UserTransaction {
   /**
    * Resumes the transaction.
    */
-  public void resume(UserTransactionSuspendState state)
+  public void userResume(UserTransactionSuspendState state)
   {
     /*
     if (_inTransaction)

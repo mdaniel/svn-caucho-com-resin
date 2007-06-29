@@ -33,21 +33,18 @@ import com.caucho.log.Log;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
 
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
-import javax.transaction.UserTransaction;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
+import javax.transaction.*;
+import javax.transaction.xa.*;
 import java.util.logging.Logger;
 
 /**
  * Implementation of the UserTransactionImpl for a thread instance.
  */
-public class UserTransactionProxy implements UserTransaction {
-  private static final Logger log = Log.open(UserTransactionProxy.class);
+public class UserTransactionProxy
+  implements UserTransaction, TransactionManager
+{
+  private static final Logger log
+    = Logger.getLogger(UserTransactionProxy.class.getName());
   private static final L10N L = new L10N(UserTransactionProxy.class);
 
   /*
@@ -83,7 +80,7 @@ public class UserTransactionProxy implements UserTransaction {
   /**
    * Gets the thread transaction.
    */
-  public UserTransactionImpl getTransaction()
+  public UserTransactionImpl getUserTransaction()
   {
     UserTransactionImpl xa = _threadTransaction.get();
 
@@ -101,7 +98,7 @@ public class UserTransactionProxy implements UserTransaction {
   public void setTransactionTimeout(int seconds)
     throws SystemException
   {
-    getTransaction().setTransactionTimeout(seconds);
+    getUserTransaction().setTransactionTimeout(seconds);
   }
   
   /**
@@ -110,7 +107,7 @@ public class UserTransactionProxy implements UserTransaction {
   public int getStatus()
     throws SystemException
   {
-    return getTransaction().getStatus();
+    return getUserTransaction().getStatus();
   }
   
   /**
@@ -119,7 +116,7 @@ public class UserTransactionProxy implements UserTransaction {
   public void begin()
     throws NotSupportedException, SystemException
   {
-    getTransaction().begin();
+    getUserTransaction().begin();
   }
   
   /**
@@ -128,7 +125,7 @@ public class UserTransactionProxy implements UserTransaction {
   public void setRollbackOnly()
     throws IllegalStateException, SystemException
   {
-    getTransaction().setRollbackOnly();
+    getUserTransaction().setRollbackOnly();
   }
   
   /**
@@ -138,7 +135,7 @@ public class UserTransactionProxy implements UserTransaction {
     throws IllegalStateException, RollbackException, HeuristicMixedException,
 	   HeuristicRollbackException, SecurityException, SystemException
   {
-    getTransaction().commit();
+    getUserTransaction().commit();
   }
   
   /**
@@ -147,7 +144,7 @@ public class UserTransactionProxy implements UserTransaction {
   public void rollback()
     throws IllegalStateException, SecurityException, SystemException
   {
-    getTransaction().rollback();
+    getUserTransaction().rollback();
   }
 
   /**
@@ -156,7 +153,7 @@ public class UserTransactionProxy implements UserTransaction {
   public void enlistBeginResource(BeginResource resource)
     throws IllegalStateException
   {
-    getTransaction().enlistBeginResource(resource);
+    getUserTransaction().enlistBeginResource(resource);
   }
 
   /**
@@ -165,7 +162,7 @@ public class UserTransactionProxy implements UserTransaction {
   public void enlistCloseResource(CloseResource resource)
     throws IllegalStateException
   {
-    getTransaction().enlistCloseResource(resource);
+    getUserTransaction().enlistCloseResource(resource);
   }
 
   /**
@@ -189,6 +186,38 @@ public class UserTransactionProxy implements UserTransaction {
     throws XAException
   {
     TransactionManagerImpl.getLocal().recover(xaRes);
+  }
+
+  //
+  // TransactionManager compatibility.  These should not be used by
+  // application code.
+  //
+
+  /**
+   * Returns the current transaction.
+   */
+  public Transaction getTransaction()
+    throws SystemException
+  {
+    return TransactionManagerImpl.getLocal().getTransaction();
+  }
+  
+  /**
+   * Suspends the transaction.
+   */
+  public Transaction suspend()
+    throws SystemException
+  {
+    return TransactionManagerImpl.getLocal().suspend();
+  }
+
+  /**
+   * Resume a transaction.
+   */
+  public void resume(Transaction transaction)
+    throws IllegalStateException, InvalidTransactionException, SystemException
+  {
+    TransactionManagerImpl.getLocal().resume(transaction);
   }
 
   public String toString()

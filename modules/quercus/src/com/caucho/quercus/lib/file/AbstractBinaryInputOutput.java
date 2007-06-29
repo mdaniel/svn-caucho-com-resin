@@ -225,7 +225,7 @@ public class AbstractBinaryInputOutput
 	  sb.append('\n');
 	else
 	  _is.unread();
-	
+
 	return sb;
       }
       else
@@ -441,6 +441,10 @@ public class AbstractBinaryInputOutput
   public Object toJavaObject()
   {
     return this;
+  }
+
+  public void setTimeout(long timeout)
+  {
   }
 
   public String getResourceType()

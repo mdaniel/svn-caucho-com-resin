@@ -12,6 +12,9 @@
 
 <s2 title="3.1.2">
 <ul>
+<li>Add TransactionManager compatibility for UserTransaction (not intended for application use) (#1814, rep by Takahiro Fukuda)</li>
+<li>setHeader("Connection", "close") will close the keepalive (#1829, rep by sf)</li>
+<li>multipart form needs to override query string values (#1831, rep by sf)</li>
 <li>quercus: array sort() with floats</li>
 <li>quercus: new self::$foo() (#1811, rep by Kibo)</li>
 <li>quercus: preg_match backreferences (#1562, rep by obaltz)</li>

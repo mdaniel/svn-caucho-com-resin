@@ -130,10 +130,18 @@ class MultipartForm {
           throw new IOException(msg);
 	}
 
+	// server/136u
+	/*
         addTable(table, name, tempFile.getNativePath());
         addTable(table, name + ".file", tempFile.getNativePath());
         addTable(table, name + ".filename", filename);
         addTable(table, name + ".content-type", contentType);
+	*/
+
+	table.put(name, new String[] { tempFile.getNativePath() });
+        table.put(name + ".file", new String[] { tempFile.getNativePath() });
+        table.put(name + ".filename", new String[] { filename });
+        table.put(name + ".content-type", new String[] { contentType });
         
         if (log.isLoggable(Level.FINE))
           log.fine("mp-file: " + name + "(filename:" + filename + ")");

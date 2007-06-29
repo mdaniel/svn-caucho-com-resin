@@ -37,12 +37,16 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.logging.*;
 
 /**
  * Represents read/write stream
  */
 public class SocketReadWrite extends AbstractBinaryInputOutput
 {
+  private static final Logger log
+    = Logger.getLogger(SocketReadWrite.class.getName());
+  
   public enum Domain { AF_INET, AF_INET6, AF_UNIX };
 
   private int _lastError;
@@ -84,6 +88,16 @@ public class SocketReadWrite extends AbstractBinaryInputOutput
     ReadStream is = new ReadStream(sock, os);
 
     init(is, os);
+  }
+
+  public void setTimeout(long timeout)
+  {
+    try {
+      if (_socket != null)
+	_socket.setSoTimeout((int) timeout);
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 
   /**
