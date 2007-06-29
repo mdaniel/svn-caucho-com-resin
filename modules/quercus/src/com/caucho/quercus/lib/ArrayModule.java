@@ -34,6 +34,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.UsesSymbolTable;
+import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.env.ArrayValue.AbstractGet;
 import com.caucho.quercus.env.ArrayValue.GetKey;
@@ -1181,75 +1182,26 @@ public class ArrayModule
   }
 
   /**
-   * Recursively executes a callback function on all elements in the array,
-   * including elements of elements (i.e., arrays within arrays).  Returns true
-   * if the process succeeded, otherwise false.
-   *
-   * @param array the array to walk
-   * @param call the name of the callback function
-   * @param extra extra parameter required by the callback function
-   * @return true if the walk succedded, false otherwise
-   */
-  public boolean array_walk_recursive(Env env,
-                                      ArrayValue array,
-                                      Callback callback,
-                                      @Optional("NULL") Value extra)
-  {
-    if (array == null)
-      return false;
-
-    if (callback == null || ! callback.isValid())
-      return true;
-
-    try {
-      Value []keyArray = array.getKeyArray(env);
-
-      for (int i = 0; i < keyArray.length; i++) {
-        Value key = keyArray[i];
-        Value val = array.getRaw(key);
-
-        if (val.isArray()) {
-          boolean result = array_walk_recursive(env,
-                                                (ArrayValue)val.toValue(),
-                                                callback,
-                                                extra);
-          
-          if (! result)
-            return false;
-        }
-        else {
-          callback.call(env, array, key, val, key, extra);
-        }
-      }
-      
-      return true;
-    }
-    catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-      env.warning("An error occured while invoking the callback", e);
-      
-      return false;
-    }
-  }
-
-  /**
    * Executes a callback on each of the elements in the array.
    *
    * @param array the array to walk along
-   * @param call the name of the callback function
+   * @param callbacj the callback function
    * @param extra extra parameter required by the callback function
+   *
    * @return true if the walk succedded, false otherwise
    */
   public boolean array_walk(Env env,
-                            ArrayValue array,
+                            @NotNull ArrayValue array,
                             Callback callback,
                             @Optional("NULL") Value extra)
   {
+    if (callback == null || ! callback.isValid()) {
+      env.error(L.l("'{0}' is an unknown function", callback.getCallbackName()));
+      return false;
+    }
+
     if (array == null)
       return false;
-
-    if (callback == null || ! callback.isValid())
-      return true;
 
     try {
       Value []keyArray = array.getKeyArray(env);
@@ -1270,7 +1222,61 @@ public class ArrayModule
       return false;
     }
   }
-  
+
+  /**
+   * Recursively executes a callback function on all elements in the array,
+   * including elements of elements (i.e., arrays within arrays).  Returns true
+   * if the process succeeded, otherwise false.
+   *
+   * @param array the array to walk
+   * @param call the name of the callback function
+   * @param extra extra parameter required by the callback function
+   * @return true if the walk succedded, false otherwise
+   */
+  public boolean array_walk_recursive(Env env,
+                                      @NotNull ArrayValue array,
+                                      Callback callback,
+                                      @Optional("NULL") Value extra)
+  {
+    if (callback == null || ! callback.isValid()) {
+      env.error(L.l("'{0}' is an unknown function", callback.getCallbackName()));
+      return false;
+    }
+
+    if (array == null)
+      return false;
+
+    try {
+      Value []keyArray = array.getKeyArray(env);
+
+      for (int i = 0; i < keyArray.length; i++) {
+        Value key = keyArray[i];
+        Value val = array.getRaw(key);
+
+        if (val.isArray()) {
+          boolean result = array_walk_recursive(env,
+                                                (ArrayValue)val.toValue(),
+                                                callback,
+                                                extra);
+
+          if (! result)
+            return false;
+        }
+        else {
+          callback.call(env, array, key, val, key, extra);
+        }
+      }
+
+      return true;
+    }
+    catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      env.warning("An error occured while invoking the callback", e);
+
+      return false;
+    }
+  }
+
   /**
    * Sorts the array based on values in reverse order, preserving keys
    *
