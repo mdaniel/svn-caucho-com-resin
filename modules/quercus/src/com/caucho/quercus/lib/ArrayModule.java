@@ -94,33 +94,43 @@ public class ArrayModule
 
   private static final CompareString CS_VALUE_NORMAL
     = new CompareString(ArrayValue.GET_VALUE, SORT_NORMAL);
+
   private static final CompareString CS_VALUE_REVERSE
     = new CompareString(ArrayValue.GET_VALUE, SORT_REVERSE);
+
   private static final CompareString CS_KEY_NORMAL
     = new CompareString(ArrayValue.GET_KEY, SORT_NORMAL);
+
   private static final CompareString CS_KEY_REVERSE
     = new CompareString(ArrayValue.GET_KEY, SORT_REVERSE);
 
   private static final CompareNumeric CN_VALUE_NORMAL
     = new CompareNumeric(ArrayValue.GET_VALUE, SORT_NORMAL);
+
   private static final CompareNumeric CN_VALUE_REVERSE
     = new CompareNumeric(ArrayValue.GET_VALUE, SORT_REVERSE);
+
   private static final CompareNumeric CN_KEY_NORMAL
     = new CompareNumeric(ArrayValue.GET_KEY, SORT_NORMAL);
+
   private static final CompareNumeric CN_KEY_REVERSE
     = new CompareNumeric(ArrayValue.GET_KEY, SORT_REVERSE);
 
   private static final CompareNormal CNO_VALUE_NORMAL
     = new CompareNormal(ArrayValue.GET_VALUE, SORT_NORMAL);
+
   private static final CompareNormal CNO_VALUE_REVERSE
     = new CompareNormal(ArrayValue.GET_VALUE, SORT_REVERSE);
+
   private static final CompareNormal CNO_KEY_NORMAL
     = new CompareNormal(ArrayValue.GET_KEY, SORT_NORMAL);
+
   private static final CompareNormal CNO_KEY_REVERSE
     = new CompareNormal(ArrayValue.GET_KEY, SORT_REVERSE);
 
   private static final CompareNatural CNA_VALUE_NORMAL_SENSITIVE
     = new CompareNatural(ArrayValue.GET_VALUE, SORT_NORMAL, CASE_SENSITIVE);
+
   private static final CompareNatural CNA_VALUE_NORMAL_INSENSITIVE
     = new CompareNatural(ArrayValue.GET_VALUE, SORT_NORMAL, CASE_INSENSITIVE);
 
@@ -2556,20 +2566,20 @@ public class ArrayModule
   static public boolean array_multisort(Env env, Value[] arrays)
   {
     int maxsize = 0;
-    for(int i=0; i<arrays.length; i++)
+    for (int i = 0; i < arrays.length; i++)
       if (arrays[i] instanceof ArrayValue)
 	maxsize = Math.max(maxsize,
 			   ((ArrayValue)arrays[i]).getSize());
 
     // create the identity permutation [1..n]
     LongValue []rows = new LongValue[maxsize];
-    for(int i=0; i<rows.length; i++)
+    for (int i = 0; i < rows.length; i++)
       rows[i] = LongValue.create(i);
 
     java.util.Arrays.sort(rows, new MultiSortComparator(env, arrays));
 
     // apply the permuation
-    for(int i=0; i<arrays.length; i++)
+    for (int i = 0; i < arrays.length; i++)
       if (arrays[i] instanceof ArrayValue)
 	permute(env, (ArrayValue)arrays[i], rows);
 
@@ -2585,7 +2595,7 @@ public class ArrayModule
 			      LongValue[] permutation)
   {
     Value[] values = array.getValueArray(env);
-    for(int i=0; i<permutation.length; i++)
+    for (int i = 0; i < permutation.length; i++)
       array.put(LongValue.create(i),
 		values[(int)permutation[i].toLong()]);
   }
@@ -3324,8 +3334,9 @@ public class ArrayModule
                        Map.Entry<Value, Value> bEntry)
     {
       try {
-        long aElement = _getter.get(aEntry).toLong();
-        long bElement = _getter.get(bEntry).toLong();
+        // php/1756
+        double aElement = _getter.get(aEntry).toDouble();
+        double bElement = _getter.get(bEntry).toDouble();
 
         if (aElement == bElement)
           return 0;
@@ -3522,40 +3533,65 @@ public class ArrayModule
      */
     public int compare(LongValue index1, LongValue index2)
     {
-      for(int i=0; i<_arrays.length; i++) {
+      for (int i = 0; i < _arrays.length; i++) {
 
 	// reset direction/mode for each array (per the php.net spec)
 	int direction = SORT_ASC;
 	int mode      = SORT_REGULAR;
-	ArrayValue av = (ArrayValue)_arrays[i];
+	ArrayValue av = (ArrayValue) _arrays[i];
 
 	// process all flags appearing *after* an array but before the next one
-	while((i+1)<_arrays.length && _arrays[i+1] instanceof LongValue) {
-	  switch(_arrays[++i].toInt()) {
-	    case SORT_ASC:      direction = SORT_ASC; break;
-	    case SORT_DESC:     direction = SORT_DESC; break;
-	    case SORT_REGULAR:  mode      = SORT_REGULAR; break;
-	    case SORT_STRING:   mode      = SORT_STRING; break;
-	    case SORT_NUMERIC:  mode      = SORT_NUMERIC; break;
-	    default: _env.warning("Unknown sort flag: " + _arrays[i]);
+	while( (i + 1) < _arrays.length && _arrays[i + 1] instanceof LongValue) {
+          i++;
+
+          int flag = _arrays[i].toInt();
+
+          switch (flag) {
+	    case SORT_ASC:
+              direction = SORT_ASC;
+              break;
+
+            case SORT_DESC:
+              direction = SORT_DESC;
+              break;
+
+            case SORT_REGULAR:
+              mode = SORT_REGULAR;
+              break;
+
+            case SORT_STRING:
+              mode = SORT_STRING;
+              break;
+
+            case SORT_NUMERIC:
+              mode = SORT_NUMERIC;
+              break;
+
+            default:
+              _env.warning("Unknown sort flag: " + _arrays[i]);
 	  }
 	}
 
-	Value v1 = av.get(index1);
-	Value v2 = av.get(index2);
+        int cmp;
 
-	if (mode==SORT_STRING) {
-	  v1 = v1.toStringValue();
-	  v2 = v2.toStringValue();
-	} else if (mode==SORT_NUMERIC) {
-	  v1 = LongValue.create(v1.toLong());
-	  v2 = LongValue.create(v2.toLong());
+        Value lValue = av.get(index1);
+	Value rValue = av.get(index2);
+
+        if (mode == SORT_STRING) {
+          // php/173g
+          cmp = lValue.toString().compareTo(rValue.toString());
 	}
+        else if (mode == SORT_NUMERIC) {
+          // php/173f
+          cmp = NumberValue.compareNum(lValue, rValue);
+	}
+        else
+          cmp = lValue.cmp(rValue);
 
-	if (v1.lt(v2)) return direction==SORT_ASC ? -1 : 1;
-	if (v1.gt(v2)) return direction==SORT_ASC ? 1 : -1;
-
+        if (cmp != 0)
+          return direction == SORT_ASC ? cmp : -1 * cmp;
       }
+
       return 0;
     }
   }

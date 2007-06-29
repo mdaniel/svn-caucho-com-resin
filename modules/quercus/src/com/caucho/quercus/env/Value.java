@@ -235,32 +235,39 @@ abstract public class Value implements java.io.Serializable
     Value rVal = rValue.toValue();
 
     if (lVal instanceof StringValue && rVal instanceof NullValue)
-      return ((StringValue)lVal).cmpString(StringValue.EMPTY);
-    if (lVal instanceof NullValue && rVal instanceof StringValue)
-      return StringValue.EMPTY.cmpString((StringValue)rVal);
-    if (lVal instanceof StringValue && rVal instanceof StringValue)
-      return ((StringValue)lVal).cmpString((StringValue)rVal);
+      return ((StringValue) lVal).cmpString(StringValue.EMPTY);
 
-    if (lVal instanceof NullValue || lVal instanceof BooleanValue ||
-	rVal instanceof NullValue || rVal instanceof BooleanValue) {
-      boolean thisBool = toBoolean();
+    if (lVal instanceof NullValue && rVal instanceof StringValue)
+      return StringValue.EMPTY.cmpString((StringValue) rVal);
+
+    if (lVal instanceof StringValue && rVal instanceof StringValue)
+      return ((StringValue) lVal).cmpString((StringValue) rVal);
+
+    if (lVal instanceof NullValue
+        || lVal instanceof BooleanValue
+        || rVal instanceof NullValue
+        || rVal instanceof BooleanValue)
+    {
+      boolean lBool = toBoolean();
       boolean rBool    = rValue.toBoolean();
-      if (!thisBool && rBool) return -1;
-      if (thisBool && !rBool) return 1;
+      if (!lBool && rBool) return -1;
+      if (lBool && !rBool) return 1;
       return 0;
     }
 
     if (lVal.isObject() && rVal.isObject())
-      return ((ObjectValue)lVal).cmpObject((ObjectValue)rVal);
+      return ((ObjectValue) lVal).cmpObject((ObjectValue) rVal);
 
-    if ((lVal instanceof StringValue || lVal instanceof NumberValue ||
-	 lVal instanceof ResourceValue) &&
-	(rVal instanceof StringValue || rVal instanceof NumberValue ||
-	 rVal instanceof ResourceValue))
+    if ((lVal instanceof StringValue
+         || lVal instanceof NumberValue
+         || lVal instanceof ResourceValue)
+        && (rVal instanceof StringValue
+            || rVal instanceof NumberValue
+            || rVal instanceof ResourceValue))
       return NumberValue.compareNum(lVal, rVal);
 
     if (lVal instanceof ArrayValue && rVal instanceof ArrayValue)
-      ((ArrayValue)lVal).compareArray((ArrayValue)rVal);
+      ((ArrayValue) lVal).compareArray((ArrayValue) rVal);
 
     if (lVal instanceof ArrayValue) return 1;
     if (rVal instanceof ArrayValue) return -1;
@@ -277,7 +284,7 @@ abstract public class Value implements java.io.Serializable
    */
   public final boolean lt(Value rValue)
   {
-    return cmp(rValue)<0;
+    return cmp(rValue) < 0;
   }
 
   /**
@@ -285,7 +292,7 @@ abstract public class Value implements java.io.Serializable
    */
   public final boolean leq(Value rValue)
   {
-    return cmp(rValue)<=0;
+    return cmp(rValue) <= 0;
   }
 
   /**
@@ -293,7 +300,7 @@ abstract public class Value implements java.io.Serializable
    */
   public final boolean gt(Value rValue)
   {
-    return cmp(rValue)>0;
+    return cmp(rValue) > 0;
   }
 
   /**
@@ -301,7 +308,7 @@ abstract public class Value implements java.io.Serializable
    */
   public final boolean geq(Value rValue)
   {
-    return cmp(rValue)>=0;
+    return cmp(rValue) >= 0;
   }
 
   //

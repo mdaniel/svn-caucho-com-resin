@@ -50,11 +50,6 @@ abstract public class ArrayValue extends Value {
   protected static final StringValue KEY = new StringValueImpl("key");
   protected static final StringValue VALUE = new StringValueImpl("value");
 
-  private static final int SORT_REGULAR = 0;
-  private static final int SORT_NUMERIC = 1;
-  private static final int SORT_STRING = 2;
-  private static final int SORT_LOCALE_STRING = 5;
-
   public static final GetKey GET_KEY = new GetKey();
   public static final GetValue GET_VALUE = new GetValue();
 
