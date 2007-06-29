@@ -165,6 +165,14 @@ public class FromItem {
   }
 
   /**
+   * Returns true if there is an entity type.
+   */
+  public boolean isEntityType()
+  {
+    return _entityType != null;
+  }
+
+  /**
    * Sets the table.
    */
   public void setTable(Table table)

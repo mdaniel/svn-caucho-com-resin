@@ -740,6 +740,12 @@ public class QueryParser {
 
       while (true) {
         AmberExpr expr = parseExpr();
+
+        // jpa/1114
+        if (isCollectionExpr(expr))
+          throw error(L.l("Unexpected collection at ORDER BY '{0}'.",
+                          expr.getClass().getName()));
+
         expr = expr.bindSelect(this);
 
         orderList.add(expr);
@@ -771,7 +777,7 @@ public class QueryParser {
 
       token = scanToken();
       if (token != INTEGER)
-	throw error(L.l("Expected INTEGER at {0}", tokenName(token)));
+        throw error(L.l("Expected INTEGER at {0}", tokenName(token)));
 
       int offset = Integer.parseInt(_lexeme);
 
@@ -785,11 +791,11 @@ public class QueryParser {
 
       token = scanToken();
       if (token != INTEGER)
-	throw error(L.l("Expected INTEGER at {0}", tokenName(token)));
+        throw error(L.l("Expected INTEGER at {0}", tokenName(token)));
 
       int limit = Integer.parseInt(_lexeme);
       query.setLimit(limit);
-      
+
       token = peekToken();
     }
 
@@ -1348,12 +1354,29 @@ public class QueryParser {
 
       AmberExpr max = parseConcatExpr();
 
+      // jpa/106a
+      if (! isCompatibleExpression(expr, min))
+        throw error(L.l("Expected compatible expression at {0} BETWEEN {1}", expr, min));
+
+      if (! isCompatibleExpression(expr, max))
+        throw error(L.l("Expected compatible expression at BETWEEN {0} AND {1}", min, max));
+
       return new BetweenExpr(expr, min, max, isNot);
     }
     else if (token == LIKE) {
       scanToken();
 
       AmberExpr pattern = parseConcatExpr();
+
+      // jpa/1075
+      if (pattern instanceof LiteralExpr) {
+        LiteralExpr literalExpr = (LiteralExpr) pattern;
+
+        if (literalExpr.getJavaType() != String.class)
+          throw error(L.l("Expected string at {0}", pattern));
+      }
+      else
+        throw error(L.l("Expected string at {0}", pattern));
 
       String escape = null;
       if (peekToken() == ESCAPE) {
@@ -1392,6 +1415,14 @@ public class QueryParser {
 
       scanToken();
 
+      if (expr instanceof IdExpr) {
+        IdExpr idExpr = (IdExpr) expr;
+
+        // jpa/1174
+        if (idExpr.getFromItem().isEntityType())
+          throw error(L.l("Unexpected entity at '{0} IN'", expr));
+      }
+
       return new InExpr(expr, args, isNot);
     }
     else if (token == MEMBER) {
@@ -1410,19 +1441,9 @@ public class QueryParser {
       else if (! (expr instanceof PathExpr))
         throw error(L.l("MEMBER OF requires an entity-valued item."));
 
-      // ManyToMany is implemented as a
-      // ManyToOne[embeddeding OneToMany]
-      if ((collection instanceof ManyToOneExpr) &&
-          (((ManyToOneExpr) collection).getParent() instanceof OneToManyExpr)) {
-      }
-      else if (collection instanceof OneToManyExpr) {
-      }
-      else if (collection instanceof CollectionIdExpr) {
-      }
-      else {
+      if (! isCollectionExpr(collection))
         throw error(L.l("MEMBER OF requires an entity-valued collection at '{0}'.",
                         collection.getClass().getName()));
-      }
 
       return parseIs(MemberExpr.create(this,
                                        expr,
@@ -1452,9 +1473,15 @@ public class QueryParser {
     }
 
     if (token == NULL) {
-
       if (expr instanceof KeyColumnExpr)
         expr = ((KeyColumnExpr) expr).getParent();
+      else if (expr instanceof IdExpr) {
+        IdExpr idExpr = (IdExpr) expr;
+
+        // jpa/1093
+        if (idExpr.getFromItem().isEntityType())
+          throw error(L.l("Unexpected entity at '{0} IS'", expr));
+      }
 
       if (isNot)
         return new UnaryExpr(NOT_NULL, expr);
@@ -1462,6 +1489,9 @@ public class QueryParser {
         return new UnaryExpr(NULL, expr);
     }
     else if (token == EMPTY) {
+      if (! isCollectionExpr(expr))
+        throw error(L.l("IS EMPTY requires an entity-valued collection at '{0}'.",
+                        expr.getClass().getName()));
 
       expr = new EmptyExpr(expr);
 
@@ -1922,7 +1952,7 @@ public class QueryParser {
         scanToken();
         break;
 
-      // default: [BOTH], but no scanToken().
+        // default: [BOTH], but no scanToken().
       }
 
       AmberExpr arg = null;
@@ -2185,6 +2215,47 @@ public class QueryParser {
   }
 
   /**
+   * Returns true if expr is a collection.
+   */
+  private boolean isCollectionExpr(AmberExpr expr)
+  {
+    // jpa/10a2
+
+    // ManyToMany is implemented as a
+    // ManyToOne[embeddeding OneToMany]
+    if ((expr instanceof ManyToOneExpr) &&
+        (((ManyToOneExpr) expr).getParent() instanceof OneToManyExpr))
+      return true;
+    else if (expr instanceof OneToManyExpr)
+      return true;
+    else if (expr instanceof CollectionIdExpr)
+      return true;
+
+    return false;
+  }
+
+  /**
+   * Returns true if expr1 and expr2 are compatible.
+   */
+  private boolean isCompatibleExpression(AmberExpr expr1, AmberExpr expr2)
+  {
+    // XXX: jpa/106a
+    if (expr1 instanceof LiteralExpr) {
+      if (expr2 instanceof LiteralExpr) {
+        Class javaType1 = ((LiteralExpr) expr1).getJavaType();
+        Class javaType2 = ((LiteralExpr) expr2).getJavaType();
+
+        if (javaType1.isAssignableFrom(javaType2))
+          return true;
+
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
    * Parses an identifier.
    */
   private String parseIdentifier()
@@ -2357,7 +2428,7 @@ public class QueryParser {
       else
         throw error(L.l("unexpected char at {0}", String.valueOf((char) ch)));
 
-      // @@ is useless?
+    // @@ is useless?
     case '@':
       if ((ch = read()) != '@')
         throw error(L.l("`@' expected at {0}", charName(ch)));
