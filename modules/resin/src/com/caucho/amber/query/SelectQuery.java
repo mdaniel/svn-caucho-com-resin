@@ -56,8 +56,6 @@ public class SelectQuery extends AbstractQuery {
   private boolean _isDistinct;
 
   private ArrayList<AmberExpr> _resultList;
-  private AmberExpr _where;
-  private AmberExpr _having;
 
   private ArrayList<AmberExpr> _orderList;
   private ArrayList<Boolean> _ascList;
@@ -287,152 +285,9 @@ public class SelectQuery extends AbstractQuery {
    * initializes the query.
    */
   void init()
-    throws SQLException
+    throws QueryParseException
   {
-    if (_where instanceof AndExpr) {
-      AndExpr and = (AndExpr) _where;
-
-      ArrayList<AmberExpr> components = and.getComponents();
-
-      for (int i = components.size() - 1; i >= 0; i--) {
-        AmberExpr component = components.get(i);
-
-        if (component instanceof JoinExpr) {
-          JoinExpr link = (JoinExpr) component;
-
-          if (link.bindToFromItem()) {
-            components.remove(i);
-          }
-        }
-      }
-
-      _where = and.getSingle();
-    }
-
-    if (_having instanceof AndExpr) {
-      AndExpr and = (AndExpr) _having;
-
-      ArrayList<AmberExpr> components = and.getComponents();
-
-      for (int i = components.size() - 1; i >= 0; i--) {
-        AmberExpr component = components.get(i);
-
-        if (component instanceof JoinExpr) {
-          JoinExpr link = (JoinExpr) component;
-
-          if (link.bindToFromItem()) {
-            components.remove(i);
-          }
-        }
-      }
-
-      _having = and.getSingle();
-    }
-
-    // Rolls up unused from items from the left to the right.
-    // It's not necessary to roll up the rightmost items because
-    // they're only created if they're actually needed
-    for (int i = 0; i < _fromList.size(); i++) {
-      FromItem item = _fromList.get(i);
-
-      JoinExpr join = item.getJoinExpr();
-
-      if (join == null)
-        continue;
-
-      // XXX: jpa/1173, jpa/1178
-      // if (getParentQuery() != null)
-      //   break;
-
-      FromItem joinParent = join.getJoinParent();
-      FromItem joinTarget = join.getJoinTarget();
-
-      boolean isTarget = item == joinTarget;
-
-      if (joinParent == null) {
-      }
-      else if (joinParent.getJoinExpr() == null
-               && joinParent == joinTarget
-               && ! usesFromData(joinParent)) {
-        _fromList.remove(joinParent);
-
-        replaceJoin(join);
-
-        // XXX:
-        item.setJoinExpr(null);
-        //item.setOuterJoin(false);
-        i = -1;
-
-        AmberExpr joinWhere = join.getWhere();
-
-        if (joinWhere != null)
-          _where = AndExpr.create(_where, joinWhere);
-      }
-      else if (item == joinTarget
-               && ! isJoinParent(item)
-               && ! usesFromData(item)) {
-
-        boolean isManyToOne = false;
-        boolean isManyToMany = false;
-
-        if (join instanceof ManyToOneJoinExpr) {
-          // jpa/0h1c
-          isManyToOne = true;
-
-          // jpa/1144
-          ManyToOneJoinExpr manyToOneJoinExpr;
-          manyToOneJoinExpr = (ManyToOneJoinExpr) join;
-          isManyToMany = manyToOneJoinExpr.isManyToMany();
-        }
-
-        // ejb/06u0, jpa/1144, jpa/0h1c, jpa/114g
-        if (isManyToMany || (isManyToOne && ! item.isInnerJoin())) {
-          // ejb/06u0 || isFromInnerJoin(item)))) {
-
-          // Optimization for common children query:
-          // SELECT o FROM TestBean o WHERE o.parent.id=?
-          // jpa/0h1k
-          // jpa/114g as negative exists test
-
-          // jpa/0h1m
-          if (i + 1 < _fromList.size()) {
-            FromItem subItem = _fromList.get(i + 1);
-
-            JoinExpr nextJoin = subItem.getJoinExpr();
-
-            if (nextJoin != null
-                && nextJoin instanceof ManyToOneJoinExpr) {
-              continue;
-            }
-          }
-
-          _fromList.remove(item);
-
-          replaceJoin(join);
-
-          i = -1;
-
-          AmberExpr joinWhere = join.getWhere();
-
-          if (joinWhere != null)
-            _where = AndExpr.create(_where, joinWhere);
-        }
-      }
-    }
-
-    for (int i = 0; i < _fromList.size(); i++) {
-      FromItem item = _fromList.get(i);
-
-      if (item.isInnerJoin())
-        continue;
-
-      if (item.getJoinExpr() == null)
-        continue;
-
-      boolean isFromInner = isFromInnerJoin(item);
-
-      item.setOuterJoin(! isFromInner);
-    }
+    super.init();
 
     _cacheTimeout = Long.MAX_VALUE / 2;
     _isTableReadOnly = true;
@@ -455,30 +310,6 @@ public class SelectQuery extends AbstractQuery {
     }
 
     _sql = generateLoadSQL();
-  }
-
-  boolean isJoinParent(FromItem item)
-  {
-    for (int i = 0; i < _fromList.size(); i++) {
-      FromItem subItem = _fromList.get(i);
-
-      if (subItem.getJoinExpr() != null &&
-          subItem.getJoinExpr().getJoinParent() == item) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  boolean isFromInnerJoin(FromItem item)
-  {
-    return usesFrom(item, AmberExpr.IS_INNER_JOIN);
-  }
-
-  boolean usesFromData(FromItem item)
-  {
-    return usesFrom(item, AmberExpr.USES_DATA);
   }
 
   /**
@@ -837,22 +668,6 @@ public class SelectQuery extends AbstractQuery {
     }
 
     return cb.toString();
-  }
-
-  /**
-   * Generates update
-   */
-  void registerUpdates(CachedQuery query)
-  {
-    for (int i = 0; i < _fromList.size(); i++) {
-      FromItem item = _fromList.get(i);
-
-      AmberEntityHome home = item.getEntityHome();
-
-      CacheUpdate update = new TableCacheUpdate(query);
-
-      home.addUpdate(update);
-    }
   }
 
   /**

@@ -32,7 +32,11 @@ package com.caucho.amber.query;
 import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.TableInvalidateCompletion;
 import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.expr.JoinExpr;
 import com.caucho.amber.manager.AmberConnection;
+import com.caucho.amber.table.Column;
+import com.caucho.amber.type.SubEntityType;
+import com.caucho.amber.type.EntityType;
 import com.caucho.util.CharBuffer;
 
 import java.sql.SQLException;
@@ -45,7 +49,6 @@ import java.util.ArrayList;
 public class UpdateQuery extends AbstractQuery {
   private ArrayList<AmberExpr> _fieldList;
   private ArrayList<AmberExpr> _valueList;
-  private AmberExpr _where;
 
   private String _sql;
 
@@ -106,7 +109,10 @@ public class UpdateQuery extends AbstractQuery {
    * Initialize
    */
   void init()
+    throws QueryParseException
   {
+    super.init();
+
     CharBuffer cb = new CharBuffer();
 
     cb.append("update ");
@@ -132,28 +138,161 @@ public class UpdateQuery extends AbstractQuery {
       _valueList.get(i).generateUpdateWhere(cb);
     }
 
+    String updateJoin = null;
+
     if (_where != null) {
       cb.append(" where ");
-      _where.generateUpdateWhere(cb);
-    }
+
+      // jpa/1201
+      if (_fromList.size() == 1) {
+        _where.generateUpdateWhere(cb);
+      }
+      else {
+        // jpa/1201
+        item = _fromList.get(0);
+
+        EntityType type = item.getEntityType();
+
+        String updateId = type.getId().generateSelect(item.getTable().getName());
+        String relatedId = item.getName() + "." + type.getId().generateSelect(null);
+
+        updateJoin = " and " + relatedId + " = " + updateId;
+
+        cb.append("exists (select ");
+
+        cb.append(relatedId);
+
+        cb.append(" from ");
+
+        // jpa/114f: reorder from list for left outer join
+        for (int i = 1; i < _fromList.size(); i++) {
+          item = _fromList.get(i);
+
+          if (item.isOuterJoin()) {
+            JoinExpr join = item.getJoinExpr();
+
+            if (join == null)
+              continue;
+
+            FromItem parent = join.getJoinParent();
+
+            int index = _fromList.indexOf(parent);
+
+            if (index < 0)
+              continue;
+
+            _fromList.remove(i);
+
+            if (index < i)
+              index++;
+
+            _fromList.add(index, item);
+          }
+        }
+
+        boolean hasJoinExpr = false;
+        boolean isFirst = true;
+        for (int i = 0; i < _fromList.size(); i++) {
+          item = _fromList.get(i);
+
+          // jpa/1178
+          if (getParentQuery() != null) {
+            ArrayList<FromItem> fromList = getParentQuery().getFromList();
+            if (fromList != null) {
+              if (fromList.contains(item)) {
+                hasJoinExpr = true;
+                continue;
+              }
+            }
+          }
+
+          if (isFirst) {
+            isFirst = false;
+          }
+          else {
+            if (item.isOuterJoin())
+              cb.append(" left outer join ");
+            else {
+              cb.append(", ");
+
+              if (item.getJoinExpr() != null)
+                hasJoinExpr = true;
+            }
+          }
+
+          cb.append(item.getTable().getName());
+          cb.append(" ");
+          cb.append(item.getName());
+
+          if (item.getJoinExpr() != null && item.isOuterJoin()) {
+            cb.append(" on ");
+            item.getJoinExpr().generateJoin(cb);
+          }
+        }
+
+        // jpa/0l12
+        // if (hasJoinExpr || _where != null) {
+
+        boolean hasExpr = false;
+
+        for (int i = 0; i < _fromList.size(); i++) {
+          item = _fromList.get(i);
+
+          AmberExpr expr = item.getJoinExpr();
+
+          if (expr != null && ! item.isOuterJoin()) {
+            if (hasExpr)
+              cb.append(" and ");
+            else {
+              cb.append(" where ");
+              hasExpr = true;
+            }
+
+            expr.generateJoin(cb);
+          }
+
+          EntityType entityType = item.getEntityType();
+
+          // jpa/0l44
+          if (entityType != null) {
+            Column discriminator = entityType.getDiscriminator();
+
+            // jpa/0l43
+            if (entityType instanceof SubEntityType &&
+                discriminator != null) {
+              // jpa/0l12, jpa/0l4b
+
+              if (item.getTable() == discriminator.getTable()) {
+                if (hasExpr)
+                  cb.append(" and ");
+                else {
+                  cb.append(" where ");
+                  hasExpr = true;
+                }
+
+                cb.append("(" + item.getName() + "." + discriminator.getName() + " = ");
+                cb.append("'" + entityType.getDiscriminatorValue() + "')");
+              }
+            }
+          }
+        }
+
+        if (hasExpr)
+          cb.append(" and ");
+        else {
+          cb.append(" where ");
+          hasExpr = true;
+        }
+
+        _where.generateWhere(cb);
+      }
+    } // end if (_where != null)
+
+    // jpa/1201
+    if (updateJoin != null)
+      cb.append(updateJoin + ")");
 
     _sql = cb.close();
-  }
-
-  /**
-   * Generates update
-   */
-  void registerUpdates(CachedQuery query)
-  {
-    for (int i = 0; i < _fromList.size(); i++) {
-      FromItem item = _fromList.get(i);
-
-      AmberEntityHome home = item.getEntityHome();
-
-      CacheUpdate update = new TableCacheUpdate(query);
-
-      home.addUpdate(update);
-    }
   }
 
   /**

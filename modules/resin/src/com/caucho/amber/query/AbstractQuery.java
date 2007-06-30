@@ -29,6 +29,9 @@
 
 package com.caucho.amber.query;
 
+import com.caucho.amber.entity.AmberEntityHome;
+import com.caucho.amber.expr.AmberExpr;
+import com.caucho.amber.expr.AndExpr;
 import com.caucho.amber.expr.ArgExpr;
 import com.caucho.amber.expr.EmbeddedExpr;
 import com.caucho.amber.expr.JoinExpr;
@@ -47,6 +50,9 @@ import java.util.HashMap;
  */
 abstract public class AbstractQuery {
   private String _sql;
+
+  AmberExpr _where;
+  AmberExpr _having;
 
   protected ArrayList<FromItem> _fromList = new ArrayList<FromItem>();
 
@@ -176,6 +182,214 @@ abstract public class AbstractQuery {
   public abstract String getSQL();
 
   /**
+   * initializes the query.
+   */
+  void init()
+    throws QueryParseException
+  {
+    if (_where instanceof AndExpr) {
+      AndExpr and = (AndExpr) _where;
+
+      ArrayList<AmberExpr> components = and.getComponents();
+
+      for (int i = components.size() - 1; i >= 0; i--) {
+        AmberExpr component = components.get(i);
+
+        if (component instanceof JoinExpr) {
+          JoinExpr link = (JoinExpr) component;
+
+          if (link.bindToFromItem()) {
+            components.remove(i);
+          }
+        }
+      }
+
+      _where = and.getSingle();
+    }
+
+    if (_having instanceof AndExpr) {
+      AndExpr and = (AndExpr) _having;
+
+      ArrayList<AmberExpr> components = and.getComponents();
+
+      for (int i = components.size() - 1; i >= 0; i--) {
+        AmberExpr component = components.get(i);
+
+        if (component instanceof JoinExpr) {
+          JoinExpr link = (JoinExpr) component;
+
+          if (link.bindToFromItem()) {
+            components.remove(i);
+          }
+        }
+      }
+
+      _having = and.getSingle();
+    }
+
+    // Rolls up unused from items from the left to the right.
+    // It's not necessary to roll up the rightmost items because
+    // they're only created if they're actually needed
+    for (int i = 0; i < _fromList.size(); i++) {
+      FromItem item = _fromList.get(i);
+
+      JoinExpr join = item.getJoinExpr();
+
+      if (join == null)
+        continue;
+
+      // XXX: jpa/1173, jpa/1178
+      // if (getParentQuery() != null)
+      //   break;
+
+      FromItem joinParent = join.getJoinParent();
+      FromItem joinTarget = join.getJoinTarget();
+
+      boolean isTarget = item == joinTarget;
+
+      if (joinParent == null) {
+      }
+      else if (joinParent.getJoinExpr() == null
+               && joinParent == joinTarget
+               && ! usesFromData(joinParent)) {
+        _fromList.remove(joinParent);
+
+        replaceJoin(join);
+
+        // XXX:
+        item.setJoinExpr(null);
+        //item.setOuterJoin(false);
+        i = -1;
+
+        AmberExpr joinWhere = join.getWhere();
+
+        if (joinWhere != null)
+          _where = AndExpr.create(_where, joinWhere);
+      }
+      else if (item == joinTarget
+               && ! isJoinParent(item)
+               && ! usesFromData(item)) {
+
+        boolean isManyToOne = false;
+        boolean isManyToMany = false;
+
+        if (join instanceof ManyToOneJoinExpr) {
+          // jpa/0h1c
+          isManyToOne = true;
+
+          // jpa/1144
+          ManyToOneJoinExpr manyToOneJoinExpr;
+          manyToOneJoinExpr = (ManyToOneJoinExpr) join;
+          isManyToMany = manyToOneJoinExpr.isManyToMany();
+        }
+
+        // ejb/06u0, jpa/1144, jpa/0h1c, jpa/114g
+        if (isManyToMany || (isManyToOne && ! item.isInnerJoin())) {
+          // ejb/06u0 || isFromInnerJoin(item)))) {
+
+          // Optimization for common children query:
+          // SELECT o FROM TestBean o WHERE o.parent.id=?
+          // jpa/0h1k
+          // jpa/114g as negative exists test
+
+          // jpa/0h1m
+          if (i + 1 < _fromList.size()) {
+            FromItem subItem = _fromList.get(i + 1);
+
+            JoinExpr nextJoin = subItem.getJoinExpr();
+
+            if (nextJoin != null
+                && nextJoin instanceof ManyToOneJoinExpr) {
+              continue;
+            }
+          }
+
+          _fromList.remove(item);
+
+          replaceJoin(join);
+
+          i = -1;
+
+          AmberExpr joinWhere = join.getWhere();
+
+          if (joinWhere != null)
+            _where = AndExpr.create(_where, joinWhere);
+        }
+      }
+    }
+
+    for (int i = 0; i < _fromList.size(); i++) {
+      FromItem item = _fromList.get(i);
+
+      if (item.isInnerJoin())
+        continue;
+
+      if (item.getJoinExpr() == null)
+        continue;
+
+      boolean isFromInner = isFromInnerJoin(item);
+
+      item.setOuterJoin(! isFromInner);
+    }
+  }
+
+  boolean isJoinParent(FromItem item)
+  {
+    for (int i = 0; i < _fromList.size(); i++) {
+      FromItem subItem = _fromList.get(i);
+
+      if (subItem.getJoinExpr() != null &&
+          subItem.getJoinExpr().getJoinParent() == item) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  boolean isFromInnerJoin(FromItem item)
+  {
+    return usesFrom(item, AmberExpr.IS_INNER_JOIN);
+  }
+
+  boolean usesFromData(FromItem item)
+  {
+    return usesFrom(item, AmberExpr.USES_DATA);
+  }
+
+  /**
+   * Returns true if the item must have at least one entry in the database.
+   */
+  public boolean exists(FromItem item)
+  {
+    if (_where != null && _where.exists(item)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Returns true if the from item is used by the query.
+   */
+  public boolean usesFrom(FromItem item, int type)
+  {
+    // jpa/1201
+    if (_where != null && _where.usesFrom(item, type)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  void replaceJoin(JoinExpr join)
+  {
+    if (_where != null) {
+      _where = _where.replaceJoin(join);
+    }
+  }
+
+  /**
    * Sets the arg list.
    */
   boolean setArgList(ArgExpr []argList)
@@ -216,7 +430,18 @@ abstract public class AbstractQuery {
   /**
    * Generates update
    */
-  abstract void registerUpdates(CachedQuery query);
+  void registerUpdates(CachedQuery query)
+  {
+    for (int i = 0; i < _fromList.size(); i++) {
+      FromItem item = _fromList.get(i);
+
+      AmberEntityHome home = item.getEntityHome();
+
+      CacheUpdate update = new TableCacheUpdate(query);
+
+      home.addUpdate(update);
+    }
+  }
 
   /**
    * Returns the expire time.

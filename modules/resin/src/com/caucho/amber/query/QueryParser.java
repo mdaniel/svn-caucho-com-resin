@@ -810,11 +810,7 @@ public class QueryParser {
 
     }
 
-    try {
-      query.init();
-    } catch (SQLException e) {
-      throw new QueryParseException(e);
-    }
+    query.init();
 
     _joinSemantics = oldJoinSemantics;
     _isJoinFetch = oldIsJoinFetch;
@@ -848,7 +844,9 @@ public class QueryParser {
 
     token = scanToken();
     if (token == WHERE) {
-      query.setWhere(parseExpr().createBoolean().bindSelect(this));
+      AmberExpr expr = parseExpr();
+
+      query.setWhere(expr.createBoolean().bindSelect(this));
 
       token = scanToken();
     }
@@ -1375,7 +1373,7 @@ public class QueryParser {
         if (literalExpr.getJavaType() != String.class)
           throw error(L.l("Expected string at {0}", pattern));
       }
-      else
+      else if (! (pattern instanceof ArgExpr)) // jpa/1076
         throw error(L.l("Expected string at {0}", pattern));
 
       String escape = null;

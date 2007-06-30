@@ -41,8 +41,6 @@ import java.sql.SQLException;
  * Represents an Amber delete query
  */
 public class DeleteQuery extends AbstractQuery {
-  private AmberExpr _where;
-
   private String _sql;
 
   DeleteQuery(String query)
@@ -70,7 +68,10 @@ public class DeleteQuery extends AbstractQuery {
    * Initialize
    */
   void init()
+    throws QueryParseException
   {
+    super.init();
+
     CharBuffer cb = CharBuffer.allocate();
 
     cb.append("DELETE FROM ");
@@ -85,22 +86,6 @@ public class DeleteQuery extends AbstractQuery {
     }
 
     _sql = cb.close();
-  }
-
-  /**
-   * Generates update
-   */
-  void registerUpdates(CachedQuery query)
-  {
-    for (int i = 0; i < _fromList.size(); i++) {
-      FromItem item = _fromList.get(i);
-
-      AmberEntityHome home = item.getEntityHome();
-
-      CacheUpdate update = new TableCacheUpdate(query);
-
-      home.addUpdate(update);
-    }
   }
 
   /**
