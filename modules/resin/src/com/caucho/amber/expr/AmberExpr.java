@@ -136,6 +136,11 @@ public interface AmberExpr {
     throws SQLException;
 
   /**
+   * Returns true if this expr has any relationship.
+   */
+  public boolean hasRelationship();
+
+  /**
    * Returns the object for the expr.
    */
   public EntityItem findItem(AmberConnection aConn,

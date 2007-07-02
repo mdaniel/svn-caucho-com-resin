@@ -78,7 +78,10 @@ public class DeleteQuery extends AbstractQuery {
 
     FromItem item = _fromList.get(0);
 
+    // jpa/1332
     cb.append(item.getTable().getName());
+    cb.append(" ");
+    cb.append(item.getName());
 
     if (_where != null) {
       cb.append(" WHERE ");

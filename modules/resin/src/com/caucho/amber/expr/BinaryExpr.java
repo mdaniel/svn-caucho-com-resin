@@ -57,6 +57,16 @@ public class BinaryExpr extends AbstractAmberExpr {
   }
 
   /**
+   * Returns true if this expr has any relationship.
+   */
+  public boolean hasRelationship()
+  {
+    // jpa/1235
+    return _left.hasRelationship()
+      || _right.hasRelationship();
+  }
+
+  /**
    * Returns true for a boolean expr.
    */
   public boolean isBoolean()

@@ -82,6 +82,15 @@ public class ColumnExpr extends AbstractAmberExpr {
   }
 
   /**
+   * Returns true if this expr has any relationship.
+   */
+  public boolean hasRelationship()
+  {
+    // jpa/1232
+    return ! (_parent instanceof IdExpr);
+  }
+
+  /**
    * Returns a boolean expression.
    */
   public AmberExpr createBoolean()

@@ -65,6 +65,14 @@ abstract public class AbstractAmberExpr implements AmberExpr {
   }
 
   /**
+   * Returns true if this expr has any relationship.
+   */
+  public boolean hasRelationship()
+  {
+    return false;
+  }
+
+  /**
    * Converts to a boolean expression.
    */
   public AmberExpr createBoolean()

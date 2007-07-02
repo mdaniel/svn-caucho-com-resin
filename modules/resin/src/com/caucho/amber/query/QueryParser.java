@@ -941,6 +941,9 @@ public class QueryParser {
       // jpa/1222 expr = parseSimpleTerm();
       expr = parseConcatExpr();
 
+      if (expr.hasRelationship())
+        throw error(L.l("UPDATE cannot set values with relationships. Unexpected path expression at {0}", expr));
+
       expr = expr.bindSelect(this);
 
       values.add(expr);

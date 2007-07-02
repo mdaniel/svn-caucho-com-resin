@@ -120,6 +120,8 @@ public class UpdateQuery extends AbstractQuery {
     FromItem item = _fromList.get(0);
 
     cb.append(item.getTable().getName());
+    cb.append(" ");
+    cb.append(item.getName());
 
     cb.append(" set ");
 
@@ -149,14 +151,11 @@ public class UpdateQuery extends AbstractQuery {
       }
       else {
         // jpa/1201
-        item = _fromList.get(0);
+        item = _fromList.get(1);
 
         EntityType type = item.getEntityType();
 
-        String updateId = type.getId().generateSelect(item.getTable().getName());
-        String relatedId = item.getName() + "." + type.getId().generateSelect(null);
-
-        updateJoin = " and " + relatedId + " = " + updateId;
+        String relatedId = type.getId().generateSelect(item.getName());
 
         cb.append("exists (select ");
 
@@ -192,7 +191,10 @@ public class UpdateQuery extends AbstractQuery {
 
         boolean hasJoinExpr = false;
         boolean isFirst = true;
-        for (int i = 0; i < _fromList.size(); i++) {
+
+        // 1201: skip the first from item since it is
+        // available in the UPDATE clause
+        for (int i = 1; i < _fromList.size(); i++) {
           item = _fromList.get(i);
 
           // jpa/1178
@@ -289,8 +291,8 @@ public class UpdateQuery extends AbstractQuery {
     } // end if (_where != null)
 
     // jpa/1201
-    if (updateJoin != null)
-      cb.append(updateJoin + ")");
+    if (_fromList.size() > 1)
+      cb.append(")");
 
     _sql = cb.close();
   }
