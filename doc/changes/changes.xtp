@@ -10,9 +10,9 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.2">
+<s2 title="3.1.2 snap">
 <ul>
-<li>Add TransactionManager compatibility for UserTransaction (not intended for application use) (#1814, rep by Takahiro Fukuda)</li>
+<li>(2007-07-02) Add TransactionManager compatibility for UserTransaction (not intended for application use) (#1814, rep by Takahiro Fukuda)</li>
 <li>setHeader("Connection", "close") will close the keepalive (#1829, rep by sf)</li>
 <li>multipart form needs to override query string values (#1831, rep by sf)</li>
 <li>quercus: array sort() with floats</li>
