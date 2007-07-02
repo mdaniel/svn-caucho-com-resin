@@ -92,27 +92,50 @@ public class ForeachStatement
 
       return null;
     } else {
-      for (Value key : obj.getKeyArray(env)) {
-	if (_key != null)
-	  _key.evalAssign(env, key);
+      if (_isRef) {
+        Value []keys = obj.getKeyArray(env);
+        
+        for (int i = 0; i < keys.length; i++) {
+          Value key = keys[i];
 
-	if (_isRef) {
-	  Value value = origObj.getRef(key);
+          if (_key != null)
+            _key.evalAssign(env, key);
 
-	  _value.evalAssign(env, value);
-	} else {
-	  Value value = obj.get(key).toValue();
+          Value value = origObj.getRef(key);
 
-	  _value.evalAssign(env, value);
-	}
+          _value.evalAssign(env, value);
 
-	Value result = _block.execute(env);
+          Value result = _block.execute(env);
 
-	if (result == null || result instanceof ContinueValue) {
-	} else if (result instanceof BreakValue)
-	  return null;
-	else
-	  return result;
+          if (result == null || result instanceof ContinueValue) {
+          } else if (result instanceof BreakValue)
+            return null;
+          else
+            return result;
+        }
+      }
+      else {
+        Value []keys = obj.getKeyArray(env);
+        Value []values = obj.getValueArray(env);
+        
+        for (int i = 0; i < keys.length; i++) {
+          Value key = keys[i];
+          
+          if (_key != null)
+            _key.evalAssign(env, key);
+
+          Value value = values[i].toValue();
+
+          _value.evalAssign(env, value);
+
+          Value result = _block.execute(env);
+
+          if (result == null || result instanceof ContinueValue) {
+          } else if (result instanceof BreakValue)
+            return null;
+          else
+            return result;
+        }
       }
     }
 

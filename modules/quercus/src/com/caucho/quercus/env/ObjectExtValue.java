@@ -261,8 +261,12 @@ public class ObjectExtValue extends ObjectValue
 
   public Value get(Value key)
   {
-    // php/066q
-    return getField(null, key.toString());
+    Env.getInstance().error(L.l("Can't use object '{0}' as array", getName()));
+    
+    return NullValue.NULL;
+    
+    // php/066q vs. php/0906
+    //return getField(null, key.toString());
   }
 
   public Value put(Value index, Value value)
