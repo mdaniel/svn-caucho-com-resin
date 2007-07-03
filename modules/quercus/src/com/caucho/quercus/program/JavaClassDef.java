@@ -85,11 +85,11 @@ public class JavaClassDef extends ClassDef {
   private final MethodMap<AbstractJavaMethod> _functionMap
     = new MethodMap<AbstractJavaMethod>();
 
-  private final HashMap<String, JavaMethod> _getMap
-    = new HashMap<String, JavaMethod>();
+  private final HashMap<String, AbstractJavaMethod> _getMap
+    = new HashMap<String, AbstractJavaMethod>();
 
-  private final HashMap<String, JavaMethod> _setMap
-    = new HashMap<String, JavaMethod>();
+  private final HashMap<String, AbstractJavaMethod> _setMap
+    = new HashMap<String, AbstractJavaMethod>();
 
   // _fieldMap stores all public non-static fields
   // used by getField and setField
@@ -258,7 +258,7 @@ public class JavaClassDef extends ClassDef {
    */
   public Value getField(Env env, Object obj, String name)
   {
-    JavaMethod get = _getMap.get(name);
+    AbstractJavaMethod get = _getMap.get(name);
     
     if (get != null) {
       try {
@@ -324,7 +324,7 @@ public class JavaClassDef extends ClassDef {
                         String name,
                         Value value)
   {
-    JavaMethod setter = _setMap.get(name);
+    AbstractJavaMethod setter = _setMap.get(name);
     
     if (setter != null) {
       try {
@@ -879,18 +879,43 @@ public class JavaClassDef extends ClassDef {
 
       if (length > 3) {
         if (methodName.startsWith("get")) {
-          _getMap.put(javaToQuercusConvert(methodName.substring(3, length)),
-		      new JavaMethod(moduleContext, method));
-
+          String quercusName = javaToQuercusConvert(methodName.substring(3, length));
+          
+          AbstractJavaMethod existingGetter = _getMap.get(quercusName);
+          AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
+          
+          if (existingGetter == null) {
+            _getMap.put(quercusName, newGetter);
+          }
+          else {
+            existingGetter.overload(newGetter);
+          }
         }
         else if (methodName.startsWith("is")) {
-          _getMap.put(javaToQuercusConvert(methodName.substring(2, length)),
-		      new JavaMethod(moduleContext, method));
+          String quercusName = javaToQuercusConvert(methodName.substring(2, length));
+          
+          AbstractJavaMethod existingGetter = _getMap.get(quercusName);
+          AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
+          
+          if (existingGetter == null) {
+            _getMap.put(quercusName, newGetter);
+          }
+          else {
+            existingGetter.overload(newGetter);
+          }
         }
         else if (methodName.startsWith("set")) {
-          JavaMethod javaMethod = new JavaMethod(moduleContext, method);
-          _setMap.put(javaToQuercusConvert(methodName.substring(3, length)),
-		      new JavaMethod(moduleContext, method));
+          String quercusName = javaToQuercusConvert(methodName.substring(3, length));
+          
+          AbstractJavaMethod existingGetter = _getMap.get(quercusName);
+          AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
+          
+          if (existingGetter == null) {
+            _getMap.put(quercusName, newGetter);
+          }
+          else {
+            existingGetter.overload(newGetter);
+          }
         } else if ("__get".equals(methodName)) {
           __get = new JavaMethod(moduleContext, method);
         } else if ("__getField".equals(methodName)) {

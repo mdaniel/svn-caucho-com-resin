@@ -1550,10 +1550,10 @@ public class FileModule extends AbstractQuercusModule {
     
     try {
       if (is == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       if (length < 0)
-	length = Integer.MAX_VALUE;
+        length = Integer.MAX_VALUE;
 
       // XXX: should use the buffer directly (?)
 
@@ -1577,7 +1577,8 @@ public class FileModule extends AbstractQuercusModule {
       throw new QuercusModuleException(e);
     }
     finally {
-      TempBuffer.free(tempBuf);
+      if (tempBuf != null)
+        TempBuffer.free(tempBuf);
     }
   }
 
