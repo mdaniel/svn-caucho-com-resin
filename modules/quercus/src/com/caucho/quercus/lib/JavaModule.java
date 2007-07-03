@@ -36,6 +36,7 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -71,6 +72,7 @@ public class JavaModule extends AbstractQuercusModule {
         return newObj;
 
     } catch (Throwable e) {
+      log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
 
       return null;
@@ -93,6 +95,7 @@ public class JavaModule extends AbstractQuercusModule {
       
       return new JavaValue(env, null, def);
     } catch (Throwable e) {
+      log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
 
       return null;

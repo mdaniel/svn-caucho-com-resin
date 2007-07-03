@@ -52,13 +52,17 @@ import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ResinModule
   extends AbstractQuercusModule
 {
   private static final L10N L = new L10N(ResinModule.class);
 
+  private static final Logger log
+    = Logger.getLogger(ResinModule.class.getName());
+  
   public final static int XA_STATUS_ACTIVE = 0;
   public final static int XA_STATUS_MARKED_ROLLBACK = 1;
   public final static int XA_STATUS_PREPARED = 2;
@@ -124,7 +128,9 @@ public class ResinModule
 
       return true;
     } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
+      
       return false;
     }
   }
@@ -139,7 +145,9 @@ public class ResinModule
 
       return true;
     } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
+      
       return false;
     }
   }
@@ -154,7 +162,9 @@ public class ResinModule
 
       return true;
     } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
+      
       return false;
     }
   }
@@ -169,7 +179,9 @@ public class ResinModule
 
       return true;
     } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
+      
       return false;
     }
   }
@@ -184,7 +196,9 @@ public class ResinModule
 
       return true;
     } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
       env.warning(e);
+      
       return false;
     }
   }
