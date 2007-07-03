@@ -103,7 +103,7 @@ public class DirectSkeleton extends Skeleton {
 
   private static final String TARGET_NAMESPACE_PREFIX = "m";
 
-  private boolean _separateSchema = true;
+  private boolean _separateSchema = false;
   private JAXBContextImpl _context;
   private Marshaller _marshaller;
   private Node _wsdlNode;
