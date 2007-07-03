@@ -172,15 +172,37 @@ public class JspViewHandler extends ViewHandler
       = (HttpServletRequest) extContext.getRequest();
 
     String contextPath = request.getContextPath();
+    
     String servletPath = request.getServletPath();
     String pathInfo = request.getPathInfo();
 
+    int lastDot = viewId.lastIndexOf('.');
+
+    String path;
+
+    if (servletPath == null)
+      path = pathInfo;
+    else if (pathInfo == null)
+      path = servletPath;
+    else
+      path = servletPath + pathInfo;
+
+    // jsf/1118
+    if (lastDot > 0 && path != null && path.indexOf('.') > 0) {
+      return (contextPath + viewId.substring(0, lastDot)
+              + path.substring(path.indexOf('.')));
+    }
+
+    /*
     if (pathInfo == null)
       return contextPath + servletPath;
     else if (servletPath == null)
       return contextPath + pathInfo;
     else
       return contextPath + servletPath + pathInfo;
+    */
+    
+    return contextPath + viewId;
   }
 
   public String getResourceURL(FacesContext context,

@@ -317,7 +317,8 @@ public class ServletFacesContextImpl extends FacesContext
 	messages.addAll(entry.getValue());
       }
 
-      //_messageMap.clear();
+      // jsf/1403
+      _messageMap.clear();
 
       return messages.iterator();
     }
@@ -329,7 +330,7 @@ public class ServletFacesContextImpl extends FacesContext
       throw new IllegalStateException(getClass().getName() + " is closed");
     
     synchronized (_messageMap) {
-      ArrayList<FacesMessage> messages = _messageMap.get(clientId);
+      ArrayList<FacesMessage> messages = _messageMap.remove(clientId);
 
       if (messages == null)
 	messages = new ArrayList<FacesMessage>();

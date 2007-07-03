@@ -114,7 +114,7 @@ public class JarPath extends FilesystemPath {
    */
   public Path getContainer()
   {
-    return getJar().getBacking();
+    return _backing;
   }
 
   /**

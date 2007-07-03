@@ -296,7 +296,6 @@ public abstract class UIComponentBase extends UIComponent
 
   public void setRendered(boolean isRendered)
   {
-    Thread.dumpStack();
     _isRendered = isRendered;
   }
 

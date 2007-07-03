@@ -120,7 +120,7 @@ public class ApplicationImpl extends Application
     ELResolver []customResolvers = new ELResolver[0];
     _elResolver = new FacesContextELResolver(customResolvers,
 					     _bundleResolver);
-    
+
     appContext.addELResolver(new FacesJspELResolver(this));
 
     addComponent(UIColumn.COMPONENT_TYPE,
