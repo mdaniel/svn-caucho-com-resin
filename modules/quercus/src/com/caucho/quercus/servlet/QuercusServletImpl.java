@@ -170,16 +170,10 @@ public class QuercusServletImpl
     catch (QuercusDieException e) {
       // normal exit
       log.log(Level.FINE, e.toString(), e);
-
-      if (ws != null)
-        ws.close();
     }
     catch (QuercusExitException e) {
       // normal exit
       log.log(Level.FINER, e.toString(), e);
-
-      if (ws != null)
-        ws.close();
     }
     catch (QuercusErrorException e) {
       // error exit

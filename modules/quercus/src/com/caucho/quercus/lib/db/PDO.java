@@ -174,7 +174,8 @@ public class PDO implements java.io.Closeable {
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
-      env.warning("A link to the server could not be established.");
+
+      env.warning(e.getMessage(), e);
       _error.error(e);
     }
   }
