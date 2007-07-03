@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.page;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
@@ -36,6 +37,7 @@ import com.caucho.quercus.env.QuercusLanguageException;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 import java.util.HashMap;
@@ -46,6 +48,8 @@ import java.util.Map;
  */
 abstract public class QuercusPage
 {
+  private static final L10N L = new L10N(QuercusPage.class);
+  
   private HashMap<String,AbstractFunction> _funMap
     = new HashMap<String,AbstractFunction>();
   
@@ -114,15 +118,39 @@ abstract public class QuercusPage
     try {
       return execute(env);
     } catch (QuercusLanguageException e) {
-      if (env.getExceptionHandler() != null)
-	env.getExceptionHandler().call(env, e.getValue());
-
+      
+      if (env.getExceptionHandler() != null) {
+        try {
+          env.getExceptionHandler().call(env, e.getValue());
+        }
+        catch (QuercusLanguageException e2) {
+          uncaughtExceptionError(env, e2);
+        }
+      }
+      else {
+        uncaughtExceptionError(env, e);
+      }
+      
       return NullValue.NULL;
+      
     } finally {
       env.setPwd(oldPwd);
     }
   }
 
+  /*
+   * Throws an error for this uncaught exception.
+   */
+  private void uncaughtExceptionError(Env env, QuercusLanguageException e)
+  {
+    Location location = e.getLocation(env);
+    String type = e.getValue().getClassName();
+    String message = e.getMessage(env);
+    
+    env.error(location,
+              L.l("Uncaught exception of type '{0}' with message '{1}'", type, message));
+  }
+  
   /**
    * Returns the pwd according to the source page.
    */

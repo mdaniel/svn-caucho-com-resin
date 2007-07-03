@@ -33,6 +33,7 @@ import com.caucho.quercus.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
+import com.caucho.quercus.lib.ErrorModule;
 import com.caucho.quercus.lib.ExceptionClass;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.file.FileModule;
@@ -2823,7 +2824,13 @@ public class Env {
     Value []args = { message };
 
     Value value = cls.callNew(this, args);
-    
+
+    StackTraceElement elt = e.getStackTrace()[0];
+
+    value.putField(this, "file", StringValue.create(elt.getFileName()));
+    value.putField(this, "line", LongValue.create(elt.getLineNumber()));
+    value.putField(this, "trace", ErrorModule.debug_backtrace(this));
+
     return value;
   }
   

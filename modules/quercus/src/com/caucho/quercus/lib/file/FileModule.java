@@ -613,16 +613,15 @@ public class FileModule extends AbstractQuercusModule {
 
     try {
       if (is == null)
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
 
       StringValue value = is.readLine(length);
 
       if (value != null)
-	return value;
+        return value;
       else
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
     } catch (IOException e) {
-      e.printStackTrace();
       throw new QuercusModuleException(e);
     }
   }
@@ -639,16 +638,16 @@ public class FileModule extends AbstractQuercusModule {
 
     try {
       if (is == null) {
-	env.warning(L.l("{0} is null", "handle"));
-	return BooleanValue.FALSE;
+        env.warning(L.l("{0} is null", "handle"));
+        return BooleanValue.FALSE;
       }
 
       StringValue value = is.readLine(length);
 
       if (value != null)
-	return StringModule.strip_tags(value, allowedTags);
+        return StringModule.strip_tags(value, allowedTags);
       else
-	return BooleanValue.FALSE;
+        return BooleanValue.FALSE;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }

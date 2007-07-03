@@ -29,7 +29,9 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.lib.VariableModule;
 
 /**
  * Parent of PHP exceptions
@@ -50,5 +52,32 @@ public class QuercusLanguageException extends QuercusException {
   public Value getValue()
   {
     return _value;
+  }
+  
+  /*
+   * Returns the PHP exception message.  If null, returns the empty string.
+   */
+  public String getMessage(Env env)
+  {
+    Value field = _value.getField(env, "message");
+    
+    if (field != null)
+      return field.toString();
+    else
+      return "";
+  }
+  
+  /**
+   * Returns the location of this PHP exception.
+   */
+  public Location getLocation(Env env)
+  {
+    Value file = _value.getField(env, "file");
+    Value line = _value.getField(env, "line");
+    
+    if (file.isNull() || line.isNull())
+      return Location.UNKNOWN;
+    else
+      return new Location(file.toString(), line.toInt(), null, null);
   }
 }

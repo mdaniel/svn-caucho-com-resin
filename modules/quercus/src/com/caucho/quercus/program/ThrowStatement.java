@@ -30,6 +30,7 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
@@ -56,8 +57,8 @@ public class ThrowStatement extends Statement {
   public Value execute(Env env)
   {
     throw _expr.eval(env).toException(env,
-				      getLocation().getFileName(),
-				      getLocation().getLineNumber());
+                                      getLocation().getFileName(),
+                                      getLocation().getLineNumber());
   }
 
   /**

@@ -108,6 +108,15 @@ public class Var extends Value
   }
 
   /**
+   * Returns the class name.
+   */
+  @Override
+  public String getClassName()
+  {
+    return _value.getClassName();
+  }
+  
+  /**
    * Returns true for an object.
    */
   public boolean isObject()

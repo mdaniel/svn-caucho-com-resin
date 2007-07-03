@@ -88,6 +88,15 @@ public class JavaAdapterVar extends Var
   }
 
   /**
+   * Returns the class name.
+   */
+  @Override
+  public String getClassName()
+  {
+    return getValue().getClassName();
+  }
+  
+  /**
    * Returns true for an object.
    */
   public boolean isObject()

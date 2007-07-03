@@ -61,7 +61,7 @@ public class JavaMethod extends JavaInvoker {
     _method = method;
     
     // php/069a
-    // I believe Java 6 fixes the need to do this for methods of inner classes
+    // Java 6 fixes the need to do this for methods of inner classes
     _method.setAccessible(true);
     
     _argLength = method.getParameterTypes().length;
