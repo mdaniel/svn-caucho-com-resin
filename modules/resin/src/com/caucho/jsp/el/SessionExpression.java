@@ -70,8 +70,8 @@ public class SessionExpression extends AbstractValueExpression
     env.setPropertyResolved(true);
     
     ServletELContext servletEnv = (ServletELContext) env;
-    
-    return servletEnv.getRequest().getSession();
+
+    return servletEnv.getSessionScope();
   }
 
   public String getExpressionString()

@@ -119,7 +119,7 @@ public class UIParameter extends UIComponentBase
     }
     else if ("value".equals(name)) {
       if (expr != null && expr.isLiteralText())
-	_name = String.valueOf(expr.getValue(null));
+	_value = String.valueOf(expr.getValue(null));
       else
 	_valueExpr = expr;
     }

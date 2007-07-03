@@ -68,20 +68,7 @@ public class ParamExpression extends AbstractValueExpression
     
     ServletELContext servletEnv = (ServletELContext) env;
 
-    HttpServletRequest request = servletEnv.getRequest();
-    
-    HashMap<String,String> map = new HashMap<String,String>();
-    Map pMap = request.getParameterMap();
-    Iterator iter = pMap.entrySet().iterator();
-      
-    while (iter.hasNext()) {
-      Map.Entry entry = (Map.Entry) iter.next();
-      String key = (String) entry.getKey();
-      String []value = (String []) entry.getValue();
-      map.put(key, value[0]);
-    }
-      
-    return map;
+    return servletEnv.getParameter();
   }
 
   public String getExpressionString()

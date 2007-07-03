@@ -153,6 +153,8 @@ public class HtmlBasicRenderKit extends RenderKit
 					     String contentTypeList,
 					     String characterEncoding)
   {
+    // jsf/2003
+    /*
     if (contentTypeList != null
 	&& contentTypeList.indexOf("text/html") < 0
 	&& contentTypeList.indexOf("application/xhtml+xml") < 0
@@ -161,6 +163,7 @@ public class HtmlBasicRenderKit extends RenderKit
       throw new IllegalArgumentException(L.l("'{0}' does not have a matching ResponseWriter.",
 					     contentTypeList));
     }
+    */
 
     if (characterEncoding != null) {
 

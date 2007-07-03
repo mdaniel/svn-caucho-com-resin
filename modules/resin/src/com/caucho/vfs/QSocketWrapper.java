@@ -73,6 +73,11 @@ public class QSocketWrapper extends QSocket {
     _is = null;
     _os = null;
   }
+  
+  public Socket getSocket()
+  {
+    return _s;
+  }
 
   /**
    * Sets the socket timeout.

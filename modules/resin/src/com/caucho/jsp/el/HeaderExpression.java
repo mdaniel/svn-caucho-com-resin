@@ -66,23 +66,12 @@ public class HeaderExpression extends AbstractValueExpression
   public Object getValue(ELContext env)
     throws ELException
   {
-    if (! (env instanceof PageContextImpl.PageELContext))
-      return null;
+    if (! (env instanceof ServletELContext))
+      return env.getELResolver().getValue(env, null, "header");
     
-    PageContextImpl page
-      = ((PageContextImpl.PageELContext) env).getPageContext();
-    
-    HttpServletRequest req = (HttpServletRequest) page.getRequest();
-    HashMap<String,String> map = new CaseInsensitiveHashMap<String>();
-    Enumeration e = req.getHeaderNames();
+    ServletELContext servletEnv = (ServletELContext) env;
 
-    while (e.hasMoreElements()) {
-      String name = (String) e.nextElement();
-
-      map.put(name, req.getHeader(name));
-    }
-      
-    return map;
+    return servletEnv.getHeader();
   }
 
   public String getExpressionString()

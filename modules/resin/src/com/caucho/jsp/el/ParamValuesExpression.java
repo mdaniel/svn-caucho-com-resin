@@ -44,6 +44,11 @@ public class ParamValuesExpression extends AbstractValueExpression
 {
   public static final ValueExpression EXPR
     = new ParamValuesExpression();
+
+  public ValueExpression createField(String field)
+  {
+    return new ParamValuesFieldExpression(field);
+  }
   
   /**
    * Evaluate the expr as an object.
@@ -54,13 +59,15 @@ public class ParamValuesExpression extends AbstractValueExpression
   public Object getValue(ELContext env)
     throws ELException
   {
-    if (! (env instanceof PageContextImpl.PageELContext))
-      return null;
+    if (! (env instanceof ServletELContext)) {
+      ELResolver elResolver = env.getELResolver();
+      
+      return elResolver.getValue(env, null, "paramValues");
+    }
     
-    PageContextImpl page
-      = ((PageContextImpl.PageELContext) env).getPageContext();
-    
-    return page.getRequest().getParameterMap();
+    ServletELContext servletEnv = (ServletELContext) env;
+
+    return servletEnv.getParameterValues();
   }
 
   public String getExpressionString()

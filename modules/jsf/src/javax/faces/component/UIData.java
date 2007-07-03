@@ -268,21 +268,21 @@ public class UIData extends UIComponentBase
 	  _value = expr.getValue(null);
 	else
 	  _valueExpr = expr;
-	break;
+	return;
       
       case FIRST:
 	if (expr != null && expr.isLiteralText())
 	  _first = (Integer) expr.getValue(null);
 	else
 	  _firstExpr = expr;
-	break;
+	return;
       
       case ROWS:
 	if (expr != null && expr.isLiteralText())
 	  _rows = (Integer) expr.getValue(null);
 	else
 	  _rowsExpr = expr;
-	break;
+	return;
       }
     }
 

@@ -69,9 +69,7 @@ public class ParamFieldExpression extends AbstractValueExpression
 
     ServletELContext servletEnv = (ServletELContext) env;
 
-    HttpServletRequest request = servletEnv.getRequest();
-
-    return request.getParameter(_field);
+    return servletEnv.getParameter(_field);
   }
 
   public String getExpressionString()

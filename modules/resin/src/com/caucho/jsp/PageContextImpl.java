@@ -1976,6 +1976,13 @@ public class PageContextImpl extends PageContext
       return new PageContextAttributeMap(PageContextImpl.this,
 					 REQUEST_SCOPE);
     }
+
+    @Override
+    public Object getSessionScope()
+    {
+      return new PageContextAttributeMap(PageContextImpl.this,
+					 SESSION_SCOPE);
+    }
     
     public ELResolver getELResolver()
     {

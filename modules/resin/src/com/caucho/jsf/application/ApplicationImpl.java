@@ -829,6 +829,12 @@ public class ApplicationImpl extends Application
   public void initRequest()
   {
     _isInit = true;
+
+    if (_viewHandler == null)
+      _viewHandler = new JspViewHandler();
+
+    if (_stateManager == null)
+      _stateManager = new SessionStateManager();
   }
 
   public String toString()

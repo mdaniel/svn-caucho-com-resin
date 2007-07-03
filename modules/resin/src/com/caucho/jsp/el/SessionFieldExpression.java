@@ -58,13 +58,14 @@ public class SessionFieldExpression extends AbstractValueExpression
   public Object getValue(ELContext env)
     throws ELException
   {
-    if (! (env instanceof PageContextImpl.PageELContext))
-      return null;
-    
-    PageContextImpl page
-      = ((PageContextImpl.PageELContext) env).getPageContext();
+    if (! (env instanceof ServletELContext))
+      return env.getELResolver().getValue(env, null, "session");
 
-    HttpServletRequest req = (HttpServletRequest) page.getRequest();
+    env.setPropertyResolved(true);
+    
+    ServletELContext servletEnv = (ServletELContext) env;
+
+    HttpServletRequest req = servletEnv.getRequest();
 
     HttpSession session = req.getSession(false);
 

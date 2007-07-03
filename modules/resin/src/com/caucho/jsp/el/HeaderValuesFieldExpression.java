@@ -60,20 +60,18 @@ public class HeaderValuesFieldExpression extends AbstractValueExpression
   public Object getValue(ELContext env)
     throws ELException
   {
-    if (! (env instanceof PageContextImpl.PageELContext))
-      return null;
+    if (! (env instanceof ServletELContext)) {
+      ELResolver elResolver = env.getELResolver();
+      Object base = elResolver.getValue(env, null, "headerValues");
+      
+      return elResolver.getValue(env, base, _field);
+    }
     
-    PageContextImpl page
-      = ((PageContextImpl.PageELContext) env).getPageContext();
+    ServletELContext servletEnv = (ServletELContext) env;
 
-    HttpServletRequest req = (HttpServletRequest) page.getRequest();
+    System.out.println("GETV: " + servletEnv.getHeaderValues(_field));
 
-    Enumeration e = req.getHeaders(_field);
-    ArrayList<String> headers = new ArrayList<String>();
-    while (e.hasMoreElements())
-      headers.add((String) e.nextElement());
-
-    return headers;
+    return servletEnv.getHeaderValues(_field);
   }
 
   public String getExpressionString()

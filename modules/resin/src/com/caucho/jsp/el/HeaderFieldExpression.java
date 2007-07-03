@@ -59,15 +59,16 @@ public class HeaderFieldExpression extends AbstractValueExpression
   public Object getValue(ELContext env)
     throws ELException
   {
-    if (! (env instanceof PageContextImpl.PageELContext))
-      return null;
+    if (! (env instanceof ServletELContext)) {
+      ELResolver elResolver = env.getELResolver();
+      Object base = elResolver.getValue(env, null, "header");
+      
+      return elResolver.getValue(env, base, _field);
+    }
     
-    PageContextImpl page
-      = ((PageContextImpl.PageELContext) env).getPageContext();
+    ServletELContext servletEnv = (ServletELContext) env;
 
-    HttpServletRequest req = (HttpServletRequest) page.getRequest();
-
-    return req.getHeader(_field);
+    return servletEnv.getHeader(_field);
   }
 
   public String getExpressionString()

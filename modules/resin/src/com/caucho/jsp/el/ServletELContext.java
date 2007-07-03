@@ -65,6 +65,37 @@ abstract public class ServletELContext extends ELContext
     return map;
   }
   
+  public Object getHeader()
+  {
+    HttpServletRequest request = getRequest();
+
+    if (request == null)
+      return null;
+
+    HashMap<String,String> map
+      = new CaseInsensitiveHashMap<String>();
+    Enumeration e = request.getHeaderNames();
+
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+      String value = request.getHeader(name);
+
+      map.put(name, value);
+    }
+      
+    return map;
+  }
+  
+  public Object getHeader(String field)
+  {
+    HttpServletRequest request = getRequest();
+
+    if (request != null)
+      return request.getHeader(field);
+    else
+      return null;
+  }
+  
   public Object getHeaderValues()
   {
     HttpServletRequest request = getRequest();
@@ -91,7 +122,116 @@ abstract public class ServletELContext extends ELContext
     return map;
   }
   
+  public Object getHeaderValues(String field)
+  {
+    HttpServletRequest request = getRequest();
+
+    if (request != null) {
+      Enumeration values = request.getHeaders(field);
+      
+      ArrayList<String> list = new ArrayList<String>();
+
+      while (values != null && values.hasMoreElements())
+	list.add((String) values.nextElement());
+
+      return list.toArray(new String[list.size()]);
+    }
+    else
+      return null;
+  }
+  
+  public Object getParameter()
+  {
+    HttpServletRequest request = getRequest();
+
+    if (request == null)
+      return null;
+
+    HashMap<String,String> map
+      = new CaseInsensitiveHashMap<String>();
+    Enumeration e = request.getParameterNames();
+
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+      String value = request.getParameter(name);
+
+      map.put(name, value);
+    }
+      
+    return map;
+  }
+  
+  public Object getParameter(String field)
+  {
+    HttpServletRequest request = getRequest();
+
+    if (request != null)
+      return request.getParameter(field);
+    else
+      return null;
+  }
+  
+  public Object getParameterValues()
+  {
+    HttpServletRequest request = getRequest();
+
+    if (request == null)
+      return null;
+
+    HashMap<String,String[]> map
+      = new CaseInsensitiveHashMap<String[]>();
+    Enumeration e = request.getParameterNames();
+
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+      String []values = request.getParameterValues(name);
+
+      map.put(name, values);
+    }
+      
+    return map;
+  }
+  
+  public Object getParameterValues(String field)
+  {
+    HttpServletRequest request = getRequest();
+
+    if (request != null) {
+      String []values = request.getParameterValues(field);
+
+      return values;
+    }
+    else
+      return null;
+  }
+  
   abstract public HttpServletRequest getRequest();
   
   abstract public Object getRequestScope();
+  
+  public Object getSessionScope()
+  {
+    HttpServletRequest request = getRequest();
+
+    if (request == null)
+      return null;
+
+    HttpSession session = request.getSession(false);
+
+    if (session == null)
+      return null;
+
+    HashMap<String,Object> map
+      = new HashMap<String,Object>();
+    Enumeration e = session.getAttributeNames();
+
+    while (e.hasMoreElements()) {
+      String name = (String) e.nextElement();
+      Object value = request.getAttribute(name);
+
+      map.put(name, value);
+    }
+      
+    return map;
+  }
 }

@@ -652,9 +652,7 @@
         <include name="lib/jca-15.jar"/>
         <include name="lib/jms-11.jar"/>
         <include name="lib/jsdk-15.jar"/>
-        <!--
         <include name="lib/jsf-12.jar"/>
-        -->
         <include name="lib/jstl-11.jar"/>
         <include name="lib/jta-101.jar"/>
         <include name="lib/portlet-10.jar"/>

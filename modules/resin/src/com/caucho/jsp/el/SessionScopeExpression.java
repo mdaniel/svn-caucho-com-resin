@@ -54,15 +54,14 @@ public class SessionScopeExpression extends AbstractValueExpression
   public Object getValue(ELContext env)
     throws ELException
   {
-    if (! (env instanceof PageContextImpl.PageELContext))
-      return null;
-    
-    PageContextImpl page
-      = ((PageContextImpl.PageELContext) env).getPageContext();
-    
+    if (! (env instanceof ServletELContext))
+      return env.getELResolver().getValue(env, null, "session");
+
     env.setPropertyResolved(true);
     
-    return new PageContextAttributeMap(page, PageContext.SESSION_SCOPE);
+    ServletELContext servletEnv = (ServletELContext) env;
+
+    return servletEnv.getSessionScope();
   }
 
   public String getExpressionString()

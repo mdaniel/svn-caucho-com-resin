@@ -44,7 +44,7 @@ public class ApplicationExpression extends AbstractValueExpression
 {
   public static final ValueExpression EXPR
     = new ApplicationExpression();
-  
+
   /**
    * Evaluate the expr as an object.
    *
