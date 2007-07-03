@@ -1447,6 +1447,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
       out.println("__caucho_session = aConn;");
       out.println("__caucho_home = home;");
 
+      out.println("aConn.prePersist((com.caucho.amber.entity.Entity) this);");
+
+      // jpa/0r20
+      for (JMethod method : _relatedType.getPrePersistCallbacks()) {
+        out.println(method.getName() + "();");
+      }
+
       if (isGeneratedValue) {
         // jpa/0g50: generated id needs to flush the insert statement at persist() time.
         out.println("__caucho_create(aConn, home);");
@@ -1456,19 +1463,13 @@ abstract public class AmberMappedComponent extends ClassComponent {
         out.println();
         out.println("__caucho_cascadePrePersist(aConn);");
 
-        out.println("aConn.prePersist((com.caucho.amber.entity.Entity) this);");
-
-        for (JMethod method : _relatedType.getPrePersistCallbacks()) {
-          out.println(method.getName() + "();");
-        }
-
         out.println("__caucho_cascadePostPersist(aConn);");
+      }
 
-        out.println("aConn.postPersist((com.caucho.amber.entity.Entity) this);");
+      out.println("aConn.postPersist((com.caucho.amber.entity.Entity) this);");
 
-        for (JMethod method : _relatedType.getPostPersistCallbacks()) {
-          out.println(method.getName() + "();");
-        }
+      for (JMethod method : _relatedType.getPostPersistCallbacks()) {
+        out.println(method.getName() + "();");
       }
 
       out.println();
