@@ -806,32 +806,30 @@ public class Hessian2Output
     if (intValue == value) {
       if (intValue == 0)
 	buffer[offset++] = (byte) DOUBLE_ZERO;
-      else if (intValue == 1)
+      else if (intValue == 1) {
 	buffer[offset++] = (byte) DOUBLE_ONE;
+
+        _offset = offset;
+
+        return;
+      }
       else if (-0x80 <= intValue && intValue < 0x80) {
 	buffer[offset++] = (byte) DOUBLE_BYTE;
 	buffer[offset++] = (byte) intValue;
+
+        _offset = offset;
+
+        return;
       }
       else if (-0x8000 <= intValue && intValue < 0x8000) {
 	buffer[offset + 0] = (byte) DOUBLE_SHORT;
 	buffer[offset + 1] = (byte) (intValue >> 8);
 	buffer[offset + 2] = (byte) intValue;
 
-	offset += 3;
+	_offset = offset + 3;
+        
+        return;
       }
-      else {
-	buffer[offset + 0] = (byte) DOUBLE_INT;
-	buffer[offset + 1] = (byte) (intValue >> 24);
-	buffer[offset + 2] = (byte) (intValue >> 16);
-	buffer[offset + 3] = (byte) (intValue >> 8);
-	buffer[offset + 4] = (byte) intValue;
-
-	offset += 5;
-      }
-
-      _offset = offset;
-      
-      return;
     }
 
     float f = (float) value;

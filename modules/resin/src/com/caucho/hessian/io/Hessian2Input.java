@@ -594,12 +594,6 @@ public class Hessian2Input
     case DOUBLE_SHORT:
       return (0x100 * read() + read()) != 0;
       
-    case DOUBLE_INT:
-      return (0x1000000L * read()
-	      + 0x10000L * read()
-	      + 0x100 * read()
-	      + read()) != 0;
-      
     case 'D':
       return parseDouble() != 0.0;
       
@@ -683,7 +677,6 @@ public class Hessian2Input
 
     case 'I':
     case LONG_INT:
-    case DOUBLE_INT:
       return ((read() << 24)
 	      + (read() << 16)
 	      + (read() << 8)
@@ -804,7 +797,6 @@ public class Hessian2Input
 
     case 'I':
     case LONG_INT:
-    case DOUBLE_INT:
       return parseInt();
 
       // direct long
@@ -917,7 +909,6 @@ public class Hessian2Input
 
     case 'I':
     case LONG_INT:
-    case DOUBLE_INT:
       return parseInt();
 
       // direct long
@@ -1655,9 +1646,6 @@ public class Hessian2Input
 
     case DOUBLE_SHORT:
       return new Double((short) (256 * read() + read()));
-      
-    case DOUBLE_INT:
-      return new Double(parseInt());
 
     case 'D':
       return new Double(parseDouble());

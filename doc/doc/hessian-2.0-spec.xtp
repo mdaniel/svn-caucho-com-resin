@@ -18,147 +18,160 @@
 
 <s1 title="Design Goals">
 
-<p>Hessian 2 is a compaction of the Hessian protocol.  All
-Hessian 1 codes are understood by Hessian 2.  The extended codes
-provide compact formats for common values, e.g. storing an
-integer zero as a single byte instead of Hessian 1's 5 bytes.</p>
-
-<p>The <a href="http://www.caucho.com/hessian">Hessian home page</a>
+<p>The <a href="http://hessian.caucho.com">Hessian home page</a>
 contains the latest information about Hessian.</p>
 
-<p>Unlike older binary protocols, Hessian is both self-describing
-and portable across languages.  The wire protocol for web
-services should be invisible to application writers.  Wire protocols
-should not require external schema or IDL.</p>
+<p>Unlike older binary protocols, Hessian is both self-describing,
+compact, and portable across languages.  The wire protocol for web
+services should be invisible to application writers, it should not require
+external schema or IDL.</p>
 
-<p>Given the EJB environment, the Hessian protocol has the
-following requirements:</p>
+<p>The Hessian protocol has the following design goals:</p>
 
 <ul>
-<li>It must support XML as a first class object.</li>
-<li>It must not require external IDL or schema definitions; it should be
-invisible to application writers.</li>
-<li>It must have sufficient power to serialize Java.</li>
-<li>It must have sufficient power to support EJB.</li>
-<li>It must allow non-Java clients to use web services.</li>
-<li>It must allow web services to deployed as a Servlet.</li>
-<li>It must be simple so it can be effectively tested.</li>
+<li>It must not require external IDL or schema definitions,
+i.e. the protocol should be invisible to application code.</li>
+<li>It must have sufficient power to serialize Java, including circular references.</li>
+<li>It must be language-independent.  In particular, it must allow non-Java clients to use web services.</li>
+<li>It must be simple so it can be effectively tested and implemented.</li>
 <li>It must be as fast as possible.</li>
-<li>It should support transaction contexts.</li>
+<li>It must be as compact as possible.</li>
+<li>It must support unicode strings.</li>
+<li>It must support 8-bit binary data (i.e. without encoding or using attachments.)</li>
+<li>It must allow web services to deployed as a Servlet.</li>
+<li>It must have sufficient power to support EJB.</li>
+<li>It must support encryption, compression, signature, and
+transaction context envelopes.</li>
+<li>Hessian 2.0 must be backwards compatible with Hessian 1.0.
+Hessian 2.0 parsers must be read Hessian 1.0 messages.</li>
 </ul>
 
 </s1>
 
 <s1 title="Hessian 2.0 Grammar">
 
-<def title="Hessian 2.0 Serialization Grammar">
-        # starting production
-top     ::= object
+<def title="Serialization Grammar">
+           # starting production
+top        ::= object
 
-        # 8-bit binary data split into 64k chunks
-binary  ::= ('b' b16 b8 binary-data)* 'B' b16 b8 binary-data
-        ::= [x20-x2f] binary-data    # binary data of length 0-15
+           # 8-bit binary data split into 64k chunks
+binary     ::= 'b' b1 b0 &lt;binary-data> binary # non-final chunk
+           ::= 'B' b1 b0 &lt;binary-data>        # final chunk
+           ::= [x20-x2f] &lt;binary-data>        # binary data of length 0-15
 
-boolean ::= 'T'
-        ::= 'F'
+           # boolean true/false
+boolean    ::= 'T'
+           ::= 'F'
 
-        # time in UTC encoded as 64-bit long milliseconds since epoch
-date    ::= 'd' b64 b56 b48 b40 b32 b24 b16 b8
+           # time in UTC encoded as 64-bit long milliseconds since epoch
+date       ::= 'd' b7 b6 b5 b4 b3 b2 b1 b0
 
-        # 64-bit IEEE double
-double  ::= 'D' b64 b56 b48 b40 b32 b24 b16 b8
-        ::= x67                   # 0.0
-        ::= x68                   # 1.0
-        ::= x69 b8                # byte cast to double (-128.0 to 127.0)
-        ::= x6a b16 b8            # short cast to double (-32768.0 to 32767.0)
-        ::= x6b b32 b24 b16 b8    # 32-bit int cast to double
-        ::= x70 b32 b24 b16 b8    # 32-bit float cast to double
+           # 64-bit IEEE double
+double     ::= 'D' b7 b6 b5 b4 b3 b2 b1 b0
+           ::= x67                   # 0.0
+           ::= x68                   # 1.0
+           ::= x69 b0                # byte cast to double (-128.0 to 127.0)
+           ::= x6a b1 b0             # short cast to double
+           ::= x6b b3 b2 b1 b0       # 32-bit float cast to double
 
-        # 32-bit signed integer
-int     ::= 'I' b32 b24 b16 b8
-        ::= [x80-xbf]             # -x10 to x3f
-        ::= [xc0-xcf] b8          # -x800 to x7ff
-        ::= [xd0-xd7] b16 b8      # -x40000 to x3ffff
+           # 32-bit signed integer
+int        ::= 'I' b3 b2 b1 b0
+           ::= [x80-xbf]             # -x10 to x3f
+           ::= [xc0-xcf] b0          # -x800 to x7ff
+           ::= [xd0-xd7] b1 b0       # -x40000 to x3ffff
 
-        # list/vector length 
-length  ::= 'l' b32 b24 b16 b8
-        ::= x6e int
+           # list/vector length 
+length     ::= 'l' b3 b2 b1 b0
+           ::= x6e int
 
-        # list/vector
-list    ::= 'V' type? length? object* 'z'
-        ::= 'v' int int object*   # type-ref, length
+           # list/vector
+list       ::= 'V' type? length? object* 'z'
+           ::= 'v' int int object*   # type-ref, length
 
-        # 64-bit signed long integer
-long    ::= 'L' b64 b56 b48 b40 b32 b24 b16 b8
-        ::= [xd8-xef]             # -x08 to x0f
-        ::= [xf0-xff] b8          # -x800 to x7ff
-        ::= [x38-x3f] b16 b8      # -x40000 to x3ffff
-        ::= x77 b32 b24 b16 b8    # 32-bit integer cast to long
+           # 64-bit signed long integer
+long       ::= 'L' b7 b6 b5 b4 b3 b2 b1 b0
+           ::= [xd8-xef]             # -x08 to x0f
+           ::= [xf0-xff] b0          # -x800 to x7ff
+           ::= [x38-x3f] b1 b0       # -x40000 to x3ffff
+           ::= x77 b3 b2 b1 b0       # 32-bit integer cast to long
 
-        # map/object
-map     ::= 'M' type? (object object)* 'z'  # key, value map pairs
-        ::= 'O' type int string*  # Object definition - length and fields
-        ::= 'o' int object*       # Object instance - type-ref
+           # map/object
+map        ::= 'M' type? (object object)* 'z'  # key, value map pairs
+           ::= 'o' int object*           # Object instance - type-ref
 
-null    ::= 'N'
+           # null value
+null       ::= 'N'
 
-        # main production for object serialization
-object  ::= null
-        ::= binary
-        ::= boolean
-        ::= date
-        ::= double
-        ::= int
-        ::= list
-        ::= map
-        ::= long
-        ::= remote
-        ::= ref
-        ::= string
-        ::= xml
+           # main production for object serialization
+object     ::= null
+           ::= binary
+           ::= boolean
+           ::= date
+           ::= double
+           ::= int
+           ::= list
+           ::= long
+           ::= map
+           ::= object-def object
+           ::= remote
+           ::= ref
+           ::= string
+           ::= xml
 
-        # Object reference (e.g. circular trees and graphs)
-ref     ::= 'R' b32 b24 b16 b8    # reference to nth map/list in stream
-        ::= x50 b8                # reference to 1-255th map/list
-        ::= x51 b16 b8            # reference to 1-65535th map/list
+           # definition for an object (compact map)
+object-def ::= 'O' type int string*
 
-        # remote object using URL as locator
-remote  ::= 'r' type? string
+           # Object reference (e.g. circular trees and graphs)
+ref        ::= 'R' b3 b2 b1 b0    # reference to nth map/list in stream
+           ::= x4a b0             # reference to 1-255th map/list
+           ::= x4b b1 b0          # reference to 1-65535th map/list
 
-        # UTF-8 encoded character string split into 64k chunks
-string  ::= ('s' b16 b8 string-data)* 'S' b16 b8 string-data
-        ::= [x00-x1f] string-data    # string of length 0 to 31
+           # remote object using URL as locator
+remote     ::= 'r' type? string
 
-        # map/list types for OO languages
-type    ::= 't' b16 b8 type-string   # type name
-        ::= x75 int                  # type reference
+           # UTF-8 encoded character string split into 64k chunks
+string     ::= 's' b1 b0 &lt;string-data> string  # non-final chunk
+           ::= 'S' b1 b0 &lt;string-data>         # string of length 0-65535
+           ::= [x00-x1f] &lt;string-data>         # string of length 0-31
 
-        # UTF-8 encoded XML data
-xml     ::= ('x' b16 b8 xml-data)* 'X' b16 b8 xml-data
+           # map/list types for OO languages
+type       ::= 't' b1 b0 &lt;type-string>         # type name
+           ::= x75 int                         # type reference
+
+           # UTF-8 encoded XML data
+xml        ::= 'x' b1 b0 &lt;xml-data> xml
+           ::= 'X' b1 b0 &lt;xml-data>
 </def>
 
-<def title="Messaging/Envelope Grammar">
-top     ::= call
-        ::= reply
-        ::= envelope
+<def title="RPC/Messaging Grammar">
+top       ::= call
+          ::= reply
+          ::= message
+          ::= envelope
 
-        # RPC-style call
-call    ::= 'c' x02 x00 header* method object* 'z'
+          # RPC-style call
+call      ::= 'c' x02 x00 header* method object* 'z'
 
-        # Envelope (e.g. for security)
-envelop ::= 'E' x02 x00 int (string object)* binary int (string object)*
+          # Envelope for encryption/headers
+envelope  ::= 'E' x02 x00 env-chunk* 'z'
 
-fault   ::= 'f' (object object)* 'z'
+          # header, body, footer
+env-chunk ::= int (string object)* binary int (string object)*
 
-        # message header for security/transactional context
-header  ::= 'H' b16 b8 header-string object
+fault     ::= 'f' (object object)* 'z'
 
-        # RPC method name (possibly mangled for overloading)
-method  ::= 'm' b16 b8 method-string
+          # message header for security/transactional context
+header    ::= 'H' b1 b0 &lt;header-string> object
 
-        # unidirectional message or RPC reply
-reply   ::= 'r' x02 x00 header* object 'z'  # successful message/reply
-        ::= 'r' x02 x00 header* fault 'z'   # exception/fault reply
+          # message
+message   ::= 'p' x02 x00 object* 'z'
+
+          # RPC method name (possibly mangled for overloading)
+method    ::= 'm' b1 b0 &lt;method-string>
+
+          # RPC reply
+reply     ::= 'r' x02 x00 header* object 'z'  # successful message/reply
+          ::= 'r' x02 x00 header* fault 'z'   # exception/fault reply
 </def>
 
 </s1>
@@ -168,202 +181,96 @@ reply   ::= 'r' x02 x00 header* object 'z'  # successful message/reply
 <p>Hessian's object serialization has 9 primitive types:</p>
 
 <ol>
-<li><a href="#boolean">boolean</a>
-</li><li>32-bit <a href="#int">int</a>
-</li><li>64-bit <a href="#long">long</a>
-</li><li>64-bit <a href="#double">double</a>
-</li><li>64-bit <a href="#date">date</a>
-</li><li>UTF8-encoded <a href="#string">string</a>
-</li><li>UTF8-encoded <a href="#xml">xml</a>
-</li><li>raw <a href="#binary">binary</a> data
-</li><li><a href="#remote">remote</a> objects
-</li></ol>
+<li><a href="#boolean">boolean</a></li>
+<li>32-bit <a href="#int">int</a></li>
+<li>64-bit <a href="#long">long</a></li>
+<li>64-bit <a href="#double">double</a></li>
+<li>64-bit <a href="#date">date</a></li>
+<li>UTF8-encoded <a href="#string">string</a></li>
+<li>UTF8-encoded <a href="#xml">xml</a></li>
+<li>raw <a href="#binary">binary</a> data</li>
+<li><a href="#remote">remote</a> objects</li>
+</ol>
 
 <p>It has 2 combining constructs:</p>
 <ol>
-<li><a href="#list">list</a> for lists and arrays
-</li><li><a href="#map">map</a> for objects and hash tables.
-</li></ol>
+<li><a href="#list">list</a> for lists and arrays</li>
+<li><a href="#map">map</a> for objects and hash tables.</li>
+</ol>
 
 <p>Finally, it has 2 special contructs:</p>
 <ol>
-<li><a href="#null">null</a> for null values
-</li><li><a href="#ref">ref</a> for shared and circular object references.
-</li></ol>
+<li><a href="#null">null</a> for null values</li>
+<li><a href="#ref">ref</a> for shared and circular object references.</li>
+</ol>
 
-<s2 title="null" type="defun">
-<p>Null represents a null pointer.</p>
+<p>Hessian 2.0 has 3 reference maps:</p>
 
-<p>The byte <var>'N'</var> represents the null pointer.</p>
+<ol>
+<li>An object/list reference map.</li>
+<li>A type (class) reference map.</li>
+<li>An object definition reference map.</li>
+</ol>
 
-<p><var>null</var> values are allowed in place of any <var>string</var>, <var>xml</var>,
-<var>binary</var>, <var>list</var>, <var>map</var>, or <var>remote</var>.</p>
+<s2 title="binary data" type="defun">
 
-<example title="null">
-null ::= N
-</example>
+<def title="binary grammar">
+binary ::= b b1 b0 &lt;binary-data> binary
+       ::= B b1 b0 &lt;binary-data>
+       ::= [x20-x2f] &lt;binary-data>
+</def>
+
+<p>Binary data is encoded in chunks.  <var>'B'</var> represents the final chunk
+and <var>'b'</var> represents any non-final chunk.  Each chunk has a 16-bit
+length value.</p>
+
+<s3 title="Compact: short binary">
+
+<p>Binary data with length less than 15 may be encoded with a single
+length byte [x20-x2f].</p>
+
+</s3>
+
+<s3 title="binary data examples">
+
+<def title="binary data examples">
+x20               # zero-length binary data
+
+x23 x01 x02 x03   # 3 byte data
+
+B x10 x00 ....    # 4k final chunk of data
+
+b x04 x00 ....    # 1k non-final chunk of data
+</def>
+
+</s3>
+
 </s2>
 
 <s2 title="boolean" type="defun">
-<p>The byte <var>'F'</var> represents false and the byte <var>'T'</var>
-represents true.</p>
 
-<def>
+<def title="boolean grammar">
 boolean ::= T
         ::= F
 </def>
 
-<example title="boolean true">
-T
-</example>
+<p>The byte <var>'F'</var> represents false and the byte <var>'T'</var>
+represents true.</p>
 
-</s2>
-
-<s2 title="int" type="defun">
-<p>A 32-bit signed integer.  An integer is represented by the
-byte <var>'I'</var> followed by the 4-bytes of the integer in big-endian
-order</p>
-
-<def>
-int ::= I b32 b24 b16 b8
-</def>
-
-<example title="integer 300">
-I x00 x00 x01 x2c
-</example>
-
-<s3 title="Compact: single octet integers">
-
-<p>Integers between -16 and 31 are represented by a single byte in the
-range <code>x80</code> to <code>xaf</code>.
-The value of the integer is <code>b0 - x90</code>.</p>
-
-<def>
-int ::= [x80-xaf]
-</def>
-
-<p>The integer zero is represented by <code>x90</code>,
--1 is represented by <code>x8f</code> and
-17 is represented by <code>xa1</code></p>
-
-</s3>
-
-<s3 title="Compact: two octet integers (byte)">
-
-<p>Integers between -2048 and 2047 are encoded in two bytes with
-the leading byte in the range <code>xd0</code> to <code>xdf</code>.
-The value of the integer is <code>256 * (b0 - xd8) + b1</code>.</p>
-
-<def>
-int ::= [xc0-xcf] b1
-</def>
-
-<p>The integer zero is represented by <code>xd8 x00</code>,
--256 is represented by <code>xd7 x00</code> and
-513 is represented by <code>xda x01</code></p>
-
-</s3>
-
-<s3 title="Compact: three octet integers (short)">
-
-<p>Integers between -262144 and 262143 are encoded in three bytes with
-the leading byte in the range <code>x58</code> to <code>x5f</code>.
-The value of the integer is <code>65536 * (b0 - x5c) + 256 * b1 + b0</code>.</p>
-
-<def>
-int ::= [xd0-xd7] b1 b2
-</def>
-
-<p>The integer zero is represented by <code>xd4 x00 x00</code>,
--65536 is represented by <code>xd3 x00 x00</code> and
-65537 is represented by <code>xd5 x00 x01</code></p>
-
-</s3>
-
-</s2>
-
-<s2 title="long" type="defun">
-<p>A 64-bit signed integer.  An long is represented by the
-byte <var>'L'</var> followed by the 8-bytes of the integer in big-endian order
-</p>
-
-<def>
-long ::= L b64 b56 b48 b40 b32 b24 b16 b8
-</def>
-
-<example title="long 300">
-L x00 x00 x00 x00 x00 x00 x01 x2c
-</example>
-
-<s3 title="Compact: single octet longs">
-
-<p>Longs between -8 and 15 are represented by a single byte in the
-range <code>xd8</code> to <code>xef</code>.
-The value of the long is <code>b0 - xe0</code>.</p>
-
-<def>
-long ::= [xd8-xef]
-</def>
-
-<p>The long zero is represented by <code>xe0</code>,
--1 is represented by <code>xdf</code> and
-15 is represented by <code>xef</code></p>
-
-</s3>
-
-<s3 title="Compact: two octet longs (byte)">
-
-<p>Longs between -2048 and 2047 are encoded in two bytes with
-the leading byte in the range <code>xf0</code> to <code>xff</code>.
-The value of the long is <code>256 * (b0 - xf8) + b1</code>.</p>
-
-<def>
-long ::= [xf0-xff] b1
-</def>
-
-<p>The long zero is represented by <code>xf8 x00</code>,
--256 is represented by <code>xf7 x00</code> and
-513 is represented by <code>xfa x01</code></p>
-
-</s3>
-
-<s3 title="Compact: three octet longs (short)">
-
-<p>Longs between -262144 and 262143 are encoded in three bytes with
-the leading byte in the range <code>x38</code> to <code>x3f</code>.
-The value of the long is <code>65536 * (b0 - x3c) + 256 * b1 + b0</code>.</p>
-
-<def>
-long ::= [x38-x3f] b1 b2
-</def>
-
-<p>The long zero is represented by <code>x3c x00 x00</code>,
--65536 is represented by <code>x3b x00 x00</code> and
-65537 is represented by <code>x3d x00 x01</code></p>
-
-</s3>
-
-</s2>
-
-<s2 title="double" type="defun">
-<p>A 64-bit IEEE floating pointer number.</p>
-
-<def>
-double ::= D b64 b56 b48 b40 b32 b24 b16 b8
-</def>
-
-<example title="double 12.25">
-D x40 x28 x80 x00 x00 x00 x00 x00
+<example title="boolean examples">
+T   # true
+F   # false
 </example>
 
 </s2>
 
 <s2 title="date" type="defun">
-<p>Date represented by a 64-bits long of milliseconds since the epoch, GMT.</p>
 
 <def>
-date ::= d b64 b56 b48 b40 b32 b24 b16 b8
+date ::= d b7 b6 b5 b4 b3 b2 b1 b0
 </def>
+
+<p>Date represented by a 64-bit long of milliseconds since the epoch, GMT.</p>
 
 <example title="2:51:31 May 8, 1998 GMT">
 d x00 x00 x00 xd0 x4b x92 x84 xb8
@@ -371,80 +278,141 @@ d x00 x00 x00 xd0 x4b x92 x84 xb8
 
 </s2>
 
-<s2 title="string" type="defun">
-<p>A 16-bit unicode character string encoded in UTF-8.
-Strings are encoded in chunks.  <var>'S'</var> represents the final chunk
-and <var>'s'</var> represents any initial chunk.  Each chunk has a 16-bit
-length value.</p>
+<s2 title="double" type="defun">
 
-<p>The length is the number of characters, which may be different than
-the number of bytes.</p>
-
-<p>String chunks may not split surrogate pairs.</p>
-
-<def>
-string ::= (s b16 b8 utf-8-data)* S b16 b8 utf-8-data
+<def title="double grammar">
+double ::= D b7 b6 b5 b4 b3 b2 b1 b0
+       ::= x67
+       ::= x68
+       ::= x69 b0
+       ::= x6a b1 b0
+       ::= x6b b3 b2 b1 b0
 </def>
 
-<example title="&quot;Hello&quot; string">
-S x00 x05 hello
-</example>
+<p>A 64-bit IEEE floating pointer number.</p>
 
-<s3 title="Compact: short strings">
+<s3 title="Compact: double zero">
 
-<p>Strings with length less than 15 may be encoded with a single
-length byte [x00-x0f].</p>
+<p>The double 0.0 can be represented by the byte <code>x67</code></p>
 
-<def>
-string ::= [x00-x0f] string-data
-</def>
+</s3>
 
-<example title="&quot;Hello&quot; string">
-x05 hello
+<s3 title="Compact: double one">
+
+<p>The double 1.0 can be represented by the byte <code>x68</code></p>
+
+</s3>
+
+<s3 title="Compact: double byte">
+
+<p>Doubles between -128.0 and 127.0 with no fractional component
+can be represented in two bytes by casting the byte value to a double.</p>
+
+</s3>
+
+<s3 title="Compact: double short">
+
+<p>Doubles between -32768.0 and 32767.0 with no fractional component
+can be represented in three bytes by casting the short value to a double.</p>
+
+</s3>
+
+<s3 title="Compact: double float">
+
+<p>Doubles which are equivalent to their 32-bit float representation
+can be represented as the 4-byte float and then cast to double.</p>
+
+</s3>
+
+<s3 title="double examples">
+
+<example title="double examples">
+x67          # 0.0
+x68          # 1.0
+
+x69 x00      # 0.0
+x69 x80      # -128.0
+x69 xff      # 127.0
+
+x70 x00 x00  # 0.0
+x70 x80 x00  # -32768.0
+x70 xff xff  # 32767.0
+
+D x40 x28 x80 x00 x00 x00 x00 x00  # 12.25
 </example>
 
 </s3>
 
 </s2>
 
-<s2 title="xml" type="defun">
-<p>An XML document encoded as a 16-bit unicode character
-string encoded in UTF-8.
-XML data is encoded in chunks.  <var>'X'</var> represents the final chunk
-and <var>'x'</var> represents any initial chunk.</p>
+<s2 title="int" type="defun">
 
-<p>Each chunk has a 16-bit
-length value.  The length is the number of characters, which may
-be different than the number of bytes.</p>
-
-<def>
-xml ::= (x b16 b8 utf-8-data)* X b16 b8 utf-8-data
+<def title="integer grammar">
+int ::= 'I' b3 b2 b1 b0
+    ::= [x80-xbf]
+    ::= [xc0-xcf] b0
+    ::= [xd0-xd7] b1 b0
 </def>
 
-<example title="trivial XML document">
-X x00 x10 &lt;top&gt;hello&lt;/top&gt;
+<p>A 32-bit signed integer.  An integer is represented by the
+byte <var>'I'</var> followed by the 4-bytes of the integer in big-endian
+order</p>
+
+<s3 title="Compact: single octet integers">
+
+<p>Integers between -16 and 47 can be encoded by a single byte in the
+range <code>x80</code> to <code>xbf</code>.
+The value of the integer is <code>code - x90</code>.</p>
+
+</s3>
+
+<s3 title="Compact: two octet integers (byte)">
+
+<p>Integers between -2048 and 2047 can be encoded in two bytes with
+the leading byte in the range <code>xc0</code> to <code>xcf</code>.
+The value of the integer is <code>256 * (code - xc8) + b0</code>.</p>
+
+</s3>
+
+<s3 title="Compact: three octet integers (short)">
+
+<p>Integers between -262144 and 262143 can be encoded in three bytes with
+the leading byte in the range <code>xd0</code> to <code>xd7</code>.
+The value of the integer is <code>65536 * (code - xd4) + 256 * b1 + b0</code>.</p>
+
+</s3>
+
+<s3 title="int examples">
+
+<example title="integer examples">
+x90                # 0
+x80                # -16
+xbf                # 47
+
+xc8 x00            # 0
+xc0 x00            # -2048
+xc7 x00            # -256
+xcf xff            # 2047
+
+xd4 x00 x00        # 0
+xd0 x00 x00        # -262144
+xd7 xff xff        # 262143
+
+I x00 x00 x00 x00  # 0
+I x00 x00 x01 x2c  # 300
 </example>
 
-<note>Because this document does not define the language mapping,
-implementations are free to return a string when reading an <var>xml</var>
-entity.</note>
-
-</s2>
-
-<s2 title="binary" type="defun">
-<p>A binary value.</p>
-
-<p>Binary data is encoded in chunks.  <var>'B'</var> represents the final chunk
-and <var>'b'</var> represents any initial chunk.  Each chunk has a 16-bit
-length value.</p>
-
-<def>
-binary ::= (b b16 b8 binary-data)* B b16 b8 binary-data
-</def>
+</s3>
 
 </s2>
 
 <s2 title="list" type="defun">
+
+<def title="list grammar">
+list ::= V type? length? object* z
+     ::= v int int object*
+</def>
+
 <p>An ordered list, like an array.  All lists have a type string,
 a length, a list of objects, and a trailing 'z'.
 The type string may be an arbitrary UTF-8 string understood
@@ -452,30 +420,12 @@ by the service (often a Java class name, but this isn't required.)
 The length may be -1 to indicate that the list is variable length.
 </p>
 
-<def>
-list ::= V <var>type</var>? <var>length</var>? <var>object</var>* z
-</def>
-
 <p>Each <var>list</var> item is added to the reference list to handle
 shared and circular elements.  See the
 <var>ref</var> element.</p>
 
 <p>Any parser expecting a <var>list</var> must also accept a <var>null</var>
 or a shared <var>ref</var>.</p>
-
-<results title="serialization of a Java int[] = {0, 1}">
-V t x00 x04 [int
-  l x00 x00 x00 x02
-  I x00 x00 x00 x00
-  I x00 x00 x00 x01
-  z
-</results>
-
-<results title="anonymous variable-length list = {0, &quot;foobar&quot;}">
-V I x00 x00 x00 x00
-  S x00 x06 foobar
-  z
-</results>
 
 <note>The valid values of <var>type</var> are not specified in this
 document and may depend on the specific application.  For example, a
@@ -492,28 +442,125 @@ the same type where the length is known beforehand.
 The type and length are encoded by integers, where the type is a reference to
 an earlier specified type.</p>
 
-<pre>
-list ::= 'v' <var>int (type)</var> <var>int (length)</var> <var>object</var>*
-</pre>
+</s3>
 
-<example title="int[] {0, 1}">
-V t x00 x04 [int u x02 x90 x91 z
-v x01 x02 x90 x91
+<s3 title="list examples">
+
+<results title="serialization of a Java int[] = {0, 1}">
+V
+  t x00 x04 [int     # encoding of int[] type
+  x6e x02            # length = 2
+  x90                # integer 0
+  x91                # integer 1
+  z
+</results>
+
+<results title="anonymous variable-length list = {0, &quot;foobar&quot;}">
+V
+  x90                # integer 0
+  x06 foobar         # "foobar"
+  z
+</results>
+
+<example title="repeated list type">
+V
+  t x00 x04 [int   # type for int[] (save as type #1)
+  x63 x02          # length 2
+  x90              # integer 0
+  x91              # integer 1
+  z
+
+v
+  x91              # type reference to int[] (integer #1)
+  x92              # length 2
+  x92              # integer 2
+  x93              # integer 3
 </example>
 
 </s3>
 
 </s2>
 
+<s2 title="long" type="defun">
+
+<def>
+long ::= L b7 b6 b5 b4 b3 b2 b1 b0
+     ::= [xd8-xef]
+     ::= [xf0-xff] b0
+     ::= [x38-x3f] b1 b0
+     ::= x77 b3 b2 b1 b0
+</def>
+
+<p>A 64-bit signed integer.  An long is represented by the
+byte <var>'L'</var> followed by the 8-bytes of the integer in big-endian order
+</p>
+
+<s3 title="Compact: single octet longs">
+
+<p>Longs between -8 and 15 are represented by a single byte in the
+range <code>xd8</code> to <code>xef</code>.
+The value of the long is <code>code - xe0</code>.</p>
+
+</s3>
+
+<s3 title="Compact: two octet longs (byte)">
+
+<p>Longs between -2048 and 2047 are encoded in two bytes with
+the leading byte in the range <code>xf0</code> to <code>xff</code>.
+The value of the long is <code>256 * (code - xf8) + b0</code>.</p>
+
+</s3>
+
+<s3 title="Compact: three octet longs (short)">
+
+<p>Longs between -262144 and 262143 are encoded in three bytes with
+the leading byte in the range <code>x38</code> to <code>x3f</code>.
+The value of the long is <code>65536 * (code - x3c) + 256 * b1 + b0</code>.</p>
+
+</s3>
+
+<s3 title="Compact: four octet longs (int)">
+
+<p>Longs between which fit into 32-bits are encoded in five bytes with
+the leading byte <code>x77</code>.</p>
+
+</s3>
+
+<example title="long examples">
+xe0                  # 0
+xd8                  # -8
+xef                  # 15
+
+xf8 x00              # 0
+xf0 x00              # -2048
+xf7 x00              # -256
+xff xff              # 2047
+
+x3c x00 x00          # 0
+x38 x00 x00          # -262144
+x3f xff xff          # 262143
+
+x77 x00 x00 x00 x00  # 0
+x77 x00 x00 x01 x2c  # 300
+
+L x00 x00 x00 x00 x00 x00 x01 x2c  # 300
+</example>
+
+</s2>
+
 <s2 title="map" type="defun">
+
+<def>
+map        ::= M type? (object object)* z
+           ::= 'o' int object*
+
+object-def ::= 'O' type int string*
+</def>
+
 <p>Represents serialized objects and Maps. The <var>type</var>
 element describes the type of the map.  Objects are represented by a
 map from field names to their values and <var>type</var> is the class
 of the object itself.</p>
-
-<def>
-map ::= M t b16 b8 type-string (<var>object</var>, <var>object</var>)* z
-</def>
 
 <p>The <var>type</var> may be empty, i.e. a zero length.  The parser is
 responsible for choosing a type if one is not specified.
@@ -523,72 +570,79 @@ For objects, unrecognized keys will be ignored.</p>
 parser expects a <var>map</var>, it must also be able to support a
 <var>null</var> or a <var>ref</var>.</p>
 
-<example title="Serialization of a Java Object">
-public class Car implements Serializable {
-  String model = "Beetle";
-  String color = "aquamarine";
-  int mileage = 65536;
-}
-</example>
-<results>
-M t x00 x13 com.caucho.test.Car
-  S x00 x05 model
-  S x00 x06 Beetle
+<note>The <var>type</var> is chosen by the service.  Often it may be the
+Java classname describing the service.</note>
 
-  S x00 x05 color
-  S x00 x0a aquamarine
+<s3 title="Compact: object definition">
 
-  S x00 x07 mileage
-  I x00 x01 x00 x00
-  z
-</results>
+<p>Hessian 2.0 has a compact object form where the field names
+are only serialized once.  Following objects only need to serialize
+their values</p>
+
+<p>The object definition includes a mandatory type string, the number of
+fields, and the field names.  The object definition is stored in the
+object definition map and will be referenced by object instances with
+an integer reference.</p>
+
+</s3>
+
+<s3 title="Compact: object instantiation">
+
+<p>Hessian 2.0 has a compact object form where the field names
+are only serialized once.  Following objects only need to serialize
+their values</p>
+
+<p>The object instantiation creates a new object based on a previous
+definition.   The integer value refers to the object definition.</p>
+
+</s3>
+
+<s3 title="map examples">
 
 <example title="A sparse array">
 map = new HashMap();
 map.put(new Integer(1), "fee");
 map.put(new Integer(16), "fie");
 map.put(new Integer(256), "foe");
-</example>
-<results>
-M I x00 x00 x00 x01
-  S x00 x03 fee
 
-  I x00 x00 x00 x10
-  S x00 x03 fie
+---
 
-  I x00 x00 x01 x00
-  S x00 x03 foe
+M
+  x91       # 1
+  x03 fee   # "fee"
+
+  xa0       # 16
+  x03 fie   # "fie"
+
+  xb9 x00   # 256
+  x03 foe   # "foe"
 
   z
-</results>
+</example>
 
-<note>The <var>type</var> is chosen by the service.  Often it may be the
-Java classname describing the service.</note>
+<example title="Serialization of a Java Object">
+public class Car implements Serializable {
+  String color = "aquamarine";
+  String model = "Beetle";
+  int mileage = 65536;
+}
 
-<s3 title="Compact: object definition and instantiation">
+---
+M
+  t x00 x13 com.caucho.test.Car  # type
 
-<p>Hessian 2.0 has a compact object form where the field names
-are only serialized once.  Following objects only need to serialize
-their values</p>
+  x05 color                # color field
+  x0a aquamarine
 
-<p>The object definition includes a manadatory type string, the number of
-fields, the field names, and the values for the first object.
-The first integer is the length of the type string.</p>
+  x05 model                # model field
+  x06 Beetle
 
-<def title="Object definition">
-map ::= 'O' <var>int</var> type-string <var>int</var> <var>string</var>* <var>object</var>*
-</def>
+  x07 mileage              # mileage field
+  I x00 x01 x00 x00
+  z
+</example>
 
-<p>The object instantiation creates a new object based on a previous
-definition.</p>
-
-<p>The integer is a reference to the object definition.</p>
-
-<def title="Object instantiation">
-map ::= 'o' <var>int</var> <var>object</var>*
-</def>
-
-<example title="Object serialization">
+<example title="Compact Object serialization">
 class Car {
   String color;
   String model;
@@ -596,22 +650,76 @@ class Car {
 
 out.writeObject(new Car("red", "corvette"));
 out.writeObject(new Car("green", "civic"));
-</example>
-<results>
-O x9b example.Car   -- type of the object length is int(12)
-  x92               -- number of fields encoded as an int(2)
-  x05 color         -- field names
-  x05 model
-  x03 red           -- data for object
-  x08 corvette
 
-o x91               -- second object x91 = int(1)
-  x05 green
-  x05 civic
-</results>
+---
+
+O                        # object definition (#1)
+  t x00 x0b example.Car  # type is example.Car
+  x92                    # two fields
+  x05 color              # color field name
+  x05 model              # model field name
+
+o
+  x91                    # object definition #1
+  x03 red                # color field value
+  x08 corvette           # model field value
+
+o
+  x91                    # object definition #1
+  x05 green              # color field value
+  x05 civic              # model field value
+</example>
+
+<example title="Enumeration serialization">
+enum Color {
+  RED,
+  GREEN,
+  BLUE,
+}
+
+out.writeObject(Color.RED);
+out.writeObject(Color.GREEN);
+out.writeObject(Color.BLUE);
+out.writeObject(Color.GREEN);
+
+---
+
+O                         # object definition #1
+  t x00 x0b example.Color # type is example.Color
+  x91                     # one field
+  x04 name                # enumeration field is "name"
+
+o                         # object #0
+  x91                     # object definition ref #1
+  x03 RED                 # RED value
+
+o                         # object #1
+  x91                     # object definition ref #1
+  x05 GREEN               # GREEN value
+
+o                         # object #2
+  x91                     # object definition ref #1
+  x04 BLUE                # BLUE value
+
+x4a x01                   # object ref #1, i.e. Color.GREEN
+</example>
 
 </s3>
 
+</s2>
+
+<s2 title="null" type="defun">
+
+<def title="null grammar">
+null ::= N
+</def>
+
+<p>Null represents a null pointer.</p>
+
+<p>The byte <var>'N'</var> represents the null pointer.</p>
+
+<p><var>null</var> values are allowed in place of any <var>string</var>, <var>xml</var>,
+<var>binary</var>, <var>list</var>, <var>map</var>, or <var>remote</var>.</p>
 </s2>
 
 <s2 title="ref" type="defun">
@@ -673,6 +781,70 @@ remote ::= r t b16 b8 type-name S b16 b8 url
 r t x00 x0c test.TestObj
   S x00 x24 http://slytherin/ejbhome?id=69Xm8-zW
 </results>
+
+</s2>
+
+<s2 title="string" type="defun">
+
+<def title="string grammar">
+string ::= s b1 b0 &lt;utf-8-data> string
+       ::= S b1 b0 &lt;utf-8-data>
+       ::= [x00-x1f] &lt;utf-8-data>
+</def>
+
+<p>A 16-bit unicode character string encoded in UTF-8.
+Strings are encoded in chunks.  <var>'S'</var> represents the final chunk
+and <var>'s'</var> represents any non-final chunk.  Each chunk has a 16-bit
+length value.</p>
+
+<p>The length is the number of characters, which may be different than
+the number of bytes.</p>
+
+<p>String chunks may not split surrogate pairs.</p>
+
+<s3 title="Compact: short strings">
+
+<p>Strings with length less than 32 may be encoded with a single
+byte length [x00-x1f].</p>
+
+</s3>
+
+<s3 title="string examples">
+
+<example title="String examples">
+x00             # "", empty string
+x05 hello       # "hello"
+x01 xc3 x83     # "\u00c3"
+
+S x00 x05 hello # "hello"
+</example>
+
+</s3>
+
+</s2>
+
+<s2 title="xml" type="defun">
+
+<def title="xml grammar">
+xml ::= x b1 b0 &lt;utf-8-data> xml
+    ::= X b1 b0 utf-8-data
+</def>
+<p>An XML document encoded as a 16-bit unicode character
+string encoded in UTF-8.
+XML data is encoded in chunks.  <var>'X'</var> represents the final chunk
+and <var>'x'</var> represents any initial chunk.</p>
+
+<p>Each chunk has a 16-bit
+length value.  The length is the number of characters, which may
+be different than the number of bytes.</p>
+
+<example title="trivial XML document">
+X x00 x10 &lt;top&gt;hello&lt;/top&gt;
+</example>
+
+<note>Because this document does not define the language mapping,
+implementations are free to return a string when reading an <var>xml</var>
+entity.</note>
 
 </s2>
 
@@ -911,48 +1083,9 @@ by the server.
 
 </s1>
 
-<s1 title="Metadata (non-normative)">
-
-<p>Metadata is handled by special method calls, methods beginning
-with <var>_hessian_</var>.</p>
-
-<p><var>_hessian_getAttribute(String&#160;key)</var> returns a string.
-The following attributes are predefined by this spec:</p>
-
-<deftable>
-<tr><th>attribute</th><th>meaning
-</th></tr><tr><td>java.api.class</td><td>Java interface for this URL
-</td></tr><tr><td>java.home.class</td><td>Java interface for this service
-</td></tr><tr><td>java.object.class</td><td>Java interface for a service object
-</td></tr><tr><td>java.ejb.primary.key.class</td><td>Java EJB primary key class
-</td></tr></deftable>
-
-<p>"java.api.class" returns the client proxy's Java API class
-for the current URL.  "java.home.class" returns the API class for the
-factory URL, i.e. without any "?id=XXX" query string.  "java.object.class"
-returns the API class for object instances.</p>
-
-<p>In the case of services with no object instances, i.e.
-non-factory services, all three attributes will return the
-same class name.</p>
-
-<s2 title="Obsolete meta data properties">
-
-<deftable>
-<tr><th>attribute</th><th>meaning
-</th></tr><tr><td>home-class</td><td>Java class for the home interface.
-</td></tr><tr><td>remote-class</td><td>Java class for the object interface.
-</td></tr><tr><td>primary-key-class</td><td>Java class for the primary key.
-</td></tr></deftable>
-
-</s2>
-
-</s1>
-
 <s1 title="Micro Hessian">
 
-<p>A "Micro Hessian" implementation may omit support for the "double" type.
-</p>
+<p>See Hessian 1.0 for "Micro Hessian".</p>
 
 </s1>
 
@@ -962,26 +1095,28 @@ same class name.</p>
 implementation is essentially a big switch statement on the initial
 bytecode.</p>
 
-<def title="Encoding">
+<def title="Bytecode Encoding">
 x00 - x1f    # utf-8 string length 0-32
 x20 - x2f    # binary data length 0-16
 x30 - x37    # reserved
 x38 - x3f    # long from -x40000 to x3ffff
 x40 - x41    # reserved
 x42          # 8-bit binary data final chunk ('B')
-x43          # reserved
+x43          # reserved ('C' streaming call)
 x44          # 64-bit IEEE encoded double ('D')
-x45          # reserved
+x45          # reserved ('E' envelope)
 x46          # boolean false ('F')
-x47 - x48    # reserved
+x47          # reserved
+x48          # reserved ('H' header)
 x49          # 32-bit signed integer ('I')
-x4a - x4b    # reserved
+x4a          # reference to 1-256th map/list
+x4b          # reference to 1-65536th map/list
 x4c          # 64-bit signed long integer ('L')
 x4d          # map with optional type ('M')
 x4e          # null ('N')
 x4f          # object definition ('O')
-x50          # reference to 1-255th map/list
-x51          # reference to 1-65536th map/list
+x50          # reserved ('P' streaming message/post)
+x51          # reserved
 x52          # reference to map/list - integer ('R')
 x53          # utf-8 string final chunk ('S')
 x54          # boolean true ('T')
@@ -999,12 +1134,12 @@ x67          # double 0.0
 x68          # double 1.0
 x69          # double represented as byte (-128.0 to 127.0)
 x6a          # double represented as short (-32768.0 to 327676.0)
-x6b          # double represented as 32-bit int
+x6b          # double represented as float
 x6c          # list/vector length ('l')
 x6d          # reserved ('m' method for RPC call)
 x6e          # list/vector compact length
 x6f          # object instance ('o')
-x70          # double represented as float
+x70          # reserved ('p' - message/post)
 x71          # reserved
 x72          # reserved ('r' reply for message/RPC)
 x73          # utf-8 string non-final chunk ('s')
@@ -1026,7 +1161,7 @@ xd0 - xd7    # three-byte compact int (-x40000 to x3ffff)
 <s1 title="Copyright and Licensing">
 
 <p>
-© Copyright 2000-2004 Caucho Technology, Inc. All Rights Reserved.
+Copyright 2000-2007 Caucho Technology, Inc. All Rights Reserved.
 </p>
 
 <p>Any party may implement this protocol for any purpose without royalty
@@ -1058,6 +1193,8 @@ WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.</p>
 
 <ul>
 <li>Added envelope ('E') syntax.</li>
+<li>Added post/message ('p') syntax.</li>
+<li>Added compact encoding.</li>
 </ul>
 
 </s2>

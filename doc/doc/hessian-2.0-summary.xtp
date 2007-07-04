@@ -71,8 +71,7 @@ double  ::= 'D' b64 b56 b48 b40 b32 b24 b16 b8
         ::= x68                   # 1.0
         ::= x69 b8                # byte cast to double (-128.0 to 127.0)
         ::= x6a b16 b8            # short cast to double (-32768.0 to 32767.0)
-        ::= x6b b32 b24 b16 b8    # 32-bit int cast to double
-        ::= x70 b32 b24 b16 b8    # 32-bit float cast to double
+        ::= x6b b32 b24 b16 b8    # 32-bit float cast to double
 
         # 32-bit signed integer
 int     ::= 'I' b32 b24 b16 b8
@@ -119,8 +118,8 @@ object  ::= null
 
         # Object reference (e.g. circular trees and graphs)
 ref     ::= 'R' b32 b24 b16 b8    # reference to nth map/list in stream
-        ::= x50 b8                # reference to 1-255th map/list
-        ::= x51 b16 b8            # reference to 1-65535th map/list
+        ::= x4a b8                # reference to 1-255th map/list
+        ::= x4b b16 b8            # reference to 1-65535th map/list
 
         # remote object using URL as locator
 remote  ::= 'r' type? string
@@ -157,26 +156,28 @@ reply   ::= 'r' x02 x00 header* object 'z'  # successful message/reply
         ::= 'r' x02 x00 header* fault 'z'   # exception/fault reply
 </def>
 
-<def title="Encoding">
+<def title="Bytecode Encoding">
 x00 - x1f    # utf-8 string length 0-32
 x20 - x2f    # binary data length 0-16
 x30 - x37    # reserved
 x38 - x3f    # long from -x40000 to x3ffff
 x40 - x41    # reserved
 x42          # 8-bit binary data final chunk ('B')
-x43          # reserved
+x43          # reserved ('C' streaming call)
 x44          # 64-bit IEEE encoded double ('D')
-x45          # reserved
+x45          # reserved ('E' envelope)
 x46          # boolean false ('F')
-x47 - x48    # reserved
+x47          # reserved
+x48          # reserved ('H' header)
 x49          # 32-bit signed integer ('I')
-x4a - x4b    # reserved
+x4a          # reference to 1-256th map/list
+x4b          # reference to 1-65536th map/list
 x4c          # 64-bit signed long integer ('L')
 x4d          # map with optional type ('M')
 x4e          # null ('N')
 x4f          # object definition ('O')
-x50          # reference to 1-255th map/list
-x51          # reference to 1-65536th map/list
+x50          # reserved ('P' streaming message/post)
+x51          # reserved
 x52          # reference to map/list - integer ('R')
 x53          # utf-8 string final chunk ('S')
 x54          # boolean true ('T')
@@ -194,12 +195,12 @@ x67          # double 0.0
 x68          # double 1.0
 x69          # double represented as byte (-128.0 to 127.0)
 x6a          # double represented as short (-32768.0 to 327676.0)
-x6b          # double represented as 32-bit int
+x6b          # double represented as float
 x6c          # list/vector length ('l')
 x6d          # reserved ('m' method for RPC call)
 x6e          # list/vector compact length
 x6f          # object instance ('o')
-x70          # double represented as float
+x70          # reserved ('p' - message/post)
 x71          # reserved
 x72          # reserved ('r' reply for message/RPC)
 x73          # utf-8 string non-final chunk ('s')
