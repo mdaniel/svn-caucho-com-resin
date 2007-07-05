@@ -40,6 +40,7 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EntityType;
+import com.caucho.jdbc.JdbcMetaData;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -72,10 +73,13 @@ abstract public class AbstractQuery {
   //
   private ArrayList<String> _preparedMapping = new ArrayList<String>();
 
+  private JdbcMetaData _metaData;
 
-  AbstractQuery(String sql)
+
+  AbstractQuery(String sql, JdbcMetaData metaData)
   {
     _sql = sql;
+    _metaData = metaData;
   }
 
   /**
@@ -465,5 +469,13 @@ abstract public class AbstractQuery {
   public void complete(UserQuery userQuery, AmberConnection aConn)
     throws SQLException
   {
+  }
+
+  /**
+   * Returns the jdbc meta data, if available.
+   */
+  JdbcMetaData getMetaData()
+  {
+    return _metaData;
   }
 }

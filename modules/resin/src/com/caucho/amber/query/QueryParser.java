@@ -40,6 +40,7 @@ import com.caucho.amber.table.Table;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.RelatedType;
 import com.caucho.amber.type.Type;
+import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.log.Log;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
@@ -360,7 +361,7 @@ public class QueryParser {
     _havingExpr = null;
     _appendResultList = null;
 
-    SelectQuery query = new SelectQuery(_sql);
+    SelectQuery query = new SelectQuery(_sql, getMetaData());
     query.setParentQuery(_query);
     _query = query;
 
@@ -825,7 +826,7 @@ public class QueryParser {
   private AbstractQuery parseUpdate()
     throws QueryParseException
   {
-    UpdateQuery query = new UpdateQuery(_sql);
+    UpdateQuery query = new UpdateQuery(_sql, getMetaData());
     _query = query;
 
     FromItem fromItem = parseFrom();
@@ -865,7 +866,7 @@ public class QueryParser {
   private AbstractQuery parseDelete()
     throws QueryParseException
   {
-    DeleteQuery query = new DeleteQuery(_sql);
+    DeleteQuery query = new DeleteQuery(_sql, getMetaData());
     _query = query;
 
     int token = peekToken();
@@ -2546,6 +2547,17 @@ public class QueryParser {
   {
     if (ch >= 0)
       _parseIndex--;
+  }
+
+  /**
+   * Returns the jdbc meta data, if available.
+   */
+  private JdbcMetaData getMetaData()
+  {
+    if (_persistenceUnit == null)
+      return null;
+
+    return _persistenceUnit.getMetaData();
   }
 
   /**

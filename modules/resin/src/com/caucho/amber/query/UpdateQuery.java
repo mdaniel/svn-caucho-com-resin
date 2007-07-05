@@ -37,6 +37,8 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.table.Column;
 import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.EntityType;
+import com.caucho.jdbc.JdbcMetaData;
+import com.caucho.jdbc.PostgresMetaData;
 import com.caucho.util.CharBuffer;
 
 import java.sql.SQLException;
@@ -52,9 +54,9 @@ public class UpdateQuery extends AbstractQuery {
 
   private String _sql;
 
-  UpdateQuery(String query)
+  UpdateQuery(String query, JdbcMetaData metaData)
   {
-    super(query);
+    super(query, metaData);
   }
 
   /**
@@ -119,9 +121,29 @@ public class UpdateQuery extends AbstractQuery {
 
     FromItem item = _fromList.get(0);
 
-    cb.append(item.getTable().getName());
-    cb.append(" ");
-    cb.append(item.getName());
+    // Postgres 8.2.x accepts UPDATE statements with
+    // table alias name, but Postgres 8.0.x does not.
+    //
+    // Also, adds portability for MySql 3.23 vs MySql 4.x/5.x
+    // In MySql 3.23, UPDATE with joins are not supported.
+    //
+    // jpa/1201 vs jpa/1202 vs jpa/1203
+    if (getMetaData().supportsUpdateTableAlias()
+        && (_fromList.size() > 1)) {
+      if (getMetaData().supportsUpdateTableList()) {
+        // MySql: jpa/1202
+        generateFromList(cb, false);
+      }
+      else { // Oracle: jpa/1203
+        cb.append(item.getTable().getName());
+        cb.append(" ");
+        cb.append(item.getName());
+      }
+    }
+    else {
+      // Postgres: jpa/1201
+      cb.append(item.getTable().getName());
+    }
 
     cb.append(" set ");
 
@@ -133,103 +155,80 @@ public class UpdateQuery extends AbstractQuery {
 
       AmberExpr expr = _fieldList.get(i);
 
-      expr.generateUpdateWhere(cb);
+      // jpa/1202
+      if (getMetaData().supportsUpdateTableAlias())
+        expr.generateWhere(cb);
+      else
+        expr.generateUpdateWhere(cb);
 
       cb.append("=");
 
-      _valueList.get(i).generateUpdateWhere(cb);
+      if (getMetaData().supportsUpdateTableAlias())
+        _valueList.get(i).generateWhere(cb);
+      else
+        _valueList.get(i).generateUpdateWhere(cb);
     }
 
     String updateJoin = null;
 
     if (_where != null) {
-      cb.append(" where ");
-
-      // jpa/1201
+      // jpa/1200 vs jpa/1201
       if (_fromList.size() == 1) {
+        cb.append(" where ");
+
         _where.generateUpdateWhere(cb);
       }
       else {
-        // jpa/1201
-        item = _fromList.get(1);
-
-        EntityType type = item.getEntityType();
-
-        String relatedId = type.getId().generateSelect(item.getName());
-
-        cb.append("exists (select ");
-
-        cb.append(relatedId);
-
-        cb.append(" from ");
-
-        // jpa/114f: reorder from list for left outer join
-        for (int i = 1; i < _fromList.size(); i++) {
-          item = _fromList.get(i);
-
-          if (item.isOuterJoin()) {
-            JoinExpr join = item.getJoinExpr();
-
-            if (join == null)
-              continue;
-
-            FromItem parent = join.getJoinParent();
-
-            int index = _fromList.indexOf(parent);
-
-            if (index < 0)
-              continue;
-
-            _fromList.remove(i);
-
-            if (index < i)
-              index++;
-
-            _fromList.add(index, item);
-          }
-        }
-
-        boolean hasJoinExpr = false;
         boolean isFirst = true;
 
-        // 1201: skip the first from item since it is
-        // available in the UPDATE clause
-        for (int i = 1; i < _fromList.size(); i++) {
-          item = _fromList.get(i);
+        // jpa/1201: postgres 8.0.x/8.2.x compatibility
+        if (getMetaData() instanceof PostgresMetaData) {
+          item = _fromList.get(0);
 
-          // jpa/1178
-          if (getParentQuery() != null) {
-            ArrayList<FromItem> fromList = getParentQuery().getFromList();
-            if (fromList != null) {
-              if (fromList.contains(item)) {
-                hasJoinExpr = true;
-                continue;
-              }
-            }
-          }
+          EntityType type = item.getEntityType();
+
+          String targetId = type.getId().generateSelect(item.getName());
+
+          cb.append(" FROM ");
+
+          String tableName = item.getTable().getName();
+
+          cb.append(tableName);
+          cb.append(' ');
+          cb.append(item.getName());
+
+          isFirst = false;
+
+          cb.append(" where ");
+
+          cb.append(targetId);
+          cb.append(" = ");
+          cb.append(type.getId().generateSelect(item.getTable().getName()));
+
+          cb.append(" and ");
+        }
+
+        // jpa/1202 vs jpa/1201 and jpa/1203
+        if (! getMetaData().supportsUpdateTableList()) {
+          // Postgres: jpa/1201 and Oracle: jpa/1203
+          item = _fromList.get(1);
+
+          EntityType type = item.getEntityType();
+
+          String relatedId = type.getId().generateSelect(item.getName());
 
           if (isFirst) {
             isFirst = false;
-          }
-          else {
-            if (item.isOuterJoin())
-              cb.append(" left outer join ");
-            else {
-              cb.append(", ");
-
-              if (item.getJoinExpr() != null)
-                hasJoinExpr = true;
-            }
+            cb.append(" where ");
           }
 
-          cb.append(item.getTable().getName());
-          cb.append(" ");
-          cb.append(item.getName());
+          cb.append("exists (select ");
 
-          if (item.getJoinExpr() != null && item.isOuterJoin()) {
-            cb.append(" on ");
-            item.getJoinExpr().generateJoin(cb);
-          }
+          cb.append(relatedId);
+
+          cb.append(" from ");
+
+          generateFromList(cb, true);
         }
 
         // jpa/0l12
@@ -290,9 +289,11 @@ public class UpdateQuery extends AbstractQuery {
       }
     } // end if (_where != null)
 
-    // jpa/1201
-    if (_fromList.size() > 1)
+    // jpa/1201 vs jpa/1202
+    if (_fromList.size() > 1
+        && ! getMetaData().supportsUpdateTableList()) {
       cb.append(")");
+    }
 
     _sql = cb.close();
   }
@@ -325,5 +326,87 @@ public class UpdateQuery extends AbstractQuery {
   public String toString()
   {
     return "UpdateQuery[" + getQueryString() + "]";
+  }
+
+  /**
+   * Generates the FROM list.
+   */
+  private void generateFromList(CharBuffer cb, boolean skipFirst)
+  {
+    FromItem item;
+
+    // jpa/114f: reorder from list for left outer join
+    for (int i = 1; i < _fromList.size(); i++) {
+      item = _fromList.get(i);
+
+      if (item.isOuterJoin()) {
+        JoinExpr join = item.getJoinExpr();
+
+        if (join == null)
+          continue;
+
+        FromItem parent = join.getJoinParent();
+
+        int index = _fromList.indexOf(parent);
+
+        if (index < 0)
+          continue;
+
+        _fromList.remove(i);
+
+        if (index < i)
+          index++;
+
+        _fromList.add(index, item);
+      }
+    }
+
+    boolean hasJoinExpr = false;
+    boolean isFirst = true;
+
+    int i = 0;
+
+    // 1201: skip the first from item since it is
+    // available in the UPDATE clause
+    if (skipFirst)
+      i++;
+
+    for (; i < _fromList.size(); i++) {
+      item = _fromList.get(i);
+
+      // jpa/1178
+      if (getParentQuery() != null) {
+        ArrayList<FromItem> fromList = getParentQuery().getFromList();
+        if (fromList != null) {
+          if (fromList.contains(item)) {
+            hasJoinExpr = true;
+            continue;
+          }
+        }
+      }
+
+      if (isFirst) {
+        isFirst = false;
+      }
+      else {
+        if (item.isOuterJoin())
+          cb.append(" left outer join ");
+        else {
+          cb.append(", ");
+
+          if (item.getJoinExpr() != null)
+            hasJoinExpr = true;
+        }
+      }
+
+      cb.append(item.getTable().getName());
+      cb.append(" ");
+      cb.append(item.getName());
+
+      if (item.getJoinExpr() != null && item.isOuterJoin()) {
+        cb.append(" on ");
+        item.getJoinExpr().generateJoin(cb);
+      }
+    }
   }
 }

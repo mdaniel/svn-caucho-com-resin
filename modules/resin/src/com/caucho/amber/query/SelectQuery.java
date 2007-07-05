@@ -40,6 +40,7 @@ import com.caucho.amber.table.Column;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.SubEntityType;
 import com.caucho.amber.type.Type;
+import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.util.CharBuffer;
 
 import java.sql.SQLException;
@@ -77,9 +78,9 @@ public class SelectQuery extends AbstractQuery {
 
   private boolean _hasFrom = true;
 
-  SelectQuery(String query)
+  SelectQuery(String query, JdbcMetaData metaData)
   {
-    super(query);
+    super(query, metaData);
   }
 
   /**

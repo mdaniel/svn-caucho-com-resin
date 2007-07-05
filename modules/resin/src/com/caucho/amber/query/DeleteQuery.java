@@ -32,6 +32,7 @@ import com.caucho.amber.entity.AmberEntityHome;
 import com.caucho.amber.entity.TableInvalidateCompletion;
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.amber.manager.AmberConnection;
+import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.util.CharBuffer;
 
 import java.sql.SQLException;
@@ -43,9 +44,9 @@ import java.sql.SQLException;
 public class DeleteQuery extends AbstractQuery {
   private String _sql;
 
-  DeleteQuery(String query)
+  DeleteQuery(String query, JdbcMetaData metaData)
   {
-    super(query);
+    super(query, metaData);
   }
 
   /**
@@ -80,8 +81,13 @@ public class DeleteQuery extends AbstractQuery {
 
     // jpa/1332
     cb.append(item.getTable().getName());
-    cb.append(" ");
-    cb.append(item.getName());
+
+    // jpa/1300
+    if (getMetaData().supportsUpdateTableAlias()
+        && (_fromList.size() > 1)) {
+      cb.append(" ");
+      cb.append(item.getName());
+    }
 
     if (_where != null) {
       cb.append(" WHERE ");
