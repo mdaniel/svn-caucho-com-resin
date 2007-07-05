@@ -884,12 +884,11 @@ public class JavaClassDef extends ClassDef {
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
           AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
           
-          if (existingGetter == null) {
-            _getMap.put(quercusName, newGetter);
+          if (existingGetter != null) {
+            newGetter = existingGetter.overload(newGetter);
           }
-          else {
-            existingGetter.overload(newGetter);
-          }
+          
+          _getMap.put(quercusName, newGetter);
         }
         else if (methodName.startsWith("is")) {
           String quercusName = javaToQuercusConvert(methodName.substring(2, length));
@@ -897,25 +896,23 @@ public class JavaClassDef extends ClassDef {
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
           AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
           
-          if (existingGetter == null) {
-            _getMap.put(quercusName, newGetter);
+          if (existingGetter != null) {
+            newGetter = existingGetter.overload(newGetter);
           }
-          else {
-            existingGetter.overload(newGetter);
-          }
+          
+          _getMap.put(quercusName, newGetter);
         }
         else if (methodName.startsWith("set")) {
           String quercusName = javaToQuercusConvert(methodName.substring(3, length));
           
-          AbstractJavaMethod existingGetter = _getMap.get(quercusName);
+          AbstractJavaMethod existingGetter = _setMap.get(quercusName);
           AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
           
-          if (existingGetter == null) {
-            _getMap.put(quercusName, newGetter);
+          if (existingGetter != null) {
+            newGetter = existingGetter.overload(newGetter);
           }
-          else {
-            existingGetter.overload(newGetter);
-          }
+          
+          _setMap.put(quercusName, newGetter);
         } else if ("__get".equals(methodName)) {
           __get = new JavaMethod(moduleContext, method);
         } else if ("__getField".equals(methodName)) {

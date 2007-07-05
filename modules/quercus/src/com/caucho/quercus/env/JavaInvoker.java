@@ -96,7 +96,7 @@ abstract public class JavaInvoker
   }
 
   public synchronized void init()
-  {    
+  {
     if (_isInit)
       return;
 
