@@ -28,8 +28,8 @@
 #ifndef CSE_VERSION_H
 #define CSE_VERSION_H
 
-#define VERSION "Resin/3.1.s070705"
-#define FULL_VERSION "Resin-3.1.s070705 (built Thu, 05 Jul 2007 09:39:37 PDT)"
+#define VERSION "Resin/3.1.s070706"
+#define FULL_VERSION "Resin-3.1.s070706 (built Fri, 06 Jul 2007 04:14:22 PDT)"
 
 #endif /* CSE_VERSION_H */
 

@@ -257,6 +257,12 @@ public class X509Encryption extends HessianEnvelope {
     {
       _cipherOut.write(ch);
     }
+    
+    public void write(byte []buffer, int offset, int length)
+      throws IOException
+    {
+      _cipherOut.write(buffer, offset, length);
+    }
 
     public void close()
       throws IOException
@@ -269,6 +275,7 @@ public class X509Encryption extends HessianEnvelope {
 	_bodyOut.close();
 
 	out.writeInt(0);
+        out.completeEnvelope();
 	out.close();
       }
     }
@@ -328,6 +335,12 @@ public class X509Encryption extends HessianEnvelope {
     {
       return _cipherIn.read();
     }
+    
+    public int read(byte []buffer, int offset, int length)
+      throws IOException
+    {
+      return _cipherIn.read(buffer, offset, length);
+    }
 
     public void close()
       throws IOException
@@ -343,6 +356,8 @@ public class X509Encryption extends HessianEnvelope {
 
 	if (len != 0)
 	  throw new IOException("Unexpected footer");
+
+        in.completeEnvelope();
 
 	in.close();
       }

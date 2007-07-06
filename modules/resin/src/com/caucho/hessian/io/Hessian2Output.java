@@ -257,6 +257,23 @@ public class Hessian2Output
   }
 
   /**
+   * Completes an envelope.
+   *
+   * <p>A successful completion will have a single value:
+   *
+   * <pre>
+   * z
+   * </pre>
+   */
+  public void completeEnvelope()
+    throws IOException
+  {
+    flushIfFull();
+    
+    _buffer[_offset++] = (byte) 'z';
+  }
+
+  /**
    * Writes the method tag.
    *
    * <code><pre>

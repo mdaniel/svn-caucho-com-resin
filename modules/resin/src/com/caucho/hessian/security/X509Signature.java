@@ -239,6 +239,13 @@ public class X509Signature extends HessianEnvelope {
       _mac.update((byte) ch);
     }
 
+    public void write(byte []buffer, int offset, int length)
+      throws IOException
+    {
+      _bodyOut.write(buffer, offset, length);
+      _mac.update(buffer, offset, length);
+    }
+
     public void close()
       throws IOException
     {
@@ -255,6 +262,8 @@ public class X509Signature extends HessianEnvelope {
       out.writeInt(1);
       out.writeString("signature");
       out.writeBytes(sig);
+
+      out.completeEnvelope();
       out.close();
     }
   }
@@ -318,6 +327,19 @@ public class X509Signature extends HessianEnvelope {
 
       return ch;
     }
+    
+    public int read(byte []buffer, int offset, int length)
+      throws IOException
+    {
+      int len = _bodyIn.read(buffer, offset, length);
+
+      if (len < 0)
+	return len;
+
+      _mac.update(buffer, offset, len);
+
+      return len;
+    }
 
     public void close()
       throws IOException
@@ -331,13 +353,16 @@ public class X509Signature extends HessianEnvelope {
 	int len = in.readInt();
 	byte []signature = null;
 
-
 	for (int i = 0; i < len; i++) {
 	  String header = in.readString();
 
 	  if ("signature".equals(header))
 	    signature = in.readBytes();
 	}
+
+        in.completeEnvelope();
+        in.close();
+          
 
 	if (signature == null)
 	  throw new IOException("Expected signature");

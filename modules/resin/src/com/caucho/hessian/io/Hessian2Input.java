@@ -229,6 +229,24 @@ public class Hessian2Input
   }
 
   /**
+   * Completes reading the envelope
+   *
+   * <p>A successful completion will have a single value:
+   *
+   * <pre>
+   * z
+   * </pre>
+   */
+  public void completeEnvelope()
+    throws IOException
+  {
+    int tag = read();
+    
+    if (tag != 'z')
+      error("expected end of envelope");
+  }
+
+  /**
    * Starts reading the call
    *
    * <p>A successful completion will have a single value:
@@ -1713,6 +1731,13 @@ public class Hessian2Input
 
     case DOUBLE_SHORT:
       return new Double((short) (256 * read() + read()));
+      
+    case DOUBLE_FLOAT:
+      {
+	int f = parseInt();
+
+	return new Double(Float.intBitsToFloat(f));
+      }
 
     case 'D':
       return new Double(parseDouble());
@@ -2092,27 +2117,34 @@ public class Hessian2Input
   {
     int code = _offset < _length ? (_buffer[_offset++] & 0xff) : read();
 
-    if (code == 't') {
-      int len = 256 * read() + read();
-      String type = readLenString(len);
+    switch (code) {
+    case 't':
+      {
+        int len = 256 * read() + read();
+        String type = readLenString(len);
 
-      if (_types == null)
-	_types = new ArrayList();
+        if (_types == null)
+          _types = new ArrayList();
 
-      _types.add(type);
+        _types.add(type);
 
-      return type;
-    }
-    else if (code == 'T') {
-      int ref = readInt();
+        return type;
+      }
 
-      return (String) _types.get(ref);
-    }
-    else {
-      if (code >= 0)
-	_offset--;
+    case 'T':
+      {
+        int ref = readInt();
+
+        return (String) _types.get(ref);
+      }
+
+    default:
+      {
+        if (code >= 0)
+          _offset--;
       
-      return "";
+        return "";
+      }
     }
   }
 
