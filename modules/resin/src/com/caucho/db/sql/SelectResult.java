@@ -49,8 +49,8 @@ import java.sql.SQLException;
 public class SelectResult {
   private static final L10N L = new L10N(SelectResult.class);
   
-  private static final FreeList<SelectResult> _freeList =
-    new FreeList<SelectResult>(32);
+  private static final FreeList<SelectResult> _freeList
+    = new FreeList<SelectResult>(32);
 
   private static final int SIZE_BITS = 13;
   private static final int SIZE_MASK = 8192 - 1;

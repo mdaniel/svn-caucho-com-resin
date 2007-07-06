@@ -41,7 +41,8 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 abstract public class Column {
-  protected final static Logger log = Log.open(Column.class);
+  protected final static Logger log
+    = Logger.getLogger(Column.class.getName());
   
   public final static int NONE = 0;
   public final static int VARCHAR = 1;
@@ -51,6 +52,7 @@ abstract public class Column {
   public final static int DATE = 5;
   public final static int BLOB = 6;
   public final static int NUMERIC = 7;
+  public final static int VARBINARY = 8;
   
   private final Row _row;
   private final String _name;
@@ -516,6 +518,17 @@ abstract public class Column {
   void delete(Transaction xa, byte []block, int rowOffset)
     throws SQLException
   {
+  }
+
+  /**
+   * Cleanup of the column on table shutdown.
+   */
+  public void close()
+  {
+    BTree index = _index;
+    
+    if (index != null)
+      index.close();
   }
 
   public String toString()

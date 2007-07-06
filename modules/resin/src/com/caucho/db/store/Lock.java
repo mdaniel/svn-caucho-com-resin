@@ -114,9 +114,10 @@ public final class Lock {
 	Thread.dumpStack();
       }
 
-      throw new LockTimeoutException(L.l("Lock {0} timed out ({1}ms) try-writers:{2} is-write:{3}",
+      throw new LockTimeoutException(L.l("{0} lockRead timed out ({1}ms) read-count:{2} try-writers:{3} is-write:{4}",
 					 this,
 					 Alarm.getCurrentTime() - start,
+					 _readCount,
 					 _tryWriteCount,
 					 _isWrite));
     }
@@ -195,9 +196,10 @@ public final class Lock {
 	  Thread.dumpStack();
 	}
 	
-	throw new LockTimeoutException(L.l("{0} lockReadAndWrite timed out ({1}ms) is-write:{2} try-writers:{3} try-upgrade:{4}",
+	throw new LockTimeoutException(L.l("{0} lockReadAndWrite timed out ({1}ms) readers:{2} is-write:{3} try-writers:{4} try-upgrade:{5}",
 					   this,
 					   (Alarm.getCurrentTime() - start),
+					   _readCount,
 					   _isWrite,
 					   _tryWriteCount,
 					   _tryUpgradeCount));
@@ -206,6 +208,59 @@ public final class Lock {
 
 	notifyAll();
       }
+    }
+  }
+
+  /**
+   * Tries to get a write lock, but does not wait if other threads are
+   * reading or writing.  insert() uses this call to avoid blocking when
+   * allocating a new row.
+   *
+   * @return true if the write was successful
+   */
+  public boolean lockReadAndWriteNoWait()
+    throws SQLException
+  {
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " lockReadAndWriteNoWait (read:" + _readCount
+		 + " write:" + _isWrite
+		 + " try-write:" + _tryWriteCount + ")");
+    }
+
+    synchronized (this) {
+      // XXX: temp debug only
+      if (_owner == null)
+	_owner = Thread.currentThread();
+
+      if (_readCount == 0 && ! _isWrite) {
+	_owner = Thread.currentThread();
+	_readCount++;
+	_isWrite = true;
+	return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Clears a write lock.
+   */
+  void unlockReadAndWrite()
+    throws SQLException
+  {
+    synchronized (this) {
+      _readCount--;
+      _isWrite = false;
+      _owner = null;
+
+      notifyAll();
+    }
+    
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " unlockReadAndWrite (read:" + _readCount
+		 + " write:" + _isWrite
+		 + " try-write:" + _tryWriteCount + ")");
     }
   }
 
@@ -225,7 +280,6 @@ public final class Lock {
 
     long start = Alarm.getCurrentTime();
     long expire = start + timeout;
-    boolean isOkay = false;
 
     synchronized (this) {
       _tryWriteCount++;
@@ -260,37 +314,18 @@ public final class Lock {
 	  Thread.dumpStack();
 	}
 	
-	throw new LockTimeoutException(L.l("{0} lockWrite timed out ({1}ms) try-writers:{2}",
+	throw new LockTimeoutException(L.l("{0} lockWrite timed out ({1}ms) readers:{2} try-writers:{3} upgrade:{4}",
 					   this,
 					   Alarm.getCurrentTime() - start,
-					   _tryWriteCount));
+					   _readCount,
+					   _tryWriteCount,
+					   _tryUpgradeCount));
       } finally {
 	_tryWriteCount--;
 	_tryUpgradeCount--;
 
 	notifyAll();
       }
-    }
-  }
-
-  /**
-   * Clears a write lock.
-   */
-  void unlockReadAndWrite()
-    throws SQLException
-  {
-    synchronized (this) {
-      _readCount--;
-      _isWrite = false;
-      _owner = null;
-
-      notifyAll();
-    }
-    
-    if (log.isLoggable(Level.FINEST)) {
-      log.finest(this + " unlockReadAndWrite (read:" + _readCount
-		 + " write:" + _isWrite
-		 + " try-write:" + _tryWriteCount + ")");
     }
   }
 
@@ -311,6 +346,31 @@ public final class Lock {
       log.finest(this + " unlockWrite (read:" + _readCount
 		 + " write:" + _isWrite
 		 + " try-write:" + _tryWriteCount + ")");
+    }
+  }
+
+  /**
+   * Waits until all the writers drain before committing, see Block.commit()
+   */
+  void waitForCommit()
+  {
+    Thread.yield();
+    
+    synchronized (this) {
+      while (true) {
+	if (! _isWrite && _tryWriteCount == 0) {
+	  return;
+	}
+
+	if (Alarm.isTest())
+	  return;
+
+	try {
+	  wait(1000L);
+	} catch (InterruptedException e) {
+	  log.log(Level.FINER, e.toString(), e);
+	}
+      }
     }
   }
 

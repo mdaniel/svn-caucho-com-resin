@@ -752,35 +752,41 @@ public class Parser {
 
       factory.addVarchar(name, length);
     }
+    else if (type.equalsIgnoreCase("varbinary")) {
+      if (length < 0)
+	throw error(L.l("VARBINARY needs a defined length"));
+
+      factory.addVarbinary(name, length);
+    }
     else if (type.equalsIgnoreCase("blob")) {
       factory.addBlob(name);
     }
-    else if (type.equalsIgnoreCase("integer") ||
-	     type.equalsIgnoreCase("int") ||
-	     type.equalsIgnoreCase("smallint") ||
-	     type.equalsIgnoreCase("tinyint") ||
-	     type.equalsIgnoreCase("mediumint") ||
-	     type.equalsIgnoreCase("bit")) {
+    else if (type.equalsIgnoreCase("integer")
+	     || type.equalsIgnoreCase("int")
+	     || type.equalsIgnoreCase("smallint")
+	     || type.equalsIgnoreCase("tinyint")
+	     || type.equalsIgnoreCase("mediumint")
+	     || type.equalsIgnoreCase("bit")) {
       factory.addInteger(name);
     }
     else if (type.equalsIgnoreCase("bigint")) {
       factory.addLong(name);
     }
-    else if (type.equalsIgnoreCase("double") ||
-	     type.equalsIgnoreCase("float") ||
-	     type.equalsIgnoreCase("real")) {
+    else if (type.equalsIgnoreCase("double")
+	     || type.equalsIgnoreCase("float")
+	     || type.equalsIgnoreCase("real")) {
       factory.addDouble(name);
     }
-    else if (type.equalsIgnoreCase("datetime") ||
-	     type.equalsIgnoreCase("timestamp")) {
+    else if (type.equalsIgnoreCase("datetime")
+	     || type.equalsIgnoreCase("timestamp")) {
       factory.addDateTime(name);
     }
-    else if (type.equalsIgnoreCase("text") ||
-	     type.equalsIgnoreCase("clob")) {
+    else if (type.equalsIgnoreCase("text")
+	     || type.equalsIgnoreCase("clob")) {
       factory.addVarchar(name, 255);
     }
-    else if (type.equalsIgnoreCase("decimal") ||
-	     type.equalsIgnoreCase("numeric")) {
+    else if (type.equalsIgnoreCase("decimal")
+	     || type.equalsIgnoreCase("numeric")) {
       factory.addNumeric(name, length, scale);
     }
     else

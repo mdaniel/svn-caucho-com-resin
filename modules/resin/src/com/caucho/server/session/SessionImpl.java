@@ -482,8 +482,9 @@ public class SessionImpl implements HttpSession, CacheListener {
     }
 
     if (! _isClosing) {
-      log.warning(L.l("session {0} LRU while in use.  Consider increasing session-count.",
-		     _id));
+      log.warning(L.l("session {0} LRU while in use (use-count={1}).  Consider increasing session-count.",
+		      _id,
+		      _useCount));
     }
     
     boolean isValid = _isValid;
@@ -496,8 +497,8 @@ public class SessionImpl implements HttpSession, CacheListener {
     Store store = _manager.getSessionStore();
 
     // server/015k
-    if (_isInvalidating ||
-	store == null || _accessTime + getMaxInactiveInterval() < now)
+    if (_isInvalidating
+	|| store == null || _accessTime + getMaxInactiveInterval() < now)
       notifyDestroy();
 
     invalidateLocal();

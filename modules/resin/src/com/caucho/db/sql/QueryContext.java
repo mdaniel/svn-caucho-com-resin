@@ -493,12 +493,26 @@ public class QueryContext {
       return;
     
     _isLocked = false;
+    
+    int len = _blockLocks.length;
+
+    // need to unlock first since the writeData/commit will wait for
+    // write locks to clear before committing
+    for (int i = len - 1; i >= 0; i--) {
+      Block block = _blockLocks[i];
+
+      if (block == null) {
+      }
+      else if (_isWrite) {
+	_xa.unlockReadAndWrite(block.getLock());
+      }
+      else
+	_xa.unlockRead(block.getLock());
+    }
 
     try {
       _xa.writeData();
     } finally {
-      int len = _blockLocks.length;
-
       for (int i = len - 1; i >= 0; i--) {
 	Block block = _blockLocks[i];
 	_blockLocks[i] = null;
@@ -506,16 +520,12 @@ public class QueryContext {
 	if (block == null) {
 	}
 	else if (_isWrite) {
-	  _xa.unlockReadAndWrite(block.getLock());
-
 	  try {
 	    block.commit();
 	  } catch (IOException e) {
 	    log.log(Level.FINE, e.toString(), e);
 	  }
 	}
-	else
-	  _xa.unlockRead(block.getLock());
       }
     }
   }

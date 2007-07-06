@@ -386,10 +386,40 @@ abstract public class Expr {
 	
 	return offset;
       }
+
+    case Column.VARBINARY:
+      {
+	String v = evalString(context);
+
+	if (v == null)
+	  return -1;
+	
+	int length = v.length();
+	int offset = 1;
+
+	for (int i = 0; i < length; i++) {
+	  int ch = v.charAt(i);
+
+	  if (ch < 0x80)
+	    buffer[offset++] = (byte) (ch & 0xff);
+	  else if (ch < 0x800) {
+	    buffer[offset++] = (byte) (0xc0 + ((ch >> 6) & 0x1f));
+	    buffer[offset++] = (byte) (0x80 + (ch & 0x3f));
+	  }
+	  else {
+	    buffer[offset++] = (byte) (0xe0 + ((ch >> 12) & 0x0f));
+	    buffer[offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
+	    buffer[offset++] = (byte) (0x80 + (ch & 0x3f));
+	  }
+	}
+	buffer[0] = (byte) (offset - 1);
+	
+	return offset;
+      }
       
       
     default:
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException("unknown column: " + columnType);
     }
   }
 

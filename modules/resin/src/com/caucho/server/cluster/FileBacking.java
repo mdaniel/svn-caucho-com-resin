@@ -179,18 +179,18 @@ public class FileBacking {
 	rs.close();
 
 	return;
-      } catch (Throwable e) {
+      } catch (Exception e) {
 	log.finer(e.toString());
       }
 
       try {
 	stmt.executeQuery("DROP TABLE " + _tableName);
-      } catch (Throwable e) {
+      } catch (Exception e) {
 	log.log(Level.FINEST, e.toString(), e);
       }
 
       String sql = ("CREATE TABLE " + _tableName + " (\n" +
-		    "  id VARCHAR(128) PRIMARY KEY,\n" +
+		    "  id VARBINARY(64) PRIMARY KEY,\n" +
 		    "  data BLOB,\n" +
 		    "  expire_interval INTEGER,\n" +
 		    "  access_time INTEGER,\n" +

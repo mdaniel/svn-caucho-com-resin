@@ -208,6 +208,46 @@ public class Transaction extends StoreTransaction {
       throw e;
     }
   }
+
+  /**
+   * Conditionally a new write lock, if no contention exists.
+   */
+  public boolean lockReadAndWriteNoWait(Lock lock)
+    throws SQLException
+  {
+    if (_isRollbackOnly) {
+      if (_rollbackExn != null)
+	throw _rollbackExn;
+      else
+	throw new SQLException(L.l("can't get lock with rollback transaction"));
+    }
+
+    try {
+      if (_readLocks == null)
+	_readLocks = new ArrayList<Lock>();
+      if (_writeLocks == null)
+	_writeLocks = new ArrayList<Lock>();
+
+      if (_readLocks.contains(lock))
+	throw new SQLException(L.l("lockReadAndWrite cannot already have a read lock"));
+
+      if (_writeLocks.contains(lock))
+	throw new SQLException(L.l("lockReadAndWrite cannot already have a write lock"));
+      
+      if (lock.lockReadAndWriteNoWait()) {
+	_readLocks.add(lock);
+	_writeLocks.add(lock);
+
+	return true;
+      }
+    } catch (SQLException e) {
+      setRollbackOnly(e);
+      
+      throw e;
+    }
+
+    return false;
+  }
   /**
    * Acquires a new write lock.
    */

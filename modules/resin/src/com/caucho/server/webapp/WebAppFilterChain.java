@@ -197,6 +197,13 @@ public class WebAppFilterChain implements FilterChain {
 	  log.log(Level.WARNING, e.toString(), e);
 	}
       }
+
+      // put finish() before access log so the session isn't tied up while
+      // logging
+
+      // needed for things like closing the session
+      if (request instanceof AbstractHttpRequest)
+        ((AbstractHttpRequest) request).finish();
         
       try {
 	if (_accessLog != null) {
@@ -207,10 +214,6 @@ public class WebAppFilterChain implements FilterChain {
       } catch (Throwable e) {
 	log.log(Level.FINE, e.toString(), e);
       }
-
-      // needed for things like closing the session
-      if (request instanceof AbstractHttpRequest)
-        ((AbstractHttpRequest) request).finish();
       
       thread.setContextClassLoader(oldLoader);
     }

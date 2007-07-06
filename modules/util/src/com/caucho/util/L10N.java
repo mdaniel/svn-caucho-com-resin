@@ -383,6 +383,68 @@ public class L10N {
     
     return cb.close();
   }
+  
+  public String l(String msg, Object o1, Object o2,
+                  Object o3, Object o4, Object o5, Object o6)
+  {
+    msg = getTranslated(msg);
+    
+    CharBuffer cb = CharBuffer.allocate();
+
+    int length = msg.length();
+    int i = 0;
+
+    while (i < length) {
+      char ch = msg.charAt(i);
+
+      if (ch != '{' || i + 2 >= length) {
+        cb.append(ch);
+        i++;
+      }
+      else {
+        ch = msg.charAt(i + 1);
+        
+        if (ch == '{') {
+          cb.append('{');
+          i += 2;
+        }
+        else if (msg.charAt(i + 2) != '}') {
+          cb.append('{');
+          i++;
+        }
+        else if (ch == '0') {
+          cb.append(o1);
+          i += 3;
+        }
+        else if (ch == '1') {
+          cb.append(o2);
+          i += 3;
+        }
+        else if (ch == '2') {
+          cb.append(o3);
+          i += 3;
+        }
+        else if (ch == '3') {
+          cb.append(o4);
+          i += 3;
+        }
+        else if (ch == '4') {
+          cb.append(o5);
+          i += 3;
+        }
+        else if (ch == '5') {
+          cb.append(o6);
+          i += 3;
+        }
+        else {
+          cb.append('{');
+          i++;
+        }
+      }
+    }
+    
+    return cb.close();
+  }
 
   private String getTranslated(String msg)
   {

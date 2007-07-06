@@ -55,7 +55,8 @@ import java.util.logging.Logger;
  */
 abstract public class StoreManager
   implements AlarmListener, EnvironmentListener, ClassLoaderListener {
-  static protected final Logger log = Log.open(StoreManager.class);
+  static protected final Logger log
+    = Logger.getLogger(StoreManager.class.getName());
   static final L10N L = new L10N(StoreManager.class);
   
   private static int DECODE[];
@@ -76,8 +77,7 @@ abstract public class StoreManager
   protected boolean _isAlwaysSave;
   
   protected HashMap<String,Store> _storeMap;
-  protected LruCache<String,ClusterObject> _clusterObjects
-    =  new LruCache<String,ClusterObject>(4096);
+  protected LruCache<String,ClusterObject> _clusterObjects;
 
   private final Lifecycle _lifecycle = new Lifecycle(log, toString());
 
@@ -93,6 +93,9 @@ abstract public class StoreManager
 
   protected StoreManager()
   {
+    _clusterObjects = new LruCache<String,ClusterObject>(4096);
+    _clusterObjects.setEnableListeners(false);
+    
     _storeMap = new HashMap<String,Store>();
 
     _alarm = new Alarm(this);
@@ -550,7 +553,7 @@ abstract public class StoreManager
 
 	return clusterObj;
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 
       return null;

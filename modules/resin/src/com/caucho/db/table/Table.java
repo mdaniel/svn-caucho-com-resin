@@ -296,7 +296,7 @@ public class Table extends Store {
 	table.rebuildIndexes();
       
 	return table;
-      } catch (Throwable e) {
+      } catch (Exception e) {
 	log.log(Level.FINE, e.toString(), e);
 	
 	log.warning(e.toString());
@@ -444,7 +444,7 @@ public class Table extends Store {
       iter.init(xa);
 
       Column []columns = _row.getColumns();
-    
+
       while (iter.nextBlock()) {
 	iter.initRow();
 
@@ -506,6 +506,9 @@ public class Table extends Store {
       switch (column.getTypeCode()) {
       case Column.VARCHAR:
 	os.print("VARCHAR(" + column.getDeclarationSize() + ")");
+	break;
+      case Column.VARBINARY:
+	os.print("VARBINARY(" + column.getDeclarationSize() + ")");
 	break;
       case Column.INT:
 	os.print("INTEGER");
@@ -683,24 +686,27 @@ public class Table extends Store {
 
 	if (block == null)
 	  block = xa.readBlock(this, blockId);
-	
-	xa.lockReadAndWrite(block.getLock());
-	try {
-	  rowOffset = 0;
 
-	  byte []buffer = block.getBuffer();
+	Lock blockLock = block.getLock();
+
+	if (xa.lockReadAndWriteNoWait(blockLock)) {
+	  try {
+	    rowOffset = 0;
+
+	    byte []buffer = block.getBuffer();
 	    
-	  for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
-	    if (buffer[rowOffset] == 0) {
-	      block.setDirty(rowOffset, rowOffset + 1);
+	    for (; rowOffset < _rowEnd; rowOffset += _rowLength) {
+	      if (buffer[rowOffset] == 0) {
+		block.setDirty(rowOffset, rowOffset + 1);
 			     
-	      hasRow = true;
-	      buffer[rowOffset] = ROW_ALLOC;
-	      break;
+		hasRow = true;
+		buffer[rowOffset] = ROW_ALLOC;
+		break;
+	      }
 	    }
+	  } finally {
+	    xa.unlockReadAndWrite(blockLock);
 	  }
-	} finally {
-	  xa.unlockReadAndWrite(block.getLock());
 	}
       } while (! hasRow);
 

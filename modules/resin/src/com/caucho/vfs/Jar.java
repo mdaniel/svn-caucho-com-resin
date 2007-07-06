@@ -81,7 +81,7 @@ public class Jar implements CacheListener {
   // last time the file was checked
   private long _lastTime;
 
-  private JarCache _cache;
+  private SoftReference<JarCache> _cacheRef;
 
   // cached zip file to read jar entries
   private SoftReference<JarFile> _jarFileRef;
@@ -504,10 +504,11 @@ public class Jar implements CacheListener {
 
   private JarNode getJarNode(String path)
   {
-    JarCache cache;
+    JarCache cache = null;
 
     synchronized (this) {
-      cache = _cache;
+      if (_cacheRef != null)
+	cache = _cacheRef.get();
       
       if (! isCacheValid() || cache == null) {
 	try {
@@ -515,8 +516,10 @@ public class Jar implements CacheListener {
 
 	  if (file == null)
 	    return null;
+	  
+	  cache = new JarCache();
 
-	  _cache = cache = new JarCache();
+	  _cacheRef = new SoftReference<JarCache>(cache);
 
 	  Enumeration<JarEntry> e = file.entries();
 	  while (e.hasMoreElements()) {
@@ -646,7 +649,7 @@ public class Jar implements CacheListener {
 	
       _jarFileRef = null;
       _jarLastModified = 0;
-      _cache = null;
+      _cacheRef = null;
       _depend = null;
 
       JarFile oldCloseFile = null;

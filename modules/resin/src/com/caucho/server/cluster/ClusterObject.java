@@ -423,9 +423,8 @@ public class ClusterObject {
     } catch (NotSerializableException e) {
       log.warning(e.toString());
       _isSerializable = false;
-    } catch (Throwable e) {
-      log.warning(e.toString());
-      log.log(Level.FINE, e.toString(), e);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
 
       _isValid = false;
     } finally {

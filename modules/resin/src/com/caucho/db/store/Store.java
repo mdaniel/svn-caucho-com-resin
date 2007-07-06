@@ -152,6 +152,7 @@ public class Store {
   // number of minifragments currently used
   private long _miniFragmentUseCount;
 
+  private Object _fileLock = new Object();
   private SoftReference<RandomAccessWrapper> _cachedRowFile;
   
   private Lock _rowLock;
@@ -1431,6 +1432,7 @@ public class Store {
 	  }
 	}
 
+	// XXX: this exception occurs
 	if (fragOffset < 0)
 	  throw new IllegalStateException();
 
@@ -1678,31 +1680,34 @@ public class Store {
   public void readBlock(long blockId, byte []buffer, int offset, int length)
     throws IOException
   {
-    RandomAccessWrapper wrapper = openRowFile();
-    RandomAccessStream is = wrapper.getFile();
+    synchronized (_fileLock) {
+      RandomAccessWrapper wrapper = openRowFile();
+      RandomAccessStream is = wrapper.getFile();
 
-    long blockAddress = blockId & BLOCK_MASK;
+      long blockAddress = blockId & BLOCK_MASK;
 
-    try {
-      if (blockAddress < 0 || _fileSize < blockAddress + length) {
-	throw new IllegalStateException(L.l("block at {0} is invalid for file {1} (length {2})",
-					    Long.toHexString(blockAddress),
-					    _path,
-					    Long.toHexString(_fileSize)));
-      }
+      try {
+	if (blockAddress < 0 || _fileSize < blockAddress + length) {
+	  throw new IllegalStateException(L.l("block at {0} is invalid for file {1} (length {2})",
+					      Long.toHexString(blockAddress),
+					      _path,
+					      Long.toHexString(_fileSize)));
+	}
 
-      int readLen = is.read(blockAddress, buffer, offset, length);
+	//System.out.println("READ: " + (blockAddress >> 16) + ":" + (blockAddress & 0xffff));
+	int readLen = is.read(blockAddress, buffer, offset, length);
 
-      if (readLen < 0) {
-	for (int i = 0; i < BLOCK_SIZE; i++)
-	  buffer[i] = 0;
-      }
+	if (readLen < 0) {
+	  for (int i = 0; i < BLOCK_SIZE; i++)
+	    buffer[i] = 0;
+	}
       
-      freeRowFile(wrapper);
-      wrapper = null;
-    } finally {
-      if (wrapper != null)
-	wrapper.close();
+	freeRowFile(wrapper);
+	wrapper = null;
+      } finally {
+	if (wrapper != null)
+	  wrapper.close();
+      }
     }
   }
 
@@ -1713,22 +1718,24 @@ public class Store {
 			 byte []buffer, int offset, int length)
     throws IOException
   {
-    RandomAccessWrapper wrapper = openRowFile();
-    RandomAccessStream os = wrapper.getFile();
+    synchronized (_fileLock) {
+      RandomAccessWrapper wrapper = openRowFile();
+      RandomAccessStream os = wrapper.getFile();
     
-    try {
-      os.write(blockAddress, buffer, offset, length);
+      try {
+	os.write(blockAddress, buffer, offset, length);
       
-      freeRowFile(wrapper);
-      wrapper = null;
+	freeRowFile(wrapper);
+	wrapper = null;
       
-      if (_fileSize < blockAddress + length) {
-	_fileSize = blockAddress + length;
+	if (_fileSize < blockAddress + length) {
+	  _fileSize = blockAddress + length;
+	}
+      
+      } finally {
+	if (wrapper != null)
+	  wrapper.close();
       }
-      
-    } finally {
-      if (wrapper != null)
-	wrapper.close();
     }
   }
 

@@ -97,7 +97,7 @@ abstract public class Block implements SyncCacheListener {
   /**
    * Allocates the block for a query.
    */
-  boolean allocate()
+  public boolean allocate()
   {
     synchronized (this) {
       if (getBuffer() == null)
@@ -186,27 +186,34 @@ abstract public class Block implements SyncCacheListener {
   public void write()
     throws IOException
   {
+    getLock().waitForCommit();
+
+    int dirtyMin = 0;
+    int dirtyMax = 0;
+    
     synchronized (this) {
-      int dirtyMin = _dirtyMin;
+      dirtyMin = _dirtyMin;
       _dirtyMin = Store.BLOCK_SIZE;
 
-      int dirtyMax = _dirtyMax;
+      dirtyMax = _dirtyMax;
       _dirtyMax = 0;
 
-      if (dirtyMin < dirtyMax) {
-	if (log.isLoggable(Level.FINEST))
-	  log.finest("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
+      if (dirtyMax <= dirtyMin)
+	return;
 
-	//System.out.println(this + " WRITE_BEGIN");
-	writeImpl(dirtyMin, dirtyMax - dirtyMin);
-	//System.out.println(this + " WRITE_END");
-      }
-      else {
-	if (log.isLoggable(Level.FINEST))
-	  log.finest("not-dirty db-block " + this);
-      }
-      
+      _useCount++;
       _isValid = true;
+    }
+
+    try {
+      if (log.isLoggable(Level.FINEST))
+	log.finest("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
+
+      //System.out.println(this + " WRITE_BEGIN");
+      writeImpl(dirtyMin, dirtyMax - dirtyMin);
+      //System.out.println(this + " WRITE_END");
+    } finally {
+      free();
     }
   }
 
@@ -225,12 +232,14 @@ abstract public class Block implements SyncCacheListener {
    */
   public void invalidate()
   {
-    if (_dirtyMin < _dirtyMax)
-      throw new IllegalStateException();
+    synchronized (this) {
+      if (_dirtyMin < _dirtyMax)
+	throw new IllegalStateException();
     
-    _isValid = false;
-    _dirtyMin = Store.BLOCK_SIZE;
-    _dirtyMax = 0;
+      _isValid = false;
+      _dirtyMin = Store.BLOCK_SIZE;
+      _dirtyMax = 0;
+    }
   }
 
   /**
@@ -248,14 +257,16 @@ abstract public class Block implements SyncCacheListener {
   {
     if (Store.BLOCK_SIZE < max)
       Thread.dumpStack();
-    
-    _isValid = true;
 
-    if (min < _dirtyMin)
-      _dirtyMin = min;
+    synchronized (this) {
+      _isValid = true;
+
+      if (min < _dirtyMin)
+	_dirtyMin = min;
     
-    if (_dirtyMax < max)
-      _dirtyMax = max;
+      if (_dirtyMax < max)
+	_dirtyMax = max;
+    }
   }
 
   /**

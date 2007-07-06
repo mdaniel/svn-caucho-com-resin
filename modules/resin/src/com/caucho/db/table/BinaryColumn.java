@@ -31,7 +31,7 @@ package com.caucho.db.table;
 
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
-import com.caucho.db.index.StringKeyCompare;
+import com.caucho.db.index.BinaryKeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
@@ -42,20 +42,20 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class StringColumn extends Column {
+class BinaryColumn extends Column {
   private static final Logger log
-    = Logger.getLogger(StringColumn.class.getName());
-  private static final L10N L = new L10N(StringColumn.class);
+    = Logger.getLogger(BinaryColumn.class.getName());
+  private static final L10N L = new L10N(BinaryColumn.class);
   
   private final int _maxLength;
 
   /**
-   * Creates a string column.
+   * Creates a binary column.
    *
    * @param columnOffset the offset within the row
-   * @param maxLength the maximum length of the string
+   * @param maxLength the maximum length of the binary
    */
-  StringColumn(Row row, String name, int maxLength)
+  BinaryColumn(Row row, String name, int maxLength)
   {
     super(row, name);
 
@@ -72,7 +72,7 @@ class StringColumn extends Column {
    */
   public int getTypeCode()
   {
-    return VARCHAR;
+    return VARBINARY;
   }
 
   /**
@@ -96,7 +96,7 @@ class StringColumn extends Column {
    */
   public int getLength()
   {
-    return 2 * _maxLength + 1;
+    return _maxLength + 1;
   }
 
   /**
@@ -104,7 +104,7 @@ class StringColumn extends Column {
    */
   public KeyCompare getIndexKeyCompare()
   {
-    return new StringKeyCompare();
+    return new BinaryKeyCompare();
   }
 
   /**
@@ -124,15 +124,25 @@ class StringColumn extends Column {
     }
 
     int len = str.length();
-    int maxOffset = offset + 2 * _maxLength + 1;
+    int maxOffset = offset + _maxLength + 1;
 
-    block[offset++] = (byte) (len);
+    int lenOffset = offset++;
     for (int i = 0; i < len && offset < maxOffset; i++) {
       int ch = str.charAt(i);
 
-      block[offset++] = (byte) (ch >> 8);
-      block[offset++] = (byte) (ch);
+      if (ch < 0x80)
+	block[offset++] = (byte) ch;
+      else if (ch < 0x800) {
+	block[offset++] = (byte) (0xc0 + ((ch >> 6) & 0x1f));
+	block[offset++] = (byte) (0x80 + (ch & 0x3f));
+      }
+      else {
+	block[offset++] = (byte) (0xe0 + ((ch >> 12) & 0x0f));
+	block[offset++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
+	block[offset++] = (byte) (0x80 + (ch & 0x3f));
+      }
     }
+    block[lenOffset] = (byte) (offset - lenOffset - 1);
 
     setNonNull(block, rowOffset);
   }
@@ -145,19 +155,32 @@ class StringColumn extends Column {
     int startOffset = rowOffset + _columnOffset;
     int len = block[startOffset] & 0xff;
 
-    char []cBuf = new char[len];
+    StringBuffer sb = new StringBuffer();
 
     int offset = startOffset + 1;
-    int endOffset = offset + 2 * len;
+    int endOffset = offset + len;
     int i = 0;
     while (offset < endOffset) {
       int ch1 = block[offset++] & 0xff;
-      int ch2 = block[offset++] & 0xff;
 
-      cBuf[i++] = (char) ((ch1 << 8) + ch2);
+      if (ch1 < 0x80)
+	sb.append((char) ch1);
+      else if ((ch1 & 0xe0) == 0xc0) {
+	int ch2 = block[offset++] & 0xff;
+	
+	sb.append((char) ((ch1 & 0x1f) << 6) + (ch2 & 0x3f));
+      }
+      else {
+	int ch2 = block[offset++] & 0xff;
+	int ch3 = block[offset++] & 0xff;
+	
+	sb.append((char) ((ch1 & 0x0f) << 12)
+		  + ((ch2 & 0x3f) << 6)
+		  + ((ch3 & 0x3f)));
+      }
     }
 
-    return new String(cBuf, 0, cBuf.length);
+    return sb.toString();
   }
   
   /**
@@ -196,7 +219,7 @@ class StringColumn extends Column {
     if (len1 != len2)
       return false;
 
-    for (int i = 2 * len1; i > 0; i--) {
+    for (int i = len1; i > 0; i--) {
       if (block1[startOffset1 + i] != block2[startOffset2 + i])
 	return false;
     }
@@ -220,7 +243,7 @@ class StringColumn extends Column {
       return false;
 
     int blockOffset = startOffset + 1;
-    int endOffset = blockOffset + 2 * len;
+    int endOffset = blockOffset + len;
     while (blockOffset < endOffset) {
       if (block[blockOffset++] != buffer[offset++])
 	return false;
@@ -243,11 +266,13 @@ class StringColumn extends Column {
     int strOffset = 0;
 
     int offset = startOffset + 1;
-    int endOffset = offset + 2 * len;
+    int endOffset = offset + len;
     while (offset < endOffset && strOffset < strLength) {
-      int ch1 = ((block[offset++] & 0xff) << 8) + (block[offset++] & 0xff);
       char ch = value.charAt(strOffset++);
+      
+      int ch1 = block[offset++] & 0xff;
 
+      // XXX: missing utf-8
       if (ch1 != ch)
 	return false;
     }
@@ -265,18 +290,8 @@ class StringColumn extends Column {
       return;
     }
 
-    int startOffset = rowOffset + _columnOffset;
-    int len = block[startOffset] & 0xff;
-
-    result.writeString(block, startOffset + 1, len);
-    /*
-    result.write(Column.VARCHAR);
-    result.write(0);
-    result.write(0);
-    result.write(0);
-    result.write(len);
-    result.write(block, startOffset + 1, len);
-    */
+    // XXX: add writeVarBinary to SelectResult
+    result.writeString(getString(block, rowOffset));
   }
   
   /**
@@ -356,8 +371,8 @@ class StringColumn extends Column {
   public String toString()
   {
     if (getIndex() != null)
-      return "StringColumn[" + getName() + ",index]";
+      return "VarBinaryColumn[" + getName() + ",index]";
     else
-      return "StringColumn[" + getName() + "]";
+      return "VarBinaryColumn[" + getName() + "]";
   }
 }

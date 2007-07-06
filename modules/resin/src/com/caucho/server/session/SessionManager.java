@@ -121,7 +121,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   private boolean _isInvalidateAfterListener;
 
   // maximum number of sessions
-  private int _sessionMax = 4096;
+  private int _sessionMax = 8192;
   // how long a session will be inactive before it times out
   private long _sessionTimeout = 30 * 60 * 1000;
 

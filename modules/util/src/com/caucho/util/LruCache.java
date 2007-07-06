@@ -44,6 +44,8 @@ public class LruCache<K,V> {
   // hash table containing the entries.  Its size is twice the capacity
   // so it will always remain at least half empty
   private CacheItem []_entries;
+
+  private boolean _isEnableListeners = true;
   
   // maximum allowed entries
   private int _capacity;
@@ -94,6 +96,14 @@ public class LruCache<K,V> {
   }
 
   /**
+   * Disable the listeners
+   */
+  public void setEnableListeners(boolean isEnable)
+  {
+    _isEnableListeners = isEnable;
+  }
+
+  /**
    * Returns the current number of entries in the cache.
    */
   public int size()
@@ -113,12 +123,14 @@ public class LruCache<K,V> {
         CacheItem<K,V> item = _entries[i];
         _entries[i] = null;
 
-        for (; item != null; item = item._nextHash) {
-          if (item._value instanceof CacheListener) {
-            if (listeners == null)
-              listeners = new ArrayList<CacheListener>();
-            listeners.add((CacheListener) item._value);
-          }
+	if (_isEnableListeners) {
+	  for (; item != null; item = item._nextHash) {
+	    if (item._value instanceof CacheListener) {
+	      if (listeners == null)
+		listeners = new ArrayList<CacheListener>();
+	      listeners.add((CacheListener) item._value);
+	    }
+	  }
         }
       }
 
@@ -185,7 +197,7 @@ public class LruCache<K,V> {
   {
     V oldValue = put(key, value, true);
 
-    if (oldValue instanceof CacheListener)
+    if (_isEnableListeners && oldValue instanceof CacheListener)
       ((CacheListener) oldValue).removeEvent();
 
     return oldValue;
@@ -280,11 +292,12 @@ public class LruCache<K,V> {
 	return null;
       }
 
-      if (replace && oldValue instanceof SyncCacheListener)
+      if (_isEnableListeners && replace
+	  && oldValue instanceof SyncCacheListener)
 	((SyncCacheListener) oldValue).syncRemoveEvent();
     }
 
-    if (replace && oldValue instanceof CacheListener)
+    if (_isEnableListeners && replace && oldValue instanceof CacheListener)
       ((CacheListener) oldValue).removeEvent();
 
     return oldValue;
@@ -296,19 +309,19 @@ public class LruCache<K,V> {
    */
   private void updateLru(CacheItem<K,V> item)
   {
-    CacheItem<K,V> prev = item._prevLru;
-    CacheItem<K,V> next = item._nextLru;
+    CacheItem<K,V> prevLru = item._prevLru;
+    CacheItem<K,V> nextLru = item._nextLru;
 
     if (item._hitCount++ == 1) {
-      if (prev != null)
-	prev._nextLru = next;
+      if (prevLru != null)
+	prevLru._nextLru = nextLru;
       else
-	_head1 = next;
+	_head1 = nextLru;
 
-      if (next != null)
-	next._prevLru = prev;
+      if (nextLru != null)
+	nextLru._prevLru = prevLru;
       else
-	_tail1 = prev;
+	_tail1 = prevLru;
 
       item._prevLru = null;
       if (_head2 != null)
@@ -323,10 +336,10 @@ public class LruCache<K,V> {
       _size2++;
     }
     else {
-      if (prev == null)
+      if (prevLru == null)
 	return;
       
-      prev._nextLru = next;
+      prevLru._nextLru = nextLru;
 
       item._prevLru = null;
       item._nextLru = _head2;
@@ -334,10 +347,10 @@ public class LruCache<K,V> {
       _head2._prevLru = item;
       _head2 = item;
       
-      if (next != null)
-	next._prevLru = prev;
+      if (nextLru != null)
+	nextLru._prevLru = prevLru;
       else
-	_tail2 = prev;
+	_tail2 = prevLru;
     }
   }
 
@@ -355,7 +368,7 @@ public class LruCache<K,V> {
 
     if (tail == null)
       return false;
-      
+    
     remove(tail._key);
     
     return true;
@@ -379,7 +392,7 @@ public class LruCache<K,V> {
 
     if (tail == null)
       return false;
-      
+
     remove(tail._key);
     
     return true;
@@ -410,8 +423,6 @@ public class LruCache<K,V> {
 	if (item._key == okey || item._key.equals(okey)) {
 	  CacheItem<K,V> prevHash = item._prevHash;
 	  CacheItem<K,V> nextHash = item._nextHash;
-	  CacheItem<K,V> prevLru = item._prevLru;
-	  CacheItem<K,V> nextLru = item._nextLru;
 
 	  if (prevHash != null)
 	    prevHash._nextHash = nextHash;
@@ -420,6 +431,9 @@ public class LruCache<K,V> {
 	  
 	  if (nextHash != null)
 	    nextHash._prevHash = prevHash;
+	  
+	  CacheItem<K,V> prevLru = item._prevLru;
+	  CacheItem<K,V> nextLru = item._nextLru;
 
 	  if (item._hitCount == 1) {
 	    _size1--; 
@@ -453,14 +467,14 @@ public class LruCache<K,V> {
 	}
       }
 
-      if (value instanceof SyncCacheListener)
+      if (_isEnableListeners && value instanceof SyncCacheListener)
 	((SyncCacheListener) value).syncRemoveEvent();
     }
 
     if (count < 0)
       throw new RuntimeException("internal cache error");
 
-    if (value instanceof CacheListener)
+    if (_isEnableListeners && value instanceof CacheListener)
       ((CacheListener) value).removeEvent();
 
     return value;
