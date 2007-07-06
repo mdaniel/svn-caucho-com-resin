@@ -1,0 +1,37 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.1.2 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 3.1.x">
+
+<p>Resin 3.1.x is a development branch.  New capabilities will be added
+along with bug fixes for future versions of the Resin 3.1.x branch.</p>
+
+<p>Deployments which need a Resin version with only bug fixes should
+use the Resin 3.0.x branch.</p>
+
+</s1>
+
+<s1 title="Amber/JPA">
+
+<p>In Resin 3.1.2, Amber is the first production release 
+with full support for JPA.</p>
+
+<p>Essentially, Amber passes the JPA TCK. Both persistence 
+context types are supported: TRANSACTION and EXTENDED. Also, 
+potential issues including persistence unit configurations, 
+cascading operations and query portability have been reviewed.</p>
+
+<p>With the next releases, we expect to have benchmarking comparisons
+with other JPA implementations.</p>
+
+</s1>
+
+</body>
+</document>
