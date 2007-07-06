@@ -354,6 +354,61 @@ public class Hessian2Output
   }
 
   /**
+   * Starts the message
+   *
+   * <p>A message contains several objects followed by a 'z'</p>
+   *
+   * <pre>
+   * p x02 x00
+   * </pre>
+   */
+  public void startMessage()
+    throws IOException
+  {
+    flushIfFull();
+    
+    _buffer[_offset++] = (byte) 'p';
+    _buffer[_offset++] = (byte) 2;
+    _buffer[_offset++] = (byte) 0;
+  }
+
+  /**
+   * Starts the streaming message
+   *
+   * <p>A streaming message starts with 'P'</p>
+   *
+   * <pre>
+   * P x02 x00
+   * </pre>
+   */
+  public void startStreamingMessage()
+    throws IOException
+  {
+    flushIfFull();
+    
+    _buffer[_offset++] = (byte) 'P';
+    _buffer[_offset++] = (byte) 2;
+    _buffer[_offset++] = (byte) 0;
+  }
+
+  /**
+   * Completes reading the message
+   *
+   * <p>A successful completion will have a single value:
+   *
+   * <pre>
+   * z
+   * </pre>
+   */
+  public void completeMessage()
+    throws IOException
+  {
+    flushIfFull();
+    
+    _buffer[_offset++] = (byte) 'z';
+  }
+
+  /**
    * Writes a header name.  The header value must immediately follow.
    *
    * <code><pre>
@@ -530,10 +585,10 @@ public class Hessian2Output
   }
 
   /**
-   * Writes the object header to the stream.
+   * Writes the object definition
    *
    * <code><pre>
-   * O t b16 b8 <key>* Z <value>* z
+   * O t b16 b8 <string>*
    * </pre></code>
    */
   public int writeObjectBegin(String type)
@@ -543,7 +598,6 @@ public class Hessian2Output
       _classRefs = new HashMap();
 
     Integer refV = (Integer) _classRefs.get(type);
-
 
     if (refV != null) {
       int ref = refV.intValue();
@@ -557,7 +611,7 @@ public class Hessian2Output
       return ref;
     }
     else {
-      int ref = _classRefs.size() + 1;
+      int ref = _classRefs.size();
       
       _classRefs.put(type, new Integer(ref));
       
@@ -572,7 +626,7 @@ public class Hessian2Output
       
       printString(type, 0, len);
 
-      return 0;
+      return -1;
     }
   }
 
@@ -804,8 +858,13 @@ public class Hessian2Output
     int intValue = (int) value;
     
     if (intValue == value) {
-      if (intValue == 0)
+      if (intValue == 0) {
 	buffer[offset++] = (byte) DOUBLE_ZERO;
+
+        _offset = offset;
+
+        return;
+      }
       else if (intValue == 1) {
 	buffer[offset++] = (byte) DOUBLE_ONE;
 

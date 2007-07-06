@@ -1,15 +1,11 @@
 <document>
   <header>
     <product>resin</product>
-    <title>Hessian 2.0 Draft Specification</title>
+    <title>Hessian 2.0 Specification (Draft 2)</title>
     <date>Jul 8, 2006</date>
     <description>
       <p>Hessian is a compact binary protocol for connecting web
       services.</p>
-
-      <p>Because Hessian is a small protocol, J2ME devices like cell-phones can use
-      it to connect to Resin servers.  Because it's powerful, it can be used
-      for EJB services.</p>
     </description>
   </header>
 

@@ -101,6 +101,9 @@ public class Hessian2Input
   // a peek character
   private int _offset;
   private int _length;
+
+  // true for streaming data
+  private boolean _isStreaming;
   
   // the method for a call
   private String _method;
@@ -457,6 +460,49 @@ public class Hessian2Input
   }
 
   /**
+   * Starts reading the message
+   *
+   * <pre>
+   * p major minor
+   * </pre>
+   */
+  public int readMessage()
+    throws IOException
+  {
+    int tag = read();
+
+    if (tag == 'p')
+      _isStreaming = false;
+    else if (tag == 'P')
+      _isStreaming = true;
+    else
+      throw error("expected Hessian message ('p') at code=" + tag + " ch=" + (char) tag);
+
+    int major = read();
+    int minor = read();
+
+    return (major << 16) + minor;
+  }
+
+  /**
+   * Completes reading the message
+   *
+   * <p>A successful completion will have a single value:
+   *
+   * <pre>
+   * z
+   * </pre>
+   */
+  public void completeMessage()
+    throws IOException
+  {
+    int tag = read();
+    
+    if (tag != 'z')
+      error("expected end of message");
+  }
+
+  /**
    * Reads a null
    *
    * <pre>
@@ -594,6 +640,13 @@ public class Hessian2Input
     case DOUBLE_SHORT:
       return (0x100 * read() + read()) != 0;
       
+    case DOUBLE_FLOAT:
+      {
+	int f = parseInt();
+
+	return Float.intBitsToFloat(f) != 0;
+      }
+      
     case 'D':
       return parseDouble() != 0.0;
       
@@ -707,6 +760,12 @@ public class Hessian2Input
     case 'L':
       return (int) parseLong();
 
+    case DOUBLE_ZERO:
+      return 0;
+
+    case DOUBLE_ONE:
+      return 1;
+
       //case LONG_BYTE:
     case DOUBLE_BYTE:
       return (byte) (_offset < _length ? _buffer[_offset++] : read());
@@ -716,11 +775,12 @@ public class Hessian2Input
     case DOUBLE_SHORT:
       return (short) (256 * read() + read());
 
-    case DOUBLE_ZERO:
-      return 0;
+    case DOUBLE_FLOAT:
+      {
+	int f = parseInt();
 
-    case DOUBLE_ONE:
-      return 1;
+	return (int) Float.intBitsToFloat(f);
+      }
 
     case 'D':
       return (int) parseDouble();
@@ -829,6 +889,13 @@ public class Hessian2Input
 
     case DOUBLE_ONE:
       return 1;
+
+    case DOUBLE_FLOAT:
+      {
+	int f = parseInt();
+
+	return (long) Float.intBitsToFloat(f);
+      }
 
     case 'D':
       return (long) parseDouble();
@@ -1471,7 +1538,7 @@ public class Hessian2Input
     {
       int ref = readInt();
 
-      ObjectDefinition def = (ObjectDefinition) _classDefs.get(ref - 1);
+      ObjectDefinition def = (ObjectDefinition) _classDefs.get(ref);
 
       return readObjectInstance(cl, def);
     }
@@ -1762,7 +1829,7 @@ public class Hessian2Input
     case 'o': {
       int ref = readInt();
 
-      ObjectDefinition def = (ObjectDefinition) _classDefs.get(ref - 1);
+      ObjectDefinition def = (ObjectDefinition) _classDefs.get(ref);
 
       return readObjectInstance(null, def);
     }

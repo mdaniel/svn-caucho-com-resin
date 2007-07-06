@@ -160,11 +160,11 @@ public class JavaSerializer extends AbstractSerializer
 
     int ref = out.writeObjectBegin(cl.getName());
 
-    if (ref < 0) {
+    if (ref < -1) {
       writeObject10(obj, out);
     }
     else {
-      if (ref == 0) {
+      if (ref == -1) {
 	writeDefinition20(out);
 	out.writeObjectBegin(cl.getName());
       }

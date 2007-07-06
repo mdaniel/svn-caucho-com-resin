@@ -477,7 +477,7 @@ abstract public class AbstractHessianOutput {
   {
     writeMapBegin(type);
     
-    return -1;
+    return -2;
   }
 
   /**

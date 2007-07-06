@@ -180,7 +180,7 @@ public class BeanSerializer extends AbstractSerializer {
 
     int ref = out.writeObjectBegin(cl.getName());
 
-    if (ref < 0) {
+    if (ref < -1) {
       // Hessian 1.1 uses a map
       
       for (int i = 0; i < _methods.length; i++) {
@@ -201,7 +201,7 @@ public class BeanSerializer extends AbstractSerializer {
       out.writeMapEnd();
     }
     else {
-      if (ref == 0) {
+      if (ref == -1) {
 	out.writeInt(_names.length);
 	
 	for (int i = 0; i < _names.length; i++)

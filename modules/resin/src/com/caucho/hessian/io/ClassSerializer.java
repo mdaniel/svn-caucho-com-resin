@@ -68,13 +68,13 @@ public class ClassSerializer extends AbstractSerializer {
     else {
       int ref = out.writeObjectBegin("java.lang.Class");
 
-      if (ref < 0) {
+      if (ref < -1) {
 	out.writeString("name");
 	out.writeString(cl.getName());
 	out.writeMapEnd();
       }
       else {
-	if (ref == 0) {
+	if (ref == -1) {
 	  out.writeInt(1);
 	  out.writeString("name");
 	  out.writeObjectBegin("java.lang.Class");
