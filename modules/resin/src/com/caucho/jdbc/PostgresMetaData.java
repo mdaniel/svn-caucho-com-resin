@@ -70,6 +70,15 @@ public class PostgresMetaData extends GenericMetaData {
   }
 
   /**
+   * Returns true if table alias name with UPDATE is supported.
+   */
+  public boolean supportsUpdateTableAlias()
+  {
+    // Postgres 8.0.x compatibility. Postgres 8.2.x supports it.
+    return false;
+  }
+
+  /**
    * Returns a sequence select expression.
    */
   public String createSequenceSQL(String name, int size)

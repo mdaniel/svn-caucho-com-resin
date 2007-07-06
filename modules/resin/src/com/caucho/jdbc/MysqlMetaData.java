@@ -69,6 +69,15 @@ public class MysqlMetaData extends GenericMetaData {
   }
 
   /**
+   * Returns true if table list with UPDATE is supported:
+   * UPDATE table1 a, table2 b SET ...
+   */
+  public boolean supportsUpdateTableList()
+  {
+    return true;
+  }
+
+  /**
    * Returns the identity property
    */
   public String createIdentitySQL(String sqlType)

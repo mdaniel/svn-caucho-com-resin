@@ -310,6 +310,24 @@ public class GenericMetaData
   }
 
   /**
+   * Returns true if table alias name with UPDATE is supported.
+   */
+  public boolean supportsUpdateTableAlias()
+  {
+    return true;
+  }
+
+  /**
+   * Returns true if table list with UPDATE is supported:
+   * UPDATE table1 a, table2 b SET ...
+   */
+  public boolean supportsUpdateTableList()
+  {
+    // Normally, MySql is the only one which supports it.
+    return false;
+  }
+
+  /**
    * Returns true if identity is supported.
    */
   public boolean supportsIdentity()

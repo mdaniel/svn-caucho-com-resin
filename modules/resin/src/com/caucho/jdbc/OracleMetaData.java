@@ -96,6 +96,14 @@ public class OracleMetaData extends GenericMetaData {
   }
 
   /**
+   * Returns true if table alias name with UPDATE is supported.
+   */
+  public boolean supportsUpdateTableAlias()
+  {
+    return true;
+  }
+
+  /**
    * Returns a sequence select expression.
    */
   public String createSequenceSQL(String name, int size)

@@ -153,6 +153,17 @@ abstract public class JdbcMetaData {
   abstract public boolean supportsPositionFunction();
 
   /**
+   * Returns true if table alias name with UPDATE is supported.
+   */
+  abstract public boolean supportsUpdateTableAlias();
+
+  /**
+   * Returns true if table list with UPDATE is supported:
+   * UPDATE table1 a, table2 b SET ...
+   */
+  abstract public boolean supportsUpdateTableList();
+
+  /**
    * Returns true if the sql state is a "foreign key violation" error.
    */
   public boolean isForeignKeyViolationSQLState(String sqlState)
