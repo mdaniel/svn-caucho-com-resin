@@ -234,7 +234,7 @@ public abstract class Accessor implements Namer {
 
           // XXX XmlList value?
           _property =
-            _context.createProperty(getGenericType(), false, mimeType);
+            _context.createProperty(getGenericType(), false, mimeType, true);
 
           break;
         }
@@ -440,18 +440,18 @@ public abstract class Accessor implements Namer {
   {
     if (value != null) {
       QName name = getQName(value);
+      String output = ((CDataProperty) _property).write(value);
 
       if (name.getNamespaceURI() == null || "".equals(name.getNamespaceURI()))
-        out.writeAttribute(name.getLocalPart(), value.toString());
+        out.writeAttribute(name.getLocalPart(), output);
       else if (name.getPrefix() == null || "".equals(name.getPrefix())) {
-        out.writeAttribute(name.getNamespaceURI(), name.getLocalPart(), 
-                           value.toString());
+        out.writeAttribute(name.getNamespaceURI(), name.getLocalPart(), output);
       }
       else {
         out.writeAttribute(name.getPrefix(), 
                            name.getNamespaceURI(), 
                            name.getLocalPart(), 
-                           value.toString());
+                           output);
       }
     }
   }

@@ -62,14 +62,19 @@ public class XmlListCollectionProperty extends CDataProperty {
     try {
       if (collectionType.isInterface() || 
           Modifier.isAbstract(collectionType.getModifiers())) {
+
         if (List.class.isAssignableFrom(collectionType)) 
           _collectionConstructor = ArrayList.class.getConstructor();
+
         else if (Set.class.isAssignableFrom(collectionType))
           _collectionConstructor = LinkedHashSet.class.getConstructor();
+
         else if (Queue.class.isAssignableFrom(collectionType))
           _collectionConstructor = LinkedList.class.getConstructor();
+
         else if (Collection.class.isAssignableFrom(collectionType))
           _collectionConstructor = ArrayList.class.getConstructor();
+
         else
           _collectionConstructor = null;
       }
