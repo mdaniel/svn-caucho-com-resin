@@ -82,9 +82,9 @@ public class DeleteQuery extends AbstractQuery {
     // jpa/1332
     cb.append(item.getTable().getName());
 
-    // jpa/1300
-    if (getMetaData().supportsUpdateTableAlias()
-        && (_fromList.size() > 1)) {
+    // jpa/1300, jpa/1331
+    if ((getMetaData().supportsUpdateTableAlias() && (_fromList.size() > 1))
+        || hasSubQuery()) {
       cb.append(" ");
       cb.append(item.getName());
     }
