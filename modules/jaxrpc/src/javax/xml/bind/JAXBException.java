@@ -83,5 +83,17 @@ public class JAXBException extends Exception {
     _exception = exception;
   }
 
+  public String toString()
+  {
+    StringBuilder sb = new StringBuilder(super.toString());
+
+    if (getLinkedException() != null) {
+      sb.append("\n - with linked exception:\n[");
+      sb.append(getLinkedException().toString());
+      sb.append("]");
+    }
+
+    return sb.toString();
+  }
 }
 

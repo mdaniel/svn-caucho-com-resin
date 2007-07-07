@@ -33,6 +33,7 @@ import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -105,6 +106,12 @@ public abstract class JAXBContext {
                                                         Map.class });
       return (JAXBContext) con.newInstance(new Object[] { classesToBeBound,
                                                           properties });
+    }
+    catch (InvocationTargetException e) {
+      if (e.getCause() instanceof JAXBException) 
+        throw (JAXBException) e.getCause();
+      else
+        throw new JAXBException (e);
     }
     catch (Exception e) {
       throw new JAXBException(e);
