@@ -1885,7 +1885,7 @@ public class Hessian2Input
     }
 
     default:
-      throw error("unknown code:" + tag + " " + (char) tag);
+      throw error("unknown code: 0x" + Integer.toHexString(tag) + " " + (char) tag);
     }
   }
 
@@ -2138,6 +2138,13 @@ public class Hessian2Input
         return (String) _types.get(ref);
       }
 
+    case TYPE_REF:
+      {
+        int ref = readInt();
+
+        return (String) _types.get(ref);
+      }
+      
     default:
       {
         if (code >= 0)
