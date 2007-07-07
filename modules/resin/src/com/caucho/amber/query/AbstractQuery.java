@@ -75,6 +75,9 @@ abstract public class AbstractQuery {
 
   private JdbcMetaData _metaData;
 
+  // jpa/1231
+  private boolean _hasSubQuery;
+
 
   AbstractQuery(String sql, JdbcMetaData metaData)
   {
@@ -359,6 +362,22 @@ abstract public class AbstractQuery {
   boolean usesFromData(FromItem item)
   {
     return usesFrom(item, AmberExpr.USES_DATA);
+  }
+
+  /**
+   * Returns true if this query has a subquery.
+   */
+  public boolean hasSubQuery()
+  {
+    return _hasSubQuery;
+  }
+
+  /**
+   * Sets true if this query has a subquery.
+   */
+  public void setHasSubQuery(boolean hasSubQuery)
+  {
+    _hasSubQuery = hasSubQuery;
   }
 
   /**

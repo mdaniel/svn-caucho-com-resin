@@ -124,6 +124,9 @@ public class SelectQuery extends AbstractQuery {
   void setParentQuery(AbstractQuery parent)
   {
     _parentQuery = parent;
+
+    // jpa/1231
+    parent.setHasSubQuery(true);
   }
 
   /**

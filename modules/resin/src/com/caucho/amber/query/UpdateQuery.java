@@ -163,7 +163,8 @@ public class UpdateQuery extends AbstractQuery {
 
       cb.append("=");
 
-      if (getMetaData().supportsUpdateTableAlias())
+      // jpa/1231
+      if (getMetaData().supportsUpdateTableAlias() || hasSubQuery())
         _valueList.get(i).generateWhere(cb);
       else
         _valueList.get(i).generateUpdateWhere(cb);
@@ -172,8 +173,8 @@ public class UpdateQuery extends AbstractQuery {
     String updateJoin = null;
 
     if (_where != null) {
-      // jpa/1200 vs jpa/1201
-      if (_fromList.size() == 1) {
+      // jpa/1200 vs jpa/1201 and jpa/1231
+      if (_fromList.size() == 1 && ! hasSubQuery()) {
         cb.append(" where ");
 
         _where.generateUpdateWhere(cb);
@@ -204,12 +205,11 @@ public class UpdateQuery extends AbstractQuery {
           cb.append(targetId);
           cb.append(" = ");
           cb.append(type.getId().generateSelect(item.getTable().getName()));
-
-          cb.append(" and ");
         }
 
-        // jpa/1202 vs jpa/1201 and jpa/1203
-        if (! getMetaData().supportsUpdateTableList()) {
+        // jpa/1231, jpa/1202 vs jpa/1201 and jpa/1203
+        if (_fromList.size() > 1
+            && ! getMetaData().supportsUpdateTableList()) {
           // Postgres: jpa/1201 and Oracle: jpa/1203
           item = _fromList.get(1);
 
@@ -221,6 +221,8 @@ public class UpdateQuery extends AbstractQuery {
             isFirst = false;
             cb.append(" where ");
           }
+          else
+            cb.append(" and ");
 
           cb.append("exists (select ");
 
@@ -229,12 +231,10 @@ public class UpdateQuery extends AbstractQuery {
           cb.append(" from ");
 
           generateFromList(cb, true);
+
+          // jpa/1231
+          isFirst = true;
         }
-
-        // jpa/0l12
-        // if (hasJoinExpr || _where != null) {
-
-        boolean hasExpr = false;
 
         for (int i = 0; i < _fromList.size(); i++) {
           item = _fromList.get(i);
@@ -242,12 +242,13 @@ public class UpdateQuery extends AbstractQuery {
           AmberExpr expr = item.getJoinExpr();
 
           if (expr != null && ! item.isOuterJoin()) {
-            if (hasExpr)
-              cb.append(" and ");
-            else {
+            // jpa/1231
+            if (isFirst) {
+              isFirst = false;
               cb.append(" where ");
-              hasExpr = true;
             }
+            else
+              cb.append(" and ");
 
             expr.generateJoin(cb);
           }
@@ -264,12 +265,12 @@ public class UpdateQuery extends AbstractQuery {
               // jpa/0l12, jpa/0l4b
 
               if (item.getTable() == discriminator.getTable()) {
-                if (hasExpr)
-                  cb.append(" and ");
-                else {
+                if (isFirst) {
+                  isFirst = false;
                   cb.append(" where ");
-                  hasExpr = true;
                 }
+                else
+                  cb.append(" and ");
 
                 cb.append("(" + item.getName() + "." + discriminator.getName() + " = ");
                 cb.append("'" + entityType.getDiscriminatorValue() + "')");
@@ -278,12 +279,12 @@ public class UpdateQuery extends AbstractQuery {
           }
         }
 
-        if (hasExpr)
-          cb.append(" and ");
-        else {
+        if (isFirst) {
+          isFirst = false;
           cb.append(" where ");
-          hasExpr = true;
         }
+        else
+          cb.append(" and ");
 
         _where.generateWhere(cb);
       }
