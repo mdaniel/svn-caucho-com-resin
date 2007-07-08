@@ -40,7 +40,8 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 class UpdateQuery extends Query {
-  private static final Logger log = Log.open(UpdateQuery.class);
+  private static final Logger log
+    = Logger.getLogger(UpdateQuery.class.getName());
 
   private final Table _table;
   private SetItem []_setItems;

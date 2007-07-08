@@ -474,10 +474,12 @@ public class QueryContext {
 
       if (bestBlock == null) {
       }
-      else if (_isWrite)
+      else if (_isWrite) {
 	_xa.lockReadAndWrite(bestBlock.getLock());
-      else
+      }
+      else {
 	_xa.lockRead(bestBlock.getLock());
+      }
     }
   }
 
@@ -506,8 +508,9 @@ public class QueryContext {
       else if (_isWrite) {
 	_xa.unlockReadAndWrite(block.getLock());
       }
-      else
+      else {
 	_xa.unlockRead(block.getLock());
+      }
     }
 
     try {

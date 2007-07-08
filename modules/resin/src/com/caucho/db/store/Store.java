@@ -1411,55 +1411,57 @@ public class Store {
   public long allocateMiniFragment(StoreTransaction xa)
     throws IOException
   {
-    long blockAddr = allocateMiniFragmentBlock(xa);
+    while (true) {
+      long blockAddr = allocateMiniFragmentBlock(xa);
 
-    Block block = readBlock(blockAddr);
-    int fragOffset = -1;
+      Block block = readBlock(blockAddr);
+      int fragOffset = -1;
 
-    try {
-      byte []blockBuffer = block.getBuffer();
+      try {
+	byte []blockBuffer = block.getBuffer();
 
-      synchronized (blockBuffer) {
-	for (int i = 0; i < MINI_FRAG_PER_BLOCK; i++) {
-	  int offset = i / 8 + MINI_FRAG_ALLOC_OFFSET;
-	  int mask = 1 << (i % 8);
+	synchronized (blockBuffer) {
+	  for (int i = 0; i < MINI_FRAG_PER_BLOCK; i++) {
+	    int offset = i / 8 + MINI_FRAG_ALLOC_OFFSET;
+	    int mask = 1 << (i % 8);
 	  
-	  if ((blockBuffer[offset] & mask) == 0) {
-	    fragOffset = i;
-	    blockBuffer[offset] |= mask;
-	    block.setDirty(offset, offset + 1);
-	    break;
+	    if ((blockBuffer[offset] & mask) == 0) {
+	      fragOffset = i;
+	      blockBuffer[offset] |= mask;
+	      block.setDirty(offset, offset + 1);
+	      break;
+	    }
 	  }
-	}
 
-	// XXX: this exception occurs
-	if (fragOffset < 0)
-	  throw new IllegalStateException();
+	  // fragment allocated underneath us
+	  if (fragOffset < 0)
+	    continue;
 
-	boolean hasFree = false;
-	for (int i = 0; i < MINI_FRAG_PER_BLOCK; i++) {
-	  int offset = i / 8 + MINI_FRAG_ALLOC_OFFSET;
-	  int mask = 1 << (i % 8);
+	  boolean hasFree = false;
+	  for (int i = 0; i < MINI_FRAG_PER_BLOCK; i++) {
+	    int offset = i / 8 + MINI_FRAG_ALLOC_OFFSET;
+	    int mask = 1 << (i % 8);
 
-	  if ((blockBuffer[offset] & mask) == 0) {
-	    hasFree = true;
-	    break;
+	    if ((blockBuffer[offset] & mask) == 0) {
+	      hasFree = true;
+	      break;
+	    }
 	  }
-	}
 
-	if (hasFree) {
-	  int i = (int) (ALLOC_BYTES_PER_BLOCK * (blockAddr / BLOCK_SIZE));
+	  if (hasFree) {
+	    int i = (int) (ALLOC_BYTES_PER_BLOCK * (blockAddr / BLOCK_SIZE));
     
-	  synchronized (_allocationLock) {
-	    _allocationTable[i + 1]  = 0;
-	    setAllocDirty(i + 1, i + 2);
+	    synchronized (_allocationLock) {
+	      _allocationTable[i + 1]  = 0;
+	      setAllocDirty(i + 1, i + 2);
+	    }
 	  }
-	}
 
-	return blockAddr + fragOffset;
+	  return blockAddr + fragOffset;
+	}
+      } finally {
+	block.free();
       }
-    } finally {
-      block.free();
     }
   }
   

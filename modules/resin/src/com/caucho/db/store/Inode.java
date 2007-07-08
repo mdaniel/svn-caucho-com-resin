@@ -917,6 +917,10 @@ public class Inode {
   {
     int fragCount = (int) (fragLength / MINI_FRAG_SIZE);
     
+    if ((fragAddr & Store.BLOCK_MASK) == 0) {
+      throw new IllegalStateException(store + ": inode block " + fragLength + " has zero value " + fragAddr);
+    }
+    
     writeLong(inode, offset + (fragCount + 1) * 8, fragAddr);
   }
 

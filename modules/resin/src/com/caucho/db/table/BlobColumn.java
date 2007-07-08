@@ -96,11 +96,6 @@ class BlobColumn extends Column {
   void setString(Transaction xa,
 		 byte []block, int rowOffset, String str)
   {
-    if (str == null) {
-      setNull(block, rowOffset);
-      return;
-    }
-
     if (! isNull(block, rowOffset)) {
       long length = Inode.readLong(block, rowOffset + _columnOffset);
 
@@ -109,6 +104,11 @@ class BlobColumn extends Column {
 	inode.init(getTable(), xa, block, rowOffset + _columnOffset);
 	xa.addDeleteInode(inode);
       }
+    }
+    
+    if (str == null) {
+      setNull(block, rowOffset);
+      return;
     }
 
     setNonNull(block, rowOffset);
@@ -152,11 +152,6 @@ class BlobColumn extends Column {
 			 byte []block, int rowOffset,
 			 InputStream value)
   {
-    if (value == null) {
-      setNull(block, rowOffset);
-      return;
-    }
-
     if (! isNull(block, rowOffset)) {
       long length = Inode.readLong(block, rowOffset + _columnOffset);
 
@@ -165,6 +160,11 @@ class BlobColumn extends Column {
 	inode.init(getTable(), xa, block, rowOffset + _columnOffset);
 	xa.addDeleteInode(inode);
       }
+    }
+
+    if (value == null) {
+      setNull(block, rowOffset);
+      return;
     }
 
     setNonNull(block, rowOffset);

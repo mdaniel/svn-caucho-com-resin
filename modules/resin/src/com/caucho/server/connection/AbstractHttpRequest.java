@@ -1056,19 +1056,6 @@ public abstract class AbstractHttpRequest
    */
   private void fillCookies()
   {
-    /*
-    ArrayList<CharSegment> cookieHeaders = _arrayList;
-    cookieHeaders.clear();
-    getHeaderBuffers("Cookie", cookieHeaders);
-
-    int length = cookieHeaders.size();
-    for (int i = 0; i < length; i++) {
-      CharSegment rawCookie = cookieHeaders.get(i);
-
-      fillCookie(_cookies, rawCookie);
-    }
-    */
-
     int size = _cookies.size();
 
     if (size > 0) {
@@ -1087,12 +1074,13 @@ public abstract class AbstractHttpRequest
    */
   private void fillCookie(ArrayList cookies, CharSegment rawCookie)
   {
-    int j = 0;
-    int len = rawCookie.length();
+    char []buf = rawCookie.getBuffer();
+    int j = rawCookie.getOffset();
+    int end = j + rawCookie.length();
     int version = 0;
     Cookie cookie = null;
 
-    while (j < len) {
+    while (j < end) {
       char ch = 0;
 
       CharBuffer cbName = _cbName;
@@ -1101,30 +1089,31 @@ public abstract class AbstractHttpRequest
       cbName.clear();
       cbValue.clear();
 
-      for (; j < len && ((ch = rawCookie.charAt(j)) == ' ' ||
-                         ch == ';' || ch ==','); j++) {
+      for (;
+	   j < end && ((ch = buf[j]) == ' ' || ch == ';' || ch ==',');
+	   j++) {
       }
 
-      if (j >= len)
+      if (end <= j)
         break;
 
       boolean isSpecial = false;
-      if (rawCookie.charAt(j) == '$') {
+      if (buf[j] == '$') {
         isSpecial = true;
         j++;
       }
 
-      for (; j < len; j++) {
-	ch = rawCookie.charAt(j);
+      for (; j < end; j++) {
+	ch = buf[j];
 	if (ch == ' ' || ch == '=' || ch == ';' || ch == ',')
 	  break;
 	cbName.append(ch);
       }
 
-      for (; j < len && (ch = rawCookie.charAt(j)) == ' '; j++) {
+      for (; j < end && (ch = buf[j]) == ' '; j++) {
       }
 
-      if (j >= len)
+      if (end <= j)
 	break;
       else if (ch == ';' || ch == ',') {
         try {
@@ -1138,19 +1127,19 @@ public abstract class AbstractHttpRequest
         continue;
       }
       else if (ch != '=') {
-        for (; j < len && (ch = rawCookie.charAt(j)) != ';'; j++) {
+        for (; j < end && (ch = buf[j]) != ';'; j++) {
         }
         continue;
       }
 
       j++;
 
-      for (; j < len && (ch = rawCookie.charAt(j)) == ' '; j++) {
+      for (; j < end && (ch = buf[j]) == ' '; j++) {
       }
 
       if (ch == '"') {
-        for (j++; j < len; j++) {
-          ch = rawCookie.charAt(j);
+        for (j++; j < end; j++) {
+          ch = buf[j];
           if (ch == '"')
             break;
           cbValue.append(ch);
@@ -1158,8 +1147,8 @@ public abstract class AbstractHttpRequest
         j++;
       }
       else {
-        for (; j < len; j++) {
-          ch = rawCookie.charAt(j);
+        for (; j < end; j++) {
+          ch = buf[j];
           if (ch == ' ' || ch == ';' || ch == ',')
             break;
           cbValue.append(ch);
