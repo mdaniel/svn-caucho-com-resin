@@ -155,8 +155,9 @@ public class UpdateQuery extends AbstractQuery {
 
       AmberExpr expr = _fieldList.get(i);
 
-      // jpa/1202
-      if (getMetaData().supportsUpdateTableAlias())
+      // jpa/1202, jpa/0k15
+      if (getMetaData().supportsUpdateTableAlias()
+          && (_fromList.size() > 1))
         expr.generateWhere(cb);
       else
         expr.generateUpdateWhere(cb);
