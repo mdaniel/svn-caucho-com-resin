@@ -1070,7 +1070,13 @@ public class PostgresModule extends AbstractQuercusModule {
         result.seek(env, row.toInt());
       }
 
-      return result.fetchObject(env);
+      Value resultValue =  result.fetchObject(env);
+
+      // php/430l
+      if (resultValue.isNull())
+        return BooleanValue.FALSE;
+      else
+        return resultValue;
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
