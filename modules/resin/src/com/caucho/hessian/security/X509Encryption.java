@@ -48,10 +48,7 @@
 
 package com.caucho.hessian.security;
 
-import java.security.KeyStore;
-import java.security.Key;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.cert.*;
 import java.util.*;
 import javax.crypto.*;
@@ -220,7 +217,14 @@ public class X509Encryption extends HessianEnvelope {
 
       _out.startEnvelope(X509Encryption.class.getName());
 
-      String keyAlgorithm = _cert.getPublicKey().getAlgorithm();
+      PublicKey publicKey = _cert.getPublicKey();
+
+      byte []encoded = publicKey.getEncoded();
+      MessageDigest md = MessageDigest.getInstance("SHA1");
+      md.update(encoded);
+      byte []fingerprint = md.digest();
+      
+      String keyAlgorithm = publicKey.getAlgorithm();
       Cipher keyCipher = Cipher.getInstance(keyAlgorithm);
       if (_secureRandom != null)
 	keyCipher.init(Cipher.WRAP_MODE, _cert, _secureRandom);
@@ -229,17 +233,16 @@ public class X509Encryption extends HessianEnvelope {
 
       byte []encKey = keyCipher.wrap(sharedKey);
     
-      _out.writeInt(5);
-      _out.writeString("issuer");
-      _out.writeString(_cert.getIssuerX500Principal().toString());
-      _out.writeString("serial");
-      _out.writeLong(_cert.getSerialNumber().longValue());
+      _out.writeInt(4);
+      
+      _out.writeString("algorithm");
+      _out.writeString(_algorithm);
+      _out.writeString("fingerprint");
+      _out.writeBytes(fingerprint);
       _out.writeString("key-algorithm");
       _out.writeString(keyAlgorithm);
       _out.writeString("key");
       _out.writeBytes(encKey);
-      _out.writeString("algorithm");
-      _out.writeString(_algorithm);
 
       _bodyOut = _out.getBytesOutputStream();
 
@@ -293,8 +296,7 @@ public class X509Encryption extends HessianEnvelope {
     {
       _in = in;
 
-      String issuer = null;
-      long serial = -1;
+      byte []fingerprint = null;
       String keyAlgorithm = null;
       String algorithm = null;
       byte []encKey = null;
@@ -304,10 +306,8 @@ public class X509Encryption extends HessianEnvelope {
       for (int i = 0; i < len; i++) {
 	String header = in.readString();
 
-	if ("issuer".equals(header))
-	  issuer = in.readString();
-	else if ("serial".equals(header))
-	  serial = in.readLong();
+	if ("fingerprint".equals(header))
+	  fingerprint = in.readBytes();
 	else if ("key-algorithm".equals(header))
 	  keyAlgorithm = in.readString();
 	else if ("algorithm".equals(header))
