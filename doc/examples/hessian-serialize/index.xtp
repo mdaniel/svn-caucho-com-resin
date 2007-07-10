@@ -1,0 +1,186 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Hessian Serialization</title>
+    <description>
+      <p>Hessian Serialization.</p>
+    </description>
+    <type>tutorial</type>
+    <tutorial-startpage>serialize</tutorial-startpage>
+  </header>
+
+  <body>
+    <summary/>
+
+<s1 title="Files in this tutorial">
+<deftable>
+<tr>
+  <td><viewfile-link file="WEB-INF/classes/example/HessianSerializeServlet.java"/></td>
+  <td>Interface for the greeting service.</td>
+</tr>
+</deftable>
+</s1>
+
+<s1 title="Service Implementation">
+
+<example title="GreetingAPI.java">
+package example;
+
+public interface GreetingAPI {
+  public String hello();
+}
+</example>
+
+<s2 title="Service Implementation">
+
+<p>The Greeting implementation is a plain Java class that implements
+the MatchService API.  Making the service a plain class offers a number of advantages:</p>
+
+<ul>
+<li><b>Simplicity:</b> It can concentrate on its business logic because it doesn't need to implement any protocol-dependent code.
+</li><li><b>Independence:</b> It can be reused more easily because it isn't tied to a distributed framework (e.g. in contrast to EJB).
+</li><li><b>Testability:</b> It is more easily tested since the test harness doesn't need to implement the protocol or its stubs.  The harness can just test the service as a plain old Java object.
+</li></ul>
+
+<example title="GreetingImpl.java">
+package example;
+
+public class GreetingImpl implements GreetingAPI {
+  private String _greeting = "Hello, world";
+
+  public void setGreeting(String greeting)
+  {
+    _greeting = greeting;
+  }
+
+  public String greeting()
+  {
+    return _greeting;
+  }
+}
+</example>
+
+</s2>
+
+<s2 title="Configuration using Dependency Injection">
+
+<example title="resin-web.xml">
+&lt;resource jndi-name="service/greeting"
+          type="example.GreetingImpl"&gt;
+  &lt;init&gt;
+    &lt;greeting&gt;Hello, web.xml&lt;/greeting&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
+
+&lt;servlet url-pattern="/hessian/greeting"
+         servlet-class="com.caucho.hessian.server.HessianServlet"&gt;
+  &lt;init&gt;
+    &lt;home&gt;\${jndi("service/greeting")}&lt;/home&gt;
+    &lt;home-api&gt;example.GreetingAPI&lt;/home-api&gt;
+  &lt;/init&gt;
+&lt;/servlet&gt;
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="Client">
+
+<p>Configuring the client servlet with Dependency Injection
+allows for a simpler and more general client.  The following client
+can use any proxy/stub which implements the GreetingAPI without change,
+for example:</p>
+
+<ul>
+<li>Hessian proxy
+</li><li>Burlap proxy
+</li><li>EJB local object stub
+</li><li>JMX proxy
+</li><li>Java bean instance
+</li></ul>
+
+<p>Using the Dependency Injection patter, the servlet doesn't care
+how the proxy is implemented, or how the greeting service is
+discovered.</p>
+
+<example title="GreetingClientServlet.java">
+public class GreetingClientServlet extends GenericServlet {
+  private String _name = "generic";
+  private GreetingAPI _greeting;
+
+  public void setName(String name)
+  {
+    _name = name;
+  }
+
+  public void setGreeting(GreetingAPI greeting)
+  {
+    _greeting = greeting;
+  }
+
+  public void service(ServletRequest req, ServletResponse res)
+    throws IOException, ServletException
+  {
+    PrintWriter out = res.getWriter();
+
+    out.println(_name + ": " + _greeting.greeting());
+  }
+}
+</example>
+
+<s2 title="Hessian Client using Dependency Injection">
+
+<p>The following example stores a &lt;reference&gt;
+to the Hessian proxy in JNDI for the service.  The servlet configuration
+looks up the Hessian proxy in JNDI.</p> 
+
+<example title="resin-web.xml">
+&lt;reference jndi-name="client/greeting"
+           factory="com.caucho.hessian.client.HessianProxyFactory"&gt;
+  &lt;init-param url="\${app.getURL()}/hessian/greeting"/&gt;
+  &lt;init-param type="example.GreetingAPI"/&gt;
+&lt;/reference&gt;
+
+&lt;servlet-mapping url-pattern="/client/greeting"
+                 servlet-class="example.GreetingClientServlet"&gt;
+  &lt;init&gt;
+    &lt;name&gt;Hessian Client&lt;/name&gt;
+    &lt;greeting&gt;\${jndi("client/greeting")}&lt;/greeting&gt;
+  &lt;/init&gt;
+&lt;/servlet-mapping&gt;
+</example>
+
+</s2>
+
+<s2 title="JMX Configuration">
+
+<p>The following JMX configuration shows the flexibility of
+the Dependency Injection pattern.  With no changes to either the
+Greeting service or its client, the Greeting service can change to
+a JMX bean used by and the client to use a JMX proxy.</p>
+
+<example title="resin-web.xml">
+&lt;resource mbean-name="type=Greeting"
+          mbean-interface="example.GreetingAPI"
+          type="example.GreetingImpl"&gt;
+  &lt;init&gt;
+    &lt;greeting&gt;Hello, web.xml&lt;/greeting&gt;
+  &lt;/init&gt;
+&lt;/resource&gt;
+
+&lt;servlet-mapping url-pattern="/client/greeting"
+                 servlet-class="example.GreetingClientServlet"&gt;
+  &lt;init&gt;
+    &lt;name&gt;JMX Client&lt;/name&gt;
+    &lt;greeting&gt;\${jndi("mbean:type=Greeting")}&lt;/greeting&gt;
+  &lt;/init&gt;
+&lt;/servlet-mapping&gt;
+</example>
+
+</s2>
+
+</s1>
+
+  </body>
+</document>
