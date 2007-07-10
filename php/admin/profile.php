@@ -90,7 +90,11 @@ if ($profile) {
     if (sizeof($entries) <= 0)
       continue;
 
-    $topTicks = $entries[0]->getCount();
+    //$topTicks = $entries[0]->getCount();
+    $totalTicks = 0;
+    for ($i = sizeof($entries) - 1; $i >= 0; $i--) {
+      $totalTicks += $entries[$i]->getCount();
+    }
 
     echo "<tr class='head'><th colspan='4' align='left'>$name (" . sizeof($entries) . ")";
 
@@ -111,8 +115,10 @@ if ($profile) {
       $entry = $entries[$i];
 
       echo "<tr>";
-      echo "<td>";
-      printf("%.4f&nbsp;(%d/%d)", $entry->getCount() / $topTicks, $entry->getCount(), $topTicks);
+      echo "<td align='right'>";
+      printf("%9.3f%%", 100 * $entry->getCount() / $totalTicks);
+      echo "</td><td align='right'>";
+      printf("%.4fs", $entry->getCount() * $profile->period * 0.0001);
       echo "</td>";
       echo "<td>";
       echo "<a id='s_{$name}_{$i}' href=\"javascript:show('t_{$name}_{$i}');hide('s_{$name}_{$i}');show('h_{$name}_{$i}');\">show</a> ";
@@ -125,7 +131,7 @@ if ($profile) {
       echo "</tr>\n";
 
       echo "<tr id='t_{$name}_{$i}' style='display:none'>";
-      echo "<td>";
+      echo "<td colspan='2'>";
       echo "</td>";
       echo "<td colspan='2'>";
 

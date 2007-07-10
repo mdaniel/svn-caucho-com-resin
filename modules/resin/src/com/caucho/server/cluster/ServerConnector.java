@@ -119,6 +119,8 @@ public class ServerConnector
   
   // load management data
   private volatile long _lastFailConnectTime;
+  private volatile long _dynamicFailRecoverTime = 1000L;
+  
   private volatile long _lastFailTime;
   private volatile long _lastBusyTime;
   private volatile long _firstSuccessTime;
@@ -568,7 +570,7 @@ public class ServerConnector
     else if (ST_STARTING <= state && state < ST_ACTIVE) {
       long now = Alarm.getCurrentTime();
 
-      if (now < _lastFailConnectTime + 1000L) {
+      if (now < _lastFailConnectTime + _dynamicFailRecoverTime) {
 	return false;
       }
 
@@ -679,6 +681,9 @@ public class ServerConnector
       long now = Alarm.getCurrentTime();
       _lastFailTime = now;
       _lastFailConnectTime = now;
+      _dynamicFailRecoverTime *= 2;
+      if (_failRecoverTime < _dynamicFailRecoverTime)
+	_dynamicFailRecoverTime = _failRecoverTime;
 
       if (_warmupState < WARMUP_MIN)
 	_warmupState = WARMUP_MIN;
@@ -1023,6 +1028,9 @@ public class ServerConnector
     
       if (warmupState >= 0 && _firstSuccessTime > 0) {
 	warmupState = (int) ((now - _firstSuccessTime) / _warmupChunkTime);
+
+	// reset the connection fail recover time
+	_dynamicFailRecoverTime = 1000L;
 
 	if (WARMUP_MAX <= warmupState) {
 	  warmupState = WARMUP_MAX;
