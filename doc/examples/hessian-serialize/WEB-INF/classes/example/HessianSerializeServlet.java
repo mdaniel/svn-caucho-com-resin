@@ -8,7 +8,13 @@ import javax.servlet.http.*;
 
 import com.caucho.hessian.io.*;
 
-public class HessianSerializeServlet extends HttpServlet {
+public class HessianSerializeServlet extends HttpServlet
+{
+  /**
+   * The servlet serializes three Car objects into a byte[] array
+   * using Hessian 2.0, Hessian 2.0 with a Deflation envelope, and
+   * java.io.ObjectOutputStream serialization.
+   */
   public void service(HttpServletRequest req, HttpServletResponse res)
     throws IOException, ServletException
   {
@@ -33,6 +39,9 @@ public class HessianSerializeServlet extends HttpServlet {
     out.println("java.io serialize size: " + data.length);
   }
 
+  /**
+   * Hessian 2.0 serialization API resembles the java.io.ObjectOutputStream.
+   */
   private byte []hessianSerialize()
     throws IOException
   {
@@ -47,6 +56,9 @@ public class HessianSerializeServlet extends HttpServlet {
     return bos.toByteArray();
   }
 
+  /**
+   * Hessian 2.0 deserialization API resembles the java.io.ObjectOutputStream.
+   */
   private Object hessianDeserialize(byte []data)
     throws IOException
   {
@@ -57,6 +69,11 @@ public class HessianSerializeServlet extends HttpServlet {
     return hessianDeserialize(in);
   }
 
+  /**
+   * Serialization with compression is wraps the Hessian2Output stream
+   * in a compression envelope.  The serialization itself is identical
+   * with and without the envelope.
+   */
   private byte []hessianDeflate()
     throws IOException
   {
@@ -89,6 +106,11 @@ public class HessianSerializeServlet extends HttpServlet {
     return hessianDeserialize(in);
   }
 
+  /**
+   * The example serializes three Car objects into the message.  The
+   * application can use any sequence of <code>writeXXX</code> calls
+   * as long as the deserialization follows the same order.
+   */
   private void hessianSerialize(Hessian2Output out)
     throws IOException
   {
