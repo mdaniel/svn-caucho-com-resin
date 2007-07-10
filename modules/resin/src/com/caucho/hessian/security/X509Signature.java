@@ -137,7 +137,7 @@ public class X509Signature extends HessianEnvelope {
   }
 
   public Hessian2Output wrap(Hessian2Output out)
-    throws Exception
+    throws IOException
   {
     if (_privateKey == null)
       throw new IOException("X509Signature.wrap requires a private key");
@@ -155,7 +155,7 @@ public class X509Signature extends HessianEnvelope {
   }
 
   public Hessian2Input unwrap(Hessian2Input in)
-    throws Exception
+    throws IOException
   {
     if (_cert == null)
       throw new IOException("X509Signature.unwrap requires a certificate");
@@ -172,7 +172,7 @@ public class X509Signature extends HessianEnvelope {
   }
 
   public Hessian2Input unwrapHeaders(Hessian2Input in)
-    throws Exception
+    throws IOException
   {
     if (_cert == null)
       throw new IOException("X509Signature.unwrap requires a certificate");
@@ -192,46 +192,54 @@ public class X509Signature extends HessianEnvelope {
     private Mac _mac;
     
     SignatureOutputStream(Hessian2Output out)
-      throws Exception
+      throws IOException
     {
-      KeyGenerator keyGen = KeyGenerator.getInstance(_algorithm);
+      try {
+        KeyGenerator keyGen = KeyGenerator.getInstance(_algorithm);
 
-      if (_secureRandom != null)
-	keyGen.init(_secureRandom);
+        if (_secureRandom != null)
+          keyGen.init(_secureRandom);
 
-      SecretKey sharedKey = keyGen.generateKey();
+        SecretKey sharedKey = keyGen.generateKey();
     
-      _out = out;
+        _out = out;
 
-      _out.startEnvelope(X509Signature.class.getName());
+        _out.startEnvelope(X509Signature.class.getName());
       
-      PublicKey publicKey = _cert.getPublicKey();
+        PublicKey publicKey = _cert.getPublicKey();
 
-      byte []encoded = publicKey.getEncoded();
-      MessageDigest md = MessageDigest.getInstance("SHA1");
-      md.update(encoded);
-      byte []fingerprint = md.digest();
+        byte []encoded = publicKey.getEncoded();
+        MessageDigest md = MessageDigest.getInstance("SHA1");
+        md.update(encoded);
+        byte []fingerprint = md.digest();
 
-      String keyAlgorithm = _privateKey.getAlgorithm();
-      Cipher keyCipher = Cipher.getInstance(keyAlgorithm);
-      keyCipher.init(Cipher.WRAP_MODE, _privateKey);
+        String keyAlgorithm = _privateKey.getAlgorithm();
+        Cipher keyCipher = Cipher.getInstance(keyAlgorithm);
+        keyCipher.init(Cipher.WRAP_MODE, _privateKey);
 
-      byte []encKey = keyCipher.wrap(sharedKey);
+        byte []encKey = keyCipher.wrap(sharedKey);
     
-      _out.writeInt(4);
-      _out.writeString("algorithm");
-      _out.writeString(_algorithm);
-      _out.writeString("fingerprint");
-      _out.writeBytes(fingerprint);
-      _out.writeString("key-algorithm");
-      _out.writeString(keyAlgorithm);
-      _out.writeString("key");
-      _out.writeBytes(encKey);
+        _out.writeInt(4);
+        _out.writeString("algorithm");
+        _out.writeString(_algorithm);
+        _out.writeString("fingerprint");
+        _out.writeBytes(fingerprint);
+        _out.writeString("key-algorithm");
+        _out.writeString(keyAlgorithm);
+        _out.writeString("key");
+        _out.writeBytes(encKey);
 
-      _mac = Mac.getInstance(_algorithm);
-      _mac.init(sharedKey);
+        _mac = Mac.getInstance(_algorithm);
+        _mac.init(sharedKey);
 
-      _bodyOut = _out.getBytesOutputStream();
+        _bodyOut = _out.getBytesOutputStream();
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (IOException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
 
     public void write(int ch)
@@ -278,40 +286,48 @@ public class X509Signature extends HessianEnvelope {
     private CipherInputStream _cipherIn;
     
     SignatureInputStream(Hessian2Input in)
-      throws Exception
+      throws IOException
     {
-      _in = in;
+      try {
+        _in = in;
 
-      byte []fingerprint = null;
-      String keyAlgorithm = null;
-      String algorithm = null;
-      byte []encKey = null;
+        byte []fingerprint = null;
+        String keyAlgorithm = null;
+        String algorithm = null;
+        byte []encKey = null;
 
-      int len = in.readInt();
+        int len = in.readInt();
 
-      for (int i = 0; i < len; i++) {
-	String header = in.readString();
+        for (int i = 0; i < len; i++) {
+          String header = in.readString();
 
-	if ("fingerprint".equals(header))
-	  fingerprint = in.readBytes();
-	else if ("key-algorithm".equals(header))
-	  keyAlgorithm = in.readString();
-	else if ("algorithm".equals(header))
-	  algorithm = in.readString();
-	else if ("key".equals(header))
-	  encKey = in.readBytes();
-	else
-	  throw new IOException("'" + header + "' is an unexpected header");
+          if ("fingerprint".equals(header))
+            fingerprint = in.readBytes();
+          else if ("key-algorithm".equals(header))
+            keyAlgorithm = in.readString();
+          else if ("algorithm".equals(header))
+            algorithm = in.readString();
+          else if ("key".equals(header))
+            encKey = in.readBytes();
+          else
+            throw new IOException("'" + header + "' is an unexpected header");
+        }
+
+        Cipher keyCipher = Cipher.getInstance(keyAlgorithm);
+        keyCipher.init(Cipher.UNWRAP_MODE, _cert);
+
+        Key key = keyCipher.unwrap(encKey, algorithm, Cipher.SECRET_KEY);
+        _bodyIn = _in.readInputStream();
+
+        _mac = Mac.getInstance(algorithm);
+        _mac.init(key);
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (IOException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
-
-      Cipher keyCipher = Cipher.getInstance(keyAlgorithm);
-      keyCipher.init(Cipher.UNWRAP_MODE, _cert);
-
-      Key key = keyCipher.unwrap(encKey, algorithm, Cipher.SECRET_KEY);
-      _bodyIn = _in.readInputStream();
-
-      _mac = Mac.getInstance(algorithm);
-      _mac.init(key);
     }
     
     public int read()

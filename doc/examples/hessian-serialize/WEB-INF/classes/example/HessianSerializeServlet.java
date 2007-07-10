@@ -114,7 +114,7 @@ public class HessianSerializeServlet extends HttpServlet
   private void hessianSerialize(Hessian2Output out)
     throws IOException
   {
-    //out.readMessage();
+    out.startMessage();
       
     out.writeInt(3);
 
@@ -136,8 +136,7 @@ public class HessianSerializeServlet extends HttpServlet
   private Object hessianDeserialize(Hessian2Input in)
     throws IOException
   {
-    //in.startMessage();
-    in.readMessage();
+    in.startMessage();
 
     ArrayList list = new ArrayList();
 
