@@ -99,6 +99,7 @@
        - Hessian
       -->
     <item link="hessian.xtp" title="Hessian">
+      <item link="hessian-serialize/index.xtp" title="Hessian Serialization"/>
       <item link="hessian-add/index.xtp" title="Hessian Addition"/>
       <item link="hessian-service/index.xtp" title="Service Addition"/>
       <item link="hessian-ioc/index.xtp" title="Hessian with DI"/>

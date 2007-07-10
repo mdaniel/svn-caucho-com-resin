@@ -484,7 +484,7 @@ public class Hessian2Input
    * p major minor
    * </pre>
    */
-  public int readMessage()
+  public int startMessage()
     throws IOException
   {
     int tag = read();

@@ -494,7 +494,10 @@ public abstract class AbstractHttpRequest
    */
   public String getRequestURI() 
   {
-    return _invocation.getRawURI();
+    if (_invocation != null)
+      return _invocation.getRawURI();
+    else
+      return "";
   }
 
   /**
@@ -2385,7 +2388,8 @@ public abstract class AbstractHttpRequest
       SessionImpl session = _session;
       _session = null;
 
-      _invocation = null;
+      // server/0219
+      // _invocation = null;
       
       SecurityContext.setProvider(oldProvider);
       

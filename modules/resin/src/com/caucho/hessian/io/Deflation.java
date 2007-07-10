@@ -63,7 +63,7 @@ public class Deflation extends HessianEnvelope {
   }
 
   public Hessian2Output wrap(Hessian2Output out)
-    throws Exception
+    throws IOException
   {
     OutputStream os = new DeflateOutputStream(out);
     
@@ -75,7 +75,7 @@ public class Deflation extends HessianEnvelope {
   }
 
   public Hessian2Input unwrap(Hessian2Input in)
-    throws Exception
+    throws IOException
   {
     int version = in.readEnvelope();
 
@@ -89,7 +89,7 @@ public class Deflation extends HessianEnvelope {
   }
 
   public Hessian2Input unwrapHeaders(Hessian2Input in)
-    throws Exception
+    throws IOException
   {
     InputStream is = new DeflateInputStream(in);
 
@@ -106,7 +106,7 @@ public class Deflation extends HessianEnvelope {
     private DeflaterOutputStream _deflateOut;
     
     DeflateOutputStream(Hessian2Output out)
-      throws Exception
+      throws IOException
     {
       _out = out;
 
@@ -157,7 +157,7 @@ public class Deflation extends HessianEnvelope {
     private InflaterInputStream _inflateIn;
     
     DeflateInputStream(Hessian2Input in)
-      throws Exception
+      throws IOException
     {
       _in = in;
 

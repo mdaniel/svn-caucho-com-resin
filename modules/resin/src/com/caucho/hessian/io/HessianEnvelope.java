@@ -48,6 +48,8 @@
 
 package com.caucho.hessian.io;
 
+import java.io.*;
+
 /**
  * Factory class for wrapping and unwrapping hessian streams.
  */
@@ -56,7 +58,7 @@ abstract public class HessianEnvelope {
    * Wrap the Hessian output stream in an envelope.
    */
   abstract public Hessian2Output wrap(Hessian2Output out)
-    throws Exception;
+    throws IOException;
 
   /**
    * Unwrap the Hessian input stream with this envelope.  It is an
@@ -64,7 +66,7 @@ abstract public class HessianEnvelope {
    * class.
    */
   abstract public Hessian2Input unwrap(Hessian2Input in)
-    throws Exception;
+    throws IOException;
 
   /**
    * Unwrap the envelope after having read the envelope code ('E') and
@@ -72,5 +74,5 @@ abstract public class HessianEnvelope {
    * reading of the envelopes.
    */
   abstract public Hessian2Input unwrapHeaders(Hessian2Input in)
-    throws Exception;
+    throws IOException;
 }
