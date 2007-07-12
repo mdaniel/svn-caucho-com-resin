@@ -1021,6 +1021,9 @@ r_session-config = element session-config {
   & (attribute save-only-on-shutdown { r_boolean-Type }
      | element save-only-on-shutdown { r_boolean-Type })?
 
+  & (attribute serialization-type { string }
+     | element serialization-type { string })?
+
   & (attribute session-max { r_int }
      | element session-max { r_int })?
 

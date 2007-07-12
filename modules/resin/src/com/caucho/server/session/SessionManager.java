@@ -150,6 +150,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   // If true, serialization errors should not be logged
   // XXX: changed for JSF
   private boolean _ignoreSerializationErrors = true;
+  private boolean _isHessianSerialization = false;
 
   // List of the HttpSessionListeners from the configuration file
   private ArrayList<HttpSessionListener> _listeners;
@@ -496,6 +497,28 @@ public final class SessionManager implements ObjectManager, AlarmListener
     log.warning("<save-on-shutdown> is deprecated.  Use <save-only-on-shutdown> instead");
 
     setSaveOnlyOnShutdown(save);
+  }
+
+  /**
+   * Sets the serialization type.
+   */
+  public void setSerializationType(String type)
+  {
+    if ("hessian".equals(type))
+      _isHessianSerialization = true;
+    else if ("java".equals(type))
+      _isHessianSerialization = false;
+    else
+      throw new ConfigException(L.l("'{0}' is an unknown valud for serialization-type.  The valid types are 'hessian' and 'java'.",
+				    type));
+  }
+
+  /**
+   * Returns true for Hessian serialization.
+   */
+  public boolean isHessianSerialization()
+  {
+    return _isHessianSerialization;
   }
 
   /**
@@ -1513,11 +1536,20 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     SessionImpl session = (SessionImpl) obj;
 
-    Hessian2Input in = new Hessian2Input(is);
+    if (_isHessianSerialization) {
+      Hessian2Input in = new Hessian2Input(is);
 
-    session.load(in);
+      session.load(in);
 
-    in.close();
+      in.close();
+    }
+    else {
+      ObjectInputStream in = new DistributedObjectInputStream(is);
+
+      session.load(in);
+
+      in.close();
+    }
   }
 
   /**
@@ -1538,11 +1570,20 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     SessionImpl session = (SessionImpl) obj;
 
-    Hessian2Output out = new Hessian2Output(os);
+    if (_isHessianSerialization) {
+      Hessian2Output out = new Hessian2Output(os);
 
-    session.store(out);
+      session.store(out);
 
-    out.close();
+      out.close();
+    }
+    else {
+      ObjectOutputStream out = new ObjectOutputStream(os);
+
+      session.store(out);
+
+      out.close();
+    }
   }
 
   /**
@@ -1679,6 +1720,27 @@ public final class SessionManager implements ObjectManager, AlarmListener
     if (_clusterManager != null)
       _clusterManager.removeContext(_distributionId);
     */
+  }
+
+  static class DistributedObjectInputStream extends ObjectInputStream {
+    private ClassLoader _loader;
+    
+    DistributedObjectInputStream(InputStream is)
+      throws IOException
+    {
+      super(is);
+
+      Thread thread = Thread.currentThread();
+      _loader = thread.getContextClassLoader();
+    }
+
+    protected Class resolveClass(ObjectStreamClass v)
+      throws IOException, ClassNotFoundException
+    {
+      String name = v.getName();
+
+      return Class.forName(name, false, _loader);
+    }
   }
 
   static {

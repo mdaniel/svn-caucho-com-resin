@@ -42,11 +42,7 @@ import com.caucho.vfs.IOExceptionWrapper;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.*;
-import java.io.IOException;
-import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.security.Principal;
 import java.util.*;
 import java.util.logging.Level;
@@ -940,6 +936,14 @@ public class SessionImpl implements HttpSession, CacheListener {
   }
 
   /**
+   * Returns true if the session is empty.
+   */
+  public boolean isEmpty()
+  {
+    return _values == null || _values.size() == 0;
+  }
+
+  /**
    * Loads the object from the input stream.
    */
   public void load(Hessian2Input in)
@@ -993,14 +997,6 @@ public class SessionImpl implements HttpSession, CacheListener {
   }
 
   /**
-   * Returns true if the session is empty.
-   */
-  public boolean isEmpty()
-  {
-    return _values == null || _values.size() == 0;
-  }
-
-  /**
    * Saves the object to the input stream.
    */
   public void store(Hessian2Output out)
@@ -1047,6 +1043,132 @@ public class SessionImpl implements HttpSession, CacheListener {
 	Object value = entry.getValue();
 
 	out.writeString((String) entry.getKey());
+
+	if (ignoreNonSerializable && ! (value instanceof Serializable)) {
+	  out.writeObject(null);
+	  continue;
+	}
+	      
+	if (value instanceof HttpSessionActivationListener) {
+	  HttpSessionActivationListener listener
+	    = (HttpSessionActivationListener) value;
+
+	  if (event == null)
+	    event = new HttpSessionEvent(this);
+
+	  listener.sessionWillPassivate(event);
+	}
+
+	try {
+	  out.writeObject(value);
+	} catch (NotSerializableException e) {
+	  log.warning(L.l("Failed storing persistent session attribute `{0}'.  Persistent session values must extend java.io.Serializable.\n{1}", entry.getKey(), String.valueOf(e)));
+	  throw e;
+	}
+      }
+    }
+  }
+
+  /**
+   * Loads the object from the input stream.
+   */
+  public void load(ObjectInput in)
+    throws IOException
+  {
+    HttpSessionEvent event = null;
+    
+    synchronized (_values) {
+      unbind();
+
+      try {
+	int size = in.readInt();
+
+	//System.out.println("LOAD: " + size + " " + this + " " + _clusterObject + System.identityHashCode(this));
+
+	for (int i = 0; i < size; i++) {
+	  String key = in.readUTF();
+	  Object value = in.readObject();
+
+	  if (value != null) {
+	    synchronized (_values) {
+	      _values.put(key, value);
+	    }
+	      
+	    if (value instanceof HttpSessionActivationListener) {
+	      HttpSessionActivationListener listener
+		= (HttpSessionActivationListener) value;
+
+	      if (event == null)
+		event = new HttpSessionEvent(this);
+
+	      listener.sessionDidActivate(event);
+	    }
+	  }
+	}
+      } catch (Exception e) {
+	throw IOExceptionWrapper.create(e);
+      }
+
+      ArrayList<HttpSessionActivationListener> listeners;
+      listeners = _manager.getActivationListeners();
+      for (int i = 0; listeners != null && i < listeners.size(); i++) {
+	HttpSessionActivationListener listener = listeners.get(i);
+
+	if (event == null)
+	  event = new HttpSessionEvent(this);
+	
+	listener.sessionDidActivate(event);
+      }
+    }
+  }
+
+  /**
+   * Saves the object to the input stream.
+   */
+  public void store(ObjectOutput out)
+    throws IOException
+  {
+    HttpSessionEvent event = null;
+    
+    synchronized (_values) {
+      Set set = getEntrySet();
+
+      int size = set == null ? 0 : set.size();
+
+      out.writeInt(size);
+
+      if (size == 0)
+	return;
+
+      ArrayList<HttpSessionActivationListener> listeners;
+      listeners = _manager.getActivationListeners();
+      for (int i = 0; listeners != null && i < listeners.size(); i++) {
+	HttpSessionActivationListener listener = listeners.get(i);
+
+	if (event == null)
+	  event = new HttpSessionEvent(this);
+	
+	listener.sessionWillPassivate(event);
+      }
+
+      boolean ignoreNonSerializable =
+	getManager().getIgnoreSerializationErrors();
+
+      Map.Entry []entries = new Map.Entry[set.size()];
+      
+      Iterator iter = set.iterator();
+      int i = 0;
+      while (iter.hasNext()) {
+	entries[i++] = (Map.Entry) iter.next();
+      }
+
+      Arrays.sort(entries, KEY_COMPARATOR);
+
+      for (i = 0; i < entries.length; i++) {
+	Map.Entry entry = entries[i];
+	Object value = entry.getValue();
+
+	out.writeUTF((String) entry.getKey());
 
 	if (ignoreNonSerializable && ! (value instanceof Serializable)) {
 	  out.writeObject(null);
