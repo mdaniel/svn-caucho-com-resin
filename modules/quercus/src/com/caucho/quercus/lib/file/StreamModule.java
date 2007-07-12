@@ -383,7 +383,7 @@ public class StreamModule extends AbstractQuercusModule {
       return false;
 
     Object obj = stream.toJavaObject();
-    System.out.println("OBJ: " + obj + " " + stream);
+
     if (obj instanceof AbstractBinaryInputOutput)
       ((AbstractBinaryInputOutput) obj).setTimeout(1000L * seconds);
 

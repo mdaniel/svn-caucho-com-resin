@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusRuntimeException;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -954,6 +955,15 @@ public class StringBuilderValue extends UnicodeValue
       }
 
       return true;
+    } else if (o instanceof BinaryBuilderValue) {
+      BinaryBuilderValue bb = (BinaryBuilderValue)o;
+      
+      try {
+        return equals(bb.toUnicodeValue(Env.getInstance()));
+      }
+      catch (QuercusRuntimeException e) {
+        return false;
+      }
     } else {
       return false;
     }

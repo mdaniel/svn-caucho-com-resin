@@ -31,6 +31,7 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempCharBuffer;
 import com.caucho.vfs.TempStream;
@@ -1104,7 +1105,14 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public InputStream toInputStream()
   {
-    return new StringValueInputStream();
+    try {
+      //XXX: refactor so that env is passed in
+      return toInputStream(Env.getInstance().getRuntimeEncoding().toString());
+    }
+    catch (UnsupportedEncodingException e) {
+      throw new QuercusRuntimeException(e);
+    }
+    //return new StringValueInputStream();
   }
 
   /**

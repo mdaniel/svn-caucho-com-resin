@@ -833,36 +833,23 @@ public class BinaryBuilderValue extends BinaryValue
       int length = _length;
       
       if (length != value._length)
-	return false;
+        return false;
 
       byte []bufferA = _buffer;
       byte []bufferB = value._buffer;
 
       for (int i = length - 1; i >= 0; i--) {
-	if (bufferA[i] != bufferB[i])
-	  return false;
+        if (bufferA[i] != bufferB[i])
+          return false;
       }
 
       return true;
     }
-    /*
-    else if (o instanceof StringValue) {
-      StringValue value = (StringValue) o;
-
-      int length = _length;
-      if (length != value.length())
-	return false;
-
-      byte []buffer = _buffer;
-
-      for (int i = length - 1; i >= 0; i--) {
-	if ((buffer[i] & 0xff) != value.charAt(i))
-	  return false;
-      }
-
-      return true;
+    else if (o instanceof UnicodeValue) {
+      UnicodeValue value = (UnicodeValue)o;
+      
+      return value.equals(this);
     }
-    */
     else
       return false;
   }
