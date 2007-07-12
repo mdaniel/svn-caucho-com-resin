@@ -12,6 +12,9 @@
 
 <s2 title="3.1.2 snap">
 <ul>
+<li>HttpProxyServlet needs to use matchesIgnoreCase for Connection header check (#1856, rep by H Shih)</li>
+<li>Hessian: issue with deserialization with replicated types (#1854, rep by remilon)</li>
+<li>added serialization-type to session-config allowing for "hessian" and "java" (rep by Jan Kriesten, #1868)</li>
 <li>(2007-07-02) Add TransactionManager compatibility for UserTransaction (not intended for application use) (#1814, rep by Takahiro Fukuda)</li>
 <li>setHeader("Connection", "close") will close the keepalive (#1829, rep by sf)</li>
 <li>multipart form needs to override query string values (#1831, rep by sf)</li>

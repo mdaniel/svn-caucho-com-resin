@@ -174,9 +174,9 @@ class HttpStream extends StreamImpl {
     HttpStream stream = null;
     long streamTime = 0;
     synchronized (LOCK) {
-      if (_savedStream != null &&
-          host.equals(_savedStream.getHost()) &&
-          port == _savedStream.getPort()) {
+      if (_savedStream != null
+          && host.equals(_savedStream.getHost())
+          && port == _savedStream.getPort()) {
         stream = _savedStream;
         streamTime = _saveTime;
         _savedStream = null;
@@ -694,8 +694,8 @@ class HttpStream extends StreamImpl {
 
       key.clear();
       for (;
-           i < lineLength && ! Character.isWhitespace(line.charAt(i)) &&
-             line.charAt(i) != ':';
+           i < lineLength && ! Character.isWhitespace(line.charAt(i))
+             && line.charAt(i) != ':';
            i++) {
         key.append((char) line.charAt(i));
       }
@@ -719,15 +719,15 @@ class HttpStream extends StreamImpl {
       if (log.isLoggable(Level.FINE))
         log.fine(key + ": " + value);
       
-      if (key.matches("content-length")) {
+      if (key.matchesIgnoreCase("content-length")) {
         _contentLength = Integer.parseInt(value);
       }
-      else if (key.matches("connection") &&
-               value.equalsIgnoreCase("close")) {
+      else if (key.matchesIgnoreCase("connection")
+               && value.equalsIgnoreCase("close")) {
         _isKeepalive = false;
       }
-      else if (key.matches("transfer-encoding") &&
-               value.equalsIgnoreCase("chunked")) {
+      else if (key.matchesIgnoreCase("transfer-encoding")
+               && value.equalsIgnoreCase("chunked")) {
         
         _isChunked = true;
         _chunkLength = 0;
