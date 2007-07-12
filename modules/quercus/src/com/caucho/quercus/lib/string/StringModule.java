@@ -4081,14 +4081,32 @@ v   *
     private final int _index;
 
     LongPrintfSegment(String format, int index)
-    {
+    { 
       if (hasIndex(format)) {
-	_index = getIndex(format);
-	_format = getIndexFormat(format);
+        _index = getIndex(format);
+        format = getIndexFormat(format);
       }
       else {
-	_format = '%' + format;
-	_index = index;
+        format = '%' + format;
+        _index = index;
+      }
+      
+      // php/115b
+      // strip out illegal precision specifier from phpBB vote function
+      if (format.length() > 1 && format.charAt(1) == '.') {
+        int i;
+        
+        for (i = 2; i < format.length(); i++) {
+          char ch = format.charAt(i);
+          
+          if (ch < '0' || ch > '9')
+            break;
+        }
+        
+        _format = '%' + format.substring(i);
+      }
+      else {
+        _format = format;
       }
     }
 
