@@ -3572,7 +3572,7 @@ v   *
         result = result.append(string.substring(head, bestHead));
 
       if (bestI >= 0)
-        result.append(to[bestI]);
+        result = result.append(to[bestI]);
 
       head = bestHead + bestLength;
     }

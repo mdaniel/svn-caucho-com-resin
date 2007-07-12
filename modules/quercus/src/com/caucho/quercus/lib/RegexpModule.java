@@ -659,7 +659,7 @@ public class RegexpModule
 
     Matcher matcher = pattern.matcher(subject);
 
-    StringBuilderValue result = new StringBuilderValue();
+    StringValue result = new StringBuilderValue();
     int tail = 0;
 
     while (matcher.find() && numberOfMatches < limit) {
@@ -670,7 +670,7 @@ public class RegexpModule
       }
 
       if (tail < matcher.start())
-        result.append(subject.substring(tail, matcher.start()));
+        result = result.append(subject.substring(tail, matcher.start()));
 
       ArrayValue regs = new ArrayValueImpl();
 
@@ -685,7 +685,7 @@ public class RegexpModule
 
       Value replacement = fun.call(env, regs);
 
-      result.append(replacement);
+      result = result.append(replacement);
 
       tail = matcher.end();
 
@@ -693,7 +693,7 @@ public class RegexpModule
     }
 
     if (tail < subject.length())
-      result.append(subject.substring(tail));
+      result = result.append(subject.substring(tail));
 
     return result;
   }
@@ -1270,6 +1270,8 @@ public class RegexpModule
       delim = ']';
     else if (delim == '(')
       delim = ')';
+    else if (delim == '<')
+      delim = '>';
 
     int tail = rawRegexp.lastIndexOf(delim);
 
