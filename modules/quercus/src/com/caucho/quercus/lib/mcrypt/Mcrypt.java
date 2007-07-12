@@ -206,17 +206,18 @@ public class Mcrypt {
   /**
    * Initialize the crypt.
    */
-  public int init(String keyString, String iv)
+  public int init(byte []keyBytesArg, byte []iv)
   {
     byte []keyBytes = new byte[get_key_size()];
-
-    for (int i = 0; i < keyString.length() && i < keyBytes.length; i++)
-      keyBytes[i] = (byte) keyString.charAt(i);
+    
+    int length = Math.min(keyBytesArg.length, keyBytes.length);
+    
+    System.arraycopy(keyBytesArg, 0, keyBytes, 0, length);
 
     _key = new SecretKeySpec(keyBytes, getAlgorithm(_algorithm));
 
     if (_mode.equals("CBC") || _mode.equals("CFB") || _mode.equals("OFB"))
-      _iv = new IvParameterSpec(iv.getBytes());
+      _iv = new IvParameterSpec(iv);
     else
       _iv = null;
 

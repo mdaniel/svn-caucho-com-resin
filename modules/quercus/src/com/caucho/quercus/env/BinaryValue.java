@@ -177,11 +177,14 @@ abstract public class BinaryValue extends StringValue
    */
   public void appendTo(StringBuilderValue sb)
   {
+    if (length() == 0)
+      return;
+    
     Env env = Env.getInstance();
 
     try {
       Reader reader = env.getRuntimeEncodingFactory().create(toInputStream());
-
+      
       if (reader != null) {
         sb.append(reader);
 
@@ -201,6 +204,39 @@ abstract public class BinaryValue extends StringValue
     return true;
   }
 
+  /**
+   * Returns true for equality
+   */
+  @Override
+  public boolean eq(Value rValue)
+  {
+    rValue = rValue.toValue();
+
+    if (rValue instanceof BooleanValue) {
+      return toBoolean() == rValue.toBoolean();
+    }
+
+    int type = getNumericType();
+
+    if (type == IS_STRING) {
+      if (rValue.isBinary())
+        return equals(rValue);
+      else if (rValue.isUnicode()) {
+        return toUnicodeValue(Env.getInstance()).equals(rValue);
+      }
+      else if (rValue.isLongConvertible())
+        return toLong() ==  rValue.toLong();
+      else if (rValue instanceof BooleanValue)
+        return toLong() == rValue.toLong();
+      else
+        return equals(rValue.toStringValue());
+    }
+    else if (rValue.isNumberConvertible())
+      return toDouble() == rValue.toDouble();
+    else
+      return equals(rValue.toStringValue());
+  }
+  
   abstract public byte[] toBytes();
 }
 

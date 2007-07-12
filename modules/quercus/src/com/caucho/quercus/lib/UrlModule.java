@@ -73,9 +73,9 @@ public class UrlModule extends AbstractQuercusModule {
 
     int len;
     int offset = 0;
-
+    
     try {
-      while ((len = is.read(buffer, offset, buffer.length)) >= 0) {
+      while ((len = is.read(buffer, offset, buffer.length - offset)) >= 0) {
         int tail = len % 3;
 
         Base64.encode(cb, buffer, 0, len - tail);
@@ -88,9 +88,9 @@ public class UrlModule extends AbstractQuercusModule {
         Base64.encode(cb, buffer, 0, offset);
     } catch (IOException e) {
       throw new RuntimeException(e);
+    } finally {
+      TempBuffer.free(tb);
     }
-
-    TempBuffer.free(tb);
 
     return cb.toString();
   }

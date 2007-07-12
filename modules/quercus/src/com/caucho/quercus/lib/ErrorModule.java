@@ -284,7 +284,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	i++;
       }
       else {
-	System.out.println("UNKNOWN:" + className.charAt(i + 1) + " " + className);
+	//System.out.println("UNKNOWN:" + className.charAt(i + 1) + " " + className);
       }
     }
 

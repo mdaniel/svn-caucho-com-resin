@@ -845,11 +845,13 @@ public class BinaryBuilderValue extends BinaryValue
 
       return true;
     }
+    /*
     else if (o instanceof UnicodeValue) {
       UnicodeValue value = (UnicodeValue)o;
       
       return value.equals(this);
     }
+    */
     else
       return false;
   }

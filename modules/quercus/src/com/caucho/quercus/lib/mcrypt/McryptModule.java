@@ -32,9 +32,12 @@ package com.caucho.quercus.lib.mcrypt;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
@@ -83,22 +86,26 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Encrypt with cbc
    */
-  public static String mcrypt_cbc(Env env,
-                                  String cipher,
-                                  String key,
-                                  String data,
-                                  int mode,
-                                  @Optional String iv)
+  public static BinaryValue mcrypt_cbc(Env env,
+                                       String cipher,
+                                       byte []key,
+                                       byte []data,
+                                       int mode,
+                                       @Optional byte []iv)
   {
     try {
       Mcrypt mcrypt = new Mcrypt(env, cipher, "cbc");
 
       mcrypt.init(key, iv);
 
+      byte []result;
+      
       if (mode == MCRYPT_ENCRYPT)
-        return new String(mcrypt.encrypt(data.getBytes()));
+        result = mcrypt.encrypt(data);
       else
-        return new String(mcrypt.decrypt(data.getBytes()));
+        result = mcrypt.decrypt(data);
+      
+      return new BinaryBuilderValue(result);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -107,22 +114,26 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Encrypt with cfb
    */
-  public static String mcrypt_cfb(Env env,
+  public static BinaryValue mcrypt_cfb(Env env,
                                   String cipher,
-                                  String key,
-                                  String data,
+                                  byte []key,
+                                  byte []data,
                                   int mode,
-                                  @Optional String iv)
+                                  @Optional byte []iv)
   {
     try {
       Mcrypt mcrypt = new Mcrypt(env, cipher, "cfb");
 
       mcrypt.init(key, iv);
 
+      byte []result;
+      
       if (mode == MCRYPT_ENCRYPT)
-        return new String(mcrypt.encrypt(data.getBytes()));
+        result = mcrypt.encrypt(data);
       else
-        return new String(mcrypt.decrypt(data.getBytes()));
+        result = mcrypt.decrypt(data);
+      
+      return new BinaryBuilderValue(result);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -131,33 +142,33 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Creates the IV vector.
    */
-  public static String mcrypt_create_iv(int size,
-                                        @Optional int randomMode)
+  public static BinaryValue mcrypt_create_iv(int size,
+                                             @Optional int randomMode)
   {
-    StringBuilder sb = new StringBuilder();
+    BinaryBuilderValue bb = new BinaryBuilderValue();
 
     for (int i = 0; i < size; i++)
-      sb.append((char) RandomUtil.nextInt(256));
+      bb.append((byte) RandomUtil.nextInt(256));
 
-    return sb.toString();
+    return bb;
   }
 
   /**
    * Decrypt
    */
-  public static String mcrypt_decrypt(Env env,
-                                      String cipher,
-                                      String key,
-                                      String data,
-                                      String mode,
-                                      @Optional String iv)
+  public static BinaryValue mcrypt_decrypt(Env env,
+                                           String cipher,
+                                           byte []key,
+                                           byte []data,
+                                           String mode,
+                                           @Optional byte []iv)
   {
     try {
       Mcrypt mcrypt = new Mcrypt(env, cipher, mode);
 
       mcrypt.init(key, iv);
 
-      return new String(mcrypt.decrypt(data.getBytes()));
+      return new BinaryBuilderValue(mcrypt.decrypt(data));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -166,22 +177,26 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Encrypt with cfb
    */
-  public static String mcrypt_ecb(Env env,
-                                  String cipher,
-                                  String key,
-                                  String data,
-                                  int mode,
-                                  @Optional String iv)
+  public static BinaryValue mcrypt_ecb(Env env,
+                                       String cipher,
+                                       byte []key,
+                                       byte []data,
+                                       int mode,
+                                       @Optional byte []iv)
   {
     try {
       Mcrypt mcrypt = new Mcrypt(env, cipher, "ecb");
 
       mcrypt.init(key, iv);
 
+      byte []result;
+      
       if (mode == MCRYPT_ENCRYPT)
-        return new String(mcrypt.encrypt(data.getBytes()));
+        result = mcrypt.encrypt(data);
       else
-        return new String(mcrypt.decrypt(data.getBytes()));
+        result =  mcrypt.decrypt(data);
+      
+      return new BinaryBuilderValue(result);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -300,19 +315,19 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Encrypt
    */
-  public static String mcrypt_encrypt(Env env,
-                                      String cipher,
-                                      String key,
-                                      String data,
-                                      String mode,
-                                      @Optional String iv)
+  public static BinaryValue mcrypt_encrypt(Env env,
+                                           String cipher,
+                                           byte []key,
+                                           byte []data,
+                                           String mode,
+                                           @Optional byte []iv)
   {
     try {
       Mcrypt mcrypt = new Mcrypt(env, cipher, mode);
 
       mcrypt.init(key, iv);
 
-      return new String(mcrypt.encrypt(data.getBytes()));
+      return new BinaryBuilderValue(mcrypt.encrypt(data));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -321,12 +336,12 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Initialize encrption
    */
-  public static String mcrypt_generic(Mcrypt mcrypt, String data)
+  public static BinaryValue mcrypt_generic(Mcrypt mcrypt, byte []data)
   {
     if (mcrypt == null)
       return null;
     else
-      return new String(mcrypt.encrypt(data.getBytes()));
+      return new BinaryBuilderValue(mcrypt.encrypt(data));
   }
 
   /**
@@ -343,7 +358,9 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Initialize encrption
    */
-  public static Value mcrypt_generic_init(Mcrypt mcrypt, String key, String iv)
+  public static Value mcrypt_generic_init(Mcrypt mcrypt,
+                                          byte []key,
+                                          byte []iv)
   {
     if (mcrypt == null)
       return BooleanValue.FALSE;
@@ -568,22 +585,26 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Encrypt with ofb
    */
-  public static String mcrypt_ofb(Env env,
+  public static BinaryValue mcrypt_ofb(Env env,
                                   String cipher,
-                                  String key,
-                                  String data,
+                                  byte []key,
+                                  byte []data,
                                   int mode,
-                                  @Optional String iv)
+                                  @Optional byte []iv)
   {
     try {
       Mcrypt mcrypt = new Mcrypt(env, cipher, "ofb");
 
       mcrypt.init(key, iv);
 
+      byte []result;
+      
       if (mode == MCRYPT_ENCRYPT)
-        return new String(mcrypt.encrypt(data.getBytes()));
+        result = mcrypt.encrypt(data);
       else
-        return new String(mcrypt.decrypt(data.getBytes()));
+        result = mcrypt.decrypt(data);
+      
+      return new BinaryBuilderValue(result);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -592,11 +613,11 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Initialize encrption
    */
-  public static String mdecrypt_generic(Mcrypt mcrypt, String data)
+  public static Value mdecrypt_generic(Mcrypt mcrypt, byte []data)
   {
     if (mcrypt == null)
-      return null;
+      return BooleanValue.FALSE;
     else
-      return new String(mcrypt.decrypt(data.getBytes()));
+      return new BinaryBuilderValue(mcrypt.decrypt(data));
   }
 }

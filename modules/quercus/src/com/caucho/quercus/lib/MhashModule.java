@@ -31,6 +31,8 @@ package com.caucho.quercus.lib;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BinaryValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
@@ -138,11 +140,11 @@ public class MhashModule extends AbstractQuercusModule {
       _highestOrdinal = ordinal;
   }
 
-  public Value mhash(int hash, String data, @Optional String key)
+  public Value mhash(int hash, BinaryValue data, @Optional String key)
   {
     if (key.length() > 0)
       throw new UnsupportedOperationException("key"); // XXX:
-
+    
     MhashAlgorithm algorithm = _algorithmMap.get(hash);
 
     if (algorithm == null)
@@ -156,12 +158,9 @@ public class MhashModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
 
-    // XXX: s/b "StringValue data" as parameter
-    StringValue dataV = new StringValueImpl(data);
+    byte[] result = messageDigest.digest(data.toBytes());
 
-    byte[] result = messageDigest.digest(dataV.toString().getBytes());
-
-    return new StringValueImpl(new String(result));
+    return new BinaryBuilderValue(result);
   }
 
   /**

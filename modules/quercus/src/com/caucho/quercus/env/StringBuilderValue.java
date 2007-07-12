@@ -955,6 +955,7 @@ public class StringBuilderValue extends UnicodeValue
       }
 
       return true;
+    /*
     } else if (o instanceof BinaryBuilderValue) {
       BinaryBuilderValue bb = (BinaryBuilderValue)o;
       
@@ -964,6 +965,7 @@ public class StringBuilderValue extends UnicodeValue
       catch (QuercusRuntimeException e) {
         return false;
       }
+    */
     } else {
       return false;
     }
