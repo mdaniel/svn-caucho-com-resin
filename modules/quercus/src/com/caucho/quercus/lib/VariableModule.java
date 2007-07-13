@@ -616,7 +616,7 @@ public class VariableModule extends AbstractQuercusModule {
       return true;
     }
     else if ("boolean".equals(type) || "bool".equals(type)) {
-      var.set(value.toBoolean() ? BooleanValue.TRUE : BooleanValue.TRUE);
+      var.set(value.toBoolean() ? BooleanValue.TRUE : BooleanValue.FALSE);
       return true;
     }
     else if ("string".equals(type)) {

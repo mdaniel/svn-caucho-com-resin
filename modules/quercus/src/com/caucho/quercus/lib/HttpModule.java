@@ -138,12 +138,12 @@ public class HttpModule extends AbstractQuercusModule {
 
         if (key.equalsIgnoreCase("Content-Type")) {
           if (value.indexOf("charset") < 0) {
-            //XXX: change to UTF-8
+            //XXX: change to UTF-8 for 3.1.3
             if (value.indexOf("text/") < 0)
               res.setCharacterEncoding("iso-8859-1");
           }
           else if ("".equals(res.getCharacterEncoding())) {
-            //XXX: change to UTF-8
+            //XXX: change to UTF-8 for 3.1.3
             // php/1b0d
             res.setCharacterEncoding("iso-8859-1");
           }
