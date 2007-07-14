@@ -51,6 +51,11 @@ public class SimpleXMLModule
     = Logger.getLogger(SimpleXMLModule.class.getName());
   private static final L10N L = new L10N(SimpleXMLModule.class);
 
+  public String []getLoadedExtensions()
+  {
+    return new String[] { "simplexml" };
+  }
+  
   @ReturnNullAsFalse
   public SimpleXMLElement simplexml_load_string(Env env,
                                                 Value data,
