@@ -33,5 +33,29 @@ with other JPA implementations.</p>
 
 </s1>
 
+<s1 title="Quercus">
+
+<s2 title="Applications Running on Quercus">
+
+<ol>
+
+<li>DokuWiki 2007-06-26</li>
+<li>Dragonfly CMS 9.0.6.1.7</li>
+<li>Drupal 5.1</li>
+<li>Gallery2 2.2.2</li>
+<li>Joomla 1.0.12</li>
+<li>Mantis 1.0.8</li>
+<li>MediaWiki 1.10.0</li>
+<li>Openads 2.0.11-pr1</li>
+<li>Phorum 5.1.23</li>
+<li>phpBB 2.0.22</li>
+<li>Smarty Template Engine 2.6.18</li>
+<li>Wordpress 2.2</li>
+</ol>
+
+</s2>
+
+</s1>
+
 </body>
 </document>
