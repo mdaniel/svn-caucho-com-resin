@@ -61,6 +61,12 @@ dnl should be unnecessary
 AC_SUBST(LD)
 
 #
+# additional CFLAGS
+#
+# for solaris        
+CFLAGS="$CFLAGS -D_POSIX_PTHREAD_SEMANTICS"                          
+
+#
 # --with-apache-src
 #
 AC_ARG_WITH(apache-src,

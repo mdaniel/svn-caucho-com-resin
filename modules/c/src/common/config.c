@@ -603,7 +603,7 @@ read_config(stream_t *s, config_t *config, resin_host_t *host,
 	buf[0] = 0;
 
 #ifndef WIN32
-	ctime_r(&host->last_update, buf);
+ 	ctime_r(&host->last_update, buf);
 #else
 	strcpy(buf, ctime(&host->last_update));
 #endif
