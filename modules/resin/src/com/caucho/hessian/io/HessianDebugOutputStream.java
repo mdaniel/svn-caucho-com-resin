@@ -49,25 +49,24 @@
 package com.caucho.hessian.io;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
- * Debugging input stream for Hessian requests.
+ * Debugging output stream for Hessian requests.
  */
-public class HessianDebugInputStream extends InputStream
+public class HessianDebugOutputStream extends OutputStream
 {
-  private InputStream _is;
+  private OutputStream _os;
   
   private HessianDebugState _state;
   
   /**
    * Creates an uninitialized Hessian input stream.
    */
-  public HessianDebugInputStream(InputStream is, PrintWriter dbg)
+  public HessianDebugOutputStream(OutputStream os, PrintWriter dbg)
   {
-    _is = is;
+    _os = os;
 
     _state = new HessianDebugState(dbg);
   }
@@ -75,21 +74,12 @@ public class HessianDebugInputStream extends InputStream
   /**
    * Reads a character.
    */
-  public int read()
+  public void write(int ch)
     throws IOException
   {
-    int ch;
-
-    InputStream is = _is;
-
-    if (is == null)
-      return -1;
-    else
-      ch = is.read();
+    _os.write(ch);
 
     _state.next(ch);
-
-    return ch;
   }
 
   /**
@@ -98,12 +88,12 @@ public class HessianDebugInputStream extends InputStream
   public void close()
     throws IOException
   {
-    InputStream is = _is;
-    _is = null;
+    OutputStream os = _os;
+    _os = null;
 
-    if (is != null)
-      is.close();
-    
+    if (os != null)
+      os.close();
+
     _state.println();
   }
 }
