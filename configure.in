@@ -649,6 +649,15 @@ if test -z "${LD_SHLIB}"; then
   esac	
 fi
 
+case "$target_os" in
+  linux*)
+        CFLAGS="$CFLAGS -DHAS_SOCK_TIMEOUT"
+	;;
+  darwin*)
+        CFLAGS="$CFLAGS -DHAS_SOCK_TIMEOUT"
+	;;
+esac        
+
 if test -z "$apache"; then
   a=b
 elif test -r "${apache_include}/apr_thread_mutex.h" -o -n "${apr_inc}"; then
