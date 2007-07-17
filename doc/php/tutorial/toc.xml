@@ -1,8 +1,0 @@
-<navigation threaded="true" section="Resin : PHP : Tutorials" comment="true">
-  <item title="Tutorials" link="index.xtp">
-    <item link="hello/index.xtp" title="Hello World"/>
-    <item link="module/index.xtp" title="Java Modules"/>
-    <item link="json/index.xtp" title="JSON" />
-  </item>
-</navigation>
-

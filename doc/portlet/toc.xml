@@ -1,5 +1,0 @@
-<navigation threaded="true" section="Resin : Portlet : " comment="true">
-  <item title="Portlet" link="index.xtp">
-    <item title="Tutorials" link="tutorial/index.xtp" atoc-descend='2'/>
-  </item>
-</navigation>

@@ -1,7 +1,0 @@
-<navigation threaded="true" section="Resin : ESB : Tutorials" comment="true">
-  <item title="Tutorials" link="index.xtp">
-    <item link="hello-world/index.xtp" title="Simple Service"/>
-    <item link="hello-jaxb/index.xtp" title="Configuring a service with JAXB"/>
-    <item link="servlet-client/index.xtp" title="An ESB client"/>
-  </item>
-</navigation>

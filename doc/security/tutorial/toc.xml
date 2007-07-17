@@ -1,5 +1,0 @@
-<navigation threaded="true" section="Resin : Security : Tutorials" comment="true">
-  <item title="Tutorials" link="index.xtp">
-    <item link="security-basic/index.xtp" title="Basic Security"/>
-  </item>
-</navigation>

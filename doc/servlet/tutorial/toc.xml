@@ -1,8 +1,0 @@
-<navigation threaded="true" section="Resin : Servlets : Tutorial" comment="true">
-  <item title="Tutorials" link="index.xtp">
-    <item link="helloworld/index.xtp" title="Hello World"/>
-    <item link="bean-init/index.xtp" title="Bean-Init"/>
-    <item link="sub-bean/index.xtp" title="Sub-Bean-Init"/>
-    <item link="filter-templates/index.xtp" title="Filter Templates"/>
-  </item>
-</navigation>

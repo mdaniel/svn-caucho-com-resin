@@ -1,9 +1,0 @@
-<navigation threaded="true" section="Resin : Protocols : Tutorials" comment="true">
-  <item title='Tutorials' link="index.xtp">
-    <item link="hessian-add/index.xtp" title="Hessian Addition"/>
-    <item link="hessian-service/index.xtp" title="Service Addition"/>
-    <item link="hessian-ioc/index.xtp" title="Hessian with DI"/>
-    <item link="burlap-add/index.xtp" title="Burlap Addition"/>
-    <item link="custom-protocol/index.xtp" title="custom-protocol"/>
-  </item>
-</navigation>
