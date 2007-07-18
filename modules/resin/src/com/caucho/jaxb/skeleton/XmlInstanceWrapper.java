@@ -87,6 +87,7 @@ public class XmlInstanceWrapper extends Accessor {
   {
     _attributes = attributes;
     _type = type;
+    _property = StringProperty.PROPERTY;
   }
 
   // XXX this is an ugly hack
