@@ -56,7 +56,7 @@ to ISO-8859-1.  If you need to set ini values, see <a href="#php.ini">php.ini</a
 <a href="http://www.mysql.com/products/connector/j/">MySQL Connector/J JDBC driver</a>
 into <code>${resin.root}/lib</code> to enable mysql database functions (See <a href="#databases">Using Databases</a>).</p>
 
-<p>Step 4.  The configuration for Resin/Quercus is now complete.  Now you'll need to go through the application's installation routine.  For Wordpress, go to <a href="http://localhost:8080/wordpress/wp-admin/setup-config.php">http://localhost:8080/wordpress/wp-admin/setup-config.php</a> to start the installation.</p>
+<p>Step 4.  The configuration for Resin/Quercus is now complete.  Now you'll need to go through the application's installation routine.  For Wordpress, go to http://localhost:8080/wordpress/wp-admin/setup-config.php to start the installation.</p>
 
 <p>That's it for Wordpress on Quercus.  If you are encountering issues with a certain application, please see <a>Resources</a> for assistance.</p>
 

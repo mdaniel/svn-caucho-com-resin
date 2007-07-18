@@ -10,8 +10,9 @@
 <a href="changes-2.xtp">Resin 2.1 changes</a>
 </p>
 
-<s2 title="3.1.2 snap">
+<s2 title="3.1.2 - July 18, 2007">
 <ul>
+<li>JNI: solaris does not understand setsocketopt socket timeout (#1855, rep by T Corning)</li>
 <li>HttpProxyServlet needs to use matchesIgnoreCase for Connection header check (#1856, rep by H Shih)</li>
 <li>Hessian: issue with deserialization with replicated types (#1854, rep by remilon)</li>
 <li>added serialization-type to session-config allowing for "hessian" and "java" (rep by Jan Kriesten, #1868)</li>

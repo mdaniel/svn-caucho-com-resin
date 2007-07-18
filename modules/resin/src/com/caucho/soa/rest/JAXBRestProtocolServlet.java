@@ -134,10 +134,11 @@ public class JAXBRestProtocolServlet extends RestProtocolServlet
       else {
         Class[] classes = jaxbClasses.toArray(new Class[jaxbClasses.size()]);
         _context = JAXBContext.newInstance(classes);
-        _marshaller = _context.createMarshaller();
-        _marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        _unmarshaller = _context.createUnmarshaller();
       }
+      
+      _marshaller = _context.createMarshaller();
+      _marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+      _unmarshaller = _context.createUnmarshaller();
     }
     catch (Exception e) {
       throw new ServletException(e);
@@ -162,6 +163,7 @@ public class JAXBRestProtocolServlet extends RestProtocolServlet
 
     try {
       XMLStreamWriterImpl writer = new XMLStreamWriterImpl(ws);
+      
       _marshaller.marshal(result, writer);
     } 
     catch (JAXBException e) {
