@@ -1019,7 +1019,11 @@ public class QuercusParser {
     }
 
     do {
-      statementList.add(parseTopExpr().createUnset(_factory, getLocation()));
+      // XXX: statementList.add(parseTopExpr().createUnset(_factory, getLocation()));
+
+      Expr topExpr = parseTopExpr();
+
+      statementList.add(topExpr.createUnset(_factory, getLocation()));
     } while ((token = parseToken()) == ',');
 
     _peekToken = token;

@@ -671,6 +671,42 @@ public class Var extends Value
   }
 
   /**
+   * Returns true for less than
+   */
+  public boolean lt(Value rValue)
+  {
+    // php/335h
+    return _value.lt(rValue);
+  }
+
+  /**
+   * Returns true for less than or equal to
+   */
+  public boolean leq(Value rValue)
+  {
+    // php/335h
+    return _value.leq(rValue);
+  }
+
+  /**
+   * Returns true for greater than
+   */
+  public boolean gt(Value rValue)
+  {
+    // php/335h
+    return _value.gt(rValue);
+  }
+
+  /**
+   * Returns true for greater than or equal to
+   */
+  public boolean geq(Value rValue)
+  {
+    // php/335h
+    return _value.geq(rValue);
+  }
+
+  /**
    * Returns the array/object size
    */
   public int getSize()
@@ -829,9 +865,9 @@ public class Var extends Value
    * Returns the field ref.
    */
   @Override
-  public Value getField(Env env, String index)
+  public Value getField(Env env, String index, boolean create)
   {
-    return _value.getField(env, index);
+    return _value.getField(env, index, create);
   }
 
   /**

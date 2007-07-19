@@ -266,9 +266,6 @@ abstract public class Value implements java.io.Serializable
             || rVal instanceof ResourceValue))
       return NumberValue.compareNum(lVal, rVal);
 
-    if (lVal instanceof ArrayValue && rVal instanceof ArrayValue)
-      ((ArrayValue) lVal).compareArray((ArrayValue) rVal);
-
     if (lVal instanceof ArrayValue) return 1;
     if (rVal instanceof ArrayValue) return -1;
     if (lVal instanceof ObjectValue) return 1;
@@ -282,7 +279,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns true for less than
    */
-  public final boolean lt(Value rValue)
+  public boolean lt(Value rValue)
   {
     return cmp(rValue) < 0;
   }
@@ -290,7 +287,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns true for less than or equal to
    */
-  public final boolean leq(Value rValue)
+  public boolean leq(Value rValue)
   {
     return cmp(rValue) <= 0;
   }
@@ -298,7 +295,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns true for greater than
    */
-  public final boolean gt(Value rValue)
+  public boolean gt(Value rValue)
   {
     return cmp(rValue) > 0;
   }
@@ -306,7 +303,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns true for greater than or equal to
    */
-  public final boolean geq(Value rValue)
+  public boolean geq(Value rValue)
   {
     return cmp(rValue) >= 0;
   }
@@ -1678,7 +1675,15 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns the field ref.
    */
-  public Value getField(Env env, String index)
+  public final Value getField(Env env, String index)
+  {
+    return getField(env, index, false);
+  }
+
+  /**
+   * Returns the field ref, optionally creating it if it does not exist.
+   */
+  public Value getField(Env env, String index, boolean create)
   {
     return NullValue.NULL;
   }

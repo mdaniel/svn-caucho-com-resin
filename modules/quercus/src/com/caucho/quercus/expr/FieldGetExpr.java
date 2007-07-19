@@ -65,6 +65,7 @@ public class FieldGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     Value obj = _objExpr.eval(env);
@@ -79,11 +80,21 @@ public class FieldGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalArg(Env env)
   {
     Value value = _objExpr.evalArg(env);
 
     return value.getFieldArg(env, _name);
+  }
+
+  @Override
+  public Value evalDirty(Env env)
+  {
+    // php/0228
+    Value obj = _objExpr.eval(env);
+
+    return obj.getField(env, _name, true);
   }
 
   /**
@@ -93,6 +104,7 @@ public class FieldGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalRef(Env env)
   {
     // quercus/0d1k
@@ -108,6 +120,7 @@ public class FieldGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalCopy(Env env)
   {
     Value obj = _objExpr.eval(env);
@@ -122,6 +135,7 @@ public class FieldGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public void evalAssign(Env env, Value value)
   {
     Value obj = _objExpr.evalObject(env);
@@ -136,6 +150,7 @@ public class FieldGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalArray(Env env)
   {
     Value obj = _objExpr.evalObject(env);
@@ -150,6 +165,7 @@ public class FieldGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalObject(Env env)
   {
     Value obj = _objExpr.evalObject(env);
@@ -165,6 +181,7 @@ public class FieldGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public void evalUnset(Env env)
   {
     Value obj = _objExpr.eval(env);
@@ -172,6 +189,7 @@ public class FieldGetExpr extends AbstractVarExpr {
     obj.removeField(_name);
   }
 
+  @Override
   public String toString()
   {
     return _objExpr + "->" + _name;

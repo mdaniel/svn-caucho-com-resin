@@ -166,7 +166,7 @@ public class ObjectExtValue extends ObjectValue
    * Gets a field value.
    */
   @Override
-  public Value getField(Env env, String key)
+  public Value getField(Env env, String key, boolean create)
   {
     int capacity = _entries.length;
 
@@ -178,7 +178,10 @@ public class ObjectExtValue extends ObjectValue
       Entry entry = _entries[hash];
 
       if (entry == null) {
-        return _cl.getField(env, this, key);
+        if (create)
+          return createEntry(key).getValue();
+        else
+          return _cl.getField(env, this, key);
       }
       else if (key.equals(entry.getKey())) {
         return entry.getValue();

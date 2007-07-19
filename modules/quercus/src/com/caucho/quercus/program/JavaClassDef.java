@@ -256,7 +256,7 @@ public class JavaClassDef extends ClassDef {
    * @param name
    * @return Value attained through invoking getter
    */
-  public Value getField(Env env, Object obj, String name)
+  public Value getField(Env env, Object obj, String name, boolean create)
   {
     AbstractJavaMethod get = _getMap.get(name);
     
@@ -288,6 +288,9 @@ public class JavaClassDef extends ClassDef {
         return NullValue.NULL;
       }
     }
+
+    if (create)
+      env.warning(L.l("field '{0}' is invalid"));
 
     return NullValue.NULL;
   }

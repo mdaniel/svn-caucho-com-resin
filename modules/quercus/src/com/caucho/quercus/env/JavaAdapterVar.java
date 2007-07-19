@@ -824,9 +824,9 @@ public class JavaAdapterVar extends Var
    * Returns the field ref.
    */
   @Override
-  public Value getField(Env env, String index)
+  public Value getField(Env env, String index, boolean create)
   {
-    return getValue().getField(env, index);
+    return getValue().getField(env, index, create);
   }
 
   /**

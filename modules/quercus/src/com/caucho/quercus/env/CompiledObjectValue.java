@@ -160,7 +160,7 @@ public class CompiledObjectValue extends ObjectValue
    * Gets a new value.
    */
   @Override
-  public Value getField(Env env, String key)
+  public Value getField(Env env, String key, boolean create)
   {
     if (_fields.length > 0) {
       int index = _cl.findFieldIndex(key);
@@ -169,8 +169,14 @@ public class CompiledObjectValue extends ObjectValue
 	return _fields[index].toValue();
     }
     
-    if (_object != null)
-      return _object.getField(env, key);
+    if (_object != null) {
+      return _object.getField(env, key, create);
+    }
+    else if (create) {
+      _object = new ObjectExtValue(_cl);
+
+      return _object.getField(env, key, create);
+    }
     else
       return UnsetValue.UNSET;
   }

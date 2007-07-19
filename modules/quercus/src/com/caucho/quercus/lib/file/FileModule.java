@@ -184,6 +184,7 @@ public class FileModule extends AbstractQuercusModule {
   public static boolean chroot(Env env, Path path)
   {
     if (path.isDirectory()) {
+      
       env.setPwd(path.createRoot());
 
       return true;

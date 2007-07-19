@@ -279,6 +279,79 @@ abstract public class ArrayValue extends Value {
    */
   abstract public void clear();
 
+  public int cmp(Value rValue)
+  {
+    return cmpImpl(rValue, 1);
+  }
+
+  private int cmpImpl(Value rValue, int resultIfKeyMissing)
+  {
+    // "if key from operand 1 is not found in operand 2 then
+    // arrays are uncomparable, otherwise - compare value by value"
+
+    // php/335h
+
+    if (!rValue.isArray())
+      return 1;
+
+    int lSize =  getSize();
+    int rSize = rValue.toArray().getSize();
+    
+    if (lSize != rSize)
+      return lSize < rSize ? -1 : 1;
+
+    for (Map.Entry<Value,Value> entry : entrySet()) {
+      Value lElementValue = entry.getValue();
+      Value rElementValue = rValue.get(entry.getKey());
+
+      if (!rElementValue.isset())
+        return resultIfKeyMissing;
+
+      int cmp = lElementValue.cmp(rElementValue);
+
+      if (cmp != 0)
+        return cmp;
+    }
+
+    return 0;
+  }
+
+  /**
+   * Returns true for less than
+   */
+  public boolean lt(Value rValue)
+  {
+    // php/335h
+    return cmpImpl(rValue, 1) < 0;
+  }
+
+  /**
+   * Returns true for less than or equal to
+   */
+  public boolean leq(Value rValue)
+  {
+    // php/335h
+    return cmpImpl(rValue, 1) <= 0;
+  }
+
+  /**
+   * Returns true for greater than
+   */
+  public boolean gt(Value rValue)
+  {
+    // php/335h
+    return cmpImpl(rValue, -1) > 0;
+  }
+
+  /**
+   * Returns true for greater than or equal to
+   */
+  public boolean geq(Value rValue)
+  {
+    // php/335h
+    return cmpImpl(rValue, -1) >= 0;
+  }
+
   /**
    * Adds a new value.
    */
@@ -566,20 +639,6 @@ abstract public class ArrayValue extends Value {
       return new ArrayValueImpl().put(value);
   }
 
-  /**
-   * Compare two arrays.
-   */
-  public int compareArray(ArrayValue rValue)
-  {
-    // XXX: "if key from operand 1 is not found in operand 2 then
-    // arrays are uncomparable, otherwise - compare value by value"
-    int lArraySize = this.getSize();
-    int rArraySize = rValue.getSize();
-
-    if (lArraySize < rArraySize) return -1;
-    if (lArraySize > rArraySize) return 1;
-    return 0;
-  }
 
   /**
    * Prints the value.

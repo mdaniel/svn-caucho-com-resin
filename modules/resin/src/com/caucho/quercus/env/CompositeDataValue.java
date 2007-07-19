@@ -30,17 +30,8 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.Value;
-
-import javax.management.Attribute;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.openmbean.*;
-import java.util.HashMap;
-import java.util.logging.Level;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.InvalidKeyException;
 import java.util.logging.Logger;
 
 public class CompositeDataValue extends Value {
@@ -58,9 +49,14 @@ public class CompositeDataValue extends Value {
    * Returns an attribute.
    */
   @Override
-  public Value getField(Env env, String attrName)
+  public Value getField(Env env, String attrName, boolean create)
   {
     try {
+      Object value = _data.get(attrName);
+
+      if (create && value == null)
+          env.warning(L.l("field '{0}' is invalid"));
+
       return env.wrapJava(_data.get(attrName));
     } catch (InvalidKeyException e) {
       env.warning(e);
