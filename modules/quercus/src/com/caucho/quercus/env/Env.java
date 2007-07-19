@@ -38,6 +38,7 @@ import com.caucho.quercus.lib.ExceptionClass;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.string.StringUtility;
+import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.page.QuercusPage;
@@ -1743,15 +1744,10 @@ public class Env {
 
           String value = decodeValue(cookie.getValue());
 
-          StringValue valueAsValue;
+          StringValue valueAsValue = new StringValueImpl(value);
 
-	  // PHP 6 removes magic_quotes
-	  /*
-          if (getIniBoolean("magic_quotes_gpc"))
-            valueAsValue = StringModule.addslashes(value);
-          else
-	  */
-	  valueAsValue = new StringValueImpl(value);
+          if (getIniBoolean("magic_quotes_gpc")) // php/0876
+            valueAsValue = StringModule.addslashes(valueAsValue);
 
           array.append(new StringValueImpl(cookie.getName()), valueAsValue);
         }

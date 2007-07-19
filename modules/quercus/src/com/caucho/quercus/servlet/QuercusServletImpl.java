@@ -52,6 +52,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,7 +95,19 @@ public class QuercusServletImpl
     try {
       Path path = getPath(request);
 
-      QuercusPage page = getQuercus().parse(path);
+      QuercusPage page;
+
+      try {
+        page = getQuercus().parse(path);
+      }
+      catch (FileNotFoundException ex) {
+        // php/2001
+        log.log(Level.FINER, ex.toString(), ex);
+
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+        return;
+      }
 
       StreamImpl out;
       

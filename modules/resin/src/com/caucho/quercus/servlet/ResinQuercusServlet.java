@@ -29,24 +29,23 @@
 
 package com.caucho.quercus.servlet;
 
-import com.caucho.config.ConfigException;
 import com.caucho.quercus.*;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
-import com.caucho.quercus.module.QuercusModule;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.server.connection.CauchoResponse;
-import com.caucho.server.session.SessionManager;
 import com.caucho.server.resin.Resin;
-import com.caucho.server.webapp.*;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Level;
@@ -95,7 +94,20 @@ public class ResinQuercusServlet extends QuercusServletImpl
     try {
       Path path = getPath(request);
 
-      QuercusPage page = getQuercus().parse(path);
+      QuercusPage page;
+
+      try {
+        page = getQuercus().parse(path);
+      }
+      catch (FileNotFoundException ex) {
+        // php/2001
+        log.log(Level.FINER, ex.toString(), ex);
+
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+        return;
+      }
+
 
       // XXX: check if correct.  PHP doesn't expect the lower levels
       // to deal with the encoding, so this may be okay
