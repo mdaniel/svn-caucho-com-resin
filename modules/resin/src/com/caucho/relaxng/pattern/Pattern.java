@@ -42,7 +42,8 @@ abstract public class Pattern {
   private Pattern _parent;
   private String _elementName;
 
-  private String _location;
+  private String _filename;
+  private int _line;
 
   /**
    * Returns the relax config name.
@@ -55,9 +56,17 @@ abstract public class Pattern {
   /**
    * Sets the pattern source location.
    */
-  public void setLocation(String location)
+  public void setFilename(String filename)
   {
-    _location = location;
+    _filename = filename;
+  }
+
+  /**
+   * Sets the pattern line
+   */
+  public void setLine(int line)
+  {
+    _line = line;
   }
 
   /**
@@ -65,8 +74,8 @@ abstract public class Pattern {
    */
   public String getLocation()
   {
-    if (_location != null)
-      return _location;
+    if (_filename != null)
+      return _filename + ":" + _line;
     else if (_parent != null)
       return _parent.getLocation();
     else

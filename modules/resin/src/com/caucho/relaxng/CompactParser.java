@@ -231,7 +231,7 @@ public class CompactParser {
     }
 
     if (token != NAMESPACE)
-      throw error(L.l("expected `namespace' at {0}", _cb));
+      throw error(L.l("expected 'namespace' at {0}", _cb));
       
     token = parseToken();
 
@@ -243,7 +243,7 @@ public class CompactParser {
     token = parseToken();
     
     if (token != '=')
-      throw error(L.l("expected `=' at {0}", _cb));
+      throw error(L.l("expected '=' at {0}", _cb));
 
     String value = parseLiteral();
 
@@ -275,7 +275,7 @@ public class CompactParser {
         if (next == '=')
           grammar.setStart(parsePattern(grammar));
         else
-          throw error(L.l("expected `=' at {0}", _cb));
+          throw error(L.l("expected '=' at {0}", _cb));
         break;
 
       case IDENTIFIER:
@@ -287,7 +287,7 @@ public class CompactParser {
           grammar.setDefinition(name, parsePattern(grammar));
         }
         else
-          throw error(L.l("expected `=' at {0}", _cb));
+          throw error(L.l("expected '=' at {0}", _cb));
         break;
 
       case INCLUDE:
@@ -469,7 +469,8 @@ public class CompactParser {
 
     case IDENTIFIER:
       pattern = new RefPattern(_grammar, _lexeme);
-      pattern.setLocation(getLocation());
+      pattern.setFilename(_filename);
+      pattern.setLine(_line);
       break;
 
     default:
@@ -517,7 +518,7 @@ public class CompactParser {
 
       token = parseToken();
       if (token != '}')
-        throw error(L.l("expected `}' at {0}", _cb));
+        throw error(L.l("expected '}' at {0}", _cb));
     }
 
     return elt;
@@ -545,7 +546,7 @@ public class CompactParser {
 
       token = parseToken();
       if (token != '}')
-        throw error(L.l("expected `}' at {0}", _cb));
+        throw error(L.l("expected '}' at {0}", _cb));
     }
 
     return elt;
@@ -594,7 +595,7 @@ public class CompactParser {
       NameClassPattern name = parseNameClass(grammar, isElement);
       ch = skipWhitespace();
       if (ch != ')')
-        throw error(L.l("expected `)' at `{0}'", String.valueOf((char) ch)));
+        throw error(L.l("expected ')' at '{0}'", String.valueOf((char) ch)));
       return name;
     }
     
@@ -607,7 +608,9 @@ public class CompactParser {
       _peek = ch;
 
     if (_cb.length() == 0)
-      throw error(L.l("expected name at `{0}'", String.valueOf((char) ch)));
+      throw error(L.l("expected name at '{0}'", String.valueOf((char) ch)));
+
+    NameClassPattern pattern;
 
     String lexeme = _cb.toString();
 
@@ -627,29 +630,44 @@ public class CompactParser {
       ns = _nsMap.get(prefix);
 
       if (ns == null && localName.equals("*"))
-        throw error(L.l("`{0}' does not match a defined namespace.", lexeme));
+        throw error(L.l("'{0}' does not match a defined namespace.", lexeme));
       
       if (ns == null) {// && isElement) {
-	return new NamePattern(new QName(lexeme, ""));
+	pattern = createNamePattern(lexeme, "");
+
+        return pattern;
       }
     }
 
     if (lexeme.equals("*")) {
-      AnyNamePattern pattern = new AnyNamePattern();
-      pattern.setExcept(parseExcept(grammar, isElement));
-      return pattern;
+      AnyNamePattern namePattern = new AnyNamePattern();
+      
+      namePattern.setExcept(parseExcept(grammar, isElement));
+      
+      return namePattern;
     }
     else if (localName.equals("*")) {
-      NsNamePattern pattern = new NsNamePattern(lexeme, ns);
-      pattern.setExcept(parseExcept(grammar, isElement));
-      return pattern;
+      NsNamePattern namePattern = new NsNamePattern(lexeme, ns);
+      
+      namePattern.setExcept(parseExcept(grammar, isElement));
+      
+      return namePattern;
     }
     else if ("".equals(ns) || ns == null) {
-      return new NamePattern(new QName(localName, ""));
+      pattern = createNamePattern(localName, "");
+
+      return pattern;
     }
     else {
-      return new NamePattern(new QName(lexeme, ns));
+      pattern = createNamePattern(lexeme, ns);
+
+      return pattern;
     }
+  }
+
+  private NamePattern createNamePattern(String localName, String namespace)
+  {
+    return new NamePattern(new QName(localName, namespace));
   }
 
   /**
@@ -716,7 +734,7 @@ public class CompactParser {
       do {
         ch = read();
         if (ch != '#')
-          throw error(L.l("expeced `#' at `{0}'", String.valueOf((char) ch)));
+          throw error(L.l("expeced '#' at '{0}'", String.valueOf((char) ch)));
         
         if (_cb.length() > 0)
           _cb.append('\n');
@@ -734,7 +752,6 @@ public class CompactParser {
       } while (ch == '#');
 
       _peek = ch;
-      _lexeme = _cb.toString();
       return COMMENT;
 
     default:
@@ -743,17 +760,20 @@ public class CompactParser {
           _cb.append((char) ch);
         }
         _peek = ch;
-        _lexeme = _cb.toString().intern();
 
-        int token = _tokenMap.get(_lexeme);
+        int token = _tokenMap.get(_cb);
 
-        if (token > 0)
+        if (token > 0) {
+          _lexeme = null;
           return token;
-        else
+        }
+        else {
+          _lexeme = _cb.toString().intern();
           return IDENTIFIER;
+        }
       }
       else {
-        throw error(L.l("Unknown character `{0}'", String.valueOf((char) ch)));
+        throw error(L.l("Unknown character '{0}'", String.valueOf((char) ch)));
       }
     }
   }
@@ -764,7 +784,7 @@ public class CompactParser {
     int end = skipWhitespace();
 
     if (end != '"' && end != '\'')
-      throw error(L.l("expected `\"' at `{0}'", String.valueOf((char) end)));
+      throw error(L.l("expected '\"' at '{0}'", String.valueOf((char) end)));
 
     _cb.clear();
     int ch = read();
@@ -773,7 +793,7 @@ public class CompactParser {
     }
 
     if (ch != end)
-      throw error(L.l("expected `\"' at `{0}'", String.valueOf((char) ch)));
+      throw error(L.l("expected '\"' at '{0}'", String.valueOf((char) ch)));
 
     return _cb.toString();
   }
@@ -785,7 +805,7 @@ public class CompactParser {
     int ch = skipWhitespace();
 
     if (! XmlChar.isNameChar(ch))
-      throw error(L.l("expected identifier character at `{0}'", String.valueOf((char) ch)));
+      throw error(L.l("expected identifier character at '{0}'", String.valueOf((char) ch)));
 
     _cb.clear();
     for (; XmlChar.isNameChar(ch); ch = read()) {
@@ -820,10 +840,12 @@ public class CompactParser {
   /**
    * Returns the current location string.
    */
+  /*
   public String getLocation()
   {
     return _filename + ":" + _line;
   }
+  */
 
   /**
    * Reads a character.
@@ -856,21 +878,21 @@ public class CompactParser {
   }
 
   static {
-    _tokenMap.put("namespace", NAMESPACE);
-    _tokenMap.put("default", DEFAULT);
+    _tokenMap.put(new CharBuffer("namespace"), NAMESPACE);
+    _tokenMap.put(new CharBuffer("default"), DEFAULT);
     
-    _tokenMap.put("start", START);
-    _tokenMap.put("div", DIV);
+    _tokenMap.put(new CharBuffer("start"), START);
+    _tokenMap.put(new CharBuffer("div"), DIV);
     
-    _tokenMap.put("element", ELEMENT);
-    _tokenMap.put("attribute", ATTRIBUTE);
+    _tokenMap.put(new CharBuffer("element"), ELEMENT);
+    _tokenMap.put(new CharBuffer("attribute"), ATTRIBUTE);
     
-    _tokenMap.put("text", TEXT);
-    _tokenMap.put("string", STRING);
-    _tokenMap.put("token", TOKEN);
+    _tokenMap.put(new CharBuffer("text"), TEXT);
+    _tokenMap.put(new CharBuffer("string"), STRING);
+    _tokenMap.put(new CharBuffer("token"), TOKEN);
     
-    _tokenMap.put("empty", EMPTY);
+    _tokenMap.put(new CharBuffer("empty"), EMPTY);
     
-    _tokenMap.put("include", INCLUDE);
+    _tokenMap.put(new CharBuffer("include"), INCLUDE);
   }
 }

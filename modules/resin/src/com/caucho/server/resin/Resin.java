@@ -681,7 +681,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     if (! _lifecycle.toActive())
       return;
 
-    long start = Alarm.getCurrentTime();
+    long start = Alarm.getExactTime();
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -718,7 +718,7 @@ public class Resin implements EnvironmentBean, SchemaBean
 	}
       */
 
-      log().info("Resin started in " + (Alarm.getCurrentTime() - _startTime) + "ms");
+      log().info("Resin started in " + (Alarm.getExactTime() - _startTime) + "ms");
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

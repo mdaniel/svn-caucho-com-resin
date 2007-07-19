@@ -116,6 +116,9 @@ public class LruCache<K,V> {
    */
   public void clear()
   {
+    if (_size1 == 0 && _size2 == 0)
+      return;
+    
     ArrayList<CacheListener> listeners = null;
 
     synchronized (this) {

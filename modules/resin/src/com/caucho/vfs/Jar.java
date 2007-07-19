@@ -42,12 +42,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
+import java.util.*;
+import java.util.jar.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -71,6 +67,7 @@ public class Jar implements CacheListener {
     = new EnvironmentLocal<Integer>("caucho.vfs.jar-size");
   
   private Path _backing;
+  private boolean _backingIsFile;
 
   private JarDepend _depend;
   
@@ -88,6 +85,7 @@ public class Jar implements CacheListener {
   // last time the zip file was modified
   private long _jarLastModified;
   private long _jarLength;
+  private Boolean _isSigned;
 
   // file to be closed
   private SoftReference<JarFile> _closeJarFileRef;
@@ -99,7 +97,13 @@ public class Jar implements CacheListener {
    */
   private Jar(Path backing)
   {
+    if (backing instanceof JarPath)
+      throw new IllegalStateException();
+    
     _backing = backing;
+    
+    _backingIsFile = (_backing.getScheme().equals("file")
+                      && _backing.canRead());
   }
 
   /**
@@ -192,6 +196,48 @@ public class Jar implements CacheListener {
     return _depend;
   }
 
+  private boolean isSigned()
+  {
+    Boolean isSigned = _isSigned;
+
+    if (isSigned != null)
+      return isSigned;
+
+    try {
+      Manifest manifest = getManifest();
+
+      if (manifest == null) {
+        _isSigned = Boolean.FALSE;
+        return false;
+      }
+
+      Map<String,Attributes> entries = manifest.getEntries();
+
+      if (entries == null) {
+        _isSigned = Boolean.FALSE;
+        return false;
+      }
+      
+      for (Attributes attr : entries.values()) {
+        for (Object key : attr.keySet()) {
+          String keyString = String.valueOf(key);
+
+          if (keyString.contains("Digest")) {
+            _isSigned = Boolean.TRUE;
+
+            return true;
+          }
+        }
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    _isSigned = Boolean.FALSE;
+    
+    return false;
+  }
+
   /**
    * Returns true if the entry is a file in the jar.
    *
@@ -221,6 +267,9 @@ public class Jar implements CacheListener {
    */
   public Certificate []getCertificates(String path)
   {
+    if (! isSigned())
+      return null;
+    
     if (path.length() > 0 && path.charAt(0) == '/')
       path = path.substring(1);
 
@@ -233,8 +282,8 @@ public class Jar implements CacheListener {
       InputStream is = null;
 
       try {
-	entry = (JarEntry) jarFile.getEntry(path);
-      
+	entry = jarFile.getJarEntry(path);
+
 	if (entry != null) {
 	  is = jarFile.getInputStream(entry);
 
@@ -452,56 +501,6 @@ public class Jar implements CacheListener {
     }
   }
 
-  /**
-   * Returns the named jar entry.
-   *
-   * @param path name in the jar file of the path.
-   *
-   * @return the jar entry or null.
-   */
-  private ZipEntry getSafeJarEntry(String path)
-  {
-    try {
-      return getJarEntry(path);
-    } catch (Exception e) {
-      _jarLastModified = 0;
-      _jarLength = 0;
-
-      try {
-	closeJarFile();
-      } catch (Exception e1) {
-      }
-      
-      try {
-	return getJarEntry(path);
-      } catch (Exception e1) {
-	log.log(Level.INFO, e1.toString(), e1);
-      
-	return null;
-      }
-    }
-  }
-
-  /**
-   * Returns the jar entry.  Since the entries are cached, this needs to
-   * reload the cache on a jar file change.
-   *
-   * @param path name in the jar file of the path.
-   */
-  private ZipEntry getJarEntry(String path)
-    throws IOException
-  {
-    if (path.startsWith("/"))
-      path = path.substring(1);
-    
-    JarFile jarFile = getJarFile();
-    
-    if (jarFile != null)
-      return jarFile.getEntry(path);
-    else
-      return null;
-  }
-
   private JarNode getJarNode(String path)
   {
     JarCache cache = null;
@@ -536,13 +535,46 @@ public class Jar implements CacheListener {
     closeJarFile();
 
     if (cache != null && path != null) {
-      if (path.endsWith("/"))
-        path = path.substring(0, path.length() - 1);
-      
       return cache.get(path);
     }
     else
       return null;
+  }
+
+  private JarCache getJarCache()
+  {
+    JarCache cache = null;
+
+    synchronized (this) {
+      if (_cacheRef != null)
+	cache = _cacheRef.get();
+      
+      if (! isCacheValid() || cache == null) {
+	try {
+	  JarFile file = getJarFile();
+
+	  if (file == null)
+	    return null;
+	  
+	  cache = new JarCache();
+
+	  _cacheRef = new SoftReference<JarCache>(cache);
+
+	  Enumeration<JarEntry> e = file.entries();
+	  while (e.hasMoreElements()) {
+	    JarEntry entry = e.nextElement();
+
+	    cache.add(entry);
+	  }
+	} catch (IOException e) {
+	  log.log(Level.FINE, e.toString(), e);
+	}
+      }
+    }
+
+    closeJarFile();
+
+    return cache;
   }
 
   /**
@@ -558,16 +590,14 @@ public class Jar implements CacheListener {
 
     isCacheValid();
     
-    // if (isCacheValid()) {
-      SoftReference<JarFile> jarFileRef = _jarFileRef;
+    SoftReference<JarFile> jarFileRef = _jarFileRef;
 
-      if (jarFileRef != null) {
-	jarFile = jarFileRef.get();
+    if (jarFileRef != null) {
+      jarFile = jarFileRef.get();
 	
-	if (jarFile != null)
-	  return jarFile;
-      }
-      //}
+      if (jarFile != null)
+        return jarFile;
+    }
 
     SoftReference<JarFile> oldJarRef = _jarFileRef;
     _jarFileRef = null;
@@ -588,7 +618,7 @@ public class Jar implements CacheListener {
       }
     }
 
-    if (_backing.getScheme().equals("file") && _backing.canRead()) {
+    if (_backingIsFile) {
       try {
         jarFile = new JarFile(_backing.getNativePath());
       }
@@ -651,6 +681,7 @@ public class Jar implements CacheListener {
       _jarLastModified = 0;
       _cacheRef = null;
       _depend = null;
+      _isSigned = null;
 
       JarFile oldCloseFile = null;
       if (_closeJarFileRef != null)

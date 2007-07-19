@@ -338,7 +338,8 @@ public class ChoiceItem extends Item {
   /**
    * Returns the next item on the match.
    */
-  public Item text(String data)
+  @Override
+  public Item text(CharSequence data)
     throws RelaxException
   {
     Item result = null;

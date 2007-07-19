@@ -76,11 +76,6 @@ public class QName implements Comparable, Serializable {
 	_localName = _fullName;
       }
     }
-    
-    if (_namespace != null)
-      _canonicalName = ("{" + _namespace + "}" + _localName).intern();
-    else
-      _canonicalName = _fullName;
   }
     
   public QName(String prefix, String localName, String namespace)
@@ -109,11 +104,6 @@ public class QName implements Comparable, Serializable {
     
     if (namespace != null)
       _namespace = namespace.intern();
-    
-    if (_namespace != null)
-      _canonicalName = ("{" + _namespace + "}" + _localName).intern();
-    else
-      _canonicalName = _fullName;
   }
 
   private void init(String prefix, String localName, String namespace)
@@ -139,11 +129,6 @@ public class QName implements Comparable, Serializable {
     }
     else if (namespace != null)
       _namespace = namespace.intern();
-
-    if (_namespace != null)
-      _canonicalName = ("{" + _namespace + "}" + localName).intern();
-    else
-      _canonicalName = _fullName;
   }
 
   public String getName()
@@ -163,6 +148,13 @@ public class QName implements Comparable, Serializable {
 
   public String getCanonicalName()
   {
+    if (_canonicalName == null) {
+      if (_namespace != null)
+        _canonicalName = ("{" + _namespace + "}" + _localName).intern();
+      else
+        _canonicalName = _fullName;
+    }
+    
     return _canonicalName;
   }
 
@@ -181,13 +173,10 @@ public class QName implements Comparable, Serializable {
    */
   public int hashCode()
   {
-    return _canonicalName.hashCode();
-    /*
     if (_namespace != null)
       return _localName.hashCode() * 65521 + _namespace.hashCode();
     else
-      return _localName.hashCode() * 65521;
-    */
+      return _localName.hashCode();
   }
 
   /**
@@ -203,8 +192,6 @@ public class QName implements Comparable, Serializable {
 
     QName name = (QName) b;
 
-    return _canonicalName == name._canonicalName;
-    /*
     if (_localName != name._localName)
       return false;
     
@@ -212,12 +199,6 @@ public class QName implements Comparable, Serializable {
       return false;
 
     return true;
-
-    if (_namespace != "")
-      return true;
-    else
-      return _prefix == bName._prefix;
-    */
   }
 
   public int compareTo(Object b)
@@ -248,8 +229,8 @@ public class QName implements Comparable, Serializable {
   public String toString()
   {
     if (_prefix != null)
-      return "QName[" + _prefix + ":" + _canonicalName + "]";
+      return "QName[" + _prefix + ":" + getCanonicalName() + "]";
     else
-      return "QName[" + _canonicalName + "]";
+      return "QName[" + getCanonicalName() + "]";
   }
 }

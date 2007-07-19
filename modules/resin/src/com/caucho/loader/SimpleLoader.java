@@ -233,21 +233,17 @@ public class SimpleLoader extends Loader {
   /**
    * Adds the class of this resource.
    */
-  protected String getClassPath(String head)
+  @Override
+  protected void buildClassPath(StringBuilder head)
   {
-    CharBuffer cb = new CharBuffer();
-
-    if (! head.equals("")) {
-      cb.append(head);
-      cb.append(Path.getPathSeparatorChar());
+    if (head.length() > 0) {
+      head.append(Path.getPathSeparatorChar());
     }
     
     if (_path instanceof JarPath)
-      cb.append(((JarPath) _path).getContainer().getNativePath());
+      head.append(((JarPath) _path).getContainer().getNativePath());
     else if (_path.isDirectory())
-      cb.append(_path.getNativePath());
-
-    return cb.toString();
+      head.append(_path.getNativePath());
   }
 
   /**

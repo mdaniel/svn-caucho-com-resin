@@ -99,7 +99,6 @@ public class IntrospectionMBean implements DynamicMBean {
 
     _mbeanInfo = introspect(impl, mbeanInterface, isLowercaseAttributeNames);
     _impl = impl;
-
   }
 
   /**
@@ -399,7 +398,8 @@ v   * Returns the open mbean unmarshaller for the given return type.
     return _mbeanInfo;
   }
 
-  static MBeanInfo introspect(Object obj, Class cl, boolean isLowercaseAttributeNames)
+  static MBeanInfo introspect(Object obj, Class cl,
+                              boolean isLowercaseAttributeNames)
     throws NotCompliantMBeanException
   {
     try {
@@ -434,8 +434,8 @@ v   * Returns the open mbean unmarshaller for the given return type.
         Class []args = method.getParameterTypes();
         Class retType = method.getReturnType();
 
-        if (methodName.startsWith("get") && args.length == 0 &&
-            ! retType.equals(void.class)) {
+        if (methodName.startsWith("get") && args.length == 0
+            && ! retType.equals(void.class)) {
 	  Method getter = method;
           String name = methodName.substring(3);
 

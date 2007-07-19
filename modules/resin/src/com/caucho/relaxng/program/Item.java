@@ -189,7 +189,7 @@ abstract public class Item {
   /**
    * Adds text.
    */
-  public Item text(String text)
+  public Item text(CharSequence text)
     throws RelaxException
   {
     return null;

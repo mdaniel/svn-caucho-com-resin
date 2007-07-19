@@ -335,7 +335,8 @@ public class InterleaveItem extends Item {
   /**
    * Returns the next item on some text
    */
-  public Item text(String string)
+  @Override
+  public Item text(CharSequence string)
     throws RelaxException
   {
     Item result = null;

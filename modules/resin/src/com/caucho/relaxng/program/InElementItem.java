@@ -171,7 +171,8 @@ public class InElementItem extends Item {
    *
    * @return the program for handling the element
    */
-  public Item text(String string)
+  @Override
+  public Item text(CharSequence string)
     throws RelaxException
   {
     Item nextElt = _eltItem.text(string);

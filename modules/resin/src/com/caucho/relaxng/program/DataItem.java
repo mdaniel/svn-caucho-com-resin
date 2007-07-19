@@ -65,7 +65,8 @@ public class DataItem extends Item {
   /**
    * Data repeats
    */
-  public Item text(String text)
+  @Override
+  public Item text(CharSequence text)
   {
     return this;
   }

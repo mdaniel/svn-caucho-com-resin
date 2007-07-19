@@ -60,6 +60,9 @@ public class JarPath extends FilesystemPath {
 
     if (_root == null)
       _root = this;
+
+    if (backing instanceof JarPath)
+      throw new IllegalStateException(backing.toString() + " is already a jar");
     
     _backing = backing;
   }
@@ -69,6 +72,9 @@ public class JarPath extends FilesystemPath {
    */
   public static JarPath create(Path backing)
   {
+    if (backing instanceof JarPath)
+      return (JarPath) backing;
+    
     JarPath path = _jarCache.get(backing);
 
     if (path == null) {

@@ -65,6 +65,8 @@ public class JarCache
     = new HashMap<String,JarNode>();
   private final JarNode _root;
 
+  private Boolean _isSigned;
+
   JarCache()
   {
     _root = new JarNode("", "");
@@ -83,6 +85,19 @@ public class JarCache
     JarNode node = addNode(name);
 
     node.fill(entry);
+
+    if (node.isDirectory())
+      _map.put(name + "/", node);
+  }
+
+  Boolean isSigned()
+  {
+    return _isSigned;
+  }
+
+  void setSigned(Boolean isSigned)
+  {
+    _isSigned = isSigned;
   }
 
   private JarNode addNode(String childName)

@@ -189,17 +189,16 @@ abstract public class Loader {
   /**
    * Adds the classpath of this loader.
    */
-  protected String getClassPath(String head)
+  protected void buildClassPath(StringBuilder head)
   {
-    return head;
   }
   
   /**
    * Adds the sourcepath of this loader.
    */
-  protected String getSourcePath(String head)
+  protected void buildSourcePath(StringBuilder head)
   {
-    return getClassPath(head);
+    buildClassPath(head);
   }
 
   /**

@@ -38,9 +38,7 @@ import com.caucho.relaxng.VerifierFilter;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.util.LruCache;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.*;
 import com.caucho.xml.DOMBuilder;
 import com.caucho.xml.QDocument;
 import com.caucho.xml.QName;
@@ -58,6 +56,7 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -413,21 +412,26 @@ public class Config {
     try {
       if (location == null)
 	return null;
-      
-      MergePath schemaPath = new MergePath();
-      schemaPath.addClassPath();
-      
-      Path path = schemaPath.lookup(location);
-      if (path.canRead()) {
-	// VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
-          
-	CompactVerifierFactoryImpl factory;
-	factory = new CompactVerifierFactoryImpl();
 
-	return factory.compileSchema(path);
-      }
-      else
-	return null;
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+
+      if (loader == null)
+        loader = ClassLoader.getSystemClassLoader();
+      
+      URL url = loader.getResource(location);
+      
+      if (url == null)
+        return null;
+      
+      Path path = Vfs.lookup(url.toString());
+
+      // VerifierFactory factory = VerifierFactory.newInstance("http://caucho.com/ns/compact-relax-ng/1.0");
+          
+      CompactVerifierFactoryImpl factory;
+      factory = new CompactVerifierFactoryImpl();
+
+      return factory.compileSchema(path);
     } catch (IOException e) {
       throw e;
     } catch (Exception e) {

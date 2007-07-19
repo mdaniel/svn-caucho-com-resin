@@ -395,18 +395,18 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (_lifecycle.isDestroyed())
       throw new IllegalStateException(L().l("can't add jars after closing"));
 
-    if (jar.isDirectory()) {
-      SimpleLoader loader = new SimpleLoader();
-      loader.setPath(jar);
-      addLoader(loader);
-    }
-    else {
+    if (jar instanceof JarPath || jar.isFile()) {
       if (_jarLoader == null) {
         _jarLoader = new JarLoader();
         addLoader(_jarLoader);
       }
 
       _jarLoader.addJar(jar);
+    }
+    else {
+      SimpleLoader loader = new SimpleLoader();
+      loader.setPath(jar);
+      addLoader(loader);
     }
   }
 
@@ -784,22 +784,31 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public final String getClassPath()
   {
+    StringBuilder head = new StringBuilder();
+
+    buildClassPath(head);
+
+    return head.toString();
+  }
+
+  /**
+   * Fill data for the class path.  fillClassPath() will add all 
+   * .jar and .zip files in the directory list.
+   */
+  protected final void buildClassPath(StringBuilder head)
+  {
     ClassLoader parent = getParent();
 
-    String head;
-
     if (parent instanceof DynamicClassLoader)
-      head = (((DynamicClassLoader) parent).getClassPath());
+      ((DynamicClassLoader) parent).buildClassPath(head);
     else
-      head = CauchoSystem.getClassPath();
+      head.append(CauchoSystem.getClassPath());
 
     for (int i = 0; i < _loaders.size(); i++) {
       Loader loader = _loaders.get(i);
 
-      head = loader.getClassPath(head);
+      loader.buildClassPath(head);
     }
-
-    return head;
   }
 
   /**
@@ -808,15 +817,15 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public final String getLocalClassPath()
   {
-    String head = "";
+    StringBuilder head = new StringBuilder();
 
     for (int i = 0; i < _loaders.size(); i++) {
       Loader loader = _loaders.get(i);
 
-      head = loader.getClassPath(head);
+      buildClassPath(head);
     }
 
-    return head;
+    return head.toString();
   }
 
   /**
@@ -825,22 +834,31 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public final String getSourcePath()
   {
+    StringBuilder head = new StringBuilder();
+
+    buildSourcePath(head);
+
+    return head.toString();
+  }
+
+  /**
+   * Fill data for the class path.  fillSourcePath() will add all 
+   * .jar and .zip files in the directory list.
+   */
+  protected final void buildSourcePath(StringBuilder head)
+  {
     ClassLoader parent = getParent();
 
-    String head;
-
     if (parent instanceof DynamicClassLoader)
-      head = (((DynamicClassLoader) parent).getSourcePath());
+      ((DynamicClassLoader) parent).buildSourcePath(head);
     else
-      head = CauchoSystem.getClassPath();
+      head.append(CauchoSystem.getClassPath());
 
     for (int i = 0; i < _loaders.size(); i++) {
       Loader loader = _loaders.get(i);
 
-      head = loader.getSourcePath(head);
+      loader.buildSourcePath(head);
     }
-
-    return head;
   }
 
   /**
@@ -850,12 +868,12 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     ClassLoader parent = getParent();
 
-    String head = "";
+    StringBuilder head = new StringBuilder();
     int size = _loaders != null ? _loaders.size() : 0;
     for (int i = 0; i < size; i++) {
       Loader loader = _loaders.get(i);
 
-      head = loader.getSourcePath(head);
+      buildSourcePath(head);
     }
 
     String tail;
@@ -864,12 +882,16 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     else
       tail = CauchoSystem.getClassPath();
 
-    if (head == null || head.equals(""))
+    if (head == null || head.length() == 0)
       return tail;
     if (tail == null || tail.equals(""))
-      return head;
-    else
-      return head + CauchoSystem.getPathSeparatorChar() + tail;
+      return head.toString();
+    else {
+      head.append(CauchoSystem.getPathSeparatorChar());
+      head.append(tail);
+      
+      return head.toString();
+    }
   }
 
   /**

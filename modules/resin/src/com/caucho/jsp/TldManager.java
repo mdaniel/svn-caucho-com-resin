@@ -43,7 +43,6 @@ import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
-import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
@@ -189,10 +188,7 @@ public class TldManager {
     
     taglibs.addAll(_globalTaglibs);
 
-    MergePath classPath = new MergePath();
-    classPath.addClassPath();
-
-    ArrayList<Path> paths = classPath.getMergePaths();
+    ArrayList<Path> paths = getClassPath();
 
     for (int i = 0; i < paths.size(); i++) {
       Path subPath = paths.get(i);
@@ -246,12 +242,10 @@ public class TldManager {
 
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
-      thread.setContextClassLoader(TldManager.class.getClassLoader());
+      ClassLoader globalLoader = TldManager.class.getClassLoader();
+      thread.setContextClassLoader(globalLoader);
       try {
-	MergePath globalClassPath = new MergePath();
-	globalClassPath.addClassPath();
-	
-	ArrayList<Path> paths = globalClassPath.getMergePaths();
+	ArrayList<Path> paths = getClassPath(globalLoader);
 	_globalPaths = paths;
 
 	loadClassPathTlds(globalTaglibs, paths, "");
@@ -666,8 +660,8 @@ public class TldManager {
       
     String schema = null;
 
-    if (_webApp.getJsp() == null ||
-	_webApp.getJsp().isValidateTaglibSchema()) {
+    if (_webApp.getJsp() == null
+        || _webApp.getJsp().isValidateTaglibSchema()) {
       schema = getSchema();
     }
 
@@ -742,5 +736,62 @@ public class TldManager {
       return path;
     else
       return null;
+  }
+
+  /**
+   * Adds the classpath as paths in the MergePath.
+   */
+  private ArrayList<Path> getClassPath()
+  {
+    return getClassPath(Thread.currentThread().getContextClassLoader());
+  }
+  
+  /**
+   * Adds the classpath for the loader as paths in the MergePath.
+   *
+   * @param loader class loader whose classpath should be used to search.
+   */
+  private ArrayList<Path> getClassPath(ClassLoader loader)
+  {
+    String classpath = null;
+    
+    if (loader instanceof DynamicClassLoader)
+      classpath = ((DynamicClassLoader) loader).getClassPath();
+    else
+      classpath = CauchoSystem.getClassPath();
+
+    return getClassPath(classpath);
+  }
+  
+  /**
+   * Adds the classpath for the loader as paths in the MergePath.
+   *
+   * @param classpath class loader whose classpath should be used to search.
+   */
+  private ArrayList<Path> getClassPath(String classpath)
+  {
+    ArrayList<Path> list = new ArrayList<Path>();
+    
+    char sep = CauchoSystem.getPathSeparatorChar();
+    int head = 0;
+    int tail = 0;
+    while (head < classpath.length()) {
+      tail = classpath.indexOf(sep, head);
+
+      String segment = null;
+      if (tail < 0) {
+        segment = classpath.substring(head);
+        head = classpath.length();
+      }
+      else {
+        segment = classpath.substring(head, tail);
+        head = tail + 1;
+      }
+
+      if (! segment.equals(""))
+        list.add(Vfs.lookup(segment));
+    }
+
+    return list;
   }
 }

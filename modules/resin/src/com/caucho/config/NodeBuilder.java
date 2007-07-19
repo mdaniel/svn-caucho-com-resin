@@ -36,12 +36,7 @@ import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
-import com.caucho.xml.QAbstractNode;
-import com.caucho.xml.QDocument;
-import com.caucho.xml.QElement;
-import com.caucho.xml.QName;
-import com.caucho.xml.QNode;
-import com.caucho.xml.XmlUtil;
+import com.caucho.xml.*;
 
 import org.w3c.dom.*;
 
@@ -80,6 +75,9 @@ public class NodeBuilder {
 
   private ConfigELContext _elContext;
   private ELResolver _varResolver;
+
+  private ArrayList<Dependency> _dependList;
+  private Document _dependDocument;
 
   NodeBuilder()
   {
@@ -340,13 +338,22 @@ public class NodeBuilder {
 				   Node top)
     throws Exception
   {
-    NamedNodeMap attrList = top.getAttributes();
-    if (attrList != null) {
-      int length = attrList.getLength();
-      for (int i = 0; i < length; i++) {
-	Node child = attrList.item(i);
+    if (top instanceof QAttributedNode) {
+      Node child = ((QAttributedNode) top).getFirstAttribute();
 
-	configureAttributeImpl(typeStrategy, bean, child);
+      for (; child != null; child = child.getNextSibling()) {
+        configureAttributeImpl(typeStrategy, bean, child);
+      }
+    }
+    else {
+      NamedNodeMap attrList = top.getAttributes();
+      if (attrList != null) {
+        int length = attrList.getLength();
+        for (int i = 0; i < length; i++) {
+          Node child = attrList.item(i);
+
+          configureAttributeImpl(typeStrategy, bean, child);
+        }
       }
     }
   }
@@ -413,8 +420,15 @@ public class NodeBuilder {
       builder.setNode(bean, qelt);
       */
 
+      QDocument doc = (QDocument) qelt.getOwnerDocument();
+
+      if (doc == _dependDocument)
+        return _dependList;
+
+      _dependDocument = doc;
+
       ArrayList<Path> pathList;
-      pathList = ((QDocument) qelt.getOwnerDocument()).getDependList();
+      pathList = doc.getDependList();
 
       if (pathList != null) {
         dependList = new ArrayList<Dependency>();
@@ -423,6 +437,8 @@ public class NodeBuilder {
           dependList.add(new Depend(pathList.get(i)));
         }
       }
+
+      _dependList = dependList;
     }
 
     return dependList;
@@ -599,11 +615,21 @@ public class NodeBuilder {
   {
     Node ptr;
 
-    NamedNodeMap attrList = node.getAttributes();
-    if (attrList != null) {
-      for (int i = 0; i < attrList.getLength(); i++) {
-	if (! attrList.item(i).getNodeName().startsWith("xml"))
-	  return true;
+    if (node instanceof QAttributedNode) {
+      Node attr = ((QAttributedNode) node).getFirstAttribute();
+
+      for (; attr != null; attr = attr.getNextSibling()) {
+        if (! attr.getNodeName().startsWith("xml"))
+          return true;
+      }
+    }
+    else if (node instanceof Element) {
+      NamedNodeMap attrList = node.getAttributes();
+      if (attrList != null) {
+        for (int i = 0; i < attrList.getLength(); i++) {
+          if (! attrList.item(i).getNodeName().startsWith("xml"))
+            return true;
+        }
       }
     }
 
@@ -617,12 +643,21 @@ public class NodeBuilder {
 
   static String getValue(QName name, Node node, String defaultValue)
   {
+    /*
     NamedNodeMap attrList = node.getAttributes();
     if (attrList != null) {
       for (int i = 0; i < attrList.getLength(); i++) {
 	if (attrList.item(i).getNodeName().equals(name.getName()))
 	  return attrList.item(i).getNodeValue();
       }
+    }
+    */
+
+    if (node instanceof Element) {
+      String value = ((Element) node).getAttribute(name.getName());
+
+      if (! "".equals(value))
+        return value;
     }
 
     Node ptr;

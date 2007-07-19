@@ -776,12 +776,11 @@ public class CompilingLoader extends Loader implements Make {
    * @param head the overriding classpath
    * @return the new classpath
    */
-  protected String getClassPath(String head)
+  @Override
+  protected void buildClassPath(StringBuilder head)
   {
-    CharBuffer cb = new CharBuffer();
-
     if (! _classDir.getScheme().equals("file"))
-      return head;
+      return;
 
     try {
       if (! _classDir.isDirectory() && _sourceDir.isDirectory()) {
@@ -791,25 +790,21 @@ public class CompilingLoader extends Loader implements Make {
         }
       }
 
-      cb.append(head);
-
       if (_classDir.isDirectory()) {
-        if (cb.length() > 0)
-          cb.append(CauchoSystem.getPathSeparatorChar());
-        cb.append(_classDir.getNativePath());
+        if (head.length() > 0)
+          head.append(CauchoSystem.getPathSeparatorChar());
+        
+        head.append(_classDir.getNativePath());
       }
     
       if (! _classDir.equals(_sourceDir)) {
-        if (cb.length() > 0)
-          cb.append(CauchoSystem.getPathSeparatorChar());
-        cb.append(_sourceDir.getNativePath());
+        if (head.length() > 0)
+          head.append(CauchoSystem.getPathSeparatorChar());
+        
+        head.append(_sourceDir.getNativePath());
       }
-
-      return cb.close();
     } catch (java.security.AccessControlException e) {
       log.log(Level.WARNING, e.toString(), e);
-      
-      return head;
     }
   }
 
@@ -843,9 +838,10 @@ public class CompilingLoader extends Loader implements Make {
     return cb.close();
   }
 
-  protected String getSourcePath(String head)
+  @Override
+  protected void buildSourcePath(StringBuilder head)
   {
-    return getClassPath(head);
+    buildClassPath(head);
 
     /* XXX: getClassPath already includes the source path
     if (! sourceDir.getScheme().equals("file"))

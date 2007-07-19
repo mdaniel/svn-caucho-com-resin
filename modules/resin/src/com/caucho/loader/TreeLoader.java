@@ -243,22 +243,18 @@ public class TreeLoader extends Loader implements Dependency
    * Fill data for the class path.  fillClassPath() will add all 
    * .jar and .zip files in the directory list.
    */
-  protected String getClassPath(String head)
+  @Override
+  protected void buildClassPath(StringBuilder head)
   {
-    CharBuffer cb = new CharBuffer();
-
-    cb.append(head);
-
     for (int i = 0; i < _jarList.size(); i++) {
       JarEntry jarEntry = _jarList.get(i);
       JarPath jar = jarEntry.getJarPath();
 
-      if (cb.length() > 0)
-        cb.append(Path.getPathSeparatorChar());
-      cb.append(jar.getContainer().getNativePath());
+      if (head.length() > 0)
+        head.append(Path.getPathSeparatorChar());
+      
+      head.append(jar.getContainer().getNativePath());
     }
-
-    return cb.close();
   }
 
   /**

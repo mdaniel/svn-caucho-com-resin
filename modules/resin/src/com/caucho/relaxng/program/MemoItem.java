@@ -174,7 +174,8 @@ public class MemoItem extends Item {
   /**
    * Adds text.
    */
-  public Item text(String text)
+  @Override
+  public Item text(CharSequence text)
     throws RelaxException
   {
     Item item = _item.text(text);

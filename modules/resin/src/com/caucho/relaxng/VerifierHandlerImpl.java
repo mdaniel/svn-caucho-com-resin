@@ -284,13 +284,13 @@ public class VerifierHandlerImpl extends DefaultHandler
       return;
 
     _hasText = false;
-    String string = _text.toString();
-    _text.clear();
 
     try {
-      Item newItem = _item.text(string);
-
+      Item newItem = _item.text(_text);
+      
       if (newItem == null) {
+        String string = _text.toString();
+
 	Item parentItem = _itemStack.get(_itemStack.size() - 1);
 	
         throw new RelaxException(L.l("The following text is not allowed in this context.\n{0}\n{1}", string,
@@ -298,8 +298,10 @@ public class VerifierHandlerImpl extends DefaultHandler
 							_name.getName(), null)));
       }
 
+      _text.clear();
       _item = newItem;                  
     } catch (Exception e) {
+      _text.clear();
       error(e);
     }
   }

@@ -66,7 +66,8 @@ public class TextItem extends Item {
   /**
    * Text repeats
    */
-  public Item text(String text)
+  @Override
+  public Item text(CharSequence text)
   {
     return this;
   }

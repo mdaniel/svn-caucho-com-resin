@@ -100,8 +100,10 @@ public class EnvironmentTypeStrategy extends BeanTypeStrategy {
     ArrayList<Dependency> dependencyList = builder.getDependencyList(node);
 
     if (dependencyList != null) {
-      for (Dependency dependency : dependencyList) {
-        Environment.addDependency(dependency);
+      int size = dependencyList.size();
+
+      for (int i = 0; i < size; i++) {
+        Environment.addDependency(dependencyList.get(i));
       }
     }
   }

@@ -140,7 +140,7 @@ public class PathBuilder {
    */
   public static String rewritePathString(String pathName)
   {
-    CharBuffer cb = new CharBuffer();
+    StringBuilder cb = new StringBuilder();
 
     int length = pathName.length();
     for (int i = 0; i < length; i++) {
@@ -187,6 +187,6 @@ public class PathBuilder {
         cb.append('$');
     }
     
-    return cb.close();
+    return cb.toString();
   }
 }

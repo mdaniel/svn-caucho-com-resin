@@ -109,15 +109,7 @@ public class GrammarPattern extends Pattern {
    */
   public void mergeInclude(GrammarPattern grammar)
   {
-    Iterator<String> names = grammar._definitions.keySet().iterator();
-
-    while (names.hasNext()) {
-      String name = names.next();
-
-      Pattern includePattern = grammar._definitions.get(name);
-
-      _definitions.put(name, includePattern);
-    }
+    _definitions.putAll(grammar._definitions);
   }
 
   /**
