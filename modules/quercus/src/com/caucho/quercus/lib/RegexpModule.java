@@ -2370,6 +2370,7 @@ public class RegexpModule
     PREG_QUOTE['>'] = true;
     PREG_QUOTE['|'] = true;
     PREG_QUOTE[':'] = true;
+    PREG_QUOTE['.'] = true;
 
   }
 }
