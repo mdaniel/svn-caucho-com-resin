@@ -372,6 +372,17 @@ public class NullValue extends Value
   {
     return LongValue.create( - rLong);
   }
+  
+  /**
+   * Returns true for equality
+   */
+  public boolean eq(Value rValue)
+  {
+    if (rValue.isString())
+      return toString().equals(rValue.toString());
+    else
+      return toBoolean() == rValue.toBoolean();
+  }
 
   /**
    * Returns true for equality

@@ -186,7 +186,7 @@ public class StringBuilderValue extends UnicodeValue
     int len = _length;
 
     if (len == 0)
-      return true;
+      return false;
 
     int i = 0;
     char ch = _buffer[0];

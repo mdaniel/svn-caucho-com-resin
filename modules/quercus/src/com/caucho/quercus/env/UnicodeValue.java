@@ -72,10 +72,30 @@ abstract public class UnicodeValue extends StringValue {
   {
     rValue = rValue.toValue();
 
-    if (rValue instanceof BooleanValue) {
+    if (rValue.isUnicode()) {
+      if (equals(rValue))
+        return true;
+    }
+    else if (rValue.isBinary()) {
+      if (equals(rValue.toUnicodeValue(Env.getInstance())))
+        return true;
+    }
+    else if (rValue instanceof LongValue) {
+      return toLong() == rValue.toLong();
+    }
+    else if (rValue instanceof DoubleValue) {
+      return toDouble() == rValue.toDouble();
+    }
+    else if (rValue instanceof BooleanValue) {
       return toBoolean() == rValue.toBoolean();
     }
 
+    if (isNumberConvertible() && rValue.isNumberConvertible())
+      return toDouble() == rValue.toDouble();
+    else
+      return equals(rValue.toStringValue());
+    
+    /*
     int type = getNumericType();
 
     if (type == IS_STRING) {
@@ -94,6 +114,7 @@ abstract public class UnicodeValue extends StringValue {
       return toDouble() == rValue.toDouble();
     else
       return equals(rValue.toStringValue());
+    */
   }
 
 }

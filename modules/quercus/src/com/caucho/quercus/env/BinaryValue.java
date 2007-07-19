@@ -212,6 +212,30 @@ abstract public class BinaryValue extends StringValue
   {
     rValue = rValue.toValue();
 
+    if (rValue.isBinary()) {
+      if (equals(rValue))
+        return true;
+    }
+    else if (rValue.isUnicode()) {
+      if (toUnicodeValue(Env.getInstance()).equals(rValue))
+        return true;
+    }
+    else if (rValue instanceof LongValue) {
+      return toLong() == rValue.toLong();
+    }
+    else if (rValue instanceof DoubleValue) {
+      return toDouble() == rValue.toDouble();
+    }
+    else if (rValue instanceof BooleanValue) {
+      return toBoolean() == rValue.toBoolean();
+    }
+
+    if (isNumberConvertible() && rValue.isNumberConvertible())
+      return toDouble() == rValue.toDouble();
+    else
+      return equals(rValue.toStringValue());
+    
+    /*
     if (rValue instanceof BooleanValue) {
       return toBoolean() == rValue.toBoolean();
     }
@@ -235,6 +259,7 @@ abstract public class BinaryValue extends StringValue
       return toDouble() == rValue.toDouble();
     else
       return equals(rValue.toStringValue());
+    */
   }
   
   abstract public byte[] toBytes();
