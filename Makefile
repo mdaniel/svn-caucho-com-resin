@@ -1,5 +1,4 @@
-PREFIX=/home/nam/caucho/resin
-LIBEXEC=libexec
+PREFIX=/Users/ferg/ws/resin
 
 all	: 
 	(cd modules/c/src; $(MAKE))
@@ -11,8 +10,8 @@ install	:
 	(cd modules/c/src; $(MAKE) install)
 	if test $(PREFIX) != `pwd`; then \
 	  mkdir -p $(PREFIX)/lib; \
-	  mkdir -p $(PREFIX)/$(LIBEXEC); \
-	  cp -r libexec/* $(PREFIX)/$(LIBEXEC); \
+	  mkdir -p $(PREFIX)/libexec; \
+	  cp -r libexec/* $(PREFIX)/libexec; \
 	  cp lib/*.jar $(PREFIX)/lib; \
 	  mkdir -p $(PREFIX)/bin; \
 	  cp bin/* $(PREFIX)/bin; \
