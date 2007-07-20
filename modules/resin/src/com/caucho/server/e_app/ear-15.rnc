@@ -18,7 +18,9 @@ javaee_application = element application {
 
   javaee_module+,
 
-  javaee_security-role*
+  javaee_security-role*,
+
+  javaee_library-directory?
 }
 
 ## path to rar connector
@@ -32,6 +34,8 @@ javaee_ejb = element ejb { javaee_path }
 
 ## path to application client module
 javaee_java = element java { javaee_path }
+
+javaee_library-directory = element library-directory { javaee_path }
 
 javaee_module = element module {
   attribute id { string }?,

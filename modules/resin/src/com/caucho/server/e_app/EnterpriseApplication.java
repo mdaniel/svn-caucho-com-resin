@@ -85,6 +85,8 @@ public class EnterpriseApplication
   private WebAppContainer _container;
   private String _version;
 
+  private String _libraryDirectory;
+
   private boolean _hasModule;
 
   // private WarDirApplicationGenerator _warDeploy;
@@ -128,6 +130,12 @@ public class EnterpriseApplication
       Environment.addDependency(new Depend(controller.getArchivePath()), _loader);
   }
 
+  // ejb/0fa0
+  public EnterpriseApplication()
+  {
+    _lifecycle = new Lifecycle(log, toString(), Level.INFO);
+  }
+
   /**
    * Sets the name.
    */
@@ -143,6 +151,22 @@ public class EnterpriseApplication
   public String getName()
   {
     return _name;
+  }
+
+  /**
+   * Sets the library directory.
+   */
+  public void setLibraryDirectory(String libraryDirectory)
+  {
+    _libraryDirectory = libraryDirectory;
+  }
+
+  /**
+   * Gets the library directory.
+   */
+  public String getLibraryDirectory()
+  {
+    return _libraryDirectory;
   }
 
   /**
@@ -453,8 +477,14 @@ public class EnterpriseApplication
   private void fillDefaultLib()
     throws Exception
   {
-    if (_rootDir.lookup("lib").isDirectory()) {
-      Path lib = _rootDir.lookup("lib");
+    String libDir = "lib";
+
+    // ejb/0fa0
+    if (_libraryDirectory != null)
+      libDir = _libraryDirectory;
+
+    if (_rootDir.lookup(libDir).isDirectory()) {
+      Path lib = _rootDir.lookup(libDir);
 
       for (String file : lib.list()) {
         if (file.endsWith(".jar")) {

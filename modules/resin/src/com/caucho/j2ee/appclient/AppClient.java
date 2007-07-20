@@ -40,6 +40,7 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.soa.client.WebServiceClient;
+import com.caucho.server.e_app.EnterpriseApplication;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
@@ -57,6 +58,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import java.io.InputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -82,6 +84,7 @@ public class AppClient implements EnvironmentBean
   private Path _workDirectory;
   private String _mainClassName;
   private Path _clientJar;
+  private Path _earFile;
 
   private ArrayList<Path> _configList = new ArrayList<Path>();
 
@@ -171,6 +174,11 @@ public class AppClient implements EnvironmentBean
     _clientJar = clientJar;
   }
 
+  public void setEarFile(Path earFile)
+  {
+    _earFile = earFile;
+  }
+
   public void setMainClass(String mainClassName)
   {
     _mainClassName = mainClassName;
@@ -247,6 +255,41 @@ public class AppClient implements EnvironmentBean
 
     _loader.setId(toString());
     _loader.addJar(_clientJar);
+
+    // ejb/0fa2
+    if (_earFile != null) {
+      Path deployDir = _earFile.getParent();
+
+      String s = _earFile.getTail();
+
+      s = "_ear_" + s.substring(0, s.length() - 4);
+
+      s = deployDir + "/" + s + "/";
+
+      String libDir = "lib";
+
+      Path applicationXml = Vfs.lookup(s + "META-INF/application.xml");
+
+      EnterpriseApplication eapp = new EnterpriseApplication();
+
+      InputStream is = applicationXml.openRead();
+
+      new Config().configure(eapp, is,
+                             "com/caucho/server/e_app/ear.rnc");
+
+      // ejb/0fa0
+      libDir = eapp.getLibraryDirectory();
+
+      Path lib = Vfs.lookup(s + libDir);
+
+      for (String file : lib.list()) {
+        if (file.endsWith(".jar")) {
+          Path sharedLib = lib.lookup(file);
+
+          _loader.addJar(sharedLib);
+        }
+      }
+    }
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -354,6 +397,7 @@ public class AppClient implements EnvironmentBean
     throws Throwable
   {
     String clientJar = null;
+    String earFile = null;
     String main = null;
     String conf = null;
     String workDir = null;
@@ -373,6 +417,10 @@ public class AppClient implements EnvironmentBean
         }
         else if (option.equals("client-jar")) {
           clientJar = args[++i];
+          continue;
+        }
+        else if (option.equals("ear-file")) {
+          earFile = args[++i];
           continue;
         }
         else if (option.equals("work-dir")) {
@@ -398,6 +446,9 @@ public class AppClient implements EnvironmentBean
 
     if (clientJar != null)
       appClient.setClientJar(Vfs.lookup(clientJar));
+
+    if (earFile != null)
+      appClient.setEarFile(Vfs.lookup(earFile));
 
     if (conf != null)
       appClient.addConfig(Vfs.lookup(conf));
