@@ -62,26 +62,26 @@ public class StatelessAssembler extends SessionAssembler
    * Adds the header component.
    */
   public void addHeaderComponent(JClass beanClass,
-				 String contextClassName,
-				 String implClassName)
+                                 String contextClassName,
+                                 String implClassName)
   {
     _genClass.addComponent(new StatelessBean(_sessionBean,
-					     beanClass,
-					     contextClassName));
+                                             beanClass,
+                                             contextClassName));
   }
 
   /**
    * Creates the home view.
    */
   public ViewClass createHomeView(JClass homeClass,
-				  String fullClassName,
-				  String viewPrefix)
+                                  String fullClassName,
+                                  String viewPrefix)
   {
     SessionHomeView homeView = new SessionHomeView(homeClass,
-						   fullClassName,
-						   viewPrefix,
-						   true);
-    
+                                                   fullClassName,
+                                                   viewPrefix,
+                                                   true);
+
     _genClass.addComponent(homeView);
 
     return homeView;
@@ -91,13 +91,13 @@ public class StatelessAssembler extends SessionAssembler
    * Creates the home view.
    */
   public ViewClass createView(ArrayList<JClass> apiList,
-			      String fullClassName,
-			      String viewPrefix)
+                              String fullClassName,
+                              String viewPrefix)
   {
     SessionView view = new SessionView(apiList,
-				       fullClassName,
-				       viewPrefix,
-				       true);
+                                       fullClassName,
+                                       viewPrefix,
+                                       true);
 
     _genClass.addComponent(view);
 
@@ -113,7 +113,7 @@ public class StatelessAssembler extends SessionAssembler
 
     CallChain call = method.getCall();
 
-    call = new SessionPoolChain(call);
+    call = new SessionPoolChain(call, method);
 
     method.setCall(call);
 

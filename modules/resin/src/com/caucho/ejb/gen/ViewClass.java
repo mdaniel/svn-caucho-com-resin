@@ -52,18 +52,18 @@ public class ViewClass extends BaseClass {
    * Adds the pool chaining.
    */
   public BaseMethod createCreateMethod(JMethod apiMethod,
-				       JMethod implMethod,
-				       String fullClassName,
-				       String viewPrefix)
+                                       JMethod implMethod,
+                                       String fullClassName,
+                                       String viewPrefix)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
   public BaseMethod createCreateMethod(EjbEntityBean bean,
-				       JMethod api,
-				       JMethod create,
-				       JMethod postCreate,
-				       String fullClassName)
+                                       JMethod api,
+                                       JMethod create,
+                                       JMethod postCreate,
+                                       String fullClassName)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -74,17 +74,17 @@ public class ViewClass extends BaseClass {
   public BaseMethod createBusinessMethod(EjbMethod ejbMethod)
   {
     BaseMethod method = new BaseMethod(ejbMethod.getApiMethod(),
-				       ejbMethod.getImplMethod());
+                                       ejbMethod.getImplMethod());
 
-    method.setCall(createPoolChain(method.getCall()));
-		    
+    method.setCall(createPoolChain(method.getCall(), method));
+
     return method;
   }
 
   /**
    * Adds the pool chaining.
    */
-  public CallChain createPoolChain(CallChain call)
+  public CallChain createPoolChain(CallChain call, BaseMethod method)
   {
     return call;
   }

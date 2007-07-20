@@ -30,6 +30,7 @@
 package com.caucho.ejb.gen;
 
 import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
 import com.caucho.java.gen.FilterCallChain;
 import com.caucho.util.L10N;
@@ -39,14 +40,14 @@ import java.io.IOException;
 /**
  * The pooling interceptor for stateless session beans.
  */
-public class StatelessPoolChain extends FilterCallChain {
+public class StatelessPoolChain extends SessionPoolChain {
   private static L10N L = new L10N(StatelessPoolChain.class);
 
-  public StatelessPoolChain(CallChain next)
+  public StatelessPoolChain(CallChain next, BaseMethod method)
   {
-    super(next);
+    super(next, method);
   }
-  
+
   /**
    * Prints a call within the same JVM
    *
@@ -55,23 +56,25 @@ public class StatelessPoolChain extends FilterCallChain {
    * @param args the call's arguments
    */
   public void generateCall(JavaWriter out, String retVar,
-			   String var, String []args)
+                           String var, String []args)
     throws IOException
   {
     out.println("Bean ptr = _context._ejb_begin(trans);");
-    
+
     out.println("try {");
     out.pushDepth();
 
-    super.generateCall(out, retVar, "ptr", args);
-    
+    generateCallInterceptors(out, args);
+
+    generateFilterCall(out, retVar, "ptr", args);
+
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
     out.pushDepth();
     out.println("ptr = null;");
 
     out.println("throw e;");
-    
+
     out.popDepth();
 
     out.println("} finally {");

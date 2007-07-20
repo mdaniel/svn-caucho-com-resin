@@ -32,6 +32,7 @@ package com.caucho.ejb.gen;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JClassLoader;
 import com.caucho.ejb.cfg.EjbSessionBean;
+import com.caucho.ejb.cfg.Interceptor;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.util.L10N;
@@ -48,16 +49,16 @@ public class SessionBean extends ClassComponent {
   private EjbSessionBean _bean;
   private JClass _ejbClass;
   protected String _contextClassName;
-  
+
   public SessionBean(EjbSessionBean bean,
-		     JClass ejbClass,
-		     String contextClassName)
+                     JClass ejbClass,
+                     String contextClassName)
   {
     _bean = bean;
     _ejbClass = ejbClass;
     _contextClassName = contextClassName;
   }
-  
+
   public void generate(JavaWriter out)
     throws IOException
   {
@@ -65,7 +66,7 @@ public class SessionBean extends ClassComponent {
 
     generateNewInstance(out);
     generateNewRemoteInstance(out);
-    
+
     generateBean(out);
   }
 
@@ -77,7 +78,7 @@ public class SessionBean extends ClassComponent {
 
     if (p > 0)
       shortContextName = shortContextName.substring(p + 1);
-    
+
     out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\"" + _contextClassName + "\");");
     out.println();
     out.println("com.caucho.ejb.xa.EjbTransactionManager _xaManager;");
@@ -88,7 +89,7 @@ public class SessionBean extends ClassComponent {
     out.println("  super(server);");
     out.println("  _xaManager = server.getContainer().getTransactionManager();");
     out.println("}");
-    
+
     out.println();
     out.println("Bean _ejb_begin(com.caucho.ejb.xa.TransactionContext trans)");
     out.println("  throws javax.ejb.EJBException");
@@ -108,7 +109,7 @@ public class SessionBean extends ClassComponent {
     out.println("throw new EJBException(\"session bean is not reentrant\");");
     out.popDepth();
     out.println("}");
-    
+
     out.println();
     out.println("void _ejb_free(Bean bean)");
     out.println("  throws javax.ejb.EJBException");
@@ -123,10 +124,10 @@ public class SessionBean extends ClassComponent {
     out.println("    return;");
     out.println("  }");
     out.println("}");
-    
+
     out.popDepth();
     out.println("}");
-    
+
     out.println();
     out.println("public void destroy()");
     out.println("{");
@@ -136,7 +137,7 @@ public class SessionBean extends ClassComponent {
     out.println("  ptr = _freeBean;");
     out.println("  _freeBean = null;");
     out.println("}");
-    
+
     if (hasMethod("ejbRemove", new JClass[0])) {
       out.println();
       out.println("try {");
@@ -156,32 +157,32 @@ public class SessionBean extends ClassComponent {
     // ejb/0g27
     if (_bean.getLocalHome() == null && _bean.getLocalList().size() == 0)
       return;
-    
+
     out.println();
     out.println("protected Object _caucho_newInstance()");
     out.println("{");
     out.pushDepth();
-    
+
     out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
 
     out.println("Bean bean = new Bean(cxt);");
-    
+
     out.println("cxt._ejb_free(bean);");
-    
+
     out.println();
 
     /*
-    Class retType = getReturnType();
-    if ("RemoteHome".equals(_prefix))
-      out.println("return (" + retType.getName() + ") cxt.getRemoteView();");
-    else if ("LocalHome".equals(_prefix))
-      out.println("return (" + retType.getName() + ") cxt.getLocalView();");
-    else
-      throw new IOException(L.l("trying to create unknown type {0}",
-				_prefix));
+      Class retType = getReturnType();
+      if ("RemoteHome".equals(_prefix))
+        out.println("return (" + retType.getName() + ") cxt.getRemoteView();");
+      else if ("LocalHome".equals(_prefix))
+        out.println("return (" + retType.getName() + ") cxt.getLocalView();");
+      else
+        throw new IOException(L.l("trying to create unknown type {0}",
+                              _prefix));
     */
     out.println("return cxt.getEJBLocalObject();");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -192,7 +193,7 @@ public class SessionBean extends ClassComponent {
     // ejb/0g27
     if (_bean.getRemoteHome() == null && _bean.getRemoteList().size() == 0)
       return;
-    
+
     out.println();
     out.println("protected Object _caucho_newRemoteInstance()");
     out.println("{");
@@ -201,23 +202,23 @@ public class SessionBean extends ClassComponent {
     out.println(_contextClassName + " cxt = new " + _contextClassName + "(_server);");
 
     out.println("Bean bean = new Bean(cxt);");
-    
+
     out.println("cxt._ejb_free(bean);");
-    
+
     out.println();
 
     /*
-    Class retType = getReturnType();
-    if ("RemoteHome".equals(_prefix))
-      out.println("return (" + retType.getName() + ") cxt.getRemoteView();");
-    else if ("LocalHome".equals(_prefix))
-      out.println("return (" + retType.getName() + ") cxt.getLocalView();");
-    else
-      throw new IOException(L.l("trying to create unknown type {0}",
-				_prefix));
+      Class retType = getReturnType();
+      if ("RemoteHome".equals(_prefix))
+        out.println("return (" + retType.getName() + ") cxt.getRemoteView();");
+      else if ("LocalHome".equals(_prefix))
+        out.println("return (" + retType.getName() + ") cxt.getLocalView();");
+      else
+        throw new IOException(L.l("trying to create unknown type {0}",
+                              _prefix));
     */
     out.println("return cxt.getEJBObject();");
-    
+
     out.popDepth();
     out.println("}");
   }
@@ -237,6 +238,14 @@ public class SessionBean extends ClassComponent {
     out.println(_contextClassName + " _ejb_context;");
     out.println("boolean _ejb_isActive;");
 
+    int i = 0;
+
+    for (Interceptor interceptor : _bean.getInterceptors()) {
+      String clName = interceptor.getInterceptorClass();
+
+      out.println("Object _interceptor" + i++ + ";");
+    }
+
     out.println();
     out.println("Bean(" + _contextClassName + " context)");
     out.println("{");
@@ -249,7 +258,7 @@ public class SessionBean extends ClassComponent {
 
     out.println("try {");
     out.pushDepth();
-    
+
     out.println("_ejb_context = context;");
 
     if (hasMethod("setSessionContext", new JClass[] { JClassLoader.systemForName(SessionContext.class.getName()) })) {
@@ -266,6 +275,62 @@ public class SessionBean extends ClassComponent {
     out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
     out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
     out.println("}");
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("public javax.interceptor.InvocationContext __caucho_callInterceptors(Object []args)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("javax.interceptor.InvocationContext invocationContext;");
+
+    // XXX: invocation context pool ???
+    out.println();
+    out.println("invocationContext = new com.caucho.ejb.interceptor.InvocationContextImpl();");
+    out.println("invocationContext.setParameters(args);");
+
+    out.println();
+    out.println("try {");
+    out.pushDepth();
+
+    i = 0;
+
+    for (Interceptor interceptor : _bean.getInterceptors()) {
+      String aroundInvokeMethodName = interceptor.getAroundInvokeMethodName();
+      String clName = interceptor.getInterceptorClass();
+
+      int j = i++;
+
+      out.println("Class cl" + j + " = Class.forName(\"" + clName + "\");");
+
+      out.println();
+      out.println("if (_interceptor" + j + " == null) {");
+      out.println("  _interceptor" + j + " = cl" + j + ".newInstance();");
+      out.println("}");
+
+      out.println();
+      out.println("java.lang.reflect.Method method" + j + " = cl" + j + ".getDeclaredMethod(\"" + aroundInvokeMethodName + "\", new Class[] { javax.interceptor.InvocationContext.class });");
+
+      // XXX: private/protected methods. Restore access after making it accessible?
+      out.println("com.caucho.ejb.cfg.Interceptor.makeAccessible(method" + j + ");");
+      out.println();
+
+      out.println();
+      out.println("method" + j + ".invoke(_interceptor" + j + ", new Object[] { invocationContext });");
+    }
+
+    out.popDepth();
+    out.println("} catch (RuntimeException e) {");
+    out.println("  throw e;");
+    out.println("} catch (Throwable e) {");
+    out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
+    out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
+    out.println("}");
+
+    out.println();
+    out.println("return invocationContext;");
 
     out.popDepth();
     out.println("}");

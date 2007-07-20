@@ -39,8 +39,8 @@ import com.caucho.ejb.cfg.EjbBean;
 import com.caucho.ejb.cfg.EjbMethod;
 import com.caucho.ejb.cfg.EjbMethodPattern;
 import com.caucho.ejb.cfg.EjbSessionBean;
-import com.caucho.ejb.cfg.MethodSignature;
 import com.caucho.ejb.cfg.EjbMessageBean;
+import com.caucho.ejb.cfg.MethodSignature;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -58,9 +58,9 @@ public class Bean {
   private static final Logger log = Log.open(Bean.class);
 
   private ClassLoader _loader;
-  
+
   private EjbServerManager _ejbManager;
-  
+
   private JClass _type;
   private String _name;
 
@@ -69,7 +69,7 @@ public class Bean {
   public Bean(EjbServerManager ejbManager)
   {
     _loader = Thread.currentThread().getContextClassLoader();
-    
+
     _ejbManager = ejbManager;
   }
 
@@ -97,7 +97,7 @@ public class Bean {
 
     if (_type == null) {
       throw new ConfigException(L.l("'{0}' is an unknown type",
-				    typeName));
+                                    typeName));
     }
     else if (_type.getAnnotation(Stateless.class) != null) {
     }
@@ -109,7 +109,7 @@ public class Bean {
     }
     else
       throw new ConfigException(L.l("{0} is an unknown bean type.  Beans expect MessageDriven, Entity, Stateful, or Stateless class annotations.",
-				    _type.getName()));
+                                    _type.getName()));
   }
 
   /**
@@ -135,13 +135,13 @@ public class Bean {
 
     try {
       if (stateless != null)
-	configureStateless(_type);
+        configureStateless(_type);
       else if (stateful != null)
-	configureStateful(_type);
+        configureStateful(_type);
       else if (messageDriven != null)
         configureMessageDriven(_type);
       else
-	throw new ConfigException(L.l("only stateless beans are currently supported."));
+        throw new ConfigException(L.l("only stateless beans are currently supported."));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -153,14 +153,14 @@ public class Bean {
     throws ConfigException
   {
     String className = type.getName();
-    
+
     JAnnotation stateless = type.getAnnotation(Stateless.class);
 
     EjbSessionBean bean = new EjbSessionBean(_ejbManager.getConfig(), getEJBModuleName());
     bean.setAllowPOJO(true);
 
     bean.setSessionType("Stateless");
-    
+
     JAnnotation transaction = type.getAnnotation(TransactionManagement.class);
     if (transaction == null)
       bean.setTransactionType("Container");
@@ -177,7 +177,7 @@ public class Bean {
     throws ConfigException
   {
     String className = type.getName();
-    
+
     JAnnotation stateful = type.getAnnotation(Stateful.class);
 
     EjbSessionBean bean = new EjbSessionBean(_ejbManager.getConfig(), getEJBModuleName());
@@ -200,15 +200,15 @@ public class Bean {
     /**
      // how does xa work for mdb?
 
-    JAnnotation transaction = type.getAnnotation(TransactionManagement.class);
-    if (transaction == null)
-      bean.setTransactionType("Container");
-    else if (TransactionManagementType.BEAN.equals(transaction.get("value")))
-      bean.setTransactionType("Bean");
-    else {
-      bean.setTransactionType("Container");
-    }
-     */
+     JAnnotation transaction = type.getAnnotation(TransactionManagement.class);
+     if (transaction == null)
+       bean.setTransactionType("Container");
+     else if (TransactionManagementType.BEAN.equals(transaction.get("value")))
+       bean.setTransactionType("Bean");
+     else {
+       bean.setTransactionType("Container");
+     }
+    */
 
     configureBean(bean, type, messageDriven.getString("name"));
   }
@@ -223,105 +223,104 @@ public class Bean {
       _ejbManager.getConfig().setBeanConfig(bean.getEJBName(), bean);
 
       /*
-      String name = _name;
+        String name = _name;
 
-      if (name == null || name.equals(""))
-	name = defaultName;
+        if (name == null || name.equals(""))
+          name = defaultName;
 
-      if (name == null || name.equals("")) {
-	String className = type.getName();
-      
-	int p = className.lastIndexOf('.');
+        if (name == null || name.equals("")) {
+          String className = type.getName();
 
-	if (p > 0)
-	  name = className.substring(p + 1);
-	else
-	  name = className;
-      }
+        int p = className.lastIndexOf('.');
 
-      bean.setEJBName(name);
+        if (p > 0)
+          name = className.substring(p + 1);
+        else
+          name = className;
+        }
 
-      JAnnotation local = type.getAnnotation(Local.class);
-      if (local != null) {
-	Object []values = (Object []) local.get("value");
+        bean.setEJBName(name);
 
-	for (int i = 0; i < values.length; i++) {
-	  JClass localClass = (JClass) values[i];
-	  
-	  bean.setLocalWrapper(localClass);
-	}
+        JAnnotation local = type.getAnnotation(Local.class);
+        if (local != null) {
+          Object []values = (Object []) local.get("value");
 
-      }
+          for (int i = 0; i < values.length; i++) {
+            JClass localClass = (JClass) values[i];
 
-      JAnnotation remote = type.getAnnotation(Remote.class);
-      if (remote != null) {
-	Object []values = (Object []) remote.get("value");
+            bean.setLocalWrapper(localClass);
+          }
+        }
 
-	for (int i = 0; i < values.length; i++) {
-	  JClass remoteClass = (JClass) values[i];
-	  
-	  bean.setRemoteWrapper(remoteClass);
-	}
-      }
+        JAnnotation remote = type.getAnnotation(Remote.class);
+        if (remote != null) {
+          Object []values = (Object []) remote.get("value");
 
-      JClass []ifs = type.getInterfaces();
+          for (int i = 0; i < values.length; i++) {
+            JClass remoteClass = (JClass) values[i];
 
-      ArrayList<JClass> interfaceList = new ArrayList<JClass>();
+            bean.setRemoteWrapper(remoteClass);
+          }
+        }
 
-      for (int i = 0; i < ifs.length; i++) {
-	local = ifs[i].getAnnotation(Local.class);
+        JClass []ifs = type.getInterfaces();
 
-	if (local != null) {
-	  bean.setLocalWrapper(ifs[i]);
-	  continue;
-	}
-      
-	remote = ifs[i].getAnnotation(Remote.class);
+        ArrayList<JClass> interfaceList = new ArrayList<JClass>();
 
-	if (remote != null || ifs[i].isAssignableTo(java.rmi.Remote.class)) {
-	  bean.setRemoteWrapper(ifs[i]);
-	  continue;
-	}
+        for (int i = 0; i < ifs.length; i++) {
+          local = ifs[i].getAnnotation(Local.class);
 
-	if (ifs[i].getName().equals("java.io.Serializable"))
-	  continue;
-	
-	if (ifs[i].getName().equals("java.rmi.Remote"))
-	  continue;
+          if (local != null) {
+            bean.setLocalWrapper(ifs[i]);
+            continue;
+          }
 
-	interfaceList.add(ifs[i]);
-      }
+          remote = ifs[i].getAnnotation(Remote.class);
 
-      if (bean.getLocal() != null || bean.getRemote() != null) {
-      }
-      else if (interfaceList.size() == 0)
-	throw new ConfigException(L.l("'{0}' has no interfaces.  Can't currently generate.",
-				      type.getName()));
-      else if (interfaceList.size() != 1)
-	throw new ConfigException(L.l("'{0}' has multiple interfaces, but none are marked as @Local or @Remote.",
-				      type.getName()));
-      else {
-	bean.setLocalWrapper(interfaceList.get(0));
-      }
+          if (remote != null || ifs[i].isAssignableTo(java.rmi.Remote.class)) {
+            bean.setRemoteWrapper(ifs[i]);
+            continue;
+          }
 
-      JAnnotation xa = type.getAnnotation(TransactionAttribute.class);
-      if (xa != null) {
-	MethodSignature sig = new MethodSignature();
-	sig.setMethodName("*");
+          if (ifs[i].getName().equals("java.io.Serializable"))
+            continue;
 
-	EjbMethodPattern pattern = bean.createMethod(sig);
+          if (ifs[i].getName().equals("java.rmi.Remote"))
+            continue;
 
-	setPatternTransaction(pattern, xa);
-      }
+          interfaceList.add(ifs[i]);
+        }
 
-      configureMethods(bean, type);
+        if (bean.getLocal() != null || bean.getRemote() != null) {
+        }
+        else if (interfaceList.size() == 0)
+          throw new ConfigException(L.l("'{0}' has no interfaces.  Can't currently generate.",
+                                    type.getName()));
+        else if (interfaceList.size() != 1)
+          throw new ConfigException(L.l("'{0}' has multiple interfaces, but none are marked as @Local or @Remote.",
+                                    type.getName()));
+        else {
+          bean.setLocalWrapper(interfaceList.get(0));
+        }
 
-      for (int i = 0; i < _initList.size(); i++)
-	bean.addInitProgram(_initList.get(i).getBuilderProgram());
+        JAnnotation xa = type.getAnnotation(TransactionAttribute.class);
+        if (xa != null) {
+          MethodSignature sig = new MethodSignature();
+          sig.setMethodName("*");
 
-      bean.init();
+          EjbMethodPattern pattern = bean.createMethod(sig);
 
-      _ejbManager.getConfig().setBeanConfig(bean.getEJBName(), bean);
+          setPatternTransaction(pattern, xa);
+        }
+
+        configureMethods(bean, type);
+
+        for (int i = 0; i < _initList.size(); i++)
+          bean.addInitProgram(_initList.get(i).getBuilderProgram());
+
+        bean.init();
+
+        _ejbManager.getConfig().setBeanConfig(bean.getEJBName(), bean);
       */
     } catch (ConfigException e) {
       throw e;
@@ -339,19 +338,19 @@ public class Bean {
 
     for (int i = 0; i < methods.length; i++) {
       JMethod method = methods[i];
-      
+
       JAnnotation xa = method.getAnnotation(TransactionAttribute.class);
 
       if (xa != null) {
-	EjbMethodPattern pattern = bean.createMethod(getSignature(method));
+        EjbMethodPattern pattern = bean.createMethod(getSignature(method));
 
-	setPatternTransaction(pattern, xa);
+        setPatternTransaction(pattern, xa);
       }
     }
   }
 
   private void setPatternTransaction(EjbMethodPattern pattern,
-				     JAnnotation xa)
+                                     JAnnotation xa)
     throws ConfigException
   {
     TransactionAttributeType xaType;
@@ -361,27 +360,27 @@ public class Bean {
     case REQUIRED:
       pattern.setTransaction(EjbMethod.TRANS_REQUIRED);
       break;
-	  
+
     case REQUIRES_NEW:
       pattern.setTransaction(EjbMethod.TRANS_REQUIRES_NEW);
       break;
-	  
+
     case MANDATORY:
       pattern.setTransaction(EjbMethod.TRANS_MANDATORY);
       break;
-	  
+
     case SUPPORTS:
       pattern.setTransaction(EjbMethod.TRANS_SUPPORTS);
       break;
-	  
+
     case NOT_SUPPORTED:
       pattern.setTransaction(EjbMethod.TRANS_NOT_SUPPORTED);
       break;
-	  
+
     case NEVER:
       pattern.setTransaction(EjbMethod.TRANS_NEVER);
       break;
-      
+
     default:
       throw new IllegalStateException();
     }
@@ -405,15 +404,15 @@ public class Bean {
 
   /*
   private void configureInject(EjbBean bean,
-			       JMethod method,
-			       Inject inject)
+                               JMethod method,
+                               Inject inject)
     throws ConfigException
   {
     JClass []paramTypes = method.getParameterTypes();
 
     if (paramTypes.length != 1)
       throw new ConfigException(L.l("method '{0}' must have a single value for injection.",
-				    method.getName()));
+                                    method.getName()));
 
     JClass paramType = paramTypes[0];
 
@@ -423,7 +422,7 @@ public class Bean {
     if (DataSource.class.isAssignableFrom(paramType)) {
       prefix = "jdbc/";
     }
-    
+
     if (jndiName != null && ! jndiName.equals("")) {
     }
     else if (UserTransaction.class.equals(paramType)) {
@@ -433,21 +432,21 @@ public class Bean {
       jndiName = method.getName();
 
       if (jndiName.startsWith("set") && jndiName.length() > 3) {
-	jndiName = jndiName.substring(3);
+        jndiName = jndiName.substring(3);
 
-	char ch = jndiName.charAt(0);
-	
-	if (Character.isUpperCase(ch) &&
-	    (jndiName.length() == 4 ||
-	     Character.isLowerCase(jndiName.charAt(1)))) {
-	  jndiName = Character.toLowerCase(ch) + jndiName.substring(1);
-	}
+        char ch = jndiName.charAt(0);
+
+        if (Character.isUpperCase(ch) &&
+            (jndiName.length() == 4 ||
+             Character.isLowerCase(jndiName.charAt(1)))) {
+          jndiName = Character.toLowerCase(ch) + jndiName.substring(1);
+        }
       }
     }
 
     int colon = jndiName.indexOf(':');
     int slash = jndiName.indexOf('/');
-    
+
     if (colon < 0 || slash > 0 && slash < colon)
       jndiName = "java:comp/env/" + prefix + jndiName;
 

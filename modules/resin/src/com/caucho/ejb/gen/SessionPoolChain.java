@@ -28,7 +28,9 @@
 
 package com.caucho.ejb.gen;
 
+import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
 import com.caucho.java.gen.FilterCallChain;
 import com.caucho.util.L10N;
@@ -41,11 +43,15 @@ import java.io.IOException;
 public class SessionPoolChain extends FilterCallChain {
   private static L10N L = new L10N(SessionPoolChain.class);
 
-  public SessionPoolChain(CallChain next)
+  private BaseMethod _method;
+
+  public SessionPoolChain(CallChain next, BaseMethod method)
   {
     super(next);
+
+    _method = method;
   }
-  
+
   /**
    * Prints a call within the same JVM
    *
@@ -54,23 +60,25 @@ public class SessionPoolChain extends FilterCallChain {
    * @param args the call's arguments
    */
   public void generateCall(JavaWriter out, String retVar,
-			   String var, String []args)
+                           String var, String []args)
     throws IOException
   {
     out.println("Bean ptr = _context._ejb_begin(trans);");
-    
+
     out.println("try {");
     out.pushDepth();
 
+    generateCallInterceptors(out, args);
+
     super.generateCall(out, retVar, "ptr", args);
-    
+
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
     out.pushDepth();
     out.println("ptr = null;");
 
     out.println("throw e;");
-    
+
     out.popDepth();
 
     out.println("} finally {");
@@ -80,5 +88,73 @@ public class SessionPoolChain extends FilterCallChain {
 
     out.popDepth();
     out.println("}");
+  }
+
+  protected void generateFilterCall(JavaWriter out, String retVar,
+                                    String var, String []args)
+    throws IOException
+  {
+    super.generateCall(out, retVar, "ptr", args);
+  }
+
+  protected void generateCallInterceptors(JavaWriter out, String []args)
+    throws IOException
+  {
+    String argList = "";
+
+    boolean isFirst = true;
+
+    for (String arg : args) {
+      if (isFirst)
+        isFirst = false;
+      else
+        argList += ", ";
+
+      argList += arg;
+    }
+
+    out.println("javax.interceptor.InvocationContext invocationContext;");
+    out.println();
+
+    out.println("invocationContext = ptr.__caucho_callInterceptors(new Object[] {" + argList + "});");
+    out.println();
+
+    out.println("Object parameters[] = invocationContext.getParameters();");
+    out.println();
+
+    JClass types[] = _method.getParameterTypes();
+
+    for (int i = 0; i < args.length; i++) {
+      String typeName = types[i].getName();
+
+      out.print(args[i] + " = ");
+
+      String s = "parameters[" + i + "]";
+
+      if (! types[i].isPrimitive())
+        out.print("(" + typeName + ") " + s + ";");
+      else {
+        Class primitiveType = (Class) types[i].getJavaClass();
+
+        if (primitiveType == Boolean.TYPE)
+          out.print("((Boolean) " + s + ").booleanValue();");
+        else if (primitiveType == Byte.TYPE)
+          out.print("((Byte) " + s + ").byteValue();");
+        else if (primitiveType == Character.TYPE)
+          out.print("((Character) " + s + ").charValue();");
+        else if (primitiveType == Double.TYPE)
+          out.print("((Double) " + s + ").doubleValue();");
+        else if (primitiveType == Float.TYPE)
+          out.print("((Float) " + s + ").floatValue();");
+        else if (primitiveType == Integer.TYPE)
+          out.print("((Integer) " + s + ").intValue();");
+        else if (primitiveType == Long.TYPE)
+          out.print("((Long) " + s + ").longValue();");
+        else if (primitiveType == Short.TYPE)
+          out.print("((Short) " + s + ").shortValue();");
+      }
+    }
+
+    out.println();
   }
 }
