@@ -71,19 +71,25 @@ public class EjbJar {
   public void setDisplayName(String value)
   {
   }
-  
+
   public EjbEnterpriseBeans createEnterpriseBeans()
     throws ConfigException
   {
     return new EjbEnterpriseBeans(_config, _ejbModuleName);
   }
-  
+
+  public Interceptors createInterceptors()
+    throws ConfigException
+  {
+    return new Interceptors(_config, _ejbModuleName);
+  }
+
   public Relationships createRelationships()
     throws ConfigException
   {
     return new Relationships(_config);
   }
-  
+
   public AssemblyDescriptor createAssemblyDescriptor()
     throws ConfigException
   {

@@ -42,6 +42,7 @@ import com.caucho.config.types.MessageDestinationRef;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.amber.AmberConfig;
+import com.caucho.ejb.cfg.Interceptor;
 import com.caucho.ejb.gen.BeanAssembler;
 import com.caucho.ejb.gen.TransactionChain;
 import com.caucho.ejb.gen.UserInRoleChain;
@@ -64,6 +65,7 @@ import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
+import javax.interceptor.Interceptors;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -134,6 +136,9 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     = new ArrayList<BuilderProgram>();
   private BuilderProgramContainer _serverProgram;
 
+  private ArrayList<Interceptor> _interceptors
+    = new ArrayList<Interceptor>();
+
   private long _transactionTimeout;
 
   /**
@@ -147,6 +152,37 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
     _loader = Thread.currentThread().getContextClassLoader();
 
     _jClassLoader = JClassLoaderWrapper.create(_loader);
+  }
+
+  /**
+   * Returns the interceptors.
+   */
+  public ArrayList<Interceptor> getInterceptors()
+  {
+    return _interceptors;
+  }
+
+  /**
+   * Adds a new interceptor.
+   */
+  public void addInterceptor(Interceptor interceptor)
+  {
+    _interceptors.add(interceptor);
+  }
+
+  /**
+   * Returns true if the interceptor is already configured.
+   */
+  public boolean containsInterceptor(Class interceptorClass)
+  {
+    for (Interceptor interceptor : _interceptors) {
+      String className = interceptor.getInterceptorClass();
+
+      if (className.equals(interceptorClass.getName()))
+        return true;
+    }
+
+    return false;
   }
 
   /**
@@ -842,6 +878,40 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
   public void initIntrospect()
     throws ConfigException
   {
+    JAnnotation interceptorsAnn = _ejbClass.getAnnotation(Interceptors.class);
+
+    if (interceptorsAnn != null) {
+      for (Class cl : (Class []) interceptorsAnn.get("value")) {
+        // XXX: ejb/0fb0
+        if (! containsInterceptor(cl)) {
+          addInterceptor(configureInterceptor(cl));
+        }
+      }
+    }
+  }
+
+  private Interceptor configureInterceptor(Class cl)
+    throws ConfigException
+  {
+    JClass type = _jClassLoader.forName(cl.getName());
+
+    if (type == null)
+      throw new ConfigException(L.l("'{0}' is an unknown interceptor type",
+                                    cl.getName()));
+
+    try {
+      Interceptor interceptor = new Interceptor();
+
+      interceptor.setInterceptorClass(cl.getName());
+
+      interceptor.init();
+
+      return interceptor;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -1389,7 +1459,7 @@ public class EjbBean implements EnvironmentBean, DependencyBean {
                                           methods[i].getFullName());
 
         CallChain call = new MethodCallChain(beanMethod);
-        call = view.createPoolChain(call);
+        call = view.createPoolChain(call, null);
         call = getTransactionChain(call, beanMethod, prefix);
         call = getSecurityChain(call, beanMethod, prefix);
 

@@ -62,7 +62,7 @@ public class EjbSessionBean extends EjbBean {
 
   private boolean _isStateless;
   private boolean _isContainerTransaction;
-  
+
   /**
    * Creates a new session bean configuration.
    */
@@ -94,12 +94,12 @@ public class EjbSessionBean extends EjbBean {
       throw error(L.l("'{0}' must not be abstract.  Session bean implementations must be fully implemented.", ejbClass.getName()));
 
     /*
-    if (! ejbClass.isAssignableTo(SessionBean.class)
-	&& ! ejbClass.isAnnotationPresent(Stateless.class)
-	&& ! ejbClass.isAnnotationPresent(Stateful.class))
-      throw error(L.l("'{0}' must implement SessionBean or @Stateless or @Stateful.  Session beans must implement javax.ejb.SessionBean.", ejbClass.getName()));
+      if (! ejbClass.isAssignableTo(SessionBean.class)
+          && ! ejbClass.isAnnotationPresent(Stateless.class)
+          && ! ejbClass.isAnnotationPresent(Stateful.class))
+        throw error(L.l("'{0}' must implement SessionBean or @Stateless or @Stateful.  Session beans must implement javax.ejb.SessionBean.", ejbClass.getName()));
     */
-      
+
     introspectSession();
   }
 
@@ -158,32 +158,32 @@ public class EjbSessionBean extends EjbBean {
 
     try {
       if (getRemoteHome() != null)
-	validateHome(getRemoteHome(), getRemoteList().get(0));
-      
+        validateHome(getRemoteHome(), getRemoteList().get(0));
+
       if (getLocalHome() != null) {
-	validateHome(getLocalHome(), getLocalList().get(0));
+        validateHome(getLocalHome(), getLocalList().get(0));
       }
-      
+
       for (JClass remoteApi : getRemoteList())
-	validateRemote(remoteApi);
+        validateRemote(remoteApi);
 
       for (JClass localApi : getLocalList())
-	validateRemote(localApi);
+        validateRemote(localApi);
 
       if (getEJBClass() == null) {
-	throw error(L.l("'{0}' does not have a defined ejb-class.  Session beans must have an ejb-class.",
-			getEJBName()));
+        throw error(L.l("'{0}' does not have a defined ejb-class.  Session beans must have an ejb-class.",
+                        getEJBName()));
       }
 
       if (! getEJBClassWrapper().isAssignableTo(SessionSynchronization.class)) {
       }
       else if (isStateless()) {
-	throw error(L.l("'{0}' must not implement SessionSynchronization.  Stateless session beans must not implement SessionSynchronization.",
-			getEJBClass().getName()));
+        throw error(L.l("'{0}' must not implement SessionSynchronization.  Stateless session beans must not implement SessionSynchronization.",
+                        getEJBClass().getName()));
       }
       else if (! _isContainerTransaction) {
-	throw error(L.l("'{0}' must not implement SessionSynchronization.  Session beans with Bean-managed transactions may not use SessionSynchronization.",
-			getEJBClass().getName()));
+        throw error(L.l("'{0}' must not implement SessionSynchronization.  Session beans with Bean-managed transactions may not use SessionSynchronization.",
+                        getEJBClass().getName()));
       }
     } catch (LineConfigException e) {
       throw e;
@@ -203,14 +203,16 @@ public class EjbSessionBean extends EjbBean {
   public void initIntrospect()
     throws ConfigException
   {
+    super.initIntrospect();
+
     JClass type = getEJBClassWrapper();
-    
+
     if (! type.isAnnotationPresent(Stateful.class)
-	&& ! type.isAnnotationPresent(Stateless.class))
+        && ! type.isAnnotationPresent(Stateless.class))
       return;
-    
+
     if (_localHome != null || _localList.size() != 0
-	|| _remoteHome != null || _remoteList.size() != 0)
+        || _remoteHome != null || _remoteList.size() != 0)
       return;
 
     JClass []ifs = type.getInterfaces();
@@ -221,42 +223,42 @@ public class EjbSessionBean extends EjbBean {
       JAnnotation local = ifs[i].getAnnotation(javax.ejb.Local.class);
 
       if (local != null) {
-	setLocalWrapper(ifs[i]);
-	continue;
+        setLocalWrapper(ifs[i]);
+        continue;
       }
-      
+
       JAnnotation remote = ifs[i].getAnnotation(javax.ejb.Remote.class);
 
       if (remote != null || ifs[i].isAssignableTo(java.rmi.Remote.class)) {
-	setRemoteWrapper(ifs[i]);
-	continue;
+        setRemoteWrapper(ifs[i]);
+        continue;
       }
 
       if (ifs[i].getName().equals("java.io.Serializable"))
-	continue;
+        continue;
 
       if (ifs[i].getName().equals("java.io.Externalizable"))
-	continue;
-	
+        continue;
+
       if (ifs[i].getName().startsWith("javax.ejb"))
-	continue;
-	
+        continue;
+
       if (ifs[i].getName().equals("java.rmi.Remote"))
-	continue;
+        continue;
 
       if (! interfaceList.contains(ifs[i]))
-	interfaceList.add(ifs[i]);
+        interfaceList.add(ifs[i]);
     }
 
     if (getLocalList().size() != 0 || getRemoteList().size() != 0) {
     }
     else if (interfaceList.size() == 0)
       throw new ConfigException(L.l("'{0}' has no interfaces.  Can't currently generate.",
-				    type.getName()));
+                                    type.getName()));
     else if (interfaceList.size() != 1)
       throw new ConfigException(L.l("'{0}' has multiple interfaces, but none are marked as @Local or @Remote.\n{1}",
-				    type.getName(),
-				    interfaceList.toString()));
+                                    type.getName(),
+                                    interfaceList.toString()));
     else {
       setLocalWrapper(interfaceList.get(0));
     }
@@ -310,11 +312,11 @@ public class EjbSessionBean extends EjbBean {
    * Deploys the bean.
    */
   public AbstractServer deployServer(EjbServerManager ejbManager,
-				     JavaClassGenerator javaGen)
+                                     JavaClassGenerator javaGen)
     throws ClassNotFoundException, ConfigException
   {
     AbstractServer server;
-    
+
     if (isStateless())
       server = new StatelessServer(ejbManager);
     else
@@ -327,25 +329,25 @@ public class EjbSessionBean extends EjbBean {
     JClass remoteHome = getRemoteHome();
     if (remoteHome != null)
       server.setRemoteHomeClass(remoteHome.getJavaClass());
-    
+
     ArrayList<JClass> remoteList = getRemoteList();
     if (remoteList.size() > 0)
       server.setRemoteObjectList(remoteList);
-    
+
     JClass localHome = getLocalHome();
     if (localHome != null)
       server.setLocalHomeClass(localHome.getJavaClass());
-    
+
     ArrayList<JClass> localList = getLocalList();
     if (localList.size() > 0)
       server.setLocalApiList(localList);
 
     Class contextImplClass = javaGen.loadClass(getSkeletonName());
-    
+
     server.setContextImplClass(contextImplClass);
 
     Class beanClass = javaGen.loadClass(getEJBClass().getName());
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -358,25 +360,25 @@ public class EjbSessionBean extends EjbBean {
       BuilderProgramContainer initContainer = getInitProgram();
 
       if (initList != null && initList.size() > 0) {
-	if (initContainer == null)
-	  initContainer = new BuilderProgramContainer();
+        if (initContainer == null)
+          initContainer = new BuilderProgramContainer();
 
-	for (BuilderProgram init : initList) {
-	  initContainer.addProgram(init);
-	}
+        for (BuilderProgram init : initList) {
+          initContainer.addProgram(init);
+        }
       }
-    
+
       server.setInitProgram(initContainer);
 
       try {
-	if (getServerProgram() != null)
-	  getServerProgram().configure(server);
+        if (getServerProgram() != null)
+          getServerProgram().configure(server);
       } catch (ConfigException e) {
-	throw e;
+        throw e;
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new ConfigException(e);
+        throw new ConfigException(e);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -389,7 +391,7 @@ public class EjbSessionBean extends EjbBean {
     throws ConfigException
   {
     JClass ejbClass = getEJBClassWrapper();
-    
+
     if (ejbClass.isAnnotationPresent(Stateless.class))
       introspectStateless(ejbClass);
     else if (ejbClass.isAnnotationPresent(Stateful.class))
@@ -400,13 +402,13 @@ public class EjbSessionBean extends EjbBean {
     throws ConfigException
   {
     String className = type.getName();
-    
+
     JAnnotation stateless = type.getAnnotation(Stateless.class);
-    
+
     setAllowPOJO(true);
 
     setSessionType("Stateless");
-    
+
     JAnnotation transaction = type.getAnnotation(TransactionManagement.class);
     if (transaction == null)
       setTransactionType("Container");
@@ -421,7 +423,7 @@ public class EjbSessionBean extends EjbBean {
       name = stateless.getString("name");
     else
       name = className;
-    
+
     introspectBean(type, name);
   }
 
@@ -429,7 +431,7 @@ public class EjbSessionBean extends EjbBean {
     throws ConfigException
   {
     String className = type.getName();
-    
+
     JAnnotation stateful = type.getAnnotation(Stateful.class);
 
     setAllowPOJO(true);
@@ -442,7 +444,7 @@ public class EjbSessionBean extends EjbBean {
       name = stateful.getString("name");
     else
       name = className;
-    
+
     introspectBean(type, name);
   }
 
@@ -459,17 +461,17 @@ public class EjbSessionBean extends EjbBean {
   {
     JClass beanClass = getEJBClassWrapper();
     String beanName = beanClass.getName();
-  
+
     if (homeClass == null)
       return;
     String homeName = homeClass.getName();
     String objectName = objectClass.getName();
 
     boolean hasFindByPrimaryKey = false;
-  
+
     if (! homeClass.isPublic())
       throw error(L.l("'{0}' must be public", homeName));
-  
+
     if (beanClass.isFinal())
       throw error(L.l("'{0}' must not be final", beanName));
 
@@ -494,7 +496,7 @@ public class EjbSessionBean extends EjbBean {
 
       if (homeClass.isAssignableTo(EJBHome.class))
         validateException(method, java.rmi.RemoteException.class);
-      
+
       if (name.startsWith("create")) {
         hasCreate = true;
 
@@ -505,8 +507,8 @@ public class EjbSessionBean extends EjbBean {
                           homeName));
         }
 
-	if (! isAllowPOJO())
-	  validateException(method, CreateException.class);
+        if (! isAllowPOJO())
+          validateException(method, CreateException.class);
 
         if (! retType.equals(objectClass))
           throw error(L.l("{0}: '{1}' must return {2}.  Create methods must return the local or remote interface.",
@@ -517,17 +519,17 @@ public class EjbSessionBean extends EjbBean {
         String createName = "ejbC" + name.substring(1);
         JMethod implMethod =
           validateNonFinalMethod(createName, param,
-				 method, homeClass, isAllowPOJO());
+                                 method, homeClass, isAllowPOJO());
 
-	if (implMethod != null) {
-	  if (! implMethod.getReturnType().getName().equals("void"))
-	    throw error(L.l("'{0}' must return {1} in {2}",
-			    getFullMethodName(createName, param),
-			    "void",
-			    beanName));
+        if (implMethod != null) {
+          if (! implMethod.getReturnType().getName().equals("void"))
+            throw error(L.l("'{0}' must return {1} in {2}",
+                            getFullMethodName(createName, param),
+                            "void",
+                            beanName));
 
-	  validateExceptions(method, implMethod.getExceptionTypes());
-	}
+          validateExceptions(method, implMethod.getExceptionTypes());
+        }
       }
       else if (name.startsWith("ejb") || name.startsWith("remove")) {
         throw error(L.l("'{0}' forbidden in {1}",
