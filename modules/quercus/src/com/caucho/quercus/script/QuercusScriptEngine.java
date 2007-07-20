@@ -79,18 +79,19 @@ public class QuercusScriptEngine
       WriteStream out;
 
       if (writer != null) {
-	ReaderWriterStream s = new ReaderWriterStream(null, writer);
-	WriteStream os = new WriteStream(s);
+        WriterStreamImpl s = new WriterStreamImpl();
+        s.setWriter(writer);
+        WriteStream os = new WriteStream(s);
     
-	try {
-	  os.setEncoding("utf-8");
-	} catch (Exception e) {
-	}
+        try {
+          os.setEncoding("iso-8859-1");
+        } catch (Exception e) {
+        }
 
-	out = os;
+        out = os;
       }
       else
-	out = new NullWriteStream();
+        out = new NullWriteStream();
 
       QuercusPage page = new InterpretedPage(program);
 

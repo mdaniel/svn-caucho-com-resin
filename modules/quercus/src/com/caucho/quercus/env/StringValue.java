@@ -563,8 +563,12 @@ abstract public class StringValue extends Value implements CharSequence {
   public Value postincr(int incr)
   {
     // php/03i6
-    if (length() == 0)
-      return LongValue.create(incr);
+    if (length() == 0) {
+      if (incr == 1)
+        return StringValue.create("1");
+      else
+        return LongValue.MINUS_ONE;
+    }
 
     if (incr > 0) {
       StringBuilder tail = new StringBuilder();
