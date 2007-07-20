@@ -100,6 +100,9 @@ public class SessionPoolChain extends FilterCallChain {
   protected void generateCallInterceptors(JavaWriter out, String []args)
     throws IOException
   {
+    if (_method == null)
+      return;
+
     String argList = "";
 
     boolean isFirst = true;

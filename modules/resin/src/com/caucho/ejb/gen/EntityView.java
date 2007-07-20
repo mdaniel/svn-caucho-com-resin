@@ -31,6 +31,7 @@ package com.caucho.ejb.gen;
 
 import com.caucho.bytecode.JClass;
 import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.BaseMethod;
 import com.caucho.java.gen.CallChain;
 import com.caucho.util.L10N;
 
@@ -45,10 +46,10 @@ public class EntityView extends ViewClass {
   private JClass _remoteClass;
   private String _prefix;
   private String _contextClassName;
-  
+
   public EntityView(JClass remoteClass,
-		    String contextClassName,
-		    String prefix)
+                    String contextClassName,
+                    String prefix)
   {
     super(prefix, "EntityObject");
 
@@ -63,7 +64,7 @@ public class EntityView extends ViewClass {
   /**
    * Adds the pool chaining.
    */
-  public CallChain createPoolChain(CallChain call)
+  public CallChain createPoolChain(CallChain call, BaseMethod method)
   {
     return new EntityPoolChain(call, false);
   }
@@ -81,35 +82,35 @@ public class EntityView extends ViewClass {
     throws IOException
   {
     out.println("private " + _prefix + " _view" + _prefix + ";");
-    
+
     out.println();
     if (_prefix.equals("Local"))
       out.println("public EJBLocalObject getEJBLocalObject()");
     else
       out.println("public EJBObject getRemoteView()");
-    
+
     out.println("{");
     out.println("  if (_view" + _prefix + " == null)");
     out.println("    _view" + _prefix + " = new " + _prefix + "(this);");
-    
+
     out.println();
     out.println("  return _view" + _prefix + ";");
     out.println("}");
   }
-	   
+
   protected void generateClassContent(JavaWriter out)
     throws IOException
   {
     out.println("private " + _contextClassName + " _context;");
     out.println("private EjbTransactionManager _xaManager;");
-    
+
     out.println();
     out.println(_prefix + "(" + _contextClassName + " context)");
     out.println("{");
     out.println("  _context = context;");
     out.println("  _xaManager = context.getEntityServer().getTransactionManager();");
     out.println("}");
-    
+
     out.println();
     out.println("public QEntityContext getEntityContext()");
     out.println("{");
@@ -138,7 +139,7 @@ public class EntityView extends ViewClass {
     out.popDepth();
     out.println("}");
     out.println();
-    
+
     out.println("public Object _caucho_getBean()");
     out.println("{");
     out.pushDepth();

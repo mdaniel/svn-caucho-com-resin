@@ -46,16 +46,16 @@ public class EntityHomeView extends ViewClass {
   private static L10N L = new L10N(EntityHomeView.class);
 
   private EjbEntityBean _bean;
-  
+
   private JClass _remoteClass;
   private String _prefix;
   private String _contextClassName;
   private boolean _isCMP;
 
   public EntityHomeView(JClass remoteClass,
-			String contextClassName,
-			String prefix,
-			boolean isCMP)
+                        String contextClassName,
+                        String prefix,
+                        boolean isCMP)
   {
     super(prefix, "Entity" + prefix);
 
@@ -77,14 +77,14 @@ public class EntityHomeView extends ViewClass {
   }
 
   public BaseMethod createCreateMethod(EjbEntityBean bean,
-				       JMethod api,
-				       JMethod create,
-				       JMethod postCreate,
-				       String fullClassName)
+                                       JMethod api,
+                                       JMethod create,
+                                       JMethod postCreate,
+                                       String fullClassName)
   {
     EntityCreateMethod method;
     method = new EntityCreateMethod(bean, api, create,
-				    postCreate, fullClassName);
+                                    postCreate, fullClassName);
 
     EntityCreateCall call = (EntityCreateCall) method.getCall();
 
@@ -96,7 +96,7 @@ public class EntityHomeView extends ViewClass {
   /**
    * Adds the pool chaining.
    */
-  public CallChain createPoolChain(CallChain call)
+  public CallChain createPoolChain(CallChain call, BaseMethod method)
   {
     return new EntityPoolChain(call, true);
   }
@@ -130,7 +130,7 @@ public class EntityHomeView extends ViewClass {
       out.println();
     }
   }
-	   
+
   protected void generateClassContent(JavaWriter out)
     throws IOException
   {
@@ -156,7 +156,7 @@ public class EntityHomeView extends ViewClass {
     out.println("}");
 
     out.println();
-    
+
     generateComponents(out);
   }
 }

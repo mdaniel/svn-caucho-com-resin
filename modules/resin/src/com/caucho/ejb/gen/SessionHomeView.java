@@ -50,9 +50,9 @@ public class SessionHomeView extends ViewClass {
   private boolean _isStateless;
 
   public SessionHomeView(JClass remoteClass,
-			 String contextClassName,
-			 String prefix,
-			 boolean isStateless)
+                         String contextClassName,
+                         String prefix,
+                         boolean isStateless)
   {
     super(prefix, isStateless ? "StatelessHome" : "SessionHome");
 
@@ -77,25 +77,25 @@ public class SessionHomeView extends ViewClass {
    * Adds the pool chaining.
    */
   public BaseMethod createCreateMethod(JMethod apiMethod,
-				       JMethod implMethod,
-				       String fullClassName,
-				       String prefix)
+                                       JMethod implMethod,
+                                       String fullClassName,
+                                       String prefix)
   {
     if (_isStateless)
       return new StatelessCreateMethod(apiMethod,
-				       fullClassName,
-				       prefix);
+                                       fullClassName,
+                                       prefix);
     else
       return new SessionCreateMethod(apiMethod,
-				     implMethod,
-				     fullClassName,
-				     prefix);
+                                     implMethod,
+                                     fullClassName,
+                                     prefix);
   }
 
   /**
    * Adds the pool chaining.
    */
-  public CallChain createPoolChain(CallChain call)
+  public CallChain createPoolChain(CallChain call, BaseMethod method)
   {
     return call;
   }
@@ -129,7 +129,7 @@ public class SessionHomeView extends ViewClass {
       out.println();
     }
   }
-	   
+
   protected void generateClassContent(JavaWriter out)
     throws IOException
   {
@@ -153,7 +153,7 @@ public class SessionHomeView extends ViewClass {
     out.println("}");
 
     out.println();
-    
+
     generateComponents(out);
   }
 }
