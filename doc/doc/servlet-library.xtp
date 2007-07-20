@@ -149,23 +149,27 @@ the value of <code>$RESIN_HOME</code></p>
 <tr><td>executable</td><td>Path to the script program</td><td>default exec
 </td></tr></deftable-parameters>
 
-<example>
-&lt;web-app&gt;
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;servlet&gt;
     &lt;servlet-name&gt;cgi&lt;/servlet-name&gt;
     &lt;servlet-class&gt;com.caucho.servlets.CGIServlet&lt;/servlet-class&gt;
   &lt;/servlet&gt;
 
-  &lt;servlet-mapping&gt;
-    &lt;servlet-name&gt;cgi&lt;/servlet-name&gt;
-    &lt;url-pattern&gt;*.cgi&lt;/url-pattern&gt;
-  &lt;/servlet-mapping&gt;
+  &lt;servlet-mapping servlet-name="cgi" url-pattern="/cgi-bin/*.exe"/&gt;
 &lt;/web-app&gt;
 </example>
 
-<p>See <a href="javadoc|com.caucho.servlets.CGIServlet|"/>.</p>
+<p>
+The <code>servlet-mapping</code> specifies the requests that will be treated as
+CGI exectutables.  In the example above, only files in the /cgi-bin directory
+with an extension of ".exe" will be executed.  It is important to limit the
+url-pattern as much as possible to avoid allowing unintended execution of
+scripts or binaries on the system.
+</p>
 
-<p>A CGI script must output a blank line between the HTTP header(s) and the
+<p>
+A CGI script must output a blank line between the HTTP header(s) and the
 rest of the response.  If no blank line is encountered, the contents of your
 browser page will be blank.  Usually a CGI script will output a
 <code>Content-Type:</code> header and then a blank line before the content:
