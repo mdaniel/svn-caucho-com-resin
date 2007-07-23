@@ -581,6 +581,7 @@ public class EnterpriseApplication
 
     if (controller == null) {
       controller = new WebAppController(contextUrl,
+					contextUrl,
                                         path,
                                         _container);
 

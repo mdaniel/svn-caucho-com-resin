@@ -205,7 +205,8 @@ public class WebAppSingleDeployGenerator
 					      _container.getRootDirectory());
     }
     
-    _controller = new WebAppController(_urlPrefix, _rootDirectory, _container);
+    _controller = new WebAppController(_urlPrefix, _urlPrefix,
+				       _rootDirectory, _container);
 
     _controller.setArchivePath(_archivePath);
 
@@ -244,7 +245,8 @@ public class WebAppSingleDeployGenerator
     if (name.equals(_controller.getContextPath())) {
       WebAppController webApp;
       
-      webApp = new WebAppController(_urlPrefix, _rootDirectory, _container);
+      webApp = new WebAppController(_urlPrefix, _urlPrefix,
+				    _rootDirectory, _container);
 
       webApp.setArchivePath(_controller.getArchivePath());
 

@@ -577,7 +577,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     return archiveDigest * 65521 + expandDigest;
   }
 
-  protected ArrayList<String> getVersionNames(String name)
+  public ArrayList<String> getVersionNames(String name)
   {
     if (! isVersioning())
       return null;
@@ -625,8 +625,20 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
       else
 	entryName = archiveNameToEntryName(archiveName);
 
-      if (entryName != null)
+      if (entryName != null) {
 	entryNames.add(entryName);
+
+	if (_isVersioning) {
+	  int p = entryName.lastIndexOf('-');
+
+	  if (p >= 0) {
+	    entryName = entryName.substring(0, p);
+
+	    if (! entryNames.contains(entryName))
+	      entryNames.add(entryName);
+	  }
+	}
+      }
     }
     
     String []entryExpandList = expandDirectory.list();
@@ -655,6 +667,17 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
       if (! entryNames.contains(entryName))
 	entryNames.add(entryName);
+
+      if (_isVersioning) {
+	int p = entryName.lastIndexOf('-');
+
+	if (p >= 0) {
+	  entryName = entryName.substring(0, p);
+
+	  if (! entryNames.contains(entryName))
+	    entryNames.add(entryName);
+	}
+      }
     }
 
     return entryNames;
@@ -670,9 +693,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
     versionMap = new TreeMap<String,ArrayList<String>>();
 
     for (String name : entryNames) {
-      if (_isVersioning) {
-	String baseName = versionedNameToBaseName(name);
+      String baseName = versionedNameToBaseName(name);
 
+      if (_isVersioning && ! baseName.equals(name)) {
 	ArrayList<String> list = versionMap.get(baseName);
 	if (list == null)
 	  list = new ArrayList<String>();
@@ -680,13 +703,6 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 	list.add(name);
 
 	versionMap.put(baseName, list);
-      }
-      else {
-	ArrayList<String> list = new ArrayList<String>();
-
-	list.add(name);
-
-	versionMap.put(name, list);
       }
     }
 
@@ -838,7 +854,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
-        log.log(Level.FINE, L.l("unknown name `{0}'", name));
+        log.log(Level.FINE, L.l("unknown name '{0}'", name));
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("known names are {0}", getNamesAsString()));
@@ -860,12 +876,12 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
-        log.log(Level.FINE, L.l("unknown name `{0}'", name));
+        log.log(Level.FINE, L.l("unknown name '{0}'", name));
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("known names are {0}", getNamesAsString()));
 
-      return new ConfigException(L.l("unknown name `{0}'", name));
+      return new ConfigException(L.l("unknown name '{0}'", name));
     }
 
     return controller.getConfigException();
@@ -879,7 +895,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
-        log.log(Level.FINE, L.l("unknown name `{0}'", name));
+        log.log(Level.FINE, L.l("unknown name '{0}'", name));
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("known names are {0}", getNamesAsString()));
@@ -901,7 +917,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
 
     if (controller == null) {
       if (log.isLoggable(Level.FINE))
-        log.log(Level.FINE, L.l("unknown name `{0}'", name));
+        log.log(Level.FINE, L.l("unknown name '{0}'", name));
 
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l("known names are {0}", getNamesAsString()));

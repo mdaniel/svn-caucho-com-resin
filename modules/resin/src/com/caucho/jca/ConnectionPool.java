@@ -80,6 +80,9 @@ public class ConnectionPool extends AbstractManagedObject
   // the maximum number of connections being created
   private int _maxCreateConnections = 5;
 
+  // max idle size
+  private int _idleMax = 32;
+
   // time before an idle connection is closed (30s default)
   private long _maxIdleTime = 30000L;
 
@@ -537,7 +540,8 @@ public class ConnectionPool extends AbstractManagedObject
 	    if (_idlePool.size() == 0)
 	      _lastIdlePoolEmptyTime = now;
 	    
-	    if (now - _lastIdlePoolEmptyTime < _maxIdleTime) {
+	    if (now - _lastIdlePoolEmptyTime < _maxIdleTime
+		&& _idlePool.size() < _maxIdle) {
 	      _idlePool.add(mConn);
 
 	      return;
@@ -615,11 +619,14 @@ public class ConnectionPool extends AbstractManagedObject
     
     ArrayList<PoolItem> clearItems = new ArrayList<PoolItem>();
 
+    synchronized (_idlePool) {
+      _idlePool.clear();
+    }
+    
     synchronized (pool) {
       clearItems.addAll(pool);
 
       pool.clear();
-      _idlePool.clear();
     }
     
     for (int i = 0; i < clearItems.size(); i++) {
@@ -790,9 +797,9 @@ public class ConnectionPool extends AbstractManagedObject
   private void validate(ValidatingManagedConnectionFactory mcf)
   {
     Set invalid = null;
-
+    /*
     synchronized (_idlePool) {
-    }
+    } */
   }
 
   /**
@@ -808,17 +815,17 @@ public class ConnectionPool extends AbstractManagedObject
     synchronized (_pool) {
       int size = _pool.size();
 
-      if (isOverflow &&
-          _maxConnections + _maxOverflowConnections <= _createCount + size) {
+      if (isOverflow
+	  && _maxConnections + _maxOverflowConnections <= _createCount + size) {
         throw new ResourceException(L.l("Connection pool is full.  Can't allocate connection."));
       }
       // if the pool is full, don't create, and wait
-      else if (! isOverflow &&
-               (_maxConnections <= _createCount + size ||
-                _maxCreateConnections <= _createCount)) {
+      else if (! isOverflow
+	       && (_maxConnections <= _createCount + size
+		   || _maxCreateConnections <= _createCount)) {
         try {
           _pool.wait(1000);
-        } catch (Throwable e) {
+        } catch (Exception e) {
           log.log(Level.FINE, e.toString(), e);
         }
 

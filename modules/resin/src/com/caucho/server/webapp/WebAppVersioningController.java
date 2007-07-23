@@ -55,29 +55,21 @@ public class WebAppVersioningController extends WebAppController {
   private static final Logger log
     = Logger.getLogger(WebAppController.class.getName());
 
-  private final ArrayList<WebAppController> _controllerList
+  private ArrayList<WebAppController> _controllerList
     = new ArrayList<WebAppController>();
 
+  private final WebAppExpandDeployGenerator _generator;
+  
   private WebAppController _primaryController;
+  private boolean _isModified = true;
 
-  public WebAppVersioningController(String contextPath)
+  public WebAppVersioningController(String contextPath,
+				    WebAppExpandDeployGenerator generator,
+				    WebAppContainer container)
   {
-    super(contextPath, null, null);
-  }
+    super(contextPath, contextPath, null, container);
 
-  /**
-   * Adds a version to the controller list.
-   */
-  @Override
-  protected WebAppController addVersion(WebAppController controller)
-  {
-    _controllerList.add(controller);
-
-    Collections.sort(_controllerList, new VersionComparator());
-    
-    _primaryController = _controllerList.get(0);
-    
-    return this;
+    _generator = generator;
   }
 
   /**
@@ -117,6 +109,11 @@ public class WebAppVersioningController extends WebAppController {
   }
   */
 
+  void setModified(boolean isModified)
+  {
+    _isModified = isModified;
+  }
+
   /**
    * Returns the instance for a top-level request
    * @return the request object or null for none.
@@ -124,7 +121,15 @@ public class WebAppVersioningController extends WebAppController {
   @Override
   public WebApp request()
   {
-    return _primaryController.request();
+    if (_isModified)
+      updateVersion();
+
+    WebAppController controller = _primaryController;
+
+    if (controller != null)
+      return controller.request();
+    else
+      return null;
   }
 
   /**
@@ -135,7 +140,15 @@ public class WebAppVersioningController extends WebAppController {
   @Override
   public WebApp subrequest()
   {
-    return _primaryController.subrequest();
+    if (_isModified)
+      updateVersion();
+
+    WebAppController controller = _primaryController;
+
+    if (controller != null)
+      return controller.request();
+    else
+      return null;
   }
 
   /**
@@ -144,7 +157,15 @@ public class WebAppVersioningController extends WebAppController {
   @Override
   protected WebApp startImpl()
   {
-    return _primaryController.request();
+    if (_isModified)
+      updateVersion();
+
+    WebAppController controller = _primaryController;
+
+    if (controller != null)
+      return controller.request();
+    else
+      return null;
   }
 
   /**
@@ -155,6 +176,45 @@ public class WebAppVersioningController extends WebAppController {
     /*
     super.initBegin();
     */
+  }
+
+  private void updateVersion()
+  {
+    synchronized (this) {
+      if (! _isModified)
+	return;
+      _isModified = false;
+      
+      _controllerList = new ArrayList<WebAppController>();
+
+      ArrayList<String> versionNames = _generator.getVersionNames(getId());
+
+      if (versionNames != null) {
+	for (int i = 0; i < versionNames.size(); i++) {
+	  String versionName = versionNames.get(i);
+
+	  WebAppController newController
+	    = _container.getWebAppGenerator().findController(versionName);
+
+	  addNewVersion(newController);
+	}
+      }
+    }
+  }
+
+  /**
+   * Adds a version to the controller list.
+   */
+  private void addNewVersion(WebAppController controller)
+  {
+    if (controller == null)
+      throw new NullPointerException();
+    
+    _controllerList.add(controller);
+
+    Collections.sort(_controllerList, new VersionComparator());
+    
+    _primaryController = _controllerList.get(0);
   }
   
   /**

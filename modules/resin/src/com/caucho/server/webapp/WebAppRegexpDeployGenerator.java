@@ -169,7 +169,7 @@ public class WebAppRegexpDeployGenerator
 	    return controller;
 	}
 
-	controller = new WebAppController(name, appDir, _container);
+	controller = new WebAppController(name, name, appDir, _container);
 
 	// XXX: not dynamic-deploy in the sense that the mappings are known
 	//controller.setDynamicDeploy(true);

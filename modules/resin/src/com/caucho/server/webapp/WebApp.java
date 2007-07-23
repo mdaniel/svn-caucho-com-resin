@@ -292,7 +292,7 @@ public class WebApp extends ServletContextImpl
    */
   public WebApp(Path rootDirectory)
   {
-    this(new WebAppController("/", rootDirectory, null));
+    this(new WebAppController("/", "/", rootDirectory, null));
   }
 
   /**

@@ -301,8 +301,8 @@ public class JspCompiler implements EnvironmentBean {
       if (rootDirectory == null)
         rootDirectory = getAppDir();
       
-      WebAppController controller =
-	new WebAppController("",  rootDirectory, null);
+      WebAppController controller
+	= new WebAppController("",  "", rootDirectory, null);
 
       _app = controller.getDeployInstance();
     }

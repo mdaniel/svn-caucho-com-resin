@@ -52,11 +52,12 @@ import java.util.regex.Pattern;
  * A configuration entry for a web-app.
  */
 public class WebAppController
-  extends EnvironmentDeployController<WebApp,WebAppConfig> {
+  extends EnvironmentDeployController<WebApp,WebAppConfig>
+{
   private static final L10N L = new L10N(WebAppController.class);
   private static final Logger log = Log.open(WebAppController.class);
 
-  private WebAppContainer _container;
+  protected WebAppContainer _container;
 
   private WebAppController _parent;
 
@@ -88,14 +89,15 @@ public class WebAppController
 
   public WebAppController()
   {
-    this("/", null, null);
+    this("/", "/", null, null);
   }
 
-  public WebAppController(String contextPath,
+  public WebAppController(String name,
+			  String contextPath,
 			  Path rootDirectory,
 			  WebAppContainer container)
   {
-    super(contextPath, rootDirectory);
+    super(name, rootDirectory);
 
     _container = container;
 
@@ -292,8 +294,8 @@ public class WebAppController
 
   protected String getMBeanId()
   {
-    String name = _contextPath;
-    if (_contextPath.equals(""))
+    String name = getId();
+    if (name.equals(""))
       name = "/";
 
     return name;
@@ -318,6 +320,7 @@ public class WebAppController
   /**
    * Adds a version to the controller list.
    */
+  /*
   protected WebAppController addVersion(WebAppController controller)
   {
     WebAppVersioningController versioningController
@@ -328,6 +331,7 @@ public class WebAppController
 
     return versioningController;
   }
+  */
 
   /**
    * Returns the deploy admin.
@@ -372,8 +376,8 @@ public class WebAppController
   {
     if (getConfig() != null && getConfig().getURLRegexp() != null)
       return newController;
-    else if (newController.getConfig() != null &&
-	     newController.getConfig().getURLRegexp() != null)
+    else if (newController.getConfig() != null
+	     && newController.getConfig().getURLRegexp() != null)
       return this;
     else {
       Thread thread = Thread.currentThread();
@@ -385,6 +389,7 @@ public class WebAppController
 	//  The contextPath comes from current web-app
 	WebAppController mergedController
 	  = new WebAppController(getContextPath(),
+				 getContextPath(),
 				 getRootDirectory(),
 				 _container);
 

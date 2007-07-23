@@ -248,6 +248,7 @@ public class WebAppExpandDeployGenerator
 
     if (versionNames == null || versionNames.size() == 0)
       return makeController(name, segmentName);
+    
     /*
     else if (versionNames.size() == 1) {
       String versionName = versionNames.get(0);
@@ -260,16 +261,7 @@ public class WebAppExpandDeployGenerator
     */
 
     WebAppController controller
-      = new WebAppVersioningController(name);
-    
-    for (int i = 0; i < versionNames.size(); i++) {
-      String versionName = versionNames.get(i);
-
-      WebAppController newController
-	= _container.getWebAppGenerator().findController(versionName);
-
-      controller.addVersion(newController);
-    }
+      = new WebAppVersioningController(name, this, _container);
 
     return controller;
   }
@@ -277,12 +269,16 @@ public class WebAppExpandDeployGenerator
   private WebAppController makeController(String name, String versionName)
   {
     String version = "";
+    String contextPath = versionName;
+    String baseName = contextPath;
 
     if (isVersioning()) {
       int p = versionName.lastIndexOf('-');
       
-      if (p > 0)
+      if (p > 0) {
 	version = versionName.substring(p + 1);
+	baseName = versionName.substring(0, p);
+      }
     }
     
     String expandName = getExpandName(versionName.substring(1));
@@ -314,7 +310,8 @@ public class WebAppExpandDeployGenerator
       name = cfg.getContextPath();
 
     WebAppController controller
-      = new WebAppController(name, rootDirectory, _container);
+      = new WebAppController(versionName, contextPath,
+			     rootDirectory, _container);
 
     controller.setWarName(versionName.substring(1));
 
@@ -324,6 +321,15 @@ public class WebAppExpandDeployGenerator
     controller.setSourceType("expand");
 
     controller.setVersion(version);
+
+    if (! baseName.equals(contextPath)) {
+      WebAppController versionController
+	= _container.getWebAppGenerator().findController(baseName);
+
+      if (versionController instanceof WebAppVersioningController) {
+	((WebAppVersioningController) versionController).setModified(true);
+      }
+    }
 
     return controller;
   }
