@@ -63,8 +63,8 @@ public class FileModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(FileModule.class.getName());
 
-  public static final String DIRECTORY_SEPARATOR = "/";
-  public static final String PATH_SEPARATOR = ":QUERCUS_PATH_SEPARATOR:";
+  public static final String DIRECTORY_SEPARATOR = "" + Path.getFileSeparatorChar();
+  public static final String PATH_SEPARATOR = "" + Path.getPathSeparatorChar();
 
   public static final int UPLOAD_ERR_OK = 0;
   public static final int UPLOAD_ERR_INI_SIZE = 1;
