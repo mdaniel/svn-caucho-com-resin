@@ -16,37 +16,19 @@
     </init>
   </authenticator>
 
-  <login-config auth-method="form">
-     <form-login-config form-login-page='/login.php'
-                        form-error-page='/login.php'/>
-  </login-config>
+  <login-config auth-method="basic"/>
 
   <servlet servlet-name="resin-php"
            servlet-class="com.caucho.quercus.servlet.QuercusServlet">
   </servlet>
 
-  <welcome-file-list>index.php</welcome-file-list>
-
   <servlet-mapping url-pattern="*.php" servlet-name="resin-php"/>
-
-  <servlet-mapping url-pattern="/*" servlet-name="plugin-match"/>
   
   <security-constraint>
-    <web-resource-collection url-pattern="*.php"/>
+    <web-resource-collection url-pattern="/*"/>
       
     <auth-constraint role-name="*"/>
   </security-constraint>
-
-  <resin:if test="${resin_admin_localhost}">
-    <security-constraint>
-      <web-resource-collection url-pattern="*.php"/>
-      
-      <ip-constraint>
-        <allow>127.0.0.1</allow>
-        <allow>192.168/16</allow>
-      </ip-constraint>
-    </security-constraint>
-  </resin:if>
 
   <!--
      - Provide a remote interface for instances of the administration 
@@ -72,18 +54,4 @@
   </servlet>
 
   <servlet-mapping url-pattern='/deploy' servlet-name='deploy'/>
-
-  <!--
-    - Security constraints limit access to remote management
-   -->
-
-  <security-constraint>
-    <web-resource-collection>
-      <url-pattern>/remote</url-pattern>
-      <url-pattern>/deploy</url-pattern>
-    </web-resource-collection>
-    
-    <auth-constraint role-name='*'/>
-  </security-constraint>
-
 </web-app>
