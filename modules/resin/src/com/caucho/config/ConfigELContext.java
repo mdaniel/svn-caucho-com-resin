@@ -97,7 +97,7 @@ public class ConfigELContext extends ELContext {
   public Object getValue(String var)
   {
     if (_varResolver != null)
-      return _varResolver.getValue(this, null, var);
+      return _varResolver.getValue(this, var, null);
     else
       return null;
   }
@@ -105,7 +105,7 @@ public class ConfigELContext extends ELContext {
   public void setValue(String var, Object value)
   {
     if (_varResolver != null)
-      _varResolver.setValue(this, null, var, value);
+      _varResolver.setValue(this, var, null, value);
   }
 
   @Override

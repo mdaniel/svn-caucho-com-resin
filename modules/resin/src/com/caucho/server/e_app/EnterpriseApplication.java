@@ -110,12 +110,21 @@ public class EnterpriseApplication
   EnterpriseApplication(WebAppContainer container,
                         EarDeployController controller, String name)
   {
+    if (container == null || controller == null)
+      throw new NullPointerException();
+    
     _container = container;
 
     _controller = controller;
     _name = name;
 
-    ClassLoader parentLoader = container.getClassLoader();
+
+    ClassLoader parentLoader;
+
+    if (container != null)
+      parentLoader = container.getClassLoader();
+    else
+      parentLoader = Thread.currentThread().getContextClassLoader();
 
     _loader = new EnvironmentClassLoader(parentLoader);
     _loader.setId("EnterpriseApplication[" + name + "]");
@@ -130,11 +139,13 @@ public class EnterpriseApplication
       Environment.addDependency(new Depend(controller.getArchivePath()), _loader);
   }
 
+  /*
   // ejb/0fa0
   public EnterpriseApplication()
   {
     _lifecycle = new Lifecycle(log, toString(), Level.INFO);
   }
+  */
 
   /**
    * Sets the name.

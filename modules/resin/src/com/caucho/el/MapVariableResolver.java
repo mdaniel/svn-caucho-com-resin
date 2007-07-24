@@ -66,10 +66,10 @@ public class MapVariableResolver extends ELResolver {
   @Override
   public Object getValue(ELContext context, Object base, Object property)
   {
-    if (base != null || ! (property instanceof String))
+    if (! (base instanceof String) || property != null)
       return null;
 
-    String var = (String) property;
+    String var = (String) base;
     
     Object value = _map.get(var);
 
@@ -91,10 +91,10 @@ public class MapVariableResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
-    if (base != null || ! (property instanceof String))
+    if (! (base instanceof String) || property != null)
       return;
     
-    String var = (String) property;
+    String var = (String) base;
 
     context.setPropertyResolved(true);
     

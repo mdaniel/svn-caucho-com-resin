@@ -101,7 +101,6 @@ public class AppClient implements EnvironmentBean
     _local.set(this, _loader);
 
     _home = CauchoSystem.getResinHome();
-
   }
 
   public ClassLoader getClassLoader()
@@ -238,6 +237,7 @@ public class AppClient implements EnvironmentBean
     //System.setSecurityManager(new SecurityManager());
 
     if (_rootDirectory == null) {
+      /*
       String name = _clientJar.getTail();
 
       int lastDot = name.lastIndexOf(".");
@@ -245,7 +245,12 @@ public class AppClient implements EnvironmentBean
       if (lastDot > -1)
         name = name.substring(0, lastDot);
 
-      _rootDirectory = WorkDir.getLocalWorkDir(_loader).lookup("_appclient").lookup("_" + name);
+      Path root = WorkDir.getLocalWorkDir(_loader).lookup("_appclient").lookup("_" + name);
+
+      _rootDirectory = root;
+      */
+
+      setRootDirectory(_clientJar.getParent());
     }
 
     if (_workDirectory == null)
@@ -256,6 +261,7 @@ public class AppClient implements EnvironmentBean
     _loader.setId(toString());
     _loader.addJar(_clientJar);
 
+    /*
     // ejb/0fa2
     if (_earFile != null) {
       Path deployDir = _earFile.getParent();
@@ -290,6 +296,7 @@ public class AppClient implements EnvironmentBean
         }
       }
     }
+    */
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

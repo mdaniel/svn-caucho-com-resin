@@ -68,6 +68,8 @@ public class ResinLog {
     Logger log = Logger.getLogger(_name);
 
     log.info(_text.toString());
+
+    Thread.dumpStack();
   }
 }
 

@@ -29,6 +29,7 @@
 package com.caucho.config;
 
 import com.caucho.util.L10N;
+import com.caucho.xml.*;
 
 import org.w3c.dom.Node;
 
@@ -50,6 +51,10 @@ public class NodeBuilderChildProgram extends BuilderProgram {
   public void configureImpl(NodeBuilder builder, Object bean)
     throws ConfigException
   {
+    if (_node instanceof QNode) {
+      builder.putVar("__FILE__", ((QNode) _node).getBaseURI());
+    }
+    
     builder.configureAttribute(bean, _node);
   }
 
