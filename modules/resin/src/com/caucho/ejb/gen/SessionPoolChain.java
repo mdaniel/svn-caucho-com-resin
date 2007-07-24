@@ -128,7 +128,7 @@ public class SessionPoolChain extends FilterCallChain {
     JClass types[] = _method.getParameterTypes();
 
     for (int i = 0; i < args.length; i++) {
-      String typeName = types[i].getName();
+      String typeName = types[i].getPrintName();
 
       out.print(args[i] + " = ");
 
