@@ -115,6 +115,8 @@ public class BasicDeserializer extends AbstractDeserializer {
       return Date.class;
     case NUMBER:
       return Number.class;
+    case OBJECT:
+      return Object.class;
 
     case BOOLEAN_ARRAY:
       return boolean[].class;

@@ -118,8 +118,7 @@ public class ConnectionPool extends AbstractManagedObject
 
   private final ArrayList<PoolItem> _pool = new ArrayList<PoolItem>();
 
-  private final FifoSet<ManagedConnection> _idlePool
-    = new FifoSet<ManagedConnection>();
+  private IdlePoolSet _idlePool;
 
   // temporary connection list for the alarm callback
   private final ArrayList<PoolItem> _alarmConnections
@@ -452,6 +451,8 @@ public class ConnectionPool extends AbstractManagedObject
     if (_tm == null)
       throw new ConfigException(L.l("the connection manager needs a transaction manager."));
 
+    _idlePool = new IdlePoolSet(_idleMax);
+
     registerSelf();
 
     _alarm = new WeakAlarm(this);
@@ -541,9 +542,7 @@ public class ConnectionPool extends AbstractManagedObject
 	      _lastIdlePoolEmptyTime = now;
 	    
 	    if (now - _lastIdlePoolEmptyTime < _maxIdleTime
-		&& _idlePool.size() < _maxIdle) {
-	      _idlePool.add(mConn);
-
+		&& _idlePool.add(mConn)) {
 	      return;
 	    }
 	    else {
@@ -914,6 +913,7 @@ public class ConnectionPool extends AbstractManagedObject
 
     synchronized (_pool) {
       _pool.remove(item);
+      _pool.notify();
     }
 
     try {

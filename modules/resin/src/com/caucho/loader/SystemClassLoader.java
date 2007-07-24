@@ -126,6 +126,11 @@ public class SystemClassLoader
   {
     return "com/caucho/loader/system.rnc";
   }
+
+  public String toString()
+  {
+    return "SystemClassLoader[]";
+  }
 }
 
 

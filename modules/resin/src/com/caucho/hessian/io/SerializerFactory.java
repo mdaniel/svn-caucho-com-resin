@@ -63,6 +63,9 @@ public class SerializerFactory extends AbstractSerializerFactory
 {
   private static final Logger log
     = Logger.getLogger(SerializerFactory.class.getName());
+
+  private static Deserializer OBJECT_DESERIALIZER
+    = new BasicDeserializer(BasicDeserializer.OBJECT);
   
   private static HashMap _staticSerializerMap;
   private static HashMap _staticDeserializerMap;
@@ -268,6 +271,9 @@ public class SerializerFactory extends AbstractSerializerFactory
 
     if (deserializer != null) {
     }
+
+    else if (cl.isInterface())
+      deserializer = OBJECT_DESERIALIZER;
 
     else if (Collection.class.isAssignableFrom(cl))
       deserializer = new CollectionDeserializer(cl);

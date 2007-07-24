@@ -1067,14 +1067,12 @@ public class HessianInput extends AbstractHessianInput {
 
     _peek = tag;
 
-    // hessian/332i
-    return readObject();
+    // hessian/332i vs hessian/3406
+    //return readObject();
     
-    /*
     Object value = _serializerFactory.getDeserializer(cl).readObject(this);
 
     return value;
-    */
   }
   
   /**

@@ -1102,13 +1102,26 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   protected synchronized Class loadClass(String name, boolean resolve)
     throws ClassNotFoundException
   {
-    /*
-    if (! _useServletHack) {
-      // XXX: sync issues with loading and compiling?
-      return super.loadClass(name, resolve);
-    }
-    */
+    Class cl = loadClassImpl(name, resolve);
 
+    if (cl != null)
+      return cl;
+    else
+      throw new ClassNotFoundException(name);
+  }
+
+  /**
+   * Load a class using this class loader
+   *
+   * @param name the classname to load
+   * @param resolve if true, resolve the class
+   *
+   * @return the loaded classes
+   */
+  // XXX: added synchronized for RSN-373
+  protected Class loadClassImpl(String name, boolean resolve)
+    throws ClassNotFoundException
+  {
     // The JVM has already cached the classes, so we don't need to
     Class cl = findLoadedClass(name);
 
@@ -1133,12 +1146,19 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (normalJdkOrder) {
       try {
         ClassLoader parent = getParent();
-        if (parent != null)
+
+	if (parent instanceof DynamicClassLoader)
+	  cl = ((DynamicClassLoader) parent).loadClassImpl(name, resolve);
+        else if (parent != null) {
           cl = Class.forName(name, false, parent);
+	}
         else
           cl = findSystemClass(name);
       } catch (ClassNotFoundException e) {
-        cl = findClass(name);
+      }
+
+      if (cl == null) {
+        cl = findClassImpl(name);
       }
     }
     else {
@@ -1153,7 +1173,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       }
     }
 
-    if (resolve)
+    if (resolve && cl != null)
       resolveClass(cl);
 
     return cl;
@@ -1167,6 +1187,24 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    * @return the loaded class
    */
   protected Class findClass(String name)
+    throws ClassNotFoundException
+  {
+    Class cl = findClassImpl(name);
+
+    if (cl != null)
+      return cl;
+    else
+      throw new ClassNotFoundException(name);
+  }
+
+  /**
+   * Load a class using this class loader
+   *
+   * @param name the classname using either '/' or '.'
+   *
+   * @return the loaded class
+   */
+  protected Class findClassImpl(String name)
     throws ClassNotFoundException
   {
     if (_isVerbose)
@@ -1199,7 +1237,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         entry = getClassEntry(name);
 
       if (entry == null)
-        throw new ClassNotFoundException(name);
+        return null;
 
       if (entry != null && _isVerbose)
         verbose(name, (isNormalJdkOrder(name) ? "found" : "found (took priority from parent)"));

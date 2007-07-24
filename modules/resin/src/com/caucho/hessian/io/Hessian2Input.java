@@ -1629,11 +1629,11 @@ public class Hessian2Input
     if (tag >= 0)
       _offset--;
 
-    // hessian/3b2i
-    return readObject();
-    
-    //Object value = findSerializerFactory().getDeserializer(cl).readObject(this);
-    // return value;
+    // hessian/3b2i vs hessian/3406
+    // return readObject();
+
+    Object value = findSerializerFactory().getDeserializer(cl).readObject(this);
+    return value;
   }
   
   /**

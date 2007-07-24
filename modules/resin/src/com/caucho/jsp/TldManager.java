@@ -281,8 +281,11 @@ public class TldManager {
     for (int i = 0; i < paths.size(); i++) {
       Path subPath = paths.get(i);
 
-      if (subPath instanceof JarPath)
-	loadJarTlds(taglibs, (JarPath) subPath, prefix);
+      if (subPath.getPath().endsWith(".jar")) {
+	JarPath jarPath = JarPath.create(subPath);
+
+	loadJarTlds(taglibs, jarPath, prefix);
+      }
       else if (prefix != null && ! prefix.equals(""))
 	loadAllTlds(taglibs, subPath.lookup(prefix), 64, prefix);
       else

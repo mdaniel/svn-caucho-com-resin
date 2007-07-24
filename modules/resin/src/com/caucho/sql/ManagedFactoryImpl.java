@@ -30,6 +30,7 @@
 package com.caucho.sql;
 
 import com.caucho.log.Log;
+import com.caucho.jca.IdlePoolSet;
 import com.caucho.util.L10N;
 
 import javax.resource.ResourceException;
@@ -164,6 +165,22 @@ public class ManagedFactoryImpl
 			    ConnectionRequestInfo requestInfo)
     throws ResourceException
   {
+    if (connSet instanceof IdlePoolSet) {
+      IdlePoolSet idle = (IdlePoolSet) connSet;
+
+      ManagedConnectionImpl mConn = (ManagedConnectionImpl) idle.first();
+
+      if (mConn == null)
+	return null;
+      
+      Credential mCredentials = mConn.getCredentials();
+
+      if (requestInfo == mCredentials
+	  || requestInfo != null && requestInfo.equals(mCredentials)) {
+	return mConn;
+      }
+    }
+    
     Iterator iter = connSet.iterator();
 
     while (iter.hasNext()) {
