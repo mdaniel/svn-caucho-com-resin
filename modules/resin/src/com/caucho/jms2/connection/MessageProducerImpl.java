@@ -57,9 +57,6 @@ public class MessageProducerImpl implements MessageProducer {
 
   public MessageProducerImpl(SessionImpl session, AbstractQueue queue)
   {
-    assert session != null;
-    assert queue != null;
-
     _session = session;
     _queue = queue;
   }

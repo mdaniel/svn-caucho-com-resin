@@ -638,9 +638,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       
       Jndi.bindDeep("java:comp/ThreadPool",
 		    ResinThreadPoolExecutor.getThreadPool());
-      
-      Jndi.rebindDeep("java:comp/ORB",
-		      new com.caucho.iiop.orb.ORBImpl());
 
       String oldBuilder = props.getProperty("javax.management.builder.initial");
       if (oldBuilder == null)
@@ -667,6 +664,13 @@ public class EnvironmentClassLoader extends DynamicClassLoader
                     Jmx.getContextMBeanServer());
       Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
                     Jmx.getGlobalMBeanServer());
+
+      try {
+        Jndi.rebindDeep("java:comp/ORB",
+                        new com.caucho.iiop.orb.ORBImpl());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
 
       J2EEManagedObject.register(new JTAResource(tm));
 

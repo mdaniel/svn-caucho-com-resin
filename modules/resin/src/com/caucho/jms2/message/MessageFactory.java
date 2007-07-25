@@ -99,8 +99,17 @@ public class MessageFactory
     else if (msg instanceof MapMessage) {
       return new MapMessageImpl((MapMessage) msg);
     }
+    else if (msg instanceof BytesMessage) {
+      return new BytesMessageImpl((BytesMessage) msg);
+    }
+    else if (msg instanceof StreamMessage) {
+      return new StreamMessageImpl((StreamMessage) msg);
+    }
+    else if (msg instanceof ObjectMessage) {
+      return new ObjectMessageImpl((ObjectMessage) msg);
+    }
     else
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException(String.valueOf(msg));
   }
 
   /**

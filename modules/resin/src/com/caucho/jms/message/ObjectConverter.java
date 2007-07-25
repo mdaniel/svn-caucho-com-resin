@@ -63,7 +63,8 @@ public class ObjectConverter  {
   public static byte toByte(Object obj)
     throws JMSException
   {
-    if (obj instanceof Byte)
+    // ForeignMsgQueueTests.java#sendReceiveMapMsgQueue
+    if (obj instanceof Number)
       return ((Number) obj).byteValue();
     else if (obj == null || obj instanceof String)
       return (byte) Long.parseLong((String) obj);
@@ -177,8 +178,14 @@ public class ObjectConverter  {
       throw new NullPointerException();
     else if (obj instanceof Character)
       return ((Character) obj).charValue();
-    else if (obj instanceof String)
-      return ((String) obj).charAt(0);
+    else if (obj instanceof String) {
+      String s = (String) obj;
+
+      if (s.length() != 1)
+        throw new MessageFormatException(L.l("bad property {0}", obj));
+      
+      return s.charAt(0);
+    }
     else
       throw new MessageFormatException(L.l("bad property {0}", obj));
     
@@ -199,6 +206,7 @@ public class ObjectConverter  {
       
       return newBytes;
     }
+    /*
     else if (obj instanceof String) {
       String string = toString(obj);
       try {
@@ -207,6 +215,7 @@ public class ObjectConverter  {
 	throw new MessageFormatException(e.toString());
       }
     }
+    */
     else
       throw new MessageFormatException(L.l("can't convert {0} to byte[]",
 					   obj.getClass().getName()));

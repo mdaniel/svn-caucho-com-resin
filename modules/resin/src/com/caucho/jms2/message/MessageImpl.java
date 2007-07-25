@@ -663,7 +663,6 @@ public class MessageImpl implements Message
    * Sets the body for reading.
    */
   protected void setBodyReadOnly()
-    throws JMSException
   {
     _isBodyWriteable = false;
   }

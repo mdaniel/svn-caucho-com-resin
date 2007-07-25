@@ -1117,7 +1117,7 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
 
     // for error messages, show path relative to rootDirectory
-    if (!resinConf.exists())
+    if (! resinConf.exists())
       resinConf = _rootDirectory.lookup(_configFile);
 
     _resinConf = resinConf;

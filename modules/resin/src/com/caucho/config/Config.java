@@ -66,10 +66,11 @@ import java.util.logging.Logger;
  */
 public class Config {
   private static final L10N L = new L10N(Config.class);
-  private static final Logger log = Log.open(Config.class);
+  private static final Logger log
+    = Logger.getLogger(Config.class.getName());
 
-  private static LruCache<Path,SoftReference<QDocument>> _parseCache =
-    new LruCache<Path,SoftReference<QDocument>>(32);
+  private static LruCache<Path,SoftReference<QDocument>> _parseCache
+    = new LruCache<Path,SoftReference<QDocument>>(32);
 
   // Copied from parent for resin:import, server/13jk
   private ConfigVariableResolver _varResolver;

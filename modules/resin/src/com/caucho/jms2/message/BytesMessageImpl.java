@@ -59,8 +59,13 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
   {
     super(bytes);
 
-    int ch;
-    while ((ch = bytes.readUnsignedByte()) >= 0) {
+    bytes.reset();
+
+    long length = bytes.getBodyLength();
+
+    for (int i = 0; i < length; i++) {
+      int ch = bytes.readUnsignedByte();
+
       writeByte((byte) ch);
     }
 
@@ -132,7 +137,12 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     ReadStream is = getReadStream();
 
     try {
-      return is.read() == 1;
+      int value = is.read();
+
+      if (value >= 0)
+        return value == 1;
+      else
+        throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
       throw new JMSExceptionWrapper(e);
     }
@@ -147,7 +157,12 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     ReadStream is = getReadStream();
 
     try {
-      return (byte) is.read();
+      int value = is.read();
+
+      if (value >= 0)
+        return (byte) value;
+      else
+        throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
       throw new JMSExceptionWrapper(e);
     }
@@ -165,7 +180,12 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       return -1;
 
     try {
-      return is.read();
+      int value = is.read();
+
+      if (value >= 0)
+        return is.read();
+      else
+        throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
       throw new JMSExceptionWrapper(e);
     }
@@ -182,8 +202,11 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     try {
       int d1 = is.read();    
       int d2 = is.read();    
-    
-      return (short) ((d1 << 8) + d2);
+
+      if (d2 >= 0)
+        return (short) ((d1 << 8) + d2);
+      else
+        throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
       throw new JMSExceptionWrapper(e);
     }
@@ -200,8 +223,11 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     try {
       int d1 = is.read();    
       int d2 = is.read();    
-    
-      return ((d1 << 8) + d2);
+
+      if (d2 >= 0)
+        return ((d1 << 8) + d2);
+      else
+        throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
       throw new JMSExceptionWrapper(e);
     }
@@ -220,8 +246,11 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       int d2 = is.read();    
       int d3 = is.read();    
       int d4 = is.read();    
-    
-      return (d1 << 24) + (d2 << 16) + (d3 << 8) + d4;
+
+      if (d4 >= 0)
+        return (d1 << 24) + (d2 << 16) + (d3 << 8) + d4;
+      else
+        throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
       throw new JMSExceptionWrapper(e);
     }
@@ -244,15 +273,19 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       long d6 = is.read();    
       long d7 = is.read();    
       long d8 = is.read();    
-    
-      return ((d1 << 56) +
-              (d2 << 48) +
-              (d3 << 40) +
-              (d4 << 32) +
-              (d5 << 24) +
-              (d6 << 16) +
-              (d7 << 8) +
-              (d8));
+
+      if (d8 >= 0) {
+        return ((d1 << 56)
+                + (d2 << 48)
+                + (d3 << 40)
+                + (d4 << 32)
+                + (d5 << 24)
+                + (d6 << 16)
+                + (d7 << 8)
+                + (d8));
+      }
+      else
+        throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
       throw new JMSExceptionWrapper(e);
     }
@@ -288,7 +321,10 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
       int d1 = is.read();    
       int d2 = is.read();
 
-      return (char) ((d1 << 8) + d2);
+      if (d2 >= 0)
+        return (char) ((d1 << 8) + d2);
+      else
+        throw new MessageEOFException("BytesMessage EOF");
     } catch (IOException e) {
       throw new JMSExceptionWrapper(e);
     }
@@ -602,7 +638,7 @@ public class BytesMessageImpl extends MessageImpl implements BytesMessage {
     else if (obj instanceof byte[])
       writeBytes((byte[]) obj);
     else
-      throw new JMSException("jms");
+      throw new MessageFormatException(obj.getClass().getName() + ": " + String.valueOf(obj));
   }
 
   public long getBodyLength()

@@ -76,6 +76,14 @@ public abstract class AttributeStrategy {
   }
 
   /**
+   * Creates the child node.
+   */
+  public Object create()
+  {
+    return null;
+  }
+
+  /**
    * Evaluate as a string.
    */
   public static String evalString(String exprString)

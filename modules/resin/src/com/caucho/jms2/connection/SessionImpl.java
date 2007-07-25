@@ -60,8 +60,10 @@ public class SessionImpl implements Session, ThreadTask {
   private ClassLoader _classLoader;
   
   private ConnectionImpl _connection;
-  private ArrayList<MessageConsumerImpl> _consumers =
-    new ArrayList<MessageConsumerImpl>();
+  
+  private ArrayList<MessageConsumerImpl> _consumers
+    = new ArrayList<MessageConsumerImpl>();
+  
   private MessageListener _messageListener;
   private boolean _isAsynchronous;
 
@@ -493,6 +495,13 @@ public class SessionImpl implements Session, ThreadTask {
     throws JMSException
   {
     checkOpen();
+
+    if (topic == null)
+      throw new InvalidDestinationException(L.l("destination is null.  Destination may not be null for Session.createDurableSubscriber"));
+    
+    if (! (topic instanceof AbstractQueue))
+      throw new InvalidDestinationException(L.l("'{0}' is an unknown destination.  The destination must be a Resin JMS Destination.",
+						topic));
     
     AbstractQueue topicImpl = (AbstractQueue) topic;
 
@@ -523,7 +532,13 @@ public class SessionImpl implements Session, ThreadTask {
   {
     checkOpen();
 
-    _connection.removeDurableSubscriber(name);
+    if (name == null)
+      throw new InvalidDestinationException(L.l("destination is null.  Destination may not be null for Session.unsubscribe"));
+
+    TopicSubscriber subscriber = _connection.removeDurableSubscriber(name);
+
+    if (subscriber == null)
+      throw new InvalidDestinationException(L.l("'{0}' is an unknown subscriber for Session.unsubscribe"));
   }
 
   /**

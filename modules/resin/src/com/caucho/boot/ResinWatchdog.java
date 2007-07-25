@@ -373,6 +373,7 @@ public class ResinWatchdog extends AbstractManagedObject
     list.add("-Djava.system.class.loader=com.caucho.loader.SystemClassLoader");
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getPath());
+    list.add("-Dresin.root=" + resinRoot.getPath());
 
     if (! _hasWatchdogXss)
       list.add("-Xss256k");

@@ -68,6 +68,13 @@ public abstract class TypeStrategy {
   }
 
   /**
+   * Called before the children are configured.
+   */
+  public void beforeConfigure(NodeBuilder builder, Object bean)
+  {
+  }
+
+  /**
    * Return the attribute strategy for the given name.
    *
    * @param attrName the configuration attribute name
@@ -76,9 +83,12 @@ public abstract class TypeStrategy {
   public AttributeStrategy getAttributeStrategy(QName attrName)
           throws Exception
   {
+    /*
     throw new ConfigException(L.l("'{0}' is an unknown attribute of {1}.",
                                   attrName.getName(),
 				  getTypeName()));
+    */
+    return null;
   }
 
   /**
@@ -101,7 +111,7 @@ public abstract class TypeStrategy {
   public void configureBean(NodeBuilder builder, Object bean, Node top)
     throws Exception
   {
-    builder.configureBeanImpl(this, bean, top);
+    //builder.configureBeanImpl(this, bean, top);
   }
 
   /**
@@ -110,7 +120,7 @@ public abstract class TypeStrategy {
   public void configureAttribute(NodeBuilder builder, Object bean, Node attr)
     throws Exception
   {
-    builder.configureAttributeImpl(this, bean, attr);
+    //builder.configureAttributeImpl(this, bean, attr);
   }
 
   /**

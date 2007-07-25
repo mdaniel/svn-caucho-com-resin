@@ -45,6 +45,25 @@ public class EnvironmentTypeStrategy extends BeanTypeStrategy {
     super(type);
   }
 
+  /**
+   * Called before the children are configured.
+   */
+  public void beforeConfigure(NodeBuilder builder, Object bean)
+  {
+    super.beforeConfigure(builder, bean);
+    
+    EnvironmentBean envBean = (EnvironmentBean) bean;
+    ClassLoader loader = envBean.getClassLoader();
+
+    Thread thread = Thread.currentThread();
+    thread.setContextClassLoader(loader);
+
+    builder.getELContext().push(EnvironmentLevelELResolver.create(loader));
+    // XXX: builder.setClassLoader?
+
+    addDependencies(builder);
+  }
+
   public void configureBean(NodeBuilder builder, Object bean, Node node)
     throws Exception
   {
@@ -60,7 +79,7 @@ public class EnvironmentTypeStrategy extends BeanTypeStrategy {
       builder.getELContext().push(EnvironmentLevelELResolver.create(loader));
       // XXX: builder.setClassLoader?
 
-      addDependencies(builder, node);
+      addDependencies(builder);
 
       super.configureBean(builder, bean, node);
     } finally {
@@ -81,7 +100,7 @@ public class EnvironmentTypeStrategy extends BeanTypeStrategy {
       thread.setContextClassLoader(envBean.getClassLoader());
       // XXX: builder.setClassLoader?
 
-      addDependencies(builder, attr);
+      addDependencies(builder);
 
       super.configureAttribute(builder, bean, attr);
     } finally {
@@ -95,9 +114,9 @@ public class EnvironmentTypeStrategy extends BeanTypeStrategy {
    * @param builder the builder context
    * @param node the configuration node
    */
-  private void addDependencies(NodeBuilder builder, Node node)
+  private void addDependencies(NodeBuilder builder)
   {
-    ArrayList<Dependency> dependencyList = builder.getDependencyList(node);
+    ArrayList<Dependency> dependencyList = builder.getDependencyList();
 
     if (dependencyList != null) {
       int size = dependencyList.size();

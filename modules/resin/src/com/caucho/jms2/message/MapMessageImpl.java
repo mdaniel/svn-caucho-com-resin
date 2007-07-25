@@ -82,7 +82,7 @@ public class MapMessageImpl extends MessageImpl implements MapMessage  {
   public boolean itemExists(String name)
     throws JMSException
   {
-    return getObject(name) != null;
+    return _map.containsKey(name);
   }
 
   /**
@@ -391,14 +391,15 @@ public class MapMessageImpl extends MessageImpl implements MapMessage  {
   public void readBody(InputStream is)
     throws IOException, JMSException
   {
-    if (is == null)
-      return;
+    if (is != null) {
+      Hessian2Input in = new Hessian2Input(is);
 
-    Hessian2Input in = new Hessian2Input(is);
+      _map = (HashMap<String,Object>) in.readObject();
 
-    _map = (HashMap<String,Object>) in.readObject();
-
-    in.close();
+      in.close();
+    }
+    
+    setBodyReadOnly();
   }
 
   public String toString()

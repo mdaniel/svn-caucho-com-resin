@@ -200,8 +200,11 @@ public class BeanTypeStrategy extends TypeStrategy {
       }
 
       if (strategy == null)
+        return null;
+      /*
         throw new ConfigException(L.l("'{0}' is an unknown property of '{1}'.",
                                       attrName.getName(), _type.getName()));
+      */
 
       _nsAttributeMap.put(attrName, strategy);
     }

@@ -93,10 +93,17 @@ public class SetterAttributeStrategy extends AttributeStrategy {
     try {
       _setter.invoke(bean, value);
     } catch (IllegalArgumentException e) {
+      System.out.println("THIS: " + this + " " + getClass());
       log.log(Level.FINE, e.toString(), e);
 
       throw new ConfigException(L.l("Can't assign {0} ({1}) to a {2}.",
-				    value, value.getClass(), _setter.getParameterTypes()[0]));
+				    value, value.getClass(), _setter.getParameterTypes()[0]),
+                                e);
     }
+  }
+
+  public String toString()
+  {
+    return "SetterAttributeStrategy[" + _setter + "]";
   }
 }

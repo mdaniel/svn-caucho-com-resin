@@ -90,7 +90,7 @@ abstract public class AbstractQueue
     long expires = Alarm.getCurrentTime() + timeout;
     
     MessageImpl queueMsg = _messageFactory.copy(msg);
-    
+
     SendStatus status = _listenerManager.send(queueMsg);
 
     if (status == SendStatus.FAIL) {

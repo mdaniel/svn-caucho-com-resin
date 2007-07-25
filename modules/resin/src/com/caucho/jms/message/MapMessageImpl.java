@@ -47,7 +47,7 @@ public class MapMessageImpl extends MessageImpl implements MapMessage  {
   public boolean itemExists(String name)
     throws JMSException
   {
-    return getObject(name) != null;
+    return _map.containsKey(name);
   }
 
   /**

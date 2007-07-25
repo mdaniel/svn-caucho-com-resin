@@ -46,6 +46,8 @@ public class IOExceptionWrapper extends IOException {
   {
     super(message);
 
+
+    e.printStackTrace();
     _rootCause = e;
   }
   
@@ -53,6 +55,7 @@ public class IOExceptionWrapper extends IOException {
   {
     super(e.toString());
 
+    e.printStackTrace();
     _rootCause = e;
   }
 
