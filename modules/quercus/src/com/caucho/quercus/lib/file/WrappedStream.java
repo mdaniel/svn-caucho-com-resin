@@ -235,7 +235,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
 
         int ch2 = read();
 
-        if (ch == '\n')
+        if (ch2 == '\n')
           sb.append('\n');
         else
           unread();

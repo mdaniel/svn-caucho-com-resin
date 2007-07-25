@@ -30,12 +30,7 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BinaryValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.vfs.ReadStream;
 
 import java.io.IOException;
@@ -53,13 +48,30 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
     = Logger.getLogger(ReadStreamInput.class.getName());
 
   private ReadStream _is;
+  private Boolean _isMacLineEnding;
 
-  public ReadStreamInput()
+  public ReadStreamInput(Env env)
   {
+    if (! env.getIniBoolean("auto_detect_line_endings"))
+      _isMacLineEnding = false;
   }
 
-  public ReadStreamInput(ReadStream is)
+  public ReadStreamInput(Env env, ReadStream is)
   {
+    if (! env.getIniBoolean("auto_detect_line_endings"))
+      _isMacLineEnding = false;
+
+    init(is);
+  }
+
+  protected ReadStreamInput(Boolean isMacLineEnding)
+  {
+    _isMacLineEnding = isMacLineEnding;
+  }
+
+  protected ReadStreamInput(Boolean isMacLineEnding, ReadStream is)
+  {
+    _isMacLineEnding = isMacLineEnding;
     init(is);
   }
 
@@ -82,7 +94,7 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   public BinaryInput openCopy()
     throws IOException
   {
-    return new ReadStreamInput(_is.getPath().openRead());
+    return new ReadStreamInput(_isMacLineEnding, _is.getPath().openRead());
   }
 
   public void setEncoding(String encoding)
@@ -195,27 +207,50 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   {
     if (_is == null)
       return null;
-    
+
     StringBuilderValue sb = new StringBuilderValue();
 
     int ch;
 
     for (; length > 0 && (ch = _is.readChar()) >= 0; length--) {
+      // php/161[pq] newlines
       if (ch == '\n') {
 	sb.append((char) ch);
-	return sb;
+
+        if (_isMacLineEnding == null)
+          _isMacLineEnding = false;
+
+        if (!_isMacLineEnding)
+          return sb;
       }
       else if (ch == '\r') {
 	sb.append('\r');
-	
-	int ch2 = _is.read();
 
-	if (ch == '\n')
-	  sb.append('\n');
-	else
-	  _is.unread();
-	
-	return sb;
+        int ch2 = _is.read();
+
+	if (ch2 == '\n') {
+          if (_isMacLineEnding == null)
+            _isMacLineEnding = false;
+
+          if (_isMacLineEnding) {
+            _is.unread();
+            return sb;
+          }
+          else {
+            sb.append('\n');
+            return sb;
+          }
+        }
+        else {
+          _is.unread();
+
+          if (_isMacLineEnding == null)
+            _isMacLineEnding = true;
+
+          if (_isMacLineEnding)
+            return sb;
+        }
+
       }
       else
 	sb.append((char) ch);

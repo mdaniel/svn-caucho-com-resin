@@ -261,8 +261,6 @@ public class FileInputOutput extends AbstractBinaryOutput
 
     int ch;
 
-    InputStream is = getInputStream();
-
     for (; length > 0 && (ch = readChar()) >= 0; length--) {
       if (ch == '\n') {
         sb.append((char) ch);

@@ -51,6 +51,8 @@ public class ZipEntryInputStream extends ReadStreamInput
   public ZipEntryInputStream(BinaryInput in, long position)
     throws IOException
   {
+    super(false);
+
     _in = in;
     _position = position;
 

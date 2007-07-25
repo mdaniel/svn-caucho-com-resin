@@ -48,6 +48,7 @@ public class ZlibInputStream extends ReadStreamInput
   
   public ZlibInputStream(BinaryInput in) throws IOException
   {
+    super(false);
     init(in);
   }
 

@@ -49,6 +49,8 @@ public class PopenInput extends ReadStreamInput {
   public PopenInput(Env env, Process process)
     throws IOException
   {
+    super(env);
+    
     _env = env;
     
     _env.addClose(this);

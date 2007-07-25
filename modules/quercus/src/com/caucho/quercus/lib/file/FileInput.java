@@ -56,6 +56,8 @@ public class FileInput extends ReadStreamInput implements LockableStream {
   public FileInput(Env env, Path path)
     throws IOException
   {
+    super(env);
+    
     _env = env;
     
     env.addClose(this);

@@ -56,6 +56,8 @@ public class ProcOpenInput extends ReadStreamInput {
   public ProcOpenInput(Env env, InputStream in)
     throws IOException
   {
+    super(env);
+    
     _env = env;
     _in = in;
     
@@ -66,6 +68,8 @@ public class ProcOpenInput extends ReadStreamInput {
   
   public ProcOpenInput(Env env, InputStream in, FileOutput out)
   {
+    super(env);
+    
     _env = env;
     _in = in;
     
