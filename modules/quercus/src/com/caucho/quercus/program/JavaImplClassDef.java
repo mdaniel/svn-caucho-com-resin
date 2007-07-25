@@ -117,8 +117,8 @@ public class JavaImplClassDef extends ClassDef {
     AbstractJavaMethod method = _functionMap.getFunction(name);
 
     if (method == null) {
-      env.warning(env.getLocation().getMessagePrefix() + L.l("{0}::{1} is an unknown method.",
-                                          _name, name));
+      env.warning(env.getLocation(), L.l("{0}::{1} is an unknown method.",
+                                         _name, name));
 
       return NullValue.NULL;
     }
@@ -191,7 +191,7 @@ public class JavaImplClassDef extends ClassDef {
     AbstractJavaMethod method = _functionMap.getFunction(name);
 
     if (method == null) {
-      env.error("'" + name + "' is an unknown method.");
+      env.error(env.getLocation(), "'" + name + "' is an unknown method.");
     }
 
     return method;

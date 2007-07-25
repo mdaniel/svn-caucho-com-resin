@@ -27,10 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib;
+package com.caucho.quercus.lib.date;
 
+import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.annotation.Construct;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
+import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.Alarm;
@@ -358,16 +362,28 @@ public class DateModule extends AbstractQuercusModule {
     return (c + day + e + f - 1524.5);
   }
 
+  private String date(String format, long time, boolean isGMT)
+  {
+    QDate calendar = isGMT ? _gmtCalendar : _localCalendar;
+    
+    return dateImpl(format, time, calendar);
+  }
+  
+  protected static String date(String format, long time, QDate calendar)
+  {
+    calendar = (QDate) calendar.clone();
+    
+    return dateImpl(format, time, calendar);
+  }
+  
   /**
    * Returns the formatted date.
    */
-  private String date(String format,
-		      long time,
-		      boolean isGMT)
+  private static String dateImpl(String format,
+                                 long time,
+                                 QDate calendar)
   {
     long now = 1000 * time;
-
-    QDate calendar = isGMT ? _gmtCalendar : _localCalendar;
 
     synchronized (calendar) {
       calendar.setGMTTime(now);
@@ -634,6 +650,14 @@ public class DateModule extends AbstractQuercusModule {
 	    sb.append(zone.getDisplayName(calendar.isDST(), TimeZone.SHORT));
 	    break;
 	  }
+      
+    case 'e':
+      {
+        TimeZone zone = calendar.getLocalTimeZone();
+        
+        sb.append(zone.getID());
+        break;
+      }
 
 	case 'Z':
 	  {
@@ -894,7 +918,181 @@ public class DateModule extends AbstractQuercusModule {
     }
   }
 
-  class DateParser {
+  public static DateTime date_create(@Optional("now") String time,
+                                     @Optional DateTimeZone dateTimeZone)
+  {
+    return DateTime.__construct(time, dateTimeZone);
+  }
+  
+  public static void date_date_set(DateTime dateTime,
+                                   int year,
+                                   int month,
+                                   int day)
+  {
+    dateTime.setDate(year, month, day);
+  }
+  
+  public static String date_default_timezone_get()
+  {
+    throw new UnimplementedException("date_default_timezone_get");
+  }
+  
+  public static boolean date_default_timezone_set(String id)
+  {
+    throw new UnimplementedException("date_default_timezone_set");
+  }
+  
+  public static String date_format(DateTime dateTime, String format) 
+  {
+    return dateTime.format(format);
+  }
+  
+  public static void date_isodate_set(DateTime dateTime,
+                                      int year,
+                                      int week,
+                                      int day)
+  {
+    dateTime.setISODate(year, week, day);
+  }
+  
+  public static void date_modify(DateTime dateTime, String modify)
+  {
+    dateTime.modify(modify);
+  }
+  
+  public static long date_offset_get(DateTime dateTime)
+  {
+    return dateTime.getOffset();
+  }
+  
+  public static Value date_parse(String date)
+  {
+    DateTime dateTime = new DateTime(date);
+    QDate qDate = dateTime.getQDate();
+    
+    ArrayValue array = new ArrayValueImpl();
+    
+    array.put("year", qDate.getYear());
+    array.put("month", qDate.getMonth());
+    array.put("day", qDate.getDayOfMonth());
+    array.put("minute", qDate.getMinute());
+    array.put("second", qDate.getSecond());
+    array.put("fraction", qDate.getMillisecond() / 1000.0);
+    
+    //warning_count
+    //warnings
+    //error_count
+    //errors
+    //is_localtime
+    
+    return array;
+  }
+  
+  public static ArrayValue date_sun_info(long time,
+                                         double latitude,
+                                         double longitude)
+  {
+    throw new UnimplementedException("date_sun_info");
+  }
+  
+  public static Value date_sunrise(int timestamp,
+                                   @Optional int format,
+                                   @Optional double latitude,
+                                   @Optional double longitude,
+                                   @Optional double zenith,
+                                   @Optional double gmtOffset)
+  {
+  //gmtOffset is specified in hours
+    throw new UnimplementedException("date_sunrise");
+  }
+  
+  public static Value date_sunset(int timestamp,
+                                  @Optional int format,
+                                  @Optional double latitude,
+                                  @Optional double longitude,
+                                  @Optional double zenith,
+                                  @Optional double gmtOffset)
+  {
+    //gmtOffset is specified in hours
+    throw new UnimplementedException("date_sunset");
+  }
+  
+  public static void date_time_set(DateTime dateTime,
+                                   int hour,
+                                   int minute,
+                                   @Optional int second)
+  {
+    dateTime.setTime(hour, minute, second);
+  }
+
+  @ReturnNullAsFalse
+  public static DateTimeZone date_timezone_get(Env env,
+                                               @NotNull DateTime dateTime)
+  {
+    if (dateTime == null) {
+      env.warning("DateTime parameter must not be null");
+      
+      return null;
+    }
+    
+    return dateTime.getTimeZone();
+  }
+  
+  public static void date_timezone_set(Env env,
+                                       @NotNull DateTime dateTime,
+                                       @NotNull DateTimeZone dateTimeZone)
+  {
+    if (dateTime == null || dateTimeZone == null) {
+      env.warning("parameters must not be null");
+      
+      return;
+    }
+    
+    dateTime.setTimeZone(dateTimeZone);
+  }
+  
+  public static ArrayValue timezone_abbreviations_list()
+  {
+    return DateTimeZone.listAbbreviations();
+  }
+  
+  public static ArrayValue timezone_identifiers_list()
+  {
+    return DateTimeZone.listIdentifiers();
+  }
+  
+  public static Value timezone_name_from_abbr(StringValue abbr,
+                                              @Optional("-1") int gmtOffset,
+                                              @Optional boolean isDST)
+  {
+    if (gmtOffset == -1)
+      return DateTimeZone.findTimeZone(abbr);
+    else
+      return DateTimeZone.findTimeZone(abbr, gmtOffset, isDST);
+  }
+  
+  public static String timezone_name_get(DateTimeZone dateTimeZone)
+  {
+    return dateTimeZone.getName();
+  }
+  
+  public static long timezone_offset_get(DateTimeZone dateTimeZone,
+                                         DateTime dateTime)
+  {
+    return dateTimeZone.getOffset(dateTime);
+  }
+  
+  public static DateTimeZone timezone_open(String timeZone)
+  {
+    return new DateTimeZone(timeZone);
+  }
+  
+  public static Value timezone_transitions_get(DateTimeZone dateTimeZone)
+  {
+    return dateTimeZone.getTransitions();
+  }
+  
+  static class DateParser {
     private static final int INT = 1;
     private static final int PERIOD = 2;
     private static final int AGO = 3;

@@ -3766,6 +3766,20 @@ public class Env {
 
     return error(B_WARNING, "", msg + getFunctionLocation());
   }
+  
+  /**
+   * A runtime warning.
+   */
+  public Value warning(Location location, String msg)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      QuercusException e = new QuercusException(msg);
+
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    return error(B_WARNING, location, "", msg + getFunctionLocation());
+  }
 
   /**
    * A warning with an exception.
@@ -3776,6 +3790,16 @@ public class Env {
 
     return warning(msg);
   }
+  
+  /**
+   * A warning with an exception.
+   */
+  public Value warning(Location location, String msg, Throwable e)
+  {
+    log.log(Level.FINE, e.toString(), e);
+
+    return warning(location, msg);
+  }
 
   /**
    * A warning with an exception.
@@ -3783,6 +3807,14 @@ public class Env {
   public Value warning(Throwable e)
   {
     return warning(e.toString(), e);
+  }
+  
+  /**
+   * A warning with an exception.
+   */
+  public Value warning(Location location, Throwable e)
+  {
+    return warning(location, e.toString(), e);
   }
   
   /**

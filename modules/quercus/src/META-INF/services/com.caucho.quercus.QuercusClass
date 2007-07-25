@@ -1,3 +1,5 @@
+com.caucho.quercus.lib.date.DateTime
+com.caucho.quercus.lib.date.DateTimeZone
 com.caucho.quercus.lib.db.Mysqli
 com.caucho.quercus.lib.db.OracleOciCollection
 com.caucho.quercus.lib.db.OracleOciLob

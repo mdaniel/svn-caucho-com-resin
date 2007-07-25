@@ -570,9 +570,9 @@ public class QuercusClass {
    * calls the function.
    */
   public Value callMethod(Env env,
-			  Value thisValue,
+                          Value thisValue,
                           int hash, char []name, int nameLength,
-			  Expr []args)
+                          Expr []args)
   {
     AbstractFunction fun = _methodMap.get(hash, name, nameLength);
     

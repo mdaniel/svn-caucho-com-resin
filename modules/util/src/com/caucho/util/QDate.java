@@ -468,7 +468,7 @@ public class QDate {
    */
   public TimeZone getLocalTimeZone()
   {
-    return _localTimeZone;
+    return _timeZone;
   }
 
   /**

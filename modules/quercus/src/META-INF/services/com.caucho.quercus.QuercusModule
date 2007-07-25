@@ -5,7 +5,7 @@ com.caucho.quercus.lib.BcmathModule
 com.caucho.quercus.lib.ClassesModule
 com.caucho.quercus.lib.CtypeModule
 com.caucho.quercus.lib.curl.CurlModule
-com.caucho.quercus.lib.DateModule
+com.caucho.quercus.lib.date.DateModule
 com.caucho.quercus.lib.ErrorModule
 com.caucho.quercus.lib.ExifModule
 com.caucho.quercus.lib.file.FileModule

@@ -566,6 +566,14 @@ abstract public class ArrayValue extends Value {
   {
     put(new StringValueImpl(key), new LongValue(value));
   }
+  
+  /**
+   * Convenience for lib.
+   */
+  public void put(String key, double value)
+  {
+    put(new StringValueImpl(key), new DoubleValue(value));
+  }
 
   /**
    * Convenience for lib.

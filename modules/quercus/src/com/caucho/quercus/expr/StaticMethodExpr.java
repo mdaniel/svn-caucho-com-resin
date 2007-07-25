@@ -131,7 +131,7 @@ public class StaticMethodExpr extends Expr {
     QuercusClass cl = env.findClass(_className);
 
     if (cl == null) {
-      throw new QuercusException(L.l("no matching class {0}", _className));
+      env.error(getLocation(), L.l("no matching class {0}", _className));
     }
 
     // qa/0954 - what appears to be a static call may be a call to a super constructor
@@ -152,7 +152,7 @@ public class StaticMethodExpr extends Expr {
     QuercusClass cl = env.findClass(_className);
 
     if (cl == null) {
-      throw new QuercusException(L.l("no matching class {0}", _className));
+      env.error(getLocation(), L.l("no matching class {0}", _className));
     }
 
     // qa/0954 - what appears to be a static call may be a call to a super constructor
