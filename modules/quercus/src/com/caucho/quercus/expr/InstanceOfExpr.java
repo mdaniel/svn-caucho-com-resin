@@ -75,8 +75,7 @@ public class InstanceOfExpr extends UnaryExpr {
    */
   public boolean evalBoolean(Env env)
   {
-    Value lValue = _expr.eval(env);
-
+    // php/03p1
     return _expr.eval(env).isA(_right);
   }
 

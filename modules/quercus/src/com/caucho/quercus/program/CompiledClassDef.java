@@ -38,7 +38,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.util.IdentityIntMap;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
@@ -67,6 +66,7 @@ public class CompiledClassDef extends ClassDef {
   /**
    * Initialize the quercus class.
    */
+  @Override
   public void initClass(QuercusClass cl)
   {
     try {
@@ -106,6 +106,7 @@ public class CompiledClassDef extends ClassDef {
   /**
    * Returns the constructor
    */
+  @Override
   public AbstractFunction findConstructor()
   {
     return null;
@@ -312,6 +313,7 @@ public class CompiledClassDef extends ClassDef {
   /**
    * Eval new
    */
+  @Override
   public Value callNew(Env env, Expr []args)
   {
     return null;
@@ -320,6 +322,7 @@ public class CompiledClassDef extends ClassDef {
   /**
    * Eval new
    */
+  @Override
   public Value callNew(Env env, Value []args)
   {
     return null;

@@ -32,24 +32,21 @@ package com.caucho.quercus.lib.dom;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.TempBufferStringValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StringStream;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.xml.XmlPrinter;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -456,15 +453,15 @@ public class DOMDocument
   }
 
   // XXX: also can be called statically, returns a DOMDocument in that case
-  public boolean loadXML(Env env, String source, @Optional Value options)
+  public boolean loadXML(Env env, BinaryValue source, @Optional Value options)
   {
     if (options != null)
       env.stub(L.l("`{0}' is ignored", "options"));
 
-    ReadStream is = StringStream.open(source);
+    InputStream is = source.toInputStream();
 
     try {
-      getImpl().parseXMLDocument(_delegate, is, null);
+      getImpl().parseXMLDocument(_delegate, Vfs.openRead(is), null);
     }
     catch (SAXException ex) {
       env.warning(ex);
@@ -477,7 +474,12 @@ public class DOMDocument
     }
     finally {
       if (is != null) {
-	is.close();
+        try {
+          is.close();
+        }
+        catch (IOException ex) {
+          env.warning(ex);
+        }
       }
     }
 

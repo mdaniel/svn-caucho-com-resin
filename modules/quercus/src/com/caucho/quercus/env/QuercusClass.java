@@ -30,7 +30,9 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.expr.*;
+import com.caucho.quercus.expr.ClassConstExpr;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.StringLiteralExpr;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
 import com.caucho.quercus.program.Function;
@@ -43,7 +45,6 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -137,6 +138,11 @@ public class QuercusClass {
   public QuercusClass getParent()
   {
     return _parent;
+  }
+
+  public boolean isInterface()
+  {
+    return _classDef.isInterface();
   }
 
   /**

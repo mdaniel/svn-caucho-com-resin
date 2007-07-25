@@ -2899,7 +2899,11 @@ public class QuercusParser {
 	  }
 
 	}
-	else {
+        else if (token == INSTANCEOF) {
+          // php/03p1
+          return _factory.createNot(_factory.createInstanceOf(expr, parseIdentifier()));
+        }
+        else {
 	  _peekToken = token;
 	  
 	  return _factory.createNot(expr);

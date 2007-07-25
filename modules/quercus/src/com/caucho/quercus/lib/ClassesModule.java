@@ -56,7 +56,10 @@ public class ClassesModule extends AbstractQuercusModule {
                               String className,
                               @Optional("true") boolean useAutoload)
   {
-    return env.findClass(className, useAutoload) != null;
+    QuercusClass cl =  env.findClass(className, useAutoload);
+
+    // php/[03]9m1
+    return cl != null && !cl.isInterface();
   }
 
   /**
@@ -84,8 +87,6 @@ public class ClassesModule extends AbstractQuercusModule {
    * @param className the name of the class
    *
    * @return an array of method names and values
-   *
-   * @throws errorException
    */
   public static Value get_class_methods(Env env, String className)
   {
@@ -202,6 +203,19 @@ public class ClassesModule extends AbstractQuercusModule {
     }
 
     return BooleanValue.FALSE;
+  }
+
+  /**
+   * Returns true if the class exists.
+   */
+  public boolean interface_exists(Env env,
+                                  String interfaceName,
+                                  @Optional("true") boolean useAutoload)
+  {
+    QuercusClass cl =  env.findClass(interfaceName, useAutoload);
+
+    // php/[03]9m0
+    return cl != null && cl.isInterface();
   }
 
   /**
