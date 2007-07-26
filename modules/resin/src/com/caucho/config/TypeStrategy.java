@@ -75,6 +75,13 @@ public abstract class TypeStrategy {
   }
 
   /**
+   * Called after the children are configured.
+   */
+  public void afterConfigure(NodeBuilder builder, Object bean)
+  {
+  }
+
+  /**
    * Return the attribute strategy for the given name.
    *
    * @param attrName the configuration attribute name

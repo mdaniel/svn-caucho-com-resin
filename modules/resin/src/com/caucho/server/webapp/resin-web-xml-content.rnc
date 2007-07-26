@@ -624,6 +624,8 @@ r_rewrite-dispatch-Contents =
        r_rewrite-conditions-Type
      }*
 
+   & rcore_import
+
    & element import {
 
        (attribute dependency-check-interval { r_period-Type}

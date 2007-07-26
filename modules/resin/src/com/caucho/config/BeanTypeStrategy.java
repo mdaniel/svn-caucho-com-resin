@@ -37,8 +37,7 @@ import com.caucho.loader.WeakDestroyListener;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.NotImplementedException;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.PersistentDependency;
+import com.caucho.vfs.*;
 import com.caucho.xml.CauchoNode;
 import com.caucho.xml.QAbstractNode;
 import com.caucho.xml.QName;
@@ -176,6 +175,30 @@ public class BeanTypeStrategy extends TypeStrategy {
       }
     }
   }
+  /**
+   * Called before the children are configured.
+   */
+  public void beforeConfigure(NodeBuilder builder, Object bean)
+  {
+    super.beforeConfigure(builder, bean);
+
+    try {
+      if (_addDependency != null) {
+	ArrayList<Dependency> list = builder.getDependencyList();
+
+	for (int i = 0; i < list.size(); i++) {
+	  Dependency depend = list.get(i);
+
+	  if (depend instanceof PersistentDependency)
+	    _addDependency.invoke(bean, ((PersistentDependency) depend));
+	}
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ConfigException(e);
+    }
+  }
 
   /**
    * Returns the appropriate strategy for the bean.
@@ -219,51 +242,6 @@ public class BeanTypeStrategy extends TypeStrategy {
     throws Exception
   {
     return builder.configureChildImpl(this, node, parent);
-  }
-
-  public void configureBean(NodeBuilder builder, Object bean, Node node)
-         throws Exception
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      if (node instanceof CauchoNode) {
-        CauchoNode cauchoNode = (CauchoNode) node;
-
-        if (_setNode != null)
-          _setNode.invoke(bean, cauchoNode);
-
-        if (_setLocation != null)
-          _setLocation.invoke(bean, cauchoNode.getFilename(), cauchoNode.getLine());
-
-        if (_setSystemId != null)
-          _setSystemId.invoke(bean, cauchoNode.getBaseURI());
-      }
-
-      if (_addDependency != null && (node instanceof QAbstractNode)) {
-        QAbstractNode qAbstractNode = (QAbstractNode) node;
-        ArrayList<Depend> dependList = qAbstractNode.getDependencyList();
-
-        for (int i = 0; dependList != null && i < dependList.size(); i++)
-          _addDependency.invoke(bean, dependList.get(i));
-      }
-
-      for (int i = 0; i < _injectList.size(); i++) {
-	try {
-	  _injectList.get(i).configure(bean);
-	} catch (Throwable e) {
-	  throw new ConfigException(e);
-	}
-      }
-
-      super.configureBean(builder, bean, node);
-
-      if (bean instanceof Validator)
-        builder.addValidator((Validator) bean);
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
   }
 
   /**

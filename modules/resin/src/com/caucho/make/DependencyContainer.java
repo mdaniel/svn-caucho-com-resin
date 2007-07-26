@@ -101,6 +101,11 @@ public class DependencyContainer implements Dependency
     return this;
   }
 
+  public int size()
+  {
+    return _dependencyList.size();
+  }
+
   /**
    * Sets the check modification check interval in milliseconds.
    * Negative values mean never check. 0 means always check.

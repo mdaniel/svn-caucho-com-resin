@@ -29,6 +29,7 @@
 
 package com.caucho.server.rewrite;
 
+import com.caucho.config.*;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
@@ -53,7 +54,9 @@ public class RewriteDispatch
   private final WebApp _webApp;
   private final DispatchServer _dispatchServer;
 
-  private final MatchRule _matchRule;
+  private MatchRule _matchRule;
+
+  private BuilderProgramContainer _program = new BuilderProgramContainer();
 
   private final boolean _isFiner;
   private final boolean _isFinest;
@@ -73,9 +76,6 @@ public class RewriteDispatch
     _dispatchServer = dispatchServer;
     _webApp = webApp;
 
-    _matchRule = new MatchRule(this);
-    _matchRule.setRegexp(Pattern.compile(".*"));
-
     _isFiner = log.isLoggable(Level.FINER);
     _isFinest = log.isLoggable(Level.FINEST);
   }
@@ -85,6 +85,15 @@ public class RewriteDispatch
     return _webApp;
   }
 
+  /**
+   * Adds to the builder program.
+   */
+  public void addBuilderProgram(BuilderProgram program)
+  {
+    _program.addProgram(program);
+  }
+
+  /*
   public AcceptRule createDispatch()
   {
     return _matchRule.createDispatch();
@@ -214,12 +223,11 @@ public class RewriteDispatch
   {
     _matchRule.addSet(set);
   }
+  */
 
   @PostConstruct
   public void init()
   {
-    _matchRule.init();
-    _matchRule.register();
   }
 
   public FilterChain map(String uri, FilterChain next)
@@ -227,6 +235,18 @@ public class RewriteDispatch
   {
     if (_isFinest)
       log.finest("rewrite-dispatch check uri '" + uri + "'");
+
+    if (_matchRule == null || _matchRule.isModified()) {
+      if (_matchRule != null)
+	_matchRule.destroy();
+      
+      _matchRule = new MatchRule(this);
+      _matchRule.setRegexp(Pattern.compile(".*"));
+
+      _program.configure(_matchRule);
+
+      _matchRule.init();
+    }
 
     return _matchRule.map(uri, next);
   }
@@ -239,10 +259,12 @@ public class RewriteDispatch
       _dispatchServer.clearCache();
   }
 
+  /*
   @PreDestroy
   public void destroy()
   {
     _matchRule.destroy();
   }
+  */
 }
   

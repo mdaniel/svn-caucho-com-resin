@@ -64,6 +64,16 @@ public class EnvironmentTypeStrategy extends BeanTypeStrategy {
     addDependencies(builder);
   }
 
+  /**
+   * Called after the children are configured.
+   */
+  public void afterConfigure(NodeBuilder builder, Object bean)
+  {
+    super.afterConfigure(builder, bean);
+    
+    builder.getELContext().pop();
+  }
+
   public void configureBean(NodeBuilder builder, Object bean, Node node)
     throws Exception
   {
@@ -81,7 +91,7 @@ public class EnvironmentTypeStrategy extends BeanTypeStrategy {
 
       addDependencies(builder);
 
-      super.configureBean(builder, bean, node);
+      // super.configureBean(builder, bean, node);
     } finally {
       builder.getELContext().pop();
       

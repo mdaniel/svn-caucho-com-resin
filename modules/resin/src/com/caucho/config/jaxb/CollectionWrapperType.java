@@ -79,7 +79,7 @@ public class CollectionWrapperType extends TypeStrategy {
   public Object configure(NodeBuilder builder, Node node, Object parent)
     throws Exception
   {
-    configureBean(builder, parent, node);
+    // configureBean(builder, parent, node);
 
     return parent;
   }

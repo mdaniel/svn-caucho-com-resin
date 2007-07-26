@@ -132,6 +132,7 @@ public class JaxbBeanType extends TypeStrategy
   public void configureBean(NodeBuilder builder, Object bean, Node top)
     throws Exception
   {
+    /*
     if (_valueAttr != null) {
       _valueAttr.configure(builder, bean, ((QNode) top).getQName(), top);
 
@@ -139,6 +140,7 @@ public class JaxbBeanType extends TypeStrategy
     }
     else
       builder.configureBeanImpl(this, bean, top);
+    */
   }
 
   public void init(Object bean)

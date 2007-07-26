@@ -84,6 +84,7 @@ public class BeanField extends JaxbProperty {
 			       Node node)
     throws ConfigException
   {
+    /*
     try {
       Object value = _type.newInstance();
 
@@ -100,5 +101,6 @@ public class BeanField extends JaxbProperty {
     } catch (Exception e) {
       throw builder.error(e, node);
     }
+    */
   }
 }

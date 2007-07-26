@@ -82,6 +82,7 @@ public class CollectionWrapperProperty extends JaxbProperty {
 			       Node node)
     throws ConfigException
   {
+    /*
     try {
       _wrapperType.configureBean(builder, bean, node);
     } catch (RuntimeException e) {
@@ -91,5 +92,6 @@ public class CollectionWrapperProperty extends JaxbProperty {
     } catch (Exception e) {
       throw builder.error(e, node);
     }
+    */
   }
 }

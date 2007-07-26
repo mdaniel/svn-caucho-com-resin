@@ -32,7 +32,11 @@ package com.caucho.server.rewrite;
 import com.caucho.config.ConfigException;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
+import com.caucho.util.*;
+import com.caucho.make.*;
+import com.caucho.vfs.*;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -41,17 +45,22 @@ import java.util.logging.Logger;
 
 public class MatchRule
   extends AbstractRuleWithConditions
+  implements AlarmListener
 {
   private static final L10N L = new L10N(MatchRule.class);
 
   private static final Logger log
     = Logger.getLogger(MatchRule.class.getName());
 
+  private DependencyContainer _depend = new DependencyContainer();
+
   private ArrayList<Rule> _ruleList = new ArrayList<Rule>();
 
   private FilterChainMapper _lastFilterChainMapper = new LastFilterChainMapper();
   private Rule _firstRule;
   private Rule _lastRule;
+
+  private Alarm _alarm;
 
   protected MatchRule(RewriteDispatch rewriteDispatch)
   {
@@ -63,6 +72,17 @@ public class MatchRule
   public String getTagName()
   {
     return "match";
+  }
+
+  public boolean isModified()
+  {
+    return _depend.isModified();
+  }
+
+  public void addDependency(PersistentDependency depend)
+  {
+    System.out.println("DEP: " + depend);
+    _depend.add(depend);
   }
 
   public void setPassFilterChainMapper(FilterChainMapper nextFilterChainMapper)
@@ -268,6 +288,12 @@ public class MatchRule
     super.init();
 
     _ruleList.trimToSize();
+
+    if (_depend.size() > 0) {
+      _alarm = new Alarm(this);
+      
+      handleAlarm(_alarm);
+    }
   }
 
   public FilterChain dispatch(String uri,
@@ -308,6 +334,24 @@ public class MatchRule
     super.unregister();
   }
 
+  public void handleAlarm(Alarm alarm)
+  {
+    if (_ruleList == null) {
+    }
+    else if (_depend.isModified()) {
+      getRewriteDispatch().clearCache();
+    }
+    else {
+      long time = _depend.getCheckInterval();
+      if (time >= 0 && time < 5000)
+	time = 5000;
+
+      if (time > 0) {
+	alarm.queue(time);
+      }
+    }
+  }
+
   @Override
   public void destroy()
   {
@@ -324,6 +368,12 @@ public class MatchRule
       // XXX: s/b  Config.destroy(rule);
       rule.destroy();
     }
+
+    Alarm alarm = _alarm;
+    _alarm = null;
+
+    if (alarm != null)
+      alarm.dequeue();
 
     super.destroy();
   }
