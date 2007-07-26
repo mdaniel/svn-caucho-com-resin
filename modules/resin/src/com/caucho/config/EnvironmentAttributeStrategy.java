@@ -44,13 +44,23 @@ public class EnvironmentAttributeStrategy extends AttributeStrategy {
     _typeStrategy = typeStrategy;
   }
 
+  @Override
+  public Object create(NodeBuilder builder, Object parent)
+    throws Exception
+  {
+    return _typeStrategy.create();
+  }
+
   public void configure(NodeBuilder builder, Object bean,
 			QName name, Node node)
           throws Exception
   {
     if (builder.isIgnoreEnvironment())
       return;
-    
+
+    Object value = _typeStrategy.configure(builder, node, bean);
+
+    /*
     // builder.configureChildImpl(_typeStrategy, node, bean);
     Object child = builder.createResinType(node);
 
@@ -64,6 +74,7 @@ public class EnvironmentAttributeStrategy extends AttributeStrategy {
     }
     else
       builder.configureChildImpl(_typeStrategy, node, bean);
+    */
   }
 
   public String toString()

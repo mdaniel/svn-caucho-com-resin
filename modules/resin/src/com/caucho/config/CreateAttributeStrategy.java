@@ -56,6 +56,16 @@ public class CreateAttributeStrategy extends AttributeStrategy {
   }
 
   /**
+   * Creates an instance.
+   */
+  @Override
+  public Object create(NodeBuilder builder, Object parent)
+    throws Exception
+  {
+    return _createMethod.invoke(parent);
+  }
+
+  /**
    * Configures the attribute with the given configuration node.
    *
    * @param builder the node builder context

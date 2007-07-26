@@ -67,4 +67,24 @@ public class QNameMapAttributeStrategy extends AttributeStrategy {
   {
     _setter.invoke(bean, _name, _typeStrategy.configure(builder, node, bean));
   }
+
+  /**
+   * Sets the named attribute value.
+   *
+   * @param bean the owning bean
+   * @param name the attribute name
+   * @param value the attribute value
+   * @throws Exception
+   */
+  public void setAttribute(Object bean, QName name, Object value)
+         throws Exception
+  {
+    try {
+      _setter.invoke(bean, _name, value);
+    } catch (IllegalArgumentException e) {
+      throw new ConfigException(L.l("Can't assign {0} ({1}) to a {2}.",
+				    value, value.getClass(), _setter.getParameterTypes()[0]),
+                                e);
+    }
+  }
 }

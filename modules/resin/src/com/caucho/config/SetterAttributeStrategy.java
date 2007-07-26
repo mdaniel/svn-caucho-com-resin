@@ -61,6 +61,16 @@ public class SetterAttributeStrategy extends AttributeStrategy {
   }
 
   /**
+   * Creates an instance.
+   */
+  @Override
+  public Object create(NodeBuilder builder, Object parent)
+    throws Exception
+  {
+    return _typeStrategy.create();
+  }
+
+  /**
    * Configures the primitive value.
    *
    * @param builder the owning node builder
@@ -93,7 +103,6 @@ public class SetterAttributeStrategy extends AttributeStrategy {
     try {
       _setter.invoke(bean, value);
     } catch (IllegalArgumentException e) {
-      System.out.println("THIS: " + this + " " + getClass());
       log.log(Level.FINE, e.toString(), e);
 
       throw new ConfigException(L.l("Can't assign {0} ({1}) to a {2}.",

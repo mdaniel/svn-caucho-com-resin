@@ -227,10 +227,11 @@ public class NodeBuilder {
     NodeBuilder oldBuilder = getCurrentBuilder();
     try {
       setCurrentBuilder(this);
+      
+      TypeStrategy typeStrategy
+        = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
-      TypeStrategy typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
-
-      typeStrategy.configureAttribute(this, bean, attribute);
+      configureChildNode(attribute, bean, typeStrategy);
     }
     catch (LineConfigException e) {
       throw e;
@@ -294,53 +295,7 @@ public class NodeBuilder {
       for (Node childNode = node.getFirstChild();
            childNode != null;
            childNode = childNode.getNextSibling()) {
-        QName qName = ((QAbstractNode) childNode).getQName();
-
-        AttributeStrategy attrStrategy;
-
-        if (childNode instanceof Element) {
-          attrStrategy = typeStrategy.getAttributeStrategy(qName);
-          
-          if (attrStrategy == null)
-            throw error(L.l("'{0}' is an unknown property of '{1}'.",
-                            qName.getName(), typeStrategy.getTypeName()),
-                        childNode);
-
-          if (! hasChildren(childNode)) {
-            attrStrategy.configure(this, bean, qName, childNode);
-
-            continue;
-          }
-          else {
-            Object childBean = createResinType(childNode);
-
-            if (childBean == null)
-              childBean = attrStrategy.create();
-
-            if (childBean != null) {
-              TypeStrategy childTypeStrategy
-                = TypeStrategyFactory.getTypeStrategy(childBean.getClass());
-
-              childTypeStrategy.setParent(childBean, bean);
-
-              configureNode(childNode, childBean, childTypeStrategy);
-
-              childTypeStrategy.init(childBean);
-
-              childBean = childTypeStrategy.replaceObject(childBean);
-
-              attrStrategy.setAttribute(bean, qName, childBean);
-            }
-            else
-              attrStrategy.configure(this, bean, qName, childNode);
-          }
-        }
-        else if (childNode instanceof Text) {
-          attrStrategy = typeStrategy.getAttributeStrategy(qName);
-          
-          if (attrStrategy != null)
-            attrStrategy.configure(this, bean, qName, childNode);
-        }
+        configureChildNode(childNode, bean, typeStrategy);
       }
     } catch (LineConfigException e) {
       throw e;
@@ -385,6 +340,58 @@ public class NodeBuilder {
           configureAttributeImpl(attr, bean, typeStrategy);
         }
       }
+    }
+  }
+  
+  private void configureChildNode(Node childNode,
+                                  Object bean,
+                                  TypeStrategy typeStrategy)
+    throws Exception
+  {
+    QName qName = ((QAbstractNode) childNode).getQName();
+
+    AttributeStrategy attrStrategy;
+
+    if (childNode instanceof Element) {
+      attrStrategy = typeStrategy.getAttributeStrategy(qName);
+          
+      if (attrStrategy == null)
+        throw error(L.l("'{0}' is an unknown property of '{1}'.",
+                        qName.getName(), typeStrategy.getTypeName()),
+                    childNode);
+
+      if (! attrStrategy.isBean() || ! hasChildren(childNode)) {
+        attrStrategy.configure(this, bean, qName, childNode);
+      }
+      else {
+        Object childBean = createResinType(childNode);
+
+        if (childBean == null)
+          childBean = attrStrategy.create(this, bean);
+
+        if (childBean != null) {
+          TypeStrategy childTypeStrategy
+            = TypeStrategyFactory.getTypeStrategy(childBean.getClass());
+
+          childTypeStrategy.setParent(childBean, bean);
+
+          configureNode(childNode, childBean, childTypeStrategy);
+
+          childTypeStrategy.init(childBean);
+
+          childBean = childTypeStrategy.replaceObject(childBean);
+
+          attrStrategy.setAttribute(bean, qName, childBean);
+        }
+        else
+          attrStrategy.configure(this, bean, qName, childNode);
+      }
+    }
+    else if (childNode instanceof Text) {
+      attrStrategy = typeStrategy.getAttributeStrategy(qName);
+          
+      if (attrStrategy != null)
+        attrStrategy.configure(this, bean, qName, childNode);
     }
   }
 
@@ -459,7 +466,11 @@ public class NodeBuilder {
 
     typeStrategy.setParent(bean, parent);
 
-    configureNode(top, bean, typeStrategy);
+    // server/231e
+    AttributeStrategy textAttr = typeStrategy.getAttributeStrategy(TEXT);
+
+    if (textAttr != null)
+      textAttr.configure(this, bean, TEXT, top);
 
     typeStrategy.init(bean);
 

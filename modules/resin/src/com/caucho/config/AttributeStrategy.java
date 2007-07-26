@@ -78,9 +78,15 @@ public abstract class AttributeStrategy {
   /**
    * Creates the child node.
    */
-  public Object create()
+  public Object create(NodeBuilder builder, Object parent)
+    throws Exception
   {
     return null;
+  }
+
+  public boolean isBean()
+  {
+    return true;
   }
 
   /**

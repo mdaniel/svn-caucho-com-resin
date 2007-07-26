@@ -54,7 +54,7 @@ public abstract class TypeStrategy {
   public Object create()
     throws Exception
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return null;
   }
 
   /**

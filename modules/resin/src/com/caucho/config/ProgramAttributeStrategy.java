@@ -63,6 +63,11 @@ public class ProgramAttributeStrategy extends AttributeStrategy {
     _method = method;
   }
 
+  public boolean isBean()
+  {
+    return false;
+  }
+
   /**
    * Return true if the attribute builder adds a program.
    */
