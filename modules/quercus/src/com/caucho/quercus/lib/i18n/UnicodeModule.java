@@ -502,7 +502,7 @@ public class UnicodeModule extends AbstractQuercusModule {
     addIni(_iniMap, "unicode.output_encoding", null, PHP_INI_ALL);
     addIni(_iniMap, "unicode.runtime_encoding", null, PHP_INI_ALL);
     addIni(_iniMap, "unicode.script_encoding", null, PHP_INI_ALL);
-    addIni(_iniMap, "unicode.semantics", "on", PHP_INI_ALL);
+    addIni(_iniMap, "unicode.semantics", "off", PHP_INI_SYSTEM);
 
     addIni(_iniMap, "iconv.input_encoding", "utf-8", PHP_INI_ALL);
     addIni(_iniMap, "iconv.output_encoding", "utf-8", PHP_INI_ALL);

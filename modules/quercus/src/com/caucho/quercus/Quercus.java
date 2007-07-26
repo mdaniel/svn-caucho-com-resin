@@ -577,9 +577,6 @@ public class Quercus
    */
   public void setIni(String name, String value)
   {
-    if ("off".equalsIgnoreCase(value))
-      value = "";
-
     setIni(name, new StringValueImpl(value));
   }
 

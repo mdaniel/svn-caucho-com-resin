@@ -1234,7 +1234,15 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     String s = toString();
 
-    out.print("string(" + s.length() + ") \"" + s + "\"");
+    if (env.isUnicodeSemantics()) // php/5000
+      out.print("unicode(");
+    else
+      out.print("string(");
+
+    out.print(s.length());
+    out.print(") \"");
+    out.print(s);
+    out.print("\"");
   }
 
   class StringValueInputStream extends java.io.InputStream {

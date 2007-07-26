@@ -34,11 +34,10 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.lib.ErrorModule;
-import com.caucho.quercus.lib.ExceptionClass;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.file.FileModule;
-import com.caucho.quercus.lib.string.StringUtility;
 import com.caucho.quercus.lib.string.StringModule;
+import com.caucho.quercus.lib.string.StringUtility;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.page.QuercusPage;
@@ -51,9 +50,12 @@ import com.caucho.util.Alarm;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
-import com.caucho.vfs.*;
-import com.caucho.vfs.i18n.*;
-import com.caucho.config.ConfigException;
+import com.caucho.vfs.ByteToChar;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.i18n.EncodingReader;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -71,7 +73,6 @@ import java.net.URL;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -149,7 +150,8 @@ public class Env {
 
   private static ThreadLocal<Env> _env = new ThreadLocal<Env>();
 
-  protected Quercus _quercus;
+  protected final Quercus _quercus;
+  private final boolean _isUnicodeSemantics; 
   private QuercusPage _page;
 
   private Value _this = NullThisValue.NULL;
@@ -284,6 +286,7 @@ public class Env {
     _quercus = quercus;
 
     _isStrict = quercus.isStrict();
+    _isUnicodeSemantics = getIniBoolean("unicode.semantics");
 
     _page = page;
 
@@ -350,6 +353,14 @@ public class Env {
   //
   // i18n
   //
+
+  /**
+   * Returns true if unicode.semantics is on.
+   */
+  public boolean isUnicodeSemantics()
+  {
+    return _isUnicodeSemantics;
+  }
 
   /**
    * Returns the encoding used for scripts.
@@ -1171,17 +1182,14 @@ public class Env {
    */
   public StringValue getIni(String var)
   {
-    StringValue value = null;
+    if (_iniMap != null) {
+      StringValue value = _iniMap.get(var);
 
-    if (_iniMap != null)
-      value = _iniMap.get(var);
+      if (value != null)
+        return value;
+    }
 
-    if (value != null)
-      return value;
-
-    value = _quercus.getIni(var);
-
-    return value;
+    return _quercus.getIni(var);
   }
 
   /**
@@ -1191,10 +1199,18 @@ public class Env {
   {
     Value value = getIni(var);
 
-    if (value != null)
-      return value.toBoolean();
-    else
+    if (value == null)
       return false;
+    else
+    {
+      String valueAsString = value.toString().trim();
+
+      if (valueAsString.equalsIgnoreCase("false")
+          || valueAsString.equalsIgnoreCase("off"))
+        return false;
+
+      return value.toBoolean();
+    }
   }
 
   /**
