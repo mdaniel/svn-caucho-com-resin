@@ -47,6 +47,7 @@ abstract public class Expr {
   private static final Logger log = Logger.getLogger(Expr.class.getName());
 
   public static final int COMPILE_ARG_MAX = 5;
+  private boolean _isParenthesized;
 
   private final Location _location;
 
@@ -105,6 +106,22 @@ abstract public class Expr {
     else
       return "";
   }
+  
+  /**
+   *  Returns true if this expr is enclosed inside parentheses.
+   */
+  public boolean getIsParenthesized()
+  {
+    return _isParenthesized;
+  }
+  
+  /*
+   * Sets whether or not this expr is enclosed inside parentheses.
+   */
+  public void setIsParenthesized(boolean val)
+  {
+    _isParenthesized = val;
+  }
 
   /**
    * Returns true for a reference.
@@ -142,6 +159,14 @@ abstract public class Expr {
    * Returns true if a static false value.
    */
   public boolean isFalse()
+  {
+    return false;
+  }
+  
+  /*
+   * Returns true if this is an assign expr.
+   */
+  public boolean isAssign()
   {
     return false;
   }
@@ -269,7 +294,7 @@ abstract public class Expr {
     throw new IOException(L.l("{0} is an illegal value to isset",
 			      this));
   }
-
+  
   /**
    * Returns true if the expression evaluates to a boolean.
    */

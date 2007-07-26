@@ -66,6 +66,15 @@ public class AssignExpr extends Expr {
   }
 
   /**
+   * Returns true if a static false value.
+   */
+  @Override
+  public boolean isAssign()
+  {
+    return true;
+  }
+  
+  /**
    * Evaluates the expression.
    *
    * @param env the calling environment.

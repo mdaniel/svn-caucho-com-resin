@@ -1047,6 +1047,11 @@ public class QuercusParser {
       Expr test = parseExpr();
 
       expect(')');
+      
+      if (test.isAssign() && ! test.getIsParenthesized()) { 
+        // php/
+        //XXX: warning
+      }
 
       int token = parseToken();
 
@@ -1253,6 +1258,10 @@ public class QuercusParser {
 
       expect(')');
 
+      if (test.isAssign() && ! test.getIsParenthesized()) { 
+        //warning
+      }
+      
       Statement block;
 
       int token = parseToken();
@@ -1294,6 +1303,11 @@ public class QuercusParser {
       Expr test = parseExpr();
 
       expect(')');
+      
+      if (test.isAssign() && ! test.getIsParenthesized()) { 
+        // php/
+        //XXX: warning
+      }
     
       return _factory.createDo(location, test, block);
     } finally {
@@ -1328,9 +1342,13 @@ public class QuercusParser {
 
       token = parseToken();
       if (token != ';') {
-	_peekToken = token;
-	test = parseTopCommaExpr();
-	expect(';');
+        _peekToken = token;
+        test = parseTopCommaExpr();
+        expect(';');
+    
+        if (test.isAssign() && ! test.getIsParenthesized()) { 
+          //warning
+        }
       }
 
       Expr incr = null;
@@ -3023,34 +3041,36 @@ public class QuercusParser {
 
     case '(':
       {
-	Expr expr = parseExpr();
+        Expr expr = parseExpr();
 
-	expect(')');
+        expect(')');
 
-	if (expr instanceof ConstExpr) {
-	  String type = ((ConstExpr) expr).getVar();
-	  
-	  if ("bool".equals(type) || "boolean".equals(type))
-	    return _factory.createToBoolean(parseTerm());
-	  else if ("int".equals(type) || "integer".equals(type))
-	    return _factory.createToLong(parseTerm());
-	  else if ("float".equals(type)
-		   || "double".equals(type)
-		   || "real".equals(type))
-	    return _factory.createToDouble(parseTerm());
-	  else if ("string".equals(type))
-	    return _factory.createToString(parseTerm());
-	  else if ("binary".equals(type))
-	    return _factory.createToBinary(parseTerm());
-	  else if ("unicode".equals(type))
-	    return _factory.createToUnicode(parseTerm());
-	  else if ("object".equals(type))
-	    return _factory.createToObject(parseTerm());
-	  else if ("array".equalsIgnoreCase(type))
-	    return _factory.createToArray(parseTerm());
-	}
+        expr.setIsParenthesized(true);
+        
+        if (expr instanceof ConstExpr) {
+          String type = ((ConstExpr) expr).getVar();
+          
+          if ("bool".equals(type) || "boolean".equals(type))
+            return _factory.createToBoolean(parseTerm());
+          else if ("int".equals(type) || "integer".equals(type))
+            return _factory.createToLong(parseTerm());
+          else if ("float".equals(type)
+                || "double".equals(type)
+                || "real".equals(type))
+            return _factory.createToDouble(parseTerm());
+          else if ("string".equals(type))
+            return _factory.createToString(parseTerm());
+          else if ("binary".equals(type))
+            return _factory.createToBinary(parseTerm());
+          else if ("unicode".equals(type))
+            return _factory.createToUnicode(parseTerm());
+          else if ("object".equals(type))
+            return _factory.createToObject(parseTerm());
+          else if ("array".equalsIgnoreCase(type))
+            return _factory.createToArray(parseTerm());
+        }
 
-	return expr;
+        return expr;
       }
       
     case IMPORT:

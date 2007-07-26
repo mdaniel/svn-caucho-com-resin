@@ -80,23 +80,23 @@ public class IconvUtility {
       Reader in;
 
       try {
-	in = str.toReader(inCharset);
+        in = str.toReader(inCharset);
       } catch (IOException e) {
-	log.log(Level.WARNING, e.toString(), e);
-	
-	in = str.toReader("utf-8");
+        log.log(Level.WARNING, e.toString(), e);
+    
+        in = str.toReader("utf-8");
       }
 
       TempStream ts = new TempStream();
       WriteStream out = new WriteStream(ts);
 
       try {
-	out.setEncoding(outCharset);
+        out.setEncoding(outCharset);
       } catch (IOException e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
+    
+        out.setEncoding("utf-8");
       }
-      
-      out.setEncoding("utf-8");
 
       while (offset > 0) {
         if (in.read() < 0)

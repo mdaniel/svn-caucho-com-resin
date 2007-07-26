@@ -43,6 +43,17 @@ abstract public class UnicodeValue extends StringValue {
   }
 
   /**
+   * Decodes from charset and returns UnicodeValue.
+   *
+   * @param env
+   * @param charset
+   */
+  public UnicodeValue toUnicodeValue(Env env, String charset)
+  {
+    return this;
+  }
+
+  /**
    * Converts to a string builder
    */
   @Override
