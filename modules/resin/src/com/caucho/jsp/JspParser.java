@@ -140,7 +140,8 @@ public class JspParser {
   private int _peek = -1;
   private boolean _seenCr = false;
 
-  private Namespace _namespaces;
+  private Namespace _namespaces
+    = new Namespace(null, "jsp", JSP_NS);
   
   private boolean _isXml;
   private boolean _isTop = true;
@@ -240,7 +241,6 @@ public class JspParser {
   void parse(Path path, String uri)
     throws Exception
   {
-    _namespaces = new Namespace(null, "jsp", JSP_NS);
     _parseState.pushNamespace("jsp", JSP_NS);
 
     _isXml = _parseState.isXml();

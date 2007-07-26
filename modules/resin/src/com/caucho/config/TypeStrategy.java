@@ -98,24 +98,13 @@ public abstract class TypeStrategy {
    * @param node the configuration node
    * @param parent
    */
-  abstract public Object configure(NodeBuilder builder, Node node, Object parent)
+  abstract public Object configure(NodeBuilder builder,
+                                   Node node,
+                                   Object parent)
     throws Exception;
 
   /**
-   * Configures the bean
-   *
-   * @param builder the context builder
-   * @param bean the bean to be configured
-   * @param top the configuration node
-   */
-  public void configureBean(NodeBuilder builder, Object bean, Node top)
-    throws Exception
-  {
-    //builder.configureBeanImpl(this, bean, top);
-  }
-
-  /**
-   * Configures based on an attribute.
+   * Configures as an attribute.
    */
   public void configureAttribute(NodeBuilder builder, Object bean, Node attr)
     throws Exception

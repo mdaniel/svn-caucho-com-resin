@@ -66,6 +66,7 @@ public class NodeBuilder {
     = new QName("resin:type", "http://caucho.com/ns/resin/core");
   
   private final static QName TEXT = new QName("#text");
+  private final static QName VALUE = new QName("value");
 
   private static ThreadLocal<NodeBuilder> _currentBuilder
     = new ThreadLocal<NodeBuilder>();
@@ -231,7 +232,9 @@ public class NodeBuilder {
       TypeStrategy typeStrategy
         = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
-      configureChildNode(attribute, bean, typeStrategy);
+      QName qName = ((QNode) attribute).getQName();
+
+      configureChildNode(attribute, qName, bean, typeStrategy);
     }
     catch (LineConfigException e) {
       throw e;
@@ -240,33 +243,6 @@ public class NodeBuilder {
       throw error(e, attribute);
     } finally {
       setCurrentBuilder(oldBuilder);
-    }
-  }
-
-  /**
-   * Configures a bean, calling its init() and replaceObject() methods.
-   *
-   * @param typeStrategy the strategy for handling the bean's type
-   * @param bean the bean instance
-   * @param top the configuration top
-   * @return the configured bean, possibly the replaced object
-   * @throws LineConfigException
-   */
-  Object configureImpl(TypeStrategy typeStrategy,
-                       Object bean,
-		       Node top)
-    throws LineConfigException
-  {
-    try {
-      typeStrategy.configureBean(this, bean, top);
-
-      typeStrategy.init(bean);
-
-      return typeStrategy.replaceObject(bean);
-    } catch (LineConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw error(e, top);
     }
   }
 
@@ -295,7 +271,9 @@ public class NodeBuilder {
       for (Node childNode = node.getFirstChild();
            childNode != null;
            childNode = childNode.getNextSibling()) {
-        configureChildNode(childNode, bean, typeStrategy);
+        QName qName = ((QAbstractNode) childNode).getQName();
+        
+        configureChildNode(childNode, qName, bean, typeStrategy);
       }
     } catch (LineConfigException e) {
       throw e;
@@ -327,7 +305,9 @@ public class NodeBuilder {
 
       for (; child != null; child = child.getNextSibling()) {
         Attr attr = (Attr) child;
-        configureAttributeImpl(attr, bean, typeStrategy);
+        QName qName = ((QNode) attr).getQName();
+        
+        configureChildNode(attr, qName, bean, typeStrategy);
       }
     }
     else {
@@ -336,100 +316,65 @@ public class NodeBuilder {
         int length = attrList.getLength();
         for (int i = 0; i < length; i++) {
           Attr attr = (Attr) attrList.item(i);
+          QName qName = ((QNode) attr).getQName();
 
-          configureAttributeImpl(attr, bean, typeStrategy);
+          configureChildNode(attr, qName, bean, typeStrategy);
         }
       }
     }
   }
   
   private void configureChildNode(Node childNode,
+                                  QName qName,
                                   Object bean,
                                   TypeStrategy typeStrategy)
     throws Exception
   {
-    QName qName = ((QAbstractNode) childNode).getQName();
+    if (childNode instanceof Attr
+        && (qName.getName().startsWith("xmlns")
+            || qName.getName().equals("resin:type"))) {
+      return;
+    }
 
     AttributeStrategy attrStrategy;
 
-    if (childNode instanceof Element) {
-      attrStrategy = typeStrategy.getAttributeStrategy(qName);
-          
-      if (attrStrategy == null)
-        throw error(L.l("'{0}' is an unknown property of '{1}'.",
-                        qName.getName(), typeStrategy.getTypeName()),
-                    childNode);
+    attrStrategy = typeStrategy.getAttributeStrategy(qName);
 
-      if (! attrStrategy.isBean() || ! hasChildren(childNode)) {
-        attrStrategy.configure(this, bean, qName, childNode);
-      }
-      else {
-        Object childBean = createResinType(childNode);
-
-        if (childBean == null)
-          childBean = attrStrategy.create(this, bean);
-
-        if (childBean != null) {
-          TypeStrategy childTypeStrategy
-            = TypeStrategyFactory.getTypeStrategy(childBean.getClass());
-
-          childTypeStrategy.setParent(childBean, bean);
-
-          configureNode(childNode, childBean, childTypeStrategy);
-
-          childTypeStrategy.init(childBean);
-
-          childBean = childTypeStrategy.replaceObject(childBean);
-
-          attrStrategy.setAttribute(bean, qName, childBean);
-        }
-        else
-          attrStrategy.configure(this, bean, qName, childNode);
-      }
+    if (attrStrategy != null) {
     }
-    else if (childNode instanceof Text) {
-      attrStrategy = typeStrategy.getAttributeStrategy(qName);
-          
-      if (attrStrategy != null)
-        attrStrategy.configure(this, bean, qName, childNode);
-    }
-  }
-
-  /**
-   * ConfigureAttributeImpl is the main workhorse of the configuration.
-   */
-  void configureAttributeImpl(Attr attr,
-		              Object bean,
-                              TypeStrategy typeStrategy)
-    throws Exception
-  {
-    QName qName = ((QAbstractNode) attr).getQName();
-    
-    if (qName.getName().startsWith("xmlns"))
-      return;
-    else if (qName.getName().equals("resin:type"))
-      return;
-
-    AttributeStrategy attrStrategy = typeStrategy.getAttributeStrategy(qName);
-
-    if (attrStrategy == null)
-      throw error(L.l("{0} is an unknown property of {1}.",
-                      qName, typeStrategy),
-                  attr);
-
-    attrStrategy.configure(this, bean, qName, attr);
-  }
-
-  Object configureValue(Node node)
-  {
-    String value = textValue(node);
-
-    if (isEL() && value != null
-        && value.startsWith("${") && value.endsWith("}")) {
-      return evalObject(value);
+    else if (childNode instanceof Element
+             || childNode instanceof Attr) {
+      throw error(L.l("'{0}' is an unknown property of '{1}'.",
+                      qName.getName(), typeStrategy.getTypeName()),
+                  childNode);
     }
     else
-      return value;
+      return;
+
+    Object childBean = createResinType(childNode);
+
+    if (childBean == null)
+      childBean = attrStrategy.create(this, bean);
+
+    if (childBean != null) {
+      TypeStrategy childTypeStrategy
+        = TypeStrategyFactory.getTypeStrategy(childBean.getClass());
+
+      childTypeStrategy.setParent(childBean, bean);
+
+      if (childNode instanceof Element)
+        configureNode(childNode, childBean, childTypeStrategy);
+      else
+        configureChildNode(childNode, TEXT, childBean, childTypeStrategy);
+
+      childTypeStrategy.init(childBean);
+
+      childBean = childTypeStrategy.replaceObject(childBean);
+
+      attrStrategy.setAttribute(bean, qName, childBean);
+    }
+    else
+      attrStrategy.configure(this, bean, qName, childNode);
   }
 
   /**
@@ -459,129 +404,27 @@ public class NodeBuilder {
       }
     }
 
-    if (bean == null)
-      bean = typeStrategy.create();
-
-    typeStrategy = TypeStrategyFactory.getTypeStrategy(bean.getClass());
-
     typeStrategy.setParent(bean, parent);
 
-    // server/231e
-    AttributeStrategy textAttr = typeStrategy.getAttributeStrategy(TEXT);
-
-    if (textAttr != null)
-      textAttr.configure(this, bean, TEXT, top);
+    configureChildNode(top, TEXT, bean, typeStrategy);
 
     typeStrategy.init(bean);
 
-    return typeStrategy.replaceObject(bean);
+    bean = typeStrategy.replaceObject(bean);
+
+    return bean;
   }
 
-  /**
-   * Configures the bean with the values in the top.
-   *
-   * @param typeStrategy
-   * @param bean
-   * @param top top-level XML top
-   * @throws Exception
-   */
-  public void configureBeanImpl(TypeStrategy typeStrategy,
-				Object bean,
-				Node top)
-    throws Exception
+  Object configureValue(Node node)
   {
-    // XXX: need test for the CharacterData (<dependency-check-interval>)
-    if (top instanceof Attr || top instanceof CharacterData) {
-      QName qName = new QName("#text");
+    String value = textValue(node);
 
-      AttributeStrategy attrStrategy = typeStrategy.getAttributeStrategy(qName);
-
-      attrStrategy.configure(this, bean, qName, top);
-
-      return;
+    if (isEL() && value != null
+        && value.startsWith("${") && value.endsWith("}")) {
+      return evalObject(value);
     }
-
-    configureBeanAttributesImpl(typeStrategy, bean, top);
-
-    Node child = top.getFirstChild();
-
-    for (; child != null; child = child.getNextSibling()) {
-      configureAttributeImpl(typeStrategy, bean, child);
-    }
-  }
-
-  public void configureBeanAttributesImpl(TypeStrategy typeStrategy,
-				   Object bean,
-				   Node top)
-    throws Exception
-  {
-    if (top instanceof QAttributedNode) {
-      Node child = ((QAttributedNode) top).getFirstAttribute();
-
-      for (; child != null; child = child.getNextSibling()) {
-        configureAttributeImpl(typeStrategy, bean, child);
-      }
-    }
-    else {
-      NamedNodeMap attrList = top.getAttributes();
-      if (attrList != null) {
-        int length = attrList.getLength();
-        for (int i = 0; i < length; i++) {
-          Node child = attrList.item(i);
-
-          configureAttributeImpl(typeStrategy, bean, child);
-        }
-      }
-    }
-  }
-
-  /**
-   * ConfigureAttributeImpl is the main workhorse of the configuration.
-   */
-  void configureAttributeImpl(TypeStrategy typeStrategy,
-		              Object bean,
-			      Node node)
-    throws Exception
-  {
-    try {
-      QName qName = ((QAbstractNode) node).getQName();
-
-      if (node instanceof Comment) {
-        return;
-      }
-      else if (node instanceof DocumentType) {
-        return;
-      }
-      else if (node instanceof ProcessingInstruction) {
-        return;
-      }
-      else if (node instanceof CharacterData) {
-        String data = ((CharacterData) node).getData();
-
-        if (XmlUtil.isWhitespace(data))
-	  return;
-	
-        qName = new QName("#text");
-      }
-
-      if (qName.getName().startsWith("xmlns"))
-        return;
-      else if (qName.getName().equals("resin:type"))
-        return;
-
-      AttributeStrategy attrStrategy = typeStrategy.getAttributeStrategy(qName);
-
-      if (attrStrategy == null)
-	throw error(L.l("{0} is an unknown property of {1}.",
-			qName, typeStrategy),
-		    node);
-
-      attrStrategy.configure(this, bean, qName, node);
-    } catch (LineConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw error(e, node);
-    }
+    else
+      return value;
   }
 
   ArrayList<Dependency> getDependencyList()
@@ -711,6 +554,24 @@ public class NodeBuilder {
     String value = textValueNoTrim(child);
 
     return value;
+  }
+  
+  Object configureImpl(TypeStrategy typeStrategy,
+                       Object bean,
+		       Node top)
+    throws LineConfigException
+  {
+    try {
+      typeStrategy.configureAttribute(this, bean, top);
+
+      typeStrategy.init(bean);
+
+      return typeStrategy.replaceObject(bean);
+    } catch (LineConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw error(e, top);
+    }
   }
 
   /**

@@ -12,6 +12,7 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>jsp: prelude and coda were not setting taglib prefixes (#1840, rep by sergek)</li>
 <li>resin.root needs to be set by Watchdog (#1869, rep by Brian Burke)</li>
 <li>update development.conf and ORB initialization (#1883, rep by guduri)</li>
 <li>hessian: issue with float args vs Serializable[] (#1894, rep by Rick Bray)</li>
