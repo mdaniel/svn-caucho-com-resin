@@ -30,14 +30,10 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.util.RandomUtil;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SocketStream;
-import com.caucho.vfs.StreamFilter;
-import com.caucho.vfs.VfsStream;
 import com.caucho.vfs.WriteStream;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -91,35 +87,6 @@ public class SocketReadWrite extends AbstractBinaryInputOutput
 
     WriteStream os = new WriteStream(sock);
     ReadStream is = new ReadStream(sock, os);
-
-
-    try {
-      String tmp = "/tmp/t" + RandomUtil.getRandomLong();
-      System.out.println("XXX: SocketReadWrite init() " + tmp);
-      final WriteStream tmpWS = VfsStream.openWrite(new FileOutputStream(tmp));
-      is.pushFilter(new StreamFilter() {
-
-        public int read(byte[] buffer, int offset, int length)
-        throws IOException
-        {
-          int len = super.read(buffer, offset, length);
-          tmpWS.write(buffer, offset, len);
-          tmpWS.flush();
-          return len;
-        }
-
-
-        public void close()
-          throws IOException
-        {
-          super.close();
-          tmpWS.close();
-        }
-      });
-    }
-    catch (Exception ex) {
-      throw new RuntimeException(ex);
-    }
 
     init(is, os);
   }
