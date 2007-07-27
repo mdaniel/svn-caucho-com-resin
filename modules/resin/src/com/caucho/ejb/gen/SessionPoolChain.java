@@ -201,6 +201,7 @@ public class SessionPoolChain extends FilterCallChain {
   protected void generateInterceptorExceptionHandling(JavaWriter out)
     throws IOException
   {
+    out.popDepth();
     out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
     out.pushDepth();
 
@@ -210,6 +211,5 @@ public class SessionPoolChain extends FilterCallChain {
     }
 
     out.println("throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
-    out.popDepth();
   }
 }
