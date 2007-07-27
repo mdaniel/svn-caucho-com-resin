@@ -34,13 +34,13 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -174,8 +174,7 @@ public class TokenModule extends AbstractQuercusModule {
 
   private static final IntMap _reservedMap = new IntMap();
 
-  private static final HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   public String []getLoadedExtensions()
   {
@@ -183,11 +182,11 @@ public class TokenModule extends AbstractQuercusModule {
   }
 
   /**
-   * Returns the default quercus.ini values.
+   * Returns the default php.ini values.
    */
-  public Map<String,StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
 
   public static Value highlight_file(Env env,
@@ -1063,12 +1062,17 @@ public class TokenModule extends AbstractQuercusModule {
     _reservedMap.put("__CLASS__", T_CLASS_C);
   }
 
-  static {
-    addIni(_iniMap, "highlight.string", "#DD0000", PHP_INI_ALL);
-    addIni(_iniMap, "highlight.comment", "#FF8000", PHP_INI_ALL);
-    addIni(_iniMap, "highlight.keyword", "#007700", PHP_INI_ALL);
-    addIni(_iniMap, "highlight.bg", "#ffffff", PHP_INI_ALL);
-    addIni(_iniMap, "highlight.default", "#0000BB", PHP_INI_ALL);
-    addIni(_iniMap, "highlight.html", "#000000", PHP_INI_ALL);
-  }
+
+  static final IniDefinition INI_HIGHLIGHT_STRING
+    = _iniDefinitions.add("highlight.string", "#DD0000", PHP_INI_ALL);
+  static final IniDefinition INI_HIGHLIGHT_COMMENT
+    = _iniDefinitions.add("highlight.comment", "#FF8000", PHP_INI_ALL);
+  static final IniDefinition INI_HIGHLIGHT_KEYWORD
+    = _iniDefinitions.add("highlight.keyword", "#007700", PHP_INI_ALL);
+  static final IniDefinition INI_HIGHLIGHT_BG
+    = _iniDefinitions.add("highlight.bg", "#ffffff", PHP_INI_ALL);
+  static final IniDefinition INI_HIGHLIGHT_DEFAULT
+    = _iniDefinitions.add("highlight.default", "#0000BB", PHP_INI_ALL);
+  static final IniDefinition INI_HIGHLIGHT_HTML
+    = _iniDefinitions.add("highlight.html", "#000000", PHP_INI_ALL);
 }

@@ -65,8 +65,7 @@ public class ModuleInfo {
   private HashMap<String, AbstractFunction> _staticFunctions
     = new HashMap<String, AbstractFunction>();
 
-  private HashMap<String, StringValue> _iniMap
-    = new HashMap<String, StringValue>();
+  private IniDefinitions _iniDefinitions = new IniDefinitions();
 
   /**
    * Constructor.
@@ -125,9 +124,9 @@ public class ModuleInfo {
     return _staticFunctions;
   }
 
-  public HashMap<String, StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
 
   /**
@@ -165,10 +164,10 @@ public class ModuleInfo {
         _constMap.put(field.getName(), value);
     }
 
-    Map<String, StringValue> iniMap = _module.getDefaultIni();
+    IniDefinitions iniDefinitions = _module.getIniDefinitions();
 
     if (map != null)
-      _iniMap.putAll(iniMap);
+      _iniDefinitions.addAll(iniDefinitions);
 
     for (Method method : cl.getMethods()) {
       if (method.getDeclaringClass().equals(Object.class))

@@ -30,21 +30,16 @@
 package com.caucho.quercus.lib;
 
 import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.DoubleValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.L10N;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * PHP math routines.
@@ -57,21 +52,19 @@ public class BcmathModule extends AbstractQuercusModule {
   private static final BigDecimal TWO = new BigDecimal(2);
   private static final int SQRT_MAX_ITERATIONS = 50;
 
-  private static final HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
-
-  static {
-    addIni(_iniMap, "bcmath.scale", "0", PHP_INI_ALL);
-  }
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   public String []getLoadedExtensions()
   {
     return new String[] {  "bcmath" };
   }
 
-  public Map<String,StringValue> getDefaultIni()
+  /**
+   * Returns the default php.ini values.
+   */
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
 
   private static BigDecimal toBigDecimal(Value value)
@@ -430,4 +423,6 @@ public class BcmathModule extends AbstractQuercusModule {
 
     return bd.toPlainString();
   }
+
+  public static final IniDefinition INI_BCMATH_SCALE = _iniDefinitions.add("bcmath.scale", false, PHP_INI_ALL);
 }

@@ -32,6 +32,8 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -47,8 +49,8 @@ public class ApcModule extends AbstractQuercusModule {
   private static final Logger log = Logger.getLogger(ApcModule.class.getName());
   private static final L10N L = new L10N(ApcModule.class);
 
-  private static final HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
+
 
   private LruCache<String,Entry> _cache = new LruCache<String,Entry>(4096);
 
@@ -60,6 +62,14 @@ public class ApcModule extends AbstractQuercusModule {
   public String []getLoadedExtensions()
   {
     return new String[] { "apc" };
+  }
+
+  /**
+   * Returns the default php.ini values.
+   */
+  public IniDefinitions getIniDefinitions()
+  {
+    return _iniDefinitions;
   }
 
   /**
@@ -205,27 +215,30 @@ public class ApcModule extends AbstractQuercusModule {
     }
   }
 
-  /**
-   * Returns the default quercus.ini values.
-   */
-  public Map<String,StringValue> getDefaultIni()
-  {
-    return _iniMap;
-  }
-
-  static {
-    addIni(_iniMap, "apc.enabled", "1", PHP_INI_ALL);
-    addIni(_iniMap, "apc.shm_segments", "1", PHP_INI_SYSTEM);
-    addIni(_iniMap, "apc.shm_size", "30", PHP_INI_SYSTEM);
-    addIni(_iniMap, "apc.optimization", "0", PHP_INI_ALL);
-    addIni(_iniMap, "apc.num_files_hint", "1000", PHP_INI_SYSTEM);
-    addIni(_iniMap, "apc.ttl", "0", PHP_INI_SYSTEM);
-    addIni(_iniMap, "apc.gc_ttl", "3600", PHP_INI_SYSTEM);
-    addIni(_iniMap, "apc.cache_by_default", "1", PHP_INI_SYSTEM);
-    addIni(_iniMap, "apc.filters", "", PHP_INI_SYSTEM);
-    addIni(_iniMap, "apc.mmap_file_mask", "", PHP_INI_SYSTEM);
-    addIni(_iniMap, "apc.slam_defense", "0", PHP_INI_SYSTEM);
-    addIni(_iniMap, "apc.file_update_protection", "2", PHP_INI_SYSTEM);
-    addIni(_iniMap, "apc.enable_cli", "0", PHP_INI_SYSTEM);
-  }
+  static final IniDefinition INI_APC_ENABLED
+    = _iniDefinitions.add("apc.enabled", true, PHP_INI_ALL);
+  static final IniDefinition INI_APC_SHM_SEGMENTS
+    = _iniDefinitions.add("apc.shm_segments", 1, PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_SHM_SIZE
+    = _iniDefinitions.add("apc.shm_size", 30, PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_OPTIMIZATION
+    = _iniDefinitions.add("apc.optimization", false, PHP_INI_ALL);
+  static final IniDefinition INI_APC_NUM_FILES_HINT
+    = _iniDefinitions.add("apc.num_files_hint", 1000, PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_TTL
+    = _iniDefinitions.add("apc.ttl", 0, PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_GC_TTL
+    = _iniDefinitions.add("apc.gc_ttl", "3600", PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_CACHE_BY_DEFAULT
+    = _iniDefinitions.add("apc.cache_by_default", true, PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_FILTERS
+    = _iniDefinitions.add("apc.filters", "", PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_MMAP_FILE_MASK
+    = _iniDefinitions.add("apc.mmap_file_mask", "", PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_SLAM_DEFENSE
+    = _iniDefinitions.add("apc.slam_defense", false, PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_FILE_UPDATE_PROTECTION
+    = _iniDefinitions.add("apc.file_update_protection", "2", PHP_INI_SYSTEM);
+  static final IniDefinition INI_APC_ENABLE_CLI
+    = _iniDefinitions.add("apc.enable_cli", false, PHP_INI_SYSTEM);
 }

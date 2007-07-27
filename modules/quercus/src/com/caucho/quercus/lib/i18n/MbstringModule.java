@@ -39,19 +39,20 @@ import com.caucho.quercus.lib.MailModule;
 import com.caucho.quercus.lib.RegexpModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Encoding;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 public class MbstringModule
   extends AbstractQuercusModule
 {
-  private static final HashMap<String,StringValue> _iniMap
-  = new HashMap<String,StringValue>();
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
+
 
   private static final Logger log =
                        Logger.getLogger(MbstringModule.class.getName());
@@ -70,11 +71,11 @@ public class MbstringModule
   }
 
   /**
-   * Returns the default quercus.ini values.
+   * Returns the default php.ini values.
    */
-  public Map<String,StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
 
   /**
@@ -1209,8 +1210,8 @@ public class MbstringModule
     }
   }
 
-  static {
-    addIni(_iniMap, "mbstring.http_input", "pass", PHP_INI_ALL);
-    addIni(_iniMap, "mbstring.http_output", "pass", PHP_INI_ALL);
-  }
+  static final IniDefinition INI_MBSTRING_HTTP_INPUT
+    = _iniDefinitions.add("mbstring.http_input", "pass", PHP_INI_ALL);
+  static final IniDefinition INI_MBSTRING_HTTP_OUTPUT
+    = _iniDefinitions.add("mbstring.http_output", "pass", PHP_INI_ALL);
 }

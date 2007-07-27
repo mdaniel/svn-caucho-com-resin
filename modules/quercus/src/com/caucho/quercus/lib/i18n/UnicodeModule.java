@@ -33,6 +33,8 @@ import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.L10N;
 
 import javax.mail.Header;
@@ -40,19 +42,13 @@ import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
 import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /**
  * Unicode handling.  Also includes iconv, etc.
  */
 public class UnicodeModule extends AbstractQuercusModule {
-  private static final HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
-
-  private static final Logger log =
-                       Logger.getLogger(UnicodeModule.class.getName());
+  private static final Logger log = Logger.getLogger(UnicodeModule.class.getName());
   private static final L10N L = new L10N(UnicodeModule.class);
 
   public static final int U_INVALID_STOP = 0;
@@ -66,12 +62,14 @@ public class UnicodeModule extends AbstractQuercusModule {
   public static final int ICONV_MIME_DECODE_STRICT = 1;
   public static final int ICONV_MIME_DECODE_CONTINUE_ON_ERROR = 2;
 
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
+
   /**
    * Returns the default quercus.ini values.
    */
-  public Map<String,StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
 
   public static BooleanValue unicode_semantics(Env env)
@@ -494,20 +492,13 @@ public class UnicodeModule extends AbstractQuercusModule {
     throw new UnimplementedException("ob_iconv_handler");
   }
 
-  static {
-    addIni(_iniMap, "unicode.fallback_encoding", "utf-8", PHP_INI_ALL);
-    addIni(_iniMap, "unicode.from_error_mode", "2", PHP_INI_ALL);
-    addIni(_iniMap, "unicode.from_error_subst_char", "3f", PHP_INI_ALL);
-    addIni(_iniMap, "unicode.http_input_encoding", null, PHP_INI_ALL);
-    addIni(_iniMap, "unicode.output_encoding", null, PHP_INI_ALL);
-    addIni(_iniMap, "unicode.runtime_encoding", null, PHP_INI_ALL);
-    addIni(_iniMap, "unicode.script_encoding", null, PHP_INI_ALL);
-    addIni(_iniMap, "unicode.semantics", "off", PHP_INI_SYSTEM);
 
-    addIni(_iniMap, "iconv.input_encoding", "utf-8", PHP_INI_ALL);
-    addIni(_iniMap, "iconv.output_encoding", "utf-8", PHP_INI_ALL);
-    addIni(_iniMap, "iconv.internal_encoding", "utf-8", PHP_INI_ALL);
-  }
+  static final IniDefinition INI_ICONV_INPUT_ENCODING
+    = _iniDefinitions.add("iconv.input_encoding", "utf-8", PHP_INI_ALL);
+  static final IniDefinition INI_ICONV_OUTPUT_ENCODING
+    = _iniDefinitions.add("iconv.output_encoding", "utf-8", PHP_INI_ALL);
+  static final IniDefinition INI_ICONV_INTERNAL_ENCODING
+    = _iniDefinitions.add("iconv.internal_encoding", "utf-8", PHP_INI_ALL);
 }
 
 // XXX: "//TRANSLIT" and "//IGNORE" charset suffixes

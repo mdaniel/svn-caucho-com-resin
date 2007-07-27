@@ -35,11 +35,13 @@ import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.lib.ErrorModule;
 import com.caucho.quercus.lib.VariableModule;
+import com.caucho.quercus.lib.i18n.UnicodeModule;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.string.StringUtility;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleStartupListener;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.program.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
@@ -76,6 +78,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.IdentityHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -203,7 +206,7 @@ public class Env {
   private HashSet<String> _initializedClassSet
     = new HashSet<String>();
 
-  private HashMap<String, StringValue> _iniMap;
+  private IdentityHashMap<String, Value> _iniMap;
 
   // specialMap is used for implicit resources like the mysql link
   private HashMap<String, Object> _specialMap
@@ -369,13 +372,14 @@ public class Env {
   {
     StringValue encoding = getIni("unicode.script_encoding");
 
-    if (encoding == null)
+    if (encoding.length() == 0) {
       encoding = getIni("unicode.fallback_encoding");
 
-    if (encoding != null)
-      return encoding.toString();
-    else
-      return getQuercus().getScriptEncoding();
+      if (encoding.length() == 0)
+        return getQuercus().getScriptEncoding();
+    }
+
+    return encoding.toString();
   }
 
   /**
@@ -385,13 +389,14 @@ public class Env {
   {
     StringValue encoding = getIni("unicode.runtime_encoding");
 
-    if (encoding == null)
+    if (encoding.length() == 0) {
       encoding = getIni("unicode.fallback_encoding");
 
-    if (encoding != null)
-      return encoding;
-    else
-      return UTF8_STRING;
+      if (encoding.length() == 0)
+        encoding = UTF8_STRING;
+    }
+
+    return encoding;
   }
 
   /**
@@ -418,29 +423,33 @@ public class Env {
   {
     StringValue encoding = getIni("unicode.http_input_encoding");
 
-    if (encoding == null)
+    if (encoding.length() == 0) {
       encoding = getIni("unicode.fallback_encoding");
 
-    if (encoding != null)
-      return encoding;
-    else
-      return UTF8_STRING;
+      if (encoding.length() == 0)
+        encoding = UTF8_STRING;
+    }
+
+    return encoding;
   }
 
   /**
-   * Returns the encoding used for output
+   * Returns the encoding used for output, null if unicode.semantics is off.
    */
-  public StringValue getOutputEncoding()
+  public String getOutputEncoding()
   {
-    StringValue encoding = getIni("unicode.output_encoding");
+    if (! _isUnicodeSemantics)
+      return null;
+
+    String encoding = Quercus.INI_UNICODE_OUTPUT_ENCODING.getAsString(this);
 
     if (encoding == null)
-      encoding = getIni("unicode.fallback_encoding");
+      encoding = Quercus.INI_UNICODE_FALLBACK_ENCODING.getAsString(this);
 
-    if (encoding != null)
-      return encoding;
-    else
-      return UTF8_STRING;
+    if (encoding == null)
+      encoding = "utf-8";
+
+    return encoding;
   }
 
   public void setScriptContext(ScriptContext context)
@@ -459,19 +468,19 @@ public class Env {
   public void start()
   {
     // quercus/1b06
-    String encoding = getOutputEncoding().toString();
+    String encoding = getOutputEncoding();
     String type = getIniString("default_mimetype");
     
     if ("".equals(type) || _response == null) {
     }
-    else if (! "".equals(encoding))
+    else if (encoding != null)
       _response.setContentType(type + "; charset=" + encoding);
     else
       _response.setContentType(type);
 
-    if (_out != null) {
+    if (_out != null && encoding != null) {
       try {
-	_out.setEncoding(encoding);
+        _out.setEncoding(encoding);
       } catch (Exception e) {
 	log.log(Level.WARNING, e.toString(), e);
       }
@@ -1123,23 +1132,28 @@ public class Env {
    */
   public Value getConfigVar(String var)
   {
-    StringValue value =  _quercus.getIni(var);
+    return _quercus.getIniAsStringValue(var);
+  }
 
-    // php/1a0d
-    return value == null ? BooleanValue.FALSE : value;
+  /**
+   * Returns a map of the ini values that have been explicitly set.
+   */
+  public IdentityHashMap<String, Value> getIniMap(boolean create)
+  {
+    if (_iniMap == null && create)
+      _iniMap = new IdentityHashMap<String,Value>();
+
+    return _iniMap;
   }
 
   /**
    * Sets an ini value.
    */
-  public StringValue setIni(String var, String value)
+  public StringValue setIni(String name, Value value)
   {
-    StringValue oldValue = getIni(var);
+    StringValue oldValue = getIni(name);
 
-    if (_iniMap == null)
-      _iniMap = new HashMap<String, StringValue>();
-
-    _iniMap.put(var, new StringValueImpl(value));
+    getIniDefinition(name).set(this, value);
 
     return oldValue;
   }
@@ -1147,153 +1161,58 @@ public class Env {
   /**
    * Sets an ini value.
    */
-  public Value setIni(String var, StringValue value)
+  public StringValue setIni(String name, String value)
   {
-    StringValue oldValue = getIni(var);
+    StringValue oldValue = getIni(name);
 
-    if (_iniMap == null)
-      _iniMap = new HashMap<String, StringValue>();
-
-    _iniMap.put(var, value);
+    getIniDefinition(name).set(this, value);
 
     return oldValue;
   }
 
   /**
-   * Sets a boolean ini value.
+   * Returns an ini value.
    */
-  public Value setIniBoolean(String var, Value value)
+  public StringValue getIni(String name)
   {
-    // XXX: needs testing and correlation with Quercus.setIni
+    return getIniDefinition(name).getAsStringValue(this);
+  }
 
-    if (value instanceof StringValue) {
-      if ("off".equalsIgnoreCase(value.toString()))
-        return setIni(var, "");
-
-      if ("on".equalsIgnoreCase(value.toString()))
-        return setIni(var, "1");
-    }
-
-    return setIni(var, value.toBoolean() ? "1" : "");
+  private IniDefinition getIniDefinition(String name)
+  {
+    return _quercus.getIniDefinitions().get(name);
   }
 
   /**
    * Returns an ini value.
    */
-  public StringValue getIni(String var)
+  public boolean getIniBoolean(String name)
   {
-    if (_iniMap != null) {
-      StringValue value = _iniMap.get(var);
-
-      if (value != null)
-        return value;
-    }
-
-    return _quercus.getIni(var);
-  }
-
-  /**
-   * Returns an ini value.
-   */
-  public boolean getIniBoolean(String var)
-  {
-    Value value = getIni(var);
-
-    if (value == null)
-      return false;
-    else
-    {
-      String valueAsString = value.toString().trim();
-
-      if (valueAsString.equalsIgnoreCase("false")
-          || valueAsString.equalsIgnoreCase("off"))
-        return false;
-
-      return value.toBoolean();
-    }
-  }
-
-  /**
-   * Returns an ini value.
-   */
-  public long getIniBytes(String var, long deflt)
-  {
-    Value iniValue = getIni(var);
-
-    if (iniValue == null)
-      return deflt;
-
-    String bytes = iniValue.toString();
-
-    long value = 0;
-    long sign = 1;
-    int i = 0;
-    int length = bytes.length();
-
-    if (length == 0)
-      return deflt;
-
-    if (bytes.charAt(i) == '-') {
-      sign = -1;
-      i++;
-    }
-    else if (bytes.charAt(i) == '+') {
-      i++;
-    }
-
-    if (length <= i)
-      return deflt;
-
-    int ch;
-    for (; i < length && (ch = bytes.charAt(i)) >= '0' && ch <= '9'; i++)
-      value = 10 * value + ch - '0';
-
-    value = sign * value;
-
-    if (bytes.endsWith("gb") || bytes.endsWith("g") || bytes.endsWith("G")) {
-      return value * 1024L * 1024L * 1024L;
-    }
-    else if (bytes.endsWith("mb") || bytes.endsWith("m") || bytes.endsWith("M")) {
-      return value * 1024L * 1024L;
-    }
-    else if (bytes.endsWith("kb") || bytes.endsWith("k") || bytes.endsWith("K")) {
-      return value * 1024L;
-    }
-    else if (bytes.endsWith("b") || bytes.endsWith("B")) {
-      return value;
-    }
-    else if (value < 0)
-      return value;
-    else {
-      warning(L.l("byte-valued expression '{0}' for ini value '{1}' must have units.  '16B' for bytes, '16K' for kilobytes, '16M' for megabytes, '16G' for gigabytes", var));
-      return deflt;
-    }
+    return getIniDefinition(name).getAsBoolean(this);
   }
 
   /**
    * Returns an ini value as a long.
    */
-  public long getIniLong(String var)
+  public long getIniLong(String name)
   {
-    Value value = getIni(var);
-
-    if (value != null)
-      return value.toLong();
-    else
-      return 0;
+    return getIniDefinition(name).getAsLong(this);
   }
 
   /**
-   * Returns an ini value as a string.
+   * Returns an ini value as a string, null for missing or empty string
    */
-  public String getIniString(String var)
+  public String getIniString(String name)
   {
-    Value value = getIni(var);
+    return getIniDefinition(name).getAsString(this);
+  }
 
-    if (value != null)
-      return value.toString();
-    else
-      return null;
+  /**
+   * Returns an ini value.
+   */
+  public long getIniBytes(String name, long deflt)
+  {
+    return getIniDefinition(name).getAsLongBytes(this, deflt);
   }
 
   /**

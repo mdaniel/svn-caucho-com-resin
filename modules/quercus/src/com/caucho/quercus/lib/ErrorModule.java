@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.QuercusDieException;
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.Expr;
@@ -38,11 +36,10 @@ import com.caucho.quercus.expr.FunctionExpr;
 import com.caucho.quercus.expr.IncludeExpr;
 import com.caucho.quercus.expr.MethodCallExpr;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.L10N;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -53,8 +50,7 @@ public class ErrorModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(ErrorModule.class.getName());
 
-  private static final HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   public static final int E_ERROR = Env.E_ERROR;
   public static final int E_WARNING = Env.E_WARNING;
@@ -73,11 +69,11 @@ public class ErrorModule extends AbstractQuercusModule {
   private long _errorReporting = Env.E_DEFAULT;
 
   /**
-   * Returns the default quercus.ini values.
+   * Returns the default php.ini values.
    */
-  public Map<String,StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
 
   /**
@@ -460,23 +456,38 @@ public class ErrorModule extends AbstractQuercusModule {
     return trigger_error(env, msg, code);
   }
 
-  static {
-    addIni(_iniMap, "error_reporing", null, PHP_INI_ALL);
-    addIni(_iniMap, "display_errors", "1", PHP_INI_ALL);
-    addIni(_iniMap, "display_startup_errors", "0", PHP_INI_ALL);
-    addIni(_iniMap, "log_errors", "0", PHP_INI_ALL);
-    addIni(_iniMap, "log_errors_max_len", "1024", PHP_INI_ALL);
-    addIni(_iniMap, "ignore_repeated_errors", "0", PHP_INI_ALL);
-    addIni(_iniMap, "ignore_repeated_source", "0", PHP_INI_ALL);
-    addIni(_iniMap, "report_memleaks", "1", PHP_INI_ALL);
-    addIni(_iniMap, "track_errors", "0", PHP_INI_ALL);
-    addIni(_iniMap, "html_errors", "1", PHP_INI_ALL);
-    addIni(_iniMap, "docref_root", "", PHP_INI_ALL);
-    addIni(_iniMap, "docref_ext", "", PHP_INI_ALL);
-    addIni(_iniMap, "error_prepend_string", null, PHP_INI_ALL);
-    addIni(_iniMap, "error_append_string", null, PHP_INI_ALL);
-    addIni(_iniMap, "error_log", null, PHP_INI_ALL);
-    addIni(_iniMap, "warn_plus_overloading", null, PHP_INI_ALL);
-  }
+
+  static final IniDefinition INI_ERROR_REPORING
+    = _iniDefinitions.add("error_reporing", null, PHP_INI_ALL);
+  static final IniDefinition INI_DISPLAY_ERRORS
+    = _iniDefinitions.add("display_errors", true, PHP_INI_ALL);
+  static final IniDefinition INI_DISPLAY_STARTUP_ERRORS
+    = _iniDefinitions.add("display_startup_errors", false, PHP_INI_ALL);
+  static final IniDefinition INI_LOG_ERRORS
+    = _iniDefinitions.add("log_errors", false, PHP_INI_ALL);
+  static final IniDefinition INI_LOG_ERRORS_MAX_LEN
+    = _iniDefinitions.add("log_errors_max_len", 1024, PHP_INI_ALL);
+  static final IniDefinition INI_IGNORE_REPEATED_ERRORS
+    = _iniDefinitions.add("ignore_repeated_errors", false, PHP_INI_ALL);
+  static final IniDefinition INI_IGNORE_REPEATED_SOURCE
+    = _iniDefinitions.add("ignore_repeated_source", false, PHP_INI_ALL);
+  static final IniDefinition INI_REPORT_MEMLEAKS
+    = _iniDefinitions.add("report_memleaks", true, PHP_INI_ALL);
+  static final IniDefinition INI_TRACK_ERRORS
+    = _iniDefinitions.add("track_errors", false, PHP_INI_ALL);
+  static final IniDefinition INI_HTML_ERRORS
+    = _iniDefinitions.add("html_errors", true, PHP_INI_ALL);
+  static final IniDefinition INI_DOCREF_ROOT
+    = _iniDefinitions.add("docref_root", "", PHP_INI_ALL);
+  static final IniDefinition INI_DOCREF_EXT
+    = _iniDefinitions.add("docref_ext", "", PHP_INI_ALL);
+  static final IniDefinition INI_ERROR_PREPEND_STRING
+    = _iniDefinitions.add("error_prepend_string", null, PHP_INI_ALL);
+  static final IniDefinition INI_ERROR_APPEND_STRING
+    = _iniDefinitions.add("error_append_string", null, PHP_INI_ALL);
+  static final IniDefinition INI_ERROR_LOG
+    = _iniDefinitions.add("error_log", null, PHP_INI_ALL);
+  static final IniDefinition INI_WARN_PLUS_OVERLOADING
+    = _iniDefinitions.add("warn_plus_overloading", null, PHP_INI_ALL);
 }
 

@@ -83,18 +83,22 @@ public class OutputBuffer {
     _tempStream = new TempStream();
     _out = new WriteStream(_tempStream);
 
-    try {
-      _out.setEncoding(env.getOutputEncoding().toString());
-    }
-    catch (UnsupportedEncodingException e) {
-      if (log.isLoggable(Level.WARNING))
-        log.log(Level.WARNING, e.toString(), e);
+    String encoding = env.getOutputEncoding();
+
+    if (encoding != null) {
       try {
-        _out.setEncoding("UTF-8");
+        _out.setEncoding(env.getOutputEncoding());
       }
-      catch (UnsupportedEncodingException e2) {
+      catch (UnsupportedEncodingException e) {
         if (log.isLoggable(Level.WARNING))
-          log.log(Level.WARNING, e.toString(), e2);
+          log.log(Level.WARNING, e.toString(), e);
+        try {
+          _out.setEncoding("UTF-8");
+        }
+        catch (UnsupportedEncodingException e2) {
+          if (log.isLoggable(Level.WARNING))
+            log.log(Level.WARNING, e.toString(), e2);
+        }
       }
     }
 

@@ -32,15 +32,16 @@ package com.caucho.quercus.lib.jms;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
-import javax.jms.*;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -54,20 +55,17 @@ public class JMSModule extends AbstractQuercusModule
 
   private static final L10N L = new L10N(JMSModule.class);
 
-  private static final HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
-
-  private ConnectionFactory _connectionFactory = null;
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   /**
-   * Returns the default quercus.ini values.
+   * Returns the default php.ini values.
    */
-  public Map<String,StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
 
-  static JMSQueue message_get_queue(Env env, String queueName, 
+  static JMSQueue message_get_queue(Env env, String queueName,
                                     ConnectionFactory connectionFactory)
   {
     if (connectionFactory == null)
@@ -116,9 +114,7 @@ public class JMSModule extends AbstractQuercusModule
     }
   }
 
-  static {
-    addIni(_iniMap, "jms.connection_factory", 
-                    "jms/ConnectionFactory", PHP_INI_SYSTEM);
-  }
+  static final IniDefinition INI_JMS_CONNECTION_FACTORY
+    = _iniDefinitions.add("jms.connection_factory",  "jms/ConnectionFactory", PHP_INI_SYSTEM);
 }
 

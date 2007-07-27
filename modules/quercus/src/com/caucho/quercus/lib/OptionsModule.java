@@ -36,9 +36,10 @@ import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -70,7 +71,6 @@ public class OptionsModule extends AbstractQuercusModule {
   public static final int CREDITS_QA = 64;
   public static final int CREDITS_ALL = -1;
 
-
   public static final int INFO_GENERAL = 1;
   public static final int INFO_CREDITS = 2;
   public static final int INFO_CONFIGURATION = 4;
@@ -80,15 +80,14 @@ public class OptionsModule extends AbstractQuercusModule {
   public static final int INFO_LICENSE = 64;
   public static final int INFO_ALL = -1;
 
-  private static final HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   /**
-   * Returns the default quercus.ini values.
+   * Returns the default php.ini values.
    */
-  public Map<String,StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
 
   /**
@@ -867,75 +866,64 @@ public class OptionsModule extends AbstractQuercusModule {
       return 1;
   }
 
-  static {
-    addIni(_iniMap, "assert.active", "1", PHP_INI_ALL);
-    addIni(_iniMap, "assert.bail", "0", PHP_INI_ALL);
-    addIni(_iniMap, "assert.warning", "1", PHP_INI_ALL);
-    addIni(_iniMap, "assert.callback", null, PHP_INI_ALL);
-    addIni(_iniMap, "assert.quiet_eval", "0", PHP_INI_ALL);
-    addIni(_iniMap, "enable_dl", "1", PHP_INI_SYSTEM);
-    addIni(_iniMap, "max_execution_time", "30", PHP_INI_ALL);
-    addIni(_iniMap, "max_input_time", "-1", PHP_INI_PERDIR);
-    addIni(_iniMap, "magic_quotes_gpc", "1", PHP_INI_PERDIR);
-    // magic_quotes is ignored in PHP 6
-    addIni(_iniMap, "magic_quotes_runtime", "0", PHP_INI_ALL);
+  static final IniDefinition INI_ASSERT_ACTIVE
+    = _iniDefinitions.add("assert.active", true, PHP_INI_ALL);
+  static final IniDefinition INI_ASSERT_BAIL
+    = _iniDefinitions.add("assert.bail", false, PHP_INI_ALL);
+  static final IniDefinition INI_ASSERT_WARNING
+    = _iniDefinitions.add("assert.warning", true, PHP_INI_ALL);
+  static final IniDefinition INI_ASSERT_CALLBACK
+    = _iniDefinitions.add("assert.callback", null, PHP_INI_ALL);
+  static final IniDefinition INI_ASSERT_QUIET_EVAL
+    = _iniDefinitions.add("assert.quiet_eval", false, PHP_INI_ALL);
+  static final IniDefinition INI_ENABLE_DL
+    = _iniDefinitions.add("enable_dl", true, PHP_INI_SYSTEM);
+  static final IniDefinition INI_MAX_EXECUTION_TIME
+    = _iniDefinitions.add("max_execution_time", "30", PHP_INI_ALL);
+  static final IniDefinition INI_MAX_INPUT_TIME
+    = _iniDefinitions.add("max_input_time", "-1", PHP_INI_PERDIR);
+  static final IniDefinition INI_MAGIC_QUOTES_GPC
+    = _iniDefinitions.add("magic_quotes_gpc", true, PHP_INI_PERDIR);
 
-    // basic
-    addIni(_iniMap, "track_vars", "On", PHP_INI_ALL);
-    addIni(_iniMap, "arg_separator.output", "&", PHP_INI_ALL);
-    addIni(_iniMap, "arg_separator.input", "&", PHP_INI_ALL);
-    addIni(_iniMap, "variables_order", "EGPCS", PHP_INI_ALL);
-    addIni(_iniMap, "auto_globals_jit", "1", PHP_INI_ALL);
-    // register_globals is ignored in PHP 6
-    addIni(_iniMap, "register_globals", "0", PHP_INI_ALL);
-    addIni(_iniMap, "register_argc_argv", "1", PHP_INI_ALL);
-    addIni(_iniMap, "register_long_arrays", "1", PHP_INI_ALL);
-    addIni(_iniMap, "post_max_size", "8M", PHP_INI_ALL);
-    addIni(_iniMap, "gpc_order", "GPC", PHP_INI_ALL);
-    addIni(_iniMap, "auto_prepend_file", null, PHP_INI_ALL);
-    addIni(_iniMap, "auto_append_file", null, PHP_INI_ALL);
-    addIni(_iniMap, "default_mimetype", "text/html", PHP_INI_ALL);
-    addIni(_iniMap, "default_charset", "", PHP_INI_ALL);
-    addIni(_iniMap, "always_populate_raw_post_data", "0", PHP_INI_ALL);
-    addIni(_iniMap, "allow_webdav_methods", "0", PHP_INI_ALL);
+  static final IniDefinition INI_TRACK_VARS
+    = _iniDefinitions.add("track_vars", "On", PHP_INI_ALL);
+  static final IniDefinition INI_ARG_SEPARATOR_OUTPUT
+    = _iniDefinitions.add("arg_separator.output", "&", PHP_INI_ALL);
+  static final IniDefinition INI_ARG_SEPARATOR_INPUT
+    = _iniDefinitions.add("arg_separator.input", "&", PHP_INI_ALL);
+  static final IniDefinition INI_VARIABLES_ORDER
+    = _iniDefinitions.add("variables_order", "EGPCS", PHP_INI_ALL);
+  static final IniDefinition INI_AUTO_GLOBALS_JIT
+    = _iniDefinitions.add("auto_globals_jit", "1", PHP_INI_ALL);
+  static final IniDefinition INI_REGISTER_ARGC_ARGV
+    = _iniDefinitions.add("register_argc_argv", true, PHP_INI_ALL);
+  static final IniDefinition INI_REGISTER_LONG_ARRAYS
+    = _iniDefinitions.add("register_long_arrays", true, PHP_INI_ALL);
+  static final IniDefinition INI_POST_MAX_SIZE
+    = _iniDefinitions.add("post_max_size", "8M", PHP_INI_ALL);
+  static final IniDefinition INI_GPC_ORDER
+    = _iniDefinitions.add("gpc_order", "GPC", PHP_INI_ALL);
+  static final IniDefinition INI_AUTO_PREPEND_FILE
+    = _iniDefinitions.add("auto_prepend_file", null, PHP_INI_ALL);
+  static final IniDefinition INI_AUTO_APPEND_FILE
+    = _iniDefinitions.add("auto_append_file", null, PHP_INI_ALL);
+  static final IniDefinition INI_DEFAULT_MIMETYPE
+    = _iniDefinitions.add("default_mimetype", "text/html", PHP_INI_ALL);
+  static final IniDefinition INI_DEFAULT_CHARSET
+    = _iniDefinitions.add("default_charset", "", PHP_INI_ALL);
+  static final IniDefinition INI_ALWAYS_POPULATE_RAW_POST_DATA =
+    _iniDefinitions.add("always_populate_raw_post_data", false, PHP_INI_ALL);
+  static final IniDefinition INI_ALLOW_WEBDAV_METHODS
+    = _iniDefinitions.add("allow_webdav_methods", false, PHP_INI_ALL);
+  static final IniDefinition INI_MEMORY_LIMIT
+    = _iniDefinitions.add("memory_limit", -1, PHP_INI_ALL);
 
-    addIni(_iniMap, "memory_limit", "-1", PHP_INI_ALL);
-  }
-
-  //@todo mixed   assert_options(int what [, mixed value])
-  //@todo boolean assert(mixed assertion)
-  //@todo int     dl(string library)
-  //@todo boolean extension_loaded(string name)
-  //@todo string  get_cfg_var(string varname)
-  //@todo string  get_current_user()
-  //@todo array   get_extension_funcs(string module_name)
-  //@todo string  get_include_path()
-  //@todo array   get_included_files()
-  //@todo array   get_loaded_extensions()
-  //@todo int     get_magic_quotes_runtime()
-  //@todo array   get_required_files() ALIAS of get_included_files
-  //@todo int     getlastmod()
-  //@todo int     getmygid()
-  //@todo int     getmyinode()
-  //@todo int     getmypid()
-  //@todo int     getmyuid()
-  //@todo array   getopt(string options [,array longopts])
-  //@todo array   getrusage([int who])
-  //@todo string  ini_alter(string varname, string newvalue) ALIAS of ini_set
-  //@todo array   ini_get_all([string extension])
-  //@todo void    ini_restore(string varname)
-  //XXX main is Dummy for main()
-  //@todo int     memory_get_usage()
-  //@todo string  quercus_ini_scanned_files()
-  //@todo string  quercus_logo_guid()
-  //@todo string  quercus_uname([string mode])
-  //@todo boolean quercuscredits([int flag])
-  //@todo boolean quercusinfo([int what])
-  //@todo boolean pupenv(string setting)
-  //@todo void    restore_include_path()
-  //@todo string  set_include_path(string new_include_path)
-  //@todo string  zend_logo_guid()
-
-
+  // unsupported
+  static final IniDefinition MAGIC_QUOTES_RUNTIME
+    = _iniDefinitions.addUnsupported("magic_quotes_runtime", false, PHP_INI_ALL);
+  static final IniDefinition MAGIC_QUOTES_SYBASE
+    = _iniDefinitions.addUnsupported("magic_quotes_sybase", false, PHP_INI_ALL);
+  static final IniDefinition INI_REGISTER_GLOBALS
+    = _iniDefinitions.addUnsupported("register_globals", false, PHP_INI_ALL);
 }
 

@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.module;
 
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
 import com.caucho.quercus.env.Value;
 
 import java.util.HashMap;
@@ -40,16 +38,13 @@ import java.util.Map;
  * Represents a quercus module.
  */
 public class AbstractQuercusModule implements QuercusModule {
-  protected static final int PHP_INI_USER = 1;
-  protected static final int PHP_INI_PERDIR = 2;
-  protected static final int PHP_INI_SYSTEM = 4;
-  protected static final int PHP_INI_ALL = 7;
+  protected static final int PHP_INI_USER = IniDefinition.PHP_INI_USER;
+  protected static final int PHP_INI_PERDIR = IniDefinition.PHP_INI_PERDIR;
+  protected static final int PHP_INI_SYSTEM = IniDefinition.PHP_INI_SYSTEM;
+  protected static final int PHP_INI_ALL = IniDefinition.PHP_INI_ALL;
 
   private static final HashMap<String,Value> NULL_MAP
     = new HashMap<String,Value>();
-
-  private static final HashMap<String,StringValue> NULL_INI_MAP
-    = new HashMap<String,StringValue>();
 
   public Map<String,Value> getConstMap()
   {
@@ -59,9 +54,9 @@ public class AbstractQuercusModule implements QuercusModule {
   /**
    * Returns the default quercus.ini values.
    */
-  public Map<String,StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return NULL_INI_MAP;
+    return IniDefinitions.EMPTY;
   }
 
   /**
@@ -70,20 +65,6 @@ public class AbstractQuercusModule implements QuercusModule {
   public String []getLoadedExtensions()
   {
     return new String[0];
-  }
-
-  /**
-   * Adds a default ini.
-   */
-  protected static void addIni(Map<String,StringValue> map,
-                               String name,
-                               String value,
-                               int code)
-  {
-    if (value != null)
-      map.put(name, new StringValueImpl(value));
-    else
-      map.put(name, null);
   }
 }
 

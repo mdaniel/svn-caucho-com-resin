@@ -279,7 +279,7 @@ public class ZlibModule extends AbstractQuercusModule {
    * Reads a chunk of data from the gzip stream.
    */
   @ReturnNullAsFalse
-  public BinaryValue gzread(@NotNull BinaryInput is, int length)
+  public StringValue gzread(@NotNull BinaryInput is, int length)
   {
     if (is == null)
       return null;

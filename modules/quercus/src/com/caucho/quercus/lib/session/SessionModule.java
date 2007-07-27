@@ -34,12 +34,12 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.OutputModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.ModuleStartupListener;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.L10N;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -51,15 +51,14 @@ public class SessionModule extends AbstractQuercusModule
   private static final Logger log
     = Logger.getLogger(SessionModule.class.getName());
 
-  private static final HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   /**
    * Returns the default php.ini values.
    */
-  public Map<String,StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
 
   public String []getLoadedExtensions()
@@ -609,31 +608,55 @@ public class SessionModule extends AbstractQuercusModule
       return '-';
   }
 
-  static {
-    addIni(_iniMap, "session.save_path", "", PHP_INI_ALL);
-    addIni(_iniMap, "session.name", "PHPSESSID", PHP_INI_ALL);
-    addIni(_iniMap, "session.save_handler", "files", PHP_INI_ALL);
-    addIni(_iniMap, "session.auto_start", "0", PHP_INI_ALL);
-    addIni(_iniMap, "session.gc_probability_start", "1", PHP_INI_ALL);
-    addIni(_iniMap, "session.gc_divisor", "100", PHP_INI_ALL);
-    addIni(_iniMap, "session.gc_maxlifetime", "1440", PHP_INI_ALL);
-    addIni(_iniMap, "session.serialize_handler", "quercus", PHP_INI_ALL);
-    addIni(_iniMap, "session.cookie_lifetime", "0", PHP_INI_ALL);
-    addIni(_iniMap, "session.cookie_path", "/", PHP_INI_ALL);
-    addIni(_iniMap, "session.cookie_domain", "", PHP_INI_ALL);
-    addIni(_iniMap, "session.cookie_secure", "", PHP_INI_ALL);
-    addIni(_iniMap, "session.use_cookies", "1", PHP_INI_ALL);
-    addIni(_iniMap, "session.use_only_cookies", "1", PHP_INI_ALL);
-    addIni(_iniMap, "session.referer_check", "", PHP_INI_ALL);
-    addIni(_iniMap, "session.entropy_file", "", PHP_INI_ALL);
-    addIni(_iniMap, "session.entropy_length", "0", PHP_INI_ALL);
-    addIni(_iniMap, "session.cache_limiter", "nocache", PHP_INI_ALL);
-    addIni(_iniMap, "session.cache_expire", "180", PHP_INI_ALL);
-    addIni(_iniMap, "session.use_trans_sid", "0", PHP_INI_ALL);
-    addIni(_iniMap, "session.bug_compat_42", "1", PHP_INI_ALL);
-    addIni(_iniMap, "session.bug_compat_warn", "1", PHP_INI_ALL);
-    addIni(_iniMap, "session.hash_function", "0", PHP_INI_ALL);
-    addIni(_iniMap, "session.hash_bits_per_character", "4", PHP_INI_ALL);
-    addIni(_iniMap, "url_rewriter.tags", "a=href,area=href,frame=src,form=,fieldset=", PHP_INI_ALL);
-  }
+
+  static final IniDefinition INI_SESSION_SAVE_PATH
+    = _iniDefinitions.add("session.save_path", "", PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_NAME
+    = _iniDefinitions.add("session.name", "PHPSESSID", PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_SAVE_HANDLER
+    = _iniDefinitions.add("session.save_handler", "files", PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_AUTO_START
+    = _iniDefinitions.add("session.auto_start", false, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_GC_PROBABILITY_START
+    = _iniDefinitions.add("session.gc_probability_start", true, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_GC_DIVISOR
+    = _iniDefinitions.add("session.gc_divisor", 100, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_GC_MAXLIFETIME
+    = _iniDefinitions.add("session.gc_maxlifetime", 1440, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_SERIALIZE_HANDLER
+    = _iniDefinitions.add("session.serialize_handler", "quercus", PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_COOKIE_LIFETIME
+    = _iniDefinitions.add("session.cookie_lifetime", 0, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_COOKIE_PATH
+    = _iniDefinitions.add("session.cookie_path", "/", PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_COOKIE_DOMAIN
+    = _iniDefinitions.add("session.cookie_domain", "", PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_COOKIE_SECURE
+    = _iniDefinitions.add("session.cookie_secure", "", PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_USE_COOKIES
+    = _iniDefinitions.add("session.use_cookies", true, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_USE_ONLY_COOKIES
+    = _iniDefinitions.add("session.use_only_cookies", true, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_REFERER_CHECK
+    = _iniDefinitions.add("session.referer_check", "", PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_ENTROPY_FILE
+    = _iniDefinitions.add("session.entropy_file", "", PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_ENTROPY_LENGTH
+    = _iniDefinitions.add("session.entropy_length", false, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_CACHE_LIMITER
+    = _iniDefinitions.add("session.cache_limiter", "nocache", PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_CACHE_EXPIRE
+    = _iniDefinitions.add("session.cache_expire", 180, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_USE_TRANS_SID
+    = _iniDefinitions.add("session.use_trans_sid", false, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_BUG_COMPAT_42
+    = _iniDefinitions.add("session.bug_compat_42", true, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_BUG_COMPAT_WARN
+    = _iniDefinitions.add("session.bug_compat_warn", true, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_HASH_FUNCTION
+    = _iniDefinitions.add("session.hash_function", false, PHP_INI_ALL);
+  static final IniDefinition INI_SESSION_HASH_BITS_PER_CHARACTER
+    = _iniDefinitions.add("session.hash_bits_per_character", 4, PHP_INI_ALL);
+  static final IniDefinition INI_URL_REWRITER_TAGS
+    = _iniDefinitions.add("url_rewriter.tags", "a=href,area=href,frame=src,form=,fieldset=", PHP_INI_ALL);
 }

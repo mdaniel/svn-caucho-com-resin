@@ -37,6 +37,8 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.UrlModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -100,8 +102,7 @@ public class FileModule extends AbstractQuercusModule {
   public static final int PATHINFO_EXTENSION = 4;
   public static final int PATHINFO_FILENAME = 8;
 
-  private static final HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   private static final HashMap<String,Value> _constMap
     = new HashMap<String,Value>();
@@ -109,9 +110,9 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Returns the default quercus.ini values.
    */
-  public Map<String,StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
   
   /**
@@ -2783,18 +2784,32 @@ public class FileModule extends AbstractQuercusModule {
     _constMap.put("GLOB_NOESCAPE", LongValue.create(GLOB_NOESCAPE));
     _constMap.put("GLOB_BRACE", LongValue.create(GLOB_BRACE));
     _constMap.put("GLOB_ONLYDIR", LongValue.create(GLOB_ONLYDIR));
-    
-    addIni(_iniMap, "allow_url_fopen", "1", PHP_INI_SYSTEM);
-    addIni(_iniMap, "user_agent", null, PHP_INI_ALL);
-    addIni(_iniMap, "default_socket_timeout", "60", PHP_INI_ALL);
-    addIni(_iniMap, "from", "", PHP_INI_ALL);
-    addIni(_iniMap, "auto_detect_line_endings", "0", PHP_INI_ALL);
-
-    // file uploads
-    addIni(_iniMap, "file_uploads", "1", PHP_INI_SYSTEM);
-    addIni(_iniMap, "upload_tmp_dir", null, PHP_INI_SYSTEM);
-    addIni(_iniMap, "upload_max_filesize", "2M", PHP_INI_SYSTEM);
-
   }
+
+  static final IniDefinition INI_ALLOW_URL_FOPEN
+    = _iniDefinitions.add("allow_url_fopen", true, PHP_INI_SYSTEM);
+
+  static final IniDefinition INI_USER_AGENT
+    = _iniDefinitions.add("user_agent", null, PHP_INI_ALL);
+
+  static final IniDefinition INI_DEFAULT_SOCKET_TIMEOUT
+    = _iniDefinitions.add("default_socket_timeout", 60, PHP_INI_ALL);
+
+  static final IniDefinition INI_FROM
+    = _iniDefinitions.add("from", "", PHP_INI_ALL);
+
+  static final IniDefinition INI_AUTO_DETECT_LINE_ENDINGS
+    = _iniDefinitions.add("auto_detect_line_endings", false, PHP_INI_ALL);
+
+  // file uploads
+
+  static final IniDefinition INI_FILE_UPLOADS
+    = _iniDefinitions.add("file_uploads", true, PHP_INI_SYSTEM);
+
+  static final IniDefinition INI_UPLOAD_TMP_DIR
+    = _iniDefinitions.add("upload_tmp_dir", null, PHP_INI_SYSTEM);
+
+  static final IniDefinition INI_UPLOAD_MAX_FILESIZE
+    = _iniDefinitions.add("upload_max_filesize", "2M", PHP_INI_SYSTEM);
 }
 

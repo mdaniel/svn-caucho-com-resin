@@ -33,6 +33,8 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.ModuleStartupListener;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.util.L10N;
 import com.caucho.vfs.StreamImplOutputStream;
 import com.caucho.vfs.TempStream;
@@ -40,7 +42,6 @@ import com.caucho.vfs.TempStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
@@ -51,13 +52,12 @@ import java.util.zip.GZIPOutputStream;
 public class OutputModule extends AbstractQuercusModule 
   implements ModuleStartupListener {
   private static final L10N L = new L10N(OutputModule.class);
-  private static final Logger log
-    = Logger.getLogger(OutputModule.class.getName());
-  private static final StringValue HTTP_ACCEPT_ENCODING 
+  private static final Logger log = Logger.getLogger(OutputModule.class.getName());
+
+  private static final StringValue HTTP_ACCEPT_ENCODING
     = new StringValueImpl("HTTP_ACCEPT_ENCODING");
 
-  private static final HashMap<String,StringValue> _iniMap
-    = new HashMap<String,StringValue>();
+  private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   // ob_gzhandler related variables/types
   private enum Encoding {NONE, GZIP, DEFLATE};
@@ -70,13 +70,12 @@ public class OutputModule extends AbstractQuercusModule
   private static HashMap<Env,GZOutputPair> _gzOutputPairs 
     = new HashMap<Env,GZOutputPair>();
 
-
   /**
    * Returns the default php.ini values.
    */
-  public Map<String,StringValue> getDefaultIni()
+  public IniDefinitions getIniDefinitions()
   {
-    return _iniMap;
+    return _iniDefinitions;
   }
 
   public void startup(Env env)
@@ -556,9 +555,10 @@ public class OutputModule extends AbstractQuercusModule
     return result;
   }
 
-  static {
-    addIni(_iniMap, "output_buffering", "0", PHP_INI_PERDIR);
-    addIni(_iniMap, "output_handler", "", PHP_INI_PERDIR);
-    addIni(_iniMap, "implicit_flush", "0", PHP_INI_ALL);
-  }
+  static final IniDefinition INI_OUTPUT_BUFFERING
+    = _iniDefinitions.add("output_buffering", false, PHP_INI_PERDIR);
+  static final IniDefinition INI_OUTPUT_HANDLER
+    = _iniDefinitions.add("output_handler", "", PHP_INI_PERDIR);
+  static final IniDefinition INI_IMPLICIT_FLUSH
+    = _iniDefinitions.add("implicit_flush", false, PHP_INI_ALL);
 }

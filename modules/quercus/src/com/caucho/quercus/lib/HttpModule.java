@@ -137,16 +137,18 @@ public class HttpModule extends AbstractQuercusModule {
         }
 
         if (key.equalsIgnoreCase("Content-Type")) {
-          if (value.indexOf("charset") < 0) {
-            if (value.indexOf("text/") < 0)
-              res.setCharacterEncoding(env.getOutputEncoding().toString());
+          String encoding = env.getOutputEncoding();
+
+          if (encoding != null) {
+            if (value.indexOf("charset") < 0) {
+              if (value.indexOf("text/") < 0)
+                res.setCharacterEncoding(encoding);
+            }
+            else if ("".equals(res.getCharacterEncoding())) {
+              // php/1b0d
+              res.setCharacterEncoding(encoding);
+            }
           }
-          else if ("".equals(res.getCharacterEncoding())) {
-            // php/1b0d
-            res.setCharacterEncoding(env.getOutputEncoding().toString());
-          }
-	
-          env.getOut().setEncoding(res.getCharacterEncoding());
         }
 
       }

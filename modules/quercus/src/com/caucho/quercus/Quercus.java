@@ -38,7 +38,8 @@ import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ModuleInfo;
 import com.caucho.quercus.module.ModuleStartupListener;
 import com.caucho.quercus.module.QuercusModule;
-import com.caucho.quercus.module.StaticFunction;
+import com.caucho.quercus.module.IniDefinitions;
+import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.page.InterpretedPage;
 import com.caucho.quercus.page.PageManager;
 import com.caucho.quercus.page.QuercusPage;
@@ -56,15 +57,10 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,6 +74,8 @@ public class Quercus
 
   private static HashSet<String> _superGlobals
     = new HashSet<String>();
+
+  private static IniDefinitions _ini = new IniDefinitions();
 
   private final PageManager _pageManager;
   private final QuercusSessionManager _sessionManager;
@@ -124,8 +122,9 @@ public class Quercus
   private HashMap<String, JavaClassDef> _lowerJavaClassWrappers
     = new HashMap<String, JavaClassDef>();
 
-  private HashMap<String, StringValue> _iniMap
-    = new HashMap<String, StringValue>();
+  private final IniDefinitions _iniDefinitions = new IniDefinitions();
+  
+  private IdentityHashMap<String, Value> _iniMap;
 
   private HashMap<Value, Value> _serverEnvMap
     = new HashMap<Value, Value>();
@@ -181,6 +180,8 @@ public class Quercus
     _sessionManager = createSessionManager();
 
     _workDir = getWorkDir();
+
+    _iniDefinitions.addAll(_ini);
   }
 
   public Env createEnv(QuercusPage page,
@@ -526,18 +527,38 @@ public class Quercus
   }
 
   /**
+   * Returns the IniDefinitions for all ini that have been defined by modules.
+   */
+  public IniDefinitions getIniDefinitions()
+  {
+    return _iniDefinitions;
+  }
+
+  /**
+   * Returns a map of the ini values that have been explicitly set.
+   */
+  public IdentityHashMap<String, Value> getIniMap(boolean create)
+  {
+    if (_iniMap == null && create)
+      _iniMap = new IdentityHashMap<String, Value>();
+
+    return _iniMap;
+  }
+
+  /**
    * Sets an ini value.
    */
   public void setIni(String name, StringValue value)
   {
-    // XXX: s/b specified some other way
-    if ("magic_quotes_sybase".equals(value.toString())
-        || "magic_quotes_runtime".equals(value.toString())) {
-      if (value.toBoolean())
-        throw new UnsupportedOperationException(name);
-    }
+    _iniDefinitions.get(name).set(this, value);
+  }
 
-    _iniMap.put(name, value);
+  /**
+   * Sets an ini value.
+   */
+  public void setIni(String name, String value)
+  {
+    _iniDefinitions.get(name).set(this, value);
   }
 
   /**
@@ -573,19 +594,11 @@ public class Quercus
   }
 
   /**
-   * Sets an ini value.
-   */
-  public void setIni(String name, String value)
-  {
-    setIni(name, new StringValueImpl(value));
-  }
-
-  /**
    * Gets an ini value.
    */
-  public StringValue getIni(String name)
+  public StringValue getIniAsStringValue(String name)
   {
-    return _iniMap.get(name);
+    return _iniDefinitions.get(name).getAsStringValue(this);
   }
 
   /**
@@ -593,16 +606,19 @@ public class Quercus
    */
   public HashMap<String,StringValue> getIniAll(String prefix)
   {
-    if (_iniMap == null)
+    if (_iniDefinitions == null)
       return null;
 
     HashMap<String, StringValue> iniCopy = new HashMap<String, StringValue>();
 
-    for (Map.Entry<String, StringValue> entry : _iniMap.entrySet()) {
-      String key = entry.getKey();
-      StringValue value = entry.getValue();
-      if (key.startsWith(prefix))
-        iniCopy.put(key, entry.getValue());
+    TreeSet<String> names = new TreeSet<String>();
+
+    names.addAll(_iniMap.keySet());
+    names.addAll(_iniDefinitions.getNames());
+
+    for (String name : names) {
+      if (name.startsWith(prefix))
+        iniCopy.put(name, getIniAsStringValue(name));
     }
 
     return iniCopy;
@@ -1140,8 +1156,7 @@ public class Quercus
     if (map != null)
       _constMap.putAll(map);
 
-    Map<String, StringValue> iniMap = info.getDefaultIni();
-    _iniMap.putAll(iniMap);
+    _iniDefinitions.addAll(info.getIniDefinitions());
 
     for (Map.Entry<String, AbstractFunction> entry : info.getFunctions().entrySet()) {
       _funMap.put(entry.getKey(), entry.getValue());
@@ -1459,5 +1474,23 @@ public class Quercus
     _superGlobals.add("_SESSION");
     _superGlobals.add("_REQUEST");
   }
+
+  public static final IniDefinition INI_UNICODE_SEMANTICS
+    = _ini.add("unicode.semantics", false, IniDefinition.PHP_INI_SYSTEM);
+  public static final IniDefinition INI_UNICODE_FALLBACK_ENCODING
+    = _ini.add("unicode.fallback_encoding", "utf-8", IniDefinition.PHP_INI_ALL);
+  public static final IniDefinition INI_UNICODE_FROM_ERROR_MODE
+    = _ini.add("unicode.from_error_mode", "2", IniDefinition.PHP_INI_ALL);
+  public static final IniDefinition INI_UNICODE_FROM_ERROR_SUBST_CHAR
+    = _ini.add("unicode.from_error_subst_char", "3f", IniDefinition.PHP_INI_ALL);
+  public static final IniDefinition INI_UNICODE_HTTP_INPUT_ENCODING
+    = _ini.add("unicode.http_input_encoding", null, IniDefinition.PHP_INI_ALL);
+  public static final IniDefinition INI_UNICODE_OUTPUT_ENCODING
+    = _ini.add("unicode.output_encoding", null, IniDefinition.PHP_INI_ALL);
+  public static final IniDefinition INI_UNICODE_RUNTIME_ENCODING
+    = _ini.add("unicode.runtime_encoding", null, IniDefinition.PHP_INI_ALL);
+  public static final IniDefinition INI_UNICODE_SCRIPT_ENCODING
+    = _ini.add("unicode.script_encoding", null, IniDefinition.PHP_INI_ALL);
+
 }
 
