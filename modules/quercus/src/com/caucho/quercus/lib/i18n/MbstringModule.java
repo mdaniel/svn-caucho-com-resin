@@ -165,7 +165,7 @@ public class MbstringModule
 
     vars.set(encodeAll(env, decoded, toEncoding));
 
-    return new StringValueImpl(srcEncoding);
+    return new UnicodeValueImpl(srcEncoding);
   }
 
   /**
@@ -232,7 +232,7 @@ public class MbstringModule
                                                 transfer_encoding,
                                                 linefeed,
                                                 76);
-      return new StringValueImpl(mime);
+      return new UnicodeValueImpl(mime);
 
     } catch (UnsupportedEncodingException e) {
       throw new QuercusModuleException(e.getMessage());
@@ -540,14 +540,14 @@ public class MbstringModule
     if (type.length() == 0) {
       ArrayValue array = new ArrayValueImpl();
 
-      array.put(new StringValueImpl("internal_encoding"),
-                new StringValueImpl(getEncoding(env)));
+      array.put(new UnicodeValueImpl("internal_encoding"),
+                new UnicodeValueImpl(getEncoding(env)));
 
       return array;
     }
 
     else if (type.equals("internal_encoding")) {
-      return new StringValueImpl(getEncoding(env));
+      return new UnicodeValueImpl(getEncoding(env));
 
     } else {
       throw new UnimplementedException("mb_get_info");
@@ -585,7 +585,7 @@ public class MbstringModule
                               @Optional String encoding)
   {
     if (encoding.length() == 0)
-      return new StringValueImpl(getEncoding(env));
+      return new UnicodeValueImpl(getEncoding(env));
     else {
       setEncoding(env, encoding);
       return BooleanValue.TRUE;
@@ -602,11 +602,11 @@ public class MbstringModule
 
     if (language.length() == 0) {
       if (encoding.equalsIgnoreCase("ISO-2022-JP"))
-        return new StringValueImpl("Japanese");
+        return new UnicodeValueImpl("Japanese");
       else if (encoding.equalsIgnoreCase("ISO-8859-1"))
-        return new StringValueImpl("English");
+        return new UnicodeValueImpl("English");
       else if (encoding.equalsIgnoreCase("UTF-8"))
-        return new StringValueImpl("uni");
+        return new UnicodeValueImpl("uni");
     }
     else if (language.equals("Japanese") || language.equals("ja"))
       setEncoding(env, "ISO-2022-JP");
@@ -627,18 +627,18 @@ public class MbstringModule
   {
     ArrayValue array = new ArrayValueImpl();
 
-    array.put(new StringValueImpl("ASCII"));
-    array.put(new StringValueImpl("UTF-8"));
-    array.put(new StringValueImpl("UTF-16"));
-    array.put(new StringValueImpl("ISO-8859-1"));
-    array.put(new StringValueImpl("ISO-8859-2"));
-    array.put(new StringValueImpl("ISO-8859-15"));
-    array.put(new StringValueImpl("ISO-2022-JP"));
-    array.put(new StringValueImpl("EUC-KR"));
-    array.put(new StringValueImpl("EUC-CN"));
-    array.put(new StringValueImpl("EUC-TW"));
-    array.put(new StringValueImpl("EUC-JP"));
-    array.put(new StringValueImpl("JIS"));
+    array.put(new UnicodeValueImpl("ASCII"));
+    array.put(new UnicodeValueImpl("UTF-8"));
+    array.put(new UnicodeValueImpl("UTF-16"));
+    array.put(new UnicodeValueImpl("ISO-8859-1"));
+    array.put(new UnicodeValueImpl("ISO-8859-2"));
+    array.put(new UnicodeValueImpl("ISO-8859-15"));
+    array.put(new UnicodeValueImpl("ISO-2022-JP"));
+    array.put(new UnicodeValueImpl("EUC-KR"));
+    array.put(new UnicodeValueImpl("EUC-CN"));
+    array.put(new UnicodeValueImpl("EUC-TW"));
+    array.put(new UnicodeValueImpl("EUC-JP"));
+    array.put(new UnicodeValueImpl("JIS"));
 
     return array;
   }
@@ -683,7 +683,7 @@ public class MbstringModule
   {
     String mimeName = Encoding.getMimeName(encoding.toString());
 
-    return new StringValueImpl(mimeName);
+    return new UnicodeValueImpl(mimeName);
   }
 
   /**
@@ -806,7 +806,7 @@ public class MbstringModule
     str = str.substring(start, end);
 
     if (end < len && trimmarker.length() > 0) {
-      StringBuilderValue sb = new StringBuilderValue();
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
       sb.append(str);
       sb.append(trimmarker.toUnicodeValue(env, encoding));
@@ -997,7 +997,7 @@ public class MbstringModule
    */
   private static StringValue toUpperCaseTitle(StringValue string)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     int strLen = string.length();
     boolean isWordStart = true;

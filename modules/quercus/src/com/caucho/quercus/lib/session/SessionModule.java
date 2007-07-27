@@ -193,7 +193,7 @@ public class SessionModule extends AbstractQuercusModule
       oldValue = "";
 
     if (id != null && ! "".equals(id))
-      env.setSpecialValue("caucho.session_id", new StringValueImpl(id));
+      env.setSpecialValue("caucho.session_id", new UnicodeValueImpl(id));
 
     return oldValue;
   }
@@ -203,7 +203,7 @@ public class SessionModule extends AbstractQuercusModule
    */
   public static boolean session_is_registered(Env env, String name)
   {
-    return env.getGlobalValue("_SESSION").get(new StringValueImpl(name)).isset();
+    return env.getGlobalValue("_SESSION").get(new UnicodeValueImpl(name)).isset();
   }
 
   /**
@@ -322,7 +322,7 @@ public class SessionModule extends AbstractQuercusModule
 
     if (value.isNull() || value.length() == 0) {
       // XXX: should we create work directory if does not exist?
-      value = new StringValueImpl(env.getWorkDir().getPath());
+      value = new UnicodeValueImpl(env.getWorkDir().getPath());
     }
     
     return value;
@@ -449,7 +449,7 @@ public class SessionModule extends AbstractQuercusModule
         }
       }
 
-      env.addConstant("SID", new StringValueImpl(cookieName + '=' + sessionId),
+      env.addConstant("SID", new UnicodeValueImpl(cookieName + '=' + sessionId),
                       false);
       
       OutputModule.pushUrlRewriter(env);
@@ -500,7 +500,7 @@ public class SessionModule extends AbstractQuercusModule
     if (env.getIni("session.use_cookies").toBoolean() && generateCookie) {
       generateSessionCookie(env, sessionId);
     }
-    env.setSpecialValue("caucho.session_id", new StringValueImpl(sessionId));
+    env.setSpecialValue("caucho.session_id", new UnicodeValueImpl(sessionId));
 
     return true;
   }
@@ -515,7 +515,7 @@ public class SessionModule extends AbstractQuercusModule
     String cookieName = env.getIni("session.name").toString();
     
     env.addConstant("SID", 
-            new StringValueImpl(cookieName + '=' + sessionId), 
+            new UnicodeValueImpl(cookieName + '=' + sessionId),
             false);
 
     Cookie cookie = new Cookie(cookieName, sessionId);

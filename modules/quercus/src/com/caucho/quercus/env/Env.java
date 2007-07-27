@@ -35,7 +35,6 @@ import com.caucho.quercus.function.Marshal;
 import com.caucho.quercus.function.MarshalFactory;
 import com.caucho.quercus.lib.ErrorModule;
 import com.caucho.quercus.lib.VariableModule;
-import com.caucho.quercus.lib.i18n.UnicodeModule;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.string.StringUtility;
@@ -138,10 +137,10 @@ public class Env {
   private static final IntMap SPECIAL_VARS = new IntMap();
 
   private static final StringValue PHP_SELF_STRING
-    = new StringValueImpl("PHP_SELF");
+    = new UnicodeValueImpl("PHP_SELF");
 
   private static final StringValue UTF8_STRING
-    = new StringValueImpl("utf-8");
+    = new UnicodeValueImpl("utf-8");
 
   private static final
     LruCache<ClassKey,SoftReference<QuercusClass>> _classCache
@@ -1679,12 +1678,12 @@ public class Env {
 
           String value = decodeValue(cookie.getValue());
 
-          StringValue valueAsValue = new StringValueImpl(value);
+          StringValue valueAsValue = new UnicodeValueImpl(value);
 
           if (getIniBoolean("magic_quotes_gpc")) // php/0876
             valueAsValue = StringModule.addslashes(valueAsValue);
 
-          array.append(new StringValueImpl(cookie.getName()), valueAsValue);
+          array.append(new UnicodeValueImpl(cookie.getName()), valueAsValue);
         }
       }
 
@@ -2105,7 +2104,7 @@ public class Env {
        name));
     */
 
-    value = new StringValueImpl(name);
+    value = new UnicodeValueImpl(name);
 
     return value;
   }
@@ -2178,11 +2177,11 @@ public class Env {
     ArrayValue result = new ArrayValueImpl();
 
     for (Map.Entry<String, Value> entry : _quercus.getConstMap().entrySet()) {
-      result.put(new StringValueImpl(entry.getKey()), entry.getValue());
+      result.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
     }
 
     for (Map.Entry<String, Value> entry : _constMap.entrySet()) {
-      result.put(new StringValueImpl(entry.getKey()), entry.getValue());
+      result.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
     }
 
     return result;
@@ -2741,7 +2740,7 @@ public class Env {
    */
   public Value createString(byte []buffer, int offset, int length)
   {
-    return new StringValueImpl(new String(buffer, offset, length));
+    return new UnicodeValueImpl(new String(buffer, offset, length));
   }
 
   /**
@@ -2751,7 +2750,7 @@ public class Env {
   {
     QuercusClass cls = findClass("Exception");
     
-    StringValue message = new StringValueImpl(e.getMessage());
+    StringValue message = new UnicodeValueImpl(e.getMessage());
     Value []args = { message };
 
     Value value = cls.callNew(this, args);
@@ -3018,7 +3017,7 @@ public class Env {
         _autoload = findFunction("__autoload");
       
       if (_autoload != null) {
-        _autoload.call(this, new StringValueImpl(name));
+        _autoload.call(this, new UnicodeValueImpl(name));
         return createClassImpl(name, false, useImport);
       }
     }
@@ -3977,7 +3976,7 @@ public class Env {
         String fileName = location.getFileName();
 
         if (fileName != null)
-          fileNameV = new StringValueImpl(fileName);
+          fileNameV = new UnicodeValueImpl(fileName);
 
         Value lineV = NullValue.NULL;
         int line = location.getLineNumber();
@@ -3986,7 +3985,7 @@ public class Env {
 
         Value context = NullValue.NULL;
 
-        handler.call(this, new LongValue(mask), new StringValueImpl(msg),
+        handler.call(this, new LongValue(mask), new UnicodeValueImpl(msg),
                      fileNameV, lineV, context);
 
         return NullValue.NULL;
@@ -4007,7 +4006,7 @@ public class Env {
 	String fullMsg = locationMessagePrefix + getCodeName(mask) + msg;
 
 	if (getIniBoolean("track_errors"))
-	  setGlobalValue("php_errormsg", new StringValueImpl(fullMsg));
+	  setGlobalValue("php_errormsg", new UnicodeValueImpl(fullMsg));
 
 	if (getIniBoolean("display_errors"))
 	  getOut().println(fullMsg);

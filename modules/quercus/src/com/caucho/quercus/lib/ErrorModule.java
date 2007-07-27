@@ -124,7 +124,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	
 	call.put("function", unmangleFunction(className));
 
-	call.put(new StringValueImpl("args"), new ArrayValueImpl());
+	call.put(new UnicodeValueImpl("args"), new ArrayValueImpl());
       }
       else if (className.startsWith("_quercus._")
 	       && name.equals("callMethod")) {
@@ -141,7 +141,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	call.put("class", unmangleClass(className));
 	call.put("type", "->");
 
-	call.put(new StringValueImpl("args"), new ArrayValueImpl());
+	call.put(new UnicodeValueImpl("args"), new ArrayValueImpl());
       }
       else if (className.startsWith("_quercus._")
 	       && name.equals("execute")) {
@@ -156,7 +156,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	  call.put("file", fileName);
 	  call.put("line", env.getSourceLine(className, elt.getLineNumber()));
 
-	  call.put(new StringValueImpl("args"), new ArrayValueImpl());
+	  call.put(new UnicodeValueImpl("args"), new ArrayValueImpl());
 	}
       }
       else if (className.equals("com.caucho.quercus.expr.FunctionExpr")
@@ -195,7 +195,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	call.put("function", elt.getMethodName());
 	call.put("class", elt.getClassName());
 
-	call.put(new StringValueImpl("args"), new ArrayValueImpl());
+	call.put(new UnicodeValueImpl("args"), new ArrayValueImpl());
       }
     }
 
@@ -218,7 +218,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	
       call.put("function", callExpr.getName());
 
-      call.put(new StringValueImpl("args"), new ArrayValueImpl());
+      call.put(new UnicodeValueImpl("args"), new ArrayValueImpl());
     }
     else if (expr instanceof MethodCallExpr) {
       MethodCallExpr callExpr = (MethodCallExpr) expr;
@@ -238,7 +238,7 @@ public class ErrorModule extends AbstractQuercusModule {
 
       call.put("type", "->");
 
-      call.put(new StringValueImpl("args"), new ArrayValueImpl());
+      call.put(new UnicodeValueImpl("args"), new ArrayValueImpl());
     }
     else if (expr instanceof IncludeExpr) {
       ArrayValue call = new ArrayValueImpl();
@@ -251,7 +251,7 @@ public class ErrorModule extends AbstractQuercusModule {
 	
       call.put("function", "include");
 
-      call.put(new StringValueImpl("args"), new ArrayValueImpl());
+      call.put(new UnicodeValueImpl("args"), new ArrayValueImpl());
     }
   }
 

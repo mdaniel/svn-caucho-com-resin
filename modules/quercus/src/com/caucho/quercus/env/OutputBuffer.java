@@ -131,7 +131,7 @@ public class OutputBuffer {
       _out.flush();
 
       ReadStream rs = _tempStream.openRead(false);
-      BinaryBuilderValue bb = new BinaryBuilderValue();
+      BytesBuilderValue bb = new BytesBuilderValue();
       int ch;
 
       // XXX: encoding
@@ -256,8 +256,8 @@ public class OutputBuffer {
       clean();
 
       try {
-        if (result instanceof BinaryValue)
-          _out.write(((BinaryValue) result).toBytes());
+        if (result instanceof BytesValue)
+          _out.write(((BytesValue) result).toBytes());
         else
           _out.print(result.toString(_env).toString());
       } catch (IOException e) {

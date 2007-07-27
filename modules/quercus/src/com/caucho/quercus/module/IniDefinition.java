@@ -107,7 +107,7 @@ public class IniDefinition {
   {
     set(quercus.getIniMap(true),
         PHP_INI_SYSTEM,
-        new StringValueImpl(value));
+        new UnicodeValueImpl(value));
   }
 
   /**
@@ -125,7 +125,7 @@ public class IniDefinition {
   {
     set(env.getIniMap(true),
         PHP_INI_USER,
-        new StringValueImpl(value));
+        new UnicodeValueImpl(value));
   }
 
   /**
@@ -179,7 +179,7 @@ public class IniDefinition {
     Value value = get(overrideMap, iniMap);
 
     if (value instanceof BooleanValue)
-      return value.toBoolean() ? new InternStringValue("1") : new InternStringValue("0");
+      return value.toBoolean() ? new InternUnicodeValue("1") : new InternUnicodeValue("0");
     else
       return value.toStringValue();
   }

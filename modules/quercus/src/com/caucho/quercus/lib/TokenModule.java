@@ -211,12 +211,12 @@ public class TokenModule extends AbstractQuercusModule {
 				       @Optional boolean isReturn)
   {
     try {
-      StringBuilderValue sb = isReturn ? new StringBuilderValue() : null;
+      UnicodeBuilderValue sb = isReturn ? new UnicodeBuilderValue() : null;
       WriteStream out = env.getOut();
 
       Token lexer = new Token(s);
       int token;
-      StringValue topColor = new StringValueImpl("#000000");
+      StringValue topColor = new UnicodeValueImpl("#000000");
       StringValue lastColor = topColor;
 
       highlight(sb, out, "<code>");
@@ -262,7 +262,7 @@ public class TokenModule extends AbstractQuercusModule {
     }
   }
 
-  private static void highlight(StringBuilderValue sb,
+  private static void highlight(UnicodeBuilderValue sb,
 				WriteStream out,
 				String string)
     throws IOException
@@ -275,7 +275,7 @@ public class TokenModule extends AbstractQuercusModule {
     }
   }
 
-  private static void highlight(StringBuilderValue sb,
+  private static void highlight(UnicodeBuilderValue sb,
 				WriteStream out,
 				StringValue string)
     throws IOException
@@ -515,7 +515,7 @@ public class TokenModule extends AbstractQuercusModule {
     private int _i;
     private boolean _inPhp;
 
-    private StringBuilderValue _lexeme;
+    private UnicodeBuilderValue _lexeme;
 
     Token(StringValue s)
     {
@@ -525,7 +525,7 @@ public class TokenModule extends AbstractQuercusModule {
 
     int nextToken()
     {
-      _lexeme = new StringBuilderValue();
+      _lexeme = new UnicodeBuilderValue();
 
       if (! _inPhp) {
 	_inPhp = true;
@@ -919,7 +919,7 @@ public class TokenModule extends AbstractQuercusModule {
       }
     }
 
-    StringBuilderValue getLexeme()
+    UnicodeBuilderValue getLexeme()
     {
       return _lexeme;
     }

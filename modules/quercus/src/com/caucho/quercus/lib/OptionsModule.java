@@ -416,9 +416,9 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     ArrayValue directives = new ArrayValueImpl();
 
-    Value global = new StringValueImpl("global_value");
-    Value local = new StringValueImpl("local_value");
-    Value access = new StringValueImpl("access");
+    Value global = new UnicodeValueImpl("global_value");
+    Value local = new UnicodeValueImpl("local_value");
+    Value access = new UnicodeValueImpl("access");
 
     Value level = new LongValue(7);
 
@@ -445,7 +445,7 @@ public class OptionsModule extends AbstractQuercusModule {
         inner.put(local, formatIniValue(localVal));
 
       inner.put(access, level);
-      directives.put(new StringValueImpl(key), inner);
+      directives.put(new UnicodeValueImpl(key), inner);
     }
 
     return directives;
@@ -455,7 +455,7 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     String string = val.toString().toLowerCase();
     if ("on".equals(string))
-      return new StringValueImpl("1");
+      return new UnicodeValueImpl("1");
     else if ("off".equals(string))
       return StringValue.EMPTY;
 
@@ -822,7 +822,7 @@ public class OptionsModule extends AbstractQuercusModule {
         else
           s = "z" + s;
 
-        expand.add(new StringValueImpl(s));
+        expand.add(new UnicodeValueImpl(s));
       }
       else
         i++;

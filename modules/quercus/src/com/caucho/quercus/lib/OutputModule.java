@@ -55,7 +55,7 @@ public class OutputModule extends AbstractQuercusModule
   private static final Logger log = Logger.getLogger(OutputModule.class.getName());
 
   private static final StringValue HTTP_ACCEPT_ENCODING
-    = new StringValueImpl("HTTP_ACCEPT_ENCODING");
+    = new UnicodeValueImpl("HTTP_ACCEPT_ENCODING");
 
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
@@ -83,7 +83,7 @@ public class OutputModule extends AbstractQuercusModule
     String handlerName = env.getConfigVar("output_handler").toString();
 
     if (! "".equals(handlerName) && env.getFunction(handlerName) != null) {
-      Callback callback = env.createCallback(new StringValueImpl(handlerName));
+      Callback callback = env.createCallback(new UnicodeValueImpl(handlerName));
 
       ob_start(env, callback, 0, true);
     } else if (env.getConfigVar("output_buffering").toBoolean()) {
@@ -261,9 +261,9 @@ public class OutputModule extends AbstractQuercusModule
     Callback callback = ob.getCallback();
 
     if (callback != null) 
-      handlers.put(new StringValueImpl(callback.getCallbackName()));
+      handlers.put(new UnicodeValueImpl(callback.getCallbackName()));
     else
-      handlers.put(new StringValueImpl("default output handler"));
+      handlers.put(new UnicodeValueImpl("default output handler"));
   }
   
   /**
@@ -292,7 +292,7 @@ public class OutputModule extends AbstractQuercusModule
     if (callback != null && callback.isInternal())
       type = LongValue.ZERO;
 
-    element.put(new StringValueImpl("type"), type);
+    element.put(new UnicodeValueImpl("type"), type);
 
     // the rewriter is a special case where it includes a field
     // "buffer_size" right in the middle of the common elements, 
@@ -301,7 +301,7 @@ public class OutputModule extends AbstractQuercusModule
     // and no indication of its meaning.
     if (fullStatus && callback != null &&
         callback == UrlRewriterCallback.getInstance(env))
-      element.put(new StringValueImpl("buffer_size"), LongValue.ZERO);
+      element.put(new UnicodeValueImpl("buffer_size"), LongValue.ZERO);
 
     // Technically, there are supposed to be three possible values
     // for status: 
@@ -313,20 +313,20 @@ public class OutputModule extends AbstractQuercusModule
     // ob_get_status() in the handler on a ob_end_flush() does not
     // invoke this state.)
     LongValue status = ob.haveFlushed() ? LongValue.ONE : LongValue.ZERO;
-    element.put(new StringValueImpl("status"), status);
+    element.put(new UnicodeValueImpl("status"), status);
 
     StringValue name;
 
     if (callback != null)
-      name = new StringValueImpl(callback.getCallbackName());
+      name = new UnicodeValueImpl(callback.getCallbackName());
     else
-      name = new StringValueImpl("default output handler".intern());
+      name = new UnicodeValueImpl("default output handler".intern());
 
-    element.put(new StringValueImpl("name".intern()), name);
+    element.put(new UnicodeValueImpl("name".intern()), name);
 
     Value del = ob.getEraseFlag() ? BooleanValue.TRUE : 
       BooleanValue.FALSE;
-    element.put(new StringValueImpl("del"), del);
+    element.put(new UnicodeValueImpl("del"), del);
   }
 
   /**
@@ -342,14 +342,14 @@ public class OutputModule extends AbstractQuercusModule
 
     ArrayValue element = new ArrayValueImpl();
 
-    element.put(new StringValueImpl("chunk_size"), 
+    element.put(new UnicodeValueImpl("chunk_size"),
                 LongValue.create(ob.getChunkSize()));
     
     // XXX: Not sure why we even need to list a size -- PHP doesn't 
     // even seem to respect it.  -1 => infinity?  
     // (Note: "size" == "capacity")
-    element.put(new StringValueImpl("size"), LongValue.create(-1));
-    element.put(new StringValueImpl("block_size"), LongValue.create(-1));
+    element.put(new UnicodeValueImpl("size"), LongValue.create(-1));
+    element.put(new UnicodeValueImpl("block_size"), LongValue.create(-1));
 
     putCommonStatus(element, ob, env, true);
    
@@ -374,7 +374,7 @@ public class OutputModule extends AbstractQuercusModule
     ArrayValue result = new ArrayValueImpl();
 
     if (ob != null) {
-      result.put(new StringValueImpl("level"), 
+      result.put(new UnicodeValueImpl("level"),
                  LongValue.create(ob.getLevel()));
 
       putCommonStatus(result, ob, env, false);
@@ -548,7 +548,7 @@ public class OutputModule extends AbstractQuercusModule
       return BooleanValue.FALSE;
     }
 
-    Value result = new TempBufferStringValue(pair.tempStream.getHead());
+    Value result = new TempBufferBytesValue(pair.tempStream.getHead());
 
     pair.tempStream.discard();
 

@@ -78,13 +78,13 @@ public class UnicodeModule extends AbstractQuercusModule {
   }
 
   public static UnicodeValue unicode_decode(Env env,
-                              BinaryValue str,
+                              BytesValue str,
                               String encoding)
   {
     return str.toUnicodeValue(env, encoding);
   }
 
-  public static BinaryValue unicode_encode(Env env,
+  public static BytesValue unicode_encode(Env env,
                               UnicodeValue str,
                               String encoding)
   {
@@ -115,11 +115,11 @@ public class UnicodeModule extends AbstractQuercusModule {
     }
 
     if ("input_encoding".equals(type))
-      return new StringValueImpl(env.getIniString("iconv.input_encoding"));
+      return new UnicodeValueImpl(env.getIniString("iconv.input_encoding"));
     else if ("output_encoding".equals(type))
-      return new StringValueImpl(env.getIniString("iconv.output_encoding"));
+      return new UnicodeValueImpl(env.getIniString("iconv.output_encoding"));
     else if ("internal_encoding".equals(type))
-      return new StringValueImpl(env.getIniString("iconv.internal_encoding"));
+      return new UnicodeValueImpl(env.getIniString("iconv.internal_encoding"));
 
     return BooleanValue.FALSE;
   }
@@ -261,23 +261,23 @@ public class UnicodeModule extends AbstractQuercusModule {
       int lineLength = 76;
 
       if (preferences != null) {
-        Value tmp = new StringValueImpl("scheme");
+        Value tmp = new UnicodeValueImpl("scheme");
         if ((tmp = preferences.get(tmp)).isset())
           scheme = tmp.toString();
 
-        tmp = new StringValueImpl("line-break-chars");
+        tmp = new UnicodeValueImpl("line-break-chars");
         if ((tmp = preferences.get(tmp)).isset())
           lineBreakChars = tmp.toString();
 
-        tmp = new StringValueImpl("input-charset");
+        tmp = new UnicodeValueImpl("input-charset");
         if ((tmp = preferences.get(tmp)).isset())
           inCharset = tmp.toString();
 
-        tmp = new StringValueImpl("output-charset");
+        tmp = new UnicodeValueImpl("output-charset");
         if ((tmp = preferences.get(tmp)).isset())
           outCharset = tmp.toString();
 
-        tmp = new StringValueImpl("line-length");
+        tmp = new UnicodeValueImpl("line-length");
         if ((tmp = preferences.get(tmp)).isset()) {
         if (tmp.isLongConvertible())
           lineLength = (int)tmp.toLong();

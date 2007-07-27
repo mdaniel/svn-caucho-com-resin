@@ -84,7 +84,7 @@ public class ApcModule extends AbstractQuercusModule {
     value.put("num_hits", 0);
     value.put("num_misses", 0);
     value.put("start_time", 0);
-    value.put(new StringValueImpl("cache_list"), new ArrayValueImpl());
+    value.put(new UnicodeValueImpl("cache_list"), new ArrayValueImpl());
 
     return value;
   }
@@ -169,7 +169,7 @@ public class ApcModule extends AbstractQuercusModule {
     value.put("num_seg", 1);
     value.put("seg_size", 1024 * 1024);
     value.put("avail_mem", 1024 * 1024);
-    value.put(new StringValueImpl("block_lists"), new ArrayValueImpl());
+    value.put(new UnicodeValueImpl("block_lists"), new ArrayValueImpl());
 
     return value;
   }

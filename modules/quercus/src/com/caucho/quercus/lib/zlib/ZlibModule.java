@@ -269,7 +269,7 @@ public class ZlibModule extends AbstractQuercusModule {
       if (ch < 0)
         return BooleanValue.FALSE;
       else
-        return new BinaryBuilderValue(new byte[] { (byte) ch });
+        return new BytesBuilderValue(new byte[] { (byte) ch });
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -401,16 +401,16 @@ public class ZlibModule extends AbstractQuercusModule {
     }
 
     ServerArrayValue sav = new ServerArrayValue(env);
-    Value val = sav.get(new StringValueImpl("HTTP_ACCEPT_ENCODING"));
+    Value val = sav.get(new UnicodeValueImpl("HTTP_ACCEPT_ENCODING"));
 
     if (!val.isset())
       return BooleanValue.FALSE;
 
     String s = val.toString();
     if (s.contains("gzip"))
-      return new StringValueImpl("gzip");
+      return new UnicodeValueImpl("gzip");
     else if(s.contains("deflate"))
-      return new StringValueImpl("deflate");
+      return new UnicodeValueImpl("deflate");
     else
       return BooleanValue.FALSE;
   }
@@ -477,7 +477,7 @@ public class ZlibModule extends AbstractQuercusModule {
 
       out.write(buffer, 0, 4, true);
 
-      return new TempBufferStringValue(out.getHead());
+      return new TempBufferBytesValue(out.getHead());
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     } finally {
@@ -513,7 +513,7 @@ public class ZlibModule extends AbstractQuercusModule {
 
       in.close();
 
-      return new TempBufferStringValue(out.getHead());
+      return new TempBufferBytesValue(out.getHead());
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
     } finally {
@@ -559,7 +559,7 @@ public class ZlibModule extends AbstractQuercusModule {
       }
       deflater.end();
 
-      return new TempBufferStringValue(out.getHead());
+      return new TempBufferBytesValue(out.getHead());
 
     } catch (Exception e) {
       throw QuercusModuleException.create(e);
@@ -606,7 +606,7 @@ public class ZlibModule extends AbstractQuercusModule {
 
       inflater.end();
 
-      return new TempBufferStringValue(out.getHead());
+      return new TempBufferBytesValue(out.getHead());
     } catch (Exception e) {
       env.warning(e);
       return BooleanValue.FALSE;
@@ -648,7 +648,7 @@ public class ZlibModule extends AbstractQuercusModule {
         gzOut.write(buffer, 0, len);
       }
       gzOut.close();
-      return new TempBufferStringValue(ts.getHead());
+      return new TempBufferBytesValue(ts.getHead());
 
     } catch(IOException e) {
       throw QuercusModuleException.create(e);

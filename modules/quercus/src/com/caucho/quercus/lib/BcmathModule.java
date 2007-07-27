@@ -303,7 +303,7 @@ public class BcmathModule extends AbstractQuercusModule {
     if (pow == null)
       return null;
 
-    return bcmod(env, new StringValueImpl(pow), modulus);
+    return bcmod(env, new UnicodeValueImpl(pow), modulus);
   }
 
 

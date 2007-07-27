@@ -84,8 +84,8 @@ public class Quercus
   
   private ModuleContext _moduleContext;
 
-  private HashMap<String, InternStringValue> _internMap
-    = new HashMap<String, InternStringValue>();
+  private HashMap<String, InternUnicodeValue> _internMap
+    = new HashMap<String, InternUnicodeValue>();
 
   private HashMap<String, ModuleInfo> _modules
     = new HashMap<String, ModuleInfo>();
@@ -566,7 +566,7 @@ public class Quercus
    */
   public void setServerEnv(String name, String value)
   {
-    setServerEnv(new StringValueImpl(name), new StringValueImpl(value));
+    setServerEnv(new UnicodeValueImpl(name), new UnicodeValueImpl(value));
   }
 
   /**
@@ -963,15 +963,15 @@ public class Quercus
   /**
    * Interns a string.
    */
-  public InternStringValue intern(String name)
+  public InternUnicodeValue intern(String name)
   {
     synchronized (_internMap) {
-      InternStringValue value = _internMap.get(name);
+      InternUnicodeValue value = _internMap.get(name);
 
       if (value == null) {
         name = name.intern();
 
-        value = new InternStringValue(name);
+        value = new InternUnicodeValue(name);
         _internMap.put(name, value);
       }
 
@@ -1177,7 +1177,7 @@ public class Quercus
                Double.class.equals(obj.getClass())) {
       return DoubleValue.create(((Number) obj).doubleValue());
     } else if (String.class.equals(obj.getClass())) {
-      return new StringValueImpl((String) obj);
+      return new UnicodeValueImpl((String) obj);
     } else {
       // XXX: unknown types, e.g. Character?
 
@@ -1416,7 +1416,7 @@ public class Quercus
   public static Value exnConstructor(Env env, Value obj, String msg)
   {
     if (obj != null) {
-      obj.putField(env, "message", new StringValueImpl(msg));
+      obj.putField(env, "message", new UnicodeValueImpl(msg));
     }
 
     return NullValue.NULL;

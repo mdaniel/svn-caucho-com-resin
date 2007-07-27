@@ -491,7 +491,7 @@ public class FileModule extends AbstractQuercusModule {
       int ch = is.read();
 
       if (ch >= 0)
-	return new BinaryBuilderValue(new byte[] { (byte) ch });
+	return new BytesBuilderValue(new byte[] { (byte) ch });
       else
 	return BooleanValue.FALSE;
     } catch (IOException e) {
@@ -554,7 +554,7 @@ public class FileModule extends AbstractQuercusModule {
 	    break;
 	}
 
-	StringBuilderValue sb = new StringBuilderValue();
+	UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
 	if (ch == quote) {
 	  for (ch = is.read(); ch >= 0; ch = is.read()) {
@@ -682,7 +682,7 @@ public class FileModule extends AbstractQuercusModule {
 
       try {
         while (true) {
-          BinaryBuilderValue bb = new BinaryBuilderValue();
+          BytesBuilderValue bb = new BytesBuilderValue();
 
           for (int ch = is.read(); ch >= 0; ch = is.read()) {
             if (ch == '\n') {
@@ -872,19 +872,19 @@ public class FileModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
     else if (path.isDirectory())
-      return new StringValueImpl("dir");
+      return new UnicodeValueImpl("dir");
     else if (path.isFile())
-      return new StringValueImpl("file");
+      return new UnicodeValueImpl("file");
     else if (path.isFIFO())
-      return new StringValueImpl("fifo");
+      return new UnicodeValueImpl("fifo");
     else if (path.isLink())
-      return new StringValueImpl("link");
+      return new UnicodeValueImpl("link");
     else if (path.isBlockDevice())
-      return new StringValueImpl("block");
+      return new UnicodeValueImpl("block");
     else if (path.isCharacterDevice())
-      return new StringValueImpl("char");
+      return new UnicodeValueImpl("char");
     else
-      return new StringValueImpl("unknown");
+      return new UnicodeValueImpl("unknown");
   }
 
   /**
@@ -908,8 +908,8 @@ public class FileModule extends AbstractQuercusModule {
    * @param context the resource context
    */
   @ReturnNullAsFalse
-  public static BinaryValue
-    file_get_contents(Env env,
+  public static BytesValue
+                file_get_contents(Env env,
 		      String filename,
 		      @Optional boolean useIncludePath,
 		      @Optional Value context,
@@ -930,7 +930,7 @@ public class FileModule extends AbstractQuercusModule {
       BinaryInput is = (BinaryInput) s;
 
       try {
-	BinaryBuilderValue bb = new BinaryBuilderValue();
+	BytesBuilderValue bb = new BytesBuilderValue();
 
 	int len;
 
@@ -1300,7 +1300,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     ArrayValue url = (ArrayValue) UrlModule.parse_url(env, pathName);
 
-    Value scheme = url.get(new StringValueImpl("scheme"));
+    Value scheme = url.get(new UnicodeValueImpl("scheme"));
 
     if (scheme == UnsetValue.UNSET)
       return null;
@@ -1342,8 +1342,8 @@ public class FileModule extends AbstractQuercusModule {
         if (useIncludePath)
           options = StreamModule.STREAM_USE_PATH;
            
-        return wrapper.fopen(env, new StringValueImpl(filename), 
-                                  new StringValueImpl(mode), 
+        return wrapper.fopen(env, new UnicodeValueImpl(filename),
+                                  new UnicodeValueImpl(mode),
                                   LongValue.create(options));
       }
 
@@ -1568,11 +1568,11 @@ public class FileModule extends AbstractQuercusModule {
       length = is.read(buffer, 0, length);
 
       if (length > 0) {
-        BinaryBuilderValue bb = new BinaryBuilderValue(buffer, 0, length);
+        BytesBuilderValue bb = new BytesBuilderValue(buffer, 0, length);
         return bb;
       }
       else {
-        return BinaryValue.EMPTY;
+        return BytesValue.EMPTY;
       }
     } catch (IOException e) {
       throw new QuercusModuleException(e);
@@ -1742,7 +1742,7 @@ public class FileModule extends AbstractQuercusModule {
       Matcher matcher = compiledGlobRegex.matcher(entry);
 
       if (matcher.matches()) {
-        StringBuilderValue sb = new StringBuilderValue();
+        UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
         sb.append(prefix);
 
@@ -2123,7 +2123,7 @@ public class FileModule extends AbstractQuercusModule {
 
 	if (processSections) {
 	  section = new ArrayValueImpl();
-	  top.put(new StringValueImpl(name), section);
+	  top.put(new UnicodeValueImpl(name), section);
 	}
       }
       else if (isValidIniKeyChar((char) ch)) {
@@ -2143,7 +2143,7 @@ public class FileModule extends AbstractQuercusModule {
 
 	Value value = parseIniValue(env, ch, is);
 
-	section.put(new StringValueImpl(key), value);
+	section.put(new UnicodeValueImpl(key), value);
       }
     }
 
@@ -2165,7 +2165,7 @@ public class FileModule extends AbstractQuercusModule {
 
       skipToEndOfLine(ch, is);
 
-      return new StringValueImpl(sb.toString());
+      return new UnicodeValueImpl(sb.toString());
     }
     else if (ch == '\'') {
       StringBuilder sb = new StringBuilder();
@@ -2176,7 +2176,7 @@ public class FileModule extends AbstractQuercusModule {
 
       skipToEndOfLine(ch, is);
 
-      return new StringValueImpl(sb.toString());
+      return new UnicodeValueImpl(sb.toString());
     }
     else {
       StringBuilder sb = new StringBuilder();
@@ -2191,15 +2191,15 @@ public class FileModule extends AbstractQuercusModule {
 	return StringValue.EMPTY;
       else if (value.equalsIgnoreCase("true") ||
 	       value.equalsIgnoreCase("yes"))
-	return new StringValueImpl("1");
+	return new UnicodeValueImpl("1");
       else if (value.equalsIgnoreCase("false") ||
 	       value.equalsIgnoreCase("no"))
 	return StringValue.EMPTY;
 
       if (env.isDefined(value))
-	return new StringValueImpl(env.getConstant(value).toString());
+	return new UnicodeValueImpl(env.getConstant(value).toString());
       else
-	return new StringValueImpl(value);
+	return new UnicodeValueImpl(value);
     }
   }
 
@@ -2276,13 +2276,13 @@ public class FileModule extends AbstractQuercusModule {
       int options = optionsV.toInt();
 
       if ((options & PATHINFO_DIRNAME) == PATHINFO_DIRNAME)
-        return new StringValueImpl(dirname);
+        return new UnicodeValueImpl(dirname);
       else if ((options & PATHINFO_BASENAME) == PATHINFO_BASENAME)
-        return new StringValueImpl(path);
+        return new UnicodeValueImpl(path);
       else if ((options & PATHINFO_EXTENSION) == PATHINFO_EXTENSION)
-        return new StringValueImpl(ext);
+        return new UnicodeValueImpl(ext);
       else if ((options & PATHINFO_FILENAME) == PATHINFO_FILENAME)
-        return new StringValueImpl(filename);
+        return new UnicodeValueImpl(filename);
       else
         return StringValue.EMPTY;
     }
@@ -2547,12 +2547,12 @@ public class FileModule extends AbstractQuercusModule {
 
       if (order == 1) {
         for (int i = 0; i < values.length; i++)
-          result.append(new LongValue(i), new StringValueImpl(values[i]));
+          result.append(new LongValue(i), new UnicodeValueImpl(values[i]));
       }
       else {
         for (int i = values.length - 1; i >= 0; i--) {
           result.append(new LongValue(values.length - i - 1),
-          new StringValueImpl(values[i]));
+          new UnicodeValueImpl(values[i]));
         }
       }
 
@@ -2659,7 +2659,7 @@ public class FileModule extends AbstractQuercusModule {
 
     try {
       Path path = dir.createTempFile(prefix, ".tmp");
-      return new StringValueImpl(path.getTail());
+      return new UnicodeValueImpl(path.getTail());
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
@@ -2757,11 +2757,11 @@ public class FileModule extends AbstractQuercusModule {
 
   static {
     ProtocolWrapper zlibProtocolWrapper = new ZlibProtocolWrapper();
-    StreamModule.stream_wrapper_register(new StringValueImpl("compress.zlib"), 
+    StreamModule.stream_wrapper_register(new UnicodeValueImpl("compress.zlib"),
                                          zlibProtocolWrapper);
-    StreamModule.stream_wrapper_register(new StringValueImpl("zlib"), 
+    StreamModule.stream_wrapper_register(new UnicodeValueImpl("zlib"),
                                          zlibProtocolWrapper);
-    StreamModule.stream_wrapper_register(new StringValueImpl("php"), 
+    StreamModule.stream_wrapper_register(new UnicodeValueImpl("php"),
                                          new PhpProtocolWrapper());
 
     _constMap.put("SEEK_SET", LongValue.create(BinaryInput.SEEK_SET));
