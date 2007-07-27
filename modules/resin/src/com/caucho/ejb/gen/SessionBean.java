@@ -280,7 +280,8 @@ public class SessionBean extends ClassComponent {
     out.println("}");
 
     out.println();
-    out.println("public javax.interceptor.InvocationContext __caucho_callInterceptors(Object []args)");
+    out.println("public javax.interceptor.InvocationContext __caucho_callInterceptors(Object target, Object []args, String methodName, Class paramTypes[])");
+    out.println("  throws java.lang.reflect.InvocationTargetException");
     out.println("{");
     out.pushDepth();
 
@@ -288,7 +289,7 @@ public class SessionBean extends ClassComponent {
 
     // XXX: invocation context pool ???
     out.println();
-    out.println("invocationContext = new com.caucho.ejb.interceptor.InvocationContextImpl();");
+    out.println("invocationContext = new com.caucho.ejb.interceptor.InvocationContextImpl(target, methodName, paramTypes);");
     out.println("invocationContext.setParameters(args);");
 
     out.println();
@@ -322,6 +323,13 @@ public class SessionBean extends ClassComponent {
     }
 
     out.popDepth();
+
+    // ejb/0f66
+    if (_bean.getInterceptors().size() > 0) {
+      out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
+      out.println("  throw e;");
+    }
+
     out.println("} catch (RuntimeException e) {");
     out.println("  throw e;");
     out.println("} catch (Throwable e) {");

@@ -523,27 +523,53 @@ public class EjbConfig {
 
       _ejbManager.getAmberManager().initEntityHomes();
 
-      // ejb/0g1c
-      // XXX: TO BE REMOVED
-      if (beanConfig.size() > 0) {
-        EjbBean bean = beanConfig.remove(0);
-        beanConfig.add(bean);
-      }
+      // ejb/0g1c, ejb/0f68, ejb/0f69
+      ArrayList<EjbBean> beanList = new ArrayList<EjbBean>();
 
       for (EjbBean bean : beanConfig) {
-        AbstractServer server = null;
+        if (beanList.contains(bean))
+          continue;
 
-        server = bean.deployServer(_ejbManager, javaGen);
+        AbstractServer server = initBean(bean, javaGen);
 
-        thread.setContextClassLoader(server.getClassLoader());
+        ArrayList<String> dependList = bean.getBeanDependList();
 
-        server.init();
+        for (String depend : dependList) {
+          for (EjbBean b : beanConfig) {
+            if (bean == b)
+              continue;
+
+            if (depend.equals(b.getEJBName())) {
+              beanList.add(b);
+
+              AbstractServer dependServer = initBean(b, javaGen);
+
+              _ejbManager.addServer(dependServer);
+
+              thread.setContextClassLoader(server.getClassLoader());
+            }
+          }
+        }
 
         _ejbManager.addServer(server);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+
+  private AbstractServer initBean(EjbBean bean, JavaClassGenerator javaGen)
+    throws Throwable
+  {
+    AbstractServer server = bean.deployServer(_ejbManager, javaGen);
+
+    Thread thread = Thread.currentThread();
+
+    thread.setContextClassLoader(server.getClassLoader());
+
+    server.init();
+
+    return server;
   }
 
   /**

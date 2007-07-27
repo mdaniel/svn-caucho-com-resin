@@ -59,17 +59,17 @@ public class EjbInjectProgram extends BuilderProgram
   private AccessibleInject _field;
 
   EjbInjectProgram(String name,
-		   String beanName,
-		   String mappedName,
-		   Class type,
-		   AccessibleInject field)
+                   String beanName,
+                   String mappedName,
+                   Class type,
+                   AccessibleInject field)
     throws ConfigException
   {
     try {
       _name = name;
       _beanName = beanName;
       _mappedName = mappedName;
-      
+
       _type = type;
 
       _field = field;
@@ -78,6 +78,11 @@ public class EjbInjectProgram extends BuilderProgram
     } catch (Exception e) {
       throw new ConfigException(e);
     }
+  }
+
+  public String getBeanName()
+  {
+    return _beanName;
   }
 
   public void configureImpl(NodeBuilder builder, Object bean)
@@ -104,98 +109,98 @@ public class EjbInjectProgram extends BuilderProgram
 
       // first see if already bound by the name attribute
       try {
-	if (_name != null && ! "".equals(_name)) {
-	  String fullName = Jndi.getFullName(_name);
-	    
-	  value = ic.lookup(fullName);
+        if (_name != null && ! "".equals(_name)) {
+          String fullName = Jndi.getFullName(_name);
 
-	  if (value != null) {
-	    if (! _type.isAssignableFrom(value.getClass())) {
-	      value = PortableRemoteObject.narrow(value, _type);
-	    }
-	    
-	    return value;
-	  }
-	}
+          value = ic.lookup(fullName);
+
+          if (value != null) {
+            if (! _type.isAssignableFrom(value.getClass())) {
+              value = PortableRemoteObject.narrow(value, _type);
+            }
+
+            return value;
+          }
+        }
       } catch (NamingException e) {
-	log.finest(e.toString());
+        log.finest(e.toString());
       }
 
       // If not, see if it's bound by mapped-name
       if (_mappedName != null && ! "".equals(_mappedName)) {
-	// XXX: s/b link value for stateful(?)
-	value = ic.lookup(_mappedName);
-	
-	if (value == null) {
-	  log.fine(L.l("'{0}' is an unknown @EJB mapped-name.", _mappedName));
-	  return null;
-	}
+        // XXX: s/b link value for stateful(?)
+        value = ic.lookup(_mappedName);
+
+        if (value == null) {
+          log.fine(L.l("'{0}' is an unknown @EJB mapped-name.", _mappedName));
+          return null;
+        }
       }
       else {
-	EjbServerManager manager = EjbServerManager.getLocal();
+        EjbServerManager manager = EjbServerManager.getLocal();
 
-	if (manager != null) {
-	  if (_beanName != null && ! "".equals(_beanName)) {
-	    try {
-	      value = ic.lookup(manager.getRemoteJndiPrefix() + _beanName);
-	    } catch (NamingException e) {
-	      log.log(Level.FINEST, e.toString(), e);
-	    }
-	    
-	    try {
-	      if (value == null)
-		value = ic.lookup(manager.getLocalJndiPrefix() + _beanName);
-	    } catch (NamingException e) {
-	      log.log(Level.FINEST, e.toString(), e);
-	    }
-	  }
-	      
-	  if (value == null) {
-	    value = manager.getLocalByInterface(_type);
+        if (manager != null) {
+          if (_beanName != null && ! "".equals(_beanName)) {
+            try {
+              value = ic.lookup(manager.getRemoteJndiPrefix() + _beanName);
+            } catch (NamingException e) {
+              log.log(Level.FINEST, e.toString(), e);
+            }
 
-	    if (value instanceof ObjectProxy) {
-	      jndiValue = value;
-	      value = ((ObjectProxy) value).createObject(null);
-	    }
-	  }
+            try {
+              if (value == null)
+                value = ic.lookup(manager.getLocalJndiPrefix() + _beanName);
+            } catch (NamingException e) {
+              log.log(Level.FINEST, e.toString(), e);
+            }
+          }
 
-	  if (value == null)
-	    value = manager.getRemoteByInterface(_type);
-	}
+          if (value == null) {
+            value = manager.getLocalByInterface(_type);
+
+            if (value instanceof ObjectProxy) {
+              jndiValue = value;
+              value = ((ObjectProxy) value).createObject(null);
+            }
+          }
+
+          if (value == null)
+            value = manager.getRemoteByInterface(_type);
+        }
       }
 
       if (value == null) {
-	EjbRefContext context = EjbRefContext.getLocal();
+        EjbRefContext context = EjbRefContext.getLocal();
 
-	if (context != null)
-	  value = context.findByType(_type);
+        if (context != null)
+          value = context.findByType(_type);
       }
-	
+
       if (value == null) {
-	log.fine(L.l("'{0}' is an unknown @EJB.", _type.getName()));
-	return null;
+        log.fine(L.l("'{0}' is an unknown @EJB.", _type.getName()));
+        return null;
       }
 
       if (! _type.isAssignableFrom(value.getClass())) {
-	value = PortableRemoteObject.narrow(value, _type);
+        value = PortableRemoteObject.narrow(value, _type);
       }
 
       if (! _type.isAssignableFrom(value.getClass())) {
-	throw new ConfigException(L.l("EJB at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
-				      _name,
-				      value.getClass().getName(),
-				      _field.getName(),
-				      _type.getName()));
+        throw new ConfigException(L.l("EJB at '{0}' of type {1} is not assignable to field '{2}' of type {3}.",
+                                      _name,
+                                      value.getClass().getName(),
+                                      _field.getName(),
+                                      _type.getName()));
       }
 
       // rebind to name
       if (_name != null && ! "".equals(_name)) {
-	log.fine("@EJB binding " + _name + "in JNDI for " + value);
+        log.fine("@EJB binding " + _name + "in JNDI for " + value);
 
-	if (jndiValue != null)
-	  Jndi.rebindDeepShort(_name, jndiValue);
-	else
-	  Jndi.rebindDeepShort(_name, value);
+        if (jndiValue != null)
+          Jndi.rebindDeepShort(_name, jndiValue);
+        else
+          Jndi.rebindDeepShort(_name, value);
       }
 
       return value;

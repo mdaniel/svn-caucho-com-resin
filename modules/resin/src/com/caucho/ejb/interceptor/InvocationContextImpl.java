@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.interceptor;
 
+import com.caucho.bytecode.JClass;
 import com.caucho.util.L10N;
 
 import javax.interceptor.InvocationContext;
@@ -41,20 +42,39 @@ import java.util.Map;
 public class InvocationContextImpl implements InvocationContext {
   private static final L10N L = new L10N(InvocationContextImpl.class);
 
-  Object _parameters[];
+  private Object _target;
+  private Object _parameters[];
 
-  public InvocationContextImpl()
+  private Method _method;
+  private String _methodName;
+  private Class _parameterTypes[];
+
+
+  public InvocationContextImpl(Object target, String methodName, Class parameterTypes[])
   {
+    _target = target;
+    _methodName = methodName;
+    _parameterTypes = parameterTypes;
   }
 
   public Object getTarget()
   {
-    return null;
+    return _target;
   }
 
   public Method getMethod()
   {
-    return null;
+    if (_method == null) {
+      Class cl = _target.getClass();
+
+      try {
+        _method = cl.getDeclaredMethod(_methodName, _parameterTypes);
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    return _method;
   }
 
   public Object[] getParameters()

@@ -36,7 +36,9 @@ import com.caucho.config.BuilderProgram;
 import com.caucho.config.BuilderProgramContainer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
+import com.caucho.config.j2ee.EjbInjectProgram;
 import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.config.j2ee.JndiBindProgram;
 import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EjbServerManager;
 import com.caucho.ejb.gen.BeanAssembler;
@@ -355,7 +357,7 @@ public class EjbSessionBean extends EjbBean {
       thread.setContextClassLoader(server.getClassLoader());
 
       ArrayList<BuilderProgram> initList;
-      initList = InjectIntrospector.introspect(beanClass);
+      initList = InjectIntrospector.introspect(beanClass, ejbManager.getLocalJndiPrefix());
 
       BuilderProgramContainer initContainer = getInitProgram();
 
@@ -364,6 +366,29 @@ public class EjbSessionBean extends EjbBean {
           initContainer = new BuilderProgramContainer();
 
         for (BuilderProgram init : initList) {
+          String foreignName = null;
+
+          if (init instanceof JndiBindProgram) {
+            // ejb/0f6c
+            JndiBindProgram jndiBind = (JndiBindProgram) init;
+
+            foreignName = jndiBind.getForeignName();
+          }
+          else if (init instanceof EjbInjectProgram) {
+            // ejb/0g1c
+            EjbInjectProgram ejbInject = (EjbInjectProgram) init;
+
+            foreignName = ejbInject.getBeanName();
+          }
+
+          if (foreignName != null) {
+            int index = foreignName.lastIndexOf("/");
+
+            foreignName = foreignName.substring(++index);
+
+            addBeanDependency(foreignName);
+          }
+
           initContainer.addProgram(init);
         }
       }
@@ -409,14 +434,7 @@ public class EjbSessionBean extends EjbBean {
 
     setSessionType("Stateless");
 
-    JAnnotation transaction = type.getAnnotation(TransactionManagement.class);
-    if (transaction == null)
-      setTransactionType("Container");
-    else if (TransactionManagementType.BEAN.equals(transaction.get("value")))
-      setTransactionType("Bean");
-    else {
-      setTransactionType("Container");
-    }
+    setTransactionType(type);
 
     String name;
     if (stateless != null)
@@ -437,7 +455,8 @@ public class EjbSessionBean extends EjbBean {
     setAllowPOJO(true);
 
     setSessionType("Stateful");
-    setTransactionType("Container");
+
+    setTransactionType(type);
 
     String name;
     if (stateful != null)
@@ -446,6 +465,18 @@ public class EjbSessionBean extends EjbBean {
       name = className;
 
     introspectBean(type, name);
+  }
+
+  private void setTransactionType(JClass type)
+  {
+    JAnnotation transaction = type.getAnnotation(TransactionManagement.class);
+    if (transaction == null)
+      setTransactionType("Container");
+    else if (TransactionManagementType.BEAN.equals(transaction.get("value")))
+      setTransactionType("Bean");
+    else {
+      setTransactionType("Container");
+    }
   }
 
   private void validateMethods()

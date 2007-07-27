@@ -31,6 +31,7 @@ package com.caucho.config.j2ee;
 
 import com.caucho.config.BuilderProgram;
 import com.caucho.config.ConfigException;
+import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -41,11 +42,10 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.annotation.Resources;
 import javax.ejb.EJB;
+import javax.ejb.EJBs;
 import javax.ejb.SessionContext;
 import javax.ejb.MessageDrivenContext;
-import javax.naming.InitialContext;
-import javax.naming.NameClassPair;
-import javax.naming.NamingEnumeration;
+import javax.naming.*;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.transaction.UserTransaction;
@@ -104,10 +104,19 @@ public class InjectIntrospector {
   public static ArrayList<BuilderProgram> introspect(Class type)
     throws ConfigException
   {
+    return introspect(type, null);
+  }
+
+  /**
+   * Analyzes a bean for @Inject tags, building an init program for them.
+   */
+  public static ArrayList<BuilderProgram> introspect(Class type, String localJndiPrefix)
+    throws ConfigException
+  {
     ArrayList<BuilderProgram> initList = new ArrayList<BuilderProgram>();
 
     try {
-      introspectImpl(initList, type);
+      introspectImpl(initList, type, localJndiPrefix);
 
       introspectConstruct(initList, type);
     } catch (ClassNotFoundException e) {
@@ -138,12 +147,20 @@ public class InjectIntrospector {
                                      Class type)
     throws ConfigException, ClassNotFoundException
   {
+    introspectImpl(initList, type, null);
+  }
+
+  private static void introspectImpl(ArrayList<BuilderProgram> initList,
+                                     Class type,
+                                     String localJndiPrefix)
+    throws ConfigException, ClassNotFoundException
+  {
     if (type == null || type.equals(Object.class))
       return;
 
     introspectImpl(initList, type.getSuperclass());
 
-    configureClassResources(initList, type);
+    configureClassResources(initList, type, localJndiPrefix);
 
     for (Method method : type.getDeclaredMethods()) {
       String fieldName = method.getName();
@@ -205,6 +222,15 @@ public class InjectIntrospector {
                             Class type)
     throws ConfigException
   {
+    configureClassResources(initList, type, null);
+  }
+
+  public static void
+    configureClassResources(ArrayList<BuilderProgram> initList,
+                            Class type,
+                            String localJndiPrefix)
+    throws ConfigException
+  {
     Resources resources = (Resources) type.getAnnotation(Resources.class);
     if (resources != null) {
       for (Resource resource : resources.value()) {
@@ -226,6 +252,30 @@ public class InjectIntrospector {
       if (! foreignName.equals(pc.name()) && ! "".equals(pc.name()))
         initList.add(new JndiBindProgram(pc.name(), foreignName,
                                          javax.persistence.EntityManager.class));
+    }
+
+    // ejb/0f66
+    EJB ejb = (EJB) type.getAnnotation(EJB.class);
+
+    // ejb/0f67
+    EJBs ejbs = (EJBs) type.getAnnotation(EJBs.class);
+
+    if (localJndiPrefix == null)
+      localJndiPrefix = "java:comp/env/cmp";
+
+    if (ejb != null && ejbs != null) {
+      throw new ConfigException(L.l("{0} cannot have both @EJBs and @EJB",
+                                    type.getName()));
+    } else if (ejb != null) {
+      initList.add(new JndiBindProgram("java:comp/env/" + ejb.name(),
+                                       localJndiPrefix + "/" + ejb.beanName(),
+                                       null));
+    } else if (ejbs != null) {
+      for (EJB e : ejbs.value()) {
+        initList.add(new JndiBindProgram("java:comp/env/" + e.name(),
+                                         localJndiPrefix + "/" + e.beanName(),
+                                         null));
+      }
     }
 
     for (Field field : type.getDeclaredFields()) {
@@ -307,7 +357,7 @@ public class InjectIntrospector {
       inject = new FieldInject((Field) field);
     else
       inject = new PropertyInject((Method) field);
-    
+
     if (field.isAnnotationPresent(Resource.class))
       configureResource(initList, field, fieldName, fieldType);
     else if (field.isAnnotationPresent(EJB.class))

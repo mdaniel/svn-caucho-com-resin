@@ -237,6 +237,12 @@ public class EjbProtocolManager {
 
         if (localObj != null) {
           if (_localJndiPrefix != null) {
+            // ejb/0f6c (tck) vs ejb/0g01
+            if (! _localJndiPrefix.endsWith("/env")) {
+              // ejb/0f6c: should use the ejb-name for local beans (ignore mapped-name).
+              mappedName = ejbName;
+            }
+
             localJndiName = Jndi.getFullName(_localJndiPrefix + "/" + mappedName);
 
             if (log.isLoggable(Level.CONFIG))
@@ -252,7 +258,7 @@ public class EjbProtocolManager {
       }
 
       Object remoteObj = server.getRemoteObject();
-        
+
       if (remoteObj != null) {
         if (_remoteJndiPrefix != null) {
           String remoteJndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + mappedName);

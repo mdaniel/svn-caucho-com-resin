@@ -73,6 +73,9 @@ public class SessionPoolChain extends FilterCallChain {
     super.generateCall(out, retVar, "ptr", args);
 
     out.popDepth();
+
+    generateInterceptorExceptionHandling(out);
+
     out.println("} catch (RuntimeException e) {");
     out.pushDepth();
     out.println("ptr = null;");
@@ -116,48 +119,97 @@ public class SessionPoolChain extends FilterCallChain {
       argList += arg;
     }
 
+
+    JClass types[] = _method.getParameterTypes();
+
+    String paramTypes = "";
+    String parametersCasting = "";
+
+    isFirst = true;
+
+    for (int i = 0; i < args.length; i++) {
+      String typeName = types[i].getPrintName();
+
+      if (isFirst)
+        isFirst = false;
+      else
+        paramTypes += ", ";
+
+      parametersCasting += args[i] + " = ";
+
+      String s = "parameters[" + i + "]";
+
+      if (! types[i].isPrimitive()) {
+        paramTypes += typeName + ".class";
+        parametersCasting += "(" + typeName + ") " + s + ";";
+      }
+      else {
+        Class primitiveType = (Class) types[i].getJavaClass();
+
+        if (primitiveType == Boolean.TYPE) {
+          paramTypes += "Boolean.TYPE";
+          parametersCasting += "((Boolean) " + s + ").booleanValue();";
+        }
+        else if (primitiveType == Byte.TYPE) {
+          paramTypes += "Byte.TYPE";
+          parametersCasting += "((Byte) " + s + ").byteValue();";
+        }
+        else if (primitiveType == Character.TYPE) {
+          paramTypes += "Character.TYPE";
+          parametersCasting += "((Character) " + s + ").charValue();";
+        }
+        else if (primitiveType == Double.TYPE) {
+          paramTypes += "Double.TYPE";
+          parametersCasting += "((Double) " + s + ").doubleValue();";
+        }
+        else if (primitiveType == Float.TYPE) {
+          paramTypes += "Float.TYPE";
+          parametersCasting += "((Float) " + s + ").floatValue();";
+        }
+        else if (primitiveType == Integer.TYPE) {
+          paramTypes += "Integer.TYPE";
+          parametersCasting += "((Integer) " + s + ").intValue();";
+        }
+        else if (primitiveType == Long.TYPE) {
+          paramTypes += "Long.TYPE";
+          parametersCasting += "((Long) " + s + ").longValue();";
+        }
+        else if (primitiveType == Short.TYPE) {
+          paramTypes += "Short.TYPE";
+          parametersCasting += "((Short) " + s + ").shortValue();";
+        }
+      }
+    }
+
     out.println("javax.interceptor.InvocationContext invocationContext;");
     out.println();
 
-    out.println("invocationContext = ptr.__caucho_callInterceptors(new Object[] {" + argList + "});");
+    out.print("invocationContext = ptr.__caucho_callInterceptors(this, ");
+    out.print("new Object[] {" + argList + "}, ");
+    out.println("\"" + _method.getMethodName() + "\", new Class[] {" + paramTypes + "});");
     out.println();
 
     out.println("Object parameters[] = invocationContext.getParameters();");
     out.println();
 
-    JClass types[] = _method.getParameterTypes();
+    if (! "".equals(parametersCasting)) {
+      out.println(parametersCasting);
+      out.println();
+    }
+  }
 
-    for (int i = 0; i < args.length; i++) {
-      String typeName = types[i].getPrintName();
+  protected void generateInterceptorExceptionHandling(JavaWriter out)
+    throws IOException
+  {
+    out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
+    out.pushDepth();
 
-      out.print(args[i] + " = ");
-
-      String s = "parameters[" + i + "]";
-
-      if (! types[i].isPrimitive())
-        out.print("(" + typeName + ") " + s + ";");
-      else {
-        Class primitiveType = (Class) types[i].getJavaClass();
-
-        if (primitiveType == Boolean.TYPE)
-          out.print("((Boolean) " + s + ").booleanValue();");
-        else if (primitiveType == Byte.TYPE)
-          out.print("((Byte) " + s + ").byteValue();");
-        else if (primitiveType == Character.TYPE)
-          out.print("((Character) " + s + ").charValue();");
-        else if (primitiveType == Double.TYPE)
-          out.print("((Double) " + s + ").doubleValue();");
-        else if (primitiveType == Float.TYPE)
-          out.print("((Float) " + s + ").floatValue();");
-        else if (primitiveType == Integer.TYPE)
-          out.print("((Integer) " + s + ").intValue();");
-        else if (primitiveType == Long.TYPE)
-          out.print("((Long) " + s + ").longValue();");
-        else if (primitiveType == Short.TYPE)
-          out.print("((Short) " + s + ").shortValue();");
-      }
+    for (JClass cl : _method.getExceptionTypes()) {
+      out.println("if (e.getCause() instanceof " + cl.getName() + ")");
+      out.println("  throw (" + cl.getName() + ") e.getCause();");
     }
 
-    out.println();
+    out.println("throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
+    out.popDepth();
   }
 }

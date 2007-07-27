@@ -68,6 +68,9 @@ public class StatelessPoolChain extends SessionPoolChain {
 
     generateFilterCall(out, retVar, "ptr", args);
 
+    // ejb/0fb0
+    generateInterceptorExceptionHandling(out);
+
     out.popDepth();
     out.println("} catch (RuntimeException e) {");
     out.pushDepth();

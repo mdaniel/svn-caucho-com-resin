@@ -44,21 +44,26 @@ import java.util.logging.Logger;
 public class JndiBindProgram extends BuilderProgram
 {
   private static final Logger log
-    = Logger.getLogger(EjbInjectProgram.class.getName());
+    = Logger.getLogger(JndiBindProgram.class.getName());
   private static final L10N L
-    = new L10N(EjbInjectProgram.class);
+    = new L10N(JndiBindProgram.class);
 
   private String _jndiName;
   private String _foreignName;
   private Class _type;
 
   JndiBindProgram(String jndiName,
-		  String foreignName,
-		  Class type)
+                  String foreignName,
+                  Class type)
   {
     _jndiName = Jndi.getFullName(jndiName);
     _foreignName = Jndi.getFullName(foreignName);
     _type = type;
+  }
+
+  public String getForeignName()
+  {
+    return _foreignName;
   }
 
   public void configureImpl(NodeBuilder builder, Object bean)
@@ -68,14 +73,14 @@ public class JndiBindProgram extends BuilderProgram
       Object value = new InitialContext().lookup(_foreignName);
 
       if (value == null)
-	return;
+        return;
 
       if (_type == null) {
       }
       else if (_type.isAssignableFrom(value.getClass())) {
       }
       else
-	value = PortableRemoteObject.narrow(value, _type);
+        value = PortableRemoteObject.narrow(value, _type);
 
       Jndi.rebindDeep(_jndiName, value);
     } catch (NamingException e) {
