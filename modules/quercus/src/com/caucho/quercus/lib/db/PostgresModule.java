@@ -527,7 +527,7 @@ public class PostgresModule extends AbstractQuercusModule {
           if (value.isLongConvertible()) {
             value = LongValue.create(value.toLong());
           } else {
-            StringBuilderValue sb = new StringBuilderValue();
+            UnicodeBuilderValue sb = new UnicodeBuilderValue();
             value = sb.append("'").append(value).append("'");
           }
           break;
@@ -540,13 +540,13 @@ public class PostgresModule extends AbstractQuercusModule {
           if (value.isDoubleConvertible()) {
             value = DoubleValue.create(value.toDouble());
           } else {
-            StringBuilderValue sb = new StringBuilderValue();
+            UnicodeBuilderValue sb = new UnicodeBuilderValue();
             value = sb.append("'").append(value).append("'");
           }
           break;
 
         default:
-          StringBuilderValue sb = new StringBuilderValue();
+          UnicodeBuilderValue sb = new UnicodeBuilderValue();
           if (value.isNumberConvertible())  {
             value = sb.append(value);
           } else {
@@ -706,7 +706,7 @@ public class PostgresModule extends AbstractQuercusModule {
         ArrayValueImpl arr = (ArrayValueImpl) value;
         int count = arr.size();
 
-        StringBuilderValue sb = new StringBuilderValue();
+        UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
         LongValue currValue = LongValue.create(curr);
 
@@ -841,19 +841,19 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         return null;
 
-      BinaryBuilderValue binaryBuilder = new BinaryBuilderValue();
+      BytesBuilderValue bytesBuilder = new BytesBuilderValue();
 
       int nbytes;
       byte buffer[] = new byte[128];
       while ((nbytes = is.read(buffer, 0, 128)) > 0) {
-        binaryBuilder.append(buffer, 0, nbytes);
+        bytesBuilder.append(buffer, 0, nbytes);
       }
 
       Class cl = Class.forName("org.postgresql.util.PGbytea");
 
       Method method = cl.getDeclaredMethod("toPGString", new Class[] {byte[].class});
 
-      String s = (String) method.invoke(cl, new Object[] {binaryBuilder.toBytes()});
+      String s = (String) method.invoke(cl, new Object[] {bytesBuilder.toBytes()});
 
       return conn.realEscapeString((StringValue) StringValue.create(s));
 
@@ -2222,7 +2222,7 @@ public class PostgresModule extends AbstractQuercusModule {
 
       InputStream is = (InputStream) method.invoke(largeObject, new Object[] {});
 
-      BinaryBuilderValue binaryBuilder = new BinaryBuilderValue();
+      BytesBuilderValue bytesBuilder = new BytesBuilderValue();
 
       int nbytes;
       byte buffer[] = new byte[128];
@@ -2230,13 +2230,13 @@ public class PostgresModule extends AbstractQuercusModule {
         if (nbytes > len) {
           nbytes = len;
         }
-        binaryBuilder.append(buffer, 0, nbytes);
+        bytesBuilder.append(buffer, 0, nbytes);
         len -= nbytes;
       }
 
       is.close();
 
-      return binaryBuilder.toString();
+      return bytesBuilder.toString();
 
     } catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
@@ -2888,7 +2888,7 @@ public class PostgresModule extends AbstractQuercusModule {
       if (conn == null)
         return null;
 
-      StringBuilderValue whereClause = new StringBuilderValue();
+      UnicodeBuilderValue whereClause = new UnicodeBuilderValue();
 
       boolean isFirst = true;
 
@@ -2905,7 +2905,7 @@ public class PostgresModule extends AbstractQuercusModule {
         // pi = pi.replaceAll("\\\\", "\\\\\\\\");
       }
 
-      StringBuilderValue query = new StringBuilderValue();
+      UnicodeBuilderValue query = new UnicodeBuilderValue();
       query.append("SELECT * FROM ").append(tableName).append(" WHERE ").append(whereClause);
 
       PostgresResult result = pg_query(env, conn, query.toString());

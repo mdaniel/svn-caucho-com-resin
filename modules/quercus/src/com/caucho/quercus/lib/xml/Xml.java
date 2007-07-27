@@ -453,7 +453,7 @@ public class Xml {
       case XmlModule.XML_OPTION_SKIP_WHITE:
         return (_xmlOptionSkipWhite ? BooleanValue.TRUE : BooleanValue.FALSE);
       case XmlModule.XML_OPTION_TARGET_ENCODING:
-        return new StringValueImpl(_xmlOptionTargetEncoding);
+        return new UnicodeValueImpl(_xmlOptionTargetEncoding);
       default:
         return BooleanValue.FALSE;
     }
@@ -506,7 +506,7 @@ public class Xml {
         String aName = attrs.getLocalName(i); // Attr name
         if ("".equals(aName)) aName = attrs.getQName(i);
         if (_xmlOptionCaseFolding) aName = aName.toUpperCase();
-        result.put(new StringValueImpl(aName), new StringValueImpl(attrs.getValue(i)));
+        result.put(new UnicodeValueImpl(aName), new UnicodeValueImpl(attrs.getValue(i)));
       }
 
       return result;
@@ -532,13 +532,13 @@ public class Xml {
       if ("".equals(eName)) eName = qName;
       if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
 
-      elementArray.put(new StringValueImpl("tag"), new StringValueImpl(eName));
-      elementArray.put(new StringValueImpl("type"), new StringValueImpl("open"));
-      elementArray.put(new StringValueImpl("level"), new DoubleValue((double) _level));
+      elementArray.put(new UnicodeValueImpl("tag"), new UnicodeValueImpl(eName));
+      elementArray.put(new UnicodeValueImpl("type"), new UnicodeValueImpl("open"));
+      elementArray.put(new UnicodeValueImpl("level"), new DoubleValue((double) _level));
       _paramHashMap.put(_level, eName);
 
       if (attrs.getLength() > 0) {
-        elementArray.put(new StringValueImpl("attributes"), createAttributeArray(attrs));
+        elementArray.put(new UnicodeValueImpl("attributes"), createAttributeArray(attrs));
       }
 
       _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
@@ -562,15 +562,15 @@ public class Xml {
 
       if (_isComplete) {
         elementArray = _valueArray.get(new DoubleValue((double) _valueArrayIndex - 1));
-        elementArray.put(new StringValueImpl("type"), new StringValueImpl("complete"));
+        elementArray.put(new UnicodeValueImpl("type"), new UnicodeValueImpl("complete"));
       } else {
         elementArray = new ArrayValueImpl();
         String eName = sName; // element name
         if ("".equals(sName)) eName = qName;
         if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
-        elementArray.put(new StringValueImpl("tag"), new StringValueImpl(eName));
-        elementArray.put(new StringValueImpl("type"), new StringValueImpl("close"));
-        elementArray.put(new StringValueImpl("level"), new DoubleValue((double) _level));
+        elementArray.put(new UnicodeValueImpl("tag"), new UnicodeValueImpl(eName));
+        elementArray.put(new UnicodeValueImpl("type"), new UnicodeValueImpl("close"));
+        elementArray.put(new UnicodeValueImpl("level"), new DoubleValue((double) _level));
         _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
 
         addToIndexArrayHashMap(eName);
@@ -583,7 +583,7 @@ public class Xml {
 
     private void addToIndexArrayHashMap(String eName)
     {
-      StringValue key = new StringValueImpl(eName);
+      StringValue key = new UnicodeValueImpl(eName);
       ArrayValueImpl indexArray = _indexArrayHashMap.get(key);
 
       if (indexArray == null) {
@@ -604,19 +604,19 @@ public class Xml {
 
       if (_isOutside) {
         Value elementArray = new ArrayValueImpl();
-        elementArray.put(new StringValueImpl("tag"), new StringValueImpl(_paramHashMap.get(_level - 1)));
-        elementArray.put(new StringValueImpl("value"), new StringValueImpl(s));
-        elementArray.put(new StringValueImpl("type"), new StringValueImpl("cdata"));
-        elementArray.put(new StringValueImpl("level"), new DoubleValue((double) _level - 1));
+        elementArray.put(new UnicodeValueImpl("tag"), new UnicodeValueImpl(_paramHashMap.get(_level - 1)));
+        elementArray.put(new UnicodeValueImpl("value"), new UnicodeValueImpl(s));
+        elementArray.put(new UnicodeValueImpl("type"), new UnicodeValueImpl("cdata"));
+        elementArray.put(new UnicodeValueImpl("level"), new DoubleValue((double) _level - 1));
         _valueArray.put(new DoubleValue((double)_valueArrayIndex), elementArray);
 
-        Value indexArray = _indexArray.get(new StringValueImpl(_paramHashMap.get(_level - 1)));
+        Value indexArray = _indexArray.get(new UnicodeValueImpl(_paramHashMap.get(_level - 1)));
         indexArray.put(new DoubleValue((double) _valueArrayIndex));
 
         _valueArrayIndex++;
       } else {
         Value elementArray = _valueArray.get(new DoubleValue((double) _valueArrayIndex - 1));
-        elementArray.put(new StringValueImpl("value"), new StringValueImpl(s));
+        elementArray.put(new UnicodeValueImpl("value"), new UnicodeValueImpl(s));
       }
     }
   }
@@ -654,7 +654,7 @@ public class Xml {
       String eName = lName; // element name
       if ("".equals(eName)) eName = qName;
       if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
-      args[1] = new StringValueImpl(eName);
+      args[1] = new UnicodeValueImpl(eName);
 
       // turn attrs into an array of name, value pairs
       args[2] = new ArrayValueImpl();
@@ -662,7 +662,7 @@ public class Xml {
         String aName = attrs.getLocalName(i); // Attr name
         if ("".equals(aName)) aName = attrs.getQName(i);
         if (_xmlOptionCaseFolding) aName = aName.toUpperCase();
-        args[2].put(new StringValueImpl(aName), new StringValueImpl(attrs.getValue(i)));
+        args[2].put(new UnicodeValueImpl(aName), new UnicodeValueImpl(attrs.getValue(i)));
       }
 
       try {
@@ -695,7 +695,7 @@ public class Xml {
         if (_xmlOptionCaseFolding) eName = eName.toUpperCase();
 
         if (_endElementHandler != null)
-          _endElementHandler.call(_env, _parser, new StringValueImpl(eName));
+          _endElementHandler.call(_env, _parser, new UnicodeValueImpl(eName));
         else
           throw new Throwable("end element handler is not set");
       } catch (Throwable t) {
@@ -721,9 +721,9 @@ public class Xml {
 
       try {
         if (_characterDataHandler != null)
-          _characterDataHandler.call(_env, _parser, new StringValueImpl(s));
+          _characterDataHandler.call(_env, _parser, new UnicodeValueImpl(s));
         else if (_defaultHandler != null)
-          _defaultHandler.call(_env, _parser, new StringValueImpl(s));
+          _defaultHandler.call(_env, _parser, new UnicodeValueImpl(s));
         else
           throw new Throwable("neither character data handler nor default handler is set");
       } catch (Throwable t) {
@@ -744,7 +744,7 @@ public class Xml {
     {
       try {
         if (_processingInstructionHandler != null)
-          _processingInstructionHandler.call(_env, _parser, new StringValueImpl(target), new StringValueImpl(data));
+          _processingInstructionHandler.call(_env, _parser, new UnicodeValueImpl(target), new UnicodeValueImpl(data));
         else
           throw new Throwable("processing instruction handler is not set");
       } catch (Throwable t) {
@@ -765,7 +765,7 @@ public class Xml {
     {
       try {
         if (_startNamespaceDeclHandler != null)
-          _startNamespaceDeclHandler.call(_env, new StringValueImpl(prefix), new StringValueImpl(uri));
+          _startNamespaceDeclHandler.call(_env, new UnicodeValueImpl(prefix), new UnicodeValueImpl(uri));
         else
           throw new Throwable("start namespace decl handler is not set");
       } catch (Throwable t) {
@@ -785,7 +785,7 @@ public class Xml {
     {
       try {
         if (_endNamespaceDeclHandler != null)
-          _endNamespaceDeclHandler.call(_env, new StringValueImpl(prefix));
+          _endNamespaceDeclHandler.call(_env, new UnicodeValueImpl(prefix));
         else
           throw new Throwable("end namespace decl handler is not set");
       } catch (Throwable t) {
@@ -803,10 +803,10 @@ public class Xml {
         if (_notationDeclHandler != null)
           _notationDeclHandler.call(_env,
                                     _parser,
-                                    new StringValueImpl(name),
-                                    new StringValueImpl(""),
-                                    new StringValueImpl(systemId),
-                                    new StringValueImpl(publicId));
+                                    new UnicodeValueImpl(name),
+                                    new UnicodeValueImpl(""),
+                                    new UnicodeValueImpl(systemId),
+                                    new UnicodeValueImpl(publicId));
         else
           throw new Throwable("notation declaration handler is not set");
       } catch (Throwable t) {
@@ -833,11 +833,11 @@ public class Xml {
       Value[] args = new Value[6];
 
       args[0] = _parser;
-      args[1] = new StringValueImpl(name);
-      args[2] = new StringValueImpl("");
-      args[3] = new StringValueImpl(systemId);
-      args[4] = new StringValueImpl(publicId);
-      args[5] = new StringValueImpl(notationName);
+      args[1] = new UnicodeValueImpl(name);
+      args[2] = new UnicodeValueImpl("");
+      args[3] = new UnicodeValueImpl(systemId);
+      args[4] = new UnicodeValueImpl(publicId);
+      args[5] = new UnicodeValueImpl(notationName);
 
       try {
         if (_unparsedEntityDeclHandler != null)

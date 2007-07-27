@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib.gettext;
 
-import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.lib.gettext.expr.PluralExpr;
@@ -245,13 +245,13 @@ class POFileParser extends GettextParser
   private int readString(int token)
     throws IOException
   {
-    return readString(new StringBuilderValue(), token);
+    return readString(new UnicodeBuilderValue(), token);
   }
 
   /**
    * XXX: any other possible character escapes?
    */
-  private int readString(StringBuilderValue sb, int token)
+  private int readString(UnicodeBuilderValue sb, int token)
     throws IOException
   {
     for (int ch = read(); ch != '"'; ch = read()) {

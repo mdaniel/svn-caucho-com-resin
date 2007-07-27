@@ -35,9 +35,9 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BytesBuilderValue;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.BinaryStream;
 import com.caucho.quercus.lib.file.FileModule;
@@ -113,7 +113,7 @@ public class ZipModule extends AbstractQuercusModule {
     if (entry == null)
       return BooleanValue.FALSE;
 
-    return new StringValueImpl(entry.zip_entry_name());
+    return new UnicodeValueImpl(entry.zip_entry_name());
   }
 
   /**
@@ -183,7 +183,7 @@ public class ZipModule extends AbstractQuercusModule {
    * @return false or decompressed BinaryValue
    */
   @ReturnNullAsFalse
-  public BinaryBuilderValue zip_entry_read(Env env,
+  public BytesBuilderValue zip_entry_read(Env env,
                                            @NotNull QuercusZipEntry entry,
                                            @Optional("1024") int length)
   {

@@ -30,11 +30,9 @@
 package com.caucho.quercus.lib.date;
 
 import com.caucho.quercus.UnimplementedException;
-import com.caucho.quercus.annotation.Construct;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.Alarm;
@@ -776,7 +774,7 @@ public class DateModule extends AbstractQuercusModule {
       return new DoubleValue(((double) now) / 1e6);
     }
     else {
-      return (new StringBuilderValue()
+      return (new UnicodeBuilderValue()
 	      .append(now % 1000000L / 1e6)
 	      .append(' ')
 	      .append(now / 1000000L));

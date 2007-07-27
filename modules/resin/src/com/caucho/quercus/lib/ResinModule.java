@@ -87,7 +87,7 @@ public class ResinModule
     try {
       byte[] bytes = string.getBytes(encoding);
 
-      return new BinaryBuilderValue(bytes);
+      return new BytesBuilderValue(bytes);
     } catch (UnsupportedEncodingException e) {
 
       env.error(e);

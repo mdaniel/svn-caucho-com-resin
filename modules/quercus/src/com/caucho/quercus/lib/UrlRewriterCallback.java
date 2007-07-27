@@ -133,7 +133,7 @@ public class UrlRewriterCallback extends CallbackFunction {
     private boolean _quoted;
 
     private String _input;
-    private StringBuilderValue _output = new StringBuilderValue();
+    private UnicodeBuilderValue _output = new UnicodeBuilderValue();
 
     public Parser(String input, Env env)
     {

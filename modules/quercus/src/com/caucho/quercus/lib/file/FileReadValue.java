@@ -30,7 +30,7 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 
@@ -145,7 +145,7 @@ public class FileReadValue extends FileValue {
     // XXX: offset messed up
 
     if (_is != null)
-      return new StringValueImpl(_is.readLineNoChop());
+      return new UnicodeValueImpl(_is.readLineNoChop());
     else
       return null;
   }

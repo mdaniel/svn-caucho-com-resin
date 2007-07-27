@@ -36,7 +36,6 @@ import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.*;
 
 import javax.jms.*;
-import javax.naming.Context;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Map;
@@ -105,8 +104,8 @@ public class JMSQueue
       Set<Map.Entry<Value,Value>> entrySet = array.entrySet();
 
       for (Map.Entry<Value,Value> entry : entrySet) {
-        if (entry.getValue() instanceof BinaryValue) {
-          byte []bytes = ((BinaryValue) entry.getValue()).toBytes();
+        if (entry.getValue() instanceof BytesValue) {
+          byte []bytes = ((BytesValue) entry.getValue()).toBytes();
 
           ((MapMessage) message).setBytes(entry.getKey().toString(), bytes);
         } else {
@@ -115,11 +114,11 @@ public class JMSQueue
                                            entry.getValue().toString());
         }
       }
-    } else if (value instanceof BinaryValue) {
+    } else if (value instanceof BytesValue) {
       message = _session.createBytesMessage();
 
 
-      byte []bytes = ((BinaryValue) value).toBytes();
+      byte []bytes = ((BytesValue) value).toBytes();
 
       ((BytesMessage) message).writeBytes(bytes);
     } else if (value.isLongConvertible()) {
@@ -163,7 +162,7 @@ public class JMSQueue
 
       return objectToValue(object, env);
     } else if (message instanceof TextMessage) {
-      return new StringValueImpl(((TextMessage) message).getText());
+      return new UnicodeValueImpl(((TextMessage) message).getText());
     } else if (message instanceof StreamMessage) {
       Object object = ((StreamMessage) message).readObject();
 
@@ -171,8 +170,8 @@ public class JMSQueue
     } else if (message instanceof BytesMessage) {
       BytesMessage bytesMessage = (BytesMessage) message;
 
-      BinaryBuilderValue bb =
-        new BinaryBuilderValue((int) bytesMessage.getBodyLength());
+      BytesBuilderValue bb =
+        new BytesBuilderValue((int) bytesMessage.getBodyLength());
 
       bytesMessage.readBytes(bb.getBuffer());
       bb.setOffset((int) bytesMessage.getBodyLength());
@@ -190,7 +189,7 @@ public class JMSQueue
 
         Object object = mapMessage.getObject(name);
 
-        array.put(new StringValueImpl(name), objectToValue(object, env));
+        array.put(new UnicodeValueImpl(name), objectToValue(object, env));
       }
 
       return array;

@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib.gettext;
 
-import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeValue;
 import com.caucho.quercus.lib.gettext.expr.PluralExpr;
@@ -175,7 +175,7 @@ class MOFileParser extends GettextParser
   private UnicodeValue readOriginalString()
     throws IOException
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     for (int ch = _in.readChar(); ch > 0; ch = _in.readChar()) {
       sb.append((char)ch);
@@ -191,7 +191,7 @@ class MOFileParser extends GettextParser
     throws IOException
   {
     ArrayList<UnicodeValue> list = new ArrayList<UnicodeValue>();
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     for (; length > 0; length--) {
       int ch = _in.readChar();
@@ -201,7 +201,7 @@ class MOFileParser extends GettextParser
 
       else if (ch == 0) {
         list.add(sb);
-        sb = new StringBuilderValue();
+        sb = new UnicodeBuilderValue();
       }
       else
         break;

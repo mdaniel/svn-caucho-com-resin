@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.parser;
 
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InterpretedClassDef;
@@ -72,7 +72,7 @@ public class ClassScope extends Scope {
    */
   public void addVar(String name, Expr value)
   {
-    _cl.addValue(new StringValueImpl(name), value);
+    _cl.addValue(new UnicodeValueImpl(name), value);
   }
   
   /**
@@ -80,7 +80,7 @@ public class ClassScope extends Scope {
    */
   public void addStaticVar(String name, Expr value)
   {
-    _cl.addStaticValue(new StringValueImpl(name), value);
+    _cl.addStaticValue(new UnicodeValueImpl(name), value);
   }
   
   /**

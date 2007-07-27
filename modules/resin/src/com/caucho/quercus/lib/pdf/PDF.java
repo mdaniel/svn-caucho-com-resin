@@ -33,7 +33,7 @@ import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.TempBufferStringValue;
+import com.caucho.quercus.env.TempBufferBytesValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -167,7 +167,7 @@ public class PDF {
     if (ts == null)
       return BooleanValue.FALSE;
 
-    return new TempBufferStringValue(ts.getHead());
+    return new TempBufferBytesValue(ts.getHead());
   }
 
   /**

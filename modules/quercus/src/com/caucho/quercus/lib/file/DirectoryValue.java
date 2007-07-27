@@ -32,7 +32,7 @@ package com.caucho.quercus.lib.file;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ResourceValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Path;
 
@@ -64,7 +64,7 @@ public class DirectoryValue extends ResourceValue {
   public Value readdir()
   {
     if (_index < _list.length)
-      return new StringValueImpl(_list[_index++]);
+      return new UnicodeValueImpl(_list[_index++]);
     else
       return BooleanValue.FALSE;
   }

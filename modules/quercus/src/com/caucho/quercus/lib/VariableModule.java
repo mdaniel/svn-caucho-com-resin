@@ -204,14 +204,14 @@ public class VariableModule extends AbstractQuercusModule {
     HashMap<String,Var> map = env.getEnv();
 
     for (Map.Entry<String,Var> entry : map.entrySet()) {
-      result.append(new StringValueImpl(entry.getKey()),
+      result.append(new UnicodeValueImpl(entry.getKey()),
 		    entry.getValue().toValue());
     }
 
     HashMap<String,Var> globalMap = env.getGlobalEnv();
     if (map != globalMap) {
       for (Map.Entry<String,Var> entry : globalMap.entrySet()) {
-	result.append(new StringValueImpl(entry.getKey()),
+	result.append(new UnicodeValueImpl(entry.getKey()),
 		      entry.getValue().toValue());
       }
     }
@@ -544,7 +544,7 @@ public class VariableModule extends AbstractQuercusModule {
     if (v instanceof StringValue)
       return (StringValue) v;
     else
-      return new StringValueImpl(v.toString());
+      return new UnicodeValueImpl(v.toString());
   }
 
   /**
@@ -569,7 +569,7 @@ public class VariableModule extends AbstractQuercusModule {
         
         v.printR(env, out, 0, new IdentityHashMap<Value, String>());
         
-        return new StringValueImpl(writer.getString());
+        return new UnicodeValueImpl(writer.getString());
       }
       else {
         out = env.getOut();
@@ -620,7 +620,7 @@ public class VariableModule extends AbstractQuercusModule {
       return true;
     }
     else if ("string".equals(type)) {
-      var.set(new StringValueImpl(value.toString()));
+      var.set(new UnicodeValueImpl(value.toString()));
       return true;
     }
     else if ("int".equals(type) || "integer".equals(type)) {
@@ -691,7 +691,7 @@ public class VariableModule extends AbstractQuercusModule {
     v.varExport(sb);
 
     if (isReturn)
-      return new StringValueImpl(sb.toString());
+      return new UnicodeValueImpl(sb.toString());
     else {
       env.print(sb);
 

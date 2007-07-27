@@ -326,7 +326,7 @@ public class CurlModule
     if (curl == null)
       return BooleanValue.FALSE;
 
-    return new StringValueImpl(curl.getError());
+    return new UnicodeValueImpl(curl.getError());
   }
 
   /**
@@ -368,7 +368,7 @@ public class CurlModule
   {
     switch (option) {
       case CURLINFO_EFFECTIVE_URL:
-        return new StringValueImpl(curl.getURL());
+        return new UnicodeValueImpl(curl.getURL());
       case CURLINFO_HTTP_CODE:
         return LongValue.create(curl.getResponseCode());
       case CURLINFO_FILETIME:
@@ -409,7 +409,7 @@ public class CurlModule
         if (type == null)
           return NullValue.NULL;
 
-        return new StringValueImpl(type);
+        return new UnicodeValueImpl(type);
       default:
         env.warning(L.l("Unknown CURL getinfo option"));
     }

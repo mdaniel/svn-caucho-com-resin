@@ -87,7 +87,7 @@ public class CurlResource
 
   private StringValue _header;
   private StringValue _body;
-  private BinaryValue _postBody;
+  private BytesValue _postBody;
 
   private String _contentType;
   private int _contentLength;
@@ -401,7 +401,7 @@ public class CurlResource
   /**
    * Sets the body to POST to the server.
    */
-  public BinaryValue getPostBody()
+  public BytesValue getPostBody()
   {
     return _postBody;
   }
@@ -409,7 +409,7 @@ public class CurlResource
   /**
    * Sets the body to POST to the server.
    */
-  public void setPostBody(BinaryValue body)
+  public void setPostBody(BytesValue body)
   {
     _postBody = body;
   }
@@ -547,7 +547,7 @@ public class CurlResource
    */
   public Value getRequestProperties()
   {
-    BinaryBuilderValue bb = new BinaryBuilderValue();
+    BytesBuilderValue bb = new BytesBuilderValue();
 
     for (Map.Entry<String,String> entry: _requestProperties.entrySet()) {
       bb.appendBytes(entry.getKey());
@@ -729,7 +729,7 @@ public class CurlResource
         return BooleanValue.TRUE;
     }
     else {
-      BinaryBuilderValue bb = new BinaryBuilderValue();
+      BytesBuilderValue bb = new BytesBuilderValue();
 
       if (_isReturningHeader)
         _header.appendTo(bb);

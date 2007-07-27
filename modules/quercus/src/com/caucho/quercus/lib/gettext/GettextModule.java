@@ -74,7 +74,7 @@ public class GettextModule
                               StringValue domain,
                               StringValue codeset)
   {
-    return new StringValueImpl("UTF-16");
+    return new UnicodeValueImpl("UTF-16");
   }
 
   /**
@@ -387,7 +387,7 @@ public class GettextModule
     Object val = env.getSpecialValue("caucho.gettext_current");
 
     if (val == null)
-      return setCurrentDomain(env, new StringValueImpl("messages"));
+      return setCurrentDomain(env, new UnicodeValueImpl("messages"));
 
     return (StringValue)val;
   }
@@ -446,11 +446,11 @@ public class GettextModule
       return formatBinary(env, msg, args);
   }
 
-  private static BinaryValue formatBinary(Env env,
+  private static BytesValue formatBinary(Env env,
                               StringValue msg,
                               Value []args)
   {
-    BinaryBuilderValue sb = new BinaryBuilderValue();
+    BytesBuilderValue sb = new BytesBuilderValue();
 
     int i = 0;
     int length = msg.length();
@@ -493,7 +493,7 @@ public class GettextModule
                               StringValue msg,
                               Value []args)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     int i = 0;
     int length = msg.length();

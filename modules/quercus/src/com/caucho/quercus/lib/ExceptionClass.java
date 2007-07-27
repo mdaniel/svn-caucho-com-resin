@@ -36,9 +36,9 @@ import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.ObjectValue;
-import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 
 /**
@@ -60,9 +60,9 @@ public class ExceptionClass {
     Location location = env.getLocation();
     if (location != null) {
       if (location.getFileName() != null)
-        value.putField(env, "file", new StringValueImpl(location.getFileName()));
+        value.putField(env, "file", new UnicodeValueImpl(location.getFileName()));
       else
-        value.putField(env, "file", new StringValueImpl("unknown"));
+        value.putField(env, "file", new UnicodeValueImpl("unknown"));
 
       value.putField(env, "line", new LongValue(location.getLineNumber()));
     }
@@ -77,7 +77,7 @@ public class ExceptionClass {
    */
   public static Value __toString(Env env, @This ObjectValue value)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
     
     sb.append("ExceptionClass[" + value.getName() + "]\n");
     sb.append(getMessage(env, value));
@@ -133,6 +133,6 @@ public class ExceptionClass {
    */
   public static Value getTraceAsString(Env env, @This ObjectValue obj)
   {
-    return new StringValueImpl("<trace>");
+    return new UnicodeValueImpl("<trace>");
   }
 }

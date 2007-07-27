@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib.curl;
 
-import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Env;
 
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class HttpPostRequest
   {
     super.transfer(env);
 
-    BinaryValue body = getCurlResource().getPostBody();
+    BytesValue body = getCurlResource().getPostBody();
 
     if (body == null)
       return;

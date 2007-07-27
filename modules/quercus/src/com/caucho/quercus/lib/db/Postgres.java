@@ -32,9 +32,9 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Method;
@@ -119,14 +119,14 @@ public class Postgres extends JdbcConnectionResource {
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
       env.setSpecialValue("postgres.connectErrno",new LongValue(e.getErrorCode()));
-      env.setSpecialValue("postgres.connectError", new StringValueImpl(e.getMessage()));
+      env.setSpecialValue("postgres.connectError", new UnicodeValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
       return false;
     } catch (Exception e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("postgres.connectError", new StringValueImpl(e.getMessage()));
+      env.setSpecialValue("postgres.connectError", new UnicodeValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
       return false;
@@ -226,9 +226,9 @@ public class Postgres extends JdbcConnectionResource {
    * @param str a string
    * @return the string escaped for SQL statements
    */
-  protected StringBuilderValue realEscapeString(StringValue str)
+  protected UnicodeBuilderValue realEscapeString(StringValue str)
   {
-    StringBuilderValue buf = new StringBuilderValue(str.length());
+    UnicodeBuilderValue buf = new UnicodeBuilderValue(str.length());
 
     final int strLength = str.length();
 

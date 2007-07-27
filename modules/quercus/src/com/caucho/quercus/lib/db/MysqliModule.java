@@ -171,7 +171,7 @@ public class MysqliModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
 
     // XXX: stubbed out as "latin1"
-    return new StringValueImpl("latin1");
+    return new UnicodeValueImpl("latin1");
   }
 
   /**

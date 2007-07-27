@@ -46,7 +46,7 @@ public class IconvUtility {
   private static final Logger log
     = Logger.getLogger(IconvUtility.class.getName());
 
-  public static BinaryValue decodeEncode(StringValue str,
+  public static BytesValue decodeEncode(StringValue str,
                               String inCharset,
                               String outCharset)
     throws UnsupportedEncodingException
@@ -54,7 +54,7 @@ public class IconvUtility {
     return decodeEncode(str, inCharset, outCharset, 0, Integer.MAX_VALUE);
   }
 
-  public static BinaryValue decodeEncode(StringValue str,
+  public static BytesValue decodeEncode(StringValue str,
                               String inCharset,
                               String outCharset,
                               int offset)
@@ -66,7 +66,7 @@ public class IconvUtility {
   /**
    * Decodes and encodes to specified charsets at the same time.
    */
-  public static BinaryValue decodeEncode(StringValue str,
+  public static BytesValue decodeEncode(StringValue str,
                               String inCharset,
                               String outCharset,
                               int offset,
@@ -116,7 +116,7 @@ public class IconvUtility {
       }
 
       out.flush();
-      return new TempBufferStringValue(ts.getHead());
+      return new TempBufferBytesValue(ts.getHead());
 
     } catch (IOException e) {
       throw new QuercusModuleException(e);
@@ -130,12 +130,12 @@ public class IconvUtility {
   /**
    * Returns decoded Mime header/field.
    */
-  public static BinaryValue decodeMime(Env env,
+  public static BytesValue decodeMime(Env env,
                               CharSequence word,
                               String charset)
     throws UnsupportedEncodingException
   {
-    StringValue str = new StringValueImpl(
+    StringValue str = new UnicodeValueImpl(
             MimeUtility.unfold(MimeUtility.decodeText(word.toString())));
 
     return str.toBinaryValue(env, charset);
@@ -184,7 +184,7 @@ public class IconvUtility {
     name = name.toUnicodeValue(env, inCharset);
     value = value.toUnicodeValue(env, inCharset);
 
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
     sb.append(name);
     sb.append(':');
     sb.append(' ');

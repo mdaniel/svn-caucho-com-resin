@@ -36,7 +36,6 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.lib.ArrayModule;
 import com.caucho.quercus.lib.file.BinaryOutput;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -109,7 +108,7 @@ public class StringModule extends AbstractQuercusModule {
 
     int length = source.length();
 
-    StringBuilderValue sb = new StringBuilderValue(length * 5 / 4);
+    UnicodeBuilderValue sb = new UnicodeBuilderValue(length * 5 / 4);
 
     for (int i = 0; i < length; i++) {
       char ch = source.charAt(i);
@@ -213,7 +212,7 @@ public class StringModule extends AbstractQuercusModule {
    */
   public static StringValue addslashes(StringValue source)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     int length = source.length();
     for (int i = 0; i < length; i++) {
@@ -247,7 +246,7 @@ public class StringModule extends AbstractQuercusModule {
   public static StringValue bin2hex(InputStream is)
   {
     try {
-      StringBuilderValue sb = new StringBuilderValue();
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
       int ch;
       while ((ch = is.read()) >= 0) {
@@ -393,7 +392,7 @@ v   *
 	}
       }
 
-      return new StringValueImpl(byteToChar.getConvertedString());
+      return new UnicodeValueImpl(byteToChar.getConvertedString());
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -407,7 +406,7 @@ v   *
     if (source == null || source.length() == 0)
       return BooleanValue.FALSE;
 
-    StringBuilderValue result = new StringBuilderValue();
+    UnicodeBuilderValue result = new UnicodeBuilderValue();
 
     int i = 0;
     int length = source.length();
@@ -506,7 +505,7 @@ v   *
             sb.append((char) i);
         }
 
-        return new StringValueImpl(sb.toString());
+        return new UnicodeValueImpl(sb.toString());
       }
 
     case 4:
@@ -518,7 +517,7 @@ v   *
             sb.append((char) i);
         }
 
-        return new StringValueImpl(sb.toString());
+        return new UnicodeValueImpl(sb.toString());
       }
 
     default:
@@ -652,7 +651,7 @@ v   *
       return NullValue.NULL;
     }
 
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
     boolean isFirst = true;
 
     for (ArrayValue.Entry entry = pieces.getHead();
@@ -707,7 +706,7 @@ v   *
       
       byte []digest = md.digest();
       
-      StringBuilderValue sb = new StringBuilderValue();
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
       for (int i = 0; i < digest.length; i++) {
         int d1 = (digest[i] >> 4) & 0xf;
         int d2 = (digest[i] & 0xf);
@@ -764,7 +763,7 @@ v   *
 
   private static StringValue digestToString(byte []digest)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
     for (int i = 0; i < digest.length; i++) {
       int d1 = (digest[i] >> 4) & 0xf;
       int d2 = (digest[i] & 0xf);
@@ -1305,7 +1304,7 @@ v   *
    */
   public static Value quotemeta(StringValue string)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     int len = string.length();
     for (int i = 0; i < len; i++) {
@@ -1466,21 +1465,21 @@ v   *
         Locale locale = setLocale(localeInfo, category, value.toString());
 
         if (locale != null)
-          return new StringValueImpl(locale.toString());
+          return new UnicodeValueImpl(locale.toString());
       }
     }
     else {
       Locale locale = setLocale(localeInfo, category, localeArg.toString());
 
       if (locale != null)
-        return new StringValueImpl(locale.toString());
+        return new UnicodeValueImpl(locale.toString());
     }
 
     for (int i = 0; i < fallback.length; i++) {
       Locale locale = setLocale(localeInfo, category, fallback[i].toString());
 
       if (locale != null)
-        return new StringValueImpl(locale.toString());
+        return new UnicodeValueImpl(locale.toString());
     }
 
     return BooleanValue.FALSE;
@@ -1800,7 +1799,7 @@ v   *
     if (maxLen < 0)
       maxLen = Integer.MAX_VALUE;
 
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     for (; sIndex < strlen && maxLen-- > 0; sIndex++) {
       char ch = string.charAt(sIndex);
@@ -1877,7 +1876,7 @@ v   *
       result.append('0');
     }
 
-    return new StringValueImpl(result.toString());
+    return new UnicodeValueImpl(result.toString());
   }
 
   /**
@@ -1895,7 +1894,7 @@ v   *
     
     ArrayList<PrintfSegment> segments = parsePrintfFormat(format);
 
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     for (PrintfSegment segment : segments)
       segment.apply(sb, args);
@@ -2122,7 +2121,7 @@ v   *
       break;
     }
 
-    StringValue sb = new StringBuilderValue();
+    StringValue sb = new UnicodeBuilderValue();
 
     int padStringLen = pad.length();
 
@@ -2145,7 +2144,7 @@ v   *
    */
   public static Value str_repeat(StringValue string, int count)
   {
-    StringValue sb = new StringBuilderValue();
+    StringValue sb = new UnicodeBuilderValue();
 
     for (int i = 0; i < count; i++)
       sb = sb.append(string);
@@ -2325,7 +2324,7 @@ v   *
 
     while ((next = indexOf(subject, search, head, isInsensitive)) >= head) {
       if (result == null)
-        result = new StringBuilderValue();
+        result = new UnicodeBuilderValue();
 	
       result = result.append(subject, head, next);
       result = result.append(replace);
@@ -2416,7 +2415,7 @@ v   *
       }
     }
 
-    return new StringValueImpl(sb.toString());
+    return new UnicodeValueImpl(sb.toString());
   }
 
   /**
@@ -2462,9 +2461,9 @@ v   *
       Value value;
 
       if (i + chunk <= strLen) {
-        value = new StringValueImpl(string.substring(i, i + chunk));
+        value = new UnicodeValueImpl(string.substring(i, i + chunk));
       } else {
-        value = new StringValueImpl(string.substring(i));
+        value = new UnicodeValueImpl(string.substring(i));
       }
 
       array.put(new LongValue(i), value);
@@ -2527,7 +2526,7 @@ v   *
           isBetweenWords = true;
 
           if (format > 0) {
-            StringValue word = new StringValueImpl(string.substring(lastWordStart, i));
+            StringValue word = new UnicodeValueImpl(string.substring(lastWordStart, i));
 
             if (format == 1)
               resultArray.append(word);
@@ -2677,7 +2676,7 @@ v   *
   {
     // XXX: allowTags is stubbed
 
-    StringBuilderValue result = new StringBuilderValue();
+    UnicodeBuilderValue result = new UnicodeBuilderValue();
 
     int len = string.length();
 
@@ -3091,7 +3090,7 @@ v   *
    */
   public static StringValue stripslashes(StringValue string)
   { 
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
     int len = string.length();
 
     for (int i = 0; i < len; i++) {
@@ -3138,7 +3137,7 @@ v   *
     int i = haystackLower.indexOf(needleLower);
 
     if (i >= 0)
-      return new StringValueImpl(haystack.substring(i));
+      return new UnicodeValueImpl(haystack.substring(i));
     else
       return BooleanValue.FALSE;
   }
@@ -3168,7 +3167,7 @@ v   *
     int i = haystack.lastIndexOf(needle);
 
     if (i > 0)
-      return new StringValueImpl(haystack.substring(i));
+      return new UnicodeValueImpl(haystack.substring(i));
     else
       return BooleanValue.FALSE;
   }
@@ -3179,7 +3178,7 @@ v   *
    */
   public static Value strrev(StringValue string)
   { 
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     for (int i = string.length() - 1; i >= 0; i--) {
       sb.append(string.charAt(i));
@@ -3361,7 +3360,7 @@ v   *
     int i = haystack.indexOf(needle);
 
     if (i >= 0)
-      return new StringValueImpl(haystack.substring(i));
+      return new UnicodeValueImpl(haystack.substring(i));
     else
       return BooleanValue.FALSE;
   }
@@ -3458,7 +3457,7 @@ v   *
           break;
       }
 
-      result = new StringValueImpl(string.substring(start, offset));
+      result = new UnicodeValueImpl(string.substring(start, offset));
     }
 
     env.setSpecialValue("caucho.strtok_offset", offset);
@@ -3512,7 +3511,7 @@ v   *
     for (int i = len - 1; i >= 0; i--)
       map[from.charAt(i)] = to.charAt(i);
 
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     len = string.length();
     for (int i = 0; i < len; i++) {
@@ -3548,7 +3547,7 @@ v   *
       k++;
     }
 
-    StringValue result = new StringBuilderValue();
+    StringValue result = new UnicodeBuilderValue();
     int len = string.length();
     int head = 0;
 
@@ -3750,7 +3749,7 @@ v   *
     else
       end = Math.min(start + len, strLen);
 
-    StringValue result = new StringBuilderValue();
+    StringValue result = new UnicodeBuilderValue();
 
     result = result.append(string.substring(0, start));
     result = result.append(replacement);
@@ -4029,7 +4028,7 @@ v   *
   }
 
   abstract static class PrintfSegment {
-    abstract public void apply(StringBuilderValue sb, Value []args);
+    abstract public void apply(UnicodeBuilderValue sb, Value []args);
     
     static boolean hasIndex(String format)
     {
@@ -4070,7 +4069,7 @@ v   *
       text.getChars(0, _text.length, _text, 0);
     }
 
-    public void apply(StringBuilderValue sb, Value []args)
+    public void apply(UnicodeBuilderValue sb, Value []args)
     {
       sb.append(_text, 0, _text.length);
     }
@@ -4110,7 +4109,7 @@ v   *
       }
     }
 
-    public void apply(StringBuilderValue sb, Value []args)
+    public void apply(UnicodeBuilderValue sb, Value []args)
     {
       long value;
 
@@ -4139,7 +4138,7 @@ v   *
       }
     }
 
-    public void apply(StringBuilderValue sb, Value []args)
+    public void apply(UnicodeBuilderValue sb, Value []args)
     {
       double value;
 
@@ -4204,7 +4203,7 @@ v   *
       _index = index;
     }
 
-    public void apply(StringBuilderValue sb, Value []args)
+    public void apply(UnicodeBuilderValue sb, Value []args)
     {
       sb.append(_prefix, 0, _prefix.length);
 

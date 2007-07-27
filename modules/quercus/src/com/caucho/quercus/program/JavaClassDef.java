@@ -282,7 +282,7 @@ public class JavaClassDef extends ClassDef {
     
     if (__getField != null) {
       try {
-        return __getField.call(env, obj, new StringValueImpl(name));
+        return __getField.call(env, obj, new UnicodeValueImpl(name));
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
@@ -356,7 +356,7 @@ public class JavaClassDef extends ClassDef {
     
     if (__setField != null) {
       try {
-        return __setField.call(env, obj, new StringValueImpl(name), value);
+        return __setField.call(env, obj, new UnicodeValueImpl(name), value);
       } catch (Throwable e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
         return NullValue.NULL;
@@ -485,7 +485,7 @@ public class JavaClassDef extends ClassDef {
     else if (__call != null) {
       Value []extArgs = new Value[args.length + 1];
 
-      extArgs[0] = new StringBuilderValue(name, nameLen);
+      extArgs[0] = new UnicodeBuilderValue(name, nameLen);
 
       System.arraycopy(args, 0, extArgs, 1, args.length);
       
@@ -510,7 +510,7 @@ public class JavaClassDef extends ClassDef {
     if (method != null)
       return method.call(env, obj);
     else if (__call != null)
-      return __call.call(env, obj, new StringBuilderValue(name, nameLen));
+      return __call.call(env, obj, new UnicodeBuilderValue(name, nameLen));
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
 		    _name, toMethod(name, nameLen)));
@@ -531,7 +531,7 @@ public class JavaClassDef extends ClassDef {
     if (method != null)
       return method.call(env, obj, a1);
     else if (__call != null)
-      return __call.call(env, obj, new StringBuilderValue(name, nameLen), a1);
+      return __call.call(env, obj, new UnicodeBuilderValue(name, nameLen), a1);
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
 		    _name, toMethod(name, nameLen)));
@@ -552,7 +552,7 @@ public class JavaClassDef extends ClassDef {
     if (method != null)
       return method.call(env, obj, a1, a2);
     else if (__call != null)
-      return __call.call(env, obj, new StringBuilderValue(name, nameLen),
+      return __call.call(env, obj, new UnicodeBuilderValue(name, nameLen),
                          a1, a2);
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
@@ -574,7 +574,7 @@ public class JavaClassDef extends ClassDef {
     if (method != null)
       return method.call(env, obj, a1, a2, a3);
     else if (__call != null)
-      return __call.call(env, obj, new StringBuilderValue(name, nameLen),
+      return __call.call(env, obj, new UnicodeBuilderValue(name, nameLen),
                          a1, a2, a3);
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
@@ -596,7 +596,7 @@ public class JavaClassDef extends ClassDef {
     if (method != null)
       return method.call(env, obj, a1, a2, a3, a4);
     else if (__call != null)
-      return __call.call(env, obj, new StringBuilderValue(name, nameLen),
+      return __call.call(env, obj, new UnicodeBuilderValue(name, nameLen),
                          a1, a2, a3, a4);
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
@@ -619,7 +619,7 @@ public class JavaClassDef extends ClassDef {
       return method.call(env, obj, a1, a2, a3, a4, a5);
     else if (__call != null)
       return __call.call(env, obj,
-                         new Value[] { new StringBuilderValue(name, nameLen),
+                         new Value[] { new UnicodeBuilderValue(name, nameLen),
                                        a1, a2, a3, a4, a5 });
     else {
       env.error(L.l("'{0}::{1}' is an unknown method",
@@ -1166,7 +1166,7 @@ public class JavaClassDef extends ClassDef {
 
     public Value wrap(Env env, Object obj)
     {
-      return new StringValueImpl((String) obj);
+      return new UnicodeValueImpl((String) obj);
     }
   }
   

@@ -437,15 +437,15 @@ public class UrlModule extends AbstractQuercusModule {
         }
         else if (state == ParseUrlState.PASS) {
           value.put("host", user);
-          value.put(new StringValueImpl("port"),
-                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          value.put(new UnicodeValueImpl("port"),
+                    new LongValue(new UnicodeValueImpl(sb.toString()).toLong()));
           sb.clear();
           state = ParseUrlState.PATH;
           sb.append(ch);
         }
         else if (state == ParseUrlState.PORT) {
-          value.put(new StringValueImpl("port"),
-                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          value.put(new UnicodeValueImpl("port"),
+                    new LongValue(new UnicodeValueImpl(sb.toString()).toLong()));
           sb.clear();
           state = ParseUrlState.PATH;
           sb.append(ch);
@@ -462,14 +462,14 @@ public class UrlModule extends AbstractQuercusModule {
         }
         else if (state == ParseUrlState.PASS) {
           value.put("host", user);
-          value.put(new StringValueImpl("port"),
-                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          value.put(new UnicodeValueImpl("port"),
+                    new LongValue(new UnicodeValueImpl(sb.toString()).toLong()));
           sb.clear();
           state = ParseUrlState.QUERY;
         }
         else if (state == ParseUrlState.PORT) {
-          value.put(new StringValueImpl("port"),
-                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          value.put(new UnicodeValueImpl("port"),
+                    new LongValue(new UnicodeValueImpl(sb.toString()).toLong()));
           sb.clear();
           state = ParseUrlState.QUERY;
         }
@@ -491,14 +491,14 @@ public class UrlModule extends AbstractQuercusModule {
         }
         else if (state == ParseUrlState.PASS) {
           value.put("host", user);
-          value.put(new StringValueImpl("port"),
-                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          value.put(new UnicodeValueImpl("port"),
+                    new LongValue(new UnicodeValueImpl(sb.toString()).toLong()));
           sb.clear();
           state = ParseUrlState.FRAGMENT;
         }
         else if (state == ParseUrlState.PORT) {
-          value.put(new StringValueImpl("port"),
-                    new LongValue(new StringValueImpl(sb.toString()).toLong()));
+          value.put(new UnicodeValueImpl("port"),
+                    new LongValue(new UnicodeValueImpl(sb.toString()).toLong()));
           sb.clear();
           state = ParseUrlState.FRAGMENT;
         }
@@ -531,12 +531,12 @@ public class UrlModule extends AbstractQuercusModule {
       value.put("host", sb.toString());
     else if (state == ParseUrlState.PASS) {
       value.put("host", user);
-      value.put(new StringValueImpl("port"),
-                new LongValue(new StringValueImpl(sb.toString()).toLong()));
+      value.put(new UnicodeValueImpl("port"),
+                new LongValue(new UnicodeValueImpl(sb.toString()).toLong()));
     }
     else if (state == ParseUrlState.PORT) {
-      value.put(new StringValueImpl("port"),
-                new LongValue(new StringValueImpl(sb.toString()).toLong()));
+      value.put(new UnicodeValueImpl("port"),
+                new LongValue(new UnicodeValueImpl(sb.toString()).toLong()));
     }
     else if (state == ParseUrlState.QUERY)
       value.put("query", sb.toString());
@@ -554,7 +554,7 @@ public class UrlModule extends AbstractQuercusModule {
     String result =
       httpBuildQueryImpl(env, "", formdata, numeric_prefix).toString();
 
-    return new StringValueImpl(result);
+    return new UnicodeValueImpl(result);
   }
 
   public static StringBuilder httpBuildQueryImpl(Env env, String path,
@@ -574,7 +574,7 @@ public class UrlModule extends AbstractQuercusModule {
       LinkedHashMap<Value,Value> valueMap = new LinkedHashMap<Value,Value>();
 
       for (Map.Entry<String,Value> entry : stringEntrySet)
-        valueMap.put(new StringValueImpl(entry.getKey()), entry.getValue());
+        valueMap.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
 
       entrySet = valueMap.entrySet();
     } else {
@@ -692,17 +692,17 @@ public class UrlModule extends AbstractQuercusModule {
           ArrayValue values;
 
           if (colon < 0)
-            result.put(new StringValueImpl(line.trim()));
+            result.put(new UnicodeValueImpl(line.trim()));
           else {
-            StringValueImpl key =
-              new StringValueImpl(line.substring(0, colon).trim());
+            UnicodeValueImpl key =
+              new UnicodeValueImpl(line.substring(0, colon).trim());
 
-            StringValueImpl value;
+            UnicodeValueImpl value;
 
             if (colon < line.length())
-              value = new StringValueImpl(line.substring(colon + 1).trim());
+              value = new UnicodeValueImpl(line.substring(colon + 1).trim());
             else
-              value = new StringValueImpl("");
+              value = new UnicodeValueImpl("");
 
 
             if (result.get(key) != UnsetValue.UNSET)
@@ -733,7 +733,7 @@ public class UrlModule extends AbstractQuercusModule {
           if (line.length() == 0)
             continue;
 
-          result.put(new StringValueImpl(line.trim()));
+          result.put(new UnicodeValueImpl(line.trim()));
         }
       }
 
@@ -790,8 +790,8 @@ public class UrlModule extends AbstractQuercusModule {
             }
 
             if (name != null && content != null) {
-              result.put(new StringValueImpl(name),
-                         new StringValueImpl(content));
+              result.put(new UnicodeValueImpl(name),
+                         new UnicodeValueImpl(content));
               break;
             }
           }

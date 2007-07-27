@@ -61,13 +61,13 @@ public class JsonModule
    */
   public StringValue json_encode(Env env, Value val)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     jsonEncodeImpl(env, sb, val);
     return sb;
   }
 
-  private void jsonEncodeImpl(Env env, StringBuilderValue sb, Value val)
+  private void jsonEncodeImpl(Env env, UnicodeBuilderValue sb, Value val)
   {
     if (val instanceof StringValue) {
       sb.append('"');
@@ -97,7 +97,7 @@ public class JsonModule
     }
   }
 
-  private void encodeArray(Env env, StringBuilderValue sb, ArrayValue val)
+  private void encodeArray(Env env, UnicodeBuilderValue sb, ArrayValue val)
   {
     long length = 0;
     for (Value key : val.keySet()) {
@@ -124,7 +124,7 @@ public class JsonModule
   /**
    * Encodes an associative array into a JSON object.
    */
-  private void encodeArrayToObject(Env env, StringBuilderValue sb, ArrayValue val)
+  private void encodeArrayToObject(Env env, UnicodeBuilderValue sb, ArrayValue val)
   {
       sb.append('{');
 
@@ -145,7 +145,7 @@ public class JsonModule
   /**
    * Encodes an PHP object into a JSON object.
    */
-  private void encodeObject(Env env, StringBuilderValue sb, ObjectValue val)
+  private void encodeObject(Env env, UnicodeBuilderValue sb, ObjectValue val)
   {
       sb.append('{');
 
@@ -154,7 +154,7 @@ public class JsonModule
         if (length > 0)
           sb.append(',');
 
-        jsonEncodeImpl(env, sb, new StringValueImpl(entry.getKey()));
+        jsonEncodeImpl(env, sb, new UnicodeValueImpl(entry.getKey()));
         sb.append(':');
         jsonEncodeImpl(env, sb, entry.getValue());
         length++;
@@ -166,7 +166,7 @@ public class JsonModule
   /**
    * Escapes special/control characters.
    */
-  private void encodeString(StringBuilderValue sb, StringValue val)
+  private void encodeString(UnicodeBuilderValue sb, StringValue val)
   {
     int len = val.length();
     for (int i = 0; i < len; i++) {

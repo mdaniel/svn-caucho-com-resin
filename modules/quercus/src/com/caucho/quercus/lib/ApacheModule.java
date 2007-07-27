@@ -34,7 +34,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
@@ -99,7 +99,7 @@ public class ApacheModule extends AbstractQuercusModule {
     while (e.hasMoreElements()) {
       String key = (String) e.nextElement();
 
-      result.put(new StringValueImpl(key), new StringValueImpl(req.getHeader(key)));
+      result.put(new UnicodeValueImpl(key), new UnicodeValueImpl(req.getHeader(key)));
     }
 
     return result;

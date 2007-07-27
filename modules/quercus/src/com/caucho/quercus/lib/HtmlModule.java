@@ -34,7 +34,7 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ConstArrayValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
@@ -87,10 +87,10 @@ public class HtmlModule extends AbstractQuercusModule {
       result = HTML_SPECIALCHARS_ARRAY.copy();
 
     if ((quoteStyle & ENT_HTML_QUOTE_SINGLE) != 0)
-      result.put(new StringValueImpl("'"), new StringValueImpl("&apos;"));
+      result.put(new UnicodeValueImpl("'"), new UnicodeValueImpl("&apos;"));
 
     if ((quoteStyle & ENT_HTML_QUOTE_DOUBLE) != 0)
-      result.put(new StringValueImpl("\""), new StringValueImpl("&quot;"));
+      result.put(new UnicodeValueImpl("\""), new UnicodeValueImpl("&quot;"));
 
     return result;
   }
@@ -139,7 +139,7 @@ public class HtmlModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValueImpl(sb.toString());
+    return new UnicodeValueImpl(sb.toString());
   }
 
   /**
@@ -237,7 +237,7 @@ public class HtmlModule extends AbstractQuercusModule {
       }
     }
 
-    return new StringValueImpl(sb.toString());
+    return new UnicodeValueImpl(sb.toString());
   }
 
   private static void entity(int ch, String entity)

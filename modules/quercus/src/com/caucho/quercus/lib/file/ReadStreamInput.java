@@ -142,13 +142,13 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   /**
    * Reads into a binary builder.
    */
-  public BinaryValue read(int length)
+  public BytesValue read(int length)
     throws IOException
     {
       if (_is == null)
         return null;
 
-      BinaryBuilderValue bb = new BinaryBuilderValue();
+      BytesBuilderValue bb = new BytesBuilderValue();
 
       while (length > 0) {
         bb.prepareReadBuffer();
@@ -208,7 +208,7 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
     if (_is == null)
       return null;
 
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     int ch;
 

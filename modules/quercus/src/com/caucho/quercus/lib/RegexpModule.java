@@ -140,7 +140,7 @@ public class RegexpModule
       ArrayValue regs = new ArrayValueImpl();
       regsV.set(regs);
 
-      regs.put(LongValue.ZERO, new StringValueImpl(matcher.group()));
+      regs.put(LongValue.ZERO, new UnicodeValueImpl(matcher.group()));
       int count = matcher.groupCount();
 
       for (int i = 1; i <= count; i++) {
@@ -150,7 +150,7 @@ public class RegexpModule
         if (group == null)
           value = BooleanValue.FALSE;
         else
-          value = new StringValueImpl(group);
+          value = new UnicodeValueImpl(group);
 
         regs.put(new LongValue(i), value);
       }
@@ -182,8 +182,8 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static int preg_match(Env env,
-                               BinaryValue regexp,
-                               BinaryValue subject,
+                               BytesValue regexp,
+                               BytesValue subject,
                                @Optional @Reference Value matchRef,
                                @Optional int flags,
                                @Optional int offset)
@@ -220,13 +220,13 @@ public class RegexpModule
     if (regs != null) {
       if (isOffsetCapture) {
         ArrayValueImpl part = new ArrayValueImpl();
-        part.append(new StringValueImpl(matcher.group()));
+        part.append(new UnicodeValueImpl(matcher.group()));
         part.append(new LongValue(matcher.start()));
 
         regs.put(LongValue.ZERO, part);
       }
       else
-        regs.put(LongValue.ZERO, new StringValueImpl(matcher.group()));
+        regs.put(LongValue.ZERO, new UnicodeValueImpl(matcher.group()));
 
       int count = matcher.groupCount();
 
@@ -249,7 +249,7 @@ public class RegexpModule
           }
 
           ArrayValueImpl part = new ArrayValueImpl();
-          part.append(new StringValueImpl(group));
+          part.append(new UnicodeValueImpl(group));
           part.append(new LongValue(matcher.start(i)));
 
           Value name = pcrePattern.get(i);
@@ -265,7 +265,7 @@ public class RegexpModule
             regs.put(new LongValue(j), StringValue.EMPTY);
           }
 
-          StringValue match = new StringValueImpl(group);
+          StringValue match = new UnicodeValueImpl(group);
           
           Value name = pcrePattern.get(i);
           if (name != null)
@@ -287,8 +287,8 @@ public class RegexpModule
    * @param env the calling environment
    */
   public static int preg_match_all(Env env,
-                                   BinaryValue regexp,
-                                   BinaryValue subject,
+                                   BytesValue regexp,
+                                   BytesValue subject,
                                    @Reference Value matchRef,
                                    @Optional("PREG_PATTERN_ORDER") int flags,
                                    @Optional int offset)
@@ -357,7 +357,7 @@ public class RegexpModule
    */
   public static int pregMatchAllPatternOrder(Env env,
                                              PCREPattern pcrePattern,
-                                             BinaryValue subject,
+                                             BytesValue subject,
                                              ArrayValue matches,
                                              int flags,
                                              int offset)
@@ -427,7 +427,7 @@ public class RegexpModule
    */
   private static int pregMatchAllSetOrder(Env env,
 					  PCREPattern pattern,
-					  BinaryValue subject,
+					  BytesValue subject,
 					  ArrayValue matches,
 					  int flags,
 					  int offset)
@@ -659,7 +659,7 @@ public class RegexpModule
 
     Matcher matcher = pattern.matcher(subject);
 
-    StringValue result = new StringBuilderValue();
+    StringValue result = new UnicodeBuilderValue();
     int tail = 0;
 
     while (matcher.find() && numberOfMatches < limit) {
@@ -678,7 +678,7 @@ public class RegexpModule
         String group = matcher.group(i);
 
         if (group != null)
-          regs.put(new StringValueImpl(group));
+          regs.put(new UnicodeValueImpl(group));
         else
           regs.put(StringValue.EMPTY);
       }
@@ -799,14 +799,14 @@ public class RegexpModule
 
     Matcher matcher = pattern.matcher(subject);
 
-    StringBuilderValue result = null;
+    UnicodeBuilderValue result = null;
     int tail = 0;
 
     int replacementLen = replacementProgram.size();
 
     while (matcher.find() && limit-- > 0) {
       if (result == null)
-	result = new StringBuilderValue();
+	result = new UnicodeBuilderValue();
       
       // Increment countV (note: if countV != null, then it should be a Var)
       if ((countV != null) && (countV instanceof Var)) {
@@ -820,7 +820,7 @@ public class RegexpModule
       // if isEval then append replacement evaluated as PHP code
       // else append replacement string
       if (isEval) {
-        StringBuilderValue evalString = new StringBuilderValue();
+        UnicodeBuilderValue evalString = new UnicodeBuilderValue();
 
         for (int i = 0; i < replacementLen; i++) {
           Replacement replacement = replacementProgram.get(i);
@@ -2005,7 +2005,7 @@ public class RegexpModule
   }
 
   static class Replacement {
-    void eval(StringBuilderValue sb, StringValue subject, Matcher matcher)
+    void eval(UnicodeBuilderValue sb, StringValue subject, Matcher matcher)
     {
     }
 
@@ -2029,7 +2029,7 @@ public class RegexpModule
       text.getChars(0, length, _text, 0);
     }
 
-    void eval(StringBuilderValue sb, StringValue subject, Matcher matcher)
+    void eval(UnicodeBuilderValue sb, StringValue subject, Matcher matcher)
     {
       sb.append(_text, 0, _text.length);
     }
@@ -2060,7 +2060,7 @@ public class RegexpModule
       _group = group;
     }
 
-    void eval(StringBuilderValue sb, StringValue subject, Matcher matcher)
+    void eval(UnicodeBuilderValue sb, StringValue subject, Matcher matcher)
     {
       if (_group <= matcher.groupCount())
         sb.append(subject.substring(matcher.start(_group),
@@ -2083,7 +2083,7 @@ public class RegexpModule
       _group = group;
     }
 
-    void eval(StringBuilderValue sb, StringValue subject, Matcher matcher)
+    void eval(UnicodeBuilderValue sb, StringValue subject, Matcher matcher)
     {
       if (_group <= matcher.groupCount()) {
 	StringValue group = subject.substring(matcher.start(_group),
@@ -2211,7 +2211,7 @@ public class RegexpModule
 
     private HashMap<Integer,StringValue> _patternMap;
 
-    PCREPattern(Env env, BinaryValue regexp)
+    PCREPattern(Env env, BytesValue regexp)
     {
       _flags = regexpFlags(regexp);
 
@@ -2270,7 +2270,7 @@ public class RegexpModule
         return _patternMap.get(Integer.valueOf(group));
     }
 
-    public Matcher matcher(Env env, BinaryValue value)
+    public Matcher matcher(Env env, BytesValue value)
     {
       if (_regexp == null || _pattern == null)
         return null;
@@ -2283,7 +2283,7 @@ public class RegexpModule
 
     private StringValue cleanRegexpAndAddGroups(StringValue pattern)
     {
-      StringBuilderValue sb = new StringBuilderValue();
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
       int length = pattern.length();
       
       int groupCount = 1;

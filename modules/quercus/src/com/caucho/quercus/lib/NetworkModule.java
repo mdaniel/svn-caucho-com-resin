@@ -37,7 +37,6 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.SocketReadWrite;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
 import javax.naming.NameNotFoundException;
@@ -148,7 +147,7 @@ public class NetworkModule extends AbstractQuercusModule {
       log.log(Level.FINE, e.toString(), e);
 
       if (errstr != null)
-        errstr.set(new StringValueImpl(e.toString()));
+        errstr.set(new UnicodeValueImpl(e.toString()));
 
       return null;
     }
@@ -248,7 +247,7 @@ public class NetworkModule extends AbstractQuercusModule {
     for (int k = 0; k < ip.length; k++) {
       String currentIPString = ip[k].getHostAddress();
 
-      StringValue currentIP = new StringValueImpl((currentIPString));
+      StringValue currentIP = new UnicodeValueImpl((currentIPString));
 
       ipArray.append(currentIP);
     }

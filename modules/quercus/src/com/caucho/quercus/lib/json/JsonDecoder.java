@@ -308,7 +308,7 @@ class JsonDecoder {
    */
   private Value decodeString(Env env)
   {
-    StringBuilderValue sbv = new StringBuilderValue();
+    UnicodeBuilderValue sbv = new UnicodeBuilderValue();
 
     for (int ch = read(); ch >= 0; ch = read()) {
 

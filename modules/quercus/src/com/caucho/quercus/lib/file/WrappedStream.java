@@ -42,22 +42,22 @@ import java.io.UnsupportedEncodingException;
  * A stream that has its operations mediated by a Quercus object.
  */
 public class WrappedStream implements BinaryInput, BinaryOutput {
-  private static final StringBuilderValue STREAM_CLOSE
-    = new StringBuilderValue("stream_close");
-  private static final StringBuilderValue STREAM_EOF
-    = new StringBuilderValue("stream_eof");
-  private static final StringBuilderValue STREAM_FLUSH
-    = new StringBuilderValue("stream_flush");
-  private static final StringBuilderValue STREAM_OPEN
-    = new StringBuilderValue("stream_open");
-  private static final StringBuilderValue STREAM_READ
-    = new StringBuilderValue("stream_read");
-  private static final StringBuilderValue STREAM_SEEK
-    = new StringBuilderValue("stream_seek");
-  private static final StringBuilderValue STREAM_TELL
-    = new StringBuilderValue("stream_tell");
-  private static final StringBuilderValue STREAM_WRITE
-    = new StringBuilderValue("stream_write");
+  private static final UnicodeBuilderValue STREAM_CLOSE
+    = new UnicodeBuilderValue("stream_close");
+  private static final UnicodeBuilderValue STREAM_EOF
+    = new UnicodeBuilderValue("stream_eof");
+  private static final UnicodeBuilderValue STREAM_FLUSH
+    = new UnicodeBuilderValue("stream_flush");
+  private static final UnicodeBuilderValue STREAM_OPEN
+    = new UnicodeBuilderValue("stream_open");
+  private static final UnicodeBuilderValue STREAM_READ
+    = new UnicodeBuilderValue("stream_read");
+  private static final UnicodeBuilderValue STREAM_SEEK
+    = new UnicodeBuilderValue("stream_seek");
+  private static final UnicodeBuilderValue STREAM_TELL
+    = new UnicodeBuilderValue("stream_tell");
+  private static final UnicodeBuilderValue STREAM_WRITE
+    = new UnicodeBuilderValue("stream_write");
   
   private byte []printBuffer = new byte[1];
 
@@ -189,7 +189,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
   /**
    * Reads a Binary string.
    */
-  public BinaryValue read(int length)
+  public BytesValue read(int length)
     throws IOException
   {
     Value output = _wrapper.callMethod(_env, STREAM_READ, 
@@ -221,7 +221,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
   public StringValue readLine(long length)
     throws IOException
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     int ch;
 
@@ -255,7 +255,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
   public void write(byte []buffer, int offset, int length)
     throws IOException
   {
-    BinaryBuilderValue bb = new BinaryBuilderValue(buffer, offset, length);
+    BytesBuilderValue bb = new BytesBuilderValue(buffer, offset, length);
 
     Value output = _wrapper.callMethod(_env, STREAM_WRITE, bb);
 

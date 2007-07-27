@@ -30,7 +30,7 @@ package com.caucho.quercus.lib.zip;
 
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BytesBuilderValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.util.L10N;
@@ -120,13 +120,13 @@ public class QuercusZipEntry {
    * @return decompressed BinaryValue or FALSE on error
    */
   @ReturnNullAsFalse
-  public BinaryBuilderValue zip_entry_read(Env env,
+  public BytesBuilderValue zip_entry_read(Env env,
                                            @Optional("1024") int length)
   {
     if (_in == null)
       return null;
 
-    BinaryBuilderValue bbv = new BinaryBuilderValue();
+    BytesBuilderValue bbv = new BytesBuilderValue();
     TempBuffer tb = TempBuffer.allocate();
     byte[] buffer = tb.getBuffer();
 

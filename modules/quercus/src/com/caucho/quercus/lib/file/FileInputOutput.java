@@ -29,10 +29,10 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BytesBuilderValue;
+import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Encoding;
@@ -207,10 +207,10 @@ public class FileInputOutput extends AbstractBinaryOutput
   /**
    * Reads a Binary string.
    */
-  public BinaryValue read(int length)
+  public BytesValue read(int length)
     throws IOException
   {
-    BinaryBuilderValue bb = new BinaryBuilderValue();
+    BytesBuilderValue bb = new BytesBuilderValue();
 
     while (length > 0) {
       bb.prepareReadBuffer();
@@ -257,7 +257,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   public StringValue readLine(long length)
     throws IOException
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     int ch;
 

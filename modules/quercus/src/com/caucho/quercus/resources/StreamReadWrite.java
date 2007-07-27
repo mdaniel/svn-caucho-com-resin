@@ -32,7 +32,7 @@ package com.caucho.quercus.resources;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -115,9 +115,9 @@ public class StreamReadWrite extends StreamResource {
     throws IOException
   {
     if (_is != null)
-      return new StringValueImpl(_is.readLineNoChop());
+      return new UnicodeValueImpl(_is.readLineNoChop());
     else
-      return StringValueImpl.EMPTY;
+      return UnicodeValueImpl.EMPTY;
   }
 
   /**

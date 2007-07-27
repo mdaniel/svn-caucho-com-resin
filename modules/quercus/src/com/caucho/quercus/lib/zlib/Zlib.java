@@ -215,7 +215,7 @@ public class Zlib {
       int ch = _in.read();
 
       if (ch >= 0)
-	return new StringValueImpl(Character.toString((char) ch));
+	return new UnicodeValueImpl(Character.toString((char) ch));
       else
 	return BooleanValue.FALSE;
     } catch (IOException e) {
@@ -237,7 +237,7 @@ public class Zlib {
     if (_in == null)
       return null;
 
-    StringBuilderValue sbv = new StringBuilderValue();
+    UnicodeBuilderValue sbv = new UnicodeBuilderValue();
     int readChar;
 
     try {
@@ -296,9 +296,9 @@ public class Zlib {
    * @throws IOException
    * @throws DataFormatException
    */
-  public BinaryValue gzread(int length)
+  public BytesValue gzread(int length)
   {
-    BinaryBuilderValue sbv = new BinaryBuilderValue();
+    BytesBuilderValue sbv = new BytesBuilderValue();
     int readChar;
 
     if (_in == null)
@@ -356,7 +356,7 @@ public class Zlib {
       if (_in == null)
         return null;
 
-      StringBuilderValue sbv = new StringBuilderValue();
+      UnicodeBuilderValue sbv = new UnicodeBuilderValue();
       int readChar;
       for (int i=0; i < length; i++) {
         readChar = _in.read();

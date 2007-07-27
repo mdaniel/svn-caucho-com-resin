@@ -165,7 +165,7 @@ public final class UnserializeReader {
           obj = env.createObject();
           obj.putField(env,
                    "__Quercus_Incomplete_Class_name",
-                   new StringValueImpl(className));
+                   new UnicodeValueImpl(className));
         }
 	
         for (int i = 0; i < count; i++) {
@@ -219,14 +219,14 @@ public final class UnserializeReader {
             StringKey key = new StringKey(_buffer, _index, len);
 
             String s = readString(len);
-            v = new InternStringValue(s);
+            v = new InternUnicodeValue(s);
 
             _keyCache.put(key, v);
           }
         }
         else {
           String s = readString(len);
-          v = new StringValueImpl(s);
+          v = new UnicodeValueImpl(s);
         }
 
         expect('"');
@@ -319,7 +319,7 @@ public final class UnserializeReader {
 
   public final StringValue readStringValue(int len)
   {
-    StringValue s = new StringBuilderValue(_buffer, _index, len, true);
+    StringValue s = new UnicodeBuilderValue(_buffer, _index, len, true);
 
     _index += len;
 

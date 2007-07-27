@@ -32,10 +32,10 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BytesBuilderValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -879,12 +879,12 @@ public class OracleOciLob {
     }
   }
 
-  private BinaryBuilderValue readInternalBlob(Env env,
+  private BytesBuilderValue readInternalBlob(Env env,
                                               long length)
   {
     try {
 
-      BinaryBuilderValue contents = new BinaryBuilderValue();
+      BytesBuilderValue contents = new BytesBuilderValue();
 
       Blob blob = (Blob) _lob;
       InputStream is = blob.getBinaryStream();
@@ -912,12 +912,12 @@ public class OracleOciLob {
     }
   }
 
-  private StringBuilderValue readInternalClob(Env env,
+  private UnicodeBuilderValue readInternalClob(Env env,
                                               long length)
   {
     try {
 
-      StringBuilderValue contents = new StringBuilderValue();
+      UnicodeBuilderValue contents = new UnicodeBuilderValue();
 
       Clob clob = (Clob) _lob;
       Reader reader = clob.getCharacterStream();

@@ -453,7 +453,7 @@ public class DOMDocument
   }
 
   // XXX: also can be called statically, returns a DOMDocument in that case
-  public boolean loadXML(Env env, BinaryValue source, @Optional Value options)
+  public boolean loadXML(Env env, BytesValue source, @Optional Value options)
   {
     if (options != null)
       env.stub(L.l("`{0}' is ignored", "options"));
@@ -594,7 +594,7 @@ public class DOMDocument
       return null;
     }
 
-    TempBufferStringValue result = new TempBufferStringValue(tempStream.getHead());
+    TempBufferBytesValue result = new TempBufferBytesValue(tempStream.getHead());
 
     tempStream.discard();
 

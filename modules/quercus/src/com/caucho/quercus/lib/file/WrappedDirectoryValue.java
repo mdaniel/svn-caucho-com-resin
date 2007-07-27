@@ -35,14 +35,14 @@ import com.caucho.quercus.env.*;
  * Represents a PHP directory listing
  */
 public class WrappedDirectoryValue extends DirectoryValue {
-  private static final StringBuilderValue DIR_CLOSEDIR
-    = new StringBuilderValue("dir_closedir");
-  private static final StringBuilderValue DIR_OPENDIR
-    = new StringBuilderValue("dir_opendir");
-  private static final StringBuilderValue DIR_READDIR
-    = new StringBuilderValue("dir_readdir");
-  private static final StringBuilderValue DIR_REWINDDIR
-    = new StringBuilderValue("dir_rewinddir");
+  private static final UnicodeBuilderValue DIR_CLOSEDIR
+    = new UnicodeBuilderValue("dir_closedir");
+  private static final UnicodeBuilderValue DIR_OPENDIR
+    = new UnicodeBuilderValue("dir_opendir");
+  private static final UnicodeBuilderValue DIR_READDIR
+    = new UnicodeBuilderValue("dir_readdir");
+  private static final UnicodeBuilderValue DIR_REWINDDIR
+    = new UnicodeBuilderValue("dir_rewinddir");
   
   private Env _env;
   private Value _wrapper;

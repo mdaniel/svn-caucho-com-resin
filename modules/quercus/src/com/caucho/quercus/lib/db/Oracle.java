@@ -32,7 +32,7 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.util.L10N;
 
 import java.sql.Connection;
@@ -110,14 +110,14 @@ public class Oracle extends JdbcConnectionResource {
     } catch (SQLException e) {
       env.warning("A link to the server could not be established. " + e.toString());
       env.setSpecialValue("oracle.connectErrno",new LongValue(e.getErrorCode()));
-      env.setSpecialValue("oracle.connectError", new StringValueImpl(e.getMessage()));
+      env.setSpecialValue("oracle.connectError", new UnicodeValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
 
       return false;
     } catch (Exception e) {
       env.warning("A link to the server could not be established. " + e.toString());
-      env.setSpecialValue("oracle.connectError", new StringValueImpl(e.getMessage()));
+      env.setSpecialValue("oracle.connectError", new UnicodeValueImpl(e.getMessage()));
 
       log.log(Level.FINE, e.toString(), e);
       return false;

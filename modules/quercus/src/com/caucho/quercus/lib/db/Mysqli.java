@@ -36,11 +36,10 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.ResultSet;
@@ -148,12 +147,12 @@ public class Mysqli extends JdbcConnectionResource {
       env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()));
 
       env.setSpecialValue("mysqli.connectErrno",new LongValue(e.getErrorCode()));
-      env.setSpecialValue("mysqli.connectError", new StringValueImpl(e.getMessage()));
+      env.setSpecialValue("mysqli.connectError", new UnicodeValueImpl(e.getMessage()));
 
       return false;
     } catch (Exception e) {
       env.warning(L.l("A link to the server could not be established.\n  url={0}\n  driver={1}\n  {2}", url, driver, e.toString()));
-      env.setSpecialValue("mysqli.connectError", new StringValueImpl(e.toString()));
+      env.setSpecialValue("mysqli.connectError", new UnicodeValueImpl(e.toString()));
 
       return false;
     }
@@ -673,7 +672,7 @@ public class Mysqli extends JdbcConnectionResource {
           str.append(rs.getString(2));
         }
 
-        return new StringValueImpl(str.toString());
+        return new UnicodeValueImpl(str.toString());
       } finally {
         if (stmt != null)
           stmt.close();

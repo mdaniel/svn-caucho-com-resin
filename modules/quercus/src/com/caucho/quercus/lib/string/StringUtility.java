@@ -37,7 +37,7 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Post;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.lib.ArrayModule;
 import com.caucho.util.L10N;
@@ -118,9 +118,9 @@ public class StringUtility
               }
               if (closeBracketIndex > openBracketIndex + 1) {
                 String index = key.substring(key.indexOf('[') + 1,key.indexOf(']'));
-                v.put(new StringValueImpl(index), new StringValueImpl(value));
+                v.put(new UnicodeValueImpl(index), new UnicodeValueImpl(value));
               } else {
-                v.put(new StringValueImpl(value));
+                v.put(new UnicodeValueImpl(value));
               }
             } else {
               Post.addFormValue(result, key, new String[] { value }, isMagicQuotes);
@@ -190,13 +190,13 @@ public class StringUtility
     
     int p;
 
-    Value value = new StringValueImpl(valueStr);
+    Value value = new UnicodeValueImpl(valueStr);
 
     if ((p = key.indexOf('[')) > 0 && key.endsWith("]")) {
       String index = key.substring(p + 1, key.length() - 1);
       key = key.substring(0, p);
 
-      Value keyValue = new StringValueImpl(key);
+      Value keyValue = new UnicodeValueImpl(key);
 
       Value part;
 
@@ -211,7 +211,7 @@ public class StringUtility
       if (index.equals(""))
         part.put(value);
       else
-        part.put(new StringValueImpl(index), value);
+        part.put(new UnicodeValueImpl(index), value);
 
       if (array != null)
         array.put(keyValue, part);
@@ -220,7 +220,7 @@ public class StringUtility
     }
     else {
       if (array != null)
-        array.put(new StringValueImpl(key), value);
+        array.put(new UnicodeValueImpl(key), value);
       else
         env.setVar(key, value);
     }

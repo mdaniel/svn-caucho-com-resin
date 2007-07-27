@@ -32,7 +32,6 @@ package com.caucho.quercus.lib;
 import com.caucho.quercus.Quercus;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
@@ -43,8 +42,6 @@ import com.caucho.quercus.lib.file.BinaryStream;
 import com.caucho.quercus.lib.file.FileInput;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.file.FileOutput;
-import com.caucho.quercus.lib.file.PopenInput;
-import com.caucho.quercus.lib.file.PopenOutput;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.L10N;
@@ -176,7 +173,7 @@ public class MiscModule extends AbstractQuercusModule {
     try {
       ArrayList<PackSegment> segments = parsePackFormat(format);
 
-      BinaryBuilderValue bb = new BinaryBuilderValue();
+      BytesBuilderValue bb = new BytesBuilderValue();
 
       int i = 0;
       for (PackSegment segment : segments) {
@@ -291,14 +288,14 @@ public class MiscModule extends AbstractQuercusModule {
             line = sb.toString();
             sb.setLength(0);
             if (output != null)
-              output.put(new StringValueImpl(line));
+              output.put(new UnicodeValueImpl(line));
           }
           hasCr = false;
         }
         else if (ch == '\r') {
           line = sb.toString();
           sb.setLength(0);
-          output.put(new StringValueImpl(line));
+          output.put(new UnicodeValueImpl(line));
           hasCr = true;
         }
         else
@@ -308,7 +305,7 @@ public class MiscModule extends AbstractQuercusModule {
       if (sb.length() > 0) {
         line = sb.toString();
         sb.setLength(0);
-        output.put(new StringValueImpl(line));
+        output.put(new UnicodeValueImpl(line));
       }
 
       is.close();
@@ -355,7 +352,7 @@ public class MiscModule extends AbstractQuercusModule {
       OutputStream os = process.getOutputStream();
       os.close();
 
-      StringBuilderValue sb = new StringBuilderValue();
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
       int ch;
       while ((ch = is.read()) >= 0) {
@@ -760,18 +757,18 @@ public class MiscModule extends AbstractQuercusModule {
 
     if (regExpMatched == null)
       capabilities.put(
-          new StringValueImpl("browser_name_regex"), patternMatched);
+          new UnicodeValueImpl("browser_name_regex"), patternMatched);
     else
       capabilities.put("browser_name_regex", regExpMatched);
     capabilities.put(
-        new StringValueImpl("browser_name_pattern"), patternMatched);
+        new UnicodeValueImpl("browser_name_pattern"), patternMatched);
 
     addBrowserCapabilities(env, browsers,
-        capabilities.get(new StringValueImpl("parent")), capabilities);
+        capabilities.get(new UnicodeValueImpl("parent")), capabilities);
 
     if (return_array) {
       ArrayValue array = new ArrayValueImpl();
-      array.put(new StringValueImpl(user_agent), capabilities);
+      array.put(new UnicodeValueImpl(user_agent), capabilities);
       return array;
     }
 
@@ -797,7 +794,7 @@ public class MiscModule extends AbstractQuercusModule {
       return;
 
     ArrayValue browserCapabilities = field.toArrayValue(env);
-    StringValue parentString = new StringValueImpl("parent");
+    StringValue parentString = new UnicodeValueImpl("parent");
     
     for (Map.Entry<Value,Value> entry : browserCapabilities.entrySet()) {
       Value key = entry.getKey();
@@ -1068,7 +1065,7 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   abstract static class PackSegment {
-    abstract public int pack(Env env, BinaryBuilderValue bb,
+    abstract public int pack(Env env, BytesBuilderValue bb,
 			      int i, Value []args)
       throws IOException;
     
@@ -1088,12 +1085,12 @@ public class MiscModule extends AbstractQuercusModule {
 
     SpacePackSegment(String name, int length, byte pad)
     {
-      _name = new StringValueImpl(name);
+      _name = new UnicodeValueImpl(name);
       _length = length;
       _pad = pad;
     }
     
-    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
       throws IOException
     {
       Value arg;
@@ -1129,7 +1126,7 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
-      BinaryBuilderValue bb = new BinaryBuilderValue();
+      BytesBuilderValue bb = new BytesBuilderValue();
       for (int i = 0; i < _length; i++) {
 	int ch = is.read();
 
@@ -1156,11 +1153,11 @@ public class MiscModule extends AbstractQuercusModule {
 
     HexPackSegment(String name, int length)
     {
-      _name = new StringValueImpl(name);
+      _name = new UnicodeValueImpl(name);
       _length = length;
     }
     
-    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
       throws IOException
     {
       Value arg;
@@ -1216,7 +1213,7 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
-      StringBuilderValue sb = new StringBuilderValue();
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
       for (int i = _length / 2 - 1; i >= 0; i--) {
 	int ch = is.read();
 
@@ -1239,11 +1236,11 @@ public class MiscModule extends AbstractQuercusModule {
 
     RevHexPackSegment(String name, int length)
     {
-      _name = new StringValueImpl(name);
+      _name = new UnicodeValueImpl(name);
       _length = length;
     }
     
-    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
       throws IOException
     {
       Value arg;
@@ -1299,7 +1296,7 @@ public class MiscModule extends AbstractQuercusModule {
     public void unpack(Env env, ArrayValue result, InputStream is)
       throws IOException
     {
-      StringBuilderValue sb = new StringBuilderValue();
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
       for (int i = _length / 2 - 1; i >= 0; i--) {
 	int ch = is.read();
 
@@ -1333,7 +1330,7 @@ public class MiscModule extends AbstractQuercusModule {
       _isSigned = isSigned;
     }
     
-    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -1370,9 +1367,9 @@ public class MiscModule extends AbstractQuercusModule {
 	if (_name == "")
 	  key = LongValue.create(j);
 	else if (_length == 1)
-	  key = new StringValueImpl(_name);
+	  key = new UnicodeValueImpl(_name);
 	else {
-	  StringBuilderValue sb = new StringBuilderValue();
+	  UnicodeBuilderValue sb = new UnicodeBuilderValue();
 	  sb.append(_name);
 	  sb.append(j);
 
@@ -1425,7 +1422,7 @@ public class MiscModule extends AbstractQuercusModule {
       _bytes = bytes;
     }
     
-    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -1462,9 +1459,9 @@ public class MiscModule extends AbstractQuercusModule {
 	if (_name == "")
 	  key = LongValue.create(j);
 	else if (_length == 1)
-	  key = new StringValueImpl(_name);
+	  key = new UnicodeValueImpl(_name);
 	else {
-	  StringBuilderValue sb = new StringBuilderValue();
+	  UnicodeBuilderValue sb = new UnicodeBuilderValue();
 	  sb.append(_name);
 	  sb.append(j);
 
@@ -1499,7 +1496,7 @@ public class MiscModule extends AbstractQuercusModule {
       _length = length;
     }
     
-    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -1537,9 +1534,9 @@ public class MiscModule extends AbstractQuercusModule {
 	if (_name == "")
 	  key = LongValue.create(j);
 	else if (_length == 1)
-	  key = new StringValueImpl(_name);
+	  key = new UnicodeValueImpl(_name);
 	else {
-	  StringBuilderValue sb = new StringBuilderValue();
+	  UnicodeBuilderValue sb = new UnicodeBuilderValue();
 	  sb.append(_name);
 	  sb.append(j);
 
@@ -1574,7 +1571,7 @@ public class MiscModule extends AbstractQuercusModule {
       _length = length;
     }
     
-    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -1612,9 +1609,9 @@ public class MiscModule extends AbstractQuercusModule {
 	if (_name == "")
 	  key = LongValue.create(j);
 	else if (_length == 1)
-	  key = new StringValueImpl(_name);
+	  key = new UnicodeValueImpl(_name);
 	else {
-	  StringBuilderValue sb = new StringBuilderValue();
+	  UnicodeBuilderValue sb = new UnicodeBuilderValue();
 	  sb.append(_name);
 	  sb.append(j);
 
@@ -1653,7 +1650,7 @@ public class MiscModule extends AbstractQuercusModule {
       _length = length;
     }
     
-    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
       throws IOException
     {
       for (int j = 0; j < _length; j++) {
@@ -1687,7 +1684,7 @@ public class MiscModule extends AbstractQuercusModule {
       _length = length;
     }
     
-    public int pack(Env env, BinaryBuilderValue bb, int i, Value []args)
+    public int pack(Env env, BytesBuilderValue bb, int i, Value []args)
       throws IOException
     {
       while (bb.length() < _length) {

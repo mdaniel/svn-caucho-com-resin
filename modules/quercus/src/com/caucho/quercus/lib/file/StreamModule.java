@@ -274,7 +274,7 @@ public class StreamModule extends AbstractQuercusModule {
 
       // XXX: handle offset and maxlen
 
-      return new StringValueImpl(sb.toString());
+      return new UnicodeValueImpl(sb.toString());
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
@@ -331,7 +331,7 @@ public class StreamModule extends AbstractQuercusModule {
     env.stub("stream_get_meta_data");
     
     ArrayValue array = new ArrayValueImpl();    
-    array.put(new StringValueImpl("timed_out"), BooleanValue.FALSE);
+    array.put(new UnicodeValueImpl("timed_out"), BooleanValue.FALSE);
     
     return array;
   }
@@ -343,8 +343,8 @@ public class StreamModule extends AbstractQuercusModule {
   {
     ArrayValue value = new ArrayValueImpl();
 
-    value.append(new StringValueImpl("tcp"));
-    value.append(new StringValueImpl("udp"));
+    value.append(new UnicodeValueImpl("tcp"));
+    value.append(new UnicodeValueImpl("udp"));
 
     return value;
   }
@@ -474,10 +474,10 @@ public class StreamModule extends AbstractQuercusModule {
   }
 
   static {
-    _wrapperArray.append(new StringValueImpl("quercus"));
-    _wrapperArray.append(new StringValueImpl("file"));
-    _wrapperArray.append(new StringValueImpl("http"));
-    _wrapperArray.append(new StringValueImpl("ftp"));
+    _wrapperArray.append(new UnicodeValueImpl("quercus"));
+    _wrapperArray.append(new UnicodeValueImpl("file"));
+    _wrapperArray.append(new UnicodeValueImpl("http"));
+    _wrapperArray.append(new UnicodeValueImpl("ftp"));
   }
 
   static {

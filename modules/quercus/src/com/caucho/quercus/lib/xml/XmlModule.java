@@ -37,7 +37,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
@@ -105,7 +105,7 @@ public class XmlModule extends AbstractQuercusModule {
   {
     // XXX: need to make a marker for the string
 
-    return new StringValueImpl(str);
+    return new UnicodeValueImpl(str);
   }
 
   /**
@@ -115,7 +115,7 @@ public class XmlModule extends AbstractQuercusModule {
   {
     // XXX: need to make a marker for the string
 
-    return new StringValueImpl(str);
+    return new UnicodeValueImpl(str);
   }
 
   /**

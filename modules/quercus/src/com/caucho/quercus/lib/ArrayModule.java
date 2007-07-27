@@ -165,7 +165,7 @@ public class ArrayModule
         else
           key = key.toLowerCase();
 
-        newArray.put(new StringValueImpl(key), entry.getValue());
+        newArray.put(new UnicodeValueImpl(key), entry.getValue());
       }
       else
         newArray.put(keyValue, entry.getValue());

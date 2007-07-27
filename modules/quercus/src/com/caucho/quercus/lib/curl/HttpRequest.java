@@ -30,8 +30,8 @@
 package com.caucho.quercus.lib.curl;
 
 import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BytesBuilderValue;
+import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
@@ -169,8 +169,8 @@ public class HttpRequest
   {
     _curl.setResponseCode(_conn.getResponseCode());
 
-    _curl.setHeader(getHeader(new BinaryBuilderValue()));
-    _curl.setBody(getBody(new BinaryBuilderValue()));
+    _curl.setHeader(getHeader(new BytesBuilderValue()));
+    _curl.setBody(getBody(new BytesBuilderValue()));
 
     _curl.setContentLength(_conn.getContentLength());
 
@@ -270,7 +270,7 @@ public class HttpRequest
   /**
    * Returns the server response header.
    */
-  private final BinaryValue getHeader(BinaryBuilderValue bb)
+  private final BytesValue getHeader(BytesBuilderValue bb)
   {
     // Append server response to the very top
     bb.appendBytes(_conn.getHeaderField(0));
@@ -295,7 +295,7 @@ public class HttpRequest
   /**
    * Returns the server response body.
    */
-  private final StringValue getBody(BinaryBuilderValue bb)
+  private final StringValue getBody(BytesBuilderValue bb)
     throws SocketTimeoutException, IOException
   {
     InputStream in;

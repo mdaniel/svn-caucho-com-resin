@@ -31,12 +31,11 @@ package com.caucho.quercus.lib;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BytesBuilderValue;
+import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
@@ -140,7 +139,7 @@ public class MhashModule extends AbstractQuercusModule {
       _highestOrdinal = ordinal;
   }
 
-  public Value mhash(int hash, BinaryValue data, @Optional String key)
+  public Value mhash(int hash, BytesValue data, @Optional String key)
   {
     if (key.length() > 0)
       throw new UnsupportedOperationException("key"); // XXX:
@@ -160,7 +159,7 @@ public class MhashModule extends AbstractQuercusModule {
 
     byte[] result = messageDigest.digest(data.toBytes());
 
-    return new BinaryBuilderValue(result);
+    return new BytesBuilderValue(result);
   }
 
   /**
@@ -188,7 +187,7 @@ public class MhashModule extends AbstractQuercusModule {
     if (algorithm == null)
       return BooleanValue.FALSE;
     else
-      return new StringValueImpl(algorithm.getName());
+      return new UnicodeValueImpl(algorithm.getName());
   }
 
   // XXX: public String mhash_keygen_s2k(int hash, String password, String salt, int bytes)

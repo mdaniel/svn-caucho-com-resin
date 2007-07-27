@@ -54,7 +54,7 @@ public class ZlibProtocolWrapper extends ProtocolWrapper {
     ArrayValue components = 
       (ArrayValue) UrlModule.parse_url(env, path.toString());
 
-    Value pathComponent = components.get(new StringValueImpl("path"));
+    Value pathComponent = components.get(new UnicodeValueImpl("path"));
     
     if (pathComponent == UnsetValue.UNSET) {
       log.info(L.l("no path component found in '{0}'", path.toString()));
