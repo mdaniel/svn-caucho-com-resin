@@ -32,7 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 
 /**
@@ -71,7 +71,7 @@ public class ToStringExpr extends UnaryExpr {
     if (value instanceof StringValue)
       return value;
     else
-      return new StringValueImpl(value.toString());
+      return new UnicodeValueImpl(value.toString());
   }
 
   public String toString()

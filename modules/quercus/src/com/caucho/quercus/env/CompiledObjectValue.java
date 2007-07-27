@@ -49,7 +49,7 @@ import java.util.Set;
 public class CompiledObjectValue extends ObjectValue
   implements Serializable
 {
-  private static final StringValue TO_STRING = new StringValueImpl("__toString");
+  private static final StringValue TO_STRING = new UnicodeValueImpl("__toString");
   private static final Value []NULL_FIELDS = new Value[0];
 
   private QuercusClass _cl;
@@ -337,7 +337,7 @@ public class CompiledObjectValue extends ObjectValue
    */
   public Value putField(String key, String value)
   {
-    return putField(null, key, new StringValueImpl(value));
+    return putField(null, key, new UnicodeValueImpl(value));
   }
 
   /**
@@ -688,7 +688,7 @@ public class CompiledObjectValue extends ObjectValue
     if (fun != null)
       return fun.callMethod(env, this, new Expr[0]).toString(env);
     else
-      return new StringBuilderValue().append(_cl.getName()).append("[]");
+      return new UnicodeBuilderValue().append(_cl.getName()).append("[]");
   }
 
   /**
@@ -708,7 +708,7 @@ public class CompiledObjectValue extends ObjectValue
     ArrayValue array = new ArrayValueImpl();
 
     for (Map.Entry<String,Value> entry : entrySet()) {
-      array.put(new StringValueImpl(entry.getKey()), entry.getValue());
+      array.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
     }
 
     return array;
@@ -842,7 +842,7 @@ public class CompiledObjectValue extends ObjectValue
 
       putField(env,
                "__Quercus_Class_Definition_Not_Found",
-               new StringValueImpl(name));
+               new UnicodeValueImpl(name));
     }
   }
 }

@@ -30,7 +30,6 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.Quercus;
-import com.caucho.quercus.QuercusRuntimeException;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -42,7 +41,8 @@ import java.io.Serializable;
 /**
  * Represents a PHP string value.
  */
-public class StringBuilderValue extends UnicodeValue
+public class UnicodeBuilderValue
+  extends UnicodeValue
   implements Serializable
 {
   private char []_buffer;
@@ -51,12 +51,12 @@ public class StringBuilderValue extends UnicodeValue
 
   private String _value;
 
-  public StringBuilderValue()
+  public UnicodeBuilderValue()
   {
     _buffer = new char[128];
   }
 
-  public StringBuilderValue(int capacity)
+  public UnicodeBuilderValue(int capacity)
   {
     if (capacity < 64)
       capacity = 64;
@@ -64,7 +64,7 @@ public class StringBuilderValue extends UnicodeValue
     _buffer = new char[capacity];
   }
 
-  public StringBuilderValue(String value)
+  public UnicodeBuilderValue(String value)
   {
     if (value == null)
       value = "";
@@ -80,7 +80,7 @@ public class StringBuilderValue extends UnicodeValue
     _value = value;
   }
 
-  public StringBuilderValue(String value, int minLength)
+  public UnicodeBuilderValue(String value, int minLength)
   {
     if (value == null)
       value = "";
@@ -98,7 +98,7 @@ public class StringBuilderValue extends UnicodeValue
     value.getChars(0, _length, _buffer, 0);
   }
 
-  public StringBuilderValue(char []buffer, int offset, int length)
+  public UnicodeBuilderValue(char []buffer, int offset, int length)
   {
     int newCapacity;
 
@@ -115,24 +115,24 @@ public class StringBuilderValue extends UnicodeValue
     System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
-  private StringBuilderValue(char []buffer, int offset, int length,
+  private UnicodeBuilderValue(char []buffer, int offset, int length,
                              String copy)
   {
     _buffer = buffer;
     _length = length;
   }
 
-  public StringBuilderValue(char []buffer)
+  public UnicodeBuilderValue(char []buffer)
   {
     this(buffer, 0, buffer.length);
   }
 
-  public StringBuilderValue(char []buffer, int length)
+  public UnicodeBuilderValue(char []buffer, int length)
   {
     this(buffer, 0, length);
   }
 
-  public StringBuilderValue(char []buffer, int offset, int length,
+  public UnicodeBuilderValue(char []buffer, int offset, int length,
                             boolean isExact)
   {
     _buffer = new char[length];
@@ -141,7 +141,7 @@ public class StringBuilderValue extends UnicodeValue
     System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
-  public StringBuilderValue(Character []buffer)
+  public UnicodeBuilderValue(Character []buffer)
   {
     int length = buffer.length;
     
@@ -172,7 +172,7 @@ public class StringBuilderValue extends UnicodeValue
   /**
    * Interns the string.
    */
-  public InternStringValue intern(Quercus quercus)
+  public InternUnicodeValue intern(Quercus quercus)
   {
     return quercus.intern(toString());
   }
@@ -422,11 +422,11 @@ public class StringBuilderValue extends UnicodeValue
   public StringValue toStringBuilder()
   {
     if (_isCopy)
-      return new StringBuilderValue(_buffer, 0, _length);
+      return new UnicodeBuilderValue(_buffer, 0, _length);
     else {
       _isCopy = true;
       
-      return new StringBuilderValue(_buffer, 0, _length, "copy");
+      return new UnicodeBuilderValue(_buffer, 0, _length, "copy");
     }
   }
 
@@ -434,7 +434,7 @@ public class StringBuilderValue extends UnicodeValue
    * Append to a string builder.
    */
   @Override
-  public void appendTo(StringBuilderValue sb)
+  public void appendTo(UnicodeBuilderValue sb)
   {
     sb.append(_buffer, 0, _length);
   }
@@ -516,7 +516,7 @@ public class StringBuilderValue extends UnicodeValue
     int len = _length;
 
     if (index < 0 || len <= index)
-      return UnsetStringValue.UNSET;
+      return UnsetUnicodeValue.UNSET;
     else
       return StringValue.create(_buffer[(int) index]);
   }
@@ -535,7 +535,7 @@ public class StringBuilderValue extends UnicodeValue
     if (index < 0 || len <= index)
       return this;
     else {
-      StringBuilderValue sb = new StringBuilderValue(_buffer, 0, (int) index);
+      UnicodeBuilderValue sb = new UnicodeBuilderValue(_buffer, 0, (int) index);
       sb.append(value);
       sb.append(_buffer, (int) (index + 1), (int) (len - index - 1));
 
@@ -583,7 +583,7 @@ public class StringBuilderValue extends UnicodeValue
     
     System.arraycopy(_buffer, start, newBuffer, 0, end - start);
 		     
-    return new StringBuilderValue(newBuffer, 0, end - start);
+    return new UnicodeBuilderValue(newBuffer, 0, end - start);
   }
 
   //
@@ -824,8 +824,8 @@ public class StringBuilderValue extends UnicodeValue
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
 
-    if (buf instanceof StringBuilderValue) {
-      StringBuilderValue sb = (StringBuilderValue) buf;
+    if (buf instanceof UnicodeBuilderValue) {
+      UnicodeBuilderValue sb = (UnicodeBuilderValue) buf;
       
       System.arraycopy(sb._buffer, head, _buffer, _length, tail - head);
 
@@ -842,7 +842,7 @@ public class StringBuilderValue extends UnicodeValue
    * Append a Java buffer to the value.
    */
   @Override
-  public final StringValue append(StringBuilderValue sb, int head, int tail)
+  public final StringValue append(UnicodeBuilderValue sb, int head, int tail)
   {
     _value = null;
     
@@ -921,8 +921,8 @@ public class StringBuilderValue extends UnicodeValue
   {
     if (this == o)
       return true;
-    else if (o instanceof StringBuilderValue) {
-      StringBuilderValue s = (StringBuilderValue) o;
+    else if (o instanceof UnicodeBuilderValue) {
+      UnicodeBuilderValue s = (UnicodeBuilderValue) o;
 
       int aLength = _length;
       int bLength = s._length;

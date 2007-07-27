@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Map;
 
 /**
@@ -140,7 +139,7 @@ public class Post {
           value.append((char) ch);
         }
 
-        addFormValue(post, name, new StringValueImpl(value.toString()), null, addSlashesToValues);
+        addFormValue(post, name, new UnicodeValueImpl(value.toString()), null, addSlashesToValues);
       }
       else {
         Path tmpPath = env.getUploadDirectory().createTempFile("php", "tmp");
@@ -182,7 +181,7 @@ public class Post {
       name = name.substring(0, p);
     }
 
-    StringValue nameValue = new StringValueImpl(name);
+    StringValue nameValue = new UnicodeValueImpl(name);
     Value v = files.get(nameValue).toValue();
     ArrayValue entry = null;
     if (v instanceof ArrayValue)
@@ -203,7 +202,7 @@ public class Post {
     else
       error = FileModule.UPLOAD_ERR_OK;
 
-    addFormValue(entry, "name" + index, new StringValueImpl(fileName),
+    addFormValue(entry, "name" + index, new UnicodeValueImpl(fileName),
             null, addSlashesToValues);
 
     long size;
@@ -218,13 +217,13 @@ public class Post {
     }
 
     if (mimeType != null) {
-      addFormValue(entry, "type" + index, new StringValueImpl(mimeType),
+      addFormValue(entry, "type" + index, new UnicodeValueImpl(mimeType),
               null, addSlashesToValues);
 
       entry.put("type", mimeType);
     }
 
-    addFormValue(entry, "tmp_name" + index, new StringValueImpl(tmpName),
+    addFormValue(entry, "tmp_name" + index, new UnicodeValueImpl(tmpName),
             null, addSlashesToValues);
 
     addFormValue(entry, "error" + index, new LongValue(error),
@@ -242,7 +241,7 @@ public class Post {
                                   boolean addSlashesToValues)
   {
     // php/081b
-    Value value = new StringValueImpl(formValueList[formValueList.length - 1]);
+    Value value = new UnicodeValueImpl(formValueList[formValueList.length - 1]);
 
     addFormValue(array, key,
                  value,
@@ -268,7 +267,7 @@ public class Post {
       if (p > 0) {
 	key = key.substring(0, p);
 
-	keyValue = new StringValueImpl(key);
+	keyValue = new UnicodeValueImpl(key);
 	existingValue = array.get(keyValue);
 
 	if (existingValue == null || ! existingValue.isset()) {
@@ -292,7 +291,7 @@ public class Post {
           array.put(existingValue);
         }
         else {
-          keyValue = new StringValueImpl(key);
+          keyValue = new UnicodeValueImpl(key);
           existingValue = array.get(keyValue);
 
           if (existingValue == null || ! existingValue.isset()) {
@@ -319,7 +318,7 @@ public class Post {
       if (index.equals("")) {
         if (formValueList != null) {
           for (int i = 0; i < formValueList.length; i++) {
-            put(array, null, new StringValueImpl(formValueList[i]), addSlashesToValues);
+            put(array, null, new UnicodeValueImpl(formValueList[i]), addSlashesToValues);
           }
         }
         else
@@ -328,10 +327,10 @@ public class Post {
       else if ('0' <= index.charAt(0) && index.charAt(0) <= '9')
         put(array, new LongValue(StringValue.toLong(index)), formValue, addSlashesToValues);
       else
-        put(array, new StringValueImpl(index), formValue, addSlashesToValues);
+        put(array, new UnicodeValueImpl(index), formValue, addSlashesToValues);
     }
     else {
-      put(array, new StringValueImpl(key), formValue, addSlashesToValues);
+      put(array, new UnicodeValueImpl(key), formValue, addSlashesToValues);
     }
   }
 

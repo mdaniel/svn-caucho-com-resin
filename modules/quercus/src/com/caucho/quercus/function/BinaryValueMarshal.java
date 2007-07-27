@@ -29,9 +29,9 @@
 
 package com.caucho.quercus.function;
 
-import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
@@ -65,12 +65,12 @@ public class BinaryValueMarshal extends Marshal
 
   public Value unmarshal(Env env, Object value)
   {
-    if (value instanceof BinaryValue)
-      return (BinaryValue) value;
+    if (value instanceof BytesValue)
+      return (BytesValue) value;
     else if (value instanceof Value)
       return ((Value) value).toBinaryValue(env);
     else
-      return new StringValueImpl(String.valueOf(value));
+      return new UnicodeValueImpl(String.valueOf(value));
   }
   
   @Override
@@ -89,6 +89,6 @@ public class BinaryValueMarshal extends Marshal
   @Override
   public Class getExpectedClass()
   {
-    return BinaryValue.class;
+    return BytesValue.class;
   }
 }

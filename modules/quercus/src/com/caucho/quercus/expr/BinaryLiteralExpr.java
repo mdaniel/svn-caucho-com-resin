@@ -30,8 +30,8 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.BinaryBuilderValue;
-import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BytesBuilderValue;
+import com.caucho.quercus.env.BytesValue;
 
 /**
  * Represents a PHP string literal expression.
@@ -40,10 +40,10 @@ public class BinaryLiteralExpr extends StringLiteralExpr
 {
   public BinaryLiteralExpr(Location location, byte[] bytes)
   {
-    super(location, new BinaryBuilderValue(bytes));
+    super(location, new BytesBuilderValue(bytes));
   }
 
-  public BinaryLiteralExpr(Location location, BinaryValue value)
+  public BinaryLiteralExpr(Location location, BytesValue value)
   {
     super(location, value);
   }
@@ -53,7 +53,7 @@ public class BinaryLiteralExpr extends StringLiteralExpr
     this(Location.UNKNOWN, bytes);
   }
 
-  public BinaryLiteralExpr(BinaryValue value)
+  public BinaryLiteralExpr(BytesValue value)
   {
     this(Location.UNKNOWN, value);
   }

@@ -34,7 +34,8 @@ import java.io.*;
 /**
  * Represents a 8-bit binary builder
  */
-public class BinaryBuilderValue extends BinaryValue
+public class BytesBuilderValue
+  extends BytesValue
   implements Serializable
 {
   private byte []_buffer;
@@ -42,12 +43,12 @@ public class BinaryBuilderValue extends BinaryValue
 
   private String _value;
 
-  public BinaryBuilderValue()
+  public BytesBuilderValue()
   {
     _buffer = new byte[128];
   }
 
-  public BinaryBuilderValue(int capacity)
+  public BytesBuilderValue(int capacity)
   {
     if (capacity < 64)
       capacity = 128;
@@ -57,7 +58,7 @@ public class BinaryBuilderValue extends BinaryValue
     _buffer = new byte[capacity];
   }
 
-  public BinaryBuilderValue(byte []buffer, int offset, int length)
+  public BytesBuilderValue(byte []buffer, int offset, int length)
   {
     _buffer = new byte[length];
     _length = length;
@@ -65,12 +66,12 @@ public class BinaryBuilderValue extends BinaryValue
     System.arraycopy(buffer, offset, _buffer, 0, length);
   }
 
-  public BinaryBuilderValue(byte []buffer)
+  public BytesBuilderValue(byte []buffer)
   {
     this(buffer, 0, buffer.length);
   }
   
-  public BinaryBuilderValue(Byte []buffer)
+  public BytesBuilderValue(Byte []buffer)
   {
     int length = buffer.length;
     
@@ -82,12 +83,12 @@ public class BinaryBuilderValue extends BinaryValue
     }
   }
 
-  public BinaryBuilderValue(String value)
+  public BytesBuilderValue(String value)
   {
     this(value.getBytes());
   }
 
-  public BinaryBuilderValue(String value, boolean isBytes)
+  public BytesBuilderValue(String value, boolean isBytes)
   {
     int length = value.length();
     
@@ -333,13 +334,13 @@ public class BinaryBuilderValue extends BinaryValue
   @Override
   public StringValue toStringBuilder()
   {
-    return new BinaryBuilderValue(_buffer, 0, _length);
+    return new BytesBuilderValue(_buffer, 0, _length);
   }
   
   /**
    * Append to a string builder.
    */
-  public void appendTo(BinaryBuilderValue bb)
+  public void appendTo(BytesBuilderValue bb)
   {
     bb.append(_buffer, 0, _length);
   }
@@ -419,7 +420,7 @@ public class BinaryBuilderValue extends BinaryValue
     int len = _length;
 
     if (index < 0 || len <= index)
-      return UnsetStringValue.UNSET;
+      return UnsetUnicodeValue.UNSET;
     else
       return StringValue.create((char) (_buffer[(int) index] & 0xff));
   }
@@ -479,7 +480,7 @@ public class BinaryBuilderValue extends BinaryValue
     
     System.arraycopy(_buffer, start, newBuffer, 0, end - start);
 		     
-    return new BinaryBuilderValue(newBuffer, 0, end - start);
+    return new BytesBuilderValue(newBuffer, 0, end - start);
   }
 
   //
@@ -517,7 +518,7 @@ public class BinaryBuilderValue extends BinaryValue
   @Override
   public final StringValue append(String s)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     appendTo(sb);
     sb.append(s);
@@ -531,7 +532,7 @@ public class BinaryBuilderValue extends BinaryValue
   @Override
   public final StringValue append(String s, int start, int end)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     appendTo(sb);
     sb.append(s, start, end);
@@ -545,7 +546,7 @@ public class BinaryBuilderValue extends BinaryValue
   @Override
   public final StringValue append(char ch)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     appendTo(sb);
     sb.append(ch);
@@ -559,7 +560,7 @@ public class BinaryBuilderValue extends BinaryValue
   @Override
   public final StringValue append(char []buf, int offset, int length)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     appendTo(sb);
     sb.append(buf, offset, length);
@@ -578,8 +579,8 @@ public class BinaryBuilderValue extends BinaryValue
     if (_buffer.length < _length + length)
       ensureCapacity(_length + length);
 
-    if (buf instanceof BinaryBuilderValue) {
-      BinaryBuilderValue sb = (BinaryBuilderValue) buf;
+    if (buf instanceof BytesBuilderValue) {
+      BytesBuilderValue sb = (BytesBuilderValue) buf;
       
       System.arraycopy(sb._buffer, head, _buffer, _length, tail - head);
 
@@ -588,7 +589,7 @@ public class BinaryBuilderValue extends BinaryValue
       return this;
     }
     else {
-      StringBuilderValue sb = new StringBuilderValue();
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
       appendTo(sb);
       sb.append(buf, head, tail);
@@ -601,7 +602,7 @@ public class BinaryBuilderValue extends BinaryValue
    * Append a Java buffer to the value.
    */
   // @Override
-  public final StringValue append(BinaryBuilderValue sb, int head, int tail)
+  public final StringValue append(BytesBuilderValue sb, int head, int tail)
   {
     int length = tail - head;
     
@@ -630,7 +631,7 @@ public class BinaryBuilderValue extends BinaryValue
     }
     else if (v.isUnicode()) {
       // php/033c
-      StringBuilderValue sb = new StringBuilderValue();
+      UnicodeBuilderValue sb = new UnicodeBuilderValue();
       
       appendTo(sb);
       v.appendTo(sb);
@@ -641,7 +642,7 @@ public class BinaryBuilderValue extends BinaryValue
       return v.toStringBuilder();
     else {
       // php/033a
-      BinaryBuilderValue bb = new BinaryBuilderValue();
+      BytesBuilderValue bb = new BytesBuilderValue();
 
       appendTo(bb);
       v.appendTo(bb);
@@ -827,8 +828,8 @@ public class BinaryBuilderValue extends BinaryValue
   
   public boolean equals(Object o)
   {
-    if (o instanceof BinaryBuilderValue) {
-      BinaryBuilderValue value = (BinaryBuilderValue) o;
+    if (o instanceof BytesBuilderValue) {
+      BytesBuilderValue value = (BytesBuilderValue) o;
 
       int length = _length;
       

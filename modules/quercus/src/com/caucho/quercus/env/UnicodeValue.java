@@ -29,10 +29,34 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.vfs.WriteStream;
+
+import java.util.IdentityHashMap;
+import java.io.IOException;
+
 /**
  * Represents a 16-bit unicode string value.
  */
 abstract public class UnicodeValue extends StringValue {
+
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    int length = length();
+
+    out.print("unicode(");
+    out.print(length);
+    out.print(") \"");
+
+    for (int i = 0; i < length; i++)
+      out.print(charAt(i));
+
+    out.print("\"");
+  }
+
   /**
    * Convert to a unicode value.
    */
@@ -59,7 +83,7 @@ abstract public class UnicodeValue extends StringValue {
   @Override
   public StringValue toStringBuilder()
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     sb.append(this);
 

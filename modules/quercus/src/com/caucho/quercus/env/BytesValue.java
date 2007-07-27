@@ -42,15 +42,16 @@ import java.util.IdentityHashMap;
 /**
  * Represents a 8-bit binary string value.
  */
-abstract public class BinaryValue extends StringValue
+abstract public class BytesValue
+  extends StringValue
 {
-  public static final StringValue EMPTY = new BinaryBuilderValue();
+  public static final StringValue EMPTY = new BytesBuilderValue();
 
   /**
    * Convert to a binary value.
    */
   @Override
-  public BinaryValue toBinaryValue(Env env)
+  public BytesValue toBinaryValue(Env env)
   {
     return this;
   }
@@ -92,6 +93,23 @@ abstract public class BinaryValue extends StringValue
                           IdentityHashMap<Value, String> valueSet)
     throws IOException
   {
+    /**
+     * XXX: s/b:
+    int length = length();
+
+    out.print("string(");
+    out.print(length);
+    out.print(") \"");
+
+    for (int i = 0; i < length; i++)
+      out.print(charAt(i));
+
+    out.print("\"");
+     */
+
+    /**
+     * XXX: old, should be moved to BinaryBuidlerValue
+     * */
     int length = length();
     
     out.print("binary(" + length() + ") \"");
@@ -100,9 +118,9 @@ abstract public class BinaryValue extends StringValue
       char ch = charAt(i);
 
       if (0x20 <= ch && ch < 0x7f)
-	out.print(charAt(i));
+	out.print(ch);
       else if (ch == '\r' || ch == '\n' || ch == '\t')
-	out.print(charAt(i));
+	out.print(ch);
       else
 	out.print("\\x" + Integer.toHexString(ch >> 4) + Integer.toHexString(ch % 16));
     }
@@ -138,7 +156,7 @@ abstract public class BinaryValue extends StringValue
   @Override
   public StringValue toStringBuilder()
   {
-    BinaryBuilderValue bb = new BinaryBuilderValue();
+    BytesBuilderValue bb = new BytesBuilderValue();
     
     bb.append(this);
     
@@ -152,7 +170,7 @@ abstract public class BinaryValue extends StringValue
    * @param charset ignored since BinaryValue has no set encoding
    */
   @Override
-  public BinaryValue toBinaryValue(Env env, String charset)
+  public BytesValue toBinaryValue(Env env, String charset)
   {
     return this;
   }
@@ -165,7 +183,7 @@ abstract public class BinaryValue extends StringValue
   @Override
   public UnicodeValue toUnicodeValue(Env env)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     appendTo(sb);
 
@@ -175,7 +193,7 @@ abstract public class BinaryValue extends StringValue
   /**
    * Append to a string builder.
    */
-  public void appendTo(StringBuilderValue sb)
+  public void appendTo(UnicodeBuilderValue sb)
   {
     if (length() == 0)
       return;

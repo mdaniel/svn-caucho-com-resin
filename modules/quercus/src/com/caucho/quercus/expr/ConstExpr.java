@@ -31,7 +31,7 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 
 /**
@@ -71,7 +71,7 @@ public class ConstExpr extends Expr {
     Value value = env.getConstant(_var);
 
     if (value == null)
-      value = new StringValueImpl(_var);
+      value = new UnicodeValueImpl(_var);
 
     return value;
   }

@@ -30,7 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -59,7 +59,7 @@ public class ToBinaryExpr extends ToStringExpr {
   {
     Value value = _expr.eval(env).toValue();
 
-    if (value instanceof BinaryValue)
+    if (value instanceof BytesValue)
       return value;
     else
       return value.toBinaryValue(env);

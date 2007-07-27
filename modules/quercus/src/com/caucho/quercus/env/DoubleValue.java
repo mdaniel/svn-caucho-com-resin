@@ -269,7 +269,7 @@ public class DoubleValue extends NumberValue
    * Append to a string builder.
    */
   @Override
-  public void appendTo(StringBuilderValue sb)
+  public void appendTo(UnicodeBuilderValue sb)
   {
     sb.append(toString());
   }
@@ -278,7 +278,7 @@ public class DoubleValue extends NumberValue
    * Append to a binary builder.
    */
   @Override
-  public void appendTo(BinaryBuilderValue sb)
+  public void appendTo(BytesBuilderValue sb)
   {
     sb.append(toString());
   }

@@ -208,7 +208,7 @@ public class QuercusClass {
   {
     _fieldNames.add(name);
     _fieldMap.put(name, index);
-    _fieldInitMap.put(new StringBuilderValue(name), initExpr);
+    _fieldInitMap.put(new UnicodeBuilderValue(name), initExpr);
   }
 
   /**
@@ -469,7 +469,7 @@ public class QuercusClass {
   public Value getField(Env env, Value qThis, String field)
   {
     if (_get != null)
-      return _get.callMethod(env, qThis, new StringBuilderValue(field));
+      return _get.callMethod(env, qThis, new UnicodeBuilderValue(field));
     else
       return UnsetValue.UNSET;
   }
@@ -480,7 +480,7 @@ public class QuercusClass {
   public void setField(Env env, Value qThis, String field, Value value)
   {
     if (_set != null)
-      _set.callMethod(env, qThis, new StringBuilderValue(field), value);
+      _set.callMethod(env, qThis, new UnicodeBuilderValue(field), value);
   }
 
   /**
@@ -605,7 +605,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new StringBuilderValue(name, nameLen),
+				  new UnicodeBuilderValue(name, nameLen),
 				  new ArrayValueImpl(args));
     }
     else
@@ -626,7 +626,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new StringBuilderValue(name, nameLen),
+				  new UnicodeBuilderValue(name, nameLen),
 				  new ArrayValueImpl());
     }
     else
@@ -648,7 +648,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new StringBuilderValue(name, nameLen),
+				  new UnicodeBuilderValue(name, nameLen),
 				  new ArrayValueImpl()
 				  .append(a1));
     }
@@ -671,7 +671,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new StringBuilderValue(name, nameLen),
+				  new UnicodeBuilderValue(name, nameLen),
 				  new ArrayValueImpl()
 				  .append(a1)
 				  .append(a2));
@@ -695,7 +695,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new StringBuilderValue(name, nameLen),
+				  new UnicodeBuilderValue(name, nameLen),
 				  new ArrayValueImpl()
 				  .append(a1)
 				  .append(a2)
@@ -720,7 +720,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new StringBuilderValue(name, nameLen),
+				  new UnicodeBuilderValue(name, nameLen),
 				  new ArrayValueImpl()
 				  .append(a1)
 				  .append(a2)
@@ -746,7 +746,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethod(env,
 				  thisValue,
-				  new StringBuilderValue(name, nameLen),
+				  new UnicodeBuilderValue(name, nameLen),
 				  new ArrayValueImpl()
 				  .append(a1)
 				  .append(a2)
@@ -785,7 +785,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new StringBuilderValue(name, nameLen),
+                                     new UnicodeBuilderValue(name, nameLen),
                                      new ArrayValueImpl(args));
     }
     else
@@ -806,7 +806,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new StringBuilderValue(name, nameLen),
+                                     new UnicodeBuilderValue(name, nameLen),
                                      new ArrayValueImpl());
     }
     else
@@ -828,7 +828,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new StringBuilderValue(name, nameLen),
+                                     new UnicodeBuilderValue(name, nameLen),
                                      new ArrayValueImpl()
                                      .append(a1));
     }
@@ -851,7 +851,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new StringBuilderValue(name, nameLen),
+                                     new UnicodeBuilderValue(name, nameLen),
                                      new ArrayValueImpl()
                                      .append(a1)
                                      .append(a2));
@@ -875,7 +875,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new StringBuilderValue(name, nameLen),
+                                     new UnicodeBuilderValue(name, nameLen),
                                      new ArrayValueImpl()
                                      .append(a1)
                                      .append(a2)
@@ -900,7 +900,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new StringBuilderValue(name, nameLen),
+                                     new UnicodeBuilderValue(name, nameLen),
                                      new ArrayValueImpl()
                                      .append(a1)
                                      .append(a2)
@@ -926,7 +926,7 @@ public class QuercusClass {
     else if (getCall() != null) {
       return getCall().callMethodRef(env,
                                      thisValue,
-                                     new StringBuilderValue(name, nameLen),
+                                     new UnicodeBuilderValue(name, nameLen),
                                      new ArrayValueImpl()
                                      .append(a1)
                                      .append(a2)

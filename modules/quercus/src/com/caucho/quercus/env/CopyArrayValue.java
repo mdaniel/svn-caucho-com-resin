@@ -224,7 +224,7 @@ public class CopyArrayValue extends ArrayValue {
    */
   public void put(String key, String value)
   {
-    put(new StringValueImpl(key), new StringValueImpl(value));
+    put(new UnicodeValueImpl(key), new UnicodeValueImpl(value));
   }
 
   /**

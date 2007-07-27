@@ -448,7 +448,7 @@ public class NullValue extends Value
   /**
    * Append to a binary builder.
    */
-  public void appendTo(BinaryBuilderValue sb)
+  public void appendTo(BytesBuilderValue sb)
   {
   }
 

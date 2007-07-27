@@ -357,7 +357,7 @@ public class JavaAdapterVar extends Var
   /**
    * Append to a string builder.
    */
-  public void appendTo(StringBuilderValue sb)
+  public void appendTo(UnicodeBuilderValue sb)
   {
     getValue().appendTo(sb);
   }
@@ -365,7 +365,7 @@ public class JavaAdapterVar extends Var
   /**
    * Append to a string builder.
    */
-  public void appendTo(BinaryBuilderValue sb)
+  public void appendTo(BytesBuilderValue sb)
   {
     getValue().appendTo(sb);
   }
@@ -442,7 +442,7 @@ public class JavaAdapterVar extends Var
   }
 
   @Override
-  public BinaryValue toBinaryValue(Env env)
+  public BytesValue toBinaryValue(Env env)
   {
     return getValue().toBinaryValue(env);
   }

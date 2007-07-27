@@ -30,7 +30,7 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.ArrayValue;
-import com.caucho.quercus.env.BinaryValue;
+import com.caucho.quercus.env.BytesValue;
 import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeValue;
@@ -143,7 +143,7 @@ public class MarshalFactory {
     else if (UnicodeValue.class.equals(argType)) {
       marshal = UnicodeValueMarshal.MARSHAL;
     }
-    else if (BinaryValue.class.equals(argType)) {
+    else if (BytesValue.class.equals(argType)) {
       marshal = BinaryValueMarshal.MARSHAL;
     }
     else if (InputStream.class.equals(argType)) {

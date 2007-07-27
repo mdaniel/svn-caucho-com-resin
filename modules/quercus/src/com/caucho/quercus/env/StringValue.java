@@ -49,7 +49,7 @@ import java.util.IdentityHashMap;
  * Represents a Quercus string value.
  */
 abstract public class StringValue extends Value implements CharSequence {
-  public static final StringValue EMPTY = new StringValueImpl("");
+  public static final StringValue EMPTY = new UnicodeValueImpl("");
 
   private final static StringValue []CHAR_STRINGS;
 
@@ -65,7 +65,7 @@ abstract public class StringValue extends Value implements CharSequence {
     if (value == null)
       return NullValue.NULL;
     else
-      return new StringValueImpl(value);
+      return new UnicodeValueImpl(value);
   }
 
   /**
@@ -76,7 +76,7 @@ abstract public class StringValue extends Value implements CharSequence {
     if (value < CHAR_STRINGS.length)
       return CHAR_STRINGS[value];
     else
-      return new StringValueImpl(String.valueOf(value));
+      return new UnicodeValueImpl(String.valueOf(value));
   }
 
   /**
@@ -87,7 +87,7 @@ abstract public class StringValue extends Value implements CharSequence {
     if (value == null)
       return NullValue.NULL;
     else
-      return new StringValueImpl(value.toString());
+      return new UnicodeValueImpl(value.toString());
   }
 
   //
@@ -525,7 +525,7 @@ abstract public class StringValue extends Value implements CharSequence {
     int len = length();
 
     if (index < 0 || len <= index)
-      return UnsetStringValue.UNSET;
+      return UnsetUnicodeValue.UNSET;
     else {
       return StringValue.create(charAt((int) index));
     }
@@ -542,7 +542,7 @@ abstract public class StringValue extends Value implements CharSequence {
     if (index < 0 || len <= index)
       return this;
     else {
-      return (new StringBuilderValue()
+      return (new UnicodeBuilderValue()
 	      .append(this, 0, (int) index)
 	      .append(value)
 	      .append(this, (int) (index + 1), length()));
@@ -578,24 +578,24 @@ abstract public class StringValue extends Value implements CharSequence {
 
         if (ch == 'z') {
           if (i == 0)
-            return new StringBuilderValue().append("aa").append(tail);
+            return new UnicodeBuilderValue().append("aa").append(tail);
           else
             tail.insert(0, 'a');
         }
         else if ('a' <= ch && ch < 'z') {
-          return (new StringBuilderValue()
+          return (new UnicodeBuilderValue()
 		  .append(this, 0, i)
 		  .append((char) (ch + 1))
 		  .append(tail));
         }
         else if (ch == 'Z') {
           if (i == 0)
-            return new StringBuilderValue().append("AA").append(tail);
+            return new UnicodeBuilderValue().append("AA").append(tail);
           else
             tail.insert(0, 'A');
         }
         else if ('A' <= ch && ch < 'Z') {
-          return (new StringBuilderValue()
+          return (new UnicodeBuilderValue()
 		  .append(this, 0, i)
 		  .append((char) (ch + 1))
 		  .append(tail));
@@ -605,7 +605,7 @@ abstract public class StringValue extends Value implements CharSequence {
         }
       }
 
-      return new StringBuilderValue(tail.toString());
+      return new UnicodeBuilderValue(tail.toString());
     }
     else if (isLongConvertible()) {
       return LongValue.create(toLong() - 1);
@@ -686,7 +686,7 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Append a Java buffer to the value.
    */
-  public StringValue append(StringBuilderValue sb, int head, int tail)
+  public StringValue append(UnicodeBuilderValue sb, int head, int tail)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -766,7 +766,7 @@ abstract public class StringValue extends Value implements CharSequence {
    * Append to a string builder.
    */
   @Override
-  public void appendTo(StringBuilderValue sb)
+  public void appendTo(UnicodeBuilderValue sb)
   {
     int length = length();
 
@@ -804,7 +804,7 @@ abstract public class StringValue extends Value implements CharSequence {
   /**
    * Interns the string.
    */
-  public InternStringValue intern(Quercus quercus)
+  public InternUnicodeValue intern(Quercus quercus)
   {
     return quercus.intern(toString());
   }
@@ -834,7 +834,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public CharSequence subSequence(int start, int end)
   {
-    return new StringValueImpl(toString().substring(start, end));
+    return new UnicodeValueImpl(toString().substring(start, end));
   }
 
   //
@@ -1023,7 +1023,7 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     int length = length();
     
-    StringBuilderValue string = new StringBuilderValue(length);
+    UnicodeBuilderValue string = new UnicodeBuilderValue(length);
     
     char []buffer = string.getBuffer();
     getChars(0, buffer, 0, length);
@@ -1051,7 +1051,7 @@ abstract public class StringValue extends Value implements CharSequence {
   {
     int length = length();
     
-    StringBuilderValue string = new StringBuilderValue(length);
+    UnicodeBuilderValue string = new UnicodeBuilderValue(length);
 
     char []buffer = string.getBuffer();
     getChars(0, buffer, 0, length);
@@ -1120,7 +1120,7 @@ abstract public class StringValue extends Value implements CharSequence {
    * @param env
    * @param charset
    */
-  public BinaryValue toBinaryValue(Env env, String charset)
+  public BytesValue toBinaryValue(Env env, String charset)
   {
     TempBuffer tb = TempBuffer.allocate();
     byte[] buffer = tb.getBuffer();
@@ -1137,7 +1137,7 @@ abstract public class StringValue extends Value implements CharSequence {
       }
 
       out.flush();
-      return new TempBufferStringValue(out.getHead());
+      return new TempBufferBytesValue(out.getHead());
 
     } catch (IOException e) {
       throw new QuercusModuleException(e.getMessage());
@@ -1154,7 +1154,7 @@ abstract public class StringValue extends Value implements CharSequence {
    */
   public UnicodeValue toUnicodeValue(Env env, String charset)
   {
-    StringBuilderValue sb = new StringBuilderValue();
+    UnicodeBuilderValue sb = new UnicodeBuilderValue();
 
     TempCharBuffer tb = TempCharBuffer.allocate();
     char[] charBuf = tb.getBuffer();
@@ -1226,24 +1226,11 @@ abstract public class StringValue extends Value implements CharSequence {
     return true;
   }
 
-  public void varDumpImpl(Env env,
-                          WriteStream out,
-                          int depth,
-                          IdentityHashMap<Value, String> valueSet)
-    throws IOException
-  {
-    String s = toString();
-
-    if (env.isUnicodeSemantics()) // php/5000
-      out.print("unicode(");
-    else
-      out.print("string(");
-
-    out.print(s.length());
-    out.print(") \"");
-    out.print(s);
-    out.print("\"");
-  }
+  abstract public void varDumpImpl(Env env,
+                                   WriteStream out,
+                                   int depth,
+                                   IdentityHashMap<Value, String> valueSet)
+    throws IOException;
 
   class StringValueInputStream extends java.io.InputStream {
     private final int _length;
@@ -1293,7 +1280,7 @@ abstract public class StringValue extends Value implements CharSequence {
     CHAR_STRINGS = new StringValue[256];
 
     for (int i = 0; i < CHAR_STRINGS.length; i++)
-      CHAR_STRINGS[i] = new StringValueImpl(String.valueOf((char) i));
+      CHAR_STRINGS[i] = new UnicodeValueImpl(String.valueOf((char) i));
   }
 }
 

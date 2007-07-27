@@ -39,7 +39,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -161,7 +160,7 @@ public class SessionArrayValue extends ArrayValueWrapper
 
           String key = sb.toString();
 
-          array.put(new StringValueImpl(key), is.unserialize(env));
+          array.put(new UnicodeValueImpl(key), is.unserialize(env));
         }
       }
     } catch (IOException e) {

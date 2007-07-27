@@ -46,7 +46,7 @@ import java.util.*;
 public class ObjectExtValue extends ObjectValue
   implements Serializable
 {
-  private static final StringValue TO_STRING = new StringValueImpl("__toString");
+  private static final StringValue TO_STRING = new UnicodeValueImpl("__toString");
 
   private static final int DEFAULT_SIZE = 16;
 
@@ -359,7 +359,7 @@ public class ObjectExtValue extends ObjectValue
       entry = getEntry(key);
       
       if (entry == null)
-        return setField.callMethod(env, this, new StringValueImpl(key), value);
+        return setField.callMethod(env, this, new UnicodeValueImpl(key), value);
     }
     else
       entry = createEntry(key);
@@ -387,7 +387,7 @@ public class ObjectExtValue extends ObjectValue
    */
   public Value putField(String key, String value)
   {
-    return putField(null, key, new StringValueImpl(value));
+    return putField(null, key, new UnicodeValueImpl(value));
   }
 
   /**
@@ -530,7 +530,7 @@ public class ObjectExtValue extends ObjectValue
       Entry entry = _entries[i];
 
       if (entry != null)
-	keys[k++] = new StringValueImpl(entry.getKey());
+	keys[k++] = new UnicodeValueImpl(entry.getKey());
     }
 
     return keys;
@@ -565,7 +565,7 @@ public class ObjectExtValue extends ObjectValue
       Entry entry = _entries[i];
 
       if (entry != null)
-	indices.add(new StringValueImpl(entry.getKey()));
+	indices.add(new UnicodeValueImpl(entry.getKey()));
     }
 
     return indices;
@@ -858,7 +858,7 @@ public class ObjectExtValue extends ObjectValue
     if (fun != null)
       return fun.callMethod(env, this, new Expr[0]).toStringValue();
     else
-      return new StringValueImpl(_cl.getName() + "[]");
+      return new UnicodeValueImpl(_cl.getName() + "[]");
   }
 
   /**
@@ -878,7 +878,7 @@ public class ObjectExtValue extends ObjectValue
     ArrayValue array = new ArrayValueImpl();
 
     for (Map.Entry<String,Value> entry : entrySet()) {
-      array.put(new StringValueImpl(entry.getKey()), entry.getValue());
+      array.put(new UnicodeValueImpl(entry.getKey()), entry.getValue());
     }
 
     return array;
@@ -993,7 +993,7 @@ public class ObjectExtValue extends ObjectValue
 
       putField(env,
                "__Quercus_Class_Definition_Not_Found",
-               new StringValueImpl(name));
+               new UnicodeValueImpl(name));
     }
 
     int size = in.readInt();

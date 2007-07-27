@@ -48,8 +48,8 @@ public class ArrayValueImpl extends ArrayValue
   private static final Logger log
     = Logger.getLogger(ArrayValueImpl.class.getName());
 
-  private static final StringValue KEY = new StringValueImpl("key");
-  private static final StringValue VALUE = new StringValueImpl("value");
+  private static final StringValue KEY = new UnicodeValueImpl("key");
+  private static final StringValue VALUE = new UnicodeValueImpl("value");
   
   private static final int DEFAULT_SIZE = 16;
   
@@ -205,7 +205,7 @@ public class ArrayValueImpl extends ArrayValue
    */
   public StringValue toString(Env env)
   {
-    return new StringValueImpl("Array");
+    return new UnicodeValueImpl("Array");
   }
   
   /**

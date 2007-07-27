@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.function;
 
-import com.caucho.quercus.env.BinaryBuilderValue;
+import com.caucho.quercus.env.BytesBuilderValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
@@ -41,7 +41,7 @@ public class JavaByteArrayMarshal extends JavaArrayMarshal
   @Override
   public Value unmarshal(Env env, Object value)
   {
-    return new BinaryBuilderValue((byte[]) value);
+    return new BytesBuilderValue((byte[]) value);
   }
   
   @Override

@@ -388,7 +388,7 @@ public class Var extends Value
   /**
    * Append to a string builder.
    */
-  public void appendTo(StringBuilderValue sb)
+  public void appendTo(UnicodeBuilderValue sb)
   {
     _value.appendTo(sb);
   }
@@ -396,7 +396,7 @@ public class Var extends Value
   /**
    * Append to a string builder.
    */
-  public void appendTo(BinaryBuilderValue sb)
+  public void appendTo(BytesBuilderValue sb)
   {
     _value.appendTo(sb);
   }
@@ -481,7 +481,7 @@ public class Var extends Value
   }
 
   @Override
-  public BinaryValue toBinaryValue(Env env)
+  public BytesValue toBinaryValue(Env env)
   {
     return _value.toBinaryValue(env);
   }

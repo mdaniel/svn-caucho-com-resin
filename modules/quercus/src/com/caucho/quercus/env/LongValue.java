@@ -33,7 +33,6 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.util.IdentityHashMap;
 
 /**
@@ -296,7 +295,7 @@ public class LongValue extends NumberValue
    * Append to a string builder.
    */
   @Override
-  public void appendTo(StringBuilderValue sb)
+  public void appendTo(UnicodeBuilderValue sb)
   {
     sb.append(_value);
   }
@@ -305,7 +304,7 @@ public class LongValue extends NumberValue
    * Append to a binary builder.
    */
   @Override
-  public void appendTo(BinaryBuilderValue sb)
+  public void appendTo(BytesBuilderValue sb)
   {
     sb.append(_value);
   }

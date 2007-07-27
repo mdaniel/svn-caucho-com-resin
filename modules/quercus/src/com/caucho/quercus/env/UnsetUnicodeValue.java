@@ -28,11 +28,12 @@
  */
 package com.caucho.quercus.env;
 
-public class UnsetStringValue extends StringValueImpl
+public class UnsetUnicodeValue
+  extends UnicodeValueImpl
 {
-  public static final UnsetStringValue UNSET = new UnsetStringValue();
+  public static final UnsetUnicodeValue UNSET = new UnsetUnicodeValue();
   
-  private UnsetStringValue()
+  private UnsetUnicodeValue()
   {
     super("");
   }

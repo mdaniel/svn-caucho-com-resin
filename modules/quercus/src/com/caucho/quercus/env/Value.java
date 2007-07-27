@@ -56,7 +56,7 @@ abstract public class Value implements java.io.Serializable
 {
   protected static final L10N L = new L10N(Value.class);
 
-  public static final StringValue SCALAR_V = new StringValueImpl("scalar");
+  public static final StringValue SCALAR_V = new UnicodeValueImpl("scalar");
 
   public static final Value []NULL_VALUE_ARRAY = new Value[0];
   public static final Value []NULL_ARGS = new Value[0];
@@ -593,7 +593,7 @@ abstract public class Value implements java.io.Serializable
    */
   public QuercusException toException(Env env, String file, int line)
   {
-    putField(env, "file", new StringValueImpl(file));
+    putField(env, "file", new UnicodeValueImpl(file));
     putField(env, "line", LongValue.create(line));
     
     return new QuercusLanguageException(this);
@@ -688,7 +688,7 @@ abstract public class Value implements java.io.Serializable
    */
   public StringValue toStringValue()
   {
-    return new StringValueImpl(toString());
+    return new UnicodeValueImpl(toString());
   }
 
   /**
@@ -696,18 +696,18 @@ abstract public class Value implements java.io.Serializable
    */
   public UnicodeValue toUnicodeValue(Env env)
   {
-    return new StringValueImpl(toString());
+    return new UnicodeValueImpl(toString());
   }
 
   /**
    * Converts to a BinaryValue.
    */
-  public BinaryValue toBinaryValue(Env env)
+  public BytesValue toBinaryValue(Env env)
   {
     try {
       InputStream is = toInputStream();
 
-      BinaryBuilderValue bb = new BinaryBuilderValue();
+      BytesBuilderValue bb = new BytesBuilderValue();
 
       int length = 0;
       while (true) {
@@ -745,7 +745,7 @@ abstract public class Value implements java.io.Serializable
    */
   public StringValue toStringBuilder()
   {
-    return new StringBuilderValue(toString(), 32);
+    return new UnicodeBuilderValue(toString(), 32);
   }
 
   /**
@@ -771,7 +771,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Append to a string builder.
    */
-  public void appendTo(StringBuilderValue sb)
+  public void appendTo(UnicodeBuilderValue sb)
   {
     //System.out.println("APPEND: " + toString());
     sb.append(toString());
@@ -780,7 +780,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Append to a binary builder.
    */
-  public void appendTo(BinaryBuilderValue sb)
+  public void appendTo(BytesBuilderValue sb)
   {
     sb.appendBytes(toString());
   }

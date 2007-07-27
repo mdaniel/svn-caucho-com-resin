@@ -49,7 +49,7 @@ public class GlobalArrayValue extends ArrayValueImpl {
    */
   public StringValue toString(Env env)
   {
-    return new StringValueImpl("Array");
+    return new UnicodeValueImpl("Array");
   }
   
   /**

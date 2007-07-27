@@ -158,11 +158,11 @@ public final class DefinitionState {
     ArrayValue internal = _quercus.getDefinedFunctions();
     ArrayValue user = new ArrayValueImpl();
 
-    result.put(new StringValueImpl("internal"), internal);
-    result.put(new StringValueImpl("user"), user);
+    result.put(new UnicodeValueImpl("internal"), internal);
+    result.put(new UnicodeValueImpl("user"), user);
 
     for (String name : _funMap.keySet()) {
-      StringValue key = new StringValueImpl(name);
+      StringValue key = new UnicodeValueImpl(name);
 
       if (! internal.contains(key).isset())
         user.put(name);
@@ -349,7 +349,7 @@ public final class DefinitionState {
     ArrayValue array = new ArrayValueImpl();
 
     for (String name : names) {
-      array.put(new StringValueImpl(name));
+      array.put(new UnicodeValueImpl(name));
     }
 
     return array;

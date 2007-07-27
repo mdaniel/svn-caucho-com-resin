@@ -40,14 +40,15 @@ import java.io.Serializable;
  * Represents a PHP string value implemented as a TempBuffer, with
  * encoding iso-8859-1..
  */
-public class TempBufferStringValue extends BinaryValue
+public class TempBufferBytesValue
+  extends BytesValue
   implements Serializable
 {
   private TempBuffer _head;
 
   private String _string;
 
-  public TempBufferStringValue(TempBuffer buffer)
+  public TempBufferBytesValue(TempBuffer buffer)
   {
     _head = buffer;
   }
@@ -165,8 +166,8 @@ public class TempBufferStringValue extends BinaryValue
   {
     if (this == o)
       return true;
-    else if ((o instanceof TempBufferStringValue)) {
-      TempBufferStringValue tb = (TempBufferStringValue) o;
+    else if ((o instanceof TempBufferBytesValue)) {
+      TempBufferBytesValue tb = (TempBufferBytesValue) o;
 
       TempBuffer ptrA = _head;
       TempBuffer ptrB = tb._head;
@@ -217,7 +218,7 @@ public class TempBufferStringValue extends BinaryValue
   
   public Object writeReplace()
   {
-    return new BinaryBuilderValue(toBytes());
+    return new BytesBuilderValue(toBytes());
   }
 }
 

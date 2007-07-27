@@ -34,12 +34,14 @@ import com.caucho.quercus.Quercus;
 /**
  * Represents a PHP string value.
  */
-public final class InternStringValue extends StringValueImpl {
+public final class InternUnicodeValue
+  extends UnicodeValueImpl
+{
   private final int _hashCode;
   private final Value _key;
   private final int _type;
 
-  public InternStringValue(String value)
+  public InternUnicodeValue(String value)
   {
     super(value.intern());
 
@@ -51,7 +53,7 @@ public final class InternStringValue extends StringValueImpl {
   /**
    * Interns the string.
    */
-  public InternStringValue intern(Quercus quercus)
+  public InternUnicodeValue intern(Quercus quercus)
   {
     return this;
   }

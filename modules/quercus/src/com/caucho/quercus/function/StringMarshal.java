@@ -31,8 +31,7 @@ package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValueImpl;
-import com.caucho.quercus.env.UnicodeValue;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
@@ -67,7 +66,7 @@ public class StringMarshal extends Marshal {
     if (value == null)
       return NullValue.NULL;
     else
-      return new StringValueImpl((String) value);
+      return new UnicodeValueImpl((String) value);
   }
   
   @Override

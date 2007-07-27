@@ -31,7 +31,7 @@ package com.caucho.quercus.function;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringValueImpl;
+import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
@@ -70,7 +70,7 @@ public class StringValueMarshal extends Marshal
     else if (value instanceof Value)
       return ((Value) value).toStringValue();
     else
-      return new StringValueImpl(String.valueOf(value));
+      return new UnicodeValueImpl(String.valueOf(value));
   }
   
   @Override
