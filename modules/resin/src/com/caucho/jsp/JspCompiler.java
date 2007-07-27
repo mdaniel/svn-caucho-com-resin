@@ -30,7 +30,8 @@
 package com.caucho.jsp;
 
 import com.caucho.config.*;
-import com.caucho.java.JavaCompiler;
+import com.caucho.config.types.*;
+import com.caucho.java.*;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.jsp.cfg.JspTaglib;
@@ -551,6 +552,7 @@ public class JspCompiler implements EnvironmentBean {
       System.out.println("usage: com.caucho.jsp.JspCompiler [flags] jsp1 jsp2 ...");
       System.out.println(" -app-dir  : The directory root of the web-app.");
       System.out.println(" -class-dir: The working directory to use as output.");
+      System.out.println(" -compiler: sets the javac.");
       System.out.println(" -conf: A configuration file for the compiler.");
       System.exit(1);
     }
@@ -568,6 +570,10 @@ public class JspCompiler implements EnvironmentBean {
       thread.setContextClassLoader(loader);
         
       ArrayList<String> pendingClasses = new ArrayList<String>();
+
+      if (i == args.length) {
+	compiler.compilePath(pendingClasses, ".");
+      }
 
       for (; i < args.length; i++) {
 	String uri = args[i];
@@ -626,6 +632,11 @@ public class JspCompiler implements EnvironmentBean {
 	}
 	else if (args[i].equals("-class-dir") || args[i].equals("-d")) {
 	  setClassDirectory(Vfs.lookup(args[i + 1]));
+	  i += 2;
+	}
+	else if (args[i].equals("-compiler")) {
+	  JavacConfig.getLocalConfig().setCompiler(args[i + 1]);
+
 	  i += 2;
 	}
 	else if (args[i].equals("-conf")) {

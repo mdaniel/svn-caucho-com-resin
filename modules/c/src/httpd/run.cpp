@@ -255,7 +255,7 @@ usage(char *name)
 	  "  -resin_home <dir>  : home of Resin\n"
 	  "  -classpath <dir>   : java classpath\n"
 	  "  -Jxxx              : JVM arg xxx\n"
-	  "  -Dfoo=bar          : Set JVM variable\n"
+	  "  -J-Dfoo=bar        : Set JVM variable\n"
 	  "  -Xxxx              : JVM -X parameter\n"
 	  "  -install           : install as NT service\n"
 	  "  -install-as <name> : install as a named NT service\n"

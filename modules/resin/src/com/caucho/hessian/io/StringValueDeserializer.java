@@ -89,7 +89,11 @@ public class StringValueDeserializer extends AbstractDeserializer {
 
     in.readMapEnd();
 
-    return create(value);
+    Object object = create(value);
+
+    in.addRef(object);
+
+    return object;
   }
   
   public Object readObject(AbstractHessianInput in, String []fieldNames)
@@ -104,7 +108,11 @@ public class StringValueDeserializer extends AbstractDeserializer {
 	in.readObject();
     }
 
-    return create(value);
+    Object object = create(value);
+    
+    in.addRef(object);
+
+    return object;
   }
 
   private Object create(String value)

@@ -140,7 +140,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   private int _isCookieHttpOnly;
   private String _cookiePort;
   private int _reuseSessionId = COOKIE;
-  private int _cookieLength = 18;
+  private int _cookieLength = 21;
 
   private int _sessionSaveMode = SAVE_AFTER_REQUEST;
 
@@ -1226,6 +1226,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
     int length = _cookieLength;
 
     addBackup(cb, index);
+
+    length -= cb.length();
 
     long random = RandomUtil.getRandomLong();
 

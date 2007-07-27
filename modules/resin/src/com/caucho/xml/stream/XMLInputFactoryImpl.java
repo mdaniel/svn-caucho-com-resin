@@ -145,6 +145,9 @@ public class XMLInputFactoryImpl extends XMLInputFactory {
     createXMLStreamReader(InputStream stream, String encoding)
     throws XMLStreamException
   {
+    if (encoding == null)
+      encoding = "iso-8859-1";
+    
     try {
       InputStreamReader isr = new InputStreamReader(stream, encoding);
       return new XMLStreamReaderImpl(isr);

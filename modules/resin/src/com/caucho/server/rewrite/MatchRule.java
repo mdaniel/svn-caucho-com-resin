@@ -81,7 +81,6 @@ public class MatchRule
 
   public void addDependency(PersistentDependency depend)
   {
-    System.out.println("DEP: " + depend);
     _depend.add(depend);
   }
 

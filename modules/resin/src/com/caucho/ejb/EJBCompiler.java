@@ -134,6 +134,8 @@ public class EJBCompiler {
       System.exit(1);
     }
 
+    EnvironmentClassLoader.initializeEnvironment();
+
     try {
       new EJBCompiler(args).compile();
     } catch (Throwable e) {

@@ -277,15 +277,6 @@ C:\&gt; net start ResinA
   <td>""</td>
 </tr>
 <tr>
-  <td>-stdout <var>xxx</var></td>
-  <td>Sets the file to save stdout messages.</td>
-  <td>log/stdout.log.</td>
-</tr>
-<tr>
-  <td>-stderr <var>xxx</var></td>
-  <td>Sets the file to save stdout messages.</td><td>log/stderr.log.</td>
-</tr>
-<tr>
   <td>-verbose</td>
   <td>Show the Java environment before starting Resin.</td>
   <td>off</td>
@@ -333,9 +324,15 @@ C:\&gt; net start ResinA
 you can find the full list by starting "java -X".</p>
 
 <deftable title="Memory Configuration">
-<tr><td>-Xms&lt;size&gt;</td><td>Initial Java heap size, e.g. -Xms32m
-</td></tr><tr><td>-Xmx&lt;size&gt;</td><td>Maximum Java heap size, e.g. -Xmx128m
-</td></tr></deftable>
+<tr>
+  <td>-Xms&lt;size&gt;</td>
+  <td>Initial Java heap size, e.g. -Xms32m</td>
+  </tr>
+<tr>
+  <td>-Xmx&lt;size&gt;</td>
+  <td>Maximum Java heap size, e.g. -Xmx128m</td>
+</tr>
+</deftable>
 
 </s2>
 
