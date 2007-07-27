@@ -1476,7 +1476,7 @@ public class Quercus
   }
 
   public static final IniDefinition INI_UNICODE_SEMANTICS
-    = _ini.add("unicode.semantics", false, IniDefinition.PHP_INI_SYSTEM);
+    = _ini.add("unicode.semantics", true, IniDefinition.PHP_INI_SYSTEM);
   public static final IniDefinition INI_UNICODE_FALLBACK_ENCODING
     = _ini.add("unicode.fallback_encoding", "utf-8", IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_UNICODE_FROM_ERROR_MODE

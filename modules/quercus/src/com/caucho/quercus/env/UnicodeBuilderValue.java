@@ -983,7 +983,7 @@ public class UnicodeBuilderValue
   public void generate(PrintWriter out)
     throws IOException
   {
-    out.print("new InternStringValue(\"");
+    out.print("new InternUnicodeValue(\"");
     printJavaString(out, toString());
     out.print("\")");
   }

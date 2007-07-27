@@ -875,7 +875,7 @@ public class BytesBuilderValue
       sb.append((char)_buffer[i]);
     }
     
-    out.print("new BinaryBuilderValue(\"");
+    out.print("new BytesBuilderValue(\"");
     printJavaString(out, sb.toString());
     out.print("\", true)");
   }

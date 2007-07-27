@@ -47,7 +47,8 @@ abstract public class UnicodeValue extends StringValue {
   {
     int length = length();
 
-    out.print("unicode(");
+    // XXX: out.print("unicode("); // XXX: less impact on current qa
+    out.print("string(");
     out.print(length);
     out.print(") \"");
 
