@@ -12,6 +12,7 @@
 
 <s2 title="3.1.3 snap">
 <ul>
+<li>Request.getInputStream should not check the encoding (#1874, rep by Leos)</li>
 <li>createXMLStreamReader needs to deal with null charsetName (#1823, rep by jkriesten)</li>
 <li>JspCompiler now has -compiler flag to choose compiler (#1877, rep by A Deshpande)</li>
 <li>JspCompiler should default to compiling the app dir (#1870, rep by A Deshpande)</li>

@@ -987,7 +987,7 @@ public abstract class AbstractHttpRequest
     _readEncoding = encoding;
     
     try {
-      getStream().setEncoding(_readEncoding);
+      getStream(true).setEncoding(_readEncoding);
     } catch (UnsupportedEncodingException e) {
       throw e;
     } catch (java.nio.charset.UnsupportedCharsetException e) {
@@ -1750,16 +1750,27 @@ public abstract class AbstractHttpRequest
   public ReadStream getStream()
     throws IOException
   {
+    return getStream(true);
+  }
+
+  /**
+   * Returns the requests underlying read stream, e.g. the post stream.
+   */
+  public ReadStream getStream(boolean isReader)
+    throws IOException
+  {
     if (! _hasReadStream) {
       _hasReadStream = true;
       
       initStream(_readStream, _rawRead);
-      
-      // Encoding is based on getCharacterEncoding.
-      // getReader needs the encoding.
-      String charEncoding = getCharacterEncoding();
-      String javaEncoding = Encoding.getJavaName(charEncoding);
-      _readStream.setEncoding(javaEncoding);
+
+      if (isReader) {
+	// Encoding is based on getCharacterEncoding.
+	// getReader needs the encoding.
+	String charEncoding = getCharacterEncoding();
+	String javaEncoding = Encoding.getJavaName(charEncoding);
+	_readStream.setEncoding(javaEncoding);
+      }
 
       if (_expect100Continue) {
 	_expect100Continue = false;
@@ -1817,8 +1828,8 @@ public abstract class AbstractHttpRequest
       throw new IllegalStateException(L.l("getInputStream() can't be called after getReader()"));
 
     _hasInputStream = true;
-    
-    ReadStream stream = getStream();
+
+    ReadStream stream = getStream(false);
 
     _is.init(stream);
 
@@ -1838,7 +1849,7 @@ public abstract class AbstractHttpRequest
 
     try {
       // bufferedReader is just an adapter to get the signature right.
-      _bufferedReader.init(getStream());
+      _bufferedReader.init(getStream(true));
 
       return _bufferedReader;
     } catch (java.nio.charset.UnsupportedCharsetException e) {
@@ -1993,7 +2004,7 @@ public abstract class AbstractHttpRequest
 
         try {
           MultipartForm.parsePostData(_form,
-                                      getStream(), boundary.toString(),
+                                      getStream(false), boundary.toString(),
                                       this,
                                       javaEncoding,
                                       formUploadMax);
