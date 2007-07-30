@@ -984,7 +984,7 @@ public class UnicodeBuilderValue
     throws IOException
   {
     out.print("new InternUnicodeValue(\"");
-    printJavaString(out, toString());
+    printJavaString(out, this);
     out.print("\")");
   }
 

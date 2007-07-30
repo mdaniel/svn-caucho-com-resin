@@ -193,6 +193,7 @@ public class QuercusParser {
 
   private int _peek = -1;
   private Reader _is;
+  private String _encoding;
 
   private CharBuffer _sb = new CharBuffer();
 
@@ -225,18 +226,19 @@ public class QuercusParser {
   {
     this(quercus);
 
-    init(sourceFile, is);
+    init(sourceFile, is, "UTF-8");
   }
 
   private void init(Path sourceFile)
     throws IOException
   {
-    init(sourceFile, sourceFile.openRead().getReader());
+    init(sourceFile, sourceFile.openRead().getReader(), "UTF-8");
   }
 
-  private void init(Path sourceFile, Reader is)
+  private void init(Path sourceFile, Reader is, String encoding)
   {
     _is = is;
+    _encoding = encoding;
 
     if (sourceFile != null) {
       _parserLocation.setFileName(sourceFile.getPath());
@@ -2808,8 +2810,7 @@ public class QuercusParser {
 
     case BINARY:
       {
-	// XXX: getBytes is incorrect
-	return _factory.createBinary(_lexeme.getBytes());
+	return _factory.createBinary(_lexeme, _encoding);
       }
 
     case SIMPLE_BINARY_ESCAPE:

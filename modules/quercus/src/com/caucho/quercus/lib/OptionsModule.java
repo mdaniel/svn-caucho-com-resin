@@ -36,15 +36,15 @@ import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.IniDefinition;
+import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * PHP options
@@ -124,64 +124,37 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value assert_options(Env env,
 				     int code,
-				     @Optional("-1") Value value)
+				     @Optional("null") Value value)
   {
-    Value result = null;
-    Value longResult = null;
-    
-    if (value.equals(LongValue.MINUS_ONE)) {
-      switch (code) {
+    Value result;
+
+    switch (code) {
       case ASSERT_ACTIVE:
-	longResult = env.getIni("assert.active");
-	break;
+        result = INI_ASSERT_ACTIVE.getAsLongValue(env);
+        if (!value.isNull()) INI_ASSERT_ACTIVE.set(env, value);
+        break;
       case ASSERT_WARNING:
-	longResult = env.getIni("assert.warning");
-	break;
+        result = INI_ASSERT_WARNING.getAsLongValue(env);
+        if (!value.isNull()) INI_ASSERT_WARNING.set(env, value);
+        break;
       case ASSERT_BAIL:
-	longResult = env.getIni("assert.bail");
-	break;
+        result = INI_ASSERT_BAIL.getAsLongValue(env);
+        if (!value.isNull()) INI_ASSERT_BAIL.set(env, value);
+        break;
       case ASSERT_QUIET_EVAL:
-	longResult = env.getIni("assert.quiet_eval");
-	break;
+        result = INI_ASSERT_QUIET_EVAL.getAsLongValue(env);
+        if (!value.isNull()) INI_ASSERT_QUIET_EVAL.set(env, value);
+        break;
       case ASSERT_CALLBACK:
-	result = env.getIni("assert.callback");
-	break;
+        result = INI_ASSERT_CALLBACK.getValue(env);
+        if (!value.isNull()) INI_ASSERT_CALLBACK.set(env, value);
+        break;
       default:
         env.warning(L.l("unknown value {0}", code));
         result = BooleanValue.FALSE;
-	break;
-      }
-    }
-    else {
-      switch (code) {
-      case ASSERT_ACTIVE:
-	longResult = env.setIni("assert.active", value.toString());
-	break;
-      case ASSERT_WARNING:
-	longResult = env.setIni("assert.warning", value.toString());
-	break;
-      case ASSERT_BAIL:
-	longResult = env.setIni("assert.bail", value.toString());
-	break;
-      case ASSERT_QUIET_EVAL:
-	longResult = env.setIni("assert.quiet_eval", value.toString());
-	break;
-      case ASSERT_CALLBACK:
-	result = env.setIni("assert.callback", value.toString());
-	break;
-      default:
-        env.warning(L.l("unknown value {0}", code));
-	result = BooleanValue.FALSE;
-	break;
-      }
     }
 
-    if (longResult != null)
-      return longResult.toLongValue();
-    else if (result != null)
-      return result;
-    else
-      return NullValue.NULL;
+    return result;
   }
 
   /**
@@ -259,10 +232,10 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     Value value = env.getConfigVar(name);
 
-    if (value != null)
+    if (!value.isNull())
       return value;
     else
-      return NullValue.NULL;
+      return BooleanValue.FALSE;
   }
 
   /**
@@ -411,52 +384,37 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     ArrayValue directives = new ArrayValueImpl();
 
-    Value global = new UnicodeValueImpl("global_value");
-    Value local = new UnicodeValueImpl("local_value");
-    Value access = new UnicodeValueImpl("access");
+    Value global = new InternUnicodeValue("global_value");
+    Value local = new InternUnicodeValue("local_value");
+    Value access = new InternUnicodeValue("access");
 
-    Value level = new LongValue(7);
+    IniDefinitions iniDefinitions = env.getQuercus().getIniDefinitions();
 
-    HashMap<String, StringValue> iniMap =
-        env.getQuercus().getIniAll(prefix);
+    TreeSet<String> names = new TreeSet<String>();
 
-    for (Map.Entry<String,StringValue> entry : iniMap.entrySet()) {
-      ArrayValue inner = new ArrayValueImpl();
-      
-      String key = entry.getKey();
-      Value globalVal = entry.getValue();
+    names.addAll(iniDefinitions.getNames());
 
-      if (globalVal == null)
-        inner.put(NullValue.NULL);
-      else {
-        globalVal = formatIniValue(globalVal);
-        inner.put(global, globalVal);
+    for (String name : names) {
+      if (name.startsWith(prefix)) {
+        IniDefinition iniDefinition = iniDefinitions.get(name);
+
+        // php/1a0n - do not add unless defined
+        if (!iniDefinition.isRuntimeDefinition()) {
+
+          ArrayValue inner = new ArrayValueImpl();
+
+          inner.put(global, iniDefinition.getAsStringValue(env.getQuercus()));
+          inner.put(local, iniDefinition.getAsStringValue(env));
+          inner.put(access, LongValue.create(iniDefinition.getScope()));
+
+          directives.put(new InternUnicodeValue(name), inner);
+        }
       }
-
-      Value localVal = env.getIni(key);
-      if (localVal == null)
-        inner.put(local, globalVal);
-      else
-        inner.put(local, formatIniValue(localVal));
-
-      inner.put(access, level);
-      directives.put(new UnicodeValueImpl(key), inner);
     }
 
     return directives;
   }
   
-  private static Value formatIniValue(Value val)
-  {
-    String string = val.toString().toLowerCase();
-    if ("on".equals(string))
-      return new UnicodeValueImpl("1");
-    else if ("off".equals(string))
-      return StringValue.EMPTY;
-
-    return val;
-  }
-
   /**
    * Restore the initial configuration value
    */

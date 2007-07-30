@@ -153,10 +153,7 @@ public class IniDefinitions {
     IniDefinition iniDefinition = _defaultMap == null ? null : _defaultMap.get(name);
 
     if (iniDefinition == null) {
-      iniDefinition = new IniDefinition(name,
-                                        IniDefinition.Type.STRING,
-                                        NullValue.NULL,
-                                        IniDefinition.PHP_INI_ALL);
+      iniDefinition = new IniDefinition.Runtime(name);
 
       add(iniDefinition);
     }

@@ -594,37 +594,6 @@ public class Quercus
   }
 
   /**
-   * Gets an ini value.
-   */
-  public StringValue getIniAsStringValue(String name)
-  {
-    return _iniDefinitions.get(name).getAsStringValue(this);
-  }
-
-  /**
-   * Gets all ini values having this prefix.
-   */
-  public HashMap<String,StringValue> getIniAll(String prefix)
-  {
-    if (_iniDefinitions == null)
-      return null;
-
-    HashMap<String, StringValue> iniCopy = new HashMap<String, StringValue>();
-
-    TreeSet<String> names = new TreeSet<String>();
-
-    names.addAll(_iniMap.keySet());
-    names.addAll(_iniDefinitions.getNames());
-
-    for (String name : names) {
-      if (name.startsWith(prefix))
-        iniCopy.put(name, getIniAsStringValue(name));
-    }
-
-    return iniCopy;
-  }
-
-  /**
    * Returns the relative path.
    */
   /*

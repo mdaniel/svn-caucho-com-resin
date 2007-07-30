@@ -90,6 +90,14 @@ public class ExprFactory {
   }
 
   /**
+   * Creates a binary literal expression.
+   */
+  public Expr createBinary(String bytes, String encoding)
+  {
+    return new BinaryLiteralExpr(bytes, encoding);
+  }
+
+  /**
    * Creates a long literal expression.
    */
   public Expr createLong(long value)

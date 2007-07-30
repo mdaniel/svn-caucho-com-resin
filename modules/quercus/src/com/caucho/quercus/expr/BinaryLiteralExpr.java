@@ -30,7 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.BytesBuilderValue;
+import com.caucho.quercus.env.BinaryBuilderValue;
 import com.caucho.quercus.env.BytesValue;
 
 /**
@@ -40,7 +40,12 @@ public class BinaryLiteralExpr extends StringLiteralExpr
 {
   public BinaryLiteralExpr(Location location, byte[] bytes)
   {
-    super(location, new BytesBuilderValue(bytes));
+    super(location, new BinaryBuilderValue(bytes));
+  }
+
+  public BinaryLiteralExpr(Location location, String string, String encoding)
+  {
+    super(location, new BinaryBuilderValue(string, encoding));
   }
 
   public BinaryLiteralExpr(Location location, BytesValue value)
@@ -51,6 +56,11 @@ public class BinaryLiteralExpr extends StringLiteralExpr
   public BinaryLiteralExpr(byte[] bytes)
   {
     this(Location.UNKNOWN, bytes);
+  }
+
+  public BinaryLiteralExpr(String string, String encoding)
+  {
+    this(Location.UNKNOWN, string, encoding);
   }
 
   public BinaryLiteralExpr(BytesValue value)

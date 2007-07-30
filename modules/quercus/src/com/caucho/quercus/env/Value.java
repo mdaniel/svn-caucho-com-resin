@@ -1943,7 +1943,7 @@ abstract public class Value implements java.io.Serializable
   {
   }
 
-  protected void printJavaString(PrintWriter out, String s)
+  protected void printJavaString(PrintWriter out, StringValue s)
   {
     if (s == null) {
       out.print("");

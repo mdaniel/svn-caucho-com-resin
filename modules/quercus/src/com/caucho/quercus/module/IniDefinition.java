@@ -69,9 +69,29 @@ public class IniDefinition {
     _deflt = deflt;
   }
 
+  /**
+   * Returns the name of the ini definition.
+   */
   protected String getName()
   {
     return _name;
+  }
+
+  /**
+   * Returns the scope in which the value of the ini variable can be set.
+   */
+  public int getScope()
+  {
+    return _scope;
+  }
+
+  /**
+   * Returns true if this definition was added at runtime and not
+   * definied by a module.
+   */
+  public boolean isRuntimeDefinition()
+  {
+    return false;
   }
 
   private BooleanValue toBooleanValue(Value value)
@@ -93,7 +113,7 @@ public class IniDefinition {
   }
 
   /**
-   * Set the ini value in the map with the given scope.
+   * Set the ini value for the given scope.
    */
   public void set(Quercus quercus, Value value)
   {
@@ -101,7 +121,7 @@ public class IniDefinition {
   }
 
   /**
-   * Set the ini value in the map with the given scope.
+   * Set the ini value for the given scope.
    */
   public void set(Quercus quercus, String value)
   {
@@ -111,7 +131,7 @@ public class IniDefinition {
   }
 
   /**
-   * Set the ini value in the map with the given scope.
+   * Set the ini value for the given scope.
    */
   public void set(Env env, Value value)
   {
@@ -119,7 +139,7 @@ public class IniDefinition {
   }
 
   /**
-   * Set the ini value in the map with the given scope.
+   * Set the ini value for the given scope.
    */
   public void set(Env env, String value)
   {
@@ -129,19 +149,16 @@ public class IniDefinition {
   }
 
   /**
-   * Set the ini value in the map with the given scope.
+   * Set the ini value for the given scope.
    */
   protected void set(IdentityHashMap<String, Value> map,
                      int scope,
                      Value value)
   {
-    System.out.println("XXX: set " + _name + " " + value.getClass() + " " + value);
-
     if (scope == PHP_INI_USER
         && !(_scope == PHP_INI_USER || _scope == PHP_INI_ALL))
     {
       // do nothing
-      System.out.println("XXX: set out of scope");
     }
     else if (_type == Type.BOOLEAN) {
       map.put(_name, toBooleanValue(value));
@@ -166,27 +183,41 @@ public class IniDefinition {
     if (value == null)
       value = _deflt;
 
-    System.out.println("XXX: get " + _name + " " + value.getClass() + " " + value);
+    if (value == null)
+      value = NullValue.NULL;
 
     return value;
   }
 
+  /**
+   * Returns the value set for name, or the default from the definition if
+   * it has not been set.
+   */
+  public Value getValue(Quercus quercus)
+  {
+    return get(null, quercus.getIniMap(false));
+  }
+
+  /**
+   * Returns the value set for name, the first oof the local value set for the
+   * environment, the global configuration value set for quercus, or the default
+   * from the definition.
+   *
+   * @returns the value, or NullValue.NULL.
+   */
+  public Value getValue(Env env)
+  {
+    return get(env.getIniMap(false), env.getQuercus().getIniMap(false));
+  }
+
   public StringValue getAsStringValue(Quercus quercus)
   {
-    return getAsStringValue(null, quercus.getIniMap(false));
+    return get(null, quercus.getIniMap(false)).toStringValue();
   }
 
   public StringValue getAsStringValue(Env env)
   {
-    return getAsStringValue(env.getIniMap(false), env.getQuercus().getIniMap(false));
-  }
-
-  private StringValue getAsStringValue(IdentityHashMap<String, Value> overrideMap,
-                                       IdentityHashMap<String, Value> iniMap)
-  {
-    Value value = get(overrideMap, iniMap);
-
-    return value.toStringValue();
+    return getValue(env).toStringValue();
   }
 
   /**
@@ -347,4 +378,23 @@ public class IniDefinition {
       Env.getInstance().warning(L.l("ini value `{0}' is not supported", getName()));
     }
   }
+
+  static public class Runtime
+    extends IniDefinition
+  {
+    public Runtime(String name)
+    {
+      super(name,
+            IniDefinition.Type.STRING,
+            NullValue.NULL,
+            IniDefinition.PHP_INI_ALL);
+    }
+
+    @Override
+    public boolean isRuntimeDefinition()
+    {
+      return true;
+    }
+  }
+
 }

@@ -424,5 +424,5 @@ public class BcmathModule extends AbstractQuercusModule {
     return bd.toPlainString();
   }
 
-  public static final IniDefinition INI_BCMATH_SCALE = _iniDefinitions.add("bcmath.scale", false, PHP_INI_ALL);
+  public static final IniDefinition INI_BCMATH_SCALE = _iniDefinitions.add("bcmath.scale", 0, PHP_INI_ALL);
 }

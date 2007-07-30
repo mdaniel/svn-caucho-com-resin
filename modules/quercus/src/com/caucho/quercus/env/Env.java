@@ -1129,9 +1129,9 @@ public class Env {
   /**
    * Returns the configuration value of an init var.
    */
-  public Value getConfigVar(String var)
+  public Value getConfigVar(String name)
   {
-    return _quercus.getIniAsStringValue(var);
+    return getIniDefinition(name).getValue(_quercus);
   }
 
   /**

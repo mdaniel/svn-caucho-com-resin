@@ -32,14 +32,14 @@ package com.caucho.quercus.env;
 import java.io.*;
 
 /**
- * Represents a 8-bit binary builder
+ * Represents a 8-bit PHP 5 style binary builder
  */
 public class BytesBuilderValue
   extends BytesValue
   implements Serializable
 {
-  private byte []_buffer;
-  private int _length;
+  protected byte []_buffer;
+  protected int _length;
 
   private String _value;
 
@@ -83,31 +83,29 @@ public class BytesBuilderValue
     }
   }
 
-  public BytesBuilderValue(String value)
+  /**
+   * @param string the value as a Java string
+   * @param encoding the original encoding of the binary data
+   */
+  public BytesBuilderValue(String string, String encoding)
   {
-    this(value.getBytes());
-  }
+    // XXX: encoding
 
-  public BytesBuilderValue(String value, boolean isBytes)
-  {
-    int length = value.length();
-    
-    if (isBytes) {
-      _buffer = new byte[length];
-      _length = length;
-      
-      for (int i = 0; i < length; i++) {
-        _buffer[i] = (byte)value.charAt(i);
-      }
-    }
-    else {
-      _buffer = new byte[length];
-      _length = length;
+    int length = string.length();
 
-      System.arraycopy(value.getBytes(), 0, _buffer, 0, length);
+    _buffer = new byte[length];
+    _length = length;
+
+    for (int i = 0; i < length; i++) {
+      _buffer[i] = (byte) string.charAt(i);
     }
   }
-  
+
+  protected BytesValue copy(byte[] buffer, int offset, int length)
+  {
+    return new BytesBuilderValue(buffer, offset, length);
+  }
+
   /**
    * Returns the value.
    */
@@ -119,6 +117,7 @@ public class BytesBuilderValue
   /**
    * Returns the type.
    */
+  @Override
   public String getType()
   {
     return "string";
@@ -127,6 +126,7 @@ public class BytesBuilderValue
   /**
    * Returns true for a long
    */
+  @Override
   public boolean isLongConvertible()
   {
     byte []buffer = _buffer;
@@ -156,6 +156,7 @@ public class BytesBuilderValue
   /**
    * Returns true for a number
    */
+  @Override
   public boolean isNumber()
   {
     return getNumericType() != IS_STRING;
@@ -164,6 +165,7 @@ public class BytesBuilderValue
   /**
    * Returns true for a scalar
    */
+  @Override
   public boolean isScalar()
   {
     return true;
@@ -172,6 +174,7 @@ public class BytesBuilderValue
   /**
    * Converts to a double.
    */
+  @Override
   protected int getNumericType()
   {
     byte []buffer = _buffer;
@@ -227,6 +230,7 @@ public class BytesBuilderValue
   /**
    * Converts to a boolean.
    */
+  @Override
   public boolean toBoolean()
   {
     if (_length == 0)
@@ -240,6 +244,7 @@ public class BytesBuilderValue
   /**
    * Converts to a long.
    */
+  @Override
   public long toLong()
   {
     return toLong(_buffer, 0, _length);
@@ -248,6 +253,7 @@ public class BytesBuilderValue
   /**
    * Converts to a double.
    */
+  @Override
   public double toDouble()
   {
     byte []buffer = _buffer;
@@ -300,6 +306,7 @@ public class BytesBuilderValue
   /**
    * Convert to an input stream.
    */
+  @Override
   public InputStream toInputStream()
   {
     return new BuilderInputStream();
@@ -308,6 +315,7 @@ public class BytesBuilderValue
   /**
    * Converts to a string.
    */
+  @Override
   public String toString()
   {
     // XXX: encoding
@@ -320,6 +328,7 @@ public class BytesBuilderValue
   /**
    * Converts to an object.
    */
+  @Override
   public Object toJavaObject()
   {
     if (_value == null)
@@ -334,12 +343,14 @@ public class BytesBuilderValue
   @Override
   public StringValue toStringBuilder()
   {
-    return new BytesBuilderValue(_buffer, 0, _length);
+    // XXX: can this just return this, or does it need to return a copy?
+    return copy(_buffer, 0, _length);
   }
   
   /**
    * Append to a string builder.
    */
+  @Override
   public void appendTo(BytesBuilderValue bb)
   {
     bb.append(_buffer, 0, _length);
@@ -348,6 +359,7 @@ public class BytesBuilderValue
   /**
    * Converts to a key.
    */
+  @Override
   public Value toKey()
   {
     byte []buffer = _buffer;
@@ -475,12 +487,8 @@ public class BytesBuilderValue
   {
     if (end <= start)
       return StringValue.EMPTY;
-    
-    byte []newBuffer = new byte[end - start];
-    
-    System.arraycopy(_buffer, start, newBuffer, 0, end - start);
-		     
-    return new BytesBuilderValue(newBuffer, 0, end - start);
+
+    return copy(_buffer, start, end - start);
   }
 
   //
@@ -642,12 +650,9 @@ public class BytesBuilderValue
       return v.toStringBuilder();
     else {
       // php/033a
-      BytesBuilderValue bb = new BytesBuilderValue();
+      v.appendTo(this);
 
-      appendTo(bb);
-      v.appendTo(bb);
-
-      return bb;
+      return this;
     }
   }
 
@@ -677,6 +682,7 @@ public class BytesBuilderValue
   /**
    * Append a byte to the value.
    */
+  @Override
   public final StringValue append(byte v)
   {
     if (_buffer.length < _length + 1)
@@ -812,6 +818,7 @@ public class BytesBuilderValue
   /**
    * Returns the hash code.
    */
+  @Override
   public int hashCode()
   {
     int hash = 37;
@@ -825,7 +832,8 @@ public class BytesBuilderValue
 
     return hash;
   }
-  
+
+  @Override
   public boolean equals(Object o)
   {
     if (o instanceof BytesBuilderValue) {
@@ -866,18 +874,13 @@ public class BytesBuilderValue
    *
    * @param out the writer to the Java source code.
    */
+  @Override
   public void generate(PrintWriter out)
     throws IOException
   {
-    StringBuilder sb = new StringBuilder();
-    
-    for (int i = 0; i < _length; i++) {
-      sb.append((char)_buffer[i]);
-    }
-    
-    out.print("new BytesBuilderValue(\"");
-    printJavaString(out, sb.toString());
-    out.print("\", true)");
+    out.print("new InternBytesValue(\"");
+    printJavaString(out, this);
+    out.print("\", \"UTF-8\")");
   }
   
   //
@@ -906,6 +909,7 @@ public class BytesBuilderValue
     /**
      * Reads the next byte.
      */
+    @Override
     public int read()
     {
       if (_offset < _length)
@@ -917,6 +921,7 @@ public class BytesBuilderValue
     /**
      * Reads into a buffer.
      */
+    @Override
     public int read(byte []buffer, int offset, int length)
     {
       int sublen = _length - _offset;
@@ -941,6 +946,7 @@ public class BytesBuilderValue
     /**
      * Reads the next byte.
      */
+    @Override
     public int read()
     {
       if (_index < _length)
@@ -952,6 +958,7 @@ public class BytesBuilderValue
     /**
      * Reads into a buffer.
      */
+    @Override
     public int read(byte []buffer, int offset, int length)
     {
       int sublen = _length - _index;
@@ -974,6 +981,7 @@ public class BytesBuilderValue
     /**
      * Writes the next byte.
      */
+    @Override
     public void write(int ch)
     {
       append(ch);
@@ -982,6 +990,7 @@ public class BytesBuilderValue
     /**
      * Reads into a buffer.
      */
+    @Override
     public void write(byte []buffer, int offset, int length)
     {
       append(buffer, offset, length);
