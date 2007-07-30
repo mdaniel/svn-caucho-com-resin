@@ -101,11 +101,11 @@ public class Resin implements EnvironmentBean, SchemaBean
 
   private static final String OBJECT_NAME= "resin:type=Resin";
 
-  private static final EnvironmentLocal<Resin> _resinLocal =
-    new EnvironmentLocal<Resin>();
+  private static final EnvironmentLocal<Resin> _resinLocal
+    = new EnvironmentLocal<Resin>();
 
-  private final EnvironmentLocal<String> _serverIdLocal =
-    new EnvironmentLocal<String>("caucho.server-id");
+  private final EnvironmentLocal<String> _serverIdLocal
+    = new EnvironmentLocal<String>("caucho.server-id");
 
   private ObjectName _objectName;
 
@@ -212,6 +212,9 @@ public class Resin implements EnvironmentBean, SchemaBean
       if (serverRoot != null)
 	setRootDirectory(Vfs.lookup(serverRoot));
 
+      // default server id
+      setServerId("");
+      
       // watchdog/0212
       // else
       //  setRootDirectory(Vfs.getPwd());
@@ -468,31 +471,6 @@ public class Resin implements EnvironmentBean, SchemaBean
   public ServerCompatConfig createServer()
   {
     return new ServerCompatConfig(this);
-    /*
-    if (Alarm.isTest() && _servers.size() == 1) {
-      _servers.get(0).addConfigDefault(config);
-    }
-    else {
-      String id = config.getId();
-
-      if (id != null && ! id.equals("")) {
-      }
-      else
-        id = String.valueOf(_servers.size());
-
-      ServerController controller = new ServerController(config);
-      controller.setResin(this);
-
-      _servers.add(controller);
-
-      // XXX: controller.addServerListener(this);
-
-      controller.setServerId(_serverId);
-      controller.setConfig(config);
-
-      controller.init();
-    }
-    */
   }
 
   /**
@@ -821,26 +799,6 @@ public class Resin implements EnvironmentBean, SchemaBean
     }
   }
 
-  /**
-   * Create a new Resin server.
-   *
-   * @param argv the command-line to initialize Resin with
-   * @param isHttp default to http
-   */
-  /*
-  public Resin(String []argv)
-    throws Exception
-  {
-    _systemClassLoader = Thread.currentThread().getContextClassLoader();
-    _startTime = Alarm.getCurrentTime();
-
-    _resinHome = CauchoSystem.getResinHome();
-    _serverRoot = _resinHome;
-
-    parseCommandLine(argv);
-  }
-  */
-
   private void parseCommandLine(String []argv)
     throws Exception
   {
@@ -887,7 +845,7 @@ public class Resin implements EnvironmentBean, SchemaBean
       else if (i + 1 < len &&
                (argv[i].equals("-server") ||
                 argv[i].equals("--server"))) {
-	_serverId = argv[i + 1];
+	setServerId(argv[i + 1]);
 	i += 2;
       }
       else if (argv[i].equals("-version")
