@@ -624,7 +624,7 @@ r_rewrite-dispatch-Contents =
        r_rewrite-conditions-Type
      }*
 
-   & rcore_import
+   & rcore_import?
 
    & element import {
 

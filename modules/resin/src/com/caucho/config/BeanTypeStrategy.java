@@ -193,6 +193,10 @@ public class BeanTypeStrategy extends TypeStrategy {
 	    _addDependency.invoke(bean, ((PersistentDependency) depend));
 	}
       }
+
+      for (int i = 0; i < _injectList.size(); i++) {
+        _injectList.get(i).configure(builder, bean);
+      }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

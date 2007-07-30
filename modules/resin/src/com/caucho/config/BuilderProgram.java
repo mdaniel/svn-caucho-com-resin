@@ -68,6 +68,15 @@ public abstract class BuilderProgram {
       configureImpl(NodeBuilder.createForProgram(), bean);
   }
 
+  /**
+   * Configures the object.
+   */
+  public void configure(NodeBuilder builder, Object bean)
+    throws ConfigException
+  {
+    configureImpl(NodeBuilder.getCurrentBuilder(), bean);
+  }
+
   public Object configure(Class type)
     throws ConfigException
   {
