@@ -1475,6 +1475,10 @@ public class Quercus
     _superGlobals.add("_REQUEST");
   }
 
+  public static final IniDefinition INI_INCLUDE_PATH
+    = _ini.add("include_path", "", IniDefinition.PHP_INI_ALL);
+  public static final IniDefinition INI_REGISTER_LONG_ARRAYS
+    = _ini.add("register_long_arrays", true, IniDefinition.PHP_INI_PERDIR);
   public static final IniDefinition INI_UNICODE_SEMANTICS
     = _ini.add("unicode.semantics", true, IniDefinition.PHP_INI_SYSTEM);
   public static final IniDefinition INI_UNICODE_FALLBACK_ENCODING

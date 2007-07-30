@@ -31,9 +31,9 @@ package com.caucho.quercus.module;
 
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.NullValue;
 
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -41,8 +41,6 @@ import java.util.Set;
 
 public class IniDefinitions {
   public static final IniDefinitions EMPTY = new IniDefinitions();
-
-  public static final IniDefinition NULL_DEFINITION = IniDefinition.NULL;
 
   private IdentityHashMap<String, IniDefinition> _defaultMap;
 
@@ -150,14 +148,19 @@ public class IniDefinitions {
 
   public IniDefinition get(String name)
   {
-    if (_defaultMap == null)
-      return NULL_DEFINITION;
+    name = name.intern();
 
-    IniDefinition iniDefinition = _defaultMap.get(name.intern());
+    IniDefinition iniDefinition = _defaultMap == null ? null : _defaultMap.get(name);
 
-    if (iniDefinition == null)
-      return NULL_DEFINITION;
-    else
-      return iniDefinition;
+    if (iniDefinition == null) {
+      iniDefinition = new IniDefinition(name,
+                                        IniDefinition.Type.STRING,
+                                        NullValue.NULL,
+                                        IniDefinition.PHP_INI_ALL);
+
+      add(iniDefinition);
+    }
+
+    return iniDefinition;
   }
 }

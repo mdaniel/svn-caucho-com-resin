@@ -288,12 +288,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value get_include_path(Env env)
   {
-    Value value = env.getIni("include_path");
-
-    if (value != null)
-      return value;
-    else
-      return StringValue.EMPTY;
+    return Quercus.INI_INCLUDE_PATH.getAsStringValue(env);
   }
 
   /**
@@ -897,8 +892,6 @@ public class OptionsModule extends AbstractQuercusModule {
     = _iniDefinitions.add("auto_globals_jit", "1", PHP_INI_ALL);
   static final IniDefinition INI_REGISTER_ARGC_ARGV
     = _iniDefinitions.add("register_argc_argv", true, PHP_INI_ALL);
-  static final IniDefinition INI_REGISTER_LONG_ARRAYS
-    = _iniDefinitions.add("register_long_arrays", true, PHP_INI_ALL);
   static final IniDefinition INI_POST_MAX_SIZE
     = _iniDefinitions.add("post_max_size", "8M", PHP_INI_ALL);
   static final IniDefinition INI_GPC_ORDER

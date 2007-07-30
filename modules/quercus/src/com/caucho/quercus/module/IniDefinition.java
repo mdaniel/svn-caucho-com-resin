@@ -43,8 +43,7 @@ public class IniDefinition {
   public static final int PHP_INI_SYSTEM = 4;
   public static final int PHP_INI_ALL = 7;
 
-  public static IniDefinition NULL
-    = new IniDefinition("#null", IniDefinition.Type.STRING, NullValue.NULL, PHP_INI_ALL);
+  public static IniDefinition NULL = new Null();
 
   private final String _name;
   private final int _scope;
@@ -86,7 +85,8 @@ public class IniDefinition {
     String valueAsString = value.toString().trim();
 
     if (valueAsString.equalsIgnoreCase("false")
-        || valueAsString.equalsIgnoreCase("off"))
+        || valueAsString.equalsIgnoreCase("off")
+        || valueAsString.equalsIgnoreCase("0"))
       return BooleanValue.FALSE;
     else
       return BooleanValue.TRUE;
@@ -135,30 +135,38 @@ public class IniDefinition {
                      int scope,
                      Value value)
   {
-    if ((_scope & scope) == 0) {
+    System.out.println("XXX: set " + _name + " " + value.getClass() + " " + value);
+
+    if (scope == PHP_INI_USER
+        && !(_scope == PHP_INI_USER || _scope == PHP_INI_ALL))
+    {
       // do nothing
+      System.out.println("XXX: set out of scope");
     }
-    else if (_type == Type.BOOLEAN)
+    else if (_type == Type.BOOLEAN) {
       map.put(_name, toBooleanValue(value));
+    }
     else if (_type == Type.LONG)
       map.put(_name, value.toLongValue());
     else
       map.put(_name, value);
   }
 
-  private Value get(IdentityHashMap<String, Value> overrideMap,
-                    IdentityHashMap<String, Value> iniMap)
+  private Value get(IdentityHashMap<String, Value> envMap,
+                    IdentityHashMap<String, Value> quercusMap)
   {
     Value value =  null;
 
-    if (overrideMap != null)
-      value = overrideMap.get(_name);
+    if (envMap != null)
+      value = envMap.get(_name);
 
-    if (value == null && iniMap != null)
-      value = iniMap.get(_name);
+    if (value == null && quercusMap != null)
+      value = quercusMap.get(_name);
 
     if (value == null)
       value = _deflt;
+
+    System.out.println("XXX: get " + _name + " " + value.getClass() + " " + value);
 
     return value;
   }
@@ -178,10 +186,7 @@ public class IniDefinition {
   {
     Value value = get(overrideMap, iniMap);
 
-    if (value instanceof BooleanValue)
-      return value.toBoolean() ? new InternUnicodeValue("1") : new InternUnicodeValue("0");
-    else
-      return value.toStringValue();
+    return value.toStringValue();
   }
 
   /**
@@ -192,6 +197,11 @@ public class IniDefinition {
     StringValue value = getAsStringValue(env);
 
     return (value.length() == 0) ? null : value.toString();
+  }
+
+  public boolean getAsBoolean(Quercus quercus)
+  {
+    return getAsBooleanValue(quercus).toBoolean();
   }
 
   public boolean getAsBoolean(Env env)
@@ -312,6 +322,28 @@ public class IniDefinition {
                     int scope,
                     Value value)
     {
+      Env.getInstance().warning(L.l("ini value `{0}' is not supported", getName()));
+    }
+  }
+
+  static private class Null
+    extends Unsupported
+  {
+    private L10N L = new L10N(Unsupported.class);
+
+    public Null()
+    {
+     super("#null", IniDefinition.Type.STRING, NullValue.NULL, PHP_INI_ALL);
+    }
+
+    @Override
+    public void set(IdentityHashMap<String, Value> map,
+                    int scope,
+                    Value value)
+    {
+      if (true)
+        throw new UnsupportedOperationException();
+
       Env.getInstance().warning(L.l("ini value `{0}' is not supported", getName()));
     }
   }

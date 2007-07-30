@@ -1520,7 +1520,7 @@ public class Env {
     }
 
     case HTTP_POST_VARS:
-      if (! getIniBoolean("register_long_arrays"))
+      if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
 	return null;
     case _POST: {
       var = new Var();
@@ -1547,7 +1547,7 @@ public class Env {
 
 
     case HTTP_POST_FILES:
-      if (! getIniBoolean("register_long_arrays"))
+      if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
 	return null;
     case _FILES: {
       var = new Var();
@@ -1567,7 +1567,7 @@ public class Env {
     break;
 
     case HTTP_GET_VARS:
-      if (! getIniBoolean("register_long_arrays"))
+      if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
         return null;
       
     case _GET: {
@@ -1640,7 +1640,7 @@ public class Env {
     }
 
     case HTTP_SERVER_VARS:
-      if (! getIniBoolean("register_long_arrays"))
+      if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
 	return null;
     case _SERVER: {
       var = new Var();
@@ -1663,7 +1663,7 @@ public class Env {
     }
 
     case HTTP_COOKIE_VARS:
-      if (! getIniBoolean("register_long_arrays"))
+      if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
 	return null;
     case _COOKIE: {
       var = new Var();
@@ -3354,7 +3354,7 @@ public class Env {
 
   private Path lookupInclude(String include, Path pwd, Path scriptPwd)
   {
-    String includePath = getIniString("include_path");
+    String includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
 
     if (includePath == null)
       includePath = ".";
@@ -3416,7 +3416,8 @@ public class Env {
    */
   private ArrayList<Path> getIncludePath(Path pwd)
   {
-    String includePath = getIniString("include_path");
+    String includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
+
 
     if (includePath == null)
       includePath = ".";
@@ -3466,12 +3467,12 @@ public class Env {
    */
   public String setIncludePath(String path)
   {
-    _prevIncludePath = getIniString("include_path");
+    _prevIncludePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
 
     if (_prevIncludePath == null)
       _prevIncludePath = "";
 
-    setIni("include_path", path);
+    Quercus.INI_INCLUDE_PATH.set(this, path);
 
     return _prevIncludePath;
   }
@@ -3481,9 +3482,9 @@ public class Env {
    */
   public void restoreIncludePath()
   {
-    String path = getIniString("include_path");
+    String path = Quercus.INI_INCLUDE_PATH.getAsString(this);
 
-    setIni("include_path", _prevIncludePath);
+    Quercus.INI_INCLUDE_PATH.set(this, _prevIncludePath);
 
     _prevIncludePath = path;
   }

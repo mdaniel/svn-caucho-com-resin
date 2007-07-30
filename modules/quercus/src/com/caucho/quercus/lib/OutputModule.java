@@ -80,17 +80,21 @@ public class OutputModule extends AbstractQuercusModule
 
   public void startup(Env env)
   {
-    String handlerName = env.getConfigVar("output_handler").toString();
+    boolean isOutputBuffering = INI_OUTPUT_BUFFERING.getAsBoolean(env);
+    String handlerName = INI_OUTPUT_HANDLER.getAsString(env);
 
-    if (! "".equals(handlerName) && env.getFunction(handlerName) != null) {
+    if (handlerName != null
+        && ! "".equals(handlerName)
+        && env.getFunction(handlerName) != null)
+    {
       Callback callback = env.createCallback(new UnicodeValueImpl(handlerName));
 
       ob_start(env, callback, 0, true);
-    } else if (env.getConfigVar("output_buffering").toBoolean()) {
+    } else if (isOutputBuffering) {
       ob_start(env, null, 0, true);
     }
 
-    ob_implicit_flush(env, env.getConfigVar("output_buffering").toBoolean());
+    ob_implicit_flush(env, isOutputBuffering);
   }
 
   /**
