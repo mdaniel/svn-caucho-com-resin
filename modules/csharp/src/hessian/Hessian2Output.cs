@@ -79,6 +79,26 @@ public class Hessian2Output
   public const int INT_SHORT_MAX = 0x3ffff;
   public const int INT_SHORT_ZERO = 0xd4;
 
+  public const long LONG_DIRECT_MIN = -0x08;
+  public const long LONG_DIRECT_MAX =  0x0f;
+  public const int LONG_ZERO = 0xe0;
+
+  public const long LONG_BYTE_MIN = -0x800;
+  public const long LONG_BYTE_MAX =  0x7ff;
+  public const int LONG_BYTE_ZERO = 0xf8;
+
+  public const int LONG_SHORT_MIN = -0x40000;
+  public const int LONG_SHORT_MAX = 0x3ffff;
+  public const int LONG_SHORT_ZERO = 0x3c;
+
+  public const int LONG_INT = 0x77;
+
+  public const int DOUBLE_ZERO = 0x67;
+  public const int DOUBLE_ONE = 0x68;
+  public const int DOUBLE_BYTE = 0x69;
+  public const int DOUBLE_SHORT = 0x6a;
+  public const int DOUBLE_FLOAT = 0x6b;
+
   private Stream _os;
 
   public Hessian2Output(Stream os)
@@ -96,12 +116,145 @@ public class Hessian2Output
     if (INT_DIRECT_MIN <= v && v <= INT_DIRECT_MAX) {
       _os.WriteByte((byte) (INT_ZERO + v));
     }
+    else if (INT_BYTE_MIN <= v && v <= INT_BYTE_MAX) {
+      _os.WriteByte((byte) (INT_BYTE_ZERO + (v >> 8)));
+      _os.WriteByte((byte) (v));
+    }
+    else if (INT_SHORT_MIN <= v && v <= INT_SHORT_MAX) {
+      _os.WriteByte((byte) (INT_SHORT_ZERO + (v >> 16)));
+      _os.WriteByte((byte) (v >> 8));
+      _os.WriteByte((byte) (v));
+    }
     else {
       _os.WriteByte((byte) 'I');
       _os.WriteByte((byte) (v >> 24));
       _os.WriteByte((byte) (v >> 16));
       _os.WriteByte((byte) (v >> 8));
       _os.WriteByte((byte) (v));
+    }
+  }
+
+  public void WriteLong(long v)
+  {
+    if (LONG_DIRECT_MIN <= v && v <= LONG_DIRECT_MAX) {
+      _os.WriteByte((byte) (LONG_ZERO + v));
+    }
+    else if (LONG_BYTE_MIN <= v && v <= LONG_BYTE_MAX) {
+      _os.WriteByte((byte) (LONG_BYTE_ZERO + (v >> 8)));
+      _os.WriteByte((byte) (v));
+    }
+    else if (LONG_SHORT_MIN <= v && v <= LONG_SHORT_MAX) {
+      _os.WriteByte((byte) (LONG_SHORT_ZERO + (v >> 16)));
+      _os.WriteByte((byte) (v >> 8));
+      _os.WriteByte((byte) (v));
+    }
+    else {
+      _os.WriteByte((byte) 'L');
+      _os.WriteByte((byte) (v >> 56));
+      _os.WriteByte((byte) (v >> 48));
+      _os.WriteByte((byte) (v >> 40));
+      _os.WriteByte((byte) (v >> 32));
+      _os.WriteByte((byte) (v >> 24));
+      _os.WriteByte((byte) (v >> 16));
+      _os.WriteByte((byte) (v >> 8));
+      _os.WriteByte((byte) (v));
+    }
+  }
+
+  public void WriteDouble(double v)
+  {
+    if (v == 0.0) {
+      _os.WriteByte((byte) (DOUBLE_ZERO));
+      return;
+    }
+    else if (v == 1.0) {
+      _os.WriteByte((byte) (DOUBLE_ONE));
+      return;
+    }
+
+    int intValue = (int) v;
+
+    if (intValue != v) {
+    }
+    else if (-0x80 <= intValue && intValue < 0x80) {
+      _os.WriteByte((byte) DOUBLE_BYTE);
+      _os.WriteByte((byte) intValue);
+      return;
+    }
+    else if (-0x8000 <= intValue && intValue < 0x8000) {
+      _os.WriteByte((byte) DOUBLE_SHORT);
+      _os.WriteByte((byte) (intValue >> 8));
+      _os.WriteByte((byte) (intValue));
+      return;
+    }
+/*
+      _os.WriteByte((byte) 'D');
+      _os.WriteByte((byte) (v >> 56));
+      _os.WriteByte((byte) (v >> 48));
+      _os.WriteByte((byte) (v >> 40));
+      _os.WriteByte((byte) (v >> 32));
+      _os.WriteByte((byte) (v >> 24));
+      _os.WriteByte((byte) (v >> 16));
+      _os.WriteByte((byte) (v >> 8));
+      _os.WriteByte((byte) (v));
+*/
+  }
+
+  public void WriteString(string v)
+  {
+    if (v == null) {
+      _os.WriteByte((byte) 'N');
+      return;
+    }
+
+    int length = v.Length;
+    int offset = 0;
+
+    while (length >= 0x4000) {
+      length -= 0x4000;
+
+      for (int sublen = 0x4000; sublen > 0; sublen--) {
+        int ch = v[offset++];
+
+        if (ch < 0x80) {
+          _os.WriteByte((byte) ch);
+        }
+        else if (ch < 0x800) {
+          _os.WriteByte((byte) (0xc0 + (ch >> 6)));
+          _os.WriteByte((byte) (0x80 + (ch & 0x3f)));
+        }
+        else {
+          _os.WriteByte((byte) (0xe0 + (ch >> 12)));
+          _os.WriteByte((byte) (0x80 + ((ch >> 6) & 0x3f)));
+          _os.WriteByte((byte) (0x80 + (ch & 0x3f)));
+        }
+      }
+    }
+
+    if (length < 0x20) {
+      _os.WriteByte((byte) length);
+    }
+    else {
+      _os.WriteByte((byte) 'S');
+      _os.WriteByte((byte) (length >> 8));
+      _os.WriteByte((byte) length);
+    }
+
+    for (; length > 0; length--) {
+      int ch = v[offset++];
+
+      if (ch < 0x80) {
+        _os.WriteByte((byte) ch);
+      }
+      else if (ch < 0x800) {
+        _os.WriteByte((byte) (0xc0 + (ch >> 6)));
+        _os.WriteByte((byte) (0x80 + (ch & 0x3f)));
+      }
+      else {
+        _os.WriteByte((byte) (0xe0 + (ch >> 12)));
+        _os.WriteByte((byte) (0x80 + ((ch >> 6) & 0x3f)));
+        _os.WriteByte((byte) (0x80 + (ch & 0x3f)));
+      }
     }
   }
 }
