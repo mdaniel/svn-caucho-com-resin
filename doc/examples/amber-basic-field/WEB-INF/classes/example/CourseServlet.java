@@ -69,5 +69,20 @@ public class CourseServlet extends HttpServlet {
       out.println("teacher: " + course.teacher() + "<br>");
       out.println("<br>");
     }
+
+    out.println("<h3>Add a Course</h3>");
+    
+    _manager.getTransaction().begin();
+    try {
+      _manager.persist(new Course("Charms", "Professor Flitwick"));
+    } finally {
+      _manager.getTransaction().commit();
+    }
+    
+    for (Course course : (List<Course>) query.getResultList()) {
+      out.println("course: " + course.course() + "<br>");
+      out.println("teacher: " + course.teacher() + "<br>");
+      out.println("<br>");
+    }
   }
 }

@@ -34,6 +34,6 @@ import javax.servlet.ServletException;
 
 public interface FilterChainMapper
 {
-  public FilterChain map(String uri, FilterChain accept)
+  public FilterChain map(String uri, String queryString, FilterChain accept)
     throws ServletException;
 }

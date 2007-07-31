@@ -380,26 +380,26 @@ public class MatchRule
   private class FirstFilterChainMapper
     implements FilterChainMapper
   {
-    public FilterChain map(String uri, FilterChain accept)
+    public FilterChain map(String uri, String queryString, FilterChain accept)
       throws ServletException
     {
       if (_firstRule != null)
-        return _firstRule.map(uri, accept);
+        return _firstRule.map(uri, queryString, accept);
       else
-        return _lastFilterChainMapper.map(uri, accept);
+        return _lastFilterChainMapper.map(uri, queryString, accept);
     }
   }
 
   private class LastFilterChainMapper
     implements FilterChainMapper
   {
-    public FilterChain map(String uri, FilterChain accept)
+    public FilterChain map(String uri, String queryString, FilterChain accept)
       throws ServletException
     {
       FilterChainMapper failFilterChainMapper = getFailFilterChainMapper();
 
       if (failFilterChainMapper != null)
-        return failFilterChainMapper.map(uri, accept);
+        return failFilterChainMapper.map(uri, queryString, accept);
       else
         return accept;
     }

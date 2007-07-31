@@ -559,7 +559,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })),
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })),
 
        r_rewrite-conditions-Type
    }*
@@ -578,7 +580,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })),
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })),
 
        r_rewrite-conditions-Type
      }*
@@ -597,7 +601,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })
 
         & (attribute target { string }
            | element target { string })),
@@ -619,7 +625,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })),
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })),
 
        r_rewrite-conditions-Type
      }*
@@ -665,7 +673,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })),
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })),
 
        ((attribute cluster { string }
          | element cluster { string })
@@ -696,7 +706,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })),
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })),
 
        r_rewrite-conditions-Type,
 
@@ -717,7 +729,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })
 
         & (attribute target { string }
            | element target { string })),
@@ -739,7 +753,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })),
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })),
 
        r_rewrite-conditions-Type
      }*
@@ -758,7 +774,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })),
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })),
 
        (attribute address { string }
         | element address { string })+,
@@ -780,7 +798,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })
 
         & (attribute target { string }
            | element target { string })),
@@ -802,7 +822,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })
+           | element regexp { string }
+           | attribute full-url-regexp { string }
+           | element full-url-regexp { string })
 
         & (attribute replacement { string }
            | element replacement { string })),
@@ -824,7 +846,9 @@ r_rewrite-dispatch-Contents =
            | element name { string })?
 
         & (attribute regexp { string }
-           | element regexp { string })?
+           | element regexp { string }
+           | attribute url-regexp { string }
+           | element url-regexp { string })?
 
         & (attribute request-character-encoding { string }
            | element request-character-encoding { string })?

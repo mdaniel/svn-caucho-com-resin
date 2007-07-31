@@ -232,7 +232,7 @@ public class NodeBuilder {
       TypeStrategy typeStrategy
         = TypeStrategyFactory.getTypeStrategy(bean.getClass());
 
-      QName qName = ((QNode) attribute).getQName();
+      QName qName = ((QAbstractNode) attribute).getQName();
 
       configureChildNode(attribute, qName, bean, typeStrategy);
     }
@@ -352,6 +352,21 @@ public class NodeBuilder {
       return;
 
     Object childBean = createResinType(childNode);
+    
+    if (childBean == null
+        && attrStrategy.isBean()
+        && ! hasChildren(childNode)) {
+      String value = textValue(childNode);
+
+      if (isEL() && value != null
+          && value.startsWith("${") && value.endsWith("}")) {
+        childBean = evalObject(value);
+
+        attrStrategy.setAttribute(bean, qName, childBean);
+        
+	return;
+      }
+    }
 
     if (childBean == null)
       childBean = attrStrategy.create(this, bean);

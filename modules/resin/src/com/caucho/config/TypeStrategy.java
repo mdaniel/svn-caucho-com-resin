@@ -57,6 +57,11 @@ public abstract class TypeStrategy {
     return null;
   }
 
+  public boolean isBean()
+  {
+    return false;
+  }
+
   /**
    * Sets the object's parent
    *

@@ -154,20 +154,20 @@ package example;
 
 import javax.persistence.*;
 
-<a href="doc|amber-table.xtp#@Entity">@Entity</a>
-<a href="doc|amber-table.xtp#@Table">@Table</a>(name="amber_basic_course")
+@Entity
+@Table(name="amber_basic_course")
 public class Course {
-  <a href="doc|amber-table.xtp#@Id">@Id</a>
-  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="id")
-  <a href="doc|amber-table.xtp#@GeneratedValue">@GeneratedValue</a>
+  @Id
+  @Column(name="id")
+  @GeneratedValue
   private int _id;
 
-  <a href="doc|amber-table.xtp#@Basic">@Basic</a>
-  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="course")
+  @Basic
+  @Column(name="course")
   private String _course;
 
-  <a href="doc|amber-table.xtp#@Basic">@Basic</a>
-  <a href="doc|amber-table.xtp#@Column">@Column</a>(name="teacher")
+  @Basic
+  @Column(name="teacher")
   private String _teacher;
 
   public String course()

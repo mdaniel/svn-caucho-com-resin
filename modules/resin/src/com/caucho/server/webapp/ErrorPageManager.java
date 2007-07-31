@@ -229,10 +229,10 @@ public class ErrorPageManager {
 
       if (location != null || ! lookupErrorPage) {
       }
-      else if (rootExn instanceof LineMapException &&
-	       rootExn instanceof ServletException &&
-	       ! (rootExn instanceof LineCompileException) &&
-	       rootExn.getCause() != null) {
+      else if (rootExn instanceof LineMapException
+               && rootExn instanceof ServletException
+               && ! (rootExn instanceof LineCompileException)
+               && rootExn.getCause() != null) {
 	// hack to deal with JSP wrapping
       }
       else if (! isServletException) {
@@ -250,8 +250,8 @@ public class ErrorPageManager {
 	lookupErrorPage = false;
 
       Throwable cause = null;
-      if (rootExn instanceof ServletException &&
-	  ! (rootExn instanceof LineCompileException))
+      if (rootExn instanceof ServletException
+          && ! (rootExn instanceof LineCompileException))
         cause = ((ServletException) rootExn).getRootCause();
       else {
 	lookupErrorPage = false;
@@ -388,9 +388,9 @@ public class ErrorPageManager {
 
     out.println("<html>");
     if (! response.isCommitted())
-      out.println("<head><title>" + title + "</title></head>");
+      out.println("<head><title>" + escapeHtml(title) + "</title></head>");
     out.println("<body>");
-    out.println("<h1>" + title + "</h1>");
+    out.println("<h1>" + escapeHtml(title) + "</h1>");
 
     out.println("<code><pre>");
     
@@ -496,7 +496,7 @@ public class ErrorPageManager {
 
       if (code == HttpServletResponse.SC_NOT_FOUND) {
         out.println(L.l("{0} was not found on this server.",
-                        HTTPUtil.encodeString(request.getPageURI())));
+                        escapeHtml(request.getPageURI())));
       }
 
       String version = null;
@@ -703,6 +703,8 @@ public class ErrorPageManager {
 	cb.append("&lt;");
       else if (ch == '&')
 	cb.append("&amp;");
+      else if (ch == '%')
+	cb.append("%25");
       else if (ch == '\n' || ch == '\r') {
         lineCharacter = 0;
 	cb.append(ch);

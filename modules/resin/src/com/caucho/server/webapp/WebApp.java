@@ -1991,6 +1991,7 @@ public class WebApp extends ServletContextImpl
 
           if (_rewriteDispatch != null) {
             chain = _rewriteDispatch.map(invocation.getContextURI(),
+                                         invocation.getQueryString(),
                                          chain);
           }
 

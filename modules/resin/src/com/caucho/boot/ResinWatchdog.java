@@ -387,8 +387,15 @@ public class ResinWatchdog extends AbstractManagedObject
 
     list.add("com.caucho.boot.ResinWatchdogManager");
 
-    for (int i = 0; i < argv.length; i++)
-      list.add(argv[i]);
+    for (int i = 0; i < argv.length; i++) {
+      if (argv[i].equals("-conf")
+          || argv[i].equals("--conf")) {
+        list.add(argv[i]);
+        list.add(resinHome.lookup(argv[i + 1]).getNativePath());
+      }
+      else
+        list.add(argv[i]);
+    }
 
     builder = builder.command(list);
 

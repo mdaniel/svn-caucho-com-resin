@@ -230,7 +230,7 @@ public class RewriteDispatch
   {
   }
 
-  public FilterChain map(String uri, FilterChain next)
+  public FilterChain map(String uri, String queryString, FilterChain next)
     throws ServletException
   {
     if (_isFinest)
@@ -248,7 +248,7 @@ public class RewriteDispatch
       _matchRule.init();
     }
 
-    return _matchRule.map(uri, next);
+    return _matchRule.map(uri, queryString, next);
   }
 
   public void clearCache()

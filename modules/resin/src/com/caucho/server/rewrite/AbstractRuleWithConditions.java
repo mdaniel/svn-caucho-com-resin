@@ -52,6 +52,7 @@ public abstract class AbstractRuleWithConditions
   private final boolean _isFinest;
 
   private Pattern _regexp;
+  private Pattern _urlRegexp;
 
   private ArrayList<Condition> _conditionList = new ArrayList<Condition>();
 
@@ -78,6 +79,20 @@ public abstract class AbstractRuleWithConditions
   public Pattern getRegexp()
   {
     return _regexp;
+  }
+
+  /**
+   * Sets the regular expression pattern that must match the uri for the
+   * rule to match, required.
+   */
+  public void setFullUrlRegexp(Pattern regexp)
+  {
+    _urlRegexp = regexp;
+  }
+
+  public Pattern getFullUrlRegexp()
+  {
+    return _urlRegexp;
   }
 
   /**
@@ -155,9 +170,9 @@ public abstract class AbstractRuleWithConditions
     super.init();
   }
 
-  public FilterChain map(
-    String uri,
-    FilterChain accept)
+  public FilterChain map(String uri,
+                         String queryString,
+                         FilterChain accept)
     throws ServletException
   {
 
@@ -165,23 +180,37 @@ public abstract class AbstractRuleWithConditions
       if (_isFinest)
         log.finest(getLogPrefix() + " not enabled, no match");
 
-      return getFailFilterChainMapper().map(uri, accept);
+      return getFailFilterChainMapper().map(uri, queryString, accept);
     }
 
     Matcher matcher;
 
-    if (_regexp == null)
-      matcher = null;
-    else {
+    if (_regexp != null) {
       matcher = _regexp.matcher(uri);
 
       if (!matcher.find()) {
         if (_isFinest)
           log.finest(getLogPrefix() + " does not match " + uri);
 
-        return getFailFilterChainMapper().map(uri, accept);
+        return getFailFilterChainMapper().map(uri, queryString, accept);
       }
     }
+    else if (_urlRegexp != null) {
+      String fullUrl;
+      
+      if (queryString != null)
+        fullUrl = uri + '?' + queryString;
+      else
+        fullUrl = uri;
+      
+      matcher = _urlRegexp.matcher(fullUrl);
+
+      if (! matcher.find()) {
+        return getFailFilterChainMapper().map(uri, queryString, accept);
+      }
+    }
+    else
+      matcher = null;
 
     String targetUri = rewrite(uri, matcher);
 
@@ -194,7 +223,7 @@ public abstract class AbstractRuleWithConditions
         log.finer(getLogPrefix() + " '" + uri + "' --> '" + targetUri + "'");
 
       if (ruleChain == null)
-        return getPassFilterChainMapper().map(uri, accept);
+        return getPassFilterChainMapper().map(uri, queryString, accept);
       else
         return ruleChain;
 
@@ -203,8 +232,7 @@ public abstract class AbstractRuleWithConditions
       FilterChain passChain = ruleChain;
 
       if (passChain == null) {
-        passChain = new ContinueMapFilterChain(
-          targetUri,
+        passChain = new ContinueMapFilterChain(targetUri,
                                                accept,
                                                getPassFilterChainMapper());
       }

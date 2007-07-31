@@ -608,24 +608,18 @@ public class ParseState {
   public void addImport(String importString)
     throws JspParseException
   {
-    StringCharCursor cursor = new StringCharCursor(importString);
-    CharBuffer cb = new CharBuffer();
-    while (cursor.current() != cursor.DONE) {
-      char ch;
-      COMMA_DELIM_SCANNER.skip(cursor);
+    String []imports = importString.split("[ \t\n\r,]+");
 
-      cb.clear();
-      ch = COMMA_DELIM_SCANNER.scan(cursor, cb);
-
-      if (cb.length() != 0) {
-        String value = cb.toString();
-
-        if (! _importList.contains(value))
-          _importList.add(value);
+    for (int i = 0; i < imports.length; i++) {
+      String value = imports[i];
+      
+      if (value.equals("static") && i + 1 < imports.length) {
+        value = "static " + imports[i + 1];
+        i++;
       }
-      else if (ch != cursor.DONE)
-        throw new JspParseException(L.l("`{0}' is an illegal page import directive.",
-                                        importString));
+
+      if (! _importList.contains(value))
+        _importList.add(value);
     }
   }
 

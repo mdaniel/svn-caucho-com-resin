@@ -42,8 +42,12 @@ import com.caucho.Version;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.lang.management.*;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.management.*;
 
 /**
  * ResinBoot is the main bootstrap class for Resin.  It parses the
@@ -81,7 +85,7 @@ public class ResinBoot {
   ResinBoot(String []argv)
     throws Exception
   {
-    _argv = argv;
+    _argv = fillArgv(argv);
     
     calculateResinHome();
     
@@ -165,6 +169,39 @@ public class ResinBoot {
     
     if (_isVerbose)
       _server.setVerbose(_isVerbose);
+  }
+
+  private String []fillArgv(String []argv)
+  {
+    ArrayList<String> args = new ArrayList<String>();
+
+    try {
+      MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+      ObjectName name = new ObjectName("java.lang:type=Runtime");
+      
+      String []jvmArgs = (String []) mbeanServer.getAttribute(name,
+                                                              "InputArguments");
+
+      if (jvmArgs != null) {
+        for (int i = 0; i < jvmArgs.length; i++) {
+          String arg = jvmArgs[i];
+
+          if (arg.startsWith("-D"))
+            args.add("-J" + arg);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    for (int i = 0; i < argv.length; i++)
+      args.add(argv[i]);
+
+    argv = new String[args.size()];
+
+    args.toArray(argv);
+
+    return argv;
   }
 
   private void calculateResinHome()

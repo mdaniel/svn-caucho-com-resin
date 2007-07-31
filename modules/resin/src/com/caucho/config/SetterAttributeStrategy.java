@@ -60,6 +60,11 @@ public class SetterAttributeStrategy extends AttributeStrategy {
     _typeStrategy = TypeStrategyFactory.getTypeStrategy(param[0]);
   }
 
+  public boolean isBean()
+  {
+    return _typeStrategy.isBean();
+  }
+
   /**
    * Creates an instance.
    */

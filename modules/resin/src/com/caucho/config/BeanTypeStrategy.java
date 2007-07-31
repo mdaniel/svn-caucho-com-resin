@@ -128,6 +128,12 @@ public class BeanTypeStrategy extends TypeStrategy {
     return _type;
   }
 
+  @Override
+  public boolean isBean()
+  {
+    return true;
+  }
+
   /**
    * Returns the type name.
    */
