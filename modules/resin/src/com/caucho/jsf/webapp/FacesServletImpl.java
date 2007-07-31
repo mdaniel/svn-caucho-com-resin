@@ -163,7 +163,7 @@ public class FacesServletImpl extends GenericServlet
     if (facesPath.canRead() && ! facesPath.isDirectory()) {
       try {
 	FacesConfig facesConfig = new FacesConfig();
-	
+
 	new Config().configure(facesConfig, facesPath, FACES_SCHEMA);
 
 	app.setNavigationHandler(facesConfig.getNavigationHandler());
@@ -178,6 +178,7 @@ public class FacesServletImpl extends GenericServlet
 	  }
 
 	  ApplicationConfig appConfig = facesConfig.getApplication();
+
 	  if (appConfig != null) {
 	    appConfig.configure(appImpl);
 	    

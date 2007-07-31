@@ -51,12 +51,10 @@ import javax.xml.bind.annotation.*;
 import com.caucho.config.*;
 import com.caucho.util.*;
 
-@XmlRootElement(name="factory")
 public class FactoryConfig
 {
   private static final L10N L = new L10N(FactoryConfig.class);
   
-  @XmlAttribute(name="id")
   private String _id;
 
   private Class _applicationFactory;
@@ -67,8 +65,12 @@ public class FactoryConfig
   
   private Class _renderKitFactory;
 
-  @XmlElement(name="application-factory")
-  private void setApplicationFactory(Class factory)
+  public void setId(String id)
+  {
+    _id = id;
+  }
+
+  public void setApplicationFactory(Class factory)
     throws ConfigException
   {
     if (! ApplicationFactory.class.isAssignableFrom(factory))
@@ -88,8 +90,7 @@ public class FactoryConfig
     return _applicationFactory;
   }
 
-  @XmlElement(name="faces-context-factory")
-  private void setFacesContextFactory(Class factory)
+  public void setFacesContextFactory(Class factory)
     throws ConfigException
   {
     if (! FacesContextFactory.class.isAssignableFrom(factory))
@@ -109,8 +110,7 @@ public class FactoryConfig
     return _facesContextFactory;
   }
 
-  @XmlElement(name="lifecycle-factory")
-  private void setLifecycleFactory(Class factory)
+  public void setLifecycleFactory(Class factory)
     throws ConfigException
   {
     if (! LifecycleFactory.class.isAssignableFrom(factory))
@@ -130,8 +130,7 @@ public class FactoryConfig
     return _lifecycleFactory;
   }
 
-  @XmlElement(name="render-kit-factory")
-  private void setRenderKitFactory(Class factory)
+  public void setRenderKitFactory(Class factory)
     throws ConfigException
   {
     if (! RenderKitFactory.class.isAssignableFrom(factory))
@@ -151,8 +150,7 @@ public class FactoryConfig
     return _renderKitFactory;
   }
 
-  @XmlElement(name="factory-extension")
-  private void setFactoryExtension(BuilderProgram program)
+  public void setFactoryExtension(BuilderProgram program)
     throws ConfigException
   {
   }
