@@ -329,8 +329,12 @@ public class HostContainer implements DispatchBuilder {
       else
         url = "http://" + hostName + invocation.getURI();
 
+      String queryString = invocation.getQueryString();
+
       FilterChain chain = invocation.getFilterChain();
-      FilterChain rewriteChain = _rewriteDispatch.map(url, chain);
+      FilterChain rewriteChain = _rewriteDispatch.map(url,
+						      queryString,
+						      chain);
 
       if (rewriteChain != chain) {
         Server server = (Server) _dispatchServer;

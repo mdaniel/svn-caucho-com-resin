@@ -149,13 +149,13 @@ public class ImportRule
       _matchRule.setFailFilterChainMapper(failFilterChainMapper);
   }
 
-  public FilterChain map(String uri, FilterChain accept)
+  public FilterChain map(String uri, String query, FilterChain accept)
     throws ServletException
   {
     if (isEnabled() && _matchRule != null)
-      return _matchRule.map(uri, accept);
+      return _matchRule.map(uri, query, accept);
     else if (getPassFilterChainMapper() != null)
-      return getPassFilterChainMapper().map(uri, accept);
+      return getPassFilterChainMapper().map(uri, query, accept);
     else
       return accept;
   }

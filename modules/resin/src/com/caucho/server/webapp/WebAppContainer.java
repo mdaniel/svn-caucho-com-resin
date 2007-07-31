@@ -734,7 +734,11 @@ public class WebAppContainer
     }
 
     if (_rewriteDispatch != null) {
-      FilterChain rewriteChain = _rewriteDispatch.map(invocation.getURI(),
+      String uri = invocation.getURI();
+      String queryString = invocation.getQueryString();
+      
+      FilterChain rewriteChain = _rewriteDispatch.map(uri,
+						      queryString,
                                                       chain);
 
       if (rewriteChain != chain) {

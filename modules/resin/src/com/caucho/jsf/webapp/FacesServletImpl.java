@@ -37,6 +37,7 @@ import java.util.logging.*;
 import javax.faces.*;
 import javax.faces.application.*;
 import javax.faces.context.*;
+import javax.faces.event.*;
 import javax.faces.lifecycle.*;
 import javax.faces.webapp.*;
 
@@ -57,6 +58,9 @@ public class FacesServletImpl extends GenericServlet
     = "com/caucho/jsf/cfg/jsf.rnc";
 
   private ConfigException _configException;
+
+  private ArrayList<PhaseListener> _phaseListenerList
+    = new ArrayList<PhaseListener>();
 
   public FacesServletImpl()
   {
@@ -125,6 +129,19 @@ public class FacesServletImpl extends GenericServlet
 
     if (app.getStateManager() == null)
       app.setStateManager(new SessionStateManager());
+
+    LifecycleFactory lifecycleFactory = (LifecycleFactory)
+      FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
+
+    Iterator iter = lifecycleFactory.getLifecycleIds();
+    while (iter.hasNext()) {
+      Lifecycle lifecycle
+	= lifecycleFactory.getLifecycle((String) iter.next());
+
+      for (PhaseListener listener : _phaseListenerList) {
+	lifecycle.addPhaseListener(listener);
+      }
+    }
   }
 
   private static String getServiceFactory(String factoryName)
@@ -172,6 +189,8 @@ public class FacesServletImpl extends GenericServlet
 	  ApplicationImpl appImpl = (ApplicationImpl) app;
 	  
 	  facesConfig.configure(appImpl);
+
+	  facesConfig.configurePhaseListeners(_phaseListenerList);
 	  
 	  for (ManagedBeanConfig bean : facesConfig.getManagedBeans()) {
 	    appImpl.addManagedBean(bean.getName(), bean);

@@ -296,6 +296,7 @@ public class MatchRule
   }
 
   public FilterChain dispatch(String uri,
+			      String queryString,
                               FilterChain accept,
                               FilterChainMapper next)
     throws ServletException

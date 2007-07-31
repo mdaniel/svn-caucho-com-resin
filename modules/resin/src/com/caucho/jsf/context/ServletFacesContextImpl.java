@@ -69,7 +69,7 @@ public class ServletFacesContextImpl extends FacesContext
 
   private boolean _isClosed;
   
-  ServletFacesContextImpl(FacesContextFactoryImpl factory,
+  protected ServletFacesContextImpl(FacesContextFactoryImpl factory,
 			  ServletContext webApp,
 			  HttpServletRequest request,
 			  HttpServletResponse response)

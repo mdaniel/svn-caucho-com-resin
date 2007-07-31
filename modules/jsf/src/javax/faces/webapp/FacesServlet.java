@@ -105,7 +105,17 @@ public final class FacesServlet implements Servlet
     LifecycleFactory lifecycleFactory = (LifecycleFactory)
       FactoryFinder.getFactory(FactoryFinder.LIFECYCLE_FACTORY);
 
-    _lifecycle = lifecycleFactory.getLifecycle(LifecycleFactory.DEFAULT_LIFECYCLE);
+    String name = null;
+
+    name = config.getInitParameter("javax.faces.LIFECYCLE_ID");
+
+    if (name == null)
+      name = _webApp.getInitParameter("javax.faces.LIFECYCLE_ID");
+
+    if (name == null)
+      name = LifecycleFactory.DEFAULT_LIFECYCLE;
+
+    _lifecycle = lifecycleFactory.getLifecycle(name);
   }
 
   public void service(ServletRequest request,
@@ -115,12 +125,16 @@ public final class FacesServlet implements Servlet
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    FacesContext context
-      = _facesContextFactory.getFacesContext(_webApp, req, res, _lifecycle);
-
     FacesContext oldContext = FacesContext.getCurrentInstance();
+
+    FacesContext context = null;
     
     try {
+      context = _facesContextFactory.getFacesContext(_webApp,
+						     req,
+						     res,
+						     _lifecycle);
+      
       FacesContext.setCurrentInstance(context);
 
       try {
@@ -135,7 +149,8 @@ public final class FacesServlet implements Servlet
     } catch (FacesException e) {
       throw new ServletException(e);
     } finally {
-      context.release();
+      if (context != null)
+	context.release();
       
       FacesContext.setCurrentInstance(oldContext);
     }

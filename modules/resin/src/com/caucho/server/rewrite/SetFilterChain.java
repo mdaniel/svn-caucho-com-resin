@@ -49,6 +49,7 @@ public class SetFilterChain
 
   public SetFilterChain(
     String uri,
+    String queryString,
     FilterChain accept,
     FilterChainMapper nextFilterChainMapper,
     String requestCharacterEncoding,
@@ -56,7 +57,7 @@ public class SetFilterChain
     String responseCharacterEncoding,
     String responseContentType)
   {
-    super(uri, accept, nextFilterChainMapper);
+    super(uri, queryString, accept, nextFilterChainMapper);
 
     _requestCharacterEncoding = requestCharacterEncoding;
     _requestSecure = requestSecure;

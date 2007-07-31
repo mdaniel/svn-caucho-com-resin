@@ -39,14 +39,17 @@ public class ContinueMapFilterChain
   implements FilterChain
 {
   private final String  _uri;
+  private final String  _queryString;
   private final FilterChain _accept;
   private final FilterChainMapper _nextFilterChainMapper;
 
   public ContinueMapFilterChain(String uri,
+				String queryString,
                                 FilterChain accept,
                                 FilterChainMapper nextFilterChainMapper)
   {
     _uri = uri;
+    _queryString = queryString;
     _accept = accept;
     _nextFilterChainMapper = nextFilterChainMapper;
   }
@@ -54,7 +57,9 @@ public class ContinueMapFilterChain
   public void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
-    FilterChain next = _nextFilterChainMapper.map(_uri, _accept);
+    FilterChain next = _nextFilterChainMapper.map(_uri,
+						  _queryString,
+						  _accept);
 
     next.doFilter(request, response);
   }

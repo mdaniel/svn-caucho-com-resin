@@ -203,7 +203,10 @@ public class JarLoader extends Loader implements Dependency {
 
       if (path.exists()) {
 	try {
-	  vector.add(new URL(path.getURL()));
+	  URL url = new URL(path.getURL());
+
+	  if (! vector.contains(url))
+	    vector.add(url);
 	} catch (Exception e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	}

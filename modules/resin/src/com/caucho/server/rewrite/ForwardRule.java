@@ -63,6 +63,7 @@ public class ForwardRule
 
   @Override
   public FilterChain dispatch(String uri,
+			      String queryString,
                               FilterChain accept,
                               FilterChainMapper next)
   {

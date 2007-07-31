@@ -214,7 +214,8 @@ public abstract class AbstractRuleWithConditions
 
     String targetUri = rewrite(uri, matcher);
 
-    FilterChain ruleChain = dispatch(targetUri, accept, getPassFilterChainMapper());
+    FilterChain ruleChain = dispatch(targetUri, queryString,
+				     accept, getPassFilterChainMapper());
 
     Condition []conditions = _conditions;
 
@@ -233,13 +234,14 @@ public abstract class AbstractRuleWithConditions
 
       if (passChain == null) {
         passChain = new ContinueMapFilterChain(targetUri,
+					       queryString,
                                                accept,
                                                getPassFilterChainMapper());
       }
 
       FilterChain failChain
-        = new ContinueMapFilterChain(
-        uri,
+        = new ContinueMapFilterChain(uri,
+				     queryString,
                                      accept,
                                      getFailFilterChainMapper());
 
@@ -274,6 +276,7 @@ public abstract class AbstractRuleWithConditions
    * @param next
    */
   abstract public FilterChain dispatch(String targetUri,
+				       String queryString,
                                        FilterChain accept,
                                        FilterChainMapper next)
     throws ServletException;

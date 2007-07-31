@@ -66,6 +66,9 @@ public class FacesConfig
   private ArrayList<ConverterConfig> _converterList
     = new ArrayList<ConverterConfig>();
 
+  private ArrayList<LifecycleConfig> _lifecycleList
+    = new ArrayList<LifecycleConfig>();
+
   private ArrayList<ValidatorConfig> _validatorList
     = new ArrayList<ValidatorConfig>();
 
@@ -119,6 +122,11 @@ public class FacesConfig
   public void addConverter(ConverterConfig converter)
   {
     _converterList.add(converter);
+  }
+
+  public void addLifecycle(LifecycleConfig lifecycle)
+  {
+    _lifecycleList.add(lifecycle);
   }
 
   public void addValidator(ValidatorConfig validator)
@@ -176,5 +184,11 @@ public class FacesConfig
     
     for (int i = 0; i < _renderKitList.size(); i++)
       _renderKitList.get(i).configure();
+  }
+
+  public void configurePhaseListeners(ArrayList<PhaseListener> list)
+  {
+    for (int i = 0; i < _lifecycleList.size(); i++)
+      _lifecycleList.get(i).configurePhaseListeners(list);
   }
 }

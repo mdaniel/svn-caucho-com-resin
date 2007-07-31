@@ -73,6 +73,7 @@ public class ProxyRule
 
   @Override
   public FilterChain dispatch(String uri,
+			      String queryString,
                               FilterChain accept,
                               FilterChainMapper next)
     throws ServletException

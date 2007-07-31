@@ -87,11 +87,13 @@ public class SetRule
   }
 
   public FilterChain dispatch(String targetUri,
+			      String queryString,
                               FilterChain accept,
                               FilterChainMapper next)
     throws ServletException
   {
     return new SetFilterChain(targetUri,
+			      queryString,
                               accept,
                               next,
                               _requestCharacterEncoding,
