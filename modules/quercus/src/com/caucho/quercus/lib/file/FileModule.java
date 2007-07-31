@@ -1373,8 +1373,6 @@ public class FileModule extends AbstractQuercusModule {
           else
             input = new FileInput(env, path);
 
-          input.setEncoding(env.getRuntimeEncoding().toString());
-          
           return input;
         } catch (IOException e) {
           

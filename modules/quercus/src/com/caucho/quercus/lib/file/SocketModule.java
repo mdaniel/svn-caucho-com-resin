@@ -207,7 +207,7 @@ public class SocketModule extends AbstractQuercusModule {
   }
  
   @ReturnNullAsFalse
-  public static SocketReadWrite socket_create(Env env, 
+  public static SocketInputOutput socket_create(Env env,
                                               int domain, 
                                               int type, 
                                               int protocol)
@@ -215,14 +215,14 @@ public class SocketModule extends AbstractQuercusModule {
     try {
       InetAddress local = null;
 
-      SocketReadWrite.Domain socketDomain = SocketReadWrite.Domain.AF_INET;
+      SocketInputOutput.Domain socketDomain = SocketInputOutput.Domain.AF_INET;
 
       switch (domain) {
         case AF_INET:
-          socketDomain = SocketReadWrite.Domain.AF_INET;
+          socketDomain = SocketInputOutput.Domain.AF_INET;
           break;
         case AF_INET6:
-          socketDomain = SocketReadWrite.Domain.AF_INET6;
+          socketDomain = SocketInputOutput.Domain.AF_INET6;
           break;
         case AF_UNIX:
           env.warning(L.l("Unix sockets not supported"));
@@ -234,7 +234,7 @@ public class SocketModule extends AbstractQuercusModule {
 
       switch (type) {
         case SOCK_STREAM:
-          return new SocketReadWrite(env, new Socket(), socketDomain);
+          return new SocketInputOutput(env, new Socket(), socketDomain);
         case SOCK_DGRAM:
           env.warning(L.l("Datagrams not supported"));
           return null;
@@ -247,7 +247,7 @@ public class SocketModule extends AbstractQuercusModule {
     }
   }
 
-  public static boolean socket_bind(Env env, @NotNull SocketReadWrite socket,
+  public static boolean socket_bind(Env env, @NotNull SocketInputOutput socket,
                                     StringValue address, 
                                     @Optional("0") int port)
   {
@@ -270,12 +270,12 @@ public class SocketModule extends AbstractQuercusModule {
     }
   }
 
-  public static void socket_close(Env env, @NotNull SocketReadWrite socket)
+  public static void socket_close(Env env, @NotNull SocketInputOutput socket)
   {
     socket.close();
   }
 
-  public static boolean socket_connect(Env env, @NotNull SocketReadWrite socket,
+  public static boolean socket_connect(Env env, @NotNull SocketInputOutput socket,
                                        StringValue address, @Optional int port)
   {
     try {
@@ -302,7 +302,7 @@ public class SocketModule extends AbstractQuercusModule {
     return StreamModule.stream_get_meta_data(env, stream);
   }
 
-  public static Value socket_read(Env env, @NotNull SocketReadWrite socket,
+  public static Value socket_read(Env env, @NotNull SocketInputOutput socket,
                                   int length, @Optional int type)
   {
     TempBuffer tempBuffer = null;
@@ -349,7 +349,7 @@ public class SocketModule extends AbstractQuercusModule {
   }
 
   public static Value socket_write(Env env,
-                                   @NotNull SocketReadWrite socket,
+                                   @NotNull SocketInputOutput socket,
                                    @NotNull InputStream is, 
                                    @Optional("-1") int length)
   {
@@ -374,7 +374,7 @@ public class SocketModule extends AbstractQuercusModule {
    * @param how 0 = read, 1 = write, 2 = both
    */
   public boolean socket_shutdown(Env env,
-				 @NotNull SocketReadWrite file,
+				 @NotNull SocketInputOutput file,
 				 int how)
   {
     if (file == null)

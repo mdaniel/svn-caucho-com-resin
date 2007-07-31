@@ -101,4 +101,18 @@ public class JavaModule extends AbstractQuercusModule {
       return null;
     }
   }
+
+  /**
+   * Returns the name of the java class.
+   */
+  public static String get_java_class_name(Env env, Value obj)
+  {
+    if (obj instanceof JavaValue)
+      obj = ((JavaValue) obj).getObject(env);
+
+    if (obj == null)
+      return String.valueOf(null);
+    else
+      return obj.getClass().getName();
+  }
 }

@@ -63,6 +63,8 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
 
   private Env _env;
   private Value _wrapper;
+  private LineReader _lineReader;
+
   private InputStream _is;
   private OutputStream _os;
   private int _buffer;
@@ -75,12 +77,19 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
     _env = env;
 
     _wrapper = wrapper;
+
+    _lineReader = new LineReader(env);
   }
 
-  public WrappedStream(Env env, QuercusClass qClass, 
-                       StringValue path, StringValue mode, LongValue options)
+  public WrappedStream(Env env,
+                       QuercusClass qClass,
+                       StringValue path,
+                       StringValue mode,
+                       LongValue options)
   {
     _env = env;
+
+    _lineReader = new LineReader(env);
 
     _wrapper = qClass.callNew(_env, new Value[0]);
 
@@ -221,35 +230,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
   public StringValue readLine(long length)
     throws IOException
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
-
-    int ch;
-
-    for (; length > 0 && (ch = read()) >= 0; length--) {
-      if (ch == '\n') {
-        sb.append((char) ch);
-        return sb;
-      }
-      else if (ch == '\r') {
-        sb.append('\r');
-
-        int ch2 = read();
-
-        if (ch2 == '\n')
-          sb.append('\n');
-        else
-          unread();
-
-        return sb;
-      }
-      else
-        sb.append((char) ch);
-    }
-
-    if (sb.length() == 0)
-      return null;
-    else
-      return sb;
+    return _lineReader.readLine(this, length);
   }
   
   public void write(byte []buffer, int offset, int length)

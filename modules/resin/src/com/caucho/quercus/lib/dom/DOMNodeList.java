@@ -44,6 +44,11 @@ public class DOMNodeList
 
   public DOMNode item(int index)
   {
+    // php/1zl0
+
+    if (index < 0)
+      return null;
+
     return wrap(_delegate.item(index));
   }
 

@@ -685,8 +685,10 @@ public class BytesBuilderValue
   @Override
   public final StringValue append(byte v)
   {
-    if (_buffer.length < _length + 1)
-      ensureCapacity(_length + 1);
+    int length = _length + 1;
+
+    if (_buffer.length < length)
+      ensureCapacity(length);
 
     _buffer[_length++] = v;
 

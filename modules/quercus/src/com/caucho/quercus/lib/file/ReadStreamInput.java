@@ -47,31 +47,29 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   private static final Logger log
     = Logger.getLogger(ReadStreamInput.class.getName());
 
+  private final LineReader _lineReader;
   private ReadStream _is;
-  private Boolean _isMacLineEnding;
 
   public ReadStreamInput(Env env)
   {
-    if (! env.getIniBoolean("auto_detect_line_endings"))
-      _isMacLineEnding = false;
+    _lineReader = new LineReader(env);
   }
 
   public ReadStreamInput(Env env, ReadStream is)
   {
-    if (! env.getIniBoolean("auto_detect_line_endings"))
-      _isMacLineEnding = false;
+    this(env);
 
     init(is);
   }
 
-  protected ReadStreamInput(Boolean isMacLineEnding)
+  protected ReadStreamInput(LineReader lineReader)
   {
-    _isMacLineEnding = isMacLineEnding;
+    _lineReader = lineReader;
   }
 
-  protected ReadStreamInput(Boolean isMacLineEnding, ReadStream is)
+  protected ReadStreamInput(LineReader lineReader, ReadStream is)
   {
-    _isMacLineEnding = isMacLineEnding;
+    this(lineReader);
     init(is);
   }
 
@@ -94,7 +92,7 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   public BinaryInput openCopy()
     throws IOException
   {
-    return new ReadStreamInput(_isMacLineEnding, _is.getPath().openRead());
+    return new ReadStreamInput(_lineReader, _is.getPath().openRead());
   }
 
   public void setEncoding(String encoding)
@@ -205,61 +203,7 @@ public class ReadStreamInput extends InputStream implements BinaryInput {
   public StringValue readLine(long length)
     throws IOException
   {
-    if (_is == null)
-      return null;
-
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
-
-    int ch;
-
-    for (; length > 0 && (ch = _is.readChar()) >= 0; length--) {
-      // php/161[pq] newlines
-      if (ch == '\n') {
-	sb.append((char) ch);
-
-        if (_isMacLineEnding == null)
-          _isMacLineEnding = false;
-
-        if (!_isMacLineEnding)
-          return sb;
-      }
-      else if (ch == '\r') {
-	sb.append('\r');
-
-        int ch2 = _is.read();
-
-	if (ch2 == '\n') {
-          if (_isMacLineEnding == null)
-            _isMacLineEnding = false;
-
-          if (_isMacLineEnding) {
-            _is.unread();
-            return sb;
-          }
-          else {
-            sb.append('\n');
-            return sb;
-          }
-        }
-        else {
-          _is.unread();
-
-          if (_isMacLineEnding == null)
-            _isMacLineEnding = true;
-
-          if (_isMacLineEnding)
-            return sb;
-        }
-
-      }
-      else
-	sb.append((char) ch);
-    }
-
-    if (sb.length() == 0)
-      return null;
-    else
-      return sb;
+    return _lineReader.readLine(this, length);
   }
 
   /**

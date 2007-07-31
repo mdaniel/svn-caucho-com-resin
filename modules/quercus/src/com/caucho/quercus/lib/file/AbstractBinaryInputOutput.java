@@ -30,12 +30,7 @@
 package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.env.BytesBuilderValue;
-import com.caucho.quercus.env.BytesValue;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.UnicodeBuilderValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.*;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
@@ -57,15 +52,19 @@ public class AbstractBinaryInputOutput
   private static final Logger log
     = Logger.getLogger(AbstractBinaryInputOutput.class.getName());
 
+  private final LineReader _lineReader;
+
   private ReadStream _is;
   private WriteStream _os;
 
-  protected AbstractBinaryInputOutput()
+  protected AbstractBinaryInputOutput(Env env)
   {
+    _lineReader = new LineReader(env);
   }
 
-  protected AbstractBinaryInputOutput(ReadStream is, WriteStream os)
+  protected AbstractBinaryInputOutput(Env env, ReadStream is, WriteStream os)
   {
+    this(env);
     init(is, os);
   }
 
@@ -204,38 +203,7 @@ public class AbstractBinaryInputOutput
   public StringValue readLine(long length)
     throws IOException
   {
-    if (_is == null)
-      return null;
-    
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
-
-    int ch;
-
-    for (; length > 0 && (ch = _is.readChar()) >= 0; length--) {
-      if (ch == '\n') {
-	sb.append((char) ch);
-	return sb;
-      }
-      else if (ch == '\r') {
-	sb.append('\r');
-	
-	int ch2 = _is.read();
-
-	if (ch2 == '\n')
-	  sb.append('\n');
-	else
-	  _is.unread();
-
-	return sb;
-      }
-      else
-	sb.append((char) ch);
-    }
-
-    if (sb.length() == 0)
-      return null;
-    else
-      return sb;
+    return _lineReader.readLine(this, length);
   }
 
   /**

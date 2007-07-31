@@ -43,10 +43,11 @@ import java.util.logging.Logger;
 /**
  * Represents read/write stream
  */
-public class SocketReadWrite extends AbstractBinaryInputOutput
+public class SocketInputOutput
+  extends AbstractBinaryInputOutput
 {
   private static final Logger log
-    = Logger.getLogger(SocketReadWrite.class.getName());
+    = Logger.getLogger(SocketInputOutput.class.getName());
   
   public enum Domain { AF_INET, AF_INET6, AF_UNIX };
 
@@ -54,8 +55,10 @@ public class SocketReadWrite extends AbstractBinaryInputOutput
   private Domain _domain;
   private Socket _socket;
 
-  public SocketReadWrite(Env env, Socket socket, Domain domain)
+  public SocketInputOutput(Env env, Socket socket, Domain domain)
   {
+    super(env);
+    
     env.addClose(this);
     
     _socket = socket;

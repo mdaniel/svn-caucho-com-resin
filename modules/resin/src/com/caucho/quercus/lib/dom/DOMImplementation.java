@@ -256,6 +256,9 @@ public class DOMImplementation
 
   Object getWrapper(Object obj)
   {
+    if (obj == null)
+      return null;
+    
     Object wrapper;
 
     if (obj instanceof NodeList)

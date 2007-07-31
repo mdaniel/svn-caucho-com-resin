@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.zip;
 
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
+import com.caucho.quercus.env.Env;
 import com.caucho.vfs.*;
 import com.caucho.util.L10N;
 
@@ -51,7 +52,7 @@ public class ZipEntryInputStream extends ReadStreamInput
   public ZipEntryInputStream(BinaryInput in, long position)
     throws IOException
   {
-    super(false);
+    super(Env.getInstance());
 
     _in = in;
     _position = position;

@@ -35,7 +35,7 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.lib.file.SocketReadWrite;
+import com.caucho.quercus.lib.file.SocketInputOutput;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
@@ -122,7 +122,7 @@ public class NetworkModule extends AbstractQuercusModule {
   /**
    * Opens a socket
    */
-  public static SocketReadWrite fsockopen(Env env,
+  public static SocketInputOutput fsockopen(Env env,
                                           String host,
                                           @Optional("80") int port,
                                           @Optional @Reference Value errno,
@@ -137,8 +137,8 @@ public class NetworkModule extends AbstractQuercusModule {
       else
         s.setSoTimeout(120000);
 
-      SocketReadWrite stream;
-      stream = new SocketReadWrite(env, s, SocketReadWrite.Domain.AF_INET);
+      SocketInputOutput stream;
+      stream = new SocketInputOutput(env, s, SocketInputOutput.Domain.AF_INET);
 
       stream.init();
 

@@ -57,6 +57,13 @@ public class DOMElement
     super(impl, node);
   }
 
+  public String getNodeValue()
+    throws DOMException
+  {
+    // php/1zd1
+    return getTextContent();
+  }
+
   public String getAttribute(String name)
   {
     return _delegate.getAttribute(name);
@@ -243,5 +250,16 @@ public class DOMElement
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);
     }
+  }
+
+  public void setNodeValue(String nodeValue)
+    throws DOMException
+  {
+    // php/1zd1
+
+    if (nodeValue == null)
+      nodeValue = "";
+    
+    setTextContent(nodeValue);
   }
 }

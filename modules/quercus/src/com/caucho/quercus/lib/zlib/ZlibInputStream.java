@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.zlib;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
 import com.caucho.vfs.*;
@@ -48,7 +49,8 @@ public class ZlibInputStream extends ReadStreamInput
   
   public ZlibInputStream(BinaryInput in) throws IOException
   {
-    super(false);
+    super(Env.getInstance());
+
     init(in);
   }
 

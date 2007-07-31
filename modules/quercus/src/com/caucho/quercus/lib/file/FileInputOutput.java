@@ -57,6 +57,8 @@ public class FileInputOutput extends AbstractBinaryOutput
 
   private Env _env;
   private Path _path;
+  private LineReader _lineReader;
+
   private RandomAccessStream _stream;
   private int _buffer;
   private boolean _doUnread = false;
@@ -88,8 +90,10 @@ public class FileInputOutput extends AbstractBinaryOutput
     _env = env;
     
     env.addClose(this);
-    
+
     _path = path;
+
+    _lineReader = new LineReader(env);
 
     if (truncate)
       path.truncate(0L);
@@ -257,35 +261,7 @@ public class FileInputOutput extends AbstractBinaryOutput
   public StringValue readLine(long length)
     throws IOException
   {
-    UnicodeBuilderValue sb = new UnicodeBuilderValue();
-
-    int ch;
-
-    for (; length > 0 && (ch = readChar()) >= 0; length--) {
-      if (ch == '\n') {
-        sb.append((char) ch);
-        return sb;
-      }
-      else if (ch == '\r') {
-        sb.append('\r');
-
-        int ch2 = read();
-
-        if (ch2 == '\n')
-          sb.append('\n');
-        else
-          unread();
-
-        return sb;
-      }
-      else
-        sb.append((char) ch);
-    }
-
-    if (sb.length() == 0)
-      return null;
-    else
-      return sb;
+    return _lineReader.readLine(this, length);
   }
 
   /**
