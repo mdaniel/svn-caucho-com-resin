@@ -82,7 +82,7 @@ public class QuercusScriptEngine
         WriterStreamImpl s = new WriterStreamImpl();
         s.setWriter(writer);
         WriteStream os = new WriteStream(s);
-    
+
         try {
           os.setEncoding("iso-8859-1");
         } catch (Exception e) {
@@ -104,6 +104,15 @@ public class QuercusScriptEngine
       out.flushBuffer();
       out.free();
 
+      // flush buffer just in case
+      //
+      // jrunscript in interactive mode does not automatically flush its
+      // buffers after every input, so output to stdout will not be seen
+      // until the output buffer is full
+      //
+      // http://bugs.caucho.com/view.php?id=1914
+      //writer.flush();
+      
       return value;
       
       /*
