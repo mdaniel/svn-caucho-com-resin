@@ -29,6 +29,8 @@
 
 package javax.script;
 
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -41,9 +43,9 @@ public class SimpleScriptContext implements ScriptContext {
   protected Bindings engineScope = new SimpleBindings();
   protected Bindings globalScope = new SimpleBindings();
   
-  protected Reader reader;
-  protected Writer writer;
-  protected Writer errorWriter;
+  protected Reader reader = new InputStreamReader(System.in);
+  protected Writer writer = new OutputStreamWriter(System.out);
+  protected Writer errorWriter = new OutputStreamWriter(System.err);
 
   /**
    * Sets the bindings with the given scope.

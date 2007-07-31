@@ -111,7 +111,7 @@ public class QuercusScriptEngine
       // until the output buffer is full
       //
       // http://bugs.caucho.com/view.php?id=1914
-      //writer.flush();
+      writer.flush();
       
       return value;
       
