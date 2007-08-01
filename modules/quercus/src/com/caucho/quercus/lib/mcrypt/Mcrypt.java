@@ -141,7 +141,9 @@ public class Mcrypt {
       return _cipher.getBlockSize();
     else if (_mode.equals("CFB"))
       return _cipher.getBlockSize();
-    if (_mode.equals("CBC"))
+    else if (_mode.equals("CBC"))
+      return _cipher.getBlockSize();
+    else if (_mode.equals("ECB"))
       return _cipher.getBlockSize();
     else
       return 0;

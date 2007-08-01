@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.mcrypt;
 
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BytesBuilderValue;
@@ -43,6 +44,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.Path;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -72,6 +74,7 @@ public class McryptModule extends AbstractQuercusModule {
   public static final String MCRYPT_BLOWFISH = "blowfish";
   public static final String MCRYPT_DES = "des";
   public static final String MCRYPT_3DES = "tripledes";
+  public static final String MCRYPT_TRIPLEDES = "tripledes";
   public static final String MCRYPT_RC4 = "RC4";
   public static final String MCRYPT_RIJNDAEL_128 = "rijndael-128";
   public static final String MCRYPT_RIJNDAEL_192 = "rijndael-192";
@@ -381,6 +384,73 @@ public class McryptModule extends AbstractQuercusModule {
     }
   }
 
+  /*
+   * Returns the IV size.
+   */
+  public static Value mcrypt_get_block_size(Env env,
+                                            String cipher,
+                                            String mode)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, mode);
+      
+      return LongValue.create(mcrypt.get_block_size());
+    } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      
+      return BooleanValue.FALSE;
+    }
+  }
+  
+  /*
+   * Returns the cipher name.
+   */
+  @ReturnNullAsFalse
+  public static String mcrypt_get_cipher_name(Env env, String cipher)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, "cbc");
+    
+      return mcrypt.get_algorithms_name();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      
+      return null;
+    }
+  }
+  
+  /*
+   * Returns the IV size.
+   */
+  public static Value mcrypt_get_iv_size(Env env, String cipher, String mode)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, mode);
+      
+      return LongValue.create(mcrypt.get_iv_size());
+    } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      
+      return BooleanValue.FALSE;
+    }
+  }
+  
+  /*
+   * Returns the key size.
+   */
+  public static Value mcrypt_get_key_size(Env env, String cipher, String mode)
+  {
+    try {
+      Mcrypt mcrypt = new Mcrypt(env, cipher, mode);
+      
+      return LongValue.create(mcrypt.get_key_size());
+    } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
+      
+      return BooleanValue.FALSE;
+    }
+  }
+  
   private static final String []ALGORITHMS = {
     MCRYPT_ARCFOUR, MCRYPT_BLOWFISH,  MCRYPT_DES, MCRYPT_3DES,
     MCRYPT_RC4, MCRYPT_RIJNDAEL_128, MCRYPT_RIJNDAEL_192,
