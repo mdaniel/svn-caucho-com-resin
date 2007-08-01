@@ -565,7 +565,7 @@ public class Env {
       ConnectionEntry oldEntry = _connMap.get(entry);
 
       if (oldEntry != null)
-	return oldEntry.getConnection();
+        return oldEntry.getConnection();
 
       entry.setConnection(database.getConnection());
       _connMap.put(entry, entry);

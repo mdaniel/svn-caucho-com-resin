@@ -379,8 +379,20 @@ public class Quercus
     if (_database != null)
       return _database;
     else {
-      throw new QuercusModuleException(L.l("Can't find database for driver '{0}' and url '{1}'",
-					   driver, url));
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      try {
+        Class cls = loader.loadClass(driver);
+        
+        return (DataSource)cls.newInstance();
+        
+      } catch (ClassNotFoundException e) {
+        throw new QuercusModuleException(e);
+      } catch (InstantiationException e) {
+        throw new QuercusModuleException(e);
+      } catch (IllegalAccessException e) {
+        throw new QuercusModuleException(e);
+      }
     }
   }
 

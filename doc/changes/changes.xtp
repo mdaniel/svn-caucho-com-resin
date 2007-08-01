@@ -32,6 +32,7 @@
 <li>quercus: abstract __construct was creating invalid compiled code</li>
 <li>quercus: interface_exists() implemented, class_exists() fixed</li>
 <li>quercus: precedence with ! and instanceof</li>
+<li>quercus: database access fixed for JSR223 (#1859, rep by toomasr)</li>
 </ul>
 </s2>
 
