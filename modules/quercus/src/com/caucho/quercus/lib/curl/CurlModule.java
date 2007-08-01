@@ -424,13 +424,14 @@ public class CurlModule
    * @param url
    */
   public static CurlResource curl_init(Env env,
-                              @Optional String url)
+                                       @Optional("") String url)
   {
     CurlResource curl = new CurlResource();
 
-    if (url.length() > 0)
+    if (url != null && url.length() > 0) {
       setURL(curl, url);
       //curl.setURL(url);
+    }
 
     return curl;
   }
