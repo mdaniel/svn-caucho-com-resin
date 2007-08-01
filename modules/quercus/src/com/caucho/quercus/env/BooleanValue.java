@@ -78,6 +78,15 @@ public class BooleanValue extends Value
   }
 
   /**
+   * Returns true for a BooleanValue
+   */
+  @Override
+  public boolean isBoolean()
+  {
+    return true;
+  }
+  
+  /**
    * Returns true for a scalar
    */
   public boolean isScalar()
@@ -169,21 +178,6 @@ public class BooleanValue extends Value
   public boolean eq(Value rValue)
   {
     return _value == rValue.toBoolean();
-
-/*
-    if (rValue instanceof StringValue) {
-      String v = rValue.toString();
-
-      if (_value)
-	return ! v.equals("") && ! v.equals("0");
-      else
-	return v.equals("") || v.equals("0");
-    }
-    else if (rValue.isNumberConvertible())
-      return toDouble() == rValue.toDouble();
-    else
-      return toString().equals(rValue.toString());
-*/
   }
   
   /**

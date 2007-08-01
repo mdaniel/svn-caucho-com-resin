@@ -186,7 +186,7 @@ public class UnicodeBuilderValue
     int len = _length;
 
     if (len == 0)
-      return false;
+      return true;
 
     int i = 0;
     char ch = _buffer[0];

@@ -133,7 +133,7 @@ public class BytesBuilderValue
     int len = _length;
 
     if (len == 0)
-      return false;
+      return true;
 
     for (int i = 0; i < len; i++) {
       int ch = _buffer[i];

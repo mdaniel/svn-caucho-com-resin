@@ -52,6 +52,15 @@ public class DefaultValue extends NullValue {
   }
   
   /**
+   * Returns true for a DefaultValue
+   */
+  @Override
+  public boolean isDefault()
+  {
+    return true;
+  }
+  
+  /**
    * Converts to a boolean.
    */
   public boolean toBoolean()

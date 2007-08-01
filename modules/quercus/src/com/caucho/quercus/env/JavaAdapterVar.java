@@ -195,6 +195,22 @@ public class JavaAdapterVar extends Var
     return getValue().isUnicode();
   }
 
+  /**
+   * Returns true for a BooleanValue
+   */
+  public boolean isBoolean()
+  {
+    return getValue().isBoolean();
+  }
+  
+  /**
+   * Returns true for a DefaultValue
+   */
+  public boolean isDefault()
+  {
+    return getValue().isDefault();
+  }
+  
   //
   // Conversions
   //
@@ -575,6 +591,15 @@ public class JavaAdapterVar extends Var
   }
 
   /**
+   * Subtracts to the following value.
+   */
+  @Override
+  public Value sub(long rValue)
+  {
+    return getValue().sub(rValue);
+  }
+  
+  /**
    * Multiplies to the following value.
    */
   public Value mul(Value rValue)
@@ -638,6 +663,14 @@ public class JavaAdapterVar extends Var
     return getValue().cmp(rValue);
   }
 
+  /**
+   * Returns the length as a string.
+   */
+  public int length()
+  {
+    return getValue().length();
+  }
+  
   /**
    * Returns the array/object size
    */

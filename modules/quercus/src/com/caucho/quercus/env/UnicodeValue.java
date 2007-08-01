@@ -110,33 +110,13 @@ abstract public class UnicodeValue extends StringValue {
   public boolean eq(Value rValue)
   {
     rValue = rValue.toValue();
-
-    if (rValue.isUnicode()) {
-      if (equals(rValue))
-        return true;
-    }
-    else if (rValue.isBinary()) {
-      if (equals(rValue.toUnicodeValue(Env.getInstance())))
-        return true;
-    }
-    else if (rValue instanceof LongValue) {
-      return toLong() == rValue.toLong();
-    }
-    else if (rValue instanceof DoubleValue) {
-      return toDouble() == rValue.toDouble();
-    }
-    else if (rValue instanceof BooleanValue) {
+    
+    if (rValue.isBoolean()) {
       return toBoolean() == rValue.toBoolean();
     }
 
-    if (isNumberConvertible() && rValue.isNumberConvertible())
-      return toDouble() == rValue.toDouble();
-    else
-      return equals(rValue.toStringValue());
-    
-    /*
     int type = getNumericType();
-
+    
     if (type == IS_STRING) {
       if (rValue.isUnicode())
         return equals(rValue);
@@ -144,16 +124,15 @@ abstract public class UnicodeValue extends StringValue {
         return equals(rValue.toUnicodeValue(Env.getInstance()));
       else if (rValue.isLongConvertible())
         return toLong() ==  rValue.toLong();
-      else if (rValue instanceof BooleanValue)
-        return toLong() == rValue.toLong();
       else
         return equals(rValue.toStringValue());
     }
+    else if (rValue.isString() && rValue.length() == 0)
+      return length() == 0;
     else if (rValue.isNumberConvertible())
       return toDouble() == rValue.toDouble();
     else
       return equals(rValue.toStringValue());
-    */
   }
 
 }

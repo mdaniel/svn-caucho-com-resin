@@ -158,7 +158,7 @@ abstract public class Value implements java.io.Serializable
   {
     return true;
   }
-
+  
   /**
    * Returns true for a StringValue.
    */
@@ -183,6 +183,22 @@ abstract public class Value implements java.io.Serializable
     return false;
   }
 
+  /**
+   * Returns true for a BooleanValue
+   */
+  public boolean isBoolean()
+  {
+    return false;
+  }
+  
+  /**
+   * Returns true for a DefaultValue
+   */
+  public boolean isDefault()
+  {
+    return false;
+  }
+  
   /**
    * Returns true if there are more elements.
    */

@@ -110,7 +110,7 @@ abstract public class StringValue extends Value implements CharSequence {
     int len = length();
 
     if (len == 0)
-      return false;
+      return true;
 
     int i = 0;
     char ch = charAt(0);
@@ -626,6 +626,17 @@ abstract public class StringValue extends Value implements CharSequence {
     return DoubleValue.create(toDouble() + rValue);
   }
 
+  /**
+   * Adds to the following value.
+   */
+  public Value sub(long rValue)
+  {
+    if (isLongConvertible())
+      return LongValue.create(toLong() - rValue);
+    
+    return DoubleValue.create(toDouble() - rValue);
+  }
+  
   /**
    * Serializes the value.
    */

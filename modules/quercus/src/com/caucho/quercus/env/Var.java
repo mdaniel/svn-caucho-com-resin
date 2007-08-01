@@ -214,6 +214,22 @@ public class Var extends Value
   {
     return _value.isUnicode();
   }
+  
+  /**
+   * Returns true for a BooleanValue
+   */
+  public boolean isBoolean()
+  {
+    return _value.isBoolean();
+  }
+  
+  /**
+   * Returns true for a DefaultValue
+   */
+  public boolean isDefault()
+  {
+    return _value.isDefault();
+  }
 
   //
   // Conversions
@@ -575,7 +591,7 @@ public class Var extends Value
   {
     return _value.add(rValue);
   }
-
+  
   /**
    * Pre-increment the following value.
    */
@@ -606,6 +622,15 @@ public class Var extends Value
     return _value.sub(rValue);
   }
 
+  /**
+   * Subtracts to the following value.
+   */
+  @Override
+  public Value sub(long rValue)
+  {
+    return _value.sub(rValue);
+  }
+  
   /**
    * Multiplies to the following value.
    */
@@ -706,6 +731,14 @@ public class Var extends Value
     return _value.geq(rValue);
   }
 
+  /**
+   * Returns the length as a string.
+   */
+  public int length()
+  {
+    return _value.length();
+  }
+  
   /**
    * Returns the array/object size
    */

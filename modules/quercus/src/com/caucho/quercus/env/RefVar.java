@@ -260,6 +260,14 @@ public class RefVar extends Value
   }
 
   /**
+   * Subtracts to the following value.
+   */
+  public Value sub(long rValue)
+  {
+    return _var.sub(rValue);
+  }
+  
+  /**
    * Multiplies to the following value.
    */
   public Value mul(Value rValue)
