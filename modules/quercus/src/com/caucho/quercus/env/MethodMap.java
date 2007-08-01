@@ -55,6 +55,7 @@ public class MethodMap<V>
     for (entry = _entries[bucket]; entry != null; entry = entry._next) {
       if (match(entry._key, key, key.length)) {
         entry._value = value;
+
         return;
       }
     }
@@ -217,9 +218,11 @@ public class MethodMap<V>
     
     private void getNext()
     {
-      Entry<V> entry = null;
-      while (_index < _entries.length &&
-             (entry = _entries[_index++]) == null) {
+      Entry<V> entry = _next == null ? null : _next._next;
+
+      while (entry == null
+             && _index < _entries.length
+             && (entry = _entries[_index++]) == null) {
       }
 
       _next = entry;

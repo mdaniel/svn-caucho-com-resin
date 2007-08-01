@@ -251,11 +251,6 @@ public class QuercusClass {
    */
   public void addMethod(String name, AbstractFunction fun)
   {
-    /*
-    _methodMap.put(name.intern(), fun);
-    _lowerMethodMap.put(name.toLowerCase(), fun);
-    */
-
     _methodMap.put(name, fun);
   }
 

@@ -95,6 +95,38 @@ public class BinaryBuilderValue
   }
 
   @Override
+  public String toDebugString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    int length = length();
+
+    sb.append("binary(");
+    sb.append(length);
+    sb.append(") \"");
+
+    int appendLength = length > 256 ? 256 : length;
+
+    for (int i = 0; i < appendLength; i++) {
+      char ch = charAt(i);
+
+      if (0x20 <= ch && ch < 0x7f)
+        sb.append(ch);
+      else if (ch == '\r' || ch == '\n' || ch == '\t')
+        sb.append(ch);
+      else
+        sb.append("\\x" + Integer.toHexString(ch >> 4) + Integer.toHexString(ch % 16));
+    }
+
+    if (length > 256)
+      sb.append(" ...");
+
+    sb.append('"');
+
+    return sb.toString();
+  }
+
+  @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,

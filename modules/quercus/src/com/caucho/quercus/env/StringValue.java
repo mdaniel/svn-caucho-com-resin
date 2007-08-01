@@ -1237,6 +1237,10 @@ abstract public class StringValue extends Value implements CharSequence {
     return true;
   }
 
+  @Override
+  abstract public String toDebugString();
+
+  @Override
   abstract public void varDumpImpl(Env env,
                                    WriteStream out,
                                    int depth,

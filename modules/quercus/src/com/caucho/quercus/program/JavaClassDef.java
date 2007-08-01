@@ -48,16 +48,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,8 +64,10 @@ public class JavaClassDef extends ClassDef {
 
   private final String _name;
   private final Class _type;
+  private final boolean _isAbstract;
   private final boolean _isArray;
-  
+  private final boolean _isInterface;
+
   private JavaClassDef _componentDef;
 
   protected volatile boolean _isInit;
@@ -97,13 +90,9 @@ public class JavaClassDef extends ClassDef {
     = new HashMap<String, FieldMarshalPair> ();
 
   private JavaMethod __get = null;
-
   private JavaMethod __getField = null;
-
   private JavaMethod __set = null;
-
   private JavaMethod __setField = null;
-
   private JavaMethod __call = null;
 
   private Method _printRImpl = null;
@@ -121,12 +110,12 @@ public class JavaClassDef extends ClassDef {
     super(name, null, new String[0]);
 
     _moduleContext = moduleContext;
-
     _name = name;
-
     _type = type;
 
+    _isAbstract = Modifier.isAbstract(type.getModifiers());
     _isArray = type.isArray();
+    _isInterface = type.isInterface();
   }
 
   public static JavaClassDef create(ModuleContext moduleContext,
@@ -161,6 +150,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Returns the class name.
    */
+  @Override
   public String getName()
   {
     return _name;
@@ -171,6 +161,7 @@ public class JavaClassDef extends ClassDef {
     return _type;
   }
 
+  @Override
   public boolean isA(String name)
   {
     Class type = _type;
@@ -179,7 +170,7 @@ public class JavaClassDef extends ClassDef {
       if (type.getSimpleName().equalsIgnoreCase(name))
         return true;
 
-      if (isAInterface(name, type))
+      if (hasInterface(name, type))
         return true;
 
       type = type.getSuperclass();
@@ -188,7 +179,7 @@ public class JavaClassDef extends ClassDef {
     return false;
   }
 
-  private boolean isAInterface(String name, Class type)
+  private boolean hasInterface(String name, Class type)
   {
     Class[] interfaces = type.getInterfaces();
 
@@ -197,7 +188,7 @@ public class JavaClassDef extends ClassDef {
         if (intfc.getSimpleName().equalsIgnoreCase(name))
           return true;
 
-        if (isAInterface(name, intfc))
+        if (hasInterface(name, intfc))
           return true;
       }
     }
@@ -205,9 +196,21 @@ public class JavaClassDef extends ClassDef {
     return false;
   }
 
+  @Override
+  public boolean isAbstract()
+  {
+    return _isAbstract;
+  }
+
   public boolean isArray()
   {
     return _isArray;
+  }
+
+  @Override
+  public boolean isInterface()
+  {
+    return _isInterface;
   }
 
   public JavaClassDef getComponentDef()
@@ -378,6 +381,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Creates a new instance.
    */
+  @Override
   public Value newInstance(Env env, QuercusClass qClass)
   {
     // return newInstance();
@@ -400,6 +404,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval new
    */
+  @Override
   public Value callNew(Env env, Expr []args)
   {
     return _cons.call(env, (Object) null, args);
@@ -408,6 +413,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval new
    */
+  @Override
   public Value callNew(Env env, Value []args)
   {
     if (_cons != null)
@@ -694,19 +700,6 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  private AbstractJavaMethod getMethod(Env env, String name)
-  {
-    AbstractJavaMethod method = _functionMap.get(name);
-
-    if (method != null)
-      return method;
-    else if (method == null) {
-      env.error(L.l("`{0}' is an unknown method of {1}.", name, _name));
-    }
-
-    return method;
-  }
-
   private String toMethod(char []name, int nameLen)
   {
     return new String(name, 0, nameLen);
@@ -715,6 +708,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Initialize the quercus class.
    */
+  @Override
   public void initClass(QuercusClass cl)
   {
     init();
@@ -757,6 +751,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Returns the constructor
    */
+  @Override
   public AbstractFunction findConstructor()
   {
     return null;
@@ -1140,6 +1135,7 @@ public class JavaClassDef extends ClassDef {
       super(module, "Long", Long.class);
     }
 
+    @Override
     public Value wrap(Env env, Object obj)
     {
       return LongValue.create(((Number) obj).longValue());
@@ -1152,6 +1148,7 @@ public class JavaClassDef extends ClassDef {
       super(module, "Double", Double.class);
     }
 
+    @Override
     public Value wrap(Env env, Object obj)
     {
       return new DoubleValue(((Number) obj).doubleValue());
@@ -1164,6 +1161,7 @@ public class JavaClassDef extends ClassDef {
       super(module, "String", String.class);
     }
 
+    @Override
     public Value wrap(Env env, Object obj)
     {
       return new UnicodeValueImpl((String) obj);
@@ -1176,6 +1174,7 @@ public class JavaClassDef extends ClassDef {
       super(module, "Boolean", Boolean.class);
     }
 
+    @Override
     public Value wrap(Env env, Object obj)
     {
       if (Boolean.TRUE.equals(obj))
@@ -1190,7 +1189,8 @@ public class JavaClassDef extends ClassDef {
     {
       super(module, "Calendar", Calendar.class);
     }
-    
+
+    @Override
     public Value wrap(Env env, Object obj)
     {
       return new JavaCalendarValue(env, (Calendar)obj, this);
@@ -1202,7 +1202,8 @@ public class JavaClassDef extends ClassDef {
     {
       super(module, "Date", Date.class);
     }
-    
+
+    @Override
     public Value wrap(Env env, Object obj)
     {
       return new JavaDateValue(env, (Date)obj, this);
@@ -1214,7 +1215,8 @@ public class JavaClassDef extends ClassDef {
     {
       super(module, "URL", URL.class);
     }
-    
+
+    @Override
     public Value wrap(Env env, Object obj)
     {
       return new JavaURLValue(env, (URL)obj, this);

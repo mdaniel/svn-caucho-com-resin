@@ -39,6 +39,31 @@ import java.io.IOException;
  */
 abstract public class UnicodeValue extends StringValue {
 
+  @Override
+  public String toDebugString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    int length = length();
+
+    sb.append("unicode(");
+    sb.append(length);
+    sb.append(") \"");
+
+    int appendLength = length > 256 ? 256 : length;
+
+    for (int i = 0; i < appendLength; i++)
+      sb.append(charAt(i));
+
+    if (length > 256)
+      sb.append(" ...");
+
+    sb.append('"');
+
+    return sb.toString();
+  }
+
+  @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,
@@ -76,6 +101,7 @@ abstract public class UnicodeValue extends StringValue {
    * @param env
    * @param charset
    */
+  @Override
   public UnicodeValue toUnicodeValue(Env env, String charset)
   {
     return this;

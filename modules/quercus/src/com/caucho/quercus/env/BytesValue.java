@@ -87,6 +87,30 @@ abstract public class BytesValue
     return value;
   }
 
+  @Override
+  public String toDebugString()
+  {
+    StringBuilder sb = new StringBuilder();
+
+    int length = length();
+
+    sb.append("string(");
+    sb.append(length);
+    sb.append(") \"");
+
+    int appendLength = length > 256 ? 256 : length;
+
+    for (int i = 0; i < appendLength; i++)
+      sb.append(charAt(i));
+
+    if (length > 256)
+      sb.append(" ...");
+
+    sb.append('"');
+
+    return sb.toString();
+  }
+
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,
@@ -108,7 +132,7 @@ abstract public class BytesValue
      */
 
     /**
-     * XXX: old, should be moved to BinaryBuidlerValue
+     * XXX: old, has been be moved to BinaryBuidlerValue
      * */
     int length = length();
     
