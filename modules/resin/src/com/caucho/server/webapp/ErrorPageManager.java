@@ -703,8 +703,10 @@ public class ErrorPageManager {
 	cb.append("&lt;");
       else if (ch == '&')
 	cb.append("&amp;");
+      /*
       else if (ch == '%')
 	cb.append("%25");
+      */
       else if (ch == '\n' || ch == '\r') {
         lineCharacter = 0;
 	cb.append(ch);

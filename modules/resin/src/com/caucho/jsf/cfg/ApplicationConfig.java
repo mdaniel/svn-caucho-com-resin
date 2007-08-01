@@ -49,19 +49,16 @@ import javax.xml.bind.annotation.*;
 import com.caucho.config.*;
 import com.caucho.util.*;
 
-@XmlRootElement(name="application")
 public class ApplicationConfig
 {
   private static final Logger log
     = Logger.getLogger(ApplicationConfig.class.getName());
   private static final L10N L = new L10N(ApplicationConfig.class);
   
-  @XmlAttribute(name="id")
   private String _id;
 
   private Class _actionListener;
 
-  @XmlElement(name="default-render-kit-id")
   private String _defaultRenderKitId;
 
   @XmlElement(name="message-bundle")
@@ -83,11 +80,24 @@ public class ApplicationConfig
   private ArrayList<ResourceBundleConfig> _resourceBundleList
     = new ArrayList<ResourceBundleConfig>();
 
-  @XmlElement(name="locale-config")
   private LocaleConfig _localeConfig;
 
-  @XmlElement(name="action-listener")
-  private void setActionListener(Class actionListener)
+  public void setId(String id)
+  {
+    _id = id;
+  }
+
+  public void setDefaultRenderKitId(String id)
+  {
+    _defaultRenderKitId = id;
+  }
+
+  public void setMessageBundle(String messageBundle)
+  {
+    _messageBundle = messageBundle;
+  }
+
+  public void setActionListener(Class actionListener)
     throws ConfigException
   {
     Config.validate(actionListener, ActionListener.class);
@@ -95,8 +105,7 @@ public class ApplicationConfig
     _actionListener = actionListener;
   }
 
-  @XmlElement(name="navigation-handler")
-  private void setNavigationHandler(Class navigationHandler)
+  public void setNavigationHandler(Class navigationHandler)
     throws ConfigException
   {
     Config.validate(navigationHandler, NavigationHandler.class);
@@ -104,8 +113,7 @@ public class ApplicationConfig
     _navigationHandler = navigationHandler;
   }
 
-  @XmlElement(name="view-handler")
-  private void setViewHandler(Class viewHandler)
+  public void setViewHandler(Class viewHandler)
     throws ConfigException
   {
     if (! ViewHandler.class.isAssignableFrom(viewHandler))
@@ -139,8 +147,7 @@ public class ApplicationConfig
     return _viewHandler;
   }
 
-  @XmlElement(name="state-manager")
-  private void setStateManager(Class stateManager)
+  public void setStateManager(Class stateManager)
     throws ConfigException
   {
     Config.validate(stateManager, StateManager.class);
@@ -153,8 +160,7 @@ public class ApplicationConfig
     return _stateManager;
   }
 
-  @XmlElement(name="el-resolver")
-  private void setElResolver(Class elResolver)
+  public void setElResolver(Class elResolver)
     throws ConfigException
   {
     Config.validate(elResolver, ELResolver.class);
@@ -176,8 +182,7 @@ public class ApplicationConfig
     return _elResolverList;
   }
 
-  @XmlElement(name="property-resolver")
-  private void setPropertyResolver(Class propertyResolver)
+  public void setPropertyResolver(Class propertyResolver)
     throws ConfigException
   {
     Config.validate(propertyResolver, PropertyResolver.class);
@@ -190,8 +195,7 @@ public class ApplicationConfig
     return _propertyResolver;
   }
 
-  @XmlElement(name="variable-resolver")
-  private void setVariableResolver(Class variableResolver)
+  public void setVariableResolver(Class variableResolver)
     throws ConfigException
   {
     Config.validate(variableResolver, VariableResolver.class);
@@ -204,8 +208,7 @@ public class ApplicationConfig
     return _variableResolver;
   }
 
-  @XmlElement(name="resource-bundle")
-  private void setResourceBundle(ResourceBundleConfig bundle)
+  public void setResourceBundle(ResourceBundleConfig bundle)
     throws ConfigException
   {
     _resourceBundleList.add(bundle);
@@ -222,9 +225,13 @@ public class ApplicationConfig
     return _resourceBundleList;
   }
 
-  @XmlElement(name="application-extension")
-  private void setApplicationExtension(BuilderProgram program)
+  public void setApplicationExtension(BuilderProgram program)
   {
+  }
+
+  public void setLocalConfig(LocaleConfig config)
+  {
+    _localeConfig = config;
   }
 
   public void configure(Application app)

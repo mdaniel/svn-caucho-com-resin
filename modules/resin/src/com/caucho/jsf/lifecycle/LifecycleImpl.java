@@ -31,6 +31,7 @@ package com.caucho.jsf.lifecycle;
 import com.caucho.util.*;
 
 import java.util.*;
+import java.util.logging.*;
 
 import javax.faces.*;
 import javax.faces.application.*;
@@ -48,6 +49,8 @@ import com.caucho.jsf.application.*;
 public class LifecycleImpl extends Lifecycle
 {
   private static final L10N L = new L10N(LifecycleImpl.class);
+  private static final Logger log
+    = Logger.getLogger(LifecycleImpl.class.getName());
   
   private ArrayList<PhaseListener> _phaseList = new ArrayList<PhaseListener>();
   private PhaseListener []_phaseListeners = new PhaseListener[0];
@@ -91,29 +94,71 @@ public class LifecycleImpl extends Lifecycle
     if (context.getResponseComplete() || context.getRenderResponse())
       return;
 
-    restoreView(context);
-    
+    beforePhase(context, PhaseId.RESTORE_VIEW);
+
+    try {
+      restoreView(context);
+    } finally {
+      afterPhase(context, PhaseId.RESTORE_VIEW);
+    }
+
     if (context.getResponseComplete() || context.getRenderResponse())
       return;
 
     UIViewRoot viewRoot = context.getViewRoot();
 
-    viewRoot.processDecodes(context);
+    beforePhase(context, PhaseId.APPLY_REQUEST_VALUES);
+    
+    try {
+      viewRoot.processDecodes(context);
+    } finally {
+      afterPhase(context, PhaseId.APPLY_REQUEST_VALUES);
+    }
+
+    //
+    // Process Validations (processValidators)
+    //
     
     if (context.getResponseComplete() || context.getRenderResponse())
       return;
     
-    viewRoot.processValidators(context);
+    beforePhase(context, PhaseId.PROCESS_VALIDATIONS);
+
+    try {
+      viewRoot.processValidators(context);
+    } finally {
+      afterPhase(context, PhaseId.PROCESS_VALIDATIONS);
+    }
+
+    //
+    // Update Model Values (processUpdates)
+    //
     
     if (context.getResponseComplete() || context.getRenderResponse())
       return;
     
-    viewRoot.processUpdates(context);
+    beforePhase(context, PhaseId.UPDATE_MODEL_VALUES);
+
+    try {
+      viewRoot.processUpdates(context);
+    } finally {
+      afterPhase(context, PhaseId.UPDATE_MODEL_VALUES);
+    }
+
+    //
+    // Invoke Application (processApplication)
+    //
     
     if (context.getResponseComplete() || context.getRenderResponse())
       return;
     
-    viewRoot.processApplication(context);
+    beforePhase(context, PhaseId.INVOKE_APPLICATION);
+
+    try {
+      viewRoot.processApplication(context);
+    } finally {
+      afterPhase(context, PhaseId.INVOKE_APPLICATION);
+    }
   }
 
   private void restoreView(FacesContext context)
@@ -153,7 +198,6 @@ public class LifecycleImpl extends Lifecycle
 
     if (stateManager.isPostback(context)) {
       viewRoot = view.restoreView(context,  viewId);
-      System.out.println("RV: " + view + " " + viewRoot);
 
       if (viewRoot == null) {
 	context.renderResponse();
@@ -162,8 +206,7 @@ public class LifecycleImpl extends Lifecycle
 
 	context.setViewRoot(viewRoot);
 	
-	throw new ViewExpiredException(L.l("{0} is an expired view",
-					 viewId));
+	log.info(L.l("{0} is an expired view", viewId));
       }
       
       context.setViewRoot(viewRoot);
@@ -179,31 +222,7 @@ public class LifecycleImpl extends Lifecycle
 
   private String calculateViewId(FacesContext context)
   {
-    ExternalContext extContext = context.getExternalContext();
-
-    String servletPath = extContext.getRequestServletPath();
-    String pathInfo = extContext.getRequestPathInfo();
-
-    String path;
-    int dot;
-
-    if (servletPath != null
-	&& (dot = servletPath.lastIndexOf('.')) > 0
-	&& servletPath.lastIndexOf('/') < dot) {
-      // /test/foo.jsp
-
-      return servletPath.substring(0, dot) + ".jsp";
-    }
-    else if (pathInfo != null) {
-      dot = pathInfo.lastIndexOf('.');
-
-      if (dot > 0)
-	return pathInfo.substring(0, dot) + ".jsp";
-      else
-	return pathInfo + ".jsp";
-    }
-    else
-      throw new FacesException("no view-id found");
+    return JspViewHandler.createViewId(context);
   }
   
   public void render(FacesContext context)
@@ -212,6 +231,8 @@ public class LifecycleImpl extends Lifecycle
     if (context.getResponseComplete())
       return;
 
+    beforePhase(context, PhaseId.RENDER_RESPONSE);
+    
     Application app = context.getApplication();
     ViewHandler view = app.getViewHandler();
 
@@ -219,6 +240,36 @@ public class LifecycleImpl extends Lifecycle
       view.renderView(context, context.getViewRoot());
     } catch (java.io.IOException e) {
       throw new FacesException(e);
+    }
+    
+    afterPhase(context, PhaseId.RENDER_RESPONSE);
+  }
+
+  private void beforePhase(FacesContext context, PhaseId phase)
+  {
+    for (int i = 0; i < _phaseListeners.length; i++) {
+      PhaseListener listener = _phaseListeners[i];
+      PhaseId id = listener.getPhaseId();
+
+      if (phase == id || id == PhaseId.ANY_PHASE) {
+	PhaseEvent event = new PhaseEvent(context, phase, this);
+
+	listener.beforePhase(event);
+      }
+    }
+  }
+
+  private void afterPhase(FacesContext context, PhaseId phase)
+  {
+    for (int i = _phaseListeners.length - 1; i >= 0; i--) {
+      PhaseListener listener = _phaseListeners[i];
+      PhaseId id = listener.getPhaseId();
+
+      if (phase == id || id == PhaseId.ANY_PHASE) {
+	PhaseEvent event = new PhaseEvent(context, phase, this);
+	
+	listener.afterPhase(event);
+      }
     }
   }
 

@@ -258,6 +258,9 @@ public class ParseTagManager {
   private Taglib addTaglib(Taglib taglib)
     throws JspParseException
   {
+    if (taglib == null)
+      return null;
+    
     taglib = taglib.copy();
 
     for (Taglib oldTaglib : _taglibMap.values()) {
